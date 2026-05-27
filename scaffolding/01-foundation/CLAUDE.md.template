@@ -1,0 +1,261 @@
+# CLAUDE.md — repo instructions for LLM assistants
+
+> This file was scaffolded from `jokerman-session-setup` (JokermanStack / JStack). Sections between `<!-- PROJECT:START -->` and `<!-- PROJECT:END -->` are project-specific — adapt freely. The remaining sections are load-bearing and inherited from [CORE-PRINCIPLES.md](CORE-PRINCIPLES.md). Change them only with an explicit reason documented in `EVOLUTION-LOG.md`.
+
+<!-- PROJECT:START -->
+
+## What this repo is
+
+{{One sentence on the repo's purpose.}}
+
+Clear ownership domains:
+
+- `{{path1}}/` — {{what it contains}}
+- `{{path2}}/` — {{what it contains}}
+
+{{Other structural notes — legacy folders, frozen zones, etc.}}
+
+<!-- PROJECT:END -->
+
+---
+
+## Workflow Orchestration
+
+### 1. Plan Mode Default
+
+- Enter plan mode for ANY non-trivial task (3+ steps or architectural decisions)
+- If something goes wrong: STOP and re-plan immediately — do not push through
+- Use plan mode even for verification steps, not just building
+- Write detailed specs upfront to reduce ambiguity
+- Pause-report after the plan is ready; wait for approval on complex tasks
+
+### 2. Subagent Strategy
+
+- Use subagents liberally to keep the main context window clean
+- Offload research, exploration, and parallel analysis to subagents
+- For complex problems: throw more compute at it via subagents
+- One task per subagent for focused execution
+- Pre-defined subagents in `.claude/agents/`:
+  - `ReadOnly` — read-only research tasks
+  - `CodeReviewer` — review of staged/working changes
+  - `TestRunner` — runs the test suite and reports failures
+  - `SanityChecker` — cross-component architecture audit
+  <!-- PROJECT:START -->
+  - {{Add project-specific subagents here as you create them, e.g. `ADRReader`, `BicepReviewer`, etc.}}
+  <!-- PROJECT:END -->
+- Inline pattern: "Use a subagent for X" in prompts when it fits
+- When in doubt: prefer a subagent over polluting main context
+
+### 3. Self-Improvement Loop
+
+- After ANY correction: update `tasks/lessons.md` with the pattern
+- Write rules for yourself that prevent the same mistake
+- Iterate ruthlessly on these lessons until the mistake rate drops
+- Review lessons at session start
+- This is the *only* way to compound learning — without it you will repeat the same mistakes
+
+### 4. Verification Before Done
+
+- Never mark a task complete without proof that it works
+- Green tests are a minimum, not sufficient
+- Diff behavior between main and your changes when relevant
+- Ask yourself: "Would a staff engineer approve this?"
+- Run tests, check logs, demonstrate correctness
+- If you stub a mock instead of the real thing: explicitly flag it in the pause-report as "deferred to phase X"
+
+### 5. Demand Elegance (Balanced)
+
+- For non-trivial changes: pause and ask "is there a more elegant way?"
+- If a fix feels hacky: "Knowing everything I know now, implement the elegant solution"
+- Skip for simple, obvious fixes — no over-engineering
+- Challenge your own work before presenting it
+
+### 6. Autonomous Bug Fixing Within Authorized Scope
+
+- Bugs INSIDE an authorized initiative: fix directly, no hand-holding. Point at logs/errors/failing tests, solve them.
+- Bugs OUTSIDE the current authority: surface, do not act unbidden. There is no standing license to "just fix CI" or act unprompted.
+
+---
+
+## Task Management
+
+1. **Plan First:** Write the plan to `tasks/todo.md` with checkable items
+2. **Verify Plan:** Pause-report before implementation starts (for complex tasks)
+3. **Track Progress:** Mark items complete as you go
+4. **Explain Changes:** High-level summary at each pause-report
+5. **Document Results:** Add a review section to `tasks/todo.md` at task end
+6. **Capture Lessons:** Update `tasks/lessons.md` after corrections
+
+---
+
+## Core Principles
+
+- **Simplicity First:** Make each change as simple as possible. Minimal-impact code.
+- **No Laziness:** Find root causes. No temporary fixes. Senior-developer standards.
+- **Subtraction Bias:** Before finishing a non-trivial change, ask "is there a simpler form?" Fewer parts beats more abstraction.
+
+---
+
+<!-- PROJECT:START -->
+
+## When you modify code
+
+### Where do things live?
+
+{{Map files/areas to their home in the repo. Examples:}}
+
+- {{Frontend → `src/web/`}}
+- {{Backend → `src/api/`}}
+- {{Database migrations → `db/migrations/`}}
+
+### What does not change (without a decision)
+
+{{List frozen zones, shared contracts, accepted ADRs, etc.}}
+
+### How you work
+
+- Per-batch commits on a feature branch
+- Pull request against `{{main-branch}}` with description
+- Local verification before push ({{e.g. tests green, build OK}})
+- Conventional Commits, atomic, one logical change per commit
+- Write a decision record (ADR) for any non-trivial decision: `docs/adr/NNNN-short-title.md`
+
+---
+
+## Structured comment format
+
+Every meaningful code file has this at top (adjust comment syntax to language):
+
+```
+# component: <name>
+# implements: <ADR-IDs comma-separated>
+# intent: docs/<file>.md
+# constraints: docs/risks/<RISK-IDs>
+# last_intent_review: YYYY-MM-DD
+```
+
+Pre-commit hooks should verify these references resolve to existing documentation.
+
+---
+
+## Shared Schema Discipline
+
+When two or more components communicate (event buses, APIs, databases, IPC):
+
+1. Define the schema ONCE in a shared location
+2. Both sides import from shared. Never duplicate the definition locally.
+3. Never reinterpret the schema differently in two components.
+4. Write at least one integration test per communication link.
+
+{{Project-specific shared paths here, e.g.: `apps/shared-libs/src/events/`}}
+
+---
+
+## Technology-specific rules
+
+{{Add sections relevant to this project, e.g.:}}
+
+{{- Cloud preview-feature discipline (if relying on previews)}}
+{{- Cost awareness (if cloud resources)}}
+{{- API-version pinning}}
+{{- Migration discipline (if DB schema)}}
+
+<!-- PROJECT:END -->
+
+---
+
+## Compliance checklist (5-step session-start)
+
+Per JStack Layer 2. Run BEFORE any non-trivial action that touches code, data, or external systems:
+
+1. **Authority scope** — is this work inside the repo's authorized scope?
+2. **Customer-data check** — any path, secret, or content that could be customer data?
+3. **Production-mutation check** — will this mutate a shared or production system?
+4. **Secrets check** — any secret being introduced into code, logs, or commit messages?
+5. **Hard-rule check** — any operation that contradicts an explicit hard rule (see Layer 2 `HARD-RULES.md`)?
+
+A clean five-OK pass is the floor for any non-trivial action. Trivial actions (typo fix, question, doc edit) can skip.
+
+---
+
+## Auto-mode boundaries
+
+Auto-mode authorizes code changes and local verification without extra prompting, but NOT shared/production infrastructure mutations.
+
+### OK in auto-mode (no extra prompt)
+
+- File creation, file edits in the repo
+- `git commit` and `git push` to feature branches
+- Local tests, builds, lints
+- Read-only queries against external systems
+- Local container builds (no push)
+- Subagent invocations
+
+### Requires explicit per-call authorization even in auto-mode
+
+- Mutations against live, shared, or production cloud resources
+- Secrets, access policies, role assignments, firewall rules
+- Database DDL/DML outside the migrations pipeline against a live DB
+- Container image push to a live registry
+- Deploy-pipeline triggers
+- `git push` to `{{main-branch}}` (requires explicit per-batch authorization)
+
+### Borderline cases — ask first
+
+- Operations that emit production audit events
+- Production data access, even read-only, if there is a compliance dimension
+- Branch builds wired to a live deploy
+
+---
+
+## Pattern for cleanup when the boundary has been crossed
+
+1. **Stop immediately.** Do not push on in hope that a successful continuation "fixes" the mutation
+2. **Verify state.** Run read-only checks to understand the damage
+3. **Report honestly.** What was done, the state now, the risks
+4. **Propose options with trade-offs.** Do not ask for absolution — propose a concrete choice
+5. **Wait for explicit authorization** for rollback or continuation
+
+---
+
+## Direct-push to main
+
+The repo default flow is PR-based. Direct-push to `{{main-branch}}` is allowed only if explicitly authorized for a specific commit batch. The authorization applies to that batch only — the next one requires fresh approval.
+
+---
+
+## Deviation flagging policy
+
+If during implementation you discover that the INSTRUCTION or spec does not match reality (external API, docs, existing code):
+
+1. STOP implementation
+2. Pause-report with:
+   - What you discovered (with source or file:line ref)
+   - Three alternatives + trade-offs
+   - Your recommendation
+3. Wait for a decision
+4. Do not silently fix or assume your interpretation is correct
+
+---
+
+## Lessons learned
+
+See `tasks/lessons.md` for accumulated lessons from corrections and pivots.
+
+Review at session start. Add after ANY correction.
+
+---
+
+## Subagent development
+
+See `.claude/SUBAGENT-GUIDE.md` for how to add new subagents or revise existing ones.
+
+---
+
+## Voice (for any agent that produces customer-facing or official-communication content in this repo)
+
+If this repo produces customer-bound or official-communication output, agents that generate that output must declare `voice: trailblazer` in their frontmatter and follow Microsoft Our Voice guidelines (Kind + Daring + Deep, 3 modes, 6 ground rules). See JStack Layer 3 voice docs for the full guide.
+
+Internal dev agents (CodeReviewer, TestRunner, planning, etc.) declare `voice: internal` and use the direct "builder talking to builder" style.
+
+When in doubt: internal voice is the default. Use trailblazer only for genuinely customer-bound content.
