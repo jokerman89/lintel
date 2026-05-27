@@ -1,0 +1,95 @@
+# ============================================================================
+# jokerman-session-setup .gitignore
+#
+# This repo holds tooling scaffolding only. Customer artifacts, session data,
+# secrets, and per-machine state should NEVER land here.
+# ============================================================================
+
+# ----- Claude Code per-session state (live under ~/.claude/, not repo) -----
+# These are belt-and-suspenders in case someone copies their home tree by mistake.
+.claude/projects/
+.claude/sessions/
+.claude/shell-snapshots/
+.claude/history.jsonl
+.claude/file-history/
+.claude/cache/
+.claude/telemetry/
+.claude/session-env/
+.claude/plans/
+
+# ----- Generic session / scratch data -----
+session-data/
+sessions/
+scratch/
+.scratch/
+*.session
+*.session.json
+
+# ----- Secrets — defense in depth -----
+# Files matching these patterns must never be committed.
+.env
+.env.*
+!.env.example
+secrets/
+secrets.*
+*.secret
+*.pem
+*.key
+!*.public.key
+*.crt
+!*.public.crt
+*.pfx
+*.p12
+credentials.json
+service-account*.json
+.azure/
+.aws/
+.kube/
+
+# ----- Customer-data tripwires -----
+# Common patterns where customer data might land if someone forgets the rules.
+customer-data/
+customer/
+clients/
+samples/customer*
+samples/real*
+*.customer.*
+pii-test-data/
+
+# ----- Editor / IDE state -----
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ----- OS clutter -----
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ----- Node / JS toolchain (in case scripts get added) -----
+node_modules/
+package-lock.json
+yarn.lock
+.pnpm-store/
+dist/
+build/
+
+# ----- Python -----
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# ----- Local installer working files -----
+# verify.sh / install.sh may produce these
+.install-log
+.verify-log
+*.installer.tmp
+
+# ----- Local-only docs / notes -----
+NOTES.local.md
+TODO.local.md
+SCRATCH.md

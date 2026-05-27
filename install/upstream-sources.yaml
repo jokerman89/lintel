@@ -1,0 +1,135 @@
+# Upstream sources installed by install.sh / install.ps1.
+#
+# Each entry points at an external public repo. We DO NOT bundle their code in this repo —
+# the install script clones from upstream at install time. License obligations follow
+# whatever the upstream repo specifies.
+#
+# Fields:
+#   repo            — git URL (HTTPS) of the upstream repo
+#   install_path    — destination on the local machine (`~` expanded by the installer)
+#   last_verified   — date we last manually confirmed this URL + license combination
+#   license         — SPDX identifier (or "NONE" if upstream has no LICENSE file)
+#   tier            — permissive | restricted | reference-only
+#                       permissive = MIT/Apache/BSD — bundle freely
+#                       restricted = copyleft (CC-BY-SA), no-license, or mixed licensing —
+#                                    OK to install/use, NOT OK to bundle into a permissively-licensed project
+#                       reference-only = catalog/config repo, not a skill pack; install script SKIPS,
+#                                        docs point at it for reference
+#   install_type    — git-clone | git-clone-and-setup | reference-only
+#   post_install    — command to run inside install_path after clone (only if install_type=git-clone-and-setup)
+#   description     — one-line summary
+#   docs            — URL of the upstream README or docs entry-point
+#   license_note    — present only when tier=restricted; explains the obligation
+
+version: 1
+last_full_review: 2026-05-26
+
+sources:
+
+  # ----- TIER: permissive (MIT) -----
+
+  gstack:
+    repo: https://github.com/garrytan/gstack
+    install_path: ~/.claude/skills/gstack
+    last_verified: 2026-05-26
+    license: MIT
+    tier: permissive
+    install_type: git-clone-and-setup
+    post_install: "./setup"
+    description: "Garry Tan's Claude Code skill pack — 23 opinionated tools for plan/design/review/QA/ship workflows."
+    docs: https://github.com/garrytan/gstack#readme
+
+  gsd-redux:
+    repo: https://github.com/open-gsd/get-shit-done-redux
+    install_path: ~/.claude/get-shit-done
+    last_verified: 2026-05-26
+    license: MIT
+    tier: permissive
+    install_type: git-clone
+    description: "Get Shit Done (Redux) — meta-prompting + context engineering + spec-driven development for multi-CLI agents. Community fork of the original TÂCHES project."
+    docs: https://github.com/open-gsd/get-shit-done-redux#readme
+
+  agentshield:
+    repo: https://github.com/affaan-m/agentshield
+    install_path: ~/.claude/skills/agentshield
+    last_verified: 2026-05-26
+    license: MIT
+    tier: permissive
+    install_type: git-clone
+    description: "AI agent security scanner — detects vulnerabilities in agent configs, MCP servers, tool permissions. CLI + GitHub Action + GitHub App."
+    docs: https://github.com/affaan-m/agentshield#readme
+
+  ecc:
+    repo: https://github.com/affaan-m/ECC
+    install_path: ~/.claude/skills/ecc
+    last_verified: 2026-05-26
+    license: MIT
+    tier: permissive
+    install_type: git-clone
+    description: "Everything Claude Code — 27 agents, 64 skills, 33 commands. Multi-CLI agent harness (Claude Code, Codex, OpenCode, Cursor)."
+    docs: https://github.com/affaan-m/ECC#readme
+
+  # ----- TIER: restricted -----
+
+  trailofbits-skills:
+    repo: https://github.com/trailofbits/skills
+    install_path: ~/.claude/skills/trailofbits
+    last_verified: 2026-05-26
+    license: CC-BY-SA-4.0
+    tier: restricted
+    install_type: git-clone
+    description: "Trail of Bits security skills — code auditing, vulnerability detection, differential review, CodeQL/Semgrep wrappers, supply-chain auditing."
+    docs: https://github.com/trailofbits/skills#readme
+    license_note: >
+      CC-BY-SA-4.0 is share-alike copyleft. Using these skills locally is unrestricted.
+      Bundling, modifying, or redistributing any of these skills (e.g., copy-pasting one
+      into your own internal repo) requires the derivative work to be released under
+      CC-BY-SA-4.0. For internal MS-licensed projects: install and invoke from upstream,
+      do NOT inline.
+
+  anthropic-skills:
+    repo: https://github.com/anthropics/skills
+    install_path: ~/.claude/skills/anthropic
+    last_verified: 2026-05-26
+    license: Mixed (Apache-2.0 + source-available)
+    tier: restricted
+    install_type: git-clone
+    description: "Anthropic's official skill examples — mcp-builder, skill-creator, demonstration skills, plus document-creation skills (docx/pdf/pptx/xlsx)."
+    docs: https://github.com/anthropics/skills#readme
+    license_note: >
+      Most skills in this repo are Apache-2.0 (bundle-friendly). The document-creation
+      skills under `docx/`, `pdf/`, `pptx/`, `xlsx/` are explicitly source-available
+      but NOT open-source per Anthropic's README. Verify license per-skill before
+      bundling. For internal MS-licensed projects: install + invoke from upstream is
+      always safe; inlining requires per-skill license check.
+
+  # ----- TIER: reference-only -----
+
+  trailofbits-claude-code-config:
+    repo: https://github.com/trailofbits/claude-code-config
+    install_path: ~/.claude/reference/trailofbits-claude-code-config
+    last_verified: 2026-05-26
+    license: NONE
+    tier: reference-only
+    install_type: reference-only
+    description: "Trail of Bits' internal Claude Code configuration — opinionated defaults, documentation, workflows. Read it; do not copy."
+    docs: https://github.com/trailofbits/claude-code-config#readme
+    license_note: >
+      No LICENSE file = all rights reserved by default. Reading via browser or git clone
+      for personal study is fine (public repo). Redistribution / bundling is NOT
+      permitted. Treat as reference material only — the install script will not clone
+      this automatically.
+
+  anthropic-plugins-official:
+    repo: https://github.com/anthropics/claude-plugins-official
+    install_path: ~/.claude/reference/anthropic-plugins-official
+    last_verified: 2026-05-26
+    license: NONE (top-level); per-plugin licenses apply
+    tier: reference-only
+    install_type: reference-only
+    description: "Anthropic's official plugin catalog — directory of vetted Claude Code plugins. Browse for plugins; each plugin has its own LICENSE."
+    docs: https://github.com/anthropics/claude-plugins-official#readme
+    license_note: >
+      No top-level LICENSE — the README states 'see each linked plugin for the relevant
+      LICENSE file'. Use this as a catalog to discover plugins; install individual
+      plugins from their own upstream repos, not from this catalog clone.
