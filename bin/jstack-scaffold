@@ -1,0 +1,230 @@
+#!/usr/bin/env bash
+# jstack-scaffold — copy scaffolding/01-foundation/* into target repo with repo-specific rendering
+#
+# Usage:
+#   jstack-scaffold init [--target <path>] [--name <repo-name>] [--team <ms-team>] [--engagement <type>]
+#   jstack-scaffold check [--target <path>]
+#
+# Defaults:
+#   --target: current working directory
+#   --name:   basename of target
+#   --team:   MS-CAIP-SE
+#   --engagement: customer-engagement
+
+set -euo pipefail
+
+JSTACK_HOME="${JSTACK_HOME:-$HOME/.jstack}"
+SCAFFOLDING_SRC="${JSTACK_HOME}/scaffolding/01-foundation"
+
+CMD="${1:-help}"
+shift || true
+
+TARGET="$(pwd)"
+NAME=""
+TEAM="MS-CAIP-SE"
+ENGAGEMENT="customer-engagement"
+VOICE_TIER="internal"
+COMPLIANCE_LEVEL="standard"
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --target) TARGET="$2"; shift 2 ;;
+    --name) NAME="$2"; shift 2 ;;
+    --team) TEAM="$2"; shift 2 ;;
+    --engagement) ENGAGEMENT="$2"; shift 2 ;;
+    --voice) VOICE_TIER="$2"; shift 2 ;;
+    --compliance) COMPLIANCE_LEVEL="$2"; shift 2 ;;
+    *) echo "Unknown arg: $1" >&2; exit 2 ;;
+  esac
+done
+
+[ -z "$NAME" ] && NAME="$(basename "$TARGET")"
+
+help() {
+  cat <<EOF
+jstack-scaffold — initialize JStack scaffolding in a repo
+
+Usage:
+  jstack-scaffold init [options]      Initialize scaffolding files
+  jstack-scaffold check [options]     Check current state without modifying
+
+Options:
+  --target <path>          Target repo dir (default: cwd)
+  --name <repo-name>       Repo name for CLAUDE.md rendering (default: basename of target)
+  --team <ms-team>         MS team (default: MS-CAIP-SE)
+  --engagement <type>      customer-engagement | internal-tool | mvp | research (default: customer-engagement)
+  --voice <tier>           internal | trailblazer | mixed (default: internal)
+  --compliance <level>     full-SDL | standard | minimal (default: standard)
+
+Files created:
+  CLAUDE.md (rendered from template), CORE-PRINCIPLES.md, EVOLUTION.md,
+  EVOLUTION-LOG.md, tasks/{lessons,memory,personas,todo}.md,
+  docs/adr/{README,TEMPLATE}.md, docs/personas/EXAMPLE.md,
+  .claude/agents/ (4 templates), .claude/SUBAGENT-GUIDE.md,
+  TEMPLATE-skill.md, TEMPLATE-agent.md
+
+  If --compliance=full-SDL: also copies scaffolding/02-sdl/* compliance docs.
+
+Examples:
+  cd ~/new-customer-engagement && jstack-scaffold init
+  jstack-scaffold init --target ~/foo --engagement mvp
+  jstack-scaffold check
+EOF
+}
+
+check_source() {
+  if [ ! -d "$SCAFFOLDING_SRC" ]; then
+    echo "ERROR: JStack scaffolding source not found at $SCAFFOLDING_SRC" >&2
+    echo "Set JSTACK_HOME env var or run JStack installer first." >&2
+    echo "  install: bash <(curl -fsSL https://raw.githubusercontent.com/Azureflipper/jokerman-session-setup/main/install/install.sh)" >&2
+    exit 3
+  fi
+}
+
+check_collisions() {
+  local collisions=0
+  for f in CLAUDE.md CORE-PRINCIPLES.md EVOLUTION.md EVOLUTION-LOG.md; do
+    if [ -f "$TARGET/$f" ]; then
+      echo "  ⚠ exists: $f"
+      collisions=$((collisions+1))
+    fi
+  done
+  echo "$collisions"
+}
+
+cmd_check() {
+  echo "JStack scaffold check: $TARGET"
+  echo ""
+  echo "Scaffolding source: $SCAFFOLDING_SRC"
+  if [ -d "$SCAFFOLDING_SRC" ]; then
+    echo "  ✓ present"
+  else
+    echo "  ✗ NOT FOUND"
+  fi
+  echo ""
+  echo "Target state:"
+  local existing=0
+  for f in CLAUDE.md CORE-PRINCIPLES.md EVOLUTION.md EVOLUTION-LOG.md tasks/lessons.md docs/adr/README.md; do
+    if [ -e "$TARGET/$f" ]; then
+      echo "  ✓ $f"
+      existing=$((existing+1))
+    else
+      echo "  · $f (would create)"
+    fi
+  done
+  echo ""
+  if [ "$existing" -eq 0 ]; then
+    echo "Verdict: clean target — safe to scaffold."
+  elif [ "$existing" -lt 3 ]; then
+    echo "Verdict: partial scaffolding — operator may want to merge selectively."
+  else
+    echo "Verdict: existing scaffolding — backup before re-init."
+  fi
+}
+
+cmd_init() {
+  check_source
+  echo "jstack-scaffold: initializing $TARGET"
+  echo "  name=$NAME team=$TEAM engagement=$ENGAGEMENT voice=$VOICE_TIER compliance=$COMPLIANCE_LEVEL"
+  echo ""
+
+  cd "$TARGET"
+
+  # CLAUDE.md from template (basic substitution)
+  if [ -f "CLAUDE.md" ]; then
+    echo "  ⚠ CLAUDE.md exists — skipping (use --force to overwrite, future feature)"
+  else
+    if [ -f "$SCAFFOLDING_SRC/CLAUDE.md.template" ]; then
+      sed -e "s/{{REPO_NAME}}/$NAME/g" \
+          -e "s/{{MS_TEAM}}/$TEAM/g" \
+          -e "s/{{ENGAGEMENT_TYPE}}/$ENGAGEMENT/g" \
+          -e "s/{{VOICE_TIER}}/$VOICE_TIER/g" \
+          "$SCAFFOLDING_SRC/CLAUDE.md.template" > CLAUDE.md
+      echo "  ✓ CLAUDE.md (rendered)"
+    else
+      echo "  ⚠ CLAUDE.md.template not found — skipping"
+    fi
+  fi
+
+  # Copy static templates
+  for f in CORE-PRINCIPLES.md EVOLUTION.md EVOLUTION-LOG.md TEMPLATE-skill.md TEMPLATE-agent.md; do
+    if [ -f "$SCAFFOLDING_SRC/$f" ] && [ ! -f "$f" ]; then
+      cp "$SCAFFOLDING_SRC/$f" .
+      echo "  ✓ $f"
+    fi
+  done
+
+  # tasks/
+  mkdir -p tasks
+  for f in lessons.md memory.md personas.md todo.md; do
+    if [ -f "$SCAFFOLDING_SRC/tasks/$f" ] && [ ! -f "tasks/$f" ]; then
+      cp "$SCAFFOLDING_SRC/tasks/$f" tasks/
+      echo "  ✓ tasks/$f"
+    fi
+  done
+
+  # docs/adr/ + docs/personas/
+  mkdir -p docs/adr docs/personas
+  for f in "$SCAFFOLDING_SRC"/docs/adr/*.md; do
+    [ -f "$f" ] || continue
+    name=$(basename "$f")
+    if [ ! -f "docs/adr/$name" ]; then
+      cp "$f" docs/adr/
+      echo "  ✓ docs/adr/$name"
+    fi
+  done
+  for f in "$SCAFFOLDING_SRC"/docs/personas/*.md; do
+    [ -f "$f" ] || continue
+    name=$(basename "$f")
+    if [ ! -f "docs/personas/$name" ]; then
+      cp "$f" docs/personas/
+      echo "  ✓ docs/personas/$name"
+    fi
+  done
+
+  # .claude/
+  mkdir -p .claude/agents
+  for f in "$SCAFFOLDING_SRC"/.claude/agents/*.md; do
+    [ -f "$f" ] || continue
+    name=$(basename "$f")
+    if [ ! -f ".claude/agents/$name" ]; then
+      cp "$f" .claude/agents/
+      echo "  ✓ .claude/agents/$name"
+    fi
+  done
+  if [ -f "$SCAFFOLDING_SRC/.claude/SUBAGENT-GUIDE.md" ] && [ ! -f ".claude/SUBAGENT-GUIDE.md" ]; then
+    cp "$SCAFFOLDING_SRC/.claude/SUBAGENT-GUIDE.md" .claude/
+    echo "  ✓ .claude/SUBAGENT-GUIDE.md"
+  fi
+
+  # Optional: full SDL compliance docs
+  if [ "$COMPLIANCE_LEVEL" = "full-SDL" ]; then
+    mkdir -p scaffolding/02-sdl
+    if [ -d "$JSTACK_HOME/scaffolding/02-sdl" ]; then
+      cp -r "$JSTACK_HOME/scaffolding/02-sdl"/* scaffolding/02-sdl/ 2>/dev/null || true
+      echo "  ✓ scaffolding/02-sdl/* (compliance reference)"
+    fi
+  fi
+
+  echo ""
+  echo "jstack-scaffold: done."
+  echo ""
+  echo "Next steps:"
+  echo "  1. Review CLAUDE.md and customize project-specific sections."
+  echo "  2. Edit tasks/personas.md with engagement-specific personas."
+  echo "  3. Install JStack plugin for your CLI:"
+  echo "       Claude Code:    /plugin marketplace add Azureflipper/jokerman-session-setup"
+  echo "                       /plugin install jstack@jokerman-session-setup"
+  echo "       Codex:          /plugins → search jstack → Install"
+  echo "       Cursor:         /add-plugin jstack"
+  echo "       Gemini:         gemini extensions install https://github.com/Azureflipper/jokerman-session-setup"
+  echo "  4. git add -A && git commit -m 'chore: scaffold JStack base'"
+  echo ""
+}
+
+case "$CMD" in
+  init) cmd_init ;;
+  check) cmd_check ;;
+  help|--help|-h) help ;;
+  *) help; exit 2 ;;
+esac
