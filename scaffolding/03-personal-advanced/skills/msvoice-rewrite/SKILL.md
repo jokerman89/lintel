@@ -5,14 +5,14 @@ color: orange
 tools: Read, Write, Edit, Bash
 voice: trailblazer
 cli_support: [claude-code, codex]
-license_note: requires T0 corpus + calibration (TRAILBLAZER-CORPUS.md, TRAILBLAZER-CALIBRATION.md)
+license_note: requires T0 corpus + calibration (OurVoice-corpus.md, OurVoice-calibration.md)
 ---
 
 # /msvoice-rewrite
 
 Takes internal-voice prose and rewrites it in Microsoft Our Voice (Trailblazer). Each rewritten paragraph is mode-tagged (Reveal / Inspire / Provoke) with a specific technique cell (one of 12).
 
-Output is DRAFT by definition — requires `/customer-voice-check` before distribution.
+Output is DRAFT by definition — requires `/rais-customer-voice-check` before distribution.
 
 T0 calibration must be complete for the rewrite to be trusted. Pre-calibration: skill produces output but surfaces UNCALIBRATED stamp; downstream gates refuse to land it.
 
@@ -40,7 +40,7 @@ T0 calibration must be complete for the rewrite to be trusted. Pre-calibration: 
 
 ## Workflow
 
-1. **Preflight.** TRAILBLAZER-CORPUS.md must exist; TRAILBLAZER-CALIBRATION.md ≥90%/cell × ≥10 cells for trusted output. Surface UNCALIBRATED stamp if not.
+1. **Preflight.** OurVoice-corpus.md must exist; OurVoice-calibration.md ≥90%/cell × ≥10 cells for trusted output. Surface UNCALIBRATED stamp if not.
 2. **Parse input.** Split into paragraphs. Mark code blocks, tables, YAML as PRESERVE.
 3. **Per-paragraph plan.** For each non-PRESERVE paragraph: identify the topic + the right mode/cell for that topic. Heuristics:
    - Strong product claim → Reveal/Curtain or Reveal/Understatement
@@ -79,7 +79,7 @@ Mode mix:
 ✓ Six ground rules check: clarity ✓ / we-not-MS ✓ / concise ✓ / jargon ✓ / focus ✓ / perspective ✓
 
 ## Status
-DRAFT — requires /customer-voice-check before distribution.
+DRAFT — requires /rais-customer-voice-check before distribution.
 
 ## Cell distribution (chart)
 R1 Understatement   ▌▌                  (1)
@@ -95,7 +95,7 @@ P3 Exception        ▌▌                  (1)
 
 - AI-tell vocab Tier 1 scan post-rewrite — BLOCKS write on hit.
 - CELA pattern scan — competitor names, Trailblazer-persona external refs — BLOCKS.
-- Output marked DRAFT, status `requires-customer-voice-check`. Downstream `/ship` refuses without that check.
+- Output marked DRAFT, status `requires-customer-voice-check`. Downstream `/release-ev2` refuses without that check.
 - If `--input` had customer-data patterns: BLOCK before rewrite. Voice rewrite of customer-data is still customer-data.
 
 ## Voice tier note
@@ -117,7 +117,7 @@ P3 Exception        ▌▌                  (1)
 > /msvoice-rewrite --input release-notes-internal.md
 [Rewrites 11 paragraphs, preserves 4 code blocks]
 ✓ release-notes-internal-trailblazer.md DRAFT generated.
-  Next: /customer-voice-check before distribution.
+  Next: /rais-customer-voice-check before distribution.
 ```
 
 **Restricted modes:**
@@ -135,7 +135,7 @@ P3 Exception        ▌▌                  (1)
 
 ## See also
 
-- TRAILBLAZER-CORPUS.md — calibration source
-- `/customer-voice-check` — required gate AFTER this skill
+- OurVoice-corpus.md — calibration source
+- `/rais-customer-voice-check` — required gate AFTER this skill
 - `/document-generate --voice trailblazer` — generate trailblazer directly (vs rewrite)
-- `/ship` — reads downstream check verdict
+- `/release-ev2` — reads downstream check verdict

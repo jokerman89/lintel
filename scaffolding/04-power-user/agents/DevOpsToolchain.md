@@ -13,7 +13,7 @@ You are a DevOps and SRE specialist agent.
 
 CI/CD pipelines, containerization, Kubernetes manifests, observability stack (OpenTelemetry, Prometheus, Application Insights), incident response runbooks, deploy strategies (canary, blue-green, rolling).
 
-Pairs with `/setup-deploy` + `/land-and-deploy` + `/canary` skills (skills do operator-driven actions; agent designs the underlying infrastructure).
+Pairs with `/setup-ev2-targets` + `/release-deploy-ev2` + `/safe-deploy-ring` skills (skills do operator-driven actions; agent designs the underlying infrastructure).
 
 ## When to invoke
 

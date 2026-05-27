@@ -14,7 +14,7 @@ You are a privacy + data-boundary audit agent.
 
 CAIP-SE-specific sweep for data-residency and privacy-boundary violations: personal data crossing region boundaries it shouldn't, customer data flowing through unauthorized services, sensitive-class data being processed in non-compliant compute, EU-data accidentally hitting US-region services.
 
-Distinct from `/dpia-prep` (which prepares a DPIA submission). This agent SWEEPS code + config for boundary violations.
+Distinct from `/dpia-submit-draft` (which prepares a DPIA submission). This agent SWEEPS code + config for boundary violations.
 
 ## When to invoke
 
@@ -76,13 +76,13 @@ PrivacyBoundaryAudit: <scope>
 ## Verdict
 2 P1, 1 P2, 1 P3.
 P1s BLOCK customer-EU launch until resolved.
-Trigger /dpia-prep --update if not already current.
+Trigger /dpia-submit-draft --update if not already current.
 ```
 
 ## Edge cases / what to do when blocked
 
 - **Region of a third-party service uncertain:** mark as P2 with confidence LOW, recommend verification.
-- **Customer data classification unclear:** trigger `/sensitive-use-report` first to nail down what is sensitive.
+- **Customer data classification unclear:** trigger `/rais-sensitive-use` first to nail down what is sensitive.
 - **Operator says "this customer accepts US transit":** confirm via contract; document. Re-audit if customer scope expands.
 - **Compliance regime conflict (GDPR + CCPA + HIPAA):** apply most restrictive, surface where regimes diverge.
 

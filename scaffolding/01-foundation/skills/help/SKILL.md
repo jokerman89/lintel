@@ -57,7 +57,7 @@ JStack v<version> — <N skills>, <M agents>, <K hooks>
 - /review              [internal, all CLIs] — Diff-scoped pre-ship review
 
 ## Voice (<count>)
-- /customer-voice-check [trailblazer, claude-code] — Eval against MS Our Voice grid
+- /rais-customer-voice-check [trailblazer, claude-code] — Eval against MS Our Voice grid
 - /msvoice-rewrite     [trailblazer, claude-code] — Rewrite to specific Provoke technique
 
 ## Compliance (<count>)
@@ -142,7 +142,7 @@ JStack compliance skills:
 
 > /help --voice trailblazer
 JStack trailblazer-voice skills:
-- /customer-voice-check  [claude-code]
+- /rais-customer-voice-check  [claude-code]
 - /msvoice-rewrite       [claude-code]
 - /demo-deliverable-gen  [claude-code]
 ```

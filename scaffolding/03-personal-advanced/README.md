@@ -4,7 +4,7 @@ Opinionated workflow choices. The interesting layer for anyone wanting to scale 
 
 ## What lives here
 
-- **`voice/`** — Trailblazer voice tier infrastructure. Per-agent `voice:` declaration mechanism. Sanitized corpus. TEST + CALIBRATION for `/customer-voice-check`. **Currently populated:** TRAILBLAZER-TEST.md, TRAILBLAZER-CORPUS.md (skeleton awaiting operator content), TRAILBLAZER-CALIBRATION.md (pending), README.md.
+- **`voice/`** — Trailblazer voice tier infrastructure. Per-agent `voice:` declaration mechanism. Sanitized corpus. TEST + CALIBRATION for `/rais-customer-voice-check`. **Currently populated:** OurVoice-test.md, OurVoice-corpus.md (skeleton awaiting operator content), OurVoice-calibration.md (pending), README.md.
 - **`precedence/`** (pending Phase 1 completion) — 5-level agent selection precedence model + selection-flow decision tree.
 - **`promoted-agents.md`** (pending Phase 4) — tier-stamped Level-2 promoted agents list (permissive vs restricted).
 - **`harness-selection.md`** (pending Phase 1 completion) — when to use which harness pattern by project type.
@@ -37,4 +37,4 @@ Three valid values:
 - `voice: mixed` — agent produces both kinds in different sections (e.g., `TransparencyDocAuthor` writes internal-tone docs that get polished for customer publish later).
 
 `verify.sh --voice-tier-validity` rejects unknown values.
-`/customer-voice-check` runs against `voice: trailblazer` agent output; bypassed for `voice: internal`.
+`/rais-customer-voice-check` runs against `voice: trailblazer` agent output; bypassed for `voice: internal`.

@@ -23,7 +23,7 @@ After a CAIP-SE customer demo, advises on follow-up: what to send (handout updat
 
 ## When NOT to invoke
 
-- Pre-demo planning — use `/scaffold-customer-demo` or `/demo-deliverable-gen`
+- Pre-demo planning — use `/scaffold-engagement-demo` or `/demo-deliverable-gen`
 - Mid-engagement (not demo-anchored) — use `CAIPEngagementCoach`
 - Internal demo (no customer) — overhead exceeds value
 

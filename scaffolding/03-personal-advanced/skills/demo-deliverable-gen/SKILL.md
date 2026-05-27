@@ -10,9 +10,9 @@ license_note: depends on TRAILBLAZER-CORPUS calibration (T0)
 
 # /demo-deliverable-gen
 
-Produces a coordinated set of customer-bound demo deliverables: presentation script (with mode-tagged paragraphs), 1-page handout, and post-demo follow-up email. All trailblazer-voiced, all gated by `/customer-voice-check` before distribution.
+Produces a coordinated set of customer-bound demo deliverables: presentation script (with mode-tagged paragraphs), 1-page handout, and post-demo follow-up email. All trailblazer-voiced, all gated by `/rais-customer-voice-check` before distribution.
 
-Typically run inside a `/scaffold-customer-demo` repo, but also works on a standalone deliverable request.
+Typically run inside a `/scaffold-engagement-demo` repo, but also works on a standalone deliverable request.
 
 ## When to use
 
@@ -91,12 +91,12 @@ Calibration: CALIBRATED
 ✓ Brand-value words present in aggregate (Kind ✓, Daring ✓, Deep ✓)
 
 ## Status
-ALL THREE FILES: DRAFT — require /customer-voice-check before delivery.
+ALL THREE FILES: DRAFT — require /rais-customer-voice-check before delivery.
 
 ## Next steps
-1. /customer-voice-check --input deliverables/ (or per-file)
+1. /rais-customer-voice-check --input deliverables/ (or per-file)
 2. /provenance-track each artifact
-3. /compliance-gate before customer delivery
+3. /onecs-check before customer delivery
 4. After delivery: archive or move to deliverables/sent/
 ```
 
@@ -106,7 +106,7 @@ ALL THREE FILES: DRAFT — require /customer-voice-check before delivery.
 - Tier 1 AI-tell vocab + CELA pattern scan BLOCKS write on hit (with regen retries).
 - Customer-data patterns in inputs (source deck, audience description) BLOCK — sanitize first.
 - Provenance pre-seeded for `/provenance-track` to pick up.
-- Downstream `/ship` for customer-bearing deliverables refuses without passed voice-check + provenance record.
+- Downstream `/release-ev2` for customer-bearing deliverables refuses without passed voice-check + provenance record.
 
 ## Voice tier note
 
@@ -118,7 +118,7 @@ ALL THREE FILES: DRAFT — require /customer-voice-check before delivery.
 - **Source deck contains Tier 1 AI-tell vocab:** generation may inherit — WARN, recommend `/msvoice-rewrite` on source first.
 - **Audience description vague:** ask for specifics. "Public sector" is too broad; "Nordic mid-market public sector IT leadership" is workable.
 - **Duration target unrealistic (e.g. 5 min for AI-feature deep dive):** WARN — content density will hurt; suggest a different duration or scope.
-- **All three artifacts requested but `/customer-voice-check` would fail at high threshold:** generate anyway with each artifact's score noted; operator iterates.
+- **All three artifacts requested but `/rais-customer-voice-check` would fail at high threshold:** generate anyway with each artifact's score noted; operator iterates.
 
 ## Examples
 
@@ -126,7 +126,7 @@ ALL THREE FILES: DRAFT — require /customer-voice-check before delivery.
 ```
 > /demo-deliverable-gen --demo-name azure-arc-hybrid-demo --audience "mid-market public sector IT leadership" --key-message "manage on-prem like Azure"
 [Generates script + handout + follow-up email, all DRAFT]
-✓ 3 deliverables generated. Next: /customer-voice-check.
+✓ 3 deliverables generated. Next: /rais-customer-voice-check.
 ```
 
 **Just script:**
@@ -145,8 +145,8 @@ ALL THREE FILES: DRAFT — require /customer-voice-check before delivery.
 
 ## See also
 
-- `/scaffold-customer-demo` — provides the repo this skill typically runs in
-- `/customer-voice-check` — REQUIRED gate after this skill
+- `/scaffold-engagement-demo` — provides the repo this skill typically runs in
+- `/rais-customer-voice-check` — REQUIRED gate after this skill
 - `/provenance-track` — required record before distribution
 - `/msvoice-rewrite` — for individual paragraph-level rewrites
-- TRAILBLAZER-CORPUS.md — calibration source
+- OurVoice-corpus.md — calibration source

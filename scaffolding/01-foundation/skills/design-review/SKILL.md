@@ -17,7 +17,7 @@ Voice tier note: the critique itself is internal (builder-to-builder). When the 
 
 ## When to use
 
-- Frontend change is feature-complete; want a polish pass before `/ship`
+- Frontend change is feature-complete; want a polish pass before `/release-ev2`
 - A `/qa` run is clean but the UI "feels off"
 - Pre-launch on a customer-facing surface — design review is non-negotiable
 - After a design-system migration — verify pages still hold together
@@ -120,7 +120,7 @@ Overall: 7.8/10
 > /design-review --url http://localhost:5173
 [/browse runs 2 routes × 2 viewports = 4 captures]
 Pillar scores: Polish 8/10, A11y 6/10, Motion 9/10, Copy 7/10, Layout 8/10, Brand 9/10
-5 findings (1 P1, 1 P2, 3 P3). Fix P1 before /ship.
+5 findings (1 P1, 1 P2, 3 P3). Fix P1 before /release-ev2.
 ```
 
 **Multi-route staging:**
@@ -141,5 +141,5 @@ Pillar avg: 7.2/10. 12 findings, 2 P1.
 - `/browse` — the screenshot/DOM engine underneath
 - `/plan-design-review` — plan-stage equivalent (use BEFORE code is written)
 - `/msvoice-rewrite` (Phase 3) — actually rewrite copy to Trailblazer voice
-- `/customer-voice-check` (Phase 3) — gate for customer-facing artifacts before they leave
-- `/ship` — reads design-review log as part of clearance check
+- `/rais-customer-voice-check` (Phase 3) — gate for customer-facing artifacts before they leave
+- `/release-ev2` — reads design-review log as part of clearance check

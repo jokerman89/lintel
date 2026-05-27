@@ -38,7 +38,7 @@ Codex and Copilot do not have native browser-control. This skill is `claude-code
 
 ## Workflow
 
-1. **Preflight.** Verify managed Chromium present (run `/open-gstack-browser --check` internally). If missing: surface install command.
+1. **Preflight.** Verify managed Chromium present (run `/open-managed-browser --check` internally). If missing: surface install command.
 2. **Compliance gate.** Check URL against Layer 2 patterns: if hostname matches `~/.jstack/compliance/prod-hosts.txt`, BLOCK with reason "production host — customer-data risk". Operator can override via explicit per-call confirmation.
 3. **Launch.** Playwright with `--user-data-dir` pointed at the JStack profile (so cookies established via `/setup-browser-cookies` persist).
 4. **Execute actions.** Step through the action list. Each step logs to `~/.jstack/browse-runs/<ts>/trace.jsonl`. Console messages from the page captured to `console.log` in same dir.
@@ -116,5 +116,5 @@ actions.yaml:
 - `/scrape` — multi-URL extraction
 - `/make-pdf` — page-to-PDF conversion
 - `/setup-browser-cookies` — establishes auth for the managed profile
-- `/open-gstack-browser` — manual interactive session in the same profile
+- `/open-managed-browser` — manual interactive session in the same profile
 - `/qa` — for non-browser test verification

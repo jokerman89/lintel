@@ -18,7 +18,7 @@ Use to brief teammates, draft release notes, or seed an external announcement.
 - End of sprint, deploy, or significant batch — want a clean recap
 - Drafting release notes for a deliverable that's about to leave the building
 - Internal status update for stakeholders
-- Customer-facing what's-new content (with `--voice trailblazer` and `/customer-voice-check` gate)
+- Customer-facing what's-new content (with `--voice trailblazer` and `/rais-customer-voice-check` gate)
 
 ## When NOT to use
 
@@ -43,7 +43,7 @@ Use to brief teammates, draft release notes, or seed an external announcement.
 4. **Sanity scan.** Layer 2 patterns on every commit message + every PR title/body. Block on hit.
 5. **Generate report:**
    - **Internal voice (default):** structured changelog with bullets per type. Concrete, terse, file:line where relevant.
-   - **Trailblazer voice (`--voice trailblazer`):** narrative form, mode-tagged per paragraph (Reveal / Inspire / Provoke). Auto-flags as DRAFT — must pass `/customer-voice-check` before distribution.
+   - **Trailblazer voice (`--voice trailblazer`):** narrative form, mode-tagged per paragraph (Reveal / Inspire / Provoke). Auto-flags as DRAFT — must pass `/rais-customer-voice-check` before distribution.
 6. **Stats (optional).** Aggregate stats appended.
 7. **Output.** Stdout or file per `--out`.
 
@@ -76,7 +76,7 @@ Landing Report: 2026-05-20 → 2026-05-27 (main, 7 days)
 
 ```
 Landing Report: <window>
-Status: DRAFT — requires /customer-voice-check before distribution
+Status: DRAFT — requires /rais-customer-voice-check before distribution
 
 ## What changed (Reveal/Curtain)
 The work of the last seven days isn't in any single new feature. It's in the
@@ -85,16 +85,16 @@ batches without losing context, a way for the next session to start where this
 one ended.
 
 ## What's now possible (Inspire/Marvel)
-[draft text — verify via /customer-voice-check]
+[draft text — verify via /rais-customer-voice-check]
 
 ## What we'd say next (Provoke/Exception)
-[draft text — verify via /customer-voice-check]
+[draft text — verify via /rais-customer-voice-check]
 ```
 
 ## Compliance integration
 
 - Layer 2 sanity-scan on EVERY commit message ingested. If a commit message contains a secret/customer-data pattern: report STOP, surface the offending commit, refuse to render the report (a leak in a commit message is now leaked to the report too).
-- `--voice trailblazer` output marked DRAFT and gated: distribution downstream MUST run `/customer-voice-check` (Phase 3) first.
+- `--voice trailblazer` output marked DRAFT and gated: distribution downstream MUST run `/rais-customer-voice-check` (Phase 3) first.
 - Stats reveal contributors — sanity-scan checks for any unexpected non-MS or non-public author (e.g. a contractor's personal email). Surface as a warning.
 
 ## Voice tier note
@@ -122,7 +122,7 @@ one ended.
 ```
 > /landing-report --since v1.0.0 --voice trailblazer --out release-notes-draft.md
 [Trailblazer DRAFT to file]
-DRAFT written. Run /customer-voice-check before distribution.
+DRAFT written. Run /rais-customer-voice-check before distribution.
 ```
 
 **Scoped to skills:**
@@ -134,6 +134,6 @@ DRAFT written. Run /customer-voice-check before distribution.
 ## See also
 
 - `/retro` — session-internal reflection (vs ship-facing report)
-- `/customer-voice-check` (Phase 3) — required gate for trailblazer-voice output
+- `/rais-customer-voice-check` (Phase 3) — required gate for trailblazer-voice output
 - `/msvoice-rewrite` (Phase 3) — rewrite internal-voice output to trailblazer
-- `/ship` — generates a per-PR body that this skill can aggregate
+- `/release-ev2` — generates a per-PR body that this skill can aggregate

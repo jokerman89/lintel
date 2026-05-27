@@ -52,7 +52,7 @@ Distinct from `DocWriter` subagent: that one detects drift + updates existing do
    - 3-5 "you can do this" sections (Inspire/Vernacular — what becomes possible)
    - Optional "here's where teams get stuck" (Provoke/Skewer — common assumption broken)
    - "Next steps" CTA
-   - Marked DRAFT — requires `/customer-voice-check` before distribution
+   - Marked DRAFT — requires `/rais-customer-voice-check` before distribution
 
    **`tutorial`** (step-by-step):
    - "By the end of this you'll have..." outcome statement
@@ -95,8 +95,8 @@ Code examples: 9
 ## Compliance integration
 
 - Layer 2 scan on every generated section before write.
-- `--voice trailblazer` output: marked DRAFT, gated behind `/customer-voice-check` before distribution.
-- AI-tell vocabulary scan (Tier 1 blocklist from TRAILBLAZER-CORPUS.md) for both internal and trailblazer voice — keeps engineering docs from leaking into LLM-style prose.
+- `--voice trailblazer` output: marked DRAFT, gated behind `/rais-customer-voice-check` before distribution.
+- AI-tell vocabulary scan (Tier 1 blocklist from OurVoice-corpus.md) for both internal and trailblazer voice — keeps engineering docs from leaking into LLM-style prose.
 
 ## Voice tier note
 
@@ -124,7 +124,7 @@ Code examples: 9
 ```
 > /document-generate --source src/api/billing/ --target customer-guide
 [Generates trailblazer-voice draft]
-✓ docs/guides/billing.md DRAFT generated. Run /customer-voice-check before distribution.
+✓ docs/guides/billing.md DRAFT generated. Run /rais-customer-voice-check before distribution.
 ```
 
 **Newcomer tutorial:**
@@ -137,7 +137,7 @@ Code examples: 9
 ## See also
 
 - `DocWriter` subagent — detects drift in existing docs (use post-generate to keep them fresh)
-- `/customer-voice-check` (Phase 3) — required gate for trailblazer-voice output
+- `/rais-customer-voice-check` (Phase 3) — required gate for trailblazer-voice output
 - `/msvoice-rewrite` (Phase 3) — rewrite internal-voice content to trailblazer
 - `/learn` — record any documentation patterns worth remembering
-- TRAILBLAZER-CORPUS.md — the calibration anchor for trailblazer-voice output
+- OurVoice-corpus.md — the calibration anchor for trailblazer-voice output

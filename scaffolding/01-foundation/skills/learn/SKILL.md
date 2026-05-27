@@ -84,7 +84,7 @@ Future sessions reading tasks/lessons.md will surface this at session start (per
 - **Lesson body too vague to be useful:** WARN + ask whether to proceed. A vague lesson signals nothing actionable to future sessions.
 - **Duplicate lesson (same body within 30 days):** report + ask whether to skip or merge.
 - **Compliance scan hits:** BLOCK, surface what hit, refuse to write. Operator rewrites + retries.
-- **Project lessons file conflicts with `/freeze`:** if frozen, refuse + ask operator to `/unfreeze` first.
+- **Project lessons file conflicts with `/code-freeze`:** if frozen, refuse + ask operator to `/code-unfreeze` first.
 
 ## Examples
 

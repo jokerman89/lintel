@@ -60,18 +60,18 @@ Engagement state: pre-demo (customer-A nordic-finserv, 2 days out)
 
 ## What's in shape
 ✓ Compliance: 5 always-on clean, 7 on-demand 5 PASS
-✓ Voice: 2 of 3 deliverables passed /customer-voice-check
+✓ Voice: 2 of 3 deliverables passed /rais-customer-voice-check
 ✓ Demo script: locked, 30-min target, mode mix balanced
 
 ## What's gappy
-⚠ Handout DRAFT still pending /customer-voice-check
+⚠ Handout DRAFT still pending /rais-customer-voice-check
 ⚠ One RAI submission DRAFT not yet submitted (4-day reviewer SLA)
 ⚠ Dress rehearsal not scheduled
 
 ## Three moves for the next 2 days
 
 ### Move A — Stabilize for demo
-- Day 1: /customer-voice-check handout, /provenance-track all 3 deliverables, dress rehearsal with internal team
+- Day 1: /rais-customer-voice-check handout, /provenance-track all 3 deliverables, dress rehearsal with internal team
 - Day 2: minor polish, customer-prep call, ready
 - Cost: low. Risk: low. Confidence at demo: high.
 
@@ -90,7 +90,7 @@ Engagement state: pre-demo (customer-A nordic-finserv, 2 days out)
 Move A. Move B if customer signals RAI is a primary concern.
 
 ## Specific next actions
-1. /customer-voice-check --input deliverables/handout-DRAFT.md  (5 min)
+1. /rais-customer-voice-check --input deliverables/handout-DRAFT.md  (5 min)
 2. /provenance-track --artifact each of the 3 deliverables (5 min × 3)
 3. Dress rehearsal — internal, 30 min today
 4. /caip-audit final pass tomorrow morning
@@ -99,7 +99,7 @@ Move A. Move B if customer signals RAI is a primary concern.
 ## Edge cases / what to do when blocked
 
 - **Engagement state ambiguous:** ask 2-3 clarifying questions (what phase? what's the next customer touchpoint? what's the deliverable shape?). Then advise.
-- **No compliance state at all (greenfield engagement):** recommend `/scaffold-customer-demo` to set the foundation, then return.
+- **No compliance state at all (greenfield engagement):** recommend `/scaffold-engagement-demo` to set the foundation, then return.
 - **Operator already decided + asking for confirmation:** validate or push back honestly. Don't rubber-stamp.
 - **Conflict between operator urgency + compliance gates:** name the conflict, recommend the responsible-path move, but respect operator override authority.
 

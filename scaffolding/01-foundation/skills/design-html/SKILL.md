@@ -1,6 +1,6 @@
 ---
 name: jstack-design-html
-description: Generate a single-file static HTML mockup from a brief — opens with /open-gstack-browser.
+description: Generate a single-file static HTML mockup from a brief — opens with /open-managed-browser.
 color: green
 tools: Read, Write, Glob, Bash
 voice: internal
@@ -9,7 +9,7 @@ cli_support: [claude-code, codex]
 
 # /design-html
 
-Brief → single-file HTML mockup. Inline CSS, inline minimal JS if needed, no build step, no framework. The output is a `.html` file the operator can open immediately via `/open-gstack-browser --url file://...` or any browser.
+Brief → single-file HTML mockup. Inline CSS, inline minimal JS if needed, no build step, no framework. The output is a `.html` file the operator can open immediately via `/open-managed-browser --url file://...` or any browser.
 
 The point: fast exploration before any framework commitment. Use for design conversations, customer demos of UI direction, or as the seed for `/design-shotgun` to spawn variants.
 
@@ -44,9 +44,9 @@ The point: fast exploration before any framework commitment. Use for design conv
 5. **Copy population.** Per `--copy-tier`:
    - `internal`: lorem ipsum or `[TODO: real copy]` placeholders
    - `placeholder`: descriptive placeholders that explain intent (`[Headline: 4-7 words, Reveal mode, names the user benefit]`)
-   - `trailblazer-draft`: attempts real copy following 12-cell grid — NEEDS `/customer-voice-check` before customer use
-6. **Save.** Write file + log path. Skill does NOT auto-open — operator runs `/open-gstack-browser` next.
-7. **Optional preview.** If operator says "preview": chain to `/open-gstack-browser --url file://...`.
+   - `trailblazer-draft`: attempts real copy following 12-cell grid — NEEDS `/rais-customer-voice-check` before customer use
+6. **Save.** Write file + log path. Skill does NOT auto-open — operator runs `/open-managed-browser` next.
+7. **Optional preview.** If operator says "preview": chain to `/open-managed-browser --url file://...`.
 
 ## Report format
 
@@ -63,19 +63,19 @@ Generated: ~/.jstack/design-html/portal-dashboard-v3-20260527-163100.html (24KB)
   - 3-card area-grid (placeholder text)
   - Italic emerald-700 accent on H1
 
-To preview: /open-gstack-browser --url file:///Users/.../portal-dashboard-v3-20260527-163100.html
+To preview: /open-managed-browser --url file:///Users/.../portal-dashboard-v3-20260527-163100.html
 To fork into variants: /design-shotgun --seed <this path> --count 3
 ```
 
 ## Compliance integration
 
-- If `--copy-tier trailblazer-draft` and `--inherit-project` references a customer-facing surface: SURFACE reminder that `/customer-voice-check` is required before the artifact reaches a customer.
+- If `--copy-tier trailblazer-draft` and `--inherit-project` references a customer-facing surface: SURFACE reminder that `/rais-customer-voice-check` is required before the artifact reaches a customer.
 - Reference URL processed via `/browse` — Layer 2 prod-host gate applies.
 - Output HTML is local. Distribution is operator's responsibility.
 
 ## Voice tier note
 
-`voice: internal`. The skill itself is internal. The OUTPUT (HTML) may contain trailblazer-draft copy if explicitly opted in via `--copy-tier`. The skill warns when this happens and gates downstream distribution behind `/customer-voice-check`.
+`voice: internal`. The skill itself is internal. The OUTPUT (HTML) may contain trailblazer-draft copy if explicitly opted in via `--copy-tier`. The skill warns when this happens and gates downstream distribution behind `/rais-customer-voice-check`.
 
 ## Failure modes
 
@@ -92,7 +92,7 @@ To fork into variants: /design-shotgun --seed <this path> --count 3
 > /design-html "dashboard for showing 5-10 active cases with status chips, inspired by Linear"
 [Reads brief, generates]
 ✓ 18KB HTML at ~/.jstack/design-html/dashboard-20260527-163100.html
-  Preview: /open-gstack-browser --url file://...
+  Preview: /open-managed-browser --url file://...
 ```
 
 **Inherit project tokens:**
@@ -115,5 +115,5 @@ To fork into variants: /design-shotgun --seed <this path> --count 3
 - `/design-shotgun` — fork this output into N variants in parallel
 - `/design-review` — review the rendered mockup once opened
 - `/design-consultation` — talk through design decisions before generating HTML
-- `/open-gstack-browser` — open the generated file
+- `/open-managed-browser` — open the generated file
 - `/make-pdf` — convert HTML to PDF for distribution

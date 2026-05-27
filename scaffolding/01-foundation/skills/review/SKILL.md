@@ -9,16 +9,16 @@ cli_support: [claude-code, codex]
 
 # /review
 
-Reviews the current branch's diff before landing. Lighter than `/plan-eng-review` (which reviews a plan/design doc). Use when there's no plan but you want a code review pass before `/ship`.
+Reviews the current branch's diff before landing. Lighter than `/plan-eng-review` (which reviews a plan/design doc). Use when there's no plan but you want a code review pass before `/release-ev2`.
 
 Auto-scales: small diffs get fast review; large diffs (200+ lines) additionally get Codex structured review with P1 gate.
 
 ## When to use
 
 - Branch is feature-complete, no design doc exists
-- Quick correctness pass before `/ship`
+- Quick correctness pass before `/release-ev2`
 - Small fixes / refactors that don't warrant `/plan-eng-review`
-- `/ship` blocked by "Eng Review NOT CLEARED" and the work is too small for full plan-eng-review
+- `/release-ev2` blocked by "Eng Review NOT CLEARED" and the work is too small for full plan-eng-review
 
 ## When NOT to use
 
@@ -70,10 +70,10 @@ Codex pass: optional, skipped this run
 
 ## Verdict
 - P1 count: 0 — no block
-- P2 count: 1 — should fix before /ship
+- P2 count: 1 — should fix before /release-ev2
 - P3 count: 2 — recommended fixes
 
-Run /ship when P2+ resolved.
+Run /release-ev2 when P2+ resolved.
 ```
 
 Persist:
@@ -112,7 +112,7 @@ Every finding gets a 1-10 confidence:
 ```
 > /review
 Diff scope: 23 lines, 2 files (SMALL)
-✓ No findings. Clean to /ship.
+✓ No findings. Clean to /release-ev2.
 ```
 
 **Medium diff with findings:**
@@ -120,7 +120,7 @@ Diff scope: 23 lines, 2 files (SMALL)
 > /review
 [3 findings reported]
 P1: 0, P2: 1, P3: 2
-Action: fix P2 before /ship.
+Action: fix P2 before /release-ev2.
 ```
 
 **Large diff with Codex P1 gate:**
@@ -128,11 +128,11 @@ Action: fix P2 before /ship.
 > /review
 Diff: 412 lines, 18 files (LARGE)
 Codex pass: P1 found — race condition in payment-handler.ts:108
-✗ /ship BLOCKED until P1 resolved
+✗ /release-ev2 BLOCKED until P1 resolved
 ```
 
 ## See also
 
 - `/plan-eng-review` — heavier plan-stage review (use when design doc exists)
 - `/investigate` — debugging when /review finds something broken
-- `/ship` — reads /review's dashboard entry as ship-gate signal (within 7 days, current commit)
+- `/release-ev2` — reads /review's dashboard entry as ship-gate signal (within 7 days, current commit)

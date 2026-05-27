@@ -65,7 +65,7 @@ Signals: 7 commits, 32 audit entries, 14 skill invocations
 - 3a637cd — batch 4 ship pipeline (carryover from prior session)
 
 ## Stuck
-- /sync-gbrain not yet written (planned batch 10)
+- /sync-brain not yet written (planned batch 10)
 - T0 voice corpus still empty (operator-blocked, awaiting Copilot material gather)
 
 ## Surprises

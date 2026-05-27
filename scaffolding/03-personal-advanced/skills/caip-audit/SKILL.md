@@ -11,7 +11,7 @@ cli_support: [claude-code, codex]
 
 Operator-level audit for CAIP-SE customer engagements. Checks engagement state across four dimensions: engagement metadata, compliance status, voice-gate status of deliverables, technical readiness. Output is a readiness scorecard the operator uses pre-customer-meeting.
 
-Distinct from `/compliance-gate` (item-by-item checklist) and `/health` (technical install diagnostics). This is engagement-shaped.
+Distinct from `/onecs-check` (item-by-item checklist) and `/health` (technical install diagnostics). This is engagement-shaped.
 
 ## When to use
 
@@ -22,7 +22,7 @@ Distinct from `/compliance-gate` (item-by-item checklist) and `/health` (technic
 
 ## When NOT to use
 
-- Generic engineering tasks — `/health` or `/compliance-gate` fit
+- Generic engineering tasks — `/health` or `/onecs-check` fit
 - Non-CAIP work — this skill is opinionated for CAIP-SE
 - Within-MS-engineering project (no customer surface) — overkill
 
@@ -48,7 +48,7 @@ Distinct from `/compliance-gate` (item-by-item checklist) and `/health` (technic
    - Data class declarations present per artifact
 4. **Dimension 3: Voice gates.**
    - All customer-bound DRAFTs identified
-   - `/customer-voice-check` status per DRAFT
+   - `/rais-customer-voice-check` status per DRAFT
    - Provenance records present per finalized artifact
 5. **Dimension 4: Technical readiness.**
    - Tests pass on main
@@ -85,7 +85,7 @@ YELLOW
 ## Dimension 3 — Voice gates
 YELLOW
 ✓ 3 customer-bound DRAFTs identified (script, handout, follow-up email)
-⚠ /customer-voice-check: 2 PASS, 1 not-yet-run (handout)
+⚠ /rais-customer-voice-check: 2 PASS, 1 not-yet-run (handout)
 ⚠ Provenance: 2 records present, 1 missing for handout
 
 ## Dimension 4 — Technical readiness
@@ -98,7 +98,7 @@ GREEN
 ## Overall: YELLOW
 - Resolve Item 3 data class on follow-up email
 - Submit One RAI before customer demo
-- Run /customer-voice-check on handout-DRAFT
+- Run /rais-customer-voice-check on handout-DRAFT
 - /provenance-track the handout
 
 Recommended order: voice-check + provenance (5 min), then compliance items (15 min).
@@ -108,7 +108,7 @@ Estimated time to GREEN: 25 minutes.
 
 ## Compliance integration
 
-- Aggregates results from `/compliance-gate` + voice-check status + provenance state.
+- Aggregates results from `/onecs-check` + voice-check status + provenance state.
 - Per-dimension scoring is advisory; operator decides whether to proceed.
 - YELLOW + RED both block customer-demo per Layer 2 (operator can override with logged reason).
 
@@ -118,7 +118,7 @@ Estimated time to GREEN: 25 minutes.
 
 ## Failure modes
 
-- **Engagement repo doesn't match CAIP-SE structure:** report missing pieces, suggest `/scaffold-customer-demo` to fix.
+- **Engagement repo doesn't match CAIP-SE structure:** report missing pieces, suggest `/scaffold-engagement-demo` to fix.
 - **Customer real-name detected (sanitization failure):** STOP — RED on Dimension 1 + refuse other dimensions until sanitized.
 - **Compliance gate hasn't been run recently:** WARN, recommend running, continue with stale data caveat.
 - **Operator on personal branch (not main) with engagement work:** WARN — engagement artifacts on a personal branch are fragile.
@@ -136,7 +136,7 @@ YELLOW overall. Resolve 4 items before customer demo.
 ```
 > /caip-audit --dimensions voice-gates
 [Only Dimension 3]
-2 PASS, 1 missing voice-check. Run /customer-voice-check on handout-DRAFT.md.
+2 PASS, 1 missing voice-check. Run /rais-customer-voice-check on handout-DRAFT.md.
 ```
 
 **Scorecard to file for stakeholder share:**
@@ -148,8 +148,8 @@ File written. Internal-share-only — no customer-bound info.
 
 ## See also
 
-- `/compliance-gate` — Dimension 2 input
-- `/customer-voice-check` — Dimension 3 input
+- `/onecs-check` — Dimension 2 input
+- `/rais-customer-voice-check` — Dimension 3 input
 - `/provenance-track` — Dimension 3 input
 - `/health` — system-level diagnostic (this skill is engagement-level)
-- `/scaffold-customer-demo` — fix Dimension 1 structure if missing
+- `/scaffold-engagement-demo` — fix Dimension 1 structure if missing

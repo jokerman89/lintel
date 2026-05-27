@@ -141,4 +141,4 @@ TTHW improved 8m → 5m. Error messages improved 4/10 → 7/10. Test loop regres
 - `/plan-devex-review` — plan-stage equivalent
 - `/design-review` — UI critique (sister skill)
 - `/review` — diff-scoped code review (DX is broader than diff)
-- `/ship` — reads devex-review log as advisory signal (not blocking)
+- `/release-ev2` — reads devex-review log as advisory signal (not blocking)

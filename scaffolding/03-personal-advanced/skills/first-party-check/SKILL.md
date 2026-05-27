@@ -11,11 +11,11 @@ cli_support: [claude-code, codex]
 
 Scans the repo (or a specific diff) for third-party dependencies that have a viable Microsoft first-party alternative. Surfaces them, names the MS equivalent, and asks whether the choice was deliberate. The rule isn't "always pick MS"; it's "never pick non-MS without considering MS".
 
-Implements one of the 7 on-demand compliance items (Item 2). Run by `/compliance-gate` automatically; also runnable standalone.
+Implements one of the 7 on-demand compliance items (Item 2). Run by `/onecs-check` automatically; also runnable standalone.
 
 ## When to use
 
-- Pre-`/ship` on a diff that adds new dependencies
+- Pre-`/release-ev2` on a diff that adds new dependencies
 - After a 3rd-party SDK integration — verify MS alternative was at least considered
 - Periodic project hygiene (quarterly review of `package.json` / `requirements.txt`)
 - New module setup — surface MS options early
@@ -50,7 +50,7 @@ Implements one of the 7 on-demand compliance items (Item 2). Run by `/compliance
    - `cloudflare` → Azure Front Door / CDN
    - (More in `~/.jstack/first-party-alternatives.yaml`, operator-extendable)
 3. **For each flag:** check git history / repo docs for a documented decision (commit message rationale, ADR, README note). If absent: mark NEEDS_JUSTIFICATION.
-4. **Compliance gate hint:** if running inside `/compliance-gate`: emit structured output for aggregation.
+4. **Compliance gate hint:** if running inside `/onecs-check`: emit structured output for aggregation.
 5. **Report.**
 
 ## Report format
@@ -93,8 +93,8 @@ Example output on a real codebase:
 ## Compliance integration
 
 - Implements Item 2 of the 7 on-demand compliance items.
-- A NEEDS_JUSTIFICATION dep in `--strict` mode + downstream `/ship`: BLOCKS until documented.
-- Output structured-emitted to `/compliance-gate` when run as part of aggregate check.
+- A NEEDS_JUSTIFICATION dep in `--strict` mode + downstream `/release-ev2`: BLOCKS until documented.
+- Output structured-emitted to `/onecs-check` when run as part of aggregate check.
 - Operator can add to `~/.jstack/first-party-alternatives.yaml` for project-specific mappings.
 
 ## Voice tier note
@@ -121,7 +121,7 @@ Document or migrate the 2 flagged. Add justification commit or ADR.
 ```
 > /first-party-check --diff main
 [Scans only deps added since main]
-1 new flagged dep (sentry). Justify before /ship.
+1 new flagged dep (sentry). Justify before /release-ev2.
 ```
 
 **Strict CI mode:**
@@ -133,7 +133,7 @@ Use in CI to enforce first-party-first.
 
 ## See also
 
-- `/compliance-gate` — runs this skill as Item 2 of the 7
+- `/onecs-check` — runs this skill as Item 2 of the 7
 - `~/.jstack/first-party-alternatives.yaml` — operator-extendable mappings
 - Item 2 in ON-DEMAND-RULES.md (Phase 6) — the source rule
 - `/learn` — record a documented decision so future scans pick it up

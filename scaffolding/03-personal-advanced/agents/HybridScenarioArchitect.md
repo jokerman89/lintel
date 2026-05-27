@@ -87,13 +87,13 @@ HybridScenarioArchitect: customer-A nordic-finserv
 - License cost for Arc-onboarded SQL needs evaluation
 - Team needs to learn Azure Resource Graph + KQL (not optional anymore)
 
-## Demo arc suggestion (if used in /scaffold-customer-demo)
+## Demo arc suggestion (if used in /scaffold-engagement-demo)
 Frame the 2 AM page narrative: ops team gets paged for an on-prem server. Show:
 - "Today: 4 tools, 25 min to root cause"
 - "With Arc: 1 tool, 4 min to root cause"
 
 ## Cross-references
-- /scaffold-customer-demo --template governance for this engagement
+- /scaffold-engagement-demo --template governance for this engagement
 - /demo-deliverable-gen with this topology as substance
 - /privacy-boundary-audit on the Arc flow (PII patterns, EU data residency)
 ```
@@ -107,4 +107,4 @@ Frame the 2 AM page narrative: ops team gets paged for an on-prem server. Show:
 
 ## Voice tier behavior
 
-`voice: internal`. Architecture advice is engineering-internal; demo-arc suggestion is trailblazer-bound (gated by /customer-voice-check downstream).
+`voice: internal`. Architecture advice is engineering-internal; demo-arc suggestion is trailblazer-bound (gated by /rais-customer-voice-check downstream).

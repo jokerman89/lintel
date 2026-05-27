@@ -11,7 +11,7 @@ cli_support: [claude-code, codex]
 
 Records what an artifact is, where it came from, what voice tier applied, what calibration state backed the voice gate, and where the artifact ended up. Audit-trail for customer-bearing outputs.
 
-Not a generation skill. A tracking skill. Run after `/document-generate`, `/msvoice-rewrite`, `/landing-report`, `/customer-voice-check` to consolidate the artifact's "story" into one queryable record.
+Not a generation skill. A tracking skill. Run after `/document-generate`, `/msvoice-rewrite`, `/landing-report`, `/rais-customer-voice-check` to consolidate the artifact's "story" into one queryable record.
 
 ## When to use
 
@@ -40,7 +40,7 @@ Not a generation skill. A tracking skill. Run after `/document-generate`, `/msvo
    - Frontmatter `source:` or `generated_by:` fields
    - Frontmatter `voice:` for tier
    - Adjacent `~/.jstack/audit/*.jsonl` entries within 24h that reference the artifact path
-3. **Calibration state.** If voice tier is trailblazer: read TRAILBLAZER-CALIBRATION.md, capture per-cell accuracy snapshot at time of artifact generation.
+3. **Calibration state.** If voice tier is trailblazer: read OurVoice-calibration.md, capture per-cell accuracy snapshot at time of artifact generation.
 4. **Compose record:**
    ```yaml
    id: PROV-<hash-prefix>
@@ -84,7 +84,7 @@ Calibration: CALIBRATED (11/12 cells ≥90%, snapshot CALIBRATION-2026-05-27)
 Source chain:
 1. /document-generate (input: src/api/billing/, at 15:23)
 2. /msvoice-rewrite (at 15:34)
-3. /customer-voice-check (PASS 88/100, at 15:42)
+3. /rais-customer-voice-check (PASS 88/100, at 15:42)
 
 Compliance:
 - 5 always-on ✓
@@ -100,7 +100,7 @@ Stored: ~/.jstack/provenance/PROV-7a8b3c2f.yaml
 
 - Provenance records are append-only — never modified, only superseded with a new record if the artifact changes.
 - Records contain calibration snapshot AT TIME OF GENERATION — even if calibration later drifts, the record reflects the state when the artifact was made.
-- For trailblazer-voice artifacts: record is REQUIRED before distribution. Downstream `/ship` for customer-bearing artifacts refuses without a provenance record.
+- For trailblazer-voice artifacts: record is REQUIRED before distribution. Downstream `/release-ev2` for customer-bearing artifacts refuses without a provenance record.
 - Records do NOT contain customer-data — destination uses placeholder format (customer name → "customer-A nordic-finserv").
 
 ## Voice tier note
@@ -112,7 +112,7 @@ Stored: ~/.jstack/provenance/PROV-7a8b3c2f.yaml
 - **Source chain auto-detect comes up empty:** ask operator to supply `--source-chain` explicitly. Do not fabricate.
 - **Content hash mismatch on re-record:** create a NEW record (PROV-<new-hash>), do not overwrite. Old record retains.
 - **Provenance store unwriteable:** treat as compliance failure for trailblazer-voice artifacts; refuse to confirm record. Internal artifacts: WARN but allow.
-- **Calibration file missing for trailblazer artifact:** record marked UNCALIBRATED. Downstream `/ship` will refuse.
+- **Calibration file missing for trailblazer artifact:** record marked UNCALIBRATED. Downstream `/release-ev2` will refuse.
 - **Operator queries non-existent record by ID:** report not found, suggest `--query` against index.
 
 ## Examples
@@ -140,6 +140,6 @@ Ready to share. Re-run with --destination after sending to update.
 
 - `~/.jstack/provenance/` — record store
 - `~/.jstack/provenance/index.jsonl` — queryable index
-- `/customer-voice-check` — produces a verdict that lands in provenance
-- `/ship` — refuses customer-bearing without provenance record
-- `/compliance-gate` — produces compliance snapshot embedded in provenance
+- `/rais-customer-voice-check` — produces a verdict that lands in provenance
+- `/release-ev2` — refuses customer-bearing without provenance record
+- `/onecs-check` — produces compliance snapshot embedded in provenance

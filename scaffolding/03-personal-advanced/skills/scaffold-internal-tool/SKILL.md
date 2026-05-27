@@ -9,7 +9,7 @@ cli_support: [claude-code, codex]
 
 # /scaffold-internal-tool
 
-Initializes an internal-tooling repo (CLI, dashboard, automation script, ops utility). Distinct from `/scaffold-customer-demo` (customer-bearing) and `/scaffold-mvp` (product-grade). Internal-tool scaffold is leaner — no customer-voice gates, but full compliance hooks.
+Initializes an internal-tooling repo (CLI, dashboard, automation script, ops utility). Distinct from `/scaffold-engagement-demo` (customer-bearing) and `/scaffold-mvp` (product-grade). Internal-tool scaffold is leaner — no customer-voice gates, but full compliance hooks.
 
 ## When to use
 
@@ -20,7 +20,7 @@ Initializes an internal-tooling repo (CLI, dashboard, automation script, ops uti
 
 ## When NOT to use
 
-- Customer-bearing artifact — use `/scaffold-customer-demo` or `/scaffold-mvp`
+- Customer-bearing artifact — use `/scaffold-engagement-demo` or `/scaffold-mvp`
 - Adding to existing repo — that's not scaffolding, that's a new module
 - Test-only scratch project — overkill
 
@@ -127,7 +127,7 @@ CI: github
 
 ## See also
 
-- `/scaffold-customer-demo` — for customer-bearing scaffolds
+- `/scaffold-engagement-demo` — for customer-bearing scaffolds
 - `/scaffold-mvp` — for product-grade scaffolds
-- `/setup-deploy` — wire deploy targets after scaffold
+- `/setup-ev2-targets` — wire deploy targets after scaffold
 - `/health` — validate scaffolded structure post-creation

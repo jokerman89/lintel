@@ -64,7 +64,7 @@ DataPipelineDesigner: <pipeline goal>
 ## Compliance
 - PII: silver layer hashes user_id; downstream only sees hash
 - Retention: bronze 90 days, silver 1 year, gold permanent (aggregates only)
-- DPIA: trigger /dpia-prep — PII processing, even if hashed
+- DPIA: trigger /dpia-submit-draft — PII processing, even if hashed
 
 ## Cost estimate
 - Snowflake: ~$300/mo for daily compute
@@ -73,7 +73,7 @@ DataPipelineDesigner: <pipeline goal>
 - Total: ~$500/mo (at ceiling)
 
 ## Next steps
-1. /dpia-prep for the pipeline
+1. /dpia-submit-draft for the pipeline
 2. Implement bronze layer first (ingestion + simple dedupe)
 3. Build silver layer with dbt tests
 4. Gold layer aggregations + Power BI connection
@@ -83,7 +83,7 @@ DataPipelineDesigner: <pipeline goal>
 
 - **Latency requirement infeasible at cost ceiling:** surface trade-off, propose loosening latency or raising budget.
 - **No existing data infra:** scope expands — recommend `BackendArchitect` to consider data architecture as part of system design.
-- **Customer data flows through pipeline:** Layer 2 gate — DPIA required, /dsb-prep if shared.
+- **Customer data flows through pipeline:** Layer 2 gate — DPIA required, /dsb-submit-draft if shared.
 - **Real-time requested but batch is sufficient:** push back — real-time is expensive, often false economy.
 
 ## Voice tier behavior

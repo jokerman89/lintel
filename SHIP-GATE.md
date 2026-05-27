@@ -33,15 +33,15 @@ Every skill + every agent must have valid frontmatter:
 
 ## Gate 3 — T0 voice corpus calibrated
 
-- TRAILBLAZER-CORPUS.md has ≥24 paragraphs (≥2 known-good + ≥2 known-bad per cell × 12 cells)
-- TRAILBLAZER-CALIBRATION.md shows status: CALIBRATED
+- OurVoice-corpus.md has ≥24 paragraphs (≥2 known-good + ≥2 known-bad per cell × 12 cells)
+- OurVoice-calibration.md shows status: CALIBRATED
 - ≥10 of 12 cells pass at ≥90% known-good AND ≥90% known-bad accuracy
 
 **Verify:** `verify.sh --voice` confirms CALIBRATED.
 
 ## Gate 4 — Cross-CLI test matrix
 
-`/jstack-test --all` produces a matrix with:
+`/onebranch-validate --all` produces a matrix with:
 - 0 FAIL entries (DEGRADED entries are acceptable if documented in cli_support)
 - All skills declared `cli_support: [claude-code, ...]` PASS on claude-code
 - Skills declared `cli_support: [..., codex, ...]` PASS or DEGRADED on codex
@@ -118,7 +118,7 @@ bash install/verify.sh --all
 # (Operator: populate corpus, then run /jstack-eval)
 
 # Gate 4
-# (In Claude Code session: /jstack-test)
+# (In Claude Code session: /onebranch-validate)
 
 # Gate 5
 # (In Claude Code session: /codex --diff main --strict)
@@ -144,12 +144,12 @@ git push origin v1.0.0
 
 - README links to this SHIP-GATE document
 - Tag triggers release notes generation (via `/landing-report`)
-- Operator runs `/customer-voice-check` on release notes before publishing
+- Operator runs `/rais-customer-voice-check` on release notes before publishing
 - Quarterly re-run of Gates 3, 4, 7 to detect drift
 
 ## See also
 
-- `/jstack-test` skill — automates Gate 4
+- `/onebranch-validate` skill — automates Gate 4
 - `/jstack-eval` skill — automates Gate 3
 - `/codex` skill — supports Gate 5
 - `install/verify.sh --all` — automates Gates 1, 2, 10

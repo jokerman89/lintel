@@ -9,7 +9,7 @@ cli_support: [claude-code]
 
 # /make-pdf
 
-PDF generation via the same managed Chromium that powers `/browse`. Accepts URLs, local HTML, or markdown (converted to HTML first via a deterministic toolchain). Use for deliverables: rendered design docs, customer-facing one-pagers (after `/customer-voice-check`), printable runbooks.
+PDF generation via the same managed Chromium that powers `/browse`. Accepts URLs, local HTML, or markdown (converted to HTML first via a deterministic toolchain). Use for deliverables: rendered design docs, customer-facing one-pagers (after `/rais-customer-voice-check`), printable runbooks.
 
 ## When to use
 
@@ -22,7 +22,7 @@ PDF generation via the same managed Chromium that powers `/browse`. Accepts URLs
 
 - Live preview during authoring — use the IDE's markdown preview
 - Multi-page report assembly with TOC + cross-refs — out of scope. Use a dedicated typesetting tool.
-- Customer-bearing data not yet voice-checked — STOP. Run `/customer-voice-check` first (Phase 3 skill).
+- Customer-bearing data not yet voice-checked — STOP. Run `/rais-customer-voice-check` first (Phase 3 skill).
 
 ## Inputs
 
@@ -58,7 +58,7 @@ Path: ./design-doc-v2.pdf
 
 - Layer 2 customer-data gate on the input (markdown content scanned for customer-data patterns; URL hostname checked against prod list).
 - Output PDFs land where operator specified — they are NOT auto-uploaded anywhere. Distribution is the operator's responsibility.
-- If `voice: trailblazer` content detected in input markdown: surface reminder to run `/customer-voice-check` if not already done.
+- If `voice: trailblazer` content detected in input markdown: surface reminder to run `/rais-customer-voice-check` if not already done.
 
 ## Voice tier note
 
@@ -99,5 +99,5 @@ hf.yaml:
 
 - `/browse` — page rendering without PDF output
 - `/scrape` — extracting structured data instead of producing PDF
-- `/customer-voice-check` (Phase 3) — voice gate before customer-facing PDF leaves
+- `/rais-customer-voice-check` (Phase 3) — voice gate before customer-facing PDF leaves
 - `/design-html` (batch 7) — generate the HTML that feeds this skill

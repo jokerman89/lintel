@@ -9,7 +9,7 @@ cli_support: [claude-code, codex]
 
 # /scaffold-mvp
 
-Initializes a product-grade MVP repo with the full JStack treatment: compliance hooks, RAI assessment placeholders, voice gates on customer-facing surfaces, deploy targets stubbed, eval suite skeleton. Heavier than `/scaffold-internal-tool`, more product-ready than `/scaffold-customer-demo`.
+Initializes a product-grade MVP repo with the full JStack treatment: compliance hooks, RAI assessment placeholders, voice gates on customer-facing surfaces, deploy targets stubbed, eval suite skeleton. Heavier than `/scaffold-internal-tool`, more product-ready than `/scaffold-engagement-demo`.
 
 Use when the thing being built is intended to ship to real users, not just demo to them.
 
@@ -22,7 +22,7 @@ Use when the thing being built is intended to ship to real users, not just demo 
 
 ## When NOT to use
 
-- Customer demo (one-time) — `/scaffold-customer-demo`
+- Customer demo (one-time) — `/scaffold-engagement-demo`
 - Internal utility — `/scaffold-internal-tool`
 - Existing repo — this is greenfield; adding to existing is a refactor
 
@@ -33,7 +33,7 @@ Use when the thing being built is intended to ship to real users, not just demo 
 - Optional `--path <dir>` — where to create (default: cwd / `<name>`)
 - Optional `--stack <text>` — tech stack (default: ts + vite + supabase per current MS-internal patterns)
 - Optional `--has-ai <yes|no>` — pre-wires AI-specific scaffolding (RAI files, eval suite) if yes (default: yes)
-- Optional `--deploy <staging,prod>` — pre-wire deploy targets via /setup-deploy stubs
+- Optional `--deploy <staging,prod>` — pre-wire deploy targets via /setup-ev2-targets stubs
 
 ## Workflow
 
@@ -57,11 +57,11 @@ Use when the thing being built is intended to ship to real users, not just demo 
      compliance/
        data-class.md
        provenance.yaml
-       sensitive-use-DRAFT.md      # via /sensitive-use-report
-       rai-impact-DRAFT.md         # via /rai-impact-assessment (if --has-ai)
+       sensitive-use-DRAFT.md      # via /rais-sensitive-use
+       rai-impact-DRAFT.md         # via /rais-impact-assessment (if --has-ai)
        onerai-DRAFT.md             # if --has-ai
        dpia-DRAFT.md               # if processes personal data
-       transparency-note-DRAFT.md  # via /transparency-doc-gen
+       transparency-note-DRAFT.md  # via /rais-transparency-note
      eval/                         # if --has-ai
        suite/
          README.md                 # eval set construction methodology
@@ -69,7 +69,7 @@ Use when the thing being built is intended to ship to real users, not just demo 
          adversarial/              # known-failure fixtures
        runs/.gitkeep
      deploy/
-       targets.yaml                # /setup-deploy populates
+       targets.yaml                # /setup-ev2-targets populates
      docs/
        design/
          INDEX.md                  # /office-hours docs land here
@@ -77,7 +77,7 @@ Use when the thing being built is intended to ship to real users, not just demo 
        guides/                     # customer-facing (voice-gated)
      .github/workflows/
        ci.yml
-       compliance-check.yml        # runs /compliance-gate in CI
+       compliance-check.yml        # runs /onecs-check in CI
      CHANGELOG.md
    ```
 2. **CLAUDE.md.** Full Boris template with frozen zones for `compliance/*-FINAL.md` (never overwrite finalized review artifacts) and `eval/suite/golden/` (golden set is signed off, edits gated).
@@ -87,11 +87,11 @@ Use when the thing being built is intended to ship to real users, not just demo 
 4. **Compliance pre-wiring:**
    - `compliance/data-class.md` template
    - `compliance/provenance.yaml` empty
-   - `.github/workflows/compliance-check.yml` runs `/compliance-gate --strict` on PRs
+   - `.github/workflows/compliance-check.yml` runs `/onecs-check --strict` on PRs
 5. **Voice pre-wiring** (if customer-facing surface detected via `--target-users`):
    - `docs/guides/` flagged as voice-gated zone
    - `transparency-note-DRAFT.md` stub
-6. **Deploy stub.** If `--deploy` provided: pre-fill `deploy/targets.yaml` with the named targets (operator runs `/setup-deploy` to validate).
+6. **Deploy stub.** If `--deploy` provided: pre-fill `deploy/targets.yaml` with the named targets (operator runs `/setup-ev2-targets` to validate).
 7. **Git init + first commit.**
 8. **Report.**
 
@@ -104,29 +104,29 @@ Path: /e/Workspace/case-analysis-ai
 Target users: Swedish legal-tech end users (consumers + SMB)
 Stack: ts + vite + supabase
 Has AI: yes
-Deploy targets: staging, prod (stub written, run /setup-deploy to validate)
+Deploy targets: staging, prod (stub written, run /setup-ev2-targets to validate)
 
 ## Created
 - Full repo structure: 15 directories, 22 starter files
 - CLAUDE.md populated with frozen-zones for compliance + eval/golden
 - AI compliance pre-wiring:
-  - compliance/sensitive-use-DRAFT.md (run /sensitive-use-report to fill)
-  - compliance/rai-impact-DRAFT.md (run /rai-impact-assessment to fill)
-  - compliance/onerai-DRAFT.md (run /onerai-prep when above are done)
-  - compliance/dpia-DRAFT.md (run /dpia-prep — likely required for legal-tech)
+  - compliance/sensitive-use-DRAFT.md (run /rais-sensitive-use to fill)
+  - compliance/rai-impact-DRAFT.md (run /rais-impact-assessment to fill)
+  - compliance/onerai-DRAFT.md (run /onerai-submit-draft when above are done)
+  - compliance/dpia-DRAFT.md (run /dpia-submit-draft — likely required for legal-tech)
   - compliance/transparency-note-DRAFT.md (customer-facing, voice-gated)
 - eval/suite/README.md with methodology + 12-cell rubric reference
-- .github/workflows/compliance-check.yml — runs /compliance-gate on PRs
+- .github/workflows/compliance-check.yml — runs /onecs-check on PRs
 
 ## Next steps (suggested order)
 1. /office-hours to draft the design doc (lands in docs/design/)
-2. /sensitive-use-report --feature case-analysis-ai
-3. /rai-impact-assessment --feature case-analysis-ai --sensitive-use-report ...
-4. /onerai-prep --feature case-analysis-ai
-5. /dpia-prep --system case-analysis-ai
-6. /setup-deploy --check (validate stub)
-7. /transparency-doc-gen for customer disclosure
-8. First feature implementation; then /qa + /review + /ship
+2. /rais-sensitive-use --feature case-analysis-ai
+3. /rais-impact-assessment --feature case-analysis-ai --sensitive-use-report ...
+4. /onerai-submit-draft --feature case-analysis-ai
+5. /dpia-submit-draft --system case-analysis-ai
+6. /setup-ev2-targets --check (validate stub)
+7. /rais-transparency-note for customer disclosure
+8. First feature implementation; then /qa + /review + /release-ev2
 ```
 
 ## Compliance integration
@@ -145,7 +145,7 @@ Deploy targets: staging, prod (stub written, run /setup-deploy to validate)
 - **`--has-ai yes` but stack doesn't typically include AI:** ask via AskUserQuestion — operator may have non-obvious AI use.
 - **`--target-users` empty:** require it — every product has users; saying so shapes voice + RAI scope.
 - **Path exists:** ask whether to merge or pick new path.
-- **Deploy targets specified but `/setup-deploy` not runnable:** stub files written, skill surfaces manual setup steps.
+- **Deploy targets specified but `/setup-ev2-targets` not runnable:** stub files written, skill surfaces manual setup steps.
 - **Stack unrecognized:** fall back to ts + minimal, warn.
 
 ## Examples
@@ -166,8 +166,8 @@ Deploy targets: staging, prod (stub written, run /setup-deploy to validate)
 
 ## See also
 
-- `/scaffold-customer-demo` — lighter, demo-focused
+- `/scaffold-engagement-demo` — lighter, demo-focused
 - `/scaffold-internal-tool` — lightest, no customer surface
 - `/office-hours` — first design doc lands in docs/design/
 - All Phase 3 RAI skills — fill the DRAFT stubs this scaffold creates
-- `/setup-deploy` — validate the deploy stubs
+- `/setup-ev2-targets` — validate the deploy stubs

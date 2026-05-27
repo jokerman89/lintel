@@ -27,7 +27,7 @@ Pairs with `TrailblazerVoiceCritic` (which scores against Our Voice rubric); thi
 
 - Internal team comms — overhead exceeds value
 - Standard transactional confirmations ("your order shipped") — over-empathy is patronizing
-- Already-passed `/customer-voice-check` + no empathy concerns flagged
+- Already-passed `/rais-customer-voice-check` + no empathy concerns flagged
 
 ## Workflow
 
@@ -64,7 +64,7 @@ matters for week-of-the-12th — I can re-slot if not."
 
 ## Verdict
 2 of 3 paragraphs need empathy work. Rewrites preserve substance.
-Run /customer-voice-check after edits for voice-tier verification.
+Run /rais-customer-voice-check after edits for voice-tier verification.
 ```
 
 ## Edge cases / what to do when blocked

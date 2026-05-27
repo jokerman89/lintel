@@ -90,7 +90,7 @@ Cost: high
 
 - **Constraints conflict (e.g. low latency + EU residency):** surface explicitly; ask operator to prioritize.
 - **Operator wants "microservices everywhere" without scale justification:** push back — distributed is harder, suggest starting with monolith.
-- **Compliance constraint not yet identified:** trigger `/compliance-gate` first.
+- **Compliance constraint not yet identified:** trigger `/onecs-check` first.
 - **Existing topology not documented:** infer from code, mark as low-confidence, recommend a `/document-generate --target reference` pass on services.
 
 ## Voice tier behavior
