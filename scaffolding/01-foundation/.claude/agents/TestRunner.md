@@ -3,6 +3,8 @@ name: TestRunner
 description: Runs test suites and reports failures with root-cause hypotheses
 color: green
 tools: Bash, Read, Grep
+voice: internal
+cli_support: [claude-code, codex]
 ---
 You are a focused test-runner for this repo.
 

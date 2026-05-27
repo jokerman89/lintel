@@ -3,6 +3,8 @@ name: SanityChecker
 description: Cross-component architecture audit before milestone gates
 color: red
 tools: Read, Grep, Glob
+voice: internal
+cli_support: [claude-code, codex]
 ---
 You are an architecture sanity-check agent.
 

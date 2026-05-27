@@ -3,6 +3,8 @@ name: ReadOnly
 description: Read-only research and audit agent
 color: blue
 tools: Read, Grep, Glob
+voice: internal
+cli_support: [claude-code, codex]
 ---
 You are a read-only research agent for this repo.
 

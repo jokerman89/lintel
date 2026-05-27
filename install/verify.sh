@@ -91,7 +91,8 @@ cmd_cli_matrix() {
 cmd_layers() {
   hdr "Layer structure validation"
   local missing=0
-  for layer in 01-foundation 02-compliance 03-personal-advanced 04-power-user; do
+  # v2: layer 2 renamed from 02-compliance/ to 02-sdl/; accept either
+  for layer in 01-foundation 03-personal-advanced 04-power-user; do
     if [ -d "$REPO_ROOT/scaffolding/$layer" ]; then
       ok "Layer present: $layer"
     else
@@ -99,7 +100,16 @@ cmd_layers() {
       missing=$((missing + 1))
     fi
   done
-  [ "$missing" -gt 0 ] && EXIT_CODE=1
+  # Layer 2 with backward-compat
+  if [ -d "$REPO_ROOT/scaffolding/02-sdl" ]; then
+    ok "Layer present: 02-sdl (v2)"
+  elif [ -d "$REPO_ROOT/scaffolding/02-compliance" ]; then
+    ok "Layer present: 02-compliance (v1, pre-rename)"
+  else
+    fail "Layer 2 missing: neither 02-sdl/ nor 02-compliance/ present"
+    missing=$((missing + 1))
+  fi
+  if [ "$missing" -gt 0 ]; then EXIT_CODE=1; fi
 
   # Required files per layer
   for f in LAYERS.md AGENT-INSTRUCTIONS.md; do
@@ -332,7 +342,7 @@ cmd_tier_stamps() {
       ok "$(basename "$f"): tier-stamped"
     fi
   done < <(find "$REPO_ROOT/scaffolding" -path '*/agents/*.md' 2>/dev/null | grep -v README)
-  [ "$missing" -gt 0 ] && EXIT_CODE=1
+  if [ "$missing" -gt 0 ]; then EXIT_CODE=1; fi
 }
 
 # ===== Subcommand: --all =====================================================

@@ -1,6 +1,10 @@
-# jokerman-session-setup
+# jokerman-session-setup (JStack)
 
 Session bootstrap scaffolding for agent-based development. Used by Microsoft Sweden CAIP SEs to get a consistent, multi-CLI agent setup running in minutes.
+
+**Status:** v2 spec-complete (2026-05-27). See [CHANGELOG.md](CHANGELOG.md) for the v2 release notes and [SHIP-GATE.md](SHIP-GATE.md) for the v2.0.0 readiness gates. v2 ships 74 skills + 44 agents + 15 hooks + new MS-naming + portability shim spec + 1M context engine spec + MS-proprietary doc-gen (PPT/Word/Web) + 4-gate quality pipeline for customer-bound output. JStack is **scaffolding-only** — markdown skills/agents/hooks/content + bash scripts. No separate runtime; Claude Code (or other agent CLI) reads SKILL.md and does the work.
+
+For the v2 design + eng-review report, see [docs/design/jstack-v2-design.md](docs/design/jstack-v2-design.md).
 
 ## What this is
 

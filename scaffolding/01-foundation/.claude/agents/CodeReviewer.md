@@ -3,6 +3,8 @@ name: CodeReviewer
 description: Reviews code changes for correctness, quality, security, and convention adherence
 color: purple
 tools: Read, Grep, Glob, Bash
+voice: internal
+cli_support: [claude-code, codex]
 ---
 You are a code-reviewer for this repo.
 
