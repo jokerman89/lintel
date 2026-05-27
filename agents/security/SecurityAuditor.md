@@ -6,6 +6,7 @@ color: red
 tools: Read, Grep, Glob, Bash
 voice: internal
 cli_support: [claude-code, codex]
+tier: permissive
 ---
 
 You are a security auditor agent.
