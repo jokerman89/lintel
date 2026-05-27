@@ -18,7 +18,7 @@ Engineering-internal speech. Builder-talking-to-builder. Direct, technical, no r
 - Most skills + agents (default)
 
 **Examples in JStack:**
-- `/qa`, `/qa-only`, `/investigate`, `/review`, `/ship` — all internal
+- `/qa`, `/qa-only`, `/investigate`, `/review`, `/release-ev2` — all internal
 - `CodeReviewer`, `SecurityAuditor`, `TestRunner` agents — all internal
 
 ### `voice: trailblazer`
@@ -34,7 +34,7 @@ Microsoft "Our Voice" (Trailblazer) speech for customer-facing surfaces. Kind + 
 **Examples in JStack:**
 - `/msvoice-rewrite` skill — produces trailblazer-voice from internal-voice source
 - `/demo-deliverable-gen` skill — produces trailblazer-voice from substance + key-message
-- The customer-facing PDF/handout that's been gated through `/customer-voice-check`
+- The customer-facing PDF/handout that's been gated through `/rais-customer-voice-check`
 
 ### `voice: mixed`
 
@@ -74,7 +74,7 @@ Hooks read the `voice:` frontmatter of edited files:
 
 ### Through gates
 
-- `/customer-voice-check` — required ANY time `voice: trailblazer` content leaves the building
+- `/rais-customer-voice-check` — required ANY time `voice: trailblazer` content leaves the building
 - `/provenance-track` — REQUIRED before distribution of `voice: trailblazer` artifacts
 
 ## Why per-skill voice tier
@@ -103,7 +103,7 @@ The skill's own prose is internal. The SKILL'S OUTPUT may be trailblazer. Output
 
 A subtle but important distinction:
 
-- `voice: trailblazer-DRAFT` — content has been generated as trailblazer but has NOT yet passed `/customer-voice-check`. Cannot be distributed.
+- `voice: trailblazer-DRAFT` — content has been generated as trailblazer but has NOT yet passed `/rais-customer-voice-check`. Cannot be distributed.
 - `voice: trailblazer` (or `voice: trailblazer-FINAL`) — content has passed the voice gate AND has a `/provenance-track` record. Can be distributed.
 
 The DRAFT marker is honest about UNCERTIFIED state. Downstream tooling refuses to distribute DRAFT.
@@ -112,7 +112,7 @@ The DRAFT marker is honest about UNCERTIFIED state. Downstream tooling refuses t
 
 In rare cases the operator may need to bypass voice machinery:
 
-- `--ignore-stale-calibration` on `/customer-voice-check` (logs reason)
+- `--ignore-stale-calibration` on `/rais-customer-voice-check` (logs reason)
 - `--uncalibrated` on `/msvoice-rewrite` (logs reason)
 - `JSTACK_OVERRIDE_VOICE=1` env var for one-off scripts that produce trailblazer without going through skills
 
@@ -128,8 +128,8 @@ Three tiers (internal/trailblazer/mixed) covers the realistic distribution + mat
 
 ## See also
 
-- [TRAILBLAZER-VOICE.md](TRAILBLAZER-VOICE.md) — what trailblazer voice actually is
-- [TRAILBLAZER-CORPUS.md](TRAILBLAZER-CORPUS.md) — calibration anchor
-- `/customer-voice-check` skill — the gate
+- [OurVoice.md](OurVoice.md) — what trailblazer voice actually is
+- [OurVoice-corpus.md](OurVoice-corpus.md) — calibration anchor
+- `/rais-customer-voice-check` skill — the gate
 - `/provenance-track` skill — the record-keeping
-- `02-compliance/hooks/no-en-vocab-in-trailblazer/` — voice-aware hook
+- `02-sdl/hooks/no-en-vocab-in-trailblazer/` — voice-aware hook

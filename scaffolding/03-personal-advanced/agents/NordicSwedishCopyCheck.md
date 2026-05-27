@@ -67,7 +67,7 @@ Suggested: "Hör av er när det passar." (more naturally Swedish)
 
 ## Verdict
 3 fixes. Swedish-native readers will perceive a noticeable lift.
-After fixes: re-run /customer-voice-check (English voice rubric also applies — translated paragraphs preserved meaning + voice).
+After fixes: re-run /rais-customer-voice-check (English voice rubric also applies — translated paragraphs preserved meaning + voice).
 ```
 
 ## Edge cases / what to do when blocked

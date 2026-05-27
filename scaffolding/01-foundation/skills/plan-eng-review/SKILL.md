@@ -1,6 +1,6 @@
 ---
 name: jstack-plan-eng-review
-description: Architecture + tests review. The required gate before /ship. Covers arch, code quality, test coverage, performance.
+description: Architecture + tests review. The required gate before /release-ev2. Covers arch, code quality, test coverage, performance.
 color: red
 tools: Read, Bash, Grep, Glob, Edit
 voice: internal
@@ -9,7 +9,7 @@ cli_support: [claude-code, codex]
 
 # /plan-eng-review
 
-The **required** review per JStack's Review Readiness Dashboard. Scope: architecture, code quality, test coverage, performance. Outputs a structured plan-file review report + persists to `gstack-review-log` so `/ship` can read it.
+The **required** review per JStack's Review Readiness Dashboard. Scope: architecture, code quality, test coverage, performance. Outputs a structured plan-file review report + persists to `gstack-review-log` so `/release-ev2` can read it.
 
 Inspired-by gstack's equivalent. JStack version adds:
 - `cli_support` frontmatter check on every skill/agent the plan adds
@@ -19,7 +19,7 @@ Inspired-by gstack's equivalent. JStack version adds:
 ## When to use
 
 - Before any non-trivial implementation begins
-- Before `/ship` — Dashboard verdict gate depends on this
+- Before `/release-ev2` — Dashboard verdict gate depends on this
 - After any major plan revision (re-run, supersedes prior report)
 
 ## When NOT to use
@@ -142,5 +142,5 @@ Operator: proceed (Path C accepted)
 - `/plan-ceo-review` — strategy review (runs before this)
 - `/plan-design-review` — UI/UX review (parallel if there's a UI surface)
 - `/review` — diff-scoped lighter variant (when plan-eng-review is overkill)
-- `/ship` — reads this skill's review-log output as ship-gate signal
+- `/release-ev2` — reads this skill's review-log output as ship-gate signal
 - `/autoplan` — chains office-hours → ceo-review → eng-review → design-review

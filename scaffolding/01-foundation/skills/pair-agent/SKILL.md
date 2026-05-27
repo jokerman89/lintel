@@ -71,7 +71,7 @@ Operator: ACCEPTED.
 ## Synthesis
 3 turns, 3 accepted. PerformanceAnalyzer raised 1 minor concern (resolved via benchmark). No perf regression detected.
 Final diff: src/lib/dlxClient.ts +18 -7.
-Recommendation: /qa-only before /ship.
+Recommendation: /qa-only before /release-ev2.
 ```
 
 ## Compliance integration

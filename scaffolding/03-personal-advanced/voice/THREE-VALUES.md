@@ -133,7 +133,7 @@ This is performative. Real Kind is observed in behavior + word choice, not annou
 
 ## See also
 
-- [TRAILBLAZER-VOICE.md](TRAILBLAZER-VOICE.md) — voice framework summary
-- [TRAILBLAZER-EXAMPLES.md](TRAILBLAZER-EXAMPLES.md) — per-technique examples
-- [TRAILBLAZER-CORPUS.md](TRAILBLAZER-CORPUS.md) — calibration anchor
+- [OurVoice.md](OurVoice.md) — voice framework summary
+- [OurVoice-examples.md](OurVoice-examples.md) — per-technique examples
+- [OurVoice-corpus.md](OurVoice-corpus.md) — calibration anchor
 - `TrailblazerVoiceCritic` agent — per-paragraph rubric application includes the three-value check

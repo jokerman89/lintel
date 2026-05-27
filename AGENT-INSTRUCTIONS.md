@@ -18,7 +18,7 @@ Do NOT re-state the rules inline here. They live in CORE-PRINCIPLES.md and chang
 
 ### 2. Run the compliance checklist
 
-**Layer 2 — `scaffolding/02-compliance/SESSION-START-CHECK.md`** — the 5-step checklist. Authoritative.
+**Layer 2 — `scaffolding/02-sdl/SESSION-START-CHECK.md`** — the 5-step checklist. Authoritative.
 
 A clean five-OK pass is the floor for any non-trivial action. Trivial actions (typo fix, doc edit, question) can skip. The five steps:
 
@@ -26,7 +26,7 @@ A clean five-OK pass is the floor for any non-trivial action. Trivial actions (t
 2. Customer-data check
 3. Production-mutation check
 4. Secrets check
-5. Hard-rule check (see `scaffolding/02-compliance/HARD-RULES.md` for the 5 always-on rules)
+5. Hard-rule check (see `scaffolding/02-sdl/HARD-RULES.md` for the 5 always-on rules)
 
 This is an operator-confirmed checklist, NOT automated enforcement. The harness surfaces the items; the operator confirms.
 
@@ -69,7 +69,7 @@ This precedence is enforced by skill instructions in v1 — no runtime policy en
 | Layer | Path | Change rate | When to read |
 |---|---|---|---|
 | 1 Foundation | `scaffolding/01-foundation/` | Stable (EVOLUTION.md process) | Every session-start |
-| 2 Compliance | `scaffolding/02-compliance/` | MS-policy-driven (quarterly) | Every session-start (checklist) + on-demand (`/compliance-check`) |
+| 2 Compliance | `scaffolding/02-sdl/` | MS-policy-driven (quarterly) | Every session-start (checklist) + on-demand (`/compliance-check`) |
 | 3 Personal advanced | `scaffolding/03-personal-advanced/` | Opinionated (team PR) | When delegating to subagents OR when output is customer-facing |
 | 4 Power user | `scaffolding/04-power-user/` | Experimental (free adaptation) | Only when task explicitly invokes a Layer 4 pattern |
 
@@ -79,7 +79,7 @@ Full architecture rationale in [`LAYERS.md`](LAYERS.md).
 
 ## Voice tier (Layer 3)
 
-If this session involves an agent generating customer-facing or official-communication content: the agent declares `voice: trailblazer` in its frontmatter, and output is checked via `/customer-voice-check` against the 12-cell Microsoft Our Voice grid.
+If this session involves an agent generating customer-facing or official-communication content: the agent declares `voice: trailblazer` in its frontmatter, and output is checked via `/rais-customer-voice-check` against the 12-cell Microsoft Our Voice grid.
 
 If the session is internal dev work (code review, planning, tests, install): `voice: internal` — direct, builder-talking-to-builder, no Trailblazer overhead.
 

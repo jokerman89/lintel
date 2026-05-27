@@ -44,7 +44,7 @@ license_note: <empty | "see Layer 3 promoted-agents.md before bundling">  # OPTI
 
 ## Sub-skill: voice tier behavior
 
-If `voice: trailblazer`: this skill's output is checked against the 12-cell Microsoft Our Voice grid via `/customer-voice-check`. Output that fails the check surfaces to the operator before landing.
+If `voice: trailblazer`: this skill's output is checked against the 12-cell Microsoft Our Voice grid via `/rais-customer-voice-check`. Output that fails the check surfaces to the operator before landing.
 
 If `voice: internal`: direct, builder-talking-to-builder. No Trailblazer overhead.
 

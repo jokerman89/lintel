@@ -99,11 +99,50 @@ jobs:
         shell: bash
         run: bash install/verify.sh --all
 
-  compliance-check:
-    name: /compliance-gate check (when implemented)
+  unit-tests-linux:
+    name: tests/unit on Ubuntu
     runs-on: ubuntu-latest
-    if: false   # enable once /compliance-gate has CI-mode
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run unit tests
+        run: bash tests/runner/run-unit.sh
+
+  unit-tests-windows:
+    name: tests/unit on Windows
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run unit tests via Git Bash
+        shell: bash
+        run: bash tests/runner/run-unit.sh
+
+  e2e-claude-code-only:
+    name: tests/e2e claude-code-only on Ubuntu
+    runs-on: ubuntu-latest
+    needs: unit-tests-linux
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run e2e tests (claude-code-only filter)
+        run: bash tests/runner/run-e2e.sh --tag claude-code-only
+
+  e2e-cross-cli:
+    name: tests/e2e cross-CLI on Ubuntu
+    runs-on: ubuntu-latest
+    if: false   # enable when Codex CLI is available in CI runner
+    needs: e2e-claude-code-only
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run e2e tests (cross-CLI)
+        run: bash tests/runner/run-e2e.sh
+
+  compliance-check:
+    name: /onecs-check (when implemented)
+    runs-on: ubuntu-latest
+    if: false   # enable once /onecs-check has CI-mode
     steps:
       - uses: actions/checkout@v4
       - name: Placeholder
-        run: echo "compliance-gate CI mode pending implementation"
+        run: echo "onecs-check CI mode pending implementation"

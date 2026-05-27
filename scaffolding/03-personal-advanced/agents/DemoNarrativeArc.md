@@ -73,7 +73,7 @@ Fix: Spend minutes 14-18 narrating what the team WOULD do today: VPN to the serv
 
 ## Verdict
 Arc is mostly solid. Two structural fixes will tighten significantly.
-After fixes: re-run /customer-voice-check for per-paragraph voice gate.
+After fixes: re-run /rais-customer-voice-check for per-paragraph voice gate.
 ```
 
 ## Edge cases / what to do when blocked

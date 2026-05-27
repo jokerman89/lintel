@@ -70,7 +70,7 @@ Cost: low / medium / high
 5. Wire Z into the existing layout in W
 6. Run /qa
 7. /review
-8. /ship
+8. /release-ev2
 
 ## Test strategy
 - Unit: Y in isolation (mock its dep on X)
@@ -78,7 +78,7 @@ Cost: low / medium / high
 - E2E: full flow
 
 ## Risks
-- R1: Y is hot path; perf regression possible. Mitigation: /benchmark before+after.
+- R1: Y is hot path; perf regression possible. Mitigation: /perfbench before+after.
 - R2: Z is new component; voice gate applies if customer-facing. Mitigation: /design-review post-implementation.
 ```
 

@@ -17,7 +17,7 @@ Pairs with `/review` skill (skill orchestrates, this agent does deeper per-file 
 
 ## When to invoke
 
-- Pre-`/ship` second opinion on a non-trivial diff
+- Pre-`/release-ev2` second opinion on a non-trivial diff
 - Hot path or security-sensitive change — single-perspective review insufficient
 - Cross-cutting refactor across many files — agent can hold the whole change in context
 - After `/review` flagged something low-confidence — agent does the deeper read
@@ -60,7 +60,7 @@ CodeReviewer: <scope>
 
 ## Summary
 P1: 1 | P2: 1 | P3: 1
-Verdict: BLOCK /ship until P1 resolved.
+Verdict: BLOCK /release-ev2 until P1 resolved.
 ```
 
 ## Edge cases / what to do when blocked

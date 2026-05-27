@@ -9,7 +9,7 @@ cli_support: [claude-code, codex]
 
 # /jstack-eval
 
-The voice calibration runner. Applies `TRAILBLAZER-TEST.md` to every paragraph in `TRAILBLAZER-CORPUS.md`, compares the eval verdict to the `verdict_label` ground truth, computes per-cell accuracy, writes results to `TRAILBLAZER-CALIBRATION.md`.
+The voice calibration runner. Applies `OurVoice-test.md` to every paragraph in `OurVoice-corpus.md`, compares the eval verdict to the `verdict_label` ground truth, computes per-cell accuracy, writes results to `OurVoice-calibration.md`.
 
 This skill is what moves T0 from POPULATED → CALIBRATED. Calibration is a v1.0.0 prerequisite.
 
@@ -29,16 +29,16 @@ This skill is what moves T0 from POPULATED → CALIBRATED. Calibration is a v1.0
 
 ## Inputs
 
-- Optional `--corpus <path>` — path to corpus (default: `scaffolding/03-personal-advanced/voice/TRAILBLAZER-CORPUS.md`)
-- Optional `--test <path>` — path to test rubric (default: same dir, `TRAILBLAZER-TEST.md`)
+- Optional `--corpus <path>` — path to corpus (default: `scaffolding/03-personal-advanced/voice/OurVoice-corpus.md`)
+- Optional `--test <path>` — path to test rubric (default: same dir, `OurVoice-test.md`)
 - Optional `--cells <list>` — evaluate only specific cells (e.g. `R1,R3,P2`)
-- Optional `--out <path>` — calibration output (default: same dir, `TRAILBLAZER-CALIBRATION.md`)
+- Optional `--out <path>` — calibration output (default: same dir, `OurVoice-calibration.md`)
 - Optional `--threshold <pct>` — pass threshold per cell (default: 90)
 
 ## Workflow
 
 1. **Read corpus.** Parse YAML entries per cell. Filter by `--cells` if specified.
-2. **Read test rubric.** Load TRAILBLAZER-TEST.md prompt template.
+2. **Read test rubric.** Load OurVoice-test.md prompt template.
 3. **Per paragraph:**
    - Apply the TEST rubric prompt (this means an LLM call — Claude or Codex per `--cli`)
    - Extract YAML verdict from response (mode_attempted, technique, kind/daring/deep scores, ground_rules_passed/violated, anti_ai_vocab_detected, verdict)
@@ -59,7 +59,7 @@ This skill is what moves T0 from POPULATED → CALIBRATED. Calibration is a v1.0
 JStack Voice Eval
 
 Corpus: 60 paragraphs (33 known-good + 27 known-bad)
-Test rubric: TRAILBLAZER-TEST.md v2.0
+Test rubric: OurVoice-test.md v2.0
 Eval LLM: Claude Opus 4.7
 Threshold: 90%
 
@@ -102,7 +102,7 @@ v1.0.0 voice prerequisite: met.
 
 Drop the 2 PARTIAL cells from v1 scope OR iterate rubric and re-run.
 
-Written to: TRAILBLAZER-CALIBRATION.md
+Written to: OurVoice-calibration.md
 ```
 
 ## Compliance integration
@@ -148,8 +148,8 @@ Written to: TRAILBLAZER-CALIBRATION.md
 
 ## See also
 
-- TRAILBLAZER-CORPUS.md — the input
-- TRAILBLAZER-TEST.md — the rubric
-- TRAILBLAZER-CALIBRATION.md — the output
-- `/customer-voice-check` — reads calibration to decide whether to certify
+- OurVoice-corpus.md — the input
+- OurVoice-test.md — the rubric
+- OurVoice-calibration.md — the output
+- `/rais-customer-voice-check` — reads calibration to decide whether to certify
 - `SHIP-GATE.md` — v1.0.0 prerequisites

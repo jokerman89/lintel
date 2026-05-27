@@ -111,5 +111,5 @@ Service registered in services.yaml
 
 - `/browse` — uses the cookies set up here
 - `/scrape` — same
-- `/open-gstack-browser` — manual interactive session in the same profile
+- `/open-managed-browser` — manual interactive session in the same profile
 - Layer 2 compliance — secrets handling, profile permissions

@@ -13,7 +13,7 @@ Supersedes: jokerman-main-design-20260526-233348.md
 
 JStack v1 shipped: 65 skills, 40 agents, 14 hooks, T0 corpus populated, install + verify + CI matrix landed (commit `a0c996c`). It works. It's "snygg." But three structural gaps remain before it earns the role it was actually built for — being the operator's MS-CAIP-SE toolchain on every engagement, on every CLI, at every context-window size:
 
-1. **Naming gap.** Tools carry generic engineering vocab (`/qa`, `/review`, `/ship`) instead of MS-internal process language (1ES, 1ESPT, OneBranch, EV2, SDL, SFI, 1CS). The operator's mental model is MS; the toolchain should mirror that, not force re-translation every session.
+1. **Naming gap.** Tools carry generic engineering vocab (`/qa`, `/review`, `/release-ev2`) instead of MS-internal process language (1ES, 1ESPT, OneBranch, EV2, SDL, SFI, 1CS). The operator's mental model is MS; the toolchain should mirror that, not force re-translation every session.
 
 2. **Portability gap.** Skills declare `cli_support: [...]` but there's no runtime that ENFORCES degradation cleanly across claude-code, GHCP CLI, GHCP App, and Codex. A skill marked `cli_support: [claude-code]` runs perfectly there but produces silent confusion (or failure) elsewhere. We need graceful degradation as a first-class mechanism, not a frontmatter assertion.
 
@@ -125,39 +125,39 @@ Goal: Every skill, agent, hook, content doc, and runtime concept speaks MS-inter
 
 | v1 name / concept | v2 MS-mirrored name | Reason |
 |--------------------|--------------------|---------|
-| `/ship` | `/release-ev2` (alias `/ship` retained) | EV2 = Express V2, MS safe-deployment system |
-| `/land-and-deploy` | `/release-deploy-ev2` | Same EV2 anchor |
-| `/canary` | `/safe-deploy-ring` | MS ring-based deploy terminology |
-| `/freeze` / `/unfreeze` | `/code-freeze` / `/code-unfreeze` | Standard MS engineering term |
-| `/compliance-gate` | `/onecs-check` | 1CS = One Compliance System |
+| `/release-ev2` | `/release-ev2` (alias `/release-ev2` retained) | EV2 = Express V2, MS safe-deployment system |
+| `/release-deploy-ev2` | `/release-deploy-ev2` | Same EV2 anchor |
+| `/safe-deploy-ring` | `/safe-deploy-ring` | MS ring-based deploy terminology |
+| `/code-freeze` / `/code-unfreeze` | `/code-freeze` / `/code-unfreeze` | Standard MS engineering term |
+| `/onecs-check` | `/onecs-check` | 1CS = One Compliance System |
 | `/first-party-check` | `/first-party-check` | Already canonical MS term |
-| `/sensitive-use-report` | `/rais-sensitive-use` | RAIS = Responsible AI Standard |
-| `/dsb-prep` | `/dsb-submit-draft` | DSB = Data Sharing Board (canonical) |
-| `/dpia-prep` | `/dpia-submit-draft` | DPIA canonical |
-| `/onerai-prep` | `/onerai-submit-draft` | OneRAI canonical |
-| `/transparency-doc-gen` | `/rais-transparency-note` | Maps to RAIS transparency principle |
-| `/entra-agent-id-prep` | `/entra-agent-id-submit-draft` | Already canonical |
-| `/tier-stamp-agents` | `/agt-tier-stamp` | AGT = Agent Governance |
+| `/rais-sensitive-use` | `/rais-sensitive-use` | RAIS = Responsible AI Standard |
+| `/dsb-submit-draft` | `/dsb-submit-draft` | DSB = Data Sharing Board (canonical) |
+| `/dpia-submit-draft` | `/dpia-submit-draft` | DPIA canonical |
+| `/onerai-submit-draft` | `/onerai-submit-draft` | OneRAI canonical |
+| `/rais-transparency-note` | `/rais-transparency-note` | Maps to RAIS transparency principle |
+| `/entra-agent-id-submit-draft` | `/entra-agent-id-submit-draft` | Already canonical |
+| `/agt-tier-stamp` | `/agt-tier-stamp` | AGT = Agent Governance |
 | `/caip-audit` | `/caip-audit` | Already CAIP-canonical |
-| `/scaffold-customer-demo` | `/scaffold-engagement-demo` | "Engagement" is CAIP-SE canonical |
+| `/scaffold-engagement-demo` | `/scaffold-engagement-demo` | "Engagement" is CAIP-SE canonical |
 | `/scaffold-internal-tool` | `/scaffold-internal-tool` | Generic enough to keep |
 | `/scaffold-mvp` | `/scaffold-mvp` | Generic enough to keep |
-| `/eval-suite-gen` | `/cloudtest-eval-suite` | CloudTest = MS scalable test infra |
-| `/benchmark` | `/perfbench` | Closer to MS internal benchmark term |
-| `/jstack-test` | `/onebranch-validate` | OneBranch = governed pipeline; aligns matrix-test concept |
+| `/cloudtest-eval-suite` | `/cloudtest-eval-suite` | CloudTest = MS scalable test infra |
+| `/perfbench` | `/perfbench` | Closer to MS internal benchmark term |
+| `/onebranch-validate` | `/onebranch-validate` | OneBranch = governed pipeline; aligns matrix-test concept |
 | `/jstack-eval` | `/jstack-eval` | Keep — JStack-specific |
-| `/context-tokenwatch` | `/context-budgetwatch` | Refocus on budget not token-count |
-| `/setup-deploy` | `/setup-ev2-targets` | EV2-anchored |
-| `/setup-gbrain` / `/sync-gbrain` | `/setup-brain` / `/sync-brain` | Drop "gbrain" branding internally |
-| Agent: `MSComplianceAuditor` | Agent: `OneCSAuditor` | 1CS-anchored |
+| `/context-budgetwatch` | `/context-budgetwatch` | Refocus on budget not token-count |
+| `/setup-ev2-targets` | `/setup-ev2-targets` | EV2-anchored |
+| `/setup-brain` / `/sync-brain` | `/setup-brain` / `/sync-brain` | Drop "gbrain" branding internally |
+| Agent: `OneCSAuditor` | Agent: `OneCSAuditor` | 1CS-anchored |
 | Agent: `TrailblazerVoiceCritic` | Agent: `TrailblazerVoiceCritic` | Already MS-canonical |
 | Agent: `CAIPEngagementCoach` | Agent: `CAIPEngagementCoach` | Already CAIP-canonical |
 | Concept: "5-level agent precedence" | Concept: "AGT identity precedence" | Maps to AGT framework |
 | Concept: "Layer 2 always-on" | Concept: "SDL always-on" | SDL is the MS canonical framing for these requirements |
-| Concept: "scaffolding/02-compliance/" | Concept: "scaffolding/02-sdl/" | Directory rename to match SDL framing |
+| Concept: "scaffolding/02-sdl/" | Concept: "scaffolding/02-sdl/" | Directory rename to match SDL framing |
 | Concept: "TRAILBLAZER-CORPUS" | Concept: "OurVoice-corpus" | "Our Voice" is the actual MS guide title |
 
-Aliases retained: ALL v1 skill names work as aliases until v2.5 (operator muscle memory + teammates). Aliases logged on first use ("you invoked `/ship` — preferred name is `/release-ev2` in v2; alias still works"). Removed at v2.5 if usage drops to <5% per analytics.
+Aliases retained: ALL v1 skill names work as aliases until v2.5 (operator muscle memory + teammates). Aliases logged on first use ("you invoked `/release-ev2` — preferred name is `/release-ev2` in v2; alias still works"). Removed at v2.5 if usage drops to <5% per analytics.
 
 **Full migration table:** see [MIGRATION-TABLE.md](../../MIGRATION-TABLE.md) in repo root. The table here is the highlight summary; the full 65-skill + 40-agent enumeration with new-name-or-"unchanged" status lives in MIGRATION-TABLE.md as the source of truth. Phase A consumes that file as its rename input. **(P1 fix T5 — eng-review)**
 
@@ -285,7 +285,7 @@ Goal: Context as a budgeted resource per task-phase, not as "what fits before co
 
 - `/context-budget` — view + modify current phase budget, declare new phase, checkpoint.
 - `/context-warmup` — explicit preload of high-leverage context per declared warmup pattern.
-- `/context-budgetwatch` (renames `/context-tokenwatch`) — passive monitoring with budget-aware thresholds.
+- `/context-budgetwatch` (renames `/context-budgetwatch`) — passive monitoring with budget-aware thresholds.
 - Agent: `ContextBudgetAdvisor` — Layer 4 agent that suggests phase declarations for unstructured tasks.
 
 **Config:**
@@ -367,7 +367,7 @@ Doc-gen output must pass FOUR gates before it's distributable:
 3. Honest-limitations check (transparency notes only — limitations ≥ capabilities − 2)
 4. `/provenance-track` record produced (source chain + voice-check status + brand version)
 
-All four gates wired into `/release-ev2` (formerly `/ship`). Customer-bound artifacts cannot ship without passing all four.
+All four gates wired into `/release-ev2` (formerly `/release-ev2`). Customer-bound artifacts cannot ship without passing all four.
 
 #### Component 5: T0 Voice Calibration (in scope per operator)
 
@@ -376,9 +376,9 @@ Goal: Trailblazer corpus calibrated to ≥90% per-cell accuracy, ≥10 cells PAS
 **Calibration plan:**
 
 1. **First eval run**: Run `/jstack-eval` against current corpus (60 paragraphs, 12 cells). Capture per-cell accuracy.
-2. **Rubric iteration**: For any cell <90% accuracy, refine `TRAILBLAZER-TEST.md` rubric — sharpen the technique definition, add explicit fail-mode tells, adjust scoring weights.
+2. **Rubric iteration**: For any cell <90% accuracy, refine `OurVoice-test.md` rubric — sharpen the technique definition, add explicit fail-mode tells, adjust scoring weights.
 3. **Re-eval until target met**: Iterate 1-3 times. If a cell persists below 90% after 3 iterations, drop it from v1 scope (operator decision; cells P1 Vulnerability and R4 Dream are most likely candidates per known difficulty).
-4. **CALIBRATED stamp**: When ≥10 cells PASS, write `status: CALIBRATED` to `TRAILBLAZER-CALIBRATION.md` with timestamp + snapshot ID.
+4. **CALIBRATED stamp**: When ≥10 cells PASS, write `status: CALIBRATED` to `OurVoice-calibration.md` with timestamp + snapshot ID.
 5. **Downstream gate activation**: `/rais-customer-voice-check` reads CALIBRATED state. UNCALIBRATED stamp removed from all skills.
 
 **Operator-driven steps:**
@@ -397,7 +397,7 @@ Each v2.0 component ships with test coverage spec'd UPFRONT. Implementation incl
 ### Component 1 — MS-Naming Migration
 - `tests/unit/naming-migration/alias-map.test.ts` — every v1 name maps to exactly one v2 name (or "unchanged"); zero duplicates
 - `tests/unit/naming-migration/migration-table.test.ts` — `MIGRATION-TABLE.md` row count matches actual skill+agent count
-- `tests/e2e/naming-migration/alias-resolution.test.sh` — invoke `/ship` (v1 alias), verify `/release-ev2` runs + alias usage logged
+- `tests/e2e/naming-migration/alias-resolution.test.sh` — invoke `/release-ev2` (v1 alias), verify `/release-ev2` runs + alias usage logged
 - `tests/integration/naming-migration/directory-rename.test.sh` — `02-sdl/` exists, `02-compliance/` removed, all internal refs updated
 
 ### Component 2 — Portability Shim Runtime
@@ -507,7 +507,7 @@ v2.0 ships when ALL of these are true:
 - 3 new agents added (PPTNarrativeArchitect, WordTechnicalEditor, WebExperienceCritic)
 - All v1 skills renamed per migration table (aliases retained)
 - All v1 skills updated with v2 cli_support runtime declaration (degradation map)
-- Directory rename: `scaffolding/02-compliance/` → `scaffolding/02-sdl/`
+- Directory rename: `scaffolding/02-sdl/` → `scaffolding/02-sdl/`
 - All v1 content docs reframed in MS terminology (1CS, SDL, AGT, RAIS, etc.)
 
 **Behavioral (testable):**
@@ -516,7 +516,7 @@ v2.0 ships when ALL of these are true:
 - `/perfbench --context` runs a sample multi-phase task and confirms budget enforcement triggers correctly
 - `/generate-ppt` produces a brand-compliant .pptx that passes `/rais-customer-voice-check` at ≥85 score
 - `/generate-word` produces brand-compliant .docx that passes voice + brand-conformance + honest-limitations + provenance gates
-- `/generate-web` produces brand-compliant HTML that opens correctly via `/open-managed-browser` (formerly `/open-gstack-browser`)
+- `/generate-web` produces brand-compliant HTML that opens correctly via `/open-managed-browser` (formerly `/open-managed-browser`)
 - `verify.sh --all` exits 0 (all 10 subcommands clean + the new ones added in v2: --context-engine, --brand, --portability)
 
 **Operational (subjective but measurable):**
@@ -572,13 +572,13 @@ JStack v2 distribution mirrors v1 but with explicit naming.
 Big Bang ship = one big build cycle. Suggested ordering to minimize integration risk:
 
 ### Phase A — Naming migration (foundation for everything else)
-1. Rename directory `scaffolding/02-compliance/` → `scaffolding/02-sdl/`
+1. Rename directory `scaffolding/02-sdl/` → `scaffolding/02-sdl/`
 2. Per migration table: update skill frontmatter `name:` fields (new name primary, alias array secondary)
 3. Update inter-skill references (`See also`, cross-skill invocations)
 4. Update LAYERS.md, AGENT-INSTRUCTIONS.md, README, all content docs with new terminology
 5. Update verify.sh + install.sh to find skills by both old + new names
 6. Commit + push: `feat(naming): MS-internal terminology migration (v2.0)`
-7. Smoke test: `/onebranch-validate --all` (formerly `/jstack-test --all`) returns 0 FAILs
+7. Smoke test: `/onebranch-validate --all` (formerly `/onebranch-validate --all`) returns 0 FAILs
 
 ### Phase B — Portability shim runtime
 1. Define cli_support v2 schema (per-CLI degradation map)
@@ -593,7 +593,7 @@ Big Bang ship = one big build cycle. Suggested ordering to minimize integration 
 2. Build phase declaration parser
 3. Build budget tracker (per-session, per-phase)
 4. Build budget watcher hook
-5. Write `/context-budget`, `/context-warmup`, `/context-budgetwatch` (rename from `/context-tokenwatch`), `/perf-mode`
+5. Write `/context-budget`, `/context-warmup`, `/context-budgetwatch` (rename from `/context-budgetwatch`), `/perf-mode`
 6. Write `ContextBudgetAdvisor` agent
 7. Commit + push: `feat(context): 1M context-budgeting engine + warmup patterns`
 
@@ -601,7 +601,7 @@ Big Bang ship = one big build cycle. Suggested ordering to minimize integration 
 1. Run `/jstack-eval` first pass
 2. Iterate rubric for low-accuracy cells (up to 3 rounds)
 3. Decide cell drops if needed
-4. Land CALIBRATED status in `TRAILBLAZER-CALIBRATION.md` (renamed `OurVoice-calibration.md`)
+4. Land CALIBRATED status in `OurVoice-calibration.md` (renamed `OurVoice-calibration.md`)
 5. Commit + push: `feat(voice): T0 corpus CALIBRATED, 10+/12 cells PASS`
 
 ### Phase E — Brand integration foundation

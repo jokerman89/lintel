@@ -67,7 +67,7 @@ JStack question tuning preferences
 - plan-eng-review-outside-voice-offer: never-ask (recommended → skip)
 - plan-eng-review-todos-batch-approval: ask-only-for-one-way
 
-## /ship (1 set)
+## /release-ev2 (1 set)
 - ship-commit-message-format: never-ask (recommended → conventional commits)
 
 ## /office-hours (0 set)

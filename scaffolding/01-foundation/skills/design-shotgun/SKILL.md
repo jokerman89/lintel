@@ -92,7 +92,7 @@ Count: 4
                   Stone-100 base, amber-600 single accent
 
 Side-by-side: ~/.jstack/design-shotgun/20260527-164200/index.html
-Preview: /open-gstack-browser --url file://...
+Preview: /open-managed-browser --url file://...
 
 ## Skill's pick (advisory)
 Variant 3 (cool-accent). Reason: emerald accent maps to existing brand tokens; mono variants lose the brand signature.
@@ -100,7 +100,7 @@ Variant 3 (cool-accent). Reason: emerald accent maps to existing brand tokens; m
 
 ## Compliance integration
 
-- Variants inherit seed's compliance state. If seed had trailblazer-draft copy: all variants do too, and the `/customer-voice-check` gate applies to all of them.
+- Variants inherit seed's compliance state. If seed had trailblazer-draft copy: all variants do too, and the `/rais-customer-voice-check` gate applies to all of them.
 - No production touch. No Layer 2 mutations.
 - Output dir lives at `~/.jstack/design-shotgun/` — operator owns distribution.
 
@@ -144,5 +144,5 @@ Variant 3 (cool-accent). Reason: emerald accent maps to existing brand tokens; m
 - `/design-html` — generate the seed
 - `/design-review` — review each variant after opening
 - `/design-consultation` — pre-shotgun: which axis matters most?
-- `/open-gstack-browser` — open index.html for review
+- `/open-managed-browser` — open index.html for review
 - `/make-pdf` — assemble winning variant as PDF deliverable

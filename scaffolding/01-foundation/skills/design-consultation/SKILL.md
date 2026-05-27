@@ -25,7 +25,7 @@ Distinct from `/design-review`: that one critiques what's built. This one shapes
 - Reviewing a specific built page — use `/design-review`
 - Generating actual HTML/mockup — use `/design-html`
 - Plan-doc-level review — use `/plan-design-review`
-- Customer-facing copy decisions — use `/customer-voice-check` (Phase 3) + Trailblazer corpus
+- Customer-facing copy decisions — use `/rais-customer-voice-check` (Phase 3) + Trailblazer corpus
 
 ## Inputs
 

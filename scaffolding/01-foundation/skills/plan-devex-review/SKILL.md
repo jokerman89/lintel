@@ -60,7 +60,7 @@ Each dimension: measure (where possible) + 1-3 specific findings + AskUserQuesti
 | Deploy pain | 5 steps | 2 steps | scripted GitHub Actions trigger |
 | Local fidelity | 6/10 | 7/10 | added Docker compose for upstream sources |
 | Error msg quality | 5/10 | 8/10 | rewrote install.sh failure paths |
-| Docs freshness | README 47 days old | README current | added to /ship checklist |
+| Docs freshness | README 47 days old | README current | added to /release-ev2 checklist |
 
 **Overall:** 6.0/10 → 7.7/10 (after 9 decisions)
 **Competitive tier:** mid-pack (target: top-quartile for harness category)

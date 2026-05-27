@@ -45,7 +45,7 @@ Runs these checks in order. Each check passes/fails independently; report aggreg
 5. **Hooks:** for each `~/.jstack/hooks/jstack-*.sh`, check whether a symlink exists at `~/.claude/hooks/jstack-*.sh`. Report active vs inert.
 6. **Skill frontmatter:** glob `~/.claude/skills/jstack-*/SKILL.md`. Confirm required fields (name, description, color, tools, voice, cli_support). Flag any with missing fields.
 7. **Agent frontmatter:** same check on `~/.claude/agents/` (filter to JStack-relevant).
-8. **Voice corpus:** if `~/.claude-scaffolding/03-personal-advanced/voice/TRAILBLAZER-CALIBRATION.md` exists, parse the status table — report per-cell calibration status (PASS / PARTIAL / FAIL / PENDING).
+8. **Voice corpus:** if `~/.claude-scaffolding/03-personal-advanced/voice/OurVoice-calibration.md` exists, parse the status table — report per-cell calibration status (PASS / PARTIAL / FAIL / PENDING).
 9. **CLI shims:** for the current repo (if in one), check whether `CLAUDE.md`, `.github/copilot-instructions.md`, `AGENTS.md` are present.
 10. **License freshness:** for each upstream, check `last_verified` against today. Warn if >90 days.
 
