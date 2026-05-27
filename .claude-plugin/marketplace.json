@@ -1,0 +1,22 @@
+{
+  "name": "jokerman-session-setup",
+  "owner": {
+    "name": "Azureflipper",
+    "email": "johannes.akerman@microsoft.com"
+  },
+  "metadata": {
+    "description": "MS-CAIP-SE session harness marketplace",
+    "version": "3.0.0-dev"
+  },
+  "plugins": [
+    {
+      "name": "jstack",
+      "source": "./",
+      "description": "Full JStack v3 session harness — skills + agents + hooks + compliance + voice + scaffolding",
+      "version": "3.0.0-dev",
+      "category": "workflow",
+      "tags": ["microsoft", "caip", "session-harness", "rais", "trailblazer-voice"],
+      "strict": false
+    }
+  ]
+}

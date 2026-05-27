@@ -1,0 +1,22 @@
+{
+  "name": "jstack",
+  "displayName": "JStack",
+  "description": "MS-CAIP-SE session harness — skills, agents, compliance, Trailblazer voice",
+  "version": "3.0.0-dev",
+  "author": {
+    "name": "Azureflipper",
+    "email": "johannes.akerman@microsoft.com"
+  },
+  "homepage": "https://github.com/Azureflipper/jokerman-session-setup",
+  "repository": "https://github.com/Azureflipper/jokerman-session-setup",
+  "license": "MIT",
+  "keywords": [
+    "microsoft",
+    "caip",
+    "session-harness",
+    "rais",
+    "trailblazer-voice"
+  ],
+  "skills": "./skills/",
+  "agents": "./agents/"
+}
