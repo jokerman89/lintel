@@ -1,0 +1,83 @@
+#!/usr/bin/env bash
+# jstack-adr-new — bootstrap a new ADR from docs/adr/TEMPLATE.md
+#
+# Usage: jstack-adr-new "<title>" [--status proposed|accepted]
+
+set -euo pipefail
+
+TITLE="${1:-}"
+STATUS="proposed"
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --status) STATUS="$2"; shift 2 ;;
+    --help|-h)
+      cat <<EOF
+jstack-adr-new — bootstrap a new ADR
+
+Usage:
+  jstack-adr-new "<title>"                 # creates next NNNN-<slug>.md
+  jstack-adr-new "<title>" --status accepted
+  jstack-adr-new --help
+
+What it does:
+  1. Finds next ADR number from docs/adr/NNNN-*.md
+  2. Generates kebab-case slug from title
+  3. Reads docs/adr/TEMPLATE.md, substitutes title + date + status
+  4. Writes docs/adr/<NNNN>-<slug>.md
+  5. git checkout -b adr-<NNNN>-<slug>, stage + commit
+EOF
+      exit 0 ;;
+    *)
+      if [ -z "$TITLE" ]; then
+        TITLE="$1"
+        shift
+      else
+        echo "Unknown arg: $1" >&2; exit 2
+      fi
+      ;;
+  esac
+done
+
+[ -n "$TITLE" ] || { echo "Title required. Usage: jstack-adr-new \"<title>\"" >&2; exit 2; }
+[ -d "docs/adr" ] || { echo "docs/adr/ not found — run jstack-scaffold init first" >&2; exit 3; }
+
+TEMPLATE="docs/adr/TEMPLATE.md"
+[ -f "$TEMPLATE" ] || { echo "TEMPLATE missing: $TEMPLATE" >&2; exit 4; }
+
+# Find next number
+last_num=$(ls docs/adr/[0-9]*-*.md 2>/dev/null | sed 's|docs/adr/||; s|-.*||' | sort -n | tail -1 | sed 's/^0*//')
+last_num=${last_num:-0}
+next_num=$((last_num + 1))
+printf -v nnnn "%04d" "$next_num"
+
+# Slug
+slug=$(echo "$TITLE" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/--*/-/g' | sed 's/^-//; s/-$//' | cut -c1-40)
+
+FILE="docs/adr/${nnnn}-${slug}.md"
+[ -f "$FILE" ] && { echo "ADR already exists: $FILE" >&2; exit 5; }
+
+# Render from template
+sed -e "s|{{NNNN}}|$nnnn|g" \
+    -e "s|{{TITLE}}|$TITLE|g" \
+    -e "s|{{STATUS}}|$STATUS|g" \
+    -e "s|{{DATE}}|$(date +%Y-%m-%d)|g" \
+    "$TEMPLATE" > "$FILE"
+
+echo "✓ Created: $FILE"
+
+# Branch + stage + commit
+if git rev-parse --git-dir > /dev/null 2>&1; then
+  branch="adr-${nnnn}-${slug}"
+  git checkout -q -b "$branch" 2>/dev/null || git checkout -q "$branch"
+  git add "$FILE"
+  git commit -q -m "adr: $nnnn $TITLE"
+  echo "✓ Committed on branch: $branch"
+  echo ""
+  echo "Next:"
+  echo "  1. Edit $FILE — fill in Context, Decision, Consequences, Alternatives"
+  echo "  2. Re-commit as needed: git commit -am 'adr: $nnnn — details'"
+  echo "  3. Push + PR: git push -u origin $branch"
+else
+  echo "(not in a git repo — skipped commit)"
+fi

@@ -1,0 +1,193 @@
+#!/usr/bin/env bash
+# jstack-doctor — cross-CLI health check
+#
+# Detects installed AI CLIs, JStack install state per CLI, version drift,
+# scaffolding install, brand asset age, voice corpus calibration.
+#
+# Usage: jstack-doctor [--verbose] [--json]
+
+set -uo pipefail
+
+JSTACK_HOME="${JSTACK_HOME:-$HOME/.jstack}"
+VERBOSE=0
+OUTPUT_JSON=0
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --verbose|-v) VERBOSE=1; shift ;;
+    --json) OUTPUT_JSON=1; shift ;;
+    *) echo "Unknown arg: $1" >&2; exit 2 ;;
+  esac
+done
+
+GREEN=$'\033[0;32m'
+YELLOW=$'\033[0;33m'
+RED=$'\033[0;31m'
+RESET=$'\033[0m'
+
+ok() { echo "${GREEN}✓${RESET} $*"; }
+warn() { echo "${YELLOW}⚠${RESET} $*"; }
+fail() { echo "${RED}✗${RESET} $*"; }
+
+echo "JStack Doctor — health check"
+echo "Date: $(date '+%Y-%m-%d %H:%M:%S')"
+echo ""
+
+# ── 1. Detect installed CLIs ──
+echo "## Installed CLIs"
+declare -A CLI_PATHS=(
+  [claude]="$(command -v claude 2>/dev/null || echo "")"
+  [codex]="$(command -v codex 2>/dev/null || echo "")"
+  [cursor]="$(command -v cursor 2>/dev/null || echo "")"
+  [gemini]="$(command -v gemini 2>/dev/null || echo "")"
+  [opencode]="$(command -v opencode 2>/dev/null || echo "")"
+  [copilot]="$(command -v copilot 2>/dev/null || echo "")"
+  [droid]="$(command -v droid 2>/dev/null || echo "")"
+)
+
+found=0
+for cli in claude codex cursor gemini opencode copilot droid; do
+  path="${CLI_PATHS[$cli]}"
+  if [ -n "$path" ]; then
+    ok "$cli: $path"
+    found=$((found+1))
+  else
+    [ "$VERBOSE" = "1" ] && echo "  · $cli: not in PATH"
+  fi
+done
+[ "$found" = "0" ] && fail "No AI CLIs detected in PATH"
+echo ""
+
+# ── 2. JStack install per CLI ──
+echo "## JStack install per CLI"
+
+# Claude Code
+if [ -n "${CLI_PATHS[claude]}" ]; then
+  if [ -d "$HOME/.claude/plugins/jstack" ] || [ -d "$HOME/.claude/marketplaces/jokerman-session-setup" ]; then
+    if [ -f "$HOME/.claude/plugins/jstack/.claude-plugin/plugin.json" ]; then
+      version=$(grep -o '"version"[[:space:]]*:[[:space:]]*"[^"]*"' "$HOME/.claude/plugins/jstack/.claude-plugin/plugin.json" 2>/dev/null | head -1 | sed 's/.*"\([^"]*\)"$/\1/')
+      ok "claude code: jstack@${version:-unknown}"
+    else
+      ok "claude code: jstack (marketplace, version unknown)"
+    fi
+  else
+    warn "claude code: jstack NOT installed"
+    echo "    Fix: /plugin marketplace add Azureflipper/jokerman-session-setup"
+    echo "         /plugin install jstack@jokerman-session-setup"
+  fi
+fi
+
+# Codex
+if [ -n "${CLI_PATHS[codex]}" ]; then
+  if codex plugin list 2>/dev/null | grep -qi "jstack"; then
+    ok "codex: jstack installed"
+  else
+    warn "codex: jstack NOT installed (or 'plugin list' command differs)"
+    echo "    Fix: /plugins → search jstack → Install"
+  fi
+fi
+
+# Gemini
+if [ -n "${CLI_PATHS[gemini]}" ]; then
+  if gemini extensions list 2>/dev/null | grep -qi "jstack"; then
+    ok "gemini: jstack installed"
+  else
+    warn "gemini: jstack NOT installed"
+    echo "    Fix: gemini extensions install https://github.com/Azureflipper/jokerman-session-setup"
+  fi
+fi
+
+# Copilot CLI
+if [ -n "${CLI_PATHS[copilot]}" ]; then
+  if copilot plugin list 2>/dev/null | grep -qi "jstack"; then
+    ok "copilot cli: jstack installed"
+  else
+    warn "copilot cli: jstack NOT installed"
+    echo "    Fix: copilot plugin marketplace add Azureflipper/jokerman-session-setup"
+    echo "         copilot plugin install jstack@jokerman-session-setup"
+  fi
+fi
+
+# Droid
+if [ -n "${CLI_PATHS[droid]}" ]; then
+  if droid plugin list 2>/dev/null | grep -qi "jstack"; then
+    ok "droid: jstack installed"
+  else
+    warn "droid: jstack NOT installed"
+  fi
+fi
+
+echo ""
+
+# ── 3. Scaffolding install ──
+echo "## Scaffolding install"
+if [ -d "$JSTACK_HOME/scaffolding/01-foundation" ]; then
+  ok "scaffolding source at: $JSTACK_HOME/scaffolding/"
+  if [ "$VERBOSE" = "1" ]; then
+    age_days=$(( ( $(date +%s) - $(stat -c %Y "$JSTACK_HOME/scaffolding" 2>/dev/null || stat -f %m "$JSTACK_HOME/scaffolding") ) / 86400 ))
+    echo "    Last updated: ${age_days} days ago"
+  fi
+else
+  warn "scaffolding source NOT at $JSTACK_HOME/scaffolding/"
+  echo "    Fix: re-run installer, OR git clone Azureflipper/jokerman-session-setup ~/.jstack"
+fi
+echo ""
+
+# ── 4. Brand assets ──
+echo "## Brand assets"
+if [ -d "$JSTACK_HOME/brand" ]; then
+  age_days=$(( ( $(date +%s) - $(stat -c %Y "$JSTACK_HOME/brand" 2>/dev/null || stat -f %m "$JSTACK_HOME/brand") ) / 86400 ))
+  if [ "$age_days" -gt 90 ]; then
+    warn "brand assets at ${JSTACK_HOME}/brand (age: ${age_days} days — stale, >90 days threshold)"
+    echo "    Fix: invoke /brand-update skill"
+  else
+    ok "brand assets at ${JSTACK_HOME}/brand (age: ${age_days} days)"
+  fi
+else
+  warn "no brand assets at $JSTACK_HOME/brand/"
+  echo "    Fix: invoke /brand-update skill, OR run /generate-* with default-templates"
+fi
+echo ""
+
+# ── 5. Voice corpus calibration ──
+echo "## Voice corpus calibration"
+CALIBRATION_FILE=""
+for candidate in \
+  "$JSTACK_HOME/scaffolding/03-ms-team/voice/OurVoice-calibration.md" \
+  "$JSTACK_HOME/voice/OurVoice-calibration.md"; do
+  [ -f "$candidate" ] && { CALIBRATION_FILE="$candidate"; break; }
+done
+
+if [ -n "$CALIBRATION_FILE" ]; then
+  status=$(grep -o "status:[[:space:]]*[A-Z_]*" "$CALIBRATION_FILE" 2>/dev/null | head -1 | awk '{print $2}')
+  case "$status" in
+    CALIBRATED) ok "voice corpus: CALIBRATED" ;;
+    NOT_CALIBRATED) warn "voice corpus: NOT_CALIBRATED (run T0-CALIBRATION-WORKFLOW.md)" ;;
+    *) warn "voice corpus: status unknown ($status)" ;;
+  esac
+else
+  warn "voice calibration file not found"
+fi
+echo ""
+
+# ── 6. Hook activation ──
+echo "## Hooks"
+hook_count=0
+if [ -d "$JSTACK_HOME/hooks" ]; then
+  hook_count=$(find "$JSTACK_HOME/hooks" -maxdepth 2 -type l 2>/dev/null | wc -l | tr -d ' ')
+  if [ "$hook_count" = "0" ]; then
+    warn "0 hooks activated (operator opt-in via symlinks expected)"
+  else
+    ok "$hook_count hook(s) activated"
+  fi
+else
+  warn "no hooks directory at $JSTACK_HOME/hooks/"
+fi
+echo ""
+
+# ── Verdict ──
+echo "## Verdict"
+echo "  CLIs detected: $found"
+echo ""
+echo "Run 'jstack-doctor --verbose' for more detail."
+echo "Run 'jstack-update' to update plugin in each CLI."

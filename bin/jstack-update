@@ -1,0 +1,112 @@
+#!/usr/bin/env bash
+# jstack-update — update JStack plugin across all detected CLIs
+#
+# Usage: jstack-update [--dry-run]
+
+set -euo pipefail
+
+DRY_RUN=0
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --dry-run) DRY_RUN=1; shift ;;
+    --help|-h)
+      cat <<EOF
+jstack-update — update JStack plugin across detected CLIs
+
+What it does:
+  1. Detects which CLIs are installed and have JStack plugin
+  2. Runs each CLI's update command in sequence
+  3. Updates scaffolding source at \$JSTACK_HOME
+
+Options:
+  --dry-run    Show what would be done, don't execute
+
+Per-CLI update commands run:
+  claude code:    /plugin update jstack@jokerman-session-setup   (operator-driven inside CLI)
+  codex:          /plugins (search jstack, click update)         (operator-driven)
+  cursor:         /update-plugin jstack                          (operator-driven)
+  gemini:         gemini extensions update jstack
+  copilot cli:    copilot plugin update jstack@jokerman-session-setup
+  droid:          droid plugin update jstack
+
+Note: Claude Code, Codex, and Cursor update via in-CLI commands —
+      this script just lists them for you to run.
+EOF
+      exit 0 ;;
+    *) echo "Unknown arg: $1" >&2; exit 2 ;;
+  esac
+done
+
+JSTACK_HOME="${JSTACK_HOME:-$HOME/.jstack}"
+
+run() {
+  if [ "$DRY_RUN" = "1" ]; then
+    echo "  [dry-run] $*"
+  else
+    echo "  → $*"
+    "$@" || echo "    ⚠ failed (continuing)"
+  fi
+}
+
+echo "jstack-update — updating across CLIs"
+echo ""
+
+# 1. Update scaffolding source
+echo "## Scaffolding source ($JSTACK_HOME)"
+if [ -d "$JSTACK_HOME/.git" ]; then
+  if [ "$DRY_RUN" = "1" ]; then
+    echo "  [dry-run] cd $JSTACK_HOME && git fetch && git pull --ff-only"
+  else
+    cd "$JSTACK_HOME"
+    git fetch -q origin 2>/dev/null || echo "  ⚠ fetch failed"
+    git pull --ff-only -q 2>/dev/null && echo "  ✓ updated" || echo "  ⚠ pull failed (manual intervention may be needed)"
+  fi
+else
+  echo "  ⚠ $JSTACK_HOME not a git repo — skipping scaffolding update"
+  echo "    Recommend: git clone Azureflipper/jokerman-session-setup $JSTACK_HOME"
+fi
+echo ""
+
+# 2. Per-CLI plugin update
+echo "## Per-CLI plugin updates"
+
+# Gemini (scriptable)
+if command -v gemini >/dev/null 2>&1; then
+  if gemini extensions list 2>/dev/null | grep -qi "jstack"; then
+    echo "gemini:"
+    run gemini extensions update jstack
+  fi
+fi
+
+# Copilot CLI (scriptable)
+if command -v copilot >/dev/null 2>&1; then
+  if copilot plugin list 2>/dev/null | grep -qi "jstack"; then
+    echo "copilot cli:"
+    run copilot plugin update jstack@jokerman-session-setup 2>/dev/null || \
+      run copilot plugin install jstack@jokerman-session-setup --force
+  fi
+fi
+
+# Droid (scriptable)
+if command -v droid >/dev/null 2>&1; then
+  if droid plugin list 2>/dev/null | grep -qi "jstack"; then
+    echo "droid:"
+    run droid plugin update jstack 2>/dev/null || true
+  fi
+fi
+
+# Claude / Codex / Cursor — operator-driven (no CLI update command)
+echo ""
+echo "## Operator-driven updates (run inside each CLI):"
+if command -v claude >/dev/null 2>&1; then
+  echo "  claude code:  /plugin update jstack@jokerman-session-setup"
+fi
+if command -v codex >/dev/null 2>&1; then
+  echo "  codex:        /plugins → search jstack → Update"
+fi
+if command -v cursor >/dev/null 2>&1; then
+  echo "  cursor:       /update-plugin jstack (in Agent chat)"
+fi
+
+echo ""
+echo "Run 'jstack-doctor' afterward to verify all CLIs on latest version."
