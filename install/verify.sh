@@ -144,13 +144,28 @@ cmd_hooks() {
 
 cmd_voice() {
   hdr "Voice corpus + calibration state"
-  CORPUS="$REPO_ROOT/scaffolding/03-personal-advanced/voice/TRAILBLAZER-CORPUS.md"
-  TEST="$REPO_ROOT/scaffolding/03-personal-advanced/voice/TRAILBLAZER-TEST.md"
-  CALIB="$REPO_ROOT/scaffolding/03-personal-advanced/voice/TRAILBLAZER-CALIBRATION.md"
+  # v2: renamed from TRAILBLAZER-* to OurVoice-*; check both for backward compat
+  CORPUS_V2="$REPO_ROOT/scaffolding/03-personal-advanced/voice/OurVoice-corpus.md"
+  CORPUS_V1="$REPO_ROOT/scaffolding/03-personal-advanced/voice/TRAILBLAZER-CORPUS.md"
+  CORPUS=""
+  [ -f "$CORPUS_V2" ] && CORPUS="$CORPUS_V2"
+  [ -f "$CORPUS_V1" ] && CORPUS="$CORPUS_V1"
 
-  [ -f "$CORPUS" ] && ok "TRAILBLAZER-CORPUS.md present" || { fail "TRAILBLAZER-CORPUS.md missing"; EXIT_CODE=1; }
-  [ -f "$TEST" ] && ok "TRAILBLAZER-TEST.md present" || { fail "TRAILBLAZER-TEST.md missing"; EXIT_CODE=1; }
-  [ -f "$CALIB" ] && ok "TRAILBLAZER-CALIBRATION.md present" || warn "TRAILBLAZER-CALIBRATION.md missing — run /jstack-eval"
+  TEST_V2="$REPO_ROOT/scaffolding/03-personal-advanced/voice/OurVoice-test.md"
+  TEST_V1="$REPO_ROOT/scaffolding/03-personal-advanced/voice/TRAILBLAZER-TEST.md"
+  TEST=""
+  [ -f "$TEST_V2" ] && TEST="$TEST_V2"
+  [ -f "$TEST_V1" ] && TEST="$TEST_V1"
+
+  CALIB_V2="$REPO_ROOT/scaffolding/03-personal-advanced/voice/OurVoice-calibration.md"
+  CALIB_V1="$REPO_ROOT/scaffolding/03-personal-advanced/voice/TRAILBLAZER-CALIBRATION.md"
+  CALIB=""
+  [ -f "$CALIB_V2" ] && CALIB="$CALIB_V2"
+  [ -f "$CALIB_V1" ] && CALIB="$CALIB_V1"
+
+  [ -n "$CORPUS" ] && ok "Voice corpus present: $(basename "$CORPUS")" || { fail "Voice corpus missing"; EXIT_CODE=1; }
+  [ -n "$TEST" ] && ok "Voice test rubric present: $(basename "$TEST")" || { fail "Voice test rubric missing"; EXIT_CODE=1; }
+  [ -n "$CALIB" ] && ok "Voice calibration present: $(basename "$CALIB")" || warn "Voice calibration missing — run /jstack-eval"
 
   if [ -f "$CORPUS" ]; then
     populated=$(grep -c '^- id: ' "$CORPUS" 2>/dev/null || echo 0)
@@ -173,11 +188,92 @@ cmd_voice() {
 # ===== Subcommand: --compliance ==============================================
 
 cmd_compliance() {
-  hdr "Compliance docs"
+  hdr "Compliance docs (SDL)"
+  # v2: directory renamed 02-compliance/ → 02-sdl/; check both for backward compat
+  COMP_DIR=""
+  [ -d "$REPO_ROOT/scaffolding/02-sdl" ] && COMP_DIR="$REPO_ROOT/scaffolding/02-sdl"
+  [ -d "$REPO_ROOT/scaffolding/02-compliance" ] && COMP_DIR="$REPO_ROOT/scaffolding/02-compliance"
+  if [ -z "$COMP_DIR" ]; then
+    fail "Compliance directory missing (expected 02-sdl/ or 02-compliance/)"; EXIT_CODE=1
+    return
+  fi
   for f in COMPLIANCE-OVERVIEW.md HARD-RULES.md ON-DEMAND-RULES.md REFERENCE-RULES.md DATA-CLASSES.md LICENSE-TIERS.md AGT-OVERVIEW.md; do
-    path="$REPO_ROOT/scaffolding/02-compliance/$f"
-    [ -f "$path" ] && ok "$f" || { fail "$f missing"; EXIT_CODE=1; }
+    [ -f "$COMP_DIR/$f" ] && ok "$f" || { fail "$f missing"; EXIT_CODE=1; }
   done
+}
+
+# ===== Subcommand: --context-engine (NEW for v2) =============================
+
+cmd_context_engine() {
+  hdr "Context engine state (v2)"
+  ROOT_DOC="$REPO_ROOT/CONTEXT-ENGINE.md"
+  [ -f "$ROOT_DOC" ] && ok "CONTEXT-ENGINE.md present" || { fail "CONTEXT-ENGINE.md missing"; EXIT_CODE=1; }
+
+  for skill in context-budget context-warmup perf-mode; do
+    path="$REPO_ROOT/scaffolding/01-foundation/skills/$skill/SKILL.md"
+    [ -f "$path" ] && ok "skill: $skill" || { fail "skill missing: $skill"; EXIT_CODE=1; }
+  done
+
+  # Renamed context-budgetwatch (was context-tokenwatch)
+  for skill in context-budgetwatch context-tokenwatch; do
+    path="$REPO_ROOT/scaffolding/03-personal-advanced/skills/$skill/SKILL.md"
+    [ -f "$path" ] && ok "skill: $skill" && break
+  done
+
+  agent="$REPO_ROOT/scaffolding/04-power-user/agents/ContextBudgetAdvisor.md"
+  [ -f "$agent" ] && ok "agent: ContextBudgetAdvisor" || { fail "agent missing: ContextBudgetAdvisor"; EXIT_CODE=1; }
+}
+
+# ===== Subcommand: --brand (NEW for v2) ======================================
+
+cmd_brand() {
+  hdr "Brand integration state (v2)"
+  ROOT_DOC="$REPO_ROOT/BRAND-INTEGRATION.md"
+  [ -f "$ROOT_DOC" ] && ok "BRAND-INTEGRATION.md present" || { fail "BRAND-INTEGRATION.md missing"; EXIT_CODE=1; }
+
+  DEFAULTS_DIR="$REPO_ROOT/scaffolding/03-personal-advanced/doc-gen/default-templates"
+  if [ -d "$DEFAULTS_DIR" ]; then
+    for f in default-ppt-template.json default-word-template.json default-web-template.html; do
+      [ -f "$DEFAULTS_DIR/$f" ] && ok "default template: $f" || { fail "default template missing: $f"; EXIT_CODE=1; }
+    done
+  else
+    fail "default-templates/ dir missing"
+    EXIT_CODE=1
+  fi
+
+  for skill in brand-update asset-search generate-ppt generate-word generate-web; do
+    path="$REPO_ROOT/scaffolding/03-personal-advanced/skills/$skill/SKILL.md"
+    [ -f "$path" ] && ok "skill: $skill" || { fail "skill missing: $skill"; EXIT_CODE=1; }
+  done
+
+  for agent in PPTNarrativeArchitect WordTechnicalEditor WebExperienceCritic; do
+    path="$REPO_ROOT/scaffolding/03-personal-advanced/agents/$agent.md"
+    [ -f "$path" ] && ok "agent: $agent" || { fail "agent missing: $agent"; EXIT_CODE=1; }
+  done
+
+  # Brand-staleness hook
+  HOOKS_DIR=""
+  [ -d "$REPO_ROOT/scaffolding/02-sdl/hooks" ] && HOOKS_DIR="$REPO_ROOT/scaffolding/02-sdl/hooks"
+  [ -d "$REPO_ROOT/scaffolding/02-compliance/hooks" ] && HOOKS_DIR="$REPO_ROOT/scaffolding/02-compliance/hooks"
+  [ -d "$HOOKS_DIR/brand-staleness-warn" ] && ok "hook: brand-staleness-warn" || warn "hook brand-staleness-warn missing (optional)"
+}
+
+# ===== Subcommand: --portability (NEW for v2) ================================
+
+cmd_portability() {
+  hdr "Portability shim (v2)"
+  SCHEMA="$REPO_ROOT/scaffolding/01-foundation/CLI-SUPPORT-V2-SCHEMA.md"
+  [ -f "$SCHEMA" ] && ok "CLI-SUPPORT-V2-SCHEMA.md present" || { fail "CLI-SUPPORT-V2-SCHEMA.md missing"; EXIT_CODE=1; }
+
+  CLI_FINGERPRINT="$REPO_ROOT/scaffolding/01-foundation/skills/jstack-cli-fingerprint/SKILL.md"
+  [ -f "$CLI_FINGERPRINT" ] && ok "skill: jstack-cli-fingerprint" || { fail "skill missing: jstack-cli-fingerprint"; EXIT_CODE=1; }
+
+  # Validate cli_support fields on a sample of skills (full validation in --frontmatter)
+  with_cli_support=0
+  while IFS= read -r f; do
+    grep -q '^cli_support:' "$f" && with_cli_support=$((with_cli_support + 1))
+  done < <(find "$REPO_ROOT/scaffolding" -path '*/skills/*/SKILL.md' 2>/dev/null)
+  ok "$with_cli_support skills declare cli_support"
 }
 
 # ===== Subcommand: --upstream ================================================
@@ -206,7 +302,12 @@ cmd_counts() {
   hdr "Counts"
   skills=$(find "$REPO_ROOT/scaffolding" -path '*/skills/*/SKILL.md' 2>/dev/null | wc -l | tr -d ' ')
   agents=$(find "$REPO_ROOT/scaffolding" -path '*/agents/*.md' 2>/dev/null | grep -cv README || echo 0)
-  hooks=$(find "$REPO_ROOT/scaffolding/02-compliance/hooks" -name 'HOOK.md' 2>/dev/null | wc -l | tr -d ' ')
+  # v2: dir renamed to 02-sdl/; check both for backward compat
+  hooks_dir=""
+  [ -d "$REPO_ROOT/scaffolding/02-sdl/hooks" ] && hooks_dir="$REPO_ROOT/scaffolding/02-sdl/hooks"
+  [ -d "$REPO_ROOT/scaffolding/02-compliance/hooks" ] && hooks_dir="$REPO_ROOT/scaffolding/02-compliance/hooks"
+  hooks=0
+  [ -n "$hooks_dir" ] && hooks=$(find "$hooks_dir" -name 'HOOK.md' 2>/dev/null | wc -l | tr -d ' ')
 
   printf "%-20s %s\n" "Skills:" "$skills"
   printf "%-20s %s\n" "Agents:" "$agents"
@@ -245,6 +346,10 @@ cmd_all() {
   cmd_hooks
   cmd_upstream
   cmd_tier_stamps
+  # v2 additions
+  cmd_portability
+  cmd_context_engine
+  cmd_brand
   hdr "Final verdict"
   if [ "$EXIT_CODE" -eq 0 ]; then
     ok "ALL CHECKS PASSED"
@@ -263,9 +368,12 @@ case "${1:---counts}" in
   --voice)        cmd_voice ;;
   --compliance)   cmd_compliance ;;
   --upstream)     cmd_upstream ;;
-  --counts)       cmd_counts ;;
-  --tier-stamps)  cmd_tier_stamps ;;
-  --all)          cmd_all ;;
+  --counts)         cmd_counts ;;
+  --tier-stamps)    cmd_tier_stamps ;;
+  --portability)    cmd_portability ;;
+  --context-engine) cmd_context_engine ;;
+  --brand)          cmd_brand ;;
+  --all)            cmd_all ;;
   -h|--help)
     cat <<HELP
 jstack verify.sh — install + structure diagnostic
@@ -280,9 +388,12 @@ Subcommands:
   --voice         check voice corpus + calibration state
   --compliance    check compliance docs present
   --upstream      check upstream-sources.yaml
-  --counts        summary counts (default)
-  --tier-stamps   check agent tier-stamping
-  --all           run everything + aggregate verdict
+  --counts         summary counts (default)
+  --tier-stamps    check agent tier-stamping
+  --portability    (v2) CLI-SUPPORT-V2-SCHEMA + jstack-cli-fingerprint
+  --context-engine (v2) CONTEXT-ENGINE.md + context-budget/warmup/perf-mode
+  --brand          (v2) BRAND-INTEGRATION.md + default-templates + brand-update/asset-search
+  --all            run everything + aggregate verdict
 HELP
     ;;
   *)
