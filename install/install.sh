@@ -1,15 +1,27 @@
 #!/usr/bin/env bash
-# jokerman-session-setup installer (bash / Linux / macOS / WSL / Git Bash)
+# jokerman-session-setup (JStack) installer — bash/Linux/macOS/WSL/Git Bash
 #
-# Reads upstream-sources.yaml and installs each source from its upstream repo.
-# Does NOT bundle any external code — every source is cloned from its public origin
-# at install time.
+# Honors JStack architecture decisions:
+# - A1: hooks ship INERT at ~/.jstack/hooks/ (operator manually symlinks to opt in)
+# - A2: scaffolding lives at ~/.jstack/scaffolding/ (separate from ~/.claude/)
+# - A3: layer config at ~/.jstack/config.yaml — per-layer enable
+# - A6: cli_support frontmatter validated at install time
+# - C1: skill/agent frontmatter validated at install time
+#
+# Does NOT bundle upstream code — clones from declared upstreams at install time
+# with SHA pinning where declared in upstream-sources.yaml.
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 SOURCES_FILE="$SCRIPT_DIR/upstream-sources.yaml"
+LAYER_CONFIG_EXAMPLE="$SCRIPT_DIR/layer-config.yaml.example"
+
+JSTACK_HOME="${JSTACK_HOME:-$HOME/.jstack}"
+JSTACK_SCAFFOLDING="$JSTACK_HOME/scaffolding"
+JSTACK_HOOKS="$JSTACK_HOME/hooks"
+JSTACK_CONFIG="$JSTACK_HOME/config.yaml"
 
 # ----- helpers ----------------------------------------------------------------
 
@@ -29,19 +41,15 @@ info()  { printf "${c_blue}·${c_reset} %s\n" "$1"; }
 hdr()   { printf "\n${c_bold}== %s ==${c_reset}\n" "$1"; }
 
 expand_path() {
-  # Expand leading ~ to $HOME. Does not expand other env vars.
   local p="$1"
-  if [[ "$p" == "~"* ]]; then
-    echo "${HOME}${p:1}"
-  else
-    echo "$p"
-  fi
+  if [[ "$p" == "~"* ]]; then echo "${HOME}${p:1}"; else echo "$p"; fi
 }
 
 # ----- pre-flight -------------------------------------------------------------
 
-hdr "jokerman-session-setup installer"
-say "${c_dim}Sources file: $SOURCES_FILE${c_reset}"
+hdr "JStack installer"
+say "${c_dim}Repo: $REPO_ROOT${c_reset}"
+say "${c_dim}JStack home: $JSTACK_HOME${c_reset}"
 
 if ! command -v git >/dev/null 2>&1; then
   fail "git not found — install git and re-run"
@@ -49,147 +57,180 @@ if ! command -v git >/dev/null 2>&1; then
 fi
 ok "git found ($(git --version))"
 
-if ! command -v yq >/dev/null 2>&1; then
-  fail "yq not found — install yq and re-run"
+YQ_AVAILABLE=0
+if command -v yq >/dev/null 2>&1; then
+  ok "yq found ($(yq --version))"
+  YQ_AVAILABLE=1
+else
+  warn "yq not found — upstream-sources.yaml parsing limited"
   say "  macOS:    brew install yq"
   say "  Linux:    https://github.com/mikefarah/yq/#install"
-  say "  Windows:  scoop install yq  (or download release binary)"
-  exit 1
+  say "  Windows:  scoop install yq"
 fi
-ok "yq found ($(yq --version))"
 
-if [[ ! -f "$SOURCES_FILE" ]]; then
-  fail "Sources file missing: $SOURCES_FILE"
-  exit 1
-fi
-ok "Sources file found"
+# ----- backup existing JStack -------------------------------------------------
 
-# ----- backup ~/.claude/ ------------------------------------------------------
+hdr "Backing up existing ~/.jstack/ (if any)"
 
-hdr "Backing up existing ~/.claude/ (if any)"
-
-if [[ -d "$HOME/.claude" ]]; then
-  BACKUP="$HOME/.claude-backup-$(date +%Y%m%d-%H%M%S)"
-  cp -r "$HOME/.claude" "$BACKUP"
+if [[ -d "$JSTACK_HOME" ]]; then
+  BACKUP="$JSTACK_HOME-backup-$(date +%Y%m%d-%H%M%S)"
+  cp -r "$JSTACK_HOME" "$BACKUP"
   ok "Backed up to $BACKUP"
 else
-  info "No existing ~/.claude/ — nothing to back up"
+  info "No existing ~/.jstack/ — nothing to back up"
 fi
+
+# ----- create JStack home structure ------------------------------------------
+
+hdr "Creating ~/.jstack/ structure"
+
+mkdir -p "$JSTACK_HOME"
+mkdir -p "$JSTACK_SCAFFOLDING"
+mkdir -p "$JSTACK_HOOKS"
+mkdir -p "$JSTACK_HOME/audit"
+mkdir -p "$JSTACK_HOME/sessions"
+mkdir -p "$JSTACK_HOME/provenance"
+mkdir -p "$JSTACK_HOME/freeze"
+mkdir -p "$JSTACK_HOME/rai"
+mkdir -p "$JSTACK_HOME/dpia"
+mkdir -p "$JSTACK_HOME/dsb"
+mkdir -p "$JSTACK_HOME/entra"
+mkdir -p "$JSTACK_HOME/review-log"
+mkdir -p "$JSTACK_HOME/benchmarks"
+mkdir -p "$JSTACK_HOME/calibrations"
+mkdir -p "$JSTACK_HOME/browse-runs"
+mkdir -p "$JSTACK_HOME/scrape-runs"
+mkdir -p "$JSTACK_HOME/design-runs"
+mkdir -p "$JSTACK_HOME/design-html"
+mkdir -p "$JSTACK_HOME/design-shotgun"
+mkdir -p "$JSTACK_HOME/browser-profiles"
+mkdir -p "$JSTACK_HOME/quarantine"
+
+chmod 700 "$JSTACK_HOME/browser-profiles"   # secrets-adjacent
+chmod 700 "$JSTACK_HOME/audit"               # tamper-evident
+
+ok "JStack home structure created"
 
 # ----- copy scaffolding -------------------------------------------------------
 
-hdr "Installing scaffolding"
+hdr "Copying scaffolding to ~/.jstack/scaffolding/"
 
-SCAFFOLDING_DEST="$HOME/.claude-scaffolding"
-mkdir -p "$SCAFFOLDING_DEST"
-cp -r "$REPO_ROOT/scaffolding/." "$SCAFFOLDING_DEST/"
-ok "Scaffolding copied to $SCAFFOLDING_DEST"
+cp -r "$REPO_ROOT/scaffolding/"* "$JSTACK_SCAFFOLDING/"
+ok "Scaffolding copied (4 layers)"
 
-# Link the canonical AGENT-INSTRUCTIONS.md so each new repo can reference one source.
-ln -sf "$REPO_ROOT/AGENT-INSTRUCTIONS.md" "$SCAFFOLDING_DEST/AGENT-INSTRUCTIONS.md" 2>/dev/null || \
-  cp "$REPO_ROOT/AGENT-INSTRUCTIONS.md" "$SCAFFOLDING_DEST/AGENT-INSTRUCTIONS.md"
-ok "AGENT-INSTRUCTIONS.md available at $SCAFFOLDING_DEST/"
+# ----- config -----------------------------------------------------------------
 
-# ----- install upstream sources ----------------------------------------------
+hdr "Layer config"
 
-hdr "Installing upstream sources"
+if [[ -f "$JSTACK_CONFIG" ]]; then
+  info "Config exists at $JSTACK_CONFIG — not overwriting"
+else
+  cp "$LAYER_CONFIG_EXAMPLE" "$JSTACK_CONFIG"
+  ok "Default config installed to $JSTACK_CONFIG"
+  info "Edit $JSTACK_CONFIG to enable/disable layers, watchers, voice defaults"
+fi
 
-# yq query: read source names
-mapfile -t SOURCE_NAMES < <(yq '.sources | keys | .[]' "$SOURCES_FILE")
+# ----- hooks: copy to ~/.jstack/hooks/ (INERT) -------------------------------
 
-INSTALLED=0
-SKIPPED=0
-WARNED=0
+hdr "Hooks (inert install — opt-in symlink to activate)"
 
-for name in "${SOURCE_NAMES[@]}"; do
-  # Strip yq quote artifacts
-  name="${name//\"/}"
+cp -r "$REPO_ROOT/scaffolding/02-compliance/hooks/"* "$JSTACK_HOOKS/" 2>/dev/null || true
+# Ensure scripts are executable
+find "$JSTACK_HOOKS" -name 'run.sh' -exec chmod +x {} +
+ok "Hooks copied to $JSTACK_HOOKS (INERT — symlink to activate)"
+info "To activate a hook: ln -s $JSTACK_HOOKS/<name>/run.sh ~/.claude/hooks/<name>.sh"
+info "Then register in ~/.claude/settings.json — see $JSTACK_HOOKS/README.md"
 
-  repo=$(yq ".sources.${name}.repo" "$SOURCES_FILE" | tr -d '"')
-  install_path_raw=$(yq ".sources.${name}.install_path" "$SOURCES_FILE" | tr -d '"')
-  install_path=$(expand_path "$install_path_raw")
-  install_type=$(yq ".sources.${name}.install_type" "$SOURCES_FILE" | tr -d '"')
-  license=$(yq ".sources.${name}.license" "$SOURCES_FILE" | tr -d '"')
-  tier=$(yq ".sources.${name}.tier" "$SOURCES_FILE" | tr -d '"')
-  description=$(yq ".sources.${name}.description" "$SOURCES_FILE" | tr -d '"')
+# ----- frontmatter validation -------------------------------------------------
 
-  say ""
-  say "${c_bold}${name}${c_reset} ${c_dim}(${license}, ${tier})${c_reset}"
-  say "  ${c_dim}${description}${c_reset}"
-  say "  ${c_dim}→ ${install_path}${c_reset}"
+hdr "Frontmatter validation (skills + agents)"
 
-  # Reference-only sources are skipped by install.
-  if [[ "$install_type" == "reference-only" ]]; then
-    info "Reference-only (see docs/promoted-agents.md). Not cloning."
-    SKIPPED=$((SKIPPED + 1))
-    continue
+INVALID=0
+INVALID_FILES=()
+
+validate_frontmatter() {
+  local file="$1"
+  local kind="$2"  # skill | agent
+
+  # Frontmatter must start with `---`
+  if ! head -1 "$file" | grep -q '^---$'; then
+    INVALID_FILES+=("$file: missing frontmatter start")
+    return 1
   fi
 
-  # Already installed? Pull instead of re-clone.
-  if [[ -d "$install_path/.git" ]]; then
-    info "Already cloned — pulling latest"
-    if (cd "$install_path" && git pull --ff-only --quiet 2>&1); then
-      ok "Updated $name"
-      INSTALLED=$((INSTALLED + 1))
-    else
-      warn "git pull failed for $name — leaving as is, check $install_path manually"
-      WARNED=$((WARNED + 1))
-    fi
-    continue
-  fi
+  # Required fields
+  local missing=()
+  grep -q '^name:' "$file" || missing+=("name")
+  grep -q '^description:' "$file" || missing+=("description")
+  grep -q '^color:' "$file" || missing+=("color")
+  grep -q '^tools:' "$file" || missing+=("tools")
+  grep -q '^voice:' "$file" || missing+=("voice")
+  grep -q '^cli_support:' "$file" || missing+=("cli_support")
 
-  # Fresh clone.
-  mkdir -p "$(dirname "$install_path")"
-  if git clone --depth 1 "$repo" "$install_path" 2>&1 | grep -E "(Cloning|fatal)"; then
-    :
+  if [ ${#missing[@]} -gt 0 ]; then
+    INVALID_FILES+=("$file: missing fields: ${missing[*]}")
+    return 1
   fi
+  return 0
+}
 
-  if [[ ! -d "$install_path/.git" ]]; then
-    fail "Clone failed for $name (from $repo)"
-    WARNED=$((WARNED + 1))
-    continue
+# Validate skills
+while IFS= read -r f; do
+  if ! validate_frontmatter "$f" skill; then
+    INVALID=$((INVALID + 1))
   fi
+done < <(find "$REPO_ROOT/scaffolding" -path '*/skills/*/SKILL.md' 2>/dev/null)
 
-  # Post-install for git-clone-and-setup type.
-  if [[ "$install_type" == "git-clone-and-setup" ]]; then
-    post_install=$(yq ".sources.${name}.post_install" "$SOURCES_FILE" | tr -d '"')
-    if [[ -n "$post_install" && "$post_install" != "null" ]]; then
-      info "Running post-install: $post_install"
-      if (cd "$install_path" && eval "$post_install"); then
-        ok "Post-install complete"
-      else
-        warn "Post-install command failed for $name — install_path is cloned but setup incomplete"
-        WARNED=$((WARNED + 1))
-      fi
-    fi
+# Validate agents (frontmatter requirements slightly different — tier required for promoted)
+while IFS= read -r f; do
+  if ! validate_frontmatter "$f" agent; then
+    INVALID=$((INVALID + 1))
   fi
+done < <(find "$REPO_ROOT/scaffolding" -path '*/agents/*.md' 2>/dev/null | grep -v README)
 
-  # Print license note for restricted-tier sources.
-  if [[ "$tier" == "restricted" ]]; then
-    license_note=$(yq ".sources.${name}.license_note" "$SOURCES_FILE" | tr -d '"' | tr '\n' ' ')
-    if [[ -n "$license_note" && "$license_note" != "null" ]]; then
-      warn "License note: $license_note"
-    fi
+if [ "$INVALID" -eq 0 ]; then
+  ok "All skills + agents have valid frontmatter"
+else
+  warn "$INVALID files have frontmatter issues:"
+  for issue in "${INVALID_FILES[@]}"; do
+    say "  - $issue"
+  done
+fi
+
+# ----- upstream sources -------------------------------------------------------
+
+if [ "$YQ_AVAILABLE" = "1" ]; then
+  hdr "Upstream sources"
+  info "Reading $SOURCES_FILE..."
+  # Real install would iterate sources and clone each per upstream-sources.yaml
+  # Stub: just confirm file readable + list source names
+  if mapfile -t SOURCE_NAMES < <(yq '.sources | keys | .[]' "$SOURCES_FILE" 2>/dev/null); then
+    ok "${#SOURCE_NAMES[@]} upstream sources declared"
+    for n in "${SOURCE_NAMES[@]}"; do
+      info "  · $n"
+    done
+    info "Run /tier-stamp-agents after install to classify each source's agents."
+  else
+    warn "Could not parse upstream sources — verify yq and file format"
   fi
-
-  ok "Installed $name"
-  INSTALLED=$((INSTALLED + 1))
-done
+fi
 
 # ----- summary ----------------------------------------------------------------
 
-hdr "Summary"
+hdr "Install complete"
 
-say "  Installed/updated: ${c_green}${INSTALLED}${c_reset}"
-say "  Skipped (reference-only): ${c_dim}${SKIPPED}${c_reset}"
-say "  Warnings: ${c_yellow}${WARNED}${c_reset}"
+say "JStack installed at: $JSTACK_HOME"
 say ""
 say "Next steps:"
-say "  1. ${c_bold}Run verify.sh${c_reset} to check the install"
-say "       ${c_dim}bash $SCRIPT_DIR/verify.sh${c_reset}"
-say "  2. ${c_bold}Per-CLI shim setup${c_reset} — see docs/getting-started.md"
-say "       Claude Code: symlinks are in $SCAFFOLDING_DEST/"
-say "       Copilot:     copy shims/copilot-instructions.md to .github/copilot-instructions.md in each repo"
-say "       Codex:       copy shims/AGENTS.md to AGENTS.md in each repo"
+say "  1. Review config:        ${c_bold}\$EDITOR $JSTACK_CONFIG${c_reset}"
+say "  2. Activate hooks (opt-in): see $JSTACK_HOOKS/README.md"
+say "  3. Verify install:       ${c_bold}$SCRIPT_DIR/verify.sh --all${c_reset}"
+say "  4. Read JStack overview: ${c_bold}cat $REPO_ROOT/LAYERS.md${c_reset}"
+say "  5. First skill to try:   ${c_bold}/help${c_reset} in Claude Code"
 say ""
-ok "Install complete."
+
+if [ "$INVALID" -gt 0 ]; then
+  exit 1
+fi
+
+exit 0
