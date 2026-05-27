@@ -2,6 +2,105 @@
 
 All notable changes to this repo are tracked here. Format is loose — date headings + bulleted changes. Major behavior changes to the canonical instructions are also logged in `scaffolding/EVOLUTION-LOG.md` (which travels with each scaffolded repo).
 
+## 2026-05-27 — v3.0.0-dev (on `v3-dev` branch)
+
+**JStack v3: plugin-manifest pattern + agent build-out + session-harness framing.** Big Bang rework following obra/superpowers' multi-CLI plugin pattern. Discards v2's "MCP server + per-CLI compile" plan as over-engineering. Agents BUILD OUT (44 → 78), not trimmed. Scaffolding-templates preserved + modernized.
+
+Design doc: [docs/design/jstack-v3-plan.md](docs/design/jstack-v3-plan.md).
+Per-CLI plugin format research: [docs/per-cli/PLUGIN-FORMAT-RESEARCH.md](docs/per-cli/PLUGIN-FORMAT-RESEARCH.md).
+Session-harness explainer: [docs/session-harness.md](docs/session-harness.md).
+
+### Architecture shift (Phase 0–2)
+
+- **Plugin-manifest pattern.** Tiny per-CLI manifests (`.claude-plugin/`, `.codex-plugin/`, `.cursor-plugin/`, `.opencode/`, `gemini-extension.json`, `.copilot-plugin/`, `.droid-plugin/`) all point at shared `./skills/` and `./agents/` dirs. Each CLI's native plugin marketplace handles discovery + invocation. NO MCP server, NO per-CLI compile step.
+- **Root entrypoint files:** `CLAUDE.md`, `AGENTS.md`, `GEMINI.md` at repo root — read by Claude Code / Codex / Gemini respectively when working ON the JStack repo. Each links to canonical `AGENT-INSTRUCTIONS.md` + adds CLI-specific notes.
+
+### Reorganization (Phase 1)
+
+- `scaffolding/01-foundation/skills/*` + `scaffolding/03-personal-advanced/skills/*` → `skills/` (74 skills flat at repo root, with `layer: foundation | ms-team` frontmatter)
+- `scaffolding/03-personal-advanced/agents/*` + `scaffolding/04-power-user/agents/*` → `agents/<category>/<Name>.md` (organized per domain: ms-specific, engineering, security, compliance, devops, customer, communication, voice, doc-gen)
+- `scaffolding/02-sdl/hooks/*` → `hooks/shared/*` (lifted to repo root for plugin-discovery)
+- `scaffolding/04-power-user/` removed (content moved to `agents/engineering/`)
+- `scaffolding/03-personal-advanced/` renamed to `scaffolding/03-ms-team/`
+- Root cleanup: 5 design docs moved from root to `docs/design/` (MIGRATION-TABLE, CONTEXT-ENGINE, BRAND-INTEGRATION, T0-CALIBRATION-WORKFLOW, UPSTREAM-SIMILARITY, TODOS, CLI-SUPPORT-V2-SCHEMA). Root .md count: 11 → 5 (README, CHANGELOG, LAYERS, SHIP-GATE, AGENT-INSTRUCTIONS) + 3 new (CODEOWNERS, CONTRIBUTING, SECURITY).
+
+### Agent build-out (Phase 3) — 44 → 78 agents (+34 new)
+
+Per operator direction: agents are JStack value, build out instead of trim.
+
+- **ms-specific (+7):** AzureArchitect, AzureOpenAIAdvisor, M365CopilotAdvisor, GraphAPIAdvisor, BicepReviewer, ARMTemplateReviewer, KeyVaultAuditor
+- **security (+5):** ThreatModelDrafter, SecretsScanReviewer, SBOMAuditor, OAuthFlowReviewer, JWTSecurityReviewer
+- **compliance (+5):** GDPRReviewer, SDLReviewer, AGTReviewer, EUAIActReviewer, SOC2Reviewer
+- **devops (+5):** OneBranchReviewer, EV2PipelineAuditor, GHActionsReviewer, TerraformReviewer, K8sManifestReviewer
+- **customer (+5):** ProposalDrafter, RFPResponseDrafter, ExecutiveBriefingDrafter, WorkshopFacilitator, DemoNarratorJunior
+- **communication (+4):** BlogPostDrafter, LinkedInPostDrafter, EmailCustomerDrafter, SlideNarrationCritic
+- **engineering (+3):** LatencyAnalyzer, CostAnalyzer, RegressionDetective
+
+Final per-category counts: ms-specific 15, engineering 25, customer 8, security 8, devops 7, compliance 6, communication 5, doc-gen 3, voice 1. Total: 78.
+
+### Session-harness skills (Phase 4) — 74 → 81 skills (+7 new)
+
+- `/jstack-lessons-promote` — promote repo lesson → JStack global
+- `/jstack-adr-new` — bootstrap ADR from template
+- `/jstack-personas-rotate` — load persona context for demos/workshops
+- `/jstack-match` — semantic skill router (free text → top 3 skills)
+- `/jstack-doctor` — cross-CLI health check (replaces v2 spec-only jstack-cli-fingerprint)
+- `/jstack-scaffold` — invoke repo scaffolding into target
+- `/jstack-lessons` — mid-session lessons.md relevance-filtered review
+
+### Bin/ scripts (Phase 5)
+
+- `bin/jstack-scaffold` — copy scaffolding/01-foundation/* into target repo with CLAUDE.md template rendering
+- `bin/jstack-doctor` — cross-CLI health check (color-coded output, --verbose, --json)
+- `bin/jstack-lessons-sync` — per-operator opt-in lessons sync across machines (private git repo)
+- `bin/jstack-lessons-promote` — interactive promote of repo lesson → JStack global
+- `bin/jstack-adr-new` — bootstrap ADR with auto-numbering + commit
+- `bin/jstack-update` — update plugin across detected CLIs
+
+### Docs rewrite (Phase 6)
+
+- README v3-sync with honest multi-CLI table
+- `docs/session-harness.md` NEW — full mental model
+- `docs/per-cli/PLUGIN-FORMAT-RESEARCH.md` NEW — per-CLI schema findings
+- CODEOWNERS, CONTRIBUTING.md, SECURITY.md NEW (repo standards)
+- CHANGELOG.md updated with v3.0.0-dev entry
+
+### v2 components retained
+
+- AGENT-INSTRUCTIONS.md (canonical session ritual) — unchanged
+- 5+7+8 compliance arch (HARD-RULES + ON-DEMAND + REFERENCE)
+- OurVoice corpus (60 paragraphs, 12 cells) — same content, moved to `scaffolding/03-ms-team/voice/`
+- Voice tier mechanism (internal / trailblazer / mixed)
+- v1_alias frontmatter (retained until v3.5 retire)
+- install.sh / install.ps1 / verify.sh (unchanged in this phase — Phase 5b update pending)
+
+### Counts final (post-Phase 5a)
+
+- Skills: 81 (47 foundation + 27 ms-team + 7 new session-harness)
+- Agents: 78 (across 9 categories)
+- Hooks: 15
+- Plugin manifests: 7 (Claude, Codex, Cursor, Gemini, OpenCode, Copilot CLI, Droid)
+- Root entrypoint files: 3 (CLAUDE.md, AGENTS.md, GEMINI.md)
+- Bin scripts: 6 (scaffold, doctor, lessons-sync, lessons-promote, adr-new, update)
+- Scaffolding template tree: 01-foundation (CORE-PRINCIPLES, EVOLUTION, tasks/, docs/adr/, .claude/agents/) + 02-sdl (compliance refs) + 03-ms-team (voice corpus + doc-gen templates)
+
+### Remaining for v3.0.0 tag (Phases 7-9)
+
+- Phase 5b: install.sh + verify.sh extensions for plugin-manifest validation
+- Phase 7: tests for plugin-manifests + scaffolding-copy + CI matrix updates
+- Phase 8: voice corpus calibration (operator-driven) + marketplace submission
+- Phase 9: ship gate v3 + tag v3.0.0
+
+### Operator next steps
+
+1. Push `v3-dev` branch to GitHub
+2. Test plugin install in Claude Code via `/plugin marketplace add Azureflipper/jokerman-session-setup`
+3. Test `bin/jstack-scaffold` in a new repo
+4. Run T0 voice calibration
+5. Submit to Anthropic + OpenAI + Cursor + Gemini marketplaces (post MS legal review)
+
+---
+
 ## 2026-05-27 — v2.0 spec-complete (Big Bang)
 
 **JStack v2: scaffolding-only harness for MS-CAIP-SE engagements.** No runtime code; the scaffolding ITSELF is JStack. Operator (or agent reading SKILL.md) executes the work. v1 → v2 is a Big Bang ship with 5 components, eng-review-cleared.
