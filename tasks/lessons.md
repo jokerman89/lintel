@@ -38,3 +38,19 @@ Related: scaffolding-vs-content principle is the v3.5 lake-of-bloat avoidance ru
 Related: [[scaffolding-not-content]] — both lessons are about respecting what already exists before adding more. L-002 catches the case where "what exists" was infrastructure I missed; L-001 catches the case where "what doesn't need to exist" was content I shouldn't have added.
 
 ---
+
+## L-003 — Verify counts before applying "truth-fix" from external docs
+
+**Rule:** When an external document (backlog, audit report, third-party analysis) claims a specific count or fact about the codebase ("78 agents", "5 hooks", "12 compliance skills"), VERIFY the count via tool (`find | wc -l`, `grep -c`, `ls`) BEFORE applying any "fix" to docs. The external document may itself be wrong — applying its claimed-correct value as a fix would introduce the bug.
+
+**Why:** v3.6 backlog (Cohort 1 item 0.1) claimed "Agent count is 73, not 78. The '78' in README is wrong. Correct everywhere." I ran `find agents -name '*.md' | grep -v README | wc -l` before "fixing" the README and discovered the actual count was **78** — exactly what the README already said. Per-category sum confirmed: 5+6+8+7+3+25+15+8+1 = 78. The backlog-author miscounted (possibly stale tree at compile-time). If I had applied 78→73 mechanically, I would have introduced the bug the docs were correctly avoiding. Caught by `find`-verification before edit.
+
+**How to apply:**
+- For ANY "fact-fix" from external doc: run a verification command BEFORE the edit. Cost: 30 seconds. Benefit: prevents introducing bugs from miscounted external claims.
+- Document the verification command + result in the PR description (so reviewers can re-verify): `Verified via: find agents -name '*.md' | wc -l = 78. Backlog's claim of 73 is wrong. SKIPPING 0.1.`
+- Pattern applies to: file counts, line counts, version numbers, configuration values, metric claims. Any claim that can be tool-verified.
+- The same principle generalizes: external documents are inputs to think with, not commands to execute mechanically. Even your own past output (compiled backlog) is an external document that may have been wrong at compile-time.
+
+Related: [[L-002]] grep-first-before-design — L-002 says grep existing infrastructure before designing; L-003 says grep external claims before believing. Both apply the same skepticism in different directions. The trio L-001/L-002/L-003 form a discipline: respect what exists, respect what doesn't exist, and verify claims about what exists.
+
+---
