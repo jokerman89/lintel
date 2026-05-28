@@ -1,0 +1,145 @@
+# Lintel az-tldr agent mapping
+#
+# Service-to-subagent dispatch hints used by /li:az-tldr.
+# Per-section mappings + conditional secondary agents based on service traits.
+#
+# Format:
+#   <service-id>:
+#     primary: <AgentName>           # always invoked if mode=full
+#     per_section:                   # section → agent override
+#       "<section-number>": <AgentName>
+#     secondary_conditional:         # agent → triggers (any match = invoke)
+#       <AgentName>: [trait1, trait2]
+
+version: 1
+as_of: 2026-05-28
+
+services:
+
+  expressroute:
+    primary: AzureArchitect
+    per_section:
+      "4": AzureArchitect           # frameworks (CAF/WAF)
+      "13": AzureArchitect          # enterprise meaning
+      "14": CostAnalyzer            # commercial / pricing
+      "15": AzureArchitect          # implementation flow
+    secondary_conditional:
+      KeyVaultAuditor: [private-peering, ipsec-overlay, certificate-rotation, macsec]
+      BicepReviewer: [iac-discussion, gateway-deployment, alz-bicep]
+      SecurityAuditor: [public-tier-discussion, transit-routing, regulated-industry]
+      OneBranchReviewer: [provider-config-pipeline, customer-1es-context]
+
+  # Future services — placeholders for v3.6+ content additions
+  # When service content is added under services/<id>.md, this mapping activates.
+
+  azure-openai:
+    primary: AzureOpenAIAdvisor
+    per_section:
+      "4": AzureOpenAIAdvisor
+      "13": AzureOpenAIAdvisor
+      "14": CostAnalyzer
+      "15": AzureOpenAIAdvisor
+    secondary_conditional:
+      RAIReviewer: [customer-facing-output, sensitive-use-scenario, transparency-note-required]
+      KeyVaultAuditor: [byok, customer-managed-keys]
+      EUAIActReviewer: [eu-customer, high-risk-tier]
+
+  front-door:
+    primary: AzureArchitect
+    per_section:
+      "4": AzureArchitect
+      "13": AzureArchitect
+      "14": CostAnalyzer
+    secondary_conditional:
+      SecurityAuditor: [waf-discussion, ddos-protection, public-endpoint]
+      AccessibilityChecker: [customer-facing-site]
+
+  api-management:
+    primary: GraphAPIAdvisor          # closest fit in current agent catalog
+    per_section:
+      "4": AzureArchitect
+      "13": AzureArchitect
+      "14": CostAnalyzer
+    secondary_conditional:
+      OAuthFlowReviewer: [oauth-policy, jwt-validation, oidc-integration]
+      SecurityAuditor: [public-tier, rate-limiting-design]
+      JWTSecurityReviewer: [token-validation-policy]
+
+  azure-firewall:
+    primary: AzureArchitect
+    per_section:
+      "4": AzureArchitect
+      "13": AzureArchitect
+      "14": CostAnalyzer
+    secondary_conditional:
+      SecurityAuditor: [transit-routing, central-inspection]
+      ThreatModelDrafter: [threat-model-needed, customer-stride-review]
+
+  azure-firewall-premium:
+    primary: AzureArchitect
+    per_section:
+      "4": AzureArchitect
+      "13": AzureArchitect
+      "14": CostAnalyzer
+    secondary_conditional:
+      SecurityAuditor: [tls-inspection, idps-rules]
+      ThreatModelDrafter: [advanced-threat-protection-required]
+
+  aks:
+    primary: AzureArchitect
+    per_section:
+      "4": AzureArchitect
+      "13": AzureArchitect
+      "14": CostAnalyzer
+    secondary_conditional:
+      K8sManifestReviewer: [workload-design, manifest-review]
+      SecurityAuditor: [rbac-design, network-policy]
+      BicepReviewer: [iac-discussion]
+
+  storage-account:
+    primary: AzureArchitect
+    per_section:
+      "4": AzureArchitect
+      "13": AzureArchitect
+      "14": CostAnalyzer
+    secondary_conditional:
+      SecurityAuditor: [public-tier, anonymous-access, sas-tokens]
+      GDPRReviewer: [eu-data, pii-storage, retention-design]
+      KeyVaultAuditor: [byok, customer-managed-keys]
+
+  sql-mi:
+    primary: AzureArchitect
+    per_section:
+      "4": AzureArchitect
+      "13": AzureArchitect
+      "14": CostAnalyzer
+    secondary_conditional:
+      SecurityAuditor: [tde, always-encrypted, vnet-integration]
+      GDPRReviewer: [pii-storage, residency-requirement]
+      KeyVaultAuditor: [customer-managed-keys, byok-tde]
+
+# Role-context modifiers (applied when role active in ~/.lintel/profile.yaml)
+role_overlays:
+  field-cto:
+    emphasize_sections: ["13", "15"]                              # enterprise + implementation
+    deprioritize_sections: ["6", "12"]                            # pitfalls + L500 (defer to SA)
+    additional_agents: [FieldCTOAdvisor, ExecutiveBriefingDrafter]
+
+  solution-architect:
+    emphasize_sections: ["4", "5", "6", "12", "16"]               # frameworks + truths + pitfalls + L500 + service-specific
+    additional_agents: [ThreatModelDrafter, BicepReviewer]
+
+  engineering-manager:
+    emphasize_sections: ["14", "15"]                              # cost + handoff
+    additional_agents: [Planner, ReleaseEngineer]
+
+# Subagent invocation policy
+policy:
+  # Maximum agents per invocation to avoid token explosion
+  max_agents_per_section: 2
+  max_total_agents_per_invocation: 8
+
+  # When in conflict, primary wins; per_section override beats primary; conditional adds, doesn't replace.
+
+  # Token budget per agent invocation (soft cap):
+  agent_section_budget_tokens: 1500
