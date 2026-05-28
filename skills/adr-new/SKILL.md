@@ -82,7 +82,7 @@ Next:
 
 ## Edge cases
 
-- **No `docs/adr/` directory** — recommend `bin/lintel:li-scaffold init` first.
+- **No `docs/adr/` directory** — recommend `bin/li-scaffold init` first.
 - **Decision already documented in lessons.md** — recommend cross-reference.
 - **Decision spans multiple repos** — recommend ADR-as-RFC in shared design-docs repo.
 - **TEMPLATE.md custom** — respect repo customization; load whatever's there.

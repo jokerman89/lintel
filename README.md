@@ -2,9 +2,9 @@
 
 **MS-CAIP-SE session harness for agent-based development.** Markdown + bash scaffolding that any modern AI CLI loads as a plugin. No runtime, no daemons — your CLI handles execution.
 
-**Status:** v3-dev (2026-05-27). See [CHANGELOG.md](CHANGELOG.md) for v3 release notes and [SHIP-GATE.md](SHIP-GATE.md) for v3.0.0 readiness gates. The v3 design lives at [docs/design/lintel:li-v3-plan.md](docs/design/lintel:li-v3-plan.md).
+**Status:** v3-dev (2026-05-27). See [CHANGELOG.md](CHANGELOG.md) for v3 release notes and [SHIP-GATE.md](SHIP-GATE.md) for v3.0.0 readiness gates. The v3 design lives at [docs/design/lintel-v3-plan.md](docs/design/lintel-v3-plan.md).
 
-v3 ships **81 skills + 78 agents + 15 hooks** organized for plugin-manifest pattern across 8 CLIs. Plus full Kategori B scaffolding-template system (CORE-PRINCIPLES, EVOLUTION-LOG, tasks/lessons.md, ADR templates) that gets copied into new MS engagement repos via `bin/lintel:li-scaffold`.
+v3 ships **81 skills + 78 agents + 15 hooks** organized for plugin-manifest pattern across 8 CLIs. Plus full Kategori B scaffolding-template system (CORE-PRINCIPLES, EVOLUTION-LOG, tasks/lessons.md, ADR templates) that gets copied into new MS engagement repos via `bin/li-scaffold`.
 
 Lintel is the **complete session harness** — not just a skill catalog. It manages the full lifecycle: session-start ritual → mid-session interventions (hooks, voice gates, compliance) → end-of-session capture (lessons, ADR drafting, EVOLUTION-LOG) → cross-session continuity (memory, lessons-sync). See [docs/session-harness.md](docs/session-harness.md) for the full mental model.
 
@@ -115,9 +115,9 @@ Full walkthrough: [docs/getting-started.md](docs/getting-started.md).
 - **15 compliance hooks** (opt-in via symlinks): `customer-data-block`, `secret-scan-block`, `no-direct-main-push`, etc.
 - **5+7+8 compliance tiering**: 5 always-on hard rules, 7 on-demand check items, 8 reference docs (RAIS, OneCS, AGT, SDL, etc).
 - **OurVoice corpus**: 60 sanitized paragraphs across 12 cells (4 Reveal × 3 Inspire × 5 Provoke techniques) — operator-driven calibration via `T0-CALIBRATION-WORKFLOW.md`.
-- **Repo scaffolding mechanism** via `bin/lintel:li-scaffold` — 30-second new-repo setup.
-- **Cross-repo lessons sync** via `bin/lintel:li-lessons-sync` (operator-opt-in).
-- **Cross-CLI health check** via `bin/lintel:li-doctor`.
+- **Repo scaffolding mechanism** via `bin/li-scaffold` — 30-second new-repo setup.
+- **Cross-repo lessons sync** via `bin/li-lessons-sync` (operator-opt-in).
+- **Cross-CLI health check** via `bin/li-doctor`.
 
 ---
 
@@ -153,7 +153,7 @@ See [docs/compliance.md](docs/compliance.md). Key rules (always-on):
 
 See [CONTRIBUTING.md](CONTRIBUTING.md). PR-based against `main`. v3 work happens on `v3-dev` branch.
 
-Lessons learned go in `scaffolding/01-foundation/tasks/lessons.md`. Promote a lesson from a customer repo via `bin/lintel:li-lessons-promote`.
+Lessons learned go in `scaffolding/01-foundation/tasks/lessons.md`. Promote a lesson from a customer repo via `bin/li-lessons-promote`.
 
 ---
 

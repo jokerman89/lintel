@@ -6,7 +6,7 @@ Thanks for considering a contribution. Lintel is curated tooling for Microsoft S
 
 - **Read [AGENT-INSTRUCTIONS.md](AGENT-INSTRUCTIONS.md)** for the session-harness model Lintel follows.
 - **Read [docs/session-harness.md](docs/session-harness.md)** for the architecture mental model.
-- **Read [docs/design/lintel:li-v3-plan.md](docs/design/lintel:li-v3-plan.md)** for the current architecture phase.
+- **Read [docs/design/lintel-v3-plan.md](docs/design/lintel-v3-plan.md)** for the current architecture phase.
 - **Check existing skills/agents** — your contribution may already exist (or be deliberately scoped out).
 
 ## Contribution types
@@ -93,7 +93,7 @@ If adding support for a new AI CLI:
 
 When a PR is merged that includes a lesson-learned (something a future contributor should know), update `scaffolding/01-foundation/tasks/lessons.md`. This file travels into every scaffolded repo as baseline.
 
-Use `bin/lintel:li-lessons-promote` to interactively promote a lesson from a customer repo to the Lintel global lessons file.
+Use `bin/li-lessons-promote` to interactively promote a lesson from a customer repo to the Lintel global lessons file.
 
 ## Questions
 

@@ -2,11 +2,128 @@
 
 All notable changes to this repo are tracked here. Format is loose — date headings + bulleted changes. Major behavior changes to the canonical instructions are also logged in `scaffolding/EVOLUTION-LOG.md` (which travels with each scaffolded repo).
 
+## 2026-05-28 — v3.5.0-dev (on `lintel-rebrand` branch)
+
+**Lintel v3.5: 8-phase cycle + role-lifting + context-warming + rebrand from JStack.**
+
+JStack v3.0 → Lintel v3.5. Repo renamed to `jokerman-lintel` under `jokerman89` namespace. Plugin namespace `lintel:`. Skill prefix `li-*`. All 343 JStack mentions + 636 jstack identifiers + 54 Azureflipper references replaced atomically across 200+ files.
+
+### Phase A — Atomic rename
+
+- GitHub repo: `Azureflipper/jokerman-session-setup` → `jokerman89/jokerman-lintel`
+- Branch: `lintel-rebrand` from `v3-dev` (preserves 2 prior design-doc commits)
+- Plugin manifests: 7 manifests (`.claude-plugin/`, `.codex-plugin/`, `.cursor-plugin/`, `.opencode/`, `gemini-extension.json`, `.copilot-plugin/`, `.droid-plugin/`) updated to `name: lintel`
+- All 81 v3 skills got `li-` prefix in frontmatter (v3 cli_support arrays preserved)
+- Bin scripts renamed: `bin/jstack-*` → `bin/li-*` (6 files)
+- Skill folders renamed: `skills/jstack-*` → `skills/li-*` (4 dirs)
+- Env vars: `JSTACK_HOME` → `LINTEL_HOME`, `~/.jstack/` → `~/.lintel/`
+- 188 files in single atomic commit
+
+### Phase B — 8 phase-skills (cycle backbone)
+
+Full Lintel cycle backbone, each skill at design-doc depth:
+
+- `skills/li-sense/SKILL.md` (230 lines) — auto-detect intent, WorkProfile, role, prior 00-state
+- `skills/li-define/SKILL.md` (261 lines) — office-hours forcing questions + role-lens + adversarial spec review
+- `skills/li-discover/SKILL.md` (260 lines) — codebase map + ADR scan + lessons + agent/skill recommendations
+- `skills/li-plan/SKILL.md` (308 lines) — task breakdown + cost-estimate gate + founder approval + 2-stage subagent review
+- `skills/li-build/SKILL.md` (286 lines) — TDD + Subagent-Driven Development + 2-stage per-task review + hard-rule hooks
+- `skills/li-review/SKILL.md` (315 lines) — 3-stage review (spec/quality/compliance) + cross-artifact analyze
+- `skills/li-ship/SKILL.md` (333 lines) — HARD-RULES + voice + 4-gate doc-gen + EV2/OneBranch + PR creation
+- `skills/li-capture/SKILL.md` (364 lines) — lessons + ADR + EVOLUTION-LOG + cold-executor handoff trio + operator profile
+
+~2357 lines total. Each skill specs: sub-skills invoked, recommended agents, artifacts produced, gates, status protocol, pause-points, hop-in support, integration (reads/writes/triggers), anti-patterns, failure recovery, voice tier behavior.
+
+### Phase C — Cycle orchestrator + resume
+
+- `skills/li-cycle/SKILL.md` (~210 lines) — chains 8 phases with gates, 5 mode presets + auto + custom flags
+- `skills/li-resume/SKILL.md` (~180 lines) — reads `.lintel/state/00-state.md`, picks resume phase, cross-machine sync fallback
+
+### Phase D — Composite shortcuts (~100 lines each)
+
+- `skills/li-fix/SKILL.md` — hotfix workflow (SENSE+BUILD+REVIEW+SHIP)
+- `skills/li-research/SKILL.md` — research-dive (SENSE+DEFINE+DISCOVER, no build)
+- `skills/li-plan-and-build/SKILL.md` — PLAN+BUILD for split-session resumability
+- `skills/li-review-and-ship/SKILL.md` — REVIEW+SHIP+CAPTURE close-out
+
+### Phase E — Role-lifting infrastructure
+
+NEW concept: bring expert personas into session as lightweight context layers.
+
+8 role-skills:
+- `skills/li-role-activate/SKILL.md` — load IDENTITY + VOICE + OUTCOME-LENS (~500 tokens)
+- `skills/li-role-deep-dive/SKILL.md` — full role-file (~2-3k tokens, sensitivity-aware)
+- `skills/li-role-frame/SKILL.md` — apply role's lens to an artifact
+- `skills/li-role-rotate/SKILL.md` — swap active role mid-session
+- `skills/li-role-deactivate/SKILL.md` — clear role-overlay
+- `skills/li-roles-list/SKILL.md` — enumerate available roles
+- `skills/li-role-new/SKILL.md` — scaffold new role via guided interview
+- `skills/li-role-update/SKILL.md` — incremental updates, PII soft-scan
+
+3 default public roles shipped:
+- `roles/field-cto.md` — customer-facing, sales-tech, trailblazer voice
+- `roles/solution-architect.md` — enterprise IT, security-conscious, mixed voice
+- `roles/engineering-manager.md` — process, team coordination, internal voice
+
+Each role file structure: frontmatter (sensitivity field) + IDENTITY + COLD KNOWLEDGE (top 10) + DECISION CRITERIA + VOICE + OUTCOME LENS per cycle phase + ROLE-SPECIFIC INSIGHTS + COMPANION SKILLS + SENSITIVE CONTEXT (private roles only).
+
+Private roles sync via `bin/li-roles-sync` (per-operator opt-in, private git repo, never public marketplace, NEVER team-wide). Mirrors `bin/li-lessons-sync` pattern.
+
+### Phase F — Context-warming infrastructure
+
+NEW capability: on-demand 1M-context utilization beyond session-start.
+
+10 context-warming skills:
+- `skills/li-context-warm/SKILL.md` — base file load with budget tracking
+- `skills/li-context-warm-related/SKILL.md` — heuristic load by topic
+- `skills/li-context-warm-sessions/SKILL.md` — load last N session saves
+- `skills/li-context-warm-adrs/SKILL.md` — load topic-relevant ADRs
+- `skills/li-context-warm-customer/SKILL.md` — customer-engagement repo load (audit-logged)
+- `skills/li-context-warm-from-url/SKILL.md` — WebFetch + dump, WorkProfile URL gate
+- `skills/li-context-dump/SKILL.md` — load specific prior session save
+- `skills/li-context-snapshot/SKILL.md` — operator-named mid-session save
+- `skills/li-context-budget/SKILL.md` — utilization visibility + breakdown
+- `skills/li-context-cool/SKILL.md` — selective IGNORE marker (Claude Code context append-only)
+
+Session-start stays lightweight (~5-15k tokens). Warming is explicit operator action with budget confirmation for >20k loads.
+
+### Counts (post-Phase F)
+
+- Skills: 113 (81 v3 + 32 new in v3.5)
+- Agents: 78 (unchanged from v3)
+- Hooks: 15 (unchanged)
+- Plugin manifests: 7 (rebranded to lintel)
+- Root entrypoint files: 3 (CLAUDE.md, AGENTS.md, GEMINI.md — rebranded)
+- Bin scripts: 7 (6 v3 + li-roles-sync new)
+- Default public roles: 3
+- Cycle phases: 8 (named paths: SENSE, DEFINE, DISCOVER, PLAN, BUILD, REVIEW, SHIP, CAPTURE)
+- Mode presets: 5 (hotfix, customer-engagement, internal-tool, demo-prep, research-dive) + auto
+- Composite shortcuts: 4 (li-fix, li-research, li-plan-and-build, li-review-and-ship)
+
+### Remaining for v3.5.0 tag (Phases G-K)
+
+- Phase G: Cold-executor handoff trio dogfood verification (CAPTURE writes spec.md + plan.md + prompt.md; verify operator can re-execute from those alone)
+- Phase H: Doc rewrite (README + SHIP-GATE + LAYERS + AGENT-INSTRUCTIONS fully updated for v3.5)
+- Phase I: Tests (phase-skill smoke tests + cycle E2E)
+- Phase J: Operator dogfood (`/lintel:li-cycle --mode internal-tool` on internal extension)
+- Phase K: PR + tag v3.5.0-dev
+
+### Methodologies studied (per design phase)
+
+- **obra/superpowers**: per-skill richness, two-stage review (spec→quality), Subagent-Driven Development, status protocol vocabulary
+- **github/spec-kit**: 7-phase pipeline (we adopt + add CAPTURE), Constitution analog, cross-artifact analyze
+- **gstack (parent)**: AskUserQuestion decision-brief, forcing questions, premise-check, voice rules, continuous checkpoint, boil-the-lake
+- **Architect Agent image (operator-shared)**: cold-executor handoff trio, 00-state.md, cost-estimate gate, founder approval gate, failure recovery protocol
+
+Lintel-unique additions vs all 4: WorkProfile toggle, role-lifting, context-warming, 5-mode presets, multi-CLI plugin manifest, MS-internal compliance gates (RAIS/OneCS/AGT/EV2/OneBranch/SDL/1ESPT), Trailblazer voice corpus, 78 specialized agents.
+
+---
+
 ## 2026-05-27 — v3.0.0-dev (on `v3-dev` branch)
 
 **Lintel v3: plugin-manifest pattern + agent build-out + session-harness framing.** Big Bang rework following obra/superpowers' multi-CLI plugin pattern. Discards v2's "MCP server + per-CLI compile" plan as over-engineering. Agents BUILD OUT (44 → 78), not trimmed. Scaffolding-templates preserved + modernized.
 
-Design doc: [docs/design/lintel:li-v3-plan.md](docs/design/lintel:li-v3-plan.md).
+Design doc: [docs/design/lintel-v3-plan.md](docs/design/lintel-v3-plan.md).
 Per-CLI plugin format research: [docs/per-cli/PLUGIN-FORMAT-RESEARCH.md](docs/per-cli/PLUGIN-FORMAT-RESEARCH.md).
 Session-harness explainer: [docs/session-harness.md](docs/session-harness.md).
 
@@ -50,12 +167,12 @@ Final per-category counts: ms-specific 15, engineering 25, customer 8, security 
 
 ### Bin/ scripts (Phase 5)
 
-- `bin/lintel:li-scaffold` — copy scaffolding/01-foundation/* into target repo with CLAUDE.md template rendering
-- `bin/lintel:li-doctor` — cross-CLI health check (color-coded output, --verbose, --json)
-- `bin/lintel:li-lessons-sync` — per-operator opt-in lessons sync across machines (private git repo)
-- `bin/lintel:li-lessons-promote` — interactive promote of repo lesson → Lintel global
-- `bin/lintel:li-adr-new` — bootstrap ADR with auto-numbering + commit
-- `bin/lintel:li-update` — update plugin across detected CLIs
+- `bin/li-scaffold` — copy scaffolding/01-foundation/* into target repo with CLAUDE.md template rendering
+- `bin/li-doctor` — cross-CLI health check (color-coded output, --verbose, --json)
+- `bin/li-lessons-sync` — per-operator opt-in lessons sync across machines (private git repo)
+- `bin/li-lessons-promote` — interactive promote of repo lesson → Lintel global
+- `bin/li-adr-new` — bootstrap ADR with auto-numbering + commit
+- `bin/li-update` — update plugin across detected CLIs
 
 ### Docs rewrite (Phase 6)
 
@@ -95,7 +212,7 @@ Final per-category counts: ms-specific 15, engineering 25, customer 8, security 
 
 1. Push `v3-dev` branch to GitHub
 2. Test plugin install in Claude Code via `/plugin marketplace add jokerman89/jokerman-lintel`
-3. Test `bin/lintel:li-scaffold` in a new repo
+3. Test `bin/li-scaffold` in a new repo
 4. Run T0 voice calibration
 5. Submit to Anthropic + OpenAI + Cursor + Gemini marketplaces (post MS legal review)
 

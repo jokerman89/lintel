@@ -111,7 +111,7 @@ Three deeply-studied competitors. What each does well, where each is limited, an
 - **78 specialized agents per domain** — none of the three has this. Architect image had generic "Section Agent."
 - **5+7+8 compliance tiering** — HARD-RULES (always-on), ON-DEMAND, REFERENCE
 - **Trailblazer voice corpus** (60 paragraphs, 12 cells, calibratable) — beyond what any of them has
-- **Repo scaffolding via bin/lintel:li-scaffold** (becomes bin/li-scaffold) — Speckit has memory/, none has full repo bootstrap
+- **Repo scaffolding via bin/li-scaffold** (becomes bin/li-scaffold) — Speckit has memory/, none has full repo bootstrap
 - **MS-internal aware** — RAIS, OneCS, AGT, EV2, OneBranch, 1ESPT
 - **Cross-session continuity** — lessons.md, EVOLUTION-LOG.md, ADR template, /li:context-save/restore
 - **Doc-gen 4-gate** — /li:generate-ppt, /li:generate-word, /li:generate-web with voice + brand + honest-limitations + provenance
@@ -1117,12 +1117,12 @@ When approved, this runs as a discrete branch + commit sequence:
 
 1. **Create branch:** `lintel-rebrand` from `v3-dev`
 2. **Path renames (git mv preserves history):**
-   - `bin/lintel:li-scaffold` → `bin/li-scaffold`
-   - `bin/lintel:li-doctor` → `bin/li-doctor`
-   - `bin/lintel:li-lessons-sync` → `bin/li-lessons-sync`
-   - `bin/lintel:li-lessons-promote` → `bin/li-lessons-promote`
-   - `bin/lintel:li-update` → `bin/li-update`
-   - `bin/lintel:li-adr-new` → `bin/li-adr-new`
+   - `bin/li-scaffold` → `bin/li-scaffold`
+   - `bin/li-doctor` → `bin/li-doctor`
+   - `bin/li-lessons-sync` → `bin/li-lessons-sync`
+   - `bin/li-lessons-promote` → `bin/li-lessons-promote`
+   - `bin/li-update` → `bin/li-update`
+   - `bin/li-adr-new` → `bin/li-adr-new`
 3. **Skill renames:**
    - `skills/lintel:li-cli-fingerprint/` → `skills/li-doctor/` (deprecate cli-fingerprint, replaced by li-doctor)
    - `skills/lintel:li-doctor/` → `skills/li-doctor/` (merge)

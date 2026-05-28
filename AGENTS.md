@@ -14,13 +14,13 @@ Lintel is the MS-CAIP-SE session harness — markdown scaffolding for agent-base
 - `agents/` — 44 subagent roles organized per domain
 - `hooks/shared/` — 15 compliance + workflow hooks
 - `scaffolding/` — templates copied INTO other repos
-- `docs/design/lintel:li-v3-plan.md` — current architecture
+- `docs/design/lintel-v3-plan.md` — current architecture
 
 ## Session start ritual
 
 1. Read [AGENT-INSTRUCTIONS.md](AGENT-INSTRUCTIONS.md) (canonical, applies to all CLIs)
 2. Review `scaffolding/01-foundation/tasks/lessons.md` for accumulated lessons
-3. Check `docs/design/lintel:li-v3-plan.md` for current phase
+3. Check `docs/design/lintel-v3-plan.md` for current phase
 
 ## Codex-specific notes
 
