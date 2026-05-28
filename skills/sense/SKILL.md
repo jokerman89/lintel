@@ -37,6 +37,36 @@ Output: a SENSE report. Operator decides next move based on it.
 
 ## Workflow
 
+### Step 0 — Elephant-hint detection (v3.6 cohort 3 item 3.1)
+
+Before reading configuration, scan operator's prompt for breadth-signals indicating a "swelling idea" — broad scope that historically glides out of control during plan-writing. Detection heuristics:
+
+```bash
+prompt_text="<operator's last message>"
+
+# Count breadth-signals
+elephant_score=0
+echo "$prompt_text" | grep -qiE "entire|all|every|whole|full system|complete rewrite|across all" && elephant_score=$((elephant_score+2))
+echo "$prompt_text" | grep -qiE "redesign|refactor everything|new architecture|from scratch" && elephant_score=$((elephant_score+2))
+echo "$prompt_text" | grep -qiE "and also|while we're at it|maybe also|could we also" && elephant_score=$((elephant_score+1))
+word_count=$(echo "$prompt_text" | wc -w)
+[ "$word_count" -gt 80 ] && elephant_score=$((elephant_score+1))
+```
+
+If `elephant_score >= 3`: surface elephant-hint to operator (in SENSE-report only — never block):
+
+```
+⚠ Elephant detected (breadth-signal score: <N>/5)
+   Three paths:
+   A) Stycka elefanten now — focus on the smallest valuable slice first
+   B) Kör ändå — proceed broad; specifics will emerge during planning
+   C) Rough-plan first — let me sketch scope så du ser elefanten i text innan vi locks in arbete
+   
+   Operator picks via reply; defaulting to B (kör ändå) preserves momentum.
+```
+
+DEFINE phase offers the 3-path-execution if operator picks A or C. SENSE only detects + surfaces.
+
 ### Step 1 — Read configuration
 
 ```bash
