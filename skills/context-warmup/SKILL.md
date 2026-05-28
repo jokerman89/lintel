@@ -1,5 +1,5 @@
 ---
-name: li-context-warmup
+name: context-warmup
 layer: foundation
 description: Explicit preload of high-leverage context per declared warmup pattern.
 color: blue

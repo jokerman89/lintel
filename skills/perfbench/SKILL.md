@@ -1,5 +1,5 @@
 ---
-name: li-perfbench
+name: perfbench
 layer: foundation
 v1_alias: [li-benchmark]
 description: Measure performance — runtime, memory, cold-start — and detect regressions vs baseline.

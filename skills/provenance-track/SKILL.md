@@ -1,5 +1,5 @@
 ---
-name: li-provenance-track
+name: provenance-track
 layer: ms-team
 description: Track artifact provenance — source, transforms, voice tier, calibration state, distribution path.
 color: blue

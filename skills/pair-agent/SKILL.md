@@ -1,5 +1,5 @@
 ---
-name: li-pair-agent
+name: pair-agent
 layer: foundation
 description: Pair with a named subagent in the loop — explicit two-mind collaboration on a focused task.
 color: green

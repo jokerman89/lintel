@@ -70,12 +70,12 @@ What separates great from good: the great EMs know which engineering decisions n
 
 # COMPANION SKILLS
 
-- `/lintel:li-plan` — full PLAN phase with cost-estimate gate
-- `/lintel:li-plan-devex-review` — operator-DX implications
-- `/lintel:li-review` — three-stage adversarial review
-- `/lintel:li-ship --mode internal-tool` — internal-team-handoff with lighter compliance
-- `/lintel:li-retro` (in CAPTURE) — structured team retro
+- `/li:plan` — full PLAN phase with cost-estimate gate
+- `/li:plan-devex-review` — operator-DX implications
+- `/li:review` — three-stage adversarial review
+- `/li:ship --mode internal-tool` — internal-team-handoff with lighter compliance
+- `/li:retro` (in CAPTURE) — structured team retro
 - Spawn `Planner` for task decomposition, `CodeReviewer` for quality review, `ReleaseEngineer` for ship-readiness, `SanityChecker` for architectural sanity
-- `/lintel:li-adr-new` — durable decision records as they land
+- `/li:adr-new` — durable decision records as they land
 
 When role is active during PLAN: cost-estimate gate fires with team-capacity context. During SHIP: deploy ring strategy + rollback explicit.

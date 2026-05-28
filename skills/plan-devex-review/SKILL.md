@@ -1,5 +1,5 @@
 ---
-name: li-plan-devex-review
+name: plan-devex-review
 layer: foundation
 description: Developer experience gaps review. Slow CI, painful deploys, bad local dev, attrition signals.
 color: orange

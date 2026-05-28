@@ -1,5 +1,5 @@
 ---
-name: li-qa
+name: qa
 layer: foundation
 description: Run the full test suite, parse failures, fix common ones, re-run until clean or stuck.
 color: yellow

@@ -1,5 +1,5 @@
 ---
-name: li-msvoice-rewrite
+name: msvoice-rewrite
 layer: ms-team
 description: Rewrite internal-voice content into Microsoft Our Voice (Trailblazer) — 12-cell aware.
 color: orange

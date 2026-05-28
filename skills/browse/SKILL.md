@@ -1,5 +1,5 @@
 ---
-name: li-browse
+name: browse
 layer: foundation
 description: Drive a headless Chromium to a URL — screenshot, extract DOM, click, fill forms, verify UI.
 color: blue

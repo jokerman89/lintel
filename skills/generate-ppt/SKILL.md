@@ -1,5 +1,5 @@
 ---
-name: li-generate-ppt
+name: generate-ppt
 layer: ms-team
 description: Produce brand-compliant PowerPoint deck via pptx-genjs, 4-gate quality pipeline.
 color: orange

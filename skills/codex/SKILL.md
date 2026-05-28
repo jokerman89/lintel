@@ -1,5 +1,5 @@
 ---
-name: li-codex
+name: codex
 layer: foundation
 description: Outside-voice second opinion via Codex CLI. Independent review of diff, plan, or hypothesis.
 color: purple

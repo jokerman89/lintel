@@ -145,7 +145,7 @@ Goal: Every skill, agent, hook, content doc, and runtime concept speaks MS-inter
 | `/cloudtest-eval-suite` | `/cloudtest-eval-suite` | CloudTest = MS scalable test infra |
 | `/perfbench` | `/perfbench` | Closer to MS internal benchmark term |
 | `/onebranch-validate` | `/onebranch-validate` | OneBranch = governed pipeline; aligns matrix-test concept |
-| `/lintel:li-eval` | `/lintel:li-eval` | Keep — Lintel-specific |
+| `/li:eval` | `/li:eval` | Keep — Lintel-specific |
 | `/context-budgetwatch` | `/context-budgetwatch` | Refocus on budget not token-count |
 | `/setup-ev2-targets` | `/setup-ev2-targets` | EV2-anchored |
 | `/setup-brain` / `/sync-brain` | `/setup-brain` / `/sync-brain` | Drop "gbrain" branding internally |
@@ -375,14 +375,14 @@ Goal: Trailblazer corpus calibrated to ≥90% per-cell accuracy, ≥10 cells PAS
 
 **Calibration plan:**
 
-1. **First eval run**: Run `/lintel:li-eval` against current corpus (60 paragraphs, 12 cells). Capture per-cell accuracy.
+1. **First eval run**: Run `/li:eval` against current corpus (60 paragraphs, 12 cells). Capture per-cell accuracy.
 2. **Rubric iteration**: For any cell <90% accuracy, refine `OurVoice-test.md` rubric — sharpen the technique definition, add explicit fail-mode tells, adjust scoring weights.
 3. **Re-eval until target met**: Iterate 1-3 times. If a cell persists below 90% after 3 iterations, drop it from v1 scope (operator decision; cells P1 Vulnerability and R4 Dream are most likely candidates per known difficulty).
 4. **CALIBRATED stamp**: When ≥10 cells PASS, write `status: CALIBRATED` to `OurVoice-calibration.md` with timestamp + snapshot ID.
 5. **Downstream gate activation**: `/rais-customer-voice-check` reads CALIBRATED state. UNCALIBRATED stamp removed from all skills.
 
 **Operator-driven steps:**
-- Run /lintel:li-eval (operator invokes; agent computes).
+- Run /li:eval (operator invokes; agent computes).
 - Decide which cells (if any) to drop from v1 scope if iteration plateaus.
 - Approve final calibration before tag.
 
@@ -426,7 +426,7 @@ Each v2.0 component ships with test coverage spec'd UPFRONT. Implementation incl
 ### Component 5 — T0 Calibration
 - `tests/integration/eval/calibration-status.test.sh` — `/rais-customer-voice-check` reads CALIBRATED status correctly
 - `tests/integration/eval/rubric-iteration.test.sh` — changes to OurVoice-test.md produce different per-cell scores
-- Operator-run only: actual `/lintel:li-eval` against corpus → CALIBRATED stamp (LLM-call-dependent, no automated regression)
+- Operator-run only: actual `/li:eval` against corpus → CALIBRATED stamp (LLM-call-dependent, no automated regression)
 
 ---
 
@@ -471,7 +471,7 @@ tests/
 4. Add 3 CI jobs to `.github/workflows/ci.yml`
 5. Verify runner works against 1 placeholder test
 
-**T9 preflight (P2 from eng-review):** Before Phase D commits to its ordering, smoke-test `/lintel:li-eval` against 2-3 corpus paragraphs. If eval-skill doesn't produce parseable verdicts, Phase D adds "fix eval skill" as task 0. Result of smoke test logged to `~/.lintel/audit/eval-smoke-{ts}.md`.
+**T9 preflight (P2 from eng-review):** Before Phase D commits to its ordering, smoke-test `/li:eval` against 2-3 corpus paragraphs. If eval-skill doesn't produce parseable verdicts, Phase D adds "fix eval skill" as task 0. Result of smoke test logged to `~/.lintel/audit/eval-smoke-{ts}.md`.
 
 ---
 
@@ -512,7 +512,7 @@ v2.0 ships when ALL of these are true:
 
 **Behavioral (testable):**
 - `/onebranch-validate --all` produces matrix with 0 FAILs on claude-code, 0 FAILs on codex (DEGRADED entries acceptable)
-- `/lintel:li-eval` shows status: CALIBRATED with ≥10 of 12 cells PASS at ≥90%
+- `/li:eval` shows status: CALIBRATED with ≥10 of 12 cells PASS at ≥90%
 - `/perfbench --context` runs a sample multi-phase task and confirms budget enforcement triggers correctly
 - `/generate-ppt` produces a brand-compliant .pptx that passes `/rais-customer-voice-check` at ≥85 score
 - `/generate-word` produces brand-compliant .docx that passes voice + brand-conformance + honest-limitations + provenance gates
@@ -598,7 +598,7 @@ Big Bang ship = one big build cycle. Suggested ordering to minimize integration 
 7. Commit + push: `feat(context): 1M context-budgeting engine + warmup patterns`
 
 ### Phase D — T0 calibration
-1. Run `/lintel:li-eval` first pass
+1. Run `/li:eval` first pass
 2. Iterate rubric for low-accuracy cells (up to 3 rounds)
 3. Decide cell drops if needed
 4. Land CALIBRATED status in `OurVoice-calibration.md` (renamed `OurVoice-calibration.md`)

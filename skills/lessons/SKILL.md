@@ -1,5 +1,5 @@
 ---
-name: li-lessons
+name: lessons
 layer: foundation
 description: Mid-session review of accumulated lessons from tasks/lessons.md — surfaces relevant ones for current task.
 color: cyan

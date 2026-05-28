@@ -1,5 +1,5 @@
 ---
-name: li-release-deploy-ev2
+name: release-deploy-ev2
 layer: foundation
 v1_alias: [li-land-and-deploy]
 description: /release-ev2 + deploy. Adds post-merge deploy trigger. Requires explicit per-call auth.

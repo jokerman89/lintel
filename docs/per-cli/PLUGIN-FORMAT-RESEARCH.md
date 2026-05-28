@@ -29,7 +29,7 @@ This document captures the actual plugin-manifest format per CLI as of v3 planni
 ```
 
 **Directory structure (at plugin root, NOT inside .claude-plugin):**
-- `skills/<name>/SKILL.md` — model-invokable skills (slash-commands namespaced as `/lintel:<skill>`)
+- `skills/<name>/SKILL.md` — model-invokable skills (slash-commands namespaced as `/li:<skill>`)
 - `commands/<name>.md` — legacy flat skills (use `skills/` for new plugins)
 - `agents/<name>.md` — subagent definitions
 - `hooks/hooks.json` — event handlers (same format as `.claude/settings.json` hooks block)
@@ -39,7 +39,7 @@ This document captures the actual plugin-manifest format per CLI as of v3 planni
 - `bin/` — executables added to Bash tool's PATH when plugin is active
 - `settings.json` — default settings (only `agent` + `subagentStatusLine` supported)
 
-**Skill namespace:** `/<plugin-name>:<skill>` — e.g. `/lintel:qa`. This protects against conflicts.
+**Skill namespace:** `/<plugin-name>:<skill>` — e.g. `/li:qa`. This protects against conflicts.
 
 **Marketplace:**
 - `claude-plugins-official` (curated by Anthropic, no application process)
@@ -88,7 +88,7 @@ This document captures the actual plugin-manifest format per CLI as of v3 planni
     "privacyPolicyURL": "...",
     "termsOfServiceURL": "...",
     "brandColor": "#0078D4",
-    "composerIcon": "./assets/lintel:li-small.svg",
+    "composerIcon": "./assets/li:small.svg",
     "logo": "./assets/app-icon.png",
     "screenshots": []
   }
@@ -291,7 +291,7 @@ For v3 we target **Copilot CLI** (has plugin system). VSCode Copilot remains via
 ## 11. Constraints we accept
 
 - **MS-internal first.** Public marketplace submission requires MS legal review. Default v3.0.0 ships only the team-marketplace pattern (`/plugin marketplace add jokerman89/jokerman-lintel`). Public submission deferred to v3.x post-legal-clear.
-- **Per-CLI UX differences accepted.** Skill-namespacing differs (Claude `/lintel:qa` vs others), hook formats differ, subagent mechanisms differ. We document, don't normalize.
+- **Per-CLI UX differences accepted.** Skill-namespacing differs (Claude `/li:qa` vs others), hook formats differ, subagent mechanisms differ. We document, don't normalize.
 - **Schema-drift over time.** CLIs update plugin specs. We commit to verify per-CLI version every release.
 
 ---

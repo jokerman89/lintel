@@ -1,5 +1,5 @@
 ---
-name: li-dpia-submit-draft
+name: dpia-submit-draft
 layer: ms-team
 v1_alias: [li-dpia-prep]
 description: Prepare a Data Protection Impact Assessment draft — GDPR Article 35, MS Privacy framework.

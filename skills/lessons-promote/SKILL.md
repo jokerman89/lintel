@@ -1,5 +1,5 @@
 ---
-name: li-lessons-promote
+name: lessons-promote
 layer: foundation
 description: Promote a repo-local lesson from tasks/lessons.md to Lintel's global lessons (scaffolding/01-foundation/tasks/lessons.md) so all future scaffolded repos inherit it.
 color: cyan

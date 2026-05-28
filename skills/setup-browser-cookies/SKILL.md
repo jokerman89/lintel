@@ -1,5 +1,5 @@
 ---
-name: li-setup-browser-cookies
+name: setup-browser-cookies
 layer: foundation
 description: Bootstrap auth cookies for the managed Chromium profile — operator-driven, one-time per service.
 color: orange

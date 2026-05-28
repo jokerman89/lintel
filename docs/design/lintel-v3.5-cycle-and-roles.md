@@ -1124,10 +1124,10 @@ When approved, this runs as a discrete branch + commit sequence:
    - `bin/li-update` → `bin/li-update`
    - `bin/li-adr-new` → `bin/li-adr-new`
 3. **Skill renames:**
-   - `skills/lintel:li-cli-fingerprint/` → `skills/li-doctor/` (deprecate cli-fingerprint, replaced by li-doctor)
-   - `skills/lintel:li-doctor/` → `skills/li-doctor/` (merge)
-   - `skills/lintel:li-eval/` → `skills/li-eval/`
-   - `skills/lintel:li-scaffold/` → `skills/li-scaffold/`
+   - `skills/li:cli-fingerprint/` → `skills/li-doctor/` (deprecate cli-fingerprint, replaced by li-doctor)
+   - `skills/li:doctor/` → `skills/li-doctor/` (merge)
+   - `skills/li:eval/` → `skills/li-eval/`
+   - `skills/li:scaffold/` → `skills/li-scaffold/`
    - All `li-*` skill names in frontmatter `name:` field → `li-*`
 4. **Plugin manifest changes:**
    - `.claude-plugin/plugin.json` — `name: "lintel"` (full word for marketplace), description starts "Lintel — ..."
@@ -1143,9 +1143,9 @@ When approved, this runs as a discrete branch + commit sequence:
    - `jokerman89/jokerman-lintel` → `jokerman89/jokerman-lintel`
    - `jokerman89` → `jokerman89` (note: lowercase, since GH username changed)
 6. **Skill invocation namespace:**
-   - Operator types `/lintel:qa`, `/lintel:az-tldr`, `/lintel:cycle`
-   - Wait — the user wants `/li:command` short form. Plugin name = "lintel" gives `/lintel:` namespace.
-   - **DECISION needed:** plugin name "li" (gives `/li:cycle`) vs "lintel" (gives `/lintel:cycle`). Recommend "li" for ergonomics (3 chars beats 6 chars typed daily). Marketplace display name = "Lintel".
+   - Operator types `/li:qa`, `/li:az-tldr`, `/li:cycle`
+   - Wait — the user wants `/li:command` short form. Plugin name = "lintel" gives `/li:` namespace.
+   - **DECISION needed:** plugin name "li" (gives `/li:cycle`) vs "lintel" (gives `/li:cycle`). Recommend "li" for ergonomics (3 chars beats 6 chars typed daily). Marketplace display name = "Lintel".
 7. **Entrypoint files:**
    - Root `CLAUDE.md` — rewrite for Lintel
    - Root `AGENTS.md` — rewrite for Lintel + Codex
@@ -1212,7 +1212,7 @@ Estimated CC-time: ~1-2 hours mechanical execution.
 - li-* file prefixes (become li-*)
 - jokerman-lintel repo name (becomes jokerman-lintel)
 - jokerman89 namespace (becomes jokerman89)
-- /lintel:li-cli-fingerprint spec-only skill (replaced by runtime /li:doctor)
+- /li:cli-fingerprint spec-only skill (replaced by runtime /li:doctor)
 
 ---
 
@@ -1241,7 +1241,7 @@ Per user: **snabbt, underhållsfritt, smart, effektivt, ifrågasättande, explic
 
 Before execution:
 
-1. **Plugin namespace prefix:** confirm `/li:` (plugin name "li") vs `/lintel:` (plugin name "lintel"). Recommend "li" for ergonomics.
+1. **Plugin namespace prefix:** confirm `/li:` (plugin name "li") vs `/li:` (plugin name "lintel"). Recommend "li" for ergonomics.
 2. **Skill renames scope:** ALL 81 skills get `li-` prefix in frontmatter `name:` field, OR only the new cycle-phase skills? Recommend ALL (consistency).
 3. **Branch strategy for rename:** new `lintel-rebrand` branch → merge to v3-dev, OR rebase v3-dev directly? Recommend new branch (atomicity + reviewable).
 4. **Role storage repo:** Public roles ship in main repo. Private roles sync via separate private git repo via `bin/li-roles-sync` — confirm this pattern (mirrors `bin/li-lessons-sync`).

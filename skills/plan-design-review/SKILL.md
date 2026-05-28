@@ -1,5 +1,5 @@
 ---
-name: li-plan-design-review
+name: plan-design-review
 layer: foundation
 description: UI/UX gaps review for plans with a frontend surface. Skip for backend/infra/CLI-only work.
 color: orange
