@@ -16,7 +16,7 @@ Lintel is **scaffolding** — markdown + bash scripts that an AI CLI loads as a 
 
 1. **Plugin manifest content.** Per-CLI plugin.json files point at skills/agents directories. A malicious modification could redirect to attacker-controlled content.
 2. **Hook scripts** (`hooks/shared/*/run.sh`). Bash scripts that run with operator privileges. A malicious modification could execute arbitrary code.
-3. **bin/ scripts** (`bin/lintel:li-*`). Bash utilities operators install in PATH. Same risk.
+3. **bin/ scripts** (`bin/li-*`). Bash utilities operators install in PATH. Same risk.
 4. **install/install.sh + install/install.ps1.** Installer scripts run with operator privileges.
 
 ## What Lintel itself does NOT do (by design)
@@ -30,8 +30,8 @@ Lintel is **scaffolding** — markdown + bash scripts that an AI CLI loads as a 
 
 - ✓ Hook scripts can run shell commands when triggered by the agent CLI's hook system (Claude Code settings.json hooks)
 - ✓ Install scripts modify ~/.lintel/, ~/.claude/, or per-CLI config dirs
-- ✓ `bin/lintel:li-scaffold` writes to target repo paths
-- ✓ `bin/lintel:li-lessons-sync` reads/writes a git repo the operator configures
+- ✓ `bin/li-scaffold` writes to target repo paths
+- ✓ `bin/li-lessons-sync` reads/writes a git repo the operator configures
 
 ## Compliance constraints
 

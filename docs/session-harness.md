@@ -83,11 +83,11 @@ When work wraps up, Lintel ensures durable artifacts:
 
 Corrections during the session → `tasks/lessons.md` entries. The `/learn` skill formalizes this.
 
-Generalizable lessons → promote to Lintel global via `bin/lintel:li-lessons-promote`. Lands in `scaffolding/01-foundation/tasks/lessons.md` so every future scaffolded repo inherits.
+Generalizable lessons → promote to Lintel global via `bin/li-lessons-promote`. Lands in `scaffolding/01-foundation/tasks/lessons.md` so every future scaffolded repo inherits.
 
 ### ADRs drafted
 
-Non-trivial architectural decisions → `docs/adr/NNNN-<slug>.md` via `bin/lintel:li-adr-new` or `/adr-new` skill. Travels with the repo.
+Non-trivial architectural decisions → `docs/adr/NNNN-<slug>.md` via `bin/li-adr-new` or `/adr-new` skill. Travels with the repo.
 
 ### EVOLUTION-LOG appended
 
@@ -113,7 +113,7 @@ Beyond a single session:
 
 ### Lessons sync
 
-Operator-opt-in via `bin/lintel:li-lessons-sync`. Private git repo holds lessons from multiple engagement repos. Pull on machine A, lessons from machine B available.
+Operator-opt-in via `bin/li-lessons-sync`. Private git repo holds lessons from multiple engagement repos. Pull on machine A, lessons from machine B available.
 
 ### Brand + voice corpus sync
 

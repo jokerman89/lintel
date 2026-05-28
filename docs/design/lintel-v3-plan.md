@@ -616,7 +616,7 @@ Categorin används av plugin-manifests för att exponera per-domän subagent-lis
 
 ### 5.1 Repo-scaffolding (Kategori B)
 
-`bin/lintel:li-scaffold init` kopierar `scaffolding/01-foundation/` → target repo:
+`bin/li-scaffold init` kopierar `scaffolding/01-foundation/` → target repo:
 - `CLAUDE.md` (renderad från template med repo-specifik metadata)
 - `CORE-PRINCIPLES.md`
 - `EVOLUTION.md`, `EVOLUTION-LOG.md`
@@ -793,7 +793,7 @@ Per skill + agent, lägg till:
 - `cli_compat: {claude-code: full, codex: full, ...}` (ersätter v2 cli_support array)
 - `depends_on: []` (för dependency graph)
 
-Bulk-script via sed (`bin/lintel:li-migrate-v2-to-v3` engångsskript).
+Bulk-script via sed (`bin/li-migrate-v2-to-v3` engångsskript).
 
 ### 7.4 Backward-compat
 
@@ -866,12 +866,12 @@ Bulk-script via sed (`bin/lintel:li-migrate-v2-to-v3` engångsskript).
 
 ### Phase 5 — Bin scripts + install updates (2 dagar)
 
-- [ ] `bin/lintel:li-scaffold` — scaffolding/01-foundation/* → target repo
-- [ ] `bin/lintel:li-lessons-sync` — cross-repo lessons sync (gstack-brain-style)
-- [ ] `bin/lintel:li-lessons-promote` — promote to global
-- [ ] `bin/lintel:li-doctor` — health check
-- [ ] `bin/lintel:li-update` — update plugin from latest tag
-- [ ] `bin/lintel:li-adr-new` — bootstrap ADR
+- [ ] `bin/li-scaffold` — scaffolding/01-foundation/* → target repo
+- [ ] `bin/li-lessons-sync` — cross-repo lessons sync (gstack-brain-style)
+- [ ] `bin/li-lessons-promote` — promote to global
+- [ ] `bin/li-doctor` — health check
+- [ ] `bin/li-update` — update plugin from latest tag
+- [ ] `bin/li-adr-new` — bootstrap ADR
 - [ ] `install/install.sh` — extended for v3 (plugin install per detected CLI + scaffolding copy)
 - [ ] `install/verify.sh` — new subcommands: --plugin-manifests, --scaffolding, --agents-categorized, --lessons-mechanism
 

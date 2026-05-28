@@ -226,8 +226,8 @@ Last `verify.sh --all` run shows:
 
 ## See also
 
-- `docs/design/lintel:li-v3-plan.md` — current architecture
-- `docs/design/lintel:li-v2-design.md` — v2 design (historical)
+- `docs/design/lintel-v3-plan.md` — current architecture
+- `docs/design/lintel-v2-design.md` — v2 design (historical)
 - `docs/design/MIGRATION-TABLE-v2.md` — v1→v2 rename mapping
 - `docs/per-cli/PLUGIN-FORMAT-RESEARCH.md` — per-CLI plugin schema findings
 - `docs/session-harness.md` — full session-harness mental model

@@ -24,7 +24,7 @@ Loads persona definitions from `tasks/personas.md` and `docs/personas/` into ses
 ## When NOT to use
 
 - Generic content not tied to specific audience
-- No personas defined yet — recommend `bin/lintel:li-scaffold` first
+- No personas defined yet — recommend `bin/li-scaffold` first
 
 ## Workflow
 
