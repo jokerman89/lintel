@@ -1,7 +1,7 @@
 ---
-name: jstack-cloudtest-eval-suite
+name: li-cloudtest-eval-suite
 layer: ms-team
-v1_alias: [jstack-eval-suite-gen]
+v1_alias: [li-eval-suite-gen]
 description: Generate an evaluation suite skeleton for an AI feature — golden set, adversarial set, rubric.
 color: green
 tools: Read, Write, Bash, Glob, Grep
@@ -103,7 +103,7 @@ Target dir: eval/case-analysis-ai/
 1. Fill golden/ fixtures (8 stubs, ~30 min each)
 2. Fill adversarial/ fixtures (8 stubs, ~20 min each)
 3. Calibrate rubric thresholds via dry-run on 2-3 fixtures
-4. First full run: ~/.claude/skills/jstack/bin/run-eval eval/case-analysis-ai/
+4. First full run: ~/.claude/skills/lintel/bin/run-eval eval/case-analysis-ai/
 5. Iterate model / prompts / fixtures until baseline ≥ 7/10 per dimension
 6. Pre-launch: ≥ 8/10 per dimension on golden, ≥ 6/10 on adversarial
 
@@ -149,4 +149,4 @@ Estimated operator time to operational eval suite: 8-12 hours.
 - `/rais-sensitive-use` — feeds adversarial categories
 - `/onerai-submit-draft` — eval suite is a One RAI mitigation deliverable
 - `/qa-only` — runs against the eval suite once it has fixtures
-- `/jstack-eval` (Phase 8) — orchestrator for running this suite + reporting
+- `/lintel:li-eval` (Phase 8) — orchestrator for running this suite + reporting

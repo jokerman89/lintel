@@ -1,5 +1,5 @@
 ---
-name: jstack-demo-deliverable-gen
+name: li-demo-deliverable-gen
 layer: ms-team
 description: Generate customer-facing demo deliverables — script, handout, follow-up email — trailblazer-voiced.
 color: orange
@@ -34,7 +34,7 @@ Typically run inside a `/scaffold-engagement-demo` repo, but also works on a sta
 - Required `--key-message <text>` — one-sentence what-you-want-them-to-remember
 - Optional `--source-deck <path>` — existing internal deck to seed from
 - Optional `--duration <minutes>` — demo duration target (default: 30)
-- Optional `--out-dir <path>` — output directory (default: `deliverables/` if in scaffold repo, else `~/.jstack/demo-deliverables/<demo-name>/`)
+- Optional `--out-dir <path>` — output directory (default: `deliverables/` if in scaffold repo, else `~/.lintel/demo-deliverables/<demo-name>/`)
 - Optional `--include-handout` / `--include-follow-up` — toggle each piece (default: all three)
 
 ## Workflow

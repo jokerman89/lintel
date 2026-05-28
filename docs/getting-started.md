@@ -28,8 +28,8 @@ Missing `yq`?
 
 ```bash
 # Replace with the MS-internal git URL once published
-git clone <internal-MS-git-url>/jokerman-session-setup ~/Workspace/jokerman-session-setup
-cd ~/Workspace/jokerman-session-setup
+git clone <internal-MS-git-url>/jokerman-lintel ~/Workspace/jokerman-lintel
+cd ~/Workspace/jokerman-lintel
 ```
 
 ## 2. Install
@@ -78,13 +78,13 @@ In each repo where you want the scaffolding active:
 
 ```bash
 mkdir -p .github
-cp ~/Workspace/jokerman-session-setup/shims/copilot-instructions.md .github/copilot-instructions.md
+cp ~/Workspace/jokerman-lintel/shims/copilot-instructions.md .github/copilot-instructions.md
 ```
 
 Or, on a system with symlink support, prefer a symlink so updates propagate:
 
 ```bash
-ln -sf ~/Workspace/jokerman-session-setup/shims/copilot-instructions.md .github/copilot-instructions.md
+ln -sf ~/Workspace/jokerman-lintel/shims/copilot-instructions.md .github/copilot-instructions.md
 ```
 
 Then in the Copilot model picker, choose **Claude Opus** (or the latest Opus-class model). Default Copilot completions are tuned for inline suggestions — for agent-style work you want Opus.
@@ -94,7 +94,7 @@ Then in the Copilot model picker, choose **Claude Opus** (or the latest Opus-cla
 In each repo where you want the scaffolding active:
 
 ```bash
-cp ~/Workspace/jokerman-session-setup/shims/AGENTS.md AGENTS.md
+cp ~/Workspace/jokerman-lintel/shims/AGENTS.md AGENTS.md
 ```
 
 ### Other agent CLIs

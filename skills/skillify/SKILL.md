@@ -1,7 +1,7 @@
 ---
-name: jstack-skillify
+name: li-skillify
 layer: foundation
-description: Turn a recurring task or pattern into a new JStack skill — scaffolds SKILL.md from TEMPLATE.
+description: Turn a recurring task or pattern into a new Lintel skill — scaffolds SKILL.md from TEMPLATE.
 color: green
 tools: Read, Write, Edit, Bash, Glob
 voice: internal
@@ -10,7 +10,7 @@ cli_support: [claude-code, codex]
 
 # /skillify
 
-Promotes a recurring task into a first-class JStack skill. Reads the operator's description (or a `/learn` entry marked `skillify-candidate`), scaffolds a new `SKILL.md` following `TEMPLATE-skill.md`, places it in the right scaffolding layer, and validates frontmatter.
+Promotes a recurring task into a first-class Lintel skill. Reads the operator's description (or a `/learn` entry marked `skillify-candidate`), scaffolds a new `SKILL.md` following `TEMPLATE-skill.md`, places it in the right scaffolding layer, and validates frontmatter.
 
 The output is NOT a deployed skill yet — operator iterates on the draft, then runs `/health` to validate before symlinking into `~/.claude/skills/` (or repo's `.claude/skills/`).
 
@@ -25,7 +25,7 @@ The output is NOT a deployed skill yet — operator iterates on the draft, then 
 
 - One-time task — overhead of skill authoring exceeds value
 - Workflow that's still in flux — wait until shape stabilizes (3+ runs)
-- Skill name conflicts with existing JStack or upstream skill — resolve naming first
+- Skill name conflicts with existing Lintel or upstream skill — resolve naming first
 
 ## Inputs
 
@@ -38,7 +38,7 @@ The output is NOT a deployed skill yet — operator iterates on the draft, then 
 
 ## Workflow
 
-1. **Name validation.** Check name doesn't conflict with existing skill (search scaffolding tree + `~/.claude/skills/`). Must start with `jstack-`. Kebab-case.
+1. **Name validation.** Check name doesn't conflict with existing skill (search scaffolding tree + `~/.claude/skills/`). Must start with `li-`. Kebab-case.
 2. **Read template.** Load `scaffolding/01-foundation/TEMPLATE-skill.md`.
 3. **Read seed (if `--from-lesson`).** Pull lesson body, source, type to use as seed material.
 4. **Generate frontmatter.** Fill required fields per inputs + sensible defaults.
@@ -53,14 +53,14 @@ The output is NOT a deployed skill yet — operator iterates on the draft, then 
    - Failure modes — placeholder bullets
    - Examples — placeholder
    - See also — auto-link related skills based on name similarity
-6. **Write to layer.** `scaffolding/<layer>/skills/<name-without-jstack->/SKILL.md`.
+6. **Write to layer.** `scaffolding/<layer>/skills/<name-without-li->/SKILL.md`.
 7. **Validate frontmatter.** Run `verify.sh --frontmatter <new-file>` (or inline equivalent). Surface any errors.
 8. **Report path + next steps.**
 
 ## Report format
 
 ```
-Skillify: jstack-regen-mocks
+Skillify: li-regen-mocks
 
 Layer: 03-personal-advanced
 Path: scaffolding/03-personal-advanced/skills/regen-mocks/SKILL.md
@@ -69,7 +69,7 @@ CLI support: claude-code, codex
 Tools: Read, Bash, Edit, Glob
 
 ## Frontmatter validation
-✓ name format (kebab-case, jstack- prefix)
+✓ name format (kebab-case, li- prefix)
 ✓ description present, < 120 chars
 ✓ color valid (green)
 ✓ tools listed

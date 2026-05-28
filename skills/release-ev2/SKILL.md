@@ -1,7 +1,7 @@
 ---
-name: jstack-release-ev2
+name: li-release-ev2
 layer: foundation
-v1_alias: [jstack-ship]
+v1_alias: [li-ship]
 description: Land the current branch — verifies review readiness, squashes WIP commits, opens PR.
 color: green
 tools: Read, Bash, Edit, Grep, Glob
@@ -50,8 +50,8 @@ Ship Status: <branch>
 ✓ Review readiness: Eng Review CLEAR (PLAN, commit 7e7a021, 2026-05-27)
 ✓ Sanity scan: no secrets / customer-data / PII detected
 ⚠ WIP commits found: 3 — will squash to 1 atomic commit
-✓ Push: pushed origin/feature/jstack-phase-2-batch-4
-✓ PR opened: https://github.com/azureflipper/jokerman-session-setup/pull/4
+✓ Push: pushed origin/feature/lintel:li-phase-2-batch-4
+✓ PR opened: https://github.com/jokerman89/jokerman-lintel/pull/4
 
 Squashed history:
 - f19d388 → kept

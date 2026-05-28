@@ -61,7 +61,7 @@ Already-cloned sources do `git pull --ff-only` instead of re-cloning. New source
 Pull the latest of this repo, then re-run the installer:
 
 ```bash
-cd ~/Workspace/jokerman-session-setup
+cd ~/Workspace/jokerman-lintel
 git pull
 bash install/install.sh
 ```

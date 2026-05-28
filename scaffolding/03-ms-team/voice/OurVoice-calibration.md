@@ -13,7 +13,7 @@ Operator fills this iteratively while running the eval. Each row records one cal
 **v1.0.0 ships when:** every cell achieves ≥90% accuracy on known-good AND ≥90% accuracy on known-bad in the same pass.
 
 A cell that fails calibration after 3 prompt-refinement iterations falls back to one of:
-- **Option A:** Drop that cell from v1.0.0 scope. JStack's Trailblazer surface narrows by 1 cell. Document the drop in this file.
+- **Option A:** Drop that cell from v1.0.0 scope. Lintel's Trailblazer surface narrows by 1 cell. Document the drop in this file.
 - **Option B:** Gather 4+ more corpus paragraphs for that cell. Re-run after corpus expansion. May delay v1.0.0 ship.
 
 Operator decides per cell.

@@ -1,5 +1,5 @@
 ---
-name: jstack-design-consultation
+name: li-design-consultation
 layer: foundation
 description: Conversational design-system advisor — answer systems-level questions with grounded recommendations.
 color: purple

@@ -1,5 +1,5 @@
 ---
-name: jstack-design-shotgun
+name: li-design-shotgun
 layer: foundation
 description: Parallel design exploration — spawn N variants of a seed HTML, present side-by-side.
 color: purple
@@ -38,7 +38,7 @@ The shotgun pattern: when you don't know what you want yet, generate many possib
   - `motion-language` — motion idiom (static/subtle/playful/dramatic)
   - `type-system` — type hierarchy (modest/expressive, serif-led/sans-led, condensed/wide)
 - Optional `--brief <path>` — additional constraints layered on top
-- Optional `--out <dir>` — output directory (default: `~/.jstack/design-shotgun/<ts>/`)
+- Optional `--out <dir>` — output directory (default: `~/.lintel/design-shotgun/<ts>/`)
 
 ## Workflow
 
@@ -77,7 +77,7 @@ layout:
 ```
 Design Shotgun: portal-dashboard
 
-Seed: ~/.jstack/design-html/portal-dashboard-v3-20260527-163100.html
+Seed: ~/.lintel/design-html/portal-dashboard-v3-20260527-163100.html
 Axis: palette
 Count: 4
 
@@ -92,7 +92,7 @@ Count: 4
 4. warm-accent  → variant-4-warm-accent.html (23KB)
                   Stone-100 base, amber-600 single accent
 
-Side-by-side: ~/.jstack/design-shotgun/20260527-164200/index.html
+Side-by-side: ~/.lintel/design-shotgun/20260527-164200/index.html
 Preview: /open-managed-browser --url file://...
 
 ## Skill's pick (advisory)
@@ -103,7 +103,7 @@ Variant 3 (cool-accent). Reason: emerald accent maps to existing brand tokens; m
 
 - Variants inherit seed's compliance state. If seed had trailblazer-draft copy: all variants do too, and the `/rais-customer-voice-check` gate applies to all of them.
 - No production touch. No Layer 2 mutations.
-- Output dir lives at `~/.jstack/design-shotgun/` — operator owns distribution.
+- Output dir lives at `~/.lintel/design-shotgun/` — operator owns distribution.
 
 ## Voice tier note
 
@@ -123,7 +123,7 @@ Variant 3 (cool-accent). Reason: emerald accent maps to existing brand tokens; m
 ```
 > /design-shotgun --seed ./seed.html --count 4 --axis palette
 [Generates 4 variants]
-✓ 4 variants, index at ~/.jstack/design-shotgun/.../index.html
+✓ 4 variants, index at ~/.lintel/design-shotgun/.../index.html
 ```
 
 **Layout exploration with brief:**

@@ -1,7 +1,7 @@
 ---
-name: jstack-rais-transparency-note
+name: li-rais-transparency-note
 layer: ms-team
-v1_alias: [jstack-transparency-doc-gen]
+v1_alias: [li-transparency-doc-gen]
 description: Generate transparency note for an AI feature — capabilities, limitations, data, disclosure.
 color: yellow
 tools: Read, Write, Bash

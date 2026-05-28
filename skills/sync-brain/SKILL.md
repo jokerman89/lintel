@@ -1,7 +1,7 @@
 ---
-name: jstack-sync-brain
+name: li-sync-brain
 layer: foundation
-v1_alias: [jstack-sync-gbrain]
+v1_alias: [li-sync-gbrain]
 description: Refresh the gbrain index from the current worktree — incremental or full.
 color: blue
 tools: Read, Bash
@@ -37,7 +37,7 @@ Idempotent — re-running is safe. If gbrain isn't set up: this skill suggests `
 ## Workflow
 
 1. **Preflight.** Check `gbrain` binary + `~/.gbrain/config.json` + worktree `.gbrain-source` pin. If any missing: surface what's missing + recommend `/setup-brain`.
-2. **Compliance check.** Quick sanity-scan of newly-changed files (since last sync) for customer-data patterns. Block on hit. Logged commit hash of last sync to `~/.jstack/audit/gbrain-sync.jsonl`.
+2. **Compliance check.** Quick sanity-scan of newly-changed files (since last sync) for customer-data patterns. Block on hit. Logged commit hash of last sync to `~/.lintel/audit/gbrain-sync.jsonl`.
 3. **Resolve source.** Read `.gbrain-source` pin or use `--source`.
 4. **Determine sync scope.**
    - Incremental: git diff between last-sync commit and HEAD, file list.
@@ -49,7 +49,7 @@ Idempotent — re-running is safe. If gbrain isn't set up: this skill suggests `
 ## Report format
 
 ```
-Sync gbrain: jokerman-session-setup-main
+Sync gbrain: jokerman-lintel-main
 
 Mode: incremental
 Last sync: 2026-05-27T14:22:01Z (commit a60c46c)

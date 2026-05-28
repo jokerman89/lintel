@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# no-secrets-in-edit — JStack warn-only hook
+# no-secrets-in-edit — Lintel warn-only hook
 # Scans Edit/Write tool payload for secret patterns.
 
 set -euo pipefail
@@ -7,9 +7,9 @@ set -euo pipefail
 PAYLOAD="${1:-}"
 [ -z "$PAYLOAD" ] && exit 0
 
-JSTACK_HOME="${JSTACK_HOME:-$HOME/.jstack}"
-mkdir -p "$JSTACK_HOME/audit"
-AUDIT="$JSTACK_HOME/audit/hooks.jsonl"
+LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
+mkdir -p "$LINTEL_HOME/audit"
+AUDIT="$LINTEL_HOME/audit/hooks.jsonl"
 
 patterns_hit=()
 
@@ -36,7 +36,7 @@ if [ ${#patterns_hit[@]} -gt 0 ]; then
   joined=$(IFS=,; echo "${patterns_hit[*]}")
   printf '{"hook":"no-secrets-in-edit","tier":"warn","ts":"%s","patterns_matched":"%s"}\n' \
     "$ts" "$joined" >> "$AUDIT"
-  echo "WARN [JStack hook]: secret pattern detected in payload — $joined"
+  echo "WARN [Lintel hook]: secret pattern detected in payload — $joined"
   echo "WARN: If this is a real secret, abort + use env var or secret manager. (warn-only; secret-scan-block fires at commit.)"
 fi
 

@@ -1,5 +1,5 @@
 ---
-name: jstack-devex-review
+name: li-devex-review
 layer: foundation
 description: Review the built developer experience — scripts, onboarding, error messages, time-to-hello-world.
 color: yellow
@@ -109,7 +109,7 @@ P1 test-loop fix has highest impact (4 min × N runs/day per developer). Address
 
 ## Failure modes
 
-- **Fresh-clone mode but no clean clone target:** create `~/.jstack/devex-runs/<ts>/` clone dir. If permissions fail: report + fall back to in-place review with warning.
+- **Fresh-clone mode but no clean clone target:** create `~/.lintel/devex-runs/<ts>/` clone dir. If permissions fail: report + fall back to in-place review with warning.
 - **Setup script hangs:** time-budget enforces termination. Report which step hung.
 - **Test suite takes longer than time-budget:** measure first-N tests as a sample, extrapolate, flag as estimated.
 - **No documented setup steps found:** that IS the finding. Report TTHW = "undefined" + P1 doc gap.
@@ -126,7 +126,7 @@ Dimension: test loop speed 4/10. P1 finding: ts-build bottleneck.
 **Full fresh-clone audit:**
 ```
 > /devex-review --fresh-clone --time-budget 30
-[Clones into ~/.jstack/devex-runs/, runs full journey]
+[Clones into ~/.lintel/devex-runs/, runs full journey]
 6 dimensions scored. 5 findings (1 P1, 2 P2, 2 P3). Overall 6.5/10.
 ```
 

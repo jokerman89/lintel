@@ -1,5 +1,5 @@
 ---
-name: jstack-learn
+name: li-learn
 layer: foundation
 description: Record an insight, correction, or pattern as a lesson — readable at future session start.
 color: blue
@@ -10,9 +10,9 @@ cli_support: [claude-code, codex]
 
 # /learn
 
-Captures something worth remembering across sessions: a correction from the operator, a discovered pattern, a workaround for a specific quirk. Lands as a structured entry in `tasks/lessons.md` (project-level) or `~/.jstack/lessons.jsonl` (operator-level).
+Captures something worth remembering across sessions: a correction from the operator, a discovered pattern, a workaround for a specific quirk. Lands as a structured entry in `tasks/lessons.md` (project-level) or `~/.lintel/lessons.jsonl` (operator-level).
 
-The only mechanism in JStack that compounds learning across fresh sessions. Without it, the same correction gets made repeatedly.
+The only mechanism in Lintel that compounds learning across fresh sessions. Without it, the same correction gets made repeatedly.
 
 ## When to use
 
@@ -31,13 +31,13 @@ The only mechanism in JStack that compounds learning across fresh sessions. With
 ## Inputs
 
 - Required: the lesson body (inline prose)
-- Optional `--scope <project|global>` — `project` writes to `tasks/lessons.md` in the current repo; `global` writes to `~/.jstack/lessons.jsonl` (default: project)
+- Optional `--scope <project|global>` — `project` writes to `tasks/lessons.md` in the current repo; `global` writes to `~/.lintel/lessons.jsonl` (default: project)
 - Optional `--type <correction|pattern|quirk|skillify-candidate>` — categorization (default: pattern)
 - Optional `--source <text>` — what triggered this (e.g. "operator correction at 16:42", "debug session for refund flow")
 
 ## Workflow
 
-1. **Validate scope.** If `--scope project` and no `tasks/lessons.md` exists: create it with a frontmatter header. If `--scope global` and no `~/.jstack/lessons.jsonl` exists: create empty.
+1. **Validate scope.** If `--scope project` and no `tasks/lessons.md` exists: create it with a frontmatter header. If `--scope global` and no `~/.lintel/lessons.jsonl` exists: create empty.
 2. **Compliance scan.** Run Layer 2 patterns over the lesson body. If a secret/customer-data pattern hits: BLOCK + ask operator to rewrite without the sensitive bit.
 3. **Format entry.** Project lessons:
    ```markdown
@@ -51,7 +51,7 @@ The only mechanism in JStack that compounds learning across fresh sessions. With
    {"date": "YYYY-MM-DD", "type": "...", "source": "...", "body": "...", "repo": "..."}
    ```
 4. **Append.** Atomic write (read existing, append entry, write back).
-5. **Audit log.** Append to `~/.jstack/audit/lessons.jsonl`.
+5. **Audit log.** Append to `~/.lintel/audit/lessons.jsonl`.
 6. **Report.**
 
 ## Report format
@@ -74,7 +74,7 @@ Future sessions reading tasks/lessons.md will surface this at session start (per
 
 - Layer 2 secret/customer-data scan on lesson body — BLOCKS if pattern hits.
 - Project lessons file (`tasks/lessons.md`) is committed to repo — anything in it is visible to all collaborators. Sanity-scan applies.
-- Global lessons file (`~/.jstack/lessons.jsonl`) is local-only. Looser scanning, but still no customer-data.
+- Global lessons file (`~/.lintel/lessons.jsonl`) is local-only. Looser scanning, but still no customer-data.
 
 ## Voice tier note
 
@@ -103,13 +103,13 @@ Future sessions reading tasks/lessons.md will surface this at session start (per
 
 **Global quirk:**
 ```
-> /learn "On Windows, gh CLI returns case-normalized URLs (azureflipper instead of Azureflipper). Push works but display may surprise." --scope global --type quirk
-✓ Lesson appended to ~/.jstack/lessons.jsonl. Visible in any repo.
+> /learn "On Windows, gh CLI returns case-normalized URLs (jokerman89 instead of jokerman89). Push works but display may surprise." --scope global --type quirk
+✓ Lesson appended to ~/.lintel/lessons.jsonl. Visible in any repo.
 ```
 
 ## See also
 
 - `/skillify` — turn a `skillify-candidate` lesson into a real skill
-- `tasks/lessons.md` (project) / `~/.jstack/lessons.jsonl` (global) — where lessons live
+- `tasks/lessons.md` (project) / `~/.lintel/lessons.jsonl` (global) — where lessons live
 - Project CLAUDE.md "Self-improvement loop" — the discipline this skill enables
 - `/retro` — session-end reflection that may emit several /learn calls

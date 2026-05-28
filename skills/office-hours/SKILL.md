@@ -1,5 +1,5 @@
 ---
-name: jstack-office-hours
+name: li-office-hours
 layer: foundation
 description: Generate a design doc from a problem statement — structured, decision-gated, ready for /plan-eng-review.
 color: purple
@@ -10,9 +10,9 @@ cli_support: [claude-code, codex]
 
 # /office-hours
 
-The design-doc generator. Takes an unstructured problem statement and produces a structured design document with: context, goals, premises, decisions, risks, scope, and a forcing-question section. Output lands at `~/.jstack/projects/<slug>/<user>-<branch>-design-<datetime>.md` and is the input to `/plan-ceo-review` and `/plan-eng-review`.
+The design-doc generator. Takes an unstructured problem statement and produces a structured design document with: context, goals, premises, decisions, risks, scope, and a forcing-question section. Output lands at `~/.lintel/projects/<slug>/<user>-<branch>-design-<datetime>.md` and is the input to `/plan-ceo-review` and `/plan-eng-review`.
 
-JStack-namespaced sibling of gstack's `/office-hours`. Equivalent semantics, different home directory (`~/.jstack/` vs `~/.gstack/`).
+Lintel-namespaced sibling of gstack's `/office-hours`. Equivalent semantics, different home directory (`~/.lintel/` vs `~/.gstack/`).
 
 ## When to use
 
@@ -36,7 +36,7 @@ JStack-namespaced sibling of gstack's `/office-hours`. Equivalent semantics, dif
 
 ## Workflow
 
-1. **Locate or create project dir.** `~/.jstack/projects/<slug>/` based on repo name + branch. Create if absent.
+1. **Locate or create project dir.** `~/.lintel/projects/<slug>/` based on repo name + branch. Create if absent.
 2. **Read context.** Project CLAUDE.md, any `--reference` files, recent commits for repo state.
 3. **Structured intake.** Via AskUserQuestion, gather:
    - One-line goal
@@ -51,7 +51,7 @@ JStack-namespaced sibling of gstack's `/office-hours`. Equivalent semantics, dif
    - **Out-of-Scope** — explicit list of what's excluded and why
    - **Risks** — known unknowns, dependencies, single-points-of-failure
    - **Forcing Questions** — 3-5 questions that, if not answered, block implementation
-5. **Write doc.** Atomic write to `~/.jstack/projects/<slug>/<user>-<branch>-design-<datetime>.md`.
+5. **Write doc.** Atomic write to `~/.lintel/projects/<slug>/<user>-<branch>-design-<datetime>.md`.
 6. **Set status.** Doc header includes `Status: DRAFT`. Operator marks `APPROVED` after addressing forcing questions.
 7. **Report path + next step.**
 
@@ -64,7 +64,7 @@ status: DRAFT
 created: 2026-05-27T17:42:00Z
 user: jokerman
 branch: main
-slug: jokerman-session-setup
+slug: jokerman-lintel
 ---
 
 # <One-line goal>
@@ -108,7 +108,7 @@ Recommendation: A
 ## Compliance integration
 
 - Doc body sanity-scanned for Layer 2 patterns (secrets, customer-data, PII). BLOCK on hit.
-- Doc lives at `~/.jstack/projects/` (local). Optional sync to brain repo if configured.
+- Doc lives at `~/.lintel/projects/` (local). Optional sync to brain repo if configured.
 - Per Premise of repo policy: no customer data in design docs ever.
 
 ## Voice tier note
@@ -129,7 +129,7 @@ Recommendation: A
 ```
 > /office-hours "new pricing page with tiered display"
 [Intake interview, 4 questions]
-✓ Doc: ~/.jstack/projects/.../jokerman-main-design-20260527-174200.md
+✓ Doc: ~/.lintel/projects/.../jokerman-main-design-20260527-174200.md
   Status: DRAFT (operator marks APPROVED after addressing forcing questions)
   Next: /plan-ceo-review on this doc.
 ```

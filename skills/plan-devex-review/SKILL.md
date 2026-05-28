@@ -1,5 +1,5 @@
 ---
-name: jstack-plan-devex-review
+name: li-plan-devex-review
 layer: foundation
 description: Developer experience gaps review. Slow CI, painful deploys, bad local dev, attrition signals.
 color: orange
@@ -12,7 +12,7 @@ cli_support: [claude-code, codex]
 
 Reviews a plan's impact on developer experience (DX). DX is a leading indicator of code quality — slow CI, bad local dev, painful deploys → worse software, higher attrition. Optional review tier.
 
-JStack version inspired-by gstack equivalent. Scores against DX pillars. Surfaces time-to-hello-world (TTHW) as the headline metric.
+Lintel version inspired-by gstack equivalent. Scores against DX pillars. Surfaces time-to-hello-world (TTHW) as the headline metric.
 
 ## When to use
 
@@ -40,7 +40,7 @@ Measure / score 6 dimensions:
    - Library: <2 min
    - Service: <15 min
    - SDK: <10 min
-   - Harness (like JStack): <10 min cold
+   - Harness (like Lintel): <10 min cold
 2. **Test loop latency** — change → test result. <30s warm, <2min full suite is target.
 3. **Deploy pain** — number of manual steps to ship a fix. >3 steps is bad.
 4. **Local dev fidelity** — local matches prod? mocks where real services would be better?

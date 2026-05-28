@@ -52,7 +52,7 @@ Per A4: operator-confirmed checklist, NOT automated enforcement. Claude surfaces
 
 **The check:** Does this fit a Sensitive Uses category per MS Responsible AI?
 
-**Categories** (see `~/.jstack/sensitive-uses.yaml` for operator-extendable list):
+**Categories** (see `~/.lintel/sensitive-uses.yaml` for operator-extendable list):
 - Decisions consequential for individuals (legal, financial, health, employment)
 - Inferring emotional or psychological state
 - Biometric identification / categorization
@@ -119,7 +119,7 @@ The skill walks each item in sequence:
 3. If NEEDS_ACTION: names the follow-up skill
 4. Aggregates verdict
 
-Operator confirms the aggregate. Audit-logged to `~/.jstack/audit/onecs-check.jsonl`.
+Operator confirms the aggregate. Audit-logged to `~/.lintel/audit/onecs-check.jsonl`.
 
 ## When to run /onecs-check
 

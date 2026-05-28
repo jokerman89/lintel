@@ -1,7 +1,7 @@
 ---
-name: jstack-onerai-submit-draft
+name: li-onerai-submit-draft
 layer: ms-team
-v1_alias: [jstack-onerai-prep]
+v1_alias: [li-onerai-prep]
 description: Prepare a One RAI submission draft — checklist, capability/limitation, mitigation plan.
 color: orange
 tools: Read, Write, Bash, Grep
@@ -33,7 +33,7 @@ Per Layer 2: AI features with sensitive-use characteristics, customer-facing AI,
 - Required `--feature <name>` — short name for the AI feature
 - Optional `--source <path>` — code or design doc describing the feature
 - Optional `--sensitive-use-report <path>` — output from `/rais-sensitive-use` (auto-attached if recent)
-- Optional `--out <path>` — output draft path (default: `~/.jstack/rai/<feature>-onerai-DRAFT.md`)
+- Optional `--out <path>` — output draft path (default: `~/.lintel/rai/<feature>-onerai-DRAFT.md`)
 - Optional `--update <id>` — update existing draft instead of new
 
 ## Workflow
@@ -68,7 +68,7 @@ Per Layer 2: AI features with sensitive-use characteristics, customer-facing AI,
 ```
 One RAI prep: feature=case-analysis-ai
 
-Output: ~/.jstack/rai/case-analysis-ai-onerai-DRAFT.md (4.8 KB)
+Output: ~/.lintel/rai/case-analysis-ai-onerai-DRAFT.md (4.8 KB)
 Sections: 10
 Sensitive-use cross-ref: present (DLP-002, from /rais-sensitive-use)
 Open questions for reviewer: 4
@@ -88,7 +88,7 @@ Ratio 8/7 — balanced (good — honest about limits)
 1. Operator refines DRAFT (especially the 4 open questions)
 2. Submit to One RAI portal for review
 3. Update with reviewer feedback via /onerai-submit-draft --update PROV-<id>
-4. After approval: archive in ~/.jstack/rai/approved/ + reference in repo CLAUDE.md
+4. After approval: archive in ~/.lintel/rai/approved/ + reference in repo CLAUDE.md
 ```
 
 ## Compliance integration
@@ -116,13 +116,13 @@ Ratio 8/7 — balanced (good — honest about limits)
 ```
 > /onerai-submit-draft --feature case-analysis-ai --source docs/design/case-analysis-ai.md
 [Intake interview]
-✓ DRAFT at ~/.jstack/rai/case-analysis-ai-onerai-DRAFT.md
+✓ DRAFT at ~/.lintel/rai/case-analysis-ai-onerai-DRAFT.md
   Next: refine + submit to One RAI portal.
 ```
 
 **With sensitive-use input:**
 ```
-> /onerai-submit-draft --feature legal-summary --sensitive-use-report ~/.jstack/rai/legal-summary-sensitive-use.md
+> /onerai-submit-draft --feature legal-summary --sensitive-use-report ~/.lintel/rai/legal-summary-sensitive-use.md
 [Auto-imports sensitive-use findings into risk register seed]
 ✓ DRAFT generated.
 ```

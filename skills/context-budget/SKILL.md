@@ -1,5 +1,5 @@
 ---
-name: jstack-context-budget
+name: li-context-budget
 layer: foundation
 description: View/modify current phase context budget, declare new phase, checkpoint.
 color: blue
@@ -43,11 +43,11 @@ Operator-facing interface for the 1M Context Budget Engine. View current phase s
 - `--next-phase <name>` — explicit phase transition with decay
 - `--override +N` — extend current phase budget by N tokens (logged)
 - `--compress` — surface compress-options for current context (operator confirms)
-- `--config` — open `~/.jstack/config.yaml` context section for editing
+- `--config` — open `~/.lintel/config.yaml` context section for editing
 
 ## Workflow (default --view)
 
-1. Read `~/.jstack/sessions/$SESSION_ID/context-state.json`
+1. Read `~/.lintel/sessions/$SESSION_ID/context-state.json`
 2. Display current phase + spent + remaining + watcher state
 3. List warmup tasks completed/pending
 4. Show reservations
@@ -85,7 +85,7 @@ Actions:
 
 ## Compliance integration
 
-- Audit log entry per state change: `~/.jstack/audit/context-budget.jsonl`
+- Audit log entry per state change: `~/.lintel/audit/context-budget.jsonl`
 - Override events logged with operator-provided reason (prompted)
 - Read-only `--view` mode not audit-logged (high frequency, low value)
 

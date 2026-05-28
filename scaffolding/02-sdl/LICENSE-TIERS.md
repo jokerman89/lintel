@@ -1,6 +1,6 @@
 # License Tiers — permissive vs restricted
 
-JStack tier-stamps every bundled or installed agent (and skill where applicable) with a license tier. The tier determines what the operator can do with the content.
+Lintel tier-stamps every bundled or installed agent (and skill where applicable) with a license tier. The tier determines what the operator can do with the content.
 
 ## The two tiers
 
@@ -15,8 +15,8 @@ JStack tier-stamps every bundled or installed agent (and skill where applicable)
 
 **Bundle into MS-internal repos:** YES
 
-**Examples in JStack:**
-- All operator-authored JStack content (MIT)
+**Examples in Lintel:**
+- All operator-authored Lintel content (MIT)
 - gstack/ECC/AgentShield/GSD Redux (MIT)
 - Anthropic skills with Apache-2.0 (e.g. some `anthropics/skills` items)
 
@@ -35,7 +35,7 @@ JStack tier-stamps every bundled or installed agent (and skill where applicable)
 
 **Bundle into MS-internal repos:** NO
 
-**Examples in JStack:**
+**Examples in Lintel:**
 - Trail of Bits skills (CC-BY-SA-4.0) — invoke yes, copy no
 - Trail of Bits claude-code-config (no license declared) — invoke yes, copy no
 - Anthropic plugins-official (no license declared) — invoke yes, copy no
@@ -56,7 +56,7 @@ license_note: <required for restricted>
 
 For restricted-tier agents, an explicit `license_note` field documents the restrictions.
 
-## How JStack enforces tiers
+## How Lintel enforces tiers
 
 - **/release-ev2 skill** reads tier-stamp before bundling a release. If any restricted-tier agent in scope: refuses or moves to install-only mode.
 - **`OneCSAuditor` agent** flags any unstamped or mismatched agents.
@@ -81,7 +81,7 @@ License-incompatible bundling is a serious issue:
 - GPL-3.0 contamination forces derivative to be GPL — incompatible with internal proprietary
 - No-license = no permission granted — assume restricted
 
-The tier-stamp model lets the operator USE third-party work that JStack can't BUNDLE, by installing-from-upstream + invoking-as-tool.
+The tier-stamp model lets the operator USE third-party work that Lintel can't BUNDLE, by installing-from-upstream + invoking-as-tool.
 
 ## Operator-authored agents
 
@@ -97,5 +97,5 @@ license_note: "This agent reuses concept from upstream-X (CC-BY-SA-4.0); flagged
 
 - `/agt-tier-stamp` skill
 - `OneCSAuditor` agent
-- `~/.jstack/upstream-sources.yaml` — the 8 SHA-pinned upstreams + their license tiers
+- `~/.lintel/upstream-sources.yaml` — the 8 SHA-pinned upstreams + their license tiers
 - `/release-ev2` skill — refuses restricted-tier bundles into permissive repos

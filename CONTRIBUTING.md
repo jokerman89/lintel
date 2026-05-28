@@ -1,12 +1,12 @@
-# Contributing to JStack
+# Contributing to Lintel
 
-Thanks for considering a contribution. JStack is curated tooling for Microsoft Sweden CAIP-SE — we keep scope tight and quality high.
+Thanks for considering a contribution. Lintel is curated tooling for Microsoft Sweden CAIP-SE — we keep scope tight and quality high.
 
 ## Before you contribute
 
-- **Read [AGENT-INSTRUCTIONS.md](AGENT-INSTRUCTIONS.md)** for the session-harness model JStack follows.
+- **Read [AGENT-INSTRUCTIONS.md](AGENT-INSTRUCTIONS.md)** for the session-harness model Lintel follows.
 - **Read [docs/session-harness.md](docs/session-harness.md)** for the architecture mental model.
-- **Read [docs/design/jstack-v3-plan.md](docs/design/jstack-v3-plan.md)** for the current architecture phase.
+- **Read [docs/design/lintel:li-v3-plan.md](docs/design/lintel:li-v3-plan.md)** for the current architecture phase.
 - **Check existing skills/agents** — your contribution may already exist (or be deliberately scoped out).
 
 ## Contribution types
@@ -16,7 +16,7 @@ Thanks for considering a contribution. JStack is curated tooling for Microsoft S
 Each skill lives in `skills/<kebab-case-name>/SKILL.md`. Use [scaffolding/01-foundation/TEMPLATE-skill.md](scaffolding/01-foundation/TEMPLATE-skill.md) as starting point.
 
 Frontmatter must include:
-- `name` (matches dir name, prefix `jstack-` for namespacing)
+- `name` (matches dir name, prefix `li-` for namespacing)
 - `layer` (foundation | ms-team)
 - `description` (one-line for discoverability)
 - `color`, `tools`, `voice`, `cli_support`
@@ -38,7 +38,7 @@ Each hook lives in `hooks/shared/<kebab-case>/HOOK.md` + `hooks/shared/<kebab-ca
 
 ### New compliance rule
 
-Goes into `scaffolding/02-sdl/`. Coordinate with @Azureflipper — compliance changes require legal review for customer-facing engagements.
+Goes into `scaffolding/02-sdl/`. Coordinate with @jokerman89 — compliance changes require legal review for customer-facing engagements.
 
 ### New language/CLI plugin
 
@@ -83,7 +83,7 @@ If adding support for a new AI CLI:
 
 ## What we don't accept
 
-- **Third-party-code vendoring.** JStack ships only operator-authored content.
+- **Third-party-code vendoring.** Lintel ships only operator-authored content.
 - **Speculative changes.** Solve a real problem someone hit.
 - **Stylistic refactors** without behavior change unless coordinated.
 - **PRs without local verify pass.**
@@ -93,8 +93,8 @@ If adding support for a new AI CLI:
 
 When a PR is merged that includes a lesson-learned (something a future contributor should know), update `scaffolding/01-foundation/tasks/lessons.md`. This file travels into every scaffolded repo as baseline.
 
-Use `bin/jstack-lessons-promote` to interactively promote a lesson from a customer repo to the JStack global lessons file.
+Use `bin/lintel:li-lessons-promote` to interactively promote a lesson from a customer repo to the Lintel global lessons file.
 
 ## Questions
 
-Open an issue. Tag @Azureflipper. Be specific about the problem you're solving.
+Open an issue. Tag @jokerman89. Be specific about the problem you're solving.

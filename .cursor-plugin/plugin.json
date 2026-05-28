@@ -1,21 +1,23 @@
 {
-  "name": "jstack",
-  "displayName": "JStack",
-  "description": "MS-CAIP-SE session harness — skills, agents, compliance, Trailblazer voice",
-  "version": "3.0.0-dev",
+  "name": "lintel",
+  "displayName": "Lintel",
+  "description": "Lintel — MS-CAIP-SE session harness with 8-phase cycle + role-lifting + Azure toolbox",
+  "version": "3.5.0-dev",
   "author": {
-    "name": "Azureflipper",
+    "name": "jokerman89",
     "email": "johannes.akerman@microsoft.com"
   },
-  "homepage": "https://github.com/Azureflipper/jokerman-session-setup",
-  "repository": "https://github.com/Azureflipper/jokerman-session-setup",
+  "homepage": "https://github.com/jokerman89/jokerman-lintel",
+  "repository": "https://github.com/jokerman89/jokerman-lintel",
   "license": "MIT",
   "keywords": [
+    "lintel",
     "microsoft",
     "caip",
     "session-harness",
     "rais",
-    "trailblazer-voice"
+    "trailblazer-voice",
+    "azure"
   ],
   "skills": "./skills/",
   "agents": "./agents/"

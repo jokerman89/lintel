@@ -26,13 +26,13 @@ Read-only — proposes, does not execute. Pairs with the `Migrator` subagent for
 ## When NOT to invoke
 
 - Operator wants to keep the 3P dep for documented reasons — use `/learn` to record the decision
-- Dep has no viable 1P alternative — flag the gap in `~/.jstack/first-party-alternatives.yaml`
+- Dep has no viable 1P alternative — flag the gap in `~/.lintel/first-party-alternatives.yaml`
 - Migration would force major rework of the product — pause, escalate to architecture review
 
 ## Workflow
 
 1. **Read codebase usage.** Grep for the 3P dep imports + usage sites. Build call-graph.
-2. **Map to 1P alternative.** Cross-reference `~/.jstack/first-party-alternatives.yaml`. Confirm the alternative covers the use cases observed.
+2. **Map to 1P alternative.** Cross-reference `~/.lintel/first-party-alternatives.yaml`. Confirm the alternative covers the use cases observed.
 3. **Per-call-site diff sketch:**
    - Auth0 → Entra ID: `useAuth0()` → `useMsal()`; token shape differs; scope semantics differ
    - Firebase → Cosmos DB: collection model → container model; consistency semantics differ

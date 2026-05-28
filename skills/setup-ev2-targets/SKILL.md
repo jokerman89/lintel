@@ -1,7 +1,7 @@
 ---
-name: jstack-setup-ev2-targets
+name: li-setup-ev2-targets
 layer: foundation
-v1_alias: [jstack-setup-deploy]
+v1_alias: [li-setup-deploy]
 description: Configure deploy targets for /release-deploy-ev2 — write targets, validate, register.
 color: orange
 tools: Read, Write, Edit, Bash
@@ -11,20 +11,20 @@ cli_support: [claude-code, codex, copilot]
 
 # /setup-ev2-targets
 
-One-time configuration skill for `/release-deploy-ev2`. Writes `~/.jstack/deploy-targets.yaml` declaring the named targets (staging, prod, canary, etc.) along with their trigger mechanism (GitHub Actions, Azure DevOps, custom script, manual link).
+One-time configuration skill for `/release-deploy-ev2`. Writes `~/.lintel/deploy-targets.yaml` declaring the named targets (staging, prod, canary, etc.) along with their trigger mechanism (GitHub Actions, Azure DevOps, custom script, manual link).
 
 CLI-agnostic: this is config-writing only, no runtime browser or per-CLI dependency.
 
 ## When to use
 
-- New repo where deploy hasn't been wired up to JStack yet
+- New repo where deploy hasn't been wired up to Lintel yet
 - Adding a new target (e.g. ramping from "staging only" to "staging + canary + prod")
 - Migrating from one CI system to another (re-point targets)
 - Validate existing config — `--check` runs without changes
 
 ## When NOT to use
 
-- Deploy is one-time / manual / undocumented — JStack doesn't replace your CI; it triggers an existing pipeline
+- Deploy is one-time / manual / undocumented — Lintel doesn't replace your CI; it triggers an existing pipeline
 - You want to actually run a deploy — use `/release-deploy-ev2` (this skill just configures)
 
 ## Inputs
@@ -35,7 +35,7 @@ CLI-agnostic: this is config-writing only, no runtime browser or per-CLI depende
 
 ## Workflow
 
-1. **Locate config file.** `~/.jstack/deploy-targets.yaml`. If absent: create with empty stub.
+1. **Locate config file.** `~/.lintel/deploy-targets.yaml`. If absent: create with empty stub.
 2. **Detection (if `--from-repo`).** Scan repo for known CI patterns:
    - `.github/workflows/deploy.yml` → propose `github_actions` mechanism
    - `azure-pipelines.yml` with `deploy` stage → propose `azure_devops`
@@ -47,13 +47,13 @@ CLI-agnostic: this is config-writing only, no runtime browser or per-CLI depende
    - Health-check endpoint (for `/safe-deploy-ring` integration)
    - Auth requirement (always-confirm, per-batch, never-prompt)
 4. **Validate.** Confirm the trigger mechanism is reachable (e.g. `gh workflow list` for GitHub Actions, network ping for hook URLs). Do NOT actually trigger anything.
-5. **Write config.** Atomic write to `~/.jstack/deploy-targets.yaml`.
+5. **Write config.** Atomic write to `~/.lintel/deploy-targets.yaml`.
 6. **Report registered targets.**
 
 ## Config schema
 
 ```yaml
-# ~/.jstack/deploy-targets.yaml
+# ~/.lintel/deploy-targets.yaml
 version: 1
 targets:
   staging:
@@ -80,7 +80,7 @@ targets:
 ## Report format
 
 ```
-Setup deploy: ~/.jstack/deploy-targets.yaml
+Setup deploy: ~/.lintel/deploy-targets.yaml
 
 Detected from repo: GitHub Actions workflow `deploy.yml`
 Targets registered: 2

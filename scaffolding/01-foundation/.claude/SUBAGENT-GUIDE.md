@@ -53,7 +53,7 @@ You are a <role> for this repo.
 
 Free to do. Adjust the prompt; add date-stamped heads-ups if something is temporary.
 
-If the revision is generalizable and the repo was scaffolded from `jokerman-session-setup`: consider lifting the change to the scaffolded template and logging it in `EVOLUTION-LOG.md`.
+If the revision is generalizable and the repo was scaffolded from `jokerman-lintel`: consider lifting the change to the scaffolded template and logging it in `EVOLUTION-LOG.md`.
 
 ## Temporary heads-ups for subagents
 

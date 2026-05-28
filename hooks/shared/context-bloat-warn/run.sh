@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
-# context-bloat-warn — JStack warn-only hook
+# context-bloat-warn — Lintel warn-only hook
 # Surfaces token/tool-call threshold warnings.
 
 set -euo pipefail
 
-JSTACK_HOME="${JSTACK_HOME:-$HOME/.jstack}"
-SESSION_ID="${JSTACK_SESSION_ID:-default}"
-TOKEN_FILE="$JSTACK_HOME/sessions/${SESSION_ID}/tokens.txt"
-CALL_FILE="$JSTACK_HOME/sessions/${SESSION_ID}/tool-calls.count"
-RATE_FILE="$JSTACK_HOME/sessions/${SESSION_ID}/.last-bloat-warn"
+LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
+SESSION_ID="${LINTEL_SESSION_ID:-default}"
+TOKEN_FILE="$LINTEL_HOME/sessions/${SESSION_ID}/tokens.txt"
+CALL_FILE="$LINTEL_HOME/sessions/${SESSION_ID}/tool-calls.count"
+RATE_FILE="$LINTEL_HOME/sessions/${SESSION_ID}/.last-bloat-warn"
 
-CONFIG="$JSTACK_HOME/config.yaml"
+CONFIG="$LINTEL_HOME/config.yaml"
 
 # Defaults
 SOFT_TOKEN=50000
@@ -44,12 +44,12 @@ diff=$(( now_call - last_warn ))
 
 # Decide tier
 if [ "$tokens" -ge "$HARD_TOKEN" ] || [ "$calls" -ge "$HARD_CALLS" ]; then
-  echo "WARN [JStack context-bloat]: HARD threshold crossed (tokens=$tokens/$HARD_TOKEN, calls=$calls/$HARD_CALLS)"
+  echo "WARN [Lintel context-bloat]: HARD threshold crossed (tokens=$tokens/$HARD_TOKEN, calls=$calls/$HARD_CALLS)"
   echo "WARN: Run /context-save now; resume in fresh session. Quality degrades past this point."
   mkdir -p "$(dirname "$RATE_FILE")"
   echo "$now_call" > "$RATE_FILE"
 elif [ "$tokens" -ge "$SOFT_TOKEN" ] || [ "$calls" -ge "$SOFT_CALLS" ]; then
-  echo "WARN [JStack context-bloat]: soft threshold crossed (tokens=$tokens/$SOFT_TOKEN, calls=$calls/$SOFT_CALLS)"
+  echo "WARN [Lintel context-bloat]: soft threshold crossed (tokens=$tokens/$SOFT_TOKEN, calls=$calls/$SOFT_CALLS)"
   echo "WARN: Consider /context-save at next natural pause."
   mkdir -p "$(dirname "$RATE_FILE")"
   echo "$now_call" > "$RATE_FILE"

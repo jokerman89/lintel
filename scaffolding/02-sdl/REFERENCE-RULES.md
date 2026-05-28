@@ -10,7 +10,7 @@ Where the 5 always-on rules + 7 on-demand items operationalize policy, these 8 r
 
 **MS-internal source:** SDL policy + handbook (internal SharePoint).
 
-**Relevance for JStack:**
+**Relevance for Lintel:**
 - Influences `SecurityAuditor` agent's audit framing
 - Threat modeling concepts surface in `/office-hours` design docs
 - Vulnerability classes inform `no-secrets-in-edit` + `secret-scan-block` patterns
@@ -23,7 +23,7 @@ Where the 5 always-on rules + 7 on-demand items operationalize policy, these 8 r
 
 **MS-internal source:** RAIS 2026 standard + handbook.
 
-**Relevance for JStack:**
+**Relevance for Lintel:**
 - The six principles structure `/rais-impact-assessment`
 - Sensitive Uses categories from RAIS feed `/rais-sensitive-use`
 - One RAI submission process (`/onerai-submit-draft`) maps to RAIS clearance
@@ -36,7 +36,7 @@ Where the 5 always-on rules + 7 on-demand items operationalize policy, these 8 r
 
 **MS-internal source:** 1CS framework docs.
 
-**Relevance for JStack:**
+**Relevance for Lintel:**
 - Customer-bearing deliverables must align with 1CS commitments
 - Lifecycle decisions (deprecation, sunsetting) follow 1CS process
 
@@ -48,7 +48,7 @@ Where the 5 always-on rules + 7 on-demand items operationalize policy, these 8 r
 
 **MS-internal source:** MS Privacy team docs + Privacy review portal.
 
-**Relevance for JStack:**
+**Relevance for Lintel:**
 - DPIA process (`/dpia-submit-draft`) maps to Privacy framework
 - Personal data classifications + special-category handling
 - Cross-border transfer mechanisms (SCCs, adequacy decisions, EU Boundary)
@@ -61,10 +61,10 @@ Where the 5 always-on rules + 7 on-demand items operationalize policy, these 8 r
 
 **MS-internal source:** AGT framework docs + Entra Agent ID portal.
 
-**Relevance for JStack:**
+**Relevance for Lintel:**
 - `/entra-agent-id-submit-draft` produces submissions for this framework
 - `tier-stamp-agents` skill operationalizes a piece of AGT (license-tier classification)
-- 5-level precedence model in JStack adapts AGT's identity-precedence rules
+- 5-level precedence model in Lintel adapts AGT's identity-precedence rules
 
 **When to read:** Designing a new agent / Copilot extension / automation.
 
@@ -74,8 +74,8 @@ Where the 5 always-on rules + 7 on-demand items operationalize policy, these 8 r
 
 **Distinct from AGT framework:** AGT is the policy; this is the operational layer.
 
-**Relevance for JStack:**
-- Audit logs (`~/.jstack/audit/`) implement operational-side traceability
+**Relevance for Lintel:**
+- Audit logs (`~/.lintel/audit/`) implement operational-side traceability
 - `ProvenanceVerifier` agent uses this scope's concepts (forgery detection, chain integrity)
 - Periodic agent recertification surfaces in `/caip-audit`
 
@@ -87,7 +87,7 @@ Where the 5 always-on rules + 7 on-demand items operationalize policy, these 8 r
 
 **Distinct from `/dsb-submit-draft`:** the skill produces a submission; this doc explains what reviewers look for.
 
-**Relevance for JStack:**
+**Relevance for Lintel:**
 - Informs `/dsb-submit-draft`'s field set + review-perspective pushbacks
 - `RAIReviewer` agent surfaces DSB-relevant flags
 
@@ -101,7 +101,7 @@ Where the 5 always-on rules + 7 on-demand items operationalize policy, these 8 r
 
 **Distinct from `OurVoice.md` in this repo:** that file is the operationalized summary; this reference points at the canonical source.
 
-**Relevance for JStack:**
+**Relevance for Lintel:**
 - OurVoice-corpus.md draws verdicts from this source
 - OurVoice-test.md applies this rubric
 - All trailblazer-voice skills + the TrailblazerVoiceCritic agent reference this source
@@ -116,7 +116,7 @@ Where the 5 always-on rules + 7 on-demand items operationalize policy, these 8 r
 
 ## Why "reference-only" vs enforced
 
-These docs are too broad + nuanced to encode as patterns or checklists. They require domain expertise to interpret in context. JStack indexes them; operator reads + interprets.
+These docs are too broad + nuanced to encode as patterns or checklists. They require domain expertise to interpret in context. Lintel indexes them; operator reads + interprets.
 
 ## See also
 

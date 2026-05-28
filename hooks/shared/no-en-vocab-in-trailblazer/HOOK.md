@@ -4,7 +4,7 @@ tier: warn-only
 event: PreToolUse (Edit | Write)
 fires_on: trailblazer-tagged content with Tier 1 AI-tell vocab
 override: not applicable (operator should regenerate, not bypass)
-audit: ~/.jstack/audit/hooks.jsonl
+audit: ~/.lintel/audit/hooks.jsonl
 ---
 
 # no-en-vocab-in-trailblazer

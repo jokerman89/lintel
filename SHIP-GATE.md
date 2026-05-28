@@ -1,4 +1,4 @@
-# Ship Gate — JStack v3.0.0 prerequisites
+# Ship Gate — Lintel v3.0.0 prerequisites
 
 10 gates that must pass before tagging v3.0.0. Replaces v2's 12-gate list (consolidated by combining related gates + removing spec-only checks that have real implementations now).
 
@@ -30,7 +30,7 @@ All v3 directories populated as intended:
 ## Gate 2 — Frontmatter discipline
 
 Every skill + every agent must have valid frontmatter:
-- `name` (kebab-case `jstack-*` for skills, CamelCase for agents)
+- `name` (kebab-case `li-*` for skills, CamelCase for agents)
 - `description`
 - `color`
 - `tools`
@@ -62,9 +62,9 @@ Each plugin manifest installs into its CLI's plugin system and the operator can 
 
 | CLI | Verification |
 |---|---|
-| Claude Code | `claude plugin validate .claude-plugin/` passes, then `/plugin install jstack@jokerman-session-setup` works, `/jstack:qa` invokable |
-| Codex CLI | `/plugins` → search jstack → Install Plugin works, 3 skill invocations succeed |
-| Cursor | `/add-plugin jstack` works, 3 skill invocations succeed |
+| Claude Code | `claude plugin validate .claude-plugin/` passes, then `/plugin install lintel@jokerman-lintel` works, `/lintel:qa` invokable |
+| Codex CLI | `/plugins` → search lintel → Install Plugin works, 3 skill invocations succeed |
+| Cursor | `/add-plugin lintel` works, 3 skill invocations succeed |
 | Gemini CLI | `gemini extensions install <url>` works, GEMINI.md loads |
 | OpenCode | Manual via `.opencode/INSTALL.md` instructions — best-effort |
 | Copilot CLI | `copilot plugin install` works (schema may need adjustment post-launch) |
@@ -93,7 +93,7 @@ Before tagging v3.0.0:
 - One CAIP-SE teammate runs through install flow on their machine
 - They install plugin in their preferred CLI (Claude Code or Codex)
 - They invoke ≥10 skills successfully (including ≥3 v3-new session-harness skills)
-- They run `jstack-scaffold init` in a test repo and confirm output
+- They run `li-scaffold init` in a test repo and confirm output
 - They report friction points + operator addresses Critical blockers
 
 Human gate, not automated.
@@ -126,7 +126,7 @@ Before tagging v3.0.0:
 `.github/workflows/ci.yml` runs on every PR + push. For v3.0.0 tag:
 - Latest commit on `main` (after v3-dev merge) must have CI green across:
   - `verify-linux` (with v3 paths in --layers, --frontmatter, --counts)
-  - `install-linux` (install.sh against test JSTACK_HOME with v3 paths)
+  - `install-linux` (install.sh against test LINTEL_HOME with v3 paths)
   - `verify-windows` (install.ps1 + bash verify on Windows)
   - `unit-tests-linux` (includes new tests/unit/plugin-manifests-valid.sh + agents-categorized.sh)
   - `unit-tests-windows` (same on Windows)
@@ -140,7 +140,7 @@ Before tagging v3.0.0:
 
 - LICENSE file: MIT
 - All v3-new agents stamped `tier: permissive` (operator IP, MS-internal MIT)
-- README clearly states: "JStack contains operator-authored content (MIT)"
+- README clearly states: "Lintel contains operator-authored content (MIT)"
 - v3 ships NO vendored upstream code (v2's upstream-sources.yaml retained but no upstream agents in v3 — operator-authored only)
 - `docs/promoted-agents.md` updated to reflect v3 zero-upstream posture
 
@@ -161,15 +161,15 @@ bash tests/unit/agents-categorized.sh
 
 # Gate 3 (operator-driven via LLM-eval)
 # See docs/design/T0-CALIBRATION-WORKFLOW.md
-# Run /jstack-eval --corpus ... → iterate rubric → status: CALIBRATED
+# Run /lintel:li-eval --corpus ... → iterate rubric → status: CALIBRATED
 # Cost estimate: $1.80-6 per round, 3-5 rounds typical
 
 # Gate 4 (per-CLI smoke test)
 # Install plugin into each CLI you have:
-#   Claude Code:    /plugin marketplace add Azureflipper/jokerman-session-setup
-#                   /plugin install jstack@jokerman-session-setup
+#   Claude Code:    /plugin marketplace add jokerman89/jokerman-lintel
+#                   /plugin install lintel@jokerman-lintel
 #   Codex:          /plugins → search → install
-#   Cursor:         /add-plugin jstack
+#   Cursor:         /add-plugin lintel
 #   Gemini:         gemini extensions install <url>
 # Then invoke 3 skills, confirm they work.
 
@@ -226,8 +226,8 @@ Last `verify.sh --all` run shows:
 
 ## See also
 
-- `docs/design/jstack-v3-plan.md` — current architecture
-- `docs/design/jstack-v2-design.md` — v2 design (historical)
+- `docs/design/lintel:li-v3-plan.md` — current architecture
+- `docs/design/lintel:li-v2-design.md` — v2 design (historical)
 - `docs/design/MIGRATION-TABLE-v2.md` — v1→v2 rename mapping
 - `docs/per-cli/PLUGIN-FORMAT-RESEARCH.md` — per-CLI plugin schema findings
 - `docs/session-harness.md` — full session-harness mental model

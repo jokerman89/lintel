@@ -1,7 +1,7 @@
 ---
-name: jstack-context-budgetwatch
+name: li-context-budgetwatch
 layer: ms-team
-v1_alias: [jstack-context-tokenwatch]
+v1_alias: [li-context-tokenwatch]
 description: Manual context-bloat check — token + tool-call thresholds, recommendation to /clean or /context-save.
 color: yellow
 tools: Read, Bash
@@ -30,13 +30,13 @@ Per A5 decision: this is a HONEST watcher (Claude can't compact mid-session); th
 
 ## Inputs
 
-- Optional `--budget <yaml>` — override default thresholds (default: read from `~/.jstack/config.yaml` watcher section)
+- Optional `--budget <yaml>` — override default thresholds (default: read from `~/.lintel/config.yaml` watcher section)
 - Optional `--quiet` — only emit if a threshold is crossed
 - Optional `--mode <soft|hard|both>` — which thresholds to check (default: both)
 
 ## Workflow
 
-1. **Read budget.** From `~/.jstack/config.yaml`:
+1. **Read budget.** From `~/.lintel/config.yaml`:
    ```yaml
    watcher:
      soft_token: 50000
@@ -45,8 +45,8 @@ Per A5 decision: this is a HONEST watcher (Claude can't compact mid-session); th
      hard_tool_calls: 130
    ```
 2. **Estimate current state.**
-   - Token estimate: read session telemetry if available (`~/.jstack/sessions/<id>/tokens.txt`), else estimate from conversation length heuristic.
-   - Tool-call count: read `~/.jstack/sessions/<id>/tool-calls.count` if available, else estimate.
+   - Token estimate: read session telemetry if available (`~/.lintel/sessions/<id>/tokens.txt`), else estimate from conversation length heuristic.
+   - Tool-call count: read `~/.lintel/sessions/<id>/tool-calls.count` if available, else estimate.
 3. **Compare to thresholds.**
    - Below soft: GREEN
    - At/over soft but below hard: YELLOW
@@ -94,7 +94,7 @@ Next natural pause? Recommend option 1.
 ## Failure modes
 
 - **Session telemetry unavailable:** fall back to estimate. Mark "ESTIMATED" in output.
-- **`~/.jstack/config.yaml` missing watcher section:** use built-in defaults, warn.
+- **`~/.lintel/config.yaml` missing watcher section:** use built-in defaults, warn.
 - **Hard-threshold crossed:** report RED but skill itself stays read-only. Operator decides next move; auto-compact is dishonest (Claude can't actually compact mid-session).
 - **In a CI environment / non-interactive:** print state, exit non-zero on RED to enable CI gating.
 
@@ -126,5 +126,5 @@ RED. STOP — /context-save now, resume in fresh session.
 - `/clean` — in-session lighter-weight clear
 - `/context-save` — checkpoint + clean break for fresh session
 - `/context-restore` — resume from checkpoint
-- `~/.jstack/config.yaml` — watcher threshold config
+- `~/.lintel/config.yaml` — watcher threshold config
 - Layer 4 power-user docs — watcher tuning

@@ -1,5 +1,5 @@
 ---
-name: jstack-scrape
+name: li-scrape
 layer: foundation
 description: Extract structured data from one or more pages — declarative selector schema, JSON output.
 color: green
@@ -25,7 +25,7 @@ Distinct from `/browse`: that one is interactive single-page. This is declarativ
 
 - Single page, exploratory — use `/browse`
 - Behind auth — set up via `/setup-browser-cookies` first OR consider that the ToS may forbid scraping
-- High-volume commercial scraping — out of scope. JStack is a builder's toolbox, not a scraping platform.
+- High-volume commercial scraping — out of scope. Lintel is a builder's toolbox, not a scraping platform.
 - Customer data, even sanitized — STOP. Layer 2 blocks.
 
 ## Inputs
@@ -39,10 +39,10 @@ Distinct from `/browse`: that one is interactive single-page. This is declarativ
 ## Workflow
 
 1. **Validate schema.** Parse the selector YAML, confirm each rule has `field` + `selector` + optional `transform`.
-2. **Compliance gate.** Resolve each URL's hostname. Block any in `~/.jstack/compliance/prod-hosts.txt`. Warn on hosts whose `robots.txt` disallows the path.
+2. **Compliance gate.** Resolve each URL's hostname. Block any in `~/.lintel/compliance/prod-hosts.txt`. Warn on hosts whose `robots.txt` disallows the path.
 3. **Fetch loop.** For each URL: load via Playwright (handles JS-rendered content), apply selectors, transform, accumulate.
 4. **Rate-limit.** Respect `--rate-limit` per-hostname. If multiple URLs share a host, queue them serially.
-5. **Output.** JSON file at `~/.jstack/scrape-runs/<ts>/results.json`. Failure entries are emitted (with error) — never silently dropped.
+5. **Output.** JSON file at `~/.lintel/scrape-runs/<ts>/results.json`. Failure entries are emitted (with error) — never silently dropped.
 6. **Optional diff.** If `--diff`: produce a structured diff (added/removed/changed records).
 
 ## Schema format
@@ -84,7 +84,7 @@ Added: 2 records
 Removed: 1 record
 Changed: 3 records (prices moved on widget-Y, widget-Z, widget-Q)
 
-Output: ~/.jstack/scrape-runs/20260527-161033/results.json
+Output: ~/.lintel/scrape-runs/20260527-161033/results.json
 ```
 
 ## Compliance integration
@@ -92,7 +92,7 @@ Output: ~/.jstack/scrape-runs/20260527-161033/results.json
 - Layer 2 customer-data gate applies per-URL.
 - `robots.txt` checked on first visit per host. Disallowed paths surface as warnings — not auto-blocked (operator owns the ToS judgment), but logged to audit.
 - Rate-limit enforced to avoid hammering target sites. Default 1s/host is conservative.
-- Per-call auth required if any URL hostname matches `~/.jstack/compliance/auth-required-hosts.txt`.
+- Per-call auth required if any URL hostname matches `~/.lintel/compliance/auth-required-hosts.txt`.
 
 ## Voice tier note
 
@@ -104,7 +104,7 @@ Output: ~/.jstack/scrape-runs/20260527-161033/results.json
 - **Selector matches 0 elements on a page:** emit the record with empty field, log the miss. Do not retry.
 - **Host rate-limit triggered (429):** back off exponentially, retry once. If second 429: skip remaining URLs for that host, continue with other hosts.
 - **`robots.txt` disallow + operator did NOT pass `--ignore-robots`:** skip the URL, report it in failures, do not crash the whole run.
-- **Concurrency > 10:** refuse — JStack does not facilitate aggressive scraping.
+- **Concurrency > 10:** refuse — Lintel does not facilitate aggressive scraping.
 
 ## Examples
 

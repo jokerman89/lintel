@@ -3,8 +3,8 @@
 **Date:** 2026-05-28
 **Branch:** `v3-dev` (will become `lintel-rebrand` post-approval)
 **Status:** DRAFT — awaiting operator approval before rename execution
-**Supersedes:** jstack-v3-plan.md (architectural depth layer)
-**Companion:** jstack-v3.5-azure-toolbox-plan.md (still applies, becomes lintel-v3.5-azure-toolbox.md after rename)
+**Supersedes:** li-v3-plan.md (architectural depth layer)
+**Companion:** li-v3.5-azure-toolbox-plan.md (still applies, becomes lintel-v3.5-azure-toolbox.md after rename)
 
 > Deep cycle design + role-lifting + context warming + multi-mode invocation. No thin patterns. Each phase = sub-skills + dedicated agents + artifacts + gates. Built on gstack, learns from superpowers + speckit, adds what neither has: compliance-tiered, MS-internal-aware, role-lifted, multi-CLI.
 
@@ -111,7 +111,7 @@ Three deeply-studied competitors. What each does well, where each is limited, an
 - **78 specialized agents per domain** — none of the three has this. Architect image had generic "Section Agent."
 - **5+7+8 compliance tiering** — HARD-RULES (always-on), ON-DEMAND, REFERENCE
 - **Trailblazer voice corpus** (60 paragraphs, 12 cells, calibratable) — beyond what any of them has
-- **Repo scaffolding via bin/jstack-scaffold** (becomes bin/li-scaffold) — Speckit has memory/, none has full repo bootstrap
+- **Repo scaffolding via bin/lintel:li-scaffold** (becomes bin/li-scaffold) — Speckit has memory/, none has full repo bootstrap
 - **MS-internal aware** — RAIS, OneCS, AGT, EV2, OneBranch, 1ESPT
 - **Cross-session continuity** — lessons.md, EVOLUTION-LOG.md, ADR template, /li:context-save/restore
 - **Doc-gen 4-gate** — /li:generate-ppt, /li:generate-word, /li:generate-web with voice + brand + honest-limitations + provenance
@@ -1117,18 +1117,18 @@ When approved, this runs as a discrete branch + commit sequence:
 
 1. **Create branch:** `lintel-rebrand` from `v3-dev`
 2. **Path renames (git mv preserves history):**
-   - `bin/jstack-scaffold` → `bin/li-scaffold`
-   - `bin/jstack-doctor` → `bin/li-doctor`
-   - `bin/jstack-lessons-sync` → `bin/li-lessons-sync`
-   - `bin/jstack-lessons-promote` → `bin/li-lessons-promote`
-   - `bin/jstack-update` → `bin/li-update`
-   - `bin/jstack-adr-new` → `bin/li-adr-new`
+   - `bin/lintel:li-scaffold` → `bin/li-scaffold`
+   - `bin/lintel:li-doctor` → `bin/li-doctor`
+   - `bin/lintel:li-lessons-sync` → `bin/li-lessons-sync`
+   - `bin/lintel:li-lessons-promote` → `bin/li-lessons-promote`
+   - `bin/lintel:li-update` → `bin/li-update`
+   - `bin/lintel:li-adr-new` → `bin/li-adr-new`
 3. **Skill renames:**
-   - `skills/jstack-cli-fingerprint/` → `skills/li-doctor/` (deprecate cli-fingerprint, replaced by li-doctor)
-   - `skills/jstack-doctor/` → `skills/li-doctor/` (merge)
-   - `skills/jstack-eval/` → `skills/li-eval/`
-   - `skills/jstack-scaffold/` → `skills/li-scaffold/`
-   - All `jstack-*` skill names in frontmatter `name:` field → `li-*`
+   - `skills/lintel:li-cli-fingerprint/` → `skills/li-doctor/` (deprecate cli-fingerprint, replaced by li-doctor)
+   - `skills/lintel:li-doctor/` → `skills/li-doctor/` (merge)
+   - `skills/lintel:li-eval/` → `skills/li-eval/`
+   - `skills/lintel:li-scaffold/` → `skills/li-scaffold/`
+   - All `li-*` skill names in frontmatter `name:` field → `li-*`
 4. **Plugin manifest changes:**
    - `.claude-plugin/plugin.json` — `name: "lintel"` (full word for marketplace), description starts "Lintel — ..."
    - `.codex-plugin/plugin.json` — same
@@ -1136,12 +1136,12 @@ When approved, this runs as a discrete branch + commit sequence:
    - `gemini-extension.json` — `name: "lintel"`
    - All other plugin manifests
 5. **Sed-driven replacements (mass):**
-   - `JStack` → `Lintel` (case-sensitive)
-   - `jstack` → `lintel` in prose (be careful with skill prefixes; do skill renames first)
-   - `~/.jstack/` → `~/.lintel/`
-   - `jokerman-session-setup` → `jokerman-lintel`
-   - `azureflipper/jokerman-session-setup` → `jokerman89/jokerman-lintel`
-   - `Azureflipper` → `jokerman89` (note: lowercase, since GH username changed)
+   - `Lintel` → `Lintel` (case-sensitive)
+   - `lintel` → `lintel` in prose (be careful with skill prefixes; do skill renames first)
+   - `~/.lintel/` → `~/.lintel/`
+   - `jokerman-lintel` → `jokerman-lintel`
+   - `jokerman89/jokerman-lintel` → `jokerman89/jokerman-lintel`
+   - `jokerman89` → `jokerman89` (note: lowercase, since GH username changed)
 6. **Skill invocation namespace:**
    - Operator types `/lintel:qa`, `/lintel:az-tldr`, `/lintel:cycle`
    - Wait — the user wants `/li:command` short form. Plugin name = "lintel" gives `/lintel:` namespace.
@@ -1156,7 +1156,7 @@ When approved, this runs as a discrete branch + commit sequence:
    - `SHIP-GATE.md` — update gate names + Lintel references
    - `LAYERS.md` — update 2-kategori-model + cycle phases as third axis
    - `AGENT-INSTRUCTIONS.md` — update to reference Lintel cycle
-   - All design docs in `docs/design/` — `jstack-v2-design.md` → `lintel-v2-design.md` (historical), etc.
+   - All design docs in `docs/design/` — `li-v2-design.md` → `lintel-v2-design.md` (historical), etc.
    - All per-CLI docs in `docs/per-cli/`
 9. **GitHub repo rename:**
    - `gh repo rename jokerman-lintel` (from within the repo)
@@ -1167,7 +1167,7 @@ When approved, this runs as a discrete branch + commit sequence:
     - `tests/unit/agents-categorized.sh` — no change (categories same)
     - Add `tests/unit/li-skill-names.sh` — verify all skills have `li-*` name prefix
 12. **install.sh + verify.sh updates:**
-    - JSTACK_HOME → LINTEL_HOME env var
+    - LINTEL_HOME → LINTEL_HOME env var
     - All path references
 13. **Verify green:** `bash install/verify.sh --all`
 14. **Atomic push:** `lintel-rebrand` branch → operator confirms → merge to `v3-dev` (or replace v3-dev)
@@ -1208,11 +1208,11 @@ Estimated CC-time: ~1-2 hours mechanical execution.
 - Cost estimate gate
 
 ### Removing:
-- "JStack" name (becomes Lintel)
-- jstack-* file prefixes (become li-*)
-- jokerman-session-setup repo name (becomes jokerman-lintel)
-- azureflipper namespace (becomes jokerman89)
-- /jstack-cli-fingerprint spec-only skill (replaced by runtime /li:doctor)
+- "Lintel" name (becomes Lintel)
+- li-* file prefixes (become li-*)
+- jokerman-lintel repo name (becomes jokerman-lintel)
+- jokerman89 namespace (becomes jokerman89)
+- /lintel:li-cli-fingerprint spec-only skill (replaced by runtime /li:doctor)
 
 ---
 
