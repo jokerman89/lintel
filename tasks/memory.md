@@ -68,7 +68,26 @@ Cross-session working state (ej durable rules — that's [[lessons.md]]; ej pers
 
 Resterande 7 minor concerns i designdocets Reviewer Concerns-sektion. 4 MAJORs adresserade inline under cohort-execution. Minor concerns adresseras vid respective cohort-execution-time eller följdiget design-iteration.
 
-**Tracking pattern:** open reviewer concerns lever här tills addressat ELLER PR om reviewer-concern-resolution öppnas. Entry kan slutas när alla 4+7=11 resolved.
+### PR #21 (lintel-v3.7-frontend-design-system) — /plan-eng-review surfaced 7 net-new concerns
+
+Eng-review run 2026-05-28. Adversarial ReadOnly review 7/10 produced 7 reviewer-concerns inline. /plan-eng-review added 7 more (4 MAJOR + 3 MINOR). Detaljer i design-docens GSTACK REVIEW REPORT-sektion.
+
+**MAJORs som måste vara lösta FÖRE Fas A1 PR öppnas:**
+1. **M-1 design-spec.json schema collision** med generate-web `--from-pipeline`. Lösning (b) differentiated filename rekommenderat.
+2. **M-2 frontend-app-scaffold boundary violation** — escalation från MINOR #5. Rekommendation: rename → generate-app family.
+3. **M-3 Fas A monolithic-PR risk** — split till A1 (6 artifacts) + A2 (11 artifacts) rekommenderat.
+
+**MAJORs som ska adresseras inline i Fas A1 implementation:**
+4. **M-4 sequential sub-skill chain locks 3× latency** — spec PARALLEL invocation i Workflow.
+5. **M-5 schema-versioning missing** — alla 5 contract-schemas behöver `schema_version: 1`.
+6. **M-6 roundtrip integration test deferred to Fas B är fel** — minimum-viable test i A1.
+
+**MINORs (operator-judgement):**
+7. **m-1 FrontendArchitect ↔ existing FrontendBuilder non-overlap** behöver explicit doc.
+8. **m-2 SKILL.md DRY pattern** factor till docs/concepts/frontend-skill-anatomy.md (defer A2).
+9. **m-3 --overwrite flag inheritance** dokumenterad i frontend-style-extract (A2).
+
+**Tracking pattern:** open reviewer concerns lever här tills addressat ELLER PR om reviewer-concern-resolution öppnas. Entry kan slutas när alla 4+7+7=18 resolved.
 
 **Last touched:** 2026-05-28 (v3.6.1-dev milestone)
 
