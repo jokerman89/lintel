@@ -1,18 +1,18 @@
-# Ship Gate — Lintel v3.0.0 prerequisites
+# Ship Gate — Lintel v3.5.0 prerequisites
 
-10 gates that must pass before tagging v3.0.0. Replaces v2's 12-gate list (consolidated by combining related gates + removing spec-only checks that have real implementations now).
+13 gates that must pass before tagging v3.5.0. v3 (10 gates) + 3 new v3.5 gates covering cycle, role-lifting, and context-warming infrastructure.
 
-Updated for v3 plugin-manifest architecture (no more MCP/compile checks since those were dropped). Voice calibration + marketplace submission remain operator-driven.
+Updated for v3.5 cycle architecture (8 phases, role-lifting, context-warming, mode presets). Voice calibration + marketplace submission remain operator-driven.
 
 ---
 
-## Gate 1 — Structural (v3 layout)
+## Gate 1 — Structural (v3.5 layout)
 
-All v3 directories populated as intended:
+All v3.5 directories populated as intended:
 
-| Path | v3 target | Verify command |
+| Path | v3.5 target | Verify command |
 |---|---|---|
-| `skills/` | 81 skills (74 v2 + 7 new) | `bash install/verify.sh --counts` |
+| `skills/` | 113 skills (81 v3 + 32 new v3.5) | `bash install/verify.sh --counts` |
 | `agents/` | 78 agents across 9 categories | `bash install/verify.sh --agents-categorized` |
 | `hooks/shared/` | 15 hooks | `find hooks/shared -name HOOK.md \| wc -l` |
 | `scaffolding/01-foundation/` | base templates intact | `bash install/verify.sh --scaffolding-coherence` |
@@ -23,7 +23,14 @@ All v3 directories populated as intended:
 | `CLAUDE.md`, `AGENTS.md`, `GEMINI.md` at root | 3 entrypoint files | included in `--plugin-manifests` |
 | `bin/` | 6 operator-side utilities | `ls bin/` |
 
-**Aggregate v3 target:** 81 skills + 78 agents + 15 hooks + 7 plugin manifests + 3 entrypoint files + 6 bin scripts + intact scaffolding templates.
+**Aggregate v3.5 target:** 113 skills + 78 agents + 15 hooks + 7 plugin manifests + 3 entrypoint files + 7 bin scripts + 3 default public roles + intact scaffolding templates.
+
+**v3.5-specific subset:**
+- 8 phase-skills: li-sense, li-define, li-discover, li-plan, li-build, li-review, li-ship, li-capture
+- 2 orchestrator: li-cycle, li-resume
+- 4 composites: li-fix, li-research, li-plan-and-build, li-review-and-ship
+- 8 role-lifting: li-role-activate, li-role-deep-dive, li-role-frame, li-role-rotate, li-role-deactivate, li-roles-list, li-role-new, li-role-update
+- 10 context-warming: li-context-warm, li-context-warm-related/sessions/adrs/customer/from-url, li-context-dump, li-context-snapshot, li-context-budget, li-context-cool
 
 ---
 
@@ -143,6 +150,74 @@ Before tagging v3.0.0:
 - README clearly states: "Lintel contains operator-authored content (MIT)"
 - v3 ships NO vendored upstream code (v2's upstream-sources.yaml retained but no upstream agents in v3 — operator-authored only)
 - `docs/promoted-agents.md` updated to reflect v3 zero-upstream posture
+
+---
+
+## Gate 11 (NEW v3.5) — Cycle infrastructure
+
+Lintel 8-phase cycle ships with full depth:
+- All 8 phase-skills present + valid frontmatter
+- li-cycle orchestrator can dispatch each phase
+- li-resume reads 00-state.md correctly
+- 4 composite shortcuts delegate properly to li-cycle
+- 5 mode presets defined in li-cycle (hotfix, customer-engagement, internal-tool, demo-prep, research-dive)
+- 00-state.md schema consistent across all phases
+
+**Verify:**
+```bash
+bash install/verify.sh --counts | grep -E "^Skills:" # ≥113
+ls skills/li-{sense,define,discover,plan,build,review,ship,capture}/SKILL.md
+ls skills/li-{cycle,resume,fix,research,plan-and-build,review-and-ship}/SKILL.md
+bash tests/unit/cycle-skills-present.sh
+```
+
+**Operator dogfood requirement:** Run `/lintel:li-cycle --mode internal-tool` on real work, validate phase transitions + gates fire correctly.
+
+---
+
+## Gate 12 (NEW v3.5) — Role-lifting infrastructure
+
+Role-lifting capability operational:
+- All 8 role-skills present + valid frontmatter
+- 3 default public roles ship (field-cto, solution-architect, engineering-manager)
+- Role files follow AI-optimized format (IDENTITY + COLD KNOWLEDGE + DECISION CRITERIA + VOICE + OUTCOME LENS per phase + INSIGHTS + COMPANION SKILLS)
+- `bin/li-roles-sync` script executable, setup/push/pull/status/forget commands work
+- Sensitivity field enforced (public vs private separation in storage)
+- Lightweight session-start load (~500 tokens via li-role-activate)
+- Deep-dive on-demand (~2-3k tokens via li-role-deep-dive)
+
+**Verify:**
+```bash
+ls roles/{field-cto,solution-architect,engineering-manager}.md
+ls skills/li-role-{activate,deep-dive,frame,rotate,deactivate,new,update}/SKILL.md
+ls skills/li-roles-list/SKILL.md
+test -x bin/li-roles-sync
+bash tests/unit/role-files-valid.sh
+```
+
+**Operator dogfood requirement:** Activate field-cto role pre-customer-meeting, verify lens applies in DEFINE phase.
+
+---
+
+## Gate 13 (NEW v3.5) — Context-warming infrastructure
+
+On-demand 1M-context utilization beyond session-start:
+- All 10 context-warm skills present + valid frontmatter
+- Base `li-context-warm` accepts paths/globs, reports tokens added
+- Variant skills (warm-related, warm-sessions, warm-adrs, warm-customer, warm-from-url) delegate to base
+- WorkProfile=on URL gate active for warm-from-url
+- Customer-repo access audit-logged
+- Budget tracking via `.lintel/state/context-budget.md`
+- Selective cool via IGNORE markers (li-context-cool)
+
+**Verify:**
+```bash
+ls skills/li-context-{warm,warm-related,warm-sessions,warm-adrs,warm-customer,warm-from-url}/SKILL.md
+ls skills/li-context-{dump,snapshot,budget,cool}/SKILL.md
+bash tests/unit/context-warm-skills-present.sh
+```
+
+**Operator dogfood requirement:** `/lintel:li-context-warm-adrs networking` during PLAN phase, validate budget tracking accurate.
 
 ---
 
