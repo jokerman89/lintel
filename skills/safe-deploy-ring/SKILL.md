@@ -1,5 +1,5 @@
 ---
-name: li-safe-deploy-ring
+name: safe-deploy-ring
 layer: foundation
 v1_alias: [li-canary]
 description: Gate a deployed feature behind a percentage rollout — ramp up, monitor, abort safe.

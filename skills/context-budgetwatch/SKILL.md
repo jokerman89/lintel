@@ -1,5 +1,5 @@
 ---
-name: li-context-budgetwatch
+name: context-budgetwatch
 layer: ms-team
 v1_alias: [li-context-tokenwatch]
 description: Manual context-bloat check — token + tool-call thresholds, recommendation to /clean or /context-save.

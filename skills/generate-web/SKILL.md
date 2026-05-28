@@ -1,5 +1,5 @@
 ---
-name: li-generate-web
+name: generate-web
 layer: ms-team
 description: Produce brand-compliant static HTML or Next.js scaffold for demo/landing page.
 color: green

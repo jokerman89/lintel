@@ -56,7 +56,7 @@ Phase G updates ship gate (`SHIP-GATE.md` Gate 9) to require all unit + e2e-clau
 
 ## What's NOT in scope here
 
-- LLM evaluation tests (those live in `eval/<feature>/` per component; see `/lintel:li-eval` skill)
+- LLM evaluation tests (those live in `eval/<feature>/` per component; see `/li:eval` skill)
 - Performance benchmarks (those use `/perfbench` skill, results in `~/.lintel/benchmarks/`)
 - Manual QA testing (operator-driven; see `/qa` and `/qa-only` skills)
 

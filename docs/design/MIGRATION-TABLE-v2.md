@@ -85,7 +85,7 @@ Full enumeration of all 65 skills + 40 agents in v1 with v2 rename status. Sourc
 | `<v1>context-tokenwatch</v1>` | `/context-budgetwatch` | RENAMED | Refocus on budget not raw token-count |
 | `<v1>eval-suite-gen</v1>` | `/cloudtest-eval-suite` | RENAMED | CloudTest = MS scalable test infra |
 | `<v1>li-test</v1>` | `/onebranch-validate` | RENAMED | OneBranch = governed pipeline matrix-test |
-| `<v1>li-eval</v1>` | `/lintel:li-eval` | unchanged | Lintel-specific |
+| `<v1>li-eval</v1>` | `/li:eval` | unchanged | Lintel-specific |
 
 **Layer 3 changes: 14 renames / 8 unchanged (out of 22)**
 
@@ -95,7 +95,7 @@ Full enumeration of all 65 skills + 40 agents in v1 with v2 rename status. Sourc
 
 | New skill | Phase | Purpose |
 |-----------|-------|---------|
-| `/lintel:li-cli-fingerprint` | B | CLI detection runtime (operator manual override too) |
+| `/li:cli-fingerprint` | B | CLI detection runtime (operator manual override too) |
 | `/context-budget` | C | View/modify current phase budget |
 | `/context-warmup` | C | Explicit preload of high-leverage context |
 | `/perf-mode` | C | Activate 1M context-budget mode for the session |
@@ -104,7 +104,7 @@ Full enumeration of all 65 skills + 40 agents in v1 with v2 rename status. Sourc
 | `/generate-ppt` | F | Produce branded PowerPoint deck |
 | `/generate-word` | F | Produce branded Word doc (variants: technical/customer/transparency) |
 | `/generate-web` | F | Produce static demo web page or landing scaffold |
-| `/lintel:li-deprecation-status` | v2.1 backlog | Show alias usage by skill |
+| `/li:deprecation-status` | v2.1 backlog | Show alias usage by skill |
 
 ---
 

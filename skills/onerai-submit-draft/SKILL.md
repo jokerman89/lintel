@@ -1,5 +1,5 @@
 ---
-name: li-onerai-submit-draft
+name: onerai-submit-draft
 layer: ms-team
 v1_alias: [li-onerai-prep]
 description: Prepare a One RAI submission draft — checklist, capability/limitation, mitigation plan.

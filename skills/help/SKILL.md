@@ -1,5 +1,5 @@
 ---
-name: li-help
+name: help
 layer: foundation
 description: List installed Lintel skills + agents + hooks. Filter by category, voice tier, or CLI support.
 color: blue
@@ -32,7 +32,7 @@ No arguments: full list grouped by category, one line per skill.
 ## Workflow
 
 1. Read `INSTALL-MANIFEST.json` if present at `~/.claude-scaffolding/` to confirm install version.
-2. Glob `~/.claude/skills/lintel:li-*/SKILL.md` for installed skills.
+2. Glob `~/.claude/skills/li:*/SKILL.md` for installed skills.
 3. Glob `~/.claude/agents/*.md` for installed agents (filter to Lintel-relevant: check for `cli_support` field).
 4. For each skill/agent, parse YAML frontmatter for: name, description, voice, cli_support, color.
 5. Filter per operator's flags.

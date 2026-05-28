@@ -1,5 +1,5 @@
 ---
-name: li-design-shotgun
+name: design-shotgun
 layer: foundation
 description: Parallel design exploration — spawn N variants of a seed HTML, present side-by-side.
 color: purple

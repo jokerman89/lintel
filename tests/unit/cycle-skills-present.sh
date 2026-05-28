@@ -2,6 +2,7 @@
 # tests/unit/cycle-skills-present.sh
 #
 # Verifies v3.5 Lintel cycle skills are present + valid frontmatter.
+# Post-Väg-A: skill names are bare (no li- prefix), invocation /li:<name>.
 # tag: v3.5 cycle
 
 set -uo pipefail
@@ -15,17 +16,16 @@ fail() { echo "  FAIL: $1"; FAILED=1; }
 echo "tests/unit/cycle-skills-present.sh"
 echo "=================================="
 
-# 8 phase-skills
+# 8 phase-skills (bare names, no li- prefix)
 PHASES=(sense define discover plan build review ship capture)
 for phase in "${PHASES[@]}"; do
-  f="$REPO_ROOT/skills/li-$phase/SKILL.md"
+  f="$REPO_ROOT/skills/$phase/SKILL.md"
   if [ -f "$f" ]; then
     name=$(grep '^name:' "$f" | head -1 | awk '{print $2}')
-    expected="li-$phase"
-    if [ "$name" = "$expected" ]; then
-      pass "phase skill: $expected"
+    if [ "$name" = "$phase" ]; then
+      pass "phase skill: $phase (folder + frontmatter match)"
     else
-      fail "phase skill: $expected (frontmatter name mismatch: got '$name')"
+      fail "phase skill name mismatch: folder=$phase, frontmatter=$name"
     fi
   else
     fail "phase skill missing: $f"
@@ -34,30 +34,28 @@ done
 
 # 2 orchestrator skills
 for orch in cycle resume; do
-  f="$REPO_ROOT/skills/li-$orch/SKILL.md"
-  [ -f "$f" ] && pass "orchestrator: li-$orch" || fail "orchestrator missing: li-$orch"
+  f="$REPO_ROOT/skills/$orch/SKILL.md"
+  [ -f "$f" ] && pass "orchestrator: $orch" || fail "orchestrator missing: $orch"
 done
 
 # 4 composite shortcuts
 for comp in fix research plan-and-build review-and-ship; do
-  f="$REPO_ROOT/skills/li-$comp/SKILL.md"
-  [ -f "$f" ] && pass "composite: li-$comp" || fail "composite missing: li-$comp"
+  f="$REPO_ROOT/skills/$comp/SKILL.md"
+  [ -f "$f" ] && pass "composite: $comp" || fail "composite missing: $comp"
 done
 
 # Frontmatter has cli_support
-for skill_dir in li-sense li-define li-discover li-plan li-build li-review li-ship li-capture li-cycle li-resume; do
+for skill_dir in sense define discover plan build review ship capture cycle resume; do
   f="$REPO_ROOT/skills/$skill_dir/SKILL.md"
   [ -f "$f" ] || continue
-  if grep -q '^cli_support:' "$f"; then
-    : # ok
-  else
+  if ! grep -q '^cli_support:' "$f"; then
     fail "missing cli_support: $skill_dir"
   fi
 done
 pass "all cycle skills have cli_support frontmatter"
 
 # Frontmatter has layer: foundation
-for skill_dir in li-sense li-define li-discover li-plan li-build li-review li-ship li-capture li-cycle li-resume; do
+for skill_dir in sense define discover plan build review ship capture cycle resume; do
   f="$REPO_ROOT/skills/$skill_dir/SKILL.md"
   [ -f "$f" ] || continue
   layer=$(grep '^layer:' "$f" | head -1 | awk '{print $2}')

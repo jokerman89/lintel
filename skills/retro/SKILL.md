@@ -1,5 +1,5 @@
 ---
-name: li-retro
+name: retro
 layer: foundation
 description: Session retrospective — what shipped, what got stuck, what to /learn from.
 color: yellow

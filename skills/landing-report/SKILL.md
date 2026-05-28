@@ -1,5 +1,5 @@
 ---
-name: li-landing-report
+name: landing-report
 layer: foundation
 description: Post-ship report — what landed in a window, in engineering or customer-voice format.
 color: blue
@@ -69,7 +69,7 @@ Landing Report: 2026-05-20 → 2026-05-27 (main, 7 days)
 - Contributors: jokerman + Claude Opus 4.7
 
 ## Not shipped (still open)
-- Phase 3 (20 MS-specific skills) — blocked on /lintel:li-eval, T0 corpus now ready
+- Phase 3 (20 MS-specific skills) — blocked on /li:eval, T0 corpus now ready
 - Phase 4 (40 agents) — pending
 ```
 
@@ -107,7 +107,7 @@ one ended.
 - **Empty window:** report "no commits in window" + exit cleanly. No fabrication.
 - **Layer 2 hit on commit message:** STOP, surface offending commit hash + line, do not render. Operator decides — sanitize history (dangerous) or remove from window.
 - **`gh` not available:** fall back to git-log-only, note in report.
-- **Trailblazer-voice requested but T0 corpus empty:** WARN — generation will be best-effort but UNCALIBRATED. Recommend running `/lintel:li-eval` against corpus before downstream distribution.
+- **Trailblazer-voice requested but T0 corpus empty:** WARN — generation will be best-effort but UNCALIBRATED. Recommend running `/li:eval` against corpus before downstream distribution.
 - **Window spans pre-conventional-commits history:** group by author instead of type, note degraded categorization.
 
 ## Examples

@@ -69,7 +69,7 @@ Each plugin manifest installs into its CLI's plugin system and the operator can 
 
 | CLI | Verification |
 |---|---|
-| Claude Code | `claude plugin validate .claude-plugin/` passes, then `/plugin install lintel@jokerman-lintel` works, `/lintel:qa` invokable |
+| Claude Code | `claude plugin validate .claude-plugin/` passes, then `/plugin install lintel@jokerman-lintel` works, `/li:qa` invokable |
 | Codex CLI | `/plugins` → search lintel → Install Plugin works, 3 skill invocations succeed |
 | Cursor | `/add-plugin lintel` works, 3 skill invocations succeed |
 | Gemini CLI | `gemini extensions install <url>` works, GEMINI.md loads |
@@ -171,7 +171,7 @@ ls skills/li-{cycle,resume,fix,research,plan-and-build,review-and-ship}/SKILL.md
 bash tests/unit/cycle-skills-present.sh
 ```
 
-**Operator dogfood requirement:** Run `/lintel:li-cycle --mode internal-tool` on real work, validate phase transitions + gates fire correctly.
+**Operator dogfood requirement:** Run `/li:cycle --mode internal-tool` on real work, validate phase transitions + gates fire correctly.
 
 ---
 
@@ -217,7 +217,7 @@ ls skills/li-context-{dump,snapshot,budget,cool}/SKILL.md
 bash tests/unit/context-warm-skills-present.sh
 ```
 
-**Operator dogfood requirement:** `/lintel:li-context-warm-adrs networking` during PLAN phase, validate budget tracking accurate.
+**Operator dogfood requirement:** `/li:context-warm-adrs networking` during PLAN phase, validate budget tracking accurate.
 
 ---
 
@@ -236,7 +236,7 @@ bash tests/unit/agents-categorized.sh
 
 # Gate 3 (operator-driven via LLM-eval)
 # See docs/design/T0-CALIBRATION-WORKFLOW.md
-# Run /lintel:li-eval --corpus ... → iterate rubric → status: CALIBRATED
+# Run /li:eval --corpus ... → iterate rubric → status: CALIBRATED
 # Cost estimate: $1.80-6 per round, 3-5 rounds typical
 
 # Gate 4 (per-CLI smoke test)

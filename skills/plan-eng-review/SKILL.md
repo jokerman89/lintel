@@ -1,5 +1,5 @@
 ---
-name: li-plan-eng-review
+name: plan-eng-review
 layer: foundation
 description: Architecture + tests review. The required gate before /release-ev2. Covers arch, code quality, test coverage, performance.
 color: red

@@ -1,5 +1,5 @@
 ---
-name: li-scaffold-engagement-demo
+name: scaffold-engagement-demo
 layer: ms-team
 v1_alias: [li-scaffold-customer-demo]
 description: Initialize a customer-demo repo — sample data, script, slides, recording config, voice gates.

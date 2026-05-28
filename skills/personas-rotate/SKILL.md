@@ -1,5 +1,5 @@
 ---
-name: li-personas-rotate
+name: personas-rotate
 layer: foundation
 description: Load persona context from tasks/personas.md for demo-prep, workshop-facilitation, or audience-aware writing.
 color: cyan

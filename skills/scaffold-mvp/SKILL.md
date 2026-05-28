@@ -1,5 +1,5 @@
 ---
-name: li-scaffold-mvp
+name: scaffold-mvp
 layer: ms-team
 description: Initialize a product-MVP repo — full compliance + voice + RAI + deploy wiring.
 color: orange

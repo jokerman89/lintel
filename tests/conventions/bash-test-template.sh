@@ -9,7 +9,7 @@ set -euo pipefail
 # --- Test harness helpers (inline; no external dep) ---
 
 TEST_NAME="$(basename "${BASH_SOURCE[0]}" .sh)"
-TEST_TMP="$(mktemp -d "/tmp/lintel:li-test-${TEST_NAME}-XXXXXX")"
+TEST_TMP="$(mktemp -d "/tmp/li:test-${TEST_NAME}-XXXXXX")"
 FAILED=0
 
 c_green='\033[32m'; c_red='\033[31m'; c_yellow='\033[33m'; c_reset='\033[0m'

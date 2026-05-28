@@ -1,5 +1,5 @@
 ---
-name: li-make-pdf
+name: make-pdf
 layer: foundation
 description: Convert URL, markdown file, or HTML to PDF via managed Chromium.
 color: yellow

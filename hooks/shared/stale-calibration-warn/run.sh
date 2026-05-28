@@ -38,7 +38,7 @@ if [ "$age_days" -gt 30 ]; then
   printf '{"hook":"stale-calibration-warn","tier":"warn","ts":"%s","calibration_age_days":%d}\n' \
     "$ts" "$age_days" >> "$AUDIT"
   echo "WARN [Lintel hook]: TRAILBLAZER-CALIBRATION is $age_days days old (>30 day threshold)"
-  echo "WARN: Voice-check verdicts will carry STALE stamp. Re-run /lintel:li-eval against corpus to refresh."
+  echo "WARN: Voice-check verdicts will carry STALE stamp. Re-run /li:eval against corpus to refresh."
 fi
 
 exit 0

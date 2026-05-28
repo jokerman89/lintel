@@ -1,5 +1,5 @@
 ---
-name: li-perf-mode
+name: perf-mode
 layer: foundation
 description: Activate 1M context-budget mode for the session — "tuffa faser" preset.
 color: orange

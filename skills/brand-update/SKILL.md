@@ -1,5 +1,5 @@
 ---
-name: li-brand-update
+name: brand-update
 layer: ms-team
 description: Pull/register MS brand assets to ~/.lintel/brand/ — version tracking, cache invalidation.
 color: orange
