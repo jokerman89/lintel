@@ -37,6 +37,18 @@ Output: a SENSE report. Operator decides next move based on it.
 
 ## Workflow
 
+### Step 0 — Surface relevant lessons (v3.6 cohort 2 item 1.3)
+
+Before reading configuration, invoke `/li:lessons-surface` so framtida session-arbete startar med relevanta lessons från `tasks/lessons.md`. Stänger L-001/L-002-loopen (lessons skrivs men läses aldrig utan denna step).
+
+```bash
+# Auto-invoke lessons-surface med current-context som keyword
+# (branch name + recent commit subjects ger implicit topic)
+~/.claude/skills/lessons-surface --auto-from-sense 2>/dev/null || true
+```
+
+Output (max 3 lessons) prepends till SENSE-rapport. Silent om no relevant matches. Aldrig blocker.
+
 ### Step 1 — Read configuration
 
 ```bash
