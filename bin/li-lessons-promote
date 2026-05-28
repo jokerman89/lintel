@@ -1,32 +1,32 @@
 #!/usr/bin/env bash
-# jstack-lessons-promote — promote a repo-local lesson to JStack global
+# li-lessons-promote — promote a repo-local lesson to Lintel global
 # (scaffolding/01-foundation/tasks/lessons.md) so future scaffolded repos inherit
 #
-# Usage: jstack-lessons-promote [--source <file>] [--jstack-dir <path>]
+# Usage: li-lessons-promote [--source <file>] [--lintel-dir <path>]
 
 set -euo pipefail
 
 SOURCE_FILE="tasks/lessons.md"
-JSTACK_DIR="${JSTACK_DIR:-$HOME/Workspace/jokerman-session-setup}"
+LINTEL_DIR="${LINTEL_DIR:-$HOME/Workspace/jokerman-session-setup}"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --source) SOURCE_FILE="$2"; shift 2 ;;
-    --jstack-dir) JSTACK_DIR="$2"; shift 2 ;;
+    --lintel-dir) LINTEL_DIR="$2"; shift 2 ;;
     --help|-h)
       cat <<EOF
-jstack-lessons-promote — promote a repo lesson to JStack global
+li-lessons-promote — promote a repo lesson to Lintel global
 
 Workflow (interactive):
   1. Shows numbered list of lessons in current repo's tasks/lessons.md
   2. You pick which one to promote
   3. Edit to generalize (strip repo-specific paths/names)
-  4. Appends to scaffolding/01-foundation/tasks/lessons.md in JStack repo
-  5. Commits on feature branch in JStack — you push when ready
+  4. Appends to scaffolding/01-foundation/tasks/lessons.md in Lintel repo
+  5. Commits on feature branch in Lintel — you push when ready
 
 Options:
   --source <file>        Source lessons.md (default: tasks/lessons.md)
-  --jstack-dir <path>    JStack repo path (default: ~/Workspace/jokerman-session-setup)
+  --lintel-dir <path>    Lintel repo path (default: ~/Workspace/jokerman-session-setup)
 EOF
       exit 0 ;;
     *) echo "Unknown arg: $1" >&2; exit 2 ;;
@@ -34,12 +34,12 @@ EOF
 done
 
 [ -f "$SOURCE_FILE" ] || { echo "Source lessons file not found: $SOURCE_FILE" >&2; exit 3; }
-[ -d "$JSTACK_DIR/.git" ] || { echo "JStack repo not at $JSTACK_DIR" >&2; exit 4; }
+[ -d "$LINTEL_DIR/.git" ] || { echo "Lintel repo not at $LINTEL_DIR" >&2; exit 4; }
 
-TARGET_FILE="$JSTACK_DIR/scaffolding/01-foundation/tasks/lessons.md"
+TARGET_FILE="$LINTEL_DIR/scaffolding/01-foundation/tasks/lessons.md"
 [ -f "$TARGET_FILE" ] || { echo "Target file not found: $TARGET_FILE" >&2; exit 5; }
 
-echo "jstack-lessons-promote"
+echo "li-lessons-promote"
 echo "Source: $SOURCE_FILE"
 echo "Target: $TARGET_FILE"
 echo ""
@@ -87,29 +87,29 @@ if [ -z "$generalized" ]; then
   exit 0
 fi
 
-# Append to JStack global lessons
+# Append to Lintel global lessons
 source_repo=$(basename "$(git rev-parse --show-toplevel 2>/dev/null || pwd)")
 {
   echo ""
   echo "$generalized"
   echo ""
-  echo "<!-- Promoted from \`$source_repo\` on $(date +%Y-%m-%d) via jstack-lessons-promote. -->"
+  echo "<!-- Promoted from \`$source_repo\` on $(date +%Y-%m-%d) via li-lessons-promote. -->"
 } >> "$TARGET_FILE"
 
-# Commit in JStack repo on feature branch
+# Commit in Lintel repo on feature branch
 slug=$(echo "$generalized" | head -1 | sed 's/^## //; s/[^a-zA-Z0-9]/-/g; s/--*/-/g; s/^-//; s/-$//' | tr A-Z a-z | cut -c1-40)
 branch="promote-lesson-$slug-$(date +%Y%m%d)"
 
-cd "$JSTACK_DIR"
+cd "$LINTEL_DIR"
 git checkout -q -b "$branch"
 git add scaffolding/01-foundation/tasks/lessons.md
 git commit -q -m "lessons: promote '$(echo "$generalized" | head -1 | sed 's/^## //')' from $source_repo"
 
 echo ""
-echo "✓ Promoted to JStack scaffolding/01-foundation/tasks/lessons.md"
+echo "✓ Promoted to Lintel scaffolding/01-foundation/tasks/lessons.md"
 echo "✓ Branch: $branch"
 echo ""
 echo "Next:"
-echo "  cd $JSTACK_DIR"
+echo "  cd $LINTEL_DIR"
 echo "  git push -u origin $branch"
 echo "  # then open PR"

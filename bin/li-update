@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# jstack-update — update JStack plugin across all detected CLIs
+# li-update — update Lintel plugin across all detected CLIs
 #
-# Usage: jstack-update [--dry-run]
+# Usage: li-update [--dry-run]
 
 set -euo pipefail
 
@@ -11,23 +11,23 @@ while [[ $# -gt 0 ]]; do
     --dry-run) DRY_RUN=1; shift ;;
     --help|-h)
       cat <<EOF
-jstack-update — update JStack plugin across detected CLIs
+li-update — update Lintel plugin across detected CLIs
 
 What it does:
-  1. Detects which CLIs are installed and have JStack plugin
+  1. Detects which CLIs are installed and have Lintel plugin
   2. Runs each CLI's update command in sequence
-  3. Updates scaffolding source at \$JSTACK_HOME
+  3. Updates scaffolding source at \$LINTEL_HOME
 
 Options:
   --dry-run    Show what would be done, don't execute
 
 Per-CLI update commands run:
-  claude code:    /plugin update jstack@jokerman-session-setup   (operator-driven inside CLI)
-  codex:          /plugins (search jstack, click update)         (operator-driven)
-  cursor:         /update-plugin jstack                          (operator-driven)
-  gemini:         gemini extensions update jstack
-  copilot cli:    copilot plugin update jstack@jokerman-session-setup
-  droid:          droid plugin update jstack
+  claude code:    /plugin update li@jokerman-lintel   (operator-driven inside CLI)
+  codex:          /plugins (search li, click update)         (operator-driven)
+  cursor:         /update-plugin li                          (operator-driven)
+  gemini:         gemini extensions update li
+  copilot cli:    copilot plugin update li@jokerman-lintel
+  droid:          droid plugin update li
 
 Note: Claude Code, Codex, and Cursor update via in-CLI commands —
       this script just lists them for you to run.
@@ -37,7 +37,7 @@ EOF
   esac
 done
 
-JSTACK_HOME="${JSTACK_HOME:-$HOME/.jstack}"
+LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
 
 run() {
   if [ "$DRY_RUN" = "1" ]; then
@@ -48,22 +48,22 @@ run() {
   fi
 }
 
-echo "jstack-update — updating across CLIs"
+echo "li-update — updating across CLIs"
 echo ""
 
 # 1. Update scaffolding source
-echo "## Scaffolding source ($JSTACK_HOME)"
-if [ -d "$JSTACK_HOME/.git" ]; then
+echo "## Scaffolding source ($LINTEL_HOME)"
+if [ -d "$LINTEL_HOME/.git" ]; then
   if [ "$DRY_RUN" = "1" ]; then
-    echo "  [dry-run] cd $JSTACK_HOME && git fetch && git pull --ff-only"
+    echo "  [dry-run] cd $LINTEL_HOME && git fetch && git pull --ff-only"
   else
-    cd "$JSTACK_HOME"
+    cd "$LINTEL_HOME"
     git fetch -q origin 2>/dev/null || echo "  ⚠ fetch failed"
     git pull --ff-only -q 2>/dev/null && echo "  ✓ updated" || echo "  ⚠ pull failed (manual intervention may be needed)"
   fi
 else
-  echo "  ⚠ $JSTACK_HOME not a git repo — skipping scaffolding update"
-  echo "    Recommend: git clone Azureflipper/jokerman-session-setup $JSTACK_HOME"
+  echo "  ⚠ $LINTEL_HOME not a git repo — skipping scaffolding update"
+  echo "    Recommend: git clone Azureflipper/jokerman-session-setup $LINTEL_HOME"
 fi
 echo ""
 
@@ -72,26 +72,26 @@ echo "## Per-CLI plugin updates"
 
 # Gemini (scriptable)
 if command -v gemini >/dev/null 2>&1; then
-  if gemini extensions list 2>/dev/null | grep -qi "jstack"; then
+  if gemini extensions list 2>/dev/null | grep -qi "li"; then
     echo "gemini:"
-    run gemini extensions update jstack
+    run gemini extensions update li
   fi
 fi
 
 # Copilot CLI (scriptable)
 if command -v copilot >/dev/null 2>&1; then
-  if copilot plugin list 2>/dev/null | grep -qi "jstack"; then
+  if copilot plugin list 2>/dev/null | grep -qi "li"; then
     echo "copilot cli:"
-    run copilot plugin update jstack@jokerman-session-setup 2>/dev/null || \
-      run copilot plugin install jstack@jokerman-session-setup --force
+    run copilot plugin update li@jokerman-lintel 2>/dev/null || \
+      run copilot plugin install li@jokerman-lintel --force
   fi
 fi
 
 # Droid (scriptable)
 if command -v droid >/dev/null 2>&1; then
-  if droid plugin list 2>/dev/null | grep -qi "jstack"; then
+  if droid plugin list 2>/dev/null | grep -qi "li"; then
     echo "droid:"
-    run droid plugin update jstack 2>/dev/null || true
+    run droid plugin update li 2>/dev/null || true
   fi
 fi
 
@@ -99,14 +99,14 @@ fi
 echo ""
 echo "## Operator-driven updates (run inside each CLI):"
 if command -v claude >/dev/null 2>&1; then
-  echo "  claude code:  /plugin update jstack@jokerman-session-setup"
+  echo "  claude code:  /plugin update li@jokerman-lintel"
 fi
 if command -v codex >/dev/null 2>&1; then
-  echo "  codex:        /plugins → search jstack → Update"
+  echo "  codex:        /plugins → search li → Update"
 fi
 if command -v cursor >/dev/null 2>&1; then
-  echo "  cursor:       /update-plugin jstack (in Agent chat)"
+  echo "  cursor:       /update-plugin li (in Agent chat)"
 fi
 
 echo ""
-echo "Run 'jstack-doctor' afterward to verify all CLIs on latest version."
+echo "Run 'li-doctor' afterward to verify all CLIs on latest version."

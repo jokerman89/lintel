@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
-# jstack-doctor — cross-CLI health check
+# li-doctor — cross-CLI health check
 #
-# Detects installed AI CLIs, JStack install state per CLI, version drift,
+# Detects installed AI CLIs, Lintel install state per CLI, version drift,
 # scaffolding install, brand asset age, voice corpus calibration.
 #
-# Usage: jstack-doctor [--verbose] [--json]
+# Usage: li-doctor [--verbose] [--json]
 
 set -uo pipefail
 
-JSTACK_HOME="${JSTACK_HOME:-$HOME/.jstack}"
+LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
 VERBOSE=0
 OUTPUT_JSON=0
 
@@ -29,7 +29,7 @@ ok() { echo "${GREEN}✓${RESET} $*"; }
 warn() { echo "${YELLOW}⚠${RESET} $*"; }
 fail() { echo "${RED}✗${RESET} $*"; }
 
-echo "JStack Doctor — health check"
+echo "Lintel Doctor — health check"
 echo "Date: $(date '+%Y-%m-%d %H:%M:%S')"
 echo ""
 
@@ -58,62 +58,62 @@ done
 [ "$found" = "0" ] && fail "No AI CLIs detected in PATH"
 echo ""
 
-# ── 2. JStack install per CLI ──
-echo "## JStack install per CLI"
+# ── 2. Lintel install per CLI ──
+echo "## Lintel install per CLI"
 
 # Claude Code
 if [ -n "${CLI_PATHS[claude]}" ]; then
-  if [ -d "$HOME/.claude/plugins/jstack" ] || [ -d "$HOME/.claude/marketplaces/jokerman-session-setup" ]; then
-    if [ -f "$HOME/.claude/plugins/jstack/.claude-plugin/plugin.json" ]; then
-      version=$(grep -o '"version"[[:space:]]*:[[:space:]]*"[^"]*"' "$HOME/.claude/plugins/jstack/.claude-plugin/plugin.json" 2>/dev/null | head -1 | sed 's/.*"\([^"]*\)"$/\1/')
-      ok "claude code: jstack@${version:-unknown}"
+  if [ -d "$HOME/.claude/plugins/li" ] || [ -d "$HOME/.claude/marketplaces/jokerman-session-setup" ]; then
+    if [ -f "$HOME/.claude/plugins/li/.claude-plugin/plugin.json" ]; then
+      version=$(grep -o '"version"[[:space:]]*:[[:space:]]*"[^"]*"' "$HOME/.claude/plugins/li/.claude-plugin/plugin.json" 2>/dev/null | head -1 | sed 's/.*"\([^"]*\)"$/\1/')
+      ok "claude code: li@${version:-unknown}"
     else
-      ok "claude code: jstack (marketplace, version unknown)"
+      ok "claude code: li (marketplace, version unknown)"
     fi
   else
-    warn "claude code: jstack NOT installed"
+    warn "claude code: li NOT installed"
     echo "    Fix: /plugin marketplace add Azureflipper/jokerman-session-setup"
-    echo "         /plugin install jstack@jokerman-session-setup"
+    echo "         /plugin install li@jokerman-lintel"
   fi
 fi
 
 # Codex
 if [ -n "${CLI_PATHS[codex]}" ]; then
-  if codex plugin list 2>/dev/null | grep -qi "jstack"; then
-    ok "codex: jstack installed"
+  if codex plugin list 2>/dev/null | grep -qi "li"; then
+    ok "codex: li installed"
   else
-    warn "codex: jstack NOT installed (or 'plugin list' command differs)"
-    echo "    Fix: /plugins → search jstack → Install"
+    warn "codex: li NOT installed (or 'plugin list' command differs)"
+    echo "    Fix: /plugins → search li → Install"
   fi
 fi
 
 # Gemini
 if [ -n "${CLI_PATHS[gemini]}" ]; then
-  if gemini extensions list 2>/dev/null | grep -qi "jstack"; then
-    ok "gemini: jstack installed"
+  if gemini extensions list 2>/dev/null | grep -qi "li"; then
+    ok "gemini: li installed"
   else
-    warn "gemini: jstack NOT installed"
+    warn "gemini: li NOT installed"
     echo "    Fix: gemini extensions install https://github.com/Azureflipper/jokerman-session-setup"
   fi
 fi
 
 # Copilot CLI
 if [ -n "${CLI_PATHS[copilot]}" ]; then
-  if copilot plugin list 2>/dev/null | grep -qi "jstack"; then
-    ok "copilot cli: jstack installed"
+  if copilot plugin list 2>/dev/null | grep -qi "li"; then
+    ok "copilot cli: li installed"
   else
-    warn "copilot cli: jstack NOT installed"
+    warn "copilot cli: li NOT installed"
     echo "    Fix: copilot plugin marketplace add Azureflipper/jokerman-session-setup"
-    echo "         copilot plugin install jstack@jokerman-session-setup"
+    echo "         copilot plugin install li@jokerman-lintel"
   fi
 fi
 
 # Droid
 if [ -n "${CLI_PATHS[droid]}" ]; then
-  if droid plugin list 2>/dev/null | grep -qi "jstack"; then
-    ok "droid: jstack installed"
+  if droid plugin list 2>/dev/null | grep -qi "li"; then
+    ok "droid: li installed"
   else
-    warn "droid: jstack NOT installed"
+    warn "droid: li NOT installed"
   fi
 fi
 
@@ -121,30 +121,30 @@ echo ""
 
 # ── 3. Scaffolding install ──
 echo "## Scaffolding install"
-if [ -d "$JSTACK_HOME/scaffolding/01-foundation" ]; then
-  ok "scaffolding source at: $JSTACK_HOME/scaffolding/"
+if [ -d "$LINTEL_HOME/scaffolding/01-foundation" ]; then
+  ok "scaffolding source at: $LINTEL_HOME/scaffolding/"
   if [ "$VERBOSE" = "1" ]; then
-    age_days=$(( ( $(date +%s) - $(stat -c %Y "$JSTACK_HOME/scaffolding" 2>/dev/null || stat -f %m "$JSTACK_HOME/scaffolding") ) / 86400 ))
+    age_days=$(( ( $(date +%s) - $(stat -c %Y "$LINTEL_HOME/scaffolding" 2>/dev/null || stat -f %m "$LINTEL_HOME/scaffolding") ) / 86400 ))
     echo "    Last updated: ${age_days} days ago"
   fi
 else
-  warn "scaffolding source NOT at $JSTACK_HOME/scaffolding/"
-  echo "    Fix: re-run installer, OR git clone Azureflipper/jokerman-session-setup ~/.jstack"
+  warn "scaffolding source NOT at $LINTEL_HOME/scaffolding/"
+  echo "    Fix: re-run installer, OR git clone Azureflipper/jokerman-session-setup ~/.lintel"
 fi
 echo ""
 
 # ── 4. Brand assets ──
 echo "## Brand assets"
-if [ -d "$JSTACK_HOME/brand" ]; then
-  age_days=$(( ( $(date +%s) - $(stat -c %Y "$JSTACK_HOME/brand" 2>/dev/null || stat -f %m "$JSTACK_HOME/brand") ) / 86400 ))
+if [ -d "$LINTEL_HOME/brand" ]; then
+  age_days=$(( ( $(date +%s) - $(stat -c %Y "$LINTEL_HOME/brand" 2>/dev/null || stat -f %m "$LINTEL_HOME/brand") ) / 86400 ))
   if [ "$age_days" -gt 90 ]; then
-    warn "brand assets at ${JSTACK_HOME}/brand (age: ${age_days} days — stale, >90 days threshold)"
+    warn "brand assets at ${LINTEL_HOME}/brand (age: ${age_days} days — stale, >90 days threshold)"
     echo "    Fix: invoke /brand-update skill"
   else
-    ok "brand assets at ${JSTACK_HOME}/brand (age: ${age_days} days)"
+    ok "brand assets at ${LINTEL_HOME}/brand (age: ${age_days} days)"
   fi
 else
-  warn "no brand assets at $JSTACK_HOME/brand/"
+  warn "no brand assets at $LINTEL_HOME/brand/"
   echo "    Fix: invoke /brand-update skill, OR run /generate-* with default-templates"
 fi
 echo ""
@@ -153,8 +153,8 @@ echo ""
 echo "## Voice corpus calibration"
 CALIBRATION_FILE=""
 for candidate in \
-  "$JSTACK_HOME/scaffolding/03-ms-team/voice/OurVoice-calibration.md" \
-  "$JSTACK_HOME/voice/OurVoice-calibration.md"; do
+  "$LINTEL_HOME/scaffolding/03-ms-team/voice/OurVoice-calibration.md" \
+  "$LINTEL_HOME/voice/OurVoice-calibration.md"; do
   [ -f "$candidate" ] && { CALIBRATION_FILE="$candidate"; break; }
 done
 
@@ -173,15 +173,15 @@ echo ""
 # ── 6. Hook activation ──
 echo "## Hooks"
 hook_count=0
-if [ -d "$JSTACK_HOME/hooks" ]; then
-  hook_count=$(find "$JSTACK_HOME/hooks" -maxdepth 2 -type l 2>/dev/null | wc -l | tr -d ' ')
+if [ -d "$LINTEL_HOME/hooks" ]; then
+  hook_count=$(find "$LINTEL_HOME/hooks" -maxdepth 2 -type l 2>/dev/null | wc -l | tr -d ' ')
   if [ "$hook_count" = "0" ]; then
     warn "0 hooks activated (operator opt-in via symlinks expected)"
   else
     ok "$hook_count hook(s) activated"
   fi
 else
-  warn "no hooks directory at $JSTACK_HOME/hooks/"
+  warn "no hooks directory at $LINTEL_HOME/hooks/"
 fi
 echo ""
 
@@ -189,5 +189,5 @@ echo ""
 echo "## Verdict"
 echo "  CLIs detected: $found"
 echo ""
-echo "Run 'jstack-doctor --verbose' for more detail."
-echo "Run 'jstack-update' to update plugin in each CLI."
+echo "Run 'li-doctor --verbose' for more detail."
+echo "Run 'li-update' to update plugin in each CLI."

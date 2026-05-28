@@ -138,6 +138,31 @@ jobs:
       - name: Run e2e tests (cross-CLI)
         run: bash tests/runner/run-e2e.sh
 
+  shellcheck-lint:
+    # v3.6 cohort 1 item 6.6: shellcheck över bin/ + install/ + run.sh + hooks/.
+    # Warn-only initially (continue-on-error: true) — promote to required efter clean baseline etablerad.
+    name: shellcheck (warn-only)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install shellcheck
+        run: sudo apt-get install -y shellcheck
+
+      - name: Run shellcheck on bin/
+        run: shellcheck --severity=warning bin/li-* || true
+
+      - name: Run shellcheck on install/
+        run: shellcheck --severity=warning install/*.sh || true
+
+      - name: Run shellcheck on run.sh (if exists)
+        run: |
+          if [ -f run.sh ]; then shellcheck --severity=warning run.sh || true; fi
+
+      - name: Run shellcheck on tests/
+        run: shellcheck --severity=warning tests/runner/*.sh tests/unit/*.sh || true
+
   compliance-check:
     name: /onecs-check (when implemented)
     runs-on: ubuntu-latest
