@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# jstack-scaffold — copy scaffolding/01-foundation/* into target repo with repo-specific rendering
+# li-scaffold — copy scaffolding/01-foundation/* into target repo with repo-specific rendering
 #
 # Usage:
-#   jstack-scaffold init [--target <path>] [--name <repo-name>] [--team <ms-team>] [--engagement <type>]
-#   jstack-scaffold check [--target <path>]
+#   li-scaffold init [--target <path>] [--name <repo-name>] [--team <ms-team>] [--engagement <type>]
+#   li-scaffold check [--target <path>]
 #
 # Defaults:
 #   --target: current working directory
@@ -13,8 +13,8 @@
 
 set -euo pipefail
 
-JSTACK_HOME="${JSTACK_HOME:-$HOME/.jstack}"
-SCAFFOLDING_SRC="${JSTACK_HOME}/scaffolding/01-foundation"
+LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
+SCAFFOLDING_SRC="${LINTEL_HOME}/scaffolding/01-foundation"
 
 CMD="${1:-help}"
 shift || true
@@ -42,11 +42,11 @@ done
 
 help() {
   cat <<EOF
-jstack-scaffold — initialize JStack scaffolding in a repo
+li-scaffold — initialize Lintel scaffolding in a repo
 
 Usage:
-  jstack-scaffold init [options]      Initialize scaffolding files
-  jstack-scaffold check [options]     Check current state without modifying
+  li-scaffold init [options]      Initialize scaffolding files
+  li-scaffold check [options]     Check current state without modifying
 
 Options:
   --target <path>          Target repo dir (default: cwd)
@@ -66,16 +66,16 @@ Files created:
   If --compliance=full-SDL: also copies scaffolding/02-sdl/* compliance docs.
 
 Examples:
-  cd ~/new-customer-engagement && jstack-scaffold init
-  jstack-scaffold init --target ~/foo --engagement mvp
-  jstack-scaffold check
+  cd ~/new-customer-engagement && li-scaffold init
+  li-scaffold init --target ~/foo --engagement mvp
+  li-scaffold check
 EOF
 }
 
 check_source() {
   if [ ! -d "$SCAFFOLDING_SRC" ]; then
-    echo "ERROR: JStack scaffolding source not found at $SCAFFOLDING_SRC" >&2
-    echo "Set JSTACK_HOME env var or run JStack installer first." >&2
+    echo "ERROR: Lintel scaffolding source not found at $SCAFFOLDING_SRC" >&2
+    echo "Set LINTEL_HOME env var or run Lintel installer first." >&2
     echo "  install: bash <(curl -fsSL https://raw.githubusercontent.com/Azureflipper/jokerman-session-setup/main/install/install.sh)" >&2
     exit 3
   fi
@@ -93,7 +93,7 @@ check_collisions() {
 }
 
 cmd_check() {
-  echo "JStack scaffold check: $TARGET"
+  echo "Lintel scaffold check: $TARGET"
   echo ""
   echo "Scaffolding source: $SCAFFOLDING_SRC"
   if [ -d "$SCAFFOLDING_SRC" ]; then
@@ -124,7 +124,7 @@ cmd_check() {
 
 cmd_init() {
   check_source
-  echo "jstack-scaffold: initializing $TARGET"
+  echo "li-scaffold: initializing $TARGET"
   echo "  name=$NAME team=$TEAM engagement=$ENGAGEMENT voice=$VOICE_TIER compliance=$COMPLIANCE_LEVEL"
   echo ""
 
@@ -200,25 +200,25 @@ cmd_init() {
   # Optional: full SDL compliance docs
   if [ "$COMPLIANCE_LEVEL" = "full-SDL" ]; then
     mkdir -p scaffolding/02-sdl
-    if [ -d "$JSTACK_HOME/scaffolding/02-sdl" ]; then
-      cp -r "$JSTACK_HOME/scaffolding/02-sdl"/* scaffolding/02-sdl/ 2>/dev/null || true
+    if [ -d "$LINTEL_HOME/scaffolding/02-sdl" ]; then
+      cp -r "$LINTEL_HOME/scaffolding/02-sdl"/* scaffolding/02-sdl/ 2>/dev/null || true
       echo "  ✓ scaffolding/02-sdl/* (compliance reference)"
     fi
   fi
 
   echo ""
-  echo "jstack-scaffold: done."
+  echo "li-scaffold: done."
   echo ""
   echo "Next steps:"
   echo "  1. Review CLAUDE.md and customize project-specific sections."
   echo "  2. Edit tasks/personas.md with engagement-specific personas."
-  echo "  3. Install JStack plugin for your CLI:"
+  echo "  3. Install Lintel plugin for your CLI:"
   echo "       Claude Code:    /plugin marketplace add Azureflipper/jokerman-session-setup"
-  echo "                       /plugin install jstack@jokerman-session-setup"
-  echo "       Codex:          /plugins → search jstack → Install"
-  echo "       Cursor:         /add-plugin jstack"
+  echo "                       /plugin install li@jokerman-lintel"
+  echo "       Codex:          /plugins → search li → Install"
+  echo "       Cursor:         /add-plugin li"
   echo "       Gemini:         gemini extensions install https://github.com/Azureflipper/jokerman-session-setup"
-  echo "  4. git add -A && git commit -m 'chore: scaffold JStack base'"
+  echo "  4. git add -A && git commit -m 'chore: scaffold Lintel base'"
   echo ""
 }
 

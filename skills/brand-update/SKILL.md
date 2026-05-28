@@ -90,7 +90,7 @@ Operator-driven workflow to register a brand asset pull. Lintel doesn't automate
 ```
 Brand update — 2026-Q2
 
-Staging dir: /Users/operator/brand-staging-2026-q2
+Staging dir: ~/brand-staging-2026-q2
 Validated: 4 PPT templates, 6 Word templates, 2 web templates, 87 Azure SVGs
 Existing brand backed up: ~/.lintel/brand-backup-20260527-220000/
 Backup retention: last 3 (pruned 0 older backups)

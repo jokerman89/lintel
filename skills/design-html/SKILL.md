@@ -64,7 +64,7 @@ Generated: ~/.lintel/design-html/portal-dashboard-v3-20260527-163100.html (24KB)
   - 3-card area-grid (placeholder text)
   - Italic emerald-700 accent on H1
 
-To preview: /open-managed-browser --url file:///Users/.../portal-dashboard-v3-20260527-163100.html
+To preview: /open-managed-browser --url file://~/.lintel/design-html/portal-dashboard-v3-20260527-163100.html
 To fork into variants: /design-shotgun --seed <this path> --count 3
 ```
 

@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
-# jstack-lessons-sync — sync repo-local lessons.md across operator's machines
+# li-lessons-sync — sync repo-local lessons.md across operator's machines
 # (gstack-brain-style — private to operator, opt-in)
 #
-# Usage: jstack-lessons-sync [--push | --pull | --status]
+# Usage: li-lessons-sync [--push | --pull | --status]
 
 set -euo pipefail
 
-JSTACK_HOME="${JSTACK_HOME:-$HOME/.jstack}"
-LESSONS_REMOTE_FILE="$HOME/.jstack-lessons-remote.txt"
-LESSONS_LOCAL_DIR="$JSTACK_HOME/lessons"
+LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
+LESSONS_REMOTE_FILE="$HOME/.lintel-lessons-remote.txt"
+LESSONS_LOCAL_DIR="$LINTEL_HOME/lessons"
 
 CMD="${1:---status}"
 
@@ -16,27 +16,27 @@ mkdir -p "$LESSONS_LOCAL_DIR"
 
 help() {
   cat <<EOF
-jstack-lessons-sync — sync per-repo lessons across operator's machines
+li-lessons-sync — sync per-repo lessons across operator's machines
 
 This is OPT-IN. Lessons stay private to the operator (no team-wide push).
 The remote is a private git repo the operator configures.
 
 Usage:
-  jstack-lessons-sync setup <repo-url>   First-time setup with private repo URL
-  jstack-lessons-sync push               Push current repo's tasks/lessons.md
-  jstack-lessons-sync pull               Pull all lessons from remote
-  jstack-lessons-sync status             Show status (default)
-  jstack-lessons-sync forget             Remove sync configuration
+  li-lessons-sync setup <repo-url>   First-time setup with private repo URL
+  li-lessons-sync push               Push current repo's tasks/lessons.md
+  li-lessons-sync pull               Pull all lessons from remote
+  li-lessons-sync status             Show status (default)
+  li-lessons-sync forget             Remove sync configuration
 
 Setup notes:
   - <repo-url> should be a PRIVATE git repo (e.g. a personal lessons-vault)
   - Lessons sync ONE-WAY per machine — operator can pull from any, push from current
-  - No team-wide sharing — use jstack-lessons-promote for that
+  - No team-wide sharing — use li-lessons-promote for that
 EOF
 }
 
 cmd_status() {
-  echo "JStack lessons sync status"
+  echo "Lintel lessons sync status"
   echo ""
   if [ -f "$LESSONS_REMOTE_FILE" ]; then
     echo "Configured remote: $(cat "$LESSONS_REMOTE_FILE")"
@@ -48,17 +48,17 @@ cmd_status() {
       echo "Last pull: $last_pull"
       echo "Files: $file_count"
     else
-      echo "Lessons git repo not initialized — run 'jstack-lessons-sync setup <url>'"
+      echo "Lessons git repo not initialized — run 'li-lessons-sync setup <url>'"
     fi
   else
-    echo "Not configured. Run 'jstack-lessons-sync setup <repo-url>' to enable."
+    echo "Not configured. Run 'li-lessons-sync setup <repo-url>' to enable."
   fi
 }
 
 cmd_setup() {
   local url="${1:-}"
   if [ -z "$url" ]; then
-    echo "Usage: jstack-lessons-sync setup <repo-url>" >&2
+    echo "Usage: li-lessons-sync setup <repo-url>" >&2
     exit 2
   fi
   echo "$url" > "$LESSONS_REMOTE_FILE"
@@ -71,17 +71,17 @@ cmd_setup() {
       cd "$LESSONS_LOCAL_DIR"
       git init -q
       git remote add origin "$url"
-      echo "# JStack lessons vault" > README.md
+      echo "# Lintel lessons vault" > README.md
       git add README.md
       git commit -q -m "init lessons vault"
     fi
   fi
-  echo "Setup complete. Run 'jstack-lessons-sync push' from any repo to sync."
+  echo "Setup complete. Run 'li-lessons-sync push' from any repo to sync."
 }
 
 cmd_push() {
   [ -f "tasks/lessons.md" ] || { echo "No tasks/lessons.md in current dir" >&2; exit 3; }
-  [ -d "$LESSONS_LOCAL_DIR/.git" ] || { echo "Setup not done — run 'jstack-lessons-sync setup <url>'" >&2; exit 4; }
+  [ -d "$LESSONS_LOCAL_DIR/.git" ] || { echo "Setup not done — run 'li-lessons-sync setup <url>'" >&2; exit 4; }
 
   local repo_name
   repo_name=$(basename "$(git rev-parse --show-toplevel 2>/dev/null || pwd)")
