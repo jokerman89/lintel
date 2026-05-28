@@ -46,6 +46,34 @@ Rough estimates per source:
 - Conversation history: depends on session length (estimate 2-5k per significant turn)
 - Subagent results: from build-log/review-report sizes if applicable
 
+### Step 2.5 — Apply 500k soft + 750k hard cap (v3.6 cohort 3 items 2.1+2.2+2.3+3.3)
+
+Mode-aware caps per design-doc D-3a + D-3c (initial defaults, operator-overridable):
+
+```yaml
+mode_envelopes:
+  hotfix:              { soft: 200k, hard: 300k }
+  customer-engagement: { soft: 500k, hard: 750k }
+  research-dive:       { soft: 750k, hard: 900k }
+  demo-prep:           { soft: 300k, hard: 450k }
+  internal-tool:       { soft: 400k, hard: 600k }
+```
+
+Workflow:
+1. Read current mode from `~/.lintel/profile.yaml` (default: customer-engagement)
+2. Look up `soft` + `hard` cap for mode
+3. Compute current payload (loaded files + warming-projected-loads from queue)
+4. Surface verdict:
+   - `payload < soft` → **green pass** (proceed silently)
+   - `soft <= payload < hard` → **friction warning** ("near cap, consider --skip-warming-X")
+   - `payload >= hard` → **hard block** ("exceeds cap, reduce before handoff")
+
+**Synthetic vs real warming distinction (2.3):**
+- Synthetic warming (operator-written brief, agent-assigned context): cheap, doesn't count toward cap
+- Real warming (loading actual files via `/li:context-warm-*`): costs, counts against cap
+
+Hard block only triggers on real-warming-driven payload growth.
+
 ### Step 3 — Surface report
 
 ```
