@@ -4,10 +4,10 @@ Auto-generated från frontmatter på push till main.
 Regenerated av `.github/workflows/catalog.yml` per push när `skills/**/SKILL.md` ändras.
 Hand-edits skrivs över — edit frontmatter i source SKILL.md istället.
 
-Total skills: 131
-Generated: 2026-05-28T15:52:04Z
+Total skills: 133
+Generated: 2026-05-28T16:28:21Z
 
-## foundation layer (92 skills)
+## foundation layer (93 skills)
 
 | Skill | Description |
 |---|---|
@@ -51,6 +51,7 @@ Generated: 2026-05-28T15:52:04Z
 | `/li:health` | Lintel install + upstream status check. Verifies layers, manifest, hooks, upstream pins, CLI shims. |
 | `/li:help` | List installed Lintel skills + agents + hooks. Filter by category, voice tier, or CLI support. |
 | `/li:hooks-status` | Reader för hooks.jsonl — surface aktiva-vs-döda hooks + override-pattern + trigger-counts. Stänger hooks-observatio |
+| `/li:instruction-parity-check` | Verifierar substance-parity över 6 instruktionsfiler (root CLAUDE/AGENTS/GEMINI + shims). Multi-CLI promise's weak poin |
 | `/li:investigate` | Hypothesis-driven bug investigation — minimum repro, eliminate variables, root cause. |
 | `/li:landing-report` | Post-ship report — what landed in a window, in engineering or customer-voice format. |
 | `/li:learn` | Record an insight, correction, or pattern as a lesson — readable at future session start. |
@@ -104,7 +105,7 @@ Generated: 2026-05-28T15:52:04Z
 | `/li:sync-brain` | Refresh the gbrain index from the current worktree — incremental or full. |
 | `/li:usage-log` | Append-only usage log för skill/agent-invocations. Wrapper-pattern per L-001 (en log, ingen per-skill duplikat). Solo-i |
 
-## ms-team layer (38 skills)
+## ms-team layer (39 skills)
 
 | Skill | Description |
 |---|---|
@@ -127,6 +128,7 @@ Generated: 2026-05-28T15:52:04Z
 | `/li:generate-pdf` | ⚠ TEMPLATE ONLY — Slot for PDF document generation. Content not curated. AI generates fresh at invocation per L-001. |
 | `/li:generate-ppt` | Produce brand-compliant PowerPoint deck via pptx-genjs, 4-gate quality pipeline. |
 | `/li:generate-qa` | Validate generated artifacts (any format) against brand, voice, readability, and structure standards. Auto-fixes where p |
+| `/li:generate-style-learn` | Analysera .pptx/.docx/web-examples och extrahera reusable style palette. v3.5 Fas 3 av doc-generation-pipeline. |
 | `/li:generate-visio` | ⚠ TEMPLATE ONLY — Slot for Visio diagram generation (architecture sketches, network topologies, process flows). Cont |
 | `/li:generate-web` | Produce brand-compliant static HTML or Next.js scaffold for demo/landing page. |
 | `/li:generate-word` | Produce brand-compliant Word doc via docx-templater — technical / customer-summary / transparency-note variants. |
