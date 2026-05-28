@@ -35,7 +35,8 @@ case "$SCOPE" in
   unit) SEARCH_DIRS="unit" ;;
   integration) SEARCH_DIRS="integration" ;;
   e2e) SEARCH_DIRS="e2e" ;;
-  all) SEARCH_DIRS="unit integration e2e" ;;
+  behavior) SEARCH_DIRS="behavior" ;;
+  all) SEARCH_DIRS="unit behavior integration e2e" ;;
   *) echo "ERROR: unknown scope $SCOPE" >&2; exit 2 ;;
 esac
 

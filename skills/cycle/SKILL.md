@@ -141,11 +141,13 @@ Cycle plan:
 
 If operator confirms: continue. If edit: loop back to Step 2.
 
-### Step 4 — Run phases sequentially
+### Step 4 — Run phases sequentially (med phase-progress per v3.6 cohort 2 item 1.5)
 
 For each phase in phases_to_run order:
 
 ```
+0. Phase-progress output: "Phase N/M <PHASE> — next <NEXT> — est ~<X>k tokens"
+   (text-only, ingen grafik per 1.5-spec)
 1. Pre-phase: write 00-state.md entry "starting <phase>"
 2. Invoke /li:<phase>
 3. Phase runs (with its own pause-gates per phase-skill)
@@ -154,6 +156,17 @@ For each phase in phases_to_run order:
 6. If status=BLOCKED: pause cycle, surface to operator
 7. If status=NEEDS_CONTEXT: pause, gather, re-invoke phase
 ```
+
+**Phase-progress format** (printed to stdout at each phase boundary):
+
+```
+─────────────────────────────────────────────────────────
+[3/8] DISCOVER → next: PLAN
+Token est this phase: ~3.5k  |  cycle total so far: ~9.2k
+─────────────────────────────────────────────────────────
+```
+
+Token-est siffrorna kommer från phase-skill's frontmatter `tokens_est_typical:` (om present) eller default 3k per phase.
 
 Between phases:
 - Propagate phase output as input to next (e.g., DEFINE's design doc → PLAN's source)
