@@ -4,10 +4,10 @@ Auto-generated från frontmatter på push till main.
 Regenerated av `.github/workflows/catalog.yml` per push när `skills/**/SKILL.md` ändras.
 Hand-edits skrivs över — edit frontmatter i source SKILL.md istället.
 
-Total skills: 125
-Generated: 2026-05-28T15:36:42Z
+Total skills: 129
+Generated: 2026-05-28T15:37:03Z
 
-## foundation layer (89 skills)
+## foundation layer (90 skills)
 
 | Skill | Description |
 |---|---|
@@ -90,6 +90,7 @@ Generated: 2026-05-28T15:36:42Z
 | `/li:role-update` | Add learning to existing role file (sensitivity-aware) — captures new INSIGHT, refines voice phrasing, updates COLD KN |
 | `/li:roles-list` | List all available roles (public + private, if accessible). Shows id, display name, scope, sensitivity, last-updated. |
 | `/li:safe-deploy-ring` | Gate a deployed feature behind a percentage rollout — ramp up, monitor, abort safe. |
+| `/li:safe-install` | Safe-install wrapper för Lintel — version-before-every-change + uninstall-with-restore + visible-announce backup. Ope |
 | `/li:scaffold` | Scaffold a new repo with Lintel base templates — CLAUDE.md, tasks/lessons.md, EVOLUTION-LOG, docs/adr/ — interactive |
 | `/li:scrape` | Extract structured data from one or more pages — declarative selector schema, JSON output. |
 | `/li:sense` | Phase 1 of Lintel cycle — auto-detect operator intent, WorkProfile state, active role, mode recommendation, 00-state f |
@@ -101,12 +102,13 @@ Generated: 2026-05-28T15:36:42Z
 | `/li:sync-brain` | Refresh the gbrain index from the current worktree — incremental or full. |
 | `/li:usage-log` | Append-only usage log för skill/agent-invocations. Wrapper-pattern per L-001 (en log, ingen per-skill duplikat). Solo-i |
 
-## ms-team layer (36 skills)
+## ms-team layer (38 skills)
 
 | Skill | Description |
 |---|---|
 | `/li:agt-tier-stamp` | Stamp agents with license tier (permissive/restricted) — enforces 5-level precedence model. |
 | `/li:asset-search` | Search ~/.lintel/brand/azure-assets/ for the right icon or diagram primitive. |
+| `/li:az-discover-presale` | ⚠ TEMPLATE ONLY — Presale Azure discovery skill (operator-request 5.4 REPLACED per L-001). Scaffolding-slot, content |
 | `/li:az-tldr` | Comprehensive on-demand rundown of an Azure service — 15 sections covering what/why/how/pitfalls/customer-questions/co |
 | `/li:brand-update` | Pull/register MS brand assets to ~/.lintel/brand/ — version tracking, cache invalidation. |
 | `/li:caip-audit` | CAIP-SE-specific readiness audit — engagement state, compliance, voice, deliverables. |
@@ -141,4 +143,11 @@ Generated: 2026-05-28T15:36:42Z
 | `/li:scaffold-engagement-demo` | Initialize a customer-demo repo — sample data, script, slides, recording config, voice gates. |
 | `/li:scaffold-internal-tool` | Initialize an internal-tooling repo — CI, README, MS compliance hooks, no customer surface. |
 | `/li:scaffold-mvp` | Initialize a product-MVP repo — full compliance + voice + RAI + deploy wiring. |
+| `/li:security-genomlysning` | ⚠ TEMPLATE ONLY — Security + risk genomlysning (operator-request 5.5 REPLACED per L-001). Scaffolding-slot, posture- |
+
+## sdl layer (1 skills)
+
+| Skill | Description |
+|---|---|
+| `/li:compliance-gate` | Compliance-gate aggregator — kör alla relevanta compliance-skills (caip-audit, onecs-check, rais-*, *-submit-draft) s |
 
