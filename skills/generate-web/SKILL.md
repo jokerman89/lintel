@@ -41,12 +41,31 @@ Uses native HTML / Next.js templates from `~/.lintel/brand/web-templates/` or in
 
 ## Inputs
 
-- Required `--brief <path|inline>` — content brief
+- Required `--brief <path|inline>` — content brief **OR** `--from-pipeline <dir>` (Fas 2: shared pipeline mode)
 - Required `--variant <single-file|nextjs-scaffold>` — output shape
 - Optional `--audience <text>` — primary audience
 - Optional `--use-defaults` — force in-repo default templates
 - Optional `--preview` — after generation, open in `/open-managed-browser`
 - Optional `--azure-theme` — apply Azure-specific palette (vs neutral defaults)
+
+## From-pipeline mode (v3.5 Fas 2 — generate-pipeline integration)
+
+If invoked med `--from-pipeline <run-dir>` istället för `--brief`:
+
+1. **Read shared pipeline-output:**
+   - `<run-dir>/content.md` — hero + sections + body med HTML-comment annotations
+   - `<run-dir>/design-spec.json` — read `per_format.web.sections` för layout-mappings
+
+2. **Replace brief-parsing logic** med direct-read av content.md sections + design-spec web-block-types (hero / sections / features / FAQ).
+
+3. **Apply format-specific design-pass via design_pass_hook:**
+   - Reads `per_format.web.sections[N].design_pass_hook` (canonical: WebExperienceCritic)
+   - Invokes agent på web-specific fidelity-pass (information-hierarchy, accessibility, motion-language)
+   - Per Reviewer Concern #7: WebExperienceCritic stays web-specific, not lifted
+
+4. **CLI bevaras backward-compat:** befintliga `--brief`-flag invocations fungerar oförändrat. `--from-pipeline` är additive.
+
+5. **4-gate pipeline körs som vanligt** efter generation.
 
 ## Workflow
 
