@@ -113,7 +113,7 @@ Voice tier: trailblazer-draft
 ## Status
 ALL GATES PASS. Moving from draft → ./copilot-for-legal-demo.html.
 
-Preview: /open-managed-browser file:///c/Users/jokerman/.lintel/draft/copilot-for-legal-demo.html
+Preview: /open-managed-browser file://~/.lintel/draft/copilot-for-legal-demo.html
 ```
 
 ## Compliance integration

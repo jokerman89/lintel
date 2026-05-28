@@ -49,6 +49,10 @@ cmd_frontmatter() {
     grep -q '^tools:' "$file" || missing+=("tools")
     grep -q '^voice:' "$file" || missing+=("voice")
     grep -q '^cli_support:' "$file" || missing+=("cli_support")
+    # v3.6 cohort 1 item 6.4: lock layer-field discipline (SKILL.md only — agents don't carry layer)
+    if [[ "$file" == *SKILL.md ]]; then
+      grep -q '^layer:' "$file" || missing+=("layer")
+    fi
     if [ ${#missing[@]} -gt 0 ]; then
       fail "$file: missing ${missing[*]}"
       return 1

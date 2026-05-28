@@ -57,6 +57,55 @@ fi
 
 If still no state: surface "No prior state found. Run `/li:cycle` for new work or `/li:sense` for diagnostic."
 
+### Step 1.5 — Integrity check (v3.6 cohort 1 item 6.3)
+
+Before trusting 00-state.md, validate it. Defensive guard against state-drift / wrong-branch / stale state.
+
+```bash
+# Read recorded branch + commit + timestamp from 00-state.md (parse YAML-frontmatter or top entry)
+state_branch=$(grep -m1 '^branch:' "$STATE_FILE" | awk '{print $2}')
+state_commit=$(grep -m1 '^commit:' "$STATE_FILE" | awk '{print $2}')
+state_ts=$(grep -m1 '^ts:' "$STATE_FILE" | awk '{print $2}')
+
+# Current state
+current_branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo unknown)
+current_commit=$(git rev-parse HEAD 2>/dev/null || echo unknown)
+
+issues=()
+
+# Check 1: branch match (or warn if state is from other branch)
+if [ -n "$state_branch" ] && [ "$state_branch" != "$current_branch" ]; then
+  issues+=("branch-drift: state recorded on '$state_branch', currently on '$current_branch'")
+fi
+
+# Check 2: commit reachable (state's commit should be in current branch's history)
+if [ -n "$state_commit" ] && [ "$state_commit" != "$current_commit" ]; then
+  if ! git merge-base --is-ancestor "$state_commit" HEAD 2>/dev/null; then
+    issues+=("commit-unreachable: state's commit $state_commit not in current branch history")
+  fi
+fi
+
+# Check 3: staleness (warn if >7 days)
+if [ -n "$state_ts" ]; then
+  state_age_days=$(( ($(date +%s) - $(date -d "$state_ts" +%s 2>/dev/null || echo 0)) / 86400 ))
+  if [ "$state_age_days" -gt 7 ]; then
+    issues+=("stale: state is $state_age_days days old (>7d threshold)")
+  fi
+fi
+
+# Surface to operator
+if [ ${#issues[@]} -gt 0 ]; then
+  echo "⚠ Resume integrity warnings:"
+  printf '  - %s\n' "${issues[@]}"
+  echo ""
+  echo "Continue anyway? Reply YES to proceed, NO to abort and run /li:sense for diagnostic."
+  # Block on operator confirm — do not auto-continue
+fi
+```
+
+If integrity passes silently OR operator confirms continue → proceed to Step 2.
+If operator aborts → exit BLOCKED with recommendation to run `/li:sense` for fresh diagnostic.
+
 ### Step 2 — Parse last state entry
 
 Read `00-state.md`, find the LAST entry:

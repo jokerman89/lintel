@@ -112,7 +112,7 @@ asset_search:
 **Paths-only for piping:**
 ```
 > /asset-search --query "load balancer" --format paths-only --limit 1
-/Users/jokerman/.lintel/brand/azure-assets/services/azure-load-balancer.svg
+~/.lintel/brand/azure-assets/services/azure-load-balancer.svg
 ```
 
 ## See also
