@@ -1,0 +1,58 @@
+# JStack CODEOWNERS — Microsoft Sweden CAIP-SE
+#
+# This file uses GitHub CODEOWNERS syntax.
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owner for everything
+*                                       @Azureflipper
+
+# Top-level governance files — require explicit review
+/AGENT-INSTRUCTIONS.md                  @Azureflipper
+/CHANGELOG.md                           @Azureflipper
+/LICENSE                                @Azureflipper
+/SHIP-GATE.md                           @Azureflipper
+/CODEOWNERS                             @Azureflipper
+/SECURITY.md                            @Azureflipper
+
+# Plugin manifests (cross-CLI compatibility)
+/.claude-plugin/                        @Azureflipper
+/.codex-plugin/                         @Azureflipper
+/.cursor-plugin/                        @Azureflipper
+/.opencode/                             @Azureflipper
+/.copilot-plugin/                       @Azureflipper
+/.droid-plugin/                         @Azureflipper
+/gemini-extension.json                  @Azureflipper
+
+# Per-CLI entrypoint context files
+/CLAUDE.md                              @Azureflipper
+/AGENTS.md                              @Azureflipper
+/GEMINI.md                              @Azureflipper
+
+# Skills + agents — open to CAIP-SE team contributions
+/skills/                                @Azureflipper
+/agents/                                @Azureflipper
+
+# Hooks — security-relevant, narrower review
+/hooks/                                 @Azureflipper
+
+# Scaffolding templates — load-bearing for new repos
+/scaffolding/                           @Azureflipper
+
+# Compliance docs
+/scaffolding/02-sdl/                    @Azureflipper
+
+# Voice corpus
+/scaffolding/03-ms-team/voice/          @Azureflipper
+
+# Install scripts
+/install/                               @Azureflipper
+/bin/                                   @Azureflipper
+
+# CI
+/.github/workflows/                     @Azureflipper
+
+# Tests
+/tests/                                 @Azureflipper
+
+# Docs
+/docs/                                  @Azureflipper

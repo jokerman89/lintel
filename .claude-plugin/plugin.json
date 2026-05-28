@@ -1,0 +1,24 @@
+{
+  "name": "jstack",
+  "description": "MS-CAIP-SE session harness — skills, agents, hooks, compliance, voice, repo scaffolding",
+  "version": "3.0.0-dev",
+  "author": {
+    "name": "Azureflipper",
+    "email": "johannes.akerman@microsoft.com"
+  },
+  "homepage": "https://github.com/Azureflipper/jokerman-session-setup",
+  "repository": "https://github.com/Azureflipper/jokerman-session-setup",
+  "license": "MIT",
+  "keywords": [
+    "microsoft",
+    "caip",
+    "session-harness",
+    "rais",
+    "onecs",
+    "trailblazer-voice",
+    "ev2",
+    "onebranch",
+    "compliance",
+    "scaffolding"
+  ]
+}

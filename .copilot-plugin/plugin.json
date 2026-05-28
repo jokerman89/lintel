@@ -1,0 +1,16 @@
+{
+  "name": "jstack",
+  "version": "3.0.0-dev",
+  "description": "MS-CAIP-SE session harness for GitHub Copilot CLI",
+  "author": {
+    "name": "Azureflipper",
+    "email": "johannes.akerman@microsoft.com"
+  },
+  "homepage": "https://github.com/Azureflipper/jokerman-session-setup",
+  "repository": "https://github.com/Azureflipper/jokerman-session-setup",
+  "license": "MIT",
+  "keywords": ["microsoft", "caip", "session-harness", "rais"],
+  "skills": "./skills/",
+  "agents": "./agents/",
+  "_note": "Schema inferred from copilot plugin marketplace pattern (obra/superpowers reference). Verify against Copilot CLI plugin spec before submission."
+}

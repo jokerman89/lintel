@@ -134,12 +134,27 @@ fi
 
 hdr "Hooks (inert install — opt-in symlink to activate)"
 
-cp -r "$REPO_ROOT/scaffolding/02-compliance/hooks/"* "$JSTACK_HOOKS/" 2>/dev/null || true
-# Ensure scripts are executable
-find "$JSTACK_HOOKS" -name 'run.sh' -exec chmod +x {} +
-ok "Hooks copied to $JSTACK_HOOKS (INERT — symlink to activate)"
-info "To activate a hook: ln -s $JSTACK_HOOKS/<name>/run.sh ~/.claude/hooks/<name>.sh"
-info "Then register in ~/.claude/settings.json — see $JSTACK_HOOKS/README.md"
+# v3: hooks live at hooks/shared/ at repo root (lifted from scaffolding/02-sdl/hooks/)
+# v2 fallback: scaffolding/02-compliance/hooks/ or scaffolding/02-sdl/hooks/
+HOOK_SRC=""
+if [ -d "$REPO_ROOT/hooks/shared" ]; then
+  HOOK_SRC="$REPO_ROOT/hooks/shared"
+elif [ -d "$REPO_ROOT/scaffolding/02-sdl/hooks" ]; then
+  HOOK_SRC="$REPO_ROOT/scaffolding/02-sdl/hooks"
+elif [ -d "$REPO_ROOT/scaffolding/02-compliance/hooks" ]; then
+  HOOK_SRC="$REPO_ROOT/scaffolding/02-compliance/hooks"
+fi
+
+if [ -n "$HOOK_SRC" ]; then
+  cp -r "$HOOK_SRC/"* "$JSTACK_HOOKS/" 2>/dev/null || true
+  # Ensure scripts are executable
+  find "$JSTACK_HOOKS" -name 'run.sh' -exec chmod +x {} + 2>/dev/null || true
+  ok "Hooks copied from $HOOK_SRC to $JSTACK_HOOKS (INERT — symlink to activate)"
+  info "To activate a hook: ln -s $JSTACK_HOOKS/<name>/run.sh ~/.claude/hooks/<name>.sh"
+  info "Then register in ~/.claude/settings.json — see $JSTACK_HOOKS/README.md"
+else
+  warn "No hooks source found — skipping"
+fi
 
 # ----- frontmatter validation -------------------------------------------------
 
@@ -174,19 +189,34 @@ validate_frontmatter() {
   return 0
 }
 
-# Validate skills
-while IFS= read -r f; do
-  if ! validate_frontmatter "$f" skill; then
-    INVALID=$((INVALID + 1))
-  fi
-done < <(find "$REPO_ROOT/scaffolding" -path '*/skills/*/SKILL.md' 2>/dev/null)
+# v3: skills at repo root skills/, agents at agents/<category>/
+# v2 fallback: scaffolding/*/skills/ and scaffolding/*/agents/
 
-# Validate agents (frontmatter requirements slightly different — tier required for promoted)
-while IFS= read -r f; do
-  if ! validate_frontmatter "$f" agent; then
-    INVALID=$((INVALID + 1))
-  fi
-done < <(find "$REPO_ROOT/scaffolding" -path '*/agents/*.md' 2>/dev/null | grep -v README)
+# Validate skills (v3 path + v2 fallback)
+SKILL_PATHS=()
+[ -d "$REPO_ROOT/skills" ] && SKILL_PATHS+=("$REPO_ROOT/skills")
+[ -d "$REPO_ROOT/scaffolding" ] && SKILL_PATHS+=("$REPO_ROOT/scaffolding")
+
+for path in "${SKILL_PATHS[@]}"; do
+  while IFS= read -r f; do
+    if ! validate_frontmatter "$f" skill; then
+      INVALID=$((INVALID + 1))
+    fi
+  done < <(find "$path" -name 'SKILL.md' 2>/dev/null)
+done
+
+# Validate agents (v3 path + v2 fallback)
+AGENT_PATHS=()
+[ -d "$REPO_ROOT/agents" ] && AGENT_PATHS+=("$REPO_ROOT/agents")
+[ -d "$REPO_ROOT/scaffolding" ] && AGENT_PATHS+=("$REPO_ROOT/scaffolding")
+
+for path in "${AGENT_PATHS[@]}"; do
+  while IFS= read -r f; do
+    if ! validate_frontmatter "$f" agent; then
+      INVALID=$((INVALID + 1))
+    fi
+  done < <(find "$path" \( -path '*/agents/*.md' -o -path '*/agents/*/*.md' \) 2>/dev/null | grep -v README)
+done
 
 if [ "$INVALID" -eq 0 ]; then
   ok "All skills + agents have valid frontmatter"
@@ -222,11 +252,27 @@ hdr "Install complete"
 say "JStack installed at: $JSTACK_HOME"
 say ""
 say "Next steps:"
-say "  1. Review config:        ${c_bold}\$EDITOR $JSTACK_CONFIG${c_reset}"
+say "  1. Review config:           ${c_bold}\$EDITOR $JSTACK_CONFIG${c_reset}"
 say "  2. Activate hooks (opt-in): see $JSTACK_HOOKS/README.md"
-say "  3. Verify install:       ${c_bold}$SCRIPT_DIR/verify.sh --all${c_reset}"
-say "  4. Read JStack overview: ${c_bold}cat $REPO_ROOT/LAYERS.md${c_reset}"
-say "  5. First skill to try:   ${c_bold}/help${c_reset} in Claude Code"
+say "  3. Verify install:          ${c_bold}$SCRIPT_DIR/verify.sh --all${c_reset}"
+say "  4. Read JStack overview:    ${c_bold}cat $REPO_ROOT/LAYERS.md${c_reset}"
+say ""
+say "v3 plugin install (per CLI):"
+say "  Claude Code:  ${c_bold}/plugin marketplace add Azureflipper/jokerman-session-setup${c_reset}"
+say "                ${c_bold}/plugin install jstack@jokerman-session-setup${c_reset}"
+say "  Codex CLI:    ${c_bold}/plugins${c_reset} -> search jstack -> Install"
+say "  Cursor:       ${c_bold}/add-plugin jstack${c_reset}"
+say "  Gemini CLI:   ${c_bold}gemini extensions install https://github.com/Azureflipper/jokerman-session-setup${c_reset}"
+say ""
+say "v3 operator utilities (add to PATH):"
+say "  ${c_bold}export PATH=\"\$PATH:$REPO_ROOT/bin\"${c_reset}"
+say "  Available: jstack-scaffold, jstack-doctor, jstack-lessons-sync,"
+say "             jstack-lessons-promote, jstack-adr-new, jstack-update"
+say ""
+say "First commands to try:"
+say "  ${c_bold}jstack-doctor${c_reset}                 — cross-CLI health check"
+say "  ${c_bold}jstack-scaffold check${c_reset}         — preview scaffolding for current dir"
+say "  ${c_bold}/help${c_reset}                         — in Claude Code (after plugin install)"
 say ""
 
 if [ "$INVALID" -gt 0 ]; then
