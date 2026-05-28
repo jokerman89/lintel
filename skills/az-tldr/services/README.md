@@ -7,7 +7,7 @@ Curated Azure service content for `/li:az-tldr <service>` invocation.
 | Service ID | Status | Last curated | Coverage | Primary agent |
 |---|---|---|---|---|
 | `expressroute` | ✓ active | 2026-05-28 | full 15 sections + §16 BGP deep-dive | AzureArchitect |
-| `azure-openai` | ⚠ template only | — | none — agent-mapping configured | AzureOpenAIAdvisor |
+| `azure-openai` | ✓ active | 2026-05-28 | full 15 sections + §16 deployment/filter/PTU sizing | AzureOpenAIAdvisor |
 | `front-door` | ⚠ template only | — | none | AzureArchitect |
 | `api-management` | ⚠ template only | — | none | GraphAPIAdvisor |
 | `azure-firewall` | ⚠ template only | — | none | AzureArchitect |
