@@ -40,13 +40,35 @@ Uses docx-templater under the hood. Phase F of v2 build.
 
 ## Inputs
 
-- Required `--brief <path|inline>` — content brief or source markdown
+- Required `--brief <path|inline>` — content brief or source markdown **OR** `--from-pipeline <dir>` (Fas 2: shared pipeline mode)
 - Required `--target <technical|customer-summary|transparency-note>` — variant
 - Optional `--template <name>` — explicit template (default: `<target>.docx` from brand)
 - Optional `--audience <text>` — primary audience
 - Optional `--voice` — voice tier override (default per target)
 - Optional `--use-defaults` — force in-repo default templates
 - Optional `--ignore-stale-brand <reason>` — bypass staleness-warn
+
+## From-pipeline mode (v3.5 Fas 2 — generate-pipeline integration)
+
+If invoked med `--from-pipeline <run-dir>` istället för `--brief`:
+
+1. **Read shared pipeline-output:**
+   - `<run-dir>/content.md` — sections med H1/H2/H3 hierarchy + bodies + voice-annotations
+   - `<run-dir>/design-spec.json` — read `per_format.word.sections` för heading-levels + slot-mappings
+
+2. **Replace brief-parsing logic** med direct-read av content.md (per target-variant):
+   - `technical`: headings + paragraphs + code blocks + tables
+   - `customer-summary`: narrative paragraphs + key findings + next steps
+   - `transparency-note`: capabilities + limitations + data + decisions + appeals
+
+3. **Apply format-specific design-pass via design_pass_hook:**
+   - Reads `per_format.word.sections[N].design_pass_hook` (canonical: WordTechnicalEditor)
+   - Invokes agent på Word-specific fidelity-pass (heading-style consistency, technical-tone, tables-formatting)
+   - Per Reviewer Concern #7: WordTechnicalEditor stays word-specific
+
+4. **CLI bevaras backward-compat:** befintliga `--brief`-flag invocations fungerar oförändrat. `--from-pipeline` är additive.
+
+5. **4-gate pipeline körs som vanligt** (voice + brand + honest-limitations om transparency-note + provenance).
 
 ## Workflow
 
