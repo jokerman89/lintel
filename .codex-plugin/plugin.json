@@ -1,0 +1,41 @@
+{
+  "name": "jstack",
+  "version": "3.0.0-dev",
+  "description": "MS-CAIP-SE session harness for OpenAI Codex — RAIS, OneCS, Trailblazer voice, doc-gen",
+  "author": {
+    "name": "Azureflipper",
+    "email": "johannes.akerman@microsoft.com",
+    "url": "https://github.com/Azureflipper"
+  },
+  "homepage": "https://github.com/Azureflipper/jokerman-session-setup",
+  "repository": "https://github.com/Azureflipper/jokerman-session-setup",
+  "license": "MIT",
+  "keywords": [
+    "microsoft",
+    "caip",
+    "session-harness",
+    "rais",
+    "trailblazer-voice",
+    "compliance",
+    "scaffolding"
+  ],
+  "skills": "./skills/",
+  "agents": "./agents/",
+  "interface": {
+    "displayName": "JStack",
+    "shortDescription": "MS-CAIP-SE session harness — RAIS, OneCS, Trailblazer voice",
+    "longDescription": "JStack is a complete session harness for Microsoft Sweden CAIP solution engineers. Includes RAIS compliance gates, OneCS checks, Trailblazer voice calibration, doc-gen for PPT/Word/Web, and repo scaffolding for new customer engagements. Bring MS-internal standards into any agent CLI workflow.",
+    "developerName": "Azureflipper",
+    "category": "Coding",
+    "capabilities": ["Interactive", "Read", "Write"],
+    "defaultPrompt": [
+      "Hjälp mig med ett nytt customer engagement.",
+      "Kör /qa på min branch.",
+      "Validera min copy mot Trailblazer voice."
+    ],
+    "websiteURL": "https://github.com/Azureflipper/jokerman-session-setup",
+    "privacyPolicyURL": "https://privacy.microsoft.com/privacystatement",
+    "termsOfServiceURL": "https://github.com/Azureflipper/jokerman-session-setup/blob/main/LICENSE",
+    "brandColor": "#0078D4"
+  }
+}

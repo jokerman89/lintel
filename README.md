@@ -1,89 +1,169 @@
 # jokerman-session-setup (JStack)
 
-Session bootstrap scaffolding for agent-based development. Used by Microsoft Sweden CAIP SEs to get a consistent, multi-CLI agent setup running in minutes.
+**MS-CAIP-SE session harness for agent-based development.** Markdown + bash scaffolding that any modern AI CLI loads as a plugin. No runtime, no daemons — your CLI handles execution.
 
-**Status:** v2 spec-complete (2026-05-27). See [CHANGELOG.md](CHANGELOG.md) for the v2 release notes and [SHIP-GATE.md](SHIP-GATE.md) for the v2.0.0 readiness gates. v2 ships 74 skills + 44 agents + 15 hooks + new MS-naming + portability shim spec + 1M context engine spec + MS-proprietary doc-gen (PPT/Word/Web) + 4-gate quality pipeline for customer-bound output. JStack is **scaffolding-only** — markdown skills/agents/hooks/content + bash scripts. No separate runtime; Claude Code (or other agent CLI) reads SKILL.md and does the work.
+**Status:** v3-dev (2026-05-27). See [CHANGELOG.md](CHANGELOG.md) for v3 release notes and [SHIP-GATE.md](SHIP-GATE.md) for v3.0.0 readiness gates. The v3 design lives at [docs/design/jstack-v3-plan.md](docs/design/jstack-v3-plan.md).
 
-For the v2 design + eng-review report, see [docs/design/jstack-v2-design.md](docs/design/jstack-v2-design.md).
+v3 ships **81 skills + 78 agents + 15 hooks** organized for plugin-manifest pattern across 8 CLIs. Plus full Kategori B scaffolding-template system (CORE-PRINCIPLES, EVOLUTION-LOG, tasks/lessons.md, ADR templates) that gets copied into new MS engagement repos via `bin/jstack-scaffold`.
 
-## What this is
+JStack is the **complete session harness** — not just a skill catalog. It manages the full lifecycle: session-start ritual → mid-session interventions (hooks, voice gates, compliance) → end-of-session capture (lessons, ADR drafting, EVOLUTION-LOG) → cross-session continuity (memory, lessons-sync). See [docs/session-harness.md](docs/session-harness.md) for the full mental model.
 
-A shared scaffolding repo. Two pieces:
+---
 
-1. **Canonical session instructions** (`AGENT-INSTRUCTIONS.md`) — one file describing how an agent should behave during a session. Each CLI gets a small shim that points here.
-2. **Install script** that fetches upstream agent-tooling (gstack, GSD, AgentShield, Trail of Bits, Anthropic, ECC) directly from their official repos. We do not bundle anyone else's code.
+## What JStack is
 
-It is intentionally minimal. The scaffolding is what we agree on as a team. The agents and skills come from upstream.
+Two distinct categories, both shipped in this repo:
+
+**Kategori A — Agent-invokable** (what your CLI sees via plugin manifest):
+- `skills/` — 81 slash-commands (foundation + ms-team layers)
+- `agents/` — 78 subagent roles organized per domain
+- `hooks/shared/` — 15 compliance + workflow hooks
+
+**Kategori B — Repo-scaffolding** (copied INTO other repos via `jstack-scaffold`):
+- `scaffolding/01-foundation/` — CLAUDE.md template, CORE-PRINCIPLES, EVOLUTION/EVOLUTION-LOG, tasks/{lessons,memory,personas,todo}.md, docs/adr/ templates, .claude/agents/ subagent overrides
+- `scaffolding/02-sdl/` — 5+7+8 compliance reference (HARD-RULES + ON-DEMAND + REFERENCE)
+- `scaffolding/03-ms-team/` — voice corpus (60 paragraphs, 12 cells) + doc-gen default templates
+
+The architecture: write skills/agents once at repo root, ship tiny per-CLI plugin manifests (`.claude-plugin/`, `.codex-plugin/`, `.cursor-plugin/`, `.opencode/`, `gemini-extension.json`, `.copilot-plugin/`, `.droid-plugin/`) that all point at the same `./skills/` and `./agents/` directories. Each CLI's native plugin marketplace handles discovery + invocation.
 
 ## Who this is for
 
-Microsoft Sweden CAIP solution engineers. The compliance assumptions, the auto-mode bounds, and the precedence model are tuned to that team's constraints. If you are outside this team and want to fork: see [docs/compliance.md](docs/compliance.md) for what you would need to change.
+Microsoft Sweden CAIP solution engineers. The compliance assumptions, auto-mode bounds, precedence model, and voice corpus are tuned to that team's constraints. If you're outside this team and want to fork: see [docs/compliance.md](docs/compliance.md).
 
-## Multi-CLI support
+---
 
-Works with any agent CLI that reads a known instructions file. Out of the box:
+## Multi-CLI support (v3 — honest table)
 
-- **Claude Code** — reads [shims/CLAUDE.md](shims/CLAUDE.md), which points at `AGENT-INSTRUCTIONS.md`
-- **GitHub Copilot Enterprise** (with Opus model picker) — reads `.github/copilot-instructions.md`, which points at `AGENT-INSTRUCTIONS.md`
-- **Codex CLI** — reads `AGENTS.md`, which points at `AGENT-INSTRUCTIONS.md`
-- **Anything else** — add a shim under `shims/` and write the per-CLI symlink/copy step in your repo
+| CLI | Install mechanism | Skill/agent discovery | Status |
+|---|---|---|---|
+| Claude Code | `/plugin marketplace add Azureflipper/jokerman-session-setup` + `/plugin install jstack@jokerman-session-setup` | native, namespaced `/jstack:<skill>` | ✓ full |
+| Codex CLI / App | `/plugins` → search jstack → Install | native | ✓ full |
+| Cursor | `/add-plugin jstack` | native (rules + agents) | ✓ full |
+| Gemini CLI | `gemini extensions install https://github.com/Azureflipper/jokerman-session-setup` | context-file based (GEMINI.md) + skill references | ✓ supported |
+| OpenCode | Fetch + follow `.opencode/INSTALL.md` instructions | manual install, agent reads SKILL.md | ✓ supported |
+| GitHub Copilot CLI | `copilot plugin marketplace add` + `install` | native | ✓ supported (schema verified post-launch) |
+| Factory Droid | `droid plugin marketplace add` + `install` | native | ✓ supported (schema verified post-launch) |
+| Cline / Continue / Aider | Manual setup via custom instructions | degraded (no plugin discovery) | ~ best-effort |
 
-See [docs/multi-cli.md](docs/multi-cli.md) for the model.
+See [docs/per-cli/](docs/per-cli/) for per-CLI install guides.
+
+---
 
 ## Quick start
 
+### 1. Clone JStack
+
 ```bash
-# 1. Clone this repo
-git clone <internal-MS-git-url>/jokerman-session-setup ~/Workspace/jokerman-session-setup
+git clone https://github.com/Azureflipper/jokerman-session-setup ~/Workspace/jokerman-session-setup
 cd ~/Workspace/jokerman-session-setup
+```
 
-# 2. Run the installer (bash / Linux / macOS / WSL / Git Bash)
-bash install/install.sh
+### 2. Install for your CLI
 
-# 2 alt. (Windows PowerShell 7+)
-pwsh install/install.ps1
+```bash
+# Claude Code:
+#   /plugin marketplace add Azureflipper/jokerman-session-setup
+#   /plugin install jstack@jokerman-session-setup
 
-# 3. Verify
+# Codex CLI:
+#   /plugins → search jstack → Install Plugin
+
+# Cursor:
+#   /add-plugin jstack
+
+# Gemini CLI:
+gemini extensions install https://github.com/Azureflipper/jokerman-session-setup
+
+# Copilot CLI:
+copilot plugin marketplace add Azureflipper/jokerman-session-setup
+copilot plugin install jstack@jokerman-session-setup
+```
+
+### 3. Install scaffolding source (for `jstack-scaffold` in new repos)
+
+```bash
+# Set up local cache for scaffolding templates + bin/ scripts
+mkdir -p ~/.jstack
+ln -s ~/Workspace/jokerman-session-setup/scaffolding ~/.jstack/scaffolding
+export PATH="$HOME/Workspace/jokerman-session-setup/bin:$PATH"
+```
+
+### 4. Verify
+
+```bash
+jstack-doctor      # cross-CLI health check
 bash install/verify.sh
 ```
 
-Then for each repo where you want the setup:
+### 5. Scaffold a new repo
 
 ```bash
-cd <your-repo>
-
-# Claude Code:    nothing extra — symlinks done by installer
-# GitHub Copilot: cp ~/Workspace/jokerman-session-setup/shims/copilot-instructions.md .github/
-# Codex:          cp ~/Workspace/jokerman-session-setup/shims/AGENTS.md .
+cd ~/new-customer-engagement
+jstack-scaffold init --engagement customer-engagement --voice trailblazer
 ```
+
+That creates CLAUDE.md, CORE-PRINCIPLES.md, tasks/, docs/adr/, .claude/agents/ with sane MS defaults.
 
 Full walkthrough: [docs/getting-started.md](docs/getting-started.md).
 
+---
+
 ## What you get
 
-- A short, consistent session-start ritual (personas → compliance → memory → ADR scan → agent precedence).
-- A scaffolding template (`scaffolding/`) you copy into new repos: `CORE-PRINCIPLES.md`, `EVOLUTION.md`, `EVOLUTION-LOG.md`, `tasks/{lessons,memory,personas,todo}.md`, `docs/adr/`, `.claude/agents/`.
-- Curated install of 8 upstream skill/agent packs — see [install/upstream-sources.yaml](install/upstream-sources.yaml).
-- Documentation for the parts that are not obvious: precedence, promoted agents, power-user patterns, compliance.
+- **81 skills** for daily workflows: `/qa`, `/release-ev2`, `/safe-deploy-ring`, `/investigate`, `/plan-eng-review`, `/office-hours`, `/rais-customer-voice-check`, `/onecs-check`, `/agt-tier-stamp`, `/generate-ppt`, `/generate-word`, `/generate-web`, `/scaffold-engagement-demo`, plus 7 new v3 session-harness skills (`/match`, `/jstack-doctor`, `/jstack-scaffold`, `/lessons-promote`, `/adr-new`, `/personas-rotate`, `/lessons`).
+- **78 agents** organized per domain: ms-specific (15), engineering (25), security (8), compliance (6), devops (7), customer (8), communication (5), doc-gen (3), voice (1).
+- **15 compliance hooks** (opt-in via symlinks): `customer-data-block`, `secret-scan-block`, `no-direct-main-push`, etc.
+- **5+7+8 compliance tiering**: 5 always-on hard rules, 7 on-demand check items, 8 reference docs (RAIS, OneCS, AGT, SDL, etc).
+- **OurVoice corpus**: 60 sanitized paragraphs across 12 cells (4 Reveal × 3 Inspire × 5 Provoke techniques) — operator-driven calibration via `T0-CALIBRATION-WORKFLOW.md`.
+- **Repo scaffolding mechanism** via `bin/jstack-scaffold` — 30-second new-repo setup.
+- **Cross-repo lessons sync** via `bin/jstack-lessons-sync` (operator-opt-in).
+- **Cross-CLI health check** via `bin/jstack-doctor`.
+
+---
 
 ## What you don't get
 
-- **No customer data.** This repo is for tooling scaffolding. Customer artifacts never land here. See [docs/compliance.md](docs/compliance.md).
-- **No third-party code.** Upstream tools are referenced + installed from their official repos. We do not vendor them.
-- **No deployment glue.** This is a development-time setup, not a runtime.
+- **No customer data.** This repo is for tooling. Customer artifacts never land here.
+- **No third-party code bundled.** v2 had install/upstream-sources.yaml for fetching upstream packs — v3 simplified, JStack is now self-contained.
+- **No runtime.** JStack = markdown + bash. Your CLI executes — JStack provides the patterns + scaffolding.
+- **No production cross-CLI parity for everything.** Hooks are Claude-Code-only mechanism. Subagent abstractions differ per CLI. We're honest about gaps; see [docs/multi-cli.md](docs/multi-cli.md).
+
+---
 
 ## License
 
-MIT — see [LICENSE](LICENSE). Note that some installed upstream sources have non-MIT licenses (CC-BY-SA-4.0 for Trail of Bits, mixed for parts of Anthropic skills). The installer prints license notes when those are installed. See [docs/promoted-agents.md](docs/promoted-agents.md) for full per-source detail.
+MIT — see [LICENSE](LICENSE).
+
+v3 ships **only operator-authored content** (no vendored upstream). Permissive license throughout. v1 license-tier mechanism preserved for any future upstream-derived agents.
+
+---
 
 ## Compliance
 
-This setup respects Microsoft's internal guardrails for AI-assisted development. See [docs/compliance.md](docs/compliance.md) for the rule set and the 5-step session-start check. If you are using this setup with anything customer-adjacent, read that doc first.
+See [docs/compliance.md](docs/compliance.md). Key rules (always-on):
+1. No customer data in prompts, files, or commits
+2. No secrets, credentials, tokens
+3. Production mutations require explicit per-call authorization
+4. MS SSO only; no personal accounts
+5. First-party first (GHCP Enterprise, M365 Copilot, Azure OpenAI) preferred over OpenAI direct API
+
+---
 
 ## Contributing
 
-PR-based against `main`. Reviewers: anyone on the CAIP SE team listed in `CODEOWNERS` (TBD when published). Lessons learned go in `scaffolding/tasks/lessons.md`. Changes that affect the canonical instructions are logged in `scaffolding/EVOLUTION-LOG.md`.
+See [CONTRIBUTING.md](CONTRIBUTING.md). PR-based against `main`. v3 work happens on `v3-dev` branch.
+
+Lessons learned go in `scaffolding/01-foundation/tasks/lessons.md`. Promote a lesson from a customer repo via `bin/jstack-lessons-promote`.
+
+---
 
 ## Versioning
 
-This repo follows date-based releases. Each release tagged `vYYYY.MM.DD-N` where N is the iteration that day. Changes are tracked in [CHANGELOG.md](CHANGELOG.md).
+Semantic versioning since v3. v3.0.0 ships when [SHIP-GATE.md](SHIP-GATE.md) gates are all green.
+Pre-v3 used date-based versioning — see [CHANGELOG.md](CHANGELOG.md).
+
+---
+
+## Security
+
+See [SECURITY.md](SECURITY.md). Report security concerns to johannes.akerman@microsoft.com.

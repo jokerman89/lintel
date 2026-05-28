@@ -1,0 +1,115 @@
+#!/usr/bin/env bash
+# jstack-lessons-promote — promote a repo-local lesson to JStack global
+# (scaffolding/01-foundation/tasks/lessons.md) so future scaffolded repos inherit
+#
+# Usage: jstack-lessons-promote [--source <file>] [--jstack-dir <path>]
+
+set -euo pipefail
+
+SOURCE_FILE="tasks/lessons.md"
+JSTACK_DIR="${JSTACK_DIR:-$HOME/Workspace/jokerman-session-setup}"
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --source) SOURCE_FILE="$2"; shift 2 ;;
+    --jstack-dir) JSTACK_DIR="$2"; shift 2 ;;
+    --help|-h)
+      cat <<EOF
+jstack-lessons-promote — promote a repo lesson to JStack global
+
+Workflow (interactive):
+  1. Shows numbered list of lessons in current repo's tasks/lessons.md
+  2. You pick which one to promote
+  3. Edit to generalize (strip repo-specific paths/names)
+  4. Appends to scaffolding/01-foundation/tasks/lessons.md in JStack repo
+  5. Commits on feature branch in JStack — you push when ready
+
+Options:
+  --source <file>        Source lessons.md (default: tasks/lessons.md)
+  --jstack-dir <path>    JStack repo path (default: ~/Workspace/jokerman-session-setup)
+EOF
+      exit 0 ;;
+    *) echo "Unknown arg: $1" >&2; exit 2 ;;
+  esac
+done
+
+[ -f "$SOURCE_FILE" ] || { echo "Source lessons file not found: $SOURCE_FILE" >&2; exit 3; }
+[ -d "$JSTACK_DIR/.git" ] || { echo "JStack repo not at $JSTACK_DIR" >&2; exit 4; }
+
+TARGET_FILE="$JSTACK_DIR/scaffolding/01-foundation/tasks/lessons.md"
+[ -f "$TARGET_FILE" ] || { echo "Target file not found: $TARGET_FILE" >&2; exit 5; }
+
+echo "jstack-lessons-promote"
+echo "Source: $SOURCE_FILE"
+echo "Target: $TARGET_FILE"
+echo ""
+
+# List lessons (assume H2 = lesson boundary)
+echo "Lessons in $SOURCE_FILE:"
+grep -n "^## " "$SOURCE_FILE" | head -30 | nl
+echo ""
+read -rp "Enter lesson number to promote (or 'q' to quit): " choice
+if [ "$choice" = "q" ]; then
+  echo "Cancelled."
+  exit 0
+fi
+
+# Extract the chosen lesson (H2 header + body until next H2 or EOF)
+header_line=$(grep -n "^## " "$SOURCE_FILE" | sed -n "${choice}p" | cut -d: -f1)
+[ -n "$header_line" ] || { echo "Invalid lesson number" >&2; exit 6; }
+
+next_header_line=$(grep -n "^## " "$SOURCE_FILE" | awk -F: -v cur="$header_line" '$1 > cur { print $1; exit }')
+if [ -z "$next_header_line" ]; then
+  end_line='$'
+else
+  end_line=$((next_header_line - 1))
+fi
+
+extracted=$(sed -n "${header_line},${end_line}p" "$SOURCE_FILE")
+echo ""
+echo "=== EXTRACTED LESSON ==="
+echo "$extracted"
+echo "=== END ==="
+echo ""
+
+# Show editor for generalization
+TMP_FILE=$(mktemp)
+echo "$extracted" > "$TMP_FILE"
+echo "Opening editor to generalize (strip repo-specific terms)..."
+echo "Save and exit to continue, or empty out + save to cancel."
+${EDITOR:-vi} "$TMP_FILE"
+
+generalized=$(cat "$TMP_FILE")
+rm -f "$TMP_FILE"
+
+if [ -z "$generalized" ]; then
+  echo "Empty — cancelled."
+  exit 0
+fi
+
+# Append to JStack global lessons
+source_repo=$(basename "$(git rev-parse --show-toplevel 2>/dev/null || pwd)")
+{
+  echo ""
+  echo "$generalized"
+  echo ""
+  echo "<!-- Promoted from \`$source_repo\` on $(date +%Y-%m-%d) via jstack-lessons-promote. -->"
+} >> "$TARGET_FILE"
+
+# Commit in JStack repo on feature branch
+slug=$(echo "$generalized" | head -1 | sed 's/^## //; s/[^a-zA-Z0-9]/-/g; s/--*/-/g; s/^-//; s/-$//' | tr A-Z a-z | cut -c1-40)
+branch="promote-lesson-$slug-$(date +%Y%m%d)"
+
+cd "$JSTACK_DIR"
+git checkout -q -b "$branch"
+git add scaffolding/01-foundation/tasks/lessons.md
+git commit -q -m "lessons: promote '$(echo "$generalized" | head -1 | sed 's/^## //')' from $source_repo"
+
+echo ""
+echo "✓ Promoted to JStack scaffolding/01-foundation/tasks/lessons.md"
+echo "✓ Branch: $branch"
+echo ""
+echo "Next:"
+echo "  cd $JSTACK_DIR"
+echo "  git push -u origin $branch"
+echo "  # then open PR"
