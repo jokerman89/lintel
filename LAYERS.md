@@ -38,6 +38,47 @@ JokermanStack (Lintel) organizes everything into 4 layers. Each layer has its ow
 | 3 Personal advanced | **Opinionated** | PR-based, team review. No heavy EVOLUTION process but team-vetted. |
 | 4 Power user | **Experimental** | Free adaptation. Promotion to Layer 3 via PR when a pattern proves out. Archive in `EVOLUTION-LOG.md` when it doesn't. |
 
+## Durable principles (lesson-trio reflected in architecture)
+
+Three lessons har graduerats från `tasks/lessons.md` till architecture-level
+principles. They shape what each layer DOES and DOES NOT do.
+
+### L-001 — Scaffolding, not content (Layer 1 + 3 boundary)
+
+Lintel ships **structure** (templates, tests, agent-mapping, invocation skills)
++ **one canonical deep example** per pattern. Operator + AI generate the rest
+of the content at invocation time.
+
+Applied at architecture-level:
+- Layer 1 holds *patterns* (CORE-PRINCIPLES, ADR templates, tasks-format)
+- Layer 3 holds *agent rules* (voice corpus, precedence, tier-stamping)
+- **Neither layer holds curated answers.** Operator-AI generates at invocation.
+- `⚠ template only` rows in catalogs är a feature, not a gap.
+
+### L-002 — Grep existing before designing new (cross-layer hygiene)
+
+Before architecting a new skill family OR design pass, enumerate existing
+`skills/` + `agents/` för prior infrastructure. Cost: 30 seconds. Avoided cost:
+re-design after operator catches the gap.
+
+Applied at architecture-level:
+- LAYERS read order (below) starts with checking existing repo state
+- Any new layer-addition requires precedence-check across existing 4 layers
+- See `tasks/lessons.md/L-002` for the incident-driven rationale
+
+### L-003 — Verify counts before applying fact-claims (cross-layer skepticism)
+
+When external doc (backlog, audit, third-party analysis) claims a count or fact
+about codebase ("78 agents", "12 hooks"), VERIFY via tool before applying any
+"fix" to docs. External claims may itself be wrong.
+
+Applied at architecture-level:
+- LAYERS counts (113 skills + 78 agents + 15 hooks) verified via `find`
+- See `tasks/lessons.md/L-003` for the incident-driven rationale
+
+The trio forms a discipline: respect what exists (L-002), respect what doesn't
+exist (L-001), verify claims about what exists (L-003).
+
 ## Read order (canonical session-start)
 
 1. Layer 1 — `CORE-PRINCIPLES.md` (the 10 load-bearing rules)
