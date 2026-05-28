@@ -1,5 +1,5 @@
 ---
-name: li-scaffold-internal-tool
+name: scaffold-internal-tool
 layer: ms-team
 description: Initialize an internal-tooling repo — CI, README, MS compliance hooks, no customer surface.
 color: green

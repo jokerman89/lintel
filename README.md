@@ -36,7 +36,7 @@ Microsoft Sweden CAIP solution engineers. The compliance assumptions, auto-mode 
 
 | CLI | Install mechanism | Skill/agent discovery | Status |
 |---|---|---|---|
-| Claude Code | `/plugin marketplace add jokerman89/jokerman-lintel` + `/plugin install lintel@jokerman-lintel` | native, namespaced `/lintel:<skill>` | ✓ full |
+| Claude Code | `/plugin marketplace add jokerman89/jokerman-lintel` + `/plugin install lintel@jokerman-lintel` | native, namespaced `/li:<skill>` | ✓ full |
 | Codex CLI / App | `/plugins` → search lintel → Install | native | ✓ full |
 | Cursor | `/add-plugin lintel` | native (rules + agents) | ✓ full |
 | Gemini CLI | `gemini extensions install https://github.com/jokerman89/jokerman-lintel` | context-file based (GEMINI.md) + skill references | ✓ supported |
@@ -110,7 +110,7 @@ Full walkthrough: [docs/getting-started.md](docs/getting-started.md).
 
 ## What you get
 
-- **81 skills** for daily workflows: `/qa`, `/release-ev2`, `/safe-deploy-ring`, `/investigate`, `/plan-eng-review`, `/office-hours`, `/rais-customer-voice-check`, `/onecs-check`, `/agt-tier-stamp`, `/generate-ppt`, `/generate-word`, `/generate-web`, `/scaffold-engagement-demo`, plus 7 new v3 session-harness skills (`/match`, `/lintel:li-doctor`, `/lintel:li-scaffold`, `/lessons-promote`, `/adr-new`, `/personas-rotate`, `/lessons`).
+- **81 skills** for daily workflows: `/qa`, `/release-ev2`, `/safe-deploy-ring`, `/investigate`, `/plan-eng-review`, `/office-hours`, `/rais-customer-voice-check`, `/onecs-check`, `/agt-tier-stamp`, `/generate-ppt`, `/generate-word`, `/generate-web`, `/scaffold-engagement-demo`, plus 7 new v3 session-harness skills (`/match`, `/li:doctor`, `/li:scaffold`, `/lessons-promote`, `/adr-new`, `/personas-rotate`, `/lessons`).
 - **78 agents** organized per domain: ms-specific (15), engineering (25), security (8), compliance (6), devops (7), customer (8), communication (5), doc-gen (3), voice (1).
 - **15 compliance hooks** (opt-in via symlinks): `customer-data-block`, `secret-scan-block`, `no-direct-main-push`, etc.
 - **5+7+8 compliance tiering**: 5 always-on hard rules, 7 on-demand check items, 8 reference docs (RAIS, OneCS, AGT, SDL, etc).

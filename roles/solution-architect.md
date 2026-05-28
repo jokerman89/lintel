@@ -70,11 +70,11 @@ What separates great from good: the great SAs can hold three architectures in th
 
 # COMPANION SKILLS
 
-- `/lintel:li-az-tldr <service>` — current-state Azure knowledge before architectural call
-- `/lintel:li-discover` — codebase + ADR map relevant to wedge
-- `/lintel:li-plan-eng-review` — engineering plan with WAF lens
-- `/lintel:li-bicep-from-context` (when built) — IaC generation
+- `/li:az-tldr <service>` — current-state Azure knowledge before architectural call
+- `/li:discover` — codebase + ADR map relevant to wedge
+- `/li:plan-eng-review` — engineering plan with WAF lens
+- `/li:bicep-from-context` (when built) — IaC generation
 - Spawn `AzureArchitect` for arch review, `BicepReviewer` for IaC, `KeyVaultAuditor` for secrets, `ThreatModelDrafter` for STRIDE
-- `/lintel:li-adr-new` — ADR drafting as architecture decisions land
+- `/li:adr-new` — ADR drafting as architecture decisions land
 
 When role is active during REVIEW: WAF/CAF audit + threat modeling agents auto-recommended in compliance gate.

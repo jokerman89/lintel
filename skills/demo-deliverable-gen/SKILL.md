@@ -1,5 +1,5 @@
 ---
-name: li-demo-deliverable-gen
+name: demo-deliverable-gen
 layer: ms-team
 description: Generate customer-facing demo deliverables — script, handout, follow-up email — trailblazer-voiced.
 color: orange

@@ -671,7 +671,7 @@ Hook: när CLAUDE.md modifieras → auto-append entry i EVOLUTION-LOG.md med com
 
 ### 5.7 Voice corpus mekanism
 
-`scaffolding/03-ms-team/voice/OurVoice-corpus.md` finns kvar (60 paragraphs, 12 cells). Calibration via `/lintel:li-eval`. När calibrated, `/rais-customer-voice-check` skill använder den som referens.
+`scaffolding/03-ms-team/voice/OurVoice-corpus.md` finns kvar (60 paragraphs, 12 cells). Calibration via `/li:eval`. När calibrated, `/rais-customer-voice-check` skill använder den som referens.
 
 ### 5.8 Compliance mekanism
 
@@ -860,8 +860,8 @@ Bulk-script via sed (`bin/li-migrate-v2-to-v3` engångsskript).
 - [ ] `/adr-new` (bootstrap ADR from template)
 - [ ] `/personas-rotate` (load persona context)
 - [ ] `/match` (semantic skill router)
-- [ ] `/lintel:li-doctor` (cross-CLI health check)
-- [ ] `/lintel:li-scaffold` (invoke repo scaffolding)
+- [ ] `/li:doctor` (cross-CLI health check)
+- [ ] `/li:scaffold` (invoke repo scaffolding)
 - [ ] `/lessons` (mid-session lessons-review)
 
 ### Phase 5 — Bin scripts + install updates (2 dagar)
@@ -890,7 +890,7 @@ Bulk-script via sed (`bin/li-migrate-v2-to-v3` engångsskript).
 - [ ] `tests/unit/plugin-manifests-valid.sh`
 - [ ] `tests/unit/scaffolding-copy.sh`
 - [ ] `tests/unit/agents-categorized.sh`
-- [ ] `tests/integration/lintel:li-scaffold-init.sh`
+- [ ] `tests/integration/li:scaffold-init.sh`
 - [ ] `tests/integration/lessons-sync.sh`
 - [ ] `tests/e2e/claude-code-headless.sh`
 - [ ] `tests/e2e/codex-headless.sh`

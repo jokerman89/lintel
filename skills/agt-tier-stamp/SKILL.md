@@ -1,5 +1,5 @@
 ---
-name: li-agt-tier-stamp
+name: agt-tier-stamp
 layer: ms-team
 v1_alias: [li-tier-stamp-agents]
 description: Stamp agents with license tier (permissive/restricted) — enforces 5-level precedence model.

@@ -1,5 +1,5 @@
 ---
-name: li-careful
+name: careful
 layer: foundation
 description: Slow-down mode for high-stakes work — extra gates, double-confirm before mutations.
 color: red

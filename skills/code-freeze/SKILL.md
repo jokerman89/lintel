@@ -1,5 +1,5 @@
 ---
-name: li-code-freeze
+name: code-freeze
 layer: foundation
 v1_alias: [li-freeze]
 description: Mark paths as DO-NOT-MODIFY for this session — other skills check + refuse to touch.

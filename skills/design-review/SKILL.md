@@ -1,5 +1,5 @@
 ---
-name: li-design-review
+name: design-review
 layer: foundation
 description: 6-pillar visual review of frontend changes — screenshot via /browse, scored findings.
 color: orange

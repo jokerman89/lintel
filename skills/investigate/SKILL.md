@@ -1,5 +1,5 @@
 ---
-name: li-investigate
+name: investigate
 layer: foundation
 description: Hypothesis-driven bug investigation — minimum repro, eliminate variables, root cause.
 color: orange

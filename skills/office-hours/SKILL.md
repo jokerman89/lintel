@@ -1,5 +1,5 @@
 ---
-name: li-office-hours
+name: office-hours
 layer: foundation
 description: Generate a design doc from a problem statement — structured, decision-gated, ready for /plan-eng-review.
 color: purple

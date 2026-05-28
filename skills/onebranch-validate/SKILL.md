@@ -1,5 +1,5 @@
 ---
-name: li-onebranch-validate
+name: onebranch-validate
 layer: ms-team
 v1_alias: [li-test]
 description: Cross-CLI verification — run a smoke matrix across claude-code/codex/copilot per skill cli_support.
@@ -120,6 +120,6 @@ READY for v1.0.0 ship.
 
 ## See also
 
-- `/lintel:li-eval` — voice corpus calibration (different gate)
+- `/li:eval` — voice corpus calibration (different gate)
 - TEMPLATE-skill.md / TEMPLATE-agent.md — frontmatter source of truth for cli_support
 - `SHIP-GATE.md` — v1.0.0 prerequisites this skill helps enforce

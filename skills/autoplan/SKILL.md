@@ -1,5 +1,5 @@
 ---
-name: li-autoplan
+name: autoplan
 layer: foundation
 description: Chains office-hours → ceo-review → eng-review → design-review. End-to-end plan pipeline.
 color: purple

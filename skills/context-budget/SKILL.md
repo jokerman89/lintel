@@ -1,133 +1,110 @@
 ---
-name: li-context-budget
+name: context-budget
 layer: foundation
-description: View/modify current phase context budget, declare new phase, checkpoint.
-color: blue
-tools: Read, Write, Bash
+description: Show current context utilization, recommend warm/cool, surface budget breakdown by source.
+color: cyan
+tools: Read, Bash, Grep
 voice: internal
-cli_support:
-  - cli: claude-code
-    level: full
-  - cli: codex
-    level: degraded
-    degradation:
-      - capability: AskUserQuestion
-        strategy: auto-pick-recommended
-  - cli: copilot-cli
-    level: degraded
-    degradation:
-      - capability: AskUserQuestion
-        strategy: sequential-prompt
+cli_support: [claude-code, codex]
 ---
 
-# /context-budget
+You are the context-budget skill — visibility into the 1M-window.
 
-Operator-facing interface for the 1M Context Budget Engine. View current phase state, modify budget, declare next phase, checkpoint, or override.
+## What this skill does
+
+Reports current session's context utilization. Breaks down by source (CLAUDE.md, loaded files, conversation history, subagent results). Recommends warm-up or cool-down based on budget state.
 
 ## When to use
 
-- Watcher fired at 80%/100% — operator wants to see state + decide
-- Pre-heavy-task — operator wants to set explicit phase budget before starting
-- Mid-session re-planning — adjust budget after scope change
-- Post-session retro — review where tokens went
+- Operator says "how much context have we used?"
+- Before invoking heavy phase (PLAN/BUILD) to know headroom
+- Diagnosing why session feels slow / model is forgetting things
 
 ## When NOT to use
 
-- Light-touch session — engine defaults are fine
-- No phase declarations exist — declare phases first via `/perf-mode` or skill that uses context_phases frontmatter
+- Mid-task uninterrupted work (status check overhead)
+- After every skill invocation (let the skill report its impact)
 
-## Inputs
+## Workflow
 
-- `--view` — show current state + recent phase history (default)
-- `--checkpoint` — save current phase state, ready to transition
-- `--next-phase <name>` — explicit phase transition with decay
-- `--override +N` — extend current phase budget by N tokens (logged)
-- `--compress` — surface compress-options for current context (operator confirms)
-- `--config` — open `~/.lintel/config.yaml` context section for editing
+### Step 1 — Read budget log
 
-## Workflow (default --view)
-
-1. Read `~/.lintel/sessions/$SESSION_ID/context-state.json`
-2. Display current phase + spent + remaining + watcher state
-3. List warmup tasks completed/pending
-4. Show reservations
-5. Show recent phase history (last 5)
-
-## Report format
-
-```
-Context Budget — session 47821-1716926400
-
-Current phase: build
-  Budget:      500,000 tokens
-  Spent:       312,000 (62%)
-  Remaining:   188,000
-  Watchers:    80% — not fired yet | 100% — not fired
-
-Reservations:
-  voice_check.reserve_for_corpus_calibration: 50,000
-
-Warmup tasks:
-  ✓ "read all engagement docs from current branch" (45k tokens)
-  ✓ "summarize prior sessions for this customer" (23k tokens)
-
-Phase history:
-  preload: 187k / 200k (94%) — engagement docs loaded ✓
-  build:   in progress
-  voice_check: pending
-
-Actions:
-  /context-budget --checkpoint    save state, prepare transition
-  /context-budget --next-phase    transition to voice_check
-  /context-budget --override +N   extend build budget (logged)
-  /context-budget --compress      collapse low-value context
+```bash
+log_file=".lintel/state/context-budget.md"
+if [ -f "$log_file" ]; then
+  # Parse events: each context_warm / context_cool / etc has tokens_added or tokens_removed
+fi
 ```
 
-## Compliance integration
+Approximate current state by summing event deltas. (Real Claude Code context measurement is exact but here we approximate from log.)
 
-- Audit log entry per state change: `~/.lintel/audit/context-budget.jsonl`
-- Override events logged with operator-provided reason (prompted)
-- Read-only `--view` mode not audit-logged (high frequency, low value)
+### Step 2 — Estimate breakdown by source
 
-## Voice tier note
+Rough estimates per source:
+- Default session-start load (CLAUDE.md, AGENT-INSTRUCTIONS, lessons.md, memory.md, etc.): ~5-15k
+- Loaded files (from context-warm events): sum from log
+- Conversation history: depends on session length (estimate 2-5k per significant turn)
+- Subagent results: from build-log/review-report sizes if applicable
 
-`voice: internal`. Engine plumbing.
+### Step 3 — Surface report
 
-## Failure modes
-
-- **State file missing or corrupt** — engine surfaces "no active phase declared". Suggests `/perf-mode` or skill with `context_phases` frontmatter.
-- **`--override` would exceed `max_budget`** — refuse. Operator must edit config ceiling.
-- **`--next-phase` to undefined phase name** — list available phase names from current declaration.
-- **Compress without operator confirmation** — refuse. Compression is irreversible; always confirm.
-
-## Examples
-
-**View state:**
 ```
-> /context-budget
-[Current phase: build, 62% spent, no watchers fired yet]
-```
+CONTEXT BUDGET — session snapshot
 
-**Override:**
-```
-> /context-budget --override +100000
-[Prompts: reason for override?]
-Operator: "scope expanded mid-build to include additional fixture set"
-✓ Budget extended: 500k → 600k. Logged.
-```
+Current state:
+  Total: ~<N>k / 1M tokens (<%>)
+  Headroom: ~<X>k
 
-**Phase transition:**
-```
-> /context-budget --next-phase voice_check
-[Engine: phase `build` ending at 312k spent, decay_on_exit: aggressive]
-[Engine: keeping summary + reservation; dropping verbatim build context]
-✓ Phase voice_check active. Budget: 150k.
+Breakdown by source:
+  - Default session-start: ~12k
+  - Loaded files (last warm): ~45k
+  - Conversation history: ~38k
+  - Subagent results: ~12k
+  - Other: ~5k
+
+Recent loads (last 3):
+  - 2026-05-28 14:22 — context-warm "ExpressRoute" (+12k)
+  - 2026-05-28 14:35 — context-warm-adrs "networking" (+8k)
+  - 2026-05-28 15:10 — context-warm-customer "acme" (+25k)
+
+Recommendations:
+  ✓ Headroom comfortable — heavy phases can proceed
+  OR
+  ⚠ Approaching 50% — consider /li:context-cool before BUILD
+  OR
+  ⛔ At 80% — cool-down required before more loads
 ```
 
-## See also
+### Step 4 — 00-state.md append (light)
 
-- `CONTEXT-ENGINE.md` — full engine semantics
-- `/context-warmup` — explicit preload pattern
-- `/perf-mode` — activate 1M perf-mode for session
-- `/context-budgetwatch` — passive monitoring
-- `ContextBudgetAdvisor` agent — suggests phase declarations
+```yaml
+event: context_budget_check
+ts: <timestamp>
+total_tokens: <N>
+headroom: <X>
+```
+
+## Status protocol
+
+- DONE — report surfaced
+
+## Pause-points
+
+None.
+
+## Hop-in support
+
+YES — pure information query.
+
+## Integration
+
+Reads `.lintel/state/context-budget.md`. No writes beyond optional event log.
+
+## Anti-patterns
+
+- **Reporting precise tokens** — these are estimates, not real measurements (unless integrated with CLI's exact API)
+- **Recommending cool aggressively** — keep loads if work benefits
+
+## Voice tier behavior
+
+`voice: internal`.

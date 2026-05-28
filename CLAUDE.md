@@ -28,7 +28,7 @@ Lintel is the MS-CAIP-SE session harness — markdown scaffolding for agent-base
 
 ### Plugin structure
 
-This repo IS a Claude Code plugin (see `.claude-plugin/plugin.json`). Skills live at `skills/<name>/SKILL.md`. Agents at `agents/<category>/<Name>.md`. When operator installs via `/plugin install lintel@jokerman-lintel`, all skills become available as `/lintel:<skill>` (namespaced).
+This repo IS a Claude Code plugin (see `.claude-plugin/plugin.json`). Skills live at `skills/<name>/SKILL.md`. Agents at `agents/<category>/<Name>.md`. When operator installs via `/plugin install lintel@jokerman-lintel`, all skills become available as `/li:<skill>` (namespaced).
 
 ### Local testing
 
@@ -39,7 +39,7 @@ claude --plugin-dir E:/Workspace/jokerman-lintel
 
 ### Skill namespacing
 
-Skills are namespaced `/lintel:qa`, `/lintel:release-ev2`, etc. Inside this repo's own session, the slash-commands work directly because Claude Code reads SKILL.md files via the plugin manifest.
+Skills are namespaced `/li:qa`, `/li:release-ev2`, etc. Inside this repo's own session, the slash-commands work directly because Claude Code reads SKILL.md files via the plugin manifest.
 
 ### Subagent invocation
 

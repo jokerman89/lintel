@@ -1,5 +1,5 @@
 ---
-name: li-asset-search
+name: asset-search
 layer: ms-team
 description: Search ~/.lintel/brand/azure-assets/ for the right icon or diagram primitive.
 color: green

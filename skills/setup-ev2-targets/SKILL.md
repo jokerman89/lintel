@@ -1,5 +1,5 @@
 ---
-name: li-setup-ev2-targets
+name: setup-ev2-targets
 layer: foundation
 v1_alias: [li-setup-deploy]
 description: Configure deploy targets for /release-deploy-ev2 — write targets, validate, register.

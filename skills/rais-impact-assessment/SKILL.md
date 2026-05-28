@@ -1,5 +1,5 @@
 ---
-name: li-rais-impact-assessment
+name: rais-impact-assessment
 layer: ms-team
 v1_alias: [li-rai-impact-assessment]
 description: Generate an RAI Impact Assessment — fairness, reliability, privacy, inclusiveness, transparency, accountability.

@@ -1,5 +1,5 @@
 ---
-name: li-rais-customer-voice-check
+name: rais-customer-voice-check
 layer: ms-team
 v1_alias: [li-customer-voice-check]
 description: Gate customer-facing artifacts through 12-cell Trailblazer eval before distribution.
@@ -141,4 +141,4 @@ Score 88/100 — below threshold (95). ✗ FAIL. Fix violations + retry.
 - OurVoice-calibration.md — current per-cell accuracy
 - `/msvoice-rewrite` — rewrite an internal-voice draft to trailblazer
 - `/release-ev2` — reads this skill's verdict as a gate
-- `/lintel:li-eval` (Phase 8) — runs this against OurVoice-corpus.md to maintain calibration
+- `/li:eval` (Phase 8) — runs this against OurVoice-corpus.md to maintain calibration

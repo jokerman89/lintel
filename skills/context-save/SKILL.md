@@ -1,5 +1,5 @@
 ---
-name: li-context-save
+name: context-save
 layer: foundation
 description: Save current session state to a checkpoint file. Use before context bloat or before /clean.
 color: blue

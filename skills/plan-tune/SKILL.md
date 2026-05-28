@@ -1,5 +1,5 @@
 ---
-name: li-plan-tune
+name: plan-tune
 layer: foundation
 description: Adjust which AskUserQuestion prompts auto-decide vs ask. Per-question preference tuning.
 color: purple

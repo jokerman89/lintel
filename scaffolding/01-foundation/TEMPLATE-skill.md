@@ -1,6 +1,6 @@
 # {{Skill name}}
 
-> Template for new Lintel skills. Copy this file to `~/.claude/skills/lintel:li-<name>/SKILL.md` and fill the placeholders. `verify.sh --frontmatter` will reject any skill missing required fields.
+> Template for new Lintel skills. Copy this file to `~/.claude/skills/li:<name>/SKILL.md` and fill the placeholders. `verify.sh --frontmatter` will reject any skill missing required fields.
 
 ```yaml
 ---

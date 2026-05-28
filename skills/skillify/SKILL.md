@@ -1,5 +1,5 @@
 ---
-name: li-skillify
+name: skillify
 layer: foundation
 description: Turn a recurring task or pattern into a new Lintel skill — scaffolds SKILL.md from TEMPLATE.
 color: green

@@ -1,5 +1,5 @@
 ---
-name: li-rais-transparency-note
+name: rais-transparency-note
 layer: ms-team
 v1_alias: [li-transparency-doc-gen]
 description: Generate transparency note for an AI feature — capabilities, limitations, data, disclosure.

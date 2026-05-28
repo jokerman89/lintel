@@ -1,5 +1,5 @@
 ---
-name: li-rais-sensitive-use
+name: rais-sensitive-use
 layer: ms-team
 v1_alias: [li-sensitive-use-report]
 description: Classify an AI feature against MS Sensitive Uses categories — produces structured report.
