@@ -52,11 +52,11 @@ Long-running state. Operator profile, project context, feedback patterns, extern
 
 ### 7. Agent selection precedence
 
-**Layer 3 — `scaffolding/03-personal-advanced/precedence/README.md`** — 5-level precedence model:
+**Layer 3 — `scaffolding/03-ms-team/precedence/README.md`** — 5-level precedence model:
 
 1. Operator pin (named in prompt)
 2. Repo-level override (`.claude/agents/<Name>.md`)
-3. Promoted list (`scaffolding/03-personal-advanced/promoted-agents.md`, tier-stamped)
+3. Promoted list (`scaffolding/03-ms-team/promoted-agents.md`, tier-stamped)
 4. User-global (`~/.claude/agents/`)
 5. Fallback (main agent, no delegation)
 
@@ -70,7 +70,7 @@ This precedence is enforced by skill instructions in v1 — no runtime policy en
 |---|---|---|---|
 | 1 Foundation | `scaffolding/01-foundation/` | Stable (EVOLUTION.md process) | Every session-start |
 | 2 Compliance | `scaffolding/02-sdl/` | MS-policy-driven (quarterly) | Every session-start (checklist) + on-demand (`/compliance-check`) |
-| 3 Personal advanced | `scaffolding/03-personal-advanced/` | Opinionated (team PR) | When delegating to subagents OR when output is customer-facing |
+| 3 Personal advanced | `scaffolding/03-ms-team/` | Opinionated (team PR) | When delegating to subagents OR when output is customer-facing |
 | 4 Power user | `scaffolding/04-power-user/` | Experimental (free adaptation) | Only when task explicitly invokes a Layer 4 pattern |
 
 Full architecture rationale in [`LAYERS.md`](LAYERS.md).
@@ -83,7 +83,7 @@ If this session involves an agent generating customer-facing or official-communi
 
 If the session is internal dev work (code review, planning, tests, install): `voice: internal` — direct, builder-talking-to-builder, no Trailblazer overhead.
 
-Voice tier is the per-agent honest split between marketing voice (for customers) and engineering voice (for the team). See `scaffolding/03-personal-advanced/voice/README.md`.
+Voice tier is the per-agent honest split between marketing voice (for customers) and engineering voice (for the team). See `scaffolding/03-ms-team/voice/README.md`.
 
 ---
 
@@ -159,3 +159,105 @@ A clean end:
 - Commits are atomic, no WIP debris.
 
 If session ended mid-task: `tasks/todo.md` makes the next session able to pick up cold.
+
+---
+
+## Lintel cycle — the structured path (v3.5)
+
+For non-trivial work, the Lintel cycle provides an explicit 8-phase pipeline. Each phase is its own skill; composed cycles run via orchestrator.
+
+**Canonical invocation:**
+- `/lintel:li-cycle` — full 8-phase cycle SENSE → DEFINE → DISCOVER → PLAN → BUILD → REVIEW → SHIP → CAPTURE
+- `/lintel:li-cycle --mode <preset>` — apply preset (hotfix / customer-engagement / internal-tool / demo-prep / research-dive)
+- `/lintel:li-cycle --from <phase> --to <phase>` — custom subset
+- `/lintel:li-resume` — pick up at next phase based on `.lintel/state/00-state.md`
+
+**Composite shortcuts:**
+- `/lintel:li-fix` — SENSE+BUILD+REVIEW+SHIP (hotfix)
+- `/lintel:li-research` — SENSE+DEFINE+DISCOVER (no build)
+- `/lintel:li-plan-and-build` — PLAN+BUILD (split-session)
+- `/lintel:li-review-and-ship` — REVIEW+SHIP+CAPTURE (close out)
+
+**Individual phase invocation:** `/lintel:li-sense`, `/lintel:li-define`, etc. Each phase has hop-in support.
+
+**Phase gates (always enforced):**
+- Cost-estimate gate before BUILD (token-heavy phase)
+- Founder approval gate at end of PLAN (MANDATORY pause)
+- 3-stage review in REVIEW (spec compliance → quality → compliance)
+- HARD-RULES hard-stop in SHIP (if WorkProfile=on)
+- Two-stage subagent review per BUILD task (spec then quality)
+
+See [docs/design/lintel-v3.5-cycle-and-roles.md](docs/design/lintel-v3.5-cycle-and-roles.md) for the full cycle specification.
+
+---
+
+## Role-lifting (v3.5)
+
+Expert personas as lightweight session context layers. Voice + outcome-lens + decision-criteria + cold-knowledge influence cycle without bloating session-start.
+
+**Lightweight load (~500 tokens) at activation:**
+- `/lintel:li-role-activate <role-id>` — load IDENTITY + VOICE + OUTCOME-LENS summary
+- Role overlay applies to subsequent phases (DEFINE, SHIP, CAPTURE most affected)
+
+**Deep-dive on-demand (~2-3k tokens):**
+- `/lintel:li-role-deep-dive <role-id>` — load full role-file (COLD KNOWLEDGE, DECISION CRITERIA, INSIGHTS)
+
+**Default public roles shipped:**
+- `roles/field-cto.md` — customer-facing, sales-tech, trailblazer voice
+- `roles/solution-architect.md` — enterprise IT, security-conscious, mixed voice
+- `roles/engineering-manager.md` — process, team coordination, internal voice
+
+**Private roles:** Operator can scaffold custom roles via `/lintel:li-role-new`. Private roles store at `~/.lintel/roles/private/` (gitignored). Sync via `bin/li-roles-sync` to operator's private repo (never team-wide, never public marketplace).
+
+**Session-start awareness (lightweight):** SENSE reads `~/.lintel/profile.yaml` `role_active` field; if set, loads role IDENTITY + VOICE summary (~500 tokens). Full deep-dive only on operator command.
+
+---
+
+## Context warming (v3.5)
+
+On-demand 1M-context utilization beyond session-start. Default session-start stays lightweight (~5-15k tokens); operator explicitly warms when work benefits.
+
+- `/lintel:li-context-warm <files-or-globs>` — explicit file load with budget tracking
+- `/lintel:li-context-warm-related <topic>` — heuristic load by keyword
+- `/lintel:li-context-warm-sessions [N]` — load last N session saves on branch
+- `/lintel:li-context-warm-adrs <topic>` — load topic-relevant ADRs
+- `/lintel:li-context-warm-customer <engagement>` — customer-repo state (audit-logged)
+- `/lintel:li-context-warm-from-url <url>` — WebFetch + dump (WorkProfile URL gate)
+- `/lintel:li-context-budget` — utilization visibility
+- `/lintel:li-context-snapshot [name]` — operator-named mid-session save
+- `/lintel:li-context-dump <session-id>` — load specific prior session save
+- `/lintel:li-context-cool` — selective IGNORE marker
+
+For >20k token loads: explicit budget confirmation required.
+
+---
+
+## WorkProfile (v3.5)
+
+Env-level toggle in `~/.lintel/profile.yaml`. Default at first run: operator prompted to choose.
+
+**When ON:**
+- HARD-RULES.md 5 always-on rules ENFORCED (not advisory)
+- MS SSO required for any external auth in scripts
+- voice_tier_default: trailblazer (overrides mode default if customer-facing)
+- first-party-first auto-flagged in plan
+- voice gate auto-runs on audience=customer
+- provenance-track auto-runs on AI-assisted artifacts
+- Customer-repo loads + URL fetches audit-logged
+
+**When OFF:**
+- Hard-rules advisory only
+- voice_tier_default: internal
+- Operator-driven gates only
+
+**Profile fields:**
+```yaml
+workprofile: on | off
+azure_focus: on | off
+role_active: <id> | null
+voice_tier_default: internal | trailblazer | mixed
+default_mode: customer-engagement | internal-tool | hotfix | demo-prep | research-dive
+checkpoint_mode: explicit | continuous
+context_warmup_default: minimal | standard | aggressive
+proactive: true | false
+```
