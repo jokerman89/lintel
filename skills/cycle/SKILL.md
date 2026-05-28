@@ -85,6 +85,32 @@ auto:
 
 ## Workflow
 
+### Step 0 — Dry-run mode (v3.6 cohort 3 item 2.5)
+
+If `--dry-run` flag present, denna skill VISAR vad cycle skulle göra utan att exekvera:
+
+```
+LINTEL CYCLE DRY-RUN — would-execute plan
+==========================================
+
+Mode:           <preset>
+Phases:         <list>
+Skipped:        <list>
+Mode envelope:  <soft>k soft / <hard>k hard (per context-budget)
+Estimated cost: <X k tokens total>
+
+Per-phase forecast:
+  [1/N] SENSE     est ~0.5k tokens   agents-wake: none
+  [2/N] DEFINE    est ~3k tokens     agents-wake: DesignReviewer
+  [3/N] DISCOVER  est ~2k tokens     agents-wake: ArchitectureScout
+  [4/N] PLAN      est ~5k tokens     agents-wake: PlanReviewer, CostAnalyzer
+  ...
+
+No state mutated. Exit.
+```
+
+Pairas med Step 4 phase-progress output (v3.6 cohort 2 item 1.5) — dry-run och progress visar samma format men dry-run kör inte phases.
+
 ### Step 1 — Parse invocation
 
 ```bash
