@@ -409,3 +409,177 @@ Adversarial review (ReadOnly subagent, 5 dimensions) gav **7/10 approve-with-rev
 - "Vår edge kanske blir att vi kan spara design-patterns vi tar fram och återanvända dem" — du ser direkt att Lovable/V0 inte kan beat:as på generation, men kan beat:as på compounding. Det är samma instinkt som L-001 + L-002 + L-003 trion. Edge är discipline, ej toolchain.
 - "dlx/deeplex var ett testprojekt, får inte benämnas eller återberättas igen" — du sätter hard guard för project-specific references. Den disciplinen translatar till hur design-docs ska struktureras: scaffolding-and-pattern, ej project-specific-content. L-001 i action.
 - "Mappa in i Lintel with pride :D" — du värderar känslan att Lintel **äger** featuren, inte att Lintel **inkorporerar** något. Det är därför frontend-* familjen får sin egen identity istället för att smyga in som "another generate sub-skill." Pride mappar till identity mappar till architectural-separation-of-concerns.
+
+---
+
+## GSTACK REVIEW REPORT — /plan-eng-review
+
+**Reviewed by:** `/plan-eng-review` skill on 2026-05-28
+**Reviewer:** Claude Opus 4.7
+**Mode:** Auto (no clarifying questions; reasonable calls made per gstack auto-mode)
+**Verdict:** APPROVE_WITH_REVISIONS — 4 new MAJORs surfaced (1 critical: schema-collision), 3 net-new MINORs. Total reviewer-concerns now: existing 7 + new 7 = 14. **Fas A PR should NOT open until M-1 (schema-collision) is resolved.**
+
+### Step 0 — Scope challenge
+
+**Verdict:** ❌ Fas A monolithic. Recommend split.
+
+Fas A delivers **17 net-new artifacts** (7 skills + 5 agents + 3 brand-asset-slots + 1 hook + 1 canonical pattern). Exceeds plan-eng-review threshold (~8 files / 2 new services). Single PR review fatigue + merge-blast-radius risk.
+
+**Recommendation — Fas A split into A1 + A2:**
+
+- **Fas A1 (core, 6 artifacts, ~2 days CC):**
+  - `skills/frontend-design/SKILL.md` (orchestrator)
+  - `skills/frontend-typography/SKILL.md`
+  - `skills/frontend-motion/SKILL.md`
+  - `agents/frontend/FrontendArchitect.md`
+  - `agents/frontend/MotionDirector.md`
+  - `agents/frontend/TypographyCurator.md`
+  - Brand-asset-slot bootstrapping (folders + READMEs only — no canonical pattern yet)
+  - `tests/unit/frontend-skills-present.sh` (covers 3 skills + 3 agents)
+  - Inline schema-specs (design-spec.json + typography.json + motion.json) with `schema_version: 1`
+
+- **Fas A2 (extension, 11 artifacts, ~2-3 days CC):**
+  - `skills/frontend-shader/SKILL.md`
+  - `skills/frontend-app-scaffold/SKILL.md` (or moved to generate-app — see A-3)
+  - `skills/frontend-style-extract/SKILL.md`
+  - `skills/frontend-design-review/SKILL.md`
+  - `agents/frontend/ShaderEngineer.md`
+  - `agents/frontend/DesignSystemAuditor.md`
+  - Canonical pattern `ultra-modern-lovable-style/` (hand-curated content; defer until A1 dogfood validates schema)
+
+Net: Operator can dogfood A1 helhet-mode + delar-mode before investing in shader/extract/review. L-001 risk in canonical-pattern hand-curation gets deferred until schema is operator-validated.
+
+### Architecture review
+
+**A-1 — CRITICAL (new MAJOR): `design-spec.json` schema collision with generate-web `--from-pipeline`.**
+
+generate-web SKILL.md line 44 already declares `--from-pipeline <dir>` which reads `<run-dir>/design-spec.json` (Fas 2 contract). v3.7 introduces `--from-frontend-design <dir>` parallel mode that ALSO writes `design-spec.json`. Two upstreams writing the same filename = silent schema-collision unless explicitly designed.
+
+**Resolution options (pick one in pre-A1 design-iteration):**
+- **(a) Superset schema** — frontend-design's design-spec.json EXTENDS pipeline's (additive fields). generate-web's reader works for both. Requires schema-versioning + reader-branching on field presence.
+- **(b) Differentiated filename** — frontend-design writes `frontend-design-spec.json`. generate-web's `--from-frontend-design` reader is separate. Cleanest separation; no schema-coupling.
+- **(c) Shared kernel + extension** — both pipeline and frontend-design write `design-spec.json` with a `source: "pipeline" | "frontend-design"` discriminator field. Reader dispatches on discriminator.
+
+**Recommendation: (b).** Cleanest. Avoids hidden coupling that L-002 (grep-first) discipline would catch later.
+
+**A-2 — MAJOR (new): Sequential 5-sub-skill chain locks operator into 5× sequential latency.**
+
+Success criterion claims "10 min for simple briefs" assuming sequential typography → motion → shader chain. Typography + motion + shader are **independent inputs** (operator-brief drives all three; no inter-dependency). Sub-skills can run **concurrently**.
+
+**Recommendation:** Spec PARALLEL invocation in frontend-design Workflow Step 2-4 (single-batch Agent-tool dispatch). Wallclock: ~3 min sequential → ~1 min concurrent. Document explicitly in Workflow.
+
+**A-3 — MAJOR (escalated from MINOR #5): frontend-app-scaffold straddles design-director vs rendering-engine boundary.**
+
+Original design flagged as MINOR. Re-read: "**Format-builder:** full app-scaffold orchestrator: chains design-spec + **generates project skeleton + wires up motion/shader/typography**." That's RENDERING, not design-direction. Belongs in generate-* family.
+
+**Recommendation:** Rename `skills/frontend-app-scaffold/` → `skills/generate-app/`. Frontend-design orchestrator CALLS `/li:generate-app --from-frontend-design <run-dir>`. Clean parallel: generate-web is single-file/Next.js → generate-app is full-vite/svelte/next-monorepo. Family-boundary stays clean. L-002 respected.
+
+**A-4 — MINOR (new): Agent-overlap verification needed.**
+
+5 new agents bring total 78 → 83. Per L-002 (grep before designing): some semantic-overlap risk:
+- `agents/frontend/FrontendArchitect.md` vs existing `agents/engineering/Architect.md` + `agents/engineering/FrontendBuilder.md` ← FrontendBuilder ALREADY EXISTS
+- `agents/frontend/DesignSystemAuditor.md` vs existing `agents/engineering/AccessibilityChecker.md`
+
+**Critical finding:** `agents/engineering/FrontendBuilder.md` already exists. Either:
+- (a) Rename FrontendArchitect → keep as separate role (frontend-design-director vs builder-implementer) and document explicit non-overlap, OR
+- (b) Move FrontendBuilder → agents/frontend/ as part of family-consolidation.
+
+**Recommendation: (a) keep both, document boundary.** FrontendBuilder = code-output agent (used by generate-web). FrontendArchitect = design-decision agent (used by frontend-design orchestrator). Add explicit non-overlap note in both agent files.
+
+### Code quality / maintainability review
+
+**CQ-1 — MAJOR (new): Schema-versioning missing on 5 load-bearing contracts.**
+
+`design-spec.json`, `pattern.json`, `typography.json`, `motion.json`, `shader.json` are load-bearing contracts between sub-skills + canonical pattern + generate-web reader + vault. Without `schema_version` field, future iteration breaks fixed downstream consumers silently.
+
+**Recommendation:** Mandate `"schema_version": 1` in every contract schema. generate-web reader logs+rejects on unknown major version. Document in Fas A1 inline schema-spec.
+
+**CQ-2 — MINOR: SKILL.md DRY pattern across 7 skill files risks copy-paste drift.**
+
+7 SKILL.md files share orchestrator/sub-skill anatomy (frontmatter conventions, when-to-use boilerplate, agent-mapping references). Pattern from existing generate-* family is good but undocumented.
+
+**Recommendation:** Factor common pattern into `docs/concepts/frontend-skill-anatomy.md`. Reference from each SKILL.md. (Defer to Fas A2 — A1 only ships 3 skills, drift-risk low.)
+
+**CQ-3 — MINOR (echoes Open Q#2): Pattern-vault `--overwrite` flag must inherit from style-learn.**
+
+frontend-style-extract is sister to generate-style-learn. Latter has established `--overwrite` collision-handling. Don't re-invent.
+
+**Recommendation:** Document `--overwrite` flag inheritance explicitly in frontend-style-extract SKILL.md (Fas A2 scope).
+
+### Tests review
+
+**T-1 — MAJOR (new): tests/unit/frontend-skills-present.sh not specified concretely.**
+
+Mentioned in Fas A line items but no scope. Pattern exists: `tests/unit/observation-spine-skills-present.sh`, `tests/unit/cohort5-partial-skills-present.sh`, `tests/unit/closeout-additions-present.sh`. Copy-pattern: verifies frontmatter (name, layer, color, voice, cli_support), keyword references, agent .md presence.
+
+**Recommendation:** Ship explicit test-spec in Fas A1 PR description. Covers 3 skills + 3 agents + slot-bootstrap presence.
+
+**T-2 — MAJOR (new): frontend-design → generate-web roundtrip integration test deferred to Fas B is wrong.**
+
+This IS the load-bearing flow. Without minimum-viable roundtrip test in A1, Fas B can't validate the contract.
+
+**Recommendation:** Add minimum-viable integration test in Fas A1:
+```bash
+# tests/integration/frontend-design-roundtrip.sh
+1. Hand-write minimal frontend-runs/test/design-spec.json (or frontend-design-spec.json per A-1 resolution)
+2. Invoke generate-web --from-frontend-design (or equivalent) with mock-stubbed file
+3. Assert HTML output contains expected typography stack + motion-library import
+```
+Validates the contract, not the full sub-skill chain. Catches A-1 collision early.
+
+**T-3 — MINOR: Canonical pattern test (Fas A2).**
+
+When canonical `ultra-modern-lovable-style/` ships, test should assert all 5 files present + each passes schema-validation.
+
+**T-4 — MINOR: Hook firing test (Fas C).**
+
+Timing assertion: hook fires within 200ms for vault of 1-3 patterns. Document budget-degradation past 10 patterns per existing concern #7.
+
+### Performance review
+
+**P-1 — MAJOR (echoes A-2): Sequential vs parallel sub-skill dispatch impacts 10-min budget.**
+
+See A-2. Implementation choice has 3× wallclock impact.
+
+**P-2 — MINOR (echoes existing concern #7): Vault-lookup scaling.**
+
+Already documented as MVP-budget. Defer index-file-mekanism to vault > 10 patterns.
+
+**P-3 — MINOR (echoes existing Open Q#3): WebGL/shader runtime perf-budget.**
+
+Defer to operator-opt-in flag per existing design.
+
+### Outside voice
+
+Skipped (codex review). Consistent with this session's velocity-pattern + already-completed adversarial ReadOnly review (7/10).
+
+### Implementation tasks (consume in Fas A1 prep)
+
+```jsonl
+{"id":"task-1","phase":"pre-A1","priority":"critical","title":"Resolve design-spec.json schema collision (A-1)","files":["skills/frontend-design/SKILL.md","skills/generate-web/SKILL.md"],"acceptance":"Filename + schema boundary documented; recommendation (b) differentiated filename"}
+{"id":"task-2","phase":"A1","priority":"major","title":"Spec PARALLEL sub-skill invocation in frontend-design Workflow (A-2, P-1)","files":["skills/frontend-design/SKILL.md"],"acceptance":"Workflow Step 2-4 marked CONCURRENT with single-batch dispatch pattern"}
+{"id":"task-3","phase":"pre-A1","priority":"major","title":"Decide on frontend-app-scaffold rename → generate-app (A-3)","files":["docs/design/lintel-v3.7-frontend-design-system.md"],"acceptance":"Family boundary updated in design doc; rename to generate-app applied OR explicit non-rename rationale documented"}
+{"id":"task-4","phase":"A1","priority":"minor","title":"Document FrontendArchitect non-overlap with existing FrontendBuilder + Architect agents (A-4)","files":["agents/frontend/FrontendArchitect.md","agents/engineering/FrontendBuilder.md"],"acceptance":"Both agent files cross-reference each other with explicit role-boundary"}
+{"id":"task-5","phase":"A1","priority":"major","title":"Add schema_version field to 5 contract schemas (CQ-1)","files":["skills/frontend-design/SKILL.md","skills/frontend-typography/SKILL.md","skills/frontend-motion/SKILL.md"],"acceptance":"Every contract JSON inline-spec includes schema_version: 1 + generate-web reader logs+rejects unknown major versions"}
+{"id":"task-6","phase":"A1","priority":"major","title":"Add minimum-viable roundtrip integration test (T-2)","files":["tests/integration/frontend-design-roundtrip.sh"],"acceptance":"Test invokes generate-web --from-frontend-design with mock spec; asserts HTML output contains expected tokens"}
+{"id":"task-7","phase":"planning","priority":"major","title":"Split Fas A → A1 + A2 (Scope challenge)","files":["docs/design/lintel-v3.7-frontend-design-system.md"],"acceptance":"Implementation Phases section restructured; A1 ships 6 artifacts + minimum-viable test, A2 ships 11 artifacts + canonical pattern"}
+{"id":"task-8","phase":"A2","priority":"minor","title":"Document --overwrite flag inheritance in frontend-style-extract (CQ-3)","files":["skills/frontend-style-extract/SKILL.md"],"acceptance":"--overwrite flag pattern inherits from generate-style-learn; collision-handling documented inline"}
+```
+
+### Verdict — release-gate checklist
+
+Before Fas A1 PR opens:
+- [ ] task-1 resolved (design-spec.json filename + schema boundary)
+- [ ] task-3 resolved (app-scaffold rename decision)
+- [ ] task-7 resolved (Implementation Phases section updated)
+- [ ] task-5 schemas drafted inline
+
+Before Fas A2 PR opens:
+- [ ] A1 dogfood completed by operator
+- [ ] Canonical-pattern hand-curation completed (~1 day reserved)
+
+### Reviewer-concern integration
+
+This review APPENDS to existing 7 reviewer-concerns. New concerns numbered M-1 through M-3 (MAJORs) + m-1 through m-4 (MINORs). Total now: 14. Tracking lives in `tasks/memory.md` reviewer-concerns entry — update at PR #21 merge time.
+
+**Status update for design doc:** DRAFT_WITH_CONCERNS → **DRAFT_WITH_CONCERNS+ENG_REVIEWED**. Ready for operator-approval after task-1, task-3, task-7 resolved.
