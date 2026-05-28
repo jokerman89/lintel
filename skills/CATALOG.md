@@ -4,8 +4,8 @@ Auto-generated från frontmatter på push till main.
 Regenerated av `.github/workflows/catalog.yml` per push när `skills/**/SKILL.md` ändras.
 Hand-edits skrivs över — edit frontmatter i source SKILL.md istället.
 
-Total skills: 134
-Generated: 2026-05-28T19:28:50Z
+Total skills: 137
+Generated: 2026-05-28T20:36:29Z
 
 ## foundation layer (94 skills)
 
@@ -106,7 +106,7 @@ Generated: 2026-05-28T19:28:50Z
 | `/li:sync-brain` | Refresh the gbrain index from the current worktree — incremental or full. |
 | `/li:usage-log` | Append-only usage log för skill/agent-invocations. Wrapper-pattern per L-001 (en log, ingen per-skill duplikat). Solo-i |
 
-## ms-team layer (39 skills)
+## ms-team layer (42 skills)
 
 | Skill | Description |
 |---|---|
@@ -124,6 +124,9 @@ Generated: 2026-05-28T19:28:50Z
 | `/li:entra-agent-id-submit-draft` | Prepare a Microsoft Entra Agent ID submission — identity, capabilities, governance scope. |
 | `/li:eval` | Run TRAILBLAZER-TEST against TRAILBLAZER-CORPUS — per-cell accuracy → CALIBRATION.md. |
 | `/li:first-party-check` | Scan for non-first-party dependencies and surface MS alternatives — "first-party first" enforcement. |
+| `/li:frontend-design` | Frontend design-director orchestrator. Chains typography + motion (+ shader in Fas A2) → frontend-design-spec.json → |
+| `/li:frontend-motion` | Frontend design-director sub-skill — picks motion-language (GSAP/Lenis/Theatre/Rive/Motion-One) + scroll-trigger-confi |
+| `/li:frontend-typography` | Frontend design-director sub-skill — picks font-family-stacks + variable-axes-config + size-scale + line-heights + fon |
 | `/li:generate-design` | Produce design-spec.json (per-format layout-mappings + palette + fonts + asset placements) from content.md. Shared conte |
 | `/li:generate-outline` | Produce outline.md (structured presentation/document skeleton) from a brief. Shared content-pipeline sub-skill, solo-inv |
 | `/li:generate-pdf` | ⚠ TEMPLATE ONLY — Slot for PDF document generation. Content not curated. AI generates fresh at invocation per L-001. |
