@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "name": "ultra-modern-lovable-style",
+  "version": "1.0.0",
+  "generated_at": "2026-05-28T00:00:00Z",
+  "source_artifacts": ["canonical-bundled-Lintel-v3.7-Fas-A2"],
+  "extraction_method": "hand-curated",
+  "extraction_confidence": "high",
+  "purpose": "Canonical reference pattern bundled med Lintel som schema-by-example. Serverar som baseline för operator-extracted patterns via /li:frontend-style-extract. L-001 trade-off explicitly acknowledged: re-evaluate efter Fas D dogfood om operator-extracted patterns dominerar vault (>3 patterns), can demote to docs/samples/.",
+  "layout_grammar": {
+    "max_width": "1200px",
+    "section_spacing": "clamp(4rem, 8vw, 8rem)",
+    "grid": "12-col",
+    "breakpoint_strategy": "mobile-first",
+    "container_queries": false
+  },
+  "motion_language": {
+    "libraries_detected": ["gsap", "@studio-freight/lenis"],
+    "scroll_trigger_fingerprint": "hero-act + section-fade-up + scrub-tied parallax",
+    "energy_level": "moderate"
+  },
+  "interaction_patterns": {
+    "scroll_smoothing": true,
+    "hover_intent": "subtle",
+    "page_transitions": "fade-or-slide",
+    "cursor_behavior": "default"
+  },
+  "component_library_fingerprint": {
+    "primary": "shadcn",
+    "motion_enhanced": "aceternity-ui",
+    "ux_utilities": ["vaul", "cmdk"]
+  },
+  "shader_thesis": {
+    "present": true,
+    "type": "mesh-gradient",
+    "complexity": "low"
+  },
+  "typography_ref": "./typography.json",
+  "motion_ref": "./motion.json",
+  "shader_snippets_dir": "./shader-snippets/",
+  "component_imports_ref": "./component-imports.json",
+  "visual_thesis_distilled": "Editorial-grade modern AI-app aesthetic: Fraunces serif (variable optical-size) carries editorial gravitas in display + headings, Inter handles dense body precision, GSAP+ScrollTrigger drives a hero-act + section-fade-up choreography smoothed by Lenis, shadcn primitives augmented by Aceternity for motion-cards + tracing-beam effects, Paper Shaders provides a low-complexity mesh-gradient hero background. The result reads as Lovable-grade — production-ready, modern, restrained.",
+  "license_summary": {
+    "fraunces": "free (Google Fonts)",
+    "inter": "free (Google Fonts)",
+    "jetbrains_mono": "free (Google Fonts)",
+    "gsap": "free-tier (Club plugins require commercial)",
+    "lenis": "free (MIT)",
+    "paper_shaders": "free (MIT)",
+    "shadcn": "free (MIT)",
+    "aceternity_ui": "free (MIT, copy-paste)",
+    "vaul": "free (MIT)",
+    "cmdk": "free (MIT)"
+  }
+}

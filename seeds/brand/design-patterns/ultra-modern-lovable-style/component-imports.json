@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-05-28T00:00:00Z",
+  "fingerprint": "shadcn+aceternity+vaul+cmdk",
+  "imports": [
+    {
+      "name": "shadcn",
+      "kind": "primitive",
+      "purpose": "base Radix-grounded primitives (Button, Card, Dialog, Tabs, Tooltip)",
+      "install": "npx shadcn-ui@latest init",
+      "components_used": ["button", "card", "dialog", "tabs", "tooltip", "input", "textarea"],
+      "license": {"type": "free", "source": "MIT"},
+      "docs": "https://ui.shadcn.com"
+    },
+    {
+      "name": "aceternity-ui",
+      "kind": "motion-enhanced",
+      "purpose": "bento-grid + bg-gradient + tracing-beam + motion-cards för hero + features",
+      "install": "manual copy-paste från ui.aceternity.com (per-component)",
+      "components_used": ["bento-grid", "background-gradient", "tracing-beam", "card-hover-effect"],
+      "license": {"type": "free", "source": "MIT, copy-paste model"},
+      "docs": "https://ui.aceternity.com"
+    },
+    {
+      "name": "vaul",
+      "kind": "ux-utility",
+      "purpose": "mobile bottom-sheet drawer (iOS-grade)",
+      "install": "npm i vaul",
+      "components_used": ["Drawer"],
+      "license": {"type": "free", "source": "MIT"},
+      "docs": "https://vaul.emilkowal.ski"
+    },
+    {
+      "name": "cmdk",
+      "kind": "ux-utility",
+      "purpose": "command palette (Cmd+K)",
+      "install": "npm i cmdk",
+      "components_used": ["Command", "CommandInput", "CommandList", "CommandItem"],
+      "license": {"type": "free", "source": "MIT"},
+      "docs": "https://cmdk.paco.me"
+    }
+  ],
+  "operator_instructions_md": "# Component setup — ultra-modern-lovable-style\n\n## Initial setup\n```bash\nnpx shadcn-ui@latest init\nnpm i vaul cmdk @paper-design/shaders-react gsap @studio-freight/lenis\n```\n\n## Adding shadcn primitives\n```bash\nnpx shadcn-ui@latest add button card dialog tabs tooltip input textarea\n```\n\n## Adding Aceternity components\n1. Visit ui.aceternity.com → find component (bento-grid, background-gradient, tracing-beam, card-hover-effect)\n2. Copy TSX into `components/ui/` directory\n3. Ensure tailwind.config.js has required animations (Aceternity provides them)\n\n## Vaul drawer (mobile)\n```tsx\nimport { Drawer } from 'vaul'\n```\n\n## CMDK command palette (Cmd+K)\n```tsx\nimport { Command } from 'cmdk'\n// Wrap in dialog from shadcn\n```\n"
+}

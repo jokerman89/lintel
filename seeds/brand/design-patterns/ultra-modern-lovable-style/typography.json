@@ -1,0 +1,85 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-05-28T00:00:00Z",
+  "brief_summary": "Canonical ultra-modern Lovable-style — editorial serif display + modern sans body + technical mono accents",
+  "mood": "editorial-modern",
+  "font_stacks": [
+    {
+      "role": "heading",
+      "family": "Fraunces",
+      "fallback_stack": ["Georgia", "Times New Roman", "serif"],
+      "variable_axes": {
+        "weight": [400, 900],
+        "optical_size": [9, 144],
+        "soft": [0, 100],
+        "WONK": [0, 1]
+      },
+      "loading_strategy": "Google Fonts CDN with preload critical weights (400, 700)",
+      "license": {
+        "type": "free",
+        "source": "Google Fonts",
+        "operator_instruction": "Include via <link> tag with display=swap"
+      }
+    },
+    {
+      "role": "body",
+      "family": "Inter",
+      "fallback_stack": ["-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif"],
+      "variable_axes": {
+        "weight": [400, 700],
+        "slant": [-10, 0]
+      },
+      "loading_strategy": "Google Fonts CDN with preload weight 400 + 600",
+      "license": {
+        "type": "free",
+        "source": "Google Fonts",
+        "operator_instruction": "Include via <link> tag"
+      }
+    },
+    {
+      "role": "mono",
+      "family": "JetBrains Mono",
+      "fallback_stack": ["Cascadia Code", "Menlo", "Consolas", "Liberation Mono", "monospace"],
+      "variable_axes": {
+        "weight": [400, 700]
+      },
+      "loading_strategy": "Google Fonts CDN, lazy-load (used only in code-blocks)",
+      "license": {
+        "type": "free",
+        "source": "Google Fonts",
+        "operator_instruction": "Include via <link> tag, defer if no code-blocks above-the-fold"
+      }
+    }
+  ],
+  "size_scale": {
+    "ratio": 1.25,
+    "base_px": 16,
+    "scale": [
+      "xs:0.75rem",
+      "sm:0.875rem",
+      "base:1rem",
+      "lg:1.125rem",
+      "xl:1.25rem",
+      "2xl:1.5rem",
+      "3xl:1.875rem",
+      "4xl:2.25rem",
+      "5xl:3rem",
+      "6xl:3.75rem",
+      "7xl:4.5rem"
+    ]
+  },
+  "line_heights": {
+    "tight": 1.1,
+    "snug": 1.25,
+    "normal": 1.5,
+    "relaxed": 1.625,
+    "loose": 2
+  },
+  "letter_spacing": {
+    "tight": "-0.02em",
+    "normal": "0",
+    "wide": "0.05em",
+    "wider": "0.1em"
+  },
+  "operator_instructions_md": "# Typography setup — ultra-modern-lovable-style\n\nAll fonts are free via Google Fonts.\n\n## HTML <head>\n```html\n<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">\n<link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>\n<link href=\"https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,700&family=Inter:wght@400;600&family=JetBrains+Mono:wght@400;700&display=swap\" rel=\"stylesheet\">\n```\n\n## Tailwind config\n```js\nfontFamily: {\n  serif: ['Fraunces', 'Georgia', 'serif'],\n  sans: ['Inter', '-apple-system', 'sans-serif'],\n  mono: ['JetBrains Mono', 'Menlo', 'monospace']\n}\n```\n\n## Variable axes usage (Fraunces)\n- `font-feature-settings: 'opsz' var(--opsz);` for optical-size-tied responsive sizing\n- Combine `--opsz: 96` for hero headings, `--opsz: 18` for body display\n"
+}

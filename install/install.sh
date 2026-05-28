@@ -105,6 +105,15 @@ mkdir -p "$LINTEL_HOME/design-html"
 mkdir -p "$LINTEL_HOME/design-shotgun"
 mkdir -p "$LINTEL_HOME/browser-profiles"
 mkdir -p "$LINTEL_HOME/quarantine"
+mkdir -p "$LINTEL_HOME/frontend-runs"      # v3.7 — frontend-design orchestrator run-output
+
+# v3.7 Fas A2 — brand-asset slots för frontend-* family
+mkdir -p "$LINTEL_HOME/brand"
+mkdir -p "$LINTEL_HOME/brand/design-patterns"
+mkdir -p "$LINTEL_HOME/brand/motion-libraries"
+mkdir -p "$LINTEL_HOME/brand/shader-snippets"
+mkdir -p "$LINTEL_HOME/brand/palettes"
+mkdir -p "$LINTEL_HOME/brand/fonts"
 
 chmod 700 "$LINTEL_HOME/browser-profiles"   # secrets-adjacent
 chmod 700 "$LINTEL_HOME/audit"               # tamper-evident
@@ -117,6 +126,23 @@ hdr "Copying scaffolding to ~/.lintel/scaffolding/"
 
 cp -r "$REPO_ROOT/scaffolding/"* "$LINTEL_SCAFFOLDING/"
 ok "Scaffolding copied (4 layers)"
+
+# ----- v3.7 brand-seeds (idempotent) -----------------------------------------
+
+if [[ -d "$REPO_ROOT/seeds/brand" ]]; then
+  hdr "Copying brand seeds to ~/.lintel/brand/ (idempotent — operator-extracted patterns preserved)"
+  for seed_pattern in "$REPO_ROOT/seeds/brand/design-patterns/"*/; do
+    [ -d "$seed_pattern" ] || continue
+    pattern_name=$(basename "$seed_pattern")
+    target="$LINTEL_HOME/brand/design-patterns/$pattern_name"
+    if [[ -d "$target" ]]; then
+      info "Pattern '$pattern_name' exists at $target — preserving operator state (idempotent)"
+    else
+      cp -r "$seed_pattern" "$target"
+      ok "Seeded canonical pattern: $pattern_name → $target"
+    fi
+  done
+fi
 
 # ----- config -----------------------------------------------------------------
 
