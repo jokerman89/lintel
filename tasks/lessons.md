@@ -22,3 +22,19 @@ Durable rules accumulated from corrections. Review at session start; add after a
 Related: scaffolding-vs-content principle is the v3.5 lake-of-bloat avoidance rule — every "let me add one more example" instinct is the lake refilling.
 
 ---
+
+## L-002 — Grep existing skills before designing a new family
+
+**Rule:** Before architecting a new skill family or major addition, enumerate existing `skills/` for prior infrastructure that touches the same domain. Don't trust assumed greenfield. Use `ls skills/` + `grep` for related verbs/nouns in SKILL.md frontmatter — at minimum 30 seconds of investigation before locking design premises.
+
+**Why:** During /office-hours design session for the doc-gen "forge" family, I locked four design decisions (D1-D4) before discovering that `skills/generate-ppt/`, `skills/generate-web/`, and `skills/generate-word/` already existed with 4-gate quality pipelines + brand-template-pulls + voice-gating. Operator had to redirect the entire design at D5 from "forge from scratch" to "evolve generate-namespace + refactor existing." If I had run `ls skills/ | grep generate` at Phase 1 (Context Gathering), the discovery would have shaped D1-D4 differently from the start, avoiding the design backtrack.
+
+**How to apply:**
+- In any /office-hours or design-mode invocation: Phase 1 includes `ls skills/ | head -50` + `grep -l "<domain-keyword>" skills/*/SKILL.md` as mandatory steps, not optional. Apply even if you "know" the repo.
+- When user gives an inspiration doc (DECKFORGE-style), grep the repo for any of the inspiration's verbs/nouns (here: `generate`, `ppt`, `doc`, `web`, `pdf`) before mapping inspiration to design.
+- If discovery surfaces existing infrastructure: explicitly state "premise reset" before re-asking design questions. Don't paper over.
+- The cost of 30 seconds of investigation is always less than the cost of re-designing after operator catches the gap.
+
+Related: [[scaffolding-not-content]] — both lessons are about respecting what already exists before adding more. L-002 catches the case where "what exists" was infrastructure I missed; L-001 catches the case where "what doesn't need to exist" was content I shouldn't have added.
+
+---
