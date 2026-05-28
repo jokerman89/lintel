@@ -1,0 +1,103 @@
+# Lintel generate-pipeline agent mapping
+#
+# Sub-skill-to-subagent dispatch hints used by /li:generate orchestrator + each
+# sub-skill. Per-skill primary agent + conditional secondary agents based on
+# content traits.
+#
+# Format:
+#   <skill-name>:
+#     primary: <AgentName>          # always invoked
+#     per_section:                  # section/step → agent override (optional)
+#       "<step>": <AgentName>
+#     secondary_conditional:        # agent → triggers (any match = invoke)
+#       <AgentName>: [trait1, trait2]
+
+version: 1
+as_of: 2026-05-28
+
+skills:
+
+  generate-outline:
+    primary: AzureArchitect            # default: most CAIP-SE briefs are Azure-themed
+    secondary_conditional:
+      AzureOpenAIAdvisor: [ai-content, openai-content, llm-content]
+      M365CopilotAdvisor: [m365-content, copilot-content]
+      GraphAPIAdvisor: [graph-api-content, identity-content]
+
+  generate-write:
+    primary: TrailblazerVoiceCoach     # voice-corpus-application is core to write
+    secondary_conditional:
+      AzureArchitect: [azure-content, technical-depth-needed]
+      CostAnalyzer: [cost-content, estimate-content, pricing-content]
+      SecurityAuditor: [security-content, compliance-content]
+
+  generate-design:
+    primary: AzureArchitect            # default Azure-themed layout patterns
+    per_step:
+      "ppt-layout": PPTNarrativeArchitect      # per-format design pass hook
+      "web-layout": WebExperienceCritic         # per-format design pass hook
+      "word-layout": WordTechnicalEditor        # per-format design pass hook
+    secondary_conditional:
+      AccessibilityChecker: [customer-share, public-output, accessibility-required]
+      BicepReviewer: [iac-content, deployment-design-content]
+
+  generate-qa:
+    primary: BrandComplianceAuditor    # palette/font/logo validation is primary
+    secondary_conditional:
+      TrailblazerVoiceCoach: [voice-tier-customer-share, blocklist-validation]
+      AccessibilityChecker: [contrast-validation, accessibility-required]
+      ProvenanceAuditor: [customer-share, audit-trail-required]
+
+  # ⚠ Template only slots — agent-mapping configured; content generated at invocation per L-001
+
+  generate-pdf:
+    primary: AzureArchitect            # fallback for Azure-themed content
+    secondary_conditional:
+      SecurityAuditor: [customer-data, compliance-content]
+      AccessibilityChecker: [customer-share, accessible-output-required]
+      ProvenanceAuditor: [audit-trail-required]
+
+  generate-xlsx:
+    primary: CostAnalyzer              # XLSX use cases skew cost/estimate
+    secondary_conditional:
+      AzureArchitect: [capacity-content, sizing-content]
+      SecurityAuditor: [customer-sensitive-data]
+      FinOpsReviewer: [cost-model-content, capex-opex-content]
+
+  generate-visio:
+    primary: AzureArchitect            # default architecture/topology diagrams
+    secondary_conditional:
+      NetworkArchitect: [network-topology-content, connectivity-content]
+      SecurityAuditor: [security-boundary-content, trust-zone-content]
+      BicepReviewer: [iac-deployable-content]
+
+# Role-context modifiers (applied when role active in ~/.lintel/profile.yaml)
+role_overlays:
+  field-cto:
+    emphasize_skills: [generate-design, generate-qa]    # consumer-facing visual quality matters most
+    additional_agents: [FieldCTOAdvisor, ExecutiveBriefingDrafter]
+
+  solution-architect:
+    emphasize_skills: [generate-outline, generate-design, generate-visio]
+    additional_agents: [ThreatModelDrafter, BicepReviewer]
+
+  engineering-manager:
+    emphasize_skills: [generate-outline, generate-qa]
+    additional_agents: [Planner, ReleaseEngineer]
+
+# Cross-skill invocation policy
+policy:
+  # Maximum agents per sub-skill to avoid token explosion
+  max_agents_per_skill: 2
+  max_total_agents_per_invocation: 8
+
+  # When in conflict: primary wins; per_step override beats primary; conditional adds, doesn't replace.
+
+  # Token budget per agent invocation (soft cap):
+  agent_section_budget_tokens: 1500
+
+  # Voice gate is orchestrator-level only (per design doc Reviewer Concern #2 + #8)
+  voice_gate_owner: orchestrator
+
+  # Brand/honest-limitations/provenance gates remain per-format-builder
+  format_gate_owner: format-builder
