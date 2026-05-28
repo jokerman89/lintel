@@ -1,5 +1,5 @@
 {
-  "name": "lintel",
+  "name": "li",
   "description": "Lintel — MS-CAIP-SE session harness for Gemini with 8-phase cycle + role-lifting + Azure toolbox",
   "version": "3.5.0-dev",
   "contextFileName": "GEMINI.md"

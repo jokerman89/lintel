@@ -2,6 +2,7 @@
 # tests/unit/context-warm-skills-present.sh
 #
 # Verifies v3.5 context-warming infrastructure: 10 skills present + valid.
+# Post-Väg-A: skill folder/name bare (no li- prefix), invocation /li:<name>.
 # tag: v3.5 context-warming
 
 set -uo pipefail
@@ -15,7 +16,7 @@ fail() { echo "  FAIL: $1"; FAILED=1; }
 echo "tests/unit/context-warm-skills-present.sh"
 echo "========================================="
 
-# 10 context-warming skills
+# 10 context-warming skills (bare folder names)
 WARM_SKILLS=(
   context-warm
   context-warm-related
@@ -30,14 +31,13 @@ WARM_SKILLS=(
 )
 
 for skill in "${WARM_SKILLS[@]}"; do
-  f="$REPO_ROOT/skills/li-$skill/SKILL.md"
+  f="$REPO_ROOT/skills/$skill/SKILL.md"
   if [ -f "$f" ]; then
     name=$(grep '^name:' "$f" | head -1 | awk '{print $2}')
-    expected="li-$skill"
-    if [ "$name" = "$expected" ]; then
-      pass "context skill: $expected"
+    if [ "$name" = "$skill" ]; then
+      pass "context skill: $skill"
     else
-      fail "context skill name mismatch: $expected (got '$name')"
+      fail "context skill name mismatch: folder=$skill, frontmatter=$name"
     fi
   else
     fail "context skill missing: $f"
@@ -46,43 +46,44 @@ done
 
 # All have cli_support
 for skill in "${WARM_SKILLS[@]}"; do
-  f="$REPO_ROOT/skills/li-$skill/SKILL.md"
+  f="$REPO_ROOT/skills/$skill/SKILL.md"
   [ -f "$f" ] || continue
   if ! grep -q '^cli_support:' "$f"; then
-    fail "missing cli_support: li-$skill"
+    fail "missing cli_support: $skill"
   fi
 done
 pass "all context-warming skills have cli_support frontmatter"
 
 # All have layer: foundation
 for skill in "${WARM_SKILLS[@]}"; do
-  f="$REPO_ROOT/skills/li-$skill/SKILL.md"
+  f="$REPO_ROOT/skills/$skill/SKILL.md"
   [ -f "$f" ] || continue
   layer=$(grep '^layer:' "$f" | head -1 | awk '{print $2}')
   if [ "$layer" != "foundation" ]; then
-    fail "wrong layer for li-$skill: '$layer'"
+    fail "wrong layer for $skill: '$layer'"
   fi
 done
 pass "all context-warming skills have layer: foundation"
 
-# li-context-warm is the base, others should reference it
-WARM_VARIANTS=(context-warm-related context-warm-sessions context-warm-adrs context-warm-customer context-warm-from-url context-dump)
-for variant in "${WARM_VARIANTS[@]}"; do
-  f="$REPO_ROOT/skills/li-$variant/SKILL.md"
+# context-warm is the base, most variants reference /li:context-warm.
+# from-url uses WebFetch directly (not delegating); excluded from delegation check.
+DELEGATING_VARIANTS=(context-warm-related context-warm-sessions context-warm-adrs context-warm-customer context-dump)
+for variant in "${DELEGATING_VARIANTS[@]}"; do
+  f="$REPO_ROOT/skills/$variant/SKILL.md"
   [ -f "$f" ] || continue
-  if grep -q 'li-context-warm' "$f"; then
+  if grep -q '/li:context-warm' "$f"; then
     : # ok, references base
   else
-    fail "li-$variant doesn't reference li-context-warm (delegation expected)"
+    fail "$variant doesn't reference /li:context-warm (delegation expected)"
   fi
 done
-pass "all context-warm variants delegate to base li-context-warm"
+pass "all delegating context-warm variants reference /li:context-warm"
 
-# Budget skill has tracking spec
-if grep -q 'context-budget.md' "$REPO_ROOT/skills/li-context-warm/SKILL.md"; then
-  pass "li-context-warm references context-budget.md tracking"
+# Budget tracking referenced in base skill
+if grep -q 'context-budget.md' "$REPO_ROOT/skills/context-warm/SKILL.md"; then
+  pass "context-warm references context-budget.md tracking"
 else
-  fail "li-context-warm doesn't track budget"
+  fail "context-warm doesn't track budget"
 fi
 
 echo ""

@@ -1,5 +1,5 @@
 ---
-name: li-learn
+name: learn
 layer: foundation
 description: Record an insight, correction, or pattern as a lesson — readable at future session start.
 color: blue

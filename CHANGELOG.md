@@ -105,7 +105,7 @@ Session-start stays lightweight (~5-15k tokens). Warming is explicit operator ac
 - Phase G: Cold-executor handoff trio dogfood verification (CAPTURE writes spec.md + plan.md + prompt.md; verify operator can re-execute from those alone)
 - Phase H: Doc rewrite (README + SHIP-GATE + LAYERS + AGENT-INSTRUCTIONS fully updated for v3.5)
 - Phase I: Tests (phase-skill smoke tests + cycle E2E)
-- Phase J: Operator dogfood (`/lintel:li-cycle --mode internal-tool` on internal extension)
+- Phase J: Operator dogfood (`/li:cycle --mode internal-tool` on internal extension)
 - Phase K: PR + tag v3.5.0-dev
 
 ### Methodologies studied (per design phase)
@@ -157,13 +157,13 @@ Final per-category counts: ms-specific 15, engineering 25, customer 8, security 
 
 ### Session-harness skills (Phase 4) — 74 → 81 skills (+7 new)
 
-- `/lintel:li-lessons-promote` — promote repo lesson → Lintel global
-- `/lintel:li-adr-new` — bootstrap ADR from template
-- `/lintel:li-personas-rotate` — load persona context for demos/workshops
-- `/lintel:li-match` — semantic skill router (free text → top 3 skills)
-- `/lintel:li-doctor` — cross-CLI health check (replaces v2 spec-only li-cli-fingerprint)
-- `/lintel:li-scaffold` — invoke repo scaffolding into target
-- `/lintel:li-lessons` — mid-session lessons.md relevance-filtered review
+- `/li:lessons-promote` — promote repo lesson → Lintel global
+- `/li:adr-new` — bootstrap ADR from template
+- `/li:personas-rotate` — load persona context for demos/workshops
+- `/li:match` — semantic skill router (free text → top 3 skills)
+- `/li:doctor` — cross-CLI health check (replaces v2 spec-only li-cli-fingerprint)
+- `/li:scaffold` — invoke repo scaffolding into target
+- `/li:lessons` — mid-session lessons.md relevance-filtered review
 
 ### Bin/ scripts (Phase 5)
 
@@ -224,7 +224,7 @@ Final per-category counts: ms-specific 15, engineering 25, customer 8, security 
 
 ### Naming migration (Phase A)
 
-- 24 skills renamed to mirror MS process: `/ship` → `/release-ev2`, `/compliance-gate` → `/onecs-check`, `/sensitive-use-report` → `/rais-sensitive-use`, `/lintel:li-test` → `/onebranch-validate`, etc. Full table in [MIGRATION-TABLE.md](MIGRATION-TABLE.md).
+- 24 skills renamed to mirror MS process: `/ship` → `/release-ev2`, `/compliance-gate` → `/onecs-check`, `/sensitive-use-report` → `/rais-sensitive-use`, `/li:test` → `/onebranch-validate`, etc. Full table in [MIGRATION-TABLE.md](MIGRATION-TABLE.md).
 - 2 agents renamed: `MSComplianceAuditor` → `OneCSAuditor`; `EvalSuiteAuthor` → `CloudTestSuiteAuthor`.
 - 5 voice docs renamed: `TRAILBLAZER-*.md` → `OurVoice-*.md` (matches canonical MS guide title).
 - Directory rename: `scaffolding/02-compliance/` → `scaffolding/02-sdl/` (matches SDL framing).
@@ -234,7 +234,7 @@ Final per-category counts: ms-specific 15, engineering 25, customer 8, security 
 ### Portability shim (Phase B)
 
 - New: [CLI-SUPPORT-V2-SCHEMA.md](scaffolding/01-foundation/CLI-SUPPORT-V2-SCHEMA.md) — formal per-CLI degradation grammar (full / degraded / not-supported × claude-code / codex / copilot-cli / copilot-app).
-- New skill: `/lintel:li-cli-fingerprint` — 5-step CLI detection cascade with operator-declarable fallback.
+- New skill: `/li:cli-fingerprint` — 5-step CLI detection cascade with operator-declarable fallback.
 - v1 cli_support arrays still parse correctly (backward compat).
 
 ### 1M context budget engine (Phase C)

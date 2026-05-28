@@ -1,5 +1,5 @@
 ---
-name: li-sync-brain
+name: sync-brain
 layer: foundation
 v1_alias: [li-sync-gbrain]
 description: Refresh the gbrain index from the current worktree — incremental or full.

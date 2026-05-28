@@ -1,5 +1,5 @@
 ---
-name: li-document-generate
+name: document-generate
 layer: foundation
 description: Generate documentation from code — engineering reference, customer guides, or onboarding tutorials.
 color: green

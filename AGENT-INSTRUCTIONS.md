@@ -167,18 +167,18 @@ If session ended mid-task: `tasks/todo.md` makes the next session able to pick u
 For non-trivial work, the Lintel cycle provides an explicit 8-phase pipeline. Each phase is its own skill; composed cycles run via orchestrator.
 
 **Canonical invocation:**
-- `/lintel:li-cycle` — full 8-phase cycle SENSE → DEFINE → DISCOVER → PLAN → BUILD → REVIEW → SHIP → CAPTURE
-- `/lintel:li-cycle --mode <preset>` — apply preset (hotfix / customer-engagement / internal-tool / demo-prep / research-dive)
-- `/lintel:li-cycle --from <phase> --to <phase>` — custom subset
-- `/lintel:li-resume` — pick up at next phase based on `.lintel/state/00-state.md`
+- `/li:cycle` — full 8-phase cycle SENSE → DEFINE → DISCOVER → PLAN → BUILD → REVIEW → SHIP → CAPTURE
+- `/li:cycle --mode <preset>` — apply preset (hotfix / customer-engagement / internal-tool / demo-prep / research-dive)
+- `/li:cycle --from <phase> --to <phase>` — custom subset
+- `/li:resume` — pick up at next phase based on `.lintel/state/00-state.md`
 
 **Composite shortcuts:**
-- `/lintel:li-fix` — SENSE+BUILD+REVIEW+SHIP (hotfix)
-- `/lintel:li-research` — SENSE+DEFINE+DISCOVER (no build)
-- `/lintel:li-plan-and-build` — PLAN+BUILD (split-session)
-- `/lintel:li-review-and-ship` — REVIEW+SHIP+CAPTURE (close out)
+- `/li:fix` — SENSE+BUILD+REVIEW+SHIP (hotfix)
+- `/li:research` — SENSE+DEFINE+DISCOVER (no build)
+- `/li:plan-and-build` — PLAN+BUILD (split-session)
+- `/li:review-and-ship` — REVIEW+SHIP+CAPTURE (close out)
 
-**Individual phase invocation:** `/lintel:li-sense`, `/lintel:li-define`, etc. Each phase has hop-in support.
+**Individual phase invocation:** `/li:sense`, `/li:define`, etc. Each phase has hop-in support.
 
 **Phase gates (always enforced):**
 - Cost-estimate gate before BUILD (token-heavy phase)
@@ -196,18 +196,18 @@ See [docs/design/lintel-v3.5-cycle-and-roles.md](docs/design/lintel-v3.5-cycle-a
 Expert personas as lightweight session context layers. Voice + outcome-lens + decision-criteria + cold-knowledge influence cycle without bloating session-start.
 
 **Lightweight load (~500 tokens) at activation:**
-- `/lintel:li-role-activate <role-id>` — load IDENTITY + VOICE + OUTCOME-LENS summary
+- `/li:role-activate <role-id>` — load IDENTITY + VOICE + OUTCOME-LENS summary
 - Role overlay applies to subsequent phases (DEFINE, SHIP, CAPTURE most affected)
 
 **Deep-dive on-demand (~2-3k tokens):**
-- `/lintel:li-role-deep-dive <role-id>` — load full role-file (COLD KNOWLEDGE, DECISION CRITERIA, INSIGHTS)
+- `/li:role-deep-dive <role-id>` — load full role-file (COLD KNOWLEDGE, DECISION CRITERIA, INSIGHTS)
 
 **Default public roles shipped:**
 - `roles/field-cto.md` — customer-facing, sales-tech, trailblazer voice
 - `roles/solution-architect.md` — enterprise IT, security-conscious, mixed voice
 - `roles/engineering-manager.md` — process, team coordination, internal voice
 
-**Private roles:** Operator can scaffold custom roles via `/lintel:li-role-new`. Private roles store at `~/.lintel/roles/private/` (gitignored). Sync via `bin/li-roles-sync` to operator's private repo (never team-wide, never public marketplace).
+**Private roles:** Operator can scaffold custom roles via `/li:role-new`. Private roles store at `~/.lintel/roles/private/` (gitignored). Sync via `bin/li-roles-sync` to operator's private repo (never team-wide, never public marketplace).
 
 **Session-start awareness (lightweight):** SENSE reads `~/.lintel/profile.yaml` `role_active` field; if set, loads role IDENTITY + VOICE summary (~500 tokens). Full deep-dive only on operator command.
 
@@ -217,16 +217,16 @@ Expert personas as lightweight session context layers. Voice + outcome-lens + de
 
 On-demand 1M-context utilization beyond session-start. Default session-start stays lightweight (~5-15k tokens); operator explicitly warms when work benefits.
 
-- `/lintel:li-context-warm <files-or-globs>` — explicit file load with budget tracking
-- `/lintel:li-context-warm-related <topic>` — heuristic load by keyword
-- `/lintel:li-context-warm-sessions [N]` — load last N session saves on branch
-- `/lintel:li-context-warm-adrs <topic>` — load topic-relevant ADRs
-- `/lintel:li-context-warm-customer <engagement>` — customer-repo state (audit-logged)
-- `/lintel:li-context-warm-from-url <url>` — WebFetch + dump (WorkProfile URL gate)
-- `/lintel:li-context-budget` — utilization visibility
-- `/lintel:li-context-snapshot [name]` — operator-named mid-session save
-- `/lintel:li-context-dump <session-id>` — load specific prior session save
-- `/lintel:li-context-cool` — selective IGNORE marker
+- `/li:context-warm <files-or-globs>` — explicit file load with budget tracking
+- `/li:context-warm-related <topic>` — heuristic load by keyword
+- `/li:context-warm-sessions [N]` — load last N session saves on branch
+- `/li:context-warm-adrs <topic>` — load topic-relevant ADRs
+- `/li:context-warm-customer <engagement>` — customer-repo state (audit-logged)
+- `/li:context-warm-from-url <url>` — WebFetch + dump (WorkProfile URL gate)
+- `/li:context-budget` — utilization visibility
+- `/li:context-snapshot [name]` — operator-named mid-session save
+- `/li:context-dump <session-id>` — load specific prior session save
+- `/li:context-cool` — selective IGNORE marker
 
 For >20k token loads: explicit budget confirmation required.
 

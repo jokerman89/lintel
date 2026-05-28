@@ -1,5 +1,5 @@
 ---
-name: li-setup-brain
+name: setup-brain
 layer: foundation
 v1_alias: [li-setup-gbrain]
 description: Configure gbrain semantic-index integration — initialize config, pin worktree, register sync.

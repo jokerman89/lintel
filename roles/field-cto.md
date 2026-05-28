@@ -68,11 +68,11 @@ What separates great from good: the great ones know which customers are bullshit
 # COMPANION SKILLS
 
 When this role is active, prefer:
-- `/lintel:li-define --mode customer-engagement` — applies trailblazer voice + customer-facing forcing questions
-- `/lintel:li-az-tldr <service>` — quick-rundown on Azure service before customer meeting
-- `/lintel:li-exec-brief` (when built) — 1-pager drafter for C-suite
-- `/lintel:li-proposal-drafter` (via ProposalDrafter agent) — full proposal scaffolding
-- `/lintel:li-rais-customer-voice-check` — voice gate before any customer-facing artifact ships
+- `/li:define --mode customer-engagement` — applies trailblazer voice + customer-facing forcing questions
+- `/li:az-tldr <service>` — quick-rundown on Azure service before customer meeting
+- `/li:exec-brief` (when built) — 1-pager drafter for C-suite
+- `/li:proposal-drafter` (via ProposalDrafter agent) — full proposal scaffolding
+- `/li:rais-customer-voice-check` — voice gate before any customer-facing artifact ships
 - Spawn `FieldCTOAdvisor` agent for engagement-coaching mid-task
 
 When role is active during SHIP: 4-gate doc-gen pipeline auto-applies (voice + brand + honest-limitations + provenance).

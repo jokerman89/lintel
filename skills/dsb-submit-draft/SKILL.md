@@ -1,5 +1,5 @@
 ---
-name: li-dsb-submit-draft
+name: dsb-submit-draft
 layer: ms-team
 v1_alias: [li-dsb-prep]
 description: Prepare a Data Sharing Board submission draft — recipients, purpose, data class, retention.

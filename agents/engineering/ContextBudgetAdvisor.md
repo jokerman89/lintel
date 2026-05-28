@@ -91,7 +91,7 @@ Run:
   (then proceed with build work; transition phases as you progress)
 
 ## Risk flags
-- Voice_check phase depends on T0 calibrated corpus. Verify with /lintel:li-eval status first.
+- Voice_check phase depends on T0 calibrated corpus. Verify with /li:eval status first.
 - Build phase reserves 100k for voice_check — if voice_check needs more, extend before phase transition.
 ```
 

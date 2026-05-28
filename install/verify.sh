@@ -216,7 +216,7 @@ cmd_voice() {
 
   [ -n "$CORPUS" ] && ok "Voice corpus present: $(basename "$CORPUS")" || { fail "Voice corpus missing"; EXIT_CODE=1; }
   [ -n "$TEST" ] && ok "Voice test rubric present: $(basename "$TEST")" || { fail "Voice test rubric missing"; EXIT_CODE=1; }
-  [ -n "$CALIB" ] && ok "Voice calibration present: $(basename "$CALIB")" || warn "Voice calibration missing — run /lintel:li-eval"
+  [ -n "$CALIB" ] && ok "Voice calibration present: $(basename "$CALIB")" || warn "Voice calibration missing — run /li:eval"
 
   if [ -f "$CORPUS" ]; then
     populated=$(grep -c '^- id: ' "$CORPUS" 2>/dev/null || echo 0)
@@ -231,7 +231,7 @@ cmd_voice() {
     if grep -qE 'status:\s*CALIBRATED' "$CALIB" 2>/dev/null; then
       ok "Calibration: CALIBRATED"
     else
-      warn "Calibration: NOT CALIBRATED — run /lintel:li-eval"
+      warn "Calibration: NOT CALIBRATED — run /li:eval"
     fi
   fi
 }
@@ -377,14 +377,14 @@ cmd_portability() {
   done
   [ -n "$SCHEMA" ] && ok "CLI-SUPPORT-V2-SCHEMA.md present" || warn "CLI-SUPPORT-V2-SCHEMA.md missing (v2 doc, optional in v3)"
 
-  # v3: skill at skills/lintel:li-cli-fingerprint/SKILL.md
+  # v3: skill at skills/li:cli-fingerprint/SKILL.md
   CLI_FINGERPRINT=""
   for candidate in \
-    "$REPO_ROOT/skills/lintel:li-cli-fingerprint/SKILL.md" \
-    "$REPO_ROOT/scaffolding/01-foundation/skills/lintel:li-cli-fingerprint/SKILL.md"; do
+    "$REPO_ROOT/skills/li:cli-fingerprint/SKILL.md" \
+    "$REPO_ROOT/scaffolding/01-foundation/skills/li:cli-fingerprint/SKILL.md"; do
     [ -f "$candidate" ] && { CLI_FINGERPRINT="$candidate"; break; }
   done
-  [ -n "$CLI_FINGERPRINT" ] && ok "skill: li-cli-fingerprint" || warn "skill missing: li-cli-fingerprint (use bin/lintel:li-doctor for v3 runtime)"
+  [ -n "$CLI_FINGERPRINT" ] && ok "skill: li-cli-fingerprint" || warn "skill missing: li-cli-fingerprint (use bin/li:doctor for v3 runtime)"
 
   # Validate cli_support fields on skills (v3 path + v2 fallback)
   with_cli_support=0

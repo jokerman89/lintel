@@ -1,5 +1,5 @@
 ---
-name: li-adr-new
+name: adr-new
 layer: foundation
 description: Bootstrap a new ADR (Architecture Decision Record) from template, with context-gathering questions.
 color: cyan

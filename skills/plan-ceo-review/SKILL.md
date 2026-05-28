@@ -1,5 +1,5 @@
 ---
-name: li-plan-ceo-review
+name: plan-ceo-review
 layer: foundation
 description: Strategy + scope review. Surface product/business assumptions before architecture lands.
 color: purple

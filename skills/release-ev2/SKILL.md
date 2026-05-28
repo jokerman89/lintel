@@ -1,5 +1,5 @@
 ---
-name: li-release-ev2
+name: release-ev2
 layer: foundation
 v1_alias: [li-ship]
 description: Land the current branch — verifies review readiness, squashes WIP commits, opens PR.
@@ -50,7 +50,7 @@ Ship Status: <branch>
 ✓ Review readiness: Eng Review CLEAR (PLAN, commit 7e7a021, 2026-05-27)
 ✓ Sanity scan: no secrets / customer-data / PII detected
 ⚠ WIP commits found: 3 — will squash to 1 atomic commit
-✓ Push: pushed origin/feature/lintel:li-phase-2-batch-4
+✓ Push: pushed origin/feature/li:phase-2-batch-4
 ✓ PR opened: https://github.com/jokerman89/jokerman-lintel/pull/4
 
 Squashed history:

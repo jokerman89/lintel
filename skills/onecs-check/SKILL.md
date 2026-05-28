@@ -1,5 +1,5 @@
 ---
-name: li-onecs-check
+name: onecs-check
 layer: ms-team
 v1_alias: [li-compliance-gate]
 description: Run the 7 on-demand MS compliance checklist items on-request (vs the 5 always-on auto).

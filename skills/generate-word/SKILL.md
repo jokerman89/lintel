@@ -1,5 +1,5 @@
 ---
-name: li-generate-word
+name: generate-word
 layer: ms-team
 description: Produce brand-compliant Word doc via docx-templater — technical / customer-summary / transparency-note variants.
 color: orange

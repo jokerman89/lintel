@@ -223,6 +223,6 @@ Override takes precedence over skill frontmatter. Logged on use.
 
 - `scaffolding/01-foundation/TEMPLATE-skill.md` — references this schema
 - `scaffolding/01-foundation/TEMPLATE-agent.md` — references this schema
-- `/lintel:li-cli-fingerprint` skill — runtime CLI detection that feeds shim lookup
+- `/li:cli-fingerprint` skill — runtime CLI detection that feeds shim lookup
 - `verify.sh --portability` — schema validation subcommand
 - Phase B implementation (this design) — runtime that consumes the schema

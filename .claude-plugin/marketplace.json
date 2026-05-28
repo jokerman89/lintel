@@ -10,7 +10,7 @@
   },
   "plugins": [
     {
-      "name": "lintel",
+      "name": "li",
       "source": "./",
       "description": "Lintel v3.5 — 8-phase cycle (SENSE→CAPTURE) + role-lifting + context-warming + 78 specialized agents + compliance tiering + multi-CLI",
       "version": "3.5.0-dev",

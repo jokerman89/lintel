@@ -1,5 +1,5 @@
 ---
-name: li-design-html
+name: design-html
 layer: foundation
 description: Generate a single-file static HTML mockup from a brief — opens with /open-managed-browser.
 color: green

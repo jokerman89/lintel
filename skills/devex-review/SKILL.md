@@ -1,5 +1,5 @@
 ---
-name: li-devex-review
+name: devex-review
 layer: foundation
 description: Review the built developer experience — scripts, onboarding, error messages, time-to-hello-world.
 color: yellow

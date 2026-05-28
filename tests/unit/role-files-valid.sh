@@ -3,6 +3,7 @@
 #
 # Verifies v3.5 role-lifting infrastructure: 8 role-skills + 3 default
 # public roles + bin/li-roles-sync.
+# Post-Väg-A: skill folder/name bare (no li- prefix). bin script keeps li- prefix.
 # tag: v3.5 roles
 
 set -uo pipefail
@@ -16,11 +17,11 @@ fail() { echo "  FAIL: $1"; FAILED=1; }
 echo "tests/unit/role-files-valid.sh"
 echo "=============================="
 
-# 8 role-lifting skills
+# 8 role-lifting skills (bare folder names)
 ROLE_SKILLS=(role-activate role-deep-dive role-frame role-rotate role-deactivate roles-list role-new role-update)
 for skill in "${ROLE_SKILLS[@]}"; do
-  f="$REPO_ROOT/skills/li-$skill/SKILL.md"
-  [ -f "$f" ] && pass "role-skill: li-$skill" || fail "role-skill missing: li-$skill"
+  f="$REPO_ROOT/skills/$skill/SKILL.md"
+  [ -f "$f" ] && pass "role-skill: $skill" || fail "role-skill missing: $skill"
 done
 
 # 3 default public roles
@@ -63,7 +64,7 @@ for role in "${ROLES[@]}"; do
   fi
 done
 
-# bin/li-roles-sync executable
+# bin/li-roles-sync executable (bin scripts keep li- prefix per shell convention)
 if [ -x "$REPO_ROOT/bin/li-roles-sync" ]; then
   pass "bin/li-roles-sync executable"
 else

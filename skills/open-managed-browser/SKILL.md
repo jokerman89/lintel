@@ -1,5 +1,5 @@
 ---
-name: li-open-managed-browser
+name: open-managed-browser
 layer: foundation
 v1_alias: [li-open-gstack-browser]
 description: Open the Lintel-managed Chromium in headed mode — interactive operator session.

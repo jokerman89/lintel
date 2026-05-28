@@ -1,5 +1,5 @@
 ---
-name: li-code-unfreeze
+name: code-unfreeze
 layer: foundation
 v1_alias: [li-unfreeze]
 description: Remove a path from session freeze — other skills can write to it again.

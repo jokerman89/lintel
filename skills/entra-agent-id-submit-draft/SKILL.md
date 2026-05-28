@@ -1,5 +1,5 @@
 ---
-name: li-entra-agent-id-submit-draft
+name: entra-agent-id-submit-draft
 layer: ms-team
 v1_alias: [li-entra-agent-id-prep]
 description: Prepare a Microsoft Entra Agent ID submission — identity, capabilities, governance scope.

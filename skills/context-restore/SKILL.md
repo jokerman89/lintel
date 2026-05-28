@@ -1,5 +1,5 @@
 ---
-name: li-context-restore
+name: context-restore
 layer: foundation
 description: Restore session state from a checkpoint file. Run at start of a fresh session that continues prior work.
 color: blue

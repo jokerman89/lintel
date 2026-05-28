@@ -1,5 +1,5 @@
 ---
-name: li-health
+name: health
 layer: foundation
 description: Lintel install + upstream status check. Verifies layers, manifest, hooks, upstream pins, CLI shims.
 color: green
@@ -43,8 +43,8 @@ Runs these checks in order. Each check passes/fails independently; report aggreg
 2. **Layers:** for each `layer_N.enabled: true` in `~/.lintel/config.yaml`, confirm `install_path` exists and contains expected files.
 3. **Cross-refs:** spot-check that key links resolve — `AGENT-INSTRUCTIONS.md` → layer READMEs → CORE-PRINCIPLES.md.
 4. **Upstream sources:** for each entry in `~/.claude-scaffolding/upstream-sources.yaml`, confirm clone exists at install_path + HEAD matches the pinned SHA.
-5. **Hooks:** for each `~/.lintel/hooks/lintel:li-*.sh`, check whether a symlink exists at `~/.claude/hooks/lintel:li-*.sh`. Report active vs inert.
-6. **Skill frontmatter:** glob `~/.claude/skills/lintel:li-*/SKILL.md`. Confirm required fields (name, description, color, tools, voice, cli_support). Flag any with missing fields.
+5. **Hooks:** for each `~/.lintel/hooks/li:*.sh`, check whether a symlink exists at `~/.claude/hooks/li:*.sh`. Report active vs inert.
+6. **Skill frontmatter:** glob `~/.claude/skills/li:*/SKILL.md`. Confirm required fields (name, description, color, tools, voice, cli_support). Flag any with missing fields.
 7. **Agent frontmatter:** same check on `~/.claude/agents/` (filter to Lintel-relevant).
 8. **Voice corpus:** if `~/.claude-scaffolding/03-personal-advanced/voice/OurVoice-calibration.md` exists, parse the status table — report per-cell calibration status (PASS / PARTIAL / FAIL / PENDING).
 9. **CLI shims:** for the current repo (if in one), check whether `CLAUDE.md`, `.github/copilot-instructions.md`, `AGENTS.md` are present.

@@ -1,5 +1,5 @@
 ---
-name: li-scrape
+name: scrape
 layer: foundation
 description: Extract structured data from one or more pages — declarative selector schema, JSON output.
 color: green

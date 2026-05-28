@@ -1,5 +1,5 @@
 ---
-name: li-qa-only
+name: qa-only
 layer: foundation
 description: Read-only test run — reports failures, never edits. For ship-gate verification.
 color: blue

@@ -1,5 +1,5 @@
 ---
-name: li-match
+name: match
 layer: foundation
 description: Semantic skill router — given free-text user intent, suggests top 3 matching Lintel skills with rationale.
 color: cyan

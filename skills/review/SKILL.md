@@ -1,139 +1,315 @@
 ---
-name: li-review
+name: review
 layer: foundation
-description: Diff-scoped pre-landing code review. Lighter than /plan-eng-review, focused on changed code only.
-color: red
+description: Phase 6 of Lintel cycle — adversarial review of BUILD output across 3 stages (spec compliance, code quality, compliance gates per WorkProfile). Cross-artifact consistency. P1 blocks SHIP.
+color: cyan
 tools: Read, Bash, Grep, Glob
 voice: internal
 cli_support: [claude-code, codex]
 ---
 
-# /review
+You are the REVIEW skill — Phase 6 of the Lintel cycle.
 
-Reviews the current branch's diff before landing. Lighter than `/plan-eng-review` (which reviews a plan/design doc). Use when there's no plan but you want a code review pass before `/release-ev2`.
+## What this skill does
 
-Auto-scales: small diffs get fast review; large diffs (200+ lines) additionally get Codex structured review with P1 gate.
+Comprehensive adversarial review of BUILD output across three sequential stages. P1 findings block SHIP. Voice + compliance gates fire if applicable. Produces `review-report.md` + `compliance-report.md`.
+
+Three-stage discipline (extends superpowers' two-stage with compliance):
+1. **Spec compliance** — does built code match plan.md requirements exactly?
+2. **Code quality** — only after Stage 1 PASS. Quality dimensions per CodeReviewer agent.
+3. **Compliance gates** — only after Stage 2 PASS. Fires per WorkProfile + voice_tier + audience.
 
 ## When to use
 
-- Branch is feature-complete, no design doc exists
-- Quick correctness pass before `/release-ev2`
-- Small fixes / refactors that don't warrant `/plan-eng-review`
-- `/release-ev2` blocked by "Eng Review NOT CLEARED" and the work is too small for full plan-eng-review
+- After BUILD completes (auto-invoked in /li:cycle)
+- Standalone on existing diff/PR (operator types `/li:review`)
+- After PR feedback to validate fixes
+- Pre-SHIP final gate
 
 ## When NOT to use
 
-- Plan exists — use `/plan-eng-review` against the plan instead
-- Diff too small to be reviewable (<5 lines, trivial fix) — skip review
-- Tests fail — fix first, review after
-
-## Inputs
-
-- Optional `--base <branch>` — compare against this base instead of default branch (default: `main`)
-- Optional `--codex` — force Codex structured review even on small diffs
-- Optional `--no-codex` — skip Codex even on large diffs
+- intent=research-only (no code to review)
+- intent=docs-only (lighter review path — invoke `/li:docs-review` if exists, or skip)
+- Before BUILD complete (mid-task reviews happen in BUILD's two-stage cycle, not REVIEW phase)
 
 ## Workflow
 
-1. **Diff stats** — `git diff <base>...HEAD --stat`. Auto-classify:
-   - <50 lines changed: SMALL (Claude-only review)
-   - 50-200: MEDIUM (Claude + optional Codex)
-   - 200+: LARGE (Claude + mandatory Codex with P1 gate, unless --no-codex)
-2. **Read diff content** — `git diff <base>...HEAD`. Identify changed files + functions + tests.
-3. **4-dimension review** (lighter than `/plan-eng-review`'s 4 sections — no per-issue AskUserQuestion overhead):
-   - Architecture impact (does the diff respect existing boundaries?)
-   - Code quality (DRY violations, error handling, edge cases)
-   - Test coverage (does the diff add tests for new code paths? regression risk?)
-   - Performance (N+1, memory, slow paths introduced)
-4. **Codex pass (if LARGE diff or --codex)** — invoke Codex with structured review prompt. P1 findings BLOCK ship.
-5. **Persist via gstack-review-log** with `skill: review` (distinct from `plan-eng-review`).
-6. **Output: findings list + severity + suggested fixes.**
+### Step 1 — Load context
 
-## Report format
+Read:
+- plan.md (from PLAN) — source of requirements
+- design doc (from DEFINE) — original intent
+- build-log.md (from BUILD) — task outcomes
+- review-report.md (if exists, prior REVIEW result)
+- CORE-PRINCIPLES.md
+- HARD-RULES.md (if WorkProfile=on)
+- REFERENCE-RULES.md (if WorkProfile=on)
 
-```
-Review Status: <branch> vs <base>
+Identify scope of review:
+- Files changed in BUILD (`git diff <plan-start-sha>..HEAD --name-only`)
+- Subset of plan tasks (if --tasks flag) or all
+- Default: full BUILD output
 
-Diff scope: 173 lines changed across 8 files (MEDIUM)
-Codex pass: optional, skipped this run
+### Step 2 — Stage 1: Spec compliance review
 
-## Findings (3)
+Dispatch CodeReviewer agent (or general-purpose):
 
-[P2] (confidence: 8/10) src/services/billing.ts:47 — N+1 query in refund flow
-   Loop calls payment.fetch() per refund; batch via .fetchMany()
-   Suggested: ~5 line refactor
+Prompt:
+"Review the diff against plan.md. For each task in plan.md, verify the implementation matches requirements EXACTLY. Be strict. 'Close enough' is not acceptable. Output:
+- Per-task: PASS or list deviations with file:line + suggested fix
+- Aggregate: total tasks PASS / total deviations / spec-compliance score
+Be terse. Don't praise."
 
-[P3] (confidence: 7/10) src/utils/format.ts:12 — DRY violation
-   formatDate duplicated in format.ts and date-helpers.ts; consolidate
+If Stage 1 FAILS:
+- Surface per-task deviations
+- AskUserQuestion: fix now (loop back to BUILD with fix-list) / defer with ADR / accept-risk
+- Most cases: fix loop. Re-dispatch Stage 1 review. Max 3 iterations.
 
-[P3] (confidence: 9/10) tests/billing.test.ts:NEW — Missing edge case
-   refundPayment with 0 amount: no test. Add test or document why allowed.
+### Step 3 — Stage 2: Code quality review (ONLY after Stage 1 PASS)
+
+Dispatch CodeReviewer agent:
+
+Prompt:
+"Review the diff for quality. Dimensions:
+- Correctness (logic, edge cases, error handling)
+- Security (injection, secrets, auth, OWASP)
+- Performance (N+1, hot paths, memory)
+- Code style (naming, structure, DRY)
+- Test coverage (happy path, edge cases, regression)
+
+For each finding: P1 (block ship) / P2 (must fix) / P3 (nit). Include file:line + concrete fix. Confidence per finding. Be terse."
+
+If Stage 2 FAILS:
+- P1 findings BLOCK — fix loop required
+- P2 findings: AskUserQuestion fix now / defer
+- P3 findings: log + can ship
+- Max 3 iterations on P1 fixes
+
+### Step 4 — Stage 3: Compliance gates (fires per WorkProfile + voice + audience)
+
+Run sub-skills in parallel-ish if independent. Each blocks if fails.
+
+**`/li:caip-audit`** (if WorkProfile=on):
+- Full MS-CAIP-SE compliance: 5 hard-rules + 7 on-demand items
+- Dispatch OneCSAuditor agent
+- Output: per-rule PASS/FAIL with evidence
+
+**`/li:onecs-check`** (if WorkProfile=on AND audience=customer):
+- 1CS-specific compliance gates
+- Customer-deliverable readiness
+
+**`/li:rais-customer-voice-check`** (if voice_tier=trailblazer AND audience=customer):
+- Dispatch TrailblazerVoiceCritic agent
+- Score against OurVoice-corpus.md (12 cells)
+- Threshold: ≥85% known-good match per cell
+- If <85%: surface, suggest edits, re-score
+
+**`/li:agt-tier-stamp`** (if BUILD includes agentic system):
+- Agent Governance Framework tier classification
+- Dispatch AGTReviewer agent
+- Output: tier (informational / advisory / action-taking / autonomous) + governance posture
+
+**`/li:provenance-track`** (if WorkProfile=on AND artifact will ship):
+- Log AI-assisted-generation provenance
+- Append to repo's provenance log
+
+**`/li:first-party-check`** (if WorkProfile=on):
+- Dispatch FirstPartyMigrator agent if violations found
+- Flag any non-Azure-native choices that have MS-native equivalents
+
+**`/li:dependency-audit`**:
+- Dispatch DependencyAuditor agent
+- CVE check, license compatibility, supply-chain risk
+- P1: critical CVE or license blocker → BLOCK
+- P2: outdated lib with known issues → fix recommended
+
+### Step 5 — Cross-artifact analyze (adopted from speckit)
+
+Verify consistency:
+- BUILD output matches PLAN tasks (already checked Stage 1, but re-verify aggregate)
+- PLAN tasks trace to DESIGN requirements (already checked in PLAN's analyze, but re-verify if BUILD changed scope)
+- BUILD didn't accidentally implement DEFERRED items
+- BUILD didn't accidentally SKIP REQUIRED items
+
+Surface gaps. If any: AskUserQuestion fix / defer / accept.
+
+### Step 6 — Optional outside-voice review (gated)
+
+AskUserQuestion: "Run independent Codex review? 3-5 min."
+
+If YES:
+- `codex exec` with read-only sandbox
+- Prompt: "Independent reviewer. 5 representative diffs. Spot what internal review may have missed. Output: P1/P2/P3 findings."
+- Run with 5-min timeout
+- Surface output verbatim under "OUTSIDE VOICE (Codex):" header
+- Cross-synthesize with internal findings
+
+If unavailable: skip silently.
+
+### Step 7 — Write artifacts
+
+**`review-report.md`** (`.lintel/state/review-report-<datetime>.md`):
+```markdown
+# Review report: <wedge title>
+
+**Phase:** REVIEW
+**Date:** <date>
+**Stage 1 (spec compliance):** PASS | FAIL (N iterations)
+**Stage 2 (code quality):** PASS | FAIL (N iterations)
+**Stage 3 (compliance gates):** PASS | FAIL (per gate breakdown)
+
+## Stage 1 — Spec compliance findings
+[per-task deviations and fixes applied]
+
+## Stage 2 — Code quality findings
+### P1 (block ship)
+- [file:line] <issue> — Fix: <concrete>
+### P2 (must fix)
+...
+### P3 (nit)
+...
+
+## Stage 3 — Compliance gate findings
+### CAIP audit: PASS/FAIL
+### Voice gate: <score>%
+### Provenance: logged
+### Dependency audit: <N CVEs / clean>
+...
+
+## Cross-artifact analyze
+[gaps / coverage / consistency]
+
+## Outside voice (if run)
+[Codex output verbatim]
 
 ## Verdict
-- P1 count: 0 — no block
-- P2 count: 1 — should fix before /release-ev2
-- P3 count: 2 — recommended fixes
-
-Run /release-ev2 when P2+ resolved.
+- Ship-ready: <yes/no/yes-with-caveats>
+- Remaining concerns: <list>
+- Loop-back recommended: <to BUILD if P1 unaddressed; to PLAN if scope-gap; to DEFINE if requirements unclear>
 ```
 
-Persist:
-```bash
-~/.claude/skills/gstack/bin/gstack-review-log '{"skill":"review","timestamp":"...","status":"...","findings":N,"findings_fixed":N,"gate":"P1_clean","commit":"..."}'
+**`compliance-report.md`** (if WorkProfile=on):
+- Per-gate breakdown for audit trail
+- Path: `.lintel/state/compliance-report-<datetime>.md`
+
+### Step 8 — 00-state.md append
+
+```yaml
+phase: REVIEW
+ts: <timestamp>
+review_report_path: <path>
+compliance_report_path: <path or n/a>
+stage_1_status: PASS | FAIL
+stage_2_status: PASS | FAIL  
+stage_3_status: PASS | FAIL | n/a
+p1_findings: <count>
+p2_findings: <count>
+p3_findings: <count>
+voice_gate_score: <% if applicable>
+ship_ready: yes | no | yes-with-caveats
+status: DONE | DONE_WITH_CONCERNS | BLOCKED
+next_recommended: SHIP | BUILD (loop-back) | DEFINE (scope gap)
 ```
 
-## Compliance integration
+## Status protocol
 
-- Sanity scan on diff content (secrets, customer-data, PII) — fast pre-check. Blocks if hit.
-- `cli_support` + `voice` frontmatter validation on any new/changed skill or agent files in the diff.
+- **DONE** — all stages PASS, P1 findings addressed, ship-ready
+- **DONE_WITH_CONCERNS** — P2/P3 findings noted, voice gate <100% but ≥85%
+- **BLOCKED** — P1 unfixed OR compliance gate failed (HARD-RULE)
+- **NEEDS_CONTEXT** — review can't proceed without more info (rare)
 
-## Confidence scoring
+## Pause-points (MANDATORY)
 
-Every finding gets a 1-10 confidence:
-- 9-10: verified by reading specific code
-- 7-8: high-confidence pattern match
-- 5-6: medium — show with "verify this is actually an issue" caveat
-- 3-4: suppressed from main report, appendix only
-- 1-2: speculation only (rarely reported)
+1. After Stage 1: confirm pass before Stage 2 (don't merge stages)
+2. After Stage 2: confirm pass before compliance gates
+3. Per P1 finding: operator decision (fix now / defer with rationale / accept-risk via ADR)
+4. On HARD-RULE compliance failure: full stop, surface to operator
+5. On voice gate <85%: surface findings, operator decides edit or accept
 
-## Voice tier note
+## Hop-in support
 
-`voice: internal`. Code review prose is engineering-internal.
+YES — standalone for diff/PR review. Common use:
+- `/li:review --diff origin/main..HEAD` — review against main
+- `/li:review --pr 42` — review specific PR
 
-## Failure modes
+Skip-conditions: intent=research-only, intent=docs-only.
 
-- **Diff empty:** no changes to review. Report + exit.
-- **Diff too large to fully analyze:** spot-check + warn operator that some files weren't deeply reviewed.
-- **Codex unavailable:** fall back to Claude adversarial subagent. Note in report.
-- **gstack-review-log unavailable:** still print findings, but no dashboard update.
+## Integration
 
-## Examples
+**Reads:**
+- BUILD output (git diff)
+- plan.md (PLAN phase)
+- design doc (DEFINE phase)
+- build-log.md (BUILD phase)
+- CORE-PRINCIPLES.md
+- HARD-RULES.md, REFERENCE-RULES.md (if WorkProfile=on)
+- OurVoice-corpus.md (if voice gate)
 
-**Small clean diff:**
-```
-> /review
-Diff scope: 23 lines, 2 files (SMALL)
-✓ No findings. Clean to /release-ev2.
-```
+**Writes:**
+- `.lintel/state/review-report-<datetime>.md`
+- `.lintel/state/compliance-report-<datetime>.md` (if WorkProfile=on)
+- `.lintel/state/00-state.md` (REVIEW entry)
+- `~/.lintel/analytics/review-metrics.jsonl`
 
-**Medium diff with findings:**
-```
-> /review
-[3 findings reported]
-P1: 0, P2: 1, P3: 2
-Action: fix P2 before /release-ev2.
-```
+**Triggers:**
+- SHIP if PASS
+- BUILD loop-back if P1 unfixed
+- DEFINE loop-back if scope gap revealed
 
-**Large diff with Codex P1 gate:**
-```
-> /review
-Diff: 412 lines, 18 files (LARGE)
-Codex pass: P1 found — race condition in payment-handler.ts:108
-✗ /release-ev2 BLOCKED until P1 resolved
-```
+## Recommended agents (concentrated review pool)
 
-## See also
+**Engineering:**
+- CodeReviewer — primary for Stage 1 + 2
+- SanityChecker — cross-component architectural sanity
+- DebugForensics — if reviews reveal bug
+- RegressionDetective — if regression suspected
 
-- `/plan-eng-review` — heavier plan-stage review (use when design doc exists)
-- `/investigate` — debugging when /review finds something broken
-- `/release-ev2` — reads /review's dashboard entry as ship-gate signal (within 7 days, current commit)
+**Security:**
+- SecurityAuditor — primary security pass
+- SecretsScanReviewer — if secrets-adjacent changes
+- OAuthFlowReviewer — if auth-related
+- JWTSecurityReviewer — if JWT-related
+- SBOMAuditor — if dep changes
+- ThreatModelDrafter — if new attack surface
+- DependencyAuditor — CVE/license/supply-chain
+
+**Compliance:**
+- GDPRReviewer — if EU customer + PII
+- SDLReviewer — if SDL gate applicable
+- AGTReviewer — if agentic system
+- EUAIActReviewer — if AI in EU market
+- SOC2Reviewer — if SOC2 scope
+
+**MS-specific:**
+- OneCSAuditor — if customer-engagement
+- RAIReviewer — if AI scenario
+- PrivacyBoundaryAudit — if cross-tenant
+- ProvenanceVerifier — if AI-assisted artifact
+
+**Voice + doc-gen:**
+- TrailblazerVoiceCritic — if voice_tier=trailblazer
+- WebExperienceCritic / PPTNarrativeArchitect / WordTechnicalEditor — if doc-gen output
+
+**Accessibility:**
+- AccessibilityChecker — if web/UI
+
+## Anti-patterns
+
+- **Running quality before spec-compliance** — order matters, Stage 1 first
+- **Accepting "close enough" on spec compliance** — Stage 1 must PASS exactly
+- **Letting CodeReviewer be the only reviewer** — compliance + voice + security also fire
+- **Skipping voice gate because "operator just wrote it themselves"** — if final artifact is customer-facing, gate fires regardless of authorship
+- **Bundling all 3 stages into one subagent call** — separate dispatches give cleaner findings
+- **Logging P3 findings without surfacing** — operator should see them even if not blocking
+- **Outside-voice Codex review as default** — gated, costs tokens, only when adds clear value
+
+## Failure recovery
+
+- **Subagent unavailable (529 overload)**: skip that specific reviewer, note in report. If primary CodeReviewer unavailable: BLOCKED — can't ship without primary review.
+- **Voice gate persistent fail** (3 iterations <85%): escalate. May indicate voice tier wrong for artifact OR corpus needs recalibration.
+- **HARD-RULE violation found**: NEVER silently proceed. Hard stop. Operator must fix or explicitly override (rare, never recommended).
+- **Cross-artifact analyze finds critical gap**: loop-back to DEFINE (scope problem) or PLAN (decomposition problem), not just BUILD fix.
+
+## Voice tier behavior
+
+`voice: internal`. Review reports are engineering-internal. If voice_tier=trailblazer AND customer-facing artifact reviewed, the voice gate output is operator-internal critique but the artifact itself goes through TrailblazerVoiceCritic.

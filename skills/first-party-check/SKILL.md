@@ -1,5 +1,5 @@
 ---
-name: li-first-party-check
+name: first-party-check
 layer: ms-team
 description: Scan for non-first-party dependencies and surface MS alternatives — "first-party first" enforcement.
 color: yellow

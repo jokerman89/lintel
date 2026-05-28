@@ -1,5 +1,5 @@
 ---
-name: li-cloudtest-eval-suite
+name: cloudtest-eval-suite
 layer: ms-team
 v1_alias: [li-eval-suite-gen]
 description: Generate an evaluation suite skeleton for an AI feature — golden set, adversarial set, rubric.
@@ -149,4 +149,4 @@ Estimated operator time to operational eval suite: 8-12 hours.
 - `/rais-sensitive-use` — feeds adversarial categories
 - `/onerai-submit-draft` — eval suite is a One RAI mitigation deliverable
 - `/qa-only` — runs against the eval suite once it has fixtures
-- `/lintel:li-eval` (Phase 8) — orchestrator for running this suite + reporting
+- `/li:eval` (Phase 8) — orchestrator for running this suite + reporting

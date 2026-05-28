@@ -1,5 +1,5 @@
 ---
-name: li-clean
+name: clean
 layer: foundation
 description: Manual self-maintenance trigger. Suggests /context-save + restart when session feels heavy.
 color: yellow
