@@ -4,10 +4,10 @@ Auto-generated från frontmatter på push till main.
 Regenerated av `.github/workflows/catalog.yml` per push när `skills/**/SKILL.md` ändras.
 Hand-edits skrivs över — edit frontmatter i source SKILL.md istället.
 
-Total skills: 133
-Generated: 2026-05-28T16:28:21Z
+Total skills: 134
+Generated: 2026-05-28T19:28:50Z
 
-## foundation layer (93 skills)
+## foundation layer (94 skills)
 
 | Skill | Description |
 |---|---|
@@ -48,6 +48,7 @@ Generated: 2026-05-28T16:28:21Z
 | `/li:doctor` | Cross-CLI health check — verifies which CLIs are installed, plugin install status, Lintel version, and surfaces drift. |
 | `/li:document-generate` | Generate documentation from code — engineering reference, customer guides, or onboarding tutorials. |
 | `/li:fix` | Composite shortcut for hotfix workflow — runs SENSE + BUILD + REVIEW + SHIP, skipping DEFINE/DISCOVER/PLAN/CAPTURE. Fo |
+| `/li:handoff-size-check` | Handoff-size-warning tied to 500k cap. Per v3.6 backlog 3.2 — elephant-hint och token-cap som samma mekanism från tv� |
 | `/li:health` | Lintel install + upstream status check. Verifies layers, manifest, hooks, upstream pins, CLI shims. |
 | `/li:help` | List installed Lintel skills + agents + hooks. Filter by category, voice tier, or CLI support. |
 | `/li:hooks-status` | Reader för hooks.jsonl — surface aktiva-vs-döda hooks + override-pattern + trigger-counts. Stänger hooks-observatio |
