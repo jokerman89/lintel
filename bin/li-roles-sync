@@ -1,0 +1,135 @@
+#!/usr/bin/env bash
+# li-roles-sync — sync private role files across operator's machines
+# (private git repo per operator — never team-wide, never public marketplace)
+#
+# Usage: li-roles-sync [setup|push|pull|status|forget]
+
+set -euo pipefail
+
+LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
+ROLES_REMOTE_FILE="$HOME/.lintel-roles-remote.txt"
+ROLES_LOCAL_DIR="$LINTEL_HOME/roles/private"
+
+CMD="${1:---status}"
+
+mkdir -p "$ROLES_LOCAL_DIR"
+
+help() {
+  cat <<EOF
+li-roles-sync — sync private role files across operator's machines
+
+This is OPT-IN. Private role files (customer-specific personas, sensitive
+context) stay PRIVATE to the operator. The remote is a private git repo
+the operator configures. NEVER team-wide. NEVER public marketplace.
+
+Usage:
+  li-roles-sync setup <repo-url>   First-time setup with private repo URL
+  li-roles-sync push               Push current local private roles
+  li-roles-sync pull               Pull all private roles from remote
+  li-roles-sync status             Show status (default)
+  li-roles-sync forget             Remove sync configuration
+
+Setup notes:
+  - <repo-url> should be a PRIVATE git repo (e.g. a personal lintel-roles-vault)
+  - Sync is ONE-WAY per machine — operator pulls from any, pushes from current
+  - Public roles live in repo/roles/ and ship via marketplace (different mechanism)
+  - This skill is ONLY for private roles in ~/.lintel/roles/private/
+EOF
+}
+
+cmd_status() {
+  echo "Lintel roles sync status"
+  echo ""
+  if [ -f "$ROLES_REMOTE_FILE" ]; then
+    echo "Configured remote: $(cat "$ROLES_REMOTE_FILE")"
+    echo "Local roles dir: $ROLES_LOCAL_DIR"
+    if [ -d "$ROLES_LOCAL_DIR/.git" ]; then
+      cd "$ROLES_LOCAL_DIR"
+      last_pull=$(git log -1 --format=%cd --date=short 2>/dev/null || echo "never")
+      file_count=$(find . -name "*.md" -not -path "./.git/*" | wc -l | tr -d ' ')
+      echo "Last pull: $last_pull"
+      echo "Files: $file_count"
+    else
+      echo "Roles git repo not initialized — run 'li-roles-sync setup <url>'"
+    fi
+  else
+    echo "Not configured. Run 'li-roles-sync setup <repo-url>' to enable."
+  fi
+}
+
+cmd_setup() {
+  local url="${1:-}"
+  if [ -z "$url" ]; then
+    echo "Usage: li-roles-sync setup <repo-url>" >&2
+    exit 2
+  fi
+  echo "$url" > "$ROLES_REMOTE_FILE"
+  echo "Remote configured: $url"
+
+  if [ ! -d "$ROLES_LOCAL_DIR/.git" ]; then
+    echo "Cloning into $ROLES_LOCAL_DIR..."
+    if ! git clone "$url" "$ROLES_LOCAL_DIR" 2>/dev/null; then
+      echo "Clone failed — initializing empty repo + setting remote"
+      cd "$ROLES_LOCAL_DIR"
+      git init -q
+      git remote add origin "$url"
+      echo "# Lintel private roles vault" > README.md
+      cat > .gitignore <<'EOF'
+# Never commit operator-local profile pointers
+profile-local-*.yaml
+*.draft
+*.tmp
+EOF
+      git add README.md .gitignore
+      git commit -q -m "init lintel roles vault"
+    fi
+  fi
+  echo "Setup complete. Run 'li-roles-sync push' to sync your private roles."
+}
+
+cmd_push() {
+  [ -d "$ROLES_LOCAL_DIR" ] || { echo "No private roles dir at $ROLES_LOCAL_DIR" >&2; exit 3; }
+  [ -d "$ROLES_LOCAL_DIR/.git" ] || { echo "Setup not done — run 'li-roles-sync setup <url>'" >&2; exit 4; }
+
+  cd "$ROLES_LOCAL_DIR"
+  git add *.md 2>/dev/null
+  if git diff --cached --quiet; then
+    echo "No changes to push (local private roles identical to last push)."
+    exit 0
+  fi
+  git commit -q -m "sync private roles @ $(date +%Y-%m-%d)"
+  if git push origin HEAD 2>/dev/null; then
+    count=$(git diff --name-only HEAD~1 HEAD | wc -l | tr -d ' ')
+    echo "✓ Pushed $count private role(s)"
+  else
+    echo "⚠ Local commit done, but push failed. Check remote credentials."
+  fi
+}
+
+cmd_pull() {
+  [ -d "$ROLES_LOCAL_DIR/.git" ] || { echo "Setup not done" >&2; exit 4; }
+  cd "$ROLES_LOCAL_DIR"
+  if git pull --ff-only 2>/dev/null; then
+    echo "✓ Pulled latest private roles"
+    file_count=$(find . -name "*.md" -not -path "./.git/*" | wc -l | tr -d ' ')
+    echo "  ${file_count} private role file(s) available at $ROLES_LOCAL_DIR"
+  else
+    echo "⚠ Pull failed"
+  fi
+}
+
+cmd_forget() {
+  rm -f "$ROLES_REMOTE_FILE"
+  echo "Sync configuration removed."
+  echo "Local cache at $ROLES_LOCAL_DIR preserved — delete manually if desired."
+}
+
+case "$CMD" in
+  setup) shift; cmd_setup "$@" ;;
+  push) cmd_push ;;
+  pull) cmd_pull ;;
+  status|--status) cmd_status ;;
+  forget) cmd_forget ;;
+  help|--help|-h) help ;;
+  *) help; exit 2 ;;
+esac
