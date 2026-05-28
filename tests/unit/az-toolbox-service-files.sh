@@ -53,7 +53,7 @@ if [ -f "$SKILL_FILE" ]; then
 fi
 
 # 3. Active service files have all sections
-ACTIVE_SERVICES=(expressroute)
+ACTIVE_SERVICES=(expressroute azure-openai)
 for service in "${ACTIVE_SERVICES[@]}"; do
   f="$REPO_ROOT/skills/az-tldr/services/${service}.md"
   if [ ! -f "$f" ]; then
