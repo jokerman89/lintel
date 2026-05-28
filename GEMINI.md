@@ -1,6 +1,6 @@
-# Gemini CLI session entry for JStack repo
+# Gemini CLI session entry for Lintel repo
 
-This file is read by Gemini CLI when working **on the JStack repo itself**.
+This file is read by Gemini CLI when working **on the Lintel repo itself**.
 
 For canonical session bootstrap, see [AGENT-INSTRUCTIONS.md](AGENT-INSTRUCTIONS.md).
 
@@ -8,19 +8,19 @@ For canonical session bootstrap, see [AGENT-INSTRUCTIONS.md](AGENT-INSTRUCTIONS.
 
 ## Repo overview
 
-JStack is the MS-CAIP-SE session harness — markdown scaffolding for agent-based development.
+Lintel is the MS-CAIP-SE session harness — markdown scaffolding for agent-based development.
 
 - `skills/` — 74 slash-commands (foundation + ms-team layers)
 - `agents/` — 44 subagent roles organized per domain
 - `hooks/shared/` — 15 compliance + workflow hooks
 - `scaffolding/` — templates copied INTO other repos
-- `docs/design/jstack-v3-plan.md` — current architecture
+- `docs/design/lintel-v3-plan.md` — current architecture
 
 ## Session start ritual
 
 1. Read [AGENT-INSTRUCTIONS.md](AGENT-INSTRUCTIONS.md) (canonical, applies to all CLIs)
 2. Review `scaffolding/01-foundation/tasks/lessons.md` for accumulated lessons
-3. Check `docs/design/jstack-v3-plan.md` for current phase
+3. Check `docs/design/lintel-v3-plan.md` for current phase
 
 ## Gemini-specific notes
 
@@ -29,13 +29,13 @@ JStack is the MS-CAIP-SE session harness — markdown scaffolding for agent-base
 This repo is a Gemini extension (see `gemini-extension.json`). Install via:
 
 ```bash
-gemini extensions install https://github.com/Azureflipper/jokerman-session-setup
+gemini extensions install https://github.com/jokerman89/jokerman-lintel
 ```
 
 Update via:
 
 ```bash
-gemini extensions update jstack
+gemini extensions update lintel
 ```
 
 ### Skill discovery on Gemini

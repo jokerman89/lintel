@@ -1,5 +1,5 @@
 ---
-name: jstack-generate-ppt
+name: li-generate-ppt
 layer: ms-team
 description: Produce brand-compliant PowerPoint deck via pptx-genjs, 4-gate quality pipeline.
 color: orange
@@ -20,7 +20,7 @@ license_note: produces customer-bound output; requires T0 CALIBRATED status for 
 
 # /generate-ppt
 
-Produces a brand-compliant PowerPoint deck (.pptx) for customer engagements. Uses pptx-genjs under the hood. Pulls templates from `~/.jstack/brand/ppt-templates/` (or falls back to in-repo defaults if brand not pulled). Voice-gated before distribution.
+Produces a brand-compliant PowerPoint deck (.pptx) for customer engagements. Uses pptx-genjs under the hood. Pulls templates from `~/.lintel/brand/ppt-templates/` (or falls back to in-repo defaults if brand not pulled). Voice-gated before distribution.
 
 Phase F of v2 build.
 
@@ -40,7 +40,7 @@ Phase F of v2 build.
 ## Inputs
 
 - Required `--brief <path|inline>` — content brief describing the deck purpose
-- Required `--template <name>` — PPT template name from `~/.jstack/brand/ppt-templates/` (e.g. `pitch-deck`, `workshop`)
+- Required `--template <name>` — PPT template name from `~/.lintel/brand/ppt-templates/` (e.g. `pitch-deck`, `workshop`)
 - Optional `--audience <text>` — primary audience (affects voice tier output)
 - Optional `--slide-count <N>` — target slide count (default: 20-30 based on duration)
 - Optional `--duration <minutes>` — presentation duration (informs slide pacing)
@@ -51,7 +51,7 @@ Phase F of v2 build.
 ## Workflow
 
 1. **Preflight gates:**
-   - `~/.jstack/brand/ppt-templates/<template>.pptx` exists OR `--use-defaults` flag present
+   - `~/.lintel/brand/ppt-templates/<template>.pptx` exists OR `--use-defaults` flag present
    - brand-staleness-warn check (90-day rule) — surface warning if stale
    - T0 calibration status if `--voice trailblazer-draft` (UNCALIBRATED → output marked unverified)
 
@@ -74,7 +74,7 @@ Phase F of v2 build.
    - Insert assets via `/asset-search` matches
    - Mode-tag in slide notes for voice-check downstream
 
-5. **4-gate quality pipeline** (output stays in `~/.jstack/draft/` until ALL 4 PASS):
+5. **4-gate quality pipeline** (output stays in `~/.lintel/draft/` until ALL 4 PASS):
 
    **Gate 1 — Voice (`/rais-customer-voice-check`):**
    - Apply 12-cell Trailblazer rubric to slide text
@@ -83,7 +83,7 @@ Phase F of v2 build.
 
    **Gate 2 — Brand-conformance:**
    - Template matches latest brand version (or default-fallback marker present)
-   - Assets are from `~/.jstack/brand/azure-assets/` (or operator-confirmed)
+   - Assets are from `~/.lintel/brand/azure-assets/` (or operator-confirmed)
    - No unauthorized branding (third-party logos)
    - Color/typography matches template tokens
 
@@ -94,9 +94,9 @@ Phase F of v2 build.
 
    **Gate 4 — Provenance:**
    - `/provenance-track` generates record with source chain + voice score + brand version
-   - Record landed in `~/.jstack/provenance/`
+   - Record landed in `~/.lintel/provenance/`
 
-6. **On all 4 PASS:** move from `~/.jstack/draft/` → operator-specified `--out` path (or `<brief-stem>.pptx` in cwd).
+6. **On all 4 PASS:** move from `~/.lintel/draft/` → operator-specified `--out` path (or `<brief-stem>.pptx` in cwd).
 
 7. **On any gate FAIL:** keep in draft, surface specific failures, allow operator iteration.
 
@@ -105,7 +105,7 @@ Phase F of v2 build.
 ```
 Generate PPT: customer-A-arc-pitch
 
-Template: pitch-deck.pptx (~/.jstack/brand/ppt-templates/, brand version 2026-Q2)
+Template: pitch-deck.pptx (~/.lintel/brand/ppt-templates/, brand version 2026-Q2)
 Brand staleness: ok (32 days)
 Voice tier: trailblazer-draft
 Audience: mid-market public sector IT leadership
@@ -119,7 +119,7 @@ Audience: mid-market public sector IT leadership
 
 ## Generation (pptx-genjs)
   9 slides generated. 6 Azure service icons resolved via /asset-search.
-  142 KB output → ~/.jstack/draft/customer-A-arc-pitch.pptx
+  142 KB output → ~/.lintel/draft/customer-A-arc-pitch.pptx
 
 ## 4-Gate pipeline
   Gate 1 (voice):   ✓ PASS — score 87/100, 0 P1 violations
@@ -146,7 +146,7 @@ Distribution: operator-driven. Run /provenance-track --query PROV-7f8a2 to verif
 
 ## Failure modes
 
-- **pptx-genjs runtime error** (lib bug, malformed template) — surface error, keep work-in-progress in `~/.jstack/draft/.work/`, allow operator manual debug
+- **pptx-genjs runtime error** (lib bug, malformed template) — surface error, keep work-in-progress in `~/.lintel/draft/.work/`, allow operator manual debug
 - **Brand template missing AND --use-defaults not set** — surface options: pull brand, use defaults, abort
 - **Voice gate fails after 2 regen attempts** — keep draft, surface specific slide failures with fix recommendations
 - **Asset search returns 0 results for slide concept** — surface to operator, allow them to provide path manually OR skip the asset for that slide

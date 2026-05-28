@@ -7,7 +7,7 @@ How the same scaffolding works across multiple agent CLIs without duplication.
 One canonical file. Multiple shims. Each shim is a thin pointer.
 
 ```
-jokerman-session-setup/
+jokerman-lintel/
 ├── AGENT-INSTRUCTIONS.md          ← canonical, CLI-agnostic source
 └── shims/
     ├── CLAUDE.md                   ← Claude Code reads this

@@ -1,15 +1,16 @@
 {
-  "name": "jstack",
-  "description": "MS-CAIP-SE session harness — skills, agents, hooks, compliance, voice, repo scaffolding",
-  "version": "3.0.0-dev",
+  "name": "lintel",
+  "description": "Lintel — MS-CAIP-SE session harness with 8-phase cycle, role-lifting, context-warming",
+  "version": "3.5.0-dev",
   "author": {
-    "name": "Azureflipper",
+    "name": "jokerman89",
     "email": "johannes.akerman@microsoft.com"
   },
-  "homepage": "https://github.com/Azureflipper/jokerman-session-setup",
-  "repository": "https://github.com/Azureflipper/jokerman-session-setup",
+  "homepage": "https://github.com/jokerman89/jokerman-lintel",
+  "repository": "https://github.com/jokerman89/jokerman-lintel",
   "license": "MIT",
   "keywords": [
+    "lintel",
     "microsoft",
     "caip",
     "session-harness",
@@ -19,6 +20,7 @@
     "ev2",
     "onebranch",
     "compliance",
-    "scaffolding"
+    "scaffolding",
+    "azure"
   ]
 }

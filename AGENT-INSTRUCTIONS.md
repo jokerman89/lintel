@@ -1,4 +1,4 @@
-# Agent instructions — JStack canonical navigation pointer
+# Agent instructions — Lintel canonical navigation pointer
 
 Read this file at session start. Each agent CLI (Claude Code, GitHub Copilot Enterprise, Codex, others) has a shim that points here.
 
@@ -89,27 +89,27 @@ Voice tier is the per-agent honest split between marketing voice (for customers)
 
 ## Self-maintenance — context-bloat watchers (Layer 4, opt-in)
 
-If activated (operator symlinks from `~/.jstack/hooks/` to `~/.claude/hooks/`), the watchers print soft warnings when:
+If activated (operator symlinks from `~/.lintel/hooks/` to `~/.claude/hooks/`), the watchers print soft warnings when:
 
 - Token count hits 50k (warn) or 80k (escalate)
 - Tool-call count hits 80 (warn) or 130 (escalate)
 
 The watchers do NOT auto-compact — Claude can't compact its own conversation. They surface the right move (`/context-save` + restart in a fresh session) before bloat hits productivity.
 
-Configure thresholds in `~/.jstack/config.yaml`.
+Configure thresholds in `~/.lintel/config.yaml`.
 
 ---
 
 ## Per-CLI capability matrix
 
-JStack ships with honest degradation. Not every skill works on every CLI.
+Lintel ships with honest degradation. Not every skill works on every CLI.
 
 - **Claude Code:** full support — skills + agents + hooks + slash commands.
 - **GitHub Copilot Enterprise (with Opus picker):** degraded — `.github/copilot-instructions.md` reads canonical instructions; no skill mechanism, no subagent delegation. Skills that depend on these degrade to "operator-runs-manually."
 - **Codex CLI:** degraded — `AGENTS.md` reads canonical instructions; no first-class skills; subagents sequentialize.
 - **Other CLIs:** capability TBD per CLI. Run `verify.sh --cli-matrix` for the up-to-date table.
 
-Every skill / agent in JStack declares `cli_support` in YAML frontmatter. `verify.sh --cli-matrix` prints the table.
+Every skill / agent in Lintel declares `cli_support` in YAML frontmatter. `verify.sh --cli-matrix` prints the table.
 
 ---
 

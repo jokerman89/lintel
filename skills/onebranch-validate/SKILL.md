@@ -1,7 +1,7 @@
 ---
-name: jstack-onebranch-validate
+name: li-onebranch-validate
 layer: ms-team
-v1_alias: [jstack-test]
+v1_alias: [li-test]
 description: Cross-CLI verification — run a smoke matrix across claude-code/codex/copilot per skill cli_support.
 color: yellow
 tools: Read, Bash, Glob, Grep
@@ -32,7 +32,7 @@ The final cross-CLI verification skill. Reads each skill + agent's `cli_support`
 - Optional `--scope <layer>` — run only specific layer (01-foundation | 02-compliance | 03-personal-advanced | 04-power-user) (default: all)
 - Optional `--cli <name>` — restrict to one CLI (claude-code | codex | copilot)
 - Optional `--smoke-only` — run only smoke (invoke + verify-no-crash); skip output-quality check
-- Optional `--out <path>` — write matrix to file (default: `~/.jstack/test-matrix-<ts>.md`)
+- Optional `--out <path>` — write matrix to file (default: `~/.lintel/test-matrix-<ts>.md`)
 
 ## Workflow
 
@@ -52,7 +52,7 @@ The final cross-CLI verification skill. Reads each skill + agent's `cli_support`
 ## Report format
 
 ```
-JStack Test Matrix — 2026-05-27T19:00:00Z
+Lintel Test Matrix — 2026-05-27T19:00:00Z
 
 | Skill / Agent                  | claude-code | codex     | copilot   |
 |--------------------------------|-------------|-----------|-----------|
@@ -84,7 +84,7 @@ READY for v1.0.0 ship.
 
 - Read-only on skills/agents (no modification).
 - Test artifacts (matrix output) are engineering-internal — no Layer 2 customer-data concern.
-- Audit log: `~/.jstack/audit/test-matrix.jsonl` records each run.
+- Audit log: `~/.lintel/audit/test-matrix.jsonl` records each run.
 
 ## Voice tier note
 
@@ -103,7 +103,7 @@ READY for v1.0.0 ship.
 ```
 > /onebranch-validate
 [Iterates 63 skills + 40 agents × 3 CLIs]
-60 PASS / 18 DEGRADED / 0 FAIL on claude-code. Matrix written to ~/.jstack/test-matrix-<ts>.md.
+60 PASS / 18 DEGRADED / 0 FAIL on claude-code. Matrix written to ~/.lintel/test-matrix-<ts>.md.
 ```
 
 **Layer-scoped:**
@@ -120,6 +120,6 @@ READY for v1.0.0 ship.
 
 ## See also
 
-- `/jstack-eval` — voice corpus calibration (different gate)
+- `/lintel:li-eval` — voice corpus calibration (different gate)
 - TEMPLATE-skill.md / TEMPLATE-agent.md — frontmatter source of truth for cli_support
 - `SHIP-GATE.md` — v1.0.0 prerequisites this skill helps enforce

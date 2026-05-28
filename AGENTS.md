@@ -1,6 +1,6 @@
-# Codex session entry for JStack repo
+# Codex session entry for Lintel repo
 
-This file is read by OpenAI Codex CLI when working **on the JStack repo itself**.
+This file is read by OpenAI Codex CLI when working **on the Lintel repo itself**.
 
 For canonical session bootstrap, see [AGENT-INSTRUCTIONS.md](AGENT-INSTRUCTIONS.md).
 
@@ -8,19 +8,19 @@ For canonical session bootstrap, see [AGENT-INSTRUCTIONS.md](AGENT-INSTRUCTIONS.
 
 ## Repo overview
 
-JStack is the MS-CAIP-SE session harness — markdown scaffolding for agent-based development.
+Lintel is the MS-CAIP-SE session harness — markdown scaffolding for agent-based development.
 
 - `skills/` — 74 slash-commands (foundation + ms-team layers)
 - `agents/` — 44 subagent roles organized per domain
 - `hooks/shared/` — 15 compliance + workflow hooks
 - `scaffolding/` — templates copied INTO other repos
-- `docs/design/jstack-v3-plan.md` — current architecture
+- `docs/design/lintel-v3-plan.md` — current architecture
 
 ## Session start ritual
 
 1. Read [AGENT-INSTRUCTIONS.md](AGENT-INSTRUCTIONS.md) (canonical, applies to all CLIs)
 2. Review `scaffolding/01-foundation/tasks/lessons.md` for accumulated lessons
-3. Check `docs/design/jstack-v3-plan.md` for current phase
+3. Check `docs/design/lintel-v3-plan.md` for current phase
 
 ## Codex-specific notes
 
@@ -30,7 +30,7 @@ This repo is a Codex plugin (see `.codex-plugin/plugin.json` with full `interfac
 
 ```
 /plugins
-> search jstack
+> search lintel
 > Install Plugin
 ```
 

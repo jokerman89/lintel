@@ -1,5 +1,5 @@
 ---
-name: jstack-design-html
+name: li-design-html
 layer: foundation
 description: Generate a single-file static HTML mockup from a brief — opens with /open-managed-browser.
 color: green
@@ -33,7 +33,7 @@ The point: fast exploration before any framework commitment. Use for design conv
 - Optional `--reference <file|url>` — visual reference to anchor against (palette, type, layout style)
 - Optional `--tokens <file>` — design tokens to honor (default: read project tokens if `--inherit-project` flag)
 - Optional `--inherit-project` — read project's design system from `.lovable/memory/style/` or `docs/design/`
-- Optional `--out <path>` — output HTML file (default: `~/.jstack/design-html/<slug>-<ts>.html`)
+- Optional `--out <path>` — output HTML file (default: `~/.lintel/design-html/<slug>-<ts>.html`)
 - Optional `--copy-tier <internal|placeholder|trailblazer-draft>` — what kind of copy to use (see voice section below)
 
 ## Workflow
@@ -59,7 +59,7 @@ Reference: ./refs/competitor-dashboard.png (palette extracted: emerald-50/-500/-
 Tokens: inherited from .lovable/memory/style/portal-design-v2.md
 Copy tier: placeholder
 
-Generated: ~/.jstack/design-html/portal-dashboard-v3-20260527-163100.html (24KB)
+Generated: ~/.lintel/design-html/portal-dashboard-v3-20260527-163100.html (24KB)
   - Hero with grainy emerald watermark
   - 3-card area-grid (placeholder text)
   - Italic emerald-700 accent on H1
@@ -92,7 +92,7 @@ To fork into variants: /design-shotgun --seed <this path> --count 3
 ```
 > /design-html "dashboard for showing 5-10 active cases with status chips, inspired by Linear"
 [Reads brief, generates]
-✓ 18KB HTML at ~/.jstack/design-html/dashboard-20260527-163100.html
+✓ 18KB HTML at ~/.lintel/design-html/dashboard-20260527-163100.html
   Preview: /open-managed-browser --url file://...
 ```
 
@@ -107,7 +107,7 @@ To fork into variants: /design-shotgun --seed <this path> --count 3
 ```
 > /design-html "marketplace tool card" --reference ./refs/inspiration.png
 [Generates v1]
-> /design-shotgun --seed ~/.jstack/design-html/marketplace-tool-card-20260527-163200.html --count 4
+> /design-shotgun --seed ~/.lintel/design-html/marketplace-tool-card-20260527-163200.html --count 4
 [Spawns 4 variants in parallel]
 ```
 

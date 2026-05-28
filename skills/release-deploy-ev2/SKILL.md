@@ -1,7 +1,7 @@
 ---
-name: jstack-release-deploy-ev2
+name: li-release-deploy-ev2
 layer: foundation
-v1_alias: [jstack-land-and-deploy]
+v1_alias: [li-land-and-deploy]
 description: /release-ev2 + deploy. Adds post-merge deploy trigger. Requires explicit per-call auth.
 color: red
 tools: Read, Bash, Edit
@@ -11,7 +11,7 @@ cli_support: [claude-code, codex]
 
 # /release-deploy-ev2
 
-Extension of `/release-ev2` that also triggers a deploy after PR merges. Higher-stakes — production-adjacent. Per JStack Layer 2 compliance: deploy-pipeline triggers REQUIRE explicit per-call authorization, even in auto-mode.
+Extension of `/release-ev2` that also triggers a deploy after PR merges. Higher-stakes — production-adjacent. Per Lintel Layer 2 compliance: deploy-pipeline triggers REQUIRE explicit per-call authorization, even in auto-mode.
 
 ## When to use
 
@@ -39,7 +39,7 @@ Extension of `/release-ev2` that also triggers a deploy after PR merges. Higher-
 4. **Trigger deploy** — invoke the repo's configured deploy mechanism:
    - GitHub Actions: `gh workflow run deploy.yml --ref main --field target=<target>`
    - Azure DevOps: `az pipelines run --name deploy --branch main --variables target=<target>`
-   - Custom: read from `~/.jstack/deploy-targets.yaml` (per-repo config)
+   - Custom: read from `~/.lintel/deploy-targets.yaml` (per-repo config)
 5. **Optional wait** — if `--wait`: poll deploy status until complete or 30min timeout.
 6. **Report deploy URL + status** to operator.
 
@@ -54,7 +54,7 @@ Land & Deploy: <branch>
   Target: staging
   Canary: 100% (full rollout)
   Status: in_progress (1m 23s elapsed)
-  URL: https://github.com/azureflipper/jokerman-session-setup/actions/runs/M
+  URL: https://github.com/jokerman89/jokerman-lintel/actions/runs/M
 
 [--wait: blocks until status=completed]
 ```
@@ -62,7 +62,7 @@ Land & Deploy: <branch>
 ## Compliance integration
 
 - Deploy is a Layer 2 production-mutation. Per-call auth is **mandatory** — `/release-deploy-ev2` invocation alone is not auth. The Step 3 explicit confirmation IS the auth.
-- For Layer 3 governance: log the deploy trigger to audit trail (`~/.jstack/audit/deploys.jsonl`).
+- For Layer 3 governance: log the deploy trigger to audit trail (`~/.lintel/audit/deploys.jsonl`).
 
 ## Voice tier note
 
@@ -108,5 +108,5 @@ PR merged but deploy deferred. Operator owns the next step.
 ## See also
 
 - `/release-ev2` — ship without deploy
-- `/setup-ev2-targets` — configure deploy targets in `~/.jstack/deploy-targets.yaml`
+- `/setup-ev2-targets` — configure deploy targets in `~/.lintel/deploy-targets.yaml`
 - Layer 2 compliance — production-mutation auth requirement

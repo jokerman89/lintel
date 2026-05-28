@@ -1,5 +1,5 @@
 ---
-name: jstack-caip-audit
+name: li-caip-audit
 layer: ms-team
 description: CAIP-SE-specific readiness audit — engagement state, compliance, voice, deliverables.
 color: yellow

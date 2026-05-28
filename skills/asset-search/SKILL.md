@@ -1,7 +1,7 @@
 ---
-name: jstack-asset-search
+name: li-asset-search
 layer: ms-team
-description: Search ~/.jstack/brand/azure-assets/ for the right icon or diagram primitive.
+description: Search ~/.lintel/brand/azure-assets/ for the right icon or diagram primitive.
 color: green
 tools: Read, Bash, Glob, Grep
 voice: internal
@@ -29,7 +29,7 @@ Search the registered MS Azure asset library for icons, primitives, diagram elem
 
 ## When NOT to use
 
-- `~/.jstack/brand/azure-assets/` empty (no brand pull yet) — run `/brand-update` first OR use defaults
+- `~/.lintel/brand/azure-assets/` empty (no brand pull yet) — run `/brand-update` first OR use defaults
 - One-off non-Azure imagery — operator's own asset library, not this skill
 
 ## Inputs
@@ -42,7 +42,7 @@ Search the registered MS Azure asset library for icons, primitives, diagram elem
 
 ## Workflow
 
-1. **Load asset index** from cache (`~/.jstack/brand/.cache/asset-index.yaml`). If cache empty: rebuild from `~/.jstack/brand/azure-assets/`.
+1. **Load asset index** from cache (`~/.lintel/brand/.cache/asset-index.yaml`). If cache empty: rebuild from `~/.lintel/brand/azure-assets/`.
 2. **Match query.** Use:
    - Filename match (e.g. "azure-sql.svg" → match "azure sql")
    - Tag match (parsed from filename or sidecar `.json` metadata)
@@ -56,15 +56,15 @@ Search the registered MS Azure asset library for icons, primitives, diagram elem
 asset_search:
   query: "azure sql"
   results:
-    - path: ~/.jstack/brand/azure-assets/services/azure-sql-database.svg
+    - path: ~/.lintel/brand/azure-assets/services/azure-sql-database.svg
       tags: [service, sql, database, azure]
       dimensions: { width: 64, height: 64, format: svg }
       relevance: high
-    - path: ~/.jstack/brand/azure-assets/services/azure-sql-managed-instance.svg
+    - path: ~/.lintel/brand/azure-assets/services/azure-sql-managed-instance.svg
       tags: [service, sql, mi, database]
       dimensions: { width: 64, height: 64, format: svg }
       relevance: high
-    - path: ~/.jstack/brand/azure-assets/diagrams/sql-architecture-pattern.svg
+    - path: ~/.lintel/brand/azure-assets/diagrams/sql-architecture-pattern.svg
       tags: [diagram, sql, pattern]
       dimensions: { width: 320, height: 240, format: svg }
       relevance: medium
@@ -74,7 +74,7 @@ asset_search:
 
 ## Compliance integration
 
-- Read-only on `~/.jstack/brand/`. No Layer 2 concern.
+- Read-only on `~/.lintel/brand/`. No Layer 2 concern.
 - Asset paths not committed to git.
 - Output is paths-only by default — operator copies the path into their work.
 
@@ -84,7 +84,7 @@ asset_search:
 
 ## Failure modes
 
-- **No `~/.jstack/brand/azure-assets/`** — surface "no brand pulled" + recommend `/brand-update`. Return empty.
+- **No `~/.lintel/brand/azure-assets/`** — surface "no brand pulled" + recommend `/brand-update`. Return empty.
 - **Index cache stale** — auto-rebuild on first search after brand-update. Subsequent searches fast.
 - **Query too broad** (returns 50+ matches) — recommend narrower query or `--category` filter.
 - **No results** — suggest alternative spellings + show top-5 categories present in library.
@@ -112,7 +112,7 @@ asset_search:
 **Paths-only for piping:**
 ```
 > /asset-search --query "load balancer" --format paths-only --limit 1
-/Users/jokerman/.jstack/brand/azure-assets/services/azure-load-balancer.svg
+/Users/jokerman/.lintel/brand/azure-assets/services/azure-load-balancer.svg
 ```
 
 ## See also

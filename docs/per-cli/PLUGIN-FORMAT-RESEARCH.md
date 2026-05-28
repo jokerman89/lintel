@@ -17,19 +17,19 @@ This document captures the actual plugin-manifest format per CLI as of v3 planni
 **Schema (minimal):**
 ```json
 {
-  "name": "jstack",
+  "name": "lintel",
   "description": "MS-CAIP-SE session harness",
   "version": "3.0.0",
-  "author": { "name": "Azureflipper", "email": "johannes.akerman@microsoft.com" },
-  "homepage": "https://github.com/Azureflipper/jokerman-session-setup",
-  "repository": "https://github.com/Azureflipper/jokerman-session-setup",
+  "author": { "name": "jokerman89", "email": "johannes.akerman@microsoft.com" },
+  "homepage": "https://github.com/jokerman89/jokerman-lintel",
+  "repository": "https://github.com/jokerman89/jokerman-lintel",
   "license": "MIT",
   "keywords": ["microsoft", "caip", "rais", "compliance", "session-harness"]
 }
 ```
 
 **Directory structure (at plugin root, NOT inside .claude-plugin):**
-- `skills/<name>/SKILL.md` — model-invokable skills (slash-commands namespaced as `/jstack:<skill>`)
+- `skills/<name>/SKILL.md` — model-invokable skills (slash-commands namespaced as `/lintel:<skill>`)
 - `commands/<name>.md` — legacy flat skills (use `skills/` for new plugins)
 - `agents/<name>.md` — subagent definitions
 - `hooks/hooks.json` — event handlers (same format as `.claude/settings.json` hooks block)
@@ -39,20 +39,20 @@ This document captures the actual plugin-manifest format per CLI as of v3 planni
 - `bin/` — executables added to Bash tool's PATH when plugin is active
 - `settings.json` — default settings (only `agent` + `subagentStatusLine` supported)
 
-**Skill namespace:** `/<plugin-name>:<skill>` — e.g. `/jstack:qa`. This protects against conflicts.
+**Skill namespace:** `/<plugin-name>:<skill>` — e.g. `/lintel:qa`. This protects against conflicts.
 
 **Marketplace:**
 - `claude-plugins-official` (curated by Anthropic, no application process)
 - `claude-plugins-community` (community-submitted via claude.ai/settings/plugins/submit, reviewed)
-- Team marketplaces: `/plugin marketplace add <owner>/<repo>` then `/plugin install jstack@<repo>`
+- Team marketplaces: `/plugin marketplace add <owner>/<repo>` then `/plugin install lintel@<repo>`
 
-**For JStack:** Team marketplace pattern. MS-CAIP-SE operators run:
+**For Lintel:** Team marketplace pattern. MS-CAIP-SE operators run:
 ```
-/plugin marketplace add Azureflipper/jokerman-session-setup
-/plugin install jstack@jokerman-session-setup
+/plugin marketplace add jokerman89/jokerman-lintel
+/plugin install lintel@jokerman-lintel
 ```
 
-**Plus:** A `.claude-plugin/marketplace.json` if we want to expose JStack-as-a-marketplace that contains multiple plugins (e.g. jstack-core + jstack-ms + jstack-doc-gen). For now: single plugin, single manifest.
+**Plus:** A `.claude-plugin/marketplace.json` if we want to expose Lintel-as-a-marketplace that contains multiple plugins (e.g. li-core + li-ms + li-doc-gen). For now: single plugin, single manifest.
 
 **Validation:** `claude plugin validate <path>` locally before any submission.
 
@@ -67,20 +67,20 @@ This document captures the actual plugin-manifest format per CLI as of v3 planni
 **Schema (with `interface{}` block for app UI):**
 ```json
 {
-  "name": "jstack",
+  "name": "lintel",
   "version": "3.0.0",
   "description": "MS-CAIP-SE session harness for OpenAI Codex",
-  "author": { "name": "Azureflipper", "email": "...", "url": "https://github.com/Azureflipper" },
-  "homepage": "https://github.com/Azureflipper/jokerman-session-setup",
-  "repository": "https://github.com/Azureflipper/jokerman-session-setup",
+  "author": { "name": "jokerman89", "email": "...", "url": "https://github.com/jokerman89" },
+  "homepage": "https://github.com/jokerman89/jokerman-lintel",
+  "repository": "https://github.com/jokerman89/jokerman-lintel",
   "license": "MIT",
   "keywords": ["microsoft", "caip", "rais", "session-harness"],
   "skills": "./skills/",
   "interface": {
-    "displayName": "JStack",
+    "displayName": "Lintel",
     "shortDescription": "MS-CAIP-SE session harness — RAIS, OneCS, Trailblazer voice",
     "longDescription": "...",
-    "developerName": "Azureflipper",
+    "developerName": "jokerman89",
     "category": "Coding",
     "capabilities": ["Interactive", "Read", "Write"],
     "defaultPrompt": ["Hjälp mig med ett nytt customer engagement.", "Kör /qa på min branch."],
@@ -88,7 +88,7 @@ This document captures the actual plugin-manifest format per CLI as of v3 planni
     "privacyPolicyURL": "...",
     "termsOfServiceURL": "...",
     "brandColor": "#0078D4",
-    "composerIcon": "./assets/jstack-small.svg",
+    "composerIcon": "./assets/lintel:li-small.svg",
     "logo": "./assets/app-icon.png",
     "screenshots": []
   }
@@ -117,13 +117,13 @@ This document captures the actual plugin-manifest format per CLI as of v3 planni
 **Schema (richer than Claude, includes hooks):**
 ```json
 {
-  "name": "jstack",
-  "displayName": "JStack",
+  "name": "lintel",
+  "displayName": "Lintel",
   "description": "MS-CAIP-SE session harness",
   "version": "3.0.0",
-  "author": { "name": "Azureflipper", "email": "..." },
-  "homepage": "https://github.com/Azureflipper/jokerman-session-setup",
-  "repository": "https://github.com/Azureflipper/jokerman-session-setup",
+  "author": { "name": "jokerman89", "email": "..." },
+  "homepage": "https://github.com/jokerman89/jokerman-lintel",
+  "repository": "https://github.com/jokerman89/jokerman-lintel",
   "license": "MIT",
   "keywords": ["microsoft", "caip", "session-harness"],
   "skills": "./skills/",
@@ -135,7 +135,7 @@ This document captures the actual plugin-manifest format per CLI as of v3 planni
 
 **Install command:**
 ```
-/add-plugin jstack
+/add-plugin lintel
 ```
 (in Cursor Agent chat)
 
@@ -154,7 +154,7 @@ This document captures the actual plugin-manifest format per CLI as of v3 planni
 **Schema (minimal):**
 ```json
 {
-  "name": "jstack",
+  "name": "lintel",
   "description": "MS-CAIP-SE session harness for Gemini",
   "version": "3.0.0",
   "contextFileName": "GEMINI.md"
@@ -163,10 +163,10 @@ This document captures the actual plugin-manifest format per CLI as of v3 planni
 
 **Install command:**
 ```
-gemini extensions install https://github.com/Azureflipper/jokerman-session-setup
+gemini extensions install https://github.com/jokerman89/jokerman-lintel
 ```
 
-**Update command:** `gemini extensions update jstack`
+**Update command:** `gemini extensions update lintel`
 
 **Top-level GEMINI.md:** Required. Acts as context file Gemini loads on session start. Should point to AGENT-INSTRUCTIONS.md.
 
@@ -184,13 +184,13 @@ gemini extensions install https://github.com/Azureflipper/jokerman-session-setup
 
 **Install command:**
 ```
-Fetch and follow instructions from https://raw.githubusercontent.com/Azureflipper/jokerman-session-setup/refs/heads/main/.opencode/INSTALL.md
+Fetch and follow instructions from https://raw.githubusercontent.com/jokerman89/jokerman-lintel/refs/heads/main/.opencode/INSTALL.md
 ```
 
 The operator literally tells OpenCode to fetch and follow the INSTALL.md. OpenCode then does the install steps documented there.
 
 **Format:** Custom per-project. We need to write a well-structured INSTALL.md that OpenCode can follow:
-1. Add JStack to OpenCode's plugins dir
+1. Add Lintel to OpenCode's plugins dir
 2. Symlink skills/, agents/
 3. Configure context-file (likely AGENTS.md or similar)
 
@@ -204,8 +204,8 @@ The operator literally tells OpenCode to fetch and follow the INSTALL.md. OpenCo
 
 **Install command:**
 ```bash
-droid plugin marketplace add https://github.com/Azureflipper/jokerman-session-setup
-droid plugin install jstack@jstack
+droid plugin marketplace add https://github.com/jokerman89/jokerman-lintel
+droid plugin install lintel@lintel
 ```
 
 **Manifest location:** `.droid-plugin/plugin.json` (inferred from pattern). Verify before writing.
@@ -222,8 +222,8 @@ droid plugin install jstack@jstack
 
 **Install command:**
 ```bash
-copilot plugin marketplace add Azureflipper/jokerman-session-setup
-copilot plugin install jstack@jokerman-session-setup
+copilot plugin marketplace add jokerman89/jokerman-lintel
+copilot plugin install lintel@jokerman-lintel
 ```
 
 **Manifest location:** `.copilot-plugin/plugin.json` (inferred). Verify before writing.
@@ -244,7 +244,7 @@ For v3 we target **Copilot CLI** (has plugin system). VSCode Copilot remains via
 
 **Plus:** `.github/prompts/<name>.prompt.md` for slash-commands (VSCode 2024-Q4+).
 
-**For JStack:** This is the v2 shim pattern. v3 keeps `shims/copilot-instructions.md` as fallback for VSCode/JetBrains Copilot, but primary install for Copilot CLI uses the plugin manifest.
+**For Lintel:** This is the v2 shim pattern. v3 keeps `shims/copilot-instructions.md` as fallback for VSCode/JetBrains Copilot, but primary install for Copilot CLI uses the plugin manifest.
 
 ---
 
@@ -290,8 +290,8 @@ For v3 we target **Copilot CLI** (has plugin system). VSCode Copilot remains via
 
 ## 11. Constraints we accept
 
-- **MS-internal first.** Public marketplace submission requires MS legal review. Default v3.0.0 ships only the team-marketplace pattern (`/plugin marketplace add Azureflipper/jokerman-session-setup`). Public submission deferred to v3.x post-legal-clear.
-- **Per-CLI UX differences accepted.** Skill-namespacing differs (Claude `/jstack:qa` vs others), hook formats differ, subagent mechanisms differ. We document, don't normalize.
+- **MS-internal first.** Public marketplace submission requires MS legal review. Default v3.0.0 ships only the team-marketplace pattern (`/plugin marketplace add jokerman89/jokerman-lintel`). Public submission deferred to v3.x post-legal-clear.
+- **Per-CLI UX differences accepted.** Skill-namespacing differs (Claude `/lintel:qa` vs others), hook formats differ, subagent mechanisms differ. We document, don't normalize.
 - **Schema-drift over time.** CLIs update plugin specs. We commit to verify per-CLI version every release.
 
 ---

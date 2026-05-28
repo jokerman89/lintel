@@ -1,5 +1,5 @@
 ---
-name: jstack-clean
+name: li-clean
 layer: foundation
 description: Manual self-maintenance trigger. Suggests /context-save + restart when session feels heavy.
 color: yellow
@@ -12,7 +12,7 @@ cli_support: [claude-code]
 
 Manual companion to the Layer 4 context-bloat watchers. Operator runs this when a session feels heavy (or when a watcher fired and you want to act). Outputs a short readout + offers the cleanup path: `/context-save` → restart fresh session → `/context-restore`.
 
-**JStack does NOT make Claude's context infinite. This skill surfaces the cleanup ritual.**
+**Lintel does NOT make Claude's context infinite. This skill surfaces the cleanup ritual.**
 
 ## When to use
 
@@ -45,7 +45,7 @@ Manual companion to the Layer 4 context-bloat watchers. Operator runs this when 
 2. **Read recent checkpoint:**
    - `ls -t ~/.gstack/projects/<slug>/checkpoints/<branch>-*.md | head -1`
    - If exists: timestamp, age in minutes
-3. **Read watcher thresholds** from `~/.jstack/config.yaml`:
+3. **Read watcher thresholds** from `~/.lintel/config.yaml`:
    - `watchers.token_watcher.warn_threshold` (default 50000)
    - `watchers.toolcall_watcher.warn_threshold` (default 80)
 4. **Decision tree:**
@@ -63,7 +63,7 @@ Session health: ✓ within thresholds
   Tool calls: 42 (warn at 80)
   Skills invoked: office-hours, plan-eng-review
   Time elapsed: 1h 47m
-  Latest checkpoint: 2h ago (~/.gstack/projects/jstack/checkpoints/main-20260527-...)
+  Latest checkpoint: 2h ago (~/.gstack/projects/lintel/checkpoints/main-20260527-...)
 
 No cleanup needed yet. Run /clean again if session grows heavier.
 ```
@@ -106,14 +106,14 @@ If you push past this, expect:
 
 ## Edge cases
 
-- **No `~/.jstack/config.yaml` exists:** use defaults (50k/80k tokens, 80/130 tool calls).
+- **No `~/.lintel/config.yaml` exists:** use defaults (50k/80k tokens, 80/130 tool calls).
 - **No checkpoint history:** skip the "latest checkpoint" line.
 - **Operator overrides default thresholds:** read them from config and apply.
 - **Token count unavailable:** skip token line, only report tool-call count + qualitative signal ("you've invoked 5 skills, session feels heavy").
 
 ## Honest framing
 
-JStack can't compact your conversation. Only Claude can. This skill:
+Lintel can't compact your conversation. Only Claude can. This skill:
 
 - Surfaces the right thresholds
 - Suggests the right ritual (`/context-save` + restart + `/context-restore`)
@@ -153,5 +153,5 @@ STRONG recommendation: /context-save then restart.
 
 - `/context-save` — paired write step
 - `/context-restore` — paired read step
-- Layer 4 `jstack-token-watcher` + `jstack-toolcall-watcher` hooks — fire warnings that lead operator here
-- `~/.jstack/config.yaml` — threshold overrides
+- Layer 4 `li-token-watcher` + `li-toolcall-watcher` hooks — fire warnings that lead operator here
+- `~/.lintel/config.yaml` — threshold overrides

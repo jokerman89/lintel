@@ -4,7 +4,7 @@ tier: warn-only
 event: PreToolUse (Edit | Write)
 fires_on: every Edit or Write payload
 override: not applicable (warn only)
-audit: ~/.jstack/audit/hooks.jsonl
+audit: ~/.lintel/audit/hooks.jsonl
 ---
 
 # no-secrets-in-edit

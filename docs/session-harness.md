@@ -1,20 +1,20 @@
-# JStack as a session harness
+# Lintel as a session harness
 
-This explains the mental model for v3 and beyond. If you're new to JStack, read this first.
+This explains the mental model for v3 and beyond. If you're new to Lintel, read this first.
 
 ---
 
 ## What "session harness" means
 
-JStack is not a skill library you happen to invoke. JStack is **the harness around your agent's session** — the file structure, documentation, and mechanisms that together shape HOW the agent behaves, from first prompt to last commit.
+Lintel is not a skill library you happen to invoke. Lintel is **the harness around your agent's session** — the file structure, documentation, and mechanisms that together shape HOW the agent behaves, from first prompt to last commit.
 
-A session has four phases. JStack covers all four.
+A session has four phases. Lintel covers all four.
 
 ---
 
 ## Phase 1 — Session start ritual
 
-When Claude Code (or Codex, Cursor, Gemini, etc.) loads in your repo, JStack ensures it:
+When Claude Code (or Codex, Cursor, Gemini, etc.) loads in your repo, Lintel ensures it:
 
 1. **Reads canonical session instructions** — `AGENT-INSTRUCTIONS.md` (always loaded via per-CLI entrypoint file: CLAUDE.md / AGENTS.md / GEMINI.md).
 2. **Reviews accumulated lessons** — `tasks/lessons.md` so the agent doesn't repeat past mistakes.
@@ -30,7 +30,7 @@ Result: the agent enters mid-session with full context. No re-explaining how thi
 
 ## Phase 2 — Mid-session interventions
 
-While the agent is working, JStack provides:
+While the agent is working, Lintel provides:
 
 ### Hook enforcement
 
@@ -71,23 +71,23 @@ Mid-workflow, the agent invokes RAIS / OneCS / AGT / voice gates per the workflo
 
 ### Pause-reports
 
-At decision points, the agent surfaces a structured pause-report. JStack patterns establish what gets surfaced (alternatives + recommendation + completeness score), reducing operator decision fatigue.
+At decision points, the agent surfaces a structured pause-report. Lintel patterns establish what gets surfaced (alternatives + recommendation + completeness score), reducing operator decision fatigue.
 
 ---
 
 ## Phase 3 — Session end capture
 
-When work wraps up, JStack ensures durable artifacts:
+When work wraps up, Lintel ensures durable artifacts:
 
 ### Lessons captured
 
 Corrections during the session → `tasks/lessons.md` entries. The `/learn` skill formalizes this.
 
-Generalizable lessons → promote to JStack global via `bin/jstack-lessons-promote`. Lands in `scaffolding/01-foundation/tasks/lessons.md` so every future scaffolded repo inherits.
+Generalizable lessons → promote to Lintel global via `bin/li-lessons-promote`. Lands in `scaffolding/01-foundation/tasks/lessons.md` so every future scaffolded repo inherits.
 
 ### ADRs drafted
 
-Non-trivial architectural decisions → `docs/adr/NNNN-<slug>.md` via `bin/jstack-adr-new` or `/adr-new` skill. Travels with the repo.
+Non-trivial architectural decisions → `docs/adr/NNNN-<slug>.md` via `bin/li-adr-new` or `/adr-new` skill. Travels with the repo.
 
 ### EVOLUTION-LOG appended
 
@@ -113,11 +113,11 @@ Beyond a single session:
 
 ### Lessons sync
 
-Operator-opt-in via `bin/jstack-lessons-sync`. Private git repo holds lessons from multiple engagement repos. Pull on machine A, lessons from machine B available.
+Operator-opt-in via `bin/li-lessons-sync`. Private git repo holds lessons from multiple engagement repos. Pull on machine A, lessons from machine B available.
 
 ### Brand + voice corpus sync
 
-`~/.jstack/brand/` (MS brand assets) + `~/.jstack/voice/` (OurVoice corpus) — operator pulls from MS portal. `brand-staleness-warn` hook fires when >90 days old.
+`~/.lintel/brand/` (MS brand assets) + `~/.lintel/voice/` (OurVoice corpus) — operator pulls from MS portal. `brand-staleness-warn` hook fires when >90 days old.
 
 ### Cross-machine state
 
@@ -127,7 +127,7 @@ Operator-opt-in via `bin/jstack-lessons-sync`. Private git repo holds lessons fr
 
 ## Two categories of content
 
-JStack ships TWO distinct categories:
+Lintel ships TWO distinct categories:
 
 ### Kategori A — Agent-invokable
 
@@ -140,7 +140,7 @@ Lives at repo root. Discovered by Claude Code, Codex, Cursor, Gemini, etc. via t
 
 ### Kategori B — Repo-scaffolding
 
-What gets copied INTO other repos via `jstack-scaffold init`:
+What gets copied INTO other repos via `li-scaffold init`:
 - `scaffolding/01-foundation/` — CLAUDE.md template, CORE-PRINCIPLES, EVOLUTION-LOG, tasks/, docs/adr/, .claude/agents/, TEMPLATE-skill.md, TEMPLATE-agent.md
 - `scaffolding/02-sdl/` — compliance reference
 - `scaffolding/03-ms-team/` — voice corpus + doc-gen templates
@@ -151,15 +151,15 @@ The agent CLI doesn't "load" scaffolding. The operator copies it into their work
 
 ## Why this matters for MS-CAIP-SE
 
-Without JStack, every new customer engagement starts from blank:
+Without Lintel, every new customer engagement starts from blank:
 - New CLAUDE.md (60-180 min to write)
 - New compliance checklist
 - New voice guidance
 - No agent precedence resolution
 - No accumulated lessons
 
-With JStack:
-- `jstack-scaffold init` → 30 seconds for full base
+With Lintel:
+- `li-scaffold init` → 30 seconds for full base
 - All skills/agents/hooks via single plugin install
 - Voice corpus + compliance refs available immediately
 - Lessons from prior engagements visible (via opt-in sync)

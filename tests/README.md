@@ -1,6 +1,6 @@
-# JStack Tests
+# Lintel Tests
 
-Test infrastructure for JStack v2.0+. Spec'd in v2 design as P1 fix T2 (eng-review).
+Test infrastructure for Lintel v2.0+. Spec'd in v2 design as P1 fix T2 (eng-review).
 
 ## Structure
 
@@ -56,10 +56,10 @@ Phase G updates ship gate (`SHIP-GATE.md` Gate 9) to require all unit + e2e-clau
 
 ## What's NOT in scope here
 
-- LLM evaluation tests (those live in `eval/<feature>/` per component; see `/jstack-eval` skill)
-- Performance benchmarks (those use `/perfbench` skill, results in `~/.jstack/benchmarks/`)
+- LLM evaluation tests (those live in `eval/<feature>/` per component; see `/lintel:li-eval` skill)
+- Performance benchmarks (those use `/perfbench` skill, results in `~/.lintel/benchmarks/`)
 - Manual QA testing (operator-driven; see `/qa` and `/qa-only` skills)
 
 ## Status
 
-Created in Phase A of JStack v2.0 build. Currently contains scaffolding only — actual tests land in Phase A.8 onwards as components are built.
+Created in Phase A of Lintel v2.0 build. Currently contains scaffolding only — actual tests land in Phase A.8 onwards as components are built.

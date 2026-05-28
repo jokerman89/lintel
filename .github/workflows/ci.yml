@@ -58,19 +58,19 @@ jobs:
           sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
           sudo chmod +x /usr/local/bin/yq
 
-      - name: Run install.sh (against test JSTACK_HOME)
+      - name: Run install.sh (against test LINTEL_HOME)
         env:
-          JSTACK_HOME: /tmp/jstack-test
+          LINTEL_HOME: /tmp/lintel:li-test
         run: bash install/install.sh
 
       - name: Verify install
         env:
-          JSTACK_HOME: /tmp/jstack-test
+          LINTEL_HOME: /tmp/lintel:li-test
         run: |
           bash install/verify.sh --all
-          test -d /tmp/jstack-test/scaffolding
-          test -d /tmp/jstack-test/hooks
-          test -f /tmp/jstack-test/config.yaml
+          test -d /tmp/lintel:li-test/scaffolding
+          test -d /tmp/lintel:li-test/hooks
+          test -f /tmp/lintel:li-test/config.yaml
 
   verify-windows:
     name: install.ps1 on Windows
@@ -80,22 +80,22 @@ jobs:
 
       - name: Run install.ps1
         env:
-          JSTACK_HOME: C:\jstack-test
+          LINTEL_HOME: C:\li-test
         shell: pwsh
         run: install/install.ps1
 
       - name: Confirm structure
         env:
-          JSTACK_HOME: C:\jstack-test
+          LINTEL_HOME: C:\li-test
         shell: pwsh
         run: |
-          Test-Path C:\jstack-test\scaffolding | Should -Be $true
-          Test-Path C:\jstack-test\hooks | Should -Be $true
-          Test-Path C:\jstack-test\config.yaml | Should -Be $true
+          Test-Path C:\li-test\scaffolding | Should -Be $true
+          Test-Path C:\li-test\hooks | Should -Be $true
+          Test-Path C:\li-test\config.yaml | Should -Be $true
 
       - name: Run verify.sh via Git Bash
         env:
-          JSTACK_HOME: C:\jstack-test
+          LINTEL_HOME: C:\li-test
         shell: bash
         run: bash install/verify.sh --all
 

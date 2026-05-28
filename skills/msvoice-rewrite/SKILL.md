@@ -1,5 +1,5 @@
 ---
-name: jstack-msvoice-rewrite
+name: li-msvoice-rewrite
 layer: ms-team
 description: Rewrite internal-voice content into Microsoft Our Voice (Trailblazer) — 12-cell aware.
 color: orange
@@ -101,7 +101,7 @@ P3 Exception        ▌▌                  (1)
 
 ## Voice tier note
 
-`voice: trailblazer`. This skill is one of the few JStack skills that PRODUCES trailblazer-voice output. Its own report frontmatter is internal; the rewritten artifact is trailblazer-draft.
+`voice: trailblazer`. This skill is one of the few Lintel skills that PRODUCES trailblazer-voice output. Its own report frontmatter is internal; the rewritten artifact is trailblazer-draft.
 
 ## Failure modes
 

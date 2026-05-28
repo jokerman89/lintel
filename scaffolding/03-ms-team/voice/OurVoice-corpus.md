@@ -813,13 +813,13 @@ All three must be present **simultaneously** in aggregate over a paragraph — n
 
 Floor was 30. We're at 60. All 12 cells covered with ≥2 known-good + ≥2 known-bad.
 
-**Status:** READY for `/jstack-eval` against `OurVoice-test.md`. T0 unblocked. Phase 3 can start.
+**Status:** READY for `/lintel:li-eval` against `OurVoice-test.md`. T0 unblocked. Phase 3 can start.
 
 ---
 
 ## Operator workflow (post-population)
 
-1. **Run `/jstack-eval`** (Phase 8 skill — to be written) against this corpus. The eval applies OurVoice-test.md per-paragraph and compares verdict to `verdict_label`.
+1. **Run `/lintel:li-eval`** (Phase 8 skill — to be written) against this corpus. The eval applies OurVoice-test.md per-paragraph and compares verdict to `verdict_label`.
 
 2. **Record per-cell accuracy in `OurVoice-calibration.md`.** Target: ≥90% known-good correctly verdicted + ≥90% known-bad correctly verdicted per cell.
 

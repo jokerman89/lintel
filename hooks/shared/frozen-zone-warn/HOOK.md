@@ -4,14 +4,14 @@ tier: warn-only
 event: PreToolUse (Edit | Write)
 fires_on: edit to a path matching frozen-zone rules
 override: pass --ignore-freeze flag to invoking skill
-audit: ~/.jstack/audit/hooks.jsonl
+audit: ~/.lintel/audit/hooks.jsonl
 ---
 
 # frozen-zone-warn
 
 Warns when an Edit or Write is about to modify a path inside a frozen zone. Frozen zones come from two sources:
 
-1. **Session freezes** (`/code-freeze` skill) — `~/.jstack/code-freeze/<session-id>.yaml`
+1. **Session freezes** (`/code-freeze` skill) — `~/.lintel/code-freeze/<session-id>.yaml`
 2. **Permanent freezes** (project CLAUDE.md) — `## Frozen zones` section
 
 ## What it does

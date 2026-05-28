@@ -4,12 +4,12 @@ tier: warn-only
 event: PreToolUse (Edit | Write) on package.json / requirements.txt / pyproject.toml / Cargo.toml
 fires_on: edit adds a known-3P dep with viable MS-1P alternative
 override: pass --justify-non-first-party to invoking skill (logged)
-audit: ~/.jstack/audit/hooks.jsonl
+audit: ~/.lintel/audit/hooks.jsonl
 ---
 
 # non-first-party-warn
 
-Warns when an Edit/Write on a manifest file appears to add a third-party dep that has a documented MS first-party alternative (per `~/.jstack/first-party-alternatives.yaml`).
+Warns when an Edit/Write on a manifest file appears to add a third-party dep that has a documented MS first-party alternative (per `~/.lintel/first-party-alternatives.yaml`).
 
 ## Detection
 

@@ -1,5 +1,5 @@
 ---
-name: jstack-lessons
+name: li-lessons
 layer: foundation
 description: Mid-session review of accumulated lessons from tasks/lessons.md — surfaces relevant ones for current task.
 color: cyan
@@ -22,7 +22,7 @@ Reads `tasks/lessons.md` (current repo) and surfaces relevant lessons given the 
 
 ## When NOT to use
 
-- No lessons.md yet — recommend `jstack-scaffold init` first
+- No lessons.md yet — recommend `li-scaffold init` first
 - Tiny task (single-line edit) — overkill
 
 ## Workflow
@@ -38,7 +38,7 @@ Reads `tasks/lessons.md` (current repo) and surfaces relevant lessons given the 
 
 4. **Top 3-5 relevant lessons.** Surface with original text + 1-line "why this might apply now".
 
-5. **Plus global lessons (optional).** If operator opted in to `jstack-lessons-sync`, also surface from `~/.jstack/lessons/global.md`.
+5. **Plus global lessons (optional).** If operator opted in to `li-lessons-sync`, also surface from `~/.lintel/lessons/global.md`.
 
 ## Output format
 

@@ -4,7 +4,7 @@ tier: warn-only
 event: UserPromptSubmit
 fires_on: every operator prompt
 override: not applicable (warn only)
-audit: ~/.jstack/audit/hooks.jsonl
+audit: ~/.lintel/audit/hooks.jsonl
 ---
 
 # no-customer-data-in-message

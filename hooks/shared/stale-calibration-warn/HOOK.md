@@ -4,7 +4,7 @@ tier: warn-only
 event: PreToolUse (Bash | Edit | Write) when target involves trailblazer-tagged content
 fires_on: trailblazer-voice operation while TRAILBLAZER-CALIBRATION is >30 days old
 override: pass --ignore-stale-calibration to invoking skill (logged)
-audit: ~/.jstack/audit/hooks.jsonl
+audit: ~/.lintel/audit/hooks.jsonl
 ---
 
 # stale-calibration-warn

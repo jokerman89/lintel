@@ -81,7 +81,7 @@ Post-generation: scores the output + surfaces findings.
    - White space rhythm
 
    **Brand consistency:**
-   - Colors from `~/.jstack/brand/` palette OR default-fallback marker present
+   - Colors from `~/.lintel/brand/` palette OR default-fallback marker present
    - Typography from brand
    - Logo/marks where expected
 

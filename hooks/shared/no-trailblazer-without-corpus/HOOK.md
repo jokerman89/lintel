@@ -4,7 +4,7 @@ tier: warn-only
 event: PreToolUse (Edit | Write)
 fires_on: writing a file with frontmatter `voice: trailblazer` while T0 corpus empty/incomplete
 override: pass --uncalibrated flag to invoking skill (logged)
-audit: ~/.jstack/audit/hooks.jsonl
+audit: ~/.lintel/audit/hooks.jsonl
 ---
 
 # no-trailblazer-without-corpus

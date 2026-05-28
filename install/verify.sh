@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# jstack verify.sh — install + structure diagnostic
+# lintel verify.sh — install + structure diagnostic
 #
 # 10 subcommands:
 #   --frontmatter   validate skill + agent frontmatter
@@ -20,7 +20,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 SOURCES_FILE="$SCRIPT_DIR/upstream-sources.yaml"
-JSTACK_HOME="${JSTACK_HOME:-$HOME/.jstack}"
+LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
 
 c_reset='\033[0m'; c_bold='\033[1m'; c_dim='\033[2m'
 c_green='\033[32m'; c_yellow='\033[33m'; c_red='\033[31m'
@@ -162,12 +162,12 @@ cmd_hooks() {
   local total=0
   local activated=0
 
-  if [ ! -d "$JSTACK_HOME/hooks" ]; then
-    warn "$JSTACK_HOME/hooks/ not present — run install.sh first"
+  if [ ! -d "$LINTEL_HOME/hooks" ]; then
+    warn "$LINTEL_HOME/hooks/ not present — run install.sh first"
     return
   fi
 
-  for dir in "$JSTACK_HOME/hooks/"*/; do
+  for dir in "$LINTEL_HOME/hooks/"*/; do
     [ -d "$dir" ] || continue
     name=$(basename "$dir")
     [ "$name" = "README.md" ] && continue
@@ -216,7 +216,7 @@ cmd_voice() {
 
   [ -n "$CORPUS" ] && ok "Voice corpus present: $(basename "$CORPUS")" || { fail "Voice corpus missing"; EXIT_CODE=1; }
   [ -n "$TEST" ] && ok "Voice test rubric present: $(basename "$TEST")" || { fail "Voice test rubric missing"; EXIT_CODE=1; }
-  [ -n "$CALIB" ] && ok "Voice calibration present: $(basename "$CALIB")" || warn "Voice calibration missing — run /jstack-eval"
+  [ -n "$CALIB" ] && ok "Voice calibration present: $(basename "$CALIB")" || warn "Voice calibration missing — run /lintel:li-eval"
 
   if [ -f "$CORPUS" ]; then
     populated=$(grep -c '^- id: ' "$CORPUS" 2>/dev/null || echo 0)
@@ -231,7 +231,7 @@ cmd_voice() {
     if grep -qE 'status:\s*CALIBRATED' "$CALIB" 2>/dev/null; then
       ok "Calibration: CALIBRATED"
     else
-      warn "Calibration: NOT CALIBRATED — run /jstack-eval"
+      warn "Calibration: NOT CALIBRATED — run /lintel:li-eval"
     fi
   fi
 }
@@ -377,14 +377,14 @@ cmd_portability() {
   done
   [ -n "$SCHEMA" ] && ok "CLI-SUPPORT-V2-SCHEMA.md present" || warn "CLI-SUPPORT-V2-SCHEMA.md missing (v2 doc, optional in v3)"
 
-  # v3: skill at skills/jstack-cli-fingerprint/SKILL.md
+  # v3: skill at skills/lintel:li-cli-fingerprint/SKILL.md
   CLI_FINGERPRINT=""
   for candidate in \
-    "$REPO_ROOT/skills/jstack-cli-fingerprint/SKILL.md" \
-    "$REPO_ROOT/scaffolding/01-foundation/skills/jstack-cli-fingerprint/SKILL.md"; do
+    "$REPO_ROOT/skills/lintel:li-cli-fingerprint/SKILL.md" \
+    "$REPO_ROOT/scaffolding/01-foundation/skills/lintel:li-cli-fingerprint/SKILL.md"; do
     [ -f "$candidate" ] && { CLI_FINGERPRINT="$candidate"; break; }
   done
-  [ -n "$CLI_FINGERPRINT" ] && ok "skill: jstack-cli-fingerprint" || warn "skill missing: jstack-cli-fingerprint (use bin/jstack-doctor for v3 runtime)"
+  [ -n "$CLI_FINGERPRINT" ] && ok "skill: li-cli-fingerprint" || warn "skill missing: li-cli-fingerprint (use bin/lintel:li-doctor for v3 runtime)"
 
   # Validate cli_support fields on skills (v3 path + v2 fallback)
   with_cli_support=0
@@ -668,7 +668,7 @@ case "${1:---counts}" in
   --all)            cmd_all ;;
   -h|--help)
     cat <<HELP
-jstack verify.sh — install + structure diagnostic
+lintel verify.sh — install + structure diagnostic
 
 Usage: verify.sh [--subcommand]
 
@@ -682,7 +682,7 @@ Subcommands:
   --upstream      check upstream-sources.yaml
   --counts         summary counts (default)
   --tier-stamps    check agent tier-stamping
-  --portability    (v2) CLI-SUPPORT-V2-SCHEMA + jstack-cli-fingerprint
+  --portability    (v2) CLI-SUPPORT-V2-SCHEMA + li-cli-fingerprint
   --context-engine (v2) CONTEXT-ENGINE.md + context-budget/warmup/perf-mode
   --brand          (v2) BRAND-INTEGRATION.md + default-templates + brand-update/asset-search
   --plugin-manifests       (v3) validate JSON + presence of per-CLI plugin manifests

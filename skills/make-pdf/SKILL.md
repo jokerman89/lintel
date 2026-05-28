@@ -1,5 +1,5 @@
 ---
-name: jstack-make-pdf
+name: li-make-pdf
 layer: foundation
 description: Convert URL, markdown file, or HTML to PDF via managed Chromium.
 color: yellow

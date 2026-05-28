@@ -1,5 +1,5 @@
 ---
-name: jstack-scaffold-mvp
+name: li-scaffold-mvp
 layer: ms-team
 description: Initialize a product-MVP repo — full compliance + voice + RAI + deploy wiring.
 color: orange
@@ -10,7 +10,7 @@ cli_support: [claude-code, codex]
 
 # /scaffold-mvp
 
-Initializes a product-grade MVP repo with the full JStack treatment: compliance hooks, RAI assessment placeholders, voice gates on customer-facing surfaces, deploy targets stubbed, eval suite skeleton. Heavier than `/scaffold-internal-tool`, more product-ready than `/scaffold-engagement-demo`.
+Initializes a product-grade MVP repo with the full Lintel treatment: compliance hooks, RAI assessment placeholders, voice gates on customer-facing surfaces, deploy targets stubbed, eval suite skeleton. Heavier than `/scaffold-internal-tool`, more product-ready than `/scaffold-engagement-demo`.
 
 Use when the thing being built is intended to ship to real users, not just demo to them.
 

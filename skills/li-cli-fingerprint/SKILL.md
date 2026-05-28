@@ -1,7 +1,7 @@
 ---
-name: jstack-cli-fingerprint
+name: li-cli-fingerprint
 layer: foundation
-description: Detect which CLI is running JStack — env-var → process → tool-probe → config fallback.
+description: Detect which CLI is running Lintel — env-var → process → tool-probe → config fallback.
 color: blue
 tools: Read, Bash
 voice: internal
@@ -16,7 +16,7 @@ cli_support:
     level: full
 ---
 
-# /jstack-cli-fingerprint
+# /lintel:li-cli-fingerprint
 
 CLI detection runtime that feeds the portability shim. **Foundational** — every other skill's degradation decision depends on knowing which CLI is currently running.
 
@@ -32,23 +32,23 @@ P1 fix T2 (eng-review): Phase B sub-step 0. Without reliable detection the shim 
 ## When NOT to use
 
 - Inside a skill that already received its CLI ID from session cache
-- Test fixtures with mock CLI ID (use `JSTACK_CLI=test` instead)
+- Test fixtures with mock CLI ID (use `LINTEL_CLI=test` instead)
 
 ## Inputs
 
 - Optional `--force-redetect` — ignore session cache, re-run all detection steps
-- Optional `--declare <cli-id>` — operator-side manual declaration (writes to `~/.jstack/cli-id.txt`)
+- Optional `--declare <cli-id>` — operator-side manual declaration (writes to `~/.lintel/cli-id.txt`)
 - Optional `--verbose` — print the cascade evaluation step-by-step
 
 ## Workflow
 
 1. **Check explicit env var first.**
    ```bash
-   if [ -n "${JSTACK_CLI:-}" ]; then
-     return "$JSTACK_CLI"
+   if [ -n "${LINTEL_CLI:-}" ]; then
+     return "$LINTEL_CLI"
    fi
    ```
-   This is the highest-priority signal — operator pinned via shell init or per-invocation `JSTACK_CLI=codex command`.
+   This is the highest-priority signal — operator pinned via shell init or per-invocation `LINTEL_CLI=codex command`.
 
 2. **Process inspection.**
    - Check `$0` / `process.argv0` for known binary patterns:
@@ -68,25 +68,25 @@ P1 fix T2 (eng-review): Phase B sub-step 0. Without reliable detection the shim 
      - `~/.codex/config.toml` exists → suggests `codex`
 
 4. **Operator-declared fallback.**
-   - Read `~/.jstack/cli-id.txt` if exists
-   - This is operator-set via `/jstack-cli-fingerprint --declare <cli-id>`
+   - Read `~/.lintel/cli-id.txt` if exists
+   - This is operator-set via `/lintel:li-cli-fingerprint --declare <cli-id>`
 
 5. **Refuse + ask.**
    - If all detection steps fail: print:
      ```
-     Could not detect CLI. JStack needs to know which CLI it's running in
+     Could not detect CLI. Lintel needs to know which CLI it's running in
      to apply the correct shim behavior.
 
-     Set JSTACK_CLI env var:
-       export JSTACK_CLI=claude-code   # or codex / copilot-cli / copilot-app
+     Set LINTEL_CLI env var:
+       export LINTEL_CLI=claude-code   # or codex / copilot-cli / copilot-app
 
      Or declare via skill:
-       /jstack-cli-fingerprint --declare <cli-id>
+       /lintel:li-cli-fingerprint --declare <cli-id>
      ```
    - Exit 1.
 
 6. **Cache result.**
-   - Write detected CLI to `~/.jstack/sessions/$SESSION_ID/cli-id.txt`
+   - Write detected CLI to `~/.lintel/sessions/$SESSION_ID/cli-id.txt`
    - Subsequent skill invocations read cache instead of re-running detection.
 
 7. **Report.**
@@ -97,15 +97,15 @@ P1 fix T2 (eng-review): Phase B sub-step 0. Without reliable detection the shim 
 CLI fingerprint: claude-code
 
 Detection cascade:
-  Step 1 (env var JSTACK_CLI):     not set
+  Step 1 (env var LINTEL_CLI):     not set
   Step 2 (process inspection):     match — process.argv0 contains "claude-code"
   Step 3 (tool probe):             skipped (matched at step 2)
   Step 4 (declared fallback):      skipped
   Step 5 (refuse):                 skipped
 
-Cached to: ~/.jstack/sessions/47821-1716926400/cli-id.txt
+Cached to: ~/.lintel/sessions/47821-1716926400/cli-id.txt
 TTL: session
-Override: JSTACK_CLI=<other> in env, or /jstack-cli-fingerprint --declare <other>
+Override: LINTEL_CLI=<other> in env, or /lintel:li-cli-fingerprint --declare <other>
 
 Shim behavior for this CLI:
   AskUserQuestion: native
@@ -117,7 +117,7 @@ Shim behavior for this CLI:
 ## Compliance integration
 
 - CLI ID is not sensitive — Layer 2 / SDL rules don't apply.
-- Audit log entry per detection event: `~/.jstack/audit/cli-detect.jsonl`. Helps debug "why is this skill using degraded path?".
+- Audit log entry per detection event: `~/.lintel/audit/cli-detect.jsonl`. Helps debug "why is this skill using degraded path?".
 - Operator-declared override is logged with operator reason if provided.
 
 ## Voice tier note
@@ -136,28 +136,28 @@ Shim behavior for this CLI:
 
 **Standard session-start:**
 ```
-> /jstack-cli-fingerprint
+> /lintel:li-cli-fingerprint
 ✓ Detected: claude-code (via process inspection)
 Cached to session.
 ```
 
 **Force redetect after CLI upgrade:**
 ```
-> /jstack-cli-fingerprint --force-redetect --verbose
+> /lintel:li-cli-fingerprint --force-redetect --verbose
 [Step-by-step cascade printed]
-✓ Detected: codex (env var JSTACK_CLI=codex)
+✓ Detected: codex (env var LINTEL_CLI=codex)
 ```
 
 **Operator declares manually:**
 ```
-> /jstack-cli-fingerprint --declare copilot-app
-Wrote ~/.jstack/cli-id.txt = copilot-app
+> /lintel:li-cli-fingerprint --declare copilot-app
+Wrote ~/.lintel/cli-id.txt = copilot-app
 Subsequent detections will use this declared value (step 4) if no env var or process match.
 ```
 
 **Refusal:**
 ```
-> /jstack-cli-fingerprint
+> /lintel:li-cli-fingerprint
 ✗ Could not detect CLI.
 [Instructions printed]
 ```
@@ -165,6 +165,6 @@ Subsequent detections will use this declared value (step 4) if no env var or pro
 ## See also
 
 - `CLI-SUPPORT-V2-SCHEMA.md` — schema this skill's output feeds
-- `~/.jstack/config.yaml` — operator overrides per-skill cli_support
+- `~/.lintel/config.yaml` — operator overrides per-skill cli_support
 - `verify.sh --portability` — schema validation
 - Phase B design — full shim runtime that consumes detection

@@ -1,10 +1,10 @@
 # {{Skill name}}
 
-> Template for new JStack skills. Copy this file to `~/.claude/skills/jstack-<name>/SKILL.md` and fill the placeholders. `verify.sh --frontmatter` will reject any skill missing required fields.
+> Template for new Lintel skills. Copy this file to `~/.claude/skills/lintel:li-<name>/SKILL.md` and fill the placeholders. `verify.sh --frontmatter` will reject any skill missing required fields.
 
 ```yaml
 ---
-name: jstack-<name>                       # REQUIRED: kebab-case, must start with `jstack-`
+name: li-<name>                       # REQUIRED: kebab-case, must start with `li-`
 description: <one-line summary of what the skill does — appears in slash-command picker>  # REQUIRED
 color: <blue|purple|green|red|orange|yellow>   # REQUIRED: color tag for the picker
 tools: <comma-separated list — only what the skill needs>  # REQUIRED

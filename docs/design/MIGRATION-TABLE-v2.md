@@ -1,4 +1,4 @@
-# JStack v2 Migration Table
+# Lintel v2 Migration Table
 
 Full enumeration of all 65 skills + 40 agents in v1 with v2 rename status. Source of truth consumed by Phase A migration script.
 
@@ -50,7 +50,7 @@ Full enumeration of all 65 skills + 40 agents in v1 with v2 rename status. Sourc
 | `<v1>office-hours</v1>` | `/office-hours` | unchanged | Generic |
 | `<v1>retro</v1>` | `/retro` | unchanged | Generic |
 | `<v1>pair-agent</v1>` | `/pair-agent` | unchanged | Generic |
-| `<v1>skillify</v1>` | `/skillify` | unchanged | JStack-specific |
+| `<v1>skillify</v1>` | `/skillify` | unchanged | Lintel-specific |
 | `<v1>landing-report</v1>` | `/landing-report` | unchanged | Generic |
 | `<v1>setup-gbrain</v1>` | `/setup-brain` | RENAMED | Drop gstack-brain branding |
 | `<v1>sync-gbrain</v1>` | `/sync-brain` | RENAMED | Same |
@@ -84,8 +84,8 @@ Full enumeration of all 65 skills + 40 agents in v1 with v2 rename status. Sourc
 | `<v1>caip-audit</v1>` | `/caip-audit` | unchanged | Already CAIP-canonical |
 | `<v1>context-tokenwatch</v1>` | `/context-budgetwatch` | RENAMED | Refocus on budget not raw token-count |
 | `<v1>eval-suite-gen</v1>` | `/cloudtest-eval-suite` | RENAMED | CloudTest = MS scalable test infra |
-| `<v1>jstack-test</v1>` | `/onebranch-validate` | RENAMED | OneBranch = governed pipeline matrix-test |
-| `<v1>jstack-eval</v1>` | `/jstack-eval` | unchanged | JStack-specific |
+| `<v1>li-test</v1>` | `/onebranch-validate` | RENAMED | OneBranch = governed pipeline matrix-test |
+| `<v1>li-eval</v1>` | `/lintel:li-eval` | unchanged | Lintel-specific |
 
 **Layer 3 changes: 14 renames / 8 unchanged (out of 22)**
 
@@ -95,16 +95,16 @@ Full enumeration of all 65 skills + 40 agents in v1 with v2 rename status. Sourc
 
 | New skill | Phase | Purpose |
 |-----------|-------|---------|
-| `/jstack-cli-fingerprint` | B | CLI detection runtime (operator manual override too) |
+| `/lintel:li-cli-fingerprint` | B | CLI detection runtime (operator manual override too) |
 | `/context-budget` | C | View/modify current phase budget |
 | `/context-warmup` | C | Explicit preload of high-leverage context |
 | `/perf-mode` | C | Activate 1M context-budget mode for the session |
 | `/brand-update` | E | Manual pull from MS brand portal with version tracking |
-| `/asset-search` | E | Search `~/.jstack/brand/azure-assets/` |
+| `/asset-search` | E | Search `~/.lintel/brand/azure-assets/` |
 | `/generate-ppt` | F | Produce branded PowerPoint deck |
 | `/generate-word` | F | Produce branded Word doc (variants: technical/customer/transparency) |
 | `/generate-web` | F | Produce static demo web page or landing scaffold |
-| `/jstack-deprecation-status` | v2.1 backlog | Show alias usage by skill |
+| `/lintel:li-deprecation-status` | v2.1 backlog | Show alias usage by skill |
 
 ---
 

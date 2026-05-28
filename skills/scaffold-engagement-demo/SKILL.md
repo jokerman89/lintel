@@ -1,7 +1,7 @@
 ---
-name: jstack-scaffold-engagement-demo
+name: li-scaffold-engagement-demo
 layer: ms-team
-v1_alias: [jstack-scaffold-customer-demo]
+v1_alias: [li-scaffold-customer-demo]
 description: Initialize a customer-demo repo — sample data, script, slides, recording config, voice gates.
 color: green
 tools: Read, Write, Bash, Glob
@@ -67,7 +67,7 @@ Use for CAIP-SE customer engagements where the demo material needs to be reusabl
    - `infra`: includes terraform/bicep stub directory
 4. **Pre-wire compliance gates.** Create `compliance/data-class.md` skeleton. Add a pre-commit-hook reference (handled in Phase 5 hook setup).
 5. **Pre-wire voice gates.** Mark `demo/script.md` + all `*-DRAFT.md` files with frontmatter `voice: trailblazer, status: requires-customer-voice-check`. Add to `.gitignore` an entry preventing `*-FINAL.md` artifacts without a passed `/rais-customer-voice-check`.
-6. **Git init.** Initialize repo, set up `.gitignore`, first commit "chore: scaffold customer-demo via jstack".
+6. **Git init.** Initialize repo, set up `.gitignore`, first commit "chore: scaffold customer-demo via lintel".
 7. **Report next steps.**
 
 ## Report format

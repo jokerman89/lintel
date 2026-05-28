@@ -3,8 +3,8 @@ name: customer-data-block
 tier: JUSTIFIED-BLOCK
 event: PreToolUse (Bash) for git commit/push
 fires_on: staged content contains Tier 1 customer-data pattern
-override: JSTACK_OVERRIDE_CUSTOMER_DATA=1 + JSTACK_OVERRIDE_REASON env vars
-audit: ~/.jstack/audit/hooks.jsonl
+override: LINTEL_OVERRIDE_CUSTOMER_DATA=1 + LINTEL_OVERRIDE_REASON env vars
+audit: ~/.lintel/audit/hooks.jsonl
 ---
 
 # customer-data-block (JUSTIFIED-BLOCK)
@@ -25,7 +25,7 @@ Same Tier 1 customer-data patterns:
 
 ## Override
 
-`JSTACK_OVERRIDE_CUSTOMER_DATA=1 JSTACK_OVERRIDE_REASON="explanation" git commit ...`
+`LINTEL_OVERRIDE_CUSTOMER_DATA=1 LINTEL_OVERRIDE_REASON="explanation" git commit ...`
 
 Use only when:
 - Operator confirms data is public-domain (e.g. example email in docs)

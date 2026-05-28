@@ -1,5 +1,5 @@
 ---
-name: jstack-retro
+name: li-retro
 layer: foundation
 description: Session retrospective — what shipped, what got stuck, what to /learn from.
 color: yellow
@@ -39,9 +39,9 @@ Optional `/learn` emission: skill can offer to write 1-3 lesson entries on the o
 1. **Determine window.** Resolve `--since` to a concrete timestamp.
 2. **Gather signals:**
    - Git log since window start (commits + messages)
-   - Audit log entries (`~/.jstack/audit/*.jsonl`) within window
+   - Audit log entries (`~/.lintel/audit/*.jsonl`) within window
    - Todo state changes (if tracked)
-   - Skill invocations within window (from `~/.jstack/analytics/skill-usage.jsonl`)
+   - Skill invocations within window (from `~/.lintel/analytics/skill-usage.jsonl`)
 3. **Structured analysis:**
    - **Shipped:** what landed (commits + PRs + deploys)
    - **Stuck:** unresolved items (audit log entries marked BLOCKED, failing CI runs, abandoned skills)
@@ -53,7 +53,7 @@ Optional `/learn` emission: skill can offer to write 1-3 lesson entries on the o
 ## Report format
 
 ```
-Retro: jokerman-session-setup / main
+Retro: jokerman-lintel / main
 
 Window: 2026-05-27 09:00 → 17:55 (8h 55min, active session)
 Signals: 7 commits, 32 audit entries, 14 skill invocations
@@ -70,7 +70,7 @@ Signals: 7 commits, 32 audit entries, 14 skill invocations
 - T0 voice corpus still empty (operator-blocked, awaiting Copilot material gather)
 
 ## Surprises
-- gh CLI returned case-normalized azureflipper URL — push worked anyway, but display surprised
+- gh CLI returned case-normalized jokerman89 URL — push worked anyway, but display surprised
 - CRLF warnings on every commit (Windows git default) — not blocking but noisy
 
 ## Patterns worth recording
@@ -130,5 +130,5 @@ Retro written to docs/retros/2026-W22.md. 14 commits, 4 stuck, 6 patterns.
 
 - `/learn` — what /retro --emit-lessons drives
 - `/context-save` — for actual session-end persistence
-- `tasks/lessons.md` (project) / `~/.jstack/lessons.jsonl` (global) — where lessons land
+- `tasks/lessons.md` (project) / `~/.lintel/lessons.jsonl` (global) — where lessons land
 - Project CLAUDE.md "Self-improvement loop" — the discipline /retro enables

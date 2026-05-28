@@ -1,5 +1,5 @@
 ---
-name: jstack-eval
+name: li-eval
 layer: ms-team
 description: Run TRAILBLAZER-TEST against TRAILBLAZER-CORPUS — per-cell accuracy → CALIBRATION.md.
 color: orange
@@ -8,7 +8,7 @@ voice: internal
 cli_support: [claude-code, codex]
 ---
 
-# /jstack-eval
+# /lintel:li-eval
 
 The voice calibration runner. Applies `OurVoice-test.md` to every paragraph in `OurVoice-corpus.md`, compares the eval verdict to the `verdict_label` ground truth, computes per-cell accuracy, writes results to `OurVoice-calibration.md`.
 
@@ -57,7 +57,7 @@ This skill is what moves T0 from POPULATED → CALIBRATED. Calibration is a v1.0
 ## Report format
 
 ```
-JStack Voice Eval
+Lintel Voice Eval
 
 Corpus: 60 paragraphs (33 known-good + 27 known-bad)
 Test rubric: OurVoice-test.md v2.0
@@ -109,7 +109,7 @@ Written to: OurVoice-calibration.md
 ## Compliance integration
 
 - LLM eval calls run against Claude Opus (or Codex if `--cli codex`). For MS-internal: routes via Azure OpenAI gateway if configured.
-- Audit-logged each run: `~/.jstack/audit/eval-runs.jsonl`.
+- Audit-logged each run: `~/.lintel/audit/eval-runs.jsonl`.
 - Calibration snapshot stamped with run-id. Provenance records reference snapshots for stability.
 
 ## Voice tier note
@@ -128,21 +128,21 @@ Written to: OurVoice-calibration.md
 
 **Full eval:**
 ```
-> /jstack-eval
+> /lintel:li-eval
 [60 LLM calls + comparison]
 10/12 cells PASS. CALIBRATED. v1.0.0 voice prerequisite met.
 ```
 
 **Cell-scoped re-eval:**
 ```
-> /jstack-eval --cells R4,P2
+> /lintel:li-eval --cells R4,P2
 [Re-evaluates the 2 PARTIAL cells]
 2/2 PASS now after rubric refinement. Overall calibration: 12/12.
 ```
 
 **Stricter threshold:**
 ```
-> /jstack-eval --threshold 95
+> /lintel:li-eval --threshold 95
 [Same corpus, higher bar]
 8/12 cells PASS at 95% — operator decides whether to relax or iterate further.
 ```

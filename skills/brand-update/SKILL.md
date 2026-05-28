@@ -1,7 +1,7 @@
 ---
-name: jstack-brand-update
+name: li-brand-update
 layer: ms-team
-description: Pull/register MS brand assets to ~/.jstack/brand/ — version tracking, cache invalidation.
+description: Pull/register MS brand assets to ~/.lintel/brand/ — version tracking, cache invalidation.
 color: orange
 tools: Read, Write, Bash, Glob
 voice: internal
@@ -17,10 +17,10 @@ cli_support:
 
 # /brand-update
 
-Operator-driven workflow to register a brand asset pull. JStack doesn't automate the actual download (auth + corporate-portal access is operator-side). This skill:
+Operator-driven workflow to register a brand asset pull. Lintel doesn't automate the actual download (auth + corporate-portal access is operator-side). This skill:
 
 1. Validates a staging directory the operator populated
-2. Moves assets to `~/.jstack/brand/`
+2. Moves assets to `~/.lintel/brand/`
 3. Records version + pull metadata
 4. Invalidates cache (P3 fix T12)
 5. Optionally restarts brand-staleness-warn hook timer
@@ -42,7 +42,7 @@ Operator-driven workflow to register a brand asset pull. JStack doesn't automate
 - `--staging <path>` — path to operator's staging dir containing pulled assets
 - `--register` — just register metadata + invalidate cache (no asset move)
 - `--invalidate-cache` — force cache rebuild without re-import
-- `--verify` — check current `~/.jstack/brand/` state without changes
+- `--verify` — check current `~/.lintel/brand/` state without changes
 - `--version <text>` — brand portal version stamp (e.g. "2026-Q2")
 
 ## Workflow
@@ -59,11 +59,11 @@ Operator-driven workflow to register a brand asset pull. JStack doesn't automate
    Reject if structure malformed; show what's missing.
 
 2. **Confirm move** via AskUserQuestion:
-   > "Move <count> assets from <staging> to ~/.jstack/brand/? Existing brand will be backed up."
+   > "Move <count> assets from <staging> to ~/.lintel/brand/? Existing brand will be backed up."
 
-3. **Backup existing.** `~/.jstack/brand/` → `~/.jstack/brand-backup-<timestamp>/`. Keep last 3 backups; older ones pruned.
+3. **Backup existing.** `~/.lintel/brand/` → `~/.lintel/brand-backup-<timestamp>/`. Keep last 3 backups; older ones pruned.
 
-4. **Move staging → live.** `cp -r <staging>/* ~/.jstack/brand/`.
+4. **Move staging → live.** `cp -r <staging>/* ~/.lintel/brand/`.
 
 5. **Write `brand-version.txt`**:
    ```
@@ -79,9 +79,9 @@ Operator-driven workflow to register a brand asset pull. JStack doesn't automate
      voice: 3
    ```
 
-6. **Invalidate cache.** Remove `~/.jstack/brand/.cache/*`. Cache rebuilds on next doc-gen.
+6. **Invalidate cache.** Remove `~/.lintel/brand/.cache/*`. Cache rebuilds on next doc-gen.
 
-7. **Reset brand-staleness watcher.** Touch `~/.jstack/brand/.staleness-watcher-reset`.
+7. **Reset brand-staleness watcher.** Touch `~/.lintel/brand/.staleness-watcher-reset`.
 
 8. **Report.**
 
@@ -92,7 +92,7 @@ Brand update — 2026-Q2
 
 Staging dir: /Users/operator/brand-staging-2026-q2
 Validated: 4 PPT templates, 6 Word templates, 2 web templates, 87 Azure SVGs
-Existing brand backed up: ~/.jstack/brand-backup-20260527-220000/
+Existing brand backed up: ~/.lintel/brand-backup-20260527-220000/
 Backup retention: last 3 (pruned 0 older backups)
 Cache invalidated: 47 cached entries cleared
 
@@ -111,9 +111,9 @@ Doc-gen now uses pulled brand. Verify:
 ## Compliance integration
 
 - Brand assets are MS-internal IP. NOT customer data → no Layer 2 customer-data scan.
-- Asset paths stored locally. NOT committed to git (`~/.jstack/brand/` is in `.gitignore` per BRAND-INTEGRATION.md).
+- Asset paths stored locally. NOT committed to git (`~/.lintel/brand/` is in `.gitignore` per BRAND-INTEGRATION.md).
 - Backup retention bounded to prevent disk bloat.
-- Audit log entry per pull: `~/.jstack/audit/brand-updates.jsonl`
+- Audit log entry per pull: `~/.lintel/audit/brand-updates.jsonl`
 
 ## Voice tier note
 
@@ -138,7 +138,7 @@ Doc-gen now uses pulled brand. Verify:
 **Just register (assets already moved manually):**
 ```
 > /brand-update --register --version 2026-Q2
-[Validates ~/.jstack/brand/ contents, writes brand-version.txt]
+[Validates ~/.lintel/brand/ contents, writes brand-version.txt]
 ✓ Registered. Cache invalidated.
 ```
 

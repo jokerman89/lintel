@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# brand-staleness-warn — JStack warn-only hook
+# brand-staleness-warn — Lintel warn-only hook
 # Surfaces when doc-gen runs against brand assets older than 90 days.
 
 set -euo pipefail
 
-JSTACK_HOME="${JSTACK_HOME:-$HOME/.jstack}"
-BRAND_VERSION_FILE="$JSTACK_HOME/brand/brand-version.txt"
-AUDIT="$JSTACK_HOME/audit/hooks.jsonl"
-mkdir -p "$JSTACK_HOME/audit" "$JSTACK_HOME/brand"
+LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
+BRAND_VERSION_FILE="$LINTEL_HOME/brand/brand-version.txt"
+AUDIT="$LINTEL_HOME/audit/hooks.jsonl"
+mkdir -p "$LINTEL_HOME/audit" "$LINTEL_HOME/brand"
 
 [ -f "$BRAND_VERSION_FILE" ] || exit 0   # No brand pulled = different problem, not this hook
 
@@ -32,7 +32,7 @@ if [ "$age_days" -gt 90 ]; then
   printf '{"hook":"brand-staleness-warn","tier":"warn","ts":"%s","brand_age_days":%d,"brand_version":"%s","skill_invoked":"%s"}\n' \
     "$ts" "$age_days" "$brand_version" "$skill_invoked" >> "$AUDIT"
 
-  echo "WARN [JStack hook]: brand version $brand_version is $age_days days old (>90 day threshold)"
+  echo "WARN [Lintel hook]: brand version $brand_version is $age_days days old (>90 day threshold)"
   echo "WARN: Consider /brand-update to refresh from MS portal. Override with --ignore-stale-brand if intentional."
 fi
 
