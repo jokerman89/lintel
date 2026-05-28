@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
-# DESCRIPTION: Phase A naming migration sanity — all v2 skill names present, all v1 names absent from frontmatter
+# DESCRIPTION: Phase A naming migration sanity — all v2 skill names present (bare, post Väg A), v1 li-prefixed names absent from frontmatter
 # TAGS: claude-code-only,codex-compatible,unit
+#
+# Updated 2026-05-28 for Väg A: skill folder names are bare (no `li-` prefix);
+# the `li-` namespace lives in the plugin manifest, not in folder names. The
+# canonical skills directory is `skills/`, not `scaffolding/` (scaffolding/
+# now contains layered templates only).
 
 set -euo pipefail
 
@@ -12,21 +17,23 @@ pass() { printf "${c_green}PASS${c_reset} %s :: %s\n" "$TEST_NAME" "$1"; }
 fail() { printf "${c_red}FAIL${c_reset} %s :: %s\n" "$TEST_NAME" "$1"; FAILED=$((FAILED+1)); }
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-SKILLS_DIR="$REPO_ROOT/scaffolding"
+SKILLS_DIR="$REPO_ROOT/skills"
 
-# All v2 skill names that should be present (renamed ones)
+# All v2 skill names that should be present (renamed ones) — bare, post Väg A
 V2_NAMES=(
-  "li-release-ev2" "li-release-deploy-ev2" "li-open-managed-browser"
-  "li-perfbench" "li-safe-deploy-ring" "li-code-freeze" "li-code-unfreeze"
-  "li-setup-ev2-targets" "li-setup-brain" "li-sync-brain"
-  "li-rais-customer-voice-check" "li-onecs-check" "li-onerai-submit-draft"
-  "li-dsb-submit-draft" "li-dpia-submit-draft" "li-rais-sensitive-use"
-  "li-rais-impact-assessment" "li-scaffold-engagement-demo" "li-rais-transparency-note"
-  "li-agt-tier-stamp" "li-entra-agent-id-submit-draft" "li-context-budgetwatch"
-  "li-cloudtest-eval-suite" "li-onebranch-validate"
+  "release-ev2" "release-deploy-ev2" "open-managed-browser"
+  "perfbench" "safe-deploy-ring" "code-freeze" "code-unfreeze"
+  "setup-ev2-targets" "setup-brain" "sync-brain"
+  "rais-customer-voice-check" "onecs-check" "onerai-submit-draft"
+  "dsb-submit-draft" "dpia-submit-draft" "rais-sensitive-use"
+  "rais-impact-assessment" "scaffold-engagement-demo" "rais-transparency-note"
+  "agt-tier-stamp" "entra-agent-id-submit-draft" "context-budgetwatch"
+  "cloudtest-eval-suite" "onebranch-validate"
 )
 
-# V1 names that should NO LONGER appear as `name:` value
+# v1 li-prefixed names that should NEVER appear as canonical `name:` value.
+# Post Väg A no skill uses `li-` prefix in its name (the prefix lives in the
+# plugin namespace `/li:<skill>` instead). Keeping these to detect regression.
 V1_NAMES_TO_BE_GONE=(
   "li-ship" "li-land-and-deploy" "li-open-gstack-browser"
   "li-benchmark" "li-canary" "li-freeze" "li-unfreeze"
@@ -47,12 +54,12 @@ for v2_name in "${V2_NAMES[@]}"; do
   fi
 done
 
-# Verify v1 names no longer appear as canonical `name:` (but they may appear in v1_alias arrays)
+# Verify li-prefixed v1 names never appear as canonical `name:` post Väg A
 for v1_name in "${V1_NAMES_TO_BE_GONE[@]}"; do
   if grep -r -l "^name: $v1_name$" "$SKILLS_DIR" >/dev/null 2>&1; then
-    fail "v1 name STILL canonical: $v1_name"
+    fail "v1 li-prefixed name STILL canonical: $v1_name"
   else
-    pass "v1 name no longer canonical: $v1_name"
+    pass "v1 li-prefixed name no longer canonical: $v1_name"
   fi
 done
 
@@ -64,13 +71,13 @@ else
   fail "v1_alias entries low: $ALIAS_COUNT (expected ≥24)"
 fi
 
-# Verify directory rename
+# Verify directory rename (sdl replaced compliance under scaffolding/)
 [ -d "$REPO_ROOT/scaffolding/02-sdl" ] && pass "scaffolding/02-sdl/ exists" || fail "scaffolding/02-sdl/ MISSING"
 [ ! -d "$REPO_ROOT/scaffolding/02-compliance" ] && pass "scaffolding/02-compliance/ removed" || fail "scaffolding/02-compliance/ still exists"
 
-# Verify voice doc renames
+# Verify voice doc renames (under scaffolding/03-ms-team/voice/, not 03-personal-advanced/)
 for voice_doc in OurVoice-corpus.md OurVoice-test.md OurVoice-calibration.md OurVoice.md OurVoice-examples.md; do
-  [ -f "$REPO_ROOT/scaffolding/03-personal-advanced/voice/$voice_doc" ] && pass "voice doc renamed: $voice_doc" || fail "voice doc MISSING: $voice_doc"
+  [ -f "$REPO_ROOT/scaffolding/03-ms-team/voice/$voice_doc" ] && pass "voice doc renamed: $voice_doc" || fail "voice doc MISSING: $voice_doc"
 done
 
 if [ "$FAILED" -gt 0 ]; then
