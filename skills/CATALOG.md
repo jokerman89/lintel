@@ -5,7 +5,7 @@ Regenerated av `.github/workflows/catalog.yml` per push när `skills/**/SKILL.md
 Hand-edits skrivs över — edit frontmatter i source SKILL.md istället.
 
 Total skills: 129
-Generated: 2026-05-28T15:44:41Z
+Generated: 2026-05-28T15:46:54Z
 
 ## foundation layer (90 skills)
 
