@@ -1,0 +1,114 @@
+---
+name: li-context-warm-related
+layer: foundation
+description: Heuristic context warm — search codebase for files related to a topic, load top N most-relevant.
+color: cyan
+tools: Read, Bash, Grep, Glob
+voice: internal
+cli_support: [claude-code, codex]
+---
+
+You are the context-warm-related skill — topic-heuristic loading.
+
+## What this skill does
+
+Given a topic (e.g., "ExpressRoute", "auth flow", "BicepReviewer pattern"), heuristically finds the top N most-relevant files across cwd + `~/.lintel/scaffolding/` + `docs/design/` and loads them via `/lintel:li-context-warm`.
+
+## When to use
+
+- Operator says "warm context with everything related to X"
+- Pre-PLAN when DISCOVER identified topic-relevant files
+- Cross-repo topic understanding (e.g., compare current repo's X with scaffolding template's X)
+
+## When NOT to use
+
+- Specific files known — use `/lintel:li-context-warm <paths>` directly
+- Whole-repo context needed — too broad for heuristic, use targeted patterns
+
+## Workflow
+
+### Step 1 — Topic + scope
+
+```bash
+topic="$1"
+scope="${2:-cwd}"  # cwd | repo | lintel-home | all
+limit="${3:-10}"
+```
+
+### Step 2 — Heuristic search
+
+Multi-source search:
+- Filename match: `find . -iname "*<topic>*"`
+- Content match: `grep -rli "<topic>" --include='*.md' --include='*.ts' --include='*.py' --include='*.go'`
+- Frontmatter match (for skills/agents): `grep -li "<topic>" skills/*/SKILL.md agents/*/*.md`
+
+Score files:
+- 3 points: filename match
+- 2 points: ≥5 content matches
+- 1 point: 1-4 content matches
+
+Top N by score.
+
+### Step 3 — Surface candidate list
+
+```
+CANDIDATE FILES (related to "<topic>") — top <N> by relevance:
+
+| Score | File | Match type |
+|---|---|---|
+| 5 | docs/design/lintel-v3.5-azure-toolbox-plan.md | filename + 12 content |
+| 4 | skills/li-az-tldr/services/expressroute.md | filename + 8 content |
+| 3 | docs/design/CONTEXT-ENGINE.md | 7 content |
+| ... | | |
+
+Estimated tokens to load all <N>: ~<X>k
+
+Load all? (Y / select subset / cancel)
+```
+
+### Step 4 — Delegate to context-warm
+
+If operator selects all or subset:
+```bash
+/lintel:li-context-warm <space-separated-paths>
+```
+
+### Step 5 — 00-state.md append
+
+```yaml
+event: context_warm_related
+ts: <timestamp>
+topic: <topic>
+candidates_surfaced: <N>
+loaded: <count>
+tokens_added: <approx>
+```
+
+## Status protocol
+
+- **DONE** — files loaded
+- **DONE_WITH_CONCERNS** — partial load (operator selected subset)
+- **BLOCKED** — no files matched OR operator canceled
+- **NEEDS_CONTEXT** — operator didn't specify topic
+
+## Pause-points
+
+- Confirm load (always, since heuristic can be wrong)
+
+## Hop-in support
+
+YES.
+
+## Integration
+
+Reads codebase + delegates to `/lintel:li-context-warm`. Writes to budget tracking via that skill.
+
+## Anti-patterns
+
+- **Loading 50+ files because "related" is broad** — cap at N=10 default, operator can extend
+- **Skipping confirmation** — heuristic match isn't always right
+- **Using broad topics like "Azure"** — too many matches; suggest narrower
+
+## Voice tier behavior
+
+`voice: internal`.

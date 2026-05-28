@@ -1,7 +1,7 @@
 ---
-name: jstack-dpia-submit-draft
+name: li-dpia-submit-draft
 layer: ms-team
-v1_alias: [jstack-dpia-prep]
+v1_alias: [li-dpia-prep]
 description: Prepare a Data Protection Impact Assessment draft — GDPR Article 35, MS Privacy framework.
 color: orange
 tools: Read, Write, Bash, Grep
@@ -30,7 +30,7 @@ Drafts a Data Protection Impact Assessment (DPIA) for a system that processes pe
 
 - Required `--system <name>` — short name for the system
 - Optional `--source <path>` — code, design doc, or data flow diagram
-- Optional `--out <path>` — output draft path (default: `~/.jstack/dpia/<system>-dpia-DRAFT.md`)
+- Optional `--out <path>` — output draft path (default: `~/.lintel/dpia/<system>-dpia-DRAFT.md`)
 - Optional `--regime <gdpr|ccpa|both>` — privacy regime (default: gdpr; both adds CCPA-specific sections)
 
 ## Workflow
@@ -72,7 +72,7 @@ Drafts a Data Protection Impact Assessment (DPIA) for a system that processes pe
 ```
 DPIA prep: system=case-intake
 
-Output: ~/.jstack/dpia/case-intake-dpia-DRAFT.md (5.4 KB)
+Output: ~/.lintel/dpia/case-intake-dpia-DRAFT.md (5.4 KB)
 Regime: GDPR
 Article 35 high-risk: TRIGGERED (automated decision-making on legal advice)
 

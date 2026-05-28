@@ -1,8 +1,8 @@
 ---
-name: jstack-open-managed-browser
+name: li-open-managed-browser
 layer: foundation
-v1_alias: [jstack-open-gstack-browser]
-description: Open the JStack-managed Chromium in headed mode — interactive operator session.
+v1_alias: [li-open-gstack-browser]
+description: Open the Lintel-managed Chromium in headed mode — interactive operator session.
 color: blue
 tools: Bash
 voice: internal
@@ -13,7 +13,7 @@ cli_support: [claude-code]
 
 Simple launcher: opens the same managed Chromium that `/browse` and `/scrape` use, but in headed mode for the operator to drive directly. Same persistent profile, same cookie store. Use when you want to do manual work (debug, screenshot, explore) without scripting it.
 
-Name preserves continuity with the gstack `/open-managed-browser` convention even though we're in JStack — the alternative (`/open-jstack-browser`) is less recognizable, and operators carry muscle memory across both stacks.
+Name preserves continuity with the gstack `/open-managed-browser` convention even though we're in Lintel — the alternative (`/open-li-browser`) is less recognizable, and operators carry muscle memory across both stacks.
 
 ## When to use
 
@@ -38,7 +38,7 @@ Name preserves continuity with the gstack `/open-managed-browser` convention eve
 ## Workflow
 
 1. **Check Chromium binary.** Locate the managed install. If absent: print install command + exit.
-2. **Profile dir.** Verify `~/.jstack/browser-profiles/<profile>/` exists + is writable + `chmod 700`. Create with correct perms if missing.
+2. **Profile dir.** Verify `~/.lintel/browser-profiles/<profile>/` exists + is writable + `chmod 700`. Create with correct perms if missing.
 3. **Optional compliance.** If `--url` is set AND hostname matches Layer 2 prod-host list: BLOCK + ask for override reason.
 4. **Launch.** `chromium --user-data-dir=<profile-path> [--url <url>] [--auto-open-devtools-for-tabs]`. Process detaches; skill returns immediately.
 5. **Report.** PID, profile path, URL (if any), reminder of cookie state (last-validated services).
@@ -53,10 +53,10 @@ Name preserves continuity with the gstack `/open-managed-browser` convention eve
 ## Report format
 
 ```
-Open JStack browser
+Open Lintel browser
 
-Binary: ~/.jstack/bin/chromium (v124.0.6367.x)
-Profile: default (~/.jstack/browser-profiles/default/)
+Binary: ~/.lintel/bin/chromium (v124.0.6367.x)
+Profile: default (~/.lintel/browser-profiles/default/)
 URL: about:blank
 PID: 47821
 
@@ -72,7 +72,7 @@ Browser detached. Close manually when done.
 
 - Same Layer 2 prod-host gate as `/browse` — if `--url` is set and hits a prod host, it blocks.
 - Profile dir perms verified (chmod 700) — if loose, surface fix.
-- If `audit-mode` is on per `~/.jstack/config.yaml`: log the launch event with timestamp + profile + URL.
+- If `audit-mode` is on per `~/.lintel/config.yaml`: log the launch event with timestamp + profile + URL.
 - Browser process is detached and runs under operator's user — anything they do in it is THEIR action, not skill-mediated.
 
 ## Voice tier note

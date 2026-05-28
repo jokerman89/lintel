@@ -1,6 +1,6 @@
 # Layer 1 — Foundation
 
-The load-bearing layer. Every JStack-scaffolded repo gets this. Every harness, every skill, every agent runs on top of it.
+The load-bearing layer. Every Lintel-scaffolded repo gets this. Every harness, every skill, every agent runs on top of it.
 
 ## What lives here
 
@@ -20,10 +20,10 @@ The load-bearing layer. Every JStack-scaffolded repo gets this. Every harness, e
 
 ## Why this layer exists
 
-Without it, every harness and skill operates against a blank slate. With it, gstack/JStack/GSD/ECC all run on top of stable principles.
+Without it, every harness and skill operates against a blank slate. With it, gstack/Lintel/GSD/ECC all run on top of stable principles.
 
 The cost of having scaffolding is one-time setup. The cost of not having it is rediscovery every session.
 
 ## Provenance
 
-`CORE-PRINCIPLES.md` + `EVOLUTION.md` + `EVOLUTION-LOG.md` + `tasks/lessons.md` shape + ADR pattern + Boris CLAUDE.md template = inspired by the operator's pre-existing `claude-scaffolding/` work (Boris-style discipline). JStack v1 preserves this layer AS-IS — it predates the 4-layer architecture and is the foundation everything else sits on.
+`CORE-PRINCIPLES.md` + `EVOLUTION.md` + `EVOLUTION-LOG.md` + `tasks/lessons.md` shape + ADR pattern + Boris CLAUDE.md template = inspired by the operator's pre-existing `claude-scaffolding/` work (Boris-style discipline). Lintel v1 preserves this layer AS-IS — it predates the 4-layer architecture and is the foundation everything else sits on.

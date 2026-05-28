@@ -1,5 +1,5 @@
 ---
-name: jstack-context-save
+name: li-context-save
 layer: foundation
 description: Save current session state to a checkpoint file. Use before context bloat or before /clean.
 color: blue
@@ -116,7 +116,7 @@ To restore this session: `/context-restore <checkpoint-path>` OR paste this file
 
 ## Compliance integration
 
-This skill writes a file outside the repo (to `~/.gstack/`). Per JStack Layer 2:
+This skill writes a file outside the repo (to `~/.gstack/`). Per Lintel Layer 2:
 - The checkpoint file may contain references to in-flight work that touched files in the repo. Operator confirms NO customer-data is captured in the checkpoint before saving.
 - Default sanity-grep before write: if the checkpoint text matches secret-shaped patterns, halt and surface to operator.
 
@@ -132,19 +132,19 @@ This skill writes a file outside the repo (to `~/.gstack/`). Per JStack Layer 2:
 ```
 > /context-save phase-2-skills-batch-1
 ✓ Checkpoint saved
-  Path: ~/.gstack/projects/jstack/checkpoints/main-20260527-153022-phase-2-skills-batch-1.md
-  Resume: /context-restore ~/.gstack/projects/jstack/checkpoints/main-20260527-153022-phase-2-skills-batch-1.md
+  Path: ~/.gstack/projects/lintel/checkpoints/main-20260527-153022-phase-2-skills-batch-1.md
+  Resume: /context-restore ~/.gstack/projects/lintel/checkpoints/main-20260527-153022-phase-2-skills-batch-1.md
 ```
 
 **No label:**
 ```
 > /context-save
 ✓ Checkpoint saved
-  Path: ~/.gstack/projects/jstack/checkpoints/main-20260527-153455.md
+  Path: ~/.gstack/projects/lintel/checkpoints/main-20260527-153455.md
 ```
 
 ## See also
 
 - `/context-restore` — read a checkpoint into a fresh session
 - `/clean` — manual self-maintenance trigger (offers to call this first)
-- Layer 4 `jstack-token-watcher` hook — surfaces this skill when token thresholds hit
+- Layer 4 `li-token-watcher` hook — surfaces this skill when token thresholds hit

@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
-# no-customer-data-in-screenshot — JStack warn-only hook
+# no-customer-data-in-screenshot — Lintel warn-only hook
 set -euo pipefail
 
 ARTIFACT_DIR="${1:-}"
 [ -z "$ARTIFACT_DIR" ] && exit 0
 [ ! -d "$ARTIFACT_DIR" ] && exit 0
 
-JSTACK_HOME="${JSTACK_HOME:-$HOME/.jstack}"
-mkdir -p "$JSTACK_HOME/audit"
-AUDIT="$JSTACK_HOME/audit/hooks.jsonl"
+LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
+mkdir -p "$LINTEL_HOME/audit"
+AUDIT="$LINTEL_HOME/audit/hooks.jsonl"
 
 DOM="$ARTIFACT_DIR/dom.html"
 [ ! -f "$DOM" ] && exit 0
@@ -25,8 +25,8 @@ if [ ${#patterns_hit[@]} -gt 0 ]; then
   joined=$(IFS=,; echo "${patterns_hit[*]}")
   printf '{"hook":"no-customer-data-in-screenshot","tier":"warn","ts":"%s","artifact_dir":"%s","patterns_matched":"%s"}\n' \
     "$ts" "$ARTIFACT_DIR" "$joined" >> "$AUDIT"
-  echo "WARN [JStack hook]: screenshot DOM at $ARTIFACT_DIR contains customer-data tells ($joined)"
-  echo "WARN: Quarantine the artifact before sharing. Consider mv to ~/.jstack/quarantine/"
+  echo "WARN [Lintel hook]: screenshot DOM at $ARTIFACT_DIR contains customer-data tells ($joined)"
+  echo "WARN: Quarantine the artifact before sharing. Consider mv to ~/.lintel/quarantine/"
 fi
 
 exit 0

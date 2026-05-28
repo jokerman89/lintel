@@ -1,4 +1,4 @@
-# JStack Context Engine (1M Budget Engine)
+# Lintel Context Engine (1M Budget Engine)
 
 Context as a **budgeted resource**, not as "what fits before compaction." Outcome-based — spend tokens where outcome density is high, save where it doesn't.
 
@@ -22,7 +22,7 @@ Skills + multi-step orchestrators declare context budget per phase in frontmatte
 
 ```yaml
 ---
-name: jstack-engagement-deepdive
+name: li-engagement-deepdive
 context_phases:
   - phase: preload
     budget: 200000              # tokens
@@ -56,7 +56,7 @@ context_phases:
 
 ## Budget tracker semantics
 
-The tracker maintains state in `~/.jstack/sessions/$SESSION_ID/context-state.json`:
+The tracker maintains state in `~/.lintel/sessions/$SESSION_ID/context-state.json`:
 
 ```json
 {
@@ -168,7 +168,7 @@ No decay. Phase context flows into next phase unchanged. Useful for tightly-coup
 |-------|----------------|
 | Phase transition error (invalid phase name, etc.) | Log + continue current phase. Don't crash session. |
 | Budget exceeded mid-phase | Warn + offer compress/checkpoint/override. No silent compaction. |
-| Operator cancels phase | Checkpoint current phase state to `~/.jstack/sessions/$SESSION_ID/checkpoint-<phase>.md`. Resumable. |
+| Operator cancels phase | Checkpoint current phase state to `~/.lintel/sessions/$SESSION_ID/checkpoint-<phase>.md`. Resumable. |
 | Engine config read error | Fall back to safe defaults (`default_budget: 200000`, no warmup) + warn. |
 | Warmup task fails | Mark task as failed in state, continue with remaining warmup. Phase budget not refunded. |
 | Override request beyond `max_budget` ceiling | Refuse + surface ceiling. Operator can edit config to raise ceiling permanently. |
@@ -197,7 +197,7 @@ Periodic `/perfbench --context` report shows token-spend per outcome category. O
 
 ## Cost tracking (P2 fix T11)
 
-Monthly summary log at `~/.jstack/audit/context-cost-monthly.jsonl`:
+Monthly summary log at `~/.lintel/audit/context-cost-monthly.jsonl`:
 
 ```jsonl
 {"month":"2026-05","perf_mode_sessions":7,"total_tokens":4200000,"estimated_cost_usd":63.0,"avg_outcome_density":"medium"}
@@ -207,7 +207,7 @@ Token cost estimated using Anthropic prompt-cache pricing (input $3/M, output $1
 
 ---
 
-## Config (`~/.jstack/config.yaml`)
+## Config (`~/.lintel/config.yaml`)
 
 ```yaml
 context:

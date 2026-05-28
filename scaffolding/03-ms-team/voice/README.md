@@ -1,8 +1,8 @@
 # Trailblazer voice — the wedge proof point
 
-This folder holds the Trailblazer voice eval infrastructure. Per JStack v1 design doc:
+This folder holds the Trailblazer voice eval infrastructure. Per Lintel v1 design doc:
 
-> Until calibration passes ≥90% known-good AND ≥90% known-bad across 12 cells, do not write any other JStack content. Without it, customer-facing skills ship generic-AI prose under a Microsoft brand — a values failure, not just a quality failure.
+> Until calibration passes ≥90% known-good AND ≥90% known-bad across 12 cells, do not write any other Lintel content. Without it, customer-facing skills ship generic-AI prose under a Microsoft brand — a values failure, not just a quality failure.
 
 ## Three files, one purpose
 
@@ -48,7 +48,7 @@ Total: 4 + 3 + 5 = **12 cells**, not 15. The corpus template targets 12 cells ×
 
 ## When T0 unblocks
 
-Phase 1 of JStack v1 begins when `OurVoice-calibration.md`'s status table shows PASS for all cells the operator chose to include in v1 scope. Cells dropped via Option A reduce the v1 Trailblazer surface but don't block T0.
+Phase 1 of Lintel v1 begins when `OurVoice-calibration.md`'s status table shows PASS for all cells the operator chose to include in v1 scope. Cells dropped via Option A reduce the v1 Trailblazer surface but don't block T0.
 
 Eng review session 2 verdict line is the ship gate:
 > "ENG CLEARED — ready to begin Phase 1 implementation, BLOCKED by T0 voice corpus assignment."

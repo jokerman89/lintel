@@ -1,5 +1,5 @@
 ---
-name: jstack-codex
+name: li-codex
 layer: foundation
 description: Outside-voice second opinion via Codex CLI. Independent review of diff, plan, or hypothesis.
 color: purple
@@ -38,7 +38,7 @@ The skill itself runs in Claude Code (which is why `cli_support: [claude-code]` 
 1. **Preflight.** Verify `codex` is on PATH. If not: report missing setup + exit. No fallback.
 2. **Construct prompt.** Inject the target (diff, plan body, code excerpt, hypothesis statement). Wrap in a directive: "You are reviewing this independently. The author has their own reasoning; surface what you'd push back on."
 3. **Run Codex.** `codex exec --quiet --output json --prompt-file <tmp>` (or equivalent — adjust to current Codex CLI flags). Capture stdout, stderr, exit code.
-4. **Parse output.** Codex returns structured findings (severity, location, claim, evidence). Normalize to JStack's P1/P2/P3 severity.
+4. **Parse output.** Codex returns structured findings (severity, location, claim, evidence). Normalize to Lintel's P1/P2/P3 severity.
 5. **Compare to local reasoning.** If invoked mid-`/investigate` or post-`/review`: explicitly diff Codex's findings against what was already concluded. Surface AGREEMENT and DISAGREEMENT separately.
 6. **Persist via gstack-review-log** with `skill: codex` so downstream `/release-ev2` can read.
 7. **Report.**
@@ -74,8 +74,8 @@ Tokens used: 31,400 / 50,000
 ## Compliance integration
 
 - Codex sees code. Per Layer 2: code is not customer-data, so no auth gate. But: if the target includes a fixture path containing customer-data patterns, BLOCK the Codex call and surface (Codex would receive that data).
-- Token spend logged to `~/.jstack/audit/codex-spend.jsonl`.
-- First-party-first reminder: Codex is OpenAI. For MS-internal: prefer Azure OpenAI gateway if configured per `~/.jstack/config.yaml`.
+- Token spend logged to `~/.lintel/audit/codex-spend.jsonl`.
+- First-party-first reminder: Codex is OpenAI. For MS-internal: prefer Azure OpenAI gateway if configured per `~/.lintel/config.yaml`.
 
 ## Voice tier note
 
@@ -84,7 +84,7 @@ Tokens used: 31,400 / 50,000
 ## Failure modes
 
 - **Codex CLI missing:** report + exit. No fallback to Claude self-review (that defeats the purpose).
-- **Codex returns malformed output:** capture raw stdout to `~/.jstack/audit/codex-raw-<ts>.txt`, report parse failure, exit.
+- **Codex returns malformed output:** capture raw stdout to `~/.lintel/audit/codex-raw-<ts>.txt`, report parse failure, exit.
 - **Budget exceeded mid-call:** Codex's own truncation kicks in. Report partial findings + budget overflow.
 - **Codex output contains a finding referencing a file we never sent:** flag as hallucination, suppress from main report, log to debug appendix.
 

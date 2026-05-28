@@ -41,7 +41,7 @@ Reviews output from secrets-scanning tools (gitleaks, trufflehog, GitGuardian, A
    - Rotation timeline (1h for production credentials, 24h for non-prod)
    - Notify channels (#security-incidents, secrets-rotation log)
 4. **For history cleanup if needed:** Recommend BFG Repo-Cleaner or git filter-repo.
-5. **Prevention recommendations:** Pre-commit hook (the JStack `no-secrets-in-edit` hook), CI gate, allowed-secret list.
+5. **Prevention recommendations:** Pre-commit hook (the Lintel `no-secrets-in-edit` hook), CI gate, allowed-secret list.
 
 ## Report format
 
@@ -81,7 +81,7 @@ SecretsScanReviewer: <repo>@<sha>
 - Force-push approval: <required from whom>
 
 ## Prevention recommendations
-- [ ] Enable `no-secrets-in-edit` hook (jstack)
+- [ ] Enable `no-secrets-in-edit` hook (lintel)
 - [ ] CI pre-merge gate (gitleaks-action)
 - [ ] Update .gitleaksignore with confirmed FPs
 - [ ] Train team on secrets management (Key Vault, env vars)

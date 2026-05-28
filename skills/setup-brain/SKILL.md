@@ -1,7 +1,7 @@
 ---
-name: jstack-setup-brain
+name: li-setup-brain
 layer: foundation
-v1_alias: [jstack-setup-gbrain]
+v1_alias: [li-setup-gbrain]
 description: Configure gbrain semantic-index integration — initialize config, pin worktree, register sync.
 color: orange
 tools: Read, Write, Bash
@@ -13,7 +13,7 @@ cli_support: [claude-code]
 
 One-time setup for gbrain integration. Writes `~/.gbrain/config.json`, creates the per-worktree `.gbrain-source` pin, and registers the worktree for `gbrain search` / `gbrain code-def` / `gbrain query` semantic operations.
 
-gbrain is a third-party (gstack-ecosystem) tool — JStack integrates with it but does not require it. If gbrain isn't installed, this skill reports the install path + exits.
+gbrain is a third-party (gstack-ecosystem) tool — Lintel integrates with it but does not require it. If gbrain isn't installed, this skill reports the install path + exits.
 
 ## When to use
 
@@ -54,8 +54,8 @@ gbrain is a third-party (gstack-ecosystem) tool — JStack integrates with it bu
   "version": 1,
   "mode": "local-stdio",
   "sources": {
-    "jokerman-session-setup-main": {
-      "path": "/e/Workspace/jokerman-session-setup",
+    "jokerman-lintel-main": {
+      "path": "/e/Workspace/jokerman-lintel",
       "indexed_at": "2026-05-27T18:14:03Z",
       "files_indexed": 64
     }
@@ -69,13 +69,13 @@ gbrain is a third-party (gstack-ecosystem) tool — JStack integrates with it bu
 ## Report format
 
 ```
-Setup gbrain: jokerman-session-setup-main
+Setup gbrain: jokerman-lintel-main
 
 gbrain version: 0.14.2
 Mode: local-stdio
-Source: jokerman-session-setup-main
-Path: /e/Workspace/jokerman-session-setup
-Pin: /e/Workspace/jokerman-session-setup/.gbrain-source (added to .gitignore)
+Source: jokerman-lintel-main
+Path: /e/Workspace/jokerman-lintel
+Pin: /e/Workspace/jokerman-lintel/.gbrain-source (added to .gitignore)
 
 ## Initial index
 Indexed: 64 files (.md, .ts, .tsx, .py — see ~/.gbrain/config.json for full extension list)
@@ -104,7 +104,7 @@ Refresh: /sync-brain
 ## Failure modes
 
 - **gbrain not installed:** report install instructions for the operator's platform + exit. Do not silently degrade to Grep fallback.
-- **Initial index crashes:** capture stderr, write to `~/.jstack/audit/gbrain-setup-<ts>.log`, report failure mode (most common: file-permission, OOM on huge repos, unsupported binary file).
+- **Initial index crashes:** capture stderr, write to `~/.lintel/audit/gbrain-setup-<ts>.log`, report failure mode (most common: file-permission, OOM on huge repos, unsupported binary file).
 - **Config file unwriteable:** report exact path + permission issue.
 - **Remote mode without `--remote-url`:** prompt via AskUserQuestion.
 - **`.gbrain-source` would overwrite existing pin:** ask whether to replace. Do not auto-overwrite.

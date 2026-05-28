@@ -1,5 +1,5 @@
 ---
-name: jstack-qa
+name: li-qa
 layer: foundation
 description: Run the full test suite, parse failures, fix common ones, re-run until clean or stuck.
 color: yellow
@@ -72,7 +72,7 @@ Remaining: 2
 
 - Sanity-scan on every Edit before applying (no secrets/customer-data in fix payload).
 - If auto-fix would touch a frozen-zone path (per project CLAUDE.md): block + escalate.
-- Audit-log every auto-fix to `~/.jstack/audit/qa-fixes.jsonl` (Layer 2 traceability).
+- Audit-log every auto-fix to `~/.lintel/audit/qa-fixes.jsonl` (Layer 2 traceability).
 
 ## Voice tier note
 
@@ -80,7 +80,7 @@ Remaining: 2
 
 ## Failure modes
 
-- **No test runner detected:** report + ask operator to declare via `package.json` scripts or `~/.jstack/qa.yaml`.
+- **No test runner detected:** report + ask operator to declare via `package.json` scripts or `~/.lintel/qa.yaml`.
 - **Runner crashes (not test failure, runner itself):** report + exit. Do not retry blindly.
 - **Max iterations hit with failures remaining:** STUCK state — surface full failure list + recommendations. Operator chooses next move.
 - **Auto-fix introduces a NEW failure:** revert the fix, mark that failure non-auto-fixable, continue with remaining.

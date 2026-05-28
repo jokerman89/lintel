@@ -1,16 +1,16 @@
-# jokerman-session-setup (JStack)
+# jokerman-lintel (Lintel)
 
 **MS-CAIP-SE session harness for agent-based development.** Markdown + bash scaffolding that any modern AI CLI loads as a plugin. No runtime, no daemons — your CLI handles execution.
 
-**Status:** v3-dev (2026-05-27). See [CHANGELOG.md](CHANGELOG.md) for v3 release notes and [SHIP-GATE.md](SHIP-GATE.md) for v3.0.0 readiness gates. The v3 design lives at [docs/design/jstack-v3-plan.md](docs/design/jstack-v3-plan.md).
+**Status:** v3-dev (2026-05-27). See [CHANGELOG.md](CHANGELOG.md) for v3 release notes and [SHIP-GATE.md](SHIP-GATE.md) for v3.0.0 readiness gates. The v3 design lives at [docs/design/lintel-v3-plan.md](docs/design/lintel-v3-plan.md).
 
-v3 ships **81 skills + 78 agents + 15 hooks** organized for plugin-manifest pattern across 8 CLIs. Plus full Kategori B scaffolding-template system (CORE-PRINCIPLES, EVOLUTION-LOG, tasks/lessons.md, ADR templates) that gets copied into new MS engagement repos via `bin/jstack-scaffold`.
+v3 ships **81 skills + 78 agents + 15 hooks** organized for plugin-manifest pattern across 8 CLIs. Plus full Kategori B scaffolding-template system (CORE-PRINCIPLES, EVOLUTION-LOG, tasks/lessons.md, ADR templates) that gets copied into new MS engagement repos via `bin/li-scaffold`.
 
-JStack is the **complete session harness** — not just a skill catalog. It manages the full lifecycle: session-start ritual → mid-session interventions (hooks, voice gates, compliance) → end-of-session capture (lessons, ADR drafting, EVOLUTION-LOG) → cross-session continuity (memory, lessons-sync). See [docs/session-harness.md](docs/session-harness.md) for the full mental model.
+Lintel is the **complete session harness** — not just a skill catalog. It manages the full lifecycle: session-start ritual → mid-session interventions (hooks, voice gates, compliance) → end-of-session capture (lessons, ADR drafting, EVOLUTION-LOG) → cross-session continuity (memory, lessons-sync). See [docs/session-harness.md](docs/session-harness.md) for the full mental model.
 
 ---
 
-## What JStack is
+## What Lintel is
 
 Two distinct categories, both shipped in this repo:
 
@@ -19,7 +19,7 @@ Two distinct categories, both shipped in this repo:
 - `agents/` — 78 subagent roles organized per domain
 - `hooks/shared/` — 15 compliance + workflow hooks
 
-**Kategori B — Repo-scaffolding** (copied INTO other repos via `jstack-scaffold`):
+**Kategori B — Repo-scaffolding** (copied INTO other repos via `li-scaffold`):
 - `scaffolding/01-foundation/` — CLAUDE.md template, CORE-PRINCIPLES, EVOLUTION/EVOLUTION-LOG, tasks/{lessons,memory,personas,todo}.md, docs/adr/ templates, .claude/agents/ subagent overrides
 - `scaffolding/02-sdl/` — 5+7+8 compliance reference (HARD-RULES + ON-DEMAND + REFERENCE)
 - `scaffolding/03-ms-team/` — voice corpus (60 paragraphs, 12 cells) + doc-gen default templates
@@ -36,10 +36,10 @@ Microsoft Sweden CAIP solution engineers. The compliance assumptions, auto-mode 
 
 | CLI | Install mechanism | Skill/agent discovery | Status |
 |---|---|---|---|
-| Claude Code | `/plugin marketplace add Azureflipper/jokerman-session-setup` + `/plugin install jstack@jokerman-session-setup` | native, namespaced `/jstack:<skill>` | ✓ full |
-| Codex CLI / App | `/plugins` → search jstack → Install | native | ✓ full |
-| Cursor | `/add-plugin jstack` | native (rules + agents) | ✓ full |
-| Gemini CLI | `gemini extensions install https://github.com/Azureflipper/jokerman-session-setup` | context-file based (GEMINI.md) + skill references | ✓ supported |
+| Claude Code | `/plugin marketplace add jokerman89/jokerman-lintel` + `/plugin install lintel@jokerman-lintel` | native, namespaced `/lintel:<skill>` | ✓ full |
+| Codex CLI / App | `/plugins` → search lintel → Install | native | ✓ full |
+| Cursor | `/add-plugin lintel` | native (rules + agents) | ✓ full |
+| Gemini CLI | `gemini extensions install https://github.com/jokerman89/jokerman-lintel` | context-file based (GEMINI.md) + skill references | ✓ supported |
 | OpenCode | Fetch + follow `.opencode/INSTALL.md` instructions | manual install, agent reads SKILL.md | ✓ supported |
 | GitHub Copilot CLI | `copilot plugin marketplace add` + `install` | native | ✓ supported (schema verified post-launch) |
 | Factory Droid | `droid plugin marketplace add` + `install` | native | ✓ supported (schema verified post-launch) |
@@ -51,47 +51,47 @@ See [docs/per-cli/](docs/per-cli/) for per-CLI install guides.
 
 ## Quick start
 
-### 1. Clone JStack
+### 1. Clone Lintel
 
 ```bash
-git clone https://github.com/Azureflipper/jokerman-session-setup ~/Workspace/jokerman-session-setup
-cd ~/Workspace/jokerman-session-setup
+git clone https://github.com/jokerman89/jokerman-lintel ~/Workspace/jokerman-lintel
+cd ~/Workspace/jokerman-lintel
 ```
 
 ### 2. Install for your CLI
 
 ```bash
 # Claude Code:
-#   /plugin marketplace add Azureflipper/jokerman-session-setup
-#   /plugin install jstack@jokerman-session-setup
+#   /plugin marketplace add jokerman89/jokerman-lintel
+#   /plugin install lintel@jokerman-lintel
 
 # Codex CLI:
-#   /plugins → search jstack → Install Plugin
+#   /plugins → search lintel → Install Plugin
 
 # Cursor:
-#   /add-plugin jstack
+#   /add-plugin lintel
 
 # Gemini CLI:
-gemini extensions install https://github.com/Azureflipper/jokerman-session-setup
+gemini extensions install https://github.com/jokerman89/jokerman-lintel
 
 # Copilot CLI:
-copilot plugin marketplace add Azureflipper/jokerman-session-setup
-copilot plugin install jstack@jokerman-session-setup
+copilot plugin marketplace add jokerman89/jokerman-lintel
+copilot plugin install lintel@jokerman-lintel
 ```
 
-### 3. Install scaffolding source (for `jstack-scaffold` in new repos)
+### 3. Install scaffolding source (for `li-scaffold` in new repos)
 
 ```bash
 # Set up local cache for scaffolding templates + bin/ scripts
-mkdir -p ~/.jstack
-ln -s ~/Workspace/jokerman-session-setup/scaffolding ~/.jstack/scaffolding
-export PATH="$HOME/Workspace/jokerman-session-setup/bin:$PATH"
+mkdir -p ~/.lintel
+ln -s ~/Workspace/jokerman-lintel/scaffolding ~/.lintel/scaffolding
+export PATH="$HOME/Workspace/jokerman-lintel/bin:$PATH"
 ```
 
 ### 4. Verify
 
 ```bash
-jstack-doctor      # cross-CLI health check
+li-doctor      # cross-CLI health check
 bash install/verify.sh
 ```
 
@@ -99,7 +99,7 @@ bash install/verify.sh
 
 ```bash
 cd ~/new-customer-engagement
-jstack-scaffold init --engagement customer-engagement --voice trailblazer
+li-scaffold init --engagement customer-engagement --voice trailblazer
 ```
 
 That creates CLAUDE.md, CORE-PRINCIPLES.md, tasks/, docs/adr/, .claude/agents/ with sane MS defaults.
@@ -110,22 +110,22 @@ Full walkthrough: [docs/getting-started.md](docs/getting-started.md).
 
 ## What you get
 
-- **81 skills** for daily workflows: `/qa`, `/release-ev2`, `/safe-deploy-ring`, `/investigate`, `/plan-eng-review`, `/office-hours`, `/rais-customer-voice-check`, `/onecs-check`, `/agt-tier-stamp`, `/generate-ppt`, `/generate-word`, `/generate-web`, `/scaffold-engagement-demo`, plus 7 new v3 session-harness skills (`/match`, `/jstack-doctor`, `/jstack-scaffold`, `/lessons-promote`, `/adr-new`, `/personas-rotate`, `/lessons`).
+- **81 skills** for daily workflows: `/qa`, `/release-ev2`, `/safe-deploy-ring`, `/investigate`, `/plan-eng-review`, `/office-hours`, `/rais-customer-voice-check`, `/onecs-check`, `/agt-tier-stamp`, `/generate-ppt`, `/generate-word`, `/generate-web`, `/scaffold-engagement-demo`, plus 7 new v3 session-harness skills (`/match`, `/lintel:li-doctor`, `/lintel:li-scaffold`, `/lessons-promote`, `/adr-new`, `/personas-rotate`, `/lessons`).
 - **78 agents** organized per domain: ms-specific (15), engineering (25), security (8), compliance (6), devops (7), customer (8), communication (5), doc-gen (3), voice (1).
 - **15 compliance hooks** (opt-in via symlinks): `customer-data-block`, `secret-scan-block`, `no-direct-main-push`, etc.
 - **5+7+8 compliance tiering**: 5 always-on hard rules, 7 on-demand check items, 8 reference docs (RAIS, OneCS, AGT, SDL, etc).
 - **OurVoice corpus**: 60 sanitized paragraphs across 12 cells (4 Reveal × 3 Inspire × 5 Provoke techniques) — operator-driven calibration via `T0-CALIBRATION-WORKFLOW.md`.
-- **Repo scaffolding mechanism** via `bin/jstack-scaffold` — 30-second new-repo setup.
-- **Cross-repo lessons sync** via `bin/jstack-lessons-sync` (operator-opt-in).
-- **Cross-CLI health check** via `bin/jstack-doctor`.
+- **Repo scaffolding mechanism** via `bin/li-scaffold` — 30-second new-repo setup.
+- **Cross-repo lessons sync** via `bin/li-lessons-sync` (operator-opt-in).
+- **Cross-CLI health check** via `bin/li-doctor`.
 
 ---
 
 ## What you don't get
 
 - **No customer data.** This repo is for tooling. Customer artifacts never land here.
-- **No third-party code bundled.** v2 had install/upstream-sources.yaml for fetching upstream packs — v3 simplified, JStack is now self-contained.
-- **No runtime.** JStack = markdown + bash. Your CLI executes — JStack provides the patterns + scaffolding.
+- **No third-party code bundled.** v2 had install/upstream-sources.yaml for fetching upstream packs — v3 simplified, Lintel is now self-contained.
+- **No runtime.** Lintel = markdown + bash. Your CLI executes — Lintel provides the patterns + scaffolding.
 - **No production cross-CLI parity for everything.** Hooks are Claude-Code-only mechanism. Subagent abstractions differ per CLI. We're honest about gaps; see [docs/multi-cli.md](docs/multi-cli.md).
 
 ---
@@ -153,7 +153,7 @@ See [docs/compliance.md](docs/compliance.md). Key rules (always-on):
 
 See [CONTRIBUTING.md](CONTRIBUTING.md). PR-based against `main`. v3 work happens on `v3-dev` branch.
 
-Lessons learned go in `scaffolding/01-foundation/tasks/lessons.md`. Promote a lesson from a customer repo via `bin/jstack-lessons-promote`.
+Lessons learned go in `scaffolding/01-foundation/tasks/lessons.md`. Promote a lesson from a customer repo via `bin/li-lessons-promote`.
 
 ---
 

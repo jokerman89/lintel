@@ -1,5 +1,5 @@
 ---
-name: jstack-autoplan
+name: li-autoplan
 layer: foundation
 description: Chains office-hours → ceo-review → eng-review → design-review. End-to-end plan pipeline.
 color: purple
@@ -51,7 +51,7 @@ Chain: office-hours → plan-ceo-review → plan-eng-review → plan-design-revi
 Mode: full
 Skipped: plan-devex-review (default)
 
-Step 1/4 /office-hours: ✓ design doc APPROVED (~/.gstack/projects/jstack/<user>-main-design-20260527-...)
+Step 1/4 /office-hours: ✓ design doc APPROVED (~/.gstack/projects/lintel/<user>-main-design-20260527-...)
 Step 2/4 /plan-ceo-review: ✓ SCOPE LOCKED (3 forcing-questions answered, 5 premises agreed)
 Step 3/4 /plan-eng-review: ✓ ENG CLEARED (6 issues resolved, 2 critical gaps encoded as tasks)
 Step 4/4 /plan-design-review: ⏸ SKIPPED — no UI scope detected

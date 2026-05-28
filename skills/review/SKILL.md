@@ -1,5 +1,5 @@
 ---
-name: jstack-review
+name: li-review
 layer: foundation
 description: Diff-scoped pre-landing code review. Lighter than /plan-eng-review, focused on changed code only.
 color: red

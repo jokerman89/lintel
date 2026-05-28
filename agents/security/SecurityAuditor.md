@@ -64,7 +64,7 @@ SecurityAuditor: <scope>
 
 ## Verdict
 1 P1, 1 P2, 1 P3. BLOCK ship. Address P1 immediately, P2 before release.
-Audit log: ~/.jstack/audit/security-audits.jsonl
+Audit log: ~/.lintel/audit/security-audits.jsonl
 ```
 
 ## Edge cases / what to do when blocked

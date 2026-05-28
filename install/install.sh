@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# jokerman-session-setup (JStack) installer — bash/Linux/macOS/WSL/Git Bash
+# jokerman-lintel (Lintel) installer — bash/Linux/macOS/WSL/Git Bash
 #
-# Honors JStack architecture decisions:
-# - A1: hooks ship INERT at ~/.jstack/hooks/ (operator manually symlinks to opt in)
-# - A2: scaffolding lives at ~/.jstack/scaffolding/ (separate from ~/.claude/)
-# - A3: layer config at ~/.jstack/config.yaml — per-layer enable
+# Honors Lintel architecture decisions:
+# - A1: hooks ship INERT at ~/.lintel/hooks/ (operator manually symlinks to opt in)
+# - A2: scaffolding lives at ~/.lintel/scaffolding/ (separate from ~/.claude/)
+# - A3: layer config at ~/.lintel/config.yaml — per-layer enable
 # - A6: cli_support frontmatter validated at install time
 # - C1: skill/agent frontmatter validated at install time
 #
@@ -18,10 +18,10 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 SOURCES_FILE="$SCRIPT_DIR/upstream-sources.yaml"
 LAYER_CONFIG_EXAMPLE="$SCRIPT_DIR/layer-config.yaml.example"
 
-JSTACK_HOME="${JSTACK_HOME:-$HOME/.jstack}"
-JSTACK_SCAFFOLDING="$JSTACK_HOME/scaffolding"
-JSTACK_HOOKS="$JSTACK_HOME/hooks"
-JSTACK_CONFIG="$JSTACK_HOME/config.yaml"
+LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
+LINTEL_SCAFFOLDING="$LINTEL_HOME/scaffolding"
+LINTEL_HOOKS="$LINTEL_HOME/hooks"
+LINTEL_CONFIG="$LINTEL_HOME/config.yaml"
 
 # ----- helpers ----------------------------------------------------------------
 
@@ -47,9 +47,9 @@ expand_path() {
 
 # ----- pre-flight -------------------------------------------------------------
 
-hdr "JStack installer"
+hdr "Lintel installer"
 say "${c_dim}Repo: $REPO_ROOT${c_reset}"
-say "${c_dim}JStack home: $JSTACK_HOME${c_reset}"
+say "${c_dim}Lintel home: $LINTEL_HOME${c_reset}"
 
 if ! command -v git >/dev/null 2>&1; then
   fail "git not found — install git and re-run"
@@ -68,69 +68,69 @@ else
   say "  Windows:  scoop install yq"
 fi
 
-# ----- backup existing JStack -------------------------------------------------
+# ----- backup existing Lintel -------------------------------------------------
 
-hdr "Backing up existing ~/.jstack/ (if any)"
+hdr "Backing up existing ~/.lintel/ (if any)"
 
-if [[ -d "$JSTACK_HOME" ]]; then
-  BACKUP="$JSTACK_HOME-backup-$(date +%Y%m%d-%H%M%S)"
-  cp -r "$JSTACK_HOME" "$BACKUP"
+if [[ -d "$LINTEL_HOME" ]]; then
+  BACKUP="$LINTEL_HOME-backup-$(date +%Y%m%d-%H%M%S)"
+  cp -r "$LINTEL_HOME" "$BACKUP"
   ok "Backed up to $BACKUP"
 else
-  info "No existing ~/.jstack/ — nothing to back up"
+  info "No existing ~/.lintel/ — nothing to back up"
 fi
 
-# ----- create JStack home structure ------------------------------------------
+# ----- create Lintel home structure ------------------------------------------
 
-hdr "Creating ~/.jstack/ structure"
+hdr "Creating ~/.lintel/ structure"
 
-mkdir -p "$JSTACK_HOME"
-mkdir -p "$JSTACK_SCAFFOLDING"
-mkdir -p "$JSTACK_HOOKS"
-mkdir -p "$JSTACK_HOME/audit"
-mkdir -p "$JSTACK_HOME/sessions"
-mkdir -p "$JSTACK_HOME/provenance"
-mkdir -p "$JSTACK_HOME/freeze"
-mkdir -p "$JSTACK_HOME/rai"
-mkdir -p "$JSTACK_HOME/dpia"
-mkdir -p "$JSTACK_HOME/dsb"
-mkdir -p "$JSTACK_HOME/entra"
-mkdir -p "$JSTACK_HOME/review-log"
-mkdir -p "$JSTACK_HOME/benchmarks"
-mkdir -p "$JSTACK_HOME/calibrations"
-mkdir -p "$JSTACK_HOME/browse-runs"
-mkdir -p "$JSTACK_HOME/scrape-runs"
-mkdir -p "$JSTACK_HOME/design-runs"
-mkdir -p "$JSTACK_HOME/design-html"
-mkdir -p "$JSTACK_HOME/design-shotgun"
-mkdir -p "$JSTACK_HOME/browser-profiles"
-mkdir -p "$JSTACK_HOME/quarantine"
+mkdir -p "$LINTEL_HOME"
+mkdir -p "$LINTEL_SCAFFOLDING"
+mkdir -p "$LINTEL_HOOKS"
+mkdir -p "$LINTEL_HOME/audit"
+mkdir -p "$LINTEL_HOME/sessions"
+mkdir -p "$LINTEL_HOME/provenance"
+mkdir -p "$LINTEL_HOME/freeze"
+mkdir -p "$LINTEL_HOME/rai"
+mkdir -p "$LINTEL_HOME/dpia"
+mkdir -p "$LINTEL_HOME/dsb"
+mkdir -p "$LINTEL_HOME/entra"
+mkdir -p "$LINTEL_HOME/review-log"
+mkdir -p "$LINTEL_HOME/benchmarks"
+mkdir -p "$LINTEL_HOME/calibrations"
+mkdir -p "$LINTEL_HOME/browse-runs"
+mkdir -p "$LINTEL_HOME/scrape-runs"
+mkdir -p "$LINTEL_HOME/design-runs"
+mkdir -p "$LINTEL_HOME/design-html"
+mkdir -p "$LINTEL_HOME/design-shotgun"
+mkdir -p "$LINTEL_HOME/browser-profiles"
+mkdir -p "$LINTEL_HOME/quarantine"
 
-chmod 700 "$JSTACK_HOME/browser-profiles"   # secrets-adjacent
-chmod 700 "$JSTACK_HOME/audit"               # tamper-evident
+chmod 700 "$LINTEL_HOME/browser-profiles"   # secrets-adjacent
+chmod 700 "$LINTEL_HOME/audit"               # tamper-evident
 
-ok "JStack home structure created"
+ok "Lintel home structure created"
 
 # ----- copy scaffolding -------------------------------------------------------
 
-hdr "Copying scaffolding to ~/.jstack/scaffolding/"
+hdr "Copying scaffolding to ~/.lintel/scaffolding/"
 
-cp -r "$REPO_ROOT/scaffolding/"* "$JSTACK_SCAFFOLDING/"
+cp -r "$REPO_ROOT/scaffolding/"* "$LINTEL_SCAFFOLDING/"
 ok "Scaffolding copied (4 layers)"
 
 # ----- config -----------------------------------------------------------------
 
 hdr "Layer config"
 
-if [[ -f "$JSTACK_CONFIG" ]]; then
-  info "Config exists at $JSTACK_CONFIG — not overwriting"
+if [[ -f "$LINTEL_CONFIG" ]]; then
+  info "Config exists at $LINTEL_CONFIG — not overwriting"
 else
-  cp "$LAYER_CONFIG_EXAMPLE" "$JSTACK_CONFIG"
-  ok "Default config installed to $JSTACK_CONFIG"
-  info "Edit $JSTACK_CONFIG to enable/disable layers, watchers, voice defaults"
+  cp "$LAYER_CONFIG_EXAMPLE" "$LINTEL_CONFIG"
+  ok "Default config installed to $LINTEL_CONFIG"
+  info "Edit $LINTEL_CONFIG to enable/disable layers, watchers, voice defaults"
 fi
 
-# ----- hooks: copy to ~/.jstack/hooks/ (INERT) -------------------------------
+# ----- hooks: copy to ~/.lintel/hooks/ (INERT) -------------------------------
 
 hdr "Hooks (inert install — opt-in symlink to activate)"
 
@@ -146,12 +146,12 @@ elif [ -d "$REPO_ROOT/scaffolding/02-compliance/hooks" ]; then
 fi
 
 if [ -n "$HOOK_SRC" ]; then
-  cp -r "$HOOK_SRC/"* "$JSTACK_HOOKS/" 2>/dev/null || true
+  cp -r "$HOOK_SRC/"* "$LINTEL_HOOKS/" 2>/dev/null || true
   # Ensure scripts are executable
-  find "$JSTACK_HOOKS" -name 'run.sh' -exec chmod +x {} + 2>/dev/null || true
-  ok "Hooks copied from $HOOK_SRC to $JSTACK_HOOKS (INERT — symlink to activate)"
-  info "To activate a hook: ln -s $JSTACK_HOOKS/<name>/run.sh ~/.claude/hooks/<name>.sh"
-  info "Then register in ~/.claude/settings.json — see $JSTACK_HOOKS/README.md"
+  find "$LINTEL_HOOKS" -name 'run.sh' -exec chmod +x {} + 2>/dev/null || true
+  ok "Hooks copied from $HOOK_SRC to $LINTEL_HOOKS (INERT — symlink to activate)"
+  info "To activate a hook: ln -s $LINTEL_HOOKS/<name>/run.sh ~/.claude/hooks/<name>.sh"
+  info "Then register in ~/.claude/settings.json — see $LINTEL_HOOKS/README.md"
 else
   warn "No hooks source found — skipping"
 fi
@@ -249,29 +249,29 @@ fi
 
 hdr "Install complete"
 
-say "JStack installed at: $JSTACK_HOME"
+say "Lintel installed at: $LINTEL_HOME"
 say ""
 say "Next steps:"
-say "  1. Review config:           ${c_bold}\$EDITOR $JSTACK_CONFIG${c_reset}"
-say "  2. Activate hooks (opt-in): see $JSTACK_HOOKS/README.md"
+say "  1. Review config:           ${c_bold}\$EDITOR $LINTEL_CONFIG${c_reset}"
+say "  2. Activate hooks (opt-in): see $LINTEL_HOOKS/README.md"
 say "  3. Verify install:          ${c_bold}$SCRIPT_DIR/verify.sh --all${c_reset}"
-say "  4. Read JStack overview:    ${c_bold}cat $REPO_ROOT/LAYERS.md${c_reset}"
+say "  4. Read Lintel overview:    ${c_bold}cat $REPO_ROOT/LAYERS.md${c_reset}"
 say ""
 say "v3 plugin install (per CLI):"
-say "  Claude Code:  ${c_bold}/plugin marketplace add Azureflipper/jokerman-session-setup${c_reset}"
-say "                ${c_bold}/plugin install jstack@jokerman-session-setup${c_reset}"
-say "  Codex CLI:    ${c_bold}/plugins${c_reset} -> search jstack -> Install"
-say "  Cursor:       ${c_bold}/add-plugin jstack${c_reset}"
-say "  Gemini CLI:   ${c_bold}gemini extensions install https://github.com/Azureflipper/jokerman-session-setup${c_reset}"
+say "  Claude Code:  ${c_bold}/plugin marketplace add jokerman89/jokerman-lintel${c_reset}"
+say "                ${c_bold}/plugin install lintel@jokerman-lintel${c_reset}"
+say "  Codex CLI:    ${c_bold}/plugins${c_reset} -> search lintel -> Install"
+say "  Cursor:       ${c_bold}/add-plugin lintel${c_reset}"
+say "  Gemini CLI:   ${c_bold}gemini extensions install https://github.com/jokerman89/jokerman-lintel${c_reset}"
 say ""
 say "v3 operator utilities (add to PATH):"
 say "  ${c_bold}export PATH=\"\$PATH:$REPO_ROOT/bin\"${c_reset}"
-say "  Available: jstack-scaffold, jstack-doctor, jstack-lessons-sync,"
-say "             jstack-lessons-promote, jstack-adr-new, jstack-update"
+say "  Available: li-scaffold, li-doctor, li-lessons-sync,"
+say "             li-lessons-promote, li-adr-new, li-update"
 say ""
 say "First commands to try:"
-say "  ${c_bold}jstack-doctor${c_reset}                 — cross-CLI health check"
-say "  ${c_bold}jstack-scaffold check${c_reset}         — preview scaffolding for current dir"
+say "  ${c_bold}li-doctor${c_reset}                 — cross-CLI health check"
+say "  ${c_bold}li-scaffold check${c_reset}         — preview scaffolding for current dir"
 say "  ${c_bold}/help${c_reset}                         — in Claude Code (after plugin install)"
 say ""
 

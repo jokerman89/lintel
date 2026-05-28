@@ -1,7 +1,7 @@
 ---
-name: jstack-onecs-check
+name: li-onecs-check
 layer: ms-team
-v1_alias: [jstack-compliance-gate]
+v1_alias: [li-compliance-gate]
 description: Run the 7 on-demand MS compliance checklist items on-request (vs the 5 always-on auto).
 color: red
 tools: Read, Bash, Grep, Glob
@@ -50,7 +50,7 @@ Per A4 from design: this skill is a CHECKLIST run by operator, not automated enf
 3. **Aggregate.** Per-item status: PASS / NEEDS_ACTION / NOT_APPLICABLE.
 4. **Surface action items.** For each NEEDS_ACTION, name the specific follow-up skill or human escalation path.
 5. **Operator confirms.** Via AskUserQuestion: "all NEEDS_ACTION items confirmed handled?" Operator says yes / not yet / N/A.
-6. **Audit log.** Append every item + operator decision to `~/.jstack/audit/onecs-check.jsonl`.
+6. **Audit log.** Append every item + operator decision to `~/.lintel/audit/onecs-check.jsonl`.
 7. **Report.**
 
 ## Report format
@@ -89,7 +89,7 @@ PASS — demo script includes AI-disclosure paragraph + capability/limitation no
 1 NEEDS_ACTION (Item 3). Resolve before customer demo.
 
 Operator confirmation: not yet — sanitize data first
-Audit logged: ~/.jstack/audit/compliance-gate-20260527-185412.jsonl
+Audit logged: ~/.lintel/audit/compliance-gate-20260527-185412.jsonl
 ```
 
 ## Compliance integration

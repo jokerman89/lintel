@@ -1,7 +1,7 @@
 ---
-name: jstack-entra-agent-id-submit-draft
+name: li-entra-agent-id-submit-draft
 layer: ms-team
-v1_alias: [jstack-entra-agent-id-prep]
+v1_alias: [li-entra-agent-id-prep]
 description: Prepare a Microsoft Entra Agent ID submission — identity, capabilities, governance scope.
 color: orange
 tools: Read, Write, Bash, Grep
@@ -32,7 +32,7 @@ Per Layer 2: agents that act on behalf of users / interact with MS Graph / hold 
 
 - Required `--agent-name <name>` — short name for the agent
 - Optional `--source <path>` — agent code / design doc
-- Optional `--out <path>` — output draft path (default: `~/.jstack/entra/<agent-name>-agent-id-DRAFT.md`)
+- Optional `--out <path>` — output draft path (default: `~/.lintel/entra/<agent-name>-agent-id-DRAFT.md`)
 
 ## Workflow
 
@@ -67,7 +67,7 @@ Per Layer 2: agents that act on behalf of users / interact with MS Graph / hold 
 ```
 Entra Agent ID prep: case-intake-agent
 
-Output: ~/.jstack/entra/case-intake-agent-agent-id-DRAFT.md (4.0 KB)
+Output: ~/.lintel/entra/case-intake-agent-agent-id-DRAFT.md (4.0 KB)
 
 ## Identity model
 User context (acting on behalf of authenticated user)

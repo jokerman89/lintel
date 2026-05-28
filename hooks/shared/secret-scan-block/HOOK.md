@@ -3,8 +3,8 @@ name: secret-scan-block
 tier: JUSTIFIED-BLOCK
 event: PreToolUse (Bash) for git commit/push commands
 fires_on: staged content contains Tier 1 secret pattern
-override: operator must commit with explicit JSTACK_OVERRIDE_SECRET=1 env var + reason
-audit: ~/.jstack/audit/hooks.jsonl
+override: operator must commit with explicit LINTEL_OVERRIDE_SECRET=1 env var + reason
+audit: ~/.lintel/audit/hooks.jsonl
 ---
 
 # secret-scan-block (JUSTIFIED-BLOCK)
@@ -26,7 +26,7 @@ Reads staged content via `git diff --cached`.
 
 ## Override
 
-`JSTACK_OVERRIDE_SECRET=1 JSTACK_OVERRIDE_REASON="explanation" git commit ...`
+`LINTEL_OVERRIDE_SECRET=1 LINTEL_OVERRIDE_REASON="explanation" git commit ...`
 
 Both env vars required. Reason logged to audit log. Use only when: known-false-positive (placeholder secret in docs/tests), explicit operator decision with reason.
 

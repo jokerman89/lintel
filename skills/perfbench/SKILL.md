@@ -1,7 +1,7 @@
 ---
-name: jstack-perfbench
+name: li-perfbench
 layer: foundation
-v1_alias: [jstack-benchmark]
+v1_alias: [li-benchmark]
 description: Measure performance — runtime, memory, cold-start — and detect regressions vs baseline.
 color: yellow
 tools: Read, Bash, Glob
@@ -39,14 +39,14 @@ Not a profiler — that's `PerformanceAnalyzer` subagent territory. This skill i
 
 ## Workflow
 
-1. **Detect benchmark mechanism.** Check `package.json` for `bench` script, `pyproject.toml` for hyperfine/pytest-benchmark, repo-specific `bench/` directory. If none: ask operator to declare via `~/.jstack/perfbench.yaml`.
+1. **Detect benchmark mechanism.** Check `package.json` for `bench` script, `pyproject.toml` for hyperfine/pytest-benchmark, repo-specific `bench/` directory. If none: ask operator to declare via `~/.lintel/perfbench.yaml`.
 2. **Compliance gate.** Benchmarks that hit external services (production APIs, paid endpoints): require per-call auth. Local-only benchmarks: no gate.
 3. **Warmup.** Run warmup iterations, discard.
 4. **Measurement run.** N iterations. Capture per-iteration metrics: wall time, peak memory, allocations (if available), cold-start time (if applicable).
 5. **Aggregate.** Median + p50/p95/p99 for time metrics. Mean for memory.
-6. **Load baseline.** Read `~/.jstack/benchmarks/<repo>/<suite>-baseline.json`. If absent: this run becomes the baseline (no diff possible first time).
+6. **Load baseline.** Read `~/.lintel/benchmarks/<repo>/<suite>-baseline.json`. If absent: this run becomes the baseline (no diff possible first time).
 7. **Diff.** Compare each metric to baseline. Flag regressions at +5% (warn), +15% (P2), +30% (P1).
-8. **Persist.** Write run results to `~/.jstack/benchmarks/<repo>/<ts>.json`. If `--save-as-baseline`: also overwrite baseline file.
+8. **Persist.** Write run results to `~/.lintel/benchmarks/<repo>/<ts>.json`. If `--save-as-baseline`: also overwrite baseline file.
 9. **Report.**
 
 ## Report format
@@ -83,7 +83,7 @@ Address P1 before /release-ev2. P2 acceptable if intentional — record reason i
 
 - Layer 2 production-mutation rule applies if a benchmark scenario hits production. Per-call auth required.
 - Network-dependent benchmarks: warning if network conditions vary (results not comparable).
-- Benchmark runs logged to `~/.jstack/audit/benchmarks.jsonl`.
+- Benchmark runs logged to `~/.lintel/audit/benchmarks.jsonl`.
 
 ## Voice tier note
 

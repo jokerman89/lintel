@@ -1,5 +1,5 @@
 ---
-name: jstack-qa-only
+name: li-qa-only
 layer: foundation
 description: Read-only test run — reports failures, never edits. For ship-gate verification.
 color: blue

@@ -1,5 +1,5 @@
 ---
-name: jstack-context-restore
+name: li-context-restore
 layer: foundation
 description: Restore session state from a checkpoint file. Run at start of a fresh session that continues prior work.
 color: blue
@@ -90,9 +90,9 @@ Suggested next action: <verbatim "next" step #1 from checkpoint>
 **Auto-discover latest:**
 ```
 > /context-restore
-✓ Restored from ~/.gstack/projects/jstack/checkpoints/main-20260527-153022-phase-2-skills-batch-1.md
+✓ Restored from ~/.gstack/projects/lintel/checkpoints/main-20260527-153022-phase-2-skills-batch-1.md
   Original timestamp: 2026-05-27T15:30:22Z
-  Slug/branch: jstack/main
+  Slug/branch: lintel/main
   Last commit at save: 7e7a021 (now: 7e7a021 — 0 commits since)
 
 ## Task
@@ -113,7 +113,7 @@ Suggested next action: complete /clean, /help, /health skills
 
 **With explicit path:**
 ```
-> /context-restore ~/.gstack/projects/jstack/checkpoints/main-20260526-225146.md
+> /context-restore ~/.gstack/projects/lintel/checkpoints/main-20260526-225146.md
 ...
 ```
 

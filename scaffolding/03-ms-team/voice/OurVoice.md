@@ -82,7 +82,7 @@ For: headlines, key paragraphs, social. Asserts + differentiates + makes a state
 - Never reference the "Trailblazer" persona externally — internal-only
 - Never use third-party Trailblazers (cited individuals) without CELA approval
 
-## How JStack operationalizes the voice
+## How Lintel operationalizes the voice
 
 - **OurVoice-corpus.md** — 60 sanitized paragraphs, 12 cells × ≥2 known-good + ≥2 known-bad
 - **OurVoice-test.md** — eval rubric applied per paragraph

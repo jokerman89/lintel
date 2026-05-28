@@ -1,4 +1,4 @@
-# Brand Integration (JStack v2)
+# Brand Integration (Lintel v2)
 
 Brand-compliant doc-generation foundation. Phase E of v2 build.
 
@@ -9,7 +9,7 @@ Goal: customer-bound deliverables (PPT, Word, Web) that carry MS brand identity 
 ## Architecture
 
 ```
-~/.jstack/brand/                          # operator-pulled (manual)
+~/.lintel/brand/                          # operator-pulled (manual)
   ppt-templates/                          # PowerPoint .pptx templates
     pitch-deck.pptx
     workshop.pptx
@@ -41,7 +41,7 @@ scaffolding/03-personal-advanced/doc-gen/
 
 ## Acquisition (P1 fix T3 — minimal default fallback)
 
-Operator pulls MS brand assets manually from MS brand portal. JStack doesn't automate the pull — credentials + corporate procurement step is operator-driven.
+Operator pulls MS brand assets manually from MS brand portal. Lintel doesn't automate the pull — credentials + corporate procurement step is operator-driven.
 
 **Until the pull lands**, doc-gen uses the in-repo defaults. Output is marked `brand_version: default-fallback` in meta.yaml. Operator can ship with defaults if needed; updates later when pull lands.
 
@@ -51,7 +51,7 @@ Operator pulls MS brand assets manually from MS brand portal. JStack doesn't aut
 2. Download latest PowerPoint template stack
 3. Download Word template stack
 4. Download Azure icon SVG library
-5. Place in `~/.jstack/brand/` per the structure above
+5. Place in `~/.lintel/brand/` per the structure above
 6. Run `/brand-update --register` to record the pull metadata
 7. Cache invalidates automatically
 
@@ -65,7 +65,7 @@ Operator pulls MS brand assets manually from MS brand portal. JStack doesn't aut
 
 ## Cache + invalidation (P3 fix T12)
 
-Brand asset loading is cached at `~/.jstack/brand/.cache/`:
+Brand asset loading is cached at `~/.lintel/brand/.cache/`:
 - Parsed template metadata (slide layouts, available styles)
 - Asset index (SVG file paths + tags + dimensions)
 - Voice patterns (parsed markdown → structured rules)
@@ -89,7 +89,7 @@ Typical brand asset set: ~50MB raw → ~5MB cache. Cache directory should never 
 - Surfaces "brand assets stale — consider re-pulling from MS portal"
 - No block; some operators legitimately use stale brand for archival deliverables
 
-Audit log entry per fire: `~/.jstack/audit/brand-staleness.jsonl`
+Audit log entry per fire: `~/.lintel/audit/brand-staleness.jsonl`
 
 ---
 
@@ -115,7 +115,7 @@ Audit log entry per fire: `~/.jstack/audit/brand-staleness.jsonl`
     "ink": "#1a1a1a"
   },
   "layouts": ["title", "title-and-content", "two-column", "section-divider", "blank"],
-  "notes": "Generic neutral styling. No MS brand. Used when ~/.jstack/brand/ppt-templates/ is empty."
+  "notes": "Generic neutral styling. No MS brand. Used when ~/.lintel/brand/ppt-templates/ is empty."
 }
 ```
 
@@ -137,7 +137,7 @@ Audit log entry per fire: `~/.jstack/audit/brand-staleness.jsonl`
     "h3": { "size": 12, "weight": "bold" },
     "body": { "size": 11, "line_height": 1.5 }
   },
-  "notes": "Generic neutral styling. Used when ~/.jstack/brand/word-templates/ is empty."
+  "notes": "Generic neutral styling. Used when ~/.lintel/brand/word-templates/ is empty."
 }
 ```
 
@@ -162,7 +162,7 @@ These choices land in `package.json` when Phase F runtime is built.
 | Skill | Purpose |
 |-------|---------|
 | `/brand-update` | Manual pull from MS brand portal with version tracking |
-| `/asset-search` | Search `~/.jstack/brand/azure-assets/` for icons + diagram primitives |
+| `/asset-search` | Search `~/.lintel/brand/azure-assets/` for icons + diagram primitives |
 
 Plus hook: `brand-staleness-warn` (warn-only).
 

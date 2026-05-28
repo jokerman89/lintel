@@ -1,6 +1,6 @@
 # Voice Tier Mechanism
 
-JStack's per-skill / per-agent voice-tier system. Explains the `voice:` frontmatter and how it propagates through the toolchain.
+Lintel's per-skill / per-agent voice-tier system. Explains the `voice:` frontmatter and how it propagates through the toolchain.
 
 ## The three voice tiers
 
@@ -17,7 +17,7 @@ Engineering-internal speech. Builder-talking-to-builder. Direct, technical, no r
 - The 5 always-on rules, the 7 on-demand items
 - Most skills + agents (default)
 
-**Examples in JStack:**
+**Examples in Lintel:**
 - `/qa`, `/qa-only`, `/investigate`, `/review`, `/release-ev2` — all internal
 - `CodeReviewer`, `SecurityAuditor`, `TestRunner` agents — all internal
 
@@ -31,7 +31,7 @@ Microsoft "Our Voice" (Trailblazer) speech for customer-facing surfaces. Kind + 
 - Public web pages, marketing copy
 - Customer transparency notes (under voice + provenance gates)
 
-**Examples in JStack:**
+**Examples in Lintel:**
 - `/msvoice-rewrite` skill — produces trailblazer-voice from internal-voice source
 - `/demo-deliverable-gen` skill — produces trailblazer-voice from substance + key-message
 - The customer-facing PDF/handout that's been gated through `/rais-customer-voice-check`
@@ -45,7 +45,7 @@ Skill or artifact that consumes one tier and produces / references the other. Bo
 - Documentation that contains both engineering-internal explanation AND customer-bound copy as examples
 - Reviewers that score trailblazer content via internal-voice prose
 
-**Examples in JStack:**
+**Examples in Lintel:**
 - `/design-review` — reviews trailblazer-content but report itself is internal
 - `/document-generate` — `--target customer-guide` produces mixed (trailblazer body + internal scaffolding)
 - `/landing-report --voice trailblazer` — engineering-summary scaffolding + trailblazer-bound narrative paragraphs
@@ -58,7 +58,7 @@ When a skill or agent is invoked, the runtime reads the frontmatter:
 
 ```yaml
 ---
-name: jstack-msvoice-rewrite
+name: li-msvoice-rewrite
 voice: trailblazer
 ---
 ```
@@ -114,7 +114,7 @@ In rare cases the operator may need to bypass voice machinery:
 
 - `--ignore-stale-calibration` on `/rais-customer-voice-check` (logs reason)
 - `--uncalibrated` on `/msvoice-rewrite` (logs reason)
-- `JSTACK_OVERRIDE_VOICE=1` env var for one-off scripts that produce trailblazer without going through skills
+- `LINTEL_OVERRIDE_VOICE=1` env var for one-off scripts that produce trailblazer without going through skills
 
 All overrides are audit-logged. Periodic `/caip-audit` surfaces overrides for review.
 

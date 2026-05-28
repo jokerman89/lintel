@@ -1,7 +1,7 @@
 ---
-name: jstack-code-freeze
+name: li-code-freeze
 layer: foundation
-v1_alias: [jstack-freeze]
+v1_alias: [li-freeze]
 description: Mark paths as DO-NOT-MODIFY for this session — other skills check + refuse to touch.
 color: red
 tools: Read, Edit, Bash
@@ -11,7 +11,7 @@ cli_support: [claude-code, codex]
 
 # /code-freeze
 
-Session-scoped lockdown of files or directories. While a path is frozen, other JStack skills refuse to modify it. The freeze is metadata in `~/.jstack/code-freeze/<session-id>.yaml` — not a filesystem lock — so an explicit override is possible if the operator means it.
+Session-scoped lockdown of files or directories. While a path is frozen, other Lintel skills refuse to modify it. The freeze is metadata in `~/.lintel/code-freeze/<session-id>.yaml` — not a filesystem lock — so an explicit override is possible if the operator means it.
 
 Use to prevent drift: "we're working on portal/, do not touch landing/ this session."
 
@@ -38,8 +38,8 @@ Use to prevent drift: "we're working on portal/, do not touch landing/ this sess
 ## Workflow
 
 1. **Resolve paths.** Expand globs, canonicalize.
-2. **Sanity check.** Reject obvious mistakes: empty path, root `/`, freezing `~/.jstack/` itself.
-3. **Write to session freeze file.** `~/.jstack/code-freeze/<session-id>.yaml`:
+2. **Sanity check.** Reject obvious mistakes: empty path, root `/`, freezing `~/.lintel/` itself.
+3. **Write to session freeze file.** `~/.lintel/code-freeze/<session-id>.yaml`:
    ```yaml
    frozen:
      - path: src/components/landing/
@@ -47,8 +47,8 @@ Use to prevent drift: "we're working on portal/, do not touch landing/ this sess
        added_at: 2026-05-27T17:14:03Z
        expires: session
    ```
-4. **Notify chained skills.** Other JStack skills read this file before any Edit/Write. If the target matches: skill refuses + reports the freeze.
-5. **Audit log.** Append to `~/.jstack/audit/code-freeze.jsonl`.
+4. **Notify chained skills.** Other Lintel skills read this file before any Edit/Write. If the target matches: skill refuses + reports the freeze.
+5. **Audit log.** Append to `~/.lintel/audit/code-freeze.jsonl`.
 6. **Report current freeze state.**
 
 ## Report format
@@ -66,9 +66,9 @@ To override for one skill invocation: skill --ignore-freeze
 
 ## How other skills honor the freeze
 
-Every JStack skill that writes files MUST:
+Every Lintel skill that writes files MUST:
 
-1. Read `~/.jstack/code-freeze/<session-id>.yaml` before any Edit/Write.
+1. Read `~/.lintel/code-freeze/<session-id>.yaml` before any Edit/Write.
 2. If target path matches a frozen entry: refuse, report the freeze + reason.
 3. Honor `--ignore-freeze` ONLY if operator passes it AND logs a reason to audit.
 

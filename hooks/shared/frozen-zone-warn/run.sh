@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# frozen-zone-warn — JStack warn-only hook
+# frozen-zone-warn — Lintel warn-only hook
 # Warns when Edit/Write targets a frozen-zone path.
 
 set -euo pipefail
@@ -7,13 +7,13 @@ set -euo pipefail
 TARGET_PATH="${1:-}"
 [ -z "$TARGET_PATH" ] && exit 0
 
-JSTACK_HOME="${JSTACK_HOME:-$HOME/.jstack}"
-mkdir -p "$JSTACK_HOME/audit"
-AUDIT="$JSTACK_HOME/audit/hooks.jsonl"
+LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
+mkdir -p "$LINTEL_HOME/audit"
+AUDIT="$LINTEL_HOME/audit/hooks.jsonl"
 
 # Collect frozen patterns from session + project CLAUDE.md
-SESSION_ID="${JSTACK_SESSION_ID:-default}"
-SESSION_FREEZE="$JSTACK_HOME/freeze/${SESSION_ID}.yaml"
+SESSION_ID="${LINTEL_SESSION_ID:-default}"
+SESSION_FREEZE="$LINTEL_HOME/freeze/${SESSION_ID}.yaml"
 PROJECT_CLAUDE_MD="$(pwd)/CLAUDE.md"
 
 session_match=""
@@ -68,7 +68,7 @@ if [ -n "$session_match" ] || [ -n "$project_match" ]; then
   fi
   printf '{"hook":"frozen-zone-warn","tier":"warn","ts":"%s","frozen_path":"%s","edit_target":"%s","source":"%s"}\n' \
     "$ts" "$matched" "$TARGET_PATH" "$source" >> "$AUDIT"
-  echo "WARN [JStack hook]: editing $TARGET_PATH which is in frozen zone ($matched, source: $source)"
+  echo "WARN [Lintel hook]: editing $TARGET_PATH which is in frozen zone ($matched, source: $source)"
   echo "WARN: Use /unfreeze if intentional, or consider whether this edit is correct. (warn-only.)"
 fi
 

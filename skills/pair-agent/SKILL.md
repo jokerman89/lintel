@@ -1,5 +1,5 @@
 ---
-name: jstack-pair-agent
+name: li-pair-agent
 layer: foundation
 description: Pair with a named subagent in the loop — explicit two-mind collaboration on a focused task.
 color: green
@@ -78,7 +78,7 @@ Recommendation: /qa-only before /release-ev2.
 ## Compliance integration
 
 - Each main-agent Edit goes through normal Layer 2 sanity-scan.
-- Subagent invocations logged to `~/.jstack/audit/pair-agent.jsonl`.
+- Subagent invocations logged to `~/.lintel/audit/pair-agent.jsonl`.
 - Subagent inherits scope restriction from `--scope`; cannot read outside that set.
 
 ## Voice tier note

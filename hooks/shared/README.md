@@ -1,13 +1,13 @@
-# JStack Hooks
+# Lintel Hooks
 
 14 hooks: 12 warn-only + 2 justified-block.
 
 ## Activation model (per A1 design decision)
 
-Hooks ship INERT at `~/.jstack/hooks/`. They are NOT auto-installed into `~/.claude/hooks/` — operator manually symlinks each one to opt in:
+Hooks ship INERT at `~/.lintel/hooks/`. They are NOT auto-installed into `~/.claude/hooks/` — operator manually symlinks each one to opt in:
 
 ```bash
-ln -s ~/.jstack/hooks/<hook-name>/run.sh ~/.claude/hooks/<hook-name>.sh
+ln -s ~/.lintel/hooks/<hook-name>/run.sh ~/.claude/hooks/<hook-name>.sh
 ```
 
 Then register in `~/.claude/settings.json`:
@@ -67,7 +67,7 @@ Each subdirectory contains:
 
 ## Audit
 
-Every hook fire (warn or block) logs to `~/.jstack/audit/hooks.jsonl`. Append-only.
+Every hook fire (warn or block) logs to `~/.lintel/audit/hooks.jsonl`. Append-only.
 
 ## See also
 

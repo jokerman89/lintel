@@ -11,7 +11,7 @@ These run at session start automatically. They cannot be disabled. Detection hap
 - Screenshots / DOM captures from `/browse`
 - Provenance records or audit logs
 
-**Why:** This is a Premise of the JStack design. Customer data in repo = compliance incident. Even immediate-revert leaves git-history traces.
+**Why:** This is a Premise of the Lintel design. Customer data in repo = compliance incident. Even immediate-revert leaves git-history traces.
 
 **Detection patterns:**
 - Email addresses
@@ -25,11 +25,11 @@ These run at session start automatically. They cannot be disabled. Detection hap
 - `no-customer-data-in-screenshot` (warn-only) — DOM scan
 - `customer-data-block` (JUSTIFIED-BLOCK) — git commit scan
 
-**Override path:** ONLY at commit-block tier, via explicit `JSTACK_OVERRIDE_CUSTOMER_DATA=1 JSTACK_OVERRIDE_REASON="..."`. Use only for confirmed placeholders, public-domain examples, test fixtures explicitly marked.
+**Override path:** ONLY at commit-block tier, via explicit `LINTEL_OVERRIDE_CUSTOMER_DATA=1 LINTEL_OVERRIDE_REASON="..."`. Use only for confirmed placeholders, public-domain examples, test fixtures explicitly marked.
 
 **What to do if violated:**
 - Stop immediately
-- Quarantine the artifact (~/.jstack/quarantine/)
+- Quarantine the artifact (~/.lintel/quarantine/)
 - Re-collect from sanitized source
 - Open an issue if it landed in git history (then real-quarantine the repo)
 
@@ -56,7 +56,7 @@ These run at session start automatically. They cannot be disabled. Detection hap
 - `no-secrets-in-edit` (warn-only)
 - `secret-scan-block` (JUSTIFIED-BLOCK at commit)
 
-**Override path:** ONLY at commit-block tier, via `JSTACK_OVERRIDE_SECRET=1 JSTACK_OVERRIDE_REASON="..."`. Use only when known-false-positive (example placeholder in docs, test fixture).
+**Override path:** ONLY at commit-block tier, via `LINTEL_OVERRIDE_SECRET=1 LINTEL_OVERRIDE_REASON="..."`. Use only when known-false-positive (example placeholder in docs, test fixture).
 
 **What to do if violated:**
 - Stop. Do NOT commit / push hoping to fix forward.
@@ -120,7 +120,7 @@ These run at session start automatically. They cannot be disabled. Detection hap
 
 **Detection patterns:**
 - Common 3P deps in package.json / requirements.txt / etc. with documented MS alternatives
-- See `~/.jstack/first-party-alternatives.yaml` for the mapping
+- See `~/.lintel/first-party-alternatives.yaml` for the mapping
 
 **Hooks:**
 - `non-first-party-warn` (warn-only) — manifest edit scan

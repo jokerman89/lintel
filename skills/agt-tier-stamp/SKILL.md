@@ -1,7 +1,7 @@
 ---
-name: jstack-agt-tier-stamp
+name: li-agt-tier-stamp
 layer: ms-team
-v1_alias: [jstack-tier-stamp-agents]
+v1_alias: [li-tier-stamp-agents]
 description: Stamp agents with license tier (permissive/restricted) — enforces 5-level precedence model.
 color: orange
 tools: Read, Write, Edit, Bash, Glob, Grep
@@ -33,7 +33,7 @@ The tier-stamp determines what an agent is allowed to do:
 ## Inputs
 
 - Optional `--scope <path>` — directory to scan (default: `~/.claude/agents/` + repo's `.claude/agents/`)
-- Optional `--policy <yaml>` — license-policy override (default: `~/.jstack/license-policy.yaml`)
+- Optional `--policy <yaml>` — license-policy override (default: `~/.lintel/license-policy.yaml`)
 - Optional `--dry-run` — report what would be stamped, do not modify
 - Optional `--strict` — fail-on-restricted: refuses agents that would be restricted-tier (use for MS-internal-bundled releases)
 
@@ -42,7 +42,7 @@ The tier-stamp determines what an agent is allowed to do:
 1. **Locate agents.** Glob `**/*.md` in scope dirs. Filter to files with agent frontmatter.
 2. **Read license source.** For each agent, determine origin:
    - Check agent frontmatter for `source:` / `upstream:`
-   - Cross-reference `~/.jstack/upstream-sources.yaml` (the 8 sources with SHA pins)
+   - Cross-reference `~/.lintel/upstream-sources.yaml` (the 8 sources with SHA pins)
    - If no source: mark `origin: operator-authored`
 3. **Classify per policy:**
    - MIT, Apache-2.0, BSD-2/3, ISC → **permissive**
@@ -54,11 +54,11 @@ The tier-stamp determines what an agent is allowed to do:
    tier: permissive | restricted
    tier_source: <upstream-url-or-operator>
    tier_stamped_at: <iso-timestamp>
-   tier_stamped_by: jstack-tier-stamp-agents
+   tier_stamped_by: li-tier-stamp-agents
    ```
 5. **Precedence integrity check.** Walk the 5 levels (operator pin → repo → promoted → user-global → fallback). For each agent name with multiple definitions: verify precedence is honored.
 6. **Strict-mode handling.** If `--strict` AND any restricted-tier agent in scope: exit non-zero, list the offenders.
-7. **Audit log.** Every stamp event to `~/.jstack/audit/tier-stamp.jsonl`.
+7. **Audit log.** Every stamp event to `~/.lintel/audit/tier-stamp.jsonl`.
 8. **Report.**
 
 ## Report format
@@ -66,7 +66,7 @@ The tier-stamp determines what an agent is allowed to do:
 ```
 Tier stamp: scope=~/.claude/agents/ + .claude/agents/
 
-Policy: default (~/.jstack/license-policy.yaml — last updated 2026-05-15)
+Policy: default (~/.lintel/license-policy.yaml — last updated 2026-05-15)
 Mode: live (use --dry-run to preview)
 
 ## Scanned: 47 agents
@@ -76,7 +76,7 @@ Mode: live (use --dry-run to preview)
 |--------------|-------|---------------------------------------------|
 | permissive   | 38    | CodeReviewer, SecurityAuditor, Architect... |
 | restricted   | 6     | trail-of-bits/safe-code-review, ...         |
-| operator     | 3     | jstack-custom-pair-agent, ...               |
+| operator     | 3     | li-custom-pair-agent, ...               |
 
 ## Precedence integrity
 ✓ 5-level walk clean — no shadow/override surprises
@@ -88,12 +88,12 @@ Mode: live (use --dry-run to preview)
 For MIT-internal distribution: would need to drop the 6 OR convert to permissive sources.
 
 ## Audit
-47 stamp events logged to ~/.jstack/audit/tier-stamp.jsonl
+47 stamp events logged to ~/.lintel/audit/tier-stamp.jsonl
 ```
 
 ## Compliance integration
 
-- Implements the 5-level precedence model from JStack design.
+- Implements the 5-level precedence model from Lintel design.
 - A restricted-tier agent CANNOT be bundled into MS-internal MIT repos — `/release-ev2` reads tier-stamp + license-class of repo + refuses on mismatch.
 - Stamp + audit trail is load-bearing for external-distribution compliance review.
 
@@ -134,8 +134,8 @@ For MIT-internal distribution: would need to drop the 6 OR convert to permissive
 
 ## See also
 
-- `~/.jstack/license-policy.yaml` — operator-configurable policy
-- `~/.jstack/upstream-sources.yaml` — the 8 upstream-source SHA-pinned origins
-- 5-level precedence model — designed in JStack vision doc
+- `~/.lintel/license-policy.yaml` — operator-configurable policy
+- `~/.lintel/upstream-sources.yaml` — the 8 upstream-source SHA-pinned origins
+- 5-level precedence model — designed in Lintel vision doc
 - `/release-ev2` — reads tier-stamp before bundle/release
 - `/health` — verifies stamping is current

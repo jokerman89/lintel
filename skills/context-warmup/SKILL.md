@@ -1,5 +1,5 @@
 ---
-name: jstack-context-warmup
+name: li-context-warmup
 layer: foundation
 description: Explicit preload of high-leverage context per declared warmup pattern.
 color: blue
@@ -69,14 +69,14 @@ Operator: continue? (auto-yes if warmup_enabled: true)
 
 [Execution]
 Task 1: reading docs/engagement/*.md... 14 files, 42k tokens consumed
-Task 2: reading ~/.jstack/projects/.../checkpoints/*.md... 3 sessions, 23k tokens
+Task 2: reading ~/.lintel/projects/.../checkpoints/*.md... 3 sessions, 23k tokens
 ✓ Warmup complete. Phase spent: 65k / 200k.
 ```
 
 ## Compliance integration
 
 - Layer 2 customer-data scan on every file loaded via warmup. BLOCK on hit.
-- Audit log entry per task: `~/.jstack/audit/context-warmup.jsonl`
+- Audit log entry per task: `~/.lintel/audit/context-warmup.jsonl`
 - Files matching frozen-zone patterns are loaded but flagged for read-only treatment downstream
 
 ## Voice tier note

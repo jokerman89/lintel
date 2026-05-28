@@ -1,23 +1,23 @@
 ---
-name: jstack-doctor
+name: li-doctor
 layer: foundation
-description: Cross-CLI health check — verifies which CLIs are installed, plugin install status, JStack version, and surfaces drift.
+description: Cross-CLI health check — verifies which CLIs are installed, plugin install status, Lintel version, and surfaces drift.
 color: cyan
 tools: Read, Bash, Grep, Glob
 voice: internal
 cli_support: [claude-code, codex]
 ---
 
-You are the jstack-doctor skill.
+You are the li-doctor skill.
 
 ## What this skill does
 
-Diagnostic health-check across operator's machine. Detects which AI CLIs are installed, whether JStack is installed in each, version skew between them, and any drift (e.g., one CLI on v3.0.0, another on v2.x).
+Diagnostic health-check across operator's machine. Detects which AI CLIs are installed, whether Lintel is installed in each, version skew between them, and any drift (e.g., one CLI on v3.0.0, another on v2.x).
 
 ## When to use
 
 - Onboarding new operator — verify setup
-- Suspect JStack not loading in CLI X
+- Suspect Lintel not loading in CLI X
 - Quarterly health review
 - Pre-engagement-start — confirm tools ready
 
@@ -37,24 +37,24 @@ Diagnostic health-check across operator's machine. Detects which AI CLIs are ins
    - `copilot` (GitHub Copilot CLI)
    - `droid` (Factory Droid)
 
-2. **Per detected CLI, check JStack install:**
-   - Claude Code: `~/.claude/plugins/jstack/` or `~/.claude/marketplaces/jokerman-session-setup/`
+2. **Per detected CLI, check Lintel install:**
+   - Claude Code: `~/.claude/plugins/lintel/` or `~/.claude/marketplaces/jokerman-lintel/`
    - Codex: depends on Codex install dir
    - Cursor: `~/.cursor/extensions/` or similar
-   - Gemini: `gemini extensions list | grep jstack`
-   - OpenCode: `.opencode/plugins/jstack/`
-   - Copilot: `copilot plugin list | grep jstack`
-   - Droid: `droid plugin list | grep jstack`
+   - Gemini: `gemini extensions list | grep lintel`
+   - OpenCode: `.opencode/plugins/lintel/`
+   - Copilot: `copilot plugin list | grep lintel`
+   - Droid: `droid plugin list | grep lintel`
 
 3. **Per install, read version** (from plugin.json in each CLI's plugin dir).
 
 4. **Cross-CLI drift detection.** If versions differ across CLIs, flag.
 
-5. **Check scaffolding install.** `~/.jstack/scaffolding/` populated?
+5. **Check scaffolding install.** `~/.lintel/scaffolding/` populated?
 
-6. **Check brand assets.** `~/.jstack/brand/` present + age (warn if >90 days via `brand-staleness-warn` hook).
+6. **Check brand assets.** `~/.lintel/brand/` present + age (warn if >90 days via `brand-staleness-warn` hook).
 
-7. **Hook activation status.** `~/.jstack/hooks/<name>` symlinks vs canonical.
+7. **Hook activation status.** `~/.lintel/hooks/<name>` symlinks vs canonical.
 
 ## Output format
 
@@ -62,7 +62,7 @@ Diagnostic health-check across operator's machine. Detects which AI CLIs are ins
 JSTACK-DOCTOR: health check (date)
 
 ## CLIs detected
-| CLI | Path | Version | JStack installed | JStack version |
+| CLI | Path | Version | Lintel installed | Lintel version |
 |---|---|---|---|---|
 | claude | /usr/local/bin/claude | 2.1.x | ✓ | 3.0.0 |
 | codex | /usr/local/bin/codex | x.y | ✓ | 3.0.0 |
@@ -73,19 +73,19 @@ JSTACK-DOCTOR: health check (date)
 | droid | n/a | n/a | — | — |
 
 ## Drift detected
-- Copilot CLI on JStack v2.0.5 vs others on v3.0.0
-  → Action: `copilot plugin update jstack`
+- Copilot CLI on Lintel v2.0.5 vs others on v3.0.0
+  → Action: `copilot plugin update lintel`
 
 ## Scaffolding
-- ~/.jstack/scaffolding/: ✓ present, last updated <date>
+- ~/.lintel/scaffolding/: ✓ present, last updated <date>
 
 ## Brand assets
-- ~/.jstack/brand/: ⚠ 95 days old (>90 day threshold)
+- ~/.lintel/brand/: ⚠ 95 days old (>90 day threshold)
   → Action: invoke `/brand-update` skill
 
 ## Hooks
 - Activated: <N>/15 (operator opt-in)
-- See: ~/.jstack/hooks/
+- See: ~/.lintel/hooks/
 
 ## Voice corpus
 - Status: <CALIBRATED | NOT_CALIBRATED>
@@ -110,4 +110,4 @@ JSTACK-DOCTOR: health check (date)
 
 Cross-CLI operator may have 3-5 CLIs installed. Version drift between them is real. This skill makes drift visible at a glance.
 
-Replaces v2's spec-only `/jstack-cli-fingerprint` skill with a runtime check that actually runs.
+Replaces v2's spec-only `/lintel:li-cli-fingerprint` skill with a runtime check that actually runs.

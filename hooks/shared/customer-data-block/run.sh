@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# customer-data-block — JStack JUSTIFIED-BLOCK hook
+# customer-data-block — Lintel JUSTIFIED-BLOCK hook
 # Blocks git commit/push if Tier 1 customer-data pattern in staged content.
 
 set -euo pipefail
@@ -7,21 +7,21 @@ set -euo pipefail
 CMD="${1:-}"
 [ -z "$CMD" ] && exit 0
 
-JSTACK_HOME="${JSTACK_HOME:-$HOME/.jstack}"
-mkdir -p "$JSTACK_HOME/audit"
-AUDIT="$JSTACK_HOME/audit/hooks.jsonl"
+LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
+mkdir -p "$LINTEL_HOME/audit"
+AUDIT="$LINTEL_HOME/audit/hooks.jsonl"
 
 if ! echo "$CMD" | grep -qE '^git\s+(commit|push)\b'; then
   exit 0
 fi
 
 # Override path
-if [ "${JSTACK_OVERRIDE_CUSTOMER_DATA:-}" = "1" ]; then
-  reason="${JSTACK_OVERRIDE_REASON:-no-reason-given}"
+if [ "${LINTEL_OVERRIDE_CUSTOMER_DATA:-}" = "1" ]; then
+  reason="${LINTEL_OVERRIDE_REASON:-no-reason-given}"
   ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
   printf '{"hook":"customer-data-block","tier":"OVERRIDDEN","ts":"%s","reason":"%s","blocked":false}\n' \
     "$ts" "$reason" >> "$AUDIT"
-  echo "INFO [JStack hook]: customer-data-block OVERRIDDEN (reason: $reason). Audit-logged."
+  echo "INFO [Lintel hook]: customer-data-block OVERRIDDEN (reason: $reason). Audit-logged."
   exit 0
 fi
 
@@ -39,10 +39,10 @@ if [ ${#patterns_hit[@]} -gt 0 ]; then
   joined=$(IFS=,; echo "${patterns_hit[*]}")
   printf '{"hook":"customer-data-block","tier":"BLOCK","ts":"%s","patterns_matched":"%s","blocked":true}\n' \
     "$ts" "$joined" >> "$AUDIT"
-  echo "ERROR [JStack hook]: customer-data pattern in staged content — $joined" >&2
+  echo "ERROR [Lintel hook]: customer-data pattern in staged content — $joined" >&2
   echo "ERROR: COMMIT BLOCKED. Sanitize the staged content (placeholders) + re-stage." >&2
   echo "ERROR: To override (e.g. confirmed placeholder, public-domain example):" >&2
-  echo '  JSTACK_OVERRIDE_CUSTOMER_DATA=1 JSTACK_OVERRIDE_REASON="<reason>" git commit ...' >&2
+  echo '  LINTEL_OVERRIDE_CUSTOMER_DATA=1 LINTEL_OVERRIDE_REASON="<reason>" git commit ...' >&2
   exit 1
 fi
 

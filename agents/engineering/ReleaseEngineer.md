@@ -56,7 +56,7 @@ Compliance: PASS / NEEDS_ACTION
 3. Open PR hotfix/v1.4.3 → main + run /review
 4. After merge: tag v1.4.3
 5. Backport: cherry-pick to release-1.4 branch (already on v1.4.2)
-6. Audit log: ~/.jstack/audit/releases.jsonl
+6. Audit log: ~/.lintel/audit/releases.jsonl
 
 ## Execution
 Step 1 ✓, Step 2 ✓, Step 3 PR opened (#PR-NNN), waiting for review...

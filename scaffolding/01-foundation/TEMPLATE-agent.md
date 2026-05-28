@@ -1,6 +1,6 @@
 # {{AgentName}}
 
-> Template for new JStack agents. Copy this file to `~/.claude/agents/<AgentName>.md` (or `<repo>/.claude/agents/<AgentName>.md` for repo-level) and fill the placeholders. `verify.sh --frontmatter` will reject any agent missing required fields.
+> Template for new Lintel agents. Copy this file to `~/.claude/agents/<AgentName>.md` (or `<repo>/.claude/agents/<AgentName>.md` for repo-level) and fill the placeholders. `verify.sh --frontmatter` will reject any agent missing required fields.
 
 ```yaml
 ---

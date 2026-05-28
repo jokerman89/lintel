@@ -13,7 +13,7 @@ You are a provenance chain verifier agent.
 
 ## What this agent does
 
-Reads `~/.jstack/provenance/` records, validates each artifact's claimed source chain against actual audit log entries, surfaces inconsistencies, and reports overall integrity of the provenance store.
+Reads `~/.lintel/provenance/` records, validates each artifact's claimed source chain against actual audit log entries, surfaces inconsistencies, and reports overall integrity of the provenance store.
 
 Read-only. Pairs with `/provenance-track` skill (skill records; agent verifies).
 
@@ -32,7 +32,7 @@ Read-only. Pairs with `/provenance-track` skill (skill records; agent verifies).
 
 ## Workflow
 
-1. **List records.** Glob `~/.jstack/provenance/PROV-*.yaml`. Read index.jsonl.
+1. **List records.** Glob `~/.lintel/provenance/PROV-*.yaml`. Read index.jsonl.
 2. **Per-record verification:**
    - Content hash matches actual artifact file (still on disk)?
    - Source chain skills referenced exist in audit logs at claimed timestamps?
@@ -50,7 +50,7 @@ Read-only. Pairs with `/provenance-track` skill (skill records; agent verifies).
 ## Report format
 
 ```
-ProvenanceVerifier: ~/.jstack/provenance/
+ProvenanceVerifier: ~/.lintel/provenance/
 
 Records scanned: 42
 Index entries: 42
@@ -67,7 +67,7 @@ Mismatches between records + index: 0
 [ANOMALY-1] PROV-3f4d2a8b — audit gap
    Artifact: deliverables/handout-FINAL.md (file present)
    Claimed: /rais-customer-voice-check at 2026-05-15T14:22:00Z, verdict PASS
-   Audit log: no entry at that time in ~/.jstack/audit/rais-customer-voice-check.jsonl
+   Audit log: no entry at that time in ~/.lintel/audit/rais-customer-voice-check.jsonl
    Possible causes:
    - Audit log truncated / lost
    - Manual provenance record written without running the actual skill (FORGERY)
@@ -77,7 +77,7 @@ Mismatches between records + index: 0
 [ANOMALY-2] PROV-9c8e7d5a — missing calibration snapshot
    Artifact: docs/customer-pitch.md
    Claimed calibration snapshot: CALIBRATION-2026-04-15
-   Reality: ~/.jstack/calibrations/ has snapshots from 2026-05-01 onwards only
+   Reality: ~/.lintel/calibrations/ has snapshots from 2026-05-01 onwards only
    Possible cause: snapshot pruned (older than retention)
    Mitigation: record stands but historical evidence is incomplete; document in audit
 

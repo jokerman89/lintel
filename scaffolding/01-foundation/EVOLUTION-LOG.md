@@ -2,7 +2,7 @@
 
 Changelog for the scaffolding system. Most recent first.
 
-Different from the top-level `CHANGELOG.md` (which tracks the `jokerman-session-setup` repo itself): this log travels with the scaffolding when it lands in a target repo. It captures changes to the canonical instructions, the subagent set, the task-file conventions, and other patterns that affect how the assistant operates.
+Different from the top-level `CHANGELOG.md` (which tracks the `jokerman-lintel` repo itself): this log travels with the scaffolding when it lands in a target repo. It captures changes to the canonical instructions, the subagent set, the task-file conventions, and other patterns that affect how the assistant operates.
 
 Entry format:
 
@@ -26,7 +26,7 @@ Types:
 ## 2026-05-26 — Initial release
 
 **Type:** TEMPLATE
-**What changed:** Scaffolding initialized as part of `jokerman-session-setup`. Contains:
+**What changed:** Scaffolding initialized as part of `jokerman-lintel`. Contains:
 
 - `CORE-PRINCIPLES.md`, `EVOLUTION.md`, this `EVOLUTION-LOG.md`.
 - `tasks/` — `lessons.md`, `memory.md`, `personas.md`, `todo.md` as templates.

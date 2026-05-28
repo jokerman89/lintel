@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# JStack test runner — runs all tests under tests/, aggregates pass/fail/skip.
+# Lintel test runner — runs all tests under tests/, aggregates pass/fail/skip.
 #
 # Usage:
 #   bash tests/runner/run-all.sh                  # everything
@@ -56,9 +56,9 @@ for dir in $SEARCH_DIRS; do
 
     # Set tag filter env var if provided
     if [ -n "$TAG_FILTER" ]; then
-      export JSTACK_TEST_FILTER_TAGS="$TAG_FILTER"
+      export LINTEL_TEST_FILTER_TAGS="$TAG_FILTER"
     else
-      unset JSTACK_TEST_FILTER_TAGS 2>/dev/null || true
+      unset LINTEL_TEST_FILTER_TAGS 2>/dev/null || true
     fi
 
     output=$(bash "$test_file" 2>&1) || rc=$?
@@ -79,7 +79,7 @@ done
 
 # Report
 echo ""
-printf "${c_bold}== JStack test summary ==${c_reset}\n"
+printf "${c_bold}== Lintel test summary ==${c_reset}\n"
 printf "Total:   %d\n" "$total"
 printf "${c_green}Pass:   %d${c_reset}\n" "$passed"
 printf "${c_yellow}Skip:   %d${c_reset}\n" "$skipped"
