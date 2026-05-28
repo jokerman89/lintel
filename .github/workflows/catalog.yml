@@ -1,0 +1,69 @@
+name: catalog-regenerate
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'skills/**/SKILL.md'
+      - '.github/workflows/catalog.yml'
+
+jobs:
+  regenerate:
+    name: auto-regenerate skills/CATALOG.md
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate CATALOG.md from frontmatter
+        run: |
+          {
+            echo "# Lintel Skill Catalog"
+            echo ""
+            echo "Auto-generated från frontmatter på push till main."
+            echo "Regenerated av \`.github/workflows/catalog.yml\` per push när \`skills/**/SKILL.md\` ändras."
+            echo "Hand-edits skrivs över — edit frontmatter i source SKILL.md istället."
+            echo ""
+            echo "Total skills: $(find skills -name 'SKILL.md' | wc -l)"
+            echo "Generated: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo ""
+
+            # Group by layer
+            for layer in foundation ms-team sdl personal-advanced other; do
+              count=0
+              section=""
+              while IFS= read -r f; do
+                fm_layer=$(grep -m1 '^layer:' "$f" | sed 's/^layer:[ ]*//' | tr -d '\r')
+                if [ "$fm_layer" = "$layer" ]; then
+                  name=$(grep -m1 '^name:' "$f" | sed 's/^name:[ ]*//' | tr -d '\r')
+                  description=$(grep -m1 '^description:' "$f" | sed 's/^description:[ ]*//' | tr -d '\r' | head -c 120)
+                  section+="| \`/li:$name\` | $description |"$'\n'
+                  count=$((count + 1))
+                fi
+              done < <(find skills -name 'SKILL.md' | sort)
+
+              if [ "$count" -gt 0 ]; then
+                echo "## $layer layer ($count skills)"
+                echo ""
+                echo "| Skill | Description |"
+                echo "|---|---|"
+                printf "%s" "$section"
+                echo ""
+              fi
+            done
+          } > skills/CATALOG.md
+
+      - name: Commit if changed
+        run: |
+          git config user.name "lintel-catalog-bot"
+          git config user.email "bot@lintel.local"
+          git add skills/CATALOG.md
+          if ! git diff --staged --quiet; then
+            git commit -m "chore(catalog): auto-regenerate skills/CATALOG.md"
+            git push
+          else
+            echo "No catalog changes."
+          fi
