@@ -4,10 +4,10 @@ Auto-generated från frontmatter på push till main.
 Regenerated av `.github/workflows/catalog.yml` per push när `skills/**/SKILL.md` ändras.
 Hand-edits skrivs över — edit frontmatter i source SKILL.md istället.
 
-Total skills: 129
-Generated: 2026-05-28T15:46:54Z
+Total skills: 131
+Generated: 2026-05-28T15:52:04Z
 
-## foundation layer (90 skills)
+## foundation layer (92 skills)
 
 | Skill | Description |
 |---|---|
@@ -57,6 +57,7 @@ Generated: 2026-05-28T15:46:54Z
 | `/li:lessons-promote` | Promote a repo-local lesson from tasks/lessons.md to Lintel's global lessons (scaffolding/01-foundation/tasks/lessons.md |
 | `/li:lessons-surface` | Surface relevanta lessons.md-entries baserat på keyword/context. STÄNGER L-001/L-002-LOOPEN (lessons skrivs men läses |
 | `/li:lessons` | Mid-session review of accumulated lessons from tasks/lessons.md — surfaces relevant ones for current task. |
+| `/li:maintenance` | On-demand maintenance — force-compact + static-path monitoring + token-cost simulation. Operator-request 5.3. Bygger p |
 | `/li:make-pdf` | Convert URL, markdown file, or HTML to PDF via managed Chromium. |
 | `/li:match` | Semantic skill router — given free-text user intent, suggests top 3 matching Lintel skills with rationale. |
 | `/li:office-hours` | Generate a design doc from a problem statement — structured, decision-gated, ready for /plan-eng-review. |
@@ -72,6 +73,7 @@ Generated: 2026-05-28T15:46:54Z
 | `/li:plan-eng-review` | Architecture + tests review. The required gate before /release-ev2. Covers arch, code quality, test coverage, performanc |
 | `/li:plan-tune` | Adjust which AskUserQuestion prompts auto-decide vs ask. Per-question preference tuning. |
 | `/li:plan` | Phase 4 of Lintel cycle — convert design + discovery into executable task breakdown with cost estimate, dependency gra |
+| `/li:profile-switch` | Toggle Lintel install on/off fast + swap till previous setup utan att röra repot. Operator-request 5.2. |
 | `/li:qa-only` | Read-only test run — reports failures, never edits. For ship-gate verification. |
 | `/li:qa` | Run the full test suite, parse failures, fix common ones, re-run until clean or stuck. |
 | `/li:release-deploy-ev2` | /release-ev2 + deploy. Adds post-merge deploy trigger. Requires explicit per-call auth. |
