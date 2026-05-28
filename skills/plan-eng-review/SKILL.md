@@ -1,5 +1,5 @@
 ---
-name: jstack-plan-eng-review
+name: li-plan-eng-review
 layer: foundation
 description: Architecture + tests review. The required gate before /release-ev2. Covers arch, code quality, test coverage, performance.
 color: red
@@ -10,9 +10,9 @@ cli_support: [claude-code, codex]
 
 # /plan-eng-review
 
-The **required** review per JStack's Review Readiness Dashboard. Scope: architecture, code quality, test coverage, performance. Outputs a structured plan-file review report + persists to `gstack-review-log` so `/release-ev2` can read it.
+The **required** review per Lintel's Review Readiness Dashboard. Scope: architecture, code quality, test coverage, performance. Outputs a structured plan-file review report + persists to `gstack-review-log` so `/release-ev2` can read it.
 
-Inspired-by gstack's equivalent. JStack version adds:
+Inspired-by gstack's equivalent. Lintel version adds:
 - `cli_support` frontmatter check on every skill/agent the plan adds
 - Voice-tier check on every customer-facing skill the plan adds
 - 5-always-on compliance checklist gate inside Step 0
@@ -96,7 +96,7 @@ Persist:
 ## Compliance integration
 
 - The 5 always-on rules run at Step 0 (no customer data in plan prose, no secrets, no production mutations without auth, MS SSO+zero retention, first-party-first).
-- Per JStack v1: also verify every new skill/agent introduced declares `cli_support` in frontmatter (per C1) and `voice` tier (per A6).
+- Per Lintel v1: also verify every new skill/agent introduced declares `cli_support` in frontmatter (per C1) and `voice` tier (per A6).
 
 ## Exit Plan Mode Gate (BLOCKING)
 

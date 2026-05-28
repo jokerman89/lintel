@@ -101,9 +101,9 @@ Schema validation runs at install time + in CI (`unit-tests-linux` job exercises
 
 ## Lookup performance (P3 fix T13)
 
-The shim runtime builds a hashmap on session start: `<cli>:<capability>` → `<strategy>`. O(1) lookup. The hashmap also contains aliases — v1 skill names like `jstack-ship` resolve to v2 canonical via the same map (single resolution layer).
+The shim runtime builds a hashmap on session start: `<cli>:<capability>` → `<strategy>`. O(1) lookup. The hashmap also contains aliases — v1 skill names like `li-ship` resolve to v2 canonical via the same map (single resolution layer).
 
-Map persisted to `~/.jstack/sessions/$SESSION_ID/shim-map.json`. Recomputed if config changes mid-session.
+Map persisted to `~/.lintel/sessions/$SESSION_ID/shim-map.json`. Recomputed if config changes mid-session.
 
 ---
 
@@ -204,7 +204,7 @@ Automated bulk migration is out-of-scope for v2.0. Per-skill conversion happens 
 
 ## Operator overrides
 
-`~/.jstack/config.yaml` can override per-skill cli_support:
+`~/.lintel/config.yaml` can override per-skill cli_support:
 
 ```yaml
 overrides:
@@ -223,6 +223,6 @@ Override takes precedence over skill frontmatter. Logged on use.
 
 - `scaffolding/01-foundation/TEMPLATE-skill.md` — references this schema
 - `scaffolding/01-foundation/TEMPLATE-agent.md` — references this schema
-- `/jstack-cli-fingerprint` skill — runtime CLI detection that feeds shim lookup
+- `/lintel:li-cli-fingerprint` skill — runtime CLI detection that feeds shim lookup
 - `verify.sh --portability` — schema validation subcommand
 - Phase B implementation (this design) — runtime that consumes the schema

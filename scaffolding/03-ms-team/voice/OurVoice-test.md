@@ -103,7 +103,7 @@ The eval is calibrated and ready for v1.0.0 ship when:
 - No anti-AI vocabulary false positives (the blacklist is precise, not pattern-matched against word fragments)
 
 If a cell fails calibration after 3 iterations of prompt refinement:
-- Option A: drop that cell from v1.0.0 scope (narrows JStack's Trailblazer surface but ships)
+- Option A: drop that cell from v1.0.0 scope (narrows Lintel's Trailblazer surface but ships)
 - Option B: gather more corpus paragraphs for that cell (delays v1.0.0)
 
 Operator decides per cell.

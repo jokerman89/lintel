@@ -10,7 +10,7 @@ MS-policy-driven, non-negotiable. Lives near the top of the canonical session-st
 - **`SESSION-START-CHECK.md`** — the 5-step compliance checklist. ~50 tokens. Highest-leverage budget in the harness.
 - **`INLINE-RULES.md`** — during-work rules (≥8-line copyright flag, no OpenAI code in Claude Code, etc.).
 - **`ON-DEMAND-RULES.md`** — 7 rules surfaced via `/compliance-check` skill (OneRAI, threat model, DPIA, transparency doc, sensitive-use report, SAST, Entra Agent ID).
-- **`REFERENCE-RULES.md`** — 8 documented-only rules (SDL AI subtopics, Agent 365 details, evaluation framework, AAA Policy, quarterly refresh ritual). Operator can elevate any to always-on per project via `~/.jstack/config.yaml`.
+- **`REFERENCE-RULES.md`** — 8 documented-only rules (SDL AI subtopics, Agent 365 details, evaluation framework, AAA Policy, quarterly refresh ritual). Operator can elevate any to always-on per project via `~/.lintel/config.yaml`.
 - **`ACCOUNT-SETUP.md`** — MS SSO + GovID + SSPA onboarding checklist.
 - **`REFRESH-PROCESS.md`** — quarterly MS-policy review cadence.
 - **`AGENT-365-INTEGRATION.md`** — Entra Agent ID + Purview + Defender pointers.
@@ -29,11 +29,11 @@ The compliance hooks in Layer 4 (`secret-scan`, `data-classification`, etc.) add
 
 ## Why this layer exists
 
-These rules are MS-employee-specific. Keeping them as separate layer lets the rest of JStack stay portable across employer contexts while compliance gets priority placement.
+These rules are MS-employee-specific. Keeping them as separate layer lets the rest of Lintel stay portable across employer contexts while compliance gets priority placement.
 
 ## Per-tier operator override
 
-Per `~/.jstack/config.yaml`, operator can:
+Per `~/.lintel/config.yaml`, operator can:
 
 - Elevate any of the 7 ON-DEMAND rules to always-on (becomes a 6th, 7th... step in the session-start checklist)
 - Elevate any of the 8 REFERENCE rules to ON-DEMAND or always-on

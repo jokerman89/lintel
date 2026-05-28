@@ -1,7 +1,7 @@
 ---
-name: jstack-rais-customer-voice-check
+name: li-rais-customer-voice-check
 layer: ms-team
-v1_alias: [jstack-customer-voice-check]
+v1_alias: [li-customer-voice-check]
 description: Gate customer-facing artifacts through 12-cell Trailblazer eval before distribution.
 color: red
 tools: Read, Bash, Glob
@@ -141,4 +141,4 @@ Score 88/100 — below threshold (95). ✗ FAIL. Fix violations + retry.
 - OurVoice-calibration.md — current per-cell accuracy
 - `/msvoice-rewrite` — rewrite an internal-voice draft to trailblazer
 - `/release-ev2` — reads this skill's verdict as a gate
-- `/jstack-eval` (Phase 8) — runs this against OurVoice-corpus.md to maintain calibration
+- `/lintel:li-eval` (Phase 8) — runs this against OurVoice-corpus.md to maintain calibration

@@ -1,5 +1,5 @@
 ---
-name: jstack-plan-ceo-review
+name: li-plan-ceo-review
 layer: foundation
 description: Strategy + scope review. Surface product/business assumptions before architecture lands.
 color: purple
@@ -12,7 +12,7 @@ cli_support: [claude-code, codex]
 
 Strategy-level review of a plan or design doc. Asks the hard product/business questions BEFORE `/plan-eng-review` locks architecture. Optional but recommended for any plan that changes user-facing behavior, expands scope, or introduces a new market position.
 
-JStack's CEO review is **inspired-by gstack's** equivalent but written fresh per the inspiration-not-plagiarism constraint. Voice stays internal (this is operator-to-operator strategic challenge, not customer-facing).
+Lintel's CEO review is **inspired-by gstack's** equivalent but written fresh per the inspiration-not-plagiarism constraint. Voice stays internal (this is operator-to-operator strategic challenge, not customer-facing).
 
 ## When to use
 

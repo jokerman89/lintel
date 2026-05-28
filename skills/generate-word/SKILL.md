@@ -1,5 +1,5 @@
 ---
-name: jstack-generate-word
+name: li-generate-word
 layer: ms-team
 description: Produce brand-compliant Word doc via docx-templater — technical / customer-summary / transparency-note variants.
 color: orange
@@ -74,7 +74,7 @@ Uses docx-templater under the hood. Phase F of v2 build.
    - Gate 3: honest-limitations (active only for transparency-note variant)
    - Gate 4: provenance record
 
-6. **On all 4 PASS:** move from `~/.jstack/draft/` → `--out` path.
+6. **On all 4 PASS:** move from `~/.lintel/draft/` → `--out` path.
 
 ## Report format
 
@@ -82,7 +82,7 @@ Uses docx-templater under the hood. Phase F of v2 build.
 Generate Word: case-analysis-ai-transparency-note
 
 Target: transparency-note
-Template: transparency-note.docx (~/.jstack/brand/word-templates/, brand version 2026-Q2)
+Template: transparency-note.docx (~/.lintel/brand/word-templates/, brand version 2026-Q2)
 Voice tier: trailblazer-draft
 
 ## Structure (from brief)
@@ -94,7 +94,7 @@ Voice tier: trailblazer-draft
 - Appeals + feedback: documented
 
 ## Generation (docx-templater)
-  Produced ~/.jstack/draft/case-analysis-ai-transparency-note.docx (47 KB)
+  Produced ~/.lintel/draft/case-analysis-ai-transparency-note.docx (47 KB)
 
 ## 4-Gate pipeline
   Gate 1 (voice):   ✓ PASS — score 88/100

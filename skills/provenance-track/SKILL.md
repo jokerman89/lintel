@@ -1,5 +1,5 @@
 ---
-name: jstack-provenance-track
+name: li-provenance-track
 layer: ms-team
 description: Track artifact provenance — source, transforms, voice tier, calibration state, distribution path.
 color: blue
@@ -40,7 +40,7 @@ Not a generation skill. A tracking skill. Run after `/document-generate`, `/msvo
 2. **Auto-detect source chain:**
    - Frontmatter `source:` or `generated_by:` fields
    - Frontmatter `voice:` for tier
-   - Adjacent `~/.jstack/audit/*.jsonl` entries within 24h that reference the artifact path
+   - Adjacent `~/.lintel/audit/*.jsonl` entries within 24h that reference the artifact path
 3. **Calibration state.** If voice tier is trailblazer: read OurVoice-calibration.md, capture per-cell accuracy snapshot at time of artifact generation.
 4. **Compose record:**
    ```yaml
@@ -54,12 +54,12 @@ Not a generation skill. A tracking skill. Run after `/document-generate`, `/msvo
      per_cell_accuracy: { R1: 0.92, R2: 0.91, ... }
      snapshot_id: <CALIBRATION-NNN>
    source_chain:
-     - skill: jstack-document-generate
+     - skill: li-document-generate
        input: src/lib/dlxClient.ts
        at: 2026-05-27T15:23:11Z
-     - skill: jstack-msvoice-rewrite
+     - skill: li-msvoice-rewrite
        at: 2026-05-27T15:34:02Z
-     - skill: jstack-customer-voice-check
+     - skill: li-customer-voice-check
        verdict: PASS
        score: 88
        at: 2026-05-27T15:42:18Z
@@ -69,7 +69,7 @@ Not a generation skill. A tracking skill. Run after `/document-generate`, `/msvo
    destination: customer-A nordic-finserv quarterly-deck
    distributed_at: <iso-timestamp or null>
    ```
-5. **Write to provenance store.** `~/.jstack/provenance/PROV-<hash>.yaml`. Also append index entry to `~/.jstack/provenance/index.jsonl`.
+5. **Write to provenance store.** `~/.lintel/provenance/PROV-<hash>.yaml`. Also append index entry to `~/.lintel/provenance/index.jsonl`.
 6. **Report.** Confirm record ID + summary.
 
 ## Report format
@@ -94,7 +94,7 @@ Compliance:
 Destination: customer-A nordic-finserv quarterly-deck
 Distributed: not yet (record pending)
 
-Stored: ~/.jstack/provenance/PROV-7a8b3c2f.yaml
+Stored: ~/.lintel/provenance/PROV-7a8b3c2f.yaml
 ```
 
 ## Compliance integration
@@ -139,8 +139,8 @@ Ready to share. Re-run with --destination after sending to update.
 
 ## See also
 
-- `~/.jstack/provenance/` — record store
-- `~/.jstack/provenance/index.jsonl` — queryable index
+- `~/.lintel/provenance/` — record store
+- `~/.lintel/provenance/index.jsonl` — queryable index
 - `/rais-customer-voice-check` — produces a verdict that lands in provenance
 - `/release-ev2` — refuses customer-bearing without provenance record
 - `/onecs-check` — produces compliance snapshot embedded in provenance

@@ -1,9 +1,9 @@
-# JStack v3 — plan (revised)
+# Lintel v3 — plan (revised)
 
 **Datum:** 2026-05-27
-**Föregående:** [jstack-v2-design.md](jstack-v2-design.md) (v2 spec-complete)
+**Föregående:** [li-v2-design.md](li-v2-design.md) (v2 spec-complete)
 **Status:** PLAN — approved by operator 2026-05-27. Execution started on `v3-dev` branch.
-**Författare:** Claude Code (Opus 4.7) på begäran av Azureflipper (MS Sweden CAIP-SE).
+**Författare:** Claude Code (Opus 4.7) på begäran av jokerman89 (MS Sweden CAIP-SE).
 
 > Den första v3-planen rekommenderade MCP-server + per-CLI compile. Den var överarbetad. Operatör pekade på [obra/superpowers](https://github.com/obra/superpowers) som visar att varje modern AI-CLI redan har plugin/extension-system inbyggt — vi behöver bara små per-CLI manifest-filer som pekar på samma `skills/`-katalog. Denna version reflekterar det.
 
@@ -11,7 +11,7 @@
 
 ## TL;DR
 
-v3 = **JStack som komplett session-harness** för MS Sweden CAIP-SE — inte bara en skill-katalog.
+v3 = **Lintel som komplett session-harness** för MS Sweden CAIP-SE — inte bara en skill-katalog.
 
 Tre arkitektoniska beslut som driver allt:
 
@@ -19,9 +19,9 @@ Tre arkitektoniska beslut som driver allt:
 
 2. **Bygg ut, inte trimma.** v2:s 44 agents → v3:s ~60-70, organiserade per domän (`agents/ms-specific/`, `agents/engineering/`, `agents/security/`, etc.). v2:s 74 skills → konsoliderade där dubbletter finns (~60), inte radikalt trimmade.
 
-3. **Session-harness är JStack:s identitet.** Inte en skill-leverantör — en komplett harness som hanterar hela sessionens livscykel: session-start ritual → mid-session interventions (hooks, voice gates, compliance) → end-of-session capture (lessons, ADR, evolution-log) → cross-session continuity (memory, lessons-sync). Repo-scaffolding för andra projekt är en del av detta.
+3. **Session-harness är Lintel:s identitet.** Inte en skill-leverantör — en komplett harness som hanterar hela sessionens livscykel: session-start ritual → mid-session interventions (hooks, voice gates, compliance) → end-of-session capture (lessons, ADR, evolution-log) → cross-session continuity (memory, lessons-sync). Repo-scaffolding för andra projekt är en del av detta.
 
-**Resultat:** En operatör som arbetar i Claude Code, Codex, Cursor, Gemini, OpenCode, Copilot CLI eller Factory Droid får samma JStack-upplevelse via varje CLI:s native plugin-marketplace. Och varje nytt MS-engagement-repo får komplett scaffolding (CORE-PRINCIPLES, lessons.md, ADR-templates, EVOLUTION-LOG) via `jstack scaffold init`.
+**Resultat:** En operatör som arbetar i Claude Code, Codex, Cursor, Gemini, OpenCode, Copilot CLI eller Factory Droid får samma Lintel-upplevelse via varje CLI:s native plugin-marketplace. Och varje nytt MS-engagement-repo får komplett scaffolding (CORE-PRINCIPLES, lessons.md, ADR-templates, EVOLUTION-LOG) via `lintel scaffold init`.
 
 ---
 
@@ -44,9 +44,9 @@ Tre arkitektoniska beslut som driver allt:
 
 ### 1.2 Mina två fel i första v3-planen
 
-**Fel #1: MCP-server som kärnan.** Övertekniskt. JStack:s skill-bodies är statisk markdown — en runtime-server tillför inget. Plugin-manifest räcker.
+**Fel #1: MCP-server som kärnan.** Övertekniskt. Lintel:s skill-bodies är statisk markdown — en runtime-server tillför inget. Plugin-manifest räcker.
 
-**Fel #2: "Trim 25 Layer-4 agents → docs/USE-TASK-TOOL.md".** Felaktig framing — agenterna är JStack-kurerat värde, inte gstack-duplikat. v3 BYGGER UT agenterna istället, organiserade per domän.
+**Fel #2: "Trim 25 Layer-4 agents → docs/USE-TASK-TOOL.md".** Felaktig framing — agenterna är Lintel-kurerat värde, inte gstack-duplikat. v3 BYGGER UT agenterna istället, organiserade per domän.
 
 **Fel #3: Glömde att scaffolding/01-foundation/ är templates, inte skills.** CORE-PRINCIPLES, EVOLUTION-LOG, tasks/lessons.md, ADR-mallar — de kopieras IN i andra repos via `install.sh`. Måste bevaras + moderniseras.
 
@@ -58,9 +58,9 @@ Operatör korrigerade alla tre i sessionen. v3-planen reflekterar nu rätt arkit
 
 ### 2.1 Vad är en "session-harness"?
 
-JStack är inte ett skill-bibliotek man råkar invokera. JStack är **harness-en runt agentens session** — den fil-strukturen, dokumentationen och de mekanismerna som tillsammans formar HUR agenten beter sig, från första prompt till sista commit.
+Lintel är inte ett skill-bibliotek man råkar invokera. Lintel är **harness-en runt agentens session** — den fil-strukturen, dokumentationen och de mekanismerna som tillsammans formar HUR agenten beter sig, från första prompt till sista commit.
 
-**Sessionens livscykel som JStack hanterar:**
+**Sessionens livscykel som Lintel hanterar:**
 
 ```
 SESSION START
@@ -89,12 +89,12 @@ SESSION END
 
 CROSS-SESSION (persistent)
 ├─ Memory persistence (across sessions in same repo)
-├─ Lessons sync (across repos via jstack-lessons-sync, opt-in)
-├─ Brand/voice corpus sync (~/.jstack/brand/, ~/.jstack/voice/)
+├─ Lessons sync (across repos via li-lessons-sync, opt-in)
+├─ Brand/voice corpus sync (~/.lintel/brand/, ~/.lintel/voice/)
 └─ Cross-machine state (gstack-brain pattern)
 ```
 
-Varje fas har JStack-komponenter som styr beteendet. **Det är därför v3 inte är "bara skills".**
+Varje fas har Lintel-komponenter som styr beteendet. **Det är därför v3 inte är "bara skills".**
 
 ### 2.2 Vad det betyder för v3-design
 
@@ -102,7 +102,7 @@ Varje fas har JStack-komponenter som styr beteendet. **Det är därför v3 inte 
 - **Scaffolding-templates** = repo-init + start-of-session-baseline (Kategori B)
 - **Hooks** = mid-session enforcement (Kategori A)
 - **Voice corpus, compliance docs, ADR-mallar** = referensmaterial harness:en konsulterar
-- **bin/ scripts** (jstack-scaffold, jstack-lessons-sync, jstack-doctor) = operator-side utilities som binder samman
+- **bin/ scripts** (li-scaffold, li-lessons-sync, li-doctor) = operator-side utilities som binder samman
 
 Vi designar för hela livscykeln, inte bara `/qa`-kommandot.
 
@@ -110,10 +110,10 @@ Vi designar för hela livscykeln, inte bara `/qa`-kommandot.
 
 | CLI | Plugin-mekanism | Installer-kommando | Status |
 |---|---|---|---|
-| Claude Code | `.claude-plugin/plugin.json` + marketplace.json | `/plugin install jstack@jstack-marketplace` | ✓ native via Anthropic marketplace |
+| Claude Code | `.claude-plugin/plugin.json` + marketplace.json | `/plugin install lintel@li-marketplace` | ✓ native via Anthropic marketplace |
 | Codex CLI | `.codex-plugin/plugin.json` med `interface{}` block | `/plugins` search + install | ✓ native via OpenAI marketplace |
 | Codex App | Samma plugin.json | sidebar → Plugins → `+` | ✓ native |
-| Cursor | `.cursor-plugin/plugin.json` med skills+agents+commands+hooks | `/add-plugin jstack` | ✓ native via Cursor marketplace |
+| Cursor | `.cursor-plugin/plugin.json` med skills+agents+commands+hooks | `/add-plugin lintel` | ✓ native via Cursor marketplace |
 | Gemini CLI | `gemini-extension.json` + GEMINI.md | `gemini extensions install <repo-url>` | ✓ native via Gemini extensions |
 | OpenCode | `.opencode/INSTALL.md` + `.opencode/plugins/` | Fetch INSTALL.md instructions | ✓ native, dokumenterad workflow |
 | Copilot CLI | `copilot plugin marketplace add` + `install` | `copilot plugin install` | ✓ native (verified by superpowers) |
@@ -143,7 +143,7 @@ Vi designar för hela livscykeln, inte bara `/qa`-kommandot.
 ### 3.2 Layoutdiagram
 
 ```
-jokerman-session-setup/
+jokerman-lintel/
 │
 ├── README.md                          ← honest v3-sync
 ├── LICENSE
@@ -196,7 +196,7 @@ jokerman-session-setup/
 │   ├── caip-audit/SKILL.md
 │   ├── cloudtest-eval-suite/SKILL.md
 │   ├── onebranch-validate/SKILL.md
-│   ├── jstack-eval/SKILL.md
+│   ├── li-eval/SKILL.md
 │   ├── scaffold-engagement-demo/SKILL.md
 │   ├── scaffold-internal-tool/SKILL.md
 │   ├── scaffold-mvp/SKILL.md
@@ -250,12 +250,12 @@ jokerman-session-setup/
 │   ├── landing-report/SKILL.md
 │   │
 │   │  # NEW v3 session-harness skills:
-│   ├── lessons-promote/SKILL.md       ← NEW: promote repo lesson → JStack global
+│   ├── lessons-promote/SKILL.md       ← NEW: promote repo lesson → Lintel global
 │   ├── adr-new/SKILL.md               ← NEW: bootstrap ADR from template
 │   ├── personas-rotate/SKILL.md       ← NEW: load persona context
 │   ├── match/SKILL.md                 ← NEW: semantic skill router
-│   ├── jstack-doctor/SKILL.md         ← NEW: cross-CLI health check
-│   └── jstack-scaffold/SKILL.md       ← NEW: invoke repo scaffolding
+│   ├── li-doctor/SKILL.md         ← NEW: cross-CLI health check
+│   └── li-scaffold/SKILL.md       ← NEW: invoke repo scaffolding
 │
 ├── agents/                            ← Kategori A: ~60-70 agents, organized per domain
 │   ├── ms-specific/                   ← MS-team-specifika
@@ -421,18 +421,18 @@ jokerman-session-setup/
 │               └── default-web-template.html
 │
 ├── install/
-│   ├── install.sh                     ← installs plugin + copies scaffolding to ~/.jstack/
+│   ├── install.sh                     ← installs plugin + copies scaffolding to ~/.lintel/
 │   ├── install.ps1                    ← PowerShell variant
 │   ├── verify.sh                      ← extended for v3 plugin-manifest checks
 │   └── upstream-sources.yaml
 │
 ├── bin/                               ← operator-side utilities
-│   ├── jstack-scaffold                ← copy scaffolding/01-foundation/ → target repo
-│   ├── jstack-lessons-sync            ← cross-repo lessons sync (gstack-brain-style)
-│   ├── jstack-lessons-promote         ← promote repo lesson → global JStack
-│   ├── jstack-doctor                  ← cross-CLI health check
-│   ├── jstack-update                  ← update plugin from latest tag
-│   └── jstack-adr-new                 ← bootstrap ADR
+│   ├── li-scaffold                ← copy scaffolding/01-foundation/ → target repo
+│   ├── li-lessons-sync            ← cross-repo lessons sync (gstack-brain-style)
+│   ├── li-lessons-promote         ← promote repo lesson → global Lintel
+│   ├── li-doctor                  ← cross-CLI health check
+│   ├── li-update                  ← update plugin from latest tag
+│   └── li-adr-new                 ← bootstrap ADR
 │
 ├── docs/
 │   ├── getting-started.md
@@ -463,8 +463,8 @@ jokerman-session-setup/
 │   │   ├── voice.md
 │   │   └── doc-gen.md
 │   └── design/
-│       ├── jstack-v2-design.md        ← historical
-│       ├── jstack-v3-plan.md          ← THIS FILE
+│       ├── li-v2-design.md        ← historical
+│       ├── li-v3-plan.md          ← THIS FILE
 │       ├── MIGRATION-TABLE-v2.md      ← moved from root
 │       ├── CONTEXT-ENGINE.md          ← moved from root + STATUS marker
 │       ├── BRAND-INTEGRATION.md       ← moved from root
@@ -479,7 +479,7 @@ jokerman-session-setup/
 │   │   ├── scaffolding-copy.sh        ← NEW
 │   │   └── agents-categorized.sh      ← NEW
 │   ├── integration/
-│   │   ├── jstack-scaffold-init.sh    ← NEW
+│   │   ├── li-scaffold-init.sh    ← NEW
 │   │   └── lessons-sync.sh            ← NEW
 │   ├── e2e/
 │   │   ├── claude-code-headless.sh
@@ -501,15 +501,15 @@ jokerman-session-setup/
 **`.claude-plugin/plugin.json`:**
 ```json
 {
-  "name": "jstack",
+  "name": "lintel",
   "description": "MS-CAIP-SE session harness — skills, agents, hooks, compliance",
   "version": "3.0.0",
   "author": {
-    "name": "Azureflipper",
+    "name": "jokerman89",
     "email": "johannes.akerman@microsoft.com"
   },
-  "homepage": "https://github.com/Azureflipper/jokerman-session-setup",
-  "repository": "https://github.com/Azureflipper/jokerman-session-setup",
+  "homepage": "https://github.com/jokerman89/jokerman-lintel",
+  "repository": "https://github.com/jokerman89/jokerman-lintel",
   "license": "MIT",
   "keywords": ["microsoft", "caip", "compliance", "rais", "trailblazer-voice", "session-harness"]
 }
@@ -518,18 +518,18 @@ jokerman-session-setup/
 **`.codex-plugin/plugin.json`:**
 ```json
 {
-  "name": "jstack",
+  "name": "lintel",
   "version": "3.0.0",
   "description": "MS-CAIP-SE session harness for OpenAI Codex",
-  "homepage": "https://github.com/Azureflipper/jokerman-session-setup",
-  "repository": "https://github.com/Azureflipper/jokerman-session-setup",
+  "homepage": "https://github.com/jokerman89/jokerman-lintel",
+  "repository": "https://github.com/jokerman89/jokerman-lintel",
   "license": "MIT",
   "skills": "./skills/",
   "interface": {
-    "displayName": "JStack",
+    "displayName": "Lintel",
     "shortDescription": "MS-CAIP-SE session harness — RAIS, OneCS, Trailblazer voice",
-    "longDescription": "JStack är en session-harness för Microsoft Sweden CAIP solution engineers. Inkluderar RAIS-gates, OneCS-checks, Trailblazer voice rubric, doc-gen för PPT/Word/Web, och repo-scaffolding för nya engagements.",
-    "developerName": "Azureflipper",
+    "longDescription": "Lintel är en session-harness för Microsoft Sweden CAIP solution engineers. Inkluderar RAIS-gates, OneCS-checks, Trailblazer voice rubric, doc-gen för PPT/Word/Web, och repo-scaffolding för nya engagements.",
+    "developerName": "jokerman89",
     "category": "Coding",
     "capabilities": ["Interactive", "Read", "Write"],
     "defaultPrompt": [
@@ -544,8 +544,8 @@ jokerman-session-setup/
 **`.cursor-plugin/plugin.json`:**
 ```json
 {
-  "name": "jstack",
-  "displayName": "JStack",
+  "name": "lintel",
+  "displayName": "Lintel",
   "description": "MS-CAIP-SE session harness",
   "version": "3.0.0",
   "license": "MIT",
@@ -558,7 +558,7 @@ jokerman-session-setup/
 **`gemini-extension.json`:**
 ```json
 {
-  "name": "jstack",
+  "name": "lintel",
   "description": "MS-CAIP-SE session harness for Gemini",
   "version": "3.0.0",
   "contextFileName": "GEMINI.md"
@@ -616,7 +616,7 @@ Categorin används av plugin-manifests för att exponera per-domän subagent-lis
 
 ### 5.1 Repo-scaffolding (Kategori B)
 
-`bin/jstack-scaffold init` kopierar `scaffolding/01-foundation/` → target repo:
+`bin/lintel:li-scaffold init` kopierar `scaffolding/01-foundation/` → target repo:
 - `CLAUDE.md` (renderad från template med repo-specifik metadata)
 - `CORE-PRINCIPLES.md`
 - `EVOLUTION.md`, `EVOLUTION-LOG.md`
@@ -639,9 +639,9 @@ Resultat: ny repo har sane defaults inom 30 sekunder.
 
 1. **Per-repo `tasks/lessons.md`** — lessons från corrections i det specifika repot. Reviewas vid session-start.
 
-2. **Cross-repo sync via `jstack-lessons-sync`** — opt-in. Lessons från Repo A sync:as till `~/.jstack/lessons/<repo-slug>.md` så Repo B kan referera. Gstack-brain-style — privat per operatör.
+2. **Cross-repo sync via `li-lessons-sync`** — opt-in. Lessons från Repo A sync:as till `~/.lintel/lessons/<repo-slug>.md` så Repo B kan referera. Gstack-brain-style — privat per operatör.
 
-3. **Global JStack lessons via `jstack-lessons-promote`** — när en lesson är generell (inte repo-specific), promote till JStack global. Hamnar i `scaffolding/01-foundation/tasks/lessons.md` så alla framtida scaffolded repos får den som baseline.
+3. **Global Lintel lessons via `li-lessons-promote`** — när en lesson är generell (inte repo-specific), promote till Lintel global. Hamnar i `scaffolding/01-foundation/tasks/lessons.md` så alla framtida scaffolded repos får den som baseline.
 
 **Mid-session lessons-review skill:** `/lessons` slash-command laddar relevanta lessons (filtrerade på keywords från current task) som kontext.
 
@@ -671,7 +671,7 @@ Hook: när CLAUDE.md modifieras → auto-append entry i EVOLUTION-LOG.md med com
 
 ### 5.7 Voice corpus mekanism
 
-`scaffolding/03-ms-team/voice/OurVoice-corpus.md` finns kvar (60 paragraphs, 12 cells). Calibration via `/jstack-eval`. När calibrated, `/rais-customer-voice-check` skill använder den som referens.
+`scaffolding/03-ms-team/voice/OurVoice-corpus.md` finns kvar (60 paragraphs, 12 cells). Calibration via `/lintel:li-eval`. När calibrated, `/rais-customer-voice-check` skill använder den som referens.
 
 ### 5.8 Compliance mekanism
 
@@ -685,8 +685,8 @@ Hook: när CLAUDE.md modifieras → auto-append entry i EVOLUTION-LOG.md med com
 
 **Plugin install:**
 ```bash
-/plugin marketplace add Azureflipper/jokerman-session-setup
-/plugin install jstack@jokerman-session-setup
+/plugin marketplace add jokerman89/jokerman-lintel
+/plugin install lintel@jokerman-lintel
 ```
 
 **Vad operatör får:**
@@ -701,7 +701,7 @@ Hook: när CLAUDE.md modifieras → auto-append entry i EVOLUTION-LOG.md med com
 ```bash
 codex
 > /plugins
-> search jstack
+> search lintel
 > Install Plugin
 ```
 
@@ -715,7 +715,7 @@ codex
 **Plugin install:**
 ```
 In Cursor Agent chat:
-/add-plugin jstack
+/add-plugin lintel
 ```
 
 **Vad operatör får:**
@@ -727,7 +727,7 @@ In Cursor Agent chat:
 
 **Extension install:**
 ```bash
-gemini extensions install https://github.com/Azureflipper/jokerman-session-setup
+gemini extensions install https://github.com/jokerman89/jokerman-lintel
 ```
 
 **Vad operatör får:**
@@ -738,23 +738,23 @@ gemini extensions install https://github.com/Azureflipper/jokerman-session-setup
 
 **Install:**
 ```
-Fetch and follow instructions from https://raw.githubusercontent.com/Azureflipper/jokerman-session-setup/main/.opencode/INSTALL.md
+Fetch and follow instructions from https://raw.githubusercontent.com/jokerman89/jokerman-lintel/main/.opencode/INSTALL.md
 ```
 
 ### 6.6 GitHub Copilot CLI
 
 **Plugin install:**
 ```bash
-copilot plugin marketplace add Azureflipper/jokerman-session-setup
-copilot plugin install jstack@jokerman-session-setup
+copilot plugin marketplace add jokerman89/jokerman-lintel
+copilot plugin install lintel@jokerman-lintel
 ```
 
 ### 6.7 Factory Droid
 
 **Plugin install:**
 ```bash
-droid plugin marketplace add https://github.com/Azureflipper/jokerman-session-setup
-droid plugin install jstack@jstack
+droid plugin marketplace add https://github.com/jokerman89/jokerman-lintel
+droid plugin install lintel@lintel
 ```
 
 ---
@@ -793,7 +793,7 @@ Per skill + agent, lägg till:
 - `cli_compat: {claude-code: full, codex: full, ...}` (ersätter v2 cli_support array)
 - `depends_on: []` (för dependency graph)
 
-Bulk-script via sed (`bin/jstack-migrate-v2-to-v3` engångsskript).
+Bulk-script via sed (`bin/lintel:li-migrate-v2-to-v3` engångsskript).
 
 ### 7.4 Backward-compat
 
@@ -860,18 +860,18 @@ Bulk-script via sed (`bin/jstack-migrate-v2-to-v3` engångsskript).
 - [ ] `/adr-new` (bootstrap ADR from template)
 - [ ] `/personas-rotate` (load persona context)
 - [ ] `/match` (semantic skill router)
-- [ ] `/jstack-doctor` (cross-CLI health check)
-- [ ] `/jstack-scaffold` (invoke repo scaffolding)
+- [ ] `/lintel:li-doctor` (cross-CLI health check)
+- [ ] `/lintel:li-scaffold` (invoke repo scaffolding)
 - [ ] `/lessons` (mid-session lessons-review)
 
 ### Phase 5 — Bin scripts + install updates (2 dagar)
 
-- [ ] `bin/jstack-scaffold` — scaffolding/01-foundation/* → target repo
-- [ ] `bin/jstack-lessons-sync` — cross-repo lessons sync (gstack-brain-style)
-- [ ] `bin/jstack-lessons-promote` — promote to global
-- [ ] `bin/jstack-doctor` — health check
-- [ ] `bin/jstack-update` — update plugin from latest tag
-- [ ] `bin/jstack-adr-new` — bootstrap ADR
+- [ ] `bin/lintel:li-scaffold` — scaffolding/01-foundation/* → target repo
+- [ ] `bin/lintel:li-lessons-sync` — cross-repo lessons sync (gstack-brain-style)
+- [ ] `bin/lintel:li-lessons-promote` — promote to global
+- [ ] `bin/lintel:li-doctor` — health check
+- [ ] `bin/lintel:li-update` — update plugin from latest tag
+- [ ] `bin/lintel:li-adr-new` — bootstrap ADR
 - [ ] `install/install.sh` — extended for v3 (plugin install per detected CLI + scaffolding copy)
 - [ ] `install/verify.sh` — new subcommands: --plugin-manifests, --scaffolding, --agents-categorized, --lessons-mechanism
 
@@ -890,7 +890,7 @@ Bulk-script via sed (`bin/jstack-migrate-v2-to-v3` engångsskript).
 - [ ] `tests/unit/plugin-manifests-valid.sh`
 - [ ] `tests/unit/scaffolding-copy.sh`
 - [ ] `tests/unit/agents-categorized.sh`
-- [ ] `tests/integration/jstack-scaffold-init.sh`
+- [ ] `tests/integration/lintel:li-scaffold-init.sh`
 - [ ] `tests/integration/lessons-sync.sh`
 - [ ] `tests/e2e/claude-code-headless.sh`
 - [ ] `tests/e2e/codex-headless.sh`
@@ -929,7 +929,7 @@ Bulk-script via sed (`bin/jstack-migrate-v2-to-v3` engångsskript).
 | Skill count | 74 | ~60 (konsolidering) |
 | Agent count | 44 | ~70-77 (BUILD OUT) |
 | Multi-CLI native | claim only | proven via plugin marketplaces |
-| Per-CLI install | manual shim copy | `<cli> plugin install jstack` |
+| Per-CLI install | manual shim copy | `<cli> plugin install lintel` |
 | Voice corpus | NOT_CALIBRATED | CALIBRATED |
 | Session-harness framing | implicit | explicit (docs/session-harness.md) |
 | Scaffolding-templates | i scaffolding/01-foundation/ | bevarade + moderniserade |
@@ -970,7 +970,7 @@ Bulk-script via sed (`bin/jstack-migrate-v2-to-v3` engångsskript).
 2. ✓ Plugin-manifest-pattern istället för MCP+compile
 3. ✓ BUILD OUT agents, inte trim
 4. ✓ Bevara scaffolding-templates + modernisera
-5. ✓ Session-harness framing som JStack:s identitet
+5. ✓ Session-harness framing som Lintel:s identitet
 6. ✓ Kör på alla faser non-stop
 
 ---
@@ -980,9 +980,9 @@ Bulk-script via sed (`bin/jstack-migrate-v2-to-v3` engångsskript).
 **v3 levererar utöver v2:**
 - Plugin-install i 8 major CLIs via deras native marketplaces
 - ~30 nya agents organiserade per domän (säkerhet, compliance, devops, customer, communication)
-- Session-harness explicit som JStack:s identitet — docs, lifecycle, mekanismer
-- Scaffolding-templates moderniserade med `jstack-scaffold` + cross-repo lessons sync
-- 6 nya session-harness skills (lessons-promote, adr-new, personas-rotate, match, jstack-doctor, jstack-scaffold)
+- Session-harness explicit som Lintel:s identitet — docs, lifecycle, mekanismer
+- Scaffolding-templates moderniserade med `li-scaffold` + cross-repo lessons sync
+- 6 nya session-harness skills (lessons-promote, adr-new, personas-rotate, match, li-doctor, li-scaffold)
 - Honest README med per-CLI portability-table
 - Repo-standards (CODEOWNERS, CONTRIBUTING, SECURITY)
 

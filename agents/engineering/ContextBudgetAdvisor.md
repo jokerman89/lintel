@@ -64,7 +64,7 @@ context_phases:
     warmup_tasks:
       - "read all docs in docs/customer-engagements/customer-A/"
       - "read TRAILBLAZER-CORPUS.md (now OurVoice-corpus.md)"
-      - "summarize prior 3 sessions from ~/.jstack/projects/.../checkpoints/"
+      - "summarize prior 3 sessions from ~/.lintel/projects/.../checkpoints/"
     decay_on_exit: prompt-operator
   - phase: build
     budget: 400000
@@ -91,7 +91,7 @@ Run:
   (then proceed with build work; transition phases as you progress)
 
 ## Risk flags
-- Voice_check phase depends on T0 calibrated corpus. Verify with /jstack-eval status first.
+- Voice_check phase depends on T0 calibrated corpus. Verify with /lintel:li-eval status first.
 - Build phase reserves 100k for voice_check — if voice_check needs more, extend before phase transition.
 ```
 

@@ -4,12 +4,12 @@ tier: warn-only
 event: PreToolUse (Bash)
 fires_on: `gh pr merge`, `git merge` to main, similar merge ops
 override: pass explicit operator confirmation
-audit: ~/.jstack/audit/hooks.jsonl
+audit: ~/.lintel/audit/hooks.jsonl
 ---
 
 # no-merge-without-review
 
-Warns when a merge to main is about to happen without a recent `/review` or `/plan-eng-review` record. Reads `~/.jstack/review-log/` for current-commit-within-7-days clearance.
+Warns when a merge to main is about to happen without a recent `/review` or `/plan-eng-review` record. Reads `~/.lintel/review-log/` for current-commit-within-7-days clearance.
 
 ## Detection
 

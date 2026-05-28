@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
-# stale-calibration-warn — JStack warn-only hook
+# stale-calibration-warn — Lintel warn-only hook
 # Warns when trailblazer operation runs against stale calibration.
 
 set -euo pipefail
 
-JSTACK_HOME="${JSTACK_HOME:-$HOME/.jstack}"
-mkdir -p "$JSTACK_HOME/audit"
-AUDIT="$JSTACK_HOME/audit/hooks.jsonl"
+LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
+mkdir -p "$LINTEL_HOME/audit"
+AUDIT="$LINTEL_HOME/audit/hooks.jsonl"
 
 # Find TRAILBLAZER-CALIBRATION.md — repo-local or under known scaffolding path
 CALIB=""
 for candidate in \
   "./scaffolding/03-personal-advanced/voice/TRAILBLAZER-CALIBRATION.md" \
   "./TRAILBLAZER-CALIBRATION.md" \
-  "$HOME/.jstack/voice/TRAILBLAZER-CALIBRATION.md"
+  "$HOME/.lintel/voice/TRAILBLAZER-CALIBRATION.md"
 do
   if [ -f "$candidate" ]; then
     CALIB="$candidate"
@@ -37,8 +37,8 @@ if [ "$age_days" -gt 30 ]; then
   ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
   printf '{"hook":"stale-calibration-warn","tier":"warn","ts":"%s","calibration_age_days":%d}\n' \
     "$ts" "$age_days" >> "$AUDIT"
-  echo "WARN [JStack hook]: TRAILBLAZER-CALIBRATION is $age_days days old (>30 day threshold)"
-  echo "WARN: Voice-check verdicts will carry STALE stamp. Re-run /jstack-eval against corpus to refresh."
+  echo "WARN [Lintel hook]: TRAILBLAZER-CALIBRATION is $age_days days old (>30 day threshold)"
+  echo "WARN: Voice-check verdicts will carry STALE stamp. Re-run /lintel:li-eval against corpus to refresh."
 fi
 
 exit 0

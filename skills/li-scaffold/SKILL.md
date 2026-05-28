@@ -1,25 +1,25 @@
 ---
-name: jstack-scaffold
+name: li-scaffold
 layer: foundation
-description: Scaffold a new repo with JStack base templates — CLAUDE.md, tasks/lessons.md, EVOLUTION-LOG, docs/adr/ — interactive setup.
+description: Scaffold a new repo with Lintel base templates — CLAUDE.md, tasks/lessons.md, EVOLUTION-LOG, docs/adr/ — interactive setup.
 color: cyan
 tools: Read, Bash, Edit, Write, Glob
 voice: internal
 cli_support: [claude-code, codex]
 ---
 
-You are the jstack-scaffold skill.
+You are the li-scaffold skill.
 
 ## What this skill does
 
-Sets up a new repo (or initializes scaffolding in existing repo) with JStack's Kategori B templates: CLAUDE.md (from template + repo-specific variables), CORE-PRINCIPLES.md, EVOLUTION.md, EVOLUTION-LOG.md, tasks/{lessons,memory,personas,todo}.md, docs/adr/{README,TEMPLATE}.md, .claude/agents/, TEMPLATE-skill.md.
+Sets up a new repo (or initializes scaffolding in existing repo) with Lintel's Kategori B templates: CLAUDE.md (from template + repo-specific variables), CORE-PRINCIPLES.md, EVOLUTION.md, EVOLUTION-LOG.md, tasks/{lessons,memory,personas,todo}.md, docs/adr/{README,TEMPLATE}.md, .claude/agents/, TEMPLATE-skill.md.
 
-This is how new MS engagement repos get JStack defaults inside 30 seconds.
+This is how new MS engagement repos get Lintel defaults inside 30 seconds.
 
 ## When to use
 
 - Brand-new repo, no CLAUDE.md yet
-- Existing repo joining JStack standards
+- Existing repo joining Lintel standards
 - Per-engagement template initialization
 
 ## When NOT to use
@@ -37,9 +37,9 @@ This is how new MS engagement repos get JStack defaults inside 30 seconds.
    - `docs/adr/` — exists?
    Recommend backup if collisions.
 
-3. **Locate JStack scaffolding source.**
-   - Primary: `~/.jstack/scaffolding/01-foundation/`
-   - Fallback: clone or fetch from `Azureflipper/jokerman-session-setup`
+3. **Locate Lintel scaffolding source.**
+   - Primary: `~/.lintel/scaffolding/01-foundation/`
+   - Fallback: clone or fetch from `jokerman89/jokerman-lintel`
 
 4. **Gather repo-specific variables (AskUserQuestion):**
    - Repo name
@@ -69,7 +69,7 @@ This is how new MS engagement repos get JStack defaults inside 30 seconds.
 7. **Initial commit (interactive — confirm with operator):**
    ```bash
    git add CLAUDE.md CORE-PRINCIPLES.md EVOLUTION.md EVOLUTION-LOG.md tasks/ docs/ .claude/ TEMPLATE-*.md
-   git commit -m "chore: scaffold JStack base via jstack-scaffold"
+   git commit -m "chore: scaffold Lintel base via li-scaffold"
    ```
 
 8. **Add compliance template (optional).** If full-SDL compliance level chosen, copy `scaffolding/02-sdl/*` too.
@@ -107,19 +107,19 @@ Commit: <SHA>
 Next steps:
 - [ ] Review CLAUDE.md, adjust project-specific sections
 - [ ] Customize tasks/personas.md with engagement-specific personas
-- [ ] Install JStack plugin for your CLI: see docs/per-cli/
+- [ ] Install Lintel plugin for your CLI: see docs/per-cli/
 - [ ] First /qa to verify setup
 ```
 
 ## Edge cases
 
 - **Existing CLAUDE.md** — backup first, merge interactively, OR offer dry-run preview.
-- **No JStack scaffolding source available** — recommend `git clone Azureflipper/jokerman-session-setup ~/.jstack`.
+- **No Lintel scaffolding source available** — recommend `git clone jokerman89/jokerman-lintel ~/.lintel`.
 - **Non-git directory** — recommend `git init` first.
-- **Customer wants to fork JStack** — see `docs/compliance.md` for what they'd need to change.
+- **Customer wants to fork Lintel** — see `docs/compliance.md` for what they'd need to change.
 
 ## Why this matters
 
 Without this skill, every new repo starts CLAUDE.md from scratch. With it, every new repo starts with proven defaults. 30-second setup vs 30-minute setup.
 
-This is Kategori B (Repo-scaffolding) in action — the templates JStack curates get applied to make every new project consistent.
+This is Kategori B (Repo-scaffolding) in action — the templates Lintel curates get applied to make every new project consistent.

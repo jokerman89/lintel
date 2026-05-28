@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# no-trailblazer-without-corpus — JStack warn-only hook
+# no-trailblazer-without-corpus — Lintel warn-only hook
 set -euo pipefail
 
 PAYLOAD="${1:-}"
 [ -z "$PAYLOAD" ] && exit 0
 
-JSTACK_HOME="${JSTACK_HOME:-$HOME/.jstack}"
-mkdir -p "$JSTACK_HOME/audit"
-AUDIT="$JSTACK_HOME/audit/hooks.jsonl"
+LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
+mkdir -p "$LINTEL_HOME/audit"
+AUDIT="$LINTEL_HOME/audit/hooks.jsonl"
 
 # Trailblazer-tagged content?
 if ! echo "$PAYLOAD" | grep -qE '^voice:\s*trailblazer(-draft)?'; then
@@ -33,7 +33,7 @@ fi
 if [ "$calibrated" = "0" ]; then
   ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
   printf '{"hook":"no-trailblazer-without-corpus","tier":"warn","ts":"%s"}\n' "$ts" >> "$AUDIT"
-  echo "WARN [JStack hook]: writing trailblazer-voice content while T0 calibration incomplete"
+  echo "WARN [Lintel hook]: writing trailblazer-voice content while T0 calibration incomplete"
   echo "WARN: Output will carry UNCALIBRATED stamp; downstream /customer-voice-check will refuse."
 fi
 

@@ -1,5 +1,5 @@
 ---
-name: jstack-browse
+name: li-browse
 layer: foundation
 description: Drive a headless Chromium to a URL — screenshot, extract DOM, click, fill forms, verify UI.
 color: blue
@@ -34,15 +34,15 @@ Codex and Copilot do not have native browser-control. This skill is `claude-code
 - Required: URL or local file path
 - Optional `--actions <yaml>` — list of click/fill/wait/screenshot steps (inline or path to YAML)
 - Optional `--viewport <WxH>` — default 1440x900
-- Optional `--out <dir>` — where screenshots / DOM dumps land (default: `~/.jstack/browse-runs/<ts>/`)
+- Optional `--out <dir>` — where screenshots / DOM dumps land (default: `~/.lintel/browse-runs/<ts>/`)
 - Optional `--headed` — show the browser window (default: headless)
 
 ## Workflow
 
 1. **Preflight.** Verify managed Chromium present (run `/open-managed-browser --check` internally). If missing: surface install command.
-2. **Compliance gate.** Check URL against Layer 2 patterns: if hostname matches `~/.jstack/compliance/prod-hosts.txt`, BLOCK with reason "production host — customer-data risk". Operator can override via explicit per-call confirmation.
-3. **Launch.** Playwright with `--user-data-dir` pointed at the JStack profile (so cookies established via `/setup-browser-cookies` persist).
-4. **Execute actions.** Step through the action list. Each step logs to `~/.jstack/browse-runs/<ts>/trace.jsonl`. Console messages from the page captured to `console.log` in same dir.
+2. **Compliance gate.** Check URL against Layer 2 patterns: if hostname matches `~/.lintel/compliance/prod-hosts.txt`, BLOCK with reason "production host — customer-data risk". Operator can override via explicit per-call confirmation.
+3. **Launch.** Playwright with `--user-data-dir` pointed at the Lintel profile (so cookies established via `/setup-browser-cookies` persist).
+4. **Execute actions.** Step through the action list. Each step logs to `~/.lintel/browse-runs/<ts>/trace.jsonl`. Console messages from the page captured to `console.log` in same dir.
 5. **Capture.** Final screenshot (PNG) + DOM snapshot (HTML) saved.
 6. **Report.** Summary of what was loaded, what was clicked, any console errors, paths to artifacts.
 
@@ -61,7 +61,7 @@ Actions: 3 (goto, click #login-btn, fill #email)
 [log] x6 application-level logs (full content in console.log)
 
 ## Artifacts
-- screenshot.png — 142KB (~/.jstack/browse-runs/20260527-160142/)
+- screenshot.png — 142KB (~/.lintel/browse-runs/20260527-160142/)
 - dom.html — 87KB
 - trace.jsonl — full action timeline
 - console.log — page console output
@@ -70,7 +70,7 @@ Actions: 3 (goto, click #login-btn, fill #email)
 ## Compliance integration
 
 - Layer 2 customer-data gate: production hosts blocked unless explicitly overridden + logged.
-- Screenshot persistence: artifacts land in `~/.jstack/browse-runs/`. If `customer-data-block` hook is symlinked active, the hook may flag screenshots containing customer-data patterns and refuse upload to downstream skills.
+- Screenshot persistence: artifacts land in `~/.lintel/browse-runs/`. If `customer-data-block` hook is symlinked active, the hook may flag screenshots containing customer-data patterns and refuse upload to downstream skills.
 - Auth state: managed via shared user-data-dir. Per-call auth NOT required for read-only navigation against authorized hosts (the cookie store itself was set up under explicit auth via `/setup-browser-cookies`).
 
 ## Voice tier note

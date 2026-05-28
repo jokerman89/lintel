@@ -1,7 +1,7 @@
 ---
-name: jstack-dsb-submit-draft
+name: li-dsb-submit-draft
 layer: ms-team
-v1_alias: [jstack-dsb-prep]
+v1_alias: [li-dsb-prep]
 description: Prepare a Data Sharing Board submission draft — recipients, purpose, data class, retention.
 color: orange
 tools: Read, Write, Bash, Grep
@@ -32,7 +32,7 @@ DSB is the body that approves data flows leaving their original collection conte
 
 - Required `--share-name <name>` — short name for the share
 - Optional `--system <path>` — code or design doc for the system that will do the sharing
-- Optional `--out <path>` — output draft path (default: `~/.jstack/dsb/<share>-dsb-DRAFT.md`)
+- Optional `--out <path>` — output draft path (default: `~/.lintel/dsb/<share>-dsb-DRAFT.md`)
 
 ## Workflow
 
@@ -65,7 +65,7 @@ DSB is the body that approves data flows leaving their original collection conte
 ```
 DSB prep: share-name=quarterly-usage-export-to-partner
 
-Output: ~/.jstack/dsb/quarterly-usage-export-to-partner-dsb-DRAFT.md (3.2 KB)
+Output: ~/.lintel/dsb/quarterly-usage-export-to-partner-dsb-DRAFT.md (3.2 KB)
 Recipient: partner-org (Nordic region, GDPR regime)
 Purpose: quarterly product-usage analytics for joint roadmap
 
@@ -116,7 +116,7 @@ Purpose: quarterly product-usage analytics for joint roadmap
 ```
 > /dsb-submit-draft --share-name quarterly-usage-export-to-partner
 [Intake interview, data class assignment]
-✓ DRAFT at ~/.jstack/dsb/quarterly-usage-export-to-partner-dsb-DRAFT.md
+✓ DRAFT at ~/.lintel/dsb/quarterly-usage-export-to-partner-dsb-DRAFT.md
   1 Sensitive class flagged — see report for redaction recommendation.
 ```
 

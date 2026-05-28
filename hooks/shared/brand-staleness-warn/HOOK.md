@@ -2,9 +2,9 @@
 name: brand-staleness-warn
 tier: warn-only
 event: PreToolUse (Skill /generate-ppt|/generate-word|/generate-web)
-fires_on: ~/.jstack/brand/brand-version.txt older than 90 days
+fires_on: ~/.lintel/brand/brand-version.txt older than 90 days
 override: pass --ignore-stale-brand flag (operator decision, logged)
-audit: ~/.jstack/audit/hooks.jsonl
+audit: ~/.lintel/audit/hooks.jsonl
 ---
 
 # brand-staleness-warn
@@ -13,7 +13,7 @@ Surfaces when doc-gen runs against brand assets older than 90 days. Brand portal
 
 ## What it does
 
-- Reads `~/.jstack/brand/brand-version.txt`
+- Reads `~/.lintel/brand/brand-version.txt`
 - Computes age vs current time
 - If >90 days: WARN
 

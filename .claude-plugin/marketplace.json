@@ -1,21 +1,21 @@
 {
-  "name": "jokerman-session-setup",
+  "name": "jokerman-lintel",
   "owner": {
-    "name": "Azureflipper",
+    "name": "jokerman89",
     "email": "johannes.akerman@microsoft.com"
   },
   "metadata": {
-    "description": "MS-CAIP-SE session harness marketplace",
-    "version": "3.0.0-dev"
+    "description": "Lintel — MS-CAIP-SE session harness marketplace",
+    "version": "3.5.0-dev"
   },
   "plugins": [
     {
-      "name": "jstack",
+      "name": "lintel",
       "source": "./",
-      "description": "Full JStack v3 session harness — skills + agents + hooks + compliance + voice + scaffolding",
-      "version": "3.0.0-dev",
+      "description": "Lintel v3.5 — 8-phase cycle (SENSE→CAPTURE) + role-lifting + context-warming + 78 specialized agents + compliance tiering + multi-CLI",
+      "version": "3.5.0-dev",
       "category": "workflow",
-      "tags": ["microsoft", "caip", "session-harness", "rais", "trailblazer-voice"],
+      "tags": ["lintel", "microsoft", "caip", "session-harness", "rais", "trailblazer-voice", "azure"],
       "strict": false
     }
   ]

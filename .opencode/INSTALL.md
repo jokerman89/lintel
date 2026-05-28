@@ -1,14 +1,14 @@
-# JStack v3 — OpenCode install instructions
+# Lintel v3 — OpenCode install instructions
 
 These instructions are for OpenCode to follow when an operator runs:
 
 ```
-Fetch and follow instructions from https://raw.githubusercontent.com/Azureflipper/jokerman-session-setup/refs/heads/main/.opencode/INSTALL.md
+Fetch and follow instructions from https://raw.githubusercontent.com/jokerman89/jokerman-lintel/refs/heads/main/.opencode/INSTALL.md
 ```
 
-## What JStack is
+## What Lintel is
 
-JStack is a session-harness scaffold for Microsoft Sweden CAIP solution engineers. It provides:
+Lintel is a session-harness scaffold for Microsoft Sweden CAIP solution engineers. It provides:
 - ~74 skills (slash-commands) for daily engineering + MS-specific workflows
 - ~44 agents (subagent roles) organized per domain
 - 15 hooks for compliance enforcement
@@ -20,22 +20,22 @@ JStack is a session-harness scaffold for Microsoft Sweden CAIP solution engineer
 
 1. **Read the canonical session ritual:**
    ```
-   fetch https://raw.githubusercontent.com/Azureflipper/jokerman-session-setup/refs/heads/main/AGENT-INSTRUCTIONS.md
+   fetch https://raw.githubusercontent.com/jokerman89/jokerman-lintel/refs/heads/main/AGENT-INSTRUCTIONS.md
    ```
    Treat this as the primary session bootstrap doc.
 
 2. **Pull skills into OpenCode plugin directory:**
-   - Skills live at `https://github.com/Azureflipper/jokerman-session-setup/tree/main/skills/`
+   - Skills live at `https://github.com/jokerman89/jokerman-lintel/tree/main/skills/`
    - Per-skill: `<repo>/skills/<name>/SKILL.md`
    - OpenCode should clone or fetch these into its plugin/skills directory.
 
 3. **Pull agents:**
-   - Agents organized per category at `https://github.com/Azureflipper/jokerman-session-setup/tree/main/agents/`
+   - Agents organized per category at `https://github.com/jokerman89/jokerman-lintel/tree/main/agents/`
    - Categories: `ms-specific/`, `engineering/`, `doc-gen/`, `voice/`, `security/`, `compliance/`, `devops/`, `customer/`, `communication/`
    - Place per OpenCode's agent-discovery mechanism.
 
 4. **Hooks (optional, opt-in):**
-   - Hook specs at `https://github.com/Azureflipper/jokerman-session-setup/tree/main/hooks/shared/`
+   - Hook specs at `https://github.com/jokerman89/jokerman-lintel/tree/main/hooks/shared/`
    - Each has `HOOK.md` + `run.sh`. Install matching ones to OpenCode's hooks dir.
 
 5. **Compliance docs (reference):**
@@ -56,7 +56,7 @@ JStack is a session-harness scaffold for Microsoft Sweden CAIP solution engineer
 
 ## Update flow
 
-To update JStack, re-run this INSTALL.md instructions. OpenCode should re-fetch from main branch.
+To update Lintel, re-run this INSTALL.md instructions. OpenCode should re-fetch from main branch.
 
 ## Plugins directory
 
@@ -64,4 +64,4 @@ Per-skill OpenCode plugin shims (if needed) live in `.opencode/plugins/`. Curren
 
 ## Issues
 
-Report problems to: https://github.com/Azureflipper/jokerman-session-setup/issues
+Report problems to: https://github.com/jokerman89/jokerman-lintel/issues

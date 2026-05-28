@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# no-en-vocab-in-trailblazer — JStack warn-only hook
+# no-en-vocab-in-trailblazer — Lintel warn-only hook
 set -euo pipefail
 
 PAYLOAD="${1:-}"
 [ -z "$PAYLOAD" ] && exit 0
 
-JSTACK_HOME="${JSTACK_HOME:-$HOME/.jstack}"
-mkdir -p "$JSTACK_HOME/audit"
-AUDIT="$JSTACK_HOME/audit/hooks.jsonl"
+LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
+mkdir -p "$LINTEL_HOME/audit"
+AUDIT="$LINTEL_HOME/audit/hooks.jsonl"
 
 # Trailblazer-tagged?
 if ! echo "$PAYLOAD" | grep -qE '^voice:\s*trailblazer'; then
@@ -35,7 +35,7 @@ if [ ${#hits[@]} -gt 0 ]; then
   joined=$(IFS=,; echo "${hits[*]}")
   printf '{"hook":"no-en-vocab-in-trailblazer","tier":"warn","ts":"%s","tier1_hits":"%s"}\n' \
     "$ts" "$joined" >> "$AUDIT"
-  echo "WARN [JStack hook]: Tier 1 AI-tell vocab in trailblazer payload: $joined"
+  echo "WARN [Lintel hook]: Tier 1 AI-tell vocab in trailblazer payload: $joined"
   echo "WARN: Regenerate via /msvoice-rewrite or rewrite manually. /customer-voice-check WILL fail with these."
 fi
 

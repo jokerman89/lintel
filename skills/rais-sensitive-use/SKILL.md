@@ -1,7 +1,7 @@
 ---
-name: jstack-rais-sensitive-use
+name: li-rais-sensitive-use
 layer: ms-team
-v1_alias: [jstack-sensitive-use-report]
+v1_alias: [li-sensitive-use-report]
 description: Classify an AI feature against MS Sensitive Uses categories — produces structured report.
 color: red
 tools: Read, Write, Bash, Grep
@@ -13,7 +13,7 @@ cli_support: [claude-code, codex]
 
 Evaluates an AI feature against the MS Responsible AI Sensitive Uses categories — uses that warrant additional review because of the consequence of error. Output is a structured report consumed by `/onerai-submit-draft` and the Sensitive Uses review process.
 
-The MS Sensitive Uses categories (illustrative — operator-extendable via `~/.jstack/sensitive-uses.yaml`):
+The MS Sensitive Uses categories (illustrative — operator-extendable via `~/.lintel/sensitive-uses.yaml`):
 - Decisions consequential for individuals (legal, financial, health, employment)
 - Inferring emotional or psychological state
 - Biometric identification / categorization
@@ -43,7 +43,7 @@ The MS Sensitive Uses categories (illustrative — operator-extendable via `~/.j
 
 - Required `--feature <name>` — short name for the AI feature
 - Optional `--source <path>` — code or design doc
-- Optional `--out <path>` — output report path (default: `~/.jstack/rai/<feature>-sensitive-use.md`)
+- Optional `--out <path>` — output report path (default: `~/.lintel/rai/<feature>-sensitive-use.md`)
 
 ## Workflow
 
@@ -151,5 +151,5 @@ Sensitive-Uses review REQUIRED before launch.
 - `/onerai-submit-draft` — consumes this output
 - `/onecs-check` Item 4 — surfaces Sensitive-Uses requirement
 - `/dpia-submit-draft` — complementary when personal data is involved
-- `~/.jstack/sensitive-uses.yaml` — operator-extendable category list
+- `~/.lintel/sensitive-uses.yaml` — operator-extendable category list
 - MS RAI Sensitive Uses internal portal

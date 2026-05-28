@@ -4,7 +4,7 @@ tier: warn-only
 event: PostToolUse (Bash | Skill /browse)
 fires_on: screenshot file produced
 override: not applicable (post-fact informational)
-audit: ~/.jstack/audit/hooks.jsonl
+audit: ~/.lintel/audit/hooks.jsonl
 ---
 
 # no-customer-data-in-screenshot
@@ -13,7 +13,7 @@ Surfaces when a screenshot is produced from `/browse` that may contain customer-
 
 ## Detection
 
-- Trigger when a file matching `*.png` lands under `~/.jstack/browse-runs/<ts>/`
+- Trigger when a file matching `*.png` lands under `~/.lintel/browse-runs/<ts>/`
 - Read the corresponding `dom.html` in the same dir
 - Scan DOM for customer-data patterns (same regexes as `no-customer-data-in-message`)
 
@@ -23,4 +23,4 @@ The screenshot/DOM already landed when this fires — block is post-fact. The ho
 
 ## Action surfaced
 
-If a hit: "Screenshot at ~/.jstack/browse-runs/<ts>/screenshot.png may contain customer-data — quarantine before sharing."
+If a hit: "Screenshot at ~/.lintel/browse-runs/<ts>/screenshot.png may contain customer-data — quarantine before sharing."

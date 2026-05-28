@@ -4,7 +4,7 @@ tier: warn-only
 event: PreToolUse (Bash)
 fires_on: `git push` command targeting `main` (or `master`)
 override: pass explicit per-batch-auth confirmation in conversation
-audit: ~/.jstack/audit/hooks.jsonl
+audit: ~/.lintel/audit/hooks.jsonl
 ---
 
 # no-direct-main-push
@@ -21,9 +21,9 @@ Regex on the Bash command:
 
 ## Why warn-only (not block)
 
-Many JStack workflows are SHIP-VIA-PR (no direct main push). For these, the hook is a quiet safety net.
+Many Lintel workflows are SHIP-VIA-PR (no direct main push). For these, the hook is a quiet safety net.
 
-Some workflows (e.g. private personal repo, current jokerman-session-setup) routinely land on main with operator-confirmed authorization. Block would interrupt every commit.
+Some workflows (e.g. private personal repo, current jokerman-lintel) routinely land on main with operator-confirmed authorization. Block would interrupt every commit.
 
 The warning surfaces "you're about to do something CLAUDE.md flags as needing auth — make sure you have it."
 

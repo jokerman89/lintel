@@ -4,16 +4,16 @@ All notable changes to this repo are tracked here. Format is loose — date head
 
 ## 2026-05-27 — v3.0.0-dev (on `v3-dev` branch)
 
-**JStack v3: plugin-manifest pattern + agent build-out + session-harness framing.** Big Bang rework following obra/superpowers' multi-CLI plugin pattern. Discards v2's "MCP server + per-CLI compile" plan as over-engineering. Agents BUILD OUT (44 → 78), not trimmed. Scaffolding-templates preserved + modernized.
+**Lintel v3: plugin-manifest pattern + agent build-out + session-harness framing.** Big Bang rework following obra/superpowers' multi-CLI plugin pattern. Discards v2's "MCP server + per-CLI compile" plan as over-engineering. Agents BUILD OUT (44 → 78), not trimmed. Scaffolding-templates preserved + modernized.
 
-Design doc: [docs/design/jstack-v3-plan.md](docs/design/jstack-v3-plan.md).
+Design doc: [docs/design/lintel:li-v3-plan.md](docs/design/lintel:li-v3-plan.md).
 Per-CLI plugin format research: [docs/per-cli/PLUGIN-FORMAT-RESEARCH.md](docs/per-cli/PLUGIN-FORMAT-RESEARCH.md).
 Session-harness explainer: [docs/session-harness.md](docs/session-harness.md).
 
 ### Architecture shift (Phase 0–2)
 
 - **Plugin-manifest pattern.** Tiny per-CLI manifests (`.claude-plugin/`, `.codex-plugin/`, `.cursor-plugin/`, `.opencode/`, `gemini-extension.json`, `.copilot-plugin/`, `.droid-plugin/`) all point at shared `./skills/` and `./agents/` dirs. Each CLI's native plugin marketplace handles discovery + invocation. NO MCP server, NO per-CLI compile step.
-- **Root entrypoint files:** `CLAUDE.md`, `AGENTS.md`, `GEMINI.md` at repo root — read by Claude Code / Codex / Gemini respectively when working ON the JStack repo. Each links to canonical `AGENT-INSTRUCTIONS.md` + adds CLI-specific notes.
+- **Root entrypoint files:** `CLAUDE.md`, `AGENTS.md`, `GEMINI.md` at repo root — read by Claude Code / Codex / Gemini respectively when working ON the Lintel repo. Each links to canonical `AGENT-INSTRUCTIONS.md` + adds CLI-specific notes.
 
 ### Reorganization (Phase 1)
 
@@ -26,7 +26,7 @@ Session-harness explainer: [docs/session-harness.md](docs/session-harness.md).
 
 ### Agent build-out (Phase 3) — 44 → 78 agents (+34 new)
 
-Per operator direction: agents are JStack value, build out instead of trim.
+Per operator direction: agents are Lintel value, build out instead of trim.
 
 - **ms-specific (+7):** AzureArchitect, AzureOpenAIAdvisor, M365CopilotAdvisor, GraphAPIAdvisor, BicepReviewer, ARMTemplateReviewer, KeyVaultAuditor
 - **security (+5):** ThreatModelDrafter, SecretsScanReviewer, SBOMAuditor, OAuthFlowReviewer, JWTSecurityReviewer
@@ -40,22 +40,22 @@ Final per-category counts: ms-specific 15, engineering 25, customer 8, security 
 
 ### Session-harness skills (Phase 4) — 74 → 81 skills (+7 new)
 
-- `/jstack-lessons-promote` — promote repo lesson → JStack global
-- `/jstack-adr-new` — bootstrap ADR from template
-- `/jstack-personas-rotate` — load persona context for demos/workshops
-- `/jstack-match` — semantic skill router (free text → top 3 skills)
-- `/jstack-doctor` — cross-CLI health check (replaces v2 spec-only jstack-cli-fingerprint)
-- `/jstack-scaffold` — invoke repo scaffolding into target
-- `/jstack-lessons` — mid-session lessons.md relevance-filtered review
+- `/lintel:li-lessons-promote` — promote repo lesson → Lintel global
+- `/lintel:li-adr-new` — bootstrap ADR from template
+- `/lintel:li-personas-rotate` — load persona context for demos/workshops
+- `/lintel:li-match` — semantic skill router (free text → top 3 skills)
+- `/lintel:li-doctor` — cross-CLI health check (replaces v2 spec-only li-cli-fingerprint)
+- `/lintel:li-scaffold` — invoke repo scaffolding into target
+- `/lintel:li-lessons` — mid-session lessons.md relevance-filtered review
 
 ### Bin/ scripts (Phase 5)
 
-- `bin/jstack-scaffold` — copy scaffolding/01-foundation/* into target repo with CLAUDE.md template rendering
-- `bin/jstack-doctor` — cross-CLI health check (color-coded output, --verbose, --json)
-- `bin/jstack-lessons-sync` — per-operator opt-in lessons sync across machines (private git repo)
-- `bin/jstack-lessons-promote` — interactive promote of repo lesson → JStack global
-- `bin/jstack-adr-new` — bootstrap ADR with auto-numbering + commit
-- `bin/jstack-update` — update plugin across detected CLIs
+- `bin/lintel:li-scaffold` — copy scaffolding/01-foundation/* into target repo with CLAUDE.md template rendering
+- `bin/lintel:li-doctor` — cross-CLI health check (color-coded output, --verbose, --json)
+- `bin/lintel:li-lessons-sync` — per-operator opt-in lessons sync across machines (private git repo)
+- `bin/lintel:li-lessons-promote` — interactive promote of repo lesson → Lintel global
+- `bin/lintel:li-adr-new` — bootstrap ADR with auto-numbering + commit
+- `bin/lintel:li-update` — update plugin across detected CLIs
 
 ### Docs rewrite (Phase 6)
 
@@ -94,8 +94,8 @@ Final per-category counts: ms-specific 15, engineering 25, customer 8, security 
 ### Operator next steps
 
 1. Push `v3-dev` branch to GitHub
-2. Test plugin install in Claude Code via `/plugin marketplace add Azureflipper/jokerman-session-setup`
-3. Test `bin/jstack-scaffold` in a new repo
+2. Test plugin install in Claude Code via `/plugin marketplace add jokerman89/jokerman-lintel`
+3. Test `bin/lintel:li-scaffold` in a new repo
 4. Run T0 voice calibration
 5. Submit to Anthropic + OpenAI + Cursor + Gemini marketplaces (post MS legal review)
 
@@ -103,11 +103,11 @@ Final per-category counts: ms-specific 15, engineering 25, customer 8, security 
 
 ## 2026-05-27 — v2.0 spec-complete (Big Bang)
 
-**JStack v2: scaffolding-only harness for MS-CAIP-SE engagements.** No runtime code; the scaffolding ITSELF is JStack. Operator (or agent reading SKILL.md) executes the work. v1 → v2 is a Big Bang ship with 5 components, eng-review-cleared.
+**Lintel v2: scaffolding-only harness for MS-CAIP-SE engagements.** No runtime code; the scaffolding ITSELF is Lintel. Operator (or agent reading SKILL.md) executes the work. v1 → v2 is a Big Bang ship with 5 components, eng-review-cleared.
 
 ### Naming migration (Phase A)
 
-- 24 skills renamed to mirror MS process: `/ship` → `/release-ev2`, `/compliance-gate` → `/onecs-check`, `/sensitive-use-report` → `/rais-sensitive-use`, `/jstack-test` → `/onebranch-validate`, etc. Full table in [MIGRATION-TABLE.md](MIGRATION-TABLE.md).
+- 24 skills renamed to mirror MS process: `/ship` → `/release-ev2`, `/compliance-gate` → `/onecs-check`, `/sensitive-use-report` → `/rais-sensitive-use`, `/lintel:li-test` → `/onebranch-validate`, etc. Full table in [MIGRATION-TABLE.md](MIGRATION-TABLE.md).
 - 2 agents renamed: `MSComplianceAuditor` → `OneCSAuditor`; `EvalSuiteAuthor` → `CloudTestSuiteAuthor`.
 - 5 voice docs renamed: `TRAILBLAZER-*.md` → `OurVoice-*.md` (matches canonical MS guide title).
 - Directory rename: `scaffolding/02-compliance/` → `scaffolding/02-sdl/` (matches SDL framing).
@@ -117,7 +117,7 @@ Final per-category counts: ms-specific 15, engineering 25, customer 8, security 
 ### Portability shim (Phase B)
 
 - New: [CLI-SUPPORT-V2-SCHEMA.md](scaffolding/01-foundation/CLI-SUPPORT-V2-SCHEMA.md) — formal per-CLI degradation grammar (full / degraded / not-supported × claude-code / codex / copilot-cli / copilot-app).
-- New skill: `/jstack-cli-fingerprint` — 5-step CLI detection cascade with operator-declarable fallback.
+- New skill: `/lintel:li-cli-fingerprint` — 5-step CLI detection cascade with operator-declarable fallback.
 - v1 cli_support arrays still parse correctly (backward compat).
 
 ### 1M context budget engine (Phase C)
@@ -130,7 +130,7 @@ Final per-category counts: ms-specific 15, engineering 25, customer 8, security 
 ### T0 voice calibration (Phase D)
 
 - New: [T0-CALIBRATION-WORKFLOW.md](T0-CALIBRATION-WORKFLOW.md) — operator workflow for moving Trailblazer corpus from POPULATED → CALIBRATED. Pre-flight smoke-test recipe + per-cell iteration + cell-drop decision.
-- Calibration is operator-driven (requires actual LLM-eval calls); JStack documents the recipe.
+- Calibration is operator-driven (requires actual LLM-eval calls); Lintel documents the recipe.
 
 ### Brand integration (Phase E)
 
@@ -181,7 +181,7 @@ Final per-category counts: ms-specific 15, engineering 25, customer 8, security 
 
 Per [SHIP-GATE.md](SHIP-GATE.md) — 12 gates. Remaining work after this spec-complete commit:
 1. Run T0-CALIBRATION-WORKFLOW.md → CALIBRATED status (Gate 3)
-2. Pull MS brand assets to `~/.jstack/brand/` (Gate 11 prerequisite)
+2. Pull MS brand assets to `~/.lintel/brand/` (Gate 11 prerequisite)
 3. CAIP-SE teammate adoption test (Gate 6)
 4. Codex outside-voice review (Gate 5)
 5. Upstream similarity check T-303 (Gate 7)
@@ -192,8 +192,8 @@ Per [SHIP-GATE.md](SHIP-GATE.md) — 12 gates. Remaining work after this spec-co
 
 ## 2026-05-26 — Initial release
 
-- Repo created at `~/Workspace/jokerman-session-setup/` on `main` branch.
-- Scaffolding extracted from `claude-scaffolding` and adapted (refs updated to `jokerman-session-setup`).
+- Repo created at `~/Workspace/jokerman-lintel/` on `main` branch.
+- Scaffolding extracted from `claude-scaffolding` and adapted (refs updated to `jokerman-lintel`).
 - Multi-CLI shim architecture: canonical `AGENT-INSTRUCTIONS.md` + per-CLI shims under `shims/` for Claude Code, GitHub Copilot Enterprise, and Codex CLI.
 - Install scripts for bash (`install/install.sh`) and PowerShell 7+ (`install/install.ps1`).
 - `install/upstream-sources.yaml` declares 8 upstream sources across 3 tiers (permissive / restricted / reference-only):

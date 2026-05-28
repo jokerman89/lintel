@@ -9,7 +9,7 @@ set -euo pipefail
 # --- Test harness helpers (inline; no external dep) ---
 
 TEST_NAME="$(basename "${BASH_SOURCE[0]}" .sh)"
-TEST_TMP="$(mktemp -d "/tmp/jstack-test-${TEST_NAME}-XXXXXX")"
+TEST_TMP="$(mktemp -d "/tmp/lintel:li-test-${TEST_NAME}-XXXXXX")"
 FAILED=0
 
 c_green='\033[32m'; c_red='\033[31m'; c_yellow='\033[33m'; c_reset='\033[0m'
@@ -55,18 +55,18 @@ trap cleanup EXIT
 
 TAGS_HEADER=$(grep -m1 '^# TAGS:' "${BASH_SOURCE[0]}" 2>/dev/null | sed 's/^# TAGS: *//')
 
-if [ -n "${JSTACK_TEST_FILTER_TAGS:-}" ]; then
+if [ -n "${LINTEL_TEST_FILTER_TAGS:-}" ]; then
   # If a tag-filter env var is set, skip if our tags don't match
-  IFS=',' read -ra FILTER_TAGS <<< "$JSTACK_TEST_FILTER_TAGS"
+  IFS=',' read -ra FILTER_TAGS <<< "$LINTEL_TEST_FILTER_TAGS"
   match=0
   for ft in "${FILTER_TAGS[@]}"; do
     if echo "$TAGS_HEADER" | grep -q "$ft"; then match=1; break; fi
   done
-  [ "$match" = "0" ] && skip "tag filter (need: $JSTACK_TEST_FILTER_TAGS, have: $TAGS_HEADER)"
+  [ "$match" = "0" ] && skip "tag filter (need: $LINTEL_TEST_FILTER_TAGS, have: $TAGS_HEADER)"
 fi
 
 # Skip if required deps not available
-if echo "$TAGS_HEADER" | grep -q "browser-required" && [ ! -x "$HOME/.jstack/bin/chromium" ]; then
+if echo "$TAGS_HEADER" | grep -q "browser-required" && [ ! -x "$HOME/.lintel/bin/chromium" ]; then
   skip "browser-required but managed Chromium not installed"
 fi
 if echo "$TAGS_HEADER" | grep -q "gstack-binaries-required" && [ ! -x "$HOME/.claude/skills/gstack/bin/gstack-config" ]; then
@@ -77,8 +77,8 @@ fi
 
 # Example:
 #   cp tests/fixtures/sample.yaml "$TEST_TMP/sample.yaml"
-#   export JSTACK_HOME="$TEST_TMP/jstack"
-#   mkdir -p "$JSTACK_HOME"
+#   export LINTEL_HOME="$TEST_TMP/lintel"
+#   mkdir -p "$LINTEL_HOME"
 
 # --- RUN (test-specific; replace placeholder below) ---
 

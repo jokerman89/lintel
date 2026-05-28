@@ -1,5 +1,5 @@
 ---
-name: jstack-design-review
+name: li-design-review
 layer: foundation
 description: 6-pillar visual review of frontend changes — screenshot via /browse, scored findings.
 color: orange
@@ -35,12 +35,12 @@ Voice tier note: the critique itself is internal (builder-to-builder). When the 
 - Optional `--routes <file>` — list of routes to review (default: just `/`)
 - Optional `--viewport <list>` — viewports to capture (default: `1440x900,375x812`)
 - Optional `--baseline <ref>` — git ref to diff against for changed-files context
-- Optional `--include-copy-pillar` — explicit opt-in for copy critique (default: on for customer-facing routes per `~/.jstack/config.yaml`)
+- Optional `--include-copy-pillar` — explicit opt-in for copy critique (default: on for customer-facing routes per `~/.lintel/config.yaml`)
 
 ## Workflow
 
 1. **Preflight.** Verify URL is live (`curl -I`). Verify managed Chromium installed.
-2. **Capture phase.** For each route × each viewport: invoke `/browse` to load + screenshot + capture DOM + console log. Artifacts land in `~/.jstack/design-runs/<ts>/`.
+2. **Capture phase.** For each route × each viewport: invoke `/browse` to load + screenshot + capture DOM + console log. Artifacts land in `~/.lintel/design-runs/<ts>/`.
 3. **Six-pillar pass** — for each captured route:
    - **Visual polish:** alignment, spacing rhythm, hover/focus states present, no Lorem Ipsum, no broken images, no overflow.
    - **Accessibility:** contrast ratio per WCAG AA, semantic HTML in DOM, focus order, alt text on images, ARIA labels where needed.
@@ -78,7 +78,7 @@ Overall: 7.8/10
 
 [P1] Accessibility — / hero CTA
    Contrast 3.2:1 on emerald-500 over wave-watermark. WCAG AA requires 4.5:1.
-   Screenshot anchor: ~/.jstack/design-runs/.../landing-hero.png#cta
+   Screenshot anchor: ~/.lintel/design-runs/.../landing-hero.png#cta
    Fix: darken emerald to -600 OR remove watermark overlap behind CTA.
 
 [P2] Copy — /portal greeting (customer-facing)
@@ -99,8 +99,8 @@ Overall: 7.8/10
 ## Compliance integration
 
 - `/browse` underlies this skill, so Layer 2 prod-host gate applies for the URL.
-- Customer-data scan on captured DOM — if real customer data appears in the screenshot/DOM, the artifact is auto-quarantined to `~/.jstack/quarantine/` and the run is marked FAILED (no review possible on un-sanitized data).
-- Brand consistency pillar reads from project CLAUDE.md's frozen-zone + token rules. JStack does not opine on what brand consistency means — the repo does.
+- Customer-data scan on captured DOM — if real customer data appears in the screenshot/DOM, the artifact is auto-quarantined to `~/.lintel/quarantine/` and the run is marked FAILED (no review possible on un-sanitized data).
+- Brand consistency pillar reads from project CLAUDE.md's frozen-zone + token rules. Lintel does not opine on what brand consistency means — the repo does.
 
 ## Voice tier note
 
@@ -111,7 +111,7 @@ Overall: 7.8/10
 - **URL unreachable:** report + exit. No partial review.
 - **Chromium missing:** print install command, exit.
 - **DOM capture contains customer-data patterns:** quarantine artifacts, BLOCK review, surface to operator. The review cannot proceed on un-sanitized data.
-- **No routes specified + no project default in `~/.jstack/config.yaml`:** ask via AskUserQuestion which routes to review.
+- **No routes specified + no project default in `~/.lintel/config.yaml`:** ask via AskUserQuestion which routes to review.
 - **Copy pillar requested but no Trailblazer corpus yet (T0 not complete):** skip copy pillar, surface "copy pillar deferred — T0 voice calibration not landed". Other pillars still run.
 
 ## Examples

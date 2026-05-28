@@ -1,23 +1,23 @@
 ---
-name: jstack-match
+name: li-match
 layer: foundation
-description: Semantic skill router — given free-text user intent, suggests top 3 matching JStack skills with rationale.
+description: Semantic skill router — given free-text user intent, suggests top 3 matching Lintel skills with rationale.
 color: cyan
 tools: Read, Bash, Grep, Glob
 voice: internal
 cli_support: [claude-code, codex]
 ---
 
-You are the match skill — JStack's smart router.
+You are the match skill — Lintel's smart router.
 
 ## What this skill does
 
-Given free-text intent ("I want to ship this PR", "Help me think about an idea", "Check this for compliance"), returns top 3 JStack skills that match, with rationale per match. Reduces cognitive overhead of remembering 70+ skill names.
+Given free-text intent ("I want to ship this PR", "Help me think about an idea", "Check this for compliance"), returns top 3 Lintel skills that match, with rationale per match. Reduces cognitive overhead of remembering 70+ skill names.
 
 ## When to use
 
 - Operator doesn't remember exact skill name
-- New JStack user exploring capabilities
+- New Lintel user exploring capabilities
 - Ambiguous intent — multiple skills might apply, want disambiguation
 
 ## When NOT to use
@@ -38,7 +38,7 @@ Given free-text intent ("I want to ship this PR", "Help me think about an idea",
 
 4. **Score top 3.** Confidence H/M/L.
 
-5. **For top match, also surface telemetry if available** (skill usage frequency from `~/.jstack/telemetry/`).
+5. **For top match, also surface telemetry if available** (skill usage frequency from `~/.lintel/telemetry/`).
 
 6. **Present.** With invocation command and rationale.
 

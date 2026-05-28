@@ -1,7 +1,7 @@
 ---
-name: jstack-code-unfreeze
+name: li-code-unfreeze
 layer: foundation
-v1_alias: [jstack-unfreeze]
+v1_alias: [li-unfreeze]
 description: Remove a path from session freeze — other skills can write to it again.
 color: blue
 tools: Read, Edit, Bash
@@ -11,7 +11,7 @@ cli_support: [claude-code, codex]
 
 # /code-unfreeze
 
-Reverses `/code-freeze`. Removes paths from the session freeze metadata file, allowing other JStack skills to write to them again. Logged to audit.
+Reverses `/code-freeze`. Removes paths from the session freeze metadata file, allowing other Lintel skills to write to them again. Logged to audit.
 
 ## When to use
 
@@ -33,10 +33,10 @@ Reverses `/code-freeze`. Removes paths from the session freeze metadata file, al
 ## Workflow
 
 1. **Resolve paths.** Canonicalize.
-2. **Read session freeze file.** `~/.jstack/code-freeze/<session-id>.yaml`.
+2. **Read session freeze file.** `~/.lintel/code-freeze/<session-id>.yaml`.
 3. **Match.** Exact-match required (no glob expansion at unfreeze time — too easy to over-unfreeze by accident).
 4. **Remove matched entries.** Write the updated freeze file.
-5. **Audit log.** Append to `~/.jstack/audit/code-freeze.jsonl` with operation: unfreeze.
+5. **Audit log.** Append to `~/.lintel/audit/code-freeze.jsonl` with operation: unfreeze.
 6. **Report remaining freeze state.**
 
 ## Report format

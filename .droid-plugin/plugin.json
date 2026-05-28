@@ -1,15 +1,15 @@
 {
-  "name": "jstack",
-  "version": "3.0.0-dev",
-  "description": "MS-CAIP-SE session harness for Factory Droid",
+  "name": "lintel",
+  "version": "3.5.0-dev",
+  "description": "Lintel — MS-CAIP-SE session harness for Factory Droid",
   "author": {
-    "name": "Azureflipper",
+    "name": "jokerman89",
     "email": "johannes.akerman@microsoft.com"
   },
-  "homepage": "https://github.com/Azureflipper/jokerman-session-setup",
-  "repository": "https://github.com/Azureflipper/jokerman-session-setup",
+  "homepage": "https://github.com/jokerman89/jokerman-lintel",
+  "repository": "https://github.com/jokerman89/jokerman-lintel",
   "license": "MIT",
-  "keywords": ["microsoft", "caip", "session-harness", "rais"],
+  "keywords": ["lintel", "microsoft", "caip", "session-harness", "rais", "azure"],
   "skills": "./skills/",
   "agents": "./agents/",
   "_note": "Schema inferred from droid plugin marketplace pattern (obra/superpowers reference). Verify against Factory Droid plugin spec before submission."

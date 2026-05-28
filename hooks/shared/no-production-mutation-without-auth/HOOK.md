@@ -4,14 +4,14 @@ tier: warn-only
 event: PreToolUse (Bash)
 fires_on: command appears to mutate production resources
 override: explicit per-call auth confirmation in conversation
-audit: ~/.jstack/audit/hooks.jsonl
+audit: ~/.lintel/audit/hooks.jsonl
 ---
 
 # no-production-mutation-without-auth
 
 Detects Bash commands that mutate production resources and reminds operator about Layer 2 per-call auth requirement.
 
-## Patterns (heuristic — operator can extend via `~/.jstack/production-mutation-patterns.txt`)
+## Patterns (heuristic — operator can extend via `~/.lintel/production-mutation-patterns.txt`)
 
 - `az ... --subscription <prod-name>` patterns
 - `kubectl ... -n production`

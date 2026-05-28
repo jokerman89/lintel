@@ -1,7 +1,7 @@
 ---
-name: jstack-safe-deploy-ring
+name: li-safe-deploy-ring
 layer: foundation
-v1_alias: [jstack-canary]
+v1_alias: [li-canary]
 description: Gate a deployed feature behind a percentage rollout — ramp up, monitor, abort safe.
 color: orange
 tools: Read, Bash, Edit
@@ -36,7 +36,7 @@ Per Layer 2: every percentage change is a production-mutation requiring explicit
 - Required `--target <percentage>` — desired final exposure (e.g. 100, 50, 0)
 - Optional `--start <percentage>` — current exposure (skill auto-detects from flag system if omitted)
 - Optional `--steps <list>` — explicit ramp steps (default: `1,10,50,100` clipped to target)
-- Optional `--health-check <cmd>` — command to verify health between steps (default: read from `~/.jstack/safe-deploy-ring.yaml`)
+- Optional `--health-check <cmd>` — command to verify health between steps (default: read from `~/.lintel/safe-deploy-ring.yaml`)
 - Optional `--soak-minutes <N>` — wait N minutes between ramp steps (default: 15)
 
 ## Workflow
@@ -75,15 +75,15 @@ Soak: 15min between steps
 ## Final state
 Flag: feature-new-billing = 100%
 Duration: 33 min total
-Audit: ~/.jstack/audit/canary-feature-new-billing-20260527.jsonl
+Audit: ~/.lintel/audit/canary-feature-new-billing-20260527.jsonl
 ```
 
 ## Compliance integration
 
 - Layer 2 production-mutation: per-call auth for EVERY step. Confirmation in chat is the auth; logged to audit.
 - Health-check failure auto-rollback IS allowed without re-auth (rollback is the safe direction).
-- Flag-system credentials read from `~/.jstack/secrets/<system>.env` or env vars — never from prompt.
-- Audit trail written to `~/.jstack/audit/canary-<flag>-<date>.jsonl`. Tamper-evident: append-only, one event per ramp step + health check.
+- Flag-system credentials read from `~/.lintel/secrets/<system>.env` or env vars — never from prompt.
+- Audit trail written to `~/.lintel/audit/canary-<flag>-<date>.jsonl`. Tamper-evident: append-only, one event per ramp step + health check.
 
 ## Voice tier note
 
@@ -91,7 +91,7 @@ Audit: ~/.jstack/audit/canary-feature-new-billing-20260527.jsonl
 
 ## Failure modes
 
-- **Flag system not detected:** report + ask operator to configure `~/.jstack/safe-deploy-ring.yaml`. Do not proceed.
+- **Flag system not detected:** report + ask operator to configure `~/.lintel/safe-deploy-ring.yaml`. Do not proceed.
 - **Health check command not configured:** STOP — refuse to ramp without a health signal. Surface what to configure.
 - **Health check fails at step N:** AUTO-ROLLBACK to step N-1. Report failure with metrics. Do not auto-advance again.
 - **Operator declines mid-ramp at a step gate:** stop cleanly at current step. Flag stays where it is. Report partial-ramp state explicitly.

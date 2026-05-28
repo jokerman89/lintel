@@ -1,5 +1,5 @@
 ---
-name: jstack-personas-rotate
+name: li-personas-rotate
 layer: foundation
 description: Load persona context from tasks/personas.md for demo-prep, workshop-facilitation, or audience-aware writing.
 color: cyan
@@ -24,7 +24,7 @@ Loads persona definitions from `tasks/personas.md` and `docs/personas/` into ses
 ## When NOT to use
 
 - Generic content not tied to specific audience
-- No personas defined yet — recommend `bin/jstack-scaffold` first
+- No personas defined yet — recommend `bin/lintel:li-scaffold` first
 
 ## Workflow
 
@@ -75,6 +75,6 @@ To clear: /personas-rotate --clear
 
 ## Part of session-harness
 
-Personas are how JStack scales voice + audience-awareness across sessions. Without persona-rotation, every demo prep starts from blank. With it, operator's persona library compounds value.
+Personas are how Lintel scales voice + audience-awareness across sessions. Without persona-rotation, every demo prep starts from blank. With it, operator's persona library compounds value.
 
 Persona detail lives in repo (`docs/personas/`) — travels with the code, evolves with the engagement.

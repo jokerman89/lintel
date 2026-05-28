@@ -1,5 +1,5 @@
 ---
-name: jstack-first-party-check
+name: li-first-party-check
 layer: ms-team
 description: Scan for non-first-party dependencies and surface MS alternatives — "first-party first" enforcement.
 color: yellow
@@ -49,7 +49,7 @@ Implements one of the 7 on-demand compliance items (Item 2). Run by `/onecs-chec
    - `slack-api` → Microsoft Teams / Graph
    - `mailgun`, `sendgrid` → Azure Communication Services
    - `cloudflare` → Azure Front Door / CDN
-   - (More in `~/.jstack/first-party-alternatives.yaml`, operator-extendable)
+   - (More in `~/.lintel/first-party-alternatives.yaml`, operator-extendable)
 3. **For each flag:** check git history / repo docs for a documented decision (commit message rationale, ADR, README note). If absent: mark NEEDS_JUSTIFICATION.
 4. **Compliance gate hint:** if running inside `/onecs-check`: emit structured output for aggregation.
 5. **Report.**
@@ -57,7 +57,7 @@ Implements one of the 7 on-demand compliance items (Item 2). Run by `/onecs-chec
 ## Report format
 
 ```
-First-party check: jokerman-session-setup
+First-party check: jokerman-lintel
 
 Scope: full repo, all manifests
 Scan duration: 0.6s
@@ -96,7 +96,7 @@ Example output on a real codebase:
 - Implements Item 2 of the 7 on-demand compliance items.
 - A NEEDS_JUSTIFICATION dep in `--strict` mode + downstream `/release-ev2`: BLOCKS until documented.
 - Output structured-emitted to `/onecs-check` when run as part of aggregate check.
-- Operator can add to `~/.jstack/first-party-alternatives.yaml` for project-specific mappings.
+- Operator can add to `~/.lintel/first-party-alternatives.yaml` for project-specific mappings.
 
 ## Voice tier note
 
@@ -106,7 +106,7 @@ Example output on a real codebase:
 
 - **No manifest files found:** report scope is non-applicable, exit cleanly.
 - **Manifest unparseable:** report which file + line, skip, continue with others.
-- **Alternative mapping out of date:** mappings are heuristic. Operator can override via `~/.jstack/first-party-alternatives.yaml`. WARN when the built-in mapping is stale.
+- **Alternative mapping out of date:** mappings are heuristic. Operator can override via `~/.lintel/first-party-alternatives.yaml`. WARN when the built-in mapping is stale.
 - **`--strict` mode + open NEEDS_JUSTIFICATION:** non-zero exit. Suitable for CI use.
 
 ## Examples
@@ -135,6 +135,6 @@ Use in CI to enforce first-party-first.
 ## See also
 
 - `/onecs-check` — runs this skill as Item 2 of the 7
-- `~/.jstack/first-party-alternatives.yaml` — operator-extendable mappings
+- `~/.lintel/first-party-alternatives.yaml` — operator-extendable mappings
 - Item 2 in ON-DEMAND-RULES.md (Phase 6) — the source rule
 - `/learn` — record a documented decision so future scans pick it up

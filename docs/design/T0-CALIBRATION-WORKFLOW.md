@@ -8,7 +8,7 @@ Phase D of v2 build. NOTE: Calibration requires actual LLM-eval calls — this i
 
 ## Pre-flight smoke test (P2 fix T9 from eng-review)
 
-Before committing to full calibration ordering, verify `/jstack-eval` actually produces parseable verdicts.
+Before committing to full calibration ordering, verify `/lintel:li-eval` actually produces parseable verdicts.
 
 ### Recipe
 
@@ -17,16 +17,16 @@ Before committing to full calibration ordering, verify `/jstack-eval` actually p
    - `R1-BAD-001` (Revolutionary new platform)
    - `CAIP-GOOD-001` (Nordic public sector Arc migration)
 
-2. **Invoke `/jstack-eval --cells R1,CAIP --paragraphs R1-GOOD-001,R1-BAD-001,CAIP-GOOD-001 --dry-run`**.
+2. **Invoke `/lintel:li-eval --cells R1,CAIP --paragraphs R1-GOOD-001,R1-BAD-001,CAIP-GOOD-001 --dry-run`**.
 
 3. **Verify output:**
    - Each paragraph evaluated produces a YAML verdict block
    - Verdict contains all required fields: mode_attempted, technique_cell, kind/daring/deep scores, ground_rules_passed/violated, anti_ai_vocab_detected, verdict (PASS/FAIL)
    - Verdict matches the `verdict_label` field for ≥2 of the 3 test paragraphs (raw rubric accuracy at corpus-construction time)
 
-4. **Log smoke result to `~/.jstack/audit/eval-smoke-<ts>.md`**:
+4. **Log smoke result to `~/.lintel/audit/eval-smoke-<ts>.md`**:
    ```markdown
-   # /jstack-eval smoke test — <timestamp>
+   # /lintel:li-eval smoke test — <timestamp>
    Test set: R1-GOOD-001, R1-BAD-001, CAIP-GOOD-001
    Output parseable: yes/no
    Verdict accuracy: 2/3 or 3/3
@@ -46,7 +46,7 @@ After smoke test passes, execute the full calibration. Estimated time: 2-4 hours
 ### Round 1: First full eval
 
 ```
-/jstack-eval --corpus scaffolding/03-personal-advanced/voice/OurVoice-corpus.md \
+/lintel:li-eval --corpus scaffolding/03-personal-advanced/voice/OurVoice-corpus.md \
              --test scaffolding/03-personal-advanced/voice/OurVoice-test.md \
              --out scaffolding/03-personal-advanced/voice/OurVoice-calibration.md
 ```
@@ -68,7 +68,7 @@ For each cell scoring <90%:
 1. Read failure paragraphs + their YAML verdicts
 2. Identify the rubric's misclassification pattern (e.g. "fails to detect P2 punching-down because Kind-score heuristic too lenient")
 3. Edit `OurVoice-test.md` rubric for that cell — add explicit fail-mode tells, adjust scoring weights
-4. Re-run eval scoped to changed cells: `/jstack-eval --cells <changed>`
+4. Re-run eval scoped to changed cells: `/lintel:li-eval --cells <changed>`
 5. Compare new accuracy to baseline
 
 ### Round N: Cell-drop decision
@@ -102,7 +102,7 @@ When ≥10 of 12 cells PASS at ≥90% per side:
 ## Operator checklist
 
 - [ ] Smoke test 3 paragraphs (Round 0)
-- [ ] Confirm `/jstack-eval` produces parseable verdicts
+- [ ] Confirm `/lintel:li-eval` produces parseable verdicts
 - [ ] Run Round 1 full eval
 - [ ] Review per-cell accuracy
 - [ ] Iterate rubric for sub-90% cells (Rounds 2-3 as needed)
@@ -119,7 +119,7 @@ Estimated total: 6-12 hours operator work (heavily LLM-call-dependent).
 
 | Issue | Mitigation |
 |-------|------------|
-| Smoke test fails — output unparseable | Fix `/jstack-eval` skill before continuing. Likely YAML escape issue or rubric ambiguity. |
+| Smoke test fails — output unparseable | Fix `/lintel:li-eval` skill before continuing. Likely YAML escape issue or rubric ambiguity. |
 | LLM eval calls time out at scale (60 paragraphs) | Run in batches of 12-15 (per-cell). Each cell's eval is independent. |
 | Rubric iteration produces oscillation (cell PASS → FAIL → PASS) | Operator stops iterating. Accept current state OR accept "best of last 3" verdict. |
 | Costs spiral (eval = ~60 LLM calls × $0.03-0.10 = $1.80-6.00 per full round) | Use cheaper model for initial rounds (gpt-4o-mini vs gpt-4o). Promote to better model for final calibration. |
@@ -132,6 +132,6 @@ Estimated total: 6-12 hours operator work (heavily LLM-call-dependent).
 - `OurVoice-corpus.md` — input corpus
 - `OurVoice-test.md` — rubric being calibrated
 - `OurVoice-calibration.md` — output state file
-- `/jstack-eval` skill — eval orchestrator
+- `/lintel:li-eval` skill — eval orchestrator
 - `/rais-customer-voice-check` — downstream consumer of CALIBRATED status
 - `SHIP-GATE.md` Gate 3 — requires CALIBRATED status for v2.0.0 tag

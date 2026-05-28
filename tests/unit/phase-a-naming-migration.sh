@@ -16,26 +16,26 @@ SKILLS_DIR="$REPO_ROOT/scaffolding"
 
 # All v2 skill names that should be present (renamed ones)
 V2_NAMES=(
-  "jstack-release-ev2" "jstack-release-deploy-ev2" "jstack-open-managed-browser"
-  "jstack-perfbench" "jstack-safe-deploy-ring" "jstack-code-freeze" "jstack-code-unfreeze"
-  "jstack-setup-ev2-targets" "jstack-setup-brain" "jstack-sync-brain"
-  "jstack-rais-customer-voice-check" "jstack-onecs-check" "jstack-onerai-submit-draft"
-  "jstack-dsb-submit-draft" "jstack-dpia-submit-draft" "jstack-rais-sensitive-use"
-  "jstack-rais-impact-assessment" "jstack-scaffold-engagement-demo" "jstack-rais-transparency-note"
-  "jstack-agt-tier-stamp" "jstack-entra-agent-id-submit-draft" "jstack-context-budgetwatch"
-  "jstack-cloudtest-eval-suite" "jstack-onebranch-validate"
+  "li-release-ev2" "li-release-deploy-ev2" "li-open-managed-browser"
+  "li-perfbench" "li-safe-deploy-ring" "li-code-freeze" "li-code-unfreeze"
+  "li-setup-ev2-targets" "li-setup-brain" "li-sync-brain"
+  "li-rais-customer-voice-check" "li-onecs-check" "li-onerai-submit-draft"
+  "li-dsb-submit-draft" "li-dpia-submit-draft" "li-rais-sensitive-use"
+  "li-rais-impact-assessment" "li-scaffold-engagement-demo" "li-rais-transparency-note"
+  "li-agt-tier-stamp" "li-entra-agent-id-submit-draft" "li-context-budgetwatch"
+  "li-cloudtest-eval-suite" "li-onebranch-validate"
 )
 
 # V1 names that should NO LONGER appear as `name:` value
 V1_NAMES_TO_BE_GONE=(
-  "jstack-ship" "jstack-land-and-deploy" "jstack-open-gstack-browser"
-  "jstack-benchmark" "jstack-canary" "jstack-freeze" "jstack-unfreeze"
-  "jstack-setup-deploy" "jstack-setup-gbrain" "jstack-sync-gbrain"
-  "jstack-customer-voice-check" "jstack-compliance-gate" "jstack-onerai-prep"
-  "jstack-dsb-prep" "jstack-dpia-prep" "jstack-sensitive-use-report"
-  "jstack-rai-impact-assessment" "jstack-scaffold-customer-demo" "jstack-transparency-doc-gen"
-  "jstack-tier-stamp-agents" "jstack-entra-agent-id-prep" "jstack-context-tokenwatch"
-  "jstack-eval-suite-gen" "jstack-test"
+  "li-ship" "li-land-and-deploy" "li-open-gstack-browser"
+  "li-benchmark" "li-canary" "li-freeze" "li-unfreeze"
+  "li-setup-deploy" "li-setup-gbrain" "li-sync-gbrain"
+  "li-customer-voice-check" "li-compliance-gate" "li-onerai-prep"
+  "li-dsb-prep" "li-dpia-prep" "li-sensitive-use-report"
+  "li-rai-impact-assessment" "li-scaffold-customer-demo" "li-transparency-doc-gen"
+  "li-tier-stamp-agents" "li-entra-agent-id-prep" "li-context-tokenwatch"
+  "li-eval-suite-gen" "li-test"
 )
 
 # Verify each v2 name appears as `name:` in some SKILL.md

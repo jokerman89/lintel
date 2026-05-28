@@ -67,7 +67,7 @@ Post-check: ✓ (target state confirmed)
 
 ## Verdict
 Migration complete. Backward path validated by dry-run.
-Audit logged: ~/.jstack/audit/migrations.jsonl
+Audit logged: ~/.lintel/audit/migrations.jsonl
 ```
 
 ## Edge cases / what to do when blocked

@@ -1,5 +1,5 @@
 ---
-name: jstack-setup-browser-cookies
+name: li-setup-browser-cookies
 layer: foundation
 description: Bootstrap auth cookies for the managed Chromium profile — operator-driven, one-time per service.
 color: orange
@@ -10,7 +10,7 @@ cli_support: [claude-code]
 
 # /setup-browser-cookies
 
-Establishes authenticated cookies in the JStack-managed Chromium profile so that subsequent `/browse` and `/scrape` runs can hit logged-in pages without re-auth.
+Establishes authenticated cookies in the Lintel-managed Chromium profile so that subsequent `/browse` and `/scrape` runs can hit logged-in pages without re-auth.
 
 Operator-driven by design: the skill launches a headed (visible) browser, the operator logs in manually using their actual SSO or password manager, and on close the cookies persist in the managed user-data-dir. No password ever enters this skill's prompt.
 
@@ -37,11 +37,11 @@ Operator-driven by design: the skill launches a headed (visible) browser, the op
 ## Workflow
 
 1. **Compliance gate.** Hostname checked against Layer 2 prod-host list. If matched: BLOCK.
-2. **Launch headed Chromium.** With persistent user-data-dir at `~/.jstack/browser-profiles/<profile>/`.
+2. **Launch headed Chromium.** With persistent user-data-dir at `~/.lintel/browser-profiles/<profile>/`.
 3. **Operator login.** Browser navigates to `--login-url`. Skill prints "Waiting for operator login. Press Enter here when logged in."
-4. **Verify.** When operator confirms, skill navigates to a service-known authed URL (per `~/.jstack/browser-profiles/services.yaml`) and checks for non-login response.
+4. **Verify.** When operator confirms, skill navigates to a service-known authed URL (per `~/.lintel/browser-profiles/services.yaml`) and checks for non-login response.
 5. **Persist + close.** Cookies are already on disk (persistent profile); skill just confirms presence + closes browser.
-6. **Register service.** Append metadata to `~/.jstack/browser-profiles/services.yaml`: service name, last-validated-at, login URL, validation URL.
+6. **Register service.** Append metadata to `~/.lintel/browser-profiles/services.yaml`: service name, last-validated-at, login URL, validation URL.
 7. **Report.** Confirmation + expiry estimate (read from cookie max-age if available).
 
 ## Workflow (--check mode)
@@ -56,7 +56,7 @@ Operator-driven by design: the skill launches a headed (visible) browser, the op
 ```
 Setup browser cookies: github.com
 
-Profile: default (~/.jstack/browser-profiles/default/)
+Profile: default (~/.lintel/browser-profiles/default/)
 Login URL: https://github.com/login
 Validation URL: https://github.com/settings/profile
 
@@ -71,9 +71,9 @@ Service registered in services.yaml
 ## Compliance integration
 
 - Layer 2 prod-host gate ALWAYS applies — you cannot bootstrap cookies against a customer-data-bearing prod host through this skill. Use sanitized staging/test environments.
-- Profile dir permissions: `~/.jstack/browser-profiles/` should be `chmod 700` (skill verifies + warns if loose).
+- Profile dir permissions: `~/.lintel/browser-profiles/` should be `chmod 700` (skill verifies + warns if loose).
 - NEVER prompts operator for passwords. NEVER captures keystrokes. NEVER reads the browser's password autofill store.
-- Cookie store excluded from gstack/jstack brain-sync by default (per Layer 2 secrets-rule). If sync is enabled: a hook will block.
+- Cookie store excluded from gstack/lintel brain-sync by default (per Layer 2 secrets-rule). If sync is enabled: a hook will block.
 
 ## Voice tier note
 

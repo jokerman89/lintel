@@ -1,6 +1,6 @@
-# JStack Compliance Overview
+# Lintel Compliance Overview
 
-Layer 2 of the JStack architecture: MS compliance posture. Tiered as 5/7/8 per A4 design decision.
+Layer 2 of the Lintel architecture: MS compliance posture. Tiered as 5/7/8 per A4 design decision.
 
 ## The three tiers
 
@@ -47,16 +47,16 @@ The 5/7/8 split:
 - **7 on-demand** — operator-judgment items that require domain context, surfaced via checklist
 - **8 reference** — background reading, indexed for retrieval, not actively triggered
 
-## How JStack enforces (and what JStack does NOT)
+## How Lintel enforces (and what Lintel does NOT)
 
-**JStack DOES:**
+**Lintel DOES:**
 - Surface patterns at session start (5 always-on)
 - Provide operator-driven checklist (7 on-demand via `/onecs-check`)
 - Index reference docs for retrieval (8 reference)
-- Audit-log compliance decisions to `~/.jstack/audit/`
+- Audit-log compliance decisions to `~/.lintel/audit/`
 - Provide skills to prepare submission DRAFTs (DSB, DPIA, One RAI, Sensitive Use, Transparency Note)
 
-**JStack does NOT:**
+**Lintel does NOT:**
 - Auto-submit any compliance form (operator does that via MS portals)
 - Replace MS RAI / Privacy / DSB review (skills produce DRAFTs; reviewers approve)
 - Replace operator judgment (the 7 are CHECKLIST items, not gates)
@@ -64,7 +64,7 @@ The 5/7/8 split:
 
 ## Implementation layers
 
-JStack compliance lives in:
+Lintel compliance lives in:
 - **5 always-on:** detection runs inline in skills + as opt-in hooks (`02-sdl/hooks/`)
 - **7 on-demand:** orchestrated by `/onecs-check` skill
 - **8 reference:** documents in this directory, accessible via `/help --rules reference`
@@ -73,7 +73,7 @@ Hooks are OPT-IN. Operator manually symlinks chosen hooks into `~/.claude/hooks/
 
 ## Cross-references
 
-- `LAYERS.md` — JStack architecture overview
+- `LAYERS.md` — Lintel architecture overview
 - `/onecs-check` skill — runs the 7 on-demand items
 - `/health` skill — verifies compliance hook activation state
 - `OneCSAuditor` agent — automated 5+7 audit pass

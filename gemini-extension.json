@@ -1,6 +1,6 @@
 {
-  "name": "jstack",
-  "description": "MS-CAIP-SE session harness for Gemini — skills, agents, compliance",
-  "version": "3.0.0-dev",
+  "name": "lintel",
+  "description": "Lintel — MS-CAIP-SE session harness for Gemini with 8-phase cycle + role-lifting + Azure toolbox",
+  "version": "3.5.0-dev",
   "contextFileName": "GEMINI.md"
 }

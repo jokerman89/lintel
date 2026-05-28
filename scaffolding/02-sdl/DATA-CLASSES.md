@@ -1,6 +1,6 @@
 # MS Business Data Classes
 
-The 6-tier classification for data sensitivity. Used throughout JStack's compliance gates.
+The 6-tier classification for data sensitivity. Used throughout Lintel's compliance gates.
 
 ## The 6 classes (low → high sensitivity)
 
@@ -58,7 +58,7 @@ The 6-tier classification for data sensitivity. Used throughout JStack's complia
 - Internal sharing on need-to-know basis
 - External sharing requires DSB + explicit operator + reviewer approval
 - Audit required
-- JStack: customer-data-block hook prevents commit
+- Lintel: customer-data-block hook prevents commit
 
 ### 5. Highly Sensitive
 
@@ -75,7 +75,7 @@ The 6-tier classification for data sensitivity. Used throughout JStack's complia
 - Need-to-know basis with named individuals
 - External sharing: only via explicit legal + DSB + executive approval
 - Audit required at every access
-- JStack: not appropriate to handle in JStack repos at all
+- Lintel: not appropriate to handle in Lintel repos at all
 
 ### 6. Confidential
 
@@ -89,9 +89,9 @@ The 6-tier classification for data sensitivity. Used throughout JStack's complia
 
 **Handling:**
 - Specifically-named individuals only, often on physically-isolated systems
-- No JStack handling — out of scope
+- No Lintel handling — out of scope
 
-## Class declaration in JStack repos
+## Class declaration in Lintel repos
 
 Each artifact handling data should have a `compliance/data-class.md` file declaring its highest-class:
 
@@ -110,7 +110,7 @@ declared_by: SE-engineer
 - **Internal tooling (no customer surface):** Non-business
 - **Internal tooling with engagement metadata:** Business
 - **Customer-engagement repos (sanitized):** Business
-- **Customer-engagement repos (raw):** Sensitive — should NOT be in JStack at all
+- **Customer-engagement repos (raw):** Sensitive — should NOT be in Lintel at all
 
 ## Class escalation rules
 
@@ -121,9 +121,9 @@ If a Sensitive-class artifact is added to a Business-class repo: the repo is now
 - External sharing gets stricter
 - May require migration to a Sensitive-class-appropriate repo location
 
-## What JStack supports
+## What Lintel supports
 
-JStack actively supports Public → Business class data. It supports Sensitive class data WITH operator vigilance + opt-in additional controls. It does NOT support Highly Sensitive or Confidential data — those classes belong in dedicated MS systems with different controls.
+Lintel actively supports Public → Business class data. It supports Sensitive class data WITH operator vigilance + opt-in additional controls. It does NOT support Highly Sensitive or Confidential data — those classes belong in dedicated MS systems with different controls.
 
 ## Cross-reference
 

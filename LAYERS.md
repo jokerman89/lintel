@@ -1,6 +1,6 @@
 # LAYERS — the 4-layer architecture manifest
 
-JokermanStack (JStack) organizes everything into 4 layers. Each layer has its own purpose, change rate, and per-repo override rules.
+JokermanStack (Lintel) organizes everything into 4 layers. Each layer has its own purpose, change rate, and per-repo override rules.
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -53,9 +53,9 @@ JokermanStack (JStack) organizes everything into 4 layers. Each layer has its ow
 
 Each scaffolded repo can override layer behavior via:
 
-- `<repo>/CLAUDE.md` — repo-specific rules ALWAYS override JStack defaults. Per-repo wins.
+- `<repo>/CLAUDE.md` — repo-specific rules ALWAYS override Lintel defaults. Per-repo wins.
 - `<repo>/.claude/agents/` — repo-level subagents override user-global with same name (Layer 3 precedence rule 2).
-- `~/.jstack/config.yaml` — operator-global overrides for Layer 2 tier elevation, Layer 4 hook activation, Layer 3 voice tier defaults, etc.
+- `~/.lintel/config.yaml` — operator-global overrides for Layer 2 tier elevation, Layer 4 hook activation, Layer 3 voice tier defaults, etc.
 
 ## What each layer DOES NOT do
 
@@ -73,4 +73,4 @@ Each scaffolded repo can override layer behavior via:
 
 ## Provenance
 
-The 4-layer architecture model is from the operator's internal wiki ("My Claude Code Setup (experimental)" — Layer 1 Universal foundation / Layer 2 Compliance / Layer 3 Personal advanced / Layer 4 Power user). JStack v1 operationalizes that wiki vision into installable + verifiable infrastructure.
+The 4-layer architecture model is from the operator's internal wiki ("My Claude Code Setup (experimental)" — Layer 1 Universal foundation / Layer 2 Compliance / Layer 3 Personal advanced / Layer 4 Power user). Lintel v1 operationalizes that wiki vision into installable + verifiable infrastructure.

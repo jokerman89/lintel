@@ -1,7 +1,7 @@
 ---
-name: jstack-rais-impact-assessment
+name: li-rais-impact-assessment
 layer: ms-team
-v1_alias: [jstack-rai-impact-assessment]
+v1_alias: [li-rai-impact-assessment]
 description: Generate an RAI Impact Assessment — fairness, reliability, privacy, inclusiveness, transparency, accountability.
 color: orange
 tools: Read, Write, Bash, Grep
@@ -33,7 +33,7 @@ Distinct from `/rais-sensitive-use` (category classification) and `/onerai-submi
 - Required `--feature <name>` — short name for the AI feature
 - Optional `--source <path>` — design doc / spec for the feature
 - Optional `--sensitive-use-report <path>` — output from `/rais-sensitive-use`
-- Optional `--out <path>` — output report path (default: `~/.jstack/rai/<feature>-impact-assessment.md`)
+- Optional `--out <path>` — output report path (default: `~/.lintel/rai/<feature>-impact-assessment.md`)
 - Optional `--depth <quick|thorough>` — quick = 1-2 lines per principle; thorough = structured per-principle questionnaire
 
 ## Workflow

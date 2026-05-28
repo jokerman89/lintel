@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# no-customer-data-in-message — JStack warn-only hook
+# no-customer-data-in-message — Lintel warn-only hook
 # Scans operator prompt for customer-data tells.
 # Reads prompt content from $1 (Claude Code passes prompt as first arg).
 
@@ -8,9 +8,9 @@ set -euo pipefail
 PROMPT="${1:-}"
 [ -z "$PROMPT" ] && exit 0
 
-JSTACK_HOME="${JSTACK_HOME:-$HOME/.jstack}"
-mkdir -p "$JSTACK_HOME/audit"
-AUDIT="$JSTACK_HOME/audit/hooks.jsonl"
+LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
+mkdir -p "$LINTEL_HOME/audit"
+AUDIT="$LINTEL_HOME/audit/hooks.jsonl"
 
 patterns_hit=()
 
@@ -39,7 +39,7 @@ if [ ${#patterns_hit[@]} -gt 0 ]; then
   joined=$(IFS=,; echo "${patterns_hit[*]}")
   printf '{"hook":"no-customer-data-in-message","tier":"warn","ts":"%s","patterns_matched":"%s"}\n' \
     "$ts" "$joined" >> "$AUDIT"
-  echo "WARN [JStack hook]: customer-data tell detected in prompt — patterns: $joined"
+  echo "WARN [Lintel hook]: customer-data tell detected in prompt — patterns: $joined"
   echo "WARN: Sanitize before continuing if this is sensitive. (warn-only; not blocking.)"
 fi
 

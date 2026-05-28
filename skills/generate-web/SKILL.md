@@ -1,5 +1,5 @@
 ---
-name: jstack-generate-web
+name: li-generate-web
 layer: ms-team
 description: Produce brand-compliant static HTML or Next.js scaffold for demo/landing page.
 color: green
@@ -25,7 +25,7 @@ Brand-compliant web artifact generation. Two variants:
 - **`single-file`** — self-contained HTML (Lovable-style aesthetic; one file, inline CSS, optional inline JS)
 - **`nextjs-scaffold`** — multi-file Next.js project (real demo with routes, components, deploy-ready)
 
-Uses native HTML / Next.js templates from `~/.jstack/brand/web-templates/` or in-repo defaults.
+Uses native HTML / Next.js templates from `~/.lintel/brand/web-templates/` or in-repo defaults.
 
 ## When to use
 
@@ -64,8 +64,8 @@ Uses native HTML / Next.js templates from `~/.jstack/brand/web-templates/` or in
    - Brand alignment
 
 4. **Generate per variant:**
-   - **single-file:** populate `~/.jstack/brand/web-templates/landing-single-file.html` (or default)
-   - **nextjs-scaffold:** copy `~/.jstack/brand/web-templates/demo-site/` skeleton, write src/app/page.tsx + components, generate package.json
+   - **single-file:** populate `~/.lintel/brand/web-templates/landing-single-file.html` (or default)
+   - **nextjs-scaffold:** copy `~/.lintel/brand/web-templates/demo-site/` skeleton, write src/app/page.tsx + components, generate package.json
 
 5. **4-gate quality pipeline** (per /generate-ppt):
    - Gate 1: voice (if customer-bound)
@@ -83,7 +83,7 @@ Uses native HTML / Next.js templates from `~/.jstack/brand/web-templates/` or in
 Generate Web: copilot-for-legal-demo
 
 Variant: single-file
-Template: landing-single-file.html (~/.jstack/brand/web-templates/, brand 2026-Q2)
+Template: landing-single-file.html (~/.lintel/brand/web-templates/, brand 2026-Q2)
 Azure theme: enabled
 Voice tier: trailblazer-draft
 
@@ -101,7 +101,7 @@ Voice tier: trailblazer-draft
   Brand: Azure palette applied ✓
 
 ## Generation
-  Produced ~/.jstack/draft/copilot-for-legal-demo.html (87 KB)
+  Produced ~/.lintel/draft/copilot-for-legal-demo.html (87 KB)
   6 Azure SVGs embedded via /asset-search
 
 ## 4-Gate pipeline
@@ -113,7 +113,7 @@ Voice tier: trailblazer-draft
 ## Status
 ALL GATES PASS. Moving from draft → ./copilot-for-legal-demo.html.
 
-Preview: /open-managed-browser file:///c/Users/jokerman/.jstack/draft/copilot-for-legal-demo.html
+Preview: /open-managed-browser file:///c/Users/jokerman/.lintel/draft/copilot-for-legal-demo.html
 ```
 
 ## Compliance integration

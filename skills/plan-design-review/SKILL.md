@@ -1,5 +1,5 @@
 ---
-name: jstack-plan-design-review
+name: li-plan-design-review
 layer: foundation
 description: UI/UX gaps review for plans with a frontend surface. Skip for backend/infra/CLI-only work.
 color: orange
@@ -12,7 +12,7 @@ cli_support: [claude-code]
 
 Visual + interaction review of a plan that introduces or changes a UI surface. Optional — only fires when the plan touches frontend components, CSS, views, user-facing flows, or any rendered output.
 
-JStack version inspired-by gstack's `/plan-design-review` but written fresh. Stays internal voice (design critique among builders).
+Lintel version inspired-by gstack's `/plan-design-review` but written fresh. Stays internal voice (design critique among builders).
 
 ## When to use
 
