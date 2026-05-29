@@ -20,6 +20,32 @@ Cross-session working state (ej durable rules — that's [[lessons.md]]; ej pers
 **Last touched:** YYYY-MM-DD
 -->
 
+## v4.0-reframe — design doc DRAFT_FOR_REVIEW 2026-05-29
+
+**Status:** design phase — awaiting operator pass
+
+**Scope:** Master design consolidating 3 operator-supplied FRs + 1 text-form engineering-depth request + 1 meta-process note into 5-chapter reframe of what Lintel IS. Becomes v4.0.
+
+**5 chapters in one architecture:**
+1. **Spine + Packs + Navigation** — generic spine, pack-loaded identity, mandatory navigation declarations, orientator at SENSE (honors `lintel-feature-spine-packs-navigation.md`)
+2. **Brief Forge + Envelope + Wiki** — universal hand-off gate, standardized payload, generated 1:1 documentation (honors `lintel-feature-brief-forge.md`)
+3. **Engineering Depth** — 5 domain modules (tech-architecture · data-architecture · security-compliance · devops-hosting · testing-qa) with full/loop/single granularities, per-module checkpoints + recovery + iteration loops (NEW — interprets operator text-form FR)
+4. **Meta-infra Discipline** — `meta-infra` mode envelope + 4 mandatory gates (structure-impact, compatibility-audit, regression-shape-tests, future-operator validation) for harness-on-harness work (NEW — interprets operator meta-process note)
+5. **Composition** — ship sequencing, cross-chapter deps, risks, operator validation criteria
+
+**Estimates:** ~17-27 CC-days for v4.0 ship (alpha/beta/rc), ~10-15 CC-days for engineering-depth rollout (v4.1-4.5).
+
+**Open decisions:** 14 numbered (C1-D1 through C5-D2). All recommendations included; operator confirms or vetoes per-line.
+
+**Files:**
+- `docs/design/lintel-v4.0-reframe-design.md` (master doc)
+- `docs/feature-requests/lintel-feature-spine-packs-navigation.md` (canonical reference)
+- `docs/feature-requests/lintel-feature-brief-forge.md` (canonical reference)
+
+**Last touched:** 2026-05-29
+
+---
+
 ## v3.5-close — Generate-pipeline COMPLETE
 
 **Status:** completed
