@@ -4,8 +4,8 @@ Auto-generated från frontmatter på push till main.
 Regenerated av `.github/workflows/catalog.yml` per push när `skills/**/SKILL.md` ändras.
 Hand-edits skrivs över — edit frontmatter i source SKILL.md istället.
 
-Total skills: 137
-Generated: 2026-05-28T20:36:29Z
+Total skills: 140
+Generated: 2026-05-29T09:13:40Z
 
 ## foundation layer (94 skills)
 
@@ -106,7 +106,7 @@ Generated: 2026-05-28T20:36:29Z
 | `/li:sync-brain` | Refresh the gbrain index from the current worktree — incremental or full. |
 | `/li:usage-log` | Append-only usage log för skill/agent-invocations. Wrapper-pattern per L-001 (en log, ingen per-skill duplikat). Solo-i |
 
-## ms-team layer (42 skills)
+## ms-team layer (45 skills)
 
 | Skill | Description |
 |---|---|
@@ -124,8 +124,11 @@ Generated: 2026-05-28T20:36:29Z
 | `/li:entra-agent-id-submit-draft` | Prepare a Microsoft Entra Agent ID submission — identity, capabilities, governance scope. |
 | `/li:eval` | Run TRAILBLAZER-TEST against TRAILBLAZER-CORPUS — per-cell accuracy → CALIBRATION.md. |
 | `/li:first-party-check` | Scan for non-first-party dependencies and surface MS alternatives — "first-party first" enforcement. |
+| `/li:frontend-design-review` | Quality gate för produced frontend designs. 6-dimension audit (typography hierarchy + motion coherence + shader perf-bu |
 | `/li:frontend-design` | Frontend design-director orchestrator. Chains typography + motion (+ shader in Fas A2) → frontend-design-spec.json → |
 | `/li:frontend-motion` | Frontend design-director sub-skill — picks motion-language (GSAP/Lenis/Theatre/Rive/Motion-One) + scroll-trigger-confi |
+| `/li:frontend-shader` | Frontend design-director sub-skill — picks shader library (Paper Shaders / OGL / react-three-fiber / Lygia) + visual t |
+| `/li:frontend-style-extract` | Pattern-level extraction sister till generate-style-learn. Reads artifacts (URLs, screenshots, .tsx files) → extracts  |
 | `/li:frontend-typography` | Frontend design-director sub-skill — picks font-family-stacks + variable-axes-config + size-scale + line-heights + fon |
 | `/li:generate-design` | Produce design-spec.json (per-format layout-mappings + palette + fonts + asset placements) from content.md. Shared conte |
 | `/li:generate-outline` | Produce outline.md (structured presentation/document skeleton) from a brief. Shared content-pipeline sub-skill, solo-inv |
