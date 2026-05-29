@@ -10,7 +10,7 @@ cli_support: [claude-code, codex]
 
 # /plan-eng-review
 
-The **required** review per Lintel's Review Readiness Dashboard. Scope: architecture, code quality, test coverage, performance. Outputs a structured plan-file review report + persists to `gstack-review-log` so `/release-ev2` can read it.
+The **required** review per Lintel's Review Readiness Dashboard. Scope: architecture, code quality, test coverage, performance. Outputs a structured plan-file review report + persists via first-party `bin/li-review-log` so `/release-ev2` can read it.
 
 Inspired-by gstack's equivalent. Lintel version adds:
 - `cli_support` frontmatter check on every skill/agent the plan adds
@@ -88,9 +88,9 @@ After all 4 sections: offer codex (or Claude subagent if codex unavailable) for 
 **VERDICT:** ENG CLEARED — ready to implement | NOT CLEARED — <reason>
 ```
 
-Persist:
+Persist via first-party `bin/li-review-log` (legacy alias: gstack-review-log):
 ```bash
-~/.claude/skills/gstack/bin/gstack-review-log '{"skill":"plan-eng-review","timestamp":"...","status":"...","unresolved":N,"critical_gaps":N,"issues_found":N,"mode":"FULL_REVIEW","commit":"..."}'
+bin/li-review-log '{"skill":"plan-eng-review","timestamp":"...","status":"...","unresolved":N,"critical_gaps":N,"issues_found":N,"mode":"FULL_REVIEW","commit":"..."}'
 ```
 
 ## Required outputs
@@ -114,7 +114,7 @@ Before `ExitPlanMode`:
 
 1. Read the plan file. Confirm LAST `## ` heading is `## GSTACK REVIEW REPORT`.
 2. Report contains: Runs/Status/Findings table + VERDICT line.
-3. `gstack-review-log` called + `gstack-review-read` consumed at least once.
+3. `bin/li-review-log` called + `bin/li-review-read` consumed at least once.
 
 Failing this gate + calling `ExitPlanMode` = contract violation. User sees a plan with a missing/stale report + rejects it.
 

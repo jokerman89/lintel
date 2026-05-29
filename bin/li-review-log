@@ -1,0 +1,113 @@
+#!/usr/bin/env bash
+# bin/li-review-log — first-party review-log writer (first-party-first remediation)
+#
+# Replaces the external gstack binary `~/.claude/skills/gstack/bin/gstack-review-log`
+# on Lintel's execution path. Accepts the same single JSON-object argument the
+# review skills already pass (plan-ceo-review, plan-eng-review, plan-design-review,
+# plan-devex-review, code-review, codex) and appends a record to the first-party
+# audit log at ~/.lintel/audit/reviews.jsonl by sourcing bin/_audit.sh.
+#
+# Why first-party: Lintel ships a `non-first-party-warn` rule. Calling the external
+# gstack binary on the execution path violates that rule. This wrapper keeps the
+# same JSON contract but writes via the first-party audit_log() helper. The legacy
+# gstack alias still exists on disk but is no longer called by Lintel skills.
+#
+# Usage:
+#   bin/li-review-log '{"skill":"plan-eng-review","timestamp":"...","status":"CLEAR","commit":"7e7a021","mode":"FULL_REVIEW"}'
+#
+# Contract (matches legacy gstack-review-log):
+#   - Single argument: a JSON object describing the review.
+#   - Recognised top-level keys: skill, status, commit, timestamp (+ any extras,
+#     which are preserved verbatim under "extra").
+#   - Invalid JSON (best-effort check) is rejected with exit 1.
+#
+# Writes to: ~/.lintel/audit/reviews.jsonl  (category=reviews, kind=<skill>)
+#
+# Exit codes:
+#   0 = record written
+#   1 = invalid / missing JSON input
+#   2 = invocation error (audit helper missing, etc.)
+
+set -euo pipefail
+
+REPO_ROOT="${LINTEL_REPO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." 2>/dev/null && pwd)}"
+
+usage() {
+  head -33 "$0" | sed 's/^# \{0,1\}//' | sed '1d'
+  exit "${1:-2}"
+}
+
+INPUT=""
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -h|--help) usage 0 ;;
+    -*) echo "li-review-log: unknown flag: $1" >&2; usage 2 ;;
+    *) INPUT="$1"; shift ;;
+  esac
+done
+
+[ -n "$INPUT" ] || { echo "li-review-log: JSON argument required" >&2; usage 2; }
+
+AUDIT_LIB="$REPO_ROOT/bin/_audit.sh"
+[ -f "$AUDIT_LIB" ] || { echo "li-review-log: audit helper missing: $AUDIT_LIB" >&2; exit 2; }
+# shellcheck source=/dev/null
+source "$AUDIT_LIB"
+
+# ── Extract a string field from the JSON object (jq if available, else regex) ──
+# Best-effort, dependency-light: matches "key":"value" or "key": value (number).
+_json_field() {
+  local key="$1"
+  if command -v jq >/dev/null 2>&1; then
+    printf '%s' "$INPUT" | jq -r --arg k "$key" '.[$k] // empty' 2>/dev/null
+    return 0
+  fi
+  # Regex fallback: quoted string value
+  printf '%s' "$INPUT" | sed -n "s/.*\"$key\"[[:space:]]*:[[:space:]]*\"\([^\"]*\)\".*/\1/p" | head -1
+}
+
+# ── Validate input is parseable JSON (matches legacy reject-on-malformed) ──
+if command -v jq >/dev/null 2>&1; then
+  if ! printf '%s' "$INPUT" | jq -e . >/dev/null 2>&1; then
+    echo "li-review-log: invalid JSON, skipping" >&2
+    exit 1
+  fi
+else
+  # Minimal shape check without jq: must look like a JSON object.
+  case "$INPUT" in
+    \{*\}) : ;;
+    *) echo "li-review-log: input does not look like a JSON object, skipping" >&2; exit 1 ;;
+  esac
+fi
+
+SKILL="$(_json_field skill)"
+STATUS="$(_json_field status)"
+COMMIT="$(_json_field commit)"
+TIMESTAMP="$(_json_field timestamp)"
+
+SKILL="${SKILL:-unknown}"
+
+# Resolve commit to current short HEAD when the skill passed a placeholder/empty.
+case "$COMMIT" in
+  ""|"..."|"<commit>"|"unknown")
+    COMMIT="$(git rev-parse --short HEAD 2>/dev/null || echo unknown)"
+    ;;
+esac
+
+# audit_log stamps its own ts; preserve the skill-supplied timestamp too when given
+# (drop placeholder "..."), so reviews.jsonl carries the review's own time.
+case "$TIMESTAMP" in
+  ""|"...") TIMESTAMP="" ;;
+esac
+
+# Preserve the full original JSON payload verbatim for replay / downstream parsing.
+RAW_ONE_LINE="$(printf '%s' "$INPUT" | tr '\n' ' ')"
+
+# Write the first-party audit record:
+#   category=reviews  kind=<skill>  status=... commit=... [review_ts=...] raw=<payload>
+set -- "status=$STATUS" "commit=$COMMIT"
+[ -n "$TIMESTAMP" ] && set -- "$@" "review_ts=$TIMESTAMP"
+set -- "$@" "raw=$RAW_ONE_LINE"
+
+audit_log reviews "$SKILL" "$@"
+
+echo "li-review-log: recorded ${SKILL} status=${STATUS:-?} commit=${COMMIT} → ${LINTEL_AUDIT_DIR}/reviews.jsonl"

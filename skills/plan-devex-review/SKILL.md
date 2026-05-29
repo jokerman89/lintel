@@ -68,9 +68,9 @@ Each dimension: measure (where possible) + 1-3 specific findings + AskUserQuesti
 **Persona:** CAIP SE — primary, intrapreneur secondary
 ```
 
-Persist:
+Persist via first-party `bin/li-review-log` (legacy alias: gstack-review-log):
 ```bash
-~/.claude/skills/gstack/bin/gstack-review-log '{"skill":"plan-devex-review","timestamp":"...","status":"...","initial_score":N,"overall_score":N,"product_type":"...","tthw_current":"...","tthw_target":"...","mode":"...","persona":"...","competitive_tier":"...","unresolved":N,"commit":"..."}'
+bin/li-review-log '{"skill":"plan-devex-review","timestamp":"...","status":"...","initial_score":N,"overall_score":N,"product_type":"...","tthw_current":"...","tthw_target":"...","mode":"...","persona":"...","competitive_tier":"...","unresolved":N,"commit":"..."}'
 ```
 
 ## Compliance integration

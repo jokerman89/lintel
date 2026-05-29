@@ -1,0 +1,169 @@
+#!/usr/bin/env bash
+# bin/li-review-read — first-party review-log reader for the release gate
+#
+# Replaces the external gstack binary `~/.claude/skills/gstack/bin/gstack-review-read`
+# that /release-ev2 used at its "Review readiness check" step. Reads the first-party
+# audit log at ~/.lintel/audit/reviews.jsonl and emits the verdict shape /release-ev2
+# expects: whether an Eng Review is CLEAR within 7 days for the current commit.
+#
+# Back-compat: also folds in any legacy gstack records written before this
+# remediation (~/.gstack/projects/<slug>/<branch>-reviews.jsonl), so historical
+# entries still count toward the gate. The legacy gstack binary is no longer
+# called on the execution path — this reader just still *reads* its old output.
+#
+# Usage:
+#   bin/li-review-read                  # human + machine verdict to stdout
+#   bin/li-review-read --skill <name>   # gate on a specific skill (default: plan-eng-review)
+#   bin/li-review-read --days <N>       # freshness window (default: 7)
+#   bin/li-review-read --json           # emit records as JSONL only (no verdict block)
+#
+# Output (default): raw review records, then a ---VERDICT--- block release-ev2 reads:
+#   VERDICT: Eng Review CLEAR within 7 days   (or)   VERDICT: NO fresh Eng Review
+#   plus the matched record's status/commit/age and current HEAD.
+#
+# Exit codes:
+#   0 = a fresh CLEAR record for the current commit was found (gate may proceed)
+#   3 = no fresh/CLEAR record for current commit (gate should surface + ask)
+#   2 = invocation error
+
+set -uo pipefail
+
+REPO_ROOT="${LINTEL_REPO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." 2>/dev/null && pwd)}"
+
+LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
+LINTEL_AUDIT_DIR="${LINTEL_AUDIT_DIR:-$LINTEL_HOME/audit}"
+REVIEWS_LOG="$LINTEL_AUDIT_DIR/reviews.jsonl"
+
+GATE_SKILL="plan-eng-review"
+DAYS=7
+JSON_ONLY=0
+
+usage() {
+  head -34 "$0" | sed 's/^# \{0,1\}//' | sed '1d'
+  exit "${1:-2}"
+}
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --skill) GATE_SKILL="${2:-}"; shift 2 ;;
+    --days)  DAYS="${2:-7}"; shift 2 ;;
+    --json)  JSON_ONLY=1; shift ;;
+    -h|--help) usage 0 ;;
+    -*) echo "li-review-read: unknown flag: $1" >&2; usage 2 ;;
+    *) echo "li-review-read: unexpected arg: $1" >&2; usage 2 ;;
+  esac
+done
+
+HEAD_SHORT="$(git rev-parse --short HEAD 2>/dev/null || echo unknown)"
+
+# ── Derive the legacy gstack path (slug + branch), mirroring gstack-slug logic ──
+# so historical entries written before this remediation still count. Sanitized to
+# [a-zA-Z0-9._-] exactly as gstack-slug does.
+_legacy_review_file() {
+  local slug branch remote raw
+  remote="$(git remote get-url origin 2>/dev/null || echo "")"
+  if [ -n "$remote" ]; then
+    raw="$(printf '%s' "$remote" | sed 's|.*[:/]\([^/]*/[^/]*\)\.git$|\1|;s|.*[:/]\([^/]*/[^/]*\)$|\1|' | tr '/' '-')"
+    slug="$(printf '%s' "$raw" | tr -cd 'a-zA-Z0-9._-')"
+  fi
+  slug="${slug:-$(basename "$PWD" | tr -cd 'a-zA-Z0-9._-')}"
+  branch="$(git rev-parse --abbrev-ref HEAD 2>/dev/null | tr -cd 'a-zA-Z0-9._-')"
+  branch="${branch:-unknown}"
+  printf '%s/projects/%s/%s-reviews.jsonl' "${GSTACK_HOME:-$HOME/.gstack}" "$slug" "$branch"
+}
+LEGACY_LOG="$(_legacy_review_file)"
+
+# ── Collect candidate records from both sources into one stream ──
+ALL_RECORDS="$(
+  { [ -f "$REVIEWS_LOG" ] && cat "$REVIEWS_LOG"; } 2>/dev/null
+  { [ -f "$LEGACY_LOG" ]  && cat "$LEGACY_LOG"; }  2>/dev/null
+)"
+
+if [ "$JSON_ONLY" -eq 1 ]; then
+  printf '%s\n' "$ALL_RECORDS" | sed '/^$/d'
+  exit 0
+fi
+
+# ── Emit the raw records (release-ev2 / model can inspect them directly) ──
+echo "## Review records (first-party: $REVIEWS_LOG)"
+if [ -f "$LEGACY_LOG" ]; then
+  echo "##                (legacy back-compat: $LEGACY_LOG)"
+fi
+if [ -n "$ALL_RECORDS" ]; then
+  printf '%s\n' "$ALL_RECORDS" | sed '/^$/d'
+else
+  echo "NO_REVIEWS"
+fi
+
+# ── Compute the verdict: is there a CLEAR <gate_skill> record within N days for HEAD? ──
+# A record matches when:
+#   - it mentions "skill":"<GATE_SKILL>"  (first-party stores skill as kind too, but
+#     the raw payload — preserved verbatim — always carries "skill":"<...>")
+#   - its status is CLEAR/CLEARED/CLEAR (PLAN)/SCOPE LOCKED (treated as clear)
+#   - its commit matches the current short HEAD
+#   - its timestamp (review_ts / ts / timestamp) is within DAYS of now
+# Timestamps are ISO-8601 UTC; string comparison is valid for the freshness cutoff.
+
+_cutoff_iso() {
+  date -u -d "$DAYS days ago" +"%Y-%m-%dT%H:%M:%SZ" 2>/dev/null || \
+    date -u -v "-${DAYS}d" +"%Y-%m-%dT%H:%M:%SZ" 2>/dev/null || \
+    printf '1970-01-01T00:00:00Z'
+}
+CUTOFF="$(_cutoff_iso)"
+
+VERDICT_RECORD="$(
+  printf '%s\n' "$ALL_RECORDS" | sed '/^$/d' | awk -v skill="$GATE_SKILL" -v head="$HEAD_SHORT" -v cutoff="$CUTOFF" '
+    {
+      line=$0
+      # skill match: first-party records store the skill as top-level "kind";
+      # legacy gstack records (and the preserved "raw" payload) carry "skill".
+      # Accept the escaped form too (\"skill\":\"...\") since raw is JSON-in-JSON.
+      if (index(line, "\"kind\":\"" skill "\"") == 0 \
+          && index(line, "\"skill\":\"" skill "\"") == 0 \
+          && index(line, "\\\"skill\\\":\\\"" skill "\\\"") == 0) next
+      # status: must look CLEAR (CLEAR, CLEARED, CLEAR (PLAN), ENG CLEARED, SCOPE LOCKED).
+      # Reject anything negated ("NOT CLEARED", "NOT CLEAR") — substring "CLEAR" alone
+      # is not sufficient.
+      st=""
+      if (match(line, /"status":"[^"]*"/)) st=substr(line, RSTART+10, RLENGTH-11)
+      up=toupper(st)
+      if (index(up,"NOT ")>0 || index(up,"REVISE")>0) next
+      if (index(up,"CLEAR")==0 && index(up,"LOCKED")==0) next
+      # commit match (current HEAD); accept records that carry no commit only if HEAD unknown
+      cm=""
+      if (match(line, /"commit":"[^"]*"/)) cm=substr(line, RSTART+10, RLENGTH-11)
+      if (head != "unknown" && cm != "" && cm != head) next
+      # freshness: prefer review_ts, then timestamp, then ts
+      tsv=""
+      if (match(line, /"review_ts":"[^"]*"/)) tsv=substr(line, RSTART+13, RLENGTH-14)
+      if (tsv=="" && match(line, /"timestamp":"[^"]*"/)) tsv=substr(line, RSTART+13, RLENGTH-14)
+      if (tsv=="" && match(line, /"ts":"[^"]*"/)) tsv=substr(line, RSTART+6, RLENGTH-7)
+      if (tsv=="" || tsv=="...") next
+      if (tsv < cutoff) next
+      print line
+    }
+  ' | tail -1
+)"
+
+echo ""
+echo "---VERDICT---"
+echo "gate_skill: $GATE_SKILL"
+echo "window_days: $DAYS"
+echo "current_head: $HEAD_SHORT"
+echo "freshness_cutoff: $CUTOFF"
+
+if [ -n "$VERDICT_RECORD" ]; then
+  v_status="$(printf '%s' "$VERDICT_RECORD" | sed -n 's/.*"status":"\([^"]*\)".*/\1/p')"
+  v_commit="$(printf '%s' "$VERDICT_RECORD" | sed -n 's/.*"commit":"\([^"]*\)".*/\1/p')"
+  v_ts="$(printf '%s' "$VERDICT_RECORD" | sed -n 's/.*"review_ts":"\([^"]*\)".*/\1/p')"
+  [ -z "$v_ts" ] && v_ts="$(printf '%s' "$VERDICT_RECORD" | sed -n 's/.*"timestamp":"\([^"]*\)".*/\1/p')"
+  [ -z "$v_ts" ] && v_ts="$(printf '%s' "$VERDICT_RECORD" | sed -n 's/.*"ts":"\([^"]*\)".*/\1/p')"
+  echo "matched_status: ${v_status:-?}"
+  echo "matched_commit: ${v_commit:-$HEAD_SHORT}"
+  echo "matched_timestamp: ${v_ts:-?}"
+  echo "VERDICT: Eng Review CLEAR within ${DAYS} days"
+  exit 0
+else
+  echo "VERDICT: NO fresh Eng Review (no CLEAR ${GATE_SKILL} record within ${DAYS} days for commit ${HEAD_SHORT})"
+  exit 3
+fi
