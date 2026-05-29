@@ -113,8 +113,12 @@ Match wedge to existing agents that should be subagent-pulled in PLAN/BUILD:
 
 ```bash
 # For each agent category, score relevance to wedge
-for cat in ms-specific engineering security compliance devops customer communication voice doc-gen; do
+# Categories are directory-derived so the scan can never drift from agents/.
+for cat_dir in agents/*/; do
+  cat=$(basename "$cat_dir")
   for agent in agents/$cat/*.md; do
+    [ "$(basename "$agent")" = "_TEMPLATE.md" ] && continue
+    [ "$(basename "$agent")" = "README.md" ] && continue
     name=$(basename "$agent" .md)
     description=$(grep '^description:' "$agent" | head -1)
     # If keywords match, add to recommended_agents[]
