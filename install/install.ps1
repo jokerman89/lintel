@@ -53,7 +53,10 @@ $dirs = @(
   "$LintelHome\entra", "$LintelHome\review-log", "$LintelHome\benchmarks",
   "$LintelHome\calibrations", "$LintelHome\browse-runs", "$LintelHome\scrape-runs",
   "$LintelHome\design-runs", "$LintelHome\design-html", "$LintelHome\design-shotgun",
-  "$LintelHome\browser-profiles", "$LintelHome\quarantine"
+  "$LintelHome\browser-profiles", "$LintelHome\quarantine",
+  "$LintelHome\frontend-runs",
+  "$LintelHome\brand", "$LintelHome\brand\design-patterns", "$LintelHome\brand\motion-libraries",
+  "$LintelHome\brand\shader-snippets", "$LintelHome\brand\palettes", "$LintelHome\brand\fonts"
 )
 foreach ($d in $dirs) {
   if (-not (Test-Path $d)) { New-Item -ItemType Directory -Path $d | Out-Null }
@@ -64,6 +67,22 @@ Ok "Lintel home structure created"
 Hdr "Copying scaffolding to ~\.lintel\scaffolding\"
 Copy-Item -Path (Join-Path $RepoRoot "scaffolding\*") -Destination $LintelScaffolding -Recurse -Force
 Ok "Scaffolding copied (4 layers)"
+
+# v3.7 brand-seeds (idempotent) - copies canonical design-patterns from seeds/
+$seedsBrand = Join-Path $RepoRoot "seeds\brand"
+if (Test-Path $seedsBrand) {
+  Hdr "Copying brand seeds to ~\.lintel\brand\ (idempotent - operator-extracted patterns preserved)"
+  $seedPatterns = Get-ChildItem -Path (Join-Path $seedsBrand "design-patterns") -Directory -ErrorAction SilentlyContinue
+  foreach ($sp in $seedPatterns) {
+    $target = Join-Path "$LintelHome\brand\design-patterns" $sp.Name
+    if (Test-Path $target) {
+      Info "Pattern '$($sp.Name)' exists at $target - preserving operator state (idempotent)"
+    } else {
+      Copy-Item -Path $sp.FullName -Destination $target -Recurse -Force
+      Ok "Seeded canonical pattern: $($sp.Name) -> $target"
+    }
+  }
+}
 
 # Config
 Hdr "Layer config"
