@@ -214,7 +214,7 @@ Next options:
   • /li:cycle [--mode <preset>]   — full cycle from here
   • /li:<phase>                    — jump to specific phase
   • /li:resume                     — pick up where we left off
-  • /li:match "<intent>"           — semantic router if unsure
+  • /li:skill-router "<intent>"    — semantic router if unsure (was /li:match — grace until 2026-08-29)
 ```
 
 ## Status protocol

@@ -1,7 +1,7 @@
 ---
 name: capture
 layer: foundation
-description: Phase 8 of Lintel cycle — durable capture. Lessons updated, ADR drafted, EVOLUTION-LOG appended, cold-executor handoff trio finalized (spec.md + plan.md + prompt.md). Cross-session continuity.
+description: Phase 8 of Lintel cycle — durable capture. Lessons updated, ADR drafted, EVOLUTION-LOG appended, cold-executor handoff trio REAFFIRMED against build evidence (trio born in PLAN per v3.8 Feature 2.2, not here). Cross-session continuity.
 color: cyan
 tools: Read, Write, Edit, Bash, Grep, Glob
 voice: internal
@@ -18,7 +18,7 @@ Five artifact categories:
 1. **Lessons** — corrections from BUILD/REVIEW → `tasks/lessons.md` (filtered, durable patterns only)
 2. **ADR** — non-trivial decisions → `docs/adr/NNNN-<slug>.md`
 3. **EVOLUTION-LOG** — CLAUDE.md changes → log entry
-4. **Cold-executor handoff trio** (NEW v3.5) — finalize `spec.md` + `plan.md` + `prompt.md` so a NEW cold session can re-execute
+4. **Cold-executor handoff trio** — reaffirm `spec.md` + `plan.md` + `prompt.md` against build evidence (trio BORN in PLAN per v3.8 Feature 2.2; CAPTURE only annotates with actual-build outcomes)
 5. **Operator profile** — append session entry to `~/.lintel/state/operator-profile.jsonl` for tier tracking
 
 Plus role-debrief (if role active) and retro (optional).
@@ -121,68 +121,27 @@ fi
 
 Auto-append (not optional) when CLAUDE.md changes — this is the audit trail for how guidance evolves.
 
-### Step 6 — Cold-executor handoff trio (NEW v3.5)
+### Step 6 — Cold-executor handoff trio (REAFFIRM, v3.8 Feature 2.2)
 
-THE BIG NEW CAPTURE: produce self-contained trio so a FRESH session can re-execute.
+**v3.8 change:** the trio (plan.md + spec.md + prompt.md) is now BORN TOGETHER in PLAN, not split across PLAN+CAPTURE. CAPTURE's job here is to RE-AFFIRM the trio against actual-build evidence — not generate.
 
-**`spec.md` finalize** (from PLAN's draft):
-- Complete specifications (interfaces, contracts, data models)
-- Requirements traced to design doc
-- Acceptance criteria from plan.md
-- Status: APPROVED (from DRAFT)
-- Path: root `spec.md` (canonical) or `docs/specs/<slug>-spec.md`
+**`spec.md` reaffirm** (born in PLAN):
+- Verify spec.md still matches actual implementation
+- Update interfaces/contracts that drifted during BUILD (annotated as post-build-evidence)
+- Status: APPROVED (from PLAN) — unchanged unless drift detected
 
-**`plan.md` finalize**:
-- Final plan.md from PLAN with all tasks marked DONE/STATUS in build-log
+**`plan.md` reaffirm** (born in PLAN):
+- Annotate plan.md tasks with actual STATUS (DONE/SKIPPED/DEFERRED) from build-log
 - Acceptance criteria post-verification (which actually passed)
-- Path: root `plan.md` or `docs/plans/<slug>-plan.md`
 
-**`prompt.md` NEW** (self-contained executor prompt):
-```markdown
-# Cold-Executor Prompt — <wedge title>
+**`prompt.md` reaffirm** (born in PLAN, v3.8 Feature 2.2 moved birth to PLAN):
+- Verify prompt.md still describes the work accurately
+- Add any "What you DON'T need to know" entries discovered during BUILD
+- Path: root `prompt.md` OR `docs/plans/<slug>/prompt.md` (born by PLAN, lives there)
 
-This file is a SELF-CONTAINED prompt. A fresh AI session reading only this prompt + the linked spec.md + plan.md should be able to re-execute or extend this work without prior context.
+**Why moved to PLAN:** standalone `/li:plan <design.md>` (workflow_root post-v3.8) needs to produce the complete trio at PLAN-time. CAPTURE-only generation broke that — operator running PLAN solo got 2/3 of a handoff. Trio born together fixes this.
 
-## Context
-<2-3 paragraphs: what this is, what it accomplishes, what business outcome>
-
-## Constraints
-- Must respect: <list constraints from design doc>
-- Must NOT: <list explicit anti-requirements>
-- Compliance: <HARD-RULES applicable>
-- Voice tier: <tier>
-
-## Acceptance criteria (verify)
-- [ ] <criterion 1 — concrete, testable>
-- [ ] <criterion 2>
-...
-
-## Deliverables
-- spec.md (this directory)
-- plan.md (this directory)
-- Code as per spec
-- Tests with N% coverage
-- Documentation per plan.md task X
-
-## How to re-execute
-1. Read spec.md fully
-2. Read plan.md
-3. Run /li:cycle --from BUILD (skip DEFINE/PLAN, they're done)
-4. Apply two-stage review per task
-5. Run /li:qa final
-6. Ship per /li:ship
-
-## What you DON'T need to know
-- This cycle's specific operator preferences (in lessons.md)
-- This cycle's prior failures (in build-log if needed)
-- The full conversation history that produced this
-
-This prompt is the IRRADUCIBLE handoff. Everything needed is here or in the linked files.
-```
-
-Path: root `prompt.md` (alongside spec.md and plan.md as the trio).
-
-AskUserQuestion: "Want to dogfood the trio? Spawn fresh subagent with ONLY these 3 files + verify it can describe what to build." (Optional verification step.)
+AskUserQuestion: "Want to dogfood the trio? Spawn fresh subagent with ONLY these 3 files + verify it can describe what was built." (Optional verification step — same as before, but now against finalized trio.)
 
 ### Step 7 — Role debrief (if role was active)
 

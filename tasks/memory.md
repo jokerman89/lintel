@@ -33,6 +33,25 @@ Cross-session working state (ej durable rules — that's [[lessons.md]]; ej pers
 
 ---
 
+## v3.8-jobs-and-planner — Curated-flow tracking + planner-as-module SHIPPED 2026-05-29
+
+**Status:** ready for merge (PR open)
+
+**What shipped:**
+- **Feature 1 (jobs system):** ~/.lintel/jobs/_active.md as single source of truth. 3 hooks (job-begin, job-end, job-stale-warn). 2 skills (`/li:jobs`, `/li:status`). `workflow_root: true` frontmatter flag on cycle + plan. Helper bin/_jobs.sh.
+- **Feature 2.1:** plan declares workflow_root: true (spawns its own job when invoked standalone).
+- **Feature 2.2:** prompt.md generation moved from CAPTURE to PLAN. Trio (plan.md + spec.md + prompt.md) born together. CAPTURE now reaffirms (annotates with build evidence), doesn't regenerate.
+- **Feature 2.3:** granularity hard check in plan-eng-review Step 0 — per-task ≤5min (operator-LOCKED). Tasks >5min trigger decompose-or-accept AskUserQuestion.
+- **Feature 2.4:** plan/SKILL.md documents Module-callable section. Three invocation modes documented (inside cycle, standalone, sub-module called by another workflow_root skill). --no-job flag for nested calls.
+
+**Concept docs:** docs/concepts/jobs-system.md + docs/concepts/planner-as-module.md.
+
+**Tests:** tests/unit/jobs-system-present.sh + tests/unit/workflow-root-and-trio.sh. 20/20 PASS local. Behavior smoke: job_create → job_update → job_archive end-to-end verified with audit-log writes.
+
+**Last touched:** 2026-05-29
+
+---
+
 ## v3.7-close — Frontend-design family COMPLETE
 
 **Status:** completed
@@ -117,7 +136,7 @@ Eng-review run 2026-05-28. v3.7 Fas A1+A2+B+C shipped i PR #22-#25, all merged 2
 
 **What's pending:**
 
-1. **WS-4a + WS-4b naming-sessions** (2-3h operator) → unlocks Cohort 4 implementation + PR #14 alias-mekanism implementation
+1. ~~**WS-4a + WS-4b naming-sessions**~~ ✅ AUTO-EXECUTED with operator-veto path 2026-05-29. WS-4a: NO renames (prefix-only disambiguation principle adopted). WS-4b: 4 renames (match→skill-router, setup-brain→gbrain-setup, sync-brain→gbrain-sync, agt-tier-stamp→agent-tier-stamp). Alias-mekanism + bin/_aliases.sh + tests shipped. Operator vetoes any line if disagreement.
 2. ~~**6.7 internal-voice consistency check** (D-5a)~~ ✅ INVESTIGATED 2026-05-29 — verdict: INTENDED, not drift. 125 internal / 14 mixed / 2 trailblazer distribution coherent. See [decisions-67-68 doc](docs/design/lintel-v3.6-decisions-67-68.md). Operator vetoes by reply "drift" if disagree.
 3. ~~**6.8 3-role validation** (D-5b)~~ ✅ INVESTIGATED 2026-05-29 — verdict: PATTERN VALIDATED. 3 role files structurally consistent (7/7 sections, 78-81 lines). Ready for role #4 — recommended `frontend-designer` to anchor v3.7 family. Operator vetoes by reply "not yet" or "go with X".
 4. **T0 voice corpus calibration** ($1.80-6 × 3-5 rundor)
@@ -125,4 +144,4 @@ Eng-review run 2026-05-28. v3.7 Fas A1+A2+B+C shipped i PR #22-#25, all merged 2
 6. **Marketplace submission** (post MS legal review)
 7. **PR #14 merge** efter WS-4a/b + alias-implementation
 
-**Last touched:** 2026-05-28
+**Last touched:** 2026-05-29

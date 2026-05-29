@@ -104,7 +104,7 @@ Run sub-skills in parallel-ish if independent. Each blocks if fails.
 - Threshold: ≥85% known-good match per cell
 - If <85%: surface, suggest edits, re-score
 
-**`/li:agt-tier-stamp`** (if BUILD includes agentic system):
+**`/li:agent-tier-stamp`** (if BUILD includes agentic system; was `/li:agt-tier-stamp`):
 - Agent Governance Framework tier classification
 - Dispatch AGTReviewer agent
 - Output: tier (informational / advisory / action-taking / autonomous) + governance posture

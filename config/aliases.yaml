@@ -1,0 +1,55 @@
+# Lintel alias-mekanism — single source of truth
+#
+# Per design: docs/design/lintel-v3.6-alias-mechanism.md (Approach C — central dispatcher)
+# Naming decisions: docs/design/lintel-v3.6-cohort4-naming-decisions.md (WS-4a + WS-4b)
+#
+# Three alias kinds: skill-folder, env-var, plugin-slug (last shape-supported but empty).
+# Default grace-period: 90 days. Operator-overridable per alias.
+# Removal requires explicit PR with `removal_at` date as commit-trigger reference.
+#
+# Audit log: ~/.lintel/audit/alias-resolution.jsonl
+# Listing: bin/li-doctor --aliases
+
+version: 1
+as_of: 2026-05-29
+
+skill_aliases:
+  - old: match
+    new: skill-router
+    deprecated_at: 2026-05-29
+    removal_at: 2026-08-29
+    reason: "WS-4b rename — 'match' too generic, hides semantic-router contract (Cohort 4 naming-decisions)"
+
+  - old: setup-brain
+    new: gbrain-setup
+    deprecated_at: 2026-05-29
+    removal_at: 2026-08-29
+    reason: "WS-4b rename — domain-prefix-first (gbrain), drop redundant li- prefix (Cohort 4)"
+
+  - old: sync-brain
+    new: gbrain-sync
+    deprecated_at: 2026-05-29
+    removal_at: 2026-08-29
+    reason: "WS-4b rename — sibling to gbrain-setup, same domain-prefix-first pattern"
+
+  - old: agt-tier-stamp
+    new: agent-tier-stamp
+    deprecated_at: 2026-05-29
+    removal_at: 2026-08-29
+    reason: "WS-4b rename — expand 'agt' abbreviation, verb-first consistency"
+
+env_var_aliases:
+  - old: JSTACK_HOME
+    new: LINTEL_HOME
+    deprecated_at: 2026-05-28
+    removal_at: 2026-06-28
+    reason: "Phase A JStack → Lintel rebrand (Cohort 1 hard-renamed bin/, this alias covers operator env)"
+
+  - old: JSTACK_DIR
+    new: LINTEL_DIR
+    deprecated_at: 2026-05-28
+    removal_at: 2026-06-28
+    reason: "Phase A JStack → Lintel rebrand"
+
+plugin_slug_aliases:
+  # Empty — no plugin-slug renames in v3.6. Shape-supported for future use.

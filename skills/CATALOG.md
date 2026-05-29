@@ -4,10 +4,10 @@ Auto-generated från frontmatter på push till main.
 Regenerated av `.github/workflows/catalog.yml` per push när `skills/**/SKILL.md` ändras.
 Hand-edits skrivs över — edit frontmatter i source SKILL.md istället.
 
-Total skills: 141
-Generated: 2026-05-29T09:37:23Z
+Total skills: 143
+Generated: 2026-05-29T15:34:50Z
 
-## foundation layer (94 skills)
+## foundation layer (96 skills)
 
 | Skill | Description |
 |---|---|
@@ -48,12 +48,15 @@ Generated: 2026-05-29T09:37:23Z
 | `/li:doctor` | Cross-CLI health check — verifies which CLIs are installed, plugin install status, Lintel version, and surfaces drift. |
 | `/li:document-generate` | Generate documentation from code — engineering reference, customer guides, or onboarding tutorials. |
 | `/li:fix` | Composite shortcut for hotfix workflow — runs SENSE + BUILD + REVIEW + SHIP, skipping DEFINE/DISCOVER/PLAN/CAPTURE. Fo |
+| `/li:gbrain-setup` | Configure gbrain semantic-index integration — initialize config, pin worktree, register sync. |
+| `/li:gbrain-sync` | Refresh the gbrain index from the current worktree — incremental or full. |
 | `/li:handoff-size-check` | Handoff-size-warning tied to 500k cap. Per v3.6 backlog 3.2 — elephant-hint och token-cap som samma mekanism från tv� |
 | `/li:health` | Lintel install + upstream status check. Verifies layers, manifest, hooks, upstream pins, CLI shims. |
 | `/li:help` | List installed Lintel skills + agents + hooks. Filter by category, voice tier, or CLI support. |
 | `/li:hooks-status` | Reader för hooks.jsonl — surface aktiva-vs-döda hooks + override-pattern + trigger-counts. Stänger hooks-observatio |
 | `/li:instruction-parity-check` | Verifierar substance-parity över 6 instruktionsfiler (root CLAUDE/AGENTS/GEMINI + shims). Multi-CLI promise's weak poin |
 | `/li:investigate` | Hypothesis-driven bug investigation — minimum repro, eliminate variables, root cause. |
+| `/li:jobs` | Curated-flow lifecycle controller — list / continue / replan / abort / branch in-flight Lintel jobs. Single source of  |
 | `/li:landing-report` | Post-ship report — what landed in a window, in engineering or customer-voice format. |
 | `/li:learn` | Record an insight, correction, or pattern as a lesson — readable at future session start. |
 | `/li:lessons-promote` | Promote a repo-local lesson from tasks/lessons.md to Lintel's global lessons (scaffolding/01-foundation/tasks/lessons.md |
@@ -61,7 +64,6 @@ Generated: 2026-05-29T09:37:23Z
 | `/li:lessons` | Mid-session review of accumulated lessons from tasks/lessons.md — surfaces relevant ones for current task. |
 | `/li:maintenance` | On-demand maintenance — force-compact + static-path monitoring + token-cost simulation. Operator-request 5.3. Bygger p |
 | `/li:make-pdf` | Convert URL, markdown file, or HTML to PDF via managed Chromium. |
-| `/li:match` | Semantic skill router — given free-text user intent, suggests top 3 matching Lintel skills with rationale. |
 | `/li:office-hours` | Generate a design doc from a problem statement — structured, decision-gated, ready for /plan-eng-review. |
 | `/li:open-managed-browser` | Open the Lintel-managed Chromium in headed mode — interactive operator session. |
 | `/li:pair-agent` | Pair with a named subagent in the loop — explicit two-mind collaboration on a focused task. |
@@ -74,7 +76,7 @@ Generated: 2026-05-29T09:37:23Z
 | `/li:plan-devex-review` | Developer experience gaps review. Slow CI, painful deploys, bad local dev, attrition signals. |
 | `/li:plan-eng-review` | Architecture + tests review. The required gate before /release-ev2. Covers arch, code quality, test coverage, performanc |
 | `/li:plan-tune` | Adjust which AskUserQuestion prompts auto-decide vs ask. Per-question preference tuning. |
-| `/li:plan` | Phase 4 of Lintel cycle — convert design + discovery into executable task breakdown with cost estimate, dependency gra |
+| `/li:plan` | Phase 4 of Lintel cycle, ALSO callable standalone as a planner module (v3.8 Feature 2). Produces the cold-executor trio  |
 | `/li:profile-switch` | Toggle Lintel install on/off fast + swap till previous setup utan att röra repot. Operator-request 5.2. |
 | `/li:qa-only` | Read-only test run — reports failures, never edits. For ship-gate verification. |
 | `/li:qa` | Run the full test suite, parse failures, fix common ones, re-run until clean or stuck. |
@@ -98,19 +100,19 @@ Generated: 2026-05-29T09:37:23Z
 | `/li:scaffold` | Scaffold a new repo with Lintel base templates — CLAUDE.md, tasks/lessons.md, EVOLUTION-LOG, docs/adr/ — interactive |
 | `/li:scrape` | Extract structured data from one or more pages — declarative selector schema, JSON output. |
 | `/li:sense` | Phase 1 of Lintel cycle — auto-detect operator intent, WorkProfile state, active role, mode recommendation, 00-state f |
-| `/li:setup-brain` | Configure gbrain semantic-index integration — initialize config, pin worktree, register sync. |
 | `/li:setup-browser-cookies` | Bootstrap auth cookies for the managed Chromium profile — operator-driven, one-time per service. |
 | `/li:setup-ev2-targets` | Configure deploy targets for /release-deploy-ev2 — write targets, validate, register. |
 | `/li:ship` | Phase 7 of Lintel cycle — PR / deploy / customer handoff. Final compliance hard-stops. Voice + brand + honest-limitati |
+| `/li:skill-router` | Semantic skill router — given free-text user intent, suggests top 3 matching Lintel skills with rationale. |
 | `/li:skillify` | Turn a recurring task or pattern into a new Lintel skill — scaffolds SKILL.md from TEMPLATE. |
-| `/li:sync-brain` | Refresh the gbrain index from the current worktree — incremental or full. |
+| `/li:status` | Show what's open right now — alias for /li:jobs list. Single command for "where am I in flight?". |
 | `/li:usage-log` | Append-only usage log för skill/agent-invocations. Wrapper-pattern per L-001 (en log, ingen per-skill duplikat). Solo-i |
 
 ## ms-team layer (46 skills)
 
 | Skill | Description |
 |---|---|
-| `/li:agt-tier-stamp` | Stamp agents with license tier (permissive/restricted) — enforces 5-level precedence model. |
+| `/li:agent-tier-stamp` | Stamp agents with license tier (permissive/restricted) — enforces 5-level precedence model. |
 | `/li:asset-search` | Search ~/.lintel/brand/azure-assets/ for the right icon or diagram primitive. |
 | `/li:az-discover-presale` | ⚠ TEMPLATE ONLY — Presale Azure discovery skill (operator-request 5.4 REPLACED per L-001). Scaffolding-slot, content |
 | `/li:az-tldr` | Comprehensive on-demand rundown of an Azure service — 15 sections covering what/why/how/pitfalls/customer-questions/co |
