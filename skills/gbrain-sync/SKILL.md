@@ -1,7 +1,7 @@
 ---
-name: sync-brain
+name: gbrain-sync
 layer: foundation
-v1_alias: [li-sync-gbrain]
+deprecated_aliases: [sync-brain, li-sync-gbrain]
 description: Refresh the gbrain index from the current worktree — incremental or full.
 color: blue
 tools: Read, Bash
@@ -9,7 +9,7 @@ voice: internal
 cli_support: [claude-code]
 ---
 
-# /sync-brain
+# /gbrain-sync (previously /sync-brain)
 
 Refreshes the gbrain index for the current worktree. Incremental by default (only changed files since last sync); `--full` re-indexes everything.
 

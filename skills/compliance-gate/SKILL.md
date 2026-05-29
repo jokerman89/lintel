@@ -43,7 +43,7 @@ Reads:
 - `/li:dsb-submit-draft`
 - `/li:dpia-submit-draft`
 - `/li:entra-agent-id-submit-draft`
-- `/li:agt-tier-stamp`
+- `/li:agent-tier-stamp` (was `/li:agt-tier-stamp` — grace until 2026-08-29)
 - `/li:onebranch-validate`
 - `/li:first-party-check`
 
