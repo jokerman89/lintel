@@ -21,6 +21,7 @@ while [ $# -gt 0 ]; do
   case "$1" in
     --tag) TAG_FILTER="$2"; shift 2 ;;
     --scope) SCOPE="$2"; shift 2 ;;
+    --shape-only) SCOPE="shape"; shift ;;
     -h|--help)
       head -10 "${BASH_SOURCE[0]}"; exit 0 ;;
     *) shift ;;
@@ -36,7 +37,8 @@ case "$SCOPE" in
   integration) SEARCH_DIRS="integration" ;;
   e2e) SEARCH_DIRS="e2e" ;;
   behavior) SEARCH_DIRS="behavior" ;;
-  all) SEARCH_DIRS="unit behavior integration e2e" ;;
+  shape) SEARCH_DIRS="shape" ;;
+  all) SEARCH_DIRS="unit behavior integration e2e shape" ;;
   *) echo "ERROR: unknown scope $SCOPE" >&2; exit 2 ;;
 esac
 

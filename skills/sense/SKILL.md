@@ -79,6 +79,38 @@ If `elephant_score >= 3`: surface elephant-hint to operator (in SENSE-report onl
 
 DEFINE phase offers the 3-path-execution if operator picks A or C. SENSE only detects + surfaces.
 
+### Step 0c — Meta-infra mode auto-detection (v4.0)
+
+Before reading configuration, check if cwd diff touches scaffolding paths. Meta-infra mode activates four extra gates (M1-M4) — operator should know up front so they can opt into the heavier path or override.
+
+```bash
+# Path-glob detection: which paths in working diff touch Lintel scaffolding?
+meta_paths_changed=$(git diff --name-only HEAD 2>/dev/null | grep -cE '^(skills|agents|hooks|bin|lib|packs|install)/|^LAYERS\.md$|^bin/_.*\.sh$' || echo 0)
+meta_staged=$(git diff --cached --name-only 2>/dev/null | grep -cE '^(skills|agents|hooks|bin|lib|packs|install)/|^LAYERS\.md$|^bin/_.*\.sh$' || echo 0)
+meta_total=$((meta_paths_changed + meta_staged))
+
+# Also detect intent from operator's last message
+operator_signal=0
+prompt_text="<operator's last message>"
+echo "$prompt_text" | grep -qiE "skill|agent|hook|pack|scaffold|lintel itself|meta-infra|li-bin|install/" && operator_signal=1
+
+if [ "$meta_total" -gt 0 ] || [ "$operator_signal" -eq 1 ]; then
+  meta_infra_detected=true
+fi
+```
+
+If `meta_infra_detected=true`: surface to operator in SENSE-report (never block):
+
+```
+⚙ Meta-infra mode detected
+   Diff touches: <list of scaffolding paths>
+   Recommendation: --mode meta-infra (activates Gates M1-M4)
+   Override: --mode <other> if change is content-only or test-only
+   Cap: 600k soft / 900k hard (heavier REVIEW + CAPTURE)
+```
+
+DEFINE phase reads `meta_infra_detected` from 00-state.md and pre-fills the structure-changes/<date>-<slug>.md template. Operator can still override via `--mode <other>`.
+
 ### Step 1 — Read configuration
 
 ```bash
@@ -178,6 +210,8 @@ azure_focus: $azure_focus
 intent_detected: $intent
 phases_completed: []
 context_budget: $current_tokens / 1M
+meta_infra_detected: $meta_infra_detected
+meta_paths_changed: $meta_total
 ---
 EOF
 ```
