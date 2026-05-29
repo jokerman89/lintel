@@ -1007,4 +1007,104 @@ Operator told me to honor intent. The stances carried through every chapter:
 
 ---
 
+# GSTACK REVIEW REPORT — /plan-eng-review
+
+**Reviewed by:** `/plan-eng-review` (fresh-context CodeReviewer subagent + self-synthesis)
+**Date:** 2026-05-29
+**Verdict:** **APPROVE_WITH_REVISIONS_REQUIRED** — architecture sound; scope contradicts itself; L-001 + L-002 violations in Chapter 3; 7 P1 findings require resolution before code starts.
+**Severity counts:** P1: 7 · P2: 11 · P3: 5 · Granularity: 4
+
+The fresh-context review surfaced 23 findings, then my self-synthesis grouped them by load-bearing. Below is the consolidated report. Full subagent output is in the PR description for posterity.
+
+## Verdict at a glance
+
+| Section | P1 | P2 | P3 | Net |
+|---|---|---|---|---|
+| Step 0 — Scope | 3 | 1 | 0 | Scope contradicts itself; v4.0-minimal path missing |
+| §1 — Architecture | 2 | 4 | 1 | L-002 overlaps in Chapter 3; resolver failure-modes undefined |
+| §2 — Code-quality (doc-as-code) | 1 | 4 | 3 | Naming + path inconsistencies; pattern not DRY-factored |
+| §3 — Tests/validation | 2 | 3 | 1 | Shape-tests unenumerated; criterion #10 unmechanical |
+| §4 — Performance | 1 | 3 | 1 | Engineering-pass token budget unaccounted; telemetry overhead unspecced |
+| Granularity (v3.8 F2.3) | 2 | 2 | 0 | Phase-1 + Phase-3 uberblocks fail ≤5min check |
+
+## The 7 P1 findings (must resolve before code)
+
+### S0-P1.1 — v4.0 is contradictorily defined (Chapter 3 is both in and out)
+- Ship plan (lines 824–847) puts Chapter 3 in v4.1-4.5.
+- Operator validation criterion #7 (line 917) requires Chapter 3 modules invokable at v4.0 ship.
+- Pick one: (a) pull Ch.3 out of v4.0 entirely, OR (b) reduce criterion #7 to "pattern shipped + 1 reference module proves it."
+- **Recommend (b)** — ship the engineering-module PATTERN in v4.0 + TA module as reference; defer other 4 modules to v4.1+.
+
+### S0-P1.2 — The puddle path is hidden
+- Doc says "Lintel already does most of this informally" (line 82) but never offers a minimum-viable v4.0.
+- **Add v4.0-minimal variant**: Ch.1 + Ch.2 + Ch.4 (no Ch.3). ~17-20 CC-days. ~12-15 net-new skills. Lets operator pick lake-or-puddle explicitly.
+
+### S0-P1.3 — Chapter 3 breaks L-001 (scaffolding-not-content)
+- 5 modules × 7 sub-skills = 35 net-new skills that ARE the content (`ta-api-design`, `da-pii-scan`, `dh-runbook-draft` etc.)
+- L-001 says ship the pattern + ONE canonical example.
+- **Fix:** Ship 1 reference module (TA, per C3-D1 default) + `<module>-template` skill family. Defer 4 modules × 7 sub-skills = 28 skills. **Drops scope ~30%.**
+
+### 1-P1.1 — Pack-resolver is critical-path singleton with no failure-mode spec
+- Used by 30+ skills. What happens on malformed pack.yaml? Resolver bug? Mid-cycle staleness?
+- **Add §1.2.1** "Pack-resolver failure semantics": parse-error → hard-fail SENSE; bug → fall-back-to-_default + warn; in-session value cached at SENSE, immutable for cycle lifetime.
+
+### 1-P1.2 — Engineering domain modules overlap existing families (L-002 violation)
+- Verified overlaps: `tq-coverage-audit` ↔ `generate-qa`. `sc-orchestrator` ↔ `compliance-gate`. `dh-ci-design` ↔ Azure-toolbox. `ta-api-design` ↔ `APIDesigner` agent.
+- SC module says "orchestrates rather than creates" (line 437) — TA/DA/DH/TQ should follow same discipline.
+- **Fix:** Per-module mandatory L-002 inventory before sub-skill list. Where overlaps exist, module REUSES, doesn't recreate.
+
+### 3-P1.1 — Validation criterion #10 is unmechanical
+- "Six months after v4.0 ships, MS colleague clones the repo..." cannot be tested at ship-time.
+- **Fix:** Replace with `/li:pack-new --interactive --dry-run` produces valid pack.yaml in ≤10 prompts. Move colleague-validation to a post-ship hypothesis-tracker.
+
+### 3-P1.2 — "Shape-tests" referenced 5× but never enumerated
+- Gate M3 cannot fire until shape-tests exist.
+- **Fix:** §4.3.1 — Initial 4 shape-tests: `frontmatter-lint-all`, `agents-categorized`, `catalog-regenerates-clean`, `deprecated-aliases-resolve`. Each is its own file under `tests/shape/`. Documented in `tests/shape/_README.md`.
+
+### 4-P1.1 — Engineering "full pass" composition exceeds customer-engagement 500k cap
+- 5 modules × ~80k tokens each = 400k of 500k cap. Leaves 100k for OTHER 7 cycle phases. Math doesn't work.
+- **Fix:** Either (a) per-module sub-budget allocation, OR (b) raise customer-engagement cap to 750k for full-pass mode, OR (c) introduce `customer-engagement-deep` as 6th mode envelope.
+
+## The most surgical P2s
+
+- **2-P2.4 — 14 "open decisions" are 14 recommendations dressed as questions.** Only C3-D1 (which module ships first) is genuinely undecided. **Fix:** Rename section "Defaults pending operator sign-off." Add separate §"Real open decisions" with only the genuine forks.
+- **2-P2.1 — Module YAML pattern repeated 5× with subtle drift.** TQ section omits recovery/continuation/raise-help spec that TA gets in full (line 577 is 1 line vs TA's 10). **Fix:** Factor pattern into §3.2 template; each module lists ONLY pack-specific deltas.
+- **2-P2.2 — Frontmatter field has 3 names** (`brief_forge:`, `brief_forge_handoffs:`, no canonical anywhere). **Fix:** Pick `brief_forge_handoffs:`. Search-replace.
+- **2-P1.1 — Three different docs path conventions** (`docs/v4.0/`, `docs/v4.x/`, mixed). **Fix:** Pick `docs/v4.x/<artifact-class>/<date>-<slug>.md` for all meta-infra outputs.
+- **1-P2.1 — Brief Forge fires on every operator→skill invocation.** Cumulative-per-day overhead unaccounted. **Fix:** Add cold-path bypass: trivial skills (read-only, no spawn) declare `brief_forge_handoffs: skip` in frontmatter.
+
+## Implementation tasks (JSONL — 15 tasks, granularity ≤5min each per v3.8 F2.3)
+
+```jsonl
+{"id":"T-V4-001","phase":"P1","title":"Define meta-infra mode envelope schema","est_min":15,"deps":[]}
+{"id":"T-V4-002","phase":"P1","title":"SENSE auto-detection for meta-infra mode","est_min":20,"deps":["T-V4-001"]}
+{"id":"T-V4-003","phase":"P1","title":"Audit-override store schema + writer","est_min":25,"deps":["T-V4-002"]}
+{"id":"T-V4-004","phase":"P1","title":"Gate M1 (structure-impact) template + skill","est_min":30,"deps":["T-V4-001"]}
+{"id":"T-V4-005","phase":"P1","title":"Gate M2 (compatibility audit) mechanical sweep","est_min":45,"deps":["T-V4-001"]}
+{"id":"T-V4-006","phase":"P1","title":"Initial shape-test suite (4 shape-tests)","est_min":40,"deps":["T-V4-001"]}
+{"id":"T-V4-007","phase":"P1","title":"Ship /li:migrations skill","est_min":25,"deps":["T-V4-004"]}
+{"id":"T-V4-008","phase":"P1","title":"Pack-resolver: neutral defaults schema","est_min":30,"deps":[]}
+{"id":"T-V4-009","phase":"P1","title":"Pack-resolver: implement with failure semantics","est_min":50,"deps":["T-V4-008"]}
+{"id":"T-V4-010","phase":"P1","title":"Pack-resolver test harness (9 scenarios)","est_min":40,"deps":["T-V4-009"]}
+{"id":"T-V4-011","phase":"P1","title":"Spine extraction audit deliverable","est_min":35,"deps":[]}
+{"id":"T-V4-012","phase":"P2","title":"pack.yaml schema with brief_forge_handoffs","est_min":45,"deps":["T-V4-010"]}
+{"id":"T-V4-013","phase":"P2","title":"Evaluator registry + 7 built-in evaluators","est_min":60,"deps":["T-V4-012"]}
+{"id":"T-V4-014","phase":"P2","title":"Envelope schema + replay dry-run UX","est_min":50,"deps":[]}
+{"id":"T-V4-015","phase":"P3","title":"Orientator agent with bounded escalation","est_min":55,"deps":["T-V4-009","T-V4-012"]}
+```
+
+**Granularity flag (v3.8 F2.3):** Tasks T-V4-005, T-V4-009, T-V4-013, T-V4-014, T-V4-015 estimate 45-60 min. All exceed 5min/cold-subagent target. **Decision required:** A) Decompose now (preferred — reduces blast radius if any sub-task fails) or B) Accept-with-concern (logs to plan.md when implementation starts).
+
+## Side-finding — out of scope but worth flagging
+
+CLAUDE.md (repo root) still cites "74 skills" and "44 agents" — stale vs verified 141+/83+. Not addressed by v4.0 reframe. Surfaces L-003 (verify-counts) discipline: counts in CLAUDE.md should be regenerated from `find` / catalog auto-gen at the same time wiki-gen runs. **Add to Chapter 2.C wiki-gen scope: regenerate CLAUDE.md count strings from authoritative source.**
+
+## Status update
+
+**Doc status:** DRAFT_FOR_REVIEW → **DRAFT_REVIEW_COMPLETE_AWAITING_RESOLUTION**.
+**Operator pass required on:** the 7 P1 findings above + decision on v4.0-minimal vs v4.0-full path (S0-P1.1 + S0-P1.2 + S0-P1.3 are connected — they all collapse if you pick v4.0-minimal).
+**Implementation gate:** Phase 1 code can start once P1 findings are resolved + operator picks scope path.
+
+---
+
 *End of v4.0 reframe design doc.*
