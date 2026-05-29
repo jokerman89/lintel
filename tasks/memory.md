@@ -33,6 +33,25 @@ Cross-session working state (ej durable rules — that's [[lessons.md]]; ej pers
 
 ---
 
+## v3.8-jobs-and-planner — Curated-flow tracking + planner-as-module SHIPPED 2026-05-29
+
+**Status:** ready for merge (PR open)
+
+**What shipped:**
+- **Feature 1 (jobs system):** ~/.lintel/jobs/_active.md as single source of truth. 3 hooks (job-begin, job-end, job-stale-warn). 2 skills (`/li:jobs`, `/li:status`). `workflow_root: true` frontmatter flag on cycle + plan. Helper bin/_jobs.sh.
+- **Feature 2.1:** plan declares workflow_root: true (spawns its own job when invoked standalone).
+- **Feature 2.2:** prompt.md generation moved from CAPTURE to PLAN. Trio (plan.md + spec.md + prompt.md) born together. CAPTURE now reaffirms (annotates with build evidence), doesn't regenerate.
+- **Feature 2.3:** granularity hard check in plan-eng-review Step 0 — per-task ≤5min (operator-LOCKED). Tasks >5min trigger decompose-or-accept AskUserQuestion.
+- **Feature 2.4:** plan/SKILL.md documents Module-callable section. Three invocation modes documented (inside cycle, standalone, sub-module called by another workflow_root skill). --no-job flag for nested calls.
+
+**Concept docs:** docs/concepts/jobs-system.md + docs/concepts/planner-as-module.md.
+
+**Tests:** tests/unit/jobs-system-present.sh + tests/unit/workflow-root-and-trio.sh. 20/20 PASS local. Behavior smoke: job_create → job_update → job_archive end-to-end verified with audit-log writes.
+
+**Last touched:** 2026-05-29
+
+---
+
 ## v3.7-close — Frontend-design family COMPLETE
 
 **Status:** completed
