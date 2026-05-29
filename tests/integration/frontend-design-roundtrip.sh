@@ -179,17 +179,65 @@ if [ -f "$SKILL" ]; then
   done
 fi
 
-# Step 9 — Future Fas B: this test will be extended to invoke generate-web
-# --from-frontend-design "$TMP" and assert that HTML output references the
-# typography family + GSAP imports. For Fas A1, schema-shape contract is the bar.
+# Step 9 — Fas B: verify generate-web + generate-app skills consume frontend-design-spec.json
+# (full HTML/JSX output assertion deferred till Fas D operator-dogfood — skills are scaffolding,
+# agents produce content at invocation per L-001).
+
+# generate-web SKILL.md documents --from-frontend-design mode
+GENERATE_WEB="$REPO_ROOT/skills/generate-web/SKILL.md"
+if [ -f "$GENERATE_WEB" ]; then
+  if grep -q "from-frontend-design" "$GENERATE_WEB"; then
+    pass "generate-web SKILL.md documents --from-frontend-design mode (Fas B)"
+  else
+    fail "generate-web SKILL.md missing --from-frontend-design mode (Fas B contract)"
+  fi
+
+  if grep -q "frontend-design-spec.json" "$GENERATE_WEB"; then
+    pass "generate-web SKILL.md references frontend-design-spec.json (M-1 contract)"
+  else
+    fail "generate-web SKILL.md missing frontend-design-spec.json reference"
+  fi
+
+  if grep -q "schema_version" "$GENERATE_WEB"; then
+    pass "generate-web SKILL.md has schema-version handshake (M-5 contract)"
+  else
+    fail "generate-web SKILL.md missing schema-version handshake (M-5)"
+  fi
+fi
+
+# generate-app skill present (M-2 resolution)
+GENERATE_APP="$REPO_ROOT/skills/generate-app/SKILL.md"
+if [ -f "$GENERATE_APP" ]; then
+  pass "generate-app SKILL.md present (M-2 resolution — full-app scaffold)"
+
+  if grep -q "from-frontend-design" "$GENERATE_APP"; then
+    pass "generate-app reads --from-frontend-design (M-1 contract)"
+  else
+    fail "generate-app missing --from-frontend-design input (M-1 contract)"
+  fi
+
+  if grep -qE "next-app|vite-react|svelte-kit" "$GENERATE_APP"; then
+    pass "generate-app documents stack choices (next-app/vite-react/svelte-kit)"
+  else
+    fail "generate-app missing stack choices"
+  fi
+
+  # M-5 schema-version handshake
+  if grep -q "schema_version" "$GENERATE_APP"; then
+    pass "generate-app has schema-version handshake (M-5)"
+  else
+    fail "generate-app missing schema-version handshake (M-5)"
+  fi
+else
+  fail "generate-app SKILL.md missing (M-2 implementation required)"
+fi
 
 echo ""
 if [ "$FAILED" -eq 0 ]; then
   echo "All frontend-design-roundtrip tests PASSED"
   echo ""
-  echo "Note: Fas B will extend this test to invoke generate-web --from-frontend-design"
-  echo "and assert produced HTML references typography + motion choices. Fas A1 bar:"
-  echo "schema-shape contract validated."
+  echo "Fas B contract validated. Full HTML/JSX output assertion deferred to Fas D"
+  echo "operator-dogfood — skills are scaffolding, agents produce content at invocation per L-001."
   exit 0
 else
   echo "Some frontend-design-roundtrip tests FAILED"

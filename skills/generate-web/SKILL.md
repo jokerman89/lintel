@@ -41,7 +41,7 @@ Uses native HTML / Next.js templates from `~/.lintel/brand/web-templates/` or in
 
 ## Inputs
 
-- Required `--brief <path|inline>` — content brief **OR** `--from-pipeline <dir>` (Fas 2: shared pipeline mode)
+- Required `--brief <path|inline>` — content brief **OR** `--from-pipeline <dir>` (Fas 2: shared pipeline mode) **OR** `--from-frontend-design <dir>` (v3.7 Fas B: frontend-design family integration)
 - Required `--variant <single-file|nextjs-scaffold>` — output shape
 - Optional `--audience <text>` — primary audience
 - Optional `--use-defaults` — force in-repo default templates
@@ -66,6 +66,46 @@ If invoked med `--from-pipeline <run-dir>` istället för `--brief`:
 4. **CLI bevaras backward-compat:** befintliga `--brief`-flag invocations fungerar oförändrat. `--from-pipeline` är additive.
 
 5. **4-gate pipeline körs som vanligt** efter generation.
+
+## From-frontend-design mode (v3.7 Fas B — frontend-* family integration, M-1 resolution)
+
+If invoked med `--from-frontend-design <run-dir>` istället för `--brief` eller `--from-pipeline`:
+
+1. **Read frontend-design output:**
+   - `<run-dir>/frontend-design-spec.json` — **distinct filename** från pipeline's `design-spec.json` (M-1 resolution per /plan-eng-review — avoids schema collision). Verify `"source": "frontend-design"` + `"schema_version": 1` before consuming.
+   - Embedded blocks: `typography` (font-stacks + variable-axes + size-scale) + `motion` (libraries + scroll-trigger-config + key-animations + perf-budget) + `shader` (om present; nullable) + `component_libraries` (shadcn + Aceternity etc) + `layout_grammar` (max-width + grid + breakpoints) + `interaction_signature` (scroll-smoothing + hover-intent + page-transitions) + `visual_thesis` (one-paragraph)
+
+2. **Schema-version handshake:**
+   ```bash
+   spec="<run-dir>/frontend-design-spec.json"
+   sv=$(jq -r '.schema_version' "$spec")
+   source=$(jq -r '.source' "$spec")
+   [ "$sv" = "1" ] || { echo "Unsupported schema_version: $sv (this skill reads v1)"; exit 1; }
+   [ "$source" = "frontend-design" ] || { echo "Wrong source: $source (expected frontend-design)"; exit 1; }
+   ```
+
+3. **Replace brief-parsing logic** med direct-read av spec:
+   - Hero copy: synthesize from `visual_thesis` + brand-context
+   - Typography: emit `<link>` tags from `typography.font_stacks[].loading_strategy` + apply via Tailwind config
+   - Motion: emit GSAP/Lenis import snippets från `motion.libraries[]` + scroll-trigger setup from `motion.scroll_trigger_config` + key-animations from `motion.key_animations[]`
+   - Shader: om `shader != null` → emit Paper Shaders component eller OGL canvas-mount
+   - Component-libraries: emit shadcn-init command + Aceternity copy-paste-references in operator-instructions
+   - Layout: apply `layout_grammar.max_width` + grid-config to root layout
+   - Interaction: emit Lenis init om `interaction_signature.scroll_smoothing`
+
+4. **Design-pass hook integration:**
+   - WebExperienceCritic agent runs on produced HTML/JSX (existing pattern)
+   - DesignSystemAuditor agent (Fas A2) optional post-gen audit if `--review` flag set
+
+5. **CLI bevaras backward-compat:** befintliga `--brief` + `--from-pipeline`-flag invocations fungerar oförändrat. `--from-frontend-design` är additive third mode.
+
+6. **prefers-reduced-motion handling** — always emit fallback per `motion.perf_budget.fallback_for_prefers_reduced_motion` field. Non-negotiable.
+
+7. **Mobile-strategy emission** — read `motion.perf_budget.mobile_strategy` + apply via `gsap.matchMedia()` conditional logic in generated code.
+
+8. **4-gate pipeline körs som vanligt** efter generation.
+
+**Boundary med frontend-* family (L-002):** generate-web är **rendering-engine** — file-output. frontend-design är **design-director** — decisions. generate-web does NOT make design-decisions; it READS them from frontend-design-spec.json + renders accordingly.
 
 ## Workflow
 

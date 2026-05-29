@@ -33,6 +33,24 @@ Cross-session working state (ej durable rules — that's [[lessons.md]]; ej pers
 
 ---
 
+## v3.7-close — Frontend-design family COMPLETE
+
+**Status:** completed
+
+**What's pending:**
+- ~~Fas A1: foundation core~~ ✅ SHIPPED (PR #22)
+- ~~Fas A2: extension + canonical pattern~~ ✅ SHIPPED (PR #23)
+- ~~Fas B: generate-web --from-frontend-design + new generate-app skill (M-2)~~ ✅ SHIPPED (PR #24)
+- ~~Fas C: frontend-design-surface hook + vault loop closure~~ ✅ SHIPPED (PR #25)
+- v3.7.0-dev tag ✅ pushed 2026-05-29
+- **Fas D** (operator-only) — real-engagement dogfood + L-004 canonical-pattern re-evaluation pending
+
+**Stats:** 9 net-new skills + 5 new agents (78→83) + 1 hook + canonical pattern + L-004 lesson durable. M-1/M-2/M-3/M-4/M-5/M-6 + m-1/m-3 all resolved. 17/17 tests pass.
+
+**Last touched:** 2026-05-29 (v3.7.0-dev milestone)
+
+---
+
 ## v3.6-cohorts — Backlog execution NEARLY COMPLETE
 
 **Status:** active (Cohort 4 operator-only kvar)
@@ -68,28 +86,28 @@ Cross-session working state (ej durable rules — that's [[lessons.md]]; ej pers
 
 Resterande 7 minor concerns i designdocets Reviewer Concerns-sektion. 4 MAJORs adresserade inline under cohort-execution. Minor concerns adresseras vid respective cohort-execution-time eller följdiget design-iteration.
 
-### PR #21 (lintel-v3.7-frontend-design-system) — /plan-eng-review surfaced 7 net-new concerns
+### PR #21 (lintel-v3.7-frontend-design-system) — 7 of 9 concerns RESOLVED via implementation
 
-Eng-review run 2026-05-28. Adversarial ReadOnly review 7/10 produced 7 reviewer-concerns inline. /plan-eng-review added 7 more (4 MAJOR + 3 MINOR). Detaljer i design-docens GSTACK REVIEW REPORT-sektion.
+Eng-review run 2026-05-28. v3.7 Fas A1+A2+B+C shipped i PR #22-#25, all merged 2026-05-29. Status update för 9 concerns:
 
-**MAJORs som måste vara lösta FÖRE Fas A1 PR öppnas:**
-1. **M-1 design-spec.json schema collision** med generate-web `--from-pipeline`. Lösning (b) differentiated filename rekommenderat.
-2. **M-2 frontend-app-scaffold boundary violation** — escalation från MINOR #5. Rekommendation: rename → generate-app family.
-3. **M-3 Fas A monolithic-PR risk** — split till A1 (6 artifacts) + A2 (11 artifacts) rekommenderat.
+**MAJORs — alla 6 RESOLVED:**
+1. ~~M-1 design-spec.json schema collision~~ ✅ RESOLVED i PR #21 (filename → `frontend-design-spec.json`) + PR #24 (generate-web reader)
+2. ~~M-2 frontend-app-scaffold boundary violation~~ ✅ RESOLVED i PR #21 (renamed till generate-app) + PR #24 (skill shipped i generate-* family)
+3. ~~M-3 Fas A monolithic-PR risk~~ ✅ RESOLVED i PR #21 (split till A1 + A2)
+4. ~~M-4 sequential sub-skill chain 3× latency~~ ✅ RESOLVED i PR #22 (orchestrator Workflow Step 2-4 parallel-dispatch documented)
+5. ~~M-5 schema-versioning missing~~ ✅ RESOLVED i PR #22/#23 (`schema_version: 1` på alla contract JSON)
+6. ~~M-6 roundtrip integration test deferred~~ ✅ RESOLVED i PR #22 (`tests/integration/frontend-design-roundtrip.sh`)
 
-**MAJORs som ska adresseras inline i Fas A1 implementation:**
-4. **M-4 sequential sub-skill chain locks 3× latency** — spec PARALLEL invocation i Workflow.
-5. **M-5 schema-versioning missing** — alla 5 contract-schemas behöver `schema_version: 1`.
-6. **M-6 roundtrip integration test deferred to Fas B är fel** — minimum-viable test i A1.
+**MINORs — 2 of 3 RESOLVED, 1 deferred:**
+7. ~~m-1 FrontendArchitect ↔ FrontendBuilder non-overlap~~ ✅ RESOLVED i PR #22 (explicit non-overlap section)
+8. **m-2 SKILL.md DRY pattern** — ⏳ DEFERRED. 9 frontend-* + generate-* skills now exist; pattern-anatomy doc not yet authored. Low-priority — drift signal-to-noise är låg så länge antalet är manageable. Address when next family adds.
+9. ~~m-3 --overwrite flag inheritance~~ ✅ RESOLVED i PR #23 (frontend-style-extract documents flag)
 
-**MINORs (operator-judgement):**
-7. **m-1 FrontendArchitect ↔ existing FrontendBuilder non-overlap** behöver explicit doc.
-8. **m-2 SKILL.md DRY pattern** factor till docs/concepts/frontend-skill-anatomy.md (defer A2).
-9. **m-3 --overwrite flag inheritance** dokumenterad i frontend-style-extract (A2).
+**Additional concern surfaced post-shipment (#7 perf-budget):** vault-lookup latency budget documented i PR #25 frontend-design-surface hook (<200ms MVP target for vault of 1-3 patterns, scaling-index deferred till vault > 10).
 
-**Tracking pattern:** open reviewer concerns lever här tills addressat ELLER PR om reviewer-concern-resolution öppnas. Entry kan slutas när alla 4+7+7=18 resolved.
+**Status:** PR #21 reviewer-concerns 7-of-9 closed via implementation. Remaining m-2 carries over till next family-design occasion. Entry can close after m-2 addressed or operator dismisses som YAGNI.
 
-**Last touched:** 2026-05-28 (v3.6.1-dev milestone)
+**Last touched:** 2026-05-29 (v3.7.0-dev milestone)
 
 ---
 
