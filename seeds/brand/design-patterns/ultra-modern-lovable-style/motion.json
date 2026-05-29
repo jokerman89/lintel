@@ -1,0 +1,81 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-05-28T00:00:00Z",
+  "brief_summary": "Canonical ultra-modern Lovable-style motion — hero-act + scrub-tied parallax + section-fade-up, smoothed by Lenis",
+  "energy_level": "moderate",
+  "target_device": "both",
+  "libraries": [
+    {
+      "name": "gsap",
+      "purpose": "scroll-choreography + timeline-animations",
+      "version_min": "3.12.x",
+      "license": {
+        "type": "free-tier",
+        "source": "greensock.com",
+        "operator_instruction": "npm i gsap. Free tier covers ScrollTrigger + core. Club plugins (SplitText, MorphSVG, DrawSVG) require commercial license."
+      },
+      "npm": "gsap"
+    },
+    {
+      "name": "@studio-freight/lenis",
+      "purpose": "smooth-scroll baseline",
+      "version_min": "1.0.x",
+      "license": {
+        "type": "free",
+        "source": "MIT"
+      },
+      "npm": "@studio-freight/lenis"
+    }
+  ],
+  "scroll_trigger_config": {
+    "scrub": true,
+    "anticipatePin": 1,
+    "markers_in_dev": true,
+    "ignoreMobileResize": true
+  },
+  "smooth_scroll_config": {
+    "lerp": 0.1,
+    "wheelMultiplier": 1.0,
+    "touch_responsive": true,
+    "syncTouch": true
+  },
+  "key_animations": [
+    {
+      "name": "hero-reveal",
+      "trigger": "page-load, no scroll-dependency",
+      "spec": "headline letter-mask reveal (1.2s ease-out-expo) + subhead fade-up (lag 180ms) + cta fade-in (lag 360ms)",
+      "library": "gsap"
+    },
+    {
+      "name": "hero-parallax-bg",
+      "trigger": "scrub-tied 0-30vh",
+      "spec": "background mesh-gradient translateY(0) → translateY(-15%) + opacity 1 → 0.7",
+      "library": "gsap+ScrollTrigger"
+    },
+    {
+      "name": "section-fade-up",
+      "trigger": "section enters viewport 20%",
+      "spec": "translateY(40px) → 0, opacity 0 → 1, duration 700ms ease-out-quart",
+      "library": "gsap+ScrollTrigger"
+    },
+    {
+      "name": "image-parallax",
+      "trigger": "scrub-tied per-image",
+      "spec": "image translateY(0) → translateY(-20%) over its viewport-pass",
+      "library": "gsap+ScrollTrigger"
+    },
+    {
+      "name": "cta-magnetic-hover",
+      "trigger": "mouse hover within 60px",
+      "spec": "button translates 8px toward cursor + slight scale 1.02 (300ms ease-out)",
+      "library": "gsap"
+    }
+  ],
+  "perf_budget": {
+    "fps_target": 60,
+    "scroll_jank_max_ms": 16,
+    "fallback_for_prefers_reduced_motion": "disable-all-scroll-animations, keep hero-reveal as instant-fade",
+    "mobile_strategy": "reduce-scrub-fidelity-and-skip-parallax-on-images, hero-parallax-bg downscale to opacity-only"
+  },
+  "operator_instructions_md": "# Motion setup — ultra-modern-lovable-style\n\n```bash\nnpm i gsap @studio-freight/lenis\n```\n\n## Lenis initialization (Next.js app/providers.tsx)\n```tsx\n'use client'\nimport { useEffect } from 'react'\nimport Lenis from '@studio-freight/lenis'\n\nexport function LenisProvider({ children }: { children: React.ReactNode }) {\n  useEffect(() => {\n    const lenis = new Lenis({ lerp: 0.1, smoothWheel: true, syncTouch: true })\n    function raf(time: number) { lenis.raf(time); requestAnimationFrame(raf) }\n    requestAnimationFrame(raf)\n    return () => lenis.destroy()\n  }, [])\n  return <>{children}</>\n}\n```\n\n## GSAP + ScrollTrigger (with prefers-reduced-motion)\n```tsx\nimport { gsap } from 'gsap'\nimport { ScrollTrigger } from 'gsap/ScrollTrigger'\ngsap.registerPlugin(ScrollTrigger)\n\nconst mm = gsap.matchMedia()\nmm.add({\n  reduceMotion: '(prefers-reduced-motion: reduce)',\n  hasMotion: '(prefers-reduced-motion: no-preference)'\n}, (ctx) => {\n  const { reduceMotion } = ctx.conditions!\n  if (reduceMotion) {\n    // Instant fades only\n    gsap.set('.fade-up', { opacity: 1, y: 0 })\n  } else {\n    gsap.from('.fade-up', {\n      y: 40, opacity: 0, duration: 0.7, ease: 'power4.out',\n      scrollTrigger: { trigger: '.fade-up', start: 'top 80%' }\n    })\n  }\n})\n```\n"
+}
