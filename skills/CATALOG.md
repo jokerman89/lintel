@@ -4,8 +4,8 @@ Auto-generated från frontmatter på push till main.
 Regenerated av `.github/workflows/catalog.yml` per push när `skills/**/SKILL.md` ändras.
 Hand-edits skrivs över — edit frontmatter i source SKILL.md istället.
 
-Total skills: 140
-Generated: 2026-05-29T09:13:40Z
+Total skills: 141
+Generated: 2026-05-29T09:37:23Z
 
 ## foundation layer (94 skills)
 
@@ -106,7 +106,7 @@ Generated: 2026-05-29T09:13:40Z
 | `/li:sync-brain` | Refresh the gbrain index from the current worktree — incremental or full. |
 | `/li:usage-log` | Append-only usage log för skill/agent-invocations. Wrapper-pattern per L-001 (en log, ingen per-skill duplikat). Solo-i |
 
-## ms-team layer (45 skills)
+## ms-team layer (46 skills)
 
 | Skill | Description |
 |---|---|
@@ -130,6 +130,7 @@ Generated: 2026-05-29T09:13:40Z
 | `/li:frontend-shader` | Frontend design-director sub-skill — picks shader library (Paper Shaders / OGL / react-three-fiber / Lygia) + visual t |
 | `/li:frontend-style-extract` | Pattern-level extraction sister till generate-style-learn. Reads artifacts (URLs, screenshots, .tsx files) → extracts  |
 | `/li:frontend-typography` | Frontend design-director sub-skill — picks font-family-stacks + variable-axes-config + size-scale + line-heights + fon |
+| `/li:generate-app` | Full-app scaffold-orchestrator. Reads frontend-design-spec.json + generates vite-react/next-app/svelte-kit project skele |
 | `/li:generate-design` | Produce design-spec.json (per-format layout-mappings + palette + fonts + asset placements) from content.md. Shared conte |
 | `/li:generate-outline` | Produce outline.md (structured presentation/document skeleton) from a brief. Shared content-pipeline sub-skill, solo-inv |
 | `/li:generate-pdf` | ⚠ TEMPLATE ONLY — Slot for PDF document generation. Content not curated. AI generates fresh at invocation per L-001. |
