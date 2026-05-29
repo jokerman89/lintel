@@ -79,6 +79,29 @@ Applied at architecture-level:
 The trio forms a discipline: respect what exists (L-002), respect what doesn't
 exist (L-001), verify claims about what exists (L-003).
 
+### L-004 — Separate decision-layer from rendering-layer when both exist (v3.7 reflection)
+
+When two skill families could plausibly own the same scope, split them by
+**decision vs execution**, not by feature-coverage. v3.7 made this explicit:
+
+- **frontend-* family** = design-director-layer. Owns typography/motion/shader
+  decisions + visual thesis. Produces `frontend-design-spec.json`.
+- **generate-* family** = rendering-engine-layer. Reads spec + emits files
+  (`generate-web`, `generate-app`, `generate-ppt`, `generate-word`).
+
+Why this matters at architecture level:
+- Schema becomes the boundary contract (M-5 schema-version handshake)
+- Each family stays small + composable. Frontend-* can grow new sub-skills
+  (frontend-shader, frontend-style-extract) without bloating generate-*.
+- L-002 stays clean: new family is identity-anchor, not replacement.
+
+Applied to layer model: this separation pattern is canonical Layer 3 discipline
+(personal-advanced opinionated workflow). Any future "could-overlap" decision
+should follow: split by decision/execution before splitting by feature.
+
+The lesson-quartet now: respect existing (L-002), respect non-existing (L-001),
+verify claims (L-003), separate decisions from execution (L-004).
+
 ## Read order (canonical session-start)
 
 1. Layer 1 — `CORE-PRINCIPLES.md` (the 10 load-bearing rules)

@@ -54,3 +54,19 @@ Related: [[scaffolding-not-content]] — both lessons are about respecting what 
 Related: [[L-002]] grep-first-before-design — L-002 says grep existing infrastructure before designing; L-003 says grep external claims before believing. Both apply the same skepticism in different directions. The trio L-001/L-002/L-003 form a discipline: respect what exists, respect what doesn't exist, and verify claims about what exists.
 
 ---
+
+## L-004 — Separate decision-layer from rendering-layer when both could plausibly own the scope (v3.7)
+
+**Rule:** When designing a new skill family that could plausibly extend an existing family OR stand alone, decide by asking: "does this make decisions, or does it execute decisions?" Split by decision vs execution, not by feature-coverage. Decisions live in one family; execution lives in another. The schema between them IS the boundary contract.
+
+**Why:** During v3.7 frontend-design-system design, operator picked option B (new `frontend-*` family) over my recommended A (extend `generate-*`). Initial instinct: A is simpler (fewer families). But A would have mixed decisions (typography choice, motion language) with execution (HTML file-output), making both harder to evolve. B with explicit separation — frontend-* owns design-director-decisions, generate-* owns rendering-engine-execution, `frontend-design-spec.json` is the contract — let each family grow independently. `frontend-shader` + `frontend-style-extract` (A2) + `generate-app` (B, new) all land cleanly without touching the other family. /plan-eng-review caught a near-collision (M-1: `design-spec.json` filename in both modes) precisely because the boundary was explicit; without the boundary, the collision would have been silent.
+
+**How to apply:**
+- When operator picks "B = separate family" over "A = extend existing": don't argue, design B properly. Build the explicit boundary table (which concern lives in which family) as part of the design doc.
+- The boundary contract is the schema. Both families version the schema (M-5 `schema_version: 1`) + use source-discriminator (M-1 `source: "frontend-design"` vs `source: "pipeline"`).
+- New sub-skills in either family must respect the boundary. If a sub-skill straddles (v3.7's original `frontend-app-scaffold`), rename it into the correct family (became `generate-app` in generate-* per M-2).
+- Pre-existing infrastructure check: enumerate existing schemas/filenames that the new family will write or read. If filename collision possible, differentiate proactively (`frontend-design-spec.json` ≠ `design-spec.json`).
+
+**Why this is durable, not v3.7-specific:** any future feature that "could be part of X or could be its own thing" should follow the decision/execution split. Examples ahead: a future `personalize-*` family might split into `personalize-decision` (audience-targeting, channel-pick) vs `generate-*` (delivery). Same pattern.
+
+Related: [[L-001]] scaffolding-not-content (frontend-* family ships scaffolding + 1 canonical pattern, agents produce content at invocation), [[L-002]] grep-first (boundary table proved generate-* already existed + needed respect), [[L-003]] verify counts (M-1 collision caught via grep of generate-web SKILL.md before merge). The lesson-quartet now: respect existing, respect non-existing, verify claims, separate decisions from execution.
