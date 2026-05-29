@@ -5,7 +5,7 @@ Regenerated av `.github/workflows/catalog.yml` per push när `skills/**/SKILL.md
 Hand-edits skrivs över — edit frontmatter i source SKILL.md istället.
 
 Total skills: 143
-Generated: 2026-05-29T13:21:13Z
+Generated: 2026-05-29T15:34:50Z
 
 ## foundation layer (96 skills)
 
@@ -48,6 +48,8 @@ Generated: 2026-05-29T13:21:13Z
 | `/li:doctor` | Cross-CLI health check — verifies which CLIs are installed, plugin install status, Lintel version, and surfaces drift. |
 | `/li:document-generate` | Generate documentation from code — engineering reference, customer guides, or onboarding tutorials. |
 | `/li:fix` | Composite shortcut for hotfix workflow — runs SENSE + BUILD + REVIEW + SHIP, skipping DEFINE/DISCOVER/PLAN/CAPTURE. Fo |
+| `/li:gbrain-setup` | Configure gbrain semantic-index integration — initialize config, pin worktree, register sync. |
+| `/li:gbrain-sync` | Refresh the gbrain index from the current worktree — incremental or full. |
 | `/li:handoff-size-check` | Handoff-size-warning tied to 500k cap. Per v3.6 backlog 3.2 — elephant-hint och token-cap som samma mekanism från tv� |
 | `/li:health` | Lintel install + upstream status check. Verifies layers, manifest, hooks, upstream pins, CLI shims. |
 | `/li:help` | List installed Lintel skills + agents + hooks. Filter by category, voice tier, or CLI support. |
@@ -62,7 +64,6 @@ Generated: 2026-05-29T13:21:13Z
 | `/li:lessons` | Mid-session review of accumulated lessons from tasks/lessons.md — surfaces relevant ones for current task. |
 | `/li:maintenance` | On-demand maintenance — force-compact + static-path monitoring + token-cost simulation. Operator-request 5.3. Bygger p |
 | `/li:make-pdf` | Convert URL, markdown file, or HTML to PDF via managed Chromium. |
-| `/li:match` | Semantic skill router — given free-text user intent, suggests top 3 matching Lintel skills with rationale. |
 | `/li:office-hours` | Generate a design doc from a problem statement — structured, decision-gated, ready for /plan-eng-review. |
 | `/li:open-managed-browser` | Open the Lintel-managed Chromium in headed mode — interactive operator session. |
 | `/li:pair-agent` | Pair with a named subagent in the loop — explicit two-mind collaboration on a focused task. |
@@ -99,20 +100,19 @@ Generated: 2026-05-29T13:21:13Z
 | `/li:scaffold` | Scaffold a new repo with Lintel base templates — CLAUDE.md, tasks/lessons.md, EVOLUTION-LOG, docs/adr/ — interactive |
 | `/li:scrape` | Extract structured data from one or more pages — declarative selector schema, JSON output. |
 | `/li:sense` | Phase 1 of Lintel cycle — auto-detect operator intent, WorkProfile state, active role, mode recommendation, 00-state f |
-| `/li:setup-brain` | Configure gbrain semantic-index integration — initialize config, pin worktree, register sync. |
 | `/li:setup-browser-cookies` | Bootstrap auth cookies for the managed Chromium profile — operator-driven, one-time per service. |
 | `/li:setup-ev2-targets` | Configure deploy targets for /release-deploy-ev2 — write targets, validate, register. |
 | `/li:ship` | Phase 7 of Lintel cycle — PR / deploy / customer handoff. Final compliance hard-stops. Voice + brand + honest-limitati |
+| `/li:skill-router` | Semantic skill router — given free-text user intent, suggests top 3 matching Lintel skills with rationale. |
 | `/li:skillify` | Turn a recurring task or pattern into a new Lintel skill — scaffolds SKILL.md from TEMPLATE. |
 | `/li:status` | Show what's open right now — alias for /li:jobs list. Single command for "where am I in flight?". |
-| `/li:sync-brain` | Refresh the gbrain index from the current worktree — incremental or full. |
 | `/li:usage-log` | Append-only usage log för skill/agent-invocations. Wrapper-pattern per L-001 (en log, ingen per-skill duplikat). Solo-i |
 
 ## ms-team layer (46 skills)
 
 | Skill | Description |
 |---|---|
-| `/li:agt-tier-stamp` | Stamp agents with license tier (permissive/restricted) — enforces 5-level precedence model. |
+| `/li:agent-tier-stamp` | Stamp agents with license tier (permissive/restricted) — enforces 5-level precedence model. |
 | `/li:asset-search` | Search ~/.lintel/brand/azure-assets/ for the right icon or diagram primitive. |
 | `/li:az-discover-presale` | ⚠ TEMPLATE ONLY — Presale Azure discovery skill (operator-request 5.4 REPLACED per L-001). Scaffolding-slot, content |
 | `/li:az-tldr` | Comprehensive on-demand rundown of an Azure service — 15 sections covering what/why/how/pitfalls/customer-questions/co |
