@@ -20,9 +20,44 @@ Cross-session working state (ej durable rules — that's [[lessons.md]]; ej pers
 **Last touched:** YYYY-MM-DD
 -->
 
-## v4.0-reframe — design doc DRAFT_FOR_REVIEW 2026-05-29
+## v4.0-reframe — design doc v2.0 READY_FOR_IMPLEMENTATION 2026-05-29
 
-**Status:** design phase — awaiting operator pass
+**Status:** design phase complete · operator picked full-lake scope · all 23 review findings absorbed inline
+
+**Path:** v1.0 DRAFT_FOR_REVIEW (PR #33 merged) → /plan-eng-review (PR #34 — 23 findings) → v2.0 READY_FOR_IMPLEMENTATION (this entry, PR opening)
+
+**Scope decision (operator-locked):** FULL — all 5 chapters, no skipping, lake-path explicitly chosen over puddle. 5 engineering modules ship as scaffolding-pattern (workflow + dispatch contract, NOT curated content) to honor L-001 even at full scope.
+
+**v2.0 additions beyond v1.0:**
+- §1 Architectural intent + portability axis (4 dimensions: multi-CLI, pack-swap, schema-version, audit JSONL)
+- §2.4 Pack-resolver failure semantics (9 scenarios + neutral defaults skeleton)
+- §3.2.4 Cold-path bypass for trivial skills
+- §3.2.2 Evaluator registry separated from built-ins
+- §4.2 L-001 scaffolding-pattern resolution (modules dispatch, agents generate)
+- §4.3 L-002 per-module inventory MANDATORY pre-PR (with verified existing-overlap list)
+- §4.4 Module template factored once; modules list deltas only
+- §4.6 customer-engagement-deep mode (6th envelope, 750k/1000k) for full engineering pass
+- §5.3 Unified audit-override store with category field
+- §5.4 Gate M3 shape-test inventory (8 tests enumerated)
+- §5.5 docs/v4.x/migrations/_INDEX.md as durable tracker
+- §7 vs §8: 16 defaults pending sign-off + 1 actual open decision (C3-D1)
+- §9 mechanical validation criteria (criterion #10 reformulated to dry-run test)
+- Appendix D: 23 findings → resolutions traceability map
+
+**Estimates revised for full scope:** 37-52 CC-days for v4.x (was 30-40). 5 phases (alpha/beta/rc/ship+2-modules/3-modules-complete). ~80 net-new artifacts (~46 skills + ~8 agents + ~17 hooks + ~4 helpers + ~5 misc).
+
+**Files:**
+- `docs/design/lintel-v4.0-reframe-design.md` v2.0 (master doc, ~1900 lines)
+- `docs/feature-requests/lintel-feature-spine-packs-navigation.md` (canonical reference, unchanged)
+- `docs/feature-requests/lintel-feature-brief-forge.md` (canonical reference, unchanged)
+
+**Next:** Phase 1 implementation can start. Operator confirms recommendations in §7 (default-accept unless flagged). Real open decision (§8 C3-D1) needs operator pick before Phase 4.
+
+**Last touched:** 2026-05-29
+
+---
+
+## v4.0-reframe-v1 — superseded 2026-05-29 by v2.0
 
 **Scope:** Master design consolidating 3 operator-supplied FRs + 1 text-form engineering-depth request + 1 meta-process note into 5-chapter reframe of what Lintel IS. Becomes v4.0.
 
