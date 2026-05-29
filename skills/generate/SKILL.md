@@ -199,6 +199,26 @@ Step 6 (orchestrator):  voice (T0 + vocab-blocklist) ─── applied to conten
 
 Voice gate is single-source (orchestrator only). Brand/honest/provenance gates remain per-format (format-builder owns).
 
+## Voice-blocklist ↔ customer-share-gate interaction (resolves PR #7 concern #4)
+
+The vocabulary-blocklist enforcement chain is:
+
+1. **Operator passes `--customer-share` to /li:generate orchestrator**
+2. **Orchestrator propagates voice-tier:** sets `--voice-tier trailblazer-draft` on generate-write (Step 4)
+3. **generate-write applies vocabulary-blocklist** via OurVoice corpus reference (`scaffolding/03-ms-team/voice/OurVoice.md`) — words on blocklist are never emitted
+4. **generate-qa runs voice gate** (Step 6) using `/li:rais-customer-voice-check` — verifies blocklist compliance + T0 calibration + 12-cell match score ≥ 85%
+5. **compliance-gate aggregator** (Cohort 5) optionally invokes broader customer-share gates at end-of-pipeline (caip-audit, first-party-check, dependency-audit) — `/li:compliance-gate --scope customer-share` runs all
+
+The customer-share flag is **load-bearing for the entire chain**. Without it: voice-tier defaults to internal, blocklist not enforced, voice gate doesn't fire, compliance-gate aggregator not auto-invoked.
+
+Single source of truth: `--customer-share` on `/li:generate`. All downstream voice + compliance behavior derives from this flag.
+
+## Deferred flags (YAGNI)
+
+These flags appeared in earlier design-doc drafts but are **not implemented** as of v3.6 closeout. Documented here so future readers don't expect them:
+
+- **`--keep-runs <N>`** — purge run-dirs after N retained. Not implemented (PR #7 concern #3, deferred). If operator's `~/.lintel/generate-runs/` grows unwieldy, manual cleanup or future `--keep-runs` add. Don't pre-build until dogfood shows the friction.
+
 ## Failure recovery
 
 - **Sub-skill fails mid-chain**: stop, surface error, write partial run-state to `${run_dir}/RUN-STATE.md`. Operator can resume with `--resume ${run_id}`.

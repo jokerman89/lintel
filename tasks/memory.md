@@ -94,16 +94,23 @@ Cross-session working state (ej durable rules — that's [[lessons.md]]; ej pers
 
 **What's pending:**
 
-### PR #7 (lintel-v3.5-doc-generation-plan) — 4 MAJORs öppna
+### PR #7 (lintel-v3.5-doc-generation-plan) — ALL 4 MAJORs RESOLVED (2026-05-29 sweep)
 
-1. **Voice-gate terminology mismatch** — designdoc nämner `TrailblazerVoiceCritic`, befintliga `/li:generate-*` använder `/li:rais-customer-voice-check` + "T0 CALIBRATED". `orchestrator-level voice-gate` landed med `/li:rais-customer-voice-check`-reference i Fas 1 PR #8. Adresseras: konsekvent terminologi vid Fas 2 dogfood.
-2. **4-gate explicit home** — `voice_gate_owner: orchestrator` + `format_gate_owner: format-builder` i `skills/generate/agent-mapping.yaml` IS the spec. Validate vid Fas 2 dogfood.
-3. **`--keep-runs <N>` YAGNI** — flag specced men inte implementerat. Defer om operator dogfood visar behov.
-4. **Voice-blocklist-customer-share-gate** — interaction not explicitly specced. Falls under "address at invocation per L-001".
+1. ~~**Voice-gate terminology mismatch**~~ ✅ CLOSED. Audit confirmed generate-* family uses `/li:rais-customer-voice-check` consistently (no `TrailblazerVoiceCritic` references in skills/). Terminology unified — design doc had stale name.
+2. ~~**4-gate explicit home**~~ ✅ CLOSED. `skills/generate/agent-mapping.yaml` has `voice_gate_owner: orchestrator` + `format_gate_owner: format-builder` explicit. Validated at v3.5 Fas 2 merge (PR #17).
+3. ~~**`--keep-runs <N>` YAGNI**~~ ✅ CLOSED. Documented as YAGNI in `skills/generate/SKILL.md` "Deferred flags" section. Operator can request implementation when run-dir size becomes friction.
+4. ~~**Voice-blocklist-customer-share-gate interaction**~~ ✅ CLOSED. Full interaction chain documented in `skills/generate/SKILL.md` "Voice-blocklist ↔ customer-share-gate interaction" section: --customer-share → voice-tier=trailblazer-draft → blocklist enforced via OurVoice corpus → rais-customer-voice-check verifies + compliance-gate aggregates.
 
-### PR #9 (lintel-v3.6-backlog-sequencing) — 7 concerns captured
+### PR #9 (lintel-v3.6-backlog-sequencing) — 7 of 7 concerns RESOLVED (2026-05-29 sweep)
 
-Resterande 7 minor concerns i designdocets Reviewer Concerns-sektion. 4 MAJORs adresserade inline under cohort-execution. Minor concerns adresseras vid respective cohort-execution-time eller följdiget design-iteration.
+MAJORs (#1, #2): coverage matrix shipped inline; 4.1 alias-mekanism CLOSED via PR #14 (design) + PR #27 (implementation 2026-05-29).
+
+MINORs (#3-#7): all CLOSED via cohort-execution paths:
+- ~~#3 5.6 distribution targets~~ enumerated at Cohort 1 PR-open (truth-fixes + 6.3+6.4+6.6 went there)
+- ~~#4 6.3 resume integrity spec~~ implemented in Cohort 1 PR #10 (resume Step 1.5)
+- ~~#5 6.6 shellcheck estimate~~ shipped warn-only in Cohort 1 (PR #10) per recommendation
+- ~~#6 L-002 grep-evidence for 4.3~~ context-family pair-by-pair verified in PR #27 WS-4a section (33 collisions enumerated)
+- ~~#7 M-3 LAYERS.md pre-baking~~ link-not-content approach used: LAYERS.md got L-001/L-002/L-003 (Cohort 1) + L-004 (v3.7 closeout) as durable principles with reference to lessons.md for incident-driven rationale
 
 ### PR #21 (lintel-v3.7-frontend-design-system) — 7 of 9 concerns RESOLVED via implementation
 
