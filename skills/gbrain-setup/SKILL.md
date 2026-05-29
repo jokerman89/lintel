@@ -1,7 +1,7 @@
 ---
-name: setup-brain
+name: gbrain-setup
 layer: foundation
-v1_alias: [li-setup-gbrain]
+deprecated_aliases: [setup-brain, li-setup-gbrain]
 description: Configure gbrain semantic-index integration — initialize config, pin worktree, register sync.
 color: orange
 tools: Read, Write, Bash
@@ -9,7 +9,7 @@ voice: internal
 cli_support: [claude-code]
 ---
 
-# /setup-brain
+# /gbrain-setup (previously /setup-brain)
 
 One-time setup for gbrain integration. Writes `~/.gbrain/config.json`, creates the per-worktree `.gbrain-source` pin, and registers the worktree for `gbrain search` / `gbrain code-def` / `gbrain query` semantic operations.
 

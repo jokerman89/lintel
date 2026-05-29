@@ -1,7 +1,7 @@
 ---
-name: agt-tier-stamp
+name: agent-tier-stamp
 layer: ms-team
-v1_alias: [li-tier-stamp-agents]
+deprecated_aliases: [agt-tier-stamp, li-tier-stamp-agents]
 description: Stamp agents with license tier (permissive/restricted) — enforces 5-level precedence model.
 color: orange
 tools: Read, Write, Edit, Bash, Glob, Grep
@@ -9,7 +9,7 @@ voice: internal
 cli_support: [claude-code, codex]
 ---
 
-# /agt-tier-stamp
+# /agent-tier-stamp (previously /agt-tier-stamp)
 
 Scans agents in scope, classifies each by upstream license (permissive vs restricted), stamps the frontmatter accordingly, and verifies the 5-level precedence model integrity (Operator pin → Repo-level → Promoted/tier-stamped → User-global → Fallback).
 
