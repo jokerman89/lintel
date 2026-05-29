@@ -1,11 +1,12 @@
 # Lintel _default pack — neutral baseline
 #
-# v4.0 Phase 1 alpha · 2026-05-29
+# v4.0 Phase 2 (schema_version added) · 2026-05-29
 #
 # This pack ships with Lintel and represents the neutral-everything baseline.
 # Operators create their own pack (or activate caip-se / future packs) on top.
 # Every field below documents the v2.0 design doc's neutral default.
 
+schema_version: "1"
 name: _default
 version: 1.0.0
 shareable: false                                  # default pack is not for sharing

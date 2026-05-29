@@ -1,0 +1,146 @@
+# caip-se — Microsoft Cloud Advocacy & Industry Partners SE pack
+#
+# Lifts pack-bound content from the spine per the 2026-05-29 spine-extraction
+# audit. Trailblazer voice, persona corpus, voice corpus, CAIP-SE-specific
+# compliance hooks now live here rather than in skills/agents/ directly.
+#
+# Extends: ms-internal (compliance + SDL + audit defaults).
+#
+# Refs:
+#   docs/design/lintel-v4.0-reframe-design.md §1.5 (FR-D: CAIP-SE as reference pack)
+#   docs/v4.x/structure-changes/2026-05-29-spine-extraction-audit.md
+
+schema_version: "1"
+name: caip-se
+version: 1.0.0
+description: Microsoft CAIP-SE pack — Trailblazer voice, customer-engagement personas, SE workflows
+extends: ms-internal
+shareable: false
+maintainers: []
+
+# ─── Voice ─────────────────────────────────────────────────────────────────
+# Trailblazer-by-default for SE customer-facing work.
+voice:
+  default_tier: trailblazer
+  corpus: voice/                            # path within pack to voice corpus
+  enforce: customer_facing
+  gates_active:
+    - voice_critic
+    - trailblazer_alignment                 # custom gate this pack adds
+  trailblazer_corpus_path: voice/trailblazer/
+
+# ─── Compliance ────────────────────────────────────────────────────────────
+# Inherits ms-internal hard mode + SDL gates. Adds customer-engagement-specific:
+compliance:
+  mode: hard
+  hooks:
+    - sdl_threat_model_check
+    - sdl_secrets_scan
+    - sdl_dependency_audit
+    - workprofile_validate
+    - customer_engagement_gate              # CAIP-SE-specific
+    - field_eligibility_check               # CAIP-SE-specific
+  workprofile_default: on
+  audit_paths:
+    - ~/.lintel/audit/caip-se-sdl.jsonl
+    - ~/.lintel/audit/caip-se-customer-engagement.jsonl
+    - ~/.lintel/audit/caip-se-field-eligibility.jsonl
+  sdl_active: true
+  data_residency: us
+
+# ─── Navigation ────────────────────────────────────────────────────────────
+# Customer-engagement work has higher LLM budget for orientator (intent
+# detection is harder when the operator's prompt is customer-context-heavy).
+navigation:
+  default_workflow: cycle
+  high_risk_workflows:
+    - cycle
+    - plan
+    - ship
+    - customer-engagement-deep              # custom workflow this pack adds
+  orientator_budget_tokens: 5000            # higher than _default 2k per §1.4 tweak
+  orientator_max_output_tokens: 300
+  escalation_threshold: medium
+  auto_mode_eligible: false
+
+# ─── Persona ───────────────────────────────────────────────────────────────
+persona:
+  source: persona/                          # path within pack to persona dir
+  voice_alignment: true
+  inventory:
+    - sales_engineer
+    - cloud_solution_architect
+    - customer_engineer
+
+# ─── Roles ─────────────────────────────────────────────────────────────────
+roles:
+  source: roles/
+  default_role: null                        # operator picks per cycle
+  inventory:
+    - sales_engineer
+    - cloud_solution_architect
+    - customer_engineer
+    - technical_specialist
+
+# ─── Brand ─────────────────────────────────────────────────────────────────
+brand:
+  templates: brand/templates/
+  color_tokens: brand/color-tokens.yaml
+  name: Microsoft
+  copy_tone: neutral                        # MS brand is precise + neutral
+
+# ─── Know-how ──────────────────────────────────────────────────────────────
+knowhow:
+  source: knowhow/
+  override_session_priors: false
+  domains:
+    - azure
+    - microsoft-365
+    - power-platform
+    - security
+    - data-and-ai
+
+# ─── Lessons ───────────────────────────────────────────────────────────────
+lessons:
+  packaged: lessons/caip-se-packaged.md
+  operator_lessons: ~/.lintel/lessons.md
+  paths:
+    - tasks/lessons.md
+    - lessons/caip-se-packaged.md
+
+# ─── Opinions ──────────────────────────────────────────────────────────────
+opinions:
+  source: opinions/
+  inventory:
+    - stance-on-trailblazer-voice
+    - stance-on-customer-deliverable-shape
+    - stance-on-sdl-scope
+
+# ─── Brief Forge handoffs ──────────────────────────────────────────────────
+# Inherits ms-internal. Adds Trailblazer-alignment evaluator on customer-facing
+# transitions.
+brief_forge_handoffs:
+  on_subagent_spawn:
+    enabled: true
+    evaluators: [security, stale, sdl_compliance]
+  on_phase_transition:
+    enabled: true
+    evaluators: [completeness, trailblazer_alignment]
+  on_workflow_handoff:
+    enabled: true
+    evaluators: [completeness, sdl_compliance, trailblazer_alignment]
+  on_cold_executor:
+    enabled: true
+    evaluators: [security, completeness, sdl_compliance]
+  on_operator_input:
+    enabled: false
+    evaluators: []
+  cold_path_bypass:
+    eligible_skills:
+      - hotfix                              # hotfix mode bypasses Brief Forge
+  budget_tokens: 7000                       # +1k vs ms-internal for Trailblazer evaluator
+  override_allowed: true
+  override_requires_audit: true
+
+# ─── Compatibility ─────────────────────────────────────────────────────────
+requires_lintel: ">=4.0.0"

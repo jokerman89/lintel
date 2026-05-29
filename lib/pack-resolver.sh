@@ -129,6 +129,69 @@ validate_pack() {
   return 0
 }
 
+# ─── Inheritance chain resolution (extends: walk) ──────────────────────────
+# Returns space-separated chain ordered root → leaf, e.g. "ms-internal caip-se".
+# Does NOT auto-prepend _default — _default is the resolver's fallback layer
+# for missing fields, not an explicit extends target.
+_resolve_extends_chain() {
+  local name="$1"
+  local chain="$name"
+  local current="$name"
+  local depth=0
+  while [ "$depth" -lt 10 ]; do
+    local pack_dir
+    pack_dir=$(_pack_dir "$current") || break
+    local ext
+    ext=$(grep -E '^extends:' "$pack_dir/pack.yaml" 2>/dev/null | head -1 | awk '{print $2}')
+    [ -z "$ext" ] && break
+    # Prepend parent (walk leaf → root, reverse implicit through prepend)
+    chain="$ext $chain"
+    current="$ext"
+    depth=$((depth + 1))
+  done
+  printf '%s' "$chain"
+}
+
+# Merge an extends-chain into the session cache. Top-level keys from later
+# packs in the chain override earlier ones (child overrides parent).
+# Per design doc §1.3: nested blocks REPLACE wholesale, not deep-merge.
+_merge_packs_into_cache() {
+  local chain="$1"      # space-separated, root → leaf
+  local out="$PACK_CACHE_FILE"
+  : > "$out"
+
+  # Each top-level key gets the LAST occurrence in the chain.
+  # Strategy: collect all manifests, then for each top-level key the child's
+  # version replaces the parent's. We process in order root → leaf, and for
+  # each manifest we overwrite the same top-level keys in $out.
+
+  for name in $chain; do
+    local pack_dir
+    pack_dir=$(_pack_dir "$name") 2>/dev/null || continue
+    local manifest="$pack_dir/pack.yaml"
+    [ -f "$manifest" ] || continue
+
+    # Extract this manifest's top-level keys
+    local keys
+    keys=$(grep -E '^[A-Za-z_][A-Za-z_0-9]*:' "$manifest" | awk -F: '{print $1}' | sort -u)
+
+    # For each key in this manifest, remove the corresponding block from $out
+    for key in $keys; do
+      [ -z "$key" ] && continue
+      awk -v key="$key" '
+        BEGIN { skip=0 }
+        $0 ~ "^"key":" { skip=1; next }
+        skip && /^[A-Za-z_]/ { skip=0 }
+        !skip { print }
+      ' "$out" > "$out.tmp2" 2>/dev/null && mv "$out.tmp2" "$out"
+    done
+
+    # Append this manifest's content to $out (skipping comments/blanks for clean cache)
+    cat "$manifest" >> "$out"
+    printf '\n' >> "$out"
+  done
+}
+
 # ─── Cache management ──────────────────────────────────────────────────────
 _prime_cache_for_session() {
   # Reads active pack, validates, copies merged manifest to cache.
@@ -150,14 +213,32 @@ _prime_cache_for_session() {
     fi
   fi
 
-  local pack_dir
-  pack_dir=$(_pack_dir "$name")
-  cp "$pack_dir/pack.yaml" "$PACK_CACHE_FILE" 2>/dev/null || {
-    _resolver_fail "could not cache pack.yaml to $PACK_CACHE_FILE"
-    return 1
-  }
+  # Resolve extends: chain (parent → child order)
+  local chain
+  chain=$(_resolve_extends_chain "$name")
 
-  _resolver_audit cache_primed "pack=$name session=$LINTEL_SESSION_ID"
+  # Count chain length (whitespace-separated tokens)
+  local chain_count
+  # shellcheck disable=SC2086
+  chain_count=$(printf '%s' "$chain" | awk '{print NF}')
+
+  if [ "${chain_count:-1}" -le 1 ]; then
+    # No inheritance — single pack, simple copy
+    local pack_dir
+    pack_dir=$(_pack_dir "$name")
+    cp "$pack_dir/pack.yaml" "$PACK_CACHE_FILE" 2>/dev/null || {
+      _resolver_fail "could not cache pack.yaml to $PACK_CACHE_FILE"
+      return 1
+    }
+  else
+    # Inheritance — merge chain into cache
+    _merge_packs_into_cache "$chain" || {
+      _resolver_fail "merge of extends chain '$chain' failed"
+      return 1
+    }
+  fi
+
+  _resolver_audit cache_primed "pack=$name chain=$chain session=$LINTEL_SESSION_ID"
   return 0
 }
 

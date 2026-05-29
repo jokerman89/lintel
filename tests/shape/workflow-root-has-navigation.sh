@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 # tests/shape/workflow-root-has-navigation.sh
-# Asserts (NEW v4.0): every workflow_root: true skill declares a navigation: block.
+# Asserts (v4.0 Phase 2): every workflow_root: true skill declares a navigation: block.
 # tag: shape v4.0
+#
+# Phase 1 (PR #36) shipped this in WARN mode as grace.
+# Phase 2 (this branch) tightens to FAIL — workflow_root contract is mandatory.
 
 set -uo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -24,26 +27,25 @@ else
   pass "Found ${#WR_SKILLS[@]} workflow_root: true skills"
 fi
 
-# Each must declare navigation: block
-# Phase 1 enforcement is documentation-only (v4.0 Chapter 1 §2.5 mandates the block
-# at spine-load time; spine extraction ships in Phase 2 where the actual rejection
-# fires). For Phase 1 we surface MISSING navigation as WARNING, not FAIL.
-MISSING=()
+# Each MUST declare navigation: block (Phase 2 hard requirement)
 for f in "${WR_SKILLS[@]}"; do
+  skill_name=$(basename "$(dirname "$f")")
   if grep -qE "^navigation:" "$f"; then
-    pass "navigation: block present in $(basename "$(dirname "$f")")/SKILL.md"
+    pass "navigation: block present in $skill_name/SKILL.md"
+
+    # Phase 2 sub-checks: required nav fields
+    for required in primary_intent triggers risk_level; do
+      if grep -qE "^[[:space:]]+${required}:" "$f"; then
+        pass "  required nav field '$required' present in $skill_name"
+      else
+        fail "  required nav field '$required' MISSING in $skill_name/SKILL.md"
+      fi
+    done
   else
-    echo "  WARN: navigation: block MISSING in $(basename "$(dirname "$f")")/SKILL.md (will block in Phase 2)"
-    MISSING+=("$f")
+    fail "navigation: block MISSING in $skill_name/SKILL.md (Phase 2 mandatory)"
   fi
 done
 
-if [ "${#MISSING[@]}" -gt 0 ]; then
-  echo ""
-  echo "  Phase 1 grace: ${#MISSING[@]} workflow_root skill(s) missing navigation: block."
-  echo "  Phase 2 spine-load enforcement will reject these. Schedule migration."
-fi
-
 echo ""
-if [ "$FAILED" -eq 0 ]; then echo "All workflow-root-has-navigation assertions PASSED (warnings ok in Phase 1)"; exit 0
+if [ "$FAILED" -eq 0 ]; then echo "All workflow-root-has-navigation assertions PASSED"; exit 0
 else echo "Some workflow-root-has-navigation assertions FAILED"; exit 1; fi
