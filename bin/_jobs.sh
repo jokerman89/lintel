@@ -1,0 +1,231 @@
+#!/usr/bin/env bash
+# bin/_jobs.sh — sourced helper for jobs system (v3.8 Feature 1)
+#
+# Lifecycle:
+#   job_create <workflow> <mode>     → creates ~/.lintel/jobs/<id>/{job.yaml,outputs,inputs} + regenerates _active.md
+#   job_update <id> <step> <status>  → updates job.yaml current_step + step status + last_touched
+#   job_archive <id> <result>        → moves to _archive/<date>/<id>/ + applies cleanup
+#   regenerate_active                → rebuilds _active.md from all jobs/<id>/job.yaml
+#   list_jobs                        → reads _active.md (or rebuilds if missing)
+#   job_path <id>                    → echoes absolute job-dir path
+#   stale_jobs <hours>               → lists jobs untouched > N hours
+#
+# Source-once-and-call pattern (matches bin/_aliases.sh):
+#   source "$(dirname "$0")/_jobs.sh"
+#   job_create cycle customer-engagement
+
+LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
+LINTEL_JOBS_DIR="${LINTEL_JOBS_DIR:-$LINTEL_HOME/jobs}"
+LINTEL_JOBS_ACTIVE="${LINTEL_JOBS_ACTIVE:-$LINTEL_JOBS_DIR/_active.md}"
+LINTEL_JOBS_ARCHIVE="${LINTEL_JOBS_ARCHIVE:-$LINTEL_JOBS_DIR/_archive}"
+LINTEL_AUDIT_DIR="${LINTEL_AUDIT_DIR:-$LINTEL_HOME/audit}"
+
+mkdir -p "$LINTEL_JOBS_DIR" "$LINTEL_JOBS_ARCHIVE" "$LINTEL_AUDIT_DIR" 2>/dev/null || true
+
+_jobs_iso_now() { date -u +"%Y-%m-%dT%H:%M:%SZ"; }
+_jobs_epoch_now() { date +%s; }
+
+# Generate a job-id: <workflow>-<YYYYMMDD-HHMM>-<short-hash>
+job_id() {
+  local workflow="$1"
+  local stamp
+  stamp=$(date +"%Y%m%d-%H%M")
+  local hash
+  hash=$(printf '%s' "$RANDOM-$$-$(_jobs_epoch_now)" | shasum 2>/dev/null | cut -c1-6 || \
+         printf '%06x' $((RANDOM * RANDOM)) | cut -c1-6)
+  printf '%s-%s-%s' "$workflow" "$stamp" "$hash"
+}
+
+# Create a new job folder + job.yaml + regenerate _active.md
+# Args: <workflow> <mode>
+job_create() {
+  local workflow="${1:-cycle}"
+  local mode="${2:-internal-tool}"
+  local id
+  id=$(job_id "$workflow")
+  local dir="$LINTEL_JOBS_DIR/$id"
+  mkdir -p "$dir/outputs" "$dir/inputs" 2>/dev/null || true
+
+  local ts
+  ts=$(_jobs_iso_now)
+  cat > "$dir/job.yaml" <<EOF
+workflow: $workflow
+job_id: $id
+called_by: ${CALLED_BY:-operator}
+mode: $mode
+started_at: $ts
+last_touched: $ts
+current_step: SENSE
+status: ACTIVE
+cleanup_policy:
+  keep: [adr, lessons, plan.md, spec.md, prompt.md]
+  discard: [scratch/*]
+steps: []
+EOF
+
+  # Touch a placeholder 00-state.md inside the job
+  : > "$dir/00-state.md"
+
+  # Audit
+  printf '{"ts":"%s","kind":"job_begin","job_id":"%s","workflow":"%s","mode":"%s"}\n' \
+    "$ts" "$id" "$workflow" "$mode" >> "$LINTEL_AUDIT_DIR/jobs.jsonl" 2>/dev/null || true
+
+  regenerate_active
+
+  printf '%s\n' "$id"
+}
+
+# Update a job step + status (touches last_touched too)
+# Args: <id> <step> <status>
+job_update() {
+  local id="$1"
+  local step="$2"
+  local status="${3:-IN_PROGRESS}"
+  local dir="$LINTEL_JOBS_DIR/$id"
+  [ -f "$dir/job.yaml" ] || return 1
+
+  local ts
+  ts=$(_jobs_iso_now)
+
+  # In-place update of last_touched + current_step (portable awk)
+  awk -v ts="$ts" -v step="$step" -v status="$status" '
+    BEGIN { updated_lt=0; updated_cs=0; updated_st=0 }
+    /^last_touched:/ && !updated_lt { print "last_touched: " ts; updated_lt=1; next }
+    /^current_step:/ && !updated_cs { print "current_step: " step; updated_cs=1; next }
+    /^status:/ && !updated_st { print "status: " status; updated_st=1; next }
+    { print }
+  ' "$dir/job.yaml" > "$dir/job.yaml.tmp" && mv "$dir/job.yaml.tmp" "$dir/job.yaml"
+
+  printf '{"ts":"%s","kind":"job_update","job_id":"%s","step":"%s","status":"%s"}\n' \
+    "$ts" "$id" "$step" "$status" >> "$LINTEL_AUDIT_DIR/jobs.jsonl" 2>/dev/null || true
+
+  regenerate_active
+}
+
+# Archive a job + apply cleanup
+# Args: <id> <result>  result in: DONE / ABORTED / FAILED
+job_archive() {
+  local id="$1"
+  local result="${2:-DONE}"
+  local dir="$LINTEL_JOBS_DIR/$id"
+  [ -d "$dir" ] || return 1
+
+  local date_stamp
+  date_stamp=$(date +"%Y-%m-%d")
+  local archive_dir="$LINTEL_JOBS_ARCHIVE/$date_stamp"
+  mkdir -p "$archive_dir" 2>/dev/null || true
+
+  # Apply cleanup-policy: discard scratch/*
+  if [ -d "$dir/scratch" ]; then
+    rm -rf "$dir/scratch" 2>/dev/null || true
+  fi
+
+  # Mark final status + ts in job.yaml
+  local ts
+  ts=$(_jobs_iso_now)
+  awk -v ts="$ts" -v result="$result" '
+    BEGIN { updated_lt=0; updated_st=0; appended_arc=0 }
+    /^last_touched:/ && !updated_lt { print "last_touched: " ts; updated_lt=1; next }
+    /^status:/ && !updated_st { print "status: " result; updated_st=1; next }
+    { print }
+    END { print "archived_at: " ts }
+  ' "$dir/job.yaml" > "$dir/job.yaml.tmp" && mv "$dir/job.yaml.tmp" "$dir/job.yaml"
+
+  # Move to archive (mv across paths)
+  mv "$dir" "$archive_dir/" 2>/dev/null || true
+
+  printf '{"ts":"%s","kind":"job_end","job_id":"%s","result":"%s"}\n' \
+    "$ts" "$id" "$result" >> "$LINTEL_AUDIT_DIR/jobs.jsonl" 2>/dev/null || true
+
+  regenerate_active
+}
+
+# Regenerate _active.md from all jobs/<id>/job.yaml
+regenerate_active() {
+  local out="$LINTEL_JOBS_ACTIVE"
+  {
+    printf '# Active Lintel jobs\n'
+    printf '\n'
+    printf '> Generated by bin/_jobs.sh at %s. Do not edit by hand.\n' "$(_jobs_iso_now)"
+    printf '\n'
+
+    local count=0
+    for d in "$LINTEL_JOBS_DIR"/*/; do
+      [ -d "$d" ] || continue
+      local f="$d/job.yaml"
+      [ -f "$f" ] || continue
+      local id workflow mode current_step status started last_touched
+      id=$(grep '^job_id:' "$f" | head -1 | awk '{print $2}')
+      workflow=$(grep '^workflow:' "$f" | head -1 | awk '{print $2}')
+      mode=$(grep '^mode:' "$f" | head -1 | awk '{print $2}')
+      current_step=$(grep '^current_step:' "$f" | head -1 | awk '{print $2}')
+      status=$(grep '^status:' "$f" | head -1 | awk '{print $2}')
+      started=$(grep '^started_at:' "$f" | head -1 | awk '{print $2}')
+      last_touched=$(grep '^last_touched:' "$f" | head -1 | awk '{print $2}')
+
+      printf '## %s\n' "$id"
+      printf -- '- workflow: `%s`\n' "$workflow"
+      printf -- '- mode: `%s`\n' "$mode"
+      printf -- '- current_step: `%s`\n' "$current_step"
+      printf -- '- status: `%s`\n' "$status"
+      printf -- '- started: %s\n' "$started"
+      printf -- '- last_touched: %s\n' "$last_touched"
+      printf '\n'
+      count=$((count + 1))
+    done
+
+    if [ "$count" -eq 0 ]; then
+      printf '_No active jobs._\n'
+    fi
+  } > "$out"
+}
+
+# Print all jobs
+list_jobs() {
+  [ -f "$LINTEL_JOBS_ACTIVE" ] || regenerate_active
+  cat "$LINTEL_JOBS_ACTIVE"
+}
+
+# Find jobs untouched > N hours
+# Args: <hours> (default 24)
+stale_jobs() {
+  local hours="${1:-24}"
+  local now_epoch
+  now_epoch=$(_jobs_epoch_now)
+  local threshold=$((hours * 3600))
+
+  for d in "$LINTEL_JOBS_DIR"/*/; do
+    [ -d "$d" ] || continue
+    local f="$d/job.yaml"
+    [ -f "$f" ] || continue
+    local id last_touched
+    id=$(grep '^job_id:' "$f" | head -1 | awk '{print $2}')
+    last_touched=$(grep '^last_touched:' "$f" | head -1 | awk '{print $2}')
+    [ -z "$last_touched" ] && continue
+
+    # Convert ISO-8601 to epoch (portable-ish via date -d / -j)
+    local lt_epoch
+    lt_epoch=$(date -d "$last_touched" +%s 2>/dev/null || \
+               date -j -f "%Y-%m-%dT%H:%M:%SZ" "$last_touched" +%s 2>/dev/null || \
+               echo "$now_epoch")
+    local age=$((now_epoch - lt_epoch))
+    if [ "$age" -gt "$threshold" ]; then
+      local age_hours=$((age / 3600))
+      printf '%s\t%dh\n' "$id" "$age_hours"
+    fi
+  done
+}
+
+# Resolve job_id to abs path
+job_path() {
+  local id="$1"
+  printf '%s' "$LINTEL_JOBS_DIR/$id"
+}
+
+# Self-test mode
+if [ "${BASH_SOURCE[0]}" = "$0" ]; then
+  echo "_jobs.sh self-test:"
+  echo "  LINTEL_JOBS_DIR = $LINTEL_JOBS_DIR"
+  echo "  Active jobs:"
+  list_jobs | sed 's/^/    /'
+fi

@@ -1,7 +1,8 @@
 ---
 name: plan
 layer: foundation
-description: Phase 4 of Lintel cycle — convert design + discovery into executable task breakdown with cost estimate, dependency graph, founder approval gate. Cold-executor handoff prep begins here.
+workflow_root: true
+description: Phase 4 of Lintel cycle, ALSO callable standalone as a planner module (v3.8 Feature 2). Produces the cold-executor trio (plan.md + spec.md + prompt.md) BORN TOGETHER. Granularity hard-checked at ≤5min/task. Founder approval gate. Spawns a job when invoked standalone.
 color: cyan
 tools: Read, Write, Edit, Bash, Grep, Glob
 voice: internal
@@ -206,12 +207,58 @@ If A: write plan.md final + checkpoint, status DONE.
 ### T2: ...
 ```
 
-**spec.md (draft)** (canonical, root or `docs/specs/`):
-- Master engineering specification — finalized in CAPTURE phase
+**spec.md** (canonical, root or `docs/specs/`):
+- Master engineering specification — born in PLAN (v3.8 Feature 2.2: trio born together)
 - Architecture overview from design doc
 - Data model, interfaces, contracts
 - Requirements traced to design
-- Status: DRAFT (becomes APPROVED in CAPTURE)
+- Status: APPROVED (CAPTURE re-affirms on cycle-end, no longer the birth-point)
+
+**prompt.md** (canonical, root or `docs/plans/<slug>/`) — **v3.8 Feature 2.2: born in PLAN, not CAPTURE.**
+
+```markdown
+# Cold-Executor Prompt — <wedge title>
+
+This file is a SELF-CONTAINED prompt. A fresh AI session reading only this prompt + the linked spec.md + plan.md should be able to re-execute or extend this work without prior context.
+
+## Context
+<2-3 paragraphs: what this is, what it accomplishes, what business outcome>
+
+## Constraints
+- Must respect: <list constraints from design doc>
+- Must NOT: <list explicit anti-requirements>
+- Compliance: <HARD-RULES applicable>
+- Voice tier: <tier>
+
+## Acceptance criteria (verify)
+- [ ] <criterion 1 — concrete, testable>
+- [ ] <criterion 2>
+...
+
+## Deliverables
+- spec.md (this directory)
+- plan.md (this directory)
+- Code as per spec
+- Tests with N% coverage
+- Documentation per plan.md task X
+
+## How to re-execute
+1. Read spec.md fully
+2. Read plan.md
+3. Run /li:cycle --from BUILD (skip DEFINE/PLAN, they're done)
+4. Apply two-stage review per task
+5. Run /li:qa final
+6. Ship per /li:ship
+
+## What you DON'T need to know
+- This cycle's specific operator preferences (in lessons.md)
+- This cycle's prior failures (in build-log if needed)
+- The full conversation history that produced this
+
+This prompt is the IRREDUCIBLE handoff. Everything needed is here or in the linked files.
+```
+
+The trio (plan.md + spec.md + prompt.md) is the cold-executor handoff contract. Born together in PLAN so standalone planner-module invocations (`/li:plan <design.md>` without a surrounding cycle) produce a complete handoff. CAPTURE re-affirms the trio (verifies presence, updates with final-build evidence) but no longer generates prompt.md.
 
 **.planner-checkpoint.md** (`.lintel/state/`):
 - State for `/li:resume`
@@ -305,4 +352,68 @@ Skip-conditions:
 
 ## Voice tier behavior
 
-`voice: internal`. Plan.md is engineering-internal. spec.md draft inherits voice tier of cycle mode (trailblazer if customer-engagement, internal otherwise).
+`voice: internal`. Plan.md is engineering-internal. spec.md inherits voice tier of cycle mode (trailblazer if customer-engagement, internal otherwise).
+
+## Module-callable (v3.8 Feature 2.4)
+
+PLAN is no longer just Phase 4 of `cycle` — it's a callable planner-module that any workflow can invoke.
+
+### Three invocation modes
+
+**1. Inside cycle (Phase 4):**
+```
+/li:cycle → SENSE → DEFINE → DISCOVER → PLAN → BUILD → REVIEW → SHIP → CAPTURE
+                                          ▲
+                                  reads DEFINE + DISCOVER outputs from job dir
+```
+
+**2. Standalone:**
+```
+/li:plan <design.md>
+   ↓
+   workflow_root: true → spawns own job at ~/.lintel/jobs/plan-<stamp>-<hash>/
+   produces: plan.md + spec.md + prompt.md (the trio)
+   handoff-size-check against 500k cap (trio + warming)
+   founder approval gate
+   → DONE, ready for cold-executor handoff
+```
+
+**3. Sub-module called by another workflow_root skill:**
+```
+/li:cycle-azure-e2e          OR    /li:safe-install
+  ↓ discovery                       ↓ pre-flight
+  CALL /li:plan --from <design>     CALL /li:plan --from <change-spec>
+  ↓ receives trio                   ↓ receives trio
+  proceed to BUILD with trio        proceed to execute with trio
+```
+
+The calling workflow passes:
+- `--from <path>` (design doc or change-spec)
+- `--called-by <skill-name>` (sets `CALLED_BY` env so job.yaml records caller)
+- `--no-job` (if the caller is itself a workflow_root job; nested jobs are pointless)
+
+### Output contract (deterministic for callers)
+
+Regardless of invocation mode, PLAN always emits:
+
+- `<run-dir>/plan.md` — task breakdown
+- `<run-dir>/spec.md` — engineering master spec
+- `<run-dir>/prompt.md` — cold-executor handoff (born here, v3.8 Feature 2.2)
+
+Callers can rely on these paths existing post-DONE. CAPTURE re-affirms but doesn't (re)generate.
+
+### Job integration
+
+When `workflow_root: true` fires `job-begin` hook:
+- Job spawned at `~/.lintel/jobs/plan-<stamp>-<hash>/`
+- Trio written to `outputs/plan.md`, `outputs/spec.md`, `outputs/prompt.md`
+- `job-end` promotes trio to `docs/plans/<slug>/` on DONE
+
+### Anti-pattern: nested job spawning
+
+If `/li:cycle` calls `/li:plan` as Phase 4, the operator already has a cycle-job. PLAN should NOT spawn its own nested job — that creates two open jobs for one workflow. The caller passes `--no-job` (or `NO_JOB=1` env) so the `job-begin` hook short-circuits.
+
+### See also
+
+- `docs/concepts/planner-as-module.md` (architecture doc)
+- `/li:jobs` controller

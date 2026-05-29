@@ -45,6 +45,16 @@ Inspired-by gstack's equivalent. Lintel version adds:
 4. **TODOS.md cross-reference:** any deferred items now blocking? Any items the plan SHOULD subsume?
 5. **Completeness check:** is plan doing the complete version or a shortcut? With AI-assisted coding, completeness cost is 10-100x cheaper than human-team — recommend the lake, not the puddle.
 6. **Distribution check:** new artifact type (binary, package, container)? CI/CD pipeline included or deferred?
+7. **Granularity hard check (v3.8 Feature 2.3, LOCKED at 2–5 min per cold-subagent task):**
+   For each task in plan.md, estimate cold-subagent implementation time. Apply the superpowers rule:
+   - **Target: 2–5 minutes per task**, implementable by a single cold-subagent reading only the task spec + the spec.md + the prompt.md (no prior conversation context).
+   - **Any task estimated >5 min** → AskUserQuestion with two options:
+     - A) **Decompose now** — split the task into 2-N smaller tasks ≤5 min each. Preferred.
+     - B) **Accept with concern** — keep the task; log the concern in plan.md "Reviewer Concerns" section.
+   - Tasks <2 min are fine (combinable if useful, but no hard rule).
+   - **This is mechanical — apply per task, no batching.**
+
+   Rationale: small tasks = clean handoff = fewer errors. Source: superpowers SDD pattern + Architect-blueprint discipline. The cold-executor trio (plan.md + spec.md + prompt.md) lives or dies on per-task granularity.
 
 ### Sections 1-4 (after scope agreed)
 
