@@ -1,7 +1,8 @@
 ---
 name: cycle
 layer: foundation
-description: Lintel cycle orchestrator — runs full 8-phase pipeline (SENSE → CAPTURE) or operator-specified subset. Mode presets, hop-in support, cost-estimate gate before BUILD.
+workflow_root: true
+description: Lintel cycle orchestrator — runs full 8-phase pipeline (SENSE → CAPTURE) or operator-specified subset. Mode presets, hop-in support, cost-estimate gate before BUILD. Spawns a job (v3.8 Feature 1) at invocation.
 color: cyan
 tools: Read, Write, Edit, Bash, Grep, Glob
 voice: internal
