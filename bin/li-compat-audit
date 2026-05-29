@@ -1,0 +1,195 @@
+#!/usr/bin/env bash
+# bin/li-compat-audit — Gate M2 mechanical compatibility audit (v4.0 Phase 1)
+#
+# Per v4.0 design Ch.4 §5.4 Gate M2: scans skills/ + agents/ + hooks/ asking
+# four questions when a structural change is proposed. Output: a compatibility-
+# audit markdown report. Empty audit = green; non-empty = review per item.
+#
+# The 4 questions:
+# 1. Does this change affect frontmatter contracts skills depend on?
+# 2. Does this change rename or move a referenced path?
+# 3. Does this change new-default a previously-optional field?
+# 4. Does this change a shared helper (bin/_*.sh, lib/*.sh)?
+#
+# Usage:
+#   bin/li-compat-audit --against <ref>            # compare HEAD vs git ref
+#   bin/li-compat-audit --diff <patch-file>        # apply patch + audit
+#   bin/li-compat-audit --output <slug>            # custom output filename
+#
+# Default: compares working-tree vs HEAD; output to
+# docs/v4.x/compatibility-audits/<date>-<slug>.md
+
+set -uo pipefail
+
+REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+DATE_STAMP="$(date +%Y-%m-%d)"
+SLUG="${SLUG:-compat-audit-${DATE_STAMP}-$$}"
+AGAINST=""
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --against) AGAINST="$2"; shift 2 ;;
+    --output)  SLUG="$2"; shift 2 ;;
+    -h|--help)
+      sed -n '2,20p' "$0"; exit 0 ;;
+    *) echo "Unknown arg: $1" >&2; exit 2 ;;
+  esac
+done
+
+cd "$REPO_ROOT" || exit 1
+
+# Build the diff source
+TMP_DIFF=$(mktemp)
+trap 'rm -f "$TMP_DIFF"' EXIT
+
+if [ -n "$AGAINST" ]; then
+  git diff "$AGAINST"...HEAD --name-only > "$TMP_DIFF" 2>/dev/null
+else
+  git diff --name-only HEAD > "$TMP_DIFF" 2>/dev/null
+fi
+
+# If no changes, output green-only audit
+if [ ! -s "$TMP_DIFF" ]; then
+  OUT="docs/v4.x/compatibility-audits/${DATE_STAMP}-${SLUG}.md"
+  mkdir -p "$(dirname "$OUT")"
+  cat > "$OUT" <<EOF
+---
+slug: $SLUG
+date: $DATE_STAMP
+against: ${AGAINST:-working-tree}
+verdict: GREEN
+affected_count: 0
+---
+
+# Compatibility audit: $SLUG
+
+**Verdict: GREEN** — no changes detected.
+EOF
+  echo "$OUT"
+  exit 0
+fi
+
+# ─── Q1: frontmatter contract changes ────────────────────────────────────
+Q1_FILES=()
+while IFS= read -r file; do
+  [ -f "$file" ] || continue
+  case "$file" in
+    skills/*/SKILL.md|agents/*/*.md|hooks/*/HOOK.md)
+      # Check if the change touches frontmatter (lines 1-15 typically)
+      if git diff -- "$file" 2>/dev/null | grep -E "^[+-][a-z_]+:" | grep -qv "^[+-][+-][+-]"; then
+        Q1_FILES+=("$file")
+      fi
+      ;;
+  esac
+done < "$TMP_DIFF"
+
+# ─── Q2: renames/moves ────────────────────────────────────────────────────
+Q2_FILES=()
+if [ -n "$AGAINST" ]; then
+  while IFS= read -r line; do
+    Q2_FILES+=("$line")
+  done < <(git diff "$AGAINST"...HEAD --name-status 2>/dev/null | grep -E "^R" | awk '{print $2 " → " $3}')
+fi
+
+# ─── Q3: new-default on previously-optional fields ────────────────────────
+Q3_FILES=()
+while IFS= read -r file; do
+  case "$file" in
+    skills/*/SKILL.md|agents/*/*.md|hooks/*/HOOK.md|packs/*/pack.yaml|lib/*.yaml)
+      if git diff -- "$file" 2>/dev/null | grep -qE "^[+][a-z_]+:[[:space:]]+[^[:space:]]"; then
+        Q3_FILES+=("$file")
+      fi
+      ;;
+  esac
+done < "$TMP_DIFF"
+
+# ─── Q4: shared helpers ───────────────────────────────────────────────────
+Q4_FILES=()
+while IFS= read -r file; do
+  case "$file" in
+    bin/_*.sh|lib/*.sh|lib/*.yaml)
+      Q4_FILES+=("$file")
+      ;;
+  esac
+done < "$TMP_DIFF"
+
+# ─── Compute verdict ──────────────────────────────────────────────────────
+TOTAL=$(( ${#Q1_FILES[@]} + ${#Q2_FILES[@]} + ${#Q3_FILES[@]} + ${#Q4_FILES[@]} ))
+if [ "$TOTAL" -eq 0 ]; then
+  VERDICT="GREEN"
+elif [ "$TOTAL" -le 3 ]; then
+  VERDICT="YELLOW"
+else
+  VERDICT="RED"
+fi
+
+# ─── Write report ─────────────────────────────────────────────────────────
+OUT="docs/v4.x/compatibility-audits/${DATE_STAMP}-${SLUG}.md"
+mkdir -p "$(dirname "$OUT")"
+
+{
+  cat <<EOF
+---
+slug: $SLUG
+date: $DATE_STAMP
+against: ${AGAINST:-working-tree}
+verdict: $VERDICT
+affected_count: $TOTAL
+---
+
+# Compatibility audit: $SLUG
+
+**Verdict: $VERDICT** — $TOTAL affected artifacts across 4 questions.
+
+## Q1 — Frontmatter contract changes (${#Q1_FILES[@]})
+
+EOF
+  if [ "${#Q1_FILES[@]}" -eq 0 ]; then
+    echo "_None._"
+  else
+    for f in "${Q1_FILES[@]}"; do echo "- \`$f\`"; done
+  fi
+
+  cat <<EOF
+
+## Q2 — Renames or moves (${#Q2_FILES[@]})
+
+EOF
+  if [ "${#Q2_FILES[@]}" -eq 0 ]; then
+    echo "_None._"
+  else
+    for f in "${Q2_FILES[@]}"; do echo "- $f"; done
+  fi
+
+  cat <<EOF
+
+## Q3 — New-defaults on previously-optional fields (${#Q3_FILES[@]})
+
+EOF
+  if [ "${#Q3_FILES[@]}" -eq 0 ]; then
+    echo "_None._"
+  else
+    for f in "${Q3_FILES[@]}"; do echo "- \`$f\`"; done
+  fi
+
+  cat <<EOF
+
+## Q4 — Shared helper changes (${#Q4_FILES[@]})
+
+EOF
+  if [ "${#Q4_FILES[@]}" -eq 0 ]; then
+    echo "_None._"
+  else
+    for f in "${Q4_FILES[@]}"; do echo "- \`$f\` (cross-cutting — verify all callers)"; done
+  fi
+
+  cat <<EOF
+
+---
+
+*Generated by bin/li-compat-audit at $(date -u +%Y-%m-%dT%H:%M:%SZ)*
+EOF
+} > "$OUT"
+
+echo "$OUT"
+exit 0

@@ -7,6 +7,19 @@ color: cyan
 tools: Read, Write, Edit, Bash, Grep, Glob
 voice: internal
 cli_support: [claude-code, codex]
+navigation:
+  primary_intent: produce cold-executor trio (plan.md + spec.md + prompt.md) born together
+  triggers:
+    - operator types /li:plan as standalone (planner-as-module)
+    - cycle phase 4 invokes after DEFINE + DISCOVER
+    - operator wants ≤5min/task granularity discipline + founder approval gate
+  sibling_workflows:
+    - /li:cycle — full 8-phase pipeline that includes plan
+    - /li:define — design doc producer (plan input)
+    - /li:discover — codebase mapper (plan input)
+  risk_level: medium
+  auto_mode_eligible: false
+  estimated_tokens: 8000
 ---
 
 You are the PLAN skill — Phase 4 of the Lintel cycle.

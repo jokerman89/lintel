@@ -1,0 +1,163 @@
+#!/usr/bin/env bash
+# bin/li-envelope-validate — verify an envelope against lib/envelope-schema.yaml
+#
+# Usage:
+#   bin/li-envelope-validate <envelope-file>            # YAML or JSON
+#   bin/li-envelope-validate --stdin                    # reads from stdin
+#   bin/li-envelope-validate <file> --quiet             # exit-code only
+#
+# Exit codes:
+#   0 = envelope valid
+#   1 = envelope invalid (errors surfaced)
+#   2 = invocation error (file missing, etc.)
+#
+# Ref: lib/envelope-schema.yaml v1 (Phase 2)
+
+set -uo pipefail
+
+REPO_ROOT="${LINTEL_REPO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." 2>/dev/null && pwd)}"
+SCHEMA="$REPO_ROOT/lib/envelope-schema.yaml"
+QUIET=0
+INPUT=""
+STDIN_MODE=0
+
+usage() {
+  head -16 "$0" | sed 's/^# \{0,1\}//' | sed '1d'
+  exit "${1:-2}"
+}
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --stdin) STDIN_MODE=1; shift ;;
+    --quiet) QUIET=1; shift ;;
+    -h|--help) usage 0 ;;
+    -*) echo "ERROR: unknown flag: $1" >&2; usage 2 ;;
+    *) INPUT="$1"; shift ;;
+  esac
+done
+
+[ -f "$SCHEMA" ] || { echo "ERROR: $SCHEMA missing" >&2; exit 2; }
+
+# Read envelope into temp file
+TMP_ENV=$(mktemp)
+trap 'rm -f "$TMP_ENV"' EXIT
+
+if [ "$STDIN_MODE" -eq 1 ]; then
+  cat > "$TMP_ENV"
+elif [ -n "$INPUT" ]; then
+  [ -f "$INPUT" ] || { echo "ERROR: $INPUT not found" >&2; exit 2; }
+  cp "$INPUT" "$TMP_ENV"
+else
+  usage 2
+fi
+
+# Errors collected here
+ERRORS=()
+
+# ─── Required top-level structure (head / body / tail) ────────────────────
+for section in head body tail; do
+  if ! grep -qE "^${section}:" "$TMP_ENV"; then
+    ERRORS+=("MISSING top-level: $section")
+  fi
+done
+
+# ─── HEAD required fields ─────────────────────────────────────────────────
+# Extract head block (lines from ^head: until next top-level key)
+HEAD_BLOCK=$(awk '/^head:/,/^[a-z_]+:[[:space:]]*$/' "$TMP_ENV" | sed '$d')
+[ -z "$HEAD_BLOCK" ] && HEAD_BLOCK=$(awk '/^head:/{flag=1; next} /^[a-z_]+:/{flag=0} flag' "$TMP_ENV")
+
+for field in envelope_id envelope_schema_version kind from to issued_at; do
+  if ! printf '%s' "$HEAD_BLOCK" | grep -qE "^[[:space:]]+${field}:"; then
+    ERRORS+=("MISSING head.$field")
+  fi
+done
+
+# envelope_schema_version must equal "1"
+schema_v=$(printf '%s' "$HEAD_BLOCK" | grep -E '^[[:space:]]+envelope_schema_version:' | head -1 | awk -F': *' '{print $2}' | tr -d '"' | tr -d "'" | tr -d '[:space:]')
+if [ -n "$schema_v" ] && [ "$schema_v" != "1" ]; then
+  ERRORS+=("INVALID head.envelope_schema_version: '$schema_v' (Phase 2 accepts '1')")
+fi
+
+# kind must be a known enum value
+kind_v=$(printf '%s' "$HEAD_BLOCK" | grep -E '^[[:space:]]+kind:' | head -1 | awk -F': *' '{print $2}' | tr -d '"' | tr -d "'" | tr -d '[:space:]')
+case "$kind_v" in
+  subagent_spawn|phase_transition|workflow_handoff|cold_executor|operator_input|reply|audit) ;;
+  "") ;;
+  *) ERRORS+=("INVALID head.kind: '$kind_v' (must be one of: subagent_spawn|phase_transition|workflow_handoff|cold_executor|operator_input|reply|audit)") ;;
+esac
+
+# ─── BODY required fields ─────────────────────────────────────────────────
+BODY_BLOCK=$(awk '/^body:/{flag=1; next} /^[a-z_]+:/{flag=0} flag' "$TMP_ENV")
+
+for field in content_type content; do
+  if ! printf '%s' "$BODY_BLOCK" | grep -qE "^[[:space:]]+${field}:"; then
+    ERRORS+=("MISSING body.$field")
+  fi
+done
+
+# content_type must be a known enum
+content_type=$(printf '%s' "$BODY_BLOCK" | grep -E '^[[:space:]]+content_type:' | head -1 | awk -F': *' '{print $2}' | tr -d '"' | tr -d "'" | tr -d '[:space:]')
+case "$content_type" in
+  brief|spec|plan|payload_freeform) ;;
+  "") ;;
+  *) ERRORS+=("INVALID body.content_type: '$content_type' (must be one of: brief|spec|plan|payload_freeform)") ;;
+esac
+
+# Content-type-specific required fields (best-effort, since body.content is nested)
+case "$content_type" in
+  brief)
+    for f in task constraints acceptance; do
+      if ! printf '%s' "$BODY_BLOCK" | grep -qE "^[[:space:]]+${f}:"; then
+        ERRORS+=("MISSING body.content.$f (required for content_type=brief)")
+      fi
+    done
+    ;;
+  spec)
+    for f in intent inputs outputs; do
+      if ! printf '%s' "$BODY_BLOCK" | grep -qE "^[[:space:]]+${f}:"; then
+        ERRORS+=("MISSING body.content.$f (required for content_type=spec)")
+      fi
+    done
+    ;;
+  plan)
+    if ! printf '%s' "$BODY_BLOCK" | grep -qE "^[[:space:]]+tasks:"; then
+      ERRORS+=("MISSING body.content.tasks (required for content_type=plan)")
+    fi
+    ;;
+esac
+
+# ─── TAIL required fields ─────────────────────────────────────────────────
+TAIL_BLOCK=$(awk '/^tail:/{flag=1; next} /^[a-z_]+:/{flag=0} flag' "$TMP_ENV")
+
+for field in completeness_score evaluators_run escape_hatches audit_pointer; do
+  if ! printf '%s' "$TAIL_BLOCK" | grep -qE "^[[:space:]]+${field}:"; then
+    ERRORS+=("MISSING tail.$field")
+  fi
+done
+
+# completeness_score in [0, 100]
+score=$(printf '%s' "$TAIL_BLOCK" | grep -E '^[[:space:]]+completeness_score:' | head -1 | awk -F': *' '{print $2}' | tr -d '"' | tr -d "'" | tr -d '[:space:]')
+if [ -n "$score" ]; then
+  if ! echo "$score" | grep -qE '^[0-9]+$'; then
+    ERRORS+=("INVALID tail.completeness_score: '$score' (must be integer)")
+  elif [ "$score" -lt 0 ] || [ "$score" -gt 100 ]; then
+    ERRORS+=("INVALID tail.completeness_score: $score (must be 0-100)")
+  fi
+fi
+
+# ─── Report ───────────────────────────────────────────────────────────────
+if [ "$QUIET" -eq 1 ]; then
+  [ "${#ERRORS[@]}" -eq 0 ] && exit 0 || exit 1
+fi
+
+if [ "${#ERRORS[@]}" -eq 0 ]; then
+  echo "envelope OK: $INPUT"
+  exit 0
+fi
+
+echo "envelope INVALID: $INPUT"
+echo "Errors:"
+for e in "${ERRORS[@]}"; do
+  echo "  - $e"
+done
+exit 1

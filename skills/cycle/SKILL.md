@@ -7,6 +7,19 @@ color: cyan
 tools: Read, Write, Edit, Bash, Grep, Glob
 voice: internal
 cli_support: [claude-code, codex]
+navigation:
+  primary_intent: full feature/cycle work with structured 8-phase pipeline
+  triggers:
+    - operator types /li:cycle (cold start)
+    - operator wants the full path with gates between phases
+    - resume from prior state via /li:resume
+  sibling_workflows:
+    - /li:hotfix — bug fix without DESIGN/PLAN gates
+    - /li:plan — standalone planner (subset of cycle)
+    - /li:review — standalone review (subset of cycle)
+  risk_level: medium
+  auto_mode_eligible: false
+  estimated_tokens: 40000
 ---
 
 You are the CYCLE orchestrator — the entry point for running the full Lintel cycle or operator-specified subset.
@@ -79,10 +92,44 @@ research-dive:
   cost_estimate: ~10-20k tokens, 20-40 min
   use_when: explore + understand, no code yet
 
+meta-infra:
+  phases: ALL_8  # heavier REVIEW + CAPTURE
+  audience: operator + future-operator
+  voice_tier: internal
+  compliance: scaffolding-only  # skip customer-facing gates; activate Gates M1-M4
+  cap_soft: 600k
+  cap_hard: 900k
+  cost_estimate: ~80-200k tokens, 2-6 hours
+  gates_active: [M1_structure_impact, M2_compatibility_audit, M3_shape_tests, M4_future_operator_clarity]
+  use_when: change touches skills/, agents/, hooks/, bin/_*.sh, install/, LAYERS.md, lib/, packs/, core templates
+  detection: auto-detected by SENSE Step 0c (path-glob on cwd diff); operator can override
+
 auto:
   phases: SENSE recommends, operator confirms before chain
   use_when: operator unsure which preset fits
 ```
+
+### Meta-infra mode mechanics
+
+`meta-infra` is the operator's mode when modifying Lintel itself (scaffolding). Lintel changes ripple across every downstream cycle, so REVIEW + CAPTURE run heavier and four meta-gates activate:
+
+**M1 — Structure-impact assessment** (in DEFINE)
+Before merging design, write a structure-changes/<date>-<slug>.md entry documenting: what changed, backward-compat, migration path, forward-compat, verification, rollback. Template: `docs/v4.x/structure-changes/_TEMPLATE.md`.
+
+**M2 — Compatibility audit** (in REVIEW)
+Run `bin/li-compat-audit` to produce mechanical GREEN/YELLOW/RED sweep across four questions:
+1. Did any frontmatter contract change? (REQUIRED_SKILL_FIELDS, REQUIRED_AGENT_FIELDS)
+2. Were skills/agents/hooks renamed or moved?
+3. Did defaults change for any existing field?
+4. Did any shared helper signature change? (lib/*.sh)
+
+Output: `docs/v4.x/compatibility-audits/<date>-<slug>.md`. RED requires explicit override.
+
+**M3 — Shape-tests** (in REVIEW)
+Run `bash tests/runner/run-all.sh --shape-only`. The 8 shape-tests assert structural invariants (see `tests/shape/_README.md`). Any FAIL blocks SHIP.
+
+**M4 — Future-operator clarity** (in CAPTURE)
+CAPTURE writes a recap that future-operator (or future-you) can use cold. Specifically: surface every migration that future operators need to run, every new convention introduced, every deprecated path. Append to `docs/v4.x/migrations/_INDEX.md` if any migration ships.
 
 ## Workflow
 
