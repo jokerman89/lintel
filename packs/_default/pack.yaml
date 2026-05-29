@@ -1,0 +1,89 @@
+# Lintel _default pack — neutral baseline
+#
+# v4.0 Phase 1 alpha · 2026-05-29
+#
+# This pack ships with Lintel and represents the neutral-everything baseline.
+# Operators create their own pack (or activate caip-se / future packs) on top.
+# Every field below documents the v2.0 design doc's neutral default.
+
+name: _default
+version: 1.0.0
+shareable: false                                  # default pack is not for sharing
+
+# ─── Voice ─────────────────────────────────────────────────────────────────
+voice:
+  default_tier: internal                          # internal | mixed | trailblazer | custom
+  corpus: null                                    # path within pack to voice corpus
+  enforce: none                                   # all | customer_facing | none
+
+# ─── Compliance ────────────────────────────────────────────────────────────
+compliance:
+  mode: advisory                                  # hard | advisory | off
+  hooks: []                                       # which Lintel hooks this pack activates
+  workprofile_default: off                        # was a separate concept; now a pack field
+
+# ─── Persona ───────────────────────────────────────────────────────────────
+persona:
+  source: null                                    # path within pack to operator persona
+  voice_alignment: false                          # voice-critic checks operator output vs persona?
+
+# ─── Roles ─────────────────────────────────────────────────────────────────
+roles:
+  source: null                                    # directory of role definitions
+  default_role: null
+
+# ─── Brand ─────────────────────────────────────────────────────────────────
+brand:
+  templates: null                                 # doc-gen templates dir (ppt, web, word)
+  color_tokens: null                              # used by /generate-web etc.
+
+# ─── Know-how (knowledge-base) ─────────────────────────────────────────────
+knowhow:
+  source: null                                    # tag-indexed knowledge base
+  override_session_priors: false                  # is override-enforce allowed?
+
+# ─── Lessons ───────────────────────────────────────────────────────────────
+lessons:
+  packaged: null                                  # immutable lessons shipped with pack
+  operator_lessons: ~/.lintel/lessons.md          # operator's own (never in pack)
+
+# ─── Opinions ──────────────────────────────────────────────────────────────
+opinions:
+  source: null                                    # stance documents
+
+# ─── Navigation (orientator at SENSE) ──────────────────────────────────────
+navigation:
+  default_workflow: cycle                         # primary workflow for this pack
+  high_risk_workflows:                            # require confirmation in auto-mode
+    - cycle
+    - plan
+    - ship
+  orientator_budget_tokens: 2000                  # LLM input cap per SENSE
+  orientator_max_output_tokens: 200               # LLM output cap (200-byte JSON)
+  escalation_threshold: medium                    # never | low | medium | high
+
+# ─── Brief Forge handoffs (universal hand-off gate) ────────────────────────
+brief_forge_handoffs:
+  on_subagent_spawn:
+    enabled: true
+    evaluators: [security, stale]
+  on_phase_transition:
+    enabled: true
+    evaluators: [completeness]
+  on_workflow_handoff:
+    enabled: true
+    evaluators: [completeness]
+  on_cold_executor:
+    enabled: true
+    evaluators: [security, completeness]
+  on_operator_input:
+    enabled: false                                # operator input is curated by the operator
+    evaluators: []
+  cold_path_bypass:
+    eligible_skills: []                           # skills declare skip in their own frontmatter
+  budget_tokens: 5000                             # total budget per hand-off
+  override_allowed: true
+  override_requires_audit: true
+
+# ─── Compatibility ─────────────────────────────────────────────────────────
+requires_lintel: ">=4.0.0"
