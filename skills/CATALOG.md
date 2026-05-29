@@ -4,10 +4,10 @@ Auto-generated från frontmatter på push till main.
 Regenerated av `.github/workflows/catalog.yml` per push när `skills/**/SKILL.md` ändras.
 Hand-edits skrivs över — edit frontmatter i source SKILL.md istället.
 
-Total skills: 141
-Generated: 2026-05-29T09:37:23Z
+Total skills: 143
+Generated: 2026-05-29T13:21:13Z
 
-## foundation layer (94 skills)
+## foundation layer (96 skills)
 
 | Skill | Description |
 |---|---|
@@ -54,6 +54,7 @@ Generated: 2026-05-29T09:37:23Z
 | `/li:hooks-status` | Reader för hooks.jsonl — surface aktiva-vs-döda hooks + override-pattern + trigger-counts. Stänger hooks-observatio |
 | `/li:instruction-parity-check` | Verifierar substance-parity över 6 instruktionsfiler (root CLAUDE/AGENTS/GEMINI + shims). Multi-CLI promise's weak poin |
 | `/li:investigate` | Hypothesis-driven bug investigation — minimum repro, eliminate variables, root cause. |
+| `/li:jobs` | Curated-flow lifecycle controller — list / continue / replan / abort / branch in-flight Lintel jobs. Single source of  |
 | `/li:landing-report` | Post-ship report — what landed in a window, in engineering or customer-voice format. |
 | `/li:learn` | Record an insight, correction, or pattern as a lesson — readable at future session start. |
 | `/li:lessons-promote` | Promote a repo-local lesson from tasks/lessons.md to Lintel's global lessons (scaffolding/01-foundation/tasks/lessons.md |
@@ -74,7 +75,7 @@ Generated: 2026-05-29T09:37:23Z
 | `/li:plan-devex-review` | Developer experience gaps review. Slow CI, painful deploys, bad local dev, attrition signals. |
 | `/li:plan-eng-review` | Architecture + tests review. The required gate before /release-ev2. Covers arch, code quality, test coverage, performanc |
 | `/li:plan-tune` | Adjust which AskUserQuestion prompts auto-decide vs ask. Per-question preference tuning. |
-| `/li:plan` | Phase 4 of Lintel cycle — convert design + discovery into executable task breakdown with cost estimate, dependency gra |
+| `/li:plan` | Phase 4 of Lintel cycle, ALSO callable standalone as a planner module (v3.8 Feature 2). Produces the cold-executor trio  |
 | `/li:profile-switch` | Toggle Lintel install on/off fast + swap till previous setup utan att röra repot. Operator-request 5.2. |
 | `/li:qa-only` | Read-only test run — reports failures, never edits. For ship-gate verification. |
 | `/li:qa` | Run the full test suite, parse failures, fix common ones, re-run until clean or stuck. |
@@ -103,6 +104,7 @@ Generated: 2026-05-29T09:37:23Z
 | `/li:setup-ev2-targets` | Configure deploy targets for /release-deploy-ev2 — write targets, validate, register. |
 | `/li:ship` | Phase 7 of Lintel cycle — PR / deploy / customer handoff. Final compliance hard-stops. Voice + brand + honest-limitati |
 | `/li:skillify` | Turn a recurring task or pattern into a new Lintel skill — scaffolds SKILL.md from TEMPLATE. |
+| `/li:status` | Show what's open right now — alias for /li:jobs list. Single command for "where am I in flight?". |
 | `/li:sync-brain` | Refresh the gbrain index from the current worktree — incremental or full. |
 | `/li:usage-log` | Append-only usage log för skill/agent-invocations. Wrapper-pattern per L-001 (en log, ingen per-skill duplikat). Solo-i |
 
