@@ -33,7 +33,7 @@ Read a checkpoint file (written by `/context-save`) into a fresh session. Output
 1. **Resolve slug + branch** via `gstack-slug` + `git branch --show-current`.
 2. **Find checkpoint:**
    - If argument provided: validate the path exists, read it.
-   - Else: `ls -t ~/.gstack/projects/<slug>/checkpoints/<branch>-*.md | head -1`. Read the most recent.
+   - Else: `ls -t ~/.lintel/sessions/<branch>/*-context-save.md | head -1`. Read the most recent.
 3. **Parse checkpoint structure** — extract: task description, done, in-flight, next, decisions, failed attempts, files touched.
 4. **Read referenced files** — for each file under "Files touched," `Read` it so subsequent edits land on accurate state (post-checkpoint changes may exist).
 5. **Diff check** — `git log <last-commit-in-checkpoint>..HEAD` to surface any commits landed since checkpoint was written.
@@ -90,7 +90,7 @@ Suggested next action: <verbatim "next" step #1 from checkpoint>
 **Auto-discover latest:**
 ```
 > /context-restore
-✓ Restored from ~/.gstack/projects/lintel/checkpoints/main-20260527-153022-phase-2-skills-batch-1.md
+✓ Restored from ~/.lintel/sessions/main/20260527-153022-lintel-phase-2-skills-batch-1-context-save.md
   Original timestamp: 2026-05-27T15:30:22Z
   Slug/branch: lintel/main
   Last commit at save: 7e7a021 (now: 7e7a021 — 0 commits since)
@@ -113,7 +113,7 @@ Suggested next action: complete /clean, /help, /health skills
 
 **With explicit path:**
 ```
-> /context-restore ~/.gstack/projects/lintel/checkpoints/main-20260526-225146.md
+> /context-restore ~/.lintel/sessions/main/20260526-225146-lintel-context-save.md
 ...
 ```
 
