@@ -1,6 +1,7 @@
 ---
-name: match
+name: skill-router
 layer: foundation
+deprecated_aliases: [match]
 description: Semantic skill router — given free-text user intent, suggests top 3 matching Lintel skills with rationale.
 color: cyan
 tools: Read, Bash, Grep, Glob
@@ -8,7 +9,7 @@ voice: internal
 cli_support: [claude-code, codex]
 ---
 
-You are the match skill — Lintel's smart router.
+You are the skill-router skill — Lintel's smart router. (Previously named `match` — see deprecated_aliases.)
 
 ## What this skill does
 

@@ -20,14 +20,16 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 SKILLS_DIR="$REPO_ROOT/skills"
 
 # All v2 skill names that should be present (renamed ones) — bare, post Väg A
+# Updated 2026-05-29 for v3.6 Cohort 4 WS-4b renames:
+#   setup-brain → gbrain-setup, sync-brain → gbrain-sync, agt-tier-stamp → agent-tier-stamp
 V2_NAMES=(
   "release-ev2" "release-deploy-ev2" "open-managed-browser"
   "perfbench" "safe-deploy-ring" "code-freeze" "code-unfreeze"
-  "setup-ev2-targets" "setup-brain" "sync-brain"
+  "setup-ev2-targets" "gbrain-setup" "gbrain-sync"
   "rais-customer-voice-check" "onecs-check" "onerai-submit-draft"
   "dsb-submit-draft" "dpia-submit-draft" "rais-sensitive-use"
   "rais-impact-assessment" "scaffold-engagement-demo" "rais-transparency-note"
-  "agt-tier-stamp" "entra-agent-id-submit-draft" "context-budgetwatch"
+  "agent-tier-stamp" "entra-agent-id-submit-draft" "context-budgetwatch"
   "cloudtest-eval-suite" "onebranch-validate"
 )
 
@@ -63,12 +65,16 @@ for v1_name in "${V1_NAMES_TO_BE_GONE[@]}"; do
   fi
 done
 
-# Verify v1 names appear in v1_alias: arrays (where applicable)
-ALIAS_COUNT=$(grep -r "^v1_alias:" "$SKILLS_DIR" 2>/dev/null | wc -l | tr -d ' ')
-if [ "$ALIAS_COUNT" -ge 24 ]; then
-  pass "v1_alias entries present: $ALIAS_COUNT (expected ≥24)"
+# Verify v1 names appear in alias arrays (v1_alias OR deprecated_aliases — v3.6 Cohort 4 added the new field).
+# Three v1_alias entries dropped in Cohort 4 (setup-brain/sync-brain/agt-tier-stamp renamed +
+# their li- aliases migrated to deprecated_aliases array on the new-name skill).
+V1_ALIAS_COUNT=$(grep -r "^v1_alias:" "$SKILLS_DIR" 2>/dev/null | wc -l | tr -d ' ')
+DEP_ALIAS_COUNT=$(grep -r "^deprecated_aliases:" "$SKILLS_DIR" 2>/dev/null | wc -l | tr -d ' ')
+TOTAL=$((V1_ALIAS_COUNT + DEP_ALIAS_COUNT))
+if [ "$TOTAL" -ge 24 ]; then
+  pass "alias entries present: $TOTAL (v1_alias=$V1_ALIAS_COUNT + deprecated_aliases=$DEP_ALIAS_COUNT; expected ≥24)"
 else
-  fail "v1_alias entries low: $ALIAS_COUNT (expected ≥24)"
+  fail "alias entries low: $TOTAL (v1_alias=$V1_ALIAS_COUNT + deprecated_aliases=$DEP_ALIAS_COUNT; expected ≥24)"
 fi
 
 # Verify directory rename (sdl replaced compliance under scaffolding/)

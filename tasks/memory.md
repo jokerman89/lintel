@@ -136,7 +136,7 @@ Eng-review run 2026-05-28. v3.7 Fas A1+A2+B+C shipped i PR #22-#25, all merged 2
 
 **What's pending:**
 
-1. **WS-4a + WS-4b naming-sessions** (2-3h operator) → unlocks Cohort 4 implementation + PR #14 alias-mekanism implementation
+1. ~~**WS-4a + WS-4b naming-sessions**~~ ✅ AUTO-EXECUTED with operator-veto path 2026-05-29. WS-4a: NO renames (prefix-only disambiguation principle adopted). WS-4b: 4 renames (match→skill-router, setup-brain→gbrain-setup, sync-brain→gbrain-sync, agt-tier-stamp→agent-tier-stamp). Alias-mekanism + bin/_aliases.sh + tests shipped. Operator vetoes any line if disagreement.
 2. **6.7 internal-voice consistency check** decision (D-5a: intended gap or drift?)
 3. **6.8 3-role validation** before more role-tooling (D-5b)
 4. **T0 voice corpus calibration** ($1.80-6 × 3-5 rundor)
