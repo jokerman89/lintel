@@ -95,12 +95,15 @@ done
 # frontend-design-surface-hook.sh cover individual contracts. This closeout
 # test only verifies presence.
 
-# --- Total agent count check (78 originally + 5 v3.7 = 83) ---
-total_agents=$(find "$REPO_ROOT/agents" -name '*.md' 2>/dev/null | grep -v README | wc -l | tr -d ' ')
-if [ "$total_agents" -ge 83 ]; then
-  pass "total agent count $total_agents >= 83 (v3.7 expectation)"
+# --- Frontend agents — exactly 5 in agents/frontend/ (the v3.7 contract) ---
+# Note: total-agent count varies between local + CI because agents/customer/* is
+# gitignored (untracked locally inflates local count). Use frontend-only count
+# as the contract instead — it's exact and matches reality on both surfaces.
+frontend_count=$(find "$REPO_ROOT/agents/frontend" -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
+if [ "$frontend_count" -eq 5 ]; then
+  pass "agents/frontend/ has exactly 5 agents (v3.7 contract: 3 from A1 + 2 from A2)"
 else
-  fail "total agent count $total_agents < 83 (v3.7 expects 5 new in frontend/)"
+  fail "agents/frontend/ has $frontend_count agents, expected 5 (v3.7 contract)"
 fi
 
 # --- Reviewer-concern tracking — memory.md captures v3.7 PRs ---
