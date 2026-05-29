@@ -1,0 +1,155 @@
+# Lintel pack schema v1 — declarative contract for what a pack manifest may declare.
+#
+# Single source of truth. Pack-resolver validates against this. Wiki generator
+# reads this. Operators authoring new packs copy `packs/_default/pack.yaml`,
+# which is itself an instance of this schema.
+#
+# Versioning: schema_version is a string. Major bumps are breaking. Minor bumps
+# are additive. Phase 2 ships v1.
+#
+# Ref: docs/design/lintel-v4.0-reframe-design.md §1.3 (pack architecture)
+
+schema_version: "1"
+schema_kind: pack-manifest
+as_of: 2026-05-29
+
+# Required top-level fields every pack manifest must declare.
+required_fields:
+  - name              # string: unique identifier (filesystem-safe, kebab-case)
+  - version           # string: semver, e.g. "1.0.0"
+  - voice             # block (see voice schema)
+  - compliance        # block (see compliance schema)
+  - navigation        # block (see navigation schema)
+  - requires_lintel   # string: semver range, e.g. ">=4.0.0"
+
+# Optional top-level fields a pack may declare.
+optional_fields:
+  - extends           # string: name of parent pack to inherit from (shallow merge)
+  - shareable         # bool: may this pack be published / git-mv'd to another repo?
+  - persona           # block (see persona schema)
+  - roles             # block (see roles schema)
+  - brand             # block (see brand schema)
+  - knowhow           # block (see knowhow schema)
+  - lessons           # block (see lessons schema)
+  - opinions          # block (see opinions schema)
+  - brief_forge_handoffs   # block (see brief_forge_handoffs schema)
+  - description       # string: one-line operator-facing summary
+  - maintainers       # list[string]: GitHub handles or contact pointers
+
+# ─── Nested block schemas ──────────────────────────────────────────────────
+
+voice:
+  required:
+    - default_tier      # enum: internal | mixed | trailblazer | custom
+  optional:
+    - corpus            # string|null: path within pack to voice corpus dir
+    - enforce           # enum: all | customer_facing | none — default "none"
+    - gates_active      # list[string]: voice-gate names this pack opts in
+    - trailblazer_corpus_path  # string|null: path to Trailblazer-specific corpus
+
+compliance:
+  required:
+    - mode              # enum: hard | advisory | off
+  optional:
+    - hooks             # list[string]: hook names this pack activates
+    - workprofile_default  # enum: on | off
+    - audit_paths       # list[string]: where compliance audits land
+    - sdl_active        # bool: SDL (Secure Development Lifecycle) gates active
+    - data_residency    # enum: us | eu | apac | none — default none
+
+navigation:
+  required:
+    - default_workflow              # string: primary workflow for this pack (e.g. "cycle")
+  optional:
+    - high_risk_workflows           # list[string]: require confirmation in auto-mode
+    - orientator_budget_tokens      # int: LLM input cap per SENSE — default 2000
+    - orientator_max_output_tokens  # int: LLM output cap — default 200
+    - escalation_threshold          # enum: never | low | medium | high — default medium
+    - auto_mode_eligible            # bool: pack may run in auto-mode — default false
+
+persona:
+  optional:
+    - source                      # string|null: dir of operator persona files
+    - voice_alignment             # bool: voice-critic checks operator output vs persona
+    - inventory                   # list[string]: persona ids
+
+roles:
+  optional:
+    - source                      # string|null: dir of role definitions
+    - default_role                # string|null
+    - inventory                   # list[string]: role ids
+
+brand:
+  optional:
+    - templates                   # string|null: doc-gen templates dir
+    - color_tokens                # string|null: brand color tokens path
+    - name                        # string|null: brand display name
+    - copy_tone                   # enum: neutral | playful | formal — default neutral
+
+knowhow:
+  optional:
+    - source                      # string|null: tag-indexed knowledge-base dir
+    - override_session_priors     # bool: is override-enforce allowed?
+    - domains                     # list[string]: domain tags
+
+lessons:
+  optional:
+    - packaged                    # string|null: immutable lessons shipped with pack
+    - operator_lessons            # string: path to operator's lessons file
+    - paths                       # list[string]: additional lessons sources
+
+opinions:
+  optional:
+    - source                      # string|null: stance documents dir
+    - inventory                   # list[string]: stance ids
+
+brief_forge_handoffs:
+  optional:
+    - on_subagent_spawn           # {enabled: bool, evaluators: list[string]}
+    - on_phase_transition         # {enabled: bool, evaluators: list[string]}
+    - on_workflow_handoff         # {enabled: bool, evaluators: list[string]}
+    - on_cold_executor            # {enabled: bool, evaluators: list[string]}
+    - on_operator_input           # {enabled: bool, evaluators: list[string]}
+    - cold_path_bypass            # {eligible_skills: list[string]}
+    - budget_tokens               # int: total budget per hand-off — default 5000
+    - override_allowed            # bool — default true
+    - override_requires_audit     # bool — default true
+
+# ─── Inheritance semantics ─────────────────────────────────────────────────
+#
+# `extends:` triggers shallow merge of parent pack into child.
+#
+# Precedence: child fields override parent fields at the top level. Nested
+# blocks (e.g. voice.default_tier) replace the parent's block entirely — they
+# do NOT deep-merge. Reason: nested deep-merge produces surprising hybrid
+# states that are hard to predict; whole-block replacement is the operator's
+# explicit choice.
+#
+# Exception: list fields under brief_forge_handoffs evaluators arrays merge by
+# concatenation + dedup, so a child can opt in to additional evaluators
+# without restating the parent's list.
+#
+# Cycle detection: max-depth 10. If `pack-a extends: pack-b` and
+# `pack-b extends: pack-a`, validation rejects.
+#
+# Missing parent: validation rejects.
+
+# ─── Validation behavior ───────────────────────────────────────────────────
+#
+# Pack-resolver invokes validate_pack() at SENSE Step 1:
+#   1. Manifest file exists
+#   2. All required_fields present at top level
+#   3. All required sub-fields present in nested blocks (voice.default_tier,
+#      compliance.mode, navigation.default_workflow)
+#   4. extends: chain resolves (parent exists) + no cycle
+#   5. schema_version is a known version (Phase 2 accepts "1")
+#
+# On failure: warn + audit + fall back to _default.
+# On success: cache merged manifest for session lifetime.
+
+# ─── Version compatibility ─────────────────────────────────────────────────
+#
+# Pack declares `requires_lintel: ">=4.0.0"`. Resolver compares against
+# current Lintel version at validation. Mismatch handling:
+#   v4.0: warn-only (per design doc §1.3 C1-D2)
+#   v4.1+: block-on-incompatible

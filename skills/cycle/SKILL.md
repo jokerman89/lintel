@@ -7,6 +7,19 @@ color: cyan
 tools: Read, Write, Edit, Bash, Grep, Glob
 voice: internal
 cli_support: [claude-code, codex]
+navigation:
+  primary_intent: full feature/cycle work with structured 8-phase pipeline
+  triggers:
+    - operator types /li:cycle (cold start)
+    - operator wants the full path with gates between phases
+    - resume from prior state via /li:resume
+  sibling_workflows:
+    - /li:hotfix — bug fix without DESIGN/PLAN gates
+    - /li:plan — standalone planner (subset of cycle)
+    - /li:review — standalone review (subset of cycle)
+  risk_level: medium
+  auto_mode_eligible: false
+  estimated_tokens: 40000
 ---
 
 You are the CYCLE orchestrator — the entry point for running the full Lintel cycle or operator-specified subset.
