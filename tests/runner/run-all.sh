@@ -64,8 +64,8 @@ for dir in $SEARCH_DIRS; do
       unset LINTEL_TEST_FILTER_TAGS 2>/dev/null || true
     fi
 
+    rc=0
     output=$(bash "$test_file" 2>&1) || rc=$?
-    rc=${rc:-0}
 
     if [ "$rc" -eq 0 ]; then
       if echo "$output" | grep -q '^SKIP'; then

@@ -111,6 +111,38 @@ If `meta_infra_detected=true`: surface to operator in SENSE-report (never block)
 
 DEFINE phase reads `meta_infra_detected` from 00-state.md and pre-fills the structure-changes/<date>-<slug>.md template. Operator can still override via `--mode <other>`.
 
+### Step 0d — Orientator invocation (v4.0 Phase 3)
+
+Invoke the lightweight orientator agent to recommend a workflow based on operator's prompt + active pack's `navigation.*` block. Mechanical-first; LLM escalation only when mechanical confidence falls below pack's `escalation_threshold`. See [orientator concept doc](../../docs/concepts/orientator.md).
+
+```bash
+# Run only when operator didn't already specify --mode/--from explicitly
+if [ -z "${flag_mode:-}" ] && [ -z "${flag_from:-}" ]; then
+  source "$LINTEL_REPO_ROOT/lib/orientator-routing.sh"
+
+  intent=$(classify_intent "$prompt_text")
+  default_workflow=$(resolve_pack_field navigation.default_workflow)
+  workflow=$(match_workflow "$intent" "$default_workflow")
+  high_risk_csv=$(resolve_pack_field navigation.high_risk_workflows)
+  risk=$(assess_risk "$workflow" "$high_risk_csv")
+  confidence=$(score_confidence "$intent" "$workflow")
+  budget_tokens=$(resolve_pack_field navigation.orientator_budget_tokens)
+  budget_tokens="${budget_tokens:-2000}"
+  escalation=$(resolve_pack_field navigation.escalation_threshold)
+  escalation="${escalation:-medium}"
+
+  # Audit
+  ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+  audit_path="${LINTEL_HOME:-$HOME/.lintel}/audit/orientator-decisions.jsonl"
+  mkdir -p "$(dirname "$audit_path")"
+  printf '{"ts":"%s","kind":"orientator_decision","intent":"%s","workflow":"%s","risk":"%s","confidence":"%s","operator":"%s"}\n' \
+    "$ts" "$intent" "$workflow" "$risk" "$confidence" "$(whoami 2>/dev/null || echo unknown)" \
+    >> "$audit_path"
+fi
+```
+
+Surfaces in SENSE report (Step 7 output) as recommended workflow. Per auto-mode level (b): low-risk + high-confidence auto-starts (if pack `auto_mode_eligible: true`), high-risk always confirms.
+
 ### Step 1 — Read configuration
 
 ```bash
