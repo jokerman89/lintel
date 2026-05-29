@@ -137,11 +137,11 @@ Eng-review run 2026-05-28. v3.7 Fas A1+A2+B+C shipped i PR #22-#25, all merged 2
 **What's pending:**
 
 1. ~~**WS-4a + WS-4b naming-sessions**~~ ✅ AUTO-EXECUTED with operator-veto path 2026-05-29. WS-4a: NO renames (prefix-only disambiguation principle adopted). WS-4b: 4 renames (match→skill-router, setup-brain→gbrain-setup, sync-brain→gbrain-sync, agt-tier-stamp→agent-tier-stamp). Alias-mekanism + bin/_aliases.sh + tests shipped. Operator vetoes any line if disagreement.
-2. **6.7 internal-voice consistency check** decision (D-5a: intended gap or drift?)
-3. **6.8 3-role validation** before more role-tooling (D-5b)
+2. ~~**6.7 internal-voice consistency check** (D-5a)~~ ✅ INVESTIGATED 2026-05-29 — verdict: INTENDED, not drift. 125 internal / 14 mixed / 2 trailblazer distribution coherent. See [decisions-67-68 doc](docs/design/lintel-v3.6-decisions-67-68.md). Operator vetoes by reply "drift" if disagree.
+3. ~~**6.8 3-role validation** (D-5b)~~ ✅ INVESTIGATED 2026-05-29 — verdict: PATTERN VALIDATED. 3 role files structurally consistent (7/7 sections, 78-81 lines). Ready for role #4 — recommended `frontend-designer` to anchor v3.7 family. Operator vetoes by reply "not yet" or "go with X".
 4. **T0 voice corpus calibration** ($1.80-6 × 3-5 rundor)
 5. **Real-work `/li:cycle` dogfood** på faktisk Azure-engagement
 6. **Marketplace submission** (post MS legal review)
 7. **PR #14 merge** efter WS-4a/b + alias-implementation
 
-**Last touched:** 2026-05-28
+**Last touched:** 2026-05-29
