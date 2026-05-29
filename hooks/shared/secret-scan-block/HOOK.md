@@ -4,6 +4,8 @@ tier: JUSTIFIED-BLOCK
 event: PreToolUse (Bash) for git commit/push commands
 fires_on: staged content contains Tier 1 secret pattern
 override: operator must commit with explicit LINTEL_OVERRIDE_SECRET=1 env var + reason
+necessity: REQUIRED
+gap_if_skipped: "Tokens/keys leak into history; credentials must be rotated; mirrors already have copies."
 audit: ~/.lintel/audit/hooks.jsonl
 ---
 

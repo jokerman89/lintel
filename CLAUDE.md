@@ -10,9 +10,9 @@ For canonical session bootstrap, see [AGENT-INSTRUCTIONS.md](AGENT-INSTRUCTIONS.
 
 Lintel is the MS-CAIP-SE session harness — markdown scaffolding for agent-based development.
 
-- `skills/` — 74 slash-commands (foundation + ms-team layers)
-- `agents/` — 44 subagent roles organized per domain (ms-specific, engineering, doc-gen, voice, security, compliance, devops, customer, communication)
-- `hooks/shared/` — 15 compliance + workflow hooks
+- `skills/` — 151 slash-commands (foundation + ms-team layers)
+- `agents/` — 78 subagent roles organized per domain (ms-specific, engineering, doc-gen, voice, security, compliance, devops, customer, communication)
+- `hooks/shared/` — 19 compliance + workflow hooks
 - `scaffolding/` — templates that get copied INTO other repos via `bin/li-scaffold`
 - `docs/design/lintel-v3-plan.md` — current architecture
 - `docs/per-cli/` — per-CLI plugin setup guides

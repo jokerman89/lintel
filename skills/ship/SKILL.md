@@ -6,6 +6,8 @@ color: cyan
 tools: Read, Bash, Edit, Grep, Glob
 voice: mixed
 cli_support: [claude-code, codex]
+necessity: REQUIRED
+gap_if_skipped: "No deployment validation, rollback plan, or audit log; production mutations without authorization."
 ---
 
 You are the SHIP skill — Phase 7 of the Lintel cycle.
