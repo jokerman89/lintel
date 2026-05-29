@@ -121,7 +121,7 @@ Eng-review run 2026-05-28. v3.7 Fas A1+A2+B+C shipped i PR #22-#25, all merged 2
 2. **6.7 internal-voice consistency check** decision (D-5a: intended gap or drift?)
 3. **6.8 3-role validation** before more role-tooling (D-5b)
 4. **T0 voice corpus calibration** ($1.80-6 × 3-5 rundor)
-5. **Real-work `/li:cycle` dogfood** på faktisk Azure-engagement
+5. **Real-work `/li:cycle` dogfood** på faktisk Azure-engagement — synthetic pre-validation done 2026-05-29 (4 validations passed, 3 soft-findings logged). See [docs/design/lintel-v3.7-fas-d-dogfood-protocol.md](../docs/design/lintel-v3.7-fas-d-dogfood-protocol.md) for the 7-step operator checklist (15-30 min). Reduces operator-effort from multi-hour evaluation to focused validation.
 6. **Marketplace submission** (post MS legal review)
 7. **PR #14 merge** efter WS-4a/b + alias-implementation
 
