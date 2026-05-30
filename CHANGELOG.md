@@ -2,6 +2,64 @@
 
 All notable changes to this repo are tracked here. Format is loose — date headings + bulleted changes. Major behavior changes to the canonical instructions are also logged in `scaffolding/EVOLUTION-LOG.md` (which travels with each scaffolded repo).
 
+## 2026-05-30 — v4.2.0 — DA (data-architecture) module
+
+**Second engineering-domain module of v4.x.** Follows the engineering-modules pattern locked in v4.1. Purely additive on v4.1; no breaking changes.
+
+### Module + sub-skills shipped
+
+- `skills/da/SKILL.md` — workflow_root, 5 checkpoints (data_model_complete, schema_locked, migration_safe, retention_specified, query_patterns_documented), 6-dim scoring rubric, 3 raise-help triggers
+- 7 sub-skills (L-001 dispatch contracts):
+  - `da-schema-design` (DatabaseDesigner + SchemaArchitect)
+  - `da-migration-plan` (MigrationPlanner + Migrator)
+  - `da-retention-policy` (DatabaseDesigner + Architect)
+  - `da-query-pattern-audit` (Explorer + DatabaseDesigner)
+  - `da-sharding-plan` (SchemaArchitect + DatabaseDesigner)
+  - `da-data-contract-collision` (DatabaseDesigner + Architect)
+  - `da-analytics-readiness` (DataPipelineDesigner + SchemaArchitect)
+
+### Agents (L-002: 5 of 7 reuse existing)
+
+- 5 sub-skills dispatch to existing agents: DatabaseDesigner, DataPipelineDesigner, Migrator, Architect, Explorer
+- 2 new agents for genuinely new capability:
+  - `agents/engineering/SchemaArchitect.md` — cross-store reasoning, partition-key selection, dimensional modeling
+  - `agents/engineering/MigrationPlanner.md` — zero-downtime migration planning, reversibility analysis, lock-acquisition strategy
+
+### 3 warn-only hooks (using unified `audit_log` from `bin/_audit.sh`)
+
+- `hooks/shared/da-schema-drift-warn` — pre-edit on schema-ADR-claimed files
+- `hooks/shared/da-migration-irreversible-warn` — pre-commit on migrations with destructive ops + no rollback
+- `hooks/shared/da-retention-violation-warn` — pre-edit on data-access code skipping retention filters
+
+### Profile preferences
+
+`~/.lintel/profile.yaml` `engineering.data_architecture.*`:
+  primary_store (postgres | mongodb | cassandra | clickhouse | mixed)
+  migration_window (zero-downtime-required | maintenance-window-ok | tolerated)
+  retention_default_days
+  schema_versioning
+  require_migration_review_above_rows
+
+### Tests added
+
+- `tests/shape/da-module-contract.sh` — engineering-module contract verification + v4.1+ conventions (necessity, gap_if_skipped, structured cli_support, audit_log integration)
+- `tests/unit/da-routing.sh` — 9 scenarios (granularities, sub-skill dispatch, checkpoints, raise-help, hooks, rubric, prefs, pattern consistency)
+
+### Concept doc
+
+- `docs/concepts/da-module.md` — DA-specific reference + checkpoint pass-criteria + raise-help triggers + scoring rubric + 5-pillar composition placement (parallel with SC after TA)
+
+### What's next
+
+3 modules remain:
+- **v4.3 SC** — security-compliance (SDL, threat models, secret management, compliance gates)
+- **v4.4 DH** — devops-hosting (deployment patterns, observability, cost ops)
+- **v4.5 TQ** — testing-qa (critical-path coverage, perf budgets, contract tests)
+
+Plus future `/li:full-engineering-pass` composition skill (TA → DA‖SC → DH → TQ).
+
+---
+
 ## 2026-05-30 — v4.1.0 — TA (tech-architecture) module
 
 **First engineering-domain module of v4.x. The pattern that the next four (DA, SC, DH, TQ) follow.**
