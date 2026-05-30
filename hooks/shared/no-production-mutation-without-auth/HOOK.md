@@ -4,6 +4,8 @@ tier: warn-only
 event: PreToolUse (Bash)
 fires_on: command appears to mutate production resources
 override: explicit per-call auth confirmation in conversation
+necessity: REQUIRED
+gap_if_skipped: "Production data modified without per-call operator confirmation; no audit trail."
 audit: ~/.lintel/audit/hooks.jsonl
 ---
 

@@ -2,6 +2,83 @@
 
 All notable changes to this repo are tracked here. Format is loose — date headings + bulleted changes. Major behavior changes to the canonical instructions are also logged in `scaffolding/EVOLUTION-LOG.md` (which travels with each scaffolded repo).
 
+## 2026-05-29 — v4.0.0 (SHIPPED)
+
+**Lintel v4.0: harness with packs + orientator + Brief Forge + generated wiki. CAIP-SE as one pack among many.**
+
+Three shipping phases, all on `main`:
+
+### Phase 1 — meta-infra spine (PR #36)
+- Meta-infra mode (6th cycle preset) with auto-detection in SENSE Step 0c
+- Pack-resolver as critical-path singleton: 9 failure modes, per-session cache, three-layer fallback
+- `_default` pack as neutral baseline
+- Gate M2 (`bin/li-compat-audit`) + structure-changes tracker
+- 8 shape-tests in `tests/shape/` enforcing structural invariants
+- Concept docs: pack-defaults, pack-resolver, meta-infra-discipline
+
+### Phase 2 — pack architecture + envelope schema (PR #37)
+- `lib/pack-schema.yaml` v1 — declarative pack contract
+- `packs/ms-internal/` (compliance + SDL base) + `packs/caip-se/` extends ms-internal
+- Pack inheritance: extends-chain walk + shallow merge in resolver
+- `lib/envelope-schema.yaml` v1 — HEAD + BODY (content_type discriminator) + TAIL
+- `bin/li-envelope-validate` + `bin/li-envelope-replay` (dry-run default)
+- 5 lifecycle skills: pack-create, pack-switch, pack-list, pack-validate, v4-migrate
+- Navigation block mandatory on workflow_root skills (shape-test tightened FAIL)
+
+### Phase 3 — navigation + Brief Forge + wiki-gen (this release)
+- `skills/orientator/SKILL.md` + `lib/orientator-routing.sh` — mechanical-first workflow routing
+- SENSE Step 0d auto-invokes orientator, audits decisions to `~/.lintel/audit/orientator-decisions.jsonl`
+- `skills/brief-forge/SKILL.md` + `lib/brief-forge.sh` + `lib/brief-forge-evaluators.sh`
+- 5 default evaluators: security, completeness, stale, sdl_compliance, trailblazer_alignment
+- Score aggregation = minimum (worst evaluator wins, can't hide problems by averaging)
+- Cold-path-bypass via skill frontmatter `brief_forge_bypass: true` or pack policy
+- `bin/li-wiki-gen` — regenerates both `docs/wiki/` (markdown) + `docs/showcase/lintel-the-harness.html` from the same sources
+- Deterministic output (verified by `tests/unit/wiki-gen-idempotency.sh`)
+- CI integration via `bin/li-wiki-gen --check` (warn-only in v4.0; fail from v4.1)
+
+### v4.0 migration
+
+Operators currently on v3.x:
+1. `git pull` brings v4.0 into the repo
+2. `/li:v4-migrate` detects v3.x usage signals + recommends pack activation
+3. `/li:pack-switch caip-se` for CAIP-SE operators (behavior identical to v3.x post-switch)
+4. `/li:pack-switch ms-internal` for general Microsoft work
+5. Operators on neutral defaults: no action needed (`_default` is the v4.0 fallback)
+
+### v4.0 architecture
+
+| Contract | What it does | Where |
+|---|---|---|
+| Pack manifest | Declarative configuration per customer/team domain | `lib/pack-schema.yaml` |
+| Envelope | Universal shape for every hand-off (HEAD + BODY + TAIL) | `lib/envelope-schema.yaml` |
+| Meta-infra discipline | 4 mandatory gates (M1-M4) on scaffolding changes | `skills/cycle`, `bin/li-compat-audit` |
+| Pack inheritance | Shallow merge with explicit child-over-parent precedence | `lib/pack-resolver.sh` |
+| Orientator | Mechanical-first workflow routing + LLM escalation gate | `skills/orientator`, `lib/orientator-routing.sh` |
+| Brief Forge | Universal hand-off gate with 5 evaluators | `skills/brief-forge`, `lib/brief-forge.sh` |
+| Wiki generator | Both wiki + showcase regenerate from sources | `bin/li-wiki-gen` |
+
+### Decisions locked
+
+Per design doc §1.3 / §1.5 / §2.3:
+- ms-internal base pack ships **NOW** (C1-D1)
+- Pack-version enforcement: **warn-only** in v4.0; block from v4.1 (C1-D2)
+- `auto_mode_eligible`: **false** by default (C1-D3)
+- `orientator_budget_tokens`: **2000 default, 5000 caip-se** (C1-D4)
+- Envelope replay: **dry-run default**, `--apply` requires explicit opt-in (§2.3)
+
+### Tests at ship
+
+39/39 PASS:
+- 12 shape-tests (mechanical invariants)
+- 27 unit/behavior/integration tests
+- 4 unit tests added by Phase 3 (orientator routing, brief-forge evaluators, wiki idempotency, plus existing pack-inheritance + envelope-validates + pack-resolver-fallbacks)
+
+### What's next (v4.1+)
+
+Per design doc §5.2 Phase 4: 5 engineering-domain modules (TA, SC, DA, DH, TQ) ship one at a time as v4.1 / v4.2 / v4.3 / v4.4 / v4.5. Order operator-driven based on engagement needs.
+
+---
+
 ## 2026-05-28 — v3.5.0-dev (on `lintel-rebrand` branch)
 
 **Lintel v3.5: 8-phase cycle + role-lifting + context-warming + rebrand from JStack.**

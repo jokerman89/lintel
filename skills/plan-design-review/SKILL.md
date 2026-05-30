@@ -64,14 +64,14 @@ After scoring: **overall_score = average** of 6 pillars.
 **Unresolved:** 1 (subtraction-default — operator deferred to v1.1)
 ```
 
-Persist:
+Persist via first-party `bin/li-review-log` (legacy alias: gstack-review-log):
 ```bash
-~/.claude/skills/gstack/bin/gstack-review-log '{"skill":"plan-design-review","timestamp":"...","status":"...","initial_score":N,"overall_score":N,"unresolved":N,"decisions_made":N,"commit":"..."}'
+bin/li-review-log '{"skill":"plan-design-review","timestamp":"...","status":"...","initial_score":N,"overall_score":N,"unresolved":N,"decisions_made":N,"commit":"..."}'
 ```
 
 ## Visual sketch + outside voices (optional)
 
-If the plan benefits from visual exploration: invoke `design` binary (if `~/.claude/skills/gstack/design/dist/design` exists) to generate ASCII / HTML wireframes for the proposed UI. Otherwise skip — `/plan-design-review` is primarily critique, not generation.
+If the plan benefits from visual exploration: optionally invoke the external `design` binary **only if** `~/.claude/skills/gstack/design/dist/design` exists — if it is not present, skip silently (no hard dependency). This binary is a non-first-party convenience; it is never on Lintel's required execution path. Either way, `/plan-design-review` is primarily critique, not generation.
 
 Outside voices (Codex + Claude subagent) can propose alternative design directions. Always informational — user decides.
 

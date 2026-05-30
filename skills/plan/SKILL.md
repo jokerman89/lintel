@@ -7,6 +7,8 @@ color: cyan
 tools: Read, Write, Edit, Bash, Grep, Glob
 voice: internal
 cli_support: [claude-code, codex]
+necessity: REQUIRED
+gap_if_skipped: "BUILD runs against an unwritten/unreviewed plan; the cold-executor trio (plan.md/spec.md/prompt.md) never exists, so CAPTURE and cold executors have nothing to read."
 navigation:
   primary_intent: produce cold-executor trio (plan.md + spec.md + prompt.md) born together
   triggers:
@@ -52,7 +54,16 @@ Adopted from speckit (cross-section Analyze), Architect image (cost-estimate gat
 
 ### Step 1 — Load context
 
-Read:
+**Surface relevant lessons (mirrors SENSE Step 0a — non-blocking):**
+
+Invoke `/li:lessons-surface` keyword-scoped to planning so prior-session lessons warm the plan before any tasks are written. Same mechanism SENSE uses (max 3 lessons, prepended to context, silent on no match, never a blocker):
+
+```bash
+# Keyword-scope to this phase's concerns; silent if no relevant matches.
+~/.claude/skills/lessons-surface --keyword "planning architecture scope dependencies" 2>/dev/null || true
+```
+
+Then read:
 - APPROVED design doc from DEFINE
 - discover-report.md from DISCOVER (if present)
 - CORE-PRINCIPLES.md (always)
@@ -322,6 +333,7 @@ Skip-conditions:
 - CORE-PRINCIPLES.md
 - HARD-RULES.md (if WorkProfile=on)
 - Recent relevant ADRs
+- `tasks/lessons.md` (via `/li:lessons-surface`, keyword-scoped, non-blocking)
 
 **Writes:**
 - `plan.md` (canonical)

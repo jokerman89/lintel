@@ -6,6 +6,8 @@ color: cyan
 tools: Read, Bash, Grep, Glob
 voice: internal
 cli_support: [claude-code, codex]
+necessity: STRONGLY_RECOMMENDED
+gap_if_skipped: "Unreviewed code reaches SHIP with no signal; spec-compliance and compliance gates never fire yet a ship-ready verdict is asserted."
 ---
 
 You are the REVIEW skill — Phase 6 of the Lintel cycle.
@@ -36,7 +38,16 @@ Three-stage discipline (extends superpowers' two-stage with compliance):
 
 ### Step 1 — Load context
 
-Read:
+**Surface relevant lessons (mirrors SENSE Step 0a — non-blocking):**
+
+Invoke `/li:lessons-surface` keyword-scoped to review so prior-session lessons inform what to scrutinize before the adversarial stages run. Same mechanism SENSE uses (max 3 lessons, prepended to context, silent on no match, never a blocker):
+
+```bash
+# Keyword-scope to this phase's concerns; silent if no relevant matches.
+~/.claude/skills/lessons-surface --keyword "review specification compliance correctness" 2>/dev/null || true
+```
+
+Then read:
 - plan.md (from PLAN) — source of requirements
 - design doc (from DEFINE) — original intent
 - build-log.md (from BUILD) — task outcomes
@@ -244,6 +255,7 @@ Skip-conditions: intent=research-only, intent=docs-only.
 - CORE-PRINCIPLES.md
 - HARD-RULES.md, REFERENCE-RULES.md (if WorkProfile=on)
 - OurVoice-corpus.md (if voice gate)
+- `tasks/lessons.md` (via `/li:lessons-surface`, keyword-scoped, non-blocking)
 
 **Writes:**
 - `.lintel/state/review-report-<datetime>.md`

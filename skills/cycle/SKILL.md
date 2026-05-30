@@ -7,6 +7,8 @@ color: cyan
 tools: Read, Write, Edit, Bash, Grep, Glob
 voice: internal
 cli_support: [claude-code, codex]
+necessity: STRONGLY_RECOMMENDED
+gap_if_skipped: "Ad-hoc phase sequencing without cost-estimate gate, founder-approval gate, or compliance gates between REVIEW and SHIP."
 navigation:
   primary_intent: full feature/cycle work with structured 8-phase pipeline
   triggers:
