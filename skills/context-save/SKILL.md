@@ -38,7 +38,7 @@ Save the current session's load-bearing state to a checkpoint file so a fresh se
 ## Workflow
 
 1. Resolve slug + branch + timestamp.
-2. Compute checkpoint path: `~/.gstack/projects/<slug>/checkpoints/<branch>-<YYYYMMDD-HHMMSS>[-<label>].md`.
+2. Compute checkpoint path: `~/.lintel/sessions/<branch>/<YYYYMMDD-HHMMSS>-<slug>[-<label>]-context-save.md` (the filename MUST end `-context-save.md` so `/context-restore`, `/context-dump`, and `/context-warm-sessions` globs match).
 3. Gather:
    - **What the task is** — one-line description (operator-provided or inferred from recent turns).
    - **What got done** — bulleted from todo-list completed items + recent commit messages on this branch.
@@ -110,13 +110,13 @@ To restore this session: `/context-restore <checkpoint-path>` OR paste this file
 ## Edge cases
 
 - **No git repo:** still save, but `branch` field is `no-git`. Slug derived from cwd basename.
-- **No `~/.gstack/projects/<slug>/`:** create it.
+- **No `~/.lintel/sessions/<branch>/`:** create it.
 - **Existing checkpoint with same timestamp:** suffix with `-2`, `-3`, etc. Never overwrite.
 - **Operator pastes recent turns inline:** capture them verbatim under a `## Recent turns (operator-pasted)` section.
 
 ## Compliance integration
 
-This skill writes a file outside the repo (to `~/.gstack/`). Per Lintel Layer 2:
+This skill writes a file outside the repo (to `~/.lintel/`). Per Lintel Layer 2:
 - The checkpoint file may contain references to in-flight work that touched files in the repo. Operator confirms NO customer-data is captured in the checkpoint before saving.
 - Default sanity-grep before write: if the checkpoint text matches secret-shaped patterns, halt and surface to operator.
 
@@ -132,15 +132,15 @@ This skill writes a file outside the repo (to `~/.gstack/`). Per Lintel Layer 2:
 ```
 > /context-save phase-2-skills-batch-1
 ✓ Checkpoint saved
-  Path: ~/.gstack/projects/lintel/checkpoints/main-20260527-153022-phase-2-skills-batch-1.md
-  Resume: /context-restore ~/.gstack/projects/lintel/checkpoints/main-20260527-153022-phase-2-skills-batch-1.md
+  Path: ~/.lintel/sessions/main/20260527-153022-lintel-phase-2-skills-batch-1-context-save.md
+  Resume: /context-restore ~/.lintel/sessions/main/20260527-153022-lintel-phase-2-skills-batch-1-context-save.md
 ```
 
 **No label:**
 ```
 > /context-save
 ✓ Checkpoint saved
-  Path: ~/.gstack/projects/lintel/checkpoints/main-20260527-153455.md
+  Path: ~/.lintel/sessions/main/20260527-153455-lintel-context-save.md
 ```
 
 ## See also

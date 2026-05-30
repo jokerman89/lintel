@@ -33,7 +33,7 @@ The release-engineer skill. Runs the full ship gauntlet: review readiness check 
 
 ## Workflow
 
-1. **Review readiness check** — run `gstack-review-read`, verify Eng Review CLEAR within 7 days for current commit. If not: surface + ask whether to run `/plan-eng-review` first or proceed anyway.
+1. **Review readiness check** — run first-party `bin/li-review-read` (legacy alias: gstack-review-read), verify Eng Review CLEAR within 7 days for current commit. The reader emits a `---VERDICT---` block (`VERDICT: Eng Review CLEAR within 7 days` on a fresh+matching CLEAR record, exit 0; `VERDICT: NO fresh Eng Review` otherwise, exit 3) and folds in any legacy `~/.gstack/...` records for back-compat. If not CLEAR: surface + ask whether to run `/plan-eng-review` first or proceed anyway.
 2. **Sanity scan** — secret patterns, customer-data patterns, PII patterns. Block if any hit.
 3. **WIP commit detection** — scan recent commits for `WIP:` prefix. Group into logical chunks (file overlap heuristic).
 4. **Squash plan** — surface proposed squash via AskUserQuestion. Operator approves before any history rewrite.

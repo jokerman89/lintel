@@ -49,7 +49,7 @@ Voice tier note: the critique itself is internal (builder-to-builder). When the 
    - **Layout/density:** information density appropriate, viewport-responsive, no wasted whitespace at mobile, no cramped desktop.
    - **Brand consistency:** colors from token set, typography from token set, signature elements present where expected (per project CLAUDE.md).
 4. **Score findings.** Each pillar gets a 1-10 score + finding list. Findings get P1/P2/P3 severity.
-5. **Persist via gstack-review-log** with `skill: design-review`.
+5. **Persist via first-party `bin/li-review-log`** (legacy alias: gstack-review-log) with `skill: design-review`.
 6. **Output** the structured report.
 
 ## Report format

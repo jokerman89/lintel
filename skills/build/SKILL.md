@@ -6,6 +6,8 @@ color: cyan
 tools: Read, Write, Edit, Bash, Grep, Glob
 voice: internal
 cli_support: [claude-code, codex]
+necessity: REQUIRED
+gap_if_skipped: "No implementation is produced; the plan's tasks are never executed."
 ---
 
 You are the BUILD skill — Phase 5 of the Lintel cycle.
@@ -49,6 +51,15 @@ Verify:
 If on main without consent: HARD STOP per superpowers rule. AskUserQuestion: "Switch to feature branch / proceed on main with confirmation / abort?"
 
 ### Step 2 — Read plan, extract tasks, create TodoWrite
+
+**Surface relevant lessons (mirrors SENSE Step 0a — non-blocking):**
+
+Before reading the plan and dispatching implementers, invoke `/li:lessons-surface` keyword-scoped to implementation so prior-session lessons inform task execution and subagent dispatch. Same mechanism SENSE uses (max 3 lessons, prepended to context, silent on no match, never a blocker):
+
+```bash
+# Keyword-scope to this phase's concerns; silent if no relevant matches.
+~/.claude/skills/lessons-surface --keyword "implementation testing subagent" 2>/dev/null || true
+```
 
 Read entire plan.md once. Extract:
 - All task titles + IDs
@@ -222,6 +233,7 @@ Skip-conditions: intent=review-only, intent=research-only, intent=plan-only.
 - HARD-RULES.md (if WorkProfile=on)
 - role file (if active, voice/tone signals only)
 - recent test results
+- `tasks/lessons.md` (via `/li:lessons-surface`, keyword-scoped, non-blocking)
 
 **Writes:**
 - source code (edits via implementer subagents)

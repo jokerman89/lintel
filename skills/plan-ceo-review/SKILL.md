@@ -70,9 +70,9 @@ Lintel's CEO review is **inspired-by gstack's** equivalent but written fresh per
         OR  REVISE — design doc needs <specific change> before eng review
 ```
 
-Persist via `gstack-review-log`:
+Persist via first-party `bin/li-review-log` (legacy alias: gstack-review-log):
 ```bash
-~/.claude/skills/gstack/bin/gstack-review-log '{"skill":"plan-ceo-review","timestamp":"...","status":"...","scope_proposed":N,"scope_accepted":N,"scope_deferred":N,"mode":"...","commit":"..."}'
+bin/li-review-log '{"skill":"plan-ceo-review","timestamp":"...","status":"...","scope_proposed":N,"scope_accepted":N,"scope_deferred":N,"mode":"...","commit":"..."}'
 ```
 
 ## Compliance integration

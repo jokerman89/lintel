@@ -4,7 +4,7 @@
 
 **Status:** v3-dev (2026-05-27). See [CHANGELOG.md](CHANGELOG.md) for v3 release notes and [SHIP-GATE.md](SHIP-GATE.md) for v3.0.0 readiness gates. The v3 design lives at [docs/design/lintel-v3-plan.md](docs/design/lintel-v3-plan.md).
 
-v3 ships **81 skills + 78 agents + 15 hooks** organized for plugin-manifest pattern across 8 CLIs. Plus full Kategori B scaffolding-template system (CORE-PRINCIPLES, EVOLUTION-LOG, tasks/lessons.md, ADR templates) that gets copied into new MS engagement repos via `bin/li-scaffold`.
+v3 ships **151 skills + 78 agents + 19 hooks** organized for plugin-manifest pattern across 8 CLIs. Plus full Kategori B scaffolding-template system (CORE-PRINCIPLES, EVOLUTION-LOG, tasks/lessons.md, ADR templates) that gets copied into new MS engagement repos via `bin/li-scaffold`.
 
 Lintel is the **complete session harness** — not just a skill catalog. It manages the full lifecycle: session-start ritual → mid-session interventions (hooks, voice gates, compliance) → end-of-session capture (lessons, ADR drafting, EVOLUTION-LOG) → cross-session continuity (memory, lessons-sync). See [docs/session-harness.md](docs/session-harness.md) for the full mental model.
 
@@ -15,9 +15,9 @@ Lintel is the **complete session harness** — not just a skill catalog. It mana
 Two distinct categories, both shipped in this repo:
 
 **Kategori A — Agent-invokable** (what your CLI sees via plugin manifest):
-- `skills/` — 81 slash-commands (foundation + ms-team layers)
+- `skills/` — 151 slash-commands (foundation + ms-team layers)
 - `agents/` — 78 subagent roles organized per domain
-- `hooks/shared/` — 15 compliance + workflow hooks
+- `hooks/shared/` — 19 compliance + workflow hooks
 
 **Kategori B — Repo-scaffolding** (copied INTO other repos via `li-scaffold`):
 - `scaffolding/01-foundation/` — CLAUDE.md template, CORE-PRINCIPLES, EVOLUTION/EVOLUTION-LOG, tasks/{lessons,memory,personas,todo}.md, docs/adr/ templates, .claude/agents/ subagent overrides
@@ -110,9 +110,9 @@ Full walkthrough: [docs/getting-started.md](docs/getting-started.md).
 
 ## What you get
 
-- **81 skills** for daily workflows: `/qa`, `/release-ev2`, `/safe-deploy-ring`, `/investigate`, `/plan-eng-review`, `/office-hours`, `/rais-customer-voice-check`, `/onecs-check`, `/agt-tier-stamp`, `/generate-ppt`, `/generate-word`, `/generate-web`, `/scaffold-engagement-demo`, plus 7 new v3 session-harness skills (`/match`, `/li:doctor`, `/li:scaffold`, `/lessons-promote`, `/adr-new`, `/personas-rotate`, `/lessons`).
+- **151 skills** for daily workflows: `/qa`, `/release-ev2`, `/safe-deploy-ring`, `/investigate`, `/plan-eng-review`, `/office-hours`, `/rais-customer-voice-check`, `/onecs-check`, `/agt-tier-stamp`, `/generate-ppt`, `/generate-word`, `/generate-web`, `/scaffold-engagement-demo`, plus 7 new v3 session-harness skills (`/match`, `/li:doctor`, `/li:scaffold`, `/lessons-promote`, `/adr-new`, `/personas-rotate`, `/lessons`).
 - **78 agents** organized per domain: ms-specific (15), engineering (25), security (8), compliance (6), devops (7), customer (8), communication (5), doc-gen (3), voice (1).
-- **15 compliance hooks** (opt-in via symlinks): `customer-data-block`, `secret-scan-block`, `no-direct-main-push`, etc.
+- **19 compliance hooks** (opt-in via symlinks): `customer-data-block`, `secret-scan-block`, `no-direct-main-push`, etc.
 - **5+7+8 compliance tiering**: 5 always-on hard rules, 7 on-demand check items, 8 reference docs (RAIS, OneCS, AGT, SDL, etc).
 - **OurVoice corpus**: 60 sanitized paragraphs across 12 cells (4 Reveal × 3 Inspire × 5 Provoke techniques) — operator-driven calibration via `T0-CALIBRATION-WORKFLOW.md`.
 - **Repo scaffolding mechanism** via `bin/li-scaffold` — 30-second new-repo setup.
