@@ -21,6 +21,7 @@ set -uo pipefail
 REPO_ROOT="${LINTEL_REPO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." 2>/dev/null && pwd)}"
 LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
 AUDIT_DIR="${LINTEL_AUDIT_DIR:-$LINTEL_HOME/audit}"
+command -v audit_log >/dev/null 2>&1 || source "$REPO_ROOT/bin/_audit.sh"
 mkdir -p "$AUDIT_DIR" 2>/dev/null || true
 
 APPLY=0
@@ -122,13 +123,11 @@ if [ -n "$deprecated_after" ]; then
 fi
 
 # ─── Apply (audit first, execute is operator-bound per skill type) ───────
-ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-operator=$(whoami 2>/dev/null || echo unknown)
+# audit_log supplies ts + operator + cycle_id; we pass the replay-specific fields.
 forced=$([ "$FORCE" -eq 1 ] && echo true || echo false)
 
-printf '{"ts":"%s","kind":"envelope_replay_applied","envelope_id":"%s","original_kind":"%s","from":"%s","to":"%s","operator":"%s","forced":%s}\n' \
-  "$ts" "$envelope_id" "$kind" "$from" "$to" "$operator" "$forced" \
-  >> "$AUDIT_LOG"
+audit_log "envelope-replay" "envelope_replay_applied" \
+  "envelope_id=$envelope_id" "original_kind=$kind" "from=$from" "to=$to" "forced=$forced"
 
 echo "APPLY recorded to $AUDIT_LOG"
 echo ""

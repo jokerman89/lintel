@@ -80,9 +80,9 @@ else
   fail "run.sh missing throttle logic"
 fi
 
-# Audit-log write
-if grep -q "AUDIT" "$RUN_SH" && grep -q "hooks.jsonl" "$RUN_SH"; then
-  pass "run.sh writes to hooks.jsonl audit"
+# Audit-log write (via unified audit_log helper → hooks category → hooks.jsonl)
+if grep -qE 'audit_log[[:space:]]+"hooks"' "$RUN_SH"; then
+  pass "run.sh writes to hooks audit via audit_log helper"
 else
   fail "run.sh missing audit-log write"
 fi

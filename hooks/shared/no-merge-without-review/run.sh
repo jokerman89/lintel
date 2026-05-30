@@ -7,7 +7,9 @@ CMD="${1:-}"
 
 LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
 mkdir -p "$LINTEL_HOME/audit"
-AUDIT="$LINTEL_HOME/audit/hooks.jsonl"
+
+# Unified audit writer (hooks/shared/<name>/ → repo-root → bin/). Idempotent source.
+command -v audit_log >/dev/null 2>&1 || source "$(dirname "${BASH_SOURCE[0]}")/../../../bin/_audit.sh"
 
 # Detect merge-to-main patterns
 if echo "$CMD" | grep -qE '(gh\s+pr\s+merge|git\s+merge.*main|git\s+merge.*master)'; then
@@ -24,9 +26,7 @@ if echo "$CMD" | grep -qE '(gh\s+pr\s+merge|git\s+merge.*main|git\s+merge.*maste
   fi
 
   if [ "$recent_review" = "0" ]; then
-    ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-    printf '{"hook":"no-merge-without-review","tier":"warn","ts":"%s","cmd_preview":"%s"}\n' \
-      "$ts" "$(echo "$CMD" | head -c 120)" >> "$AUDIT"
+    audit_log "hooks" "no_merge_without_review" "hook=no-merge-without-review" "tier=warn" "cmd_preview=$(echo "$CMD" | head -c 120)"
     echo "WARN [Lintel hook]: merge to main detected without recent /review or /plan-eng-review CLEARED for HEAD"
     echo "WARN: Run /review or /plan-eng-review first, or confirm intentional bypass."
   fi
