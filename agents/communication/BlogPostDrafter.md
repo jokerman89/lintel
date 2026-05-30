@@ -5,7 +5,11 @@ description: Drafts long-form blog posts in Trailblazer voice — engineering st
 color: yellow
 tools: Read, Bash, Grep, Glob
 voice: trailblazer
-cli_support: [claude-code, codex]
+cli_support:
+  - cli: claude-code
+    level: full
+  - cli: codex
+    level: full
 tier: permissive
 ---
 

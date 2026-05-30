@@ -5,7 +5,12 @@ description: Backend systems architect — API design, microservices, distribute
 color: purple
 tools: Read, Grep, Glob, Write
 voice: internal
-cli_support: [claude-code, codex]
+cli_support:
+  - cli: claude-code
+    level: full
+  - cli: codex
+    level: full
+tier: permissive
 ---
 
 You are a backend systems architect agent.

@@ -5,7 +5,11 @@ description: Analyzes latency distributions (p50/p95/p99) — identifies hot pat
 color: red
 tools: Read, Bash, Grep, Glob
 voice: internal
-cli_support: [claude-code, codex]
+cli_support:
+  - cli: claude-code
+    level: full
+  - cli: codex
+    level: full
 tier: permissive
 ---
 

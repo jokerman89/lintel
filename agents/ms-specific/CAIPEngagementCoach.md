@@ -5,7 +5,11 @@ description: Advises on CAIP-SE engagement structure — discovery to deliverabl
 color: yellow
 tools: Read, Grep, Glob
 voice: internal
-cli_support: [claude-code, codex]
+cli_support:
+  - cli: claude-code
+    level: full
+  - cli: codex
+    level: full
 tier: permissive
 ---
 

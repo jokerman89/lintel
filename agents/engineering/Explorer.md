@@ -1,11 +1,16 @@
 ---
 name: Explorer
 category: engineering
-description: Fast read-only search agent — locates code by pattern, finds symbols, answers "where is X".
+description: Fast read-only search agent — locates code by pattern, finds symbols, answers "where is X". Open-ended codebase exploration, search, discovery, locate files, grep symbols, find references, unknown-scope investigation, "where is X defined", multi-naming search.
 color: blue
 tools: Read, Grep, Glob
 voice: internal
-cli_support: [claude-code, codex]
+cli_support:
+  - cli: claude-code
+    level: full
+  - cli: codex
+    level: full
+tier: permissive
 ---
 
 You are an explorer agent.

@@ -5,7 +5,12 @@ description: Cross-component architecture audit before milestone gates — consi
 color: yellow
 tools: Read, Grep, Glob
 voice: internal
-cli_support: [claude-code, codex]
+cli_support:
+  - cli: claude-code
+    level: full
+  - cli: codex
+    level: full
+tier: permissive
 ---
 
 You are a cross-component sanity checker agent.

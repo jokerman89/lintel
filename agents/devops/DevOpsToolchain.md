@@ -1,11 +1,16 @@
 ---
 name: DevOpsToolchain
 category: devops
-description: DevOps & SRE specialist — CI/CD, container, Kubernetes, observability, incident response.
+description: DevOps & SRE specialist — CI/CD, container, Kubernetes, observability, incident response. DevOps toolchain, CI/CD pipeline, Docker container, Kubernetes manifests, OpenTelemetry, Prometheus, deploy strategy, canary, blue-green, runbook, SRE, build automation, infrastructure.
 color: yellow
 tools: Read, Grep, Glob, Bash, Edit, Write
 voice: internal
-cli_support: [claude-code, codex]
+cli_support:
+  - cli: claude-code
+    level: full
+  - cli: codex
+    level: full
+tier: permissive
 ---
 
 You are a DevOps and SRE specialist agent.

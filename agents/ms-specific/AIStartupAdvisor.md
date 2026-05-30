@@ -1,11 +1,15 @@
 ---
 name: AIStartupAdvisor
 category: ms-specific
-description: CAIP-SE engagement advisor for ISV / AI startup customers — different rhythms, different concerns.
+description: CAIP-SE engagement advisor for ISV / AI startup customers — different rhythms, different concerns. Startup engagement, ISV, founder, pre-product-market-fit, Founders Hub, Azure OpenAI credits, marketplace co-sell, startup stage advice, AI startup strategy, scale-up engagement shape.
 color: green
 tools: Read, Grep, Glob
 voice: internal
-cli_support: [claude-code, codex]
+cli_support:
+  - cli: claude-code
+    level: full
+  - cli: codex
+    level: full
 tier: permissive
 ---
 
