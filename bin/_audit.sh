@@ -25,9 +25,19 @@ mkdir -p "$LINTEL_AUDIT_DIR" 2>/dev/null || true
 
 _audit_iso_now() { date -u +"%Y-%m-%dT%H:%M:%SZ"; }
 
-# Escape a value for JSON
+# Escape a value for JSON, assigning the result to the variable _AUDIT_ESC.
+# Pure-bash parameter expansion with an out-variable — no subprocess fork at
+# all (neither a sed pipe nor a $(...) command-substitution subshell). Hooks
+# fire on every Edit/Bash event, so a fork per key=value pair is ~10-50x
+# costlier than this on some platforms (notably Windows/MSYS).
+# Order matters: backslashes first, then quotes, then tabs.
+_AUDIT_ESC=""
 _audit_escape() {
-  printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g; s/	/\\t/g'
+  local s="$1"
+  s="${s//\\/\\\\}"   # \  -> \\
+  s="${s//\"/\\\"}"   # "  -> \"
+  s="${s//$'\t'/\\t}" # tab -> \t
+  _AUDIT_ESC="$s"
 }
 
 # Write an audit record
@@ -41,17 +51,28 @@ audit_log() {
   local ts cycle_id operator
   ts=$(_audit_iso_now)
   cycle_id="${LINTEL_CYCLE_ID:-${CYCLE_ID:-unknown}}"
-  operator="${LINTEL_OPERATOR:-$(whoami 2>/dev/null || echo unknown)}"
+  # Prefer env-provided identity (zero fork). Fall back to whoami only if no
+  # env var is set — hooks fire on hot paths and a whoami fork per write is
+  # expensive on some platforms.
+  operator="${LINTEL_OPERATOR:-${USER:-${LOGNAME:-${USERNAME:-}}}}"
+  [ -n "$operator" ] || operator="$(whoami 2>/dev/null || echo unknown)"
 
-  # Build the JSON record manually (no jq dependency at audit-time)
-  local rec
-  rec=$(printf '{"ts":"%s","kind":"%s","operator":"%s","cycle_id":"%s"' \
-    "$ts" "$(_audit_escape "$kind")" "$(_audit_escape "$operator")" "$(_audit_escape "$cycle_id")")
+  # Build the JSON record manually (no jq dependency at audit-time).
+  # printf -v + the _audit_escape out-variable assign in-place — no
+  # command-substitution subshell forks. The only remaining fork is the single
+  # date(1) call for the timestamp above, which is unavoidable.
+  local rec esc_kind esc_op esc_cyc
+  _audit_escape "$kind"; esc_kind="$_AUDIT_ESC"
+  _audit_escape "$operator"; esc_op="$_AUDIT_ESC"
+  _audit_escape "$cycle_id"; esc_cyc="$_AUDIT_ESC"
+  printf -v rec '{"ts":"%s","kind":"%s","operator":"%s","cycle_id":"%s"' \
+    "$ts" "$esc_kind" "$esc_op" "$esc_cyc"
 
   for kv in "$@"; do
     local k="${kv%%=*}"
     local v="${kv#*=}"
-    rec="${rec},\"${k}\":\"$(_audit_escape "$v")\""
+    _audit_escape "$v"
+    rec="${rec},\"${k}\":\"${_AUDIT_ESC}\""
   done
 
   rec="${rec}}"
