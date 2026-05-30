@@ -14,6 +14,8 @@ Durable tracker for v4.x migration windows. Each row points to a migration file 
 | pack-version-warn-only | 2026-05-29 | 2026-11-29 | 2027-02-28 | v4.0 ships `requires_lintel` enforcement as warn-only. v4.1 will block on incompat. Pack authors should declare `requires_lintel: ">=4.0.0"` now to avoid the future warn-storm. |
 | wiki-gen-check-warn-only | 2026-05-29 | 2026-11-29 | 2027-02-28 | CI runs `bin/li-wiki-gen --check` and warns on diff. v4.1 will fail PRs on diff. Operators should regen + commit wiki before that bites. |
 | envelope-completeness-soft-gate | 2026-05-29 | 2026-08-29 | 2026-11-29 | Brief Forge envelopes with `completeness_score < 40` surface ESCALATE but currently do not hard-block. v4.1 will hard-block at < 40 unless `--no-brief-forge` is explicit. |
+| ta-hooks-warn-only | 2026-05-30 | 2026-11-30 | 2027-02-28 | TA module's 3 hooks (arch-drift, contract-collision, complexity-budget) ship as warn-only in v4.1. v4.2+ may add per-pack opt-in block. Operators wanting block now can use Brief Forge security/sdl_compliance evaluators with hard fail. |
+| profile-engineering-block | 2026-05-30 | 2027-05-30 | none-removed | `~/.lintel/profile.yaml` gains an `engineering:` block in v4.1 (TA: tech_architecture.*; v4.2-v4.5 add other domains). Operators without the block see defaults (cyclomatic 12, cognitive 18, etc.). No removal — the block is purely additive. |
 
 ## Archived migrations
 
