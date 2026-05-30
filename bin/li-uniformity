@@ -1,0 +1,295 @@
+#!/usr/bin/env bash
+# bin/li-uniformity — regenerates docs/audit/uniformity-matrix.md from the
+# frontmatter of every component (skills/, agents/, hooks/, packs/).
+#
+# This is the LIVING DASHBOARD for the uniformity-as-contract mechanism
+# (docs/concepts/uniformity-contract.md). It replaces the static findings
+# register with a regenerable coverage matrix: rows = components grouped by
+# KIND, columns = the trackable D1–D14 dimensions, cells = present / absent /
+# n-a-for-kind, plus a per-kind adoption-% summary at the top.
+#
+# Same regenerable-artifact discipline as bin/li-wiki-gen: idempotent (re-run =
+# same output, modulo the timestamp header which can be pinned via WGEN_TS).
+#
+# Usage:
+#   bin/li-uniformity                  # regenerate docs/audit/uniformity-matrix.md
+#   bin/li-uniformity --check          # exit 1 if regen would change the matrix
+#   bin/li-uniformity --output <file>  # write to a custom path
+#   bin/li-uniformity --stdout         # print to stdout, write nothing
+#
+# Exit codes:
+#   0 = generated (or --check clean)
+#   1 = --check found a diff (warn-only in CI, mirrors li-wiki-gen)
+#   2 = invocation error
+
+set -uo pipefail
+
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+OUT="$REPO_ROOT/docs/audit/uniformity-matrix.md"
+CHECK=0
+STDOUT=0
+
+usage() { head -22 "$0" | sed 's/^# \{0,1\}//' | sed '1d'; exit "${1:-2}"; }
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --check)  CHECK=1; shift ;;
+    --stdout) STDOUT=1; shift ;;
+    --output) OUT="$2"; shift 2 ;;
+    -h|--help) usage 0 ;;
+    *) echo "ERROR: unknown arg: $1" >&2; usage 2 ;;
+  esac
+done
+
+# Source helpers.
+if [ -f "$REPO_ROOT/lib/uniformity-coverage.sh" ]; then
+  # shellcheck disable=SC1091
+  source "$REPO_ROOT/lib/uniformity-coverage.sh"
+else
+  echo "ERROR: lib/uniformity-coverage.sh not found" >&2
+  exit 2
+fi
+
+# Deterministic timestamp (pin via WGEN_TS for reproducible/--check runs).
+TS="${WGEN_TS:-$(date -u +%Y-%m-%dT%H:%M:%SZ)}"
+
+# ─── Tracked dimensions per kind, with requirement level ──────────────────────
+# Format: "field:LEVEL" where LEVEL is R (floor), O (tracked), na (kind-excl).
+# Column order is fixed so the table is stable.
+COLS_SKILL_WR=(necessity:R gap_if_skipped:R navigation:R brief_forge_handoffs:O pack_influence:O observability:O recovery:O checkpoints:O)
+COLS_SKILL_REG=(necessity:O gap_if_skipped:O navigation:O brief_forge_handoffs:O pack_influence:O observability:O recovery:O checkpoints:O)
+COLS_AGENT=(necessity:O gap_if_skipped:O navigation:na brief_forge_handoffs:O pack_influence:O observability:O delegates_to:na)
+COLS_HOOK_BLOCK=(necessity:R gap_if_skipped:R navigation:na brief_forge_handoffs:na pack_influence:O observability:O recovery:na)
+COLS_HOOK_WARN=(necessity:O gap_if_skipped:O navigation:na brief_forge_handoffs:na pack_influence:O observability:O recovery:na)
+COLS_PACK=(necessity:O pack_influence:na navigation:O brief_forge_handoffs:na observability:na)
+
+# Column header labels (short forms with the D-number).
+declare -A DLABEL=(
+  [necessity]="D14 necessity"
+  [gap_if_skipped]="D12 gap"
+  [navigation]="D4 nav"
+  [brief_forge_handoffs]="D9 brief-forge"
+  [pack_influence]="D7 pack"
+  [observability]="D13 obs"
+  [recovery]="D6 recovery"
+  [checkpoints]="D5 checkpoints"
+  [delegates_to]="D11 delegate"
+)
+
+# ─── Enumerate components ─────────────────────────────────────────────────────
+mapfile_compat() { # portable replacement for mapfile (not always present)
+  local __arr="$1"; shift
+  eval "$__arr=()"
+  local line
+  while IFS= read -r line; do eval "$__arr+=(\"\$line\")"; done
+}
+
+SKILLS=();  while IFS= read -r f; do SKILLS+=("$f"); done < <(find "$REPO_ROOT/skills" -name SKILL.md -type f 2>/dev/null | sort)
+AGENTS=();  while IFS= read -r f; do AGENTS+=("$f"); done < <(find "$REPO_ROOT/agents" -name "*.md" -type f 2>/dev/null | grep -v README | grep -v "_TEMPLATE" | sort)
+HOOKS=();   while IFS= read -r f; do HOOKS+=("$f"); done < <(find "$REPO_ROOT/hooks/shared" -name HOOK.md -type f 2>/dev/null | sort)
+PACKS=();   while IFS= read -r f; do PACKS+=("$f"); done < <(find "$REPO_ROOT/packs" -name pack.yaml -type f 2>/dev/null | sort)
+
+# Partition skills + hooks by kind.
+WR=(); REG=()
+for f in "${SKILLS[@]:-}"; do
+  [ -z "$f" ] && continue
+  if [ "$(unif_skill_kind "$f")" = "workflow_root" ]; then WR+=("$f"); else REG+=("$f"); fi
+done
+HBLOCK=(); HWARN=(); HLIFE=()
+for f in "${HOOKS[@]:-}"; do
+  [ -z "$f" ] && continue
+  case "$(unif_hook_kind "$f")" in
+    block) HBLOCK+=("$f") ;;
+    lifecycle) HLIFE+=("$f") ;;
+    *) HWARN+=("$f") ;;
+  esac
+done
+
+# ─── Frontmatter field-set cache ──────────────────────────────────────────────
+# Parse every component's frontmatter EXACTLY ONCE (one awk fork per file) into
+# FSET[$file]. All downstream rendering + adoption counting reads this cache —
+# no awk re-forks. This is the load-bearing perf fix: the naive version
+# re-parsed each file per-column AND per-summary-call, forking awk thousands of
+# times across 160 skills + 80 agents, which got the process killed mid-stream
+# under Windows/MSYS.
+declare -A FSET
+build_fset_cache() {
+  local f
+  for f in "$@"; do
+    [ -z "$f" ] && continue
+    FSET["$f"]="$(unif_fm_fieldset "$f")"
+  done
+}
+build_fset_cache "${SKILLS[@]:-}" "${AGENTS[@]:-}" "${HOOKS[@]:-}" "${PACKS[@]:-}"
+
+# ─── Rendering helpers ────────────────────────────────────────────────────────
+# component display name = parent dir for skills/hooks, basename for agents/packs.
+# Pure bash parameter expansion — no basename/dirname forks.
+comp_name() {
+  local f="$1" d b
+  case "$f" in
+    */SKILL.md|*/HOOK.md|*/pack.yaml)
+      d="${f%/*}"; echo "${d##*/}" ;;          # parent dir name
+    *)
+      b="${f##*/}"; echo "${b%.md}" ;;         # basename minus .md
+  esac
+}
+
+# Print one kind section: a header, a column legend, the per-component rows,
+# and an adoption-% line. Args: <label> <cols-array-name> <file...>
+#
+# Performance: each file's frontmatter is parsed exactly ONCE (unif_fm_fieldset,
+# one awk fork) and reused for every column + the adoption counters. This is the
+# fix for the naive per-cell version which forked awk O(files × columns) times
+# and got killed mid-stream under Windows/MSYS.
+emit_section() {
+  local label="$1" cols_name="$2"; shift 2
+  local files=("$@")
+  local -n cols="$cols_name"
+  local total="${#files[@]}"
+
+  echo "### ${label} (n=${total})"
+  echo ""
+
+  # Header row
+  local header="| Component |"
+  local sep="|---|"
+  local c field
+  for c in "${cols[@]}"; do
+    field="${c%%:*}"
+    header+=" ${DLABEL[$field]} |"
+    sep+="---|"
+  done
+  echo "$header"
+  echo "$sep"
+
+  # Per-field present counters for the adoption line (only O/R columns count).
+  declare -A present_count
+  declare -A applicable_count
+  for c in "${cols[@]}"; do
+    field="${c%%:*}"; present_count[$field]=0; applicable_count[$field]=0
+  done
+
+  local f req cell row fset
+  for f in "${files[@]}"; do
+    [ -z "$f" ] && continue
+    fset="${FSET[$f]:-}"                  # cached: zero awk forks here
+    row="| \`$(comp_name "$f")\` |"
+    for c in "${cols[@]}"; do
+      field="${c%%:*}"; req="${c##*:}"
+      cell="$(unif_cell_from_set "$field" "$fset" "$req")"
+      row+=" ${cell} |"
+      if [ "$req" != "na" ]; then
+        applicable_count[$field]=$(( applicable_count[$field] + 1 ))
+        [ "$cell" = "yes" ] && present_count[$field]=$(( present_count[$field] + 1 ))
+      fi
+    done
+    echo "$row"
+  done
+
+  # Adoption line
+  echo ""
+  local adopt="Adoption:"
+  for c in "${cols[@]}"; do
+    field="${c%%:*}"; req="${c##*:}"
+    [ "$req" = "na" ] && continue
+    adopt+=" ${DLABEL[$field]}=$(unif_pct "${present_count[$field]}" "${applicable_count[$field]}")"
+    [ "$req" = "R" ] && adopt+="(floor)"
+    adopt+=" ·"
+  done
+  echo "${adopt% ·}"
+  echo ""
+}
+
+# Compute a single field's adoption across a file set (for the summary table).
+# Reads the cached field-set — no awk forks.
+adoption_for() {
+  local field="$1"; shift
+  local files=("$@") n=0 d=0 f
+  for f in "${files[@]}"; do
+    [ -z "$f" ] && continue
+    d=$((d + 1))
+    unif_set_has "$field" "${FSET[$f]:-}" && n=$((n + 1))
+  done
+  unif_pct "$n" "$d"
+}
+
+# ─── Generate the document ────────────────────────────────────────────────────
+generate() {
+  cat <<EOF
+# Uniformity coverage matrix — generated
+
+Generated: ${TS} by \`bin/li-uniformity\`. **Do not hand-edit** — regenerate
+from frontmatter. Contract: [uniformity-contract.md](../concepts/uniformity-contract.md).
+
+This is the living dashboard for uniformity-as-contract. The FLOOR (D14
+necessity on workflow_root skills + block-hooks) is mechanically enforced by
+\`tests/shape/uniformity-coverage.sh\`; everything else here is **tracked, not
+mandated**. Cells: \`yes\` = field present · \`—\` = absent (optional) ·
+\`MISS\` = absent on a FLOOR-required cell (CI-red until backfilled) · \`n/a\` =
+not applicable for this kind (see contract for the per-kind reasons).
+
+## Per-kind adoption summary (D14 necessity — the floor dimension)
+
+| Kind | Count | necessity adoption | gap_if_skipped | navigation |
+|---|---|---|---|---|
+| workflow_root skills | ${#WR[@]} | $(adoption_for necessity "${WR[@]:-}") | $(adoption_for gap_if_skipped "${WR[@]:-}") | $(adoption_for navigation "${WR[@]:-}") |
+| regular skills | ${#REG[@]} | $(adoption_for necessity "${REG[@]:-}") | $(adoption_for gap_if_skipped "${REG[@]:-}") | $(adoption_for navigation "${REG[@]:-}") |
+| agents | ${#AGENTS[@]} | $(adoption_for necessity "${AGENTS[@]:-}") | $(adoption_for gap_if_skipped "${AGENTS[@]:-}") | n/a |
+| block-hooks | ${#HBLOCK[@]} | $(adoption_for necessity "${HBLOCK[@]:-}") | $(adoption_for gap_if_skipped "${HBLOCK[@]:-}") | n/a |
+| warn-hooks | ${#HWARN[@]} | $(adoption_for necessity "${HWARN[@]:-}") | $(adoption_for gap_if_skipped "${HWARN[@]:-}") | n/a |
+| lifecycle-hooks | ${#HLIFE[@]} | $(adoption_for necessity "${HLIFE[@]:-}") | $(adoption_for gap_if_skipped "${HLIFE[@]:-}") | n/a |
+| packs | ${#PACKS[@]} | $(adoption_for necessity "${PACKS[@]:-}") | n/a | $(adoption_for navigation "${PACKS[@]:-}") |
+
+> The two floor rows are **workflow_root skills** and **block-hooks** — their
+> \`necessity adoption\` must reach 100% for CI to pass. The other rows are the
+> tracked long tail; low % there is expected and is not a CI failure.
+
+## Matrix by kind
+
+EOF
+
+  [ "${#WR[@]}"     -gt 0 ] && emit_section "Workflow-root skills" COLS_SKILL_WR  "${WR[@]}"
+  [ "${#REG[@]}"    -gt 0 ] && emit_section "Regular skills"       COLS_SKILL_REG "${REG[@]}"
+  [ "${#AGENTS[@]}" -gt 0 ] && emit_section "Agents"               COLS_AGENT     "${AGENTS[@]}"
+  [ "${#HBLOCK[@]}" -gt 0 ] && emit_section "Block-hooks"          COLS_HOOK_BLOCK "${HBLOCK[@]}"
+  [ "${#HWARN[@]}"  -gt 0 ] && emit_section "Warn-hooks"           COLS_HOOK_WARN "${HWARN[@]}"
+  [ "${#HLIFE[@]}"  -gt 0 ] && emit_section "Lifecycle-hooks"      COLS_HOOK_WARN "${HLIFE[@]}"
+  [ "${#PACKS[@]}"  -gt 0 ] && emit_section "Packs"                COLS_PACK      "${PACKS[@]}"
+
+  cat <<EOF
+---
+
+Regenerate: \`bin/li-uniformity\`. Check-only (CI): \`bin/li-uniformity --check\`.
+Floor gate: \`bash tests/shape/uniformity-coverage.sh\`.
+EOF
+}
+
+# ─── --check / --stdout / write ───────────────────────────────────────────────
+if [ "$CHECK" -eq 1 ]; then
+  # Pin the timestamp to the existing file's so only content diffs matter.
+  if [ -f "$OUT" ]; then
+    EXIST_TS=$(grep -m1 -oE 'Generated: [^ ]+' "$OUT" 2>/dev/null | awk '{print $2}')
+    [ -n "$EXIST_TS" ] && TS="$EXIST_TS"
+  fi
+  NEW=$(generate)
+  if [ -f "$OUT" ] && diff -q <(printf '%s\n' "$NEW") "$OUT" >/dev/null 2>&1; then
+    echo "li-uniformity --check: clean (matrix up to date)"
+    exit 0
+  else
+    echo "li-uniformity --check: DIFF (matrix is stale; run bin/li-uniformity)"
+    [ -f "$OUT" ] && diff "$OUT" <(printf '%s\n' "$NEW") || true
+    exit 1
+  fi
+fi
+
+if [ "$STDOUT" -eq 1 ]; then
+  generate
+  exit 0
+fi
+
+mkdir -p "$(dirname "$OUT")" 2>/dev/null
+generate > "$OUT"
+echo "wrote $OUT"
+echo ""
+echo "li-uniformity: complete"

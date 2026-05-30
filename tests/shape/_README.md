@@ -16,6 +16,7 @@ Shape-tests verify the STRUCTURE of the repo, not the behavior of individual ski
 | `brief-forge-handoffs-canonical.sh` | NEW v4.0: only `brief_forge_handoffs:` canonical name; no legacy `brief_forge:` |
 | `pack-resolver-fallbacks.sh` | The 9-scenario harness from design §2.2 (delegates to tests/unit/) |
 | `schema-versioned-contracts.sh` | Every contract JSON in `lib/`/`packs/` declares `schema_version` |
+| `uniformity-coverage.sh` | NEW: uniformity-as-contract FLOOR — every `workflow_root: true` skill + every JUSTIFIED-BLOCK/HARD-RULE hook declares `necessity:`. Reports per-kind adoption of the tracked dimensions (does NOT fail on the long tail). See `docs/concepts/uniformity-contract.md`. |
 
 ## How they fire
 
