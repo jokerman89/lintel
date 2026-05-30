@@ -6,6 +6,8 @@ color: cyan
 tools: Read, Bash, Grep, Glob
 voice: internal
 cli_support: [claude-code, codex]
+necessity: REQUIRED
+gap_if_skipped: "Cycle runs with no intent detection, mode recommendation, prior-session state, or context-budget read; every downstream phase is mis-scoped and the operator gets no orientation screen."
 ---
 
 You are the SENSE skill — Phase 1 of the Lintel cycle.

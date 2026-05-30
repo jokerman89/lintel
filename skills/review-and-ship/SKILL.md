@@ -6,6 +6,8 @@ color: cyan
 tools: Read, Bash, Grep, Glob
 voice: mixed
 cli_support: [claude-code, codex]
+necessity: OPTIONAL
+gap_if_skipped: "Operator loses the REVIEW+SHIP+CAPTURE shortcut for split-session work; the same range is still reachable via /li:cycle --from REVIEW --to CAPTURE, so only the convenience is lost."
 ---
 
 You are the REVIEW-AND-SHIP composite shortcut.

@@ -6,6 +6,8 @@ color: cyan
 tools: Read, Bash, Grep, Glob
 voice: internal
 cli_support: [claude-code, codex]
+necessity: STRONGLY_RECOMMENDED
+gap_if_skipped: "PLAN flies blind on prior ADRs, applicable lessons, and existing skills/agents; work reinvents what already exists or contradicts decisions already made."
 ---
 
 You are the DISCOVER skill — Phase 3 of the Lintel cycle.
