@@ -2,6 +2,64 @@
 
 All notable changes to this repo are tracked here. Format is loose — date headings + bulleted changes. Major behavior changes to the canonical instructions are also logged in `scaffolding/EVOLUTION-LOG.md` (which travels with each scaffolded repo).
 
+## 2026-05-30 — v4.1.0 — TA (tech-architecture) module
+
+**First engineering-domain module of v4.x. The pattern that the next four (DA, SC, DH, TQ) follow.**
+
+Engineering modules ship one at a time per design doc §5.2. TA goes first because architectural decisions constrain everything downstream in a full engineering pass.
+
+### Engineering modules pattern (shared across v4.1-v4.5)
+
+`docs/concepts/engineering-modules.md` — canonical reference for the pattern:
+- Three granularities per module: `full` (multi-phase loop with checkpoints), `loop` (one iteration), `single --action <name>` (targeted op)
+- Module contract: `workflow_root: true` + navigation block + brief_forge declaration + domain block with checkpoints/recovery/continuation/raise_help
+- 6-dimensional scoring rubric per module (mirrors frontend-design-review pattern)
+- 2-5 warn-only hooks per module
+- Profile preferences under `engineering.<domain>.*`
+- Module-color convention: TA amber, DA blue, SC red, DH purple, TQ green
+
+### TA module shipped
+
+- `skills/ta/SKILL.md` — workflow_root module skill with 5 checkpoints + 6-dim rubric
+- 7 sub-skills (L-001 dispatch contracts):
+  - `ta-api-design` (APIDesigner)
+  - `ta-dependency-graph` (Explorer + Architect)
+  - `ta-complexity-audit` (Architect + CodeReviewer)
+  - `ta-boundary-review` (BackendArchitect + Architect)
+  - `ta-scaling-plan` (CapacityPlanner + BackendArchitect)
+  - `ta-contract-collision` (APIDesigner + Architect)
+  - `ta-quality-attributes` (SystemArchitect + Architect)
+- 2 new agents:
+  - `agents/engineering/SystemArchitect.md` — system-of-systems thinking, NFR specs, cross-system invariants
+  - `agents/engineering/CapacityPlanner.md` — capacity model + bottleneck identification + cost projection
+- 3 warn-only hooks:
+  - `hooks/shared/ta-arch-drift-warn/` — pre-edit on ADR-claimed files
+  - `hooks/shared/ta-contract-collision-warn/` — pre-edit on interface files with consumers
+  - `hooks/shared/ta-complexity-budget-warn/` — pre-commit on over-budget files
+- Profile preferences under `engineering.tech_architecture.*` (api_style, versioning, complexity budgets, require_adr_on, deprecation_window_days)
+- `docs/concepts/ta-module.md` — TA-specific reference + checkpoint pass-criteria + raise-help triggers + scoring rubric
+
+### L-002 inventory result
+
+5 of 7 sub-skills dispatch to existing agents (Architect, BackendArchitect, APIDesigner, Explorer, CodeReviewer). Only 2 new agents (SystemArchitect, CapacityPlanner) for genuinely new capability.
+
+### Tests added
+
+- `tests/shape/ta-module-contract.sh` — verifies workflow_root + navigation + domain block + 7 sub-skills + 2 agents + 3 hooks present
+- `tests/unit/ta-routing.sh` — 8 scenarios: granularities, sub-skill dispatch, checkpoints, raise-help triggers, hook integration, scoring rubric, profile prefs
+
+### What's next
+
+Per design doc §5.2 Phase 4: 4 modules remain.
+- **v4.2 DA** — data-architecture (schema, migrations, retention)
+- **v4.3 SC** — security-compliance (SDL, threat models, secret management)
+- **v4.4 DH** — devops-hosting (deployment patterns, observability, cost)
+- **v4.5 TQ** — testing-qa (critical-path coverage, perf budgets, contract tests)
+
+Plus a future `/li:full-engineering-pass` composition skill that runs all 5 in DAG order (TA → DA‖SC → DH → TQ).
+
+---
+
 ## 2026-05-29 — v4.0.0 (SHIPPED)
 
 **Lintel v4.0: harness with packs + orientator + Brief Forge + generated wiki. CAIP-SE as one pack among many.**
