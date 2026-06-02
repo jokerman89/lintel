@@ -2,6 +2,62 @@
 
 All notable changes to this repo are tracked here. Format is loose — date headings + bulleted changes. Major behavior changes to the canonical instructions are also logged in `scaffolding/EVOLUTION-LOG.md` (which travels with each scaffolded repo).
 
+## 2026-06-02 — v4.4.0 — DH (devops-hosting) module
+
+**Fourth engineering-domain module of v4.x.** Follows the engineering-modules pattern locked in v4.1. Purely additive on v4.3.
+
+### Module + sub-skills shipped
+
+- `skills/dh/SKILL.md` — workflow_root, 5 checkpoints (deployment_plan_locked, observability_specified, slos_defined, cost_projected, on_call_ready), 6-dim scoring rubric, 3 raise-help triggers
+- 7 sub-skills (L-001 dispatch contracts):
+  - `dh-deployment-plan` (ReleaseEngineer + DeploymentEngineer)
+  - `dh-observability-spec` (ObservabilityArchitect + Architect)
+  - `dh-sli-slo-spec` (ObservabilityArchitect + SystemArchitect)
+  - `dh-cost-projection` (CostAnalyzer + CapacityPlanner)
+  - `dh-rollback-strategy` (ReleaseEngineer + SecurityAuditor)
+  - `dh-capacity-headroom` (CapacityPlanner + LatencyAnalyzer)
+  - `dh-on-call-playbook` (ReleaseEngineer + SecurityAuditor)
+
+### Agents (L-002: 5 of 7 reuse existing)
+
+- 5 sub-skills dispatch to existing agents: ReleaseEngineer, CostAnalyzer, LatencyAnalyzer, CapacityPlanner (from TA), SystemArchitect (from TA), SecurityAuditor, Architect
+- 2 new agents:
+  - `agents/engineering/DeploymentEngineer.md` — deployment pattern reasoning (blue-green/canary/rolling), traffic-cutover stages, feature-flag rollout strategy
+  - `agents/engineering/ObservabilityArchitect.md` — signals design (metrics RED+USE, traces, structured logs), SLI definitions tied to measurable queries
+
+### 3 warn-only hooks (using unified `audit_log` from `bin/_audit.sh`)
+
+- `hooks/shared/dh-deploy-without-rollback-warn` — pre-commit on deploy/IaC without rollback declaration
+- `hooks/shared/dh-observability-gap-warn` — pre-edit on service entry-points lacking metric/trace/log markers
+- `hooks/shared/dh-cost-budget-warn` — pre-commit on IaC with cost-increasing patterns (SKU upsizing, replica increases, premium storage, always-on additions)
+
+### Profile preferences
+
+`~/.lintel/profile.yaml` `engineering.devops_hosting.*`:
+  cloud (azure | aws | gcp | oci | on-prem)
+  deployment_pattern (blue-green | canary | rolling)
+  observability_stack (app-insights | datadog | grafana-stack | new-relic | mixed)
+  error_budget_window_days (default 30)
+  cost_budget_monthly_usd_threshold (default 10000)
+
+### Tests added
+
+- `tests/shape/dh-module-contract.sh` — engineering-module contract + v4.1+ conventions
+- `tests/unit/dh-routing.sh` — 10 scenarios including L-002 reuse verification
+
+### Concept doc
+
+- `docs/concepts/dh-module.md` — DH-specific reference + composition placement (third stage after TA + DA‖SC)
+
+### What's next
+
+1 module remains:
+- **v4.5 TQ** — testing-qa (critical-path coverage, perf budgets, contract tests)
+
+Plus future `/li:full-engineering-pass` composition skill running all 5 modules in DAG order (TA → DA‖SC → DH → TQ).
+
+---
+
 ## 2026-05-31 — v4.3.0 — SC (security-compliance) module
 
 **Third engineering-domain module of v4.x.** Follows the engineering-modules pattern locked in v4.1. Purely additive on v4.2.
