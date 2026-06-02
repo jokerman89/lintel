@@ -2,6 +2,75 @@
 
 All notable changes to this repo are tracked here. Format is loose — date headings + bulleted changes. Major behavior changes to the canonical instructions are also logged in `scaffolding/EVOLUTION-LOG.md` (which travels with each scaffolded repo).
 
+## 2026-06-02 — v4.5.0 — TQ (testing-qa) module — FINAL engineering-domain module
+
+**Final engineering-domain module of v4.x.** With TQ shipping, all 5 modules per design doc §3 are complete: TA, DA, SC, DH, TQ.
+
+### Module + sub-skills shipped
+
+- `skills/tq/SKILL.md` — workflow_root, 5 checkpoints (coverage_targets_met, perf_budgets_locked, contract_tests_complete, regression_suite_curated, chaos_scenarios_documented), 6-dim scoring rubric, 3 raise-help triggers
+- 7 sub-skills (L-001 dispatch contracts):
+  - `tq-coverage-audit` (TestRunner + Architect)
+  - `tq-perf-budget-spec` (LatencyAnalyzer + PerfBudgetEnforcer)
+  - `tq-contract-test-design` (APIDesigner + ContractTestArchitect)
+  - `tq-regression-suite` (RegressionDetective + TestRunner)
+  - `tq-chaos-plan` (SecurityAuditor + SystemArchitect)
+  - `tq-flaky-quarantine` (TestRunner + RegressionDetective)
+  - `tq-test-pyramid-review` (Architect + TestRunner)
+
+### Agents (L-002: 5 of 7 reuse existing)
+
+- 5 sub-skills dispatch to existing agents: TestRunner, RegressionDetective, LatencyAnalyzer, APIDesigner, SecurityAuditor, SystemArchitect (TA), Architect
+- 2 new agents:
+  - `agents/engineering/PerfBudgetEnforcer.md` — perf budget definition + regression detection thresholds + enforcement mode
+  - `agents/engineering/ContractTestArchitect.md` — consumer-driven contract test design + version compatibility matrix
+
+### 3 warn-only hooks (using unified `audit_log` from `bin/_audit.sh`)
+
+- `hooks/shared/tq-coverage-drop-warn` — pre-commit when coverage drops below threshold
+- `hooks/shared/tq-perf-regression-warn` — pre-commit on edits to perf-budget-bound paths
+- `hooks/shared/tq-contract-break-warn` — pre-commit on provider edits without paired contract-test update
+
+### Profile preferences
+
+`~/.lintel/profile.yaml` `engineering.testing_qa.*`:
+  coverage_target (default 80)
+  critical_path_coverage (default 100)
+  perf_budget_p95_ms (default 200)
+  contract_test_framework (pact | consumer-driven-internal | none)
+  chaos_active (default true)
+  flaky_quarantine_threshold (default 3)
+
+### Tests added
+
+- `tests/shape/tq-module-contract.sh` — module contract + v4.1+ conventions
+- `tests/unit/tq-routing.sh` — 10 scenarios including final-module marker verification
+
+### Concept doc
+
+- `docs/concepts/tq-module.md` — TQ reference + composition placement (final stage after DH)
+
+### v4.x engineering-depth COMPLETE
+
+All 5 engineering-domain modules shipped per design doc §3:
+| Module | Version | Color | New agents | Existing agents reused |
+|---|---|---|---|---|
+| TA — tech-architecture | v4.1 | amber | SystemArchitect, CapacityPlanner | 5 of 7 |
+| DA — data-architecture | v4.2 | blue | SchemaArchitect, MigrationPlanner | 5 of 7 |
+| SC — security-compliance | v4.3 | red | ComplianceOfficer | 6 of 7 |
+| DH — devops-hosting | v4.4 | purple | DeploymentEngineer, ObservabilityArchitect | 5 of 7 |
+| TQ — testing-qa | v4.5 | green | PerfBudgetEnforcer, ContractTestArchitect | 5 of 7 |
+
+Cumulative L-002 result: 26 of 35 sub-skills reuse existing agents (74%). Only 9 new agents across 5 modules.
+
+### What's next
+
+**1 final v4.x deliverable remains:**
+- `/li:full-engineering-pass` composition skill — runs all 5 modules in DAG order (TA → DA‖SC → DH → TQ)
+
+After that, v4.x is feature-complete.
+---
+
 ## 2026-06-02 — v4.4.0 — DH (devops-hosting) module
 
 **Fourth engineering-domain module of v4.x.** Follows the engineering-modules pattern locked in v4.1. Purely additive on v4.3.
@@ -55,6 +124,7 @@ All notable changes to this repo are tracked here. Format is loose — date head
 - **v4.5 TQ** — testing-qa (critical-path coverage, perf budgets, contract tests)
 
 Plus future `/li:full-engineering-pass` composition skill running all 5 modules in DAG order (TA → DA‖SC → DH → TQ).
+---
 
 ---
 
