@@ -4,10 +4,10 @@ Auto-generated från frontmatter på push till main.
 Regenerated av `.github/workflows/catalog.yml` per push när `skills/**/SKILL.md` ändras.
 Hand-edits skrivs över — edit frontmatter i source SKILL.md istället.
 
-Total skills: 175
-Generated: 2026-06-02T09:21:17Z
+Total skills: 183
+Generated: 2026-06-02T09:24:40Z
 
-## foundation layer (128 skills)
+## foundation layer (136 skills)
 
 | Skill | Description |
 |---|---|
@@ -53,6 +53,14 @@ Generated: 2026-06-02T09:21:17Z
 | `/li:design-review` | 6-pillar visual review of frontend changes — screenshot via /browse, scored findings. |
 | `/li:design-shotgun` | Parallel design exploration — spawn N variants of a seed HTML, present side-by-side. |
 | `/li:devex-review` | Review the built developer experience — scripts, onboarding, error messages, time-to-hello-world. |
+| `/li:dh-capacity-headroom` | DH sub-skill — headroom margins + alert thresholds + scaling triggers. Dispatches to CapacityPlanner + LatencyAnalyzer |
+| `/li:dh-cost-projection` | DH sub-skill — per-component cost projection + anomaly detection thresholds. Dispatches to CostAnalyzer + CapacityPlan |
+| `/li:dh-deployment-plan` | DH sub-skill — deployment pattern + traffic cutover + feature-flag strategy. Dispatches to ReleaseEngineer + Deploymen |
+| `/li:dh-observability-spec` | DH sub-skill — metrics + traces + logs + dashboards per component. Dispatches to ObservabilityArchitect (NEW) + Archit |
+| `/li:dh-on-call-playbook` | DH sub-skill — per-failure-mode runbook + escalation matrix. Dispatches to ReleaseEngineer + SecurityAuditor agents. |
+| `/li:dh-rollback-strategy` | DH sub-skill — rollback mechanics + blast-radius limiting + hot-swap path. Dispatches to ReleaseEngineer + SecurityAud |
+| `/li:dh-sli-slo-spec` | DH sub-skill — SLI definitions + SLO budgets + error budget policy. Dispatches to ObservabilityArchitect (NEW) + Syste |
+| `/li:dh` | Phase 4 v4.4 — devops-hosting module. Three granularities (full / loop / single). Sub-skills dispatch to existing ops  |
 | `/li:discover` | Phase 3 of Lintel cycle — map codebase, surface ADRs, apply lessons, identify reusable patterns + agents/skills releva |
 | `/li:doctor` | Cross-CLI health check — verifies which CLIs are installed, plugin install status, Lintel version, and surfaces drift. |
 | `/li:document-generate` | Generate documentation from code — engineering reference, customer guides, or onboarding tutorials. |
