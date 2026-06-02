@@ -1,6 +1,6 @@
 # Uniformity coverage matrix — generated
 
-Generated: 2026-05-30T17:34:35Z by `bin/li-uniformity`. **Do not hand-edit** — regenerate
+Generated: 2026-06-02T13:34:59Z by `bin/li-uniformity`. **Do not hand-edit** — regenerate
 from frontmatter. Contract: [uniformity-contract.md](../concepts/uniformity-contract.md).
 
 This is the living dashboard for uniformity-as-contract. The FLOOR (D14
@@ -14,11 +14,11 @@ not applicable for this kind (see contract for the per-kind reasons).
 
 | Kind | Count | necessity adoption | gap_if_skipped | navigation |
 |---|---|---|---|---|
-| workflow_root skills | 3 | 100% | 100% | 100% |
-| regular skills | 158 | 6% | 6% | 0% |
-| agents | 80 | 0% | 0% | n/a |
+| workflow_root skills | 8 | 100% | 100% | 100% |
+| regular skills | 186 | 5% | 5% | 0% |
+| agents | 87 | 0% | 0% | n/a |
 | block-hooks | 2 | 100% | 100% | n/a |
-| warn-hooks | 18 | 11% | 11% | n/a |
+| warn-hooks | 30 | 6% | 6% | n/a |
 | lifecycle-hooks | 2 | 0% | 0% | n/a |
 | packs | 3 | 0% | n/a | 0% |
 
@@ -28,17 +28,22 @@ not applicable for this kind (see contract for the per-kind reasons).
 
 ## Matrix by kind
 
-### Workflow-root skills (n=3)
+### Workflow-root skills (n=8)
 
 | Component | D14 necessity | D12 gap | D4 nav | D9 brief-forge | D7 pack | D13 obs | D6 recovery | D5 checkpoints |
 |---|---|---|---|---|---|---|---|---|
 | `cycle` | yes | yes | yes | — | — | — | — | — |
+| `da` | yes | yes | yes | — | — | — | — | — |
+| `dh` | yes | yes | yes | — | — | — | — | — |
+| `full-engineering-pass` | yes | yes | yes | — | — | — | — | — |
 | `plan` | yes | yes | yes | — | — | — | — | — |
+| `sc` | yes | yes | yes | — | — | — | — | — |
 | `ta` | yes | yes | yes | — | — | — | — | — |
+| `tq` | yes | yes | yes | — | — | — | — | — |
 
 Adoption: D14 necessity=100%(floor) · D12 gap=100%(floor) · D4 nav=100%(floor) · D9 brief-forge=0% · D7 pack=0% · D13 obs=0% · D6 recovery=0% · D5 checkpoints=0%
 
-### Regular skills (n=158)
+### Regular skills (n=186)
 
 | Component | D14 necessity | D12 gap | D4 nav | D9 brief-forge | D7 pack | D13 obs | D6 recovery | D5 checkpoints |
 |---|---|---|---|---|---|---|---|---|
@@ -79,6 +84,13 @@ Adoption: D14 necessity=100%(floor) · D12 gap=100%(floor) · D4 nav=100%(floor)
 | `context-warm-sessions` | — | — | — | — | — | — | — | — |
 | `context-warm` | — | — | — | — | — | — | — | — |
 | `context-warmup` | — | — | — | — | — | — | — | — |
+| `da-analytics-readiness` | — | — | — | — | — | — | — | — |
+| `da-data-contract-collision` | — | — | — | — | — | — | — | — |
+| `da-migration-plan` | — | — | — | — | — | — | — | — |
+| `da-query-pattern-audit` | — | — | — | — | — | — | — | — |
+| `da-retention-policy` | — | — | — | — | — | — | — | — |
+| `da-schema-design` | — | — | — | — | — | — | — | — |
+| `da-sharding-plan` | — | — | — | — | — | — | — | — |
 | `define` | yes | yes | — | — | — | — | — | — |
 | `demo-deliverable-gen` | — | — | — | — | — | — | — | — |
 | `design-consultation` | — | — | — | — | — | — | — | — |
@@ -86,6 +98,13 @@ Adoption: D14 necessity=100%(floor) · D12 gap=100%(floor) · D4 nav=100%(floor)
 | `design-review` | — | — | — | — | — | — | — | — |
 | `design-shotgun` | — | — | — | — | — | — | — | — |
 | `devex-review` | — | — | — | — | — | — | — | — |
+| `dh-capacity-headroom` | — | — | — | — | — | — | — | — |
+| `dh-cost-projection` | — | — | — | — | — | — | — | — |
+| `dh-deployment-plan` | — | — | — | — | — | — | — | — |
+| `dh-observability-spec` | — | — | — | — | — | — | — | — |
+| `dh-on-call-playbook` | — | — | — | — | — | — | — | — |
+| `dh-rollback-strategy` | — | — | — | — | — | — | — | — |
+| `dh-sli-slo-spec` | — | — | — | — | — | — | — | — |
 | `discover` | yes | yes | — | — | — | — | — | — |
 | `doctor` | — | — | — | — | — | — | — | — |
 | `document-generate` | — | — | — | — | — | — | — | — |
@@ -177,6 +196,13 @@ Adoption: D14 necessity=100%(floor) · D12 gap=100%(floor) · D4 nav=100%(floor)
 | `roles-list` | — | — | — | — | — | — | — | — |
 | `safe-deploy-ring` | — | — | — | — | — | — | — | — |
 | `safe-install` | — | — | — | — | — | — | — | — |
+| `sc-audit-path` | — | — | — | — | — | — | — | — |
+| `sc-auth-flow` | — | — | — | — | — | — | — | — |
+| `sc-compliance-evidence` | — | — | — | — | — | — | — | — |
+| `sc-dependency-security` | — | — | — | — | — | — | — | — |
+| `sc-incident-runbook` | — | — | — | — | — | — | — | — |
+| `sc-secret-management` | — | — | — | — | — | — | — | — |
+| `sc-threat-model` | — | — | — | — | — | — | — | — |
 | `scaffold-engagement-demo` | — | — | — | — | — | — | — | — |
 | `scaffold-internal-tool` | — | — | — | — | — | — | — | — |
 | `scaffold-mvp` | — | — | — | — | — | — | — | — |
@@ -197,13 +223,20 @@ Adoption: D14 necessity=100%(floor) · D12 gap=100%(floor) · D4 nav=100%(floor)
 | `ta-dependency-graph` | — | — | — | — | — | — | — | — |
 | `ta-quality-attributes` | — | — | — | — | — | — | — | — |
 | `ta-scaling-plan` | — | — | — | — | — | — | — | — |
+| `tq-chaos-plan` | — | — | — | — | — | — | — | — |
+| `tq-contract-test-design` | — | — | — | — | — | — | — | — |
+| `tq-coverage-audit` | — | — | — | — | — | — | — | — |
+| `tq-flaky-quarantine` | — | — | — | — | — | — | — | — |
+| `tq-perf-budget-spec` | — | — | — | — | — | — | — | — |
+| `tq-regression-suite` | — | — | — | — | — | — | — | — |
+| `tq-test-pyramid-review` | — | — | — | — | — | — | — | — |
 | `uniformity` | — | — | — | — | — | — | — | — |
 | `usage-log` | — | — | — | — | — | — | — | — |
 | `v4-migrate` | — | — | — | — | — | — | — | — |
 
-Adoption: D14 necessity=6% · D12 gap=6% · D4 nav=0% · D9 brief-forge=0% · D7 pack=0% · D13 obs=0% · D6 recovery=0% · D5 checkpoints=0%
+Adoption: D14 necessity=5% · D12 gap=5% · D4 nav=0% · D9 brief-forge=0% · D7 pack=0% · D13 obs=0% · D6 recovery=0% · D5 checkpoints=0%
 
-### Agents (n=80)
+### Agents (n=87)
 
 | Component | D14 necessity | D12 gap | D4 nav | D9 brief-forge | D7 pack | D13 obs | D11 delegate |
 |---|---|---|---|---|---|---|---|
@@ -240,15 +273,20 @@ Adoption: D14 necessity=6% · D12 gap=6% · D4 nav=0% · D9 brief-forge=0% · D7
 | `ChangelogMaintainer` | — | — | n/a | — | — | — | n/a |
 | `CodeReviewer` | — | — | n/a | — | — | — | n/a |
 | `ContextBudgetAdvisor` | — | — | n/a | — | — | — | n/a |
+| `ContractTestArchitect` | — | — | n/a | — | — | — | n/a |
 | `CostAnalyzer` | — | — | n/a | — | — | — | n/a |
 | `DataPipelineDesigner` | — | — | n/a | — | — | — | n/a |
 | `DatabaseDesigner` | — | — | n/a | — | — | — | n/a |
 | `DebugForensics` | — | — | n/a | — | — | — | n/a |
+| `DeploymentEngineer` | — | — | n/a | — | — | — | n/a |
 | `DocWriter` | — | — | n/a | — | — | — | n/a |
 | `Explorer` | — | — | n/a | — | — | — | n/a |
 | `FrontendBuilder` | — | — | n/a | — | — | — | n/a |
 | `LatencyAnalyzer` | — | — | n/a | — | — | — | n/a |
+| `MigrationPlanner` | — | — | n/a | — | — | — | n/a |
 | `Migrator` | — | — | n/a | — | — | — | n/a |
+| `ObservabilityArchitect` | — | — | n/a | — | — | — | n/a |
+| `PerfBudgetEnforcer` | — | — | n/a | — | — | — | n/a |
 | `Planner` | — | — | n/a | — | — | — | n/a |
 | `ReadOnly` | — | — | n/a | — | — | — | n/a |
 | `Refactorer` | — | — | n/a | — | — | — | n/a |
@@ -256,6 +294,7 @@ Adoption: D14 necessity=6% · D12 gap=6% · D4 nav=0% · D9 brief-forge=0% · D7
 | `ReleaseEngineer` | — | — | n/a | — | — | — | n/a |
 | `ResearchSynthesizer` | — | — | n/a | — | — | — | n/a |
 | `SanityChecker` | — | — | n/a | — | — | — | n/a |
+| `SchemaArchitect` | — | — | n/a | — | — | — | n/a |
 | `SystemArchitect` | — | — | n/a | — | — | — | n/a |
 | `TestRunner` | — | — | n/a | — | — | — | n/a |
 | `DesignSystemAuditor` | — | — | n/a | — | — | — | n/a |
@@ -278,6 +317,7 @@ Adoption: D14 necessity=6% · D12 gap=6% · D4 nav=0% · D9 brief-forge=0% · D7
 | `M365CopilotAdvisor` | — | — | n/a | — | — | — | n/a |
 | `OneCSAuditor` | — | — | n/a | — | — | — | n/a |
 | `ProvenanceVerifier` | — | — | n/a | — | — | — | n/a |
+| `ComplianceOfficer` | — | — | n/a | — | — | — | n/a |
 | `DependencyAuditor` | — | — | n/a | — | — | — | n/a |
 | `JWTSecurityReviewer` | — | — | n/a | — | — | — | n/a |
 | `OAuthFlowReviewer` | — | — | n/a | — | — | — | n/a |
@@ -299,12 +339,18 @@ Adoption: D14 necessity=0% · D12 gap=0% · D9 brief-forge=0% · D7 pack=0% · D
 
 Adoption: D14 necessity=100%(floor) · D12 gap=100%(floor) · D7 pack=0% · D13 obs=0%
 
-### Warn-hooks (n=18)
+### Warn-hooks (n=30)
 
 | Component | D14 necessity | D12 gap | D4 nav | D9 brief-forge | D7 pack | D13 obs | D6 recovery |
 |---|---|---|---|---|---|---|---|
 | `brand-staleness-warn` | — | — | n/a | n/a | — | — | n/a |
 | `context-bloat-warn` | — | — | n/a | n/a | — | — | n/a |
+| `da-migration-irreversible-warn` | — | — | n/a | n/a | — | — | n/a |
+| `da-retention-violation-warn` | — | — | n/a | n/a | — | — | n/a |
+| `da-schema-drift-warn` | — | — | n/a | n/a | — | — | n/a |
+| `dh-cost-budget-warn` | — | — | n/a | n/a | — | — | n/a |
+| `dh-deploy-without-rollback-warn` | — | — | n/a | n/a | — | — | n/a |
+| `dh-observability-gap-warn` | — | — | n/a | n/a | — | — | n/a |
 | `frontend-design-surface` | — | — | n/a | n/a | — | — | n/a |
 | `frozen-zone-warn` | — | — | n/a | n/a | — | — | n/a |
 | `job-stale-warn` | — | — | n/a | n/a | — | — | n/a |
@@ -317,12 +363,18 @@ Adoption: D14 necessity=100%(floor) · D12 gap=100%(floor) · D7 pack=0% · D13 
 | `no-secrets-in-edit` | — | — | n/a | n/a | — | — | n/a |
 | `no-trailblazer-without-corpus` | — | — | n/a | n/a | — | — | n/a |
 | `non-first-party-warn` | — | — | n/a | n/a | — | — | n/a |
+| `sc-auth-bypass-warn` | — | — | n/a | n/a | — | — | n/a |
+| `sc-compliance-gap-warn` | — | — | n/a | n/a | — | — | n/a |
+| `sc-threat-coverage-warn` | — | — | n/a | n/a | — | — | n/a |
 | `stale-calibration-warn` | — | — | n/a | n/a | — | — | n/a |
 | `ta-arch-drift-warn` | — | — | n/a | n/a | — | — | n/a |
 | `ta-complexity-budget-warn` | — | — | n/a | n/a | — | — | n/a |
 | `ta-contract-collision-warn` | — | — | n/a | n/a | — | — | n/a |
+| `tq-contract-break-warn` | — | — | n/a | n/a | — | — | n/a |
+| `tq-coverage-drop-warn` | — | — | n/a | n/a | — | — | n/a |
+| `tq-perf-regression-warn` | — | — | n/a | n/a | — | — | n/a |
 
-Adoption: D14 necessity=11% · D12 gap=11% · D7 pack=0% · D13 obs=0%
+Adoption: D14 necessity=6% · D12 gap=6% · D7 pack=0% · D13 obs=0%
 
 ### Lifecycle-hooks (n=2)
 
