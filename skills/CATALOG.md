@@ -4,10 +4,10 @@ Auto-generated från frontmatter på push till main.
 Regenerated av `.github/workflows/catalog.yml` per push när `skills/**/SKILL.md` ändras.
 Hand-edits skrivs över — edit frontmatter i source SKILL.md istället.
 
-Total skills: 191
-Generated: 2026-06-02T09:28:16Z
+Total skills: 192
+Generated: 2026-06-02T09:30:15Z
 
-## foundation layer (144 skills)
+## foundation layer (145 skills)
 
 | Skill | Description |
 |---|---|
@@ -65,6 +65,7 @@ Generated: 2026-06-02T09:28:16Z
 | `/li:doctor` | Cross-CLI health check — verifies which CLIs are installed, plugin install status, Lintel version, and surfaces drift. |
 | `/li:document-generate` | Generate documentation from code — engineering reference, customer guides, or onboarding tutorials. |
 | `/li:fix` | Composite shortcut for hotfix workflow — runs SENSE + BUILD + REVIEW + SHIP, skipping DEFINE/DISCOVER/PLAN/CAPTURE. Fo |
+| `/li:full-engineering-pass` | v4.6 (v4.x feature-complete) — composes all 5 engineering-domain modules in DAG order (TA → DA‖SC → DH → TQ).  |
 | `/li:gbrain-setup` | Configure gbrain semantic-index integration — initialize config, pin worktree, register sync. |
 | `/li:gbrain-sync` | Refresh the gbrain index from the current worktree — incremental or full. |
 | `/li:handoff-size-check` | Handoff-size-warning tied to 500k cap. Per v3.6 backlog 3.2 — elephant-hint och token-cap som samma mekanism från tv� |
