@@ -24,6 +24,7 @@ Durable tracker for v4.x migration windows. Each row points to a migration file 
 | profile-engineering-devops-hosting | 2026-06-02 | 2027-06-02 | none-removed | v4.4 adds `engineering.devops_hosting.*` sub-block (cloud, deployment_pattern, observability_stack, error_budget_window_days, cost_budget_monthly_usd_threshold). Defaults baked in when block absent. Additive only. |
 | tq-hooks-warn-only | 2026-06-02 | 2026-12-02 | 2027-03-02 | TQ module's 3 hooks (coverage-drop, perf-regression, contract-break) ship as warn-only in v4.5. v4.6+ may add per-pack opt-in block (contract-break is highest-confidence candidate). |
 | profile-engineering-testing-qa | 2026-06-02 | 2027-06-02 | none-removed | v4.5 adds `engineering.testing_qa.*` sub-block (coverage_target, critical_path_coverage, perf_budget_p95_ms, contract_test_framework, chaos_active, flaky_quarantine_threshold). Additive only. |
+| full-engineering-pass-graceful-degradation | 2026-06-02 | 2026-12-02 | none-removed | v4.6 composition skill gracefully skips missing modules during the v4.x stacking-rollout window (when v4.3/v4.4/v4.5 land at different times). Once all 5 modules merge to main, composition runs the full DAG. Graceful behavior stays for future partial-rollout scenarios. |
 
 ## Archived migrations
 
