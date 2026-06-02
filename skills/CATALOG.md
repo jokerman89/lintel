@@ -4,10 +4,10 @@ Auto-generated från frontmatter på push till main.
 Regenerated av `.github/workflows/catalog.yml` per push när `skills/**/SKILL.md` ändras.
 Hand-edits skrivs över — edit frontmatter i source SKILL.md istället.
 
-Total skills: 183
-Generated: 2026-06-02T09:24:40Z
+Total skills: 191
+Generated: 2026-06-02T09:28:16Z
 
-## foundation layer (136 skills)
+## foundation layer (144 skills)
 
 | Skill | Description |
 |---|---|
@@ -145,6 +145,14 @@ Generated: 2026-06-02T09:24:40Z
 | `/li:ta-quality-attributes` | TA sub-skill — non-functional requirement spec (latency, throughput, reliability, observability). Dispatches to System |
 | `/li:ta-scaling-plan` | TA sub-skill — capacity model + bottleneck identification + cost projection. Dispatches to CapacityPlanner (NEW) + Bac |
 | `/li:ta` | Phase 4 v4.1 — tech-architecture module. Three granularities (full / loop / single). Sub-skills dispatch to existing a |
+| `/li:tq-chaos-plan` | TQ sub-skill — failure injection scenarios + dependency-chaos + recovery validation. Dispatches to SecurityAuditor + S |
+| `/li:tq-contract-test-design` | TQ sub-skill — consumer-driven contract tests + schema-versioning tests. Dispatches to APIDesigner + ContractTestArchi |
+| `/li:tq-coverage-audit` | TQ sub-skill — critical-path coverage + branch coverage + mutation testing report. Dispatches to TestRunner + Architec |
+| `/li:tq-flaky-quarantine` | TQ sub-skill — flaky test detection + quarantine + remediation plan. Dispatches to TestRunner + RegressionDetective. |
+| `/li:tq-perf-budget-spec` | TQ sub-skill — per-journey perf budget + regression detection thresholds. Dispatches to LatencyAnalyzer + PerfBudgetEn |
+| `/li:tq-regression-suite` | TQ sub-skill — golden-path tests + recent-bug-fix tests curated. Dispatches to RegressionDetective + TestRunner agents |
+| `/li:tq-test-pyramid-review` | TQ sub-skill — unit/integration/e2e ratio audit + test-distribution health. Dispatches to Architect + TestRunner. |
+| `/li:tq` | Phase 4 v4.5 — testing-qa module. Three granularities (full / loop / single). Sub-skills dispatch to existing test age |
 | `/li:usage-log` | Append-only usage log för skill/agent-invocations. Wrapper-pattern per L-001 (en log, ingen per-skill duplikat). Solo-i |
 | `/li:v4-migrate` | Walks operator through v3.x → v4.0 migration — detects v3.x usage signals, recommends pack activation, optionally wr |
 
