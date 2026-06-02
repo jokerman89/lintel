@@ -18,6 +18,8 @@ Durable tracker for v4.x migration windows. Each row points to a migration file 
 | profile-engineering-block | 2026-05-30 | 2027-05-30 | none-removed | `~/.lintel/profile.yaml` gains an `engineering:` block in v4.1 (TA: tech_architecture.*; v4.2-v4.5 add other domains). Operators without the block see defaults (cyclomatic 12, cognitive 18, etc.). No removal — the block is purely additive. |
 | da-hooks-warn-only | 2026-05-30 | 2026-11-30 | 2027-02-28 | DA module's 3 hooks (schema-drift, migration-irreversible, retention-violation) ship as warn-only in v4.2. v4.3+ may add per-pack opt-in block for migration-irreversible specifically (destructive migrations are higher-risk than the others). |
 | profile-engineering-data-architecture | 2026-05-30 | 2027-05-30 | none-removed | v4.2 adds `engineering.data_architecture.*` sub-block (primary_store, migration_window, retention_default_days, schema_versioning, require_migration_review_above_rows). Defaults baked in when block absent. Additive only. |
+| sc-hooks-warn-only | 2026-05-31 | 2026-11-30 | 2027-02-28 | SC module's 3 hooks (threat-coverage, auth-bypass, compliance-gap) ship as warn-only in v4.3. v4.4+ may add per-pack opt-in block for auth-bypass specifically (high-risk auth patterns are higher-confidence than the others). |
+| profile-engineering-security-compliance | 2026-05-31 | 2027-05-31 | none-removed | v4.3 adds `engineering.security_compliance.*` sub-block (sdl_active, secret_management, threat_model_required_on, compliance_frameworks, audit_retention_days). Defaults baked in when block absent. Additive only. |
 
 ## Archived migrations
 

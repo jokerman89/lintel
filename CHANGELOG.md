@@ -2,6 +2,68 @@
 
 All notable changes to this repo are tracked here. Format is loose — date headings + bulleted changes. Major behavior changes to the canonical instructions are also logged in `scaffolding/EVOLUTION-LOG.md` (which travels with each scaffolded repo).
 
+## 2026-05-31 — v4.3.0 — SC (security-compliance) module
+
+**Third engineering-domain module of v4.x.** Follows the engineering-modules pattern locked in v4.1. Purely additive on v4.2.
+
+### L-002 record: 6 of 7 sub-skills reuse existing agents
+
+This phase had the highest L-002 reuse rate so far (vs 5 of 7 in TA + DA). The 6 existing security agents (SecurityAuditor, ThreatModelDrafter, DependencyAuditor, JWTSecurityReviewer, SBOMAuditor, PrivacyBoundaryAudit) cover threat modeling, secret management, auth review, dependency security, audit path, and incident runbook respectively. Only `sc-compliance-evidence` needs a new agent.
+
+### Module + sub-skills shipped
+
+- `skills/sc/SKILL.md` — workflow_root, 5 checkpoints (threat_model_complete, secrets_inventoried, auth_flow_locked, compliance_evidence_present, audit_path_verified), 6-dim scoring rubric, 3 raise-help triggers
+- 7 sub-skills (L-001 dispatch contracts):
+  - `sc-threat-model` (ThreatModelDrafter + SecurityAuditor)
+  - `sc-secret-management` (SecurityAuditor + SBOMAuditor)
+  - `sc-auth-flow` (JWTSecurityReviewer + SecurityAuditor)
+  - `sc-compliance-evidence` (ComplianceOfficer + Architect)
+  - `sc-audit-path` (SecurityAuditor + Architect)
+  - `sc-dependency-security` (DependencyAuditor + SBOMAuditor)
+  - `sc-incident-runbook` (SecurityAuditor + ReleaseEngineer)
+
+### 1 new agent (minimal L-002 addition)
+
+- `agents/security/ComplianceOfficer.md` — cross-framework evidence orchestration (SOC2/GDPR/HIPAA/PCI-DSS/FedRAMP/ISO27001). Maps technical + procedural controls to framework requirements; surfaces gaps + collects evidence pointers.
+
+### 3 warn-only hooks (using unified `audit_log` from `bin/_audit.sh`)
+
+- `hooks/shared/sc-threat-coverage-warn` — pre-edit on auth/data files when threat model is missing, stale (>90 days), or doesn't cover the file
+- `hooks/shared/sc-auth-bypass-warn` — pre-edit on auth-flow files detecting skip-auth flags, magic credentials, bypass routes, direct role assignments
+- `hooks/shared/sc-compliance-gap-warn` — pre-edit on regulated-data paths with stale or gap-marked evidence
+
+### Existing security hooks (reused, not duplicated)
+
+`no-secrets-in-edit`, `secret-scan-block`, `customer-data-block`, `no-production-mutation-without-auth` — already exist; SC module wires them through Brief Forge's `security` and `sdl_compliance` evaluators.
+
+### Profile preferences
+
+`~/.lintel/profile.yaml` `engineering.security_compliance.*`:
+  sdl_active: true
+  secret_management (keyvault | aws-secrets-manager | hashicorp-vault | local-encrypted)
+  threat_model_required_on: [new_external_dependency, new_data_path, new_auth_flow]
+  compliance_frameworks (default: [soc2, gdpr])
+  audit_retention_days (default: 2555 = 7 years)
+
+### Tests added
+
+- `tests/shape/sc-module-contract.sh` — engineering-module contract + v4.1+ conventions
+- `tests/unit/sc-routing.sh` — 10 scenarios including L-002 reuse rate verification
+
+### Concept doc
+
+- `docs/concepts/sc-module.md` — SC reference + composition placement (parallel with DA after TA)
+
+### What's next
+
+2 modules remain:
+- **v4.4 DH** — devops-hosting (deployment patterns, observability, cost ops)
+- **v4.5 TQ** — testing-qa (critical-path coverage, perf budgets, contract tests)
+
+Plus future `/li:full-engineering-pass` composition skill (TA → DA‖SC → DH → TQ).
+
+---
+
 ## 2026-05-30 — v4.2.0 — DA (data-architecture) module
 
 **Second engineering-domain module of v4.x.** Follows the engineering-modules pattern locked in v4.1. Purely additive on v4.1; no breaking changes.
