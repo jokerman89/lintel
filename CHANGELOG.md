@@ -2,6 +2,58 @@
 
 All notable changes to this repo are tracked here. Format is loose — date headings + bulleted changes. Major behavior changes to the canonical instructions are also logged in `scaffolding/EVOLUTION-LOG.md` (which travels with each scaffolded repo).
 
+## 2026-06-02 — v4.6.0 — full-engineering-pass composition skill — **v4.x FEATURE-COMPLETE**
+
+**Final v4.x deliverable.** Composition skill that runs all 5 engineering-domain modules in DAG order (TA → DA‖SC → DH → TQ). Single invocation produces architecture decisions + data model + security posture + ops plan + quality validation for customer engagements or major releases.
+
+### Composition shipped
+
+- `skills/full-engineering-pass/SKILL.md` — workflow_root composition skill, color cyan (distinct from module colors)
+- DAG: 4 stages (TA alone → DA + SC parallel → DH alone → TQ alone)
+- 30-dim aggregate scoring (6 dims × 5 modules)
+- Graceful degradation for partial-rollout state (skips missing modules, warns operator)
+- `--resume` from last-completed stage
+- `--skip-module <name>` for operator override
+- Brief Forge `phase_transition` envelopes between stages
+
+### Composition contract
+
+- `cap_soft: 500000` / `cap_hard: 750000` tokens (caip-se pack overrides to 750k/1000k)
+- `auto_mode_eligible: false` — operator confirms at every stage boundary
+- SHIP verdict GREEN (all modules ≥80) / YELLOW (1-2 below or missing modules) / RED (any module BLOCKED)
+
+### Tests added
+
+- `tests/shape/full-engineering-pass-contract.sh` — composition workflow_root + DAG + module refs + graceful degradation
+- `tests/unit/full-engineering-pass-dag.sh` — 10 scenarios (ordering, parallel marker, deps, graceful degradation, operator override, Brief Forge, SHIP verdict, cap, siblings, aggregate score)
+
+### Concept doc
+
+- `docs/concepts/full-engineering-pass.md` — DAG explanation + why this ordering + graceful degradation rules + aggregate scoring + resume semantics + cap reasoning + cross-module Brief Forge handoffs
+
+### v4.x feature-complete summary
+
+| Version | Ship date | Contents |
+|---|---|---|
+| v4.0 | 2026-05-29 | harness + packs + orientator + Brief Forge + wiki-gen |
+| v4.1 | 2026-05-30 | TA module (tech-architecture) |
+| v4.2 | 2026-05-30 | DA module (data-architecture) |
+| v4.3 | 2026-05-31 | SC module (security-compliance) |
+| v4.4 | 2026-06-02 | DH module (devops-hosting) |
+| v4.5 | 2026-06-02 | TQ module (testing-qa) — FINAL engineering-domain module |
+| **v4.6** | **2026-06-02** | **full-engineering-pass composition — v4.x FEATURE-COMPLETE** |
+
+Per design doc §5.2 total estimate: 17-27 CC-days for v4.0 ship + ~10-15 CC-days engineering-depth = ~30-40 CC-days for complete v4.x. Actual: shipped in 5 CC-days at much higher density than estimated.
+
+### What remains after v4.6
+
+v4.x is **feature-complete**. Remaining work is operational:
+- Pack-specific tuning (per-customer pack creation as engagements ramp)
+- Additional module sub-skills as operator needs surface
+- v5.x design decisions (not scheduled)
+
+---
+
 ## 2026-06-02 — v4.5.0 — TQ (testing-qa) module — FINAL engineering-domain module
 
 **Final engineering-domain module of v4.x.** With TQ shipping, all 5 modules per design doc §3 are complete: TA, DA, SC, DH, TQ.
