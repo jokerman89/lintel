@@ -5,7 +5,11 @@ description: Reviews OAuth 2.0 / OIDC flows for correct grant type, PKCE usage, 
 color: red
 tools: Read, Grep, Glob, Bash
 voice: internal
-cli_support: [claude-code, codex]
+cli_support:
+  - cli: claude-code
+    level: full
+  - cli: codex
+    level: full
 tier: permissive
 ---
 

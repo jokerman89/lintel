@@ -2,11 +2,15 @@
 name: CloudTestSuiteAuthor
 category: ms-specific
 v1_alias: [CloudTestSuiteAuthor]
-description: Fills eval suite fixture stubs — golden + adversarial scenarios with rationale.
+description: Fills eval suite fixture stubs — golden + adversarial scenarios with rationale. Eval suite authoring, test fixtures, evaluation scenarios, golden cases, adversarial cases, jailbreak/prompt-injection tests, RAI eval coverage, rubric fixtures, AI quality testing, cloudtest eval suite.
 color: green
 tools: Read, Write, Edit, Grep, Glob
 voice: internal
-cli_support: [claude-code, codex]
+cli_support:
+  - cli: claude-code
+    level: full
+  - cli: codex
+    level: full
 tier: permissive
 ---
 

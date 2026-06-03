@@ -5,7 +5,11 @@ description: Reviews JWT token usage — signing algorithm, validation chain, cl
 color: red
 tools: Read, Grep, Glob, Bash
 voice: internal
-cli_support: [claude-code, codex]
+cli_support:
+  - cli: claude-code
+    level: full
+  - cli: codex
+    level: full
 tier: permissive
 ---
 

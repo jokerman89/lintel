@@ -9,7 +9,9 @@ CMD="${1:-}"
 
 LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
 mkdir -p "$LINTEL_HOME/audit"
-AUDIT="$LINTEL_HOME/audit/hooks.jsonl"
+
+# Unified audit writer (hooks/shared/<name>/ → repo-root → bin/). Idempotent source.
+command -v audit_log >/dev/null 2>&1 || source "$(dirname "${BASH_SOURCE[0]}")/../../../bin/_audit.sh"
 
 if ! echo "$CMD" | grep -qE '^git\s+(commit|push)\b'; then
   exit 0
@@ -18,9 +20,7 @@ fi
 # Override path
 if [ "${LINTEL_OVERRIDE_CUSTOMER_DATA:-}" = "1" ]; then
   reason="${LINTEL_OVERRIDE_REASON:-no-reason-given}"
-  ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-  printf '{"hook":"customer-data-block","tier":"OVERRIDDEN","ts":"%s","reason":"%s","blocked":false}\n' \
-    "$ts" "$reason" >> "$AUDIT"
+  audit_log "hooks" "customer_data_block" "hook=customer-data-block" "tier=OVERRIDDEN" "override=true" "reason=$reason" "blocked=false"
   echo "INFO [Lintel hook]: customer-data-block OVERRIDDEN (reason: $reason). Audit-logged."
   exit 0
 fi
@@ -35,10 +35,8 @@ echo "$STAGED" | grep -qE '\b[0-9]{6}[-+][0-9]{4}\b' && patterns_hit+=("personnu
 echo "$STAGED" | grep -qE '\b[A-ZÅÄÖ][a-zåäö]+ [A-ZÅÄÖ][a-zåäö]+,?\s+(case|kase|ärende)\s*#?[0-9]+' && patterns_hit+=("name-with-case-id")
 
 if [ ${#patterns_hit[@]} -gt 0 ]; then
-  ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
   joined=$(IFS=,; echo "${patterns_hit[*]}")
-  printf '{"hook":"customer-data-block","tier":"BLOCK","ts":"%s","patterns_matched":"%s","blocked":true}\n' \
-    "$ts" "$joined" >> "$AUDIT"
+  audit_log "hooks" "customer_data_block" "hook=customer-data-block" "tier=BLOCK" "patterns_matched=$joined" "blocked=true"
   echo "ERROR [Lintel hook]: customer-data pattern in staged content — $joined" >&2
   echo "ERROR: COMMIT BLOCKED. Sanitize the staged content (placeholders) + re-stage." >&2
   echo "ERROR: To override (e.g. confirmed placeholder, public-domain example):" >&2

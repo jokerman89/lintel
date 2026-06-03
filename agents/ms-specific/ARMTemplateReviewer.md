@@ -5,7 +5,11 @@ description: Reviews legacy ARM JSON templates and recommends Bicep migration pa
 color: blue
 tools: Read, Grep, Glob, Bash
 voice: internal
-cli_support: [claude-code, codex]
+cli_support:
+  - cli: claude-code
+    level: full
+  - cli: codex
+    level: full
 tier: permissive
 ---
 

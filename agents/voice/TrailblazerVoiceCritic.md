@@ -5,7 +5,11 @@ description: Applies the 12-cell Trailblazer voice rubric to customer-bound pros
 color: purple
 tools: Read
 voice: internal
-cli_support: [claude-code, codex]
+cli_support:
+  - cli: claude-code
+    level: full
+  - cli: codex
+    level: full
 tier: permissive
 ---
 

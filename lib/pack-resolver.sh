@@ -32,15 +32,15 @@ PACK_CACHE_FILE="${LINTEL_HOME}/sessions/${LINTEL_SESSION_ID}-pack-cache.yaml"
 
 mkdir -p "$LINTEL_AUDIT_DIR" "${LINTEL_HOME}/sessions" 2>/dev/null || true
 
+# Unified audit writer (resolved via repo-root). Idempotent source.
+command -v audit_log >/dev/null 2>&1 || source "${LINTEL_REPO_ROOT}/bin/_audit.sh"
+
 # ─── Internal logging ──────────────────────────────────────────────────────
 _resolver_audit() {
-  local ts kind msg
-  ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+  local kind msg
   kind="${1:-info}"
   msg="${2:-}"
-  printf '{"ts":"%s","kind":"pack_resolver_%s","msg":%s}\n' \
-    "$ts" "$kind" "$(printf '%s' "$msg" | sed 's/"/\\"/g; s/^/"/; s/$/"/')" \
-    >> "$LINTEL_AUDIT_DIR/pack-resolver.jsonl" 2>/dev/null || true
+  audit_log "pack-resolver" "pack_resolver_${kind}" "msg=$msg"
 }
 
 _resolver_warn() {

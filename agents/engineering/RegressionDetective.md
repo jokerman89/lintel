@@ -5,7 +5,11 @@ description: Investigates regressions — bisects between known-good and known-b
 color: red
 tools: Read, Bash, Grep, Glob
 voice: internal
-cli_support: [claude-code, codex]
+cli_support:
+  - cli: claude-code
+    level: full
+  - cli: codex
+    level: full
 tier: permissive
 ---
 

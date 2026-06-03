@@ -10,7 +10,9 @@ PROMPT="${1:-}"
 
 LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
 mkdir -p "$LINTEL_HOME/audit"
-AUDIT="$LINTEL_HOME/audit/hooks.jsonl"
+
+# Unified audit writer (hooks/shared/<name>/ → repo-root → bin/). Idempotent source.
+command -v audit_log >/dev/null 2>&1 || source "$(dirname "${BASH_SOURCE[0]}")/../../../bin/_audit.sh"
 
 patterns_hit=()
 
@@ -35,10 +37,8 @@ if echo "$PROMPT" | grep -qE '\b[A-ZÅÄÖ][a-zåäö]+ [A-ZÅÄÖ][a-zåäö]+,
 fi
 
 if [ ${#patterns_hit[@]} -gt 0 ]; then
-  ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
   joined=$(IFS=,; echo "${patterns_hit[*]}")
-  printf '{"hook":"no-customer-data-in-message","tier":"warn","ts":"%s","patterns_matched":"%s"}\n' \
-    "$ts" "$joined" >> "$AUDIT"
+  audit_log "hooks" "no_customer_data_in_message" "hook=no-customer-data-in-message" "tier=warn" "patterns_matched=$joined"
   echo "WARN [Lintel hook]: customer-data tell detected in prompt — patterns: $joined"
   echo "WARN: Sanitize before continuing if this is sensitive. (warn-only; not blocking.)"
 fi

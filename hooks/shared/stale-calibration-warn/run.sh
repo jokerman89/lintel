@@ -6,7 +6,9 @@ set -euo pipefail
 
 LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
 mkdir -p "$LINTEL_HOME/audit"
-AUDIT="$LINTEL_HOME/audit/hooks.jsonl"
+
+# Unified audit writer (hooks/shared/<name>/ → repo-root → bin/). Idempotent source.
+command -v audit_log >/dev/null 2>&1 || source "$(dirname "${BASH_SOURCE[0]}")/../../../bin/_audit.sh"
 
 # Find TRAILBLAZER-CALIBRATION.md — repo-local or under known scaffolding path
 CALIB=""
@@ -34,9 +36,7 @@ now=$(date +%s)
 age_days=$(( (now - mtime) / 86400 ))
 
 if [ "$age_days" -gt 30 ]; then
-  ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-  printf '{"hook":"stale-calibration-warn","tier":"warn","ts":"%s","calibration_age_days":%d}\n' \
-    "$ts" "$age_days" >> "$AUDIT"
+  audit_log "hooks" "stale_calibration_warn" "hook=stale-calibration-warn" "tier=warn" "calibration_age_days=$age_days"
   echo "WARN [Lintel hook]: TRAILBLAZER-CALIBRATION is $age_days days old (>30 day threshold)"
   echo "WARN: Voice-check verdicts will carry STALE stamp. Re-run /li:eval against corpus to refresh."
 fi

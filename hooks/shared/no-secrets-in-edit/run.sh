@@ -9,7 +9,9 @@ PAYLOAD="${1:-}"
 
 LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
 mkdir -p "$LINTEL_HOME/audit"
-AUDIT="$LINTEL_HOME/audit/hooks.jsonl"
+
+# Unified audit writer (hooks/shared/<name>/ → repo-root → bin/). Idempotent source.
+command -v audit_log >/dev/null 2>&1 || source "$(dirname "${BASH_SOURCE[0]}")/../../../bin/_audit.sh"
 
 patterns_hit=()
 
@@ -32,10 +34,8 @@ echo "$PAYLOAD" | grep -qE '\-+BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY\-+' && patt
 echo "$PAYLOAD" | grep -qE 'password\s*[=:]\s*"[^"]{8,}"' && patterns_hit+=("hardcoded-password")
 
 if [ ${#patterns_hit[@]} -gt 0 ]; then
-  ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
   joined=$(IFS=,; echo "${patterns_hit[*]}")
-  printf '{"hook":"no-secrets-in-edit","tier":"warn","ts":"%s","patterns_matched":"%s"}\n' \
-    "$ts" "$joined" >> "$AUDIT"
+  audit_log "hooks" "no_secrets_in_edit" "hook=no-secrets-in-edit" "tier=warn" "patterns_matched=$joined"
   echo "WARN [Lintel hook]: secret pattern detected in payload — $joined"
   echo "WARN: If this is a real secret, abort + use env var or secret manager. (warn-only; secret-scan-block fires at commit.)"
 fi

@@ -5,7 +5,11 @@ description: Advises on Azure OpenAI service selection, model picking, deploymen
 color: blue
 tools: Read, Grep, Glob, Bash
 voice: internal
-cli_support: [claude-code, codex]
+cli_support:
+  - cli: claude-code
+    level: full
+  - cli: codex
+    level: full
 tier: permissive
 ---
 

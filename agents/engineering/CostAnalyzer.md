@@ -5,7 +5,11 @@ description: Analyzes cloud-cost data — identifies top spenders, waste pattern
 color: red
 tools: Read, Bash, Grep, Glob
 voice: internal
-cli_support: [claude-code, codex]
+cli_support:
+  - cli: claude-code
+    level: full
+  - cli: codex
+    level: full
 tier: permissive
 ---
 

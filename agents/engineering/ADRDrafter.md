@@ -5,7 +5,12 @@ description: Drafts Architecture Decision Records in the repo's format — Statu
 color: purple
 tools: Read, Grep, Glob, Write
 voice: internal
-cli_support: [claude-code, codex]
+cli_support:
+  - cli: claude-code
+    level: full
+  - cli: codex
+    level: full
+tier: permissive
 ---
 
 You are an ADR drafter agent.

@@ -9,7 +9,9 @@ TARGET_PATH="${1:-}"
 
 LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
 mkdir -p "$LINTEL_HOME/audit"
-AUDIT="$LINTEL_HOME/audit/hooks.jsonl"
+
+# Unified audit writer (hooks/shared/<name>/ → repo-root → bin/). Idempotent source.
+command -v audit_log >/dev/null 2>&1 || source "$(dirname "${BASH_SOURCE[0]}")/../../../bin/_audit.sh"
 
 # Collect frozen patterns from session + project CLAUDE.md
 SESSION_ID="${LINTEL_SESSION_ID:-default}"
@@ -56,7 +58,6 @@ if [ -f "$PROJECT_CLAUDE_MD" ]; then
 fi
 
 if [ -n "$session_match" ] || [ -n "$project_match" ]; then
-  ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
   source=""
   matched=""
   if [ -n "$session_match" ]; then
@@ -66,8 +67,7 @@ if [ -n "$session_match" ] || [ -n "$project_match" ]; then
     source="project-claude-md"
     matched="$project_match"
   fi
-  printf '{"hook":"frozen-zone-warn","tier":"warn","ts":"%s","frozen_path":"%s","edit_target":"%s","source":"%s"}\n' \
-    "$ts" "$matched" "$TARGET_PATH" "$source" >> "$AUDIT"
+  audit_log "hooks" "frozen_zone_warn" "hook=frozen-zone-warn" "tier=warn" "frozen_path=$matched" "edit_target=$TARGET_PATH" "source=$source"
   echo "WARN [Lintel hook]: editing $TARGET_PATH which is in frozen zone ($matched, source: $source)"
   echo "WARN: Use /unfreeze if intentional, or consider whether this edit is correct. (warn-only.)"
 fi

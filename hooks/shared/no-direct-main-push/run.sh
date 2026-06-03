@@ -9,7 +9,9 @@ CMD="${1:-}"
 
 LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
 mkdir -p "$LINTEL_HOME/audit"
-AUDIT="$LINTEL_HOME/audit/hooks.jsonl"
+
+# Unified audit writer (hooks/shared/<name>/ → repo-root → bin/). Idempotent source.
+command -v audit_log >/dev/null 2>&1 || source "$(dirname "${BASH_SOURCE[0]}")/../../../bin/_audit.sh"
 
 # Detect direct-push patterns
 matched=""
@@ -24,9 +26,7 @@ if echo "$CMD" | grep -qE 'git\s+push\s+\S+\s+HEAD:(main|master)'; then
 fi
 
 if [ -n "$matched" ]; then
-  ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-  printf '{"hook":"no-direct-main-push","tier":"warn","ts":"%s","pattern":"%s","cmd_preview":"%s"}\n' \
-    "$ts" "$matched" "$(echo "$CMD" | head -c 120)" >> "$AUDIT"
+  audit_log "hooks" "no_direct_main_push" "hook=no-direct-main-push" "tier=warn" "pattern=$matched" "cmd_preview=$(echo "$CMD" | head -c 120)"
   echo "WARN [Lintel hook]: $matched to main/master detected"
   echo "WARN: CLAUDE.md requires explicit per-batch authorization for direct main push."
   echo "WARN: Confirm in conversation: 'yes, push this batch to main, I authorize'."

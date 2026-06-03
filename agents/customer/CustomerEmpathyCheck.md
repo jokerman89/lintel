@@ -1,11 +1,15 @@
 ---
 name: CustomerEmpathyCheck
 category: customer
-description: CAIP-SE customer-empathy review — does this comms read like a human cares?
+description: CAIP-SE customer-empathy review — does this comms read like a human cares? Customer communication review, empathy check, tone, email, follow-up, escalation response, difficult message, customer-facing copy, humanity in comms, incident-response messaging.
 color: orange
 tools: Read
 voice: internal
-cli_support: [claude-code, codex]
+cli_support:
+  - cli: claude-code
+    level: full
+  - cli: codex
+    level: full
 tier: permissive
 ---
 

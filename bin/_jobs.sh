@@ -20,6 +20,9 @@ LINTEL_JOBS_ACTIVE="${LINTEL_JOBS_ACTIVE:-$LINTEL_JOBS_DIR/_active.md}"
 LINTEL_JOBS_ARCHIVE="${LINTEL_JOBS_ARCHIVE:-$LINTEL_JOBS_DIR/_archive}"
 LINTEL_AUDIT_DIR="${LINTEL_AUDIT_DIR:-$LINTEL_HOME/audit}"
 
+# Unified audit writer (sibling in bin/). Idempotent source.
+command -v audit_log >/dev/null 2>&1 || source "$(dirname "${BASH_SOURCE[0]}")/_audit.sh"
+
 mkdir -p "$LINTEL_JOBS_DIR" "$LINTEL_JOBS_ARCHIVE" "$LINTEL_AUDIT_DIR" 2>/dev/null || true
 
 _jobs_iso_now() { date -u +"%Y-%m-%dT%H:%M:%SZ"; }
@@ -66,9 +69,8 @@ EOF
   # Touch a placeholder 00-state.md inside the job
   : > "$dir/00-state.md"
 
-  # Audit
-  printf '{"ts":"%s","kind":"job_begin","job_id":"%s","workflow":"%s","mode":"%s"}\n' \
-    "$ts" "$id" "$workflow" "$mode" >> "$LINTEL_AUDIT_DIR/jobs.jsonl" 2>/dev/null || true
+  # Audit (unified writer → ~/.lintel/audit/jobs.jsonl)
+  audit_log "jobs" "job_begin" "job_id=$id" "workflow=$workflow" "mode=$mode"
 
   regenerate_active
 
@@ -96,8 +98,7 @@ job_update() {
     { print }
   ' "$dir/job.yaml" > "$dir/job.yaml.tmp" && mv "$dir/job.yaml.tmp" "$dir/job.yaml"
 
-  printf '{"ts":"%s","kind":"job_update","job_id":"%s","step":"%s","status":"%s"}\n' \
-    "$ts" "$id" "$step" "$status" >> "$LINTEL_AUDIT_DIR/jobs.jsonl" 2>/dev/null || true
+  audit_log "jobs" "job_update" "job_id=$id" "step=$step" "status=$status"
 
   regenerate_active
 }
@@ -134,8 +135,7 @@ job_archive() {
   # Move to archive (mv across paths)
   mv "$dir" "$archive_dir/" 2>/dev/null || true
 
-  printf '{"ts":"%s","kind":"job_end","job_id":"%s","result":"%s"}\n' \
-    "$ts" "$id" "$result" >> "$LINTEL_AUDIT_DIR/jobs.jsonl" 2>/dev/null || true
+  audit_log "jobs" "job_end" "job_id=$id" "result=$result"
 
   regenerate_active
 }
