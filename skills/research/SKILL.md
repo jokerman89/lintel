@@ -6,6 +6,8 @@ color: cyan
 tools: Read, Bash, Grep, Glob
 voice: internal
 cli_support: [claude-code, codex]
+necessity: OPTIONAL
+gap_if_skipped: "Operator loses the research-dive shortcut; the same SENSE+DEFINE+DISCOVER chain is still reachable via /li:cycle --mode research-dive, so only the convenience is lost."
 ---
 
 You are the RESEARCH composite shortcut — research-dive mode pre-baked.

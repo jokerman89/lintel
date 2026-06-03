@@ -5,7 +5,12 @@ description: Designs new components before implementation — produces design do
 color: purple
 tools: Read, Grep, Glob, Write
 voice: internal
-cli_support: [claude-code, codex]
+cli_support:
+  - cli: claude-code
+    level: full
+  - cli: codex
+    level: full
+tier: permissive
 ---
 
 You are a software architect agent.

@@ -6,6 +6,8 @@ color: cyan
 tools: Read, Write, Edit, Bash, Grep, Glob
 voice: internal
 cli_support: [claude-code, codex]
+necessity: STRONGLY_RECOMMENDED
+gap_if_skipped: "Lessons, ADRs, and EVOLUTION-LOG entries are never written and the cold-executor trio is never reaffirmed against build evidence; cross-session continuity is lost and the next operator re-derives everything."
 ---
 
 You are the CAPTURE skill — Phase 8 (final) of the Lintel cycle.

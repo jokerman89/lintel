@@ -7,9 +7,11 @@ set -uo pipefail
 LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
 BIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../bin" 2>/dev/null && pwd)" || \
 BIN_DIR="${LINTEL_HOME}/scaffolding/bin"
-AUDIT="$LINTEL_HOME/audit/jobs.jsonl"
 
 mkdir -p "$LINTEL_HOME/audit" 2>/dev/null || true
+
+# Unified audit writer (hooks/shared/<name>/ → repo-root → bin/). Idempotent source.
+command -v audit_log >/dev/null 2>&1 || source "$(dirname "${BASH_SOURCE[0]}")/../../../bin/_audit.sh"
 
 # Operator override
 [ -f "$HOME/.lintel/.jobs-stale-warn-disabled" ] && exit 0
@@ -46,9 +48,7 @@ if [ "${#stale_lines[@]}" -gt 0 ]; then
     age=$(printf '%s' "$line" | awk '{print $2}')
     echo "  ⚠ $job_id ($age) — /li:jobs continue $job_id  ·  /li:jobs abort $job_id  ·  /li:jobs branch $job_id"
 
-    ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-    printf '{"ts":"%s","kind":"job_stale_warn","job_id":"%s","age_hours_str":"%s","threshold_hours":%d}\n' \
-      "$ts" "$job_id" "$age" "$hours" >> "$AUDIT" 2>/dev/null || true
+    audit_log "jobs" "job_stale_warn" "job_id=$job_id" "age_hours_str=$age" "threshold_hours=$hours"
   done
 fi
 

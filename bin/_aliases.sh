@@ -18,6 +18,9 @@ LINTEL_REPO_ROOT="${LINTEL_REPO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." 2
 LINTEL_ALIASES_FILE="${LINTEL_ALIASES_FILE:-$LINTEL_REPO_ROOT/config/aliases.yaml}"
 LINTEL_AUDIT_DIR="${LINTEL_AUDIT_DIR:-$HOME/.lintel/audit}"
 
+# Unified audit writer (sibling in bin/). Idempotent source.
+command -v audit_log >/dev/null 2>&1 || source "$(dirname "${BASH_SOURCE[0]}")/_audit.sh"
+
 resolve_env_var() {
   local new_name="$1"
   local new_value
@@ -54,12 +57,8 @@ resolve_env_var() {
         local old_value="${!current_old:-}"
         if [ -n "$old_value" ]; then
           echo "[lintel] WARN: \$$current_old is deprecated, please switch to \$$new_name" >&2
-          # Audit-log
-          mkdir -p "$LINTEL_AUDIT_DIR" 2>/dev/null || true
-          local ts
-          ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-          printf '{"ts":"%s","kind":"env_var","old":"%s","new":"%s","context":"resolve_env_var"}\n' \
-            "$ts" "$current_old" "$new_name" >> "$LINTEL_AUDIT_DIR/alias-resolution.jsonl" 2>/dev/null || true
+          # Audit-log (unified writer → ~/.lintel/audit/alias-resolution.jsonl)
+          audit_log "alias-resolution" "env_var" "old=$current_old" "new=$new_name" "context=resolve_env_var"
           printf '%s' "$old_value"
           return 0
         fi

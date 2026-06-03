@@ -7,7 +7,9 @@ PAYLOAD="${1:-}"
 
 LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
 mkdir -p "$LINTEL_HOME/audit"
-AUDIT="$LINTEL_HOME/audit/hooks.jsonl"
+
+# Unified audit writer (hooks/shared/<name>/ → repo-root → bin/). Idempotent source.
+command -v audit_log >/dev/null 2>&1 || source "$(dirname "${BASH_SOURCE[0]}")/../../../bin/_audit.sh"
 
 # Trailblazer-tagged content?
 if ! echo "$PAYLOAD" | grep -qE '^voice:\s*trailblazer(-draft)?'; then
@@ -31,8 +33,8 @@ if [ -n "$CALIB" ]; then
 fi
 
 if [ "$calibrated" = "0" ]; then
-  ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-  printf '{"hook":"no-trailblazer-without-corpus","tier":"warn","ts":"%s"}\n' "$ts" >> "$AUDIT"
+  # Unified writer → ~/.lintel/audit/hooks.jsonl
+  audit_log "hooks" "no_trailblazer_without_corpus" "tier=warn"
   echo "WARN [Lintel hook]: writing trailblazer-voice content while T0 calibration incomplete"
   echo "WARN: Output will carry UNCALIBRATED stamp; downstream /customer-voice-check will refuse."
 fi

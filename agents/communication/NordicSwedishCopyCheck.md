@@ -1,11 +1,15 @@
 ---
 name: NordicSwedishCopyCheck
 category: communication
-description: Swedish-language CAIP-SE copy review — natural Swedish, idiom, register, no MS-jargon-translated.
+description: Swedish-language CAIP-SE copy review — natural Swedish, idiom, register, no MS-jargon-translated. Swedish copy review, Nordic localization, translation check, natural Swedish, register du/ni, idiom, anglicism, English-to-Swedish, language localization, customer copy in Swedish.
 color: yellow
 tools: Read
 voice: internal
-cli_support: [claude-code, codex]
+cli_support:
+  - cli: claude-code
+    level: full
+  - cli: codex
+    level: full
 tier: permissive
 ---
 

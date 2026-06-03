@@ -5,7 +5,12 @@ description: Database schema design, indexes, query optimization, migration safe
 color: purple
 tools: Read, Grep, Glob, Write, Bash
 voice: internal
-cli_support: [claude-code, codex]
+cli_support:
+  - cli: claude-code
+    level: full
+  - cli: codex
+    level: full
+tier: permissive
 ---
 
 You are a database designer agent.

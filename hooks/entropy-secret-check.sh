@@ -10,15 +10,14 @@
 
 set -uo pipefail
 
-HOOK_LOG="${HOME}/.lintel/audit/hooks.jsonl"
-mkdir -p "$(dirname "$HOOK_LOG")"
-ts=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+mkdir -p "${HOME}/.lintel/audit"
+
+# Unified audit writer (hooks/ → repo-root → bin/). Idempotent source.
+command -v audit_log >/dev/null 2>&1 || source "$(dirname "${BASH_SOURCE[0]}")/../bin/_audit.sh"
 
 # Override-handling
 if [ "${LINTEL_OVERRIDE_ENTROPY:-0}" = "1" ]; then
-  jq -nc --arg ts "$ts" --arg hook "entropy-secret-check" --arg override "true" \
-    --arg reason "${LINTEL_OVERRIDE_REASON:-not-specified}" \
-    '{ts:$ts, hook:$hook, override:$override, reason:$reason}' >> "$HOOK_LOG" 2>/dev/null
+  audit_log "hooks" "entropy_secret_check" "hook=entropy-secret-check" "override=true" "reason=${LINTEL_OVERRIDE_REASON:-not-specified}"
   exit 0
 fi
 
@@ -58,8 +57,7 @@ for f in $staged_files; do
 done
 
 # Log hook execution
-jq -nc --arg ts "$ts" --arg hook "entropy-secret-check" --arg result "$total_hits" \
-  '{ts:$ts, hook:$hook, hits:$result|tonumber}' >> "$HOOK_LOG" 2>/dev/null
+audit_log "hooks" "entropy_secret_check" "hook=entropy-secret-check" "hits=$total_hits"
 
 if [ "$total_hits" -gt 0 ]; then
   echo ""

@@ -5,7 +5,12 @@ description: Hypothesis-driven debugging — designs minimum repro, eliminates v
 color: orange
 tools: Read, Grep, Glob, Bash
 voice: internal
-cli_support: [claude-code, codex]
+cli_support:
+  - cli: claude-code
+    level: full
+  - cli: codex
+    level: full
+tier: permissive
 ---
 
 You are a debug forensics agent.

@@ -1,11 +1,15 @@
 ---
 name: PostDemoFollowup
 category: customer
-description: Post-demo strategic-followup advisor — what to send, when, what expansion paths to open.
+description: Post-demo strategic-followup advisor — what to send, when, what expansion paths to open. Post-demo follow-up, customer demo, engagement next steps, follow-up cadence, expansion paths, proposal, 30-day plan, demo outcome, customer follow-up email, deal progression.
 color: orange
 tools: Read, Grep, Glob
 voice: internal
-cli_support: [claude-code, codex]
+cli_support:
+  - cli: claude-code
+    level: full
+  - cli: codex
+    level: full
 tier: permissive
 ---
 

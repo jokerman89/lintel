@@ -7,7 +7,9 @@ PAYLOAD="${1:-}"
 
 LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
 mkdir -p "$LINTEL_HOME/audit"
-AUDIT="$LINTEL_HOME/audit/hooks.jsonl"
+
+# Unified audit writer (hooks/shared/<name>/ → repo-root → bin/). Idempotent source.
+command -v audit_log >/dev/null 2>&1 || source "$(dirname "${BASH_SOURCE[0]}")/../../../bin/_audit.sh"
 
 # Trailblazer-tagged?
 if ! echo "$PAYLOAD" | grep -qE '^voice:\s*trailblazer'; then
@@ -31,10 +33,8 @@ for w in "${TIER1[@]}"; do
 done
 
 if [ ${#hits[@]} -gt 0 ]; then
-  ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
   joined=$(IFS=,; echo "${hits[*]}")
-  printf '{"hook":"no-en-vocab-in-trailblazer","tier":"warn","ts":"%s","tier1_hits":"%s"}\n' \
-    "$ts" "$joined" >> "$AUDIT"
+  audit_log "hooks" "no_en_vocab_in_trailblazer" "hook=no-en-vocab-in-trailblazer" "tier=warn" "tier1_hits=$joined"
   echo "WARN [Lintel hook]: Tier 1 AI-tell vocab in trailblazer payload: $joined"
   echo "WARN: Regenerate via /msvoice-rewrite or rewrite manually. /customer-voice-check WILL fail with these."
 fi

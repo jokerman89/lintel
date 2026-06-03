@@ -1,11 +1,15 @@
 ---
 name: HybridScenarioArchitect
 category: ms-specific
-description: CAIP-SE hybrid-architecture advisor — Azure + on-prem + edge scenarios with Arc + Stack + management.
+description: CAIP-SE hybrid-architecture advisor — Azure + on-prem + edge scenarios with Arc + Stack + management. Hybrid cloud architecture, on-premises, edge, Azure Arc, Azure Stack HCI, Azure Local, hybrid identity, multi-cloud, topology design, adoption sequence, unified control plane.
 color: purple
 tools: Read, Grep, Glob, Write
 voice: internal
-cli_support: [claude-code, codex]
+cli_support:
+  - cli: claude-code
+    level: full
+  - cli: codex
+    level: full
 tier: permissive
 ---
 

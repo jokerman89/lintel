@@ -5,7 +5,11 @@ description: Reviews RAI assessments + sensitive-use reports + One RAI submissio
 color: orange
 tools: Read, Grep, Glob
 voice: internal
-cli_support: [claude-code, codex]
+cli_support:
+  - cli: claude-code
+    level: full
+  - cli: codex
+    level: full
 tier: permissive
 ---
 

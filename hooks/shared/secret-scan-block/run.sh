@@ -9,7 +9,9 @@ CMD="${1:-}"
 
 LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
 mkdir -p "$LINTEL_HOME/audit"
-AUDIT="$LINTEL_HOME/audit/hooks.jsonl"
+
+# Unified audit writer (hooks/shared/<name>/ → repo-root → bin/). Idempotent source.
+command -v audit_log >/dev/null 2>&1 || source "$(dirname "${BASH_SOURCE[0]}")/../../../bin/_audit.sh"
 
 # Only fire on git commit / git push
 if ! echo "$CMD" | grep -qE '^git\s+(commit|push)\b'; then
@@ -19,9 +21,7 @@ fi
 # Override path
 if [ "${LINTEL_OVERRIDE_SECRET:-}" = "1" ]; then
   reason="${LINTEL_OVERRIDE_REASON:-no-reason-given}"
-  ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-  printf '{"hook":"secret-scan-block","tier":"OVERRIDDEN","ts":"%s","reason":"%s","blocked":false}\n' \
-    "$ts" "$reason" >> "$AUDIT"
+  audit_log "hooks" "secret_scan_block" "hook=secret-scan-block" "tier=OVERRIDDEN" "override=true" "reason=$reason" "blocked=false"
   echo "INFO [Lintel hook]: secret-scan-block OVERRIDDEN by operator (reason: $reason). Audit-logged."
   exit 0
 fi
@@ -40,10 +40,8 @@ echo "$STAGED" | grep -qE 'sk-ant-[A-Za-z0-9-]{30,}' && patterns_hit+=("anthropi
 echo "$STAGED" | grep -qE '\-+BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY\-+' && patterns_hit+=("private-key")
 
 if [ ${#patterns_hit[@]} -gt 0 ]; then
-  ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
   joined=$(IFS=,; echo "${patterns_hit[*]}")
-  printf '{"hook":"secret-scan-block","tier":"BLOCK","ts":"%s","patterns_matched":"%s","blocked":true}\n' \
-    "$ts" "$joined" >> "$AUDIT"
+  audit_log "hooks" "secret_scan_block" "hook=secret-scan-block" "tier=BLOCK" "patterns_matched=$joined" "blocked=true"
   echo "ERROR [Lintel hook]: secret pattern in staged content — $joined" >&2
   echo "ERROR: COMMIT BLOCKED. Remove the secret + re-stage." >&2
   echo "ERROR: To override (e.g. known-false-positive in test fixtures):" >&2

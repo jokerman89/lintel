@@ -10,7 +10,9 @@ PAYLOAD="${2:-}"
 
 LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
 mkdir -p "$LINTEL_HOME/audit"
-AUDIT="$LINTEL_HOME/audit/hooks.jsonl"
+
+# Unified audit writer (hooks/shared/<name>/ → repo-root → bin/). Idempotent source.
+command -v audit_log >/dev/null 2>&1 || source "$(dirname "${BASH_SOURCE[0]}")/../../../bin/_audit.sh"
 
 # Only fire on manifest files
 case "$TARGET_PATH" in
@@ -36,10 +38,8 @@ while IFS= read -r line; do
 done < "$ALT_FILE"
 
 if [ ${#hits[@]} -gt 0 ]; then
-  ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
   joined=$(IFS='|'; echo "${hits[*]}")
-  printf '{"hook":"non-first-party-warn","tier":"warn","ts":"%s","target":"%s","hits":"%s"}\n' \
-    "$ts" "$TARGET_PATH" "$joined" >> "$AUDIT"
+  audit_log "hooks" "non_first_party_warn" "hook=non-first-party-warn" "tier=warn" "target=$TARGET_PATH" "hits=$joined"
   echo "WARN [Lintel hook]: 3P deps with MS-1P alternatives found in $TARGET_PATH"
   for hit in "${hits[@]}"; do
     echo "WARN:   $hit"

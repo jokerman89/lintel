@@ -5,7 +5,11 @@ description: Advises on Microsoft 365 Copilot Extensibility — declarative agen
 color: blue
 tools: Read, Grep, Glob, Bash
 voice: internal
-cli_support: [claude-code, codex]
+cli_support:
+  - cli: claude-code
+    level: full
+  - cli: codex
+    level: full
 tier: permissive
 ---
 

@@ -5,7 +5,11 @@ description: Reviews agentic systems against MS Agent Governance Framework (AGT)
 color: orange
 tools: Read, Grep, Glob, Bash
 voice: internal
-cli_support: [claude-code, codex]
+cli_support:
+  - cli: claude-code
+    level: full
+  - cli: codex
+    level: full
 tier: permissive
 ---
 

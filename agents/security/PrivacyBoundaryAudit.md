@@ -5,7 +5,11 @@ description: CAIP-SE privacy + data-residency sweep — identifies where data cr
 color: red
 tools: Read, Grep, Glob
 voice: internal
-cli_support: [claude-code, codex]
+cli_support:
+  - cli: claude-code
+    level: full
+  - cli: codex
+    level: full
 tier: permissive
 ---
 

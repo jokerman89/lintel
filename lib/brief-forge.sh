@@ -21,6 +21,9 @@ set -uo pipefail
 LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
 LINTEL_AUDIT_DIR="${LINTEL_AUDIT_DIR:-$LINTEL_HOME/audit}"
 
+# Unified audit writer (lib/ → repo-root → bin/). Idempotent source.
+command -v audit_log >/dev/null 2>&1 || source "$(dirname "${BASH_SOURCE[0]}")/../bin/_audit.sh"
+
 # ─── generate_envelope_id ──────────────────────────────────────────────────
 # Returns a sortable, unique id. ULID-like: 26 char Base32.
 # Phase 3 uses a simple sortable id; Phase 4 may upgrade to full ULID.
@@ -126,14 +129,11 @@ forge_envelope() {
 }
 
 # ─── write_bypass_audit ────────────────────────────────────────────────────
+# Unified writer → ~/.lintel/audit/brief-forge.jsonl (operator field now
+# supplied by audit_log itself, no longer inlined here).
 write_bypass_audit() {
   local kind="${1:?}" from="${2:?}" to="${3:?}"
-  local ts
-  ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-  mkdir -p "$LINTEL_AUDIT_DIR"
-  printf '{"ts":"%s","kind":"brief_forge_bypassed","event":"%s","from":"%s","to":"%s","operator":"%s"}\n' \
-    "$ts" "$kind" "$from" "$to" "$(whoami 2>/dev/null || echo unknown)" \
-    >> "$LINTEL_AUDIT_DIR/brief-forge.jsonl"
+  audit_log "brief-forge" "brief_forge_bypassed" "event=$kind" "from=$from" "to=$to"
 }
 
 # ─── yaml_to_json ──────────────────────────────────────────────────────────

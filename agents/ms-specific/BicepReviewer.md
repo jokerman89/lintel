@@ -5,7 +5,11 @@ description: Reviews Bicep templates for correctness, security, modularity, nami
 color: blue
 tools: Read, Grep, Glob, Bash
 voice: internal
-cli_support: [claude-code, codex]
+cli_support:
+  - cli: claude-code
+    level: full
+  - cli: codex
+    level: full
 tier: permissive
 ---
 

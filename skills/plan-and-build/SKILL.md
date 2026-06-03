@@ -6,6 +6,8 @@ color: cyan
 tools: Read, Bash, Grep, Glob
 voice: internal
 cli_support: [claude-code, codex]
+necessity: OPTIONAL
+gap_if_skipped: "Operator loses the PLAN+BUILD shortcut for split-session work; the same range is still reachable via /li:cycle --from PLAN --to BUILD, so only the convenience is lost."
 ---
 
 You are the PLAN-AND-BUILD composite shortcut.

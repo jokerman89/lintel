@@ -5,8 +5,10 @@
 set -euo pipefail
 
 LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
-AUDIT="$LINTEL_HOME/audit/hooks.jsonl"
 mkdir -p "$LINTEL_HOME/audit"
+
+# Unified audit writer (hooks/shared/<name>/ → repo-root → bin/). Idempotent source.
+command -v audit_log >/dev/null 2>&1 || source "$(dirname "${BASH_SOURCE[0]}")/../../../bin/_audit.sh"
 
 file_edited="${1:-}"
 [ -z "$file_edited" ] && exit 0
@@ -40,11 +42,7 @@ if [ -f "$registry" ]; then
 fi
 
 if [ "$matches_interface" -eq 1 ] || [ "$consumer_count" -gt 0 ]; then
-  ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-  operator=$(whoami 2>/dev/null || echo unknown)
-
-  printf '{"hook":"ta-contract-collision-warn","tier":"warn","ts":"%s","file_edited":"%s","consumer_count":%d,"operator":"%s"}\n' \
-    "$ts" "$file_edited" "$consumer_count" "$operator" >> "$AUDIT"
+  audit_log "hooks" "ta_contract_collision_warn" "hook=ta-contract-collision-warn" "tier=warn" "file_edited=$file_edited" "consumer_count=$consumer_count"
 
   echo "WARN [Lintel hook ta-contract-collision-warn]: editing $file_edited"
   if [ "$consumer_count" -gt 0 ]; then

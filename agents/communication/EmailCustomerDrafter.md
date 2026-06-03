@@ -5,7 +5,11 @@ description: Drafts customer-facing emails — intro / follow-up / decision-aski
 color: yellow
 tools: Read, Bash, Grep, Glob
 voice: trailblazer
-cli_support: [claude-code, codex]
+cli_support:
+  - cli: claude-code
+    level: full
+  - cli: codex
+    level: full
 tier: permissive
 ---
 

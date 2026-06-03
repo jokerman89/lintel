@@ -5,7 +5,11 @@ description: Reviews CAIP-SE demo scripts against narrative principles — openi
 color: yellow
 tools: Read
 voice: internal
-cli_support: [claude-code, codex]
+cli_support:
+  - cli: claude-code
+    level: full
+  - cli: codex
+    level: full
 tier: permissive
 ---
 

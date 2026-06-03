@@ -7,7 +7,6 @@ set -uo pipefail
 
 LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
 VAULT="$LINTEL_HOME/brand/design-patterns"
-AUDIT="$LINTEL_HOME/audit/hooks.jsonl"
 SESSION_DIR="$LINTEL_HOME/sessions"
 
 mkdir -p "$LINTEL_HOME/audit" "$SESSION_DIR"
@@ -99,10 +98,10 @@ echo "INFO [Lintel]: design-patterns relevant to ${target_file}: ${patterns_csv}
 # Mark surfaced
 echo "$target_canonical" >> "$marker"
 
-# Audit-log
-ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-patterns_json=$(printf '"%s",' "${relevant_patterns[@]}" | sed 's/,$//')
-printf '{"hook":"frontend-design-surface","tier":"surface","ts":"%s","file":"%s","patterns":[%s],"vault_size":%d}\n' \
-  "$ts" "$target_canonical" "$patterns_json" "$pattern_count" >> "$AUDIT"
+# Audit-log (lazy-source the unified writer only on the write path).
+# hooks/shared/<name>/ → repo-root → bin/. Idempotent source.
+command -v audit_log >/dev/null 2>&1 || source "$(dirname "${BASH_SOURCE[0]}")/../../../bin/_audit.sh"
+patterns_csv_audit=$(IFS=,; echo "${relevant_patterns[*]}")
+audit_log "hooks" "frontend_design_surface" "hook=frontend-design-surface" "tier=surface" "file=$target_canonical" "patterns=$patterns_csv_audit" "vault_size=$pattern_count"
 
 exit 0

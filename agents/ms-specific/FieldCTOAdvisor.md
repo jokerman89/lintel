@@ -5,7 +5,11 @@ description: Strategic CAIP-SE engagement advisor — Field CTO perspective on t
 color: purple
 tools: Read, Grep, Glob
 voice: internal
-cli_support: [claude-code, codex]
+cli_support:
+  - cli: claude-code
+    level: full
+  - cli: codex
+    level: full
 tier: permissive
 ---
 
