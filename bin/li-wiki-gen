@@ -329,13 +329,13 @@ gen_showcase() {
     <tr><td>workflow</td><td>orientator, brief-forge, pack-*, v4-migrate</td></tr>
     <tr><td>schemas</td><td>pack-schema.yaml, envelope-schema.yaml</td></tr>
     <tr><td>tools</td><td>li-envelope-validate, li-envelope-replay, li-wiki-gen, li-compat-audit</td></tr>
-    <tr><td>packs</td><td>_default → ms-internal → caip-se (inheritance chain)</td></tr>
+    <tr><td>packs</td><td>_default (neutral base) + optional external packs via inheritance</td></tr>
   </tbody>
 </table>
 
 <h2>v4.0 architecture</h2>
 
-<p>v4.0 lifts Lintel from MS-CAIP-SE-bound to pack-driven. Three contracts hold it together:</p>
+<p>v4.0 makes Lintel pack-driven and company-neutral. Three contracts hold it together:</p>
 
 <table>
   <thead><tr><th>Contract</th><th>What it does</th><th>Where</th></tr></thead>

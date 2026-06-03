@@ -16,7 +16,7 @@ The skill itself runs in Claude Code (which is why `cli_support: [claude-code]` 
 
 ## When to use
 
-- Pre-`/release-ev2` outside-voice review on a non-trivial diff
+- Pre-`/ship` outside-voice review on a non-trivial diff
 - `/investigate` produced a confident root cause and you want it independently challenged
 - A design decision was made in conversation and you want a fresh-eyes critique
 - `/plan-eng-review` cleared with caveats — use Codex to triangulate the caveats
@@ -40,7 +40,7 @@ The skill itself runs in Claude Code (which is why `cli_support: [claude-code]` 
 3. **Run Codex.** `codex exec --quiet --output json --prompt-file <tmp>` (or equivalent — adjust to current Codex CLI flags). Capture stdout, stderr, exit code.
 4. **Parse output.** Codex returns structured findings (severity, location, claim, evidence). Normalize to Lintel's P1/P2/P3 severity.
 5. **Compare to local reasoning.** If invoked mid-`/investigate` or post-`/review`: explicitly diff Codex's findings against what was already concluded. Surface AGREEMENT and DISAGREEMENT separately.
-6. **Persist via first-party `bin/li-review-log`** (legacy alias: gstack-review-log) with `skill: codex` so downstream `/release-ev2` can read.
+6. **Persist via `bin/li-review-log`** (legacy alias: gstack-review-log) with `skill: codex` so downstream `/ship` can read.
 7. **Report.**
 
 ## Report format
@@ -67,7 +67,7 @@ Tokens used: 31,400 / 50,000
 
 ## Synthesis
 - 1 finding agrees with local conclusion (strengthens confidence)
-- 1 new finding (P2) — recommend addressing before /release-ev2
+- 1 new finding (P2) — recommend addressing before /ship
 - 1 style nit (P3) — defer or include in same diff
 ```
 
@@ -75,7 +75,7 @@ Tokens used: 31,400 / 50,000
 
 - Codex sees code. Per Layer 2: code is not customer-data, so no auth gate. But: if the target includes a fixture path containing customer-data patterns, BLOCK the Codex call and surface (Codex would receive that data).
 - Token spend logged to `~/.lintel/audit/codex-spend.jsonl`.
-- First-party-first reminder: Codex is OpenAI. For MS-internal: prefer Azure OpenAI gateway if configured per `~/.lintel/config.yaml`.
+- The active pack may route Codex calls via a configured gateway per `~/.lintel/config.yaml` (none by default).
 
 ## Voice tier note
 
@@ -93,7 +93,7 @@ Tokens used: 31,400 / 50,000
 **Outside opinion on a diff:**
 ```
 > /codex --diff
-Codex found 2 P2 findings the local review missed. Recommend addressing before /release-ev2.
+Codex found 2 P2 findings the local review missed. Recommend addressing before /ship.
 ```
 
 **Challenge a hypothesis:**
@@ -113,4 +113,4 @@ Codex agrees (9/10 confidence). Strengthens the root cause.
 - `/review` — local diff review (use `/codex` as a follow-up for important diffs)
 - `/investigate` — `--with-codex` flag chains automatically
 - `/plan-eng-review` — uses `/codex` internally as the outside-voice step
-- `/release-ev2` — reads codex review-log entries as part of clearance check
+- `/ship` — reads codex review-log entries as part of clearance check

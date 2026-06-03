@@ -24,7 +24,7 @@ Lintel version inspired-by gstack's `/plan-design-review` but written fresh. Sta
 
 - Backend-only changes — no design surface
 - Pure infra (Bicep, Terraform, GitHub Actions) — `/plan-eng-review` covers
-- Prompt/LLM-only changes — `/rais-customer-voice-check` is the relevant eval
+- Prompt/LLM-only changes — the active pack's voice/compliance gates are the relevant eval (none by default)
 
 ## Inputs
 
@@ -77,12 +77,12 @@ Outside voices (Codex + Claude subagent) can propose alternative design directio
 
 ## Compliance integration
 
-- If the plan is customer-facing: design output must pass `/rais-customer-voice-check` if any Trailblazer-tier copy is included.
+- If the plan is customer-facing: design output must pass the active pack's voice/compliance gates (`resolve_pack_field compliance.hooks`; none by default) if any elevated-tier copy is included.
 - If the plan involves data display: confirm sensitivity labels carry through from source to UI.
 
 ## Voice tier note
 
-`voice: internal` — review prose is builder-to-builder. But this skill OFTEN finds issues in `voice: trailblazer` output (e.g., a UI button using generic AI copy). When it does: cross-reference `/rais-customer-voice-check` for the copy itself.
+`voice: internal` — review prose is builder-to-builder. But this skill OFTEN finds issues in elevated-tier voice output (e.g., a UI button using generic AI copy). When it does: cross-reference the active pack's voice gates for the copy itself (none by default).
 
 ## Failure modes
 
@@ -114,4 +114,3 @@ Outside voices (Codex + Claude subagent) can propose alternative design directio
 - `/plan-eng-review` — runs in parallel for arch + tests
 - `/design-review` — diff-scoped lighter variant (when plan-design-review is overkill)
 - `/design-consultation` — interactive design partner mode
-- `/rais-customer-voice-check` — eval UI copy when Trailblazer-tier

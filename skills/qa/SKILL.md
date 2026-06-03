@@ -14,7 +14,7 @@ The active-QA skill. Runs the repo's test suite, parses failures, applies target
 
 ## When to use
 
-- You just finished implementation and want a clean test pass before `/review` or `/release-ev2`
+- You just finished implementation and want a clean test pass before `/review` or `/ship`
 - CI is red and you want to reproduce + fix locally before pushing
 - After a refactor where snapshots and fixtures need to catch up
 
@@ -76,7 +76,7 @@ Remaining: 2
 
 ## Voice tier note
 
-`voice: internal`. QA reports are engineering-internal — no Trailblazer voice.
+`voice: internal`. QA reports are engineering-internal — no elevated voice tier.
 
 ## Failure modes
 
@@ -114,4 +114,4 @@ Iteration 3: 2 failures remaining (non-auto-fixable)
 - `/qa-only` — read-only variant for ship-gate verification
 - `/investigate` — when QA finds a real product-logic bug
 - `/review` — runs after QA clean for diff-scoped review
-- `/release-ev2` — reads QA status as a pre-flight gate
+- `/ship` — reads QA status as a pre-flight gate

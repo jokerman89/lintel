@@ -113,7 +113,7 @@ Recommendation: A
 
 ## Voice tier note
 
-`voice: internal`. Design docs are engineering-internal. If the design covers a customer-facing surface, copy decisions reference the Trailblazer grid as a standard — but the design prose itself is internal.
+`voice: internal`. Design docs are engineering-internal. If the design covers a customer-facing surface, copy decisions reference the active pack's voice grid as a standard — but the design prose itself is internal.
 
 ## Failure modes
 

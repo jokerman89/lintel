@@ -10,7 +10,7 @@ cli_support: [claude-code, codex]
 
 # /document-generate
 
-Reads source code (or a directory of source files) and produces a target documentation artifact. Three voice tiers: `internal` (engineering reference), `customer` (Trailblazer-voiced guide), `tutorial` (step-by-step onboarding for newcomers).
+Reads source code (or a directory of source files) and produces a target documentation artifact. Three voice tiers: `internal` (engineering reference), `customer` (pack-voiced guide, using the active pack's customer-facing voice tier), `tutorial` (step-by-step onboarding for newcomers).
 
 Distinct from `DocWriter` subagent: that one detects drift + updates existing docs. This skill generates new docs from source.
 
@@ -31,7 +31,7 @@ Distinct from `DocWriter` subagent: that one detects drift + updates existing do
 
 - Required `--source <path-or-glob>` — source files to document
 - Required `--target <type>` — `reference` | `customer-guide` | `tutorial`
-- Optional `--voice <internal|trailblazer>` — voice tier (default: internal for reference/tutorial, trailblazer for customer-guide)
+- Optional `--voice <internal|pack>` — voice tier (default: internal for reference/tutorial, the active pack's customer-facing tier for customer-guide)
 - Optional `--out <path>` — output path (default: `docs/<source-stem>.md` for reference, `docs/guides/<source-stem>.md` for customer-guide, `docs/tutorials/<source-stem>.md` for tutorial)
 - Optional `--depth <shallow|deep>` — shallow = function signatures + one-liners; deep = examples + edge cases + caveats
 
@@ -48,12 +48,12 @@ Distinct from `DocWriter` subagent: that one detects drift + updates existing do
    - Internal helpers section (if `--depth deep`)
    - Cross-references to related modules
 
-   **`customer-guide`** (trailblazer-voiced when --voice trailblazer):
-   - Welcome paragraph (Reveal/Curtain — what's this tool for, what's the hidden value)
-   - 3-5 "you can do this" sections (Inspire/Vernacular — what becomes possible)
-   - Optional "here's where teams get stuck" (Provoke/Skewer — common assumption broken)
+   **`customer-guide`** (pack-voiced when `--voice pack`):
+   - Welcome paragraph (what's this tool for, what's the hidden value)
+   - 3-5 "you can do this" sections (what becomes possible)
+   - Optional "here's where teams get stuck" (common assumption broken)
    - "Next steps" CTA
-   - Marked DRAFT — requires `/rais-customer-voice-check` before distribution
+   - Marked DRAFT — requires the active pack's compliance gates before distribution
 
    **`tutorial`** (step-by-step):
    - "By the end of this you'll have..." outcome statement
@@ -96,19 +96,19 @@ Code examples: 9
 ## Compliance integration
 
 - Layer 2 scan on every generated section before write.
-- `--voice trailblazer` output: marked DRAFT, gated behind `/rais-customer-voice-check` before distribution.
-- AI-tell vocabulary scan (Tier 1 blocklist from OurVoice-corpus.md) for both internal and trailblazer voice — keeps engineering docs from leaking into LLM-style prose.
+- `--voice pack` output: marked DRAFT, gated behind the active pack's compliance gates (`resolve_pack_field compliance.hooks`; none by default) before distribution.
+- AI-tell vocabulary scan (generic Tier 1 blocklist, extended by the active pack's voice corpus if one is configured) for both internal and pack voice — keeps engineering docs from leaking into LLM-style prose.
 
 ## Voice tier note
 
-`voice: mixed`. Reference + tutorial default to internal. Customer-guide defaults to trailblazer (with DRAFT gating). Operator can override via `--voice`.
+`voice: mixed`. Reference + tutorial default to internal. Customer-guide defaults to the active pack's customer-facing tier (with DRAFT gating). Operator can override via `--voice`.
 
 ## Failure modes
 
 - **Source not found:** report missing paths, bail.
 - **No public exports detected in source:** ask whether to document internal helpers (operator may want a private-API doc).
 - **Compliance scan hits:** STOP, surface which section + pattern, refuse to write.
-- **Trailblazer voice without T0 corpus calibration:** WARN — generation will be best-effort but UNCALIBRATED. Recommend running calibration before customer distribution.
+- **Pack voice requested but no pack corpus configured:** WARN — generation will be best-effort against generic ground rules only. Recommend installing a voice pack before customer distribution.
 - **Output path already exists:** ask via AskUserQuestion — overwrite, append, or write to alternative path with -v2 suffix.
 - **Tests directory absent (reference target):** generate without example signal, mark as low-fidelity.
 
@@ -124,8 +124,8 @@ Code examples: 9
 **Customer guide (DRAFT):**
 ```
 > /document-generate --source src/api/billing/ --target customer-guide
-[Generates trailblazer-voice draft]
-✓ docs/guides/billing.md DRAFT generated. Run /rais-customer-voice-check before distribution.
+[Generates pack-voice draft]
+✓ docs/guides/billing.md DRAFT generated. Run the active pack's compliance gates before distribution.
 ```
 
 **Newcomer tutorial:**
@@ -138,7 +138,6 @@ Code examples: 9
 ## See also
 
 - `DocWriter` subagent — detects drift in existing docs (use post-generate to keep them fresh)
-- `/rais-customer-voice-check` (Phase 3) — required gate for trailblazer-voice output
-- `/msvoice-rewrite` (Phase 3) — rewrite internal-voice content to trailblazer
+- The active pack's compliance gates — required gate for pack-voice output
 - `/learn` — record any documentation patterns worth remembering
-- OurVoice-corpus.md — the calibration anchor for trailblazer-voice output
+- The active pack's voice corpus (`resolve_pack_field voice.corpus`; none by default) — the calibration anchor for pack-voice output

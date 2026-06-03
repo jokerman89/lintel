@@ -1,7 +1,7 @@
 ---
 name: scaffold-internal-tool
-layer: ms-team
-description: Initialize an internal-tooling repo — CI, README, MS compliance hooks, no customer surface.
+layer: foundation
+description: Initialize an internal-tooling repo — CI, README, pack compliance hooks, no customer surface.
 color: green
 tools: Read, Write, Bash, Glob
 voice: internal
@@ -10,7 +10,7 @@ cli_support: [claude-code, codex]
 
 # /scaffold-internal-tool
 
-Initializes an internal-tooling repo (CLI, dashboard, automation script, ops utility). Distinct from `/scaffold-engagement-demo` (customer-bearing) and `/scaffold-mvp` (product-grade). Internal-tool scaffold is leaner — no customer-voice gates, but full compliance hooks.
+Initializes an internal-tooling repo (CLI, dashboard, automation script, ops utility). Distinct from `/scaffold-mvp` (product-grade) and from any customer-bearing scaffold a pack may provide. Internal-tool scaffold is leaner — no customer-voice gates, but it still applies the active pack's compliance hooks (none by default).
 
 ## When to use
 
@@ -21,7 +21,7 @@ Initializes an internal-tooling repo (CLI, dashboard, automation script, ops uti
 
 ## When NOT to use
 
-- Customer-bearing artifact — use `/scaffold-engagement-demo` or `/scaffold-mvp`
+- Customer-bearing artifact — use `/scaffold-mvp` (or a pack-provided customer-bearing scaffold)
 - Adding to existing repo — that's not scaffolding, that's a new module
 - Test-only scratch project — overkill
 
@@ -42,7 +42,7 @@ Initializes an internal-tooling repo (CLI, dashboard, automation script, ops uti
    - `script`: single-file `<name>.{ts,py,go,rs}` + minimal config
 2. **Standard files:**
    - `README.md` — purpose, install, usage, contributing
-   - `CLAUDE.md` — Boris template, internal-tool defaults
+   - `CLAUDE.md` — internal-tool defaults
    - `.gitignore`, `LICENSE` (MIT default)
    - `.editorconfig`
    - `tests/` directory with one starter test
@@ -56,7 +56,7 @@ Initializes an internal-tooling repo (CLI, dashboard, automation script, ops uti
    - `azure-devops`: `azure-pipelines.yml`
 5. **Compliance pre-wiring:**
    - `compliance/data-class.md` — declares this is internal-tool (no customer-data surface by default)
-   - First-party check baseline (no third-party SDKs pre-added)
+   - Preferred-vendor baseline (pack-configurable; none by default — no third-party SDKs pre-added)
 6. **Git init + first commit.**
 7. **Report.**
 
@@ -78,7 +78,7 @@ CI: github
 - README.md (template populated)
 - CLAUDE.md (internal-tool defaults)
 - .github/workflows/ci.yml
-- compliance/data-class.md (internal-tool default: Non-business)
+- compliance/data-class.md (internal-tool default: non-business)
 
 ## Next steps
 1. Edit src/index.ts — implement the CLI entry
@@ -90,13 +90,13 @@ CI: github
 
 ## Compliance integration
 
-- Pre-declares MS Business Data class as Non-business (internal-tool default — operator changes if the tool processes Business+ data).
-- Pre-wires `first-party-first` baseline: no third-party SDKs added by default.
+- Pre-declares a data class of non-business (internal-tool default — operator changes if the tool processes higher-sensitivity data).
+- Pre-wires a preferred-vendor baseline (pack-configurable; none by default): no third-party SDKs added by default.
 - No voice gates (this is internal-tool, no customer surface).
 
 ## Voice tier note
 
-`voice: internal`. Skill produces internal-tooling scaffold — no trailblazer surface involved.
+`voice: internal`. Skill produces internal-tooling scaffold — no elevated-tier surface involved.
 
 ## Failure modes
 
@@ -128,7 +128,5 @@ CI: github
 
 ## See also
 
-- `/scaffold-engagement-demo` — for customer-bearing scaffolds
 - `/scaffold-mvp` — for product-grade scaffolds
-- `/setup-ev2-targets` — wire deploy targets after scaffold
 - `/health` — validate scaffolded structure post-creation

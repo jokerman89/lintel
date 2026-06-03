@@ -152,7 +152,7 @@ YES — invoked anytime mid-session.
 
 - **Loading entire repo by accident** — glob carefully, preview file list before load if large
 - **Skipping budget check for >20k loads** — operator should see cost upfront
-- **Loading customer data without WorkProfile check** — if WorkProfile=on and files match customer-PII patterns, warn before load
+- **Loading customer data without a compliance check** — if the active pack's compliance mode is `hard` and files match customer-PII patterns, warn before load
 - **Caching warmed content across sessions** — ephemeral by design, each session is fresh
 
 ## Failure recovery

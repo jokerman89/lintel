@@ -83,7 +83,7 @@ Inherits from /li:cycle. Most relevant: BUILD DONE/BLOCKED.
 
 - PLAN cost-estimate gate + founder approval gate
 - Per-task two-stage review during BUILD
-- HARD-RULE hooks if WorkProfile=on
+- HARD-RULE hooks if the active pack's compliance mode is `hard` (`resolve_pack_field compliance.mode`; advisory by default)
 
 ## Hop-in support
 

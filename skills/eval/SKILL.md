@@ -1,7 +1,7 @@
 ---
 name: eval
-layer: ms-team
-description: Run TRAILBLAZER-TEST against TRAILBLAZER-CORPUS — per-cell accuracy → CALIBRATION.md.
+layer: foundation
+description: Run the active pack's voice TEST against its voice CORPUS — per-cell accuracy → CALIBRATION.md.
 color: orange
 tools: Read, Write, Bash
 voice: internal
@@ -10,36 +10,36 @@ cli_support: [claude-code, codex]
 
 # /li:eval
 
-The voice calibration runner. Applies `OurVoice-test.md` to every paragraph in `OurVoice-corpus.md`, compares the eval verdict to the `verdict_label` ground truth, computes per-cell accuracy, writes results to `OurVoice-calibration.md`.
+The voice calibration runner. Applies the pack's voice test rubric to every paragraph in the pack's voice corpus (`resolve_pack_field voice.corpus`; none by default), compares the eval verdict to the `verdict_label` ground truth, computes per-cell accuracy, writes results to a calibration file.
 
-This skill is what moves T0 from POPULATED → CALIBRATED. Calibration is a v1.0.0 prerequisite.
+This skill moves a voice corpus from POPULATED → CALIBRATED. Calibration is a ship prerequisite for any voice-bearing surface.
 
 ## When to use
 
-- T0 corpus is populated, ready to calibrate
+- Voice corpus is populated, ready to calibrate
 - Calibration is stale (>30 days) — refresh
-- Pre-ship of customer-bearing AI feature using trailblazer voice
+- Pre-ship of a customer-bearing AI feature using the pack's voice tier
 - TEST rubric was tuned — re-eval to measure if accuracy improved
 - After cell-coverage expansion (added more paragraphs to a cell)
 
 ## When NOT to use
 
-- Corpus is empty — populate first (operator + internal Copilot)
+- Corpus is empty — populate first, or the active pack defines no voice corpus
 - TEST rubric file missing — needed to compute verdicts
-- Single-paragraph spot-check — use `TrailblazerVoiceCritic` agent directly
+- Single-paragraph spot-check — apply the rubric directly
 
 ## Inputs
 
-- Optional `--corpus <path>` — path to corpus (default: `scaffolding/03-personal-advanced/voice/OurVoice-corpus.md`)
-- Optional `--test <path>` — path to test rubric (default: same dir, `OurVoice-test.md`)
+- Optional `--corpus <path>` — path to corpus (default: the active pack's voice corpus, `resolve_pack_field voice.corpus`)
+- Optional `--test <path>` — path to test rubric (default: same dir as the corpus, test variant)
 - Optional `--cells <list>` — evaluate only specific cells (e.g. `R1,R3,P2`)
-- Optional `--out <path>` — calibration output (default: same dir, `OurVoice-calibration.md`)
+- Optional `--out <path>` — calibration output (default: same dir as the corpus, calibration variant)
 - Optional `--threshold <pct>` — pass threshold per cell (default: 90)
 
 ## Workflow
 
 1. **Read corpus.** Parse YAML entries per cell. Filter by `--cells` if specified.
-2. **Read test rubric.** Load OurVoice-test.md prompt template.
+2. **Read test rubric.** Load the test rubric prompt template.
 3. **Per paragraph:**
    - Apply the TEST rubric prompt (this means an LLM call — Claude or Codex per `--cli`)
    - Extract YAML verdict from response (mode_attempted, technique, kind/daring/deep scores, ground_rules_passed/violated, anti_ai_vocab_detected, verdict)
@@ -51,7 +51,7 @@ This skill is what moves T0 from POPULATED → CALIBRATED. Calibration is a v1.0
 5. **Aggregate:**
    - Cells PASS / FAIL
    - Overall calibration status (CALIBRATED if ≥10 cells PASS)
-6. **Write CALIBRATION.md** with timestamp, per-cell results, aggregate verdict.
+6. **Write the calibration file** with timestamp, per-cell results, aggregate verdict.
 7. **Report.**
 
 ## Report format
@@ -60,7 +60,7 @@ This skill is what moves T0 from POPULATED → CALIBRATED. Calibration is a v1.0
 Lintel Voice Eval
 
 Corpus: 60 paragraphs (33 known-good + 27 known-bad)
-Test rubric: OurVoice-test.md v2.0
+Test rubric: voice-test.md v2.0
 Eval LLM: Claude Opus 4.7
 Threshold: 90%
 
@@ -99,22 +99,22 @@ Threshold: 90%
 
 ## Status
 CALIBRATED — 10/12 cells PASS at ≥90%.
-v1.0.0 voice prerequisite: met.
+Voice ship prerequisite: met.
 
-Drop the 2 PARTIAL cells from v1 scope OR iterate rubric and re-run.
+Drop the 2 PARTIAL cells from scope OR iterate rubric and re-run.
 
-Written to: OurVoice-calibration.md
+Written to: voice-calibration.md
 ```
 
 ## Compliance integration
 
-- LLM eval calls run against Claude Opus (or Codex if `--cli codex`). For MS-internal: routes via Azure OpenAI gateway if configured.
+- LLM eval calls run against Claude Opus (or Codex if `--cli codex`). The active pack may route calls via a configured gateway.
 - Audit-logged each run: `~/.lintel/audit/eval-runs.jsonl`.
-- Calibration snapshot stamped with run-id. Provenance records reference snapshots for stability.
+- Calibration snapshot stamped with run-id; downstream consumers reference snapshots for stability.
 
 ## Voice tier note
 
-`voice: internal`. Eval report is engineering-internal; the SUBJECT is trailblazer.
+`voice: internal`. Eval report is engineering-internal; the SUBJECT is the pack's voice tier.
 
 ## Failure modes
 
@@ -130,7 +130,7 @@ Written to: OurVoice-calibration.md
 ```
 > /li:eval
 [60 LLM calls + comparison]
-10/12 cells PASS. CALIBRATED. v1.0.0 voice prerequisite met.
+10/12 cells PASS. CALIBRATED. Voice ship prerequisite met.
 ```
 
 **Cell-scoped re-eval:**
@@ -149,8 +149,8 @@ Written to: OurVoice-calibration.md
 
 ## See also
 
-- OurVoice-corpus.md — the input
-- OurVoice-test.md — the rubric
-- OurVoice-calibration.md — the output
-- `/rais-customer-voice-check` — reads calibration to decide whether to certify
-- `SHIP-GATE.md` — v1.0.0 prerequisites
+- the pack's voice corpus — the input (`resolve_pack_field voice.corpus`)
+- the pack's voice test rubric — the rubric
+- the calibration file — the output
+- the active pack's voice gate — reads calibration to decide whether to certify
+- `SHIP-GATE.md` — ship prerequisites

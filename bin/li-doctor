@@ -2,7 +2,7 @@
 # li-doctor — cross-CLI health check
 #
 # Detects installed AI CLIs, Lintel install state per CLI, version drift,
-# scaffolding install, brand asset age, voice corpus calibration.
+# scaffolding install, and hook activation.
 #
 # Usage: li-doctor [--verbose] [--json]
 
@@ -133,44 +133,7 @@ else
 fi
 echo ""
 
-# ── 4. Brand assets ──
-echo "## Brand assets"
-if [ -d "$LINTEL_HOME/brand" ]; then
-  age_days=$(( ( $(date +%s) - $(stat -c %Y "$LINTEL_HOME/brand" 2>/dev/null || stat -f %m "$LINTEL_HOME/brand") ) / 86400 ))
-  if [ "$age_days" -gt 90 ]; then
-    warn "brand assets at ${LINTEL_HOME}/brand (age: ${age_days} days — stale, >90 days threshold)"
-    echo "    Fix: invoke /brand-update skill"
-  else
-    ok "brand assets at ${LINTEL_HOME}/brand (age: ${age_days} days)"
-  fi
-else
-  warn "no brand assets at $LINTEL_HOME/brand/"
-  echo "    Fix: invoke /brand-update skill, OR run /generate-* with default-templates"
-fi
-echo ""
-
-# ── 5. Voice corpus calibration ──
-echo "## Voice corpus calibration"
-CALIBRATION_FILE=""
-for candidate in \
-  "$LINTEL_HOME/scaffolding/03-ms-team/voice/OurVoice-calibration.md" \
-  "$LINTEL_HOME/voice/OurVoice-calibration.md"; do
-  [ -f "$candidate" ] && { CALIBRATION_FILE="$candidate"; break; }
-done
-
-if [ -n "$CALIBRATION_FILE" ]; then
-  status=$(grep -o "status:[[:space:]]*[A-Z_]*" "$CALIBRATION_FILE" 2>/dev/null | head -1 | awk '{print $2}')
-  case "$status" in
-    CALIBRATED) ok "voice corpus: CALIBRATED" ;;
-    NOT_CALIBRATED) warn "voice corpus: NOT_CALIBRATED (run T0-CALIBRATION-WORKFLOW.md)" ;;
-    *) warn "voice corpus: status unknown ($status)" ;;
-  esac
-else
-  warn "voice calibration file not found"
-fi
-echo ""
-
-# ── 6. Hook activation ──
+# ── 4. Hook activation ──
 echo "## Hooks"
 hook_count=0
 if [ -d "$LINTEL_HOME/hooks" ]; then

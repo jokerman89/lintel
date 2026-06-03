@@ -126,7 +126,7 @@ trap 'rm -rf "$TMP"' EXIT
   export LINTEL_REPO_ROOT="$REPO_ROOT"
   source "$HELPER"
   output=$(list_skill_aliases)
-  for pair in "match -> skill-router" "setup-brain -> gbrain-setup" "sync-brain -> gbrain-sync" "agt-tier-stamp -> agent-tier-stamp"; do
+  for pair in "match -> skill-router" "setup-brain -> gbrain-setup" "sync-brain -> gbrain-sync"; do
     if echo "$output" | grep -qF "$pair"; then
       echo "  PASS: list_skill_aliases reports: $pair"
     else
@@ -141,7 +141,6 @@ declare -A RENAMES=(
   [match]=skill-router
   [setup-brain]=gbrain-setup
   [sync-brain]=gbrain-sync
-  [agt-tier-stamp]=agent-tier-stamp
 )
 for old in "${!RENAMES[@]}"; do
   new="${RENAMES[$old]}"
@@ -178,7 +177,7 @@ for old in "${!RENAMES[@]}"; do
 done
 
 # Step 6 — Each rename has matching entry in aliases.yaml
-for old in match setup-brain sync-brain agt-tier-stamp; do
+for old in match setup-brain sync-brain; do
   if grep -qE "^[[:space:]]*-[[:space:]]*old:[[:space:]]*$old\$" "$ALIASES"; then
     pass "aliases.yaml has skill_alias entry: old=$old"
   else

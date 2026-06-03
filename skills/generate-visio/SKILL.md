@@ -1,6 +1,6 @@
 ---
 name: generate-visio
-layer: ms-team
+layer: foundation
 description: ⚠ TEMPLATE ONLY — Slot for Visio diagram generation (architecture sketches, network topologies, process flows). Content not curated. AI generates fresh at invocation per L-001.
 color: orange
 tools: Read, Write, Bash, Glob
@@ -27,29 +27,28 @@ Alternative consideration: Visio diagrams are often delivered as `.vsdx` (Visio 
 When invoked (via `/li:generate-visio --from-pipeline <run-dir>` or directly):
 
 1. **Diagram-type detection:** AI reads content.md + identifies sections with diagrammable content (architecture sketches in §X, network topologies in §Y, process flows in §Z). Detection signals: keywords like "topology," "flow," "sequence," "deployment," explicit Visio mentions in `notes_for_writer` from outline.
-2. **Diagram-type selection:** Per detected section, AI picks the right Visio diagram-type (Azure Architecture, Network, Cross-functional Flowchart, Sequence Diagram, etc.). For Azure-themed content, defaults to "Azure Architecture" stencils.
-3. **Stencil + connector layout:** AI lays out shapes per Azure-Architecture-Center reference patterns (or equivalent for non-Azure content). Uses design-spec.json's palette for color-coding (primary for compute, secondary for network, accent for identity, etc.).
+2. **Diagram-type selection:** Per detected section, AI picks the right Visio diagram-type (Cloud Architecture, Network, Cross-functional Flowchart, Sequence Diagram, etc.). For cloud-architecture content, defaults to a cloud-architecture stencil set (provider-specific stencils contributed by the active pack if present).
+3. **Stencil + connector layout:** AI lays out shapes per standard architecture-diagram reference patterns. Uses design-spec.json's palette for color-coding (primary for compute, secondary for network, accent for identity, etc.).
 4. **Output-format selection:** Default `vsdx` for editable handoff. `svg` for embedded artifacts. `png` for slide-embed. `drawio` for collaborative editing if customer prefers draw.io over Visio.
 5. **Build:** Use python-vsdx or libvsx-equivalent (or generate via draw.io XML format if more reliable). Brand-template from `~/.lintel/brand/visio-templates/` if present.
 6. **QA hand-off:** Pass produced diagram to `/li:generate-qa` for validation (mostly visual — stencil-consistency, connector-validity).
 
 ## Brand template
 
-`~/.lintel/brand/visio-templates/` slot exists. Templates might include: `azure-architecture-base.vsdx`, `network-topology-base.vsdx`, `swimlane-base.vsdx`. If template present, AI uses it as starting stencil set. If empty, AI uses Azure Architecture Center stencils (canonical) or generic shapes.
+`~/.lintel/brand/visio-templates/` slot exists. Templates might include: `cloud-architecture-base.vsdx`, `network-topology-base.vsdx`, `swimlane-base.vsdx`. If template present, AI uses it as starting stencil set. If empty, AI uses generic shapes (or a provider stencil set contributed by the active pack).
 
 ## Agent dispatch
 
 Per `skills/generate/agent-mapping.yaml`:
-- Primary: AzureArchitect (for Azure-themed diagrams) or general SolutionArchitect
+- Primary: SystemArchitect (default architecture/topology diagrams)
 - Conditional: NetworkArchitect if topology-focused content
-- Conditional: SecurityAuditor if diagram includes security boundaries (trust zones, DMZ, NSG)
-- Conditional: BicepReviewer if diagram references IaC-deployable components (post-diagram code suggestion)
+- Conditional: SecurityAuditor if diagram includes security boundaries (trust zones, DMZ)
 
 ## Voice tier
 
 `voice: internal` default. Diagrams have minimal prose (labels, captions). Voice constraints apply to labels but loosely.
 
-If invoked with `--customer-share`, requires upstream `/li:rais-customer-voice-check` PASS on any text labels in diagram (orchestrator-level gate).
+If invoked with `--customer-share`, requires an upstream PASS from the active pack's voice gate (none by default) on any text labels in diagram (orchestrator-level gate).
 
 ## Status protocol
 
@@ -60,7 +59,7 @@ If invoked with `--customer-share`, requires upstream `/li:rais-customer-voice-c
 
 ## When to promote from slot to curated
 
-If a recurring diagram-pattern emerges (e.g., always Azure-Arc-architecture with same shape-layout), promote that pattern into the SKILL.md body — that becomes a canonical Visio-builder for that scenario.
+If a recurring diagram-pattern emerges (e.g., always the same cloud-architecture with same shape-layout), promote that pattern into the SKILL.md body — that becomes a canonical Visio-builder for that scenario.
 
 Until then: AI generates fresh per invocation. Repo stays clean.
 

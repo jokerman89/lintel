@@ -134,8 +134,8 @@ If discover-report identifies files outside what's currently in context, surface
 
 "Context warmup recommended for PLAN phase:
 - 8 ADRs (~12k tokens) — `/li:context-warm-adrs networking`
-- Related skills overlap (~5k tokens) — `/li:context-warm 'skills/li-az-*'`
-- Customer Bicep templates (~15k tokens) — `/li:context-warm '~/Workspace/customer-X/bicep/*'`
+- Related skills overlap (~5k tokens) — `/li:context-warm 'skills/li-*'`
+- Infra templates (~15k tokens) — `/li:context-warm '~/Workspace/project-X/infra/*'`
 
 Estimated total warm-up: ~32k tokens. Headroom available: <X>k."
 
@@ -178,7 +178,7 @@ skills_overlap: <count>
 # Recommended agents for PLAN dispatch
 | Category | Agent | Why |
 |---|---|---|
-| ms-specific | AzureArchitect | wedge involves Azure-native design |
+| engineering | SystemArchitect | wedge involves system-level design |
 | security | SecretsScanReviewer | wedge touches auth flow |
 | ...
 

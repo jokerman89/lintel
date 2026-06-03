@@ -1,7 +1,7 @@
 ---
 name: context-warm-from-url
 layer: foundation
-description: Fetch URL + dump into context. Useful for loading Microsoft Learn docs, blog posts, external references on-demand.
+description: Fetch URL + dump into context. Useful for loading documentation, blog posts, external references on-demand.
 color: cyan
 tools: Read, Bash, WebFetch
 voice: internal
@@ -12,17 +12,17 @@ You are the context-warm-from-url skill.
 
 ## What this skill does
 
-Fetches a URL via WebFetch and dumps content into session context. With WorkProfile=on, validates URL is from approved domain list (MS-domain, customer-approved, etc.).
+Fetches a URL via WebFetch and dumps content into session context. When the active pack's compliance mode is `hard`, validates the URL against the pack's approved-domain allowlist (none by default).
 
 ## When to use
 
-- Loading a Microsoft Learn doc for current discussion
+- Loading a documentation page for current discussion
 - Bringing in a referenced blog post for design comparison
 - Fetching a specific gist or GitHub README
 
 ## When NOT to use
 
-- Untrusted URLs (WorkProfile gate blocks)
+- Untrusted URLs (pack compliance gate blocks when mode is `hard`)
 - Already in context (don't re-fetch)
 - Long-running data fetch (not for live API calls — those are subagent or tool work)
 
@@ -39,28 +39,22 @@ if ! echo "$url" | grep -qE '^https?://'; then
   exit 1
 fi
 
-# WorkProfile check (if on)
-workprofile=$(grep '^workprofile:' "$LINTEL_HOME/profile.yaml" | awk '{print $2}')
-if [ "$workprofile" = "on" ]; then
-  # Allowed domains: MS-domain, customer-approved
-  allowed_domains=(
-    "learn.microsoft.com"
-    "docs.microsoft.com"
-    "techcommunity.microsoft.com"
-    "azure.microsoft.com"
-    "github.com/microsoft"
-    "github.com/Azure"
-  )
-  
+# Compliance check (only enforced when the active pack runs in hard mode)
+compliance_mode=$(resolve_pack_field compliance.mode)   # advisory by default
+if [ "$compliance_mode" = "hard" ]; then
+  # Allowed domains come from the active pack's allowlist (empty by default)
+  mapfile -t allowed_domains < <(resolve_pack_field compliance.url_allowlist 2>/dev/null)
+
   domain=$(echo "$url" | sed -E 's|https?://([^/]+).*|\1|')
   is_allowed=no
   for allowed in "${allowed_domains[@]}"; do
+    [ -z "$allowed" ] && continue
     [[ "$domain" == "$allowed" || "$domain" == *.${allowed#*.} ]] && { is_allowed=yes; break; }
   done
-  
+
   if [ "$is_allowed" = "no" ]; then
     # Ask operator
-    echo "URL not in MS-allowed list. Confirm or cancel?"
+    echo "URL not in the pack's approved-domain allowlist. Confirm or cancel?"
     # AskUserQuestion: A) load anyway / B) cancel
   fi
 fi
@@ -85,7 +79,7 @@ Load into session context via Read-equivalent injection.
 event: context_warm_from_url
 url: <url>
 domain: <domain>
-workprofile_check: <pass/skipped>
+compliance_check: <pass/skipped>
 tokens_added: <approx>
 ts: <timestamp>
 ```
@@ -94,11 +88,11 @@ Audit log for compliance trail: `~/.lintel/audit/url-fetches.jsonl`.
 
 ## Status protocol
 
-- DONE / BLOCKED (URL invalid OR WorkProfile denied)
+- DONE / BLOCKED (URL invalid OR pack compliance gate denied)
 
 ## Pause-points
 
-- Non-MS domain confirmation (if WorkProfile=on)
+- Off-allowlist domain confirmation (if the active pack's compliance mode is `hard`)
 
 ## Hop-in support
 
@@ -110,7 +104,7 @@ Reads via WebFetch tool. Writes audit log.
 
 ## Anti-patterns
 
-- **Bypassing WorkProfile URL check** — never
+- **Bypassing the pack compliance URL check** — never
 - **Fetching same URL repeatedly** — check 15-min cache via WebFetch
 - **Loading URLs that don't actually contain text** (binaries, paywalled, JS-rendered) — surface failure cleanly
 

@@ -1,6 +1,6 @@
 ---
 name: generate-style-learn
-layer: ms-team
+layer: foundation
 description: Analysera .pptx/.docx/web-examples och extrahera reusable style palette. v3.5 Fas 3 av doc-generation-pipeline.
 color: orange
 tools: Read, Write, Bash, Glob
@@ -217,7 +217,6 @@ YES — solo-invocable. Designed för one-shot extraction sessions.
 **Consumed by:**
 - `/li:generate --palette <name>` (downstream format-builders)
 - `/li:generate-design --palette <name>` (in shared pipeline)
-- `/li:brand-update` (kan use extraction-result vid brand-refresh)
 
 ## Anti-patterns
 

@@ -1,6 +1,6 @@
 ---
 name: frontend-typography
-layer: ms-team
+layer: foundation
 description: Frontend design-director sub-skill — picks font-family-stacks + variable-axes-config + size-scale + line-heights + font-loading-strategy from brief. Solo-invokable.
 color: orange
 tools: Read, Write, Bash, Glob

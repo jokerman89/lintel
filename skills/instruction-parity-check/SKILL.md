@@ -27,8 +27,8 @@ Lintel ships 6 instruktionsfiler so different CLIs read same Lintel-rules:
 Per v3.6 backlog 6.2: "De kommer driva — en Copilot-kollega får olika regler än en Claude-Code-kollega. Detta är multi-CLI-promise's weak point."
 
 Detta skill kompararar substans-equivalens över filerna + flag drift på 4 key sections:
-1. **Compliance rules** (5+7+8 tier, MS Business Data classification, customer-data block)
-2. **Voice tier semantics** (internal vs trailblazer-draft)
+1. **Compliance rules** (the active pack's compliance gates, data classification, customer-data block)
+2. **Voice tier semantics** (internal vs the active pack's voice tier)
 3. **Scaffolding principles** (L-001 + L-002 + L-003 reflected)
 4. **Auto-mode boundaries** (what's OK without prompt, what needs auth)
 

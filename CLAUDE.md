@@ -8,11 +8,11 @@ For canonical session bootstrap, see [AGENT-INSTRUCTIONS.md](AGENT-INSTRUCTIONS.
 
 ## Repo overview
 
-Lintel is the MS-CAIP-SE session harness — markdown scaffolding for agent-based development.
+Lintel is a company-neutral, pack-driven session harness — markdown scaffolding for agent-based development. Company identity (the Microsoft CAIP-SE workprofile) loads from the separate lintel-caip-pack.
 
-- `skills/` — 151 slash-commands (foundation + ms-team layers)
-- `agents/` — 78 subagent roles organized per domain (ms-specific, engineering, doc-gen, voice, security, compliance, devops, customer, communication)
-- `hooks/shared/` — 19 compliance + workflow hooks
+- `skills/` — slash-commands (8-phase cycle + engineering modules + session-harness)
+- `agents/` — subagent roles organized per domain (engineering, doc-gen, security, compliance, devops, customer, communication, frontend)
+- `hooks/shared/` — compliance + workflow hooks
 - `scaffolding/` — templates that get copied INTO other repos via `bin/li-scaffold`
 - `docs/design/lintel-v3-plan.md` — current architecture
 - `docs/per-cli/` — per-CLI plugin setup guides
@@ -39,11 +39,11 @@ claude --plugin-dir E:/Workspace/jokerman-lintel
 
 ### Skill namespacing
 
-Skills are namespaced `/li:qa`, `/li:release-ev2`, etc. Inside this repo's own session, the slash-commands work directly because Claude Code reads SKILL.md files via the plugin manifest.
+Skills are namespaced `/li:qa`, `/li:cycle`, etc. Inside this repo's own session, the slash-commands work directly because Claude Code reads SKILL.md files via the plugin manifest.
 
 ### Subagent invocation
 
-Subagents in `agents/<category>/<Name>.md` are spawned via the Task tool. Agent name resolution uses the `description:` field for affinity match. To invoke explicitly: "Use the OneCSAuditor agent for this check."
+Subagents in `agents/<category>/<Name>.md` are spawned via the Task tool. Agent name resolution uses the `description:` field for affinity match. To invoke explicitly: "Use the SecurityAuditor agent for this check."
 
 ### Plan mode
 

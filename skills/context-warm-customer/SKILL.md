@@ -12,13 +12,13 @@ You are the context-warm-customer skill — customer-engagement repo loader.
 
 ## What this skill does
 
-Loads a customer-engagement repo's relevant state into current session: their CLAUDE.md, recent ADRs, Bicep/Terraform IaC, recent commits, README. Useful when current session needs cross-repo reasoning (e.g., comparing internal Azure patterns against customer's current state).
+Loads a customer-engagement repo's relevant state into current session: their CLAUDE.md, recent ADRs, IaC (Terraform/Bicep/etc.), recent commits, README. Useful when current session needs cross-repo reasoning (e.g., comparing internal reference patterns against the customer's current state).
 
 ## When to use
 
 - Pre-customer-meeting prep on operator's machine
 - Cross-repo reasoning: "compare our reference architecture against customer X's actual state"
-- Operator wants to assess customer's CAF/WAF posture before recommending
+- Operator wants to assess a customer's architecture posture before recommending
 
 ## When NOT to use
 
@@ -49,7 +49,7 @@ fi
 
 ### Step 2 — Sensitivity check
 
-WorkProfile=on: verify customer repo's `.gitignore` excludes customer-PII patterns. If patterns present in tracked files: warn + ask confirm.
+If the active pack's compliance mode is `hard` (`resolve_pack_field compliance.mode`): verify customer repo's `.gitignore` excludes customer-PII patterns. If patterns present in tracked files: warn + ask confirm.
 
 ### Step 3 — Identify relevant files (limited scope)
 
@@ -101,7 +101,7 @@ Also append to `~/.lintel/audit/customer-repo-access.jsonl` for traceability.
 
 ## Pause-points
 
-- Sensitivity confirmation (MANDATORY if WorkProfile=on)
+- Sensitivity confirmation (MANDATORY if the active pack's compliance mode is `hard`)
 
 ## Hop-in support
 

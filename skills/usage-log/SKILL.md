@@ -42,7 +42,7 @@ Designed per Cohort 2 i v3.6 backlog. Foundation som `/li:maintenance` (5.3) och
 ```json
 {
   "ts": "2026-05-28T14:23:45Z",
-  "skill": "az-tldr",
+  "skill": "research",
   "mode": "full",
   "tokens_est": 3500,
   "cli": "claude-code",

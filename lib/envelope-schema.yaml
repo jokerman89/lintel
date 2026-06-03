@@ -37,7 +37,7 @@ head:
     - parent_envelope_id    # string|null: if this envelope replies to another
     - pack                  # string|null: active pack name at issue time
     - operator              # string|null: $(whoami) at issue time
-    - voice_tier            # enum|null: internal | mixed | trailblazer | custom
+    - voice_tier            # enum|null: internal | mixed | external | custom
     - cost_estimate_tokens  # int|null: predicted token cost of consuming this envelope
 
 # ─── kinds (HEAD.kind enum values) ─────────────────────────────────────────

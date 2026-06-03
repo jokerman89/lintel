@@ -41,7 +41,7 @@ Clear ownership domains:
   - `TestRunner` — runs the test suite and reports failures
   - `SanityChecker` — cross-component architecture audit
   <!-- PROJECT:START -->
-  - {{Add project-specific subagents here as you create them, e.g. `ADRReader`, `BicepReviewer`, etc.}}
+  - {{Add project-specific subagents here as you create them, e.g. `ADRReader`, `MigrationAuditor`, etc.}}
   <!-- PROJECT:END -->
 - Inline pattern: "Use a subagent for X" in prompts when it fits
 - When in doubt: prefer a subagent over polluting main context
@@ -254,8 +254,8 @@ See `.claude/SUBAGENT-GUIDE.md` for how to add new subagents or revise existing 
 
 ## Voice (for any agent that produces customer-facing or official-communication content in this repo)
 
-If this repo produces customer-bound or official-communication output, agents that generate that output must declare `voice: trailblazer` in their frontmatter and follow Microsoft Our Voice guidelines (Kind + Daring + Deep, 3 modes, 6 ground rules). See JStack Layer 3 voice docs for the full guide.
+Voice is pack-driven. The active pack's voice tier (`resolve_pack_field voice.default_tier`; neutral default: `internal`) determines the default style, and a pack may supply a voice corpus (`resolve_pack_field voice.corpus`; none by default) plus a critic that checks customer-facing output before it lands. If this repo produces customer-bound or official-communication output, agents that generate it declare a non-internal voice tier and follow whatever guidelines the active pack defines.
 
 Internal dev agents (CodeReviewer, TestRunner, planning, etc.) declare `voice: internal` and use the direct "builder talking to builder" style.
 
-When in doubt: internal voice is the default. Use trailblazer only for genuinely customer-bound content.
+When in doubt: internal voice is the default. Use a customer-facing tier only for genuinely customer-bound content.

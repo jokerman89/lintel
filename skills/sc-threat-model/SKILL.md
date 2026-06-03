@@ -21,7 +21,7 @@ Per L-001: workflow + dispatch contract. Content from agents at invocation.
 - SC full pass threat_model_complete checkpoint
 - Single action `/li:sc single --action threat-model`
 - New external surface or auth path introduction
-- Pre-customer-engagement threat surface review
+- Pre-release threat surface review
 
 ## When NOT to use
 

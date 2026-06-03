@@ -19,7 +19,6 @@ Lintel's CEO review is **inspired-by gstack's** equivalent but written fresh per
 - Plan introduces new user-facing features
 - Plan changes product direction
 - Scope feels ambitious — challenge the wedge
-- A customer engagement is about to pivot
 - Before deciding to build vs. partner vs. defer
 
 ## When NOT to use
@@ -81,7 +80,7 @@ The 5 always-on rules apply during the review (don't surface customer data in th
 
 ## Voice tier note
 
-This skill's output uses `voice: internal` — direct, operator-to-operator. Even when reviewing a customer-facing product, the review itself is for the internal team. No Trailblazer overhead.
+This skill's output uses `voice: internal` — direct, operator-to-operator. Even when reviewing a customer-facing product, the review itself is for the internal team. No elevated voice tier applies regardless of the active pack.
 
 ## Failure modes
 

@@ -10,16 +10,16 @@ cli_support: [claude-code, codex]
 
 # /review
 
-Reviews the current branch's diff before landing. Lighter than `/plan-eng-review` (which reviews a plan/design doc). Use when there's no plan but you want a code review pass before `/release-ev2`.
+Reviews the current branch's diff before landing. Lighter than `/plan-eng-review` (which reviews a plan/design doc). Use when there's no plan but you want a code review pass before `/ship`.
 
 Auto-scales: small diffs get fast review; large diffs (200+ lines) additionally get Codex structured review with P1 gate.
 
 ## When to use
 
 - Branch is feature-complete, no design doc exists
-- Quick correctness pass before `/release-ev2`
+- Quick correctness pass before `/ship`
 - Small fixes / refactors that don't warrant `/plan-eng-review`
-- `/release-ev2` blocked by "Eng Review NOT CLEARED" and the work is too small for full plan-eng-review
+- `/ship` blocked by "Eng Review NOT CLEARED" and the work is too small for full plan-eng-review
 
 ## When NOT to use
 
@@ -46,7 +46,7 @@ Auto-scales: small diffs get fast review; large diffs (200+ lines) additionally 
    - Test coverage (does the diff add tests for new code paths? regression risk?)
    - Performance (N+1, memory, slow paths introduced)
 4. **Codex pass (if LARGE diff or --codex)** — invoke Codex with structured review prompt. P1 findings BLOCK ship.
-5. **Persist via first-party `bin/li-review-log`** (legacy alias: gstack-review-log) with `skill: review` (distinct from `plan-eng-review`).
+5. **Persist via `bin/li-review-log`** (legacy alias: gstack-review-log) with `skill: review` (distinct from `plan-eng-review`).
 6. **Output: findings list + severity + suggested fixes.**
 
 ## Report format
@@ -71,13 +71,13 @@ Codex pass: optional, skipped this run
 
 ## Verdict
 - P1 count: 0 — no block
-- P2 count: 1 — should fix before /release-ev2
+- P2 count: 1 — should fix before /ship
 - P3 count: 2 — recommended fixes
 
-Run /release-ev2 when P2+ resolved.
+Run /ship when P2+ resolved.
 ```
 
-Persist via first-party `bin/li-review-log` (legacy alias: gstack-review-log):
+Persist via `bin/li-review-log` (legacy alias: gstack-review-log):
 ```bash
 bin/li-review-log '{"skill":"review","timestamp":"...","status":"...","findings":N,"findings_fixed":N,"gate":"P1_clean","commit":"..."}'
 ```
@@ -113,7 +113,7 @@ Every finding gets a 1-10 confidence:
 ```
 > /review
 Diff scope: 23 lines, 2 files (SMALL)
-✓ No findings. Clean to /release-ev2.
+✓ No findings. Clean to /ship.
 ```
 
 **Medium diff with findings:**
@@ -121,7 +121,7 @@ Diff scope: 23 lines, 2 files (SMALL)
 > /review
 [3 findings reported]
 P1: 0, P2: 1, P3: 2
-Action: fix P2 before /release-ev2.
+Action: fix P2 before /ship.
 ```
 
 **Large diff with Codex P1 gate:**
@@ -129,11 +129,11 @@ Action: fix P2 before /release-ev2.
 > /review
 Diff: 412 lines, 18 files (LARGE)
 Codex pass: P1 found — race condition in payment-handler.ts:108
-✗ /release-ev2 BLOCKED until P1 resolved
+✗ /ship BLOCKED until P1 resolved
 ```
 
 ## See also
 
 - `/plan-eng-review` — heavier plan-stage review (use when design doc exists)
 - `/investigate` — debugging when /review finds something broken
-- `/release-ev2` — reads /review's dashboard entry as ship-gate signal (within 7 days, current commit)
+- `/ship` — reads /review's dashboard entry as ship-gate signal (within 7 days, current commit)

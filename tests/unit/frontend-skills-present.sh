@@ -28,7 +28,7 @@ for skill in "${FRONTEND_SKILLS[@]}"; do
     color=$(grep '^color:' "$f" | head -1 | awk '{print $2}')
     voice=$(grep '^voice:' "$f" | head -1 | awk '{print $2}')
 
-    if [ "$name" = "$skill" ] && [ "$layer" = "ms-team" ]; then
+    if [ "$name" = "$skill" ] && [ "$layer" = "foundation" ]; then
       pass "frontend-* skill: $skill (name + layer match)"
     else
       fail "frontend-* skill frontmatter: $skill (name=$name, layer=$layer)"

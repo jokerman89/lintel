@@ -1,6 +1,6 @@
 # jokerman-lintel (Lintel)
 
-**MS-CAIP-SE session harness for agent-based development.** Markdown + bash scaffolding that any modern AI CLI loads as a plugin. No runtime, no daemons — your CLI handles execution.
+**Company-neutral, pack-driven session harness for agent-based development.** Markdown + bash scaffolding that any modern AI CLI loads as a plugin. No runtime, no daemons — your CLI handles execution. Identity (voice, compliance, personas, brand) is supplied by an installable **pack**; the harness ships only the neutral `_default` pack.
 
 **Status:** v3-dev (2026-05-27). See [CHANGELOG.md](CHANGELOG.md) for v3 release notes and [SHIP-GATE.md](SHIP-GATE.md) for v3.0.0 readiness gates. The v3 design lives at [docs/design/lintel-v3-plan.md](docs/design/lintel-v3-plan.md).
 
@@ -15,20 +15,20 @@ Lintel is the **complete session harness** — not just a skill catalog. It mana
 Two distinct categories, both shipped in this repo:
 
 **Kategori A — Agent-invokable** (what your CLI sees via plugin manifest):
-- `skills/` — 151 slash-commands (foundation + ms-team layers)
-- `agents/` — 78 subagent roles organized per domain
-- `hooks/shared/` — 19 compliance + workflow hooks
+- `skills/` — slash-commands (8-phase cycle + engineering modules + session-harness)
+- `agents/` — subagent roles organized per domain
+- `hooks/shared/` — compliance + workflow hooks
 
 **Kategori B — Repo-scaffolding** (copied INTO other repos via `li-scaffold`):
 - `scaffolding/01-foundation/` — CLAUDE.md template, CORE-PRINCIPLES, EVOLUTION/EVOLUTION-LOG, tasks/{lessons,memory,personas,todo}.md, docs/adr/ templates, .claude/agents/ subagent overrides
-- `scaffolding/02-sdl/` — 5+7+8 compliance reference (HARD-RULES + ON-DEMAND + REFERENCE)
-- `scaffolding/03-ms-team/` — voice corpus (60 paragraphs, 12 cells) + doc-gen default templates
+
+Company-specific scaffolding (compliance reference, voice corpus, doc-gen templates) is supplied by an installable pack — see the [lintel-caip-pack](https://github.com/jokerman89/lintel-caip-pack) example for the Microsoft CAIP-SE identity.
 
 The architecture: write skills/agents once at repo root, ship tiny per-CLI plugin manifests (`.claude-plugin/`, `.codex-plugin/`, `.cursor-plugin/`, `.opencode/`, `gemini-extension.json`, `.copilot-plugin/`, `.droid-plugin/`) that all point at the same `./skills/` and `./agents/` directories. Each CLI's native plugin marketplace handles discovery + invocation.
 
 ## Who this is for
 
-Microsoft Sweden CAIP solution engineers. The compliance assumptions, auto-mode bounds, precedence model, and voice corpus are tuned to that team's constraints. If you're outside this team and want to fork: see [docs/compliance.md](docs/compliance.md).
+Anyone running an AI CLI who wants a disciplined session harness. The harness itself is company-neutral; team-specific compliance, voice, personas, and brand load from an installable pack. The Microsoft CAIP-SE identity (Trailblazer voice, RAIS/OneCS/AGT/SDL compliance, EV2/OneBranch) ships as the separate [lintel-caip-pack](https://github.com/jokerman89/lintel-caip-pack); build your own pack with `/li:pack-create`.
 
 ---
 
@@ -98,11 +98,11 @@ bash install/verify.sh
 ### 5. Scaffold a new repo
 
 ```bash
-cd ~/new-customer-engagement
-li-scaffold init --engagement customer-engagement --voice trailblazer
+cd ~/new-repo
+li-scaffold init --mode internal-tool --pack _default
 ```
 
-That creates CLAUDE.md, CORE-PRINCIPLES.md, tasks/, docs/adr/, .claude/agents/ with sane MS defaults.
+That creates CLAUDE.md, CORE-PRINCIPLES.md, tasks/, docs/adr/, .claude/agents/ with neutral defaults. Activate a company pack (e.g. `caip-se`) for team-specific voice/compliance.
 
 Full walkthrough: [docs/getting-started.md](docs/getting-started.md).
 
@@ -110,11 +110,10 @@ Full walkthrough: [docs/getting-started.md](docs/getting-started.md).
 
 ## What you get
 
-- **151 skills** for daily workflows: `/qa`, `/release-ev2`, `/safe-deploy-ring`, `/investigate`, `/plan-eng-review`, `/office-hours`, `/rais-customer-voice-check`, `/onecs-check`, `/agt-tier-stamp`, `/generate-ppt`, `/generate-word`, `/generate-web`, `/scaffold-engagement-demo`, plus 7 new v3 session-harness skills (`/match`, `/li:doctor`, `/li:scaffold`, `/lessons-promote`, `/adr-new`, `/personas-rotate`, `/lessons`).
-- **78 agents** organized per domain: ms-specific (15), engineering (25), security (8), compliance (6), devops (7), customer (8), communication (5), doc-gen (3), voice (1).
-- **19 compliance hooks** (opt-in via symlinks): `customer-data-block`, `secret-scan-block`, `no-direct-main-push`, etc.
-- **5+7+8 compliance tiering**: 5 always-on hard rules, 7 on-demand check items, 8 reference docs (RAIS, OneCS, AGT, SDL, etc).
-- **OurVoice corpus**: 60 sanitized paragraphs across 12 cells (4 Reveal × 3 Inspire × 5 Provoke techniques) — operator-driven calibration via `T0-CALIBRATION-WORKFLOW.md`.
+- **Skills** for daily workflows: the 8-phase `/li:cycle` (sense→capture), engineering-domain modules (`/li:ta`, `/li:da`, `/li:sc`, `/li:dh`, `/li:tq`), `/qa`, `/investigate`, `/plan-eng-review`, `/office-hours`, `/generate-ppt`, `/generate-word`, `/generate-web`, plus session-harness skills (`/skill-router`, `/li:doctor`, `/li:scaffold`, `/lessons-promote`, `/adr-new`, `/personas-rotate`, `/pack-create`, `/pack-switch`).
+- **Agents** organized per domain: engineering, security, compliance (generic frameworks — GDPR/SOC2/EU-AI-Act), devops, customer, communication, doc-gen, frontend. Company-specific agents load from a pack.
+- **Compliance hooks** (opt-in via symlinks): `customer-data-block`, `secret-scan-block`, `no-direct-main-push`, etc.
+- **Pack-driven compliance + voice**: the active pack declares its compliance gates and voice tier; the neutral `_default` pack enforces nothing. Company packs (e.g. lintel-caip-pack) supply tiered compliance and a calibrated voice corpus.
 - **Repo scaffolding mechanism** via `bin/li-scaffold` — 30-second new-repo setup.
 - **Cross-repo lessons sync** via `bin/li-lessons-sync` (operator-opt-in).
 - **Cross-CLI health check** via `bin/li-doctor`.
@@ -144,8 +143,8 @@ See [docs/compliance.md](docs/compliance.md). Key rules (always-on):
 1. No customer data in prompts, files, or commits
 2. No secrets, credentials, tokens
 3. Production mutations require explicit per-call authorization
-4. MS SSO only; no personal accounts
-5. First-party first (GHCP Enterprise, M365 Copilot, Azure OpenAI) preferred over OpenAI direct API
+
+Beyond these neutral baselines, tiered compliance (SSO policy, vendor preference, regulatory gates) is supplied by the active pack — see the lintel-caip-pack example for the Microsoft CAIP-SE ruleset.
 
 ---
 

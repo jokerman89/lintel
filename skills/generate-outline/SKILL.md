@@ -1,6 +1,6 @@
 ---
 name: generate-outline
-layer: ms-team
+layer: foundation
 description: Produce outline.md (structured presentation/document skeleton) from a brief. Shared content-pipeline sub-skill, solo-invokable.
 color: orange
 tools: Read, Write, Bash, Glob
@@ -87,7 +87,7 @@ source_brief_hash: <sha256 of brief>
 ...
 ```
 
-Sections are numbered §1, §2, ... — matching the az-tldr §-pattern for consistency.
+Sections are numbered §1, §2, ... — a consistent §-pattern across content artifacts.
 
 ## Workflow
 

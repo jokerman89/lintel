@@ -16,20 +16,19 @@ Walks `~/.lintel/packs/` + `<repo>/packs/`, parses each pack.yaml, prints a tabl
 
 ```
 PACK              ACTIVE  EXTENDS       VOICE       COMPLIANCE  REQUIRES
-_default                                internal    advisory    >=4.0.0
-ms-internal               (none)        mixed       hard        >=4.0.0
-caip-se           *       ms-internal   trailblazer hard        >=4.0.0
-foo-customer              caip-se       trailblazer hard        >=4.0.0
+_default          *                     internal    advisory    >=4.0.0
+acme-internal             (none)        mixed       hard        >=4.0.0
+acme-customer             acme-internal customer    hard        >=4.0.0
 ```
 
-`*` marks the active pack.
+`*` marks the active pack. Only `_default` ships with Lintel; other packs are installed by the operator (e.g. the external `lintel-caip-pack` contributes a `caip-se` pack).
 
 ## When to use
 
 - Operator forgot which packs exist
 - Before `/li:pack-switch` to confirm target
 - Before `/li:pack-create` to avoid name collision
-- After `/li:v4-migrate` to confirm caip-se is present
+- After `/li:v4-migrate` to confirm the recommended pack is present
 
 ## When NOT to use
 
@@ -94,8 +93,8 @@ fi
 ### Step 5 — Surface counts + footer
 
 ```
-Total: 4 packs (1 active)
-Sources: ~/.lintel/packs (2), <repo>/packs (2)
+Total: 3 packs (1 active)
+Sources: ~/.lintel/packs (2), <repo>/packs (1)
 ```
 
 Footer:

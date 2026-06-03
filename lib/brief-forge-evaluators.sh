@@ -1,21 +1,47 @@
 #!/usr/bin/env bash
-# lib/brief-forge-evaluators.sh — 5 default evaluators for Brief Forge envelopes.
+# lib/brief-forge-evaluators.sh — generic default evaluators for Brief Forge envelopes.
 #
 # Each evaluator function takes an envelope file path and returns a JSON line
 # with {score: 0-100, budget_used: int, notes: "..."}. Higher score = better.
 # Mechanical-first; LLM upgrade hooks documented but not active in v4.0.
 #
+# These are the company-neutral evaluators that ship with Lintel. Custom
+# evaluators (e.g. compliance-specific or voice-alignment checks) live in the
+# active pack under packs/<pack>/brief-forge/evaluators/ and are sourced by the
+# pack, not by this lib. For the _default pack the generic set below is all that
+# runs.
+#
 # Sourced by skills/brief-forge/SKILL.md via run_evaluator dispatch.
 #
 # Public:
 #   run_evaluator <name> <envelope_path>            → JSON result
+#   evaluators_for_handoff <handoff_key>            → space-separated evaluator names
 #   evaluator_security <envelope_path>              → JSON result
 #   evaluator_completeness <envelope_path>          → JSON result
 #   evaluator_stale <envelope_path>                 → JSON result
-#   evaluator_sdl_compliance <envelope_path>        → JSON result
-#   evaluator_trailblazer_alignment <envelope_path> → JSON result
 
 set -uo pipefail
+
+# ─── Pack resolution ───────────────────────────────────────────────────────
+# Resolve which evaluators to run for a given hand-off from the active pack.
+# Reads brief_forge_handoffs.<handoff_key>.evaluators via resolve_pack_field.
+# For the _default pack this yields only the generic evaluators; an external
+# pack (e.g. lintel-caip-pack) may declare its own additional evaluators that
+# it ships under packs/<pack>/brief-forge/evaluators/.
+_BFE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" 2>/dev/null && pwd)"
+if [ -f "$_BFE_DIR/pack-resolver.sh" ]; then
+  # shellcheck source=lib/pack-resolver.sh
+  source "$_BFE_DIR/pack-resolver.sh"
+fi
+
+evaluators_for_handoff() {
+  local handoff="${1:?}"
+  if declare -F resolve_pack_field >/dev/null 2>&1; then
+    # YAML inline-list form: [security, stale] — strip brackets/commas.
+    resolve_pack_field "brief_forge_handoffs.${handoff}.evaluators" \
+      | tr -d '[]' | tr ',' ' '
+  fi
+}
 
 # ─── run_evaluator dispatcher ──────────────────────────────────────────────
 run_evaluator() {
@@ -148,72 +174,9 @@ evaluator_stale() {
   printf '{"score":%d,"budget_used":40,"notes":"%s"}' "$score" "$notes"
 }
 
-# ─── evaluator_sdl_compliance ──────────────────────────────────────────────
-# MS-internal + caip-se: verifies SDL hooks ran on payload. Mechanical check:
-# audit log contains SDL hook invocations within the last 24h tied to from/to.
-evaluator_sdl_compliance() {
-  local f="${1:?}"
-  local score=100
-  local notes=""
-
-  local from to
-  from=$(grep -E '^[[:space:]]+from:' "$f" | head -1 | awk -F': *' '{print $2}' | tr -d '[:space:]')
-  to=$(grep -E '^[[:space:]]+to:' "$f" | head -1 | awk -F': *' '{print $2}' | tr -d '[:space:]')
-
-  local sdl_log="${LINTEL_HOME:-$HOME/.lintel}/audit/ms-internal-sdl.jsonl"
-
-  if [ ! -f "$sdl_log" ]; then
-    # No SDL log means SDL hooks didn't run; for ms-internal/caip-se this is a fail
-    score=60
-    notes="SDL audit log not found (acceptable for non-MS packs; fail for ms-internal/caip-se)"
-  else
-    # Look for recent SDL hook invocation tied to from or to
-    if grep -qE "\"from\":\"$from\"|\"to\":\"$to\"|\"actor\":\"$from\"" "$sdl_log" 2>/dev/null; then
-      notes="SDL hooks recorded for $from or $to"
-    else
-      score=70
-      notes="no recent SDL hook invocation tied to $from/$to — verify"
-    fi
-  fi
-
-  printf '{"score":%d,"budget_used":60,"notes":"%s"}' "$score" "$notes"
-}
-
-# ─── evaluator_trailblazer_alignment ───────────────────────────────────────
-# caip-se: voice-tier check against Trailblazer corpus. Mechanical:
-# 1) HEAD.voice_tier == trailblazer
-# 2) BODY content does NOT contain forbidden non-Trailblazer markers
-# 3) Specific Trailblazer cues present in customer-facing content_types
-evaluator_trailblazer_alignment() {
-  local f="${1:?}"
-  local score=100
-  local notes=""
-
-  local voice_tier
-  voice_tier=$(grep -E '^[[:space:]]+voice_tier:' "$f" | head -1 | awk -F': *' '{print $2}' | tr -d '[:space:]')
-
-  if [ "$voice_tier" != "trailblazer" ]; then
-    # Not a Trailblazer envelope — evaluator is no-op
-    printf '{"score":100,"budget_used":10,"notes":"voice_tier != trailblazer; skip"}'
-    return 0
-  fi
-
-  # Forbidden non-Trailblazer markers (corporate/AI cliches per CLAUDE.md voice rules)
-  if grep -qiE 'delve into|crucial|robust|comprehensive|nuanced|leverage[ds]?[[:space:]]+(the|our)|unlock[[:space:]]+the[[:space:]]+power|seamless(ly)?[[:space:]]+integrate' "$f" 2>/dev/null; then
-    score=$((score - 35))
-    notes="${notes}AI/corporate cliches detected; "
-  fi
-
-  # Em-dash check (per voice rules: no em dashes)
-  if grep -q '—' "$f" 2>/dev/null; then
-    score=$((score - 10))
-    notes="${notes}em-dash present (Trailblazer voice avoids); "
-  fi
-
-  [ "$score" -lt 0 ] && score=0
-  [ -z "$notes" ] && notes="Trailblazer alignment clean"
-  printf '{"score":%d,"budget_used":40,"notes":"%s"}' "$score" "$notes"
-}
+# Pack-specific evaluators (compliance, voice-alignment, etc.) are NOT defined
+# here. They live in the active pack under packs/<pack>/brief-forge/evaluators/
+# and are resolved per hand-off via evaluators_for_handoff / resolve_pack_field.
 
 # ─── Self-test mode ────────────────────────────────────────────────────────
 if [ "${BASH_SOURCE[0]}" = "$0" ]; then
@@ -242,8 +205,9 @@ tail:
   escape_hatches: []
   audit_pointer: /tmp/x.jsonl
 EOF
-  for e in security completeness stale sdl_compliance trailblazer_alignment; do
+  for e in security completeness stale; do
     printf '  %s → %s\n' "$e" "$(run_evaluator "$e" "$tmp")"
   done
+  printf '  evaluators_for_handoff on_subagent_spawn → %s\n' "$(evaluators_for_handoff on_subagent_spawn)"
   rm -f "$tmp"
 fi

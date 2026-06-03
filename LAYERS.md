@@ -1,6 +1,8 @@
 # LAYERS — the 4-layer architecture manifest
 
-JokermanStack (Lintel) organizes everything into 4 layers. Each layer has its own purpose, change rate, and per-repo override rules.
+> **STATUS: superseded by the v4.0 foundation + packs model.** Layers 2–4 (compliance, personal-advanced, power-user) were folded into the **pack** system: compliance, voice, personas, and brand are now declared by the active pack (`packs/<name>/pack.yaml`), not by `scaffolding/02-*`/`03-*`/`04-*` directories (which no longer exist). Only `scaffolding/01-foundation/` remains on disk. The neutral `_default` pack is the baseline; company identity (e.g. Microsoft CAIP-SE) installs as an external pack (lintel-caip-pack). The historical 4-layer rationale below is kept for context. See [docs/design/lintel-v4.0-reframe-design.md](docs/design/lintel-v4.0-reframe-design.md) for the current model.
+
+Lintel originally organized everything into 4 layers. Each layer had its own purpose, change rate, and per-repo override rules.
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -11,11 +13,11 @@ JokermanStack (Lintel) organizes everything into 4 layers. Each layer has its ow
 ├─────────────────────────────────────────────────────────────┤
 │  Layer 3 — Personal advanced (opinionated workflow)         │
 │  03-personal-advanced/                                       │
-│    voice tier (internal vs trailblazer),                    │
+│    voice tier (pack-driven),                                │
 │    precedence model (5 levels),                             │
 │    promoted-agents (tier-stamped)                            │
 ├─────────────────────────────────────────────────────────────┤
-│  Layer 2 — Compliance (MS-policy-driven, non-negotiable)    │
+│  Layer 2 — Compliance (pack-driven, non-negotiable)         │
 │  02-compliance/                                              │
 │    5 hard rules (always-on checklist at session-start)      │
 │    7 on-demand rules (/compliance-check skill)              │
@@ -34,7 +36,7 @@ JokermanStack (Lintel) organizes everything into 4 layers. Each layer has its ow
 | Layer | Change rate | Process to change |
 |---|---|---|
 | 1 Foundation | **Stable** | Goes through `EVOLUTION.md` process. CORE change = explicit decision + EVOLUTION-LOG entry. |
-| 2 Compliance | **MS-policy-driven** | Quarterly review against MS internal SharePoint sources. Refresh on policy announcements. |
+| 2 Compliance | **pack-driven** | Declared by the active pack's `compliance.*`. A company pack refreshes on its own policy cadence. |
 | 3 Personal advanced | **Opinionated** | PR-based, team review. No heavy EVOLUTION process but team-vetted. |
 | 4 Power user | **Experimental** | Free adaptation. Promotion to Layer 3 via PR when a pattern proves out. Archive in `EVOLUTION-LOG.md` when it doesn't. |
 

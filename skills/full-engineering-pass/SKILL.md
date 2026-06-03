@@ -364,4 +364,4 @@ This handles the v4.x stacking-rollout window where SC + DH + TQ + composition l
 
 ## Voice tier behavior
 
-`voice: internal`. Composition produces operator-facing engineering artifacts. Customer-facing voice picks up at SHIP phase when caip-se pack adds Trailblazer alignment via Brief Forge — composition artifacts are inputs to that, not the customer-facing output.
+`voice: internal`. Composition produces operator-facing engineering artifacts. Customer-facing voice picks up at the SHIP phase when the active pack adds voice alignment via Brief Forge (an external pack like lintel-caip-pack supplies this; none by default) — composition artifacts are inputs to that, not the customer-facing output.

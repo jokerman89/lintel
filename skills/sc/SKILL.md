@@ -59,7 +59,7 @@ Produces threat-grade artifacts and compliance evidence when work touches securi
 
 - New external surface (API endpoint, OAuth integration, webhook receiver)
 - Work touches customer data, PII, secrets, or regulated material
-- Customer engagement requires SOC2/GDPR/HIPAA/PCI-DSS/FedRAMP evidence
+- Work requires SOC2/GDPR/HIPAA/PCI-DSS/FedRAMP evidence
 - Pre-production for any feature with auth or authorization path
 - BUILD phase detected auth or compliance intent (Phase 4 wiring auto-invokes)
 
@@ -109,14 +109,14 @@ esac
 ```bash
 source "$LINTEL_REPO_ROOT/lib/pack-resolver.sh"
 
-# Pack policy provides hard gates
-sdl_active=$(resolve_pack_field compliance.sdl_active 2>/dev/null || echo true)
+# Pack policy provides hard gates (the active pack's compliance gates; none by default)
+compliance_hooks=$(resolve_pack_field compliance.hooks 2>/dev/null || true)
 audit_paths=$(resolve_pack_field compliance.audit_paths 2>/dev/null || true)
 
 # Profile preferences (engineering.security_compliance.*)
 PROFILE="$LINTEL_HOME/profile.yaml"
 secret_management=$(grep -A30 '^engineering:' "$PROFILE" 2>/dev/null | grep -A10 'security_compliance:' | grep 'secret_management:' | head -1 | awk -F': *' '{print $2}' | tr -d '[:space:]')
-secret_management="${secret_management:-keyvault}"
+secret_management="${secret_management:-local-encrypted}"
 
 compliance_frameworks=$(grep -A30 '^engineering:' "$PROFILE" 2>/dev/null | grep -A10 'security_compliance:' | grep 'compliance_frameworks:' | head -1 | awk -F': *' '{print $2}' | tr -d '[]"' | tr -d "'")
 compliance_frameworks="${compliance_frameworks:-soc2,gdpr}"
@@ -258,7 +258,7 @@ YES. `/li:sc loop` resumes from prior state. `/li:sc single --action <name>` ent
 
 **Reads:**
 - `~/.lintel/profile.yaml` `engineering.security_compliance.*` block
-- `lib/pack-resolver.sh` for pack policy (sdl_active, audit_paths)
+- `lib/pack-resolver.sh` for pack policy (compliance.hooks, audit_paths)
 - Existing security agents: SecurityAuditor, ThreatModelDrafter, DependencyAuditor, JWTSecurityReviewer, SBOMAuditor, PrivacyBoundaryAudit
 - New agents: ComplianceOfficer
 - Existing security-flavored ADRs (`.lintel/decisions/`, `docs/decisions/`, `docs/adr/`)
@@ -301,4 +301,4 @@ Plus EXISTING hooks (sourced from earlier work):
 
 ## Voice tier behavior
 
-`voice: internal`. SC produces operator-facing security artifacts. Customer-facing voice picks up at the SHIP phase when caip-se pack adds Trailblazer alignment via Brief Forge — specifically NOT in audit log content (audit content stays factual + neutral regardless of pack).
+`voice: internal`. SC produces operator-facing security artifacts. Customer-facing voice picks up at the SHIP phase when the active pack adds voice alignment via Brief Forge (an external pack like lintel-caip-pack supplies this; none by default) — specifically NOT in audit log content (audit content stays factual + neutral regardless of pack).

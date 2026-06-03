@@ -67,7 +67,7 @@ Signals: 7 commits, 32 audit entries, 14 skill invocations
 
 ## Stuck
 - /sync-brain not yet written (planned batch 10)
-- T0 voice corpus still empty (operator-blocked, awaiting Copilot material gather)
+- active pack's voice corpus still empty (operator-blocked, awaiting source material)
 
 ## Surprises
 - gh CLI returned case-normalized jokerman89 URL — push worked anyway, but display surprised
@@ -76,7 +76,7 @@ Signals: 7 commits, 32 audit entries, 14 skill invocations
 ## Patterns worth recording
 1. Skill files consistently land at ~150-250 lines following TEMPLATE-skill.md — write velocity 5 skills/batch in parallel works
 2. cli_support: [claude-code] for browser-dependent skills (Codex/Copilot lack browser control) — established convention
-3. Voice tier: internal default, mixed only when skill consumes trailblazer content as standard (e.g. /design-review copy pillar)
+3. Voice tier: internal default, mixed only when a skill consumes elevated-tier content as standard (e.g. /design-review copy pillar)
 
 ## Lesson proposals (--emit-lessons enabled)
 [Operator confirms each before /learn is invoked]

@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# bin/li-review-read — first-party review-log reader for the release gate
+# bin/li-review-read — native review-log reader for the release gate
 #
 # Replaces the external gstack binary `~/.claude/skills/gstack/bin/gstack-review-read`
-# that /release-ev2 used at its "Review readiness check" step. Reads the first-party
-# audit log at ~/.lintel/audit/reviews.jsonl and emits the verdict shape /release-ev2
-# expects: whether an Eng Review is CLEAR within 7 days for the current commit.
+# that the release gate used at its "Review readiness check" step. Reads Lintel's own
+# audit log at ~/.lintel/audit/reviews.jsonl and emits the verdict shape the release
+# gate expects: whether an Eng Review is CLEAR within 7 days for the current commit.
 #
 # Back-compat: also folds in any legacy gstack records written before this
 # remediation (~/.gstack/projects/<slug>/<branch>-reviews.jsonl), so historical
@@ -17,7 +17,7 @@
 #   bin/li-review-read --days <N>       # freshness window (default: 7)
 #   bin/li-review-read --json           # emit records as JSONL only (no verdict block)
 #
-# Output (default): raw review records, then a ---VERDICT--- block release-ev2 reads:
+# Output (default): raw review records, then a ---VERDICT--- block the release gate reads:
 #   VERDICT: Eng Review CLEAR within 7 days   (or)   VERDICT: NO fresh Eng Review
 #   plus the matched record's status/commit/age and current HEAD.
 #
@@ -84,8 +84,8 @@ if [ "$JSON_ONLY" -eq 1 ]; then
   exit 0
 fi
 
-# ── Emit the raw records (release-ev2 / model can inspect them directly) ──
-echo "## Review records (first-party: $REVIEWS_LOG)"
+# ── Emit the raw records (release gate / model can inspect them directly) ──
+echo "## Review records (native: $REVIEWS_LOG)"
 if [ -f "$LEGACY_LOG" ]; then
   echo "##                (legacy back-compat: $LEGACY_LOG)"
 fi
@@ -97,7 +97,7 @@ fi
 
 # ── Compute the verdict: is there a CLEAR <gate_skill> record within N days for HEAD? ──
 # A record matches when:
-#   - it mentions "skill":"<GATE_SKILL>"  (first-party stores skill as kind too, but
+#   - it mentions "skill":"<GATE_SKILL>"  (native records store skill as kind too, but
 #     the raw payload — preserved verbatim — always carries "skill":"<...>")
 #   - its status is CLEAR/CLEARED/CLEAR (PLAN)/SCOPE LOCKED (treated as clear)
 #   - its commit matches the current short HEAD
@@ -115,7 +115,7 @@ VERDICT_RECORD="$(
   printf '%s\n' "$ALL_RECORDS" | sed '/^$/d' | awk -v skill="$GATE_SKILL" -v head="$HEAD_SHORT" -v cutoff="$CUTOFF" '
     {
       line=$0
-      # skill match: first-party records store the skill as top-level "kind";
+      # skill match: native records store the skill as top-level "kind";
       # legacy gstack records (and the preserved "raw" payload) carry "skill".
       # Accept the escaped form too (\"skill\":\"...\") since raw is JSON-in-JSON.
       if (index(line, "\"kind\":\"" skill "\"") == 0 \

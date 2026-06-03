@@ -51,8 +51,9 @@ if [ "$mismatch" = "0" ]; then
   pass "all agents' category matches their directory"
 fi
 
-# Expected categories present (v3.7 Fas A1 adds 'frontend')
-EXPECTED_CATEGORIES=(ms-specific engineering security compliance devops customer communication doc-gen voice frontend)
+# Expected categories present (company-neutral set; ms-specific + voice moved to
+# external packs, e.g. lintel-caip-pack, as of v4.7 CAIP extraction)
+EXPECTED_CATEGORIES=(engineering security compliance devops customer communication doc-gen frontend)
 for cat in "${EXPECTED_CATEGORIES[@]}"; do
   if [ -d "$REPO_ROOT/agents/$cat" ]; then
     count=$(find "$REPO_ROOT/agents/$cat" -name '*.md' 2>/dev/null | wc -l | tr -d ' ')

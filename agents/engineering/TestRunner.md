@@ -20,7 +20,7 @@ Pairs with `/qa-only` skill (skill orchestrates from operator side; this agent d
 
 - Diff is non-trivial and operator wants test signal independent of main agent's view
 - CI is red, want a local reproduction + analysis
-- Pre-`/release-ev2` final verification
+- Pre-`/ship` final verification
 
 ## When NOT to invoke
 

@@ -32,7 +32,7 @@ Enumerates secrets the system uses (env vars, KeyVault refs, embedded credential
 ### Step 1 — Read preferences + existing inventory
 
 ```bash
-secret_management="${secret_management:-keyvault}"   # keyvault | aws-secrets-manager | hashicorp-vault | local-encrypted
+secret_management="${secret_management:-local-encrypted}"   # keyvault | aws-secrets-manager | hashicorp-vault | local-encrypted
 
 existing_inventory=".lintel/state/sc/secret-inventory.md"
 [ -f "$existing_inventory" ] && has_prior=true || has_prior=false

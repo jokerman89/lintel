@@ -24,8 +24,7 @@ Reviews `.tf` files for state management (backend config, state locking), module
 
 ## When NOT to invoke
 
-- Bicep — use BicepReviewer
-- ARM JSON — use ARMTemplateReviewer
+- Bicep / ARM JSON — use a cloud-specific IaC reviewer from the active pack, if any
 - Pulumi / CDK — out of scope
 
 ## Workflow

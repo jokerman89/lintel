@@ -59,8 +59,8 @@ For each correction operator made during the cycle:
 - If SPECIFIC: keep in this cycle's notes only
 
 Examples of LESSON-worthy:
-- "Don't mock Azure SDK in tests — last 3 cycles' tests passed but prod failed because mocks diverged from real API"
-- "Always run /li:az-tldr first when planning Azure work — saved 90 min on this engagement"
+- "Don't mock the vendor SDK in tests — last 3 cycles' tests passed but prod failed because mocks diverged from real API"
+- "Always map the codebase first when planning infra work — saved 90 min on this engagement"
 
 Examples NOT lesson-worthy:
 - "Use specific port 8443 in this customer's deployment" — too specific
@@ -272,7 +272,7 @@ YES — standalone post-implementation reflection. Useful if operator forgot CAP
 - All `.lintel/state/00-state.md` entries from cycle
 - `.lintel/state/build-log.md`
 - `.lintel/state/review-report-*.md`
-- `.lintel/state/compliance-report-*.md` (if WorkProfile=on)
+- `.lintel/state/compliance-report-*.md` (if the active pack defines compliance gates)
 - design doc, plan.md (DRAFT), spec.md (DRAFT)
 - Cycle's git diff for change scope
 - role file (if active)
@@ -300,7 +300,7 @@ YES — standalone post-implementation reflection. Useful if operator forgot CAP
 - **ADRDrafter** (engineering/) — primary, ADR drafting
 - **ChangelogMaintainer** (engineering/) — release-note polish if SHIP didn't already
 - **DocWriter** (engineering/) — synthesize cold-executor trio prose
-- **TrailblazerVoiceCritic** (voice/) — if any CAPTURE artifact ships outside (rare, voice gate active)
+- The active pack's voice gates (`resolve_pack_field voice.gates_active`; none by default) — if any CAPTURE artifact ships outside (rare)
 
 ## Anti-patterns
 
@@ -320,4 +320,4 @@ YES — standalone post-implementation reflection. Useful if operator forgot CAP
 
 ## Voice tier behavior
 
-`voice: internal`. CAPTURE artifacts are mostly engineering-internal. Customer-facing release notes (if shipped from CAPTURE) follow voice_tier of mode.
+`voice: internal`. CAPTURE artifacts are mostly engineering-internal. Customer-facing release notes (if shipped from CAPTURE) follow the active pack's voice tier (`resolve_pack_field voice.default_tier`; default: internal).

@@ -8,11 +8,11 @@ For canonical session bootstrap, see [AGENT-INSTRUCTIONS.md](AGENT-INSTRUCTIONS.
 
 ## Repo overview
 
-Lintel is the MS-CAIP-SE session harness — markdown scaffolding for agent-based development.
+Lintel is a company-neutral, pack-driven session harness — markdown scaffolding for agent-based development. Company identity (the Microsoft CAIP-SE workprofile) loads from the separate lintel-caip-pack.
 
-- `skills/` — 74 slash-commands (foundation + ms-team layers)
-- `agents/` — 44 subagent roles organized per domain
-- `hooks/shared/` — 15 compliance + workflow hooks
+- `skills/` — slash-commands (8-phase cycle + engineering modules + session-harness)
+- `agents/` — subagent roles organized per domain
+- `hooks/shared/` — compliance + workflow hooks
 - `scaffolding/` — templates copied INTO other repos
 - `docs/design/lintel-v3-plan.md` — current architecture
 
@@ -41,7 +41,7 @@ Or for Codex App: sidebar → Plugins → `+`.
 Codex doesn't have a first-class subagent abstraction like Claude Code's Task tool. The closest equivalent is `codex exec` subprocess. Agents in `agents/<category>/<Name>.md` are reference patterns — operator runs them via:
 
 ```bash
-codex exec --prompt "$(cat agents/ms-specific/OneCSAuditor.md). Audit branch X."
+codex exec --prompt "$(cat agents/security/SecurityAuditor.md). Audit branch X."
 ```
 
 ### Plan mode
@@ -57,9 +57,9 @@ Codex's tool-permission model is per-invocation. Auto-mode bounds in `AGENT-INST
 Skills at `skills/<name>/SKILL.md`. Codex doesn't have native slash-command discovery — operator references skills explicitly:
 
 ```bash
-codex exec --prompt "$(cat skills/release-ev2/SKILL.md). Execute on current branch."
+codex exec --prompt "$(cat skills/ship/SKILL.md). Execute on current branch."
 ```
 
 ### Compliance
 
-5+7+8 compliance tier in `scaffolding/02-sdl/`. Hard rules apply across all Codex invocations: no customer data, no secrets, no prod mutations without auth, MS SSO only, first-party-first.
+Compliance is pack-driven (`resolve_pack_field compliance.*`). Neutral baselines apply across all Codex invocations: no customer data, no secrets, no prod mutations without auth. Tiered rules (SSO policy, vendor preference, regulatory gates) come from the active pack — see the lintel-caip-pack example for the Microsoft CAIP-SE ruleset.

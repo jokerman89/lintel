@@ -12,7 +12,7 @@
 #
 # Source-once-and-call pattern (matches bin/_aliases.sh):
 #   source "$(dirname "$0")/_jobs.sh"
-#   job_create cycle customer-engagement
+#   job_create cycle internal-tool
 
 LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
 LINTEL_JOBS_DIR="${LINTEL_JOBS_DIR:-$LINTEL_HOME/jobs}"
