@@ -70,3 +70,19 @@ Related: [[L-002]] grep-first-before-design — L-002 says grep existing infrast
 **Why this is durable, not v3.7-specific:** any future feature that "could be part of X or could be its own thing" should follow the decision/execution split. Examples ahead: a future `personalize-*` family might split into `personalize-decision` (audience-targeting, channel-pick) vs `generate-*` (delivery). Same pattern.
 
 Related: [[L-001]] scaffolding-not-content (frontend-* family ships scaffolding + 1 canonical pattern, agents produce content at invocation), [[L-002]] grep-first (boundary table proved generate-* already existed + needed respect), [[L-003]] verify counts (M-1 collision caught via grep of generate-web SKILL.md before merge). The lesson-quartet now: respect existing, respect non-existing, verify claims, separate decisions from execution.
+
+---
+
+## L-005 — A removal/de-bias sweep is only as complete as its widest token set (v4.7)
+
+**Rule:** When grepping to find everything that references content you're extracting or genericizing, the FIRST grep must enumerate every shape the reference can take: lowercase skill-folder names AND their `RAIS`-style uppercase tokens AND bare agent/class names AND path strings. A token set that only has the "obvious" tokens will silently miss a whole class of callsites, and you'll discover them only when tests fail or a second sweep runs.
+
+**Why:** During the v4.7 CAIP extraction, my first sweep used tokens like `RAIS`, `Trailblazer`, `WorkProfile`, `first-party`. It matched ~437 lines across ~130 files — but `RAIS` is case-sensitive, so lowercase skill refs `/li:rais-customer-voice-check` did NOT match, and bare agent names like `AzureArchitect`/`FirstPartyMigrator` weren't in the set at all. ~25 files (more `generate-*`, all `frontend-*`, `discover`, `install.sh`, AGENT-INSTRUCTIONS Layer refs) were never assigned to a de-bias batch. A second, broader sweep (lowercase skill names + every removed agent name + paths) found them. This is L-003 applied to my own search: verify the search is complete before trusting "0 results."
+
+**How to apply:**
+- Build the token set from the actual removed inventory: for every removed skill, add both `skill-folder-name` and any in-prose token; for every removed agent, add the exact `CamelCaseName`; for every removed dir, add the path.
+- Run the sweep case-insensitively (`grep -i`) OR include both cases explicitly.
+- After the de-bias, re-run the WIDEST sweep and require 0 hits (excluding intentional mentions) before committing — don't trust the first sweep's file list as the full scope.
+- Let tests be the backstop, not the discovery mechanism: tests that assert presence of removed content (layer values, alias entries, file existence) will fail and reveal residue — but finding it via grep first is cheaper than via a red test suite.
+
+Related: [[L-003]] verify-counts-before-fact-claims — L-003 says verify external claims; L-005 says verify your own search's completeness. Both are "don't trust the first number." [[L-002]] grep-first — L-002 greps before designing; L-005 greps comprehensively before declaring a sweep done.
