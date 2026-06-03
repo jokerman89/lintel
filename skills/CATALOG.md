@@ -4,14 +4,15 @@ Auto-generated från frontmatter på push till main.
 Regenerated av `.github/workflows/catalog.yml` per push när `skills/**/SKILL.md` ändras.
 Hand-edits skrivs över — edit frontmatter i source SKILL.md istället.
 
-Total skills: 192
-Generated: 2026-06-02T09:30:15Z
+Total skills: 194
+Generated: 2026-06-03T18:54:35Z
 
-## foundation layer (145 skills)
+## foundation layer (147 skills)
 
 | Skill | Description |
 |---|---|
 | `/li:adr-new` | Bootstrap a new ADR (Architecture Decision Record) from template, with context-gathering questions. |
+| `/li:audit` | Read the unified Lintel audit trail — surface ~/.lintel/audit/<category>.jsonl records with optional category / kind / |
 | `/li:autoplan` | Chains office-hours → ceo-review → eng-review → design-review. End-to-end plan pipeline. |
 | `/li:brief-forge` | Phase 3 v4.0 — universal hand-off gate. Constructs envelopes per lib/envelope-schema.yaml + runs evaluators on every s |
 | `/li:browse` | Drive a headless Chromium to a URL — screenshot, extract DOM, click, fill forms, verify UI. |
@@ -154,6 +155,7 @@ Generated: 2026-06-02T09:30:15Z
 | `/li:tq-regression-suite` | TQ sub-skill — golden-path tests + recent-bug-fix tests curated. Dispatches to RegressionDetective + TestRunner agents |
 | `/li:tq-test-pyramid-review` | TQ sub-skill — unit/integration/e2e ratio audit + test-distribution health. Dispatches to Architect + TestRunner. |
 | `/li:tq` | Phase 4 v4.5 — testing-qa module. Three granularities (full / loop / single). Sub-skills dispatch to existing test age |
+| `/li:uniformity` | Read-only uniformity-contract dashboard — runs the Gate-M3 floor shape-test and points at the regenerable coverage mat |
 | `/li:usage-log` | Append-only usage log för skill/agent-invocations. Wrapper-pattern per L-001 (en log, ingen per-skill duplikat). Solo-i |
 | `/li:v4-migrate` | Walks operator through v3.x → v4.0 migration — detects v3.x usage signals, recommends pack activation, optionally wr |
 
