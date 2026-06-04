@@ -1,142 +1,74 @@
 # LAYERS — the 4-layer architecture manifest
 
-> **STATUS: superseded by the v4.0 foundation + packs model.** Layers 2–4 (compliance, personal-advanced, power-user) were folded into the **pack** system: compliance, voice, personas, and brand are now declared by the active pack (`packs/<name>/pack.yaml`), not by `scaffolding/02-*`/`03-*`/`04-*` directories (which no longer exist). Only `scaffolding/01-foundation/` remains on disk. The neutral `_default` pack is the baseline; company identity (e.g. Microsoft CAIP-SE) installs as an external pack (lintel-caip-pack). The historical 4-layer rationale below is kept for context. See [docs/design/lintel-v4.0-reframe-design.md](docs/design/lintel-v4.0-reframe-design.md) for the current model.
+> **STATUS: superseded by the v4.0 foundation + packs model.** Layers 2–4 (compliance, personal-advanced, power-user) were folded into the **pack** system: compliance, voice, personas, and brand are now declared by the active pack (`packs/<name>/pack.yaml`), not by `scaffolding/02-*`/`03-*`/`04-*` directories (which no longer exist). Only `scaffolding/01-foundation/` remains on disk. The neutral `_default` pack is the baseline; company identity (e.g. Microsoft CAIP-SE) installs as an external pack (lintel-caip-pack). The historical 4-layer rationale is gone; the current model is documented below. See [docs/design/lintel-v4.0-reframe-design.md](docs/design/lintel-v4.0-reframe-design.md) for the full design.
 
-Lintel originally organized everything into 4 layers. Each layer had its own purpose, change rate, and per-repo override rules.
+Lintel is now built from **two parts**: a stable **foundation** and one active **pack**. The foundation is company-neutral discipline that every repo gets. The pack supplies identity — compliance, voice, personas, brand, roles — and is swappable. Lintel ships only the neutral `_default` pack; company identity installs on top.
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│  Layer 4 — Power user (experimental, actively learning)     │
-│  04-power-user/                                              │
-│    hooks (inert by default), workflow templates,            │
-│    memory protocols, multi-repo, skill activation rules     │
+│  Pack — identity, swappable (packs/<name>/pack.yaml)        │
+│    voice · compliance · persona · roles · brand · knowhow   │
+│    lessons · opinions · navigation · brief_forge_handoffs   │
+│    resolved by lib/pack-resolver.sh                         │
+│    _default = neutral baseline · company pack installs over │
 ├─────────────────────────────────────────────────────────────┤
-│  Layer 3 — Personal advanced (opinionated workflow)         │
-│  03-personal-advanced/                                       │
-│    voice tier (pack-driven),                                │
-│    precedence model (5 levels),                             │
-│    promoted-agents (tier-stamped)                            │
-├─────────────────────────────────────────────────────────────┤
-│  Layer 2 — Compliance (pack-driven, non-negotiable)         │
-│  02-compliance/                                              │
-│    5 hard rules (always-on checklist at session-start)      │
-│    7 on-demand rules (/compliance-check skill)              │
-│    8 reference rules (operator can elevate per repo)        │
-├─────────────────────────────────────────────────────────────┤
-│  Layer 1 — Foundation (Boris-style discipline, stable)      │
-│  01-foundation/                                              │
+│  Foundation — discipline, stable (scaffolding/01-foundation)│
 │    CORE-PRINCIPLES, EVOLUTION, EVOLUTION-LOG,               │
 │    tasks/{lessons,memory,personas,todo},                    │
-│    docs/adr/, .claude/agents/, CLAUDE.md.template           │
+│    docs/adr/ templates, .claude/agents/, CLAUDE.md.template │
 └─────────────────────────────────────────────────────────────┘
 ```
 
-## Change rate per layer
+## Foundation — what it holds
 
-| Layer | Change rate | Process to change |
-|---|---|---|
-| 1 Foundation | **Stable** | Goes through `EVOLUTION.md` process. CORE change = explicit decision + EVOLUTION-LOG entry. |
-| 2 Compliance | **pack-driven** | Declared by the active pack's `compliance.*`. A company pack refreshes on its own policy cadence. |
-| 3 Personal advanced | **Opinionated** | PR-based, team review. No heavy EVOLUTION process but team-vetted. |
-| 4 Power user | **Experimental** | Free adaptation. Promotion to Layer 3 via PR when a pattern proves out. Archive in `EVOLUTION-LOG.md` when it doesn't. |
+`scaffolding/01-foundation/` is the stable, company-neutral base copied into every scaffolded repo via `bin/li-scaffold`. It ships **structure, not content**:
 
-## Durable principles (lesson-trio reflected in architecture)
+- `CORE-PRINCIPLES.md` — the load-bearing rules, read at session-start.
+- `EVOLUTION.md` + `EVOLUTION-LOG.md` — the change process for foundation itself and the log of decisions taken.
+- `tasks/{lessons,memory,personas,todo}.md` — ephemeral working memory templates (lessons, long-running state, operator calibration, the active todo).
+- `docs/adr/` templates — architecture decision record scaffolding.
+- `.claude/agents/` — per-repo subagent override slot.
+- `CLAUDE.md.template` — the session entrypoint a new repo starts from.
 
-Three lessons har graduerats från `tasks/lessons.md` till architecture-level
-principles. They shape what each layer DOES and DOES NOT do.
+Foundation **documents discipline; it does not enforce.** Agents read it at session-start; there is no runtime check. It changes rarely, and only through the `EVOLUTION.md` process (a foundation change = explicit decision + `EVOLUTION-LOG.md` entry).
 
-### L-001 — Scaffolding, not content (Layer 1 + 3 boundary)
+## Pack — what it declares
 
-Lintel ships **structure** (templates, tests, agent-mapping, invocation skills)
-+ **one canonical deep example** per pattern. Operator + AI generate the rest
-of the content at invocation time.
+A pack is `packs/<name>/pack.yaml` plus any corpus files it references. It is where identity lives. The schema (`lib/pack-schema.yaml`) defines these top-level fields:
 
-Applied at architecture-level:
-- Layer 1 holds *patterns* (CORE-PRINCIPLES, ADR templates, tasks-format)
-- Layer 3 holds *agent rules* (voice corpus, precedence, tier-stamping)
-- **Neither layer holds curated answers.** Operator-AI generates at invocation.
-- `⚠ template only` rows in catalogs är a feature, not a gap.
+| Field | Declares |
+|---|---|
+| `voice` | voice tier (`internal`/`mixed`/`custom`), corpus path, enforcement scope, active gates |
+| `compliance` | mode (`hard`/`advisory`/`off`) + which Lintel hooks the pack activates |
+| `persona` | operator persona source + whether voice-critic checks output against it |
+| `roles` | role-definition directory + default role |
+| `brand` | doc-gen templates + color tokens for `/generate-web` etc. |
+| `knowhow` | tag-indexed knowledge base + whether it may override session priors |
+| `lessons` | immutable lessons shipped with the pack (operator lessons stay outside it) |
+| `opinions` | stance documents |
+| `navigation` | default + high-risk workflows, orientator token budget, escalation threshold |
+| `brief_forge_handoffs` | which evaluators fire on subagent-spawn, phase-transition, workflow-handoff, cold-executor |
 
-### L-002 — Grep existing before designing new (cross-layer hygiene)
+The neutral `_default` pack sets all of these to off/null: no voice enforcement, advisory-only compliance with no hooks, no personas, no brand. It is the everything-neutral baseline.
 
-Before architecting a new skill family OR design pass, enumerate existing
-`skills/` + `agents/` för prior infrastructure. Cost: 30 seconds. Avoided cost:
-re-design after operator catches the gap.
+## Resolution and inheritance
 
-Applied at architecture-level:
-- LAYERS read order (below) starts with checking existing repo state
-- Any new layer-addition requires precedence-check across existing 4 layers
-- See `tasks/lessons.md/L-002` for the incident-driven rationale
+`lib/pack-resolver.sh` resolves the active pack at session-start:
 
-### L-003 — Verify counts before applying fact-claims (cross-layer skepticism)
+- A pack may declare `extends: <parent>` to inherit from another pack. The resolver walks the chain parent→child and merges top-level keys, with the child overriding the parent.
+- `_default` is the resolver's **fallback layer for missing fields**, not an implicit `extends` target. Any field a pack leaves unset falls back to the `_default` value (and, last resort, to hardcoded neutral defaults).
+- Failure modes are guarded: an `extends:` cycle is refused, and an invalid active pack falls back to `_default` with a warning (if `_default` itself is invalid, the repo is broken and the resolver fails loudly).
 
-When external doc (backlog, audit, third-party analysis) claims a count or fact
-about codebase ("78 agents", "12 hooks"), VERIFY via tool before applying any
-"fix" to docs. External claims may itself be wrong.
-
-Applied at architecture-level:
-- LAYERS counts (113 skills + 78 agents + 15 hooks) verified via `find`
-- See `tasks/lessons.md/L-003` for the incident-driven rationale
-
-The trio forms a discipline: respect what exists (L-002), respect what doesn't
-exist (L-001), verify claims about what exists (L-003).
-
-### L-004 — Separate decision-layer from rendering-layer when both exist (v3.7 reflection)
-
-When two skill families could plausibly own the same scope, split them by
-**decision vs execution**, not by feature-coverage. v3.7 made this explicit:
-
-- **frontend-* family** = design-director-layer. Owns typography/motion/shader
-  decisions + visual thesis. Produces `frontend-design-spec.json`.
-- **generate-* family** = rendering-engine-layer. Reads spec + emits files
-  (`generate-web`, `generate-app`, `generate-ppt`, `generate-word`).
-
-Why this matters at architecture level:
-- Schema becomes the boundary contract (M-5 schema-version handshake)
-- Each family stays small + composable. Frontend-* can grow new sub-skills
-  (frontend-shader, frontend-style-extract) without bloating generate-*.
-- L-002 stays clean: new family is identity-anchor, not replacement.
-
-Applied to layer model: this separation pattern is canonical Layer 3 discipline
-(personal-advanced opinionated workflow). Any future "could-overlap" decision
-should follow: split by decision/execution before splitting by feature.
-
-The lesson-quartet now: respect existing (L-002), respect non-existing (L-001),
-verify claims (L-003), separate decisions from execution (L-004).
-
-## Read order (canonical session-start)
-
-1. Layer 1 — `CORE-PRINCIPLES.md` (the 10 load-bearing rules)
-2. Layer 2 — `SESSION-START-CHECK.md` (the 5-step compliance checklist)
-3. Layer 1 — `tasks/personas.md` (operator calibration)
-4. Layer 1 — `tasks/memory.md` (long-running state)
-5. Layer 1 — recent `tasks/lessons.md` entries
-6. Layer 1 — relevant ADRs in `docs/adr/`
-7. Layer 3 — `precedence/README.md` (when delegating)
-8. Layer 4 — only when the task explicitly needs a Layer 4 pattern
+So identity composes: a company pack declares only what it changes, inherits the rest from its parent, and anything still unset lands on the neutral baseline.
 
 ## Per-repo override mechanism
 
-Each scaffolded repo can override layer behavior via:
+A scaffolded repo overrides pack/foundation behavior through three levels, repo-most-specific winning:
 
 - `<repo>/CLAUDE.md` — repo-specific rules ALWAYS override Lintel defaults. Per-repo wins.
-- `<repo>/.claude/agents/` — repo-level subagents override user-global with same name (Layer 3 precedence rule 2).
-- `~/.lintel/config.yaml` — operator-global overrides for Layer 2 tier elevation, Layer 4 hook activation, Layer 3 voice tier defaults, etc.
-
-## What each layer DOES NOT do
-
-- **Layer 1 does NOT enforce.** It documents discipline. Agents read it at session-start; no runtime check.
-- **Layer 2 does NOT auto-verify.** "No customer data" is operator-confirmed at session-start, not pattern-matched. The hooks in Layer 4 add specific automated checks for specific failure modes.
-- **Layer 3 does NOT route at runtime in v1.** The 5-level precedence is enforced by skill instructions only (agents reading the canonical instructions follow the rule). Runtime policy engine deferred to v1.1.
-- **Layer 4 does NOT auto-activate.** Hook files install but are inert until operator symlinks them.
-
-## Why 4 layers, not 3 or 5?
-
-- **Compliance separation** is non-negotiable for MS employees — must live at Layer 2.
-- **Foundation vs personal-advanced** separation lets compliance sit at the top without burying personal workflow.
-- **Power-user separation** lets experimental patterns live without polluting load-bearing foundation.
-- 5-layer model was considered; rejected because the 4 categories above naturally cluster.
+- `<repo>/.claude/agents/` — repo-level subagents override user-global ones with the same name.
+- `~/.lintel/config` — operator-global overrides (which pack is active, compliance-tier elevation, hook activation, voice-tier defaults).
 
 ## Provenance
 
-The 4-layer architecture model is from the operator's internal wiki ("My Claude Code Setup (experimental)" — Layer 1 Universal foundation / Layer 2 Compliance / Layer 3 Personal advanced / Layer 4 Power user). Lintel v1 operationalizes that wiki vision into installable + verifiable infrastructure.
+The original 4-layer model came from the operator's internal wiki ("My Claude Code Setup (experimental)" — Layer 1 Universal foundation / Layer 2 Compliance / Layer 3 Personal advanced / Layer 4 Power user). v1 operationalized that vision into installable infrastructure; v4.0 collapsed Layers 2–4 into the pack system, leaving the foundation + packs model documented above.

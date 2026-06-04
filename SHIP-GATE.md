@@ -12,16 +12,16 @@ All v3.5 directories populated as intended:
 
 | Path | v3.5 target | Verify command |
 |---|---|---|
-| `skills/` | 113 skills (81 v3 + 32 new v3.5) | `bash install/verify.sh --counts` |
-| `agents/` | 78 agents across 9 categories | `bash install/verify.sh --agents-categorized` |
-| `hooks/shared/` | 15 hooks | `find hooks/shared -name HOOK.md \| wc -l` |
+| `skills/` | 165 skills | `bash install/verify.sh --counts` |
+| `agents/` | 70 agents across 8 categories | `bash install/verify.sh --agents-categorized` |
+| `hooks/shared/` | 29 hooks | `find hooks/shared -name HOOK.md \| wc -l` |
 | `scaffolding/01-foundation/` | base templates intact | `bash install/verify.sh --scaffolding-coherence` |
 | `packs/_default/` | neutral baseline pack | `bash install/verify.sh --packs` |
 | `.claude-plugin/`, `.codex-plugin/`, `.cursor-plugin/`, `.opencode/`, `.copilot-plugin/`, `.droid-plugin/`, `gemini-extension.json` | 7 plugin manifests valid JSON | `bash install/verify.sh --plugin-manifests` |
 | `CLAUDE.md`, `AGENTS.md`, `GEMINI.md` at root | 3 entrypoint files | included in `--plugin-manifests` |
 | `bin/` | 6 operator-side utilities | `ls bin/` |
 
-**Aggregate v3.5 target:** 113 skills + 78 agents + 15 hooks + 7 plugin manifests + 3 entrypoint files + 7 bin scripts + 3 default public roles + intact scaffolding templates.
+**Aggregate target:** 165 skills + 70 agents + 29 hooks + 7 plugin manifests + 3 entrypoint files + 7 bin scripts + 3 default public roles + intact scaffolding templates.
 
 **v3.5-specific subset:**
 - 8 phase-skills: li-sense, li-define, li-discover, li-plan, li-build, li-review, li-ship, li-capture
@@ -42,8 +42,8 @@ Every skill + every agent must have valid frontmatter:
 - `voice` (internal | mixed | custom — resolves to active pack's voice tier)
 - `cli_support` (v2 array — retained for compat; v3 plugin manifests handle CLI discovery)
 - `category` (NEW v3 — for agents only; matches directory)
-- `layer` (NEW v3 — for skills only; foundation | ms-team)
-- `tier` (REQUIRED for ms-specific / security / compliance agents — permissive default for engineering)
+- `layer` (for skills only; foundation)
+- `tier` (REQUIRED for security / compliance agents — permissive default for engineering)
 
 **Verify:** `bash install/verify.sh --frontmatter && bash install/verify.sh --agents-categorized` both exit 0.
 
@@ -145,7 +145,7 @@ Before tagging v3.0.0:
 ## Gate 10 — License posture
 
 - LICENSE file: MIT
-- All v3-new agents stamped `tier: permissive` (operator IP, MS-internal MIT)
+- All agents stamped `tier: permissive` (operator IP, MIT)
 - README clearly states: "Lintel contains operator-authored content (MIT)"
 - v3 ships NO vendored upstream code (v2's upstream-sources.yaml retained but no upstream agents in v3 — operator-authored only)
 - `docs/promoted-agents.md` updated to reflect v3 zero-upstream posture
@@ -159,12 +159,12 @@ Lintel 8-phase cycle ships with full depth:
 - li-cycle orchestrator can dispatch each phase
 - li-resume reads 00-state.md correctly
 - 4 composite shortcuts delegate properly to li-cycle
-- 5 mode presets defined in li-cycle (hotfix, customer-engagement, internal-tool, demo-prep, research-dive)
+- generic mode presets defined in li-cycle (hotfix, internal-tool, research-dive, meta-infra); customer-engagement/demo-prep are pack-contributed
 - 00-state.md schema consistent across all phases
 
 **Verify:**
 ```bash
-bash install/verify.sh --counts | grep -E "^Skills:" # ≥113
+bash install/verify.sh --counts | grep -E "^Skills:" # ≥165
 ls skills/li-{sense,define,discover,plan,build,review,ship,capture}/SKILL.md
 ls skills/li-{cycle,resume,fix,research,plan-and-build,review-and-ship}/SKILL.md
 bash tests/unit/cycle-skills-present.sh
@@ -300,7 +300,8 @@ Last `verify.sh --all` run shows:
 
 ## See also
 
-- `docs/design/lintel-v3-plan.md` — current architecture
+- `docs/design/lintel-v4.0-reframe-design.md` — current architecture
+- `docs/design/lintel-v3-plan.md` — v3 design (historical)
 - `docs/design/lintel-v2-design.md` — v2 design (historical)
 - `docs/design/MIGRATION-TABLE-v2.md` — v1→v2 rename mapping
 - `docs/per-cli/PLUGIN-FORMAT-RESEARCH.md` — per-CLI plugin schema findings

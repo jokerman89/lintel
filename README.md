@@ -2,9 +2,9 @@
 
 **Company-neutral, pack-driven session harness for agent-based development.** Markdown + bash scaffolding that any modern AI CLI loads as a plugin. No runtime, no daemons — your CLI handles execution. Identity (voice, compliance, personas, brand) is supplied by an installable **pack**; the harness ships only the neutral `_default` pack.
 
-**Status:** v3-dev (2026-05-27). See [CHANGELOG.md](CHANGELOG.md) for v3 release notes and [SHIP-GATE.md](SHIP-GATE.md) for v3.0.0 readiness gates. The v3 design lives at [docs/design/lintel-v3-plan.md](docs/design/lintel-v3-plan.md).
+**Status:** v4.7 — company-neutral, pack-driven harness. The Microsoft CAIP-SE identity has been extracted to the separate [lintel-caip-pack](https://github.com/jokerman89/lintel-caip-pack); Lintel ships only the neutral `_default` pack. See [CHANGELOG.md](CHANGELOG.md) for release notes and [SHIP-GATE.md](SHIP-GATE.md) for readiness gates. Current architecture lives at [docs/design/lintel-v4.0-reframe-design.md](docs/design/lintel-v4.0-reframe-design.md).
 
-v3 ships **151 skills + 78 agents + 19 hooks** organized for plugin-manifest pattern across 8 CLIs. Plus full Kategori B scaffolding-template system (CORE-PRINCIPLES, EVOLUTION-LOG, tasks/lessons.md, ADR templates) that gets copied into new MS engagement repos via `bin/li-scaffold`.
+Lintel ships **165 skills + 70 agents + 29 hooks** organized for the plugin-manifest pattern across 8 CLIs. Plus the foundation scaffolding-template system (CORE-PRINCIPLES, EVOLUTION-LOG, tasks/lessons.md, ADR templates) that gets copied into new repos via `bin/li-scaffold`. The engineering-domain modules (`/li:ta`, `/li:da`, `/li:sc`, `/li:dh`, `/li:tq`) plus the 8-phase cycle are the core.
 
 Lintel is the **complete session harness** — not just a skill catalog. It manages the full lifecycle: session-start ritual → mid-session interventions (hooks, voice gates, compliance) → end-of-session capture (lessons, ADR drafting, EVOLUTION-LOG) → cross-session continuity (memory, lessons-sync). See [docs/session-harness.md](docs/session-harness.md) for the full mental model.
 
@@ -22,7 +22,7 @@ Two distinct categories, both shipped in this repo:
 **Kategori B — Repo-scaffolding** (copied INTO other repos via `li-scaffold`):
 - `scaffolding/01-foundation/` — CLAUDE.md template, CORE-PRINCIPLES, EVOLUTION/EVOLUTION-LOG, tasks/{lessons,memory,personas,todo}.md, docs/adr/ templates, .claude/agents/ subagent overrides
 
-Company-specific scaffolding (compliance reference, voice corpus, doc-gen templates) is supplied by an installable pack — see the [lintel-caip-pack](https://github.com/jokerman89/lintel-caip-pack) example for the Microsoft CAIP-SE identity.
+Company-specific scaffolding (compliance reference, voice corpus, doc-gen templates) is supplied by an installable pack — Lintel ships only the neutral `_default` pack. See the [lintel-caip-pack](https://github.com/jokerman89/lintel-caip-pack) example for the Microsoft CAIP-SE identity.
 
 The architecture: write skills/agents once at repo root, ship tiny per-CLI plugin manifests (`.claude-plugin/`, `.codex-plugin/`, `.cursor-plugin/`, `.opencode/`, `gemini-extension.json`, `.copilot-plugin/`, `.droid-plugin/`) that all point at the same `./skills/` and `./agents/` directories. Each CLI's native plugin marketplace handles discovery + invocation.
 
@@ -32,7 +32,7 @@ Anyone running an AI CLI who wants a disciplined session harness. The harness it
 
 ---
 
-## Multi-CLI support (v3 — honest table)
+## Multi-CLI support (honest table)
 
 | CLI | Install mechanism | Skill/agent discovery | Status |
 |---|---|---|---|
@@ -133,7 +133,7 @@ Full walkthrough: [docs/getting-started.md](docs/getting-started.md).
 
 MIT — see [LICENSE](LICENSE).
 
-v3 ships **only operator-authored content** (no vendored upstream). Permissive license throughout. v1 license-tier mechanism preserved for any future upstream-derived agents.
+Lintel ships **only operator-authored content** (no vendored upstream). Permissive license throughout. The license-tier mechanism is preserved for any future upstream-derived agents.
 
 ---
 
@@ -150,7 +150,7 @@ Beyond these neutral baselines, tiered compliance (SSO policy, vendor preference
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md). PR-based against `main`. v3 work happens on `v3-dev` branch.
+See [CONTRIBUTING.md](CONTRIBUTING.md). PR-based against `main`.
 
 Lessons learned go in `scaffolding/01-foundation/tasks/lessons.md`. Promote a lesson from a customer repo via `bin/li-lessons-promote`.
 
@@ -158,7 +158,7 @@ Lessons learned go in `scaffolding/01-foundation/tasks/lessons.md`. Promote a le
 
 ## Versioning
 
-Semantic versioning since v3. v3.0.0 ships when [SHIP-GATE.md](SHIP-GATE.md) gates are all green.
+Semantic versioning since v3; the current line is v4.7. Releases ship when [SHIP-GATE.md](SHIP-GATE.md) gates are all green.
 Pre-v3 used date-based versioning — see [CHANGELOG.md](CHANGELOG.md).
 
 ---
