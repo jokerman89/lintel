@@ -33,6 +33,7 @@ Output: a SENSE report. Operator decides next move based on it.
 
 ## When NOT to use
 
+- For sizing + disambiguating a request — use `/li:scope` (Phase 1.5); SENSE only pre-reads size, SCOPE owns the gate
 - For exploratory codebase mapping — use `/li:discover` (Phase 3)
 - For clarifying problem definition — use `/li:define` (Phase 2)
 - Mid-cycle (SENSE only runs once at cycle entry; don't re-invoke)
@@ -140,46 +141,35 @@ fi
 
 Surfaces in SENSE report (Step 7 output) as recommended workflow. Per auto-mode level (b): low-risk + high-confidence auto-starts (if pack `auto_mode_eligible: true`), high-risk always confirms.
 
-### Step 0e — Scale gate (Slice 1 — design §3.2)
+### Step 0e — Scale pre-read (Slice 2 — design §3.2)
 
-Runs **after** step 0d (it needs the orientator's route to be able to override a confidently-wrong one). Closes the keystone hole: a request like "deploy a website to azure" could mean a static page (XS) or an ALZ landing-zone + CI/CD + Front Door (XL), and nothing asked. The scale-estimator gives the size axis; this gate asks one sharp question only when the request is genuinely bimodal, and stays silent otherwise.
+> **Slice 2 change:** the substantive scale **gate** (the clarifying AskUserQuestion + route-override + `scope.md` emit) has been **promoted to the first-class SCOPE phase** (`skills/scope/SKILL.md`), which runs between SENSE and DEFINE. SENSE step 0e is now a **light pre-read**: it surfaces the size in the SENSE report so the operator sees it early, and **delegates the gate + `scope.md` to SCOPE**. This keeps SENSE read-only and light (it never pauses), and gives the gate a testable home that can grow without bloating SENSE.
+
+Runs **after** step 0d (so the orientator's route is available to surface alongside size). Mechanical only — no question is ever asked here.
 
 ```bash
 source "$LINTEL_REPO_ROOT/lib/scale-estimator.sh"
-escalation=$(resolve_pack_field navigation.escalation_threshold); escalation="${escalation:-medium}"
 
 scale_size=$(classify_size "$prompt_text")
 scale_amb=$(scale_ambiguous "$prompt_text")
-scale_esc=$(scale_escalate "$prompt_text" "$escalation")
 depth_schema=$(size_to_depth_schema "$scale_size")
 ```
 
-**Mechanical-first, agent on escalation (decision 1B):**
+**What SENSE does (pre-read only):**
 
-- **If `scale_amb=no`** (clear): no question. `chosen_reading` = the single reading. If `scale_size` is `L`/`XL`, note in the SENSE report that PLAN will use a deeper `depth_schema` — but do not interrupt. Small/clear requests feel nothing.
-- **If `scale_amb=yes`** (bimodal): you (the agent) are the escalation. Judge the request's two plausible readings, give each a sharp label + size, and fire **one** AskUserQuestion (the clarifying gate). Example for "deploy a website to azure":
-  - A) Static page (Storage/SWA) — ~XS
-  - B) ALZ landing-zone + CI/CD + Front Door — ~XL
-  Set `chosen_reading` + final `scale_size`/`depth_schema` from the answer. If AskUserQuestion is unavailable (degraded), fall back to the mechanical labels and the conservative size (`scale_size`), and note the assumption in the SENSE report rather than blocking.
+- Surface `scale_size` + `depth_schema` in the SENSE report (Step 7 output) so the operator sees the request's size before committing to a phase.
+- If `scale_amb=yes`, surface a one-line **flag** — "scale is bimodal; SCOPE will ask one clarifying question" — but **do not ask it here.** SENSE never pauses.
+- If `scale_size` ∈ {L, XL}, note that PLAN will use a deeper `depth_schema`.
 
-**Route override:** if the orientator route (step 0d) conflicts with the resolved scale — e.g. `intent=ship` (→ `/li:cycle --from SHIP`) but the resolved reading is a large greenfield build (`scale_size` ∈ {L,XL} and no existing artifact to ship) — **override** the route to a full cycle from DEFINE (`/li:cycle`, entry DEFINE) and say why in the SENSE report. This is what stops "deploy a website to azure" from skipping DEFINE/DISCOVER/PLAN.
+**What SENSE delegates to SCOPE (does NOT do here):**
 
-**Emit `scope.md` (step 0e output, T5):** write the resolved scope so DEFINE inherits the wedge and PLAN reads `depth_schema`. Canonical home: the job dir (`~/.lintel/jobs/<id>/scope.md`) when a job is active, else `.lintel/state/scope.md`.
+- the clarifying gate (the AskUserQuestion that disambiguates a bimodal reading),
+- the orientator route-override (`deploy→ship` → full cycle from DEFINE),
+- emitting `scope.md`.
 
-```bash
-scope_out="${LINTEL_STATE_DIR:-.lintel/state}/scope.md"; mkdir -p "$(dirname "$scope_out")"
-cat > "$scope_out" <<EOF
-# Scope: $prompt_text
-size: $scale_size
-intent: $intent
-ambiguous: ${scale_amb}${chosen_reading:+ → resolved}
-chosen_reading: "${chosen_reading:-$prompt_text}"
-depth_schema: $depth_schema
-est_tokens: <agent fills from size prior; time only on --with-time>
-EOF
-```
+**Standalone SENSE still works.** When SENSE is run on its own (no SCOPE follows), the mechanical `scale_size` / `depth_schema` in the report are complete and correct — just un-disambiguated. The bimodal flag tells the operator a question is pending; running `/li:scope` (or `/li:cycle`) resolves it. SENSE never blocks on scale.
 
-`depth_schema` flows to PLAN (step T6): `flat` → today's task list, `phased` → phases + tasks, `tree` → phase→task→subtask (Slice 2). Time estimates stay out unless the operator asks (`--with-time`).
+`depth_schema` flows downstream to PLAN: `flat` → flat task list, `phased` → phases + tasks, `tree` → phase→task→subtask (Slice 2). Time estimates stay out unless the operator asks (`--with-time`).
 
 ### Step 1 — Read configuration
 
@@ -355,6 +345,7 @@ If operator explicitly asks for the SENSE report mid-session, re-run is allowed 
 - `.lintel/state/00-state.md` (new SENSE entry, appends)
 
 **Triggers (recommends, never auto-invokes):**
+- SCOPE next in `/li:cycle` (sizes + disambiguates the request before DEFINE)
 - Operator chooses next phase
 
 ## Anti-patterns
