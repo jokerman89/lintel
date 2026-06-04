@@ -53,18 +53,13 @@ Output (max 3 lessons) prepends till SENSE-rapport. Silent om no relevant matche
 
 ### Step 0b — Elephant-hint detection (v3.6 cohort 3 item 3.1)
 
-Before reading configuration, scan operator's prompt for breadth-signals indicating a "swelling idea" — broad scope that historically glides out of control during plan-writing. Detection heuristics:
+Before reading configuration, scan operator's prompt for breadth-signals indicating a "swelling idea" — broad scope that historically glides out of control during plan-writing. The breadth score now comes from the **single source** (`lib/scale-estimator.sh`, decision 2A) so this hint and the scale gate (step 0e) can never disagree on how broad a request is:
 
 ```bash
 prompt_text="<operator's last message>"
 
-# Count breadth-signals
-elephant_score=0
-echo "$prompt_text" | grep -qiE "entire|all|every|whole|full system|complete rewrite|across all" && elephant_score=$((elephant_score+2))
-echo "$prompt_text" | grep -qiE "redesign|refactor everything|new architecture|from scratch" && elephant_score=$((elephant_score+2))
-echo "$prompt_text" | grep -qiE "and also|while we're at it|maybe also|could we also" && elephant_score=$((elephant_score+1))
-word_count=$(echo "$prompt_text" | wc -w)
-[ "$word_count" -gt 80 ] && elephant_score=$((elephant_score+1))
+source "$LINTEL_REPO_ROOT/lib/scale-estimator.sh"
+elephant_score=$(elephant_score "$prompt_text")   # single source (was inline; now lib/scale-estimator.sh detect_breadth)
 ```
 
 If `elephant_score >= 3`: surface elephant-hint to operator (in SENSE-report only — never block):
@@ -144,6 +139,47 @@ fi
 ```
 
 Surfaces in SENSE report (Step 7 output) as recommended workflow. Per auto-mode level (b): low-risk + high-confidence auto-starts (if pack `auto_mode_eligible: true`), high-risk always confirms.
+
+### Step 0e — Scale gate (Slice 1 — design §3.2)
+
+Runs **after** step 0d (it needs the orientator's route to be able to override a confidently-wrong one). Closes the keystone hole: a request like "deploy a website to azure" could mean a static page (XS) or an ALZ landing-zone + CI/CD + Front Door (XL), and nothing asked. The scale-estimator gives the size axis; this gate asks one sharp question only when the request is genuinely bimodal, and stays silent otherwise.
+
+```bash
+source "$LINTEL_REPO_ROOT/lib/scale-estimator.sh"
+escalation=$(resolve_pack_field navigation.escalation_threshold); escalation="${escalation:-medium}"
+
+scale_size=$(classify_size "$prompt_text")
+scale_amb=$(scale_ambiguous "$prompt_text")
+scale_esc=$(scale_escalate "$prompt_text" "$escalation")
+depth_schema=$(size_to_depth_schema "$scale_size")
+```
+
+**Mechanical-first, agent on escalation (decision 1B):**
+
+- **If `scale_amb=no`** (clear): no question. `chosen_reading` = the single reading. If `scale_size` is `L`/`XL`, note in the SENSE report that PLAN will use a deeper `depth_schema` — but do not interrupt. Small/clear requests feel nothing.
+- **If `scale_amb=yes`** (bimodal): you (the agent) are the escalation. Judge the request's two plausible readings, give each a sharp label + size, and fire **one** AskUserQuestion (the clarifying gate). Example for "deploy a website to azure":
+  - A) Static page (Storage/SWA) — ~XS
+  - B) ALZ landing-zone + CI/CD + Front Door — ~XL
+  Set `chosen_reading` + final `scale_size`/`depth_schema` from the answer. If AskUserQuestion is unavailable (degraded), fall back to the mechanical labels and the conservative size (`scale_size`), and note the assumption in the SENSE report rather than blocking.
+
+**Route override:** if the orientator route (step 0d) conflicts with the resolved scale — e.g. `intent=ship` (→ `/li:cycle --from SHIP`) but the resolved reading is a large greenfield build (`scale_size` ∈ {L,XL} and no existing artifact to ship) — **override** the route to a full cycle from DEFINE (`/li:cycle`, entry DEFINE) and say why in the SENSE report. This is what stops "deploy a website to azure" from skipping DEFINE/DISCOVER/PLAN.
+
+**Emit `scope.md` (step 0e output, T5):** write the resolved scope so DEFINE inherits the wedge and PLAN reads `depth_schema`. Canonical home: the job dir (`~/.lintel/jobs/<id>/scope.md`) when a job is active, else `.lintel/state/scope.md`.
+
+```bash
+scope_out="${LINTEL_STATE_DIR:-.lintel/state}/scope.md"; mkdir -p "$(dirname "$scope_out")"
+cat > "$scope_out" <<EOF
+# Scope: $prompt_text
+size: $scale_size
+intent: $intent
+ambiguous: ${scale_amb}${chosen_reading:+ → resolved}
+chosen_reading: "${chosen_reading:-$prompt_text}"
+depth_schema: $depth_schema
+est_tokens: <agent fills from size prior; time only on --with-time>
+EOF
+```
+
+`depth_schema` flows to PLAN (step T6): `flat` → today's task list, `phased` → phases + tasks, `tree` → phase→task→subtask (Slice 2). Time estimates stay out unless the operator asks (`--with-time`).
 
 ### Step 1 — Read configuration
 
