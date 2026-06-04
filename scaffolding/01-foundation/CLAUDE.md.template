@@ -1,6 +1,6 @@
 # CLAUDE.md — repo instructions for LLM assistants
 
-> This file was scaffolded from `jokerman-session-setup` (JokermanStack / JStack). Sections between `<!-- PROJECT:START -->` and `<!-- PROJECT:END -->` are project-specific — adapt freely. The remaining sections are load-bearing and inherited from [CORE-PRINCIPLES.md](CORE-PRINCIPLES.md). Change them only with an explicit reason documented in `EVOLUTION-LOG.md`.
+> This file was scaffolded by Lintel (`jokerman-session-setup`). Sections between `<!-- PROJECT:START -->` and `<!-- PROJECT:END -->` are project-specific — adapt freely. The remaining sections are load-bearing and inherited from [CORE-PRINCIPLES.md](CORE-PRINCIPLES.md). Change them only with an explicit reason documented in `EVOLUTION-LOG.md`. This file is self-contained: it works without the operator's global `~/.claude/CLAUDE.md`.
 
 <!-- PROJECT:START -->
 
@@ -166,7 +166,7 @@ When two or more components communicate (event buses, APIs, databases, IPC):
 
 ## Compliance checklist (5-step session-start)
 
-Per JStack Layer 2. Run BEFORE any non-trivial action that touches code, data, or external systems:
+Run BEFORE any non-trivial action that touches code, data, or external systems (the active pack's compliance mode tightens or relaxes this):
 
 1. **Authority scope** — is this work inside the repo's authorized scope?
 2. **Customer-data check** — any path, secret, or content that could be customer data?

@@ -133,6 +133,30 @@ else
 fi
 echo ""
 
+# ── 3b. Current repo scaffolding adoption ──
+# Catches the "factory never ran on this repo" failure: a repo that USES Lintel but
+# never had li-scaffold applied to itself (no .claude/, no docs/adr/, thin CLAUDE.md).
+echo "## This repo's scaffolding adoption"
+repo_root=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
+missing=""
+[ -d "$repo_root/.claude" ] || missing="$missing .claude/"
+[ -d "$repo_root/docs/adr" ] || [ -d "$repo_root/docs/decisions" ] || [ -d "$repo_root/docs/06-decisions" ] || missing="$missing docs/adr/"
+[ -f "$repo_root/tasks/lessons.md" ] || missing="$missing tasks/lessons.md"
+# A scaffolded CLAUDE.md restates the protocol; a thin one is just a pointer.
+if [ -f "$repo_root/CLAUDE.md" ] && grep -qiE "Workflow Orchestration|Self-Improvement Loop|Auto-mode boundaries" "$repo_root/CLAUDE.md"; then
+  claude_scaffolded=1
+else
+  claude_scaffolded=0; missing="$missing scaffolded-CLAUDE.md"
+fi
+if [ -z "$missing" ]; then
+  ok "repo has its own scaffolding (.claude/, docs/adr/, lessons, scaffolded CLAUDE.md)"
+else
+  warn "repo is missing its own scaffolding:$missing"
+  echo "    This repo uses Lintel but never had the scaffolding applied to itself."
+  echo "    Fix: li-scaffold init   (or copy scaffolding/01-foundation/ into the repo root)"
+fi
+echo ""
+
 # ── 4. Hook activation ──
 echo "## Hooks"
 hook_count=0
