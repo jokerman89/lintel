@@ -23,7 +23,7 @@ Meta-skill. Lists what Lintel has installed on this machine so the operator know
 
 Optional flags:
 - `--category <name>` — filter to one category (`plan`, `qa`, `ship`, `compliance`, `voice`, `meta`, `ops`)
-- `--voice <internal|trailblazer|mixed>` — filter by voice tier
+- `--voice <internal|customer|mixed>` — filter by voice tier
 - `--cli <claude-code|codex|copilot>` — show only skills supported on a specific CLI
 - `--verbose` — include description per entry (default: one-line entries)
 
@@ -58,11 +58,10 @@ Lintel v<version> — <N skills>, <M agents>, <K hooks>
 - /review              [internal, all CLIs] — Diff-scoped pre-ship review
 
 ## Voice (<count>)
-- /rais-customer-voice-check [trailblazer, claude-code] — Eval against MS Our Voice grid
-- /msvoice-rewrite     [trailblazer, claude-code] — Rewrite to specific Provoke technique
+- /li:eval             [internal, claude-code] — Calibrate the pack's voice corpus
 
 ## Compliance (<count>)
-- /compliance-check    [internal, all CLIs] — Run 7 on-demand rules
+- /compliance-check    [internal, all CLIs] — Run the active pack's compliance gates
 
 ## Meta + ops (<count>)
 - /context-save        [internal, claude-code] — Save checkpoint
@@ -137,15 +136,13 @@ None — read-only meta information.
 > /help --category compliance --verbose
 Lintel compliance skills:
 - /compliance-check  [internal, all CLIs]
-    Runs the 7 on-demand compliance rules (OneRAI registration, threat
-    model, DPIA, transparency doc, sensitive-use report, SAST, Entra
-    Agent ID). Surfaces results; does NOT enforce — operator confirms.
+    Runs the active pack's compliance gates (`resolve_pack_field
+    compliance.hooks`; none by default). Surfaces results; does NOT
+    enforce — operator confirms.
 
-> /help --voice trailblazer
-Lintel trailblazer-voice skills:
-- /rais-customer-voice-check  [claude-code]
-- /msvoice-rewrite       [claude-code]
-- /demo-deliverable-gen  [claude-code]
+> /help --voice customer
+Lintel customer-voice skills:
+- /li:eval  [claude-code]
 ```
 
 ## See also

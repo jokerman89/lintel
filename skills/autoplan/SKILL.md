@@ -10,7 +10,7 @@ cli_support: [claude-code]
 
 # /autoplan
 
-Orchestrator skill. Chains the full plan pipeline: `/office-hours` (design doc) → `/plan-ceo-review` (scope) → `/plan-eng-review` (arch + tests) → optionally `/plan-design-review` (UI/UX) → optionally `/plan-devex-review` (DX). One invocation, one design + complete review set, ready for `/release-ev2`.
+Orchestrator skill. Chains the full plan pipeline: `/office-hours` (design doc) → `/plan-ceo-review` (scope) → `/plan-eng-review` (arch + tests) → optionally `/plan-design-review` (UI/UX) → optionally `/plan-devex-review` (DX). One invocation, one design + complete review set, ready to ship.
 
 ## When to use
 
@@ -20,7 +20,7 @@ Orchestrator skill. Chains the full plan pipeline: `/office-hours` (design doc) 
 
 ## When NOT to use
 
-- Trivial fix / refactor — too heavy. Use `/review` then `/release-ev2`.
+- Trivial fix / refactor — too heavy. Use `/review` then `/ship`.
 - Plan already exists — skip `/office-hours`, run individual review skills.
 - Ongoing iterative work — chain overhead exceeds value per cycle.
 
@@ -59,7 +59,7 @@ Step 4/4 /plan-design-review: ⏸ SKIPPED — no UI scope detected
 Final verdict: ✓ READY TO IMPLEMENT
 Design doc: <path>
 Task list: 17 implementation tasks
-Next: begin Phase 1 implementation OR /release-ev2 (if work already done)
+Next: begin Phase 1 implementation OR /ship (if work already done)
 ```
 
 ## Compliance integration
@@ -126,4 +126,4 @@ Chain paused. Update design doc, re-run /autoplan when ready.
 - `/plan-eng-review` — step 3 (the required gate)
 - `/plan-design-review` — step 4 (UI scope only)
 - `/plan-devex-review` — opt-in step 5
-- `/release-ev2` — runs AFTER autoplan completes
+- `/ship` — runs AFTER autoplan completes

@@ -1,6 +1,6 @@
 ---
 name: generate-word
-layer: ms-team
+layer: foundation
 description: Produce brand-compliant Word doc via docx-templater — technical / customer-summary / transparency-note variants.
 color: orange
 tools: Read, Write, Bash, Glob
@@ -13,7 +13,7 @@ cli_support:
     degradation:
       - capability: AskUserQuestion
         strategy: auto-pick-recommended
-license_note: produces customer-bound output; requires T0 CALIBRATED for trailblazer variants
+license_note: produces customer-bound output; honors the active pack's compliance gates for customer-facing variants
 ---
 
 # /generate-word
@@ -21,16 +21,16 @@ license_note: produces customer-bound output; requires T0 CALIBRATED for trailbl
 Brand-compliant Word document generation. Three target variants:
 
 - **`technical`** — engineering-internal deliverable (technical spec, runbook, ADR-style doc) — voice: internal
-- **`customer-summary`** — customer-bound engagement summary — voice: trailblazer-draft, gated
-- **`transparency-note`** — RAIS transparency note for AI feature — voice: trailblazer-draft, gated, includes honest-limitations check
+- **`customer-summary`** — customer-bound engagement summary — voice: pack-resolved (customer-facing tier), gated
+- **`transparency-note`** — AI-feature transparency note — voice: pack-resolved (customer-facing tier), gated, includes honest-limitations check
 
 Uses docx-templater under the hood. Phase F of v2 build.
 
 ## When to use
 
 - Customer engagement summary deliverable
-- Technical spec / architecture doc with MS brand identity
-- AI feature transparency note (RAIS compliance artifact)
+- Technical spec / architecture doc with the active pack's brand identity
+- AI-feature transparency note (compliance artifact, if the active pack requires one)
 
 ## When NOT to use
 
@@ -72,7 +72,7 @@ If invoked med `--from-pipeline <run-dir>` istället för `--brief`:
 
 ## Workflow
 
-1. **Preflight gates** (same as /generate-ppt) — brand template present, staleness check, T0 status check for trailblazer variants
+1. **Preflight gates** (same as /generate-ppt) — brand template present, staleness check, the active pack's compliance gates for customer-facing variants
 
 2. **Read brief + parse into target-shape:**
    - **technical:** headings + paragraphs + code blocks + tables → matched to technical template
@@ -105,7 +105,7 @@ Generate Word: case-analysis-ai-transparency-note
 
 Target: transparency-note
 Template: transparency-note.docx (~/.lintel/brand/word-templates/, brand version 2026-Q2)
-Voice tier: trailblazer-draft
+Voice tier: internal (pack-resolved)
 
 ## Structure (from brief)
 - Overview: 1 paragraph
@@ -127,15 +127,15 @@ Voice tier: trailblazer-draft
 ## Status
 ALL GATES PASS. Moving from draft → ./case-analysis-ai-transparency-note.docx.
 
-For customer distribution: confirm provenance with /provenance-track --query PROV-8b2c4.
+For customer distribution: confirm the recorded provenance reference PROV-8b2c4.
 ```
 
 ## Compliance integration
 
-- 4-gate pipeline IS Layer 2 SDL enforcement for customer-bound output
-- transparency-note variant invokes honest-limitations gate (mandatory)
+- 4-gate pipeline is the customer-bound enforcement path; the specific gates are pack-configurable (`resolve_pack_field compliance.hooks`; none by default)
+- transparency-note variant invokes the honest-limitations gate (mandatory)
 - Customer-data in brief → BLOCK
-- Distribution gated by /release-ev2 reading provenance + voice status
+- Distribution gated by the active pack's deploy/release gate (if any) reading provenance + voice status
 
 ## Voice tier note
 
@@ -160,14 +160,14 @@ For customer distribution: confirm provenance with /provenance-track --query PRO
 **Customer summary:**
 ```
 > /generate-word --brief engagement-notes.md --target customer-summary --audience "Customer A finserv CISO"
-[Trailblazer voice; full 4-gate]
+[Customer-facing voice tier; full 4-gate]
 ✓ ./engagement-summary.docx — PROV-9a3.
 ```
 
 **Transparency note:**
 ```
 > /generate-word --brief case-analysis-design.md --target transparency-note
-[Cross-references /rais-impact-assessment + /onerai-submit-draft if present]
+[Honest-limitations gate active; cross-references the active pack's impact-assessment gates if present]
 ✓ ./case-analysis-ai-transparency-note.docx — PROV-8b2c4.
 ```
 
@@ -175,5 +175,5 @@ For customer distribution: confirm provenance with /provenance-track --query PRO
 
 - `BRAND-INTEGRATION.md`
 - `WordTechnicalEditor` agent
-- `/rais-customer-voice-check`, `/rais-transparency-note`, `/provenance-track`
+- The active pack's compliance gates (`resolve_pack_field compliance.hooks`; none by default)
 - `/generate-ppt`, `/generate-web`

@@ -1,6 +1,6 @@
 ---
 name: generate-qa
-layer: ms-team
+layer: foundation
 description: Validate generated artifacts (any format) against brand, voice, readability, and structure standards. Auto-fixes where possible. Solo-invokable on any artifact (even non-generate-produced).
 color: orange
 tools: Read, Write, Bash, Glob
@@ -34,7 +34,7 @@ Used by `generate` orchestrator as Step 8 (aggregate QA on all produced formats)
 
 ## When NOT to use
 
-- Voice-gate (T0 + vocabulary-blocklist) — that's `/li:rais-customer-voice-check`. QA enforces broader checks; voice-gate is the customer-share-specific block.
+- Voice-gate (vocabulary-blocklist) — that's the active pack's compliance gates (`resolve_pack_field compliance.hooks`; none by default). QA enforces broader checks; the voice-gate is the customer-share-specific block.
 - Brand-asset audit (template freshness across the brand directory) — that's a separate operator workflow
 - Pre-implementation design review — use `/li:plan-design-review` for design-doc-level review
 
@@ -42,7 +42,7 @@ Used by `generate` orchestrator as Step 8 (aggregate QA on all produced formats)
 
 - Required `--artifacts <path|paths>` — single artifact or list (glob: `${run_dir}/*/*` works)
 - Optional `--design-spec <path>` — generating design-spec.json for cross-reference checks (if available)
-- Optional `--palette <name>` — palette for brand-color validation (default: inferred from design-spec or `ms-default`)
+- Optional `--palette <name>` — palette for brand-color validation (default: inferred from design-spec or the active pack's default palette)
 - Optional `--vocabulary-blocklist <path>` — voice blocklist for content-text checks
 - Optional `--auto-fix <safe|aggressive|none>` — auto-fix mode (default: safe)
 - Optional `--out <path>` — qa-report.json output path (default: alongside artifacts)
@@ -145,8 +145,8 @@ Parse `--artifacts` (single path or glob). Validate each exists + is in supporte
 ### Step 2 — Load context
 
 - `--design-spec <path>` if provided (for cross-reference checks: does artifact match what was specified?)
-- `--palette <name>` (or infer from design-spec, or default to ms-default)
-- `--vocabulary-blocklist <path>` (or default from voice corpus)
+- `--palette <name>` (or infer from design-spec, or default to the active pack's default palette)
+- `--vocabulary-blocklist <path>` (or default from the active pack's voice corpus; none by default)
 
 ### Step 3 — Per-artifact checks
 
@@ -171,7 +171,7 @@ Print: total checks, pass/warn/err counts, qa_pass status, auto-fix count, top 3
 
 ## Voice tier behavior
 
-`voice: internal`. QA-report is operator-facing intermediate artifact. QA itself runs no voice-gate; it just CHECKS voice constraints. For the voice GATE, use `/li:rais-customer-voice-check` separately (typically at orchestrator level).
+`voice: internal`. QA-report is operator-facing intermediate artifact. QA itself runs no voice-gate; it just CHECKS voice constraints. For the voice GATE, use the active pack's compliance gates separately (typically at orchestrator level).
 
 ## Status protocol
 
@@ -183,7 +183,7 @@ Print: total checks, pass/warn/err counts, qa_pass status, auto-fix count, top 3
 ## Pause-points
 
 - Auto-fix would substantially modify artifact (> 20% changes): confirm with operator before applying
-- Vocabulary-blocklist match in customer-share context but operator hasn't run `/li:rais-customer-voice-check`: surface recommendation to run voice-gate
+- Vocabulary-blocklist match in customer-share context but operator hasn't run the active pack's compliance gates: surface recommendation to run the voice-gate
 
 ## Hop-in support
 
@@ -195,7 +195,7 @@ YES — heavily-used as solo skill. Run on any artifact at any time.
 - Artifact files (PPTX, DOCX, HTML, PDF, XLSX, Visio)
 - `design-spec.json` (optional, for cross-reference)
 - `~/.lintel/brand/palettes/<palette>.json`
-- `scaffolding/03-ms-team/voice/OurVoice-blocklist.md` (default vocabulary blocklist)
+- The active pack's vocabulary blocklist (`resolve_pack_field voice.corpus`; none by default)
 
 **Writes:**
 - `qa-report.json` to `--out`
@@ -216,11 +216,11 @@ YES — heavily-used as solo skill. Run on any artifact at any time.
 
 - Format-specific extraction tool missing (e.g., no python-pptx for PPTX): degrade to text-only checks, flag in report
 - Artifact corrupted: report unreadable + skip, continue with other artifacts in batch
-- Palette resolution fails: fall back to ms-default, flag inferred-palette in report
+- Palette resolution fails: fall back to the active pack's default palette, flag inferred-palette in report
 
 ## Recommended next steps after invocation
 
 - If `qa_pass=true`: artifact is ready for next step (delivery, voice-gate for customer-share, archive)
 - If `qa_pass=false` with errors: operator addresses errors manually, re-runs QA
 - If many warnings: consider re-invoking `/li:generate-design` with different palette or template
-- For customer-share: chain `/li:rais-customer-voice-check` after QA-pass
+- For customer-share: chain the active pack's compliance gates after QA-pass

@@ -14,11 +14,11 @@ The polish gate. Drives `/browse` to capture the current state of a frontend cha
 
 Distinct from `/plan-design-review`: that one reviews a design doc *plan*. This one reviews the *built result*.
 
-Voice tier note: the critique itself is internal (builder-to-builder). When the copy pillar fires on a customer-facing surface, this skill references the 12-cell Trailblazer grid as the standard, but does NOT produce trailblazer-voice copy. Use `/msvoice-rewrite` (Phase 3) for that.
+Voice tier note: the critique itself is internal (builder-to-builder). When the copy pillar fires on a customer-facing surface, this skill references the active pack's voice corpus as the standard, but does NOT produce pack-voice copy. Use a pack-provided voice-rewrite skill for that.
 
 ## When to use
 
-- Frontend change is feature-complete; want a polish pass before `/release-ev2`
+- Frontend change is feature-complete; want a polish pass before the active pack's release gate
 - A `/qa` run is clean but the UI "feels off"
 - Pre-launch on a customer-facing surface — design review is non-negotiable
 - After a design-system migration — verify pages still hold together
@@ -26,7 +26,7 @@ Voice tier note: the critique itself is internal (builder-to-builder). When the 
 ## When NOT to use
 
 - Backend-only change, no UI touched — skip
-- Pure copy change with no layout impact — use `/msvoice-rewrite` directly
+- Pure copy change with no layout impact — use a pack-provided voice-rewrite skill directly
 - Plan-stage review before any code is written — use `/plan-design-review`
 
 ## Inputs
@@ -45,11 +45,11 @@ Voice tier note: the critique itself is internal (builder-to-builder). When the 
    - **Visual polish:** alignment, spacing rhythm, hover/focus states present, no Lorem Ipsum, no broken images, no overflow.
    - **Accessibility:** contrast ratio per WCAG AA, semantic HTML in DOM, focus order, alt text on images, ARIA labels where needed.
    - **Motion:** if motion exists, does it respect `prefers-reduced-motion`? Are transitions consistent in duration/easing?
-   - **Copy:** typos, voice/tone consistency, length appropriate to context. If customer-facing AND `--include-copy-pillar`: cross-reference against Trailblazer 12-cell grid (Reveal/Inspire/Provoke modes + ground rules).
+   - **Copy:** typos, voice/tone consistency, length appropriate to context. If customer-facing AND `--include-copy-pillar`: cross-reference against the active pack's voice corpus (modes + ground rules, if the pack defines them).
    - **Layout/density:** information density appropriate, viewport-responsive, no wasted whitespace at mobile, no cramped desktop.
    - **Brand consistency:** colors from token set, typography from token set, signature elements present where expected (per project CLAUDE.md).
 4. **Score findings.** Each pillar gets a 1-10 score + finding list. Findings get P1/P2/P3 severity.
-5. **Persist via first-party `bin/li-review-log`** (legacy alias: gstack-review-log) with `skill: design-review`.
+5. **Persist via the native `bin/li-review-log`** (legacy alias: gstack-review-log) with `skill: design-review`.
 6. **Output** the structured report.
 
 ## Report format
@@ -82,9 +82,9 @@ Overall: 7.8/10
    Fix: darken emerald to -600 OR remove watermark overlap behind CTA.
 
 [P2] Copy — /portal greeting (customer-facing)
-   "Welcome back, friend" — too casual for Trailblazer "Kind" register.
-   Trailblazer grid suggests Reveal mode here ("Welcome back. Pick up where you left off.").
-   Use /msvoice-rewrite for the actual rewrite.
+   "Welcome back, friend" — too casual for the active pack's register.
+   The pack voice corpus suggests a plainer line here ("Welcome back. Pick up where you left off.").
+   Use a pack-provided voice-rewrite skill for the actual rewrite.
 
 [P3] Visual polish — /portal/cases card
    3px misalignment between status chip and case title at 1440. Consistent at 375.
@@ -104,7 +104,7 @@ Overall: 7.8/10
 
 ## Voice tier note
 
-`voice: internal`. Critique-of-customer-facing content is still engineering-internal output. The copy pillar references trailblazer voice as a *standard to check against*, not voice this skill produces.
+`voice: internal`. Critique-of-customer-facing content is still engineering-internal output. The copy pillar references the active pack's voice as a *standard to check against*, not voice this skill produces.
 
 ## Failure modes
 
@@ -112,7 +112,7 @@ Overall: 7.8/10
 - **Chromium missing:** print install command, exit.
 - **DOM capture contains customer-data patterns:** quarantine artifacts, BLOCK review, surface to operator. The review cannot proceed on un-sanitized data.
 - **No routes specified + no project default in `~/.lintel/config.yaml`:** ask via AskUserQuestion which routes to review.
-- **Copy pillar requested but no Trailblazer corpus yet (T0 not complete):** skip copy pillar, surface "copy pillar deferred — T0 voice calibration not landed". Other pillars still run.
+- **Copy pillar requested but no pack voice corpus configured:** skip copy pillar, surface "copy pillar deferred — no pack voice corpus installed". Other pillars still run.
 
 ## Examples
 
@@ -121,7 +121,7 @@ Overall: 7.8/10
 > /design-review --url http://localhost:5173
 [/browse runs 2 routes × 2 viewports = 4 captures]
 Pillar scores: Polish 8/10, A11y 6/10, Motion 9/10, Copy 7/10, Layout 8/10, Brand 9/10
-5 findings (1 P1, 1 P2, 3 P3). Fix P1 before /release-ev2.
+5 findings (1 P1, 1 P2, 3 P3). Fix P1 before the active pack's release gate.
 ```
 
 **Multi-route staging:**
@@ -141,6 +141,6 @@ Pillar avg: 7.2/10. 12 findings, 2 P1.
 
 - `/browse` — the screenshot/DOM engine underneath
 - `/plan-design-review` — plan-stage equivalent (use BEFORE code is written)
-- `/msvoice-rewrite` (Phase 3) — actually rewrite copy to Trailblazer voice
-- `/rais-customer-voice-check` (Phase 3) — gate for customer-facing artifacts before they leave
-- `/release-ev2` — reads design-review log as part of clearance check
+- A pack-provided voice-rewrite skill — actually rewrite copy to the pack's voice
+- The active pack's compliance gates — gate for customer-facing artifacts before they leave
+- The active pack's release gate — reads design-review log as part of clearance check

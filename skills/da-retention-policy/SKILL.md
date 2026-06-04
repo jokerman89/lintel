@@ -38,7 +38,6 @@ retention_default="${retention_default:-365}"
 source "$LINTEL_REPO_ROOT/lib/pack-resolver.sh"
 compliance_hooks=$(resolve_pack_field compliance.hooks 2>/dev/null || true)
 data_residency=$(resolve_pack_field compliance.data_residency 2>/dev/null || true)
-sdl_active=$(resolve_pack_field compliance.sdl_active 2>/dev/null || true)
 ```
 
 ### Step 2 — Spawn DatabaseDesigner for data classification

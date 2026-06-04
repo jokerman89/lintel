@@ -61,7 +61,7 @@ Produces ops-grade artifacts when work has production rollout, observability, or
 - Major version rollout requiring traffic-cutover plan
 - Observability gap discovered (incident root-caused to missing signal)
 - Cost anomaly investigation or budget threshold approaching
-- SLO definition for customer engagement
+- SLO definition for a service or release
 - BUILD phase detected deployment intent (Phase 4 wiring auto-invokes)
 
 ## When NOT to use
@@ -114,11 +114,11 @@ source "$LINTEL_REPO_ROOT/lib/pack-resolver.sh"
 # Profile preferences (engineering.devops_hosting.*)
 PROFILE="$LINTEL_HOME/profile.yaml"
 cloud=$(grep -A30 '^engineering:' "$PROFILE" 2>/dev/null | grep -A10 'devops_hosting:' | grep 'cloud:' | head -1 | awk -F': *' '{print $2}' | tr -d '[:space:]')
-cloud="${cloud:-azure}"
+cloud="${cloud:-unspecified}"
 deployment_pattern=$(grep -A30 '^engineering:' "$PROFILE" 2>/dev/null | grep -A10 'devops_hosting:' | grep 'deployment_pattern:' | head -1 | awk -F': *' '{print $2}' | tr -d '[:space:]')
 deployment_pattern="${deployment_pattern:-blue-green}"
 observability_stack=$(grep -A30 '^engineering:' "$PROFILE" 2>/dev/null | grep -A10 'devops_hosting:' | grep 'observability_stack:' | head -1 | awk -F': *' '{print $2}' | tr -d '[:space:]')
-observability_stack="${observability_stack:-app-insights}"
+observability_stack="${observability_stack:-otel}"
 error_budget_window=$(grep -A30 '^engineering:' "$PROFILE" 2>/dev/null | grep -A10 'devops_hosting:' | grep 'error_budget_window_days:' | head -1 | awk -F': *' '{print $2}' | tr -d '[:space:]')
 error_budget_window="${error_budget_window:-30}"
 cost_threshold=$(grep -A30 '^engineering:' "$PROFILE" 2>/dev/null | grep -A10 'devops_hosting:' | grep 'cost_budget_monthly_usd_threshold:' | head -1 | awk -F': *' '{print $2}' | tr -d '[:space:]')
@@ -290,4 +290,4 @@ YES. `/li:dh loop` resumes from prior state. `/li:dh single --action <name>` ent
 
 ## Voice tier behavior
 
-`voice: internal`. DH produces operator-facing ops artifacts. Customer-facing voice picks up at SHIP phase when caip-se pack adds Trailblazer alignment.
+`voice: internal`. DH produces operator-facing ops artifacts. Customer-facing voice picks up at the SHIP phase when the active pack adds voice alignment via Brief Forge (an external pack like lintel-caip-pack supplies this; none by default).

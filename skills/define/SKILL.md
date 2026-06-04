@@ -260,4 +260,4 @@ Skip-conditions (DEFINE is skipped when):
 
 ## Voice tier behavior
 
-`voice: mixed`. Forcing questions and operator-internal sections in direct internal voice. Design doc's customer-facing parts (Distribution Plan, ELI5 sections if any) follow voice tier of mode/role. If voice_tier=trailblazer, dispatch TrailblazerVoiceCritic on customer-facing prose before approval gate.
+`voice: mixed`. Forcing questions and operator-internal sections in direct internal voice. Design doc's customer-facing parts (Distribution Plan, ELI5 sections if any) follow the active pack's voice tier (`resolve_pack_field voice.default_tier`; default: internal). If the pack defines voice gates (`resolve_pack_field voice.gates_active`; none by default), run them on customer-facing prose before the approval gate.

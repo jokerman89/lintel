@@ -84,7 +84,7 @@ Duration: 8.2s
 
 ## Validation
 ✓ gbrain doctor --fast: all green
-✓ gbrain search test ("voice corpus"): returns 3 matches in OurVoice-corpus.md
+✓ gbrain search test ("voice corpus"): returns 3 matches in voice-corpus.md
 
 Ready: gbrain search <query> | gbrain code-def <symbol> | gbrain query <semantic question>
 Refresh: /sync-brain

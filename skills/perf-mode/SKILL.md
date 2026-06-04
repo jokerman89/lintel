@@ -17,16 +17,16 @@ cli_support:
 
 # /perf-mode
 
-Activates Performance Mode for the current session. Raises context budget ceiling from default (200k) to perf-mode level (800k default; configurable to 1M ceiling). Use for hard CAIP-SE phases that genuinely need 800k+ tokens of loaded context.
+Activates Performance Mode for the current session. Raises context budget ceiling from default (200k) to perf-mode level (800k default; configurable to 1M ceiling). Use for hard phases that genuinely need 800k+ tokens of loaded context.
 
 Outcome-based, not token-saving. Spend tokens where outcome density justifies it.
 
 ## When to use
 
-- Multi-week customer engagement consolidation — load all prior session checkpoints + design docs + brand
+- Multi-week project consolidation — load all prior session checkpoints + design docs
 - Parallel decomposed task — multiple sub-tasks need shared deep context
-- Warmup-heavy integration moment — preload entire engagement state before authoring
-- Critical demo prep — context window must hold script + handout + follow-up + brand assets
+- Warmup-heavy integration moment — preload entire project state before authoring
+- Critical deliverable prep — context window must hold the full source set
 
 ## When NOT to use
 

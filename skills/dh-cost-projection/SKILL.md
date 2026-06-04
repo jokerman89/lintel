@@ -18,7 +18,7 @@ Reads capacity model (from TA scaling-plan if present, else fresh estimate) + ac
 
 - DH full pass cost_projected checkpoint
 - Single action `/li:dh single --action cost-projection`
-- Pre-customer-engagement budget conversation
+- Pre-release budget conversation
 - After cost anomaly investigation
 
 ## When NOT to use
@@ -31,7 +31,7 @@ Reads capacity model (from TA scaling-plan if present, else fresh estimate) + ac
 ### Step 1 — Read preferences + scaling context
 
 ```bash
-cloud="${cloud:-azure}"
+cloud="${cloud:-unspecified}"
 threshold="${threshold:-${cost_budget_monthly_usd_threshold:-10000}}"
 scaling_plan=$(find .lintel/state/ta -name "scaling-plan-*.md" -mtime -30 2>/dev/null | sort | tail -1)
 ```

@@ -17,7 +17,7 @@ You are a release engineer agent.
 
 ## What this agent does
 
-Heavier-touch counterpart to `/release-ev2` skill. The skill is the canonical ship entry; this agent handles non-standard release flows: multi-PR releases, release-train coordination, post-merge fixup, hotfix flow with backport.
+Heavier-touch counterpart to the `/ship` skill. The skill is the canonical ship entry; this agent handles non-standard release flows: multi-PR releases, release-train coordination, post-merge fixup, hotfix flow with backport. Deploys via the active pack's CI/deploy targets (GitHub Actions by default).
 
 ## When to invoke
 
@@ -28,16 +28,16 @@ Heavier-touch counterpart to `/release-ev2` skill. The skill is the canonical sh
 
 ## When NOT to invoke
 
-- Standard single-PR ship — use `/release-ev2` skill directly
+- Standard single-PR ship — use `/ship` skill directly
 - Pre-PR work (not yet ready to release) — wrong phase
-- Routine deploy after release — use `/release-deploy-ev2` skill
+- Routine deploy after release — use the active pack's CI/deploy targets (GitHub Actions by default)
 
 ## Workflow
 
 1. **Read release state.** Branch graph, open PRs, recent merges, current release tag.
 2. **Identify release type:** standard / hotfix / coordinated / fixup.
 3. **Per-type playbook:**
-   - **Standard:** delegate to `/release-ev2` skill.
+   - **Standard:** delegate to the `/ship` skill.
    - **Hotfix:** create hotfix branch from latest release tag, cherry-pick fix, PR to main + PR to release-X branch with cherry-pick.
    - **Coordinated:** ensure all PRs in set land before any deploy fires.
    - **Fixup:** identify the original PR / commit, propose targeted follow-up commit.

@@ -41,7 +41,7 @@ Read-only — agent suggests, operator decides.
    - Single-file edit → no phase declaration needed, default budget
    - Multi-file refactor → 1 phase, ~500k budget, decay aggressive
    - New feature build → 3 phases (design / build / verify), per-phase budget
-   - Customer-engagement consolidation → 4 phases (preload / build / voice-check / provenance), perf-mode
+   - Customer-engagement consolidation → 4 phases (preload / build / voice-check / handoff), perf-mode
    - Debugging session → 1 phase, conservative decay (need to retain failure context)
 3. **Suggest phases.** Concrete YAML declaration the operator can paste into a skill or use ad-hoc.
 4. **Suggest warmup tasks.** For each phase, name specific files/queries to preload.
@@ -64,7 +64,7 @@ context_phases:
     budget: 200000
     warmup_tasks:
       - "read all docs in docs/customer-engagements/customer-A/"
-      - "read TRAILBLAZER-CORPUS.md (now OurVoice-corpus.md)"
+      - "read the active pack's voice corpus (`resolve_pack_field voice.corpus`; none by default)"
       - "summarize prior 3 sessions from ~/.lintel/projects/.../checkpoints/"
     decay_on_exit: prompt-operator
   - phase: build

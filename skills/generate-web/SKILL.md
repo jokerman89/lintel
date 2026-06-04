@@ -1,6 +1,6 @@
 ---
 name: generate-web
-layer: ms-team
+layer: foundation
 description: Produce brand-compliant static HTML or Next.js scaffold for demo/landing page.
 color: green
 tools: Read, Write, Bash, Glob
@@ -31,7 +31,7 @@ Uses native HTML / Next.js templates from `~/.lintel/brand/web-templates/` or in
 
 - Customer-demo landing page (single-file for quick iteration; Next.js for deployable demo)
 - Engagement-internal microsite (technical wiki, runbook viewer)
-- Pitch artifact that needs to look modern + carry MS brand
+- Pitch artifact that needs to look modern + carry the active pack's brand
 
 ## When NOT to use
 
@@ -46,7 +46,7 @@ Uses native HTML / Next.js templates from `~/.lintel/brand/web-templates/` or in
 - Optional `--audience <text>` — primary audience
 - Optional `--use-defaults` — force in-repo default templates
 - Optional `--preview` — after generation, open in `/open-managed-browser`
-- Optional `--azure-theme` — apply Azure-specific palette (vs neutral defaults)
+- Optional `--theme <name>` — apply a pack-provided theme palette (default: neutral)
 
 ## From-pipeline mode (v3.5 Fas 2 — generate-pipeline integration)
 
@@ -109,7 +109,7 @@ If invoked med `--from-frontend-design <run-dir>` istället för `--brief` eller
 
 ## Workflow
 
-1. **Preflight gates** — brand templates check, staleness, voice/T0 if customer-bound
+1. **Preflight gates** — brand templates check, staleness, the active pack's compliance gates if customer-bound
 
 2. **Read brief + parse structure:**
    - Hero (title + subtitle + CTA)
@@ -143,8 +143,8 @@ Generate Web: copilot-for-legal-demo
 
 Variant: single-file
 Template: landing-single-file.html (~/.lintel/brand/web-templates/, brand 2026-Q2)
-Azure theme: enabled
-Voice tier: trailblazer-draft
+Theme: pack-default
+Voice tier: internal (pack-resolved)
 
 ## Structure (from brief)
   Hero: "Lex Sweden gets a copilot"
@@ -157,15 +157,15 @@ Voice tier: trailblazer-draft
   Information hierarchy: clear ✓
   Accessibility: WCAG AA (contrast verified) ✓
   Motion: prefers-reduced-motion respected ✓
-  Brand: Azure palette applied ✓
+  Brand: pack palette applied ✓
 
 ## Generation
   Produced ~/.lintel/draft/copilot-for-legal-demo.html (87 KB)
-  6 Azure SVGs embedded via /asset-search
+  6 SVGs embedded from the active pack's asset library
 
 ## 4-Gate pipeline
   Gate 1 (voice):   ✓ PASS — score 86/100
-  Gate 2 (brand):   ✓ PASS — Azure palette + assets from brand 2026-Q2
+  Gate 2 (brand):   ✓ PASS — pack palette + assets from brand 2026-Q2
   Gate 3 (honest):  N/A — no AI-disclosure section in this variant
   Gate 4 (proven):  ✓ PASS — PROV-c4d5 recorded
 
@@ -177,9 +177,9 @@ Preview: /open-managed-browser file://~/.lintel/draft/copilot-for-legal-demo.htm
 
 ## Compliance integration
 
-- 4-gate pipeline IS Layer 2 SDL enforcement for customer-bound output
+- 4-gate pipeline is the customer-bound enforcement path; the specific gates are pack-configurable (`resolve_pack_field compliance.hooks`; none by default)
 - HTML/JS output sanitized — no inline scripts that fetch external resources without disclosure
-- nextjs-scaffold pre-wires deploy gate via `/setup-ev2-targets` reference
+- nextjs-scaffold pre-wires the active pack's deploy gate (if any)
 
 ## Voice tier note
 
@@ -188,7 +188,7 @@ Preview: /open-managed-browser file://~/.lintel/draft/copilot-for-legal-demo.htm
 ## Failure modes
 
 - **nextjs-scaffold template incomplete** — fall back to single-file variant + warn
-- **Voice gate fails on trailblazer-draft content** — surface flagged paragraphs, allow regen
+- **Voice gate fails on customer-facing content** — surface flagged paragraphs, allow regen
 - **Accessibility audit fails** (contrast issue, missing alt text) — surface findings; require fixes before gate-2 passes
 - **Customer-data in brief** — BLOCK
 
@@ -196,7 +196,7 @@ Preview: /open-managed-browser file://~/.lintel/draft/copilot-for-legal-demo.htm
 
 **Single-file customer demo:**
 ```
-> /generate-web --brief demo-brief.md --variant single-file --azure-theme --preview
+> /generate-web --brief demo-brief.md --variant single-file --theme pack-default --preview
 [Generates HTML, opens in /open-managed-browser]
 ```
 
@@ -212,5 +212,5 @@ Run: cd copilot-for-legal && npm install && npm run dev
 - `BRAND-INTEGRATION.md`
 - `WebExperienceCritic` agent
 - `AccessibilityChecker` (Layer 4) for WCAG audit
-- `/asset-search`, `/open-managed-browser`, `/provenance-track`
-- `/setup-ev2-targets` — wire Next.js deploy gate
+- `/open-managed-browser` — open the generated file
+- The active pack's deploy gate — wire Next.js deployment (pack-configurable)

@@ -23,7 +23,7 @@ The verification-only sibling of `/qa`. Runs the test suite, parses results, sur
 
 - You want failures auto-fixed — use `/qa` instead
 - You're debugging a single failure deeply — use `/investigate`
-- Tests aren't set up yet — use `/setup-ev2-targets` or repo-specific bootstrap first
+- Tests aren't set up yet — use repo-specific bootstrap first
 
 ## Inputs
 

@@ -19,7 +19,7 @@ For each compliance framework declared in `pack.compliance.hooks` or `engineerin
 - SC full pass compliance_evidence_present checkpoint
 - Single action `/li:sc single --action compliance-evidence`
 - Pre-audit prep (customer audit, internal audit, regulatory)
-- Customer engagement requires evidence package
+- An engagement or release requires an evidence package
 
 ## When NOT to use
 

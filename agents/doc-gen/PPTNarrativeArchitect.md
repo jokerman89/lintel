@@ -48,7 +48,7 @@ The architect doesn't write final copy — it designs the structure so pptx-genj
    - One-line content goal (what the slide must communicate)
    - Mode tag (Reveal/Inspire/Provoke/Neutral)
    - Suggested layout (title/title-and-content/two-column/section-divider)
-   - Suggested asset (e.g. "Azure SQL service icon", "Arc topology diagram", "screenshot of Portal")
+   - Suggested asset (e.g. "service icon", "topology diagram", "product screenshot")
 4. **Pacing check** — slide count vs duration. Recommend ~1 slide per 1.5-2 min for technical, ~1 per 1 min for pitch.
 5. **Return slide list** for /generate-ppt to consume.
 
@@ -95,4 +95,4 @@ slide_arc:
 
 ## Voice tier behavior
 
-`voice: internal`. Arc design is engineering-internal. Final slide copy (trailblazer) is /generate-ppt's job under voice gate.
+`voice: internal`. Narrative-arc design is engineering-internal. Final slide copy (in the pack's customer-facing voice tier) is /generate-ppt's job under voice gate.

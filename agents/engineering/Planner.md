@@ -76,7 +76,7 @@ Cost: low / medium / high
 5. Wire Z into the existing layout in W
 6. Run /qa
 7. /review
-8. /release-ev2
+8. /ship
 
 ## Test strategy
 - Unit: Y in isolation (mock its dep on X)

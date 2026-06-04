@@ -65,22 +65,22 @@ ResearchSynthesizer: <question>
 
 ## Themes
 - Stripe works but has trade-offs the team has accumulated
-- No MS-first-party alternative chosen at the time of ADR-0033
-- New: Azure Communication Services now offers a payments-adjacent SDK (informal — verify with /first-party-check)
+- No alternative vendor evaluated at the time of ADR-0033
+- New: an adjacent vendor now offers a payments-adjacent SDK (informal — needs verification)
 
 ## Gaps
-- No documented migration path to Azure-native if/when decision changes
-- No /first-party-check has run on payment surface area in the last quarter
+- No documented migration path if/when the decision changes
+- No vendor re-evaluation has run on payment surface area in the last quarter
 
 ## Recommendations
-1. Run /first-party-check --scope src/lib/payment
-2. If MS-1P alternative identified: /office-hours to draft a migration ADR
+1. Re-evaluate vendor options for src/lib/payment
+2. If a better-fit alternative is identified: /office-hours to draft a migration ADR
 3. If staying with Stripe: amend ADR-0033 with current state notes
 
 ## Confidence
 HIGH on state-of-the-art (anchored to current code).
 MEDIUM on Themes (some inference).
-LOW on "Azure Communication Services payments-adjacent" — needs verification.
+LOW on "adjacent-vendor payments-adjacent SDK" — needs verification.
 ```
 
 ## Edge cases / what to do when blocked

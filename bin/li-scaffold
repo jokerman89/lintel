@@ -2,14 +2,14 @@
 # li-scaffold — copy scaffolding/01-foundation/* into target repo with repo-specific rendering
 #
 # Usage:
-#   li-scaffold init [--target <path>] [--name <repo-name>] [--team <ms-team>] [--engagement <type>]
+#   li-scaffold init [--target <path>] [--name <repo-name>] [--pack <pack>] [--mode <type>]
 #   li-scaffold check [--target <path>]
 #
 # Defaults:
 #   --target: current working directory
 #   --name:   basename of target
-#   --team:   MS-CAIP-SE
-#   --engagement: customer-engagement
+#   --pack:   _default (neutral)
+#   --mode:   internal-tool
 
 set -euo pipefail
 
@@ -21,8 +21,8 @@ shift || true
 
 TARGET="$(pwd)"
 NAME=""
-TEAM="MS-CAIP-SE"
-ENGAGEMENT="customer-engagement"
+PACK="_default"
+MODE="internal-tool"
 VOICE_TIER="internal"
 COMPLIANCE_LEVEL="standard"
 
@@ -30,8 +30,8 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     --target) TARGET="$2"; shift 2 ;;
     --name) NAME="$2"; shift 2 ;;
-    --team) TEAM="$2"; shift 2 ;;
-    --engagement) ENGAGEMENT="$2"; shift 2 ;;
+    --pack) PACK="$2"; shift 2 ;;
+    --mode) MODE="$2"; shift 2 ;;
     --voice) VOICE_TIER="$2"; shift 2 ;;
     --compliance) COMPLIANCE_LEVEL="$2"; shift 2 ;;
     *) echo "Unknown arg: $1" >&2; exit 2 ;;
@@ -51,10 +51,10 @@ Usage:
 Options:
   --target <path>          Target repo dir (default: cwd)
   --name <repo-name>       Repo name for CLAUDE.md rendering (default: basename of target)
-  --team <ms-team>         MS team (default: MS-CAIP-SE)
-  --engagement <type>      customer-engagement | internal-tool | mvp | research (default: customer-engagement)
-  --voice <tier>           internal | trailblazer | mixed (default: internal)
-  --compliance <level>     full-SDL | standard | minimal (default: standard)
+  --pack <pack>            Active pack name (default: _default — neutral)
+  --mode <type>            hotfix | internal-tool | mvp | research-dive (default: internal-tool)
+  --voice <tier>           voice tier from the active pack (default: internal)
+  --compliance <level>     full | standard | minimal (default: standard)
 
 Files created:
   CLAUDE.md (rendered from template), CORE-PRINCIPLES.md, EVOLUTION.md,
@@ -63,11 +63,9 @@ Files created:
   .claude/agents/ (4 templates), .claude/SUBAGENT-GUIDE.md,
   TEMPLATE-skill.md, TEMPLATE-agent.md
 
-  If --compliance=full-SDL: also copies scaffolding/02-sdl/* compliance docs.
-
 Examples:
-  cd ~/new-customer-engagement && li-scaffold init
-  li-scaffold init --target ~/foo --engagement mvp
+  cd ~/new-repo && li-scaffold init
+  li-scaffold init --target ~/foo --mode mvp
   li-scaffold check
 EOF
 }
@@ -125,7 +123,7 @@ cmd_check() {
 cmd_init() {
   check_source
   echo "li-scaffold: initializing $TARGET"
-  echo "  name=$NAME team=$TEAM engagement=$ENGAGEMENT voice=$VOICE_TIER compliance=$COMPLIANCE_LEVEL"
+  echo "  name=$NAME pack=$PACK mode=$MODE voice=$VOICE_TIER compliance=$COMPLIANCE_LEVEL"
   echo ""
 
   cd "$TARGET"
@@ -136,8 +134,8 @@ cmd_init() {
   else
     if [ -f "$SCAFFOLDING_SRC/CLAUDE.md.template" ]; then
       sed -e "s/{{REPO_NAME}}/$NAME/g" \
-          -e "s/{{MS_TEAM}}/$TEAM/g" \
-          -e "s/{{ENGAGEMENT_TYPE}}/$ENGAGEMENT/g" \
+          -e "s/{{PACK}}/$PACK/g" \
+          -e "s/{{MODE}}/$MODE/g" \
           -e "s/{{VOICE_TIER}}/$VOICE_TIER/g" \
           "$SCAFFOLDING_SRC/CLAUDE.md.template" > CLAUDE.md
       echo "  ✓ CLAUDE.md (rendered)"
@@ -197,21 +195,12 @@ cmd_init() {
     echo "  ✓ .claude/SUBAGENT-GUIDE.md"
   fi
 
-  # Optional: full SDL compliance docs
-  if [ "$COMPLIANCE_LEVEL" = "full-SDL" ]; then
-    mkdir -p scaffolding/02-sdl
-    if [ -d "$LINTEL_HOME/scaffolding/02-sdl" ]; then
-      cp -r "$LINTEL_HOME/scaffolding/02-sdl"/* scaffolding/02-sdl/ 2>/dev/null || true
-      echo "  ✓ scaffolding/02-sdl/* (compliance reference)"
-    fi
-  fi
-
   echo ""
   echo "li-scaffold: done."
   echo ""
   echo "Next steps:"
   echo "  1. Review CLAUDE.md and customize project-specific sections."
-  echo "  2. Edit tasks/personas.md with engagement-specific personas."
+  echo "  2. Edit tasks/personas.md with project-specific personas."
   echo "  3. Install Lintel plugin for your CLI:"
   echo "       Claude Code:    /plugin marketplace add Azureflipper/jokerman-session-setup"
   echo "                       /plugin install li@jokerman-lintel"

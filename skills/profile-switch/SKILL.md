@@ -16,14 +16,14 @@ You are the `profile-switch` skill — fast on/off toggle av Lintel-install + pr
 
 ## What this skill does
 
-Operator-request 5.2: tools för toggle Lintel on/off fast + swap till previous setup UTAN att röra repot. Distinkt från WorkProfile (env-level compliance/voice/telemetry-switch).
+Operator-request 5.2: tools för toggle Lintel on/off fast + swap till previous setup UTAN att röra repot. Distinkt från pack compliance mode (`resolve_pack_field compliance.mode` — the env-level compliance/voice switch).
 
 Profile-switch handlar om **install-state**:
 - `active`: Lintel-skills/agents/hooks är installed + accessible via plugin manifests
 - `dormant`: Lintel temporarily inactive (operator switching till annan tooling t.ex. gstack), kan re-aktiveras snabbt
 - `previous-setup`: snapshot av pre-Lintel setup (jstack-vendored skills, custom CLI configs) som operator kan restore
 
-WorkProfile är complement: env-level (compliance-policies on/off). Profile-switch är install-level (Lintel itself on/off).
+Pack compliance mode är complement: env-level (compliance-policies on/off). Profile-switch är install-level (Lintel itself on/off).
 
 ## When to use
 
@@ -36,7 +36,7 @@ WorkProfile är complement: env-level (compliance-policies on/off). Profile-swit
 
 ## When NOT to use
 
-- WorkProfile changes — use `/li:workprofile-toggle` istället (compliance on/off)
+- Compliance-mode changes — switch the active pack istället (`compliance.mode` lives in the pack, not in install-state)
 - Repo state changes — denna rör inte repot, bara install-state
 - Single-skill disable — kommentera ut i `~/.lintel/profile.yaml` istället
 

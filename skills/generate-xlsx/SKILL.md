@@ -1,6 +1,6 @@
 ---
 name: generate-xlsx
-layer: ms-team
+layer: foundation
 description: ⚠ TEMPLATE ONLY — Slot for Excel spreadsheet generation (data + estimates + tables). Content not curated. AI generates fresh at invocation per L-001.
 color: orange
 tools: Read, Write, Bash, Glob
@@ -37,15 +37,15 @@ When invoked (via `/li:generate-xlsx --from-pipeline <run-dir>` or directly):
 ## Agent dispatch
 
 Per `skills/generate/agent-mapping.yaml`:
-- Primary: CostAnalyzer (for estimate-heavy content) or AzureArchitect (for capacity/sizing)
+- Primary: CostAnalyzer (XLSX use cases skew cost/estimate)
+- Conditional: CapacityPlanner if capacity/sizing content
 - Conditional: SecurityAuditor if content references customer-sensitive data
-- Conditional: FinOpsReviewer if `--cost-model` flag (capex/opex breakdown)
 
 ## Voice tier
 
 `voice: internal` default. XLSX content typically internal-only; even when shared with customer, voice is data-driven (numbers + labels), not prose.
 
-If invoked with `--customer-share`, requires upstream `/li:rais-customer-voice-check` PASS on any prose labels/headers (orchestrator-level gate).
+If invoked with `--customer-share`, requires an upstream PASS from the active pack's voice gate (none by default) on any prose labels/headers (orchestrator-level gate).
 
 ## Status protocol
 
@@ -56,7 +56,7 @@ If invoked with `--customer-share`, requires upstream `/li:rais-customer-voice-c
 
 ## When to promote from slot to curated
 
-If a recurring estimate-pattern emerges (e.g., always Azure-Arc-cost-estimate with same worksheet structure), promote that pattern into the SKILL.md body — that becomes a canonical XLSX-builder for that scenario.
+If a recurring estimate-pattern emerges (e.g., always the same cost-estimate with same worksheet structure), promote that pattern into the SKILL.md body — that becomes a canonical XLSX-builder for that scenario.
 
 Until then: AI generates fresh per invocation. Repo stays clean.
 

@@ -55,41 +55,24 @@ hotfix:
   phases: [SENSE, BUILD, REVIEW, SHIP]
   skip: [DEFINE, DISCOVER, PLAN, CAPTURE]
   audience: solo
-  voice_tier: internal
-  compliance: minimal
+  voice_tier: pack          # resolve_pack_field voice.default_tier (default internal)
+  compliance: pack-minimal  # resolve_pack_field compliance.hooks (none by default)
   cost_estimate: ~5k tokens, 10-30 min
   use_when: known bug + fix path clear + ship now
-
-customer-engagement:
-  phases: ALL_8
-  audience: customer
-  voice_tier: trailblazer
-  compliance: full_SDL  # all 5+7+8 active
-  cost_estimate: ~40-80k tokens, 1-3 hours
-  use_when: customer-bound deliverable + high-stakes
 
 internal-tool:
   phases: ALL_8 (lighter REVIEW)
   audience: team
-  voice_tier: mixed
-  compliance: standard  # 5 hard + 3-5 on-demand
+  voice_tier: pack          # resolve_pack_field voice.default_tier (default internal)
+  compliance: pack-standard # resolve_pack_field compliance.hooks (none by default)
   cost_estimate: ~25-50k tokens, 45 min - 2 hours
-  use_when: internal tool / MS-internal scaffolding
-
-demo-prep:
-  phases: [SENSE, DEFINE, BUILD]
-  skip: [DISCOVER, PLAN, REVIEW, SHIP, CAPTURE]
-  audience: customer
-  voice_tier: trailblazer
-  compliance: minimal  # but voice gate active
-  cost_estimate: ~15-25k tokens, 30-60 min
-  use_when: rapid demo iteration, throwaway code
+  use_when: internal tool / scaffolding
 
 research-dive:
   phases: [SENSE, DEFINE, DISCOVER]
   skip: [PLAN, BUILD, REVIEW, SHIP, CAPTURE]
   audience: solo
-  voice_tier: internal
+  voice_tier: pack          # resolve_pack_field voice.default_tier (default internal)
   compliance: none
   cost_estimate: ~10-20k tokens, 20-40 min
   use_when: explore + understand, no code yet
@@ -110,6 +93,16 @@ auto:
   phases: SENSE recommends, operator confirms before chain
   use_when: operator unsure which preset fits
 ```
+
+### Pack-contributed modes
+
+The presets above ship with Lintel and are company-neutral. A pack may contribute
+additional modes with their own voice/compliance posture — e.g. an external pack
+(installable via lintel-caip-pack) can add `customer-engagement` or `demo-prep`
+modes that set a customer audience, a non-internal voice tier, and the pack's
+compliance gates. CYCLE merges pack-contributed modes into the preset list at
+invocation; their voice/compliance behavior resolves through `resolve_pack_field`
+(voice.default_tier, voice.gates_active, compliance.hooks), never hardcoded here.
 
 ### Meta-infra mode mechanics
 
@@ -246,7 +239,7 @@ Token-est siffrorna kommer från phase-skill's frontmatter `tokens_est_typical:`
 
 Between phases:
 - Propagate phase output as input to next (e.g., DEFINE's design doc → PLAN's source)
-- Check if mode-specific gates apply (e.g., customer-engagement mode auto-runs voice gate after SHIP)
+- Check if mode-specific gates apply (e.g., a pack-contributed customer mode may auto-run the active pack's voice gates after SHIP — `resolve_pack_field voice.gates_active`)
 
 ### Step 5 — Cost-estimate gate (BEFORE BUILD)
 
@@ -380,4 +373,4 @@ Failure events logged to `~/.lintel/audit/cycle-failures.jsonl` for audit.
 
 ## Voice tier behavior
 
-`voice: internal`. Cycle orchestrator output is operator-internal coordination. Individual phases inherit voice_tier per mode (customer-engagement → trailblazer in customer-facing phases).
+`voice: internal`. Cycle orchestrator output is operator-internal coordination. Individual phases inherit the voice tier of the active mode, which resolves through the active pack (`resolve_pack_field voice.default_tier`; default: internal). Pack-contributed customer modes can raise it for customer-facing phases.

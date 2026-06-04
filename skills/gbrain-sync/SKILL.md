@@ -62,7 +62,7 @@ Duration: 1.8s
 
 ## Validation
 ✓ gbrain doctor --fast: green
-✓ Test query ("trailblazer corpus"): returns updated OurVoice-corpus.md
+✓ Test query ("voice corpus"): returns updated voice-corpus.md
 ```
 
 ## Compliance integration

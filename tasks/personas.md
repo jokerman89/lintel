@@ -27,18 +27,19 @@ Related: [[other-persona]] or [[lesson-name]]
 
 ## solo-operator (default)
 
-**Role:** CAIP-SE Solution Engineer arbetar customer engagements + internal velocity.
+**Role:** Harness maintainer arbetar på Lintel själv — pack-driven, company-neutral session-harness.
 
 **What this persona cares about:**
 - Snabb iteration mellan idé och leverans
-- Scaffolding-stil tooling (L-001) som inte rostar mellan engagements
-- Cross-engagement learning compounding via [[lessons.md]]
+- Scaffolding-stil tooling (L-001) som inte rostar mellan projekt
+- Cross-project learning compounding via [[lessons.md]]
 - Minimum decision-fatigue mellan repetitiva tasks
+- Att spine:n förblir företagsneutral; identitet bor i packs
 
 **What this persona avoids:**
 - Mass-curated content som rostar (model catalogs, pricing, compliance versions)
 - Tooling som kräver context-switch per session
-- Discovery-tax inför varje engagement
+- Att läcka company-specifik logik in i den generiska spine:n
 
 Related: [[lessons.md/L-001]] scaffolding-not-content, [[lessons.md/L-002]] grep-first
 
@@ -46,7 +47,7 @@ Related: [[lessons.md/L-001]] scaffolding-not-content, [[lessons.md/L-002]] grep
 
 ## team-onboarding (future)
 
-**Role:** Nya CAIP-SE-teammates i MS-Sweden cluster, adoption-fasen.
+**Role:** Nya teammates som adopterar Lintel-harness:en, adoption-fasen.
 
 **What this persona cares about:**
 - (TBD — add when first team-member adopts Lintel)

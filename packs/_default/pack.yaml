@@ -13,9 +13,10 @@ shareable: false                                  # default pack is not for shar
 
 # ─── Voice ─────────────────────────────────────────────────────────────────
 voice:
-  default_tier: internal                          # internal | mixed | trailblazer | custom
+  default_tier: internal                          # internal | mixed | custom | <pack-defined>
   corpus: null                                    # path within pack to voice corpus
   enforce: none                                   # all | customer_facing | none
+  gates_active: []                                # voice gates the pack activates (none in _default)
 
 # ─── Compliance ────────────────────────────────────────────────────────────
 compliance:

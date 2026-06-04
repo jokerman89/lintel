@@ -40,12 +40,11 @@ optional_fields:
 
 voice:
   required:
-    - default_tier      # enum: internal | mixed | trailblazer | custom
+    - default_tier      # enum: internal | mixed | external | custom
   optional:
     - corpus            # string|null: path within pack to voice corpus dir
     - enforce           # enum: all | customer_facing | none — default "none"
     - gates_active      # list[string]: voice-gate names this pack opts in
-    - trailblazer_corpus_path  # string|null: path to Trailblazer-specific corpus
 
 compliance:
   required:
@@ -54,7 +53,6 @@ compliance:
     - hooks             # list[string]: hook names this pack activates
     - workprofile_default  # enum: on | off
     - audit_paths       # list[string]: where compliance audits land
-    - sdl_active        # bool: SDL (Secure Development Lifecycle) gates active
     - data_residency    # enum: us | eu | apac | none — default none
 
 navigation:

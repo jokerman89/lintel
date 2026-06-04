@@ -13,7 +13,7 @@ You are the roles-list skill.
 ## What this skill does
 
 Enumerates role files available to the operator:
-- Public roles in repo (`roles/*.md`)
+- Pack-provided roles (`resolve_pack_field roles.source`; none in `_default`)
 - Public roles in user home (`~/.lintel/roles/*.md`)
 - Private roles in user home (`~/.lintel/roles/private/*.md`)
 
@@ -35,12 +35,15 @@ Surfaces a table for selection.
 
 ```bash
 roles=()
-# Public in repo
-for f in roles/*.md 2>/dev/null; do [ -f "$f" ] && roles+=("$f"); done
+# Pack-provided (resolve_pack_field roles.source — empty in _default)
+PACK_ROLES_DIR="$(resolve_pack_field roles.source)"
+if [ -n "$PACK_ROLES_DIR" ]; then
+  for f in "$PACK_ROLES_DIR"/*.md; do [ -f "$f" ] && roles+=("$f"); done
+fi
 # Public in home
-for f in "$LINTEL_HOME"/roles/*.md 2>/dev/null; do [ -f "$f" ] && roles+=("$f"); done
+for f in "$LINTEL_HOME"/roles/*.md; do [ -f "$f" ] && roles+=("$f"); done
 # Private in home
-for f in "$LINTEL_HOME"/roles/private/*.md 2>/dev/null; do [ -f "$f" ] && roles+=("$f"); done
+for f in "$LINTEL_HOME"/roles/private/*.md; do [ -f "$f" ] && roles+=("$f"); done
 ```
 
 ### Step 2 — Parse frontmatter per role
@@ -61,10 +64,11 @@ LINTEL ROLES AVAILABLE
 
 | ID | Display name | Scope | Voice | Sensitivity | Last updated |
 |---|---|---|---|---|---|
-| field-cto | Field CTO | customer-facing, sales-tech | trailblazer | public | 2026-05-28 |
-| solution-architect | Solution Architect | enterprise IT, security-conscious | mixed | public | 2026-05-28 |
 | engineering-manager | Engineering Manager | process, team coordination | internal | public | 2026-05-28 |
-| customer-acme-cio | CIO of Acme Corp | <scope> | trailblazer | private | 2026-05-20 |
+| customer-acme-cio | CIO of Acme Corp | <scope> | mixed | private | 2026-05-20 |
+
+(rows shown above are illustrative; actual rows come from the active pack's role
+directory plus any operator-local roles — none ship with Lintel itself)
 
 Currently active: <role-id or null>
 
@@ -75,7 +79,7 @@ To create new role: /li:role-new <id>
 
 ### Step 4 — Auto-suggest if cycle phase implies role fit
 
-If cycle is mid-DEFINE for customer-engagement mode, surface: "Recommended for current phase: field-cto (matches customer-facing audience)."
+If cycle is mid-DEFINE for a customer-facing mode, surface a pack-provided role whose audience matches (if the active pack defines one): "Recommended for current phase: <role-id> (matches customer-facing audience)."
 
 ### Step 5 — 00-state.md append (light, optional)
 
@@ -102,7 +106,7 @@ YES — pure information query, anytime.
 ## Integration
 
 **Reads:**
-- `roles/*.md`
+- `<roles.source>/*.md` (active pack's role directory; none in `_default`)
 - `~/.lintel/roles/*.md` (public)
 - `~/.lintel/roles/private/*.md`
 - `~/.lintel/profile.yaml` (active role)

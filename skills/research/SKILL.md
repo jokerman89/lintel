@@ -35,7 +35,7 @@ Output: APPROVED design doc + discover-report.md. Operator can later resume with
 
 - Ready to build — use `/li:cycle` (full)
 - Known territory — skip DISCOVER, just `/li:define`
-- Just want quick info on a service — use `/li:az-tldr <service>` (Azure toolbox)
+- Just want a quick lookup on a single topic — a focused web search is enough
 - No design discussion needed — use `/li:discover` standalone
 
 ## Workflow

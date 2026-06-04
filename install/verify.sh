@@ -1,14 +1,12 @@
 #!/usr/bin/env bash
 # lintel verify.sh — install + structure diagnostic
 #
-# 10 subcommands:
+# Subcommands:
 #   --frontmatter   validate skill + agent frontmatter
 #   --cli-matrix    print CLI support matrix
-#   --layers        validate 4-layer scaffolding structure
+#   --layers        validate scaffolding structure
 #   --hooks         check hook activation state (symlinks)
-#   --voice         check voice corpus + calibration state
-#   --compliance    check compliance docs present
-#   --upstream      check upstream-sources.yaml + tier-stamp state
+#   --upstream      check upstream-sources.yaml
 #   --counts        summary counts (skills/agents/hooks)
 #   --tier-stamps   check agent tier-stamping
 #   --all           run everything + aggregate verdict
@@ -105,8 +103,7 @@ cmd_cli_matrix() {
 cmd_layers() {
   hdr "Layer structure validation"
   local missing=0
-  # v3: 01-foundation/02-sdl/03-ms-team (04-power-user removed in v3, agents flattened)
-  # v2 backward-compat accepts 02-compliance and 03-personal-advanced too
+  # v4: scaffolding reduced to 01-foundation (foundation templates copied into target repos).
   for layer in 01-foundation; do
     if [ -d "$REPO_ROOT/scaffolding/$layer" ]; then
       ok "Layer present: $layer"
@@ -115,30 +112,6 @@ cmd_layers() {
       missing=$((missing + 1))
     fi
   done
-  # Layer 2 (SDL/compliance)
-  if [ -d "$REPO_ROOT/scaffolding/02-sdl" ]; then
-    ok "Layer present: 02-sdl"
-  elif [ -d "$REPO_ROOT/scaffolding/02-compliance" ]; then
-    ok "Layer present: 02-compliance (v1)"
-  else
-    fail "Layer 2 missing: neither 02-sdl/ nor 02-compliance/ present"
-    missing=$((missing + 1))
-  fi
-  # Layer 3 (MS team / personal-advanced)
-  if [ -d "$REPO_ROOT/scaffolding/03-ms-team" ]; then
-    ok "Layer present: 03-ms-team (v3)"
-  elif [ -d "$REPO_ROOT/scaffolding/03-personal-advanced" ]; then
-    ok "Layer present: 03-personal-advanced (v2)"
-  else
-    fail "Layer 3 missing: neither 03-ms-team/ nor 03-personal-advanced/ present"
-    missing=$((missing + 1))
-  fi
-  # Layer 4 (legacy v2; removed in v3, agents moved to agents/engineering/)
-  if [ -d "$REPO_ROOT/scaffolding/04-power-user" ]; then
-    info "Layer present: 04-power-user (v2 legacy — content moved to agents/engineering/ in v3)"
-  else
-    info "Layer 04-power-user absent (expected in v3)"
-  fi
   if [ "$missing" -gt 0 ]; then EXIT_CODE=1; fi
 
   # Required files per layer
@@ -187,81 +160,10 @@ cmd_hooks() {
   ok "$activated / $total hooks activated"
 }
 
-# ===== Subcommand: --voice ===================================================
-
-cmd_voice() {
-  hdr "Voice corpus + calibration state"
-  # v3: scaffolding/03-ms-team/voice/
-  # v2: scaffolding/03-personal-advanced/voice/ (pre-rename)
-  # v1: TRAILBLAZER-* names (pre-OurVoice rename)
-  CORPUS=""
-  for candidate in \
-    "$REPO_ROOT/scaffolding/03-ms-team/voice/OurVoice-corpus.md" \
-    "$REPO_ROOT/scaffolding/03-personal-advanced/voice/OurVoice-corpus.md" \
-    "$REPO_ROOT/scaffolding/03-personal-advanced/voice/TRAILBLAZER-CORPUS.md"; do
-    [ -f "$candidate" ] && { CORPUS="$candidate"; break; }
-  done
-
-  TEST=""
-  for candidate in \
-    "$REPO_ROOT/scaffolding/03-ms-team/voice/OurVoice-test.md" \
-    "$REPO_ROOT/scaffolding/03-personal-advanced/voice/OurVoice-test.md" \
-    "$REPO_ROOT/scaffolding/03-personal-advanced/voice/TRAILBLAZER-TEST.md"; do
-    [ -f "$candidate" ] && { TEST="$candidate"; break; }
-  done
-
-  CALIB=""
-  for candidate in \
-    "$REPO_ROOT/scaffolding/03-ms-team/voice/OurVoice-calibration.md" \
-    "$REPO_ROOT/scaffolding/03-personal-advanced/voice/OurVoice-calibration.md" \
-    "$REPO_ROOT/scaffolding/03-personal-advanced/voice/TRAILBLAZER-CALIBRATION.md"; do
-    [ -f "$candidate" ] && { CALIB="$candidate"; break; }
-  done
-
-  [ -n "$CORPUS" ] && ok "Voice corpus present: $(basename "$CORPUS")" || { fail "Voice corpus missing"; EXIT_CODE=1; }
-  [ -n "$TEST" ] && ok "Voice test rubric present: $(basename "$TEST")" || { fail "Voice test rubric missing"; EXIT_CODE=1; }
-  [ -n "$CALIB" ] && ok "Voice calibration present: $(basename "$CALIB")" || warn "Voice calibration missing — run /li:eval"
-
-  if [ -f "$CORPUS" ]; then
-    populated=$(grep -c '^- id: ' "$CORPUS" 2>/dev/null || echo 0)
-    if [ "$populated" -ge 24 ]; then
-      ok "Corpus populated: $populated paragraphs (≥24 floor)"
-    else
-      warn "Corpus has $populated paragraphs — operator should add more (≥24 floor)"
-    fi
-  fi
-
-  if [ -f "$CALIB" ]; then
-    if grep -qE 'status:\s*CALIBRATED' "$CALIB" 2>/dev/null; then
-      ok "Calibration: CALIBRATED"
-    else
-      warn "Calibration: NOT CALIBRATED — run /li:eval"
-    fi
-  fi
-}
-
-# ===== Subcommand: --compliance ==============================================
-
-cmd_compliance() {
-  hdr "Compliance docs (SDL)"
-  # v2: directory renamed 02-compliance/ → 02-sdl/; check both for backward compat
-  COMP_DIR=""
-  [ -d "$REPO_ROOT/scaffolding/02-sdl" ] && COMP_DIR="$REPO_ROOT/scaffolding/02-sdl"
-  [ -d "$REPO_ROOT/scaffolding/02-compliance" ] && COMP_DIR="$REPO_ROOT/scaffolding/02-compliance"
-  if [ -z "$COMP_DIR" ]; then
-    fail "Compliance directory missing (expected 02-sdl/ or 02-compliance/)"; EXIT_CODE=1
-    return
-  fi
-  for f in COMPLIANCE-OVERVIEW.md HARD-RULES.md ON-DEMAND-RULES.md REFERENCE-RULES.md DATA-CLASSES.md LICENSE-TIERS.md AGT-OVERVIEW.md; do
-    [ -f "$COMP_DIR/$f" ] && ok "$f" || { fail "$f missing"; EXIT_CODE=1; }
-  done
-}
-
 # ===== Subcommand: --context-engine (NEW for v2) =============================
 
 cmd_context_engine() {
-  hdr "Context engine state (v2/v3)"
-  # v3: doc moved to docs/design/
+  hdr "Context engine state"
   ROOT_DOC=""
   for candidate in \
     "$REPO_ROOT/docs/design/CONTEXT-ENGINE.md" \
@@ -270,7 +172,7 @@ cmd_context_engine() {
   done
   [ -n "$ROOT_DOC" ] && ok "CONTEXT-ENGINE.md present ($ROOT_DOC)" || { fail "CONTEXT-ENGINE.md missing"; EXIT_CODE=1; }
 
-  # v3: skills at repo root skills/<name>/SKILL.md
+  # skills at repo root skills/<name>/SKILL.md
   for skill in context-budget context-warmup perf-mode; do
     found=""
     for path in \
@@ -281,90 +183,20 @@ cmd_context_engine() {
     [ -n "$found" ] && ok "skill: $skill" || { fail "skill missing: $skill"; EXIT_CODE=1; }
   done
 
-  # Renamed context-budgetwatch (was context-tokenwatch)
+  # context-budgetwatch (was context-tokenwatch)
   found=""
   for skill in context-budgetwatch context-tokenwatch; do
-    for path in \
-      "$REPO_ROOT/skills/$skill/SKILL.md" \
-      "$REPO_ROOT/scaffolding/03-personal-advanced/skills/$skill/SKILL.md" \
-      "$REPO_ROOT/scaffolding/03-ms-team/skills/$skill/SKILL.md"; do
-      [ -f "$path" ] && { found="$path"; ok "skill: $skill"; break 2; }
-    done
+    if [ -f "$REPO_ROOT/skills/$skill/SKILL.md" ]; then
+      found="$REPO_ROOT/skills/$skill/SKILL.md"; ok "skill: $skill"; break
+    fi
   done
   [ -z "$found" ] && warn "skill: context-budgetwatch / context-tokenwatch missing (optional)"
 
-  # v3: ContextBudgetAdvisor moved to agents/engineering/
-  found=""
-  for path in \
-    "$REPO_ROOT/agents/engineering/ContextBudgetAdvisor.md" \
-    "$REPO_ROOT/scaffolding/04-power-user/agents/ContextBudgetAdvisor.md"; do
-    [ -f "$path" ] && { found="$path"; break; }
-  done
-  [ -n "$found" ] && ok "agent: ContextBudgetAdvisor" || { fail "agent missing: ContextBudgetAdvisor"; EXIT_CODE=1; }
-}
-
-# ===== Subcommand: --brand (NEW for v2) ======================================
-
-cmd_brand() {
-  hdr "Brand integration state (v2/v3)"
-  # v3: doc moved to docs/design/
-  ROOT_DOC=""
-  for candidate in \
-    "$REPO_ROOT/docs/design/BRAND-INTEGRATION.md" \
-    "$REPO_ROOT/BRAND-INTEGRATION.md"; do
-    [ -f "$candidate" ] && { ROOT_DOC="$candidate"; break; }
-  done
-  [ -n "$ROOT_DOC" ] && ok "BRAND-INTEGRATION.md present" || { fail "BRAND-INTEGRATION.md missing"; EXIT_CODE=1; }
-
-  # v3: 03-personal-advanced renamed to 03-ms-team
-  DEFAULTS_DIR=""
-  for candidate in \
-    "$REPO_ROOT/scaffolding/03-ms-team/doc-gen/default-templates" \
-    "$REPO_ROOT/scaffolding/03-personal-advanced/doc-gen/default-templates"; do
-    [ -d "$candidate" ] && { DEFAULTS_DIR="$candidate"; break; }
-  done
-  if [ -n "$DEFAULTS_DIR" ]; then
-    for f in default-ppt-template.json default-word-template.json default-web-template.html; do
-      [ -f "$DEFAULTS_DIR/$f" ] && ok "default template: $f" || { fail "default template missing: $f"; EXIT_CODE=1; }
-    done
+  # ContextBudgetAdvisor at agents/engineering/
+  if [ -f "$REPO_ROOT/agents/engineering/ContextBudgetAdvisor.md" ]; then
+    ok "agent: ContextBudgetAdvisor"
   else
-    fail "default-templates/ dir missing"
-    EXIT_CODE=1
-  fi
-
-  # v3: skills at skills/<name>/SKILL.md
-  for skill in brand-update asset-search generate-ppt generate-word generate-web; do
-    found=""
-    for path in \
-      "$REPO_ROOT/skills/$skill/SKILL.md" \
-      "$REPO_ROOT/scaffolding/03-personal-advanced/skills/$skill/SKILL.md" \
-      "$REPO_ROOT/scaffolding/03-ms-team/skills/$skill/SKILL.md"; do
-      [ -f "$path" ] && { found="$path"; break; }
-    done
-    [ -n "$found" ] && ok "skill: $skill" || { fail "skill missing: $skill"; EXIT_CODE=1; }
-  done
-
-  # v3: doc-gen agents at agents/doc-gen/
-  for agent in PPTNarrativeArchitect WordTechnicalEditor WebExperienceCritic; do
-    found=""
-    for path in \
-      "$REPO_ROOT/agents/doc-gen/$agent.md" \
-      "$REPO_ROOT/scaffolding/03-personal-advanced/agents/$agent.md" \
-      "$REPO_ROOT/scaffolding/03-ms-team/agents/$agent.md"; do
-      [ -f "$path" ] && { found="$path"; break; }
-    done
-    [ -n "$found" ] && ok "agent: $agent" || { fail "agent missing: $agent"; EXIT_CODE=1; }
-  done
-
-  # Brand-staleness hook (v3: hooks/shared/; v2: scaffolding/02-sdl/hooks)
-  HOOKS_DIR=""
-  [ -d "$REPO_ROOT/hooks/shared" ] && HOOKS_DIR="$REPO_ROOT/hooks/shared"
-  [ -d "$REPO_ROOT/scaffolding/02-sdl/hooks" ] && [ -z "$HOOKS_DIR" ] && HOOKS_DIR="$REPO_ROOT/scaffolding/02-sdl/hooks"
-  [ -d "$REPO_ROOT/scaffolding/02-compliance/hooks" ] && [ -z "$HOOKS_DIR" ] && HOOKS_DIR="$REPO_ROOT/scaffolding/02-compliance/hooks"
-  if [ -n "$HOOKS_DIR" ] && [ -d "$HOOKS_DIR/brand-staleness-warn" ]; then
-    ok "hook: brand-staleness-warn"
-  else
-    warn "hook brand-staleness-warn missing (optional)"
+    fail "agent missing: ContextBudgetAdvisor"; EXIT_CODE=1
   fi
 }
 
@@ -440,8 +272,6 @@ cmd_counts() {
   skills_v2=$(find "$REPO_ROOT/scaffolding" -path '*/skills/*/SKILL.md' 2>/dev/null | wc -l | tr -d ' ')
   agents_v2=$(find "$REPO_ROOT/scaffolding" -path '*/agents/*.md' 2>/dev/null | grep -cv README || echo 0)
   hooks_v2_dir=""
-  [ -d "$REPO_ROOT/scaffolding/02-sdl/hooks" ] && hooks_v2_dir="$REPO_ROOT/scaffolding/02-sdl/hooks"
-  [ -d "$REPO_ROOT/scaffolding/02-compliance/hooks" ] && hooks_v2_dir="$REPO_ROOT/scaffolding/02-compliance/hooks"
   hooks_v2=0
   [ -n "$hooks_v2_dir" ] && hooks_v2=$(find "$hooks_v2_dir" -name 'HOOK.md' 2>/dev/null | wc -l | tr -d ' ')
 
@@ -467,19 +297,15 @@ cmd_tier_stamps() {
   hdr "Agent tier-stamps"
   local missing=0
   local agent_paths=()
-  # v3: agents/ at repo root, organized per category
+  # agents/ at repo root, organized per category
   [ -d "$REPO_ROOT/agents" ] && agent_paths+=("$REPO_ROOT/agents")
-  # v2 fallback
-  [ -d "$REPO_ROOT/scaffolding/03-personal-advanced/agents" ] && agent_paths+=("$REPO_ROOT/scaffolding/03-personal-advanced/agents")
-  [ -d "$REPO_ROOT/scaffolding/03-ms-team/agents" ] && agent_paths+=("$REPO_ROOT/scaffolding/03-ms-team/agents")
 
   for path in "${agent_paths[@]}"; do
     while IFS= read -r f; do
       if ! grep -q '^tier:' "$f"; then
-        # ms-specific / customer / compliance / security / etc require tier (operator IP)
+        # security / compliance / customer categories require tier (operator IP)
         # engineering category may omit tier (defaults to permissive)
         local category=""
-        [[ "$f" == *"/ms-specific/"* ]] && category="ms-specific"
         [[ "$f" == *"/security/"* ]] && category="security"
         [[ "$f" == *"/compliance/"* ]] && category="compliance"
         if [ -n "$category" ]; then
@@ -607,10 +433,6 @@ cmd_scaffolding_coherence() {
     "scaffolding/01-foundation/docs/adr/TEMPLATE.md"
     "scaffolding/01-foundation/TEMPLATE-skill.md"
     "scaffolding/01-foundation/TEMPLATE-agent.md"
-    "scaffolding/02-sdl/HARD-RULES.md"
-    "scaffolding/02-sdl/ON-DEMAND-RULES.md"
-    "scaffolding/02-sdl/REFERENCE-RULES.md"
-    "scaffolding/03-ms-team/voice/OurVoice-corpus.md"
   )
   for f in "${required[@]}"; do
     if [ -f "$REPO_ROOT/$f" ]; then
@@ -630,15 +452,12 @@ cmd_all() {
   cmd_layers
   cmd_counts
   cmd_frontmatter
-  cmd_compliance
-  cmd_voice
   cmd_hooks
   cmd_upstream
   cmd_tier_stamps
   # v2 additions
   cmd_portability
   cmd_context_engine
-  cmd_brand
   # v3 additions
   cmd_plugin_manifests
   cmd_agents_categorized
@@ -658,14 +477,11 @@ case "${1:---counts}" in
   --cli-matrix)   cmd_cli_matrix ;;
   --layers)       cmd_layers ;;
   --hooks)        cmd_hooks ;;
-  --voice)        cmd_voice ;;
-  --compliance)   cmd_compliance ;;
   --upstream)     cmd_upstream ;;
   --counts)         cmd_counts ;;
   --tier-stamps)    cmd_tier_stamps ;;
   --portability)    cmd_portability ;;
   --context-engine) cmd_context_engine ;;
-  --brand)          cmd_brand ;;
   --plugin-manifests)     cmd_plugin_manifests ;;
   --agents-categorized)   cmd_agents_categorized ;;
   --scaffolding-coherence) cmd_scaffolding_coherence ;;
@@ -679,16 +495,13 @@ Usage: verify.sh [--subcommand]
 Subcommands:
   --frontmatter   validate skill + agent frontmatter
   --cli-matrix    print CLI support matrix
-  --layers        validate 4-layer scaffolding structure
+  --layers        validate scaffolding structure
   --hooks         check hook activation state (symlinks)
-  --voice         check voice corpus + calibration state
-  --compliance    check compliance docs present
   --upstream      check upstream-sources.yaml
   --counts         summary counts (default)
   --tier-stamps    check agent tier-stamping
   --portability    (v2) CLI-SUPPORT-V2-SCHEMA + li-cli-fingerprint
   --context-engine (v2) CONTEXT-ENGINE.md + context-budget/warmup/perf-mode
-  --brand          (v2) BRAND-INTEGRATION.md + default-templates + brand-update/asset-search
   --plugin-manifests       (v3) validate JSON + presence of per-CLI plugin manifests
   --agents-categorized     (v3) verify all agents have category frontmatter
   --scaffolding-coherence  (v3) verify scaffolding Kategori B templates present

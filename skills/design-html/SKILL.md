@@ -34,7 +34,7 @@ The point: fast exploration before any framework commitment. Use for design conv
 - Optional `--tokens <file>` — design tokens to honor (default: read project tokens if `--inherit-project` flag)
 - Optional `--inherit-project` — read project's design system from `.lovable/memory/style/` or `docs/design/`
 - Optional `--out <path>` — output HTML file (default: `~/.lintel/design-html/<slug>-<ts>.html`)
-- Optional `--copy-tier <internal|placeholder|trailblazer-draft>` — what kind of copy to use (see voice section below)
+- Optional `--copy-tier <internal|placeholder|pack-voice>` — what kind of copy to use (see voice section below)
 
 ## Workflow
 
@@ -44,8 +44,8 @@ The point: fast exploration before any framework commitment. Use for design conv
 4. **Generate HTML.** Single file. Inline `<style>` (no external CSS). Minimal inline `<script>` only if needed for interactivity demo (toggle, accordion).
 5. **Copy population.** Per `--copy-tier`:
    - `internal`: lorem ipsum or `[TODO: real copy]` placeholders
-   - `placeholder`: descriptive placeholders that explain intent (`[Headline: 4-7 words, Reveal mode, names the user benefit]`)
-   - `trailblazer-draft`: attempts real copy following 12-cell grid — NEEDS `/rais-customer-voice-check` before customer use
+   - `placeholder`: descriptive placeholders that explain intent (`[Headline: 4-7 words, names the user benefit]`)
+   - `pack-voice`: attempts real copy following the active pack's voice corpus — NEEDS the active pack's compliance gates before customer use
 6. **Save.** Write file + log path. Skill does NOT auto-open — operator runs `/open-managed-browser` next.
 7. **Optional preview.** If operator says "preview": chain to `/open-managed-browser --url file://...`.
 
@@ -70,13 +70,13 @@ To fork into variants: /design-shotgun --seed <this path> --count 3
 
 ## Compliance integration
 
-- If `--copy-tier trailblazer-draft` and `--inherit-project` references a customer-facing surface: SURFACE reminder that `/rais-customer-voice-check` is required before the artifact reaches a customer.
+- If `--copy-tier pack-voice` and `--inherit-project` references a customer-facing surface: SURFACE reminder that the active pack's compliance gates are required before the artifact reaches a customer.
 - Reference URL processed via `/browse` — Layer 2 prod-host gate applies.
 - Output HTML is local. Distribution is operator's responsibility.
 
 ## Voice tier note
 
-`voice: internal`. The skill itself is internal. The OUTPUT (HTML) may contain trailblazer-draft copy if explicitly opted in via `--copy-tier`. The skill warns when this happens and gates downstream distribution behind `/rais-customer-voice-check`.
+`voice: internal`. The skill itself is internal. The OUTPUT (HTML) may contain pack-voice copy if explicitly opted in via `--copy-tier`. The skill warns when this happens and gates downstream distribution behind the active pack's compliance gates.
 
 ## Failure modes
 
@@ -84,7 +84,7 @@ To fork into variants: /design-shotgun --seed <this path> --count 3
 - **Reference URL blocked by Layer 2:** generate without reference; note the gap in the report.
 - **Token file unreadable:** fall back to defaults; warn in report.
 - **Output dir unwriteable:** report exact path + permission issue; do not retry blindly.
-- **Operator asks for `trailblazer-draft` but T0 voice corpus not landed:** WARN — copy will be best-effort but UNVALIDATED until corpus + calibration land.
+- **Operator asks for `pack-voice` but no pack voice corpus configured:** WARN — copy will be best-effort but UNVALIDATED until a voice pack is installed.
 
 ## Examples
 

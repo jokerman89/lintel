@@ -32,7 +32,7 @@ but with shorter typing. Runs 4 phases (SENSE → BUILD → REVIEW → SHIP), sk
 
 - New feature work — use `/li:cycle` (full)
 - Unclear root cause — use `/li:investigate` first, then `/li:fix`
-- Customer-deliverable involved — use `/li:cycle --mode customer-engagement` (voice/brand gates)
+- Customer-deliverable involved — use `/li:cycle --mode customer-engagement` (the active pack's voice + compliance gates apply)
 - Significant architecture change — needs DEFINE + PLAN phases
 
 ## Workflow
@@ -52,7 +52,7 @@ Confirm hotfix mode is appropriate:
 Mode preset handles:
 - audience=solo
 - voice_tier=internal
-- compliance=minimal (HARD-RULES still enforced if WorkProfile=on)
+- compliance=minimal (HARD-RULES still enforced per the pack's compliance mode; default advisory)
 - Cost expectation pre-set low
 
 ### Step 3 — Post-fix

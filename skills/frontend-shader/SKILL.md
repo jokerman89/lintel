@@ -1,6 +1,6 @@
 ---
 name: frontend-shader
-layer: ms-team
+layer: foundation
 description: Frontend design-director sub-skill — picks shader library (Paper Shaders / OGL / react-three-fiber / Lygia) + visual thesis + GLSL snippet references + perf-budget. Solo-invokable.
 color: orange
 tools: Read, Write, Bash, Glob

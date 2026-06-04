@@ -34,7 +34,7 @@ Use only when:
 - Data is sanitized placeholder that LOOKS like real but isn't
 - Test fixture explicitly marked
 
-Reason logged to audit. Pattern + override pair surfaces in next `/caip-audit`.
+Reason logged to audit. Pattern + override pair surfaces in the next compliance audit.
 
 ## Audit
 

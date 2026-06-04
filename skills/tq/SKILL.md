@@ -293,4 +293,4 @@ YES. `/li:tq loop` resumes from prior state. `/li:tq single --action <name>` ent
 
 ## Voice tier behavior
 
-`voice: internal`. TQ produces operator-facing quality artifacts. Customer-facing voice picks up at SHIP phase when caip-se pack adds Trailblazer alignment.
+`voice: internal`. TQ produces operator-facing quality artifacts. Customer-facing voice picks up at the SHIP phase when the active pack adds voice alignment via Brief Forge (an external pack like lintel-caip-pack supplies this; none by default).

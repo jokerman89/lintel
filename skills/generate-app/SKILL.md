@@ -1,6 +1,6 @@
 ---
 name: generate-app
-layer: ms-team
+layer: foundation
 description: Full-app scaffold-orchestrator. Reads frontend-design-spec.json + generates vite-react/next-app/svelte-kit project skeleton with motion/shader/typography wired up. Sister till generate-web — same family (rendering-engine), larger scope.
 color: green
 tools: Read, Write, Bash, Glob
@@ -185,7 +185,7 @@ Same as generate-web (per existing v3.5 pattern):
 1. Build-test: `npm run build` smoke-test
 2. WebExperienceCritic agent: layout/hierarchy/accessibility review
 3. DesignSystemAuditor (Fas A2) optional: 6-dimension audit if `--review` flag
-4. Voice-gate via `/li:rais-customer-voice-check` om customer-share
+4. Voice-gate via the active pack's voice gate (`resolve_pack_field compliance.hooks`; none by default) om customer-share
 
 ## Voice tier behavior
 
@@ -223,7 +223,7 @@ YES — solo-invocable (given an existing frontend-design-spec.json).
 **Calls into:**
 - `agents/doc-gen/WebExperienceCritic.md` (existing — design-pass review)
 - `agents/frontend/DesignSystemAuditor.md` (Fas A2 — optional 6-dimension audit if --review)
-- `/li:rais-customer-voice-check` (om customer-share)
+- the active pack's voice gate (`resolve_pack_field compliance.hooks`; none by default — om customer-share)
 - `/li:compliance-gate` (om customer-share)
 
 **Boundary med frontend-* family (L-002):**

@@ -71,7 +71,7 @@ Post-generation: scores the output + surfaces findings.
    - No motion-sickness anti-patterns (parallax with no off-switch)
 
    **Copy:**
-   - Voice tier alignment (defers to /rais-customer-voice-check for trailblazer scoring)
+   - Voice tier alignment (defers to the active pack's voice gate for scoring)
    - Length appropriate to context
    - Typos / grammar
 

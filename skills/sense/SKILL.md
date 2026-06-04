@@ -1,7 +1,7 @@
 ---
 name: sense
 layer: foundation
-description: Phase 1 of Lintel cycle — auto-detect operator intent, WorkProfile state, active role, mode recommendation, 00-state from prior session. Lightweight diagnostic, no gates.
+description: Phase 1 of Lintel cycle — auto-detect operator intent, pack compliance mode, active role, mode recommendation, 00-state from prior session. Lightweight diagnostic, no gates.
 color: cyan
 tools: Read, Bash, Grep, Glob
 voice: internal
@@ -18,7 +18,7 @@ Reads operator state silently and surfaces a one-screen diagnostic. NOT explorat
 
 SENSE answers four things before the operator commits to a phase:
 1. What's the operator's intent likely to be? (build / fix / review / research / ship / scaffold / unclear)
-2. What's the current configuration? (WorkProfile on/off, role active, voice tier, Azure focus, mode default)
+2. What's the current configuration? (pack compliance mode, role active, voice tier, mode default)
 3. Where did the last session leave off? (00-state.md from cwd, if present)
 4. What's the context budget? (current tokens used, headroom for warm-up)
 
@@ -152,20 +152,22 @@ LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
 PROFILE="$LINTEL_HOME/profile.yaml"
 
 if [ -f "$PROFILE" ]; then
-  # Parse: workprofile, role_active, voice_tier_default, azure_focus, default_mode, etc
-  workprofile=$(grep -E '^workprofile:' "$PROFILE" | awk '{print $2}')
+  # Parse: role_active, default_mode, proactive from profile.
   role_active=$(grep -E '^role_active:' "$PROFILE" | awk '{print $2}')
   default_mode=$(grep -E '^default_mode:' "$PROFILE" | awk '{print $2}')
-  voice_default=$(grep -E '^voice_tier_default:' "$PROFILE" | awk '{print $2}')
-  azure_focus=$(grep -E '^azure_focus:' "$PROFILE" | awk '{print $2}')
   proactive=$(grep -E '^proactive:' "$PROFILE" | awk '{print $2}')
 else
   # First-run: profile missing. Surface prompt-on-first-run per D9.3.
   echo "FIRST_RUN_DETECTED"
 fi
+
+# Compliance + voice come from the active pack (neutral defaults if _default).
+compliance_mode=$(resolve_pack_field compliance.mode)              # advisory by default
+workprofile=$(resolve_pack_field compliance.workprofile_default)   # off by default
+voice_default=$(resolve_pack_field voice.default_tier)             # internal by default
 ```
 
-If profile missing → prompt operator via AskUserQuestion: "Lintel kan köras med eller utan MS-compliance-policies (WorkProfile). MS-internal operator → recommend ON. Non-MS → recommend OFF. Välj."
+If profile missing → prompt operator via AskUserQuestion: "Lintel kan köras med eller utan compliance-gates. The active pack drives this (`resolve_pack_field compliance.mode`); the `_default` pack is advisory + workprofile off. Välj pack om du vill ha hårdare gates."
 
 ### Step 2 — Read prior 00-state.md
 
@@ -236,11 +238,11 @@ cat >> .lintel/state/00-state.md <<EOF
 phase: SENSE
 ts: $(date -u +%Y-%m-%dT%H:%M:%SZ)
 operator: $(whoami)
+compliance_mode: $compliance_mode
 workprofile: $workprofile
 mode_recommended: $recommended_mode
 role: $role_active
 voice_tier: $effective_voice_tier
-azure_focus: $azure_focus
 intent_detected: $intent
 phases_completed: []
 context_budget: $current_tokens / 1M
@@ -257,10 +259,9 @@ LINTEL SENSE — <timestamp>
 
 Operator: <whoami>
 Mode: <recommended-or-default>
-WorkProfile: <ON/OFF> — <implication if ON>
+Compliance: <pack compliance.mode> (from active pack)
 Role: <id active> | <none>
 Voice tier: <effective>
-Azure focus: <ON/OFF>
 
 Intent detected: <classification>
 Recommended phase: <next>
@@ -295,7 +296,7 @@ Next options:
 
 None. SENSE runs to completion silently or surfaces report.
 
-Exception: first-run case where `profile.yaml` doesn't exist → AskUserQuestion to set up WorkProfile (per D9.3). This is a one-time setup pause, not a recurring SENSE behavior.
+Exception: first-run case where `profile.yaml` doesn't exist → AskUserQuestion to set the active pack (per D9.3). This is a one-time setup pause, not a recurring SENSE behavior.
 
 ## Hop-in support
 
@@ -324,7 +325,7 @@ If operator explicitly asks for the SENSE report mid-session, re-run is allowed 
 
 - **Loading full role-file content** — only IDENTITY summary (50-100 tokens)
 - **Running expensive grep / glob** — that's DISCOVER's job
-- **Asking questions** — SENSE is read-only (except first-run WorkProfile setup)
+- **Asking questions** — SENSE is read-only (except first-run pack setup)
 - **Auto-invoking next phase** — surface recommendation, operator decides
 - **Re-running SENSE mid-cycle** — once per cycle entry, that's it
 - **Skipping 00-state.md write** — every phase appends; this is the resumability mechanism
