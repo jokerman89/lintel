@@ -126,11 +126,14 @@ Detect cycles. Detect impossible-orderings. Surface blockers explicitly.
 
 ### Step 7 — Cost estimate (MANDATORY GATE)
 
+**Time-on-request (design §3.7):** wall-clock time fields are emitted **only** when the operator asked for them (`--with-time`, or they explicitly request it). Tokens + task count + size are always shown; time is opt-in so the default estimate never anchors on a guessed duration.
+
 ```yaml
 # Cost breakdown
 total_tasks: N
+size: <XS|S|M|L|XL from scope.md>
 estimated_tokens: <sum across tasks × model used>
-estimated_time: <sum minutes>
+# estimated_time: <sum minutes>          # only when --with-time
 model_mix:
   - Haiku (mechanical): <% tasks>
   - Sonnet (multi-file): <% tasks>
@@ -138,13 +141,12 @@ model_mix:
 
 cost_estimate:
   tokens: <total>
-  time_human_walkthrough: <hours if reading the doc>
-  time_cc_execution: <minutes/hours>
+  # time_human_walkthrough / time_cc_execution: <…>   # only when --with-time
   dollar_estimate: $<X>  (based on current model pricing)
 ```
 
 AskUserQuestion (MANDATORY):
-"Plan ready: <N> tasks, est. <tokens> tokens, <duration>, ~$<cost>. Proceed?"
+"Plan ready: <N> tasks, est. <tokens> tokens, ~$<cost>. Proceed?"  (append ", <duration>" only when `--with-time`)
 - A) Approve and proceed
 - B) Scope-trim (which tasks to defer)
 - C) Decompose (tasks too big, break further)
@@ -207,16 +209,35 @@ If A: write plan.md final + checkpoint, status DONE.
 
 ## Cost estimate
 - Tasks: <N>
+- Size: <XS|S|M|L|XL from scope.md>
 - Tokens: <total>
-- Duration: <time>
 - Cost: $<estimate>
+<!-- - Duration: <time>   ← only emit when --with-time (design §3.7) -->
+```
 
+**Depth-parametric rendering (Slice 1 — design §3.3).** Read `depth_schema` from `scope.md` (SENSE step 0e) and render the task breakdown to match the request's size. The 2-5 min granularity rule applies to the **leaf** (task at flat/phased, subtask at tree) — hierarchy adds milestones, it does not weaken the leaf check.
+
+- **`flat`** (XS/S — today's shape): one task table, IDs `T1, T2, …`.
+- **`phased`** (M): phases with tasks, numbered `1, 1.1 / 2, 2.1`.
+- **`tree`** (L/XL): phases → tasks → subtasks + milestone checkpoints, `1 / 1.1 / 1.1.a` — **ships in Slice 2**; until then `tree` renders as `phased` so a big plan is at least sectioned.
+
+```markdown
+<!-- depth_schema: flat -->
 ## Task list
 | ID | Title | Files | Deps | Subagent | Tokens | Min |
 |---|---|---|---|---|---|---|
 | T1 | <title> | <paths> | - | TestRunner | 2k | 4 |
 | T2 | ... | | T1 | BackendArchitect | 8k | 15 |
-| ... | | | | | | |
+
+<!-- depth_schema: phased -->
+## Phase 1 — <name>   [milestone: <pass criterion>]
+| ID | Title | Files | Deps | Subagent | Tokens | Min |
+|---|---|---|---|---|---|---|
+| 1.1 | <title> | <paths> | - | <agent> | 2k | 4 |
+| 1.2 | ... | | 1.1 | <agent> | 4k | 5 |
+## Phase 2 — <name>   [milestone]
+| 2.1 | ... | | 1.2 | <agent> | | |
+```
 
 ## Per-task detail
 ### T1: <title>
