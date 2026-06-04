@@ -38,16 +38,19 @@ Phase-2 spine extraction.
 - [x] Lintel README/AGENT-INSTRUCTIONS/LAYERS/CLAUDE/AGENTS/GEMINI/SHIP-GATE → company-neutral
 - [x] CAIP repo README → install-on-top docs
 
-## P5 — Verify  ✅ (local) / ⏳ (operator)
+## P5 — Verify  ✅
 - [x] Lintel: shape 19/0, unit 29/0; bash -n clean; 0 dangling refs; packs/=_default
 - [x] Tests updated for new boundary (8 unit + 1 shape; 2 obsolete tests removed)
-- [ ] OPERATOR: install lintel-caip-pack on top + /li:pack-switch caip-se → confirm parity
-- [ ] OPERATOR: decide push / PR (not pushed — awaiting authorization)
+- [x] STRUCTURAL PARITY: pack-resolver resolves caip-se → trailblazer/hard/5000/7000;
+      _default → internal/advisory. Install + pack-switch mechanism confirmed.
+- [ ] OPERATOR: decide push / PR + create GitHub remote for lintel-caip-pack (outward — awaiting auth)
 
-## Deferred (separate doc-refresh, flagged not blocking)
-- [ ] README/SHIP-GATE v3→v4 count drift (pre-existing, not caused by extraction)
-- [ ] LAYERS.md full rewrite to foundation+packs model (banner added; historical body kept)
-- [ ] CAIP repo: mirror remaining 6 per-CLI manifests; populate knowhow/lessons/opinions
+## Doc-refresh ✅ (was deferred — now done)
+- [x] README: v3→v4.7 status + counts (165/70/29) + company-neutral framing
+- [x] SHIP-GATE: counts 165/70/29; ms-team + customer-engagement-mode residue removed
+- [x] LAYERS.md: body rewritten to foundation+packs model
+- [x] CAIP repo: 6 per-CLI manifests + entry files; evaluators (sdl + trailblazer);
+      brand-tokens, packaged lessons, knowhow index, 3 stance docs (commit a555eef)
 
 ## Review
 
