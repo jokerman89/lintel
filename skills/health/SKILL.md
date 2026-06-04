@@ -46,7 +46,7 @@ Runs these checks in order. Each check passes/fails independently; report aggreg
 5. **Hooks:** for each `~/.lintel/hooks/li:*.sh`, check whether a symlink exists at `~/.claude/hooks/li:*.sh`. Report active vs inert.
 6. **Skill frontmatter:** glob `~/.claude/skills/li:*/SKILL.md`. Confirm required fields (name, description, color, tools, voice, cli_support). Flag any with missing fields.
 7. **Agent frontmatter:** same check on `~/.claude/agents/` (filter to Lintel-relevant).
-8. **Voice corpus:** if `~/.claude-scaffolding/03-personal-advanced/voice/OurVoice-calibration.md` exists, parse the status table — report per-cell calibration status (PASS / PARTIAL / FAIL / PENDING).
+8. **Voice corpus:** if the active pack defines a voice corpus (`resolve_pack_field voice.corpus`) and its calibration file exists, parse the status table — report per-cell calibration status (PASS / PARTIAL / FAIL / PENDING).
 9. **CLI shims:** for the current repo (if in one), check whether `CLAUDE.md`, `.github/copilot-instructions.md`, `AGENTS.md` are present.
 10. **License freshness:** for each upstream, check `last_verified` against today. Warn if >90 days.
 
@@ -56,10 +56,10 @@ Runs these checks in order. Each check passes/fails independently; report aggreg
 ```
 Lintel v1.0.0 health: ✓ all checks pass
   Manifest: 2026-05-27, commit 7e7a021
-  Layers (4/4): 01-foundation ✓ 02-compliance ✓ 03-personal-advanced ✓ 04-power-user ✓
+  Layers (enabled): 01-foundation ✓ (plus any pack-contributed layers)
   Skills (25/25): all frontmatter valid
   Agents (40/40): all frontmatter valid
-  Voice corpus: PENDING (T0 — no calibration data yet)
+  Voice corpus: PENDING (no calibration data yet)
 ```
 
 **Issues (full):**
@@ -70,13 +70,13 @@ Lintel v1.0.0 health: ⚠ 3 issues, 1 warning
 ✓ Layers (4/4 enabled, all install paths exist)
 ✗ Skill frontmatter:
     li-foo: missing `cli_support` field
-    li-bar: invalid voice tier value ("trailerblazer" — typo of "trailblazer")
+    li-bar: invalid voice tier value ("intrenal" — typo of "internal")
 ✗ Upstream pin drift:
     trailofbits-skills: HEAD at abc1234, pinned to def5678 (10 commits ahead)
 ⚠ License freshness:
     anthropic-skills: last_verified 2026-02-15 (>90 days stale)
 ✓ Hooks (1/14 active): li-secret-scan symlinked
-✓ Voice corpus: 8/12 cells PASS, 4/12 PENDING (waiting for T0 completion)
+✓ Voice corpus: 8/12 cells PASS, 4/12 PENDING (waiting for corpus completion)
 ✓ CLI shims for current repo: CLAUDE.md ✓, .github/copilot-instructions.md ✓, AGENTS.md missing (not on Codex)
 
 Recommended next steps:

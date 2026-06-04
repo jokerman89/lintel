@@ -67,7 +67,7 @@ Then read:
 - APPROVED design doc from DEFINE
 - discover-report.md from DISCOVER (if present)
 - CORE-PRINCIPLES.md (always)
-- HARD-RULES.md (if WorkProfile=on)
+- the active pack's compliance gates (`resolve_pack_field compliance.hooks`; none by default)
 - Recent ADRs identified by DISCOVER as relevant
 
 If design doc not APPROVED → BLOCKED, return to DEFINE.
@@ -251,8 +251,8 @@ This file is a SELF-CONTAINED prompt. A fresh AI session reading only this promp
 ## Constraints
 - Must respect: <list constraints from design doc>
 - Must NOT: <list explicit anti-requirements>
-- Compliance: <HARD-RULES applicable>
-- Voice tier: <tier>
+- Compliance: <active pack's gates — resolve_pack_field compliance.hooks; none by default>
+- Voice tier: <active pack's voice tier — resolve_pack_field voice.default_tier; default internal>
 
 ## Acceptance criteria (verify)
 - [ ] <criterion 1 — concrete, testable>
@@ -331,7 +331,7 @@ Skip-conditions:
 - APPROVED design doc (from DEFINE)
 - discover-report.md (from DISCOVER)
 - CORE-PRINCIPLES.md
-- HARD-RULES.md (if WorkProfile=on)
+- the active pack's compliance gates (`resolve_pack_field compliance.hooks`; none by default)
 - Recent relevant ADRs
 - `tasks/lessons.md` (via `/li:lessons-surface`, keyword-scoped, non-blocking)
 
@@ -352,11 +352,10 @@ Skip-conditions:
 - **BackendArchitect / FrontendBuilder / DataPipelineDesigner** (engineering/) — per domain
 - **APIDesigner** (engineering/) — if API surface
 - **DatabaseDesigner** (engineering/) — if schema changes
-- **BicepReviewer / TerraformReviewer / K8sManifestReviewer** (devops/) — if infra
-- **AzureArchitect / AzureOpenAIAdvisor / KeyVaultAuditor / GraphAPIAdvisor** (ms-specific/) — if Azure
+- **TerraformReviewer / K8sManifestReviewer** (devops/) — if infra
 - **ADRDrafter** (engineering/) — if non-trivial decisions surface during planning
 - **SecurityAuditor / ThreatModelDrafter** (security/) — sensitive-data flow review
-- **RAIReviewer / EUAIActReviewer / SDLReviewer** (compliance/) — if AI/ML/regulated
+- **EUAIActReviewer** (compliance/) — if AI/ML in a regulated market
 
 ## Anti-patterns
 
@@ -377,7 +376,7 @@ Skip-conditions:
 
 ## Voice tier behavior
 
-`voice: internal`. Plan.md is engineering-internal. spec.md inherits voice tier of cycle mode (trailblazer if customer-engagement, internal otherwise).
+`voice: internal`. Plan.md is engineering-internal. spec.md inherits the active pack's voice tier (`resolve_pack_field voice.default_tier`; default: internal).
 
 ## Module-callable (v3.8 Feature 2.4)
 
@@ -405,7 +404,7 @@ PLAN is no longer just Phase 4 of `cycle` — it's a callable planner-module tha
 
 **3. Sub-module called by another workflow_root skill:**
 ```
-/li:cycle-azure-e2e          OR    /li:safe-install
+/li:cycle                    OR    /li:safe-install
   ↓ discovery                       ↓ pre-flight
   CALL /li:plan --from <design>     CALL /li:plan --from <change-spec>
   ↓ receives trio                   ↓ receives trio

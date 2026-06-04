@@ -31,7 +31,7 @@ Not a standalone workflow — invokes other skills (or your direct work) with el
 
 ## Inputs
 
-- Optional `--for <skill>` — wrap a specific skill invocation in careful mode (e.g. `/careful --for /release-ev2`)
+- Optional `--for <skill>` — wrap a specific skill invocation in careful mode (e.g. `/careful --for /ship`)
 - Optional `--reason <text>` — operator's stated reason for elevation (logged to audit)
 - Optional `--off` — explicitly disable careful mode if it was auto-enabled by a watcher
 
@@ -75,7 +75,7 @@ Operator confirmed: yes (at 14:23:01)
 - Layer 2 production-mutation rules apply at maximum strictness — every per-call auth is explicit AND logged.
 - 5 always-on rules check on every mutation (not just session-start).
 - Sanity scan on every Edit payload (Layer 2 secret/customer-data patterns).
-- If `--for /release-ev2` and the target is `main`: triple confirmation required.
+- If `--for /ship` and the target is `main`: triple confirmation required.
 
 ## Voice tier note
 
@@ -90,13 +90,13 @@ Operator confirmed: yes (at 14:23:01)
 
 ## Examples
 
-**Wrapping /release-ev2 for a high-stakes branch:**
+**Wrapping /ship for a high-stakes branch:**
 ```
-> /careful --for /release-ev2 --reason "merging to main, prod deploy follows"
+> /careful --for /ship --reason "merging to main, prod deploy follows"
 CAREFUL MODE ON — reason: merging to main, prod deploy follows
 Restated goal: ship branch feat/billing-refund-v2 via PR to main
 Operator confirmed: yes
-[/release-ev2 runs with per-step confirmation, takes ~3x longer]
+[/ship runs with per-step confirmation, takes ~3x longer]
 ```
 
 **Manual mutation flow:**
@@ -116,7 +116,7 @@ CAREFUL MODE OFF. Back to normal cadence.
 
 ## See also
 
-- `/release-ev2` — high-stakes invocation: prefer `/careful --for /release-ev2`
-- `/release-deploy-ev2` — production deploy: prefer `/careful --for /release-deploy-ev2`
+- `/ship` — high-stakes invocation: prefer `/careful --for /ship`
+- `/land-and-deploy` — production deploy: prefer `/careful --for /land-and-deploy`
 - `/investigate` — read-only by default, careful mode is optional overlay for prod-data investigation
 - Layer 2 compliance — careful mode is the operator-side counterpart to Layer 2 auto-checks

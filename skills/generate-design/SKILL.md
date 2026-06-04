@@ -1,6 +1,6 @@
 ---
 name: generate-design
-layer: ms-team
+layer: foundation
 description: Produce design-spec.json (per-format layout-mappings + palette + fonts + asset placements) from content.md. Shared content-pipeline sub-skill, solo-invokable.
 color: orange
 tools: Read, Write, Bash, Glob

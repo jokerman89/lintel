@@ -101,7 +101,7 @@ Variant 3 (cool-accent). Reason: emerald accent maps to existing brand tokens; m
 
 ## Compliance integration
 
-- Variants inherit seed's compliance state. If seed had trailblazer-draft copy: all variants do too, and the `/rais-customer-voice-check` gate applies to all of them.
+- Variants inherit seed's compliance state. If seed had pack-voice copy: all variants do too, and the active pack's compliance gates apply to all of them.
 - No production touch. No Layer 2 mutations.
 - Output dir lives at `~/.lintel/design-shotgun/` — operator owns distribution.
 

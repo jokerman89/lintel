@@ -60,7 +60,7 @@ Produces architecture-grade decisions and contracts when work has architectural 
 - New service, API, dependency restructure, cross-system boundary
 - Operator wants explicit architectural decisions documented as ADRs
 - BUILD phase detected architectural intent (Phase 4 wiring auto-invokes)
-- Customer engagement requires architecture-grade artifacts
+- Work requires architecture-grade artifacts
 
 ## When NOT to use
 
@@ -308,4 +308,4 @@ YES. `/li:ta loop` resumes from prior state at `.lintel/state/ta/00-state.md`. `
 
 ## Voice tier behavior
 
-`voice: internal`. TA produces operator-facing architectural artifacts. Customer-facing voice picks up at the SHIP phase when caip-se pack adds Trailblazer alignment via Brief Forge.
+`voice: internal`. TA produces operator-facing architectural artifacts. Customer-facing voice picks up at the SHIP phase when the active pack adds voice alignment via Brief Forge (an external pack like lintel-caip-pack supplies this; none by default).

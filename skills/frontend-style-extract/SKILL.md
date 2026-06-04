@@ -1,6 +1,6 @@
 ---
 name: frontend-style-extract
-layer: ms-team
+layer: foundation
 description: Pattern-level extraction sister till generate-style-learn. Reads artifacts (URLs, screenshots, .tsx files) → extracts layout-grammar + motion-language + interaction-patterns + component-library-fingerprint + shader-thesis → writes ~/.lintel/brand/design-patterns/<name>/. Solo-invokable.
 color: orange
 tools: Read, Write, Bash, Glob

@@ -54,11 +54,11 @@ phase: <current phase if cycle active>
 # Snapshot: <name>
 
 ## Active state
-- WorkProfile: <on/off>
+- Active pack: <pack name>
+- Compliance mode: <resolve_pack_field compliance.mode — advisory by default>
 - Mode: <preset>
 - Role: <active id or null>
 - Voice tier: <effective>
-- Azure focus: <on/off>
 
 ## Context budget at snapshot
 - Tokens used: <approx>
@@ -107,7 +107,7 @@ Reads cwd state. Writes `~/.lintel/sessions/<branch>/`.
 
 ## Anti-patterns
 
-- **Snapshot without name** — make names mnemonic ("before-azure-deep-dive" beats "save1")
+- **Snapshot without name** — make names mnemonic ("before-refactor-deep-dive" beats "save1")
 - **Frequent snapshots** — 3-5 per session max, beyond that get lost
 
 ## Voice tier behavior

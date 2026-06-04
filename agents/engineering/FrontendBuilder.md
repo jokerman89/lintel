@@ -82,7 +82,7 @@ Ready. Recommend /design-review --routes /portal/cases for visual sign-off.
 
 - **Design unclear at component level:** ask 1-2 targeted questions; do not invent.
 - **Token doesn't exist for needed style:** propose adding it to the design system, do not hardcode.
-- **Customer-facing copy in component:** if voice: trailblazer applies, mark DRAFT and recommend `/rais-customer-voice-check`.
+- **Customer-facing copy in component:** if the pack sets a customer-facing voice tier, mark DRAFT and recommend running the active pack's voice gate.
 - **Accessibility conflict with design (e.g. brand color fails contrast):** surface, propose alternative, ask operator.
 
 ## Voice tier behavior

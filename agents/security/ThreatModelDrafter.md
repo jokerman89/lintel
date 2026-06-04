@@ -22,7 +22,7 @@ Drafts STRIDE-based threat models (Spoofing / Tampering / Repudiation / Informat
 ## When to invoke
 
 - New feature in design phase
-- Pre-SDL review milestone
+- Pre-security-review milestone
 - Customer asks "what could go wrong?"
 - Annual threat-model refresh
 - Security architecture pivot
@@ -31,7 +31,7 @@ Drafts STRIDE-based threat models (Spoofing / Tampering / Repudiation / Informat
 
 - Code-level vuln scan — use SecurityAuditor
 - Specific OWASP Top 10 check on web app — use SecurityAuditor with web-focus
-- Penetration testing — out of scope (recommend MS Red Team)
+- Penetration testing — out of scope (recommend a dedicated red team)
 
 ## Workflow
 
@@ -86,7 +86,7 @@ ThreatModelDrafter: <system-name>
 
 ## Action items
 - [ ] /adr-new for accepted risks
-- [ ] /rais-sensitive-use if PII/AI scenario
+- [ ] run the active pack's compliance gates if PII/AI scenario (`resolve_pack_field compliance.hooks`; none by default)
 - [ ] SecurityAuditor code-scan after build
 ```
 
@@ -98,4 +98,4 @@ ThreatModelDrafter: <system-name>
 
 ## Voice tier behavior
 
-`voice: internal`. Threat models are internal artifacts. Customer-facing summary requires `/rais-transparency-note` translation.
+`voice: internal`. Threat models are internal artifacts. Customer-facing summary requires translation via the active pack's voice/compliance tooling, if any.

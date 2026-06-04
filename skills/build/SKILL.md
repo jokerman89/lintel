@@ -18,8 +18,8 @@ Executes plan.md task-by-task using superpowers' Subagent-Driven Development pat
 1. Read plan.md, extract all tasks with full text
 2. Create TodoWrite for tasks
 3. Per task: dispatch fresh implementer subagent → implementer executes (TDD red-green-refactor) → two-stage review (spec compliance THEN code quality) → fix loop if needed → mark complete
-4. Hard-rule hooks fire automatically (if activated)
-5. Voice gates fire on customer-facing artifacts (if audience=customer)
+4. The active pack's compliance hooks fire automatically (`resolve_pack_field compliance.hooks`; none by default)
+5. The active pack's voice gates fire on customer-facing artifacts (`resolve_pack_field voice.gates_active`; none by default)
 6. Continuous checkpoint (if checkpoint_mode=continuous)
 7. Final code review after all tasks
 
@@ -45,7 +45,7 @@ This phase is where most token spend happens. Cost-estimate from PLAN sets expec
 Verify:
 - plan.md exists and is APPROVED status
 - Current branch is NOT main/master (if no explicit user consent for main)
-- HARD-RULES hooks status (if WorkProfile=on, customer-data-block + secret-scan-block must be activated)
+- Active pack's compliance hooks status (`resolve_pack_field compliance.hooks`; none by default — when present, e.g. customer-data-block + secret-scan-block, they must be activated)
 - Git worktree state clean OR operator confirms WIP state OK
 
 If on main without consent: HARD STOP per superpowers rule. AskUserQuestion: "Switch to feature branch / proceed on main with confirmation / abort?"
@@ -123,21 +123,20 @@ If Stage 2 FAILS:
 - Re-dispatch
 - Max 3 iterations
 
-#### 3e — Hard-rule hooks (auto-fire if WorkProfile=on)
+#### 3e — Compliance hooks (auto-fire per active pack)
 
-These run automatically on every edit/commit (if hook activated):
+The active pack's hooks (`resolve_pack_field compliance.hooks`; none by default) run automatically on every edit/commit when present. Example hooks a pack may activate:
 - `customer-data-block`: BLOCKS commit with customer-PII patterns
 - `secret-scan-block`: BLOCKS commit with detected secrets
 - `no-direct-main-push`: WARNS on direct main push
-- `no-en-vocab-in-trailblazer`: WARNS Trailblazer-tagged docs with AI vocab
 
-If hook BLOCKS: hard stop. Operator decides override (rarely warranted).
+If a hook BLOCKS: hard stop. Operator decides override (rarely warranted).
 
-#### 3f — Voice gate (if customer-facing artifact + voice_tier=trailblazer)
+#### 3f — Voice gate (if customer-facing artifact + pack defines voice gates)
 
 If task produces customer-facing output (docs, copy, demo content):
-- Dispatch TrailblazerVoiceCritic agent
-- Score against OurVoice corpus
+- Run the active pack's voice gates (`resolve_pack_field voice.gates_active`; none by default)
+- Score against the pack's voice corpus (`resolve_pack_field voice.corpus`; none by default)
 - If score <85%, surface findings, suggest edits, re-review
 
 #### 3g — Mark complete
@@ -216,7 +215,7 @@ next_recommended: REVIEW
 - After each task review-pass: TodoWrite mark complete (no operator pause unless concerns)
 - Every Nth task (N=5 default): optional summary report
 - On BLOCKED: pause, root-cause hypothesis, operator decision
-- On HARD-RULE hook fire: hard stop, never silently proceed
+- On a blocking compliance hook fire: hard stop, never silently proceed
 - On voice gate fail: surface, operator decides override or re-write
 
 ## Hop-in support
@@ -230,7 +229,7 @@ Skip-conditions: intent=review-only, intent=research-only, intent=plan-only.
 **Reads:**
 - plan.md (canonical, MANDATORY)
 - CORE-PRINCIPLES.md
-- HARD-RULES.md (if WorkProfile=on)
+- the active pack's compliance hooks (`resolve_pack_field compliance.hooks`; none by default)
 - role file (if active, voice/tone signals only)
 - recent test results
 - `tasks/lessons.md` (via `/li:lessons-surface`, keyword-scoped, non-blocking)
@@ -252,11 +251,9 @@ Skip-conditions: intent=review-only, intent=research-only, intent=plan-only.
 - **Refactorer** (engineering/) — refactor phase
 - **Migrator** (engineering/) — schema/API migrations
 - **BackendArchitect / FrontendBuilder** (engineering/) — per task domain
-- **BicepReviewer / ARMTemplateReviewer** (ms-specific/) — IaC tasks
 - **K8sManifestReviewer / TerraformReviewer** (devops/) — infra tasks
 - **CostAnalyzer / LatencyAnalyzer / RegressionDetective** (engineering/) — perf-related tasks
 - **SecurityAuditor / SecretsScanReviewer / ThreatModelDrafter** (security/) — security tasks
-- **AzureArchitect / AzureOpenAIAdvisor / KeyVaultAuditor / GraphAPIAdvisor** (ms-specific/) — Azure tasks
 - **CodeReviewer** (engineering/) — reviewer for both stages
 
 ## Anti-patterns (from superpowers)
@@ -282,7 +279,7 @@ Skip-conditions: intent=review-only, intent=research-only, intent=plan-only.
   - Plan correct but environment broken → escalate to operator
 - **Reviewer subagent unavailable**: skip review, note in build-log "unreviewed task". Status: DONE_WITH_CONCERNS.
 - **Test suite breaks during task**: revert task, mark BLOCKED, investigate via `/li:investigate`.
-- **Hard-rule hook fires repeatedly**: STOP. Investigate why operator's content keeps triggering. Likely real issue.
+- **A blocking compliance hook fires repeatedly**: STOP. Investigate why operator's content keeps triggering. Likely real issue.
 - **Voice gate fails 3x for same artifact**: surface to operator, decide accept-with-caveat or re-write from scratch.
 
 ## Model selection strategy (from superpowers)
@@ -295,4 +292,4 @@ Plan.md should specify which model per task. If not specified, default Sonnet.
 
 ## Voice tier behavior
 
-`voice: internal`. Code is engineering-internal. Customer-facing artifacts (if any in BUILD) flow through voice gate per `/li:rais-customer-voice-check`.
+`voice: internal`. Code is engineering-internal. Customer-facing artifacts (if any in BUILD) flow through the active pack's voice gates (`resolve_pack_field voice.gates_active`; none by default).

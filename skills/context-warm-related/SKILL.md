@@ -12,7 +12,7 @@ You are the context-warm-related skill — topic-heuristic loading.
 
 ## What this skill does
 
-Given a topic (e.g., "ExpressRoute", "auth flow", "BicepReviewer pattern"), heuristically finds the top N most-relevant files across cwd + `~/.lintel/scaffolding/` + `docs/design/` and loads them via `/li:context-warm`.
+Given a topic (e.g., "rate limiter", "auth flow", "retry pattern"), heuristically finds the top N most-relevant files across cwd + `~/.lintel/scaffolding/` + `docs/design/` and loads them via `/li:context-warm`.
 
 ## When to use
 
@@ -56,8 +56,8 @@ CANDIDATE FILES (related to "<topic>") — top <N> by relevance:
 
 | Score | File | Match type |
 |---|---|---|
-| 5 | docs/design/lintel-v3.5-azure-toolbox-plan.md | filename + 12 content |
-| 4 | skills/li-az-tldr/services/expressroute.md | filename + 8 content |
+| 5 | docs/design/lintel-v3-plan.md | filename + 12 content |
+| 4 | src/lib/rate-limiter.ts | filename + 8 content |
 | 3 | docs/design/CONTEXT-ENGINE.md | 7 content |
 | ... | | |
 
@@ -107,7 +107,7 @@ Reads codebase + delegates to `/li:context-warm`. Writes to budget tracking via 
 
 - **Loading 50+ files because "related" is broad** — cap at N=10 default, operator can extend
 - **Skipping confirmation** — heuristic match isn't always right
-- **Using broad topics like "Azure"** — too many matches; suggest narrower
+- **Using broad topics like "api"** — too many matches; suggest narrower
 
 ## Voice tier behavior
 

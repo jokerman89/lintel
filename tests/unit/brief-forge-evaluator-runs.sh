@@ -52,7 +52,7 @@ tail:
   audit_pointer: /tmp/x.jsonl
 EOF
 
-for e in security completeness stale trailblazer_alignment; do
+for e in security completeness stale; do
   result=$(run_evaluator "$e" "$TMP")
   score=$(printf '%s' "$result" | grep -oE '"score"[[:space:]]*:[[:space:]]*[0-9]+' | head -1 | grep -oE '[0-9]+')
   if [ -n "$score" ] && [ "$score" -ge 90 ]; then
@@ -125,38 +125,8 @@ else
   fail "completeness missed gap → score=$score (expected ≤80)"
 fi
 
-# ─── Scenario 4: Trailblazer voice with corporate cliché → low ──────────
-echo ""
-echo "[4] Trailblazer envelope with corporate cliché → trailblazer_alignment low"
-cat > "$TMP.tb" <<'EOF'
-head:
-  envelope_id: "01J-corp"
-  envelope_schema_version: "1"
-  kind: subagent_spawn
-  from: plan
-  to: ReviewerAgent
-  issued_at: "2026-05-29T15:00:00Z"
-  voice_tier: trailblazer
-body:
-  content_type: brief
-  content:
-    task: Let us delve into the crucial robust comprehensive review
-    constraints: [comprehensive]
-    acceptance: [robust]
-tail:
-  completeness_score: 0
-  evaluators_run: []
-  escape_hatches: []
-  audit_pointer: /tmp/x.jsonl
-EOF
-
-result=$(run_evaluator trailblazer_alignment "$TMP.tb")
-score=$(printf '%s' "$result" | grep -oE '"score"[[:space:]]*:[[:space:]]*[0-9]+' | head -1 | grep -oE '[0-9]+')
-if [ -n "$score" ] && [ "$score" -le 70 ]; then
-  pass "trailblazer_alignment caught cliché → score=$score"
-else
-  fail "trailblazer_alignment missed cliché → score=$score (expected ≤70)"
-fi
+# ─── Scenario 4 removed: trailblazer_alignment evaluator moved to an external
+#     pack (lintel-caip-pack) in the v4.7 CAIP extraction. The pack repo tests it. ───
 
 # ─── Scenario 5: envelope construction roundtrip ─────────────────────────
 echo ""

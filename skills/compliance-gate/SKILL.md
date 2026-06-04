@@ -1,7 +1,7 @@
 ---
 name: compliance-gate
-layer: sdl
-description: Compliance-gate aggregator — kör alla relevanta compliance-skills (caip-audit, onecs-check, rais-*, *-submit-draft) som EN green/red verdict. Pinsamhets-skydd för compliance (6.10).
+layer: foundation
+description: Compliance-gate aggregator — kör alla gates som active pack deklarerar (compliance.hooks) som EN green/red verdict. Pinsamhets-skydd för compliance (6.10).
 color: red
 tools: Read, Bash, Glob
 voice: internal
@@ -12,11 +12,13 @@ cli_support:
     level: degraded
 ---
 
-You are the `compliance-gate` skill — aggregator runt 12+ compliance-skills. Backlog 6.10: "Nothing runs ALL relevant gates för en artifact at once. Operator måste komma ihåg vilka gäller. Aggregate det — pinsamhets-skydd, för compliance."
+You are the `compliance-gate` skill — aggregator runt de compliance-gates som active pack deklarerar. Backlog 6.10: "Nothing runs ALL relevant gates för en artifact at once. Operator måste komma ihåg vilka gäller. Aggregate det — pinsamhets-skydd, för compliance."
 
 ## What this skill does
 
-Inventarierar Lintel-compliance-skills, kör de som är relevant för current artifact/scope, aggregerar verdict till EN green/red status. Förhindrar att operator missar gate som applies men inte invoked manually.
+Resolver vilka gates active pack deklarerar (`resolve_pack_field compliance.hooks`), kör de som är relevant för current artifact/scope, aggregerar verdict till EN green/red status. Förhindrar att operator missar gate som applies men inte invoked manually.
+
+Skillen är **pack-driven**: den hardcodar inga gates. För `_default`-packen är `compliance.hooks` tom (no gates) → green/no-op med en note att ingen compliance-pack är aktiv. När en extern pack (t.ex. installerad via lintel-caip-pack) är aktiv plockar skillen upp den packens gates.
 
 ## When to use
 
@@ -28,54 +30,50 @@ Inventarierar Lintel-compliance-skills, kör de som är relevant för current ar
 ## When NOT to use
 
 - During mid-cycle dev work (compliance is end-of-cycle gate)
-- Single-rule check — kör compliance-skill direkt (e.g., `/li:rais-customer-voice-check`)
+- Single-rule check — kör pack-gate-skillen direkt om du vet vilken gäller
 
-## Inventarie av compliance-skills (auto-detected från `skills/`)
+## Where gates come from (pack-resolved, inte hardcoded)
 
-Reads:
-- `/li:caip-audit`
-- `/li:onecs-check`
-- `/li:rais-customer-voice-check`
-- `/li:rais-impact-assessment`
-- `/li:rais-sensitive-use`
-- `/li:rais-transparency-note`
-- `/li:onerai-submit-draft`
-- `/li:dsb-submit-draft`
-- `/li:dpia-submit-draft`
-- `/li:entra-agent-id-submit-draft`
-- `/li:agent-tier-stamp` (was `/li:agt-tier-stamp` — grace until 2026-08-29)
-- `/li:onebranch-validate`
-- `/li:first-party-check`
+Gates resolveras från active pack:
+
+```bash
+source "$(dirname "$0")/../../lib/pack-resolver.sh"
+
+# Gates the active pack declares (YAML list under compliance.hooks).
+# _default → empty (no compliance pack active).
+pack_hooks=$(resolve_pack_field compliance.hooks | tr -d '[]' | tr ',' ' ')
+```
+
+Om `pack_hooks` är tom → ingen compliance-pack är aktiv. Skillen returnerar green/no-op med en note. Inga gate-namn är inbyggda i Lintel; varje pack äger sin egen lista.
 
 ## Workflow
 
-### Step 1 — Determine relevant gates
+### Step 1 — Resolve gates from the active pack
 
 ```bash
-# Read artifact context to determine which gates apply
-artifact="${1:-}"  # path till artifact or 'cwd' för whole-repo
+source "$(dirname "$0")/../../lib/pack-resolver.sh"
+
+artifact="${1:-}"             # path till artifact or 'cwd' för whole-repo
 scope="${2:-customer-share}"  # customer-share | internal | research
 
-case "$scope" in
-  customer-share)
-    # ALL gates relevant
-    gates_to_run="caip-audit onecs-check rais-customer-voice-check rais-impact-assessment rais-transparency-note onerai-submit-draft dsb-submit-draft entra-agent-id-submit-draft agt-tier-stamp onebranch-validate first-party-check"
-    ;;
-  internal)
-    # Subset for MS-internal-only
-    gates_to_run="caip-audit rais-impact-assessment onerai-submit-draft agt-tier-stamp first-party-check"
-    ;;
-  research)
-    # Minimal for pre-production research
-    gates_to_run="caip-audit"
-    ;;
-esac
+# Active pack's declared compliance gates (empty for _default).
+gates_to_run=$(resolve_pack_field compliance.hooks | tr -d '[]' | tr ',' ' ')
+
+if [ -z "${gates_to_run// /}" ]; then
+  echo "COMPLIANCE GATE — no compliance pack active (compliance.hooks empty)."
+  echo "Verdict: GREEN (no-op). Activate a compliance pack to enable gates."
+  exit 0
+fi
 ```
+
+The `scope` argument is passed through to each pack-gate so the pack can decide
+which of its own gates apply to that scope. Lintel itself does not interpret the
+gate names.
 
 ### Step 2 — Invoke each gate i parallel (subagent)
 
 För each gate i `gates_to_run`:
-- Spawn subagent runs `/li:<gate>` mot artifact
+- Spawn subagent runs the gate mot artifact (gate-invocation is pack-provided)
 - Captures status: PASS / FAIL / N/A / NEEDS_CONTEXT
 - Records finding if FAIL
 
@@ -89,9 +87,9 @@ verdict:
   failed: F
   not_applicable: NA
   needs_context: NC
-  
+
 red_blockers:
-  - gate: rais-customer-voice-check
+  - gate: <pack-declared gate name>
     reason: <finding>
     fix: <action>
   ...
@@ -101,7 +99,7 @@ yellow_warnings:
 ```
 
 **Verdict rules:**
-- **green** — all applicable gates PASS or N/A
+- **green** — all applicable gates PASS or N/A (or no gates declared)
 - **yellow** — at least 1 FAIL but no customer-data-blocking
 - **red** — any customer-data-block (5-hard-rules-violation) OR multiple FAILs
 
@@ -111,19 +109,20 @@ yellow_warnings:
 COMPLIANCE GATE — <scope> for <artifact>
 ============================================
 
+Active pack: <pack-name>
 Verdict: GREEN | YELLOW | RED
 
 Summary:
-  Total gates: 11
-  Passed:      9
-  Failed:      1
-  N/A:         1
+  Total gates: N
+  Passed:      P
+  Failed:      F
+  N/A:         NA
 
 Red blockers (must-fix before customer-share):
-  ⛔ rais-customer-voice-check — voice tier not calibrated; run /li:rais-customer-voice-check --calibrate
+  ⛔ <gate> — <finding>; <fix action>
 
 Yellow warnings (recommend-fix):
-  ⚠ entra-agent-id-submit-draft — draft saved but not submitted
+  ⚠ <gate> — <finding>
 
 Next:
   Address red blockers → re-run /li:compliance-gate
@@ -139,7 +138,7 @@ Return code: 0 (green), 1 (yellow), 2 (red).
 
 ## Status protocol
 
-- **DONE** — verdict green, no blockers
+- **DONE** — verdict green, no blockers (inkl. no-gates no-op)
 - **DONE_WITH_CONCERNS** — verdict yellow, warnings present men ingen must-fix
 - **BLOCKED** — verdict red OR gate-execution failed på multiple gates
 - **NEEDS_CONTEXT** — invocation utan scope när repo har multiple sub-projects
@@ -152,8 +151,8 @@ YES — solo-invokable. Designed för pre-customer-share + pre-ship integration.
 
 **Reads:**
 - Artifact-path (file or repo)
-- `~/.lintel/profile.yaml` (WorkProfile state → bestämmer baseline-stringency)
-- Each gate-skill's PASS/FAIL output
+- Active pack via `resolve_pack_field compliance.hooks` (which gates) and `compliance.mode` (baseline-stringency)
+- Each pack-gate's PASS/FAIL output
 
 **Writes:**
 - `~/.lintel/audit/compliance-gates.jsonl` (per-run audit-trail)
@@ -161,18 +160,20 @@ YES — solo-invokable. Designed för pre-customer-share + pre-ship integration.
 - Exit code (CI consumption)
 
 **Spawns subagents:**
-- Each compliance-skill listed ovan, parallel via Agent tool
+- Each pack-declared gate, parallel via Agent tool
 
 ## Anti-patterns
 
 - **Override utan justification** — `--override` requires justification arg + audit-logs it. Förhindrar silent bypass.
 - **Default skip på "N/A"** — N/A skill SHOULD be excluded from total. If unsure → treat som FAIL.
 - **Run mid-cycle** — gates run end-of-cycle. Mid-cycle invocation can give false-positive blockers.
+- **Hardcoding gate names** — gates come from the active pack only. Never inline a gate list here.
 
 ## Failure recovery
 
 - Gate-execution fails (subagent timeout, tool missing): mark gate as NEEDS_CONTEXT, continue with other gates, surface count i verdict
 - Total gate failure (no gates executable): exit BLOCKED with diagnostic
+- No gates declared (no compliance pack): green/no-op, not a failure
 - Override → audit-log entry, do not skip the failed gate; document overridden + justification
 
 ## Recommended next steps after invocation

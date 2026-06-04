@@ -7,41 +7,27 @@
 version: 1
 
 # Per-layer install controls.
-# Layers 1 + 2 are always enabled (foundation + compliance — required for any JStack repo).
-# Layers 3 + 4 default enabled but can be disabled per-operator.
+# The foundation layer is always enabled (required for any repo). Domain-specific
+# behavior comes from the active pack, not from extra scaffolding layers.
 layers:
   layer_1:
     enabled: true                   # required — install.sh refuses to disable
     install_path: ~/.jstack/scaffolding/01-foundation
-  layer_2:
-    enabled: true                   # required — install.sh refuses to disable
-    install_path: ~/.jstack/scaffolding/02-compliance
-  layer_3:
-    enabled: true                   # default true; can disable for pure-foundation use
-    install_path: ~/.jstack/scaffolding/03-personal-advanced
-  layer_4:
-    enabled: true                   # default true; files-on-disk but inert until symlinked
-    install_path: ~/.jstack/scaffolding/04-power-user
 
 # Compliance tier override.
-# Per Eng review session 2 A4: 5 always-on, 7 on-demand, 8 reference.
-# Operator can ELEVATE any reference rule to on-demand or always-on per project.
-# Operator CANNOT DISABLE any of the 5 always-on rules — install.sh refuses.
+# The active pack defines its own compliance gates (resolve_pack_field
+# compliance.hooks; none by default). The neutral defaults below are
+# pack-agnostic safety rules. Operator can ELEVATE any reference rule to
+# on-demand or always-on per project.
+# Operator CANNOT DISABLE the always-on rules — install.sh refuses.
 compliance:
-  always_on_rules:                  # the 5 — non-negotiable
+  always_on_rules:                  # non-negotiable
     - no_customer_data
     - no_secrets_in_prompts
     - no_production_mutation_without_auth
-    - ms_sso_zero_retention
-    - first_party_first
-  on_demand_rules:                  # the 7 — surfaced via /compliance-check
-    - onerai_registration
+  on_demand_rules:                  # surfaced via the active pack's compliance gates
     - threat_model
-    - dpia
-    - transparency_doc
-    - sensitive_use_report
     - sast_in_pipeline
-    - entra_agent_id
   # elevations: list reference rule names here to promote them to always-on for this repo
   elevate_to_always_on: []
 
@@ -58,14 +44,12 @@ watchers:
     warn_threshold: 80              # tool calls per session
     escalate_threshold: 130
 
-# Voice tier defaults (per Layer 3 voice mechanism).
-# Operator can override the default per-skill via the skill's own frontmatter.
+# Voice tier defaults.
+# The active pack supplies its own voice tier (resolve_pack_field
+# voice.default_tier; neutral default: internal). Operator can override the
+# default per-skill via the skill's own frontmatter.
 voice:
   default_tier: internal            # safe default — direct, builder-talking-to-builder
-  trailblazer_required_for:         # output bound for these surfaces MUST use trailblazer
-    - customer-facing
-    - official-communication
-    - sales-bound
 
 # Upstream sources (clone-time pins).
 # upstream-sources.yaml carries the actual pin SHAs.

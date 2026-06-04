@@ -18,15 +18,15 @@ Do NOT re-state the rules inline here. They live in CORE-PRINCIPLES.md and chang
 
 ### 2. Run the compliance checklist
 
-**Layer 2 — `scaffolding/02-sdl/SESSION-START-CHECK.md`** — the 5-step checklist. Authoritative.
+**Compliance — pack-driven.** The active pack declares its compliance posture (`resolve_pack_field compliance.mode|compliance.hooks`). The neutral `_default` pack enforces only the baseline below; a company pack (e.g. lintel-caip-pack) adds tiered gates.
 
-A clean five-OK pass is the floor for any non-trivial action. Trivial actions (typo fix, doc edit, question) can skip. The five steps:
+A clean pass on the neutral baseline is the floor for any non-trivial action. Trivial actions (typo fix, doc edit, question) can skip. The baseline steps:
 
 1. Authority scope
 2. Customer-data check
 3. Production-mutation check
 4. Secrets check
-5. Hard-rule check (see `scaffolding/02-sdl/HARD-RULES.md` for the 5 always-on rules)
+5. The active pack's compliance gates (none in `_default`)
 
 This is an operator-confirmed checklist, NOT automated enforcement. The harness surfaces the items; the operator confirms.
 
@@ -52,38 +52,39 @@ Long-running state. Operator profile, project context, feedback patterns, extern
 
 ### 7. Agent selection precedence
 
-**Layer 3 — `scaffolding/03-ms-team/precedence/README.md`** — 5-level precedence model:
+5-level agent-selection precedence:
 
 1. Operator pin (named in prompt)
 2. Repo-level override (`.claude/agents/<Name>.md`)
-3. Promoted list (`scaffolding/03-ms-team/promoted-agents.md`, tier-stamped)
+3. Pack-promoted agents (from the active pack, if any)
 4. User-global (`~/.claude/agents/`)
 5. Fallback (main agent, no delegation)
 
-This precedence is enforced by skill instructions in v1 — no runtime policy engine. Agents reading this file follow the rule.
+This precedence is enforced by skill instructions — no runtime policy engine. Agents reading this file follow the rule.
 
 ---
 
 ## Layer index
 
-| Layer | Path | Change rate | When to read |
+| Source | Path | Change rate | When to read |
 |---|---|---|---|
-| 1 Foundation | `scaffolding/01-foundation/` | Stable (EVOLUTION.md process) | Every session-start |
-| 2 Compliance | `scaffolding/02-sdl/` | MS-policy-driven (quarterly) | Every session-start (checklist) + on-demand (`/compliance-check`) |
-| 3 Personal advanced | `scaffolding/03-ms-team/` | Opinionated (team PR) | When delegating to subagents OR when output is customer-facing |
-| 4 Power user | `scaffolding/04-power-user/` | Experimental (free adaptation) | Only when task explicitly invokes a Layer 4 pattern |
+| Foundation | `scaffolding/01-foundation/` | Stable (EVOLUTION.md process) | Every session-start |
+| Active pack | `packs/<name>/pack.yaml` (resolved) | Pack-driven | Every session-start (compliance + voice + persona) |
+| Neutral baseline | `packs/_default/pack.yaml` | Stable | Fallback when no company pack is active |
 
 Full architecture rationale in [`LAYERS.md`](LAYERS.md).
 
 ---
 
-## Voice tier (Layer 3)
+## Voice tier (pack-driven)
 
-If this session involves an agent generating customer-facing or official-communication content: the agent declares `voice: trailblazer` in its frontmatter, and output is checked via `/rais-customer-voice-check` against the 12-cell Microsoft Our Voice grid.
+Voice is supplied by the active pack. The neutral `_default` pack uses `voice: internal` and enforces nothing. A company pack may declare a customer-facing tier and a calibrated voice corpus.
 
-If the session is internal dev work (code review, planning, tests, install): `voice: internal` — direct, builder-talking-to-builder, no Trailblazer overhead.
+If this session generates customer-facing or official-communication content: the agent declares its voice tier in frontmatter, and output is checked against the active pack's voice gates (`resolve_pack_field voice.gates_active`; none by default) and voice corpus (`resolve_pack_field voice.corpus`).
 
-Voice tier is the per-agent honest split between marketing voice (for customers) and engineering voice (for the team). See `scaffolding/03-ms-team/voice/README.md`.
+If the session is internal dev work (code review, planning, tests, install): `voice: internal` — direct, builder-talking-to-builder.
+
+Voice tier is the per-agent honest split between external voice (for customers) and engineering voice (for the team). The Microsoft CAIP-SE Trailblazer corpus ships in the lintel-caip-pack example.
 
 ---
 
@@ -184,7 +185,7 @@ For non-trivial work, the Lintel cycle provides an explicit 8-phase pipeline. Ea
 - Cost-estimate gate before BUILD (token-heavy phase)
 - Founder approval gate at end of PLAN (MANDATORY pause)
 - 3-stage review in REVIEW (spec compliance → quality → compliance)
-- HARD-RULES hard-stop in SHIP (if WorkProfile=on)
+- Compliance hard-stop in SHIP (if the active pack's compliance mode is `hard`)
 - Two-stage subagent review per BUILD task (spec then quality)
 
 See [docs/design/lintel-v3.5-cycle-and-roles.md](docs/design/lintel-v3.5-cycle-and-roles.md) for the full cycle specification.
@@ -202,10 +203,7 @@ Expert personas as lightweight session context layers. Voice + outcome-lens + de
 **Deep-dive on-demand (~2-3k tokens):**
 - `/li:role-deep-dive <role-id>` — load full role-file (COLD KNOWLEDGE, DECISION CRITERIA, INSIGHTS)
 
-**Default public roles shipped:**
-- `roles/field-cto.md` — customer-facing, sales-tech, trailblazer voice
-- `roles/solution-architect.md` — enterprise IT, security-conscious, mixed voice
-- `roles/engineering-manager.md` — process, team coordination, internal voice
+**Roles load from the active pack** (`resolve_pack_field roles.source`; none in `_default`). A company pack supplies its own role set — e.g. the lintel-caip-pack example ships `field-cto`, `solution-architect`, `engineering-manager`.
 
 **Private roles:** Operator can scaffold custom roles via `/li:role-new`. Private roles store at `~/.lintel/roles/private/` (gitignored). Sync via `bin/li-roles-sync` to operator's private repo (never team-wide, never public marketplace).
 
@@ -222,7 +220,7 @@ On-demand 1M-context utilization beyond session-start. Default session-start sta
 - `/li:context-warm-sessions [N]` — load last N session saves on branch
 - `/li:context-warm-adrs <topic>` — load topic-relevant ADRs
 - `/li:context-warm-customer <engagement>` — customer-repo state (audit-logged)
-- `/li:context-warm-from-url <url>` — WebFetch + dump (WorkProfile URL gate)
+- `/li:context-warm-from-url <url>` — WebFetch + dump (URL gate when pack compliance mode is `hard`)
 - `/li:context-budget` — utilization visibility
 - `/li:context-snapshot [name]` — operator-named mid-session save
 - `/li:context-dump <session-id>` — load specific prior session save
@@ -232,31 +230,27 @@ For >20k token loads: explicit budget confirmation required.
 
 ---
 
-## WorkProfile (v3.5)
+## Compliance mode (pack-driven)
 
-Env-level toggle in `~/.lintel/profile.yaml`. Default at first run: operator prompted to choose.
+Compliance posture is declared by the active pack (`resolve_pack_field compliance.mode`), not a separate env toggle. The neutral `_default` pack is `advisory`. A company pack can set `hard`.
 
-**When ON:**
-- HARD-RULES.md 5 always-on rules ENFORCED (not advisory)
-- MS SSO required for any external auth in scripts
-- voice_tier_default: trailblazer (overrides mode default if customer-facing)
-- first-party-first auto-flagged in plan
-- voice gate auto-runs on audience=customer
-- provenance-track auto-runs on AI-assisted artifacts
+**When the active pack is `hard`:**
+- The pack's compliance gates (`compliance.hooks`) are ENFORCED (not advisory)
+- The pack's voice tier auto-applies on customer-facing output
 - Customer-repo loads + URL fetches audit-logged
 
-**When OFF:**
-- Hard-rules advisory only
-- voice_tier_default: internal
+**When `advisory` (default):**
+- Compliance hooks are advisory only
+- `voice.default_tier`: internal
 - Operator-driven gates only
+
+The lintel-caip-pack example sets `hard` mode with the Microsoft CAIP-SE ruleset (SSO policy, first-party preference, RAIS/OneCS/SDL gates, Trailblazer voice).
 
 **Profile fields:**
 ```yaml
-workprofile: on | off
-azure_focus: on | off
+active_pack: <name> | _default
 role_active: <id> | null
-voice_tier_default: internal | trailblazer | mixed
-default_mode: customer-engagement | internal-tool | hotfix | demo-prep | research-dive
+default_mode: internal-tool | hotfix | research-dive | meta-infra   # plus pack-contributed modes
 checkpoint_mode: explicit | continuous
 context_warmup_default: minimal | standard | aggressive
 proactive: true | false

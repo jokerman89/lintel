@@ -4,10 +4,10 @@ Auto-generated från frontmatter på push till main.
 Regenerated av `.github/workflows/catalog.yml` per push när `skills/**/SKILL.md` ändras.
 Hand-edits skrivs över — edit frontmatter i source SKILL.md istället.
 
-Total skills: 194
-Generated: 2026-06-03T18:54:35Z
+Total skills: 167
+Generated: 2026-06-04T00:00:00Z
 
-## foundation layer (147 skills)
+## foundation layer (167 skills)
 
 | Skill | Description |
 |---|---|
@@ -26,7 +26,9 @@ Generated: 2026-06-03T18:54:35Z
 | `/li:review` | Diff-scoped pre-landing code review. Lighter than /plan-eng-review, focused on changed code only. |
 | `/li:code-unfreeze` | Remove a path from session freeze — other skills can write to it again. |
 | `/li:codex` | Outside-voice second opinion via Codex CLI. Independent review of diff, plan, or hypothesis. |
+| `/li:compliance-gate` | Compliance-gate aggregator — kör alla gates som active pack deklarerar (compliance.hooks) som EN green/red verdict. P |
 | `/li:context-budget` | Show current context utilization, recommend warm/cool, surface budget breakdown by source. |
+| `/li:context-budgetwatch` | Manual context-bloat check — token + tool-call thresholds, recommendation to /clean or /context-save. |
 | `/li:context-cool` | Selectively drop context from session — free budget for further warming. Operator picks what to keep. |
 | `/li:context-dump` | Read prior session's context-save output and inject into current session. Cross-session memory recovery. |
 | `/li:context-restore` | Restore session state from a checkpoint file. Run at start of a fresh session that continues prior work. |
@@ -34,7 +36,7 @@ Generated: 2026-06-03T18:54:35Z
 | `/li:context-snapshot` | Save current context state to disk — operator-named snapshot for later resume via /li:context-dump. |
 | `/li:context-warm-adrs` | Load topic-relevant ADRs into context — design constraints + prior decisions surfaced for current work. |
 | `/li:context-warm-customer` | Load customer-engagement repo state into context — customer's Bicep, their CLAUDE.md, their ADRs, recent commits. |
-| `/li:context-warm-from-url` | Fetch URL + dump into context. Useful for loading Microsoft Learn docs, blog posts, external references on-demand. |
+| `/li:context-warm-from-url` | Fetch URL + dump into context. Useful for loading documentation, blog posts, external references on-demand. |
 | `/li:context-warm-related` | Heuristic context warm — search codebase for files related to a topic, load top N most-relevant. |
 | `/li:context-warm-sessions` | Load last N session saves on current branch — cross-session continuity for resumed work. |
 | `/li:context-warm` | Load specified files into session context — on-demand 1M-window utilization. Reports tokens added + budget impact. Bas |
@@ -65,10 +67,30 @@ Generated: 2026-06-03T18:54:35Z
 | `/li:discover` | Phase 3 of Lintel cycle — map codebase, surface ADRs, apply lessons, identify reusable patterns + agents/skills releva |
 | `/li:doctor` | Cross-CLI health check — verifies which CLIs are installed, plugin install status, Lintel version, and surfaces drift. |
 | `/li:document-generate` | Generate documentation from code — engineering reference, customer guides, or onboarding tutorials. |
+| `/li:eval` | Run the active pack's voice TEST against its voice CORPUS — per-cell accuracy → CALIBRATION.md. |
 | `/li:fix` | Composite shortcut for hotfix workflow — runs SENSE + BUILD + REVIEW + SHIP, skipping DEFINE/DISCOVER/PLAN/CAPTURE. Fo |
+| `/li:frontend-design-review` | Quality gate för produced frontend designs. 6-dimension audit (typography hierarchy + motion coherence + shader perf-bu |
+| `/li:frontend-design` | Frontend design-director orchestrator. Chains typography + motion (+ shader in Fas A2) → frontend-design-spec.json → |
+| `/li:frontend-motion` | Frontend design-director sub-skill — picks motion-language (GSAP/Lenis/Theatre/Rive/Motion-One) + scroll-trigger-confi |
+| `/li:frontend-shader` | Frontend design-director sub-skill — picks shader library (Paper Shaders / OGL / react-three-fiber / Lygia) + visual t |
+| `/li:frontend-style-extract` | Pattern-level extraction sister till generate-style-learn. Reads artifacts (URLs, screenshots, .tsx files) → extracts  |
+| `/li:frontend-typography` | Frontend design-director sub-skill — picks font-family-stacks + variable-axes-config + size-scale + line-heights + fon |
 | `/li:full-engineering-pass` | v4.6 (v4.x feature-complete) — composes all 5 engineering-domain modules in DAG order (TA → DA‖SC → DH → TQ).  |
 | `/li:gbrain-setup` | Configure gbrain semantic-index integration — initialize config, pin worktree, register sync. |
 | `/li:gbrain-sync` | Refresh the gbrain index from the current worktree — incremental or full. |
+| `/li:generate-app` | Full-app scaffold-orchestrator. Reads frontend-design-spec.json + generates vite-react/next-app/svelte-kit project skele |
+| `/li:generate-design` | Produce design-spec.json (per-format layout-mappings + palette + fonts + asset placements) from content.md. Shared conte |
+| `/li:generate-outline` | Produce outline.md (structured presentation/document skeleton) from a brief. Shared content-pipeline sub-skill, solo-inv |
+| `/li:generate-pdf` | ⚠ TEMPLATE ONLY — Slot for PDF document generation. Content not curated. AI generates fresh at invocation per L-001. |
+| `/li:generate-ppt` | Produce brand-compliant PowerPoint deck via pptx-genjs, 4-gate quality pipeline. |
+| `/li:generate-qa` | Validate generated artifacts (any format) against brand, voice, readability, and structure standards. Auto-fixes where p |
+| `/li:generate-style-learn` | Analysera .pptx/.docx/web-examples och extrahera reusable style palette. v3.5 Fas 3 av doc-generation-pipeline. |
+| `/li:generate-visio` | ⚠ TEMPLATE ONLY — Slot for Visio diagram generation (architecture sketches, network topologies, process flows). Cont |
+| `/li:generate-web` | Produce brand-compliant static HTML or Next.js scaffold for demo/landing page. |
+| `/li:generate-word` | Produce brand-compliant Word doc via docx-templater — technical / customer-summary / transparency-note variants. |
+| `/li:generate-write` | Produce content.md (slide/section bodies + bullets + titles) and speaker-notes.md from outline.md. Applies voice corpus. |
+| `/li:generate-xlsx` | ⚠ TEMPLATE ONLY — Slot for Excel spreadsheet generation (data + estimates + tables). Content not curated. AI generat |
+| `/li:generate` | Multi-format document generation orchestrator. Chains shared content pipeline (outline → write → design → qa) + pe |
 | `/li:handoff-size-check` | Handoff-size-warning tied to 500k cap. Per v3.6 backlog 3.2 — elephant-hint och token-cap som samma mekanism från tv� |
 | `/li:health` | Lintel install + upstream status check. Verifies layers, manifest, hooks, upstream pins, CLI shims. |
 | `/li:help` | List installed Lintel skills + agents + hooks. Filter by category, voice tier, or CLI support. |
@@ -99,19 +121,17 @@ Generated: 2026-06-03T18:54:35Z
 | `/li:plan-ceo-review` | Strategy + scope review. Surface product/business assumptions before architecture lands. |
 | `/li:plan-design-review` | UI/UX gaps review for plans with a frontend surface. Skip for backend/infra/CLI-only work. |
 | `/li:plan-devex-review` | Developer experience gaps review. Slow CI, painful deploys, bad local dev, attrition signals. |
-| `/li:plan-eng-review` | Architecture + tests review. The required gate before /release-ev2. Covers arch, code quality, test coverage, performanc |
+| `/li:plan-eng-review` | Architecture + tests review. The required gate before ship. Covers arch, code quality, test coverage, performance. |
 | `/li:plan-tune` | Adjust which AskUserQuestion prompts auto-decide vs ask. Per-question preference tuning. |
 | `/li:plan` | Phase 4 of Lintel cycle, ALSO callable standalone as a planner module (v3.8 Feature 2). Produces the cold-executor trio  |
 | `/li:profile-switch` | Toggle Lintel install on/off fast + swap till previous setup utan att röra repot. Operator-request 5.2. |
 | `/li:qa-only` | Read-only test run — reports failures, never edits. For ship-gate verification. |
 | `/li:qa` | Run the full test suite, parse failures, fix common ones, re-run until clean or stuck. |
-| `/li:release-deploy-ev2` | /release-ev2 + deploy. Adds post-merge deploy trigger. Requires explicit per-call auth. |
-| `/li:release-ev2` | Land the current branch — verifies review readiness, squashes WIP commits, opens PR. |
 | `/li:research` | Composite shortcut for research-dive — runs SENSE + DEFINE + DISCOVER, no BUILD/SHIP. For "understand before commit" m |
 | `/li:resume` | Resume Lintel cycle from prior session — reads 00-state.md, picks up at next-recommended phase or operator-specified.  |
 | `/li:retro` | Session retrospective — what shipped, what got stuck, what to /learn from. |
 | `/li:review-and-ship` | Composite shortcut REVIEW + SHIP + CAPTURE — for when BUILD is done and operator wants to finalize, ship, capture in o |
-| `/li:review` | Phase 6 of Lintel cycle — adversarial review of BUILD output across 3 stages (spec compliance, code quality, complianc |
+| `/li:review` | Phase 6 of Lintel cycle — adversarial review of BUILD output across 3 stages (spec compliance, code quality, the activ |
 | `/li:role-activate` | Activate a role for the current session — loads role IDENTITY + voice + outcome-lens (LIGHTWEIGHT ~500 tokens). Deep-d |
 | `/li:role-deactivate` | Remove active role from session — clears overlay, voice tier reverts to mode/profile default. |
 | `/li:role-deep-dive` | Load full role-file content on-demand — COLD KNOWLEDGE, DECISION CRITERIA, INSIGHTS, OUTCOME LENS per phase. For when  |
@@ -120,7 +140,6 @@ Generated: 2026-06-03T18:54:35Z
 | `/li:role-rotate` | Swap active role mid-session — deactivate current, activate new. Preserves session memory but shifts overlay. |
 | `/li:role-update` | Add learning to existing role file (sensitivity-aware) — captures new INSIGHT, refines voice phrasing, updates COLD KN |
 | `/li:roles-list` | List all available roles (public + private, if accessible). Shows id, display name, scope, sensitivity, last-updated. |
-| `/li:safe-deploy-ring` | Gate a deployed feature behind a percentage rollout — ramp up, monitor, abort safe. |
 | `/li:safe-install` | Safe-install wrapper för Lintel — version-before-every-change + uninstall-with-restore + visible-announce backup. Ope |
 | `/li:sc-audit-path` | SC sub-skill — audit log design with retention + integrity. Dispatches to SecurityAuditor + Architect agents. |
 | `/li:sc-auth-flow` | SC sub-skill — auth design with security review verdict. Dispatches to JWTSecurityReviewer + SecurityAuditor agents. |
@@ -130,12 +149,13 @@ Generated: 2026-06-03T18:54:35Z
 | `/li:sc-secret-management` | SC sub-skill — secret inventory + rotation policy + secret-scan integration. Dispatches to SecurityAuditor + SBOMAudit |
 | `/li:sc-threat-model` | SC sub-skill — STRIDE / attack-tree threat enumeration with mitigations. Dispatches to ThreatModelDrafter + SecurityAu |
 | `/li:sc` | Phase 4 v4.3 — security-compliance module. Three granularities (full / loop / single). Sub-skills dispatch to existing |
+| `/li:scaffold-internal-tool` | Initialize an internal-tooling repo — CI, README, pack compliance hooks, no customer surface. |
+| `/li:scaffold-mvp` | Initialize a product-MVP repo — full structure + pack-driven compliance/voice/deploy wiring. |
 | `/li:scaffold` | Scaffold a new repo with Lintel base templates — CLAUDE.md, tasks/lessons.md, EVOLUTION-LOG, docs/adr/ — interactive |
 | `/li:scrape` | Extract structured data from one or more pages — declarative selector schema, JSON output. |
-| `/li:sense` | Phase 1 of Lintel cycle — auto-detect operator intent, WorkProfile state, active role, mode recommendation, 00-state f |
+| `/li:sense` | Phase 1 of Lintel cycle — auto-detect operator intent, pack compliance mode, active role, mode recommendation, 00-stat |
 | `/li:setup-browser-cookies` | Bootstrap auth cookies for the managed Chromium profile — operator-driven, one-time per service. |
-| `/li:setup-ev2-targets` | Configure deploy targets for /release-deploy-ev2 — write targets, validate, register. |
-| `/li:ship` | Phase 7 of Lintel cycle — PR / deploy / customer handoff. Final compliance hard-stops. Voice + brand + honest-limitati |
+| `/li:ship` | Phase 7 of Lintel cycle — PR / deploy / customer handoff. Final compliance hard-stops (the active pack's gates; none b |
 | `/li:skill-router` | Semantic skill router — given free-text user intent, suggests top 3 matching Lintel skills with rationale. |
 | `/li:skillify` | Turn a recurring task or pattern into a new Lintel skill — scaffolds SKILL.md from TEMPLATE. |
 | `/li:status` | Show what's open right now — alias for /li:jobs list. Single command for "where am I in flight?". |
@@ -158,61 +178,4 @@ Generated: 2026-06-03T18:54:35Z
 | `/li:uniformity` | Read-only uniformity-contract dashboard — runs the Gate-M3 floor shape-test and points at the regenerable coverage mat |
 | `/li:usage-log` | Append-only usage log för skill/agent-invocations. Wrapper-pattern per L-001 (en log, ingen per-skill duplikat). Solo-i |
 | `/li:v4-migrate` | Walks operator through v3.x → v4.0 migration — detects v3.x usage signals, recommends pack activation, optionally wr |
-
-## ms-team layer (46 skills)
-
-| Skill | Description |
-|---|---|
-| `/li:agent-tier-stamp` | Stamp agents with license tier (permissive/restricted) — enforces 5-level precedence model. |
-| `/li:asset-search` | Search ~/.lintel/brand/azure-assets/ for the right icon or diagram primitive. |
-| `/li:az-discover-presale` | ⚠ TEMPLATE ONLY — Presale Azure discovery skill (operator-request 5.4 REPLACED per L-001). Scaffolding-slot, content |
-| `/li:az-tldr` | Comprehensive on-demand rundown of an Azure service — 15 sections covering what/why/how/pitfalls/customer-questions/co |
-| `/li:brand-update` | Pull/register MS brand assets to ~/.lintel/brand/ — version tracking, cache invalidation. |
-| `/li:caip-audit` | CAIP-SE-specific readiness audit — engagement state, compliance, voice, deliverables. |
-| `/li:cloudtest-eval-suite` | Generate an evaluation suite skeleton for an AI feature — golden set, adversarial set, rubric. |
-| `/li:context-budgetwatch` | Manual context-bloat check — token + tool-call thresholds, recommendation to /clean or /context-save. |
-| `/li:demo-deliverable-gen` | Generate customer-facing demo deliverables — script, handout, follow-up email — trailblazer-voiced. |
-| `/li:dpia-submit-draft` | Prepare a Data Protection Impact Assessment draft — GDPR Article 35, MS Privacy framework. |
-| `/li:dsb-submit-draft` | Prepare a Data Sharing Board submission draft — recipients, purpose, data class, retention. |
-| `/li:entra-agent-id-submit-draft` | Prepare a Microsoft Entra Agent ID submission — identity, capabilities, governance scope. |
-| `/li:eval` | Run TRAILBLAZER-TEST against TRAILBLAZER-CORPUS — per-cell accuracy → CALIBRATION.md. |
-| `/li:first-party-check` | Scan for non-first-party dependencies and surface MS alternatives — "first-party first" enforcement. |
-| `/li:frontend-design-review` | Quality gate för produced frontend designs. 6-dimension audit (typography hierarchy + motion coherence + shader perf-bu |
-| `/li:frontend-design` | Frontend design-director orchestrator. Chains typography + motion (+ shader in Fas A2) → frontend-design-spec.json → |
-| `/li:frontend-motion` | Frontend design-director sub-skill — picks motion-language (GSAP/Lenis/Theatre/Rive/Motion-One) + scroll-trigger-confi |
-| `/li:frontend-shader` | Frontend design-director sub-skill — picks shader library (Paper Shaders / OGL / react-three-fiber / Lygia) + visual t |
-| `/li:frontend-style-extract` | Pattern-level extraction sister till generate-style-learn. Reads artifacts (URLs, screenshots, .tsx files) → extracts  |
-| `/li:frontend-typography` | Frontend design-director sub-skill — picks font-family-stacks + variable-axes-config + size-scale + line-heights + fon |
-| `/li:generate-app` | Full-app scaffold-orchestrator. Reads frontend-design-spec.json + generates vite-react/next-app/svelte-kit project skele |
-| `/li:generate-design` | Produce design-spec.json (per-format layout-mappings + palette + fonts + asset placements) from content.md. Shared conte |
-| `/li:generate-outline` | Produce outline.md (structured presentation/document skeleton) from a brief. Shared content-pipeline sub-skill, solo-inv |
-| `/li:generate-pdf` | ⚠ TEMPLATE ONLY — Slot for PDF document generation. Content not curated. AI generates fresh at invocation per L-001. |
-| `/li:generate-ppt` | Produce brand-compliant PowerPoint deck via pptx-genjs, 4-gate quality pipeline. |
-| `/li:generate-qa` | Validate generated artifacts (any format) against brand, voice, readability, and structure standards. Auto-fixes where p |
-| `/li:generate-style-learn` | Analysera .pptx/.docx/web-examples och extrahera reusable style palette. v3.5 Fas 3 av doc-generation-pipeline. |
-| `/li:generate-visio` | ⚠ TEMPLATE ONLY — Slot for Visio diagram generation (architecture sketches, network topologies, process flows). Cont |
-| `/li:generate-web` | Produce brand-compliant static HTML or Next.js scaffold for demo/landing page. |
-| `/li:generate-word` | Produce brand-compliant Word doc via docx-templater — technical / customer-summary / transparency-note variants. |
-| `/li:generate-write` | Produce content.md (slide/section bodies + bullets + titles) and speaker-notes.md from outline.md. Applies voice corpus. |
-| `/li:generate-xlsx` | ⚠ TEMPLATE ONLY — Slot for Excel spreadsheet generation (data + estimates + tables). Content not curated. AI generat |
-| `/li:generate` | Multi-format document generation orchestrator. Chains shared content pipeline (outline → write → design → qa) + pe |
-| `/li:msvoice-rewrite` | Rewrite internal-voice content into Microsoft Our Voice (Trailblazer) — 12-cell aware. |
-| `/li:onebranch-validate` | Cross-CLI verification — run a smoke matrix across claude-code/codex/copilot per skill cli_support. |
-| `/li:onecs-check` | Run the 7 on-demand MS compliance checklist items on-request (vs the 5 always-on auto). |
-| `/li:onerai-submit-draft` | Prepare a One RAI submission draft — checklist, capability/limitation, mitigation plan. |
-| `/li:provenance-track` | Track artifact provenance — source, transforms, voice tier, calibration state, distribution path. |
-| `/li:rais-customer-voice-check` | Gate customer-facing artifacts through 12-cell Trailblazer eval before distribution. |
-| `/li:rais-impact-assessment` | Generate an RAI Impact Assessment — fairness, reliability, privacy, inclusiveness, transparency, accountability. |
-| `/li:rais-sensitive-use` | Classify an AI feature against MS Sensitive Uses categories — produces structured report. |
-| `/li:rais-transparency-note` | Generate transparency note for an AI feature — capabilities, limitations, data, disclosure. |
-| `/li:scaffold-engagement-demo` | Initialize a customer-demo repo — sample data, script, slides, recording config, voice gates. |
-| `/li:scaffold-internal-tool` | Initialize an internal-tooling repo — CI, README, MS compliance hooks, no customer surface. |
-| `/li:scaffold-mvp` | Initialize a product-MVP repo — full compliance + voice + RAI + deploy wiring. |
-| `/li:security-genomlysning` | ⚠ TEMPLATE ONLY — Security + risk genomlysning (operator-request 5.5 REPLACED per L-001). Scaffolding-slot, posture- |
-
-## sdl layer (1 skills)
-
-| Skill | Description |
-|---|---|
-| `/li:compliance-gate` | Compliance-gate aggregator — kör alla relevanta compliance-skills (caip-audit, onecs-check, rais-*, *-submit-draft) s |
 

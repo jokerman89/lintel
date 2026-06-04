@@ -1,6 +1,6 @@
 ---
 name: frontend-design
-layer: ms-team
+layer: foundation
 description: Frontend design-director orchestrator. Chains typography + motion (+ shader in Fas A2) → frontend-design-spec.json → calls generate-web/generate-app for rendering. Design-director-layer per v3.7 family-separation.
 color: orange
 tools: Read, Write, Bash, Glob
@@ -64,7 +64,7 @@ out_dir="${OUT:-$HOME/.lintel/frontend-runs/$(date +%Y%m%d-%H%M%S)-${RANDOM}}"
 mkdir -p "$out_dir"
 ```
 
-Voice-tier resolution: default `internal`. If `--customer-share` → call `/li:rais-customer-voice-check` first (existing skill). Per L-001-discipline: skill body bevarar contract, agent at invocation produces actual content.
+Voice-tier resolution: default `internal`. If `--customer-share` → run the active pack's voice gate (`resolve_pack_field compliance.hooks`; none by default) first. Per L-001-discipline: skill body bevarar contract, agent at invocation produces actual content.
 
 ### Step 2-4 — Parallel sub-skill dispatch (M-4 resolution)
 
@@ -158,7 +158,7 @@ Next:
 
 ## Voice tier behavior
 
-`voice: mixed`. Default `internal`. `--customer-share` triggers compliance-gate + voice-gate via existing `/li:rais-customer-voice-check`-skill.
+`voice: mixed`. Default `internal`. `--customer-share` triggers the active pack's compliance-gate + voice-gate (`resolve_pack_field compliance.hooks`; none by default).
 
 ## Status protocol
 
@@ -194,7 +194,7 @@ YES — solo-invocable. Designed för auto-invocation från `/li:cycle` BUILD-ph
 - `/li:frontend-typography` (sub-skill, parallel)
 - `/li:frontend-motion` (sub-skill, parallel)
 - `/li:generate-web --from-frontend-design <run-dir>` (Fas B)
-- `/li:rais-customer-voice-check` (existing voice-gate, om customer-share)
+- the active pack's voice gate (`resolve_pack_field compliance.hooks`; none by default — om customer-share)
 - `/li:compliance-gate` (existing, om customer-share)
 
 **Boundary med generate-* family:**

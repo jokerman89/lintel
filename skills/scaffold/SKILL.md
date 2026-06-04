@@ -14,7 +14,7 @@ You are the li-scaffold skill.
 
 Sets up a new repo (or initializes scaffolding in existing repo) with Lintel's Kategori B templates: CLAUDE.md (from template + repo-specific variables), CORE-PRINCIPLES.md, EVOLUTION.md, EVOLUTION-LOG.md, tasks/{lessons,memory,personas,todo}.md, docs/adr/{README,TEMPLATE}.md, .claude/agents/, TEMPLATE-skill.md.
 
-This is how new MS engagement repos get Lintel defaults inside 30 seconds.
+This is how new repos get Lintel defaults inside 30 seconds.
 
 ## When to use
 
@@ -25,7 +25,7 @@ This is how new MS engagement repos get Lintel defaults inside 30 seconds.
 ## When NOT to use
 
 - Repo already has CLAUDE.md (warn before overwrite)
-- Non-MS-engagement (outside scope; recommend lighter setup)
+- Scratch / throwaway repo (outside scope; recommend lighter setup)
 
 ## Workflow
 
@@ -43,10 +43,10 @@ This is how new MS engagement repos get Lintel defaults inside 30 seconds.
 
 4. **Gather repo-specific variables (AskUserQuestion):**
    - Repo name
-   - MS team
+   - Team / owner
    - Engagement type (customer-engagement / internal-tool / mvp / research)
-   - Default voice tier (internal / trailblazer / mixed)
-   - Compliance level (full-SDL / standard / minimal)
+   - Default voice tier (resolved from the active pack — `internal` by default)
+   - Compliance level (resolved from the active pack — `advisory` by default)
    - GitHub URL (if known)
 
 5. **Render CLAUDE.md from template.** Substitute variables. Result: project-specific CLAUDE.md.
@@ -72,7 +72,7 @@ This is how new MS engagement repos get Lintel defaults inside 30 seconds.
    git commit -m "chore: scaffold Lintel base via li-scaffold"
    ```
 
-8. **Add compliance template (optional).** If full-SDL compliance level chosen, copy `scaffolding/02-sdl/*` too.
+8. **Add compliance template (optional).** If the active pack ships compliance scaffolding (`resolve_pack_field compliance.hooks` non-empty), apply the pack's compliance templates too. The `_default` pack ships none.
 
 9. **Report.** Files created + next steps.
 
@@ -99,8 +99,8 @@ Files created:
 - ✓ .claude/SUBAGENT-GUIDE.md
 - ✓ TEMPLATE-skill.md, TEMPLATE-agent.md
 
-If full-SDL chosen:
-- ✓ scaffolding/02-sdl/* compliance docs
+If the active pack ships compliance scaffolding:
+- ✓ pack-provided compliance docs (none in _default)
 
 Commit: <SHA>
 

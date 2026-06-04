@@ -20,7 +20,7 @@ You are the `catalog` skill — auto-generates `skills/CATALOG.md` från frontma
 
 Outputs:
 - `skills/CATALOG.md` (commit:ad, läses av operator OCH framtida skills som vill se "all available")
-- Organiserad per `layer:` (foundation / ms-team / sdl / ...) sen alfabetiskt
+- Organiserad per `layer:` (foundation / personal-advanced / ...) sen alfabetiskt
 
 Pairs med `/li:usage-log --report` för usage-overlay (trending vs cold).
 
@@ -52,7 +52,7 @@ done | sort
 
 ### Step 2 — Group by layer
 
-Order: foundation → ms-team → sdl → personal-advanced → other
+Order: foundation → personal-advanced → power-user → other
 
 ### Step 3 — Render CATALOG.md
 
@@ -71,18 +71,12 @@ Total: N skills
 | `/li:lessons-surface` | Surface relevanta lessons.md-entries ... |
 | ... | ... |
 
-## MS-team layer (N skills)
+## Personal-advanced layer (N skills)
 
 | Skill | Description |
 |---|---|
-| `/li:az-tldr` | Comprehensive on-demand rundown ... |
+| `/li:office-hours` | Generate a design doc from a problem statement ... |
 | ... | ... |
-
-## SDL layer (N skills)
-
-| Skill | Description |
-|---|---|
-...
 ```
 
 ### Step 4 — Optional `--trends` overlay
@@ -125,7 +119,7 @@ YES — solo-regenerate any time + CI-automation.
 - Operator (navigation aid)
 - `/li:sense` (discovery before planning)
 - `/li:plan` (knowing-what-exists)
-- New CAIP-SE teammates (onboarding)
+- New teammates (onboarding)
 
 ## Anti-patterns
 

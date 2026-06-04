@@ -28,7 +28,7 @@ Reviews `.github/workflows/*.yml` for security (action pinning, secret scope, GI
 
 ## When NOT to invoke
 
-- Azure DevOps Pipelines — use OneBranchReviewer for 1ES, generic ADO reviewer otherwise
+- Non-GitHub CI/CD pipelines — use a pipeline-specific reviewer for that platform
 - Build script content (Makefile, npm scripts) — out of scope
 
 ## Workflow
@@ -98,7 +98,7 @@ GHActionsReviewer: <repo>/.github/workflows/
 
 - **Reusable workflows** — review caller + reusable separately.
 - **Self-hosted runners** — security posture different from GitHub-hosted (verify runner provisioning).
-- **OIDC to cloud (Azure)** — verify trust policy + claims.
+- **OIDC to cloud** — verify trust policy + claims.
 
 ## Voice tier behavior
 

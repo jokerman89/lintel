@@ -143,8 +143,8 @@ done
 - `evaluator_security`
 - `evaluator_completeness`
 - `evaluator_stale`
-- `evaluator_sdl_compliance`
-- `evaluator_trailblazer_alignment`
+- `evaluator_compliance` (the active pack's compliance gates; none by default)
+- `evaluator_voice_alignment` (the active pack's voice tier)
 
 Each returns JSON `{score: 0-100, budget_used: N, notes: "..."}`.
 

@@ -1,6 +1,6 @@
 ---
 name: frontend-motion
-layer: ms-team
+layer: foundation
 description: Frontend design-director sub-skill — picks motion-language (GSAP/Lenis/Theatre/Rive/Motion-One) + scroll-trigger-config + smooth-scroll-config + key-animations-spec. Solo-invokable.
 color: orange
 tools: Read, Write, Bash, Glob

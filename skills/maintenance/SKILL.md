@@ -79,7 +79,6 @@ load-bearing_paths:
 
 deprecated_paths_check:
   - $HOME/.jstack/             # post Phase A: should be empty or migrated
-  - scaffolding/02-compliance/ # renamed to scaffolding/02-sdl/ Phase A
 
 required_files_in_paths:
   - skills/CATALOG.md          # auto-generated, should exist post-Cohort-2 merge

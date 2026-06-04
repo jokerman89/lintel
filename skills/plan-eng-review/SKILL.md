@@ -1,7 +1,7 @@
 ---
 name: plan-eng-review
 layer: foundation
-description: Architecture + tests review. The required gate before /release-ev2. Covers arch, code quality, test coverage, performance.
+description: Architecture + tests review. The required gate before ship. Covers arch, code quality, test coverage, performance.
 color: red
 tools: Read, Bash, Grep, Glob, Edit
 voice: internal
@@ -10,17 +10,17 @@ cli_support: [claude-code, codex]
 
 # /plan-eng-review
 
-The **required** review per Lintel's Review Readiness Dashboard. Scope: architecture, code quality, test coverage, performance. Outputs a structured plan-file review report + persists via first-party `bin/li-review-log` so `/release-ev2` can read it.
+The **required** review per Lintel's Review Readiness Dashboard. Scope: architecture, code quality, test coverage, performance. Outputs a structured plan-file review report + persists via first-party `bin/li-review-log` so the ship phase can read it.
 
 Inspired-by gstack's equivalent. Lintel version adds:
 - `cli_support` frontmatter check on every skill/agent the plan adds
 - Voice-tier check on every customer-facing skill the plan adds
-- 5-always-on compliance checklist gate inside Step 0
+- the active pack's compliance gates as a checklist inside Step 0 (`resolve_pack_field compliance.hooks`; none by default)
 
 ## When to use
 
 - Before any non-trivial implementation begins
-- Before `/release-ev2` — Dashboard verdict gate depends on this
+- Before ship — Dashboard verdict gate depends on this
 - After any major plan revision (re-run, supersedes prior report)
 
 ## When NOT to use
@@ -105,7 +105,7 @@ bin/li-review-log '{"skill":"plan-eng-review","timestamp":"...","status":"...","
 
 ## Compliance integration
 
-- The 5 always-on rules run at Step 0 (no customer data in plan prose, no secrets, no production mutations without auth, MS SSO+zero retention, first-party-first).
+- The active pack's compliance gates run at Step 0 (`resolve_pack_field compliance.hooks`; none by default). The advisory baseline still applies — no customer data in plan prose, no secrets, no production mutations without auth.
 - Per Lintel v1: also verify every new skill/agent introduced declares `cli_support` in frontmatter (per C1) and `voice` tier (per A6).
 
 ## Exit Plan Mode Gate (BLOCKING)
@@ -120,7 +120,7 @@ Failing this gate + calling `ExitPlanMode` = contract violation. User sees a pla
 
 ## Voice tier note
 
-`voice: internal` — direct, builder-talking-to-builder. No Trailblazer overhead.
+`voice: internal` — direct, builder-talking-to-builder. No elevated voice tier applies regardless of the active pack.
 
 ## Failure modes
 
@@ -153,5 +153,5 @@ Operator: proceed (Path C accepted)
 - `/plan-ceo-review` — strategy review (runs before this)
 - `/plan-design-review` — UI/UX review (parallel if there's a UI surface)
 - `/review` — diff-scoped lighter variant (when plan-eng-review is overkill)
-- `/release-ev2` — reads this skill's review-log output as ship-gate signal
+- `/ship` — reads this skill's review-log output as ship-gate signal
 - `/autoplan` — chains office-hours → ceo-review → eng-review → design-review

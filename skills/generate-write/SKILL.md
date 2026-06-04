@@ -1,6 +1,6 @@
 ---
 name: generate-write
-layer: ms-team
+layer: foundation
 description: Produce content.md (slide/section bodies + bullets + titles) and speaker-notes.md from outline.md. Applies voice corpus. Shared content-pipeline sub-skill, solo-invokable.
 color: orange
 tools: Read, Write, Bash, Glob
@@ -21,7 +21,7 @@ You are the `generate-write` skill — second stage of the v3.5 shared content p
 
 Reads outline.md (frontmatter + section/slide list with key_messages + voice_techniques) → writes content.md with titles + bodies + bullets + voice-annotated blocks. If `ppt` in target_formats, also produces speaker-notes.md with 40-80-word note per slide.
 
-Applies the Microsoft Trailblazer Voice corpus (`scaffolding/03-ms-team/voice/`) — three modes (Reveal / Inspire / Provoke), six ground rules, vocabulary blocklist enforcement. Per-slide/per-section voice technique is picked from outline's `voice_technique` field; rewritten if missing or inappropriate.
+Applies the active pack's voice corpus (`resolve_pack_field voice.corpus`; none by default) — voice modes, ground rules, and vocabulary blocklist as defined by the pack. Per-slide/per-section voice technique is picked from outline's `voice_technique` field; rewritten if missing or inappropriate. With no pack corpus, falls back to neutral ground-rules-only mode.
 
 Used by `generate` orchestrator as Step 4, or solo when operator wants to evolve an existing outline into content.
 
@@ -35,15 +35,15 @@ Used by `generate` orchestrator as Step 4, or solo when operator wants to evolve
 ## When NOT to use
 
 - Operator has no outline — invoke `/li:generate-outline` first
-- Final voice-gate (T0 + customer-share check) — that runs at orchestrator level, not here
+- Final voice-gate (pack compliance + customer-share check) — that runs at orchestrator level, not here
 - Format-specific styling — that's `generate-design`, not write
 
 ## Inputs
 
 - Required `--outline <path>` — outline.md from generate-outline
-- Optional `--voice-corpus <path>` — voice guide reference (default: `scaffolding/03-ms-team/voice/OurVoice.md`)
-- Optional `--vocabulary-blocklist <path>` — words to never emit (default: voice-corpus default)
-- Optional `--voice-tier <internal|trailblazer-draft>` — voice tier (default: internal; trailblazer-draft when `--customer-share` upstream)
+- Optional `--voice-corpus <path>` — voice guide reference (default: the active pack's voice corpus, `resolve_pack_field voice.corpus`; none by default)
+- Optional `--vocabulary-blocklist <path>` — words to never emit (default: voice-corpus default, if any)
+- Optional `--voice-tier <tier>` — voice tier (default: the active pack's voice tier, `internal` by default; upgraded per pack when `--customer-share` upstream)
 - Optional `--out-dir <path>` — output directory (default: alongside outline.md)
 
 ## Content.md schema
@@ -55,7 +55,7 @@ audience: <inherited>
 arc: <inherited>
 language: <inherited>
 target_formats: <inherited>
-voice_tier: <internal|trailblazer-draft>
+voice_tier: <pack-resolved; internal default>
 generated_at: <iso-8601>
 source_outline_hash: <sha256 of outline.md>
 ---
@@ -64,7 +64,7 @@ source_outline_hash: <sha256 of outline.md>
 
 ## §1 — <title from outline> {#sec-1}
 
-<!-- voice: REVEAL/Understatement -->
+<!-- voice: <pack-defined mode/technique, or null> -->
 <!-- type: title -->
 <!-- key_message: <inherited> -->
 
@@ -107,37 +107,20 @@ language: <inherited>
 
 ## Voice corpus rules
 
-Read voice corpus at session start. Apply:
+Read the active pack's voice corpus at session start (`resolve_pack_field voice.corpus`; none by default). Apply whatever modes, ground rules, and mode-selection guidance the corpus defines.
 
-**Three modes (one per section, based on `voice_technique` from outline):**
-- REVEAL — audience feels "in the know" (Understatement / Draw back the curtain / Dream out loud / Leave the question unanswered)
-- INSPIRE — audience feels "empowered" (Make opposites attractive / Make our vernacular spectacular / Marvel at a simple truth)
-- PROVOKE — audience feels "challenged" (Skewer the sacred / Make it an exception that rules / Make it all or nothing / Make it unflinching / Make vulnerability a strength)
-
-**Six ground rules (always applied):**
+With **no pack corpus** (the neutral default), fall back to generic ground rules:
 1. Strive for clarity
-2. "We", not "Microsoft"
-3. Be concise
-4. Limit jargon
-5. Find the focus
-6. Have a perspective
+2. Be concise
+3. Limit jargon
+4. Find the focus
+5. Have a perspective
 
-**Mode selection per slide type:**
-- Title/Opening → Provoke or Inspire
-- Data/Evidence → Reveal
-- Vision/Future → Inspire
-- Challenge/Problem → Provoke
-- Closing/CTA → Provoke (Vulnerability) or Inspire (Marvel)
+A pack corpus may additionally define named voice modes (mapped per section via the outline's `voice_technique` field) and a per-slide-type mode-selection table. Honor those when present.
 
 ## Vocabulary blocklist (hard enforcement)
 
-Read blocklist from voice-corpus. Zero matches allowed in output. Hard-block on commit attempt if blocklist words present:
-
-**Tier 1 hard-block:** delve, crucial, robust, comprehensive, multifaceted, nuanced, intricate, paradigm, harness, navigate-the-landscape, at-the-forefront, cutting-edge, game-changing, revolutionize, transformative, synergy, holistic, best-in-class, world-class, state-of-the-art, elevate, empower (overused)
-
-**Tier 2 replace:** leverage→use, utilize→use, facilitate→help, streamline→simplify, optimize→improve, ecosystem→system/environment
-
-**Tier 3 phrase patterns:** "We are excited to announce" / "In today's rapidly evolving landscape" / "It goes without saying" / "At Microsoft, we believe" / "Our mission-critical solution delivers" / "We are committed to"
+Read the blocklist from the active pack's voice corpus, if it defines one. When present, zero matches allowed in output — hard-block on commit attempt if blocklist words appear. The corpus defines its own tiers (hard-block words, replace-words, phrase-patterns). With no pack corpus, the only baseline blocklist is the generic AI-tell vocabulary (e.g. delve, robust, comprehensive, leverage, utilize, "in today's rapidly evolving landscape") to keep output from drifting into LLM-style prose.
 
 ## Writing constraints
 
@@ -153,7 +136,7 @@ Read blocklist from voice-corpus. Zero matches allowed in output. Hard-block on 
 
 ### Step 1 — Read outline.md + voice corpus
 
-Parse outline.md frontmatter + section list. Load voice corpus + blocklist.
+Parse outline.md frontmatter + section list. Load the active pack's voice corpus + blocklist if one is configured.
 
 ### Step 2 — Per section: generate title + body
 
@@ -184,7 +167,7 @@ Write to `--out-dir`. Surface summary (word count, voice-tier, blocklist-pass) t
 
 `voice: internal`. Content.md itself is operator-facing intermediate artifact. Voice-gate runs at orchestrator level (`generate`), not here.
 
-If upstream `--customer-share`: voice_tier in content frontmatter is set to `trailblazer-draft` (signals to downstream that content was written for customer-facing surface).
+If upstream `--customer-share`: voice_tier in content frontmatter is set to the active pack's customer-facing tier (signals to downstream that content was written for a customer-facing surface).
 
 ## Status protocol
 
@@ -206,8 +189,8 @@ YES — solo-invokable. Common solo use: operator iterates voice-tier or languag
 
 **Reads:**
 - `outline.md` (from generate-outline)
-- `scaffolding/03-ms-team/voice/OurVoice.md` (corpus)
-- `scaffolding/03-ms-team/voice/OurVoice-blocklist.md` (vocabulary blocklist)
+- The active pack's voice corpus (`resolve_pack_field voice.corpus`; none by default)
+- The active pack's vocabulary blocklist (from the same corpus, if defined)
 
 **Writes:**
 - `content.md` (always)
@@ -216,7 +199,7 @@ YES — solo-invokable. Common solo use: operator iterates voice-tier or languag
 **Consumed by:**
 - `/li:generate` orchestrator (Step 4)
 - `/li:generate-design` (input → design-spec.json)
-- `/li:rais-customer-voice-check` (orchestrator-level voice-gate)
+- The active pack's compliance gates (orchestrator-level voice-gate)
 
 ## Anti-patterns
 
@@ -236,4 +219,4 @@ YES — solo-invokable. Common solo use: operator iterates voice-tier or languag
 
 - For full chain: invoke `/li:generate-design --content <content.md> --target-formats <formats>` to produce design-spec
 - For solo-iteration: operator edits content.md manually, then resumes chain at generate-design
-- For voice-tier upgrade: re-invoke with `--voice-tier trailblazer-draft` (still requires upstream voice-gate at orchestrator)
+- For voice-tier upgrade: re-invoke with the active pack's customer-facing `--voice-tier` (still requires upstream voice-gate at orchestrator)

@@ -18,68 +18,58 @@ as_of: 2026-05-28
 skills:
 
   generate-outline:
-    primary: AzureArchitect            # default: most CAIP-SE briefs are Azure-themed
+    primary: SystemArchitect            # default: general technical brief structure
     secondary_conditional:
-      AzureOpenAIAdvisor: [ai-content, openai-content, llm-content]
-      M365CopilotAdvisor: [m365-content, copilot-content]
-      GraphAPIAdvisor: [graph-api-content, identity-content]
+      ResearchSynthesizer: [research-content, synthesis-content]
 
   generate-write:
-    primary: TrailblazerVoiceCoach     # voice-corpus-application is core to write
+    primary: WordTechnicalEditor        # content structure + tone application is core to write
     secondary_conditional:
-      AzureArchitect: [azure-content, technical-depth-needed]
       CostAnalyzer: [cost-content, estimate-content, pricing-content]
       SecurityAuditor: [security-content, compliance-content]
 
   generate-design:
-    primary: AzureArchitect            # default Azure-themed layout patterns
+    primary: DesignSystemAuditor        # default layout/design-system patterns
     per_step:
       "ppt-layout": PPTNarrativeArchitect      # per-format design pass hook
       "web-layout": WebExperienceCritic         # per-format design pass hook
       "word-layout": WordTechnicalEditor        # per-format design pass hook
     secondary_conditional:
       AccessibilityChecker: [customer-share, public-output, accessibility-required]
-      BicepReviewer: [iac-content, deployment-design-content]
 
   generate-qa:
-    primary: BrandComplianceAuditor    # palette/font/logo validation is primary
+    primary: DesignSystemAuditor        # palette/font/layout validation is primary
     secondary_conditional:
-      TrailblazerVoiceCoach: [voice-tier-customer-share, blocklist-validation]
       AccessibilityChecker: [contrast-validation, accessibility-required]
-      ProvenanceAuditor: [customer-share, audit-trail-required]
 
   # ⚠ Template only slots — agent-mapping configured; content generated at invocation per L-001
 
   generate-pdf:
-    primary: AzureArchitect            # fallback for Azure-themed content
+    primary: WordTechnicalEditor        # fallback for document-shaped content
     secondary_conditional:
       SecurityAuditor: [customer-data, compliance-content]
       AccessibilityChecker: [customer-share, accessible-output-required]
-      ProvenanceAuditor: [audit-trail-required]
 
   generate-xlsx:
     primary: CostAnalyzer              # XLSX use cases skew cost/estimate
     secondary_conditional:
-      AzureArchitect: [capacity-content, sizing-content]
+      CapacityPlanner: [capacity-content, sizing-content]
       SecurityAuditor: [customer-sensitive-data]
-      FinOpsReviewer: [cost-model-content, capex-opex-content]
 
   generate-visio:
-    primary: AzureArchitect            # default architecture/topology diagrams
+    primary: SystemArchitect            # default architecture/topology diagrams
     secondary_conditional:
-      NetworkArchitect: [network-topology-content, connectivity-content]
       SecurityAuditor: [security-boundary-content, trust-zone-content]
-      BicepReviewer: [iac-deployable-content]
 
 # Role-context modifiers (applied when role active in ~/.lintel/profile.yaml)
 role_overlays:
   field-cto:
     emphasize_skills: [generate-design, generate-qa]    # consumer-facing visual quality matters most
-    additional_agents: [FieldCTOAdvisor, ExecutiveBriefingDrafter]
+    additional_agents: [ExecutiveBriefingDrafter]
 
   solution-architect:
     emphasize_skills: [generate-outline, generate-design, generate-visio]
-    additional_agents: [ThreatModelDrafter, BicepReviewer]
+    additional_agents: [ThreatModelDrafter]
 
   engineering-manager:
     emphasize_skills: [generate-outline, generate-qa]

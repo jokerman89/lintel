@@ -1,6 +1,6 @@
 ---
 name: generate-pdf
-layer: ms-team
+layer: foundation
 description: ⚠ TEMPLATE ONLY — Slot for PDF document generation. Content not curated. AI generates fresh at invocation per L-001.
 color: orange
 tools: Read, Write, Bash, Glob
@@ -36,13 +36,13 @@ When invoked (via `/li:generate-pdf --from-pipeline <run-dir>` or directly):
 ## Agent dispatch
 
 Per `skills/generate/agent-mapping.yaml`:
-- Primary: AzureArchitect (when content is Azure-themed) or general WordTechnicalEditor
+- Primary: WordTechnicalEditor (fallback for document-shaped content)
 - Conditional: SecurityAuditor if content references customer-data or compliance
 - Conditional: AccessibilityChecker if `--accessible` flag
 
 ## Voice tier
 
-`voice: internal` default. If invoked with `--customer-share`, requires upstream `/li:rais-customer-voice-check` PASS (orchestrator-level gate).
+`voice: internal` default. If invoked with `--customer-share`, requires an upstream PASS from the active pack's voice gate (none by default) (orchestrator-level gate).
 
 ## Status protocol
 
@@ -61,5 +61,5 @@ Until then: AI generates fresh per invocation. Repo stays clean.
 
 After invocation:
 - For QA: `/li:generate-qa --artifacts <pdf-path>`
-- For voice-gate (if customer-share): chain `/li:rais-customer-voice-check` on source content before PDF-export
+- For voice-gate (if customer-share): run the active pack's voice gate (none by default) on source content before PDF-export
 - For multi-format consistency: invoke parent `/li:generate` instead of solo-invocation

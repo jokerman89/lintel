@@ -305,4 +305,4 @@ YES. `/li:da loop` resumes from prior state at `.lintel/state/da/00-state.md`. `
 
 ## Voice tier behavior
 
-`voice: internal`. DA produces operator-facing data-model artifacts. Customer-facing voice picks up at the SHIP phase when caip-se pack adds Trailblazer alignment via Brief Forge.
+`voice: internal`. DA produces operator-facing data-model artifacts. Customer-facing voice picks up at the SHIP phase when the active pack adds voice alignment via Brief Forge (an external pack like lintel-caip-pack supplies this; none by default).

@@ -111,15 +111,14 @@ EUAIActReviewer: <ai-system-name>
 
 ## Cross-checks
 - GDPR: invoke GDPRReviewer
-- RAI: invoke RAIReviewer
-- Sensitive use: invoke `/rais-sensitive-use`
+- Responsible-AI / sensitive-use: run the active pack's compliance gates (`resolve_pack_field compliance.hooks`; none by default)
 ```
 
 ## Edge cases / what to do when blocked
 
 - **Prohibited use case identified** — STOP. Recommend system redesign. Do not continue.
 - **GPAI fine-tuning** — provider obligations may pass to fine-tuner if substantial modification.
-- **Customer deploys AI in EU even though MS is provider** — joint compliance; clarify roles in DPA.
+- **Customer deploys AI in EU even though you are the provider** — joint compliance; clarify roles in DPA.
 
 ## Voice tier behavior
 

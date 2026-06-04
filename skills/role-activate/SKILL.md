@@ -18,8 +18,8 @@ Does NOT load full role file. For deep knowledge access on-demand, use `/li:role
 
 ## When to use
 
-- Pre-engagement: load Field CTO persona before customer prep
-- Mid-cycle: rotate roles for different facets (Field CTO → Engineering Manager)
+- Pre-engagement: load a role persona before customer prep
+- Mid-cycle: rotate roles for different facets
 - Voice + tone alignment for customer-facing artifacts
 - When operator wants role-overlay on subsequent skill invocations
 
@@ -33,16 +33,20 @@ Does NOT load full role file. For deep knowledge access on-demand, use `/li:role
 
 ### Step 1 — Locate role file
 
-```bash
-ROLE_ID="$1"  # e.g., "field-cto"
+Roles resolve from the active pack's role directory (`resolve_pack_field roles.source`; none in `_default`). The repo ships no roles of its own.
 
-# Try public roles first (in repo)
+```bash
+ROLE_ID="$1"  # e.g., "engineering-manager"
+
+# Pack-provided role directory + operator's private roles
+PACK_ROLES_DIR="$(resolve_pack_field roles.source)"  # may be empty (none by default)
+
 ROLE_FILE=""
 for candidate in \
-  "roles/${ROLE_ID}.md" \
+  "${PACK_ROLES_DIR:+$PACK_ROLES_DIR/${ROLE_ID}.md}" \
   "$LINTEL_HOME/roles/private/${ROLE_ID}.md" \
   "$LINTEL_HOME/roles/${ROLE_ID}.md"; do
-  [ -f "$candidate" ] && { ROLE_FILE="$candidate"; break; }
+  [ -n "$candidate" ] && [ -f "$candidate" ] && { ROLE_FILE="$candidate"; break; }
 done
 
 if [ -z "$ROLE_FILE" ]; then
@@ -141,7 +145,7 @@ YES — invokable anytime. Replaces any previously-active role.
 ## Integration
 
 **Reads:**
-- Role file (public or private path)
+- Role file (pack-provided via `roles.source`, or operator's private path)
 - `~/.lintel/profile.yaml`
 
 **Writes:**
@@ -166,4 +170,4 @@ YES — invokable anytime. Replaces any previously-active role.
 
 ## Voice tier behavior
 
-`voice: internal`. The role's voice_tier propagates to downstream skills. If role.voice_tier=trailblazer, customer-facing skills (e.g., `/li:exec-brief`) auto-apply Trailblazer voice gate.
+`voice: internal`. The role's voice_tier propagates to downstream skills. If the role declares an elevated voice_tier, customer-facing skills auto-apply the active pack's voice gate for that tier (none by default).

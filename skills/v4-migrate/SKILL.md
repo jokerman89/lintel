@@ -16,14 +16,14 @@ Detects v3.x usage signals in the operator's local state + repo + audit log, sur
 
 Detection signals checked:
 1. **Compliance hooks invoked** under v3.x names (e.g. `sdl_threat_model` without pack scope)
-2. **Trailblazer voice references** in operator's own state files
-3. **CAIP-SE-shaped state** (`compliance.workprofile: on` baked into profile.yaml)
-4. **WorkProfile defaults** in `~/.lintel/profile.yaml`
+2. **Voice-tier references** in operator's own state files (any non-internal tier)
+3. **Domain-shaped state** (`compliance.workprofile: on` baked into profile.yaml)
+4. **Compliance-mode defaults** in `~/.lintel/profile.yaml`
 5. **Hardcoded paths** referencing pre-v4.0 layout
 
 Recommendation per signal:
-- All three signals present → recommend `caip-se` pack
-- Just compliance + SDL signals → recommend `ms-internal` pack
+- Strong domain signals → recommend the operator's installed domain pack (e.g. the external `caip-se` pack from `lintel-caip-pack`, if present); otherwise the closest installed pack
+- Partial compliance signals → recommend the operator's installed compliance pack, if present
 - No signals → recommend keeping `_default` (no migration needed)
 
 ## When to use
@@ -47,22 +47,22 @@ PROFILE="$LINTEL_HOME/profile.yaml"
 signals=0
 declare -a signal_evidence
 
-# Signal 1: WorkProfile baked into profile.yaml
+# Signal 1: workprofile baked into profile.yaml (v3.x compliance-mode field)
 if [ -f "$PROFILE" ] && grep -qE '^workprofile:[[:space:]]*on' "$PROFILE"; then
   signals=$((signals + 1))
   signal_evidence+=("workprofile=on in profile.yaml")
 fi
 
-# Signal 2: Trailblazer voice references in operator state
-if grep -rq "trailblazer" "$LINTEL_HOME"/profile.yaml "$LINTEL_HOME"/state/ 2>/dev/null; then
+# Signal 2: non-internal voice references in operator state
+if grep -rqE 'voice(_tier)?:[[:space:]]*(customer|[^i])' "$LINTEL_HOME"/profile.yaml "$LINTEL_HOME"/state/ 2>/dev/null; then
   signals=$((signals + 1))
-  signal_evidence+=("Trailblazer voice references in operator state")
+  signal_evidence+=("non-internal voice references in operator state")
 fi
 
-# Signal 3: SDL hooks referenced in audit log
-if [ -d "$LINTEL_HOME/audit" ] && grep -rq "sdl_threat_model\|sdl_secrets_scan" "$LINTEL_HOME/audit/" 2>/dev/null; then
+# Signal 3: compliance hooks referenced in audit log (v3.x un-scoped hook names)
+if [ -d "$LINTEL_HOME/audit" ] && grep -rqE '_threat_model|_secrets_scan' "$LINTEL_HOME/audit/" 2>/dev/null; then
   signals=$((signals + 1))
-  signal_evidence+=("SDL hook invocations in audit log")
+  signal_evidence+=("compliance hook invocations in audit log")
 fi
 
 # Signal 4: cwd is in a repo with pre-v4.0 layout
@@ -75,12 +75,18 @@ fi
 ### Step 2 — Determine recommendation
 
 ```bash
+# LINTEL_DOMAIN_PACK / LINTEL_COMPLIANCE_PACK are the operator's installed
+# pack names (set in profile/config). If unset, fall back to _default.
+# An external pack such as caip-se (from lintel-caip-pack) sets these.
+domain_pack="${LINTEL_DOMAIN_PACK:-_default}"
+compliance_pack="${LINTEL_COMPLIANCE_PACK:-_default}"
+
 if [ "$signals" -ge 3 ]; then
-  recommended="caip-se"
-  reason="Strong v3.x CAIP-SE signals: Trailblazer voice + SDL hooks + WorkProfile"
+  recommended="$domain_pack"
+  reason="Strong v3.x domain signals: non-internal voice + compliance hooks + workprofile"
 elif [ "$signals" -ge 2 ]; then
-  recommended="ms-internal"
-  reason="MS-internal signals but no Trailblazer corpus references"
+  recommended="$compliance_pack"
+  reason="Compliance signals but no voice-corpus references"
 elif [ "$signals" -ge 1 ]; then
   recommended="_default"
   reason="Single signal — light v3.x footprint; _default is safe"
@@ -97,17 +103,17 @@ LINTEL v3.x → v4.0 MIGRATION
 
 Detected signals (4 checked):
   ✓ workprofile=on in profile.yaml
-  ✓ Trailblazer voice references in operator state
-  ✓ SDL hook invocations in audit log
+  ✓ non-internal voice references in operator state
+  ✓ compliance hook invocations in audit log
   ✗ .lintel/state/ pre-v4.0 layout
 
-Recommendation: activate `caip-se` pack
-Reason: Strong v3.x CAIP-SE signals (Trailblazer voice + SDL hooks + WorkProfile)
+Recommendation: activate `<domain-pack>` (e.g. caip-se from lintel-caip-pack, if installed)
+Reason: Strong v3.x domain signals (non-internal voice + compliance hooks + workprofile)
 
 What happens on apply:
-  1. Writes ~/.lintel/packs/active-pack with: caip-se
-  2. NEXT session reads caip-se → ms-internal → _default chain
-  3. Trailblazer voice, SDL hooks, persona corpus resolve from pack
+  1. Writes ~/.lintel/packs/active-pack with: <domain-pack>
+  2. NEXT session reads the pack's extends-chain → _default
+  3. Voice tier, compliance hooks, persona corpus resolve from pack
   4. Audit entry written to ~/.lintel/audit/pack-lifecycle.jsonl
 
 What does NOT change:
@@ -146,9 +152,9 @@ If no `--apply`: print the plan, exit with "Re-invoke with --apply to commit."
 
 ```
 Deprecated v3.x references in this session/repo (no auto-removal):
-  - ~/.lintel/profile.yaml line 12: workprofile: on (now lives in pack)
-  - tasks/lessons.md line 47: "WorkProfile" mentioned without pack context
-  - .lintel/state/00-state.md line 8: trailblazer (now derived from pack)
+  - ~/.lintel/profile.yaml line 12: workprofile: on (compliance mode now lives in pack)
+  - tasks/lessons.md line 47: compliance mode mentioned without pack context
+  - .lintel/state/00-state.md line 8: voice tier hardcoded (now derived from pack)
   
 These continue to work — pack values OVERRIDE these — but you can clean them up:
   /li:pack-list to confirm pack values, then edit profile.yaml/state if desired.

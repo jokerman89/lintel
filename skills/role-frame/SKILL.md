@@ -148,12 +148,12 @@ YES — invokable on any artifact path, anytime role is active.
 - `.lintel/state/00-state.md` (event)
 
 **Triggers:**
-- Could chain into `/li:rais-customer-voice-check` if voice misalignment is the main finding
+- Could chain into the active pack's voice gate if voice misalignment is the main finding
 
 ## Anti-patterns
 
 - **Auto-applying role's voice to entire artifact** — operator should approve per-edit, not blanket overwrite
-- **Treating role-frame as voice gate** — voice gate is `/li:rais-customer-voice-check`; frame is broader (decision criteria + cold knowledge + voice)
+- **Treating role-frame as voice gate** — the voice gate is the active pack's voice gate; frame is broader (decision criteria + cold knowledge + voice)
 - **Cross-contaminating private role lens into public artifact** — strict separation
 - **Framing without role-activate first** — undefined behavior, no role context
 

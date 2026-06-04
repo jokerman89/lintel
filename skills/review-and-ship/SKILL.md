@@ -91,4 +91,4 @@ Delegates to `/li:cycle --from REVIEW --to CAPTURE`.
 
 ## Voice tier behavior
 
-`voice: mixed`. SHIP phase surfaces customer-facing artifacts which inherit voice_tier from mode (trailblazer for customer-engagement). CAPTURE's release notes follow mode voice tier.
+`voice: mixed`. SHIP phase surfaces customer-facing artifacts which inherit voice_tier from the active pack (`resolve_pack_field voice.default_tier`; `internal` by default). CAPTURE's release notes follow the same pack voice tier.

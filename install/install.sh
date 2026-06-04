@@ -160,15 +160,10 @@ fi
 
 hdr "Hooks (inert install — opt-in symlink to activate)"
 
-# v3: hooks live at hooks/shared/ at repo root (lifted from scaffolding/02-sdl/hooks/)
-# v2 fallback: scaffolding/02-compliance/hooks/ or scaffolding/02-sdl/hooks/
+# Hooks live at hooks/shared/ at repo root
 HOOK_SRC=""
 if [ -d "$REPO_ROOT/hooks/shared" ]; then
   HOOK_SRC="$REPO_ROOT/hooks/shared"
-elif [ -d "$REPO_ROOT/scaffolding/02-sdl/hooks" ]; then
-  HOOK_SRC="$REPO_ROOT/scaffolding/02-sdl/hooks"
-elif [ -d "$REPO_ROOT/scaffolding/02-compliance/hooks" ]; then
-  HOOK_SRC="$REPO_ROOT/scaffolding/02-compliance/hooks"
 fi
 
 if [ -n "$HOOK_SRC" ]; then

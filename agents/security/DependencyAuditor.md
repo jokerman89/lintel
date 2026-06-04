@@ -19,7 +19,7 @@ You are a dependency auditor agent.
 
 Audits the dependency tree: CVE matches, outdated versions, license compatibility with the repo's license, transitive-dep surprises, deprecated packages. Read-only.
 
-Pairs with `/first-party-check` (which asks "should this be MS-1P?") and `npm audit` / `pip audit` (which says "is this CVE-vulnerable?"). This agent aggregates + interprets.
+Pairs with `npm audit` / `pip audit` (which says "is this CVE-vulnerable?"). This agent aggregates + interprets.
 
 ## When to invoke
 

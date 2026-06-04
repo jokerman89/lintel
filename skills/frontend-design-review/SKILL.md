@@ -1,6 +1,6 @@
 ---
 name: frontend-design-review
-layer: ms-team
+layer: foundation
 description: Quality gate för produced frontend designs. 6-dimension audit (typography hierarchy + motion coherence + shader perf-budget + accessibility WCAG AA + brand conformance + responsive fidelity). Scored rubric. Solo-invokable.
 color: orange
 tools: Read, Write, Bash, Glob

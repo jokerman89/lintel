@@ -18,7 +18,7 @@ Reads deployment plan (from `dh-deployment-plan` if present) + threat surface (f
 
 - DH full pass deployment_plan_locked checkpoint (deployment + rollback must lock together)
 - Single action `/li:dh single --action rollback-strategy`
-- Pre-customer-deployment rollback rehearsal
+- Pre-production-deployment rollback rehearsal
 - After near-miss incident requires rollback path improvement
 
 ## When NOT to use

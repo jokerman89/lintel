@@ -25,7 +25,7 @@ Manual companion to the Layer 4 context-bloat watchers. Operator runs this when 
 
 - Pure short Q&A — nothing to clean
 - Mid-tool-call sequences — let the current sequence finish first
-- Before a `/release-ev2` — let ship complete, THEN clean
+- Before a `/ship` — let ship complete, THEN clean
 
 ## Inputs
 

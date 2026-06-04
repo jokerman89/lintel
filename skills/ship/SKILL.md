@@ -1,7 +1,7 @@
 ---
 name: ship
 layer: foundation
-description: Phase 7 of Lintel cycle — PR / deploy / customer handoff. Final compliance hard-stops. Voice + brand + honest-limitations + provenance gates on customer-facing artifacts. EV2/OneBranch validation.
+description: Phase 7 of Lintel cycle — PR / deploy / customer handoff. Final compliance hard-stops (the active pack's gates; none by default). Voice gates on customer-facing artifacts. Pack-configured CI/deploy validation.
 color: cyan
 tools: Read, Bash, Edit, Grep, Glob
 voice: mixed
@@ -14,16 +14,14 @@ You are the SHIP skill — Phase 7 of the Lintel cycle.
 
 ## What this skill does
 
-Ships the BUILD output via PR (default) or direct-push (with explicit per-batch authorization). Customer-deliverables go through 4-gate doc-gen pipeline. Provenance logged. Release notes generated.
+Ships the BUILD output via PR (default) or direct-push (with explicit per-batch authorization). Customer-deliverables go through the doc-gen pipeline. Release notes generated.
 
-Hard-stops if WorkProfile=on:
+Hard-stops from the active pack's compliance gates (`resolve_pack_field compliance.hooks`; none by default). When a pack activates them, typical gates include:
 - customer-data in commit
 - secrets in any file
 - prod-mutations without explicit per-call auth
-- non-MS-SSO authentication used
-- non-first-party choices without rationale
 
-Voice + brand gates fire on customer-facing artifacts.
+The active pack's voice gates (`resolve_pack_field voice.gates_active`; none by default) fire on customer-facing artifacts.
 
 ## When to use
 
@@ -48,7 +46,7 @@ Verify ship-readiness:
 - Current branch is NOT main (unless explicit per-batch direct-push auth)
 - All tests pass (run `/li:qa` if not already passed in REVIEW)
 - review-report.md shows PASS (or operator overrides with documented rationale)
-- compliance-report.md shows PASS (if WorkProfile=on)
+- compliance-report.md shows PASS (if the active pack defines compliance gates)
 
 If pre-flight fails: BLOCKED. Don't proceed.
 
@@ -61,9 +59,9 @@ From mode + role:
 
 Determines which gates fire in subsequent steps.
 
-### Step 3 — HARD-RULES hard-stop check (if WorkProfile=on)
+### Step 3 — Compliance hard-stop check (active pack's gates)
 
-NEVER bypassable. Re-verify even if REVIEW passed (last-second pre-ship sanity):
+Run the active pack's compliance gates (`resolve_pack_field compliance.hooks`; none by default). NEVER bypassable when present. Re-verify even if REVIEW passed (last-second pre-ship sanity). Example gates a pack may activate:
 
 ```bash
 # Customer data
@@ -72,34 +70,32 @@ grep -rE '(customer-name-patterns|PII-patterns)' --include='*.md' --include='*.t
 gitleaks detect --staged
 # Production mutations without auth
 # (operator-specific, check for prod-deploy commands or live-cloud-mutation)
-# MS SSO only
-# First-party-first (light check, full in REVIEW)
 ```
 
-If ANY hard-rule violation:
+If ANY gate violation:
 - HARD STOP
 - Surface to operator: violation + file:line + recommended fix
 - Operator MUST fix or explicitly override (rarely warranted)
-- Log to `~/.lintel/audit/hard-rule-stops.jsonl`
+- Log to `~/.lintel/audit/compliance-stops.jsonl`
 
 ### Step 4 — Voice + brand gate (if customer-facing)
 
-If `audience=customer` AND `voice_tier=trailblazer`:
-- Invoke `/li:rais-customer-voice-check` (already done in REVIEW Stage 3, but final verification)
+If `audience=customer` AND the active pack defines voice gates (`resolve_pack_field voice.gates_active`; none by default):
+- Run the pack's voice gates (already done in REVIEW Stage 3, but final verification)
 - If new edits since REVIEW: re-run
-- Threshold: ≥85% known-good match
+- Threshold: ≥85% known-good match against the pack's voice corpus (`resolve_pack_field voice.corpus`)
 
 If `artifact_kind=customer-deliverable` (PPT/Word/Web):
-- Invoke `/li:generate-ppt` / `-word` / `-web` 4-gate pipeline:
-  1. Voice gate (TrailblazerVoiceCritic)
-  2. Brand-conformance (MS brand assets if `~/.lintel/brand/` populated, default-fallback otherwise)
+- Invoke `/li:generate-ppt` / `-word` / `-web` pipeline; gates derive from the active pack:
+  1. Voice gate (`resolve_pack_field voice.gates_active`; none by default)
+  2. Brand-conformance (`resolve_pack_field brand.templates`; default-fallback if null)
   3. Honest-limitations (AI-disclaimer present?)
   4. Provenance (AI-assistance logged?)
-- ALL 4 must PASS for customer-shippable
+- All configured gates must PASS for customer-shippable
 
-### Step 5 — Provenance tracking (if WorkProfile=on)
+### Step 5 — Provenance tracking (if the active pack requires it)
 
-Invoke `/li:provenance-track`:
+If the active pack activates a provenance gate (`resolve_pack_field compliance.hooks`; none by default):
 - Log AI-assistance provenance for shipped artifact
 - Append to `~/.lintel/provenance/<repo>-provenance-log.jsonl`:
 ```json
@@ -108,7 +104,7 @@ Invoke `/li:provenance-track`:
   "repo": "<name>",
   "branch": "<branch>",
   "commit_range": "<sha>..<sha>",
-  "ai_assistance": "lintel-cycle-v3.5",
+  "ai_assistance": "lintel-cycle",
   "phases": ["DEFINE", "PLAN", "BUILD", "REVIEW", "SHIP"],
   "operator": "<whoami>",
   "audience": "<audience>",
@@ -117,7 +113,7 @@ Invoke `/li:provenance-track`:
 }
 ```
 
-If audience=customer AND AI-system shipped: also invoke `/li:rais-transparency-note` to draft transparency note for customer.
+If audience=customer AND an AI-system shipped: if the pack provides a transparency-note generator, draft a transparency note for the customer.
 
 ### Step 6 — Choose ship path
 
@@ -132,7 +128,7 @@ ship_path:
   # Direct-push (requires explicit per-batch auth)
   direct_main:
     - operator must explicitly authorize: "commita och merga"
-    - HARD-RULES re-checked
+    - the active pack's compliance gates re-checked
     - merge commit message includes review-report path
   
   # Demo handoff (no PR, customer deliverable)
@@ -162,7 +158,7 @@ gh pr create --title "<short title>" --body "$(cat <<'EOF'
 [Bulleted checklist from plan.md acceptance criteria]
 
 ## Provenance
-AI-assisted via /li:cycle v3.5
+AI-assisted via /li:cycle
 Phases: DEFINE → PLAN → BUILD → REVIEW → SHIP
 Operator review: passed REVIEW phase
 
@@ -173,17 +169,13 @@ EOF
 
 Apply CODEOWNERS auto-request. Note required reviewers.
 
-### Step 8 — EV2 / OneBranch / Pipeline validation (if MS infra)
+### Step 8 — CI / deploy validation (if the active pack configures deploy targets)
 
-If shipping to MS-internal infra:
-- `/li:onebranch-validate` if 1ES pipeline involved
-- `/li:release-ev2` (or `release-deploy-ev2`) for EV2 ring deployments
-- `/li:safe-deploy-ring` for canary strategy
-
-Dispatch agents:
-- EV2PipelineAuditor (devops/) for EV2 config audit
-- OneBranchReviewer (devops/) for 1ESPT compliance
+If the active pack defines CI/deploy targets (and provides validation skills for them), run them here. Generic targets work out of the box:
 - GHActionsReviewer (devops/) if GH Actions involved
+- TerraformReviewer / K8sManifestReviewer (devops/) if infra ship
+
+Pack-specific deploy pipelines (e.g. ring-based or canary strategies) are contributed by the active pack and run via the pack's own validation skills; none ship with Lintel by default.
 
 ### Step 9 — Customer-deliverable generation (if applicable)
 
@@ -191,10 +183,10 @@ For artifact_kind=customer-deliverable:
 
 **PPT path:**
 ```bash
-# Invoke /li:generate-ppt with 4-gate pipeline
-# Dispatch agents: PPTNarrativeArchitect (5-beat slide arc), TrailblazerVoiceCritic (voice gate)
+# Invoke /li:generate-ppt with the pack-configured gate pipeline
+# Dispatch agents: PPTNarrativeArchitect (5-beat slide arc) + the pack's voice gate (resolve_pack_field voice.gates_active; none by default)
 # Output: <name>.pptx
-# Brand: from ~/.lintel/brand/ or default fallback template
+# Brand: from resolve_pack_field brand.templates or default fallback template
 ```
 
 **Word path:**
@@ -209,14 +201,14 @@ For artifact_kind=customer-deliverable:
 # Variants: single-file HTML OR Next.js scaffold
 ```
 
-All paths go through 4 gates before customer-shippable.
+All paths go through the pack-configured gates before customer-shippable.
 
 ### Step 10 — Release notes (if version tag)
 
 If shipping tags release version:
 - Invoke `/li:landing-report`
 - Generate release notes from commit log between tags
-- TrailblazerVoiceCritic gate if customer-facing release
+- The active pack's voice gates fire if customer-facing release (`resolve_pack_field voice.gates_active`; none by default)
 - Output: `CHANGELOG.md` entry + `RELEASE-NOTES.md`
 
 ### Step 11 — 00-state.md append
@@ -242,14 +234,14 @@ next_recommended: CAPTURE
 
 - **DONE** — PR opened / deployed / handoff complete, all gates PASS
 - **DONE_WITH_CONCERNS** — shipped with caveats (e.g., voice gate at 85%, P3 deferred)
-- **BLOCKED** — HARD-RULE violation OR critical compliance failure
+- **BLOCKED** — compliance-gate violation OR critical compliance failure
 - **NEEDS_CONTEXT** — deploy target unclear, or PR template not configured
 
 ## Pause-points (MANDATORY)
 
 1. Before PR open: confirm commit messages + branch state + base branch
-2. On ANY HARD-RULE detection: full stop, never silently proceed (per CLAUDE.md)
-3. Per customer-deliverable: 4 gates (voice + brand + honest-limitations + provenance) each fire
+2. On ANY compliance-gate violation: full stop, never silently proceed (per CLAUDE.md)
+3. Per customer-deliverable: the pack-configured gates (voice + brand + honest-limitations + provenance) each fire
 4. PR creation confirmation: AskUserQuestion "Open PR now?" — last chance to cancel
 5. If direct-main path: AskUserQuestion explicit per-batch authorization required (per CLAUDE.md)
 
@@ -262,11 +254,11 @@ Skip-conditions: intent=research-only, intent=local-dev-only, intent=draft-only.
 ## Integration
 
 **Reads:**
-- HARD-RULES.md (MANDATORY if WorkProfile=on)
+- the active pack's compliance gates (`resolve_pack_field compliance.hooks`; none by default)
 - review-report.md (must show PASS)
-- compliance-report.md (if WorkProfile=on)
-- brand assets (`~/.lintel/brand/` if doc-gen)
-- OurVoice-corpus.md (if voice gate)
+- compliance-report.md (if the active pack defines compliance gates)
+- brand assets (`resolve_pack_field brand.templates` if doc-gen)
+- the active pack's voice corpus (`resolve_pack_field voice.corpus`; none by default — if voice gate)
 - plan.md (for PR body)
 - design doc (for PR body)
 
@@ -277,7 +269,7 @@ Skip-conditions: intent=research-only, intent=local-dev-only, intent=draft-only.
 - customer deliverables (.pptx, .docx, .html if applicable)
 - transparency-note.md (if AI-system shipped to customer)
 - `.lintel/state/00-state.md` (SHIP entry)
-- `~/.lintel/audit/hard-rule-stops.jsonl` (if any violations)
+- `~/.lintel/audit/compliance-stops.jsonl` (if any violations)
 
 **Triggers:**
 - CAPTURE next (final phase)
@@ -286,17 +278,14 @@ Skip-conditions: intent=research-only, intent=local-dev-only, intent=draft-only.
 
 **Release infrastructure:**
 - ReleaseEngineer (engineering/) — primary
-- EV2PipelineAuditor (devops/) — EV2-specific
-- OneBranchReviewer (devops/) — 1ES pipeline
 - GHActionsReviewer (devops/) — GH Actions
-- TerraformReviewer / K8sManifestReviewer — if infra ship
+- TerraformReviewer / K8sManifestReviewer (devops/) — if infra ship
 
-**MS compliance final:**
-- OneCSAuditor (ms-specific/) — final compliance pass
-- ProvenanceVerifier (ms-specific/) — provenance check
+**Compliance final (pack-contributed):**
+- The active pack's compliance gates (`resolve_pack_field compliance.hooks`; none by default) supply any final compliance + provenance reviewers.
 
 **Voice + doc-gen (customer artifacts):**
-- TrailblazerVoiceCritic (voice/) — voice gate
+- The active pack's voice gates (`resolve_pack_field voice.gates_active`; none by default) — voice gate
 - PPTNarrativeArchitect (doc-gen/) — slide arc
 - WordTechnicalEditor (doc-gen/) — Word variants
 - WebExperienceCritic (doc-gen/) — web review
@@ -313,23 +302,23 @@ Skip-conditions: intent=research-only, intent=local-dev-only, intent=draft-only.
 ## Anti-patterns
 
 - **Direct-push to main without explicit per-batch auth** — never (per CLAUDE.md)
-- **Skipping HARD-RULES re-check at SHIP** — REVIEW passed but pre-ship sanity is mandatory
-- **Skipping voice gate because "operator wrote it themselves"** — if final artifact customer-facing, gate fires regardless
+- **Skipping the pack's compliance re-check at SHIP** — REVIEW passed but pre-ship sanity is mandatory when the pack defines gates
+- **Skipping voice gate because "operator wrote it themselves"** — if final artifact customer-facing and the pack defines voice gates, they fire regardless
 - **Letting honest-limitations be implicit** — must be explicit AI-disclaimer
-- **Shipping AI-assisted artifacts without provenance log** — audit trail mandatory if WorkProfile=on
+- **Shipping AI-assisted artifacts without provenance log** — audit trail mandatory if the pack activates a provenance gate
 - **Bundling unrelated changes in one PR** — atomic per design doc (one logical change per PR)
 - **PR body without design+plan+review links** — traceability requirement
 - **Skipping --no-verify** to bypass hooks — never bypass hooks unless explicitly authorized
 
 ## Failure recovery
 
-- **HARD-RULE violation at pre-ship**: full stop. Operator fixes. Re-run SHIP from Step 3. Log to audit.
+- **Compliance-gate violation at pre-ship**: full stop. Operator fixes. Re-run SHIP from Step 3. Log to audit.
 - **gh CLI unavailable**: surface command, operator runs manually. Save state for resume.
 - **Voice gate fails after edits**: surface findings, operator decides accept-with-caveat or further edit + re-gate.
 - **Brand assets missing AND default templates failed**: surface, operator either pulls brand or accepts text-only output.
-- **EV2 validation fails**: BLOCKED. Fix infra config. Re-run.
-- **Customer wants to delay deliverable**: SHIP completes commit/PR but skips customer-handoff. Resume customer-handoff later via `/li:demo-deliverable-gen`.
+- **Pack deploy validation fails**: BLOCKED. Fix infra config. Re-run.
+- **Customer wants to delay deliverable**: SHIP completes commit/PR but skips customer-handoff. Resume customer-handoff later via the doc-gen path (`/li:generate-ppt` / `-word` / `-web`).
 
 ## Voice tier behavior
 
-`voice: mixed`. PR body + release notes follow voice_tier of mode. Customer-facing artifacts go through TrailblazerVoiceCritic gate (trailblazer voice). Internal handoff (engineering team) uses internal voice.
+`voice: mixed`. PR body + release notes follow the active pack's voice tier (`resolve_pack_field voice.default_tier`; default: internal). Customer-facing artifacts go through the pack's voice gates (`resolve_pack_field voice.gates_active`; none by default). Internal handoff (engineering team) uses internal voice.

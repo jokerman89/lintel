@@ -10,7 +10,7 @@ cli_support: [claude-code, codex]
 
 # /skillify
 
-Promotes a recurring task into a first-class Lintel skill. Reads the operator's description (or a `/learn` entry marked `skillify-candidate`), scaffolds a new `SKILL.md` following `TEMPLATE-skill.md`, places it in the right scaffolding layer, and validates frontmatter.
+Promotes a recurring task into a first-class Lintel skill. Reads the operator's description (or a `/learn` entry marked `skillify-candidate`), scaffolds a new `SKILL.md` following `TEMPLATE-skill.md`, places it under `scaffolding/01-foundation/skills/`, and validates frontmatter.
 
 The output is NOT a deployed skill yet — operator iterates on the draft, then runs `/health` to validate before symlinking into `~/.claude/skills/` (or repo's `.claude/skills/`).
 
@@ -31,8 +31,8 @@ The output is NOT a deployed skill yet — operator iterates on the draft, then 
 
 - Required: name (kebab-case) + one-line description
 - Optional `--from-lesson <id>` — read a `/learn` entry by id, use it as seed
-- Optional `--layer <01-foundation|02-compliance|03-personal-advanced|04-power-user>` — which scaffolding layer (default: 03-personal-advanced for new skills)
-- Optional `--voice <internal|trailblazer|mixed>` — voice tier (default: internal)
+- Optional `--dir <subdir>` — scaffolding subdirectory under `scaffolding/01-foundation/skills/` (default: the skill's own name)
+- Optional `--voice <internal|customer|mixed>` — voice tier (default: internal)
 - Optional `--cli <list>` — CLIs supported (default: `claude-code,codex`)
 - Optional `--tools <list>` — tools the skill needs (default: `Read, Bash`)
 
@@ -53,7 +53,7 @@ The output is NOT a deployed skill yet — operator iterates on the draft, then 
    - Failure modes — placeholder bullets
    - Examples — placeholder
    - See also — auto-link related skills based on name similarity
-6. **Write to layer.** `scaffolding/<layer>/skills/<name-without-li->/SKILL.md`.
+6. **Write to scaffolding.** `scaffolding/01-foundation/skills/<name-without-li->/SKILL.md`.
 7. **Validate frontmatter.** Run `verify.sh --frontmatter <new-file>` (or inline equivalent). Surface any errors.
 8. **Report path + next steps.**
 
@@ -62,8 +62,7 @@ The output is NOT a deployed skill yet — operator iterates on the draft, then 
 ```
 Skillify: li-regen-mocks
 
-Layer: 03-personal-advanced
-Path: scaffolding/03-personal-advanced/skills/regen-mocks/SKILL.md
+Path: scaffolding/01-foundation/skills/regen-mocks/SKILL.md
 Voice: internal
 CLI support: claude-code, codex
 Tools: Read, Bash, Edit, Glob
@@ -90,8 +89,7 @@ Tools: Read, Bash, Edit, Glob
 
 ## Compliance integration
 
-- New skill file goes through Layer 2 sanity-scan on save (paranoid: a skill spec might inadvertently include a secret pattern).
-- Layer assignment: 01-foundation is RESERVED for stable skills — skillify defaults to 03-personal-advanced, requires explicit `--layer 01-foundation` to write there, and surfaces "are you sure?" gate.
+- New skill file goes through the active pack's compliance gates on save (`resolve_pack_field compliance.hooks`; none by default — paranoid packs may scan a skill spec for secret patterns).
 
 ## Voice tier note
 
@@ -100,7 +98,6 @@ Tools: Read, Bash, Edit, Glob
 ## Failure modes
 
 - **Name collides:** report existing skill path, exit. Do not auto-rename.
-- **Layer is 01-foundation but operator did not confirm:** AskUserQuestion gate — refuses by default.
 - **Template missing or corrupted:** report + exit. Do not silently generate without template.
 - **Frontmatter validation fails:** write file anyway BUT mark it INVALID in report. Operator must fix before activation.
 - **Lesson id (`--from-lesson`) not found:** report + ask operator to supply lesson body inline.
@@ -111,7 +108,7 @@ Tools: Read, Bash, Edit, Glob
 ```
 > /skillify --name regen-mocks --from-lesson LESSON-042
 [Reads lesson body, scaffolds SKILL.md]
-✓ Skill draft at scaffolding/03-personal-advanced/skills/regen-mocks/SKILL.md
+✓ Skill draft at scaffolding/01-foundation/skills/regen-mocks/SKILL.md
   Next: fill workflow + examples, then /health
 ```
 
@@ -120,14 +117,6 @@ Tools: Read, Bash, Edit, Glob
 > /skillify --name standup-brief --voice mixed --cli claude-code,codex
 [Description: "Generate a 3-bullet morning standup from yesterday's commits + open PRs"]
 ✓ Skill draft scaffolded. 12 TODO markers remain in body.
-```
-
-**Foundation-layer (rare):**
-```
-> /skillify --name custom-foundation-helper --layer 01-foundation
-[AskUserQuestion: 01-foundation is reserved for stable skills. Confirm?]
-[Operator: yes, with reason]
-✓ Skill scaffolded in 01-foundation. Audit logged.
 ```
 
 ## See also

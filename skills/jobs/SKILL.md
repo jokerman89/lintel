@@ -40,7 +40,7 @@ Each operation regenerates `_active.md` so `/li:status` reflects current truth.
 ## When NOT to use
 
 - Mid-task code-editing — jobs is lifecycle, not editing
-- For non-workflow_root skills — single-shot skills (`/li:doctor`, `/li:asset-search`) don't spawn jobs
+- For non-workflow_root skills — single-shot skills (`/li:doctor`, `/li:health`) don't spawn jobs
 - To enforce ordering between steps — that's `job.yaml.blocked_until` field, not this skill
 
 ## Inputs

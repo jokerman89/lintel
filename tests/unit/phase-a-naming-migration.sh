@@ -22,15 +22,12 @@ SKILLS_DIR="$REPO_ROOT/skills"
 # All v2 skill names that should be present (renamed ones) — bare, post Väg A
 # Updated 2026-05-29 for v3.6 Cohort 4 WS-4b renames:
 #   setup-brain → gbrain-setup, sync-brain → gbrain-sync, agt-tier-stamp → agent-tier-stamp
+# CAIP-specific skills (release-ev2, rais-*, onecs-check, agent-tier-stamp,
+# cloudtest-eval-suite, onebranch-validate, scaffold-engagement-demo, etc.) were
+# moved to lintel-caip-pack in the v4.7 extraction. Only generic survivors remain.
 V2_NAMES=(
-  "release-ev2" "release-deploy-ev2" "open-managed-browser"
-  "perfbench" "safe-deploy-ring" "code-freeze" "code-unfreeze"
-  "setup-ev2-targets" "gbrain-setup" "gbrain-sync"
-  "rais-customer-voice-check" "onecs-check" "onerai-submit-draft"
-  "dsb-submit-draft" "dpia-submit-draft" "rais-sensitive-use"
-  "rais-impact-assessment" "scaffold-engagement-demo" "rais-transparency-note"
-  "agent-tier-stamp" "entra-agent-id-submit-draft" "context-budgetwatch"
-  "cloudtest-eval-suite" "onebranch-validate"
+  "open-managed-browser" "perfbench" "code-freeze" "code-unfreeze"
+  "gbrain-setup" "gbrain-sync" "context-budgetwatch"
 )
 
 # v1 li-prefixed names that should NEVER appear as canonical `name:` value.
@@ -71,20 +68,18 @@ done
 V1_ALIAS_COUNT=$(grep -r "^v1_alias:" "$SKILLS_DIR" 2>/dev/null | wc -l | tr -d ' ')
 DEP_ALIAS_COUNT=$(grep -r "^deprecated_aliases:" "$SKILLS_DIR" 2>/dev/null | wc -l | tr -d ' ')
 TOTAL=$((V1_ALIAS_COUNT + DEP_ALIAS_COUNT))
-if [ "$TOTAL" -ge 24 ]; then
-  pass "alias entries present: $TOTAL (v1_alias=$V1_ALIAS_COUNT + deprecated_aliases=$DEP_ALIAS_COUNT; expected ≥24)"
+# Alias count dropped after the CAIP extraction (removed skills carried v1_alias entries).
+if [ "$TOTAL" -ge 5 ]; then
+  pass "alias entries present: $TOTAL (v1_alias=$V1_ALIAS_COUNT + deprecated_aliases=$DEP_ALIAS_COUNT; expected ≥5 post-extraction)"
 else
-  fail "alias entries low: $TOTAL (v1_alias=$V1_ALIAS_COUNT + deprecated_aliases=$DEP_ALIAS_COUNT; expected ≥24)"
+  fail "alias entries low: $TOTAL (v1_alias=$V1_ALIAS_COUNT + deprecated_aliases=$DEP_ALIAS_COUNT; expected ≥5)"
 fi
 
-# Verify directory rename (sdl replaced compliance under scaffolding/)
-[ -d "$REPO_ROOT/scaffolding/02-sdl" ] && pass "scaffolding/02-sdl/ exists" || fail "scaffolding/02-sdl/ MISSING"
-[ ! -d "$REPO_ROOT/scaffolding/02-compliance" ] && pass "scaffolding/02-compliance/ removed" || fail "scaffolding/02-compliance/ still exists"
-
-# Verify voice doc renames (under scaffolding/03-ms-team/voice/, not 03-personal-advanced/)
-for voice_doc in OurVoice-corpus.md OurVoice-test.md OurVoice-calibration.md OurVoice.md OurVoice-examples.md; do
-  [ -f "$REPO_ROOT/scaffolding/03-ms-team/voice/$voice_doc" ] && pass "voice doc renamed: $voice_doc" || fail "voice doc MISSING: $voice_doc"
-done
+# Post v4.7 CAIP extraction: company-specific scaffolding (02-sdl, 03-ms-team) moved
+# to lintel-caip-pack. Only 01-foundation remains; packs/_default is the neutral baseline.
+[ ! -d "$REPO_ROOT/scaffolding/02-sdl" ] && pass "scaffolding/02-sdl/ removed (extracted to pack)" || fail "scaffolding/02-sdl/ still present"
+[ ! -d "$REPO_ROOT/scaffolding/03-ms-team" ] && pass "scaffolding/03-ms-team/ removed (extracted to pack)" || fail "scaffolding/03-ms-team/ still present"
+[ -f "$REPO_ROOT/packs/_default/pack.yaml" ] && pass "packs/_default/ neutral baseline present" || fail "packs/_default/ MISSING"
 
 if [ "$FAILED" -gt 0 ]; then
   printf "${c_red}FAILED${c_reset} $TEST_NAME with $FAILED failure(s)\n"

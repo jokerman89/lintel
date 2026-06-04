@@ -12,7 +12,7 @@ You are the role-new skill — scaffolding for role files.
 
 ## What this skill does
 
-Creates a new role file via guided interview. Operator answers questions, skill renders structured role file at `roles/<id>.md` (public) or `~/.lintel/roles/private/<id>.md` (private).
+Creates a new role file via guided interview. Operator answers questions, skill renders structured role file into the active pack's role directory (`resolve_pack_field roles.source`) for public roles, or `~/.lintel/roles/private/<id>.md` for private ones.
 
 ## When to use
 
@@ -68,10 +68,10 @@ AskUserQuestion: "Top patterns, common mistakes, what differentiates great vs go
 
 AskUserQuestion: "Which Lintel skills/agents prefer this role? List them."
 
-Examples:
-- `/li:exec-brief` (Field CTO works well with)
-- `FieldCTOAdvisor` agent
-- `/li:proposal-drafter`
+Examples (pack-provided skills/agents — none ship with Lintel itself):
+- a pack's executive-brief skill
+- a pack's advisor agent for this role
+- a pack's proposal-drafter skill
 
 ### Step 9 — Sensitive context (private roles only)
 
@@ -135,7 +135,15 @@ companion_agents: [<list>]
 
 ```bash
 if sensitivity == public:
-  target="roles/<id>.md"
+  # Public roles land in the active pack's role directory (resolve_pack_field roles.source)
+  PACK_ROLES_DIR="$(resolve_pack_field roles.source)"
+  if [ -z "$PACK_ROLES_DIR" ]; then
+    echo "No pack role directory configured (roles.source is null in _default)."
+    echo "Activate a pack that provides roles, or save this role as private."
+    exit 1
+  fi
+  target="$PACK_ROLES_DIR/<id>.md"
+  mkdir -p "$PACK_ROLES_DIR"
 else:
   target="$LINTEL_HOME/roles/private/<id>.md"
   mkdir -p "$LINTEL_HOME/roles/private"
@@ -190,7 +198,7 @@ YES — anytime operator wants to scaffold a role.
 - Role template (inline in this skill)
 
 **Writes:**
-- `roles/<id>.md` (public) OR `~/.lintel/roles/private/<id>.md`
+- the active pack's role directory `<roles.source>/<id>.md` (public) OR `~/.lintel/roles/private/<id>.md`
 - `.lintel/state/00-state.md` (event)
 - `~/.lintel/profile.yaml` (if activated immediately)
 

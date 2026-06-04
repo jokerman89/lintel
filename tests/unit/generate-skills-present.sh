@@ -25,10 +25,10 @@ f="$REPO_ROOT/skills/$ORCHESTRATOR/SKILL.md"
 if [ -f "$f" ]; then
   name=$(grep '^name:' "$f" | head -1 | awk '{print $2}')
   layer=$(grep '^layer:' "$f" | head -1 | awk '{print $2}')
-  if [ "$name" = "$ORCHESTRATOR" ] && [ "$layer" = "ms-team" ]; then
+  if [ "$name" = "$ORCHESTRATOR" ] && [ "$layer" = "foundation" ]; then
     pass "orchestrator: $ORCHESTRATOR (name + layer match)"
   else
-    fail "orchestrator frontmatter: name=$name, layer=$layer (expected $ORCHESTRATOR + ms-team)"
+    fail "orchestrator frontmatter: name=$name, layer=$layer (expected $ORCHESTRATOR + foundation)"
   fi
 else
   fail "orchestrator SKILL.md missing: $f"
@@ -41,7 +41,7 @@ for skill in "${SHARED_SUBSKILLS[@]}"; do
   if [ -f "$f" ]; then
     name=$(grep '^name:' "$f" | head -1 | awk '{print $2}')
     layer=$(grep '^layer:' "$f" | head -1 | awk '{print $2}')
-    if [ "$name" = "$skill" ] && [ "$layer" = "ms-team" ]; then
+    if [ "$name" = "$skill" ] && [ "$layer" = "foundation" ]; then
       pass "shared sub-skill: $skill (name + layer match)"
     else
       fail "shared sub-skill frontmatter: $skill (name=$name, layer=$layer)"
@@ -60,7 +60,7 @@ for skill in "${SLOT_SKILLS[@]}"; do
     layer=$(grep '^layer:' "$f" | head -1 | awk '{print $2}')
 
     # Frontmatter check
-    if [ "$name" = "$skill" ] && [ "$layer" = "ms-team" ]; then
+    if [ "$name" = "$skill" ] && [ "$layer" = "foundation" ]; then
       pass "slot: $skill (name + layer match)"
     else
       fail "slot frontmatter: $skill (name=$name, layer=$layer)"

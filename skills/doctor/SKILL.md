@@ -52,7 +52,7 @@ Diagnostic health-check across operator's machine. Detects which AI CLIs are ins
 
 5. **Check scaffolding install.** `~/.lintel/scaffolding/` populated?
 
-6. **Check brand assets.** `~/.lintel/brand/` present + age (warn if >90 days via `brand-staleness-warn` hook).
+6. **Check pack assets.** `~/.lintel/brand/` present + age (warn if >90 days via `brand-staleness-warn` hook). Brand/voice assets are pack-contributed (`resolve_pack_field brand.*`; none by default).
 
 7. **Hook activation status.** `~/.lintel/hooks/<name>` symlinks vs canonical.
 
@@ -79,16 +79,17 @@ JSTACK-DOCTOR: health check (date)
 ## Scaffolding
 - ~/.lintel/scaffolding/: ✓ present, last updated <date>
 
-## Brand assets
+## Pack assets
 - ~/.lintel/brand/: ⚠ 95 days old (>90 day threshold)
-  → Action: invoke `/brand-update` skill
+  → Action: refresh the active pack's brand/voice assets
 
 ## Hooks
 - Activated: <N>/15 (operator opt-in)
 - See: ~/.lintel/hooks/
 
-## Voice corpus
-- Status: <CALIBRATED | NOT_CALIBRATED>
+## Voice corpus (pack-contributed)
+- Source: <resolve_pack_field voice.corpus — none by default>
+- Status: <CALIBRATED | NOT_CALIBRATED | N/A (no pack corpus)>
 - Last calibration: <date>
 
 ## Verdict

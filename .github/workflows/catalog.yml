@@ -32,7 +32,7 @@ jobs:
             echo ""
 
             # Group by layer
-            for layer in foundation ms-team sdl personal-advanced other; do
+            for layer in foundation personal-advanced other; do
               count=0
               section=""
               while IFS= read -r f; do

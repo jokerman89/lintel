@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
-# bin/li-review-log — first-party review-log writer (first-party-first remediation)
+# bin/li-review-log — native review-log writer
 #
 # Replaces the external gstack binary `~/.claude/skills/gstack/bin/gstack-review-log`
 # on Lintel's execution path. Accepts the same single JSON-object argument the
 # review skills already pass (plan-ceo-review, plan-eng-review, plan-design-review,
-# plan-devex-review, code-review, codex) and appends a record to the first-party
+# plan-devex-review, code-review, codex) and appends a record to Lintel's own
 # audit log at ~/.lintel/audit/reviews.jsonl by sourcing bin/_audit.sh.
 #
-# Why first-party: Lintel ships a `non-first-party-warn` rule. Calling the external
-# gstack binary on the execution path violates that rule. This wrapper keeps the
-# same JSON contract but writes via the first-party audit_log() helper. The legacy
-# gstack alias still exists on disk but is no longer called by Lintel skills.
+# Why native: keeping the review log on Lintel's own execution path avoids an
+# external dependency on the gstack binary. This wrapper keeps the same JSON
+# contract but writes via Lintel's audit_log() helper. The legacy gstack alias
+# still exists on disk but is no longer called by Lintel skills.
 #
 # Usage:
 #   bin/li-review-log '{"skill":"plan-eng-review","timestamp":"...","status":"CLEAR","commit":"7e7a021","mode":"FULL_REVIEW"}'
@@ -102,7 +102,7 @@ esac
 # Preserve the full original JSON payload verbatim for replay / downstream parsing.
 RAW_ONE_LINE="$(printf '%s' "$INPUT" | tr '\n' ' ')"
 
-# Write the first-party audit record:
+# Write the audit record:
 #   category=reviews  kind=<skill>  status=... commit=... [review_ts=...] raw=<payload>
 set -- "status=$STATUS" "commit=$COMMIT"
 [ -n "$TIMESTAMP" ] && set -- "$@" "review_ts=$TIMESTAMP"

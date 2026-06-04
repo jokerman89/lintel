@@ -96,7 +96,7 @@ if (Test-Path $LintelConfig) {
 
 # Hooks (inert)
 Hdr "Hooks (inert install - opt-in symlink to activate)"
-$hookSource = Join-Path $RepoRoot "scaffolding\02-compliance\hooks"
+$hookSource = Join-Path $RepoRoot "hooks\shared"
 if (Test-Path $hookSource) {
   Copy-Item -Path "$hookSource\*" -Destination $LintelHooks -Recurse -Force
   Ok "Hooks copied to $LintelHooks (INERT - symlink to activate)"

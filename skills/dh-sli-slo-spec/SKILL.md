@@ -18,7 +18,7 @@ Reads NFR spec (from TA quality-attributes if present, else operator's targets).
 
 - DH full pass slos_defined checkpoint
 - Single action `/li:dh single --action sli-slo-spec`
-- Pre-customer-engagement SLA negotiation
+- Pre-release SLA negotiation
 - After repeated incidents to formalize tolerance
 
 ## When NOT to use
