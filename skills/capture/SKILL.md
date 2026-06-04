@@ -51,6 +51,36 @@ Read entire cycle's `.lintel/state/00-state.md` log. Extract:
 
 This is the source data for capture artifacts.
 
+### Step 1b — Granularity calibration record (scale-estimator feedback)
+
+Close the calibration loop (design §3.5): record this cycle's **actual** outcome against the SCOPE estimate so `lib/scale-estimator.sh` can correct its token/size priors next time. Today the estimate is born in SCOPE but never compared to reality — this step is the missing feedback edge.
+
+Mechanical, non-blocking. Read the planned scale from `scope.md` (or the cycle's `00-state.md` SCOPE entry) and the actuals from the cycle history aggregated in Step 1, then append one record via the unified `audit_log` writer — the same call pattern every other Lintel producer uses (e.g. `skills/migrations`):
+
+```bash
+source "$(dirname "$0")/../../bin/_audit.sh"
+
+# From scope.md / SCOPE state entry (the plan's estimate):
+size="$SCOPE_SIZE"                 # XS | S | M | L | XL
+est_tokens="$SCOPE_EST_TOKENS"     # the estimator's prior at plan time
+depth_schema="$SCOPE_DEPTH_SCHEMA" # flat | phased | tree
+# From this cycle's actuals (Step 1 aggregation):
+actual_tokens="$CYCLE_TOKENS_USED" # measured token cost this cycle
+task_count="$CYCLE_TASK_COUNT"     # leaf tasks actually executed
+
+audit_log granularity actual_vs_estimated \
+  "size=$size" \
+  "est_tokens=$est_tokens" \
+  "actual_tokens=$actual_tokens" \
+  "task_count=$task_count" \
+  "depth_schema=$depth_schema"
+# → appends one JSONL line to ~/.lintel/audit/granularity.jsonl
+```
+
+If any field is unavailable (e.g. SCOPE was silent on an XS request, or tokens weren't tracked), pass what you have and omit the rest — `audit_log` records whatever k=v pairs it's given; a partial record is still useful history. Never block the cycle on this; a failed write is silent by design (`_audit.sh` swallows write errors).
+
+The estimator's `scale_calibrated_prior <size>` reads exactly this log: it takes the median `actual_tokens` for a size as the corrected prior, falling back to the mechanical default when no history exists. One record per cycle here is what makes the next estimate sharper.
+
 ### Step 2 — Lessons capture (filtered)
 
 Invoke `/li:learn` (or inline):
@@ -291,6 +321,7 @@ YES — standalone post-implementation reflection. Useful if operator forgot CAP
 - `~/.lintel/roles/<id>.md` (update if role active + insights to add)
 - `.lintel/state/00-state.md` (CAPTURE final entry)
 - `~/.lintel/analytics/cycle-completion.jsonl`
+- `~/.lintel/audit/granularity.jsonl` (append — actual-vs-estimated calibration record, via `audit_log`; read by `lib/scale-estimator.sh` `scale_calibrated_prior`)
 
 **Triggers:**
 - Nothing automatically — cycle complete

@@ -15,6 +15,10 @@
 #   scale_confidence <prompt>      → low | high  (low ⇒ escalate to agent judgment)
 #   scale_escalate <prompt> <thr>  → yes | no
 #   size_to_depth_schema <size>    → flat | phased | tree
+#   size_default_prior <size>      → integer est_tokens (mechanical fallback)
+#   scale_calibrated_prior <size>  → integer est_tokens, corrected from history
+#                                    (Slice 4 calibration loop; falls back to
+#                                     size_default_prior when no history exists)
 #   scale_estimate <prompt>        → emits the scope block (YAML) for the skill
 #   elephant_score <prompt>        → alias of detect_breadth (back-compat)
 #
@@ -155,17 +159,96 @@ size_to_depth_schema() {
   esac
 }
 
+# ─── Token priors (Slice 4 — calibration loop, design §3.5 / §3.7) ────────────
+# The mechanical, hardcoded fallback prior per size — the "guess" used when no
+# calibration history exists yet. scale_calibrated_prior corrects this from the
+# audit log over time. Order-of-magnitude bands matching the design's readings
+# (XS≈4k … XL≈120k). Override by exporting SCALE_PRIOR_<SIZE>.
+size_default_prior() {
+  case "${1:-S}" in
+    XS) printf '%s' "${SCALE_PRIOR_XS:-4000}" ;;
+    S)  printf '%s' "${SCALE_PRIOR_S:-12000}" ;;
+    M)  printf '%s' "${SCALE_PRIOR_M:-30000}" ;;
+    L)  printf '%s' "${SCALE_PRIOR_L:-70000}" ;;
+    XL) printf '%s' "${SCALE_PRIOR_XL:-120000}" ;;
+    *)  printf '%s' "${SCALE_PRIOR_S:-12000}" ;;
+  esac
+}
+
+# ─── scale_calibrated_prior ───────────────────────────────────────────────────
+# The compounding edge (design §3.5): correct the token prior for a given size
+# from recorded actual-vs-estimated history instead of the hardcoded guess.
+#
+#   scale_calibrated_prior <size>  → integer est_tokens
+#
+# Reads CAPTURE's append-only log at $LINTEL_HOME/audit/granularity.jsonl
+# (written via `audit_log granularity ...`). For every record whose `size`
+# field matches <size> and that carries a numeric `actual_tokens`, it takes the
+# MEDIAN of those actuals as the corrected prior — median, not mean, so a single
+# runaway cycle cannot skew the band.
+#
+# Graceful fallback (keeps Slice 1's behaviour intact): if the log is absent,
+# unreadable, or holds no usable actual_tokens for that size, it returns
+# size_default_prior — the exact mechanical guess used before this slice. This
+# function is purely additive: callers that never had history simply get the
+# old number.
+scale_calibrated_prior() {
+  local size="${1:-S}"
+  local home="${LINTEL_HOME:-$HOME/.lintel}"
+  local log="${LINTEL_AUDIT_DIR:-$home/audit}/granularity.jsonl"
+
+  # No history → mechanical default (the Slice-1 guess).
+  [ -r "$log" ] || { size_default_prior "$size"; return 0; }
+
+  # Collect actual_tokens for records matching this size. Pure awk: match the
+  # size field exactly, pull the numeric actual_tokens, sort, take the median.
+  # If nothing matches, awk prints the empty string and we fall back.
+  local median
+  median=$(awk -v want="$size" '
+    {
+      # size field: "size":"<value>"
+      if (match($0, /"size":"[^"]*"/)) {
+        s = substr($0, RSTART+8, RLENGTH-9)
+      } else { s = "" }
+      if (s != want) next
+      # actual_tokens field: "actual_tokens":"<n>" or :<n>
+      if (match($0, /"actual_tokens":"?[0-9]+"?/)) {
+        t = substr($0, RSTART, RLENGTH)
+        gsub(/[^0-9]/, "", t)
+        if (t != "") vals[n++] = t + 0
+      }
+    }
+    END {
+      if (n == 0) { print ""; exit }
+      # insertion sort (n is small — one entry per cycle)
+      for (i = 1; i < n; i++) {
+        v = vals[i]; j = i - 1
+        while (j >= 0 && vals[j] > v) { vals[j+1] = vals[j]; j-- }
+        vals[j+1] = v
+      }
+      if (n % 2) print vals[(n-1)/2]
+      else       print int((vals[n/2-1] + vals[n/2]) / 2)
+    }
+  ' "$log" 2>/dev/null)
+
+  if [ -n "$median" ]; then printf '%s' "$median"; else size_default_prior "$size"; fi
+}
+
 # ─── scale_estimate ──────────────────────────────────────────────────────────
 # Emits the scope block (YAML) for SENSE step 0e to read. Mechanical; the agent
 # refines `readings` when escalate=yes (decision 1B).
 scale_estimate() {
   local p="${1:-}" thr="${2:-medium}"
-  local size amb conf esc schema breadth depth surfaces
+  local size amb conf esc schema breadth depth surfaces est_tokens
   size=$(classify_size "$p")
   amb=$(scale_ambiguous "$p")
   conf=$(scale_confidence "$p")
   esc=$(scale_escalate "$p" "$thr")
   schema=$(size_to_depth_schema "$size")
+  # est_tokens: calibrated from CAPTURE history when present, else the
+  # mechanical default (Slice 4, design §3.5). Additive — never changes the
+  # pre-existing keys, only adds one informed by the calibration loop.
+  est_tokens=$(scale_calibrated_prior "$size")
   breadth=$(detect_breadth "$p"); depth=$(detect_depth "$p"); surfaces=$(detect_surface_count "$p")
   cat <<EOF
 scale:
@@ -174,6 +257,7 @@ scale:
   ambiguous: $amb
   escalate: $esc
   depth_schema: $schema
+  est_tokens: $est_tokens
   signals: { breadth: $breadth, depth: $depth, surfaces: $surfaces }
 EOF
 }
@@ -188,7 +272,8 @@ if [ "${BASH_SOURCE[0]}" = "$0" ]; then
     "stand up a full landing zone with CI/CD and front door on azure" \
     "add multi-tenant support" \
     "research how others do feature flags"; do
-    printf '  prompt=%-58s size=%-3s ambiguous=%-3s schema=%s\n' \
-      "\"$p\"" "$(classify_size "$p")" "$(scale_ambiguous "$p")" "$(size_to_depth_schema "$(classify_size "$p")")"
+    sz=$(classify_size "$p")
+    printf '  prompt=%-58s size=%-3s ambiguous=%-3s schema=%-7s est_tokens=%s\n' \
+      "\"$p\"" "$sz" "$(scale_ambiguous "$p")" "$(size_to_depth_schema "$sz")" "$(scale_calibrated_prior "$sz")"
   done
 fi
