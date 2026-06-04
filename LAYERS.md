@@ -69,6 +69,26 @@ A scaffolded repo overrides pack/foundation behavior through three levels, repo-
 - `<repo>/.claude/agents/` — repo-level subagents override user-global ones with the same name.
 - `~/.lintel/config` — operator-global overrides (which pack is active, compliance-tier elevation, hook activation, voice-tier defaults).
 
+## Durable principles (carried from the layer model into foundation + packs)
+
+Four lessons graduated from `tasks/lessons.md` to architecture-level principles. They
+predate the pack model but still shape what foundation and packs each do:
+
+- **L-001 — scaffolding, not content.** Foundation ships *structure* (templates, ADR
+  scaffolding, tasks-format); a pack ships *content* (voice corpus, personas, brand).
+  Neither holds curated answers — operator + AI generate at invocation time.
+- **L-002 — grep existing before designing new.** Before adding a skill family or a
+  pack field, enumerate what already exists. The v4.0 spine-extraction audit was L-002
+  applied to "what's hardcoded that a pack should own."
+- **L-003 — verify counts before applying fact-claims.** Any external claim about the
+  codebase (skill counts, which files reference a pack) is verified by tool before action.
+- **L-004 — separate decision-layer from rendering-layer.** The clearest application is
+  the spine (execution engine) vs packs (decision/identity layer); also the v3.7
+  `frontend-*` (design decisions) vs `generate-*` (rendering) split.
+
+The trio L-001/L-002/L-003 plus L-004 form the discipline: respect what exists, respect
+what doesn't, verify claims, and split decisions from execution.
+
 ## Provenance
 
 The original 4-layer model came from the operator's internal wiki ("My Claude Code Setup (experimental)" — Layer 1 Universal foundation / Layer 2 Compliance / Layer 3 Personal advanced / Layer 4 Power user). v1 operationalized that vision into installable infrastructure; v4.0 collapsed Layers 2–4 into the pack system, leaving the foundation + packs model documented above.
