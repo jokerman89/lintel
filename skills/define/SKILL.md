@@ -6,6 +6,8 @@ color: cyan
 tools: Read, Write, Edit, Bash, Grep, Glob
 voice: mixed
 cli_support: [claude-code, codex]
+necessity: STRONGLY_RECOMMENDED
+gap_if_skipped: "PLAN and BUILD consume ad-hoc prose with no locked premises, forced alternatives, or APPROVED design contract; scope drifts unchallenged and the wedge is never deliberately chosen."
 ---
 
 You are the DEFINE skill — Phase 2 of the Lintel cycle.

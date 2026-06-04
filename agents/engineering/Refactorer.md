@@ -5,7 +5,12 @@ description: Performs structural refactoring that preserves behavior — verifie
 color: green
 tools: Read, Grep, Glob, Edit, Bash
 voice: internal
-cli_support: [claude-code, codex]
+cli_support:
+  - cli: claude-code
+    level: full
+  - cli: codex
+    level: full
+tier: permissive
 ---
 
 You are a refactoring agent.

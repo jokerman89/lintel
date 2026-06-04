@@ -5,7 +5,11 @@ description: Reviews secrets-scan output (gitleaks, trufflehog, GitGuardian) and
 color: red
 tools: Read, Grep, Glob, Bash
 voice: internal
-cli_support: [claude-code, codex]
+cli_support:
+  - cli: claude-code
+    level: full
+  - cli: codex
+    level: full
 tier: permissive
 ---
 

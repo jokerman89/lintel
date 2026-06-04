@@ -5,8 +5,10 @@
 set -euo pipefail
 
 LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
-AUDIT="$LINTEL_HOME/audit/hooks.jsonl"
 mkdir -p "$LINTEL_HOME/audit"
+
+# Unified audit writer (hooks/shared/<name>/ → repo-root → bin/). Idempotent source.
+command -v audit_log >/dev/null 2>&1 || source "$(dirname "${BASH_SOURCE[0]}")/../../../bin/_audit.sh"
 
 file_edited="${1:-}"
 [ -z "$file_edited" ] && exit 0
@@ -36,11 +38,7 @@ for dir in "${adr_dirs[@]}"; do
 done
 
 if [ -n "$matching_adr" ]; then
-  ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-  operator=$(whoami 2>/dev/null || echo unknown)
-
-  printf '{"hook":"ta-arch-drift-warn","tier":"warn","ts":"%s","file_edited":"%s","adr_id":"%s","adr_decision":"%s","operator":"%s"}\n' \
-    "$ts" "$file_edited" "$matching_adr" "$matching_decision" "$operator" >> "$AUDIT"
+  audit_log "hooks" "ta_arch_drift_warn" "hook=ta-arch-drift-warn" "tier=warn" "file_edited=$file_edited" "adr_id=$matching_adr" "adr_decision=$matching_decision"
 
   echo "WARN [Lintel hook ta-arch-drift-warn]: editing $file_edited"
   echo "WARN: file is claimed by $matching_adr — '$matching_decision'"

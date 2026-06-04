@@ -1,7 +1,7 @@
 ---
 name: DesignSystemAuditor
 category: frontend
-description: Quality-gate agent för frontend-design-review skill. Runs 6-dimension audit (typography hierarchy + motion coherence + shader perf-budget + accessibility WCAG AA + brand conformance + responsive fidelity). Scored rubric: ≥80=green, 60-79=yellow, <60=red per dimension.
+description: "Quality-gate agent för frontend-design-review skill. Runs 6-dimension audit (typography hierarchy + motion coherence + shader perf-budget + accessibility WCAG AA + brand conformance + responsive fidelity). Scored rubric: ≥80=green, 60-79=yellow, <60=red per dimension."
 color: purple
 tools: Read, Grep, Glob, Write, Bash
 voice: internal

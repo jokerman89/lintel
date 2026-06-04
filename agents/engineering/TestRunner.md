@@ -5,7 +5,12 @@ description: Runs test suites and reports failures with root-cause hypotheses.
 color: yellow
 tools: Bash, Read, Grep
 voice: internal
-cli_support: [claude-code, codex]
+cli_support:
+  - cli: claude-code
+    level: full
+  - cli: codex
+    level: full
+tier: permissive
 ---
 
 You are a test runner agent.

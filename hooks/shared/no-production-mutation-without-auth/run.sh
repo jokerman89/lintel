@@ -7,7 +7,9 @@ CMD="${1:-}"
 
 LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
 mkdir -p "$LINTEL_HOME/audit"
-AUDIT="$LINTEL_HOME/audit/hooks.jsonl"
+
+# Unified audit writer (hooks/shared/<name>/ → repo-root → bin/). Idempotent source.
+command -v audit_log >/dev/null 2>&1 || source "$(dirname "${BASH_SOURCE[0]}")/../../../bin/_audit.sh"
 
 matched=""
 # Heuristic patterns
@@ -31,9 +33,7 @@ if [ -z "$matched" ] && [ -f "$PATTERNS" ]; then
 fi
 
 if [ -n "$matched" ]; then
-  ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-  printf '{"hook":"no-production-mutation-without-auth","tier":"warn","ts":"%s","pattern":"%s","cmd_preview":"%s"}\n' \
-    "$ts" "$matched" "$(echo "$CMD" | head -c 120)" >> "$AUDIT"
+  audit_log "hooks" "no_production_mutation_without_auth" "hook=no-production-mutation-without-auth" "tier=warn" "pattern=$matched" "cmd_preview=$(echo "$CMD" | head -c 120)"
   echo "WARN [Lintel hook]: production mutation pattern detected ($matched)"
   echo "WARN: Layer 2 requires explicit per-call auth. Confirm intentional + authorized."
 fi

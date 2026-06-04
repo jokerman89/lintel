@@ -10,6 +10,7 @@ cli_support:
     level: full
   - cli: codex
     level: full
+tier: permissive
 ---
 
 You are a context-budget advisor agent.

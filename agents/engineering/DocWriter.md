@@ -5,7 +5,12 @@ description: Generates and updates documentation from code — detects doc/code 
 color: green
 tools: Read, Grep, Glob, Write, Edit
 voice: internal
-cli_support: [claude-code, codex]
+cli_support:
+  - cli: claude-code
+    level: full
+  - cli: codex
+    level: full
+tier: permissive
 ---
 
 You are a documentation writer agent.

@@ -4,14 +4,15 @@ Auto-generated från frontmatter på push till main.
 Regenerated av `.github/workflows/catalog.yml` per push när `skills/**/SKILL.md` ändras.
 Hand-edits skrivs över — edit frontmatter i source SKILL.md istället.
 
-Total skills: 165
-Generated: 2026-06-03T00:00:00Z
+Total skills: 167
+Generated: 2026-06-04T00:00:00Z
 
-## foundation layer (165 skills)
+## foundation layer (167 skills)
 
 | Skill | Description |
 |---|---|
 | `/li:adr-new` | Bootstrap a new ADR (Architecture Decision Record) from template, with context-gathering questions. |
+| `/li:audit` | Read the unified Lintel audit trail — surface ~/.lintel/audit/<category>.jsonl records with optional category / kind / |
 | `/li:autoplan` | Chains office-hours → ceo-review → eng-review → design-review. End-to-end plan pipeline. |
 | `/li:brief-forge` | Phase 3 v4.0 — universal hand-off gate. Constructs envelopes per lib/envelope-schema.yaml + runs evaluators on every s |
 | `/li:browse` | Drive a headless Chromium to a URL — screenshot, extract DOM, click, fill forms, verify UI. |
@@ -149,7 +150,7 @@ Generated: 2026-06-03T00:00:00Z
 | `/li:sc-threat-model` | SC sub-skill — STRIDE / attack-tree threat enumeration with mitigations. Dispatches to ThreatModelDrafter + SecurityAu |
 | `/li:sc` | Phase 4 v4.3 — security-compliance module. Three granularities (full / loop / single). Sub-skills dispatch to existing |
 | `/li:scaffold-internal-tool` | Initialize an internal-tooling repo — CI, README, pack compliance hooks, no customer surface. |
-| `/li:scaffold-mvp` | Initialize a product-MVP repo — full compliance + voice + RAI + deploy wiring. |
+| `/li:scaffold-mvp` | Initialize a product-MVP repo — full structure + pack-driven compliance/voice/deploy wiring. |
 | `/li:scaffold` | Scaffold a new repo with Lintel base templates — CLAUDE.md, tasks/lessons.md, EVOLUTION-LOG, docs/adr/ — interactive |
 | `/li:scrape` | Extract structured data from one or more pages — declarative selector schema, JSON output. |
 | `/li:sense` | Phase 1 of Lintel cycle — auto-detect operator intent, pack compliance mode, active role, mode recommendation, 00-stat |
@@ -174,6 +175,7 @@ Generated: 2026-06-03T00:00:00Z
 | `/li:tq-regression-suite` | TQ sub-skill — golden-path tests + recent-bug-fix tests curated. Dispatches to RegressionDetective + TestRunner agents |
 | `/li:tq-test-pyramid-review` | TQ sub-skill — unit/integration/e2e ratio audit + test-distribution health. Dispatches to Architect + TestRunner. |
 | `/li:tq` | Phase 4 v4.5 — testing-qa module. Three granularities (full / loop / single). Sub-skills dispatch to existing test age |
+| `/li:uniformity` | Read-only uniformity-contract dashboard — runs the Gate-M3 floor shape-test and points at the regenerable coverage mat |
 | `/li:usage-log` | Append-only usage log för skill/agent-invocations. Wrapper-pattern per L-001 (en log, ingen per-skill duplikat). Solo-i |
 | `/li:v4-migrate` | Walks operator through v3.x → v4.0 migration — detects v3.x usage signals, recommends pack activation, optionally wr |
 

@@ -7,6 +7,8 @@ color: amber
 tools: Read, Write, Edit, Bash, Grep, Glob
 voice: internal
 cli_support: [claude-code, codex]
+necessity: STRONGLY_RECOMMENDED
+gap_if_skipped: "Architecturally-deep work proceeds with no ADRs, no locked/versioned interface contracts, and no complexity-budget or non-functional checks; boundary drift and breaking changes reach consumers undetected."
 navigation:
   primary_intent: produce architecture-grade decisions and contracts when work has architectural depth
   triggers:

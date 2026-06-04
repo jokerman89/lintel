@@ -6,6 +6,8 @@ color: cyan
 tools: Read, Bash, Grep, Glob
 voice: internal
 cli_support: [claude-code, codex]
+necessity: OPTIONAL
+gap_if_skipped: "Operator loses the one-word hotfix shortcut; the identical workflow is still reachable via /li:cycle --mode hotfix, so no capability is lost — only the convenience."
 ---
 
 You are the FIX composite shortcut — hotfix mode pre-baked.

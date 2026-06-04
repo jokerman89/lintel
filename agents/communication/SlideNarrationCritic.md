@@ -1,11 +1,15 @@
 ---
 name: SlideNarrationCritic
 category: communication
-description: Critiques slide narration scripts for voice consistency, pacing, audience alignment, and recovery-line presence.
+description: Critiques slide narration scripts for voice consistency, pacing, audience alignment, and recovery-line presence. Slide narration critique, presentation script review, demo rehearsal, talk track, pacing words-per-minute, speaker notes, recovery lines, audience alignment, demo narration, deck voiceover.
 color: yellow
 tools: Read, Bash, Grep, Glob
 voice: internal
-cli_support: [claude-code, codex]
+cli_support:
+  - cli: claude-code
+    level: full
+  - cli: codex
+    level: full
 tier: permissive
 ---
 

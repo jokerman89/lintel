@@ -5,7 +5,12 @@ description: Performs schema, API, and dependency migrations — reversible, ide
 color: orange
 tools: Read, Grep, Glob, Edit, Bash
 voice: internal
-cli_support: [claude-code, codex]
+cli_support:
+  - cli: claude-code
+    level: full
+  - cli: codex
+    level: full
+tier: permissive
 ---
 
 You are a migration agent.

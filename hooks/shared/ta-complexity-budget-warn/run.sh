@@ -5,9 +5,11 @@
 set -euo pipefail
 
 LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
-AUDIT="$LINTEL_HOME/audit/hooks.jsonl"
 PROFILE="$LINTEL_HOME/profile.yaml"
 mkdir -p "$LINTEL_HOME/audit"
+
+# Unified audit writer (hooks/shared/<name>/ → repo-root → bin/). Idempotent source.
+command -v audit_log >/dev/null 2>&1 || source "$(dirname "${BASH_SOURCE[0]}")/../../../bin/_audit.sh"
 
 file_edited="${1:-}"
 [ -z "$file_edited" ] || [ ! -f "$file_edited" ] && exit 0
@@ -58,11 +60,7 @@ esac
 [ "$cognitive" = 0 ] && cognitive=$(( cyclomatic * 13 / 10 ))
 
 if [ "$cyclomatic" -gt "$budget_cyclomatic" ] || [ "$cognitive" -gt "$budget_cognitive" ]; then
-  ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-  operator=$(whoami 2>/dev/null || echo unknown)
-
-  printf '{"hook":"ta-complexity-budget-warn","tier":"warn","ts":"%s","file_edited":"%s","cyclomatic":%d,"cognitive":%d,"budget_cyclomatic":%d,"budget_cognitive":%d,"operator":"%s"}\n' \
-    "$ts" "$file_edited" "$cyclomatic" "$cognitive" "$budget_cyclomatic" "$budget_cognitive" "$operator" >> "$AUDIT"
+  audit_log "hooks" "ta_complexity_budget_warn" "hook=ta-complexity-budget-warn" "tier=warn" "file_edited=$file_edited" "cyclomatic=$cyclomatic" "cognitive=$cognitive" "budget_cyclomatic=$budget_cyclomatic" "budget_cognitive=$budget_cognitive"
 
   echo "WARN [Lintel hook ta-complexity-budget-warn]: $file_edited"
   echo "WARN: cyclomatic=$cyclomatic (budget $budget_cyclomatic), cognitive=$cognitive (budget $budget_cognitive)"
