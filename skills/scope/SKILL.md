@@ -120,7 +120,7 @@ mkdir -p "$(dirname "$scope_out")"
 cat > "$scope_out" <<EOF
 # Scope: $prompt_text
 size: $scale_size
-intent: ${override_route:+build (overrode $intent→ship)}${override_route:-$intent}
+intent: ${override_route:+build (overrode $intent→build)}${override_route:-$intent}
 ambiguous: ${scale_amb}${chosen_reading:+ → resolved}
 chosen_reading: "${chosen_reading:-$prompt_text}"
 surface: [<agent fills from signals: infra/ci/auth/data/api/network>]

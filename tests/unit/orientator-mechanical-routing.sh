@@ -86,6 +86,27 @@ should=$(check_escalation_threshold "high" "medium")
 should=$(check_escalation_threshold "low" "never")
 [ "$should" = "no" ] && pass "threshold=never → never escalate" || fail "got $should"
 
+# ─── Scenario 8: deploy is a distinct intent (D3), ship unchanged ────────
+# Regression: classify_intent used to collapse deploy → ship, leaving the
+# scope/SKILL.md route-override `deploy` arm dead. Deploy is now its own intent
+# so the SCOPE greenfield override (deploy a website to azure → build) is live.
+echo ""
+echo "[8] deploy/ship intent split (D3 regression)"
+intent=$(classify_intent "deploy a website to azure")
+[ "$intent" = "deploy" ] && pass "'deploy a website to azure' → deploy" || fail "intent=$intent (expected deploy)"
+intent=$(classify_intent "deploy to production")
+[ "$intent" = "deploy" ] && pass "'deploy to production' → deploy" || fail "intent=$intent (expected deploy)"
+intent=$(classify_intent "ship it")
+[ "$intent" = "ship" ] && pass "'ship it' → ship (unchanged)" || fail "intent=$intent (expected ship)"
+intent=$(classify_intent "release v2")
+[ "$intent" = "ship" ] && pass "'release v2' → ship (release stays ship)" || fail "intent=$intent (expected ship)"
+workflow=$(match_workflow "deploy" "cycle")
+[ "$workflow" = "/li:cycle --from SHIP" ] && pass "deploy → /li:cycle --from SHIP" || fail "workflow=$workflow"
+confidence=$(score_confidence "deploy" "/li:cycle --from SHIP")
+[ "$confidence" = "high" ] && pass "deploy confidence=high" || fail "confidence=$confidence"
+intent=$(classify_intent "driftsätt till produktion")
+[ "$intent" = "deploy" ] && pass "Swedish 'driftsätt' → deploy (bilingual input preserved)" || fail "intent=$intent (expected deploy)"
+
 echo ""
 if [ "$FAILED" -eq 0 ]; then echo "All orientator-mechanical-routing scenarios PASSED"; exit 0
 else echo "Some orientator-mechanical-routing scenarios FAILED"; exit 1; fi
