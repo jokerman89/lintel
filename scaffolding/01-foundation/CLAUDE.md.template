@@ -1,6 +1,6 @@
 # CLAUDE.md — repo instructions for LLM assistants
 
-> This file was scaffolded from `jokerman-session-setup` (JokermanStack / JStack). Sections between `<!-- PROJECT:START -->` and `<!-- PROJECT:END -->` are project-specific — adapt freely. The remaining sections are load-bearing and inherited from [CORE-PRINCIPLES.md](CORE-PRINCIPLES.md). Change them only with an explicit reason documented in `EVOLUTION-LOG.md`.
+> This file was scaffolded by Lintel (`jokerman-session-setup`). Sections between `<!-- PROJECT:START -->` and `<!-- PROJECT:END -->` are project-specific — adapt freely. The remaining sections are load-bearing and inherited from [CORE-PRINCIPLES.md](CORE-PRINCIPLES.md). Change them only with an explicit reason documented in `EVOLUTION-LOG.md`. This file is self-contained: it works without the operator's global `~/.claude/CLAUDE.md`.
 
 <!-- PROJECT:START -->
 
@@ -16,6 +16,51 @@ Clear ownership domains:
 {{Other structural notes — legacy folders, frozen zones, etc.}}
 
 <!-- PROJECT:END -->
+
+---
+
+## Session-start ritual
+
+> If this repo uses Lintel, Claude Code auto-loads a digest (active pack/mode/role + recent lessons +
+> open jobs + recent decisions) via the `session-digest` SessionStart hook. This ritual is the deeper
+> read on top of that — **and the fallback for non-hook CLIs** (Codex, Gemini, …), which read these
+> files explicitly.
+
+1. Read this file + `CORE-PRINCIPLES.md`.
+2. Review recent `tasks/lessons.md` — accumulated lessons. **Read before acting.**
+3. Skim `tasks/memory.md` (durable state) + `tasks/personas.md` (operator calibration).
+4. List `docs/adr/` — read any decision record relevant to the task.
+
+---
+
+## Skill routing
+
+When a request matches a skill, **invoke it** (Lintel skills are auto-surfaced). A nudge, not a map —
+run `/li:catalog` to discover the full set.
+
+- Multi-step work / a real task → `/li:cycle` (8-phase SENSE→CAPTURE; writes `.lintel/state/00-state.md`)
+- Bug → `/li:investigate`  ·  Tests → `/li:qa`  ·  Deep context → `/li:context-warm`
+- Plan review → `/li:plan-eng-review`  ·  Brainstorm → `/li:office-hours`
+- Record a decision → `/li:adr-new`  ·  Save / resume → `/li:context-save` · `/li:resume`
+- Engineering depth → `/li:ta` `/li:da` `/li:sc` `/li:dh` `/li:tq`  ·  Discover all → `/li:catalog`
+
+---
+
+## Where state lives (the memory map)
+
+The snowball — read on demand, **write after corrections/decisions** so it compounds:
+
+| Store | Holds |
+|---|---|
+| `tasks/lessons.md` | lessons from corrections (append after ANY correction) |
+| `tasks/memory.md` | durable cross-session state |
+| `tasks/personas.md` | operator calibration |
+| `docs/adr/NNNN-*.md` | decision records (one per non-trivial decision) |
+| `.lintel/state/` | per-repo cycle + module state (written by cycle/module skills) |
+| `~/.lintel/profile.yaml` | active pack · mode · role |
+| `~/.lintel/jobs/_active.md` | open jobs (`/li:resume` reads it) |
+
+The `session-digest` hook injects the top rows at session-start; this table is the full map.
 
 ---
 
@@ -166,7 +211,7 @@ When two or more components communicate (event buses, APIs, databases, IPC):
 
 ## Compliance checklist (5-step session-start)
 
-Per JStack Layer 2. Run BEFORE any non-trivial action that touches code, data, or external systems:
+Run BEFORE any non-trivial action that touches code, data, or external systems (the active pack's compliance mode tightens or relaxes this):
 
 1. **Authority scope** — is this work inside the repo's authorized scope?
 2. **Customer-data check** — any path, secret, or content that could be customer data?

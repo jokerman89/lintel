@@ -1,65 +1,29 @@
-# Todo — CAIP pack extraction to standalone repo
+# Todo — session-digest auto-load (v4.8, implementation)
 
-**Initiative:** Lift `ms-internal` + `caip-se` packs (and all CAIP/MS-branded content) out of
-Lintel into a separate distributable pack-on-top repo. Finishes the deferred v4.0 FR-D /
-Phase-2 spine extraction.
+**Initiative:** Implement the approved design
+([docs/design/claude-md-capability-and-memory-surfacing.md](../docs/design/claude-md-capability-and-memory-surfacing.md)):
+a SessionStart digest hook that auto-loads Lintel's snowball (pack/mode/role + recent lessons +
+open jobs + recent ADRs), plus capability/state surfacing in CLAUDE.md + the template.
 
-**Manifest (cut-list):** [docs/v4.x/structure-changes/2026-06-03-caip-pack-extraction.md](../docs/v4.x/structure-changes/2026-06-03-caip-pack-extraction.md)
-
-**Decisions locked:** pack-on-top · ms-internal+caip-se both out · aggressive de-MS.
-
-## P0 — Approve + scaffold (current)
-- [x] Map packs concept + verify CAIP inventory on disk
-- [x] Surface + lock the 3 strategic decisions
-- [x] Write extraction manifest (M1 artifact)
-- [ ] **Operator approves manifest**
-- [ ] **Operator names target repo + location**
-- [ ] Init target repo; `git tag pre-caip-extraction` in Lintel; create feature branch
-
-## P1 — FR-D co-location (built directly in CAIP repo)  ✅
-- [x] Create packs/caip-se/{voice,persona,roles,brand,...} in lintel-caip-pack
-- [x] voice corpus → packs/caip-se/voice; MS doc-gen templates → brand/templates
-- [x] personas.md sales-eng template → packs/caip-se/persona/operator.md
-- [x] pack.yaml shareable:true, requires_lintel >=4.7.0
-
-## P2 — De-bias spine (Bucket B)  ✅
-- [x] Comprehensive grep sweep (two waves — see L-005); ~437 refs across ~130 files
-- [x] Replace hardcoded refs with resolve_pack_field / remove (10 subagents + identity docs by hand)
-- [x] Final sweep: 0 dangling CAIP refs in staying tree
-- [x] Bucket C resolved: roles/→pack, seeds/brand→stays, customer/→stays, config/aliases agt-alias dropped
-- [x] layer: ms-team → foundation (22 skills); CATALOG + generator updated
-
-## P3 — Extract to new repo  ✅
-- [x] lintel-caip-pack initial commit bd9b210 (99 files; clean-copy + provenance note, not filter-repo)
-- [x] Own .claude-plugin manifest + marketplace; README documents install-on-top
-- [x] Lintel packs/ = _default only (commit 04337f6)
-
-## P4 — Identity rewrite  ✅
-- [x] Lintel README/AGENT-INSTRUCTIONS/LAYERS/CLAUDE/AGENTS/GEMINI/SHIP-GATE → company-neutral
-- [x] CAIP repo README → install-on-top docs
-
-## P5 — Verify  ✅
-- [x] Lintel: shape 19/0, unit 29/0; bash -n clean; 0 dangling refs; packs/=_default
-- [x] Tests updated for new boundary (8 unit + 1 shape; 2 obsolete tests removed)
-- [x] STRUCTURAL PARITY: pack-resolver resolves caip-se → trailblazer/hard/5000/7000;
-      _default → internal/advisory. Install + pack-switch mechanism confirmed.
-- [ ] OPERATOR: decide push / PR + create GitHub remote for lintel-caip-pack (outward — awaiting auth)
-
-## Doc-refresh ✅ (was deferred — now done)
-- [x] README: v3→v4.7 status + counts (165/70/29) + company-neutral framing
-- [x] SHIP-GATE: counts 165/70/29; ms-team + customer-engagement-mode residue removed
-- [x] LAYERS.md: body rewritten to foundation+packs model
-- [x] CAIP repo: 6 per-CLI manifests + entry files; evaluators (sdl + trailblazer);
-      brand-tokens, packaged lessons, knowhow index, 3 stance docs (commit a555eef)
+## Plan
+- [x] ADR-0002 — session-digest auto-load decision
+- [x] `hooks/shared/session-digest/` — HOOK.md + run.sh (≤~400-token digest; ~200 chars actual; graceful degrade)
+- [x] Test run.sh: valid JSON via both jq + no-jq fallback; degrades to nothing in a fresh repo
+- [x] Root CLAUDE.md: `## Skill routing`, `## Where state lives`, structured-comment-format, ritual note (hook + non-hook-CLI fallback)
+- [x] `CLAUDE.md.template`: same sections (generic)
+- [x] SessionStart wiring: `hooks/claude-code/session-digest.settings.json` + install.sh note
+- [x] `bin/li-doctor`: session-digest present + wired check
+- [x] Verify: bash -n clean; shape 19/19, unit 29/0; audit-helper contract satisfied (uses audit_log)
 
 ## Review
 
-CAIP successfully lifted out as a distributable pack-on-top (lintel-caip-pack),
-completing the v4.0 reframe's deferred FR-D + Phase-2 spine extraction. Lintel is
-now company-neutral (only _default pack). Three atomic commits on
-v4.7-caip-extraction; main untouched; tag pre-caip-extraction is the restore point.
-NOT pushed — awaiting operator authorization for push/PR.
+Built the approved design. The session-digest SessionStart hook auto-injects a ~200-char digest
+(pack/mode/role/compliance + recent lessons L-004..L-006 + recent ADRs 0001/0002), validated as
+JSON with and without jq, fail-open + graceful in a fresh repo. CLAUDE.md (root + template) now
+surfaces skill routing, the state map, and structured-comments; the session-start ritual is the
+non-hook-CLI fallback. li-doctor flags an un-wired digest. Caught + fixed a real contract break:
+the hook initially wrote audit inline, violating the v4.0 audit-via-helper shape test — now routes
+through `audit_log`.
 
-Surprise: de-bias surface was ~10x the manifest estimate (the v4.0 spine extraction
-was never actually run). Handled via 10 parallel de-bias subagents + hand-edited
-identity docs. Lesson L-005 recorded (grep-token completeness).
+**Deferred (design doc open questions):** pack-overridable digest budget; keyword-relevant (vs
+recency) lesson selection; unifying ADR location with deeplex's `docs/06-decisions/`.
