@@ -74,7 +74,7 @@ check_source() {
   if [ ! -d "$SCAFFOLDING_SRC" ]; then
     echo "ERROR: Lintel scaffolding source not found at $SCAFFOLDING_SRC" >&2
     echo "Set LINTEL_HOME env var or run Lintel installer first." >&2
-    echo "  install: bash <(curl -fsSL https://raw.githubusercontent.com/Azureflipper/jokerman-session-setup/main/install/install.sh)" >&2
+    echo "  install: bash <(curl -fsSL https://raw.githubusercontent.com/jokerman89/lintel/main/install/install.sh)" >&2
     exit 3
   fi
 }
@@ -202,11 +202,11 @@ cmd_init() {
   echo "  1. Review CLAUDE.md and customize project-specific sections."
   echo "  2. Edit tasks/personas.md with project-specific personas."
   echo "  3. Install Lintel plugin for your CLI:"
-  echo "       Claude Code:    /plugin marketplace add Azureflipper/jokerman-session-setup"
+  echo "       Claude Code:    /plugin marketplace add jokerman89/lintel"
   echo "                       /plugin install li@jokerman-lintel"
   echo "       Codex:          /plugins → search li → Install"
   echo "       Cursor:         /add-plugin li"
-  echo "       Gemini:         gemini extensions install https://github.com/Azureflipper/jokerman-session-setup"
+  echo "       Gemini:         gemini extensions install https://github.com/jokerman89/lintel"
   echo "  4. git add -A && git commit -m 'chore: scaffold Lintel base'"
   echo ""
 }

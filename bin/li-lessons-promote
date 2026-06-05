@@ -7,7 +7,8 @@
 set -euo pipefail
 
 SOURCE_FILE="tasks/lessons.md"
-LINTEL_DIR="${LINTEL_DIR:-$HOME/Workspace/jokerman-session-setup}"
+# Default to the Lintel repo this script lives in (bin/ sits at the repo root).
+LINTEL_DIR="${LINTEL_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -26,7 +27,7 @@ Workflow (interactive):
 
 Options:
   --source <file>        Source lessons.md (default: tasks/lessons.md)
-  --lintel-dir <path>    Lintel repo path (default: ~/Workspace/jokerman-session-setup)
+  --lintel-dir <path>    Lintel repo path (default: the repo this script lives in)
 EOF
       exit 0 ;;
     *) echo "Unknown arg: $1" >&2; exit 2 ;;

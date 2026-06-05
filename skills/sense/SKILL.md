@@ -29,7 +29,7 @@ Output: a SENSE report. Operator decides next move based on it.
 - Always at start of `/li:cycle` (auto-invoked)
 - Standalone when entering a new repo / new session and need orientation
 - After `/li:resume` to confirm state before continuing
-- When operator says "where are we?" / "what's the state?" / "vad är läget?"
+- When operator says "where are we?" / "what's the state?"
 
 ## When NOT to use
 
@@ -42,15 +42,11 @@ Output: a SENSE report. Operator decides next move based on it.
 
 ### Step 0a — Surface relevant lessons (v3.6 cohort 2 item 1.3)
 
-Before reading configuration, invoke `/li:lessons-surface` so framtida session-arbete startar med relevanta lessons från `tasks/lessons.md`. Stänger L-001/L-002-loopen (lessons skrivs men läses aldrig utan denna step).
+Before reading configuration, invoke `/li:lessons-surface` so future session work starts with relevant lessons from `tasks/lessons.md`. Closes the L-001/L-002 loop (lessons are written but never read without this step).
 
-```bash
-# Auto-invoke lessons-surface med current-context som keyword
-# (branch name + recent commit subjects ger implicit topic)
-~/.claude/skills/lessons-surface --auto-from-sense 2>/dev/null || true
-```
+Invocation: `/li:lessons-surface --auto-from-sense` — keyword derived from the branch name + recent commit subjects. (A skill call, portable across every CLI; the old `~/.claude/skills/...` path was Claude-Code-only and non-executable.)
 
-Output (max 3 lessons) prepends till SENSE-rapport. Silent om no relevant matches. Aldrig blocker.
+Output (max 3 lessons) prepends to the SENSE report. Silent if no relevant matches. Never a blocker.
 
 ### Step 0b — Elephant-hint detection (v3.6 cohort 3 item 3.1)
 
@@ -63,16 +59,16 @@ source "$LINTEL_REPO_ROOT/lib/scale-estimator.sh"
 elephant_score=$(elephant_score "$prompt_text")   # single source (was inline; now lib/scale-estimator.sh detect_breadth)
 ```
 
-If `elephant_score >= 3`: surface elephant-hint to operator (in SENSE-report only — never block):
+If `elephant_score >= 3`: surface elephant-hint to operator (in SENSE report only — never block):
 
 ```
 ⚠ Elephant detected (breadth-signal score: <N>/5)
    Three paths:
-   A) Stycka elefanten now — focus on the smallest valuable slice first
-   B) Kör ändå — proceed broad; specifics will emerge during planning
-   C) Rough-plan first — let me sketch scope så du ser elefanten i text innan vi locks in arbete
+   A) Slice the elephant now — focus on the smallest valuable slice first
+   B) Proceed anyway — proceed broad; specifics will emerge during planning
+   C) Rough-plan first — let me sketch scope so you see the elephant in text before we lock in work
    
-   Operator picks via reply; defaulting to B (kör ändå) preserves momentum.
+   Operator picks via reply; defaulting to B (proceed anyway) preserves momentum.
 ```
 
 DEFINE phase offers the 3-path-execution if operator picks A or C. SENSE only detects + surfaces.
@@ -97,7 +93,7 @@ if [ "$meta_total" -gt 0 ] || [ "$operator_signal" -eq 1 ]; then
 fi
 ```
 
-If `meta_infra_detected=true`: surface to operator in SENSE-report (never block):
+If `meta_infra_detected=true`: surface to operator in the SENSE report (never block):
 
 ```
 ⚙ Meta-infra mode detected
@@ -193,7 +189,7 @@ workprofile=$(resolve_pack_field compliance.workprofile_default)   # off by defa
 voice_default=$(resolve_pack_field voice.default_tier)             # internal by default
 ```
 
-If profile missing → prompt operator via AskUserQuestion: "Lintel kan köras med eller utan compliance-gates. The active pack drives this (`resolve_pack_field compliance.mode`); the `_default` pack is advisory + workprofile off. Välj pack om du vill ha hårdare gates."
+If profile missing → prompt operator via AskUserQuestion: "Lintel can run with or without compliance gates. The active pack drives this (`resolve_pack_field compliance.mode`); the `_default` pack is advisory + workprofile off. Pick a pack if you want stricter gates."
 
 ### Step 2 — Read prior 00-state.md
 

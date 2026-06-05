@@ -1,13 +1,13 @@
 {
   "name": "li",
   "description": "Lintel — MS-CAIP-SE session harness with 8-phase cycle, role-lifting, context-warming",
-  "version": "3.5.0-dev",
+  "version": "4.9.0",
   "author": {
     "name": "jokerman89",
-    "email": "johannes.akerman@microsoft.com"
+    "email": "johannes.akerman@gmail.com"
   },
-  "homepage": "https://github.com/jokerman89/jokerman-lintel",
-  "repository": "https://github.com/jokerman89/jokerman-lintel",
+  "homepage": "https://github.com/jokerman89/lintel",
+  "repository": "https://github.com/jokerman89/lintel",
   "license": "MIT",
   "keywords": [
     "lintel",

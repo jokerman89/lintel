@@ -42,10 +42,7 @@ Three-stage discipline (extends superpowers' two-stage with compliance):
 
 Invoke `/li:lessons-surface` keyword-scoped to review so prior-session lessons inform what to scrutinize before the adversarial stages run. Same mechanism SENSE uses (max 3 lessons, prepended to context, silent on no match, never a blocker):
 
-```bash
-# Keyword-scope to this phase's concerns; silent if no relevant matches.
-~/.claude/skills/lessons-surface --keyword "review specification compliance correctness" 2>/dev/null || true
-```
+Invocation: `/li:lessons-surface --keyword "review specification compliance correctness"` (a portable skill call; silent if no relevant matches).
 
 Then read:
 - plan.md (from PLAN) — source of requirements

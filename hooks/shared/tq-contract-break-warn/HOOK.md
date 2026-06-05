@@ -1,7 +1,7 @@
 ---
 name: tq-contract-break-warn
 tier: warn-only
-event: PreCommit on provider files
+event: PreToolUse (Edit|Write on provider/contract files)
 fires_on: edit to a provider file (matching pack.testing_qa.provider_glob OR identified by .lintel/state/tq/contract-test-suite-*.md) without paired contract-test update
 override: pass --ignore-contract-break flag (operator decision, logged)
 audit: ~/.lintel/audit/hooks.jsonl
@@ -30,5 +30,5 @@ Surfaces provider edits without paired contract-test update. Warning, not block 
 ## Audit format
 
 ```jsonl
-{"hook":"tq-contract-break-warn","tier":"warn","ts":"...","file_edited":"src/api/users.go","contract_test_updated":false,"operator":"jokerman"}
+{"hook":"tq-contract-break-warn","tier":"warn","ts":"...","file_edited":"src/api/users.go","contract_test_updated":false,"operator":"<operator>"}
 ```

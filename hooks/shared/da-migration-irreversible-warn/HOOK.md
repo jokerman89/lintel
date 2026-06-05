@@ -1,7 +1,7 @@
 ---
 name: da-migration-irreversible-warn
 tier: warn-only
-event: PreCommit (or PostEdit when integrated) on migration files
+event: PreToolUse (Edit|Write on migration files)
 fires_on: migration file lacks a paired down-migration OR contains destructive operations without documented data-loss acceptance
 override: pass --ignore-irreversibility flag (operator decision, logged)
 audit: ~/.lintel/audit/hooks.jsonl
@@ -37,5 +37,5 @@ Surfaces when a migration commit lacks a rollback path. Warning, not block — d
 ## Audit format
 
 ```jsonl
-{"hook":"da-migration-irreversible-warn","tier":"warn","ts":"...","file":"db/migrations/0042_drop_legacy.sql","destructive_ops":["DROP TABLE","TRUNCATE"],"has_rollback":false,"operator":"jokerman"}
+{"hook":"da-migration-irreversible-warn","tier":"warn","ts":"...","file":"db/migrations/0042_drop_legacy.sql","destructive_ops":["DROP TABLE","TRUNCATE"],"has_rollback":false,"operator":"<operator>"}
 ```

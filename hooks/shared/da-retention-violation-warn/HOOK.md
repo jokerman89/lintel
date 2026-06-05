@@ -37,5 +37,5 @@ Surfaces when an edit touches data-access code reading a retention-bound table w
 ## Audit format
 
 ```jsonl
-{"hook":"da-retention-violation-warn","tier":"warn","ts":"...","file_edited":"src/users/repository.ts","table":"users","retention_window_days":90,"missing_filter":"deleted_at","operator":"jokerman"}
+{"hook":"da-retention-violation-warn","tier":"warn","ts":"...","file_edited":"src/users/repository.ts","table":"users","retention_window_days":90,"missing_filter":"deleted_at","operator":"<operator>"}
 ```

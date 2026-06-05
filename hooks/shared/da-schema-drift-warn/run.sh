@@ -10,7 +10,8 @@ mkdir -p "$LINTEL_HOME/audit"
 # Unified audit writer (hooks/shared/<name>/ → repo-root → bin/). Idempotent source.
 command -v audit_log >/dev/null 2>&1 || source "$(dirname "${BASH_SOURCE[0]}")/../../../bin/_audit.sh"
 
-file_edited="${1:-}"
+source "$(dirname "${BASH_SOURCE[0]}")/../_input.sh"
+file_edited="$(hook_input file_path "${1:-}")"
 [ -z "$file_edited" ] && exit 0
 
 # Schema-flavored ADRs only — heuristic match on filename or content

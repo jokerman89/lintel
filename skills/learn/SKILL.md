@@ -61,11 +61,11 @@ Lesson recorded
 
 Scope: project (tasks/lessons.md)
 Type: pattern
-Source: operator correction at 16:42 — wanted "Starta gratis ärende" not "Kom igång"
+Source: operator correction at 16:42 — wanted "Start free case" not "Get started"
 
 Body:
-> CTA copy on landing pages should use "Starta gratis ärende" (canonical primary CTA).
-> Never use "Kom igång", "Starta din analys", or other variants. Refactor when seen.
+> CTA copy on landing pages should use "Start free case" (canonical primary CTA).
+> Never use "Get started", "Start your analysis", or other variants. Refactor when seen.
 
 Future sessions reading tasks/lessons.md will surface this at session start (per repo CLAUDE.md "Review at session start" rule).
 ```
@@ -91,7 +91,7 @@ Future sessions reading tasks/lessons.md will surface this at session start (per
 
 **Operator correction:**
 ```
-> /learn "CTA copy must be 'Starta gratis ärende' on landing, never 'Kom igång' — canonical primary CTA per project memory" --type correction
+> /learn "CTA copy must be 'Start free case' on landing, never 'Get started' — canonical primary CTA per project memory" --type correction
 ✓ Lesson appended to tasks/lessons.md. Visible to future sessions.
 ```
 

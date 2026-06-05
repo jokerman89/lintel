@@ -48,7 +48,7 @@ Sub-skills (per-action workflows)
 Agents (mostly existing 83, augmented as needed)
        │
        ▼
-Hooks (domain-specific gates: arch-drift-warn, complexity-budget-warn, etc.)
+Hooks (domain-specific gates: ta-arch-drift-warn, ta-complexity-budget-warn, etc.)
        │
        ▼
 Scoring rubric (6-dimensional, mirrors frontend-design-review)
@@ -219,9 +219,9 @@ Module's `--full` exit gate: every dimension ≥ pass threshold OR explicit oper
 Each module ships 2-5 hooks specific to its concerns. Hooks fire on operator's normal work (pre-edit, pre-commit) and surface warnings inline — never block silently.
 
 TA hooks:
-- `arch-drift-warn` (pre-edit) — file is claimed by an ADR's "decisions" block; warn if change contradicts ADR
-- `contract-collision-warn` (pre-edit) — file is an interface with declared consumers; warn about breaking-change risk
-- `complexity-budget-warn` (pre-commit) — cyclomatic exceeds threshold from preferences
+- `ta-arch-drift-warn` (pre-edit) — file is claimed by an ADR's "decisions" block; warn if change contradicts ADR
+- `ta-contract-collision-warn` (pre-edit) — file is an interface with declared consumers; warn about breaking-change risk
+- `ta-complexity-budget-warn` (pre-commit) — cyclomatic exceeds threshold from preferences
 
 All three are warn-only in v4.1; v4.2 may tighten to block based on operator feedback.
 

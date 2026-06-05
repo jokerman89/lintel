@@ -1,7 +1,7 @@
 # Wiki generation — both outputs from the same sources
 
 **Last updated:** 2026-05-29 (v4.0 Phase 3)
-**Status:** Concept doc — referenced by `bin/li-wiki-gen`, `lib/wiki-gen.sh`, `bin/li-forge-stats`
+**Status:** Concept doc — referenced by `bin/li-wiki-gen`, `lib/wiki-gen.sh`, `bin/li-forge-stats` (planned — not yet shipped)
 
 > Lintel has two surfaces that describe itself: the developer-facing wiki (markdown reference for every skill, agent, pack, schema) and the operator-facing showcase HTML (single-file system map). Pre-v4.0 the showcase was hand-curated and the wiki didn't exist as a generated artifact. Both drifted from code. v4.0 closes the gap: `bin/li-wiki-gen` reads the same sources to produce both outputs deterministically.
 

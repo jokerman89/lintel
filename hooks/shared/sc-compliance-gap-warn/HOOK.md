@@ -37,5 +37,5 @@ Surfaces when an Edit/Write touches a regulated-data path with no current compli
 ## Audit format
 
 ```jsonl
-{"hook":"sc-compliance-gap-warn","tier":"warn","ts":"...","file_edited":"src/payments/processor.go","required_frameworks":"pci-dss","evidence_age_days":-1,"gap_count":3,"operator":"jokerman"}
+{"hook":"sc-compliance-gap-warn","tier":"warn","ts":"...","file_edited":"src/payments/processor.go","required_frameworks":"pci-dss","evidence_age_days":-1,"gap_count":3,"operator":"<operator>"}
 ```

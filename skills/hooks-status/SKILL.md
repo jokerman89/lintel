@@ -1,7 +1,7 @@
 ---
 name: hooks-status
 layer: foundation
-description: Reader för hooks.jsonl — surface aktiva-vs-döda hooks + override-pattern + trigger-counts. Stänger hooks-observation-loopen.
+description: Reader for hooks.jsonl — surface active-vs-dead hooks + override patterns + trigger counts. Closes the hooks-observation loop.
 color: yellow
 tools: Read, Write, Bash, Glob
 voice: internal
@@ -12,30 +12,30 @@ cli_support:
     level: degraded
 ---
 
-You are the `hooks-status` skill — reader för `~/.lintel/audit/hooks.jsonl`. Stänger backlog 1.2 (consume hooks.jsonl) + 1.7 (hook usage status) som en skill.
+You are the `hooks-status` skill — reader for `~/.lintel/audit/hooks.jsonl`. Closes backlog 1.2 (consume hooks.jsonl) + 1.7 (hook usage status) as one skill.
 
 ## What this skill does
 
-Lintel har 15 hooks installerade. Hooks.jsonl skrivs på override-attempts + trigger-events, men ingenting läser den. Denna skill:
+Lintel has 15 hooks installed. Hooks.jsonl is written on override attempts + trigger events, but nothing reads it. This skill:
 
-1. Aggregerar trigger-counts per hook (senaste N dagar)
-2. Identifierar override-pattern ("customer-data-block overridad 6× denna vecka" → flag-worthy)
-3. Surface:ar döda hooks (zero triggers > 30 dagar — candidate för cleanup)
-4. Korrelerar override-trender med skills (via run_id cross-reference till usage-log)
+1. Aggregates trigger counts per hook (last N days)
+2. Identifies override patterns ("customer-data-block overridden 6× this week" → flag-worthy)
+3. Surfaces dead hooks (zero triggers > 30 days — candidate for cleanup)
+4. Correlates override trends with skills (via run_id cross-reference to usage-log)
 
-Closes self-observation-spine loop per Cohort 2 mål: data skriven → data läst → operatör ser pattern.
+Closes the self-observation-spine loop per Cohort 2 goal: data written → data read → operator sees pattern.
 
 ## When to use
 
-- "Vilka hooks fires faktiskt?" → `/li:hooks-status --triggers --days 30`
-- "Har jag overridat för mycket?" → `/li:hooks-status --overrides`
-- "Vilka hooks är döda?" → `/li:hooks-status --dead --days 90` (no trigger past 90 days)
-- Maintenance-pre-flight: kombineras med `/li:usage-log --report` för full observation-pass
+- "Which hooks actually fire?" → `/li:hooks-status --triggers --days 30`
+- "Have I overridden too much?" → `/li:hooks-status --overrides`
+- "Which hooks are dead?" → `/li:hooks-status --dead --days 90` (no trigger past 90 days)
+- Maintenance pre-flight: combine with `/li:usage-log --report` for a full observation pass
 
 ## When NOT to use
 
-- Real-time hook-firing detection — denna är retroactive, läser jsonl efter event
-- Hook design eller install — `bin/li-doctor` har hook-install-state check
+- Real-time hook-firing detection — this is retroactive, reads the jsonl after the event
+- Hook design or install — `bin/li-doctor` has a hook-install-state check
 
 ## Workflow
 
@@ -57,9 +57,9 @@ fi
 - Surface table: hook_name | trigger_count | last_trigger_ts
 
 **`--overrides`:**
-- Filter lines med `override: true`
+- Filter lines with `override: true`
 - Group by `hook_name` + `override_reason`
-- Surface: "hook X overridad N× (reasons: ...)"
+- Surface: "hook X overridden N× (reasons: ...)"
 - Flag if N > 5 for any hook in past 7 days (signals friction)
 
 **`--dead --days N`:**
@@ -69,25 +69,25 @@ fi
 
 ### Step 3 — Cross-reference with usage-log (optional via `--correlate`)
 
-Om `--correlate` flag:
+If `--correlate` flag:
 - Read `usage-*.jsonl` (usage-log writer output)
-- Match override-events to invoked skills via `run_id`
-- Surface: "när hook X overrides, skill Y invokeras N% av tiden" → causal-link hint
+- Match override events to invoked skills via `run_id`
+- Surface: "when hook X overrides, skill Y is invoked N% of the time" → causal-link hint
 
 ### Step 4 — Render report
 
-Markdown table-output till stdout. Operatör pipear till less eller redirectar till fil.
+Markdown table output to stdout. Operator pipes to less or redirects to a file.
 
 ## Voice tier behavior
 
-`voice: internal`. Operatör-observability. Ingen voice-gate.
+`voice: internal`. Operator observability. No voice gate.
 
 ## Status protocol
 
 - **DONE** — report rendered
-- **DONE_WITH_CONCERNS** — report rendered men hooks.jsonl är malformed på rader (skip + count i report)
+- **DONE_WITH_CONCERNS** — report rendered but hooks.jsonl is malformed on some lines (skip + count in report)
 - **BLOCKED** — `~/.lintel/audit/hooks.jsonl` permissions deny read
-- **NEEDS_CONTEXT** — invocation utan view-flag (`--triggers` / `--overrides` / `--dead`)
+- **NEEDS_CONTEXT** — invocation without a view flag (`--triggers` / `--overrides` / `--dead`)
 
 ## Hop-in support
 
@@ -98,7 +98,7 @@ YES — pure-reader skill, solo-invocable any time.
 **Reads:**
 - `~/.lintel/audit/hooks.jsonl` (canonical hooks-audit log)
 - `~/.lintel/audit/usage-*.jsonl` (optional cross-reference via `--correlate`)
-- `hooks/`-dir scan (för dead-hook detection — vilka hooks är installerade)
+- `hooks/`-dir scan (for dead-hook detection — which hooks are installed)
 
 **Writes:**
 - stdout (markdown report)
@@ -109,8 +109,8 @@ YES — pure-reader skill, solo-invocable any time.
 
 ## Anti-patterns
 
-- **Modifying hooks.jsonl** — denna är reader-only. Audit-log är immutable.
-- **Streaming live triggers** — denna processar batches. Real-time hook-watching är `inotify`/`fswatch`-jobb, ej denna.
+- **Modifying hooks.jsonl** — this is reader-only. The audit log is immutable.
+- **Streaming live triggers** — this processes batches. Real-time hook-watching is an `inotify`/`fswatch` job, not this.
 
 ## Failure recovery
 
@@ -120,6 +120,6 @@ YES — pure-reader skill, solo-invocable any time.
 
 ## Recommended next steps after invocation
 
-- För full picture: pair med `/li:usage-log --report` (sibling skill)
-- Vid override-spike: surface till operator-decision om hook-tuning behövs
-- Vid dead-hook: `/li:doctor --hooks` validerar installed-state innan cleanup-decision
+- For the full picture: pair with `/li:usage-log --report` (sibling skill)
+- On an override spike: surface to operator decision on whether hook-tuning is needed
+- On a dead hook: `/li:doctor --hooks` validates installed-state before a cleanup decision

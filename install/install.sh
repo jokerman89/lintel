@@ -107,7 +107,7 @@ mkdir -p "$LINTEL_HOME/browser-profiles"
 mkdir -p "$LINTEL_HOME/quarantine"
 mkdir -p "$LINTEL_HOME/frontend-runs"      # v3.7 — frontend-design orchestrator run-output
 
-# v3.7 Fas A2 — brand-asset slots för frontend-* family
+# v3.7 Phase A2 — brand-asset slots for the frontend-* family
 mkdir -p "$LINTEL_HOME/brand"
 mkdir -p "$LINTEL_HOME/brand/design-patterns"
 mkdir -p "$LINTEL_HOME/brand/motion-libraries"
@@ -285,11 +285,11 @@ say "  3. Verify install:          ${c_bold}$SCRIPT_DIR/verify.sh --all${c_reset
 say "  4. Read Lintel overview:    ${c_bold}cat $REPO_ROOT/LAYERS.md${c_reset}"
 say ""
 say "v3 plugin install (per CLI):"
-say "  Claude Code:  ${c_bold}/plugin marketplace add jokerman89/jokerman-lintel${c_reset}"
+say "  Claude Code:  ${c_bold}/plugin marketplace add jokerman89/lintel${c_reset}"
 say "                ${c_bold}/plugin install lintel@jokerman-lintel${c_reset}"
 say "  Codex CLI:    ${c_bold}/plugins${c_reset} -> search lintel -> Install"
 say "  Cursor:       ${c_bold}/add-plugin lintel${c_reset}"
-say "  Gemini CLI:   ${c_bold}gemini extensions install https://github.com/jokerman89/jokerman-lintel${c_reset}"
+say "  Gemini CLI:   ${c_bold}gemini extensions install https://github.com/jokerman89/lintel${c_reset}"
 say ""
 say "v3 operator utilities (add to PATH):"
 say "  ${c_bold}export PATH=\"\$PATH:$REPO_ROOT/bin\"${c_reset}"

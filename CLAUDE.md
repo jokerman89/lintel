@@ -161,7 +161,8 @@ Identity (voice, compliance, persona, brand, roles) is **not** hardcoded — it 
 
 ### Local testing
 ```bash
-claude --plugin-dir E:/Workspace/jokerman-session-setup
+# run from the repo root
+claude --plugin-dir "$PWD"
 ```
 
 ### Skill namespacing

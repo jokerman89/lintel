@@ -287,7 +287,7 @@ Agents invoked via Claude Code's Task tool (or equivalent in other CLIs).
 ## Distribution Plan
 
 - v3.5 ships på samma `v3-dev` branch som v3.0.0 (extends, doesn't fork).
-- Operator dogfoodar via `claude --plugin-dir E:/Workspace/jokerman-lintel` (no plugin re-install needed).
+- Operator dogfoodar via `claude --plugin-dir /path/to/lintel` (no plugin re-install needed).
 - After dogfooding cycle (1-2 weeks), if validation green:
   - PR `v3-dev → main`
   - Tag `v3.0.0` (includes v3.5 Azure toolbox seed)

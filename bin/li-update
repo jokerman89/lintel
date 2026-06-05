@@ -63,7 +63,7 @@ if [ -d "$LINTEL_HOME/.git" ]; then
   fi
 else
   echo "  ⚠ $LINTEL_HOME not a git repo — skipping scaffolding update"
-  echo "    Recommend: git clone Azureflipper/jokerman-session-setup $LINTEL_HOME"
+  echo "    Recommend: git clone jokerman89/lintel $LINTEL_HOME"
 fi
 echo ""
 

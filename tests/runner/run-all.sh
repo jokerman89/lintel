@@ -65,7 +65,11 @@ for dir in $SEARCH_DIRS; do
     fi
 
     rc=0
-    output=$(bash "$test_file" 2>&1) || rc=$?
+    # Isolate each test's stdin from the runner's control FD. The loop reads test
+    # paths from `< <(find ...)`; a test that invokes a hook (hooks now read stdin
+    # via hooks/shared/_input.sh) would otherwise consume that FD and eat the rest
+    # of the test list. /dev/null gives hooks an immediate EOF → their $1 fallback.
+    output=$(bash "$test_file" </dev/null 2>&1) || rc=$?
 
     if [ "$rc" -eq 0 ]; then
       if echo "$output" | grep -q '^SKIP'; then

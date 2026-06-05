@@ -134,7 +134,7 @@ Every envelope is appended to `~/.lintel/audit/envelopes-<date>.jsonl` (per-day 
 
 `bin/li-envelope-replay <envelope-id>` pulls the envelope from the audit log and dry-runs it: surfaces what the receiver would do, given current state of the world. `--apply` actually re-invokes the receiver (audited as `envelope_replay_applied`).
 
-`bin/li-forge-stats` (Phase 3 also ships this) aggregates envelopes across audit logs and reports per-skill / per-pack completeness over time. Operators use this to spot evaluators that are too strict (too many low scores) or skills that consistently produce bad briefs (always needing escape hatches).
+`bin/li-forge-stats` (planned — not yet shipped) will aggregate envelopes across audit logs and report per-skill / per-pack completeness over time. Operators use this to spot evaluators that are too strict (too many low scores) or skills that consistently produce bad briefs (always needing escape hatches).
 
 ## Hand-off events
 

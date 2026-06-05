@@ -1,7 +1,7 @@
 ---
 name: dh-deploy-without-rollback-warn
 tier: warn-only
-event: PreCommit on deploy/IaC files
+event: PreToolUse (Edit|Write on deploy/IaC files)
 fires_on: commit touches deploy manifest, helm chart, Terraform, or CI/CD pipeline file without rollback declaration in same commit or in .lintel/state/dh/rollback-strategy-*.md
 override: pass --ignore-rollback flag (operator decision, logged)
 audit: ~/.lintel/audit/hooks.jsonl
@@ -30,5 +30,5 @@ Surfaces when a deploy or IaC commit lacks a documented rollback path. Warning, 
 ## Audit format
 
 ```jsonl
-{"hook":"dh-deploy-without-rollback-warn","tier":"warn","ts":"...","file_edited":"infra/k8s/deployment.yaml","rollback_age_days":-1,"operator":"jokerman"}
+{"hook":"dh-deploy-without-rollback-warn","tier":"warn","ts":"...","file_edited":"infra/k8s/deployment.yaml","rollback_age_days":-1,"operator":"<operator>"}
 ```

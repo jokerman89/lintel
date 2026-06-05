@@ -1,14 +1,14 @@
 {
   "name": "li",
-  "version": "3.5.0-dev",
+  "version": "4.9.0",
   "description": "Lintel — MS-CAIP-SE session harness for OpenAI Codex with 8-phase cycle + role-lifting + Azure toolbox",
   "author": {
     "name": "jokerman89",
-    "email": "johannes.akerman@microsoft.com",
+    "email": "johannes.akerman@gmail.com",
     "url": "https://github.com/jokerman89"
   },
-  "homepage": "https://github.com/jokerman89/jokerman-lintel",
-  "repository": "https://github.com/jokerman89/jokerman-lintel",
+  "homepage": "https://github.com/jokerman89/lintel",
+  "repository": "https://github.com/jokerman89/lintel",
   "license": "MIT",
   "keywords": [
     "lintel",
@@ -31,13 +31,13 @@
     "category": "Coding",
     "capabilities": ["Interactive", "Read", "Write"],
     "defaultPrompt": [
-      "Hjälp mig med ett nytt customer engagement.",
-      "Kör /li:cycle --mode customer-engagement.",
-      "Validera min copy mot Trailblazer voice."
+      "Help me with a new customer engagement.",
+      "Run /li:cycle --mode customer-engagement.",
+      "Validate my copy against Trailblazer voice."
     ],
-    "websiteURL": "https://github.com/jokerman89/jokerman-lintel",
+    "websiteURL": "https://github.com/jokerman89/lintel",
     "privacyPolicyURL": "https://privacy.microsoft.com/privacystatement",
-    "termsOfServiceURL": "https://github.com/jokerman89/jokerman-lintel/blob/main/LICENSE",
+    "termsOfServiceURL": "https://github.com/jokerman89/lintel/blob/main/LICENSE",
     "brandColor": "#0078D4"
   }
 }

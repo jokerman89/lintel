@@ -58,7 +58,11 @@ Close the calibration loop (design §3.5): record this cycle's **actual** outcom
 Mechanical, non-blocking. Read the planned scale from `scope.md` (or the cycle's `00-state.md` SCOPE entry) and the actuals from the cycle history aggregated in Step 1, then append one record via the unified `audit_log` writer — the same call pattern every other Lintel producer uses (e.g. `skills/migrations`):
 
 ```bash
-source "$(dirname "$0")/../../bin/_audit.sh"
+# A skill body has no reliable $0/BASH_SOURCE — resolve the repo root the way
+# every other skill does ($LINTEL_REPO_ROOT), with a git fallback if it is unset.
+# Using $(dirname "$0") here made this calibration write silently no-op.
+REPO_ROOT="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}"
+source "$REPO_ROOT/bin/_audit.sh"
 
 # From scope.md / SCOPE state entry (the plan's estimate):
 size="$SCOPE_SIZE"                 # XS | S | M | L | XL
@@ -174,6 +178,15 @@ Auto-append (not optional) when CLAUDE.md changes — this is the audit trail fo
 **Why moved to PLAN:** standalone `/li:plan <design.md>` (workflow_root post-v3.8) needs to produce the complete trio at PLAN-time. CAPTURE-only generation broke that — operator running PLAN solo got 2/3 of a handoff. Trio born together fixes this.
 
 AskUserQuestion: "Want to dogfood the trio? Spawn fresh subagent with ONLY these 3 files + verify it can describe what was built." (Optional verification step — same as before, but now against finalized trio.)
+
+**Handoff-size check against the 500k cap (NON-BLOCKING).** The reaffirmed trio is the durable cold-executor handoff — the artifact a fresh cold session reads to re-execute. Run the existing cap check so the finalized trio (now annotated with build evidence, possibly larger than at PLAN-time) plus any warming context can't silently exceed the 500k cap. This closes the second un-gated handoff the v4.9 audit flagged (Promise 6: cap logic existed but was invoked at no handoff).
+
+Invoke the existing mechanism — do **not** rebuild it:
+
+`/li:handoff-size-check` (a portable skill call; reads the reaffirmed trio + `.lintel/state/warming-manifest.md`, applies the mode-aware cap from `/li:context-budget` mode_envelopes, default `customer-engagement: 500k soft / 750k hard`).
+
+- **SURFACE, don't block.** A yellow/red verdict warns ("finalized trio yields ~Nk handoff, near cap") and notes the durable handoff is large — the operator decides whether to trim before it becomes the cross-session record. It does NOT halt CAPTURE.
+- **Off-switch:** `--skip-handoff-size-check` (or `SKIP_HANDOFF_SIZE_CHECK=1`) skips the gate entirely. Silent when skipped, and silent on a green pass.
 
 ### Step 7 — Role debrief (if role was active)
 

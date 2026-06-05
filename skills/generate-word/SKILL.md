@@ -48,27 +48,27 @@ Uses docx-templater under the hood. Phase F of v2 build.
 - Optional `--use-defaults` — force in-repo default templates
 - Optional `--ignore-stale-brand <reason>` — bypass staleness-warn
 
-## From-pipeline mode (v3.5 Fas 2 — generate-pipeline integration)
+## From-pipeline mode (v3.5 Phase 2 — generate-pipeline integration)
 
-If invoked med `--from-pipeline <run-dir>` istället för `--brief`:
+If invoked with `--from-pipeline <run-dir>` instead of `--brief`:
 
 1. **Read shared pipeline-output:**
-   - `<run-dir>/content.md` — sections med H1/H2/H3 hierarchy + bodies + voice-annotations
-   - `<run-dir>/design-spec.json` — read `per_format.word.sections` för heading-levels + slot-mappings
+   - `<run-dir>/content.md` — sections with H1/H2/H3 hierarchy + bodies + voice-annotations
+   - `<run-dir>/design-spec.json` — read `per_format.word.sections` for heading-levels + slot-mappings
 
-2. **Replace brief-parsing logic** med direct-read av content.md (per target-variant):
+2. **Replace brief-parsing logic** with direct-read of content.md (per target-variant):
    - `technical`: headings + paragraphs + code blocks + tables
    - `customer-summary`: narrative paragraphs + key findings + next steps
    - `transparency-note`: capabilities + limitations + data + decisions + appeals
 
 3. **Apply format-specific design-pass via design_pass_hook:**
    - Reads `per_format.word.sections[N].design_pass_hook` (canonical: WordTechnicalEditor)
-   - Invokes agent på Word-specific fidelity-pass (heading-style consistency, technical-tone, tables-formatting)
+   - Invokes agent for a Word-specific fidelity-pass (heading-style consistency, technical-tone, tables-formatting)
    - Per Reviewer Concern #7: WordTechnicalEditor stays word-specific
 
-4. **CLI bevaras backward-compat:** befintliga `--brief`-flag invocations fungerar oförändrat. `--from-pipeline` är additive.
+4. **CLI stays backward-compat:** existing `--brief`-flag invocations work unchanged. `--from-pipeline` is additive.
 
-5. **4-gate pipeline körs som vanligt** (voice + brand + honest-limitations om transparency-note + provenance).
+5. **4-gate pipeline runs as usual** (voice + brand + honest-limitations if transparency-note + provenance).
 
 ## Workflow
 

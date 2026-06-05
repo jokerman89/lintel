@@ -130,6 +130,29 @@ done
 
 Output recommended agents organized by category. PLAN uses this to know which subagents to dispatch.
 
+### Step 6b — Synthesize findings via `ResearchSynthesizer` (research-dive mode, or on operator request)
+
+When invoked in research-dive mode (via `/li:research`) or when the wedge spans many sources, dispatch `ResearchSynthesizer` to aggregate the codebase map + ADRs + lessons + deps into a single structured brief:
+
+```bash
+synth_brief=$(mktemp)
+cat > "$synth_brief" <<EOF
+task: Synthesize discover findings into a structured research brief
+context_pointers:
+  - codebase map (Step 1 output)
+  - relevant ADRs (Step 2 output)
+  - applicable lessons (Step 3 output)
+  - flagged dependencies (Step 4 output)
+constraints:
+  - state of the art + gaps + recommendations
+  - cite sources (file paths, ADR-IDs, lesson titles)
+acceptance:
+  - structured brief with state-of-the-art, gaps, recommendations, citations
+EOF
+
+/li:brief-forge subagent_spawn discover ResearchSynthesizer brief "$synth_brief"
+```
+
 ### Step 7 — Context warmup hint (operator opt-in)
 
 If discover-report identifies files outside what's currently in context, surface:

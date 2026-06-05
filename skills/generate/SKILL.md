@@ -24,7 +24,7 @@ Orchestrates the v3.5 shared content pipeline + per-format builders to produce b
 
 Reads operator brief → chains outline → write → design → qa → format-specific builders (`generate-ppt`, `generate-web`, `generate-word`, and ⚠ slots for `generate-pdf` / `generate-xlsx` / `generate-visio`) → writes artifacts to `~/.lintel/generate-runs/<run-id>/`.
 
-Designed for "skriv manus en gång, leverera till N format utan duplikat-arbete." Per v3.5 doc-gen plan, replaces the prior pattern where operator invoked each `/li:generate-X` separately with different briefs.
+Designed for "write the script once, deliver to N formats without duplicate work." Per v3.5 doc-gen plan, replaces the prior pattern where operator invoked each `/li:generate-X` separately with different briefs.
 
 ## When to use
 

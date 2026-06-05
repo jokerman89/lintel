@@ -12,7 +12,7 @@ budget: <100ms for typical operator-vault of <20 jobs
 
 Surfaces forgotten jobs at session-start. Pattern follows `brand-staleness-warn` (90-day default) — read-only surfacing, never blocks.
 
-Per v3.8 Feature 1: closes the "Tappad tråd mitt i flödet" failure mode.
+Per v3.8 Feature 1: closes the "lost thread mid-flow" failure mode.
 
 ## What it does
 

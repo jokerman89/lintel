@@ -418,7 +418,7 @@ cmd_agents_categorized() {
 # ===== Subcommand: --scaffolding-coherence (v3) ==============================
 
 cmd_scaffolding_coherence() {
-  hdr "Scaffolding coherence (v3 Kategori B)"
+  hdr "Scaffolding coherence (v3 Category B)"
   local missing=0
   local required=(
     "scaffolding/01-foundation/CORE-PRINCIPLES.md"
@@ -504,7 +504,7 @@ Subcommands:
   --context-engine (v2) CONTEXT-ENGINE.md + context-budget/warmup/perf-mode
   --plugin-manifests       (v3) validate JSON + presence of per-CLI plugin manifests
   --agents-categorized     (v3) verify all agents have category frontmatter
-  --scaffolding-coherence  (v3) verify scaffolding Kategori B templates present
+  --scaffolding-coherence  (v3) verify scaffolding Category B templates present
   --all            run everything + aggregate verdict
 HELP
     ;;
