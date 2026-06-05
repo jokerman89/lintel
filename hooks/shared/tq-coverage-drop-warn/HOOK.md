@@ -1,7 +1,7 @@
 ---
 name: tq-coverage-drop-warn
 tier: warn-only
-event: PreCommit
+event: PreToolUse (Edit|Write on test/source files)
 fires_on: commit drops aggregate or critical-path coverage below threshold from profile
 override: pass --ignore-coverage-drop flag (operator decision, logged)
 audit: ~/.lintel/audit/hooks.jsonl

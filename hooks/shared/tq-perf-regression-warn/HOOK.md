@@ -1,7 +1,7 @@
 ---
 name: tq-perf-regression-warn
 tier: warn-only
-event: PreCommit on perf-budget paths
+event: PreToolUse (Edit|Write on perf-budget paths)
 fires_on: edit to a file in pack.testing_qa.perf_path_glob OR identified as on a critical journey by .lintel/state/tq/perf-budget-*.md
 override: pass --ignore-perf-regression flag (operator decision, logged)
 audit: ~/.lintel/audit/hooks.jsonl

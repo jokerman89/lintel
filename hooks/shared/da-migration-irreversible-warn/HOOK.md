@@ -1,7 +1,7 @@
 ---
 name: da-migration-irreversible-warn
 tier: warn-only
-event: PreCommit (or PostEdit when integrated) on migration files
+event: PreToolUse (Edit|Write on migration files)
 fires_on: migration file lacks a paired down-migration OR contains destructive operations without documented data-loss acceptance
 override: pass --ignore-irreversibility flag (operator decision, logged)
 audit: ~/.lintel/audit/hooks.jsonl

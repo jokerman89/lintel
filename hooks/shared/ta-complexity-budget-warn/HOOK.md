@@ -1,7 +1,7 @@
 ---
 name: ta-complexity-budget-warn
 tier: warn-only
-event: PreCommit (or PostEdit when integrated)
+event: PreToolUse (Edit|Write)
 fires_on: edited file's cyclomatic OR cognitive complexity exceeds profile.engineering.tech_architecture.complexity_budget_*
 override: pass --ignore-complexity flag (operator decision, logged)
 audit: ~/.lintel/audit/hooks.jsonl
