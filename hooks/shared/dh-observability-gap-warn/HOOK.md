@@ -30,5 +30,5 @@ Surfaces when an edit to a service entry point lacks observability instrumentati
 ## Audit format
 
 ```jsonl
-{"hook":"dh-observability-gap-warn","tier":"warn","ts":"...","file_edited":"src/api/users.go","markers_found":0,"operator":"jokerman"}
+{"hook":"dh-observability-gap-warn","tier":"warn","ts":"...","file_edited":"src/api/users.go","markers_found":0,"operator":"<operator>"}
 ```

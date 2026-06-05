@@ -30,5 +30,5 @@ Surfaces when a commit drops coverage below the configured threshold. Warning, n
 ## Audit format
 
 ```jsonl
-{"hook":"tq-coverage-drop-warn","tier":"warn","ts":"...","coverage_pct":78,"target_pct":80,"critical_below":1,"operator":"jokerman"}
+{"hook":"tq-coverage-drop-warn","tier":"warn","ts":"...","coverage_pct":78,"target_pct":80,"critical_below":1,"operator":"<operator>"}
 ```

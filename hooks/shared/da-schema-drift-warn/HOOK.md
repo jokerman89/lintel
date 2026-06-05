@@ -34,5 +34,5 @@ Schema decisions evolve. The warn prompts the operator to either: (a) update the
 ## Audit format
 
 ```jsonl
-{"hook":"da-schema-drift-warn","tier":"warn","ts":"...","file_edited":"db/migrations/0042_user_schema.sql","adr_id":"ADR-014","adr_decision":"User schema versioning","operator":"jokerman"}
+{"hook":"da-schema-drift-warn","tier":"warn","ts":"...","file_edited":"db/migrations/0042_user_schema.sql","adr_id":"ADR-014","adr_decision":"User schema versioning","operator":"<operator>"}
 ```

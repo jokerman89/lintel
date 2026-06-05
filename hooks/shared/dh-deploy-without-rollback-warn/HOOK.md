@@ -30,5 +30,5 @@ Surfaces when a deploy or IaC commit lacks a documented rollback path. Warning, 
 ## Audit format
 
 ```jsonl
-{"hook":"dh-deploy-without-rollback-warn","tier":"warn","ts":"...","file_edited":"infra/k8s/deployment.yaml","rollback_age_days":-1,"operator":"jokerman"}
+{"hook":"dh-deploy-without-rollback-warn","tier":"warn","ts":"...","file_edited":"infra/k8s/deployment.yaml","rollback_age_days":-1,"operator":"<operator>"}
 ```

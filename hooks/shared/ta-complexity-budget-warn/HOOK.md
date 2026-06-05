@@ -37,5 +37,5 @@ Surfaces when an edit pushes a file over the operator's complexity budget. Warni
 ## Audit format
 
 ```jsonl
-{"hook":"ta-complexity-budget-warn","tier":"warn","ts":"...","file_edited":"src/parser.go","cyclomatic":18,"cognitive":24,"budget_cyclomatic":12,"budget_cognitive":18,"operator":"jokerman"}
+{"hook":"ta-complexity-budget-warn","tier":"warn","ts":"...","file_edited":"src/parser.go","cyclomatic":18,"cognitive":24,"budget_cyclomatic":12,"budget_cognitive":18,"operator":"<operator>"}
 ```

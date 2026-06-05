@@ -30,5 +30,5 @@ Surfaces provider edits without paired contract-test update. Warning, not block 
 ## Audit format
 
 ```jsonl
-{"hook":"tq-contract-break-warn","tier":"warn","ts":"...","file_edited":"src/api/users.go","contract_test_updated":false,"operator":"jokerman"}
+{"hook":"tq-contract-break-warn","tier":"warn","ts":"...","file_edited":"src/api/users.go","contract_test_updated":false,"operator":"<operator>"}
 ```

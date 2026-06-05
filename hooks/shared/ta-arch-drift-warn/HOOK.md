@@ -34,5 +34,5 @@ ADRs codify decisions but don't freeze them. Operators evolve architectures. The
 ## Audit format
 
 ```jsonl
-{"hook":"ta-arch-drift-warn","tier":"warn","ts":"...","file_edited":"src/auth/jwt.go","adr_id":"ADR-007","adr_decision":"JWT signing key rotation policy","operator":"jokerman"}
+{"hook":"ta-arch-drift-warn","tier":"warn","ts":"...","file_edited":"src/auth/jwt.go","adr_id":"ADR-007","adr_decision":"JWT signing key rotation policy","operator":"<operator>"}
 ```

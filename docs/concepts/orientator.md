@@ -156,7 +156,7 @@ Phase 4 will wire a real subagent (probably `OrientatorAgent` with budget-bounde
 Every routing decision writes to `~/.lintel/audit/orientator-decisions.jsonl`:
 
 ```jsonl
-{"ts":"2026-05-29T15:00:00Z","kind":"orientator_decision","intent":"fix","workflow":"/li:cycle --mode hotfix","risk":"medium","confidence":"high","decision":"confirm_with_operator","budget_used":0,"escalated":false,"operator":"jokerman"}
+{"ts":"2026-05-29T15:00:00Z","kind":"orientator_decision","intent":"fix","workflow":"/li:cycle --mode hotfix","risk":"medium","confidence":"high","decision":"confirm_with_operator","budget_used":0,"escalated":false,"operator":"<operator>"}
 ```
 
 Operators inspect via `bin/li-doctor --orientator-stats` (Phase 4 tool) or by grepping the audit log directly. The audit is the feedback loop — if the orientator consistently misroutes a particular prompt pattern, the operator surfaces it as a bug and the routing heuristics get tightened.

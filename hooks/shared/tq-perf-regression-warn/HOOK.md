@@ -29,5 +29,5 @@ Surfaces when an edit touches a perf-budget-bound path. Warning, not block — t
 ## Audit format
 
 ```jsonl
-{"hook":"tq-perf-regression-warn","tier":"warn","ts":"...","file_edited":"src/api/search.go","journey":"search","budget_p95_ms":150,"operator":"jokerman"}
+{"hook":"tq-perf-regression-warn","tier":"warn","ts":"...","file_edited":"src/api/search.go","journey":"search","budget_p95_ms":150,"operator":"<operator>"}
 ```

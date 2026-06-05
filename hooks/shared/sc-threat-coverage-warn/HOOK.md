@@ -35,5 +35,5 @@ Threat modeling is recursive — every iteration improves coverage. Warning prom
 ## Audit format
 
 ```jsonl
-{"hook":"sc-threat-coverage-warn","tier":"warn","ts":"...","file_edited":"src/auth/oauth.go","threat_model_age_days":-1,"file_in_model":false,"operator":"jokerman"}
+{"hook":"sc-threat-coverage-warn","tier":"warn","ts":"...","file_edited":"src/auth/oauth.go","threat_model_age_days":-1,"file_in_model":false,"operator":"<operator>"}
 ```

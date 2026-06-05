@@ -82,10 +82,10 @@ copilot plugin install lintel@jokerman-lintel
 ### 3. Install scaffolding source (for `li-scaffold` in new repos)
 
 ```bash
-# Set up local cache for scaffolding templates + bin/ scripts
+# Set up local cache for scaffolding templates + bin/ scripts (run from your clone root)
 mkdir -p ~/.lintel
-ln -s ~/Workspace/jokerman-lintel/scaffolding ~/.lintel/scaffolding
-export PATH="$HOME/Workspace/jokerman-lintel/bin:$PATH"
+ln -s "$PWD/scaffolding" ~/.lintel/scaffolding
+export PATH="$PWD/bin:$PATH"
 ```
 
 ### 4. Verify

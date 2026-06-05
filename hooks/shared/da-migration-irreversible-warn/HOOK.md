@@ -37,5 +37,5 @@ Surfaces when a migration commit lacks a rollback path. Warning, not block — d
 ## Audit format
 
 ```jsonl
-{"hook":"da-migration-irreversible-warn","tier":"warn","ts":"...","file":"db/migrations/0042_drop_legacy.sql","destructive_ops":["DROP TABLE","TRUNCATE"],"has_rollback":false,"operator":"jokerman"}
+{"hook":"da-migration-irreversible-warn","tier":"warn","ts":"...","file":"db/migrations/0042_drop_legacy.sql","destructive_ops":["DROP TABLE","TRUNCATE"],"has_rollback":false,"operator":"<operator>"}
 ```

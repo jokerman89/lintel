@@ -34,5 +34,5 @@ Surfaces IaC commits that bump cost without explicit acknowledgment. Warning, no
 ## Audit format
 
 ```jsonl
-{"hook":"dh-cost-budget-warn","tier":"warn","ts":"...","file_edited":"infra/main.tf","patterns":"sku-upsize,replicas-up","operator":"jokerman"}
+{"hook":"dh-cost-budget-warn","tier":"warn","ts":"...","file_edited":"infra/main.tf","patterns":"sku-upsize,replicas-up","operator":"<operator>"}
 ```
