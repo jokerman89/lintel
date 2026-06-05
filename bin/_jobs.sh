@@ -40,10 +40,16 @@ job_id() {
 }
 
 # Create a new job folder + job.yaml + regenerate _active.md
-# Args: <workflow> <mode>
+# Args: <workflow> <mode> [<step-spec> ...]
+#
+# Each optional <step-spec> is a pipe-delimited per-step contract (same grammar
+# as job_set_steps below). When none are given, job.yaml is written with an
+# empty `steps: []` block (back-compat — the historical behaviour) and the
+# caller can populate it later via job_set_steps.
 job_create() {
   local workflow="${1:-cycle}"
   local mode="${2:-internal-tool}"
+  shift 2 2>/dev/null || true
   local id
   id=$(job_id "$workflow")
   local dir="$LINTEL_JOBS_DIR/$id"
@@ -72,9 +78,139 @@ EOF
   # Audit (unified writer → ~/.lintel/audit/jobs.jsonl)
   audit_log "jobs" "job_begin" "job_id=$id" "workflow=$workflow" "mode=$mode"
 
+  # Optional inline step contracts (design §3.4 — per-step consumes/produces).
+  if [ "$#" -gt 0 ]; then
+    job_set_steps "$id" "$@"
+  fi
+
   regenerate_active
 
   printf '%s\n' "$id"
+}
+
+# ── Per-step contracts (design §3.4 / docs/concepts/jobs-system.md "Mechanics") ──
+#
+# A <step-spec> is a single pipe-delimited record describing one WBS leaf/phase:
+#
+#   NAME|consumes=a.md,b.md|produces=c.md,d.md|status=PENDING|blocked_until=PLAN.status == DONE
+#
+#   - field 1 (positional) is the step NAME. For flat/phased plans this is a
+#     phase token (PLAN, BUILD); for tree plans it is a WBS node-path (1.1.a).
+#   - consumes / produces are comma-separated artifact lists (rendered as YAML
+#     inline sequences). Omit → [].
+#   - status defaults to PENDING.
+#   - blocked_until is a predicate over OTHER steps' status (grammar below).
+#
+# Field order after NAME is free; unknown keys are ignored.
+#
+# blocked_until predicate grammar (kept deliberately small — see job_can_start):
+#   <predicate> := <clause> ( "&&" <clause> )*
+#   <clause>    := <STEP>.status == DONE
+# i.e. a conjunction of "this named step has reached DONE" tests. Empty/absent
+# means "never blocked". No OR, no negation, no other status values — by design.
+
+# Render one step-spec to indented YAML on stdout.
+_jobs_render_step() {
+  local spec="$1"
+  local name consumes produces status blocked field key val
+  name=""; consumes=""; produces=""; status="PENDING"; blocked=""
+
+  # First pipe-field is the name; the rest are key=value.
+  name="${spec%%|*}"
+  local rest="${spec#"$name"}"
+  rest="${rest#|}"
+
+  # Split remaining fields on '|'
+  local IFS_SAVE="$IFS"
+  IFS='|'
+  # shellcheck disable=SC2206
+  local fields=($rest)
+  IFS="$IFS_SAVE"
+  for field in "${fields[@]}"; do
+    [ -n "$field" ] || continue
+    key="${field%%=*}"
+    val="${field#*=}"
+    case "$key" in
+      consumes) consumes="$val" ;;
+      produces) produces="$val" ;;
+      status)   status="$val" ;;
+      blocked_until) blocked="$val" ;;
+    esac
+  done
+
+  # Comma-list → YAML inline sequence "[a, b]"
+  _jobs_yaml_seq() {
+    local csv="$1"
+    [ -n "$csv" ] || { printf '[]'; return; }
+    local out="" item
+    local IFS=','
+    # shellcheck disable=SC2206
+    local items=($csv)
+    for item in "${items[@]}"; do
+      item="${item# }"; item="${item%% }"
+      [ -n "$item" ] || continue
+      [ -n "$out" ] && out="$out, $item" || out="$item"
+    done
+    printf '[%s]' "$out"
+  }
+
+  printf '  - name: %s\n' "$name"
+  printf '    consumes: %s\n' "$(_jobs_yaml_seq "$consumes")"
+  printf '    produces: %s\n' "$(_jobs_yaml_seq "$produces")"
+  printf '    status: %s\n' "$status"
+  if [ -n "$blocked" ]; then
+    printf '    blocked_until: %s\n' "$blocked"
+  fi
+}
+
+# Write the steps[] block of a job from one-or-more step-specs.
+# Args: <id> <step-spec> [<step-spec> ...]
+# Replaces any existing steps[] block (everything from the `steps:` line to EOF).
+job_set_steps() {
+  local id="$1"; shift || true
+  local dir="$LINTEL_JOBS_DIR/$id"
+  [ -f "$dir/job.yaml" ] || return 1
+
+  local body
+  body=$(
+    for spec in "$@"; do
+      [ -n "$spec" ] || continue
+      _jobs_render_step "$spec"
+    done
+  )
+
+  # Reprint job.yaml up to (not including) the `steps:` line, then re-emit steps.
+  # The steps block is always the trailing block (job_create writes it last),
+  # so dropping from `^steps:` to EOF and re-appending is safe and idempotent.
+  awk '
+    /^steps:/ { found=1 }
+    !found { print }
+  ' "$dir/job.yaml" > "$dir/job.yaml.tmp"
+
+  if [ -z "$body" ]; then
+    printf 'steps: []\n' >> "$dir/job.yaml.tmp"
+  else
+    printf 'steps:\n' >> "$dir/job.yaml.tmp"
+    printf '%s\n' "$body" >> "$dir/job.yaml.tmp"
+  fi
+
+  mv "$dir/job.yaml.tmp" "$dir/job.yaml"
+
+  audit_log "jobs" "job_set_steps" "job_id=$id" "count=$#"
+}
+
+# Read one named step's status. Echoes the status (e.g. DONE) or empty if absent.
+# Args: <id> <step-name>
+job_step_status() {
+  local id="$1"
+  local step="$2"
+  local dir="$LINTEL_JOBS_DIR/$id"
+  [ -f "$dir/job.yaml" ] || return 1
+
+  awk -v want="$step" '
+    /^  - name:/ { cur=$3; next }
+    /^    status:/ && cur==want { print $2; exit }
+  ' "$dir/job.yaml"
 }
 
 # Update a job step + status (touches last_touched too)
@@ -89,12 +225,33 @@ job_update() {
   local ts
   ts=$(_jobs_iso_now)
 
-  # In-place update of last_touched + current_step (portable awk)
-  awk -v ts="$ts" -v step="$step" -v status="$status" '
-    BEGIN { updated_lt=0; updated_cs=0; updated_st=0 }
+  # Does <step> name an actual entry in steps[]? If so, <status> is a STEP-level
+  # transition and the job's top-level `status:` must NOT be flipped (the job
+  # stays ACTIVE until job_archive sets a terminal status). If <step> is not a
+  # populated step (the legacy flat/un-stepped case), preserve the historical
+  # behaviour: <status> writes to top-level `status:`. This keeps the existing
+  # `job_update <id> PLAN IN_PROGRESS` contract intact while making per-step
+  # updates safe.
+  local step_exists=0
+  if [ -n "$(job_step_status "$id" "$step")" ]; then
+    step_exists=1
+  fi
+
+  # In-place update of last_touched + current_step + the named step's nested
+  # status inside steps[] (portable awk).
+  #
+  # Top-level keys are anchored at column 0 (^last_touched:/^current_step:/^status:);
+  # the nested step status is indented ("    status:") so it never collides with
+  # the ^status: matcher. `cur` tracks which step block we are inside so the
+  # right nested status line is rewritten. The top-level `status:` is only
+  # rewritten when the step is NOT a populated steps[] entry (see above).
+  awk -v ts="$ts" -v step="$step" -v status="$status" -v step_exists="$step_exists" '
+    BEGIN { updated_lt=0; updated_cs=0; updated_st=0; cur="" }
     /^last_touched:/ && !updated_lt { print "last_touched: " ts; updated_lt=1; next }
     /^current_step:/ && !updated_cs { print "current_step: " step; updated_cs=1; next }
-    /^status:/ && !updated_st { print "status: " status; updated_st=1; next }
+    /^status:/ && !updated_st && step_exists=="0" { print "status: " status; updated_st=1; next }
+    /^  - name:/ { cur=$3; print; next }
+    /^    status:/ && cur==step { print "    status: " status; next }
     { print }
   ' "$dir/job.yaml" > "$dir/job.yaml.tmp" && mv "$dir/job.yaml.tmp" "$dir/job.yaml"
 
@@ -220,6 +377,118 @@ stale_jobs() {
 job_path() {
   local id="$1"
   printf '%s' "$LINTEL_JOBS_DIR/$id"
+}
+
+# ── blocked_until enforcement (design §3.4) ──────────────────────────────────
+#
+# job_can_start <id> <step> → echoes "yes" or "no" (and returns 0/1 respectively).
+#
+# Reads the named step's blocked_until predicate and evaluates it against the
+# CURRENT status of the referenced steps. Grammar (see job_set_steps header):
+#
+#   <predicate> := <clause> ( "&&" <clause> )*
+#   <clause>    := <STEP>.status == DONE
+#
+# A step with no blocked_until (or an empty one) is always startable. Every
+# clause must hold (logical AND) for the step to start. A clause referencing a
+# step whose status is anything other than DONE (including a missing/unknown
+# step) evaluates false → blocked. Anything outside the grammar is treated
+# conservatively as unsatisfiable (blocked) so a malformed predicate never
+# silently unblocks a gate.
+job_can_start() {
+  local id="$1"
+  local step="$2"
+  local dir="$LINTEL_JOBS_DIR/$id"
+  [ -f "$dir/job.yaml" ] || { printf 'no\n'; return 1; }
+
+  # Extract the blocked_until line for the named step.
+  local pred
+  pred=$(awk -v want="$step" '
+    /^  - name:/ { cur=$3; next }
+    /^    blocked_until:/ && cur==want {
+      sub(/^    blocked_until:[ \t]*/, "")
+      print
+      exit
+    }
+  ' "$dir/job.yaml")
+
+  # No predicate → not blocked.
+  if [ -z "$pred" ]; then
+    printf 'yes\n'; return 0
+  fi
+
+  # Split on '&&' and require every clause to hold.
+  local clause dep got
+  local IFS_SAVE="$IFS"
+  IFS='&'
+  # shellcheck disable=SC2206
+  local raw=($pred)
+  IFS="$IFS_SAVE"
+  for clause in "${raw[@]}"; do
+    # Empty fragments arise from splitting on the doubled '&&'; skip them.
+    clause="${clause#"${clause%%[![:space:]]*}"}"   # ltrim
+    clause="${clause%"${clause##*[![:space:]]}"}"    # rtrim
+    [ -n "$clause" ] || continue
+
+    # Clause must be exactly: <STEP>.status == DONE
+    case "$clause" in
+      *.status\ ==\ DONE)
+        dep="${clause%%.status*}"
+        got=$(job_step_status "$id" "$dep")
+        if [ "$got" != "DONE" ]; then
+          printf 'no\n'; return 1
+        fi
+        ;;
+      *)
+        # Outside the supported grammar → conservatively blocked.
+        printf 'no\n'; return 1
+        ;;
+    esac
+  done
+
+  printf 'yes\n'; return 0
+}
+
+# ── Node-path resume (design §3.4 — tree-schema plans) ───────────────────────
+#
+# job_resume_point <id> → echoes the deepest incomplete WBS node-path.
+#
+# Steps are authored in WBS order (1, 1.1, 1.1.a, 1.2, 2, …), so the FIRST step
+# whose status is not DONE is the resume point. For a tree plan the step `name`
+# IS the node-path (1.1.a) and that node-path is returned; for flat/phased plans
+# the name is a phase token (BUILD) and that is returned instead — the resume
+# skill falls back to current_step in that case (see skills/resume/SKILL.md).
+#
+# A blocked step (its blocked_until predicate does not yet hold) is skipped — it
+# is not yet resumable — so the resume point is the first step that is both
+# incomplete AND startable. If every step is DONE, echoes empty (job complete).
+# If no steps[] are populated at all, echoes empty (caller falls back to
+# current_step).
+job_resume_point() {
+  local id="$1"
+  local dir="$LINTEL_JOBS_DIR/$id"
+  [ -f "$dir/job.yaml" ] || return 1
+
+  # Collect (name, status) pairs in document order.
+  local names statuses
+  names=$(awk '/^  - name:/ { print $3 }' "$dir/job.yaml")
+  [ -n "$names" ] || return 0   # no steps → empty (fall back to current_step)
+
+  local name st can
+  while IFS= read -r name; do
+    [ -n "$name" ] || continue
+    st=$(job_step_status "$id" "$name")
+    if [ "$st" != "DONE" ]; then
+      can=$(job_can_start "$id" "$name")
+      if [ "$can" = "yes" ]; then
+        printf '%s\n' "$name"
+        return 0
+      fi
+    fi
+  done <<< "$names"
+
+  # All steps DONE (or all remaining ones blocked) → empty resume point.
+  return 0
 }
 
 # Self-test mode

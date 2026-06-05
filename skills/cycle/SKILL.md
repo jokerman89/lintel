@@ -28,11 +28,13 @@ You are the CYCLE orchestrator — the entry point for running the full Lintel c
 
 ## What this skill does
 
-Coordinates execution of the 8-phase Lintel cycle. Operator picks granularity via flags:
-- Full: `/li:cycle` → SENSE → DEFINE → DISCOVER → PLAN → BUILD → REVIEW → SHIP → CAPTURE
+Coordinates execution of the Lintel cycle (8 core phases + the light SCOPE phase between SENSE and DEFINE). Operator picks granularity via flags:
+- Full: `/li:cycle` → SENSE → SCOPE → DEFINE → DISCOVER → PLAN → BUILD → REVIEW → SHIP → CAPTURE
 - Mode preset: `/li:cycle --mode hotfix` → runs preset's phase-subset
 - Custom: `/li:cycle --from <phase> --to <phase> --skip <phases>` → operator-specified subset
 - Auto: `/li:cycle --mode auto` → SENSE detects intent + recommends mode
+
+SCOPE is a light, skippable phase (like DEFINE): it sizes + disambiguates the request before DEFINE burns tokens. Light modes (hotfix) skip it.
 
 Each phase is its own skill (`/li:sense`, `/li:define`, etc.). CYCLE chains them with gates between, propagates context, handles pause-points.
 
@@ -53,7 +55,7 @@ Each phase is its own skill (`/li:sense`, `/li:define`, etc.). CYCLE chains them
 ```yaml
 hotfix:
   phases: [SENSE, BUILD, REVIEW, SHIP]
-  skip: [DEFINE, DISCOVER, PLAN, CAPTURE]
+  skip: [SCOPE, DEFINE, DISCOVER, PLAN, CAPTURE]
   audience: solo
   voice_tier: pack          # resolve_pack_field voice.default_tier (default internal)
   compliance: pack-minimal  # resolve_pack_field compliance.hooks (none by default)
@@ -61,7 +63,7 @@ hotfix:
   use_when: known bug + fix path clear + ship now
 
 internal-tool:
-  phases: ALL_8 (lighter REVIEW)
+  phases: ALL_8 (+ SCOPE; lighter REVIEW)
   audience: team
   voice_tier: pack          # resolve_pack_field voice.default_tier (default internal)
   compliance: pack-standard # resolve_pack_field compliance.hooks (none by default)
@@ -70,7 +72,7 @@ internal-tool:
 
 research-dive:
   phases: [SENSE, DEFINE, DISCOVER]
-  skip: [PLAN, BUILD, REVIEW, SHIP, CAPTURE]
+  skip: [SCOPE, PLAN, BUILD, REVIEW, SHIP, CAPTURE]
   audience: solo
   voice_tier: pack          # resolve_pack_field voice.default_tier (default internal)
   compliance: none
@@ -78,7 +80,7 @@ research-dive:
   use_when: explore + understand, no code yet
 
 meta-infra:
-  phases: ALL_8  # heavier REVIEW + CAPTURE
+  phases: ALL_8  # + SCOPE; heavier REVIEW + CAPTURE
   audience: operator + future-operator
   voice_tier: internal
   compliance: scaffolding-only  # skip customer-facing gates; activate Gates M1-M4
@@ -144,9 +146,10 @@ Estimated cost: <X k tokens total>
 
 Per-phase forecast:
   [1/N] SENSE     est ~0.5k tokens   agents-wake: none
-  [2/N] DEFINE    est ~3k tokens     agents-wake: DesignReviewer
-  [3/N] DISCOVER  est ~2k tokens     agents-wake: ArchitectureScout
-  [4/N] PLAN      est ~5k tokens     agents-wake: PlanReviewer, CostAnalyzer
+  [2/N] SCOPE     est ~0.5k tokens   agents-wake: none (1 gate only if bimodal)
+  [3/N] DEFINE    est ~3k tokens     agents-wake: DesignReviewer
+  [4/N] DISCOVER  est ~2k tokens     agents-wake: ArchitectureScout
+  [5/N] PLAN      est ~5k tokens     agents-wake: PlanReviewer, CostAnalyzer
   ...
 
 No state mutated. Exit.
@@ -173,9 +176,21 @@ If conflicting flags (e.g., --mode hotfix AND --from DEFINE): surface conflict, 
 /li:sense
 ```
 
-SENSE returns: intent, mode recommendation, workprofile state, role, context budget.
+SENSE returns: intent, mode recommendation, workprofile state, role, context budget, **scale pre-read** (size + depth_schema; a bimodal flag if the request is ambiguous).
 
 If `--mode auto`: use SENSE's recommendation. AskUserQuestion: "SENSE recommends mode=<X>. Proceed?"
+
+### Step 2.5 — Run SCOPE (unless skipped by mode)
+
+SCOPE runs between SENSE and DEFINE in every mode that doesn't skip it (hotfix + research-dive skip it; see presets). It sizes + disambiguates the request, fires **at most one** clarifying question (only when SENSE flagged the request bimodal), can override a confidently-wrong orientator route, and emits `scope.md`.
+
+```bash
+if phase_in_list SCOPE "$phases_to_run"; then
+  /li:scope
+fi
+```
+
+SCOPE returns: resolved `size`, `depth_schema`, `chosen_reading`, and any `route_override`. `scope.md` flows to DEFINE (the wedge) and PLAN (the depth_schema that selects the WBS template variant). If SCOPE overrode the route (e.g. `deploy→ship` → full cycle from DEFINE), CYCLE adopts the override for the remaining phase list. SCOPE is silent on clear small requests — no pause.
 
 ### Step 3 — Determine phase list
 
@@ -185,7 +200,8 @@ Based on mode preset + flags:
 if mode != auto:
   phases_to_run = mode.phases
 else:
-  phases_to_run = full 8 phases
+  phases_to_run = [SENSE, SCOPE, DEFINE, DISCOVER, PLAN, BUILD, REVIEW, SHIP, CAPTURE]
+  # 8 core phases + the light SCOPE phase between SENSE and DEFINE
 
 # Apply --skip
 phases_to_run = phases_to_run - skip_phases
@@ -265,6 +281,7 @@ Between each phase, brief progress report:
 LINTEL CYCLE — <cycle-id>
 
 ✓ SENSE (30 sec, 500 tokens)
+✓ SCOPE (20 sec, 400 tokens) — size=M, depth_schema=phased
 ✓ DEFINE (5 min, 4k tokens) — design APPROVED
 ✓ DISCOVER (3 min, 2k tokens) — 8 ADRs identified
 → PLAN (in progress, est. 10 min)
@@ -350,7 +367,7 @@ If dependency not met: surface, ask operator to satisfy or pick different `--fro
 - `~/.lintel/analytics/cycle-runs.jsonl`
 
 **Triggers:**
-- Each phase-skill in sequence: `/li:sense`, `/li:define`, etc.
+- Each phase-skill in sequence: `/li:sense`, `/li:scope`, `/li:define`, etc.
 
 ## Anti-patterns
 
