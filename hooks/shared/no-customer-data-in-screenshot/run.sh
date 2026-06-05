@@ -2,7 +2,8 @@
 # no-customer-data-in-screenshot — Lintel warn-only hook
 set -euo pipefail
 
-ARTIFACT_DIR="${1:-}"
+source "$(dirname "${BASH_SOURCE[0]}")/../_input.sh"
+ARTIFACT_DIR="$(hook_input file_path "${1:-}")"
 [ -z "$ARTIFACT_DIR" ] && exit 0
 [ ! -d "$ARTIFACT_DIR" ] && exit 0
 

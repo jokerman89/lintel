@@ -4,7 +4,8 @@
 
 set -euo pipefail
 
-TARGET_PATH="${1:-}"
+source "$(dirname "${BASH_SOURCE[0]}")/../_input.sh"
+TARGET_PATH="$(hook_input file_path "${1:-}")"
 [ -z "$TARGET_PATH" ] && exit 0
 
 LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"

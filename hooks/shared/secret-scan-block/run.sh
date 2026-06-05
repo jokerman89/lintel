@@ -4,7 +4,8 @@
 
 set -euo pipefail
 
-CMD="${1:-}"
+source "$(dirname "${BASH_SOURCE[0]}")/../_input.sh"
+CMD="$(hook_input command "${1:-}")"
 [ -z "$CMD" ] && exit 0
 
 LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"

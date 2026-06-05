@@ -5,7 +5,8 @@
 
 set -euo pipefail
 
-PROMPT="${1:-}"
+source "$(dirname "${BASH_SOURCE[0]}")/../_input.sh"
+PROMPT="$(hook_input prompt "${1:-}")"
 [ -z "$PROMPT" ] && exit 0
 
 LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
