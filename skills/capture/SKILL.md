@@ -179,6 +179,15 @@ Auto-append (not optional) when CLAUDE.md changes — this is the audit trail fo
 
 AskUserQuestion: "Want to dogfood the trio? Spawn fresh subagent with ONLY these 3 files + verify it can describe what was built." (Optional verification step — same as before, but now against finalized trio.)
 
+**Handoff-size check against the 500k cap (NON-BLOCKING).** The reaffirmed trio is the durable cold-executor handoff — the artifact a fresh cold session reads to re-execute. Run the existing cap check so the finalized trio (now annotated with build evidence, possibly larger than at PLAN-time) plus any warming context can't silently exceed the 500k cap. This closes the second un-gated handoff the v4.9 audit flagged (Promise 6: cap logic existed but was invoked at no handoff).
+
+Invoke the existing mechanism — do **not** rebuild it:
+
+`/li:handoff-size-check` (a portable skill call; reads the reaffirmed trio + `.lintel/state/warming-manifest.md`, applies the mode-aware cap from `/li:context-budget` mode_envelopes, default `customer-engagement: 500k soft / 750k hard`).
+
+- **SURFACE, don't block.** A yellow/red verdict warns ("finalized trio yields ~Nk handoff, near cap") and notes the durable handoff is large — the operator decides whether to trim before it becomes the cross-session record. It does NOT halt CAPTURE.
+- **Off-switch:** `--skip-handoff-size-check` (or `SKIP_HANDOFF_SIZE_CHECK=1`) skips the gate entirely. Silent when skipped, and silent on a green pass.
+
 ### Step 7 — Role debrief (if role was active)
 
 If role was active during cycle:

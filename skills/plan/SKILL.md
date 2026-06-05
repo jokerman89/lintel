@@ -302,6 +302,18 @@ The trio (plan.md + spec.md + prompt.md) is the cold-executor handoff contract. 
 - State for `/li:resume`
 - Includes plan.md path, current task pointer, build-log placeholder
 
+### Step 11b — Handoff-size check against the 500k cap (trio-emit gate, NON-BLOCKING)
+
+The trio (plan.md + spec.md + prompt.md) now exists on disk — this is the cold-executor handoff payload. Before recommending BUILD, run the existing cap check so the trio + warming context can't silently exceed the 500k cap (the v4.9 audit's PARTIALLY-UPHELD Promise 6: cap logic existed but was invoked at no handoff).
+
+Invoke the existing mechanism — do **not** rebuild it:
+
+`/li:handoff-size-check` (a portable skill call; reads the trio it just wrote + `.lintel/state/warming-manifest.md`, applies the mode-aware cap from `/li:context-budget` mode_envelopes, default `customer-engagement: 500k soft / 750k hard`).
+
+- **SURFACE, don't block.** A yellow/red verdict warns ("this plan yields ~Nk handoff, near cap — split it?") and surfaces options (split the plan, cut a warming target, switch to a higher-cap mode). It does NOT halt PLAN — the operator decides.
+- **Off-switch:** `--skip-handoff-size-check` (or `SKIP_HANDOFF_SIZE_CHECK=1`) skips the gate entirely for operators who don't want it. Silent when skipped.
+- Silent green pass when trio + warming < soft cap — no friction in the common case.
+
 ### Step 12 — 00-state.md append
 
 ```yaml
