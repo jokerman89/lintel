@@ -72,7 +72,7 @@ if [ -n "${CLI_PATHS[claude]}" ]; then
     fi
   else
     warn "claude code: li NOT installed"
-    echo "    Fix: /plugin marketplace add Azureflipper/jokerman-session-setup"
+    echo "    Fix: /plugin marketplace add jokerman89/lintel"
     echo "         /plugin install li@jokerman-lintel"
   fi
 fi
@@ -93,7 +93,7 @@ if [ -n "${CLI_PATHS[gemini]}" ]; then
     ok "gemini: li installed"
   else
     warn "gemini: li NOT installed"
-    echo "    Fix: gemini extensions install https://github.com/Azureflipper/jokerman-session-setup"
+    echo "    Fix: gemini extensions install https://github.com/jokerman89/lintel"
   fi
 fi
 
@@ -103,7 +103,7 @@ if [ -n "${CLI_PATHS[copilot]}" ]; then
     ok "copilot cli: li installed"
   else
     warn "copilot cli: li NOT installed"
-    echo "    Fix: copilot plugin marketplace add Azureflipper/jokerman-session-setup"
+    echo "    Fix: copilot plugin marketplace add jokerman89/lintel"
     echo "         copilot plugin install li@jokerman-lintel"
   fi
 fi
@@ -129,7 +129,7 @@ if [ -d "$LINTEL_HOME/scaffolding/01-foundation" ]; then
   fi
 else
   warn "scaffolding source NOT at $LINTEL_HOME/scaffolding/"
-  echo "    Fix: re-run installer, OR git clone Azureflipper/jokerman-session-setup ~/.lintel"
+  echo "    Fix: re-run installer, OR git clone jokerman89/lintel ~/.lintel"
 fi
 echo ""
 

@@ -2,18 +2,18 @@
   "name": "jokerman-lintel",
   "owner": {
     "name": "jokerman89",
-    "email": "johannes.akerman@microsoft.com"
+    "email": "johannes.akerman@gmail.com"
   },
   "metadata": {
     "description": "Lintel — MS-CAIP-SE session harness marketplace",
-    "version": "3.5.0-dev"
+    "version": "4.9.0"
   },
   "plugins": [
     {
       "name": "li",
       "source": "./",
       "description": "Lintel v3.5 — 8-phase cycle (SENSE→CAPTURE) + role-lifting + context-warming + 78 specialized agents + compliance tiering + multi-CLI",
-      "version": "3.5.0-dev",
+      "version": "4.9.0",
       "category": "workflow",
       "tags": ["lintel", "microsoft", "caip", "session-harness", "rais", "trailblazer-voice", "azure"],
       "strict": false

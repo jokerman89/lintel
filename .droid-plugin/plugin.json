@@ -1,13 +1,13 @@
 {
   "name": "li",
-  "version": "3.5.0-dev",
+  "version": "4.9.0",
   "description": "Lintel — MS-CAIP-SE session harness for Factory Droid",
   "author": {
     "name": "jokerman89",
-    "email": "johannes.akerman@microsoft.com"
+    "email": "johannes.akerman@gmail.com"
   },
-  "homepage": "https://github.com/jokerman89/jokerman-lintel",
-  "repository": "https://github.com/jokerman89/jokerman-lintel",
+  "homepage": "https://github.com/jokerman89/lintel",
+  "repository": "https://github.com/jokerman89/lintel",
   "license": "MIT",
   "keywords": ["lintel", "microsoft", "caip", "session-harness", "rais", "azure"],
   "skills": "./skills/",

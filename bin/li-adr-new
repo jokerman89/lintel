@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# jstack-adr-new — bootstrap a new ADR from docs/adr/TEMPLATE.md
+# li-adr-new — bootstrap a new ADR from docs/adr/TEMPLATE.md
 #
-# Usage: jstack-adr-new "<title>" [--status proposed|accepted]
+# Usage: li-adr-new "<title>" [--status proposed|accepted]
 
 set -euo pipefail
 
@@ -13,12 +13,12 @@ while [[ $# -gt 0 ]]; do
     --status) STATUS="$2"; shift 2 ;;
     --help|-h)
       cat <<EOF
-jstack-adr-new — bootstrap a new ADR
+li-adr-new — bootstrap a new ADR
 
 Usage:
-  jstack-adr-new "<title>"                 # creates next NNNN-<slug>.md
-  jstack-adr-new "<title>" --status accepted
-  jstack-adr-new --help
+  li-adr-new "<title>"                 # creates next NNNN-<slug>.md
+  li-adr-new "<title>" --status accepted
+  li-adr-new --help
 
 What it does:
   1. Finds next ADR number from docs/adr/NNNN-*.md
@@ -39,8 +39,8 @@ EOF
   esac
 done
 
-[ -n "$TITLE" ] || { echo "Title required. Usage: jstack-adr-new \"<title>\"" >&2; exit 2; }
-[ -d "docs/adr" ] || { echo "docs/adr/ not found — run jstack-scaffold init first" >&2; exit 3; }
+[ -n "$TITLE" ] || { echo "Title required. Usage: li-adr-new \"<title>\"" >&2; exit 2; }
+[ -d "docs/adr" ] || { echo "docs/adr/ not found — run li-scaffold init first" >&2; exit 3; }
 
 TEMPLATE="docs/adr/TEMPLATE.md"
 [ -f "$TEMPLATE" ] || { echo "TEMPLATE missing: $TEMPLATE" >&2; exit 4; }
