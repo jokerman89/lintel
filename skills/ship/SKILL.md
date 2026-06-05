@@ -127,7 +127,7 @@ ship_path:
   
   # Direct-push (requires explicit per-batch auth)
   direct_main:
-    - operator must explicitly authorize: "commita och merga"
+    - operator must explicitly authorize: "commit and merge"
     - the active pack's compliance gates re-checked
     - merge commit message includes review-report path
   

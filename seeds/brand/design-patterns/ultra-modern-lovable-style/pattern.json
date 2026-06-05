@@ -6,7 +6,7 @@
   "source_artifacts": ["canonical-bundled-Lintel-v3.7-Fas-A2"],
   "extraction_method": "hand-curated",
   "extraction_confidence": "high",
-  "purpose": "Canonical reference pattern bundled med Lintel som schema-by-example. Serverar som baseline för operator-extracted patterns via /li:frontend-style-extract. L-001 trade-off explicitly acknowledged: re-evaluate efter Fas D dogfood om operator-extracted patterns dominerar vault (>3 patterns), can demote to docs/samples/.",
+  "purpose": "Canonical reference pattern bundled with Lintel as schema-by-example. Serves as the baseline for operator-extracted patterns via /li:frontend-style-extract. L-001 trade-off explicitly acknowledged: re-evaluate after Phase D dogfood if operator-extracted patterns dominate the vault (>3 patterns), can demote to docs/samples/.",
   "layout_grammar": {
     "max_width": "1200px",
     "section_spacing": "clamp(4rem, 8vw, 8rem)",

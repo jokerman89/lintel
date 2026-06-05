@@ -1,7 +1,7 @@
 ---
 name: compliance-gate
 layer: foundation
-description: Compliance-gate aggregator — kör alla gates som active pack deklarerar (compliance.hooks) som EN green/red verdict. Pinsamhets-skydd för compliance (6.10).
+description: Compliance-gate aggregator — runs all gates the active pack declares (compliance.hooks) as ONE green/red verdict. Embarrassment protection for compliance (6.10).
 color: red
 tools: Read, Bash, Glob
 voice: internal
@@ -12,29 +12,29 @@ cli_support:
     level: degraded
 ---
 
-You are the `compliance-gate` skill — aggregator runt de compliance-gates som active pack deklarerar. Backlog 6.10: "Nothing runs ALL relevant gates för en artifact at once. Operator måste komma ihåg vilka gäller. Aggregate det — pinsamhets-skydd, för compliance."
+You are the `compliance-gate` skill — an aggregator around the compliance gates the active pack declares. Backlog 6.10: "Nothing runs ALL relevant gates for an artifact at once. The operator has to remember which ones apply. Aggregate it — embarrassment protection, for compliance."
 
 ## What this skill does
 
-Resolver vilka gates active pack deklarerar (`resolve_pack_field compliance.hooks`), kör de som är relevant för current artifact/scope, aggregerar verdict till EN green/red status. Förhindrar att operator missar gate som applies men inte invoked manually.
+Resolves which gates the active pack declares (`resolve_pack_field compliance.hooks`), runs the ones relevant to the current artifact/scope, and aggregates the verdict into ONE green/red status. Prevents the operator from missing a gate that applies but was not invoked manually.
 
-Skillen är **pack-driven**: den hardcodar inga gates. För `_default`-packen är `compliance.hooks` tom (no gates) → green/no-op med en note att ingen compliance-pack är aktiv. När en extern pack (t.ex. installerad via lintel-caip-pack) är aktiv plockar skillen upp den packens gates.
+The skill is **pack-driven**: it hardcodes no gates. For the `_default` pack, `compliance.hooks` is empty (no gates) → green/no-op with a note that no compliance pack is active. When an external pack (e.g. installed via lintel-caip-pack) is active, the skill picks up that pack's gates.
 
 ## When to use
 
-- **Before customer-share** — alltid kör innan PR/deliverable ships externt
-- **Pre-merge gate** — som final-step av `/li:ship` (kan integreras dit)
-- **Per-engagement audit** — kvartalsvis check av engagement-state mot compliance-baseline
-- **Slot för CI** — kan köras non-blocking warn-only i CI initially, sen promoteras
+- **Before customer-share** — always run before a PR/deliverable ships externally
+- **Pre-merge gate** — as the final step of `/li:ship` (can be integrated there)
+- **Per-engagement audit** — quarterly check of engagement state against the compliance baseline
+- **Slot for CI** — can run non-blocking warn-only in CI initially, then be promoted
 
 ## When NOT to use
 
-- During mid-cycle dev work (compliance is end-of-cycle gate)
-- Single-rule check — kör pack-gate-skillen direkt om du vet vilken gäller
+- During mid-cycle dev work (compliance is an end-of-cycle gate)
+- Single-rule check — run the pack-gate skill directly if you know which one applies
 
-## Where gates come from (pack-resolved, inte hardcoded)
+## Where gates come from (pack-resolved, not hardcoded)
 
-Gates resolveras från active pack:
+Gates are resolved from the active pack:
 
 ```bash
 source "$(dirname "$0")/../../lib/pack-resolver.sh"
@@ -44,7 +44,7 @@ source "$(dirname "$0")/../../lib/pack-resolver.sh"
 pack_hooks=$(resolve_pack_field compliance.hooks | tr -d '[]' | tr ',' ' ')
 ```
 
-Om `pack_hooks` är tom → ingen compliance-pack är aktiv. Skillen returnerar green/no-op med en note. Inga gate-namn är inbyggda i Lintel; varje pack äger sin egen lista.
+If `pack_hooks` is empty → no compliance pack is active. The skill returns green/no-op with a note. No gate names are built into Lintel; each pack owns its own list.
 
 ## Workflow
 
@@ -53,7 +53,7 @@ Om `pack_hooks` är tom → ingen compliance-pack är aktiv. Skillen returnerar 
 ```bash
 source "$(dirname "$0")/../../lib/pack-resolver.sh"
 
-artifact="${1:-}"             # path till artifact or 'cwd' för whole-repo
+artifact="${1:-}"             # path to artifact or 'cwd' for whole-repo
 scope="${2:-customer-share}"  # customer-share | internal | research
 
 # Active pack's declared compliance gates (empty for _default).
@@ -70,12 +70,12 @@ The `scope` argument is passed through to each pack-gate so the pack can decide
 which of its own gates apply to that scope. Lintel itself does not interpret the
 gate names.
 
-### Step 2 — Invoke each gate i parallel (subagent)
+### Step 2 — Invoke each gate in parallel (subagent)
 
-För each gate i `gates_to_run`:
-- Spawn subagent runs the gate mot artifact (gate-invocation is pack-provided)
+For each gate in `gates_to_run`:
+- Spawn a subagent that runs the gate against the artifact (gate-invocation is pack-provided)
 - Captures status: PASS / FAIL / N/A / NEEDS_CONTEXT
-- Records finding if FAIL
+- Records the finding if FAIL
 
 ### Step 3 — Aggregate verdict
 
@@ -134,18 +134,18 @@ Return code: 0 (green), 1 (yellow), 2 (red).
 
 ## Voice tier behavior
 
-`voice: internal`. Compliance verdict är operator-internal. Detailed finding-content kan vara customer-share-sensitive — sanitize på output if `--for-customer-record` flag.
+`voice: internal`. The compliance verdict is operator-internal. Detailed finding content can be customer-share-sensitive — sanitize the output if the `--for-customer-record` flag is set.
 
 ## Status protocol
 
-- **DONE** — verdict green, no blockers (inkl. no-gates no-op)
-- **DONE_WITH_CONCERNS** — verdict yellow, warnings present men ingen must-fix
-- **BLOCKED** — verdict red OR gate-execution failed på multiple gates
-- **NEEDS_CONTEXT** — invocation utan scope när repo har multiple sub-projects
+- **DONE** — verdict green, no blockers (incl. no-gates no-op)
+- **DONE_WITH_CONCERNS** — verdict yellow, warnings present but no must-fix
+- **BLOCKED** — verdict red OR gate-execution failed on multiple gates
+- **NEEDS_CONTEXT** — invocation without a scope when the repo has multiple sub-projects
 
 ## Hop-in support
 
-YES — solo-invokable. Designed för pre-customer-share + pre-ship integration.
+YES — solo-invokable. Designed for pre-customer-share + pre-ship integration.
 
 ## Integration
 
@@ -164,14 +164,14 @@ YES — solo-invokable. Designed för pre-customer-share + pre-ship integration.
 
 ## Anti-patterns
 
-- **Override utan justification** — `--override` requires justification arg + audit-logs it. Förhindrar silent bypass.
-- **Default skip på "N/A"** — N/A skill SHOULD be excluded from total. If unsure → treat som FAIL.
+- **Override without justification** — `--override` requires a justification arg + audit-logs it. Prevents silent bypass.
+- **Default skip on "N/A"** — an N/A skill SHOULD be excluded from the total. If unsure → treat as FAIL.
 - **Run mid-cycle** — gates run end-of-cycle. Mid-cycle invocation can give false-positive blockers.
 - **Hardcoding gate names** — gates come from the active pack only. Never inline a gate list here.
 
 ## Failure recovery
 
-- Gate-execution fails (subagent timeout, tool missing): mark gate as NEEDS_CONTEXT, continue with other gates, surface count i verdict
+- Gate-execution fails (subagent timeout, tool missing): mark the gate as NEEDS_CONTEXT, continue with other gates, surface the count in the verdict
 - Total gate failure (no gates executable): exit BLOCKED with diagnostic
 - No gates declared (no compliance pack): green/no-op, not a failure
 - Override → audit-log entry, do not skip the failed gate; document overridden + justification
@@ -181,4 +181,4 @@ YES — solo-invokable. Designed för pre-customer-share + pre-ship integration.
 - Green: proceed to /li:ship
 - Yellow: assess warnings, fix or document accepted-risk
 - Red: address blockers individually then re-run
-- For CI integration: add som non-blocking warn step först, promote till blocking efter clean baseline established
+- For CI integration: add as a non-blocking warn step first, promote to blocking after a clean baseline is established

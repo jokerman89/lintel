@@ -48,27 +48,27 @@ Phase F of v2 build.
 - Optional `--use-defaults` — force use of in-repo default templates instead of brand pull
 - Optional `--ignore-stale-brand <reason>` — bypass brand-staleness-warn
 
-## From-pipeline mode (v3.5 Fas 2 — generate-pipeline integration)
+## From-pipeline mode (v3.5 Phase 2 — generate-pipeline integration)
 
-If invoked med `--from-pipeline <run-dir>` istället för `--brief`:
+If invoked with `--from-pipeline <run-dir>` instead of `--brief`:
 
 1. **Read shared pipeline-output:**
-   - `<run-dir>/content.md` — written content (med HTML-comment annotations för voice/type/key_message per section)
+   - `<run-dir>/content.md` — written content (with HTML-comment annotations for voice/type/key_message per section)
    - `<run-dir>/speaker-notes.md` — speaker notes per slide
    - `<run-dir>/design-spec.json` — per-format layout-mappings (read `per_format.ppt.layouts`)
 
-2. **Replace brief-parsing logic** med direct-read av content.md sections + design-spec layouts. PPTNarrativeArchitect agent invokeras INTE i denna mode (narrative-design redan gjord av shared generate-design).
+2. **Replace brief-parsing logic** with direct-read of content.md sections + design-spec layouts. The PPTNarrativeArchitect agent is NOT invoked in this mode (narrative-design already done by shared generate-design).
 
 3. **Apply format-specific design-pass via design_pass_hook:**
    - Reads `per_format.ppt.layouts[N].design_pass_hook` (canonical: PPTNarrativeArchitect)
-   - Invokes agent på PPT-specific fidelity-pass (slide-narrative-arc, FastPath-recommendations, animation-cues) ovanpå shared baseline
-   - Acknowledges plan-eng-review Reviewer Concern #7 — per-format design-agents stays per-format
+   - Invokes agent for a PPT-specific fidelity-pass (slide-narrative-arc, FastPath-recommendations, animation-cues) on top of the shared baseline
+   - Acknowledges plan-eng-review Reviewer Concern #7 — per-format design-agents stay per-format
 
-4. **CLI bevaras backward-compat:** befintliga `--brief`-flag invocations fungerar oförändrat. `--from-pipeline` är additive.
+4. **CLI stays backward-compat:** existing `--brief`-flag invocations work unchanged. `--from-pipeline` is additive.
 
-5. **4-gate pipeline körs som vanligt** efter generation (brand + voice + honest-limitations + provenance).
+5. **4-gate pipeline runs as usual** after generation (brand + voice + honest-limitations + provenance).
 
-Operator-CLI bevaras icke-breaking. Existing workflow-scripts påverkas inte.
+Operator-CLI stays non-breaking. Existing workflow-scripts are unaffected.
 
 ## Workflow
 

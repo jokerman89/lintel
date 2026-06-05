@@ -1,7 +1,7 @@
 ---
 name: handoff-size-check
 layer: foundation
-description: Handoff-size-warning tied to 500k cap. Per v3.6 backlog 3.2 — elephant-hint och token-cap som samma mekanism från två ändar.
+description: Handoff-size warning tied to the 500k cap. Per v3.6 backlog 3.2 — elephant-hint and token-cap as the same mechanism from two ends.
 color: yellow
 tools: Read, Bash, Glob, Grep
 voice: internal
@@ -12,28 +12,28 @@ cli_support:
     level: degraded
 ---
 
-You are the `handoff-size-check` skill — pre-handoff payload-validation mot 500k cap.
+You are the `handoff-size-check` skill — pre-handoff payload validation against the 500k cap.
 
 ## What this skill does
 
-När operator picks "kör ändå" på broad idea (elephant-hint default), the plan declares its own handoff size. Om plan's payload närmar sig 500k cap → natural warning point ("denna plan yields ~480k handoff, near cap — stycka?").
+When the operator picks "run anyway" on a broad idea (elephant-hint default), the plan declares its own handoff size. If the plan's payload approaches the 500k cap → natural warning point ("this plan yields ~480k handoff, near cap — split it?").
 
-Per v3.6 backlog 3.2 — kompletterar 3.1 elephant-hint + 2.1 500k cap som **samma mekanism från två ändar:**
-- Elephant-hint (3.1): catches broad idea BEFORE plan-writing
-- Handoff-size-check (3.2): catches large plan AFTER plan-writing
-- Cleanare än två separata systems.
+Per v3.6 backlog 3.2 — complements 3.1 elephant-hint + 2.1 500k cap as **the same mechanism from two ends:**
+- Elephant-hint (3.1): catches a broad idea BEFORE plan-writing
+- Handoff-size-check (3.2): catches a large plan AFTER plan-writing
+- Cleaner than two separate systems.
 
 ## When to use
 
-- **Post-PLAN-phase auto** — `/li:cycle` invokes denna efter PLAN.md är klar
-- **Standalone audit** — `/li:handoff-size-check <plan.md>` → check specific plan
-- **Pre-cold-executor-handoff** — verifierar trio + warming totalt < cap
+- **Post-PLAN-phase auto** — `/li:cycle` invokes this after PLAN.md is done
+- **Standalone audit** — `/li:handoff-size-check <plan.md>` → check a specific plan
+- **Pre-cold-executor-handoff** — verifies trio + warming total < cap
 
 ## When NOT to use
 
-- Mid-plan-writing (warning vs partial plan är false-positive)
-- Single-skill estimate — använd `/li:context-budget` direkt
-- Real-time monitoring — denna är batch-check vid handoff-points
+- Mid-plan-writing (a warning against a partial plan is a false positive)
+- Single-skill estimate — use `/li:context-budget` directly
+- Real-time monitoring — this is a batch check at handoff points
 
 ## Workflow
 
@@ -41,7 +41,7 @@ Per v3.6 backlog 3.2 — kompletterar 3.1 elephant-hint + 2.1 500k cap som **sam
 
 ```bash
 PLAN_FILE="${1:-.lintel/state/PLAN.md}"
-WARMING_FILE=".lintel/state/warming-manifest.md"  # från context-warm-* invocations
+WARMING_FILE=".lintel/state/warming-manifest.md"  # from context-warm-* invocations
 [ -f "$PLAN_FILE" ] || { echo "No plan found at $PLAN_FILE"; exit 2; }
 ```
 
@@ -56,7 +56,7 @@ prompt_size=$(wc -c < .lintel/state/prompt.md 2>/dev/null || echo 0)
 # Warming projected loads
 warming_total=0
 if [ -f "$WARMING_FILE" ]; then
-  # Parse warming-manifest för per-load file-sizes
+  # Parse warming-manifest for per-load file-sizes
   while IFS= read -r line; do
     if [[ "$line" =~ ^load:[[:space:]]*([0-9]+) ]]; then
       warming_total=$((warming_total + ${BASH_REMATCH[1]}))
@@ -72,7 +72,7 @@ total_tokens=$(( trio_tokens + warming_tokens ))
 
 ### Step 3 — Apply mode-aware cap (per 2.1)
 
-Read current mode från `~/.lintel/profile.yaml`. Look up cap från context-budget mode_envelopes:
+Read current mode from `~/.lintel/profile.yaml`. Look up the cap from context-budget mode_envelopes:
 
 ```yaml
 hotfix:              { soft: 200k, hard: 300k }
@@ -95,11 +95,11 @@ TOTAL HANDOFF:    <Z>k tokens
 Status:
   Z < soft  → ✅ GREEN — proceed
   soft ≤ Z < hard → ⚠ YELLOW — near cap, consider:
-    - Stycka planet (split into 2 smaller phases)
+    - Split the plan (into 2 smaller phases)
     - Skip --skip-warming-<X> on lowest-priority warming target
-    - Switch till research-dive mode (higher cap) if research-justified
+    - Switch to research-dive mode (higher cap) if research-justified
   Z >= hard → ⛔ RED — exceeds cap, MUST reduce:
-    - Plan is too broad → stycka now
+    - Plan is too broad → split now
     - Warming includes too many files → cut to essentials
     - Mode mismatch → consider research-dive
 
@@ -124,20 +124,20 @@ jq -nc --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
 
 ## Status protocol
 
-- **DONE** — check klar, verdict green
+- **DONE** — check done, verdict green
 - **DONE_WITH_CONCERNS** — yellow verdict (near cap warnings)
 - **BLOCKED** — red verdict (exceeds cap) — operator must address before handoff
-- **NEEDS_CONTEXT** — no plan-file at default path och `--plan` arg saknas
+- **NEEDS_CONTEXT** — no plan file at default path and `--plan` arg missing
 
 ## Pause-points
 
-- Red verdict: hard-block för operator-decision (stycka / cut warming / abort handoff)
-- Yellow verdict: surface options + ask if proceed (override OK with justification)
-- Missing warming-manifest: assume warming = 0 + warn att estimate kan vara low
+- Red verdict: hard-block for operator decision (split / cut warming / abort handoff)
+- Yellow verdict: surface options + ask whether to proceed (override OK with justification)
+- Missing warming-manifest: assume warming = 0 + warn that the estimate may be low
 
 ## Hop-in support
 
-YES — solo-invocable. Designed för auto-invocation från `/li:cycle` Step 5
+YES — solo-invocable. Designed for auto-invocation from `/li:cycle` Step 5
 (post-PLAN, pre-handoff).
 
 ## Integration
@@ -157,25 +157,25 @@ YES — solo-invocable. Designed för auto-invocation från `/li:cycle` Step 5
 **Consumed by:**
 - `/li:cycle` (auto-invocation post-PLAN)
 - Operator (pre-handoff manual check)
-- `/li:ship` (could integrate som ship-gate)
+- `/li:ship` (could integrate as a ship-gate)
 
 ## Anti-patterns
 
-- **Auto-cut warming utan operator-approval** — cap-violation surfaces options;
+- **Auto-cut warming without operator-approval** — cap-violation surfaces options;
   operator decides which warming targets stay.
-- **Override red verdict utan justification-log** — `--override "<reason>"` logs
+- **Override red verdict without justification-log** — `--override "<reason>"` logs
   intent. Silent bypass = future-debugging-pain.
-- **Token-budget i bytes** — Lintel cap is in tokens. Convert at compute time.
+- **Token-budget in bytes** — Lintel cap is in tokens. Convert at compute time.
 
 ## Failure recovery
 
-- Plan-file unreadable: exit BLOCKED med diagnostic
-- Mode unknown: fall back till customer-engagement defaults + warn
+- Plan-file unreadable: exit BLOCKED with diagnostic
+- Mode unknown: fall back to customer-engagement defaults + warn
 - Warming-manifest absent: assume 0 warming, surface "estimate may be low"
 
 ## Recommended next steps after invocation
 
-- Green: proceed med cold-executor handoff
-- Yellow: review warming-list för cut-candidates, consider stycka
-- Red: address blocker (stycka / cut / mode-change), re-run check
-- Pair med `/li:context-budget --report` för deeper headroom-analysis
+- Green: proceed with cold-executor handoff
+- Yellow: review the warming list for cut-candidates, consider splitting
+- Red: address blocker (split / cut / mode-change), re-run check
+- Pair with `/li:context-budget --report` for deeper headroom-analysis

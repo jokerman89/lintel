@@ -31,9 +31,9 @@
     "category": "Coding",
     "capabilities": ["Interactive", "Read", "Write"],
     "defaultPrompt": [
-      "Hjälp mig med ett nytt customer engagement.",
-      "Kör /li:cycle --mode customer-engagement.",
-      "Validera min copy mot Trailblazer voice."
+      "Help me with a new customer engagement.",
+      "Run /li:cycle --mode customer-engagement.",
+      "Validate my copy against Trailblazer voice."
     ],
     "websiteURL": "https://github.com/jokerman89/jokerman-lintel",
     "privacyPolicyURL": "https://privacy.microsoft.com/privacystatement",

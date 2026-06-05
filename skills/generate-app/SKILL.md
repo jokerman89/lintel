@@ -1,7 +1,7 @@
 ---
 name: generate-app
 layer: foundation
-description: Full-app scaffold-orchestrator. Reads frontend-design-spec.json + generates vite-react/next-app/svelte-kit project skeleton with motion/shader/typography wired up. Sister till generate-web — same family (rendering-engine), larger scope.
+description: Full-app scaffold-orchestrator. Reads frontend-design-spec.json + generates vite-react/next-app/svelte-kit project skeleton with motion/shader/typography wired up. Sister to generate-web — same family (rendering-engine), larger scope.
 color: green
 tools: Read, Write, Bash, Glob
 voice: mixed
@@ -16,15 +16,15 @@ cli_support:
 license_note: produces customer-bound output if --customer-share flag set
 ---
 
-You are the `generate-app` orchestrator skill — full-app scaffold for v3.7 generate-* family (Fas B — resolves M-2 från /plan-eng-review per design-director vs rendering-engine separation).
+You are the `generate-app` orchestrator skill — full-app scaffold for v3.7 generate-* family (Phase B — resolves M-2 from /plan-eng-review per design-director vs rendering-engine separation).
 
 ## What this skill does
 
-Reads `frontend-design-spec.json` (from `/li:frontend-design` orchestrator output) → generates a **working repo skeleton** the operator can `npm install && npm run dev`. Spans single-page-app territory beyond what generate-web's `single-file` eller `nextjs-scaffold`-variants cover.
+Reads `frontend-design-spec.json` (from `/li:frontend-design` orchestrator output) → generates a **working repo skeleton** the operator can `npm install && npm run dev`. Spans single-page-app territory beyond what generate-web's `single-file` or `nextjs-scaffold` variants cover.
 
 **Why separate from generate-web** (M-2 resolution): generate-web targets pitch-artifacts (single-file landing + Next.js scaffold). generate-app targets production-grade app skeletons (multi-route, state, API stubs, deploy-config). Same rendering-engine family, different scope.
 
-L-001-discipline: skill body är contract (what scaffolds get generated). Agent at invocation produces actual file-content. Don't pre-bake "the best React structure" — let agent decide based on stack + brief.
+L-001-discipline: skill body is the contract (what scaffolds get generated). Agent at invocation produces actual file-content. Don't pre-bake "the best React structure" — let agent decide based on stack + brief.
 
 ## When to use
 
@@ -104,7 +104,7 @@ source=$(jq -r '.source' "$spec")
    package.json         — gsap + lenis + (paper-shaders if applicable) + shadcn + (Aceternity reference)
    next.config.js
    tsconfig.json
-   tailwind.config.ts   — fontFamily med stacks från typography.json
+   tailwind.config.ts   — fontFamily with stacks from typography.json
    ```
 
 **For `--stack vite-react`:**
@@ -124,11 +124,11 @@ source=$(jq -r '.source' "$spec")
 
 For each file generated, apply transforms from `frontend-design-spec.json`:
 
-- **layout.tsx / +layout.svelte:** inject `<link>` tags from `typography.font_stacks[].loading_strategy`, wrap children with LenisProvider om `interaction_signature.scroll_smoothing`, set up fontFamily classNames
+- **layout.tsx / +layout.svelte:** inject `<link>` tags from `typography.font_stacks[].loading_strategy`, wrap children with LenisProvider if `interaction_signature.scroll_smoothing`, set up fontFamily classNames
 - **page.tsx / +page.svelte:** apply `visual_thesis` to hero copy + structure
 - **tailwind.config:** map `typography.size_scale.scale` + `typography.line_heights` + `layout_grammar.max_width` to Tailwind tokens
 - **components/motion/*.tsx:** GSAP setup with prefers-reduced-motion gating per `motion.perf_budget.fallback_for_prefers_reduced_motion`
-- **components/hero/HeroShader.tsx:** om `shader != null` → emit Paper Shaders component eller OGL canvas-mount
+- **components/hero/HeroShader.tsx:** if `shader != null` → emit Paper Shaders component or OGL canvas-mount
 
 ### Step 5 — Generate `package.json`
 
@@ -184,8 +184,8 @@ Operator-licensed items (per frontend-design-spec.json):
 Same as generate-web (per existing v3.5 pattern):
 1. Build-test: `npm run build` smoke-test
 2. WebExperienceCritic agent: layout/hierarchy/accessibility review
-3. DesignSystemAuditor (Fas A2) optional: 6-dimension audit if `--review` flag
-4. Voice-gate via the active pack's voice gate (`resolve_pack_field compliance.hooks`; none by default) om customer-share
+3. DesignSystemAuditor (Phase A2) optional: 6-dimension audit if `--review` flag
+4. Voice-gate via the active pack's voice gate (`resolve_pack_field compliance.hooks`; none by default) if customer-share
 
 ## Voice tier behavior
 
@@ -194,15 +194,15 @@ Same as generate-web (per existing v3.5 pattern):
 ## Status protocol
 
 - **DONE** — app skeleton generated, npm install + npm run dev succeed in smoke-test
-- **DONE_WITH_CONCERNS** — build succeeds but design-review yellow (om --review)
+- **DONE_WITH_CONCERNS** — build succeeds but design-review yellow (if --review)
 - **BLOCKED** — frontend-design-spec.json invalid schema, OR build fails, OR customer-share voice-fail
-- **NEEDS_CONTEXT** — stack-choice missing eller frontend-design-spec absent
+- **NEEDS_CONTEXT** — stack-choice missing or frontend-design-spec absent
 
 ## Pause-points
 
 - Schema-version handshake fail: BLOCKED hard
 - Build smoke-test fail: surface diagnostic + offer retry
-- Customer-share + voice-gate fail: BLOCKED för operator-review
+- Customer-share + voice-gate fail: BLOCKED for operator-review
 
 ## Hop-in support
 
@@ -213,7 +213,7 @@ YES — solo-invocable (given an existing frontend-design-spec.json).
 **Reads:**
 - `<from-frontend-design>/frontend-design-spec.json` (mandatory)
 - `~/.lintel/brand/web-templates/<stack>/` (templates if exist, else use cli scaffold tools)
-- `~/.lintel/brand/design-patterns/<name>/` (om frontend-design ran with --pattern)
+- `~/.lintel/brand/design-patterns/<name>/` (if frontend-design ran with --pattern)
 - `~/.lintel/profile.yaml` (mode → voice-tier)
 
 **Writes:**
@@ -222,26 +222,26 @@ YES — solo-invocable (given an existing frontend-design-spec.json).
 
 **Calls into:**
 - `agents/doc-gen/WebExperienceCritic.md` (existing — design-pass review)
-- `agents/frontend/DesignSystemAuditor.md` (Fas A2 — optional 6-dimension audit if --review)
-- the active pack's voice gate (`resolve_pack_field compliance.hooks`; none by default — om customer-share)
-- `/li:compliance-gate` (om customer-share)
+- `agents/frontend/DesignSystemAuditor.md` (Phase A2 — optional 6-dimension audit if --review)
+- the active pack's voice gate (`resolve_pack_field compliance.hooks`; none by default — if customer-share)
+- `/li:compliance-gate` (if customer-share)
 
-**Boundary med frontend-* family (L-002):**
+**Boundary with frontend-* family (L-002):**
 
-generate-app är **rendering-engine** — produces files. frontend-design är **design-director** — produces spec. generate-app does NOT make design-decisions; it READS them from spec + scaffolds accordingly. Same role as generate-web but larger-scope output.
+generate-app is the **rendering-engine** — produces files. frontend-design is the **design-director** — produces spec. generate-app does NOT make design-decisions; it READS them from spec + scaffolds accordingly. Same role as generate-web but larger-scope output.
 
 | Concern | generate-web | generate-app |
 |---|---|---|
 | Output | single .html OR Next.js scaffold (basic) | Full vite/next/svelte project skeleton |
 | Use case | Pitch artifact, landing page | Production-grade app POC |
 | Routes | 1-3 | Multi (configurable) |
-| Build-system | Embedded eller npm-init | Full package.json + npm-build |
+| Build-system | Embedded or npm-init | Full package.json + npm-build |
 | API stubs | No | Optional via --with-api-stubs |
 | Auth stubs | No | Optional via --with-auth-stubs |
 
 ## Anti-patterns
 
-- **Making design-decisions in generate-app** — wrong layer. Read them från frontend-design-spec.json.
+- **Making design-decisions in generate-app** — wrong layer. Read them from frontend-design-spec.json.
 - **Bundling specific component-library versions** — let operator's npm install resolve. Skill body documents version-min, doesn't pin.
 - **Generating without schema-version handshake** — M-1 + M-5 violation.
 - **Skipping prefers-reduced-motion handling** — accessibility-fail. Mandatory.
@@ -251,11 +251,11 @@ generate-app är **rendering-engine** — produces files. frontend-design är **
 
 - Schema-version handshake fail: BLOCKED + diagnostic
 - npm install fails in smoke-test: surface error + offer `--skip-smoke-test` retry
-- Stack-template missing eller cli scaffold tool unavailable: BLOCKED with install-instruction
+- Stack-template missing or cli scaffold tool unavailable: BLOCKED with install-instruction
 
 ## Recommended next steps after invocation
 
 - `cd $out_dir && npm install && npm run dev` — operator validates locally
-- `/li:frontend-design-review $out_dir` — Fas A2 6-dimension audit (om not already auto-run)
-- Operator commits till customer-repo om customer-share
-- Pair med `/li:compliance-gate` för final ship-gate
+- `/li:frontend-design-review $out_dir` — Phase A2 6-dimension audit (if not already auto-run)
+- Operator commits to customer-repo if customer-share
+- Pair with `/li:compliance-gate` for final ship-gate

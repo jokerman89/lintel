@@ -1,7 +1,7 @@
 ---
 name: frontend-design-review
 layer: foundation
-description: Quality gate för produced frontend designs. 6-dimension audit (typography hierarchy + motion coherence + shader perf-budget + accessibility WCAG AA + brand conformance + responsive fidelity). Scored rubric. Solo-invokable.
+description: Quality gate for produced frontend designs. 6-dimension audit (typography hierarchy + motion coherence + shader perf-budget + accessibility WCAG AA + brand conformance + responsive fidelity). Scored rubric. Solo-invokable.
 color: orange
 tools: Read, Write, Bash, Glob
 voice: internal
@@ -15,25 +15,25 @@ cli_support:
         strategy: auto-pick-recommended
 ---
 
-You are the `frontend-design-review` skill — quality gate för v3.7 frontend-* family (Fas A2 — resolves /plan-eng-review M-3 reviewer-concern #3).
+You are the `frontend-design-review` skill — quality gate for the v3.7 frontend-* family (Phase A2 — resolves /plan-eng-review M-3 reviewer-concern #3).
 
 ## What this skill does
 
-Reads a produced frontend artifact (HTML file, Next.js project, screenshots, eller live URL) → DesignSystemAuditor agent runs **6-dimension audit** with explicit scoring rubric → writes `design-review.json` med per-dimension scores (0-100) + verdict (green/yellow/red) per dimension + overall verdict.
+Reads a produced frontend artifact (HTML file, Next.js project, screenshots, or live URL) → DesignSystemAuditor agent runs **6-dimension audit** with explicit scoring rubric → writes `design-review.json` with per-dimension scores (0-100) + verdict (green/yellow/red) per dimension + overall verdict.
 
-Solo-invokable för audit eller chained from `/li:frontend-design` Workflow Step 7 (om enabled).
+Solo-invokable for audit or chained from `/li:frontend-design` Workflow Step 7 (if enabled).
 
 **Scoring rubric (resolves M-3 from /plan-eng-review):**
 - Per dimension: **≥80 = green**, **60-79 = yellow**, **<60 = red**
 - Overall verdict: ALL dimensions green → GREEN. Any red → RED. Otherwise YELLOW.
-- Customer-share runs: any yellow eller red → BLOCKED until operator addresses
+- Customer-share runs: any yellow or red → BLOCKED until operator addresses
 
-L-001-discipline: skill body är contract (the 6 dimensions). Agent at invocation does actual scoring against produced artifact. Don't pre-bake what "good" looks like.
+L-001-discipline: skill body is the contract (the 6 dimensions). Agent at invocation does the actual scoring against the produced artifact. Don't pre-bake what "good" looks like.
 
 ## When to use
 
 - Pre-customer-share artifact-validation
-- Auto-invoked by `/li:frontend-design` Workflow Step 7 (om not skipped)
+- Auto-invoked by `/li:frontend-design` Workflow Step 7 (if not skipped)
 - Standalone audit of operator-built site
 - Diff-mode: compare produced output vs vault baseline
 
@@ -50,7 +50,7 @@ L-001-discipline: skill body är contract (the 6 dimensions). Agent at invocatio
 - Optional `--dimensions <comma-list>` — subset audit (default: all 6)
 - Optional `--out <path>` — output path (default: `<artifact-dir>/design-review.json`)
 - Optional `--customer-share` — strict-mode: yellow → BLOCKED
-- Optional `--include-screenshots` — capture artifact rendering för audit-log (Playwright headless)
+- Optional `--include-screenshots` — capture artifact rendering for audit-log (Playwright headless)
 
 ## Workflow
 
@@ -86,10 +86,10 @@ Hand off to `agents/frontend/DesignSystemAuditor.md`. Agent loads artifact + (op
 
 **Dimension 1: Typography hierarchy (0-100)**
 - Heading scale-ratio applied consistently (1.25/1.333/1.618)
-- Line-height bands: tight för display, normal för body, relaxed för long-form
-- Letter-spacing applied at scale (tight för large, wide för small uppercase)
+- Line-height bands: tight for display, normal for body, relaxed for long-form
+- Letter-spacing applied at scale (tight for large, wide for small uppercase)
 - Font-loading: preload critical, swap-strategy declared
-- Variable-axes used (om font supports)
+- Variable-axes used (if font supports)
 - **Red flags (subtract):** heading-soup (>4 size-levels in fold), font-loading FOIT >100ms, no fallback-stack
 
 **Dimension 2: Motion coherence (0-100)**
@@ -102,12 +102,12 @@ Hand off to `agents/frontend/DesignSystemAuditor.md`. Agent loads artifact + (op
 **Dimension 3: Shader perf-budget (0-100)**
 - WebGL initialization gated by viewport-intersection
 - Fragment-shader complexity within mid-tier-mobile budget
-- Fallback för no-WebGL contexts
-- IntersectionObserver pause för off-screen
+- Fallback for no-WebGL contexts
+- IntersectionObserver pause for off-screen
 - **Red flags:** fps drops below 30 on mid-tier mobile, no fallback, WebGL crashes leak
 
 **Dimension 4: Accessibility WCAG AA (0-100)**
-- Color-contrast ≥4.5:1 för normal text, ≥3:1 för large text
+- Color-contrast ≥4.5:1 for normal text, ≥3:1 for large text
 - All interactive elements keyboard-reachable
 - Focus-rings visible + meet contrast
 - Aria-labels on icon-buttons
@@ -115,11 +115,11 @@ Hand off to `agents/frontend/DesignSystemAuditor.md`. Agent loads artifact + (op
 - **Red flags:** contrast <3:1 on critical text, no keyboard nav, focus-rings stripped without replacement
 
 **Dimension 5: Brand conformance (0-100)**
-- Palette tokens match `~/.lintel/brand/palettes/<active>.json` (om customer-share)
+- Palette tokens match `~/.lintel/brand/palettes/<active>.json` (if customer-share)
 - Logo placement matches brand guidelines
-- Typography family matches brand spec (om operator-licensed)
+- Typography family matches brand spec (if operator-licensed)
 - Voice-tier compliance (internal vs customer-share copy)
-- **Red flags:** off-palette colors >20% of accents, logo missing eller misused, voice-tier mismatch
+- **Red flags:** off-palette colors >20% of accents, logo missing or misused, voice-tier mismatch
 
 **Dimension 6: Responsive fidelity (0-100)**
 - Breakpoints: mobile (<640px), tablet (640-1024px), desktop (>1024px) all valid
@@ -236,8 +236,8 @@ Full report: $out
 ## Pause-points
 
 - Customer-share + yellow/red: BLOCKED + surface top findings + ask "address now or override?"
-- Red dimension: hard-block för customer-share regardless of overall
-- Baseline-comparison fails (vault entry missing): warn + fall back till absolute audit
+- Red dimension: hard-block for customer-share regardless of overall
+- Baseline-comparison fails (vault entry missing): warn + fall back to absolute audit
 
 ## Hop-in support
 
@@ -247,33 +247,33 @@ YES — solo-invocable.
 
 **Reads:**
 - `<artifact>` (URL, file, dir, screenshot)
-- `~/.lintel/brand/design-patterns/<baseline>/` (om --baseline)
-- `~/.lintel/brand/palettes/<active>.json` (för brand-conformance dimension)
+- `~/.lintel/brand/design-patterns/<baseline>/` (if --baseline)
+- `~/.lintel/brand/palettes/<active>.json` (for brand-conformance dimension)
 
 **Writes:**
-- `<artifact-dir>/design-review.json` (eller $OUT-path)
+- `<artifact-dir>/design-review.json` (or $OUT-path)
 - Audit-log: `~/.lintel/audit/frontend-design-review-runs.jsonl`
 
 **Calls into:**
 - `agents/frontend/DesignSystemAuditor.md` (primary)
-- `/li:compliance-gate` (om --customer-share + red dimension)
+- `/li:compliance-gate` (if --customer-share + red dimension)
 
 **Consumed by:**
-- `/li:frontend-design` Workflow Step 7 (Fas A2-onwards integration)
+- `/li:frontend-design` Workflow Step 7 (Phase A2-onwards integration)
 - Operator standalone audit
 - Pre-customer-share gate-check
 
 ## Anti-patterns
 
 - **Scoring without rubric** — pre-A2 design-doc concern #3. Skill body documents rubric explicitly.
-- **Treating all dimensions equal-weight** — accessibility + brand-conformance are gating för customer-share. Don't average them in.
+- **Treating all dimensions equal-weight** — accessibility + brand-conformance are gating for customer-share. Don't average them in.
 - **Skipping baseline comparison when vault has match** — operator-invested patterns. Use them.
 - **Producing review.json without `schema_version`** — M-5 compliance.
 
 ## Failure recovery
 
 - Artifact unreadable: BLOCKED with diagnostic ("file not found", "URL 404", "directory not a project")
-- Headless-browser screenshot fails: degrade till static-audit + flag in review
+- Headless-browser screenshot fails: degrade to static-audit + flag in review
 - Baseline-vault missing: warn + fall back
 
 ## Recommended next steps after invocation
@@ -281,4 +281,4 @@ YES — solo-invocable.
 - GREEN → ship
 - YELLOW → address findings + re-run review
 - RED → hard-block + investigate per-dimension findings
-- Use design-review.json som input to `/li:context-save` för session-handoff
+- Use design-review.json as input to `/li:context-save` for session-handoff

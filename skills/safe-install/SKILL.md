@@ -1,7 +1,7 @@
 ---
 name: safe-install
 layer: foundation
-description: Safe-install wrapper för Lintel — version-before-every-change + uninstall-with-restore + visible-announce backup. Operator-request 5.1.
+description: Safe-install wrapper for Lintel — version-before-every-change + uninstall-with-restore + visible-announce backup. Operator-request 5.1.
 color: yellow
 tools: Read, Write, Bash, Glob
 voice: internal
@@ -12,31 +12,31 @@ cli_support:
     level: degraded
 ---
 
-You are the `safe-install` skill — operator-protective wrapper runt install/uninstall/update operations.
+You are the `safe-install` skill — an operator-protective wrapper around install/uninstall/update operations.
 
 ## What this skill does
 
-Defaults för Lintel install-operations som operator explicit bad om (v3.6 backlog 5.1):
+Defaults for Lintel install operations that the operator explicitly asked for (v3.6 backlog 5.1):
 
-1. **Version-before-every-change** (inte bara at install) — backup current LINTEL_HOME state innan ANY destructive operation
-2. **Uninstall with restore** — defaultatt restore latest backup. Currently NO uninstall path (`grep uninstall` = 0 hits i hela repot)
-3. **Update-from-repo OR cmd** — operator kan pinpoint update från specific git ref eller live-cmd
-4. **Make backup visible** — backup-path announced explicit; ej silent
+1. **Version-before-every-change** (not just at install) — back up the current LINTEL_HOME state before ANY destructive operation
+2. **Uninstall with restore** — default to restoring the latest backup. Currently NO uninstall path (`grep uninstall` = 0 hits in the whole repo)
+3. **Update-from-repo OR cmd** — the operator can pinpoint an update from a specific git ref or a live cmd
+4. **Make backup visible** — backup path announced explicitly; not silent
 
-Bygger på existing backup-pattern (install/install.sh:76 `cp -r "$LINTEL_HOME" "$BACKUP"`). Generaliserar till alla destructive ops.
+Builds on the existing backup pattern (install/install.sh:76 `cp -r "$LINTEL_HOME" "$BACKUP"`). Generalizes it to all destructive ops.
 
 ## When to use
 
-- `/li:safe-install --update` (uppdaterar Lintel från latest main; auto-backup först)
-- `/li:safe-install --uninstall` (ren-uninstall + restore latest backup automatically)
-- `/li:safe-install --backup-only` (snapshot LINTEL_HOME utan ändring)
-- `/li:safe-install --list-backups` (visa available restore points)
-- `/li:safe-install --restore <backup-id>` (manual restore till specific snapshot)
+- `/li:safe-install --update` (updates Lintel from latest main; auto-backup first)
+- `/li:safe-install --uninstall` (clean uninstall + restore latest backup automatically)
+- `/li:safe-install --backup-only` (snapshot LINTEL_HOME without changing anything)
+- `/li:safe-install --list-backups` (show available restore points)
+- `/li:safe-install --restore <backup-id>` (manual restore to a specific snapshot)
 
 ## When NOT to use
 
-- First-time install — `install/install.sh` är canonical (denna wrappar för subsequent ops)
-- Mid-cycle skill-debug — använd `bin/li-doctor` istället
+- First-time install — `install/install.sh` is canonical (this wraps subsequent ops)
+- Mid-cycle skill debug — use `bin/li-doctor` instead
 - Reading current state — `bin/li-doctor --quick`
 
 ## Workflow
@@ -54,7 +54,7 @@ case "${1:-}" in
 esac
 ```
 
-### Step 2 — Backup current state (vid update/uninstall)
+### Step 2 — Backup current state (on update/uninstall)
 
 ```bash
 LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
@@ -77,10 +77,10 @@ fi
 ### Step 3 — Execute operation
 
 **`update`:**
-- Pull latest från config'd Lintel-repo source
+- Pull latest from the configured Lintel-repo source
 - Run install/install.sh in update-mode
-- Surface diff-summary av changed files
-- If anything fails → auto-restore from backup, surface error
+- Surface a diff summary of changed files
+- If anything fails → auto-restore from backup, surface the error
 
 **`uninstall`:**
 - Confirm via AskUserQuestion ("Will remove $LINTEL_HOME. Latest backup at <path>. Proceed?")
@@ -91,7 +91,7 @@ fi
 - Just creates backup (Step 2). No state change.
 
 **`list`:**
-- ls $BACKUP_ROOT/snapshot-* | format som table
+- ls $BACKUP_ROOT/snapshot-* | format as a table
 - Most recent first
 - Size + date per snapshot
 
@@ -104,7 +104,7 @@ fi
 
 ### Step 4 — Backup retention
 
-Default: keep last 5 snapshots. Prune older än 30 dagar.
+Default: keep the last 5 snapshots. Prune those older than 30 days.
 
 ```bash
 cd "$BACKUP_ROOT"
@@ -120,20 +120,20 @@ Surface "Pruned N old snapshots (kept latest 5 + recent 30 days)."
 
 ## Status protocol
 
-- **DONE** — operation klar, backup visible, retention enforced
-- **DONE_WITH_CONCERNS** — operation klar men retention failed eller verify hade warnings
-- **BLOCKED** — destination not writable, missing $LINTEL_HOME för restore, etc
-- **NEEDS_CONTEXT** — `--restore` utan `<backup-id>`
+- **DONE** — operation complete, backup visible, retention enforced
+- **DONE_WITH_CONCERNS** — operation complete but retention failed or verify had warnings
+- **BLOCKED** — destination not writable, missing $LINTEL_HOME for restore, etc
+- **NEEDS_CONTEXT** — `--restore` without a `<backup-id>`
 
 ## Pause-points
 
-- Vid `--uninstall`: hard-block för operator-confirmation (destructive op)
-- Vid `--restore`: hard-block för operator-confirmation (replaces current state)
-- Vid backup fails mid-update: surface + offer abort
+- On `--uninstall`: hard-block for operator confirmation (destructive op)
+- On `--restore`: hard-block for operator confirmation (replaces current state)
+- If backup fails mid-update: surface + offer abort
 
 ## Hop-in support
 
-YES — solo-invokable för all 5 modes.
+YES — solo-invokable for all 5 modes.
 
 ## Integration
 
@@ -148,17 +148,17 @@ YES — solo-invokable för all 5 modes.
 
 **Consumed by:**
 - Operator (manual invocation)
-- `bin/li-update` (could wrap denna instead of doing inline backup) — future-refactor
+- `bin/li-update` (could wrap this instead of doing inline backup) — future refactor
 
 ## Anti-patterns
 
-- **Silent backup** — backup-path MUST be announced till operator. Otherwise "kan inte hitta backup"-pattern återupprepas.
-- **No retention enforcement** — backups blir disk-spam. Always prune.
-- **Skip confirm på destructive ops** — uninstall + restore är båda one-way. Always confirm.
-- **Backup till same disk som live** — for safety, recommend backup-path är på separate disk/path om möjligt.
+- **Silent backup** — the backup path MUST be announced to the operator. Otherwise the "can't find the backup" pattern recurs.
+- **No retention enforcement** — backups become disk spam. Always prune.
+- **Skip confirm on destructive ops** — uninstall + restore are both one-way. Always confirm.
+- **Backup to the same disk as live** — for safety, recommend the backup path be on a separate disk/path if possible.
 
 ## Failure recovery
 
 - Update fails → auto-restore latest backup → exit BLOCKED with error
-- Restore fails (corrupted backup): fall back till previous snapshot, surface warning
+- Restore fails (corrupted backup): fall back to the previous snapshot, surface a warning
 - Disk full → refuse + surface free-space-instructions

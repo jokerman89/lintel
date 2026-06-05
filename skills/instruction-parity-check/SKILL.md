@@ -1,7 +1,7 @@
 ---
 name: instruction-parity-check
 layer: foundation
-description: Verifierar substance-parity över 6 instruktionsfiler (root CLAUDE/AGENTS/GEMINI + shims). Multi-CLI promise's weak point per 6.2.
+description: Verifies substance-parity across 6 instruction files (root CLAUDE/AGENTS/GEMINI + shims). The multi-CLI promise's weak point per 6.2.
 color: yellow
 tools: Read, Bash, Glob, Grep
 voice: internal
@@ -12,11 +12,11 @@ cli_support:
     level: degraded
 ---
 
-You are the `instruction-parity-check` skill — defender mot drift mellan multi-CLI instruction files.
+You are the `instruction-parity-check` skill — defender against drift between multi-CLI instruction files.
 
 ## What this skill does
 
-Lintel ships 6 instruktionsfiler so different CLIs read same Lintel-rules:
+Lintel ships 6 instruction files so different CLIs read the same Lintel rules:
 - `CLAUDE.md` (claude-code root)
 - `AGENTS.md` (codex root)
 - `GEMINI.md` (gemini root)
@@ -24,9 +24,9 @@ Lintel ships 6 instruktionsfiler so different CLIs read same Lintel-rules:
 - `.codex/CLAUDE.md` (codex shim)
 - `.github/copilot-instructions.md` (copilot)
 
-Per v3.6 backlog 6.2: "De kommer driva — en Copilot-kollega får olika regler än en Claude-Code-kollega. Detta är multi-CLI-promise's weak point."
+Per v3.6 backlog 6.2: "They will drift — a Copilot colleague gets different rules than a Claude-Code colleague. This is the multi-CLI promise's weak point."
 
-Detta skill kompararar substans-equivalens över filerna + flag drift på 4 key sections:
+This skill compares substance-equivalence across the files + flags drift on 4 key sections:
 1. **Compliance rules** (the active pack's compliance gates, data classification, customer-data block)
 2. **Voice tier semantics** (internal vs the active pack's voice tier)
 3. **Scaffolding principles** (L-001 + L-002 + L-003 reflected)
@@ -34,16 +34,16 @@ Detta skill kompararar substans-equivalens över filerna + flag drift på 4 key 
 
 ## When to use
 
-- **CI-integrated** — kör per push till main, flag if substance-drift > threshold
+- **CI-integrated** — runs per push to main, flag if substance-drift > threshold
 - **Pre-shipping multi-CLI feature** — verify all 6 files reflect change
 - **Onboarding new CLI** — adding 7th instruction file: compare existing 6 first
 - **Post-rename** — verify instructions follow Phase A / Phase B rename-discipline
 
 ## When NOT to use
 
-- Hand-editing single file — denna skill READS, ej modifies
-- Diff-checking style/grammar — endast substance-comparison
-- Real-time live-comparison — denna är batch-pass
+- Hand-editing a single file — this skill READS, does not modify
+- Diff-checking style/grammar — substance-comparison only
+- Real-time live-comparison — this is a batch pass
 
 ## Workflow
 
@@ -69,7 +69,7 @@ done
 
 ### Step 2 — Extract key sections per file
 
-För each file, parse sektion-headers + canonical-content:
+For each file, parse section headers + canonical content:
 
 ```bash
 extract_section() {
@@ -88,17 +88,17 @@ for f in "${INSTR_FILES[@]}"; do
   voice=$(extract_section "$f" "[Vv]oice [Tt]ier")
   scaffolding=$(extract_section "$f" "[Ss]caffolding|L-001|L-002|L-003")
   automode=$(extract_section "$f" "[Aa]uto.[Mm]ode|[Bb]oundaries")
-  # Capture into per-section files för diff
+  # Capture into per-section files for diff
 done
 ```
 
 ### Step 3 — Cross-file substance-diff
 
-För each of 4 key sections:
-1. Compute canonical-form av text (lowercase + collapse whitespace + strip examples)
+For each of the 4 key sections:
+1. Compute canonical form of text (lowercase + collapse whitespace + strip examples)
 2. Pairwise diff: file A vs file B, A vs C, ..., E vs F
-3. Score similarity (jaccard på 5-grams eller equivalent)
-4. Flag pairs med < 80% substance-similarity
+3. Score similarity (jaccard on 5-grams or equivalent)
+4. Flag pairs with < 80% substance-similarity
 
 ### Step 4 — Surface drift report
 
@@ -127,7 +127,7 @@ För each of 4 key sections:
 - GEMINI.md: none referenced ⚠ DRIFT
 
 ## Recommended actions
-1. Update GEMINI.md compliance section — add 7+8 tier-explanation från CLAUDE.md
+1. Update GEMINI.md compliance section — add 7+8 tier-explanation from CLAUDE.md
 2. Add L-002 + L-003 references to AGENTS.md + GEMINI.md
 3. ...
 ```
@@ -152,14 +152,14 @@ mkdir -p "$(dirname "$REPORT")"
 ## Status protocol
 
 - **DONE** — report rendered, all 6 files compared, no major drift
-- **DONE_WITH_CONCERNS** — comparison klar but warns present (<major threshold)
+- **DONE_WITH_CONCERNS** — comparison done but warnings present (<major threshold)
 - **BLOCKED** — multiple files missing OR can't read REPO_ROOT
-- **NEEDS_CONTEXT** — invocation outside git repo
+- **NEEDS_CONTEXT** — invocation outside a git repo
 
 ## Pause-points
 
-- 1+ files missing: surface + ask if proceed med partial-comparison
-- Major drift detected på all key sections: surface aggressively, recommend halt-multi-CLI-release
+- 1+ files missing: surface + ask whether to proceed with partial-comparison
+- Major drift detected on all key sections: surface aggressively, recommend halting the multi-CLI release
 
 ## Hop-in support
 
@@ -168,8 +168,8 @@ YES — solo-invocable + CI-integrated.
 ## Integration
 
 **Reads:**
-- All 6 instruction-files i repo
-- (Optional) Previous parity-report för delta-comparison
+- All 6 instruction files in the repo
+- (Optional) Previous parity-report for delta-comparison
 
 **Writes:**
 - `~/.lintel/audit/instruction-parity-<date>.md` (report)
@@ -183,8 +183,8 @@ YES — solo-invocable + CI-integrated.
 
 ## Anti-patterns
 
-- **Mass-overwrite för parity** — denna skill REPORTS drift, doesn't auto-fix. Auto-fix risks losing CLI-specific necessary divergence.
-- **Threshold == 100% similarity** — minor formatting drift OK; substance-drift is the issue. 80% similarity threshold is heuristic-correct för v3.6.
+- **Mass-overwrite for parity** — this skill REPORTS drift, doesn't auto-fix. Auto-fix risks losing CLI-specific necessary divergence.
+- **Threshold == 100% similarity** — minor formatting drift OK; substance-drift is the issue. The 80% similarity threshold is heuristic-correct for v3.6.
 - **Hidden-section drift** — extraction must cover ALL key sections; missing one defeats purpose.
 
 ## Failure recovery

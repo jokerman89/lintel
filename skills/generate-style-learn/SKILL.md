@@ -1,7 +1,7 @@
 ---
 name: generate-style-learn
 layer: foundation
-description: Analysera .pptx/.docx/web-examples och extrahera reusable style palette. v3.5 Fas 3 av doc-generation-pipeline.
+description: Analyze .pptx/.docx/web-examples and extract a reusable style palette. v3.5 Phase 3 of the doc-generation-pipeline.
 color: orange
 tools: Read, Write, Bash, Glob
 voice: internal
@@ -12,34 +12,34 @@ cli_support:
     level: degraded
 ---
 
-You are the `generate-style-learn` skill — v3.5 Fas 3 av doc-generation-pipeline. Extraherar palettes från existing artifacts.
+You are the `generate-style-learn` skill — v3.5 Phase 3 of the doc-generation-pipeline. Extracts palettes from existing artifacts.
 
 ## What this skill does
 
-Analyserar 1+ artifact-files (PPT/DOCX/web/PDF) och extraherar reusable style palette till `~/.lintel/brand/palettes/<name>.json` + companion `~/.lintel/brand/palettes/<name>-STYLE.md` (human-readable).
+Analyzes 1+ artifact-files (PPT/DOCX/web/PDF) and extracts a reusable style palette to `~/.lintel/brand/palettes/<name>.json` + companion `~/.lintel/brand/palettes/<name>-STYLE.md` (human-readable).
 
-Modifies aldrig input-files. Read-only analysis.
+Never modifies input-files. Read-only analysis.
 
-Use case: operator får customer-brand-deck → vill extract palette + apply till future generation-runs utan att manuellt curera tokens.
+Use case: operator gets a customer-brand-deck → wants to extract the palette + apply it to future generation-runs without manually curating tokens.
 
-Per v3.5 design-doc Phase 3 (deferred från Fas 1 + Fas 2): style-learn är optional add-on, body-shopped after Fas 1+2 dogfoodat. Detta är completion-PR.
+Per v3.5 design-doc Phase 3 (deferred from Phase 1 + Phase 2): style-learn is an optional add-on, body-shopped after Phase 1+2 were dogfooded. This is the completion-PR.
 
 ## When to use
 
-- "Customer skickade en deck — extrahera deras style så jag matchar i nästa rapport" → `/li:generate-style-learn deck1.pptx --name customer-A`
-- "Compare two style-references" → kör skill on each, diff palettes
-- "Operator's own brand snapshot" → audit current `~/.lintel/brand/`-palettes mot ground-truth artifacts
+- "Customer sent a deck — extract their style so I match it in the next report" → `/li:generate-style-learn deck1.pptx --name customer-A`
+- "Compare two style-references" → run the skill on each, diff palettes
+- "Operator's own brand snapshot" → audit current `~/.lintel/brand/`-palettes against ground-truth artifacts
 
 ## When NOT to use
 
-- Live style-edit — denna är extraction, ej editor
-- Single-color-pick — `bin/li-doctor --brand-summary` faster för one-off
-- Customer-specific live-stream — denna är batch
+- Live style-edit — this is extraction, not an editor
+- Single-color-pick — `bin/li-doctor --brand-summary` is faster for a one-off
+- Customer-specific live-stream — this is batch
 
 ## Inputs
 
 - Required `<paths>` — 1+ artifact files (varierande format ok)
-- Required `--name <slug>` — palette-name för output (e.g., `customer-A` eller `nordic-minimal`)
+- Required `--name <slug>` — palette-name for output (e.g., `customer-A` or `nordic-minimal`)
 - Optional `--format <ppt|web|word|auto>` — explicit format hint (default: auto-detect)
 - Optional `--overwrite` — replace existing `<name>.json` if present
 - Optional `--out-dir <path>` — palette output dir (default: `~/.lintel/brand/palettes/`)
@@ -57,7 +57,7 @@ Per v3.5 design-doc Phase 3 (deferred från Fas 1 + Fas 2): style-learn är opti
 
 **DOCX (.docx):**
 - Open via python-docx OR docx-templater
-- Theme colors från docDefaults + styles.xml
+- Theme colors from docDefaults + styles.xml
 - Font hierarchy (heading 1/2/3 + body)
 - Margins + line-spacing
 - Header/footer styles
@@ -66,7 +66,7 @@ Per v3.5 design-doc Phase 3 (deferred från Fas 1 + Fas 2): style-learn är opti
 - Parse <style> + linked CSS
 - Extract :root CSS variables (preferred source)
 - Fall back: most-frequent computed colors in DOM
-- Typography från font-family declarations
+- Typography from font-family declarations
 
 **Auto-detect:** file extension determines format
 
@@ -198,12 +198,12 @@ To use: /li:generate ... --palette nordic-minimal
 
 ## Pause-points
 
-- `--overwrite` not set but palette name exists: hard-block för operator-confirm
+- `--overwrite` not set but palette name exists: hard-block for operator-confirm
 - Multiple wildly-different styles in source files: surface "sources don't agree, palette will be averaged — proceed?"
 
 ## Hop-in support
 
-YES — solo-invocable. Designed för one-shot extraction sessions.
+YES — solo-invocable. Designed for one-shot extraction sessions.
 
 ## Integration
 
@@ -220,15 +220,15 @@ YES — solo-invocable. Designed för one-shot extraction sessions.
 
 ## Anti-patterns
 
-- **Modify source files** — extraction är read-only.
-- **Inferred color-roles utan justification** — if 60-30-10 ratio unclear, surface ambiguity + ask för operator-guidance rather than guessing.
-- **Overwrite without confirm** — `--overwrite` flag required för replacement.
+- **Modify source files** — extraction is read-only.
+- **Inferred color-roles without justification** — if the 60-30-10 ratio is unclear, surface the ambiguity + ask for operator-guidance rather than guessing.
+- **Overwrite without confirm** — `--overwrite` flag required for replacement.
 
 ## Failure recovery
 
-- File format-detection fails: surface available formats + ask för `--format` hint
+- File format-detection fails: surface available formats + ask for a `--format` hint
 - Aggregation conflict (multiple wildly-different styles): default to most-recent file's style + flag with warning
-- Output dir not writable: fall back till `./palettes/<name>.json` (current dir)
+- Output dir not writable: fall back to `./palettes/<name>.json` (current dir)
 
 ## Recommended next steps after invocation
 

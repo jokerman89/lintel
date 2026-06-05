@@ -15,21 +15,21 @@ cli_support:
         strategy: auto-pick-recommended
 ---
 
-You are the `frontend-typography` sub-skill — typography-curator för frontend-design family.
+You are the `frontend-typography` sub-skill — typography-curator for the frontend-design family.
 
 ## What this skill does
 
-Reads operator brief → TypographyCurator agent picks font-stack från font-recommendation-tree (Google Fonts | Pangram | Velvetyne | Recursive | Fraunces | Future Fonts) + maps variable-axes + size-scale + line-heights + font-loading-strategy → writes `typography.json` (schema_version: 1) with licensing-context.
+Reads operator brief → TypographyCurator agent picks font-stack from the font-recommendation-tree (Google Fonts | Pangram | Velvetyne | Recursive | Fraunces | Future Fonts) + maps variable-axes + size-scale + line-heights + font-loading-strategy → writes `typography.json` (schema_version: 1) with licensing-context.
 
-Solo-invokable för delar-mode ("just typography please") eller auto-invoked by `/li:frontend-design` orchestrator i parallel-dispatch (Workflow Step 2).
+Solo-invokable for component-mode ("just typography please") or auto-invoked by the `/li:frontend-design` orchestrator in parallel-dispatch (Workflow Step 2).
 
-L-001-discipline: skill body är contract. Agent at invocation produces specific font choices and licensing-instructions. Don't pre-bake recommendations i SKILL.md body.
+L-001-discipline: skill body is the contract. Agent at invocation produces specific font choices and licensing-instructions. Don't pre-bake recommendations in the SKILL.md body.
 
 ## When to use
 
 - Solo: "ai-app for legal professionals — give me a typography stack"
 - Orchestrator-parallel: dispatched from `/li:frontend-design` Step 2
-- Brand-update: "kund-deck just landed, what should our heading-stack be?"
+- Brand-update: "customer-deck just landed, what should our heading-stack be?"
 
 ## When NOT to use
 
@@ -39,7 +39,7 @@ L-001-discipline: skill body är contract. Agent at invocation produces specific
 
 ## Inputs
 
-- Required `--brief <text>` ELLER `--target-audience <description>` (one or other minimum)
+- Required `--brief <text>` OR `--target-audience <description>` (one or other minimum)
 - Optional `--mood <serif-display|tight-mono|variable-experimental|editorial|techy>` — override default mood-inference
 - Optional `--out <path>` — output path (default: stdout if solo, `$run_dir/typography.json` if orchestrator-parallel)
 - Optional `--customer-share` — triggers license-validation strict-mode
@@ -58,7 +58,7 @@ out="${OUT:-/dev/stdout}"
 
 ### Step 2 — TypographyCurator agent dispatch
 
-Hand off to `agents/frontend/TypographyCurator.md`. Agent reads brief + (optionally) audience + mood. Picks font-stack från recommendation-tree:
+Hand off to `agents/frontend/TypographyCurator.md`. Agent reads brief + (optionally) audience + mood. Picks font-stack from the recommendation-tree:
 
 - **Google Fonts (free, no-license-friction):** Inter, IBM Plex, Space Grotesk, JetBrains Mono, Fraunces (variable), Recursive (variable)
 - **Pangram Pangram (commercial license required):** PP Editorial New, PP Neue Montreal, PP Mori, PP Right Grotesk
@@ -128,7 +128,7 @@ Agent verifies current licensing terms at invocation (L-003: don't trust stale c
 }
 ```
 
-Agent fyller i specifika choices baserat på brief. Don't pre-bake.
+Agent fills in specific choices based on the brief. Don't pre-bake.
 
 ### Step 4 — Schema-validate + emit
 
@@ -144,12 +144,12 @@ fi
 
 ## Voice tier behavior
 
-`voice: internal`. Default. `--customer-share` triggers `/li:compliance-gate --check font-licensing` (Fas A1: skill body documents; agent at invocation kontrollerar).
+`voice: internal`. Default. `--customer-share` triggers `/li:compliance-gate --check font-licensing` (Phase A1: skill body documents; agent at invocation verifies).
 
 ## Status protocol
 
 - **DONE** — typography.json written, schema valid
-- **DONE_WITH_CONCERNS** — font-license-check borderline (e.g., Pangram referenced without operator-confirmation av licens)
+- **DONE_WITH_CONCERNS** — font-license-check borderline (e.g., Pangram referenced without operator-confirmation of the license)
 - **BLOCKED** — brief unparsable, OR customer-share license-check failed
 - **NEEDS_CONTEXT** — brief lacks audience-direction
 
@@ -166,7 +166,7 @@ YES — solo-invocable.
 
 **Reads:**
 - `--brief` argument
-- `~/.lintel/brand/fonts/` (för operator-licensed fonts; lazy-created)
+- `~/.lintel/brand/fonts/` (for operator-licensed fonts; lazy-created)
 
 **Writes:**
 - `typography.json` (stdout default, $OUT-path if orchestrator)
@@ -174,11 +174,11 @@ YES — solo-invocable.
 
 **Calls into:**
 - `agents/frontend/TypographyCurator.md` (primary)
-- `/li:compliance-gate --check font-licensing` (om --customer-share)
+- `/li:compliance-gate --check font-licensing` (if --customer-share)
 
 **Consumed by:**
 - `/li:frontend-design` Workflow Step 5 (synthesis input)
-- Operator direct (solo delar-mode)
+- Operator direct (solo component-mode)
 
 ## Anti-patterns
 
@@ -188,7 +188,7 @@ YES — solo-invocable.
 
 ## Failure recovery
 
-- Agent fails to pick (brief too vague): NEEDS_CONTEXT med specific clarification-question
+- Agent fails to pick (brief too vague): NEEDS_CONTEXT with a specific clarification-question
 - Font-recommendation references unavailable font: agent re-picks; logs the attempt
 - Schema validation fails: BLOCKED, return diff
 
@@ -196,4 +196,4 @@ YES — solo-invocable.
 
 - Solo: review typography.json + drop in target project
 - Orchestrator: parallel-dispatch returns to `/li:frontend-design` Step 5 synthesis
-- Customer-share: pair med `/li:compliance-gate` för final license-audit
+- Customer-share: pair with `/li:compliance-gate` for final license-audit

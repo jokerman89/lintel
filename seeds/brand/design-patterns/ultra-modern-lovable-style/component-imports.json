@@ -15,8 +15,8 @@
     {
       "name": "aceternity-ui",
       "kind": "motion-enhanced",
-      "purpose": "bento-grid + bg-gradient + tracing-beam + motion-cards för hero + features",
-      "install": "manual copy-paste från ui.aceternity.com (per-component)",
+      "purpose": "bento-grid + bg-gradient + tracing-beam + motion-cards for hero + features",
+      "install": "manual copy-paste from ui.aceternity.com (per-component)",
       "components_used": ["bento-grid", "background-gradient", "tracing-beam", "card-hover-effect"],
       "license": {"type": "free", "source": "MIT, copy-paste model"},
       "docs": "https://ui.aceternity.com"

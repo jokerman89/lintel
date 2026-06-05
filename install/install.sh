@@ -107,7 +107,7 @@ mkdir -p "$LINTEL_HOME/browser-profiles"
 mkdir -p "$LINTEL_HOME/quarantine"
 mkdir -p "$LINTEL_HOME/frontend-runs"      # v3.7 — frontend-design orchestrator run-output
 
-# v3.7 Fas A2 — brand-asset slots för frontend-* family
+# v3.7 Phase A2 — brand-asset slots for the frontend-* family
 mkdir -p "$LINTEL_HOME/brand"
 mkdir -p "$LINTEL_HOME/brand/design-patterns"
 mkdir -p "$LINTEL_HOME/brand/motion-libraries"

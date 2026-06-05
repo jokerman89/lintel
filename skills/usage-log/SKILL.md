@@ -1,7 +1,7 @@
 ---
 name: usage-log
 layer: foundation
-description: Append-only usage log för skill/agent-invocations. Wrapper-pattern per L-001 (en log, ingen per-skill duplikat). Solo-invokable för rapport.
+description: Append-only usage log for skill/agent invocations. Wrapper pattern per L-001 (one log, no per-skill duplicates). Solo-invokable for reports.
 color: yellow
 tools: Read, Write, Bash, Glob
 voice: internal
@@ -12,30 +12,30 @@ cli_support:
     level: degraded
 ---
 
-You are the `usage-log` skill — observation foundation under maintenance, token-premiering, hook-audit, och "what rusts."
+You are the `usage-log` skill — the observation foundation under maintenance, token budgeting, hook audit, and "what rusts."
 
 ## What this skill does
 
 Two modes:
 
-**Writer mode (default at-skill-invocation):** Appends a JSON line per skill/agent invokation till `~/.lintel/audit/usage-<YYYYMMDD>.jsonl`. Schema: `{ts, skill, mode, tokens_est, cli, run_id}`. Daily-file rotation från dag 1 (Finding 3A från plan-eng-review — multi-MB growth annars).
+**Writer mode (default at-skill-invocation):** Appends a JSON line per skill/agent invocation to `~/.lintel/audit/usage-<YYYYMMDD>.jsonl`. Schema: `{ts, skill, mode, tokens_est, cli, run_id}`. Daily-file rotation from day 1 (Finding 3A from plan-eng-review — multi-MB growth otherwise).
 
-**Reader mode (solo-invokable for reports):** Reads recent usage logs, surfaces top-skills + frequency + estimated-token-spend per skill family. Pairs with `/li:hooks-status` (siblings i observation spine).
+**Reader mode (solo-invokable for reports):** Reads recent usage logs, surfaces top-skills + frequency + estimated token spend per skill family. Pairs with `/li:hooks-status` (siblings in the observation spine).
 
-Designed per Cohort 2 i v3.6 backlog. Foundation som `/li:maintenance` (5.3) och `/li:catalog` (1.6 trends) bygger på.
+Designed per Cohort 2 in the v3.6 backlog. The foundation that `/li:maintenance` (5.3) and `/li:catalog` (1.6 trends) build on.
 
 ## When to use
 
-- **Writer mode:** invoked automatiskt via wrapper-hook efter varje skill-invocation. Operatör rör inte denna direkt.
-- **Reader mode:** "vad har jag använt mest senaste veckan?" → `/li:usage-log --report --days 7`
-- Maintenance-pre-flight: `/li:usage-log --report --topn 10` ser vad som rostar (skills used <2× per månad)
-- Token-budget-debugging: `/li:usage-log --tokens-by-skill` aggregerar token-est per skill
+- **Writer mode:** invoked automatically via the wrapper-hook after each skill invocation. The operator does not touch this directly.
+- **Reader mode:** "what have I used most over the past week?" → `/li:usage-log --report --days 7`
+- Maintenance pre-flight: `/li:usage-log --report --topn 10` sees what's rusting (skills used <2× per month)
+- Token-budget debugging: `/li:usage-log --tokens-by-skill` aggregates token-est per skill
 
 ## When NOT to use
 
-- Real-time telemetry — denna är append-only, ej streaming
-- Forensic audit — `hooks.jsonl` är audit-canonical (per L-001 premiss 1: forensiska loggar undantagna från read-back-rule)
-- Per-invocation token-counting — denna estimerar (tokens_est är heuristik, ej OpenAI-counted)
+- Real-time telemetry — this is append-only, not streaming
+- Forensic audit — `hooks.jsonl` is audit-canonical (per L-001 premise 1: forensic logs are exempt from the read-back rule)
+- Per-invocation token-counting — this estimates (tokens_est is a heuristic, not OpenAI-counted)
 
 ## Schema (per JSONL line)
 
@@ -50,11 +50,11 @@ Designed per Cohort 2 i v3.6 backlog. Foundation som `/li:maintenance` (5.3) och
 }
 ```
 
-**Fält-spec:**
+**Field spec:**
 - `ts` — ISO-8601 UTC timestamp
 - `skill` — frontmatter `name:` value
 - `mode` — invocation mode if relevant ("full", "brief", "section:<x>", or null)
-- `tokens_est` — heuristic estimate (input + output, ej cached)
+- `tokens_est` — heuristic estimate (input + output, not cached)
 - `cli` — claude-code | codex | cursor | gemini | copilot-cli | droid
 - `run_id` — unique invocation ID (timestamp + random suffix, links to other logs)
 
@@ -76,8 +76,8 @@ Wrapper-hook at `hooks/post-skill-invocation.sh` calls:
 Append-script:
 1. Compute today's filename: `~/.lintel/audit/usage-$(date +%Y%m%d).jsonl`
 2. JSON-encode args + ts via `jq -nc`
-3. Append to file (atomic — write to .tmp then mv för concurrent-safety)
-4. Silent — no operator-output unless error
+3. Append to the file (atomic — write to .tmp then mv for concurrent-safety)
+4. Silent — no operator output unless an error
 
 ### Step 2 — Reader mode (solo-invokable)
 
@@ -87,37 +87,37 @@ Append-script:
 
 Glob across days. Surface:
 - **Top N skills by frequency** (`--topn 10 --days 7`)
-- **Token-spend by skill family** (`--tokens-by-skill`)
-- **Rust detection** (skills used < 2× past 30 days — flag candidates för archive)
-- **Override-pattern correlation** (cross-reference med hooks.jsonl override-counts)
+- **Token spend by skill family** (`--tokens-by-skill`)
+- **Rust detection** (skills used < 2× past 30 days — flag candidates for archive)
+- **Override-pattern correlation** (cross-reference with hooks.jsonl override-counts)
 
 ### Step 3 — Rotation policy (built-in)
 
-- **Daily-file rotation** by default — new file per day → ingen single-file-multi-MB-risk
-- **Retention:** keep last 90 days, archive older till `~/.lintel/audit/archive/` (gzipped)
-- **Compaction:** quarterly summary written till `~/.lintel/audit/usage-summary-<YYYY-Q>.json` med top-100 skills + total-invocations
+- **Daily-file rotation** by default — new file per day → no single-file multi-MB risk
+- **Retention:** keep the last 90 days, archive older ones to `~/.lintel/audit/archive/` (gzipped)
+- **Compaction:** a quarterly summary written to `~/.lintel/audit/usage-summary-<YYYY-Q>.json` with the top-100 skills + total-invocations
 
-Operator kan trigga compaction via `/li:usage-log --compact`.
+The operator can trigger compaction via `/li:usage-log --compact`.
 
 ## Voice tier behavior
 
-`voice: internal`. Telemetry är operator-internal observability. Aldrig customer-bound, ingen voice-gate.
+`voice: internal`. Telemetry is operator-internal observability. Never customer-bound, no voice-gate.
 
 ## Status protocol
 
-- **DONE** — writer-append klar OR reader-report rendered
-- **DONE_WITH_CONCERNS** — append klar men file-rotation eller compaction failade non-fatally
-- **BLOCKED** — `~/.lintel/audit/` write-permission saknas
-- **NEEDS_CONTEXT** — reader mode utan `--report` / `--topn` / `--tokens-by-skill`-flag
+- **DONE** — writer-append complete OR reader-report rendered
+- **DONE_WITH_CONCERNS** — append complete but file-rotation or compaction failed non-fatally
+- **BLOCKED** — `~/.lintel/audit/` write-permission missing
+- **NEEDS_CONTEXT** — reader mode without a `--report` / `--topn` / `--tokens-by-skill` flag
 
 ## Pause-points
 
-- File-rotation conflict (concurrent invocations försöker rotate samma minut) — atomic-mv-pattern lös detta
-- Quarterly compaction tar > 30s — surface progress, allow operator-interrupt
+- File-rotation conflict (concurrent invocations try to rotate in the same minute) — the atomic-mv pattern resolves this
+- Quarterly compaction takes > 30s — surface progress, allow operator interrupt
 
 ## Hop-in support
 
-YES — reader mode solo-invokable. Writer mode körs automatiskt via wrapper-hook.
+YES — reader mode is solo-invokable. Writer mode runs automatically via the wrapper-hook.
 
 ## Integration
 
@@ -131,7 +131,7 @@ YES — reader mode solo-invokable. Writer mode körs automatiskt via wrapper-ho
 
 **Reads (reader mode):**
 - `~/.lintel/audit/usage-*.jsonl` (glob)
-- `~/.lintel/audit/hooks.jsonl` (cross-reference för override-pattern correlation, if requested)
+- `~/.lintel/audit/hooks.jsonl` (cross-reference for override-pattern correlation, if requested)
 
 **Consumed by:**
 - `/li:maintenance` (5.3 — token-cost simulation, rust detection)
@@ -141,19 +141,19 @@ YES — reader mode solo-invokable. Writer mode körs automatiskt via wrapper-ho
 
 ## Anti-patterns
 
-- **Per-skill append-bash i SKILL.md** — bryter DRY över 113 skills (Finding 2A). Wrapper-hook only.
-- **Single growing file (`usage.jsonl` flat)** — bryter rotation policy. Multi-MB risk efter månader.
-- **Token-counting "exakt" via OpenAI API** — out of scope. Heuristic ÄR tokens_est-fältet.
-- **Read-back i forensisk syfte** — fel skill. Use `~/.lintel/audit/hooks.jsonl` (audit-canonical).
+- **Per-skill append-bash in SKILL.md** — breaks DRY across 113 skills (Finding 2A). Wrapper-hook only.
+- **Single growing file (`usage.jsonl` flat)** — breaks the rotation policy. Multi-MB risk after months.
+- **Token-counting "exactly" via the OpenAI API** — out of scope. The heuristic IS the tokens_est field.
+- **Read-back for forensic purposes** — wrong skill. Use `~/.lintel/audit/hooks.jsonl` (audit-canonical).
 
 ## Failure recovery
 
-- Append fails (permission, disk-full): silent skip, error logged till stderr only. Skill-invocation continues — observation ska aldrig blocka work.
-- Rotation fails: fall back till today's file (no daily file change), warn till stderr.
-- Reader-report empty (no logs yet): surface "No usage data yet. Skill-invocations börjar logga efter denna hook installerats."
+- Append fails (permission, disk-full): silent skip, error logged to stderr only. Skill invocation continues — observation should never block work.
+- Rotation fails: fall back to today's file (no daily file change), warn to stderr.
+- Reader-report empty (no logs yet): surface "No usage data yet. Skill invocations start logging once this hook is installed."
 
 ## Recommended next steps after invocation
 
-- För full observation: pair med `/li:hooks-status` (sibling skill)
-- För maintenance: `/li:maintenance` använder denna som data-source
-- För catalog-trending: `/li:catalog --trends` overlayer usage-frequency på discoverability
+- For full observation: pair with `/li:hooks-status` (sibling skill)
+- For maintenance: `/li:maintenance` uses this as a data source
+- For catalog-trending: `/li:catalog --trends` overlays usage-frequency on discoverability
