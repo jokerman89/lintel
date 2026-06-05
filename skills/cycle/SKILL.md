@@ -132,7 +132,7 @@ CAPTURE writes a recap that future-operator (or future-you) can use cold. Specif
 
 ### Step 0 — Dry-run mode (v3.6 cohort 3 item 2.5)
 
-If `--dry-run` flag present, denna skill VISAR vad cycle skulle göra utan att exekvera:
+If `--dry-run` flag present, this skill SHOWS what cycle would do without executing:
 
 ```
 LINTEL CYCLE DRY-RUN — would-execute plan
@@ -155,7 +155,7 @@ Per-phase forecast:
 No state mutated. Exit.
 ```
 
-Pairas med Step 4 phase-progress output (v3.6 cohort 2 item 1.5) — dry-run och progress visar samma format men dry-run kör inte phases.
+Paired with Step 4 phase-progress output (v3.6 cohort 2 item 1.5) — dry-run and progress show the same format but dry-run does not run phases.
 
 ### Step 1 — Parse invocation
 
@@ -226,13 +226,13 @@ Cycle plan:
 
 If operator confirms: continue. If edit: loop back to Step 2.
 
-### Step 4 — Run phases sequentially (med phase-progress per v3.6 cohort 2 item 1.5)
+### Step 4 — Run phases sequentially (with phase-progress per v3.6 cohort 2 item 1.5)
 
 For each phase in phases_to_run order:
 
 ```
 0. Phase-progress output: "Phase N/M <PHASE> — next <NEXT> — est ~<X>k tokens"
-   (text-only, ingen grafik per 1.5-spec)
+   (text-only, no graphics per 1.5 spec)
 1. Pre-phase: write 00-state.md entry "starting <phase>"
 2. Invoke /li:<phase>
 3. Phase runs (with its own pause-gates per phase-skill)
@@ -251,7 +251,7 @@ Token est this phase: ~3.5k  |  cycle total so far: ~9.2k
 ─────────────────────────────────────────────────────────
 ```
 
-Token-est siffrorna kommer från phase-skill's frontmatter `tokens_est_typical:` (om present) eller default 3k per phase.
+The token-est numbers come from the phase-skill's frontmatter `tokens_est_typical:` (if present) or default 3k per phase.
 
 Between phases:
 - Propagate phase output as input to next (e.g., DEFINE's design doc → PLAN's source)

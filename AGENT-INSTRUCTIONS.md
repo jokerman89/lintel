@@ -168,8 +168,8 @@ If session ended mid-task: `tasks/todo.md` makes the next session able to pick u
 For non-trivial work, the Lintel cycle provides an explicit 8-phase pipeline. Each phase is its own skill; composed cycles run via orchestrator.
 
 **Canonical invocation:**
-- `/li:cycle` — full 8-phase cycle SENSE → DEFINE → DISCOVER → PLAN → BUILD → REVIEW → SHIP → CAPTURE
-- `/li:cycle --mode <preset>` — apply preset (hotfix / customer-engagement / internal-tool / demo-prep / research-dive)
+- `/li:cycle` — full cycle SENSE → SCOPE → DEFINE → DISCOVER → PLAN → BUILD → REVIEW → SHIP → CAPTURE (8 core phases + the light, skippable SCOPE phase between SENSE and DEFINE)
+- `/li:cycle --mode <preset>` — apply preset. Neutral spine presets: hotfix / internal-tool / research-dive / meta-infra. Pack-contributed presets (customer-engagement, demo-prep) are supplied by an active pack (e.g. lintel-caip-pack), not by the neutral spine.
 - `/li:cycle --from <phase> --to <phase>` — custom subset
 - `/li:resume` — pick up at next phase based on `.lintel/state/00-state.md`
 

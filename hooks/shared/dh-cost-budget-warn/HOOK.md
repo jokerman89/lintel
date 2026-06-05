@@ -1,7 +1,7 @@
 ---
 name: dh-cost-budget-warn
 tier: warn-only
-event: PreCommit on IaC files
+event: PreToolUse (Edit|Write on IaC files)
 fires_on: commit increases projected cloud cost above pack/profile threshold (heuristic: scaling-up SKU class, adding always-on resource, increasing replica count beyond cap)
 override: pass --ignore-cost-warn flag (operator decision, logged)
 audit: ~/.lintel/audit/hooks.jsonl
@@ -34,5 +34,5 @@ Surfaces IaC commits that bump cost without explicit acknowledgment. Warning, no
 ## Audit format
 
 ```jsonl
-{"hook":"dh-cost-budget-warn","tier":"warn","ts":"...","file_edited":"infra/main.tf","patterns":"sku-upsize,replicas-up","operator":"jokerman"}
+{"hook":"dh-cost-budget-warn","tier":"warn","ts":"...","file_edited":"infra/main.tf","patterns":"sku-upsize,replicas-up","operator":"<operator>"}
 ```

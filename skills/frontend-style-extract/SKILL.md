@@ -1,7 +1,7 @@
 ---
 name: frontend-style-extract
 layer: foundation
-description: Pattern-level extraction sister till generate-style-learn. Reads artifacts (URLs, screenshots, .tsx files) → extracts layout-grammar + motion-language + interaction-patterns + component-library-fingerprint + shader-thesis → writes ~/.lintel/brand/design-patterns/<name>/. Solo-invokable.
+description: Pattern-level extraction sister to generate-style-learn. Reads artifacts (URLs, screenshots, .tsx files) → extracts layout-grammar + motion-language + interaction-patterns + component-library-fingerprint + shader-thesis → writes ~/.lintel/brand/design-patterns/<name>/. Solo-invokable.
 color: orange
 tools: Read, Write, Bash, Glob
 voice: internal
@@ -15,7 +15,7 @@ cli_support:
         strategy: auto-pick-recommended
 ---
 
-You are the `frontend-style-extract` skill — pattern-level extraction for v3.7 frontend-* family (Fas A2).
+You are the `frontend-style-extract` skill — pattern-level extraction for the v3.7 frontend-* family (Phase A2).
 
 ## What this skill does
 
@@ -26,32 +26,32 @@ Reads 1+ artifacts (live URLs, screenshots, Figma exports, existing .tsx/.svelte
 - **Interaction patterns** (scroll-smoothing, hover-intent, page-transitions, cursor-behaviors)
 - **Component-library fingerprint** (shadcn? Aceternity? Magic UI? bespoke?)
 - **Shader thesis** (mesh-gradient? noise-field? particle? none?)
-- **Typography** (delegated to generate-style-learn för palette+fonts; this skill imports those)
+- **Typography** (delegated to generate-style-learn for palette+fonts; this skill imports those)
 
-Writes `~/.lintel/brand/design-patterns/<name>/` med 5 files:
+Writes `~/.lintel/brand/design-patterns/<name>/` with 5 files:
 - `pattern.json` — top-level synthesis (schema_version: 1)
 - `typography.json` — embedded from generate-style-learn-output OR fresh extraction
 - `motion.json` — motion-language extraction
-- `shader-snippets/` — GLSL extraction (om detected)
+- `shader-snippets/` — GLSL extraction (if detected)
 - `component-imports.json` — component-library-fingerprint + import-references
 
-**Boundary med generate-style-learn:**
+**Boundary with generate-style-learn:**
 - generate-style-learn extracts PALETTE + FONTS (low-level visual tokens) → `~/.lintel/brand/palettes/`
 - frontend-style-extract extracts PATTERN (high-level design grammar) → `~/.lintel/brand/design-patterns/`
 - Together they cover full design-DNA. Sister disciplines, disjoint output paths.
 
-L-001-discipline: skill body är contract. Agent at invocation does actual extraction. Don't pre-bake what "patterns" look like.
+L-001-discipline: skill body is the contract. Agent at invocation does the actual extraction. Don't pre-bake what "patterns" look like.
 
 ## When to use
 
 - "Customer just shared their site — extract their pattern for future runs"
 - "Awwwards-of-the-day inspired me — capture the language"
-- Operator-engagement compounding: build vault av extracted patterns over time → L-001 disciplinerad way
-- Sister-pair: run `/li:generate-style-learn <artifact>` FIRST för palette → then `/li:frontend-style-extract <artifact>` för pattern
+- Operator-engagement compounding: build a vault of extracted patterns over time → the L-001 disciplined way
+- Sister-pair: run `/li:generate-style-learn <artifact>` FIRST for palette → then `/li:frontend-style-extract <artifact>` for pattern
 
 ## When NOT to use
 
-- Live style-edit — denna är extraction, ej editor
+- Live style-edit — this is extraction, not an editor
 - Single-color-pick — `bin/li-doctor --brand-summary` faster
 - Component-library-version-pinning — that's package.json territory
 - Pure-palette extraction — use `/li:generate-style-learn` (palette ≠ pattern)
@@ -59,10 +59,10 @@ L-001-discipline: skill body är contract. Agent at invocation does actual extra
 ## Inputs
 
 - Required `<artifacts>` — 1+ paths (URLs OK), space-separated. Examples: `https://example.com`, `screenshots/hero.png`, `existing-site/components/`
-- Required `--name <pattern-name>` — kebab-case identifier för vault entry
+- Required `--name <pattern-name>` — kebab-case identifier for vault entry
 - Optional `--overwrite` — inherits from `generate-style-learn`. Default fail-on-existing (m-3 resolution).
 - Optional `--out <path>` — override default `~/.lintel/brand/design-patterns/<name>/`
-- Optional `--with-palette` — chain `/li:generate-style-learn` first för palette → embed in pattern.json
+- Optional `--with-palette` — chain `/li:generate-style-learn` first for palette → embed in pattern.json
 - Optional `--customer-share` — triggers compliance-gate
 
 ## Workflow
@@ -108,7 +108,7 @@ This produces the typography.json + palette block that pattern.json references.
 
 ### Step 4 — Pattern synthesis
 
-Agent (FrontendArchitect.md — yes the Fas A1 agent — reused for extraction-direction) synthesizes per-axis findings:
+Agent (FrontendArchitect.md — yes the Phase A1 agent — reused for extraction-direction) synthesizes per-axis findings:
 
 ```json
 {
@@ -158,7 +158,7 @@ Agent (FrontendArchitect.md — yes the Fas A1 agent — reused for extraction-d
 ```bash
 # typography.json — embedded or extracted via generate-style-learn
 # motion.json — schema matches frontend-motion's contract
-# shader-snippets/<n>.glsl — raw GLSL där detected
+# shader-snippets/<n>.glsl — raw GLSL where detected
 # component-imports.json — { "imports": [...], "fingerprint": "shadcn+aceternity" }
 ```
 
@@ -197,7 +197,7 @@ Next:
 
 ## Voice tier behavior
 
-`voice: internal`. Default. `--customer-share` triggers `/li:compliance-gate` om source-artifacts are customer-owned (re-use questions).
+`voice: internal`. Default. `--customer-share` triggers `/li:compliance-gate` if source-artifacts are customer-owned (re-use questions).
 
 ## Status protocol
 
@@ -228,8 +228,8 @@ YES — solo-invocable.
 
 **Calls into:**
 - `agents/frontend/FrontendArchitect.md` (synthesis-direction, reused from Fas A1)
-- `/li:generate-style-learn` (chained om `--with-palette` flag)
-- `/li:compliance-gate` (om --customer-share)
+- `/li:generate-style-learn` (chained if `--with-palette` flag)
+- `/li:compliance-gate` (if --customer-share)
 
 **Consumed by:**
 - `/li:frontend-design --pattern <name>` (vault lookup)
@@ -259,6 +259,6 @@ Operator can manually `rm -rf ~/.lintel/brand/design-patterns/<name>` if they wa
 
 ## Recommended next steps after invocation
 
-- Reuse extracted pattern: `/li:frontend-design "<brief>" --pattern <name>` (Fas A1 orchestrator supports --pattern flag)
+- Reuse extracted pattern: `/li:frontend-design "<brief>" --pattern <name>` (Phase A1 orchestrator supports --pattern flag)
 - Diff vs canonical: `diff ~/.lintel/brand/design-patterns/<name>/pattern.json ~/.lintel/brand/design-patterns/ultra-modern-lovable-style/pattern.json`
-- L-001 vault-growth check: efter 3+ operator-extracted patterns, re-evaluate om canonical can demotas till docs/samples/
+- L-001 vault-growth check: after 3+ operator-extracted patterns, re-evaluate whether the canonical one can be demoted to docs/samples/

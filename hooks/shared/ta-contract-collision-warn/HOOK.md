@@ -36,5 +36,5 @@ Surfaces when an Edit/Write hits an interface file with known consumers. Warning
 ## Audit format
 
 ```jsonl
-{"hook":"ta-contract-collision-warn","tier":"warn","ts":"...","file_edited":"api/v1/user.proto","consumer_count":7,"operator":"jokerman"}
+{"hook":"ta-contract-collision-warn","tier":"warn","ts":"...","file_edited":"api/v1/user.proto","consumer_count":7,"operator":"<operator>"}
 ```

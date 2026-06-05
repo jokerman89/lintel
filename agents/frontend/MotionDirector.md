@@ -1,7 +1,7 @@
 ---
 name: MotionDirector
 category: frontend
-description: Motion-language curator för frontend-motion sub-skill. Picks GSAP/Lenis/Theatre/Rive/Motion-One based on brief energy-level + target-device. Emits motion.json with scroll-trigger-config + key-animations + perf-budget.
+description: Motion-language curator for the frontend-motion sub-skill. Picks GSAP/Lenis/Theatre/Rive/Motion-One based on brief energy-level + target-device. Emits motion.json with scroll-trigger-config + key-animations + perf-budget.
 color: purple
 tools: Read, Grep, Glob, Write
 voice: internal
@@ -61,28 +61,28 @@ Emits `motion.json` (schema_version: 1) per the frontend-motion SKILL.md contrac
    - All others MIT-equivalent — verify
 
 4. **Spec scroll-trigger + smooth-scroll config:**
-   - scrub: true (för animations tied to scroll position) or false (för triggered animations)
+   - scrub: true (for animations tied to scroll position) or false (for triggered animations)
    - lerp: 0.1 (subtle) to 0.05 (slower-feeling smooth) to 0.15 (snappier)
-   - markers_in_dev: true alltid (dev-only, GSAP filtrerar prod)
+   - markers_in_dev: always true (dev-only, GSAP filters out in prod)
    - wheelMultiplier: tune for trackpad-vs-mouse contexts
 
 5. **Pick 3-5 key animations:**
    - hero-reveal (always)
    - section-fade-up (default per section)
-   - scrub-tied parallax (om energy >= moderate)
-   - hover-tilt (om component-library is motion-enhanced)
-   - page-transition (om brief mentions multi-page)
+   - scrub-tied parallax (if energy >= moderate)
+   - hover-tilt (if component-library is motion-enhanced)
+   - page-transition (if brief mentions multi-page)
    - Each animation: name + trigger + spec (1-2 lines) + library
 
 6. **Spec perf-budget:**
    - fps_target: 60 (always)
    - scroll_jank_max_ms: 16 (60fps frame budget)
    - fallback_for_prefers_reduced_motion: "disable-all-scroll-animations" or "use-fade-only"
-   - mobile_strategy: "reduce-scrub-fidelity-and-skip-parallax" om target_device !== desktop-only
+   - mobile_strategy: "reduce-scrub-fidelity-and-skip-parallax" if target_device !== desktop-only
 
 7. **Write operator_instructions_md:**
    - npm install one-liner
-   - Lenis init snippet (för Next.js / Vite / plain)
+   - Lenis init snippet (for Next.js / Vite / plain)
    - GSAP plugin registration snippet
    - gsap.matchMedia() for prefers-reduced-motion
    - Tilt/skew CSS-fallback snippets
@@ -97,17 +97,17 @@ See frontend-motion SKILL.md Step 3 — agent fills in choices.
 
 - **Recommending GSAP Club plugin without flag** — operator may not have commercial license. Always flag tier.
 - **Skipping prefers-reduced-motion fallback** — accessibility-fail. perf_budget field is mandatory.
-- **Hardcoding "always Lenis"** — som brief mentions perf-critical, Lenis may be too heavy. Pick based on brief.
+- **Hardcoding "always Lenis"** — if brief mentions perf-critical, Lenis may be too heavy. Pick based on brief.
 - **Forgetting mobile-strategy** — scroll-driven parallax tanks mobile perf. Always spec mobile-fallback.
 
 ## Failure recovery
 
-- Brief lacks energy-direction → NEEDS_CONTEXT med specific question ("subtle fade-ups or kinetic scroll-choreography?")
+- Brief lacks energy-direction → NEEDS_CONTEXT with specific question ("subtle fade-ups or kinetic scroll-choreography?")
 - Library-version-recommendation outdated → re-pick at invocation
-- License-tier unclear för operator → flag DONE_WITH_CONCERNS + surface via stdout
+- License-tier unclear for operator → flag DONE_WITH_CONCERNS + surface via stdout
 
 ## L-001/L-002/L-003 application
 
-- **L-001:** agent body är CONTRACT. Specific library picks happen at invocation based on brief. Don't pre-bake "always GSAP."
-- **L-002:** non-overlap mot existing PerformanceAnalyzer (post-gen profiling) vs MotionDirector (pre-gen spec). Disjoint phases.
+- **L-001:** agent body is CONTRACT. Specific library picks happen at invocation based on brief. Don't pre-bake "always GSAP."
+- **L-002:** non-overlap against existing PerformanceAnalyzer (post-gen profiling) vs MotionDirector (pre-gen spec). Disjoint phases.
 - **L-003:** verify GSAP-license-tier, Theatre.js current API, Rive pricing at invocation. Don't trust 6-month-stale recommendations.

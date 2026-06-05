@@ -31,7 +31,7 @@ Distinct from `/codex` (outside-voice review post-hoc) and from spawning a subag
 
 ## Inputs
 
-- Required `--agent <name>` — registered subagent name (e.g. `CodeReviewer`, `SecurityAuditor`, `Architect`, `Refactorer`)
+- Required `--agent <name>` — registered subagent name (e.g. `CodeReviewer`, `SecurityAuditor`, `Architect`, `Refactorer`, `DevOpsToolchain`, `ReadOnly`)
 - Required: task description (inline prose)
 - Optional `--turns <N>` — how many alternation turns (default: 3)
 - Optional `--scope <files>` — restrict subagent's reads to these files
@@ -114,6 +114,20 @@ Recommendation: /qa-only before /ship.
 > /pair-agent --agent CodeReviewer --turns 1 "review this rename across 12 files"
 [Single turn: main shows diff, reviewer checks for missed references]
 ✓ Reviewer found 2 missed references in tests/. Fix proposed.
+```
+
+**DevOps pair on CI/CD change:**
+```
+> /pair-agent --agent DevOpsToolchain --turns 3 "add a canary stage to the deploy workflow"
+[Main proposes pipeline edits, DevOpsToolchain reviews each for SRE/observability gaps]
+✓ 3/3 accepted. DevOpsToolchain added a rollback trigger on canary error-rate breach.
+```
+
+**Read-only context pair:**
+```
+> /pair-agent --agent ReadOnly --scope src/lib/ "explain how retry/backoff is wired before I refactor"
+[Main asks, ReadOnly explores src/lib/ non-destructively and returns cited findings]
+✓ ReadOnly surfaced 3 retry call-sites + 1 undocumented backoff cap.
 ```
 
 ## See also

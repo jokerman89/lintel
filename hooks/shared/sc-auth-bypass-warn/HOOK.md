@@ -40,5 +40,5 @@ Surfaces when an Edit/Write to an auth-flow file introduces or modifies high-ris
 ## Audit format
 
 ```jsonl
-{"hook":"sc-auth-bypass-warn","tier":"warn","ts":"...","file_edited":"src/auth/middleware.go","pattern":"skip-auth-flag","line":42,"operator":"jokerman"}
+{"hook":"sc-auth-bypass-warn","tier":"warn","ts":"...","file_edited":"src/auth/middleware.go","pattern":"skip-auth-flag","line":42,"operator":"<operator>"}
 ```

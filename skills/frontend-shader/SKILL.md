@@ -15,19 +15,19 @@ cli_support:
         strategy: auto-pick-recommended
 ---
 
-You are the `frontend-shader` sub-skill — shader-engineer for v3.7 frontend-* family (Fas A2).
+You are the `frontend-shader` sub-skill — shader-engineer for the v3.7 frontend-* family (Phase A2).
 
 ## What this skill does
 
-Reads operator brief → ShaderEngineer agent picks shader-library (Paper Shaders deklarativ | OGL+glslify | react-three-fiber+postprocessing | Lygia-snippets | CSS-houdini-paint-worklet) + visual-thesis + GLSL-snippet-references + GPU-fallback-strategy + perf-budget → writes `shader.json` (schema_version: 1).
+Reads operator brief → ShaderEngineer agent picks shader-library (Paper Shaders declarative | OGL+glslify | react-three-fiber+postprocessing | Lygia-snippets | CSS-houdini-paint-worklet) + visual-thesis + GLSL-snippet-references + GPU-fallback-strategy + perf-budget → writes `shader.json` (schema_version: 1).
 
-Solo-invokable för delar-mode eller auto-invoked by `/li:frontend-design` orchestrator i parallel-dispatch (Workflow Step 4) som tredje parallel sub-skill (efter typography + motion).
+Solo-invokable for component-mode or auto-invoked by the `/li:frontend-design` orchestrator in parallel-dispatch (Workflow Step 4) as the third parallel sub-skill (after typography + motion).
 
-L-001-discipline: skill body är contract. Agent at invocation produces specific library picks + GLSL recommendations. Don't pre-bake shader-snippets i SKILL.md body.
+L-001-discipline: skill body is the contract. Agent at invocation produces specific library picks + GLSL recommendations. Don't pre-bake shader-snippets in the SKILL.md body.
 
 ## When to use
 
-- Solo: "hero-bakgrund för enterprise SaaS landing — want a subtle mesh-gradient"
+- Solo: "hero-background for enterprise SaaS landing — want a subtle mesh-gradient"
 - Orchestrator-parallel: dispatched from `/li:frontend-design` Step 4
 - Audit existing site: "extract shader-thesis from this site"
 
@@ -62,10 +62,10 @@ out="${OUT:-/dev/stdout}"
 Hand off to `agents/frontend/ShaderEngineer.md`. Agent picks shader-library:
 
 - **Paper Shaders** (MIT, declarative React/Vue/Vanilla): mesh-gradients + animated bg. Best for non-3D hero-visuals. Lowest implementation-cost.
-- **OGL** (MIT, lightweight 3D + raw WebGL): direct GLSL with full control. Best för custom thesis + performance-critical.
-- **react-three-fiber + drei + postprocessing** (MIT, React 3D + effects): production 3D scenes + post-FX. Best för immersive contexts.
-- **Lygia** (MIT, GLSL function library): drop-in functions för noise/SDF/lighting. Pairs with OGL eller r3f. Don't ship alone.
-- **CSS Houdini Paint Worklet** (W3C, browser-paint API): GPU-accelerated CSS paint. Best för super-lightweight backgrounds where shader-lib is overkill.
+- **OGL** (MIT, lightweight 3D + raw WebGL): direct GLSL with full control. Best for custom thesis + performance-critical.
+- **react-three-fiber + drei + postprocessing** (MIT, React 3D + effects): production 3D scenes + post-FX. Best for immersive contexts.
+- **Lygia** (MIT, GLSL function library): drop-in functions for noise/SDF/lighting. Pairs with OGL or r3f. Don't ship alone.
+- **CSS Houdini Paint Worklet** (W3C, browser-paint API): GPU-accelerated CSS paint. Best for super-lightweight backgrounds where shader-lib is overkill.
 - **shadcn + CSS conic-gradient + filter blur** (zero-lib): no-shader fallback. Often sufficient.
 
 Agent verifies current licensing at invocation (L-003).
@@ -111,7 +111,7 @@ Agent verifies current licensing at invocation (L-003).
 }
 ```
 
-Agent fyller specific picks. Don't hardcode.
+Agent fills in specific picks. Don't hardcode.
 
 ### Step 4 — Schema-validate + emit
 
@@ -130,7 +130,7 @@ fi
 
 ### Step 5 — Visual-thesis === "none" short-circuit
 
-Agent kan returnera visual_thesis="none" om brief doesn't warrant shader. Skill body STILL emits valid JSON så orchestrator-Step-5 synthesis kan handle `shader: null` gracefully.
+Agent can return visual_thesis="none" if the brief doesn't warrant a shader. Skill body STILL emits valid JSON so orchestrator-Step-5 synthesis can handle `shader: null` gracefully.
 
 ## Voice tier behavior
 
@@ -157,7 +157,7 @@ YES — solo-invocable.
 
 **Reads:**
 - `--brief` argument
-- `~/.lintel/brand/shader-snippets/` (om operator-curated; lazy-created)
+- `~/.lintel/brand/shader-snippets/` (if operator-curated; lazy-created)
 
 **Writes:**
 - `shader.json` (stdout default, $OUT-path if orchestrator)
@@ -165,11 +165,11 @@ YES — solo-invocable.
 
 **Calls into:**
 - `agents/frontend/ShaderEngineer.md` (primary)
-- `/li:compliance-gate --check shader-licensing` (om --customer-share)
+- `/li:compliance-gate --check shader-licensing` (if --customer-share)
 
 **Consumed by:**
 - `/li:frontend-design` Workflow Step 5 (synthesis input — `shader` field)
-- Operator direct (solo delar-mode)
+- Operator direct (solo component-mode)
 
 ## Anti-patterns
 
@@ -188,7 +188,7 @@ YES — solo-invocable.
 
 ## Recommended next steps after invocation
 
-- Solo: review shader.json + apply till target project
+- Solo: review shader.json + apply to target project
 - Orchestrator: parallel-dispatch returns to `/li:frontend-design` Step 5
-- Customer-share: pair med `/li:compliance-gate` för final license-audit
-- Future: extract proven shader-snippets till `~/.lintel/brand/shader-snippets/` (via frontend-style-extract)
+- Customer-share: pair with `/li:compliance-gate` for final license-audit
+- Future: extract proven shader-snippets to `~/.lintel/brand/shader-snippets/` (via frontend-style-extract)

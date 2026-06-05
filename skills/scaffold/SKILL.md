@@ -12,7 +12,7 @@ You are the li-scaffold skill.
 
 ## What this skill does
 
-Sets up a new repo (or initializes scaffolding in existing repo) with Lintel's Kategori B templates: CLAUDE.md (from template + repo-specific variables), CORE-PRINCIPLES.md, EVOLUTION.md, EVOLUTION-LOG.md, tasks/{lessons,memory,personas,todo}.md, docs/adr/{README,TEMPLATE}.md, .claude/agents/, TEMPLATE-skill.md.
+Sets up a new repo (or initializes scaffolding in existing repo) with Lintel's Category B templates: CLAUDE.md (from template + repo-specific variables), CORE-PRINCIPLES.md, EVOLUTION.md, EVOLUTION-LOG.md, tasks/{lessons,memory,personas,todo}.md, docs/adr/{README,TEMPLATE}.md, .claude/agents/, TEMPLATE-skill.md.
 
 This is how new repos get Lintel defaults inside 30 seconds.
 
@@ -122,4 +122,4 @@ Next steps:
 
 Without this skill, every new repo starts CLAUDE.md from scratch. With it, every new repo starts with proven defaults. 30-second setup vs 30-minute setup.
 
-This is Kategori B (Repo-scaffolding) in action — the templates Lintel curates get applied to make every new project consistent.
+This is Category B (Repo-scaffolding) in action — the templates Lintel curates get applied to make every new project consistent.

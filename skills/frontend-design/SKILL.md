@@ -1,7 +1,7 @@
 ---
 name: frontend-design
 layer: foundation
-description: Frontend design-director orchestrator. Chains typography + motion (+ shader in Fas A2) → frontend-design-spec.json → calls generate-web/generate-app for rendering. Design-director-layer per v3.7 family-separation.
+description: Frontend design-director orchestrator. Chains typography + motion (+ shader in Phase A2) → frontend-design-spec.json → calls generate-web/generate-app for rendering. Design-director-layer per v3.7 family-separation.
 color: orange
 tools: Read, Write, Bash, Glob
 voice: mixed
@@ -16,38 +16,38 @@ cli_support:
 license_note: produces customer-bound output if --customer-share flag set
 ---
 
-You are the `frontend-design` orchestrator skill — entrypoint för production-ready frontend design e2e per v3.7 frontend-* family.
+You are the `frontend-design` orchestrator skill — entrypoint for production-ready frontend design e2e per v3.7 frontend-* family.
 
 ## What this skill does
 
-Orchestrates **design-director-decisions** (typography + motion + shader thesis + component-library-pick) → produces `frontend-design-spec.json` → calls **rendering-engine** (`generate-web` single-file/Next.js eller `generate-app` full-vite/svelte/next-monorepo — Fas B) för fil-output.
+Orchestrates **design-director-decisions** (typography + motion + shader thesis + component-library-pick) → produces `frontend-design-spec.json` → calls **rendering-engine** (`generate-web` single-file/Next.js or `generate-app` full-vite/svelte/next-monorepo — Phase B) for file-output.
 
-Skillen ÄGER design-decisions. ÄGER INTE HTML/Next.js-file-generation (det är generate-* family per v3.7 design-doc-boundary).
+The skill OWNS design-decisions. It does NOT own HTML/Next.js-file-generation (that's the generate-* family per the v3.7 design-doc-boundary).
 
 Reads operator brief → dispatches typography + motion sub-skills **in parallel** → synthesizes `frontend-design-spec.json` → calls rendering-engine.
 
 ## When to use
 
-- "Lex Sweden gets a copilot landing page" — full helhet-mode för production-ready design
-- Customer demo som måste se Awwwards-grade ut
-- Internal microsite där visual quality påverkar adoption
-- Multi-format engagement där /li:cycle BUILD-phase producerar app + design måste matcha pitch
+- "Lex Sweden gets a copilot landing page" — full end-to-end mode for production-ready design
+- Customer demo that must look Awwwards-grade
+- Internal microsite where visual quality affects adoption
+- Multi-format engagement where /li:cycle BUILD-phase produces an app + design must match the pitch
 
 ## When NOT to use
 
 - Wireframe-only sketch → `/li:design-html` (existing skill)
-- Single design-decision-axis (just typography eller just motion) → solo sub-skill `/li:frontend-typography` eller `/li:frontend-motion`
-- Pure file-gen utan design-direction → `/li:generate-web` direkt med `--brief`
+- Single design-decision-axis (just typography or just motion) → solo sub-skill `/li:frontend-typography` or `/li:frontend-motion`
+- Pure file-gen without design-direction → `/li:generate-web` directly with `--brief`
 - Re-render existing run → `/li:generate-web --from-frontend-design <existing-run-dir>`
 
 ## Inputs
 
-- Required `<brief>` — design brief text eller path till brief.md
-- Optional `--pattern <vault-name>` — välj från `~/.lintel/brand/design-patterns/<name>/` (Fas A2 enables canonical pattern)
-- Optional `--target-format <single-file|nextjs|app>` — default: `single-file`. `app` triggar generate-app (Fas B)
+- Required `<brief>` — design brief text or path to brief.md
+- Optional `--pattern <vault-name>` — select from `~/.lintel/brand/design-patterns/<name>/` (Phase A2 enables canonical pattern)
+- Optional `--target-format <single-file|nextjs|app>` — default: `single-file`. `app` triggers generate-app (Phase B)
 - Optional `--customer-share` — sets CUSTOMER_SHARE=1, triggers compliance-gate + voice-gate
 - Optional `--out <path>` — output path (default: `~/.lintel/frontend-runs/<run-id>/`)
-- Optional `--skip-shader` — Fas A1 default (frontend-shader skill ships i A2)
+- Optional `--skip-shader` — Phase A1 default (frontend-shader skill ships in A2)
 
 ## Workflow
 
@@ -64,7 +64,7 @@ out_dir="${OUT:-$HOME/.lintel/frontend-runs/$(date +%Y%m%d-%H%M%S)-${RANDOM}}"
 mkdir -p "$out_dir"
 ```
 
-Voice-tier resolution: default `internal`. If `--customer-share` → run the active pack's voice gate (`resolve_pack_field compliance.hooks`; none by default) first. Per L-001-discipline: skill body bevarar contract, agent at invocation produces actual content.
+Voice-tier resolution: default `internal`. If `--customer-share` → run the active pack's voice gate (`resolve_pack_field compliance.hooks`; none by default) first. Per L-001-discipline: skill body preserves contract, agent at invocation produces actual content.
 
 ### Step 2-4 — Parallel sub-skill dispatch (M-4 resolution)
 
@@ -75,14 +75,14 @@ Concurrent dispatch:
   ├─ /li:frontend-typography --brief "$brief" --out "$out_dir/typography.json"
   └─ /li:frontend-motion --brief "$brief" --out "$out_dir/motion.json"
 
-(Fas A2 adds parallel /li:frontend-shader → $out_dir/shader.json)
+(Phase A2 adds parallel /li:frontend-shader → $out_dir/shader.json)
 ```
 
-Wallclock budget: ~60s concurrent (vs ~180s sequential). Wait för båda att slutföra before Step 5.
+Wallclock budget: ~60s concurrent (vs ~180s sequential). Wait for both to complete before Step 5.
 
 ### Step 5 — Synthesize `frontend-design-spec.json`
 
-Read typography.json + motion.json (+ shader.json om A2). Synthesizes till `frontend-design-spec.json`:
+Read typography.json + motion.json (+ shader.json if A2). Synthesizes into `frontend-design-spec.json`:
 
 ```json
 {
@@ -91,8 +91,8 @@ Read typography.json + motion.json (+ shader.json om A2). Synthesizes till `fron
   "brief_hash": "<sha256 of brief>",
   "source": "frontend-design",
   "target_format": "single-file | nextjs | app",
-  "typography": { /* embedded från typography.json */ },
-  "motion": { /* embedded från motion.json */ },
+  "typography": { /* embedded from typography.json */ },
+  "motion": { /* embedded from motion.json */ },
   "shader": null,
   "component_libraries": [
     {"name": "shadcn", "kind": "primitive"},
@@ -125,16 +125,16 @@ case "$target_format" in
     /li:generate-web --from-frontend-design "$out_dir"
     ;;
   app)
-    /li:generate-app --from-frontend-design "$out_dir"   # Fas B skill
+    /li:generate-app --from-frontend-design "$out_dir"   # Phase B skill
     ;;
 esac
 ```
 
-Fas A1 NOTE: `--from-frontend-design` mode i generate-web ships i Fas B PR. Fas A1 stops at frontend-design-spec.json emission + the minimum-viable roundtrip test verifies the contract is consumable.
+Phase A1 NOTE: `--from-frontend-design` mode in generate-web ships in the Phase B PR. Phase A1 stops at frontend-design-spec.json emission + the minimum-viable roundtrip test verifies the contract is consumable.
 
-### Step 7 — Quality gate (Fas A2)
+### Step 7 — Quality gate (Phase A2)
 
-`/li:frontend-design-review <out_dir>` (Fas A2 skill) — 6-dimension audit. Fas A1 stub: emit "skip" log entry tills A2 ships.
+`/li:frontend-design-review <out_dir>` (Phase A2 skill) — 6-dimension audit. Phase A1 stub: emit "skip" log entry until A2 ships.
 
 ### Step 8 — Output paths + recommendation
 
@@ -151,9 +151,9 @@ Voice tier:             $voice_tier
 Target format:          $target_format
 
 Next:
-  Render:               /li:generate-web --from-frontend-design $out_dir   (Fas B)
-  Review:               /li:frontend-design-review $out_dir                 (Fas A2)
-  Extract som pattern:  /li:frontend-style-extract $out_dir/*               (Fas A2)
+  Render:               /li:generate-web --from-frontend-design $out_dir   (Phase B)
+  Review:               /li:frontend-design-review $out_dir                 (Phase A2)
+  Extract as pattern:   /li:frontend-style-extract $out_dir/*               (Phase A2)
 ```
 
 ## Voice tier behavior
@@ -169,19 +169,19 @@ Next:
 
 ## Pause-points
 
-- Customer-share flag set + voice-check fails → BLOCKED för operator-review
-- Brief lacks "for whom" eller "what aesthetic" → NEEDS_CONTEXT
-- Sub-skill returns with critical-warning → DONE_WITH_CONCERNS surface till operator
+- Customer-share flag set + voice-check fails → BLOCKED for operator-review
+- Brief lacks "for whom" or "what aesthetic" → NEEDS_CONTEXT
+- Sub-skill returns with critical-warning → DONE_WITH_CONCERNS surface to operator
 
 ## Hop-in support
 
-YES — solo-invocable. Designed för auto-invocation från `/li:cycle` BUILD-phase i Fas D (when cycle-integration ships).
+YES — solo-invocable. Designed for auto-invocation from `/li:cycle` BUILD-phase in Phase D (when cycle-integration ships).
 
 ## Integration
 
 **Reads:**
-- `<brief>` argument (path eller inline text)
-- `~/.lintel/brand/design-patterns/<name>/` (om `--pattern` flag set; Fas A2 enables)
+- `<brief>` argument (path or inline text)
+- `~/.lintel/brand/design-patterns/<name>/` (if `--pattern` flag set; Phase A2 enables)
 - `~/.lintel/profile.yaml` (mode → voice-tier)
 
 **Writes:**
@@ -193,25 +193,25 @@ YES — solo-invocable. Designed för auto-invocation från `/li:cycle` BUILD-ph
 **Calls into:**
 - `/li:frontend-typography` (sub-skill, parallel)
 - `/li:frontend-motion` (sub-skill, parallel)
-- `/li:generate-web --from-frontend-design <run-dir>` (Fas B)
-- the active pack's voice gate (`resolve_pack_field compliance.hooks`; none by default — om customer-share)
-- `/li:compliance-gate` (existing, om customer-share)
+- `/li:generate-web --from-frontend-design <run-dir>` (Phase B)
+- the active pack's voice gate (`resolve_pack_field compliance.hooks`; none by default — if customer-share)
+- `/li:compliance-gate` (existing, if customer-share)
 
-**Boundary med generate-* family:**
+**Boundary with the generate-* family:**
 
-frontend-design är DESIGN-DIRECTOR-LAYER (decisions). generate-web/generate-app är RENDERING-ENGINE-LAYER (file-output). Frontend-design CALLS into generate-* för rendering. Inte vice versa. Skarp boundary per v3.7 design-doc per family-separation-table.
+frontend-design is the DESIGN-DIRECTOR-LAYER (decisions). generate-web/generate-app are the RENDERING-ENGINE-LAYER (file-output). Frontend-design CALLS into generate-* for rendering. Not vice versa. Sharp boundary per the v3.7 design-doc family-separation-table.
 
-**Brand-asset-slots (Fas A1 documents paths; folders lazy-created):**
-- `~/.lintel/brand/design-patterns/` — Fas A2 ships canonical `ultra-modern-lovable-style/`
+**Brand-asset-slots (Phase A1 documents paths; folders lazy-created):**
+- `~/.lintel/brand/design-patterns/` — Phase A2 ships canonical `ultra-modern-lovable-style/`
 - `~/.lintel/brand/motion-libraries/` — operator-tested GSAP/Lenis-combos
-- `~/.lintel/brand/shader-snippets/` — operator-curated GLSL (Fas A2 + frontend-shader)
+- `~/.lintel/brand/shader-snippets/` — operator-curated GLSL (Phase A2 + frontend-shader)
 
 ## Anti-patterns
 
 - **Generating HTML inside frontend-design** — that's generate-web's job (boundary-violation per L-002). Use `--from-frontend-design` chain.
 - **Sequential sub-skill dispatch** — Workflow Step 2-4 explicitly PARALLEL per M-4. Sequential breaks 10-min budget.
-- **Pre-baking canonical patterns** — Fas A1 ships slot-bootstrapping only. Canonical hand-curation deferred till A2 after schema validates against operator-real briefs.
-- **Bundling commercial fonts/libraries** — Lintel ships scaffolding. Operator licenserar Pangram + installer GSAP/OGL/Aceternity via npm.
+- **Pre-baking canonical patterns** — Phase A1 ships slot-bootstrapping only. Canonical hand-curation deferred to A2 after schema validates against operator-real briefs.
+- **Bundling commercial fonts/libraries** — Lintel ships scaffolding. Operator licenses Pangram + installs GSAP/OGL/Aceternity via npm.
 
 ## Failure recovery
 
@@ -222,13 +222,13 @@ frontend-design är DESIGN-DIRECTOR-LAYER (decisions). generate-web/generate-app
 
 ## Recommended next steps after invocation
 
-- Fas A1: hand off `$out_dir/frontend-design-spec.json` till generate-web manually for now (Fas B automatisk chain)
-- Fas A2: pair med `/li:frontend-design-review` för 6-dimension audit
-- Fas A2+: extract successful design via `/li:frontend-style-extract $out_dir/*` → adds till vault
-- Cycle-integration: defer till Fas D after operator dogfood validates real-engagement flow
+- Phase A1: hand off `$out_dir/frontend-design-spec.json` to generate-web manually for now (Phase B automatic chain)
+- Phase A2: pair with `/li:frontend-design-review` for 6-dimension audit
+- Phase A2+: extract successful design via `/li:frontend-style-extract $out_dir/*` → adds to vault
+- Cycle-integration: defer to Phase D after operator dogfood validates real-engagement flow
 
 ## L-001/L-002/L-003 application
 
-- **L-001 (scaffolding-not-content):** skill body är contract. Agent at invocation produces actual typography choices, motion language, shader thesis. Canonical pattern deferred till A2. Operator-extracted patterns dominate vault long-term.
-- **L-002 (grep-first):** generate-* family bevaras. Frontend-* family = identity-anchor + design-director layer, EJ replacement. Boundary-table-row added till design-doc.
+- **L-001 (scaffolding-not-content):** skill body is contract. Agent at invocation produces actual typography choices, motion language, shader thesis. Canonical pattern deferred to A2. Operator-extracted patterns dominate vault long-term.
+- **L-002 (grep-first):** the generate-* family is preserved. Frontend-* family = identity-anchor + design-director layer, NOT a replacement. Boundary-table-row added to the design-doc.
 - **L-003 (verify-claims):** schema_version field on every contract JSON. generate-web reader verifies before consuming. Don't trust stale schemas.

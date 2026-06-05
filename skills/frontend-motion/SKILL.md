@@ -15,15 +15,15 @@ cli_support:
         strategy: auto-pick-recommended
 ---
 
-You are the `frontend-motion` sub-skill — motion-director för frontend-design family.
+You are the `frontend-motion` sub-skill — motion-director for the frontend-design family.
 
 ## What this skill does
 
-Reads operator brief → MotionDirector agent picks motion-language från recommendation-tree (GSAP+ScrollTrigger | Lenis-smooth | Theatre.js-timeline | Rive-state | Motion-One-light) + maps scroll-trigger-config + smooth-scroll-config + key-animations-spec → writes `motion.json` (schema_version: 1) with library-install-instructions.
+Reads operator brief → MotionDirector agent picks motion-language from the recommendation-tree (GSAP+ScrollTrigger | Lenis-smooth | Theatre.js-timeline | Rive-state | Motion-One-light) + maps scroll-trigger-config + smooth-scroll-config + key-animations-spec → writes `motion.json` (schema_version: 1) with library-install-instructions.
 
-Solo-invokable för delar-mode eller auto-invoked by `/li:frontend-design` orchestrator i parallel-dispatch (Workflow Step 3).
+Solo-invokable for component-mode or auto-invoked by the `/li:frontend-design` orchestrator in parallel-dispatch (Workflow Step 3).
 
-L-001-discipline: skill body är contract. Agent at invocation picks specific motion-libraries + animations. Don't pre-bake choices i SKILL.md body.
+L-001-discipline: skill body is the contract. Agent at invocation picks specific motion-libraries + animations. Don't pre-bake choices in the SKILL.md body.
 
 ## When to use
 
@@ -34,7 +34,7 @@ L-001-discipline: skill body är contract. Agent at invocation picks specific mo
 ## When NOT to use
 
 - Static page without scroll-driven interaction → motion is overkill
-- CSS-only transitions (button hover, modal slide-in) → no library needed; agent surfaces om this is actually request
+- CSS-only transitions (button hover, modal slide-in) → no library needed; agent surfaces if this is actually the request
 - Performance-troubleshooting existing animation → that's profiling, not direction
 
 ## Inputs
@@ -59,14 +59,14 @@ out="${OUT:-/dev/stdout}"
 
 ### Step 2 — MotionDirector agent dispatch
 
-Hand off to `agents/frontend/MotionDirector.md`. Agent picks motion-language från:
+Hand off to `agents/frontend/MotionDirector.md`. Agent picks motion-language from:
 
 - **GSAP + ScrollTrigger** (commercial license for some plugins; check current terms): scroll-choreographed reveals, scrub-tied keyframes, hero-act sequences. Best for kinetic-energy briefs.
-- **Lenis** (free, MIT): smooth-scroll baseline. Often paired med GSAP.
+- **Lenis** (free, MIT): smooth-scroll baseline. Often paired with GSAP.
 - **Theatre.js** (free, Apache-2.0): timeline-based animations, visual editor. Best when operator wants storyboard-style control.
-- **Rive** (commercial / freemium): state-driven vector animation. Best för icon-systems + interactive illustration.
-- **Motion-One** (free, MIT): lightweight WAAPI wrapper. Best för subtle-energy briefs där GSAP feels heavy.
-- **Framer Motion** (free, MIT): React-native motion. Best när stack is React + motion is UI-component-bound.
+- **Rive** (commercial / freemium): state-driven vector animation. Best for icon-systems + interactive illustration.
+- **Motion-One** (free, MIT): lightweight WAAPI wrapper. Best for subtle-energy briefs where GSAP feels heavy.
+- **Framer Motion** (free, MIT): React-native motion. Best when the stack is React + motion is UI-component-bound.
 - **CSS-only** (zero-license): native transitions + `@scroll-timeline` (where supported). Best subtle-energy + perf-critical.
 
 Agent verifies current licensing at invocation (L-003).
@@ -122,7 +122,7 @@ Agent verifies current licensing at invocation (L-003).
     {
       "name": "image-parallax",
       "trigger": "scrub-tied",
-      "spec": "background translateY(0) → translateY(-20%) över section",
+      "spec": "background translateY(0) → translateY(-20%) over section",
       "library": "gsap+ScrollTrigger"
     }
   ],
@@ -132,11 +132,11 @@ Agent verifies current licensing at invocation (L-003).
     "fallback_for_prefers_reduced_motion": "disable-all-scroll-animations",
     "mobile_strategy": "reduce-scrub-fidelity-and-skip-parallax"
   },
-  "operator_instructions_md": "# Motion setup\n\n```bash\nnpm i gsap @studio-freight/lenis\n```\n\nLenis initialization (Next.js app/layout.tsx):\n```ts\nimport Lenis from '@studio-freight/lenis'\nuseEffect(() => { const lenis = new Lenis({ lerp: 0.1 }); function raf(time){ lenis.raf(time); requestAnimationFrame(raf) }; requestAnimationFrame(raf); return () => lenis.destroy() }, [])\n```\n\nGSAP + ScrollTrigger:\n```ts\nimport { gsap } from 'gsap'\nimport { ScrollTrigger } from 'gsap/ScrollTrigger'\ngsap.registerPlugin(ScrollTrigger)\n```\n\n`prefers-reduced-motion` är respected via gsap.matchMedia()."
+  "operator_instructions_md": "# Motion setup\n\n```bash\nnpm i gsap @studio-freight/lenis\n```\n\nLenis initialization (Next.js app/layout.tsx):\n```ts\nimport Lenis from '@studio-freight/lenis'\nuseEffect(() => { const lenis = new Lenis({ lerp: 0.1 }); function raf(time){ lenis.raf(time); requestAnimationFrame(raf) }; requestAnimationFrame(raf); return () => lenis.destroy() }, [])\n```\n\nGSAP + ScrollTrigger:\n```ts\nimport { gsap } from 'gsap'\nimport { ScrollTrigger } from 'gsap/ScrollTrigger'\ngsap.registerPlugin(ScrollTrigger)\n```\n\n`prefers-reduced-motion` is respected via gsap.matchMedia()."
 }
 ```
 
-Agent fyller specific picks baserat på brief. Don't hardcode.
+Agent fills in specific picks based on the brief. Don't hardcode.
 
 ### Step 4 — Schema-validate + emit
 
@@ -155,7 +155,7 @@ fi
 ## Status protocol
 
 - **DONE** — motion.json written, schema valid, libraries non-empty
-- **DONE_WITH_CONCERNS** — motion picks include commercial-license-tier (GSAP Club plugins) som operator behöver bekräfta
+- **DONE_WITH_CONCERNS** — motion picks include commercial-license-tier (GSAP Club plugins) the operator needs to confirm
 - **BLOCKED** — brief unparsable, OR customer-share license-check failed
 - **NEEDS_CONTEXT** — brief lacks energy-direction (cant determine subtle vs kinetic)
 
@@ -172,7 +172,7 @@ YES — solo-invocable.
 
 **Reads:**
 - `--brief` argument
-- `~/.lintel/brand/motion-libraries/` (om vault has saved combos; lazy-created)
+- `~/.lintel/brand/motion-libraries/` (if vault has saved combos; lazy-created)
 
 **Writes:**
 - `motion.json` (stdout default, $OUT-path if orchestrator)
@@ -180,11 +180,11 @@ YES — solo-invocable.
 
 **Calls into:**
 - `agents/frontend/MotionDirector.md` (primary)
-- `/li:compliance-gate --check motion-licensing` (om --customer-share)
+- `/li:compliance-gate --check motion-licensing` (if --customer-share)
 
 **Consumed by:**
 - `/li:frontend-design` Workflow Step 5 (synthesis input)
-- Operator direct (solo delar-mode)
+- Operator direct (solo component-mode)
 
 ## Anti-patterns
 
@@ -201,7 +201,7 @@ YES — solo-invocable.
 
 ## Recommended next steps after invocation
 
-- Solo: review motion.json + apply till target project
+- Solo: review motion.json + apply to target project
 - Orchestrator: parallel-dispatch returns to `/li:frontend-design` Step 5
-- Customer-share: pair med `/li:compliance-gate` för final license-audit
-- Future: extract proven motion-combos till `~/.lintel/brand/motion-libraries/` (Fas A2 + frontend-style-extract)
+- Customer-share: pair with `/li:compliance-gate` for final license-audit
+- Future: extract proven motion-combos to `~/.lintel/brand/motion-libraries/` (Phase A2 + frontend-style-extract)

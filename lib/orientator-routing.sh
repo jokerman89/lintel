@@ -14,7 +14,7 @@
 set -uo pipefail
 
 # ─── classify_intent ───────────────────────────────────────────────────────
-# Returns: build | fix | review | research | ship | scaffold | resume | unclear
+# Returns: build | fix | review | research | ship | deploy | scaffold | resume | unclear
 classify_intent() {
   local p="${1:-}"
   [ -z "$p" ] && { printf 'unclear'; return 0; }
@@ -26,7 +26,8 @@ classify_intent() {
   # Order matters: first match wins
   case "$lp" in
     *bug*|*broken*|*error*|*crash*|*fix\ *|*fixa*|*felsök*)        printf 'fix'; return 0 ;;
-    *ship*|*release*|*deploy*|*shippa*|*landa*)                     printf 'ship'; return 0 ;;
+    *deploy*|*deploya*|*provision*|*driftsätt*)                     printf 'deploy'; return 0 ;;
+    *ship*|*release*|*shippa*|*landa*)                              printf 'ship'; return 0 ;;
     *review\ *|*audit*|*check\ *|*granska*)                         printf 'review'; return 0 ;;
     *research*|*explore*|*understand*|*utforska*|*förstå*)          printf 'research'; return 0 ;;
     *scaffold*|*new\ project*|*new\ repo*|*nytt\ projekt*|*starta*) printf 'scaffold'; return 0 ;;
@@ -48,6 +49,7 @@ match_workflow() {
     review)   printf '/li:review' ;;
     research) printf '/li:cycle --mode research-dive' ;;
     ship)     printf '/li:cycle --from SHIP' ;;
+    deploy)   printf '/li:cycle --from SHIP' ;;
     scaffold) printf 'bin/li-scaffold init' ;;
     resume)   printf '/li:resume' ;;
     unclear|*) printf '/li:%s' "$default" ;;
@@ -97,7 +99,7 @@ score_confidence() {
 
   case "$intent" in
     unclear) printf 'low' ;;
-    build|fix|review|research|ship|scaffold|resume) printf 'high' ;;
+    build|fix|review|research|ship|deploy|scaffold|resume) printf 'high' ;;
     *) printf 'medium' ;;
   esac
 }
@@ -140,7 +142,7 @@ invoke_llm_orientation() {
 # ─── Self-test mode ────────────────────────────────────────────────────────
 if [ "${BASH_SOURCE[0]}" = "$0" ]; then
   echo "orientator-routing.sh self-test:"
-  for p in "fix the broken button" "build a new feature" "what should I do?" "review my PR" "ship it"; do
+  for p in "fix the broken button" "build a new feature" "what should I do?" "review my PR" "ship it" "deploy a website to azure"; do
     intent=$(classify_intent "$p")
     workflow=$(match_workflow "$intent" cycle)
     risk=$(assess_risk "$workflow" "cycle,plan,ship")

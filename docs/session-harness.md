@@ -1,5 +1,7 @@
 # Lintel as a session harness
 
+> **STATUS: superseded — describes the v3 model.** This doc predates the v4.0 foundation + packs reframe. It references directories that no longer exist (`scaffolding/02-sdl/`, `scaffolding/03-ms-team/`), v3 counts, and Microsoft CAIP-SE as the baseline. Identity (compliance, voice, personas, brand, roles) is now declared by the active **pack** (`packs/<name>/pack.yaml`), not hardcoded; the neutral `_default` pack is the baseline and company identity (e.g. Microsoft CAIP-SE) installs as an external pack. For the current foundation + packs architecture, read [CLAUDE.md](../CLAUDE.md) and [AGENT-INSTRUCTIONS.md](../AGENT-INSTRUCTIONS.md). The mental model below is kept for historical reference.
+
 This explains the mental model for v3 and beyond. If you're new to Lintel, read this first.
 
 ---

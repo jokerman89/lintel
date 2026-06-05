@@ -1,10 +1,10 @@
-# jokerman-lintel (Lintel)
+# lintel (Lintel)
 
 **Company-neutral, pack-driven session harness for agent-based development.** Markdown + bash scaffolding that any modern AI CLI loads as a plugin. No runtime, no daemons — your CLI handles execution. Identity (voice, compliance, personas, brand) is supplied by an installable **pack**; the harness ships only the neutral `_default` pack.
 
-**Status:** v4.7 — company-neutral, pack-driven harness. The Microsoft CAIP-SE identity has been extracted to the separate [lintel-caip-pack](https://github.com/jokerman89/lintel-caip-pack); Lintel ships only the neutral `_default` pack. See [CHANGELOG.md](CHANGELOG.md) for release notes and [SHIP-GATE.md](SHIP-GATE.md) for readiness gates. Current architecture lives at [docs/design/lintel-v4.0-reframe-design.md](docs/design/lintel-v4.0-reframe-design.md).
+**Status:** v4.9 — company-neutral, pack-driven harness. The Microsoft CAIP-SE identity has been extracted to the separate [lintel-caip-pack](https://github.com/jokerman89/lintel-caip-pack); Lintel ships only the neutral `_default` pack. See [CHANGELOG.md](CHANGELOG.md) for release notes and [SHIP-GATE.md](SHIP-GATE.md) for readiness gates. Current architecture lives at [docs/design/lintel-v4.0-reframe-design.md](docs/design/lintel-v4.0-reframe-design.md).
 
-Lintel ships **165 skills + 70 agents + 29 hooks** organized for the plugin-manifest pattern across 8 CLIs. Plus the foundation scaffolding-template system (CORE-PRINCIPLES, EVOLUTION-LOG, tasks/lessons.md, ADR templates) that gets copied into new repos via `bin/li-scaffold`. The engineering-domain modules (`/li:ta`, `/li:da`, `/li:sc`, `/li:dh`, `/li:tq`) plus the 8-phase cycle are the core.
+Lintel ships **168 skills + 65 agents + 1 pack (`_default`)** organized for the plugin-manifest pattern across 8 CLIs. Plus the foundation scaffolding-template system (CORE-PRINCIPLES, EVOLUTION-LOG, tasks/lessons.md, ADR templates) that gets copied into new repos via `bin/li-scaffold`. The engineering-domain modules (`/li:ta`, `/li:da`, `/li:sc`, `/li:dh`, `/li:tq`) plus the 8-phase cycle are the core.
 
 Lintel is the **complete session harness** — not just a skill catalog. It manages the full lifecycle: session-start ritual → mid-session interventions (hooks, voice gates, compliance) → end-of-session capture (lessons, ADR drafting, EVOLUTION-LOG) → cross-session continuity (memory, lessons-sync). See [docs/session-harness.md](docs/session-harness.md) for the full mental model.
 
@@ -14,12 +14,12 @@ Lintel is the **complete session harness** — not just a skill catalog. It mana
 
 Two distinct categories, both shipped in this repo:
 
-**Kategori A — Agent-invokable** (what your CLI sees via plugin manifest):
+**Category A — Agent-invokable** (what your CLI sees via plugin manifest):
 - `skills/` — slash-commands (8-phase cycle + engineering modules + session-harness)
 - `agents/` — subagent roles organized per domain
 - `hooks/shared/` — compliance + workflow hooks
 
-**Kategori B — Repo-scaffolding** (copied INTO other repos via `li-scaffold`):
+**Category B — Repo-scaffolding** (copied INTO other repos via `li-scaffold`):
 - `scaffolding/01-foundation/` — CLAUDE.md template, CORE-PRINCIPLES, EVOLUTION/EVOLUTION-LOG, tasks/{lessons,memory,personas,todo}.md, docs/adr/ templates, .claude/agents/ subagent overrides
 
 Company-specific scaffolding (compliance reference, voice corpus, doc-gen templates) is supplied by an installable pack — Lintel ships only the neutral `_default` pack. See the [lintel-caip-pack](https://github.com/jokerman89/lintel-caip-pack) example for the Microsoft CAIP-SE identity.
@@ -36,10 +36,10 @@ Anyone running an AI CLI who wants a disciplined session harness. The harness it
 
 | CLI | Install mechanism | Skill/agent discovery | Status |
 |---|---|---|---|
-| Claude Code | `/plugin marketplace add jokerman89/jokerman-lintel` + `/plugin install lintel@jokerman-lintel` | native, namespaced `/li:<skill>` | ✓ full |
+| Claude Code | `/plugin marketplace add jokerman89/lintel` + `/plugin install lintel@jokerman-lintel` | native, namespaced `/li:<skill>` | ✓ full |
 | Codex CLI / App | `/plugins` → search lintel → Install | native | ✓ full |
 | Cursor | `/add-plugin lintel` | native (rules + agents) | ✓ full |
-| Gemini CLI | `gemini extensions install https://github.com/jokerman89/jokerman-lintel` | context-file based (GEMINI.md) + skill references | ✓ supported |
+| Gemini CLI | `gemini extensions install https://github.com/jokerman89/lintel` | context-file based (GEMINI.md) + skill references | ✓ supported |
 | OpenCode | Fetch + follow `.opencode/INSTALL.md` instructions | manual install, agent reads SKILL.md | ✓ supported |
 | GitHub Copilot CLI | `copilot plugin marketplace add` + `install` | native | ✓ supported (schema verified post-launch) |
 | Factory Droid | `droid plugin marketplace add` + `install` | native | ✓ supported (schema verified post-launch) |
@@ -54,15 +54,15 @@ See [docs/per-cli/](docs/per-cli/) for per-CLI install guides.
 ### 1. Clone Lintel
 
 ```bash
-git clone https://github.com/jokerman89/jokerman-lintel ~/Workspace/jokerman-lintel
-cd ~/Workspace/jokerman-lintel
+git clone https://github.com/jokerman89/lintel ~/Workspace/lintel
+cd ~/Workspace/lintel
 ```
 
 ### 2. Install for your CLI
 
 ```bash
 # Claude Code:
-#   /plugin marketplace add jokerman89/jokerman-lintel
+#   /plugin marketplace add jokerman89/lintel
 #   /plugin install lintel@jokerman-lintel
 
 # Codex CLI:
@@ -72,20 +72,20 @@ cd ~/Workspace/jokerman-lintel
 #   /add-plugin lintel
 
 # Gemini CLI:
-gemini extensions install https://github.com/jokerman89/jokerman-lintel
+gemini extensions install https://github.com/jokerman89/lintel
 
 # Copilot CLI:
-copilot plugin marketplace add jokerman89/jokerman-lintel
+copilot plugin marketplace add jokerman89/lintel
 copilot plugin install lintel@jokerman-lintel
 ```
 
 ### 3. Install scaffolding source (for `li-scaffold` in new repos)
 
 ```bash
-# Set up local cache for scaffolding templates + bin/ scripts
+# Set up local cache for scaffolding templates + bin/ scripts (run from your clone root)
 mkdir -p ~/.lintel
-ln -s ~/Workspace/jokerman-lintel/scaffolding ~/.lintel/scaffolding
-export PATH="$HOME/Workspace/jokerman-lintel/bin:$PATH"
+ln -s "$PWD/scaffolding" ~/.lintel/scaffolding
+export PATH="$PWD/bin:$PATH"
 ```
 
 ### 4. Verify
@@ -158,7 +158,7 @@ Lessons learned go in `scaffolding/01-foundation/tasks/lessons.md`. Promote a le
 
 ## Versioning
 
-Semantic versioning since v3; the current line is v4.7. Releases ship when [SHIP-GATE.md](SHIP-GATE.md) gates are all green.
+Semantic versioning since v3; the current line is v4.9. Releases ship when [SHIP-GATE.md](SHIP-GATE.md) gates are all green.
 Pre-v3 used date-based versioning — see [CHANGELOG.md](CHANGELOG.md).
 
 ---

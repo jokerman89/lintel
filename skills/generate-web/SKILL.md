@@ -41,38 +41,38 @@ Uses native HTML / Next.js templates from `~/.lintel/brand/web-templates/` or in
 
 ## Inputs
 
-- Required `--brief <path|inline>` — content brief **OR** `--from-pipeline <dir>` (Fas 2: shared pipeline mode) **OR** `--from-frontend-design <dir>` (v3.7 Fas B: frontend-design family integration)
+- Required `--brief <path|inline>` — content brief **OR** `--from-pipeline <dir>` (Phase 2: shared pipeline mode) **OR** `--from-frontend-design <dir>` (v3.7 Phase B: frontend-design family integration)
 - Required `--variant <single-file|nextjs-scaffold>` — output shape
 - Optional `--audience <text>` — primary audience
 - Optional `--use-defaults` — force in-repo default templates
 - Optional `--preview` — after generation, open in `/open-managed-browser`
 - Optional `--theme <name>` — apply a pack-provided theme palette (default: neutral)
 
-## From-pipeline mode (v3.5 Fas 2 — generate-pipeline integration)
+## From-pipeline mode (v3.5 Phase 2 — generate-pipeline integration)
 
-If invoked med `--from-pipeline <run-dir>` istället för `--brief`:
+If invoked with `--from-pipeline <run-dir>` instead of `--brief`:
 
 1. **Read shared pipeline-output:**
-   - `<run-dir>/content.md` — hero + sections + body med HTML-comment annotations
-   - `<run-dir>/design-spec.json` — read `per_format.web.sections` för layout-mappings
+   - `<run-dir>/content.md` — hero + sections + body with HTML-comment annotations
+   - `<run-dir>/design-spec.json` — read `per_format.web.sections` for layout-mappings
 
-2. **Replace brief-parsing logic** med direct-read av content.md sections + design-spec web-block-types (hero / sections / features / FAQ).
+2. **Replace brief-parsing logic** with direct-read of content.md sections + design-spec web-block-types (hero / sections / features / FAQ).
 
 3. **Apply format-specific design-pass via design_pass_hook:**
    - Reads `per_format.web.sections[N].design_pass_hook` (canonical: WebExperienceCritic)
-   - Invokes agent på web-specific fidelity-pass (information-hierarchy, accessibility, motion-language)
+   - Invokes agent for a web-specific fidelity-pass (information-hierarchy, accessibility, motion-language)
    - Per Reviewer Concern #7: WebExperienceCritic stays web-specific, not lifted
 
-4. **CLI bevaras backward-compat:** befintliga `--brief`-flag invocations fungerar oförändrat. `--from-pipeline` är additive.
+4. **CLI stays backward-compat:** existing `--brief`-flag invocations work unchanged. `--from-pipeline` is additive.
 
-5. **4-gate pipeline körs som vanligt** efter generation.
+5. **4-gate pipeline runs as usual** after generation.
 
-## From-frontend-design mode (v3.7 Fas B — frontend-* family integration, M-1 resolution)
+## From-frontend-design mode (v3.7 Phase B — frontend-* family integration, M-1 resolution)
 
-If invoked med `--from-frontend-design <run-dir>` istället för `--brief` eller `--from-pipeline`:
+If invoked with `--from-frontend-design <run-dir>` instead of `--brief` or `--from-pipeline`:
 
 1. **Read frontend-design output:**
-   - `<run-dir>/frontend-design-spec.json` — **distinct filename** från pipeline's `design-spec.json` (M-1 resolution per /plan-eng-review — avoids schema collision). Verify `"source": "frontend-design"` + `"schema_version": 1` before consuming.
+   - `<run-dir>/frontend-design-spec.json` — **distinct filename** from pipeline's `design-spec.json` (M-1 resolution per /plan-eng-review — avoids schema collision). Verify `"source": "frontend-design"` + `"schema_version": 1` before consuming.
    - Embedded blocks: `typography` (font-stacks + variable-axes + size-scale) + `motion` (libraries + scroll-trigger-config + key-animations + perf-budget) + `shader` (om present; nullable) + `component_libraries` (shadcn + Aceternity etc) + `layout_grammar` (max-width + grid + breakpoints) + `interaction_signature` (scroll-smoothing + hover-intent + page-transitions) + `visual_thesis` (one-paragraph)
 
 2. **Schema-version handshake:**
@@ -84,28 +84,28 @@ If invoked med `--from-frontend-design <run-dir>` istället för `--brief` eller
    [ "$source" = "frontend-design" ] || { echo "Wrong source: $source (expected frontend-design)"; exit 1; }
    ```
 
-3. **Replace brief-parsing logic** med direct-read av spec:
+3. **Replace brief-parsing logic** with direct-read of spec:
    - Hero copy: synthesize from `visual_thesis` + brand-context
    - Typography: emit `<link>` tags from `typography.font_stacks[].loading_strategy` + apply via Tailwind config
-   - Motion: emit GSAP/Lenis import snippets från `motion.libraries[]` + scroll-trigger setup from `motion.scroll_trigger_config` + key-animations from `motion.key_animations[]`
-   - Shader: om `shader != null` → emit Paper Shaders component eller OGL canvas-mount
+   - Motion: emit GSAP/Lenis import snippets from `motion.libraries[]` + scroll-trigger setup from `motion.scroll_trigger_config` + key-animations from `motion.key_animations[]`
+   - Shader: if `shader != null` → emit Paper Shaders component or OGL canvas-mount
    - Component-libraries: emit shadcn-init command + Aceternity copy-paste-references in operator-instructions
    - Layout: apply `layout_grammar.max_width` + grid-config to root layout
-   - Interaction: emit Lenis init om `interaction_signature.scroll_smoothing`
+   - Interaction: emit Lenis init if `interaction_signature.scroll_smoothing`
 
 4. **Design-pass hook integration:**
    - WebExperienceCritic agent runs on produced HTML/JSX (existing pattern)
-   - DesignSystemAuditor agent (Fas A2) optional post-gen audit if `--review` flag set
+   - DesignSystemAuditor agent (Phase A2) optional post-gen audit if `--review` flag set
 
-5. **CLI bevaras backward-compat:** befintliga `--brief` + `--from-pipeline`-flag invocations fungerar oförändrat. `--from-frontend-design` är additive third mode.
+5. **CLI stays backward-compat:** existing `--brief` + `--from-pipeline`-flag invocations work unchanged. `--from-frontend-design` is an additive third mode.
 
 6. **prefers-reduced-motion handling** — always emit fallback per `motion.perf_budget.fallback_for_prefers_reduced_motion` field. Non-negotiable.
 
 7. **Mobile-strategy emission** — read `motion.perf_budget.mobile_strategy` + apply via `gsap.matchMedia()` conditional logic in generated code.
 
-8. **4-gate pipeline körs som vanligt** efter generation.
+8. **4-gate pipeline runs as usual** after generation.
 
-**Boundary med frontend-* family (L-002):** generate-web är **rendering-engine** — file-output. frontend-design är **design-director** — decisions. generate-web does NOT make design-decisions; it READS them from frontend-design-spec.json + renders accordingly.
+**Boundary with frontend-* family (L-002):** generate-web is the **rendering-engine** — file-output. frontend-design is the **design-director** — decisions. generate-web does NOT make design-decisions; it READS them from frontend-design-spec.json + renders accordingly.
 
 ## Workflow
 

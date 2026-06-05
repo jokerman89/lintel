@@ -118,9 +118,9 @@ Callers can rely on these paths existing post-DONE. CAPTURE re-affirms but doesn
 | Operator goal | Solved by |
 |---|---|
 | "The magic sauce: a planner that breaks things down right" | 2.3 granularity hard check |
-| "Tydlig hand-off mellan när planer är skrivna och vad som förväntas" | 2.2 trio born together |
-| "Plan-fas som modul, kan användas av totala arbetsflödet eller delar" | 2.4 module-callable |
-| "Vår planner-fas med allt det innebär — industry best" | 2.1 + 2.2 + 2.3 + 2.4 together |
+| "Clear hand-off between when plans are written and what is expected" | 2.2 trio born together |
+| "Plan phase as a module, usable by the whole workflow or parts of it" | 2.4 module-callable |
+| "Our planner phase with everything it entails — industry best" | 2.1 + 2.2 + 2.3 + 2.4 together |
 
 ## What this explicitly does NOT do
 

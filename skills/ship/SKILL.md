@@ -127,7 +127,7 @@ ship_path:
   
   # Direct-push (requires explicit per-batch auth)
   direct_main:
-    - operator must explicitly authorize: "commita och merga"
+    - operator must explicitly authorize: "commit and merge"
     - the active pack's compliance gates re-checked
     - merge commit message includes review-report path
   
@@ -202,6 +202,38 @@ For artifact_kind=customer-deliverable:
 ```
 
 All paths go through the pack-configured gates before customer-shippable.
+
+**Demo handoff path** (ship_path=demo): before distributing demo comms + after the demo, dispatch the customer agents:
+
+```bash
+empathy_brief=$(mktemp)
+cat > "$empathy_brief" <<EOF
+task: Empathy-review the customer-facing demo handout / follow-up comms
+context_pointers:
+  - <demo comms draft path>
+constraints:
+  - flag transactional / corporate / dismissive phrasing
+  - preserve substance, add humanity
+acceptance:
+  - per-passage empathy verdict + specific rewrite recommendations
+EOF
+
+/li:brief-forge subagent_spawn ship CustomerEmpathyCheck brief "$empathy_brief"
+
+followup_brief=$(mktemp)
+cat > "$followup_brief" <<EOF
+task: Advise post-demo follow-up — what to send, when, which expansion paths to open
+context_pointers:
+  - demo signal (questions asked, follow-up requests, decision-maker presence)
+constraints:
+  - cadence: immediate / 48hr / weekly
+  - shape next 30-day plan + expansion paths (next demo / PoC / workshop)
+acceptance:
+  - follow-up plan with cadence + expansion paths
+EOF
+
+/li:brief-forge subagent_spawn ship PostDemoFollowup brief "$followup_brief"
+```
 
 ### Step 10 — Release notes (if version tag)
 
@@ -293,6 +325,8 @@ Skip-conditions: intent=research-only, intent=local-dev-only, intent=draft-only.
 **Customer:**
 - DemoNarrativeArc (customer/) — if demo
 - DemoNarratorJunior (customer/) — if narrative needed
+- CustomerEmpathyCheck (customer/) — empathy-review demo comms before handoff (Step 9 demo path)
+- PostDemoFollowup (customer/) — post-demo follow-up cadence + expansion paths (Step 9 demo path)
 - ExecutiveBriefingDrafter / ProposalDrafter / RFPResponseDrafter (customer/) — if engagement deliverables
 
 **Communication:**

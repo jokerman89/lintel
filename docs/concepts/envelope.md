@@ -135,7 +135,7 @@ Per design doc §1.3 C1-D2: warn-only enforcement in v4.0, block-on-incompat fro
 **Tools:**
 - `bin/li-envelope-validate <file>` — validates against schema, returns PASS/FAIL + errors
 - `bin/li-envelope-replay <file>` — dry-run by default, `--apply` to re-execute
-- (Phase 3) `bin/li-forge-stats` — aggregates completeness scores across envelopes
+- `bin/li-forge-stats` (planned — not yet shipped) — will aggregate completeness scores across envelopes
 
 **Consumed by (Phase 3):**
 - Brief Forge — issues briefs as envelopes with completeness scoring

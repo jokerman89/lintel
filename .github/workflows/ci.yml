@@ -118,6 +118,20 @@ jobs:
         shell: bash
         run: bash tests/runner/run-unit.sh
 
+  shape-tests:
+    name: tests/shape on Ubuntu
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install yq
+        run: |
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+
+      - name: Run shape tests (structural contracts incl. English-only tripwire)
+        run: bash tests/runner/run-all.sh --scope shape
+
   e2e-claude-code-only:
     name: tests/e2e claude-code-only on Ubuntu
     runs-on: ubuntu-latest
@@ -139,8 +153,8 @@ jobs:
         run: bash tests/runner/run-e2e.sh
 
   shellcheck-lint:
-    # v3.6 cohort 1 item 6.6: shellcheck över bin/ + install/ + run.sh + hooks/.
-    # Warn-only initially (continue-on-error: true) — promote to required efter clean baseline etablerad.
+    # v3.6 cohort 1 item 6.6: shellcheck over bin/ + install/ + run.sh + hooks/.
+    # Warn-only initially (continue-on-error: true) — promote to required after a clean baseline is established.
     name: shellcheck (warn-only)
     runs-on: ubuntu-latest
     continue-on-error: true

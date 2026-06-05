@@ -1,6 +1,6 @@
 # Lintel wiki — generated reference
 
-Generated: 2026-06-02T09:29:25Z by `bin/li-wiki-gen`.
+Generated: 2026-06-05T12:01:53Z by `bin/li-wiki-gen`.
 
 ## Indexes
 

@@ -56,6 +56,8 @@ Diagnostic health-check across operator's machine. Detects which AI CLIs are ins
 
 7. **Hook activation status.** `~/.lintel/hooks/<name>` symlinks vs canonical.
 
+8. **Instruction-parity drift check.** Invoke `/li:instruction-parity-check` to verify the 6 multi-CLI instruction files (CLAUDE/AGENTS/GEMINI roots + shims) have not drifted in substance. Surface its verdict (clean / warn / fail) in the drift report below. Triggered by `/li:doctor --instruction-parity`, or always-on in a full health check.
+
 ## Output format
 
 ```
@@ -86,6 +88,10 @@ JSTACK-DOCTOR: health check (date)
 ## Hooks
 - Activated: <N>/15 (operator opt-in)
 - See: ~/.lintel/hooks/
+
+## Instruction parity (via /li:instruction-parity-check)
+- 6/6 instruction files present
+- Drift: <none | warn | fail> — see ~/.lintel/audit/instruction-parity-<date>.md
 
 ## Voice corpus (pack-contributed)
 - Source: <resolve_pack_field voice.corpus — none by default>

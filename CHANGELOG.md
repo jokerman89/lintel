@@ -2,6 +2,39 @@
 
 All notable changes to this repo are tracked here. Format is loose — date headings + bulleted changes. Major behavior changes to the canonical instructions are also logged in `scaffolding/EVOLUTION-LOG.md` (which travels with each scaffolded repo).
 
+## [4.9.0] - 2026-06-05 — five-lens remediation — English-only sweep + shipping-identity reconciliation
+
+**Remediation pass across the shipped surface.** Closes the drift the five-lens audit surfaced: mixed-language source, a shipping identity frozen at an old slug/version, self-describing wiki/showcase counts that no longer matched reality, and missing CI guards. No new features — this is a correctness + consistency pass.
+
+### English-only sweep
+
+- ~500 Swedish lines translated to English across the shipped surface (skills, agents, hooks, docs)
+- 3 functional-Swedish files preserved (the Swedish is load-bearing, not prose) — left untouched on purpose
+- New CI tripwire (below) prevents reintroduction
+
+### Shipping-identity reconciliation
+
+- Repo slug reconciled to `jokerman89/lintel` across manifests + install/update paths
+- Version reconciled to `4.9.0` across every plugin manifest + marketplace metadata
+- Manifest descriptions de-drifted: hardcoded agent counts removed, stale `v3.5`-in-prose dropped
+
+### Regenerated self-describing surfaces
+
+- `docs/wiki/` + `docs/showcase/lintel-the-harness.html` regenerated to real counts: **168 skills / 65 agents / 1 pack (`_default`)** (was 192/92/3)
+- Counts now sourced from disk, not hand-maintained
+
+### New CI guards
+
+- English-only tripwire — fails CI on reintroduced non-English prose in the shipped surface
+- Manifest-identity sync test — asserts slug + version match across all manifests
+- Shape tests (`tests/shape/`) now run in CI (previously local-only)
+
+### Fixes
+
+- Runner-tolerant fix to the `frontend-design-surface` perf test (no longer flakes on slower CI runners)
+
+---
+
 ## 2026-06-02 — v4.6.0 — full-engineering-pass composition skill — **v4.x FEATURE-COMPLETE**
 
 **Final v4.x deliverable.** Composition skill that runs all 5 engineering-domain modules in DAG order (TA → DA‖SC → DH → TQ). Single invocation produces architecture decisions + data model + security posture + ops plan + quality validation for customer engagements or major releases.

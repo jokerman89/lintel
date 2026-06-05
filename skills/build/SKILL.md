@@ -56,10 +56,7 @@ If on main without consent: HARD STOP per superpowers rule. AskUserQuestion: "Sw
 
 Before reading the plan and dispatching implementers, invoke `/li:lessons-surface` keyword-scoped to implementation so prior-session lessons inform task execution and subagent dispatch. Same mechanism SENSE uses (max 3 lessons, prepended to context, silent on no match, never a blocker):
 
-```bash
-# Keyword-scope to this phase's concerns; silent if no relevant matches.
-~/.claude/skills/lessons-surface --keyword "implementation testing subagent" 2>/dev/null || true
-```
+Invocation: `/li:lessons-surface --keyword "implementation testing subagent"` (a portable skill call; silent if no relevant matches).
 
 Read entire plan.md once. Extract:
 - All task titles + IDs
@@ -101,9 +98,18 @@ Implementer self-reviews. Returns status:
 - **NEEDS_CONTEXT** — implementer asked for info, provide + re-dispatch
 - **BLOCKED** — implementer can't proceed, root-cause hypothesis, escalate to operator
 
-#### 3c — Two-stage review (MANDATORY before mark complete)
+#### 3c — Two-stage review (complexity-gated)
 
-**Stage 1 — Spec compliance review:**
+**Review-routing gate (per `docs/concepts/agent-dispatch-rules.md` rule (c) — inline when cheap + deterministic):**
+
+Route the review by the task's complexity tier (the same tier that drove model selection in 3a):
+
+- **Mechanical / Haiku-tier leaf task** (single-file edit, rename, add a log line, a trivial test) → **inline review.** The implementer's own diff + acceptance command is reviewed inline in the main thread; a dedicated reviewer subagent is skipped (its base-context warmup cost exceeds the review value for a one-file mechanical change — rule (c)). Still apply both lenses inline: spec-compliance THEN quality. Note in the build-log that the review was inline.
+- **Substantive task** (multi-file integration / Sonnet, or architecture/design-judgment / Opus) → **full two-stage dedicated review below** (UNCHANGED). Fresh reviewer context is the point (rule (b)); never inline these.
+
+This is an off-switch for trivial tasks ONLY — it does NOT remove the two-stage review for substantive work. When in doubt about a task's tier, default to the full two-stage dedicated review.
+
+**Stage 1 — Spec compliance review (substantive tasks — dedicated; mechanical tasks — inline):**
 
 Dispatch reviewer subagent (CodeReviewer or general-purpose):
 "Does the implementation match task requirements EXACTLY? List any deviations. Be strict — 'close enough' is not acceptable."
@@ -169,6 +175,7 @@ task: T<N>
 title: <title>
 status: DONE | DONE_WITH_CONCERNS | BLOCKED
 implementer_status: <as returned>
+review_mode: dedicated | inline   # inline for mechanical/Haiku-tier leaf tasks (3c gate)
 spec_review_iterations: <N>
 quality_review_iterations: <N>
 voice_gate_score: <% if applicable>
@@ -259,14 +266,14 @@ Skip-conditions: intent=review-only, intent=research-only, intent=plan-only.
 ## Anti-patterns (from superpowers)
 
 - **Starting on main/master without explicit user consent** — hard rule
-- **Skipping reviews** because "task is simple" — always two-stage review
+- **Skipping review entirely** because "task is simple" — never. Mechanical tasks get INLINE review (3c gate), not NO review; substantive tasks keep the full two-stage dedicated review.
 - **Proceeding with unfixed P1 issues** — never
 - **Dispatching multiple implementers in parallel within one phase** — sequential (gives reviewer context)
 - **Making subagent read plan.md** — give them task text directly (subagent has no plan-context unless given)
 - **Skipping scene-setting context for implementer** — they need to understand WHY this task
 - **Ignoring subagent questions** — answer + re-dispatch, don't proceed without
 - **Accepting "close enough" on spec compliance** — Stage 1 must PASS exactly
-- **Skipping review loops** — minimum 1 spec + 1 quality per task
+- **Skipping review loops** — minimum 1 spec + 1 quality per task (inline for mechanical tasks, dedicated for substantive — but both lenses always apply)
 - **Letting implementer self-review replace actual review** — never
 - **Starting code quality review before spec compliance is ✅** — order matters
 

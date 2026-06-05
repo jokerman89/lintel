@@ -12,7 +12,8 @@ SESSION_DIR="$LINTEL_HOME/sessions"
 mkdir -p "$LINTEL_HOME/audit" "$SESSION_DIR"
 
 # Argument: target file path (from hook event)
-target_file="${1:-}"
+source "$(dirname "${BASH_SOURCE[0]}")/../_input.sh"
+target_file="$(hook_input file_path "${1:-}")"
 [ -z "$target_file" ] && exit 0
 
 # Filter on frontend file-extensions

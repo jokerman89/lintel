@@ -21,10 +21,10 @@ Per v3.7 design doc:
 
 ## What it does
 
-1. Fires on PreToolUse för Read/Edit/Write när tool target matches frontend file-extensions.
-2. Reads vault patterns at `~/.lintel/brand/design-patterns/` (index lookup; <200ms för vault of 1-3).
-3. Checks throttle marker (`~/.lintel/sessions/<pid>-design-surfaced` med per-file entries).
-4. Om not-yet-surfaced this session för this file:
+1. Fires on PreToolUse for Read/Edit/Write when the tool target matches frontend file-extensions.
+2. Reads vault patterns at `~/.lintel/brand/design-patterns/` (index lookup; <200ms for a vault of 1-3).
+3. Checks throttle marker (`~/.lintel/sessions/<pid>-design-surfaced` with per-file entries).
+4. If not-yet-surfaced this session for this file:
    - Emit 1-line surface
    - Mark file as surfaced (touch marker)
 5. Logs to `~/.lintel/audit/hooks.jsonl`.
@@ -33,7 +33,7 @@ Per v3.7 design doc:
 
 Frontend-file edits are routine. Hook must not block flow. Surface 1-line recommendation is enough:
 - Operator can ignore (most common case)
-- Operator can invoke `/li:frontend-design --pattern <name>` om pattern matches their context
+- Operator can invoke `/li:frontend-design --pattern <name>` if a pattern matches their context
 
 Hard-block would create friction-without-value-for-90%-of-edits.
 
@@ -50,12 +50,12 @@ path/to/other.css
 If current file already in list → skip (no double-surface).
 If not → emit + append to list.
 
-Sessions clean up via existing 120-min stale-removal i preamble logic.
+Sessions clean up via existing 120-min stale-removal in preamble logic.
 
 ## Pattern relevance check
 
 Naive v1: match on file-extension (`.tsx` → all patterns referencing tsx-stack).
-Better v2 (Fas C+1): match on brief-hash om recent `/li:frontend-design`-run exists.
+Better v2 (Phase C+1): match on brief-hash if a recent `/li:frontend-design` run exists.
 
 Pattern-vault format check:
 ```bash
@@ -70,14 +70,14 @@ If vault is empty → silent exit (no surface). MVP.
 ## Performance budget
 
 - Target: <200ms for vault of 1-3 patterns
-- Degrades linearly to vault size — operator-vault > 10 patterns triggers vault-index.json optimization (Fas C+1)
+- Degrades linearly to vault size — operator-vault > 10 patterns triggers vault-index.json optimization (Phase C+1)
 - Per /plan-eng-review concern #7: MVP-budget documented + acknowledged
 
 ## Override paths
 
-- `--no-design-surface` flag on `/li:frontend-design` (om operator explicitly silent)
+- `--no-design-surface` flag on `/li:frontend-design` (if operator explicitly silent)
 - `/li:profile-switch --dormant frontend-design-surface` (existing skill, per-hook dormancy)
-- Touch `~/.gstack/.frontend-design-surface-disabled` för session-level silence
+- Touch `~/.gstack/.frontend-design-surface-disabled` for session-level silence
 
 ## What's NOT in scope
 
