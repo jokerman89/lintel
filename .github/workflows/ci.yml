@@ -28,11 +28,11 @@ jobs:
       - name: Run verify.sh --counts
         run: bash install/verify.sh --counts
 
-      - name: Run verify.sh --compliance
-        run: bash install/verify.sh --compliance
+      - name: Run verify.sh --agents-categorized
+        run: bash install/verify.sh --agents-categorized
 
-      - name: Run verify.sh --voice
-        run: bash install/verify.sh --voice
+      - name: Run verify.sh --scaffolding-coherence
+        run: bash install/verify.sh --scaffolding-coherence
 
       - name: Run verify.sh --tier-stamps
         run: bash install/verify.sh --tier-stamps
