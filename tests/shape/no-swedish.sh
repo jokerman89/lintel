@@ -41,7 +41,9 @@ SCAN_DIRS=(skills agents hooks install .github .codex-plugin seeds)
 # UTF-8 byte pattern for å ä ö Å Ä Ö (each is C3 followed by one of these bytes).
 CHAR_RE=$'[\xc3][\xa5\xa4\xb6\x85\x84\x96]'
 # High-signal Swedish words with no English collision (word-bounded, case-insensitive).
-WORD_RE='(och|inte|eller|denna|detta|utan|finns|vilka|ingen|aldrig|samma)'
+# Includes ASCII-only Swedish words that the letter check above cannot catch
+# (kategori, mellan, ...). Conservative set — every entry is unambiguously Swedish.
+WORD_RE='(och|inte|eller|denna|detta|utan|finns|vilka|ingen|aldrig|samma|kategori|framtida|eftersom|mellan|genom|samt|endast|enbart|stycka|vilket)'
 
 hits=0
 while IFS= read -r f; do
