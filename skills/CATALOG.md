@@ -4,10 +4,10 @@ Auto-generated från frontmatter på push till main.
 Regenerated av `.github/workflows/catalog.yml` per push när `skills/**/SKILL.md` ändras.
 Hand-edits skrivs över — edit frontmatter i source SKILL.md istället.
 
-Total skills: 167
-Generated: 2026-06-04T17:12:10Z
+Total skills: 168
+Generated: 2026-06-05T08:27:39Z
 
-## foundation layer (167 skills)
+## foundation layer (168 skills)
 
 | Skill | Description |
 |---|---|
@@ -152,6 +152,7 @@ Generated: 2026-06-04T17:12:10Z
 | `/li:scaffold-internal-tool` | Initialize an internal-tooling repo — CI, README, pack compliance hooks, no customer surface. |
 | `/li:scaffold-mvp` | Initialize a product-MVP repo — full structure + pack-driven compliance/voice/deploy wiring. |
 | `/li:scaffold` | Scaffold a new repo with Lintel base templates — CLAUDE.md, tasks/lessons.md, EVOLUTION-LOG, docs/adr/ — interactive |
+| `/li:scope` | Phase 1.5 of Lintel cycle — runs between SENSE and DEFINE. Turns a raw request into a sized, disambiguated scope via t |
 | `/li:scrape` | Extract structured data from one or more pages — declarative selector schema, JSON output. |
 | `/li:sense` | Phase 1 of Lintel cycle — auto-detect operator intent, pack compliance mode, active role, mode recommendation, 00-stat |
 | `/li:setup-browser-cookies` | Bootstrap auth cookies for the managed Chromium profile — operator-driven, one-time per service. |
