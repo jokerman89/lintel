@@ -43,12 +43,55 @@ Frozen / handle-with-care zones:
 
 ## Session-start ritual
 
+> **Claude Code auto-loads a digest** of the items below via the `session-digest` SessionStart
+> hook (active pack/mode/role + recent lessons + open jobs + recent ADRs; see [ADR-0002](docs/adr/0002-session-digest-auto-load.md)).
+> This ritual is the deeper read on top of that digest — **and the fallback for non-hook CLIs**
+> (Codex, Gemini, …), which do not run SessionStart hooks and must read these files explicitly.
+
 1. Read this file (load-bearing rules below) + [AGENT-INSTRUCTIONS.md](AGENT-INSTRUCTIONS.md) for the cross-CLI specifics.
 2. Review [scaffolding/01-foundation/CORE-PRINCIPLES.md](scaffolding/01-foundation/CORE-PRINCIPLES.md) — the 10 load-bearing rules.
 3. Review the most recent entries in [tasks/lessons.md](tasks/lessons.md) — accumulated lessons. **Read before acting.**
 4. Skim [tasks/memory.md](tasks/memory.md) — durable cross-session state.
-5. List [docs/adr/](docs/adr/) — read any ADR whose title is relevant to the task.
-6. Check [docs/v4.x/structure-changes/](docs/v4.x/structure-changes/) for recent structural decisions.
+5. Load operator calibration from [tasks/personas.md](tasks/personas.md) and the active profile (`~/.lintel/profile.yaml`: active pack, mode, role).
+6. List [docs/adr/](docs/adr/) — read any ADR whose title is relevant to the task.
+7. Check [docs/v4.x/structure-changes/](docs/v4.x/structure-changes/) for recent structural decisions.
+
+---
+
+## Skill routing
+
+When a request matches a skill, **invoke it** (skills are auto-surfaced — you can see them). A nudge,
+not an exhaustive map — run `/li:catalog` to discover the full set.
+
+- Multi-step work / a real task → `/li:cycle` (the 8-phase SENSE→CAPTURE loop; writes `.lintel/state/00-state.md`)
+- Architecture / data / security / devops / testing depth → `/li:ta` · `/li:da` · `/li:sc` · `/li:dh` · `/li:tq`
+- Bug / "why is this broken" → `/li:investigate`  ·  Tests / "does it work" → `/li:qa`
+- Plan review → `/li:plan-eng-review` / `/li:plan-ceo-review`  ·  Brainstorm an idea → `/li:office-hours`
+- Deep context load → `/li:context-warm`  ·  Save / resume → `/li:context-save` · `/li:resume`
+- Record a decision → `/li:adr-new`  ·  Capture a lesson → `/li:capture`
+- Switch / inspect identity → `/li:pack-switch` · `/li:pack-list` · `/li:role-activate`
+- Discover everything → `/li:catalog`
+
+---
+
+## Where state lives (the memory map)
+
+Lintel's snowball — read on demand, **write after corrections/decisions** so it compounds:
+
+| Store | Holds | Lifecycle |
+|---|---|---|
+| `tasks/lessons.md` | lessons from corrections (`L-NNN`) | append after ANY correction |
+| `tasks/memory.md` | durable cross-session working state | update on durable state changes |
+| `tasks/personas.md` | operator calibration | read at session-start |
+| `docs/adr/NNNN-*.md` | decision records | one per non-trivial decision |
+| `docs/v4.x/structure-changes/` | evolution log (Gate M1 artifacts) | per structural change |
+| `.lintel/state/00-state.md` + `ta/sc/dh/…` | per-repo cycle + module state | written by cycle/module skills |
+| `~/.lintel/profile.yaml` | active pack · mode · role · checkpoint mode | operator-global |
+| `~/.lintel/jobs/_active.md` | open workflow_root jobs | `/li:resume` reads it |
+| `~/.lintel/sessions/` | context-save snapshots | `/li:context-restore` reads them |
+
+The `session-digest` hook injects a compact view of the top rows at session-start; this table is the
+full map for on-demand reads + where to **write**.
 
 ---
 
@@ -141,6 +184,22 @@ Same skills/agents/hooks work across 8 CLIs via per-CLI manifests. See [docs/per
 
 ## Shared schema discipline
 When two or more components communicate (events, APIs, IPC, the pack contract): define the schema ONCE in a shared location (`lib/*-schema.yaml`), both sides import it, never reinterpret it differently, write at least one integration/shape test per link.
+
+---
+
+## Structured comment format
+
+Meaningful code/spec files carry a header linking back to intent (adjust comment syntax to language):
+
+```
+# component: <name>
+# implements: <ADR-IDs comma-separated>
+# intent: docs/<file>.md
+# constraints: docs/risks/<RISK-IDs>
+# last_intent_review: YYYY-MM-DD
+```
+
+Explains *why*, not *what*. Lets a reader trace any file back to the decision that created it.
 
 ---
 

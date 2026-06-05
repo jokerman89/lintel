@@ -170,6 +170,23 @@ if [ -d "$LINTEL_HOME/hooks" ]; then
 else
   warn "no hooks directory at $LINTEL_HOME/hooks/"
 fi
+
+# session-digest (REQUIRED, ADR-0002): present in ~/.lintel/hooks/ AND registered as SessionStart
+if [ -f "$LINTEL_HOME/hooks/session-digest/run.sh" ]; then
+  _wired="no"
+  for _s in "$HOME/.claude/settings.json" "$(git rev-parse --show-toplevel 2>/dev/null)/.claude/settings.json"; do
+    [ -f "$_s" ] && grep -q "session-digest" "$_s" 2>/dev/null && _wired="yes"
+  done
+  if [ "$_wired" = "yes" ]; then
+    ok "session-digest hook present + wired (SessionStart)"
+  else
+    warn "session-digest hook present but NOT wired as SessionStart"
+    echo "    The memory snowball will NOT auto-load. Fix: merge"
+    echo "    hooks/claude-code/session-digest.settings.json into ~/.claude/settings.json"
+  fi
+else
+  warn "session-digest hook missing (memory snowball won't auto-load — see ADR-0002)"
+fi
 echo ""
 
 # ── Verdict ──
