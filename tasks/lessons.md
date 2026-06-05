@@ -86,3 +86,33 @@ Related: [[L-001]] scaffolding-not-content (frontend-* family ships scaffolding 
 - Let tests be the backstop, not the discovery mechanism: tests that assert presence of removed content (layer values, alias entries, file existence) will fail and reveal residue — but finding it via grep first is cheaper than via a red test suite.
 
 Related: [[L-003]] verify-counts-before-fact-claims — L-003 says verify external claims; L-005 says verify your own search's completeness. Both are "don't trust the first number." [[L-002]] grep-first — L-002 greps before designing; L-005 greps comprehensively before declaring a sweep done.
+
+---
+
+## L-006 — The factory must run on itself: dogfood your own tooling (v4.8)
+
+**Rule:** When a repo's purpose is to produce tooling/discipline for OTHER repos (scaffolding, a harness,
+a generator), it must ALSO apply that tooling to itself. If it doesn't, the gap stays invisible until
+someone notices the cobbler's children have no shoes.
+
+**Why:** Lintel ships `scaffolding/01-foundation/` (CLAUDE.md template, `.claude/agents/`, `docs/adr/`,
+CORE-PRINCIPLES) to install into other repos — but never ran `li-scaffold` on itself. So Lintel's own
+root had no `.claude/`, no `docs/adr/`, and a thin v3 CLAUDE.md. Throughout the large v4.7 CAIP
+extraction I produced a structure-change doc + lessons + todo but **zero ADRs** for major decisions
+(pack-on-top vs fork, aggressive de-MS, clean-copy vs filter-repo), because the repo had no ADR
+infrastructure and CLAUDE.md didn't enforce the ritual. The operator caught it. The factory works in
+sister repos (deeplex has scaffolded CLAUDE.md + living lessons + decisions) — it just never ran here.
+
+**How to apply:**
+- When working in a repo whose job is to generate scaffolding/tooling/discipline, check at session start:
+  does THIS repo carry its own output? If `li-doctor` (or equivalent) reports "missing its own
+  scaffolding," fix that before anything else.
+- Before executing a multi-step initiative, verify the decision/lesson infrastructure exists (`docs/adr/`,
+  `tasks/lessons.md`). If it's absent, FLAG it — don't silently skip ADRs because there's nowhere to put
+  them.
+- Add a self-check to the tooling so the failure is caught for every adopter, not just the maintainer:
+  `li-doctor` now warns when a repo using Lintel lacks its own `.claude/`/`docs/adr/`/scaffolded CLAUDE.md.
+
+Related: [[L-003]] verify before acting — here, verify the meta-process infrastructure exists before
+relying on it. The discipline only compounds across sessions if the snowball (lessons + ADRs) has a
+place to accumulate.

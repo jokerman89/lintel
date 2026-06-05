@@ -173,6 +173,12 @@ if [ -n "$HOOK_SRC" ]; then
   ok "Hooks copied from $HOOK_SRC to $LINTEL_HOOKS (INERT — symlink to activate)"
   info "To activate a hook: ln -s $LINTEL_HOOKS/<name>/run.sh ~/.claude/hooks/<name>.sh"
   info "Then register in ~/.claude/settings.json — see $LINTEL_HOOKS/README.md"
+  # session-digest is REQUIRED (ADR-0002): auto-loads the memory snowball at SessionStart.
+  if [ -f "$LINTEL_HOOKS/session-digest/run.sh" ]; then
+    info "RECOMMENDED: wire the session-digest SessionStart hook so memory auto-loads."
+    info "  Merge $REPO_ROOT/hooks/claude-code/session-digest.settings.json into ~/.claude/settings.json"
+    info "  Verify with: li-doctor"
+  fi
 else
   warn "No hooks source found — skipping"
 fi
