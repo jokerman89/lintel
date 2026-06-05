@@ -41,7 +41,7 @@ Each operation regenerates `_active.md` so `/li:status` reflects current truth.
 
 - Mid-task code-editing — jobs is lifecycle, not editing
 - For non-workflow_root skills — single-shot skills (`/li:doctor`, `/li:health`) don't spawn jobs
-- To enforce ordering between steps — that's `job.yaml.blocked_until` field, not this skill
+- To enforce ordering between steps — that's `job.yaml.blocked_until`, evaluated by `job_can_start <id> <step>` in `bin/_jobs.sh`, not this skill
 
 ## Inputs
 
@@ -81,7 +81,10 @@ list_jobs
 
 **`continue <id>`:**
 1. Verify `~/.lintel/jobs/<id>/job.yaml` exists.
-2. Read `current_step` from job.yaml.
+2. Determine the resume target. For a `tree`-schema plan, call
+   `job_resume_point <id>` (deepest incomplete + startable WBS node-path, e.g.
+   `1.1.a`); for flat/phased plans, read `current_step` from job.yaml. See
+   `/li:resume` Step 2.5.
 3. Invoke `/li:resume --job <id>` (resume skill reads from job dir, not loose `.lintel/state/00-state.md`).
 4. Update last_touched.
 
@@ -150,7 +153,7 @@ YES — solo-invocable. Designed to be called anytime.
 - `~/.lintel/audit/jobs.jsonl`
 
 **Calls into:**
-- `bin/_jobs.sh` helper (sourced)
+- `bin/_jobs.sh` helper (sourced) — incl. `job_resume_point` (node-path), `job_can_start` (blocked_until), `job_set_steps` / `job_step_status`
 - `/li:resume` (for `continue` subcommand)
 - `/li:cycle` (for `replan whole`)
 

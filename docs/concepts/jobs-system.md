@@ -99,19 +99,59 @@ Single command, single purpose: show what's open right now. `cat ~/.lintel/jobs/
 
 Functions used by hooks + skills:
 
-- `job_create <workflow> <mode>` → new job
-- `job_update <id> <step> <status>` → step transition + last_touched
+- `job_create <workflow> <mode> [<step-spec> ...]` → new job; optional inline step contracts
+- `job_set_steps <id> <step-spec> ...` → (re)write the `steps[]` block with per-step contracts
+- `job_update <id> <step> <status>` → step transition + last_touched (step-scoped when `<step>` is a populated step; otherwise legacy top-level status)
+- `job_step_status <id> <step>` → echo one named step's status
+- `job_can_start <id> <step>` → `yes`/`no` — evaluates the step's `blocked_until` predicate
+- `job_resume_point <id>` → deepest incomplete + startable step name (WBS node-path for `tree` plans)
 - `job_archive <id> <result>` → cleanup + move to archive
 - `regenerate_active` → rebuild `_active.md`
 - `list_jobs` → cat `_active.md`
 - `stale_jobs <hours>` → list jobs untouched > N hours
 - `job_path <id>` → echo absolute job-dir path
 
+## State unification (design §3.6 — closes split-brain state)
+
+There is **one canonical home for each kind of state**, split by ownership:
+
+| State | Canonical home | Owner |
+|---|---|---|
+| Durable artifacts — the trio (`plan.md` / `spec.md` / `prompt.md`) + `scope.md` + WBS | **`docs/plans/<slug>/`** (in the repo) | the repo — "documented in the repo" |
+| Job control — `job.yaml`, `_active.md`, `00-state.md`, `outputs/`, `inputs/` | **`~/.lintel/jobs/<id>/`** | the harness |
+
+The trio is **born** in `~/.lintel/jobs/<id>/outputs/` during a job and **promoted**
+to the repo at `docs/plans/<slug>/` by `job-end` on DONE. The repo is the durable,
+version-controlled home; `~/.lintel/jobs/` is transient job control that the
+`_archive/` sweep eventually reclaims.
+
+### Canonical plan.md path — the one true location
+
+The audit (design hole 4) found **three divergent `plan.md` path conventions**.
+Slice 3 resolves them: **`docs/plans/<slug>/plan.md` is canonical.** The other two
+are **deprecated** (still read for back-compat during the grace window, never
+written going forward):
+
+| Convention | Status | Note |
+|---|---|---|
+| `docs/plans/<slug>/plan.md` (directory-per-plan) | **CANONICAL** | the trio + `spec.md` + `prompt.md` + `scope.md` all co-locate here; matches `job-end` promotion and `jobs-system.md` |
+| `docs/plans/<slug>-<datetime>.md` (flat file, slug+datetime) | **deprecated** | was `skills/plan/SKILL.md:198`; loses trio co-location |
+| root / cwd `plan.md` (or bare `docs/plans/`) | **deprecated** | was `skills/plan/SKILL.md:255,262` "root or …" + `docs/design/lintel-v3.5-cycle-and-roles.md`; ambiguous, collides across concurrent jobs |
+
+`<slug>` is the wedge/title slug. A directory (not a flat file) is canonical
+because the trio + scope + WBS must co-locate so resume, `handoff-size-check`, and
+the cold-executor handoff all find their siblings by a single path. The two
+deprecated forms remain readable for the grace window noted in
+`docs/v4.x/migrations/` but are no longer emitted.
+
 ## Mechanics
 
 ### Output handoff between steps is mechanical, not advisory
 
-`job.yaml` declares per-step contracts:
+`job.yaml` declares per-step contracts. As of Slice 3 (design §3.4) these are
+**populated and enforced** by `bin/_jobs.sh`, not merely documented — `job_create`
+no longer writes a literal `steps: []` when step-specs are supplied, and
+`job_set_steps` renders one record per step:
 
 ```yaml
 workflow: cycle
@@ -123,6 +163,7 @@ current_step: PLAN
 status: ACTIVE
 steps:
   - name: DEFINE
+    consumes: []
     produces: [design.md]
     status: DONE
   - name: PLAN
@@ -131,14 +172,57 @@ steps:
     status: IN_PROGRESS
   - name: BUILD
     consumes: [plan.md, spec.md, prompt.md]
+    produces: []
+    status: PENDING
     blocked_until: PLAN.status == DONE
 ```
 
-`blocked_until` is a mechanical gate. BUILD literally cannot start until `PLAN.status == DONE` and all `consumes` exist.
+Each step carries `name / consumes / produces / status` (always) and an optional
+`blocked_until` predicate. For a `tree`-schema plan (L/XL) the `name` is a **WBS
+node-path** (`1.1.a`); for flat/phased plans it is a phase token (`BUILD`).
+
+**Step-spec grammar** (the argument form `job_create` / `job_set_steps` accept —
+one pipe-delimited record per step):
+
+```
+NAME|consumes=a.md,b.md|produces=c.md|status=PENDING|blocked_until=PLAN.status == DONE
+```
+
+The first field is the `NAME`; the rest are `key=value` in any order. `consumes`
+/ `produces` are comma-separated (→ rendered as YAML inline sequences; omit → `[]`).
+`status` defaults to `PENDING`.
+
+**`blocked_until` is a mechanical gate, enforced by `job_can_start <id> <step>`**
+(echoes `yes`/`no`, returns 0/1). The predicate grammar is deliberately small:
+
+```
+<predicate> := <clause> ( "&&" <clause> )*
+<clause>    := <STEP>.status == DONE
+```
+
+i.e. a conjunction (`&&`) of "this named step has reached DONE" tests — no `||`,
+no negation, no other status values. An empty/absent predicate means "never
+blocked". A clause whose referenced step is not yet DONE (including a
+missing/unknown step) evaluates false → the step is blocked. Anything outside the
+grammar is treated conservatively as unsatisfiable, so a malformed predicate never
+silently unblocks a gate. BUILD literally cannot start until `PLAN.status == DONE`.
+
+`job_update <id> <step> <status>` updates a **named step's** status when `<step>`
+is a populated `steps[]` entry (the job stays `ACTIVE`; terminal transitions are
+`job_archive`'s job). When `<step>` is not a populated step, it preserves the
+legacy behaviour of writing the top-level `status:` — so pre-Slice-3 callers are
+unaffected.
 
 ### Resume re-points, doesn't rebuild
 
-The existing `resume` skill changes from "find a loose `00-state.md`" to "read `~/.lintel/jobs/<id>/00-state.md`". The skill's logic is unchanged — only the file path.
+The existing `resume` skill changes from "find a loose `00-state.md`" to "read
+`~/.lintel/jobs/<id>/00-state.md`". For **flat/phased** plans the resume target is
+unchanged — `current_step`. For **`tree`** plans, `job_resume_point <id>` returns
+the deepest incomplete **and startable** WBS node-path (`1.1.a`) so a half-done
+big plan resumes to the exact subtask, skipping any leaf still gated by its
+`blocked_until` predicate. If every leaf is DONE (or no `steps[]` are populated),
+it returns empty and resume falls back to `current_step`. See
+`skills/resume/SKILL.md` Step 2.5.
 
 ### Nothing runs in the background
 

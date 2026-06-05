@@ -126,6 +126,42 @@ last_ts: 2026-05-27T22:00:00Z
 duration_since_pause: 12 hours
 ```
 
+### Step 2.5 — Resume granularity: node-path for tree plans (design §3.4)
+
+A flat/phased plan resumes to a **phase** (`current_step`). A `tree`-schema
+plan (L/XL, from the scale-parametric WBS) resumes to a **WBS node-path**
+(`1.1.a`) — the deepest incomplete leaf — so a half-done big plan picks up at
+the exact subtask, not the top of a phase.
+
+When resuming a job (`/li:resume --job <id>`, the path `/li:jobs continue`
+delegates to), ask `bin/_jobs.sh` for the resume point. It returns the first
+incomplete-and-startable step `name`; for a tree job that name *is* the
+node-path:
+
+```bash
+source "$(git rev-parse --show-toplevel)/bin/_jobs.sh"   # or ~/.lintel/scaffolding/bin
+schema=$(grep -m1 '^depth_schema:' "$(job_path "$JOB_ID")/../scope.md" 2>/dev/null | awk '{print $2}')
+
+if [ "$schema" = "tree" ]; then
+  node=$(job_resume_point "$JOB_ID")           # e.g. "1.1.a"  (deepest incomplete leaf)
+  if [ -n "$node" ]; then
+    resume_target="$node"                       # land on the exact subtask
+  else
+    resume_target=$(grep -m1 '^current_step:' "$(job_path "$JOB_ID")/job.yaml" | awk '{print $2}')
+  fi
+else
+  # flat / phased (or no scope.md): unchanged — resume to current_step.
+  resume_target=$(grep -m1 '^current_step:' "$(job_path "$JOB_ID")/job.yaml" | awk '{print $2}')
+fi
+```
+
+`job_resume_point` skips any leaf still gated by its `blocked_until` predicate,
+so the target is always both incomplete **and** startable. If it returns empty
+(all leaves DONE, or no populated `steps[]`), fall back to `current_step` —
+this keeps **flat/phased resume identical to before**. Surface the node-path in
+the resume options (Step 3) so the operator sees "resume at 1.2.a — <subtask>"
+instead of just the phase.
+
 ### Step 3 — Surface resume options
 
 ```
@@ -226,8 +262,13 @@ n/a — RESUME is itself the hop-in mechanism.
 **Reads:**
 - `.lintel/state/00-state.md` (PRIMARY)
 - `~/.lintel/lessons-vault/00-state-<repo>-*.md` (cross-machine fallback)
+- `~/.lintel/jobs/<id>/job.yaml` `steps[]` (job-scoped resume — node-path via `job_resume_point`)
+- `docs/plans/<slug>/scope.md` `depth_schema` (selects node-path vs current_step resume)
 - `plan.md`, `spec.md`, `review-report.md` (for precondition checks)
 - recent git log
+
+**Calls into:**
+- `bin/_jobs.sh` — `job_resume_point` (tree node-path), `job_can_start` (skip blocked leaves), `job_path`
 
 **Writes:**
 - `.lintel/state/00-state.md` (RESUME entry)
