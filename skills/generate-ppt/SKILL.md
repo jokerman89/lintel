@@ -96,6 +96,25 @@ Operator-CLI stays non-breaking. Existing workflow-scripts are unaffected.
    - Insert assets from the active pack's asset library where matched
    - Mode-tag in slide notes for voice-check downstream
 
+4b. **Critique slide narration via `SlideNarrationCritic` agent** (if the deck carries speaker notes / a talk track):
+
+```bash
+narration_brief=$(mktemp)
+cat > "$narration_brief" <<EOF
+task: Critique the generated deck's slide narration / speaker notes
+context_pointers:
+  - <draft deck path>.pptx (speaker notes per slide)
+constraints:
+  - voice-tier consistency per active pack
+  - pacing (words-per-minute vs each slide's duration)
+  - audience alignment + recovery-line presence on risky slides
+acceptance:
+  - per-slide narration verdict + specific rewrite recommendations
+EOF
+
+/li:brief-forge subagent_spawn generate-ppt SlideNarrationCritic brief "$narration_brief"
+```
+
 5. **4-gate quality pipeline** (output stays in `~/.lintel/draft/` until ALL 4 PASS):
 
    **Gate 1 — Voice (the active pack's compliance gates):**
@@ -200,6 +219,7 @@ Distribution: operator-driven. Verify the provenance chain (PROV-7f8a2) before s
 
 - `BRAND-INTEGRATION.md` — brand architecture + cache
 - `PPTNarrativeArchitect` agent — slide arc design
+- `SlideNarrationCritic` agent — slide narration / talk-track critique (post-generation)
 - The active pack's compliance gates — Gate 1
 - `/generate-word`, `/generate-web` — sibling doc-gen skills
 - `brand-staleness-warn` hook — Phase E
