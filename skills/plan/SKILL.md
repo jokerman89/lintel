@@ -58,10 +58,7 @@ Adopted from speckit (cross-section Analyze), Architect image (cost-estimate gat
 
 Invoke `/li:lessons-surface` keyword-scoped to planning so prior-session lessons warm the plan before any tasks are written. Same mechanism SENSE uses (max 3 lessons, prepended to context, silent on no match, never a blocker):
 
-```bash
-# Keyword-scope to this phase's concerns; silent if no relevant matches.
-~/.claude/skills/lessons-surface --keyword "planning architecture scope dependencies" 2>/dev/null || true
-```
+Invocation: `/li:lessons-surface --keyword "planning architecture scope dependencies"` (a portable skill call; silent if no relevant matches).
 
 Then read:
 - APPROVED design doc from DEFINE

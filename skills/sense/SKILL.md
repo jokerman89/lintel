@@ -44,11 +44,7 @@ Output: a SENSE report. Operator decides next move based on it.
 
 Before reading configuration, invoke `/li:lessons-surface` so future session work starts with relevant lessons from `tasks/lessons.md`. Closes the L-001/L-002 loop (lessons are written but never read without this step).
 
-```bash
-# Auto-invoke lessons-surface with current-context as keyword
-# (branch name + recent commit subjects give implicit topic)
-~/.claude/skills/lessons-surface --auto-from-sense 2>/dev/null || true
-```
+Invocation: `/li:lessons-surface --auto-from-sense` — keyword derived from the branch name + recent commit subjects. (A skill call, portable across every CLI; the old `~/.claude/skills/...` path was Claude-Code-only and non-executable.)
 
 Output (max 3 lessons) prepends to the SENSE report. Silent if no relevant matches. Never a blocker.
 

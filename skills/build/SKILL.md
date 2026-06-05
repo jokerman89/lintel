@@ -56,10 +56,7 @@ If on main without consent: HARD STOP per superpowers rule. AskUserQuestion: "Sw
 
 Before reading the plan and dispatching implementers, invoke `/li:lessons-surface` keyword-scoped to implementation so prior-session lessons inform task execution and subagent dispatch. Same mechanism SENSE uses (max 3 lessons, prepended to context, silent on no match, never a blocker):
 
-```bash
-# Keyword-scope to this phase's concerns; silent if no relevant matches.
-~/.claude/skills/lessons-surface --keyword "implementation testing subagent" 2>/dev/null || true
-```
+Invocation: `/li:lessons-surface --keyword "implementation testing subagent"` (a portable skill call; silent if no relevant matches).
 
 Read entire plan.md once. Extract:
 - All task titles + IDs

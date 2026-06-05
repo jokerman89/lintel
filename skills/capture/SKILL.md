@@ -58,7 +58,11 @@ Close the calibration loop (design §3.5): record this cycle's **actual** outcom
 Mechanical, non-blocking. Read the planned scale from `scope.md` (or the cycle's `00-state.md` SCOPE entry) and the actuals from the cycle history aggregated in Step 1, then append one record via the unified `audit_log` writer — the same call pattern every other Lintel producer uses (e.g. `skills/migrations`):
 
 ```bash
-source "$(dirname "$0")/../../bin/_audit.sh"
+# A skill body has no reliable $0/BASH_SOURCE — resolve the repo root the way
+# every other skill does ($LINTEL_REPO_ROOT), with a git fallback if it is unset.
+# Using $(dirname "$0") here made this calibration write silently no-op.
+REPO_ROOT="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}"
+source "$REPO_ROOT/bin/_audit.sh"
 
 # From scope.md / SCOPE state entry (the plan's estimate):
 size="$SCOPE_SIZE"                 # XS | S | M | L | XL
