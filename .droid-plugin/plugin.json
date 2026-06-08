@@ -1,7 +1,7 @@
 {
   "name": "li",
   "version": "4.9.0",
-  "description": "Lintel — MS-CAIP-SE session harness for Factory Droid",
+  "description": "Lintel — company-neutral, pack-driven session harness for Factory Droid",
   "author": {
     "name": "jokerman89",
     "email": "johannes.akerman@gmail.com"
@@ -9,7 +9,7 @@
   "homepage": "https://github.com/jokerman89/lintel",
   "repository": "https://github.com/jokerman89/lintel",
   "license": "MIT",
-  "keywords": ["lintel", "microsoft", "caip", "session-harness", "rais", "azure"],
+  "keywords": ["lintel", "session-harness", "compliance", "scaffolding"],
   "skills": "./skills/",
   "agents": "./agents/",
   "_note": "Schema inferred from droid plugin marketplace pattern (obra/superpowers reference). Verify against Factory Droid plugin spec before submission."

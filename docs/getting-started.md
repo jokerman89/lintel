@@ -1,129 +1,127 @@
 # Getting started
 
-Step-by-step for a new MS Sweden CAIP SE getting this scaffolding running.
+Get Lintel running on your AI CLI in about five minutes. Lintel is a company-neutral,
+pack-driven session harness — markdown + bash that your CLI loads as a plugin. There is no
+runtime and no daemon; your CLI executes, Lintel supplies the disciplines.
 
 ## Prerequisites
 
-- **Git** — any recent version. Verify with `git --version`.
-- **Bash** (Linux/macOS/WSL/Git Bash on Windows) **or PowerShell 7+** (Windows).
-- **yq** for the bash installer / **powershell-yaml module** for the PowerShell installer (the PowerShell installer auto-installs the module on first run).
-- **An agent CLI** — Claude Code, GitHub Copilot Enterprise, Codex, or another tool that reads a per-repo instruction file. Multiple is fine — they share the same canonical instructions.
-- **Microsoft SSO** for your chosen CLI (enterprise tenant access).
+- **Git** — any recent version (`git --version`).
+- **An AI CLI.** Lintel is **full** on Claude Code, Codex, and Cursor; **supported** on Gemini CLI,
+  OpenCode, GitHub Copilot CLI, and Factory Droid; best-effort elsewhere. See the capability table in
+  the [README](../README.md#multi-cli-support-honest-table). One important caveat: the **enforcement
+  hooks fire only on Claude Code** — every other CLI gets the skills, the cycle discipline, and the
+  pack-driven knowledge, just not the live hook gate.
+- **Bash** (Linux/macOS/WSL/Git Bash) or **PowerShell 7+** — only needed if you want the scaffolding
+  factory (`bin/li-scaffold`) or to run the installer/tests locally.
 
-Verify the basics:
+## 1. Install for your CLI
 
-```bash
-git --version
-bash --version       # OR: pwsh --version
-yq --version         # bash users only
-```
-
-Missing `yq`?
-
-- macOS: `brew install yq`
-- Linux: `sudo apt install yq` (or download from the [yq releases page](https://github.com/mikefarah/yq/releases))
-- Windows (bash): `scoop install yq`
-
-## 1. Clone
+Lintel ships as a plugin per CLI, all pointing at the same `skills/` and `agents/`. Pick yours:
 
 ```bash
-# Replace with the MS-internal git URL once published
-git clone <internal-MS-git-url>/jokerman-lintel ~/Workspace/jokerman-lintel
-cd ~/Workspace/jokerman-lintel
+# Claude Code
+#   /plugin marketplace add jokerman89/lintel
+#   /plugin install li@jokerman-lintel
+
+# Codex CLI / App
+#   /plugins  →  search lintel  →  Install
+
+# Cursor
+#   /add-plugin lintel
+
+# Gemini CLI
+gemini extensions install https://github.com/jokerman89/lintel
+
+# GitHub Copilot CLI
+copilot plugin marketplace add jokerman89/lintel
+copilot plugin install li@jokerman-lintel
+
+# Factory Droid
+droid plugin marketplace add jokerman89/lintel
+droid plugin install li@jokerman-lintel
+
+# OpenCode
+#   fetch and follow .opencode/INSTALL.md
 ```
 
-## 2. Install
+Per-CLI install guides: [docs/per-cli/](per-cli/).
 
-Pick one based on your shell.
+## 2. See it work — `/li:welcome`
+
+In your CLI, run:
+
+```
+/li:welcome
+```
+
+It detects your CLI, shows your **honest** capability tier (what works and what doesn't here),
+runs one cycle in **dry-run** so you see the 8-phase discipline without mutating anything, and
+demonstrates a safety hook (or honestly explains why it can't fire on your CLI). This is the fastest
+way to understand what Lintel does for you. Run it first.
+
+## 3. Run a real cycle
+
+When you have a real task, run the full development cycle:
+
+```
+/li:cycle "add a rate limiter to the login endpoint"
+```
+
+It walks SENSE → SCOPE → DEFINE → DISCOVER → PLAN → BUILD → REVIEW → SHIP → CAPTURE, with gates
+(cost estimate before BUILD, a founder-approval pause at the end of PLAN, adversarial review before
+SHIP). For a quick fix, `/li:fix`; to just plan, `/li:plan`. Browse everything with `/li:catalog`.
+
+## 4. Make it yours — packs
+
+Identity (voice, compliance mode, persona, brand, rules) is **not** hardcoded — it comes from the
+active **pack**. The repo ships only the neutral `_default` pack, which enforces nothing.
+
+```
+/li:pack-list             # what packs are available
+/li:pack-switch <name>    # switch identity/compliance for this repo
+/li:pack-create           # encode your org's rules as a pack
+```
+
+Switch profiles per repo — a stricter pack at work, the neutral default for personal projects.
+Company identity (for example Microsoft CAIP-SE) installs as a separate external pack, not part of
+the neutral spine.
+
+## 5. (Optional) Install the disciplines into other repos
+
+Lintel is also a **factory**. From your clone, put `bin/` on PATH and scaffold any repo:
 
 ```bash
-# bash / zsh / Git Bash
-bash install/install.sh
+export PATH="$PWD/bin:$PATH"
+cd ~/your-other-repo
+li-scaffold init --mode internal-tool --pack _default
 ```
 
-```powershell
-# PowerShell 7+
-pwsh install/install.ps1
-```
+That drops a `CLAUDE.md`, `CORE-PRINCIPLES.md`, `tasks/` (lessons/memory/personas/todo), `docs/adr/`,
+and baseline subagents into the repo — a disciplined AI workspace in about thirty seconds. It never
+clobbers existing files.
 
-What the installer does:
-
-1. Verifies `git` and `yq` (or installs `powershell-yaml` if needed).
-2. Backs up `~/.claude/` to `~/.claude-backup-<timestamp>/` if it exists.
-3. Copies `scaffolding/` to `~/.claude-scaffolding/`.
-4. Reads `install/upstream-sources.yaml` and clones each upstream source to the install path it specifies.
-5. Prints license notes for any source on a restricted license tier (CC-BY-SA, mixed, no-license).
-
-Expect the install to take 1–3 minutes depending on network and `gstack`'s post-install step.
-
-## 3. Verify
+## 6. Health check
 
 ```bash
-bash install/verify.sh
+li-doctor          # cross-CLI: which CLIs are installed, Lintel install state, version drift
+bash install/verify.sh --all
 ```
 
-Prints `✓` per source that is correctly installed. Any `✗` means re-run the installer or fix the underlying environment issue (network, permissions).
+## Where to next
 
-## 4. Wire up per-CLI
-
-The scaffolding now lives at `~/.claude-scaffolding/`. The next step is telling each CLI to read it. Do this **once per repo where you want the setup active**, not globally.
-
-### Claude Code
-
-Nothing extra. The installer set up `~/.claude/CLAUDE.md` to point at the canonical instructions. Your existing per-repo `CLAUDE.md` files keep working — they have higher precedence than the user-global one.
-
-### GitHub Copilot Enterprise (with Opus model picker)
-
-In each repo where you want the scaffolding active:
-
-```bash
-mkdir -p .github
-cp ~/Workspace/jokerman-lintel/shims/copilot-instructions.md .github/copilot-instructions.md
-```
-
-Or, on a system with symlink support, prefer a symlink so updates propagate:
-
-```bash
-ln -sf ~/Workspace/jokerman-lintel/shims/copilot-instructions.md .github/copilot-instructions.md
-```
-
-Then in the Copilot model picker, choose **Claude Opus** (or the latest Opus-class model). Default Copilot completions are tuned for inline suggestions — for agent-style work you want Opus.
-
-### Codex CLI
-
-In each repo where you want the scaffolding active:
-
-```bash
-cp ~/Workspace/jokerman-lintel/shims/AGENTS.md AGENTS.md
-```
-
-### Other agent CLIs
-
-If the CLI reads a different filename: add a shim under `shims/` that points at `AGENT-INSTRUCTIONS.md`. Copy or symlink to the location your CLI expects.
-
-## 5. First session
-
-Open your CLI in a repo that has the shim in place. The agent should:
-
-1. Read its shim (e.g. `CLAUDE.md` or `.github/copilot-instructions.md`).
-2. Follow the shim's pointer to `AGENT-INSTRUCTIONS.md`.
-3. Walk the 5-step session-start ritual (personas → compliance → memory → ADR scan → precedence).
-4. Be ready to work.
-
-If the agent does not do this, something is wrong with the shim. Re-check the file paths and that the agent actually loaded the shim file.
-
-## 6. Where to next
-
-- **[docs/multi-cli.md](multi-cli.md)** — how the canonical-instructions + shims pattern works across CLIs.
-- **[docs/precedence.md](precedence.md)** — when an agent has multiple candidates for a task, how to pick.
-- **[docs/promoted-agents.md](promoted-agents.md)** — what each installed upstream pack does + its license terms.
-- **[docs/compliance.md](compliance.md)** — what you cannot do under MS guardrails.
-- **[docs/power-user.md](power-user.md)** — patterns once the basics are running.
-- **[docs/faq.md](faq.md)** — common questions.
+- **[docs/lintel-state-of-the-harness.md](lintel-state-of-the-harness.md)** — the full architecture +
+  what every part does.
+- **[docs/multi-cli.md](multi-cli.md)** — how one source ships to eight CLIs, and where each degrades.
+- **`/li:catalog`** — the full skill catalog.
+- **[CHANGELOG.md](../CHANGELOG.md)** — release notes.
 
 ## Troubleshooting
 
-- **`yq: command not found`** — install yq, see prerequisites above.
-- **Install fails partway through** — re-run `bash install/install.sh`. Already-cloned sources will `git pull` instead of re-clone.
-- **Copilot ignores `.github/copilot-instructions.md`** — confirm you have Copilot Enterprise (not the standard Copilot), and that the file is in `.github/` at repo root, not in a subdirectory.
-- **`gstack` post-install fails** — the gstack `./setup` script has its own prerequisites (see `~/.claude/skills/gstack/README.md`). The clone is still in place; you can re-run setup manually.
+- **`/li:<skill>` not found** — confirm the plugin installed for your CLI (`li-doctor`), and that your
+  CLI supports native skill invocation (full on Claude Code / Codex / Cursor; manual on others).
+- **Hooks don't fire** — hooks are a Claude-Code-only mechanism *and* ship opt-in (you symlink the
+  ones you want into `~/.claude/hooks/` and register them in `~/.claude/settings.json`). `/li:welcome`
+  shows you exactly how. On other CLIs they don't fire at all — that's by design, stated honestly.
+- **Installer issues** — `li-doctor --verbose` reports per-CLI state; re-running the install is safe
+  (idempotent).
