@@ -5,7 +5,11 @@ description: Drafts LinkedIn posts (3 lengths) — short hook, mid-tail story, l
 color: yellow
 tools: Read, Bash, Grep, Glob
 voice: internal
-cli_support: [claude-code, codex]
+cli_support:
+  - cli: claude-code
+    level: full
+  - cli: codex
+    level: full
 tier: permissive
 ---
 
