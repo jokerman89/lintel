@@ -170,3 +170,94 @@ hits. One cold install, watched in silence, is worth more than a week of polishi
 - You overrode my recommendation (C) and picked B with a clear reason embedded in your earlier answer
   (multi-CLI must lead) — and you were right: a CLI-detecting `/li:welcome` serves "multi-CLI leads" better
   than a Claude-centric demo. You hold the strategic thread across questions; I had to catch up to it.
+
+---
+
+## Engineering-reviewed implementation plan: `/li:welcome`
+
+`/plan-eng-review` on 2026-06-08. Scope: **`/li:welcome` as a thin orchestrator** (the floor and the
+marketing assets are a separate PR / deferred — see NOT in scope). Six decisions, all to the
+recommended option; no capability removed; reuse-first.
+
+### Architecture decisions (confirmed)
+- **A1 — tier single source.** Create `lib/cli-tiers.yaml` (per-CLI `tier` + capability flags:
+  `hooks_supported`, `skills_native`, `subagents`). `/li:welcome` reads it; `bin/li-wiki-gen` *generates*
+  the README capability table from it. Kills the prose-vs-reality drift class (same single-source pattern
+  as the v4.9 `manifest-identity` fix). There is no machine-readable harness-tier today — `--cli-matrix`
+  aggregates the finer *per-skill* `cli_support`, which cannot express "hooks only fire on Claude Code."
+- **A2 — demo = `/li:cycle --dry-run`.** Reuse the existing dry-run (shows phases + would-fire hooks +
+  token forecast, mutates nothing). A first-run welcome must not surprise-create job/plan/state artifacts.
+- **A3 — hook demo degrades honestly, per CLI AND per hook-install-state.** Hooks ship inert/opt-in and
+  fire only on Claude Code, so the headline "watch a hook fire" is the least-available thing at first run.
+  Three branches: Claude-Code + hooks-installed → real fire; Claude-Code + no-hooks → *print* the install
+  snippet (Q1) then fire; other CLIs → narrate "this is what fires on Claude Code, the only CLI with the
+  enforcement layer." This ties the demo to the A1 tier message.
+- **A4 — discovery via README quickstart + install/`li-scaffold` completion output** pointing to
+  `/li:welcome`. No auto-launch / SessionStart surfacing (deferred).
+- **Q1 — print-the-snippet, no auto-mutation.** `/li:welcome` prints the `ln -s` + `settings.json` hook
+  entry for the user to run; it does NOT auto-edit `~/.claude/settings.json` on first run (auto-mode
+  boundary on settings; avoids clashing with their existing hooks).
+- **Test design — testable shell lib.** Extract `cli_tier_field <cli> <field>` into `lib/cli-tiers.sh`,
+  sourced by BOTH `/li:welcome` and `li-wiki-gen` (one parser, not two), with a unit test. The riskiest
+  logic (the tier lookup) becomes testable + single-source.
+
+### What already exists (reuse — do not rebuild)
+- `/li:cli-fingerprint` — CLI detection (env-var → process → tool-probe → config). **Delegate.**
+- `/li:cycle --dry-run` — the guided demo. **Reuse.**
+- `bin/li-doctor` — installed-CLI + per-CLI install-state detection (for the hook-install-state branch).
+- `bin/li-wiki-gen` — extend to generate the README tier table from `cli-tiers.yaml`.
+- `scaffolding/01-foundation/TEMPLATE-skill.md` — the new-skill scaffold.
+- `tests/shape/manifest-identity.sh` + `handoff-cap-wired.sh` — the patterns the new sync/wiring tests copy.
+
+### NOT in scope (deferred, with rationale)
+- **The floor** (rewrite `getting-started.md`; `@microsoft.com`→neutral email in README/SECURITY + extend
+  the `manifest-identity` tripwire to scan them; manifest "MS-CAIP-SE" brand wording; ship-or-de-claim
+  `li-forge-stats`) — separate mechanical identity-hygiene PR; it is the *launch blocker*, but it is not
+  engineering and shouldn't gate this skill's review.
+- **Marketing assets** (demo gif, showcase-as-landing, per-CLI getting-started matrix) — deferred.
+- **The 5 dropped customer agents** + **a second example pack** — open product decisions from the design
+  doc above, not part of `/li:welcome`.
+- **`bin/li-hook-install` helper** (Q1 alt) and **a first-run SessionStart surfacing hook** (A4 alt) —
+  fine later features; not first-run, not now.
+
+### Failure modes
+| Codepath | Realistic failure | Test? | Handled? | Visible? |
+|---|---|---|---|---|
+| `cli-fingerprint` returns unknown CLI | welcome has no tier to show | `tests/unit/cli-tiers.sh` (unknown→safe default) | fall to generic "unrecognized CLI, manual path" | loud, honest |
+| `cli-tiers.yaml` missing/malformed | `cli_tier_field` returns garbage/crashes | unit test | safe default = `degraded` | loud |
+| README tier table drifts from `cli-tiers.yaml` | the one skill about honesty lies | `tests/shape/cli-tiers-sync.sh` (CI) | regenerate via wiki-gen | caught in CI |
+| `/li:cycle --dry-run` unavailable on a non-full CLI | demo can't run | (A3 narrate branch) | narrate instead of invoke | honest |
+
+No silent-failure critical gaps: every failure path either has a test, a safe default, or an honest
+narration — by design (the skill's whole job is honesty).
+
+### Worktree parallelization
+| Lane | Tasks | Depends on |
+|---|---|---|
+| **A — foundation** | `lib/cli-tiers.yaml` + `lib/cli-tiers.sh` + `tests/unit/cli-tiers.sh` | — |
+| **B — wiki-gen** | `li-wiki-gen` generates README table from cli-tiers + `tests/shape/cli-tiers-sync.sh` | A |
+| **C — the skill** | `skills/welcome/SKILL.md` (orchestrator) | A |
+| **D — wiring test** | `tests/shape/welcome-wiring.sh` | A + C |
+**Launch:** A first (foundation). Then **B ∥ C** in parallel (disjoint: `li-wiki-gen`+README vs
+`skills/welcome/`). Then D. No conflicting lanes.
+
+### Implementation tasks
+- [ ] **T1 (P1)** — runtime — `lib/cli-tiers.yaml`: `tier` + `hooks_supported`/`skills_native`/`subagents`
+  for all 8 CLIs, values sourced from the README/multi-cli honest table. Verify: parses; 8 entries.
+- [ ] **T2 (P1)** — runtime — `lib/cli-tiers.sh` `cli_tier_field <cli> <field>` (unknown→`degraded`) +
+  `tests/unit/cli-tiers.sh`. Verify: unit test green.
+- [ ] **T3 (P1)** — skill — `skills/welcome/SKILL.md` thin orchestrator: cli-fingerprint → `cli_tier_field`
+  → honest tier → `/li:cycle --dry-run` → 3-branch hook demo (print-snippet on CC-no-hooks) → point to docs.
+  Verify: T5.
+- [ ] **T4 (P1)** — wiki — `li-wiki-gen` emits the README capability table from `cli-tiers.yaml` +
+  `tests/shape/cli-tiers-sync.sh` (table == source). Verify: shape test green; `--check` idempotent.
+- [ ] **T5 (P1)** — test — `tests/shape/welcome-wiring.sh`: welcome references `/li:cli-fingerprint`,
+  `/li:cycle --dry-run`, `cli-tiers`; valid frontmatter + `cli_support`. Verify: shape green.
+- [ ] **T6 (P2)** — docs — README quickstart + `install`/`li-scaffold` completion output point to
+  `/li:welcome` (A4). Verify: grep.
+
+### Completion summary
+Scope: reduced to `/li:welcome` thin orchestrator · Architecture: 4 findings (all decided) · Code Quality:
+1 (decided) · Tests: 0/6 net-new, 3 mandated (1 unit + 2 shape) · Performance: no issues · NOT-in-scope:
+written · What-exists: 6 reuse points · Failure modes: 4 mapped, 0 critical gaps · Parallelization: 4 lanes
+(A → B∥C → D) · Verdict: **engineering-sound, reuse-first, ready to build.**
