@@ -56,6 +56,11 @@ samples/real*
 *.customer.*
 pii-test-data/
 
+# agents/customer/ holds customer-DOMAIN agent definitions, not customer DATA;
+# the broad `customer/` rule above false-positively shadows it (a new customer
+# agent would be silently dropped from commits). Re-include the agents dir.
+!agents/customer/
+
 # ----- Editor / IDE state -----
 .vscode/
 .idea/

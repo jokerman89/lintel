@@ -1,7 +1,8 @@
 ---
 name: context-budget
 layer: foundation
-description: Show current context utilization, recommend warm/cool, surface budget breakdown by source.
+v1_alias: [li-context-tokenwatch]
+description: Show current context utilization, recommend warm/cool, surface budget breakdown by source. `--watch` runs the threshold/continuous-watch check (token + tool-call soft/hard limits → /clean or /context-save).
 color: cyan
 tools: Read, Bash, Grep
 voice: internal
@@ -14,16 +15,29 @@ You are the context-budget skill — visibility into the 1M-window.
 
 Reports current session's context utilization. Breaks down by source (CLAUDE.md, loaded files, conversation history, subagent results). Recommends warm-up or cool-down based on budget state.
 
+With `--watch`, runs the context-bloat soft-warning check instead: reads session token estimate + tool-call count, compares against configured thresholds (default: 50k tokens / 80 tool calls soft, 80k / 130 hard), and recommends `/clean` or `/context-save` if approaching limits. (`/li:context-budgetwatch` is a thin alias for `/li:context-budget --watch`.)
+
 ## When to use
 
 - Operator says "how much context have we used?"
 - Before invoking heavy phase (PLAN/BUILD) to know headroom
 - Diagnosing why session feels slow / model is forgetting things
+- `--watch`: mid-session sense-check ("are we approaching context limits?"), long-running or tool-call-heavy session, pre-large-task runway check
 
 ## When NOT to use
 
 - Mid-task uninterrupted work (status check overhead)
 - After every skill invocation (let the skill report its impact)
+- `--watch` on a fresh session, or right after `/context-save` (limits reset on resume)
+
+## Inputs
+
+- `--watch` — run the threshold/continuous-watch verdict (see "Watch mode" below) instead of the budget-breakdown report
+- `--budget <yaml>` — (watch mode) override default thresholds (default: read from `~/.lintel/config.yaml` watcher section)
+- `--quiet` — (watch mode) only emit if a threshold is crossed
+- `--mode <soft|hard|both>` — (watch mode) which thresholds to check (default: both)
+
+> If `--watch` is present, run the **Watch mode** workflow below and skip the default budget-breakdown workflow.
 
 ## Workflow
 
@@ -112,6 +126,58 @@ total_tokens: <N>
 headroom: <X>
 ```
 
+## Watch mode (`--watch`)
+
+Threshold-based context-bloat watcher. Per the A5 decision this is an HONEST watcher (Claude can't compact mid-session); it SURFACES the state + recommends action. It does NOT auto-compact.
+
+1. **Read budget.** From `~/.lintel/config.yaml`:
+   ```yaml
+   watcher:
+     soft_token: 50000
+     hard_token: 80000
+     soft_tool_calls: 80
+     hard_tool_calls: 130
+   ```
+   (`--budget <yaml>` overrides; missing watcher section → built-in defaults, warn.)
+2. **Estimate current state.**
+   - Token estimate: read session telemetry if available (`~/.lintel/sessions/<id>/tokens.txt`), else estimate from conversation-length heuristic (mark "ESTIMATED").
+   - Tool-call count: read `~/.lintel/sessions/<id>/tool-calls.count` if available, else estimate.
+3. **Compare to thresholds** (honoring `--mode <soft|hard|both>`):
+   - Below soft: GREEN
+   - At/over soft but below hard: YELLOW
+   - At/over hard: RED
+4. **Recommendation:**
+   - GREEN: keep going
+   - YELLOW: recommend `/context-save` at next natural pause, OR `/clean` if mid-task
+   - RED: STOP — recommend `/context-save` now, fresh session next
+5. **Report** (with `--quiet`, emit only if a threshold is crossed):
+   ```
+   Context tokenwatch
+
+   Session: 3:47:12 elapsed
+   Token estimate: 62,400 / 80,000 hard (78% of hard, 124% of soft)
+   Tool-call count: 94 / 130 hard (72% of hard, 117% of soft)
+
+   Status: YELLOW
+
+   ## Recommendation
+   You're past the soft threshold on both axes. Operations are still safe but
+   quality may degrade — Claude works best in the first ~50k tokens of session
+   context.
+
+   Choose one:
+   1. /context-save <label> — checkpoint + resume in fresh session (recommended)
+   2. /clean — clear non-essential context buffer in-session (lighter-weight)
+   3. Keep going — acceptable but watch for repetition/forgetting
+
+   Next natural pause? Recommend option 1.
+   ```
+
+Watch-mode failure modes:
+- **Session telemetry unavailable:** fall back to estimate, mark "ESTIMATED".
+- **Hard-threshold crossed:** report RED but stay read-only — operator decides; auto-compact is dishonest (Claude can't actually compact mid-session).
+- **CI / non-interactive:** print state, exit non-zero on RED to enable CI gating.
+
 ## Status protocol
 
 - DONE — report surfaced
@@ -126,7 +192,9 @@ YES — pure information query.
 
 ## Integration
 
-Reads `.lintel/state/context-budget.md`. No writes beyond optional event log.
+Reads `.lintel/state/context-budget.md`. No writes beyond optional event log. Watch mode reads `~/.lintel/config.yaml` (watcher thresholds) + session telemetry under `~/.lintel/sessions/<id>/`, read-only — no Layer 2 mutations, no audit log needed. `/li:context-budgetwatch` delegates here via `--watch`.
+
+See also: `/clean` (in-session lighter-weight clear) · `/context-save` (checkpoint + clean break) · `/context-restore` (resume from checkpoint).
 
 ## Anti-patterns
 

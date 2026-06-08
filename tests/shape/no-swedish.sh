@@ -5,13 +5,12 @@
 # .codex-plugin/ seeds/). It detects Swedish letters (å ä ö Å Ä Ö) and a set
 # of high-signal Swedish words that never appear in English technical prose.
 #
-# Three files legitimately carry FUNCTIONAL Swedish and are allowlisted — they
-# are capability, not prose, so translating them would remove functionality:
-#   - lib/orientator-routing.sh         : Swedish intent keywords (matches
-#                                         Swedish operator input) — out of scan
-#                                         scope (lib/ not scanned) but noted here
-#   - hooks/.../customer-data-block      : regex detecting Swedish customer PII
-#   - hooks/.../no-customer-data-in-...  : regex detecting Swedish customer PII
+# These carry FUNCTIONAL Swedish (capability, not prose — translating them would
+# remove functionality) and are allowlisted or out of scan scope:
+#   - hooks/shared/_patterns.sh         : customer-PII regex (ärende, ÅÄÖ,
+#                                         personnummer) sourced by the customer hooks
+#   - lib/orientator-routing.sh         : Swedish intent keywords (matches Swedish
+#                                         operator input) — out of scan scope (lib/)
 #   - skills/CATALOG.md                  : generated from frontmatter; the source
 #                                         SKILL.md files are scanned instead
 #
@@ -30,8 +29,9 @@ echo "========================="
 
 is_allowlisted() {
   case "$1" in
-    hooks/shared/customer-data-block/run.sh) return 0 ;;
-    hooks/shared/no-customer-data-in-message/run.sh) return 0 ;;
+    # Functional Swedish PII regex (ärende, ÅÄÖ) now lives once in _patterns.sh,
+    # which the customer-data hooks source — so only this file needs the allowlist.
+    hooks/shared/_patterns.sh) return 0 ;;
     skills/CATALOG.md) return 0 ;;
   esac
   return 1
