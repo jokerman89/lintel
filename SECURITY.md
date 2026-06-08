@@ -4,9 +4,9 @@
 
 If you find a security issue in Lintel itself (the scaffolding repo), please report it privately to:
 
-**johannes.akerman@microsoft.com** (operator + Lintel maintainer)
+**johannes.akerman@gmail.com** (operator + Lintel maintainer)
 
-For MS-internal security issues, follow Microsoft's internal SDL incident response process.
+If your active pack defines its own incident-response process (e.g. a corporate SDL), follow that as well.
 
 Do not open public GitHub issues for security vulnerabilities.
 
@@ -35,12 +35,12 @@ Lintel is **scaffolding** — markdown + bash scripts that an AI CLI loads as a 
 
 ## Compliance constraints
 
-Lintel is for Microsoft Sweden CAIP-SE. These constraints apply:
+These constraints apply to the Lintel repo itself (a company pack may add stricter ones):
 
 - **No customer data anywhere in Lintel repo.** Lessons learned must be sanitized before commit (no customer names, no project codenames, no PII).
 - **No secrets in skill/agent bodies.** Examples use placeholders.
-- **MS SSO authentication only** for any external service touched by Lintel-invoked workflows.
-- **Restricted-tier upstream content** (CC-BY-SA-4.0, etc.) is not vendored. v3 ships only operator-authored MIT content.
+- **Authentication policy is pack-defined** — the neutral spine mandates none; a company pack may require SSO or vendor restrictions.
+- **Only operator-authored content is vendored** — no restricted-tier upstream (CC-BY-SA-4.0, etc.); Lintel ships MIT throughout.
 
 ## Supported versions
 

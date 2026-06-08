@@ -1,0 +1,75 @@
+# lib/cli-tiers.yaml — single source for the harness-level per-CLI capability tier.
+#
+# Read by skills/welcome (the honest first-run tier message) AND bin/li-wiki-gen
+# (which GENERATES the README capability table from this file). Edit values HERE;
+# the README table is generated, never hand-edited — that is what keeps the
+# "honest table" from drifting (the prose-vs-reality drift the v4.9 audit punished).
+#
+# Fields per CLI:
+#   label            human name for the table
+#   tier             full | supported | best-effort
+#   hooks_supported  do Lintel hooks fire on this CLI? The enforcement layer is
+#                    Claude-Code-only — this is the load-bearing honesty flag that
+#                    /li:welcome uses to decide whether the live "watch a hook fire"
+#                    demo is even possible.
+#   skills_native    does the CLI invoke /li:<skill> natively (vs operator-runs-manually)?
+#   subagents        native | sequenced | none
+#   install          the one install incantation for that CLI
+schema_version: 1
+clis:
+  claude-code:
+    label: "Claude Code"
+    tier: full
+    hooks_supported: true
+    skills_native: true
+    subagents: native
+    install: "/plugin marketplace add jokerman89/lintel  then  /plugin install lintel@jokerman-lintel"
+  codex:
+    label: "Codex CLI / App"
+    tier: full
+    hooks_supported: false
+    skills_native: true
+    subagents: sequenced
+    install: "/plugins, search lintel, Install"
+  cursor:
+    label: "Cursor"
+    tier: full
+    hooks_supported: false
+    skills_native: true
+    subagents: sequenced
+    install: "/add-plugin lintel"
+  gemini:
+    label: "Gemini CLI"
+    tier: supported
+    hooks_supported: false
+    skills_native: false
+    subagents: none
+    install: "gemini extensions install https://github.com/jokerman89/lintel"
+  opencode:
+    label: "OpenCode"
+    tier: supported
+    hooks_supported: false
+    skills_native: false
+    subagents: none
+    install: "fetch and follow .opencode/INSTALL.md"
+  copilot:
+    label: "GitHub Copilot CLI"
+    tier: supported
+    hooks_supported: false
+    skills_native: true
+    subagents: none
+    install: "copilot plugin marketplace add jokerman89/lintel  then  copilot plugin install lintel@jokerman-lintel"
+  droid:
+    label: "Factory Droid"
+    tier: supported
+    hooks_supported: false
+    skills_native: true
+    subagents: none
+    install: "droid plugin marketplace add jokerman89/lintel  then  droid plugin install lintel@jokerman-lintel"
+  other:
+    label: "Cline / Continue / Aider"
+    tier: best-effort
+    hooks_supported: false
+    skills_native: false
+    subagents: none
+    install: "manual, add AGENT-INSTRUCTIONS.md as custom instructions (no plugin discovery)"

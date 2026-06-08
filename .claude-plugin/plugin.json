@@ -1,6 +1,6 @@
 {
   "name": "li",
-  "description": "Lintel — MS-CAIP-SE session harness with 8-phase cycle, role-lifting, context-warming",
+  "description": "Lintel — company-neutral, pack-driven session harness with 8-phase cycle, role-lifting, context-warming",
   "version": "4.9.0",
   "author": {
     "name": "jokerman89",
@@ -11,16 +11,8 @@
   "license": "MIT",
   "keywords": [
     "lintel",
-    "microsoft",
-    "caip",
     "session-harness",
-    "rais",
-    "onecs",
-    "trailblazer-voice",
-    "ev2",
-    "onebranch",
     "compliance",
-    "scaffolding",
-    "azure"
+    "scaffolding"
   ]
 }

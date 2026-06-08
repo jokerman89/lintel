@@ -5,7 +5,7 @@
     "email": "johannes.akerman@gmail.com"
   },
   "metadata": {
-    "description": "Lintel — MS-CAIP-SE session harness marketplace",
+    "description": "Lintel — company-neutral, pack-driven session harness marketplace",
     "version": "4.9.0"
   },
   "plugins": [
@@ -15,7 +15,7 @@
       "description": "Lintel — 8-phase cycle (SENSE→CAPTURE) + role-lifting + context-warming + specialized agents + compliance tiering + multi-CLI",
       "version": "4.9.0",
       "category": "workflow",
-      "tags": ["lintel", "microsoft", "caip", "session-harness", "rais", "trailblazer-voice", "azure"],
+      "tags": ["lintel", "session-harness", "compliance", "scaffolding", "workflow"],
       "strict": false
     }
   ]

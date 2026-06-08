@@ -20,7 +20,7 @@ This document captures the actual plugin-manifest format per CLI as of v3 planni
   "name": "lintel",
   "description": "MS-CAIP-SE session harness",
   "version": "3.0.0",
-  "author": { "name": "jokerman89", "email": "johannes.akerman@microsoft.com" },
+  "author": { "name": "jokerman89", "email": "johannes.akerman@gmail.com" },
   "homepage": "https://github.com/jokerman89/jokerman-lintel",
   "repository": "https://github.com/jokerman89/jokerman-lintel",
   "license": "MIT",
