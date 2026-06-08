@@ -75,5 +75,20 @@ for bad in 'jokerman89/jokerman-lintel' 'Azureflipper/jokerman-session-setup' '3
   fi
 done
 
+# Focused docs tripwire: README + SECURITY are user-facing identity surfaces the
+# SURFACE loop above does NOT scan (v4.9 audit found this gap → false confidence).
+# Scan them for the two most damaging stale strings only. Skip absent files.
+DOCS=(README.md SECURITY.md)
+for f in "${DOCS[@]}"; do
+  [ -f "$f" ] || { pass "doc absent, skipped: $f"; continue; }
+  for bad in 'akerman@microsoft.com' 'jokerman89/jokerman-lintel'; do
+    if grep -qF "$bad" "$f" 2>/dev/null; then
+      fail "stale identity '$bad' present in $f"
+    else
+      pass "no '$bad' in $f"
+    fi
+  done
+done
+
 echo ""
 [ "$FAILED" -eq 0 ] && { echo "manifest-identity: ALL PASS"; exit 0; } || { echo "manifest-identity: FAILURES"; exit 1; }

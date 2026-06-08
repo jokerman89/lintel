@@ -207,7 +207,8 @@ cmd_init() {
   echo "       Codex:          /plugins → search li → Install"
   echo "       Cursor:         /add-plugin li"
   echo "       Gemini:         gemini extensions install https://github.com/jokerman89/lintel"
-  echo "  4. git add -A && git commit -m 'chore: scaffold Lintel base'"
+  echo "  4. Run /li:welcome in your CLI — detects your CLI, shows its honest tier, runs a dry-run cycle."
+  echo "  5. git add -A && git commit -m 'chore: scaffold Lintel base'"
   echo ""
 }
 

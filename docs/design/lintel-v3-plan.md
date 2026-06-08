@@ -506,7 +506,7 @@ jokerman-lintel/
   "version": "3.0.0",
   "author": {
     "name": "jokerman89",
-    "email": "johannes.akerman@microsoft.com"
+    "email": "johannes.akerman@gmail.com"
   },
   "homepage": "https://github.com/jokerman89/jokerman-lintel",
   "repository": "https://github.com/jokerman89/jokerman-lintel",

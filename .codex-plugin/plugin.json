@@ -1,7 +1,7 @@
 {
   "name": "li",
   "version": "4.9.0",
-  "description": "Lintel — MS-CAIP-SE session harness for OpenAI Codex with 8-phase cycle + role-lifting + Azure toolbox",
+  "description": "Lintel — company-neutral, pack-driven session harness for OpenAI Codex with 8-phase cycle + role-lifting",
   "author": {
     "name": "jokerman89",
     "email": "johannes.akerman@gmail.com",
@@ -12,31 +12,26 @@
   "license": "MIT",
   "keywords": [
     "lintel",
-    "microsoft",
-    "caip",
     "session-harness",
-    "rais",
-    "trailblazer-voice",
     "compliance",
-    "scaffolding",
-    "azure"
+    "scaffolding"
   ],
   "skills": "./skills/",
   "agents": "./agents/",
   "interface": {
     "displayName": "Lintel",
-    "shortDescription": "Lintel — MS-CAIP-SE session harness with 8-phase cycle + role-lifting",
-    "longDescription": "Lintel is a complete session harness for Microsoft Sweden CAIP solution engineers. 8-phase cycle (SENSE→DEFINE→DISCOVER→PLAN→BUILD→REVIEW→SHIP→CAPTURE). Role-lifting for customer-persona context. Context-warming for 1M-window utilization. RAIS compliance gates, OneCS checks, Trailblazer voice calibration, doc-gen for PPT/Word/Web, /li:az-* Azure toolbox, repo scaffolding for new customer engagements. Multi-CLI: Claude Code, Codex, Cursor, Gemini, OpenCode, Copilot CLI, Factory Droid.",
+    "shortDescription": "Lintel — pack-driven AI-CLI session harness with 8-phase cycle + role-lifting",
+    "longDescription": "Lintel is a company-neutral, pack-driven session harness for agent-based development. 8-phase cycle (SENSE→DEFINE→DISCOVER→PLAN→BUILD→REVIEW→SHIP→CAPTURE). Role-lifting for persona context. Context-warming for 1M-window utilization. Pack-driven compliance gates, voice calibration, doc-gen for PPT/Word/Web, and repo scaffolding for new engagements. Company identity (voice, compliance, persona, brand) is resolved from the active pack, not hardcoded. Multi-CLI: Claude Code, Codex, Cursor, Gemini, OpenCode, Copilot CLI, Factory Droid.",
     "developerName": "jokerman89",
     "category": "Coding",
     "capabilities": ["Interactive", "Read", "Write"],
     "defaultPrompt": [
       "Help me with a new customer engagement.",
       "Run /li:cycle --mode customer-engagement.",
-      "Validate my copy against Trailblazer voice."
+      "Validate my copy against the active pack's voice."
     ],
     "websiteURL": "https://github.com/jokerman89/lintel",
-    "privacyPolicyURL": "https://privacy.microsoft.com/privacystatement",
+    "privacyPolicyURL": "https://github.com/jokerman89/lintel/issues",
     "termsOfServiceURL": "https://github.com/jokerman89/lintel/blob/main/LICENSE",
     "brandColor": "#0078D4"
   }
