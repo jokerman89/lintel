@@ -50,5 +50,13 @@ else
   echo "  NOTE: jq absent — JSON-extraction asserts skipped (enforced in CI); fallback asserts above still ran"
 fi
 
+# ── jq-free extraction (v4.10 fix): _json_str_field never uses jq, so the
+# command/push/PII block hooks still fire on machines lacking jq (e.g. stock
+# Git-bash on Windows). Runs in BOTH CI and jq-less environments. ──
+r=$( source "$ADAPTER"; _json_str_field command '{"tool_name":"Bash","tool_input":{"command":"git push origin main"}}' )
+[ "$r" = "git push origin main" ] && pass "jq-free: _json_str_field extracts command (no jq needed)" || fail "jq-free command got '$r'"
+r=$( source "$ADAPTER"; _json_str_field file_path '{"tool_input":{"file_path":"src/auth.ts"}}' )
+[ "$r" = "src/auth.ts" ] && pass "jq-free: _json_str_field extracts file_path (no jq needed)" || fail "jq-free file_path got '$r'"
+
 echo ""
 [ "$FAILED" -eq 0 ] && { echo "hook-input-adapter: ALL PASS"; exit 0; } || { echo "hook-input-adapter: FAILURES"; exit 1; }
