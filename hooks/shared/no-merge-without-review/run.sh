@@ -14,10 +14,15 @@ command -v audit_log >/dev/null 2>&1 || source "$(dirname "${BASH_SOURCE[0]}")/.
 
 # Detect merge-to-main patterns
 if echo "$CMD" | grep -qE '(gh\s+pr\s+merge|git\s+merge.*main|git\s+merge.*master)'; then
-  REVIEW_LOG="$LINTEL_HOME/review-log/entries.jsonl"
+  # The review log is written by bin/li-review-log via the unified audit helper to
+  # ~/.lintel/audit/reviews.jsonl (NOT the legacy ~/.lintel/review-log/entries.jsonl path,
+  # which nothing writes). And li-review-log resolves commits to the SHORT HEAD, so we
+  # match on the short commit (a prefix that substring-matches whether the record stored
+  # the short or full sha). Both were silent mismatches that left this gate effectively dead.
+  REVIEW_LOG="$LINTEL_HOME/audit/reviews.jsonl"
   recent_review=0
   if [ -f "$REVIEW_LOG" ]; then
-    head_commit=$(git rev-parse HEAD 2>/dev/null || echo "")
+    head_commit=$(git rev-parse --short HEAD 2>/dev/null || echo "")
     seven_days_ago=$(date -u -d '7 days ago' +"%Y-%m-%d" 2>/dev/null || date -u -v-7d +"%Y-%m-%d" 2>/dev/null || echo "")
     if [ -n "$head_commit" ] && [ -n "$seven_days_ago" ]; then
       if grep "$head_commit" "$REVIEW_LOG" 2>/dev/null | grep -qE "\"status\":\"CLEARED\""; then
