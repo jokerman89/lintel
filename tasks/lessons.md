@@ -116,3 +116,39 @@ sister repos (deeplex has scaffolded CLAUDE.md + living lessons + decisions) —
 Related: [[L-003]] verify before acting — here, verify the meta-process infrastructure exists before
 relying on it. The discipline only compounds across sessions if the snowball (lessons + ADRs) has a
 place to accumulate.
+
+---
+
+## L-007 — REVIEW via an independent subagent, but verify the reviewer too (v4.10)
+
+**Rule:** For any meta-infra change, run REVIEW as an *independent* CodeReviewer subagent on the real
+diff before SHIP — self-testing systematically misses a class of bugs. AND treat the reviewer's report
+as an input to verify, not a verdict to execute: trace each finding to the actual code/contract before
+acting. The reviewer can both over-state (a "collision" that isn't) and under-state (its claim leads you
+to a *deeper* real bug).
+
+**Why:** Building the cycle-position footer (v4.10), my own 30-assertion unit suite was green and I was
+ready to ship. An independent CodeReviewer subagent found a **P0 hang** I'd missed entirely: a trailing
+value-flag (`render_cycle_footer --mode`) made `shift 2` fail-without-consuming → infinite loop in the
+closing footer of *every* report. Self-testing missed it because I only ever tested well-formed calls.
+But the same review's P1-C ("rename collides with Phase-6 review's log entries") was *overstated* — when
+I traced the contract, the merge-hook keys on `commit`+`status:CLEARED`, NOT the skill tag, and Phase-6
+`/review` doesn't log at all, so there was no live collision. Tracing it, however, surfaced a *genuine*
+pre-existing bug the reviewer hadn't framed: the hook read `~/.lintel/review-log/entries.jsonl` while the
+logger writes `~/.lintel/audit/reviews.jsonl` (and matched full-vs-short sha) — the gate was dead. So the
+reviewer was simultaneously wrong about the stated risk and pointing at a real one.
+
+**How to apply:**
+- Meta-infra diff → spawn an independent reviewer (one task, read-only, structured severity report) before
+  SHIP. Don't review your own work in-context; you share its blind spots.
+- Make the reviewer adversarial and feed it a REAL diff (a no-op tree lets a reviewer rubber-stamp — the
+  superpowers #1701 failure mode). Fail closed on "nothing changed."
+- For EACH finding: open the cited code/contract and confirm before acting. Downgrade overstated ones,
+  and follow the thread — an overstated finding often sits next to a real one.
+- Close the gap between asserted and tested: when an ADR claims a property ("fail-open, never errors"),
+  add the tests that prove it. The reviewer's value is partly in exposing claims you never tested.
+
+Related: [[L-003]] verify-counts-before-fact-claims — L-003 says verify external claims before believing;
+L-007 extends it to a reviewer's claims ("subagent reports, main agent decides"). Both: don't execute an
+external document mechanically. [[L-006]] dogfood — the footer feature was itself built by running the
+cycle (SENSE→…→REVIEW) on Lintel, and REVIEW is where the discipline paid off.
