@@ -307,3 +307,15 @@ Skip-conditions: intent=research-only, intent=docs-only.
 ## Voice tier behavior
 
 `voice: internal`. Review reports are engineering-internal. If the active pack defines voice gates AND a customer-facing artifact is reviewed, the voice-gate output is operator-internal critique but the artifact itself goes through the pack's voice gates (`resolve_pack_field voice.gates_active`; none by default).
+
+## Cycle-position footer
+
+Close your report with the shared position footer so the operator always knows where they are in the
+cycle and the one logical next action — whether this phase ran standalone or inside `/li:cycle`:
+
+```bash
+source "$LINTEL_REPO_ROOT/lib/cycle-footer.sh"   # fallback: "$(git rev-parse --show-toplevel)/lib/cycle-footer.sh"
+render_cycle_footer                               # reads .lintel/state/00-state.md; --compact for short replies
+```
+
+Skipped phases render `⊘`; ASCII via `LINTEL_ASCII=1`. See [ADR-0003](../../docs/adr/0003-cycle-position-footer.md).

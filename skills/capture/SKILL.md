@@ -367,3 +367,15 @@ YES — standalone post-implementation reflection. Useful if operator forgot CAP
 ## Voice tier behavior
 
 `voice: internal`. CAPTURE artifacts are mostly engineering-internal. Customer-facing release notes (if shipped from CAPTURE) follow the active pack's voice tier (`resolve_pack_field voice.default_tier`; default: internal).
+
+## Cycle-position footer
+
+Close your report with the shared position footer so the operator always knows where they are in the
+cycle and the one logical next action — whether this phase ran standalone or inside `/li:cycle`:
+
+```bash
+source "$LINTEL_REPO_ROOT/lib/cycle-footer.sh"   # fallback: "$(git rev-parse --show-toplevel)/lib/cycle-footer.sh"
+render_cycle_footer                               # reads .lintel/state/00-state.md; --compact for short replies
+```
+
+Skipped phases render `⊘`; ASCII via `LINTEL_ASCII=1`. See [ADR-0003](../../docs/adr/0003-cycle-position-footer.md).

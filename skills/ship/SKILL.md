@@ -356,3 +356,15 @@ Skip-conditions: intent=research-only, intent=local-dev-only, intent=draft-only.
 ## Voice tier behavior
 
 `voice: mixed`. PR body + release notes follow the active pack's voice tier (`resolve_pack_field voice.default_tier`; default: internal). Customer-facing artifacts go through the pack's voice gates (`resolve_pack_field voice.gates_active`; none by default). Internal handoff (engineering team) uses internal voice.
+
+## Cycle-position footer
+
+Close your report with the shared position footer so the operator always knows where they are in the
+cycle and the one logical next action — whether this phase ran standalone or inside `/li:cycle`:
+
+```bash
+source "$LINTEL_REPO_ROOT/lib/cycle-footer.sh"   # fallback: "$(git rev-parse --show-toplevel)/lib/cycle-footer.sh"
+render_cycle_footer                               # reads .lintel/state/00-state.md; --compact for short replies
+```
+
+Skipped phases render `⊘`; ASCII via `LINTEL_ASCII=1`. See [ADR-0003](../../docs/adr/0003-cycle-position-footer.md).
