@@ -1,5 +1,5 @@
 ---
-name: review
+name: code-review
 layer: foundation
 description: Diff-scoped pre-landing code review. Lighter than /plan-eng-review, focused on changed code only.
 color: red
@@ -8,7 +8,7 @@ voice: internal
 cli_support: [claude-code, codex]
 ---
 
-# /review
+# /code-review
 
 Reviews the current branch's diff before landing. Lighter than `/plan-eng-review` (which reviews a plan/design doc). Use when there's no plan but you want a code review pass before `/ship`.
 
@@ -46,7 +46,7 @@ Auto-scales: small diffs get fast review; large diffs (200+ lines) additionally 
    - Test coverage (does the diff add tests for new code paths? regression risk?)
    - Performance (N+1, memory, slow paths introduced)
 4. **Codex pass (if LARGE diff or --codex)** — invoke Codex with structured review prompt. P1 findings BLOCK ship.
-5. **Persist via `bin/li-review-log`** (legacy alias: gstack-review-log) with `skill: review` (distinct from `plan-eng-review`).
+5. **Persist via `bin/li-review-log`** (legacy alias: gstack-review-log) with `skill: code-review` (distinct from Phase-6 `/review` and `plan-eng-review`).
 6. **Output: findings list + severity + suggested fixes.**
 
 ## Report format
@@ -79,7 +79,7 @@ Run /ship when P2+ resolved.
 
 Persist via `bin/li-review-log` (legacy alias: gstack-review-log):
 ```bash
-bin/li-review-log '{"skill":"review","timestamp":"...","status":"...","findings":N,"findings_fixed":N,"gate":"P1_clean","commit":"..."}'
+bin/li-review-log '{"skill":"code-review","timestamp":"...","status":"...","findings":N,"findings_fixed":N,"gate":"P1_clean","commit":"..."}'
 ```
 
 ## Compliance integration
@@ -111,14 +111,14 @@ Every finding gets a 1-10 confidence:
 
 **Small clean diff:**
 ```
-> /review
+> /code-review
 Diff scope: 23 lines, 2 files (SMALL)
 ✓ No findings. Clean to /ship.
 ```
 
 **Medium diff with findings:**
 ```
-> /review
+> /code-review
 [3 findings reported]
 P1: 0, P2: 1, P3: 2
 Action: fix P2 before /ship.
@@ -126,7 +126,7 @@ Action: fix P2 before /ship.
 
 **Large diff with Codex P1 gate:**
 ```
-> /review
+> /code-review
 Diff: 412 lines, 18 files (LARGE)
 Codex pass: P1 found — race condition in payment-handler.ts:108
 ✗ /ship BLOCKED until P1 resolved
@@ -135,5 +135,5 @@ Codex pass: P1 found — race condition in payment-handler.ts:108
 ## See also
 
 - `/plan-eng-review` — heavier plan-stage review (use when design doc exists)
-- `/investigate` — debugging when /review finds something broken
-- `/ship` — reads /review's dashboard entry as ship-gate signal (within 7 days, current commit)
+- `/investigate` — debugging when /code-review finds something broken
+- `/ship` — reads /code-review's dashboard entry as ship-gate signal (within 7 days, current commit)

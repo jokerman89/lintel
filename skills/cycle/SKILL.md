@@ -257,6 +257,21 @@ Between phases:
 - Propagate phase output as input to next (e.g., DEFINE's design doc → PLAN's source)
 - Check if mode-specific gates apply (e.g., a pack-contributed customer mode may auto-run the active pack's voice gates after SHIP — `resolve_pack_field voice.gates_active`)
 
+**Cycle-position footer.** Each phase skill closes its own report with the shared position footer
+(see [ADR-0003](../../docs/adr/0003-cycle-position-footer.md)), so the operator always knows where
+they are and the one logical next action — regardless of where they entered the cycle. The
+orchestrator does **not** double-render between phases; it renders the footer only at its **own
+gates** (mode-confirm, the cost-estimate gate) and at **cycle completion**:
+
+```bash
+source "$LINTEL_REPO_ROOT/lib/cycle-footer.sh"   # or: git rev-parse --show-toplevel
+render_cycle_footer --awaiting "Proceed with BUILD? [Y/n/edit-plan]"   # at a gate
+render_cycle_footer                                                    # at completion
+```
+
+The footer is mode-aware (skipped phases render `⊘`) and auto-falls to a thin ambient line when no
+cycle is active. Glyphs degrade to ASCII under `LINTEL_ASCII=1`.
+
 ### Step 5 — Cost-estimate gate (BEFORE BUILD)
 
 If BUILD is in phases_to_run, before invoking it:
