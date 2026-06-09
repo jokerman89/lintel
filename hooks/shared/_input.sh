@@ -30,6 +30,14 @@ _hook_stdin() {
   printf '%s' "${_HOOK_STDIN_JSON:-}"
 }
 
+# _json_str_field <key> <json> — extract a JSON string value WITHOUT jq (sed
+# fallback for machines that lack jq, e.g. stock Git-bash on Windows). Handles
+# backslash-escaped chars inside the value. Best-effort: good enough for hook
+# detection (git commands, file paths). The jq path is preferred when present.
+_json_str_field() {
+  printf '%s' "$2" | sed -nE "s/.*\"$1\"[[:space:]]*:[[:space:]]*\"(([^\"\\\\]|\\\\.)*)\".*/\1/p" | head -1
+}
+
 # hook_input <field> [argv1]
 #   field: payload | command | file_path | prompt
 #   Returns the field from the Claude Code stdin JSON when available, else argv1.
@@ -50,8 +58,15 @@ hook_input() {
     # greppable (secret scanners); for a specific field, fall through to argv1.
     [ "$field" = "payload" ] && { printf '%s' "$json"; return 0; }
   elif [ -n "$json" ]; then
-    # No jq: a specific field can't be parsed, but the raw JSON is greppable.
-    [ "$field" = "payload" ] && { printf '%s' "$json"; return 0; }
+    # No jq: extract the requested field with a sed fallback so the command/push/PII
+    # block hooks still fire (payload stays raw JSON — it is greppable as-is).
+    case "$field" in
+      command)   extracted="$(_json_str_field command "$json")" ;;
+      file_path) extracted="$(_json_str_field file_path "$json")"; [ -z "$extracted" ] && extracted="$(_json_str_field path "$json")" ;;
+      prompt)    extracted="$(_json_str_field prompt "$json")"; [ -z "$extracted" ] && extracted="$(_json_str_field message "$json")" ;;
+      payload|*) printf '%s' "$json"; return 0 ;;
+    esac
+    if [ -n "$extracted" ]; then printf '%s' "$extracted"; return 0; fi
   fi
   printf '%s' "$argv1"
 }
