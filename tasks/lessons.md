@@ -152,3 +152,32 @@ Related: [[L-003]] verify-counts-before-fact-claims — L-003 says verify extern
 L-007 extends it to a reviewer's claims ("subagent reports, main agent decides"). Both: don't execute an
 external document mechanically. [[L-006]] dogfood — the footer feature was itself built by running the
 cycle (SENSE→…→REVIEW) on Lintel, and REVIEW is where the discipline paid off.
+
+## L-008 — Dogfood the footer: every report in Lintel work ends with the position footer (v4.11)
+
+**Rule:** When working in (or on) Lintel, close every substantive report to the operator with the
+cycle-position footer — `render_cycle_footer` (lib/cycle-footer.sh), explicit `--here/--mode` flags
+when working ad-hoc outside a skill-driven cycle. The convention shipped in v4.10 applies to the
+agent's own reports, not just skill output.
+
+**Why:** Operator correction (2026-06-10): mid-v4.11 I reported progress repeatedly with no footer —
+the exact "big report, no position, no next action" gap the v4.10 feature was built to close. The
+factory must run on itself ([[L-006]]); a convention we ship but don't follow reads as dead on arrival.
+
+**How to apply:** At the end of any status/progress/completion message in this repo: where are we,
+what's next, what to say to proceed. Use the real helper, not a hand-typed imitation, so drift in the
+helper surfaces immediately.
+
+## L-009 — Never pipe a test runner through tail/head: the pipeline eats the exit code (v4.11)
+
+**Rule:** Run suites as `rc=0; runner > out.txt 2>&1 || rc=$?` and inspect the file — never
+`runner | tail -N`. A pipeline's exit status is the LAST command's; `| tail` reports success even
+when the suite failed, and `-N` can clip the summary block that says FAILED.
+
+**Why:** v4.11 Phase A: the full suite FAILED (phase-a-naming-migration expected the removed
+context-budgetwatch) but my `| tail -6` invocation returned rc=0 and clipped the summary — I reported
+"green" on a red tree and nearly committed it. Same family as the runner's own fail-closed fix shipped
+in this very phase: silence is not success ([[L-003]]).
+
+**How to apply:** Capture to a file, echo `$rc` explicitly, read the summary from the file. In CI
+scripts, `set -o pipefail` if a pipe is unavoidable.
