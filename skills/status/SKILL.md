@@ -96,3 +96,15 @@ YES — always solo-invocable. Most-used Lintel command in the wild.
 - `/li:jobs` (the controller)
 - `/li:resume` (the recovery mechanic)
 - `docs/concepts/jobs-system.md`
+
+## Cycle-position footer
+
+Close your report with the shared position footer. Outside an active cycle it renders the thin
+ambient line; inside one it shows the operator's position + next step:
+
+```bash
+source "$LINTEL_REPO_ROOT/lib/cycle-footer.sh"   # fallback: "$(git rev-parse --show-toplevel)/lib/cycle-footer.sh"
+render_cycle_footer                               # auto: thin when no cycle, full/--compact when in one
+```
+
+See [ADR-0003](../../docs/adr/0003-cycle-position-footer.md).

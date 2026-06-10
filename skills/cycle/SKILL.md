@@ -242,6 +242,11 @@ For each phase in phases_to_run order:
 7. If status=NEEDS_CONTEXT: pause, gather, re-invoke phase
 ```
 
+**Mode persistence (for the footer).** Once the phase list + mode are fixed (Step 3), write
+`cycle_mode: <mode>` into `.lintel/state/00-state.md` once at cycle start (alongside `cycle_id`), so
+`render_cycle_footer` (and every phase skill that calls it) resolves the skipped-phase glyphs from
+state alone — no explicit `--mode` needed. See [ADR-0003](../../docs/adr/0003-cycle-position-footer.md).
+
 **Phase-progress format** (printed to stdout at each phase boundary):
 
 ```

@@ -69,6 +69,8 @@ first, then the 9 phase skills, then the rest). A few lines of footer per report
 the compact/thin tiers. The mode→skip map now has a second consumer to keep honest (covered by
 the unit test).
 
-**Follow-ups (Phases 2–3, tracked in `tasks/todo.md`).** Wire the 9 phase skills + a shape test
-asserting presence; extend to welcome/jobs/resume/status; have the cycle orchestrator write
-`cycle_mode:` into `00-state.md` so the footer reads mode from state without an explicit `--mode`.
+**Follow-ups — all shipped (Phases 2–3).** Phase 2 wired the 9 phase skills + a presence shape test.
+Phase 3 extended the footer to the high-traffic non-phase entry points (welcome/jobs/resume/status)
+and had the cycle orchestrator write `cycle_mode:` into `00-state.md`, so the footer resolves the
+skipped-phase glyphs from state alone without an explicit `--mode`. The footer now closes every
+official entry point — inside a cycle (full/compact) or outside one (thin ambient).

@@ -159,3 +159,15 @@ truth about their CLI on the first screen. Never over-claim a capability the tie
 
 - CLI detection uncertain → default to `other`/best-effort and say so; never over-claim.
 - `lib/cli-tiers.yaml` unreadable → `cli_tier_field` returns safe defaults (best-effort, hooks off); proceed, degraded-but-honest.
+
+## Cycle-position footer
+
+Close your report with the shared position footer. Outside an active cycle it renders the thin
+ambient line; inside one it shows the operator's position + next step:
+
+```bash
+source "$LINTEL_REPO_ROOT/lib/cycle-footer.sh"   # fallback: "$(git rev-parse --show-toplevel)/lib/cycle-footer.sh"
+render_cycle_footer                               # auto: thin when no cycle, full/--compact when in one
+```
+
+See [ADR-0003](../../docs/adr/0003-cycle-position-footer.md).

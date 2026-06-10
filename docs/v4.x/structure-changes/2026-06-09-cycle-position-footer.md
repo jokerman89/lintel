@@ -52,8 +52,11 @@ and glyph sets are parameterised, so new modes/CLIs extend the data, not the cod
 
 ## Verification
 
-- Shape-tests added: none yet (Phase 2 adds `tests/shape/cycle-footer-present.sh` once the 9 phase
-  skills are wired — a presence check would currently fail by design).
+- Shape-tests added: `tests/shape/cycle-footer-present.sh` (Phase 2/3) — asserts the 9 phase skills,
+  the orchestrator (+ its `cycle_mode:` state-write), and the 4 non-phase entry points all reference
+  the footer.
+- Integration-tests added: `tests/integration/no-merge-without-review.sh` (the review-log gate fix
+  folded in during REVIEW).
 - Unit-tests added: `tests/unit/cycle-footer.sh` (30 assertions — tiers, skip precedence, positional
   done-state, ASCII fallback, state-file parse, question-mode, complete→thin).
 - Existing shape-tests affected: none. `bash -n` clean on both helpers.

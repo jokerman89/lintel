@@ -294,3 +294,16 @@ n/a — RESUME is itself the hop-in mechanism.
 ## Voice tier behavior
 
 `voice: internal`. Resume output is operator-coordination.
+
+## Cycle-position footer
+
+Close your report with the shared position footer — resume's whole job is re-orienting the operator,
+so the "you are here → next" block is the natural closing line (inside a cycle it shows the resumed
+position; with none active, the thin ambient line):
+
+```bash
+source "$LINTEL_REPO_ROOT/lib/cycle-footer.sh"   # fallback: "$(git rev-parse --show-toplevel)/lib/cycle-footer.sh"
+render_cycle_footer                               # auto: thin when no cycle, full/--compact when in one
+```
+
+See [ADR-0003](../../docs/adr/0003-cycle-position-footer.md).
