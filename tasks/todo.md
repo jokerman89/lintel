@@ -60,7 +60,9 @@ Gates M1–M4 active.
       cli_support; agents category+tier+cli_support; 0/168 skills carry `category`) · five-lens
       checklist reconciled — all 19 boxes ticked with per-task tree evidence (P1-6; the work
       shipped in v4.9, only the doc state drifted). M1: 2026-06-10-v4.11-cycle-discipline.md.
-- [ ] B4 M3 suite green → REVIEW → push → PR 2 (opens after #59 merges; rebase onto main first).
+- [x] B4 Independent review (verdict SHIP-WITH-FIXES: 1 P2 start-ref gap + 2 P3 — all fixed:
+      3a records `start_ref`, guard consumes it, `git diff -w` pinned, grep -E). Suite 69/69 on
+      the tree rebased onto post-#59 main → PR #60.
 
 ## Phase C — consistency gate (PR 3, own ADR)
 
@@ -75,4 +77,15 @@ Gates M1–M4 active.
 - Remaining ~25 official skills adopting the cycle footer — incremental adoption.
 
 ## Review
-_(to be filled at task end)_
+
+Initiative complete (2026-06-10, one session). Two PRs: **#59** (Phase A launch polish — merged) and
+**#60** (Phase B cycle discipline — open). Net effect on the §18 punch-list: every item closed or
+verified already-closed; the readiness report's "hold a clean public launch" blockers are gone.
+Notable findings along the way: the audit backlog overstated three items (Convergent #2 already
+shipped; broken links were 8 not 10; most of §18 closed upstream) — re-verify audit claims against
+the live tree before building (L-003 pattern, again). Both phases went through the full L-007
+review loop; both reviewers found real gaps self-review missed (perf-mode refs, the runner's
+ANSI-blind skip counting, the 3b-guard start-ref hole). Process slips captured as lessons in-flight:
+L-008 (dogfood the footer), L-009 (pipe eats exit codes). Phase C (Convergent #6, the
+DEFINE↔PLAN↔BUILD consistency gate) is designed-not-started — it needs its own ADR and is the
+natural next initiative.
