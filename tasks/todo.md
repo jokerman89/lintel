@@ -67,11 +67,15 @@ shape-test; extend to welcome/jobs/resume/status; orchestrator to write `cycle_m
       surprise users who expect "review" → cycle REVIEW; the diff-scoped skill is a deliberate standalone.
       Reversible if PR-specific routing is later wanted. Documented, not changed.
 
-### Phase 3 — polish + reach
-- [ ] `--ascii` fallback (D2) + `--awaiting` question-mode (D4), with unit coverage.
-- [ ] Extend to non-phase official skills: `welcome, jobs, resume, status`.
-- [ ] M2 `bin/li-compat-audit` (expect GREEN/YELLOW — additive helper, no contract change) + M3 shape
-      green + M4 capture/migration note.
+### Phase 3 — polish + reach  ✅ DONE
+- [x] `--ascii` fallback (D2) + `--awaiting` question-mode (D4) — built in Phase 1, unit-covered.
+- [x] Extended to non-phase official entry points: `welcome, jobs, resume, status` (thin ambient
+      outside a cycle). Shape test covers all 4.
+- [x] Orchestrator persists `cycle_mode:` into `00-state.md` → footer resolves skips from state, no
+      `--mode` needed. Shape test asserts the write.
+- [x] M2 compat-audit + M3 suite green. (M4 capture: ADR-0003 + structure-changes mark Phases 2–3 shipped.)
+- _Remaining reach (future): the other ~25 official skills can adopt the same trailer incrementally;
+  the 4 high-traffic entry points cover the common case._
 
 ## REVIEW round (independent CodeReviewer, verdict SHIP-WITH-FIXES → all fixed)
 Adversarial review found 1 P0 + 4 P1 + 5 P2. Acted on all in-scope:
@@ -117,4 +121,12 @@ Adversarial review found 1 P0 + 4 P1 + 5 P2. Acted on all in-scope:
 - Full (P1–P3): ~40–60k tokens. Within meta-infra soft cap (600k).
 
 ## Review
-_(to be filled at task end)_
+
+Initiative complete (2026-06-10). Phases 1–2 + the adversarial-review fixes shipped to `main` via
+PR #57 (squash-merged 2026-06-09). Phase 3 (entry-point footers in `welcome`/`jobs`/`resume`/`status`,
+`cycle_mode:` persisted to `00-state.md`, shape-test coverage) landed on the branch post-merge; it was
+rebased onto `main` as one clean commit and opened as **PR #58** from `feat/cycle-footer-phase-3`
+(force-push to the old branch is gate-blocked, so a fresh branch carries the rebase; the old branch
+can be deleted). Full suite on the rebased head: **68/68 PASS**. Out-of-authority surfaces were
+resolved during the run (review-log gate fixed in #57; orientator routing: documented no-change).
+Remaining reach — the other ~25 official skills adopting the trailer — is incremental, parked above.
