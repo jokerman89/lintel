@@ -34,7 +34,7 @@ Clear ownership domains:
 Frozen / handle-with-care zones:
 
 - `packs/_default/pack.yaml` and `lib/pack-resolver.sh` — the pack contract; ~30 skills depend on it. Change behind a shape-test.
-- Frontmatter contracts (`layer`, `category`, `cli_support`, `tier`) — changing them is a meta-infra change touching every skill/agent.
+- Frontmatter contracts (skills: `layer` + `cli_support`; agents: `category` + `tier` + `cli_support`) — changing them is a meta-infra change touching every skill/agent.
 - `AGENT-INSTRUCTIONS.md` — the canonical cross-CLI session ritual.
 
 <!-- PROJECT:END -->
