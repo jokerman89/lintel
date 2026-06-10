@@ -159,7 +159,7 @@ Goal: Every skill, agent, hook, content doc, and runtime concept speaks MS-inter
 
 Aliases retained: ALL v1 skill names work as aliases until v2.5 (operator muscle memory + teammates). Aliases logged on first use ("you invoked `/release-ev2` — preferred name is `/release-ev2` in v2; alias still works"). Removed at v2.5 if usage drops to <5% per analytics.
 
-**Full migration table:** see [MIGRATION-TABLE.md](../../MIGRATION-TABLE.md) in repo root. The table here is the highlight summary; the full 65-skill + 40-agent enumeration with new-name-or-"unchanged" status lives in MIGRATION-TABLE.md as the source of truth. Phase A consumes that file as its rename input. **(P1 fix T5 — eng-review)**
+**Full migration table:** see [MIGRATION-TABLE-v2.md](MIGRATION-TABLE-v2.md) (same directory). The table here is the highlight summary; the full 65-skill + 40-agent enumeration with new-name-or-"unchanged" status lives in MIGRATION-TABLE-v2.md as the source of truth. Phase A consumes that file as its rename input. **(P1 fix T5 — eng-review)**
 
 New terminology introduced:
 - **1ES** (One Engineering System) — top-level toolchain identity reference
@@ -246,7 +246,7 @@ Goal: Context as a budgeted resource per task-phase, not as "what fits before co
 
 **(P1 fix T1 — eng-review):** v2.0 ships engine as **declarative + soft-enforcement only**. The engine emits warnings at 80% and 100% of budget — operator decides next move. Hard enforcement (block on budget exceeded) deferred to v2.0.5 patch AFTER usage data confirms warnings get acted on. Boring-by-default applied to a novel system; Claude can't compact mid-session anyway so hard enforcement would mostly produce "override" decisions which is decorative.
 
-**(P1 fix T10 — eng-review):** Error semantics specified in [CONTEXT-ENGINE.md](../../CONTEXT-ENGINE.md):
+**(P1 fix T10 — eng-review):** Error semantics specified in [CONTEXT-ENGINE.md](CONTEXT-ENGINE.md):
 - Phase transition error → log + continue current phase (don't crash)
 - Budget-exceeded mid-phase → warn + offer compress/checkpoint/override
 - Operator-cancel → checkpoint current phase state + persist to `~/.lintel/sessions/$SESSION_ID/checkpoint-{phase}.md`

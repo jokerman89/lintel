@@ -4,7 +4,7 @@
 
 **Status:** v4.9 — company-neutral, pack-driven harness. The Microsoft CAIP-SE identity has been extracted to the separate [lintel-caip-pack](https://github.com/jokerman89/lintel-caip-pack); Lintel ships only the neutral `_default` pack. See [CHANGELOG.md](CHANGELOG.md) for release notes and [SHIP-GATE.md](SHIP-GATE.md) for readiness gates. Current architecture lives at [docs/design/lintel-v4.0-reframe-design.md](docs/design/lintel-v4.0-reframe-design.md).
 
-Lintel ships **169 skills + 70 agents + 1 pack (`_default`)** organized for the plugin-manifest pattern across 8 CLIs. Plus the foundation scaffolding-template system (CORE-PRINCIPLES, EVOLUTION-LOG, tasks/lessons.md, ADR templates) that gets copied into new repos via `bin/li-scaffold`. The engineering-domain modules (`/li:ta`, `/li:da`, `/li:sc`, `/li:dh`, `/li:tq`) plus the 8-phase cycle are the core.
+Lintel ships **168 skills + 70 agents + 1 pack (`_default`)** organized for the plugin-manifest pattern across 8 CLIs. Plus the foundation scaffolding-template system (CORE-PRINCIPLES, EVOLUTION-LOG, tasks/lessons.md, ADR templates) that gets copied into new repos via `bin/li-scaffold`. The engineering-domain modules (`/li:ta`, `/li:da`, `/li:sc`, `/li:dh`, `/li:tq`) plus the 9-step cycle (8 core phases + SCOPE) are the core.
 
 Lintel is the **complete session harness** — not just a skill catalog. It manages the full lifecycle: session-start ritual → mid-session interventions (hooks, voice gates, compliance) → end-of-session capture (lessons, ADR drafting, EVOLUTION-LOG) → cross-session continuity (memory, lessons-sync). See [docs/session-harness.md](docs/session-harness.md) for the full mental model.
 
@@ -15,7 +15,7 @@ Lintel is the **complete session harness** — not just a skill catalog. It mana
 Two distinct categories, both shipped in this repo:
 
 **Category A — Agent-invokable** (what your CLI sees via plugin manifest):
-- `skills/` — slash-commands (8-phase cycle + engineering modules + session-harness)
+- `skills/` — slash-commands (9-step cycle + engineering modules + session-harness)
 - `agents/` — subagent roles organized per domain
 - `hooks/shared/` — compliance + workflow hooks
 
@@ -36,7 +36,7 @@ Anyone running an AI CLI who wants a disciplined session harness. The harness it
 
 Full on Claude Code, Codex, and Cursor; supported on four more; best-effort elsewhere. The
 **enforcement hooks fire only on Claude Code** — every other CLI still gets the skills, the
-8-phase cycle discipline, and the pack-driven knowledge, just not the live hook gate. This
+9-step cycle discipline, and the pack-driven knowledge, just not the live hook gate. This
 table is generated from `lib/cli-tiers.yaml` (the single source); `/li:welcome` reads the same
 file to tell you, on first run, exactly what works on *your* CLI. See [docs/per-cli/](docs/per-cli/)
 for per-CLI install guides.
@@ -87,7 +87,7 @@ copilot plugin install li@jokerman-lintel
 ```
 
 **Then run `/li:welcome`** in your CLI — it detects your CLI, shows your honest capability tier
-(what works and what doesn't here), runs a dry-run cycle so you feel the 8-phase discipline
+(what works and what doesn't here), runs a dry-run cycle so you feel the 9-step discipline
 without mutating anything, and demonstrates a safety hook. The fastest way to see the harness work.
 
 ### 3. Install scaffolding source (for `li-scaffold` in new repos)
@@ -121,7 +121,7 @@ Full walkthrough: [docs/getting-started.md](docs/getting-started.md).
 
 ## What you get
 
-- **Skills** for daily workflows: the 8-phase `/li:cycle` (sense→capture), engineering-domain modules (`/li:ta`, `/li:da`, `/li:sc`, `/li:dh`, `/li:tq`), `/qa`, `/investigate`, `/plan-eng-review`, `/office-hours`, `/generate-ppt`, `/generate-word`, `/generate-web`, plus session-harness skills (`/skill-router`, `/li:doctor`, `/li:scaffold`, `/lessons-promote`, `/adr-new`, `/personas-rotate`, `/pack-create`, `/pack-switch`).
+- **Skills** for daily workflows: the 9-step `/li:cycle` (sense→capture), engineering-domain modules (`/li:ta`, `/li:da`, `/li:sc`, `/li:dh`, `/li:tq`), `/qa`, `/investigate`, `/plan-eng-review`, `/office-hours`, `/generate-ppt`, `/generate-word`, `/generate-web`, plus session-harness skills (`/skill-router`, `/li:doctor`, `/li:scaffold`, `/lessons-promote`, `/adr-new`, `/personas-rotate`, `/pack-create`, `/pack-switch`).
 - **Agents** organized per domain: engineering, security, compliance (generic frameworks — GDPR/SOC2/EU-AI-Act), devops, customer, communication, doc-gen, frontend. Company-specific agents load from a pack.
 - **Compliance hooks** (opt-in via symlinks): `customer-data-block`, `secret-scan-block`, `no-direct-main-push`, etc.
 - **Pack-driven compliance + voice**: the active pack declares its compliance gates and voice tier; the neutral `_default` pack enforces nothing. Company packs (e.g. lintel-caip-pack) supply tiered compliance and a calibrated voice corpus.

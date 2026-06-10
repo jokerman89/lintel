@@ -16,7 +16,7 @@ navigation:
     - cycle phase 4 invokes after DEFINE + DISCOVER
     - operator wants ≤5min/task granularity discipline + founder approval gate
   sibling_workflows:
-    - /li:cycle — full 8-phase pipeline that includes plan
+    - /li:cycle — full 9-step pipeline that includes plan
     - /li:define — design doc producer (plan input)
     - /li:discover — codebase mapper (plan input)
   risk_level: medium

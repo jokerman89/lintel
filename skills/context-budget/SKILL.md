@@ -15,7 +15,7 @@ You are the context-budget skill — visibility into the 1M-window.
 
 Reports current session's context utilization. Breaks down by source (CLAUDE.md, loaded files, conversation history, subagent results). Recommends warm-up or cool-down based on budget state.
 
-With `--watch`, runs the context-bloat soft-warning check instead: reads session token estimate + tool-call count, compares against configured thresholds (default: 50k tokens / 80 tool calls soft, 80k / 130 hard), and recommends `/clean` or `/context-save` if approaching limits. (`/li:context-budgetwatch` is a thin alias for `/li:context-budget --watch`.)
+With `--watch`, runs the context-bloat soft-warning check instead: reads session token estimate + tool-call count, compares against configured thresholds (default: 50k tokens / 80 tool calls soft, 80k / 130 hard), and recommends `/clean` or `/context-save` if approaching limits. (The former `/li:context-budgetwatch` skill is consolidated here; the old name resolves via `config/aliases.yaml` until 2026-09-10.)
 
 ## When to use
 
@@ -192,7 +192,7 @@ YES — pure information query.
 
 ## Integration
 
-Reads `.lintel/state/context-budget.md`. No writes beyond optional event log. Watch mode reads `~/.lintel/config.yaml` (watcher thresholds) + session telemetry under `~/.lintel/sessions/<id>/`, read-only — no Layer 2 mutations, no audit log needed. `/li:context-budgetwatch` delegates here via `--watch`.
+Reads `.lintel/state/context-budget.md`. No writes beyond optional event log. Watch mode reads `~/.lintel/config.yaml` (watcher thresholds) + session telemetry under `~/.lintel/sessions/<id>/`, read-only — no Layer 2 mutations, no audit log needed. (The former `/li:context-budgetwatch` delegator was removed 2026-06-10; the name resolves via `config/aliases.yaml`.)
 
 See also: `/clean` (in-session lighter-weight clear) · `/context-save` (checkpoint + clean break) · `/context-restore` (resume from checkpoint).
 

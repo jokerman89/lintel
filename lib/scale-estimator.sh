@@ -148,8 +148,8 @@ scale_escalate() {
 }
 
 # ─── size_to_depth_schema ────────────────────────────────────────────────────
-# Slice 1 renders flat (XS/S) and phased (M). tree (L/XL) ships in Slice 2 —
-# until then L/XL fall back to phased so a big plan is at least sectioned.
+# flat (XS/S), phased (M), tree (L/XL) — full tree rendering shipped in Slice 2
+# (plan.template.md is depth_schema-parametric; see skills/plan/SKILL.md).
 size_to_depth_schema() {
   case "${1:-S}" in
     XS|S) printf 'flat' ;;

@@ -21,7 +21,7 @@ very disciplines in this file into other repos.
 
 Clear ownership domains:
 
-- `skills/` — slash-commands (the 8-phase `/li:cycle` + engineering modules `ta`/`da`/`sc`/`dh`/`tq` + session-harness skills)
+- `skills/` — slash-commands (the 9-step `/li:cycle` (8 core phases + SCOPE) + engineering modules `ta`/`da`/`sc`/`dh`/`tq` + session-harness skills)
 - `agents/` — subagent roles per domain (engineering, security, compliance, devops, customer, communication, doc-gen, frontend)
 - `hooks/shared/` — pre/post hooks (compliance + workflow enforcement)
 - `packs/` — pack manifests; only the neutral `_default` ships here. Company identity (e.g. Microsoft CAIP-SE) installs as an external pack — see [lintel-caip-pack](https://github.com/jokerman89/lintel-caip-pack).
@@ -63,7 +63,7 @@ Frozen / handle-with-care zones:
 When a request matches a skill, **invoke it** (skills are auto-surfaced — you can see them). A nudge,
 not an exhaustive map — run `/li:catalog` to discover the full set.
 
-- Multi-step work / a real task → `/li:cycle` (the 8-phase SENSE→CAPTURE loop; writes `.lintel/state/00-state.md`)
+- Multi-step work / a real task → `/li:cycle` (the 9-step SENSE→CAPTURE loop; writes `.lintel/state/00-state.md`)
 - Architecture / data / security / devops / testing depth → `/li:ta` · `/li:da` · `/li:sc` · `/li:dh` · `/li:tq`
 - Bug / "why is this broken" → `/li:investigate`  ·  Tests / "does it work" → `/li:qa`
 - Plan review → `/li:plan-eng-review` / `/li:plan-ceo-review`  ·  Brainstorm an idea → `/li:office-hours`
