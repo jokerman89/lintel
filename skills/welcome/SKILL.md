@@ -36,7 +36,7 @@ them *feel* the harness work in five minutes, honestly, on whichever CLI they ar
 
 1. Detect the active CLI.
 2. Show that CLI's **honest** capability tier — including what does NOT work here.
-3. Run one guided cycle in dry-run so they see the 8-phase discipline without mutating anything.
+3. Run one guided cycle in dry-run so they see the 9-step discipline without mutating anything.
 4. Demonstrate a safety hook (or honestly explain why it can't fire on their CLI).
 5. Point them at the next step.
 
@@ -97,7 +97,7 @@ whole point — an operator who learns the limits up front trusts the rest.
 
 ### Step 3 — Guided cycle, dry-run (no mutation)
 
-Run the 8-phase cycle in dry-run so they see the discipline without creating a job, a plan,
+Run the 9-step cycle in dry-run so they see the discipline without creating a job, a plan,
 or any state in their repo:
 
 Invocation: `/li:cycle --dry-run "add a hello endpoint"` (a throwaway prompt — dry-run shows

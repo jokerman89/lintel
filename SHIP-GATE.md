@@ -154,8 +154,8 @@ Before tagging v3.0.0:
 
 ## Gate 11 (NEW v3.5) — Cycle infrastructure
 
-Lintel 8-phase cycle ships with full depth:
-- All 8 phase-skills present + valid frontmatter
+Lintel 9-step cycle (8 core phases + SCOPE) ships with full depth:
+- All 9 phase-skills present + valid frontmatter
 - li-cycle orchestrator can dispatch each phase
 - li-resume reads 00-state.md correctly
 - 4 composite shortcuts delegate properly to li-cycle

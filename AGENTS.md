@@ -10,7 +10,7 @@ For canonical session bootstrap, see [AGENT-INSTRUCTIONS.md](AGENT-INSTRUCTIONS.
 
 Lintel is a company-neutral, pack-driven session harness — markdown scaffolding for agent-based development. Company identity (the Microsoft CAIP-SE workprofile) loads from the separate lintel-caip-pack.
 
-- `skills/` — slash-commands (8-phase cycle + engineering modules + session-harness)
+- `skills/` — slash-commands (9-step cycle + engineering modules + session-harness)
 - `agents/` — subagent roles organized per domain
 - `hooks/shared/` — compliance + workflow hooks
 - `scaffolding/` — templates copied INTO other repos

@@ -38,7 +38,7 @@ Clear ownership domains:
 When a request matches a skill, **invoke it** (Lintel skills are auto-surfaced). A nudge, not a map —
 run `/li:catalog` to discover the full set.
 
-- Multi-step work / a real task → `/li:cycle` (8-phase SENSE→CAPTURE; writes `.lintel/state/00-state.md`)
+- Multi-step work / a real task → `/li:cycle` (9-step SENSE→CAPTURE; writes `.lintel/state/00-state.md`)
 - Bug → `/li:investigate`  ·  Tests → `/li:qa`  ·  Deep context → `/li:context-warm`
 - Plan review → `/li:plan-eng-review`  ·  Brainstorm → `/li:office-hours`
 - Record a decision → `/li:adr-new`  ·  Save / resume → `/li:context-save` · `/li:resume`

@@ -32,6 +32,12 @@ skill_aliases:
     removal_at: 2026-08-29
     reason: "WS-4b rename — sibling to gbrain-setup, same domain-prefix-first pattern"
 
+  - old: context-budgetwatch
+    new: context-budget
+    deprecated_at: 2026-06-10
+    removal_at: 2026-09-10
+    reason: "T19 consolidation completed — the check lives at /li:context-budget --watch; the thin delegator skill is removed (punch-list §18 #6)"
+
   # (agt-tier-stamp → agent-tier-stamp alias removed with the skill — now in lintel-caip-pack)
 
 env_var_aliases:

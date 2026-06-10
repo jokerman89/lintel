@@ -139,7 +139,7 @@ All 168 skills are `layer: foundation`, namespaced `/li:<name>`, catalogued in t
   sub-skills (each emitting a JSON contract), `frontend-design-review` (6-dimension gate),
   `frontend-style-extract`.
 - **Context-* family (~16)** — warm (load-in): `context-warm[-adrs|-related|-customer|-sessions|-from-url]`,
-  `context-warmup`; budget/cool: `context-budget` (+`--watch`), `context-budgetwatch`, `context-cool`,
+  `context-warmup`; budget/cool: `context-budget` (+`--watch`), `context-budgetwatch` (removed 2026-06-10 — consolidated into `context-budget --watch`), `context-cool`,
   `perf-mode`; persist: `context-save`/`-restore`/`-snapshot`/`-dump`. This cluster carries the repo's
   main naming inconsistencies (see §17).
 - **Session-harness / ops (~30)** — `doctor`, `health`, `safe-install`, `scaffold[-mvp|-internal-tool]`,

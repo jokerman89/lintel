@@ -147,7 +147,7 @@ Decision:    confirm_with_operator (high-risk workflow)
 Budget:      0 / 2000 tokens (mechanical-only)
 
 Alternatives if not what you want:
-  /li:cycle          # full 8-phase cycle
+  /li:cycle          # full 9-step cycle
   /li:review         # standalone review
 ```
 

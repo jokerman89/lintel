@@ -56,7 +56,7 @@ In your CLI, run:
 ```
 
 It detects your CLI, shows your **honest** capability tier (what works and what doesn't here),
-runs one cycle in **dry-run** so you see the 8-phase discipline without mutating anything, and
+runs one cycle in **dry-run** so you see the 9-step discipline without mutating anything, and
 demonstrates a safety hook (or honestly explains why it can't fire on your CLI). This is the fastest
 way to understand what Lintel does for you. Run it first.
 

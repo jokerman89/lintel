@@ -690,7 +690,7 @@ Final per-category counts: ms-specific 15, engineering 25, customer 8, security 
 
 ### Naming migration (Phase A)
 
-- 24 skills renamed to mirror MS process: `/ship` → `/release-ev2`, `/compliance-gate` → `/onecs-check`, `/sensitive-use-report` → `/rais-sensitive-use`, `/li:test` → `/onebranch-validate`, etc. Full table in [MIGRATION-TABLE.md](MIGRATION-TABLE.md).
+- 24 skills renamed to mirror MS process: `/ship` → `/release-ev2`, `/compliance-gate` → `/onecs-check`, `/sensitive-use-report` → `/rais-sensitive-use`, `/li:test` → `/onebranch-validate`, etc. Full table in [MIGRATION-TABLE.md](docs/design/MIGRATION-TABLE-v2.md).
 - 2 agents renamed: `MSComplianceAuditor` → `OneCSAuditor`; `EvalSuiteAuthor` → `CloudTestSuiteAuthor`.
 - 5 voice docs renamed: `TRAILBLAZER-*.md` → `OurVoice-*.md` (matches canonical MS guide title).
 - Directory rename: `scaffolding/02-compliance/` → `scaffolding/02-sdl/` (matches SDL framing).
@@ -699,25 +699,25 @@ Final per-category counts: ms-specific 15, engineering 25, customer 8, security 
 
 ### Portability shim (Phase B)
 
-- New: [CLI-SUPPORT-V2-SCHEMA.md](scaffolding/01-foundation/CLI-SUPPORT-V2-SCHEMA.md) — formal per-CLI degradation grammar (full / degraded / not-supported × claude-code / codex / copilot-cli / copilot-app).
+- New: [CLI-SUPPORT-V2-SCHEMA.md](docs/design/CLI-SUPPORT-V2-SCHEMA.md) — formal per-CLI degradation grammar (full / degraded / not-supported × claude-code / codex / copilot-cli / copilot-app).
 - New skill: `/li:cli-fingerprint` — 5-step CLI detection cascade with operator-declarable fallback.
 - v1 cli_support arrays still parse correctly (backward compat).
 
 ### 1M context budget engine (Phase C)
 
-- New: [CONTEXT-ENGINE.md](CONTEXT-ENGINE.md) — phase-declaration grammar, budget tracker semantics, watcher thresholds (80%/100%), decay policies, warmup-task pattern, outcome scoring, cost tracking. **Soft enforcement only in v2.0** per eng-review P1; hard enforcement deferred to v2.0.5.
+- New: [CONTEXT-ENGINE.md](docs/design/CONTEXT-ENGINE.md) — phase-declaration grammar, budget tracker semantics, watcher thresholds (80%/100%), decay policies, warmup-task pattern, outcome scoring, cost tracking. **Soft enforcement only in v2.0** per eng-review P1; hard enforcement deferred to v2.0.5.
 - New skills: `/context-budget`, `/context-warmup`, `/perf-mode`.
 - Rename: `/context-tokenwatch` → `/context-budgetwatch`.
 - New agent: `ContextBudgetAdvisor` (Layer 4) — suggests phase declarations for unstructured tasks.
 
 ### T0 voice calibration (Phase D)
 
-- New: [T0-CALIBRATION-WORKFLOW.md](T0-CALIBRATION-WORKFLOW.md) — operator workflow for moving Trailblazer corpus from POPULATED → CALIBRATED. Pre-flight smoke-test recipe + per-cell iteration + cell-drop decision.
+- New: [T0-CALIBRATION-WORKFLOW.md](docs/design/T0-CALIBRATION-WORKFLOW.md) — operator workflow for moving Trailblazer corpus from POPULATED → CALIBRATED. Pre-flight smoke-test recipe + per-cell iteration + cell-drop decision.
 - Calibration is operator-driven (requires actual LLM-eval calls); Lintel documents the recipe.
 
 ### Brand integration (Phase E)
 
-- New: [BRAND-INTEGRATION.md](BRAND-INTEGRATION.md) — MS brand asset architecture, cache invalidation, staleness watcher.
+- New: [BRAND-INTEGRATION.md](docs/design/BRAND-INTEGRATION.md) — MS brand asset architecture, cache invalidation, staleness watcher.
 - New skills: `/brand-update`, `/asset-search`.
 - New hook: `brand-staleness-warn` (warn-only at >90 days).
 - Default fallback templates (per eng-review P1 fix T3): `scaffolding/03-personal-advanced/doc-gen/default-templates/default-{ppt,word,web}-template.{json,html}`. Doc-gen runtime works regardless of operator brand-pull status.

@@ -2,7 +2,7 @@
 name: cycle
 layer: foundation
 workflow_root: true
-description: Lintel cycle orchestrator — runs full 8-phase pipeline (SENSE → CAPTURE) or operator-specified subset. Mode presets, hop-in support, cost-estimate gate before BUILD. Spawns a job (v3.8 Feature 1) at invocation.
+description: Lintel cycle orchestrator — runs full 9-step pipeline (SENSE → CAPTURE) or operator-specified subset. Mode presets, hop-in support, cost-estimate gate before BUILD. Spawns a job (v3.8 Feature 1) at invocation.
 color: cyan
 tools: Read, Write, Edit, Bash, Grep, Glob
 voice: internal
@@ -10,7 +10,7 @@ cli_support: [claude-code, codex]
 necessity: STRONGLY_RECOMMENDED
 gap_if_skipped: "Ad-hoc phase sequencing without cost-estimate gate, founder-approval gate, or compliance gates between REVIEW and SHIP."
 navigation:
-  primary_intent: full feature/cycle work with structured 8-phase pipeline
+  primary_intent: full feature/cycle work with structured 9-step pipeline
   triggers:
     - operator types /li:cycle (cold start)
     - operator wants the full path with gates between phases

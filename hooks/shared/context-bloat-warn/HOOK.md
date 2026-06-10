@@ -9,7 +9,7 @@ audit: not logged (high-volume; would generate noise)
 
 # context-bloat-warn
 
-Surfaces context-bloat warning at the 50k token / 80 tool-call soft threshold (configurable). Hooks the periodic check so the operator doesn't have to manually run `/context-budgetwatch`.
+Surfaces context-bloat warning at the 50k token / 80 tool-call soft threshold (configurable). Hooks the periodic check so the operator doesn't have to manually run `/li:context-budget --watch`.
 
 ## Behavior
 
@@ -23,4 +23,4 @@ Claude cannot mid-session compact context. The skill is honest about this — it
 
 ## Audit
 
-Skipped — would generate too much noise. The `/context-budgetwatch` skill writes explicit audit events when operator invokes it.
+Skipped — would generate too much noise. The `/li:context-budget --watch` check writes explicit audit events when the operator invokes it.
