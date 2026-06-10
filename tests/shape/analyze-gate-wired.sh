@@ -35,10 +35,10 @@ else
 fi
 
 # 2. PLAN Step 8 delegates (and does not keep the old inline checklist)
-if grep -q "delegates to /li:analyze" "$PLAN"; then
-  pass "PLAN Step 8 delegates to /li:analyze"
+if grep -q "delegates to /li:analyze" "$PLAN" && grep -q "plan-step8" "$PLAN"; then
+  pass "PLAN Step 8 delegates to /li:analyze (plan-step8 trigger)"
 else
-  fail "PLAN Step 8 does not delegate to /li:analyze"
+  fail "PLAN Step 8 does not delegate to /li:analyze with the plan-step8 trigger"
 fi
 if grep -q "Does plan.md cover all requirements in design doc?" "$PLAN"; then
   fail "PLAN Step 8 still carries the inline checklist (duplication — shared-schema violation)"
@@ -46,18 +46,26 @@ else
   pass "PLAN Step 8 inline checklist removed (single implementation)"
 fi
 
-# 3. BUILD final pass calls the build-final leg
-if grep -q "build-final" "$BUILD" && grep -q "/li:analyze" "$BUILD"; then
-  pass "BUILD final pass invokes /li:analyze (build-final trigger)"
+# 3. BUILD final pass calls the build-final leg (same instruction, not scattered mentions)
+if grep -q '/li:analyze.*build-final\|build-final.*\`/li:analyze\`' "$BUILD"; then
+  pass "BUILD final pass invokes /li:analyze (build-final trigger, same instruction)"
 else
-  fail "BUILD final pass missing the /li:analyze call"
+  fail "BUILD final pass missing the /li:analyze build-final call"
 fi
 
-# 4. ADR exists and is Accepted
-if [ -f "$ADR" ] && grep -q "Accepted" "$ADR"; then
-  pass "ADR-0004 exists and Accepted"
+# 4. SHIP pre-flight surfaces the verdict (read-only, advisory)
+SHIP="$REPO_ROOT/skills/ship/SKILL.md"
+if grep -q "analyze-report.md" "$SHIP"; then
+  pass "SHIP pre-flight surfaces the analyze-report verdict"
 else
-  fail "ADR-0004 missing or not Accepted"
+  fail "SHIP pre-flight does not surface the analyze-report verdict (ADR-0004 gap #3)"
+fi
+
+# 5. ADR exists and its Status line is Accepted (pinned to the Status field)
+if [ -f "$ADR" ] && grep -qE '^\- \*\*Status:\*\* Accepted' "$ADR"; then
+  pass "ADR-0004 exists with Status: Accepted"
+else
+  fail "ADR-0004 missing or Status line not Accepted"
 fi
 
 echo ""

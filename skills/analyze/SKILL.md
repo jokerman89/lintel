@@ -38,8 +38,8 @@ artifact — report honestly what could not be checked):
 | Artifact | Source |
 |---|---|
 | Design doc | newest `docs/design/*-design-*.md` or the doc named in `00-state.md` DEFINE entry |
-| Cold-executor trio | `plan.md` + `spec.md` + `prompt.md` (paths from `00-state.md` PLAN entry) |
-| Discover report | `discover-report.md` (ADR constraints list) |
+| Cold-executor trio | `plan.md` + `spec.md` (paths from the `00-state.md` PLAN entry) + `prompt.md` (sibling in the same `docs/plans/<slug>/` dir — the PLAN entry records only plan/spec paths) |
+| Discover report | newest `.lintel/state/discover-report-*.md`, or the `report_path:` recorded in the `00-state.md` DISCOVER entry (ADR constraints list) |
 | Build evidence | build-log entries + `00-state.md` BUILD entry + `git log`/`git diff` over the cycle's commits |
 | Authority docs | `docs/adr/*.md` (Accepted), CLAUDE.md frozen zones |
 
@@ -47,6 +47,8 @@ artifact — report honestly what could not be checked):
 
 **Leg 1 — DEFINE↔PLAN** (plan-time; what PLAN Step 8 delegates here):
 - Every design-doc requirement maps to ≥1 plan.md task (coverage)
+- Every design decision is tasked or explicitly deferred — including decisions not phrased as
+  requirements (the old Step 8 "design decisions not yet tasked" check)
 - No plan task lacks a traceable design requirement (no untasked scope creep into the plan)
 - Design decisions marked LOCKED are not contradicted by any task
 - plan.md dependencies consistent with discover-report ADR constraints
@@ -80,6 +82,10 @@ verdict: GREEN | YELLOW | RED
 Severity rubric: **P1** = a contradiction (task vs LOCKED decision, ADR violation, untasked
 shipped work) → verdict RED. **P2** = a coverage gap (requirement with no task, task with no
 terminal status) → YELLOW unless operator-accepted. **P3** = traceability nits → GREEN-with-notes.
+
+**Supersede rule:** a re-run replaces the report, but operator-accepted findings carry forward
+(re-emit them marked `accepted <date>`, excluded from the verdict) — an acceptance recorded at
+plan-step8 must survive the build-final re-run, or accepted gaps re-flag forever.
 
 Verdict is **advisory**: RED does not hard-block — surface it and let the operator decide
 (defer to backlog / amend plan / accept gap), exactly like PLAN Step 8's existing protocol.
