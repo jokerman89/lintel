@@ -64,11 +64,17 @@ Gates M1–M4 active.
       3a records `start_ref`, guard consumes it, `git diff -w` pinned, grep -E). Suite 69/69 on
       the tree rebased onto post-#59 main → PR #60.
 
-## Phase C — consistency gate (PR 3, own ADR)
+## Phase C — consistency gate (PR 3, branch feat/v4.12-consistency-gate, ADR-0004)
 
-- [ ] C1 Convergent #6: `/analyze`-style DEFINE↔PLAN↔BUILD consistency gate (spec-kit's biggest
-      steal). Design first: ADR + where it hooks (pre-BUILD gate vs standalone skill). Largest item;
-      design doc → implement → shape test.
+- [x] C0 DEFINE: verified PLAN Step 8 already covers the plan-time leg ("adopted from speckit
+      Analyze") — real gaps: re-runnability, PLAN↔BUILD leg, persisted artifact, authority
+      re-check. Operator gate 2026-06-10: **standalone /li:analyze** chosen over extend-inline /
+      fold-into-plan-eng-review / defer. ADR-0004 (Accepted).
+- [x] C1 BUILD: `skills/analyze/SKILL.md` (3 legs, GREEN/YELLOW/RED advisory verdict, persisted
+      `.lintel/state/analyze-report.md`, footer per ADR-0003) · PLAN Step 8 → delegation (inline
+      checklist REMOVED — single implementation) · BUILD Step 6 → `--trigger build-final` call ·
+      `tests/shape/analyze-gate-wired.sh` (incl. duplication tripwire) · M1 entry.
+- [ ] C2 Suite green → REVIEW (L-007) → fixes → push → PR 3.
 
 ## Parked (explicitly not this initiative)
 - context-* naming drift + the two divergent review-rubric families (§17) — deliberate design calls,
