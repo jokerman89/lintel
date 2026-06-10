@@ -3,13 +3,13 @@
 **Last updated:** 2026-05-30 (v4.1 alpha)
 **Status:** Concept doc — referenced by `skills/ta/SKILL.md` (TA, v4.1), and future `skills/da/` (DA), `skills/sc/` (SC), `skills/dh/` (DH), `skills/tq/` (TQ)
 
-> Real engineering work has depth that the 8-phase cycle alone doesn't capture. A new service needs architectural decisions; a new datastore needs schema work; a customer engagement needs compliance plumbing; a production rollout needs deployment + observability; a critical path needs test coverage. v4.0 ships the harness; v4.1+ ships the depth as **engineering domain modules** — workflow_root skills that operators can invoke standalone, call from inside BUILD as sub-modules, or compose into a "full engineering pass."
+> Real engineering work has depth that the 9-step cycle alone doesn't capture. A new service needs architectural decisions; a new datastore needs schema work; a customer engagement needs compliance plumbing; a production rollout needs deployment + observability; a critical path needs test coverage. v4.0 ships the harness; v4.1+ ships the depth as **engineering domain modules** — workflow_root skills that operators can invoke standalone, call from inside BUILD as sub-modules, or compose into a "full engineering pass."
 
 ## The problem
 
 Pre-v4.0, BUILD was a single phase. Operators with architectural depth (new microservice, schema-breaking migration, security-bound feature) had three bad options:
 
-1. **Cram it into BUILD** — TDD discipline good, architectural reasoning bad. The 8-phase cycle assumes the architecture is known going in.
+1. **Cram it into BUILD** — TDD discipline good, architectural reasoning bad. The 9-step cycle assumes the architecture is known going in.
 2. **Drop to ad-hoc skills** — `/li:adr-draft`, `/li:api-review` exist scattered, no orchestration, no checkpoints, no recovery.
 3. **Skip the depth** — ship shallow, regret later.
 

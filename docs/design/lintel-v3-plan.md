@@ -1,7 +1,7 @@
 # Lintel v3 — plan (revised)
 
 **Datum:** 2026-05-27
-**Föregående:** [li-v2-design.md](li-v2-design.md) (v2 spec-complete)
+**Föregående:** [lintel-v2-design.md](lintel-v2-design.md) (v2 spec-complete)
 **Status:** PLAN — approved by operator 2026-05-27. Execution started on `v3-dev` branch.
 **Författare:** Claude Code (Opus 4.7) på begäran av jokerman89 (MS Sweden CAIP-SE).
 

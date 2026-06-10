@@ -165,7 +165,7 @@ If session ended mid-task: `tasks/todo.md` makes the next session able to pick u
 
 ## Lintel cycle — the structured path (v3.5)
 
-For non-trivial work, the Lintel cycle provides an explicit 8-phase pipeline. Each phase is its own skill; composed cycles run via orchestrator.
+For non-trivial work, the Lintel cycle provides an explicit 9-step pipeline (8 core phases + SCOPE). Each phase is its own skill; composed cycles run via orchestrator.
 
 **Canonical invocation:**
 - `/li:cycle` — full cycle SENSE → SCOPE → DEFINE → DISCOVER → PLAN → BUILD → REVIEW → SHIP → CAPTURE (8 core phases + the light, skippable SCOPE phase between SENSE and DEFINE)
