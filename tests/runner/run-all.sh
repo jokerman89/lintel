@@ -8,7 +8,8 @@
 #
 # Exit codes:
 #   0 = all pass (or skips only)
-#   1 = at least one fail
+#   1 = at least one fail, OR zero tests discovered (fail-closed: a green run
+#       must assert something — an empty scope is a broken promise, not a pass)
 #   2 = runner-level error (missing tests/ dir, etc.)
 
 set -euo pipefail
@@ -95,6 +96,11 @@ printf "${c_red}Fail:   %d${c_reset}\n" "$failed"
 if [ "$failed" -gt 0 ]; then
   printf "\n${c_red}== Failure details ==${c_reset}\n"
   for entry in "${FAIL_LOG[@]}"; do printf "%b\n" "$entry"; done
+  exit 1
+fi
+
+if [ "$total" -eq 0 ]; then
+  printf "\n${c_red}FAIL-CLOSED: scope '%s' discovered zero tests — a run that asserts nothing is not green.${c_reset}\n" "$SCOPE" >&2
   exit 1
 fi
 
