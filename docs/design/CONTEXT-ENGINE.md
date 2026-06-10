@@ -236,7 +236,7 @@ Operator tunes per project + per session via `/context-budget --config`.
 | `/context-budget` | View + modify current phase budget, declare new phase, checkpoint |
 | `/context-warmup` | Explicit preload of high-leverage context per declared warmup pattern |
 | `/perf-mode` | Activate 1M context-budget mode for the current session |
-| `/context-budgetwatch` (renamed from `/context-tokenwatch`) | Passive monitoring with budget-aware thresholds |
+| `/context-budgetwatch` (renamed from `/context-tokenwatch`; consolidated into `/context-budget --watch` 2026-06-10) | Passive monitoring with budget-aware thresholds |
 
 Plus agent: `ContextBudgetAdvisor` (Layer 4) — suggests phase declarations for unstructured tasks.
 

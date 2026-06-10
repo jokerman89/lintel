@@ -183,14 +183,8 @@ cmd_context_engine() {
     [ -n "$found" ] && ok "skill: $skill" || { fail "skill missing: $skill"; EXIT_CODE=1; }
   done
 
-  # context-budgetwatch (was context-tokenwatch)
-  found=""
-  for skill in context-budgetwatch context-tokenwatch; do
-    if [ -f "$REPO_ROOT/skills/$skill/SKILL.md" ]; then
-      found="$REPO_ROOT/skills/$skill/SKILL.md"; ok "skill: $skill"; break
-    fi
-  done
-  [ -z "$found" ] && warn "skill: context-budgetwatch / context-tokenwatch missing (optional)"
+  # (context-budgetwatch removed 2026-06-10 — consolidated into context-budget --watch;
+  #  the old name resolves via config/aliases.yaml until 2026-09-10)
 
   # ContextBudgetAdvisor at agents/engineering/
   if [ -f "$REPO_ROOT/agents/engineering/ContextBudgetAdvisor.md" ]; then
