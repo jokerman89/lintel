@@ -32,7 +32,20 @@ Gates M1–M4 active.
       "9-step (8 core + SCOPE)" across README/CLAUDE/AGENTS/GEMINI/AGENT-INSTRUCTIONS/SHIP-GATE/
       getting-started/engineering-modules/CLAUDE.md.template (historical design docs left as-is) ·
       README count 169 → 168 skills.
-- [ ] A4 M2 compat audit + M3 full suite green → push → PR 1.
+- [x] A4-REVIEW Independent CodeReviewer on the real diff (L-007): verdict **SHIP-WITH-FIXES**
+      (0 P0 / 1 P1 / 3 P2 / 5 P3). All acted on:
+      - P1 `skills/perf-mode` still pointed at the removed `/context-budgetwatch` (×2) → repointed.
+      - P2 runner: ANSI-blind `^SKIP` grep counted every skip as a PASS (pre-existing, first
+        activated by the tag-filtered e2e job) → ESC-strip before grep; PLUS all-skip-under-tag-filter
+        now fails closed. Verified: codex-compatible filter → rc=1 "all 1 skipped".
+      - P2 wiki/showcase don't self-heal (only CATALOG has a workflow) → `bin/li-wiki-gen` run,
+        outputs committed (168/70, budgetwatch gone).
+      - P2 9-step sweep extended to live skill surfaces: welcome(×2)/cycle(frontmatter+nav)/plan/
+        orientator — README promised "9-step" while welcome rendered "8-phase".
+      - P3 context-budget:195 stale "delegates here" · v2-design prose/link mismatch · e2e footer
+        step pins LINTEL_HOME (hermetic) + install_out printed on failure · state-of-the-harness:142
+        annotated. P3 aliases-are-convention note: accepted pattern, no action.
+- [ ] A4 M3 full suite green on the fixed tree → push → PR 1.
 
 ## Phase B — cycle discipline (PR 2)
 

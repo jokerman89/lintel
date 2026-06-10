@@ -159,7 +159,7 @@ Goal: Every skill, agent, hook, content doc, and runtime concept speaks MS-inter
 
 Aliases retained: ALL v1 skill names work as aliases until v2.5 (operator muscle memory + teammates). Aliases logged on first use ("you invoked `/release-ev2` — preferred name is `/release-ev2` in v2; alias still works"). Removed at v2.5 if usage drops to <5% per analytics.
 
-**Full migration table:** see [MIGRATION-TABLE-v2.md](MIGRATION-TABLE-v2.md) (same directory). The table here is the highlight summary; the full 65-skill + 40-agent enumeration with new-name-or-"unchanged" status lives in MIGRATION-TABLE.md as the source of truth. Phase A consumes that file as its rename input. **(P1 fix T5 — eng-review)**
+**Full migration table:** see [MIGRATION-TABLE-v2.md](MIGRATION-TABLE-v2.md) (same directory). The table here is the highlight summary; the full 65-skill + 40-agent enumeration with new-name-or-"unchanged" status lives in MIGRATION-TABLE-v2.md as the source of truth. Phase A consumes that file as its rename input. **(P1 fix T5 — eng-review)**
 
 New terminology introduced:
 - **1ES** (One Engineering System) — top-level toolchain identity reference

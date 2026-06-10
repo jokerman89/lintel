@@ -192,7 +192,7 @@ YES — pure information query.
 
 ## Integration
 
-Reads `.lintel/state/context-budget.md`. No writes beyond optional event log. Watch mode reads `~/.lintel/config.yaml` (watcher thresholds) + session telemetry under `~/.lintel/sessions/<id>/`, read-only — no Layer 2 mutations, no audit log needed. `/li:context-budgetwatch` delegates here via `--watch`.
+Reads `.lintel/state/context-budget.md`. No writes beyond optional event log. Watch mode reads `~/.lintel/config.yaml` (watcher thresholds) + session telemetry under `~/.lintel/sessions/<id>/`, read-only — no Layer 2 mutations, no audit log needed. (The former `/li:context-budgetwatch` delegator was removed 2026-06-10; the name resolves via `config/aliases.yaml`.)
 
 See also: `/clean` (in-session lighter-weight clear) · `/context-save` (checkpoint + clean break) · `/context-restore` (resume from checkpoint).
 

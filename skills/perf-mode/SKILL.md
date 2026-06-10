@@ -76,7 +76,7 @@ Active phases will use perf-mode budget unless explicitly declared otherwise.
 
 Deactivate: /perf-mode --off
 View state: /context-budget
-Monitor:    /context-budgetwatch
+Monitor:    /context-budget --watch
 ```
 
 ## Compliance integration
@@ -128,5 +128,5 @@ At average velocity: 16 hours runway. Estimated $24-48 cost.
 - `CONTEXT-ENGINE.md` — engine semantics
 - `/context-budget` — view + modify state
 - `/context-warmup` — explicit preload
-- `/context-budgetwatch` — passive monitoring
+- `/context-budget --watch` — passive monitoring
 - `ContextBudgetAdvisor` — Layer 4 agent suggests perf-mode for unstructured tasks

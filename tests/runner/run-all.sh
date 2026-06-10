@@ -8,8 +8,9 @@
 #
 # Exit codes:
 #   0 = all pass (or skips only)
-#   1 = at least one fail, OR zero tests discovered (fail-closed: a green run
-#       must assert something — an empty scope is a broken promise, not a pass)
+#   1 = at least one fail, OR zero tests discovered, OR a tag filter that
+#       matched nothing (fail-closed: a green run must assert something —
+#       an empty scope or all-skip filter is a broken promise, not a pass)
 #   2 = runner-level error (missing tests/ dir, etc.)
 
 set -euo pipefail
@@ -32,6 +33,7 @@ done
 [ -d "$TESTS_DIR" ] || { echo "ERROR: tests/ dir missing" >&2; exit 2; }
 
 c_green='\033[32m'; c_red='\033[31m'; c_yellow='\033[33m'; c_reset='\033[0m'; c_bold='\033[1m'
+ESC=$(printf '\033')
 
 case "$SCOPE" in
   unit) SEARCH_DIRS="unit" ;;
@@ -73,7 +75,9 @@ for dir in $SEARCH_DIRS; do
     output=$(bash "$test_file" </dev/null 2>&1) || rc=$?
 
     if [ "$rc" -eq 0 ]; then
-      if echo "$output" | grep -q '^SKIP'; then
+      # The test template's skip() prints a color code before "SKIP", so the
+      # line starts with an ANSI escape — strip them or every skip counts as a pass.
+      if printf '%s\n' "$output" | sed "s/${ESC}\[[0-9;]*m//g" | grep -q '^SKIP'; then
         skipped=$((skipped + 1))
       else
         passed=$((passed + 1))
@@ -101,6 +105,11 @@ fi
 
 if [ "$total" -eq 0 ]; then
   printf "\n${c_red}FAIL-CLOSED: scope '%s' discovered zero tests — a run that asserts nothing is not green.${c_reset}\n" "$SCOPE" >&2
+  exit 1
+fi
+
+if [ -n "$TAG_FILTER" ] && [ "$passed" -eq 0 ]; then
+  printf "\n${c_red}FAIL-CLOSED: tag filter '%s' matched zero tests (all %d skipped) — a run that asserts nothing is not green.${c_reset}\n" "$TAG_FILTER" "$total" >&2
   exit 1
 fi
 

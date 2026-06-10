@@ -70,6 +70,7 @@ SANDBOX_HOME="$TEST_TMP/lintel-home"
 # 1. install.sh into a sandbox LINTEL_HOME (same floor the install-linux CI job asserts)
 install_rc=0
 install_out=$(LINTEL_HOME="$SANDBOX_HOME" bash "$REPO_ROOT/install/install.sh" 2>&1 </dev/null) || install_rc=$?
+[ "$install_rc" -eq 0 ] || printf '%s\n' "$install_out"
 assert_eq "0" "$install_rc" "install.sh exit code"
 assert_dir_exists "$SANDBOX_HOME/scaffolding"
 assert_dir_exists "$SANDBOX_HOME/hooks"
@@ -88,9 +89,11 @@ printf '_default\n' > "$TEST_TMP/active-pack"
 assert_eq "internal" "$(resolver_probe voice.default_tier)" "resolve voice.default_tier"
 assert_eq "none" "$(resolver_probe voice.enforce)" "resolve voice.enforce (real parse, no fallback)"
 
-# 3. cycle footer renders from a fixture append-log state (ADR-0003 contract)
+# 3. cycle footer renders from a fixture append-log state (ADR-0003 contract).
+#    LINTEL_HOME pinned to the sandbox so a pack-sensitive footer change can never
+#    make this test depend on the operator's real ~/.lintel.
 printf 'phase: PLAN\nstatus: DONE\n\nphase: BUILD\nstatus: IN_PROGRESS\nnext_recommended: REVIEW\ncycle_mode: meta-infra\n' > "$TEST_TMP/00-state.md"
-footer_out=$(bash -c 'source "'"$REPO_ROOT"'/lib/cycle-footer.sh" && render_cycle_footer --ascii --state "'"$TEST_TMP"'/00-state.md"' 2>&1 </dev/null)
+footer_out=$(LINTEL_HOME="$SANDBOX_HOME" bash -c 'source "'"$REPO_ROOT"'/lib/cycle-footer.sh" && render_cycle_footer --ascii --state "'"$TEST_TMP"'/00-state.md"' 2>&1 </dev/null)
 assert_contains "$footer_out" "BUILD" "footer: you-are-here phase rendered"
 assert_contains "$footer_out" "/li:review" "footer: next-command derived from state"
 
