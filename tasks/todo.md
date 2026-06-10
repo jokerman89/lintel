@@ -47,15 +47,22 @@ Gates M1–M4 active.
         annotated. P3 aliases-are-convention note: accepted pattern, no action.
 - [ ] A4 M3 full suite green on the fixed tree → push → PR 1.
 
-## Phase B — cycle discipline (PR 2)
+## Phase B — cycle discipline (PR 2, branch feat/v4.11-cycle-discipline)
 
-- [ ] B1 Convergent #5: BUILD two-stage review fails CLOSED on a no-op tree (no diff → review
-      verdict cannot be SHIP). skills/build/SKILL.md + shape test.
-- [ ] B2 Convergent #2: `/li:lessons-surface` mandatory+automatic at SENSE (written-but-never-read
-      loop closed). skills/sense/SKILL.md + shape test.
-- [ ] B3 Small P1s: remove orphaned `hooks/entropy-secret-check.sh` (M1) · P1-1 frontmatter-contract
-      drift in CLAUDE.md · P1-6 stale five-lens checklist reconcile (verify still stale first).
-- [ ] B4 M2 + M3 green → push → PR 2.
+- [x] B1 Convergent #5: `skills/build/SKILL.md` step **3b-guard** — empty/whitespace-only diff →
+      review MUST NOT run, task forced BLOCKED (superpowers #1701). build-pilot.sh asserts it.
+- [x] B2 Convergent #2: **already shipped** — SENSE Step 0a unconditionally runs
+      `/li:lessons-surface --auto-from-sense` (v3.6 item 1.3 + v4.9 T17 made it multi-CLI).
+      Stale backlog item; decision documented in the M1 entry, no edit. (session-digest's
+      recent-lessons view is complementary: recency vs keyword-relevance.)
+- [x] B3 Small P1s: orphaned `hooks/entropy-secret-check.sh` removed (P1-7, zero refs verified) ·
+      CLAUDE.md frozen-zone line now states the real two-contract split (P1-1: skills layer+
+      cli_support; agents category+tier+cli_support; 0/168 skills carry `category`) · five-lens
+      checklist reconciled — all 19 boxes ticked with per-task tree evidence (P1-6; the work
+      shipped in v4.9, only the doc state drifted). M1: 2026-06-10-v4.11-cycle-discipline.md.
+- [x] B4 Independent review (verdict SHIP-WITH-FIXES: 1 P2 start-ref gap + 2 P3 — all fixed:
+      3a records `start_ref`, guard consumes it, `git diff -w` pinned, grep -E). Suite 69/69 on
+      the tree rebased onto post-#59 main → PR #60.
 
 ## Phase C — consistency gate (PR 3, own ADR)
 
@@ -70,4 +77,15 @@ Gates M1–M4 active.
 - Remaining ~25 official skills adopting the cycle footer — incremental adoption.
 
 ## Review
-_(to be filled at task end)_
+
+Initiative complete (2026-06-10, one session). Two PRs: **#59** (Phase A launch polish — merged) and
+**#60** (Phase B cycle discipline — open). Net effect on the §18 punch-list: every item closed or
+verified already-closed; the readiness report's "hold a clean public launch" blockers are gone.
+Notable findings along the way: the audit backlog overstated three items (Convergent #2 already
+shipped; broken links were 8 not 10; most of §18 closed upstream) — re-verify audit claims against
+the live tree before building (L-003 pattern, again). Both phases went through the full L-007
+review loop; both reviewers found real gaps self-review missed (perf-mode refs, the runner's
+ANSI-blind skip counting, the 3b-guard start-ref hole). Process slips captured as lessons in-flight:
+L-008 (dogfood the footer), L-009 (pipe eats exit codes). Phase C (Convergent #6, the
+DEFINE↔PLAN↔BUILD consistency gate) is designed-not-started — it needs its own ADR and is the
+natural next initiative.

@@ -73,6 +73,9 @@ For each task in dependency order:
 
 #### 3a — Dispatch implementer subagent
 
+**Record the task's start ref first:** note the current `HEAD` sha (one `git rev-parse HEAD`)
+in the build-log entry for this task — 3b-guard diffs against it after the implementer returns.
+
 Spawn fresh subagent with:
 - **Full task text** from plan.md (verbatim, not "read plan.md")
 - **Scene-setting context** (what came before this task, why, what's expected)
@@ -97,6 +100,21 @@ Implementer self-reviews. Returns status:
 - **DONE_WITH_CONCERNS** — concerns logged in implementer message
 - **NEEDS_CONTEXT** — implementer asked for info, provide + re-dispatch
 - **BLOCKED** — implementer can't proceed, root-cause hypothesis, escalate to operator
+
+#### 3b-guard — Empty-diff check (fail-closed, v4.11)
+
+Before dispatching ANY review — inline or dedicated — verify the implementer actually changed
+the tree. Compare against the task's start ref recorded in 3a: `git diff <start_ref>` covers
+both committed (WIP commits) and uncommitted work; if the start ref is somehow missing, fall
+back to `git status --porcelain` + `git diff HEAD` AND check `git log` for WIP commits carrying
+this task's ID before concluding "no change".
+
+- **Diff is empty or whitespace-only** (`git diff -w <start_ref>` produces nothing) → the review
+  MUST NOT run and the task CANNOT be marked DONE. Treat as **BLOCKED**: the implementer
+  no-op'd, reported success without editing, or wrote outside the repo. Re-dispatch with the
+  discrepancy stated, or escalate.
+- Rationale: a reviewer fed a no-op tree rubber-stamps it — "looks complete" with nothing to look
+  at (the superpowers #1701 failure mode). A green review must have reviewed *something*.
 
 #### 3c — Two-stage review (complexity-gated)
 
@@ -173,6 +191,7 @@ Append to `.lintel/state/build-log.md`:
 ```yaml
 task: T<N>
 title: <title>
+start_ref: <HEAD sha at 3a dispatch>   # 3b-guard diffs against this
 status: DONE | DONE_WITH_CONCERNS | BLOCKED
 implementer_status: <as returned>
 review_mode: dedicated | inline   # inline for mechanical/Haiku-tier leaf tasks (3c gate)
