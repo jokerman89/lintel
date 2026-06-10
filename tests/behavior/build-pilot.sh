@@ -50,6 +50,13 @@ if [ -f "$BUILD_FILE" ]; then
   else
     fail "build/SKILL.md saknar Anti-patterns-sektion"
   fi
+
+  # v4.11: review is fail-closed on a no-op tree (superpowers #1701)
+  if grep -q "3b-guard" "$BUILD_FILE" && grep -qi "empty.*diff\|diff is empty" "$BUILD_FILE"; then
+    pass "build/SKILL.md has empty-diff fail-closed guard before review dispatch"
+  else
+    fail "build/SKILL.md missing empty-diff guard — a reviewer fed a no-op tree rubber-stamps it"
+  fi
 else
   fail "skills/build/SKILL.md missing — pilot cannot run"
 fi

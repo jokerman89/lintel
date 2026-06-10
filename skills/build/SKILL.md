@@ -98,6 +98,18 @@ Implementer self-reviews. Returns status:
 - **NEEDS_CONTEXT** — implementer asked for info, provide + re-dispatch
 - **BLOCKED** — implementer can't proceed, root-cause hypothesis, escalate to operator
 
+#### 3b-guard — Empty-diff check (fail-closed, v4.11)
+
+Before dispatching ANY review — inline or dedicated — verify the implementer actually changed
+the tree. Compare against the task's start point (the WIP-commit ref recorded at dispatch, or
+`git status --porcelain` + `git diff HEAD` when the task hasn't committed):
+
+- **Diff is empty or whitespace-only** → the review MUST NOT run and the task CANNOT be marked
+  DONE. Treat as **BLOCKED**: the implementer no-op'd, reported success without editing, or wrote
+  outside the repo. Re-dispatch with the discrepancy stated, or escalate.
+- Rationale: a reviewer fed a no-op tree rubber-stamps it — "looks complete" with nothing to look
+  at (the superpowers #1701 failure mode). A green review must have reviewed *something*.
+
 #### 3c — Two-stage review (complexity-gated)
 
 **Review-routing gate (per `docs/concepts/agent-dispatch-rules.md` rule (c) — inline when cheap + deterministic):**
