@@ -49,6 +49,11 @@ lessons:
   packaged: null                                  # immutable lessons shipped with pack
   operator_lessons: ~/.lintel/lessons.md          # operator's own (never in pack)
 
+# ─── Capture (Phase 8 session-end) ─────────────────────────────────────────
+capture:
+  vault_sink_enabled: true                        # ALSO write a session summary to an external knowledge vault
+  vault_sink_path: ../jokerman-vault/50-sessions  # relative to repo root; missing path → one WARN + skip, never fails
+
 # ─── Opinions ──────────────────────────────────────────────────────────────
 opinions:
   source: null                                    # stance documents
