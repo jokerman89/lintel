@@ -6,7 +6,6 @@
 set -uo pipefail
 
 LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
-LINTEL_JOBS_DIR="${LINTEL_JOBS_DIR:-$LINTEL_HOME/jobs}"
 BIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../bin" 2>/dev/null && pwd)" || \
 BIN_DIR="${LINTEL_HOME}/scaffolding/bin"
 
@@ -15,9 +14,6 @@ job_id="${1:-}"
 result="${2:-DONE}"
 [ -z "$job_id" ] && exit 0
 [ -n "${NO_CLEANUP:-}" ] && exit 0
-
-dir="$LINTEL_JOBS_DIR/$job_id"
-[ -d "$dir" ] || exit 0
 
 helper="$BIN_DIR/_jobs.sh"
 [ -f "$helper" ] || {
@@ -29,9 +25,22 @@ helper="$BIN_DIR/_jobs.sh"
 }
 [ -f "$helper" ] || exit 0
 
-# Promote durable artifacts BEFORE moving to archive
-repo_root="${PWD}"
-docs_plans="$repo_root/docs/plans"
+# Source the helper FIRST — it scope-resolves LINTEL_JOBS_DIR (v5: repo-local
+# .claude/runtime/jobs/ on migrated repos, ~/.lintel/jobs otherwise).
+# shellcheck disable=SC1090
+source "$helper"
+
+dir="$LINTEL_JOBS_DIR/$job_id"
+[ -d "$dir" ] || exit 0
+
+# Promote durable artifacts BEFORE moving to archive (v5: .claude/plans/;
+# legacy docs/plans/ on un-migrated repos)
+repo_root="$(git rev-parse --show-toplevel 2>/dev/null || printf '%s' "$PWD")"
+if [ -f "$repo_root/.claude/lintel-layout.yaml" ]; then
+  docs_plans="$repo_root/.claude/plans"
+else
+  docs_plans="$repo_root/docs/plans"   # legacy-fallback-ok
+fi
 
 # Determine slug from job_id (strip the date+hash suffix → workflow part)
 slug=$(printf '%s' "$job_id" | sed -E 's/-[0-9]{8}-[0-9]{4}-[a-f0-9]{6}$//')
@@ -44,22 +53,25 @@ for artifact in plan.md spec.md prompt.md; do
     target_dir="$docs_plans/$slug"
     mkdir -p "$target_dir" 2>/dev/null || true
     cp "$src" "$target_dir/" 2>/dev/null && \
-      echo "[lintel] Promoted $artifact → docs/plans/$slug/"
+      echo "[lintel] Promoted $artifact → ${target_dir#"$repo_root"/}/"
   fi
 done
 
 # Promote lessons via existing /li:lessons-promote pattern (skill body handles details)
-if [ -f "$dir/outputs/lessons.md" ] && [ -f "$repo_root/tasks/lessons.md" ]; then
+lessons_file="$repo_root/.claude/memory/lessons.md"
+[ -f "$lessons_file" ] || lessons_file="$repo_root/tasks/lessons.md"   # legacy-fallback-ok
+if [ -f "$dir/outputs/lessons.md" ] && [ -f "$lessons_file" ]; then
   echo "[lintel] Lesson candidates in job — invoke /li:lessons-promote for review"
 fi
 
 # Promote ADRs
-adr_target="$repo_root/docs/adr"
+adr_target="$repo_root/.claude/decisions"
+[ -d "$adr_target" ] || adr_target="$repo_root/docs/adr"   # legacy-fallback-ok
 if [ -d "$dir/outputs/adr" ] && [ -d "$adr_target" ]; then
   for adr in "$dir/outputs/adr"/*; do
     [ -f "$adr" ] || continue
     cp "$adr" "$adr_target/" 2>/dev/null && \
-      echo "[lintel] Promoted ADR: $(basename "$adr") → docs/adr/"
+      echo "[lintel] Promoted ADR: $(basename "$adr") → ${adr_target#"$repo_root"/}/"
   done
 fi
 

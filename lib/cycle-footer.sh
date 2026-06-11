@@ -18,7 +18,8 @@
 #
 # render_cycle_footer [--full|--compact|--thin] [--ascii] [--mode M] [--here P]
 #                     [--next P] [--awaiting "<hint>"] [--state <file>]
-#   With no --here, state is read from --state (default .lintel/state/00-state.md):
+#   With no --here, state is read from --state (default .claude/runtime/state/00-state.md,
+#   falling back to the legacy .lintel/state/00-state.md on un-migrated repos):
 #   the last `phase:` block is "here", its `next_recommended:` is "next", and the set
 #   of prior `phase:` blocks are "done". --here/--next/--mode override the file.
 command -v render_cycle_footer >/dev/null 2>&1 && return 0 2>/dev/null
@@ -62,7 +63,11 @@ _cf_phase_history() {
 }
 
 render_cycle_footer() {
-  local tier="auto" ascii="${LINTEL_ASCII:-0}" awaiting="" mode="" here="" next="" state=".lintel/state/00-state.md"
+  # v5 layout (ADR-0005): state lives in .claude/runtime/state/; the .lintel/
+  # path is the pre-migration fallback (grace window to 2026-09-12).
+  local _default_state=".claude/runtime/state/00-state.md"
+  [ -f "$_default_state" ] || { [ -f ".lintel/state/00-state.md" ] && _default_state=".lintel/state/00-state.md"; }
+  local tier="auto" ascii="${LINTEL_ASCII:-0}" awaiting="" mode="" here="" next="" state="$_default_state"
   while [ $# -gt 0 ]; do
     case "$1" in
       --compact) tier="compact"; shift ;;
