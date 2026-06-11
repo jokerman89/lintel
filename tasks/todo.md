@@ -64,11 +64,20 @@ Gates M1–M4 active.
       3a records `start_ref`, guard consumes it, `git diff -w` pinned, grep -E). Suite 69/69 on
       the tree rebased onto post-#59 main → PR #60.
 
-## Phase C — consistency gate (PR 3, own ADR)
+## Phase C — consistency gate (PR 3, branch feat/v4.12-consistency-gate, ADR-0004)
 
-- [ ] C1 Convergent #6: `/analyze`-style DEFINE↔PLAN↔BUILD consistency gate (spec-kit's biggest
-      steal). Design first: ADR + where it hooks (pre-BUILD gate vs standalone skill). Largest item;
-      design doc → implement → shape test.
+- [x] C0 DEFINE: verified PLAN Step 8 already covers the plan-time leg ("adopted from speckit
+      Analyze") — real gaps: re-runnability, PLAN↔BUILD leg, persisted artifact, authority
+      re-check. Operator gate 2026-06-10: **standalone /li:analyze** chosen over extend-inline /
+      fold-into-plan-eng-review / defer. ADR-0004 (Accepted).
+- [x] C1 BUILD: `skills/analyze/SKILL.md` (3 legs, GREEN/YELLOW/RED advisory verdict, persisted
+      `.lintel/state/analyze-report.md`, footer per ADR-0003) · PLAN Step 8 → delegation (inline
+      checklist REMOVED — single implementation) · BUILD Step 6 → `--trigger build-final` call ·
+      `tests/shape/analyze-gate-wired.sh` (incl. duplication tripwire) · M1 entry.
+- [x] C2 Suite 70/70 → independent review (SHIP-WITH-FIXES: 3 P2 / 5 P3, all 8 acted on — incl.
+      the discover-report path that would have made a leg silently SKIP forever, the acceptance
+      carry-forward rule, and the SHIP verdict surface that fully closes ADR-0004 gap #3) →
+      PR #61.
 
 ## Parked (explicitly not this initiative)
 - context-* naming drift + the two divergent review-rubric families (§17) — deliberate design calls,
@@ -86,6 +95,7 @@ shipped; broken links were 8 not 10; most of §18 closed upstream) — re-verify
 the live tree before building (L-003 pattern, again). Both phases went through the full L-007
 review loop; both reviewers found real gaps self-review missed (perf-mode refs, the runner's
 ANSI-blind skip counting, the 3b-guard start-ref hole). Process slips captured as lessons in-flight:
-L-008 (dogfood the footer), L-009 (pipe eats exit codes). Phase C (Convergent #6, the
-DEFINE↔PLAN↔BUILD consistency gate) is designed-not-started — it needs its own ADR and is the
-natural next initiative.
+L-008 (dogfood the footer), L-009 (pipe eats exit codes). Phase C shipped same-day after all:
+ADR-0004 + `/li:analyze` + delegated wire-ins → PR #61. With #59/#60 merged and #61 open, the
+2026-06-09 audit backlog is **empty** — every Convergent and P1 item closed, deduped, or
+verified already-shipped. Next initiatives come from new SENSE, not this backlog.

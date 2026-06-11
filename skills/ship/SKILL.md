@@ -47,6 +47,8 @@ Verify ship-readiness:
 - All tests pass (run `/li:qa` if not already passed in REVIEW)
 - review-report.md shows PASS (or operator overrides with documented rationale)
 - compliance-report.md shows PASS (if the active pack defines compliance gates)
+- `.lintel/state/analyze-report.md` verdict surfaced if present (ADR-0004; advisory — RED/YELLOW
+  goes to the operator with the findings table, it does not auto-block)
 
 If pre-flight fails: BLOCKED. Don't proceed.
 

@@ -208,8 +208,11 @@ ts: <timestamp>
 After last task DONE:
 1. Run full test suite (`/li:qa` invoked)
 2. Check no regressions in unmentioned areas
-3. If `pair-agent` mode: invoke for operator-pair-programming-style final walkthrough
-4. Write 00-state.md BUILD entry
+3. Invoke `/li:analyze` with trigger `build-final` (ADR-0004) — the PLAN↔BUILD leg: every plan
+   task has a terminal status, no untasked work shipped, deviations reflected back. Surface the
+   report verdict; RED/YELLOW findings go to the operator (advisory, not a hard block).
+4. If `pair-agent` mode: invoke for operator-pair-programming-style final walkthrough
+5. Write 00-state.md BUILD entry
 
 ### Step 7 — 00-state.md append
 

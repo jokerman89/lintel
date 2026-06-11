@@ -4,7 +4,7 @@
 
 **Status:** v4.9 — company-neutral, pack-driven harness. The Microsoft CAIP-SE identity has been extracted to the separate [lintel-caip-pack](https://github.com/jokerman89/lintel-caip-pack); Lintel ships only the neutral `_default` pack. See [CHANGELOG.md](CHANGELOG.md) for release notes and [SHIP-GATE.md](SHIP-GATE.md) for readiness gates. Current architecture lives at [docs/design/lintel-v4.0-reframe-design.md](docs/design/lintel-v4.0-reframe-design.md).
 
-Lintel ships **168 skills + 70 agents + 1 pack (`_default`)** organized for the plugin-manifest pattern across 8 CLIs. Plus the foundation scaffolding-template system (CORE-PRINCIPLES, EVOLUTION-LOG, tasks/lessons.md, ADR templates) that gets copied into new repos via `bin/li-scaffold`. The engineering-domain modules (`/li:ta`, `/li:da`, `/li:sc`, `/li:dh`, `/li:tq`) plus the 9-step cycle (8 core phases + SCOPE) are the core.
+Lintel ships **169 skills + 70 agents + 1 pack (`_default`)** organized for the plugin-manifest pattern across 8 CLIs. Plus the foundation scaffolding-template system (CORE-PRINCIPLES, EVOLUTION-LOG, tasks/lessons.md, ADR templates) that gets copied into new repos via `bin/li-scaffold`. The engineering-domain modules (`/li:ta`, `/li:da`, `/li:sc`, `/li:dh`, `/li:tq`) plus the 9-step cycle (8 core phases + SCOPE) are the core.
 
 Lintel is the **complete session harness** — not just a skill catalog. It manages the full lifecycle: session-start ritual → mid-session interventions (hooks, voice gates, compliance) → end-of-session capture (lessons, ADR drafting, EVOLUTION-LOG) → cross-session continuity (memory, lessons-sync). See [docs/session-harness.md](docs/session-harness.md) for the full mental model.
 

@@ -153,15 +153,15 @@ AskUserQuestion (MANDATORY):
 
 If A: continue to Step 8. If B/C: loop back. If D: status BLOCKED, no advance.
 
-### Step 8 — Cross-section-analyze (adopted from speckit Analyze phase)
+### Step 8 — Cross-section-analyze (delegates to /li:analyze, ADR-0004)
 
-Cross-artifact consistency:
-- Does plan.md cover all requirements in design doc?
-- Are there design decisions not yet tasked?
-- Are there tasks that don't trace to design requirements?
-- Are dependencies in plan.md consistent with discover-report.md's ADR constraints?
+Invoke `/li:analyze` with trigger `plan-step8` — it runs the DEFINE↔PLAN and authority legs
+(coverage, traceability, LOCKED-decision contradictions, discover-report ADR constraints) and
+persists `.lintel/state/analyze-report.md`. One implementation, shared with BUILD's final pass
+and standalone runs; do not re-implement the checks inline.
 
-Output gap-list. If gaps: surface, ask operator: defer to backlog / add to plan / accept gap.
+If the report has findings: surface the gap-list, ask operator: defer to backlog / add to plan /
+accept gap (record the acceptance in the report).
 
 ### Step 9 — Adversarial two-stage review (adopted from superpowers)
 
