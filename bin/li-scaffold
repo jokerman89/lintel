@@ -56,12 +56,12 @@ Options:
   --voice <tier>           voice tier from the active pack (default: internal)
   --compliance <level>     full | standard | minimal (default: standard)
 
-Files created:
+Files created (v5 .claude/ home layout, ADR-0005):
   CLAUDE.md (rendered from template), CORE-PRINCIPLES.md, EVOLUTION.md,
-  EVOLUTION-LOG.md, tasks/{lessons,memory,personas,todo}.md,
-  docs/adr/{README,TEMPLATE}.md, docs/personas/EXAMPLE.md,
+  EVOLUTION-LOG.md, .claude/memory/{MEMORY,lessons,working-state,personas}.md,
+  .claude/plans/todo.md, .claude/decisions/{README,TEMPLATE}.md,
   .claude/agents/ (4 templates), .claude/SUBAGENT-GUIDE.md,
-  TEMPLATE-skill.md, TEMPLATE-agent.md
+  .claude/lintel-layout.yaml, TEMPLATE-skill.md, TEMPLATE-agent.md
 
 Examples:
   cd ~/new-repo && li-scaffold init
@@ -102,7 +102,7 @@ cmd_check() {
   echo ""
   echo "Target state:"
   local existing=0
-  for f in CLAUDE.md CORE-PRINCIPLES.md EVOLUTION.md EVOLUTION-LOG.md tasks/lessons.md docs/adr/README.md; do
+  for f in CLAUDE.md CORE-PRINCIPLES.md EVOLUTION.md EVOLUTION-LOG.md .claude/memory/lessons.md .claude/decisions/README.md; do
     if [ -e "$TARGET/$f" ]; then
       echo "  ✓ $f"
       existing=$((existing+1))
@@ -152,33 +152,35 @@ cmd_init() {
     fi
   done
 
-  # tasks/
-  mkdir -p tasks
-  for f in lessons.md memory.md personas.md todo.md; do
-    if [ -f "$SCAFFOLDING_SRC/tasks/$f" ] && [ ! -f "tasks/$f" ]; then
-      cp "$SCAFFOLDING_SRC/tasks/$f" tasks/
-      echo "  ✓ tasks/$f"
+  # .claude/memory/ + .claude/plans/ + .claude/decisions/ (v5 layout, ADR-0005)
+  mkdir -p .claude/memory .claude/plans .claude/decisions
+  for f in lessons.md working-state.md personas.md personas-example.md; do
+    if [ -f "$SCAFFOLDING_SRC/.claude/memory/$f" ] && [ ! -f ".claude/memory/$f" ]; then
+      cp "$SCAFFOLDING_SRC/.claude/memory/$f" .claude/memory/
+      echo "  ✓ .claude/memory/$f"
+    fi
+  done
+  if [ -f "$SCAFFOLDING_SRC/.claude/plans/todo.md" ] && [ ! -f ".claude/plans/todo.md" ]; then
+    cp "$SCAFFOLDING_SRC/.claude/plans/todo.md" .claude/plans/
+    echo "  ✓ .claude/plans/todo.md"
+  fi
+  for f in "$SCAFFOLDING_SRC"/.claude/decisions/*.md; do
+    [ -f "$f" ] || continue
+    name=$(basename "$f")
+    if [ ! -f ".claude/decisions/$name" ]; then
+      cp "$f" .claude/decisions/
+      echo "  ✓ .claude/decisions/$name"
     fi
   done
 
-  # docs/adr/ + docs/personas/
-  mkdir -p docs/adr docs/personas
-  for f in "$SCAFFOLDING_SRC"/docs/adr/*.md; do
-    [ -f "$f" ] || continue
-    name=$(basename "$f")
-    if [ ! -f "docs/adr/$name" ]; then
-      cp "$f" docs/adr/
-      echo "  ✓ docs/adr/$name"
-    fi
-  done
-  for f in "$SCAFFOLDING_SRC"/docs/personas/*.md; do
-    [ -f "$f" ] || continue
-    name=$(basename "$f")
-    if [ ! -f "docs/personas/$name" ]; then
-      cp "$f" docs/personas/
-      echo "  ✓ docs/personas/$name"
-    fi
-  done
+  # Layout stamping (marker, .gitignore, MEMORY.md seed, auto-memory pointer) —
+  # one implementation: the idempotent migration tool no-ops the moves on a
+  # fresh repo and stamps the rest.
+  if git rev-parse --show-toplevel >/dev/null 2>&1; then
+    "$(dirname "$0")/li-migrate-claude-home" --repo . | sed 's/^/  /'
+  else
+    echo "  ⚠ not a git repo — skipped layout marker/auto-memory stamping (run li-migrate-claude-home after git init)"
+  fi
 
   # .claude/
   mkdir -p .claude/agents
@@ -200,7 +202,7 @@ cmd_init() {
   echo ""
   echo "Next steps:"
   echo "  1. Review CLAUDE.md and customize project-specific sections."
-  echo "  2. Edit tasks/personas.md with project-specific personas."
+  echo "  2. Edit .claude/memory/personas.md with project-specific personas."
   echo "  3. Install Lintel plugin for your CLI:"
   echo "       Claude Code:    /plugin marketplace add jokerman89/lintel"
   echo "                       /plugin install li@jokerman-lintel"

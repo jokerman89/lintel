@@ -101,3 +101,6 @@ SCRATCH.md
 
 # Obsidian (repo may be opened as a read-only vault; never commit its state)
 .obsidian/
+
+# Lintel runtime state (v5 layout) — local only, never committed
+.claude/runtime/

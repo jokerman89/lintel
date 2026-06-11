@@ -140,8 +140,8 @@ echo "## This repo's scaffolding adoption"
 repo_root=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
 missing=""
 [ -d "$repo_root/.claude" ] || missing="$missing .claude/"
-[ -d "$repo_root/docs/adr" ] || [ -d "$repo_root/docs/decisions" ] || [ -d "$repo_root/docs/06-decisions" ] || missing="$missing docs/adr/"
-[ -f "$repo_root/tasks/lessons.md" ] || missing="$missing tasks/lessons.md"
+[ -d "$repo_root/.claude/decisions" ] || [ -d "$repo_root/docs/adr" ] || [ -d "$repo_root/docs/decisions" ] || missing="$missing .claude/decisions/"
+[ -f "$repo_root/.claude/memory/lessons.md" ] || [ -f "$repo_root/tasks/lessons.md" ] || missing="$missing lessons.md"
 # A scaffolded CLAUDE.md restates the protocol; a thin one is just a pointer.
 if [ -f "$repo_root/CLAUDE.md" ] && grep -qiE "Workflow Orchestration|Self-Improvement Loop|Auto-mode boundaries" "$repo_root/CLAUDE.md"; then
   claude_scaffolded=1
@@ -149,11 +149,32 @@ else
   claude_scaffolded=0; missing="$missing scaffolded-CLAUDE.md"
 fi
 if [ -z "$missing" ]; then
-  ok "repo has its own scaffolding (.claude/, docs/adr/, lessons, scaffolded CLAUDE.md)"
+  ok "repo has its own scaffolding (.claude/, decisions, lessons, scaffolded CLAUDE.md)"
 else
   warn "repo is missing its own scaffolding:$missing"
   echo "    This repo uses Lintel but never had the scaffolding applied to itself."
   echo "    Fix: li-scaffold init   (or copy scaffolding/01-foundation/ into the repo root)"
+fi
+
+# v5 layout (ADR-0005): one circle of control under .claude/
+if [ -f "$repo_root/.claude/lintel-layout.yaml" ]; then
+  layout_v=$(grep -E '^layout_version:' "$repo_root/.claude/lintel-layout.yaml" 2>/dev/null | head -1 | awk '{print $2}')
+  if [ "${layout_v:-0}" -ge 5 ] 2>/dev/null; then
+    ok "v5 .claude/ home layout (layout_version: $layout_v)"
+    # auto-memory convergence pointer is machine-local — verify on THIS machine
+    if grep -q '"autoMemoryDirectory"' "$repo_root/.claude/settings.local.json" 2>/dev/null; then
+      ok "native auto-memory converged (.claude/settings.local.json)"
+    else
+      warn "autoMemoryDirectory not set for this machine — native auto-memory writes outside the repo"
+      echo "    Fix: li-migrate-claude-home   (idempotent — re-stamps the pointer)"
+    fi
+  else
+    warn "layout marker present but layout_version < 5"
+  fi
+elif [ -f "$repo_root/tasks/lessons.md" ] || [ -d "$repo_root/docs/adr" ]; then
+  warn "repo uses the legacy pre-v5 layout (tasks/, docs/adr/, .lintel/state/)"
+  echo "    Knowledge and runtime are spread outside .claude/. Grace window ends 2026-09-12."
+  echo "    Fix: li-migrate-claude-home --dry-run   (then run without --dry-run)"
 fi
 echo ""
 

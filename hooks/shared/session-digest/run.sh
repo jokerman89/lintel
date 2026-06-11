@@ -41,16 +41,26 @@ fi
 [ -n "$compliance" ] && compliance=" · compliance: $compliance"
 add "Pack: ${pack} · mode: ${mode} · role: ${role}${compliance}"
 
+# v5 layout (ADR-0005): knowledge lives in .claude/; legacy paths are the
+# pre-migration fallback (grace window to 2026-09-12).
+_first_existing() { for p in "$@"; do [ -e "$p" ] && { printf '%s' "$p"; return; }; done; }
+LESSONS_FILE=""; MEMORY_FILE=""; DECISIONS_DIR=""
+if [ -n "$REPO_ROOT" ]; then
+  LESSONS_FILE="$(_first_existing "$REPO_ROOT/.claude/memory/lessons.md" "$REPO_ROOT/tasks/lessons.md")"
+  MEMORY_FILE="$(_first_existing "$REPO_ROOT/.claude/memory/working-state.md" "$REPO_ROOT/tasks/memory.md")"
+  DECISIONS_DIR="$(_first_existing "$REPO_ROOT/.claude/decisions" "$REPO_ROOT/docs/adr")"
+fi
+
 # Recent lessons (last 3 ## L-NNN headers)
-if [ -n "$REPO_ROOT" ] && [ -f "$REPO_ROOT/tasks/lessons.md" ]; then
-  les="$(grep -E '^## L-[0-9]' "$REPO_ROOT/tasks/lessons.md" 2>/dev/null | tail -3 \
+if [ -n "$LESSONS_FILE" ]; then
+  les="$(grep -E '^## L-[0-9]' "$LESSONS_FILE" 2>/dev/null | tail -3 \
         | sed -E 's/^## //; s/ — / /' | paste -sd '|' - | sed 's/|/ · /g')"
   [ -n "$les" ] && add "Recent lessons: $les"
 fi
 
 # Memory highlights (first 2 non-blank, non-comment, non-heading content lines)
-if [ -n "$REPO_ROOT" ] && [ -f "$REPO_ROOT/tasks/memory.md" ]; then
-  mem="$(grep -vE '^\s*$|^\s*#|^\s*<!--|^---' "$REPO_ROOT/tasks/memory.md" 2>/dev/null \
+if [ -n "$MEMORY_FILE" ]; then
+  mem="$(grep -vE '^\s*$|^\s*#|^\s*<!--|^---' "$MEMORY_FILE" 2>/dev/null \
         | head -2 | sed 's/^[[:space:]]*//' | paste -sd '|' - | sed 's/|/ · /g' | cut -c1-200)"
   [ -n "$mem" ] && add "Memory: $mem"
 fi
@@ -62,8 +72,8 @@ if [ -f "$LINTEL_HOME/jobs/_active.md" ]; then
 fi
 
 # Recent decisions (last 3 ADR titles)
-if [ -n "$REPO_ROOT" ] && [ -d "$REPO_ROOT/docs/adr" ]; then
-  adrs="$(grep -hE '^# ADR-[0-9]' "$REPO_ROOT"/docs/adr/[0-9]*.md 2>/dev/null | tail -3 \
+if [ -n "$DECISIONS_DIR" ] && [ -d "$DECISIONS_DIR" ]; then
+  adrs="$(grep -hE '^# ADR-[0-9]' "$DECISIONS_DIR"/[0-9]*.md 2>/dev/null | tail -3 \
          | sed -E 's/^# (ADR-[0-9]+): /\1 /' | paste -sd '|' - | sed 's/|/ · /g')"
   [ -n "$adrs" ] && add "Recent decisions: $adrs"
 fi
@@ -77,7 +87,9 @@ fi
 # Nothing but the identity line and no repo context? Still worth emitting identity.
 [ -z "$lines" ] && exit 0
 
-digest="LINTEL SESSION DIGEST (auto-loaded · tasks/lessons.md, tasks/memory.md, docs/adr/ for detail)
+# Repo-relative paths in the header (readability)
+_rel() { printf '%s' "${1#"$REPO_ROOT"/}"; }
+digest="LINTEL SESSION DIGEST (auto-loaded · $(_rel "${LESSONS_FILE:-.claude/memory/lessons.md}"), $(_rel "${MEMORY_FILE:-.claude/memory/working-state.md}"), $(_rel "${DECISIONS_DIR:-.claude/decisions}") for detail)
 ${lines}"
 
 # ── audit (best-effort, via the unified writer — keeps stdout clean for the envelope) ──

@@ -1,0 +1,174 @@
+#!/usr/bin/env bash
+# component: li-migrate-claude-home
+# implements: ADR-0005
+# intent: docs/design/lintel-v5-claude-home-memory-obsidian-design.md
+# constraints: idempotent, reversible (git mv + stubs), never destroys content
+# last_intent_review: 2026-06-12
+#
+# Migrates a repo to the v5 .claude/ home layout:
+#   tasks/lessons.md   → .claude/memory/lessons.md
+#   tasks/memory.md    → .claude/memory/working-state.md
+#   tasks/personas.md  → .claude/memory/personas.md
+#   tasks/todo.md      → .claude/plans/todo.md
+#   docs/adr/*         → .claude/decisions/
+#   .lintel/state/*    → .claude/runtime/state/
+# plus: .gitignore entry for .claude/runtime/, one-line redirect stubs at the
+# old locations (grace window to 2026-09-12), a MEMORY.md index seed, the
+# autoMemoryDirectory pointer in .claude/settings.local.json (machine-local —
+# the key only accepts absolute paths), and the .claude/lintel-layout.yaml marker.
+#
+# Usage: li-migrate-claude-home [--dry-run] [--repo <path>]
+
+set -uo pipefail
+
+DRY=0
+REPO=""
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --dry-run) DRY=1; shift ;;
+    --repo) REPO="${2:-}"; shift; [ $# -gt 0 ] && shift ;;
+    -h|--help) sed -n '8,24p' "$0"; exit 0 ;;
+    *) echo "unknown flag: $1" >&2; exit 2 ;;
+  esac
+done
+
+cd "${REPO:-.}" || { echo "ERROR: cannot cd to ${REPO}" >&2; exit 1; }
+ROOT="$(git rev-parse --show-toplevel 2>/dev/null)" || { echo "ERROR: not a git repo" >&2; exit 1; }
+cd "$ROOT" || exit 1
+
+if [ -f ".claude/lintel-layout.yaml" ]; then
+  v=$(grep -E '^layout_version:' .claude/lintel-layout.yaml | head -1 | awk '{print $2}')
+  if [ "${v:-0}" -ge 5 ] 2>/dev/null; then
+    echo "Already migrated (layout_version: $v) — nothing to do."
+    exit 0
+  fi
+fi
+
+say() { if [ "$DRY" = 1 ]; then echo "[dry-run] $*"; else echo "$*"; fi; }
+run() { if [ "$DRY" = 1 ]; then echo "[dry-run] $*"; else "$@"; fi; }
+
+# git mv when tracked, plain mv otherwise; no-op when source missing.
+move() { # <src> <dst>
+  local src="$1" dst="$2"
+  [ -e "$src" ] || return 0
+  if [ -e "$dst" ]; then say "SKIP $src → $dst (destination exists)"; return 0; fi
+  run mkdir -p "$(dirname "$dst")"
+  if git ls-files --error-unmatch "$src" >/dev/null 2>&1; then
+    run git mv "$src" "$dst"
+  else
+    run mv "$src" "$dst"
+  fi
+  say "moved $src → $dst"
+}
+
+stub() { # <old-path> <new-path>
+  local old="$1" new="$2"
+  [ -e "$old" ] && return 0
+  [ -e "$new" ] || return 0   # nothing moved → no stub
+  if [ "$DRY" = 1 ]; then say "stub  $old → pointer at $new"; return 0; fi
+  mkdir -p "$(dirname "$old")"
+  printf '> Moved to %s (v5 .claude/ home layout, ADR-0005, 2026-06-12). This stub is removed after the grace window (2026-09-12).\n' "$new" > "$old"
+  git add "$old" 2>/dev/null || true
+}
+
+echo "Migrating $ROOT to the v5 .claude/ home layout${DRY:+}$([ "$DRY" = 1 ] && echo ' (dry-run)')"
+
+# 1 — knowledge moves
+move tasks/lessons.md   .claude/memory/lessons.md
+move tasks/memory.md    .claude/memory/working-state.md
+move tasks/personas.md  .claude/memory/personas.md
+move tasks/todo.md      .claude/plans/todo.md
+if [ -d docs/adr ]; then
+  run mkdir -p .claude/decisions
+  for f in docs/adr/*; do
+    [ -e "$f" ] || continue
+    move "$f" ".claude/decisions/$(basename "$f")"
+  done
+fi
+
+# 2 — runtime move (untracked state)
+if [ -d .lintel/state ]; then
+  run mkdir -p .claude/runtime/state
+  if [ "$DRY" = 1 ]; then
+    say "mv .lintel/state/* → .claude/runtime/state/"
+  else
+    # mv contents; tolerate empty dir
+    find .lintel/state -mindepth 1 -maxdepth 1 -exec mv {} .claude/runtime/state/ \; 2>/dev/null || true
+    rmdir .lintel/state .lintel 2>/dev/null || true
+  fi
+fi
+run mkdir -p .claude/memory .claude/decisions .claude/plans .claude/runtime/state \
+             .claude/runtime/sessions .claude/runtime/jobs .claude/runtime/audit
+
+# 3 — redirect stubs (only where something actually moved)
+stub tasks/lessons.md   .claude/memory/lessons.md
+stub tasks/memory.md    .claude/memory/working-state.md
+stub tasks/personas.md  .claude/memory/personas.md
+stub tasks/todo.md      .claude/plans/todo.md
+stub docs/adr/README.md .claude/decisions/
+
+# 4 — .gitignore
+if ! grep -qE '^\.claude/runtime/' .gitignore 2>/dev/null; then
+  if [ "$DRY" = 1 ]; then say "append .claude/runtime/ to .gitignore"; else
+    { echo ''; echo '# Lintel runtime state (v5 layout) — local only, never committed'; echo '.claude/runtime/'; } >> .gitignore
+    git add .gitignore 2>/dev/null || true
+  fi
+fi
+
+# 5 — MEMORY.md index seed (native auto-memory loads the first 200 lines)
+if [ ! -f .claude/memory/MEMORY.md ] && [ "$DRY" != 1 ]; then
+  cat > .claude/memory/MEMORY.md <<'EOF'
+# Memory index
+
+Knowledge home for this repo (v5 layout, ADR-0005). Keep this file under 200
+lines — it auto-loads at session start. Details live in the linked files;
+read them on demand.
+
+- [lessons.md](lessons.md) — durable rules from corrections (L-NNN). Read before acting.
+- [working-state.md](working-state.md) — cross-session working state (what's in flight).
+- [personas.md](personas.md) — operator calibration.
+- [../decisions/](../decisions/) — decision records (ADRs).
+- [../plans/todo.md](../plans/todo.md) — current plan.
+
+## Hot notes
+<!-- agent-maintained: short, load-bearing facts; consolidate or supersede instead of appending forever -->
+EOF
+  git add .claude/memory/MEMORY.md 2>/dev/null || true
+  echo "seeded .claude/memory/MEMORY.md"
+fi
+
+# 6 — native auto-memory convergence (machine-local pointer; absolute path required)
+SLOCAL=".claude/settings.local.json"
+MEMABS="$ROOT/.claude/memory"
+if [ "$DRY" = 1 ]; then
+  say "set autoMemoryDirectory=$MEMABS in $SLOCAL"
+else
+  if command -v jq >/dev/null 2>&1 && [ -f "$SLOCAL" ]; then
+    jq --arg d "$MEMABS" '. + {autoMemoryDirectory: $d}' "$SLOCAL" > "$SLOCAL.tmp" && mv "$SLOCAL.tmp" "$SLOCAL"
+  elif [ ! -f "$SLOCAL" ]; then
+    printf '{\n  "autoMemoryDirectory": "%s"\n}\n' "$MEMABS" > "$SLOCAL"
+  else
+    echo "WARN: $SLOCAL exists and jq is unavailable — add manually: \"autoMemoryDirectory\": \"$MEMABS\""
+  fi
+fi
+
+# 7 — layout marker
+if [ "$DRY" = 1 ]; then
+  say "write .claude/lintel-layout.yaml (layout_version: 5)"
+else
+  cat > .claude/lintel-layout.yaml <<EOF
+# Lintel layout marker — written by bin/li-migrate-claude-home (ADR-0005)
+layout_version: 5
+migrated_at: $(date -u +"%Y-%m-%dT%H:%M:%SZ")
+EOF
+  git add .claude/lintel-layout.yaml 2>/dev/null || true
+fi
+
+# 8 — audit (operator-global category: harness migration)
+if [ "$DRY" != 1 ]; then
+  # shellcheck disable=SC1091
+  source "$(dirname "${BASH_SOURCE[0]}")/_audit.sh" 2>/dev/null || true
+  command -v audit_log >/dev/null 2>&1 && audit_log migration claude_home_migrated "repo=$ROOT" || true
+fi
+
+echo "Done. Review with: git status — then commit the layout change."
