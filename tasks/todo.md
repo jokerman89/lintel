@@ -1,101 +1,55 @@
-# Todo — v4.11: launch-polish remainder + cycle-discipline backlog
+# todo — v5.0 claude-home + memory v2 + Obsidian (2026-06-12)
 
-**Initiative:** Operator-approved 2026-06-10 ("Both, punch-list first"). Close what actually remains
-of the State-of-the-Harness §18 punch-list (most was already closed by the launch-readiness work),
-then roll into the parked cycle-discipline backlog from the 2026-06-09 audit without re-asking.
+Design: [docs/design/lintel-v5-claude-home-memory-obsidian-design.md](../docs/design/lintel-v5-claude-home-memory-obsidian-design.md)
+Mode: meta-infra (Gates M1–M4). Decisions D1–D4 locked by operator 2026-06-12.
+(Previous initiative v4.11 closed 2026-06-10 — see git history of this file.)
 
-**Mode:** `meta-infra` (touches test runner semantics, removes a skill, edits phase-skill spine).
-Gates M1–M4 active.
+## Phase 0 — unblock
 
-**Verified state on main @ 98999ba (re-checked, audit claims were stale):**
-- ✅ already closed upstream: getting-started.md neutral · @microsoft.com purged + tripwire scans
-  README/SECURITY · manifests de-branded · 8 customer agents tracked · li-forge-stats honestly
-  labeled "(planned — not yet shipped)" in all 3 concept docs.
-- ❌ still open: hollow e2e (empty dir, CI job vacuously green) · context-budgetwatch residual skill ·
-  hooks/shared/README.md says "29 hooks: 27 warn-only" (real: 30 dirs) · scale-estimator.sh comment
-  lag · "8-phase" branding vs the P2-A standard "9-step (8 core + SCOPE)" in CLAUDE.md/README/
-  AGENT-INSTRUCTIONS · orphaned hooks/entropy-secret-check.sh (P1-7) · P1-8 broken links (verify count).
+- [ ] Open PR for `feat/capture-vault-sink` against main (vault sink ships first)
+- [ ] Branch `feat/claude-home` off `feat/capture-vault-sink`
 
-## Phase A — launch polish (PR 1, branch feat/v4.11-launch-polish)
+## Phase A — `.claude/` home + migration (PR: feat/claude-home)
 
-- [x] A1a `tests/runner/run-all.sh`: any scope that discovers ZERO tests exits 1 (fail-closed) —
-      simplest rule, covers explicit scopes and a hypothetically empty tree alike. Verified rc=1.
-- [x] A1b `tests/e2e/harness-critical-path.sh` (tagged `claude-code-only`): sandbox install.sh →
-      pack-resolver REAL parse (asserts `voice.enforce`, outside the hardcoded fallback list) →
-      footer from fixture state. 7 assertions green; tag-filtered run green.
-- [x] A2 `skills/context-budgetwatch/` removed; alias in `config/aliases.yaml` (grace to 2026-09-10,
-      `match`→`skill-router` pattern); verify.sh probe dropped; context-budget/HOOK.md/
-      CONTEXT-ENGINE.md updated; M1 entry `2026-06-10-v4.11-launch-polish.md`. Shape suite green.
-- [x] A3 Doc sweep: hooks README "29/27" → real tally (30: 23 warn + 2 block + 2 surface +
-      2 lifecycle + 1 inject) · scale-estimator comment un-lagged (tree L/XL shipped) · 8 broken
-      links fixed (CHANGELOG×5, v2-design×2, v3-plan×1; audit's "10" was stale) · "8-phase" →
-      "9-step (8 core + SCOPE)" across README/CLAUDE/AGENTS/GEMINI/AGENT-INSTRUCTIONS/SHIP-GATE/
-      getting-started/engineering-modules/CLAUDE.md.template (historical design docs left as-is) ·
-      README count 169 → 168 skills.
-- [x] A4-REVIEW Independent CodeReviewer on the real diff (L-007): verdict **SHIP-WITH-FIXES**
-      (0 P0 / 1 P1 / 3 P2 / 5 P3). All acted on:
-      - P1 `skills/perf-mode` still pointed at the removed `/context-budgetwatch` (×2) → repointed.
-      - P2 runner: ANSI-blind `^SKIP` grep counted every skip as a PASS (pre-existing, first
-        activated by the tag-filtered e2e job) → ESC-strip before grep; PLUS all-skip-under-tag-filter
-        now fails closed. Verified: codex-compatible filter → rc=1 "all 1 skipped".
-      - P2 wiki/showcase don't self-heal (only CATALOG has a workflow) → `bin/li-wiki-gen` run,
-        outputs committed (168/70, budgetwatch gone).
-      - P2 9-step sweep extended to live skill surfaces: welcome(×2)/cycle(frontmatter+nav)/plan/
-        orientator — README promised "9-step" while welcome rendered "8-phase".
-      - P3 context-budget:195 stale "delegates here" · v2-design prose/link mismatch · e2e footer
-        step pins LINTEL_HOME (hermetic) + install_out printed on failure · state-of-the-harness:142
-        annotated. P3 aliases-are-convention note: accepted pattern, no action.
-- [ ] A4 M3 full suite green on the fixed tree → push → PR 1.
+- [ ] `lib/paths.sh` — single source for all Lintel paths, legacy fallback
+- [ ] Shape test: no skill/hook/bin hardcodes legacy paths outside lib/paths.sh
+- [ ] `bin/li-migrate-claude-home` — idempotent: git mv knowledge, create runtime/, .gitignore, redirect stubs, settings.json autoMemoryDirectory
+- [ ] Widest-token-set sweep (L-005) of all legacy path refs across skills/hooks/lib/bin/agents/scaffolding/AGENT-INSTRUCTIONS/CLAUDE.md.template
+- [ ] `bin/_audit.sh` scope routing (repo → .claude/runtime/audit/, global → ~/.lintel/audit/)
+- [ ] `bin/_jobs.sh` — job data in-repo, ~/.lintel/jobs/_active.md becomes cross-repo registry
+- [ ] session-digest hook reads new paths (+ legacy fallback)
+- [ ] li-doctor layout check + un-migrated warning
+- [ ] Scaffolding templates install new layout
+- [ ] Run migration on Lintel itself (dogfood)
+- [ ] Gate M1 structure-changes entry + M2 compat audit + M3 shape tests green
+- [ ] ADR-0005 claude-home layout
 
-## Phase B — cycle discipline (PR 2, branch feat/v4.11-cycle-discipline)
+## Phase B — memory v2 (PR: feat/memory-v2)
 
-- [x] B1 Convergent #5: `skills/build/SKILL.md` step **3b-guard** — empty/whitespace-only diff →
-      review MUST NOT run, task forced BLOCKED (superpowers #1701). build-pilot.sh asserts it.
-- [x] B2 Convergent #2: **already shipped** — SENSE Step 0a unconditionally runs
-      `/li:lessons-surface --auto-from-sense` (v3.6 item 1.3 + v4.9 T17 made it multi-CLI).
-      Stale backlog item; decision documented in the M1 entry, no edit. (session-digest's
-      recent-lessons view is complementary: recency vs keyword-relevance.)
-- [x] B3 Small P1s: orphaned `hooks/entropy-secret-check.sh` removed (P1-7, zero refs verified) ·
-      CLAUDE.md frozen-zone line now states the real two-contract split (P1-1: skills layer+
-      cli_support; agents category+tier+cli_support; 0/168 skills carry `category`) · five-lens
-      checklist reconciled — all 19 boxes ticked with per-task tree evidence (P1-6; the work
-      shipped in v4.9, only the doc state drifted). M1: 2026-06-10-v4.11-cycle-discipline.md.
-- [x] B4 Independent review (verdict SHIP-WITH-FIXES: 1 P2 start-ref gap + 2 P3 — all fixed:
-      3a records `start_ref`, guard consumes it, `git diff -w` pinned, grep -E). Suite 69/69 on
-      the tree rebased onto post-#59 main → PR #60.
+- [ ] `.claude/memory/MEMORY.md` index format (≤200 lines) + convergence contract doc
+- [ ] `lib/memory.sh`: lessons_surface (mechanical, called from SENSE Step 0a)
+- [ ] CAPTURE update-phase: add/update/supersede/no-op classification vs existing lessons
+- [ ] Supersede-don't-delete convention (`superseded_by:` markers) in lessons/memory templates
+- [ ] Block-budget warn hook (MEMORY.md ≤200, lessons threshold)
+- [ ] Consolidate context-* family 8→3 skills + `bin/_context.sh` (save/list/restore)
+- [ ] Brief-forge: implement completeness evaluator (bash), delete unimplemented promises
+- [ ] Subtract operator-profile.jsonl write from CAPTURE Step 9
+- [ ] gbrain SKILL.md honest labeling
+- [ ] `.claude/rules/` path-scoped rules support + digest index lines
+- [ ] AGENTS.md emission in scaffold
+- [ ] Ready-work view in digest (blocked_by in job.yaml)
+- [ ] Memory-map rewrite in CLAUDE.md/AGENT-INSTRUCTIONS + scaffolding
+- [ ] ADR-0006 memory v2
 
-## Phase C — consistency gate (PR 3, branch feat/v4.12-consistency-gate, ADR-0004)
+## Phase C — Obsidian patterns (PR: feat/obsidian-patterns)
 
-- [x] C0 DEFINE: verified PLAN Step 8 already covers the plan-time leg ("adopted from speckit
-      Analyze") — real gaps: re-runnability, PLAN↔BUILD leg, persisted artifact, authority
-      re-check. Operator gate 2026-06-10: **standalone /li:analyze** chosen over extend-inline /
-      fold-into-plan-eng-review / defer. ADR-0004 (Accepted).
-- [x] C1 BUILD: `skills/analyze/SKILL.md` (3 legs, GREEN/YELLOW/RED advisory verdict, persisted
-      `.lintel/state/analyze-report.md`, footer per ADR-0003) · PLAN Step 8 → delegation (inline
-      checklist REMOVED — single implementation) · BUILD Step 6 → `--trigger build-final` call ·
-      `tests/shape/analyze-gate-wired.sh` (incl. duplication tripwire) · M1 entry.
-- [x] C2 Suite 70/70 → independent review (SHIP-WITH-FIXES: 3 P2 / 5 P3, all 8 acted on — incl.
-      the discover-report path that would have made a leg silently SKIP forever, the acceptance
-      carry-forward rule, and the SHIP verdict surface that fully closes ADR-0004 gap #3) →
-      PR #61.
+- [ ] Locked session-note frontmatter schema (type/date/repo/branch/outcome/tags)
+- [ ] `templates/obsidian/sessions.base` + `bin/li-vault-init` (base + repo hub note)
+- [ ] CAPTURE Step 7b: 00-index.md regeneration + wikilinks (hub + predecessor)
+- [ ] Pack keys `obsidian.*` (flat two-level) + unit tests
+- [ ] docs/concepts: repo-as-read-vault workflow (.claude/ as mini-vault)
+- [ ] ADR-0007 Obsidian integration scope
 
-## Parked (explicitly not this initiative)
-- context-* naming drift + the two divergent review-rubric families (§17) — deliberate design calls,
-  operator hasn't decided.
-- P1-2 cli_support 131-flat/38-structured split — meta-infra contract change, needs its own design.
-- Remaining ~25 official skills adopting the cycle footer — incremental adoption.
+## Review (fylls i vid task-slut)
 
-## Review
-
-Initiative complete (2026-06-10, one session). Two PRs: **#59** (Phase A launch polish — merged) and
-**#60** (Phase B cycle discipline — open). Net effect on the §18 punch-list: every item closed or
-verified already-closed; the readiness report's "hold a clean public launch" blockers are gone.
-Notable findings along the way: the audit backlog overstated three items (Convergent #2 already
-shipped; broken links were 8 not 10; most of §18 closed upstream) — re-verify audit claims against
-the live tree before building (L-003 pattern, again). Both phases went through the full L-007
-review loop; both reviewers found real gaps self-review missed (perf-mode refs, the runner's
-ANSI-blind skip counting, the 3b-guard start-ref hole). Process slips captured as lessons in-flight:
-L-008 (dogfood the footer), L-009 (pipe eats exit codes). Phase C shipped same-day after all:
-ADR-0004 + `/li:analyze` + delegated wire-ins → PR #61. With #59/#60 merged and #61 open, the
-2026-06-09 audit backlog is **empty** — every Convergent and P1 item closed, deduped, or
-verified already-shipped. Next initiatives come from new SENSE, not this backlog.
+- [ ] Per-phase: shape + unit green, independent CodeReviewer subagent on real diff (L-007), footer discipline (L-008), no `| tail` on runners (L-009)
