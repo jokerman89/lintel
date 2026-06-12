@@ -181,8 +181,8 @@ size_default_prior() {
 #
 #   scale_calibrated_prior <size>  → integer est_tokens
 #
-# Reads CAPTURE's append-only log at $LINTEL_HOME/audit/granularity.jsonl
-# (written via `audit_log granularity ...`). For every record whose `size`
+# Reads CAPTURE's append-only log at .claude/runtime/audit/granularity.jsonl
+# (written via `audit_log granularity ...`, scope-routed by bin/_audit.sh). For every record whose `size`
 # field matches <size> and that carries a numeric `actual_tokens`, it takes the
 # MEDIAN of those actuals as the corrected prior — median, not mean, so a single
 # runaway cycle cannot skew the band.
@@ -195,7 +195,10 @@ size_default_prior() {
 scale_calibrated_prior() {
   local size="${1:-S}"
   local home="${LINTEL_HOME:-$HOME/.lintel}"
-  local log="${LINTEL_AUDIT_DIR:-$home/audit}/granularity.jsonl"
+  local root
+  root="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}"
+  local log="$root/.claude/runtime/audit/granularity.jsonl"
+  [ -r "$log" ] || log="${LINTEL_AUDIT_DIR:-$home/audit}/granularity.jsonl" # legacy-fallback-ok
 
   # No history → mechanical default (the Slice-1 guess).
   [ -r "$log" ] || { size_default_prior "$size"; return 0; }

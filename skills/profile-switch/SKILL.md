@@ -140,4 +140,4 @@ YES — solo-invokable for all 6 modes.
 
 - After dormant → activate cycle: `/li:doctor --quick` verify state
 - Snapshot pre-major-update: `/li:profile-switch --snapshot pre-v3.6 && /li:safe-install --update`
-- For audit: `~/.lintel/audit/profile-switches.jsonl` logs every transition
+- For audit: `.claude/runtime/audit/profile-switches.jsonl` logs every transition

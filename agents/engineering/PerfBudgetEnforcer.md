@@ -103,4 +103,4 @@ Internal. Operator-facing perf budget specs. No customer-facing voice.
 
 ## How operators read your output
 
-Per-journey budgets go to `.lintel/state/tq/perf-budgets.md`. Regression detection + enforcement at the same path. Operators consume via TQ perf-budget-spec sub-skill report.
+Per-journey budgets go to `.claude/runtime/state/tq/perf-budgets.md`. Regression detection + enforcement at the same path. Operators consume via TQ perf-budget-spec sub-skill report.

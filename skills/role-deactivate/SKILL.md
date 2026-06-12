@@ -41,7 +41,7 @@ fi
 
 If current role is private:
 - AskUserQuestion: "Deactivating private role <id>. Save current session's role-lens-notes? (Y/n)"
-- If Y: ensure `.lintel/state/role-lens-notes-<ts>.md` is preserved
+- If Y: ensure `.claude/runtime/state/role-lens-notes-<ts>.md` is preserved
 - If N: clear notes
 
 ### Step 3 — Clear active role in profile
@@ -88,7 +88,7 @@ YES — anytime.
 
 ## Integration
 
-Reads + writes `~/.lintel/profile.yaml`. Optionally preserves `.lintel/state/role-lens-notes-*.md`.
+Reads + writes `~/.lintel/profile.yaml`. Optionally preserves `.claude/runtime/state/role-lens-notes-*.md`.
 
 ## Anti-patterns
 

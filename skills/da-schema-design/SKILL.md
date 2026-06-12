@@ -12,7 +12,7 @@ You are DA-SCHEMA-DESIGN — the workflow that produces a versioned schema spec.
 
 ## What this skill does
 
-Reads operator's data-model intent + profile preferences (primary_store, schema_versioning). Spawns `DatabaseDesigner` for store-specific schema + `SchemaArchitect` for cross-store reasoning (when polyglot persistence applies). Validates output against checklist. Writes `.lintel/state/da/schema-<ts>.sql` (or `.cql` / `.json` per store).
+Reads operator's data-model intent + profile preferences (primary_store, schema_versioning). Spawns `DatabaseDesigner` for store-specific schema + `SchemaArchitect` for cross-store reasoning (when polyglot persistence applies). Validates output against checklist. Writes `.claude/runtime/state/da/schema-<ts>.sql` (or `.cql` / `.json` per store).
 
 Per L-001: workflow + dispatch contract. Content comes from agents at invocation.
 
@@ -48,7 +48,7 @@ constraints:
   - relationship integrity preserved
   - index strategy declared per access pattern
 acceptance:
-  - schema written to .lintel/state/da/schema-<ts>.{sql|cql|json}
+  - schema written to .claude/runtime/state/da/schema-<ts>.{sql|cql|json}
   - relationships documented with cardinality
   - index strategy per query pattern
 EOF
@@ -64,7 +64,7 @@ if [ "$primary_store" = "mixed" ]; then
   cat > "$cross_brief" <<EOF
 task: Reason about polyglot persistence across declared stores
 context_pointers:
-  - .lintel/state/da/db-schema.md
+  - .claude/runtime/state/da/db-schema.md
 constraints:
   - identify which entities live where + why
   - document consistency model across stores
@@ -91,7 +91,7 @@ fi
 
 ```bash
 ts=$(date -u +"%Y%m%dT%H%M%SZ")
-audit="$LINTEL_HOME/audit/da-decisions.jsonl"
+audit=".claude/runtime/audit/da-decisions.jsonl"
 printf '{"ts":"%s","kind":"da_schema_design","primary_store":"%s","schema_versioning":"%s","operator":"%s"}\n' \
   "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$primary_store" "$schema_versioning" "$(whoami 2>/dev/null || echo unknown)" \
   >> "$audit"
@@ -107,7 +107,7 @@ printf '{"ts":"%s","kind":"da_schema_design","primary_store":"%s","schema_versio
 ## Integration
 
 **Reads:** profile preferences, existing schema conventions, Brief Forge gate
-**Writes:** `.lintel/state/da/schema-<ts>.*`, audit JSONL
+**Writes:** `.claude/runtime/state/da/schema-<ts>.*`, audit JSONL
 **Dispatches to:** DatabaseDesigner (primary), SchemaArchitect (NEW, cross-store)
 
 ## Anti-patterns

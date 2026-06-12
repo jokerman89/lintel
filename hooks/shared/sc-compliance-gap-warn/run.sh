@@ -49,10 +49,12 @@ frameworks_csv="${frameworks_csv:-soc2,gdpr}"
 # For each framework: check evidence
 total_gap=0
 oldest_age=-1
+sc_state_dir=".claude/runtime/state/sc"
+[ -d "$sc_state_dir" ] || sc_state_dir=".lintel/state/sc" # legacy-fallback-ok
 IFS=',' read -ra frameworks <<< "$frameworks_csv"
 for fw in "${frameworks[@]}"; do
   fw=$(printf '%s' "$fw" | tr -d '[:space:]')
-  evidence_file=".lintel/state/sc/compliance-evidence-${fw}.md"
+  evidence_file="$sc_state_dir/compliance-evidence-${fw}.md"
   if [ ! -f "$evidence_file" ]; then
     total_gap=$((total_gap + 1))
     continue

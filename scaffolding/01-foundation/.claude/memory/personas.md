@@ -2,13 +2,13 @@
 
 Operator-facing personas active in this project. Loaded at session start so the assistant knows who it is collaborating with and how to communicate.
 
-Different from `memory.md → Operator profile`: that is a free-form notepad. This file is structured per-persona, and gets loaded as authoritative context.
+Different from `working-state.md → Operator profile`: that is a free-form notepad. This file is structured per-persona, and gets loaded as authoritative context.
 
 ---
 
 ## How to use this file
 
-For each active operator persona, add a `## Persona: <name>` section below. Use the structure shown in [docs/personas/EXAMPLE.md](../docs/personas/EXAMPLE.md) as a reference.
+For each active operator persona, add a `## Persona: <name>` section below. Use the structure shown in [personas-example.md](personas-example.md) as a reference.
 
 A persona is worth writing when:
 
@@ -22,7 +22,7 @@ If only one operator works with this repo, one persona is enough. Do not write p
 
 ## Active personas
 
-<!-- Add `## Persona: <name>` sections here. See docs/personas/EXAMPLE.md for the structure. -->
+<!-- Add `## Persona: <name>` sections here. See personas-example.md for the structure. -->
 
 ---
 

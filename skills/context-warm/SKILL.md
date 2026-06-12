@@ -63,7 +63,7 @@ est_tokens=$((total_chars / 4))
 
 ### Step 3 — Budget check
 
-Read current `.lintel/state/context-budget.md` if exists:
+Read current `.claude/runtime/state/context-budget.md` if exists:
 - Current tokens used
 - Headroom
 
@@ -91,7 +91,7 @@ done
 ### Step 6 — Update budget tracking
 
 ```yaml
-# .lintel/state/context-budget.md (append)
+# .claude/runtime/state/context-budget.md (append)
 event: context_warm
 ts: <timestamp>
 files_loaded: <count>
@@ -139,10 +139,10 @@ YES — invoked anytime mid-session.
 
 **Reads:**
 - Target files (via Read tool, into session context)
-- `.lintel/state/context-budget.md` (prior state)
+- `.claude/runtime/state/context-budget.md` (prior state)
 
 **Writes:**
-- `.lintel/state/context-budget.md` (append event)
+- `.claude/runtime/state/context-budget.md` (append event)
 - Session context (the loaded file content)
 
 **Triggers:**

@@ -1,6 +1,6 @@
 # Persona: Example Operator
 
-This is a reference example for the persona format used in `tasks/personas.md`. Adapt the structure — every field is optional, but the more you fill in, the more useful the persona is at session start.
+This is a reference example for the persona format used in `.claude/memory/personas.md`. Adapt the structure — every field is optional, but the more you fill in, the more useful the persona is at session start.
 
 This persona is anonymized. Do not put real customer names, internal MS account names, or PII in a persona file that lives in a shared repo.
 
@@ -50,7 +50,7 @@ Senior Engineer, hybrid IC + tech-lead responsibilities. Owns a specific subsyst
 - Use subagents to keep main context clean.
 - Mark TODOs complete as they finish — not in a batch at the end.
 - For UI/frontend work, drive a real browser to verify; do not claim "looks good" without screenshots.
-- Capture a one-line lesson in `tasks/lessons.md` after any correction.
+- Capture a one-line lesson in `.claude/memory/lessons.md` after any correction.
 
 ## What this person will NOT delegate
 

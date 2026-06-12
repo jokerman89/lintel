@@ -33,7 +33,7 @@ What this decision commits us to. Both directions:
 
 ## Implementation notes (optional)
 
-If the decision implies non-obvious migration steps, sequencing, or feature-flag work, sketch it here. Keep brief — full plans go in `tasks/todo.md` while the work is active.
+If the decision implies non-obvious migration steps, sequencing, or feature-flag work, sketch it here. Keep brief — full plans go in `.claude/plans/todo.md` while the work is active.
 
 ## References
 

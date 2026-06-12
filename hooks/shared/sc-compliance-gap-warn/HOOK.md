@@ -4,7 +4,7 @@ tier: warn-only
 event: PreToolUse (Edit|Write on regulated-data paths)
 fires_on: edit to a file in pack.security_compliance.regulated_path_glob, when no compliance evidence exists for required frameworks OR latest evidence shows gaps in covered controls
 override: pass --ignore-compliance-gap flag (operator decision, logged)
-audit: ~/.lintel/audit/hooks.jsonl
+audit: .claude/runtime/audit/hooks.jsonl
 ---
 
 # sc-compliance-gap-warn
@@ -15,7 +15,7 @@ Surfaces when an Edit/Write touches a regulated-data path with no current compli
 
 - Reads `pack.security_compliance.regulated_path_glob` (or default heuristic — paths handling PII, payment data, health data)
 - Reads `engineering.security_compliance.compliance_frameworks` from profile
-- For each required framework: checks `.lintel/state/sc/compliance-evidence-<framework>.md` exists + recent (within 90 days)
+- For each required framework: checks `.claude/runtime/state/sc/compliance-evidence-<framework>.md` exists + recent (within 90 days)
 - If gap detected (no evidence OR stale evidence OR known-gap controls): WARN
 
 ## Why warn-only

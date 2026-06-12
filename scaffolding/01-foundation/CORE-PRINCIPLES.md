@@ -21,10 +21,10 @@ If a rule here conflicts with a per-repo adaptation, the rule here wins, unless 
 
 ## 3. Self-improvement loop (lessons.md)
 
-- After ANY correction from the user → update `tasks/lessons.md`
+- After ANY correction from the user → update `.claude/memory/lessons.md`
 - Write rules that prevent the same mistake in the future
 - Include **date, context, what went wrong, what should have happened, the rule**
-- Review `tasks/lessons.md` at session start
+- Review `.claude/memory/lessons.md` at session start
 - This is the only way to compound learning
 
 ## 4. Verify before "done"

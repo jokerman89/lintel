@@ -4,7 +4,7 @@ tier: warn-only
 event: PreToolUse (Edit|Write on data-access code)
 fires_on: edit to a file that reads data classified as retention-bound, without honoring retention filter (e.g. WHERE deleted_at IS NULL, WHERE archived_at IS NULL)
 override: pass --ignore-retention flag (operator decision, logged)
-audit: ~/.lintel/audit/hooks.jsonl
+audit: .claude/runtime/audit/hooks.jsonl
 ---
 
 # da-retention-violation-warn
@@ -13,7 +13,7 @@ Surfaces when an edit touches data-access code reading a retention-bound table w
 
 ## What it does
 
-- Reads `.lintel/state/da/retention-policy.md` (if present) for tables with retention windows
+- Reads `.claude/runtime/state/da/retention-policy.md` (if present) for tables with retention windows
 - Detects data-access patterns in the edited file (SELECT / find / repository methods)
 - For each access against a retention-bound table: checks for retention filters (deleted_at, archived_at, retained_until, expires_at)
 - If access without filter: WARN

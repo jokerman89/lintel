@@ -32,7 +32,7 @@ Reads component inventory (from TA dependency graph if present, else fresh enume
 
 ```bash
 observability_stack="${stack:-${observability_stack:-app-insights}}"   # app-insights | datadog | grafana-stack | new-relic | mixed
-dep_graph=$(find .lintel/state/ta -name "dependency-graph-*.md" -mtime -7 2>/dev/null | sort | tail -1)
+dep_graph=$(find .claude/runtime/state/ta -name "dependency-graph-*.md" -mtime -7 2>/dev/null | sort | tail -1)
 ```
 
 ### Step 2 — Spawn ObservabilityArchitect for signals
@@ -63,7 +63,7 @@ dashboard_brief=$(mktemp)
 cat > "$dashboard_brief" <<EOF
 task: Design dashboards + alert routing
 context_pointers:
-  - .lintel/state/dh/signals-spec.md
+  - .claude/runtime/state/dh/signals-spec.md
 constraints:
   - one dashboard per service + one per critical journey
   - alert routing per severity (page vs ticket vs surface)
@@ -79,21 +79,21 @@ EOF
 
 ```bash
 ts=$(date -u +"%Y%m%dT%H%M%SZ")
-out=".lintel/state/dh/observability-spec-$ts.md"
+out=".claude/runtime/state/dh/observability-spec-$ts.md"
 {
   echo "# Observability spec — $(date -u +%Y-%m-%dT%H:%M:%SZ)"
   echo "## Stack: $observability_stack"
   echo ""
   echo "## Signals"
-  cat .lintel/state/dh/signals-spec.md
+  cat .claude/runtime/state/dh/signals-spec.md
   echo ""
   echo "## Dashboards + alert routing"
-  cat .lintel/state/dh/dashboards-alerts.md
+  cat .claude/runtime/state/dh/dashboards-alerts.md
 } > "$out"
 
 printf '{"ts":"%s","kind":"dh_observability_spec","stack":"%s","components":%d,"operator":"%s"}\n' \
   "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$observability_stack" "$component_count" "$(whoami 2>/dev/null || echo unknown)" \
-  >> "$LINTEL_HOME/audit/dh-decisions.jsonl"
+  >> ".claude/runtime/audit/dh-decisions.jsonl"
 ```
 
 ## Status protocol
@@ -105,7 +105,7 @@ printf '{"ts":"%s","kind":"dh_observability_spec","stack":"%s","components":%d,"
 ## Integration
 
 **Reads:** dependency graph (from TA), existing observability config
-**Writes:** `.lintel/state/dh/observability-spec-<ts>.md`, audit JSONL
+**Writes:** `.claude/runtime/state/dh/observability-spec-<ts>.md`, audit JSONL
 **Dispatches to:** ObservabilityArchitect (NEW, signals), Architect (dashboards + routing)
 
 ## Anti-patterns

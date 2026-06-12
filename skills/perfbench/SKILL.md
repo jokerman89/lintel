@@ -83,7 +83,7 @@ Address P1 before /release-ev2. P2 acceptable if intentional — record reason i
 
 - Layer 2 production-mutation rule applies if a benchmark scenario hits production. Per-call auth required.
 - Network-dependent benchmarks: warning if network conditions vary (results not comparable).
-- Benchmark runs logged to `~/.lintel/audit/benchmarks.jsonl`.
+- Benchmark runs logged to `.claude/runtime/audit/benchmarks.jsonl`.
 
 ## Voice tier note
 

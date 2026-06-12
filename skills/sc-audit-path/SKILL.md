@@ -45,7 +45,7 @@ cat > "$brief_file" <<EOF
 task: Specify audit event schema + integrity controls
 context_pointers:
   - required events: $required_events
-  - .lintel/state/sc/threat-model-*.md (latest, for tampering threats)
+  - .claude/runtime/state/sc/threat-model-*.md (latest, for tampering threats)
 constraints:
   - per event: timestamp (UTC, monotonic), actor, action, target, outcome, context-id
   - integrity: append-only sink + tamper-evident (hash chain or signed)
@@ -64,7 +64,7 @@ pipeline_brief=$(mktemp)
 cat > "$pipeline_brief" <<EOF
 task: Map audit pipeline (emission → transport → sink → retention)
 context_pointers:
-  - .lintel/state/sc/audit-event-schema.md
+  - .claude/runtime/state/sc/audit-event-schema.md
 constraints:
   - emission point: where in code each event is written
   - transport: durable (not best-effort) — queue, write-ahead-log, or sync write
@@ -84,17 +84,17 @@ EOF
 
 ```bash
 ts=$(date -u +"%Y%m%dT%H%M%SZ")
-out=".lintel/state/sc/audit-path-$ts.md"
+out=".claude/runtime/state/sc/audit-path-$ts.md"
 {
   echo "# Audit path — $(date -u +%Y-%m-%dT%H:%M:%SZ)"
   echo ""
   echo "## Retention: ${retention} days"
   echo ""
   echo "## Event schema + integrity"
-  cat .lintel/state/sc/audit-event-schema.md
+  cat .claude/runtime/state/sc/audit-event-schema.md
   echo ""
   echo "## Pipeline"
-  cat .lintel/state/sc/audit-pipeline.md
+  cat .claude/runtime/state/sc/audit-pipeline.md
 } > "$out"
 
 printf '{"ts":"%s","kind":"sc_audit_path","retention_days":%d,"events":%d,"operator":"%s"}\n' \
@@ -111,7 +111,7 @@ printf '{"ts":"%s","kind":"sc_audit_path","retention_days":%d,"events":%d,"opera
 ## Integration
 
 **Reads:** required-events from compliance + threat model, retention pref
-**Writes:** `.lintel/state/sc/audit-path-<ts>.md`, audit JSONL
+**Writes:** `.claude/runtime/state/sc/audit-path-<ts>.md`, audit JSONL
 **Dispatches to:** SecurityAuditor (event schema + integrity), Architect (pipeline + retention)
 
 ## Anti-patterns

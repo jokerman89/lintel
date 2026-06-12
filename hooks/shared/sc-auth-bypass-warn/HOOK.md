@@ -4,7 +4,7 @@ tier: warn-only
 event: PreToolUse (Edit|Write on auth-flow files)
 fires_on: edit to a file in auth-flow surface with high-risk patterns (bypass routes, skip-auth flags, magic-credential checks, hardcoded admin paths)
 override: pass --ignore-auth-bypass flag (operator decision, logged)
-audit: ~/.lintel/audit/hooks.jsonl
+audit: .claude/runtime/audit/hooks.jsonl
 ---
 
 # sc-auth-bypass-warn

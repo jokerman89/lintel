@@ -2,9 +2,9 @@
 name: ta-contract-collision-warn
 tier: warn-only
 event: PreToolUse (Edit|Write on declared interface files)
-fires_on: edit to a file matching pack.tech_architecture.interface_glob OR with declared consumers via .lintel/state/ta/consumer-registry.json
+fires_on: edit to a file matching pack.tech_architecture.interface_glob OR with declared consumers via .claude/runtime/state/ta/consumer-registry.json
 override: pass --ignore-contract-collision flag (operator decision, logged)
-audit: ~/.lintel/audit/hooks.jsonl
+audit: .claude/runtime/audit/hooks.jsonl
 ---
 
 # ta-contract-collision-warn
@@ -14,7 +14,7 @@ Surfaces when an Edit/Write hits an interface file with known consumers. Warning
 ## What it does
 
 - Reads pack policy: `pack.yaml.tech_architecture.interface_glob` (e.g. `**/api/*.proto`, `**/*.openapi.yaml`)
-- Reads consumer registry: `.lintel/state/ta/consumer-registry.json` (populated by `/li:ta-contract-collision` or operator)
+- Reads consumer registry: `.claude/runtime/state/ta/consumer-registry.json` (populated by `/li:ta-contract-collision` or operator)
 - If edited file matches interface_glob OR appears in registry: WARN with consumer count + suggestion to run `/li:ta single --action contract-collision`
 
 ## Why warn-only

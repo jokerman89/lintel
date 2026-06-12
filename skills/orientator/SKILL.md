@@ -41,7 +41,7 @@ source "$LINTEL_REPO_ROOT/lib/pack-resolver.sh"
 source "$LINTEL_REPO_ROOT/lib/orientator-routing.sh"
 
 prompt_text="${1:-}"   # operator's last message
-[ -z "$prompt_text" ] && prompt_text="$(cat .lintel/state/00-state.md 2>/dev/null | tail -20)"
+[ -z "$prompt_text" ] && prompt_text="$(cat .claude/runtime/state/00-state.md 2>/dev/null | tail -20)"
 
 default_workflow=$(resolve_pack_field navigation.default_workflow)
 high_risk_csv=$(resolve_pack_field navigation.high_risk_workflows)
@@ -125,7 +125,7 @@ fi
 ```bash
 ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 operator=$(whoami 2>/dev/null || echo unknown)
-audit_path="${LINTEL_HOME:-$HOME/.lintel}/audit/orientator-decisions.jsonl"
+audit_path=".claude/runtime/audit/orientator-decisions.jsonl"
 mkdir -p "$(dirname "$audit_path")"
 
 printf '{"ts":"%s","kind":"orientator_decision","intent":"%s","workflow":"%s","risk":"%s","confidence":"%s","decision":"%s","budget_used":%d,"escalated":%s,"operator":"%s"}\n' \
@@ -173,10 +173,10 @@ None — orientator is single-shot at SENSE.
 - Operator's last message (passed in by SENSE)
 - `lib/pack-resolver.sh` for active pack navigation policy
 - `lib/orientator-routing.sh` for mechanical helpers
-- `.lintel/state/00-state.md` (optional — for resume detection)
+- `.claude/runtime/state/00-state.md` (optional — for resume detection)
 
 **Writes:**
-- `~/.lintel/audit/orientator-decisions.jsonl`
+- `.claude/runtime/audit/orientator-decisions.jsonl`
 - stdout (recommendation block)
 
 **Called by:**

@@ -96,7 +96,7 @@ Suggested edits (prioritized):
 If active role is private (e.g., customer-specific):
 - Frame findings are operator-internal
 - Do NOT propagate role-specific insights into the artifact unless operator explicitly accepts each suggestion
-- Write findings to `.lintel/state/role-lens-notes-<ts>.md` (gitignored) instead of inline-editing the artifact
+- Write findings to `.claude/runtime/state/role-lens-notes-<ts>.md` (gitignored) instead of inline-editing the artifact
 
 ### Step 4 — Operator decides edits
 
@@ -144,8 +144,8 @@ YES — invokable on any artifact path, anytime role is active.
 
 **Writes:**
 - Optional inline edits via Edit tool
-- `.lintel/state/role-lens-notes-<ts>.md` (private roles)
-- `.lintel/state/00-state.md` (event)
+- `.claude/runtime/state/role-lens-notes-<ts>.md` (private roles)
+- `.claude/runtime/state/00-state.md` (event)
 
 **Triggers:**
 - Could chain into the active pack's voice gate if voice misalignment is the main finding

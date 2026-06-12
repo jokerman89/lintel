@@ -39,9 +39,9 @@ Optional `/learn` emission: skill can offer to write 1-3 lesson entries on the o
 1. **Determine window.** Resolve `--since` to a concrete timestamp.
 2. **Gather signals:**
    - Git log since window start (commits + messages)
-   - Audit log entries (`~/.lintel/audit/*.jsonl`) within window
+   - Audit log entries (`.claude/runtime/audit/*.jsonl`) within window
    - Todo state changes (if tracked)
-   - Skill invocations within window (from `~/.lintel/analytics/skill-usage.jsonl`)
+   - Skill invocations within window (from `.claude/runtime/audit/skill-usage.jsonl`)
 3. **Structured analysis:**
    - **Shipped:** what landed (commits + PRs + deploys)
    - **Stuck:** unresolved items (audit log entries marked BLOCKED, failing CI runs, abandoned skills)
@@ -130,5 +130,5 @@ Retro written to docs/retros/2026-W22.md. 14 commits, 4 stuck, 6 patterns.
 
 - `/learn` — what /retro --emit-lessons drives
 - `/context-save` — for actual session-end persistence
-- `tasks/lessons.md` (project) / `~/.lintel/lessons.jsonl` (global) — where lessons land
+- `.claude/memory/lessons.md` (project) / `~/.lintel/lessons.jsonl` (global) — where lessons land
 - Project CLAUDE.md "Self-improvement loop" — the discipline /retro enables

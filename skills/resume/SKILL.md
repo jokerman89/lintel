@@ -12,7 +12,7 @@ You are the RESUME skill — cross-session continuity for Lintel cycle.
 
 ## What this skill does
 
-Reads `.lintel/state/00-state.md` from cwd, determines where the prior session ended, and routes operator to the next-recommended phase (or operator-specified override). Handles:
+Reads `.claude/runtime/state/00-state.md` from cwd, determines where the prior session ended, and routes operator to the next-recommended phase (or operator-specified override). Handles:
 - Resume mid-cycle (paused/aborted before)
 - Resume new cycle starting from CAPTURE artifacts of prior cycle
 - Cross-session continuity when operator returns days/weeks later
@@ -37,7 +37,7 @@ Not a true phase — utility skill that lands the operator in the right phase.
 ### Step 1 — Locate state
 
 ```bash
-STATE_FILE=".lintel/state/00-state.md"
+STATE_FILE=".claude/runtime/state/00-state.md"
 if [ ! -f "$STATE_FILE" ]; then
   # No state from this repo
   echo "NO_PRIOR_STATE_LOCAL"
@@ -260,10 +260,10 @@ n/a — RESUME is itself the hop-in mechanism.
 ## Integration
 
 **Reads:**
-- `.lintel/state/00-state.md` (PRIMARY)
+- `.claude/runtime/state/00-state.md` (PRIMARY)
 - `~/.lintel/lessons-vault/00-state-<repo>-*.md` (cross-machine fallback)
-- `~/.lintel/jobs/<id>/job.yaml` `steps[]` (job-scoped resume — node-path via `job_resume_point`)
-- `docs/plans/<slug>/scope.md` `depth_schema` (selects node-path vs current_step resume)
+- `.claude/runtime/jobs/<id>/job.yaml` `steps[]` (job-scoped resume — node-path via `job_resume_point`)
+- `.claude/plans/<slug>/scope.md` `depth_schema` (selects node-path vs current_step resume)
 - `plan.md`, `spec.md`, `review-report.md` (for precondition checks)
 - recent git log
 
@@ -271,7 +271,7 @@ n/a — RESUME is itself the hop-in mechanism.
 - `bin/_jobs.sh` — `job_resume_point` (tree node-path), `job_can_start` (skip blocked leaves), `job_path`
 
 **Writes:**
-- `.lintel/state/00-state.md` (RESUME entry)
+- `.claude/runtime/state/00-state.md` (RESUME entry)
 - `~/.lintel/archive/<cycle-id>/` (if operator aborts)
 
 **Triggers:**
@@ -306,4 +306,4 @@ source "$LINTEL_REPO_ROOT/lib/cycle-footer.sh"   # fallback: "$(git rev-parse --
 render_cycle_footer                               # auto: thin when no cycle, full/--compact when in one
 ```
 
-See [ADR-0003](../../docs/adr/0003-cycle-position-footer.md).
+See [ADR-0003](../../.claude/decisions/0003-cycle-position-footer.md).

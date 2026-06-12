@@ -35,7 +35,7 @@ brief_file=$(mktemp)
 cat > "$brief_file" <<EOF
 task: Enumerate all queries (ORM calls + raw SQL) against declared schema
 context_pointers:
-  - .lintel/state/da/data-model.md (if present)
+  - .claude/runtime/state/da/data-model.md (if present)
 constraints:
   - one entry per (table, operation, frequency-hint)
   - capture filter columns + join columns
@@ -54,8 +54,8 @@ index_brief=$(mktemp)
 cat > "$index_brief" <<EOF
 task: Identify index gaps against documented queries
 context_pointers:
-  - .lintel/state/da/query-enumeration.json
-  - .lintel/state/da/current-schema.sql (if present)
+  - .claude/runtime/state/da/query-enumeration.json
+  - .claude/runtime/state/da/current-schema.sql (if present)
 constraints:
   - per query: existing index sufficient | needs new index | composite index needed
   - flag missing-index candidates by query frequency
@@ -70,17 +70,17 @@ EOF
 
 ```bash
 # Hot paths = top-5 by frequency
-hot_paths=$(jq -r '.queries | sort_by(.frequency_hint) | reverse | .[0:5]' .lintel/state/da/query-enumeration.json)
+hot_paths=$(jq -r '.queries | sort_by(.frequency_hint) | reverse | .[0:5]' .claude/runtime/state/da/query-enumeration.json)
 
 # Read/write ratio per table
-read_write_ratios=$(compute_rw_ratios .lintel/state/da/query-enumeration.json)
+read_write_ratios=$(compute_rw_ratios .claude/runtime/state/da/query-enumeration.json)
 ```
 
 ### Step 4 — Emit + audit
 
 ```bash
 ts=$(date -u +"%Y%m%dT%H%M%SZ")
-out=".lintel/state/da/query-pattern-audit-$ts.md"
+out=".claude/runtime/state/da/query-pattern-audit-$ts.md"
 {
   echo "# Query pattern audit — $(date -u +%Y-%m-%dT%H:%M:%SZ)"
   echo ""
@@ -91,15 +91,15 @@ out=".lintel/state/da/query-pattern-audit-$ts.md"
   echo "$read_write_ratios"
   echo ""
   echo "## Index gaps"
-  cat .lintel/state/da/index-gaps.md
+  cat .claude/runtime/state/da/index-gaps.md
   echo ""
   echo "## N+1 candidates"
-  jq -r '.queries[] | select(.n_plus_1 == true) | "- \(.table) (\(.op)): \(.location)"' .lintel/state/da/query-enumeration.json
+  jq -r '.queries[] | select(.n_plus_1 == true) | "- \(.table) (\(.op)): \(.location)"' .claude/runtime/state/da/query-enumeration.json
 } > "$out"
 
 printf '{"ts":"%s","kind":"da_query_pattern_audit","queries":%d,"hot_paths":%d,"index_gaps":%d,"operator":"%s"}\n' \
   "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$query_count" "$hot_path_count" "$index_gap_count" "$(whoami 2>/dev/null || echo unknown)" \
-  >> "$LINTEL_HOME/audit/da-decisions.jsonl"
+  >> ".claude/runtime/audit/da-decisions.jsonl"
 ```
 
 ## Status protocol
@@ -111,7 +111,7 @@ printf '{"ts":"%s","kind":"da_query_pattern_audit","queries":%d,"hot_paths":%d,"
 ## Integration
 
 **Reads:** application code, current schema, data model
-**Writes:** `.lintel/state/da/query-pattern-audit-<ts>.md`, audit JSONL
+**Writes:** `.claude/runtime/state/da/query-pattern-audit-<ts>.md`, audit JSONL
 **Dispatches to:** Explorer (enumeration), DatabaseDesigner (index-gap analysis)
 
 ## Anti-patterns

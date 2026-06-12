@@ -32,12 +32,12 @@ Reads operational data model + business questions the analytics should answer. S
 
 ```bash
 # Reuse OLTP data model + query patterns
-data_model=".lintel/state/da/data-model.md"
-query_audit=$(find .lintel/state/da -name "query-pattern-audit-*.md" -mtime -7 2>/dev/null | sort | tail -1)
+data_model=".claude/runtime/state/da/data-model.md"
+query_audit=$(find .claude/runtime/state/da -name "query-pattern-audit-*.md" -mtime -7 2>/dev/null | sort | tail -1)
 
 primary_store="${primary_store:-postgres}"
 # Business questions can be provided as arg or in current state
-business_questions="${1:-${BUSINESS_QUESTIONS:-from .lintel/state/da/business-questions.md}}"
+business_questions="${1:-${BUSINESS_QUESTIONS:-from .claude/runtime/state/da/business-questions.md}}"
 ```
 
 ### Step 2 — Spawn DataPipelineDesigner for OLAP path
@@ -71,7 +71,7 @@ cat > "$dim_brief" <<EOF
 task: Design dimensional model (facts + dimensions + grain)
 context_pointers:
   - $data_model
-  - .lintel/state/da/olap-path.md
+  - .claude/runtime/state/da/olap-path.md
   - business questions: ${business_questions}
 constraints:
   - fact table grain documented per fact (one row per X)
@@ -88,23 +88,23 @@ EOF
 
 ```bash
 ts=$(date -u +"%Y%m%dT%H%M%SZ")
-out=".lintel/state/da/analytics-readiness-$ts.md"
+out=".claude/runtime/state/da/analytics-readiness-$ts.md"
 {
   echo "# Analytics readiness — $(date -u +%Y-%m-%dT%H:%M:%SZ)"
   echo ""
   echo "## OLAP path"
-  cat .lintel/state/da/olap-path.md
+  cat .claude/runtime/state/da/olap-path.md
   echo ""
   echo "## Dimensional model"
-  cat .lintel/state/da/dimensional-model.md
+  cat .claude/runtime/state/da/dimensional-model.md
   echo ""
   echo "## Refresh contract"
-  cat .lintel/state/da/refresh-contract.md
+  cat .claude/runtime/state/da/refresh-contract.md
 } > "$out"
 
 printf '{"ts":"%s","kind":"da_analytics_readiness","primary_store":"%s","operator":"%s"}\n' \
   "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$primary_store" "$(whoami 2>/dev/null || echo unknown)" \
-  >> "$LINTEL_HOME/audit/da-decisions.jsonl"
+  >> ".claude/runtime/audit/da-decisions.jsonl"
 ```
 
 ## Status protocol
@@ -117,7 +117,7 @@ printf '{"ts":"%s","kind":"da_analytics_readiness","primary_store":"%s","operato
 ## Integration
 
 **Reads:** OLTP data model, query audit, business questions
-**Writes:** `.lintel/state/da/analytics-readiness-<ts>.md`, audit JSONL
+**Writes:** `.claude/runtime/state/da/analytics-readiness-<ts>.md`, audit JSONL
 **Dispatches to:** DataPipelineDesigner (OLAP path), SchemaArchitect (NEW, dimensional model)
 
 ## Anti-patterns

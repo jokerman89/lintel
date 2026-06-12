@@ -69,7 +69,7 @@ knowhow:
 
 lessons:
   surface_on_sense: true           # generic mechanism, always on
-  paths: ["tasks/lessons.md"]
+  paths: [".claude/memory/lessons.md"]
 
 opinions:
   inventory: []

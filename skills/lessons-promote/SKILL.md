@@ -1,7 +1,7 @@
 ---
 name: lessons-promote
 layer: foundation
-description: Promote a repo-local lesson from tasks/lessons.md to Lintel's global lessons (scaffolding/01-foundation/tasks/lessons.md) so all future scaffolded repos inherit it.
+description: Promote a repo-local lesson from .claude/memory/lessons.md to Lintel's global lessons (scaffolding/01-foundation/tasks/lessons.md) so all future scaffolded repos inherit it.
 color: cyan
 tools: Read, Bash, Edit, Grep, Glob
 voice: internal
@@ -12,7 +12,7 @@ You are the lessons-promote skill.
 
 ## What this skill does
 
-Promotes a single lesson from the current repo's `tasks/lessons.md` to Lintel's global `scaffolding/01-foundation/tasks/lessons.md`. Once promoted, every new repo scaffolded via `lintel scaffold init` includes that lesson as baseline.
+Promotes a single lesson from the current repo's `.claude/memory/lessons.md` to Lintel's global `scaffolding/01-foundation/tasks/lessons.md`. Once promoted, every new repo scaffolded via `lintel scaffold init` includes that lesson as baseline.
 
 This is how operator-discovered patterns become team-wide knowledge.
 
@@ -30,7 +30,7 @@ This is how operator-discovered patterns become team-wide knowledge.
 
 ## Workflow
 
-1. **Read current repo's lessons.md.** Verify file exists at `tasks/lessons.md`.
+1. **Read current repo's lessons.md.** Verify file exists at `.claude/memory/lessons.md`.
 
 2. **Ask operator which lesson to promote.** AskUserQuestion with numbered list of lessons in current repo. Recommend the most-cited or oldest.
 

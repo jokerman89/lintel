@@ -4,7 +4,7 @@ tier: warn-only
 event: PreToolUse (Edit|Write on IaC files)
 fires_on: commit increases projected cloud cost above pack/profile threshold (heuristic: scaling-up SKU class, adding always-on resource, increasing replica count beyond cap)
 override: pass --ignore-cost-warn flag (operator decision, logged)
-audit: ~/.lintel/audit/hooks.jsonl
+audit: .claude/runtime/audit/hooks.jsonl
 ---
 
 # dh-cost-budget-warn

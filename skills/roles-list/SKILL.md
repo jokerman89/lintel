@@ -112,7 +112,7 @@ YES — pure information query, anytime.
 - `~/.lintel/profile.yaml` (active role)
 
 **Writes:**
-- Optional `.lintel/state/00-state.md` event
+- Optional `.claude/runtime/state/00-state.md` event
 
 ## Anti-patterns
 

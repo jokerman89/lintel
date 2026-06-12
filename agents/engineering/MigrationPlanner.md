@@ -84,4 +84,4 @@ Internal. Operator-facing migration plans. No customer-facing voice.
 
 ## How operators read your output
 
-Plan goes to `.lintel/state/da/migration-plan.md`. Risk surface to `.lintel/state/da/migration-risks.md`. SQL drafts (delegated back to Migrator agent) at `.lintel/state/da/up.sql` + `down.sql`. Operators consume via DA migration-plan sub-skill report.
+Plan goes to `.claude/runtime/state/da/migration-plan.md`. Risk surface to `.claude/runtime/state/da/migration-risks.md`. SQL drafts (delegated back to Migrator agent) at `.claude/runtime/state/da/up.sql` + `down.sql`. Operators consume via DA migration-plan sub-skill report.

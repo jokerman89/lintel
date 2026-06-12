@@ -130,8 +130,8 @@ cost_threshold="${cost_threshold:-10000}"
 #### `full` granularity
 
 ```bash
-mkdir -p .lintel/state/dh
-audit="$LINTEL_HOME/audit/dh-decisions.jsonl"
+mkdir -p .claude/runtime/state/dh
+audit=".claude/runtime/audit/dh-decisions.jsonl"
 mkdir -p "$(dirname "$audit")"
 
 for checkpoint in deployment_plan_locked observability_specified slos_defined cost_projected on_call_ready; do
@@ -150,12 +150,12 @@ fi
 #### `loop` granularity
 
 ```bash
-if [ ! -f ".lintel/state/dh/00-state.md" ]; then
+if [ ! -f ".claude/runtime/state/dh/00-state.md" ]; then
   echo "ERROR: no prior DH state — use /li:dh full first"
   exit 1
 fi
 
-prior_iteration=$(grep -E '^iteration:' .lintel/state/dh/00-state.md | head -1 | awk '{print $2}')
+prior_iteration=$(grep -E '^iteration:' .claude/runtime/state/dh/00-state.md | head -1 | awk '{print $2}')
 new_iteration=$((prior_iteration + 1))
 
 run_checkpoint deployment_plan_locked
@@ -228,7 +228,7 @@ Full-pass exit: every dimension ≥ 80 OR explicit operator override.
 ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 printf '{"ts":"%s","kind":"dh_module_complete","granularity":"%s","score":%d,"checkpoints_passed":%d,"cloud":"%s","deployment_pattern":"%s","operator":"%s"}\n' \
   "$ts" "$granularity" "$score" "$passed_count" "$cloud" "$deployment_pattern" "$(whoami 2>/dev/null || echo unknown)" \
-  >> "$LINTEL_HOME/audit/dh-decisions.jsonl"
+  >> ".claude/runtime/audit/dh-decisions.jsonl"
 ```
 
 ## Status protocol
@@ -258,13 +258,13 @@ YES. `/li:dh loop` resumes from prior state. `/li:dh single --action <name>` ent
 - Prior TA scaling-plan + SC threat-model (if present, for cross-module input)
 
 **Writes:**
-- `.lintel/state/dh/deployment-plan.md`
-- `.lintel/state/dh/observability-spec.md`
-- `.lintel/state/dh/sli-slo-spec.md`
-- `.lintel/state/dh/cost-projection.md`
-- `.lintel/state/dh/rollback-strategy.md`
-- `.lintel/state/dh/on-call-playbook.md`
-- `~/.lintel/audit/dh-decisions.jsonl`
+- `.claude/runtime/state/dh/deployment-plan.md`
+- `.claude/runtime/state/dh/observability-spec.md`
+- `.claude/runtime/state/dh/sli-slo-spec.md`
+- `.claude/runtime/state/dh/cost-projection.md`
+- `.claude/runtime/state/dh/rollback-strategy.md`
+- `.claude/runtime/state/dh/on-call-playbook.md`
+- `.claude/runtime/audit/dh-decisions.jsonl`
 - Brief Forge envelopes through the standard gate
 
 **Triggered by:**

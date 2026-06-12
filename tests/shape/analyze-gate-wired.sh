@@ -18,7 +18,7 @@ echo "==================================="
 SKILL="$REPO_ROOT/skills/analyze/SKILL.md"
 PLAN="$REPO_ROOT/skills/plan/SKILL.md"
 BUILD="$REPO_ROOT/skills/build/SKILL.md"
-ADR="$REPO_ROOT/docs/adr/0004-analyze-consistency-gate.md"
+ADR="$REPO_ROOT/.claude/decisions/0004-analyze-consistency-gate.md"
 
 # 1. Skill exists with the contract pieces
 if [ -f "$SKILL" ]; then

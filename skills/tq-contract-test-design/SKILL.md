@@ -32,8 +32,8 @@ Reads API design (from TA api-design or `dh-deployment-plan` cutover) + consumer
 
 ```bash
 contract_test_framework="${framework:-${contract_test_framework:-pact}}"   # pact | consumer-driven-internal | none
-api_design=$(find .lintel/state/ta -name "api-design-*.md" -mtime -30 2>/dev/null | sort | tail -1)
-consumer_registry=".lintel/state/ta/consumer-registry.json"
+api_design=$(find .claude/runtime/state/ta -name "api-design-*.md" -mtime -30 2>/dev/null | sort | tail -1)
+consumer_registry=".claude/runtime/state/ta/consumer-registry.json"
 ```
 
 ### Step 2 — Spawn APIDesigner for contract surface
@@ -62,7 +62,7 @@ test_brief=$(mktemp)
 cat > "$test_brief" <<EOF
 task: Design consumer-driven contract tests using ${contract_test_framework}
 context_pointers:
-  - .lintel/state/tq/contract-surface.md
+  - .claude/runtime/state/tq/contract-surface.md
 constraints:
   - per consumer-provider pair: consumer expectation + provider verification
   - schema-versioning tests: compatibility matrix across active versions
@@ -77,7 +77,7 @@ EOF
 ### Step 4 — Raise-help on active-consumer break
 
 ```bash
-active_consumer_break=$(jq -r '.contracts[] | select(.breaks_active_consumer == true) | .name' .lintel/state/tq/contract-tests.json 2>/dev/null | wc -l)
+active_consumer_break=$(jq -r '.contracts[] | select(.breaks_active_consumer == true) | .name' .claude/runtime/state/tq/contract-tests.json 2>/dev/null | wc -l)
 if [ "$active_consumer_break" -gt 0 ]; then
   echo "RAISE_HELP: $active_consumer_break contract test(s) break against active consumer"
 fi
@@ -87,16 +87,16 @@ fi
 
 ```bash
 ts=$(date -u +"%Y%m%dT%H%M%SZ")
-out=".lintel/state/tq/contract-test-suite-$ts.md"
+out=".claude/runtime/state/tq/contract-test-suite-$ts.md"
 {
   echo "# Contract test suite — $(date -u +%Y-%m-%dT%H:%M:%SZ)"
   echo "## Framework: $contract_test_framework"
   echo ""
   echo "## Contract surface"
-  cat .lintel/state/tq/contract-surface.md
+  cat .claude/runtime/state/tq/contract-surface.md
   echo ""
   echo "## Tests + version matrix"
-  cat .lintel/state/tq/contract-tests.md
+  cat .claude/runtime/state/tq/contract-tests.md
 } > "$out"
 
 printf '{"ts":"%s","kind":"tq_contract_test_design","framework":"%s","contracts":%d,"breaks_active":%d,"operator":"%s"}\n' \
@@ -113,7 +113,7 @@ printf '{"ts":"%s","kind":"tq_contract_test_design","framework":"%s","contracts"
 ## Integration
 
 **Reads:** TA api-design, consumer registry, profile preferences
-**Writes:** `.lintel/state/tq/contract-test-suite-<ts>.md`, audit JSONL
+**Writes:** `.claude/runtime/state/tq/contract-test-suite-<ts>.md`, audit JSONL
 **Dispatches to:** APIDesigner (surface), ContractTestArchitect (NEW, test design)
 **Hook integration:** `tq-contract-break-warn` hook fires pre-commit on provider changes breaking consumer contracts
 

@@ -70,7 +70,7 @@ If current = private AND new = public: surface that sensitive context will be DR
 
 ```bash
 # Mark deactivation
-echo "role_deactivated: $current_role at $(date)" >> .lintel/state/00-state.md
+echo "role_deactivated: $current_role at $(date)" >> .claude/runtime/state/00-state.md
 ```
 
 Don't clear cached deep-dive context if operator wants both available — but mark current as inactive.

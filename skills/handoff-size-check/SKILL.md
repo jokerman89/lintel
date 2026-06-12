@@ -40,8 +40,8 @@ Per v3.6 backlog 3.2 — complements 3.1 elephant-hint + 2.1 500k cap as **the s
 ### Step 1 — Locate plan + warming-manifest
 
 ```bash
-PLAN_FILE="${1:-.lintel/state/PLAN.md}"
-WARMING_FILE=".lintel/state/warming-manifest.md"  # from context-warm-* invocations
+PLAN_FILE="${1:-.claude/runtime/state/PLAN.md}"
+WARMING_FILE=".claude/runtime/state/warming-manifest.md"  # from context-warm-* invocations
 [ -f "$PLAN_FILE" ] || { echo "No plan found at $PLAN_FILE"; exit 2; }
 ```
 
@@ -49,9 +49,9 @@ WARMING_FILE=".lintel/state/warming-manifest.md"  # from context-warm-* invocati
 
 ```bash
 # Cold-executor trio sizes
-spec_size=$(wc -c < .lintel/state/spec.md 2>/dev/null || echo 0)
+spec_size=$(wc -c < .claude/runtime/state/spec.md 2>/dev/null || echo 0)
 plan_size=$(wc -c < "$PLAN_FILE")
-prompt_size=$(wc -c < .lintel/state/prompt.md 2>/dev/null || echo 0)
+prompt_size=$(wc -c < .claude/runtime/state/prompt.md 2>/dev/null || echo 0)
 
 # Warming projected loads
 warming_total=0
@@ -115,7 +115,7 @@ jq -nc --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
   --arg plan "$PLAN_FILE" --arg mode "$mode" \
   --arg total "$total_tokens" --arg verdict "$verdict" \
   '{ts:$ts, plan:$plan, mode:$mode, total_tokens:$total|tonumber, verdict:$verdict}' \
-  >> ~/.lintel/audit/handoff-size-checks.jsonl
+  >> .claude/runtime/audit/handoff-size-checks.jsonl
 ```
 
 ## Voice tier behavior
@@ -143,14 +143,14 @@ YES — solo-invocable. Designed for auto-invocation from `/li:cycle` Step 5
 ## Integration
 
 **Reads:**
-- `.lintel/state/PLAN.md` (or `--plan <path>` override)
-- `.lintel/state/spec.md`, `prompt.md` (cold-executor trio)
-- `.lintel/state/warming-manifest.md`
+- `.claude/runtime/state/PLAN.md` (or `--plan <path>` override)
+- `.claude/runtime/state/spec.md`, `prompt.md` (cold-executor trio)
+- `.claude/runtime/state/warming-manifest.md`
 - `~/.lintel/profile.yaml` (current mode → cap)
 - skills/context-budget/SKILL.md mode_envelopes
 
 **Writes:**
-- `~/.lintel/audit/handoff-size-checks.jsonl`
+- `.claude/runtime/audit/handoff-size-checks.jsonl`
 - stdout (verdict report)
 - Return code (CI/script consumption)
 

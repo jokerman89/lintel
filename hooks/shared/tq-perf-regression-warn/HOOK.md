@@ -2,9 +2,9 @@
 name: tq-perf-regression-warn
 tier: warn-only
 event: PreToolUse (Edit|Write on perf-budget paths)
-fires_on: edit to a file in pack.testing_qa.perf_path_glob OR identified as on a critical journey by .lintel/state/tq/perf-budget-*.md
+fires_on: edit to a file in pack.testing_qa.perf_path_glob OR identified as on a critical journey by .claude/runtime/state/tq/perf-budget-*.md
 override: pass --ignore-perf-regression flag (operator decision, logged)
-audit: ~/.lintel/audit/hooks.jsonl
+audit: .claude/runtime/audit/hooks.jsonl
 ---
 
 # tq-perf-regression-warn
@@ -13,7 +13,7 @@ Surfaces when an edit touches a perf-budget-bound path. Warning, not block — t
 
 ## What it does
 
-- Detects perf-bound paths from `pack.testing_qa.perf_path_glob` or the latest perf-budget spec at `.lintel/state/tq/perf-budget-*.md`
+- Detects perf-bound paths from `pack.testing_qa.perf_path_glob` or the latest perf-budget spec at `.claude/runtime/state/tq/perf-budget-*.md`
 - For matched files: WARN
 
 ## Why warn-only

@@ -48,8 +48,8 @@ Granularity dispatch:
                    LatencyAnalyzer / SystemArchitect / SecurityAuditor / Architect
                        │
                        ▼
-                   Output → .lintel/state/dh/<action>-<ts>.md
-                   Audit → ~/.lintel/audit/dh-decisions.jsonl
+                   Output → .claude/runtime/state/dh/<action>-<ts>.md
+                   Audit → .claude/runtime/audit/dh-decisions.jsonl
 ```
 
 ## The five checkpoints (full pass)
@@ -78,12 +78,12 @@ Pass criterion: detection signal per failure mode + first-5-minute actions + esc
 
 | Dimension | Score 0-100 | Pass threshold | Source artifact |
 |---|---|---|---|
-| Deployment pattern + rollback path locked | _ | 80 | `.lintel/state/dh/deployment-plan-<ts>.md` + `rollback-strategy-<ts>.md` |
-| Observability instrumentation coverage | _ | 80 | `.lintel/state/dh/observability-spec-<ts>.md` |
-| SLI/SLO definitions complete | _ | 80 | `.lintel/state/dh/sli-slo-spec-<ts>.md` |
-| Cost projection per component | _ | 80 | `.lintel/state/dh/cost-projection-<ts>.md` |
-| Capacity headroom documented | _ | 80 | `.lintel/state/dh/capacity-headroom-<ts>.md` |
-| On-call playbook (per failure mode) | _ | 80 | `.lintel/state/dh/on-call-playbook-<ts>.md` |
+| Deployment pattern + rollback path locked | _ | 80 | `.claude/runtime/state/dh/deployment-plan-<ts>.md` + `rollback-strategy-<ts>.md` |
+| Observability instrumentation coverage | _ | 80 | `.claude/runtime/state/dh/observability-spec-<ts>.md` |
+| SLI/SLO definitions complete | _ | 80 | `.claude/runtime/state/dh/sli-slo-spec-<ts>.md` |
+| Cost projection per component | _ | 80 | `.claude/runtime/state/dh/cost-projection-<ts>.md` |
+| Capacity headroom documented | _ | 80 | `.claude/runtime/state/dh/capacity-headroom-<ts>.md` |
+| On-call playbook (per failure mode) | _ | 80 | `.claude/runtime/state/dh/on-call-playbook-<ts>.md` |
 
 ## Sub-skill catalog
 
@@ -197,8 +197,8 @@ DH consumes outputs from TA + DA + SC. It maps capacity → cost, threat surface
 - Prior TA scaling-plan + DA migration-plan + SC threat-model + audit-path
 
 **Writes:**
-- `.lintel/state/dh/*.{md,json}` (per-action artifacts)
-- `~/.lintel/audit/dh-decisions.jsonl`
+- `.claude/runtime/state/dh/*.{md,json}` (per-action artifacts)
+- `.claude/runtime/audit/dh-decisions.jsonl`
 - Brief Forge envelopes through the standard gate
 
 **Triggered by:**

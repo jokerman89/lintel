@@ -68,4 +68,4 @@ We are migrating from X to Y. Ignore Y references until migration is complete.
 Remove this block when the migration is done.
 ```
 
-Remove it when no longer relevant. Difference vs. `tasks/lessons.md`: lessons are permanent rules from corrections; heads-ups are short-term context.
+Remove it when no longer relevant. Difference vs. `.claude/memory/lessons.md`: lessons are permanent rules from corrections; heads-ups are short-term context.

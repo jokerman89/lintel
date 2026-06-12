@@ -54,7 +54,7 @@ arch_brief=$(mktemp)
 cat > "$arch_brief" <<EOF
 task: Assess test distribution against test-pyramid principle
 context_pointers:
-  - .lintel/state/tq/test-enumeration.md
+  - .claude/runtime/state/tq/test-enumeration.md
 constraints:
   - ideal pyramid: many unit, fewer integration, fewest e2e
   - flag inverted pyramid (more e2e than unit)
@@ -71,15 +71,15 @@ EOF
 
 ```bash
 ts=$(date -u +"%Y%m%dT%H%M%SZ")
-out=".lintel/state/tq/test-pyramid-$ts.md"
+out=".claude/runtime/state/tq/test-pyramid-$ts.md"
 {
   echo "# Test pyramid — $(date -u +%Y-%m-%dT%H:%M:%SZ)"
   echo ""
   echo "## Per-kind enumeration"
-  cat .lintel/state/tq/test-enumeration.md
+  cat .claude/runtime/state/tq/test-enumeration.md
   echo ""
   echo "## Distribution assessment"
-  cat .lintel/state/tq/distribution-assessment.md
+  cat .claude/runtime/state/tq/distribution-assessment.md
 } > "$out"
 
 printf '{"ts":"%s","kind":"tq_test_pyramid","unit":%d,"integration":%d,"e2e":%d,"contract":%d,"perf":%d,"verdict":"%s","operator":"%s"}\n' \
@@ -96,7 +96,7 @@ printf '{"ts":"%s","kind":"tq_test_pyramid","unit":%d,"integration":%d,"e2e":%d,
 ## Integration
 
 **Reads:** test directories, CI execution data
-**Writes:** `.lintel/state/tq/test-pyramid-<ts>.md`, audit JSONL
+**Writes:** `.claude/runtime/state/tq/test-pyramid-<ts>.md`, audit JSONL
 **Dispatches to:** TestRunner (enumeration), Architect (distribution assessment)
 
 ## Anti-patterns

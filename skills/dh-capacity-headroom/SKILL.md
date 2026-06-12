@@ -31,8 +31,8 @@ Reads capacity model (from TA scaling-plan if present) + observability spec (fro
 ### Step 1 — Read context
 
 ```bash
-scaling_plan=$(find .lintel/state/ta -name "scaling-plan-*.md" -mtime -30 2>/dev/null | sort | tail -1)
-observability_spec=$(find .lintel/state/dh -name "observability-spec-*.md" -mtime -7 2>/dev/null | sort | tail -1)
+scaling_plan=$(find .claude/runtime/state/ta -name "scaling-plan-*.md" -mtime -30 2>/dev/null | sort | tail -1)
+observability_spec=$(find .claude/runtime/state/dh -name "observability-spec-*.md" -mtime -7 2>/dev/null | sort | tail -1)
 ```
 
 ### Step 2 — Spawn CapacityPlanner for headroom margins
@@ -62,7 +62,7 @@ latency_brief=$(mktemp)
 cat > "$latency_brief" <<EOF
 task: Map capacity utilization to latency degradation thresholds
 context_pointers:
-  - .lintel/state/dh/headroom-margins.md
+  - .claude/runtime/state/dh/headroom-margins.md
 constraints:
   - per component: utilization level at which p99 latency begins to degrade
   - alert threshold: utilization level that triggers scaling action (typically before degradation)
@@ -78,20 +78,20 @@ EOF
 
 ```bash
 ts=$(date -u +"%Y%m%dT%H%M%SZ")
-out=".lintel/state/dh/capacity-headroom-$ts.md"
+out=".claude/runtime/state/dh/capacity-headroom-$ts.md"
 {
   echo "# Capacity headroom — $(date -u +%Y-%m-%dT%H:%M:%SZ)"
   echo ""
   echo "## Per-component headroom"
-  cat .lintel/state/dh/headroom-margins.md
+  cat .claude/runtime/state/dh/headroom-margins.md
   echo ""
   echo "## Alert + scaling triggers"
-  cat .lintel/state/dh/scaling-triggers.md
+  cat .claude/runtime/state/dh/scaling-triggers.md
 } > "$out"
 
 printf '{"ts":"%s","kind":"dh_capacity_headroom","components":%d,"operator":"%s"}\n' \
   "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$component_count" "$(whoami 2>/dev/null || echo unknown)" \
-  >> "$LINTEL_HOME/audit/dh-decisions.jsonl"
+  >> ".claude/runtime/audit/dh-decisions.jsonl"
 ```
 
 ## Status protocol
@@ -102,7 +102,7 @@ printf '{"ts":"%s","kind":"dh_capacity_headroom","components":%d,"operator":"%s"
 ## Integration
 
 **Reads:** TA scaling plan, DH observability spec
-**Writes:** `.lintel/state/dh/capacity-headroom-<ts>.md`, audit JSONL
+**Writes:** `.claude/runtime/state/dh/capacity-headroom-<ts>.md`, audit JSONL
 **Dispatches to:** CapacityPlanner (margins), LatencyAnalyzer (degradation thresholds)
 
 ## Anti-patterns

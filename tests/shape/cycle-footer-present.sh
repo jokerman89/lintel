@@ -17,7 +17,7 @@ echo "==================================="
 # The helper the skills source must exist.
 [ -f lib/cycle-footer.sh ] && pass "lib/cycle-footer.sh exists" || fail "lib/cycle-footer.sh missing"
 [ -f lib/cycle-modes.sh ] && pass "lib/cycle-modes.sh exists" || fail "lib/cycle-modes.sh missing"
-[ -f docs/adr/0003-cycle-position-footer.md ] && pass "ADR-0003 exists" || fail "ADR-0003 missing"
+[ -f .claude/decisions/0003-cycle-position-footer.md ] && pass "ADR-0003 exists" || fail "ADR-0003 missing"
 
 # Every phase skill (the 9 cycle steps) must render the footer at its close.
 PHASE_SKILLS="sense scope define discover plan build review ship capture"

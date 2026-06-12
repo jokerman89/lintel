@@ -12,7 +12,7 @@ You are TA-QUALITY-ATTRIBUTES — the workflow that produces a non-functional re
 
 ## What this skill does
 
-Reads operator's functional requirements + existing performance/reliability targets. Spawns `SystemArchitect` (new in v4.1) to produce structured NFR spec: latency budgets (p50/p95/p99), throughput targets, error rate budgets, availability targets, observability minimums. Spawns `Architect` to map NFRs to architectural constraints. Writes spec to `.lintel/state/ta/quality-attributes-<ts>.md`.
+Reads operator's functional requirements + existing performance/reliability targets. Spawns `SystemArchitect` (new in v4.1) to produce structured NFR spec: latency budgets (p50/p95/p99), throughput targets, error rate budgets, availability targets, observability minimums. Spawns `Architect` to map NFRs to architectural constraints. Writes spec to `.claude/runtime/state/ta/quality-attributes-<ts>.md`.
 
 ## When to use
 
@@ -31,8 +31,8 @@ Reads operator's functional requirements + existing performance/reliability targ
 ### Step 1 — Read existing targets if present
 
 ```bash
-existing_sla=".lintel/state/sla-targets.md"
-existing_baseline=".lintel/state/perf-baseline.md"
+existing_sla=".claude/runtime/state/sla-targets.md"
+existing_baseline=".claude/runtime/state/perf-baseline.md"
 
 [ -f "$existing_sla" ] && has_sla=1 || has_sla=0
 [ -f "$existing_baseline" ] && has_baseline=1 || has_baseline=0
@@ -67,7 +67,7 @@ constraints_brief=$(mktemp)
 cat > "$constraints_brief" <<EOF
 task: Map NFR spec to architectural constraints + verification approach
 context_pointers:
-  - .lintel/state/ta/nfr-spec.md
+  - .claude/runtime/state/ta/nfr-spec.md
 constraints:
   - per NFR: which architectural decision enables / threatens it
   - per NFR: how it'll be verified (load test / chaos test / monitoring assertion)
@@ -82,15 +82,15 @@ EOF
 
 ```bash
 ts=$(date -u +"%Y%m%dT%H%M%SZ")
-out=".lintel/state/ta/quality-attributes-$ts.md"
+out=".claude/runtime/state/ta/quality-attributes-$ts.md"
 {
   echo "# Quality attributes — $(date -u +%Y-%m-%dT%H:%M:%SZ)"
   echo ""
   echo "## NFR spec"
-  cat .lintel/state/ta/nfr-spec.md
+  cat .claude/runtime/state/ta/nfr-spec.md
   echo ""
   echo "## Architectural constraints + verification"
-  cat .lintel/state/ta/architect-constraints.md
+  cat .claude/runtime/state/ta/architect-constraints.md
 } > "$out"
 
 printf '{"ts":"%s","kind":"ta_quality_attributes","nfr_count":%d,"operator":"%s"}\n' \
@@ -108,7 +108,7 @@ printf '{"ts":"%s","kind":"ta_quality_attributes","nfr_count":%d,"operator":"%s"
 ## Integration
 
 **Reads:** existing SLA + baseline files, operator's system description
-**Writes:** `.lintel/state/ta/quality-attributes-<ts>.md`, audit JSONL
+**Writes:** `.claude/runtime/state/ta/quality-attributes-<ts>.md`, audit JSONL
 **Dispatches to:** SystemArchitect (NEW agent, NFR spec), Architect (constraints + verification)
 
 ## Anti-patterns

@@ -4,7 +4,7 @@ Cross-session memory. Lives across sessions; updated as understanding accumulate
 
 Different from `lessons.md`: lessons are **rules I do not want to violate again** (born from a correction). Memory is **context I want to recall** (the operator, the project, the stakeholders, the external systems).
 
-Different from `todo.md`: todo is ephemeral, scoped to one task. Memory survives across tasks.
+Different from `.claude/plans/todo.md`: todo is ephemeral, scoped to one task. Memory survives across tasks.
 
 Review at session start. Update when something changes — not at the end of every task.
 
@@ -26,7 +26,7 @@ Drop entries that no longer apply. Do not amass.
 
 Who I am working with — the human at the keyboard. Their role, what they own, how they want to be spoken to, what context they bring.
 
-<!-- Add entries here. Use docs/personas/EXAMPLE.md as a structural reference if you want a more detailed persona doc. -->
+<!-- Add entries here. Use personas-example.md (same directory) as a structural reference if you want a more detailed persona doc. -->
 
 ---
 

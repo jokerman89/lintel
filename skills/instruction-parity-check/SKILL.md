@@ -135,7 +135,7 @@ For each of the 4 key sections:
 ### Step 5 — Write report + return-code
 
 ```bash
-REPORT="${HOME}/.lintel/audit/instruction-parity-$(date +%Y%m%d).md"
+REPORT=".claude/runtime/audit/instruction-parity-$(date +%Y%m%d).md"
 mkdir -p "$(dirname "$REPORT")"
 # Write report
 
@@ -172,7 +172,7 @@ YES — solo-invocable + CI-integrated.
 - (Optional) Previous parity-report for delta-comparison
 
 **Writes:**
-- `~/.lintel/audit/instruction-parity-<date>.md` (report)
+- `.claude/runtime/audit/instruction-parity-<date>.md` (report)
 - stdout (summary)
 - Return code (CI consumption)
 

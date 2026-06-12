@@ -124,8 +124,8 @@ review_threshold="${review_threshold:-100000}"
 #### `full` granularity
 
 ```bash
-mkdir -p .lintel/state/da
-audit="$LINTEL_HOME/audit/da-decisions.jsonl"
+mkdir -p .claude/runtime/state/da
+audit=".claude/runtime/audit/da-decisions.jsonl"
 mkdir -p "$(dirname "$audit")"
 
 # Run checkpoint chain
@@ -142,18 +142,18 @@ if [ "$score" -lt 80 ]; then
   exit 1
 fi
 
-echo "DA full pass complete — score=$score, output .lintel/state/da/"
+echo "DA full pass complete — score=$score, output .claude/runtime/state/da/"
 ```
 
 #### `loop` granularity
 
 ```bash
-if [ ! -f ".lintel/state/da/00-state.md" ]; then
+if [ ! -f ".claude/runtime/state/da/00-state.md" ]; then
   echo "ERROR: no prior DA state — use /li:da full first"
   exit 1
 fi
 
-prior_iteration=$(grep -E '^iteration:' .lintel/state/da/00-state.md | head -1 | awk '{print $2}')
+prior_iteration=$(grep -E '^iteration:' .claude/runtime/state/da/00-state.md | head -1 | awk '{print $2}')
 new_iteration=$((prior_iteration + 1))
 
 # Re-run schema + migration + retention checkpoints
@@ -162,9 +162,9 @@ run_checkpoint migration_safe
 run_checkpoint retention_specified
 
 # Diff against prior iteration (schema backward-compat focus)
-echo "Schema diff vs iteration $prior_iteration:" > .lintel/state/da/iteration-${new_iteration}-diff.md
-diff .lintel/state/da/iteration-${prior_iteration}-schema.sql .lintel/state/da/iteration-${new_iteration}-schema.sql \
-  >> .lintel/state/da/iteration-${new_iteration}-diff.md || true
+echo "Schema diff vs iteration $prior_iteration:" > .claude/runtime/state/da/iteration-${new_iteration}-diff.md
+diff .claude/runtime/state/da/iteration-${prior_iteration}-schema.sql .claude/runtime/state/da/iteration-${new_iteration}-schema.sql \
+  >> .claude/runtime/state/da/iteration-${new_iteration}-diff.md || true
 ```
 
 #### `single` granularity
@@ -246,7 +246,7 @@ Full-pass exit: every dimension ≥ 80 OR explicit operator override.
 ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 printf '{"ts":"%s","kind":"da_module_complete","granularity":"%s","score":%d,"checkpoints_passed":%d,"primary_store":"%s","operator":"%s"}\n' \
   "$ts" "$granularity" "$score" "$passed_count" "$primary_store" "$(whoami 2>/dev/null || echo unknown)" \
-  >> "$LINTEL_HOME/audit/da-decisions.jsonl"
+  >> ".claude/runtime/audit/da-decisions.jsonl"
 ```
 
 ## Status protocol
@@ -264,7 +264,7 @@ printf '{"ts":"%s","kind":"da_module_complete","granularity":"%s","score":%d,"ch
 
 ## Hop-in support
 
-YES. `/li:da loop` resumes from prior state at `.lintel/state/da/00-state.md`. `/li:da single --action <name>` enters at the specific sub-skill without orchestration.
+YES. `/li:da loop` resumes from prior state at `.claude/runtime/state/da/00-state.md`. `/li:da single --action <name>` enters at the specific sub-skill without orchestration.
 
 ## Integration
 
@@ -273,15 +273,15 @@ YES. `/li:da loop` resumes from prior state at `.lintel/state/da/00-state.md`. `
 - `lib/pack-resolver.sh` for pack policy
 - Existing data agents: DatabaseDesigner, DataPipelineDesigner, Migrator
 - New agents: SchemaArchitect, MigrationPlanner
-- Existing schema ADRs (`.lintel/decisions/`, `docs/decisions/`, `docs/adr/`)
+- Existing schema ADRs (`.claude/decisions/`, `docs/decisions/`)
 
 **Writes:**
-- `.lintel/state/da/data-model.md` (full)
-- `.lintel/state/da/iteration-N-schema.sql` (per iteration)
-- `.lintel/state/da/iteration-N-diff.md` (loop)
-- `.lintel/state/da/migration-plan.md`
-- `.lintel/state/da/retention-policy.md`
-- `~/.lintel/audit/da-decisions.jsonl`
+- `.claude/runtime/state/da/data-model.md` (full)
+- `.claude/runtime/state/da/iteration-N-schema.sql` (per iteration)
+- `.claude/runtime/state/da/iteration-N-diff.md` (loop)
+- `.claude/runtime/state/da/migration-plan.md`
+- `.claude/runtime/state/da/retention-policy.md`
+- `.claude/runtime/audit/da-decisions.jsonl`
 - Brief Forge envelopes through the standard gate
 
 **Triggered by:**

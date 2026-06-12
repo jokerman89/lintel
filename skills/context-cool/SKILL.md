@@ -31,7 +31,7 @@ For real budget reduction: operator can `/li:context-snapshot` then restart sess
 
 ### Step 1 — Surface what's loaded
 
-Read `.lintel/state/context-budget.md` to see what was warmed:
+Read `.claude/runtime/state/context-budget.md` to see what was warmed:
 
 ```
 CURRENTLY LOADED (from context-warm events):
@@ -55,7 +55,7 @@ AskUserQuestion:
 
 ### Step 3 — Apply marker
 
-For selected items, add to `.lintel/state/context-ignore.md`:
+For selected items, add to `.claude/runtime/state/context-ignore.md`:
 ```yaml
 - source: context-warm "ExpressRoute"
   files: [...]
@@ -101,7 +101,7 @@ YES.
 
 ## Integration
 
-Reads `.lintel/state/context-budget.md`. Writes `.lintel/state/context-ignore.md` for coordination.
+Reads `.claude/runtime/state/context-budget.md`. Writes `.claude/runtime/state/context-ignore.md` for coordination.
 
 ## Anti-patterns
 

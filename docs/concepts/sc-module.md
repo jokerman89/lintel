@@ -48,8 +48,8 @@ Granularity dispatch:
                    ComplianceOfficer (NEW) / Architect / ReleaseEngineer
                        │
                        ▼
-                   Output → .lintel/state/sc/<action>-<ts>.md
-                   Audit → ~/.lintel/audit/sc-decisions.jsonl
+                   Output → .claude/runtime/state/sc/<action>-<ts>.md
+                   Audit → .claude/runtime/audit/sc-decisions.jsonl
 ```
 
 ## The five checkpoints (full pass)
@@ -78,12 +78,12 @@ Pass criterion: per-event emission point + durable transport + append-only sink 
 
 | Dimension | Score 0-100 | Pass threshold | Source artifact |
 |---|---|---|---|
-| Threat model coverage (STRIDE per surface) | _ | 80 | `.lintel/state/sc/threat-model-<ts>.md` |
-| Mitigations declared per threat | _ | 80 | `.lintel/state/sc/threats.json` (mitigation column) |
-| Secrets inventoried + rotation policy | _ | 80 | `.lintel/state/sc/secret-inventory-<ts>.md` |
-| Auth flow review verdict (PASS) | _ | 80 | `.lintel/state/sc/auth-flow-<ts>.md` (review verdict) |
-| Compliance evidence (per required framework) | _ | 80 | `.lintel/state/sc/compliance-evidence-<framework>.md` |
-| Audit path verified (events + retention + integrity) | _ | 80 | `.lintel/state/sc/audit-path-<ts>.md` |
+| Threat model coverage (STRIDE per surface) | _ | 80 | `.claude/runtime/state/sc/threat-model-<ts>.md` |
+| Mitigations declared per threat | _ | 80 | `.claude/runtime/state/sc/threats.json` (mitigation column) |
+| Secrets inventoried + rotation policy | _ | 80 | `.claude/runtime/state/sc/secret-inventory-<ts>.md` |
+| Auth flow review verdict (PASS) | _ | 80 | `.claude/runtime/state/sc/auth-flow-<ts>.md` (review verdict) |
+| Compliance evidence (per required framework) | _ | 80 | `.claude/runtime/state/sc/compliance-evidence-<framework>.md` |
+| Audit path verified (events + retention + integrity) | _ | 80 | `.claude/runtime/state/sc/audit-path-<ts>.md` |
 
 ## Sub-skill catalog
 
@@ -158,7 +158,7 @@ security_compliance:
 
 ## Audit trail
 
-Every module + sub-skill + checkpoint writes to `~/.lintel/audit/sc-decisions.jsonl`:
+Every module + sub-skill + checkpoint writes to `.claude/runtime/audit/sc-decisions.jsonl`:
 
 ```jsonl
 {"ts":"...","kind":"sc_module_complete","granularity":"full","score":87,"checkpoints_passed":5,"frameworks":"soc2,gdpr"}
@@ -205,8 +205,8 @@ SC runs in parallel with DA after TA produces architecture decisions. SC reads p
 - Existing security hooks (4) — sourced, not duplicated
 
 **Writes:**
-- `.lintel/state/sc/*.{md,json}` (per-action artifacts)
-- `~/.lintel/audit/sc-decisions.jsonl`
+- `.claude/runtime/state/sc/*.{md,json}` (per-action artifacts)
+- `.claude/runtime/audit/sc-decisions.jsonl`
 - Brief Forge envelopes through the standard gate
 
 **Triggered by:**

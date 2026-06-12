@@ -32,8 +32,8 @@ Reads SLI/SLO spec (from DH if present, else operator's perf targets) + existing
 
 ```bash
 perf_budget_p95="${p95:-${perf_budget_p95_ms:-200}}"
-slo_spec=$(find .lintel/state/dh -name "sli-slo-spec-*.md" -mtime -30 2>/dev/null | sort | tail -1)
-perf_baseline=".lintel/state/perf-baseline.md"
+slo_spec=$(find .claude/runtime/state/dh -name "sli-slo-spec-*.md" -mtime -30 2>/dev/null | sort | tail -1)
+perf_baseline=".claude/runtime/state/perf-baseline.md"
 ```
 
 ### Step 2 — Spawn LatencyAnalyzer for sensitive-path identification
@@ -62,7 +62,7 @@ budget_brief=$(mktemp)
 cat > "$budget_brief" <<EOF
 task: Set per-journey perf budget with regression detection
 context_pointers:
-  - .lintel/state/tq/sensitive-paths.md
+  - .claude/runtime/state/tq/sensitive-paths.md
   - default p95 budget: ${perf_budget_p95}ms
 constraints:
   - per journey: p50/p95/p99 budget (must be tighter than SLO to allow burndown)
@@ -79,16 +79,16 @@ EOF
 
 ```bash
 ts=$(date -u +"%Y%m%dT%H%M%SZ")
-out=".lintel/state/tq/perf-budget-$ts.md"
+out=".claude/runtime/state/tq/perf-budget-$ts.md"
 {
   echo "# Perf budget — $(date -u +%Y-%m-%dT%H:%M:%SZ)"
   echo "## Default p95: ${perf_budget_p95}ms"
   echo ""
   echo "## Sensitive paths"
-  cat .lintel/state/tq/sensitive-paths.md
+  cat .claude/runtime/state/tq/sensitive-paths.md
   echo ""
   echo "## Per-journey budget + regression detection"
-  cat .lintel/state/tq/perf-budgets.md
+  cat .claude/runtime/state/tq/perf-budgets.md
 } > "$out"
 
 printf '{"ts":"%s","kind":"tq_perf_budget_spec","default_p95_ms":%d,"journeys":%d,"operator":"%s"}\n' \
@@ -105,7 +105,7 @@ printf '{"ts":"%s","kind":"tq_perf_budget_spec","default_p95_ms":%d,"journeys":%
 ## Integration
 
 **Reads:** DH SLI/SLO spec, perf baseline, profile preferences
-**Writes:** `.lintel/state/tq/perf-budget-<ts>.md`, audit JSONL
+**Writes:** `.claude/runtime/state/tq/perf-budget-<ts>.md`, audit JSONL
 **Dispatches to:** LatencyAnalyzer (baseline), PerfBudgetEnforcer (NEW, budget + detection)
 **Hook integration:** `tq-perf-regression-warn` hook fires pre-commit on changes affecting perf-budget paths
 

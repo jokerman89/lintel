@@ -12,7 +12,7 @@ cli_support:
     level: degraded
 ---
 
-You are the `hooks-status` skill — reader for `~/.lintel/audit/hooks.jsonl`. Closes backlog 1.2 (consume hooks.jsonl) + 1.7 (hook usage status) as one skill.
+You are the `hooks-status` skill — reader for `.claude/runtime/audit/hooks.jsonl`. Closes backlog 1.2 (consume hooks.jsonl) + 1.7 (hook usage status) as one skill.
 
 ## What this skill does
 
@@ -42,7 +42,7 @@ Closes the self-observation-spine loop per Cohort 2 goal: data written → data 
 ### Step 1 — Read hooks.jsonl
 
 ```bash
-HOOKS_LOG="$HOME/.lintel/audit/hooks.jsonl"
+HOOKS_LOG=".claude/runtime/audit/hooks.jsonl"
 if [ ! -f "$HOOKS_LOG" ]; then
   echo "No hooks.jsonl yet. Hooks log at first override or trigger event."
   exit 0
@@ -86,7 +86,7 @@ Markdown table output to stdout. Operator pipes to less or redirects to a file.
 
 - **DONE** — report rendered
 - **DONE_WITH_CONCERNS** — report rendered but hooks.jsonl is malformed on some lines (skip + count in report)
-- **BLOCKED** — `~/.lintel/audit/hooks.jsonl` permissions deny read
+- **BLOCKED** — `.claude/runtime/audit/hooks.jsonl` permissions deny read
 - **NEEDS_CONTEXT** — invocation without a view flag (`--triggers` / `--overrides` / `--dead`)
 
 ## Hop-in support
@@ -96,7 +96,7 @@ YES — pure-reader skill, solo-invocable any time.
 ## Integration
 
 **Reads:**
-- `~/.lintel/audit/hooks.jsonl` (canonical hooks-audit log)
+- `.claude/runtime/audit/hooks.jsonl` (canonical hooks-audit log)
 - `~/.lintel/audit/usage-*.jsonl` (optional cross-reference via `--correlate`)
 - `hooks/`-dir scan (for dead-hook detection — which hooks are installed)
 

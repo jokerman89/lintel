@@ -37,7 +37,7 @@ Idempotent — re-running is safe. If gbrain isn't set up: this skill suggests `
 ## Workflow
 
 1. **Preflight.** Check `gbrain` binary + `~/.gbrain/config.json` + worktree `.gbrain-source` pin. If any missing: surface what's missing + recommend `/setup-brain`.
-2. **Compliance check.** Quick sanity-scan of newly-changed files (since last sync) for customer-data patterns. Block on hit. Logged commit hash of last sync to `~/.lintel/audit/gbrain-sync.jsonl`.
+2. **Compliance check.** Quick sanity-scan of newly-changed files (since last sync) for customer-data patterns. Block on hit. Logged commit hash of last sync to `.claude/runtime/audit/gbrain-sync.jsonl`.
 3. **Resolve source.** Read `.gbrain-source` pin or use `--source`.
 4. **Determine sync scope.**
    - Incremental: git diff between last-sync commit and HEAD, file list.

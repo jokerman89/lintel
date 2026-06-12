@@ -155,7 +155,7 @@ YES — solo-invokable. Designed for pre-customer-share + pre-ship integration.
 - Each pack-gate's PASS/FAIL output
 
 **Writes:**
-- `~/.lintel/audit/compliance-gates.jsonl` (per-run audit-trail)
+- `.claude/runtime/audit/compliance-gates.jsonl` (per-run audit-trail)
 - stdout (verdict report)
 - Exit code (CI consumption)
 

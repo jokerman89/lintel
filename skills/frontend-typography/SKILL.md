@@ -170,7 +170,7 @@ YES — solo-invocable.
 
 **Writes:**
 - `typography.json` (stdout default, $OUT-path if orchestrator)
-- Audit-log: `~/.lintel/audit/frontend-typography-runs.jsonl`
+- Audit-log: `.claude/runtime/audit/frontend-typography-runs.jsonl`
 
 **Calls into:**
 - `agents/frontend/TypographyCurator.md` (primary)

@@ -60,7 +60,7 @@ pattern_brief=$(mktemp)
 cat > "$pattern_brief" <<EOF
 task: Design ${deployment_pattern} cutover + feature-flag rollout
 context_pointers:
-  - .lintel/state/dh/release-pipeline.md
+  - .claude/runtime/state/dh/release-pipeline.md
 constraints:
   - traffic-cutover stages: percent, duration, success criteria, abort triggers
   - feature-flag strategy: which flags, default state, rollout cadence, deprecation
@@ -76,21 +76,21 @@ EOF
 
 ```bash
 ts=$(date -u +"%Y%m%dT%H%M%SZ")
-out=".lintel/state/dh/deployment-plan-$ts.md"
+out=".claude/runtime/state/dh/deployment-plan-$ts.md"
 {
   echo "# Deployment plan — $(date -u +%Y-%m-%dT%H:%M:%SZ)"
   echo "## Pattern: $deployment_pattern (cloud: $cloud)"
   echo ""
   echo "## Pipeline mechanics"
-  cat .lintel/state/dh/release-pipeline.md
+  cat .claude/runtime/state/dh/release-pipeline.md
   echo ""
   echo "## Cutover + flag rollout"
-  cat .lintel/state/dh/cutover-strategy.md
+  cat .claude/runtime/state/dh/cutover-strategy.md
 } > "$out"
 
 printf '{"ts":"%s","kind":"dh_deployment_plan","pattern":"%s","cloud":"%s","operator":"%s"}\n' \
   "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$deployment_pattern" "$cloud" "$(whoami 2>/dev/null || echo unknown)" \
-  >> "$LINTEL_HOME/audit/dh-decisions.jsonl"
+  >> ".claude/runtime/audit/dh-decisions.jsonl"
 ```
 
 ## Status protocol
@@ -102,7 +102,7 @@ printf '{"ts":"%s","kind":"dh_deployment_plan","pattern":"%s","cloud":"%s","oper
 ## Integration
 
 **Reads:** profile preferences, existing CI/CD configs
-**Writes:** `.lintel/state/dh/deployment-plan-<ts>.md`, audit JSONL
+**Writes:** `.claude/runtime/state/dh/deployment-plan-<ts>.md`, audit JSONL
 **Dispatches to:** ReleaseEngineer (pipeline), DeploymentEngineer (NEW, pattern + cutover)
 
 ## Anti-patterns

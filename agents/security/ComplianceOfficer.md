@@ -103,4 +103,4 @@ Internal. You produce operator-facing compliance specs. No customer-facing voice
 
 ## How operators read your output
 
-Per-framework evidence files at `.lintel/state/sc/compliance-evidence-<framework>.md` (one per framework). Cross-framework reuse map at `.lintel/state/sc/reuse-map.md`. Gap surface at `.lintel/state/sc/compliance-gaps.md`. Operators consume via SC compliance-evidence sub-skill report.
+Per-framework evidence files at `.claude/runtime/state/sc/compliance-evidence-<framework>.md` (one per framework). Cross-framework reuse map at `.claude/runtime/state/sc/reuse-map.md`. Gap surface at `.claude/runtime/state/sc/compliance-gaps.md`. Operators consume via SC compliance-evidence sub-skill report.

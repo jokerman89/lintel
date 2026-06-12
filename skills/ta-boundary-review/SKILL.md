@@ -31,10 +31,10 @@ Reads module structure (per `/li:ta-dependency-graph` output if present, else fr
 ### Step 1 — Reuse or generate dependency graph
 
 ```bash
-graph_file=$(find .lintel/state/ta -name "dependency-graph-*.md" -mtime -1 2>/dev/null | sort | tail -1)
+graph_file=$(find .claude/runtime/state/ta -name "dependency-graph-*.md" -mtime -1 2>/dev/null | sort | tail -1)
 if [ -z "$graph_file" ]; then
   /li:ta-dependency-graph
-  graph_file=$(find .lintel/state/ta -name "dependency-graph-*.md" 2>/dev/null | sort | tail -1)
+  graph_file=$(find .claude/runtime/state/ta -name "dependency-graph-*.md" 2>/dev/null | sort | tail -1)
 fi
 ```
 
@@ -54,7 +54,7 @@ cat > "$brief_file" <<EOF
 task: Analyze bounded contexts for drift + leaking abstractions
 context_pointers:
   - $graph_file
-  - .lintel/state/ta/contexts-list.txt
+  - .claude/runtime/state/ta/contexts-list.txt
 constraints:
   - flag shared mutable state across contexts
   - flag internal types exposed across context boundary
@@ -74,7 +74,7 @@ if [ "$leak_count" -gt 0 ]; then
   cat > "$refactor_brief" <<EOF
 task: Recommend boundary-hardening refactors for $leak_count leak(s)
 context_pointers:
-  - .lintel/state/ta/boundary-analysis.md
+  - .claude/runtime/state/ta/boundary-analysis.md
 constraints:
   - propose specific refactor per leak (extract interface / introduce adapter / move type)
 acceptance:
@@ -88,7 +88,7 @@ fi
 
 ```bash
 ts=$(date -u +"%Y%m%dT%H%M%SZ")
-out=".lintel/state/ta/boundary-review-$ts.md"
+out=".claude/runtime/state/ta/boundary-review-$ts.md"
 {
   echo "# Boundary review — $(date -u +%Y-%m-%dT%H:%M:%SZ)"
   echo ""
@@ -96,8 +96,8 @@ out=".lintel/state/ta/boundary-review-$ts.md"
   echo "$contexts"
   echo ""
   echo "## Findings"
-  cat .lintel/state/ta/boundary-analysis.md
-  [ -f .lintel/state/ta/architect-refactor.md ] && cat .lintel/state/ta/architect-refactor.md
+  cat .claude/runtime/state/ta/boundary-analysis.md
+  [ -f .claude/runtime/state/ta/architect-refactor.md ] && cat .claude/runtime/state/ta/architect-refactor.md
 } > "$out"
 
 verdict="GREEN"
@@ -117,8 +117,8 @@ printf '{"ts":"%s","kind":"ta_boundary_review","contexts":%d,"leaks":%d,"verdict
 
 ## Integration
 
-**Reads:** `.lintel/state/ta/dependency-graph-*.md`, repo structure
-**Writes:** `.lintel/state/ta/boundary-review-<ts>.md`, audit JSONL
+**Reads:** `.claude/runtime/state/ta/dependency-graph-*.md`, repo structure
+**Writes:** `.claude/runtime/state/ta/boundary-review-<ts>.md`, audit JSONL
 **Dispatches to:** BackendArchitect (analysis), Architect (refactor)
 
 ## Anti-patterns

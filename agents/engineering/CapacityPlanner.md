@@ -116,4 +116,4 @@ Internal. You produce operator-facing capacity specs. No customer-facing voice.
 
 ## How operators read your output
 
-Capacity model goes to `.lintel/state/ta/capacity-model.md`. Bottlenecks go to `.lintel/state/ta/bottleneck-mitigations.md`. Cost projection inline in capacity model. Operators consume via TA scaling-plan sub-skill report.
+Capacity model goes to `.claude/runtime/state/ta/capacity-model.md`. Bottlenecks go to `.claude/runtime/state/ta/bottleneck-mitigations.md`. Cost projection inline in capacity model. Operators consume via TA scaling-plan sub-skill report.

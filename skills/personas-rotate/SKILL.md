@@ -1,7 +1,7 @@
 ---
 name: personas-rotate
 layer: foundation
-description: Load persona context from tasks/personas.md for demo-prep, workshop-facilitation, or audience-aware writing.
+description: Load persona context from .claude/memory/personas.md for demo-prep, workshop-facilitation, or audience-aware writing.
 color: cyan
 tools: Read, Bash, Grep, Glob
 voice: internal
@@ -12,7 +12,7 @@ You are the personas-rotate skill.
 
 ## What this skill does
 
-Loads persona definitions from the active pack's persona source (`resolve_pack_field persona.source`; none in `_default`) plus any operator-local `tasks/personas.md` / `docs/personas/`, into session context. Lets operator name a persona (e.g., "load the CIO-Acme persona") to bias subsequent agent outputs (proposal, demo narration, email drafting) toward that persona's needs and language.
+Loads persona definitions from the active pack's persona source (`resolve_pack_field persona.source`; none in `_default`) plus any operator-local `.claude/memory/personas.md` / `docs/personas/`, into session context. Lets operator name a persona (e.g., "load the CIO-Acme persona") to bias subsequent agent outputs (proposal, demo narration, email drafting) toward that persona's needs and language.
 
 ## When to use
 
@@ -30,7 +30,7 @@ Loads persona definitions from the active pack's persona source (`resolve_pack_f
 
 1. **Locate persona sources.**
    - Primary: the active pack's persona source (`resolve_pack_field persona.source`; none in `_default`)
-   - Operator-local: `tasks/personas.md` (list of personas this repo cares about)
+   - Operator-local: `.claude/memory/personas.md` (list of personas this repo cares about)
    - Detailed: `docs/personas/<Name>.md` (one file per persona)
 
 2. **List available personas.** Output names + 1-line description per persona.
@@ -47,7 +47,7 @@ Loads persona definitions from the active pack's persona source (`resolve_pack_f
 
 5. **Inject into session context.** Tell the agent: "For the next interactions, optimize for this persona: <full detail>."
 
-6. **Persist for session.** Note persona name in session memory (`tasks/memory.md` short-term context) so subagents inherit.
+6. **Persist for session.** Note persona name in session memory (`.claude/memory/working-state.md` short-term context) so subagents inherit.
 
 ## Output format
 

@@ -31,10 +31,10 @@ Reads observability spec + rollback strategy + SLI/SLO spec. Spawns `ReleaseEngi
 ### Step 1 — Read context
 
 ```bash
-observability_spec=$(find .lintel/state/dh -name "observability-spec-*.md" -mtime -7 2>/dev/null | sort | tail -1)
-rollback_strategy=$(find .lintel/state/dh -name "rollback-strategy-*.md" -mtime -7 2>/dev/null | sort | tail -1)
-slo_spec=$(find .lintel/state/dh -name "sli-slo-spec-*.md" -mtime -7 2>/dev/null | sort | tail -1)
-sc_runbook=$(find .lintel/state/sc -name "incident-runbook-*.md" -mtime -30 2>/dev/null | sort | tail -1)
+observability_spec=$(find .claude/runtime/state/dh -name "observability-spec-*.md" -mtime -7 2>/dev/null | sort | tail -1)
+rollback_strategy=$(find .claude/runtime/state/dh -name "rollback-strategy-*.md" -mtime -7 2>/dev/null | sort | tail -1)
+slo_spec=$(find .claude/runtime/state/dh -name "sli-slo-spec-*.md" -mtime -7 2>/dev/null | sort | tail -1)
+sc_runbook=$(find .claude/runtime/state/sc -name "incident-runbook-*.md" -mtime -30 2>/dev/null | sort | tail -1)
 ```
 
 ### Step 2 — Spawn ReleaseEngineer for per-failure-mode response
@@ -65,7 +65,7 @@ sec_brief=$(mktemp)
 cat > "$sec_brief" <<EOF
 task: Cross-reference operational + security incident response
 context_pointers:
-  - .lintel/state/dh/operational-runbook.md
+  - .claude/runtime/state/dh/operational-runbook.md
   - $sc_runbook (if present)
 constraints:
   - identify failure modes that are ALSO security incidents (auth outage, secret leak, etc.)
@@ -82,23 +82,23 @@ EOF
 
 ```bash
 ts=$(date -u +"%Y%m%dT%H%M%SZ")
-out=".lintel/state/dh/on-call-playbook-$ts.md"
+out=".claude/runtime/state/dh/on-call-playbook-$ts.md"
 {
   echo "# On-call playbook — $(date -u +%Y-%m-%dT%H:%M:%SZ)"
   echo ""
   echo "## Per-failure-mode response"
-  cat .lintel/state/dh/operational-runbook.md
+  cat .claude/runtime/state/dh/operational-runbook.md
   echo ""
   echo "## Escalation matrix"
-  cat .lintel/state/dh/escalation-matrix.md
+  cat .claude/runtime/state/dh/escalation-matrix.md
   echo ""
   echo "## Security-incident cross-reference"
-  cat .lintel/state/dh/security-overlap.md
+  cat .claude/runtime/state/dh/security-overlap.md
 } > "$out"
 
 printf '{"ts":"%s","kind":"dh_on_call_playbook","failure_modes":%d,"operator":"%s"}\n' \
   "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$failure_mode_count" "$(whoami 2>/dev/null || echo unknown)" \
-  >> "$LINTEL_HOME/audit/dh-decisions.jsonl"
+  >> ".claude/runtime/audit/dh-decisions.jsonl"
 ```
 
 ## Status protocol
@@ -110,7 +110,7 @@ printf '{"ts":"%s","kind":"dh_on_call_playbook","failure_modes":%d,"operator":"%
 ## Integration
 
 **Reads:** DH observability + rollback + SLO; SC incident runbook (if present)
-**Writes:** `.lintel/state/dh/on-call-playbook-<ts>.md`, audit JSONL
+**Writes:** `.claude/runtime/state/dh/on-call-playbook-<ts>.md`, audit JSONL
 **Dispatches to:** ReleaseEngineer (response steps), SecurityAuditor (security overlap)
 
 ## Anti-patterns

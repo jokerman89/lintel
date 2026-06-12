@@ -33,7 +33,7 @@ Reads critical paths (from TA boundary-review if present, else operator-declared
 ```bash
 target="${target:-${coverage_target:-80}}"
 critical_path="${critical_path:-${critical_path_coverage:-100}}"
-boundary_review=$(find .lintel/state/ta -name "boundary-review-*.md" -mtime -30 2>/dev/null | sort | tail -1)
+boundary_review=$(find .claude/runtime/state/ta -name "boundary-review-*.md" -mtime -30 2>/dev/null | sort | tail -1)
 ```
 
 ### Step 2 — Spawn TestRunner per language
@@ -70,7 +70,7 @@ gap_brief=$(mktemp)
 cat > "$gap_brief" <<EOF
 task: Map coverage gaps against critical paths + recommend backfill priority
 context_pointers:
-  - .lintel/state/tq/coverage-raw.md
+  - .claude/runtime/state/tq/coverage-raw.md
   - $boundary_review
 constraints:
   - per gap: line vs branch vs mutation; critical-path or regular; impact estimate
@@ -85,7 +85,7 @@ EOF
 ### Step 4 — Raise-help on critical-path below threshold
 
 ```bash
-critical_below_threshold=$(jq -r '.critical_paths[] | select(.coverage_pct < '"$critical_path"') | .name' .lintel/state/tq/coverage-summary.json 2>/dev/null | wc -l)
+critical_below_threshold=$(jq -r '.critical_paths[] | select(.coverage_pct < '"$critical_path"') | .name' .claude/runtime/state/tq/coverage-summary.json 2>/dev/null | wc -l)
 if [ "$critical_below_threshold" -gt 0 ]; then
   echo "RAISE_HELP: $critical_below_threshold critical path(s) below threshold ${critical_path}%"
 fi
@@ -95,16 +95,16 @@ fi
 
 ```bash
 ts=$(date -u +"%Y%m%dT%H%M%SZ")
-out=".lintel/state/tq/coverage-audit-$ts.md"
+out=".claude/runtime/state/tq/coverage-audit-$ts.md"
 {
   echo "# Coverage audit — $(date -u +%Y-%m-%dT%H:%M:%SZ)"
   echo "## Targets: ${target}% overall, ${critical_path}% critical"
   echo ""
   echo "## Per-component"
-  cat .lintel/state/tq/coverage-raw.md
+  cat .claude/runtime/state/tq/coverage-raw.md
   echo ""
   echo "## Gap analysis + backfill priority"
-  cat .lintel/state/tq/coverage-gaps.md
+  cat .claude/runtime/state/tq/coverage-gaps.md
 } > "$out"
 
 printf '{"ts":"%s","kind":"tq_coverage_audit","language":"%s","target":%d,"critical_below_threshold":%d,"operator":"%s"}\n' \
@@ -121,7 +121,7 @@ printf '{"ts":"%s","kind":"tq_coverage_audit","language":"%s","target":%d,"criti
 ## Integration
 
 **Reads:** profile preferences, TA boundary-review (for critical paths)
-**Writes:** `.lintel/state/tq/coverage-audit-<ts>.md`, audit JSONL
+**Writes:** `.claude/runtime/state/tq/coverage-audit-<ts>.md`, audit JSONL
 **Dispatches to:** TestRunner (per language), Architect (gap analysis)
 **Hook integration:** `tq-coverage-drop-warn` hook fires pre-commit on coverage drops
 

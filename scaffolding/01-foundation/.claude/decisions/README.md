@@ -45,7 +45,7 @@ Sequential, never reused. Gaps are fine (deleted drafts leave gaps). Filename pa
 
 ## Index
 
-Maintain the index by running `ls docs/adr/*.md` — no separate file. Filenames carry both number and title.
+Maintain the index by running `ls .claude/decisions/*.md` — no separate file. Filenames carry both number and title.
 
 ## Convention notes
 

@@ -4,7 +4,7 @@ tier: warn-only
 event: PreToolUse (Edit|Write on auth/data files)
 fires_on: edit to a file in pack.security_compliance.threat_surface_glob OR matching auth/data heuristic, when no recent threat-model exists OR file not covered by latest threat model
 override: pass --ignore-threat-coverage flag (operator decision, logged)
-audit: ~/.lintel/audit/hooks.jsonl
+audit: .claude/runtime/audit/hooks.jsonl
 ---
 
 # sc-threat-coverage-warn
@@ -13,7 +13,7 @@ Surfaces when an Edit/Write touches a security-surface file with no recent threa
 
 ## What it does
 
-- Reads `.lintel/state/sc/threat-model-<latest>.md` if present (within 90 days)
+- Reads `.claude/runtime/state/sc/threat-model-<latest>.md` if present (within 90 days)
 - Resolves pack policy `pack.security_compliance.threat_surface_glob` (defaults to auth/data/api file patterns)
 - For matched files: checks whether the file is referenced in the latest threat model
 - If no threat model exists OR file not covered: WARN

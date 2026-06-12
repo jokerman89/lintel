@@ -71,7 +71,12 @@ TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
 
 (
-  export LINTEL_REPO_ROOT="$REPO_ROOT"
+  # Markerless sandbox repo root: without a v5 layout marker the audit write
+  # falls back to LINTEL_AUDIT_DIR (a migrated repo root would route it to
+  # <repo>/.claude/runtime/audit/). The alias map is pinned explicitly since
+  # its default derives from LINTEL_REPO_ROOT.
+  export LINTEL_REPO_ROOT="$TMP"
+  export LINTEL_ALIASES_FILE="$REPO_ROOT/config/aliases.yaml"
   export HOME="$TMP"
   export LINTEL_AUDIT_DIR="$TMP/.lintel/audit"
   source "$HELPER"

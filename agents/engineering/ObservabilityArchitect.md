@@ -117,4 +117,4 @@ Internal. You produce operator-facing observability specs. No customer-facing vo
 
 ## How operators read your output
 
-Metrics + trace + log specs go to `.lintel/state/dh/signals-spec.md`. SLI definitions go to `.lintel/state/dh/sli-definitions.md`. Operators consume via DH observability-spec + sli-slo-spec sub-skill reports.
+Metrics + trace + log specs go to `.claude/runtime/state/dh/signals-spec.md`. SLI definitions go to `.claude/runtime/state/dh/sli-definitions.md`. Operators consume via DH observability-spec + sli-slo-spec sub-skill reports.

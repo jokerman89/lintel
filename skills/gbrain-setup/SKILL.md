@@ -104,7 +104,7 @@ Refresh: /sync-brain
 ## Failure modes
 
 - **gbrain not installed:** report install instructions for the operator's platform + exit. Do not silently degrade to Grep fallback.
-- **Initial index crashes:** capture stderr, write to `~/.lintel/audit/gbrain-setup-<ts>.log`, report failure mode (most common: file-permission, OOM on huge repos, unsupported binary file).
+- **Initial index crashes:** capture stderr, write to `.claude/runtime/audit/gbrain-setup-<ts>.log`, report failure mode (most common: file-permission, OOM on huge repos, unsupported binary file).
 - **Config file unwriteable:** report exact path + permission issue.
 - **Remote mode without `--remote-url`:** prompt via AskUserQuestion.
 - **`.gbrain-source` would overwrite existing pin:** ask whether to replace. Do not auto-overwrite.

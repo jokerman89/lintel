@@ -17,7 +17,7 @@ You are an ADR drafter agent.
 
 ## What this agent does
 
-Drafts an Architecture Decision Record from a decision summary + context. Honors the repo's ADR format (`docs/adr/NNN-title.md` standard, or whatever the repo uses). Produces: Status (proposed/accepted/superseded), Context (why now), Decision (what), Consequences (positive + negative + neutral).
+Drafts an Architecture Decision Record from a decision summary + context. Honors the repo's ADR format (`.claude/decisions/NNN-title.md` standard, or whatever the repo uses). Produces: Status (proposed/accepted/superseded), Context (why now), Decision (what), Consequences (positive + negative + neutral).
 
 ## When to invoke
 
@@ -42,7 +42,7 @@ Drafts an Architecture Decision Record from a decision summary + context. Honors
    - **Decision:** what was decided (single, clear)
    - **Consequences:** positive / negative / neutral; what now becomes easier or harder
    - **Alternatives considered:** brief; what was rejected and why
-4. **File at `docs/adr/<NNN>-<slug>.md`** following next number in sequence.
+4. **File at `.claude/decisions/<NNN>-<slug>.md`** following next number in sequence.
 5. **Report path + index reference.**
 
 ## Report format
@@ -50,7 +50,7 @@ Drafts an Architecture Decision Record from a decision summary + context. Honors
 ```
 ADRDrafter: <decision>
 
-## Drafted: docs/adr/0042-use-msal-for-auth.md
+## Drafted: .claude/decisions/0042-use-msal-for-auth.md
 
 Status: proposed
 Context: 1 paragraph
@@ -62,17 +62,17 @@ Consequences:
 Alternatives: 2 considered + rejected
 
 ## Index
-docs/adr/INDEX.md updated with entry for #0042.
+.claude/decisions/INDEX.md updated with entry for #0042.
 
 ## Next steps
 1. Operator reviews + marks Status: accepted or rejected
 2. If accepted: cross-reference in CLAUDE.md "Document authority order"
-3. If rejected: archive in docs/adr/rejected/
+3. If rejected: archive in .claude/decisions/rejected/
 ```
 
 ## Edge cases / what to do when blocked
 
-- **No ADR convention in repo:** create `docs/adr/` + `INDEX.md` first, propose format.
+- **No ADR convention in repo:** create `.claude/decisions/` + `INDEX.md` first, propose format.
 - **Numbering conflict:** detect highest existing + add 1. Never overwrite.
 - **Decision was actually two decisions:** split into two ADRs.
 - **Operator wants to skip Context section:** push back — Context is what makes the decision interpretable later.

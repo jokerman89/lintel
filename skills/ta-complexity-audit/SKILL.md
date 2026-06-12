@@ -42,11 +42,11 @@ Args support `--budget-cyclomatic N --budget-cognitive M`. Defaults from profile
 ```bash
 language=$(detect_language)  # shared helper, same as ta-dependency-graph
 case "$language" in
-  go)     gocyclo -over "$budget_cyclomatic" . > .lintel/state/ta/complexity-raw.txt ;;
-  python) radon cc -n B -s . > .lintel/state/ta/complexity-raw.txt ;;
-  rust)   cargo-complexity > .lintel/state/ta/complexity-raw.txt 2>/dev/null || echo "skip" ;;
-  node)   npx eslintcc 'src/**/*.{js,ts}' --rule complexity > .lintel/state/ta/complexity-raw.txt ;;
-  *)      lizard . > .lintel/state/ta/complexity-raw.txt ;;
+  go)     gocyclo -over "$budget_cyclomatic" . > .claude/runtime/state/ta/complexity-raw.txt ;;
+  python) radon cc -n B -s . > .claude/runtime/state/ta/complexity-raw.txt ;;
+  rust)   cargo-complexity > .claude/runtime/state/ta/complexity-raw.txt 2>/dev/null || echo "skip" ;;
+  node)   npx eslintcc 'src/**/*.{js,ts}' --rule complexity > .claude/runtime/state/ta/complexity-raw.txt ;;
+  *)      lizard . > .claude/runtime/state/ta/complexity-raw.txt ;;
 esac
 ```
 
@@ -56,10 +56,10 @@ If detected tool missing: surface install hint, fall back to `lizard` (multi-lan
 
 ```bash
 # Per-component (file or class) cyclomatic max + cognitive avg
-parse_complexity_output > .lintel/state/ta/complexity-summary.json
+parse_complexity_output > .claude/runtime/state/ta/complexity-summary.json
 
-over_cyclo=$(jq -r '.components[] | select(.cyclomatic_max > '"$budget_cyclomatic"') | .name' .lintel/state/ta/complexity-summary.json | wc -l)
-over_cognitive=$(jq -r '.components[] | select(.cognitive_avg > '"$budget_cognitive"') | .name' .lintel/state/ta/complexity-summary.json | wc -l)
+over_cyclo=$(jq -r '.components[] | select(.cyclomatic_max > '"$budget_cyclomatic"') | .name' .claude/runtime/state/ta/complexity-summary.json | wc -l)
+over_cognitive=$(jq -r '.components[] | select(.cognitive_avg > '"$budget_cognitive"') | .name' .claude/runtime/state/ta/complexity-summary.json | wc -l)
 ```
 
 ### Step 4 — Spawn Architect for refactor recommendations (if over budget)
@@ -70,7 +70,7 @@ if [ "$over_cyclo" -gt 0 ] || [ "$over_cognitive" -gt 0 ]; then
   cat > "$brief_file" <<EOF
 task: Recommend refactor approach for $over_cyclo cyclomatic + $over_cognitive cognitive over-budget components
 context_pointers:
-  - .lintel/state/ta/complexity-summary.json
+  - .claude/runtime/state/ta/complexity-summary.json
 constraints:
   - prefer extraction over abstraction (Subtraction Bias)
   - identify specific refactor pattern per component
@@ -85,7 +85,7 @@ fi
 
 ```bash
 ts=$(date -u +"%Y%m%dT%H%M%SZ")
-out=".lintel/state/ta/complexity-audit-$ts.md"
+out=".claude/runtime/state/ta/complexity-audit-$ts.md"
 {
   echo "# Complexity audit — $(date -u +%Y-%m-%dT%H:%M:%SZ)"
   echo ""
@@ -98,8 +98,8 @@ out=".lintel/state/ta/complexity-audit-$ts.md"
   echo "- Over cognitive budget: $over_cognitive components"
   echo ""
   echo "## Per-component"
-  jq -r '.components[] | "- \(.name): cyclomatic=\(.cyclomatic_max) cognitive=\(.cognitive_avg)"' .lintel/state/ta/complexity-summary.json
-  [ -f .lintel/state/ta/architect-refactor.md ] && cat .lintel/state/ta/architect-refactor.md
+  jq -r '.components[] | "- \(.name): cyclomatic=\(.cyclomatic_max) cognitive=\(.cognitive_avg)"' .claude/runtime/state/ta/complexity-summary.json
+  [ -f .claude/runtime/state/ta/architect-refactor.md ] && cat .claude/runtime/state/ta/architect-refactor.md
 } > "$out"
 
 verdict="GREEN"
@@ -120,7 +120,7 @@ printf '{"ts":"%s","kind":"ta_complexity_audit","language":"%s","over_cyclomatic
 ## Integration
 
 **Reads:** profile preferences, language manifest, complexity tool output
-**Writes:** `.lintel/state/ta/complexity-audit-<ts>.md`, audit JSONL
+**Writes:** `.claude/runtime/state/ta/complexity-audit-<ts>.md`, audit JSONL
 **Dispatches to:** Architect (refactor recommendations when over budget)
 **Hook integration:** `complexity-budget-warn` hook fires pre-commit using same thresholds
 

@@ -34,7 +34,7 @@ Enumerates secrets the system uses (env vars, KeyVault refs, embedded credential
 ```bash
 secret_management="${secret_management:-local-encrypted}"   # keyvault | aws-secrets-manager | hashicorp-vault | local-encrypted
 
-existing_inventory=".lintel/state/sc/secret-inventory.md"
+existing_inventory=".claude/runtime/state/sc/secret-inventory.md"
 [ -f "$existing_inventory" ] && has_prior=true || has_prior=false
 ```
 
@@ -68,7 +68,7 @@ cat > "$sbom_brief" <<EOF
 task: Identify secrets that ship with dependencies (default tokens, demo keys, embedded credentials)
 context_pointers:
   - dependency manifests (package.json / go.mod / requirements.txt / etc.)
-  - .lintel/state/sc/secret-inventory.json
+  - .claude/runtime/state/sc/secret-inventory.json
 constraints:
   - flag any dependency with known-default credentials
   - flag any lockfile with hex strings that look like secrets
@@ -82,7 +82,7 @@ EOF
 ### Step 4 — Raise-help if no-rotation secrets exist
 
 ```bash
-no_rotation=$(jq -r '.secrets[] | select(.rotation_cadence_days == null) | .name' .lintel/state/sc/secret-inventory.json 2>/dev/null | wc -l)
+no_rotation=$(jq -r '.secrets[] | select(.rotation_cadence_days == null) | .name' .claude/runtime/state/sc/secret-inventory.json 2>/dev/null | wc -l)
 if [ "$no_rotation" -gt 0 ]; then
   echo "RAISE_HELP: $no_rotation secret(s) without rotation path"
 fi
@@ -92,17 +92,17 @@ fi
 
 ```bash
 ts=$(date -u +"%Y%m%dT%H%M%SZ")
-out=".lintel/state/sc/secret-inventory-$ts.md"
+out=".claude/runtime/state/sc/secret-inventory-$ts.md"
 {
   echo "# Secret inventory — $(date -u +%Y-%m-%dT%H:%M:%SZ)"
   echo ""
   echo "## Target store: $secret_management"
   echo ""
   echo "## Inventory"
-  cat .lintel/state/sc/secret-inventory.md
+  cat .claude/runtime/state/sc/secret-inventory.md
   echo ""
   echo "## Dependency secrets"
-  cat .lintel/state/sc/sbom-secrets.md
+  cat .claude/runtime/state/sc/sbom-secrets.md
 } > "$out"
 
 printf '{"ts":"%s","kind":"sc_secret_management","secrets":%d,"no_rotation":%d,"target_store":"%s","operator":"%s"}\n' \
@@ -119,7 +119,7 @@ printf '{"ts":"%s","kind":"sc_secret_management","secrets":%d,"no_rotation":%d,"
 ## Integration
 
 **Reads:** env configs, IaC files, dependency manifests
-**Writes:** `.lintel/state/sc/secret-inventory-<ts>.md`, audit JSONL
+**Writes:** `.claude/runtime/state/sc/secret-inventory-<ts>.md`, audit JSONL
 **Dispatches to:** SecurityAuditor (enumeration), SBOMAuditor (dependency secrets)
 
 ## Anti-patterns

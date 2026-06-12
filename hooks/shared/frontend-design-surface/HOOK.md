@@ -4,7 +4,7 @@ tier: surface-only
 event: PreToolUse (Read|Edit|Write on *.tsx|*.jsx|*.svelte|*.vue|*.css|*.scss)
 fires_on: frontend-file edits with relevant patterns in ~/.lintel/brand/design-patterns/
 override: pass --no-design-surface flag OR /li:profile-switch --dormant frontend-design-surface
-audit: ~/.lintel/audit/hooks.jsonl
+audit: .claude/runtime/audit/hooks.jsonl
 throttle: max 1 surface per file per session (state in ~/.lintel/sessions/<pid>-design-surfaced)
 budget: <200ms for vault of 1-3 patterns (MVP per /plan-eng-review concern #7)
 ---
@@ -27,7 +27,7 @@ Per v3.7 design doc:
 4. If not-yet-surfaced this session for this file:
    - Emit 1-line surface
    - Mark file as surfaced (touch marker)
-5. Logs to `~/.lintel/audit/hooks.jsonl`.
+5. Logs to `.claude/runtime/audit/hooks.jsonl`.
 
 ## Why surface-only
 

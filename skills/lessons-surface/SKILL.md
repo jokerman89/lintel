@@ -12,11 +12,11 @@ cli_support:
     level: degraded
 ---
 
-You are the `lessons-surface` skill — closes the L-001/L-002 loop. Without this skill, `tasks/lessons.md` grows but is never read → compounding learning that doesn't compound.
+You are the `lessons-surface` skill — closes the L-001/L-002 loop. Without this skill, `.claude/memory/lessons.md` grows but is never read → compounding learning that doesn't compound.
 
 ## What this skill does
 
-Reads `tasks/lessons.md`, matches entries against the operator's current context (keyword from prompt OR current branch/phase), surfaces relevant lessons up-front so future sessions don't repeat the same mistakes.
+Reads `.claude/memory/lessons.md`, matches entries against the operator's current context (keyword from prompt OR current branch/phase), surfaces relevant lessons up-front so future sessions don't repeat the same mistakes.
 
 Designed for Cohort 2 item 1.3. Solo-invokable. Auto-invoked from `/li:sense` Step 0 when relevant.
 
@@ -31,16 +31,16 @@ Critical: L-001 (scaffolding ≠ content) + L-002 (grep first) were created in t
 
 ## When NOT to use
 
-- Lessons authoring — manual edit of `tasks/lessons.md` directly
+- Lessons authoring — manual edit of `.claude/memory/lessons.md` directly
 - Lesson application enforcement — this surfaces; enforcement is skill-specific
-- Historical lesson archaeology — `git log tasks/lessons.md` is canonical
+- Historical lesson archaeology — `git log .claude/memory/lessons.md` is canonical
 
 ## Workflow
 
 ### Step 1 — Locate + parse lessons.md
 
 ```bash
-LESSONS_FILE="tasks/lessons.md"
+LESSONS_FILE=".claude/memory/lessons.md"
 [ -f "$LESSONS_FILE" ] || { echo "No lessons.md — nothing to surface."; exit 0; }
 ```
 
@@ -97,7 +97,7 @@ Surface MAX 3 lessons (avoid drowning operator). Sort by relevance.
 
 - **DONE** — N lessons surfaced (or 0 if no match)
 - **DONE_WITH_CONCERNS** — lessons.md present but malformed entries skipped
-- **BLOCKED** — `tasks/lessons.md` permission denies read
+- **BLOCKED** — `.claude/memory/lessons.md` permission denies read
 - **NEEDS_CONTEXT** — `--keyword` mode without a keyword arg
 
 ## Pause-points
@@ -112,7 +112,7 @@ YES — the primary use case is solo-invocation (or SENSE-auto). Designed to be 
 ## Integration
 
 **Reads:**
-- `tasks/lessons.md` (canonical)
+- `.claude/memory/lessons.md` (canonical)
 
 **Writes:**
 - stdout (markdown report)
@@ -132,8 +132,8 @@ YES — the primary use case is solo-invocation (or SENSE-auto). Designed to be 
 ## Failure recovery
 
 - Malformed entry (missing `**Rule:**` line): skip + count + report at end
-- Empty lessons.md: surface "Lessons capture empty. Start logging insights via tasks/lessons.md or /li:capture."
-- > 1000 lessons (someday): paginate or recommend grep over `tasks/lessons.md`
+- Empty lessons.md: surface "Lessons capture empty. Start logging insights via .claude/memory/lessons.md or /li:capture."
+- > 1000 lessons (someday): paginate or recommend grep over `.claude/memory/lessons.md`
 
 ## Recommended next steps after invocation
 

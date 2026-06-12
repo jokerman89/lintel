@@ -175,7 +175,7 @@ done
 # Log to audit
 jq -nc --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" --arg name "$name" --arg artifacts "${artifacts[*]}" \
   '{ts:$ts, action:"pattern-extracted", name:$name, artifacts:$artifacts}' \
-  >> "$HOME/.lintel/audit/frontend-style-extract-runs.jsonl"
+  >> ".claude/runtime/audit/frontend-style-extract-runs.jsonl"
 ```
 
 ### Step 7 — Surface verdict
@@ -224,7 +224,7 @@ YES — solo-invocable.
 
 **Writes:**
 - `~/.lintel/brand/design-patterns/<name>/` (5 files)
-- Audit-log: `~/.lintel/audit/frontend-style-extract-runs.jsonl`
+- Audit-log: `.claude/runtime/audit/frontend-style-extract-runs.jsonl`
 
 **Calls into:**
 - `agents/frontend/FrontendArchitect.md` (synthesis-direction, reused from Fas A1)

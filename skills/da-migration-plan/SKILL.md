@@ -35,7 +35,7 @@ migration_window="${migration_window:-zero-downtime-required}"   # zero-downtime
 review_threshold="${review_threshold:-100000}"
 
 # Delta input: schema delta file OR explicit description
-delta_file="${1:-.lintel/state/da/schema-delta.md}"
+delta_file="${1:-.claude/runtime/state/da/schema-delta.md}"
 [ -f "$delta_file" ] || { echo "ERROR: $delta_file not found"; exit 1; }
 ```
 
@@ -54,7 +54,7 @@ cat > "$brief_file" <<EOF
 task: Produce migration plan for declared schema delta
 context_pointers:
   - $delta_file
-  - .lintel/state/da/current-schema.sql (if present)
+  - .claude/runtime/state/da/current-schema.sql (if present)
 constraints:
   - migration_window: ${migration_window}
   - reversibility: required (down-migration declared)
@@ -77,7 +77,7 @@ ddl_brief=$(mktemp)
 cat > "$ddl_brief" <<EOF
 task: Draft SQL/DDL for migration plan
 context_pointers:
-  - .lintel/state/da/migration-plan.md
+  - .claude/runtime/state/da/migration-plan.md
 constraints:
   - up-migration matches plan steps
   - down-migration is true inverse (no data loss for additive; documented loss for destructive)
@@ -102,27 +102,27 @@ fi
 
 ```bash
 ts=$(date -u +"%Y%m%dT%H%M%SZ")
-out=".lintel/state/da/migration-plan-$ts.md"
+out=".claude/runtime/state/da/migration-plan-$ts.md"
 {
   echo "# Migration plan — $(date -u +%Y-%m-%dT%H:%M:%SZ)"
   echo ""
   echo "## Window: $migration_window"
   echo "## Affected rows: $affected_rows"
   echo ""
-  cat .lintel/state/da/migration-plan.md
+  cat .claude/runtime/state/da/migration-plan.md
   echo ""
   echo "## DDL"
   echo "### up.sql"
-  cat .lintel/state/da/up.sql
+  cat .claude/runtime/state/da/up.sql
   echo "### down.sql"
-  cat .lintel/state/da/down.sql
+  cat .claude/runtime/state/da/down.sql
 } > "$out"
 
 printf '{"ts":"%s","kind":"da_migration_plan","window":"%s","affected_rows":%d,"raise_help":%s,"operator":"%s"}\n' \
   "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$migration_window" "$affected_rows" \
   "$([ "$affected_rows" -gt "$review_threshold" ] && echo true || echo false)" \
   "$(whoami 2>/dev/null || echo unknown)" \
-  >> "$LINTEL_HOME/audit/da-decisions.jsonl"
+  >> ".claude/runtime/audit/da-decisions.jsonl"
 ```
 
 ## Status protocol
@@ -135,7 +135,7 @@ printf '{"ts":"%s","kind":"da_migration_plan","window":"%s","affected_rows":%d,"
 ## Integration
 
 **Reads:** profile preferences, delta file, current schema
-**Writes:** `.lintel/state/da/migration-plan-<ts>.md`, `up.sql`, `down.sql`, audit JSONL
+**Writes:** `.claude/runtime/state/da/migration-plan-<ts>.md`, `up.sql`, `down.sql`, audit JSONL
 **Dispatches to:** MigrationPlanner (NEW, plan), Migrator (DDL drafting)
 **Hook integration:** `da-migration-irreversible-warn` hook fires pre-commit on migration files without rollback
 

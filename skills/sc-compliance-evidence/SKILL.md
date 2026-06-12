@@ -44,10 +44,10 @@ for fw in "${frameworks[@]}"; do
   cat > "$brief_file" <<EOF
 task: Collect evidence per ${fw} control mapping
 context_pointers:
-  - .lintel/state/sc/threat-model-*.md (latest, if present)
-  - .lintel/state/sc/auth-flow-*.md (latest, if present)
-  - .lintel/state/sc/secret-inventory-*.md (latest, if present)
-  - .lintel/state/sc/audit-path-*.md (latest, if present)
+  - .claude/runtime/state/sc/threat-model-*.md (latest, if present)
+  - .claude/runtime/state/sc/auth-flow-*.md (latest, if present)
+  - .claude/runtime/state/sc/secret-inventory-*.md (latest, if present)
+  - .claude/runtime/state/sc/audit-path-*.md (latest, if present)
 constraints:
   - per ${fw} control: evidence pointer (file path or audit-log query) or flagged-gap
   - distinguish: technical-control evidence vs procedural-control evidence
@@ -55,7 +55,7 @@ acceptance:
   - per-control verdict (covered | partial | gap) with evidence pointer
 EOF
   /li:brief-forge subagent_spawn sc-compliance-evidence ComplianceOfficer brief "$brief_file"
-  mv .lintel/state/sc/evidence.md ".lintel/state/sc/compliance-evidence-${fw}.md"
+  mv .claude/runtime/state/sc/evidence.md ".claude/runtime/state/sc/compliance-evidence-${fw}.md"
 done
 ```
 
@@ -66,8 +66,8 @@ arch_brief=$(mktemp)
 cat > "$arch_brief" <<EOF
 task: Map architectural decisions (from /li:ta if present) to compliance controls
 context_pointers:
-  - .lintel/state/ta/system-arch.md (if present)
-  - .lintel/state/sc/compliance-evidence-*.md
+  - .claude/runtime/state/ta/system-arch.md (if present)
+  - .claude/runtime/state/sc/compliance-evidence-*.md
 constraints:
   - per architectural decision: which controls satisfied or threatened
 acceptance:
@@ -83,7 +83,7 @@ EOF
 total_gaps=0
 for fw in "${frameworks[@]}"; do
   fw=$(printf '%s' "$fw" | tr -d '[:space:]')
-  gap=$(jq -r '.controls[] | select(.verdict == "gap") | .id' ".lintel/state/sc/compliance-evidence-${fw}.json" 2>/dev/null | wc -l)
+  gap=$(jq -r '.controls[] | select(.verdict == "gap") | .id' ".claude/runtime/state/sc/compliance-evidence-${fw}.json" 2>/dev/null | wc -l)
   total_gaps=$((total_gaps + gap))
 done
 
@@ -96,7 +96,7 @@ fi
 
 ```bash
 ts=$(date -u +"%Y%m%dT%H%M%SZ")
-out=".lintel/state/sc/compliance-evidence-$ts.md"
+out=".claude/runtime/state/sc/compliance-evidence-$ts.md"
 {
   echo "# Compliance evidence — $(date -u +%Y-%m-%dT%H:%M:%SZ)"
   echo ""
@@ -105,11 +105,11 @@ out=".lintel/state/sc/compliance-evidence-$ts.md"
   for fw in "${frameworks[@]}"; do
     fw=$(printf '%s' "$fw" | tr -d '[:space:]')
     echo "## $fw"
-    cat ".lintel/state/sc/compliance-evidence-${fw}.md"
+    cat ".claude/runtime/state/sc/compliance-evidence-${fw}.md"
     echo ""
   done
   echo "## Architectural decisions → control cross-reference"
-  cat .lintel/state/sc/decision-control-xref.md
+  cat .claude/runtime/state/sc/decision-control-xref.md
 } > "$out"
 
 printf '{"ts":"%s","kind":"sc_compliance_evidence","frameworks":"%s","gaps":%d,"raise_help":%s,"operator":"%s"}\n' \
@@ -128,7 +128,7 @@ printf '{"ts":"%s","kind":"sc_compliance_evidence","frameworks":"%s","gaps":%d,"
 ## Integration
 
 **Reads:** pack policy, profile preferences, prior SC outputs, TA system-arch
-**Writes:** `.lintel/state/sc/compliance-evidence-<framework>.md`, audit JSONL
+**Writes:** `.claude/runtime/state/sc/compliance-evidence-<framework>.md`, audit JSONL
 **Dispatches to:** ComplianceOfficer (NEW, per-framework evidence), Architect (control mapping)
 
 ## Anti-patterns

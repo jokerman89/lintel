@@ -37,7 +37,8 @@ done
 
 # Check consumer registry
 consumer_count=0
-registry=".lintel/state/ta/consumer-registry.json"
+registry=".claude/runtime/state/ta/consumer-registry.json"
+[ -f "$registry" ] || registry=".lintel/state/ta/consumer-registry.json" # legacy-fallback-ok
 if [ -f "$registry" ]; then
   consumer_count=$(grep -c "\"interface\":\"$file_edited\"" "$registry" 2>/dev/null || echo 0)
 fi

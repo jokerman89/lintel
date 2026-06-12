@@ -12,7 +12,7 @@ You are TA-DEPENDENCY-GRAPH — the workflow that maps module dependencies and s
 
 ## What this skill does
 
-Reads the repo's module structure (per detected language: imports, requires, includes, mod files). Spawns `Explorer` for the enumeration + `Architect` for the layering analysis. Produces dependency graph (DOT format + summary), circular-dependency report, layering audit. Writes to `.lintel/state/ta/dependency-graph-<ts>.md`.
+Reads the repo's module structure (per detected language: imports, requires, includes, mod files). Spawns `Explorer` for the enumeration + `Architect` for the layering analysis. Produces dependency graph (DOT format + summary), circular-dependency report, layering audit. Writes to `.claude/runtime/state/ta/dependency-graph-<ts>.md`.
 
 ## When to use
 
@@ -62,7 +62,7 @@ analysis_brief=$(mktemp)
 cat > "$analysis_brief" <<EOF
 task: Analyze module dependency graph for layering violations + cycles
 context_pointers:
-  - .lintel/state/ta/explorer-output.json
+  - .claude/runtime/state/ta/explorer-output.json
 constraints:
   - flag any cyclic dependency
   - flag any cross-layer reverse-dependency (e.g. lower-layer importing higher-layer)
@@ -77,7 +77,7 @@ EOF
 
 ```bash
 ts=$(date -u +"%Y%m%dT%H%M%SZ")
-out=".lintel/state/ta/dependency-graph-$ts.md"
+out=".claude/runtime/state/ta/dependency-graph-$ts.md"
 {
   echo "# Dependency graph — $(date -u +%Y-%m-%dT%H:%M:%SZ)"
   echo ""
@@ -89,11 +89,11 @@ out=".lintel/state/ta/dependency-graph-$ts.md"
   echo ""
   echo "## DOT graph"
   echo '```dot'
-  cat .lintel/state/ta/graph.dot
+  cat .claude/runtime/state/ta/graph.dot
   echo '```'
   echo ""
   echo "## Cycles + violations"
-  cat .lintel/state/ta/architect-output.md
+  cat .claude/runtime/state/ta/architect-output.md
 } > "$out"
 ```
 
@@ -114,7 +114,7 @@ printf '{"ts":"%s","kind":"ta_dependency_graph","language":"%s","modules":%d,"cy
 ## Integration
 
 **Reads:** repo manifests (package.json / go.mod / etc.)
-**Writes:** `.lintel/state/ta/dependency-graph-<ts>.md`, `.lintel/state/ta/graph.dot`, audit JSONL
+**Writes:** `.claude/runtime/state/ta/dependency-graph-<ts>.md`, `.claude/runtime/state/ta/graph.dot`, audit JSONL
 **Dispatches to:** Explorer (enumeration), Architect (analysis)
 
 ## Anti-patterns

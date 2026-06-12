@@ -84,7 +84,7 @@ tokens_added: <approx>
 ts: <timestamp>
 ```
 
-Audit log for compliance trail: `~/.lintel/audit/url-fetches.jsonl`.
+Audit log for compliance trail: `.claude/runtime/audit/url-fetches.jsonl`.
 
 ## Status protocol
 

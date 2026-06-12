@@ -33,9 +33,9 @@ Per L-001: workflow + dispatch contract. Content from agents at invocation.
 ### Step 1 — Read surface context
 
 ```bash
-surface_file="${1:-.lintel/state/sc/surface-description.md}"
-auth_flow=$(find .lintel/state -name "auth-flow*.md" -mtime -7 2>/dev/null | sort | tail -1)
-data_flow=$(find .lintel/state -name "data-flow*.md" -mtime -7 2>/dev/null | sort | tail -1)
+surface_file="${1:-.claude/runtime/state/sc/surface-description.md}"
+auth_flow=$(find .claude/runtime/state -name "auth-flow*.md" -mtime -7 2>/dev/null | sort | tail -1)
+data_flow=$(find .claude/runtime/state -name "data-flow*.md" -mtime -7 2>/dev/null | sort | tail -1)
 ```
 
 ### Step 2 — Spawn ThreatModelDrafter for STRIDE enumeration
@@ -66,7 +66,7 @@ mitigation_brief=$(mktemp)
 cat > "$mitigation_brief" <<EOF
 task: Validate mitigations per enumerated threat
 context_pointers:
-  - .lintel/state/sc/threats.json
+  - .claude/runtime/state/sc/threats.json
 constraints:
   - per threat: existing mitigation OR proposed mitigation OR flagged-unmitigated
   - flagged-unmitigated requires explicit operator accept-risk
@@ -80,7 +80,7 @@ EOF
 ### Step 4 — Raise-help if high-severity unmitigated
 
 ```bash
-high_unmitigated=$(jq -r '.threats[] | select(.severity == "high" and .mitigation == "unmitigated") | .id' .lintel/state/sc/threat-model.json 2>/dev/null | wc -l)
+high_unmitigated=$(jq -r '.threats[] | select(.severity == "high" and .mitigation == "unmitigated") | .id' .claude/runtime/state/sc/threat-model.json 2>/dev/null | wc -l)
 if [ "$high_unmitigated" -gt 0 ]; then
   echo "RAISE_HELP: $high_unmitigated high-severity threat(s) unmitigated"
 fi
@@ -90,15 +90,15 @@ fi
 
 ```bash
 ts=$(date -u +"%Y%m%dT%H%M%SZ")
-out=".lintel/state/sc/threat-model-$ts.md"
+out=".claude/runtime/state/sc/threat-model-$ts.md"
 {
   echo "# Threat model — $(date -u +%Y-%m-%dT%H:%M:%SZ)"
   echo ""
   echo "## Enumeration (STRIDE)"
-  cat .lintel/state/sc/threats.md
+  cat .claude/runtime/state/sc/threats.md
   echo ""
   echo "## Mitigations"
-  cat .lintel/state/sc/mitigations.md
+  cat .claude/runtime/state/sc/mitigations.md
 } > "$out"
 
 printf '{"ts":"%s","kind":"sc_threat_model","threats":%d,"high_unmitigated":%d,"raise_help":%s,"operator":"%s"}\n' \
@@ -118,7 +118,7 @@ printf '{"ts":"%s","kind":"sc_threat_model","threats":%d,"high_unmitigated":%d,"
 ## Integration
 
 **Reads:** surface description, auth-flow + data-flow if present
-**Writes:** `.lintel/state/sc/threat-model-<ts>.md`, audit JSONL
+**Writes:** `.claude/runtime/state/sc/threat-model-<ts>.md`, audit JSONL
 **Dispatches to:** ThreatModelDrafter (enumeration), SecurityAuditor (mitigation validation)
 
 ## Anti-patterns

@@ -12,7 +12,7 @@ You are TA-API-DESIGN — the workflow that produces an interface specification.
 
 ## What this skill does
 
-Reads operator's interface intent + existing API conventions + profile preferences (api_style, versioning). Spawns `APIDesigner` agent to produce the spec. Validates the output against checklist. Writes audit + emits structured spec under `.lintel/state/ta/api-design-<ts>.md`.
+Reads operator's interface intent + existing API conventions + profile preferences (api_style, versioning). Spawns `APIDesigner` agent to produce the spec. Validates the output against checklist. Writes audit + emits structured spec under `.claude/runtime/state/ta/api-design-<ts>.md`.
 
 Per L-001: this skill is the workflow + dispatch contract. The actual API design content is produced by APIDesigner at invocation, not curated in this skill.
 
@@ -48,7 +48,7 @@ constraints:
   - backward-compat: required for v1.x
   - operator-stated requirements: [list]
 acceptance:
-  - interface spec written to .lintel/state/ta/api-design-<ts>.md
+  - interface spec written to .claude/runtime/state/ta/api-design-<ts>.md
   - breaking-change analysis present if v2.x
   - example request/response per endpoint
 EOF
@@ -84,7 +84,7 @@ printf '{"ts":"%s","kind":"ta_api_design","api_style":"%s","versioning":"%s","op
   >> "$audit"
 ```
 
-Spec emitted at `.lintel/state/ta/api-design-<ts>.md`.
+Spec emitted at `.claude/runtime/state/ta/api-design-<ts>.md`.
 
 ## Status protocol
 
@@ -96,7 +96,7 @@ Spec emitted at `.lintel/state/ta/api-design-<ts>.md`.
 ## Integration
 
 **Reads:** profile preferences, existing API conventions, Brief Forge gate
-**Writes:** `.lintel/state/ta/api-design-<ts>.md`, audit JSONL
+**Writes:** `.claude/runtime/state/ta/api-design-<ts>.md`, audit JSONL
 **Dispatches to:** `APIDesigner` agent
 **Called by:** `skills/ta/SKILL.md`, operator-direct
 

@@ -130,7 +130,7 @@ audit_retention="${audit_retention:-2555}"   # default 7 years
 #### `full` granularity
 
 ```bash
-mkdir -p .lintel/state/sc
+mkdir -p .claude/runtime/state/sc
 audit="$LINTEL_HOME/audit/sc-decisions.jsonl"
 mkdir -p "$(dirname "$audit")"
 
@@ -146,27 +146,27 @@ if [ "$score" -lt 80 ]; then
   exit 1
 fi
 
-echo "SC full pass complete — score=$score, output .lintel/state/sc/"
+echo "SC full pass complete — score=$score, output .claude/runtime/state/sc/"
 ```
 
 #### `loop` granularity
 
 ```bash
-if [ ! -f ".lintel/state/sc/00-state.md" ]; then
+if [ ! -f ".claude/runtime/state/sc/00-state.md" ]; then
   echo "ERROR: no prior SC state — use /li:sc full first"
   exit 1
 fi
 
-prior_iteration=$(grep -E '^iteration:' .lintel/state/sc/00-state.md | head -1 | awk '{print $2}')
+prior_iteration=$(grep -E '^iteration:' .claude/runtime/state/sc/00-state.md | head -1 | awk '{print $2}')
 new_iteration=$((prior_iteration + 1))
 
 run_checkpoint threat_model_complete
 run_checkpoint compliance_evidence_present
 
 # Diff against prior iteration (threat surface focus)
-echo "Threat diff vs iteration $prior_iteration:" > .lintel/state/sc/iteration-${new_iteration}-diff.md
-diff .lintel/state/sc/iteration-${prior_iteration}-threats.md .lintel/state/sc/iteration-${new_iteration}-threats.md \
-  >> .lintel/state/sc/iteration-${new_iteration}-diff.md || true
+echo "Threat diff vs iteration $prior_iteration:" > .claude/runtime/state/sc/iteration-${new_iteration}-diff.md
+diff .claude/runtime/state/sc/iteration-${prior_iteration}-threats.md .claude/runtime/state/sc/iteration-${new_iteration}-threats.md \
+  >> .claude/runtime/state/sc/iteration-${new_iteration}-diff.md || true
 ```
 
 #### `single` granularity
@@ -261,17 +261,17 @@ YES. `/li:sc loop` resumes from prior state. `/li:sc single --action <name>` ent
 - `lib/pack-resolver.sh` for pack policy (compliance.hooks, audit_paths)
 - Existing security agents: SecurityAuditor, ThreatModelDrafter, DependencyAuditor, JWTSecurityReviewer, SBOMAuditor, PrivacyBoundaryAudit
 - New agents: ComplianceOfficer
-- Existing security-flavored ADRs (`.lintel/decisions/`, `docs/decisions/`, `docs/adr/`)
+- Existing security-flavored ADRs (`.lintel/decisions/`, `docs/decisions/`, `.claude/decisions/`)
 
 **Writes:**
-- `.lintel/state/sc/threat-model.md` (full)
-- `.lintel/state/sc/secret-inventory.md`
-- `.lintel/state/sc/auth-flow-review.md`
-- `.lintel/state/sc/compliance-evidence-<framework>.md`
-- `.lintel/state/sc/audit-path.md`
-- `.lintel/state/sc/incident-runbook.md`
-- `.lintel/state/sc/iteration-N-threats.md`
-- `~/.lintel/audit/sc-decisions.jsonl`
+- `.claude/runtime/state/sc/threat-model.md` (full)
+- `.claude/runtime/state/sc/secret-inventory.md`
+- `.claude/runtime/state/sc/auth-flow-review.md`
+- `.claude/runtime/state/sc/compliance-evidence-<framework>.md`
+- `.claude/runtime/state/sc/audit-path.md`
+- `.claude/runtime/state/sc/incident-runbook.md`
+- `.claude/runtime/state/sc/iteration-N-threats.md`
+- `.claude/runtime/audit/sc-decisions.jsonl`
 - Brief Forge envelopes through the standard gate
 
 **Triggered by:**

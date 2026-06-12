@@ -32,10 +32,10 @@ Reads threat model + auth flow + secret inventory + audit path. Spawns `Security
 ### Step 1 — Read prior SC artifacts
 
 ```bash
-threat_model=$(find .lintel/state/sc -name "threat-model-*.md" -mtime -7 2>/dev/null | sort | tail -1)
-auth_flow=$(find .lintel/state/sc -name "auth-flow-*.md" -mtime -7 2>/dev/null | sort | tail -1)
-secret_inv=$(find .lintel/state/sc -name "secret-inventory-*.md" -mtime -7 2>/dev/null | sort | tail -1)
-audit_path=$(find .lintel/state/sc -name "audit-path-*.md" -mtime -7 2>/dev/null | sort | tail -1)
+threat_model=$(find .claude/runtime/state/sc -name "threat-model-*.md" -mtime -7 2>/dev/null | sort | tail -1)
+auth_flow=$(find .claude/runtime/state/sc -name "auth-flow-*.md" -mtime -7 2>/dev/null | sort | tail -1)
+secret_inv=$(find .claude/runtime/state/sc -name "secret-inventory-*.md" -mtime -7 2>/dev/null | sort | tail -1)
+audit_path=$(find .claude/runtime/state/sc -name "audit-path-*.md" -mtime -7 2>/dev/null | sort | tail -1)
 ```
 
 ### Step 2 — Spawn SecurityAuditor for per-threat-class response
@@ -68,7 +68,7 @@ release_brief=$(mktemp)
 cat > "$release_brief" <<EOF
 task: Specify rollback + hotfix mechanics referenced by incident runbook
 context_pointers:
-  - .lintel/state/sc/incident-response.md
+  - .claude/runtime/state/sc/incident-response.md
   - existing deploy / rollback runbooks
 constraints:
   - per-deploy-target: rollback command + estimated rollback time
@@ -85,15 +85,15 @@ EOF
 
 ```bash
 ts=$(date -u +"%Y%m%dT%H%M%SZ")
-out=".lintel/state/sc/incident-runbook-$ts.md"
+out=".claude/runtime/state/sc/incident-runbook-$ts.md"
 {
   echo "# Incident runbook — $(date -u +%Y-%m-%dT%H:%M:%SZ)"
   echo ""
   echo "## Per-threat-class response"
-  cat .lintel/state/sc/incident-response.md
+  cat .claude/runtime/state/sc/incident-response.md
   echo ""
   echo "## Rollback + hotfix mechanics"
-  cat .lintel/state/sc/rollback-hotfix.md
+  cat .claude/runtime/state/sc/rollback-hotfix.md
 } > "$out"
 
 printf '{"ts":"%s","kind":"sc_incident_runbook","threat_classes":%d,"operator":"%s"}\n' \
@@ -110,7 +110,7 @@ printf '{"ts":"%s","kind":"sc_incident_runbook","threat_classes":%d,"operator":"
 ## Integration
 
 **Reads:** prior SC outputs (threat-model, auth-flow, secret-inventory, audit-path)
-**Writes:** `.lintel/state/sc/incident-runbook-<ts>.md`, audit JSONL
+**Writes:** `.claude/runtime/state/sc/incident-runbook-<ts>.md`, audit JSONL
 **Dispatches to:** SecurityAuditor (response steps), ReleaseEngineer (rollback + hotfix)
 
 ## Anti-patterns

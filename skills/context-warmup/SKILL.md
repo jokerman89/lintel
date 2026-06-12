@@ -76,7 +76,7 @@ Task 2: reading ~/.lintel/projects/.../checkpoints/*.md... 3 sessions, 23k token
 ## Compliance integration
 
 - Layer 2 customer-data scan on every file loaded via warmup. BLOCK on hit.
-- Audit log entry per task: `~/.lintel/audit/context-warmup.jsonl`
+- Audit log entry per task: `.claude/runtime/audit/context-warmup.jsonl`
 - Files matching frozen-zone patterns are loaded but flagged for read-only treatment downstream
 
 ## Voice tier note

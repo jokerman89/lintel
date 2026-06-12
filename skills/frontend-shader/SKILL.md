@@ -161,7 +161,7 @@ YES — solo-invocable.
 
 **Writes:**
 - `shader.json` (stdout default, $OUT-path if orchestrator)
-- Audit-log: `~/.lintel/audit/frontend-shader-runs.jsonl`
+- Audit-log: `.claude/runtime/audit/frontend-shader-runs.jsonl`
 
 **Calls into:**
 - `agents/frontend/ShaderEngineer.md` (primary)
