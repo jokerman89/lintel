@@ -40,6 +40,24 @@ skill_aliases:
 
   # (agt-tier-stamp → agent-tier-stamp alias removed with the skill — now in lintel-caip-pack)
 
+  - old: context-snapshot
+    new: context-save
+    deprecated_at: 2026-06-12
+    removal_at: 2026-09-12
+    reason: "ADR-0006 memory v2 consolidation — snapshot was a duplicate of save; bin/_context.sh is the shared mechanical core"
+
+  - old: context-dump
+    new: context-restore
+    deprecated_at: 2026-06-12
+    removal_at: 2026-09-12
+    reason: "ADR-0006 memory v2 consolidation — dump was restore + warm under another name"
+
+  - old: context-warmup
+    new: context-warm
+    deprecated_at: 2026-06-12
+    removal_at: 2026-09-12
+    reason: "ADR-0006 memory v2 consolidation — warmup duplicated warm's preload with a declared-pattern flavor; use /li:context-warm"
+
 env_var_aliases:
   - old: JSTACK_HOME
     new: LINTEL_HOME

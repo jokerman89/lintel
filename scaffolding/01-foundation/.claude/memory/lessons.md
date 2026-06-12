@@ -2,6 +2,8 @@
 
 Living document. Updated after ANY correction. Review at session start.
 
+**Supersede, don't delete.** Entries are never edited away. When a newer lesson contradicts an older one, add `superseded_by: L-NNN (YYYY-MM-DD)` as the first body line of the old entry — surfacing (`lib/memory.sh`) then skips it.
+
 Format per lesson:
 
 ```

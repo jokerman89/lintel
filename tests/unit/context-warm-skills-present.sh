@@ -24,8 +24,8 @@ WARM_SKILLS=(
   context-warm-adrs
   context-warm-customer
   context-warm-from-url
-  context-dump
-  context-snapshot
+  context-save
+  context-restore
   context-budget
   context-cool
 )
@@ -67,7 +67,7 @@ pass "all context-warming skills have layer: foundation"
 
 # context-warm is the base, most variants reference /li:context-warm.
 # from-url uses WebFetch directly (not delegating); excluded from delegation check.
-DELEGATING_VARIANTS=(context-warm-related context-warm-sessions context-warm-adrs context-warm-customer context-dump)
+DELEGATING_VARIANTS=(context-warm-related context-warm-sessions context-warm-adrs context-warm-customer)
 for variant in "${DELEGATING_VARIANTS[@]}"; do
   f="$REPO_ROOT/skills/$variant/SKILL.md"
   [ -f "$f" ] || continue

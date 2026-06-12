@@ -226,8 +226,8 @@ On-demand 1M-context utilization beyond session-start. Default session-start sta
 - `/li:context-warm-customer <engagement>` — customer-repo state (audit-logged)
 - `/li:context-warm-from-url <url>` — WebFetch + dump (URL gate when pack compliance mode is `hard`)
 - `/li:context-budget` — utilization visibility
-- `/li:context-snapshot [name]` — operator-named mid-session save
-- `/li:context-dump <session-id>` — load specific prior session save
+- `/li:context-save [--label <name>]` — checkpoint (named saves covered by --label; the former snapshot/dump skills are aliases since v5, ADR-0006)
+- `/li:context-restore [path]` — load latest or specific prior session save
 - `/li:context-cool` — selective IGNORE marker
 
 For >20k token loads: explicit budget confirmation required.

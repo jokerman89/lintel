@@ -65,10 +65,37 @@ if [ -n "$MEMORY_FILE" ]; then
   [ -n "$mem" ] && add "Memory: $mem"
 fi
 
-# Open jobs
+# Open jobs (registry = cross-repo view) + ready-work for THIS repo (ADR-0006)
 if [ -f "$LINTEL_HOME/jobs/_active.md" ]; then
   jc="$(grep -cE '^\s*[-*|] ' "$LINTEL_HOME/jobs/_active.md" 2>/dev/null || echo 0)"
-  [ "${jc:-0}" -gt 0 ] 2>/dev/null && add "Open jobs: $jc (see ~/.lintel/jobs/_active.md)"
+  ready=""
+  _jobs_helper="${REPO_ROOT:-.}/bin/_jobs.sh"
+  [ -f "$_jobs_helper" ] || _jobs_helper="$LINTEL_HOME/scaffolding/bin/_jobs.sh"
+  if [ -n "$REPO_ROOT" ] && [ -f "$REPO_ROOT/.claude/lintel-layout.yaml" ] && [ -f "$_jobs_helper" ]; then
+    ready="$( (
+      # shellcheck disable=SC1090
+      source "$_jobs_helper" 2>/dev/null || exit 0
+      r=0
+      for d in "$LINTEL_JOBS_DIR"/*/; do
+        [ -f "$d/job.yaml" ] || continue
+        id=$(grep '^job_id:' "$d/job.yaml" | head -1 | awk '{print $2}')
+        [ "$(job_ready "$id" 2>/dev/null)" = "yes" ] && r=$((r+1))
+      done
+      printf '%s' "$r"
+    ) 2>/dev/null )"
+  fi
+  if [ "${jc:-0}" -gt 0 ] 2>/dev/null; then
+    line="Open jobs: $jc (registry: ~/.lintel/jobs/_active.md)"
+    [ -n "$ready" ] && line="$line · ready in this repo: $ready"
+    add "$line"
+  fi
+fi
+
+# Path-scoped rules index (.claude/rules/*.md — loaded natively by Claude Code,
+# listed here as an index for the other CLIs)
+if [ -n "$REPO_ROOT" ] && [ -d "$REPO_ROOT/.claude/rules" ]; then
+  rl="$(ls "$REPO_ROOT/.claude/rules"/*.md 2>/dev/null | head -5 | while IFS= read -r f; do basename "$f" .md; done | paste -sd '|' - | sed 's/|/ · /g')"
+  [ -n "$rl" ] && add "Path-scoped rules: $rl (.claude/rules/)"
 fi
 
 # Recent decisions (last 3 ADR titles)

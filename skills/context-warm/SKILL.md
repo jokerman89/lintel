@@ -14,6 +14,8 @@ You are the context-warm base skill — explicit file load into session.
 
 Loads files specified by operator into session context. Reports token cost. Updates context budget tracking. This is the BASE for all warm-* variants (related, sessions, adrs, customer, from-url).
 
+`--pattern` runs the declared-pattern preload — the former standalone warmup skill is folded into this one (its old name routes here via `config/aliases.yaml`): instead of an explicit target, it warms the repo's declared high-leverage file set.
+
 Default session-start loads ~5-15k tokens (CLAUDE.md, AGENT-INSTRUCTIONS, lessons, memory, recent ADRs, active role identity). When more context is needed for deeper work, operator explicitly warms.
 
 ## When to use
@@ -117,7 +119,7 @@ Headroom: <X>k
 
 Files are now in session — subsequent skills + agents will see them.
 To cool / drop: /li:context-cool
-To save state: /li:context-snapshot
+To save state: /li:context-save
 ```
 
 ## Status protocol

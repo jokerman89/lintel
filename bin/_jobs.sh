@@ -567,6 +567,32 @@ job_resume_point() {
   return 0
 }
 
+# Is a job READY to continue? (bd-prime steal, ADR-0006)
+# Ready = top-level ACTIVE and either no steps[] populated, or the first
+# incomplete step is startable (its blocked_until predicate holds).
+# Echoes "yes"/"no"; rc 0/1.
+job_ready() {
+  local id="$1"
+  local dir="$LINTEL_JOBS_DIR/$id"
+  [ -f "$dir/job.yaml" ] || { printf 'no
+'; return 1; }
+  local status
+  status=$(grep '^status:' "$dir/job.yaml" | head -1 | awk '{print $2}' | tr -d '')
+  [ "$status" = "ACTIVE" ] || { printf 'no
+'; return 1; }
+  local names
+  names=$(awk '/^  - name:/ { print $3 }' "$dir/job.yaml")
+  if [ -z "$names" ]; then printf 'yes
+'; return 0; fi
+  local rp
+  rp=$(job_resume_point "$id")
+  if [ -n "$rp" ]; then printf 'yes
+'; return 0; fi
+  # steps exist, none startable: either done or fully blocked → not ready
+  printf 'no
+'; return 1
+}
+
 # Self-test mode
 if [ "${BASH_SOURCE[0]}" = "$0" ]; then
   echo "_jobs.sh self-test:"
