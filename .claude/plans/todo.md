@@ -28,29 +28,29 @@ Independent review (L-007): SHIP-WITH-FIXES — 3 P1 (registry war, marker-on-pa
 
 ## Phase B — memory v2 (PR: feat/memory-v2)
 
-- [ ] `.claude/memory/MEMORY.md` index format (≤200 lines) + convergence contract doc
-- [ ] `lib/memory.sh`: lessons_surface (mechanical, called from SENSE Step 0a)
-- [ ] CAPTURE update-phase: add/update/supersede/no-op classification vs existing lessons
-- [ ] Supersede-don't-delete convention (`superseded_by:` markers) in lessons/memory templates
-- [ ] Block-budget warn hook (MEMORY.md ≤200, lessons threshold)
-- [ ] Consolidate context-* family 8→3 skills + `bin/_context.sh` (save/list/restore)
-- [ ] Brief-forge: implement completeness evaluator (bash), delete unimplemented promises
-- [ ] Subtract operator-profile.jsonl write from CAPTURE Step 9
-- [ ] gbrain SKILL.md honest labeling
-- [ ] `.claude/rules/` path-scoped rules support + digest index lines
-- [ ] AGENTS.md emission in scaffold
-- [ ] Ready-work view in digest (blocked_by in job.yaml)
-- [ ] Memory-map rewrite in CLAUDE.md/AGENT-INSTRUCTIONS + scaffolding
-- [ ] ADR-0006 memory v2
+- [x] `.claude/memory/MEMORY.md` index format (≤200 lines) + convergence contract doc
+- [x] `lib/memory.sh`: lessons_surface (mechanical, called from SENSE Step 0a)
+- [x] CAPTURE update-phase: add/update/supersede/no-op classification vs existing lessons
+- [x] Supersede-don't-delete convention (`superseded_by:` markers) in lessons/memory templates
+- [x] Block-budget warn hook (MEMORY.md ≤200, lessons threshold)
+- [x] Consolidate context-* family 8→3 skills + `bin/_context.sh` (save/list/restore)
+- [x] Brief-forge: implement completeness evaluator (bash), delete unimplemented promises — L-003 RE-VERIFIED: evaluators (security/completeness/stale) ALREADY exist in lib/brief-forge-evaluators.sh (213 lines); audit claim was wrong; no build needed
+- [x] Subtract operator-profile.jsonl write from CAPTURE Step 9
+- [x] gbrain SKILL.md honest labeling
+- [x] `.claude/rules/` path-scoped rules support + digest index lines
+- [x] AGENTS.md emission in scaffold
+- [x] Ready-work view in digest (blocked_by in job.yaml)
+- [x] Memory-map rewrite in CLAUDE.md/AGENT-INSTRUCTIONS + scaffolding
+- [x] ADR-0006 memory v2
 
 ## Phase C — Obsidian patterns (PR: feat/obsidian-patterns)
 
-- [ ] Locked session-note frontmatter schema (type/date/repo/branch/outcome/tags)
-- [ ] `templates/obsidian/sessions.base` + `bin/li-vault-init` (base + repo hub note)
-- [ ] CAPTURE Step 7b: 00-index.md regeneration + wikilinks (hub + predecessor)
-- [ ] Pack keys `obsidian.*` (flat two-level) + unit tests
-- [ ] docs/concepts: repo-as-read-vault workflow (.claude/ as mini-vault)
-- [ ] ADR-0007 Obsidian integration scope
+- [x] Locked session-note frontmatter schema (type/date/repo/branch/outcome/tags)
+- [x] `templates/obsidian/sessions.base` + `bin/li-vault-init` (base + repo hub note)
+- [x] CAPTURE Step 7b: 00-index.md regeneration + wikilinks (hub + predecessor)
+- [x] Pack keys `obsidian.*` (flat two-level) + unit tests — DESIGN SIMPLIFICATION: reused existing capture.vault_sink_* keys, no new surface (subtraction)
+- [x] docs/concepts: repo-as-read-vault workflow (.claude/ as mini-vault)
+- [x] ADR-0007 Obsidian integration scope
 
 ## Review (fylls i vid task-slut)
 

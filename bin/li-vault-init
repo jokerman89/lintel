@@ -1,0 +1,130 @@
+#!/usr/bin/env bash
+# component: li-vault-init
+# implements: ADR-0007
+# intent: docs/concepts/obsidian-integration.md
+# constraints: NEVER reorganizes the operator's vault — adds three small files, idempotently
+# last_intent_review: 2026-06-12
+#
+# Installs Lintel's Obsidian patterns into an existing vault:
+#   <vault>/<sessions-dir>/sessions.base   — Bases dashboard over session notes
+#   <vault>/<sessions-dir>/<repo>.md       — repo hub note (sessions wikilink to it)
+#   <vault>/<sessions-dir>/00-index.md     — agent-maintained index (CAPTURE regenerates)
+#
+# The vault location resolves from the active pack (capture.vault_sink_path,
+# relative to the repo root) or --vault. Opt-in, idempotent, never overwrites.
+#
+# Usage: li-vault-init [--vault <path-to-sessions-dir>] [--repo <path>] [--dry-run]
+
+set -uo pipefail
+
+DRY=0; VAULT=""; REPO=""
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --dry-run) DRY=1; shift ;;
+    --vault)
+      [ -n "${2:-}" ] || { echo "ERROR: --vault requires a path" >&2; exit 2; }
+      VAULT="$2"; shift 2 ;;
+    --repo)
+      [ -n "${2:-}" ] || { echo "ERROR: --repo requires a path" >&2; exit 2; }
+      REPO="$2"; shift 2 ;;
+    -h|--help) sed -n '8,17p' "$0"; exit 0 ;;
+    *) echo "unknown flag: $1" >&2; exit 2 ;;
+  esac
+done
+
+cd "${REPO:-.}" || { echo "ERROR: cannot cd to ${REPO}" >&2; exit 1; }
+ROOT="$(git rev-parse --show-toplevel 2>/dev/null)" || { echo "ERROR: not a git repo" >&2; exit 1; }
+cd "$ROOT" || exit 1
+REPO_NAME="$(basename "$ROOT")"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Resolve the sessions dir from the pack when --vault not given
+if [ -z "$VAULT" ]; then
+  RESOLVER="$ROOT/lib/pack-resolver.sh"
+  [ -f "$RESOLVER" ] || RESOLVER="${LINTEL_HOME:-$HOME/.lintel}/lib/pack-resolver.sh"
+  if [ -f "$RESOLVER" ]; then
+    # shellcheck disable=SC1090
+    source "$RESOLVER" 2>/dev/null || true
+    VAULT="$(resolve_pack_field capture.vault_sink_path 2>/dev/null || true)"
+  fi
+fi
+case "$VAULT" in ""|null)
+  echo "ERROR: no vault path — pass --vault or set capture.vault_sink_path in your pack" >&2
+  exit 1 ;;
+esac
+# Relative paths resolve from the repo root (same rule as the capture sink)
+case "$VAULT" in /*|[A-Za-z]:*) : ;; *) VAULT="$ROOT/$VAULT" ;; esac
+[ -d "$VAULT" ] || { echo "ERROR: vault sessions dir not found: $VAULT" >&2; exit 1; }
+
+say() { if [ "$DRY" = 1 ]; then echo "[dry-run] $*"; else echo "$*"; fi; }
+TODAY=$(date +%Y-%m-%d)
+
+echo "Installing Lintel Obsidian patterns into $VAULT$([ "$DRY" = 1 ] && echo ' (dry-run)')"
+
+# 1 — sessions.base (Bases dashboard)
+if [ -f "$VAULT/sessions.base" ]; then
+  say "skip sessions.base (exists)"
+elif [ "$DRY" = 1 ]; then
+  say "install sessions.base"
+else
+  TPL="$SCRIPT_DIR/../templates/obsidian/sessions.base"
+  [ -f "$TPL" ] || TPL="${LINTEL_HOME:-$HOME/.lintel}/templates/obsidian/sessions.base"
+  if [ -f "$TPL" ]; then
+    cp "$TPL" "$VAULT/sessions.base"
+    echo "installed sessions.base"
+  else
+    echo "WARN: sessions.base template not found — skipped"
+  fi
+fi
+
+# 2 — repo hub note (sessions wikilink here; backlinks give per-repo history)
+HUB="$VAULT/$REPO_NAME.md"
+if [ -f "$HUB" ]; then
+  say "skip hub note (exists): $(basename "$HUB")"
+elif [ "$DRY" = 1 ]; then
+  say "create hub note: $REPO_NAME.md"
+else
+  cat > "$HUB" <<EOF
+---
+created: $TODAY
+tags: [hub]
+type: repo-hub
+repo: $REPO_NAME
+---
+# $REPO_NAME
+
+Repo hub — every Lintel session note for this repo links here, so the backlinks
+panel (and the graph) is the per-repo session history.
+EOF
+  echo "created hub note: $REPO_NAME.md"
+fi
+
+# 3 — index note seed (CAPTURE Step 7b regenerates it after every session)
+IDX="$VAULT/00-index.md"
+if [ -f "$IDX" ]; then
+  say "skip 00-index.md (exists)"
+elif [ "$DRY" = 1 ]; then
+  say "create 00-index.md"
+else
+  cat > "$IDX" <<EOF
+---
+created: $TODAY
+tags: [index]
+type: session-index
+---
+# Session index
+
+Agent-maintained (Lintel CAPTURE regenerates the list below — newest first).
+
+EOF
+  echo "created 00-index.md"
+fi
+
+# Audit (best-effort)
+if [ "$DRY" != 1 ]; then
+  # shellcheck disable=SC1091
+  source "$SCRIPT_DIR/_audit.sh" 2>/dev/null || true
+  command -v audit_log >/dev/null 2>&1 && audit_log capture vault_init "vault=$VAULT" "repo=$REPO_NAME" || true
+fi
+
+echo "Done. Open the vault in Obsidian — sessions.base gives the dashboard; backlinks on $REPO_NAME.md give per-repo history."
