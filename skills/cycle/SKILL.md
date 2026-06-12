@@ -236,13 +236,14 @@ For each phase in phases_to_run order:
 1. Pre-phase: `state_append <PHASE> STARTING`
 2. Invoke /li:<phase>
 3. Phase runs (with its own pause-gates per phase-skill)
-4. Post-phase: `state_last status` — check the phase's recorded status
+4. Post-phase: `state_last status` (still `STARTING` after the phase returned = the phase crashed before its closing append → treat as BLOCKED) — check the phase's recorded status
 5. If status=DONE or DONE_WITH_CONCERNS: continue to next phase
 6. If status=BLOCKED: pause cycle, surface to operator
 7. If status=NEEDS_CONTEXT: pause, gather, re-invoke phase
 ```
 
-State writes/reads are mechanical since v5.0 (ADR-0008) — `source "$LINTEL_REPO_ROOT/lib/state.sh"` once, then one command (`state_append` / `state_last`), not a YAML obligation.
+State writes/reads are mechanical since v5.0 (ADR-0008) — `_sl="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}/lib/state.sh"
+[ -f "$_sl" ] || _sl="$HOME/.lintel/lib/state.sh"; source "$_sl"   # installed by install.sh in consumer repos` once, then one command (`state_append` / `state_last`), not a YAML obligation.
 
 **Mode persistence (for the footer).** Once the phase list + mode are fixed (Step 3), run
 `state_append CYCLE STARTING cycle_id=<id> cycle_mode=<mode>` once at cycle start, so

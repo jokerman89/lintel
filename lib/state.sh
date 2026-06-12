@@ -45,6 +45,10 @@ state_append() {
     printf 'operator: %s\n' "${LINTEL_OPERATOR:-${USER:-${USERNAME:-unknown}}}"
     local kv k v
     for kv in "$@"; do
+      case "$kv" in *=*) : ;; *)
+        echo "WARN [lintel/state]: ignoring malformed arg '$kv' (expected key=value)" >&2
+        continue ;;
+      esac
       k="${kv%%=*}"; v="${kv#*=}"
       [ "$k" = "next" ] && k="next_recommended"
       printf '%s: %s\n' "$k" "$v"
@@ -59,7 +63,7 @@ state_last() {
   f="$(state_file)" || return 1
   [ -f "$f" ] || return 1
   local block
-  block=$(awk '/^---$/{b=""} {b=b $0 "\n"} END{printf "%s", b}' "$f")
+  block=$(awk '{sub(/\r$/,"")} /^---$/{b=""} {b=b $0 "\n"} END{printf "%s", b}' "$f")
   if [ -z "$field" ]; then
     printf '%s' "$block"
   else

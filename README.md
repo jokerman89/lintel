@@ -2,7 +2,7 @@
 
 **Company-neutral, pack-driven session harness for agent-based development.** Markdown + bash scaffolding that any modern AI CLI loads as a plugin. No runtime, no daemons — your CLI handles execution. Identity (voice, compliance, personas, brand) is supplied by an installable **pack**; the harness ships only the neutral `_default` pack.
 
-**Status:** v4.9 — company-neutral, pack-driven harness. The Microsoft CAIP-SE identity has been extracted to the separate [lintel-caip-pack](https://github.com/jokerman89/lintel-caip-pack); Lintel ships only the neutral `_default` pack. See [CHANGELOG.md](CHANGELOG.md) for release notes and [SHIP-GATE.md](SHIP-GATE.md) for readiness gates. Current architecture lives at [docs/design/lintel-v4.0-reframe-design.md](docs/design/lintel-v4.0-reframe-design.md).
+**Status:** v5.0 — company-neutral, pack-driven harness with the `.claude/` home layout (ADR-0005), mechanical memory (ADR-0006) and zero-setup hook activation (ADR-0008). The Microsoft CAIP-SE identity has been extracted to the separate [lintel-caip-pack](https://github.com/jokerman89/lintel-caip-pack); Lintel ships only the neutral `_default` pack. See [CHANGELOG.md](CHANGELOG.md) for release notes and [SHIP-GATE.md](SHIP-GATE.md) for readiness gates. Current architecture lives at [docs/design/lintel-v4.0-reframe-design.md](docs/design/lintel-v4.0-reframe-design.md).
 
 Lintel ships **166 skills + 70 agents + 1 pack (`_default`)** organized for the plugin-manifest pattern across 8 CLIs. Plus the foundation scaffolding-template system (CORE-PRINCIPLES, EVOLUTION-LOG, .claude/memory/lessons.md, decision-record templates) that gets copied into new repos via `bin/li-scaffold`. The engineering-domain modules (`/li:ta`, `/li:da`, `/li:sc`, `/li:dh`, `/li:tq`) plus the 9-step cycle (8 core phases + SCOPE) are the core.
 
@@ -169,7 +169,7 @@ Lessons learned go in `scaffolding/01-foundation/.claude/memory/lessons.md`. Pro
 
 ## Versioning
 
-Semantic versioning since v3; the current line is v4.9. Releases ship when [SHIP-GATE.md](SHIP-GATE.md) gates are all green.
+Semantic versioning since v3; the current line is v5.0. Releases ship when [SHIP-GATE.md](SHIP-GATE.md) gates are all green.
 Pre-v3 used date-based versioning — see [CHANGELOG.md](CHANGELOG.md).
 
 ---

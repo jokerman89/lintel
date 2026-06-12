@@ -2,6 +2,27 @@
 
 All notable changes to this repo are tracked here. Format is loose — date headings + bulleted changes. Major behavior changes to the canonical instructions are also logged in `scaffolding/EVOLUTION-LOG.md` (which travels with each scaffolded repo).
 
+## 5.0.0 — 2026-06-12
+
+The ".claude/ home" major: one circle of control per repo, mechanical memory, zero-setup activation.
+
+### Added
+- v5 `.claude/` home layout (ADR-0005): knowledge committed (`memory/`, `decisions/`, `plans/`), runtime gitignored (`runtime/`); `lib/paths.sh` single path source; `bin/li-migrate-claude-home`; native auto-memory convergence (`autoMemoryDirectory`)
+- Memory v2 (ADR-0006): `lib/memory.sh` (mechanical lesson surfacing, supersede-aware), `bin/_context.sh`, `hooks/shared/memory-budget-warn`, update-phase capture, supersede-don't-delete convention, AGENTS.md + `.claude/rules/` emission
+- Obsidian patterns (ADR-0007): locked session-note schema, `sessions.base`, `bin/li-vault-init`, hub/predecessor wikilinks, agent-maintained index
+- Activation contract (ADR-0008): plugin hook auto-registration (`hooks/hooks.json`), `lib/state.sh` state ledger (one-command per-phase writes), identity seeding in install.sh, behavior test `tests/integration/session-leaves-traces.sh`, li-doctor proof-of-life checks
+
+### Fixed
+- secret-scan-block + customer-data-block exited 1 (non-blocking in Claude Code) — now exit 2 and actually block
+- session-digest settings snippet pointed at a path missing `shared/`
+- cross-scope jobs registry no longer clobbered in mixed v4/v5 fleets
+- 31 hook scripts committed non-executable
+
+### Changed
+- context family consolidated (snapshot→save, dump→restore, warmup→warm; aliases, grace to 2026-09-12); 169 → 166 skills
+- neutral `_default` pack ships the vault sink OFF (frozen-zone rule)
+- audit scope routing: repo events land in `.claude/runtime/audit/`, operator events stay in `~/.lintel/audit/`
+
 ## [4.9.0] - 2026-06-05 — five-lens remediation — English-only sweep + shipping-identity reconciliation
 
 **Remediation pass across the shipped surface.** Closes the drift the five-lens audit surfaced: mixed-language source, a shipping identity frozen at an old slug/version, self-describing wiki/showcase counts that no longer matched reality, and missing CI guards. No new features — this is a correctness + consistency pass.

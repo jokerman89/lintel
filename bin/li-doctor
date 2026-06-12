@@ -214,8 +214,25 @@ for _cand in "$HOME/.claude/plugins/cache"/*/li/*/hooks/hooks.json "$repo_root/h
 done
 if [ -n "$_plugin_hooks" ]; then
   ok "plugin hook auto-registration present ($_plugin_hooks)"
+  case "$_plugin_hooks" in
+    "$HOME/.claude/plugins/cache"*) : ;;
+    *) warn "auto-registration found only in the repo checkout — the INSTALLED plugin cache predates v5 (update the plugin)" ;;
+  esac
 else
   warn "no hooks/hooks.json found — session-digest/safety hooks will NOT auto-register (pre-v5 plugin?)"
+fi
+
+# Proof of life (ADR-0008): registration is not firing — check for a recent digest record
+_digest_seen=""
+for _aud in "$repo_root/.claude/runtime/audit/hooks.jsonl" "$LINTEL_HOME/audit/hooks.jsonl"; do
+  [ -f "$_aud" ] && grep -q 'session_digest' "$_aud" 2>/dev/null && _digest_seen="$_aud"
+done
+if [ -n "$_digest_seen" ]; then
+  _last_fire=$(grep 'session_digest' "$_digest_seen" | tail -1 | grep -oE '"ts":"[^"]+"' | cut -d'"' -f4)
+  ok "session-digest has fired (last: ${_last_fire:-unknown})"
+else
+  warn "session-digest has NEVER left an audit record — registered is not firing"
+  echo "    Verify: start a fresh session (or claude --debug), then re-run li-doctor."
 fi
 
 # session-digest (REQUIRED, ADR-0002): auto-registered via plugin hooks.json (v5+),

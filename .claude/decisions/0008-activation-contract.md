@@ -17,17 +17,28 @@ and nothing verified behavior.**
 ## Decision
 
 1. **Plugin hooks auto-register.** `hooks/hooks.json` ships with the plugin (Claude Code
-   registers it on install — verified mechanism, exec form for Windows): session-digest
+   registers it on install — schema verified against the installed binary): session-digest
    (SessionStart: startup|resume|clear), the 4 safety hooks (PreToolUse), memory-budget-warn
-   (PostToolUse Edit|Write). Module warn-hooks remain opt-in. No manual merges in the
-   activation path. The settings snippet remains only for non-plugin installs (path fixed).
+   (PostToolUse Edit|Write). Shell-string form (`bash "${CLAUDE_PLUGIN_ROOT}/..."`) so Windows
+   resolves bash via Claude Code's Git Bash discovery — exec-form `bash` needs bash.exe on the
+   raw process PATH, which plain Windows lacks. Module warn-hooks remain opt-in. No manual
+   merges in the activation path. The settings snippet remains only for non-plugin installs
+   (path fixed). Auto-registered hooks source ONLY their own tree / `~/.lintel` — never
+   repo-supplied code (they now run in every repo, including untrusted ones). The review also
+   surfaced that the two block hooks exited 1 — which Claude Code treats as non-blocking — so
+   "COMMIT BLOCKED" printed while the commit proceeded; they now exit 2 (the actual blocking
+   code). **Firing on this platform is verified by li-doctor's proof-of-life check (a
+   session_digest audit record), not assumed — final confirmation lands on the first session
+   after the plugin updates to 5.0.0.**
 2. **Identity is seeded, not fallen back to.** install.sh seeds `~/.lintel/profile.yaml` +
    `packs/active-pack` (`_default`) when missing. The fallback stays as a safety net, not as
    the permanent silent reality. li-doctor reports hook drift (installed vs shipped) and
    verifies the auto-registration manifest.
 3. **The state ledger costs one line.** `lib/state.sh: state_append <PHASE> <STATUS> [next=X]
    [k=v...]` + `state_last [field]`. All 9 phase skills + cycle + resume now call the helper
-   instead of hand-appending YAML blocks. If a discipline costs more than one command, it gets
+   instead of hand-appending YAML blocks (source chain falls back to `~/.lintel/lib/state.sh`
+   so the ledger works in consumer repos, not just this checkout; the footer skips
+   non-canonical CYCLE/RESUME ledger entries when resolving position). If a discipline costs more than one command, it gets
    skipped under momentum — the audit proved it.
 4. **Behavior over prose in tests.** `tests/integration/session-leaves-traces.sh` runs the
    real machinery hermetically and asserts the traces: digest envelope + audit record, ledger

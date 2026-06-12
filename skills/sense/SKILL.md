@@ -259,7 +259,8 @@ Approximate current context window utilization. If detectable from prior turns +
 Mechanical since v5.0 (ADR-0008) — one command, not a YAML obligation:
 
 ```bash
-source "$LINTEL_REPO_ROOT/lib/state.sh"
+_sl="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}/lib/state.sh"
+[ -f "$_sl" ] || _sl="$HOME/.lintel/lib/state.sh"; source "$_sl"   # installed by install.sh in consumer repos
 state_append SENSE DONE next=SCOPE mode_recommended=$recommended_mode intent_detected="$intent" role=$role_active voice_tier=$effective_voice_tier compliance_mode=$compliance_mode meta_infra_detected=$meta_infra_detected meta_paths_changed=$meta_total
 ```
 

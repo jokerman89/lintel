@@ -33,7 +33,10 @@ pack="$(_yaml "$PROFILE" active_pack)";    pack="${pack:-_default}"
 mode="$(_yaml "$PROFILE" default_mode)";   mode="${mode:-internal-tool}"
 role="$(_yaml "$PROFILE" role_active)";    role="${role:-none}"
 compliance=""
-_resolver="${REPO_ROOT:-$LINTEL_HOME}/lib/pack-resolver.sh"
+# Source order (ADR-0008 security): own tree (plugin cache / installed copy) FIRST —
+# auto-registration means this hook runs in EVERY repo, including untrusted ones;
+# never execute repo-supplied code from a SessionStart hook.
+_resolver="$(dirname "${BASH_SOURCE[0]}")/../../../lib/pack-resolver.sh"
 [ -f "$_resolver" ] || _resolver="$LINTEL_HOME/lib/pack-resolver.sh"
 if [ -f "$_resolver" ]; then
   compliance="$( ( source "$_resolver" 2>/dev/null && resolve_pack_field compliance.mode 2>/dev/null ) | tr -d '[:space:]' )"
@@ -69,7 +72,7 @@ fi
 if [ -f "$LINTEL_HOME/jobs/_active.md" ]; then
   jc="$(grep -cE '^\s*[-*|] ' "$LINTEL_HOME/jobs/_active.md" 2>/dev/null || echo 0)"
   ready=""
-  _jobs_helper="${REPO_ROOT:-.}/bin/_jobs.sh"
+  _jobs_helper="$(dirname "${BASH_SOURCE[0]}")/../../../bin/_jobs.sh"
   [ -f "$_jobs_helper" ] || _jobs_helper="$LINTEL_HOME/bin/_jobs.sh"
   if [ -n "$REPO_ROOT" ] && [ -f "$REPO_ROOT/.claude/lintel-layout.yaml" ] && [ -f "$_jobs_helper" ]; then
     ready="$( (

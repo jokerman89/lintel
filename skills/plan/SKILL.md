@@ -319,7 +319,8 @@ Invoke the existing mechanism — do **not** rebuild it:
 Mechanical since v5.0 (ADR-0008) — one command, not a YAML obligation:
 
 ```bash
-source "$LINTEL_REPO_ROOT/lib/state.sh"
+_sl="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}/lib/state.sh"
+[ -f "$_sl" ] || _sl="$HOME/.lintel/lib/state.sh"; source "$_sl"   # installed by install.sh in consumer repos
 state_append PLAN DONE next=BUILD plan_path=<path> spec_draft_path=<path> tasks_count=<N> cost_estimate_dollars=<X>
 ```
 

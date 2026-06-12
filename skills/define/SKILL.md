@@ -195,7 +195,8 @@ AskUserQuestion:
 If A: mark doc status APPROVED, then write the state entry. Mechanical since v5.0 (ADR-0008) — one command, not a YAML obligation:
 
 ```bash
-source "$LINTEL_REPO_ROOT/lib/state.sh"
+_sl="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}/lib/state.sh"
+[ -f "$_sl" ] || _sl="$HOME/.lintel/lib/state.sh"; source "$_sl"   # installed by install.sh in consumer repos
 state_append DEFINE DONE next=DISCOVER design_doc=<path> wedge="<one-line>"
 ```
 

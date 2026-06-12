@@ -319,7 +319,8 @@ is the real feedback loop and stays.
 Mechanical since v5.0 (ADR-0008) — one command, not a YAML obligation. No `next=`: the cycle is complete (`/li:resume` keys off `cycle_complete: true`); the full artifact list lives in the Step 11 closing message:
 
 ```bash
-source "$LINTEL_REPO_ROOT/lib/state.sh"
+_sl="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}/lib/state.sh"
+[ -f "$_sl" ] || _sl="$HOME/.lintel/lib/state.sh"; source "$_sl"   # installed by install.sh in consumer repos
 state_append CAPTURE DONE cycle_complete=true outcome=<DONE|DONE_WITH_CONCERNS|BLOCKED> lessons_captured=<count> adrs_drafted=<count> total_tokens=<N> cost_estimate=<$X>
 ```
 
