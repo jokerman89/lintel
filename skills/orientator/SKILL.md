@@ -5,6 +5,7 @@ description: Phase 3 v4.0 — lightweight routing agent invoked at SENSE. Reads 
 color: cyan
 tools: Read, Bash, Grep
 voice: internal
+hop_in: no   # single-shot at SENSE Step 0d — not a standalone entry point
 cli_support: [claude-code, codex]
 ---
 
