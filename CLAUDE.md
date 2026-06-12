@@ -34,6 +34,7 @@ Clear ownership domains:
 Frozen / handle-with-care zones:
 
 - `packs/_default/pack.yaml` and `lib/pack-resolver.sh` — the pack contract; ~30 skills depend on it. Change behind a shape-test.
+- `lib/paths.sh`, `lib/memory.sh`, `bin/_context.sh` — the v5 path/memory contract (ADR-0005/0006). Change behind tests/shape/claude-home-paths.sh + tests/unit/memory-v2.sh.
 - Frontmatter contracts (skills: `layer` + `cli_support`; agents: `category` + `tier` + `cli_support`) — changing them is a meta-infra change touching every skill/agent.
 - `AGENT-INSTRUCTIONS.md` — the canonical cross-CLI session ritual.
 

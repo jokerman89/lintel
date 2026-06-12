@@ -42,6 +42,7 @@ lessons_surface() {
     BEGIN {
       n = split(tolower(keywords), kw, /[ \t]+/)
     }
+    { sub(/\r$/, "") }
     /^## L-[0-9]+/ {
       if (id != "") emit()
       id = $0; sub(/^## /, "", id)
@@ -69,7 +70,7 @@ lessons_surface() {
     }
     END {
       if (id != "") emit()
-      # selection sort, descending score, stable
+      # selection sort, descending score (top-N only; ties keep no particular order)
       for (i = 1; i <= count && i <= topn; i++) {
         best = i
         for (j = i + 1; j <= count; j++) if (scores[j] > scores[best]) best = j
@@ -94,6 +95,7 @@ lessons_count() {
   file="$(lintel_lessons_file 2>/dev/null)" || { printf '0'; return 0; }
   [ -f "$file" ] || { printf '0'; return 0; }
   awk '
+    { sub(/\r$/, "") }
     /^## L-[0-9]+/ { if (id != "" && !superseded) c++; id = $0; superseded = 0; next }
     /^superseded_by:|^> superseded_by:/ { superseded = 1 }
     END { if (id != "" && !superseded) c++; print c + 0 }

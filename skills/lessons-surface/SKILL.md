@@ -56,7 +56,7 @@ LESSONS_TOP_N=2 lessons_surface $kw    # top-2 — SENSE is short
 (`superseded_by:` marker — supersede-don't-delete convention), and prints the top-3
 (`LESSONS_TOP_N` overrides). Empty output = no relevant lessons; say so in one line.
 
-**All mode (`--all`):** list every active lesson, 1 line each: `grep -E '^## L-[0-9]' <lessons-file>`.
+**All mode (`--all`):** list every lesson header, 1 line each: `grep -E '^## L-[0-9]' <lessons-file>` — note this INCLUDES superseded entries; suffix those with `(superseded)` when rendering (check each block for a `superseded_by:` line).
 
 **ID mode (`--id L-NNN`):** print that lesson block verbatim from the file.
 

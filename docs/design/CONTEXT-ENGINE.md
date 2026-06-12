@@ -234,7 +234,7 @@ Operator tunes per project + per session via `/context-budget --config`.
 | Skill | Purpose |
 |-------|---------|
 | `/context-budget` | View + modify current phase budget, declare new phase, checkpoint |
-| `/context-warmup` | Explicit preload of high-leverage context per declared warmup pattern |
+| `/context-warm --pattern` | Explicit preload of high-leverage context per declared warmup pattern (the standalone `/context-warmup` skill folded into `/context-warm`, ADR-0006) |
 | `/perf-mode` | Activate 1M context-budget mode for the current session |
 | `/context-budgetwatch` (renamed from `/context-tokenwatch`; consolidated into `/context-budget --watch` 2026-06-10) | Passive monitoring with budget-aware thresholds |
 
@@ -254,7 +254,7 @@ Plus agent: `ContextBudgetAdvisor` (Layer 4) — suggests phase declarations for
 ## See also
 
 - `/context-budget` skill — view/modify mechanism
-- `/context-warmup` skill — explicit preload
+- `/context-warm --pattern` — explicit preload (formerly `/context-warmup`, ADR-0006)
 - `/perf-mode` skill — perf-mode activation
 - `ContextBudgetAdvisor` agent — Layer 4 advice generator
 - `verify.sh --context-engine` — schema + state validation

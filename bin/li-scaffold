@@ -168,8 +168,10 @@ AGENTSEOF
     cat > .claude/rules/README.md <<'RULESEOF'
 # Path-scoped rules
 
-One rule per file. Claude Code loads a rule only when files matching its `paths:` globs are
-touched; other CLIs see the rule titles in the session digest and read on demand.
+One rule per file. Claude Code loads PROJECT-level rules (`./.claude/rules/`) conditioned on
+`paths:` frontmatter — globs MUST be quoted (`"src/api/**"`, unquoted globs fail silently) and
+user-level (`~/.claude/rules/`) path-scoping is broken as of mid-2026. Other CLIs see the rule
+titles in the session digest and read on demand.
 
 ```markdown
 ---

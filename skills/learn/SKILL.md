@@ -39,12 +39,18 @@ The only mechanism in Lintel that compounds learning across fresh sessions. With
 
 1. **Validate scope.** If `--scope project` and no `.claude/memory/lessons.md` exists: create it with a frontmatter header. If `--scope global` and no `~/.lintel/lessons.jsonl` exists: create empty.
 2. **Compliance scan.** Run Layer 2 patterns over the lesson body. If a secret/customer-data pattern hits: BLOCK + ask operator to rewrite without the sensitive bit.
-3. **Format entry.** Project lessons:
+2b. **Update-phase (ADR-0006).** Before appending, check what already exists:
+   `source lib/memory.sh; lessons_find_related <keywords>` — classify the candidate
+   add / update / supersede / no-op exactly as CAPTURE Step 2 does. Only `add` creates
+   a new entry; `supersede` also stamps the old lesson with `superseded_by: L-NNN (date)`.
+3. **Format entry.** Project lessons use the L-NNN grammar — the mechanical layer
+   (`lessons_surface`, the digest, the budget check) keys on `^## L-NNN`; a dated heading
+   would be invisible to all of it. Next number = highest existing + 1:
    ```markdown
-   ## YYYY-MM-DD — <type> — <one-line summary>
-   <source>
-   
-   <body>
+   ## L-NNN — <one-line summary>
+   **Rule:** <the durable rule>
+   **Why:** <source / what triggered it, with date>
+   **How to apply:** <bullets>
    ```
    Global lessons:
    ```jsonl
