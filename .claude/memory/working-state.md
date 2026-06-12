@@ -20,7 +20,31 @@ Cross-session working state (ej durable rules — that's [[lessons.md]]; ej pers
 **Last touched:** YYYY-MM-DD
 -->
 
-## v5.1-subtraction — PR #67 OPEN 2026-06-12
+## v5.2-battletest — PR #69 OPEN 2026-06-12
+
+**Status:** active — PR #69 to main (independent chain; #62-#68 already merged)
+
+**What shipped:** 6-persona adversarial battletest (docs/audit/2026-06-12-battletest-synthesis.md,
+6 KO + 24 HARD). ADR-0010 security (block-hook bypass + modern tokens + vault PII scan + sed RCE
++ CR/LF-safe audit/state), ADR-0011 gstack de-heritage (44 edits/30 files, zero loss, grace
+2026-09-12), ADR-0012 agent memory:/model: (23+4). Friction: resume↔context-restore, honest cost
+gates, DEFINE feature fast-path, SENSE marker-gate. New behavior tests caught 3 real bugs incl. a
+P0 forgeable-override I introduced (L-012). Suite 76/76. Manifests 5.2.0.
+
+**What's pending:**
+- Merge #69 to main; then verify li-doctor proof-of-life on a fresh session
+- STAGED (own ADRs): eval-harness (H1/H5 — the measurement every persona demanded), BUILD
+  parallelism (H9), module-YAML enforcement (H10), MCP server (H11), AGENTS.md portability
+  collapse (H13), pack provenance (H17), plugin pinning (H18), real git pre-commit/pre-push
+  install (supersedes ADR-0010 command-string match), v6 shrink-to-kernel positioning
+- The strategic verdict (competitor + grumpy): moat = pack contract + corpus, not the 124 skills;
+  direction is shrink-to-kernel + packs-as-product + AGENTS.md, decided AFTER the eval exists
+
+**Last touched:** 2026-06-12
+
+---
+
+## v5.1-subtraction — PR #67 MERGED 2026-06-12
 
 **Status:** active — chain now #62→#63→#64→#65→#66→#67
 
