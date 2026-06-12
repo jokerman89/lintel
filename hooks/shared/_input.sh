@@ -70,3 +70,32 @@ hook_input() {
   fi
   printf '%s' "$argv1"
 }
+
+# hook_git_gate_content <command-string>
+# Scannable content for the git commit/push block gates (secret-scan-block,
+# customer-data-block). Three rules, all battletest-K2 follow-ups:
+#   1. union staged + unstaged-tracked diffs — `commit -a` stages tracked
+#      edits AFTER PreToolUse runs, so a --cached-only scan misses them
+#   2. scan the cwd repo AND every `git -C <path>` target in the command —
+#      the phrasing matcher fires on `-C` commits, so the scan must follow
+#      the target (cwd alone scans the wrong repo)
+#   3. ADDED lines only (minus the +++ header) — the gate guards what the
+#      commit INTRODUCES. Raw-diff metadata false-positives the loose PII
+#      patterns (`new file mode 100644` and `index <hash>..<hash>` both
+#      match the phone regex, so every new-file commit blocked), and an
+#      already-committed hit in a context line would block every nearby
+#      edit — including the one that removes it.
+hook_git_gate_content() {
+  local cmd="${1:-}" d
+  {
+    printf '.\n'
+    printf '%s' "$cmd" \
+      | grep -oE "(^|[[:space:]])-C[[:space:]]+(\"[^\"]+\"|'[^']+'|[^[:space:]]+)" 2>/dev/null \
+      | sed -E "s/^[[:space:]]*-C[[:space:]]+//; s/^\"(.*)\"\$/\\1/; s/^'(.*)'\$/\\1/" \
+      || true
+  } | sort -u | while IFS= read -r d; do
+    [ -d "$d" ] || continue
+    git -C "$d" diff --cached 2>/dev/null || true
+    git -C "$d" diff 2>/dev/null || true
+  done | grep -E '^\+' | grep -vE '^\+\+\+' || true
+}
