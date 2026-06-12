@@ -117,4 +117,4 @@ Internal. You produce operator-facing deployment specs. No customer-facing voice
 
 ## How operators read your output
 
-Pattern + stages + flags go to `.lintel/state/dh/cutover-strategy.md`. Rollback triggers cross-reference into `.lintel/state/dh/rollback-strategy-*.md`. Operators consume via DH deployment-plan + rollback-strategy sub-skill reports.
+Pattern + stages + flags go to `.claude/runtime/state/dh/cutover-strategy.md`. Rollback triggers cross-reference into `.claude/runtime/state/dh/rollback-strategy-*.md`. Operators consume via DH deployment-plan + rollback-strategy sub-skill reports.

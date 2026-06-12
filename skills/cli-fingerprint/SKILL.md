@@ -117,7 +117,7 @@ Shim behavior for this CLI:
 ## Compliance integration
 
 - CLI ID is not sensitive — Layer 2 / SDL rules don't apply.
-- Audit log entry per detection event: `~/.lintel/audit/cli-detect.jsonl`. Helps debug "why is this skill using degraded path?".
+- Audit log entry per detection event: `.claude/runtime/audit/cli-detect.jsonl`. Helps debug "why is this skill using degraded path?".
 - Operator-declared override is logged with operator reason if provided.
 
 ## Voice tier note

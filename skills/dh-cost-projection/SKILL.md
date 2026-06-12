@@ -33,7 +33,7 @@ Reads capacity model (from TA scaling-plan if present, else fresh estimate) + ac
 ```bash
 cloud="${cloud:-unspecified}"
 threshold="${threshold:-${cost_budget_monthly_usd_threshold:-10000}}"
-scaling_plan=$(find .lintel/state/ta -name "scaling-plan-*.md" -mtime -30 2>/dev/null | sort | tail -1)
+scaling_plan=$(find .claude/runtime/state/ta -name "scaling-plan-*.md" -mtime -30 2>/dev/null | sort | tail -1)
 ```
 
 ### Step 2 — Spawn CostAnalyzer for projection
@@ -63,7 +63,7 @@ mapping_brief=$(mktemp)
 cat > "$mapping_brief" <<EOF
 task: Map workload growth to cost growth
 context_pointers:
-  - .lintel/state/dh/cost-line-items.md
+  - .claude/runtime/state/dh/cost-line-items.md
   - $scaling_plan
 constraints:
   - per workload signal (users, requests, data volume): which line items scale
@@ -79,7 +79,7 @@ EOF
 ### Step 4 — Threshold check + raise-help
 
 ```bash
-projected_monthly_cost=$(jq -r '.total_monthly_usd // 0' .lintel/state/dh/cost-projection.json 2>/dev/null)
+projected_monthly_cost=$(jq -r '.total_monthly_usd // 0' .claude/runtime/state/dh/cost-projection.json 2>/dev/null)
 projected_monthly_cost=${projected_monthly_cost%.*}
 
 if [ "${projected_monthly_cost:-0}" -gt "$threshold" ]; then
@@ -91,7 +91,7 @@ fi
 
 ```bash
 ts=$(date -u +"%Y%m%dT%H%M%SZ")
-out=".lintel/state/dh/cost-projection-$ts.md"
+out=".claude/runtime/state/dh/cost-projection-$ts.md"
 {
   echo "# Cost projection — $(date -u +%Y-%m-%dT%H:%M:%SZ)"
   echo "## Cloud: $cloud"
@@ -99,17 +99,17 @@ out=".lintel/state/dh/cost-projection-$ts.md"
   echo "## Projected: \$${projected_monthly_cost:-unknown}/month"
   echo ""
   echo "## Per-component"
-  cat .lintel/state/dh/cost-line-items.md
+  cat .claude/runtime/state/dh/cost-line-items.md
   echo ""
   echo "## Anomaly thresholds"
-  cat .lintel/state/dh/anomaly-thresholds.md
+  cat .claude/runtime/state/dh/anomaly-thresholds.md
 } > "$out"
 
 printf '{"ts":"%s","kind":"dh_cost_projection","cloud":"%s","projected_usd":%d,"threshold_usd":%d,"raise_help":%s,"operator":"%s"}\n' \
   "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$cloud" "${projected_monthly_cost:-0}" "$threshold" \
   "$([ "${projected_monthly_cost:-0}" -gt "$threshold" ] && echo true || echo false)" \
   "$(whoami 2>/dev/null || echo unknown)" \
-  >> "$LINTEL_HOME/audit/dh-decisions.jsonl"
+  >> ".claude/runtime/audit/dh-decisions.jsonl"
 ```
 
 ## Status protocol
@@ -122,7 +122,7 @@ printf '{"ts":"%s","kind":"dh_cost_projection","cloud":"%s","projected_usd":%d,"
 ## Integration
 
 **Reads:** TA scaling plan, cloud manifests, pack policy
-**Writes:** `.lintel/state/dh/cost-projection-<ts>.md`, audit JSONL
+**Writes:** `.claude/runtime/state/dh/cost-projection-<ts>.md`, audit JSONL
 **Dispatches to:** CostAnalyzer (line items), CapacityPlanner (workload mapping)
 
 ## Anti-patterns

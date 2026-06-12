@@ -6,7 +6,7 @@ fires_on: staged content contains Tier 1 customer-data pattern
 override: LINTEL_OVERRIDE_CUSTOMER_DATA=1 + LINTEL_OVERRIDE_REASON env vars
 necessity: REQUIRED
 gap_if_skipped: "Tier-1 customer-data patterns leak into git history; compliance incident requiring repo remediation."
-audit: ~/.lintel/audit/hooks.jsonl
+audit: .claude/runtime/audit/hooks.jsonl
 ---
 
 # customer-data-block (JUSTIFIED-BLOCK)

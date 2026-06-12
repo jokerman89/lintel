@@ -32,7 +32,7 @@ Reads NFR spec (from TA quality-attributes if present, else operator's targets).
 
 ```bash
 error_budget_window="${error_budget_window:-30}"
-nfr_spec=$(find .lintel/state/ta -name "quality-attributes-*.md" -mtime -30 2>/dev/null | sort | tail -1)
+nfr_spec=$(find .claude/runtime/state/ta -name "quality-attributes-*.md" -mtime -30 2>/dev/null | sort | tail -1)
 ```
 
 ### Step 2 — Spawn ObservabilityArchitect for SLI definitions
@@ -43,7 +43,7 @@ cat > "$brief_file" <<EOF
 task: Define SLIs tied to measurable signals
 context_pointers:
   - $nfr_spec
-  - .lintel/state/dh/observability-spec-*.md (latest, if present)
+  - .claude/runtime/state/dh/observability-spec-*.md (latest, if present)
 constraints:
   - SLI per critical journey (not per service — journeys cross services)
   - measurement window per SLI
@@ -62,7 +62,7 @@ slo_brief=$(mktemp)
 cat > "$slo_brief" <<EOF
 task: Set SLO budgets + error budget policy
 context_pointers:
-  - .lintel/state/dh/sli-definitions.md
+  - .claude/runtime/state/dh/sli-definitions.md
   - $nfr_spec
 constraints:
   - SLO per SLI with explicit budget (e.g. 99.9% over ${error_budget_window} days)
@@ -78,7 +78,7 @@ EOF
 ### Step 4 — Raise-help on below-minimum SLO
 
 ```bash
-slo_below_minimum=$(jq -r '.slos[] | select(.budget_pct < 99) | .name' .lintel/state/dh/slos.json 2>/dev/null | wc -l)
+slo_below_minimum=$(jq -r '.slos[] | select(.budget_pct < 99) | .name' .claude/runtime/state/dh/slos.json 2>/dev/null | wc -l)
 if [ "$slo_below_minimum" -gt 0 ]; then
   echo "RAISE_HELP: $slo_below_minimum SLO(s) below 30-day minimum (99%)"
 fi
@@ -88,21 +88,21 @@ fi
 
 ```bash
 ts=$(date -u +"%Y%m%dT%H%M%SZ")
-out=".lintel/state/dh/sli-slo-spec-$ts.md"
+out=".claude/runtime/state/dh/sli-slo-spec-$ts.md"
 {
   echo "# SLI/SLO spec — $(date -u +%Y-%m-%dT%H:%M:%SZ)"
   echo "## Window: ${error_budget_window} days"
   echo ""
   echo "## SLIs"
-  cat .lintel/state/dh/sli-definitions.md
+  cat .claude/runtime/state/dh/sli-definitions.md
   echo ""
   echo "## SLOs + error budget"
-  cat .lintel/state/dh/slos-and-budget.md
+  cat .claude/runtime/state/dh/slos-and-budget.md
 } > "$out"
 
 printf '{"ts":"%s","kind":"dh_sli_slo_spec","window_days":%d,"slos":%d,"below_minimum":%d,"operator":"%s"}\n' \
   "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$error_budget_window" "$slo_count" "$slo_below_minimum" "$(whoami 2>/dev/null || echo unknown)" \
-  >> "$LINTEL_HOME/audit/dh-decisions.jsonl"
+  >> ".claude/runtime/audit/dh-decisions.jsonl"
 ```
 
 ## Status protocol
@@ -114,7 +114,7 @@ printf '{"ts":"%s","kind":"dh_sli_slo_spec","window_days":%d,"slos":%d,"below_mi
 ## Integration
 
 **Reads:** TA NFR spec, observability spec
-**Writes:** `.lintel/state/dh/sli-slo-spec-<ts>.md`, audit JSONL
+**Writes:** `.claude/runtime/state/dh/sli-slo-spec-<ts>.md`, audit JSONL
 **Dispatches to:** ObservabilityArchitect (NEW, SLIs), SystemArchitect (SLO budgets)
 
 ## Anti-patterns

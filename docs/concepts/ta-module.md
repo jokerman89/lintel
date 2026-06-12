@@ -46,8 +46,8 @@ Granularity dispatch:
                    SystemArchitect (NEW) / CapacityPlanner (NEW)
                        │
                        ▼
-                   Output → .lintel/state/ta/<action>-<ts>.md
-                   Audit → ~/.lintel/audit/ta-decisions.jsonl
+                   Output → .claude/runtime/state/ta/<action>-<ts>.md
+                   Audit → .claude/runtime/audit/ta-decisions.jsonl
 ```
 
 Three granularities; one shape; per-action dispatch through existing-where-possible / new-where-needed agents.
@@ -100,11 +100,11 @@ Mirrors `frontend-design-review`'s pattern. Every dimension scored 0-100 by read
 
 | Dimension | Score 0-100 | Pass threshold | Source artifact |
 |---|---|---|---|
-| Decisions documented (ADR coverage) | _ | 80 | `.lintel/state/ta/iteration-N-adrs.md` |
-| Contracts locked (interfaces signed + versioned) | _ | 80 | `.lintel/state/ta/api-design-<ts>.md` + version metadata |
-| Complexity within budget | _ | 80 | `.lintel/state/ta/complexity-audit-<ts>.md` verdict |
-| Non-functionals specified | _ | 80 | `.lintel/state/ta/quality-attributes-<ts>.md` |
-| Consumer impact analyzed | _ | 80 | `.lintel/state/ta/contract-collision-<ts>.md` |
+| Decisions documented (ADR coverage) | _ | 80 | `.claude/runtime/state/ta/iteration-N-adrs.md` |
+| Contracts locked (interfaces signed + versioned) | _ | 80 | `.claude/runtime/state/ta/api-design-<ts>.md` + version metadata |
+| Complexity within budget | _ | 80 | `.claude/runtime/state/ta/complexity-audit-<ts>.md` verdict |
+| Non-functionals specified | _ | 80 | `.claude/runtime/state/ta/quality-attributes-<ts>.md` |
+| Consumer impact analyzed | _ | 80 | `.claude/runtime/state/ta/contract-collision-<ts>.md` |
 | Alternatives considered | _ | 80 | ADRs have 2+ alternatives per decision |
 
 Full-pass exit gate: every dimension ≥ 80 OR explicit operator override (audited to `ta-decisions.jsonl` with operator reason).
@@ -145,7 +145,7 @@ All three are warn-only (per engineering-modules.md pattern):
 Pre-edit on files claimed by an ADR's `decisions:` block. Surfaces: "this file is claimed by ADR-X; consider updating the ADR if revising the decision."
 
 ### `ta-contract-collision-warn`
-Pre-edit on files matching `pack.tech_architecture.interface_glob` or appearing in `.lintel/state/ta/consumer-registry.json`. Surfaces: "$N consumers registered; consider `/li:ta single --action contract-collision`."
+Pre-edit on files matching `pack.tech_architecture.interface_glob` or appearing in `.claude/runtime/state/ta/consumer-registry.json`. Surfaces: "$N consumers registered; consider `/li:ta single --action contract-collision`."
 
 ### `ta-complexity-budget-warn`
 Pre-commit (or post-edit when integrated). Surfaces: "cyclomatic=$N (budget $M); consider `/li:ta single --action complexity-audit`."
@@ -187,7 +187,7 @@ Per design doc: pack overrides allow domain-specific tuning without per-operator
 
 ## Audit trail
 
-Every module + sub-skill + checkpoint writes to `~/.lintel/audit/ta-decisions.jsonl`:
+Every module + sub-skill + checkpoint writes to `.claude/runtime/audit/ta-decisions.jsonl`:
 
 ```jsonl
 {"ts":"...","kind":"ta_module_complete","granularity":"full","score":87,"checkpoints_passed":5}
@@ -232,11 +232,11 @@ TA goes first because architectural decisions constrain everything downstream. D
 - `~/.lintel/profile.yaml` `engineering.tech_architecture.*`
 - `lib/pack-resolver.sh` for pack policy
 - Existing arch agents + 2 new agents
-- ADR locations (`.lintel/decisions/`, `docs/decisions/`, `docs/adr/`)
+- ADR locations (`.claude/decisions/` canonical; legacy `docs/decisions/`, `docs/adr/`)
 
 **Writes:**
-- `.lintel/state/ta/*.md` (per-action artifacts)
-- `~/.lintel/audit/ta-decisions.jsonl`
+- `.claude/runtime/state/ta/*.md` (per-action artifacts)
+- `.claude/runtime/audit/ta-decisions.jsonl`
 - Brief Forge envelopes through the standard gate
 
 **Triggered by:**

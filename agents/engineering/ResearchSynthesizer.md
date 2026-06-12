@@ -52,7 +52,7 @@ Distinct from `Explorer` (which locates) and `ReadOnly` (which answers single qu
 ResearchSynthesizer: <question>
 
 ## Sources consulted
-- docs/adr/0033-payment-provider.md
+- .claude/decisions/0033-payment-provider.md
 - src/lib/payment/ (5 files)
 - README.md sections 4-6
 - Recent commits 2026-04 — 2026-05
@@ -60,7 +60,7 @@ ResearchSynthesizer: <question>
 
 ## State of the art
 1. The repo currently uses Stripe via @stripe/stripe-js [src/lib/payment/client.ts:12]
-2. ADR-0033 chose Stripe for time-to-market in 2024 [docs/adr/0033:Context]
+2. ADR-0033 chose Stripe for time-to-market in 2024 [.claude/decisions/0033:Context]
 3. Three issues filed against Stripe path: webhook reliability, region pricing, dispute UX [README sec 6]
 
 ## Themes

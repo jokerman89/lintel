@@ -25,7 +25,10 @@ TMP="$(mktemp -d 2>/dev/null || echo "/tmp/nmwr.$$")"
 mkdir -p "$TMP/audit"
 trap 'rm -rf "$TMP"' EXIT
 
-run_hook(){ ( cd "$REPO_ROOT" && LINTEL_HOME="$TMP" bash "$HOOK" "$1" </dev/null 2>&1 ); }
+# LINTEL_REPO_ROOT pinned to the markerless sandbox so the hook's audit_log
+# ("hooks" category, repo-scoped under v5) cannot write into the real repo's
+# .claude/runtime/audit/ — it falls back to the sandboxed LINTEL_HOME.
+run_hook(){ ( cd "$REPO_ROOT" && LINTEL_HOME="$TMP" LINTEL_REPO_ROOT="$TMP" bash "$HOOK" "$1" </dev/null 2>&1 ); }
 
 # ── negative: no review log → merge to main WARNS ──
 out="$(run_hook 'gh pr merge 7 --squash')"

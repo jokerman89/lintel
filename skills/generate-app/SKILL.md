@@ -218,7 +218,7 @@ YES — solo-invocable (given an existing frontend-design-spec.json).
 
 **Writes:**
 - `<out_dir>/` — full repo skeleton
-- Audit-log: `~/.lintel/audit/generate-app-runs.jsonl`
+- Audit-log: `.claude/runtime/audit/generate-app-runs.jsonl`
 
 **Calls into:**
 - `agents/doc-gen/WebExperienceCritic.md` (existing — design-pass review)

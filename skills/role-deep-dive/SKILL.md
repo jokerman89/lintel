@@ -110,7 +110,7 @@ YES — invokable mid-task whenever depth needed.
 - Role file (full)
 
 **Writes:**
-- `.lintel/state/00-state.md` (deep-dive event)
+- `.claude/runtime/state/00-state.md` (deep-dive event)
 
 **Triggers:**
 - Subagents spawned post-load inherit deep role context

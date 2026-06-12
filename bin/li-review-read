@@ -3,7 +3,8 @@
 #
 # Replaces the external gstack binary `~/.claude/skills/gstack/bin/gstack-review-read`
 # that the release gate used at its "Review readiness check" step. Reads Lintel's own
-# audit log at ~/.lintel/audit/reviews.jsonl and emits the verdict shape the release
+# audit log at .claude/runtime/audit/reviews.jsonl (legacy global fallback for
+# un-migrated repos) and emits the verdict shape the release
 # gate expects: whether an Eng Review is CLEAR within 7 days for the current commit.
 #
 # Back-compat: also folds in any legacy gstack records written before this
@@ -32,7 +33,9 @@ REPO_ROOT="${LINTEL_REPO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." 2>/dev/n
 
 LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
 LINTEL_AUDIT_DIR="${LINTEL_AUDIT_DIR:-$LINTEL_HOME/audit}"
-REVIEWS_LOG="$LINTEL_AUDIT_DIR/reviews.jsonl"
+WORK_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || echo "$PWD")"
+REVIEWS_LOG="$WORK_ROOT/.claude/runtime/audit/reviews.jsonl"
+[ -f "$REVIEWS_LOG" ] || REVIEWS_LOG="$LINTEL_AUDIT_DIR/reviews.jsonl" # legacy-fallback-ok
 
 GATE_SKILL="plan-eng-review"
 DAYS=7

@@ -106,12 +106,12 @@ else
   fail "agents/frontend/ has $frontend_count agents, expected 5 (v3.7 contract)"
 fi
 
-# --- Reviewer-concern tracking — memory.md captures v3.7 PRs ---
-MEM="$REPO_ROOT/tasks/memory.md"
+# --- Reviewer-concern tracking — working-state captures v3.7 PRs (v5 home) ---
+MEM="$REPO_ROOT/.claude/memory/working-state.md"
 if [ -f "$MEM" ] && grep -q "PR #21" "$MEM"; then
-  pass "memory.md tracks PR #21 (v3.7 design doc reviewer-concerns)"
+  pass "working-state.md tracks PR #21 (v3.7 design doc reviewer-concerns)"
 else
-  fail "memory.md missing PR #21 reviewer-concern tracking"
+  fail "working-state.md missing PR #21 reviewer-concern tracking"
 fi
 
 # --- LAYERS.md reflects v3.7 separation-of-concerns lesson ---

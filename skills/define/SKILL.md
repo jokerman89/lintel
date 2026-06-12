@@ -122,7 +122,7 @@ If role active in profile:
 - Read role-file's "OUTCOME LENS → DEFINE" section
 - Frame alternatives in terms of role's decision criteria
 - Note in design doc: "Role lens applied: <role-id>"
-- Sensitivity filter: if role.sensitivity=private, role-specific lens-notes go to `.lintel/state/role-lens-notes-<ts>.md` (gitignored), NOT the public design doc
+- Sensitivity filter: if role.sensitivity=private, role-specific lens-notes go to `.claude/runtime/state/role-lens-notes-<ts>.md` (gitignored), NOT the public design doc
 
 ### Step 9 — Alternatives generation (MANDATORY 2-3)
 
@@ -149,7 +149,7 @@ AskUserQuestion with all alternatives. Operator picks. STOP until response. Do N
 
 ### Step 10 — Design doc write
 
-Path: `docs/design/lintel-<branch>-design-<datetime>.md` (or `~/.lintel/state/<slug>-design-<datetime>.md` if no docs/design/ exists).
+Path: `docs/design/lintel-<branch>-design-<datetime>.md` (or `.claude/runtime/state/<slug>-design-<datetime>.md` if no docs/design/ exists).
 
 Template (per design-doc-template in cycle-and-roles.md §2.2):
 - Problem Statement
@@ -180,7 +180,7 @@ Apply fixes inline (Edit tool). Re-dispatch reviewer. Max 3 iterations OR conver
 
 If subagent unavailable: skip with "Spec review unavailable — presenting unreviewed doc."
 
-Append metrics to `~/.lintel/analytics/spec-review.jsonl`:
+Append metrics to `.claude/runtime/audit/spec-review.jsonl`:
 ```json
 {"skill":"li-define","ts":"...","iterations":N,"issues_found":F,"issues_fixed":Fx,"remaining":R,"quality_score":S}
 ```
@@ -228,15 +228,15 @@ Skip-conditions (DEFINE is skipped when):
 **Reads:**
 - CLAUDE.md, TODOS.md, recent git log
 - `docs/design/*-design-*.md` (related design discovery)
-- `tasks/lessons.md`, `tasks/memory.md`
+- `.claude/memory/lessons.md`, `.claude/memory/working-state.md`
 - role file (if active, lens section)
 - WebSearch results (if Step 3 opt-in)
 
 **Writes:**
 - `docs/design/lintel-<branch>-design-<datetime>.md` (canonical)
-- `.lintel/state/role-lens-notes-<ts>.md` (if role sensitivity=private)
-- `~/.lintel/analytics/spec-review.jsonl`
-- `.lintel/state/00-state.md` (DEFINE entry)
+- `.claude/runtime/state/role-lens-notes-<ts>.md` (if role sensitivity=private)
+- `.claude/runtime/audit/spec-review.jsonl`
+- `.claude/runtime/state/00-state.md` (DEFINE entry)
 
 **Triggers:**
 - `/li:plan` next (if not in /li:cycle)
@@ -269,7 +269,7 @@ cycle and the one logical next action — whether this phase ran standalone or i
 
 ```bash
 source "$LINTEL_REPO_ROOT/lib/cycle-footer.sh"   # fallback: "$(git rev-parse --show-toplevel)/lib/cycle-footer.sh"
-render_cycle_footer                               # reads .lintel/state/00-state.md; --compact for short replies
+render_cycle_footer                               # reads .claude/runtime/state/00-state.md; --compact for short replies
 ```
 
-Skipped phases render `⊘`; ASCII via `LINTEL_ASCII=1`. See [ADR-0003](../../docs/adr/0003-cycle-position-footer.md).
+Skipped phases render `⊘`; ASCII via `LINTEL_ASCII=1`. See [ADR-0003](../../.claude/decisions/0003-cycle-position-footer.md).

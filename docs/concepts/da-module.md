@@ -48,8 +48,8 @@ Granularity dispatch:
                    Architect / Explorer
                        │
                        ▼
-                   Output → .lintel/state/da/<action>-<ts>.{md,sql,json}
-                   Audit → ~/.lintel/audit/da-decisions.jsonl
+                   Output → .claude/runtime/state/da/<action>-<ts>.{md,sql,json}
+                   Audit → .claude/runtime/audit/da-decisions.jsonl
 ```
 
 ## The five checkpoints (full pass)
@@ -78,12 +78,12 @@ Pass criterion: query enumeration complete; hot paths identified; missing-index 
 
 | Dimension | Score 0-100 | Pass threshold | Source artifact |
 |---|---|---|---|
-| Data model completeness | _ | 80 | `.lintel/state/da/data-model.md` |
-| Schema locked | _ | 80 | `.lintel/state/da/schema-<ts>.sql` + version metadata |
-| Migration safety | _ | 80 | `.lintel/state/da/migration-plan-<ts>.md` |
-| Retention specified | _ | 80 | `.lintel/state/da/retention-policy-<ts>.md` |
-| Query patterns documented | _ | 80 | `.lintel/state/da/query-pattern-audit-<ts>.md` |
-| Consumer impact analyzed | _ | 80 | `.lintel/state/da/data-contract-collision-<ts>.md` |
+| Data model completeness | _ | 80 | `.claude/runtime/state/da/data-model.md` |
+| Schema locked | _ | 80 | `.claude/runtime/state/da/schema-<ts>.sql` + version metadata |
+| Migration safety | _ | 80 | `.claude/runtime/state/da/migration-plan-<ts>.md` |
+| Retention specified | _ | 80 | `.claude/runtime/state/da/retention-policy-<ts>.md` |
+| Query patterns documented | _ | 80 | `.claude/runtime/state/da/query-pattern-audit-<ts>.md` |
+| Consumer impact analyzed | _ | 80 | `.claude/runtime/state/da/data-contract-collision-<ts>.md` |
 
 Full-pass exit gate: every dimension ≥ 80 OR explicit operator override.
 
@@ -157,7 +157,7 @@ data_architecture:
 
 ## Audit trail
 
-Every module + sub-skill + checkpoint writes to `~/.lintel/audit/da-decisions.jsonl`:
+Every module + sub-skill + checkpoint writes to `.claude/runtime/audit/da-decisions.jsonl`:
 
 ```jsonl
 {"ts":"...","kind":"da_module_complete","granularity":"full","score":85,"checkpoints_passed":5,"primary_store":"postgres"}
@@ -204,8 +204,8 @@ DA runs in parallel with SC after TA produces architecture decisions. SC reads c
 - Schema-flavored ADR locations
 
 **Writes:**
-- `.lintel/state/da/*.{md,sql,json}` (per-action artifacts)
-- `~/.lintel/audit/da-decisions.jsonl`
+- `.claude/runtime/state/da/*.{md,sql,json}` (per-action artifacts)
+- `.claude/runtime/audit/da-decisions.jsonl`
 - Brief Forge envelopes through the standard gate
 
 **Triggered by:**

@@ -4,7 +4,7 @@ tier: warn-only
 event: PostToolUse (Bash | Skill /browse)
 fires_on: screenshot file produced
 override: not applicable (post-fact informational)
-audit: ~/.lintel/audit/hooks.jsonl
+audit: .claude/runtime/audit/hooks.jsonl
 ---
 
 # no-customer-data-in-screenshot

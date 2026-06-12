@@ -136,7 +136,7 @@ sensitivity: <public/private>
 
 ## Pause-points
 
-- If role exists but sensitivity=private: optional confirm "Activate private role <id>? (Y/n) — sensitive context stays in ~/.lintel/state/role-lens-notes/ per session, not exported."
+- If role exists but sensitivity=private: optional confirm "Activate private role <id>? (Y/n) — sensitive context stays in .claude/runtime/state/role-lens-notes/ per session, not exported."
 
 ## Hop-in support
 
@@ -150,7 +150,7 @@ YES — invokable anytime. Replaces any previously-active role.
 
 **Writes:**
 - `~/.lintel/profile.yaml` (role_active field)
-- `.lintel/state/00-state.md` (role_activated event)
+- `.claude/runtime/state/00-state.md` (role_activated event)
 
 **Triggers:**
 - Subsequent phases use overlay (e.g., DEFINE applies role's outcome lens, SHIP uses role's voice_tier)

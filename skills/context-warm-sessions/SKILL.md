@@ -34,10 +34,10 @@ branch=$(git branch --show-current)
 N="${1:-3}"  # default last 3
 
 # Context saves stored in either:
-# - ~/.lintel/sessions/<branch>/<datetime>-context-save.md (per-operator)
+# - .claude/runtime/sessions/<branch>/<datetime>-context-save.md (repo-local)
 # - ~/.lintel/lessons-vault/sessions/<branch>/... (cross-machine sync)
 
-candidates=$(find ~/.lintel/sessions/$branch -name "*-context-save.md" 2>/dev/null \
+candidates=$(find .claude/runtime/sessions/$branch -name "*-context-save.md" 2>/dev/null \
   | sort -r | head -$N)
 ```
 
@@ -85,7 +85,7 @@ YES.
 
 ## Integration
 
-Reads `~/.lintel/sessions/<branch>/`. Delegates to `/li:context-warm`.
+Reads `.claude/runtime/sessions/<branch>/`. Delegates to `/li:context-warm`.
 
 ## Anti-patterns
 

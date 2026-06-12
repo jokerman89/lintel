@@ -32,8 +32,8 @@ Takes scaling target (from `/li:ta-scaling-plan` if available, else operator) + 
 
 ```bash
 # Reuse outputs from prior sub-skills if recent
-query_audit=$(find .lintel/state/da -name "query-pattern-audit-*.md" -mtime -1 2>/dev/null | sort | tail -1)
-scaling_plan=$(find .lintel/state/ta -name "scaling-plan-*.md" -mtime -1 2>/dev/null | sort | tail -1)
+query_audit=$(find .claude/runtime/state/da -name "query-pattern-audit-*.md" -mtime -1 2>/dev/null | sort | tail -1)
+scaling_plan=$(find .claude/runtime/state/ta -name "scaling-plan-*.md" -mtime -1 2>/dev/null | sort | tail -1)
 
 primary_store="${primary_store:-postgres}"
 scaling_target="${SCALING_TARGET:-from-ta-scaling-plan}"
@@ -48,7 +48,7 @@ task: Select partition key for declared data + query patterns
 context_pointers:
   - $query_audit
   - $scaling_plan
-  - .lintel/state/da/data-model.md
+  - .claude/runtime/state/da/data-model.md
 constraints:
   - cardinality: high enough to spread, not so high it explodes per-shard cost
   - co-location: keep frequently-joined entities on same shard
@@ -69,7 +69,7 @@ mechanics_brief=$(mktemp)
 cat > "$mechanics_brief" <<EOF
 task: Translate partition strategy to ${primary_store} sharding mechanics
 context_pointers:
-  - .lintel/state/da/partition-strategy.md
+  - .claude/runtime/state/da/partition-strategy.md
 constraints:
   - per primary_store (postgres → declarative partitioning / Citus / native; mongodb → sharded cluster + zone tags; cassandra → token-aware)
   - rebalancing approach: online vs maintenance-window
@@ -87,7 +87,7 @@ EOF
 
 ```bash
 ts=$(date -u +"%Y%m%dT%H%M%SZ")
-out=".lintel/state/da/sharding-plan-$ts.md"
+out=".claude/runtime/state/da/sharding-plan-$ts.md"
 {
   echo "# Sharding plan — $(date -u +%Y-%m-%dT%H:%M:%SZ)"
   echo ""
@@ -95,15 +95,15 @@ out=".lintel/state/da/sharding-plan-$ts.md"
   echo "## Scaling target: $scaling_target"
   echo ""
   echo "## Partition strategy"
-  cat .lintel/state/da/partition-strategy.md
+  cat .claude/runtime/state/da/partition-strategy.md
   echo ""
   echo "## Store mechanics"
-  cat .lintel/state/da/sharding-mechanics.md
+  cat .claude/runtime/state/da/sharding-mechanics.md
 } > "$out"
 
 printf '{"ts":"%s","kind":"da_sharding_plan","store":"%s","scaling_target":"%s","operator":"%s"}\n' \
   "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$primary_store" "$scaling_target" "$(whoami 2>/dev/null || echo unknown)" \
-  >> "$LINTEL_HOME/audit/da-decisions.jsonl"
+  >> ".claude/runtime/audit/da-decisions.jsonl"
 ```
 
 ## Status protocol
@@ -115,7 +115,7 @@ printf '{"ts":"%s","kind":"da_sharding_plan","store":"%s","scaling_target":"%s",
 ## Integration
 
 **Reads:** prior sub-skill outputs (query audit + scaling plan), data model
-**Writes:** `.lintel/state/da/sharding-plan-<ts>.md`, audit JSONL
+**Writes:** `.claude/runtime/state/da/sharding-plan-<ts>.md`, audit JSONL
 **Dispatches to:** SchemaArchitect (NEW, partition selection), DatabaseDesigner (store mechanics)
 
 ## Anti-patterns

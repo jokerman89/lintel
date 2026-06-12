@@ -180,7 +180,7 @@ SENSE never blocks. The operator either accepts the recommendation or explicitly
 - Edits under `docs/` (documentation; no contract change)
 - Edits under `tests/` only (test-only changes; verified by running the tests themselves)
 - Edits under `packs/<non-default>/pack.yaml` (per-pack content)
-- Project-scoped state under `.lintel/`
+- Project-scoped state under `.claude/runtime/`
 
 For "edits-under-tests only" the operator can still opt in via `--mode meta-infra` if the test change reflects a shifted contract; SENSE just doesn't auto-recommend it.
 
@@ -212,7 +212,7 @@ The four gates are not bureaucratic. M1 forces structural thinking before tasks 
 - `tests/shape/*.sh` (M3)
 
 **Writes:**
-- `.lintel/state/00-state.md` (`meta_infra_detected: true`)
+- `.claude/runtime/state/00-state.md` (`meta_infra_detected: true`)
 - `docs/v4.x/structure-changes/<date>-<slug>.md` (M1)
 - `docs/v4.x/compatibility-audits/<date>-<slug>.md` (M2)
 - `docs/v4.x/migrations/_INDEX.md` (M4 if migration ships)

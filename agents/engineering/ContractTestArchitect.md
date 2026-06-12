@@ -102,4 +102,4 @@ Internal. Operator-facing contract test specs. No customer-facing voice.
 
 ## How operators read your output
 
-Per-pair contracts go to `.lintel/state/tq/contract-tests.md`. Compatibility matrix to `.lintel/state/tq/contract-version-matrix.md`. Operators consume via TQ contract-test-design sub-skill report.
+Per-pair contracts go to `.claude/runtime/state/tq/contract-tests.md`. Compatibility matrix to `.claude/runtime/state/tq/contract-version-matrix.md`. Operators consume via TQ contract-test-design sub-skill report.

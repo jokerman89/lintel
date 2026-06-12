@@ -18,7 +18,7 @@ In a shell/CLI session the operator and AI can digress freely. Without a jobs sy
 ## The model
 
 ```
-~/.lintel/jobs/
+<repo>/.claude/runtime/jobs/
 ├── _active.md              ← regenerated on every state change. /li:status reads this.
 ├── <job-id>/
 │   ├── job.yaml            ← workflow, current_step, waiting-on, started_at, last_touched
@@ -27,6 +27,11 @@ In a shell/CLI session the operator and AI can digress freely. Without a jobs sy
 │   └── inputs/             ← refs to upstream job outputs
 └── _archive/<date>/<job-id>/    ← completed/aborted jobs
 ```
+
+Job data is repo-scoped (v5 layout, ADR-0005). `~/.lintel/jobs/_active.md` remains
+as the thin **cross-repo registry** — one line per open job anywhere, each pointing
+at its owning repo — so `/li:resume` and `/li:status` keep their "what's open
+anywhere" view.
 
 `<job-id>` format: `<workflow>-<YYYYMMDD-HHMM>-<short-hash>`.
 
@@ -45,7 +50,7 @@ Future: any new e2e recipe, safe-install flow, Azure-e2e, etc. Adding the flag i
 
 ### `job-begin` hook
 
-Fires on PreToolUse for a workflow_root skill. Creates `~/.lintel/jobs/<id>/` with `job.yaml`, moves the skill's `00-state.md` into the job folder, regenerates `_active.md`.
+Fires on PreToolUse for a workflow_root skill. Creates `<repo>/.claude/runtime/jobs/<id>/` with `job.yaml`, moves the skill's `00-state.md` into the job folder, regenerates `_active.md`.
 
 Source: `hooks/shared/job-begin/run.sh`
 
@@ -60,9 +65,9 @@ cleanup_policy:
 ```
 
 - **Keep** items promoted to permanent homes:
-  - ADRs → `docs/adr/`
-  - Lessons → `tasks/lessons.md` (via existing `lessons-promote` skill)
-  - Plan/spec/prompt → `docs/plans/<slug>/`
+  - ADRs → `.claude/decisions/`
+  - Lessons → `.claude/memory/lessons.md` (via existing `lessons-promote` skill)
+  - Plan/spec/prompt → `.claude/plans/<slug>/`
 - **Discard** items deleted.
 - Job moved to `_archive/<YYYY-MM-DD>/<job-id>/`.
 - `_active.md` regenerated.
@@ -93,7 +98,7 @@ Source: `hooks/shared/job-stale-warn/run.sh`
 
 ### `/li:status` skill — quick read
 
-Single command, single purpose: show what's open right now. `cat ~/.lintel/jobs/_active.md`. Operator-friendly alias for `/li:jobs list`.
+Single command, single purpose: show what's open right now. `cat ~/.lintel/jobs/_active.md` (the cross-repo registry). Operator-friendly alias for `/li:jobs list`.
 
 ### `bin/_jobs.sh` — sourced helper
 
@@ -117,24 +122,24 @@ There is **one canonical home for each kind of state**, split by ownership:
 
 | State | Canonical home | Owner |
 |---|---|---|
-| Durable artifacts — the trio (`plan.md` / `spec.md` / `prompt.md`) + `scope.md` + WBS | **`docs/plans/<slug>/`** (in the repo) | the repo — "documented in the repo" |
-| Job control — `job.yaml`, `_active.md`, `00-state.md`, `outputs/`, `inputs/` | **`~/.lintel/jobs/<id>/`** | the harness |
+| Durable artifacts — the trio (`plan.md` / `spec.md` / `prompt.md`) + `scope.md` + WBS | **`.claude/plans/<slug>/`** (in the repo, committed) | the repo — "documented in the repo" |
+| Job control — `job.yaml`, `_active.md`, `00-state.md`, `outputs/`, `inputs/` | **`<repo>/.claude/runtime/jobs/<id>/`** (gitignored) | the harness |
 
-The trio is **born** in `~/.lintel/jobs/<id>/outputs/` during a job and **promoted**
-to the repo at `docs/plans/<slug>/` by `job-end` on DONE. The repo is the durable,
-version-controlled home; `~/.lintel/jobs/` is transient job control that the
+The trio is **born** in `<repo>/.claude/runtime/jobs/<id>/outputs/` during a job and **promoted**
+to the repo at `.claude/plans/<slug>/` by `job-end` on DONE. The committed tree is the durable,
+version-controlled home; `.claude/runtime/jobs/` is transient job control that the
 `_archive/` sweep eventually reclaims.
 
 ### Canonical plan.md path — the one true location
 
 The audit (design hole 4) found **three divergent `plan.md` path conventions**.
-Slice 3 resolves them: **`docs/plans/<slug>/plan.md` is canonical.** The other two
-are **deprecated** (still read for back-compat during the grace window, never
-written going forward):
+Slice 3 resolves them: **`.claude/plans/<slug>/plan.md` is canonical** (v5 home;
+was `docs/plans/<slug>/plan.md` pre-ADR-0005). The other two are **deprecated**
+(still read for back-compat during the grace window, never written going forward):
 
 | Convention | Status | Note |
 |---|---|---|
-| `docs/plans/<slug>/plan.md` (directory-per-plan) | **CANONICAL** | the trio + `spec.md` + `prompt.md` + `scope.md` all co-locate here; matches `job-end` promotion and `jobs-system.md` |
+| `.claude/plans/<slug>/plan.md` (directory-per-plan) | **CANONICAL** | the trio + `spec.md` + `prompt.md` + `scope.md` all co-locate here; matches `job-end` promotion and `jobs-system.md` |
 | `docs/plans/<slug>-<datetime>.md` (flat file, slug+datetime) | **deprecated** | was `skills/plan/SKILL.md:198`; loses trio co-location |
 | root / cwd `plan.md` (or bare `docs/plans/`) | **deprecated** | was `skills/plan/SKILL.md:255,262` "root or …" + `docs/design/lintel-v3.5-cycle-and-roles.md`; ambiguous, collides across concurrent jobs |
 
@@ -216,7 +221,7 @@ unaffected.
 ### Resume re-points, doesn't rebuild
 
 The existing `resume` skill changes from "find a loose `00-state.md`" to "read
-`~/.lintel/jobs/<id>/00-state.md`". For **flat/phased** plans the resume target is
+`<repo>/.claude/runtime/jobs/<id>/00-state.md`". For **flat/phased** plans the resume target is
 unchanged — `current_step`. For **`tree`** plans, `job_resume_point <id>` returns
 the deepest incomplete **and startable** WBS node-path (`1.1.a`) so a half-done
 big plan resumes to the exact subtask, skipping any leaf still gated by its

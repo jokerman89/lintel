@@ -49,7 +49,7 @@ tail:
     - security
   escape_hatches:
     - Re-invoke /li:plan --more-detail
-  audit_pointer: ~/.lintel/audit/envelopes-2026-05-29.jsonl
+  audit_pointer: .claude/runtime/audit/envelopes-2026-05-29.jsonl
 EOF
 
 if "$VALIDATOR" --quiet "$TMP/valid-brief.yaml"; then

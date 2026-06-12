@@ -49,8 +49,8 @@ Granularity dispatch:
                    PerfBudgetEnforcer (NEW) / ContractTestArchitect (NEW)
                        │
                        ▼
-                   Output → .lintel/state/tq/<action>-<ts>.md
-                   Audit → ~/.lintel/audit/tq-decisions.jsonl
+                   Output → .claude/runtime/state/tq/<action>-<ts>.md
+                   Audit → .claude/runtime/audit/tq-decisions.jsonl
 ```
 
 ## The five checkpoints (full pass)
@@ -79,12 +79,12 @@ Pass criterion: scenarios per high-severity threat with recovery criteria + abor
 
 | Dimension | Score 0-100 | Pass threshold | Source artifact |
 |---|---|---|---|
-| Critical-path coverage at target | _ | 80 | `.lintel/state/tq/coverage-audit-<ts>.md` |
-| Perf budgets locked with regression detection | _ | 80 | `.lintel/state/tq/perf-budget-<ts>.md` |
-| Contract tests complete | _ | 80 | `.lintel/state/tq/contract-test-suite-<ts>.md` |
-| Regression suite curated | _ | 80 | `.lintel/state/tq/regression-suite-<ts>.md` |
-| Chaos scenarios documented + recovery validated | _ | 80 | `.lintel/state/tq/chaos-plan-<ts>.md` |
-| Test pyramid healthy | _ | 80 | `.lintel/state/tq/test-pyramid-<ts>.md` |
+| Critical-path coverage at target | _ | 80 | `.claude/runtime/state/tq/coverage-audit-<ts>.md` |
+| Perf budgets locked with regression detection | _ | 80 | `.claude/runtime/state/tq/perf-budget-<ts>.md` |
+| Contract tests complete | _ | 80 | `.claude/runtime/state/tq/contract-test-suite-<ts>.md` |
+| Regression suite curated | _ | 80 | `.claude/runtime/state/tq/regression-suite-<ts>.md` |
+| Chaos scenarios documented + recovery validated | _ | 80 | `.claude/runtime/state/tq/chaos-plan-<ts>.md` |
+| Test pyramid healthy | _ | 80 | `.claude/runtime/state/tq/test-pyramid-<ts>.md` |
 
 ## Sub-skill catalog
 
@@ -200,8 +200,8 @@ TQ consumes outputs from all four prior modules. It validates that the architect
 - Prior modules: TA contracts/api-design, DA query-pattern-audit, SC threat-model + audit-path, DH SLI/SLO
 
 **Writes:**
-- `.lintel/state/tq/*.{md,json}` (per-action artifacts)
-- `~/.lintel/audit/tq-decisions.jsonl`
+- `.claude/runtime/state/tq/*.{md,json}` (per-action artifacts)
+- `.claude/runtime/audit/tq-decisions.jsonl`
 - Brief Forge envelopes through the standard gate
 
 **Triggered by:**

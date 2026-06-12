@@ -47,7 +47,7 @@ brief_file=$(mktemp)
 cat > "$brief_file" <<EOF
 task: Classify data by sensitivity + lifecycle stage
 context_pointers:
-  - .lintel/state/da/data-model.md (if present)
+  - .claude/runtime/state/da/data-model.md (if present)
   - existing schema files
 constraints:
   - distinguish: PII / customer-data / operational-telemetry / aggregate-only
@@ -66,7 +66,7 @@ mechanism_brief=$(mktemp)
 cat > "$mechanism_brief" <<EOF
 task: Map retention + archival + deletion mechanisms to storage architecture
 context_pointers:
-  - .lintel/state/da/data-classification.md
+  - .claude/runtime/state/da/data-classification.md
   - pack.compliance: ${compliance_hooks}
   - pack.data_residency: ${data_residency}
 constraints:
@@ -103,7 +103,7 @@ fi
 
 ```bash
 ts=$(date -u +"%Y%m%dT%H%M%SZ")
-out=".lintel/state/da/retention-policy-$ts.md"
+out=".claude/runtime/state/da/retention-policy-$ts.md"
 {
   echo "# Retention policy — $(date -u +%Y-%m-%dT%H:%M:%SZ)"
   echo ""
@@ -113,15 +113,15 @@ out=".lintel/state/da/retention-policy-$ts.md"
   echo "- compliance_hooks: ${compliance_hooks:-none}"
   echo ""
   echo "## Per-data-class"
-  cat .lintel/state/da/data-classification.md
+  cat .claude/runtime/state/da/data-classification.md
   echo ""
   echo "## Mechanism mapping"
-  cat .lintel/state/da/retention-mechanism.md
+  cat .claude/runtime/state/da/retention-mechanism.md
 } > "$out"
 
 printf '{"ts":"%s","kind":"da_retention_policy","retention_default":%d,"compliance_conflict":%s,"operator":"%s"}\n' \
   "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$retention_default" "$compliance_conflict" "$(whoami 2>/dev/null || echo unknown)" \
-  >> "$LINTEL_HOME/audit/da-decisions.jsonl"
+  >> ".claude/runtime/audit/da-decisions.jsonl"
 ```
 
 ## Status protocol
@@ -134,7 +134,7 @@ printf '{"ts":"%s","kind":"da_retention_policy","retention_default":%d,"complian
 ## Integration
 
 **Reads:** profile preferences, pack compliance fields, existing data model
-**Writes:** `.lintel/state/da/retention-policy-<ts>.md`, audit JSONL
+**Writes:** `.claude/runtime/state/da/retention-policy-<ts>.md`, audit JSONL
 **Dispatches to:** DatabaseDesigner (classification), Architect (mechanism mapping)
 **Hook integration:** `da-retention-violation-warn` hook fires pre-edit on data-access code that doesn't honor retention
 

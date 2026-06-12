@@ -32,7 +32,7 @@ Reads recent test-run history (CI logs, junit XML, etc.). Spawns `TestRunner` to
 
 ```bash
 flaky_threshold="${threshold:-${flaky_quarantine_threshold:-3}}"   # consecutive runs failing before quarantine
-test_history=".lintel/state/tq/test-history.json"
+test_history=".claude/runtime/state/tq/test-history.json"
 ```
 
 ### Step 2 — Spawn TestRunner for flake detection
@@ -62,7 +62,7 @@ remediation_brief=$(mktemp)
 cat > "$remediation_brief" <<EOF
 task: Classify flake root cause + propose remediation
 context_pointers:
-  - .lintel/state/tq/flake-list.md
+  - .claude/runtime/state/tq/flake-list.md
 constraints:
   - per test: root cause (timing-race | external-dep | order-dependent | env-specific | unknown)
   - per test: remediation (deflake | rewrite | delete | accept-flake)
@@ -78,13 +78,13 @@ EOF
 
 ```bash
 ts=$(date -u +"%Y%m%dT%H%M%SZ")
-out=".lintel/state/tq/flaky-quarantine-$ts.md"
+out=".claude/runtime/state/tq/flaky-quarantine-$ts.md"
 {
   echo "# Flaky quarantine — $(date -u +%Y-%m-%dT%H:%M:%SZ)"
   echo "## Threshold: $flaky_threshold consecutive failures"
   echo ""
   echo "## Flake list + remediation"
-  cat .lintel/state/tq/flake-remediation.md
+  cat .claude/runtime/state/tq/flake-remediation.md
 } > "$out"
 
 printf '{"ts":"%s","kind":"tq_flaky_quarantine","threshold":%d,"flaky":%d,"quarantined":%d,"operator":"%s"}\n' \
@@ -101,7 +101,7 @@ printf '{"ts":"%s","kind":"tq_flaky_quarantine","threshold":%d,"flaky":%d,"quara
 ## Integration
 
 **Reads:** test history / CI logs
-**Writes:** `.lintel/state/tq/flaky-quarantine-<ts>.md`, audit JSONL
+**Writes:** `.claude/runtime/state/tq/flaky-quarantine-<ts>.md`, audit JSONL
 **Dispatches to:** TestRunner (detection), RegressionDetective (root-cause + remediation)
 
 ## Anti-patterns

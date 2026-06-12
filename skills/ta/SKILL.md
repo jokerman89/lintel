@@ -124,7 +124,7 @@ cognitive_budget="${cognitive_budget:-18}"
 #### `full` granularity
 
 ```bash
-mkdir -p .lintel/state/ta
+mkdir -p .claude/runtime/state/ta
 audit="$LINTEL_HOME/audit/ta-decisions.jsonl"
 mkdir -p "$(dirname "$audit")"
 
@@ -142,19 +142,19 @@ if [ "$score" -lt 80 ]; then
   exit 1
 fi
 
-echo "TA full pass complete — score=$score, output .lintel/state/ta/"
+echo "TA full pass complete — score=$score, output .claude/runtime/state/ta/"
 ```
 
 #### `loop` granularity
 
 ```bash
 # Resume from prior state if present
-if [ ! -f ".lintel/state/ta/00-state.md" ]; then
+if [ ! -f ".claude/runtime/state/ta/00-state.md" ]; then
   echo "ERROR: no prior TA state — use /li:ta full first"
   exit 1
 fi
 
-prior_iteration=$(grep -E '^iteration:' .lintel/state/ta/00-state.md | head -1 | awk '{print $2}')
+prior_iteration=$(grep -E '^iteration:' .claude/runtime/state/ta/00-state.md | head -1 | awk '{print $2}')
 new_iteration=$((prior_iteration + 1))
 
 # Re-run discovery + decision + contract checkpoints
@@ -163,9 +163,9 @@ run_checkpoint decision_documented
 run_checkpoint contract_locked
 
 # Diff against prior iteration
-echo "Diff vs iteration $prior_iteration:" > .lintel/state/ta/iteration-${new_iteration}-diff.md
-diff .lintel/state/ta/iteration-${prior_iteration}-adrs.md .lintel/state/ta/iteration-${new_iteration}-adrs.md \
-  >> .lintel/state/ta/iteration-${new_iteration}-diff.md || true
+echo "Diff vs iteration $prior_iteration:" > .claude/runtime/state/ta/iteration-${new_iteration}-diff.md
+diff .claude/runtime/state/ta/iteration-${prior_iteration}-adrs.md .claude/runtime/state/ta/iteration-${new_iteration}-adrs.md \
+  >> .claude/runtime/state/ta/iteration-${new_iteration}-diff.md || true
 ```
 
 #### `single` granularity
@@ -269,7 +269,7 @@ printf '{"ts":"%s","kind":"ta_module_complete","granularity":"%s","score":%d,"ch
 
 ## Hop-in support
 
-YES. `/li:ta loop` resumes from prior state at `.lintel/state/ta/00-state.md`. `/li:ta single --action <name>` enters at the specific sub-skill without orchestration.
+YES. `/li:ta loop` resumes from prior state at `.claude/runtime/state/ta/00-state.md`. `/li:ta single --action <name>` enters at the specific sub-skill without orchestration.
 
 ## Integration
 
@@ -281,10 +281,10 @@ YES. `/li:ta loop` resumes from prior state at `.lintel/state/ta/00-state.md`. `
 - Existing ADRs (`.lintel/decisions/*.md` if present)
 
 **Writes:**
-- `.lintel/state/ta/system-arch.md` (full)
-- `.lintel/state/ta/iteration-N-adrs.md` (per iteration)
-- `.lintel/state/ta/iteration-N-diff.md` (loop)
-- `~/.lintel/audit/ta-decisions.jsonl`
+- `.claude/runtime/state/ta/system-arch.md` (full)
+- `.claude/runtime/state/ta/iteration-N-adrs.md` (per iteration)
+- `.claude/runtime/state/ta/iteration-N-diff.md` (loop)
+- `.claude/runtime/audit/ta-decisions.jsonl`
 - Brief Forge envelopes through the standard gate
 
 **Triggered by:**

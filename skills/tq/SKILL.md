@@ -131,7 +131,7 @@ flaky_threshold="${flaky_threshold:-3}"
 #### `full` granularity
 
 ```bash
-mkdir -p .lintel/state/tq
+mkdir -p .claude/runtime/state/tq
 audit="$LINTEL_HOME/audit/tq-decisions.jsonl"
 mkdir -p "$(dirname "$audit")"
 
@@ -151,12 +151,12 @@ fi
 #### `loop` granularity
 
 ```bash
-if [ ! -f ".lintel/state/tq/00-state.md" ]; then
+if [ ! -f ".claude/runtime/state/tq/00-state.md" ]; then
   echo "ERROR: no prior TQ state — use /li:tq full first"
   exit 1
 fi
 
-prior_iteration=$(grep -E '^iteration:' .lintel/state/tq/00-state.md | head -1 | awk '{print $2}')
+prior_iteration=$(grep -E '^iteration:' .claude/runtime/state/tq/00-state.md | head -1 | awk '{print $2}')
 new_iteration=$((prior_iteration + 1))
 
 run_checkpoint coverage_targets_met
@@ -259,14 +259,14 @@ YES. `/li:tq loop` resumes from prior state. `/li:tq single --action <name>` ent
 - Prior modules' output: TA api-design + boundary-review (for contract tests), DA query-pattern-audit (for hot-path coverage), SC threat-model (for chaos scenarios), DH SLO spec (for perf budget alignment)
 
 **Writes:**
-- `.lintel/state/tq/coverage-spec.md`
-- `.lintel/state/tq/perf-budget.md`
-- `.lintel/state/tq/contract-test-suite.md`
-- `.lintel/state/tq/regression-suite.md`
-- `.lintel/state/tq/chaos-plan.md`
-- `.lintel/state/tq/flaky-quarantine.md`
-- `.lintel/state/tq/test-pyramid.md`
-- `~/.lintel/audit/tq-decisions.jsonl`
+- `.claude/runtime/state/tq/coverage-spec.md`
+- `.claude/runtime/state/tq/perf-budget.md`
+- `.claude/runtime/state/tq/contract-test-suite.md`
+- `.claude/runtime/state/tq/regression-suite.md`
+- `.claude/runtime/state/tq/chaos-plan.md`
+- `.claude/runtime/state/tq/flaky-quarantine.md`
+- `.claude/runtime/state/tq/test-pyramid.md`
+- `.claude/runtime/audit/tq-decisions.jsonl`
 - Brief Forge envelopes through the standard gate
 
 **Triggered by:**

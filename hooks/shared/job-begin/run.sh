@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # job-begin — Lintel lifecycle hook (v3.8 Feature 1)
 # Fires when a skill with workflow_root: true is invoked.
-# Creates ~/.lintel/jobs/<id>/ + regenerates _active.md.
+# Creates .claude/runtime/jobs/<id>/ + regenerates _active.md (scope resolved by bin/_jobs.sh;
+# the cross-repo registry stays at ~/.lintel/jobs/_active.md).
 
 set -uo pipefail
 

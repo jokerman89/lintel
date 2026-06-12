@@ -20,7 +20,7 @@ description: ...
 ---
 ```
 
-When operator runs `/li:plan <design.md>` outside a cycle, `job-begin` hook fires, spawns `~/.lintel/jobs/plan-<stamp>-<hash>/`, PLAN proceeds with full job tracking.
+When operator runs `/li:plan <design.md>` outside a cycle, `job-begin` hook fires, spawns `.claude/runtime/jobs/plan-<stamp>-<hash>/`, PLAN proceeds with full job tracking.
 
 When PLAN runs INSIDE `/li:cycle` (Phase 4), the caller passes `--no-job` (or `NO_JOB=1`) so the hook short-circuits and no nested job is spawned.
 
@@ -81,7 +81,7 @@ With 2.1 + 2.2 + 2.3, PLAN becomes a callable sub-workflow:
 ```
 /li:plan <design.md>
    ↓
-   workflow_root: true → job-begin → ~/.lintel/jobs/plan-<stamp>-<hash>/
+   workflow_root: true → job-begin → .claude/runtime/jobs/plan-<stamp>-<hash>/
    produces: plan.md + spec.md + prompt.md (the trio)
    handoff-size-check against 500k cap
    founder approval gate
@@ -153,4 +153,4 @@ Once both features ship, success looks like:
 - `skills/capture/SKILL.md` — trio reaffirm (not regenerate) post-v3.8
 - `skills/cycle/SKILL.md` — caller passes --no-job for Phase 4 invocation
 - `docs/concepts/jobs-system.md` — the first half of this feature pair (Feature 1)
-- `tasks/lessons.md` L-004 — separate decisions from execution
+- `.claude/memory/lessons.md` L-004 — separate decisions from execution

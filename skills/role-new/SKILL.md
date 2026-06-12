@@ -199,7 +199,7 @@ YES — anytime operator wants to scaffold a role.
 
 **Writes:**
 - the active pack's role directory `<roles.source>/<id>.md` (public) OR `~/.lintel/roles/private/<id>.md`
-- `.lintel/state/00-state.md` (event)
+- `.claude/runtime/state/00-state.md` (event)
 - `~/.lintel/profile.yaml` (if activated immediately)
 
 ## Anti-patterns

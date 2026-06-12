@@ -4,7 +4,7 @@ tier: lifecycle
 event: PostToolUse (Skill status=DONE/ABORTED) OR explicit /li:jobs abort
 fires_on: workflow_root skill reaching terminal status, OR operator abort
 override: --no-cleanup flag (rare, debugging)
-audit: ~/.lintel/audit/jobs.jsonl
+audit: .claude/runtime/audit/jobs.jsonl
 ---
 
 # job-end
@@ -17,12 +17,12 @@ Per v3.8 Feature 1: terminating jobs cleanly via this hook removes the "abandone
 
 1. Reads `job.yaml` cleanup_policy.
 2. **Keep:** promote durable artifacts to their permanent homes:
-   - `adr/*` → `docs/adr/` (via existing `lessons-promote` skill pattern)
-   - `lessons.md` → append to `tasks/lessons.md` (via existing `lessons-promote`)
-   - `plan.md` + `spec.md` + `prompt.md` → `docs/plans/<slug>/` OR operator-configured path
+   - `adr/*` → `.claude/decisions/` (via existing `lessons-promote` skill pattern)
+   - `lessons.md` → append to `.claude/memory/lessons.md` (via existing `lessons-promote`)
+   - `plan.md` + `spec.md` + `prompt.md` → `.claude/plans/<slug>/` OR operator-configured path
 3. **Discard:** delete `scratch/*` and other matching paths from policy.
-4. Moves the job folder to `~/.lintel/jobs/_archive/<YYYY-MM-DD>/<job-id>/`.
-5. Regenerates `~/.lintel/jobs/_active.md`.
+4. Moves the job folder to `.claude/runtime/jobs/_archive/<YYYY-MM-DD>/<job-id>/`.
+5. Regenerates the repo-local `.claude/runtime/jobs/_active.md` + syncs the cross-repo registry `~/.lintel/jobs/_active.md` (one line per open job across all repos, pointing at the owning repo).
 6. Audit-logs `{"kind":"job_end", "job_id":..., "result": "DONE|ABORTED|FAILED"}`.
 
 ## Why surface-only

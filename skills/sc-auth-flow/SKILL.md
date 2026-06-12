@@ -31,7 +31,7 @@ Reads auth intent (login / SSO integration / service-to-service / API key flow).
 ### Step 1 — Read auth intent
 
 ```bash
-auth_intent="${1:-${AUTH_INTENT:-from .lintel/state/sc/auth-intent.md}}"
+auth_intent="${1:-${AUTH_INTENT:-from .claude/runtime/state/sc/auth-intent.md}}"
 auth_kind=$(detect_auth_kind "$auth_intent")  # jwt | oauth2 | oidc | saml | api-key | mtls
 ```
 
@@ -75,7 +75,7 @@ if [ "$primary_agent" != "SecurityAuditor" ]; then
   cat > "$cross_brief" <<EOF
 task: Cross-check auth flow design for non-${auth_kind}-specific concerns
 context_pointers:
-  - .lintel/state/sc/auth-flow-design.md
+  - .claude/runtime/state/sc/auth-flow-design.md
 constraints:
   - rate limiting + lockout policy
   - audit-log coverage of auth events
@@ -91,17 +91,17 @@ fi
 
 ```bash
 ts=$(date -u +"%Y%m%dT%H%M%SZ")
-out=".lintel/state/sc/auth-flow-$ts.md"
+out=".claude/runtime/state/sc/auth-flow-$ts.md"
 {
   echo "# Auth flow — $(date -u +%Y-%m-%dT%H:%M:%SZ)"
   echo ""
   echo "## Kind: $auth_kind"
   echo ""
   echo "## Design"
-  cat .lintel/state/sc/auth-flow-design.md
+  cat .claude/runtime/state/sc/auth-flow-design.md
   echo ""
   echo "## Security review"
-  cat .lintel/state/sc/auth-security-review.md
+  cat .claude/runtime/state/sc/auth-security-review.md
 } > "$out"
 
 printf '{"ts":"%s","kind":"sc_auth_flow","auth_kind":"%s","review_verdict":"%s","operator":"%s"}\n' \
@@ -119,7 +119,7 @@ printf '{"ts":"%s","kind":"sc_auth_flow","auth_kind":"%s","review_verdict":"%s",
 ## Integration
 
 **Reads:** auth intent, existing auth files
-**Writes:** `.lintel/state/sc/auth-flow-<ts>.md`, audit JSONL
+**Writes:** `.claude/runtime/state/sc/auth-flow-<ts>.md`, audit JSONL
 **Dispatches to:** JWTSecurityReviewer (JWT) OR SecurityAuditor (else), cross-checks with SecurityAuditor
 
 ## Anti-patterns

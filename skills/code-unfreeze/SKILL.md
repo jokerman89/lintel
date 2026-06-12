@@ -33,10 +33,10 @@ Reverses `/code-freeze`. Removes paths from the session freeze metadata file, al
 ## Workflow
 
 1. **Resolve paths.** Canonicalize.
-2. **Read session freeze file.** `~/.lintel/code-freeze/<session-id>.yaml`.
+2. **Read session freeze file.** `.claude/runtime/state/code-freeze/<session-id>.yaml`.
 3. **Match.** Exact-match required (no glob expansion at unfreeze time — too easy to over-unfreeze by accident).
 4. **Remove matched entries.** Write the updated freeze file.
-5. **Audit log.** Append to `~/.lintel/audit/code-freeze.jsonl` with operation: unfreeze.
+5. **Audit log.** Append to `.claude/runtime/audit/code-freeze.jsonl` with operation: unfreeze.
 6. **Report remaining freeze state.**
 
 ## Report format

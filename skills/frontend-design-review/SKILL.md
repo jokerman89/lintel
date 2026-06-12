@@ -252,7 +252,7 @@ YES — solo-invocable.
 
 **Writes:**
 - `<artifact-dir>/design-review.json` (or $OUT-path)
-- Audit-log: `~/.lintel/audit/frontend-design-review-runs.jsonl`
+- Audit-log: `.claude/runtime/audit/frontend-design-review-runs.jsonl`
 
 **Calls into:**
 - `agents/frontend/DesignSystemAuditor.md` (primary)

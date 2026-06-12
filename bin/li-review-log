@@ -5,7 +5,7 @@
 # on Lintel's execution path. Accepts the same single JSON-object argument the
 # review skills already pass (plan-ceo-review, plan-eng-review, plan-design-review,
 # plan-devex-review, code-review, codex) and appends a record to Lintel's own
-# audit log at ~/.lintel/audit/reviews.jsonl by sourcing bin/_audit.sh.
+# audit log at .claude/runtime/audit/reviews.jsonl (scope-routed by bin/_audit.sh).
 #
 # Why native: keeping the review log on Lintel's own execution path avoids an
 # external dependency on the gstack binary. This wrapper keeps the same JSON
@@ -21,7 +21,7 @@
 #     which are preserved verbatim under "extra").
 #   - Invalid JSON (best-effort check) is rejected with exit 1.
 #
-# Writes to: ~/.lintel/audit/reviews.jsonl  (category=reviews, kind=<skill>)
+# Writes to: .claude/runtime/audit/reviews.jsonl  (category=reviews, kind=<skill>; scope-routed by _audit.sh)
 #
 # Exit codes:
 #   0 = record written
@@ -110,4 +110,4 @@ set -- "$@" "raw=$RAW_ONE_LINE"
 
 audit_log reviews "$SKILL" "$@"
 
-echo "li-review-log: recorded ${SKILL} status=${STATUS:-?} commit=${COMMIT} → ${LINTEL_AUDIT_DIR}/reviews.jsonl"
+echo "li-review-log: recorded ${SKILL} status=${STATUS:-?} commit=${COMMIT} → $(_audit_out_dir reviews)/reviews.jsonl"

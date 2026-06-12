@@ -22,7 +22,8 @@ case "$file_edited" in
 esac
 
 # Find retention-bound tables (read from policy file)
-policy_file=".lintel/state/da/retention-policy.md"
+policy_file=".claude/runtime/state/da/retention-policy.md"
+[ -f "$policy_file" ] || policy_file=".lintel/state/da/retention-policy.md" # legacy-fallback-ok
 [ -f "$policy_file" ] || exit 0
 
 # Heuristic extraction: lines like "- table_name: 90 days" or "table_name | 90"

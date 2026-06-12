@@ -102,7 +102,7 @@ Each subdirectory contains:
 
 ## Audit
 
-Every hook fire (warn or block) logs to `~/.lintel/audit/hooks.jsonl`. Append-only.
+Every hook fire (warn or block) logs to `.claude/runtime/audit/hooks.jsonl`. Append-only.
 
 ## See also
 

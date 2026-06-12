@@ -187,7 +187,7 @@ If `checkpoint_push: true`: also push WIP to origin.
 
 ### Step 5 — Build log
 
-Append to `.lintel/state/build-log.md`:
+Append to `.claude/runtime/state/build-log.md`:
 ```yaml
 task: T<N>
 title: <title>
@@ -261,14 +261,14 @@ Skip-conditions: intent=review-only, intent=research-only, intent=plan-only.
 - the active pack's compliance hooks (`resolve_pack_field compliance.hooks`; none by default)
 - role file (if active, voice/tone signals only)
 - recent test results
-- `tasks/lessons.md` (via `/li:lessons-surface`, keyword-scoped, non-blocking)
+- `.claude/memory/lessons.md` (via `/li:lessons-surface`, keyword-scoped, non-blocking)
 
 **Writes:**
 - source code (edits via implementer subagents)
 - WIP commits (if continuous mode)
-- `.lintel/state/build-log.md`
-- `.lintel/state/00-state.md` (BUILD entry per task + final)
-- `~/.lintel/analytics/build-metrics.jsonl`
+- `.claude/runtime/state/build-log.md`
+- `.claude/runtime/state/00-state.md` (BUILD entry per task + final)
+- `.claude/runtime/audit/build-metrics.jsonl`
 
 **Triggers:**
 - `/li:review` next (or REVIEW in /li:cycle)
@@ -330,7 +330,7 @@ cycle and the one logical next action — whether this phase ran standalone or i
 
 ```bash
 source "$LINTEL_REPO_ROOT/lib/cycle-footer.sh"   # fallback: "$(git rev-parse --show-toplevel)/lib/cycle-footer.sh"
-render_cycle_footer                               # reads .lintel/state/00-state.md; --compact for short replies
+render_cycle_footer                               # reads .claude/runtime/state/00-state.md; --compact for short replies
 ```
 
-Skipped phases render `⊘`; ASCII via `LINTEL_ASCII=1`. See [ADR-0003](../../docs/adr/0003-cycle-position-footer.md).
+Skipped phases render `⊘`; ASCII via `LINTEL_ASCII=1`. See [ADR-0003](../../.claude/decisions/0003-cycle-position-footer.md).

@@ -35,7 +35,7 @@ Scans recent bug-fix commits + identifies golden paths (most-used journeys). Spa
 recent_fixes=$(git log --since='90 days ago' --grep='^fix\|bug\|regression' --format='%H|%s' 2>/dev/null | head -50)
 
 # Golden paths from observability or operator declaration
-golden_paths=$(find .lintel/state -name "critical-journeys*.md" -o -name "golden-paths*.md" 2>/dev/null | sort | tail -1)
+golden_paths=$(find .claude/runtime/state -name "critical-journeys*.md" -o -name "golden-paths*.md" 2>/dev/null | sort | tail -1)
 ```
 
 ### Step 2 — Spawn RegressionDetective for fix-to-test mapping
@@ -66,7 +66,7 @@ cat > "$golden_brief" <<EOF
 task: Curate + execute golden-path test suite
 context_pointers:
   - $golden_paths
-  - .lintel/state/tq/fix-to-test-mapping.md
+  - .claude/runtime/state/tq/fix-to-test-mapping.md
 constraints:
   - per golden path: at least one happy-path test + one edge-case test
   - flag flaky / slow tests for separate quarantine
@@ -82,18 +82,18 @@ EOF
 
 ```bash
 ts=$(date -u +"%Y%m%dT%H%M%SZ")
-out=".lintel/state/tq/regression-suite-$ts.md"
+out=".claude/runtime/state/tq/regression-suite-$ts.md"
 {
   echo "# Regression suite — $(date -u +%Y-%m-%dT%H:%M:%SZ)"
   echo ""
   echo "## Recent fix → test mapping"
-  cat .lintel/state/tq/fix-to-test-mapping.md
+  cat .claude/runtime/state/tq/fix-to-test-mapping.md
   echo ""
   echo "## Golden-path tests"
-  cat .lintel/state/tq/golden-path-suite.md
+  cat .claude/runtime/state/tq/golden-path-suite.md
   echo ""
   echo "## Execution health"
-  cat .lintel/state/tq/execution-report.md
+  cat .claude/runtime/state/tq/execution-report.md
 } > "$out"
 
 printf '{"ts":"%s","kind":"tq_regression_suite","fixes_mapped":%d,"uncovered_fixes":%d,"golden_paths":%d,"operator":"%s"}\n' \
@@ -110,7 +110,7 @@ printf '{"ts":"%s","kind":"tq_regression_suite","fixes_mapped":%d,"uncovered_fix
 ## Integration
 
 **Reads:** git log for recent fixes, golden paths, existing tests
-**Writes:** `.lintel/state/tq/regression-suite-<ts>.md`, audit JSONL
+**Writes:** `.claude/runtime/state/tq/regression-suite-<ts>.md`, audit JSONL
 **Dispatches to:** RegressionDetective (fix mapping), TestRunner (golden-path execution)
 
 ## Anti-patterns

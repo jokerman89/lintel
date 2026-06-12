@@ -35,7 +35,7 @@ Reads existing performance/SLA targets + operator's scaling intent (e.g. "10x us
 scaling_target="${1:-${SCALING_TARGET:-3x-12-months}}"
 
 # Read existing perf baselines if present
-baseline_file=".lintel/state/perf-baseline.md"
+baseline_file=".claude/runtime/state/perf-baseline.md"
 [ -f "$baseline_file" ] || echo "WARN: no perf baseline at $baseline_file — model will be qualitative"
 ```
 
@@ -47,7 +47,7 @@ cat > "$brief_file" <<EOF
 task: Produce capacity model for scaling target: $scaling_target
 context_pointers:
   - $baseline_file
-  - .lintel/state/ta/dependency-graph-*.md (if present)
+  - .claude/runtime/state/ta/dependency-graph-*.md (if present)
 constraints:
   - per-component throughput + latency + resource projection
   - identify top-3 bottlenecks
@@ -67,7 +67,7 @@ mitigation_brief=$(mktemp)
 cat > "$mitigation_brief" <<EOF
 task: Refine bottleneck mitigations into specific architectural changes
 context_pointers:
-  - .lintel/state/ta/capacity-model.md
+  - .claude/runtime/state/ta/capacity-model.md
 constraints:
   - per-bottleneck: 2-3 concrete mitigation options with trade-offs
   - prefer extraction + caching over rewrite
@@ -82,7 +82,7 @@ EOF
 
 ```bash
 ts=$(date -u +"%Y%m%dT%H%M%SZ")
-out=".lintel/state/ta/scaling-plan-$ts.md"
+out=".claude/runtime/state/ta/scaling-plan-$ts.md"
 {
   echo "# Scaling plan — $(date -u +%Y-%m-%dT%H:%M:%SZ)"
   echo ""
@@ -90,10 +90,10 @@ out=".lintel/state/ta/scaling-plan-$ts.md"
   echo "$scaling_target"
   echo ""
   echo "## Capacity model"
-  cat .lintel/state/ta/capacity-model.md
+  cat .claude/runtime/state/ta/capacity-model.md
   echo ""
   echo "## Bottleneck mitigations"
-  cat .lintel/state/ta/bottleneck-mitigations.md
+  cat .claude/runtime/state/ta/bottleneck-mitigations.md
 } > "$out"
 
 printf '{"ts":"%s","kind":"ta_scaling_plan","target":"%s","bottlenecks":%d,"operator":"%s"}\n' \
@@ -111,7 +111,7 @@ printf '{"ts":"%s","kind":"ta_scaling_plan","target":"%s","bottlenecks":%d,"oper
 ## Integration
 
 **Reads:** perf baseline, scaling target, dependency graph
-**Writes:** `.lintel/state/ta/scaling-plan-<ts>.md`, audit JSONL
+**Writes:** `.claude/runtime/state/ta/scaling-plan-<ts>.md`, audit JSONL
 **Dispatches to:** CapacityPlanner (NEW agent), BackendArchitect (mitigation refinement)
 
 ## Anti-patterns

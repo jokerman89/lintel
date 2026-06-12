@@ -264,8 +264,8 @@ After all 5 modules ship (v4.1 through v4.5):
 - Existing agents in `agents/engineering/`
 
 **Writes:**
-- Module-specific artifacts under `.lintel/state/<domain>/` (e.g., `.lintel/state/ta/system-arch.md`)
-- `~/.lintel/audit/<domain>-decisions.jsonl`
+- Module-specific artifacts under `.claude/runtime/state/<domain>/` (e.g., `.claude/runtime/state/ta/system-arch.md`)
+- `.claude/runtime/audit/<domain>-decisions.jsonl`
 - Brief Forge envelopes through the standard gate
 
 **Triggered by:**

@@ -55,7 +55,7 @@ If the active pack's compliance mode is `hard` (`resolve_pack_field compliance.m
 
 Default load set:
 - `CLAUDE.md`, `README.md` (context)
-- `docs/adr/[0-9]*.md` (top 10 most-recent)
+- `.claude/decisions/[0-9]*.md` (top 10 most-recent)
 - `*.bicep`, `*.tf`, `*.bicepparam` (top 20 by file size)
 - `recent git log --oneline -20`
 
@@ -93,7 +93,7 @@ tokens_added: <approx>
 sensitivity_check: <result>
 ```
 
-Also append to `~/.lintel/audit/customer-repo-access.jsonl` for traceability.
+Also append to `.claude/runtime/audit/customer-repo-access.jsonl` for traceability.
 
 ## Status protocol
 

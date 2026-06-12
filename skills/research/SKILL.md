@@ -64,7 +64,7 @@ RESEARCH COMPLETE — <wedge>
 
 Artifacts produced:
   - Design doc: <docs/design/lintel-*-design-*.md> (APPROVED)
-  - Discover report: <.lintel/state/discover-report-*.md>
+  - Discover report: <.claude/runtime/state/discover-report-*.md>
 
 Findings:
   - ADRs surfaced: <N>

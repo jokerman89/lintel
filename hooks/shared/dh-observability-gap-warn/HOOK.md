@@ -4,7 +4,7 @@ tier: warn-only
 event: PreToolUse (Edit|Write on new service paths)
 fires_on: edit creates or modifies a service entry-point file without observability instrumentation (no metric emission, no trace span, no structured log)
 override: pass --ignore-observability-gap flag (operator decision, logged)
-audit: ~/.lintel/audit/hooks.jsonl
+audit: .claude/runtime/audit/hooks.jsonl
 ---
 
 # dh-observability-gap-warn

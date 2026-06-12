@@ -4,7 +4,7 @@ tier: warn-only
 event: PreToolUse (Edit|Write on migration files)
 fires_on: migration file lacks a paired down-migration OR contains destructive operations without documented data-loss acceptance
 override: pass --ignore-irreversibility flag (operator decision, logged)
-audit: ~/.lintel/audit/hooks.jsonl
+audit: .claude/runtime/audit/hooks.jsonl
 ---
 
 # da-migration-irreversible-warn

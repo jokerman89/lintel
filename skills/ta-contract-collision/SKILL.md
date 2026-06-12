@@ -63,7 +63,7 @@ cat > "$brief_file" <<EOF
 task: Assess breakage risk per consumer for change: $change_description
 context_pointers:
   - $interface_file
-  - .lintel/state/ta/consumers-list.txt
+  - .claude/runtime/state/ta/consumers-list.txt
 constraints:
   - per-consumer: backward-compat OR breaking
   - if breaking: specify the breaking aspect
@@ -77,14 +77,14 @@ EOF
 ### Step 4 — Spawn Architect for migration path (if any breaking)
 
 ```bash
-breaking_count=$(jq -r '.consumers[] | select(.breaking == true) | .name' .lintel/state/ta/breakage-assessment.json | wc -l)
+breaking_count=$(jq -r '.consumers[] | select(.breaking == true) | .name' .claude/runtime/state/ta/breakage-assessment.json | wc -l)
 
 if [ "$breaking_count" -gt 0 ]; then
   migration_brief=$(mktemp)
   cat > "$migration_brief" <<EOF
 task: Propose migration path for $breaking_count breaking consumer(s)
 context_pointers:
-  - .lintel/state/ta/breakage-assessment.json
+  - .claude/runtime/state/ta/breakage-assessment.json
 constraints:
   - deprecation window: read from pack.tech_architecture.deprecation_window_days (default 90)
   - prefer additive new-version path over in-place breaking
@@ -108,7 +108,7 @@ fi
 
 ```bash
 ts=$(date -u +"%Y%m%dT%H%M%SZ")
-out=".lintel/state/ta/contract-collision-$ts.md"
+out=".claude/runtime/state/ta/contract-collision-$ts.md"
 {
   echo "# Contract collision — $(date -u +%Y-%m-%dT%H:%M:%SZ)"
   echo ""
@@ -122,8 +122,8 @@ out=".lintel/state/ta/contract-collision-$ts.md"
   echo "Total: $consumer_count"
   echo "Breaking: $breaking_count"
   echo ""
-  cat .lintel/state/ta/breakage-assessment.md
-  [ -f .lintel/state/ta/migration-plan.md ] && cat .lintel/state/ta/migration-plan.md
+  cat .claude/runtime/state/ta/breakage-assessment.md
+  [ -f .claude/runtime/state/ta/migration-plan.md ] && cat .claude/runtime/state/ta/migration-plan.md
 } > "$out"
 
 printf '{"ts":"%s","kind":"ta_contract_collision","interface":"%s","consumers":%d,"breaking":%d,"raise_help":%s,"operator":"%s"}\n' \
@@ -141,7 +141,7 @@ printf '{"ts":"%s","kind":"ta_contract_collision","interface":"%s","consumers":%
 ## Integration
 
 **Reads:** interface file, repo source for grep, pack.yaml external_consumer_registries
-**Writes:** `.lintel/state/ta/contract-collision-<ts>.md`, audit JSONL
+**Writes:** `.claude/runtime/state/ta/contract-collision-<ts>.md`, audit JSONL
 **Dispatches to:** APIDesigner (assessment), Architect (migration)
 **Hook integration:** `contract-collision-warn` hook fires pre-edit on interface files with declared consumers
 

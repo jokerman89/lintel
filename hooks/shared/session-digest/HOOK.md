@@ -6,20 +6,20 @@ fires_on: session start / resume / clear (Claude Code SessionStart hook)
 override: set `~/.lintel/.digest-disabled` or env `NO_DIGEST=1`
 necessity: REQUIRED
 gap_if_skipped: "Lintel's memory snowball (lessons, memory, active pack/mode/role, open jobs, recent ADRs) never reaches the session — the discipline does not compound across sessions. This is the gap ADR-0002 closes."
-audit: ~/.lintel/audit/hooks.jsonl
+audit: .claude/runtime/audit/hooks.jsonl
 ---
 
 # session-digest
 
 Auto-loads Lintel's memory snowball at session start by injecting a compact digest
 (≤ ~400 tokens) into context — the mechanical equivalent of the operator's global
-`MEMORY.md`. Implements [ADR-0002](../../../docs/adr/0002-session-digest-auto-load.md).
+`MEMORY.md`. Implements [ADR-0002](../../../.claude/decisions/0002-session-digest-auto-load.md).
 
 ## Why this exists
 
 Claude Code auto-loads `CLAUDE.md`, skill descriptions, `.claude/agents/`, and hooks — but NOT
-`tasks/lessons.md`, `tasks/memory.md`, `tasks/personas.md`, `~/.lintel/profile.yaml`,
-`.lintel/state/`, or `docs/adr/`. Those are plain files. Without this hook the snowball is written
+`.claude/memory/lessons.md`, `.claude/memory/working-state.md`, `.claude/memory/personas.md`, `~/.lintel/profile.yaml`,
+`.claude/runtime/state/`, or `.claude/decisions/`. Those are plain files. Without this hook the snowball is written
 but never read on a fresh session, so it never compounds.
 
 ## What it injects
@@ -28,15 +28,15 @@ but never read on a fresh session, so it never compounds.
 LINTEL SESSION DIGEST
 Pack: <active_pack> · mode: <default_mode> · role: <role_active> · compliance: <mode>
 Recent lessons: L-NNN <slug> · …
-Memory: <highlights from tasks/memory.md>
+Memory: <highlights from .claude/memory/working-state.md>
 Open jobs: <N> (<names>)
 Recent decisions: ADR-NNNN <title> · …
 Pending migrations: <N>
 ```
 
 Sources (each optional — the hook degrades silently when absent, so it works in a fresh
-scaffolded repo): `~/.lintel/profile.yaml`, `tasks/lessons.md`, `tasks/memory.md`,
-`~/.lintel/jobs/_active.md`, `docs/adr/`, `docs/v4.x/migrations/`.
+scaffolded repo): `~/.lintel/profile.yaml`, `.claude/memory/lessons.md`, `.claude/memory/working-state.md`,
+`~/.lintel/jobs/_active.md` (the cross-repo jobs registry), `.claude/decisions/`, `docs/v4.x/migrations/`.
 
 ## Wiring (Claude Code)
 

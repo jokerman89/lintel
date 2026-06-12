@@ -131,7 +131,7 @@ YES — reader mode is solo-invokable. Writer mode runs automatically via the wr
 
 **Reads (reader mode):**
 - `~/.lintel/audit/usage-*.jsonl` (glob)
-- `~/.lintel/audit/hooks.jsonl` (cross-reference for override-pattern correlation, if requested)
+- `.claude/runtime/audit/hooks.jsonl` (cross-reference for override-pattern correlation, if requested)
 
 **Consumed by:**
 - `/li:maintenance` (5.3 — token-cost simulation, rust detection)
@@ -144,7 +144,7 @@ YES — reader mode is solo-invokable. Writer mode runs automatically via the wr
 - **Per-skill append-bash in SKILL.md** — breaks DRY across 113 skills (Finding 2A). Wrapper-hook only.
 - **Single growing file (`usage.jsonl` flat)** — breaks the rotation policy. Multi-MB risk after months.
 - **Token-counting "exactly" via the OpenAI API** — out of scope. The heuristic IS the tokens_est field.
-- **Read-back for forensic purposes** — wrong skill. Use `~/.lintel/audit/hooks.jsonl` (audit-canonical).
+- **Read-back for forensic purposes** — wrong skill. Use `.claude/runtime/audit/hooks.jsonl` (audit-canonical).
 
 ## Failure recovery
 

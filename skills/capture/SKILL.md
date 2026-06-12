@@ -17,8 +17,8 @@ You are the CAPTURE skill — Phase 8 (final) of the Lintel cycle.
 Closes the cycle by capturing what's durable. The work is shipped; CAPTURE makes sure the NEXT operator (could be you in 6 months, or a teammate, or a fresh cold session) can pick up where this ended without re-deriving everything.
 
 Five artifact categories:
-1. **Lessons** — corrections from BUILD/REVIEW → `tasks/lessons.md` (filtered, durable patterns only)
-2. **ADR** — non-trivial decisions → `docs/adr/NNNN-<slug>.md`
+1. **Lessons** — corrections from BUILD/REVIEW → `.claude/memory/lessons.md` (filtered, durable patterns only)
+2. **ADR** — non-trivial decisions → `.claude/decisions/NNNN-<slug>.md`
 3. **EVOLUTION-LOG** — CLAUDE.md changes → log entry
 4. **Cold-executor handoff trio** — reaffirm `spec.md` + `plan.md` + `prompt.md` against build evidence (trio BORN in PLAN per v3.8 Feature 2.2; CAPTURE only annotates with actual-build outcomes)
 5. **Operator profile** — append session entry to `~/.lintel/state/operator-profile.jsonl` for tier tracking
@@ -42,7 +42,7 @@ Plus role-debrief (if role active) and retro (optional).
 
 ### Step 1 — Cycle history aggregation
 
-Read entire cycle's `.lintel/state/00-state.md` log. Extract:
+Read entire cycle's `.claude/runtime/state/00-state.md` log. Extract:
 - Phases completed + their durations + token cost
 - Corrections operator made during BUILD/REVIEW (from build-log)
 - Decisions taken (alternatives chosen in DEFINE, scope changes in PLAN)
@@ -78,7 +78,7 @@ audit_log granularity actual_vs_estimated \
   "actual_tokens=$actual_tokens" \
   "task_count=$task_count" \
   "depth_schema=$depth_schema"
-# → appends one JSONL line to ~/.lintel/audit/granularity.jsonl
+# → appends one JSONL line to .claude/runtime/audit/granularity.jsonl
 ```
 
 If any field is unavailable (e.g. SCOPE was silent on an XS request, or tokens weren't tracked), pass what you have and omit the rest — `audit_log` records whatever k=v pairs it's given; a partial record is still useful history. Never block the cycle on this; a failed write is silent by design (`_audit.sh` swallows write errors).
@@ -91,7 +91,7 @@ Invoke `/li:learn` (or inline):
 
 For each correction operator made during the cycle:
 - Was this correction GENERAL (would apply to future work) or SPECIFIC (one-time)?
-- If GENERAL: candidate for `tasks/lessons.md`
+- If GENERAL: candidate for `.claude/memory/lessons.md`
 - If SPECIFIC: keep in this cycle's notes only
 
 Examples of LESSON-worthy:
@@ -104,7 +104,7 @@ Examples NOT lesson-worthy:
 
 AskUserQuestion per candidate lesson: "Capture? (yes / no / edit-first)"
 
-If yes: append to `tasks/lessons.md`:
+If yes: append to `.claude/memory/lessons.md`:
 ```markdown
 ## <date> — <lesson title>
 <lesson body>
@@ -113,7 +113,7 @@ If yes: append to `tasks/lessons.md`:
 
 ### Step 3 — Promote lesson check (NEW)
 
-For each NEW lesson captured, AskUserQuestion: "Promote to Lintel global lessons (scaffolding/01-foundation/tasks/lessons.md)? — applies to ALL future scaffolded repos."
+For each NEW lesson captured, AskUserQuestion: "Promote to Lintel global lessons (scaffolding/01-foundation/.claude/memory/lessons.md)? — applies to ALL future scaffolded repos."
 
 If yes: invoke `/li:lessons-promote`.
 
@@ -130,7 +130,7 @@ Scan cycle history for non-trivial decisions:
 For each candidate, AskUserQuestion: "Draft ADR for this decision?"
 
 If yes: invoke `/li:adr-new "<decision title>"`:
-- Reads `docs/adr/TEMPLATE.md`
+- Reads `.claude/decisions/TEMPLATE.md`
 - Auto-numbers (NNNN)
 - Substitutes title + date + status (Proposed)
 - Operator fills Context / Decision / Consequences / Alternatives during draft
@@ -173,7 +173,7 @@ Auto-append (not optional) when CLAUDE.md changes — this is the audit trail fo
 **`prompt.md` reaffirm** (born in PLAN, v3.8 Feature 2.2 moved birth to PLAN):
 - Verify prompt.md still describes the work accurately
 - Add any "What you DON'T need to know" entries discovered during BUILD
-- Path: root `prompt.md` OR `docs/plans/<slug>/prompt.md` (born by PLAN, lives there)
+- Path: `.claude/plans/<slug>/prompt.md` (born by PLAN, lives there)
 
 **Why moved to PLAN:** standalone `/li:plan <design.md>` (workflow_root post-v3.8) needs to produce the complete trio at PLAN-time. CAPTURE-only generation broke that — operator running PLAN solo got 2/3 of a handoff. Trio born together fixes this.
 
@@ -183,7 +183,7 @@ AskUserQuestion: "Want to dogfood the trio? Spawn fresh subagent with ONLY these
 
 Invoke the existing mechanism — do **not** rebuild it:
 
-`/li:handoff-size-check` (a portable skill call; reads the reaffirmed trio + `.lintel/state/warming-manifest.md`, applies the mode-aware cap from `/li:context-budget` mode_envelopes, default `customer-engagement: 500k soft / 750k hard`).
+`/li:handoff-size-check` (a portable skill call; reads the reaffirmed trio + `.claude/runtime/state/warming-manifest.md`, applies the mode-aware cap from `/li:context-budget` mode_envelopes, default `customer-engagement: 500k soft / 750k hard`).
 
 - **SURFACE, don't block.** A yellow/red verdict warns ("finalized trio yields ~Nk handoff, near cap") and notes the durable handoff is large — the operator decides whether to trim before it becomes the cross-session record. It does NOT halt CAPTURE.
 - **Off-switch:** `--skip-handoff-size-check` (or `SKIP_HANDOFF_SIZE_CHECK=1`) skips the gate entirely. Silent when skipped, and silent on a green pass.
@@ -250,7 +250,7 @@ Frontmatter must parse. After writing: `audit_log capture vault_sink_written "fi
 
 ### Step 8 — Retro (optional, light)
 
-Append to `~/.lintel/retros/<date>-<cycle-id>.md`:
+Append to `.claude/memory/retros/<date>-<cycle-id>.md`:
 ```yaml
 cycle_id: <id>
 duration_human: <hours>
@@ -366,27 +366,27 @@ YES — standalone post-implementation reflection. Useful if operator forgot CAP
 ## Integration
 
 **Reads:**
-- All `.lintel/state/00-state.md` entries from cycle
-- `.lintel/state/build-log.md`
-- `.lintel/state/review-report-*.md`
-- `.lintel/state/compliance-report-*.md` (if the active pack defines compliance gates)
+- All `.claude/runtime/state/00-state.md` entries from cycle
+- `.claude/runtime/state/build-log.md`
+- `.claude/runtime/state/review-report-*.md`
+- `.claude/runtime/state/compliance-report-*.md` (if the active pack defines compliance gates)
 - design doc, plan.md (DRAFT), spec.md (DRAFT)
 - Cycle's git diff for change scope
 - role file (if active)
 
 **Writes:**
-- `tasks/lessons.md` (append per captured lesson)
-- `docs/adr/NNNN-<slug>.md` (new ADR if drafted)
+- `.claude/memory/lessons.md` (append per captured lesson)
+- `.claude/decisions/NNNN-<slug>.md` (new ADR if drafted)
 - `EVOLUTION-LOG.md` (if CLAUDE.md changed)
 - `spec.md` (FINALIZED from PLAN's draft)
 - `plan.md` (FINALIZED with post-verification status)
 - `prompt.md` (NEW — cold-executor handoff)
-- `~/.lintel/retros/<date>-<cycle-id>.md` (optional)
+- `.claude/memory/retros/<date>-<cycle-id>.md` (optional)
 - `~/.lintel/state/operator-profile.jsonl` (append)
 - `~/.lintel/roles/<id>.md` (update if role active + insights to add)
-- `.lintel/state/00-state.md` (CAPTURE final entry)
-- `~/.lintel/analytics/cycle-completion.jsonl`
-- `~/.lintel/audit/granularity.jsonl` (append — actual-vs-estimated calibration record, via `audit_log`; read by `lib/scale-estimator.sh` `scale_calibrated_prior`)
+- `.claude/runtime/state/00-state.md` (CAPTURE final entry)
+- `.claude/runtime/audit/cycle-completion.jsonl`
+- `.claude/runtime/audit/granularity.jsonl` (append — actual-vs-estimated calibration record, via `audit_log`; read by `lib/scale-estimator.sh` `scale_calibrated_prior`)
 - `<capture.vault_sink_path>/YYYY-MM-DD-<repo>-<slug>.md` (optional — vault sink, Step 7b; only if `capture.vault_sink_enabled: true` and the path exists)
 
 **Triggers:**
@@ -413,7 +413,7 @@ YES — standalone post-implementation reflection. Useful if operator forgot CAP
 ## Failure recovery
 
 - **lessons.md missing**: create via `bin/li-scaffold` template, then proceed
-- **docs/adr/TEMPLATE.md missing**: prompt operator to run `bin/li-scaffold init` first
+- **.claude/decisions/TEMPLATE.md missing**: prompt operator to run `bin/li-scaffold init` first
 - **operator can't decide on lesson capture**: capture as PROVISIONAL (low confidence flag), they can promote/remove later
 - **CLAUDE.md changed but operator says "not significant"**: skip EVOLUTION-LOG, but log audit-trail note
 
@@ -428,7 +428,7 @@ cycle and the one logical next action — whether this phase ran standalone or i
 
 ```bash
 source "$LINTEL_REPO_ROOT/lib/cycle-footer.sh"   # fallback: "$(git rev-parse --show-toplevel)/lib/cycle-footer.sh"
-render_cycle_footer                               # reads .lintel/state/00-state.md; --compact for short replies
+render_cycle_footer                               # reads .claude/runtime/state/00-state.md; --compact for short replies
 ```
 
-Skipped phases render `⊘`; ASCII via `LINTEL_ASCII=1`. See [ADR-0003](../../docs/adr/0003-cycle-position-footer.md).
+Skipped phases render `⊘`; ASCII via `LINTEL_ASCII=1`. See [ADR-0003](../../.claude/decisions/0003-cycle-position-footer.md).

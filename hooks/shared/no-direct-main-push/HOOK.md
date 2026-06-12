@@ -6,7 +6,7 @@ fires_on: `git push` command targeting `main` (or `master`)
 override: pass explicit per-batch-auth confirmation in conversation
 necessity: REQUIRED
 gap_if_skipped: "Unreviewed code reaches main; review + founder-approval gates bypassed; no PR audit trail."
-audit: ~/.lintel/audit/hooks.jsonl
+audit: .claude/runtime/audit/hooks.jsonl
 ---
 
 # no-direct-main-push

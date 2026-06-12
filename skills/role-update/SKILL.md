@@ -144,7 +144,7 @@ YES — anytime operator wants to evolve a role file.
 
 **Writes:**
 - Target role file (Edit applied to specific section)
-- `.lintel/state/00-state.md` (event)
+- `.claude/runtime/state/00-state.md` (event)
 - Optionally pushes via `bin/li-roles-sync`
 
 ## Anti-patterns

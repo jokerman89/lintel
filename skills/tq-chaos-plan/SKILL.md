@@ -32,9 +32,9 @@ Reads threat model (from SC if present) + dependency graph (from TA if present) 
 
 ```bash
 chaos_active="${active:-${chaos_active:-true}}"
-threat_model=$(find .lintel/state/sc -name "threat-model-*.md" -mtime -30 2>/dev/null | sort | tail -1)
-dep_graph=$(find .lintel/state/ta -name "dependency-graph-*.md" -mtime -30 2>/dev/null | sort | tail -1)
-on_call_playbook=$(find .lintel/state/dh -name "on-call-playbook-*.md" -mtime -30 2>/dev/null | sort | tail -1)
+threat_model=$(find .claude/runtime/state/sc -name "threat-model-*.md" -mtime -30 2>/dev/null | sort | tail -1)
+dep_graph=$(find .claude/runtime/state/ta -name "dependency-graph-*.md" -mtime -30 2>/dev/null | sort | tail -1)
+on_call_playbook=$(find .claude/runtime/state/dh -name "on-call-playbook-*.md" -mtime -30 2>/dev/null | sort | tail -1)
 
 if [ "$chaos_active" != "true" ]; then
   echo "chaos_active=false; chaos plan not required by profile"
@@ -70,7 +70,7 @@ cat > "$dep_brief" <<EOF
 task: Design dependency-chaos paths + recovery validation
 context_pointers:
   - $dep_graph
-  - .lintel/state/tq/chaos-scenarios.md
+  - .claude/runtime/state/tq/chaos-scenarios.md
 constraints:
   - per dependency: kill / latency-spike / partial-failure
   - per scenario: recovery success criteria (RTO + RPO + auto-recovery vs manual)
@@ -86,15 +86,15 @@ EOF
 
 ```bash
 ts=$(date -u +"%Y%m%dT%H%M%SZ")
-out=".lintel/state/tq/chaos-plan-$ts.md"
+out=".claude/runtime/state/tq/chaos-plan-$ts.md"
 {
   echo "# Chaos plan — $(date -u +%Y-%m-%dT%H:%M:%SZ)"
   echo ""
   echo "## Scenarios"
-  cat .lintel/state/tq/chaos-scenarios.md
+  cat .claude/runtime/state/tq/chaos-scenarios.md
   echo ""
   echo "## Dependency-chaos + recovery validation"
-  cat .lintel/state/tq/dependency-chaos.md
+  cat .claude/runtime/state/tq/dependency-chaos.md
 } > "$out"
 
 printf '{"ts":"%s","kind":"tq_chaos_plan","scenarios":%d,"operator":"%s"}\n' \
@@ -111,7 +111,7 @@ printf '{"ts":"%s","kind":"tq_chaos_plan","scenarios":%d,"operator":"%s"}\n' \
 ## Integration
 
 **Reads:** SC threat-model, TA dependency-graph, DH on-call-playbook
-**Writes:** `.lintel/state/tq/chaos-plan-<ts>.md`, audit JSONL
+**Writes:** `.claude/runtime/state/tq/chaos-plan-<ts>.md`, audit JSONL
 **Dispatches to:** SecurityAuditor (scenarios), SystemArchitect (dep-chaos + recovery)
 
 ## Anti-patterns

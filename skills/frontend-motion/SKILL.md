@@ -176,7 +176,7 @@ YES — solo-invocable.
 
 **Writes:**
 - `motion.json` (stdout default, $OUT-path if orchestrator)
-- Audit-log: `~/.lintel/audit/frontend-motion-runs.jsonl`
+- Audit-log: `.claude/runtime/audit/frontend-motion-runs.jsonl`
 
 **Calls into:**
 - `agents/frontend/MotionDirector.md` (primary)

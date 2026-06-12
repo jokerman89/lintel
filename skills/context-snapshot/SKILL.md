@@ -12,7 +12,7 @@ You are the context-snapshot skill.
 
 ## What this skill does
 
-Saves current session state to `~/.lintel/sessions/<branch>/<datetime>-snapshot-<name>.md`. Different from `/li:context-save` (which writes canonical end-of-session save) — snapshot is operator-named mid-session preservation.
+Saves current session state to `.claude/runtime/sessions/<branch>/<datetime>-snapshot-<name>.md`. Different from `/li:context-save` (which writes canonical end-of-session save) — snapshot is operator-named mid-session preservation.
 
 ## When to use
 
@@ -33,9 +33,10 @@ Saves current session state to `~/.lintel/sessions/<branch>/<datetime>-snapshot-
 name="${1:-mid-session}"
 branch=$(git branch --show-current)
 ts=$(date +%Y%m%d-%H%M%S)
-snap_path="$LINTEL_HOME/sessions/$branch/${ts}-snapshot-${name}.md"
+REPO_ROOT="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}"
+snap_path="$REPO_ROOT/.claude/runtime/sessions/$branch/${ts}-snapshot-${name}.md"
 
-mkdir -p "$LINTEL_HOME/sessions/$branch"
+mkdir -p "$REPO_ROOT/.claude/runtime/sessions/$branch"
 ```
 
 ### Step 2 — Write snapshot
@@ -71,7 +72,7 @@ phase: <current phase if cycle active>
 $(git log --oneline -5)
 
 ## 00-state.md snapshot
-[Copy current .lintel/state/00-state.md content]
+[Copy current .claude/runtime/state/00-state.md content]
 
 ## Operator note
 [Optional: prompt operator for note]
@@ -103,7 +104,7 @@ YES.
 
 ## Integration
 
-Reads cwd state. Writes `~/.lintel/sessions/<branch>/`.
+Reads cwd state. Writes `.claude/runtime/sessions/<branch>/`.
 
 ## Anti-patterns
 

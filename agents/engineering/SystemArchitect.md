@@ -101,4 +101,4 @@ Internal. You produce operator-facing specs in markdown/yaml. No customer-facing
 
 ## How operators read your output
 
-NFR specs go into `.lintel/state/ta/nfr-spec.md`. Invariants go into `.lintel/state/ta/invariants.md`. Emergent properties go into `.lintel/state/ta/emergent-properties.md`. Operators inspect via the TA module's output report.
+NFR specs go into `.claude/runtime/state/ta/nfr-spec.md`. Invariants go into `.claude/runtime/state/ta/invariants.md`. Emergent properties go into `.claude/runtime/state/ta/emergent-properties.md`. Operators inspect via the TA module's output report.

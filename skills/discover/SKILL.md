@@ -56,8 +56,8 @@ If wedge area is large (>1000 files match), surface to operator: "Scope is large
 ### Step 2 — ADR scan
 
 ```bash
-[ -d "docs/adr/" ] && {
-  for adr in docs/adr/[0-9]*-*.md; do
+[ -d ".claude/decisions/" ] && {
+  for adr in .claude/decisions/[0-9]*-*.md; do
     # Read title + status + summary
     title=$(grep '^# ' "$adr" | head -1)
     status=$(grep -i '^status:' "$adr" | head -1)
@@ -77,7 +77,7 @@ For relevant ADRs:
 ### Step 3 — Lessons scan (filtered by relevance)
 
 Invoke `/li:lessons` skill OR inline:
-- Read `tasks/lessons.md`
+- Read `.claude/memory/lessons.md`
 - Filter by keyword match + topic similarity to wedge
 - Surface top 3-5 lessons with "Why this might apply now: <one-line>"
 
@@ -169,7 +169,7 @@ Operator decides whether to warm up before PLAN.
 ### Step 8 — Write discover-report.md
 
 ```yaml
-# .lintel/state/discover-report-<datetime>.md
+# .claude/runtime/state/discover-report-<datetime>.md
 ---
 phase: DISCOVER
 ts: <timestamp>
@@ -223,7 +223,7 @@ skills_overlap: <count>
 ```yaml
 phase: DISCOVER
 ts: <timestamp>
-report_path: .lintel/state/discover-report-<datetime>.md
+report_path: .claude/runtime/state/discover-report-<datetime>.md
 files_mapped: <count>
 adrs_found: <count>
 lessons_applied: <count>
@@ -254,15 +254,15 @@ Skip-conditions: intent=hotfix, intent=ship-existing-branch, known territory ope
 
 **Reads:**
 - cwd codebase (Grep/Glob, capped at top-20 files)
-- `docs/adr/*.md`
-- `tasks/lessons.md`
+- `.claude/decisions/*.md`
+- `.claude/memory/lessons.md`
 - `package.json` / `requirements.txt` / `Cargo.toml` / etc
 - `skills/*/SKILL.md` (description field only)
 - `agents/<category>/*.md` (description field only)
 
 **Writes:**
-- `.lintel/state/discover-report-<datetime>.md`
-- `.lintel/state/00-state.md` (DISCOVER entry)
+- `.claude/runtime/state/discover-report-<datetime>.md`
+- `.claude/runtime/state/00-state.md` (DISCOVER entry)
 
 **Triggers:**
 - `/li:context-warm` recommendations (operator-driven, not auto)
@@ -295,7 +295,7 @@ cycle and the one logical next action — whether this phase ran standalone or i
 
 ```bash
 source "$LINTEL_REPO_ROOT/lib/cycle-footer.sh"   # fallback: "$(git rev-parse --show-toplevel)/lib/cycle-footer.sh"
-render_cycle_footer                               # reads .lintel/state/00-state.md; --compact for short replies
+render_cycle_footer                               # reads .claude/runtime/state/00-state.md; --compact for short replies
 ```
 
-Skipped phases render `⊘`; ASCII via `LINTEL_ASCII=1`. See [ADR-0003](../../docs/adr/0003-cycle-position-footer.md).
+Skipped phases render `⊘`; ASCII via `LINTEL_ASCII=1`. See [ADR-0003](../../.claude/decisions/0003-cycle-position-footer.md).

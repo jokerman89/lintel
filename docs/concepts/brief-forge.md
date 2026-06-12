@@ -11,7 +11,7 @@ Pre-v4.0 hand-offs were ad-hoc. Each kind of hand-off shaped its payload differe
 
 - Subagent spawn: parent skill wrote a free-form prompt
 - Phase transition: phase appended to 00-state.md and the next phase read it
-- Cold-executor: plan + spec + prompt files in `.lintel/state/`
+- Cold-executor: plan + spec + prompt files in `.claude/runtime/state/`
 
 Three failure modes:
 
@@ -52,7 +52,7 @@ Step 5: compose tail
     │  completeness_score = min(evaluator scores)
     │  evaluators_run = list of evaluator names
     │  escape_hatches = built per content_type
-    │  audit_pointer = ~/.lintel/audit/envelopes-<date>.jsonl
+    │  audit_pointer = .claude/runtime/audit/envelopes-<date>.jsonl
     ▼
 Step 6: write audit + emit envelope
     │  envelope written to audit JSONL
@@ -118,7 +118,7 @@ Two ways to bypass:
 1. **Skill frontmatter:** add `brief_forge_bypass: true` to the source skill's SKILL.md frontmatter. Brief Forge sees this at Step 2 and writes a stub audit entry instead of constructing/evaluating.
 2. **Pack policy:** `pack.yaml.brief_forge_handoffs.cold_path_bypass.eligible_skills: [hotfix, ...]`. Operator opts a pack out of forging for specific source skills.
 
-Either way, the bypass is audited so the trail survives. Operators inspecting `~/.lintel/audit/brief-forge.jsonl` see `kind: brief_forge_bypassed` entries with reason.
+Either way, the bypass is audited so the trail survives. Operators inspecting `.claude/runtime/audit/brief-forge.jsonl` see `kind: brief_forge_bypassed` entries with reason.
 
 ## Budget enforcement
 
@@ -130,7 +130,7 @@ Why total budget vs per-evaluator: gives pack authors a single tuning knob. If a
 
 ## Audit + replay
 
-Every envelope is appended to `~/.lintel/audit/envelopes-<date>.jsonl` (per-day file for log rotation). The envelope is the audit record — there's no separate log of "Brief Forge ran"; the envelope itself is the evidence.
+Every envelope is appended to `.claude/runtime/audit/envelopes-<date>.jsonl` (per-day file for log rotation). The envelope is the audit record — there's no separate log of "Brief Forge ran"; the envelope itself is the evidence.
 
 `bin/li-envelope-replay <envelope-id>` pulls the envelope from the audit log and dry-runs it: surfaces what the receiver would do, given current state of the world. `--apply` actually re-invokes the receiver (audited as `envelope_replay_applied`).
 
@@ -175,8 +175,8 @@ Phase 4 modules wire their hand-offs through Brief Forge automatically. A `tech_
 - Content file passed in (varies by content_type)
 
 **Writes:**
-- `~/.lintel/audit/envelopes-<date>.jsonl` (per-envelope, the audit-of-record)
-- `~/.lintel/audit/brief-forge.jsonl` (per-forge stats: who-when-score-budget)
+- `.claude/runtime/audit/envelopes-<date>.jsonl` (per-envelope, the audit-of-record)
+- `.claude/runtime/audit/brief-forge.jsonl` (per-forge stats: who-when-score-budget)
 - stdout (the envelope, for receiver consumption)
 
 **Triggered by:**

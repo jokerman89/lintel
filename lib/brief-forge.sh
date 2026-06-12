@@ -129,8 +129,8 @@ forge_envelope() {
 }
 
 # ─── write_bypass_audit ────────────────────────────────────────────────────
-# Unified writer → ~/.lintel/audit/brief-forge.jsonl (operator field now
-# supplied by audit_log itself, no longer inlined here).
+# Unified writer → .claude/runtime/audit/brief-forge.jsonl (scope-routed by
+# _audit.sh; operator field now supplied by audit_log itself, no longer inlined here).
 write_bypass_audit() {
   local kind="${1:?}" from="${2:?}" to="${3:?}"
   audit_log "brief-forge" "brief_forge_bypassed" "event=$kind" "from=$from" "to=$to"
@@ -169,7 +169,7 @@ build_escape_hatches() {
   case "$content_type" in
     brief)
       printf 'Re-invoke source skill %s with --more-detail flag\n' "$from"
-      printf 'Read .lintel/state/00-state.md for full prior context\n'
+      printf 'Read .claude/runtime/state/00-state.md for full prior context\n'
       printf 'Ask operator for elaboration if score < 60\n'
       ;;
     spec)

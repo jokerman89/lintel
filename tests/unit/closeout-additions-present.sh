@@ -62,19 +62,19 @@ if [ -f "$LAYERS" ]; then
   done
 fi
 
-# M-1: memory.md reviewer-concerns tracking
-MEM="$REPO_ROOT/tasks/memory.md"
+# M-1: working-state reviewer-concerns tracking (v5 home: .claude/memory/working-state.md)
+MEM="$REPO_ROOT/.claude/memory/working-state.md"
 if [ -f "$MEM" ]; then
   if grep -q "reviewer-concerns" "$MEM"; then
-    pass "memory.md has reviewer-concerns tracking entry (M-1)"
+    pass "working-state.md has reviewer-concerns tracking entry (M-1)"
   else
-    fail "memory.md missing reviewer-concerns tracking"
+    fail "working-state.md missing reviewer-concerns tracking"
   fi
 
   if grep -q "PR #7\|PR #9" "$MEM"; then
-    pass "memory.md tracks PR #7 + #9 reviewer concerns"
+    pass "working-state.md tracks PR #7 + #9 reviewer concerns"
   else
-    fail "memory.md missing PR #7 or PR #9 tracking"
+    fail "working-state.md missing PR #7 or PR #9 tracking"
   fi
 fi
 

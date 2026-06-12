@@ -10,6 +10,11 @@ LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
 LESSONS_REMOTE_FILE="$HOME/.lintel-lessons-remote.txt"
 LESSONS_LOCAL_DIR="$LINTEL_HOME/lessons"
 
+# Repo-local lessons file resolved via lib/paths.sh (.claude/memory/lessons.md
+# on the v5 layout; un-migrated repos resolve to their legacy location).
+# shellcheck source=/dev/null
+source "$(dirname "${BASH_SOURCE[0]}")/../lib/paths.sh"
+
 CMD="${1:---status}"
 
 mkdir -p "$LESSONS_LOCAL_DIR"
@@ -23,7 +28,7 @@ The remote is a private git repo the operator configures.
 
 Usage:
   li-lessons-sync setup <repo-url>   First-time setup with private repo URL
-  li-lessons-sync push               Push current repo's tasks/lessons.md
+  li-lessons-sync push               Push current repo's .claude/memory/lessons.md
   li-lessons-sync pull               Pull all lessons from remote
   li-lessons-sync status             Show status (default)
   li-lessons-sync forget             Remove sync configuration
@@ -80,13 +85,15 @@ cmd_setup() {
 }
 
 cmd_push() {
-  [ -f "tasks/lessons.md" ] || { echo "No tasks/lessons.md in current dir" >&2; exit 3; }
+  local lessons_file
+  lessons_file="$(lintel_lessons_file)"
+  [ -f "$lessons_file" ] || { echo "No lessons file in current repo ($lessons_file)" >&2; exit 3; }
   [ -d "$LESSONS_LOCAL_DIR/.git" ] || { echo "Setup not done — run 'li-lessons-sync setup <url>'" >&2; exit 4; }
 
   local repo_name
   repo_name=$(basename "$(git rev-parse --show-toplevel 2>/dev/null || pwd)")
 
-  cp "tasks/lessons.md" "$LESSONS_LOCAL_DIR/${repo_name}.md"
+  cp "$lessons_file" "$LESSONS_LOCAL_DIR/${repo_name}.md"
   cd "$LESSONS_LOCAL_DIR"
   git add "${repo_name}.md"
   if git diff --cached --quiet; then

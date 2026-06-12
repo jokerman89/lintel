@@ -2,9 +2,9 @@
 name: dh-deploy-without-rollback-warn
 tier: warn-only
 event: PreToolUse (Edit|Write on deploy/IaC files)
-fires_on: commit touches deploy manifest, helm chart, Terraform, or CI/CD pipeline file without rollback declaration in same commit or in .lintel/state/dh/rollback-strategy-*.md
+fires_on: commit touches deploy manifest, helm chart, Terraform, or CI/CD pipeline file without rollback declaration in same commit or in .claude/runtime/state/dh/rollback-strategy-*.md
 override: pass --ignore-rollback flag (operator decision, logged)
-audit: ~/.lintel/audit/hooks.jsonl
+audit: .claude/runtime/audit/hooks.jsonl
 ---
 
 # dh-deploy-without-rollback-warn
@@ -14,7 +14,7 @@ Surfaces when a deploy or IaC commit lacks a documented rollback path. Warning, 
 ## What it does
 
 - Detects deploy/IaC commits via path heuristic + `pack.devops_hosting.deploy_path_glob`
-- Checks for paired rollback declaration in same commit OR latest `rollback-strategy-*.md` in `.lintel/state/dh/`
+- Checks for paired rollback declaration in same commit OR latest `rollback-strategy-*.md` in `.claude/runtime/state/dh/`
 - If no rollback declared: WARN
 
 ## Why warn-only

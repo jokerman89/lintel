@@ -65,7 +65,7 @@ cat > "$brief_file" <<EOF
 task: Assess breakage risk per consumer for schema delta
 context_pointers:
   - $delta_file
-  - .lintel/state/da/consumers-list.txt
+  - .claude/runtime/state/da/consumers-list.txt
 constraints:
   - per-consumer: backward-compat (additive / nullable) OR breaking (column drop / type narrowing / null→not-null)
   - flag analytics pipelines separately (silent breakage risk in dashboards)
@@ -79,14 +79,14 @@ EOF
 ### Step 4 — Spawn Architect for migration path (if any breaking)
 
 ```bash
-breaking_count=$(jq -r '.consumers[] | select(.breaking == true) | .name' .lintel/state/da/breakage-assessment.json | wc -l)
+breaking_count=$(jq -r '.consumers[] | select(.breaking == true) | .name' .claude/runtime/state/da/breakage-assessment.json | wc -l)
 
 if [ "$breaking_count" -gt 0 ]; then
   migration_brief=$(mktemp)
   cat > "$migration_brief" <<EOF
 task: Propose migration path for $breaking_count breaking consumer(s)
 context_pointers:
-  - .lintel/state/da/breakage-assessment.json
+  - .claude/runtime/state/da/breakage-assessment.json
 constraints:
   - prefer expand-and-contract pattern (add new column → backfill → switch reads → drop old)
   - declare grace window per consumer
@@ -110,7 +110,7 @@ fi
 
 ```bash
 ts=$(date -u +"%Y%m%dT%H%M%SZ")
-out=".lintel/state/da/data-contract-collision-$ts.md"
+out=".claude/runtime/state/da/data-contract-collision-$ts.md"
 {
   echo "# Data contract collision — $(date -u +%Y-%m-%dT%H:%M:%SZ)"
   echo ""
@@ -122,14 +122,14 @@ out=".lintel/state/da/data-contract-collision-$ts.md"
   echo "Total: $consumer_count"
   echo "Breaking: $breaking_count"
   echo ""
-  cat .lintel/state/da/breakage-assessment.md
-  [ -f .lintel/state/da/migration-plan.md ] && cat .lintel/state/da/migration-plan.md
+  cat .claude/runtime/state/da/breakage-assessment.md
+  [ -f .claude/runtime/state/da/migration-plan.md ] && cat .claude/runtime/state/da/migration-plan.md
 } > "$out"
 
 printf '{"ts":"%s","kind":"da_data_contract_collision","delta_file":"%s","consumers":%d,"breaking":%d,"raise_help":%s,"operator":"%s"}\n' \
   "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$delta_file" "$consumer_count" "$breaking_count" \
   "$([ "$breaking_count" -ge 3 ] && echo true || echo false)" "$(whoami 2>/dev/null || echo unknown)" \
-  >> "$LINTEL_HOME/audit/da-decisions.jsonl"
+  >> ".claude/runtime/audit/da-decisions.jsonl"
 ```
 
 ## Status protocol
@@ -141,7 +141,7 @@ printf '{"ts":"%s","kind":"da_data_contract_collision","delta_file":"%s","consum
 ## Integration
 
 **Reads:** delta file, repo source for grep, pack external_consumer_registries
-**Writes:** `.lintel/state/da/data-contract-collision-<ts>.md`, audit JSONL
+**Writes:** `.claude/runtime/state/da/data-contract-collision-<ts>.md`, audit JSONL
 **Dispatches to:** DatabaseDesigner (assessment), Architect (migration)
 **Hook integration:** `da-schema-drift-warn` hook fires pre-edit on schema-ADR-claimed files
 

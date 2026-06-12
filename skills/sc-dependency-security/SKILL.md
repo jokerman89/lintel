@@ -92,7 +92,7 @@ verdict=$(aggregate_dependency_verdict)
 
 ```bash
 ts=$(date -u +"%Y%m%dT%H%M%SZ")
-out=".lintel/state/sc/dependency-security-$ts.md"
+out=".claude/runtime/state/sc/dependency-security-$ts.md"
 {
   echo "# Dependency security — $(date -u +%Y-%m-%dT%H:%M:%SZ)"
   echo ""
@@ -100,13 +100,13 @@ out=".lintel/state/sc/dependency-security-$ts.md"
   echo "## Verdict: $verdict"
   echo ""
   echo "## CVE findings"
-  cat .lintel/state/sc/cve-findings.md
+  cat .claude/runtime/state/sc/cve-findings.md
   echo ""
   echo "## License compatibility"
-  cat .lintel/state/sc/license-report.md
+  cat .claude/runtime/state/sc/license-report.md
   echo ""
   echo "## SBOM"
-  cat .lintel/state/sc/sbom-summary.md
+  cat .claude/runtime/state/sc/sbom-summary.md
 } > "$out"
 
 printf '{"ts":"%s","kind":"sc_dependency_security","ecosystems":"%s","verdict":"%s","cves_high":%d,"cves_medium":%d,"operator":"%s"}\n' \
@@ -123,7 +123,7 @@ printf '{"ts":"%s","kind":"sc_dependency_security","ecosystems":"%s","verdict":"
 ## Integration
 
 **Reads:** dependency manifests + lockfiles
-**Writes:** `.lintel/state/sc/dependency-security-<ts>.md`, SBOM file, audit JSONL
+**Writes:** `.claude/runtime/state/sc/dependency-security-<ts>.md`, SBOM file, audit JSONL
 **Dispatches to:** DependencyAuditor (per ecosystem), SBOMAuditor (supply chain)
 
 ## Anti-patterns

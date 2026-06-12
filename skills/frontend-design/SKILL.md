@@ -188,7 +188,7 @@ YES — solo-invocable. Designed for auto-invocation from `/li:cycle` BUILD-phas
 - `~/.lintel/frontend-runs/<run-id>/typography.json` (via frontend-typography sub-skill)
 - `~/.lintel/frontend-runs/<run-id>/motion.json` (via frontend-motion sub-skill)
 - `~/.lintel/frontend-runs/<run-id>/frontend-design-spec.json` (Step 5 synthesis)
-- Audit-log: `~/.lintel/audit/frontend-design-runs.jsonl`
+- Audit-log: `.claude/runtime/audit/frontend-design-runs.jsonl`
 
 **Calls into:**
 - `/li:frontend-typography` (sub-skill, parallel)

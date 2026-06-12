@@ -96,4 +96,4 @@ Internal. Operator-facing schema architecture specs. No customer-facing voice.
 
 ## How operators read your output
 
-Polyglot boundaries go to `.lintel/state/da/polyglot-model.md`. Partition strategy to `.lintel/state/da/partition-strategy.md`. Dimensional model to `.lintel/state/da/dimensional-model.md`. Operators consume via DA module sub-skill reports.
+Polyglot boundaries go to `.claude/runtime/state/da/polyglot-model.md`. Partition strategy to `.claude/runtime/state/da/partition-strategy.md`. Dimensional model to `.claude/runtime/state/da/dimensional-model.md`. Operators consume via DA module sub-skill reports.
