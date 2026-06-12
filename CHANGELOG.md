@@ -2,6 +2,30 @@
 
 All notable changes to this repo are tracked here. Format is loose — date headings + bulleted changes. Major behavior changes to the canonical instructions are also logged in `scaffolding/EVOLUTION-LOG.md` (which travels with each scaffolded repo).
 
+## 5.2.0 — 2026-06-12
+
+Battletest remediation (six adversarial personas) + gstack de-heritage. ADR-0010/0011/0012.
+
+### Security (ADR-0010)
+- Block hooks (secret/customer-data) now match any git phrasing (`git -C`, abs paths, `&&` chains) and scan staged **union** unstaged-tracked content — closes the `^git`-anchor and `commit -am` worktree bypasses
+- Modern token formats in the BLOCK tier: github_pat_, sk-proj-, AIza (Google), sk_live_/sk_test_ (Stripe), glpat-, ASIA
+- CAPTURE vault sink scans the note for secrets+PII before the external write (aborts on hit) — the one path that left the repo unscanned
+- Audit + state ledger are CR/LF-safe (no forged/hidden records); override always audits
+- `li-scaffold` template render no longer uses `sed s///` (closed an operator-priv RCE via hostile dir/--name)
+
+### gstack de-heritage (ADR-0011)
+- 44 edits / 30 files: attribution rewritten to Lintel's own rationale; gstack paths/binaries → native helpers (`~/.lintel/projects`, `_context_repo_slug`, `context_latest`); REVIEW REPORT heading dual-accepts during grace; legacy review-log imported once; disable-file migrated once — zero functionality lost
+
+### Agent memory + model (ADR-0012)
+- 23 agents gain `memory: project` (reviewers/auditors remember repo-specific findings); 4 mechanical agents gain `model: haiku`; frontmatter-lint validates both
+
+### Friction + docs
+- resume ↔ context-restore wired (handoff no longer blind); cost gates show honest task-count + uncalibrated label (no invented dollars); DEFINE feature fast-path off scope size; SENSE meta-infra gated on a Lintel-repo marker
+- canonical hook-activation matrix, docs/GLOSSARY.md, 4-root state map, stale-count fixes, install ghosts removed
+
+### Numbers
+- agents: 23 with memory / 4 with model · 2 new behavior tests · suite 76/76
+
 ## 5.1.0 — 2026-06-12
 
 The subtraction release (ADR-0009): same capability, 23% less surface.

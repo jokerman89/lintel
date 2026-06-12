@@ -73,7 +73,7 @@ Service registered in services.yaml
 - Layer 2 prod-host gate ALWAYS applies — you cannot bootstrap cookies against a customer-data-bearing prod host through this skill. Use sanitized staging/test environments.
 - Profile dir permissions: `~/.lintel/browser-profiles/` should be `chmod 700` (skill verifies + warns if loose).
 - NEVER prompts operator for passwords. NEVER captures keystrokes. NEVER reads the browser's password autofill store.
-- Cookie store excluded from gstack/lintel brain-sync by default (per Layer 2 secrets-rule). If sync is enabled: a hook will block.
+- Cookie store excluded from any lessons/memory sync by default (Layer 2 secrets-rule). If a sync is enabled, the secrets hook blocks.
 
 ## Failure modes
 

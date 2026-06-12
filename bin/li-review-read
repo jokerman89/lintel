@@ -1,16 +1,17 @@
 #!/usr/bin/env bash
 # bin/li-review-read — native review-log reader for the release gate
 #
-# Replaces the external gstack binary `~/.claude/skills/gstack/bin/gstack-review-read`
-# that the release gate used at its "Review readiness check" step. Reads Lintel's own
-# audit log at .claude/runtime/audit/reviews.jsonl (legacy global fallback for
-# un-migrated repos) and emits the verdict shape the release
-# gate expects: whether an Eng Review is CLEAR within 7 days for the current commit.
+# The release gate's "Review readiness check" calls this. It reads Lintel's own
+# audit log at .claude/runtime/audit/reviews.jsonl (with a global ~/.lintel/audit/
+# fallback for un-migrated repos) and emits the verdict shape the release gate
+# expects: whether an Eng Review is CLEAR within 7 days for the current commit.
+# First-party by design — no external binary on the read path.
 #
-# Back-compat: also folds in any legacy gstack records written before this
-# remediation (~/.gstack/projects/<slug>/<branch>-reviews.jsonl), so historical
-# entries still count toward the gate. The legacy gstack binary is no longer
-# called on the execution path — this reader just still *reads* its old output.
+# Grace-window cleanup (until 2026-09-12): any legacy review records written
+# before this remediation (${GSTACK_HOME:-$HOME/.gstack}/projects/<slug>/<branch>-reviews.jsonl)
+# are imported ONCE into the native reviews.jsonl, idempotently — a marker prevents
+# re-import — after which this reader reads only the native file. Historical entries
+# still count toward the gate; the legacy path stops being on the read path.
 #
 # Usage:
 #   bin/li-review-read                  # human + machine verdict to stdout
@@ -33,9 +34,23 @@ REPO_ROOT="${LINTEL_REPO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." 2>/dev/n
 
 LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
 LINTEL_AUDIT_DIR="${LINTEL_AUDIT_DIR:-$LINTEL_HOME/audit}"
-WORK_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || echo "$PWD")"
-REVIEWS_LOG="$WORK_ROOT/.claude/runtime/audit/reviews.jsonl"
-[ -f "$REVIEWS_LOG" ] || REVIEWS_LOG="$LINTEL_AUDIT_DIR/reviews.jsonl" # legacy-fallback-ok
+
+# Source the unified audit helper so the legacy one-time import below routes
+# through audit_log() (the single sanctioned JSONL writer) and so the reader and
+# writer agree on the reviews-log path via _audit_out_dir.
+AUDIT_LIB="$REPO_ROOT/bin/_audit.sh"
+# shellcheck source=/dev/null
+[ -f "$AUDIT_LIB" ] && source "$AUDIT_LIB"
+
+# Canonical reviews log. _audit_out_dir routes to <repo>/.claude/runtime/audit/
+# on the v5 layout, else ~/.lintel/audit/ (global fallback for un-migrated repos).
+if command -v _audit_out_dir >/dev/null 2>&1; then
+  REVIEWS_LOG="$(_audit_out_dir reviews)/reviews.jsonl"
+else
+  WORK_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || echo "$PWD")"
+  REVIEWS_LOG="$WORK_ROOT/.claude/runtime/audit/reviews.jsonl"
+  [ -f "$REVIEWS_LOG" ] || REVIEWS_LOG="$LINTEL_AUDIT_DIR/reviews.jsonl" # legacy-fallback-ok
+fi
 
 GATE_SKILL="plan-eng-review"
 DAYS=7
@@ -59,9 +74,9 @@ done
 
 HEAD_SHORT="$(git rev-parse --short HEAD 2>/dev/null || echo unknown)"
 
-# ── Derive the legacy gstack path (slug + branch), mirroring gstack-slug logic ──
-# so historical entries written before this remediation still count. Sanitized to
-# [a-zA-Z0-9._-] exactly as gstack-slug does.
+# ── Derive the legacy review path (slug + branch) for the one-time import ──
+# Mirrors the historical slug derivation: sanitized to [a-zA-Z0-9._-]. Used only
+# by the grace-window import below, not on the steady-state read path.
 _legacy_review_file() {
   local slug branch remote raw
   remote="$(git remote get-url origin 2>/dev/null || echo "")"
@@ -76,11 +91,39 @@ _legacy_review_file() {
 }
 LEGACY_LOG="$(_legacy_review_file)"
 
-# ── Collect candidate records from both sources into one stream ──
-ALL_RECORDS="$(
-  { [ -f "$REVIEWS_LOG" ] && cat "$REVIEWS_LOG"; } 2>/dev/null
-  { [ -f "$LEGACY_LOG" ]  && cat "$LEGACY_LOG"; }  2>/dev/null
-)"
+# ── One-time grace-window import of legacy records into the native log ──
+# If a legacy review file exists and has not been imported yet, fold each of its
+# records into the native log exactly once — via audit_log() (the single sanctioned
+# JSONL writer), NOT a raw append, so the audit-writes-via-helper contract holds.
+# A marker (a plain state file, no .jsonl in its name) guards re-import. After this
+# the legacy path is no longer read; only the native file is. Removable after 2026-09-12.
+IMPORTED=0
+REVIEWS_DIR="$(dirname "$REVIEWS_LOG")"
+MARKER="$REVIEWS_DIR/reviews-legacy-import.done"
+if [ -f "$LEGACY_LOG" ] && command -v audit_log >/dev/null 2>&1; then
+  # Marker records which legacy file was already folded in (path keys the import).
+  if ! { [ -f "$MARKER" ] && grep -Fxq "$LEGACY_LOG" "$MARKER" 2>/dev/null; }; then
+    mkdir -p "$REVIEWS_DIR" 2>/dev/null || true
+    while IFS= read -r legacy_line; do
+      [ -z "$legacy_line" ] && continue
+      # Mirror li-review-log's record shape: preserve the legacy payload verbatim
+      # under "raw" (the verdict awk matches the escaped "skill" inside it) plus the
+      # parsed status/commit/review_ts when present.
+      l_skill="$(printf '%s' "$legacy_line" | sed -n 's/.*"skill"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')"
+      l_status="$(printf '%s' "$legacy_line" | sed -n 's/.*"status"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')"
+      l_commit="$(printf '%s' "$legacy_line" | sed -n 's/.*"commit"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')"
+      l_ts="$(printf '%s' "$legacy_line" | sed -n 's/.*"timestamp"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')"
+      audit_log reviews "${l_skill:-unknown}" \
+        "status=$l_status" "commit=$l_commit" "review_ts=$l_ts" "raw=$legacy_line"
+      IMPORTED=1
+    done < "$LEGACY_LOG"
+    # Append the imported legacy path to the marker (plain state file, not a log).
+    printf '%s\n' "$LEGACY_LOG" >> "$MARKER" 2>/dev/null || true
+  fi
+fi
+
+# ── Read only the native log from here on (legacy already folded in once above) ──
+ALL_RECORDS="$( { [ -f "$REVIEWS_LOG" ] && cat "$REVIEWS_LOG"; } 2>/dev/null )"
 
 if [ "$JSON_ONLY" -eq 1 ]; then
   printf '%s\n' "$ALL_RECORDS" | sed '/^$/d'
@@ -89,8 +132,8 @@ fi
 
 # ── Emit the raw records (release gate / model can inspect them directly) ──
 echo "## Review records (native: $REVIEWS_LOG)"
-if [ -f "$LEGACY_LOG" ]; then
-  echo "##                (legacy back-compat: $LEGACY_LOG)"
+if [ "$IMPORTED" -eq 1 ]; then
+  echo "##                (one-time import folded in legacy records from $LEGACY_LOG)"
 fi
 if [ -n "$ALL_RECORDS" ]; then
   printf '%s\n' "$ALL_RECORDS" | sed '/^$/d'
@@ -119,7 +162,7 @@ VERDICT_RECORD="$(
     {
       line=$0
       # skill match: native records store the skill as top-level "kind";
-      # legacy gstack records (and the preserved "raw" payload) carry "skill".
+      # imported legacy records (and the preserved "raw" payload) carry "skill".
       # Accept the escaped form too (\"skill\":\"...\") since raw is JSON-in-JSON.
       if (index(line, "\"kind\":\"" skill "\"") == 0 \
           && index(line, "\"skill\":\"" skill "\"") == 0 \

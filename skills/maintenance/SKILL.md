@@ -54,7 +54,7 @@ find .claude/runtime/state -name "*.md" -mtime +30 | xargs -r tar -czf ~/.lintel
 # 3. Build/draft directories: clean up after successful PRs
 find ~/.lintel/draft -mtime +7 -type d -empty -delete
 
-# 4. .gstack/ session markers > 120 min → already cleaned by hook
+# 4. ~/.lintel/sessions/ stale markers (design-surfaced, bloat counters) — age-gated cleanup here (nothing else cleans them; restored in v5.2)
 # (no action)
 
 # 5. Provenance records: keep latest per artifact, archive older

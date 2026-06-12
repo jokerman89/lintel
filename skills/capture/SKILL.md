@@ -285,7 +285,27 @@ Source the content from the Step 1 cycle aggregation. **Hard rules:** no secrets
 customer or employer-internal data, no full file contents — repo-relative pointers instead of
 payloads. Render the headings AND body in the session's working language (the template above is
 the canonical English form — translate it wholesale when the session ran in another language).
-Frontmatter must parse. After writing: `audit_log capture vault_sink_written "file=<filename>"`.
+Frontmatter must parse.
+
+**MANDATORY pre-write scan (battletest K4 — the vault note lands OUTSIDE the repo, where no
+git-commit hook sees it).** The "hard rules" above are not enough on their own — scan the
+rendered note body programmatically before writing, and ABORT the export (warn, never fail
+CAPTURE) on any hit:
+
+```bash
+source "$LINTEL_REPO_ROOT/hooks/shared/_patterns.sh"
+note_body="$(cat "$rendered_note")"
+sec_hits="$(scan_secrets all "$note_body")"
+pii_hits="$(scan_customer "$note_body")"
+if [ -n "$sec_hits$pii_hits" ]; then
+  echo "[lintel/capture] WARN: vault export ABORTED — ${sec_hits:+secrets: $sec_hits }${pii_hits:+pii: $pii_hits}"
+  audit_log capture vault_sink_skipped "reason=sensitive_content" "secrets=$sec_hits" "pii=$pii_hits"
+  # skip the write entirely — do NOT sanitize-and-ship; an aborted export is correct
+else
+  # write the note, then:
+  audit_log capture vault_sink_written "file=<filename>"
+fi
+```
 
 ### Step 8 — Retro (optional, light)
 
@@ -326,7 +346,7 @@ state_append CAPTURE DONE cycle_complete=true outcome=<DONE|DONE_WITH_CONCERNS|B
 
 ### Step 11 — Closing message
 
-Tight closing per gstack pattern (intrapreneurship-adapted, not YC plea):
+Tight closing — terse artifact list + operator-pattern observations, no motivational filler:
 
 ```
 LINTEL CYCLE COMPLETE — <wedge title>
@@ -412,7 +432,7 @@ YES — standalone post-implementation reflection. Useful if operator forgot CAP
 - **Drafting ADR for trivial decisions** — ADR has overhead, reserve for decisions worth preserving
 - **Skipping cold-executor trio because "we shipped already"** — the trio is the durable artifact, more valuable than the PR after months pass
 - **Polluting role-file with session-specific data** — role files are persistent identity, not session log
-- **Forgetting to update operator profile** — gstack pattern for cross-session tier tracking
+- **Forgetting the granularity calibration record (Step 1b)** — it is the surviving cross-session feedback loop (the operator-profile append was removed in v5, ADR-0006); skipping it leaves the scale estimator on its default prior
 - **Long retro write-up when cycle was small** — retro is optional + light
 
 ## Failure recovery

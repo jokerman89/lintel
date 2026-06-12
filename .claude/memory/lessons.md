@@ -227,3 +227,31 @@ around structural units (files with one caller, zero refs), not prose-shaped est
 
 Related: [[L-003]] verify counts — same family: a measured number is an input to judgment,
 not a commitment.
+
+## L-012 — A security fix that re-opens a forgeable hole is worse than the gap it closed (v5.2)
+
+**Rule:** When hardening a control, the fix must not introduce a NEW bypass that's easier or
+more deniable than the original. Especially: never let attacker-influenced text (a commit
+message, a branch name, an LLM-generated arg) flip a control off. After any security edit,
+write the NEGATIVE test — prove the thing you think you blocked is still blocked AND that the
+new code can't be talked around — before claiming it closed.
+
+**Why:** v5.2 battletest. Closing H8 (inline override left no audit) I made the block hooks
+honor `LINTEL_OVERRIDE_SECRET=1` found ANYWHERE in the command string. The independent reviewer
+showed `git commit -m "see LINTEL_OVERRIDE_SECRET=1"` then suppressed a real secret block —
+prose in a commit message defeated the gate, and the audit recorded a legitimate-looking
+override. That is strictly worse than the pre-fix state: it READS as enforced. The green suite
+missed it because it only tested the legitimate override path, never the forgery. Fix: honor
+the token only as a leading env-assignment prefix (never inside a quoted arg) + a negative
+regression assertion.
+
+**How to apply:**
+- For every control edit, add both a positive (blocks the bad thing) AND a negative (can't be
+  trivially talked around) behavior assertion. The negative test is the one that matters.
+- Treat any string the agent/attacker can influence (commit message, branch, filename, arg) as
+  hostile input to a control — never a trust signal.
+- "Fail-safe direction" (over-block) is acceptable; "fail-open via forgeable input" is not.
+
+Related: [[L-007]] verify the reviewer's claim — here the reviewer was exactly right and live-
+verified the exploit; [[L-010]] green-on-committed-tree — the suite was green AND wrong because
+it tested the happy path only. Behavior tests must include the adversarial path.

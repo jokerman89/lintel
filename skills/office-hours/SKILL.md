@@ -12,8 +12,6 @@ cli_support: [claude-code, codex]
 
 The design-doc generator. Takes an unstructured problem statement and produces a structured design document with: context, goals, premises, decisions, risks, scope, and a forcing-question section. Output lands at `~/.lintel/projects/<slug>/<user>-<branch>-design-<datetime>.md` and is the input to `/plan-ceo-review` and `/plan-eng-review`.
 
-Lintel-namespaced sibling of gstack's `/office-hours`. Equivalent semantics, different home directory (`~/.lintel/` vs `~/.gstack/`).
-
 ## When to use
 
 - New feature, big idea, or non-trivial change with multiple plausible directions
@@ -101,7 +99,7 @@ Recommendation: A
 1. ...
 2. ...
 
-## GSTACK REVIEW REPORT
+## REVIEW REPORT
 [appended by /plan-eng-review — must be the LAST h2]
 ```
 
@@ -151,6 +149,6 @@ Recommendation: A
 ## See also
 
 - `/plan-ceo-review` — next step in the plan chain
-- `/plan-eng-review` — required review gate, appends GSTACK REVIEW REPORT
+- `/plan-eng-review` — required review gate, appends the REVIEW REPORT
 - `/autoplan` — orchestrates this skill + reviews in one chain
 - `/design-consultation` — exploratory discussion before committing to a design doc

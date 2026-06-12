@@ -49,8 +49,7 @@ Hdr "Creating ~\.lintel\ structure"
 $dirs = @(
   $LintelHome, $LintelScaffolding, $LintelHooks,
   "$LintelHome\audit", "$LintelHome\sessions", "$LintelHome\provenance",
-  "$LintelHome\freeze", "$LintelHome\rai", "$LintelHome\dpia", "$LintelHome\dsb",
-  "$LintelHome\entra", "$LintelHome\review-log", "$LintelHome\benchmarks",
+  "$LintelHome\freeze", "$LintelHome\review-log", "$LintelHome\benchmarks",
   "$LintelHome\calibrations", "$LintelHome\browse-runs", "$LintelHome\scrape-runs",
   "$LintelHome\design-runs", "$LintelHome\design-html", "$LintelHome\design-shotgun",
   "$LintelHome\browser-profiles", "$LintelHome\quarantine",

@@ -14,7 +14,7 @@ You are the DEFINE skill — Phase 2 of the Lintel cycle.
 
 ## What this skill does
 
-Transforms operator intent into a locked design via forcing questions, premise-check, and mandatory alternatives. Inherits gstack's `/office-hours` discipline. Adds role-lens overlay if a role is active. Produces an APPROVED design doc that becomes the contract for PLAN and BUILD.
+Transforms operator intent into a locked design via forcing questions, premise-check, and mandatory alternatives. Applies the office-hours discipline (forcing questions, premise-check, mandatory alternatives — see /li:office-hours). Adds role-lens overlay if a role is active. Produces an APPROVED design doc that becomes the contract for PLAN and BUILD.
 
 Hard gate: do NOT invoke any implementation skill, write any code, or scaffold any project until the design doc is APPROVED via AskUserQuestion.
 
@@ -37,6 +37,10 @@ Hard gate: do NOT invoke any implementation skill, write any code, or scaffold a
 ### Step 1 — Context gather (inherited from /office-hours Phase 1)
 
 Read:
+- **`scope.md`** (from the SCOPE phase) — `size` + `chosen_reading` + `intent`. Canonical home: the
+  job dir (`.claude/runtime/jobs/<id>/scope.md`) when a job is active, else
+  `.claude/runtime/state/scope.md`. This is what selects the **fast-path vs the full treatment**
+  (Step 1.5); DEFINE must read it, not ignore it.
 - `CLAUDE.md` and `TODOS.md` if present
 - `git log --oneline -30`
 - `git diff origin/main --stat` if applicable
@@ -44,6 +48,62 @@ Read:
 - Existing design docs for this project: `ls -t docs/design/*-design-*.md`
 
 If design docs exist, list them: "Prior designs: [titles + dates]"
+
+```bash
+# Read the SCOPE phase's verdict (silent if SCOPE didn't run / no scope.md).
+scope_file="${LINTEL_JOB_DIR:+$LINTEL_JOB_DIR/scope.md}"
+[ -f "$scope_file" ] || scope_file=".claude/runtime/state/scope.md"
+scope_size=""; scope_reading=""; scope_intent=""
+if [ -f "$scope_file" ]; then
+  scope_size=$(grep -m1 -E '^size:' "$scope_file" | awk '{print $2}')          # XS|S|M|L|XL
+  scope_intent=$(grep -m1 -E '^intent:' "$scope_file" | awk '{print $2}')        # build|fix|ship|...
+  scope_reading=$(grep -m1 -E '^chosen_reading:' "$scope_file" | sed 's/^chosen_reading:[[:space:]]*//; s/^"//; s/"$//')
+fi
+```
+
+### Step 1.5 — Routing: FEATURE fast-path vs full treatment (H6)
+
+DEFINE's six founder-framed forcing questions (who-gets-fired, pay-this-week, 3-year-fit) are
+calibrated for **greenfield / venture-scale** intent. Applied to a **small feature inside an existing
+product**, they interrogate work that doesn't warrant it — fatigue with no payoff. Branch on the
+SCOPE size before Step 4:
+
+**Take the FEATURE fast-path when BOTH hold:**
+
+- `scope_size` ∈ {`S`, `M`} (read above; XS is trivial and skips DEFINE entirely, L/XL is large), **and**
+- the request is a **feature-in-existing-product**, not greenfield. Signal: an established codebase
+  (the repo has prior commits / a real tree — not a 1-commit fresh clone) **and** `scope_intent` is
+  not a new-venture/new-product framing (`scaffold` or a "new product/startup/greenfield" reading in
+  `chosen_reading` ⇒ NOT fast-path).
+
+When the fast-path applies, **collapse the six forcing questions (Step 5) and the mode question
+(Step 4) into ONE combined confirmation** — the only two things that actually matter for a feature:
+
+```
+FEATURE scope (size <S|M>, in an existing product) — one confirmation instead of the founder questions:
+
+  • The wedge — the smallest valuable slice of this feature: <one-line, inferred from the request + codebase>
+  • The one real alternative — the most credible different way to build it: <one-line>
+
+Confirm the wedge as stated, pick the alternative, or correct either. (Say "full treatment" to run the
+six forcing questions anyway.)
+```
+
+AskUserQuestion with that single combined prompt. Then **skip Steps 4–6** (mode question, six forcing
+questions, premise check) and go straight to **Step 9 (Alternatives)** — which is already where the
+chosen wedge + alternative belong — then the normal design-doc + approval gate. Record the branch in
+the design doc: `Routing: FEATURE fast-path (scope size <S|M>, existing product)`.
+
+**Take the FULL treatment (Steps 4–6 unchanged) when ANY holds:**
+
+- `scope_size` ∈ {`L`, `XL`}, **or**
+- greenfield / new-product / new-venture framing (fresh repo, `scaffold` intent, or a startup/greenfield `chosen_reading`), **or**
+- no `scope.md` exists (SCOPE didn't run — fall back to the full, safe path), **or**
+- the operator explicitly asks for the full treatment.
+
+The full path is the **safe default**: when in doubt (size unknown, intent ambiguous, scope.md
+absent), run the full forcing questions. The fast-path is an *opt-in narrowing* for the clearly-small,
+clearly-feature case — never a silent skip of due diligence on real design work.
 
 ### Step 2 — Related design discovery
 
@@ -61,6 +121,8 @@ If L3 reveals a genuine insight, name it: "EUREKA: Everyone does X because they 
 
 ### Step 4 — Mode question (if not already established)
 
+> Skipped on the FEATURE fast-path (Step 1.5) — folded into the single combined confirmation.
+
 AskUserQuestion: "What's your goal with this?"
 - Startup mode: building a startup or intrapreneurship
 - Builder mode: hackathon / open source / research / learning / having fun
@@ -68,6 +130,10 @@ AskUserQuestion: "What's your goal with this?"
 Maps to Startup Phase 2A or Builder Phase 2B forcing questions.
 
 ### Step 5 — Six forcing questions (ONE AT A TIME, push until specific)
+
+> **FULL treatment only.** Skipped on the FEATURE fast-path (Step 1.5), which replaces Steps 4–6
+> with one combined wedge+alternative confirmation. Steps 5–6 run for greenfield / L / XL / no-scope
+> / operator-requested-full work.
 
 For Startup mode (with intrapreneurship adaptation):
 
@@ -90,6 +156,8 @@ Smart-skip: if operator's earlier answers already cover a Q, skip it.
 Escape hatch: if operator says "skip the questions" — ask 2 more critical Qs from their stage, then proceed.
 
 ### Step 6 — Premise check
+
+> Skipped on the FEATURE fast-path (Step 1.5). Runs for the full treatment.
 
 State 3-5 premises operator must agree with before alternatives:
 ```
@@ -209,11 +277,15 @@ state_append DEFINE DONE next=DISCOVER design_doc=<path> wedge="<one-line>"
 
 ## Pause-points (MANDATORY)
 
+**Full treatment:**
 1. After context gather + intent → 1-sentence understanding confirmation
 2. After each forcing question (1-6) → STOP, wait
 3. After premise statement → AskUserQuestion lock
 4. After alternatives → AskUserQuestion pick (MANDATORY)
 5. After design doc + spec review → AskUserQuestion approve/revise/start-over
+
+**FEATURE fast-path (Step 1.5):** the six per-question pauses (2) and the premise lock (3) collapse
+into **one** combined wedge+alternative confirmation; pauses 1, 4 and 5 still apply.
 
 ## Hop-in support
 
@@ -232,6 +304,7 @@ Skip-conditions (DEFINE is skipped when):
 ## Integration
 
 **Reads:**
+- `scope.md` (job dir if active, else `.claude/runtime/state/scope.md`) — `size` + `chosen_reading` + `intent`; selects FEATURE fast-path vs full treatment (Step 1.5)
 - CLAUDE.md, TODOS.md, recent git log
 - `docs/design/*-design-*.md` (related design discovery)
 - `.claude/memory/lessons.md`, `.claude/memory/working-state.md`
@@ -251,7 +324,7 @@ Skip-conditions (DEFINE is skipped when):
 ## Anti-patterns
 
 - Skipping forcing questions because operator seems impatient → 1 push, then 2 critical Qs minimum
-- Asking >1 question per AskUserQuestion call → ONE AT A TIME (gstack rule)
+- Asking >1 question per AskUserQuestion call → ONE AT A TIME (one decision per gate, always)
 - Letting design doc be approved before adversarial spec review (unless reviewer unavailable)
 - Cross-contaminating private role-lens onto public design doc → sensitivity filter MANDATORY
 - Writing premises that are not actually contested (premise check is for genuine disagreements, not rubber-stamps)

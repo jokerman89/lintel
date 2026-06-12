@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # li-lessons-sync — sync repo-local lessons.md across operator's machines
-# (gstack-brain-style — private to operator, opt-in)
+# (private to operator, opt-in — syncs via a personal git remote)
 #
 # Usage: li-lessons-sync [--push | --pull | --status]
 

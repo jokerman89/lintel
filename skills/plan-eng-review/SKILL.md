@@ -13,7 +13,7 @@ hop_in: no
 
 The **required** review per Lintel's Review Readiness Dashboard. Scope: architecture, code quality, test coverage, performance. Outputs a structured plan-file review report + persists via first-party `bin/li-review-log` so the ship phase can read it.
 
-Inspired-by gstack's equivalent. Lintel version adds:
+The architecture-and-tests gate before build — the one review Lintel requires. On top of the architecture/quality/coverage/performance pass it also runs:
 - `cli_support` frontmatter check on every skill/agent the plan adds
 - Voice-tier check on every customer-facing skill the plan adds
 - the active pack's compliance gates as a checklist inside Step 0 (`resolve_pack_field compliance.hooks`; none by default)
@@ -31,7 +31,7 @@ Inspired-by gstack's equivalent. Lintel version adds:
 
 ## Inputs
 
-- Optional path to a plan/design doc. Auto-discovers from `~/.gstack/projects/<slug>/*-design-*.md` if not provided.
+- Optional path to a plan/design doc. Auto-discovers from `~/.lintel/projects/<slug>/*-design-*.md` if not provided.
 - Optional `--scope diff` — review the current branch's diff instead of a plan doc (degrades to `/review` semantics).
 
 ## Workflow
@@ -79,7 +79,7 @@ After all 4 sections: offer codex (or Claude subagent if codex unavailable) for 
 ## Report format — written to the plan/design doc
 
 ```markdown
-## GSTACK REVIEW REPORT
+## REVIEW REPORT
 
 | Review | Trigger | Why | Runs | Status | Findings |
 |--------|---------|-----|------|--------|----------|
@@ -89,7 +89,7 @@ After all 4 sections: offer codex (or Claude subagent if codex unavailable) for 
 **VERDICT:** ENG CLEARED — ready to implement | NOT CLEARED — <reason>
 ```
 
-Persist via first-party `bin/li-review-log` (legacy alias: gstack-review-log):
+Persist via first-party `bin/li-review-log`:
 ```bash
 bin/li-review-log '{"skill":"plan-eng-review","timestamp":"...","status":"...","unresolved":N,"critical_gaps":N,"issues_found":N,"mode":"FULL_REVIEW","commit":"..."}'
 ```
@@ -113,7 +113,7 @@ bin/li-review-log '{"skill":"plan-eng-review","timestamp":"...","status":"...","
 
 Before `ExitPlanMode`:
 
-1. Read the plan file. Confirm LAST `## ` heading is `## GSTACK REVIEW REPORT`.
+1. Read the plan file. Confirm the LAST `## ` heading is `## REVIEW REPORT`. Dual-accept (grace until 2026-09-12): the legacy `## GSTACK REVIEW REPORT` heading still passes, so design docs approved before the rename remain valid. New writes use `## REVIEW REPORT`.
 2. Report contains: Runs/Status/Findings table + VERDICT line.
 3. `bin/li-review-log` called + `bin/li-review-read` consumed at least once.
 
