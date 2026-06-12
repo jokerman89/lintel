@@ -87,14 +87,6 @@ Tools: Read, Bash, Edit, Glob
 4. Test in a new session
 ```
 
-## Compliance integration
-
-- New skill file goes through the active pack's compliance gates on save (`resolve_pack_field compliance.hooks`; none by default — paranoid packs may scan a skill spec for secret patterns).
-
-## Voice tier note
-
-`voice: internal`. Skill authoring is engineering-internal. The new skill's OUTPUT voice is determined by its own `voice:` frontmatter, not this skill's.
-
 ## Failure modes
 
 - **Name collides:** report existing skill path, exit. Do not auto-rename.

@@ -1,0 +1,61 @@
+{
+  "_comment": "Lintel plugin hook auto-registration (ADR-0008). These register automatically when the plugin is installed — no manual settings.json merge. Closes the activation gap found in the 2026-06-12 fit audit: session-digest (ADR-0002) and memory-budget-warn (ADR-0006) had shipped but never fired. The safety hooks are included so a fresh install gets the core safety promise with zero setup; operators who previously merged them by hand into ~/.claude/settings.json should remove those manual entries to avoid double-fire (see docs/v4.x/migrations/_INDEX.md). Module warn-hooks stay opt-in via ~/.lintel/hooks symlinks. Shell-string form is used so Windows resolves bash via Claude Code's Git Bash discovery (exec-form \"bash\" requires bash.exe on the raw process PATH, which plain Windows lacks). Verify firing after plugin update: a session_digest record must appear in the repo's .claude/runtime/audit/hooks.jsonl — li-doctor checks this.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|clear",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/shared/session-digest/run.sh\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/shared/no-secrets-in-edit/run.sh\"",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/shared/secret-scan-block/run.sh\"",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/shared/customer-data-block/run.sh\"",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/shared/no-direct-main-push/run.sh\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/shared/memory-budget-warn/run.sh\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

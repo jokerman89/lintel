@@ -136,10 +136,6 @@ For each section/slide:
 
 Write to `--out` path. Surface summary (slide_count, section types, language, arc) to operator.
 
-## Voice tier behavior
-
-`voice: internal`. Outline is operator-facing intermediate artifact, never customer-bound. No voice-gate required at this step. Voice-technique hints are applied at `generate-write` stage.
-
 ## Status protocol
 
 - **DONE** — outline.md written, validation passed
@@ -151,10 +147,6 @@ Write to `--out` path. Surface summary (slide_count, section types, language, ar
 
 - Brief is too vague to outline (less than 50 words): surface back + offer to gather more context
 - Multiple plausible arcs detected: surface options + recommendation
-
-## Hop-in support
-
-YES — solo-invokable. Common solo use: operator wants outline-only to fill in manually.
 
 ## Integration
 

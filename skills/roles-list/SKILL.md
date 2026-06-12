@@ -27,7 +27,7 @@ Surfaces a table for selection.
 
 ## When NOT to use
 
-- Already know the role-id — use `/li:role-activate <id>` directly
+- Already know the role-id — use `/li:role <id>` directly
 
 ## Workflow
 
@@ -72,9 +72,9 @@ directory plus any operator-local roles — none ship with Lintel itself)
 
 Currently active: <role-id or null>
 
-To activate: /li:role-activate <id>
-To deep-dive: /li:role-deep-dive <id>
-To create new role: /li:role-new <id>
+To activate: /li:role <id>
+To deep-dive: /li:role --deep-dive <id>
+To create new role: /li:role-new
 ```
 
 ### Step 4 — Auto-suggest if cycle phase implies role fit
@@ -89,20 +89,6 @@ ts: <timestamp>
 role_count: <N>
 ```
 
-## Status protocol
-
-- **DONE** — list surfaced
-- **DONE_WITH_CONCERNS** — list partial (some role files malformed)
-- **BLOCKED** — no role directories exist
-
-## Pause-points
-
-None.
-
-## Hop-in support
-
-YES — pure information query, anytime.
-
 ## Integration
 
 **Reads:**
@@ -112,14 +98,10 @@ YES — pure information query, anytime.
 - `~/.lintel/profile.yaml` (active role)
 
 **Writes:**
-- Optional `.lintel/state/00-state.md` event
+- Optional `.claude/runtime/state/00-state.md` event
 
 ## Anti-patterns
 
 - **Loading full role content** — frontmatter only
 - **Showing private roles to operators on shared machines without confirmation** — privacy-aware (though operator chose to list them)
 - **Truncating list silently** — show all, paginate only if huge (>20 roles)
-
-## Voice tier behavior
-
-`voice: internal`.

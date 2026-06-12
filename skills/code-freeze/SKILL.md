@@ -11,7 +11,7 @@ cli_support: [claude-code, codex]
 
 # /code-freeze
 
-Session-scoped lockdown of files or directories. While a path is frozen, other Lintel skills refuse to modify it. The freeze is metadata in `~/.lintel/code-freeze/<session-id>.yaml` — not a filesystem lock — so an explicit override is possible if the operator means it.
+Session-scoped lockdown of files or directories. While a path is frozen, other Lintel skills refuse to modify it. The freeze is metadata in `.claude/runtime/state/code-freeze/<session-id>.yaml` — not a filesystem lock — so an explicit override is possible if the operator means it.
 
 Use to prevent drift: "we're working on portal/, do not touch landing/ this session."
 
@@ -39,7 +39,7 @@ Use to prevent drift: "we're working on portal/, do not touch landing/ this sess
 
 1. **Resolve paths.** Expand globs, canonicalize.
 2. **Sanity check.** Reject obvious mistakes: empty path, root `/`, freezing `~/.lintel/` itself.
-3. **Write to session freeze file.** `~/.lintel/code-freeze/<session-id>.yaml`:
+3. **Write to session freeze file.** `.claude/runtime/state/code-freeze/<session-id>.yaml`:
    ```yaml
    frozen:
      - path: src/components/landing/
@@ -48,7 +48,7 @@ Use to prevent drift: "we're working on portal/, do not touch landing/ this sess
        expires: session
    ```
 4. **Notify chained skills.** Other Lintel skills read this file before any Edit/Write. If the target matches: skill refuses + reports the freeze.
-5. **Audit log.** Append to `~/.lintel/audit/code-freeze.jsonl`.
+5. **Audit log.** Append to `.claude/runtime/audit/code-freeze.jsonl`.
 6. **Report current freeze state.**
 
 ## Report format
@@ -68,7 +68,7 @@ To override for one skill invocation: skill --ignore-freeze
 
 Every Lintel skill that writes files MUST:
 
-1. Read `~/.lintel/code-freeze/<session-id>.yaml` before any Edit/Write.
+1. Read `.claude/runtime/state/code-freeze/<session-id>.yaml` before any Edit/Write.
 2. If target path matches a frozen entry: refuse, report the freeze + reason.
 3. Honor `--ignore-freeze` ONLY if operator passes it AND logs a reason to audit.
 
@@ -78,10 +78,6 @@ This is enforced at skill-author-level (every skill includes the check). Future 
 
 - Freeze cannot prevent Layer 2 always-on checks (those override). E.g. you can't freeze "skip the sanity-scan" — the sanity-scan is Layer 2.
 - Freeze IS load-bearing for frozen-zone enforcement: project CLAUDE.md frozen-zone files SHOULD be added to freeze on session start by `/context-restore` or `/help`.
-
-## Voice tier note
-
-`voice: internal`. Freeze ops are engineering-internal.
 
 ## Failure modes
 

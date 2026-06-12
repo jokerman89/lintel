@@ -160,10 +160,6 @@ For each content.md section (§N):
 
 Write to `--out`. Surface summary (per-format layout count, palette used, font baseline) to operator.
 
-## Voice tier behavior
-
-`voice: internal`. Design-spec.json is operator-facing intermediate artifact, never customer-bound. No voice-gate at this step.
-
 ## Status protocol
 
 - **DONE** — design-spec.json written, all sections mapped, validation passed
@@ -175,10 +171,6 @@ Write to `--out`. Surface summary (per-format layout count, palette used, font b
 
 - Palette missing for `--palette <custom>` name: offer fallback to ms-default or surface upload-instruction
 - Layout-mapping ambiguous for §N (multiple valid layouts): surface options + recommendation
-
-## Hop-in support
-
-YES — solo-invokable. Common solo use: operator retargets existing content to a different format set or palette swap.
 
 ## Integration
 

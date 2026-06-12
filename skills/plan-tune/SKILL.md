@@ -36,7 +36,7 @@ Question tuning saves keystrokes when the operator has stable preferences. Conse
 
 ## Workflow
 
-1. Read current preferences from `~/.lintel/question-preferences.jsonl` (created if missing).
+1. Read current preferences from `.claude/runtime/audit/question-preferences.jsonl` (created if missing).
 2. Per the flag:
    - `--list`: pretty-print all current preferences grouped by skill
    - `--check`: print the preference for the specified id (or "default" if unset)
@@ -103,10 +103,6 @@ Effect: auto-picks 'proceed as approved' on this question
   - Production data access
 - Operator can `--set ... ask-only-for-one-way` to auto-decide reversible while keeping one-way confirmations.
 
-## Voice tier note
-
-`voice: internal`. Tuning is operator-internal infrastructure.
-
 ## Failure modes
 
 - **Invalid question_id format:** reject with format hint (`<skill>-<slug>`).
@@ -143,5 +139,5 @@ Subsequent invocations: auto-decided as A.
 
 - `gstack-question-preference` binary (under the hood) — writes the JSONL
 - `gstack-question-log` binary — logs each question for analytics (separate from preferences)
-- `~/.lintel/question-preferences.jsonl` — authoritative preference file
-- `~/.lintel/analytics/questions.jsonl` — question telemetry (anonymized, opt-in)
+- `.claude/runtime/audit/question-preferences.jsonl` — authoritative preference file
+- `.claude/runtime/audit/questions.jsonl` — question telemetry (anonymized, opt-in)

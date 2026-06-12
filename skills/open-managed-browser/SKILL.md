@@ -75,10 +75,6 @@ Browser detached. Close manually when done.
 - If `audit-mode` is on per `~/.lintel/config.yaml`: log the launch event with timestamp + profile + URL.
 - Browser process is detached and runs under operator's user — anything they do in it is THEIR action, not skill-mediated.
 
-## Voice tier note
-
-`voice: internal`. Launcher output is engineering-internal.
-
 ## Failure modes
 
 - **Chromium binary missing:** print exact install command, exit. Do not fall back to system Chrome (which is unmanaged + may have personal cookies).

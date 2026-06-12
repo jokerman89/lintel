@@ -10,10 +10,6 @@ cli_support: [claude-code, codex]
 
 You are the adr-new skill.
 
-## What this skill does
-
-Creates a new ADR file from `docs/adr/TEMPLATE.md`, named per next-available number (e.g., `0042-<slug>.md`). Asks context-questions to populate Title, Context, Decision, Consequences sections. Commits on feature branch.
-
 ## When to use
 
 - Non-trivial architectural decision being made
@@ -29,11 +25,11 @@ Creates a new ADR file from `docs/adr/TEMPLATE.md`, named per next-available num
 
 ## Workflow
 
-1. **Locate ADR directory.** Check `docs/adr/` exists. If not, recommend scaffolding init first.
+1. **Locate ADR directory.** Check `.claude/decisions/` exists. If not, recommend scaffolding init first.
 
-2. **Find next ADR number.** Scan existing `docs/adr/NNNN-*.md` files. Next = max + 1.
+2. **Find next ADR number.** Scan existing `.claude/decisions/NNNN-*.md` files. Next = max + 1.
 
-3. **Read template.** `docs/adr/TEMPLATE.md` exists? If yes, load. If no, fall back to standard ADR format.
+3. **Read template.** `.claude/decisions/TEMPLATE.md` exists? If yes, load. If no, fall back to standard ADR format.
 
 4. **Gather context via AskUserQuestion (sequence):**
 
@@ -46,12 +42,12 @@ Creates a new ADR file from `docs/adr/TEMPLATE.md`, named per next-available num
 
 5. **Generate slug.** From title, kebab-case, ≤6 words.
 
-6. **Write ADR file.** `docs/adr/<NNNN>-<slug>.md`. Status: Proposed by default.
+6. **Write ADR file.** `.claude/decisions/<NNNN>-<slug>.md`. Status: Proposed by default.
 
 7. **Commit.** Branch + commit:
    ```bash
    git checkout -b adr-<NNNN>-<slug>
-   git add docs/adr/<NNNN>-<slug>.md
+   git add .claude/decisions/<NNNN>-<slug>.md
    git commit -m "adr: <NNNN> <title>"
    ```
 
@@ -64,7 +60,7 @@ ADR-NEW: <NNNN>-<slug>
 
 Title: <title>
 Status: Proposed
-File: docs/adr/<NNNN>-<slug>.md
+File: .claude/decisions/<NNNN>-<slug>.md
 Branch: adr-<NNNN>-<slug>
 
 Sections populated:
@@ -82,7 +78,7 @@ Next:
 
 ## Edge cases
 
-- **No `docs/adr/` directory** — recommend `bin/li-scaffold init` first.
+- **No `.claude/decisions/` directory** — recommend `bin/li-scaffold init` first.
 - **Decision already documented in lessons.md** — recommend cross-reference.
 - **Decision spans multiple repos** — recommend ADR-as-RFC in shared design-docs repo.
 - **TEMPLATE.md custom** — respect repo customization; load whatever's there.

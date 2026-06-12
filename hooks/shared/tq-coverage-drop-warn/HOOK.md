@@ -4,7 +4,7 @@ tier: warn-only
 event: PreToolUse (Edit|Write on test/source files)
 fires_on: commit drops aggregate or critical-path coverage below threshold from profile
 override: pass --ignore-coverage-drop flag (operator decision, logged)
-audit: ~/.lintel/audit/hooks.jsonl
+audit: .claude/runtime/audit/hooks.jsonl
 ---
 
 # tq-coverage-drop-warn

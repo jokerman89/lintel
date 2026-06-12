@@ -165,8 +165,6 @@ Write to `--out-dir`. Surface summary (word count, voice-tier, blocklist-pass) t
 
 ## Voice tier behavior
 
-`voice: internal`. Content.md itself is operator-facing intermediate artifact. Voice-gate runs at orchestrator level (`generate`), not here.
-
 If upstream `--customer-share`: voice_tier in content frontmatter is set to the active pack's customer-facing tier (signals to downstream that content was written for a customer-facing surface).
 
 ## Status protocol
@@ -180,10 +178,6 @@ If upstream `--customer-share`: voice_tier in content frontmatter is set to the 
 
 - Outline has missing `voice_technique` on > 30% of sections: re-invoke generate-outline with that requirement
 - Blocklist enforcement loops > 3 iterations on same section: surface to operator for manual rewrite
-
-## Hop-in support
-
-YES — solo-invokable. Common solo use: operator iterates voice-tier or language on an existing outline.
 
 ## Integration
 

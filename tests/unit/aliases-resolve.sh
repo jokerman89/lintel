@@ -71,7 +71,12 @@ TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
 
 (
-  export LINTEL_REPO_ROOT="$REPO_ROOT"
+  # Markerless sandbox repo root: without a v5 layout marker the audit write
+  # falls back to LINTEL_AUDIT_DIR (a migrated repo root would route it to
+  # <repo>/.claude/runtime/audit/). The alias map is pinned explicitly since
+  # its default derives from LINTEL_REPO_ROOT.
+  export LINTEL_REPO_ROOT="$TMP"
+  export LINTEL_ALIASES_FILE="$REPO_ROOT/config/aliases.yaml"
   export HOME="$TMP"
   export LINTEL_AUDIT_DIR="$TMP/.lintel/audit"
   source "$HELPER"
@@ -126,7 +131,7 @@ trap 'rm -rf "$TMP"' EXIT
   export LINTEL_REPO_ROOT="$REPO_ROOT"
   source "$HELPER"
   output=$(list_skill_aliases)
-  for pair in "match -> skill-router" "setup-brain -> gbrain-setup" "sync-brain -> gbrain-sync"; do
+  for pair in "match -> skill-router"; do
     if echo "$output" | grep -qF "$pair"; then
       echo "  PASS: list_skill_aliases reports: $pair"
     else
@@ -139,8 +144,6 @@ trap 'rm -rf "$TMP"' EXIT
 # Step 5 — Renamed skills exist at NEW paths with NEW frontmatter
 declare -A RENAMES=(
   [match]=skill-router
-  [setup-brain]=gbrain-setup
-  [sync-brain]=gbrain-sync
 )
 for old in "${!RENAMES[@]}"; do
   new="${RENAMES[$old]}"
@@ -177,7 +180,7 @@ for old in "${!RENAMES[@]}"; do
 done
 
 # Step 6 — Each rename has matching entry in aliases.yaml
-for old in match setup-brain sync-brain; do
+for old in match; do
   if grep -qE "^[[:space:]]*-[[:space:]]*old:[[:space:]]*$old\$" "$ALIASES"; then
     pass "aliases.yaml has skill_alias entry: old=$old"
   else

@@ -106,6 +106,7 @@ TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
 
 export LINTEL_HOME="$TMP/.lintel"
+export LINTEL_REPO_ROOT="$TMP"   # markerless sandbox: audit stays under LINTEL_HOME, not the real repo's .claude/runtime/
 export LINTEL_SESSION_ID="test-session-$$"   # stable across $() subshells in tests
 mkdir -p "$LINTEL_HOME/brand/design-patterns/test-pattern" "$LINTEL_HOME/sessions" "$LINTEL_HOME/audit"
 

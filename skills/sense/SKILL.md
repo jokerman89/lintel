@@ -42,9 +42,12 @@ Output: a SENSE report. Operator decides next move based on it.
 
 ### Step 0a — Surface relevant lessons (v3.6 cohort 2 item 1.3)
 
-Before reading configuration, invoke `/li:lessons-surface` so future session work starts with relevant lessons from `tasks/lessons.md`. Closes the L-001/L-002 loop (lessons are written but never read without this step).
+Before reading configuration, invoke `/li:lessons-surface` so future session work starts with relevant lessons from `.claude/memory/lessons.md`. Closes the L-001/L-002 loop (lessons are written but never read without this step).
 
 Invocation: `/li:lessons-surface --auto-from-sense` — keyword derived from the branch name + recent commit subjects. (A skill call, portable across every CLI; the old `~/.claude/skills/...` path was Claude-Code-only and non-executable.)
+
+The surfacing is MECHANICAL since v5 (ADR-0006): the skill runs `lessons_surface` from
+`lib/memory.sh` (grep-rank, supersede-aware) — not a prose instruction the agent may skip.
 
 Output (max 3 lessons) prepends to the SENSE report. Silent if no relevant matches. Never a blocker.
 
@@ -194,7 +197,7 @@ If profile missing → prompt operator via AskUserQuestion: "Lintel can run with
 ### Step 2 — Read prior 00-state.md
 
 ```bash
-STATE_FILE=".lintel/state/00-state.md"
+STATE_FILE=".claude/runtime/state/00-state.md"
 if [ -f "$STATE_FILE" ]; then
   # Parse: cycle_id, current_phase, next_recommended, phases_completed, intent_detected
   # Surface in report
@@ -222,7 +225,7 @@ Heuristics (apply in order, first match wins):
 If `role_active` is set in profile:
 - Read role file IDENTITY section (~50-100 tokens, NEVER full file)
 - Note voice tier from role (overrides mode default if set)
-- Surface "Role active: <id> (deep-dive: /li:role-deep-dive)"
+- Surface "Role active: <id> (deep-dive: /li:role --deep-dive)"
 
 Do NOT load:
 - COLD KNOWLEDGE section
@@ -231,13 +234,13 @@ Do NOT load:
 - ROLE-SPECIFIC INSIGHTS
 - SENSITIVE CONTEXT
 
-Those load on-demand via `/li:role-deep-dive <role-id>`.
+Those load on-demand via `/li:role --deep-dive <role-id>`.
 
 ### Step 5 — Read lessons + memory (light scan)
 
 ```bash
-[ -f "tasks/lessons.md" ] && lessons_count=$(grep -c '^## ' tasks/lessons.md)
-[ -f "tasks/memory.md" ] && memory_count=$(grep -c '^## ' tasks/memory.md)
+[ -f ".claude/memory/lessons.md" ] && lessons_count=$(grep -c '^## ' .claude/memory/lessons.md)
+[ -f ".claude/memory/working-state.md" ] && memory_count=$(grep -c '^## ' .claude/memory/working-state.md)
 ```
 
 Surface: "X lessons / Y memory entries available — invoke `/li:lessons` to filter for current intent."
@@ -253,25 +256,12 @@ Approximate current context window utilization. If detectable from prior turns +
 
 ### Step 7 — Write 00-state.md entry + surface report
 
+Mechanical since v5.0 (ADR-0008) — one command, not a YAML obligation:
+
 ```bash
-mkdir -p .lintel/state
-cat >> .lintel/state/00-state.md <<EOF
----
-phase: SENSE
-ts: $(date -u +%Y-%m-%dT%H:%M:%SZ)
-operator: $(whoami)
-compliance_mode: $compliance_mode
-workprofile: $workprofile
-mode_recommended: $recommended_mode
-role: $role_active
-voice_tier: $effective_voice_tier
-intent_detected: $intent
-phases_completed: []
-context_budget: $current_tokens / 1M
-meta_infra_detected: $meta_infra_detected
-meta_paths_changed: $meta_total
----
-EOF
+_sl="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}/lib/state.sh"
+[ -f "$_sl" ] || _sl="$HOME/.lintel/lib/state.sh"; source "$_sl"   # installed by install.sh in consumer repos
+state_append SENSE DONE next=SCOPE mode_recommended=$recommended_mode intent_detected="$intent" role=$role_active voice_tier=$effective_voice_tier compliance_mode=$compliance_mode meta_infra_detected=$meta_infra_detected meta_paths_changed=$meta_total
 ```
 
 ## Output format
@@ -330,15 +320,15 @@ If operator explicitly asks for the SENSE report mid-session, re-run is allowed 
 
 **Reads:**
 - `~/.lintel/profile.yaml`
-- `.lintel/state/00-state.md` in cwd (if present)
+- `.claude/runtime/state/00-state.md` in cwd (if present)
 - recent `git log --oneline -10` (cheap)
-- `tasks/lessons.md` (line count only)
-- `tasks/memory.md` (line count only)
+- `.claude/memory/lessons.md` (line count only)
+- `.claude/memory/working-state.md` (line count only)
 - role file IDENTITY section (if role active)
 - `~/.lintel/scaffolding/` presence
 
 **Writes:**
-- `.lintel/state/00-state.md` (new SENSE entry, appends)
+- `.claude/runtime/state/00-state.md` (new SENSE entry, appends)
 
 **Triggers (recommends, never auto-invokes):**
 - SCOPE next in `/li:cycle` (sizes + disambiguates the request before DEFINE)
@@ -357,7 +347,7 @@ If operator explicitly asks for the SENSE report mid-session, re-run is allowed 
 
 - **profile.yaml malformed**: warn but continue with defaults (workprofile=off, voice=internal, mode=auto). Recommend `/li:doctor` for diagnosis.
 - **00-state.md unreadable**: continue without prior state, NO_PRIOR_STATE flag in report.
-- **Permission errors on `.lintel/state/`**: warn, write to `/tmp/lintel-state-<ts>.md` instead, surface path.
+- **Permission errors on `.claude/runtime/state/`**: warn, write to `/tmp/lintel-state-<ts>.md` instead, surface path.
 
 ## Voice tier behavior
 
@@ -370,7 +360,7 @@ cycle and the one logical next action — whether this phase ran standalone or i
 
 ```bash
 source "$LINTEL_REPO_ROOT/lib/cycle-footer.sh"   # fallback: "$(git rev-parse --show-toplevel)/lib/cycle-footer.sh"
-render_cycle_footer                               # reads .lintel/state/00-state.md; --compact for short replies
+render_cycle_footer                               # reads .claude/runtime/state/00-state.md; --compact for short replies
 ```
 
-Skipped phases render `⊘`; ASCII via `LINTEL_ASCII=1`. See [ADR-0003](../../docs/adr/0003-cycle-position-footer.md).
+Skipped phases render `⊘`; ASCII via `LINTEL_ASCII=1`. See [ADR-0003](../../.claude/decisions/0003-cycle-position-footer.md).

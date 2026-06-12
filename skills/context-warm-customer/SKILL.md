@@ -10,10 +10,6 @@ cli_support: [claude-code, codex]
 
 You are the context-warm-customer skill — customer-engagement repo loader.
 
-## What this skill does
-
-Loads a customer-engagement repo's relevant state into current session: their CLAUDE.md, recent ADRs, IaC (Terraform/Bicep/etc.), recent commits, README. Useful when current session needs cross-repo reasoning (e.g., comparing internal reference patterns against the customer's current state).
-
 ## When to use
 
 - Pre-customer-meeting prep on operator's machine
@@ -55,7 +51,7 @@ If the active pack's compliance mode is `hard` (`resolve_pack_field compliance.m
 
 Default load set:
 - `CLAUDE.md`, `README.md` (context)
-- `docs/adr/[0-9]*.md` (top 10 most-recent)
+- `.claude/decisions/[0-9]*.md` (top 10 most-recent)
 - `*.bicep`, `*.tf`, `*.bicepparam` (top 20 by file size)
 - `recent git log --oneline -20`
 
@@ -93,19 +89,11 @@ tokens_added: <approx>
 sensitivity_check: <result>
 ```
 
-Also append to `~/.lintel/audit/customer-repo-access.jsonl` for traceability.
-
-## Status protocol
-
-- DONE / BLOCKED (sensitivity check failed, repo not found)
+Also append to `.claude/runtime/audit/customer-repo-access.jsonl` for traceability.
 
 ## Pause-points
 
 - Sensitivity confirmation (MANDATORY if the active pack's compliance mode is `hard`)
-
-## Hop-in support
-
-YES.
 
 ## Integration
 
@@ -116,7 +104,3 @@ Reads customer repo via Read/Glob. Delegates to `/li:context-warm`. Logs audit.
 - **Loading customer-data unscrubbed** — sensitivity check is MANDATORY
 - **Loading entire customer repo** — bounded scope, default file types only
 - **Forgetting audit log** — customer-repo access must be traceable
-
-## Voice tier behavior
-
-`voice: internal`. Sensitive operator-side activity.

@@ -222,10 +222,6 @@ Full report: $out
 }
 ```
 
-## Voice tier behavior
-
-`voice: internal`. Default. `--customer-share` triggers strict gate (yellow → BLOCKED).
-
 ## Status protocol
 
 - **DONE** — review complete, design-review.json emitted, overall green
@@ -237,11 +233,6 @@ Full report: $out
 
 - Customer-share + yellow/red: BLOCKED + surface top findings + ask "address now or override?"
 - Red dimension: hard-block for customer-share regardless of overall
-- Baseline-comparison fails (vault entry missing): warn + fall back to absolute audit
-
-## Hop-in support
-
-YES — solo-invocable.
 
 ## Integration
 
@@ -252,7 +243,7 @@ YES — solo-invocable.
 
 **Writes:**
 - `<artifact-dir>/design-review.json` (or $OUT-path)
-- Audit-log: `~/.lintel/audit/frontend-design-review-runs.jsonl`
+- Audit-log: `.claude/runtime/audit/frontend-design-review-runs.jsonl`
 
 **Calls into:**
 - `agents/frontend/DesignSystemAuditor.md` (primary)

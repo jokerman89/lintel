@@ -18,7 +18,8 @@
 #
 # render_cycle_footer [--full|--compact|--thin] [--ascii] [--mode M] [--here P]
 #                     [--next P] [--awaiting "<hint>"] [--state <file>]
-#   With no --here, state is read from --state (default .lintel/state/00-state.md):
+#   With no --here, state is read from --state (default .claude/runtime/state/00-state.md,
+#   falling back to the legacy .lintel/state/00-state.md on un-migrated repos):
 #   the last `phase:` block is "here", its `next_recommended:` is "next", and the set
 #   of prior `phase:` blocks are "done". --here/--next/--mode override the file.
 command -v render_cycle_footer >/dev/null 2>&1 && return 0 2>/dev/null
@@ -62,7 +63,11 @@ _cf_phase_history() {
 }
 
 render_cycle_footer() {
-  local tier="auto" ascii="${LINTEL_ASCII:-0}" awaiting="" mode="" here="" next="" state=".lintel/state/00-state.md"
+  # v5 layout (ADR-0005): state lives in .claude/runtime/state/; the .lintel/
+  # path is the pre-migration fallback (grace window to 2026-09-12).
+  local _default_state=".claude/runtime/state/00-state.md"
+  [ -f "$_default_state" ] || { [ -f ".lintel/state/00-state.md" ] && _default_state=".lintel/state/00-state.md"; }
+  local tier="auto" ascii="${LINTEL_ASCII:-0}" awaiting="" mode="" here="" next="" state="$_default_state"
   while [ $# -gt 0 ]; do
     case "$1" in
       --compact) tier="compact"; shift ;;
@@ -91,9 +96,20 @@ render_cycle_footer() {
     legend="✅ done · ⊘ skipped · 📍 here · ▢ pending"
   fi
 
-  # resolve from state where not explicitly given
+  # resolve from state where not explicitly given. Non-canonical ledger entries
+  # (CYCLE/RESUME orchestrator blocks, ADR-0008) carry metadata, not position —
+  # filter them out of the history before resolving "here".
   local history; history="$(_cf_phase_history "$state")"
-  [ -z "$here" ] && here="$(printf '%s\n' "$history" | sed '/^$/d' | tail -1)"
+  if [ -z "$here" ]; then
+    local _h _cand=""
+    while IFS= read -r _h; do
+      [ -n "$_h" ] || continue
+      cycle_phase_known "$(printf '%s' "$_h" | awk '{print toupper($1)}')" && _cand="$_h"
+    done <<EOF_HIST
+$history
+EOF_HIST
+    here="$_cand"
+  fi
   [ -z "$next" ] && next="$(_cf_state_last next_recommended "$state")"
   [ -z "$mode" ] && mode="$(_cf_state_last cycle_mode "$state")"
   [ -z "$mode" ] && mode="$(_cf_state_last mode "$state")"
@@ -158,6 +174,9 @@ render_cycle_footer() {
   if [ "$tier" = "compact" ]; then
     if [ -n "$awaiting" ]; then
       printf '> %s `%s` · **%s awaiting your answer:** %s\n' "$g_here" "${here:-?}" "$nextmark" "$awaiting"
+    elif [ -z "$here" ] && [ "$complete" != "true" ]; then
+      # cycle started (CYCLE STARTING ledger entry) but no phase has closed yet
+      printf '> %s cycle starting%s → first phase **`SENSE`**.\n' "$g_here" "${mode:+ (mode \`$mode\`)}"
     elif [ -n "$next" ]; then
       printf '> %s `%s` done → next **`%s`**. Say `go` or `/li:%s`, or `pause`.\n' "$g_here" "${here:-?}" "$next" "$nl"
     else

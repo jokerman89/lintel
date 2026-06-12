@@ -14,12 +14,6 @@ cli_support:
 
 You are the `migrations` skill — pending-migration surfacer (v4.0 Phase 1).
 
-## What this skill does
-
-Reads `docs/v4.x/migrations/_INDEX.md` + per-file migration frontmatter. For each active migration with operator-callsites still on the deprecated shape, surfaces a 1-line warning with grace-window remaining + action.
-
-Read-only. Never mutates code. Surfaces the work; operator decides when to migrate.
-
 ## When to use
 
 - Session-start (auto-invoked by SENSE Step 0c if any migration window is active)
@@ -80,19 +74,6 @@ If operator has zero callsites on any active migration: list still appears but w
 source "$(dirname "$0")/../../bin/_audit.sh"
 audit_log migration surfaced "active_count=$active_count"
 ```
-
-## Voice tier behavior
-
-`voice: internal`. Operator-only.
-
-## Status protocol
-
-- **DONE** — surface complete (zero or N migrations listed)
-- **NEEDS_CONTEXT** — `_INDEX.md` malformed (rare; surface diagnostic)
-
-## Hop-in support
-
-YES — solo-invocable. Designed for auto-invocation from SENSE Step 0c.
 
 ## Integration
 

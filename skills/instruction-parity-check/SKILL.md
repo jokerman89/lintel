@@ -135,7 +135,7 @@ For each of the 4 key sections:
 ### Step 5 — Write report + return-code
 
 ```bash
-REPORT="${HOME}/.lintel/audit/instruction-parity-$(date +%Y%m%d).md"
+REPORT=".claude/runtime/audit/instruction-parity-$(date +%Y%m%d).md"
 mkdir -p "$(dirname "$REPORT")"
 # Write report
 
@@ -144,10 +144,6 @@ mkdir -p "$(dirname "$REPORT")"
 # 1 = warn (some drift but < major-threshold)
 # 2 = fail (major drift, multi-CLI promise broken)
 ```
-
-## Voice tier behavior
-
-`voice: internal`. Operator-internal multi-CLI maintenance pass.
 
 ## Status protocol
 
@@ -161,10 +157,6 @@ mkdir -p "$(dirname "$REPORT")"
 - 1+ files missing: surface + ask whether to proceed with partial-comparison
 - Major drift detected on all key sections: surface aggressively, recommend halting the multi-CLI release
 
-## Hop-in support
-
-YES — solo-invocable + CI-integrated.
-
 ## Integration
 
 **Reads:**
@@ -172,7 +164,7 @@ YES — solo-invocable + CI-integrated.
 - (Optional) Previous parity-report for delta-comparison
 
 **Writes:**
-- `~/.lintel/audit/instruction-parity-<date>.md` (report)
+- `.claude/runtime/audit/instruction-parity-<date>.md` (report)
 - stdout (summary)
 - Return code (CI consumption)
 

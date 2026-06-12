@@ -14,6 +14,8 @@ You are the context-warm base skill — explicit file load into session.
 
 Loads files specified by operator into session context. Reports token cost. Updates context budget tracking. This is the BASE for all warm-* variants (related, sessions, adrs, customer, from-url).
 
+`--pattern` runs the declared-pattern preload — the former standalone warmup skill is folded into this one (its old name routes here via `config/aliases.yaml`): instead of an explicit target, it warms the repo's declared high-leverage file set.
+
 Default session-start loads ~5-15k tokens (CLAUDE.md, AGENT-INSTRUCTIONS, lessons, memory, recent ADRs, active role identity). When more context is needed for deeper work, operator explicitly warms.
 
 ## When to use
@@ -63,7 +65,7 @@ est_tokens=$((total_chars / 4))
 
 ### Step 3 — Budget check
 
-Read current `.lintel/state/context-budget.md` if exists:
+Read current `.claude/runtime/state/context-budget.md` if exists:
 - Current tokens used
 - Headroom
 
@@ -91,7 +93,7 @@ done
 ### Step 6 — Update budget tracking
 
 ```yaml
-# .lintel/state/context-budget.md (append)
+# .claude/runtime/state/context-budget.md (append)
 event: context_warm
 ts: <timestamp>
 files_loaded: <count>
@@ -117,32 +119,17 @@ Headroom: <X>k
 
 Files are now in session — subsequent skills + agents will see them.
 To cool / drop: /li:context-cool
-To save state: /li:context-snapshot
+To save state: /li:context-save
 ```
-
-## Status protocol
-
-- **DONE** — files loaded, budget updated, report surfaced
-- **BLOCKED** — no files matched OR budget overrun rejected
-- **NEEDS_CONTEXT** — operator didn't specify target
-
-## Pause-points
-
-- If load ≥20k tokens: confirm
-- If files have sensitive markers (customer-data patterns): warn
-
-## Hop-in support
-
-YES — invoked anytime mid-session.
 
 ## Integration
 
 **Reads:**
 - Target files (via Read tool, into session context)
-- `.lintel/state/context-budget.md` (prior state)
+- `.claude/runtime/state/context-budget.md` (prior state)
 
 **Writes:**
-- `.lintel/state/context-budget.md` (append event)
+- `.claude/runtime/state/context-budget.md` (append event)
 - Session context (the loaded file content)
 
 **Triggers:**
@@ -160,7 +147,3 @@ YES — invoked anytime mid-session.
 - **Target glob matches 0 files**: surface helpful suggestion (similar names found?)
 - **One file unreadable**: skip it, continue with rest, note in report
 - **Budget overrun**: REFUSE, recommend `/li:context-cool` first
-
-## Voice tier behavior
-
-`voice: internal`. Operator coordination only.

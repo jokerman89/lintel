@@ -1,0 +1,24 @@
+# Lintel sessions dashboard (Obsidian Bases core plugin, v1.9+)
+# Installed by bin/li-vault-init. Flat typed frontmatter on session notes
+# (type/created/repo/branch/outcome) is the contract — see ADR-0007.
+filters:
+  and:
+    - type == "session"
+views:
+  - type: table
+    name: All sessions
+    order:
+      - file.name
+      - repo
+      - branch
+      - outcome
+      - created
+  - type: table
+    name: Open threads
+    filters:
+      and:
+        - outcome != "shipped"
+    order:
+      - created
+      - repo
+      - outcome

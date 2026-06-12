@@ -6,6 +6,7 @@ color: cyan
 tools: Read, Bash, Grep, Glob
 voice: mixed
 cli_support: [claude-code, codex]
+hop_in: no
 necessity: OPTIONAL
 gap_if_skipped: "Operator loses the REVIEW+SHIP+CAPTURE shortcut for split-session work; the same range is still reachable via /li:cycle --from REVIEW --to CAPTURE, so only the convenience is lost."
 ---
@@ -74,10 +75,6 @@ Inherits from /li:cycle. Critical outcomes:
 - REVIEW 3-stage review pauses (between spec compliance / quality / compliance)
 - SHIP HARD-RULES re-check + customer-deliverable 4-gate pipeline
 - CAPTURE per-lesson and per-ADR draft confirmations
-
-## Hop-in support
-
-n/a — composite shortcut.
 
 ## Integration
 

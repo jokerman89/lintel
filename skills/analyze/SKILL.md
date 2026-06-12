@@ -1,7 +1,7 @@
 ---
 name: analyze
 layer: foundation
-description: Cross-artifact consistency gate (ADR-0004, adopted from spec-kit /analyze) — checks DEFINE↔PLAN↔BUILD legs + authority alignment, persists a severity-classified report to .lintel/state/analyze-report.md. Read-only on the tree; re-runnable at any cycle point. Delegated to by PLAN Step 8 and BUILD's final pass.
+description: Cross-artifact consistency gate (ADR-0004, adopted from spec-kit /analyze) — checks DEFINE↔PLAN↔BUILD legs + authority alignment, persists a severity-classified report to .claude/runtime/state/analyze-report.md. Read-only on the tree; re-runnable at any cycle point. Delegated to by PLAN Step 8 and BUILD's final pass.
 color: red
 tools: Read, Bash, Grep, Glob, Write
 voice: internal
@@ -15,7 +15,7 @@ gap_if_skipped: "Plan revisions and BUILD deviations go unreconciled against the
 Cross-artifact consistency check across the cycle's contract chain: the APPROVED design doc
 (DEFINE) ↔ the cold-executor trio (PLAN) ↔ the build-log + tree (BUILD), plus alignment with
 authority docs (ADRs, CLAUDE.md constraints). Read-only on the repo; writes exactly one
-artifact: `.lintel/state/analyze-report.md`.
+artifact: `.claude/runtime/state/analyze-report.md`.
 
 ## When to use
 
@@ -38,10 +38,10 @@ artifact — report honestly what could not be checked):
 | Artifact | Source |
 |---|---|
 | Design doc | newest `docs/design/*-design-*.md` or the doc named in `00-state.md` DEFINE entry |
-| Cold-executor trio | `plan.md` + `spec.md` (paths from the `00-state.md` PLAN entry) + `prompt.md` (sibling in the same `docs/plans/<slug>/` dir — the PLAN entry records only plan/spec paths) |
-| Discover report | newest `.lintel/state/discover-report-*.md`, or the `report_path:` recorded in the `00-state.md` DISCOVER entry (ADR constraints list) |
+| Cold-executor trio | `plan.md` + `spec.md` (paths from the `00-state.md` PLAN entry) + `prompt.md` (sibling in the same `.claude/plans/<slug>/` dir — the PLAN entry records only plan/spec paths) |
+| Discover report | newest `.claude/runtime/state/discover-report-*.md`, or the `report_path:` recorded in the `00-state.md` DISCOVER entry (ADR constraints list) |
 | Build evidence | build-log entries + `00-state.md` BUILD entry + `git log`/`git diff` over the cycle's commits |
-| Authority docs | `docs/adr/*.md` (Accepted), CLAUDE.md frozen zones |
+| Authority docs | `.claude/decisions/*.md` (Accepted), CLAUDE.md frozen zones |
 
 ## The three legs
 
@@ -66,7 +66,7 @@ artifact — report honestly what could not be checked):
 
 ## Report format (persisted)
 
-Write `.lintel/state/analyze-report.md`:
+Write `.claude/runtime/state/analyze-report.md`:
 
 ```
 # analyze-report
@@ -109,4 +109,4 @@ source "$LINTEL_REPO_ROOT/lib/cycle-footer.sh"   # fallback: "$(git rev-parse --
 render_cycle_footer                               # auto: thin when no cycle, full/--compact when in one
 ```
 
-See [ADR-0003](../../docs/adr/0003-cycle-position-footer.md).
+See [ADR-0003](../../.claude/decisions/0003-cycle-position-footer.md).

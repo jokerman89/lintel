@@ -20,18 +20,6 @@ skill_aliases:
     removal_at: 2026-08-29
     reason: "WS-4b rename — 'match' too generic, hides semantic-router contract (Cohort 4 naming-decisions)"
 
-  - old: setup-brain
-    new: gbrain-setup
-    deprecated_at: 2026-05-29
-    removal_at: 2026-08-29
-    reason: "WS-4b rename — domain-prefix-first (gbrain), drop redundant li- prefix (Cohort 4)"
-
-  - old: sync-brain
-    new: gbrain-sync
-    deprecated_at: 2026-05-29
-    removal_at: 2026-08-29
-    reason: "WS-4b rename — sibling to gbrain-setup, same domain-prefix-first pattern"
-
   - old: context-budgetwatch
     new: context-budget
     deprecated_at: 2026-06-10
@@ -39,6 +27,275 @@ skill_aliases:
     reason: "T19 consolidation completed — the check lives at /li:context-budget --watch; the thin delegator skill is removed (punch-list §18 #6)"
 
   # (agt-tier-stamp → agent-tier-stamp alias removed with the skill — now in lintel-caip-pack)
+  # (setup-brain/sync-brain → gbrain-* aliases retired with the skills — ADR-0009 0-ref pruning;
+  #  gbrain's query loop was never integrated and nothing referenced the setup/sync surface)
+
+  - old: context-snapshot
+    new: context-save
+    deprecated_at: 2026-06-12
+    removal_at: 2026-09-12
+    reason: "ADR-0006 memory v2 consolidation — snapshot was a duplicate of save; bin/_context.sh is the shared mechanical core"
+
+  - old: context-dump
+    new: context-restore
+    deprecated_at: 2026-06-12
+    removal_at: 2026-09-12
+    reason: "ADR-0006 memory v2 consolidation — dump was restore + warm under another name"
+
+  - old: context-warmup
+    new: context-warm
+    deprecated_at: 2026-06-12
+    removal_at: 2026-09-12
+    reason: "ADR-0006 memory v2 consolidation — warmup duplicated warm's preload with a declared-pattern flavor; use /li:context-warm"
+
+  - old: role-activate
+    new: role
+    deprecated_at: 2026-06-12
+    removal_at: 2026-09-12
+    reason: "ADR-0009 — role lifecycle consolidated into /li:role (flags) + /li:role-new (--update)"
+
+  - old: role-deactivate
+    new: role
+    deprecated_at: 2026-06-12
+    removal_at: 2026-09-12
+    reason: "ADR-0009 — role lifecycle consolidated into /li:role (flags) + /li:role-new (--update)"
+
+  - old: role-rotate
+    new: role
+    deprecated_at: 2026-06-12
+    removal_at: 2026-09-12
+    reason: "ADR-0009 — role lifecycle consolidated into /li:role (flags) + /li:role-new (--update)"
+
+  - old: role-frame
+    new: role
+    deprecated_at: 2026-06-12
+    removal_at: 2026-09-12
+    reason: "ADR-0009 — role lifecycle consolidated into /li:role (flags) + /li:role-new (--update)"
+
+  - old: role-deep-dive
+    new: role
+    deprecated_at: 2026-06-12
+    removal_at: 2026-09-12
+    reason: "ADR-0009 — role lifecycle consolidated into /li:role (flags) + /li:role-new (--update)"
+
+  - old: role-update
+    new: role-new
+    deprecated_at: 2026-06-12
+    removal_at: 2026-09-12
+    reason: "ADR-0009 — role lifecycle consolidated into /li:role (flags) + /li:role-new (--update)"
+
+  # ADR-0009 — the 35 engineering sub-skills collapsed into their module's dispatch table.
+  # Invoke as /li:<module> <capability> (e.g. /li:ta api-design).
+
+  - old: ta-api-design
+    new: ta
+    deprecated_at: 2026-06-12
+    removal_at: 2026-09-12
+    reason: "ADR-0009 — sub-skills collapsed into the module's dispatch table; invoke as /li:<module> <capability>"
+
+  - old: ta-boundary-review
+    new: ta
+    deprecated_at: 2026-06-12
+    removal_at: 2026-09-12
+    reason: "ADR-0009 — sub-skills collapsed into the module's dispatch table; invoke as /li:<module> <capability>"
+
+  - old: ta-complexity-audit
+    new: ta
+    deprecated_at: 2026-06-12
+    removal_at: 2026-09-12
+    reason: "ADR-0009 — sub-skills collapsed into the module's dispatch table; invoke as /li:<module> <capability>"
+
+  - old: ta-contract-collision
+    new: ta
+    deprecated_at: 2026-06-12
+    removal_at: 2026-09-12
+    reason: "ADR-0009 — sub-skills collapsed into the module's dispatch table; invoke as /li:<module> <capability>"
+
+  - old: ta-dependency-graph
+    new: ta
+    deprecated_at: 2026-06-12
+    removal_at: 2026-09-12
+    reason: "ADR-0009 — sub-skills collapsed into the module's dispatch table; invoke as /li:<module> <capability>"
+
+  - old: ta-quality-attributes
+    new: ta
+    deprecated_at: 2026-06-12
+    removal_at: 2026-09-12
+    reason: "ADR-0009 — sub-skills collapsed into the module's dispatch table; invoke as /li:<module> <capability>"
+
+  - old: ta-scaling-plan
+    new: ta
+    deprecated_at: 2026-06-12
+    removal_at: 2026-09-12
+    reason: "ADR-0009 — sub-skills collapsed into the module's dispatch table; invoke as /li:<module> <capability>"
+
+  - old: da-analytics-readiness
+    new: da
+    deprecated_at: 2026-06-12
+    removal_at: 2026-09-12
+    reason: "ADR-0009 — sub-skills collapsed into the module's dispatch table; invoke as /li:<module> <capability>"
+
+  - old: da-data-contract-collision
+    new: da
+    deprecated_at: 2026-06-12
+    removal_at: 2026-09-12
+    reason: "ADR-0009 — sub-skills collapsed into the module's dispatch table; invoke as /li:<module> <capability>"
+
+  - old: da-migration-plan
+    new: da
+    deprecated_at: 2026-06-12
+    removal_at: 2026-09-12
+    reason: "ADR-0009 — sub-skills collapsed into the module's dispatch table; invoke as /li:<module> <capability>"
+
+  - old: da-query-pattern-audit
+    new: da
+    deprecated_at: 2026-06-12
+    removal_at: 2026-09-12
+    reason: "ADR-0009 — sub-skills collapsed into the module's dispatch table; invoke as /li:<module> <capability>"
+
+  - old: da-retention-policy
+    new: da
+    deprecated_at: 2026-06-12
+    removal_at: 2026-09-12
+    reason: "ADR-0009 — sub-skills collapsed into the module's dispatch table; invoke as /li:<module> <capability>"
+
+  - old: da-schema-design
+    new: da
+    deprecated_at: 2026-06-12
+    removal_at: 2026-09-12
+    reason: "ADR-0009 — sub-skills collapsed into the module's dispatch table; invoke as /li:<module> <capability>"
+
+  - old: da-sharding-plan
+    new: da
+    deprecated_at: 2026-06-12
+    removal_at: 2026-09-12
+    reason: "ADR-0009 — sub-skills collapsed into the module's dispatch table; invoke as /li:<module> <capability>"
+
+  - old: sc-audit-path
+    new: sc
+    deprecated_at: 2026-06-12
+    removal_at: 2026-09-12
+    reason: "ADR-0009 — sub-skills collapsed into the module's dispatch table; invoke as /li:<module> <capability>"
+
+  - old: sc-auth-flow
+    new: sc
+    deprecated_at: 2026-06-12
+    removal_at: 2026-09-12
+    reason: "ADR-0009 — sub-skills collapsed into the module's dispatch table; invoke as /li:<module> <capability>"
+
+  - old: sc-compliance-evidence
+    new: sc
+    deprecated_at: 2026-06-12
+    removal_at: 2026-09-12
+    reason: "ADR-0009 — sub-skills collapsed into the module's dispatch table; invoke as /li:<module> <capability>"
+
+  - old: sc-dependency-security
+    new: sc
+    deprecated_at: 2026-06-12
+    removal_at: 2026-09-12
+    reason: "ADR-0009 — sub-skills collapsed into the module's dispatch table; invoke as /li:<module> <capability>"
+
+  - old: sc-incident-runbook
+    new: sc
+    deprecated_at: 2026-06-12
+    removal_at: 2026-09-12
+    reason: "ADR-0009 — sub-skills collapsed into the module's dispatch table; invoke as /li:<module> <capability>"
+
+  - old: sc-secret-management
+    new: sc
+    deprecated_at: 2026-06-12
+    removal_at: 2026-09-12
+    reason: "ADR-0009 — sub-skills collapsed into the module's dispatch table; invoke as /li:<module> <capability>"
+
+  - old: sc-threat-model
+    new: sc
+    deprecated_at: 2026-06-12
+    removal_at: 2026-09-12
+    reason: "ADR-0009 — sub-skills collapsed into the module's dispatch table; invoke as /li:<module> <capability>"
+
+  - old: dh-capacity-headroom
+    new: dh
+    deprecated_at: 2026-06-12
+    removal_at: 2026-09-12
+    reason: "ADR-0009 — sub-skills collapsed into the module's dispatch table; invoke as /li:<module> <capability>"
+
+  - old: dh-cost-projection
+    new: dh
+    deprecated_at: 2026-06-12
+    removal_at: 2026-09-12
+    reason: "ADR-0009 — sub-skills collapsed into the module's dispatch table; invoke as /li:<module> <capability>"
+
+  - old: dh-deployment-plan
+    new: dh
+    deprecated_at: 2026-06-12
+    removal_at: 2026-09-12
+    reason: "ADR-0009 — sub-skills collapsed into the module's dispatch table; invoke as /li:<module> <capability>"
+
+  - old: dh-observability-spec
+    new: dh
+    deprecated_at: 2026-06-12
+    removal_at: 2026-09-12
+    reason: "ADR-0009 — sub-skills collapsed into the module's dispatch table; invoke as /li:<module> <capability>"
+
+  - old: dh-on-call-playbook
+    new: dh
+    deprecated_at: 2026-06-12
+    removal_at: 2026-09-12
+    reason: "ADR-0009 — sub-skills collapsed into the module's dispatch table; invoke as /li:<module> <capability>"
+
+  - old: dh-rollback-strategy
+    new: dh
+    deprecated_at: 2026-06-12
+    removal_at: 2026-09-12
+    reason: "ADR-0009 — sub-skills collapsed into the module's dispatch table; invoke as /li:<module> <capability>"
+
+  - old: dh-sli-slo-spec
+    new: dh
+    deprecated_at: 2026-06-12
+    removal_at: 2026-09-12
+    reason: "ADR-0009 — sub-skills collapsed into the module's dispatch table; invoke as /li:<module> <capability>"
+
+  - old: tq-chaos-plan
+    new: tq
+    deprecated_at: 2026-06-12
+    removal_at: 2026-09-12
+    reason: "ADR-0009 — sub-skills collapsed into the module's dispatch table; invoke as /li:<module> <capability>"
+
+  - old: tq-contract-test-design
+    new: tq
+    deprecated_at: 2026-06-12
+    removal_at: 2026-09-12
+    reason: "ADR-0009 — sub-skills collapsed into the module's dispatch table; invoke as /li:<module> <capability>"
+
+  - old: tq-coverage-audit
+    new: tq
+    deprecated_at: 2026-06-12
+    removal_at: 2026-09-12
+    reason: "ADR-0009 — sub-skills collapsed into the module's dispatch table; invoke as /li:<module> <capability>"
+
+  - old: tq-flaky-quarantine
+    new: tq
+    deprecated_at: 2026-06-12
+    removal_at: 2026-09-12
+    reason: "ADR-0009 — sub-skills collapsed into the module's dispatch table; invoke as /li:<module> <capability>"
+
+  - old: tq-perf-budget-spec
+    new: tq
+    deprecated_at: 2026-06-12
+    removal_at: 2026-09-12
+    reason: "ADR-0009 — sub-skills collapsed into the module's dispatch table; invoke as /li:<module> <capability>"
+
+  - old: tq-regression-suite
+    new: tq
+    deprecated_at: 2026-06-12
+    removal_at: 2026-09-12
+    reason: "ADR-0009 — sub-skills collapsed into the module's dispatch table; invoke as /li:<module> <capability>"
+
+  - old: tq-test-pyramid-review
+    new: tq
+    deprecated_at: 2026-06-12
+    removal_at: 2026-09-12
+    reason: "ADR-0009 — sub-skills collapsed into the module's dispatch table; invoke as /li:<module> <capability>"
 
 env_var_aliases:
   - old: JSTACK_HOME

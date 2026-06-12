@@ -134,19 +134,6 @@ Summary line:
 - `PASS_WITH_WARN` — checks pass but compatibility warns
 - `FAIL` — at least one required check failed
 
-## Status protocol
-
-- **DONE** — verdict surfaced (PASS / PASS_WITH_WARN / FAIL)
-- **BLOCKED** — pack not found
-
-## Pause-points
-
-None — pack-validate is single-shot.
-
-## Hop-in support
-
-None.
-
 ## Integration
 
 **Reads:**

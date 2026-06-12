@@ -34,6 +34,7 @@ Clear ownership domains:
 Frozen / handle-with-care zones:
 
 - `packs/_default/pack.yaml` and `lib/pack-resolver.sh` — the pack contract; ~30 skills depend on it. Change behind a shape-test.
+- `lib/paths.sh`, `lib/memory.sh`, `bin/_context.sh` — the v5 path/memory contract (ADR-0005/0006). Change behind tests/shape/claude-home-paths.sh + tests/unit/memory-v2.sh.
 - Frontmatter contracts (skills: `layer` + `cli_support`; agents: `category` + `tier` + `cli_support`) — changing them is a meta-infra change touching every skill/agent.
 - `AGENT-INSTRUCTIONS.md` — the canonical cross-CLI session ritual.
 
@@ -44,17 +45,18 @@ Frozen / handle-with-care zones:
 ## Session-start ritual
 
 > **Claude Code auto-loads a digest** of the items below via the `session-digest` SessionStart
-> hook (active pack/mode/role + recent lessons + open jobs + recent ADRs; see [ADR-0002](docs/adr/0002-session-digest-auto-load.md)).
+> hook (active pack/mode/role + recent lessons + open jobs + recent ADRs; see [ADR-0002](.claude/decisions/0002-session-digest-auto-load.md)).
 > This ritual is the deeper read on top of that digest — **and the fallback for non-hook CLIs**
 > (Codex, Gemini, …), which do not run SessionStart hooks and must read these files explicitly.
 
 1. Read this file (load-bearing rules below) + [AGENT-INSTRUCTIONS.md](AGENT-INSTRUCTIONS.md) for the cross-CLI specifics.
 2. Review [scaffolding/01-foundation/CORE-PRINCIPLES.md](scaffolding/01-foundation/CORE-PRINCIPLES.md) — the 10 load-bearing rules.
-3. Review the most recent entries in [tasks/lessons.md](tasks/lessons.md) — accumulated lessons. **Read before acting.**
-4. Skim [tasks/memory.md](tasks/memory.md) — durable cross-session state.
-5. Load operator calibration from [tasks/personas.md](tasks/personas.md) and the active profile (`~/.lintel/profile.yaml`: active pack, mode, role).
-6. List [docs/adr/](docs/adr/) — read any ADR whose title is relevant to the task.
-7. Check [docs/v4.x/structure-changes/](docs/v4.x/structure-changes/) for recent structural decisions.
+3. Read [.claude/memory/MEMORY.md](.claude/memory/MEMORY.md) — the memory index (Claude Code auto-loads it natively).
+4. Review the most recent entries in [.claude/memory/lessons.md](.claude/memory/lessons.md) — accumulated lessons. **Read before acting.**
+5. Skim [.claude/memory/working-state.md](.claude/memory/working-state.md) — durable cross-session state.
+6. Load operator calibration from [.claude/memory/personas.md](.claude/memory/personas.md) and the active profile (`~/.lintel/profile.yaml`: active pack, mode, role).
+7. List [.claude/decisions/](.claude/decisions/) — read any ADR whose title is relevant to the task.
+8. Check [docs/v4.x/structure-changes/](docs/v4.x/structure-changes/) for recent structural decisions.
 
 ---
 
@@ -63,35 +65,43 @@ Frozen / handle-with-care zones:
 When a request matches a skill, **invoke it** (skills are auto-surfaced — you can see them). A nudge,
 not an exhaustive map — run `/li:catalog` to discover the full set.
 
-- Multi-step work / a real task → `/li:cycle` (the 9-step SENSE→CAPTURE loop; writes `.lintel/state/00-state.md`)
+- Multi-step work / a real task → `/li:cycle` (the 9-step SENSE→CAPTURE loop; writes `.claude/runtime/state/00-state.md`)
 - Architecture / data / security / devops / testing depth → `/li:ta` · `/li:da` · `/li:sc` · `/li:dh` · `/li:tq`
 - Bug / "why is this broken" → `/li:investigate`  ·  Tests / "does it work" → `/li:qa`
 - Plan review → `/li:plan-eng-review` / `/li:plan-ceo-review`  ·  Brainstorm an idea → `/li:office-hours`
 - Deep context load → `/li:context-warm`  ·  Save / resume → `/li:context-save` · `/li:resume`
 - Record a decision → `/li:adr-new`  ·  Capture a lesson → `/li:capture`
-- Switch / inspect identity → `/li:pack-switch` · `/li:pack-list` · `/li:role-activate`
+- Switch / inspect identity → `/li:pack-switch` · `/li:pack-list` · `/li:role`
 - Discover everything → `/li:catalog`
 
 ---
 
 ## Where state lives (the memory map)
 
-Lintel's snowball — read on demand, **write after corrections/decisions** so it compounds:
+Lintel's snowball — read on demand, **write after corrections/decisions** so it compounds. One
+circle of control (v5, ADR-0005): everything Lintel generates for this repo lives under `.claude/`
+— knowledge committed, runtime gitignored. Operator identity stays in `~/.lintel/`.
 
 | Store | Holds | Lifecycle |
 |---|---|---|
-| `tasks/lessons.md` | lessons from corrections (`L-NNN`) | append after ANY correction |
-| `tasks/memory.md` | durable cross-session working state | update on durable state changes |
-| `tasks/personas.md` | operator calibration | read at session-start |
-| `docs/adr/NNNN-*.md` | decision records | one per non-trivial decision |
+| `.claude/memory/MEMORY.md` | the index (≤200 lines, auto-loads on Claude Code) | keep current, consolidate |
+| `.claude/memory/lessons.md` | lessons from corrections (`L-NNN`) | append after ANY correction |
+| `.claude/memory/working-state.md` | durable cross-session working state | update on durable state changes |
+| `.claude/memory/personas.md` | operator calibration | read at session-start |
+| `.claude/decisions/NNNN-*.md` | decision records | one per non-trivial decision |
+| `.claude/plans/` | todo.md + cold-executor trios (`<slug>/{plan,spec,prompt}.md`) | per initiative |
+| `.claude/runtime/state/` | per-repo cycle + module state (gitignored) | written by cycle/module skills |
+| `.claude/runtime/{sessions,jobs,audit}/` | context-saves · job data · repo event log (gitignored) | written by skills/hooks |
 | `docs/v4.x/structure-changes/` | evolution log (Gate M1 artifacts) | per structural change |
-| `.lintel/state/00-state.md` + `ta/sc/dh/…` | per-repo cycle + module state | written by cycle/module skills |
 | `~/.lintel/profile.yaml` | active pack · mode · role · checkpoint mode | operator-global |
-| `~/.lintel/jobs/_active.md` | open workflow_root jobs | `/li:resume` reads it |
-| `~/.lintel/sessions/` | context-save snapshots | `/li:context-restore` reads them |
+| `~/.lintel/jobs/_active.md` | cross-repo jobs REGISTRY (data lives in each repo) | `/li:resume` reads it |
 
 The `session-digest` hook injects a compact view of the top rows at session-start; this table is the
 full map for on-demand reads + where to **write**.
+
+> **Un-migrated repos:** no `.claude/lintel-layout.yaml` marker → that repo still uses the legacy
+> locations (`tasks/*`, `docs/adr/`, `.lintel/state/`). Use those there, and suggest
+> `bin/li-migrate-claude-home` (grace window to 2026-09-12).
 
 ---
 
@@ -100,7 +110,7 @@ full map for on-demand reads + where to **write**.
 ### 1. Plan Mode Default
 - Enter plan mode for ANY non-trivial task (3+ steps or an architectural decision).
 - If something goes wrong mid-task: STOP and re-plan. Do not push through a broken plan.
-- Write the plan to `tasks/todo.md` as checkable items; pause-report before implementing complex work.
+- Write the plan to `.claude/plans/todo.md` as checkable items; pause-report before implementing complex work.
 
 ### 2. Subagent Strategy
 - Use subagents liberally to keep the main context window clean — offload research, exploration, parallel analysis. One task per subagent.
@@ -109,7 +119,7 @@ full map for on-demand reads + where to **write**.
 - When in doubt, prefer a subagent over polluting main context.
 
 ### 3. Self-Improvement Loop
-- After ANY correction from the operator: record the pattern in `tasks/lessons.md` as a rule that prevents recurrence.
+- After ANY correction from the operator: record the pattern in `.claude/memory/lessons.md` as a rule that prevents recurrence.
 - Review lessons at session start. This is the only mechanism that compounds learning across fresh sessions.
 
 ### 4. Verification Before Done
@@ -128,11 +138,11 @@ full map for on-demand reads + where to **write**.
 
 ## Task & decision management
 
-1. **Plan first** — `tasks/todo.md`, checkable items.
+1. **Plan first** — `.claude/plans/todo.md`, checkable items.
 2. **Track progress** — mark items done as you go.
-3. **Capture lessons** — `tasks/lessons.md` after corrections.
-4. **Record decisions** — write an ADR (`docs/adr/NNNN-short-title.md`, from `docs/adr/TEMPLATE.md`) for any non-trivial decision. Structural changes to `skills/`/`agents/`/`hooks/`/`lib/` also get a `docs/v4.x/structure-changes/<date>-<slug>.md` (Gate M1 artifact) under meta-infra discipline.
-5. **Review** — add a review section to `tasks/todo.md` at task end.
+3. **Capture lessons** — `.claude/memory/lessons.md` after corrections.
+4. **Record decisions** — write an ADR (`.claude/decisions/NNNN-short-title.md`, from `.claude/decisions/TEMPLATE.md`) for any non-trivial decision. Structural changes to `skills/`/`agents/`/`hooks/`/`lib/` also get a `docs/v4.x/structure-changes/<date>-<slug>.md` (Gate M1 artifact) under meta-infra discipline.
+5. **Review** — add a review section to `.claude/plans/todo.md` at task end.
 
 > **This is the discipline that was missing.** Lintel was built as the factory but never ran the
 > factory on itself: until v4.8 the repo had no `.claude/`, no `docs/adr/`, and a thin CLAUDE.md, so
@@ -227,8 +237,8 @@ If the instruction or spec does not match reality (external API, docs, existing 
 ---
 
 ## Lessons & evolution
-- `tasks/lessons.md` — accumulated lessons. Review at session start; add after ANY correction.
-- `docs/adr/` — decision records (one per non-trivial decision).
+- `.claude/memory/lessons.md` — accumulated lessons. Review at session start; add after ANY correction.
+- `.claude/decisions/` — decision records (one per non-trivial decision).
 - `docs/v4.x/structure-changes/` — the evolution log for structural changes to the harness.
 
 ---

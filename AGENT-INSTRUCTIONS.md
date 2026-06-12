@@ -32,23 +32,27 @@ This is an operator-confirmed checklist, NOT automated enforcement. The harness 
 
 ### 3. Load personas
 
-**Layer 1 — `tasks/personas.md`** in the active repo (scaffolded from `scaffolding/01-foundation/tasks/personas.md`).
+**Layer 1 — `.claude/memory/personas.md`** in the active repo (scaffolded from `scaffolding/01-foundation/.claude/memory/personas.md`).
 
 Calibrates communication style for the operator. Read once per session.
 
 ### 4. Load memory
 
-**Layer 1 — `tasks/memory.md`** in the active repo.
+**Layer 1 — `.claude/memory/working-state.md`** in the active repo.
 
 Long-running state. Operator profile, project context, feedback patterns, external references.
 
 ### 5. Recent lessons
 
-**Layer 1 — `tasks/lessons.md`** in the active repo — read the most recent 10-15 entries. Older entries are reference material.
+**Layer 1 — `.claude/memory/lessons.md`** in the active repo — read the most recent 10-15 entries. Older entries are reference material.
+> Un-migrated repos: no `.claude/lintel-layout.yaml` marker means the repo still uses the legacy
+> locations (`tasks/*`, `docs/adr/`, `.lintel/state/`) — use those there and suggest
+> `bin/li-migrate-claude-home` (grace window to 2026-09-12).
+
 
 ### 6. ADR scan
 
-**Layer 1 — `docs/adr/`** in the active repo — list filenames first, read full content only for ADRs whose title is relevant to the current task.
+**Layer 1 — `.claude/decisions/`** in the active repo — list filenames first, read full content only for ADRs whose title is relevant to the current task.
 
 ### 7. Agent selection precedence
 
@@ -153,13 +157,13 @@ If two sources conflict: surface to operator before acting. Do not silently choo
 
 A clean end:
 
-- `tasks/todo.md` has a Review section or is cleared for the next task.
-- Any new lessons in `tasks/lessons.md`.
-- Any new memory in `tasks/memory.md`.
-- Any new ADRs in `docs/adr/`.
+- `.claude/plans/todo.md` has a Review section or is cleared for the next task.
+- Any new lessons in `.claude/memory/lessons.md`.
+- Any new memory in `.claude/memory/working-state.md`.
+- Any new ADRs in `.claude/decisions/`.
 - Commits are atomic, no WIP debris.
 
-If session ended mid-task: `tasks/todo.md` makes the next session able to pick up cold.
+If session ended mid-task: `.claude/plans/todo.md` makes the next session able to pick up cold.
 
 ---
 
@@ -171,7 +175,7 @@ For non-trivial work, the Lintel cycle provides an explicit 9-step pipeline (8 c
 - `/li:cycle` — full cycle SENSE → SCOPE → DEFINE → DISCOVER → PLAN → BUILD → REVIEW → SHIP → CAPTURE (8 core phases + the light, skippable SCOPE phase between SENSE and DEFINE)
 - `/li:cycle --mode <preset>` — apply preset. Neutral spine presets: hotfix / internal-tool / research-dive / meta-infra. Pack-contributed presets (customer-engagement, demo-prep) are supplied by an active pack (e.g. lintel-caip-pack), not by the neutral spine.
 - `/li:cycle --from <phase> --to <phase>` — custom subset
-- `/li:resume` — pick up at next phase based on `.lintel/state/00-state.md`
+- `/li:resume` — pick up at next phase based on `.claude/runtime/state/00-state.md`
 
 **Composite shortcuts:**
 - `/li:fix` — SENSE+BUILD+REVIEW+SHIP (hotfix)
@@ -197,11 +201,11 @@ See [docs/design/lintel-v3.5-cycle-and-roles.md](docs/design/lintel-v3.5-cycle-a
 Expert personas as lightweight session context layers. Voice + outcome-lens + decision-criteria + cold-knowledge influence cycle without bloating session-start.
 
 **Lightweight load (~500 tokens) at activation:**
-- `/li:role-activate <role-id>` — load IDENTITY + VOICE + OUTCOME-LENS summary
+- `/li:role <role-id>` — load IDENTITY + VOICE + OUTCOME-LENS summary
 - Role overlay applies to subsequent phases (DEFINE, SHIP, CAPTURE most affected)
 
 **Deep-dive on-demand (~2-3k tokens):**
-- `/li:role-deep-dive <role-id>` — load full role-file (COLD KNOWLEDGE, DECISION CRITERIA, INSIGHTS)
+- `/li:role --deep-dive <role-id>` — load full role-file (COLD KNOWLEDGE, DECISION CRITERIA, INSIGHTS)
 
 **Roles load from the active pack** (`resolve_pack_field roles.source`; none in `_default`). A company pack supplies its own role set — e.g. the lintel-caip-pack example ships `field-cto`, `solution-architect`, `engineering-manager`.
 
@@ -222,8 +226,8 @@ On-demand 1M-context utilization beyond session-start. Default session-start sta
 - `/li:context-warm-customer <engagement>` — customer-repo state (audit-logged)
 - `/li:context-warm-from-url <url>` — WebFetch + dump (URL gate when pack compliance mode is `hard`)
 - `/li:context-budget` — utilization visibility
-- `/li:context-snapshot [name]` — operator-named mid-session save
-- `/li:context-dump <session-id>` — load specific prior session save
+- `/li:context-save [--label <name>]` — checkpoint (named saves covered by --label; the former snapshot/dump skills are aliases since v5, ADR-0006)
+- `/li:context-restore [path]` — load latest or specific prior session save
 - `/li:context-cool` — selective IGNORE marker
 
 For >20k token loads: explicit budget confirmation required.

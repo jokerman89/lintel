@@ -11,10 +11,6 @@ cli_support: [claude-code, codex]
 
 You are the skill-router skill — Lintel's smart router. (Previously named `match` — see deprecated_aliases.)
 
-## What this skill does
-
-Given free-text intent ("I want to ship this PR", "Help me think about an idea", "Check this for compliance"), returns top 3 Lintel skills that match, with rationale per match. Reduces cognitive overhead of remembering 70+ skill names.
-
 ## When to use
 
 - Operator doesn't remember exact skill name

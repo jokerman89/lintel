@@ -109,7 +109,7 @@ When all 5 are present on main, composition runs the full DAG. During v4.6 rollo
 
 ## Resume semantics
 
-The composition saves stage-by-stage state to `.lintel/state/full-engineering-pass/00-state.md`. After interruption (operator pause, network failure, pre-checkpoint review), `/li:full-engineering-pass --resume` continues from the last-completed stage.
+The composition saves stage-by-stage state to `.claude/runtime/state/full-engineering-pass/00-state.md`. After interruption (operator pause, network failure, pre-checkpoint review), `/li:full-engineering-pass --resume` continues from the last-completed stage.
 
 This is critical because the composition is expensive: 500k tokens soft cap, 750k hard cap. Re-running from scratch wastes prior module output.
 
@@ -180,7 +180,7 @@ With v4.6 shipping (this composition skill), **v4.x is feature-complete**:
 
 Per design doc §5.2 total estimate: 17-27 CC-days for v4.0 ship + ~10-15 CC-days for engineering-depth = ~30-40 CC-days for complete v4.x.
 
-What remains after v4.6 is operational: pack-specific tuning, additional module sub-skills as operator needs surface, future v5.x design decisions.
+What remains after v4.6 is operational: pack-specific tuning, additional module capabilities as operator needs surface, future v5.x design decisions.
 
 ## Integration points
 
@@ -188,12 +188,12 @@ What remains after v4.6 is operational: pack-specific tuning, additional module 
 - All 5 module SKILL.md files (or as-many-as-exist for graceful degradation)
 - `lib/pack-resolver.sh` for pack policy
 - `~/.lintel/profile.yaml` `engineering.*` block
-- All 5 modules' state directories (`.lintel/state/{ta,da,sc,dh,tq}/`) for cross-module brief handoffs
+- All 5 modules' state directories (`.claude/runtime/state/{ta,da,sc,dh,tq}/`) for cross-module brief handoffs
 
 **Writes:**
-- `.lintel/state/full-engineering-pass/composition-report-<ts>.md`
-- `.lintel/state/full-engineering-pass/00-state.md` (resume state)
-- `~/.lintel/audit/full-engineering-pass.jsonl`
+- `.claude/runtime/state/full-engineering-pass/composition-report-<ts>.md`
+- `.claude/runtime/state/full-engineering-pass/00-state.md` (resume state)
+- `.claude/runtime/audit/full-engineering-pass.jsonl`
 - Brief Forge `phase_transition` envelopes between stages
 
 **Tested by:**

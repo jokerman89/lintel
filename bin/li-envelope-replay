@@ -20,8 +20,11 @@ set -uo pipefail
 
 REPO_ROOT="${LINTEL_REPO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." 2>/dev/null && pwd)}"
 LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
-AUDIT_DIR="${LINTEL_AUDIT_DIR:-$LINTEL_HOME/audit}"
+GLOBAL_AUDIT_DIR="${LINTEL_AUDIT_DIR:-$LINTEL_HOME/audit}"
 command -v audit_log >/dev/null 2>&1 || source "$REPO_ROOT/bin/_audit.sh"
+# Repo-scoped audit dir on the v5 layout (.claude/runtime/audit/); _audit_out_dir
+# falls back to the global dir for un-migrated repos.
+AUDIT_DIR="$(_audit_out_dir envelope-replay)"
 mkdir -p "$AUDIT_DIR" 2>/dev/null || true
 
 APPLY=0
@@ -53,6 +56,7 @@ trap 'rm -f "$TMP_ENV"' EXIT
 if [ -n "$FROM_AUDIT" ]; then
   # Search audit log for an envelope with this id
   found=$(grep -l "\"envelope_id\":\"$FROM_AUDIT\"" "$AUDIT_DIR"/*.jsonl 2>/dev/null | head -1)
+  [ -n "$found" ] || found=$(grep -l "\"envelope_id\":\"$FROM_AUDIT\"" "$GLOBAL_AUDIT_DIR"/*.jsonl 2>/dev/null | head -1) # legacy-fallback-ok
   if [ -z "$found" ]; then
     echo "ERROR: envelope_id $FROM_AUDIT not found in $AUDIT_DIR/*.jsonl" >&2
     exit 1

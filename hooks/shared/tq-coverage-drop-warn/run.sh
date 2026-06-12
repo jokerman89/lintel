@@ -26,7 +26,9 @@ if [ -f "$PROFILE" ]; then
 fi
 
 # Look for a recent coverage report
-coverage_report=$(find .lintel/state/tq -name "coverage-audit-*.md" -mtime -1 2>/dev/null | sort | tail -1)
+tq_state_dir=".claude/runtime/state/tq"
+[ -d "$tq_state_dir" ] || tq_state_dir=".lintel/state/tq" # legacy-fallback-ok
+coverage_report=$(find "$tq_state_dir" -name "coverage-audit-*.md" -mtime -1 2>/dev/null | sort | tail -1)
 [ -z "$coverage_report" ] && exit 0   # No report available; can't compare; silent
 
 # Heuristic: extract overall coverage %

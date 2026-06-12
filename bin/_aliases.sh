@@ -57,7 +57,7 @@ resolve_env_var() {
         local old_value="${!current_old:-}"
         if [ -n "$old_value" ]; then
           echo "[lintel] WARN: \$$current_old is deprecated, please switch to \$$new_name" >&2
-          # Audit-log (unified writer → ~/.lintel/audit/alias-resolution.jsonl)
+          # Audit-log (unified writer → .claude/runtime/audit/alias-resolution.jsonl, scope-routed by _audit.sh)
           audit_log "alias-resolution" "env_var" "old=$current_old" "new=$new_name" "context=resolve_env_var"
           printf '%s' "$old_value"
           return 0

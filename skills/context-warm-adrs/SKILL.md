@@ -10,10 +10,6 @@ cli_support: [claude-code, codex]
 
 You are the context-warm-adrs skill.
 
-## What this skill does
-
-Scans `docs/adr/*.md` for ADRs matching a topic. Loads relevant ones into session context. ADRs are durable architecture constraints — knowing them prevents re-deriving or contradicting prior decisions.
-
 ## When to use
 
 - Pre-PLAN when wedge touches area with prior ADRs
@@ -33,7 +29,7 @@ Scans `docs/adr/*.md` for ADRs matching a topic. Loads relevant ones into sessio
 topic="$1"
 
 # Find ADRs with topic in title or body
-matched_adrs=$(grep -rli "$topic" docs/adr/*.md 2>/dev/null)
+matched_adrs=$(grep -rli "$topic" .claude/decisions/*.md 2>/dev/null)
 
 # Per match, extract metadata
 for adr in $matched_adrs; do
@@ -82,23 +78,11 @@ adrs_loaded: <N>
 tokens_added: <approx>
 ```
 
-## Status protocol
-
-- DONE / BLOCKED (no docs/adr/ dir or no matches)
-
-## Hop-in support
-
-YES.
-
 ## Integration
 
-Reads `docs/adr/*.md`. Delegates to `/li:context-warm`.
+Reads `.claude/decisions/*.md`. Delegates to `/li:context-warm`.
 
 ## Anti-patterns
 
 - **Loading ALL ADRs ever** — filter by topic
 - **Loading deprecated without note** — surface explicitly that ADR is deprecated
-
-## Voice tier behavior
-
-`voice: internal`.

@@ -52,7 +52,7 @@ Copilot's tool access is governed by enterprise policy. Auto-mode bounds in `AGE
 
 ### Context window
 
-Copilot's effective context is smaller than a fresh Claude Opus session. Keep `tasks/memory.md` lean and high-signal. Use ADR pointers (file + section) rather than inlining ADR text.
+Copilot's effective context is smaller than a fresh Claude Opus session. Keep `.claude/memory/working-state.md` lean and high-signal. Use ADR pointers (file + section) rather than inlining ADR text.
 
 ### Customer-data check
 

@@ -140,8 +140,8 @@ echo "## This repo's scaffolding adoption"
 repo_root=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
 missing=""
 [ -d "$repo_root/.claude" ] || missing="$missing .claude/"
-[ -d "$repo_root/docs/adr" ] || [ -d "$repo_root/docs/decisions" ] || [ -d "$repo_root/docs/06-decisions" ] || missing="$missing docs/adr/"
-[ -f "$repo_root/tasks/lessons.md" ] || missing="$missing tasks/lessons.md"
+[ -d "$repo_root/.claude/decisions" ] || [ -d "$repo_root/docs/adr" ] || [ -d "$repo_root/docs/decisions" ] || missing="$missing .claude/decisions/"
+[ -f "$repo_root/.claude/memory/lessons.md" ] || [ -f "$repo_root/tasks/lessons.md" ] || missing="$missing lessons.md"   # legacy-fallback-ok
 # A scaffolded CLAUDE.md restates the protocol; a thin one is just a pointer.
 if [ -f "$repo_root/CLAUDE.md" ] && grep -qiE "Workflow Orchestration|Self-Improvement Loop|Auto-mode boundaries" "$repo_root/CLAUDE.md"; then
   claude_scaffolded=1
@@ -149,11 +149,32 @@ else
   claude_scaffolded=0; missing="$missing scaffolded-CLAUDE.md"
 fi
 if [ -z "$missing" ]; then
-  ok "repo has its own scaffolding (.claude/, docs/adr/, lessons, scaffolded CLAUDE.md)"
+  ok "repo has its own scaffolding (.claude/, decisions, lessons, scaffolded CLAUDE.md)"
 else
   warn "repo is missing its own scaffolding:$missing"
   echo "    This repo uses Lintel but never had the scaffolding applied to itself."
   echo "    Fix: li-scaffold init   (or copy scaffolding/01-foundation/ into the repo root)"
+fi
+
+# v5 layout (ADR-0005): one circle of control under .claude/
+if [ -f "$repo_root/.claude/lintel-layout.yaml" ]; then
+  layout_v=$(grep -E '^layout_version:' "$repo_root/.claude/lintel-layout.yaml" 2>/dev/null | head -1 | awk '{print $2}' | tr -d '\r')
+  if [ "${layout_v:-0}" -ge 5 ] 2>/dev/null; then
+    ok "v5 .claude/ home layout (layout_version: $layout_v)"
+    # auto-memory convergence pointer is machine-local — verify on THIS machine
+    if grep -q '"autoMemoryDirectory"' "$repo_root/.claude/settings.local.json" 2>/dev/null; then
+      ok "native auto-memory converged (.claude/settings.local.json)"
+    else
+      warn "autoMemoryDirectory not set for this machine — native auto-memory writes outside the repo"
+      echo "    Fix: li-migrate-claude-home   (idempotent — re-stamps the pointer)"
+    fi
+  else
+    warn "layout marker present but layout_version < 5"
+  fi
+elif [ -f "$repo_root/tasks/lessons.md" ] || [ -d "$repo_root/docs/adr" ]; then   # legacy-fallback-ok (detection target)
+  warn "repo uses the legacy pre-v5 layout (tasks/, docs/adr/, .lintel/state/)"   # legacy-fallback-ok (message text)
+  echo "    Knowledge and runtime are spread outside .claude/. Grace window ends 2026-09-12."
+  echo "    Fix: li-migrate-claude-home --dry-run   (then run without --dry-run)"
 fi
 echo ""
 
@@ -171,18 +192,65 @@ else
   warn "no hooks directory at $LINTEL_HOME/hooks/"
 fi
 
-# session-digest (REQUIRED, ADR-0002): present in ~/.lintel/hooks/ AND registered as SessionStart
-if [ -f "$LINTEL_HOME/hooks/session-digest/run.sh" ]; then
-  _wired="no"
-  for _s in "$HOME/.claude/settings.json" "$(git rev-parse --show-toplevel 2>/dev/null)/.claude/settings.json"; do
-    [ -f "$_s" ] && grep -q "session-digest" "$_s" 2>/dev/null && _wired="yes"
-  done
-  if [ "$_wired" = "yes" ]; then
-    ok "session-digest hook present + wired (SessionStart)"
+# Hook drift: shipped (repo/plugin) vs installed (~/.lintel/hooks/shared)
+_shipped_hooks_dir=""
+for _cand in "$repo_root/hooks/shared" "$HOME/.claude/plugins/cache"/*/li/*/hooks/shared; do
+  [ -d "$_cand" ] && { _shipped_hooks_dir="$_cand"; break; }
+done
+if [ -n "$_shipped_hooks_dir" ] && [ -d "$LINTEL_HOME/hooks/shared" ]; then
+  _shipped=$(find "$_shipped_hooks_dir" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l | tr -d ' ')
+  _installed=$(find "$LINTEL_HOME/hooks/shared" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l | tr -d ' ')
+  if [ "${_installed:-0}" -lt "${_shipped:-0}" ] 2>/dev/null; then
+    warn "hook drift: $_installed installed vs $_shipped shipped — re-run install.sh to refresh ~/.lintel/hooks"
   else
-    warn "session-digest hook present but NOT wired as SessionStart"
-    echo "    The memory snowball will NOT auto-load. Fix: merge"
-    echo "    hooks/claude-code/session-digest.settings.json into ~/.claude/settings.json"
+    ok "installed hooks in sync with shipped ($_installed)"
+  fi
+fi
+
+# Plugin auto-registration (ADR-0008): hooks/hooks.json ships with the plugin
+_plugin_hooks=""
+for _cand in "$HOME/.claude/plugins/cache"/*/li/*/hooks/hooks.json "$repo_root/hooks/hooks.json"; do
+  [ -f "$_cand" ] && { _plugin_hooks="$_cand"; break; }
+done
+if [ -n "$_plugin_hooks" ]; then
+  ok "plugin hook auto-registration present ($_plugin_hooks)"
+  case "$_plugin_hooks" in
+    "$HOME/.claude/plugins/cache"*) : ;;
+    *) warn "auto-registration found only in the repo checkout — the INSTALLED plugin cache predates v5 (update the plugin)" ;;
+  esac
+else
+  warn "no hooks/hooks.json found — session-digest/safety hooks will NOT auto-register (pre-v5 plugin?)"
+fi
+
+# Proof of life (ADR-0008): registration is not firing — check for a recent digest record
+_digest_seen=""
+for _aud in "$repo_root/.claude/runtime/audit/hooks.jsonl" "$LINTEL_HOME/audit/hooks.jsonl"; do
+  [ -f "$_aud" ] && grep -q 'session_digest' "$_aud" 2>/dev/null && _digest_seen="$_aud"
+done
+if [ -n "$_digest_seen" ]; then
+  _last_fire=$(grep 'session_digest' "$_digest_seen" | tail -1 | grep -oE '"ts":"[^"]+"' | cut -d'"' -f4)
+  ok "session-digest has fired (last: ${_last_fire:-unknown})"
+else
+  warn "session-digest has NEVER left an audit record — registered is not firing"
+  echo "    Verify: start a fresh session (or claude --debug), then re-run li-doctor."
+fi
+
+# session-digest (REQUIRED, ADR-0002): auto-registered via plugin hooks.json (v5+),
+# or present in ~/.lintel/hooks/ AND merged as SessionStart (legacy path)
+if [ -f "$LINTEL_HOME/hooks/shared/session-digest/run.sh" ] || [ -n "$_plugin_hooks" ]; then
+  _wired="no"
+  [ -n "$_plugin_hooks" ] && grep -q "session-digest" "$_plugin_hooks" 2>/dev/null && _wired="plugin"
+  if [ "$_wired" = "no" ]; then
+    for _s in "$HOME/.claude/settings.json" "$(git rev-parse --show-toplevel 2>/dev/null)/.claude/settings.json"; do
+      [ -f "$_s" ] && grep -q "session-digest" "$_s" 2>/dev/null && _wired="settings"
+    done
+  fi
+  if [ "$_wired" != "no" ]; then
+    ok "session-digest wired (via $_wired)"
+  else
+    warn "session-digest present but NOT wired as SessionStart"
+    echo "    The memory snowball will NOT auto-load. Fix: update the plugin (v5+ auto-registers),"
+    echo "    or merge hooks/claude-code/session-digest.settings.json into ~/.claude/settings.json"
   fi
 else
   warn "session-digest hook missing (memory snowball won't auto-load — see ADR-0002)"

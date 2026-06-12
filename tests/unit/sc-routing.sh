@@ -37,24 +37,24 @@ for action in threat-model secret-management auth-flow compliance-evidence audit
   fi
 done
 
-# ─── Scenario 3: Each sub-skill dispatches to documented agent ──────────
+# ─── Scenario 3: Dispatch table declares agent per capability (ADR-0009) ─
 echo ""
-echo "[3] Sub-skills declare agent dispatch (L-001)"
-declare -A SUB_AGENT=(
-  ["sc-threat-model"]="ThreatModelDrafter"
-  ["sc-secret-management"]="SecurityAuditor"
-  ["sc-auth-flow"]="SecurityAuditor"
-  ["sc-compliance-evidence"]="ComplianceOfficer"
-  ["sc-audit-path"]="SecurityAuditor"
-  ["sc-dependency-security"]="DependencyAuditor"
-  ["sc-incident-runbook"]="SecurityAuditor"
+echo "[3] Dispatch rows declare agent dispatch (L-001)"
+declare -A CAP_AGENT=(
+  ["threat-model"]="ThreatModelDrafter"
+  ["secret-management"]="SecurityAuditor"
+  ["auth-flow"]="SecurityAuditor"
+  ["compliance-evidence"]="ComplianceOfficer"
+  ["audit-path"]="SecurityAuditor"
+  ["dependency-security"]="DependencyAuditor"
+  ["incident-runbook"]="SecurityAuditor"
 )
-for sub in "${!SUB_AGENT[@]}"; do
-  expected="${SUB_AGENT[$sub]}"
-  if grep -q "$expected" "$REPO_ROOT/skills/$sub/SKILL.md" 2>/dev/null; then
-    pass "$sub dispatches to $expected"
+for cap in "${!CAP_AGENT[@]}"; do
+  expected="${CAP_AGENT[$cap]}"
+  if grep -E "^\|[[:space:]]*\`${cap}\`[[:space:]]*\|" "$SC" | grep -q "$expected"; then
+    pass "dispatch row $cap → $expected"
   else
-    fail "$sub MISSING dispatch to $expected"
+    fail "dispatch row $cap MISSING agent $expected"
   fi
 done
 
@@ -111,19 +111,20 @@ else
   fail "preferences root MISSING or incorrect"
 fi
 
-# ─── Scenario 9: L-002 reuse — 6 of 7 sub-skills use existing agents ───
+# ─── Scenario 9: L-002 reuse — 6 of 7 capabilities use existing agents ──
 echo ""
-echo "[9] L-002: 6 of 7 sub-skills reuse existing agents"
+echo "[9] L-002: 6 of 7 capabilities reuse existing agents"
 existing_agent_count=0
-for sub in sc-threat-model sc-secret-management sc-auth-flow sc-audit-path sc-dependency-security sc-incident-runbook; do
-  if [ -f "$REPO_ROOT/skills/$sub/SKILL.md" ]; then
+for cap in threat-model secret-management auth-flow audit-path dependency-security incident-runbook; do
+  row=$(grep -E "^\|[[:space:]]*\`${cap}\`[[:space:]]*\|" "$SC" 2>/dev/null)
+  if [ -n "$row" ] && ! echo "$row" | grep -q "ComplianceOfficer"; then
     existing_agent_count=$((existing_agent_count + 1))
   fi
 done
 if [ "$existing_agent_count" -ge 6 ]; then
-  pass "L-002 win: $existing_agent_count of 7 sub-skills dispatch to existing security agents"
+  pass "L-002 win: $existing_agent_count of 7 capabilities dispatch to existing security agents"
 else
-  fail "L-002 gap: only $existing_agent_count sub-skills reuse existing agents"
+  fail "L-002 gap: only $existing_agent_count capabilities reuse existing agents"
 fi
 
 # ─── Scenario 10: Engineering-modules pattern consistency ───────────────

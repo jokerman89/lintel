@@ -16,7 +16,7 @@ You are the `status` skill — quick read of in-flight Lintel jobs (v3.8 Feature
 
 ## What this skill does
 
-Reads `~/.lintel/jobs/_active.md` (regenerated from each job.yaml on state change) and surfaces it. Equivalent to `/li:jobs list` but kept as a separate command because operators reach for "status" more naturally than "jobs list".
+Reads the repo-local `.claude/runtime/jobs/_active.md` (regenerated from each job.yaml on state change) and surfaces it. The cross-repo registry `~/.lintel/jobs/_active.md` (one line per open job across all repos, pointing at the owning repo) gives the "what's open anywhere" view. Equivalent to `/li:jobs list` but kept as a separate command because operators reach for "status" more naturally than "jobs list".
 
 ## When to use
 
@@ -77,8 +77,9 @@ YES — always solo-invocable. Most-used Lintel command in the wild.
 ## Integration
 
 **Reads:**
-- `~/.lintel/jobs/_active.md`
-- `~/.lintel/jobs/_archive/` (with `--all`)
+- `.claude/runtime/jobs/_active.md` (repo-local)
+- `~/.lintel/jobs/_active.md` (cross-repo registry — one line per open job across all repos)
+- `.claude/runtime/jobs/_archive/` (with `--all`)
 
 **Writes:**
 - nothing
@@ -107,4 +108,4 @@ source "$LINTEL_REPO_ROOT/lib/cycle-footer.sh"   # fallback: "$(git rev-parse --
 render_cycle_footer                               # auto: thin when no cycle, full/--compact when in one
 ```
 
-See [ADR-0003](../../docs/adr/0003-cycle-position-footer.md).
+See [ADR-0003](../../.claude/decisions/0003-cycle-position-footer.md).

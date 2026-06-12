@@ -47,7 +47,7 @@ Verify ship-readiness:
 - All tests pass (run `/li:qa` if not already passed in REVIEW)
 - review-report.md shows PASS (or operator overrides with documented rationale)
 - compliance-report.md shows PASS (if the active pack defines compliance gates)
-- `.lintel/state/analyze-report.md` verdict surfaced if present (ADR-0004; advisory — RED/YELLOW
+- `.claude/runtime/state/analyze-report.md` verdict surfaced if present (ADR-0004; advisory — RED/YELLOW
   goes to the operator with the findings table, it does not auto-block)
 
 If pre-flight fails: BLOCKED. Don't proceed.
@@ -78,7 +78,7 @@ If ANY gate violation:
 - HARD STOP
 - Surface to operator: violation + file:line + recommended fix
 - Operator MUST fix or explicitly override (rarely warranted)
-- Log to `~/.lintel/audit/compliance-stops.jsonl`
+- Log to `.claude/runtime/audit/compliance-stops.jsonl`
 
 ### Step 4 — Voice + brand gate (if customer-facing)
 
@@ -99,7 +99,7 @@ If `artifact_kind=customer-deliverable` (PPT/Word/Web):
 
 If the active pack activates a provenance gate (`resolve_pack_field compliance.hooks`; none by default):
 - Log AI-assistance provenance for shipped artifact
-- Append to `~/.lintel/provenance/<repo>-provenance-log.jsonl`:
+- Append to `.claude/runtime/audit/<repo>-provenance-log.jsonl`:
 ```json
 {
   "ts": "<timestamp>",
@@ -247,21 +247,12 @@ If shipping tags release version:
 
 ### Step 11 — 00-state.md append
 
-```yaml
-phase: SHIP
-ts: <timestamp>
-ship_path: <pr | direct_main | demo>
-pr_url: <url if PR>
-commit_range: <sha>..<sha>
-hard_rule_violations: 0  # must be 0 to reach here
-voice_gate: <score>%
-brand_gate: <PASS | n/a>
-honest_limitations: <PASS | n/a>
-provenance_logged: yes
-release_notes_path: <path if tag>
-customer_deliverables: <list of .pptx/.docx/.html paths>
-status: DONE | DONE_WITH_CONCERNS | BLOCKED
-next_recommended: CAPTURE
+Mechanical since v5.0 (ADR-0008) — one command, not a YAML obligation. `hard_rule_violations` must be 0 to reach here; gate detail lives in the compliance/provenance logs:
+
+```bash
+_sl="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}/lib/state.sh"
+[ -f "$_sl" ] || _sl="$HOME/.lintel/lib/state.sh"; source "$_sl"   # installed by install.sh in consumer repos
+state_append SHIP <DONE|DONE_WITH_CONCERNS|BLOCKED> next=CAPTURE ship_path=<pr|direct_main|demo> pr_url=<url-if-PR> commit_range=<sha>..<sha> hard_rule_violations=0
 ```
 
 ## Status protocol
@@ -302,8 +293,8 @@ Skip-conditions: intent=research-only, intent=local-dev-only, intent=draft-only.
 - provenance-log.md (append)
 - customer deliverables (.pptx, .docx, .html if applicable)
 - transparency-note.md (if AI-system shipped to customer)
-- `.lintel/state/00-state.md` (SHIP entry)
-- `~/.lintel/audit/compliance-stops.jsonl` (if any violations)
+- `.claude/runtime/state/00-state.md` (SHIP entry)
+- `.claude/runtime/audit/compliance-stops.jsonl` (if any violations)
 
 **Triggers:**
 - CAPTURE next (final phase)
@@ -366,7 +357,7 @@ cycle and the one logical next action — whether this phase ran standalone or i
 
 ```bash
 source "$LINTEL_REPO_ROOT/lib/cycle-footer.sh"   # fallback: "$(git rev-parse --show-toplevel)/lib/cycle-footer.sh"
-render_cycle_footer                               # reads .lintel/state/00-state.md; --compact for short replies
+render_cycle_footer                               # reads .claude/runtime/state/00-state.md; --compact for short replies
 ```
 
-Skipped phases render `⊘`; ASCII via `LINTEL_ASCII=1`. See [ADR-0003](../../docs/adr/0003-cycle-position-footer.md).
+Skipped phases render `⊘`; ASCII via `LINTEL_ASCII=1`. See [ADR-0003](../../.claude/decisions/0003-cycle-position-footer.md).

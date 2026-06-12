@@ -233,19 +233,22 @@ For each phase in phases_to_run order:
 ```
 0. Phase-progress output: "Phase N/M <PHASE> — next <NEXT> — est ~<X>k tokens"
    (text-only, no graphics per 1.5 spec)
-1. Pre-phase: write 00-state.md entry "starting <phase>"
+1. Pre-phase: `state_append <PHASE> STARTING`
 2. Invoke /li:<phase>
 3. Phase runs (with its own pause-gates per phase-skill)
-4. Post-phase: read phase's 00-state.md entry, check status
+4. Post-phase: `state_last status` (still `STARTING` after the phase returned = the phase crashed before its closing append → treat as BLOCKED) — check the phase's recorded status
 5. If status=DONE or DONE_WITH_CONCERNS: continue to next phase
 6. If status=BLOCKED: pause cycle, surface to operator
 7. If status=NEEDS_CONTEXT: pause, gather, re-invoke phase
 ```
 
-**Mode persistence (for the footer).** Once the phase list + mode are fixed (Step 3), write
-`cycle_mode: <mode>` into `.lintel/state/00-state.md` once at cycle start (alongside `cycle_id`), so
+State writes/reads are mechanical since v5.0 (ADR-0008) — `_sl="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}/lib/state.sh"
+[ -f "$_sl" ] || _sl="$HOME/.lintel/lib/state.sh"; source "$_sl"   # installed by install.sh in consumer repos` once, then one command (`state_append` / `state_last`), not a YAML obligation.
+
+**Mode persistence (for the footer).** Once the phase list + mode are fixed (Step 3), run
+`state_append CYCLE STARTING cycle_id=<id> cycle_mode=<mode>` once at cycle start, so
 `render_cycle_footer` (and every phase skill that calls it) resolves the skipped-phase glyphs from
-state alone — no explicit `--mode` needed. See [ADR-0003](../../docs/adr/0003-cycle-position-footer.md).
+state alone — no explicit `--mode` needed. See [ADR-0003](../../.claude/decisions/0003-cycle-position-footer.md).
 
 **Phase-progress format** (printed to stdout at each phase boundary):
 
@@ -263,7 +266,7 @@ Between phases:
 - Check if mode-specific gates apply (e.g., a pack-contributed customer mode may auto-run the active pack's voice gates after SHIP — `resolve_pack_field voice.gates_active`)
 
 **Cycle-position footer.** Each phase skill closes its own report with the shared position footer
-(see [ADR-0003](../../docs/adr/0003-cycle-position-footer.md)), so the operator always knows where
+(see [ADR-0003](../../.claude/decisions/0003-cycle-position-footer.md)), so the operator always knows where
 they are and the one logical next action — regardless of where they entered the cycle. The
 orchestrator does **not** double-render between phases; it renders the footer only at its **own
 gates** (mode-confirm, the cost-estimate gate) and at **cycle completion**:
@@ -309,7 +312,7 @@ LINTEL CYCLE — <cycle-id>
 Continue? [Y/pause/abort]
 ```
 
-If operator pauses: state saved to .lintel/state/00-state.md with `cycle_paused: true`. Resume via `/li:resume`.
+If operator pauses: state saved to .claude/runtime/state/00-state.md with `cycle_paused: true`. Resume via `/li:resume`.
 
 If operator aborts: clean shutdown, save state for next time.
 
@@ -331,11 +334,11 @@ Adopts Architect image's FAILURE RECOVERY PROTOCOL: retry → operator-choice �
 After last phase DONE:
 - Surface cycle summary (per CAPTURE phase output if CAPTURE ran)
 - If CAPTURE didn't run (e.g., custom subset without CAPTURE): write light summary
-- Mark 00-state.md `cycle_complete: true`
+- `state_append CYCLE DONE cycle_complete=true` (CAPTURE's own entry covers this when CAPTURE ran)
 
 ### Step 9 — Telemetry (operator-opt-in)
 
-Append to `~/.lintel/analytics/cycle-runs.jsonl`:
+Append to `.claude/runtime/audit/cycle-runs.jsonl`:
 ```json
 {
   "ts": "<>",
@@ -379,12 +382,12 @@ If dependency not met: surface, ask operator to satisfy or pick different `--fro
 
 **Reads:**
 - `~/.lintel/profile.yaml` (defaults)
-- `.lintel/state/00-state.md` (resume state)
+- `.claude/runtime/state/00-state.md` (resume state)
 - Each phase's outputs as inputs to next
 
 **Writes:**
-- `.lintel/state/00-state.md` (orchestrator entries per phase)
-- `~/.lintel/analytics/cycle-runs.jsonl`
+- `.claude/runtime/state/00-state.md` (orchestrator entries per phase)
+- `.claude/runtime/audit/cycle-runs.jsonl`
 
 **Triggers:**
 - Each phase-skill in sequence: `/li:sense`, `/li:scope`, `/li:define`, etc.
@@ -406,7 +409,7 @@ If dependency not met: surface, ask operator to satisfy or pick different `--fro
 4. If loop-back: re-invoke target earlier phase with corrected input
 5. If abort: clean state, save resume point, exit
 
-Failure events logged to `~/.lintel/audit/cycle-failures.jsonl` for audit.
+Failure events logged to `.claude/runtime/audit/cycle-failures.jsonl` for audit.
 
 ## Voice tier behavior
 

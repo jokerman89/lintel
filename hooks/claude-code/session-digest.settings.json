@@ -1,12 +1,12 @@
 {
-  "_comment": "Lintel session-digest SessionStart hook (ADR-0002). Merge this into ~/.claude/settings.json (or a repo's .claude/settings.json). li-scaffold wires it per-repo by default; for a global install, merge by hand. Verify with: li-doctor.",
+  "_comment": "Lintel session-digest SessionStart hook (ADR-0002). NOTE: since v5.0 the plugin auto-registers this via hooks/hooks.json — plugin installs need NO manual merge. This snippet remains ONLY for non-plugin installs (bare ~/.lintel checkout without the Claude Code plugin). Merge into ~/.claude/settings.json (or a repo's .claude/settings.json). Verify with: li-doctor.",
   "hooks": {
     "SessionStart": [
       {
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"$HOME/.lintel/hooks/session-digest/run.sh\""
+            "command": "bash \"$HOME/.lintel/hooks/shared/session-digest/run.sh\""
           }
         ]
       }

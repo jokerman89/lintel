@@ -1,12 +1,16 @@
 #!/usr/bin/env bash
 # li-lessons-promote — promote a repo-local lesson to Lintel global
-# (scaffolding/01-foundation/tasks/lessons.md) so future scaffolded repos inherit
+# (scaffolding/01-foundation/.claude/memory/lessons.md) so future scaffolded repos inherit
 #
 # Usage: li-lessons-promote [--source <file>] [--lintel-dir <path>]
 
 set -euo pipefail
 
-SOURCE_FILE="tasks/lessons.md"
+# Repo-local lessons file resolved via lib/paths.sh (.claude/memory/lessons.md
+# on the v5 layout; un-migrated repos resolve to their legacy location).
+# shellcheck source=/dev/null
+source "$(dirname "${BASH_SOURCE[0]}")/../lib/paths.sh"
+SOURCE_FILE="$(lintel_lessons_file)"
 # Default to the Lintel repo this script lives in (bin/ sits at the repo root).
 LINTEL_DIR="${LINTEL_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 
@@ -19,14 +23,14 @@ while [[ $# -gt 0 ]]; do
 li-lessons-promote — promote a repo lesson to Lintel global
 
 Workflow (interactive):
-  1. Shows numbered list of lessons in current repo's tasks/lessons.md
+  1. Shows numbered list of lessons in current repo's .claude/memory/lessons.md
   2. You pick which one to promote
   3. Edit to generalize (strip repo-specific paths/names)
-  4. Appends to scaffolding/01-foundation/tasks/lessons.md in Lintel repo
+  4. Appends to scaffolding/01-foundation/.claude/memory/lessons.md in Lintel repo
   5. Commits on feature branch in Lintel — you push when ready
 
 Options:
-  --source <file>        Source lessons.md (default: tasks/lessons.md)
+  --source <file>        Source lessons file (default: .claude/memory/lessons.md)
   --lintel-dir <path>    Lintel repo path (default: the repo this script lives in)
 EOF
       exit 0 ;;
@@ -37,7 +41,7 @@ done
 [ -f "$SOURCE_FILE" ] || { echo "Source lessons file not found: $SOURCE_FILE" >&2; exit 3; }
 [ -d "$LINTEL_DIR/.git" ] || { echo "Lintel repo not at $LINTEL_DIR" >&2; exit 4; }
 
-TARGET_FILE="$LINTEL_DIR/scaffolding/01-foundation/tasks/lessons.md"
+TARGET_FILE="$LINTEL_DIR/scaffolding/01-foundation/.claude/memory/lessons.md"
 [ -f "$TARGET_FILE" ] || { echo "Target file not found: $TARGET_FILE" >&2; exit 5; }
 
 echo "li-lessons-promote"
@@ -103,11 +107,11 @@ branch="promote-lesson-$slug-$(date +%Y%m%d)"
 
 cd "$LINTEL_DIR"
 git checkout -q -b "$branch"
-git add scaffolding/01-foundation/tasks/lessons.md
+git add scaffolding/01-foundation/.claude/memory/lessons.md
 git commit -q -m "lessons: promote '$(echo "$generalized" | head -1 | sed 's/^## //')' from $source_repo"
 
 echo ""
-echo "✓ Promoted to Lintel scaffolding/01-foundation/tasks/lessons.md"
+echo "✓ Promoted to Lintel scaffolding/01-foundation/.claude/memory/lessons.md"
 echo "✓ Branch: $branch"
 echo ""
 echo "Next:"

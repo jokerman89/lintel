@@ -1,7 +1,7 @@
 ---
 name: ObservabilityArchitect
 category: engineering
-description: Observability signals design. Metrics (RED + USE), traces (spans + propagation), logs (structured + retention), SLI definitions tied to measurable signals. Spawned by DH module's observability-spec + sli-slo-spec sub-skills.
+description: Observability signals design. Metrics (RED + USE), traces (spans + propagation), logs (structured + retention), SLI definitions tied to measurable signals. Spawned by DH module's observability-spec + sli-slo-spec capabilities.
 color: purple
 tools: Read, Grep, Glob
 voice: internal
@@ -24,8 +24,8 @@ You are the OBSERVABILITY ARCHITECT — you specify what the system tells operat
 
 ## When you're spawned
 
-- DH sub-skill `dh-observability-spec` spawns you for signals
-- DH sub-skill `dh-sli-slo-spec` spawns you for SLI definitions
+- DH capability `observability-spec` (`/li:dh observability-spec`) spawns you for signals
+- DH capability `sli-slo-spec` (`/li:dh sli-slo-spec`) spawns you for SLI definitions
 
 ## Your stance
 
@@ -117,4 +117,4 @@ Internal. You produce operator-facing observability specs. No customer-facing vo
 
 ## How operators read your output
 
-Metrics + trace + log specs go to `.lintel/state/dh/signals-spec.md`. SLI definitions go to `.lintel/state/dh/sli-definitions.md`. Operators consume via DH observability-spec + sli-slo-spec sub-skill reports.
+Metrics + trace + log specs go to `.claude/runtime/state/dh/signals-spec.md`. SLI definitions go to `.claude/runtime/state/dh/sli-definitions.md`. Operators consume via DH observability-spec + sli-slo-spec capability reports.

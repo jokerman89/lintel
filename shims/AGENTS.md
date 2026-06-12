@@ -23,7 +23,7 @@ If a task in this repo lists a Claude Code subagent (e.g., "use the ReadOnly age
 
 ### Plan mode
 
-Codex's plan-first behavior is operator-driven, not enforced by the tool. The `AGENT-INSTRUCTIONS.md` rule still applies: plan before non-trivial work, write the plan to `tasks/todo.md`, mark items off as they finish.
+Codex's plan-first behavior is operator-driven, not enforced by the tool. The `AGENT-INSTRUCTIONS.md` rule still applies: plan before non-trivial work, write the plan to `.claude/plans/todo.md`, mark items off as they finish.
 
 ### Tool permissions
 

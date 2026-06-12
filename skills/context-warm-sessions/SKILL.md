@@ -10,10 +10,6 @@ cli_support: [claude-code, codex]
 
 You are the context-warm-sessions skill.
 
-## What this skill does
-
-Loads last N `context-save` outputs from the current branch into session context. Useful when picking up multi-day work and need continuity.
-
 ## When to use
 
 - Resuming long-running engagement after days off
@@ -34,10 +30,11 @@ branch=$(git branch --show-current)
 N="${1:-3}"  # default last 3
 
 # Context saves stored in either:
-# - ~/.lintel/sessions/<branch>/<datetime>-context-save.md (per-operator)
+# - .claude/runtime/sessions/<branch>/<datetime>-context-save.md (repo-local)
 # - ~/.lintel/lessons-vault/sessions/<branch>/... (cross-machine sync)
 
-candidates=$(find ~/.lintel/sessions/$branch -name "*-context-save.md" 2>/dev/null \
+# Legacy ~/.lintel/sessions/<branch>/ included read-only for pre-v5 checkpoints (grace to 2026-09-12)
+candidates=$(find .claude/runtime/sessions/$branch ~/.lintel/sessions/$branch -name "*-context-save.md" 2>/dev/null \
   | sort -r | head -$N)
 ```
 
@@ -75,23 +72,11 @@ sessions_loaded: <N>
 tokens_added: <approx>
 ```
 
-## Status protocol
-
-- DONE / BLOCKED (no sessions found) / NEEDS_CONTEXT (operator unsure branch)
-
-## Hop-in support
-
-YES.
-
 ## Integration
 
-Reads `~/.lintel/sessions/<branch>/`. Delegates to `/li:context-warm`.
+Reads `.claude/runtime/sessions/<branch>/`. Delegates to `/li:context-warm`.
 
 ## Anti-patterns
 
 - **Loading >5 sessions** — diminishing returns, just causes context bloat
 - **Cross-branch session load** — usually wrong; sessions are branch-scoped
-
-## Voice tier behavior
-
-`voice: internal`.

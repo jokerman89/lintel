@@ -180,9 +180,9 @@ fi
 ### Step 4 — Dispatch by DAG stage
 
 ```bash
-mkdir -p .lintel/state/full-engineering-pass
-state_file=".lintel/state/full-engineering-pass/00-state.md"
-audit="$LINTEL_HOME/audit/full-engineering-pass.jsonl"
+mkdir -p .claude/runtime/state/full-engineering-pass
+state_file=".claude/runtime/state/full-engineering-pass/00-state.md"
+audit=".claude/runtime/audit/full-engineering-pass.jsonl"
 mkdir -p "$(dirname "$audit")"
 
 declare -A module_score
@@ -193,7 +193,7 @@ if [[ " ${final_modules[*]} " =~ " ta " ]]; then
   echo "════ Stage 1: TA (tech-architecture) ════"
   /li:ta full || module_status[ta]="FAILED"
   module_score[ta]=$(read_module_score ta)
-  forge_envelope phase_transition full-engineering-pass ta--complete brief .lintel/state/ta/...
+  forge_envelope phase_transition full-engineering-pass ta--complete brief .claude/runtime/state/ta/...
 fi
 
 # ─── Stage 2: DA + SC (parallel) ──────────────────────
@@ -262,7 +262,7 @@ done
 
 ```bash
 ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-out=".lintel/state/full-engineering-pass/composition-report-$ts.md"
+out=".claude/runtime/state/full-engineering-pass/composition-report-$ts.md"
 {
   echo "# Full engineering pass — $(date -u +%Y-%m-%dT%H:%M:%SZ)"
   echo "## Aggregate score: $aggregate_score / 100"
@@ -281,11 +281,11 @@ out=".lintel/state/full-engineering-pass/composition-report-$ts.md"
   fi
   echo ""
   echo "## Cross-module artifacts produced"
-  echo "- .lintel/state/ta/ (architecture decisions, ADRs, contracts, NFRs)"
-  echo "- .lintel/state/da/ (data model, migrations, retention)"
-  echo "- .lintel/state/sc/ (threat model, secrets, auth, compliance, audit)"
-  echo "- .lintel/state/dh/ (deployment, observability, SLO, cost, on-call)"
-  echo "- .lintel/state/tq/ (coverage, perf budget, contracts, regression, chaos)"
+  echo "- .claude/runtime/state/ta/ (architecture decisions, ADRs, contracts, NFRs)"
+  echo "- .claude/runtime/state/da/ (data model, migrations, retention)"
+  echo "- .claude/runtime/state/sc/ (threat model, secrets, auth, compliance, audit)"
+  echo "- .claude/runtime/state/dh/ (deployment, observability, SLO, cost, on-call)"
+  echo "- .claude/runtime/state/tq/ (coverage, perf budget, contracts, regression, chaos)"
 } > "$out"
 
 printf '{"ts":"%s","kind":"full_engineering_pass_complete","aggregate_score":%d,"modules_run":%d,"modules_missing":%d,"verdict":"%s","operator":"%s"}\n' \
@@ -321,7 +321,7 @@ YES via `--resume`:
 
 ```bash
 /li:full-engineering-pass --resume
-# reads .lintel/state/full-engineering-pass/00-state.md
+# reads .claude/runtime/state/full-engineering-pass/00-state.md
 # continues from the stage where the prior run paused
 ```
 
@@ -333,9 +333,9 @@ YES via `--resume`:
 - `~/.lintel/profile.yaml` `engineering.*` block (per-module preferences)
 
 **Writes:**
-- `.lintel/state/full-engineering-pass/composition-report-<ts>.md`
-- `.lintel/state/full-engineering-pass/00-state.md` (for `--resume`)
-- `~/.lintel/audit/full-engineering-pass.jsonl`
+- `.claude/runtime/state/full-engineering-pass/composition-report-<ts>.md`
+- `.claude/runtime/state/full-engineering-pass/00-state.md` (for `--resume`)
+- `.claude/runtime/audit/full-engineering-pass.jsonl`
 - Brief Forge envelopes through the standard gate (one per stage transition)
 
 **Triggered by:**

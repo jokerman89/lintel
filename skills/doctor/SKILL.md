@@ -10,10 +10,6 @@ cli_support: [claude-code, codex]
 
 You are the li-doctor skill.
 
-## What this skill does
-
-Diagnostic health-check across operator's machine. Detects which AI CLIs are installed, whether Lintel is installed in each, version skew between them, and any drift (e.g., one CLI on v3.0.0, another on v2.x).
-
 ## When to use
 
 - Onboarding new operator — verify setup
@@ -91,7 +87,7 @@ JSTACK-DOCTOR: health check (date)
 
 ## Instruction parity (via /li:instruction-parity-check)
 - 6/6 instruction files present
-- Drift: <none | warn | fail> — see ~/.lintel/audit/instruction-parity-<date>.md
+- Drift: <none | warn | fail> — see .claude/runtime/audit/instruction-parity-<date>.md
 
 ## Voice corpus (pack-contributed)
 - Source: <resolve_pack_field voice.corpus — none by default>

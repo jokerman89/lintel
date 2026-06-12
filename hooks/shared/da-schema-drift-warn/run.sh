@@ -46,7 +46,7 @@ if [ -n "$matching_adr" ]; then
 
   echo "WARN [Lintel hook da-schema-drift-warn]: editing $file_edited"
   echo "WARN: schema file is claimed by $matching_adr — '$matching_decision'"
-  echo "WARN: consider updating the ADR, running /li:da single --action data-contract-collision, or pass --ignore-schema-drift to override."
+  echo "WARN: consider updating the ADR, running /li:da data-contract-collision, or pass --ignore-schema-drift to override."
 fi
 
 exit 0

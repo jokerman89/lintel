@@ -2,9 +2,9 @@
 name: tq-contract-break-warn
 tier: warn-only
 event: PreToolUse (Edit|Write on provider/contract files)
-fires_on: edit to a provider file (matching pack.testing_qa.provider_glob OR identified by .lintel/state/tq/contract-test-suite-*.md) without paired contract-test update
+fires_on: edit to a provider file (matching pack.testing_qa.provider_glob OR identified by .claude/runtime/state/tq/contract-test-suite-*.md) without paired contract-test update
 override: pass --ignore-contract-break flag (operator decision, logged)
-audit: ~/.lintel/audit/hooks.jsonl
+audit: .claude/runtime/audit/hooks.jsonl
 ---
 
 # tq-contract-break-warn

@@ -137,10 +137,6 @@ For customer distribution: confirm the recorded provenance reference PROV-8b2c4.
 - Customer-data in brief → BLOCK
 - Distribution gated by the active pack's deploy/release gate (if any) reading provenance + voice status
 
-## Voice tier note
-
-`voice: mixed`. The skill is internal; output voice depends on `--target`.
-
 ## Failure modes
 
 - **docx-templater placeholder mismatch** (template + brief don't align) — surface diff, allow operator to align brief or pick different template

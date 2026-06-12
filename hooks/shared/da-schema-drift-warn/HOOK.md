@@ -4,7 +4,7 @@ tier: warn-only
 event: PreToolUse (Edit|Write on schema-ADR-claimed files)
 fires_on: edit to a file path listed in any schema-flavored ADR's "decisions:" block, OR to a migration file referenced by an ADR
 override: pass --ignore-schema-drift flag (operator decision, logged)
-audit: ~/.lintel/audit/hooks.jsonl
+audit: .claude/runtime/audit/hooks.jsonl
 ---
 
 # da-schema-drift-warn
@@ -13,7 +13,7 @@ Surfaces when an Edit/Write hits a schema file or migration covered by a prior s
 
 ## What it does
 
-- Scans `.lintel/decisions/`, `docs/decisions/`, `docs/adr/` for ADRs whose `decisions:` block references the edited file OR a migration file path inside the same schema directory
+- Scans `.lintel/decisions/`, `docs/decisions/`, `.claude/decisions/` for ADRs whose `decisions:` block references the edited file OR a migration file path inside the same schema directory
 - Filters to schema-flavored ADRs (heuristic: ADR title or content references "schema", "migration", "data model", "column", "table")
 - If match: WARN with ADR id + decision summary
 
@@ -27,7 +27,7 @@ Schema decisions evolve. The warn prompts the operator to either: (a) update the
 
 ## What's NOT in scope
 
-- Detecting indirect schema impact (downstream consumers — that's `/li:da-data-contract-collision`)
+- Detecting indirect schema impact (downstream consumers — that's `/li:da data-contract-collision`)
 - Blocking the edit (warn only)
 - Auto-updating the ADR
 

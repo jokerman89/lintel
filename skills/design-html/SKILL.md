@@ -72,7 +72,6 @@ To fork into variants: /design-shotgun --seed <this path> --count 3
 
 - If `--copy-tier pack-voice` and `--inherit-project` references a customer-facing surface: SURFACE reminder that the active pack's compliance gates are required before the artifact reaches a customer.
 - Reference URL processed via `/browse` — Layer 2 prod-host gate applies.
-- Output HTML is local. Distribution is operator's responsibility.
 
 ## Voice tier note
 

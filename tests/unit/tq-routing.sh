@@ -29,22 +29,22 @@ for action in coverage-audit perf-budget-spec contract-test-design regression-su
   else fail "TQ missing --action $action"; fi
 done
 
-# Scenario 3: Sub-skill agent dispatch (L-001)
-echo ""; echo "[3] Sub-skills declare agent dispatch"
-declare -A SUB_AGENT=(
-  ["tq-coverage-audit"]="TestRunner"
-  ["tq-perf-budget-spec"]="LatencyAnalyzer"
-  ["tq-contract-test-design"]="APIDesigner"
-  ["tq-regression-suite"]="RegressionDetective"
-  ["tq-chaos-plan"]="SecurityAuditor"
-  ["tq-flaky-quarantine"]="TestRunner"
-  ["tq-test-pyramid-review"]="Architect"
+# Scenario 3: agent dispatch (dispatch-table rows per ADR-0009)
+echo ""; echo "[3] Dispatch rows declare agent dispatch"
+declare -A CAP_AGENT=(
+  ["coverage-audit"]="TestRunner"
+  ["perf-budget-spec"]="LatencyAnalyzer"
+  ["contract-test-design"]="APIDesigner"
+  ["regression-suite"]="RegressionDetective"
+  ["chaos-plan"]="SecurityAuditor"
+  ["flaky-quarantine"]="TestRunner"
+  ["test-pyramid-review"]="Architect"
 )
-for sub in "${!SUB_AGENT[@]}"; do
-  expected="${SUB_AGENT[$sub]}"
-  if grep -q "$expected" "$REPO_ROOT/skills/$sub/SKILL.md" 2>/dev/null; then
-    pass "$sub dispatches to $expected"
-  else fail "$sub MISSING dispatch to $expected"; fi
+for cap in "${!CAP_AGENT[@]}"; do
+  expected="${CAP_AGENT[$cap]}"
+  if grep -E "^\|[[:space:]]*\`${cap}\`[[:space:]]*\|" "$TQ" | grep -q "$expected"; then
+    pass "dispatch row $cap → $expected"
+  else fail "dispatch row $cap MISSING agent $expected"; fi
 done
 
 # Scenario 4: 5 checkpoint pass-criteria

@@ -10,7 +10,7 @@
 Pre-v4.0, every hand-off was ad-hoc:
 - Subagent spawn: parent skill writes a free-form prompt
 - Phase transition: phase appends to `00-state.md` and the next phase reads it
-- Cold-executor: plan + spec + prompt files in `.lintel/state/` named by convention
+- Cold-executor: plan + spec + prompt files in `.claude/runtime/state/` named by convention
 
 Three failure modes:
 
@@ -90,7 +90,7 @@ Phase 2 envelopes (pre-Brief Forge) default to `completeness_score: 100` if not 
 ```yaml
 escape_hatches:
   - "Re-invoke source skill /li:plan with --more-detail flag"
-  - "Read .lintel/state/PLAN-2026-05-29.md for full plan"
+  - "Read .claude/runtime/state/PLAN-2026-05-29.md for full plan"
   - "Ask operator: 'plan completeness scored 65 — re-run with elaboration?'"
 ```
 
@@ -100,7 +100,7 @@ The receiver acts on the envelope and uses an escape hatch when it hits ambiguit
 
 `tail.audit_pointer` is the file path where this envelope is logged. Every envelope MUST be logged to the audit trail at issue time. The pointer tells future audit tools where to find it.
 
-Default path: `~/.lintel/audit/envelopes-<date>.jsonl`. Pack-overridable per `compliance.audit_paths`.
+Default path: `.claude/runtime/audit/envelopes-<date>.jsonl`. Pack-overridable per `compliance.audit_paths`.
 
 ## Schema versioning
 
@@ -130,7 +130,7 @@ Per design doc §1.3 C1-D2: warn-only enforcement in v4.0, block-on-incompat fro
 - `lib/envelope-schema.yaml` — the contract
 
 **Writes:**
-- `~/.lintel/audit/envelopes-<date>.jsonl` (or pack-overridden path)
+- `.claude/runtime/audit/envelopes-<date>.jsonl` (or pack-overridden path)
 
 **Tools:**
 - `bin/li-envelope-validate <file>` — validates against schema, returns PASS/FAIL + errors

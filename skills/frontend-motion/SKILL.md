@@ -148,10 +148,6 @@ if [ -n "${CUSTOMER_SHARE:-}" ]; then
 fi
 ```
 
-## Voice tier behavior
-
-`voice: internal`. Default. `--customer-share` triggers `/li:compliance-gate --check motion-licensing` (GSAP Club-plugin awareness etc).
-
 ## Status protocol
 
 - **DONE** — motion.json written, schema valid, libraries non-empty
@@ -164,10 +160,6 @@ fi
 - Customer-share + GSAP-Club-plugin reference: surface license-tier explicit + ask for operator confirm
 - Brief mentions specific motion-library agent doesn't know: agent verifies + may need NEEDS_CONTEXT
 
-## Hop-in support
-
-YES — solo-invocable.
-
 ## Integration
 
 **Reads:**
@@ -176,7 +168,7 @@ YES — solo-invocable.
 
 **Writes:**
 - `motion.json` (stdout default, $OUT-path if orchestrator)
-- Audit-log: `~/.lintel/audit/frontend-motion-runs.jsonl`
+- Audit-log: `.claude/runtime/audit/frontend-motion-runs.jsonl`
 
 **Calls into:**
 - `agents/frontend/MotionDirector.md` (primary)

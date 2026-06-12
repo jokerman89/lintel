@@ -12,7 +12,7 @@ You are the RESUME skill — cross-session continuity for Lintel cycle.
 
 ## What this skill does
 
-Reads `.lintel/state/00-state.md` from cwd, determines where the prior session ended, and routes operator to the next-recommended phase (or operator-specified override). Handles:
+Reads `.claude/runtime/state/00-state.md` from cwd, determines where the prior session ended, and routes operator to the next-recommended phase (or operator-specified override). Handles:
 - Resume mid-cycle (paused/aborted before)
 - Resume new cycle starting from CAPTURE artifacts of prior cycle
 - Cross-session continuity when operator returns days/weeks later
@@ -37,7 +37,7 @@ Not a true phase — utility skill that lands the operator in the right phase.
 ### Step 1 — Locate state
 
 ```bash
-STATE_FILE=".lintel/state/00-state.md"
+STATE_FILE=".claude/runtime/state/00-state.md"
 if [ ! -f "$STATE_FILE" ]; then
   # No state from this repo
   echo "NO_PRIOR_STATE_LOCAL"
@@ -108,7 +108,7 @@ If operator aborts → exit BLOCKED with recommendation to run `/li:sense` for f
 
 ### Step 2 — Parse last state entry
 
-Read `00-state.md`, find the LAST entry:
+Read `00-state.md`, find the LAST entry. Mechanical read via `lib/state.sh`: `state_last` prints the whole last block, `state_last <field>` (e.g. `state_last status`, `state_last next_recommended`) prints one field:
 - Last phase completed
 - Last phase status (DONE / DONE_WITH_CONCERNS / BLOCKED / paused)
 - Next recommended phase
@@ -217,7 +217,7 @@ If precondition fails: surface why, suggest correction or different phase.
 If state came from another machine (cross-machine sync via lessons-vault or operator manually copied):
 - Surface: "State imported from machine <other>. Branch may differ. Verify before proceeding."
 - AskUserQuestion: "Continue with imported state? (Y/n)"
-- If yes: write 00-state.md entry "resume from cross-machine import, source: <machine-id or path>"
+- If yes: `state_append RESUME IMPORTED source="<machine-id or path>"`
 
 ### Step 6 — Invoke chosen phase
 
@@ -226,19 +226,16 @@ Based on operator's choice (Step 3 + 4):
 - If B (restart prior): `/li:<last-phase>` (re-runs from start)
 - If C (specific): `/li:<chosen-phase>`
 - If D (full cycle): `/li:cycle` (from start, ignoring prior state)
-- If E (abort): write `cycle_aborted: true` to 00-state.md, archive to `~/.lintel/archive/`
+- If E (abort): `state_append RESUME ABORTED cycle_aborted=true`, archive to `~/.lintel/archive/`
 
 ### Step 7 — 00-state.md append
 
-```yaml
-phase: RESUME (utility, not cycle phase)
-ts: <timestamp>
-prior_state_age: <duration>
-prior_last_phase: <phase>
-operator_choice: <A | B | C | D | E>
-next_invoked: <phase>
-cross_machine: <yes/no>
-status: DONE
+RESUME is a utility, not a cycle phase. Mechanical since v5.0 (ADR-0008) — one command, not a YAML obligation:
+
+```bash
+_sl="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}/lib/state.sh"
+[ -f "$_sl" ] || _sl="$HOME/.lintel/lib/state.sh"; source "$_sl"   # installed by install.sh in consumer repos
+state_append RESUME DONE prior_last_phase=<phase> operator_choice=<A|B|C|D|E> next_invoked=<phase> cross_machine=<yes|no>
 ```
 
 ## Status protocol
@@ -260,10 +257,10 @@ n/a — RESUME is itself the hop-in mechanism.
 ## Integration
 
 **Reads:**
-- `.lintel/state/00-state.md` (PRIMARY)
+- `.claude/runtime/state/00-state.md` (PRIMARY)
 - `~/.lintel/lessons-vault/00-state-<repo>-*.md` (cross-machine fallback)
-- `~/.lintel/jobs/<id>/job.yaml` `steps[]` (job-scoped resume — node-path via `job_resume_point`)
-- `docs/plans/<slug>/scope.md` `depth_schema` (selects node-path vs current_step resume)
+- `.claude/runtime/jobs/<id>/job.yaml` `steps[]` (job-scoped resume — node-path via `job_resume_point`)
+- `.claude/plans/<slug>/scope.md` `depth_schema` (selects node-path vs current_step resume)
 - `plan.md`, `spec.md`, `review-report.md` (for precondition checks)
 - recent git log
 
@@ -271,7 +268,7 @@ n/a — RESUME is itself the hop-in mechanism.
 - `bin/_jobs.sh` — `job_resume_point` (tree node-path), `job_can_start` (skip blocked leaves), `job_path`
 
 **Writes:**
-- `.lintel/state/00-state.md` (RESUME entry)
+- `.claude/runtime/state/00-state.md` (RESUME entry)
 - `~/.lintel/archive/<cycle-id>/` (if operator aborts)
 
 **Triggers:**
@@ -306,4 +303,4 @@ source "$LINTEL_REPO_ROOT/lib/cycle-footer.sh"   # fallback: "$(git rev-parse --
 render_cycle_footer                               # auto: thin when no cycle, full/--compact when in one
 ```
 
-See [ADR-0003](../../docs/adr/0003-cycle-position-footer.md).
+See [ADR-0003](../../.claude/decisions/0003-cycle-position-footer.md).

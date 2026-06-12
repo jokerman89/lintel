@@ -116,7 +116,7 @@ Surface qa-report summary to operator. Auto-fix applied where possible (recorded
 
 ### Step 9 — Output + telemetry
 
-Print run directory + artifact paths. Append run-event to `.lintel/state/00-state.md`:
+Print run directory + artifact paths. Append run-event to `.claude/runtime/state/00-state.md`:
 
 ```yaml
 event: generate_run_complete
@@ -133,8 +133,6 @@ ts: <iso-8601>
 - **Default `internal`** — content is operator-facing intermediate artifact. No customer-bound gate required.
 - **`--customer-share` flag** — content will be delivered to customer. The active pack's compliance gates apply (`resolve_pack_field compliance.hooks`; none by default). Voice tier upgraded per pack. Vocabulary-blocklist enforced if the pack defines one.
 
-Compliance gate runs at orchestrator level (Step 6). Format-builders inherit gated content; they apply brand/honest-limitations/provenance gates per format.
-
 ## Status protocol
 
 - **DONE** — all formats produced + qa_pass=true + run_dir printed
@@ -148,21 +146,17 @@ Compliance gate runs at orchestrator level (Step 6). Format-builders inherit gat
 - Pack compliance gate fails + `--customer-share`: hard-block, surface the failing gate
 - Slot-format requested: confirm with operator that AI will generate content fresh (no pre-curated content per L-001)
 
-## Hop-in support
-
-YES — single-invocation orchestrator. Always entry-point. Can be invoked mid-cycle if operator decides to materialize a deliverable.
-
 ## Integration
 
 **Reads:**
 - Operator brief (path or inline)
 - `~/.lintel/brand/<format>-templates/` per requested format
 - `~/.lintel/profile.yaml` (role context if active)
-- `~/.lintel/state/00-state.md` (telemetry)
+- `.claude/runtime/state/00-state.md` (telemetry)
 
 **Writes:**
 - `~/.lintel/generate-runs/<run-id>/` (outline.md, content.md, speaker-notes.md if PPT, design-spec.json, per-format artifacts, qa-report.json)
-- `.lintel/state/00-state.md` (run event)
+- `.claude/runtime/state/00-state.md` (run event)
 
 **Triggers (sub-skills):**
 - `/li:generate-outline`, `/li:generate-write`, `/li:generate-design`, `/li:generate-qa` (shared pipeline)

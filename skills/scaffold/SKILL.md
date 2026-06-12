@@ -1,7 +1,7 @@
 ---
 name: scaffold
 layer: foundation
-description: Scaffold a new repo with Lintel base templates — CLAUDE.md, tasks/lessons.md, EVOLUTION-LOG, docs/adr/ — interactive setup.
+description: Scaffold a new repo with Lintel base templates — CLAUDE.md, .claude/memory/lessons.md, EVOLUTION-LOG, .claude/decisions/ — interactive setup.
 color: cyan
 tools: Read, Bash, Edit, Write, Glob
 voice: internal
@@ -12,7 +12,7 @@ You are the li-scaffold skill.
 
 ## What this skill does
 
-Sets up a new repo (or initializes scaffolding in existing repo) with Lintel's Category B templates: CLAUDE.md (from template + repo-specific variables), CORE-PRINCIPLES.md, EVOLUTION.md, EVOLUTION-LOG.md, tasks/{lessons,memory,personas,todo}.md, docs/adr/{README,TEMPLATE}.md, .claude/agents/, TEMPLATE-skill.md.
+Sets up a new repo (or initializes scaffolding in existing repo) with Lintel's Category B templates: CLAUDE.md (from template + repo-specific variables), CORE-PRINCIPLES.md, EVOLUTION.md, EVOLUTION-LOG.md, .claude/memory/{lessons,working-state,personas}.md, .claude/plans/todo.md, .claude/decisions/{README,TEMPLATE}.md, .claude/agents/, TEMPLATE-skill.md.
 
 This is how new repos get Lintel defaults inside 30 seconds.
 
@@ -33,8 +33,8 @@ This is how new repos get Lintel defaults inside 30 seconds.
 
 2. **Check for collisions.** Files that would be created or overwritten:
    - `CLAUDE.md` — overwrite or merge?
-   - `tasks/` — exists with content?
-   - `docs/adr/` — exists?
+   - `.claude/memory/` — exists with content?
+   - `.claude/decisions/` — exists?
    Recommend backup if collisions.
 
 3. **Locate Lintel scaffolding source.**
@@ -56,9 +56,10 @@ This is how new repos get Lintel defaults inside 30 seconds.
    cp scaffolding/01-foundation/CORE-PRINCIPLES.md .
    cp scaffolding/01-foundation/EVOLUTION.md .
    cp scaffolding/01-foundation/EVOLUTION-LOG.md .
-   mkdir -p tasks docs/adr docs/personas .claude/agents
-   cp scaffolding/01-foundation/tasks/* tasks/
-   cp scaffolding/01-foundation/docs/adr/* docs/adr/
+   mkdir -p .claude/memory .claude/plans .claude/decisions docs/personas .claude/agents
+   cp scaffolding/01-foundation/.claude/memory/* .claude/memory/
+   cp scaffolding/01-foundation/.claude/plans/* .claude/plans/
+   cp scaffolding/01-foundation/.claude/decisions/* .claude/decisions/
    cp scaffolding/01-foundation/docs/personas/* docs/personas/
    cp scaffolding/01-foundation/.claude/agents/* .claude/agents/
    cp scaffolding/01-foundation/.claude/SUBAGENT-GUIDE.md .claude/
@@ -68,7 +69,7 @@ This is how new repos get Lintel defaults inside 30 seconds.
 
 7. **Initial commit (interactive — confirm with operator):**
    ```bash
-   git add CLAUDE.md CORE-PRINCIPLES.md EVOLUTION.md EVOLUTION-LOG.md tasks/ docs/ .claude/ TEMPLATE-*.md
+   git add CLAUDE.md CORE-PRINCIPLES.md EVOLUTION.md EVOLUTION-LOG.md docs/ .claude/ TEMPLATE-*.md
    git commit -m "chore: scaffold Lintel base via li-scaffold"
    ```
 
@@ -92,8 +93,9 @@ Files created:
 - ✓ CLAUDE.md (rendered from template)
 - ✓ CORE-PRINCIPLES.md
 - ✓ EVOLUTION.md, EVOLUTION-LOG.md
-- ✓ tasks/{lessons,memory,personas,todo}.md
-- ✓ docs/adr/{README,TEMPLATE}.md
+- ✓ .claude/memory/{lessons,working-state,personas}.md
+- ✓ .claude/plans/todo.md
+- ✓ .claude/decisions/{README,TEMPLATE}.md
 - ✓ docs/personas/EXAMPLE.md
 - ✓ .claude/agents/ (4 template subagents)
 - ✓ .claude/SUBAGENT-GUIDE.md
@@ -106,7 +108,7 @@ Commit: <SHA>
 
 Next steps:
 - [ ] Review CLAUDE.md, adjust project-specific sections
-- [ ] Customize tasks/personas.md with engagement-specific personas
+- [ ] Customize .claude/memory/personas.md with engagement-specific personas
 - [ ] Install Lintel plugin for your CLI: see docs/per-cli/
 - [ ] First /qa to verify setup
 ```

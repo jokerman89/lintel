@@ -14,7 +14,7 @@ You are the context-cool skill — selective context dropping.
 
 In Claude Code, context isn't directly mutable mid-session — it's append-only. So "cooling" here means: signal to subsequent skills/agents to IGNORE specific loaded content + clean up budget tracking + recommend session-restart if true reduction needed.
 
-For real budget reduction: operator can `/li:context-snapshot` then restart session, then `/li:context-dump` selectively.
+For real budget reduction: operator can `/li:context-save` then restart session, then `/li:context-restore` selectively.
 
 ## When to use
 
@@ -31,7 +31,7 @@ For real budget reduction: operator can `/li:context-snapshot` then restart sess
 
 ### Step 1 — Surface what's loaded
 
-Read `.lintel/state/context-budget.md` to see what was warmed:
+Read `.claude/runtime/state/context-budget.md` to see what was warmed:
 
 ```
 CURRENTLY LOADED (from context-warm events):
@@ -55,7 +55,7 @@ AskUserQuestion:
 
 ### Step 3 — Apply marker
 
-For selected items, add to `.lintel/state/context-ignore.md`:
+For selected items, add to `.claude/runtime/state/context-ignore.md`:
 ```yaml
 - source: context-warm "ExpressRoute"
   files: [...]
@@ -76,9 +76,9 @@ Marked for IGNORE: <N> file(s)
 Effective budget freed: ~<X>k (when subagents respect IGNORE)
 
 True budget reduction requires session restart:
-  1. /li:context-snapshot
+  1. /li:context-save
   2. Restart session
-  3. /li:context-dump <snapshot>
+  3. /li:context-restore <checkpoint>
   4. /li:context-warm (only what's still needed)
 ```
 
@@ -90,24 +90,11 @@ ts: <timestamp>
 items_marked: <N>
 ```
 
-## Status protocol
-
-- DONE — markers applied
-- DONE_WITH_CONCERNS — markers don't actually reduce context in Claude Code; surface caveat
-
-## Hop-in support
-
-YES.
-
 ## Integration
 
-Reads `.lintel/state/context-budget.md`. Writes `.lintel/state/context-ignore.md` for coordination.
+Reads `.claude/runtime/state/context-budget.md`. Writes `.claude/runtime/state/context-ignore.md` for coordination.
 
 ## Anti-patterns
 
 - **Treating "cool" as true budget reduction** — it's coordination, not memory cleanup
 - **Cooling too aggressively** — operator loses access if they need files later (would need re-warm)
-
-## Voice tier behavior
-
-`voice: internal`.

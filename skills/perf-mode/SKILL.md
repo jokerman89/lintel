@@ -47,7 +47,7 @@ Outcome-based, not token-saving. Spend tokens where outcome density justifies it
 
 1. **Preflight check.** Verify context engine is enabled (`context.enabled: true` in config). If not: warn + offer to enable.
 2. **Cost estimate (if `--cost-estimate`).** Compute projected spend based on budget + average session token-velocity history. Show estimate + skip activation.
-3. **Activate.** Write to `~/.lintel/sessions/$SESSION_ID/perf-mode-active`:
+3. **Activate.** Write to `.claude/runtime/sessions/$SESSION_ID/perf-mode-active`:
    ```yaml
    active: true
    activated_at: 2026-05-27T21:30:00Z
@@ -81,13 +81,9 @@ Monitor:    /context-budget --watch
 
 ## Compliance integration
 
-- Activation logged: `~/.lintel/audit/perf-mode-activations.jsonl`
+- Activation logged: `.claude/runtime/audit/perf-mode-activations.jsonl`
 - Cost tracking aggregates perf-mode sessions to monthly summary
 - No production-mutation gate — perf-mode is local resource allocation
-
-## Voice tier note
-
-`voice: internal`.
 
 ## Failure modes
 
@@ -127,6 +123,6 @@ At average velocity: 16 hours runway. Estimated $24-48 cost.
 
 - `CONTEXT-ENGINE.md` — engine semantics
 - `/context-budget` — view + modify state
-- `/context-warmup` — explicit preload
+- `/context-warm --pattern` — explicit declared-pattern preload
 - `/context-budget --watch` — passive monitoring
 - `ContextBudgetAdvisor` — Layer 4 agent suggests perf-mode for unstructured tasks

@@ -46,7 +46,7 @@ Closes operator-request 5.3 + integrates with L-002 (grep-first-pattern adapted 
 ```bash
 # Identify compactable state:
 # 1. /context-save snapshots > N days old → archive
-find ~/.lintel/state -name "*.md" -mtime +30 | xargs -r tar -czf ~/.lintel/archive/old-state-$(date +%Y%m%d).tar.gz
+find .claude/runtime/state -name "*.md" -mtime +30 | xargs -r tar -czf ~/.lintel/archive/old-state-$(date +%Y%m%d).tar.gz
 
 # 2. usage.jsonl > 90 days old → already auto-rotated by usage-log skill
 # (verify via /li:usage-log --report)
@@ -69,11 +69,11 @@ Static-path manifest (loaded from config or hard-coded):
 
 ```yaml
 load-bearing_paths:
-  - tasks/lessons.md          # required per LAYERS.md
-  - tasks/personas.md          # required per LAYERS.md (Cohort 1 0.4)
-  - tasks/memory.md            # required per LAYERS.md (Cohort 1 0.4)
+  - .claude/memory/lessons.md          # required per LAYERS.md
+  - .claude/memory/personas.md          # required per LAYERS.md (Cohort 1 0.4)
+  - .claude/memory/working-state.md            # required per LAYERS.md (Cohort 1 0.4)
   - ~/.lintel/profile.yaml     # session-config
-  - ~/.lintel/audit/           # observation spine writes here
+  - .claude/runtime/audit/     # observation spine writes here (usage-* stays in ~/.lintel/audit/)
   - skills/                    # canonical skill location
   - agents/                    # canonical agent location
 
@@ -82,7 +82,7 @@ deprecated_paths_check:
 
 required_files_in_paths:
   - skills/CATALOG.md          # auto-generated, should exist post-Cohort-2 merge
-  - tasks/lessons.md           # canonical lessons
+  - .claude/memory/lessons.md           # canonical lessons
 ```
 
 For each path:
@@ -123,38 +123,23 @@ Read usage-log past 30 days:
 
 Pairs naturally with `/li:catalog --trends` (Cohort 2 1.6 output).
 
-## Voice tier behavior
-
-`voice: internal`. An operator-internal maintenance pass.
-
-## Status protocol
-
-- **DONE** — maintenance pass complete for the selected mode
-- **DONE_WITH_CONCERNS** — pass complete with warnings (e.g., deprecated paths still present)
-- **BLOCKED** — `~/.lintel/` permissions deny read/write
-- **NEEDS_CONTEXT** — `--simulate-tokens` without a workflow arg
-
 ## Pause-points
 
 - `--force-compact` would reclaim > 500MB: confirm via AskUserQuestion (avoid surprise)
 - `--monitor-paths` FAIL on a load-bearing path: surface with a fix recommendation
 
-## Hop-in support
-
-YES — designed for periodic operator runs + automation via a cron-like trigger.
-
 ## Integration
 
 **Reads:**
 - `~/.lintel/audit/usage-*.jsonl` (Cohort 2 1.1 output)
-- `~/.lintel/state/` (snapshot dir)
+- `.claude/runtime/state/` (snapshot dir)
 - `~/.lintel/draft/` (clean targets)
 - `skills/cycle/SKILL.md` mode_envelopes
 - Load-bearing path manifest (configurable)
 
 **Writes:**
 - `~/.lintel/archive/old-state-*.tar.gz` (compaction outputs)
-- `~/.lintel/audit/maintenance-runs.jsonl` (audit-trail)
+- `.claude/runtime/audit/maintenance-runs.jsonl` (audit-trail)
 - stdout (report)
 
 **Consumed by:**

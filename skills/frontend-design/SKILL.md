@@ -167,16 +167,6 @@ Next:
 - **BLOCKED** — sub-skill failed, OR brief unparsable, OR customer-share check failed
 - **NEEDS_CONTEXT** — brief too vague (no audience, no purpose, no aesthetic-direction)
 
-## Pause-points
-
-- Customer-share flag set + voice-check fails → BLOCKED for operator-review
-- Brief lacks "for whom" or "what aesthetic" → NEEDS_CONTEXT
-- Sub-skill returns with critical-warning → DONE_WITH_CONCERNS surface to operator
-
-## Hop-in support
-
-YES — solo-invocable. Designed for auto-invocation from `/li:cycle` BUILD-phase in Phase D (when cycle-integration ships).
-
 ## Integration
 
 **Reads:**
@@ -188,7 +178,7 @@ YES — solo-invocable. Designed for auto-invocation from `/li:cycle` BUILD-phas
 - `~/.lintel/frontend-runs/<run-id>/typography.json` (via frontend-typography sub-skill)
 - `~/.lintel/frontend-runs/<run-id>/motion.json` (via frontend-motion sub-skill)
 - `~/.lintel/frontend-runs/<run-id>/frontend-design-spec.json` (Step 5 synthesis)
-- Audit-log: `~/.lintel/audit/frontend-design-runs.jsonl`
+- Audit-log: `.claude/runtime/audit/frontend-design-runs.jsonl`
 
 **Calls into:**
 - `/li:frontend-typography` (sub-skill, parallel)
