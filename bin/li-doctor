@@ -141,7 +141,7 @@ repo_root=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
 missing=""
 [ -d "$repo_root/.claude" ] || missing="$missing .claude/"
 [ -d "$repo_root/.claude/decisions" ] || [ -d "$repo_root/docs/adr" ] || [ -d "$repo_root/docs/decisions" ] || missing="$missing .claude/decisions/"
-[ -f "$repo_root/.claude/memory/lessons.md" ] || [ -f "$repo_root/tasks/lessons.md" ] || missing="$missing lessons.md"
+[ -f "$repo_root/.claude/memory/lessons.md" ] || [ -f "$repo_root/tasks/lessons.md" ] || missing="$missing lessons.md"   # legacy-fallback-ok
 # A scaffolded CLAUDE.md restates the protocol; a thin one is just a pointer.
 if [ -f "$repo_root/CLAUDE.md" ] && grep -qiE "Workflow Orchestration|Self-Improvement Loop|Auto-mode boundaries" "$repo_root/CLAUDE.md"; then
   claude_scaffolded=1
@@ -158,7 +158,7 @@ fi
 
 # v5 layout (ADR-0005): one circle of control under .claude/
 if [ -f "$repo_root/.claude/lintel-layout.yaml" ]; then
-  layout_v=$(grep -E '^layout_version:' "$repo_root/.claude/lintel-layout.yaml" 2>/dev/null | head -1 | awk '{print $2}')
+  layout_v=$(grep -E '^layout_version:' "$repo_root/.claude/lintel-layout.yaml" 2>/dev/null | head -1 | awk '{print $2}' | tr -d '\r')
   if [ "${layout_v:-0}" -ge 5 ] 2>/dev/null; then
     ok "v5 .claude/ home layout (layout_version: $layout_v)"
     # auto-memory convergence pointer is machine-local — verify on THIS machine
@@ -171,8 +171,8 @@ if [ -f "$repo_root/.claude/lintel-layout.yaml" ]; then
   else
     warn "layout marker present but layout_version < 5"
   fi
-elif [ -f "$repo_root/tasks/lessons.md" ] || [ -d "$repo_root/docs/adr" ]; then
-  warn "repo uses the legacy pre-v5 layout (tasks/, docs/adr/, .lintel/state/)"
+elif [ -f "$repo_root/tasks/lessons.md" ] || [ -d "$repo_root/docs/adr" ]; then   # legacy-fallback-ok (detection target)
+  warn "repo uses the legacy pre-v5 layout (tasks/, docs/adr/, .lintel/state/)"   # legacy-fallback-ok (message text)
   echo "    Knowledge and runtime are spread outside .claude/. Grace window ends 2026-09-12."
   echo "    Fix: li-migrate-claude-home --dry-run   (then run without --dry-run)"
 fi

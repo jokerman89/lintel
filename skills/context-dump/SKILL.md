@@ -35,7 +35,8 @@ session_id="$1"  # e.g., "2026-05-27-2200" or just date
 branch="${2:-$(git branch --show-current)}"
 
 # Find matching context-save
-candidates=$(find .claude/runtime/sessions/$branch -name "*${session_id}*" -name "*-context-save.md" 2>/dev/null)
+# Legacy ~/.lintel/sessions/<branch>/ included read-only for pre-v5 checkpoints (grace to 2026-09-12)
+candidates=$(find .claude/runtime/sessions/$branch ~/.lintel/sessions/$branch -name "*${session_id}*" -name "*-context-save.md" 2>/dev/null)
 
 if [ -z "$candidates" ]; then
   echo "No session matched '$session_id' on branch '$branch'"

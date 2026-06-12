@@ -15,6 +15,9 @@ set -euo pipefail
 
 LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
 SCAFFOLDING_SRC="${LINTEL_HOME}/scaffolding/01-foundation"
+# Absolute sibling-tool dir, resolved BEFORE any cd (a relative $0 would
+# otherwise resolve against the target repo after `cd "$TARGET"`).
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 CMD="${1:-help}"
 shift || true
@@ -177,7 +180,7 @@ cmd_init() {
   # one implementation: the idempotent migration tool no-ops the moves on a
   # fresh repo and stamps the rest.
   if git rev-parse --show-toplevel >/dev/null 2>&1; then
-    "$(dirname "$0")/li-migrate-claude-home" --repo . | sed 's/^/  /'
+    "$SCRIPT_DIR/li-migrate-claude-home" --repo . | sed 's/^/  /'
   else
     echo "  ⚠ not a git repo — skipped layout marker/auto-memory stamping (run li-migrate-claude-home after git init)"
   fi

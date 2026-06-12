@@ -24,6 +24,15 @@
 # historical global path unchanged.
 
 LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
+# An EXPLICIT caller-set LINTEL_AUDIT_DIR is a hard override for ALL categories
+# (the documented test seam — mirrors _jobs.sh's LINTEL_JOBS_DIR behavior).
+# "Explicit" = set to something OTHER than the computed default; several sibling
+# helpers pre-default the var with the same `:-$LINTEL_HOME/audit` idiom and
+# must not count as an override.
+_AUDIT_DIR_EXPLICIT=0
+if [ -n "${LINTEL_AUDIT_DIR:-}" ] && [ "$LINTEL_AUDIT_DIR" != "$LINTEL_HOME/audit" ]; then
+  _AUDIT_DIR_EXPLICIT=1
+fi
 LINTEL_AUDIT_DIR="${LINTEL_AUDIT_DIR:-$LINTEL_HOME/audit}"
 
 mkdir -p "$LINTEL_AUDIT_DIR" 2>/dev/null || true
@@ -32,7 +41,9 @@ mkdir -p "$LINTEL_AUDIT_DIR" 2>/dev/null || true
 _AUDIT_GLOBAL_CATEGORIES="pack-lifecycle pack-resolver migration migrations self-test"
 
 # Repo root + layout, computed once per source (audit fires on hot paths —
-# avoid a git fork per write).
+# avoid a git fork per write). Note: a long-lived shell that cd's into a
+# DIFFERENT repo keeps the first repo's routing; acceptable for hook processes
+# (one process per event), set LINTEL_REPO_ROOT explicitly for anything else.
 _AUDIT_REPO_AUDIT_DIR=""
 _audit_init_repo_scope() {
   local root
@@ -41,7 +52,7 @@ _audit_init_repo_scope() {
   if [ -f "$root/.claude/lintel-layout.yaml" ]; then
     local v
     v=$(grep -E '^layout_version:' "$root/.claude/lintel-layout.yaml" 2>/dev/null \
-        | head -1 | awk '{print $2}')
+        | head -1 | awk '{print $2}' | tr -d '\r')
     if [ "${v:-0}" -ge 5 ] 2>/dev/null; then
       _AUDIT_REPO_AUDIT_DIR="$root/.claude/runtime/audit"
     fi
@@ -49,10 +60,13 @@ _audit_init_repo_scope() {
 }
 _audit_init_repo_scope
 
-# Resolve the output dir for a category: global list or no migrated repo →
-# ~/.lintel/audit; otherwise the repo's runtime audit dir.
+# Resolve the output dir for a category: explicit env override > global list >
+# migrated-repo runtime dir > ~/.lintel/audit.
 _audit_out_dir() {
   local category="$1"
+  if [ "$_AUDIT_DIR_EXPLICIT" = 1 ]; then
+    printf '%s' "$LINTEL_AUDIT_DIR"; return
+  fi
   case " $_AUDIT_GLOBAL_CATEGORIES " in
     *" $category "*) printf '%s' "$LINTEL_AUDIT_DIR"; return ;;
   esac

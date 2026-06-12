@@ -35,8 +35,14 @@ lintel_layout_migrated() { # [root] → rc 0 if v5 layout
   [ -f "$root/.claude/lintel-layout.yaml" ] || return 1
   local v
   v=$(grep -E '^layout_version:' "$root/.claude/lintel-layout.yaml" 2>/dev/null \
-      | head -1 | awk '{print $2}')
+      | head -1 | awk '{print $2}' | tr -d '\r')
   [ "${v:-0}" -ge 5 ] 2>/dev/null
+}
+
+# Outside a git repo there IS no repo home — every repo-scoped function
+# returns empty + rc 1 rather than a filesystem-root path like /.claude/.
+_lintel_require_root() {
+  [ -n "$(lintel_repo_root)" ]
 }
 
 # Resolution rule: migrated repo → new path, always. Un-migrated repo → legacy
@@ -48,22 +54,22 @@ _lintel_pick() { # <new> <legacy>
 }
 
 # ── repo-scoped: committed knowledge ─────────────────────────────────────────
-lintel_claude_dir()    { printf '%s/.claude' "$(lintel_repo_root)"; }
-lintel_memory_dir()    { local r; r=$(lintel_repo_root); _lintel_pick "$r/.claude/memory" "$r/tasks"; }
-lintel_memory_index()  { printf '%s/.claude/memory/MEMORY.md' "$(lintel_repo_root)"; }
-lintel_lessons_file()  { local r; r=$(lintel_repo_root); _lintel_pick "$r/.claude/memory/lessons.md" "$r/tasks/lessons.md"; }
-lintel_working_state_file() { local r; r=$(lintel_repo_root); _lintel_pick "$r/.claude/memory/working-state.md" "$r/tasks/memory.md"; }
-lintel_personas_file() { local r; r=$(lintel_repo_root); _lintel_pick "$r/.claude/memory/personas.md" "$r/tasks/personas.md"; }
-lintel_decisions_dir() { local r; r=$(lintel_repo_root); _lintel_pick "$r/.claude/decisions" "$r/docs/adr"; }
-lintel_plans_dir()     { printf '%s/.claude/plans' "$(lintel_repo_root)"; }
-lintel_todo_file()     { local r; r=$(lintel_repo_root); _lintel_pick "$r/.claude/plans/todo.md" "$r/tasks/todo.md"; }
+lintel_claude_dir()    { _lintel_require_root || return 1; printf '%s/.claude' "$(lintel_repo_root)"; }
+lintel_memory_dir()    { _lintel_require_root || return 1; local r; r=$(lintel_repo_root); _lintel_pick "$r/.claude/memory" "$r/tasks"; }
+lintel_memory_index()  { _lintel_require_root || return 1; printf '%s/.claude/memory/MEMORY.md' "$(lintel_repo_root)"; }
+lintel_lessons_file()  { _lintel_require_root || return 1; local r; r=$(lintel_repo_root); _lintel_pick "$r/.claude/memory/lessons.md" "$r/tasks/lessons.md"; }
+lintel_working_state_file() { _lintel_require_root || return 1; local r; r=$(lintel_repo_root); _lintel_pick "$r/.claude/memory/working-state.md" "$r/tasks/memory.md"; }
+lintel_personas_file() { _lintel_require_root || return 1; local r; r=$(lintel_repo_root); _lintel_pick "$r/.claude/memory/personas.md" "$r/tasks/personas.md"; }
+lintel_decisions_dir() { _lintel_require_root || return 1; local r; r=$(lintel_repo_root); _lintel_pick "$r/.claude/decisions" "$r/docs/adr"; }
+lintel_plans_dir()     { _lintel_require_root || return 1; printf '%s/.claude/plans' "$(lintel_repo_root)"; }
+lintel_todo_file()     { _lintel_require_root || return 1; local r; r=$(lintel_repo_root); _lintel_pick "$r/.claude/plans/todo.md" "$r/tasks/todo.md"; }
 
 # ── repo-scoped: gitignored runtime ──────────────────────────────────────────
-lintel_runtime_dir()   { printf '%s/.claude/runtime' "$(lintel_repo_root)"; }
-lintel_state_dir()     { local r; r=$(lintel_repo_root); _lintel_pick "$r/.claude/runtime/state" "$r/.lintel/state"; }
-lintel_sessions_dir()  { local r; r=$(lintel_repo_root); _lintel_pick "$r/.claude/runtime/sessions" "$LINTEL_HOME/sessions"; }
-lintel_repo_audit_dir(){ printf '%s/.claude/runtime/audit' "$(lintel_repo_root)"; }
-lintel_repo_jobs_dir() { local r; r=$(lintel_repo_root); _lintel_pick "$r/.claude/runtime/jobs" "$LINTEL_HOME/jobs"; }
+lintel_runtime_dir()   { _lintel_require_root || return 1; printf '%s/.claude/runtime' "$(lintel_repo_root)"; }
+lintel_state_dir()     { _lintel_require_root || return 1; local r; r=$(lintel_repo_root); _lintel_pick "$r/.claude/runtime/state" "$r/.lintel/state"; }
+lintel_sessions_dir()  { _lintel_require_root || return 1; local r; r=$(lintel_repo_root); _lintel_pick "$r/.claude/runtime/sessions" "$LINTEL_HOME/sessions"; }
+lintel_repo_audit_dir(){ _lintel_require_root || return 1; printf '%s/.claude/runtime/audit' "$(lintel_repo_root)"; }
+lintel_repo_jobs_dir() { _lintel_require_root || return 1; local r; r=$(lintel_repo_root); _lintel_pick "$r/.claude/runtime/jobs" "$LINTEL_HOME/jobs"; }
 
 # ── operator-global (identity + cross-repo registry — unchanged in v5) ───────
 lintel_global_audit_dir() { printf '%s/audit' "$LINTEL_HOME"; }

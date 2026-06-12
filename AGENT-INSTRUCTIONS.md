@@ -45,6 +45,10 @@ Long-running state. Operator profile, project context, feedback patterns, extern
 ### 5. Recent lessons
 
 **Layer 1 — `.claude/memory/lessons.md`** in the active repo — read the most recent 10-15 entries. Older entries are reference material.
+> Un-migrated repos: no `.claude/lintel-layout.yaml` marker means the repo still uses the legacy
+> locations (`tasks/*`, `docs/adr/`, `.lintel/state/`) — use those there and suggest
+> `bin/li-migrate-claude-home` (grace window to 2026-09-12).
+
 
 ### 6. ADR scan
 

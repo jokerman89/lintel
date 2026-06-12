@@ -98,6 +98,10 @@ circle of control (v5, ADR-0005): everything Lintel generates for this repo live
 The `session-digest` hook injects a compact view of the top rows at session-start; this table is the
 full map for on-demand reads + where to **write**.
 
+> **Un-migrated repos:** no `.claude/lintel-layout.yaml` marker → that repo still uses the legacy
+> locations (`tasks/*`, `docs/adr/`, `.lintel/state/`). Use those there, and suggest
+> `bin/li-migrate-claude-home` (grace window to 2026-09-12).
+
 ---
 
 ## Workflow Orchestration
