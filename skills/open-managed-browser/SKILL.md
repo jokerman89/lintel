@@ -1,7 +1,6 @@
 ---
 name: open-managed-browser
 layer: foundation
-v1_alias: [li-open-gstack-browser]
 description: Open the Lintel-managed Chromium in headed mode — interactive operator session.
 color: blue
 tools: Bash
@@ -13,7 +12,7 @@ cli_support: [claude-code]
 
 Simple launcher: opens the same managed Chromium that `/browse` and `/scrape` use, but in headed mode for the operator to drive directly. Same persistent profile, same cookie store. Use when you want to do manual work (debug, screenshot, explore) without scripting it.
 
-Name preserves continuity with the gstack `/open-managed-browser` convention even though we're in Lintel — the alternative (`/open-li-browser`) is less recognizable, and operators carry muscle memory across both stacks.
+Named for what it does: opens the managed Chromium profile shared with `/browse` and `/scrape`.
 
 ## When to use
 

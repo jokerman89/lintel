@@ -26,12 +26,16 @@ command -v scan_secrets >/dev/null 2>&1 && return 0 2>/dev/null
 _secret_pats() {
   cat <<'P'
 github-token	gh[opur]_[A-Za-z0-9]{36}
-openai-key	sk-[A-Za-z0-9]{32,}
+github-pat	github_pat_[A-Za-z0-9_]{22,}
+openai-key	sk-(proj-[A-Za-z0-9_-]{20,}|[A-Za-z0-9]{32,})
+anthropic-key	sk-ant-[A-Za-z0-9_-]{24,}
 slack-token	xox[abposr]-[A-Za-z0-9-]{10,}
-aws-access-key	AKIA[0-9A-Z]{16}
+aws-access-key	(AKIA|ASIA)[0-9A-Z]{16}
+google-api-key	AIza[0-9A-Za-z_-]{35}
+stripe-key	sk_(live|test)_[A-Za-z0-9]{20,}
+gitlab-pat	glpat-[A-Za-z0-9_-]{20,}
 azure-account-key	AccountKey=[A-Za-z0-9+/=]{40,}
-anthropic-key	sk-ant-[A-Za-z0-9-]{30,}
-private-key	\-+BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY\-+
+private-key	\-+BEGIN (RSA |EC |OPENSSH |DSA |PGP )?PRIVATE KEY\-+
 P
   [ "${1:-all}" = "all" ] && cat <<'P'
 azure-shared-key	SharedAccessKey=

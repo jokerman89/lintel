@@ -40,7 +40,7 @@ The skill itself runs in Claude Code (which is why `cli_support: [claude-code]` 
 3. **Run Codex.** `codex exec --quiet --output json --prompt-file <tmp>` (or equivalent — adjust to current Codex CLI flags). Capture stdout, stderr, exit code.
 4. **Parse output.** Codex returns structured findings (severity, location, claim, evidence). Normalize to Lintel's P1/P2/P3 severity.
 5. **Compare to local reasoning.** If invoked mid-`/investigate` or post-`/review`: explicitly diff Codex's findings against what was already concluded. Surface AGREEMENT and DISAGREEMENT separately.
-6. **Persist via `bin/li-review-log`** (legacy alias: gstack-review-log) with `skill: codex` so downstream `/ship` can read.
+6. **Persist via `bin/li-review-log`** with `skill: codex` so downstream `/ship` can read.
 7. **Report.**
 
 ## Report format

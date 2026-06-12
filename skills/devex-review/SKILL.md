@@ -46,7 +46,7 @@ Six dimensions: time-to-hello-world, error message quality, script ergonomics, d
    - **Test loop speed:** single-file test, full suite. Score on perceived feedback latency for a TDD-style cycle.
    - **Recovery:** intentionally break state (delete node_modules, corrupt a lockfile). Does the project guide you back, or fail mysteriously?
 4. **Score + findings.** Each dimension gets 1-10 + a P1/P2/P3 finding list.
-5. **Persist via the native `bin/li-review-log`** (legacy alias: gstack-review-log) with `skill: devex-review`.
+5. **Persist via the native `bin/li-review-log`** with `skill: devex-review`.
 6. **Report.**
 
 ## Report format

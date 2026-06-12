@@ -36,6 +36,12 @@ Not a true phase — utility skill that lands the operator in the right phase.
 
 ### Step 1 — Locate state
 
+RESUME has **two** prior-work sources, and historically it only saw one of them: the
+cycle ledger (`00-state.md`). The other is a `/li:context-save` **checkpoint** — written
+to `.claude/runtime/sessions/<branch>/`. A session that ended with `/li:context-save` (not
+mid-cycle) leaves a checkpoint but no `00-state.md` entry; resume must discover it and
+hand off to `/li:context-restore` rather than misdirect the operator to a fresh cycle.
+
 ```bash
 STATE_FILE=".claude/runtime/state/00-state.md"
 if [ ! -f "$STATE_FILE" ]; then
@@ -53,9 +59,42 @@ if [ ! -f "$STATE_FILE" ]; then
     }
   fi
 fi
+
+# ALSO discover the newest context-save checkpoint for this branch. The mechanical
+# core owns path + discovery (no raw glob); fall back to a bare glob if it's absent.
+_ctx="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}/bin/_context.sh"
+[ -f "$_ctx" ] || _ctx="$HOME/.lintel/bin/_context.sh"
+checkpoint=""
+if [ -f "$_ctx" ]; then
+  # shellcheck disable=SC1090
+  source "$_ctx"
+  checkpoint="$(context_latest 2>/dev/null || true)"   # newest checkpoint for current branch (newest-first)
+else
+  branch="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo no-branch)"
+  checkpoint="$(ls -t ".claude/runtime/sessions/$branch/"*-context-save.md 2>/dev/null | head -1)"
+fi
 ```
 
-If still no state: surface "No prior state found. Run `/li:cycle` for new work or `/li:sense` for diagnostic."
+Then branch on what exists:
+
+- **`00-state.md` present** → proceed to Step 1.5 (the cycle-ledger path, unchanged).
+- **No `00-state.md` but `$checkpoint` set** → do **not** misdirect to `/li:cycle`. Surface the
+  checkpoint and **offer `/li:context-restore <path>`**:
+
+  ```
+  No cycle ledger found, but a session checkpoint exists for this branch:
+    <checkpoint path>  (<age>)
+  Restore it to pick up where you left off:
+    /li:context-restore <checkpoint path>
+  (Or start fresh: /li:cycle for new work · /li:sense for a diagnostic.)
+  ```
+
+- **Neither present** → surface "No prior state found. Run `/li:cycle` for new work or
+  `/li:sense` for diagnostic."
+
+> **Paired with `/li:context-save`.** Resume discovers the checkpoints that `/li:context-save`
+> writes; `/li:context-restore` is the skill that reads one back in. Resume *routes* to restore —
+> it does not re-implement checkpoint parsing.
 
 ### Step 1.5 — Integrity check (v3.6 cohort 1 item 6.3)
 
@@ -258,6 +297,7 @@ n/a — RESUME is itself the hop-in mechanism.
 
 **Reads:**
 - `.claude/runtime/state/00-state.md` (PRIMARY)
+- `.claude/runtime/sessions/<branch>/*-context-save.md` (checkpoint discovery via `context_latest` — routes to `/li:context-restore`)
 - `~/.lintel/lessons-vault/00-state-<repo>-*.md` (cross-machine fallback)
 - `.claude/runtime/jobs/<id>/job.yaml` `steps[]` (job-scoped resume — node-path via `job_resume_point`)
 - `.claude/plans/<slug>/scope.md` `depth_schema` (selects node-path vs current_step resume)
@@ -266,6 +306,7 @@ n/a — RESUME is itself the hop-in mechanism.
 
 **Calls into:**
 - `bin/_jobs.sh` — `job_resume_point` (tree node-path), `job_can_start` (skip blocked leaves), `job_path`
+- `bin/_context.sh` — `context_latest` (newest checkpoint for the branch; offers `/li:context-restore`)
 
 **Writes:**
 - `.claude/runtime/state/00-state.md` (RESUME entry)
@@ -284,7 +325,7 @@ n/a — RESUME is itself the hop-in mechanism.
 ## Failure recovery
 
 - **State file corrupt**: surface, suggest manual reconstruction OR start fresh with `/li:cycle`
-- **No state found**: NOT a failure — gracefully redirect to `/li:sense` or `/li:cycle`
+- **No state found**: NOT a failure — first check for a context-save checkpoint (Step 1) and offer `/li:context-restore <path>`; only if none exists, gracefully redirect to `/li:sense` or `/li:cycle`
 - **Cross-machine state mismatch (different branch)**: surface diff, ask operator to switch branch or proceed with caveat
 - **Precondition fails 3x**: stop trying to resume that phase, suggest alternative
 

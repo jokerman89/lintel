@@ -28,17 +28,6 @@ sources:
 
   # ----- TIER: permissive (MIT) -----
 
-  gstack:
-    repo: https://github.com/garrytan/gstack
-    install_path: ~/.claude/skills/gstack
-    last_verified: 2026-05-26
-    license: MIT
-    tier: permissive
-    install_type: git-clone-and-setup
-    post_install: "./setup"
-    description: "Garry Tan's Claude Code skill pack — 23 opinionated tools for plan/design/review/QA/ship workflows."
-    docs: https://github.com/garrytan/gstack#readme
-
   gsd-redux:
     repo: https://github.com/open-gsd/get-shit-done-redux
     install_path: ~/.claude/get-shit-done
@@ -104,6 +93,20 @@ sources:
       always safe; inlining requires per-skill license check.
 
   # ----- TIER: reference-only -----
+
+  gstack:
+    repo: https://github.com/garrytan/gstack
+    install_path: ~/.claude/reference/gstack
+    last_verified: 2026-05-26
+    license: MIT
+    tier: reference-only
+    install_type: reference-only
+    description: "Garry Tan's Claude Code skill pack — 23 opinionated plan/design/review/QA/ship tools. Reference only; not on Lintel's install path."
+    docs: https://github.com/garrytan/gstack#readme
+    license_note: >
+      Lintel grew out of this harness but no longer installs or depends on it. MIT-licensed,
+      so reuse is permitted, but the install script SKIPS it — it is kept here as a reference
+      pointer, not a required/installable upstream.
 
   trailofbits-claude-code-config:
     repo: https://github.com/trailofbits/claude-code-config

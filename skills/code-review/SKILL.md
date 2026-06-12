@@ -46,7 +46,7 @@ Auto-scales: small diffs get fast review; large diffs (200+ lines) additionally 
    - Test coverage (does the diff add tests for new code paths? regression risk?)
    - Performance (N+1, memory, slow paths introduced)
 4. **Codex pass (if LARGE diff or --codex)** — invoke Codex with structured review prompt. P1 findings BLOCK ship.
-5. **Persist via `bin/li-review-log`** (legacy alias: gstack-review-log) with `skill: code-review` (distinct from Phase-6 `/review` and `plan-eng-review`).
+5. **Persist via `bin/li-review-log`** with `skill: code-review` (distinct from Phase-6 `/review` and `plan-eng-review`).
 6. **Output: findings list + severity + suggested fixes.**
 
 ## Report format
@@ -77,7 +77,7 @@ Codex pass: optional, skipped this run
 Run /ship when P2+ resolved.
 ```
 
-Persist via `bin/li-review-log` (legacy alias: gstack-review-log):
+Persist via `bin/li-review-log`:
 ```bash
 bin/li-review-log '{"skill":"code-review","timestamp":"...","status":"...","findings":N,"findings_fixed":N,"gate":"P1_clean","commit":"..."}'
 ```

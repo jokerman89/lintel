@@ -30,7 +30,7 @@ Read a checkpoint file (written by `/context-save`) into a fresh session. Output
 
 ## Workflow
 
-1. **Resolve slug + branch** via `gstack-slug` + `git branch --show-current`.
+1. **Resolve slug + branch** via `_context_repo_slug` (from `bin/_context.sh`, native — basename of the repo root; no external binary) + `git branch --show-current`.
 2. **Find checkpoint** via the mechanical core (no raw `ls`/`find`):
 
    ```bash
@@ -127,4 +127,5 @@ Suggested next action: complete /clean, /help, /health skills
 ## See also
 
 - `/context-save` — write the checkpoint this skill reads
+- `/li:resume` — **paired with this skill**: resume discovers context-save checkpoints (newest-first via `context_latest`) and, when no cycle ledger exists, routes the operator here with `/li:context-restore <path>`
 - `/clean` — companion self-maintenance command

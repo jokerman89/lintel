@@ -136,11 +136,16 @@ cmd_init() {
     echo "  ⚠ CLAUDE.md exists — skipping (use --force to overwrite, future feature)"
   else
     if [ -f "$SCAFFOLDING_SRC/CLAUDE.md.template" ]; then
-      sed -e "s/{{REPO_NAME}}/$NAME/g" \
-          -e "s/{{PACK}}/$PACK/g" \
-          -e "s/{{MODE}}/$MODE/g" \
-          -e "s/{{VOICE_TIER}}/$VOICE_TIER/g" \
-          "$SCAFFOLDING_SRC/CLAUDE.md.template" > CLAUDE.md
+      # Pure-bash literal substitution — NOT sed (battletest K1: GNU sed's `s///e`
+      # executes shell, so a repo dir / --name containing `x/;e <cmd>` was
+      # operator-priv RCE). Parameter expansion replaces literally — the value is
+      # never interpreted as a program or regex.
+      _render="$(cat "$SCAFFOLDING_SRC/CLAUDE.md.template")"
+      _render="${_render//\{\{REPO_NAME\}\}/$NAME}"
+      _render="${_render//\{\{PACK\}\}/$PACK}"
+      _render="${_render//\{\{MODE\}\}/$MODE}"
+      _render="${_render//\{\{VOICE_TIER\}\}/$VOICE_TIER}"
+      printf '%s\n' "$_render" > CLAUDE.md
       echo "  ✓ CLAUDE.md (rendered)"
     else
       echo "  ⚠ CLAUDE.md.template not found — skipping"

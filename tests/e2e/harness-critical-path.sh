@@ -5,7 +5,7 @@
 #              "empty tests/e2e/ runs vacuously green" hole (punch-list #5 / P1-3).
 # TAGS: claude-code-only,e2e
 # Tags catalog: claude-code-only, codex-compatible, browser-required,
-#               gstack-binaries-required, unit, integration, e2e, slow
+#               unit, integration, e2e, slow
 
 set -euo pipefail
 

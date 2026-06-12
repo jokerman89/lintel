@@ -13,7 +13,7 @@ hop_in: no
 
 Visual + interaction review of a plan that introduces or changes a UI surface. Optional — only fires when the plan touches frontend components, CSS, views, user-facing flows, or any rendered output.
 
-Lintel version inspired-by gstack's `/plan-design-review` but written fresh. Stays internal voice (design critique among builders).
+Design-system review before build: scores a plan's UI surface against six pillars. Stays internal voice (design critique among builders).
 
 ## When to use
 
@@ -29,7 +29,7 @@ Lintel version inspired-by gstack's `/plan-design-review` but written fresh. Sta
 
 ## Inputs
 
-- Optional path to a plan/design doc with UI scope. Auto-discovers from `~/.gstack/projects/<slug>/*-design-*.md` if not provided.
+- Optional path to a plan/design doc with UI scope. Auto-discovers from `~/.lintel/projects/<slug>/*-design-*.md` if not provided.
 
 ## Workflow
 
@@ -65,14 +65,14 @@ After scoring: **overall_score = average** of 6 pillars.
 **Unresolved:** 1 (subtraction-default — operator deferred to v1.1)
 ```
 
-Persist via first-party `bin/li-review-log` (legacy alias: gstack-review-log):
+Persist via first-party `bin/li-review-log`:
 ```bash
 bin/li-review-log '{"skill":"plan-design-review","timestamp":"...","status":"...","initial_score":N,"overall_score":N,"unresolved":N,"decisions_made":N,"commit":"..."}'
 ```
 
 ## Visual sketch + outside voices (optional)
 
-If the plan benefits from visual exploration: optionally invoke the external `design` binary **only if** `~/.claude/skills/gstack/design/dist/design` exists — if it is not present, skip silently (no hard dependency). This binary is a non-first-party convenience; it is never on Lintel's required execution path. Either way, `/plan-design-review` is primarily critique, not generation.
+If the plan benefits from visual exploration: invoke Lintel's own `/li:design-shotgun` (parallel variants) or `/li:design-html` (single mockup) — first-party, no external dependency. Either way, `/plan-design-review` is primarily critique, not generation.
 
 Outside voices (Codex + Claude subagent) can propose alternative design directions. Always informational — user decides.
 

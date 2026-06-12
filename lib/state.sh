@@ -51,6 +51,10 @@ state_append() {
       esac
       k="${kv%%=*}"; v="${kv#*=}"
       [ "$k" = "next" ] && k="next_recommended"
+      # Strip CR/LF from the value (battletest H8): a raw newline would inject
+      # forged ledger lines / `---` block boundaries that state_last + the footer
+      # parse, letting an influenced value mis-steer resume or hide a BLOCKED.
+      v="${v//$'\r'/ }"; v="${v//$'\n'/ }"
       printf '%s: %s\n' "$k" "$v"
     done
   } >> "$f"

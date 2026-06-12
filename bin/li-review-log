@@ -1,24 +1,22 @@
 #!/usr/bin/env bash
 # bin/li-review-log — native review-log writer
 #
-# Replaces the external gstack binary `~/.claude/skills/gstack/bin/gstack-review-log`
-# on Lintel's execution path. Accepts the same single JSON-object argument the
-# review skills already pass (plan-ceo-review, plan-eng-review, plan-design-review,
-# plan-devex-review, code-review, codex) and appends a record to Lintel's own
-# audit log at .claude/runtime/audit/reviews.jsonl (scope-routed by bin/_audit.sh).
+# Lintel's review skills (plan-ceo-review, plan-eng-review, plan-design-review,
+# plan-devex-review, code-review, codex) call this on the execution path. It takes
+# a single JSON-object argument and appends one record via audit_log() to Lintel's
+# own audit log at .claude/runtime/audit/reviews.jsonl (scope-routed by bin/_audit.sh).
 #
-# Why native: keeping the review log on Lintel's own execution path avoids an
-# external dependency on the gstack binary. This wrapper keeps the same JSON
-# contract but writes via Lintel's audit_log() helper. The legacy gstack alias
-# still exists on disk but is no longer called by Lintel skills.
+# Record fields: skill, status, commit, timestamp — plus any extra keys, preserved
+# verbatim under "raw". First-party by design: the review log stays on Lintel's own
+# execution path with no external binary dependency.
 #
 # Usage:
 #   bin/li-review-log '{"skill":"plan-eng-review","timestamp":"...","status":"CLEAR","commit":"7e7a021","mode":"FULL_REVIEW"}'
 #
-# Contract (matches legacy gstack-review-log):
+# Contract:
 #   - Single argument: a JSON object describing the review.
 #   - Recognised top-level keys: skill, status, commit, timestamp (+ any extras,
-#     which are preserved verbatim under "extra").
+#     which are preserved verbatim in the "raw" field).
 #   - Invalid JSON (best-effort check) is rejected with exit 1.
 #
 # Writes to: .claude/runtime/audit/reviews.jsonl  (category=reviews, kind=<skill>; scope-routed by _audit.sh)

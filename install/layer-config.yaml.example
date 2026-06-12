@@ -55,7 +55,7 @@ voice:
 # upstream-sources.yaml carries the actual pin SHAs.
 # This block lets operator opt-out of specific upstreams (e.g. team doesn't want ToB skills).
 upstreams:
-  gstack:               { enabled: true }
+  gstack:               { enabled: false }   # reference-only — not installed (ADR-0011)
   gsd-redux:            { enabled: true }
   agentshield:          { enabled: true }
   ecc:                  { enabled: true }
