@@ -241,7 +241,10 @@ When enabled and the path exists, write exactly ONE file per session,
 ---
 created: YYYY-MM-DD
 tags: [session]
+type: session
 repo: <repo-name>
+branch: <git-branch>
+outcome: shipped | in-progress | blocked | exploration
 session: <cycle-id-if-available>
 ---
 # <one-line session title>
@@ -257,7 +260,22 @@ session: <cycle-id-if-available>
 
 ## Pointers
 - <repo-relative paths to the key files/PRs touched>
+
+## Links
+- [[<repo-name>]] <- the repo hub note (backlinks = per-repo session history)
+- [[<previous session note name>]] <- predecessor, if one exists for this repo
 ```
+
+The frontmatter is a LOCKED flat schema (ADR-0007) — `sessions.base` (the Bases dashboard
+installed by `bin/li-vault-init`) and the vault's own skills query these exact properties.
+`outcome` uses the controlled vocabulary above, nothing else.
+
+**After writing the note, maintain the two navigation surfaces (same sink dir):**
+1. **Hub note** `<sink_path>/<repo-name>.md` — create a minimal one if missing (frontmatter:
+   `type: repo-hub`, `repo:`; one line of prose). Never overwrite an existing hub.
+2. **Index** `<sink_path>/00-index.md` — regenerate the list under its heading: newest-first,
+   max 15 lines, one per session note: `- [[<note-name>]] - <one-line title> (<repo>)`.
+   Keep the file's frontmatter + intro intact; replace only the list.
 
 Source the content from the Step 1 cycle aggregation. **Hard rules:** no secrets or tokens, no
 customer or employer-internal data, no full file contents — repo-relative pointers instead of

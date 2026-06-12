@@ -33,3 +33,6 @@ deeper nesting). Disable by setting `vault_sink_enabled: false` in the active pa
 No secrets or tokens. No customer or employer-internal data. No full file contents — repo-relative
 pointers instead of payloads. Swedish or English, matching the session's working language. If the
 session contains material that must not leave the repo, skip the export rather than sanitize it.
+
+Navigation patterns on top of the sink (schema, dashboard, hub wikilinks, index):
+see [obsidian-integration.md](obsidian-integration.md) (ADR-0007).
