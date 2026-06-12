@@ -23,9 +23,9 @@ if [ -f "$STAMP" ]; then
 fi
 
 # Helper lib (repo checkout → installed tree)
-MEM_LIB="$REPO_ROOT/lib/memory.sh"
+# Own tree first (ADR-0008): never execute repo-supplied code from an auto-registered hook
+MEM_LIB="$(dirname "${BASH_SOURCE[0]}")/../../../lib/memory.sh"
 [ -f "$MEM_LIB" ] || MEM_LIB="$LINTEL_HOME/lib/memory.sh"
-[ -f "$MEM_LIB" ] || MEM_LIB="$(dirname "${BASH_SOURCE[0]}")/../../../lib/memory.sh"
 [ -f "$MEM_LIB" ] || exit 0
 # shellcheck disable=SC1090
 source "$MEM_LIB" 2>/dev/null || exit 0

@@ -219,7 +219,8 @@ After last task DONE:
 Mechanical since v5.0 (ADR-0008) — one command, not a YAML obligation (per-task metrics live in build-log.md, Step 5):
 
 ```bash
-source "$LINTEL_REPO_ROOT/lib/state.sh"
+_sl="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}/lib/state.sh"
+[ -f "$_sl" ] || _sl="$HOME/.lintel/lib/state.sh"; source "$_sl"   # installed by install.sh in consumer repos
 state_append BUILD <DONE|DONE_WITH_CONCERNS|BLOCKED> next=REVIEW plan_path=<path> tasks_completed=<N> tasks_blocked=<count>
 ```
 

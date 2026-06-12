@@ -39,7 +39,7 @@ if [ -n "$joined" ]; then
   echo "ERROR: COMMIT BLOCKED. Sanitize the staged content (placeholders) + re-stage." >&2
   echo "ERROR: To override (e.g. confirmed placeholder, public-domain example):" >&2
   echo '  LINTEL_OVERRIDE_CUSTOMER_DATA=1 LINTEL_OVERRIDE_REASON="<reason>" git commit ...' >&2
-  exit 1
+  exit 2   # 2 = blocking error in Claude Code; exit 1 only WARNS while the call proceeds
 fi
 
 exit 0

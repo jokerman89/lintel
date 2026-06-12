@@ -69,7 +69,9 @@ echo ""
 echo "[4] plugin hook auto-registration manifest is valid and complete"
 HJ="$REPO_ROOT/hooks/hooks.json"
 [ -f "$HJ" ] && pass "hooks/hooks.json exists" || fail "hooks/hooks.json missing"
-if python -c "import json,sys; json.load(open(sys.argv[1], encoding='utf-8'))" "$HJ" 2>/dev/null \
+if ! command -v python >/dev/null 2>&1 && ! command -v python3 >/dev/null 2>&1; then
+  echo "  SKIP: no python for JSON validation"
+elif python -c "import json,sys; json.load(open(sys.argv[1], encoding='utf-8'))" "$HJ" 2>/dev/null \
    || python3 -c "import json,sys; json.load(open(sys.argv[1], encoding='utf-8'))" "$HJ" 2>/dev/null; then
   pass "hooks.json parses as JSON"
 else
@@ -84,7 +86,7 @@ while IFS= read -r script; do
   [ -f "$REPO_ROOT/$rel" ] && pass "script exists: $rel" || fail "registered script missing: $rel"
   mode=$(cd "$REPO_ROOT" && git ls-files -s "$rel" 2>/dev/null | awk '{print $1}')
   [ "$mode" = "100755" ] && pass "executable in index: $rel" || fail "not 100755 in index: $rel ($mode)"
-done < <(grep -o '\${CLAUDE_PLUGIN_ROOT}[^"]*' "$HJ")
+done < <(grep -o '\${CLAUDE_PLUGIN_ROOT}[^"\\]*' "$HJ")
 
 echo ""
 if [ "$FAILED" -eq 0 ]; then echo "ALL PASS"; else echo "FAILURES present"; exit 1; fi

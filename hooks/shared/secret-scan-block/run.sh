@@ -41,7 +41,7 @@ if [ -n "$joined" ]; then
   echo "ERROR: COMMIT BLOCKED. Remove the secret + re-stage." >&2
   echo "ERROR: To override (e.g. known-false-positive in test fixtures):" >&2
   echo '  LINTEL_OVERRIDE_SECRET=1 LINTEL_OVERRIDE_REASON="<reason>" git commit ...' >&2
-  exit 1
+  exit 2   # 2 = blocking error in Claude Code; exit 1 only WARNS while the call proceeds
 fi
 
 exit 0

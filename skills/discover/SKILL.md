@@ -223,7 +223,8 @@ skills_overlap: <count>
 Mechanical since v5.0 (ADR-0008) — one command, not a YAML obligation:
 
 ```bash
-source "$LINTEL_REPO_ROOT/lib/state.sh"
+_sl="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}/lib/state.sh"
+[ -f "$_sl" ] || _sl="$HOME/.lintel/lib/state.sh"; source "$_sl"   # installed by install.sh in consumer repos
 state_append DISCOVER DONE next=PLAN report_path=.claude/runtime/state/discover-report-<datetime>.md files_mapped=<count> adrs_found=<count> lessons_applied=<count>
 ```
 
