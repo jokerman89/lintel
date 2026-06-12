@@ -1,7 +1,7 @@
 ---
 name: lessons-promote
 layer: foundation
-description: Promote a repo-local lesson from .claude/memory/lessons.md to Lintel's global lessons (scaffolding/01-foundation/tasks/lessons.md) so all future scaffolded repos inherit it.
+description: Promote a repo-local lesson from .claude/memory/lessons.md to Lintel's global lessons (scaffolding/01-foundation/.claude/memory/lessons.md) so all future scaffolded repos inherit it.
 color: cyan
 tools: Read, Bash, Edit, Grep, Glob
 voice: internal
@@ -12,7 +12,7 @@ You are the lessons-promote skill.
 
 ## What this skill does
 
-Promotes a single lesson from the current repo's `.claude/memory/lessons.md` to Lintel's global `scaffolding/01-foundation/tasks/lessons.md`. Once promoted, every new repo scaffolded via `lintel scaffold init` includes that lesson as baseline.
+Promotes a single lesson from the current repo's `.claude/memory/lessons.md` to Lintel's global `scaffolding/01-foundation/.claude/memory/lessons.md`. Once promoted, every new repo scaffolded via `lintel scaffold init` includes that lesson as baseline.
 
 This is how operator-discovered patterns become team-wide knowledge.
 
@@ -38,7 +38,7 @@ This is how operator-discovered patterns become team-wide knowledge.
 
 4. **Locate Lintel global lessons.**
    - Lintel repo path: `~/Workspace/jokerman-lintel` or operator-configured
-   - Global lessons file: `scaffolding/01-foundation/tasks/lessons.md`
+   - Global lessons file: `scaffolding/01-foundation/.claude/memory/lessons.md`
 
 5. **Check for duplicate.** Grep the generalized lesson title in global lessons. Skip if duplicate.
 
@@ -53,7 +53,7 @@ This is how operator-discovered patterns become team-wide knowledge.
    ```bash
    cd $LINTEL_HOME
    git checkout -b promote-lesson-<slug>
-   git add scaffolding/01-foundation/tasks/lessons.md
+   git add scaffolding/01-foundation/.claude/memory/lessons.md
    git commit -m "lessons: promote <title> from <source-repo>"
    ```
 
@@ -74,7 +74,7 @@ Generalized text:
 ---
 
 Action:
-- ✓ Appended to Lintel scaffolding/01-foundation/tasks/lessons.md
+- ✓ Appended to Lintel scaffolding/01-foundation/.claude/memory/lessons.md
 - ✓ Branch created: promote-lesson-<slug>
 - Next: cd $LINTEL_HOME && git push && open PR
 ```

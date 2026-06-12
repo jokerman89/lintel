@@ -36,7 +36,9 @@ dir="$LINTEL_JOBS_DIR/$job_id"
 # Promote durable artifacts BEFORE moving to archive (v5: .claude/plans/;
 # legacy docs/plans/ on un-migrated repos)
 repo_root="$(git rev-parse --show-toplevel 2>/dev/null || printf '%s' "$PWD")"
-if [ -f "$repo_root/.claude/lintel-layout.yaml" ]; then
+_layout_v=$(grep -E '^layout_version:' "$repo_root/.claude/lintel-layout.yaml" 2>/dev/null \
+            | head -1 | awk '{print $2}' | tr -d '\r')
+if [ "${_layout_v:-0}" -ge 5 ] 2>/dev/null; then
   docs_plans="$repo_root/.claude/plans"
 else
   docs_plans="$repo_root/docs/plans"   # legacy-fallback-ok

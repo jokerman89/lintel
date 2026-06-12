@@ -34,6 +34,7 @@ Read a checkpoint file (written by `/context-save`) into a fresh session. Output
 2. **Find checkpoint:**
    - If argument provided: validate the path exists, read it.
    - Else: `ls -t .claude/runtime/sessions/<branch>/*-context-save.md | head -1`. Read the most recent.
+   - Pre-v5 checkpoints: if nothing found, also check the legacy `~/.lintel/sessions/<branch>/` (read-only; grace window to 2026-09-12).
 3. **Parse checkpoint structure** — extract: task description, done, in-flight, next, decisions, failed attempts, files touched.
 4. **Read referenced files** — for each file under "Files touched," `Read` it so subsequent edits land on accurate state (post-checkpoint changes may exist).
 5. **Diff check** — `git log <last-commit-in-checkpoint>..HEAD` to surface any commits landed since checkpoint was written.

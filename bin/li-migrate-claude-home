@@ -26,7 +26,9 @@ REPO=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --dry-run) DRY=1; shift ;;
-    --repo) REPO="${2:-}"; shift; [ $# -gt 0 ] && shift ;;
+    --repo)
+      [ -n "${2:-}" ] || { echo "ERROR: --repo requires a path" >&2; exit 2; }
+      REPO="$2"; shift 2 ;;
     -h|--help) sed -n '8,24p' "$0"; exit 0 ;;
     *) echo "unknown flag: $1" >&2; exit 2 ;;
   esac
@@ -37,7 +39,7 @@ ROOT="$(git rev-parse --show-toplevel 2>/dev/null)" || { echo "ERROR: not a git 
 cd "$ROOT" || exit 1
 
 if [ -f ".claude/lintel-layout.yaml" ]; then
-  v=$(grep -E '^layout_version:' .claude/lintel-layout.yaml | head -1 | awk '{print $2}')
+  v=$(grep -E '^layout_version:' .claude/lintel-layout.yaml | head -1 | awk '{print $2}' | tr -d '\r')
   if [ "${v:-0}" -ge 5 ] 2>/dev/null; then
     echo "Already migrated (layout_version: $v) — nothing to do."
     exit 0
@@ -48,30 +50,43 @@ say() { if [ "$DRY" = 1 ]; then echo "[dry-run] $*"; else echo "$*"; fi; }
 run() { if [ "$DRY" = 1 ]; then echo "[dry-run] $*"; else "$@"; fi; }
 
 # git mv when tracked, plain mv otherwise; no-op when source missing.
+# Any failed or ambiguous move sets MOVE_FAIL — the layout marker is NEVER
+# written on a partial migration (a marker over stranded legacy content would
+# hide it from every layout-aware tool).
+MOVE_FAIL=0
 move() { # <src> <dst>
   local src="$1" dst="$2"
   [ -e "$src" ] || return 0
-  if [ -e "$dst" ]; then say "SKIP $src → $dst (destination exists)"; return 0; fi
+  if [ -e "$dst" ]; then
+    echo "FAIL: $src and $dst BOTH exist — resolve manually before migrating" >&2
+    MOVE_FAIL=1
+    return 0
+  fi
   run mkdir -p "$(dirname "$dst")"
   if git ls-files --error-unmatch "$src" >/dev/null 2>&1; then
-    run git mv "$src" "$dst"
+    run git mv "$src" "$dst" || { echo "FAIL: git mv $src → $dst" >&2; MOVE_FAIL=1; return 0; }
   else
-    run mv "$src" "$dst"
+    run mv "$src" "$dst" || { echo "FAIL: mv $src → $dst" >&2; MOVE_FAIL=1; return 0; }
   fi
   say "moved $src → $dst"
 }
 
 stub() { # <old-path> <new-path>
   local old="$1" new="$2"
+  if [ "$DRY" = 1 ]; then
+    # Faithful preview: in dry-run nothing has moved yet, so report the stub
+    # whenever the SOURCE exists (it will have moved by the time stubs write).
+    [ -e "$old" ] && say "stub  $old → pointer at $new"
+    return 0
+  fi
   [ -e "$old" ] && return 0
   [ -e "$new" ] || return 0   # nothing moved → no stub
-  if [ "$DRY" = 1 ]; then say "stub  $old → pointer at $new"; return 0; fi
   mkdir -p "$(dirname "$old")"
   printf '> Moved to %s (v5 .claude/ home layout, ADR-0005, 2026-06-12). This stub is removed after the grace window (2026-09-12).\n' "$new" > "$old"
   git add "$old" 2>/dev/null || true
 }
 
-echo "Migrating $ROOT to the v5 .claude/ home layout${DRY:+}$([ "$DRY" = 1 ] && echo ' (dry-run)')"
+echo "Migrating $ROOT to the v5 .claude/ home layout$([ "$DRY" = 1 ] && echo ' (dry-run)')"
 
 # 1 — knowledge moves
 move tasks/lessons.md   .claude/memory/lessons.md
@@ -107,15 +122,24 @@ stub tasks/personas.md  .claude/memory/personas.md
 stub tasks/todo.md      .claude/plans/todo.md
 stub docs/adr/README.md .claude/decisions/
 
-# 4 — .gitignore
+# 4 — .gitignore (runtime + the machine-local settings file the tool writes)
 if ! grep -qE '^\.claude/runtime/' .gitignore 2>/dev/null; then
   if [ "$DRY" = 1 ]; then say "append .claude/runtime/ to .gitignore"; else
     { echo ''; echo '# Lintel runtime state (v5 layout) — local only, never committed'; echo '.claude/runtime/'; } >> .gitignore
     git add .gitignore 2>/dev/null || true
   fi
 fi
+if ! grep -qE '^\.claude/settings\.local\.json' .gitignore 2>/dev/null; then
+  if [ "$DRY" = 1 ]; then say "append .claude/settings.local.json to .gitignore"; else
+    echo '.claude/settings.local.json' >> .gitignore
+    git add .gitignore 2>/dev/null || true
+  fi
+fi
 
 # 5 — MEMORY.md index seed (native auto-memory loads the first 200 lines)
+if [ ! -f .claude/memory/MEMORY.md ] && [ "$DRY" = 1 ]; then
+  say "seed .claude/memory/MEMORY.md (index)"
+fi
 if [ ! -f .claude/memory/MEMORY.md ] && [ "$DRY" != 1 ]; then
   cat > .claude/memory/MEMORY.md <<'EOF'
 # Memory index
@@ -152,7 +176,14 @@ else
   fi
 fi
 
-# 7 — layout marker
+# 7 — layout marker (NEVER on partial failure — see move())
+if [ "$MOVE_FAIL" = 1 ]; then
+  echo "" >&2
+  echo "ERROR: one or more knowledge moves failed or were ambiguous (see FAIL lines)." >&2
+  echo "The layout marker was NOT written — legacy resolution stays active." >&2
+  echo "Resolve the conflicts, then re-run (idempotent)." >&2
+  exit 1
+fi
 if [ "$DRY" = 1 ]; then
   say "write .claude/lintel-layout.yaml (layout_version: 5)"
 else

@@ -38,8 +38,9 @@ done
 # Allowlist: paths.sh (defines the fallbacks), the migration tool (moves them),
 # and lines annotated `legacy-fallback-ok` or clearly fallback-guarded
 # (the session-digest hook resolves new-then-legacy explicitly).
-violations=$(grep -rnE 'tasks/(lessons|memory|personas|todo)\.md|docs/adr/' \
-    bin lib hooks/shared --include='*.sh' 2>/dev/null \
+# bin/ executables are extensionless — scan ALL of bin (text files only via -I)
+violations=$(grep -rnIE 'tasks/(lessons|memory|personas|todo)\.md|docs/adr/' \
+    bin lib hooks/shared 2>/dev/null \
   | grep -v 'lib/paths\.sh' \
   | grep -v 'li-migrate-claude-home' \
   | grep -v 'legacy-fallback-ok' \

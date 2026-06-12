@@ -37,7 +37,8 @@ N="${1:-3}"  # default last 3
 # - .claude/runtime/sessions/<branch>/<datetime>-context-save.md (repo-local)
 # - ~/.lintel/lessons-vault/sessions/<branch>/... (cross-machine sync)
 
-candidates=$(find .claude/runtime/sessions/$branch -name "*-context-save.md" 2>/dev/null \
+# Legacy ~/.lintel/sessions/<branch>/ included read-only for pre-v5 checkpoints (grace to 2026-09-12)
+candidates=$(find .claude/runtime/sessions/$branch ~/.lintel/sessions/$branch -name "*-context-save.md" 2>/dev/null \
   | sort -r | head -$N)
 ```
 
