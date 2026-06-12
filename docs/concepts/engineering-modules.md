@@ -42,7 +42,7 @@ Granularity dispatch:
        │  single → one targeted operation (e.g., "review API contract")
        │
        ▼
-Sub-skills (per-action workflows)
+Capabilities (per-action workflows)
        │
        ▼
 Agents (mostly existing 83, augmented as needed)
@@ -73,7 +73,7 @@ Example:
   → ta-discovery (map dependencies + consumers)
   → ta-decision-loop (ADR draft + alternatives + scoring)
   → ta-contract-lock (interface + versioning + consumer notification)
-  → ta-complexity-audit (cyclomatic + cognitive scoring)
+  → complexity-audit (cyclomatic + cognitive scoring)
   → ta-nfr-spec (latency + throughput + error rate)
   → SHIP gate: scoring rubric ≥ 80
 ```
@@ -90,7 +90,7 @@ Example: `/li:ta loop` — re-runs the discovery + decision + contract checkpoin
 
 One targeted operation, no orchestration. Used when the operator knows exactly what they need.
 
-Example: `/li:ta single --action api-design` — runs only `ta-api-design`, no loop, no checkpoints.
+Example: `/li:ta single --action api-design` — runs only `api-design`, no loop, no checkpoints.
 
 Per design doc §3.9: "we are not the dumb tool" — operators can always go to single-action when they know better than the orchestrator.
 
@@ -156,11 +156,11 @@ Phase sequence:
 
 Token budget per design doc §5.2: 5 modules × ~80k = 400k. Plus 100k overhead = 500k cap. customer-engagement-deep mode (750k/1000k cap) accommodates this.
 
-## Sub-skill discipline (L-001, L-002, L-004)
+## Capability discipline (L-001, L-002, L-004)
 
-**L-001 (scaffolding-not-content):** Sub-skills are workflow + dispatch contracts, not curated content. `ta-api-design` is the workflow that invokes `APIDesigner` agent + writes structured output. The agent produces content at invocation. Same pattern as `generate-web`, `generate-app`, etc.
+**L-001 (scaffolding-not-content):** Capabilities are workflow + dispatch contracts, not curated content. `api-design` is the workflow that invokes `APIDesigner` agent + writes structured output. The agent produces content at invocation. Same pattern as `generate-web`, `generate-app`, etc.
 
-**L-002 (grep-first):** Before adding a new sub-skill, grep for existing skills/agents covering the need. Most TA sub-skills dispatch to existing agents (`APIDesigner`, `Architect`, `BackendArchitect`). Only two new agents this phase: `SystemArchitect` (system-of-systems thinking) + `CapacityPlanner` (scaling model).
+**L-002 (grep-first):** Before adding a new Capability, grep for existing skills/agents covering the need. Most TA Capabilities dispatch to existing agents (`APIDesigner`, `Architect`, `BackendArchitect`). Only two new agents this phase: `SystemArchitect` (system-of-systems thinking) + `CapacityPlanner` (scaling model).
 
 **L-004 (decisions vs execution):** Every operator-visible decision in a module gets explicit surfacing. Checkpoint failures surface via AskUserQuestion with three paths (Re-loop / Accept-with-concern / Raise-help). No silent fallback.
 
@@ -249,8 +249,8 @@ After all 5 modules ship (v4.1 through v4.5):
 
 ## Anti-patterns
 
-- **Skipping the module pattern for one-off domain work** — even single-action invocations go through the module's sub-skill
-- **Putting curated content in sub-skills** — sub-skills are dispatch contracts; content is produced by agents at invocation (L-001)
+- **Skipping the module pattern for one-off domain work** — even single-action invocations go through the module's Capability
+- **Putting curated content in Capabilities** — Capabilities are dispatch contracts; content is produced by agents at invocation (L-001)
 - **Adding a new agent when an existing one covers the need** — L-002 inventory pre-PR
 - **Silent checkpoint failures** — every checkpoint failure surfaces AskUserQuestion with the three paths (L-004)
 - **Letting hooks block** — hooks warn; blocking is the operator's explicit decision via Brief Forge or pack policy

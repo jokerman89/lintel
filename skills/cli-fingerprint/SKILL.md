@@ -120,10 +120,6 @@ Shim behavior for this CLI:
 - Audit log entry per detection event: `.claude/runtime/audit/cli-detect.jsonl`. Helps debug "why is this skill using degraded path?".
 - Operator-declared override is logged with operator reason if provided.
 
-## Voice tier note
-
-`voice: internal`. Foundational engineering plumbing.
-
 ## Failure modes
 
 - **Detection cascade falls through to step 5:** refuse + clear instructions. Don't guess.

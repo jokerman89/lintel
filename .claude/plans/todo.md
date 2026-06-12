@@ -1,3 +1,27 @@
+# todo — active initiatives
+
+## v5.1 subtraction — ADR-0009 sub-skill collapse (2026-06-12, branch feat/v5.1-subtraction)
+
+- [x] 5 modules (ta/da/sc/dh/tq): add `## Sub-capability dispatch` table + short load-bearing subsections; `/li:<module> <capability>` shorthand; direct dispatch in single granularity; shed Pause-points/Hop-in/Voice boilerplate per docs/concepts/skill-protocol.md
+- [x] git rm -r the 35 sub-skill dirs
+- [x] config/aliases.yaml: 35 entries (deprecated 2026-06-12 → removal 2026-09-12, ADR-0009)
+- [x] Repoint live refs: hooks (HOOK.md + run.sh messages), agents/ (9 files), docs/concepts/{ta,da,sc,dh,tq}-module.md + engineering-modules.md + full-engineering-pass.md (NOT docs/design, docs/audit, CATALOG.md, docs/wiki [generated], CHANGELOG)
+- [x] Rewrite tests/shape/{ta,da,sc,dh,tq}-module-contract.sh (dispatch-table assertions) + fix tests/unit/{ta,da,sc,dh,tq}-routing.sh Scenario 3 + sc/dh Scenario 9 (grepped deleted files)
+- [x] Green: 5 shape + 5 routing + frontmatter-lint-all = rc 0 each, 0 FAIL lines; no commit
+
+### Review (sub-skill collapse)
+
+Modules net SHRANK while absorbing the 35 files: ta -8, da -5, sc -5, dh -6, tq -8 lines
+(boilerplate shed > dispatch-table growth; budget allowed +80-120 growth). ~4,420 sub-skill
+lines deleted. Load-bearing uniques preserved in tables/subsections: all numeric raise-help
+thresholds (≥3 consumers, 100k rows, 365d retention conflict, $10k/mo, 99% SLO floor,
+critical-path 100%, flake threshold 3 / 14d cap), validation checklists, per-language tool
+maps, verdict taxonomies. Hidden dependency found + fixed: tests/unit routing Scenario 3 (all
+5) and sc/dh Scenario 9 grepped the deleted files. docs/wiki/skills.md + CATALOG.md left for
+their generators. Known drift (pre-existing): docs/concepts/ta-module.md still lists
+CodeReviewer for complexity-audit though the workflow never spawned it; module table now says
+Architect only (matches reality).
+
 # todo — v5.0 claude-home + memory v2 + Obsidian (2026-06-12)
 
 ## Initiative 2 — P0 activation pass (2026-06-12, operator: "kör")

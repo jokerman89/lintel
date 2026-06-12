@@ -180,7 +180,7 @@ With v4.6 shipping (this composition skill), **v4.x is feature-complete**:
 
 Per design doc §5.2 total estimate: 17-27 CC-days for v4.0 ship + ~10-15 CC-days for engineering-depth = ~30-40 CC-days for complete v4.x.
 
-What remains after v4.6 is operational: pack-specific tuning, additional module sub-skills as operator needs surface, future v5.x design decisions.
+What remains after v4.6 is operational: pack-specific tuning, additional module capabilities as operator needs surface, future v5.x design decisions.
 
 ## Integration points
 

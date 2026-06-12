@@ -108,11 +108,6 @@ Recommended next steps:
 - **`INSTALL-MANIFEST.json` missing but scaffolding present:** report "scaffolding present but no manifest — install predates manifest feature, run install.sh to regenerate."
 - **Multiple layer-config.yaml files (one user-global, one operator-override):** report which takes precedence.
 
-## Compliance integration
-
-- This skill is read-only. Doesn't touch external systems.
-- One indirect compliance link: if `voice_calibration` shows FAIL cells, that's relevant to "is Lintel's customer-facing surface safe to use?" — operators can use the answer for risk decisions.
-
 ## Failure modes
 
 - **YAML parse error in config or upstream-sources:** report the file + line + error, fail the relevant check, continue with others.

@@ -55,10 +55,6 @@ Currently frozen this session:
 - Unfreezing a CLAUDE.md frozen-zone path: WARN explicitly that this is a TEMPORARY runtime override and the static rule still applies — re-freeze when done.
 - Audit log retains the unfreeze event even after session ends.
 
-## Voice tier note
-
-`voice: internal`. Lifecycle ops are engineering-internal.
-
 ## Failure modes
 
 - **Path not in current freeze:** report it wasn't frozen (no-op). Do not error.

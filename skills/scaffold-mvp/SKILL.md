@@ -122,10 +122,6 @@ Deploy targets: staging, prod (stub written)
 - Eval suite directory with the active pack's voice rubric reference for AI features.
 - Frozen zones in CLAUDE.md prevent accidental overwrite of finalized review artifacts.
 
-## Voice tier note
-
-`voice: internal`. Skill produces engineering scaffold. The scaffold CONTAINS gated voice-bearing artifact stubs if the active pack sets a customer-facing tier.
-
 ## Failure modes
 
 - **`--has-ai yes` but stack doesn't typically include AI:** ask via AskUserQuestion — operator may have non-obvious AI use.

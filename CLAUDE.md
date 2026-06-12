@@ -71,7 +71,7 @@ not an exhaustive map — run `/li:catalog` to discover the full set.
 - Plan review → `/li:plan-eng-review` / `/li:plan-ceo-review`  ·  Brainstorm an idea → `/li:office-hours`
 - Deep context load → `/li:context-warm`  ·  Save / resume → `/li:context-save` · `/li:resume`
 - Record a decision → `/li:adr-new`  ·  Capture a lesson → `/li:capture`
-- Switch / inspect identity → `/li:pack-switch` · `/li:pack-list` · `/li:role-activate`
+- Switch / inspect identity → `/li:pack-switch` · `/li:pack-list` · `/li:role`
 - Discover everything → `/li:catalog`
 
 ---

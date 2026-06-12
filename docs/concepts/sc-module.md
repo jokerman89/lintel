@@ -1,7 +1,7 @@
 # SC module — security-compliance for engineering depth
 
 **Last updated:** 2026-05-31 (v4.3)
-**Status:** Concept doc — referenced by `skills/sc/SKILL.md` + 7 sub-skills + 1 new agent + 3 hooks
+**Status:** Concept doc — referenced by `skills/sc/SKILL.md` + 7 Capabilities + 1 new agent + 3 hooks
 
 > When work touches security or regulated paths — new external surface, customer-data path, auth flow, secret material, regulated feature — running it through plain BUILD discards what the operator needs: threat model with mitigations, secret inventory + rotation, auth review verdict, per-framework compliance evidence, durable audit path, incident response runbook. SC is the **third engineering-domain module in v4.x**, following the same pattern as TA + DA documented in [engineering-modules.md](engineering-modules.md).
 
@@ -36,10 +36,10 @@ Granularity dispatch:
        │
        ├── loop   → re-run threat-model + compliance-evidence → diff vs prior
        │
-       └── single → direct sub-skill (no checkpoints, no orchestration)
-                   sc-threat-model / sc-secret-management / sc-auth-flow /
-                   sc-compliance-evidence / sc-audit-path /
-                   sc-dependency-security / sc-incident-runbook
+       └── single → direct Capability (no checkpoints, no orchestration)
+                   threat-model / secret-management / auth-flow /
+                   compliance-evidence / audit-path /
+                   dependency-security / incident-runbook
                        │
                        ▼
                    Spawn agent via Brief Forge:
@@ -55,23 +55,23 @@ Granularity dispatch:
 ## The five checkpoints (full pass)
 
 ### 1. `threat_model_complete`
-STRIDE coverage with mitigations per threat. Produced by `sc-threat-model` + ThreatModelDrafter + SecurityAuditor.
+STRIDE coverage with mitigations per threat. Produced by `threat-model` + ThreatModelDrafter + SecurityAuditor.
 Pass criterion: every enumerated threat has a mitigation OR explicit accept-risk; no high-severity unmitigated.
 
 ### 2. `secrets_inventoried`
-All secrets cataloged with rotation policy. Produced by `sc-secret-management` + SecurityAuditor + SBOMAuditor.
+All secrets cataloged with rotation policy. Produced by `secret-management` + SecurityAuditor + SBOMAuditor.
 Pass criterion: every secret has kind + scope + storage + rotation_cadence_days; raise-help on no-rotation secrets.
 
 ### 3. `auth_flow_locked`
-Auth design + security review verdict. Produced by `sc-auth-flow` + JWTSecurityReviewer/SecurityAuditor.
+Auth design + security review verdict. Produced by `auth-flow` + JWTSecurityReviewer/SecurityAuditor.
 Pass criterion: verdict PASS or PASS_WITH_CONCERNS (operator accepts); FAIL means re-loop.
 
 ### 4. `compliance_evidence_present`
-Per-framework evidence collected. Produced by `sc-compliance-evidence` + ComplianceOfficer + Architect.
+Per-framework evidence collected. Produced by `compliance-evidence` + ComplianceOfficer + Architect.
 Pass criterion: every required framework has covered controls; gaps raise-help.
 
 ### 5. `audit_path_verified`
-Audit log captures all required events with retention + integrity. Produced by `sc-audit-path` + SecurityAuditor + Architect.
+Audit log captures all required events with retention + integrity. Produced by `audit-path` + SecurityAuditor + Architect.
 Pass criterion: per-event emission point + durable transport + append-only sink + retention policy.
 
 ## The 6-dimensional scoring rubric (full pass exit gate)
@@ -85,26 +85,26 @@ Pass criterion: per-event emission point + durable transport + append-only sink 
 | Compliance evidence (per required framework) | _ | 80 | `.claude/runtime/state/sc/compliance-evidence-<framework>.md` |
 | Audit path verified (events + retention + integrity) | _ | 80 | `.claude/runtime/state/sc/audit-path-<ts>.md` |
 
-## Sub-skill catalog
+## Capability catalog
 
-| Sub-skill | Primary agent | Other agents | Output |
+| Capability | Primary agent | Other agents | Output |
 |---|---|---|---|
-| `sc-threat-model` | ThreatModelDrafter | SecurityAuditor | STRIDE threats + mitigations |
-| `sc-secret-management` | SecurityAuditor | SBOMAuditor | secret inventory + rotation + supply-chain |
-| `sc-auth-flow` | JWTSecurityReviewer or SecurityAuditor | SecurityAuditor (cross-check) | auth design + review verdict |
-| `sc-compliance-evidence` | ComplianceOfficer (NEW) | Architect | per-framework evidence + cross-ref |
-| `sc-audit-path` | SecurityAuditor | Architect | event schema + pipeline + retention |
-| `sc-dependency-security` | DependencyAuditor | SBOMAuditor | SCA + license + SBOM |
-| `sc-incident-runbook` | SecurityAuditor | ReleaseEngineer | per-threat-class runbook + rollback |
+| `threat-model` | ThreatModelDrafter | SecurityAuditor | STRIDE threats + mitigations |
+| `secret-management` | SecurityAuditor | SBOMAuditor | secret inventory + rotation + supply-chain |
+| `auth-flow` | JWTSecurityReviewer or SecurityAuditor | SecurityAuditor (cross-check) | auth design + review verdict |
+| `compliance-evidence` | ComplianceOfficer (NEW) | Architect | per-framework evidence + cross-ref |
+| `audit-path` | SecurityAuditor | Architect | event schema + pipeline + retention |
+| `dependency-security` | DependencyAuditor | SBOMAuditor | SCA + license + SBOM |
+| `incident-runbook` | SecurityAuditor | ReleaseEngineer | per-threat-class runbook + rollback |
 
-**L-002 win:** 6 of 7 sub-skills dispatch to **existing** security agents. Only 1 new agent (ComplianceOfficer) for genuinely new capability (cross-framework evidence orchestration).
+**L-002 win:** 6 of 7 Capabilities dispatch to **existing** security agents. Only 1 new agent (ComplianceOfficer) for genuinely new capability (cross-framework evidence orchestration).
 
 ## Agent additions (v4.3)
 
 ### `ComplianceOfficer`
 - **Purpose:** cross-framework compliance evidence orchestration; control coverage mapping; gap surfacing
 - **Why new:** existing security agents are threat-focused; compliance evidence is a different shape (control mappings, framework reuse, technical-vs-procedural distinction)
-- **Spawned by:** `sc-compliance-evidence`
+- **Spawned by:** `compliance-evidence`
 
 ## Hook additions (v4.3)
 
@@ -142,7 +142,7 @@ engineering:
     audit_retention_days: 2555             # 7 years default
 ```
 
-Hooks + sub-skills read these. Defaults baked in when absent.
+Hooks + Capabilities read these. Defaults baked in when absent.
 
 ## Pack overrides
 
@@ -158,7 +158,7 @@ security_compliance:
 
 ## Audit trail
 
-Every module + sub-skill + checkpoint writes to `.claude/runtime/audit/sc-decisions.jsonl`:
+Every module + Capability + checkpoint writes to `.claude/runtime/audit/sc-decisions.jsonl`:
 
 ```jsonl
 {"ts":"...","kind":"sc_module_complete","granularity":"full","score":87,"checkpoints_passed":5,"frameworks":"soc2,gdpr"}
@@ -194,7 +194,7 @@ SC runs in parallel with DA after TA produces architecture decisions. SC reads p
 - **Procedural-only evidence for technical controls** — policy doc ≠ access control implementation
 - **Audit logs in best-effort transport** — durable transport is non-negotiable
 - **Runbook without detection signals** — on-call needs the trigger, not just the response
-- **Curating threat patterns / control mappings / runbook templates** — sub-skills are dispatch contracts (L-001); content from agents at invocation
+- **Curating threat patterns / control mappings / runbook templates** — Capabilities are dispatch contracts (L-001); content from agents at invocation
 
 ## Integration points
 

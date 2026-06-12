@@ -181,10 +181,6 @@ Preview: /open-managed-browser file://~/.lintel/draft/copilot-for-legal-demo.htm
 - HTML/JS output sanitized — no inline scripts that fetch external resources without disclosure
 - nextjs-scaffold pre-wires the active pack's deploy gate (if any)
 
-## Voice tier note
-
-`voice: mixed`.
-
 ## Failure modes
 
 - **nextjs-scaffold template incomplete** — fall back to single-file variant + warn

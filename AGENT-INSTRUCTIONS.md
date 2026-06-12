@@ -201,11 +201,11 @@ See [docs/design/lintel-v3.5-cycle-and-roles.md](docs/design/lintel-v3.5-cycle-a
 Expert personas as lightweight session context layers. Voice + outcome-lens + decision-criteria + cold-knowledge influence cycle without bloating session-start.
 
 **Lightweight load (~500 tokens) at activation:**
-- `/li:role-activate <role-id>` — load IDENTITY + VOICE + OUTCOME-LENS summary
+- `/li:role <role-id>` — load IDENTITY + VOICE + OUTCOME-LENS summary
 - Role overlay applies to subsequent phases (DEFINE, SHIP, CAPTURE most affected)
 
 **Deep-dive on-demand (~2-3k tokens):**
-- `/li:role-deep-dive <role-id>` — load full role-file (COLD KNOWLEDGE, DECISION CRITERIA, INSIGHTS)
+- `/li:role --deep-dive <role-id>` — load full role-file (COLD KNOWLEDGE, DECISION CRITERIA, INSIGHTS)
 
 **Roles load from the active pack** (`resolve_pack_field roles.source`; none in `_default`). A company pack supplies its own role set — e.g. the lintel-caip-pack example ships `field-cto`, `solution-architect`, `engineering-manager`.
 

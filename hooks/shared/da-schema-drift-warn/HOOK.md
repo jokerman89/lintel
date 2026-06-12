@@ -27,7 +27,7 @@ Schema decisions evolve. The warn prompts the operator to either: (a) update the
 
 ## What's NOT in scope
 
-- Detecting indirect schema impact (downstream consumers — that's `/li:da-data-contract-collision`)
+- Detecting indirect schema impact (downstream consumers — that's `/li:da data-contract-collision`)
 - Blocking the edit (warn only)
 - Auto-updating the ADR
 

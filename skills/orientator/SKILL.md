@@ -5,6 +5,7 @@ description: Phase 3 v4.0 — lightweight routing agent invoked at SENSE. Reads 
 color: cyan
 tools: Read, Bash, Grep
 voice: internal
+hop_in: no   # single-shot at SENSE Step 0d — not a standalone entry point
 cli_support: [claude-code, codex]
 ---
 
@@ -151,21 +152,10 @@ Alternatives if not what you want:
   /li:review         # standalone review
 ```
 
-## Status protocol
-
-- **DONE** — recommendation emitted
-- **DONE_WITH_CONCERNS** — recommendation emitted but confidence < medium or budget exhausted
-- **BLOCKED** — pack has no `navigation.default_workflow` declared and no resolver default
-- **NEEDS_CONTEXT** — operator prompt empty AND no prior state file
-
 ## Pause-points
 
 - Step 4 `decision = confirm_with_operator`: SENSE surfaces the recommendation and waits for operator confirm (Y/edit/abort)
 - Operator's explicit `--mode` flag always overrides orientator's recommendation
-
-## Hop-in support
-
-None — orientator is single-shot at SENSE.
 
 ## Integration
 
@@ -190,7 +180,3 @@ None — orientator is single-shot at SENSE.
 - **Auto-starting high-risk workflows** — even with `auto_mode_eligible: true`, high-risk requires explicit confirm per level (b)
 - **Skipping audit** — every routing decision goes to orientator-decisions.jsonl for operator inspection + future learning
 - **Hard-coding workflow names** — read from pack's `default_workflow` so per-pack routing is configurable
-
-## Voice tier behavior
-
-`voice: internal`. Operator-facing diagnostic output only. No customer-facing output.

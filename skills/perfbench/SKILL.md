@@ -85,10 +85,6 @@ Address P1 before /release-ev2. P2 acceptable if intentional — record reason i
 - Network-dependent benchmarks: warning if network conditions vary (results not comparable).
 - Benchmark runs logged to `.claude/runtime/audit/benchmarks.jsonl`.
 
-## Voice tier note
-
-`voice: internal`. Perf reports are engineering-internal — numbers and recommendations, no narrative.
-
 ## Failure modes
 
 - **No benchmark mechanism found:** report + suggest setting one up. Do not fabricate baseline.

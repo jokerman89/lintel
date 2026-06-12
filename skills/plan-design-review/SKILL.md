@@ -6,6 +6,7 @@ color: orange
 tools: Read, Bash, Grep, Glob
 voice: internal
 cli_support: [claude-code]
+hop_in: no
 ---
 
 # /plan-design-review

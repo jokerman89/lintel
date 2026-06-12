@@ -27,9 +27,9 @@ SKILLS_DIR="$REPO_ROOT/skills"
 # moved to lintel-caip-pack in the v4.7 extraction. Only generic survivors remain.
 # 2026-06-10: context-budgetwatch removed — consolidated into context-budget --watch
 # (deprecated alias in config/aliases.yaml until 2026-09-10); no longer canonical.
+# 2026-06-12: gbrain-setup/gbrain-sync removed (ADR-0009 0-ref pruning) — no longer canonical.
 V2_NAMES=(
   "open-managed-browser" "perfbench" "code-freeze" "code-unfreeze"
-  "gbrain-setup" "gbrain-sync"
 )
 
 # v1 li-prefixed names that should NEVER appear as canonical `name:` value.

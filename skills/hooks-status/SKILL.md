@@ -78,20 +78,12 @@ If `--correlate` flag:
 
 Markdown table output to stdout. Operator pipes to less or redirects to a file.
 
-## Voice tier behavior
-
-`voice: internal`. Operator observability. No voice gate.
-
 ## Status protocol
 
 - **DONE** — report rendered
 - **DONE_WITH_CONCERNS** — report rendered but hooks.jsonl is malformed on some lines (skip + count in report)
 - **BLOCKED** — `.claude/runtime/audit/hooks.jsonl` permissions deny read
 - **NEEDS_CONTEXT** — invocation without a view flag (`--triggers` / `--overrides` / `--dead`)
-
-## Hop-in support
-
-YES — pure-reader skill, solo-invocable any time.
 
 ## Integration
 

@@ -123,25 +123,10 @@ Read usage-log past 30 days:
 
 Pairs naturally with `/li:catalog --trends` (Cohort 2 1.6 output).
 
-## Voice tier behavior
-
-`voice: internal`. An operator-internal maintenance pass.
-
-## Status protocol
-
-- **DONE** — maintenance pass complete for the selected mode
-- **DONE_WITH_CONCERNS** — pass complete with warnings (e.g., deprecated paths still present)
-- **BLOCKED** — `~/.lintel/` permissions deny read/write
-- **NEEDS_CONTEXT** — `--simulate-tokens` without a workflow arg
-
 ## Pause-points
 
 - `--force-compact` would reclaim > 500MB: confirm via AskUserQuestion (avoid surprise)
 - `--monitor-paths` FAIL on a load-bearing path: surface with a fix recommendation
-
-## Hop-in support
-
-YES — designed for periodic operator runs + automation via a cron-like trigger.
 
 ## Integration
 

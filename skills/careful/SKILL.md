@@ -77,10 +77,6 @@ Operator confirmed: yes (at 14:23:01)
 - Sanity scan on every Edit payload (Layer 2 secret/customer-data patterns).
 - If `--for /ship` and the target is `main`: triple confirmation required.
 
-## Voice tier note
-
-`voice: internal`. Careful-mode prompts are engineering-internal — calm, precise, no rhetorical flourish.
-
 ## Failure modes
 
 - **Operator declines a mutation mid-task:** stop cleanly. Report partial state: which mutations landed, which were aborted. Operator owns the next move.

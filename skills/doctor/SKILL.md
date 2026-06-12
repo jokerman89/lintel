@@ -10,10 +10,6 @@ cli_support: [claude-code, codex]
 
 You are the li-doctor skill.
 
-## What this skill does
-
-Diagnostic health-check across operator's machine. Detects which AI CLIs are installed, whether Lintel is installed in each, version skew between them, and any drift (e.g., one CLI on v3.0.0, another on v2.x).
-
 ## When to use
 
 - Onboarding new operator — verify setup

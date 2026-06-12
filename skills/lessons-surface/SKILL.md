@@ -84,10 +84,6 @@ Related: [[L-002]]
 
 Surface MAX 3 lessons (avoid drowning operator). Sort by relevance.
 
-## Voice tier behavior
-
-`voice: internal`. Surface output is operator-internal context-warming.
-
 ## Status protocol
 
 - **DONE** — N lessons surfaced (or 0 if no match)
@@ -99,10 +95,6 @@ Surface MAX 3 lessons (avoid drowning operator). Sort by relevance.
 
 - Lessons.md has > 50 entries and no keyword → ask for focus ("topic narrowing" via AskUserQuestion)
 - Multiple lessons score > 7 → ask the operator which is most relevant (or surface all)
-
-## Hop-in support
-
-YES — the primary use case is solo-invocation (or SENSE-auto). Designed to be invocable any time.
 
 ## Integration
 

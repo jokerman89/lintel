@@ -6,19 +6,12 @@ color: cyan
 tools: Read, Bash, Grep, Glob
 voice: internal
 cli_support: [claude-code, codex]
+hop_in: no
 necessity: OPTIONAL
 gap_if_skipped: "Operator loses the one-word hotfix shortcut; the identical workflow is still reachable via /li:cycle --mode hotfix, so no capability is lost — only the convenience."
 ---
 
-You are the FIX composite shortcut — hotfix mode pre-baked.
-
-## What this skill does
-
-Hotfix workflow as a single invocation. Equivalent to:
-```
-/li:cycle --mode hotfix
-```
-but with shorter typing. Runs 4 phases (SENSE → BUILD → REVIEW → SHIP), skips the 4 design/plan/capture phases.
+You are the FIX composite shortcut — hotfix mode pre-baked. Not nestable — /li:fix is itself the hop-in shortcut.
 
 ## When to use
 
@@ -73,19 +66,6 @@ run /li:capture manually now.
 
 This is a soft prompt — operator decides if CAPTURE is worth running post-hoc.
 
-## Status protocol
-
-Inherits from /li:cycle. Status reflects underlying cycle outcome.
-
-## Pause-points
-
-- Initial mode-confirmation
-- Each underlying phase's pause-points (BUILD's per-task review, SHIP's compliance gates)
-
-## Hop-in support
-
-No — /li-fix is itself a hop-in shortcut. Not nestable.
-
 ## Integration
 
 Delegates to `/li:cycle --mode hotfix`. No new behavior beyond that.
@@ -94,7 +74,3 @@ Delegates to `/li:cycle --mode hotfix`. No new behavior beyond that.
 
 - **Using /li-fix for new feature work** — bypass DEFINE/PLAN = guaranteed scope drift
 - **Skipping CAPTURE when fix reveals durable lesson** — soft-prompted post-hoc, don't ignore
-
-## Voice tier behavior
-
-`voice: internal`. Inherits cycle's voice_tier per mode (internal for hotfix).
