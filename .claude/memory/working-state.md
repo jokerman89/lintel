@@ -33,6 +33,11 @@ Cross-session working state (ej durable rules — that's [[lessons.md]]; ej pers
 - All three phases passed independent L-007 review (SHIP-WITH-FIXES; every P1/P2 acted on)
 
 **What's pending:**
+- ALSO open: **PR #66** (activation pass, ADR-0008) — stacked on #65. Fit audit
+  (docs/audit/2026-06-12-fable5-fit-audit.md) found ~3/14 mechanisms firing; #66 ships plugin
+  hook auto-registration + state ledger (lib/state.sh) + behavior tests + the exit-2 fix for
+  the block hooks (they never actually blocked). After merge: verify li-doctor proof-of-life
+  on first fresh session (digest audit record must appear).
 - Merge chain: #62 → #63 (re-target to main) → #64 → #65
 - Operator: run `li-migrate-claude-home` on other Lintel-connected repos (grace to 2026-09-12)
 - Operator: re-enable vault sink in a personal pack override (~/.lintel/packs/_default) — the shipped neutral default is now OFF
