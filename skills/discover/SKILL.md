@@ -220,15 +220,11 @@ skills_overlap: <count>
 
 ### Step 9 — 00-state.md append
 
-```yaml
-phase: DISCOVER
-ts: <timestamp>
-report_path: .claude/runtime/state/discover-report-<datetime>.md
-files_mapped: <count>
-adrs_found: <count>
-lessons_applied: <count>
-status: DONE
-next_recommended: PLAN
+Mechanical since v5.0 (ADR-0008) — one command, not a YAML obligation:
+
+```bash
+source "$LINTEL_REPO_ROOT/lib/state.sh"
+state_append DISCOVER DONE next=PLAN report_path=.claude/runtime/state/discover-report-<datetime>.md files_mapped=<count> adrs_found=<count> lessons_applied=<count>
 ```
 
 ## Status protocol

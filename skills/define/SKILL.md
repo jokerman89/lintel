@@ -192,7 +192,12 @@ AskUserQuestion:
 - B) REVISE — specify which sections need changes (loop back to revise)
 - C) START OVER — return to Step 5 forcing questions
 
-If A: mark doc status APPROVED, write 00-state.md entry, status DONE.
+If A: mark doc status APPROVED, then write the state entry. Mechanical since v5.0 (ADR-0008) — one command, not a YAML obligation:
+
+```bash
+source "$LINTEL_REPO_ROOT/lib/state.sh"
+state_append DEFINE DONE next=DISCOVER design_doc=<path> wedge="<one-line>"
+```
 
 ## Status protocol
 

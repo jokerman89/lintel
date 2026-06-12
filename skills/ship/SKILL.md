@@ -247,21 +247,11 @@ If shipping tags release version:
 
 ### Step 11 — 00-state.md append
 
-```yaml
-phase: SHIP
-ts: <timestamp>
-ship_path: <pr | direct_main | demo>
-pr_url: <url if PR>
-commit_range: <sha>..<sha>
-hard_rule_violations: 0  # must be 0 to reach here
-voice_gate: <score>%
-brand_gate: <PASS | n/a>
-honest_limitations: <PASS | n/a>
-provenance_logged: yes
-release_notes_path: <path if tag>
-customer_deliverables: <list of .pptx/.docx/.html paths>
-status: DONE | DONE_WITH_CONCERNS | BLOCKED
-next_recommended: CAPTURE
+Mechanical since v5.0 (ADR-0008) — one command, not a YAML obligation. `hard_rule_violations` must be 0 to reach here; gate detail lives in the compliance/provenance logs:
+
+```bash
+source "$LINTEL_REPO_ROOT/lib/state.sh"
+state_append SHIP <DONE|DONE_WITH_CONCERNS|BLOCKED> next=CAPTURE ship_path=<pr|direct_main|demo> pr_url=<url-if-PR> commit_range=<sha>..<sha> hard_rule_violations=0
 ```
 
 ## Status protocol

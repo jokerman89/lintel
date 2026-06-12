@@ -212,23 +212,15 @@ After last task DONE:
    task has a terminal status, no untasked work shipped, deviations reflected back. Surface the
    report verdict; RED/YELLOW findings go to the operator (advisory, not a hard block).
 4. If `pair-agent` mode: invoke for operator-pair-programming-style final walkthrough
-5. Write 00-state.md BUILD entry
+5. Write the 00-state.md BUILD entry via `state_append` (Step 7)
 
 ### Step 7 — 00-state.md append
 
-```yaml
-phase: BUILD
-ts: <timestamp>
-plan_path: <path>
-tasks_completed: <N>
-tasks_blocked: <count>
-spec_review_iterations_total: <sum>
-quality_review_iterations_total: <sum>
-tokens_used_total: <approx>
-voice_gate_failures: <count>
-hard_rule_blocks: <count>
-status: DONE | DONE_WITH_CONCERNS | BLOCKED
-next_recommended: REVIEW
+Mechanical since v5.0 (ADR-0008) — one command, not a YAML obligation (per-task metrics live in build-log.md, Step 5):
+
+```bash
+source "$LINTEL_REPO_ROOT/lib/state.sh"
+state_append BUILD <DONE|DONE_WITH_CONCERNS|BLOCKED> next=REVIEW plan_path=<path> tasks_completed=<N> tasks_blocked=<count>
 ```
 
 ## Status protocol
