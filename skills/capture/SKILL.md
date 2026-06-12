@@ -227,7 +227,7 @@ sink_path=$(resolve_pack_field capture.vault_sink_path)    # relative to repo ro
 
 if [ "$sink_enabled" != "true" ]; then
   : # disabled — skip silently
-elif [ ! -d "$REPO_ROOT/$sink_path" ]; then
+elif { case "$sink_path" in /*|[A-Za-z]:*) sink_dir="$sink_path" ;; *) sink_dir="$REPO_ROOT/$sink_path" ;; esac; [ ! -d "$sink_dir" ]; }; then
   echo "[lintel/capture] WARN: vault_sink path not found: $sink_path — skipping vault export"
   audit_log capture vault_sink_skipped "reason=path_missing" "path=$sink_path"
 fi
@@ -272,10 +272,14 @@ installed by `bin/li-vault-init`) and the vault's own skills query these exact p
 
 **After writing the note, maintain the two navigation surfaces (same sink dir):**
 1. **Hub note** `<sink_path>/<repo-name>.md` — create a minimal one if missing (frontmatter:
-   `type: repo-hub`, `repo:`; one line of prose). Never overwrite an existing hub.
-2. **Index** `<sink_path>/00-index.md` — regenerate the list under its heading: newest-first,
-   max 15 lines, one per session note: `- [[<note-name>]] - <one-line title> (<repo>)`.
-   Keep the file's frontmatter + intro intact; replace only the list.
+   `created:`, `tags: [hub]`, `type: repo-hub`, `repo:`; one line of prose — same shape
+   bin/li-vault-init writes). Never overwrite an existing hub.
+2. **Index** `<sink_path>/00-index.md` — create it if missing (frontmatter `type: session-index`
+   + one intro line), then maintain the list under its heading: carry the existing entries
+   forward, PREPEND this session's line, truncate to 15:
+   `- [[<note-name>]] - <one-line title> (<repo>)`. Keep frontmatter + intro intact; touch only
+   the list. (Carrying forward the index's own lines is the one sanctioned vault read — never
+   read other notes back.)
 
 Source the content from the Step 1 cycle aggregation. **Hard rules:** no secrets or tokens, no
 customer or employer-internal data, no full file contents — repo-relative pointers instead of
