@@ -31,7 +31,7 @@ done
 grep -q "render_cycle_footer" skills/cycle/SKILL.md && pass "cycle orchestrator references footer" || fail "cycle orchestrator missing footer"
 
 # The orchestrator must persist cycle_mode into state so the footer resolves skips without --mode.
-grep -q "cycle_mode:" skills/cycle/SKILL.md && pass "orchestrator persists cycle_mode to state" || fail "orchestrator missing cycle_mode write"
+grep -qE "cycle_mode[:=]" skills/cycle/SKILL.md && pass "orchestrator persists cycle_mode to state" || fail "orchestrator missing cycle_mode write"
 
 # High-traffic non-phase entry points also close with the footer (thin ambient outside a cycle).
 ENTRY_SKILLS="welcome jobs resume status"

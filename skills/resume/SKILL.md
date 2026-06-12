@@ -108,7 +108,7 @@ If operator aborts → exit BLOCKED with recommendation to run `/li:sense` for f
 
 ### Step 2 — Parse last state entry
 
-Read `00-state.md`, find the LAST entry:
+Read `00-state.md`, find the LAST entry. Mechanical read via `lib/state.sh`: `state_last` prints the whole last block, `state_last <field>` (e.g. `state_last status`, `state_last next_recommended`) prints one field:
 - Last phase completed
 - Last phase status (DONE / DONE_WITH_CONCERNS / BLOCKED / paused)
 - Next recommended phase
@@ -217,7 +217,7 @@ If precondition fails: surface why, suggest correction or different phase.
 If state came from another machine (cross-machine sync via lessons-vault or operator manually copied):
 - Surface: "State imported from machine <other>. Branch may differ. Verify before proceeding."
 - AskUserQuestion: "Continue with imported state? (Y/n)"
-- If yes: write 00-state.md entry "resume from cross-machine import, source: <machine-id or path>"
+- If yes: `state_append RESUME IMPORTED source="<machine-id or path>"`
 
 ### Step 6 — Invoke chosen phase
 
@@ -226,19 +226,15 @@ Based on operator's choice (Step 3 + 4):
 - If B (restart prior): `/li:<last-phase>` (re-runs from start)
 - If C (specific): `/li:<chosen-phase>`
 - If D (full cycle): `/li:cycle` (from start, ignoring prior state)
-- If E (abort): write `cycle_aborted: true` to 00-state.md, archive to `~/.lintel/archive/`
+- If E (abort): `state_append RESUME ABORTED cycle_aborted=true`, archive to `~/.lintel/archive/`
 
 ### Step 7 — 00-state.md append
 
-```yaml
-phase: RESUME (utility, not cycle phase)
-ts: <timestamp>
-prior_state_age: <duration>
-prior_last_phase: <phase>
-operator_choice: <A | B | C | D | E>
-next_invoked: <phase>
-cross_machine: <yes/no>
-status: DONE
+RESUME is a utility, not a cycle phase. Mechanical since v5.0 (ADR-0008) — one command, not a YAML obligation:
+
+```bash
+source "$LINTEL_REPO_ROOT/lib/state.sh"
+state_append RESUME DONE prior_last_phase=<phase> operator_choice=<A|B|C|D|E> next_invoked=<phase> cross_machine=<yes|no>
 ```
 
 ## Status protocol

@@ -316,28 +316,11 @@ is the real feedback loop and stays.
 
 ### Step 10 — 00-state.md final entry
 
-```yaml
-phase: CAPTURE
-ts: <timestamp>
-cycle_complete: true
-artifacts_produced:
-  - lessons_captured: <count>
-  - lessons_promoted: <count>
-  - adrs_drafted: <count>
-  - evolution_log_appended: <yes/no>
-  - spec_md_finalized: <path>
-  - plan_md_finalized: <path>
-  - prompt_md_written: <path>
-  - retro_written: <yes/no>
-  - role_debriefed: <yes/no>
-operator_profile_updated: yes
-cycle_summary:
-  total_duration: <hours>
-  total_tokens: <N>
-  cost_estimate: <$X>
-  outcome: <DONE | DONE_WITH_CONCERNS | BLOCKED>
-status: DONE
-next_action: cycle_complete
+Mechanical since v5.0 (ADR-0008) — one command, not a YAML obligation. No `next=`: the cycle is complete (`/li:resume` keys off `cycle_complete: true`); the full artifact list lives in the Step 11 closing message:
+
+```bash
+source "$LINTEL_REPO_ROOT/lib/state.sh"
+state_append CAPTURE DONE cycle_complete=true outcome=<DONE|DONE_WITH_CONCERNS|BLOCKED> lessons_captured=<count> adrs_drafted=<count> total_tokens=<N> cost_estimate=<$X>
 ```
 
 ### Step 11 — Closing message

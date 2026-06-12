@@ -256,25 +256,11 @@ Approximate current context window utilization. If detectable from prior turns +
 
 ### Step 7 — Write 00-state.md entry + surface report
 
+Mechanical since v5.0 (ADR-0008) — one command, not a YAML obligation:
+
 ```bash
-mkdir -p .claude/runtime/state
-cat >> .claude/runtime/state/00-state.md <<EOF
----
-phase: SENSE
-ts: $(date -u +%Y-%m-%dT%H:%M:%SZ)
-operator: $(whoami)
-compliance_mode: $compliance_mode
-workprofile: $workprofile
-mode_recommended: $recommended_mode
-role: $role_active
-voice_tier: $effective_voice_tier
-intent_detected: $intent
-phases_completed: []
-context_budget: $current_tokens / 1M
-meta_infra_detected: $meta_infra_detected
-meta_paths_changed: $meta_total
----
-EOF
+source "$LINTEL_REPO_ROOT/lib/state.sh"
+state_append SENSE DONE next=SCOPE mode_recommended=$recommended_mode intent_detected="$intent" role=$role_active voice_tier=$effective_voice_tier compliance_mode=$compliance_mode meta_infra_detected=$meta_infra_detected meta_paths_changed=$meta_total
 ```
 
 ## Output format

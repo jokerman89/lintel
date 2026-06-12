@@ -142,21 +142,11 @@ EOF
 
 ### Step 6 — Write 00-state.md entry + surface report
 
+Mechanical since v5.0 (ADR-0008) — one command, not a YAML obligation:
+
 ```bash
-mkdir -p .claude/runtime/state
-cat >> .claude/runtime/state/00-state.md <<EOF
----
-phase: SCOPE
-ts: $(date -u +%Y-%m-%dT%H:%M:%SZ)
-operator: $(whoami)
-size: $scale_size
-ambiguous: $scale_amb
-depth_schema: $depth_schema
-intent: ${override_route:+build}${override_route:-$intent}
-route_override: ${override_route:-none}
-scope_path: $scope_out
----
-EOF
+source "$LINTEL_REPO_ROOT/lib/state.sh"
+state_append SCOPE DONE next=DEFINE size=$scale_size ambiguous=$scale_amb depth_schema=$depth_schema intent="${override_route:+build}${override_route:-$intent}" route_override="${override_route:-none}" scope_path="$scope_out"
 ```
 
 ## Output format

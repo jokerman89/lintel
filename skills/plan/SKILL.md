@@ -316,16 +316,11 @@ Invoke the existing mechanism — do **not** rebuild it:
 
 ### Step 12 — 00-state.md append
 
-```yaml
-phase: PLAN
-ts: <timestamp>
-plan_path: <path>
-spec_draft_path: <path>
-checkpoint_path: .claude/runtime/state/.planner-checkpoint.md
-tasks_count: <N>
-cost_estimate_dollars: <X>
-status: DONE
-next_recommended: BUILD
+Mechanical since v5.0 (ADR-0008) — one command, not a YAML obligation:
+
+```bash
+source "$LINTEL_REPO_ROOT/lib/state.sh"
+state_append PLAN DONE next=BUILD plan_path=<path> spec_draft_path=<path> tasks_count=<N> cost_estimate_dollars=<X>
 ```
 
 ## Status protocol

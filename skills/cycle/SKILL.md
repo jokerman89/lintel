@@ -233,17 +233,19 @@ For each phase in phases_to_run order:
 ```
 0. Phase-progress output: "Phase N/M <PHASE> — next <NEXT> — est ~<X>k tokens"
    (text-only, no graphics per 1.5 spec)
-1. Pre-phase: write 00-state.md entry "starting <phase>"
+1. Pre-phase: `state_append <PHASE> STARTING`
 2. Invoke /li:<phase>
 3. Phase runs (with its own pause-gates per phase-skill)
-4. Post-phase: read phase's 00-state.md entry, check status
+4. Post-phase: `state_last status` — check the phase's recorded status
 5. If status=DONE or DONE_WITH_CONCERNS: continue to next phase
 6. If status=BLOCKED: pause cycle, surface to operator
 7. If status=NEEDS_CONTEXT: pause, gather, re-invoke phase
 ```
 
-**Mode persistence (for the footer).** Once the phase list + mode are fixed (Step 3), write
-`cycle_mode: <mode>` into `.claude/runtime/state/00-state.md` once at cycle start (alongside `cycle_id`), so
+State writes/reads are mechanical since v5.0 (ADR-0008) — `source "$LINTEL_REPO_ROOT/lib/state.sh"` once, then one command (`state_append` / `state_last`), not a YAML obligation.
+
+**Mode persistence (for the footer).** Once the phase list + mode are fixed (Step 3), run
+`state_append CYCLE STARTING cycle_id=<id> cycle_mode=<mode>` once at cycle start, so
 `render_cycle_footer` (and every phase skill that calls it) resolves the skipped-phase glyphs from
 state alone — no explicit `--mode` needed. See [ADR-0003](../../.claude/decisions/0003-cycle-position-footer.md).
 
@@ -331,7 +333,7 @@ Adopts Architect image's FAILURE RECOVERY PROTOCOL: retry → operator-choice �
 After last phase DONE:
 - Surface cycle summary (per CAPTURE phase output if CAPTURE ran)
 - If CAPTURE didn't run (e.g., custom subset without CAPTURE): write light summary
-- Mark 00-state.md `cycle_complete: true`
+- `state_append CYCLE DONE cycle_complete=true` (CAPTURE's own entry covers this when CAPTURE ran)
 
 ### Step 9 — Telemetry (operator-opt-in)
 

@@ -120,6 +120,25 @@ chmod 700 "$LINTEL_HOME/audit"               # tamper-evident
 
 ok "Lintel home structure created"
 
+# ----- seed identity (ADR-0008: no silently-unconfigured identity layer) ------
+# Every session before v5.0 ran the _default fallback because profile.yaml and
+# packs/active-pack never existed. Seed them explicitly so identity is a stated
+# fact, not a fallback. Never overwrite operator files.
+if [ ! -f "$LINTEL_HOME/profile.yaml" ]; then
+  cat > "$LINTEL_HOME/profile.yaml" <<'PROFEOF'
+# Lintel operator profile (seeded by install.sh — edit freely)
+active_pack: _default
+default_mode: internal-tool
+role_active: none
+PROFEOF
+  ok "profile.yaml seeded (_default / internal-tool)"
+fi
+mkdir -p "$LINTEL_HOME/packs"
+if [ ! -f "$LINTEL_HOME/packs/active-pack" ]; then
+  printf '_default' > "$LINTEL_HOME/packs/active-pack"
+  ok "active-pack seeded (_default)"
+fi
+
 # ----- copy scaffolding -------------------------------------------------------
 
 hdr "Copying scaffolding to ~/.lintel/scaffolding/"

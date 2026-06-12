@@ -1,5 +1,19 @@
 # todo — v5.0 claude-home + memory v2 + Obsidian (2026-06-12)
 
+## Initiative 2 — P0 activation pass (2026-06-12, operator: "kör")
+
+- [x] hooks/hooks.json — plugin auto-registration (digest + 4 safety + memory-budget-warn), exec form, schema verified against official docs
+- [x] session-digest.settings.json path fixed (missing shared/) + repositioned as non-plugin fallback
+- [x] install.sh seeds profile.yaml + packs/active-pack (identity stated, not fallen back to)
+- [x] li-doctor: hook-drift check + auto-registration check + digest wired-via detection
+- [x] shims de-staled (AGENTS tasks/todo, copilot tasks/memory) · all 6 manifests → 5.0.0
+- [x] lib/state.sh: state_append/state_last — ledger costs one command; 11 skills wired (9 phases + cycle + resume)
+- [x] tests/integration/session-leaves-traces.sh — 31 behavior assertions (digest fires + audit record, ledger roundtrip + footer, budget hook, hooks.json valid + scripts 100755) — caught all 31 hook scripts at 100644 (fixed in index)
+- [x] prod audit pollution cleaned (capture.jsonl, backup kept)
+- [x] ADR-0008 + M1 entry + migration row (manual-entries dedup guidance)
+- [ ] Operator: update plugin, remove 4 manual hook entries from ~/.claude/settings.json, re-run install.sh, verify with li-doctor
+
+
 Design: [docs/design/lintel-v5-claude-home-memory-obsidian-design.md](../docs/design/lintel-v5-claude-home-memory-obsidian-design.md)
 Mode: meta-infra (Gates M1–M4). Decisions D1–D4 locked by operator 2026-06-12.
 (Previous initiative v4.11 closed 2026-06-10 — see git history of this file.)

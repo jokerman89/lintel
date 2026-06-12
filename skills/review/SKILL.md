@@ -191,21 +191,11 @@ If unavailable: skip silently.
 
 ### Step 8 — 00-state.md append
 
-```yaml
-phase: REVIEW
-ts: <timestamp>
-review_report_path: <path>
-compliance_report_path: <path or n/a>
-stage_1_status: PASS | FAIL
-stage_2_status: PASS | FAIL  
-stage_3_status: PASS | FAIL | n/a
-p1_findings: <count>
-p2_findings: <count>
-p3_findings: <count>
-voice_gate_score: <% if applicable>
-ship_ready: yes | no | yes-with-caveats
-status: DONE | DONE_WITH_CONCERNS | BLOCKED
-next_recommended: SHIP | BUILD (loop-back) | DEFINE (scope gap)
+Mechanical since v5.0 (ADR-0008) — one command, not a YAML obligation. `next=` is SHIP, or BUILD on loop-back, or DEFINE on scope gap; per-stage detail lives in review-report.md:
+
+```bash
+source "$LINTEL_REPO_ROOT/lib/state.sh"
+state_append REVIEW <DONE|DONE_WITH_CONCERNS|BLOCKED> next=<SHIP|BUILD|DEFINE> review_report_path=<path> p1_findings=<count> p2_findings=<count> p3_findings=<count> ship_ready=<yes|no|yes-with-caveats>
 ```
 
 ## Status protocol
