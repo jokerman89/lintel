@@ -307,7 +307,7 @@ token-heavy phase — but it presents the **task count + uncalibrated estimate**
 dollar/duration figure. The estimate is `UNCALIBRATED` until CAPTURE has recorded actuals for this
 size (`lib/scale-estimator.sh` `scale_calibrated_prior`).
 
-If `--auto`: auto-decide YES at recommended option (per gstack AUTO_DECIDE opt-in). Operator can interrupt anytime.
+If `--auto`: auto-decide the recommended option on reversible gates, but still STOP at one-way doors (BUILD cost gate over budget, production mutations, force-push). Operator can interrupt anytime. (Reinvented from the inherited blanket-YES — ADR-0011 C1.)
 
 ### Step 6 — Pause-points between phases (operator can interrupt)
 

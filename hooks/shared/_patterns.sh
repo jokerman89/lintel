@@ -27,7 +27,7 @@ _secret_pats() {
   cat <<'P'
 github-token	gh[opur]_[A-Za-z0-9]{36}
 github-pat	github_pat_[A-Za-z0-9_]{22,}
-openai-key	sk-(proj-)?[A-Za-z0-9_-]{20,}
+openai-key	sk-(proj-[A-Za-z0-9_-]{20,}|[A-Za-z0-9]{32,})
 anthropic-key	sk-ant-[A-Za-z0-9_-]{24,}
 slack-token	xox[abposr]-[A-Za-z0-9-]{10,}
 aws-access-key	(AKIA|ASIA)[0-9A-Z]{16}
