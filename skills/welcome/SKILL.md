@@ -170,4 +170,4 @@ source "$LINTEL_REPO_ROOT/lib/cycle-footer.sh"   # fallback: "$(git rev-parse --
 render_cycle_footer                               # auto: thin when no cycle, full/--compact when in one
 ```
 
-See [ADR-0003](../../docs/adr/0003-cycle-position-footer.md).
+See [ADR-0003](../../.claude/decisions/0003-cycle-position-footer.md).

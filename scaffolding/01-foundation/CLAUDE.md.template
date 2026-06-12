@@ -27,9 +27,10 @@ Clear ownership domains:
 > files explicitly.
 
 1. Read this file + `CORE-PRINCIPLES.md`.
-2. Review recent `tasks/lessons.md` — accumulated lessons. **Read before acting.**
-3. Skim `tasks/memory.md` (durable state) + `tasks/personas.md` (operator calibration).
-4. List `docs/adr/` — read any decision record relevant to the task.
+2. Read `.claude/memory/MEMORY.md` — the memory index (Claude Code auto-loads it natively).
+3. Review recent `.claude/memory/lessons.md` — accumulated lessons. **Read before acting.**
+4. Skim `.claude/memory/working-state.md` (durable state) + `.claude/memory/personas.md` (operator calibration).
+5. List `.claude/decisions/` — read any decision record relevant to the task.
 
 ---
 
@@ -38,7 +39,7 @@ Clear ownership domains:
 When a request matches a skill, **invoke it** (Lintel skills are auto-surfaced). A nudge, not a map —
 run `/li:catalog` to discover the full set.
 
-- Multi-step work / a real task → `/li:cycle` (9-step SENSE→CAPTURE; writes `.lintel/state/00-state.md`)
+- Multi-step work / a real task → `/li:cycle` (9-step SENSE→CAPTURE; writes `.claude/runtime/state/00-state.md`)
 - Bug → `/li:investigate`  ·  Tests → `/li:qa`  ·  Deep context → `/li:context-warm`
 - Plan review → `/li:plan-eng-review`  ·  Brainstorm → `/li:office-hours`
 - Record a decision → `/li:adr-new`  ·  Save / resume → `/li:context-save` · `/li:resume`
@@ -48,17 +49,22 @@ run `/li:catalog` to discover the full set.
 
 ## Where state lives (the memory map)
 
-The snowball — read on demand, **write after corrections/decisions** so it compounds:
+The snowball — read on demand, **write after corrections/decisions** so it compounds. One circle of
+control (v5): everything Lintel generates for this repo lives under `.claude/` — knowledge committed,
+runtime gitignored. Operator identity stays in `~/.lintel/`.
 
 | Store | Holds |
 |---|---|
-| `tasks/lessons.md` | lessons from corrections (append after ANY correction) |
-| `tasks/memory.md` | durable cross-session state |
-| `tasks/personas.md` | operator calibration |
-| `docs/adr/NNNN-*.md` | decision records (one per non-trivial decision) |
-| `.lintel/state/` | per-repo cycle + module state (written by cycle/module skills) |
+| `.claude/memory/MEMORY.md` | the index (≤200 lines, auto-loads on Claude Code; keep current) |
+| `.claude/memory/lessons.md` | lessons from corrections (append after ANY correction) |
+| `.claude/memory/working-state.md` | durable cross-session working state |
+| `.claude/memory/personas.md` | operator calibration |
+| `.claude/decisions/NNNN-*.md` | decision records (one per non-trivial decision) |
+| `.claude/plans/` | todo.md + plan documents (per initiative) |
+| `.claude/runtime/state/` | per-repo cycle + module state (gitignored; written by cycle/module skills) |
+| `.claude/runtime/{sessions,jobs,audit}/` | context-saves · job data · repo event log (gitignored) |
 | `~/.lintel/profile.yaml` | active pack · mode · role |
-| `~/.lintel/jobs/_active.md` | open jobs (`/li:resume` reads it) |
+| `~/.lintel/jobs/_active.md` | cross-repo jobs registry (data lives in each repo; `/li:resume` reads it) |
 
 The `session-digest` hook injects the top rows at session-start; this table is the full map.
 
@@ -93,7 +99,7 @@ The `session-digest` hook injects the top rows at session-start; this table is t
 
 ### 3. Self-Improvement Loop
 
-- After ANY correction: update `tasks/lessons.md` with the pattern
+- After ANY correction: update `.claude/memory/lessons.md` with the pattern
 - Write rules for yourself that prevent the same mistake
 - Iterate ruthlessly on these lessons until the mistake rate drops
 - Review lessons at session start
@@ -124,12 +130,12 @@ The `session-digest` hook injects the top rows at session-start; this table is t
 
 ## Task Management
 
-1. **Plan First:** Write the plan to `tasks/todo.md` with checkable items
+1. **Plan First:** Write the plan to `.claude/plans/todo.md` with checkable items
 2. **Verify Plan:** Pause-report before implementation starts (for complex tasks)
 3. **Track Progress:** Mark items complete as you go
 4. **Explain Changes:** High-level summary at each pause-report
-5. **Document Results:** Add a review section to `tasks/todo.md` at task end
-6. **Capture Lessons:** Update `tasks/lessons.md` after corrections
+5. **Document Results:** Add a review section to `.claude/plans/todo.md` at task end
+6. **Capture Lessons:** Update `.claude/memory/lessons.md` after corrections
 
 ---
 
@@ -163,7 +169,7 @@ The `session-digest` hook injects the top rows at session-start; this table is t
 - Pull request against `{{main-branch}}` with description
 - Local verification before push ({{e.g. tests green, build OK}})
 - Conventional Commits, atomic, one logical change per commit
-- Write a decision record (ADR) for any non-trivial decision: `docs/adr/NNNN-short-title.md`
+- Write a decision record (ADR) for any non-trivial decision: `.claude/decisions/NNNN-short-title.md`
 
 ---
 
@@ -285,7 +291,7 @@ If during implementation you discover that the INSTRUCTION or spec does not matc
 
 ## Lessons learned
 
-See `tasks/lessons.md` for accumulated lessons from corrections and pivots.
+See `.claude/memory/lessons.md` for accumulated lessons from corrections and pivots.
 
 Review at session start. Add after ANY correction.
 

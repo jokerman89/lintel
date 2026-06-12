@@ -19,7 +19,7 @@ Lintel is a company-neutral, pack-driven session harness — markdown scaffoldin
 ## Session start ritual
 
 1. Read [AGENT-INSTRUCTIONS.md](AGENT-INSTRUCTIONS.md) (canonical, applies to all CLIs)
-2. Review `scaffolding/01-foundation/tasks/lessons.md` for accumulated lessons
+2. Review `scaffolding/01-foundation/.claude/memory/lessons.md` for accumulated lessons
 3. Check `docs/design/lintel-v3-plan.md` for current phase
 
 ## Gemini-specific notes

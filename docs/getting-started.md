@@ -97,9 +97,9 @@ cd ~/your-other-repo
 li-scaffold init --mode internal-tool --pack _default
 ```
 
-That drops a `CLAUDE.md`, `CORE-PRINCIPLES.md`, `tasks/` (lessons/memory/personas/todo), `docs/adr/`,
-and baseline subagents into the repo — a disciplined AI workspace in about thirty seconds. It never
-clobbers existing files.
+That drops a `CLAUDE.md`, `CORE-PRINCIPLES.md`, `.claude/memory/` (lessons/working-state/personas),
+`.claude/plans/todo.md`, `.claude/decisions/`, and baseline subagents into the repo — a disciplined AI
+workspace in about thirty seconds. It never clobbers existing files.
 
 ## 6. Health check
 

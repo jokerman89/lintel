@@ -2,7 +2,7 @@
 name: tq
 layer: foundation
 workflow_root: true
-description: Phase 4 v4.5 — testing-qa module. Three granularities (full / loop / single). Sub-skills dispatch to existing test agents. 5 checkpoints, 6-dim scoring rubric, 3 warn-only hooks, profile-driven preferences. Final engineering-domain module of v4.x.
+description: Phase 4 v4.5 — testing-qa module. Three granularities (full / loop / single). Capabilities dispatch to existing test agents (ADR-0009 dispatch table). 5 checkpoints, 6-dim scoring rubric, 3 warn-only hooks, profile-driven preferences. Final engineering-domain module of v4.x.
 color: green
 tools: Read, Write, Edit, Bash, Grep, Glob
 voice: internal
@@ -53,7 +53,7 @@ Produces quality-grade testing artifacts when work needs coverage / perf / contr
 |---|---|---|
 | `/li:tq full` | new service / major release prep | `coverage-spec.md` + `perf-budget.md` + `contract-test-suite.md` + `regression-suite.md` + `chaos-plan.md` + `flaky-quarantine.md` + `test-pyramid.md` |
 | `/li:tq loop` | mid-cycle refinement | revised coverage + perf + contracts + diff vs prior |
-| `/li:tq single --action <name>` | targeted operation | one of: coverage-audit / perf-budget-spec / contract-test-design / regression-suite / chaos-plan / flaky-quarantine / test-pyramid-review |
+| `/li:tq <capability>` · `/li:tq single --action <capability>` | targeted operation (see Sub-capability dispatch) | one artifact per the dispatch table below |
 
 ## When to use
 
@@ -71,39 +71,48 @@ Produces quality-grade testing artifacts when work needs coverage / perf / contr
 - Pure dev-loop test runs (use test framework directly)
 - One-time coverage report (use coverage tool directly)
 
-## Sub-skill catalog
+## Sub-capability dispatch
 
-Per L-001: sub-skills are workflow + dispatch contracts.
+Per ADR-0009 the seven capabilities live here as dispatch rows — there are no per-capability
+skill files. Invoke one directly as `/li:tq <capability>` (long form: `/li:tq single --action
+<capability>`). Per L-001 each capability is a workflow + dispatch contract: content comes from
+agents at invocation (spawned via `/li:brief-forge subagent_spawn`); each emits
+`.claude/runtime/state/tq/<capability>-<ts>.md` and appends the module audit line (Step 6).
 
-| Sub-skill | Dispatches to | Output |
-|---|---|---|
-| `tq-coverage-audit` | TestRunner + Architect | critical-path coverage + branch coverage + mutation testing report |
-| `tq-perf-budget-spec` | LatencyAnalyzer + PerfBudgetEnforcer (NEW) | per-journey perf budget + regression detection thresholds |
-| `tq-contract-test-design` | APIDesigner + ContractTestArchitect (NEW) | consumer-driven contract tests + schema-versioning tests |
-| `tq-regression-suite` | RegressionDetective + TestRunner | golden-path tests + recent-bug-fix tests curated |
-| `tq-chaos-plan` | SecurityAuditor + SystemArchitect | failure injection scenarios + dependency-chaos + recovery validation |
-| `tq-flaky-quarantine` | TestRunner + RegressionDetective | flaky test detection + quarantine + remediation plan |
-| `tq-test-pyramid-review` | Architect + TestRunner | unit/integration/e2e ratio audit + test-distribution health |
+| Capability | Dispatches to (agents) | Produces | Raise-help / notes |
+|---|---|---|---|
+| `coverage-audit` | TestRunner + Architect | per-component line/branch/mutation coverage + gap analysis + backfill priority | RAISE_HELP when any critical path below `critical_path` threshold (default 100%) (BLOCKED); prefs: `target` (default 80), `critical_path` (default 100); per-language tools below; reads TA boundary-review <30 days old; pairs with `tq-coverage-drop-warn` hook |
+| `perf-budget-spec` | LatencyAnalyzer + PerfBudgetEnforcer | per-journey p50/p95/p99 budgets + regression alert thresholds + enforcement mode | pref: `p95` (default 200ms); budgets must be tighter than SLO to allow burndown; regression detection: % drift, sample-window size, alarm fan-out; enforcement: CI gate (block PR) \| warn-only \| off; BLOCKED without inferable baseline; reads DH sli-slo-spec <30 days + `perf-baseline.md`; pairs with `tq-perf-regression-warn` hook |
+| `contract-test-design` | APIDesigner + ContractTestArchitect | contract surface + consumer-driven tests + version compatibility matrix | RAISE_HELP when any contract breaks an active consumer (BLOCKED); pref: `framework` (pact \| consumer-driven-internal \| none, default pact); pairs with `tq-contract-break-warn` hook |
+| `regression-suite` | RegressionDetective + TestRunner | fix-to-test mapping + golden-path suite + execution health | scans fix commits 90 days back (top 50); per fix: caught-by-existing \| needs-new-test \| impossible-to-test; ≥1 happy-path + 1 edge-case test per golden path; 1-3 uncovered fixes = DONE_WITH_CONCERNS; BLOCKED on golden-path failures |
+| `chaos-plan` | SecurityAuditor + SystemArchitect | failure-injection scenarios + dependency-chaos matrix + recovery criteria | exits early with a DONE_WITH_CONCERNS stub when `chaos_active=false` (pref: `active`); per dependency: kill / latency-spike / partial-failure; per scenario: RTO + RPO + auto-vs-manual recovery; game-day cadence + abort conditions; BLOCKED without SC threat model or DH on-call playbook (<30 days old) |
+| `flaky-quarantine` | TestRunner + RegressionDetective | flake list + per-test remediation + quarantine durations | pref: `threshold` (default 3 — flake = inconsistent across ≥3 runs on same code); root cause: timing-race \| external-dep \| order-dependent \| env-specific \| unknown; remediation: deflake \| rewrite \| delete \| accept-flake; quarantine cap 14 days; >5 quarantined = DONE_WITH_CONCERNS (systemic); BLOCKED without test history/CI logs |
+| `test-pyramid-review` | TestRunner + Architect | per-kind test enumeration + distribution verdict + rebalancing recommendations | classifies: unit \| integration \| e2e \| contract \| perf; per kind: count, total/average execution time, flake rate, CI time; no prefs, no prior-context read |
 
-L-002 result: 5 of 7 sub-skills dispatch to existing agents (TestRunner, RegressionDetective, LatencyAnalyzer, APIDesigner, SecurityAuditor, SystemArchitect, Architect). Only 2 new agents (PerfBudgetEnforcer, ContractTestArchitect) for genuinely new capability.
+L-002 result: 5 of 7 capabilities dispatch to existing agents (TestRunner, RegressionDetective, LatencyAnalyzer, APIDesigner, SecurityAuditor, SystemArchitect, Architect). Only 2 new agents (PerfBudgetEnforcer, ContractTestArchitect) for genuinely new capability.
+
+### coverage-audit — per-language tools
+
+go → `go test -coverprofile` · python → `pytest --cov` · node → `jest --coverage` ·
+rust → `cargo tarpaulin` · other → `lcov` / language-specific
 
 ## Workflow
 
 ### Step 1 — Parse invocation
 
 ```bash
-granularity="${1:?usage: /li:tq {full|loop|single --action <name>}}"
+granularity="${1:?usage: /li:tq {full|loop|<capability>|single --action <capability>}}"
+capabilities="coverage-audit|perf-budget-spec|contract-test-design|regression-suite|chaos-plan|flaky-quarantine|test-pyramid-review"
 case "$granularity" in
   full|loop) action="" ;;
   single)
     [ "$2" = "--action" ] || { echo "ERROR: --action required for single"; exit 1; }
-    action="$3"
-    case "$action" in
-      coverage-audit|perf-budget-spec|contract-test-design|regression-suite|chaos-plan|flaky-quarantine|test-pyramid-review) ;;
-      *) echo "ERROR: unknown action '$action'"; exit 1 ;;
-    esac
-    ;;
+    action="$3" ;;
+  *) action="$granularity"; granularity="single" ;;   # ADR-0009 shorthand: /li:tq <capability>
 esac
+if [ "$granularity" = "single" ]; then
+  echo "$action" | grep -qE "^(${capabilities})$" || { echo "ERROR: unknown capability '$action'"; exit 1; }
+fi
 ```
 
 ### Step 2 — Read pack + profile preferences
@@ -131,7 +140,7 @@ flaky_threshold="${flaky_threshold:-3}"
 #### `full` granularity
 
 ```bash
-mkdir -p .lintel/state/tq
+mkdir -p .claude/runtime/state/tq
 audit="$LINTEL_HOME/audit/tq-decisions.jsonl"
 mkdir -p "$(dirname "$audit")"
 
@@ -151,12 +160,12 @@ fi
 #### `loop` granularity
 
 ```bash
-if [ ! -f ".lintel/state/tq/00-state.md" ]; then
+if [ ! -f ".claude/runtime/state/tq/00-state.md" ]; then
   echo "ERROR: no prior TQ state — use /li:tq full first"
   exit 1
 fi
 
-prior_iteration=$(grep -E '^iteration:' .lintel/state/tq/00-state.md | head -1 | awk '{print $2}')
+prior_iteration=$(grep -E '^iteration:' .claude/runtime/state/tq/00-state.md | head -1 | awk '{print $2}')
 new_iteration=$((prior_iteration + 1))
 
 run_checkpoint coverage_targets_met
@@ -167,15 +176,12 @@ run_checkpoint contract_tests_complete
 #### `single` granularity
 
 ```bash
-case "$action" in
-  coverage-audit)        /li:tq-coverage-audit --pref target="$coverage_target" --pref critical_path="$critical_path_coverage" ;;
-  perf-budget-spec)      /li:tq-perf-budget-spec --pref p95="$perf_budget_p95" ;;
-  contract-test-design)  /li:tq-contract-test-design --pref framework="$contract_test_framework" ;;
-  regression-suite)      /li:tq-regression-suite ;;
-  chaos-plan)            /li:tq-chaos-plan --pref active="$chaos_active" ;;
-  flaky-quarantine)      /li:tq-flaky-quarantine --pref threshold="$flaky_threshold" ;;
-  test-pyramid-review)   /li:tq-test-pyramid-review ;;
-esac
+# ADR-0009: no sub-skill files — dispatch straight off the Sub-capability dispatch table.
+# Spawn the capability's agents via /li:brief-forge subagent_spawn, pass the prefs listed
+# in its row (coverage-audit ← target + critical_path; perf-budget-spec ← p95;
+# contract-test-design ← framework; chaos-plan ← active; flaky-quarantine ← threshold),
+# emit .claude/runtime/state/tq/${action}-<ts>.md, append the audit line (Step 6).
+dispatch_capability "$action"   # no loop, no checkpoints
 ```
 
 ### Step 4 — Checkpoint failure handling (recovery + raise-help)
@@ -237,17 +243,7 @@ printf '{"ts":"%s","kind":"tq_module_complete","granularity":"%s","score":%d,"ch
 - **DONE** — granularity completed, score ≥ 80, all critical paths at coverage
 - **DONE_WITH_CONCERNS** — completed but 1-2 dimensions below 80 with operator accept
 - **BLOCKED** — checkpoint failed, raise-help triggered
-- **NEEDS_CONTEXT** — `--action` missing for single, OR no prior state for loop
-
-## Pause-points
-
-- Per checkpoint failure: AskUserQuestion with three paths
-- Pre-ship if critical-path coverage below threshold: explicit accept-risk required
-- Pre-ship if active-consumer contract break: explicit break-and-notify or refine
-
-## Hop-in support
-
-YES. `/li:tq loop` resumes from prior state. `/li:tq single --action <name>` enters at the specific sub-skill.
+- **NEEDS_CONTEXT** — unknown capability for single, OR no prior state for loop
 
 ## Integration
 
@@ -259,14 +255,14 @@ YES. `/li:tq loop` resumes from prior state. `/li:tq single --action <name>` ent
 - Prior modules' output: TA api-design + boundary-review (for contract tests), DA query-pattern-audit (for hot-path coverage), SC threat-model (for chaos scenarios), DH SLO spec (for perf budget alignment)
 
 **Writes:**
-- `.lintel/state/tq/coverage-spec.md`
-- `.lintel/state/tq/perf-budget.md`
-- `.lintel/state/tq/contract-test-suite.md`
-- `.lintel/state/tq/regression-suite.md`
-- `.lintel/state/tq/chaos-plan.md`
-- `.lintel/state/tq/flaky-quarantine.md`
-- `.lintel/state/tq/test-pyramid.md`
-- `~/.lintel/audit/tq-decisions.jsonl`
+- `.claude/runtime/state/tq/coverage-spec.md`
+- `.claude/runtime/state/tq/perf-budget.md`
+- `.claude/runtime/state/tq/contract-test-suite.md`
+- `.claude/runtime/state/tq/regression-suite.md`
+- `.claude/runtime/state/tq/chaos-plan.md`
+- `.claude/runtime/state/tq/flaky-quarantine.md`
+- `.claude/runtime/state/tq/test-pyramid.md`
+- `.claude/runtime/audit/tq-decisions.jsonl`
 - Brief Forge envelopes through the standard gate
 
 **Triggered by:**
@@ -288,9 +284,5 @@ YES. `/li:tq loop` resumes from prior state. `/li:tq single --action <name>` ent
 - **Chaos for chaos sake** — every scenario validates a specific resilience claim
 - **Quarantining flaky without remediation plan** — quarantine is temporary; remediation tracks the work
 - **Inverted test pyramid (more e2e than unit)** — slow + flaky; surface the imbalance
-- **Inventing new agents when existing cover** — 5 of 7 sub-skills reuse
+- **Inventing new agents when existing cover** — 5 of 7 capabilities reuse
 - **Hardcoding coverage_target / perf_budget** — read profile
-
-## Voice tier behavior
-
-`voice: internal`. TQ produces operator-facing quality artifacts. Customer-facing voice picks up at the SHIP phase when the active pack adds voice alignment via Brief Forge (an external pack like lintel-caip-pack supplies this; none by default).

@@ -120,21 +120,10 @@ Surface:
 - "Activate with: `/li:pack-switch $name`"
 - "List all packs: `/li:pack-list`"
 
-## Status protocol
-
-- **DONE** — pack created and validates
-- **DONE_WITH_CONCERNS** — pack created but validation warned
-- **BLOCKED** — name collision, invalid parent, or write-permission error
-- **NEEDS_CONTEXT** — operator didn't specify scope and we're outside a repo
-
 ## Pause-points
 
 - Step 1 if scope ambiguous: ask `repo` or `home`
 - After Step 6 if validation fails: surface, ask to retry or abandon
-
-## Hop-in support
-
-None — pack-create is single-shot.
 
 ## Integration
 

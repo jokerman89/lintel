@@ -8,9 +8,9 @@ The load-bearing layer. Every Lintel-scaffolded repo gets this. Every harness, e
 - **`EVOLUTION.md`** — process for changing scaffolding. Three change types: per-repo adaptation (free), template change (logged), core-principle change (requires explicit decision).
 - **`EVOLUTION-LOG.md`** — changelog for scaffolding evolution. Most recent first.
 - **`CLAUDE.md.template`** — Boris-style per-repo CLAUDE.md template. `scaffold-repo.sh` drops this into a target repo's root and operator fills the `<!-- PROJECT:START -->` blocks.
-- **`tasks/`** — `lessons.md` (corrections compound), `memory.md` (long-running state), `personas.md` (operator calibration), `todo.md` (ephemeral per-task).
-- **`docs/adr/`** — ADR README + numbered template.
-- **`docs/personas/`** — `EXAMPLE.md` showing the persona format.
+- **`.claude/memory/`** — `lessons.md` (corrections compound), `working-state.md` (long-running state), `personas.md` (operator calibration), `personas-example.md` (reference persona format).
+- **`.claude/plans/`** — `todo.md` (ephemeral per-task).
+- **`.claude/decisions/`** — decision-record (ADR) README + numbered template.
 - **`.claude/agents/`** — 4 baseline subagents (ReadOnly, CodeReviewer, TestRunner, SanityChecker).
 - **`.claude/SUBAGENT-GUIDE.md`** — how to add new subagents.
 

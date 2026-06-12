@@ -4,7 +4,7 @@ tier: warn-only
 event: PreToolUse (Edit|Write on ADR-claimed files)
 fires_on: edit to a file path listed in any ADR's "decisions" block
 override: pass --ignore-arch-drift flag (operator decision, logged)
-audit: ~/.lintel/audit/hooks.jsonl
+audit: .claude/runtime/audit/hooks.jsonl
 ---
 
 # ta-arch-drift-warn
@@ -13,7 +13,7 @@ Surfaces when an Edit/Write hits a file path claimed by an ADR's `decisions:` bl
 
 ## What it does
 
-- Scans `.lintel/decisions/*.md` (and `docs/decisions/`, `docs/adr/`) for ADRs with `decisions:` frontmatter listing file paths
+- Scans `.lintel/decisions/*.md` (and `docs/decisions/`, `.claude/decisions/`) for ADRs with `decisions:` frontmatter listing file paths
 - Compares the path being edited against the ADR-claimed set
 - If match: WARN with ADR id + decision summary
 

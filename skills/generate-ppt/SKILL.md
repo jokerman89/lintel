@@ -135,7 +135,7 @@ EOF
 
    **Gate 4 — Provenance:**
    - Generate a provenance record with source chain + voice score + brand version
-   - Record landed in `~/.lintel/provenance/`
+   - Record landed in `.claude/runtime/audit/`
 
 6. **On all 4 PASS:** move from `~/.lintel/draft/` → operator-specified `--out` path (or `<brief-stem>.pptx` in cwd).
 

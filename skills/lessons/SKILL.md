@@ -1,7 +1,7 @@
 ---
 name: lessons
 layer: foundation
-description: Mid-session review of accumulated lessons from tasks/lessons.md — surfaces relevant ones for current task.
+description: Mid-session review of accumulated lessons from .claude/memory/lessons.md — surfaces relevant ones for current task.
 color: cyan
 tools: Read, Grep, Glob
 voice: internal
@@ -9,10 +9,6 @@ cli_support: [claude-code, codex]
 ---
 
 You are the lessons skill.
-
-## What this skill does
-
-Reads `tasks/lessons.md` (current repo) and surfaces relevant lessons given the current task context. Reduces "we already learned this" mistakes.
 
 ## When to use
 
@@ -27,7 +23,7 @@ Reads `tasks/lessons.md` (current repo) and surfaces relevant lessons given the 
 
 ## Workflow
 
-1. **Read tasks/lessons.md.** Parse into lessons (each header = one lesson).
+1. **Read .claude/memory/lessons.md.** Parse into lessons (each header = one lesson).
 
 2. **Identify current task context.** From last operator message, current open files, recent git log.
 
@@ -73,6 +69,6 @@ LESSONS: review for current task
 
 ## Session-harness role
 
-`tasks/lessons.md` is durable knowledge that compounds over time. This skill is the surfacing mechanism — without it, lessons accumulate but rarely get applied at the right moment.
+`.claude/memory/lessons.md` is durable knowledge that compounds over time. This skill is the surfacing mechanism — without it, lessons accumulate but rarely get applied at the right moment.
 
 Pair with `/lessons-promote` (global) for cross-repo learning.

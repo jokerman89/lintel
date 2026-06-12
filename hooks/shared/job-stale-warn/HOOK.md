@@ -4,7 +4,7 @@ tier: surface-only
 event: SessionStart (first /li:cycle, /li:resume, /li:sense, OR /li:status of session)
 fires_on: jobs untouched > N hours (default 24)
 override: ~/.lintel/.jobs-stale-warn-disabled marker
-audit: ~/.lintel/audit/jobs.jsonl
+audit: .claude/runtime/audit/jobs.jsonl
 budget: <100ms for typical operator-vault of <20 jobs
 ---
 
@@ -16,7 +16,7 @@ Per v3.8 Feature 1: closes the "lost thread mid-flow" failure mode.
 
 ## What it does
 
-1. Reads `~/.lintel/jobs/_active.md`.
+1. Reads the repo-local `.claude/runtime/jobs/_active.md` (`~/.lintel/jobs/_active.md` is the cross-repo registry — one line per open job across all repos, pointing at the owning repo).
 2. For each active job, checks `last_touched` field vs current time.
 3. Surfaces a 1-line warning per stale job: `⚠ Job <id> open, untouched <N>h. /li:jobs continue <id> · abort · branch`.
 4. Audit-logs `{"kind":"job_stale_warn", "job_id":..., "age_hours":...}`.

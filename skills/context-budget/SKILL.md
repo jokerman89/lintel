@@ -44,7 +44,7 @@ With `--watch`, runs the context-bloat soft-warning check instead: reads session
 ### Step 1 — Read budget log
 
 ```bash
-log_file=".lintel/state/context-budget.md"
+log_file=".claude/runtime/state/context-budget.md"
 if [ -f "$log_file" ]; then
   # Parse events: each context_warm / context_cool / etc has tokens_added or tokens_removed
 fi
@@ -178,21 +178,9 @@ Watch-mode failure modes:
 - **Hard-threshold crossed:** report RED but stay read-only — operator decides; auto-compact is dishonest (Claude can't actually compact mid-session).
 - **CI / non-interactive:** print state, exit non-zero on RED to enable CI gating.
 
-## Status protocol
-
-- DONE — report surfaced
-
-## Pause-points
-
-None.
-
-## Hop-in support
-
-YES — pure information query.
-
 ## Integration
 
-Reads `.lintel/state/context-budget.md`. No writes beyond optional event log. Watch mode reads `~/.lintel/config.yaml` (watcher thresholds) + session telemetry under `~/.lintel/sessions/<id>/`, read-only — no Layer 2 mutations, no audit log needed. (The former `/li:context-budgetwatch` delegator was removed 2026-06-10; the name resolves via `config/aliases.yaml`.)
+Reads `.claude/runtime/state/context-budget.md`. No writes beyond optional event log. Watch mode reads `~/.lintel/config.yaml` (watcher thresholds) + session telemetry under `~/.lintel/sessions/<id>/`, read-only — no Layer 2 mutations, no audit log needed. (The former `/li:context-budgetwatch` delegator was removed 2026-06-10; the name resolves via `config/aliases.yaml`.)
 
 See also: `/clean` (in-session lighter-weight clear) · `/context-save` (checkpoint + clean break) · `/context-restore` (resume from checkpoint).
 
@@ -200,7 +188,3 @@ See also: `/clean` (in-session lighter-weight clear) · `/context-save` (checkpo
 
 - **Reporting precise tokens** — these are estimates, not real measurements (unless integrated with CLI's exact API)
 - **Recommending cool aggressively** — keep loads if work benefits
-
-## Voice tier behavior
-
-`voice: internal`.

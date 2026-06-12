@@ -1,6 +1,6 @@
 {
   "name": "li",
   "description": "Lintel — company-neutral, pack-driven session harness for Gemini with 8-phase cycle + role-lifting",
-  "version": "4.9.0",
+  "version": "5.1.0",
   "contextFileName": "GEMINI.md"
 }

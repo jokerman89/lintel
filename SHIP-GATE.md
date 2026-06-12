@@ -28,7 +28,7 @@ All v3.5 directories populated as intended:
 - 2 orchestrator: li-cycle, li-resume
 - 4 composites: li-fix, li-research, li-plan-and-build, li-review-and-ship
 - 8 role-lifting: li-role-activate, li-role-deep-dive, li-role-frame, li-role-rotate, li-role-deactivate, li-roles-list, li-role-new, li-role-update
-- 10 context-warming: li-context-warm, li-context-warm-related/sessions/adrs/customer/from-url, li-context-dump, li-context-snapshot, li-context-budget, li-context-cool
+- 10 context-warming: li-context-warm, li-context-warm-related/sessions/adrs/customer/from-url, li-context-save, li-context-restore, li-context-budget, li-context-cool
 
 ---
 

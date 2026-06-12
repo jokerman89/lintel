@@ -2,7 +2,7 @@
 name: da
 layer: foundation
 workflow_root: true
-description: Phase 4 v4.2 — data-architecture module. Three granularities (full / loop / single). Sub-skills dispatch to existing data agents. 5 checkpoints, 6-dim scoring rubric, 3 warn-only hooks, profile-driven preferences.
+description: Phase 4 v4.2 — data-architecture module. Three granularities (full / loop / single). Capabilities dispatch to existing data agents (ADR-0009 dispatch table). 5 checkpoints, 6-dim scoring rubric, 3 warn-only hooks, profile-driven preferences.
 color: blue
 tools: Read, Write, Edit, Bash, Grep, Glob
 voice: internal
@@ -53,7 +53,7 @@ Produces schema-grade decisions and migration safety when work touches data mode
 |---|---|---|
 | `/li:da full` | new datastore / major migration | `data-model.md` + schema definitions + migration plan + retention policy + access patterns |
 | `/li:da loop` | iterative schema refinement | revised schema + diff against prior + backward-compat analysis |
-| `/li:da single --action <name>` | targeted operation (see sub-skill catalog) | one of: schema-design / migration-plan / retention-policy / query-pattern-audit / sharding-plan / data-contract-collision / analytics-readiness |
+| `/li:da <capability>` · `/li:da single --action <capability>` | targeted operation (see Sub-capability dispatch) | one artifact per the dispatch table below |
 
 ## When to use
 
@@ -66,40 +66,66 @@ Produces schema-grade decisions and migration safety when work touches data mode
 ## When NOT to use
 
 - Pure code refactor that doesn't touch persistence → `/li:cycle`
-- API design without schema impact → `/li:ta single --action api-design`
+- API design without schema impact → `/li:ta api-design`
 - Deployment of an unchanged schema → `/li:dh` (v4.4)
 
-## Sub-skill catalog
+## Sub-capability dispatch
 
-Per L-001: sub-skills are workflow + dispatch contracts. Content comes from agents at invocation.
+Per ADR-0009 the seven capabilities live here as dispatch rows — there are no per-capability
+skill files. Invoke one directly as `/li:da <capability>` (long form: `/li:da single --action
+<capability>`). Per L-001 each capability is a workflow + dispatch contract: content comes from
+agents at invocation (spawned via `/li:brief-forge subagent_spawn`); each emits
+`.claude/runtime/state/da/<capability>-<ts>.md` and appends the module audit line (Step 6).
 
-| Sub-skill | Dispatches to | Output |
-|---|---|---|
-| `da-schema-design` | DatabaseDesigner + SchemaArchitect (NEW) | schema definitions with versioning + relationships |
-| `da-migration-plan` | MigrationPlanner (NEW) + Migrator | reversible migration with zero-downtime path |
-| `da-retention-policy` | DatabaseDesigner + Architect | per-data-class retention + archival + deletion policy |
-| `da-query-pattern-audit` | DatabaseDesigner + Explorer | read/write ratios, hot paths, missing indexes |
-| `da-sharding-plan` | SchemaArchitect (NEW) + DatabaseDesigner | partitioning strategy + rebalancing approach |
-| `da-data-contract-collision` | DatabaseDesigner + Architect | schema change impact across consumers |
-| `da-analytics-readiness` | DataPipelineDesigner + SchemaArchitect (NEW) | OLAP path, dimensional model, ETL boundaries |
+| Capability | Dispatches to (agents) | Produces | Raise-help / notes |
+|---|---|---|---|
+| `schema-design` | DatabaseDesigner (+ SchemaArchitect when `primary_store=mixed`) | versioned schema spec `schema-<ts>.{sql\|cql\|json}` with relationships + index strategy | prefs: `primary_store` (postgres\|mongodb\|cassandra\|clickhouse\|mixed), `schema_versioning` (timestamp-prefix); validation checklist below |
+| `migration-plan` | MigrationPlanner + Migrator | migration plan + per-step `up.sql`/`down.sql` | RAISE_HELP when affected rows > `review_threshold` (default 100000) — downtime-window confirmation (BLOCKED); prefs: `migration_window` (zero-downtime-required\|maintenance-window-ok\|tolerated), `review_threshold`; pairs with `da-migration-irreversible-warn` hook; acceptance below |
+| `retention-policy` | DatabaseDesigner + Architect | per-data-class retention + archival + deletion policy | RAISE_HELP when pack compliance hooks match gdpr/pii AND `retention_default` > 365 days (BLOCKED); classes: PII / customer-data / operational-telemetry / aggregate-only; lifecycle: active → warm → cold → archived → deleted; pairs with `da-retention-violation-warn` hook |
+| `query-pattern-audit` | Explorer + DatabaseDesigner | read/write ratios, hot paths (top-5 by frequency), index gaps, N+1 candidates | no prefs; output reused by sharding-plan + analytics-readiness; index gaps = DONE_WITH_CONCERNS |
+| `sharding-plan` | SchemaArchitect + DatabaseDesigner | partition strategy + rebalancing playbook + cross-shard query workarounds | partition key: cardinality + co-location; tenant-isolation → shard-per-tenant; per-store mechanics (postgres → declarative/Citus; mongodb → zone tags; cassandra → token-aware); reuses query-pattern-audit + TA scaling-plan <1 day old; no sharding below single-machine Postgres <1TB |
+| `data-contract-collision` | DatabaseDesigner + Architect (when breaking > 0) | schema change impact across consumers + migration plan | RAISE_HELP at ≥3 breaking consumers (BLOCKED); breaking = column drop / type narrowing / null→not-null; prefer expand-and-contract (add → backfill → switch reads → drop); grace window from pack `data_architecture.deprecation_window_days`; triggered by `da-schema-drift-warn` hook |
+| `analytics-readiness` | DataPipelineDesigner + SchemaArchitect | OLAP path (warehouse + CDC/batch ingestion + refresh cadence) + dimensional model | NEEDS_CONTEXT without business questions (arg, `$BUSINESS_QUESTIONS`, or `business-questions.md`); pref: `primary_store`; reuses query-pattern-audit <7 days old; dimensional rules below |
+
+### schema-design — validation checklist
+
+- [ ] Each entity has primary key + indexes per query pattern
+- [ ] Relationships declared with cardinality (1:1, 1:N, N:M)
+- [ ] Versioning strategy applied (timestamp-prefix or alembic-style)
+- [ ] Constraints + invariants documented
+- [ ] Index strategy justified per access pattern
+- [ ] If polyglot: consistency model documented per store boundary
+
+### migration-plan — acceptance
+
+- migration steps with order + estimated duration
+- rollback path per step
+- lock acquisition strategy if zero-downtime
+- data validation queries pre + post
+
+### analytics-readiness — dimensional-model rules
+
+- fact table grain documented per fact (one row per X)
+- slowly-changing-dimension strategy per dimension (Type 1 / Type 2 / Type 6)
+- conformed dimensions across facts (no duplicate "Customer" with different IDs)
 
 ## Workflow
 
 ### Step 1 — Parse invocation
 
 ```bash
-granularity="${1:?usage: /li:da {full|loop|single --action <name>}}"
+granularity="${1:?usage: /li:da {full|loop|<capability>|single --action <capability>}}"
+capabilities="schema-design|migration-plan|retention-policy|query-pattern-audit|sharding-plan|data-contract-collision|analytics-readiness"
 case "$granularity" in
   full|loop) action="" ;;
   single)
     [ "$2" = "--action" ] || { echo "ERROR: --action required for single"; exit 1; }
-    action="$3"
-    case "$action" in
-      schema-design|migration-plan|retention-policy|query-pattern-audit|sharding-plan|data-contract-collision|analytics-readiness) ;;
-      *) echo "ERROR: unknown action '$action'"; exit 1 ;;
-    esac
-    ;;
+    action="$3" ;;
+  *) action="$granularity"; granularity="single" ;;   # ADR-0009 shorthand: /li:da <capability>
 esac
+if [ "$granularity" = "single" ]; then
+  echo "$action" | grep -qE "^(${capabilities})$" || { echo "ERROR: unknown capability '$action'"; exit 1; }
+fi
 ```
 
 ### Step 2 — Read pack + profile preferences
@@ -124,8 +150,8 @@ review_threshold="${review_threshold:-100000}"
 #### `full` granularity
 
 ```bash
-mkdir -p .lintel/state/da
-audit="$LINTEL_HOME/audit/da-decisions.jsonl"
+mkdir -p .claude/runtime/state/da
+audit=".claude/runtime/audit/da-decisions.jsonl"
 mkdir -p "$(dirname "$audit")"
 
 # Run checkpoint chain
@@ -142,18 +168,18 @@ if [ "$score" -lt 80 ]; then
   exit 1
 fi
 
-echo "DA full pass complete — score=$score, output .lintel/state/da/"
+echo "DA full pass complete — score=$score, output .claude/runtime/state/da/"
 ```
 
 #### `loop` granularity
 
 ```bash
-if [ ! -f ".lintel/state/da/00-state.md" ]; then
+if [ ! -f ".claude/runtime/state/da/00-state.md" ]; then
   echo "ERROR: no prior DA state — use /li:da full first"
   exit 1
 fi
 
-prior_iteration=$(grep -E '^iteration:' .lintel/state/da/00-state.md | head -1 | awk '{print $2}')
+prior_iteration=$(grep -E '^iteration:' .claude/runtime/state/da/00-state.md | head -1 | awk '{print $2}')
 new_iteration=$((prior_iteration + 1))
 
 # Re-run schema + migration + retention checkpoints
@@ -162,37 +188,20 @@ run_checkpoint migration_safe
 run_checkpoint retention_specified
 
 # Diff against prior iteration (schema backward-compat focus)
-echo "Schema diff vs iteration $prior_iteration:" > .lintel/state/da/iteration-${new_iteration}-diff.md
-diff .lintel/state/da/iteration-${prior_iteration}-schema.sql .lintel/state/da/iteration-${new_iteration}-schema.sql \
-  >> .lintel/state/da/iteration-${new_iteration}-diff.md || true
+echo "Schema diff vs iteration $prior_iteration:" > .claude/runtime/state/da/iteration-${new_iteration}-diff.md
+diff .claude/runtime/state/da/iteration-${prior_iteration}-schema.sql .claude/runtime/state/da/iteration-${new_iteration}-schema.sql \
+  >> .claude/runtime/state/da/iteration-${new_iteration}-diff.md || true
 ```
 
 #### `single` granularity
 
 ```bash
-case "$action" in
-  schema-design)
-    /li:da-schema-design --pref primary_store="$primary_store"
-    ;;
-  migration-plan)
-    /li:da-migration-plan --pref migration_window="$migration_window" --pref review_threshold="$review_threshold"
-    ;;
-  retention-policy)
-    /li:da-retention-policy --pref retention_default="$retention_default"
-    ;;
-  query-pattern-audit)
-    /li:da-query-pattern-audit
-    ;;
-  sharding-plan)
-    /li:da-sharding-plan
-    ;;
-  data-contract-collision)
-    /li:da-data-contract-collision
-    ;;
-  analytics-readiness)
-    /li:da-analytics-readiness
-    ;;
-esac
+# ADR-0009: no sub-skill files — dispatch straight off the Sub-capability dispatch table.
+# Spawn the capability's agents via /li:brief-forge subagent_spawn, pass the prefs listed
+# in its row (schema-design ← primary_store; migration-plan ← migration_window +
+# review_threshold; retention-policy ← retention_default), emit
+# .claude/runtime/state/da/${action}-<ts>.md, append the audit line (Step 6).
+dispatch_capability "$action"   # no loop, no checkpoints
 ```
 
 ### Step 4 — Checkpoint failure handling (recovery + raise-help)
@@ -246,7 +255,7 @@ Full-pass exit: every dimension ≥ 80 OR explicit operator override.
 ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 printf '{"ts":"%s","kind":"da_module_complete","granularity":"%s","score":%d,"checkpoints_passed":%d,"primary_store":"%s","operator":"%s"}\n' \
   "$ts" "$granularity" "$score" "$passed_count" "$primary_store" "$(whoami 2>/dev/null || echo unknown)" \
-  >> "$LINTEL_HOME/audit/da-decisions.jsonl"
+  >> ".claude/runtime/audit/da-decisions.jsonl"
 ```
 
 ## Status protocol
@@ -254,17 +263,7 @@ printf '{"ts":"%s","kind":"da_module_complete","granularity":"%s","score":%d,"ch
 - **DONE** — granularity completed, score ≥ 80 (full) or target dimension improved (loop) or action complete (single)
 - **DONE_WITH_CONCERNS** — completed but score 60-79 OR raise-help triggered without operator resolution
 - **BLOCKED** — checkpoint failed, operator chose Raise-help, awaiting decision
-- **NEEDS_CONTEXT** — `--action` missing for single, OR no prior state for loop
-
-## Pause-points
-
-- Per checkpoint failure: AskUserQuestion with three paths (Re-loop / Accept-with-concern / Raise-help)
-- Pre-ship if score < 80: surface dimension breakdown, ask to re-loop or accept
-- Migration against >`review_threshold` rows: explicit downtime-window confirmation
-
-## Hop-in support
-
-YES. `/li:da loop` resumes from prior state at `.lintel/state/da/00-state.md`. `/li:da single --action <name>` enters at the specific sub-skill without orchestration.
+- **NEEDS_CONTEXT** — unknown capability for single, OR no prior state for loop
 
 ## Integration
 
@@ -273,15 +272,15 @@ YES. `/li:da loop` resumes from prior state at `.lintel/state/da/00-state.md`. `
 - `lib/pack-resolver.sh` for pack policy
 - Existing data agents: DatabaseDesigner, DataPipelineDesigner, Migrator
 - New agents: SchemaArchitect, MigrationPlanner
-- Existing schema ADRs (`.lintel/decisions/`, `docs/decisions/`, `docs/adr/`)
+- Existing schema ADRs (`.claude/decisions/`, `docs/decisions/`)
 
 **Writes:**
-- `.lintel/state/da/data-model.md` (full)
-- `.lintel/state/da/iteration-N-schema.sql` (per iteration)
-- `.lintel/state/da/iteration-N-diff.md` (loop)
-- `.lintel/state/da/migration-plan.md`
-- `.lintel/state/da/retention-policy.md`
-- `~/.lintel/audit/da-decisions.jsonl`
+- `.claude/runtime/state/da/data-model.md` (full)
+- `.claude/runtime/state/da/iteration-N-schema.sql` (per iteration)
+- `.claude/runtime/state/da/iteration-N-diff.md` (loop)
+- `.claude/runtime/state/da/migration-plan.md`
+- `.claude/runtime/state/da/retention-policy.md`
+- `.claude/runtime/audit/da-decisions.jsonl`
 - Brief Forge envelopes through the standard gate
 
 **Triggered by:**
@@ -302,7 +301,3 @@ YES. `/li:da loop` resumes from prior state at `.lintel/state/da/00-state.md`. `
 - **Hardcoding primary_store** — read from profile preferences
 - **Silent score-below-threshold** — surface to operator with dimension breakdown
 - **Blocking on hook warnings** — DA hooks warn; blocking is operator's explicit decision
-
-## Voice tier behavior
-
-`voice: internal`. DA produces operator-facing data-model artifacts. Customer-facing voice picks up at the SHIP phase when the active pack adds voice alignment via Brief Forge (an external pack like lintel-caip-pack supplies this; none by default).

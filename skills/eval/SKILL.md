@@ -109,12 +109,8 @@ Written to: voice-calibration.md
 ## Compliance integration
 
 - LLM eval calls run against Claude Opus (or Codex if `--cli codex`). The active pack may route calls via a configured gateway.
-- Audit-logged each run: `~/.lintel/audit/eval-runs.jsonl`.
+- Audit-logged each run: `.claude/runtime/audit/eval-runs.jsonl`.
 - Calibration snapshot stamped with run-id; downstream consumers reference snapshots for stability.
-
-## Voice tier note
-
-`voice: internal`. Eval report is engineering-internal; the SUBJECT is the pack's voice tier.
 
 ## Failure modes
 

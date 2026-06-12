@@ -84,38 +84,53 @@ if [ -f "$JOBS_SKILL" ]; then
   done
 fi
 
-# Behavior smoke: create + update + archive
+# Behavior smoke: create + update + archive — against the v5 layout (ADR-0005):
+# job data is repo-scoped, so the sandbox simulates a MIGRATED repo (layout
+# marker present) and asserts data lands in <repo>/.claude/runtime/jobs/ with
+# the cross-repo registry at $LINTEL_HOME/jobs/_active.md.
 TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
 export LINTEL_HOME="$TMP/.lintel"
 mkdir -p "$LINTEL_HOME/audit"
+SBREPO="$TMP/repo"
+mkdir -p "$SBREPO/.claude"
+printf 'layout_version: 5\n' > "$SBREPO/.claude/lintel-layout.yaml"
+export LINTEL_REPO_ROOT="$SBREPO"
+JOBS_DIR="$SBREPO/.claude/runtime/jobs"
 
 (
   source "$HELPER"
   id=$(job_create cycle customer-engagement)
-  if [ -n "$id" ] && [ -d "$LINTEL_HOME/jobs/$id" ]; then
-    echo "  PASS: job_create produces job-id ($id) + directory"
+  if [ -n "$id" ] && [ -d "$JOBS_DIR/$id" ]; then
+    echo "  PASS: job_create produces job-id ($id) + directory in .claude/runtime/jobs/"
   else
-    echo "  FAIL: job_create did not yield directory"
+    echo "  FAIL: job_create did not yield directory under .claude/runtime/jobs/"
     exit 1
   fi
 
-  if [ -f "$LINTEL_HOME/jobs/$id/job.yaml" ]; then
+  if [ -f "$JOBS_DIR/$id/job.yaml" ]; then
     echo "  PASS: job.yaml created"
   else
     echo "  FAIL: job.yaml missing"
     exit 1
   fi
 
-  if [ -f "$LINTEL_HOME/jobs/_active.md" ]; then
-    echo "  PASS: _active.md regenerated"
+  if [ -f "$JOBS_DIR/_active.md" ]; then
+    echo "  PASS: per-repo _active.md regenerated"
   else
-    echo "  FAIL: _active.md not regenerated"
+    echo "  FAIL: per-repo _active.md not regenerated"
+    exit 1
+  fi
+
+  if [ -f "$LINTEL_HOME/jobs/_active.md" ] && grep -q "$id" "$LINTEL_HOME/jobs/_active.md"; then
+    echo "  PASS: cross-repo registry at ~/.lintel/jobs/_active.md lists the job"
+  else
+    echo "  FAIL: cross-repo registry missing or does not list the job"
     exit 1
   fi
 
   job_update "$id" "PLAN" "IN_PROGRESS"
-  if grep -q "current_step: PLAN" "$LINTEL_HOME/jobs/$id/job.yaml"; then
+  if grep -q "current_step: PLAN" "$JOBS_DIR/$id/job.yaml"; then
     echo "  PASS: job_update modifies current_step"
   else
     echo "  FAIL: job_update did not update current_step"
@@ -123,27 +138,27 @@ mkdir -p "$LINTEL_HOME/audit"
   fi
 
   job_archive "$id" "DONE"
-  if [ -d "$LINTEL_HOME/jobs/$id" ]; then
+  if [ -d "$JOBS_DIR/$id" ]; then
     echo "  FAIL: archive did not move job folder"
     exit 1
   fi
-  if find "$LINTEL_HOME/jobs/_archive" -name "job.yaml" -path "*$id*" 2>/dev/null | grep -q .; then
+  if find "$JOBS_DIR/_archive" -name "job.yaml" -path "*$id*" 2>/dev/null | grep -q .; then
     echo "  PASS: job_archive moves to _archive/"
   else
     echo "  FAIL: job not found in _archive after archive"
     exit 1
   fi
 
-  if [ -f "$LINTEL_HOME/audit/jobs.jsonl" ]; then
-    n=$(wc -l < "$LINTEL_HOME/audit/jobs.jsonl" | tr -d ' ')
+  if [ -f "$SBREPO/.claude/runtime/audit/jobs.jsonl" ]; then
+    n=$(wc -l < "$SBREPO/.claude/runtime/audit/jobs.jsonl" | tr -d ' ')
     if [ "$n" -ge 3 ]; then
-      echo "  PASS: jobs.jsonl audit log written ($n entries)"
+      echo "  PASS: jobs.jsonl audit log written repo-scoped ($n entries)"
     else
       echo "  FAIL: audit log under-populated ($n entries, expected ≥3)"
       exit 1
     fi
   else
-    echo "  FAIL: jobs.jsonl audit log not written"
+    echo "  FAIL: jobs.jsonl audit log not written to .claude/runtime/audit/"
     exit 1
   fi
 ) || FAILED=1

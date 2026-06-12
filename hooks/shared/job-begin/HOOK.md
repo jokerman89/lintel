@@ -4,7 +4,7 @@ tier: lifecycle
 event: PreToolUse (Skill /li:<name> where SKILL.md has workflow_root: true)
 fires_on: invocation of workflow_root skill
 override: pass --no-job flag (operator-internal sub-call without spawning job)
-audit: ~/.lintel/audit/jobs.jsonl
+audit: .claude/runtime/audit/jobs.jsonl
 ---
 
 # job-begin
@@ -17,9 +17,9 @@ Per v3.8 Feature 1: jobs are the single source of truth for curated flows in fli
 
 1. Reads the invoked skill's frontmatter for `workflow_root: true`.
 2. Sources `bin/_jobs.sh`.
-3. Calls `job_create <workflow> <mode>` — creates `~/.lintel/jobs/<job-id>/{job.yaml, outputs/, inputs/, 00-state.md}`.
-4. Regenerates `~/.lintel/jobs/_active.md`.
-5. Audit-logs `{"kind":"job_begin", "job_id":..., "workflow":..., "mode":...}` to `~/.lintel/audit/jobs.jsonl`.
+3. Calls `job_create <workflow> <mode>` — creates `.claude/runtime/jobs/<job-id>/{job.yaml, outputs/, inputs/, 00-state.md}`.
+4. Regenerates the repo-local `.claude/runtime/jobs/_active.md` + syncs the cross-repo registry `~/.lintel/jobs/_active.md` (one line per open job across all repos, pointing at the owning repo).
+5. Audit-logs `{"kind":"job_begin", "job_id":..., "workflow":..., "mode":...}` to `.claude/runtime/audit/jobs.jsonl`.
 
 ## Why surface-only
 

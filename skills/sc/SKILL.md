@@ -2,7 +2,7 @@
 name: sc
 layer: foundation
 workflow_root: true
-description: Phase 4 v4.3 — security-compliance module. Three granularities (full / loop / single). Sub-skills dispatch to existing security agents. 5 checkpoints, 6-dim scoring rubric, 3 warn-only hooks, profile-driven preferences.
+description: Phase 4 v4.3 — security-compliance module. Three granularities (full / loop / single). Capabilities dispatch to existing security agents (ADR-0009 dispatch table). 5 checkpoints, 6-dim scoring rubric, 3 warn-only hooks, profile-driven preferences.
 color: red
 tools: Read, Write, Edit, Bash, Grep, Glob
 voice: internal
@@ -53,7 +53,7 @@ Produces threat-grade artifacts and compliance evidence when work touches securi
 |---|---|---|
 | `/li:sc full` | new external surface / regulated feature | `threat-model.md` + `secret-management-plan.md` + `auth-flow.md` + `compliance-evidence.md` + `audit-path.md` + `incident-runbook.md` |
 | `/li:sc loop` | mid-cycle threat surface revision | revised threat model + diff against prior + new mitigations |
-| `/li:sc single --action <name>` | targeted operation (see sub-skill catalog) | one of: threat-model / secret-management / auth-flow / compliance-evidence / audit-path / dependency-security / incident-runbook |
+| `/li:sc <capability>` · `/li:sc single --action <capability>` | targeted operation (see Sub-capability dispatch) | one artifact per the dispatch table below |
 
 ## When to use
 
@@ -67,41 +67,53 @@ Produces threat-grade artifacts and compliance evidence when work touches securi
 
 - Internal-only refactor with no auth/data impact
 - Pure UI work without backend security surface — `/li:cycle`
-- Single dependency update — `Migrator` agent direct (unless it's a security-critical lib, then `sc-dependency-security`)
+- Single dependency update — `Migrator` agent direct (unless it's a security-critical lib, then `/li:sc dependency-security`)
 
-## Sub-skill catalog
+## Sub-capability dispatch
 
-Per L-001: sub-skills are workflow + dispatch contracts. Content comes from agents at invocation.
+Per ADR-0009 the seven capabilities live here as dispatch rows — there are no per-capability
+skill files. Invoke one directly as `/li:sc <capability>` (long form: `/li:sc single --action
+<capability>`). Per L-001 each capability is a workflow + dispatch contract: content comes from
+agents at invocation (spawned via `/li:brief-forge subagent_spawn`); each emits
+`.claude/runtime/state/sc/<capability>-<ts>.md` and appends the module audit line (Step 6).
 
-| Sub-skill | Dispatches to | Output |
-|---|---|---|
-| `sc-threat-model` | ThreatModelDrafter + SecurityAuditor | STRIDE / attack-tree threat enumeration with mitigations |
-| `sc-secret-management` | SecurityAuditor + SBOMAuditor | secret inventory + rotation policy + secret-scan integration |
-| `sc-auth-flow` | JWTSecurityReviewer + SecurityAuditor | auth design with security review verdict |
-| `sc-compliance-evidence` | ComplianceOfficer (NEW) + Architect | per-framework (SOC2/GDPR/HIPAA) evidence collection |
-| `sc-audit-path` | SecurityAuditor + Architect | audit log design with retention + integrity |
-| `sc-dependency-security` | DependencyAuditor + SBOMAuditor | SCA + license + vulnerability gates |
-| `sc-incident-runbook` | SecurityAuditor + ReleaseEngineer | response runbook for the new surface |
+| Capability | Dispatches to (agents) | Produces | Raise-help / notes |
+|---|---|---|---|
+| `threat-model` | ThreatModelDrafter + SecurityAuditor | STRIDE threat enumeration with mitigations | RAISE_HELP when any high-severity threat unmitigated (BLOCKED); one entry per (threat-category, attack-vector, target); severity high\|medium\|low; platform-covered threats documented, not enumerated; 1-2 medium unmitigated = DONE_WITH_CONCERNS with operator accept |
+| `secret-management` | SecurityAuditor + SBOMAuditor | secret inventory + rotation policy + dependency-shipped-secret scan | RAISE_HELP when any secret lacks a rotation cadence (BLOCKED); pref: `secret_management` (keyvault\|aws-secrets-manager\|hashicorp-vault\|local-encrypted); per secret: name, kind, scope, storage location, rotation_cadence_days; per dependency: clean\|suspect\|confirmed-default-credential |
+| `auth-flow` | JWTSecurityReviewer (when auth kind = jwt) or SecurityAuditor (otherwise), + SecurityAuditor cross-check | auth design + security review verdict (PASS \| PASS_WITH_CONCERNS \| FAIL) | routes on detected auth kind: jwt\|oauth2\|oidc\|saml\|api-key\|mtls; BLOCKED on FAIL (must re-loop); constraints below |
+| `compliance-evidence` | ComplianceOfficer (once per framework) + Architect | per-framework + aggregated evidence with per-control verdict (covered \| partial \| gap) + evidence pointer | RAISE_HELP when any control verdict = gap (BLOCKED); pref: `frameworks` (default soc2,gdpr); distinguish technical vs procedural control evidence; reads TA `system-arch.md` if present |
+| `audit-path` | SecurityAuditor + Architect | audit log design: event schema + integrity + pipeline + retention | pref: `retention` (default 2555 days / 7 years); per event: timestamp (UTC, monotonic), actor, action, target, outcome, context-id; sink append-only/WORM + tamper-evident (hash chain or signed); durable transport; audit-log content stays factual + neutral regardless of pack voice |
+| `dependency-security` | DependencyAuditor (per detected ecosystem) + SBOMAuditor | SCA report + SBOM (SPDX or CycloneDX) | RED = high-severity exploitable CVE OR license-incompatible (BLOCKED — remediate or explicit override); YELLOW = medium CVE OR abandoned maintainer; auto-detects ecosystems npm/go/cargo/python/jvm/dotnet; runs anytime (no checkpoint ordering) |
+| `incident-runbook` | SecurityAuditor + ReleaseEngineer | per-threat-class response runbook: detection signals, containment, eradication, recovery, post-mortem template | BLOCKED without a threat model (run `/li:sc threat-model` first); collects the prior SC artifacts <7 days old; distinguish on-call action (minutes) vs operator action (hours); hotfix paths: feature-flag toggle, circuit-break, traffic-cutover; communication protocol incl. status-page |
 
-L-002 win: 6 of 7 sub-skills dispatch to existing security agents. Only 1 new agent (ComplianceOfficer) for genuinely new capability (cross-framework evidence orchestration).
+L-002 win: 6 of 7 capabilities dispatch to existing security agents. Only 1 new agent (ComplianceOfficer) for genuinely new capability (cross-framework evidence orchestration).
+
+### auth-flow — design constraints
+
+- sequence diagram per flow (login / refresh / revoke / step-up MFA)
+- token lifetimes documented + justified
+- refresh strategy + revocation path
+- MFA posture per role
+- per-step security check (rate limit, replay protection, session fixation)
 
 ## Workflow
 
 ### Step 1 — Parse invocation
 
 ```bash
-granularity="${1:?usage: /li:sc {full|loop|single --action <name>}}"
+granularity="${1:?usage: /li:sc {full|loop|<capability>|single --action <capability>}}"
+capabilities="threat-model|secret-management|auth-flow|compliance-evidence|audit-path|dependency-security|incident-runbook"
 case "$granularity" in
   full|loop) action="" ;;
   single)
     [ "$2" = "--action" ] || { echo "ERROR: --action required for single"; exit 1; }
-    action="$3"
-    case "$action" in
-      threat-model|secret-management|auth-flow|compliance-evidence|audit-path|dependency-security|incident-runbook) ;;
-      *) echo "ERROR: unknown action '$action'"; exit 1 ;;
-    esac
-    ;;
+    action="$3" ;;
+  *) action="$granularity"; granularity="single" ;;   # ADR-0009 shorthand: /li:sc <capability>
 esac
+if [ "$granularity" = "single" ]; then
+  echo "$action" | grep -qE "^(${capabilities})$" || { echo "ERROR: unknown capability '$action'"; exit 1; }
+fi
 ```
 
 ### Step 2 — Read pack + profile preferences
@@ -130,7 +142,7 @@ audit_retention="${audit_retention:-2555}"   # default 7 years
 #### `full` granularity
 
 ```bash
-mkdir -p .lintel/state/sc
+mkdir -p .claude/runtime/state/sc
 audit="$LINTEL_HOME/audit/sc-decisions.jsonl"
 mkdir -p "$(dirname "$audit")"
 
@@ -146,41 +158,38 @@ if [ "$score" -lt 80 ]; then
   exit 1
 fi
 
-echo "SC full pass complete — score=$score, output .lintel/state/sc/"
+echo "SC full pass complete — score=$score, output .claude/runtime/state/sc/"
 ```
 
 #### `loop` granularity
 
 ```bash
-if [ ! -f ".lintel/state/sc/00-state.md" ]; then
+if [ ! -f ".claude/runtime/state/sc/00-state.md" ]; then
   echo "ERROR: no prior SC state — use /li:sc full first"
   exit 1
 fi
 
-prior_iteration=$(grep -E '^iteration:' .lintel/state/sc/00-state.md | head -1 | awk '{print $2}')
+prior_iteration=$(grep -E '^iteration:' .claude/runtime/state/sc/00-state.md | head -1 | awk '{print $2}')
 new_iteration=$((prior_iteration + 1))
 
 run_checkpoint threat_model_complete
 run_checkpoint compliance_evidence_present
 
 # Diff against prior iteration (threat surface focus)
-echo "Threat diff vs iteration $prior_iteration:" > .lintel/state/sc/iteration-${new_iteration}-diff.md
-diff .lintel/state/sc/iteration-${prior_iteration}-threats.md .lintel/state/sc/iteration-${new_iteration}-threats.md \
-  >> .lintel/state/sc/iteration-${new_iteration}-diff.md || true
+echo "Threat diff vs iteration $prior_iteration:" > .claude/runtime/state/sc/iteration-${new_iteration}-diff.md
+diff .claude/runtime/state/sc/iteration-${prior_iteration}-threats.md .claude/runtime/state/sc/iteration-${new_iteration}-threats.md \
+  >> .claude/runtime/state/sc/iteration-${new_iteration}-diff.md || true
 ```
 
 #### `single` granularity
 
 ```bash
-case "$action" in
-  threat-model)            /li:sc-threat-model ;;
-  secret-management)       /li:sc-secret-management --pref secret_management="$secret_management" ;;
-  auth-flow)               /li:sc-auth-flow ;;
-  compliance-evidence)     /li:sc-compliance-evidence --pref frameworks="$compliance_frameworks" ;;
-  audit-path)              /li:sc-audit-path --pref retention="$audit_retention" ;;
-  dependency-security)     /li:sc-dependency-security ;;
-  incident-runbook)        /li:sc-incident-runbook ;;
-esac
+# ADR-0009: no sub-skill files — dispatch straight off the Sub-capability dispatch table.
+# Spawn the capability's agents via /li:brief-forge subagent_spawn, pass the prefs listed
+# in its row (secret-management ← secret_management; compliance-evidence ← frameworks;
+# audit-path ← retention), emit .claude/runtime/state/sc/${action}-<ts>.md, append the
+# audit line (Step 6).
+dispatch_capability "$action"   # no loop, no checkpoints
 ```
 
 ### Step 4 — Checkpoint failure handling (recovery + raise-help)
@@ -242,17 +251,7 @@ printf '{"ts":"%s","kind":"sc_module_complete","granularity":"%s","score":%d,"ch
 - **DONE** — granularity completed, score ≥ 80, no high-severity unmitigated threats
 - **DONE_WITH_CONCERNS** — completed but 1-2 dimensions below 80 with operator accept-with-concern
 - **BLOCKED** — checkpoint failed, raise-help triggered, awaiting operator
-- **NEEDS_CONTEXT** — `--action` missing for single, OR no prior state for loop
-
-## Pause-points
-
-- Per checkpoint failure: AskUserQuestion with three paths
-- Pre-ship if score < 80: surface dimension breakdown
-- Pre-ship if any high-severity threat unmitigated: explicit accept-risk required
-
-## Hop-in support
-
-YES. `/li:sc loop` resumes from prior state. `/li:sc single --action <name>` enters at the specific sub-skill.
+- **NEEDS_CONTEXT** — unknown capability for single, OR no prior state for loop
 
 ## Integration
 
@@ -261,17 +260,17 @@ YES. `/li:sc loop` resumes from prior state. `/li:sc single --action <name>` ent
 - `lib/pack-resolver.sh` for pack policy (compliance.hooks, audit_paths)
 - Existing security agents: SecurityAuditor, ThreatModelDrafter, DependencyAuditor, JWTSecurityReviewer, SBOMAuditor, PrivacyBoundaryAudit
 - New agents: ComplianceOfficer
-- Existing security-flavored ADRs (`.lintel/decisions/`, `docs/decisions/`, `docs/adr/`)
+- Existing security-flavored ADRs (`.lintel/decisions/`, `docs/decisions/`, `.claude/decisions/`)
 
 **Writes:**
-- `.lintel/state/sc/threat-model.md` (full)
-- `.lintel/state/sc/secret-inventory.md`
-- `.lintel/state/sc/auth-flow-review.md`
-- `.lintel/state/sc/compliance-evidence-<framework>.md`
-- `.lintel/state/sc/audit-path.md`
-- `.lintel/state/sc/incident-runbook.md`
-- `.lintel/state/sc/iteration-N-threats.md`
-- `~/.lintel/audit/sc-decisions.jsonl`
+- `.claude/runtime/state/sc/threat-model.md` (full)
+- `.claude/runtime/state/sc/secret-inventory.md`
+- `.claude/runtime/state/sc/auth-flow-review.md`
+- `.claude/runtime/state/sc/compliance-evidence-<framework>.md`
+- `.claude/runtime/state/sc/audit-path.md`
+- `.claude/runtime/state/sc/incident-runbook.md`
+- `.claude/runtime/state/sc/iteration-N-threats.md`
+- `.claude/runtime/audit/sc-decisions.jsonl`
 - Brief Forge envelopes through the standard gate
 
 **Triggered by:**
@@ -298,7 +297,3 @@ Plus EXISTING hooks (sourced from earlier work):
 - **Hardcoding secret_management when profile says different** — read preferences
 - **Silent high-severity threat acceptance** — explicit operator override required, audited
 - **Blocking on hook warnings** — SC hooks warn; blocking is operator's explicit decision via pack policy
-
-## Voice tier behavior
-
-`voice: internal`. SC produces operator-facing security artifacts. Customer-facing voice picks up at the SHIP phase when the active pack adds voice alignment via Brief Forge (an external pack like lintel-caip-pack supplies this; none by default) — specifically NOT in audit log content (audit content stays factual + neutral regardless of pack).

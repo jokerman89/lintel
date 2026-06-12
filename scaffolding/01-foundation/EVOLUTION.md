@@ -11,8 +11,8 @@ This document describes how changes are made.
 No process required. The repo owner may:
 - Adapt their own `CLAUDE.md` with project-specific sections
 - Add new subagents in `<repo>/.claude/agents/`
-- Write lessons in `<repo>/tasks/lessons.md`
-- Add optional files in `<repo>/tasks/`
+- Write lessons in `<repo>/.claude/memory/lessons.md`
+- Add optional files in `<repo>/.claude/memory/`
 
 This must NOT touch the scaffolding template.
 
@@ -57,7 +57,7 @@ Heuristic: if another project would get no value from it → per-repo.
 Sometimes a subagent needs to know something temporary ("we are currently migrating X, avoid Y until Z is done"). Two options:
 
 - **Short heads-up (a few days):** add a section to the specific subagent's `.md` file with a date stamp. Remove it when no longer relevant.
-- **Lesson (permanent):** add to `tasks/lessons.md` with date and rule.
+- **Lesson (permanent):** add to `.claude/memory/lessons.md` with date and rule.
 
 Difference: lessons capture what-should-have-been-done; heads-ups capture what-is-happening-now.
 

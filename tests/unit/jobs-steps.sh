@@ -28,9 +28,15 @@ echo "========================"
 [ -f "$HELPER" ] || { fail "bin/_jobs.sh MISSING"; exit 1; }
 
 # Isolated LINTEL_HOME so we never touch the operator's real jobs dir.
+# This test pins the explicit-env seam (LINTEL_JOBS_DIR always wins — the
+# documented test escape from v5 repo-scope resolution) and points
+# LINTEL_REPO_ROOT at the markerless sandbox so audit writes stay sandboxed
+# too; scope ROUTING itself is covered by jobs-system-present.sh.
 TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
 export LINTEL_HOME="$TMP/.lintel"
+export LINTEL_JOBS_DIR="$LINTEL_HOME/jobs"
+export LINTEL_REPO_ROOT="$TMP"
 mkdir -p "$LINTEL_HOME/audit"
 
 # shellcheck disable=SC1090

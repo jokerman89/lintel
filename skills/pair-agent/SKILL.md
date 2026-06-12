@@ -78,12 +78,8 @@ Recommendation: /qa-only before /ship.
 ## Compliance integration
 
 - Each main-agent Edit goes through normal Layer 2 sanity-scan.
-- Subagent invocations logged to `~/.lintel/audit/pair-agent.jsonl`.
+- Subagent invocations logged to `.claude/runtime/audit/pair-agent.jsonl`.
 - Subagent inherits scope restriction from `--scope`; cannot read outside that set.
-
-## Voice tier note
-
-`voice: internal`. Pair collaboration is engineering-internal.
 
 ## Failure modes
 

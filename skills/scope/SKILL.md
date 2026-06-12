@@ -56,7 +56,7 @@ source "$LINTEL_REPO_ROOT/lib/scale-estimator.sh"
 prompt_text="<operator's last message>"
 
 # The orientator route SENSE recorded (intent + workflow). SCOPE may override it.
-intent=$(grep -E '^intent_detected:' .lintel/state/00-state.md 2>/dev/null | tail -1 | awk '{print $2}')
+intent=$(grep -E '^intent_detected:' .claude/runtime/state/00-state.md 2>/dev/null | tail -1 | awk '{print $2}')
 intent="${intent:-unclear}"
 
 escalation=$(resolve_pack_field navigation.escalation_threshold); escalation="${escalation:-medium}"
@@ -112,10 +112,10 @@ SCOPE has **override authority** over a confidently-wrong orientator route (desi
 
 ### Step 5 — Emit scope.md
 
-Write the resolved scope so DEFINE inherits the wedge and PLAN reads `depth_schema`. Canonical home: the job dir (`~/.lintel/jobs/<id>/scope.md`) when a job is active, else `.lintel/state/scope.md`.
+Write the resolved scope so DEFINE inherits the wedge and PLAN reads `depth_schema`. Canonical home: the job dir (`.claude/runtime/jobs/<id>/scope.md`) when a job is active, else `.claude/runtime/state/scope.md`.
 
 ```bash
-scope_out="${LINTEL_JOB_DIR:-${LINTEL_STATE_DIR:-.lintel/state}}/scope.md"
+scope_out="${LINTEL_JOB_DIR:-${LINTEL_STATE_DIR:-.claude/runtime/state}}/scope.md"
 mkdir -p "$(dirname "$scope_out")"
 cat > "$scope_out" <<EOF
 # Scope: $prompt_text
@@ -142,21 +142,12 @@ EOF
 
 ### Step 6 — Write 00-state.md entry + surface report
 
+Mechanical since v5.0 (ADR-0008) — one command, not a YAML obligation:
+
 ```bash
-mkdir -p .lintel/state
-cat >> .lintel/state/00-state.md <<EOF
----
-phase: SCOPE
-ts: $(date -u +%Y-%m-%dT%H:%M:%SZ)
-operator: $(whoami)
-size: $scale_size
-ambiguous: $scale_amb
-depth_schema: $depth_schema
-intent: ${override_route:+build}${override_route:-$intent}
-route_override: ${override_route:-none}
-scope_path: $scope_out
----
-EOF
+_sl="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}/lib/state.sh"
+[ -f "$_sl" ] || _sl="$HOME/.lintel/lib/state.sh"; source "$_sl"   # installed by install.sh in consumer repos
+state_append SCOPE DONE next=DEFINE size=$scale_size ambiguous=$scale_amb depth_schema=$depth_schema intent="${override_route:+build}${override_route:-$intent}" route_override="${override_route:-none}" scope_path="$scope_out"
 ```
 
 ## Output format
@@ -207,13 +198,13 @@ Skip-conditions (SCOPE is skipped when):
 
 **Reads:**
 - operator's last message (the request)
-- `.lintel/state/00-state.md` (SENSE's orientator route — `intent_detected`)
+- `.claude/runtime/state/00-state.md` (SENSE's orientator route — `intent_detected`)
 - `lib/scale-estimator.sh` (the size axis — Slice 1; SCOPE sources it, never edits it)
 - active pack's `navigation.escalation_threshold` (via `resolve_pack_field`)
 
 **Writes:**
-- `scope.md` (job dir if active, else `.lintel/state/scope.md`)
-- `.lintel/state/00-state.md` (SCOPE entry)
+- `scope.md` (job dir if active, else `.claude/runtime/state/scope.md`)
+- `.claude/runtime/state/00-state.md` (SCOPE entry)
 
 **Triggers (recommends, never auto-invokes):**
 - DEFINE next (inherits `chosen_reading` as the wedge)
@@ -247,7 +238,7 @@ cycle and the one logical next action — whether this phase ran standalone or i
 
 ```bash
 source "$LINTEL_REPO_ROOT/lib/cycle-footer.sh"   # fallback: "$(git rev-parse --show-toplevel)/lib/cycle-footer.sh"
-render_cycle_footer                               # reads .lintel/state/00-state.md; --compact for short replies
+render_cycle_footer                               # reads .claude/runtime/state/00-state.md; --compact for short replies
 ```
 
-Skipped phases render `⊘`; ASCII via `LINTEL_ASCII=1`. See [ADR-0003](../../docs/adr/0003-cycle-position-footer.md).
+Skipped phases render `⊘`; ASCII via `LINTEL_ASCII=1`. See [ADR-0003](../../.claude/decisions/0003-cycle-position-footer.md).

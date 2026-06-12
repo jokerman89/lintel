@@ -16,7 +16,7 @@ Every time control passes from one component to another in Lintel, Brief Forge:
 1. **Constructs an envelope** per `lib/envelope-schema.yaml` (HEAD + BODY + TAIL)
 2. **Runs evaluators** per active pack's `brief_forge_handoffs.<event>.evaluators` list
 3. **Scores completeness** (0-100) and writes to `tail.completeness_score`
-4. **Audits the envelope** to `~/.lintel/audit/envelopes-<date>.jsonl`
+4. **Audits the envelope** to `.claude/runtime/audit/envelopes-<date>.jsonl`
 5. **Surfaces escape hatches** the receiver can use if context is insufficient
 
 Five hand-off events trigger Brief Forge:
@@ -224,8 +224,8 @@ None — Brief Forge is invoked on hand-off events, not standalone.
 - Content file passed in (varies by content_type)
 
 **Writes:**
-- `~/.lintel/audit/envelopes-<date>.jsonl` (per-envelope audit)
-- `~/.lintel/audit/brief-forge.jsonl` (per-forge stats)
+- `.claude/runtime/audit/envelopes-<date>.jsonl` (per-envelope audit)
+- `.claude/runtime/audit/brief-forge.jsonl` (per-forge stats)
 - stdout (the envelope, for receiver consumption)
 
 **Triggered by:**

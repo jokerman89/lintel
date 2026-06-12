@@ -72,11 +72,7 @@ Remaining: 2
 
 - Sanity-scan on every Edit before applying (no secrets/customer-data in fix payload).
 - If auto-fix would touch a frozen-zone path (per project CLAUDE.md): block + escalate.
-- Audit-log every auto-fix to `~/.lintel/audit/qa-fixes.jsonl` (Layer 2 traceability).
-
-## Voice tier note
-
-`voice: internal`. QA reports are engineering-internal — no elevated voice tier.
+- Audit-log every auto-fix to `.claude/runtime/audit/qa-fixes.jsonl` (Layer 2 traceability).
 
 ## Failure modes
 

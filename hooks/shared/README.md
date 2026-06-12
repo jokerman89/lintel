@@ -1,6 +1,6 @@
 # Lintel Hooks
 
-30 hooks: 23 warn-only + 2 justified-block + 2 surface-only + 2 lifecycle + 1 context-inject.
+31 hooks: 24 warn-only + 2 justified-block + 2 surface-only + 2 lifecycle + 1 context-inject.
 
 ## Activation model (per A1 design decision)
 
@@ -102,7 +102,7 @@ Each subdirectory contains:
 
 ## Audit
 
-Every hook fire (warn or block) logs to `~/.lintel/audit/hooks.jsonl`. Append-only.
+Every hook fire (warn or block) logs to `.claude/runtime/audit/hooks.jsonl`. Append-only.
 
 ## See also
 

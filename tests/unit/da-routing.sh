@@ -37,24 +37,24 @@ for action in schema-design migration-plan retention-policy query-pattern-audit 
   fi
 done
 
-# ─── Scenario 3: Each sub-skill dispatches to documented agent ──────────
+# ─── Scenario 3: Dispatch table declares agent per capability (ADR-0009) ─
 echo ""
-echo "[3] Sub-skills declare agent dispatch (L-001 contract)"
-declare -A SUB_AGENT=(
-  ["da-schema-design"]="DatabaseDesigner"
-  ["da-migration-plan"]="MigrationPlanner"
-  ["da-retention-policy"]="DatabaseDesigner"
-  ["da-query-pattern-audit"]="Explorer"
-  ["da-sharding-plan"]="SchemaArchitect"
-  ["da-data-contract-collision"]="DatabaseDesigner"
-  ["da-analytics-readiness"]="DataPipelineDesigner"
+echo "[3] Dispatch rows declare agent dispatch (L-001 contract)"
+declare -A CAP_AGENT=(
+  ["schema-design"]="DatabaseDesigner"
+  ["migration-plan"]="MigrationPlanner"
+  ["retention-policy"]="DatabaseDesigner"
+  ["query-pattern-audit"]="Explorer"
+  ["sharding-plan"]="SchemaArchitect"
+  ["data-contract-collision"]="DatabaseDesigner"
+  ["analytics-readiness"]="DataPipelineDesigner"
 )
-for sub in "${!SUB_AGENT[@]}"; do
-  expected_agent="${SUB_AGENT[$sub]}"
-  if grep -q "$expected_agent" "$REPO_ROOT/skills/$sub/SKILL.md" 2>/dev/null; then
-    pass "$sub dispatches to $expected_agent"
+for cap in "${!CAP_AGENT[@]}"; do
+  expected_agent="${CAP_AGENT[$cap]}"
+  if grep -E "^\|[[:space:]]*\`${cap}\`[[:space:]]*\|" "$DA" | grep -q "$expected_agent"; then
+    pass "dispatch row $cap → $expected_agent"
   else
-    fail "$sub MISSING dispatch to $expected_agent"
+    fail "dispatch row $cap MISSING agent $expected_agent"
   fi
 done
 

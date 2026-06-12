@@ -4,12 +4,12 @@ tier: warn-only
 event: PreToolUse (Bash)
 fires_on: `gh pr merge`, `git merge` to main, similar merge ops
 override: pass explicit operator confirmation
-audit: ~/.lintel/audit/hooks.jsonl
+audit: .claude/runtime/audit/hooks.jsonl
 ---
 
 # no-merge-without-review
 
-Warns when a merge to main is about to happen without a recent `/review` or `/plan-eng-review` record. Reads `~/.lintel/audit/reviews.jsonl` (written by `bin/li-review-log`) for short-HEAD-commit-within-7-days `CLEARED` clearance.
+Warns when a merge to main is about to happen without a recent `/review` or `/plan-eng-review` record. Reads `.claude/runtime/audit/reviews.jsonl` (written by `bin/li-review-log`) for short-HEAD-commit-within-7-days `CLEARED` clearance.
 
 ## Detection
 

@@ -19,7 +19,7 @@ You are the `jobs` skill — lifecycle controller for in-flight Lintel curated f
 
 ## What this skill does
 
-Provides 5 subcommands to operate on `~/.lintel/jobs/`:
+Provides 5 subcommands to operate on `.claude/runtime/jobs/` (the repo-local job store):
 
 - `list` (default) — surface `_active.md` (regenerated from job.yaml on every state change)
 - `continue <id>` — resume the job at its `current_step` (delegates to `/li:resume` mechanic)
@@ -80,12 +80,12 @@ list_jobs
 ```
 
 **`continue <id>`:**
-1. Verify `~/.lintel/jobs/<id>/job.yaml` exists.
+1. Verify `.claude/runtime/jobs/<id>/job.yaml` exists.
 2. Determine the resume target. For a `tree`-schema plan, call
    `job_resume_point <id>` (deepest incomplete + startable WBS node-path, e.g.
    `1.1.a`); for flat/phased plans, read `current_step` from job.yaml. See
    `/li:resume` Step 2.5.
-3. Invoke `/li:resume --job <id>` (resume skill reads from job dir, not loose `.lintel/state/00-state.md`).
+3. Invoke `/li:resume --job <id>` (resume skill reads from job dir, not loose `.claude/runtime/state/00-state.md`).
 4. Update last_touched.
 
 **`replan <id>`:**
@@ -111,7 +111,7 @@ list_jobs
 
 ### Step 4 — Audit
 
-Every operation logs to `~/.lintel/audit/jobs.jsonl`:
+Every operation logs to `.claude/runtime/audit/jobs.jsonl`:
 
 ```json
 {"ts":"...","kind":"job_action","job_id":"...","action":"continue|replan|abort|branch"}
@@ -141,16 +141,18 @@ YES — solo-invocable. Designed to be called anytime.
 ## Integration
 
 **Reads:**
-- `~/.lintel/jobs/_active.md`
-- `~/.lintel/jobs/<id>/job.yaml`
-- `~/.lintel/jobs/<id>/00-state.md`
+- `.claude/runtime/jobs/_active.md` (repo-local active list)
+- `~/.lintel/jobs/_active.md` (cross-repo registry — one line per open job across all repos, pointing at the owning repo)
+- `.claude/runtime/jobs/<id>/job.yaml`
+- `.claude/runtime/jobs/<id>/00-state.md`
 - `~/.lintel/profile.yaml` (mode + stale threshold)
 
 **Writes:**
-- `~/.lintel/jobs/<id>/job.yaml` (last_touched updates)
-- `~/.lintel/jobs/_active.md` (regenerated)
-- `~/.lintel/jobs/_archive/<date>/<id>/` (on abort)
-- `~/.lintel/audit/jobs.jsonl`
+- `.claude/runtime/jobs/<id>/job.yaml` (last_touched updates)
+- `.claude/runtime/jobs/_active.md` (regenerated)
+- `~/.lintel/jobs/_active.md` (cross-repo registry line updated to point at the owning repo)
+- `.claude/runtime/jobs/_archive/<date>/<id>/` (on abort)
+- `.claude/runtime/audit/jobs.jsonl`
 
 **Calls into:**
 - `bin/_jobs.sh` helper (sourced) — incl. `job_resume_point` (node-path), `job_can_start` (blocked_until), `job_set_steps` / `job_step_status`
@@ -202,4 +204,4 @@ source "$LINTEL_REPO_ROOT/lib/cycle-footer.sh"   # fallback: "$(git rev-parse --
 render_cycle_footer                               # auto: thin when no cycle, full/--compact when in one
 ```
 
-See [ADR-0003](../../docs/adr/0003-cycle-position-footer.md).
+See [ADR-0003](../../.claude/decisions/0003-cycle-position-footer.md).

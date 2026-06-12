@@ -23,6 +23,23 @@ Types:
 
 ---
 
+## 2026-06-12 — v5 `.claude/` home for scaffolded state
+
+**Type:** TEMPLATE
+**What changed:** The per-repo state templates moved under `.claude/` (ADR-0005 in the Lintel repo):
+`tasks/{lessons,memory,personas}.md` → `.claude/memory/{lessons,working-state,personas}.md`,
+`tasks/todo.md` → `.claude/plans/todo.md`, `docs/adr/` → `.claude/decisions/`, and
+`docs/personas/EXAMPLE.md` → `.claude/memory/personas-example.md`. Runtime state (cycle state,
+context-saves, job data, repo event log) lives gitignored at `.claude/runtime/{state,sessions,jobs,audit}/`.
+`CLAUDE.md.template` carries the updated session-start ritual + memory map.
+**Why:** One circle of control — everything Lintel generates for a repo lives under `.claude/`,
+knowledge committed and runtime gitignored. Operator identity stays in `~/.lintel/`.
+**Impact on existing repos:** Already-scaffolded repos keep working — skills resolve legacy paths via
+`lib/paths.sh` fallbacks. Migrate a repo with `bin/li-migrate-claude-home`, which moves the files and
+stamps `.claude/lintel-layout.yaml` (`layout_version: 5`).
+
+---
+
 ## 2026-05-26 — Initial release
 
 **Type:** TEMPLATE

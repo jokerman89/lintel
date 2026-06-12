@@ -94,7 +94,7 @@ Default is per-phase rule above.
 
 ## Token-cost implication
 
-Dedicated subagent costs ~base-context-warmup overhead per spawn (~5-15k tokens).
+Dedicated subagent costs ~base-context warm-up overhead per spawn (~5-15k tokens).
 Inline phase costs only the work itself.
 
 Rule of thumb: if phase work < 5k tokens, inline wins on token-budget.

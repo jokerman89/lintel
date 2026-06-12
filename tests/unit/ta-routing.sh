@@ -38,24 +38,24 @@ for action in api-design dependency-graph complexity-audit boundary-review scali
   fi
 done
 
-# ─── Scenario 3: Each sub-skill documents its agent dispatch ────────────
+# ─── Scenario 3: Dispatch table declares agent per capability (ADR-0009) ─
 echo ""
-echo "[3] Sub-skills declare agent dispatch (L-001 contract)"
-declare -A SUB_AGENT=(
-  ["ta-api-design"]="APIDesigner"
-  ["ta-dependency-graph"]="Explorer"
-  ["ta-complexity-audit"]="Architect"
-  ["ta-boundary-review"]="BackendArchitect"
-  ["ta-scaling-plan"]="CapacityPlanner"
-  ["ta-contract-collision"]="APIDesigner"
-  ["ta-quality-attributes"]="SystemArchitect"
+echo "[3] Dispatch rows declare agent dispatch (L-001 contract)"
+declare -A CAP_AGENT=(
+  ["api-design"]="APIDesigner"
+  ["dependency-graph"]="Explorer"
+  ["complexity-audit"]="Architect"
+  ["boundary-review"]="BackendArchitect"
+  ["scaling-plan"]="CapacityPlanner"
+  ["contract-collision"]="APIDesigner"
+  ["quality-attributes"]="SystemArchitect"
 )
-for sub in "${!SUB_AGENT[@]}"; do
-  expected_agent="${SUB_AGENT[$sub]}"
-  if grep -q "$expected_agent" "$REPO_ROOT/skills/$sub/SKILL.md" 2>/dev/null; then
-    pass "$sub dispatches to $expected_agent"
+for cap in "${!CAP_AGENT[@]}"; do
+  expected_agent="${CAP_AGENT[$cap]}"
+  if grep -E "^\|[[:space:]]*\`${cap}\`[[:space:]]*\|" "$TA" | grep -q "$expected_agent"; then
+    pass "dispatch row $cap → $expected_agent"
   else
-    fail "$sub MISSING dispatch to $expected_agent"
+    fail "dispatch row $cap MISSING agent $expected_agent"
   fi
 done
 

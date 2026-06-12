@@ -99,26 +99,6 @@ Glob across days. Surface:
 
 The operator can trigger compaction via `/li:usage-log --compact`.
 
-## Voice tier behavior
-
-`voice: internal`. Telemetry is operator-internal observability. Never customer-bound, no voice-gate.
-
-## Status protocol
-
-- **DONE** — writer-append complete OR reader-report rendered
-- **DONE_WITH_CONCERNS** — append complete but file-rotation or compaction failed non-fatally
-- **BLOCKED** — `~/.lintel/audit/` write-permission missing
-- **NEEDS_CONTEXT** — reader mode without a `--report` / `--topn` / `--tokens-by-skill` flag
-
-## Pause-points
-
-- File-rotation conflict (concurrent invocations try to rotate in the same minute) — the atomic-mv pattern resolves this
-- Quarterly compaction takes > 30s — surface progress, allow operator interrupt
-
-## Hop-in support
-
-YES — reader mode is solo-invokable. Writer mode runs automatically via the wrapper-hook.
-
 ## Integration
 
 **Reads (writer mode):**
@@ -131,7 +111,7 @@ YES — reader mode is solo-invokable. Writer mode runs automatically via the wr
 
 **Reads (reader mode):**
 - `~/.lintel/audit/usage-*.jsonl` (glob)
-- `~/.lintel/audit/hooks.jsonl` (cross-reference for override-pattern correlation, if requested)
+- `.claude/runtime/audit/hooks.jsonl` (cross-reference for override-pattern correlation, if requested)
 
 **Consumed by:**
 - `/li:maintenance` (5.3 — token-cost simulation, rust detection)
@@ -144,7 +124,7 @@ YES — reader mode is solo-invokable. Writer mode runs automatically via the wr
 - **Per-skill append-bash in SKILL.md** — breaks DRY across 113 skills (Finding 2A). Wrapper-hook only.
 - **Single growing file (`usage.jsonl` flat)** — breaks the rotation policy. Multi-MB risk after months.
 - **Token-counting "exactly" via the OpenAI API** — out of scope. The heuristic IS the tokens_est field.
-- **Read-back for forensic purposes** — wrong skill. Use `~/.lintel/audit/hooks.jsonl` (audit-canonical).
+- **Read-back for forensic purposes** — wrong skill. Use `.claude/runtime/audit/hooks.jsonl` (audit-canonical).
 
 ## Failure recovery
 

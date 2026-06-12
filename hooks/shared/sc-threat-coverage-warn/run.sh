@@ -38,7 +38,9 @@ fi
 [ "$matches_surface" -eq 0 ] && exit 0
 
 # Find latest threat model
-latest_model=$(find .lintel/state/sc -name "threat-model-*.md" -type f 2>/dev/null | sort | tail -1)
+sc_state_dir=".claude/runtime/state/sc"
+[ -d "$sc_state_dir" ] || sc_state_dir=".lintel/state/sc" # legacy-fallback-ok
+latest_model=$(find "$sc_state_dir" -name "threat-model-*.md" -type f 2>/dev/null | sort | tail -1)
 
 threat_model_age_days=-1
 file_in_model=false
@@ -74,7 +76,7 @@ if $should_warn; then
 
   echo "WARN [Lintel hook sc-threat-coverage-warn]: editing $file_edited"
   if [ -z "$latest_model" ]; then
-    echo "WARN: no threat model found in .lintel/state/sc/"
+    echo "WARN: no threat model found in .claude/runtime/state/sc/"
   elif [ "$threat_model_age_days" -gt 90 ]; then
     echo "WARN: latest threat model is $threat_model_age_days days old (>90 day threshold)"
   else

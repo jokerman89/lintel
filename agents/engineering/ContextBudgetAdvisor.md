@@ -88,7 +88,7 @@ ACTIVATE perf-mode. Total budget (800k) > default ceiling (200k).
 
 Run:
   /perf-mode --budget 800000
-  /context-warmup --all
+  /context-warm --pattern all
   (then proceed with build work; transition phases as you progress)
 
 ## Risk flags

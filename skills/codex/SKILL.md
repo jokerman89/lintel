@@ -74,17 +74,13 @@ Tokens used: 31,400 / 50,000
 ## Compliance integration
 
 - Codex sees code. Per Layer 2: code is not customer-data, so no auth gate. But: if the target includes a fixture path containing customer-data patterns, BLOCK the Codex call and surface (Codex would receive that data).
-- Token spend logged to `~/.lintel/audit/codex-spend.jsonl`.
+- Token spend logged to `.claude/runtime/audit/codex-spend.jsonl`.
 - The active pack may route Codex calls via a configured gateway per `~/.lintel/config.yaml` (none by default).
-
-## Voice tier note
-
-`voice: internal`. Outside-voice review is engineering-internal. Codex's voice is its own — we do not rewrite it.
 
 ## Failure modes
 
 - **Codex CLI missing:** report + exit. No fallback to Claude self-review (that defeats the purpose).
-- **Codex returns malformed output:** capture raw stdout to `~/.lintel/audit/codex-raw-<ts>.txt`, report parse failure, exit.
+- **Codex returns malformed output:** capture raw stdout to `.claude/runtime/audit/codex-raw-<ts>.txt`, report parse failure, exit.
 - **Budget exceeded mid-call:** Codex's own truncation kicks in. Report partial findings + budget overflow.
 - **Codex output contains a finding referencing a file we never sent:** flag as hallucination, suppress from main report, log to debug appendix.
 

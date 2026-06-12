@@ -14,12 +14,15 @@ command -v audit_log >/dev/null 2>&1 || source "$(dirname "${BASH_SOURCE[0]}")/.
 
 # Detect merge-to-main patterns
 if echo "$CMD" | grep -qE '(gh\s+pr\s+merge|git\s+merge.*main|git\s+merge.*master)'; then
-  # The review log is written by bin/li-review-log via the unified audit helper to
-  # ~/.lintel/audit/reviews.jsonl (NOT the legacy ~/.lintel/review-log/entries.jsonl path,
-  # which nothing writes). And li-review-log resolves commits to the SHORT HEAD, so we
+  # The review log is written by bin/li-review-log via the unified audit helper to the
+  # repo's .claude/runtime/audit/reviews.jsonl (un-migrated repos still write the global
+  # file — see fallback below; NOT the old ~/.lintel/review-log/entries.jsonl path, which
+  # nothing writes). And li-review-log resolves commits to the SHORT HEAD, so we
   # match on the short commit (a prefix that substring-matches whether the record stored
   # the short or full sha). Both were silent mismatches that left this gate effectively dead.
-  REVIEW_LOG="$LINTEL_HOME/audit/reviews.jsonl"
+  repo_root=$(git rev-parse --show-toplevel 2>/dev/null || echo "")
+  REVIEW_LOG="$repo_root/.claude/runtime/audit/reviews.jsonl"
+  [ -f "$REVIEW_LOG" ] || REVIEW_LOG="$LINTEL_HOME/audit/reviews.jsonl" # legacy-fallback-ok
   recent_review=0
   if [ -f "$REVIEW_LOG" ]; then
     head_commit=$(git rev-parse --short HEAD 2>/dev/null || echo "")

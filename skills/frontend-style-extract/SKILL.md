@@ -175,7 +175,7 @@ done
 # Log to audit
 jq -nc --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" --arg name "$name" --arg artifacts "${artifacts[*]}" \
   '{ts:$ts, action:"pattern-extracted", name:$name, artifacts:$artifacts}' \
-  >> "$HOME/.lintel/audit/frontend-style-extract-runs.jsonl"
+  >> ".claude/runtime/audit/frontend-style-extract-runs.jsonl"
 ```
 
 ### Step 7 — Surface verdict
@@ -195,10 +195,6 @@ Next:
   Diff vs another:  diff <out_dir>/pattern.json <other-out>/pattern.json
 ```
 
-## Voice tier behavior
-
-`voice: internal`. Default. `--customer-share` triggers `/li:compliance-gate` if source-artifacts are customer-owned (re-use questions).
-
 ## Status protocol
 
 - **DONE** — all 4 required files emitted + schema valid
@@ -212,10 +208,6 @@ Next:
 - Customer-share + source is customer-site: ask if extraction is authorized re-use
 - Extraction-confidence low: surface "we inferred X from screenshot — verify before applying"
 
-## Hop-in support
-
-YES — solo-invocable.
-
 ## Integration
 
 **Reads:**
@@ -224,7 +216,7 @@ YES — solo-invocable.
 
 **Writes:**
 - `~/.lintel/brand/design-patterns/<name>/` (5 files)
-- Audit-log: `~/.lintel/audit/frontend-style-extract-runs.jsonl`
+- Audit-log: `.claude/runtime/audit/frontend-style-extract-runs.jsonl`
 
 **Calls into:**
 - `agents/frontend/FrontendArchitect.md` (synthesis-direction, reused from Fas A1)

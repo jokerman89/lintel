@@ -25,7 +25,7 @@ deeper nesting). Disable by setting `vault_sink_enabled: false` in the active pa
   (Vad gjordes / Beslut / Öppna trådar / Pekare). Full template in `skills/capture/SKILL.md`
   Step 7b.
 - **A missing vault never fails a session.** If the path does not exist at runtime, CAPTURE logs
-  one WARN line, writes `vault_sink_skipped` to `~/.lintel/audit/`, and moves on.
+  one WARN line, writes `vault_sink_skipped` to `.claude/runtime/audit/`, and moves on.
 - Successful writes are audit-logged as `vault_sink_written`.
 
 ## Hard rules for summary content
@@ -33,3 +33,6 @@ deeper nesting). Disable by setting `vault_sink_enabled: false` in the active pa
 No secrets or tokens. No customer or employer-internal data. No full file contents — repo-relative
 pointers instead of payloads. Swedish or English, matching the session's working language. If the
 session contains material that must not leave the repo, skip the export rather than sanitize it.
+
+Navigation patterns on top of the sink (schema, dashboard, hub wikilinks, index):
+see [obsidian-integration.md](obsidian-integration.md) (ADR-0007).

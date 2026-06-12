@@ -145,7 +145,7 @@ If unavailable: skip silently.
 
 ### Step 7 — Write artifacts
 
-**`review-report.md`** (`.lintel/state/review-report-<datetime>.md`):
+**`review-report.md`** (`.claude/runtime/state/review-report-<datetime>.md`):
 ```markdown
 # Review report: <wedge title>
 
@@ -187,25 +187,16 @@ If unavailable: skip silently.
 
 **`compliance-report.md`** (if the active pack defines compliance gates):
 - Per-gate breakdown for audit trail
-- Path: `.lintel/state/compliance-report-<datetime>.md`
+- Path: `.claude/runtime/state/compliance-report-<datetime>.md`
 
 ### Step 8 — 00-state.md append
 
-```yaml
-phase: REVIEW
-ts: <timestamp>
-review_report_path: <path>
-compliance_report_path: <path or n/a>
-stage_1_status: PASS | FAIL
-stage_2_status: PASS | FAIL  
-stage_3_status: PASS | FAIL | n/a
-p1_findings: <count>
-p2_findings: <count>
-p3_findings: <count>
-voice_gate_score: <% if applicable>
-ship_ready: yes | no | yes-with-caveats
-status: DONE | DONE_WITH_CONCERNS | BLOCKED
-next_recommended: SHIP | BUILD (loop-back) | DEFINE (scope gap)
+Mechanical since v5.0 (ADR-0008) — one command, not a YAML obligation. `next=` is SHIP, or BUILD on loop-back, or DEFINE on scope gap; per-stage detail lives in review-report.md:
+
+```bash
+_sl="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}/lib/state.sh"
+[ -f "$_sl" ] || _sl="$HOME/.lintel/lib/state.sh"; source "$_sl"   # installed by install.sh in consumer repos
+state_append REVIEW <DONE|DONE_WITH_CONCERNS|BLOCKED> next=<SHIP|BUILD|DEFINE> review_report_path=<path> p1_findings=<count> p2_findings=<count> p3_findings=<count> ship_ready=<yes|no|yes-with-caveats>
 ```
 
 ## Status protocol
@@ -241,13 +232,13 @@ Skip-conditions: intent=research-only, intent=docs-only.
 - CORE-PRINCIPLES.md
 - the active pack's compliance gates (`resolve_pack_field compliance.hooks`; none by default)
 - the active pack's voice corpus (`resolve_pack_field voice.corpus`; none by default — if voice gate)
-- `tasks/lessons.md` (via `/li:lessons-surface`, keyword-scoped, non-blocking)
+- `.claude/memory/lessons.md` (via `/li:lessons-surface`, keyword-scoped, non-blocking)
 
 **Writes:**
-- `.lintel/state/review-report-<datetime>.md`
-- `.lintel/state/compliance-report-<datetime>.md` (if the active pack defines compliance gates)
-- `.lintel/state/00-state.md` (REVIEW entry)
-- `~/.lintel/analytics/review-metrics.jsonl`
+- `.claude/runtime/state/review-report-<datetime>.md`
+- `.claude/runtime/state/compliance-report-<datetime>.md` (if the active pack defines compliance gates)
+- `.claude/runtime/state/00-state.md` (REVIEW entry)
+- `.claude/runtime/audit/review-metrics.jsonl`
 
 **Triggers:**
 - SHIP if PASS
@@ -315,7 +306,7 @@ cycle and the one logical next action — whether this phase ran standalone or i
 
 ```bash
 source "$LINTEL_REPO_ROOT/lib/cycle-footer.sh"   # fallback: "$(git rev-parse --show-toplevel)/lib/cycle-footer.sh"
-render_cycle_footer                               # reads .lintel/state/00-state.md; --compact for short replies
+render_cycle_footer                               # reads .claude/runtime/state/00-state.md; --compact for short replies
 ```
 
-Skipped phases render `⊘`; ASCII via `LINTEL_ASCII=1`. See [ADR-0003](../../docs/adr/0003-cycle-position-footer.md).
+Skipped phases render `⊘`; ASCII via `LINTEL_ASCII=1`. See [ADR-0003](../../.claude/decisions/0003-cycle-position-footer.md).

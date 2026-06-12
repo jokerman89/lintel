@@ -157,7 +157,7 @@ If A: continue to Step 8. If B/C: loop back. If D: status BLOCKED, no advance.
 
 Invoke `/li:analyze` with trigger `plan-step8` — it runs the DEFINE↔PLAN and authority legs
 (coverage, traceability, LOCKED-decision contradictions, discover-report ADR constraints) and
-persists `.lintel/state/analyze-report.md`. One implementation, shared with BUILD's final pass
+persists `.claude/runtime/state/analyze-report.md`. One implementation, shared with BUILD's final pass
 and standalone runs; do not re-implement the checks inline.
 
 If the report has findings: surface the gap-list, ask operator: defer to backlog / add to plan /
@@ -202,7 +202,7 @@ If A: write plan.md final + checkpoint, status DONE.
 
 Read the template, strip the comment header + the unused `depth_schema` sections (for plan.template.md), fill the placeholders, and write the result to the output path. The template files replace the previously-inline skeletons; if the scaffolding tree isn't present (e.g. a bare target repo before `bin/li-scaffold`), fall back to the structures documented below.
 
-**plan.md** (canonical, `docs/plans/<slug>/plan.md`) — from `plan.template.md`:
+**plan.md** (canonical, `.claude/plans/<slug>/plan.md`) — from `plan.template.md`:
 ```markdown
 # Plan: <wedge title>   (size: <XS|S|M|L|XL> · schema: <flat|phased|tree>)
 
@@ -285,20 +285,20 @@ The **subtask is the LEAF** at tree depth — the cold-executor unit. The 2-5 mi
 ### <next leaf>: ...
 ```
 
-**spec.md** (canonical, `docs/plans/<slug>/spec.md`) — from `spec.template.md`:
+**spec.md** (canonical, `.claude/plans/<slug>/spec.md`) — from `spec.template.md`:
 - Master engineering specification — born in PLAN (v3.8 Feature 2.2: trio born together)
 - Architecture overview from design doc
 - Data model, interfaces, contracts
 - Requirements traced to design
 - Status: APPROVED (CAPTURE re-affirms on cycle-end, no longer the birth-point)
 
-**prompt.md** (canonical, `docs/plans/<slug>/prompt.md`) — from `prompt.template.md` — **v3.8 Feature 2.2: born in PLAN, not CAPTURE.**
+**prompt.md** (canonical, `.claude/plans/<slug>/prompt.md`) — from `prompt.template.md` — **v3.8 Feature 2.2: born in PLAN, not CAPTURE.**
 
 It is a SELF-CONTAINED prompt: a fresh AI session reading only this prompt + the linked spec.md + plan.md can re-execute or extend the work without prior context. See `prompt.template.md` for the full skeleton (Context / Constraints / Acceptance criteria / Deliverables / How to re-execute / What you DON'T need to know).
 
 The trio (plan.md + spec.md + prompt.md) is the cold-executor handoff contract. Born together in PLAN — from the versioned templates above — so standalone planner-module invocations (`/li:plan <design.md>` without a surrounding cycle) produce a complete handoff. CAPTURE re-affirms the trio (verifies presence, updates with final-build evidence) but no longer generates prompt.md.
 
-**.planner-checkpoint.md** (`.lintel/state/`):
+**.planner-checkpoint.md** (`.claude/runtime/state/`):
 - State for `/li:resume`
 - Includes plan.md path, current task pointer, build-log placeholder
 
@@ -308,7 +308,7 @@ The trio (plan.md + spec.md + prompt.md) now exists on disk — this is the cold
 
 Invoke the existing mechanism — do **not** rebuild it:
 
-`/li:handoff-size-check` (a portable skill call; reads the trio it just wrote + `.lintel/state/warming-manifest.md`, applies the mode-aware cap from `/li:context-budget` mode_envelopes, default `customer-engagement: 500k soft / 750k hard`).
+`/li:handoff-size-check` (a portable skill call; reads the trio it just wrote + `.claude/runtime/state/warming-manifest.md`, applies the mode-aware cap from `/li:context-budget` mode_envelopes, default `customer-engagement: 500k soft / 750k hard`).
 
 - **SURFACE, don't block.** A yellow/red verdict warns ("this plan yields ~Nk handoff, near cap — split it?") and surfaces options (split the plan, cut a warming target, switch to a higher-cap mode). It does NOT halt PLAN — the operator decides.
 - **Off-switch:** `--skip-handoff-size-check` (or `SKIP_HANDOFF_SIZE_CHECK=1`) skips the gate entirely for operators who don't want it. Silent when skipped.
@@ -316,16 +316,12 @@ Invoke the existing mechanism — do **not** rebuild it:
 
 ### Step 12 — 00-state.md append
 
-```yaml
-phase: PLAN
-ts: <timestamp>
-plan_path: <path>
-spec_draft_path: <path>
-checkpoint_path: .lintel/state/.planner-checkpoint.md
-tasks_count: <N>
-cost_estimate_dollars: <X>
-status: DONE
-next_recommended: BUILD
+Mechanical since v5.0 (ADR-0008) — one command, not a YAML obligation:
+
+```bash
+_sl="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}/lib/state.sh"
+[ -f "$_sl" ] || _sl="$HOME/.lintel/lib/state.sh"; source "$_sl"   # installed by install.sh in consumer repos
+state_append PLAN DONE next=BUILD plan_path=<path> spec_draft_path=<path> tasks_count=<N> cost_estimate_dollars=<X>
 ```
 
 ## Status protocol
@@ -361,14 +357,14 @@ Skip-conditions:
 - CORE-PRINCIPLES.md
 - the active pack's compliance gates (`resolve_pack_field compliance.hooks`; none by default)
 - Recent relevant ADRs
-- `tasks/lessons.md` (via `/li:lessons-surface`, keyword-scoped, non-blocking)
+- `.claude/memory/lessons.md` (via `/li:lessons-surface`, keyword-scoped, non-blocking)
 
 **Writes:**
 - `plan.md` (canonical)
 - `spec.md` (draft, finalized in CAPTURE)
-- `.lintel/state/.planner-checkpoint.md`
-- `.lintel/state/00-state.md` (PLAN entry)
-- `~/.lintel/analytics/plan-metrics.jsonl`
+- `.claude/runtime/state/.planner-checkpoint.md`
+- `.claude/runtime/state/00-state.md` (PLAN entry)
+- `.claude/runtime/audit/plan-metrics.jsonl`
 
 **Triggers:**
 - BUILD with plan.md as canonical source
@@ -423,7 +419,7 @@ PLAN is no longer just Phase 4 of `cycle` — it's a callable planner-module tha
 ```
 /li:plan <design.md>
    ↓
-   workflow_root: true → spawns own job at ~/.lintel/jobs/plan-<stamp>-<hash>/
+   workflow_root: true → spawns own job at .claude/runtime/jobs/plan-<stamp>-<hash>/
    produces: plan.md + spec.md + prompt.md (the trio)
    handoff-size-check against 500k cap (trio + warming)
    founder approval gate
@@ -457,9 +453,9 @@ Callers can rely on these paths existing post-DONE. CAPTURE re-affirms but doesn
 ### Job integration
 
 When `workflow_root: true` fires `job-begin` hook:
-- Job spawned at `~/.lintel/jobs/plan-<stamp>-<hash>/`
+- Job spawned at `.claude/runtime/jobs/plan-<stamp>-<hash>/`
 - Trio written to `outputs/plan.md`, `outputs/spec.md`, `outputs/prompt.md`
-- `job-end` promotes trio to `docs/plans/<slug>/` on DONE
+- `job-end` promotes trio to `.claude/plans/<slug>/` on DONE
 
 ### Anti-pattern: nested job spawning
 
@@ -477,7 +473,7 @@ cycle and the one logical next action — whether this phase ran standalone or i
 
 ```bash
 source "$LINTEL_REPO_ROOT/lib/cycle-footer.sh"   # fallback: "$(git rev-parse --show-toplevel)/lib/cycle-footer.sh"
-render_cycle_footer                               # reads .lintel/state/00-state.md; --compact for short replies
+render_cycle_footer                               # reads .claude/runtime/state/00-state.md; --compact for short replies
 ```
 
-Skipped phases render `⊘`; ASCII via `LINTEL_ASCII=1`. See [ADR-0003](../../docs/adr/0003-cycle-position-footer.md).
+Skipped phases render `⊘`; ASCII via `LINTEL_ASCII=1`. See [ADR-0003](../../.claude/decisions/0003-cycle-position-footer.md).

@@ -91,12 +91,7 @@ Codex agrees with A but pushed back on the threshold — argues ~10 not 15. Wort
 
 ## Compliance integration
 
-- Read-only — no code mutation, no production touch. No Layer 2 gates trigger.
 - If question references customer data (e.g. "how should we lay out a case from <real customer>"): STOP, ask operator to sanitize the question.
-
-## Voice tier note
-
-`voice: internal`. Consultation prose is engineering-internal — direct, three-alternative structure, no rhetorical flourish.
 
 ## Failure modes
 

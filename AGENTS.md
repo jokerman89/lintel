@@ -19,7 +19,7 @@ Lintel is a company-neutral, pack-driven session harness — markdown scaffoldin
 ## Session start ritual
 
 1. Read [AGENT-INSTRUCTIONS.md](AGENT-INSTRUCTIONS.md) (canonical, applies to all CLIs)
-2. Review `scaffolding/01-foundation/tasks/lessons.md` for accumulated lessons
+2. Review `scaffolding/01-foundation/.claude/memory/lessons.md` for accumulated lessons
 3. Check `docs/design/lintel-v3-plan.md` for current phase
 
 ## Codex-specific notes
@@ -46,7 +46,7 @@ codex exec --prompt "$(cat agents/security/SecurityAuditor.md). Audit branch X."
 
 ### Plan mode
 
-Codex's plan-first behavior is operator-driven, not enforced by the tool. The `AGENT-INSTRUCTIONS.md` rule still applies: plan before non-trivial work, write to `tasks/todo.md`, mark items as they finish.
+Codex's plan-first behavior is operator-driven, not enforced by the tool. The `AGENT-INSTRUCTIONS.md` rule still applies: plan before non-trivial work, write to `.claude/plans/todo.md`, mark items as they finish.
 
 ### Tool permissions
 

@@ -12,11 +12,11 @@ cli_support:
     level: degraded
 ---
 
-You are the `lessons-surface` skill — closes the L-001/L-002 loop. Without this skill, `tasks/lessons.md` grows but is never read → compounding learning that doesn't compound.
+You are the `lessons-surface` skill — closes the L-001/L-002 loop. Without this skill, `.claude/memory/lessons.md` grows but is never read → compounding learning that doesn't compound.
 
 ## What this skill does
 
-Reads `tasks/lessons.md`, matches entries against the operator's current context (keyword from prompt OR current branch/phase), surfaces relevant lessons up-front so future sessions don't repeat the same mistakes.
+Reads `.claude/memory/lessons.md`, matches entries against the operator's current context (keyword from prompt OR current branch/phase), surfaces relevant lessons up-front so future sessions don't repeat the same mistakes.
 
 Designed for Cohort 2 item 1.3. Solo-invokable. Auto-invoked from `/li:sense` Step 0 when relevant.
 
@@ -31,45 +31,40 @@ Critical: L-001 (scaffolding ≠ content) + L-002 (grep first) were created in t
 
 ## When NOT to use
 
-- Lessons authoring — manual edit of `tasks/lessons.md` directly
+- Lessons authoring — manual edit of `.claude/memory/lessons.md` directly
 - Lesson application enforcement — this surfaces; enforcement is skill-specific
-- Historical lesson archaeology — `git log tasks/lessons.md` is canonical
+- Historical lesson archaeology — `git log .claude/memory/lessons.md` is canonical
 
 ## Workflow
 
-### Step 1 — Locate + parse lessons.md
+### Step 1 — Mechanical surface (lib/memory.sh — ADR-0006)
+
+The scoring is implemented in bash, not prose. Run it:
 
 ```bash
-LESSONS_FILE="tasks/lessons.md"
-[ -f "$LESSONS_FILE" ] || { echo "No lessons.md — nothing to surface."; exit 0; }
+source "$LINTEL_REPO_ROOT/lib/memory.sh"   # sources lib/paths.sh for the lessons location
+
+# Keyword mode (--keyword "<text>"):
+lessons_surface <keyword tokens>
+
+# Auto-from-SENSE mode (no flag): derive keywords from branch + recent commits
+kw="$(git rev-parse --abbrev-ref HEAD 2>/dev/null | tr '/-' ' ') $(git log -3 --format=%s 2>/dev/null | tr '\n' ' ')"
+LESSONS_TOP_N=2 lessons_surface $kw    # top-2 — SENSE is short
 ```
 
-Parse entries:
-- Each entry starts with `## L-NNN — <name>`
-- Capture: ID, name, Rule (first ** **-line), Why (one paragraph), How to apply (bullets)
-- Capture [[cross-references]] between lessons
+`lessons_surface` scores each `## L-NNN` block by keyword hits, SKIPS superseded lessons
+(`superseded_by:` marker — supersede-don't-delete convention), and prints the top-3
+(`LESSONS_TOP_N` overrides). Empty output = no relevant lessons; say so in one line.
 
-### Step 2 — Match against context
+**All mode (`--all`):** list every lesson header, 1 line each: `grep -E '^## L-[0-9]' <lessons-file>` — note this INCLUDES superseded entries; suffix those with `(superseded)` when rendering (check each block for a `superseded_by:` line).
 
-**Keyword mode (`--keyword "<text>"`):**
-- Tokenize keyword
-- For each lesson, score relevance:
-  - Match in `name`: +5
-  - Match in `Rule`: +3
-  - Match in `How to apply`: +2
-  - Match in `Why`: +1
-- Surface top-3 ranked
+**ID mode (`--id L-NNN`):** print that lesson block verbatim from the file.
 
-**Auto-from-SENSE mode (no flag):**
-- Read current branch name + recent git log subjects
-- Use those as implicit keywords
-- Surface top-2 (be quiet — SENSE is short)
+### Step 2 — Read the surfaced lessons
 
-**All mode (`--all`):**
-- Surface all lessons med summary (1-line per)
-
-**ID mode (`--id L-NNN`):**
-- Surface specific lesson verbatim
+For each id `lessons_surface` returned, read its full block from `.claude/memory/lessons.md`
+(Rule + Why + How to apply + [[cross-references]]) — the ranked line alone is not enough context
+to apply a lesson.
 
 ### Step 3 — Render
 
@@ -89,15 +84,11 @@ Related: [[L-002]]
 
 Surface MAX 3 lessons (avoid drowning operator). Sort by relevance.
 
-## Voice tier behavior
-
-`voice: internal`. Surface output is operator-internal context-warming.
-
 ## Status protocol
 
 - **DONE** — N lessons surfaced (or 0 if no match)
 - **DONE_WITH_CONCERNS** — lessons.md present but malformed entries skipped
-- **BLOCKED** — `tasks/lessons.md` permission denies read
+- **BLOCKED** — `.claude/memory/lessons.md` permission denies read
 - **NEEDS_CONTEXT** — `--keyword` mode without a keyword arg
 
 ## Pause-points
@@ -105,14 +96,10 @@ Surface MAX 3 lessons (avoid drowning operator). Sort by relevance.
 - Lessons.md has > 50 entries and no keyword → ask for focus ("topic narrowing" via AskUserQuestion)
 - Multiple lessons score > 7 → ask the operator which is most relevant (or surface all)
 
-## Hop-in support
-
-YES — the primary use case is solo-invocation (or SENSE-auto). Designed to be invocable any time.
-
 ## Integration
 
 **Reads:**
-- `tasks/lessons.md` (canonical)
+- `.claude/memory/lessons.md` (canonical)
 
 **Writes:**
 - stdout (markdown report)
@@ -132,8 +119,8 @@ YES — the primary use case is solo-invocation (or SENSE-auto). Designed to be 
 ## Failure recovery
 
 - Malformed entry (missing `**Rule:**` line): skip + count + report at end
-- Empty lessons.md: surface "Lessons capture empty. Start logging insights via tasks/lessons.md or /li:capture."
-- > 1000 lessons (someday): paginate or recommend grep over `tasks/lessons.md`
+- Empty lessons.md: surface "Lessons capture empty. Start logging insights via .claude/memory/lessons.md or /li:capture."
+- > 1000 lessons (someday): paginate or recommend grep over `.claude/memory/lessons.md`
 
 ## Recommended next steps after invocation
 

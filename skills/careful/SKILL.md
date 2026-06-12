@@ -43,7 +43,7 @@ Not a standalone workflow — invokes other skills (or your direct work) with el
 4. **Name the rollback.** Before any mutation, state the exact undo command (e.g. "git reset --hard HEAD@{1}", "supabase migration repair --revert").
 5. **One-thing-at-a-time.** No batched mutations. Each Edit, each command, is a separate confirmation cycle.
 6. **End-of-task verification.** Read-only verification step before declaring done — re-read the changed files, run smoke tests, confirm state matches intent.
-7. **Audit log.** Every confirmed mutation written to `~/.lintel/audit/careful-mode.jsonl` with timestamp + reason + command.
+7. **Audit log.** Every confirmed mutation written to `.claude/runtime/audit/careful-mode.jsonl` with timestamp + reason + command.
 
 ## Report format
 
@@ -76,10 +76,6 @@ Operator confirmed: yes (at 14:23:01)
 - 5 always-on rules check on every mutation (not just session-start).
 - Sanity scan on every Edit payload (Layer 2 secret/customer-data patterns).
 - If `--for /ship` and the target is `main`: triple confirmation required.
-
-## Voice tier note
-
-`voice: internal`. Careful-mode prompts are engineering-internal — calm, precise, no rhetorical flourish.
 
 ## Failure modes
 

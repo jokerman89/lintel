@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # component: cycle-modes
 # implements: ADR-0003
-# intent: docs/adr/0003-cycle-position-footer.md
+# intent: .claude/decisions/0003-cycle-position-footer.md
 # last_intent_review: 2026-06-09
 #
 # lib/cycle-modes.sh — the canonical 9-step cycle order (the 8 core phases + the light

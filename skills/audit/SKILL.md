@@ -1,7 +1,7 @@
 ---
 name: audit
 layer: foundation
-description: Read the unified Lintel audit trail — surface ~/.lintel/audit/<category>.jsonl records with optional category / kind / since-days filters. Read-only.
+description: Read the unified Lintel audit trail — surface .claude/runtime/audit/ (repo events) and ~/.lintel/audit/ (operator events) <category>.jsonl records with optional category / kind / since-days filters. Read-only.
 color: yellow
 tools: Read, Bash
 voice: internal
@@ -16,7 +16,7 @@ You are the `audit` skill — read-only window onto the unified Lintel audit tra
 
 ## What this skill does
 
-Every Lintel audit record now lands in `~/.lintel/audit/<category>.jsonl` via the unified `audit_log` writer in `bin/_audit.sh`. Each record is a single JSON line with the shape:
+Every Lintel audit record lands in `<category>.jsonl` via the unified `audit_log` writer in `bin/_audit.sh`. Since v5 the trail is split in two: repo events (cycle runs, jobs, brief-forge, granularity, …) land in `<repo>/.claude/runtime/audit/<category>.jsonl`; operator events (pack lifecycle, pack-resolver, migrations, `usage-*`) stay in `~/.lintel/audit/<category>.jsonl`. This reader checks the repo dir first, then global. Each record is a single JSON line with the shape:
 
 ```json
 {"ts":"...","kind":"...","operator":"...","cycle_id":"...", ...extra k=v fields...}
@@ -50,7 +50,17 @@ All optional:
 
 ```bash
 LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
-AUDIT_DIR="${LINTEL_AUDIT_DIR:-$LINTEL_HOME/audit}"
+REPO_ROOT="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}"
+# v5 split: repo events in <repo>/.claude/runtime/audit/, operator events
+# (pack-lifecycle, pack-resolver, migrations, usage-*) in ~/.lintel/audit/.
+# Repo dir is checked first, then global. LINTEL_AUDIT_DIR overrides both.
+if [ -n "${LINTEL_AUDIT_DIR:-}" ]; then
+  audit_dirs=("$LINTEL_AUDIT_DIR")
+else
+  audit_dirs=()
+  [ -n "$REPO_ROOT" ] && [ -d "$REPO_ROOT/.claude/runtime/audit" ] && audit_dirs+=("$REPO_ROOT/.claude/runtime/audit")
+  [ -d "$LINTEL_HOME/audit" ] && audit_dirs+=("$LINTEL_HOME/audit")
+fi
 
 category=""
 kind=""
@@ -66,21 +76,24 @@ while [ $# -gt 0 ]; do
   esac
 done
 
-if [ ! -d "$AUDIT_DIR" ]; then
-  echo "_No audit trail yet._ (Nothing has been audit-logged on this machine.)"
+if [ "${#audit_dirs[@]}" -eq 0 ]; then
+  echo "_No audit trail yet._ (Nothing has been audit-logged in this repo or on this machine.)"
   exit 0
 fi
 
-# No filters → summary table of categories + counts
+# No filters → summary table of categories + counts (repo dir first, then global)
 if [ -z "$category" ] && [ -z "$kind" ] && [ -z "$since" ]; then
   echo "## Lintel audit categories"
-  echo ""
   found=0
-  for f in "$AUDIT_DIR"/*.jsonl; do
-    [ -f "$f" ] || continue
-    found=1
-    n=$(wc -l < "$f" | tr -d ' ')
-    printf -- '- %s: %s records\n' "$(basename "$f" .jsonl)" "$n"
+  for d in "${audit_dirs[@]}"; do
+    echo ""
+    echo "### $d"
+    for f in "$d"/*.jsonl; do
+      [ -f "$f" ] || continue
+      found=1
+      n=$(wc -l < "$f" | tr -d ' ')
+      printf -- '- %s: %s records\n' "$(basename "$f" .jsonl)" "$n"
+    done
   done
   [ "$found" -eq 0 ] && echo "_No audit records yet._"
   echo ""
@@ -95,12 +108,15 @@ if [ -n "$since" ]; then
               date -u -v "-${since}d" +"%Y-%m-%dT%H:%M:%SZ" 2>/dev/null || echo "")
 fi
 
-# Resolve which files to scan
-if [ -n "$category" ]; then
-  files=("$AUDIT_DIR/$category.jsonl")
-else
-  files=("$AUDIT_DIR"/*.jsonl)
-fi
+# Resolve which files to scan (repo dir first, then global)
+files=()
+for d in "${audit_dirs[@]}"; do
+  if [ -n "$category" ]; then
+    [ -f "$d/$category.jsonl" ] && files+=("$d/$category.jsonl")
+  else
+    for f in "$d"/*.jsonl; do [ -f "$f" ] && files+=("$f"); done
+  fi
+done
 
 shown=0
 for f in "${files[@]}"; do
@@ -127,23 +143,11 @@ done
 
 The skill leans on `audit_count` / `audit_days_ago` semantics already defined in `bin/_audit.sh`; it can also source that helper if richer counting is needed (`source bin/_audit.sh; audit_count jobs job_begin`).
 
-## Voice tier behavior
-
-`voice: internal`. Operator-only diagnostic. No customer-bound output.
-
-## Status protocol
-
-- **DONE** — records (or the category summary) printed
-- **NEEDS_CONTEXT** — `--category` named a log that doesn't exist (suggest running with no args to list categories)
-
-## Hop-in support
-
-YES — always solo-invocable. Pure read, safe to call anytime.
-
 ## Integration
 
 **Reads:**
-- `~/.lintel/audit/<category>.jsonl` (all categories written by `bin/_audit.sh`)
+- `.claude/runtime/audit/<category>.jsonl` (repo events — checked first)
+- `~/.lintel/audit/<category>.jsonl` (operator events: pack lifecycle, pack-resolver, migrations, `usage-*`)
 
 **Writes:**
 - nothing (pure read)

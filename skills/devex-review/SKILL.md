@@ -100,12 +100,7 @@ P1 test-loop fix has highest impact (4 min × N runs/day per developer). Address
 ## Compliance integration
 
 - Review may run actual setup scripts in `--fresh-clone` mode — those scripts touch the filesystem in a sandboxed dir. No production mutation.
-- If setup script calls a network resource: Layer 2 reads-from-internet is fine; writes (e.g. token register) would gate.
 - Recovery dimension intentionally breaks state — only in `--fresh-clone` mode. Refuses to break state in the operator's working tree.
-
-## Voice tier note
-
-`voice: internal`. DX critique is engineering-internal.
 
 ## Failure modes
 

@@ -120,12 +120,40 @@ chmod 700 "$LINTEL_HOME/audit"               # tamper-evident
 
 ok "Lintel home structure created"
 
+# ----- seed identity (ADR-0008: no silently-unconfigured identity layer) ------
+# Every session before v5.0 ran the _default fallback because profile.yaml and
+# packs/active-pack never existed. Seed them explicitly so identity is a stated
+# fact, not a fallback. Never overwrite operator files.
+if [ ! -f "$LINTEL_HOME/profile.yaml" ]; then
+  cat > "$LINTEL_HOME/profile.yaml" <<'PROFEOF'
+# Lintel operator profile (seeded by install.sh — edit freely)
+active_pack: _default
+default_mode: internal-tool
+role_active: none
+PROFEOF
+  ok "profile.yaml seeded (_default / internal-tool)"
+fi
+mkdir -p "$LINTEL_HOME/packs"
+if [ ! -f "$LINTEL_HOME/packs/active-pack" ]; then
+  printf '_default' > "$LINTEL_HOME/packs/active-pack"
+  ok "active-pack seeded (_default)"
+fi
+
 # ----- copy scaffolding -------------------------------------------------------
 
 hdr "Copying scaffolding to ~/.lintel/scaffolding/"
 
 cp -r "$REPO_ROOT/scaffolding/"* "$LINTEL_SCAFFOLDING/"
 ok "Scaffolding copied (4 layers)"
+
+# Shared runtime helpers (lib/ + bin/) — the hooks installed under
+# ~/.lintel/hooks resolve lib/memory.sh + bin/_jobs.sh here when no repo
+# checkout is present (ADR-0006).
+mkdir -p "$LINTEL_HOME/lib" "$LINTEL_HOME/bin" "$LINTEL_HOME/templates"
+cp -r "$REPO_ROOT/lib/"* "$LINTEL_HOME/lib/" 2>/dev/null || true
+cp -r "$REPO_ROOT/bin/"* "$LINTEL_HOME/bin/" 2>/dev/null || true
+cp -r "$REPO_ROOT/templates/"* "$LINTEL_HOME/templates/" 2>/dev/null || true
+ok "Runtime helpers copied (lib/ + bin/ + templates/)"
 
 # ----- v3.7 brand-seeds (idempotent) -----------------------------------------
 
@@ -167,17 +195,22 @@ if [ -d "$REPO_ROOT/hooks/shared" ]; then
 fi
 
 if [ -n "$HOOK_SRC" ]; then
-  cp -r "$HOOK_SRC/"* "$LINTEL_HOOKS/" 2>/dev/null || true
+  # shared/ layout (ADR-0008): matches the repo tree, the settings snippet, li-doctor's
+  # drift check, and the scripts' BASH_SOURCE-relative ../_input.sh + ../../../bin lookups.
+  mkdir -p "$LINTEL_HOOKS/shared"
+  cp -r "$HOOK_SRC/"* "$LINTEL_HOOKS/shared/" 2>/dev/null || true
+  # Drop any pre-v5 flat copies so the layout is unambiguous
+  for d in "$LINTEL_HOOKS"/*/; do
+    case "$d" in */shared/) : ;; *) [ -f "${d}run.sh" ] && rm -rf "$d" ;; esac
+  done
   # Ensure scripts are executable
-  find "$LINTEL_HOOKS" -name 'run.sh' -exec chmod +x {} + 2>/dev/null || true
-  ok "Hooks copied from $HOOK_SRC to $LINTEL_HOOKS (INERT — symlink to activate)"
-  info "To activate a hook: ln -s $LINTEL_HOOKS/<name>/run.sh ~/.claude/hooks/<name>.sh"
-  info "Then register in ~/.claude/settings.json — see $LINTEL_HOOKS/README.md"
+  find "$LINTEL_HOOKS" -name '*.sh' -exec chmod +x {} + 2>/dev/null || true
+  ok "Hooks copied to $LINTEL_HOOKS/shared (Claude Code: auto-registered via the plugin's hooks/hooks.json)"
+  info "Other CLIs / non-plugin installs: register manually — see $LINTEL_HOOKS/shared/README.md"
   # session-digest is REQUIRED (ADR-0002): auto-loads the memory snowball at SessionStart.
-  if [ -f "$LINTEL_HOOKS/session-digest/run.sh" ]; then
-    info "RECOMMENDED: wire the session-digest SessionStart hook so memory auto-loads."
-    info "  Merge $REPO_ROOT/hooks/claude-code/session-digest.settings.json into ~/.claude/settings.json"
-    info "  Verify with: li-doctor"
+  if [ -f "$LINTEL_HOOKS/shared/session-digest/run.sh" ]; then
+    info "Non-plugin installs: merge $REPO_ROOT/hooks/claude-code/session-digest.settings.json"
+    info "into ~/.claude/settings.json. Verify with: li-doctor"
   fi
 else
   warn "No hooks source found — skipping"
@@ -284,7 +317,7 @@ say "  2. Activate hooks (opt-in): see $LINTEL_HOOKS/README.md"
 say "  3. Verify install:          ${c_bold}$SCRIPT_DIR/verify.sh --all${c_reset}"
 say "  4. Read Lintel overview:    ${c_bold}cat $REPO_ROOT/LAYERS.md${c_reset}"
 say ""
-say "v3 plugin install (per CLI):"
+say "v5 plugin install (per CLI):"
 say "  Claude Code:  ${c_bold}/plugin marketplace add jokerman89/lintel${c_reset}"
 say "                ${c_bold}/plugin install li@jokerman-lintel${c_reset}"
 say "  Codex CLI:    ${c_bold}/plugins${c_reset} -> search lintel -> Install"

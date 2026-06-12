@@ -50,7 +50,7 @@ Decision:
        │  confirm_with_operator (high-risk OR low-confidence)
        │  surface_and_wait (default)
        ▼
-Audit to ~/.lintel/audit/orientator-decisions.jsonl
+Audit to .claude/runtime/audit/orientator-decisions.jsonl
        │
        ▼
 SENSE report surfaces recommendation
@@ -153,7 +153,7 @@ Phase 4 will wire a real subagent (probably `OrientatorAgent` with budget-bounde
 
 ## Audit trail
 
-Every routing decision writes to `~/.lintel/audit/orientator-decisions.jsonl`:
+Every routing decision writes to `.claude/runtime/audit/orientator-decisions.jsonl`:
 
 ```jsonl
 {"ts":"2026-05-29T15:00:00Z","kind":"orientator_decision","intent":"fix","workflow":"/li:cycle --mode hotfix","risk":"medium","confidence":"high","decision":"confirm_with_operator","budget_used":0,"escalated":false,"operator":"<operator>"}
@@ -198,10 +198,10 @@ Decision:     confirm_with_operator
 **Reads:**
 - Operator's last message (passed in by SENSE)
 - `lib/pack-resolver.sh` for pack policy
-- `.lintel/state/00-state.md` (optional — for resume detection)
+- `.claude/runtime/state/00-state.md` (optional — for resume detection)
 
 **Writes:**
-- `~/.lintel/audit/orientator-decisions.jsonl`
+- `.claude/runtime/audit/orientator-decisions.jsonl`
 - stdout (recommendation block surfaced in SENSE report)
 
 **Public functions in lib/orientator-routing.sh:**

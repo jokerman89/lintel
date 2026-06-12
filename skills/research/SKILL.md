@@ -64,7 +64,7 @@ RESEARCH COMPLETE — <wedge>
 
 Artifacts produced:
   - Design doc: <docs/design/lintel-*-design-*.md> (APPROVED)
-  - Discover report: <.lintel/state/discover-report-*.md>
+  - Discover report: <.claude/runtime/state/discover-report-*.md>
 
 Findings:
   - ADRs surfaced: <N>
@@ -78,19 +78,11 @@ Next options:
   • Decide later — design doc + discover-report persist
 ```
 
-## Status protocol
-
-Inherits from /li:cycle. Most often DONE (research can't really fail unless DISCOVER blocks on scope).
-
 ## Pause-points
 
 - Initial mode-confirmation
 - DEFINE forcing questions (all 6, per office-hours discipline)
 - Premise check + alternatives + design doc approval gate
-
-## Hop-in support
-
-n/a — research-dive is the shortcut.
 
 ## Integration
 
@@ -100,7 +92,3 @@ Delegates to `/li:cycle --mode research-dive`.
 
 - **Research-then-immediate-build without re-running PLAN** — research validates direction, PLAN turns it into tasks
 - **Skipping the design doc approval gate because "this is just research"** — design doc commits to a wedge, gate confirms it
-
-## Voice tier behavior
-
-`voice: internal`. Research output is operator-internal. If operator later wants to share findings with customer, voice gate fires at that downstream skill (e.g., `/li:exec-brief`).

@@ -16,12 +16,70 @@
 #   source "$(dirname "$0")/_audit.sh"
 #   audit_log meta-infra-overrides override 'detected_mode=meta-infra chosen_mode=internal-tool reason="quick refactor"'
 #
-# Writes to: ~/.lintel/audit/meta-infra-overrides.jsonl
+# Scope routing (v5, ADR-0005): events about work IN a repo land in the repo's
+# own audit dir (<repo>/.claude/runtime/audit/) once the repo carries the v5
+# layout marker. Operator-level categories (pack lifecycle, resolver internals,
+# harness migrations, usage tallies) always stay in ~/.lintel/audit/ — they are
+# about the operator's install, not any one repo. Un-migrated repos keep the
+# historical global path unchanged.
 
 LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
+# An EXPLICIT caller-set LINTEL_AUDIT_DIR is a hard override for ALL categories
+# (the documented test seam — mirrors _jobs.sh's LINTEL_JOBS_DIR behavior).
+# "Explicit" = set to something OTHER than the computed default; several sibling
+# helpers pre-default the var with the same `:-$LINTEL_HOME/audit` idiom and
+# must not count as an override.
+_AUDIT_DIR_EXPLICIT=0
+if [ -n "${LINTEL_AUDIT_DIR:-}" ] && [ "$LINTEL_AUDIT_DIR" != "$LINTEL_HOME/audit" ]; then
+  _AUDIT_DIR_EXPLICIT=1
+fi
 LINTEL_AUDIT_DIR="${LINTEL_AUDIT_DIR:-$LINTEL_HOME/audit}"
 
 mkdir -p "$LINTEL_AUDIT_DIR" 2>/dev/null || true
+
+# Categories that are operator-global by nature (everything else is repo work).
+_AUDIT_GLOBAL_CATEGORIES="pack-lifecycle pack-resolver migration migrations self-test"
+
+# Repo root + layout, computed once per source (audit fires on hot paths —
+# avoid a git fork per write). Note: a long-lived shell that cd's into a
+# DIFFERENT repo keeps the first repo's routing; acceptable for hook processes
+# (one process per event), set LINTEL_REPO_ROOT explicitly for anything else.
+_AUDIT_REPO_AUDIT_DIR=""
+_audit_init_repo_scope() {
+  local root
+  root="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}"
+  [ -n "$root" ] || return 0
+  if [ -f "$root/.claude/lintel-layout.yaml" ]; then
+    local v
+    v=$(grep -E '^layout_version:' "$root/.claude/lintel-layout.yaml" 2>/dev/null \
+        | head -1 | awk '{print $2}' | tr -d '\r')
+    if [ "${v:-0}" -ge 5 ] 2>/dev/null; then
+      _AUDIT_REPO_AUDIT_DIR="$root/.claude/runtime/audit"
+    fi
+  fi
+}
+_audit_init_repo_scope
+
+# Resolve the output dir for a category: explicit env override > global list >
+# migrated-repo runtime dir > ~/.lintel/audit.
+_audit_out_dir() {
+  local category="$1"
+  if [ "$_AUDIT_DIR_EXPLICIT" = 1 ]; then
+    printf '%s' "$LINTEL_AUDIT_DIR"; return
+  fi
+  case " $_AUDIT_GLOBAL_CATEGORIES " in
+    *" $category "*) printf '%s' "$LINTEL_AUDIT_DIR"; return ;;
+  esac
+  case "$category" in
+    usage-*) printf '%s' "$LINTEL_AUDIT_DIR"; return ;;
+  esac
+  if [ -n "$_AUDIT_REPO_AUDIT_DIR" ]; then
+    mkdir -p "$_AUDIT_REPO_AUDIT_DIR" 2>/dev/null || true
+    printf '%s' "$_AUDIT_REPO_AUDIT_DIR"
+  else
+    printf '%s' "$LINTEL_AUDIT_DIR"
+  fi
+}
 
 _audit_iso_now() { date -u +"%Y-%m-%dT%H:%M:%SZ"; }
 
@@ -47,7 +105,8 @@ audit_log() {
   local kind="${2:-event}"
   shift 2 || true
 
-  local out="$LINTEL_AUDIT_DIR/${category_file}.jsonl"
+  local out
+  out="$(_audit_out_dir "$category_file")/${category_file}.jsonl"
   local ts cycle_id operator
   ts=$(_audit_iso_now)
   cycle_id="${LINTEL_CYCLE_ID:-${CYCLE_ID:-unknown}}"
@@ -80,12 +139,15 @@ audit_log() {
   printf '%s\n' "$rec" >> "$out" 2>/dev/null || true
 }
 
-# Count records by kind across a category
+# Count records by kind across a category (reads the scope-routed file; falls
+# back to the global file so pre-migration history stays countable)
 audit_count() {
   local category_file="$1"
   local kind="${2:-}"
   local since_iso="${3:-}"
-  local out="$LINTEL_AUDIT_DIR/${category_file}.jsonl"
+  local out
+  out="$(_audit_out_dir "$category_file")/${category_file}.jsonl"
+  [ -f "$out" ] || out="$LINTEL_AUDIT_DIR/${category_file}.jsonl"
   [ -f "$out" ] || { printf '0'; return 0; }
 
   if [ -z "$kind" ]; then

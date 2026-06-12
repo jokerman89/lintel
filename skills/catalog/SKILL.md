@@ -91,21 +91,6 @@ If `--trends`:
 
 `$REPO_ROOT/skills/CATALOG.md`. If CI mode (no operator), commit automatically. If solo mode, surface the diff + ask before committing.
 
-## Voice tier behavior
-
-`voice: internal`. The catalog is an operator-internal navigation aid.
-
-## Status protocol
-
-- **DONE** — CATALOG.md regenerated, N skills listed
-- **DONE_WITH_CONCERNS** — regenerated but some skills had missing frontmatter (now caught by verify.sh --frontmatter post-Cohort-1)
-- **BLOCKED** — skills/ dir not present or unreadable
-- **NEEDS_CONTEXT** — `--search` mode without a keyword
-
-## Hop-in support
-
-YES — solo-regenerate any time + CI-automation.
-
 ## Integration
 
 **Reads:**

@@ -2,7 +2,7 @@
 name: ta
 layer: foundation
 workflow_root: true
-description: Phase 4 v4.1 — tech-architecture module. Three granularities (full / loop / single). Sub-skills dispatch to existing arch agents. 5 checkpoints, 6-dim scoring rubric, 3 warn-only hooks, profile-driven preferences.
+description: Phase 4 v4.1 — tech-architecture module. Three granularities (full / loop / single). Capabilities dispatch to existing arch agents (ADR-0009 dispatch table). 5 checkpoints, 6-dim scoring rubric, 3 warn-only hooks, profile-driven preferences.
 color: amber
 tools: Read, Write, Edit, Bash, Grep, Glob
 voice: internal
@@ -53,7 +53,7 @@ Produces architecture-grade decisions and contracts when work has architectural 
 |---|---|---|
 | `/li:ta full` | new project / major scope change | `system-arch.md` + ADR set + interface contracts + dependency graph + non-functional requirements |
 | `/li:ta loop` | mid-cycle architecture iteration | revised ADRs + diff against prior decisions + impact analysis |
-| `/li:ta single --action <name>` | targeted operation (see sub-skill catalog) | one of: api-design / dependency-graph / complexity-audit / boundary-review / scaling-plan / contract-collision / quality-attributes |
+| `/li:ta <capability>` · `/li:ta single --action <capability>` | targeted operation (see Sub-capability dispatch) | one artifact per the dispatch table below |
 
 ## When to use
 
@@ -68,37 +68,61 @@ Produces architecture-grade decisions and contracts when work has architectural 
 - Data-model work without architectural impact → use `/li:da` (v4.2)
 - Pure observability/deployment work → use `/li:dh` (v4.4)
 
-## Sub-skill catalog
+## Sub-capability dispatch
 
-Per L-001: sub-skills are workflow + dispatch contracts. Content comes from agents at invocation.
+Per ADR-0009 the seven capabilities live here as dispatch rows — there are no per-capability
+skill files. Invoke one directly as `/li:ta <capability>` (long form: `/li:ta single --action
+<capability>`). Per L-001 each capability is a workflow + dispatch contract: content comes from
+agents at invocation (spawned via `/li:brief-forge subagent_spawn`); each emits
+`.claude/runtime/state/ta/<capability>-<ts>.md` and appends the module audit line (Step 6).
 
-| Sub-skill | Dispatches to | Output |
-|---|---|---|
-| `ta-api-design` | APIDesigner | REST/GraphQL/gRPC interface spec with versioning + breaking-change analysis |
-| `ta-dependency-graph` | Architect + Explorer | module dependency map, circular-detection, layering audit |
-| `ta-complexity-audit` | CodeReviewer + Architect | per-component cyclomatic + cognitive complexity scoring |
-| `ta-boundary-review` | BackendArchitect + Architect | bounded-context drift detection, leaking-abstraction flags |
-| `ta-scaling-plan` | CapacityPlanner (NEW) + BackendArchitect | capacity model + bottleneck identification + cost projection |
-| `ta-contract-collision` | APIDesigner + Architect | change-impact analysis across consumers of an interface |
-| `ta-quality-attributes` | SystemArchitect (NEW) + Architect | non-functional requirement spec (performance, reliability, observability) |
+| Capability | Dispatches to (agents) | Produces | Raise-help / notes |
+|---|---|---|---|
+| `api-design` | APIDesigner | REST/GraphQL/gRPC interface spec with versioning + breaking-change analysis | prefs: `api_style`, `versioning`; validation checklist below |
+| `dependency-graph` | Explorer + Architect | module dependency map + `graph.dot`, circular-detection, layering audit | owns the shared language-detect heuristic (below) |
+| `boundary-review` | BackendArchitect + Architect (when leaks > 0) | bounded-context drift report — GREEN / YELLOW (>0 leaks) / RED (>5) | reuses `dependency-graph-*.md` <1 day old, else runs dependency-graph first |
+| `complexity-audit` | Architect (refactor recs when over budget) | per-component cyclomatic + cognitive scoring vs budgets | budgets via `--budget-cyclomatic`/`--budget-cognitive` (profile defaults 12/18); YELLOW = 1-5 components over, RED = >5; per-language tools below |
+| `scaling-plan` | CapacityPlanner + BackendArchitect | capacity model + top-3 bottlenecks + cost projection | default target `3x-12-months`; qualitative-only (DONE_WITH_CONCERNS) without `perf-baseline.md` |
+| `contract-collision` | APIDesigner + Architect (when breaking > 0) | change-impact analysis across consumers of an interface | RAISE_HELP at ≥3 breaking consumers (BLOCKED); requires `--interface` + `--change`; deprecation window from pack (default 90 days), prefer additive over in-place breaking |
+| `quality-attributes` | SystemArchitect + Architect | non-functional requirement spec + verification path per NFR | backs the `non_functionals_specified` checkpoint; dims: latency p50/p95/p99 per journey, throughput RPS, error-rate %, availability SLA, observability signals per component |
+
+### api-design — validation checklist
+
+- [ ] Each endpoint has method, path, request schema, response schema, error responses
+- [ ] Versioning strategy applied consistently
+- [ ] Breaking-change analysis present (if v2.x or higher)
+- [ ] Authentication/authorization noted
+- [ ] Rate-limit / quota notes per endpoint
+- [ ] Example payload(s)
+- [ ] OpenAPI/Protobuf/SDL artifact if applicable
+
+### complexity-audit — per-language tools
+
+go → `gocyclo -over <budget>` · python → `radon cc -n B -s` · rust → `cargo-complexity` ·
+node → `npx eslintcc --rule complexity` · other → `lizard`
+
+### dependency-graph — language detection (shared helper)
+
+`package.json` → node · `go.mod` → go · `Cargo.toml` → rust ·
+`pyproject.toml`/`requirements.txt` → python · `pom.xml`/`build.gradle` → jvm · `*.csproj`/`*.sln` → dotnet
 
 ## Workflow
 
 ### Step 1 — Parse invocation
 
 ```bash
-granularity="${1:?usage: /li:ta {full|loop|single --action <name>}}"
+granularity="${1:?usage: /li:ta {full|loop|<capability>|single --action <capability>}}"
+capabilities="api-design|dependency-graph|complexity-audit|boundary-review|scaling-plan|contract-collision|quality-attributes"
 case "$granularity" in
   full|loop) action="" ;;
   single)
     [ "$2" = "--action" ] || { echo "ERROR: --action required for single"; exit 1; }
-    action="$3"
-    case "$action" in
-      api-design|dependency-graph|complexity-audit|boundary-review|scaling-plan|contract-collision|quality-attributes) ;;
-      *) echo "ERROR: unknown action '$action'"; exit 1 ;;
-    esac
-    ;;
+    action="$3" ;;
+  *) action="$granularity"; granularity="single" ;;   # ADR-0009 shorthand: /li:ta <capability>
 esac
+if [ "$granularity" = "single" ]; then
+  echo "$action" | grep -qE "^(${capabilities})$" || { echo "ERROR: unknown capability '$action'"; exit 1; }
+fi
 ```
 
 ### Step 2 — Read pack + profile preferences
@@ -124,7 +148,7 @@ cognitive_budget="${cognitive_budget:-18}"
 #### `full` granularity
 
 ```bash
-mkdir -p .lintel/state/ta
+mkdir -p .claude/runtime/state/ta
 audit="$LINTEL_HOME/audit/ta-decisions.jsonl"
 mkdir -p "$(dirname "$audit")"
 
@@ -142,19 +166,19 @@ if [ "$score" -lt 80 ]; then
   exit 1
 fi
 
-echo "TA full pass complete — score=$score, output .lintel/state/ta/"
+echo "TA full pass complete — score=$score, output .claude/runtime/state/ta/"
 ```
 
 #### `loop` granularity
 
 ```bash
 # Resume from prior state if present
-if [ ! -f ".lintel/state/ta/00-state.md" ]; then
+if [ ! -f ".claude/runtime/state/ta/00-state.md" ]; then
   echo "ERROR: no prior TA state — use /li:ta full first"
   exit 1
 fi
 
-prior_iteration=$(grep -E '^iteration:' .lintel/state/ta/00-state.md | head -1 | awk '{print $2}')
+prior_iteration=$(grep -E '^iteration:' .claude/runtime/state/ta/00-state.md | head -1 | awk '{print $2}')
 new_iteration=$((prior_iteration + 1))
 
 # Re-run discovery + decision + contract checkpoints
@@ -163,38 +187,19 @@ run_checkpoint decision_documented
 run_checkpoint contract_locked
 
 # Diff against prior iteration
-echo "Diff vs iteration $prior_iteration:" > .lintel/state/ta/iteration-${new_iteration}-diff.md
-diff .lintel/state/ta/iteration-${prior_iteration}-adrs.md .lintel/state/ta/iteration-${new_iteration}-adrs.md \
-  >> .lintel/state/ta/iteration-${new_iteration}-diff.md || true
+echo "Diff vs iteration $prior_iteration:" > .claude/runtime/state/ta/iteration-${new_iteration}-diff.md
+diff .claude/runtime/state/ta/iteration-${prior_iteration}-adrs.md .claude/runtime/state/ta/iteration-${new_iteration}-adrs.md \
+  >> .claude/runtime/state/ta/iteration-${new_iteration}-diff.md || true
 ```
 
 #### `single` granularity
 
 ```bash
-# Direct dispatch to sub-skill, no loop, no checkpoints
-case "$action" in
-  api-design)
-    /li:ta-api-design --pref api_style="$api_style" --pref versioning="$versioning"
-    ;;
-  dependency-graph)
-    /li:ta-dependency-graph
-    ;;
-  complexity-audit)
-    /li:ta-complexity-audit --budget-cyclomatic "$cyclomatic_budget" --budget-cognitive "$cognitive_budget"
-    ;;
-  boundary-review)
-    /li:ta-boundary-review
-    ;;
-  scaling-plan)
-    /li:ta-scaling-plan
-    ;;
-  contract-collision)
-    /li:ta-contract-collision
-    ;;
-  quality-attributes)
-    /li:ta-quality-attributes
-    ;;
-esac
+# ADR-0009: no sub-skill files — dispatch straight off the Sub-capability dispatch table.
+# Spawn the capability's agents via /li:brief-forge subagent_spawn, pass the prefs/budgets
+# listed in its row (api-design ← api_style + versioning; complexity-audit ← the two budgets),
+# emit .claude/runtime/state/ta/${action}-<ts>.md, append the audit line (Step 6).
+dispatch_capability "$action"   # no loop, no checkpoints
 ```
 
 ### Step 4 — Checkpoint failure handling (recovery + raise-help)
@@ -260,16 +265,7 @@ printf '{"ts":"%s","kind":"ta_module_complete","granularity":"%s","score":%d,"ch
 - **DONE** — granularity completed, score ≥ 80 (full) or target dimension improved (loop) or action complete (single)
 - **DONE_WITH_CONCERNS** — completed but score 60-79 OR raise-help triggered without operator resolution
 - **BLOCKED** — checkpoint failed, operator chose Raise-help, awaiting decision
-- **NEEDS_CONTEXT** — `--action` missing for single, OR no prior state for loop
-
-## Pause-points
-
-- Per checkpoint failure: AskUserQuestion with three paths (Re-loop / Accept-with-concern / Raise-help)
-- Pre-ship if score < 80: surface dimension breakdown, ask to re-loop or accept
-
-## Hop-in support
-
-YES. `/li:ta loop` resumes from prior state at `.lintel/state/ta/00-state.md`. `/li:ta single --action <name>` enters at the specific sub-skill without orchestration.
+- **NEEDS_CONTEXT** — unknown capability for single, OR no prior state for loop
 
 ## Integration
 
@@ -281,10 +277,10 @@ YES. `/li:ta loop` resumes from prior state at `.lintel/state/ta/00-state.md`. `
 - Existing ADRs (`.lintel/decisions/*.md` if present)
 
 **Writes:**
-- `.lintel/state/ta/system-arch.md` (full)
-- `.lintel/state/ta/iteration-N-adrs.md` (per iteration)
-- `.lintel/state/ta/iteration-N-diff.md` (loop)
-- `~/.lintel/audit/ta-decisions.jsonl`
+- `.claude/runtime/state/ta/system-arch.md` (full)
+- `.claude/runtime/state/ta/iteration-N-adrs.md` (per iteration)
+- `.claude/runtime/state/ta/iteration-N-diff.md` (loop)
+- `.claude/runtime/audit/ta-decisions.jsonl`
 - Brief Forge envelopes through the standard gate
 
 **Triggered by:**
@@ -305,7 +301,3 @@ YES. `/li:ta loop` resumes from prior state at `.lintel/state/ta/00-state.md`. `
 - **Hardcoding api_style / versioning** — read from profile preferences
 - **Silent score-below-threshold** — surface to operator with dimension breakdown; never auto-pass
 - **Blocking on hook warnings** — TA hooks warn; blocking is operator's explicit decision
-
-## Voice tier behavior
-
-`voice: internal`. TA produces operator-facing architectural artifacts. Customer-facing voice picks up at the SHIP phase when the active pack adds voice alignment via Brief Forge (an external pack like lintel-caip-pack supplies this; none by default).

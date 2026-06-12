@@ -1,9 +1,15 @@
 #!/usr/bin/env bash
-# li-adr-new — bootstrap a new ADR from docs/adr/TEMPLATE.md
+# li-adr-new — bootstrap a new ADR from .claude/decisions/TEMPLATE.md
 #
 # Usage: li-adr-new "<title>" [--status proposed|accepted]
 
 set -euo pipefail
+
+# Path contract (ADR-0005): decisions dir resolved via lib/paths.sh
+# (.claude/decisions/ on the v5 layout; un-migrated repos resolve to their legacy location).
+# shellcheck source=/dev/null
+source "$(dirname "${BASH_SOURCE[0]}")/../lib/paths.sh"
+ADR_DIR="$(lintel_decisions_dir)"
 
 TITLE="${1:-}"
 STATUS="proposed"
@@ -21,10 +27,10 @@ Usage:
   li-adr-new --help
 
 What it does:
-  1. Finds next ADR number from docs/adr/NNNN-*.md
+  1. Finds next ADR number from .claude/decisions/NNNN-*.md
   2. Generates kebab-case slug from title
-  3. Reads docs/adr/TEMPLATE.md, substitutes title + date + status
-  4. Writes docs/adr/<NNNN>-<slug>.md
+  3. Reads .claude/decisions/TEMPLATE.md, substitutes title + date + status
+  4. Writes .claude/decisions/<NNNN>-<slug>.md
   5. git checkout -b adr-<NNNN>-<slug>, stage + commit
 EOF
       exit 0 ;;
@@ -40,13 +46,13 @@ EOF
 done
 
 [ -n "$TITLE" ] || { echo "Title required. Usage: li-adr-new \"<title>\"" >&2; exit 2; }
-[ -d "docs/adr" ] || { echo "docs/adr/ not found — run li-scaffold init first" >&2; exit 3; }
+[ -d "$ADR_DIR" ] || { echo "$ADR_DIR not found — run li-scaffold init first" >&2; exit 3; }
 
-TEMPLATE="docs/adr/TEMPLATE.md"
+TEMPLATE="$ADR_DIR/TEMPLATE.md"
 [ -f "$TEMPLATE" ] || { echo "TEMPLATE missing: $TEMPLATE" >&2; exit 4; }
 
 # Find next number
-last_num=$(ls docs/adr/[0-9]*-*.md 2>/dev/null | sed 's|docs/adr/||; s|-.*||' | sort -n | tail -1 | sed 's/^0*//')
+last_num=$(ls "$ADR_DIR"/[0-9]*-*.md 2>/dev/null | sed 's|.*/||; s|-.*||' | sort -n | tail -1 | sed 's/^0*//')
 last_num=${last_num:-0}
 next_num=$((last_num + 1))
 printf -v nnnn "%04d" "$next_num"
@@ -54,7 +60,7 @@ printf -v nnnn "%04d" "$next_num"
 # Slug
 slug=$(echo "$TITLE" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/--*/-/g' | sed 's/^-//; s/-$//' | cut -c1-40)
 
-FILE="docs/adr/${nnnn}-${slug}.md"
+FILE="$ADR_DIR/${nnnn}-${slug}.md"
 [ -f "$FILE" ] && { echo "ADR already exists: $FILE" >&2; exit 5; }
 
 # Render from template
