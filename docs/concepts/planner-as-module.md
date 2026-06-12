@@ -52,7 +52,7 @@ CAPTURE's new job for the trio: REAFFIRM. Verify spec.md still matches implement
 
 ### 2.3 — Granularity hard check (LOCKED at 2–5 min per cold-subagent task)
 
-The magic sauce in gstack, superpowers, Architect, and Lovable is not plan depth — it's task size. Small tasks = clean handoff = fewer errors. Operator-locked rule: **2–5 minutes per cold-subagent task, decompose otherwise.**
+Across cold-handoff systems, the magic sauce is not plan depth — it's task size. Small tasks = clean handoff = fewer errors. Operator-locked rule: **2–5 minutes per cold-subagent task, decompose otherwise.**
 
 Implementation: `plan-eng-review` Step 0 (which is BLOCKING — already part of the plan-review flow) extended with a per-task time estimate + AskUserQuestion gate.
 

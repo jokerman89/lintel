@@ -77,7 +77,7 @@ If vault is empty → silent exit (no surface). MVP.
 
 - `--no-design-surface` flag on `/li:frontend-design` (if operator explicitly silent)
 - `/li:profile-switch --dormant frontend-design-surface` (existing skill, per-hook dormancy)
-- Touch `~/.gstack/.frontend-design-surface-disabled` for session-level silence
+- Touch `~/.lintel/.frontend-design-surface-disabled` for session-level silence
 
 ## What's NOT in scope
 

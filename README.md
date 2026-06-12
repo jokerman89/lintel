@@ -2,7 +2,7 @@
 
 **Company-neutral, pack-driven session harness for agent-based development.** Markdown + bash scaffolding that any modern AI CLI loads as a plugin. No runtime, no daemons — your CLI handles execution. Identity (voice, compliance, personas, brand) is supplied by an installable **pack**; the harness ships only the neutral `_default` pack.
 
-**Status:** v5.0 — company-neutral, pack-driven harness with the `.claude/` home layout (ADR-0005), mechanical memory (ADR-0006) and zero-setup hook activation (ADR-0008). The Microsoft CAIP-SE identity has been extracted to the separate [lintel-caip-pack](https://github.com/jokerman89/lintel-caip-pack); Lintel ships only the neutral `_default` pack. See [CHANGELOG.md](CHANGELOG.md) for release notes and [SHIP-GATE.md](SHIP-GATE.md) for readiness gates. Current architecture lives at [docs/design/lintel-v4.0-reframe-design.md](docs/design/lintel-v4.0-reframe-design.md).
+**Status:** v5.0 — company-neutral, pack-driven harness with the `.claude/` home layout (ADR-0005), mechanical memory (ADR-0006) and zero-setup hook activation (plugin install) (ADR-0008 — bare installs arm hooks manually; see [How hook activation works](docs/getting-started.md#how-hook-activation-works)). The Microsoft CAIP-SE identity has been extracted to the separate [lintel-caip-pack](https://github.com/jokerman89/lintel-caip-pack); Lintel ships only the neutral `_default` pack. See [CHANGELOG.md](CHANGELOG.md) for release notes and [SHIP-GATE.md](SHIP-GATE.md) for readiness gates. New to Lintel? Start with the **[glossary](docs/GLOSSARY.md)** and [getting-started](docs/getting-started.md). Current architecture lives at [docs/design/lintel-v4.0-reframe-design.md](docs/design/lintel-v4.0-reframe-design.md).
 
 Lintel ships **124 skills + 69 agents + 1 pack (`_default`)** organized for the plugin-manifest pattern across 8 CLIs. Plus the foundation scaffolding-template system (CORE-PRINCIPLES, EVOLUTION-LOG, .claude/memory/lessons.md, decision-record templates) that gets copied into new repos via `bin/li-scaffold`. The engineering-domain modules (`/li:ta`, `/li:da`, `/li:sc`, `/li:dh`, `/li:tq`) plus the 9-step cycle (8 core phases + SCOPE) are the core.
 
@@ -106,6 +106,9 @@ li-doctor      # cross-CLI health check
 bash install/verify.sh
 ```
 
+**Windows:** the bare installer is `install\install.ps1` (run it in PowerShell 7+) — `install/install.sh`
+is the bash/Linux/macOS/WSL/Git Bash path. A plugin install needs neither.
+
 ### 5. Scaffold a new repo
 
 ```bash
@@ -123,11 +126,27 @@ Full walkthrough: [docs/getting-started.md](docs/getting-started.md).
 
 - **Skills** for daily workflows: the 9-step `/li:cycle` (sense→capture), engineering-domain modules (`/li:ta`, `/li:da`, `/li:sc`, `/li:dh`, `/li:tq`), `/qa`, `/investigate`, `/plan-eng-review`, `/office-hours`, `/generate-ppt`, `/generate-word`, `/generate-web`, plus session-harness skills (`/skill-router`, `/li:doctor`, `/li:scaffold`, `/lessons-promote`, `/adr-new`, `/personas-rotate`, `/pack-create`, `/pack-switch`).
 - **Agents** organized per domain: engineering, security, compliance (generic frameworks — GDPR/SOC2/EU-AI-Act), devops, customer, communication, doc-gen, frontend. Company-specific agents load from a pack.
-- **Compliance hooks** (opt-in via symlinks): `customer-data-block`, `secret-scan-block`, `no-direct-main-push`, etc.
+- **Compliance hooks** — `customer-data-block`, `secret-scan-block`, `no-direct-main-push`, etc. Auto-registered on a plugin install; armed manually on a bare install. See [How hook activation works](docs/getting-started.md#how-hook-activation-works).
 - **Pack-driven compliance + voice**: the active pack declares its compliance gates and voice tier; the neutral `_default` pack enforces nothing. Company packs (e.g. lintel-caip-pack) supply tiered compliance and a calibrated voice corpus.
 - **Repo scaffolding mechanism** via `bin/li-scaffold` — 30-second new-repo setup.
 - **Cross-repo lessons sync** via `bin/li-lessons-sync` (operator-opt-in).
 - **Cross-CLI health check** via `bin/li-doctor`.
+
+---
+
+## Where things live
+
+Lintel writes to **four roots** — two machine-global, two in your repo:
+
+| Root | Scope | Holds |
+|---|---|---|
+| `~/.lintel/` | machine-global | operator identity + cross-repo state — `profile.yaml` (active pack/mode/role), packs, cross-repo jobs registry, audit log |
+| `~/.claude/` | machine-global | Claude Code's own home — your `settings.json` and any hooks you symlinked in (bare install) |
+| `<repo>/.claude/` | per-repo, **committed** | knowledge that travels with the code — `memory/` (lessons, working-state, personas), `decisions/` (ADRs), `plans/` |
+| `<repo>/.claude/runtime/` | per-repo, **gitignored** | churn that shouldn't — cycle state, job data, session saves, repo event log |
+
+The committed/gitignored split is deliberate (ADR-0005): knowledge is shared in PRs, runtime noise
+stays local. Full map + lifecycle in [CLAUDE.md](CLAUDE.md#where-state-lives-the-memory-map).
 
 ---
 

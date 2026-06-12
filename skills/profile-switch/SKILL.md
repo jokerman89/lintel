@@ -20,8 +20,8 @@ Operator-request 5.2: tools to toggle Lintel on/off fast + swap to a previous se
 
 Profile-switch is about **install state**:
 - `active`: Lintel skills/agents/hooks are installed + accessible via plugin manifests
-- `dormant`: Lintel temporarily inactive (operator switching to other tooling, e.g. gstack), can be re-activated quickly
-- `previous-setup`: a snapshot of the pre-Lintel setup (jstack-vendored skills, custom CLI configs) the operator can restore
+- `dormant`: Lintel temporarily inactive (operator switching to another harness/toolchain), can be re-activated quickly
+- `previous-setup`: a snapshot of the pre-Lintel setup (the predecessor archive at `~/.claude/_archived-frameworks/`, custom CLI configs) the operator can restore
 
 Pack compliance mode is the complement: env-level (compliance policies on/off). Profile-switch is install-level (Lintel itself on/off).
 

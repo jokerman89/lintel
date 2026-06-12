@@ -2,7 +2,7 @@
 # DESCRIPTION: <one-line what this test validates>
 # TAGS: claude-code-only,unit
 # Tags catalog: claude-code-only, codex-compatible, browser-required,
-#               gstack-binaries-required, unit, integration, e2e, slow
+#               unit, integration, e2e, slow
 
 set -euo pipefail
 
@@ -68,9 +68,6 @@ fi
 # Skip if required deps not available
 if echo "$TAGS_HEADER" | grep -q "browser-required" && [ ! -x "$HOME/.lintel/bin/chromium" ]; then
   skip "browser-required but managed Chromium not installed"
-fi
-if echo "$TAGS_HEADER" | grep -q "gstack-binaries-required" && [ ! -x "$HOME/.claude/skills/gstack/bin/gstack-config" ]; then
-  skip "gstack-binaries-required but not installed"
 fi
 
 # --- SETUP (test-specific; replace placeholder below) ---

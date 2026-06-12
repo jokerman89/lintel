@@ -1,5 +1,29 @@
 # todo — active initiatives
 
+## v5.2 battletest — newcomer-clarity doc fixes J1-J6 (2026-06-12, branch feat/v5.2-battletest)
+
+Source: docs/audit/2026-06-12-battletest-synthesis.md (JAB rows) + noob first-hour findings.
+SCOPE: README.md, docs/getting-started.md, skills/welcome/SKILL.md, CLAUDE.md, install/install.sh, NEW docs/GLOSSARY.md ONLY. Do NOT touch other skills/ or agents/.
+
+- [x] J1 — canonical hook-activation matrix added to getting-started ("How hook activation works", ADR-0008). README:5, welcome Step 4, install.sh header all point at it. No "inert" without "(bare install only)"; no "zero-setup" without "(plugin install)" — verified by grep.
+- [x] J2 — "168 skills" de-hardcoded in welcome (frontmatter + body) → "the full skill set". README/getting-started counts already 124/69 (correct); getting-started finding-skills section de-hardcodes (compute at runtime).
+- [x] J3 — CLAUDE.md:31 stale `adr/` listing → points at .claude/decisions/ + names docs/adr as redirect stub. 4-root "Where things live" map added to README + getting-started. (CLAUDE.md state map + ritual were already v5-correct — confirmed, not manufactured.)
+- [x] J4 — getting-started "Finding skills" section: /li:help + /li:catalog + 7-bucket prose purpose-grouping.
+- [x] J5 — install.sh: /tier-stamp-agents line removed; entra/+rai/dpia/dsb mkdir removed (pack concern); header honest about upstream stub (lists, does not clone); upstream-step message says "listed only". README+getting-started got the "Windows: install\install.ps1" line.
+- [x] J6 — docs/GLOSSARY.md created (12 terms, one screen); linked from README first section + getting-started top; "the 9-step cycle: 8 core phases + SCOPE" phrasing used consistently.
+- [x] VALIDATE — grep clean (no 168 / inert always qualified / no stale docs/adr mis-pointers); no-swedish.sh RC=0.
+
+### Review (J1-J6)
+
+Six fixes landed across 5 files + 1 new (GLOSSARY). Canonical hook matrix lives ONCE at
+docs/getting-started.md#how-hook-activation-works; README/welcome/install.sh all point at it
+rather than restating. Found the branch's CLAUDE.md was already largely v5-correct (state map +
+ritual cited .claude/decisions and .claude/runtime/state) — the J3 instruction assumed more drift
+than exists; corrected only the one genuinely stale ref (line 31) and did not manufacture changes.
+DEVIATION FLAGGED: install.ps1:53 still creates the Microsoft-specific entra/ dir (same ghost
+removed from install.sh) — install.ps1 was NOT in authorized scope, so surfaced not fixed; the
+new Windows line points newcomers at it, so it should get the same J5 treatment in a follow-up.
+
 ## v5.1 subtraction — ADR-0009 sub-skill collapse (2026-06-12, branch feat/v5.1-subtraction)
 
 - [x] 5 modules (ta/da/sc/dh/tq): add `## Sub-capability dispatch` table + short load-bearing subsections; `/li:<module> <capability>` shorthand; direct dispatch in single granularity; shed Pause-points/Hop-in/Voice boilerplate per docs/concepts/skill-protocol.md
@@ -108,3 +132,20 @@ the operator's vault through the new schema + hub + index, installed by li-vault
 
 Operator next: merge the chain in order (re-target #63 to main after #62), run
 li-migrate-claude-home on other repos, re-enable the vault sink in a personal pack override.
+
+## v5.2 gstack de-heritage — ADR-0011 (branch feat/v5.2-battletest)
+
+Classes A (attribution rewrites) / B (live coupling repairs) / B12 (REVIEW REPORT dual-accept).
+Reserved files (capture/context-save/-restore/resume/define/sense/plan/cycle SKILLs, bin/li-scaffold,
+bin/_audit.sh, lib/state.sh, secret/customer hooks, _patterns.sh, _input.sh) are NOT touched.
+
+- [x] A: office-hours:15 sibling sentence; open-managed-browser:4 v1_alias + :16 rationale; plan-{ceo,design,devex,eng}-review:16 own-purpose; bin/li-review-log header; bin/li-lessons-sync:3; 8x (legacy alias) deletes; agent-dispatch-rules:106; planner-as-module:55; scaffolding README:23; landing-report:58; DocWriter:55-56; scaffold-internal-tool:66/68/74/109; profile-switch:23/24
+- [x] B: autoplan:36/54 + 5 plan-review project paths gstack->lintel; clean:46/66/127 context_latest; plan-tune:140-141 delete; li-review-read one-time import (via audit_log, idempotent — tested); frontend-design-surface migrate disable-file; upstream-sources demote; layer-config disable; tests gstack-binaries-required tag removal (no test carries it)
+- [x] B12: heading rename writers (plan-eng-review:82, office-hours:104, autoplan:42) + dual-accept gate (plan-eng-review:116, grace 2026-09-12) + prose refs
+- [x] Validate: grep -i gstack over edited files (remaining hits all intentional); frontmatter-lint-all.sh rc=0 + no-swedish.sh rc=0; full shape suite green; audit-writes-via-helper rc=0
+
+### Review (gstack de-heritage)
+44 edits across 30 files. li-review-read import reworked to route through audit_log() after
+audit-writes-via-helper.sh caught a raw-append contract violation (the only test I broke; now green).
+One deviation flagged for operator: plan-design-review:75 external gstack `design` binary — NOT in the
+ADR row list, already guarded/optional/off the required path; left intact pending decision.

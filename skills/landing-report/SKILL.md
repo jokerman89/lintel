@@ -55,7 +55,7 @@ Landing Report: 2026-05-20 → 2026-05-27 (main, 7 days)
 
 ## Features (9)
 - skills: Phase 2 batch 5 — qa, qa-only, investigate, codex, careful (3a18068)
-- skills: Phase 2 batch 6 — browse, scrape, make-pdf, setup-browser-cookies, open-gstack-browser (547768c)
+- skills: Phase 2 batch 6 — browse, scrape, make-pdf, setup-browser-cookies, open-managed-browser (547768c)
 - skills: Phase 2 batch 7 — design-review, design-consultation, design-html, design-shotgun, devex-review (a60c46c)
 - skills: Phase 2b batch 8 — benchmark, canary, freeze, unfreeze, setup-deploy (f6f8ac3)
 - skills: Phase 2b batch 9 — learn, office-hours, retro, pair-agent, skillify (2dfdb55)

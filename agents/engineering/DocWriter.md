@@ -11,6 +11,7 @@ cli_support:
   - cli: codex
     level: full
 tier: permissive
+model: claude-haiku-4-5-20251001
 ---
 
 You are a documentation writer agent.
@@ -52,8 +53,8 @@ DocWriter: <doc path or scope>
 ## Drift detected (N)
 
 1. README.md:42 — outdated install command
-   Says: `npm install gstack`
-   Should: `npm install @jokerman/gstack`
+   Says: `npm install widget`
+   Should: `npm install @acme/widget`
    Fix applied: yes
 
 2. docs/api.md:128 — function signature drift

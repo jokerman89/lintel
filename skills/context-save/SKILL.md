@@ -28,7 +28,7 @@ Save the current session's load-bearing state to a checkpoint file so a fresh se
 
 - **No required arguments.** The skill reads:
   - Current branch via `git branch --show-current`
-  - SLUG via `gstack-slug` if available, else basename of repo
+  - SLUG via `_context_repo_slug` from `bin/_context.sh` (native — basename of the repo root; no external binary)
   - Recent uncommitted work via `git status -s` + `git diff --stat HEAD`
   - Active TODOs (this skill's own TodoWrite state if available, else `.claude/plans/todo.md`)
   - Last 3 user turns (operator pastes them if not introspectable)
@@ -153,5 +153,6 @@ This skill writes a checkpoint outside the committed tree (to the gitignored `.c
 ## See also
 
 - `/context-restore` — read a checkpoint into a fresh session
+- `/li:resume` — **paired with this skill**: resume discovers these checkpoints (newest-first via `context_latest`) and, when no cycle ledger exists, offers `/li:context-restore <path>` instead of misdirecting to a fresh cycle
 - `/clean` — manual self-maintenance trigger (offers to call this first)
 - Layer 4 `li-token-watcher` hook — surfaces this skill when token thresholds hit

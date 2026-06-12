@@ -137,7 +137,5 @@ Subsequent invocations: auto-decided as A.
 
 ## See also
 
-- `gstack-question-preference` binary (under the hood) — writes the JSONL
-- `gstack-question-log` binary — logs each question for analytics (separate from preferences)
 - `.claude/runtime/audit/question-preferences.jsonl` — authoritative preference file
 - `.claude/runtime/audit/questions.jsonl` — question telemetry (anonymized, opt-in)
