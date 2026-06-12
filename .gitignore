@@ -98,3 +98,6 @@ venv/
 NOTES.local.md
 TODO.local.md
 SCRATCH.md
+
+# Obsidian (repo may be opened as a read-only vault; never commit its state)
+.obsidian/

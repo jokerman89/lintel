@@ -196,6 +196,58 @@ If role was active during cycle:
 - Update role file with any new INSIGHTS learned (operator confirms)
 - Sensitivity-aware: if role is private, updates stay in `~/.lintel/roles/private/<role-id>.md`
 
+### Step 7b — Vault sink (session summary → knowledge vault)
+
+Config-gated, optional, NEVER blocking. Writes a short human-readable session summary to an
+external knowledge vault (e.g. an Obsidian vault) so the vault becomes the cross-repo memory
+layer. The repo's own capture artifacts (Steps 1–7) are unaffected — this is an additional
+sink, not a move. Nothing is ever read back from the vault into the repo.
+
+```bash
+source "$LINTEL_REPO_ROOT/lib/pack-resolver.sh"
+sink_enabled=$(resolve_pack_field capture.vault_sink_enabled)
+sink_path=$(resolve_pack_field capture.vault_sink_path)    # relative to repo root
+
+if [ "$sink_enabled" != "true" ]; then
+  : # disabled — skip silently
+elif [ ! -d "$REPO_ROOT/$sink_path" ]; then
+  echo "[lintel/capture] WARN: vault_sink path not found: $sink_path — skipping vault export"
+  audit_log capture vault_sink_skipped "reason=path_missing" "path=$sink_path"
+fi
+# A missing or disabled vault must NEVER fail CAPTURE — one-line warn, then move on.
+```
+
+When enabled and the path exists, write exactly ONE file per session,
+`<sink_path>/YYYY-MM-DD-<repo>-<short-slug>.md`:
+
+```markdown
+---
+created: YYYY-MM-DD
+tags: [session]
+repo: <repo-name>
+session: <cycle-id-if-available>
+---
+# <one-line session title>
+
+## What was done
+<3–8 lines, plain language, no code dumps>
+
+## Decisions
+<decisions taken, one line each; "None" if none>
+
+## Open threads
+<unfinished items / next steps; "None" if none>
+
+## Pointers
+- <repo-relative paths to the key files/PRs touched>
+```
+
+Source the content from the Step 1 cycle aggregation. **Hard rules:** no secrets or tokens, no
+customer or employer-internal data, no full file contents — repo-relative pointers instead of
+payloads. Render the headings AND body in the session's working language (the template above is
+the canonical English form — translate it wholesale when the session ran in another language).
+Frontmatter must parse. After writing: `audit_log capture vault_sink_written "file=<filename>"`.
+
 ### Step 8 — Retro (optional, light)
 
 Append to `~/.lintel/retros/<date>-<cycle-id>.md`:
@@ -335,6 +387,7 @@ YES — standalone post-implementation reflection. Useful if operator forgot CAP
 - `.lintel/state/00-state.md` (CAPTURE final entry)
 - `~/.lintel/analytics/cycle-completion.jsonl`
 - `~/.lintel/audit/granularity.jsonl` (append — actual-vs-estimated calibration record, via `audit_log`; read by `lib/scale-estimator.sh` `scale_calibrated_prior`)
+- `<capture.vault_sink_path>/YYYY-MM-DD-<repo>-<slug>.md` (optional — vault sink, Step 7b; only if `capture.vault_sink_enabled: true` and the path exists)
 
 **Triggers:**
 - Nothing automatically — cycle complete
