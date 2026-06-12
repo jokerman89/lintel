@@ -12,3 +12,6 @@ read them on demand.
 
 ## Hot notes
 <!-- agent-maintained: short, load-bearing facts; consolidate or supersede instead of appending forever -->
+- v5.0 (2026-06-12): this repo IS migrated — knowledge here, runtime in .claude/runtime/ (gitignored). PR chain #62→#63→#64→#65 open.
+- Conventions in force: supersede-don't-delete (`superseded_by:`), update-before-append (CAPTURE/learn), L-NNN grammar only, MEMORY.md ≤200 lines.
+- Helpers: lib/paths.sh (all paths), lib/memory.sh (lessons), bin/_context.sh (checkpoints), bin/li-migrate-claude-home, bin/li-vault-init.

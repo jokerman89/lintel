@@ -52,6 +52,21 @@ Independent review (L-007): SHIP-WITH-FIXES — 3 P1 (registry war, marker-on-pa
 - [x] docs/concepts: repo-as-read-vault workflow (.claude/ as mini-vault)
 - [x] ADR-0007 Obsidian integration scope
 
-## Review (fylls i vid task-slut)
+## Review (2026-06-12 — initiative complete in one session)
 
-- [ ] Per-phase: shape + unit green, independent CodeReviewer subagent on real diff (L-007), footer discipline (L-008), no `| tail` on runners (L-009)
+All three phases + Phase 0 shipped as a stacked PR chain: **#62** (vault sink, rebased clean)
+→ **#63** (.claude/ home, ADR-0005) → **#64** (memory v2, ADR-0006) → **#65** (Obsidian
+patterns, ADR-0007). Suite 74/74 on every pushed HEAD. Every phase went through the full
+L-007 loop — three independent reviews, three SHIP-WITH-FIXES verdicts, every P1/P2 acted on
+same-session. The reviews earned their keep: the registry-clobber race (A), the /li:learn
+grammar drift that would have made new lessons invisible to the new mechanical layer (B), and
+a unit test that could pollute the operator's real vault + a red committed suite my pre-commit
+run missed (C → L-010). Notable verification wins: the brief-forge evaluators turned out to
+ALREADY exist (the memory audit overclaimed the gap — L-003 again), and the .claude/rules
+native-loading claim was softened to documented reality after checking the actual docs/issues.
+Memory map, instruction files and scaffolding all moved in lockstep; the factory ran on
+itself (L-006): this repo is migrated, and the session note you are reading about landed in
+the operator's vault through the new schema + hub + index, installed by li-vault-init.
+
+Operator next: merge the chain in order (re-target #63 to main after #62), run
+li-migrate-claude-home on other repos, re-enable the vault sink in a personal pack override.
