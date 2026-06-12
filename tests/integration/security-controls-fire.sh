@@ -56,6 +56,10 @@ echo ""
 echo "[H8] override audits + newline-safe audit"
 rc=0; out=$( cd "$SB" && run_hook secret-scan-block 'LINTEL_OVERRIDE_SECRET=1 git commit -m x' 2>&1 ) || rc=$?
 echo "$out" | grep -q 'OVERRIDDEN' && pass "inline override recognized" || fail "inline override missed: $out"
+# NEGATIVE (review P0): the override token inside a -m MESSAGE must NOT suppress a real block
+( cd "$SB" && printf 'leak ghp_%s\n' "$(printf 'm%.0s' {1..36})" >> leak.txt && git add leak.txt )
+rc=0; ( cd "$SB" && run_hook secret-scan-block 'git commit -m "fix: see LINTEL_OVERRIDE_SECRET=1 in the docs"' ) >/dev/null 2>&1 || rc=$?
+[ "$rc" = "2" ] && pass "override token in -m message does NOT bypass (still blocks)" || fail "FORGEABLE OVERRIDE — token in message bypassed block (rc=$rc)"
 if grep -rqs '"override":"true"' "$LINTEL_AUDIT_DIR" "$SB/.claude/runtime/audit" 2>/dev/null; then
   pass "override audited"
 else

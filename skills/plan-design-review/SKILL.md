@@ -72,7 +72,7 @@ bin/li-review-log '{"skill":"plan-design-review","timestamp":"...","status":"...
 
 ## Visual sketch + outside voices (optional)
 
-If the plan benefits from visual exploration: optionally invoke the external `design` binary **only if** `~/.claude/skills/gstack/design/dist/design` exists — if it is not present, skip silently (no hard dependency). This binary is a non-first-party convenience; it is never on Lintel's required execution path. Either way, `/plan-design-review` is primarily critique, not generation.
+If the plan benefits from visual exploration: invoke Lintel's own `/li:design-shotgun` (parallel variants) or `/li:design-html` (single mockup) — first-party, no external dependency. Either way, `/plan-design-review` is primarily critique, not generation.
 
 Outside voices (Codex + Claude subagent) can propose alternative design directions. Always informational — user decides.
 

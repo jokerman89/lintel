@@ -33,5 +33,14 @@ TestRunner, ChangelogMaintainer) inherited the flagship model — a standing tok
 - Mechanical dispatches bill at the right tier without orchestrator vigilance.
 - New frontmatter fields are optional and Claude-Code-honored; the frontmatter-lint contract
   gains `memory` + `model` as recognized optional keys (not required).
-- Risk: `memory:` auto-enables Read/Write/Edit for the agent (platform behavior) — fine for
-  reviewers; we do NOT add it to agents that must stay read-only by contract.
+- Memory + tools contract (corrected after the v5.2 review flagged a contradiction): setting
+  `memory:` makes Claude Code auto-enable Write/Edit **for the agent to manage its own
+  `.claude/agent-memory/<name>/MEMORY.md`** — it is not a license for the agent to modify the
+  repo; the agent's task stays whatever its prompt + tools list say (our review/audit agents
+  remain read-only reviewers that additionally keep a memory file). So `memory: project` IS
+  correct on the read-only-tooled reviewers/auditors — that is the entire point (a reviewer that
+  remembers this repo's prior findings). The earlier draft of this ADR wrongly said "do NOT add
+  to read-only agents"; that exclusion only applies to an agent whose PROMPT must guarantee
+  zero side effects of any kind (none of our reviewers make that guarantee — they were always
+  spawned per-task and discarded). Pure search agents (Explorer, ReadOnly) are excluded from
+  `memory:` for a different reason: they have nothing to compound, and get `model:` instead.

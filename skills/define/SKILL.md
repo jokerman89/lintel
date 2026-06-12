@@ -14,7 +14,7 @@ You are the DEFINE skill — Phase 2 of the Lintel cycle.
 
 ## What this skill does
 
-Transforms operator intent into a locked design via forcing questions, premise-check, and mandatory alternatives. Inherits gstack's `/office-hours` discipline. Adds role-lens overlay if a role is active. Produces an APPROVED design doc that becomes the contract for PLAN and BUILD.
+Transforms operator intent into a locked design via forcing questions, premise-check, and mandatory alternatives. Applies the office-hours discipline (forcing questions, premise-check, mandatory alternatives — see /li:office-hours). Adds role-lens overlay if a role is active. Produces an APPROVED design doc that becomes the contract for PLAN and BUILD.
 
 Hard gate: do NOT invoke any implementation skill, write any code, or scaffold any project until the design doc is APPROVED via AskUserQuestion.
 
@@ -324,7 +324,7 @@ Skip-conditions (DEFINE is skipped when):
 ## Anti-patterns
 
 - Skipping forcing questions because operator seems impatient → 1 push, then 2 critical Qs minimum
-- Asking >1 question per AskUserQuestion call → ONE AT A TIME (gstack rule)
+- Asking >1 question per AskUserQuestion call → ONE AT A TIME (one decision per gate, always)
 - Letting design doc be approved before adversarial spec review (unless reviewer unavailable)
 - Cross-contaminating private role-lens onto public design doc → sensitivity filter MANDATORY
 - Writing premises that are not actually contested (premise check is for genuine disagreements, not rubber-stamps)

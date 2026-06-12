@@ -23,7 +23,8 @@ if ! printf '%s' "$CMD" | grep -qE '(^|[^A-Za-z0-9_-])git([[:space:]]|$).*\b(com
 fi
 
 # Override FIRST so it always audits (battletest H8). Honor env OR command-string token.
-if [ "${LINTEL_OVERRIDE_CUSTOMER_DATA:-}" = "1" ] || printf '%s' "$CMD" | grep -q 'LINTEL_OVERRIDE_CUSTOMER_DATA=1'; then
+# Override via env OR LEADING env-assignment prefix only — never a -m message (review P0).
+if [ "${LINTEL_OVERRIDE_CUSTOMER_DATA:-}" = "1" ] || printf '%s' "$CMD" | grep -qE '^[[:space:]]*([A-Za-z_][A-Za-z0-9_]*=[^[:space:]]*[[:space:]]+)*LINTEL_OVERRIDE_CUSTOMER_DATA=1([[:space:]]|=|$)'; then
   reason="${LINTEL_OVERRIDE_REASON:-no-reason-given}"
   audit_log "hooks" "customer_data_block" "hook=customer-data-block" "tier=OVERRIDDEN" "override=true" "reason=$reason" "blocked=false"
   echo "INFO [Lintel hook]: customer-data-block OVERRIDDEN (reason: $reason). Audit-logged."

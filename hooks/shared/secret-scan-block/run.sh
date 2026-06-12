@@ -28,7 +28,11 @@ fi
 # audits (battletest H8: the override branch sat after the matcher and an inline
 # `LINTEL_OVERRIDE_SECRET=1 git commit` left no record). Honor either the hook's
 # own env OR the token in the command string the operator typed.
-if [ "${LINTEL_OVERRIDE_SECRET:-}" = "1" ] || printf '%s' "$CMD" | grep -q 'LINTEL_OVERRIDE_SECRET=1'; then
+# Honor the override via the hook's env OR a LEADING env-assignment on the
+# command (`LINTEL_OVERRIDE_SECRET=1 [VAR=v ...] git commit …`) — NEVER the token
+# appearing inside a quoted arg / -m message (review P0: that re-opened a
+# forgeable fail-open). The anchored prefix is what the operator actually types.
+if [ "${LINTEL_OVERRIDE_SECRET:-}" = "1" ] || printf '%s' "$CMD" | grep -qE '^[[:space:]]*([A-Za-z_][A-Za-z0-9_]*=[^[:space:]]*[[:space:]]+)*LINTEL_OVERRIDE_SECRET=1([[:space:]]|=|$)'; then
   reason="${LINTEL_OVERRIDE_REASON:-no-reason-given}"
   audit_log "hooks" "secret_scan_block" "hook=secret-scan-block" "tier=OVERRIDDEN" "override=true" "reason=$reason" "blocked=false"
   echo "INFO [Lintel hook]: secret-scan-block OVERRIDDEN by operator (reason: $reason). Audit-logged."
