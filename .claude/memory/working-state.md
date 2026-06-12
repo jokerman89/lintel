@@ -20,6 +20,19 @@ Cross-session working state (ej durable rules — that's [[lessons.md]]; ej pers
 **Last touched:** YYYY-MM-DD
 -->
 
+## v5.1-subtraction — PR #67 OPEN 2026-06-12
+
+**Status:** active — chain now #62→#63→#64→#65→#66→#67
+
+**What shipped:** ADR-0009 — skill-protocol.md (defaults stated once), 35 sub-skills →
+5 dispatch tables, roles 8→3, gbrain + WorkshopFacilitator pruned, 41 aliases.
+166→124 skills, 27.0k→20.8k lines (−23%), suite 75/75. Review: zero lost thresholds.
+L-011 captured (structural estimates are ceilings).
+
+**Last touched:** 2026-06-12
+
+---
+
 ## v5.0-claude-home — three stacked PRs OPEN 2026-06-12
 
 **Status:** active — awaiting PR merges

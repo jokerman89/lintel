@@ -204,3 +204,26 @@ while measuring the wrong thing).
 - Reviewers: always run the suite yourself on the actual commits (this is what caught it).
 
 Related: [[L-009]] silence-is-not-success, [[L-007]] independent review catches self-test blind spots.
+
+## L-011 — Structural metrics give subtraction CEILINGS, not targets (v5.1)
+
+**Rule:** When an audit estimates removable surface from structural metrics (line counts of
+boilerplate-shaped sections, duplication counts), treat the number as a ceiling. The actual
+cut is decided by a judgment pass per file — and will land meaningfully lower, because
+sections that pattern-match "ceremony" often carry real gates.
+
+**Why:** The v5.1 subtraction: the fit audit measured ~30-38% (5.4-8.2k lines) of ceremony;
+the judgment-applied diet removed ~700 lines of it — the rest was customer-data gates,
+license confirms, verdict taxonomies and operator pause-gates wearing boilerplate headings.
+Total release still cut 23% (6.2k lines) because the FILE-level cuts (35 single-caller
+sub-skills, role CRUD) delivered what the SECTION-level diet could not. Plan subtraction
+around structural units (files with one caller, zero refs), not prose-shaped estimates.
+
+**How to apply:**
+- Audit phase: report both numbers — the structural ceiling AND a sampled judgment estimate.
+- Execution: give diet agents keep-by-exception rules and require per-file justification for
+  keeps; the exceptions list is the real finding.
+- Don't chase the ceiling: stopping at "everything left deviates from the default" IS done.
+
+Related: [[L-003]] verify counts — same family: a measured number is an input to judgment,
+not a commitment.
