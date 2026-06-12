@@ -229,23 +229,24 @@ session: <cycle-id-if-available>
 ---
 # <one-line session title>
 
-## Vad gjordes
+## What was done
 <3–8 lines, plain language, no code dumps>
 
-## Beslut
-<decisions taken, one line each; "Inga" if none>
+## Decisions
+<decisions taken, one line each; "None" if none>
 
-## Öppna trådar
-<unfinished items / next steps; "Inga" if none>
+## Open threads
+<unfinished items / next steps; "None" if none>
 
-## Pekare
+## Pointers
 - <repo-relative paths to the key files/PRs touched>
 ```
 
 Source the content from the Step 1 cycle aggregation. **Hard rules:** no secrets or tokens, no
 customer or employer-internal data, no full file contents — repo-relative pointers instead of
-payloads. Swedish or English — match the session's working language. Frontmatter must parse.
-After writing: `audit_log capture vault_sink_written "file=<filename>"`.
+payloads. Render the headings AND body in the session's working language (the template above is
+the canonical English form — translate it wholesale when the session ran in another language).
+Frontmatter must parse. After writing: `audit_log capture vault_sink_written "file=<filename>"`.
 
 ### Step 8 — Retro (optional, light)
 

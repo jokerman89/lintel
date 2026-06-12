@@ -50,9 +50,12 @@ lessons:
   operator_lessons: ~/.lintel/lessons.md          # operator's own (never in pack)
 
 # ─── Capture (Phase 8 session-end) ─────────────────────────────────────────
+# Neutral default: OFF. Operators opt in via their own pack (or a local
+# ~/.lintel/packs/_default override): set enabled + a path relative to the
+# repo root. Missing path → one WARN + skip, never fails CAPTURE.
 capture:
-  vault_sink_enabled: true                        # ALSO write a session summary to an external knowledge vault
-  vault_sink_path: ../jokerman-vault/50-sessions  # relative to repo root; missing path → one WARN + skip, never fails
+  vault_sink_enabled: false                       # ALSO write a session summary to an external knowledge vault
+  vault_sink_path: null                           # e.g. ../my-vault/50-sessions (relative to repo root)
 
 # ─── Opinions ──────────────────────────────────────────────────────────────
 opinions:
