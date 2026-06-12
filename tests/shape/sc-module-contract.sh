@@ -55,12 +55,17 @@ for g in full loop single; do
   fi
 done
 
-# 7 sub-skills
-for sub in sc-threat-model sc-secret-management sc-auth-flow sc-compliance-evidence sc-audit-path sc-dependency-security sc-incident-runbook; do
-  if [ -f "$REPO_ROOT/skills/$sub/SKILL.md" ]; then
-    pass "sub-skill $sub present"
+# Sub-capability dispatch table (ADR-0009 — sub-skill files collapsed into the module)
+if grep -q "^## Sub-capability dispatch" "$REPO_ROOT/skills/sc/SKILL.md"; then
+  pass "SC declares Sub-capability dispatch section"
+else
+  fail "SC MISSING Sub-capability dispatch section"
+fi
+for cap in threat-model secret-management auth-flow compliance-evidence audit-path dependency-security incident-runbook; do
+  if grep -qE "^\|[[:space:]]*\`${cap}\`[[:space:]]*\|" "$REPO_ROOT/skills/sc/SKILL.md"; then
+    pass "dispatch row '$cap' present"
   else
-    fail "sub-skill $sub MISSING"
+    fail "dispatch row '$cap' MISSING"
   fi
 done
 

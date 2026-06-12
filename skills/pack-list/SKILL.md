@@ -102,20 +102,6 @@ Footer:
 - "Create new: `/li:pack-create <name>`"
 - "Validate all: `/li:pack-list --validate`"
 
-## Status protocol
-
-- **DONE** — listing surfaced
-- **DONE_WITH_CONCERNS** — listing surfaced, one or more packs failed validation (only when --validate)
-- **BLOCKED** — neither home nor repo packs dir exists (shouldn't happen since _default ships)
-
-## Pause-points
-
-None — pack-list is single-shot read-only.
-
-## Hop-in support
-
-None.
-
 ## Integration
 
 **Reads:**

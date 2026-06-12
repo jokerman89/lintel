@@ -204,10 +204,6 @@ Same as generate-web (per existing v3.5 pattern):
 - Build smoke-test fail: surface diagnostic + offer retry
 - Customer-share + voice-gate fail: BLOCKED for operator-review
 
-## Hop-in support
-
-YES — solo-invocable (given an existing frontend-design-spec.json).
-
 ## Integration
 
 **Reads:**

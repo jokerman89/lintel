@@ -169,10 +169,6 @@ Aggregate all issues, compute summary stats, set `qa_pass: (errors == 0)`. Write
 
 Print: total checks, pass/warn/err counts, qa_pass status, auto-fix count, top 3 unresolved errors.
 
-## Voice tier behavior
-
-`voice: internal`. QA-report is operator-facing intermediate artifact. QA itself runs no voice-gate; it just CHECKS voice constraints. For the voice GATE, use the active pack's compliance gates separately (typically at orchestrator level).
-
 ## Status protocol
 
 - **DONE** — qa-report written, qa_pass=true (zero errors)
@@ -184,10 +180,6 @@ Print: total checks, pass/warn/err counts, qa_pass status, auto-fix count, top 3
 
 - Auto-fix would substantially modify artifact (> 20% changes): confirm with operator before applying
 - Vocabulary-blocklist match in customer-share context but operator hasn't run the active pack's compliance gates: surface recommendation to run the voice-gate
-
-## Hop-in support
-
-YES — heavily-used as solo skill. Run on any artifact at any time.
 
 ## Integration
 

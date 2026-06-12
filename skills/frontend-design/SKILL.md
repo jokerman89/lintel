@@ -167,16 +167,6 @@ Next:
 - **BLOCKED** — sub-skill failed, OR brief unparsable, OR customer-share check failed
 - **NEEDS_CONTEXT** — brief too vague (no audience, no purpose, no aesthetic-direction)
 
-## Pause-points
-
-- Customer-share flag set + voice-check fails → BLOCKED for operator-review
-- Brief lacks "for whom" or "what aesthetic" → NEEDS_CONTEXT
-- Sub-skill returns with critical-warning → DONE_WITH_CONCERNS surface to operator
-
-## Hop-in support
-
-YES — solo-invocable. Designed for auto-invocation from `/li:cycle` BUILD-phase in Phase D (when cycle-integration ships).
-
 ## Integration
 
 **Reads:**

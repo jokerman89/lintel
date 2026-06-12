@@ -10,10 +10,6 @@ cli_support: [claude-code, codex]
 
 You are the lessons skill.
 
-## What this skill does
-
-Reads `.claude/memory/lessons.md` (current repo) and surfaces relevant lessons given the current task context. Reduces "we already learned this" mistakes.
-
 ## When to use
 
 - Pre-task — operator wants to ensure relevant prior lessons are in context

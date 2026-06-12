@@ -10,12 +10,6 @@ cli_support: [claude-code, codex]
 
 You are the lessons-promote skill.
 
-## What this skill does
-
-Promotes a single lesson from the current repo's `.claude/memory/lessons.md` to Lintel's global `scaffolding/01-foundation/.claude/memory/lessons.md`. Once promoted, every new repo scaffolded via `lintel scaffold init` includes that lesson as baseline.
-
-This is how operator-discovered patterns become team-wide knowledge.
-
 ## When to use
 
 - A lesson learned in current repo is genuinely general (not repo-specific)

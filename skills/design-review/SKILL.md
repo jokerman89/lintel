@@ -102,10 +102,6 @@ Overall: 7.8/10
 - Customer-data scan on captured DOM — if real customer data appears in the screenshot/DOM, the artifact is auto-quarantined to `~/.lintel/quarantine/` and the run is marked FAILED (no review possible on un-sanitized data).
 - Brand consistency pillar reads from project CLAUDE.md's frozen-zone + token rules. Lintel does not opine on what brand consistency means — the repo does.
 
-## Voice tier note
-
-`voice: internal`. Critique-of-customer-facing content is still engineering-internal output. The copy pillar references the active pack's voice as a *standard to check against*, not voice this skill produces.
-
 ## Failure modes
 
 - **URL unreachable:** report + exit. No partial review.

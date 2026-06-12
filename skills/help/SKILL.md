@@ -118,10 +118,6 @@ shim at .github/copilot-instructions.md for the parts that DO port.
 - **Filter matches zero skills:** report "no skills match these filters" + suggest dropping a flag.
 - **Multiple Lintel versions installed (manifest + filesystem disagree):** flag drift.
 
-## Compliance integration
-
-None — read-only meta information.
-
 ## Failure modes
 
 - **`~/.claude/skills/` doesn't exist:** report "no Claude Code skills directory found."

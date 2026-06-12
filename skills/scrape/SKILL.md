@@ -94,10 +94,6 @@ Output: ~/.lintel/scrape-runs/20260527-161033/results.json
 - Rate-limit enforced to avoid hammering target sites. Default 1s/host is conservative.
 - Per-call auth required if any URL hostname matches `~/.lintel/compliance/auth-required-hosts.txt`.
 
-## Voice tier note
-
-`voice: internal`. Scrape reports are engineering-internal — counts and paths, no narrative.
-
 ## Failure modes
 
 - **Schema YAML invalid:** parse error with line:col + bail before any fetch.

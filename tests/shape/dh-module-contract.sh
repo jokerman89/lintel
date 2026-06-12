@@ -40,10 +40,13 @@ for g in full loop single; do
   else fail "DH MISSING granularity '$g'"; fi
 done
 
-# 7 sub-skills
-for sub in dh-deployment-plan dh-observability-spec dh-sli-slo-spec dh-cost-projection dh-rollback-strategy dh-capacity-headroom dh-on-call-playbook; do
-  if [ -f "$REPO_ROOT/skills/$sub/SKILL.md" ]; then pass "sub-skill $sub present"
-  else fail "sub-skill $sub MISSING"; fi
+# Sub-capability dispatch table (ADR-0009 — sub-skill files collapsed into the module)
+if grep -q "^## Sub-capability dispatch" "$REPO_ROOT/skills/dh/SKILL.md"; then
+  pass "DH declares Sub-capability dispatch section"
+else fail "DH MISSING Sub-capability dispatch section"; fi
+for cap in deployment-plan observability-spec sli-slo-spec cost-projection rollback-strategy capacity-headroom on-call-playbook; do
+  if grep -qE "^\|[[:space:]]*\`${cap}\`[[:space:]]*\|" "$REPO_ROOT/skills/dh/SKILL.md"; then pass "dispatch row '$cap' present"
+  else fail "dispatch row '$cap' MISSING"; fi
 done
 
 # 2 new agents

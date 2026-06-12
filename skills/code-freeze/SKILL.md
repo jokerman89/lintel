@@ -79,10 +79,6 @@ This is enforced at skill-author-level (every skill includes the check). Future 
 - Freeze cannot prevent Layer 2 always-on checks (those override). E.g. you can't freeze "skip the sanity-scan" — the sanity-scan is Layer 2.
 - Freeze IS load-bearing for frozen-zone enforcement: project CLAUDE.md frozen-zone files SHOULD be added to freeze on session start by `/context-restore` or `/help`.
 
-## Voice tier note
-
-`voice: internal`. Freeze ops are engineering-internal.
-
 ## Failure modes
 
 - **Path doesn't exist:** WARN, still add to freeze (you may be locking a path that will be created — refusal is "do not create this path either").

@@ -6,6 +6,7 @@ color: orange
 tools: Read, Bash, Grep, Glob
 voice: internal
 cli_support: [claude-code, codex]
+hop_in: no
 ---
 
 # /plan-devex-review
@@ -13,6 +14,8 @@ cli_support: [claude-code, codex]
 Reviews a plan's impact on developer experience (DX). DX is a leading indicator of code quality — slow CI, bad local dev, painful deploys → worse software, higher attrition. Optional review tier.
 
 Lintel version inspired-by gstack equivalent. Scores against DX pillars. Surfaces time-to-hello-world (TTHW) as the headline metric.
+
+Not solo-invokable without input: requires an existing plan/design doc — produce one via `/office-hours` first.
 
 ## When to use
 
@@ -72,14 +75,6 @@ Persist via first-party `bin/li-review-log` (legacy alias: gstack-review-log):
 ```bash
 bin/li-review-log '{"skill":"plan-devex-review","timestamp":"...","status":"...","initial_score":N,"overall_score":N,"product_type":"...","tthw_current":"...","tthw_target":"...","mode":"...","persona":"...","competitive_tier":"...","unresolved":N,"commit":"..."}'
 ```
-
-## Compliance integration
-
-None directly. DX is engineering-internal.
-
-## Voice tier note
-
-`voice: internal`. Reviewers and the team are the audience.
 
 ## Failure modes
 

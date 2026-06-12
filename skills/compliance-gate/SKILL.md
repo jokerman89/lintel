@@ -143,10 +143,6 @@ Return code: 0 (green), 1 (yellow), 2 (red).
 - **BLOCKED** — verdict red OR gate-execution failed on multiple gates
 - **NEEDS_CONTEXT** — invocation without a scope when the repo has multiple sub-projects
 
-## Hop-in support
-
-YES — solo-invokable. Designed for pre-customer-share + pre-ship integration.
-
 ## Integration
 
 **Reads:**

@@ -2,6 +2,23 @@
 
 All notable changes to this repo are tracked here. Format is loose — date headings + bulleted changes. Major behavior changes to the canonical instructions are also logged in `scaffolding/EVOLUTION-LOG.md` (which travels with each scaffolded repo).
 
+## 5.1.0 — 2026-06-12
+
+The subtraction release (ADR-0009): same capability, 23% less surface.
+
+### Removed
+- 35 engineering sub-skill files (ta-/da-/sc-/dh-/tq-*) — collapsed into per-module dispatch tables; invoke as `/li:<module> <capability>` (35 aliases, grace to 2026-09-12)
+- Role family 8 → 3: `role` (lifecycle flags) + `role-new --update` + `roles-list` (6 aliases)
+- gbrain-setup, gbrain-sync, WorkshopFacilitator agent (zero references; setup-brain/sync-brain aliases retired)
+- ~700 lines of protocol boilerplate across ~90 skills — defaults now stated once in docs/concepts/skill-protocol.md; sections remain only on deviation
+
+### Added
+- docs/concepts/skill-protocol.md — the canonical skill protocol
+- Optional frontmatter `hop_in: no` for non-solo-invokable skills
+
+### Numbers
+- Skills: 166 → 124 · agents: 70 → 69 · skill surface: 27.0k → 20.8k lines · suite 75/75
+
 ## 5.0.0 — 2026-06-12
 
 The ".claude/ home" major: one circle of control per repo, mechanical memory, zero-setup activation.

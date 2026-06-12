@@ -132,10 +132,6 @@ fi
 
 Agent can return visual_thesis="none" if the brief doesn't warrant a shader. Skill body STILL emits valid JSON so orchestrator-Step-5 synthesis can handle `shader: null` gracefully.
 
-## Voice tier behavior
-
-`voice: internal`. Default. `--customer-share` triggers `/li:compliance-gate --check shader-licensing`.
-
 ## Status protocol
 
 - **DONE** — shader.json written, schema valid, library + perf-budget non-empty (OR visual_thesis="none")
@@ -148,10 +144,6 @@ Agent can return visual_thesis="none" if the brief doesn't warrant a shader. Ski
 - Customer-share + library has obscure license → flag explicit
 - Brief mentions specific shader-lib agent doesn't know → may need NEEDS_CONTEXT
 - visual_thesis="none" — short-circuit confirmation to operator (no shader is fine)
-
-## Hop-in support
-
-YES — solo-invocable.
 
 ## Integration
 

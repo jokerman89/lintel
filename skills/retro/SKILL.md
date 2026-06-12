@@ -86,16 +86,6 @@ Signals: 7 commits, 32 audit entries, 14 skill invocations
 3. Skillify-candidate — "Recurring batch-skill workflow (mkdir × 5 + Write × 5 + commit + push) could become /batch-skills." [y/n]
 ```
 
-## Compliance integration
-
-- Read-only on audit logs (which are append-only by design).
-- Retro output sanity-scanned before optional `--out` write.
-- Lesson proposals go through `/learn`'s Layer 2 scan when emitted.
-
-## Voice tier note
-
-`voice: internal`. Reflection is engineering-internal.
-
 ## Failure modes
 
 - **No commits in window:** report empty retro, suggest widening `--since`.

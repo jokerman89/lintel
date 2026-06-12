@@ -95,20 +95,9 @@ Effective field changes (next session):
 
 Operator sees what changes before living with the new pack.
 
-## Status protocol
-
-- **DONE** — active-pack file updated, next session will use target pack
-- **DONE_WITH_CONCERNS** — target validates but field-diff surfaced large changes
-- **BLOCKED** — target pack doesn't validate
-- **NEEDS_CONTEXT** — operator didn't provide a name
-
 ## Pause-points
 
 - Step 3: confirm switch when current ≠ target (skipped with `--auto`)
-
-## Hop-in support
-
-None — pack-switch is single-shot.
 
 ## Integration
 

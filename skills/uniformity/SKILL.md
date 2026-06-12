@@ -93,20 +93,12 @@ case "$mode" in
 esac
 ```
 
-## Voice tier behavior
-
-`voice: internal`. Operator-only diagnostic. No customer-bound output.
-
 ## Status protocol
 
 - **DONE** — floor verdict + adoption summary printed
 - **NEEDS_ACTION** — the floor shape-test FAILED (a workflow_root skill or block-hook
   lacks `necessity:`); the offending component(s) are named in the test output and
   must be backfilled
-
-## Hop-in support
-
-YES — always solo-invocable. Pure read, safe to call anytime.
 
 ## Integration
 

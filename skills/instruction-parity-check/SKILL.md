@@ -145,10 +145,6 @@ mkdir -p "$(dirname "$REPORT")"
 # 2 = fail (major drift, multi-CLI promise broken)
 ```
 
-## Voice tier behavior
-
-`voice: internal`. Operator-internal multi-CLI maintenance pass.
-
 ## Status protocol
 
 - **DONE** — report rendered, all 6 files compared, no major drift
@@ -160,10 +156,6 @@ mkdir -p "$(dirname "$REPORT")"
 
 - 1+ files missing: surface + ask whether to proceed with partial-comparison
 - Major drift detected on all key sections: surface aggressively, recommend halting the multi-CLI release
-
-## Hop-in support
-
-YES — solo-invocable + CI-integrated.
 
 ## Integration
 

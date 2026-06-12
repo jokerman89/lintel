@@ -99,26 +99,6 @@ Glob across days. Surface:
 
 The operator can trigger compaction via `/li:usage-log --compact`.
 
-## Voice tier behavior
-
-`voice: internal`. Telemetry is operator-internal observability. Never customer-bound, no voice-gate.
-
-## Status protocol
-
-- **DONE** — writer-append complete OR reader-report rendered
-- **DONE_WITH_CONCERNS** — append complete but file-rotation or compaction failed non-fatally
-- **BLOCKED** — `~/.lintel/audit/` write-permission missing
-- **NEEDS_CONTEXT** — reader mode without a `--report` / `--topn` / `--tokens-by-skill` flag
-
-## Pause-points
-
-- File-rotation conflict (concurrent invocations try to rotate in the same minute) — the atomic-mv pattern resolves this
-- Quarterly compaction takes > 30s — surface progress, allow operator interrupt
-
-## Hop-in support
-
-YES — reader mode is solo-invokable. Writer mode runs automatically via the wrapper-hook.
-
 ## Integration
 
 **Reads (writer mode):**

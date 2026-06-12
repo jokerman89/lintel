@@ -90,15 +90,6 @@ ts: <timestamp>
 items_marked: <N>
 ```
 
-## Status protocol
-
-- DONE — markers applied
-- DONE_WITH_CONCERNS — markers don't actually reduce context in Claude Code; surface caveat
-
-## Hop-in support
-
-YES.
-
 ## Integration
 
 Reads `.claude/runtime/state/context-budget.md`. Writes `.claude/runtime/state/context-ignore.md` for coordination.
@@ -107,7 +98,3 @@ Reads `.claude/runtime/state/context-budget.md`. Writes `.claude/runtime/state/c
 
 - **Treating "cool" as true budget reduction** — it's coordination, not memory cleanup
 - **Cooling too aggressively** — operator loses access if they need files later (would need re-warm)
-
-## Voice tier behavior
-
-`voice: internal`.

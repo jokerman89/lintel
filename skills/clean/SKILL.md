@@ -121,10 +121,6 @@ Lintel can't compact your conversation. Only Claude can. This skill:
 
 That's the design per office-hours D5 (hybrid soft-warning + manual /clean) and reframed per eng-review A5 (watchers, not "self-maintenance").
 
-## Compliance integration
-
-None directly. /clean reads + reports; doesn't touch code or external systems.
-
 ## Failure modes
 
 - **Token count estimation off:** report it's an estimate, not authoritative.

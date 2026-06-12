@@ -195,10 +195,6 @@ Next:
   Diff vs another:  diff <out_dir>/pattern.json <other-out>/pattern.json
 ```
 
-## Voice tier behavior
-
-`voice: internal`. Default. `--customer-share` triggers `/li:compliance-gate` if source-artifacts are customer-owned (re-use questions).
-
 ## Status protocol
 
 - **DONE** — all 4 required files emitted + schema valid
@@ -211,10 +207,6 @@ Next:
 - Vault-collision: surface options (overwrite | pick different name | abort) (m-3 resolution)
 - Customer-share + source is customer-site: ask if extraction is authorized re-use
 - Extraction-confidence low: surface "we inferred X from screenshot — verify before applying"
-
-## Hop-in support
-
-YES — solo-invocable.
 
 ## Integration
 

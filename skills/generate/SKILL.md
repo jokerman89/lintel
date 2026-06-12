@@ -133,8 +133,6 @@ ts: <iso-8601>
 - **Default `internal`** — content is operator-facing intermediate artifact. No customer-bound gate required.
 - **`--customer-share` flag** — content will be delivered to customer. The active pack's compliance gates apply (`resolve_pack_field compliance.hooks`; none by default). Voice tier upgraded per pack. Vocabulary-blocklist enforced if the pack defines one.
 
-Compliance gate runs at orchestrator level (Step 6). Format-builders inherit gated content; they apply brand/honest-limitations/provenance gates per format.
-
 ## Status protocol
 
 - **DONE** — all formats produced + qa_pass=true + run_dir printed
@@ -147,10 +145,6 @@ Compliance gate runs at orchestrator level (Step 6). Format-builders inherit gat
 - Brief is ambiguous: surface back to operator + offer 3 interpretations
 - Pack compliance gate fails + `--customer-share`: hard-block, surface the failing gate
 - Slot-format requested: confirm with operator that AI will generate content fresh (no pre-curated content per L-001)
-
-## Hop-in support
-
-YES — single-invocation orchestrator. Always entry-point. Can be invoked mid-cycle if operator decides to materialize a deliverable.
 
 ## Integration
 

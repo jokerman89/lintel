@@ -1,7 +1,7 @@
 ---
 name: CapacityPlanner
 category: engineering
-description: Capacity modeling + bottleneck identification + cost projection. Produces per-component throughput/latency/resource projections against a scaling target. Spawned by TA module's scaling-plan sub-skill.
+description: Capacity modeling + bottleneck identification + cost projection. Produces per-component throughput/latency/resource projections against a scaling target. Spawned by TA module's scaling-plan capability.
 color: amber
 tools: Read, Grep, Glob
 voice: internal
@@ -24,7 +24,7 @@ You are the CAPACITY PLANNER — you turn a scaling target into a capacity model
 
 ## When you're spawned
 
-- TA sub-skill `ta-scaling-plan` spawns you with brief containing scaling target + perf baseline + dependency graph
+- TA capability `scaling-plan` (`/li:ta scaling-plan`) spawns you with brief containing scaling target + perf baseline + dependency graph
 - Optionally TA full pass non_functionals_specified checkpoint after NFR spec needs capacity context
 
 ## Your stance
@@ -116,4 +116,4 @@ Internal. You produce operator-facing capacity specs. No customer-facing voice.
 
 ## How operators read your output
 
-Capacity model goes to `.claude/runtime/state/ta/capacity-model.md`. Bottlenecks go to `.claude/runtime/state/ta/bottleneck-mitigations.md`. Cost projection inline in capacity model. Operators consume via TA scaling-plan sub-skill report.
+Capacity model goes to `.claude/runtime/state/ta/capacity-model.md`. Bottlenecks go to `.claude/runtime/state/ta/bottleneck-mitigations.md`. Cost projection inline in capacity model. Operators consume via TA scaling-plan capability report.

@@ -84,21 +84,6 @@ loaded: <count>
 tokens_added: <approx>
 ```
 
-## Status protocol
-
-- **DONE** — files loaded
-- **DONE_WITH_CONCERNS** — partial load (operator selected subset)
-- **BLOCKED** — no files matched OR operator canceled
-- **NEEDS_CONTEXT** — operator didn't specify topic
-
-## Pause-points
-
-- Confirm load (always, since heuristic can be wrong)
-
-## Hop-in support
-
-YES.
-
 ## Integration
 
 Reads codebase + delegates to `/li:context-warm`. Writes to budget tracking via that skill.
@@ -108,7 +93,3 @@ Reads codebase + delegates to `/li:context-warm`. Writes to budget tracking via 
 - **Loading 50+ files because "related" is broad** — cap at N=10 default, operator can extend
 - **Skipping confirmation** — heuristic match isn't always right
 - **Using broad topics like "api"** — too many matches; suggest narrower
-
-## Voice tier behavior
-
-`voice: internal`.

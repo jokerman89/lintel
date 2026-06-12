@@ -112,10 +112,6 @@ Written to: voice-calibration.md
 - Audit-logged each run: `.claude/runtime/audit/eval-runs.jsonl`.
 - Calibration snapshot stamped with run-id; downstream consumers reference snapshots for stability.
 
-## Voice tier note
-
-`voice: internal`. Eval report is engineering-internal; the SUBJECT is the pack's voice tier.
-
 ## Failure modes
 
 - **Corpus YAML parse error:** report the offending entry, exit. Operator fixes.

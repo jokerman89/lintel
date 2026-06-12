@@ -94,10 +94,6 @@ CI: github
 - Pre-wires a preferred-vendor baseline (pack-configurable; none by default): no third-party SDKs added by default.
 - No voice gates (this is internal-tool, no customer surface).
 
-## Voice tier note
-
-`voice: internal`. Skill produces internal-tooling scaffold — no elevated-tier surface involved.
-
 ## Failure modes
 
 - **Path exists + not empty:** ask whether to merge or pick new path.

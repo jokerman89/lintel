@@ -6,6 +6,7 @@ color: purple
 tools: Read, Bash, Grep, Glob
 voice: internal
 cli_support: [claude-code, codex]
+hop_in: no
 ---
 
 # /plan-ceo-review
@@ -73,14 +74,6 @@ Persist via first-party `bin/li-review-log` (legacy alias: gstack-review-log):
 ```bash
 bin/li-review-log '{"skill":"plan-ceo-review","timestamp":"...","status":"...","scope_proposed":N,"scope_accepted":N,"scope_deferred":N,"mode":"...","commit":"..."}'
 ```
-
-## Compliance integration
-
-The 5 always-on rules apply during the review (don't surface customer data in the review prose). Otherwise no specific compliance hooks.
-
-## Voice tier note
-
-This skill's output uses `voice: internal` — direct, operator-to-operator. Even when reviewing a customer-facing product, the review itself is for the internal team. No elevated voice tier applies regardless of the active pack.
 
 ## Failure modes
 

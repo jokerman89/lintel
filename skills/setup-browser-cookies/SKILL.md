@@ -75,10 +75,6 @@ Service registered in services.yaml
 - NEVER prompts operator for passwords. NEVER captures keystrokes. NEVER reads the browser's password autofill store.
 - Cookie store excluded from gstack/lintel brain-sync by default (per Layer 2 secrets-rule). If sync is enabled: a hook will block.
 
-## Voice tier note
-
-`voice: internal`. Setup operations are engineering-internal — concrete steps, no narrative.
-
 ## Failure modes
 
 - **Operator never confirms login:** 5-minute timeout, then skill closes browser + reports no-confirmation. Cookies that ARE present will still persist.
