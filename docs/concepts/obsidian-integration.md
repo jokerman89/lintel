@@ -12,7 +12,7 @@ Four research-validated patterns, nothing more:
    `tags` · `session`). Flat properties are what Bases and the vault's own skills can query.
 2. **`sessions.base` dashboard.** `bin/li-vault-init` installs a Bases view (core plugin) over
    the session notes — sortable by repo/branch/outcome, plus an "Open threads" view
-   (`outcome != shipped`). Headless later via `obsidian base:query --format=json`.
+   (`outcome != shipped`). Operator-side; the write-only boundary stays.
 3. **Deliberate wikilinks, graph for free.** Every session note links `[[<repo-hub>]]` and its
    predecessor session. The hub note's backlinks panel IS the per-repo session history; the
    graph clusters sessions around hubs without any graph-specific work.

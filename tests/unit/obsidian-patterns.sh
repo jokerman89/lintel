@@ -14,6 +14,9 @@ echo "==============================="
 
 TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
+# Hermetic: no real install (pack resolution) and no real audit dir may be touched
+export LINTEL_HOME="$TMP/no-home"
+export LINTEL_AUDIT_DIR="$TMP/audit"
 
 # Sandbox repo + vault
 SB="$TMP/myrepo"
@@ -40,7 +43,8 @@ echo "[3] fails loud without a vault path; dry-run writes nothing"
 rc=0; ( cd "$SB" && bash "$REPO_ROOT/bin/li-vault-init" >/dev/null 2>&1 ) || rc=$?
 [ "$rc" != "0" ] && pass "no vault path → non-zero exit" || fail "silent success without vault"
 mkdir -p "$TMP/vault2/50-sessions"
-( cd "$SB" && bash "$REPO_ROOT/bin/li-vault-init" --vault "$TMP/vault2/50-sessions" --dry-run >/dev/null 2>&1 )
+rc=0; out=$( cd "$SB" && bash "$REPO_ROOT/bin/li-vault-init" --vault "$TMP/vault2/50-sessions" --dry-run 2>&1 ) || rc=$?
+[ "$rc" = "0" ] && echo "$out" | grep -q '\[dry-run\]' && pass "dry-run runs clean + reports" || fail "dry-run rc=$rc out=$out"
 n=$(find "$TMP/vault2/50-sessions" -type f | wc -l | tr -d ' ')
 [ "$n" = "0" ] && pass "dry-run writes nothing" || fail "dry-run wrote $n files"
 
