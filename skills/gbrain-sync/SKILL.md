@@ -15,6 +15,8 @@ Refreshes the gbrain index for the current worktree. Incremental by default (onl
 
 Idempotent — re-running is safe. If gbrain isn't set up: this skill suggests `/setup-brain` and exits without errors.
 
+**Status: opt-in infrastructure** — setup + sync are implemented as workflows, but Lintel does NOT yet consume gbrain query results anywhere (no automatic context-warm integration). Until that lands, querying is manual (`gbrain search <q>` in a terminal).
+
 ## When to use
 
 - Made significant changes (refactor, large diff merge) — semantic queries should reflect new state

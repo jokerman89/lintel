@@ -33,12 +33,19 @@ Save the current session's load-bearing state to a checkpoint file so a fresh se
   - Active TODOs (this skill's own TodoWrite state if available, else `.claude/plans/todo.md`)
   - Last 3 user turns (operator pastes them if not introspectable)
 
-- **Optional argument:** a short label describing the in-flight task (used as filename suffix).
+- **Optional argument:** a short label describing the in-flight task (used as filename suffix, passed to `context_save_path` as `[label]`). `--label` covers the named-snapshot use case — the former standalone snapshot skill is folded into this one (its old name routes here via `config/aliases.yaml`).
 
 ## Workflow
 
 1. Resolve slug + branch + timestamp.
-2. Compute checkpoint path: `.claude/runtime/sessions/<branch>/<YYYYMMDD-HHMMSS>-<slug>[-<label>]-context-save.md` (the filename MUST end `-context-save.md` so `/context-restore`, `/context-dump`, and `/context-warm-sessions` globs match).
+2. Compute the checkpoint path via the mechanical core (`bin/_context.sh` owns naming + directory creation; checkpoint CONTENT stays LLM-written):
+
+   ```bash
+   source "$LINTEL_REPO_ROOT/bin/_context.sh"   # fallback: "$(git rev-parse --show-toplevel)/bin/_context.sh"
+   path=$(context_save_path [label])
+   ```
+
+   `context_save_path` echoes `.claude/runtime/sessions/<branch>/<YYYYMMDD-HHMMSS>-<slug>[-<label>]-context-save.md` and creates the directory. The filename ends `-context-save.md` so `/context-restore` and `/context-warm-sessions` globs match.
 3. Gather:
    - **What the task is** — one-line description (operator-provided or inferred from recent turns).
    - **What got done** — bulleted from todo-list completed items + recent commit messages on this branch.
@@ -47,7 +54,7 @@ Save the current session's load-bearing state to a checkpoint file so a fresh se
    - **Decisions taken** — surface any AskUserQuestion answers from the session (operator-noted).
    - **Failed attempts** — patterns/approaches tried that didn't work (so next session doesn't re-try).
    - **Files touched** — `git diff --name-only HEAD` + any uncommitted-but-staged files.
-4. Write the checkpoint file with this structure:
+4. Write the checkpoint content to `$path` with this structure:
 
 ```markdown
 # Checkpoint — <one-line task description>
@@ -110,7 +117,7 @@ To restore this session: `/context-restore <checkpoint-path>` OR paste this file
 ## Edge cases
 
 - **No git repo:** still save, but `branch` field is `no-git`. Slug derived from cwd basename.
-- **No `.claude/runtime/sessions/<branch>/`:** create it.
+- **No `.claude/runtime/sessions/<branch>/`:** `context_save_path` creates it.
 - **Existing checkpoint with same timestamp:** suffix with `-2`, `-3`, etc. Never overwrite.
 - **Operator pastes recent turns inline:** capture them verbatim under a `## Recent turns (operator-pasted)` section.
 

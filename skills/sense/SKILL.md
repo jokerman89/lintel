@@ -46,6 +46,9 @@ Before reading configuration, invoke `/li:lessons-surface` so future session wor
 
 Invocation: `/li:lessons-surface --auto-from-sense` — keyword derived from the branch name + recent commit subjects. (A skill call, portable across every CLI; the old `~/.claude/skills/...` path was Claude-Code-only and non-executable.)
 
+The surfacing is MECHANICAL since v5 (ADR-0006): the skill runs `lessons_surface` from
+`lib/memory.sh` (grep-rank, supersede-aware) — not a prose instruction the agent may skip.
+
 Output (max 3 lessons) prepends to the SENSE report. Silent if no relevant matches. Never a blocker.
 
 ### Step 0b — Elephant-hint detection (v3.6 cohort 3 item 3.1)

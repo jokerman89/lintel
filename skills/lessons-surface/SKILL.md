@@ -37,39 +37,34 @@ Critical: L-001 (scaffolding ≠ content) + L-002 (grep first) were created in t
 
 ## Workflow
 
-### Step 1 — Locate + parse lessons.md
+### Step 1 — Mechanical surface (lib/memory.sh — ADR-0006)
+
+The scoring is implemented in bash, not prose. Run it:
 
 ```bash
-LESSONS_FILE=".claude/memory/lessons.md"
-[ -f "$LESSONS_FILE" ] || { echo "No lessons.md — nothing to surface."; exit 0; }
+source "$LINTEL_REPO_ROOT/lib/memory.sh"   # sources lib/paths.sh for the lessons location
+
+# Keyword mode (--keyword "<text>"):
+lessons_surface <keyword tokens>
+
+# Auto-from-SENSE mode (no flag): derive keywords from branch + recent commits
+kw="$(git rev-parse --abbrev-ref HEAD 2>/dev/null | tr '/-' ' ') $(git log -3 --format=%s 2>/dev/null | tr '\n' ' ')"
+LESSONS_TOP_N=2 lessons_surface $kw    # top-2 — SENSE is short
 ```
 
-Parse entries:
-- Each entry starts with `## L-NNN — <name>`
-- Capture: ID, name, Rule (first ** **-line), Why (one paragraph), How to apply (bullets)
-- Capture [[cross-references]] between lessons
+`lessons_surface` scores each `## L-NNN` block by keyword hits, SKIPS superseded lessons
+(`superseded_by:` marker — supersede-don't-delete convention), and prints the top-3
+(`LESSONS_TOP_N` overrides). Empty output = no relevant lessons; say so in one line.
 
-### Step 2 — Match against context
+**All mode (`--all`):** list every active lesson, 1 line each: `grep -E '^## L-[0-9]' <lessons-file>`.
 
-**Keyword mode (`--keyword "<text>"`):**
-- Tokenize keyword
-- For each lesson, score relevance:
-  - Match in `name`: +5
-  - Match in `Rule`: +3
-  - Match in `How to apply`: +2
-  - Match in `Why`: +1
-- Surface top-3 ranked
+**ID mode (`--id L-NNN`):** print that lesson block verbatim from the file.
 
-**Auto-from-SENSE mode (no flag):**
-- Read current branch name + recent git log subjects
-- Use those as implicit keywords
-- Surface top-2 (be quiet — SENSE is short)
+### Step 2 — Read the surfaced lessons
 
-**All mode (`--all`):**
-- Surface all lessons med summary (1-line per)
-
-**ID mode (`--id L-NNN`):**
-- Surface specific lesson verbatim
+For each id `lessons_surface` returned, read its full block from `.claude/memory/lessons.md`
+(Rule + Why + How to apply + [[cross-references]]) — the ranked line alone is not enough context
+to apply a lesson.
 
 ### Step 3 — Render
 

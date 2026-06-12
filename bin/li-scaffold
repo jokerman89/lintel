@@ -147,6 +147,43 @@ cmd_init() {
     fi
   fi
 
+  # AGENTS.md — the cross-CLI instruction standard (agents.md). A pointer file:
+  # the 7 non-Claude CLIs read it natively; content lives in CLAUDE.md.
+  if [ ! -f "AGENTS.md" ] && [ -f "CLAUDE.md" ]; then
+    cat > AGENTS.md <<'AGENTSEOF'
+# Agent instructions
+
+The canonical instructions for this repo live in [CLAUDE.md](CLAUDE.md) — read it fully.
+It covers the session-start ritual, the memory map (.claude/memory/, .claude/decisions/,
+.claude/plans/), workflow orchestration, and auto-mode boundaries. This file exists so
+every AGENTS.md-aware CLI finds them natively.
+AGENTSEOF
+    echo "  ✓ AGENTS.md (pointer)"
+  fi
+
+  # .claude/rules/ — path-scoped rules (Claude Code loads paths:-scoped rules
+  # natively; the session-digest hook lists them as an index for other CLIs)
+  mkdir -p .claude/rules
+  if [ ! -f ".claude/rules/README.md" ]; then
+    cat > .claude/rules/README.md <<'RULESEOF'
+# Path-scoped rules
+
+One rule per file. Claude Code loads a rule only when files matching its `paths:` globs are
+touched; other CLIs see the rule titles in the session digest and read on demand.
+
+```markdown
+---
+paths:
+  - "src/api/**"
+---
+The API layer never throws raw exceptions across the boundary — wrap in ApiError.
+```
+
+Promote a lesson here when it is path-specific (cheaper than loading it every session).
+RULESEOF
+    echo "  ✓ .claude/rules/README.md"
+  fi
+
   # Copy static templates
   for f in CORE-PRINCIPLES.md EVOLUTION.md EVOLUTION-LOG.md TEMPLATE-skill.md TEMPLATE-agent.md; do
     if [ -f "$SCAFFOLDING_SRC/$f" ] && [ ! -f "$f" ]; then

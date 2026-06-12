@@ -15,6 +15,8 @@ One-time setup for gbrain integration. Writes `~/.gbrain/config.json`, creates t
 
 gbrain is a third-party (gstack-ecosystem) tool — Lintel integrates with it but does not require it. If gbrain isn't installed, this skill reports the install path + exits.
 
+**Status: opt-in infrastructure** — setup + sync are implemented as workflows, but Lintel does NOT yet consume gbrain query results anywhere (no automatic context-warm integration). Until that lands, querying is manual (`gbrain search <q>` in a terminal).
+
 ## When to use
 
 - New machine setup — first time using gbrain anywhere

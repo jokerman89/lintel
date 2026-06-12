@@ -14,7 +14,7 @@ You are the context-cool skill — selective context dropping.
 
 In Claude Code, context isn't directly mutable mid-session — it's append-only. So "cooling" here means: signal to subsequent skills/agents to IGNORE specific loaded content + clean up budget tracking + recommend session-restart if true reduction needed.
 
-For real budget reduction: operator can `/li:context-snapshot` then restart session, then `/li:context-dump` selectively.
+For real budget reduction: operator can `/li:context-save` then restart session, then `/li:context-restore` selectively.
 
 ## When to use
 
@@ -76,9 +76,9 @@ Marked for IGNORE: <N> file(s)
 Effective budget freed: ~<X>k (when subagents respect IGNORE)
 
 True budget reduction requires session restart:
-  1. /li:context-snapshot
+  1. /li:context-save
   2. Restart session
-  3. /li:context-dump <snapshot>
+  3. /li:context-restore <checkpoint>
   4. /li:context-warm (only what's still needed)
 ```
 

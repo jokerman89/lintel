@@ -21,7 +21,6 @@ Five artifact categories:
 2. **ADR** — non-trivial decisions → `.claude/decisions/NNNN-<slug>.md`
 3. **EVOLUTION-LOG** — CLAUDE.md changes → log entry
 4. **Cold-executor handoff trio** — reaffirm `spec.md` + `plan.md` + `prompt.md` against build evidence (trio BORN in PLAN per v3.8 Feature 2.2; CAPTURE only annotates with actual-build outcomes)
-5. **Operator profile** — append session entry to `~/.lintel/state/operator-profile.jsonl` for tier tracking
 
 Plus role-debrief (if role active) and retro (optional).
 
@@ -102,12 +101,30 @@ Examples NOT lesson-worthy:
 - "Use specific port 8443 in this customer's deployment" — too specific
 - "Forgot to update README" — operational, not a pattern
 
-AskUserQuestion per candidate lesson: "Capture? (yes / no / edit-first)"
+**Update-phase (ADR-0006) — classify BEFORE appending.** Append-only capture is the documented
+failure mode of file-based memory. For each candidate, grep what already exists:
 
-If yes: append to `.claude/memory/lessons.md`:
+```bash
+source "$LINTEL_REPO_ROOT/lib/memory.sh"
+lessons_find_related <candidate keywords>    # all related active lessons, ranked
+```
+
+Classify against the hits:
+- **add** — nothing related exists → new `## L-NNN — <title>` entry
+- **update** — an existing lesson covers it but the candidate sharpens it → extend THAT lesson's
+  How-to-apply (note the cycle id), no new entry
+- **supersede** — the candidate CONTRADICTS an existing lesson → write the new entry, then add
+  `superseded_by: L-<new> (<date>)` as the first body line of the old one. Never delete or edit
+  the old lesson away — git holds ingestion history, the marker holds validity
+  (supersede-don't-delete).
+- **no-op** — an existing lesson already says this → skip, mention the existing id
+
+AskUserQuestion per candidate lesson: "Capture as <classification>? (yes / no / edit-first)"
+
+If add: append to `.claude/memory/lessons.md`:
 ```markdown
-## <date> — <lesson title>
-<lesson body>
+## L-NNN — <lesson title>
+<lesson body: Rule / Why / How to apply>
 <-- Captured from cycle <cycle-id> by <operator>. -->
 ```
 
@@ -269,28 +286,11 @@ next_time:
 
 Not always written — only if cycle was substantial enough that retro adds value (operator-driven).
 
-### Step 9 — Operator profile update (gstack-inherited)
+### Step 9 — (removed in v5, ADR-0006)
 
-Append to `~/.lintel/state/operator-profile.jsonl`:
-```json
-{
-  "ts": "<timestamp>",
-  "cycle_id": "<id>",
-  "mode": "<preset>",
-  "audience": "<audience>",
-  "phases_completed": ["SENSE", "DEFINE", ...],
-  "tokens_used": <N>,
-  "duration_minutes": <N>,
-  "outcome": "DONE | DONE_WITH_CONCERNS | BLOCKED",
-  "lessons_captured": <count>,
-  "lessons_promoted": <count>,
-  "adrs_drafted": <count>,
-  "trio_finalized": <yes/no>,
-  "voice_gate_avg": <% if applicable>
-}
-```
-
-Used by SENSE in future sessions for tier-tracking + welcome-back-recognition (gstack pattern adapted).
+The operator-profile append (`~/.lintel/state/operator-profile.jsonl`) was a dead write — the
+promised SENSE read-back never existed. Subtracted. The granularity calibration record (Step 1b)
+is the real feedback loop and stays.
 
 ### Step 10 — 00-state.md final entry
 
@@ -382,7 +382,6 @@ YES — standalone post-implementation reflection. Useful if operator forgot CAP
 - `plan.md` (FINALIZED with post-verification status)
 - `prompt.md` (NEW — cold-executor handoff)
 - `.claude/memory/retros/<date>-<cycle-id>.md` (optional)
-- `~/.lintel/state/operator-profile.jsonl` (append)
 - `~/.lintel/roles/<id>.md` (update if role active + insights to add)
 - `.claude/runtime/state/00-state.md` (CAPTURE final entry)
 - `.claude/runtime/audit/cycle-completion.jsonl`

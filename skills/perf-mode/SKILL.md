@@ -127,6 +127,6 @@ At average velocity: 16 hours runway. Estimated $24-48 cost.
 
 - `CONTEXT-ENGINE.md` — engine semantics
 - `/context-budget` — view + modify state
-- `/context-warmup` — explicit preload
+- `/context-warm --pattern` — explicit declared-pattern preload
 - `/context-budget --watch` — passive monitoring
 - `ContextBudgetAdvisor` — Layer 4 agent suggests perf-mode for unstructured tasks

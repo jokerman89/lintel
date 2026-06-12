@@ -173,7 +173,7 @@ cmd_context_engine() {
   [ -n "$ROOT_DOC" ] && ok "CONTEXT-ENGINE.md present ($ROOT_DOC)" || { fail "CONTEXT-ENGINE.md missing"; EXIT_CODE=1; }
 
   # skills at repo root skills/<name>/SKILL.md
-  for skill in context-budget context-warmup perf-mode; do
+  for skill in context-budget context-warm perf-mode; do
     found=""
     for path in \
       "$REPO_ROOT/skills/$skill/SKILL.md" \

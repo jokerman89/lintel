@@ -3,6 +3,8 @@
 Durable rules accumulated from corrections. Review at session start; add after any correction.
 
 > Format per entry: short rule first, then `Why:` (the incident or principle), then `How to apply:` (when this kicks in). Link related lessons with `[[name]]`.
+>
+> Supersede, don't delete: entries are never edited away — a contradicted lesson gets `superseded_by: L-NNN (YYYY-MM-DD)` as its first body line and is then skipped by surfacing (`lib/memory.sh`).
 
 ---
 
