@@ -39,6 +39,6 @@ Every memory promise becomes **mechanical or subtracted** — nothing stays pros
   the helper" (auditable) instead of "prose ignored" (invisible).
 - Lessons stay sharp under growth: budgets warn, supersede markers keep surfacing relevant,
   CAPTURE classifies instead of appending.
-- 3 fewer skills (168 → 165); alias grace window to 2026-09-12.
-- bin/_context.sh + lib/memory.sh become part of the frozen-zone path contract surface.
+- 3 fewer skills (169 → 166); alias grace window to 2026-09-12.
+- bin/_context.sh + lib/memory.sh join lib/paths.sh in the handle-with-care helper contract (listed in CLAUDE.md frozen zones; pinned by tests/unit/memory-v2.sh + tests/shape/claude-home-paths.sh).
 - Concept doc: docs/concepts/memory-v2.md. Structure change: docs/v4.x/structure-changes/2026-06-12-memory-v2.md.

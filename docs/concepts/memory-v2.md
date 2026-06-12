@@ -27,9 +27,9 @@ duplication.
   as its first body line; surfacing skips it; git keeps the history. Never edit a lesson away.
 - **Update before append.** CAPTURE classifies every candidate against existing lessons —
   append-only growth is the documented failure mode of file-based agent memory.
-- **Path-scoped rules.** `.claude/rules/*.md` with `paths:` globs — loads only when relevant
-  files are touched (native on Claude Code; digest-indexed elsewhere). Promote path-specific
-  lessons here.
+- **Path-scoped rules.** `.claude/rules/*.md` with `paths:` globs — project-level conditional
+  loading on Claude Code (globs must be quoted; user-level scoping broken as of mid-2026);
+  digest-indexed on the other CLIs. Promote path-specific lessons here.
 - **AGENTS.md pointer.** Scaffolded repos carry an AGENTS.md pointing at CLAUDE.md so every
   AGENTS.md-aware CLI finds the instructions natively.
 

@@ -127,6 +127,14 @@ hdr "Copying scaffolding to ~/.lintel/scaffolding/"
 cp -r "$REPO_ROOT/scaffolding/"* "$LINTEL_SCAFFOLDING/"
 ok "Scaffolding copied (4 layers)"
 
+# Shared runtime helpers (lib/ + bin/) — the hooks installed under
+# ~/.lintel/hooks resolve lib/memory.sh + bin/_jobs.sh here when no repo
+# checkout is present (ADR-0006).
+mkdir -p "$LINTEL_HOME/lib" "$LINTEL_HOME/bin"
+cp -r "$REPO_ROOT/lib/"* "$LINTEL_HOME/lib/" 2>/dev/null || true
+cp -r "$REPO_ROOT/bin/"* "$LINTEL_HOME/bin/" 2>/dev/null || true
+ok "Runtime helpers copied (lib/ + bin/)"
+
 # ----- v3.7 brand-seeds (idempotent) -----------------------------------------
 
 if [[ -d "$REPO_ROOT/seeds/brand" ]]; then

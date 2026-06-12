@@ -44,7 +44,11 @@ LINTEL_AUDIT_DIR="${LINTEL_AUDIT_DIR:-$LINTEL_HOME/audit}"
 # Unified audit writer (sibling in bin/). Idempotent source.
 command -v audit_log >/dev/null 2>&1 || source "$(dirname "${BASH_SOURCE[0]}")/_audit.sh"
 
-mkdir -p "$LINTEL_JOBS_DIR" "$LINTEL_JOBS_ARCHIVE" "$LINTEL_AUDIT_DIR" 2>/dev/null || true
+# LINTEL_JOBS_NO_INIT=1 -> read-only source (the session digest sources this
+# just to call job_ready; a digest must not create directories as a side effect)
+if [ -z "${LINTEL_JOBS_NO_INIT:-}" ]; then
+  mkdir -p "$LINTEL_JOBS_DIR" "$LINTEL_JOBS_ARCHIVE" "$LINTEL_AUDIT_DIR" 2>/dev/null || true
+fi
 
 _jobs_iso_now() { date -u +"%Y-%m-%dT%H:%M:%SZ"; }
 _jobs_epoch_now() { date +%s; }
@@ -577,7 +581,8 @@ job_ready() {
   [ -f "$dir/job.yaml" ] || { printf 'no
 '; return 1; }
   local status
-  status=$(grep '^status:' "$dir/job.yaml" | head -1 | awk '{print $2}' | tr -d '')
+  status=$(grep '^status:' "$dir/job.yaml" | head -1 | awk '{print $2}' | tr -d '
+')
   [ "$status" = "ACTIVE" ] || { printf 'no
 '; return 1; }
   local names

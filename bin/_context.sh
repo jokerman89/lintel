@@ -44,6 +44,8 @@ context_save_path() {
   mkdir -p "$dir" 2>/dev/null || true
   ts=$(date +"%Y%m%d-%H%M%S")
   slug="$(_context_repo_slug)"
+  # slugify the label: separators/spaces → '-', keep it filename-safe
+  label=$(printf '%s' "$label" | tr ' /\\' '---' | tr -cd 'A-Za-z0-9._-')
   if [ -n "$label" ]; then
     printf '%s/%s-%s-%s-context-save.md' "$dir" "$ts" "$slug" "$label"
   else
@@ -61,12 +63,15 @@ context_list() {
   {
     [ -n "$newdir" ] && [ -d "$newdir/$branch" ] && \
       find "$newdir/$branch" -maxdepth 1 -name '*-context-save.md' 2>/dev/null
-    [ -d "$LINTEL_HOME/sessions/$branch" ] && \
+    # Legacy dir only when it is NOT what lintel_sessions_dir already resolved
+    # to (un-migrated repos resolve THERE — listing it twice double-counts).
+    if [ "$newdir" != "$LINTEL_HOME/sessions" ] && [ -d "$LINTEL_HOME/sessions/$branch" ]; then
       find "$LINTEL_HOME/sessions/$branch" -maxdepth 1 -name '*-context-save.md' 2>/dev/null   # legacy-fallback-ok
+    fi
   } | while IFS= read -r f; do
     # prefix with basename for chronological sort (timestamps lead the name)
     printf '%s\t%s\n' "$(basename "$f")" "$f"
-  done | sort -r | cut -f2
+  done | sort -r | cut -f2 | awk '!seen[$0]++'
 }
 
 # Newest checkpoint path for a branch (empty + rc 1 if none).

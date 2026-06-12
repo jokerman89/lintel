@@ -18,13 +18,13 @@ REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || true)"
 STAMP="$REPO_ROOT/.claude/runtime/state/.last-memory-budget-warn"
 if [ -f "$STAMP" ]; then
   now=$(date +%s)
-  last=$(date -r "$STAMP" +%s 2>/dev/null || stat -c %Y "$STAMP" 2>/dev/null || echo 0)
+  last=$(stat -c %Y "$STAMP" 2>/dev/null || stat -f %m "$STAMP" 2>/dev/null || echo 0)
   [ $((now - last)) -lt 3600 ] && exit 0
 fi
 
 # Helper lib (repo checkout → installed tree)
 MEM_LIB="$REPO_ROOT/lib/memory.sh"
-[ -f "$MEM_LIB" ] || MEM_LIB="$LINTEL_HOME/scaffolding/lib/memory.sh"
+[ -f "$MEM_LIB" ] || MEM_LIB="$LINTEL_HOME/lib/memory.sh"
 [ -f "$MEM_LIB" ] || MEM_LIB="$(dirname "${BASH_SOURCE[0]}")/../../../lib/memory.sh"
 [ -f "$MEM_LIB" ] || exit 0
 # shellcheck disable=SC1090
