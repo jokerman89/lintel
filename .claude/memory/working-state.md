@@ -20,6 +20,28 @@ Cross-session working state (ej durable rules — that's [[lessons.md]]; ej pers
 **Last touched:** YYYY-MM-DD
 -->
 
+## v5.0-claude-home — three stacked PRs OPEN 2026-06-12
+
+**Status:** active — awaiting PR merges
+
+**What shipped (one session, full cycle SENSE→CAPTURE):**
+- **D1–D4 locked** by operator: knowledge committed/runtime ignored · everything Lintel-owned → `.claude/` · native auto-memory converged · 4 Obsidian patterns
+- **PR #62** vault sink (rebased clean; neutral-pack default OFF after review)
+- **PR #63** v5 `.claude/` home (ADR-0005): lib/paths.sh, scope-routed audit/jobs + cross-repo registry, li-migrate-claude-home, ~210-file sweep, dogfooded on this repo
+- **PR #64** memory v2 (ADR-0006): lib/memory.sh + bin/_context.sh + memory-budget-warn hook, update-phase + supersede convention, context family 8→3 (aliases), AGENTS.md + rules emission, subtractions (operator-profile, gbrain over-claims)
+- **PR #65** Obsidian patterns (ADR-0007): locked schema, sessions.base + li-vault-init, hub/predecessor wikilinks, 00-index
+- All three phases passed independent L-007 review (SHIP-WITH-FIXES; every P1/P2 acted on)
+
+**What's pending:**
+- Merge chain: #62 → #63 (re-target to main) → #64 → #65
+- Operator: run `li-migrate-claude-home` on other Lintel-connected repos (grace to 2026-09-12)
+- Operator: re-enable vault sink in a personal pack override (~/.lintel/packs/_default) — the shipped neutral default is now OFF
+- Follow-ups parked: marker-parse consolidation (5 copies → paths.sh), basic-memory-style index if grep ever scales out
+
+**Last touched:** 2026-06-12
+
+---
+
 ## v4.0-reframe — design doc DRAFT_FOR_REVIEW 2026-05-29
 
 **Status:** design phase — awaiting operator pass

@@ -183,3 +183,24 @@ in this very phase: silence is not success ([[L-003]]).
 
 **How to apply:** Capture to a file, echo `$rc` explicitly, read the summary from the file. In CI
 scripts, `set -o pipefail` if a pipe is unavoidable.
+
+## L-010 — Green is measured on the committed tree, not the working tree (v5.0)
+
+**Rule:** Before claiming "suite green" for a commit/PR, run the suite AFTER the commit (or
+verify the index state explicitly for mode-bit/path-sensitive checks). A working-tree run can
+pass while the committed tree fails — file modes (`git ls-files -s` vs `chmod`), untracked
+files that tests skip, and CRLF normalization all differ between the two.
+
+**Why:** v5.0 Phase C: `bin/li-vault-init` was chmod +x in the working tree, so my pre-commit
+suite run was 74/74 green — but the file was committed 100644 and `bin-scripts-executable.sh`
+fails exactly that. The independent reviewer's post-commit run caught the red suite that my
+own "green" claim missed. Same family as [[L-009]] (a verification step that reports success
+while measuring the wrong thing).
+
+**How to apply:**
+- After committing, re-run at least the shape suite on the committed state — or use
+  `git update-index --chmod=+x` at creation time for every new executable.
+- For stacked PRs: the suite that counts is the one on the pushed HEAD.
+- Reviewers: always run the suite yourself on the actual commits (this is what caught it).
+
+Related: [[L-009]] silence-is-not-success, [[L-007]] independent review catches self-test blind spots.
