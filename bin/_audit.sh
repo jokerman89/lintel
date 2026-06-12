@@ -88,13 +88,19 @@ _audit_iso_now() { date -u +"%Y-%m-%dT%H:%M:%SZ"; }
 # all (neither a sed pipe nor a $(...) command-substitution subshell). Hooks
 # fire on every Edit/Bash event, so a fork per key=value pair is ~10-50x
 # costlier than this on some platforms (notably Windows/MSYS).
-# Order matters: backslashes first, then quotes, then tabs.
+# Order matters: backslashes first, then quotes, then control chars. Newlines
+# and CR MUST be escaped (battletest H8): an attacker-influenced value with a
+# raw newline otherwise splits one record into two physical lines, breaking the
+# one-JSON-object-per-line invariant every reader (wc -l, grep -c, jq) relies on
+# and hiding/forging records.
 _AUDIT_ESC=""
 _audit_escape() {
   local s="$1"
-  s="${s//\\/\\\\}"   # \  -> \\
-  s="${s//\"/\\\"}"   # "  -> \"
+  s="${s//\\/\\\\}"   # \   -> \\
+  s="${s//\"/\\\"}"   # "   -> \"
   s="${s//$'\t'/\\t}" # tab -> \t
+  s="${s//$'\r'/\\r}" # CR  -> \r
+  s="${s//$'\n'/\\n}" # LF  -> \n
   _AUDIT_ESC="$s"
 }
 

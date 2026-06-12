@@ -67,6 +67,47 @@ else
   [ "${#BAD_AGENTS[@]}" -gt 10 ] && echo "    ... and $((${#BAD_AGENTS[@]} - 10)) more"
 fi
 
+# Optional agent frontmatter (ADR-0012): memory: + model: are recognized OPTIONAL keys.
+# Unknown keys are not rejected (no strict allowlist), but when present these two must be valid.
+#   memory: one of {project, user, local}  (Claude Code agent-memory scope)
+#   model:  a known model id               (cheap-tier routing for mechanical agents)
+VALID_MEMORY_SCOPES="project user local"
+VALID_MODEL_IDS="claude-haiku-4-5-20251001 claude-sonnet-4-5-20250929 claude-opus-4-1-20250805"
+
+BAD_MEMORY=()
+BAD_MODEL=()
+for f in "${AGENT_FILES[@]}"; do
+  # only inspect the frontmatter line (anchored ^key:)
+  mval="$(grep -m1 -E '^memory:' "$f" | sed -E 's/^memory:[[:space:]]*//; s/[[:space:]]*$//')"
+  if [ -n "$mval" ]; then
+    case " $VALID_MEMORY_SCOPES " in
+      *" $mval "*) : ;;
+      *) BAD_MEMORY+=("$f: memory='$mval'") ;;
+    esac
+  fi
+  mdl="$(grep -m1 -E '^model:' "$f" | sed -E 's/^model:[[:space:]]*//; s/[[:space:]]*$//')"
+  if [ -n "$mdl" ]; then
+    case " $VALID_MODEL_IDS " in
+      *" $mdl "*) : ;;
+      *) BAD_MODEL+=("$f: model='$mdl'") ;;
+    esac
+  fi
+done
+
+if [ "${#BAD_MEMORY[@]}" -eq 0 ]; then
+  pass "All agent memory: values use a valid scope (project|user|local)"
+else
+  fail "${#BAD_MEMORY[@]} agent files have an invalid memory: scope:"
+  for e in "${BAD_MEMORY[@]}"; do echo "    - $e"; done
+fi
+
+if [ "${#BAD_MODEL[@]}" -eq 0 ]; then
+  pass "All agent model: values are a known model id"
+else
+  fail "${#BAD_MODEL[@]} agent files have an unknown model: id:"
+  for e in "${BAD_MODEL[@]}"; do echo "    - $e"; done
+fi
+
 echo ""
 if [ "$FAILED" -eq 0 ]; then echo "All frontmatter-lint-all assertions PASSED"; exit 0
 else echo "Some frontmatter-lint-all assertions FAILED"; exit 1; fi

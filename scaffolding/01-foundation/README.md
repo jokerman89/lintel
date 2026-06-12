@@ -20,7 +20,7 @@ The load-bearing layer. Every Lintel-scaffolded repo gets this. Every harness, e
 
 ## Why this layer exists
 
-Without it, every harness and skill operates against a blank slate. With it, gstack/Lintel/GSD/ECC all run on top of stable principles.
+Without it, every harness and skill operates against a blank slate. With it, Lintel — and any other harness the operator runs — sits on stable principles.
 
 The cost of having scaffolding is one-time setup. The cost of not having it is rediscovery every session.
 

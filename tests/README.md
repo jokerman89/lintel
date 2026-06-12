@@ -28,7 +28,7 @@ bash tests/runner/run-all.sh --tag claude-code-only  # filter by tag
 Bash tests follow `tests/conventions/bash-test-template.sh`. Each test declares:
 
 - **Description** — one line at top of file
-- **Tags** — dependencies the test requires (`claude-code`, `codex`, `browser`, `gstack-binaries`)
+- **Tags** — dependencies the test requires (`claude-code`, `codex`, `browser`)
 - **Setup** — fixtures or env vars needed
 - **Run** — the actual test
 - **Cleanup** — return repo to original state

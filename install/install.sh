@@ -2,14 +2,18 @@
 # jokerman-lintel (Lintel) installer — bash/Linux/macOS/WSL/Git Bash
 #
 # Honors Lintel architecture decisions:
-# - A1: hooks ship INERT at ~/.lintel/hooks/ (operator manually symlinks to opt in)
+# - A1/ADR-0008: this bare installer copies hooks to ~/.lintel/hooks/ INERT (bare install only —
+#   operator manually symlinks + merges the snippet to opt in). A PLUGIN install instead
+#   auto-registers them with zero setup via the plugin's hooks/hooks.json. Canonical matrix:
+#   docs/getting-started.md#how-hook-activation-works
 # - A2: scaffolding lives at ~/.lintel/scaffolding/ (separate from ~/.claude/)
 # - A3: layer config at ~/.lintel/config.yaml — per-layer enable
 # - A6: cli_support frontmatter validated at install time
 # - C1: skill/agent frontmatter validated at install time
 #
-# Does NOT bundle upstream code — clones from declared upstreams at install time
-# with SHA pinning where declared in upstream-sources.yaml.
+# Does NOT bundle upstream code. The upstream-sources.yaml step below is a STUB: it lists the
+# declared sources, it does NOT clone them. SHA-pinned cloning is not implemented in this
+# installer — Lintel currently ships only operator-authored content (see README "What you don't get").
 
 set -euo pipefail
 
@@ -91,10 +95,8 @@ mkdir -p "$LINTEL_HOME/audit"
 mkdir -p "$LINTEL_HOME/sessions"
 mkdir -p "$LINTEL_HOME/provenance"
 mkdir -p "$LINTEL_HOME/freeze"
-mkdir -p "$LINTEL_HOME/rai"
-mkdir -p "$LINTEL_HOME/dpia"
-mkdir -p "$LINTEL_HOME/dsb"
-mkdir -p "$LINTEL_HOME/entra"
+# Compliance-artifact dirs (rai/dpia/dsb/entra) are pack concerns, NOT spine — a company pack
+# that needs them creates them on activation. The neutral installer stays company-neutral.
 mkdir -p "$LINTEL_HOME/review-log"
 mkdir -p "$LINTEL_HOME/benchmarks"
 mkdir -p "$LINTEL_HOME/calibrations"
@@ -184,9 +186,9 @@ else
   info "Edit $LINTEL_CONFIG to enable/disable layers, watchers, voice defaults"
 fi
 
-# ----- hooks: copy to ~/.lintel/hooks/ (INERT) -------------------------------
+# ----- hooks: copy to ~/.lintel/hooks/ (INERT — bare install only) -----------
 
-hdr "Hooks (inert install — opt-in symlink to activate)"
+hdr "Hooks (inert — bare install only; opt-in symlink to activate. Plugin installs auto-register.)"
 
 # Hooks live at hooks/shared/ at repo root
 HOOK_SRC=""
@@ -295,11 +297,10 @@ if [ "$YQ_AVAILABLE" = "1" ]; then
   # Real install would iterate sources and clone each per upstream-sources.yaml
   # Stub: just confirm file readable + list source names
   if mapfile -t SOURCE_NAMES < <(yq '.sources | keys | .[]' "$SOURCES_FILE" 2>/dev/null); then
-    ok "${#SOURCE_NAMES[@]} upstream sources declared"
+    ok "${#SOURCE_NAMES[@]} upstream sources declared (listed only — this installer does not clone them)"
     for n in "${SOURCE_NAMES[@]}"; do
       info "  · $n"
     done
-    info "Run /tier-stamp-agents after install to classify each source's agents."
   else
     warn "Could not parse upstream sources — verify yq and file format"
   fi

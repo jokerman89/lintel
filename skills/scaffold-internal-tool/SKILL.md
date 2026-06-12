@@ -63,15 +63,15 @@ Initializes an internal-tooling repo (CLI, dashboard, automation script, ops uti
 ## Report format
 
 ```
-Scaffold internal-tool: gstack-replay-checker
+Scaffold internal-tool: log-replay-checker
 
-Path: /e/Workspace/gstack-replay-checker
+Path: /e/Workspace/log-replay-checker
 Language: ts
 Type: cli
 CI: github
 
 ## Created
-- src/index.ts, bin/gstack-replay-checker
+- src/index.ts, bin/log-replay-checker
 - package.json (tsc strict, vitest)
 - tsconfig.json (strict mode)
 - tests/index.test.ts
@@ -106,7 +106,7 @@ CI: github
 
 **TypeScript CLI:**
 ```
-> /scaffold-internal-tool --name gstack-replay-checker --language ts --type cli
+> /scaffold-internal-tool --name log-replay-checker --language ts --type cli
 ✓ Scaffolded. Run `npm install` then implement src/index.ts.
 ```
 

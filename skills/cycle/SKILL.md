@@ -255,11 +255,16 @@ state alone — no explicit `--mode` needed. See [ADR-0003](../../.claude/decisi
 ```
 ─────────────────────────────────────────────────────────
 [3/8] DISCOVER → next: PLAN
-Token est this phase: ~3.5k  |  cycle total so far: ~9.2k
+Token est this phase: ~3k (default — not yet calibrated)  |  cycle total so far: ~9k (uncalibrated)
 ─────────────────────────────────────────────────────────
 ```
 
-The token-est numbers come from the phase-skill's frontmatter `tokens_est_typical:` (if present) or default 3k per phase.
+The token-est numbers come from the phase-skill's frontmatter `tokens_est_typical:` **when the skill
+declares it**. Today **zero skills declare it**, so the value falls back to the `~3k per phase`
+default — which is a placeholder, not a measurement. When the fallback is in play, label it
+**`~3k (default — not yet calibrated)`** rather than printing a bare `~3.5k` that implies precision
+the system does not have. (Calibration lands when CAPTURE records actuals; see
+`lib/scale-estimator.sh` `scale_calibrated_prior`.)
 
 Between phases:
 - Propagate phase output as input to next (e.g., DEFINE's design doc → PLAN's source)
@@ -280,20 +285,27 @@ render_cycle_footer                                                    # at comp
 The footer is mode-aware (skipped phases render `⊘`) and auto-falls to a thin ambient line when no
 cycle is active. Glyphs degrade to ASCII under `LINTEL_ASCII=1`.
 
-### Step 5 — Cost-estimate gate (BEFORE BUILD)
+### Step 5 — Pre-BUILD confirm gate (BEFORE BUILD)
 
-If BUILD is in phases_to_run, before invoking it:
+If BUILD is in phases_to_run, before invoking it, confirm with the operator using the **honest
+signals PLAN recorded** — task count, the phase list, and the labelled token estimate. No dollar
+figure (Lintel has no pricing table); no bare-number duration unless `--with-time` was set. Pull the
+values PLAN wrote to state (`tasks_count`, `tokens_est`, `tokens_est_basis`):
+
 ```
-Cost estimate from PLAN:
+Plan signals (from PLAN):
 - Tasks: <N>
-- Tokens: <total>
-- Duration: <hours>
-- Cost: $<X>
+- Phases remaining: <phase list>
+- Token estimate: ~<total> (<CALIBRATED | UNCALIBRATED — no actuals recorded yet>)
+  (only when --with-time:  Duration: ~<hours>)
 
 Proceed with BUILD? [Y/n/edit-plan]
 ```
 
-This is the SECOND cost gate (PLAN already had one). Confirms before token-heavy phase.
+This is the SECOND confirm gate (PLAN already had one). Its job is unchanged — confirm before the
+token-heavy phase — but it presents the **task count + uncalibrated estimate**, never an invented
+dollar/duration figure. The estimate is `UNCALIBRATED` until CAPTURE has recorded actuals for this
+size (`lib/scale-estimator.sh` `scale_calibrated_prior`).
 
 If `--auto`: auto-decide YES at recommended option (per gstack AUTO_DECIDE opt-in). Operator can interrupt anytime.
 
@@ -347,11 +359,14 @@ Append to `.claude/runtime/audit/cycle-runs.jsonl`:
   "phases_run": [...],
   "duration_total_minutes": <>,
   "tokens_used_total": <>,
-  "cost_estimate_dollars": <>,
   "outcome": "DONE | DONE_WITH_CONCERNS | BLOCKED | ABORTED",
   "operator": "<whoami>"
 }
 ```
+
+> `tokens_used_total` is a real post-run measurement — this is the actuals stream that
+> `scale_calibrated_prior` reads to retire the UNCALIBRATED label. No `cost_estimate_dollars`
+> field: Lintel has no pricing table, so a dollar figure here would be fabricated (K6).
 
 ## Status protocol
 

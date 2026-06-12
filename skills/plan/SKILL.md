@@ -127,29 +127,36 @@ Detect cycles. Detect impossible-orderings. Surface blockers explicitly.
 
 **Time-on-request (design §3.7):** wall-clock time fields are emitted **only** when the operator asked for them (`--with-time`, or they explicitly request it). Tokens + task count + size are always shown; time is opt-in so the default estimate never anchors on a guessed duration.
 
+**Honest signals only (no invented dollar figure).** Lintel has no pricing table and the token
+estimator is **uncalibrated until CAPTURE records actuals** (`scale_calibrated_prior` falls back to
+`size_default_prior` — a hardcoded guess — when no history exists; see `lib/scale-estimator.sh`).
+So the gate presents what the system can honestly compute — **task count, the phase list, and a
+labelled token estimate** — and does **not** present a dollar number the system cannot derive.
+
 ```yaml
-# Cost breakdown
+# Plan signals (honest — task count + phases + labelled token estimate)
 total_tasks: N
+phases: [<phase list from the plan — what BUILD will actually run>]
 size: <XS|S|M|L|XL from scope.md>
-estimated_tokens: <sum across tasks × model used>
-# estimated_time: <sum minutes>          # only when --with-time
 model_mix:
   - Haiku (mechanical): <% tasks>
   - Sonnet (multi-file): <% tasks>
   - Opus (architecture): <% tasks>
 
-cost_estimate:
-  tokens: <total>
-  # time_human_walkthrough / time_cc_execution: <…>   # only when --with-time
-  dollar_estimate: $<X>  (based on current model pricing)
+token_estimate:
+  value: <scale_calibrated_prior <size>, summed across tasks>
+  basis: CALIBRATED      # when CAPTURE history exists for this size
+  # basis: UNCALIBRATED  # no actuals recorded yet — value is size_default_prior (a hardcoded guess),
+  #                        not a measurement. See lib/scale-estimator.sh. Do NOT imply precision.
+# estimated_time: <sum minutes>     # only when --with-time
 ```
 
 AskUserQuestion (MANDATORY):
-"Plan ready: <N> tasks, est. <tokens> tokens, ~$<cost>. Proceed?"  (append ", <duration>" only when `--with-time`)
+"Plan ready: <N> tasks across <phase list>, est. ~<tokens> tokens (<CALIBRATED | UNCALIBRATED — no actuals recorded yet>). Proceed?"  (append ", ~<duration>" only when `--with-time`; **never** a `$` figure)
 - A) Approve and proceed
 - B) Scope-trim (which tasks to defer)
 - C) Decompose (tasks too big, break further)
-- D) Abort (cost too high)
+- D) Abort (scope too large)
 
 If A: continue to Step 8. If B/C: loop back. If D: status BLOCKED, no advance.
 
@@ -184,7 +191,7 @@ If subagent unavailable: skip review, note in plan.md "Adversarial review unavai
 ### Step 10 — Founder approval gate (MANDATORY PAUSE)
 
 AskUserQuestion (per Architect image):
-"Plan reviewed. <N tasks>, <duration>, <cost>. Final approval?"
+"Plan reviewed. <N tasks> across <phase list>, est. ~<tokens> tokens (<CALIBRATED | UNCALIBRATED>). Final approval?"  (append ", ~<duration>" only when `--with-time`; never a `$` figure — the basis for this is Step 7)
 - A) APPROVE — proceed to BUILD
 - B) REDIRECT — specific feedback (loop back)
 - C) PAUSE — save state for later, don't proceed
@@ -215,11 +222,12 @@ Read the template, strip the comment header + the unused `depth_schema` sections
 ## Summary
 <2-3 sentences>
 
-## Cost estimate
+## Plan signals
 - Tasks: <N>
+- Phases: <phase list — what BUILD will run>
 - Size: <XS|S|M|L|XL from scope.md>
-- Tokens: <total>
-- Cost: $<estimate>
+- Token estimate: ~<total> (<CALIBRATED from CAPTURE history | UNCALIBRATED — no actuals yet, size_default_prior guess>)
+<!-- no dollar figure: Lintel has no pricing table (Step 7) -->
 <!-- - Duration: <time>   ← only emit when --with-time (design §3.7) -->
 ```
 
@@ -321,7 +329,7 @@ Mechanical since v5.0 (ADR-0008) — one command, not a YAML obligation:
 ```bash
 _sl="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}/lib/state.sh"
 [ -f "$_sl" ] || _sl="$HOME/.lintel/lib/state.sh"; source "$_sl"   # installed by install.sh in consumer repos
-state_append PLAN DONE next=BUILD plan_path=<path> spec_draft_path=<path> tasks_count=<N> cost_estimate_dollars=<X>
+state_append PLAN DONE next=BUILD plan_path=<path> spec_draft_path=<path> tasks_count=<N> tokens_est=<total> tokens_est_basis=<calibrated|uncalibrated>
 ```
 
 ## Status protocol

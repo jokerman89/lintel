@@ -13,7 +13,7 @@ hop_in: no
 
 Strategy-level review of a plan or design doc. Asks the hard product/business questions BEFORE `/plan-eng-review` locks architecture. Optional but recommended for any plan that changes user-facing behavior, expands scope, or introduces a new market position.
 
-Lintel's CEO review is **inspired-by gstack's** equivalent but written fresh per the inspiration-not-plagiarism constraint. Voice stays internal (this is operator-to-operator strategic challenge, not customer-facing).
+Operator-to-operator strategic challenge before architecture locks: demand reality, wedge specificity, 3-year fit. Voice stays internal (this is a builder-to-builder challenge, not customer-facing).
 
 ## When to use
 
@@ -30,12 +30,12 @@ Lintel's CEO review is **inspired-by gstack's** equivalent but written fresh per
 
 ## Inputs
 
-- Optional path to a design doc (auto-discovers latest from `~/.gstack/projects/<slug>/*-design-*.md`).
-- No-args: reviews the currently active design context (operator pastes plan or skill reads recent design from `~/.gstack/projects/`).
+- Optional path to a design doc (auto-discovers latest from `~/.lintel/projects/<slug>/*-design-*.md`).
+- No-args: reviews the currently active design context (operator pastes plan or skill reads recent design from `~/.lintel/projects/`).
 
 ## Workflow
 
-1. **Read design context.** Authoritative source is whichever design doc is freshest in `~/.gstack/projects/<slug>/`.
+1. **Read design context.** Authoritative source is whichever design doc is freshest in `~/.lintel/projects/<slug>/`.
 2. **Three forcing questions** — one AskUserQuestion per question. Skip if answer is already in the design doc.
    - **Q1 Demand reality:** strongest evidence someone actually wants this — not interest, not signups, behavior + money + panic-when-it-breaks?
    - **Q2 Wedge specificity:** smallest version someone would pay real money for this week, not after the platform ships?
@@ -70,7 +70,7 @@ Lintel's CEO review is **inspired-by gstack's** equivalent but written fresh per
         OR  REVISE — design doc needs <specific change> before eng review
 ```
 
-Persist via first-party `bin/li-review-log` (legacy alias: gstack-review-log):
+Persist via first-party `bin/li-review-log`:
 ```bash
 bin/li-review-log '{"skill":"plan-ceo-review","timestamp":"...","status":"...","scope_proposed":N,"scope_accepted":N,"scope_deferred":N,"mode":"...","commit":"..."}'
 ```

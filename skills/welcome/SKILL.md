@@ -11,7 +11,7 @@ cli_support:
   - cli: codex
     level: full
 necessity: OPTIONAL
-gap_if_skipped: "A first-time operator meets 168 skills with no guided entry — they read docs instead of feeling the harness work, and never learn their CLI's honest capability tier (e.g. that the enforcement hooks only fire on Claude Code)."
+gap_if_skipped: "A first-time operator meets the full skill set with no guided entry — they read docs instead of feeling the harness work, and never learn their CLI's honest capability tier (e.g. that the enforcement hooks only fire on Claude Code)."
 navigation:
   primary_intent: guided first-run onboarding — see the harness work in five minutes
   triggers:
@@ -31,7 +31,7 @@ You are the WELCOME skill — Lintel's first-run guided onboarding.
 
 ## What this skill does
 
-A new operator just installed Lintel and is staring at 168 skills. Your job is to make
+A new operator just installed Lintel and is staring at the full skill set. Your job is to make
 them *feel* the harness work in five minutes, honestly, on whichever CLI they are running:
 
 1. Detect the active CLI.
@@ -108,26 +108,32 @@ SHIP → CAPTURE, and the gate at each. One sentence each; this is the "way of w
 
 ### Step 4 — Demonstrate a safety hook (honest per-CLI degradation)
 
-The enforcement hooks are Claude-Code-only AND ship opt-in (inert until the operator
-symlinks them). Branch on `$hooks` and the install state:
+The enforcement hooks are Claude-Code-only. How they activate depends on the install path — a
+**plugin install auto-registers** them (zero-setup, via the plugin's `hooks/hooks.json`); a
+**bare install** ships them inert (bare install only) until the operator symlinks + merges the
+snippet. This is the canonical truth (ADR-0008); the full matrix lives in
+`docs/getting-started.md#how-hook-activation-works` — point the operator there, never restate it
+differently. Branch on `$hooks` and the install state:
 
-- **`hooks == true` AND a hook is already installed** (check `~/.claude/hooks/` for any
-  `*.sh` symlink into `~/.lintel/hooks/`): trigger one live. Show `no-secrets-in-edit`
-  catching a fake key — e.g. narrate writing `AKIA0000000000000000` and the WARN it emits.
-  This is the "whoa".
+- **`hooks == true` AND a hook is already firing** (plugin install — auto-registered; or a bare
+  install where the operator already symlinked into `~/.claude/hooks/`): trigger one live. Show
+  `no-secrets-in-edit` catching a fake key — e.g. narrate writing `AKIA0000000000000000` and the
+  WARN it emits. This is the "whoa". On a plugin install this just works with no setup.
 
-- **`hooks == true` but NO hook installed yet** (Claude Code, fresh): do NOT auto-edit
-  `~/.claude/settings.json`. PRINT the exact opt-in for the operator to run, then they re-run
-  this step to see it fire:
+- **`hooks == true` but NO hook firing yet** (Claude Code, **bare install**, not yet armed): do NOT
+  auto-edit `~/.claude/settings.json`. PRINT the exact opt-in for the operator to run, then they
+  re-run this step to see it fire:
 
   ```bash
-  ln -s ~/.lintel/hooks/no-secrets-in-edit/run.sh ~/.claude/hooks/no-secrets-in-edit.sh
+  ln -s ~/.lintel/hooks/shared/no-secrets-in-edit/run.sh ~/.claude/hooks/no-secrets-in-edit.sh
   # then add to ~/.claude/settings.json under PreToolUse(Edit|Write):
   #   { "hooks": [{ "type": "command", "command": "~/.claude/hooks/no-secrets-in-edit.sh" }] }
   ```
 
-  Say: "Hooks ship inert on purpose — Lintel never edits your settings behind your back.
-  Run the two lines above to arm the secret-scan hook, then `/li:welcome` again to watch it fire."
+  Say: "On a bare install hooks ship inert (bare install only) — Lintel never edits your settings
+  behind your back. Run the two lines above to arm the secret-scan hook, then `/li:welcome` again to
+  watch it fire. (A plugin install would have armed them automatically — see
+  docs/getting-started.md#how-hook-activation-works.)"
 
 - **`hooks == false`** (every CLI except Claude Code): do NOT pretend. Narrate it:
   "The enforcement layer (secret-scan, customer-data block, no-direct-push) is a Claude Code

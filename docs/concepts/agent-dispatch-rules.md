@@ -103,6 +103,6 @@ If phase work > 15k tokens AND independence-or-cleanliness matters, dedicated wi
 ## References
 
 - Backlog item 2.4 (concept doc requirement)
-- `~/.claude/skills/gstack/superpowers/` subagent-driven-development pattern
+- subagent-driven development — fresh subagent per task + two-stage review; implemented in `/li:build`
 - Lintel cycle SKILL.md `/li:cycle` Step 4 (phase execution)
 - `[[L-001]]` scaffolding-not-content — this doc IS the scaffolding for the rule

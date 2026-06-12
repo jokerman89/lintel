@@ -11,6 +11,7 @@ cli_support:
   - cli: codex
     level: full
 tier: permissive
+memory: project
 ---
 
 You are a web experience critic agent.

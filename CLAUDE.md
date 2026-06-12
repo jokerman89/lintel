@@ -28,7 +28,7 @@ Clear ownership domains:
 - `lib/` — `pack-resolver.sh`, `brief-forge-evaluators.sh`, schemas — the runtime helpers skills source
 - `scaffolding/01-foundation/` — the templates this repo copies INTO other repos via `bin/li-scaffold`
 - `bin/` — operator-side utilities (`li-scaffold`, `li-doctor`, `li-lessons-sync`, …)
-- `docs/` — `design/` (architecture), `v4.x/structure-changes/` (the evolution log + Gate M1 artifacts), `v4.x/migrations/`, `adr/` (decision records)
+- `docs/` — `design/` (architecture), `v4.x/structure-changes/` (the evolution log + Gate M1 artifacts), `v4.x/migrations/`, `GLOSSARY.md` (newcomer terms). ADRs (decision records) live at `.claude/decisions/` (v5 home, ADR-0005); `docs/adr/` is a redirect stub during the grace window.
 - `tests/` — `shape/` (structural contracts), `unit/`, `integration/`, `e2e/`
 
 Frozen / handle-with-care zones:

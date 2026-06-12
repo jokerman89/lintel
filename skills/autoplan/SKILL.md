@@ -33,13 +33,13 @@ Orchestrator skill. Chains the full plan pipeline: `/office-hours` (design doc) 
 ## Workflow
 
 1. **Mode + skip decisions** — confirm what's in the chain via AskUserQuestion (one question listing the proposed chain).
-2. **Step 1: /office-hours** — runs full skill. Output: design doc at `~/.gstack/projects/<slug>/<user>-<branch>-design-<datetime>.md` with Status: APPROVED.
+2. **Step 1: /office-hours** — runs full skill. Output: design doc at `~/.lintel/projects/<slug>/<user>-<branch>-design-<datetime>.md` with Status: APPROVED.
 3. **Auto-detect scope changes** — if office-hours produced a design doc with major product-direction changes, ensure `/plan-ceo-review` is in the chain (override --skip if needed; explicit operator override allowed).
 4. **Step 2: /plan-ceo-review** — runs against the design doc. Output: CEO review log entry + verdict.
 5. **Step 3: /plan-eng-review** — runs against the design doc. Output: required Eng Review log entry + 17-task implementation list + REPORT appended to design doc.
 6. **Step 4: /plan-design-review** (auto-detected: only fires if design doc has UI scope OR `--include-design-review`) — UI/UX review log entry.
 7. **Step 5: /plan-devex-review** (only fires if `--include-devex`) — DX review log entry.
-8. **Synthesize:** read all review-log entries from this run, render unified GSTACK REVIEW REPORT in design doc.
+8. **Synthesize:** read all review-log entries from this run, render unified REVIEW REPORT in design doc.
 9. **Final verdict:** any review NOT CLEARED → autoplan exits "NOT READY"; all CLEARED → "READY TO IMPLEMENT."
 
 ## Report format
@@ -51,7 +51,7 @@ Chain: office-hours → plan-ceo-review → plan-eng-review → plan-design-revi
 Mode: full
 Skipped: plan-devex-review (default)
 
-Step 1/4 /office-hours: ✓ design doc APPROVED (~/.gstack/projects/lintel/<user>-main-design-20260527-...)
+Step 1/4 /office-hours: ✓ design doc APPROVED (~/.lintel/projects/lintel/<user>-main-design-20260527-...)
 Step 2/4 /plan-ceo-review: ✓ SCOPE LOCKED (3 forcing-questions answered, 5 premises agreed)
 Step 3/4 /plan-eng-review: ✓ ENG CLEARED (6 issues resolved, 2 critical gaps encoded as tasks)
 Step 4/4 /plan-design-review: ⏸ SKIPPED — no UI scope detected
@@ -71,7 +71,7 @@ Next: begin Phase 1 implementation OR /ship (if work already done)
 
 - **`/office-hours` returns "NEEDS_CONTEXT" or "BLOCKED":** chain pauses. Operator addresses, then re-runs autoplan (idempotent — reads existing design doc if present).
 - **`/plan-ceo-review` returns REVISE:** chain pauses. Operator updates design doc per CEO findings, then re-runs autoplan.
-- **`/plan-eng-review` Exit Plan Mode Gate fails:** chain pauses. Operator fixes the design doc structure (GSTACK REVIEW REPORT must be last h2).
+- **`/plan-eng-review` Exit Plan Mode Gate fails:** chain pauses. Operator fixes the design doc structure (REVIEW REPORT must be last h2).
 - **Any chained skill times out:** report which skill, allow operator to re-run that skill standalone, then resume autoplan.
 
 ## Idempotency

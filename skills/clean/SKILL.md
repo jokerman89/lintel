@@ -43,7 +43,7 @@ Manual companion to the Layer 4 context-bloat watchers. Operator runs this when 
    - Skills invoked count
    - Time elapsed since session start
 2. **Read recent checkpoint:**
-   - `ls -t ~/.gstack/projects/<slug>/checkpoints/<branch>-*.md | head -1`
+   - `source "$LINTEL_REPO_ROOT/bin/_context.sh"; context_latest` (checkpoints live at `.claude/runtime/sessions/<branch>/`)
    - If exists: timestamp, age in minutes
 3. **Read watcher thresholds** from `~/.lintel/config.yaml`:
    - `watchers.token_watcher.warn_threshold` (default 50000)
@@ -63,7 +63,7 @@ Session health: ✓ within thresholds
   Tool calls: 42 (warn at 80)
   Skills invoked: office-hours, plan-eng-review
   Time elapsed: 1h 47m
-  Latest checkpoint: 2h ago (~/.gstack/projects/lintel/checkpoints/main-20260527-...)
+  Latest checkpoint: 2h ago (.claude/runtime/sessions/main/20260527-...-context-save.md)
 
 No cleanup needed yet. Run /clean again if session grows heavier.
 ```
@@ -124,7 +124,7 @@ That's the design per office-hours D5 (hybrid soft-warning + manual /clean) and 
 ## Failure modes
 
 - **Token count estimation off:** report it's an estimate, not authoritative.
-- **`~/.gstack/projects/<slug>/checkpoints/` doesn't exist:** treat as no-checkpoint-history.
+- **`context_latest` returns nothing (no `.claude/runtime/sessions/<branch>/` checkpoints):** treat as no-checkpoint-history.
 - **Operator runs /clean during a sub-skill chain:** report current state but warn that the chain hasn't completed yet — clean AFTER chain finishes.
 
 ## Examples

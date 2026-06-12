@@ -78,33 +78,61 @@ DEFINE phase offers the 3-path-execution if operator picks A or C. SENSE only de
 
 ### Step 0c — Meta-infra mode auto-detection (v4.0)
 
-Before reading configuration, check if cwd diff touches scaffolding paths. Meta-infra mode activates four extra gates (M1-M4) — operator should know up front so they can opt into the heavier path or override.
+Before reading configuration, check if the change is **meta-infra** — i.e. it modifies the Lintel
+harness *itself*. Meta-infra mode activates four extra gates (M1-M4) — operator should know up front
+so they can opt into the heavier path or override.
+
+> **H15 — gate on a Lintel-repo MARKER, not the path-glob alone.** `lib/`, `bin/`, `hooks/` are
+> ordinary directories in a normal consumer repo; touching them there must **not** trigger meta-infra.
+> The recommendation now requires that the repo *is the Lintel harness* (or a genuine fork). The
+> path-glob is a **secondary** signal that sharpens the message — never the sole trigger.
 
 ```bash
-# Path-glob detection: which paths in working diff touch Lintel scaffolding?
+# 1) PRIMARY GATE — is this repo the Lintel harness itself?
+#    Marker A: a Lintel plugin manifest (name OR description/keywords mention "lintel").
+#    Marker B (fallback for a renamed plugin): the pack-contract pair every Lintel repo has.
+repo_root="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+is_lintel_repo=false
+if [ -f "$repo_root/.claude-plugin/plugin.json" ] && grep -qi 'lintel' "$repo_root/.claude-plugin/plugin.json"; then
+  is_lintel_repo=true
+elif [ -f "$repo_root/lib/pack-resolver.sh" ] && [ -d "$repo_root/packs/_default" ]; then
+  is_lintel_repo=true
+fi
+
+# 2) SECONDARY SIGNAL — which paths in the working diff touch harness scaffolding?
+#    (Used to sharpen the message + pre-fill the structure-changes template; NOT a trigger on its own.)
 meta_paths_changed=$(git diff --name-only HEAD 2>/dev/null | grep -cE '^(skills|agents|hooks|bin|lib|packs|install)/|^LAYERS\.md$|^bin/_.*\.sh$' || echo 0)
 meta_staged=$(git diff --cached --name-only 2>/dev/null | grep -cE '^(skills|agents|hooks|bin|lib|packs|install)/|^LAYERS\.md$|^bin/_.*\.sh$' || echo 0)
 meta_total=$((meta_paths_changed + meta_staged))
 
-# Also detect intent from operator's last message
+# 3) Operator intent signal (explicit "lintel itself" / meta-infra language).
 operator_signal=0
 prompt_text="<operator's last message>"
 echo "$prompt_text" | grep -qiE "skill|agent|hook|pack|scaffold|lintel itself|meta-infra|li-bin|install/" && operator_signal=1
 
-if [ "$meta_total" -gt 0 ] || [ "$operator_signal" -eq 1 ]; then
+# Recommend meta-infra ONLY in the Lintel repo AND when the diff/intent actually touches the harness.
+# In a plain consumer repo (is_lintel_repo=false) editing lib/ or bin/ stays ordinary work — no M-gates.
+if [ "$is_lintel_repo" = true ] && { [ "$meta_total" -gt 0 ] || [ "$operator_signal" -eq 1 ]; }; then
   meta_infra_detected=true
+else
+  meta_infra_detected=false
 fi
 ```
 
-If `meta_infra_detected=true`: surface to operator in the SENSE report (never block):
+If `meta_infra_detected=true` (Lintel-repo marker present **and** the diff/intent touches the
+harness): surface to operator in the SENSE report (never block):
 
 ```
-⚙ Meta-infra mode detected
+⚙ Meta-infra mode detected (this IS the Lintel harness — <plugin.json mentions lintel | pack-resolver+_default present>)
    Diff touches: <list of scaffolding paths>
    Recommendation: --mode meta-infra (activates Gates M1-M4)
    Override: --mode <other> if change is content-only or test-only
    Cap: 600k soft / 900k hard (heavier REVIEW + CAPTURE)
 ```
+
+If `is_lintel_repo=false` (a plain consumer repo): meta-infra is **not** recommended even when the
+diff touches `lib/`, `bin/`, or `hooks/` — those are ordinary directories there. SENSE stays silent
+on meta-infra and the normal cap applies.
 
 DEFINE phase reads `meta_infra_detected` from 00-state.md and pre-fills the structure-changes/<date>-<slug>.md template. Operator can still override via `--mode <other>`.
 
@@ -321,6 +349,7 @@ If operator explicitly asks for the SENSE report mid-session, re-run is allowed 
 **Reads:**
 - `~/.lintel/profile.yaml`
 - `.claude/runtime/state/00-state.md` in cwd (if present)
+- `.claude-plugin/plugin.json` + `lib/pack-resolver.sh` + `packs/_default/` (Lintel-repo marker for meta-infra gating, Step 0c)
 - recent `git log --oneline -10` (cheap)
 - `.claude/memory/lessons.md` (line count only)
 - `.claude/memory/working-state.md` (line count only)
