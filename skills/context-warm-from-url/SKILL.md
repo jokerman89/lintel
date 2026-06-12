@@ -10,10 +10,6 @@ cli_support: [claude-code, codex]
 
 You are the context-warm-from-url skill.
 
-## What this skill does
-
-Fetches a URL via WebFetch and dumps content into session context. When the active pack's compliance mode is `hard`, validates the URL against the pack's approved-domain allowlist (none by default).
-
 ## When to use
 
 - Loading a documentation page for current discussion
@@ -86,18 +82,6 @@ ts: <timestamp>
 
 Audit log for compliance trail: `.claude/runtime/audit/url-fetches.jsonl`.
 
-## Status protocol
-
-- DONE / BLOCKED (URL invalid OR pack compliance gate denied)
-
-## Pause-points
-
-- Off-allowlist domain confirmation (if the active pack's compliance mode is `hard`)
-
-## Hop-in support
-
-YES.
-
 ## Integration
 
 Reads via WebFetch tool. Writes audit log.
@@ -107,7 +91,3 @@ Reads via WebFetch tool. Writes audit log.
 - **Bypassing the pack compliance URL check** — never
 - **Fetching same URL repeatedly** — check 15-min cache via WebFetch
 - **Loading URLs that don't actually contain text** (binaries, paywalled, JS-rendered) — surface failure cleanly
-
-## Voice tier behavior
-
-`voice: internal`.

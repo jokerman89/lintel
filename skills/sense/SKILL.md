@@ -225,7 +225,7 @@ Heuristics (apply in order, first match wins):
 If `role_active` is set in profile:
 - Read role file IDENTITY section (~50-100 tokens, NEVER full file)
 - Note voice tier from role (overrides mode default if set)
-- Surface "Role active: <id> (deep-dive: /li:role-deep-dive)"
+- Surface "Role active: <id> (deep-dive: /li:role --deep-dive)"
 
 Do NOT load:
 - COLD KNOWLEDGE section
@@ -234,7 +234,7 @@ Do NOT load:
 - ROLE-SPECIFIC INSIGHTS
 - SENSITIVE CONTEXT
 
-Those load on-demand via `/li:role-deep-dive <role-id>`.
+Those load on-demand via `/li:role --deep-dive <role-id>`.
 
 ### Step 5 — Read lessons + memory (light scan)
 

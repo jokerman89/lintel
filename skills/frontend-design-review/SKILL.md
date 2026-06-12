@@ -222,10 +222,6 @@ Full report: $out
 }
 ```
 
-## Voice tier behavior
-
-`voice: internal`. Default. `--customer-share` triggers strict gate (yellow → BLOCKED).
-
 ## Status protocol
 
 - **DONE** — review complete, design-review.json emitted, overall green
@@ -237,11 +233,6 @@ Full report: $out
 
 - Customer-share + yellow/red: BLOCKED + surface top findings + ask "address now or override?"
 - Red dimension: hard-block for customer-share regardless of overall
-- Baseline-comparison fails (vault entry missing): warn + fall back to absolute audit
-
-## Hop-in support
-
-YES — solo-invocable.
 
 ## Integration
 

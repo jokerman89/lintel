@@ -114,26 +114,11 @@ find . -maxdepth 1 -name 'snapshot-*' -mtime +30 | xargs -r rm -rf
 
 Surface "Pruned N old snapshots (kept latest 5 + recent 30 days)."
 
-## Voice tier behavior
-
-`voice: internal`. Operator-internal infrastructure.
-
-## Status protocol
-
-- **DONE** — operation complete, backup visible, retention enforced
-- **DONE_WITH_CONCERNS** — operation complete but retention failed or verify had warnings
-- **BLOCKED** — destination not writable, missing $LINTEL_HOME for restore, etc
-- **NEEDS_CONTEXT** — `--restore` without a `<backup-id>`
-
 ## Pause-points
 
 - On `--uninstall`: hard-block for operator confirmation (destructive op)
 - On `--restore`: hard-block for operator confirmation (replaces current state)
 - If backup fails mid-update: surface + offer abort
-
-## Hop-in support
-
-YES — solo-invokable for all 5 modes.
 
 ## Integration
 

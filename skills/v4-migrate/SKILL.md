@@ -160,20 +160,9 @@ These continue to work — pack values OVERRIDE these — but you can clean them
   /li:pack-list to confirm pack values, then edit profile.yaml/state if desired.
 ```
 
-## Status protocol
-
-- **DONE** — migration applied (with --apply) or dry-run surfaced (without)
-- **DONE_WITH_CONCERNS** — applied but some deprecated paths flagged for cleanup
-- **BLOCKED** — recommended pack doesn't validate (corrupted pack ecosystem)
-- **NEEDS_CONTEXT** — operator's state is ambiguous (signals contradict)
-
 ## Pause-points
 
 - Before apply: surface plan, wait for confirmation (unless `--auto`)
-
-## Hop-in support
-
-None — v4-migrate is single-shot.
 
 ## Integration
 

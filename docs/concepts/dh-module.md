@@ -1,7 +1,7 @@
 # DH module — devops-hosting for engineering depth
 
 **Last updated:** 2026-06-02 (v4.4)
-**Status:** Concept doc — referenced by `skills/dh/SKILL.md` + 7 sub-skills + 2 new agents + 3 hooks
+**Status:** Concept doc — referenced by `skills/dh/SKILL.md` + 7 Capabilities + 2 new agents + 3 hooks
 
 > When work has deployment/runtime concerns — new service, major rollout, observability gap, cost anomaly, SLO definition — running it through plain BUILD discards what the operator needs: deployment pattern + rollback, observability instrumentation, SLI/SLO with error budget, per-component cost projection, on-call playbook. DH is the **fourth engineering-domain module in v4.x**, following the same pattern as TA + DA + SC documented in [engineering-modules.md](engineering-modules.md).
 
@@ -36,10 +36,10 @@ Granularity dispatch:
        │
        ├── loop   → re-run deployment_plan + observability + cost → diff vs prior
        │
-       └── single → direct sub-skill (no checkpoints, no orchestration)
-                   dh-deployment-plan / dh-observability-spec / dh-sli-slo-spec /
-                   dh-cost-projection / dh-rollback-strategy /
-                   dh-capacity-headroom / dh-on-call-playbook
+       └── single → direct Capability (no checkpoints, no orchestration)
+                   deployment-plan / observability-spec / sli-slo-spec /
+                   cost-projection / rollback-strategy /
+                   capacity-headroom / on-call-playbook
                        │
                        ▼
                    Spawn agent via Brief Forge:
@@ -55,23 +55,23 @@ Granularity dispatch:
 ## The five checkpoints (full pass)
 
 ### 1. `deployment_plan_locked`
-Pattern declared + rollback documented + feature-flag strategy. Produced by `dh-deployment-plan` + ReleaseEngineer + DeploymentEngineer.
+Pattern declared + rollback documented + feature-flag strategy. Produced by `deployment-plan` + ReleaseEngineer + DeploymentEngineer.
 Pass criterion: pattern (blue-green/canary/rolling) chosen + cutover stages + flag rollout + rollback triggers. Raise-help on irreversible rollback.
 
 ### 2. `observability_specified`
-Metrics + traces + logs per component + dashboards defined. Produced by `dh-observability-spec` + ObservabilityArchitect + Architect.
+Metrics + traces + logs per component + dashboards defined. Produced by `observability-spec` + ObservabilityArchitect + Architect.
 Pass criterion: RED metrics per endpoint + USE per resource; trace propagation; structured logs with correlation_id; dashboards per service + per critical journey.
 
 ### 3. `slos_defined`
-SLI definitions + SLO budgets + error budget policy. Produced by `dh-sli-slo-spec` + ObservabilityArchitect + SystemArchitect.
+SLI definitions + SLO budgets + error budget policy. Produced by `sli-slo-spec` + ObservabilityArchitect + SystemArchitect.
 Pass criterion: SLI per critical journey with measurable signal; SLO with explicit budget; burn-rate alerts; budget-exhaustion policy. Raise-help on SLO below 30-day minimum.
 
 ### 4. `cost_projected`
-Per-component projection within budget threshold. Produced by `dh-cost-projection` + CostAnalyzer + CapacityPlanner.
+Per-component projection within budget threshold. Produced by `cost-projection` + CostAnalyzer + CapacityPlanner.
 Pass criterion: per-component monthly $ + anomaly detection thresholds. Raise-help on threshold breach.
 
 ### 5. `on_call_ready`
-Per-failure-mode playbook + escalation matrix. Produced by `dh-on-call-playbook` + ReleaseEngineer + SecurityAuditor.
+Per-failure-mode playbook + escalation matrix. Produced by `on-call-playbook` + ReleaseEngineer + SecurityAuditor.
 Pass criterion: detection signal per failure mode + first-5-minute actions + escalation matrix. Cross-reference with SC incident runbook if present.
 
 ## The 6-dimensional scoring rubric (full pass exit gate)
@@ -85,31 +85,31 @@ Pass criterion: detection signal per failure mode + first-5-minute actions + esc
 | Capacity headroom documented | _ | 80 | `.claude/runtime/state/dh/capacity-headroom-<ts>.md` |
 | On-call playbook (per failure mode) | _ | 80 | `.claude/runtime/state/dh/on-call-playbook-<ts>.md` |
 
-## Sub-skill catalog
+## Capability catalog
 
-| Sub-skill | Primary agent | Other agents | Output |
+| Capability | Primary agent | Other agents | Output |
 |---|---|---|---|
-| `dh-deployment-plan` | ReleaseEngineer | DeploymentEngineer (NEW) | deployment pattern + cutover + flags |
-| `dh-observability-spec` | ObservabilityArchitect (NEW) | Architect | signals + dashboards + alert routing |
-| `dh-sli-slo-spec` | ObservabilityArchitect (NEW) | SystemArchitect | SLI + SLO + error budget policy |
-| `dh-cost-projection` | CostAnalyzer | CapacityPlanner | per-component projection + thresholds |
-| `dh-rollback-strategy` | ReleaseEngineer | SecurityAuditor | rollback mechanics + blast-radius |
-| `dh-capacity-headroom` | CapacityPlanner | LatencyAnalyzer | headroom + alert + scaling triggers |
-| `dh-on-call-playbook` | ReleaseEngineer | SecurityAuditor | per-failure-mode runbook + escalation |
+| `deployment-plan` | ReleaseEngineer | DeploymentEngineer (NEW) | deployment pattern + cutover + flags |
+| `observability-spec` | ObservabilityArchitect (NEW) | Architect | signals + dashboards + alert routing |
+| `sli-slo-spec` | ObservabilityArchitect (NEW) | SystemArchitect | SLI + SLO + error budget policy |
+| `cost-projection` | CostAnalyzer | CapacityPlanner | per-component projection + thresholds |
+| `rollback-strategy` | ReleaseEngineer | SecurityAuditor | rollback mechanics + blast-radius |
+| `capacity-headroom` | CapacityPlanner | LatencyAnalyzer | headroom + alert + scaling triggers |
+| `on-call-playbook` | ReleaseEngineer | SecurityAuditor | per-failure-mode runbook + escalation |
 
-**L-002 result:** 5 of 7 sub-skills dispatch to existing agents (ReleaseEngineer, CostAnalyzer, LatencyAnalyzer, CapacityPlanner, SystemArchitect, SecurityAuditor, Architect). Only 2 new agents (DeploymentEngineer, ObservabilityArchitect) for genuinely new capability.
+**L-002 result:** 5 of 7 Capabilities dispatch to existing agents (ReleaseEngineer, CostAnalyzer, LatencyAnalyzer, CapacityPlanner, SystemArchitect, SecurityAuditor, Architect). Only 2 new agents (DeploymentEngineer, ObservabilityArchitect) for genuinely new capability.
 
 ## Agent additions (v4.4)
 
 ### `DeploymentEngineer`
 - **Purpose:** deployment pattern reasoning, traffic-cutover stages, feature-flag rollout
 - **Why new:** ReleaseEngineer handles pipeline mechanics (what runs); DeploymentEngineer handles cutover strategy (how the change reaches users)
-- **Spawned by:** `dh-deployment-plan`
+- **Spawned by:** `deployment-plan`
 
 ### `ObservabilityArchitect`
 - **Purpose:** signals design (metrics/traces/logs), SLI definitions tied to measurable queries
 - **Why new:** existing agents (LatencyAnalyzer) focus on perf analysis; ObservabilityArchitect specifies what the system tells operators
-- **Spawned by:** `dh-observability-spec`, `dh-sli-slo-spec`
+- **Spawned by:** `observability-spec`, `sli-slo-spec`
 
 ## Hook additions (v4.4)
 
@@ -138,7 +138,7 @@ engineering:
     cost_budget_monthly_usd_threshold: 10000
 ```
 
-Hooks + sub-skills read these. Defaults baked in when absent.
+Hooks + Capabilities read these. Defaults baked in when absent.
 
 ## Pack overrides
 
@@ -184,7 +184,7 @@ DH consumes outputs from TA + DA + SC. It maps capacity → cost, threat surface
 - **Single SLO for entire service** — per-critical-journey SLO; aggregate hides hot paths
 - **Cost projection without per-component breakdown** — total $ unactionable
 - **On-call playbook without detection signals** — runbook needs trigger pattern
-- **Inventing new agents when existing cover** — 5 of 7 sub-skills reuse
+- **Inventing new agents when existing cover** — 5 of 7 Capabilities reuse
 - **Hardcoding deployment_pattern / observability_stack** — read from profile
 - **Skipping rollback for "obviously safe" deploys** — every deploy has rollback documented
 

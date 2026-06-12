@@ -143,19 +143,6 @@ done
 
 The skill leans on `audit_count` / `audit_days_ago` semantics already defined in `bin/_audit.sh`; it can also source that helper if richer counting is needed (`source bin/_audit.sh; audit_count jobs job_begin`).
 
-## Voice tier behavior
-
-`voice: internal`. Operator-only diagnostic. No customer-bound output.
-
-## Status protocol
-
-- **DONE** — records (or the category summary) printed
-- **NEEDS_CONTEXT** — `--category` named a log that doesn't exist (suggest running with no args to list categories)
-
-## Hop-in support
-
-YES — always solo-invocable. Pure read, safe to call anytime.
-
 ## Integration
 
 **Reads:**

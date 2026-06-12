@@ -70,10 +70,6 @@ Exit: 1 (3 failures, 87 passes, 2 skipped)
 - No mutations means no sanity-scan needed on edits (there are none).
 - Reads test fixtures — if a fixture contains customer-data patterns, surface as a Layer 2 hint (read-only WARN, not BLOCK).
 
-## Voice tier note
-
-`voice: internal`. Test reports are engineering-internal.
-
 ## Failure modes
 
 - **No tests found in scope:** report explicitly ("0 tests matched scope") + exit 0. Empty scope is not a failure.

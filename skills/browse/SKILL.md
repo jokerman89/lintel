@@ -73,10 +73,6 @@ Actions: 3 (goto, click #login-btn, fill #email)
 - Screenshot persistence: artifacts land in `~/.lintel/browse-runs/`. If `customer-data-block` hook is symlinked active, the hook may flag screenshots containing customer-data patterns and refuse upload to downstream skills.
 - Auth state: managed via shared user-data-dir. Per-call auth NOT required for read-only navigation against authorized hosts (the cookie store itself was set up under explicit auth via `/setup-browser-cookies`).
 
-## Voice tier note
-
-`voice: internal`. Browse reports are engineering-internal — concrete artifact paths, no rhetorical flourish.
-
 ## Failure modes
 
 - **Chromium not installed:** print install command + exit. Do not silently fall back to a different browser.

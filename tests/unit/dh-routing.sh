@@ -29,22 +29,22 @@ for action in deployment-plan observability-spec sli-slo-spec cost-projection ro
   else fail "DH missing --action $action"; fi
 done
 
-# Scenario 3: agent dispatch
-echo ""; echo "[3] Sub-skills declare agent dispatch (L-001)"
-declare -A SUB_AGENT=(
-  ["dh-deployment-plan"]="ReleaseEngineer"
-  ["dh-observability-spec"]="ObservabilityArchitect"
-  ["dh-sli-slo-spec"]="ObservabilityArchitect"
-  ["dh-cost-projection"]="CostAnalyzer"
-  ["dh-rollback-strategy"]="ReleaseEngineer"
-  ["dh-capacity-headroom"]="CapacityPlanner"
-  ["dh-on-call-playbook"]="ReleaseEngineer"
+# Scenario 3: agent dispatch (dispatch-table rows per ADR-0009)
+echo ""; echo "[3] Dispatch rows declare agent dispatch (L-001)"
+declare -A CAP_AGENT=(
+  ["deployment-plan"]="ReleaseEngineer"
+  ["observability-spec"]="ObservabilityArchitect"
+  ["sli-slo-spec"]="ObservabilityArchitect"
+  ["cost-projection"]="CostAnalyzer"
+  ["rollback-strategy"]="ReleaseEngineer"
+  ["capacity-headroom"]="CapacityPlanner"
+  ["on-call-playbook"]="ReleaseEngineer"
 )
-for sub in "${!SUB_AGENT[@]}"; do
-  expected="${SUB_AGENT[$sub]}"
-  if grep -q "$expected" "$REPO_ROOT/skills/$sub/SKILL.md" 2>/dev/null; then
-    pass "$sub dispatches to $expected"
-  else fail "$sub MISSING dispatch to $expected"; fi
+for cap in "${!CAP_AGENT[@]}"; do
+  expected="${CAP_AGENT[$cap]}"
+  if grep -E "^\|[[:space:]]*\`${cap}\`[[:space:]]*\|" "$DH" | grep -q "$expected"; then
+    pass "dispatch row $cap → $expected"
+  else fail "dispatch row $cap MISSING agent $expected"; fi
 done
 
 # Scenario 4: 5 checkpoint pass-criteria
@@ -82,21 +82,22 @@ if grep -qE "preferences_root:[[:space:]]+engineering\.devops_hosting" "$DH"; th
   pass "preferences root: engineering.devops_hosting.*"
 else fail "preferences root MISSING or incorrect"; fi
 
-# Scenario 9: L-002 — 5 of 7 sub-skills use existing agents
+# Scenario 9: L-002 — 5 of 7 capabilities use existing agents
 echo ""; echo "[9] L-002: 5 of 7 reuse existing agents"
 # Existing agents at this point: ReleaseEngineer, CostAnalyzer, LatencyAnalyzer, CapacityPlanner (from TA), SystemArchitect (from TA), SecurityAuditor, Architect
 # New: DeploymentEngineer, ObservabilityArchitect
-existing_only_subs=0
-for sub in dh-cost-projection dh-rollback-strategy dh-capacity-headroom dh-on-call-playbook; do
-  # These sub-skills should have NO references to the new agents (DeploymentEngineer, ObservabilityArchitect)
-  if ! grep -qE "DeploymentEngineer|ObservabilityArchitect" "$REPO_ROOT/skills/$sub/SKILL.md" 2>/dev/null; then
-    existing_only_subs=$((existing_only_subs + 1))
+existing_only_caps=0
+for cap in cost-projection rollback-strategy capacity-headroom on-call-playbook; do
+  # These dispatch rows should have NO references to the new agents (DeploymentEngineer, ObservabilityArchitect)
+  row=$(grep -E "^\|[[:space:]]*\`${cap}\`[[:space:]]*\|" "$DH" 2>/dev/null)
+  if [ -n "$row" ] && ! echo "$row" | grep -qE "DeploymentEngineer|ObservabilityArchitect"; then
+    existing_only_caps=$((existing_only_caps + 1))
   fi
 done
-if [ "$existing_only_subs" -eq 4 ]; then
-  pass "L-002 win: 4 sub-skills dispatch ONLY to existing agents (cost-projection, rollback-strategy, capacity-headroom, on-call-playbook)"
+if [ "$existing_only_caps" -eq 4 ]; then
+  pass "L-002 win: 4 capabilities dispatch ONLY to existing agents (cost-projection, rollback-strategy, capacity-headroom, on-call-playbook)"
 else
-  fail "L-002 unexpected: only $existing_only_subs of 4 expected-existing-only sub-skills"
+  fail "L-002 unexpected: only $existing_only_caps of 4 expected-existing-only capabilities"
 fi
 
 # Scenario 10: Pattern consistency

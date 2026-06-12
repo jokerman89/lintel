@@ -118,10 +118,6 @@ jq -nc --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
   >> .claude/runtime/audit/handoff-size-checks.jsonl
 ```
 
-## Voice tier behavior
-
-`voice: internal`. Operator-internal pre-handoff gate.
-
 ## Status protocol
 
 - **DONE** — check done, verdict green
@@ -134,11 +130,6 @@ jq -nc --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
 - Red verdict: hard-block for operator decision (split / cut warming / abort handoff)
 - Yellow verdict: surface options + ask whether to proceed (override OK with justification)
 - Missing warming-manifest: assume warming = 0 + warn that the estimate may be low
-
-## Hop-in support
-
-YES — solo-invocable. Designed for auto-invocation from `/li:cycle` Step 5
-(post-PLAN, pre-handoff).
 
 ## Integration
 

@@ -14,7 +14,7 @@ Surfaces when an Edit/Write hits an interface file with known consumers. Warning
 ## What it does
 
 - Reads pack policy: `pack.yaml.tech_architecture.interface_glob` (e.g. `**/api/*.proto`, `**/*.openapi.yaml`)
-- Reads consumer registry: `.claude/runtime/state/ta/consumer-registry.json` (populated by `/li:ta-contract-collision` or operator)
+- Reads consumer registry: `.claude/runtime/state/ta/consumer-registry.json` (populated by `/li:ta contract-collision` or operator)
 - If edited file matches interface_glob OR appears in registry: WARN with consumer count + suggestion to run `/li:ta single --action contract-collision`
 
 ## Why warn-only
@@ -29,7 +29,7 @@ Surfaces when an Edit/Write hits an interface file with known consumers. Warning
 
 ## What's NOT in scope
 
-- Running the full contract-collision analysis (that's `/li:ta-contract-collision`'s job)
+- Running the full contract-collision analysis (that's `/li:ta contract-collision`'s job)
 - Identifying consumers automatically (the sub-skill populates the registry)
 - Blocking based on consumer count (warn-only by design)
 

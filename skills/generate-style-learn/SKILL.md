@@ -185,10 +185,6 @@ Style 'nordic-minimal' extracted.
 To use: /li:generate ... --palette nordic-minimal
 ```
 
-## Voice tier behavior
-
-`voice: internal`. Extraction is operator-internal style-management.
-
 ## Status protocol
 
 - **DONE** — palette + STYLE.md written, N source-files processed
@@ -200,10 +196,6 @@ To use: /li:generate ... --palette nordic-minimal
 
 - `--overwrite` not set but palette name exists: hard-block for operator-confirm
 - Multiple wildly-different styles in source files: surface "sources don't agree, palette will be averaged — proceed?"
-
-## Hop-in support
-
-YES — solo-invocable. Designed for one-shot extraction sessions.
 
 ## Integration
 

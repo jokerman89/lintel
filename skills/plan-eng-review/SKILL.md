@@ -6,6 +6,7 @@ color: red
 tools: Read, Bash, Grep, Glob, Edit
 voice: internal
 cli_support: [claude-code, codex]
+hop_in: no
 ---
 
 # /plan-eng-review
@@ -117,10 +118,6 @@ Before `ExitPlanMode`:
 3. `bin/li-review-log` called + `bin/li-review-read` consumed at least once.
 
 Failing this gate + calling `ExitPlanMode` = contract violation. User sees a plan with a missing/stale report + rejects it.
-
-## Voice tier note
-
-`voice: internal` — direct, builder-talking-to-builder. No elevated voice tier applies regardless of the active pack.
 
 ## Failure modes
 

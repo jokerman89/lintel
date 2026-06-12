@@ -36,9 +36,13 @@ for g in full loop single; do
   else fail "TQ MISSING granularity '$g'"; fi
 done
 
-for sub in tq-coverage-audit tq-perf-budget-spec tq-contract-test-design tq-regression-suite tq-chaos-plan tq-flaky-quarantine tq-test-pyramid-review; do
-  if [ -f "$REPO_ROOT/skills/$sub/SKILL.md" ]; then pass "sub-skill $sub present"
-  else fail "sub-skill $sub MISSING"; fi
+# Sub-capability dispatch table (ADR-0009 — sub-skill files collapsed into the module)
+if grep -q "^## Sub-capability dispatch" "$REPO_ROOT/skills/tq/SKILL.md"; then
+  pass "TQ declares Sub-capability dispatch section"
+else fail "TQ MISSING Sub-capability dispatch section"; fi
+for cap in coverage-audit perf-budget-spec contract-test-design regression-suite chaos-plan flaky-quarantine test-pyramid-review; do
+  if grep -qE "^\|[[:space:]]*\`${cap}\`[[:space:]]*\|" "$REPO_ROOT/skills/tq/SKILL.md"; then pass "dispatch row '$cap' present"
+  else fail "dispatch row '$cap' MISSING"; fi
 done
 
 for agent in PerfBudgetEnforcer ContractTestArchitect; do

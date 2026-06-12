@@ -77,19 +77,11 @@ Artifacts:
   - build-log.md
 ```
 
-## Status protocol
-
-Inherits from /li:cycle. Most relevant: BUILD DONE/BLOCKED.
-
 ## Pause-points
 
 - PLAN cost-estimate gate + founder approval gate
 - Per-task two-stage review during BUILD
 - HARD-RULE hooks if the active pack's compliance mode is `hard` (`resolve_pack_field compliance.mode`; advisory by default)
-
-## Hop-in support
-
-n/a — itself is a hop-in composite.
 
 ## Integration
 
@@ -100,7 +92,3 @@ Delegates to `/li:cycle --from PLAN --to BUILD`.
 - **Skipping REVIEW indefinitely** — fine to defer one cycle, dangerous as habit
 - **Treating this as faster /li-cycle** — it just skips review/ship/capture; total cost similar minus those phases
 - **Running on main** — same hard rule as BUILD, never on main without consent
-
-## Voice tier behavior
-
-`voice: internal`.

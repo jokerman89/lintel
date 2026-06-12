@@ -122,21 +122,6 @@ To cool / drop: /li:context-cool
 To save state: /li:context-save
 ```
 
-## Status protocol
-
-- **DONE** — files loaded, budget updated, report surfaced
-- **BLOCKED** — no files matched OR budget overrun rejected
-- **NEEDS_CONTEXT** — operator didn't specify target
-
-## Pause-points
-
-- If load ≥20k tokens: confirm
-- If files have sensitive markers (customer-data patterns): warn
-
-## Hop-in support
-
-YES — invoked anytime mid-session.
-
 ## Integration
 
 **Reads:**
@@ -162,7 +147,3 @@ YES — invoked anytime mid-session.
 - **Target glob matches 0 files**: surface helpful suggestion (similar names found?)
 - **One file unreadable**: skip it, continue with rest, note in report
 - **Budget overrun**: REFUSE, recommend `/li:context-cool` first
-
-## Voice tier behavior
-
-`voice: internal`. Operator coordination only.

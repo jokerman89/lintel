@@ -82,10 +82,6 @@ Future sessions reading .claude/memory/lessons.md will surface this at session s
 - Project lessons file (`.claude/memory/lessons.md`) is committed to repo — anything in it is visible to all collaborators. Sanity-scan applies.
 - Global lessons file (`~/.lintel/lessons.jsonl`) is local-only. Looser scanning, but still no customer-data.
 
-## Voice tier note
-
-`voice: internal`. Lessons are engineering-internal — direct, no rhetorical flourish.
-
 ## Failure modes
 
 - **Lesson body too vague to be useful:** WARN + ask whether to proceed. A vague lesson signals nothing actionable to future sessions.

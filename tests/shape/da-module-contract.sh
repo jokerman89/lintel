@@ -65,12 +65,17 @@ for g in full loop single; do
   fi
 done
 
-# 7 sub-skills
-for sub in da-schema-design da-migration-plan da-retention-policy da-query-pattern-audit da-sharding-plan da-data-contract-collision da-analytics-readiness; do
-  if [ -f "$REPO_ROOT/skills/$sub/SKILL.md" ]; then
-    pass "sub-skill $sub present"
+# Sub-capability dispatch table (ADR-0009 — sub-skill files collapsed into the module)
+if grep -q "^## Sub-capability dispatch" "$REPO_ROOT/skills/da/SKILL.md"; then
+  pass "DA declares Sub-capability dispatch section"
+else
+  fail "DA MISSING Sub-capability dispatch section"
+fi
+for cap in schema-design migration-plan retention-policy query-pattern-audit sharding-plan data-contract-collision analytics-readiness; do
+  if grep -qE "^\|[[:space:]]*\`${cap}\`[[:space:]]*\|" "$REPO_ROOT/skills/da/SKILL.md"; then
+    pass "dispatch row '$cap' present"
   else
-    fail "sub-skill $sub MISSING"
+    fail "dispatch row '$cap' MISSING"
   fi
 done
 

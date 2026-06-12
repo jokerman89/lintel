@@ -81,10 +81,6 @@ Recommendation: /qa-only before /ship.
 - Subagent invocations logged to `.claude/runtime/audit/pair-agent.jsonl`.
 - Subagent inherits scope restriction from `--scope`; cannot read outside that set.
 
-## Voice tier note
-
-`voice: internal`. Pair collaboration is engineering-internal.
-
 ## Failure modes
 
 - **Subagent not found:** list registered agents from `~/.claude/agents/` and `.claude/agents/`, suggest one. Exit.

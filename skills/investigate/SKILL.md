@@ -76,10 +76,6 @@ Recommend: fix here, add regression test.
 - Read-only mode. No code mutation in this skill. If investigation reveals a sec-issue (e.g. token in logs): surface as Layer 2 sanitization concern, do NOT fix in this skill.
 - If repro requires customer-data: STOP. Use synthetic data, or escalate to operator for sanitized fixture.
 
-## Voice tier note
-
-`voice: internal`. Investigation reports are engineering-internal — direct, technical, no rhetorical flourish.
-
 ## Failure modes
 
 - **Cannot reproduce:** name that as a finding. "Cannot reproduce in 50 attempts under conditions X, Y, Z" is data, not failure.

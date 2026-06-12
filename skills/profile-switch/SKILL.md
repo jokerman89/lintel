@@ -88,25 +88,10 @@ ACTIVE_PROFILE_FILE="${LINTEL_HOME}/.active-profile"
 **`--list`:**
 - Table-format: name | captured | size | active?
 
-## Voice tier behavior
-
-`voice: internal`. Operator-internal install-management.
-
-## Status protocol
-
-- **DONE** — operation complete, profile-state file updated
-- **DONE_WITH_CONCERNS** — operation complete but plugin disable/enable partial (some CLI plugins unreachable)
-- **BLOCKED** — `$PROFILE_STATE_DIR` permissions deny write, or the named profile is not found
-- **NEEDS_CONTEXT** — `--snapshot` / `--restore` without a `<name>` arg
-
 ## Pause-points
 
 - `--restore` hard-block for operator confirm (destructive)
 - Multiple CLIs detected but disable fails on some: surface partial success, ask whether to proceed
-
-## Hop-in support
-
-YES — solo-invokable for all 6 modes.
 
 ## Integration
 

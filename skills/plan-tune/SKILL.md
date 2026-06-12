@@ -103,10 +103,6 @@ Effect: auto-picks 'proceed as approved' on this question
   - Production data access
 - Operator can `--set ... ask-only-for-one-way` to auto-decide reversible while keeping one-way confirmations.
 
-## Voice tier note
-
-`voice: internal`. Tuning is operator-internal infrastructure.
-
 ## Failure modes
 
 - **Invalid question_id format:** reject with format hint (`<skill>-<slug>`).

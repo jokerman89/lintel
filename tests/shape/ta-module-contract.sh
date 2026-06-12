@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # tests/shape/ta-module-contract.sh
-# Asserts (v4.1): TA module declares the engineering-module contract:
-# workflow_root + navigation + domain block + sub-skills + new agents + hooks.
+# Asserts (v4.1, dispatch-table form per ADR-0009): TA module declares the engineering-module
+# contract: workflow_root + navigation + domain block + sub-capability dispatch table + new
+# agents + hooks.
 # tag: shape v4.1
 
 set -uo pipefail
@@ -55,12 +56,17 @@ for g in full loop single; do
   fi
 done
 
-# 7 sub-skills present
-for sub in ta-api-design ta-dependency-graph ta-complexity-audit ta-boundary-review ta-scaling-plan ta-contract-collision ta-quality-attributes; do
-  if [ -f "$REPO_ROOT/skills/$sub/SKILL.md" ]; then
-    pass "sub-skill $sub present"
+# Sub-capability dispatch table (ADR-0009 — sub-skill files collapsed into the module)
+if grep -q "^## Sub-capability dispatch" "$REPO_ROOT/skills/ta/SKILL.md"; then
+  pass "TA declares Sub-capability dispatch section"
+else
+  fail "TA MISSING Sub-capability dispatch section"
+fi
+for cap in api-design dependency-graph complexity-audit boundary-review scaling-plan contract-collision quality-attributes; do
+  if grep -qE "^\|[[:space:]]*\`${cap}\`[[:space:]]*\|" "$REPO_ROOT/skills/ta/SKILL.md"; then
+    pass "dispatch row '$cap' present"
   else
-    fail "sub-skill $sub MISSING"
+    fail "dispatch row '$cap' MISSING"
   fi
 done
 

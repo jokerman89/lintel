@@ -85,10 +85,6 @@ Monitor:    /context-budget --watch
 - Cost tracking aggregates perf-mode sessions to monthly summary
 - No production-mutation gate — perf-mode is local resource allocation
 
-## Voice tier note
-
-`voice: internal`.
-
 ## Failure modes
 
 - **Context engine disabled in config** — warn + offer to enable, then retry

@@ -96,10 +96,6 @@ Every finding gets a 1-10 confidence:
 - 3-4: suppressed from main report, appendix only
 - 1-2: speculation only (rarely reported)
 
-## Voice tier note
-
-`voice: internal`. Code review prose is engineering-internal.
-
 ## Failure modes
 
 - **Diff empty:** no changes to review. Report + exit.

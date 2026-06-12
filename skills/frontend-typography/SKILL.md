@@ -142,10 +142,6 @@ if [ -n "${CUSTOMER_SHARE:-}" ]; then
 fi
 ```
 
-## Voice tier behavior
-
-`voice: internal`. Default. `--customer-share` triggers `/li:compliance-gate --check font-licensing` (Phase A1: skill body documents; agent at invocation verifies).
-
 ## Status protocol
 
 - **DONE** — typography.json written, schema valid
@@ -157,10 +153,6 @@ fi
 
 - Customer-share + commercial-license font: surface licensing-instruction explicit + ask for confirm before proceeding
 - Brief mentions specific font operator doesn't know about: agent verifies at invocation, surface if unclear
-
-## Hop-in support
-
-YES — solo-invocable.
 
 ## Integration
 

@@ -10,10 +10,6 @@ cli_support: [claude-code, codex]
 
 You are the adr-new skill.
 
-## What this skill does
-
-Creates a new ADR file from `.claude/decisions/TEMPLATE.md`, named per next-available number (e.g., `0042-<slug>.md`). Asks context-questions to populate Title, Context, Decision, Consequences sections. Commits on feature branch.
-
 ## When to use
 
 - Non-trivial architectural decision being made

@@ -77,10 +77,6 @@ Tokens used: 31,400 / 50,000
 - Token spend logged to `.claude/runtime/audit/codex-spend.jsonl`.
 - The active pack may route Codex calls via a configured gateway per `~/.lintel/config.yaml` (none by default).
 
-## Voice tier note
-
-`voice: internal`. Outside-voice review is engineering-internal. Codex's voice is its own — we do not rewrite it.
-
 ## Failure modes
 
 - **Codex CLI missing:** report + exit. No fallback to Claude self-review (that defeats the purpose).

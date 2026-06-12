@@ -1,7 +1,7 @@
 # DA module — data-architecture for engineering depth
 
 **Last updated:** 2026-05-30 (v4.2)
-**Status:** Concept doc — referenced by `skills/da/SKILL.md` + 7 sub-skills + 2 agents + 3 hooks
+**Status:** Concept doc — referenced by `skills/da/SKILL.md` + 7 Capabilities + 2 agents + 3 hooks
 
 > When work touches data — new datastore, schema migration, retention policy, sharding plan, analytics readiness — running it through plain BUILD discards what the operator needs: versioned schemas, zero-downtime migration discipline, retention compliance, query-pattern surface, consumer-impact analysis. DA is the **second engineering-domain module in v4.x**, following the same pattern as TA documented in [engineering-modules.md](engineering-modules.md).
 
@@ -36,10 +36,10 @@ Granularity dispatch:
        │
        ├── loop   → re-run schema + migration + retention → diff vs prior
        │
-       └── single → direct sub-skill (no checkpoints, no orchestration)
-                   da-schema-design / da-migration-plan / da-retention-policy /
-                   da-query-pattern-audit / da-sharding-plan /
-                   da-data-contract-collision / da-analytics-readiness
+       └── single → direct Capability (no checkpoints, no orchestration)
+                   schema-design / migration-plan / retention-policy /
+                   query-pattern-audit / sharding-plan /
+                   data-contract-collision / analytics-readiness
                        │
                        ▼
                    Spawn agent via Brief Forge:
@@ -55,23 +55,23 @@ Granularity dispatch:
 ## The five checkpoints (full pass)
 
 ### 1. `data_model_complete`
-Entities + relationships mapped. Produced by `da-schema-design` + DatabaseDesigner.
+Entities + relationships mapped. Produced by `schema-design` + DatabaseDesigner.
 Pass criterion: every entity has a name, primary key, and cardinality-declared relationships.
 
 ### 2. `schema_locked`
-Schema with versioning + migration path declared. Produced by `da-schema-design` + `da-data-contract-collision` (consumer side).
+Schema with versioning + migration path declared. Produced by `schema-design` + `data-contract-collision` (consumer side).
 Pass criterion: schema_versioning strategy applied; if changes from prior iteration, migration path declared; if ≥3 consumers break, raise-help.
 
 ### 3. `migration_safe`
-Zero-downtime OR reversible per pack policy. Produced by `da-migration-plan` + MigrationPlanner.
+Zero-downtime OR reversible per pack policy. Produced by `migration-plan` + MigrationPlanner.
 Pass criterion: every up-migration has a documented down-migration OR explicit data-loss acceptance; affected-rows below threshold OR explicit downtime-window confirmation.
 
 ### 4. `retention_specified`
-Per-data-class retention + archival + deletion. Produced by `da-retention-policy`.
+Per-data-class retention + archival + deletion. Produced by `retention-policy`.
 Pass criterion: every classified data class has retention days + archival mechanism + deletion verification; no compliance conflicts (or explicit override).
 
 ### 5. `query_patterns_documented`
-Read/write ratios + hot paths. Produced by `da-query-pattern-audit`.
+Read/write ratios + hot paths. Produced by `query-pattern-audit`.
 Pass criterion: query enumeration complete; hot paths identified; missing-index recommendations surfaced.
 
 ## The 6-dimensional scoring rubric (full pass exit gate)
@@ -87,17 +87,17 @@ Pass criterion: query enumeration complete; hot paths identified; missing-index 
 
 Full-pass exit gate: every dimension ≥ 80 OR explicit operator override.
 
-## Sub-skill catalog
+## Capability catalog
 
-| Sub-skill | Primary agent | Other agents | Output |
+| Capability | Primary agent | Other agents | Output |
 |---|---|---|---|
-| `da-schema-design` | DatabaseDesigner | SchemaArchitect (NEW, polyglot) | schema with versioning + relationships |
-| `da-migration-plan` | MigrationPlanner (NEW) | Migrator | reversible migration with zero-downtime path |
-| `da-retention-policy` | DatabaseDesigner | Architect | per-data-class retention + archival + deletion |
-| `da-query-pattern-audit` | Explorer | DatabaseDesigner | hot paths + index gaps + N+1 candidates |
-| `da-sharding-plan` | SchemaArchitect (NEW) | DatabaseDesigner | partition strategy + rebalancing playbook |
-| `da-data-contract-collision` | DatabaseDesigner | Architect | consumer breakage + migration plan |
-| `da-analytics-readiness` | DataPipelineDesigner | SchemaArchitect (NEW) | OLAP path + dimensional model |
+| `schema-design` | DatabaseDesigner | SchemaArchitect (NEW, polyglot) | schema with versioning + relationships |
+| `migration-plan` | MigrationPlanner (NEW) | Migrator | reversible migration with zero-downtime path |
+| `retention-policy` | DatabaseDesigner | Architect | per-data-class retention + archival + deletion |
+| `query-pattern-audit` | Explorer | DatabaseDesigner | hot paths + index gaps + N+1 candidates |
+| `sharding-plan` | SchemaArchitect (NEW) | DatabaseDesigner | partition strategy + rebalancing playbook |
+| `data-contract-collision` | DatabaseDesigner | Architect | consumer breakage + migration plan |
+| `analytics-readiness` | DataPipelineDesigner | SchemaArchitect (NEW) | OLAP path + dimensional model |
 
 L-002 inventory: 5 of 7 dispatches reuse existing agents (DatabaseDesigner, DataPipelineDesigner, Migrator, Architect, Explorer). Only 2 new agents (SchemaArchitect, MigrationPlanner) for genuinely new capability.
 
@@ -106,12 +106,12 @@ L-002 inventory: 5 of 7 dispatches reuse existing agents (DatabaseDesigner, Data
 ### `SchemaArchitect`
 - **Purpose:** cross-store reasoning, partition-key selection, dimensional modeling
 - **Why new:** DatabaseDesigner is single-store; SchemaArchitect reasons across boundaries
-- **Spawned by:** `da-schema-design` (when polyglot), `da-sharding-plan`, `da-analytics-readiness`
+- **Spawned by:** `schema-design` (when polyglot), `sharding-plan`, `analytics-readiness`
 
 ### `MigrationPlanner`
 - **Purpose:** zero-downtime migration planning, reversibility analysis, lock-acquisition strategy
 - **Why new:** Migrator drafts DDL; MigrationPlanner reasons about safety + sequencing
-- **Spawned by:** `da-migration-plan`
+- **Spawned by:** `migration-plan`
 
 ## Hook additions (v4.2)
 
@@ -140,7 +140,7 @@ engineering:
     require_migration_review_above_rows: 100000
 ```
 
-Hooks + sub-skills read these. Defaults baked in when absent.
+Hooks + Capabilities read these. Defaults baked in when absent.
 
 ## Pack overrides
 
@@ -157,7 +157,7 @@ data_architecture:
 
 ## Audit trail
 
-Every module + sub-skill + checkpoint writes to `.claude/runtime/audit/da-decisions.jsonl`:
+Every module + Capability + checkpoint writes to `.claude/runtime/audit/da-decisions.jsonl`:
 
 ```jsonl
 {"ts":"...","kind":"da_module_complete","granularity":"full","score":85,"checkpoints_passed":5,"primary_store":"postgres"}
@@ -191,7 +191,7 @@ DA runs in parallel with SC after TA produces architecture decisions. SC reads c
 - **Single retention value for all data** — classify first
 - **Sharding without query-pattern audit** — partition key choice is query-dependent
 - **Inventing new agents when existing cover** — L-002 inventory pre-PR
-- **Curating data-model patterns in sub-skills** — sub-skills are dispatch contracts (L-001)
+- **Curating data-model patterns in Capabilities** — Capabilities are dispatch contracts (L-001)
 - **Hardcoding primary_store** — read from profile
 - **Skipping retention conflict detection** — compliance hooks exist for a reason
 
@@ -215,4 +215,4 @@ DA runs in parallel with SC after TA produces architecture decisions. SC reads c
 
 **Tested by:**
 - `tests/shape/da-module-contract.sh` (engineering-module-contract for DA)
-- `tests/unit/da-routing.sh` (granularity dispatch + sub-skill enumeration)
+- `tests/unit/da-routing.sh` (granularity dispatch + Capability enumeration)

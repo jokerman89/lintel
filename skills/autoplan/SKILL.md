@@ -67,10 +67,6 @@ Next: begin Phase 1 implementation OR /ship (if work already done)
 - Each chained skill runs its own 5-always-on session-start check at invocation.
 - Autoplan aggregates: if ANY chained skill flagged a Layer 2 violation, autoplan exits NOT READY.
 
-## Voice tier note
-
-`voice: internal`. Autoplan orchestrates internal reviews. None of its own output is customer-facing.
-
 ## Failure modes
 
 - **`/office-hours` returns "NEEDS_CONTEXT" or "BLOCKED":** chain pauses. Operator addresses, then re-runs autoplan (idempotent — reads existing design doc if present).
