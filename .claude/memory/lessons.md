@@ -306,3 +306,37 @@ or a deterministic source and BLOCK if it's empty —
 
 Related: [[L-007]] independent review before SHIP — both reviews earned their keep by catching
 exactly this; the lesson is to stop manufacturing the finding for them.
+
+## L-015 — Two agent sessions on one repo: isolate in a worktree, reconcile by merge, never force
+
+**Rule:** When a second agent session is concurrently editing the same repo (mtimes moving under
+you, files you didn't write appearing), do NOT race it on a shared index. Isolate your work in a
+git worktree pinned to a shared base commit, build there, and reconcile with a **merge** — never a
+force-push over the other session's branch. If neither session rewrites the other's commits, the
+convergence is clean: git auto-merges non-overlapping changes, and files both sides touched combine
+correctly *because both built on the same base*.
+
+**Why:** The v5.3 launch-readiness cycle ran alongside a second session on `feat/v5.3-cli-and-craft`.
+Detected twice via fresh mtimes; the first instinct (drive the shared tree) would have produced
+interleaved half-commits and lost work. Instead: a worktree (`launch-waves`) pinned to the other
+session's tip, all 7 waves built + committed there, then `git merge origin/feat/v5.3` — **zero
+conflicts**. The other session had independently merged my waves 1–2 and run its own L-007 review;
+its refined fail-closed hook positioning and my `CMD_FLAT` flattening combined into a strictly better
+hook because both descended from the shared `e1fec0e`. The push was a fast-forward; PR #73 absorbed
+everything. Two independent reviews (theirs + mine) made the result stronger than either alone.
+
+**How to apply:**
+- First sign of a concurrent writer (unexplained mtimes, `git status` files you didn't create):
+  `EnterWorktree` (or `git worktree add`) off the current shared tip; work there.
+- Commit wave-atomically so a later merge has clean seams; keep each file's changes in one logical
+  commit (the merge of `CODEOWNERS`/`plan` auto-resolved precisely because edits were localized).
+- Reconcile with `git merge origin/<branch>` and verify `git merge-base --is-ancestor` before any
+  push (fast-forward only — a force-push is how you delete the other session's review fixes).
+- Re-run the FULL suite on the *merged* tree (L-010): the merge adds tests/behaviour neither branch
+  tested alone (here, their `auto-decide.sh` → 81→82).
+- A guard you extend can catch your own prose: my `no-swedish` scope-widening flagged the literal
+  `å` in my own explanatory comment. Write guard rationale without trigger examples.
+
+Related: [[L-010]] green-on-committed-tree — the gate is the merged tree, not either parent;
+[[L-007]] independent review — two parallel sessions yield two independent reviews, a feature not a
+bug if you merge rather than overwrite.
