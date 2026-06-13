@@ -255,3 +255,54 @@ regression assertion.
 Related: [[L-007]] verify the reviewer's claim — here the reviewer was exactly right and live-
 verified the exploit; [[L-010]] green-on-committed-tree — the suite was green AND wrong because
 it tested the happy path only. Behavior tests must include the adversarial path.
+
+## L-013 — "Make it ours" means reinvent the substance, not remove the attribution word
+
+**Rule:** When the operator says "make it ours / go all in / live up to the name," that is an
+instruction to REINVENT — rewrite the content end-to-end in Lintel's own voice, structure, and
+model so the result would stand on its own with no ancestor. Deleting the word "gstack" (or
+"heavily inspired by X") from prose is de-heritage, NOT reinvention. They are different jobs and
+the small one masquerades as the big one.
+
+**Why:** v5.3 lineage cleanup. I removed gstack references and reported the spine "ours." The
+operator caught it cold — "did you for example look at all gstack skills and rewrote everything
+end to end to make it ours?" — then escalated: "Everything should be done, we dont half-ass
+anything … Do the full engaged refactor … go all in here and do this the best way." I had done
+a find-and-replace and called it ownership. The actual work was reinventing 12 spine skills in
+Lintel's own idiom (ADR-0013). De-heritage is cheap and invisible; reinvention is the deliverable.
+
+**How to apply:**
+- Hear "make it ours / our vision / live up to the name" as a REINVENT verb. Scope the full
+  rewrite, not a terminology sweep. If unsure which is wanted, ask — but default to the larger.
+- Test your own output: "would this stand on its own with the ancestor deleted, or does it just
+  avoid naming the ancestor?" If only the name is gone, you de-heritaged; you did not reinvent.
+- "Heavily inspired by X" in our own README is a smell: either earn the independence or keep the
+  honest attribution. Don't quietly drop the credit while keeping the borrowed substance.
+
+Related: [[L-001]] scaffolding-not-content — both are about doing the real work, not the
+work-shaped gesture. L-001 catches doing too much (pre-building content); L-013 catches doing
+too little (a rename dressed as a reinvention).
+
+## L-014 — Illustrative bash in a skill is shipped code; never dereference an unbound var
+
+**Rule:** Bash shown inside a SKILL.md (gates, examples, "run this") is read as authoritative and
+gets copy-run. Hold it to the same bar as committed code: every variable is derived or guarded
+before use, no `$slug`/`$dir` appears from nowhere. A `set -u` script dies on an unbound var; a
+non-`-u` one silently expands to empty and checks the wrong path — worse, because it passes quietly.
+
+**Why:** Recurs across reviews. The v5.2 own-patterns review caught an undefined var in
+define/office-hours; the v5.3 review caught the identical class in PLAN's Step 11a trio gate —
+`$slug` was never assigned, so the completeness check ran against the empty path and would have
+passed a missing trio. Same mistake, second cycle running. Fix pattern: derive from an env var
+or a deterministic source and BLOCK if it's empty —
+`slug_dir="${LINTEL_PLAN_DIR:-$(ls -dt .claude/plans/*/ 2>/dev/null | head -1)}"; [ -n "$slug_dir" ] || { echo BLOCKED; exit 1; }`.
+
+**How to apply:**
+- Before shipping any skill, scan its bash for variables: every one must be assigned above its
+  first use or be a documented input. Treat a bare `$var` with no origin as a bug, not a sketch.
+- Prefer `${VAR:-<fallback>}` + an empty-guard over assuming the caller set something.
+- When a reviewer flags an unbound var, grep the WHOLE surface for the same pattern — it is never
+  a one-off (it wasn't in v5.2, it wasn't in v5.3).
+
+Related: [[L-007]] independent review before SHIP — both reviews earned their keep by catching
+exactly this; the lesson is to stop manufacturing the finding for them.

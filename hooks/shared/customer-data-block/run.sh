@@ -24,16 +24,6 @@ command -v audit_log >/dev/null 2>&1 || source "$(dirname "${BASH_SOURCE[0]}")/.
 # Shared customer-PII patterns (defined once in _patterns.sh).
 source "$(dirname "${BASH_SOURCE[0]}")/../_patterns.sh"
 
-# Fail-closed: a BLOCK hook that cannot scan must BLOCK, not silently allow
-# (a missing/failed scanner is exactly the silent-bypass we are guarding against).
-if ! command -v scan_customer >/dev/null 2>&1; then
-  command -v audit_log >/dev/null 2>&1 && audit_log "hooks" "customer_data_block" "hook=customer-data-block" "tier=BLOCK" "blocked=true" "reason=scanner-unavailable"
-  echo "ERROR [Lintel hook]: customer-data-block scanner unavailable — blocking to be safe." >&2
-  echo "ERROR: source hooks/shared/_patterns.sh failed. Override only if you are certain:" >&2
-  echo '  LINTEL_OVERRIDE_CUSTOMER_DATA=1 LINTEL_OVERRIDE_REASON="<reason>" ... (see CLAUDE.md)' >&2
-  exit 2
-fi
-
 # Fire on any git commit/push however phrased (battletest K2 — the `^git` anchor
 # was bypassed by `git -C`, abs paths, `&&` chains).
 if ! printf '%s' "$CMD_FLAT" | grep -qE '(^|[^A-Za-z0-9_-])git([[:space:]]|$).*\b(commit|push)\b'; then
@@ -51,6 +41,20 @@ fi
 
 # Added lines from staged + unstaged-tracked diffs, cwd + every `git -C`
 # target in the command (helper in ../_input.sh — rationale there).
+# Fail-closed (issue I1 / ADR-0013): the matcher fired (a git commit/push is in
+# flight) and it was not overridden — if the scanner failed to load, BLOCK rather
+# than silently allow. Positioned AFTER matcher+override (not after the patterns
+# source) so a broken scanner blocks the real threat (git commits) while non-git
+# commands pass and the documented override stays reachable — ADR-0013 requires
+# the error to name a USABLE override. Audit the block (launch-waves wave).
+if ! command -v scan_customer >/dev/null 2>&1; then
+  command -v audit_log >/dev/null 2>&1 && audit_log "hooks" "customer_data_block" "hook=customer-data-block" "tier=BLOCK" "blocked=true" "reason=scanner-unavailable"
+  echo "ERROR [Lintel hook]: customer-data-block scanner unavailable — blocking to be safe." >&2
+  echo "ERROR: source hooks/shared/_patterns.sh failed. Override only if you are certain:" >&2
+  echo '  LINTEL_OVERRIDE_CUSTOMER_DATA=1 LINTEL_OVERRIDE_REASON="<reason>" git commit ...' >&2
+  exit 2
+fi
+
 CONTENT="$(hook_git_gate_content "$CMD_FLAT")"
 [ -z "$(printf '%s' "$CONTENT" | tr -d '[:space:]')" ] && exit 0
 
