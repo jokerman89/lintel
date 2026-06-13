@@ -56,9 +56,20 @@ out="${OUT:-/dev/stdout}"
 [ -z "$brief$audience" ] && { echo "Need --brief OR --target-audience"; exit 2; }
 ```
 
-### Step 2 — TypographyCurator agent dispatch
+### Step 2 — Corpus query + TypographyCurator agent dispatch
 
-Hand off to `agents/frontend/TypographyCurator.md`. Agent reads brief + (optionally) audience + mood. Picks font-stack from the recommendation-tree:
+Query the design corpus first (ADR-0015 — retrieval before generation):
+
+```bash
+python3 "${LINTEL_SKILLS_DIR:-skills}/design-dna/scripts/search.py" "<mood + audience keywords>" --domain typography -n 3
+```
+
+The active design profile's font roles are the starting point (default anthropic-default:
+Poppins display / Lora body / JetBrains Mono). Corpus pairings + the brief justify deviation;
+no deviation needed → the profile stack IS the answer. python3 absent → Read
+`skills/design-dna/data/typography.csv` directly (73 pairings, greppable).
+
+Hand off to `agents/frontend/TypographyCurator.md` with the corpus hits + profile in context. Agent reads brief + (optionally) audience + mood. Picks font-stack from the recommendation-tree:
 
 - **Google Fonts (free, no-license-friction):** Inter, IBM Plex, Space Grotesk, JetBrains Mono, Fraunces (variable), Recursive (variable)
 - **Pangram Pangram (commercial license required):** PP Editorial New, PP Neue Montreal, PP Mori, PP Right Grotesk

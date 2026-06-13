@@ -1,6 +1,6 @@
 {
   "name": "li",
-  "version": "5.2.1",
+  "version": "5.4.0",
   "description": "Lintel — company-neutral, pack-driven session harness for GitHub Copilot CLI",
   "author": {
     "name": "jokerman89",

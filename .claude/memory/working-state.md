@@ -20,6 +20,33 @@ Cross-session working state (ej durable rules — that's [[lessons.md]]; ej pers
 **Last touched:** YYYY-MM-DD
 -->
 
+## v5.4-design-dna — PR OPEN 2026-06-13
+
+**Status:** active — branch feat/v5.4-design-dna (worktree E:\Workspace\_wt-design-dna), rebased on main@5.2.1
+
+**What shipped:** ADR-0015 (consume nextlevelbuilder/ui-ux-pro-max-skill v2.5.0, MIT — corpus of
+84 styles, 161 palettes, 161 reasoning rules, 73 font pairings, 99 UX rules, 16 stack files + BM25
+stdlib search; explicit L-001 exception: third-party reference data) + ADR-0016 (anthropic-default
+design profile — 7 canonical tokens + Poppins/Lora, Apache-2.0 attributed, derived gap-fills
+source-marked; pack seam `design.profile`, contract untouched). New module skill
+`skills/design-dna/` (search|system|stack|persist|validate|profile) + `validate_design.py` hard
+gate; retrieval wired into frontend-design (required Step 1.5), typography/motion, generate-web/app
+(Gate 0), both review skills; doctrine into 4 frontend agents. 3 new tests; L-007 independent
+review SHIP-WITH-FIXES — P0 (emoji false-positive on arrows) + 4 P1 all fixed + 4 negative
+regression assertions (L-012). M2 GREEN. Manifests 5.4.0.
+
+**What's pending:**
+- Merge PR; CATALOG regen is automatic on main push
+- Known pre-existing red: tests/shape/skill-descriptions-trigger.sh fails 43x on clean main
+  (owned by the in-flight v5.3 craft branch) — zero failures reference v5.4 files
+- Follow-ups parked: slide decision-engine (emotion-to-layout CSVs) for generate-ppt; upstream
+  corpus re-sync per ATTRIBUTION.md; pack-schema-level `design.profile` validation if a second
+  profile consumer appears
+
+**Last touched:** 2026-06-13
+
+---
+
 ## v5.2-battletest — PR #69 OPEN 2026-06-12
 
 **Status:** active — PR #69 to main (independent chain; #62-#68 already merged)
