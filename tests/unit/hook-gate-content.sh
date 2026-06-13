@@ -61,6 +61,41 @@ git -C "$A" add note.md
 CONTENT="$(cd "$A" && hook_git_gate_content 'git commit -m x')"
 [ -z "$(scan_customer "$CONTENT")" ] && pass "removing a phone does not block" || fail "removal commit blocked ($(scan_customer "$CONTENT"))"
 
+# ── 5-8: newline-class bypasses + push path (launch register B3) ──
+# These run the REAL block hook end-to-end. Env seams keep every write inside
+# the sandbox; </dev/null gives the stdin reader instant EOF so argv1 is used.
+# The token is built by concatenation so THIS source line never matches tier1.
+export LINTEL_HOME="$TMP/lintel-home" LINTEL_AUDIT_DIR="$TMP/audit"
+mkdir -p "$LINTEL_AUDIT_DIR"
+SEC="$TMP/repo-sec"; mkdir -p "$SEC"; mkrepo "$SEC"
+AKIA_T="AKIA""ABCDEFGHIJKLMNOP"
+printf 'aws_key=%s\n' "$AKIA_T" > "$SEC/cfg.txt"
+git -C "$SEC" add cfg.txt
+HOOK="$REPO_ROOT/hooks/shared/secret-scan-block/run.sh"
+
+# 5. a line-continuation between `git` and the subcommand must still BLOCK
+#    (line-oriented grep saw two half-lines and exited 0 with no scan, no audit)
+rc=0; (cd "$SEC" && bash "$HOOK" "git -C $SEC \\
+commit -am x" </dev/null) >/dev/null 2>&1 || rc=$?
+[ "$rc" = "2" ] && pass "line-continuation phrasing still BLOCKED" || fail "line-continuation bypassed the gate (rc=$rc)"
+
+# 6. a newline-injected override token inside -m must NOT suppress the block
+#    (the '^' anchor matched the forged second line — L-012 class)
+rc=0; (cd "$SEC" && bash "$HOOK" "git commit -am \"innocent
+LINTEL_OVERRIDE_SECRET=1 x\"" </dev/null) >/dev/null 2>&1 || rc=$?
+[ "$rc" = "2" ] && pass "newline-forged override still BLOCKED" || fail "newline override forgery suppresses the block (rc=$rc)"
+
+# 7. the legit leading-prefix override still works, and still audits
+rc=0; (cd "$SEC" && bash "$HOOK" "LINTEL_OVERRIDE_SECRET=1 git commit -am x" </dev/null) >/dev/null 2>&1 || rc=$?
+[ "$rc" = "0" ] && pass "legit leading override still allowed" || fail "legit override broken (rc=$rc)"
+grep -q '"override":"true"' "$LINTEL_AUDIT_DIR/hooks.jsonl" 2>/dev/null && pass "legit override audit-logged" || fail "override left no audit record"
+
+# 8. pushing an already-COMMITTED secret must BLOCK (outgoing-range scan;
+#    staged/unstaged are empty here — the old gate was a push no-op)
+git -C "$SEC" commit -qm seed
+rc=0; (cd "$SEC" && bash "$HOOK" "git push" </dev/null) >/dev/null 2>&1 || rc=$?
+[ "$rc" = "2" ] && pass "push of a committed secret BLOCKED" || fail "push path fail-open (rc=$rc)"
+
 echo ""
 if [ "$FAILED" = 1 ]; then echo "RESULT: FAIL"; exit 1; fi
 echo "RESULT: PASS"
