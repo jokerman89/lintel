@@ -146,7 +146,7 @@ fi
 hdr "Copying scaffolding to ~/.lintel/scaffolding/"
 
 cp -r "$REPO_ROOT/scaffolding/"* "$LINTEL_SCAFFOLDING/"
-ok "Scaffolding copied (4 layers)"
+ok "Foundation scaffolding copied"
 
 # Shared runtime helpers (lib/ + bin/) — the hooks installed under
 # ~/.lintel/hooks resolve lib/memory.sh + bin/_jobs.sh here when no repo

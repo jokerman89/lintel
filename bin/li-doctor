@@ -4,18 +4,16 @@
 # Detects installed AI CLIs, Lintel install state per CLI, version drift,
 # scaffolding install, and hook activation.
 #
-# Usage: li-doctor [--verbose] [--json]
+# Usage: li-doctor [--verbose]
 
 set -uo pipefail
 
 LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
 VERBOSE=0
-OUTPUT_JSON=0
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --verbose|-v) VERBOSE=1; shift ;;
-    --json) OUTPUT_JSON=1; shift ;;
     *) echo "Unknown arg: $1" >&2; exit 2 ;;
   esac
 done
@@ -35,19 +33,33 @@ echo ""
 
 # ── 1. Detect installed CLIs ──
 echo "## Installed CLIs"
-declare -A CLI_PATHS=(
-  [claude]="$(command -v claude 2>/dev/null || echo "")"
-  [codex]="$(command -v codex 2>/dev/null || echo "")"
-  [cursor]="$(command -v cursor 2>/dev/null || echo "")"
-  [gemini]="$(command -v gemini 2>/dev/null || echo "")"
-  [opencode]="$(command -v opencode 2>/dev/null || echo "")"
-  [copilot]="$(command -v copilot 2>/dev/null || echo "")"
-  [droid]="$(command -v droid 2>/dev/null || echo "")"
-)
+# Plain variables + a case dispatch, NOT `declare -A`: stock macOS bash 3.2 has no
+# associative arrays and dies with a set -u unbound error — and li-doctor is the
+# first command a new operator runs.
+CLI_CLAUDE="$(command -v claude 2>/dev/null || true)"
+CLI_CODEX="$(command -v codex 2>/dev/null || true)"
+CLI_CURSOR="$(command -v cursor 2>/dev/null || true)"
+CLI_GEMINI="$(command -v gemini 2>/dev/null || true)"
+CLI_OPENCODE="$(command -v opencode 2>/dev/null || true)"
+CLI_COPILOT="$(command -v copilot 2>/dev/null || true)"
+CLI_DROID="$(command -v droid 2>/dev/null || true)"
+
+cli_path() {
+  case "$1" in
+    claude)   printf '%s' "$CLI_CLAUDE" ;;
+    codex)    printf '%s' "$CLI_CODEX" ;;
+    cursor)   printf '%s' "$CLI_CURSOR" ;;
+    gemini)   printf '%s' "$CLI_GEMINI" ;;
+    opencode) printf '%s' "$CLI_OPENCODE" ;;
+    copilot)  printf '%s' "$CLI_COPILOT" ;;
+    droid)    printf '%s' "$CLI_DROID" ;;
+    *)        : ;;
+  esac
+}
 
 found=0
 for cli in claude codex cursor gemini opencode copilot droid; do
-  path="${CLI_PATHS[$cli]}"
+  path="$(cli_path "$cli")"
   if [ -n "$path" ]; then
     ok "$cli: $path"
     found=$((found+1))
@@ -61,24 +73,26 @@ echo ""
 # ── 2. Lintel install per CLI ──
 echo "## Lintel install per CLI"
 
-# Claude Code
-if [ -n "${CLI_PATHS[claude]}" ]; then
-  if [ -d "$HOME/.claude/plugins/li" ] || [ -d "$HOME/.claude/marketplaces/jokerman-session-setup" ]; then
-    if [ -f "$HOME/.claude/plugins/li/.claude-plugin/plugin.json" ]; then
-      version=$(grep -o '"version"[[:space:]]*:[[:space:]]*"[^"]*"' "$HOME/.claude/plugins/li/.claude-plugin/plugin.json" 2>/dev/null | head -1 | sed 's/.*"\([^"]*\)"$/\1/')
-      ok "claude code: li@${version:-unknown}"
-    else
-      ok "claude code: li (marketplace, version unknown)"
-    fi
+# Claude Code — the installed plugin lives in the plugins cache; same glob as the
+# hook-drift + auto-registration checks below. (~/.claude/plugins/li and
+# ~/.claude/marketplaces/* were pre-v5 layouts that no longer exist.)
+if [ -n "$CLI_CLAUDE" ]; then
+  _li_manifest=""
+  for _cand in "$HOME/.claude/plugins/cache"/*/li/*/.claude-plugin/plugin.json; do
+    [ -f "$_cand" ] && { _li_manifest="$_cand"; break; }
+  done
+  if [ -n "$_li_manifest" ]; then
+    version=$(grep -o '"version"[[:space:]]*:[[:space:]]*"[^"]*"' "$_li_manifest" 2>/dev/null | head -1 | sed 's/.*"\([^"]*\)"$/\1/')
+    ok "claude code: li@${version:-unknown}"
   else
-    warn "claude code: li NOT installed"
+    warn "claude code: li NOT installed (no plugin under ~/.claude/plugins/cache/*/li/)"
     echo "    Fix: /plugin marketplace add jokerman89/lintel"
     echo "         /plugin install li@jokerman-lintel"
   fi
 fi
 
 # Codex
-if [ -n "${CLI_PATHS[codex]}" ]; then
+if [ -n "$CLI_CODEX" ]; then
   if codex plugin list 2>/dev/null | grep -qi "li"; then
     ok "codex: li installed"
   else
@@ -88,7 +102,7 @@ if [ -n "${CLI_PATHS[codex]}" ]; then
 fi
 
 # Gemini
-if [ -n "${CLI_PATHS[gemini]}" ]; then
+if [ -n "$CLI_GEMINI" ]; then
   if gemini extensions list 2>/dev/null | grep -qi "li"; then
     ok "gemini: li installed"
   else
@@ -98,7 +112,7 @@ if [ -n "${CLI_PATHS[gemini]}" ]; then
 fi
 
 # Copilot CLI
-if [ -n "${CLI_PATHS[copilot]}" ]; then
+if [ -n "$CLI_COPILOT" ]; then
   if copilot plugin list 2>/dev/null | grep -qi "li"; then
     ok "copilot cli: li installed"
   else
@@ -109,7 +123,7 @@ if [ -n "${CLI_PATHS[copilot]}" ]; then
 fi
 
 # Droid
-if [ -n "${CLI_PATHS[droid]}" ]; then
+if [ -n "$CLI_DROID" ]; then
   if droid plugin list 2>/dev/null | grep -qi "li"; then
     ok "droid: li installed"
   else
@@ -124,8 +138,15 @@ echo "## Scaffolding install"
 if [ -d "$LINTEL_HOME/scaffolding/01-foundation" ]; then
   ok "scaffolding source at: $LINTEL_HOME/scaffolding/"
   if [ "$VERBOSE" = "1" ]; then
-    age_days=$(( ( $(date +%s) - $(stat -c %Y "$LINTEL_HOME/scaffolding" 2>/dev/null || stat -f %m "$LINTEL_HOME/scaffolding") ) / 86400 ))
-    echo "    Last updated: ${age_days} days ago"
+    # GNU stat -c, then BSD stat -f, then 0 — if both stats fail an empty operand
+    # would crash $(( )) under set -u; default to 0 and report unknown instead.
+    _mtime=$(stat -c %Y "$LINTEL_HOME/scaffolding" 2>/dev/null || stat -f %m "$LINTEL_HOME/scaffolding" 2>/dev/null || echo 0)
+    if [ "${_mtime:-0}" -gt 0 ] 2>/dev/null; then
+      age_days=$(( ( $(date +%s) - _mtime ) / 86400 ))
+      echo "    Last updated: ${age_days} days ago"
+    else
+      echo "    Last updated: unknown (stat not available)"
+    fi
   fi
 else
   warn "scaffolding source NOT at $LINTEL_HOME/scaffolding/"
