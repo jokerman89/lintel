@@ -1,0 +1,131 @@
+# component: design-profile-anthropic-default
+# implements: ADR-0016
+# intent: docs/design/lintel-v5.4-design-dna-design.md
+# constraints: accents are graphic/display-only (~3:1 on paper — WCAG fail for body text)
+# last_intent_review: 2026-06-13
+# Derived from Anthropic's brand-guidelines + frontend-design skills
+# (Apache-2.0, Copyright 2026 Anthropic, PBC); modified. Blocks marked
+# `source: canonical` carry sourced values; `source: derived` are Lintel
+# gap-fill decisions (research C, gaps G1-G15). Descriptive naming only —
+# no Anthropic marks shipped, no endorsement implied (Apache-2.0 §6).
+
+profile:
+  id: anthropic-default
+  display_name: "anthropic-default (warm ink-and-paper)"
+  schema_version: 1
+
+color:
+  source: canonical
+  ink: "#141413"             # primary text, dark backgrounds
+  paper: "#faf9f5"           # light backgrounds, text on dark
+  neutral_mid: "#b0aea5"     # secondary elements
+  neutral_subtle: "#e8e6dc"  # subtle backgrounds, hairline borders
+  accent_primary: "#d97757"  # terracotta — primary accent
+  accent_secondary: "#6a9bcc" # slate blue — secondary accent
+  accent_tertiary: "#788c5d" # olive green — tertiary accent
+  accent_cycle: [accent_primary, accent_secondary, accent_tertiary]  # ordered rotation for graphic sequences
+  rules:
+    - accents are for shapes, fills, highlights and display text >=24px only — NEVER body text
+    - running text is always ink-on-paper (16.8:1) or paper-on-ink
+    - no colors outside this palette unless the brief explicitly pins a direction
+
+color_dark:
+  source: derived   # sources give only the ink/paper inversion hint
+  background: "#141413"
+  surface: "#1f1e1c"
+  surface_raised: "#262522"
+  text: "#faf9f5"
+  text_secondary: "#b0aea5"
+  border: "#3a3833"
+  rules:
+    - accents unchanged (mid-tone, legible on ink) but verify contrast per use
+    - dark mode is designed, not inverted — re-check every pair (no assumption carry-over)
+
+semantic:
+  source: derived   # earthy state colors in the palette's spirit; olive is NOT auto-success
+  success: "#6f8a55"
+  warning: "#c98a3d"
+  error: "#b5543e"
+  info: "#6a9bcc"
+  focus_ring: "#d97757"      # 2px solid, 2px offset — visible on paper AND ink
+  rules:
+    - functional color always pairs with icon or text — never color-only meaning
+
+type:
+  source: canonical   # families + 24pt threshold sourced; scale/weights/line-heights derived
+  display:
+    family: Poppins           # the source skill's own substitution for Styrene (OFL, Google Fonts)
+    fallback: [Arial, sans-serif]
+    threshold_pt: 24          # headings 24pt+ get the display face
+    weights: [500, 600]       # derived — Poppins reads heavy above 600
+  body:
+    family: Lora              # substitution for Tiempos Text (OFL, Google Fonts)
+    fallback: [Georgia, serif]
+    weights: [400, 500]
+  mono:
+    source: derived           # no mono face in any source
+    family: JetBrains Mono
+    fallback: [Consolas, ui-monospace, monospace]
+  scale:
+    source: derived
+    base_px: 16
+    ratio: 1.25
+    steps: ["caption:0.8125rem", "body:1rem", "lead:1.25rem", "h3:1.5625rem", "h2:1.953rem", "h1:2.441rem", "display:3.052rem"]
+  line_heights: { body: 1.65, lead: 1.5, headings: 1.2, display: 1.1 }   # derived — serif body wants air
+  rules:
+    - never swap roles (sans body under serif headings inverts the system)
+    - tabular figures for data columns, prices, timers
+
+shape:
+  source: derived
+  spacing: { base_px: 8, steps: [4, 8, 12, 16, 24, 32, 48, 64, 96, 128] }
+  radius: { sm: 6, md: 10, lg: 16, pill: 999 }
+  elevation:
+    prefer: "hairline borders (1px neutral_subtle) over shadows — flat, paper-like"
+    shadow_sm: "0 1px 2px rgba(20,20,19,0.06)"
+    shadow_md: "0 4px 12px rgba(20,20,19,0.08)"
+  layout:
+    container_max_px: 1152
+    prose_measure_ch: 68
+    breakpoints_px: [375, 768, 1024, 1440]
+
+motion:
+  source: derived   # doctrine sourced (restraint, reduced-motion floor); tokens derived
+  duration_ms: { fast: 150, base: 220, slow: 320 }
+  easing:
+    enter: "cubic-bezier(0.16, 1, 0.3, 1)"
+    exit: "ease-in"
+  rules:
+    - one orchestrated moment per view — scattered effects read as AI-generated
+    - exit shorter than enter (~60-70%)
+    - transform/opacity only; never animate width/height/top/left
+    - prefers-reduced-motion respected — non-negotiable quality floor
+
+dataviz:
+  source: derived
+  categorical: ["#d97757", "#6a9bcc", "#788c5d", "#c98a3d", "#9a7b8f", "#b0aea5"]
+  sequential: { from: "#faf9f5", to: "#d97757" }
+  rules:
+    - never red/green-only pairs; supplement color with pattern or label
+
+contrast_pairs:   # derived from sourced hexes — the allowed text/background matrix
+  source: derived
+  allowed:
+    - { fg: ink, bg: paper, ratio: "16.8:1", use: body }
+    - { fg: ink, bg: neutral_subtle, ratio: "~14:1", use: body }
+    - { fg: paper, bg: ink, ratio: "16.8:1", use: body }
+    - { fg: accent_primary, bg: paper, ratio: "~3.0:1", use: "display >=24px / graphics ONLY" }
+  forbidden:
+    - accent-on-accent text
+    - any accent as body-text color
+    - neutral_mid as body text on paper (~2.8:1)
+
+doctrine:   # sourced verbatim-distilled from the frontend-design skill (Apache-2.0)
+  source: canonical
+  - "The hero is a thesis — open with the most characteristic thing in the subject's world"
+  - "Typography carries the personality of the page, not a neutral delivery vehicle"
+  - "Structure is information — numbering/dividers/labels encode something true, never decorate"
+  - "Spend your boldness in one place; keep everything around it quiet and disciplined"
+  - "Before leaving the house, remove one accessory"
+  - "Quality floor: responsive to mobile, visible keyboard focus, reduced motion respected"
+  - "UX copy: 'Save changes', not 'Submit'; errors state cause + fix, never apologize; sentence case"
