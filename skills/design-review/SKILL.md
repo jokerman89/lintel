@@ -41,13 +41,16 @@ Voice tier note: the critique itself is internal (builder-to-builder). When the 
 
 1. **Preflight.** Verify URL is live (`curl -I`). Verify managed Chromium installed.
 2. **Capture phase.** For each route × each viewport: invoke `/browse` to load + screenshot + capture DOM + console log. Artifacts land in `~/.lintel/design-runs/<ts>/`.
+2b. **Mechanical validator (ADR-0015).** On captured DOM/HTML:
+   `python3 skills/design-dna/scripts/validate_design.py <captured.html> --profile <active-profile>` —
+   exit 1 findings become automatic P1s (objective violations; no judgment needed).
 3. **Six-pillar pass** — for each captured route:
    - **Visual polish:** alignment, spacing rhythm, hover/focus states present, no Lorem Ipsum, no broken images, no overflow.
    - **Accessibility:** contrast ratio per WCAG AA, semantic HTML in DOM, focus order, alt text on images, ARIA labels where needed.
    - **Motion:** if motion exists, does it respect `prefers-reduced-motion`? Are transitions consistent in duration/easing?
    - **Copy:** typos, voice/tone consistency, length appropriate to context. If customer-facing AND `--include-copy-pillar`: cross-reference against the active pack's voice corpus (modes + ground rules, if the pack defines them).
    - **Layout/density:** information density appropriate, viewport-responsive, no wasted whitespace at mobile, no cramped desktop.
-   - **Brand consistency:** colors from token set, typography from token set, signature elements present where expected (per project CLAUDE.md).
+   - **Brand consistency:** colors from token set, typography from token set, signature elements present where expected (per project CLAUDE.md). No project token set → the active design profile (`skills/design-dna/profiles/`, default anthropic-default) is the reference.
 4. **Score findings.** Each pillar gets a 1-10 score + finding list. Findings get P1/P2/P3 severity.
 5. **Persist via the native `bin/li-review-log`** with `skill: design-review`.
 6. **Output** the structured report.

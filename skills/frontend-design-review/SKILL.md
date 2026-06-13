@@ -78,9 +78,23 @@ else
 fi
 ```
 
+### Step 1.5 — Mechanical validator pre-pass (ADR-0015)
+
+Before any agent judgment, run the cheap hard gate on HTML artifacts:
+
+```bash
+python3 skills/design-dna/scripts/validate_design.py "$artifact" \
+  --profile "skills/design-dna/profiles/<active-profile>.yaml"
+```
+
+Exit 1 → the run is **RED** regardless of dimension scores (the violations are objective:
+zoom-disable, killed focus, emoji icons, off-palette drift). Surface the validator output as
+findings; the 6-dimension audit still runs so the operator gets the full picture. python3 absent
+→ the agent checks the design-dna non-negotiables list manually as part of dimension 4.
+
 ### Step 2 — DesignSystemAuditor agent dispatch
 
-Hand off to `agents/frontend/DesignSystemAuditor.md`. Agent loads artifact + (optional) baseline + dimension-list.
+Hand off to `agents/frontend/DesignSystemAuditor.md`. Agent loads artifact + (optional) baseline + dimension-list + the active design profile (`skills/design-dna/profiles/`, default anthropic-default) as the brand-conformance reference when no vault baseline is given.
 
 ### Step 3 — Run 6-dimension audit
 

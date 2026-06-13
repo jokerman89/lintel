@@ -57,9 +57,20 @@ out="${OUT:-/dev/stdout}"
 [ -z "$brief" ] && { echo "Need --brief"; exit 2; }
 ```
 
-### Step 2 — MotionDirector agent dispatch
+### Step 2 — Corpus query + MotionDirector agent dispatch
 
-Hand off to `agents/frontend/MotionDirector.md`. Agent picks motion-language from:
+Query the design corpus first (ADR-0015 — retrieval before generation):
+
+```bash
+python3 skills/design-dna/scripts/search.py "<animation/interaction keywords>" --domain ux -n 3
+```
+
+The active design profile's motion tokens are the default (anthropic-default: 150/220/320ms,
+ease-out enter / shorter ease-in exit, one orchestrated moment per view, transform/opacity only,
+reduced-motion respected). The brief's energy-level justifies deviation from the tokens — never
+from the reduced-motion floor.
+
+Hand off to `agents/frontend/MotionDirector.md` with the corpus hits + profile tokens in context. Agent picks motion-language from:
 
 - **GSAP + ScrollTrigger** (commercial license for some plugins; check current terms): scroll-choreographed reveals, scrub-tied keyframes, hero-act sequences. Best for kinetic-energy briefs.
 - **Lenis** (free, MIT): smooth-scroll baseline. Often paired with GSAP.
