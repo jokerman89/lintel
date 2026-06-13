@@ -24,7 +24,13 @@ _hook_stdin() {
     _HOOK_STDIN_JSON=""
     if [ ! -t 0 ]; then
       # -d '' reads the whole object (newlines included); -t bounds the wait.
-      IFS= read -r -d '' -t 0.2 _HOOK_STDIN_JSON 2>/dev/null || true
+      # Fractional -t needs bash >= 4; stock macOS bash 3.2 rejects it, the read
+      # fails instantly and the gates would scan NOTHING (silent fail-open) —
+      # probe once and fall back to an integer timeout. rc<=1 means EOF/timeout
+      # (timeout value was accepted); rc>1 means the -t value itself was bad.
+      local _t=0.2
+      ( IFS= read -r -t 0.2 _ < /dev/null ) 2>/dev/null; [ $? -le 1 ] || _t=1
+      IFS= read -r -d '' -t "$_t" _HOOK_STDIN_JSON 2>/dev/null || true
     fi
   fi
   printf '%s' "${_HOOK_STDIN_JSON:-}"
@@ -85,6 +91,9 @@ hook_input() {
 #      match the phone regex, so every new-file commit blocked), and an
 #      already-committed hit in a context line would block every nearby
 #      edit — including the one that removes it.
+#   4. on a PUSH, also scan the outgoing range — push moves COMMITTED work,
+#      so staged/unstaged diffs are empty for an already-committed secret
+#      (upstream..HEAD when an upstream exists, else recent commits).
 hook_git_gate_content() {
   local cmd="${1:-}" d
   {
@@ -95,7 +104,14 @@ hook_git_gate_content() {
       || true
   } | sort -u | while IFS= read -r d; do
     [ -d "$d" ] || continue
-    git -C "$d" diff --cached 2>/dev/null || true
-    git -C "$d" diff 2>/dev/null || true
+    # --no-ext-diff --no-textconv: the gate's own diff must never execute a
+    # repo-supplied textconv/external-diff driver (a hostile repo's
+    # .gitattributes would otherwise run code every time the gate scans).
+    git -C "$d" diff --no-ext-diff --no-textconv --cached 2>/dev/null || true
+    git -C "$d" diff --no-ext-diff --no-textconv 2>/dev/null || true
+    if printf '%s' "$cmd" | grep -qE '\bpush\b'; then
+      git -C "$d" diff --no-ext-diff --no-textconv '@{upstream}..HEAD' -- 2>/dev/null \
+        || git -C "$d" log -p --no-ext-diff --no-textconv -n 10 2>/dev/null || true
+    fi
   done | grep -E '^\+' | grep -vE '^\+\+\+' || true
 }
