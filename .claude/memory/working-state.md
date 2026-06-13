@@ -20,9 +20,9 @@ Cross-session working state (ej durable rules — that's [[lessons.md]]; ej pers
 **Last touched:** YYYY-MM-DD
 -->
 
-## v5.3-cli-and-craft — PR pending 2026-06-13
+## v5.3-cli-and-craft — PR #73 OPEN 2026-06-13
 
-**Status:** active — branch feat/v5.3-cli-and-craft pushed; PR not yet opened
+**Status:** active — PR #73 to main (independent; #69 already merged). launch-waves wave folded in.
 
 **What shipped (one meta-infra cycle, three operator workstreams):**
 - **Multi-CLI (subtraction):** deleted the two fabricated manifests (.copilot-plugin, .droid-plugin
@@ -48,12 +48,21 @@ no-archaeology, not trigger SUBSTANCE. Both staged with the eval-harness.
 $slug → L-014) + 2 P2 + 6 P3, all acted on. Captured **L-013** (make-it-ours = reinvent, not
 de-heritage) + **L-014** (no unbound vars in illustrative skill bash — recurred from v5.2).
 
+**Folded in (merge 02e916e, per "don't discard anything"):** the launch-waves wave forked from
+0042312 in parallel and had unique COMMITTED work this branch lacked — **ADR-0013** (fail-closed
+block gates, fills the empty 0013 slot) + **5 security hardenings** (macOS bash-3.2 fail-open
+fallback, push outgoing-range scan, --no-ext-diff/--no-textconv textconv-RCE guard, newline-flatten
+anti-forgery, audit-on-scanner-unavailable) + the **state-ledger scoping fix** (7ece1f4). Hook
+conflict resolved to the override-reachable fail-closed position (after matcher+override) + their
+audit/message/CMD_FLAT; security behavior tests prove the union still blocks. Cursor-full revert
+auto-merged to a no-op. Suite 79/79 on the merged tree.
+
 **What's pending:**
-- Open the v5.3 PR to main; merge after #69.
-- OPERATOR DECISION: the `worktree-launch-waves` linked worktree (.claude/worktrees/, now
-  gitignored + untracked) holds its own UNMERGED branch (security newline-gate fix, state-ledger
-  scoping, cli-tiers revert) + uncommitted edits to AGENTS.md/CLAUDE.md/README/li-doctor. Decide
-  whether to fold that work in or discard the worktree before v5.3 lands.
+- Merge PR #73 to main.
+- OPERATOR DECISION (unchanged): the `worktree-launch-waves` worktree still holds a **58-file
+  UNCOMMITTED craft-sweep WIP** (+690/−464: ~16 skills, a new tests/shape/no-swedish.sh, AGENTS/
+  CLAUDE/README/li-doctor). A merge can't capture uncommitted work — preserved untouched, fragile.
+  Decide: commit-on-branch (durable) or fold into a follow-up cycle. NOT discarded.
 - STAGED (own ADRs already written): AGENTS.md-primary (ADR-0015), lintel-state MCP server
   (ADR-0016), eval-harness (ADR-0017), per-CLI command-stub generator, field-wide
   description-trigger + aggressive-language sweep of the remaining ~80 skills.
