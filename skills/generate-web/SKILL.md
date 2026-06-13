@@ -122,11 +122,19 @@ If invoked with `--from-frontend-design <run-dir>` instead of `--brief` or `--fr
    - Motion-language considerations
    - Brand alignment
 
+3b. **Stack-guidance pass (ADR-0015 — retrieval before rendering):**
+   ```bash
+   python3 skills/design-dna/scripts/search.py "<layout/feature keywords>" --stack html-tailwind   # or nextjs per variant
+   ```
+   Apply the returned Do/Don't/Severity rules during generation. python3 absent → Read
+   `skills/design-dna/data/stacks/<stack>.csv` directly.
+
 4. **Generate per variant:**
    - **single-file:** populate `~/.lintel/brand/web-templates/landing-single-file.html` (or default)
    - **nextjs-scaffold:** copy `~/.lintel/brand/web-templates/demo-site/` skeleton, write src/app/page.tsx + components, generate package.json
 
-5. **4-gate quality pipeline** (per /generate-ppt):
+5. **Gate 0 + 4-gate quality pipeline** (per /generate-ppt):
+   - Gate 0 (mechanical, ADR-0015): `python3 skills/design-dna/scripts/validate_design.py <out>.html --profile <active-profile>` — exit 1 BLOCKS (zoom-disable, killed focus, emoji icons, off-palette drift). Fix and re-run; never ship over a red gate.
    - Gate 1: voice (if customer-bound)
    - Gate 2: brand-conformance
    - Gate 3: honest-limitations (only if generating an AI-feature page with disclosure)

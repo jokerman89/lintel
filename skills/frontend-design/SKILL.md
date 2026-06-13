@@ -66,6 +66,26 @@ mkdir -p "$out_dir"
 
 Voice-tier resolution: default `internal`. If `--customer-share` → run the active pack's voice gate (`resolve_pack_field compliance.hooks`; none by default) first. Per L-001-discipline: skill body preserves contract, agent at invocation produces actual content.
 
+### Step 1.5 — Design DNA pass (REQUIRED — ADR-0015/0016)
+
+Retrieval before generation. Resolve the active design profile and search the corpus BEFORE any
+design decision:
+
+```bash
+dna="skills/design-dna"   # resolve via plugin base dir
+profile="$(resolve_pack_field design.profile 2>/dev/null)"
+[ -z "$profile" ] || [ "$profile" = "null" ] && profile="anthropic-default"
+python3 "$dna/scripts/search.py" "<product> <industry> <tone keywords from brief>" \
+  --design-system -f markdown -p "<project>" > "$out_dir/design-dna.md"
+```
+
+Precedence: **brief > profile (`$dna/profiles/$profile.yaml`) > corpus hit** — the profile is the
+house default (anthropic-default: warm ink-and-paper); the corpus recommendation fills what the
+profile doesn't pin (style pattern, landing structure, product-specific palette when the brief
+asks for one); the brief's own words always win. Both `design-dna.md` and the profile feed
+Step 2-4 dispatch and Step 5 synthesis. No python3 → use the grep fallback documented in
+`skills/design-dna/SKILL.md` (the corpus is plain CSV).
+
 ### Step 2-4 — Parallel sub-skill dispatch (M-4 resolution)
 
 **Run typography + motion sub-skills CONCURRENTLY** (single-batch Agent-tool dispatch). They are independent — both take the brief as input, neither depends on the other.
@@ -77,6 +97,10 @@ Concurrent dispatch:
 
 (Phase A2 adds parallel /li:frontend-shader → $out_dir/shader.json)
 ```
+
+Both sub-skills receive `$out_dir/design-dna.md` + the active profile as context (Step 1.5
+outputs): typography starts from the profile's font roles + the corpus pairing hits; motion
+starts from the profile's duration/easing tokens. They deviate only where the brief demands it.
 
 Wallclock budget: ~60s concurrent (vs ~180s sequential). Wait for both to complete before Step 5.
 
@@ -108,10 +132,27 @@ Read typography.json + motion.json (+ shader.json if A2). Synthesizes into `fron
     "hover_intent": "subtle",
     "page_transitions": "fade-or-slide"
   },
+  "palette": {
+    "source_profile": "anthropic-default",
+    "tokens": { "<semantic-name>": "<hex>" },
+    "contrast_verified": true
+  },
+  "style": {
+    "name": "<chosen style from design-dna search>",
+    "anti_patterns": ["<from the corpus reasoning rule>"]
+  },
+  "design_dna": {
+    "profile": "anthropic-default",
+    "search_query": "<the Step 1.5 query>",
+    "search_ref": "design-dna.md"
+  },
   "visual_thesis": "<one-paragraph synthesis>",
   "voice_tier": "internal | customer-share"
 }
 ```
+
+`palette`, `style` and `design_dna` are additive optional fields (ADR-0015) — `schema_version`
+stays 1; readers tolerate their absence (minor-additive per the schema-evolution policy below).
 
 **Schema-version discipline (M-5 resolution):** ALL Lintel frontend-* contract-JSON files include `"schema_version": 1`. generate-web/generate-app readers log+reject on unknown major version. Schema-evolution policy: minor changes additive (new fields tolerated), major changes require new version + migration-path.
 
@@ -132,9 +173,23 @@ esac
 
 Phase A1 NOTE: `--from-frontend-design` mode in generate-web ships in the Phase B PR. Phase A1 stops at frontend-design-spec.json emission + the minimum-viable roundtrip test verifies the contract is consumable.
 
-### Step 7 — Quality gate (Phase A2)
+### Step 7 — Quality gate (MANDATORY — ADR-0015)
 
-`/li:frontend-design-review <out_dir>` (Phase A2 skill) — 6-dimension audit. Phase A1 stub: emit "skip" log entry until A2 ships.
+The gate is no longer optional. Two parts, in order:
+
+```bash
+# 1. Mechanical validator on every rendered HTML artifact (exit 1 blocks)
+python3 "$dna/scripts/validate_design.py" "$out_dir"/*.html \
+  --profile "$dna/profiles/$profile.yaml" || status=BLOCKED
+
+# 2. Six-dimension audit
+/li:frontend-design-review "$out_dir"
+```
+
+Validator errors → **BLOCKED** (fix and re-render; never ship over a red gate). No rendered HTML
+yet (spec-only run) → validator runs in generate-web/generate-app instead; the review still runs
+on the spec. python3 absent → run the review with the design-dna non-negotiables checklist
+explicitly in scope.
 
 ### Step 8 — Output paths + recommendation
 
@@ -181,6 +236,7 @@ Next:
 - Audit-log: `.claude/runtime/audit/frontend-design-runs.jsonl`
 
 **Calls into:**
+- `/li:design-dna` system search + profile resolution (Step 1.5, required) + validator (Step 7)
 - `/li:frontend-typography` (sub-skill, parallel)
 - `/li:frontend-motion` (sub-skill, parallel)
 - `/li:generate-web --from-frontend-design <run-dir>` (Phase B)
