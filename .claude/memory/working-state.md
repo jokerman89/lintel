@@ -20,6 +20,39 @@ Cross-session working state (ej durable rules — that's [[lessons.md]]; ej pers
 **Last touched:** YYYY-MM-DD
 -->
 
+## launch-readiness — v5.x "old-school ready", folded into PR #73 2026-06-13
+
+**Status:** active — merged into `feat/v5.3-cli-and-craft` (PR #73), suite 82/82 on the merged tree.
+
+**What this drive added (waves 3–7, on top of the v5.3-cli-and-craft work below):** an 8-audit
+launch-readiness register (docs/audit/2026-06-12-launch-readiness-register.md — bar §1, evidence §2,
+blockers §3-A, dated deferrals §3-B, waves §4) + the remediation it found.
+- **Security (ADR-0013):** newline-class gate bypasses closed (line-continuation matcher evasion +
+  newline-forged `-m` override — L-012 class), each with an adversarial test; gate diffs textconv-safe;
+  push scans the outgoing range; macOS bash-3.2 `read -t` fallback. (Converged with the other session's
+  fail-closed positioning in the merge.)
+- **State (register B4):** `state_cycle_segment` — the footer/resume/`cycle_id` were poisoned by
+  prior-cycle entries in the append-only ledger; now scoped to the current cycle. Multi-cycle + loop-back
+  regression tests.
+- **Windows/portability (B5):** install.ps1 full parity (seed identity + lib/bin copy + shared/ hooks);
+  li-doctor bash-3.2-safe; `.opencode/INSTALL.md` rewritten neutral; `lintel@`→`li@` everywhere;
+  fingerprint↔tiers id-normalization; exec bits.
+- **Docs truth (B6):** ~30 files swept (v3-plan/`tasks/`/`docs/adr`/gstack/v5.0 residue); dormancy
+  qualifiers; no-swedish now covers docs+README; CATALOG generator char-safe (flake fixed).
+- **Mechanism honesty (B7):** usage-log/telemetry/compliance prose → real `audit_log`; pack-resolver
+  set-leak + cache-key fixes; 4 new behaviour tests.
+- **Release (B8):** truthful CHANGELOG 5.3.0, migration date reconcile, M1 artifact
+  (docs/v4.x/structure-changes/2026-06-13-launch-readiness.md). CODEOWNERS de-CAIP'd.
+
+**What's pending:**
+- Operator: merge PR #73 → main (the git-push-to-main gate stays yours).
+- Public-launch-tier items remain DATED-not-blocking in the register §3-B: real git pre-commit/pre-push
+  install (by 2026-07-15, supersedes the command-string matcher), ADR-0015 AGENTS.md-primary, ADR-0016
+  MCP, ADR-0017 eval-harness, H17/H18, marketplace (post legal). v6 shrink-to-kernel decided after the eval.
+- `gh` couldn't auth to jokerman89/lintel from the build session — PR view/merge is operator-side.
+
+**Last touched:** 2026-06-13
+
 ## v5.3-cli-and-craft — PR #73 OPEN 2026-06-13
 
 **Status:** active — PR #73 to main (independent; #69 already merged). launch-waves wave folded in.
