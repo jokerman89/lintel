@@ -19,9 +19,9 @@ Different project shapes benefit from different scaffolding subsets.
 
 Common shapes the CAIP team encounters:
 
-- **PoC for customer demo.** Short-lived. ADRs are overkill. Keep `tasks/todo.md` and `tasks/lessons.md`, skip `docs/adr/`.
-- **Reference implementation.** Long-lived, externally-visible. Full scaffolding including ADRs, with extra weight on `tasks/personas.md` (different consumers have different needs).
-- **Internal tool / utility.** Solo maintainership. Lean scaffolding: keep `tasks/lessons.md` and `docs/adr/` for traceability, skip `tasks/personas.md`.
+- **PoC for customer demo.** Short-lived. ADRs are overkill. Keep `.claude/plans/todo.md` and `.claude/memory/lessons.md`, skip `.claude/decisions/`.
+- **Reference implementation.** Long-lived, externally-visible. Full scaffolding including ADRs, with extra weight on `.claude/memory/personas.md` (different consumers have different needs).
+- **Internal tool / utility.** Solo maintainership. Lean scaffolding: keep `.claude/memory/lessons.md` and `.claude/decisions/` for traceability, skip `.claude/memory/personas.md`.
 - **Customer engagement repo.** Customer-data-sensitive. Full scaffolding **plus** customized `CLAUDE.md` that hardens compliance for that customer's contract.
 
 Make a template script (one per shape) under `install/templates/` once you have repeated a setup more than twice.

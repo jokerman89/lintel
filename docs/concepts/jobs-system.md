@@ -248,12 +248,12 @@ A folder, three hooks, two skills, one frontmatter flag, one helper. That's the 
 
 | Operator concern | Solved by |
 |---|---|
-| "Tappad tråd mitt i flödet" | `job-stale-warn` at session-start |
-| "Öppna planfiler utan aktivt arbete" | `job-end` cleanup + stale-warn |
-| "Snabbt avbryta och starta" | `/li:jobs abort` + `branch` |
-| "Bygga på planer / köra om / komplettera" | `/li:jobs replan` (whole or parts) |
-| "Modulära flöden som börjar och slutar där de vill" | Hop-in via `/li:jobs continue` + `workflow_root` flag on any skill |
-| "Se vad som pågår direkt" | `/li:status` reads one generated file |
+| "Dropped the thread mid-flow" | `job-stale-warn` at session-start |
+| "Open plan files with no active work" | `job-end` cleanup + stale-warn |
+| "Abort and restart quickly" | `/li:jobs abort` + `branch` |
+| "Build on plans / re-run / supplement them" | `/li:jobs replan` (whole or parts) |
+| "Modular flows that start and end where they want" | Hop-in via `/li:jobs continue` + `workflow_root` flag on any skill |
+| "See what's in flight at a glance" | `/li:status` reads one generated file |
 
 ## What this explicitly does NOT do
 

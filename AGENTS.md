@@ -14,13 +14,13 @@ Lintel is a company-neutral, pack-driven session harness — markdown scaffoldin
 - `agents/` — subagent roles organized per domain
 - `hooks/shared/` — compliance + workflow hooks
 - `scaffolding/` — templates copied INTO other repos
-- `docs/design/lintel-v3-plan.md` — current architecture
+- `docs/design/lintel-v4.0-reframe-design.md` — current architecture (decisions since: `.claude/decisions/`, ADR-0005..0017)
 
 ## Session start ritual
 
 1. Read [AGENT-INSTRUCTIONS.md](AGENT-INSTRUCTIONS.md) (canonical, applies to all CLIs)
-2. Review `scaffolding/01-foundation/.claude/memory/lessons.md` for accumulated lessons
-3. Check `docs/design/lintel-v3-plan.md` for current phase
+2. Review `.claude/memory/lessons.md` for accumulated lessons
+3. Check `docs/design/lintel-v4.0-reframe-design.md` + recent ADRs in `.claude/decisions/` for current architecture state
 
 ## Codex-specific notes
 
@@ -38,7 +38,7 @@ Or for Codex App: sidebar → Plugins → `+`.
 
 ### Subagents in Codex
 
-Codex doesn't have a first-class subagent abstraction like Claude Code's Task tool. The closest equivalent is `codex exec` subprocess. Agents in `agents/<category>/<Name>.md` are reference patterns — operator runs them via:
+Codex has native subagent support (`lib/cli-tiers.yaml`: `subagents: native`). Agents in `agents/<category>/<Name>.md` load through the plugin manifest and can be delegated to directly. For scripted one-shot runs, the `codex exec` subprocess pattern still works:
 
 ```bash
 codex exec --prompt "$(cat agents/security/SecurityAuditor.md). Audit branch X."

@@ -1,26 +1,29 @@
 # Multi-CLI architecture
 
-How the same scaffolding works across multiple agent CLIs without duplication.
+How the same scaffolding works across multiple agent CLIs without duplication. The per-CLI
+capability truth is `lib/cli-tiers.yaml` (single source); the README's table is generated from it.
 
 ## The shape
 
-One canonical file. Multiple shims. Each shim is a thin pointer.
+Two mechanisms, one source:
 
-```
-jokerman-lintel/
-├── AGENT-INSTRUCTIONS.md          ← canonical, CLI-agnostic source
-└── shims/
-    ├── CLAUDE.md                   ← Claude Code reads this
-    ├── AGENTS.md                   ← Codex CLI reads this
-    └── copilot-instructions.md     ← GitHub Copilot reads this
-```
+1. **Instructions** — one canonical file (`AGENT-INSTRUCTIONS.md`), reached through each CLI's
+   native root entry file: `CLAUDE.md` (Claude Code), `AGENTS.md` (Codex and other
+   AGENTS.md-convention CLIs), `GEMINI.md` (Gemini CLI), `.github/copilot-instructions.md`
+   (Copilot Enterprise). The repo root carries these files; `shims/` holds the thin templates
+   for scaffolded repos that lack them.
+2. **Skills + agents** — written once at repo root, shipped through small per-CLI plugin
+   manifests (`.claude-plugin/`, `.codex-plugin/`, `.cursor-plugin/`, `gemini-extension.json`;
+   OpenCode follows `.opencode/INSTALL.md`) that all point at the same `./skills/` and
+   `./agents/`. Copilot CLI and Factory Droid read the `.claude-plugin/` manifest via
+   Claude-plugin interop.
 
-Each shim is short:
+Each root entry file / shim is short:
 
 1. One line that points at `AGENT-INSTRUCTIONS.md` (the canonical source).
 2. A "CLI-specific notes" section with details that only apply to that CLI (subagent mechanism, model picker, etc.).
 
-The shim never overrides core behavior. If a CLI quirk forces a different behavior, the canonical file changes — not the shim. This keeps the cross-CLI surface consistent.
+The entry file never overrides core behavior. If a CLI quirk forces a different behavior, the canonical file changes — not the shim. This keeps the cross-CLI surface consistent.
 
 ## Why the indirection
 
@@ -36,7 +39,8 @@ Three reasons.
 
 - **Reads:** `CLAUDE.md` at user-global (`~/.claude/CLAUDE.md`) and per-repo (`<repo>/CLAUDE.md`). Per-repo wins.
 - **Subagents:** First-class. Repo-level subagents live in `.claude/agents/<Name>.md`. User-global subagents in `~/.claude/agents/`. Subagents are invoked by name or by description match.
-- **Skills (slash commands):** User-global in `~/.claude/skills/`. Project-local skills can also be defined.
+- **Skills (slash commands):** Lintel's skills install as a plugin (`/plugin install li@jokerman-lintel`) and surface as `/li:<skill>`. Project-local and user-global skills can also be defined.
+- **Hooks:** The enforcement layer — a Claude-Code-only mechanism. Auto-registered on a plugin install; armed manually on a bare install.
 - **Plan mode:** Built-in. Read-only mode for planning before any mutation.
 
 This is the most full-featured target. The canonical instructions assume Claude Code's capabilities and gracefully degrade for other CLIs.
@@ -45,25 +49,27 @@ This is the most full-featured target. The canonical instructions assume Claude 
 
 - **Reads:** `.github/copilot-instructions.md` at repo root. (Per-repo only — no user-global equivalent.)
 - **Subagents:** No first-class equivalent. Copilot Extensions exist but are integrations, not delegated workers. When `AGENT-INSTRUCTIONS.md` says "use a subagent for X", the Copilot operator either sequences manually or opens a separate conversation.
-- **Skills:** No equivalent. Skills installed via the installer (gstack, AgentShield, etc.) are not callable from Copilot.
+- **Skills:** No equivalent. Lintel's `/li:*` skills are not callable from Copilot Enterprise — apply their SKILL.md content manually. (Copilot **CLI** is different: it reads the `.claude-plugin/` manifest via interop.)
 - **Model picker:** Enterprise tenants can pick Claude Opus as the backend. Pick it for agent-style work — default Copilot completions are tuned for inline suggestions, not session-level reasoning.
-- **Context window:** Smaller than a fresh Claude Code Opus session. Keep `tasks/memory.md` lean.
+- **Context window:** Smaller than a fresh Claude Code Opus session. Keep `.claude/memory/working-state.md` lean.
 
 Copilot is the **degraded mode**. It can follow the canonical instructions, but the subagent and skill plumbing does not apply.
 
 ### Codex CLI
 
 - **Reads:** `AGENTS.md` at repo root. By convention only — not enforced by the tool.
-- **Subagents:** No first-class equivalent. Closest: spawn a separate Codex run with a scoped prompt.
-- **Skills:** No equivalent.
+- **Subagents:** Native (`lib/cli-tiers.yaml`: `subagents: native`). For scripted one-shot runs, a separate `codex exec` with a scoped prompt also works.
+- **Skills:** Native — install the plugin via `/plugins`, skills surface as `/li:<skill>`.
 - **Plan-first:** Operator-driven discipline, not tool-enforced. The canonical rules still apply.
 - **Tool permissions:** Per-invocation.
 
-Codex is **between** Claude Code and Copilot in capability. Subagents degrade to sequenced runs.
+Codex is a **full-tier** CLI alongside Claude Code and Cursor — the one thing it never gets is the hook enforcement layer (Claude-Code-only).
 
 ### Other agent CLIs
 
-Pattern:
+Cursor, Gemini CLI, OpenCode, Copilot CLI, Factory Droid, and Cline/Continue/Aider each have an
+entry in `lib/cli-tiers.yaml` — that file is the live per-CLI capability truth. For a CLI not yet
+listed, the pattern:
 
 1. Identify what file the CLI reads at session start.
 2. Add a `shims/<filename>` that points at `AGENT-INSTRUCTIONS.md`.
@@ -77,7 +83,7 @@ If the CLI does not read any per-repo file: you cannot use this scaffolding with
 `AGENT-INSTRUCTIONS.md` is written to:
 
 - Operate even on a degraded CLI (no subagents, smaller context window).
-- Use file-system conventions that work everywhere (`tasks/`, `docs/adr/`, `.claude/agents/`).
+- Use file-system conventions that work everywhere (`.claude/memory/`, `.claude/plans/`, `.claude/decisions/`, `.claude/agents/`).
 - Cite where each piece of state lives rather than relying on a CLI-specific tool.
 - Treat subagent invocations as "delegate this; if you cannot delegate, sequence it instead".
 

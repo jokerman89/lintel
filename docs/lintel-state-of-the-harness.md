@@ -4,6 +4,8 @@
 > honest readiness assessment. Produced from a six-agent read-only sweep of `main @ 591925b`
 > (post-v4.9). Ground truth this run: **168 skills · 65 agents tracked (+5 untracked, see §19) ·
 > 30 hooks · 1 pack (`_default`) · version 4.9.0** consistent across all manifests.
+> *(Counts are that run's snapshot — live counts are in the README. Repo-state paths below have
+> been updated in place to the v5 `.claude/` home, ADR-0005, where the originals would mislead.)*
 
 ---
 
@@ -44,8 +46,8 @@ behaviour from the first prompt to the last commit: a session-start ritual → m
 (hooks, voice gates, compliance) → end-of-session capture (lessons, ADRs, an evolution log) →
 cross-session continuity (memory, lessons-sync). It is also the **factory** that installs its own
 disciplines into other repos via `bin/li-scaffold` — `li-scaffold init --mode internal-tool --pack
-_default` produces a `CLAUDE.md`, `CORE-PRINCIPLES.md`, `tasks/`, `docs/adr/`, and `.claude/agents/`
-in about thirty seconds.
+_default` produces a `CLAUDE.md`, `CORE-PRINCIPLES.md`, and the `.claude/` home (memory, plans,
+decisions, agents) in about thirty seconds.
 
 Two content categories ship in the one repo (`README.md:15-25`):
 
@@ -61,7 +63,7 @@ was extracted in v4.7 into an external pack, `lintel-caip-pack`.
 
 ---
 
-## 2. Architecture — the four layers
+## 2. Architecture — spine, pack, navigation, depth
 
 The v4.0 reframe (`docs/design/lintel-v4.0-reframe-design.md`) frames the system as "one architecture,
 not five features." The load-bearing model:
@@ -208,7 +210,7 @@ override only via an audited env var), **2 surface-only**, **2 lifecycle** (`job
 - **`hooks/shared/_patterns.sh`** — shared secret/PII detection, defined once, composed per hook
   *without* flattening the tier split: `scan_secrets tier1` (high-confidence, safe to BLOCK) vs `all`
   (tier1 + false-positive-prone heuristics, WARN-only); `scan_customer` (email / phone / Swedish
-  `personnummer` / name+case-id incl. `ärende`). The file is the one place functional Swedish PII regex
+  national-ID / name+case-id incl. the Swedish case-word). The file is the one place functional Swedish PII regex
   now lives, and is explicitly allowlisted in the English tripwire.
 - **`bin/_audit.sh`** — the unified `audit_log` writer. Append-only JSONL to `~/.lintel/audit/<category>.jsonl`,
   fork-free JSON escaping (an out-variable, no subprocess per key) tuned for the per-edit hot path.
@@ -313,7 +315,7 @@ The planning machinery threads a **size axis** through SENSE → SCOPE → PLAN 
 `scaffolding/01-foundation/` is the factory — everything `bin/li-scaffold init` copies into another repo:
 `CLAUDE.md` (rendered from `CLAUDE.md.template` via `sed` substitution), `CORE-PRINCIPLES.md` (the 10
 load-bearing rules), `EVOLUTION.md` + `EVOLUTION-LOG.md` (the change-governance process),
-`tasks/{lessons,memory,personas,todo}.md`, `docs/adr/{README,TEMPLATE}.md`, `.claude/agents/` (4 baseline
+`.claude/memory/{lessons,working-state,personas}.md`, `.claude/plans/todo.md`, `.claude/decisions/{README,TEMPLATE}.md`, `.claude/agents/` (4 baseline
 subagents: ReadOnly, CodeReviewer, TestRunner, SanityChecker), and the plan/spec/prompt templates.
 `li-scaffold` is collision-safe (every copy guarded by `[ ! -f ]`; re-running never clobbers operator
 edits). **Dogfooding:** the repo-root `CLAUDE.md` *is* the instantiated template — and it openly records
@@ -338,21 +340,22 @@ audit writer), `_jobs.sh` (the jobs engine).
 
 | Store | Holds | Lifecycle |
 |---|---|---|
-| `tasks/lessons.md` | lessons from corrections (`L-NNN`) | append after ANY correction |
-| `tasks/memory.md` | durable cross-session working state | update on durable change |
-| `tasks/personas.md` | structured operator calibration | read at session-start |
-| `docs/adr/NNNN-*.md` | decision records | one per non-trivial decision |
+| `.claude/memory/lessons.md` | lessons from corrections (`L-NNN`) | append after ANY correction |
+| `.claude/memory/working-state.md` | durable cross-session working state | update on durable change |
+| `.claude/memory/personas.md` | structured operator calibration | read at session-start |
+| `.claude/decisions/NNNN-*.md` | decision records | one per non-trivial decision |
 | `docs/v4.x/structure-changes/` | evolution log (Gate M1 artifacts) | per structural change |
-| `.lintel/state/00-state.md` (+ module state) | per-repo cycle state | written by cycle/module skills |
+| `.claude/runtime/state/00-state.md` (+ module state) | per-repo cycle state (gitignored) | written by cycle/module skills |
 | `~/.lintel/profile.yaml` | active pack · mode · role | operator-global |
-| `~/.lintel/jobs/_active.md` | open workflow_root jobs | `/li:resume`/`/li:status` read it |
-| `~/.lintel/sessions/` | context-save snapshots | `/li:context-restore` reads them |
+| `~/.lintel/jobs/_active.md` | cross-repo jobs registry (job data lives per-repo) | `/li:resume`/`/li:status` read it |
+| `.claude/runtime/sessions/` | context-save snapshots | `/li:context-restore` reads them |
 | `~/.lintel/audit/*.jsonl` | append-only audit (reviews, overrides, envelopes, hooks) | via `bin/_audit.sh` |
 
-**Jobs system** — `workflow_root` flows (cycle, plan) spawn a job under `~/.lintel/jobs/<id>/` holding
+**Jobs system** — `workflow_root` flows (cycle, plan) spawn a job under `.claude/runtime/jobs/<id>/`
+(registry at `~/.lintel/jobs/_active.md`) holding
 `job.yaml` (per-step contracts with mechanical `blocked_until` gates), `00-state.md`, `outputs/`,
 `inputs/`. Three hooks drive it (`job-begin`/`job-end`/`job-stale-warn`); `job-end` promotes keep-items
-(ADRs → `docs/adr/`, lessons → `tasks/lessons.md`, the trio → `docs/plans/<slug>/`) and archives the
+(ADRs → `.claude/decisions/`, lessons → `.claude/memory/lessons.md`, the trio → `.claude/plans/<slug>/`) and archives the
 rest. Explicitly **no daemon** — `_active.md` is regenerated on writes only.
 
 **Session-start ritual** — read CLAUDE.md + AGENT-INSTRUCTIONS.md + CORE-PRINCIPLES.md; read recent
@@ -404,8 +407,9 @@ entire enforcement layer is Claude-Code-only.*
 
 ## 16. Governance & the v4.9 remediation
 
-**ADRs** (`docs/adr/`): ADR-0001 (dogfood the scaffolding) and ADR-0002 (session-digest auto-load), both
-Accepted; the README codifies "ADR for any non-trivial, hard-to-reverse choice, not for bug fixes."
+**ADRs** (`.claude/decisions/` — the live home since v5; `docs/adr/` is a redirect stub): the series
+opened with ADR-0001 (dogfood the scaffolding) and ADR-0002 (session-digest auto-load) and has since
+grown through ADR-0017; the README codifies "ADR for any non-trivial, hard-to-reverse choice, not for bug fixes."
 **Evolution log** (`docs/v4.x/structure-changes/`): Gate-M1 artifacts for structural changes (phase2-packs-
 envelope, phase3-nav-forge-wiki, spine-extraction-audit, caip-pack-extraction).
 

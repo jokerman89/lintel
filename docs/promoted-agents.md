@@ -14,7 +14,7 @@ The list is intentionally short. Every promoted agent has earned its slot. New a
 - **Upstream:** [github.com/affaan-m/agentshield](https://github.com/affaan-m/agentshield)
 - **Install path:** `~/.claude/skills/agentshield/`
 - **What it does:** Scans agent configurations (CLAUDE.md, .cursorrules, agent.json, custom configs) for vulnerabilities: hardcoded secrets, permission misconfigs, hook injection, MCP server risks, prompt-injection vectors. 102 static rules, 1,282 tests.
-- **Why promoted:** This is the closest match to MS Layer 2 secret-scanning needs. We treat it as the first line of defense before any new repo accepts an agent setup. Run before every `git push` that touches `.claude/` or `CLAUDE.md`.
+- **Why promoted:** This is the closest match to the secret-scanning needs a company pack's compliance tier declares. We treat it as the first line of defense before any new repo accepts an agent setup. Run before every `git push` that touches `.claude/` or `CLAUDE.md`.
 - **When to invoke:** New repo setup, any time `CLAUDE.md` or `.claude/` is edited, before any release that includes agent config changes.
 
 ### From Trail of Bits — `trailofbits/skills` (CC-BY-SA-4.0 — restricted)
