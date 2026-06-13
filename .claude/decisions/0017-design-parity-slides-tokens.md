@@ -36,9 +36,12 @@ existing engine — a data move, not structural):
   capability in the dispatch table, and wired generate-ppt Step 2b to query it (strategy arc +
   per-slide emotion→color / goal→layout).
 - **Tokens:** vendored the token-architecture reference docs; wrote `emit_tokens.py` (stdlib
-  YAML-subset parser) that reads the active profile and emits a layered `design-tokens.css`
-  (primitive → semantic aliases → component starters). Added two token-discipline **warnings** to
-  the validator (var() usage, hardcoded font) — warnings, never hard errors, per L-012.
+  YAML-subset parser, incl. flat inline-map expansion) that reads the active profile and emits a
+  layered `design-tokens.css` (primitive → semantic aliases → component starters). **Colors,
+  radius (incl. the pill token), and type families all flow from the profile** — a profile author
+  reskins palette/radius/fonts with no Python edit; spacing uses the emitter's fixed 4/8 scale
+  (nested lists are not parsed — a deliberate stdlib-parser boundary). Added two token-discipline
+  **warnings** to the validator (var() usage, hardcoded font) — warnings, never hard errors, per L-012.
 
 **Deliberately scoped OUT** (documented, not silently dropped):
 - **Individual Google Fonts catalog lookup** (1,924-row CSV): the 73 curated pairings + the
