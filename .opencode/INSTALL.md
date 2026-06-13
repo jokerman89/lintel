@@ -1,6 +1,6 @@
-# Lintel v3 — OpenCode install instructions
+# Lintel — OpenCode install instructions
 
-These instructions are for OpenCode to follow when an operator runs:
+Instructions for OpenCode to follow when an operator runs:
 
 ```
 Fetch and follow instructions from https://raw.githubusercontent.com/jokerman89/lintel/refs/heads/main/.opencode/INSTALL.md
@@ -8,60 +8,30 @@ Fetch and follow instructions from https://raw.githubusercontent.com/jokerman89/
 
 ## What Lintel is
 
-Lintel is a session-harness scaffold for Microsoft Sweden CAIP solution engineers. It provides:
-- ~74 skills (slash-commands) for daily engineering + MS-specific workflows
-- ~44 agents (subagent roles) organized per domain
-- 15 hooks for compliance enforcement
-- 5+7+8 compliance tiering (RAIS, OneCS, AGT, EV2, OneBranch, etc.)
-- Trailblazer voice corpus + calibration mechanism
-- Repo scaffolding templates (CORE-PRINCIPLES, EVOLUTION-LOG, tasks/lessons.md, ADR templates)
+Lintel is a company-neutral, pack-driven session harness for agent-based development —
+markdown + bash scaffolding that an AI CLI loads as a plugin: skills (slash-commands),
+agents (subagent roles), hooks, and repo-scaffolding templates. Identity (voice,
+compliance, persona) resolves from the active pack; only the neutral `_default` pack
+ships in this repo.
 
-## OpenCode install steps
+## Install steps
 
-1. **Read the canonical session ritual:**
-   ```
-   fetch https://raw.githubusercontent.com/jokerman89/lintel/refs/heads/main/AGENT-INSTRUCTIONS.md
-   ```
-   Treat this as the primary session bootstrap doc.
-
-2. **Pull skills into OpenCode plugin directory:**
-   - Skills live at `https://github.com/jokerman89/lintel/tree/main/skills/`
-   - Per-skill: `<repo>/skills/<name>/SKILL.md`
-   - OpenCode should clone or fetch these into its plugin/skills directory.
-
-3. **Pull agents:**
-   - Agents organized per category at `https://github.com/jokerman89/lintel/tree/main/agents/`
-   - Categories: `ms-specific/`, `engineering/`, `doc-gen/`, `voice/`, `security/`, `compliance/`, `devops/`, `customer/`, `communication/`
-   - Place per OpenCode's agent-discovery mechanism.
-
-4. **Hooks (optional, opt-in):**
-   - Hook specs at `https://github.com/jokerman89/lintel/tree/main/hooks/shared/`
-   - Each has `HOOK.md` + `run.sh`. Install matching ones to OpenCode's hooks dir.
-
-5. **Compliance docs (reference):**
-   - `scaffolding/02-sdl/HARD-RULES.md` — 5 always-on rules
-   - `scaffolding/02-sdl/ON-DEMAND-RULES.md` — 7 on-demand items
-   - `scaffolding/02-sdl/REFERENCE-RULES.md` — 8 background docs
-   - Read these as context; enforce via hooks where applicable.
-
-6. **Voice corpus (if doing customer-facing copy):**
-   - `scaffolding/03-ms-team/voice/OurVoice-corpus.md`
-   - Status: see `OurVoice-calibration.md` (NOT_CALIBRATED until operator runs T0 calibration)
-
-## Limitations on OpenCode
-
-- Subagent spawning may differ from Claude Code's Task tool
-- AskUserQuestion behavior depends on OpenCode interactive mode
-- Hooks support depends on OpenCode hook API
+1. Clone the repo (or fetch raw files on demand): `git clone https://github.com/jokerman89/lintel`
+2. Read `AGENTS.md` (repo map + load-bearing rules), then `AGENT-INSTRUCTIONS.md` —
+   the canonical cross-CLI session ritual. Treat both as the session bootstrap.
+3. Load skills from `skills/<name>/SKILL.md` and agents from `agents/<category>/<Name>.md`
+   per OpenCode's discovery mechanism. Counts are computed, never hardcoded:
+   `find skills -name SKILL.md | wc -l` and `find agents -name '*.md' | grep -cv README`
+4. Hooks (`hooks/shared/`) are optional; hook *enforcement* fires on Claude Code only.
+   On OpenCode, read each `HOOK.md` and apply its discipline manually.
+5. Capability honesty: `source lib/cli-tiers.sh; cli_tier_field opencode tier` before
+   claiming a capability — never over-claim what this CLI cannot do.
 
 ## Update flow
 
-To update Lintel, re-run this INSTALL.md instructions. OpenCode should re-fetch from main branch.
-
-## Plugins directory
-
-Per-skill OpenCode plugin shims (if needed) live in `.opencode/plugins/`. Currently empty — skills work via direct content load.
+Re-fetch from `main` and re-read `AGENT-INSTRUCTIONS.md`. Per-skill OpenCode shims (if
+ever needed) live in `.opencode/plugins/` — currently empty; skills load as content.
 
 ## Issues
 
-Report problems to: https://github.com/jokerman89/lintel/issues
+https://github.com/jokerman89/lintel/issues
