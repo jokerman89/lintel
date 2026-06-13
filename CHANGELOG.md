@@ -44,7 +44,7 @@ and the remediation it found. ADRs 0013–0017.
 - ADR-0015 AGENTS.md-primary · ADR-0016 lintel-state MCP server · ADR-0017 eval-harness
 
 ### Numbers
-- 43 skill descriptions + 20 agents upgraded · 2 manifests deleted · exec bits corrected on 5 scripts · 4 new behavior tests (hook-gate newline cases, customer-data gate, context-checkpoint roundtrip, li-doctor smoke) · suite 81/81 on the committed tree
+- 43 skill descriptions + 20 agents upgraded · 2 manifests deleted · exec bits corrected on 5 scripts · 5 new behavior tests (hook-gate newline cases, customer-data gate, context-checkpoint roundtrip, li-doctor smoke, auto-decide one-way-door) · suite 82/82 on the committed tree
 
 ## 5.2.0 — 2026-06-12
 
