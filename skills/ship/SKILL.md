@@ -78,7 +78,13 @@ If ANY gate violation:
 - HARD STOP
 - Surface to operator: violation + file:line + recommended fix
 - Operator MUST fix or explicitly override (rarely warranted)
-- Log to `.claude/runtime/audit/compliance-stops.jsonl`
+- Log the stop mechanically (one line; ts/operator/cycle_id come from the envelope):
+
+```bash
+source "$(git rev-parse --show-toplevel)/bin/_audit.sh"
+audit_log compliance-stops gate_violation gate=<gate> file=<file:line> resolution=<fixed|overridden>
+# → .claude/runtime/audit/compliance-stops.jsonl
+```
 
 ### Step 4 — Voice + brand gate (if customer-facing)
 
@@ -98,21 +104,13 @@ If `artifact_kind=customer-deliverable` (PPT/Word/Web):
 ### Step 5 — Provenance tracking (if the active pack requires it)
 
 If the active pack activates a provenance gate (`resolve_pack_field compliance.hooks`; none by default):
-- Log AI-assistance provenance for shipped artifact
-- Append to `.claude/runtime/audit/<repo>-provenance-log.jsonl`:
-```json
-{
-  "ts": "<timestamp>",
-  "repo": "<name>",
-  "branch": "<branch>",
-  "commit_range": "<sha>..<sha>",
-  "ai_assistance": "lintel-cycle",
-  "phases": ["DEFINE", "PLAN", "BUILD", "REVIEW", "SHIP"],
-  "operator": "<whoami>",
-  "audience": "<audience>",
-  "voice_tier": "<tier>",
-  "compliance_gates_passed": [...]
-}
+- Log AI-assistance provenance for the shipped artifact — one line via the unified writer (ts/operator/cycle_id come from the envelope; the audit dir is already repo-scoped in v5 repos, so no `<repo>-` prefix in the filename):
+
+```bash
+source "$(git rev-parse --show-toplevel)/bin/_audit.sh"
+audit_log provenance-log shipped branch=<branch> commit_range=<sha>..<sha> ai_assistance=lintel-cycle \
+  phases=<DEFINE,PLAN,BUILD,REVIEW,SHIP> audience=<audience> voice_tier=<tier> gates_passed=<gate1,gate2>
+# → .claude/runtime/audit/provenance-log.jsonl
 ```
 
 If audience=customer AND an AI-system shipped: if the pack provides a transparency-note generator, draft a transparency note for the customer.

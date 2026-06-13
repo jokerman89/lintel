@@ -1,7 +1,7 @@
 ---
 name: usage-log
 layer: foundation
-description: Append-only usage log for skill/agent invocations. Wrapper pattern per L-001 (one log, no per-skill duplicates). Solo-invokable for reports.
+description: Append-only usage log for skill/agent invocations — manual writer (one audit_log line) plus reader reports. One log, no per-skill duplicates (L-001). Solo-invokable for reports.
 color: yellow
 tools: Read, Write, Bash, Glob
 voice: internal
@@ -18,15 +18,22 @@ You are the `usage-log` skill — the observation foundation under maintenance, 
 
 Two modes:
 
-**Writer mode (default at-skill-invocation):** Appends a JSON line per skill/agent invocation to `~/.lintel/audit/usage-<YYYYMMDD>.jsonl`. Schema: `{ts, skill, mode, tokens_est, cli, run_id}`. Daily-file rotation from day 1 (Finding 3A from plan-eng-review — multi-MB growth otherwise).
+**Writer mode (manual, operator-invoked):** records one JSONL line per invocation the operator wants counted, via the unified audit writer. There is NO automatic at-skill-invocation trigger — nothing fires this for you (the wrapper-hook this was originally designed around was never built):
 
-**Reader mode (solo-invokable for reports):** Reads recent usage logs, surfaces top-skills + frequency + estimated token spend per skill family. Pairs with `/li:hooks-status` (siblings in the observation spine).
+```bash
+source "$(git rev-parse --show-toplevel)/bin/_audit.sh"
+audit_log usage-skill invocation skill=<name>     # optional: mode=<mode> tokens_est=<n> cli=<cli>
+```
 
-Designed per Cohort 2 in the v3.6 backlog. The foundation that `/li:maintenance` (5.3) and `/li:catalog` (1.6 trends) build on.
+→ appends to `~/.lintel/audit/usage-skill.jsonl` (`usage-*` categories always route operator-global — see `bin/_audit.sh`).
+
+**Reader mode (solo-invokable for reports):** reads existing usage records, surfaces top-skills + frequency + estimated token spend per skill family. Pairs with `/li:hooks-status` (siblings in the observation spine).
+
+The foundation that `/li:maintenance` (5.3) and `/li:catalog` (1.6 trends) build on — both degrade gracefully when no records exist.
 
 ## When to use
 
-- **Writer mode:** invoked automatically via the wrapper-hook after each skill invocation. The operator does not touch this directly.
+- **Writer mode:** the operator (or a skill the operator instructs) wants an invocation counted — run the one-liner above.
 - **Reader mode:** "what have I used most over the past week?" → `/li:usage-log --report --days 7`
 - Maintenance pre-flight: `/li:usage-log --report --topn 10` sees what's rusting (skills used <2× per month)
 - Token-budget debugging: `/li:usage-log --tokens-by-skill` aggregates token-est per skill
@@ -39,45 +46,38 @@ Designed per Cohort 2 in the v3.6 backlog. The foundation that `/li:maintenance`
 
 ## Schema (per JSONL line)
 
+`audit_log` writes the unified envelope; the one-liner's k=v args add the usage fields:
+
 ```json
 {
-  "ts": "2026-05-28T14:23:45Z",
+  "ts": "2026-06-13T14:23:45Z",
+  "kind": "invocation",
+  "operator": "<operator>",
+  "cycle_id": "<cycle id or unknown>",
   "skill": "research",
   "mode": "full",
-  "tokens_est": 3500,
-  "cli": "claude-code",
-  "run_id": "20260528-142345-a7c"
+  "tokens_est": "3500",
+  "cli": "claude-code"
 }
 ```
 
 **Field spec:**
-- `ts` — ISO-8601 UTC timestamp
-- `skill` — frontmatter `name:` value
-- `mode` — invocation mode if relevant ("full", "brief", "section:<x>", or null)
-- `tokens_est` — heuristic estimate (input + output, not cached)
-- `cli` — claude-code | codex | cursor | gemini | copilot-cli | droid
-- `run_id` — unique invocation ID (timestamp + random suffix, links to other logs)
+- `ts` / `kind` / `operator` / `cycle_id` — supplied by the `audit_log` envelope
+- `skill` — frontmatter `name:` value (the one required k=v)
+- `mode` — invocation mode if relevant ("full", "brief", "section:<x>") — optional
+- `tokens_est` — heuristic estimate (input + output, not cached) — optional
+- `cli` — claude-code | codex | cursor | gemini | copilot-cli | droid — optional
 
 ## Workflow
 
-### Step 1 — Writer mode (automatic, via wrapper-hook)
+### Step 1 — Writer mode (manual)
 
-Wrapper-hook at `hooks/post-skill-invocation.sh` calls:
+Run the one-liner from "What this skill does". That is the whole writer — no script, no hook:
 
 ```bash
-~/.claude/skills/usage-log/bin/append.sh \
-  --skill "$INVOKED_SKILL" \
-  --mode "$INVOKE_MODE" \
-  --tokens-est "$TOKENS_EST" \
-  --cli "$ACTIVE_CLI" \
-  --run-id "$RUN_ID"
+source "$(git rev-parse --show-toplevel)/bin/_audit.sh"
+audit_log usage-skill invocation skill=research mode=full tokens_est=3500 cli=claude-code
 ```
-
-Append-script:
-1. Compute today's filename: `~/.lintel/audit/usage-$(date +%Y%m%d).jsonl`
-2. JSON-encode args + ts via `jq -nc`
-3. Append to the file (atomic — write to .tmp then mv for concurrent-safety)
-4. Silent — no operator output unless an error
 
 ### Step 2 — Reader mode (solo-invokable)
 
@@ -85,55 +85,43 @@ Append-script:
 ~/.lintel/audit/usage-*.jsonl
 ```
 
-Glob across days. Surface:
+Glob across files (the writer appends to `usage-skill.jsonl`; older `usage-<YYYYMMDD>.jsonl` files, if any exist, still match). Surface:
 - **Top N skills by frequency** (`--topn 10 --days 7`)
 - **Token spend by skill family** (`--tokens-by-skill`)
 - **Rust detection** (skills used < 2× past 30 days — flag candidates for archive)
 - **Override-pattern correlation** (cross-reference with hooks.jsonl override-counts)
 
-### Step 3 — Rotation policy (built-in)
-
-- **Daily-file rotation** by default — new file per day → no single-file multi-MB risk
-- **Retention:** keep the last 90 days, archive older ones to `~/.lintel/audit/archive/` (gzipped)
-- **Compaction:** a quarterly summary written to `~/.lintel/audit/usage-summary-<YYYY-Q>.json` with the top-100 skills + total-invocations
-
-The operator can trigger compaction via `/li:usage-log --compact`.
+If no records exist: surface "No usage data yet — the writer is manual (see writer mode)" and stop. Never invent counts.
 
 ## Integration
 
-**Reads (writer mode):**
-- Wrapper-hook context (invoked skill, mode, tokens-est, cli, run_id)
-
-**Writes:**
-- `~/.lintel/audit/usage-<YYYYMMDD>.jsonl` (append, daily-file rotation)
-- `~/.lintel/audit/archive/usage-*.jsonl.gz` (after 90 days)
-- `~/.lintel/audit/usage-summary-<YYYY-Q>.json` (quarterly compaction)
+**Writes (writer mode):**
+- `~/.lintel/audit/usage-skill.jsonl` (append, one line per recorded invocation, via `audit_log`)
 
 **Reads (reader mode):**
 - `~/.lintel/audit/usage-*.jsonl` (glob)
 - `.claude/runtime/audit/hooks.jsonl` (cross-reference for override-pattern correlation, if requested)
 
 **Consumed by:**
-- `/li:maintenance` (5.3 — token-cost simulation, rust detection)
+- `/li:maintenance` (5.3 — token-cost simulation, rust detection; falls back to defaults when no records exist)
 - `/li:catalog` (1.6 — usage-trend coloring for top-N skills)
 - `/li:hooks-status` (1.2 + 1.7 — sibling observation skill)
 - Operator (solo-report invocation)
 
 ## Anti-patterns
 
-- **Per-skill append-bash in SKILL.md** — breaks DRY across 113 skills (Finding 2A). Wrapper-hook only.
-- **Single growing file (`usage.jsonl` flat)** — breaks the rotation policy. Multi-MB risk after months.
+- **Bespoke per-skill `>>` writers** — breaks DRY across 113 skills (Finding 2A) and skips the ts/operator/cycle_id envelope. The `audit_log usage-skill ...` one-liner is the only writer.
+- **Claiming automatic capture** — there is no wrapper-hook; records exist only when someone ran the one-liner. Reports must say so.
 - **Token-counting "exactly" via the OpenAI API** — out of scope. The heuristic IS the tokens_est field.
 - **Read-back for forensic purposes** — wrong skill. Use `.claude/runtime/audit/hooks.jsonl` (audit-canonical).
 
 ## Failure recovery
 
-- Append fails (permission, disk-full): silent skip, error logged to stderr only. Skill invocation continues — observation should never block work.
-- Rotation fails: fall back to today's file (no daily file change), warn to stderr.
-- Reader-report empty (no logs yet): surface "No usage data yet. Skill invocations start logging once this hook is installed."
+- Append fails (permission, disk-full): `audit_log` warns on stderr and continues — observation never blocks work.
+- Reader-report empty (no records yet): surface "No usage data yet. The writer is manual — `audit_log usage-skill invocation skill=<name>`."
 
 ## Recommended next steps after invocation
 
 - For full observation: pair with `/li:hooks-status` (sibling skill)
-- For maintenance: `/li:maintenance` uses this as a data source
+- For maintenance: `/li:maintenance` uses this as a data source (if usage records exist)
 - For catalog-trending: `/li:catalog --trends` overlays usage-frequency on discoverability

@@ -43,7 +43,8 @@ Not a standalone workflow — invokes other skills (or your direct work) with el
 4. **Name the rollback.** Before any mutation, state the exact undo command (e.g. "git reset --hard HEAD@{1}", "supabase migration repair --revert").
 5. **One-thing-at-a-time.** No batched mutations. Each Edit, each command, is a separate confirmation cycle.
 6. **End-of-task verification.** Read-only verification step before declaring done — re-read the changed files, run smoke tests, confirm state matches intent.
-7. **Audit log.** Every confirmed mutation written to `.claude/runtime/audit/careful-mode.jsonl` with timestamp + reason + command.
+7. **Audit log.** After each confirmed mutation, one line via the unified writer (ts/operator/cycle_id come from the envelope):
+   `source "$(git rev-parse --show-toplevel)/bin/_audit.sh"; audit_log careful-mode mutation_confirmed reason=<reason> command=<command>` → `.claude/runtime/audit/careful-mode.jsonl`.
 
 ## Report format
 

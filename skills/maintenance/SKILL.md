@@ -48,8 +48,8 @@ Closes operator-request 5.3 + integrates with L-002 (grep-first-pattern adapted 
 # 1. /context-save snapshots > N days old → archive
 find .claude/runtime/state -name "*.md" -mtime +30 | xargs -r tar -czf ~/.lintel/archive/old-state-$(date +%Y%m%d).tar.gz
 
-# 2. usage.jsonl > 90 days old → already auto-rotated by usage-log skill
-# (verify via /li:usage-log --report)
+# 2. usage records (~/.lintel/audit/usage-*.jsonl), if any exist: archive entries
+# older than 90 days (the writer is manual — see /li:usage-log; no auto-rotation)
 
 # 3. Build/draft directories: clean up after successful PRs
 find ~/.lintel/draft -mtime +7 -type d -empty -delete
@@ -105,7 +105,7 @@ demo-prep:        ~15-25k tokens
 research-dive:    ~10-20k tokens
 ```
 
-Cross-reference with usage-log (post-1.1 land):
+Cross-reference with usage records, if any exist (the usage-log writer is manual, operator-invoked):
 - Read `~/.lintel/audit/usage-*.jsonl` past 30 days
 - Filter by skill-list for the chosen workflow
 - Compute median + p95 tokens-est
@@ -115,7 +115,7 @@ If no usage-log data: fall back to mode-envelope hard-coded estimates.
 
 ### `--rust-report`
 
-Read usage-log past 30 days:
+Read usage records past 30 days, if any exist (writer is manual — without records, report "no usage data" instead of a rust table):
 - For each skill in `skills/`, count invocations
 - Flag skills with < 2 invocations as rust candidates
 - Group by category: never-invoked / rare / cold / active

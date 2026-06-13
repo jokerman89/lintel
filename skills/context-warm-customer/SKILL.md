@@ -89,7 +89,13 @@ tokens_added: <approx>
 sensitivity_check: <result>
 ```
 
-Also append to `.claude/runtime/audit/customer-repo-access.jsonl` for traceability.
+Also append one traceability line via the unified writer:
+
+```bash
+source "$(git rev-parse --show-toplevel)/bin/_audit.sh"
+audit_log customer-repo-access context_warm engagement=<name> repo=<path> files_loaded=<N> sensitivity_check=<result>
+# → .claude/runtime/audit/customer-repo-access.jsonl
+```
 
 ## Pause-points
 

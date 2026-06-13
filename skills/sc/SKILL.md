@@ -278,7 +278,7 @@ printf '{"ts":"%s","kind":"sc_module_complete","granularity":"%s","score":%d,"ch
 - BUILD phase: invokes as sub-module when auth/compliance intent detected
 - `/li:full-engineering-pass`: parallel branch with DA after TA
 
-**Hooks:**
+**Hooks** (dormant by decision, ADR-0008 — ship in `hooks/shared/` but are opt-in, not auto-registered):
 - `hooks/shared/sc-threat-coverage-warn/` (pre-edit on auth/data files not covered by threat model)
 - `hooks/shared/sc-auth-bypass-warn/` (pre-edit on auth-flow files with high-risk patterns)
 - `hooks/shared/sc-compliance-gap-warn/` (pre-edit on regulated-data paths)

@@ -172,10 +172,10 @@ for f in pattern.json typography.json motion.json component-imports.json; do
   [ -f "$out_dir/$f" ] || { echo "Required file missing: $f"; exit 1; }
 done
 
-# Log to audit
-jq -nc --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" --arg name "$name" --arg artifacts "${artifacts[*]}" \
-  '{ts:$ts, action:"pattern-extracted", name:$name, artifacts:$artifacts}' \
-  >> ".claude/runtime/audit/frontend-style-extract-runs.jsonl"
+# Log to audit via the unified writer (ts/operator/cycle_id come from the envelope)
+source "$(git rev-parse --show-toplevel)/bin/_audit.sh"
+audit_log frontend-style-extract-runs pattern_extracted "name=$name" "artifacts=${artifacts[*]}"
+# → .claude/runtime/audit/frontend-style-extract-runs.jsonl
 ```
 
 ### Step 7 — Surface verdict
