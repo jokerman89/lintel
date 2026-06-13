@@ -10,7 +10,7 @@ affected_paths:
   - skills/instruction-parity-check/SKILL.md (ghost files → real shims)
   - bin/li-doctor (Windows hook-fire note, I2)
   - lib/cli-tiers.yaml (li@ typo + codex native); .copilot-plugin/, .droid-plugin/ deleted
-  - skills/ (43 descriptions → trigger form); agents/ (20 + traits/principles)
+  - skills/ (42 descriptions → trigger form); agents/ (20 + traits/principles)
   - docs/concepts/prompt-house-style.md (new); tests/shape/skill-descriptions-trigger.sh (new)
 risk_class: medium
 breaking_change: false
@@ -23,7 +23,7 @@ breaking_change: false
 
 ## What changed (shape)
 
-Prompt craft: 43 skill descriptions rewritten to trigger form; 20 agents gained
+Prompt craft: 42 skill descriptions rewritten to trigger form; 20 agents gained
 Core-principles + Behavioral-traits + trigger descriptions; house-style v2 doc + a
 description-trigger shape guard. Security/reliability: block hooks fail-closed (no set -e +
 scanner guard); lib/auto-decide.sh mechanical one-way-door guard; PLAN trio-completeness gate;

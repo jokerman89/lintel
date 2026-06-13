@@ -19,8 +19,6 @@
 /.codex-plugin/                         @Azureflipper
 /.cursor-plugin/                        @Azureflipper
 /.opencode/                             @Azureflipper
-/.copilot-plugin/                       @Azureflipper
-/.droid-plugin/                         @Azureflipper
 /gemini-extension.json                  @Azureflipper
 
 # Per-CLI entrypoint context files
