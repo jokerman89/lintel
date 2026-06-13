@@ -1,7 +1,7 @@
 ---
 name: brief-forge
 layer: foundation
-description: Phase 3 v4.0 — universal hand-off gate. Constructs envelopes per lib/envelope-schema.yaml + runs evaluators on every subagent_spawn / phase_transition / workflow_handoff / cold_executor / operator_input per pack policy.
+description: Use whenever work hands off across a boundary — spawning a subagent, transitioning a phase, passing to a cold executor, or taking operator input — to build a structured envelope and run the active pack's evaluators on it. The universal hand-off gate that keeps context intact across the handoff.
 color: cyan
 tools: Read, Write, Bash
 voice: internal

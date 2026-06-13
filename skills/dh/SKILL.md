@@ -2,7 +2,7 @@
 name: dh
 layer: foundation
 workflow_root: true
-description: Phase 4 v4.4 — devops-hosting module. Three granularities (full / loop / single). Capabilities dispatch to existing ops agents (ADR-0009 dispatch table). 5 checkpoints, 6-dim scoring rubric, 3 warn-only hooks, profile-driven preferences.
+description: Use for devops and hosting depth — deployment plans, rollback strategy, observability specs, SLI/SLO budgets, capacity headroom, cost projection, and on-call playbooks. Reach for it when the work turns on how the system runs in production. Runs full, loop, or single-capability, dispatching to the ops agents and scoring against a rubric.
 color: purple
 tools: Read, Write, Edit, Bash, Grep, Glob
 voice: internal

@@ -1,7 +1,7 @@
 ---
 name: analyze
 layer: foundation
-description: Cross-artifact consistency gate (ADR-0004, adopted from spec-kit /analyze) — checks DEFINE↔PLAN↔BUILD legs + authority alignment, persists a severity-classified report to .claude/runtime/state/analyze-report.md. Read-only on the tree; re-runnable at any cycle point. Delegated to by PLAN Step 8 and BUILD's final pass.
+description: Use to check that PLAN and BUILD still match the approved DEFINE design — run when a plan was revised or a build deviated, to catch drift between what was approved and what shipped. Checks the DEFINE-PLAN-BUILD legs and authority alignment, writes a severity-classified report, and is re-runnable read-only at any cycle point.
 color: red
 tools: Read, Bash, Grep, Glob, Write
 voice: internal

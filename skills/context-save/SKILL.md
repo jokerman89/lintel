@@ -1,7 +1,7 @@
 ---
 name: context-save
 layer: foundation
-description: Save current session state to a checkpoint file. Use before context bloat or before /clean.
+description: Use before the context window fills up or before clearing the session to save the current state to a checkpoint file. Reach for it when a session is getting heavy and you want to preserve where you are so a later session can pick up exactly here.
 color: blue
 tools: Read, Write, Bash, Grep, Glob
 voice: internal

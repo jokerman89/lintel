@@ -1,7 +1,7 @@
 ---
 name: office-hours
 layer: foundation
-description: Generate a design doc from a problem statement — structured, decision-gated, ready for /plan-eng-review.
+description: Use to turn a rough problem statement into a structured, decision-gated design doc ready for engineering review. Reach for it when you have a problem to think through but no plan yet, and want the design pinned down before committing to architecture.
 color: purple
 tools: Read, Write, Bash, Glob, Grep
 voice: internal

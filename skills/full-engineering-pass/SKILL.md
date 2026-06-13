@@ -2,7 +2,7 @@
 name: full-engineering-pass
 layer: foundation
 workflow_root: true
-description: v4.6 (v4.x feature-complete) — composes all 5 engineering-domain modules in DAG order (TA → DA‖SC → DH → TQ). Single invocation produces architecture decisions + data model + security posture + ops plan + quality validation for a customer engagement or major release.
+description: Use for a customer engagement or major release that needs the whole engineering picture at once — composes all five domain modules (architecture, data, security, devops, testing) in dependency order. One invocation produces architecture decisions, a data model, a security posture, an ops plan, and quality validation together.
 color: cyan
 tools: Read, Write, Edit, Bash, Grep, Glob
 voice: internal

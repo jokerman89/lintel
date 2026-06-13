@@ -1,7 +1,7 @@
 ---
 name: scaffold
 layer: foundation
-description: Scaffold a new repo with Lintel base templates — CLAUDE.md, .claude/memory/lessons.md, EVOLUTION-LOG, .claude/decisions/ — interactive setup.
+description: Use when setting up a new or existing repo to work with Lintel to install the base templates interactively — the repo instruction file, the lessons store, the evolution log, and the decisions directory. Reach for it to bootstrap the per-repo scaffolding the disciplines depend on.
 color: cyan
 tools: Read, Bash, Edit, Write, Glob
 voice: internal

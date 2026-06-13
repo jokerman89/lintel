@@ -1,7 +1,7 @@
 ---
 name: context-warm
 layer: foundation
-description: Load specified files into session context — on-demand 1M-window utilization. Reports tokens added + budget impact. Base skill for all context-warm variants.
+description: Use to deliberately load specific files into context before working on them, reporting tokens added and budget impact. Reach for it when you know which files the task needs and want them in the window up front. The base skill the topic-specific context-warm variants build on.
 color: cyan
 tools: Read, Bash, Glob
 voice: internal

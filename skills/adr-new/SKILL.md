@@ -1,7 +1,7 @@
 ---
 name: adr-new
 layer: foundation
-description: Bootstrap a new ADR (Architecture Decision Record) from template, with context-gathering questions.
+description: Use when a non-trivial decision needs recording to bootstrap a new Architecture Decision Record from the template, asking context-gathering questions to fill Status, Context, Decision, and Consequences. Reach for it whenever you've made or are about to make an architectural choice worth a durable record.
 color: cyan
 tools: Read, Bash, Edit, Glob
 voice: internal

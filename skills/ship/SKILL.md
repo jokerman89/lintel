@@ -1,7 +1,7 @@
 ---
 name: ship
 layer: foundation
-description: Phase 7 of Lintel cycle — PR / deploy / customer handoff. Final compliance hard-stops (the active pack's gates; none by default). Voice gates on customer-facing artifacts. Pack-configured CI/deploy validation.
+description: Use after REVIEW passes, when reviewed work is ready to land, to open a PR, deploy, or hand off to a customer — runs the active pack's final compliance hard-stops, voice gates on customer-facing artifacts, and pack-configured CI/deploy validation. The cycle's last gate before code leaves the repo.
 color: cyan
 tools: Read, Bash, Edit, Grep, Glob
 voice: mixed

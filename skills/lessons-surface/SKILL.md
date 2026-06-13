@@ -1,7 +1,7 @@
 ---
 name: lessons-surface
 layer: foundation
-description: Surface relevant lessons.md entries based on keyword/context. Closes the L-001/L-002 loop (lessons are written but never read). Solo-invokable + SENSE-integrated.
+description: Use before or during a task to pull up prior lessons relevant to it — searches the lessons store by keyword and context and surfaces matching entries so past corrections actually inform the current work. Runs at SENSE and is callable on its own when you want to check what's been learned about a topic.
 color: yellow
 tools: Read, Bash, Grep
 voice: internal

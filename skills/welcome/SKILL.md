@@ -1,7 +1,7 @@
 ---
 name: welcome
 layer: foundation
-description: First-run guided onboarding — detect the CLI, show its honest capability tier, run a dry-run cycle, and demonstrate a safety hook. The 5-minute "see the harness work" path.
+description: Use on first run, or when someone is new to Lintel, for guided onboarding — detects the CLI, shows its honest capability tier, runs a dry-run cycle, and demonstrates a safety hook. The five-minute "see the harness work" path for a first-time user.
 color: green
 tools: Read, Bash
 voice: internal

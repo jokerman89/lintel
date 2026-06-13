@@ -1,7 +1,7 @@
 ---
 name: plan-eng-review
 layer: foundation
-description: Architecture + tests review. The required gate before ship. Covers arch, code quality, test coverage, performance.
+description: Use to review a plan or change for engineering soundness before it ships — covers architecture, code quality, test coverage, and performance. The required gate before SHIP; reach for it when a design or implementation needs a rigorous technical pass.
 color: red
 tools: Read, Bash, Grep, Glob, Edit
 voice: internal

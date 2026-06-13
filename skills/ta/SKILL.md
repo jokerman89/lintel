@@ -2,7 +2,7 @@
 name: ta
 layer: foundation
 workflow_root: true
-description: Phase 4 v4.1 — tech-architecture module. Three granularities (full / loop / single). Capabilities dispatch to existing arch agents (ADR-0009 dispatch table). 5 checkpoints, 6-dim scoring rubric, 3 warn-only hooks, profile-driven preferences.
+description: Use for technical-architecture depth — service boundaries, API contracts, dependency graphs, scaling plans, complexity audits, and quality attributes. Reach for it when a design needs architectural rigor beyond what PLAN gives. Runs full, loop, or single-capability, dispatching to the architecture agents and scoring against a rubric.
 color: amber
 tools: Read, Write, Edit, Bash, Grep, Glob
 voice: internal

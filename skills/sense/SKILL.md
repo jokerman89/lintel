@@ -1,7 +1,7 @@
 ---
 name: sense
 layer: foundation
-description: Phase 1 of Lintel cycle — auto-detect operator intent, pack compliance mode, active role, mode recommendation, 00-state from prior session. Lightweight diagnostic, no gates.
+description: Use at the very start of a task to read the situation before deciding how to work — detects operator intent, the active pack's compliance mode, the active role, any 00-state left by a prior session, and recommends a workflow mode. The cycle's first step, before SCOPE; a lightweight read-only diagnostic with no gates.
 color: cyan
 tools: Read, Bash, Grep, Glob
 voice: internal
