@@ -15,10 +15,11 @@ Design DNA validator - mechanical pre-delivery gate for rendered HTML/CSS.
 Errors (exit 1) are objective violations of the non-negotiables; warnings are
 heuristics for the reviewer. Usage:
 
-  python3 validate_design.py <file.html> [<file2.html> ...] [--profile profiles/anthropic-default.yaml] [-v]
+  python3 validate_design.py <file.html> [<file2.css> ...] [--profile profiles/anthropic-default.yaml] [-v]
 """
 
 import argparse
+import html
 import re
 import sys
 import io
@@ -27,63 +28,85 @@ from pathlib import Path
 if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 
-EMOJI_RE = re.compile(
-    "[\U0001F300-\U0001FAFF\U00002600-\U000027BF\U0001F000-\U0001F02F\U00002190-\U000021FF\U00002B00-\U00002BFF]"
-)
+# Pictographic emoji only (U+1F000-U+1FAFF). Deliberately EXCLUDES arrows
+# (U+2190-21FF), checkmarks/stars (U+2600-27BF) and geometric shapes — those
+# are legitimate typography ("Next →", "✓ Done") and must not trip a hard gate.
+EMOJI_RE = re.compile("[\U0001F000-\U0001FAFF]")
 HEX_RE = re.compile(r"#[0-9A-Fa-f]{3,8}\b")
 NEUTRAL_HEX = {"#fff", "#ffffff", "#000", "#000000"}
 
 
 def load_profile_hexes(profile_path):
     """Collect every hex token from a profile YAML (regex — stdlib has no YAML)."""
-    text = Path(profile_path).read_text(encoding="utf-8")
-    return {h.lower() for h in HEX_RE.findall(text)}
+    p = Path(profile_path)
+    if not p.exists():
+        # fail closed with a clean message, not a traceback
+        print(f"x profile not found: {profile_path}")
+        sys.exit(1)
+    return {h.lower() for h in HEX_RE.findall(p.read_text(encoding="utf-8"))}
+
+
+def _strip_css_comments(text):
+    return re.sub(r"/\*.*?\*/", " ", text, flags=re.S)
+
+
+def _style_content(content, path):
+    """All CSS-bearing text: whole file for .css, else <style> blocks + inline styles."""
+    if path.suffix.lower() == ".css":
+        return content
+    parts = re.findall(r"<style[^>]*>([\s\S]*?)</style>", content, re.I)
+    parts += re.findall(r'style\s*=\s*"([^"]*)"', content)
+    parts += re.findall(r"style\s*=\s*'([^']*)'", content)
+    return " ".join(parts)
 
 
 def check(content, path, profile_hexes, verbose=False):
     errors, warnings = [], []
+    content = html.unescape(content)  # &#x1F680; is still an emoji
     lower = content.lower()
+    styles = _strip_css_comments(_style_content(content, path))
+    styles_lower = styles.lower()
     is_document = "<html" in lower
 
     # --- hard violations (the non-negotiables) ---
-    if re.search(r"user-scalable\s*=\s*no|maximum-scale\s*=\s*1(?:\.0)?\b", lower):
+    if re.search(r"user-scalable\s*=\s*no|maximum-scale\s*=\s*1(?:\.0)?(?![\d.])", lower):
         errors.append("zoom disabled in viewport meta (user-scalable=no / maximum-scale=1)")
 
     if is_document and "viewport" not in lower:
         errors.append("missing viewport meta on a full HTML document")
 
-    if re.search(r"outline\s*:\s*(none|0)\b", lower) and ":focus" not in lower:
+    if re.search(r"outline\s*:\s*(none|0)\b", styles_lower) and ":focus" not in styles_lower:
         errors.append("focus outline removed with no :focus/:focus-visible replacement anywhere")
 
+    content_emoji_seen = False
     for m in EMOJI_RE.finditer(content):
         pre = content[max(0, m.start() - 160): m.start()]
         if re.search(r"<(button|a|nav)\b[^>]*>(?:(?!</)[\s\S])*$", pre) or re.search(
             r'class\s*=\s*"[^"]*icon[^"]*"[^<]*$', pre
         ):
-            errors.append(f"emoji used as icon near: …{content[m.start()-30:m.start()+10]!r} — use SVG (Lucide/Heroicons)")
-            break  # one finding is enough to gate
-        else:
+            errors.append(
+                f"emoji used as icon near: …{content[max(0, m.start()-30):m.start()+10]!r} — use SVG (Lucide/Heroicons)"
+            )
+        elif not content_emoji_seen:
             warnings.append("emoji present in markup — verify it is content, not an icon")
-            break
+            content_emoji_seen = True
 
     # --- heuristic warnings ---
-    if "transition: all" in lower or "transition:all" in lower:
+    if re.search(r"transition\s*:\s*all\b", styles_lower):
         warnings.append("transition: all — animate specific transform/opacity properties instead")
 
-    if re.search(r"\b100vh\b", lower):
+    if re.search(r"\b100vh\b", styles_lower):
         warnings.append("100vh used — prefer 100dvh/min-h-dvh on mobile")
 
-    for m in re.finditer(r"font-size\s*:\s*(\d+(?:\.\d+)?)px", lower):
+    for m in re.finditer(r"font-size\s*:\s*(\d+(?:\.\d+)?)px", styles_lower):
         if float(m.group(1)) < 12:
             warnings.append(f"font-size {m.group(1)}px < 12px — likely unreadable body/label text")
             break
 
-    if ("@keyframes" in lower or "transition" in lower) and "prefers-reduced-motion" not in lower:
+    if ("@keyframes" in styles_lower or "transition" in styles_lower) and "prefers-reduced-motion" not in lower:
         warnings.append("animations present but prefers-reduced-motion is not respected")
 
     if profile_hexes:
-        styles = " ".join(re.findall(r"<style[^>]*>([\s\S]*?)</style>", content, re.I))
-        styles += " ".join(re.findall(r'style\s*=\s*"([^"]*)"', content))
         off_palette = {
             h.lower() for h in HEX_RE.findall(styles)
             if h.lower() not in profile_hexes and h.lower() not in NEUTRAL_HEX

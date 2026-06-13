@@ -42,7 +42,7 @@ Voice tier note: the critique itself is internal (builder-to-builder). When the 
 1. **Preflight.** Verify URL is live (`curl -I`). Verify managed Chromium installed.
 2. **Capture phase.** For each route × each viewport: invoke `/browse` to load + screenshot + capture DOM + console log. Artifacts land in `~/.lintel/design-runs/<ts>/`.
 2b. **Mechanical validator (ADR-0015).** On captured DOM/HTML:
-   `python3 skills/design-dna/scripts/validate_design.py <captured.html> --profile <active-profile>` —
+   `python3 "${LINTEL_SKILLS_DIR:-skills}/design-dna/scripts/validate_design.py" <captured.html> --profile <active-profile>` —
    exit 1 findings become automatic P1s (objective violations; no judgment needed).
 3. **Six-pillar pass** — for each captured route:
    - **Visual polish:** alignment, spacing rhythm, hover/focus states present, no Lorem Ipsum, no broken images, no overflow.

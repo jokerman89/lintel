@@ -86,12 +86,13 @@ case "$stack" in
   next-app)   dna_stack=nextjs ;;
   vite-react) dna_stack=react ;;
   svelte-kit) dna_stack=svelte ;;
+  *)          dna_stack=react; echo "unknown stack '$stack' — using react guidance" ;;
 esac
-python3 skills/design-dna/scripts/search.py "<routes/features keywords>" --stack "$dna_stack"
+python3 "${LINTEL_SKILLS_DIR:-skills}/design-dna/scripts/search.py" "<routes/features keywords>" --stack "$dna_stack"
 ```
 
 Apply the returned Do/Don't/Severity rules while scaffolding. python3 absent → Read
-`skills/design-dna/data/stacks/$dna_stack.csv` directly.
+`design-dna/data/stacks/$dna_stack.csv` (same root) directly.
 
 ### Step 3 — Stack-specific scaffold
 
@@ -196,7 +197,7 @@ Operator-licensed items (per frontend-design-spec.json):
 ### Step 7 — 4-gate quality pipeline
 
 Same as generate-web (per existing v3.5 pattern):
-0. Mechanical validator (ADR-0015): `python3 skills/design-dna/scripts/validate_design.py <rendered html/jsx pages> --profile <active-profile>` — exit 1 BLOCKS; fix before continuing
+0. Mechanical validator (ADR-0015): `python3 "${LINTEL_SKILLS_DIR:-skills}/design-dna/scripts/validate_design.py" <rendered html/jsx pages> --profile <active-profile>` — exit 1 BLOCKS; fix before continuing
 1. Build-test: `npm run build` smoke-test
 2. WebExperienceCritic agent: layout/hierarchy/accessibility review
 3. DesignSystemAuditor (Phase A2) optional: 6-dimension audit if `--review` flag

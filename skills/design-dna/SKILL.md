@@ -38,7 +38,10 @@ ink-and-paper system). This module makes NO rendering decisions — it feeds the
 
 ## Sub-capability dispatch
 
-`<base>` = this skill's directory. All searches: python3, stdlib-only, exit 0 + markdown to stdout.
+`<base>` = this skill's directory — the base dir injected at invocation (in-repo:
+`skills/design-dna`). Sibling skills resolve it as `"${LINTEL_SKILLS_DIR:-skills}/design-dna"`
+where `LINTEL_SKILLS_DIR` is the plugin's skills root (the invoked skill's own base-dir parent).
+All searches: python3, stdlib-only, exit 0 + markdown to stdout.
 
 | Capability | Invocation | Returns |
 |---|---|---|
@@ -55,9 +58,14 @@ best: product + industry + tone + density ("entertainment social vibrant content
 ## Profile resolution
 
 ```bash
+source "${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}/lib/pack-resolver.sh" 2>/dev/null \
+  || source "$HOME/.lintel/lib/pack-resolver.sh" 2>/dev/null
 profile="$(resolve_pack_field design.profile 2>/dev/null)"
 [ -z "$profile" ] || [ "$profile" = "null" ] && profile="anthropic-default"
 ```
+
+If the resolver cannot be sourced, SAY so before falling back to anthropic-default — a pack's
+declared `design.profile` must never be silently ignored.
 
 Packs override by declaring `design.profile` + shipping `profiles/<id>.yaml` in the pack dir
 (checked first), falling back to `<base>/profiles/`. The pack contract is untouched — the field
