@@ -2,7 +2,7 @@
 name: plan
 layer: foundation
 workflow_root: true
-description: Use after DISCOVER, or standalone when you have a design doc and need to break it into executable work, to produce the cold-executor trio (plan.md + spec.md + prompt.md) together. Tasks are granularity-checked to roughly five minutes each and gated on operator approval; invoked standalone it spawns a tracked job.
+description: Use after DISCOVER, or standalone when you have a design doc and need to break it into executable work, to produce the cold-executor trio (plan.md + spec.md + prompt.md) together. Tasks are granularity-checked to roughly five minutes each and gated on operator approval.
 color: cyan
 tools: Read, Write, Edit, Bash, Grep, Glob
 voice: internal
@@ -449,6 +449,8 @@ PLAN is no longer just Phase 4 of `cycle` — it's a callable planner-module tha
 /li:plan <design.md>
    ↓
    workflow_root: true → spawns own job at .claude/runtime/jobs/plan-<stamp>-<hash>/
+       (job auto-spawn is dormant by decision, ADR-0008 — the job-begin hook is
+        not auto-registered; the trio + approval gate below run regardless)
    produces: plan.md + spec.md + prompt.md (the trio)
    handoff-size-check against 500k cap (trio + warming)
    founder approval gate

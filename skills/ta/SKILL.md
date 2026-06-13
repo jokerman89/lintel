@@ -288,7 +288,7 @@ printf '{"ts":"%s","kind":"ta_module_complete","granularity":"%s","score":%d,"ch
 - BUILD phase: invokes as sub-module when architectural intent detected
 - `/li:full-engineering-pass`: first module in the composition DAG
 
-**Hooks:**
+**Hooks** (dormant by decision, ADR-0008 — ship in `hooks/shared/` but are opt-in, not auto-registered):
 - `hooks/shared/ta-arch-drift-warn/` (pre-edit on ADR-claimed files)
 - `hooks/shared/ta-contract-collision-warn/` (pre-edit on interface files)
 - `hooks/shared/ta-complexity-budget-warn/` (pre-commit)

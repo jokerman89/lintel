@@ -50,11 +50,13 @@ Read entire cycle's `.claude/runtime/state/00-state.md` log. Extract:
 
 This is the source data for capture artifacts.
 
-### Step 1b — Granularity calibration record (scale-estimator feedback)
+### Step 1b — Granularity calibration record (dormant by decision, ADR-0008 — activate with a behavior test when scale-estimator calibration is wanted)
 
-Close the calibration loop (design §3.5): record this cycle's **actual** outcome against the SCOPE estimate so `lib/scale-estimator.sh` can correct its token/size priors next time. Today the estimate is born in SCOPE but never compared to reality — this step is the missing feedback edge.
+This step is NOT part of the default CAPTURE run. ADR-0008 lists granularity writes as dormant-by-decision: zero records exist and none are expected until the loop is deliberately activated (the activation gate is a behavior test, not prose). Skip to Step 2 unless the operator has activated it.
 
-Mechanical, non-blocking. Read the planned scale from `scope.md` (or the cycle's `00-state.md` SCOPE entry) and the actuals from the cycle history aggregated in Step 1, then append one record via the unified `audit_log` writer — the same call pattern every other Lintel producer uses (e.g. `skills/migrations`):
+The design it would close (§3.5): record this cycle's **actual** outcome against the SCOPE estimate so `lib/scale-estimator.sh` can correct its token/size priors next time. `scale_calibrated_prior` already reads the log and falls back to mechanical defaults while it stays empty — readers are shipped, the writer is dormant.
+
+If — and only if — the loop is activated: read the planned scale from `scope.md` (or the cycle's `00-state.md` SCOPE entry) and the actuals from the cycle history aggregated in Step 1, then append one record via the unified `audit_log` writer:
 
 ```bash
 # A skill body has no reliable $0/BASH_SOURCE — resolve the repo root the way
@@ -80,9 +82,9 @@ audit_log granularity actual_vs_estimated \
 # → appends one JSONL line to .claude/runtime/audit/granularity.jsonl
 ```
 
-If any field is unavailable (e.g. SCOPE was silent on an XS request, or tokens weren't tracked), pass what you have and omit the rest — `audit_log` records whatever k=v pairs it's given; a partial record is still useful history. Never block the cycle on this; a failed write is silent by design (`_audit.sh` swallows write errors).
+When active: if any field is unavailable (e.g. SCOPE was silent on an XS request, or tokens weren't tracked), pass what you have and omit the rest — `audit_log` records whatever k=v pairs it's given; a partial record is still useful history. Never block the cycle on this; a failed write is silent by design (`_audit.sh` swallows write errors).
 
-The estimator's `scale_calibrated_prior <size>` reads exactly this log: it takes the median `actual_tokens` for a size as the corrected prior, falling back to the mechanical default when no history exists. One record per cycle here is what makes the next estimate sharper.
+The estimator's `scale_calibrated_prior <size>` reads exactly this log: it takes the median `actual_tokens` for a size as the corrected prior, falling back to the mechanical default when no history exists (the UNCALIBRATED label is honest while this stays dormant).
 
 ### Step 2 — Lessons capture (filtered)
 
