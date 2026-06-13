@@ -2,6 +2,19 @@
 
 All notable changes to this repo are tracked here. Format is loose — date headings + bulleted changes. Major behavior changes to the canonical instructions are also logged in `scaffolding/EVOLUTION-LOG.md` (which travels with each scaffolded repo).
 
+## 5.2.1 — 2026-06-13
+
+Patch: hook gate fix delivery (PR #70 merged content-only — without a version bump the
+plugin marketplaces report "up to date" and never refetch, so the fix could not reach
+installed plugins).
+
+- Block gates (secret-scan, customer-data) scan **added lines only** — git's own diff
+  metadata (`new file mode 100644`, `index <hash>..<hash>`) matched the phone regex and
+  blocked every new-file commit once the v5.2 matcher fix made the hooks actually fire
+- Gates follow every `git -C <path>` target in the command (cwd alone scanned the wrong repo)
+- New shared helper `hook_git_gate_content` in `hooks/shared/_input.sh`; regression-locked
+  in `tests/unit/hook-gate-content.sh`
+
 ## 5.2.0 — 2026-06-12
 
 Battletest remediation (six adversarial personas) + gstack de-heritage. ADR-0010/0011/0012.
