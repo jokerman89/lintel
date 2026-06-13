@@ -27,6 +27,11 @@ command -v render_cycle_footer >/dev/null 2>&1 && return 0 2>/dev/null
 _CYCLE_FOOTER_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck disable=SC1091
 [ -f "$_CYCLE_FOOTER_DIR/cycle-modes.sh" ] && . "$_CYCLE_FOOTER_DIR/cycle-modes.sh"
+# state_cycle_segment lives in state.sh — ONE ledger parser shared with the
+# writer side (two parsers over one ledger is the shared-schema violation that
+# caused the cross-cycle footer bug; launch register B4).
+# shellcheck disable=SC1091
+command -v state_cycle_segment >/dev/null 2>&1 || { [ -f "$_CYCLE_FOOTER_DIR/state.sh" ] && . "$_CYCLE_FOOTER_DIR/state.sh"; } || true
 
 _cf_in_list() { case " $2 " in *" $1 "*) return 0 ;; *) return 1 ;; esac; }
 
@@ -39,27 +44,27 @@ _cf_next_after() {
   done
 }
 
-# last `key: value` in a state file (CRLF-safe, ignores indentation)
+# last `key: value` from the current-cycle segment on STDIN (CRLF-safe,
+# ignores indentation)
 _cf_state_last() {
-  local key="$1" file="$2"
-  [ -f "$file" ] || return 0
+  local key="$1"
   awk -v k="${key}:" '
     { sub(/\r$/,""); line=$0; sub(/^[ \t]+/,"",line)
       if (index(line,k)==1) { v=substr(line,length(k)+1); sub(/^[ \t]+/,"",v); sub(/[ \t]+$/,"",v); last=v } }
     END { print last }
-  ' "$file"
+  '
 }
 
-# ordered, de-duplicated list of phases appearing as `phase:` blocks
+# every `phase:` value on STDIN, in ledger order — deliberately NOT
+# de-duplicated: a loop-back re-entry (BUILD blocked → PLAN again) means the
+# LAST canonical entry is the true position; first-occurrence de-dup froze a
+# revisited phase at its first position (launch register B4).
 _cf_phase_history() {
-  local file="$1"
-  [ -f "$file" ] || return 0
   awk '
     { sub(/\r$/,""); line=$0; sub(/^[ \t]+/,"",line)
       if (index(line,"phase:")==1) { v=substr(line,7); sub(/^[ \t]+/,"",v); sub(/[ \t]+$/,"",v)
-        if (v!="" && !(v in seen)) { seen[v]=1; order[++n]=v } } }
-    END { for (i=1;i<=n;i++) print order[i] }
-  ' "$file"
+        if (v!="") print v } }
+  '
 }
 
 render_cycle_footer() {
@@ -96,10 +101,20 @@ render_cycle_footer() {
     legend="✅ done · ⊘ skipped · 📍 here · ▢ pending"
   fi
 
-  # resolve from state where not explicitly given. Non-canonical ledger entries
+  # resolve from the CURRENT cycle's ledger segment (state_cycle_segment): a
+  # prior cycle's cycle_complete / phase history / mode in the same append-only
+  # file must not poison a new cycle. Non-canonical ledger entries
   # (CYCLE/RESUME orchestrator blocks, ADR-0008) carry metadata, not position —
   # filter them out of the history before resolving "here".
-  local history; history="$(_cf_phase_history "$state")"
+  local seg=""
+  if [ -f "$state" ]; then
+    if command -v state_cycle_segment >/dev/null 2>&1; then
+      seg="$(state_cycle_segment "$state")"
+    else
+      seg="$(cat "$state" 2>/dev/null)"
+    fi
+  fi
+  local history; history="$(printf '%s\n' "$seg" | _cf_phase_history)"
   if [ -z "$here" ]; then
     local _h _cand=""
     while IFS= read -r _h; do
@@ -110,11 +125,11 @@ $history
 EOF_HIST
     here="$_cand"
   fi
-  [ -z "$next" ] && next="$(_cf_state_last next_recommended "$state")"
-  [ -z "$mode" ] && mode="$(_cf_state_last cycle_mode "$state")"
-  [ -z "$mode" ] && mode="$(_cf_state_last mode "$state")"
+  [ -z "$next" ] && next="$(printf '%s\n' "$seg" | _cf_state_last next_recommended)"
+  [ -z "$mode" ] && mode="$(printf '%s\n' "$seg" | _cf_state_last cycle_mode)"
+  [ -z "$mode" ] && mode="$(printf '%s\n' "$seg" | _cf_state_last mode)"
   [ -z "$mode" ] && mode="${LINTEL_CYCLE_MODE:-}"
-  local complete; complete="$(_cf_state_last cycle_complete "$state")"
+  local complete; complete="$(printf '%s\n' "$seg" | _cf_state_last cycle_complete)"
 
   # normalize phase tokens to first-word UPPER-CASE — consistent with cycle_mode_skips /
   # cycle_phase_known, since state or operator input may be lowercase or multi-word.
