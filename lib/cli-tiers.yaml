@@ -23,17 +23,17 @@ clis:
     hooks_supported: true
     skills_native: true
     subagents: native
-    install: "/plugin marketplace add jokerman89/lintel  then  /plugin install lintel@jokerman-lintel"
+    install: "/plugin marketplace add jokerman89/lintel  then  /plugin install li@jokerman-lintel"
   codex:
     label: "Codex CLI / App"
     tier: full
     hooks_supported: false
     skills_native: true
-    subagents: sequenced
+    subagents: native
     install: "/plugins, search lintel, Install"
   cursor:
     label: "Cursor"
-    tier: full
+    tier: supported
     hooks_supported: false
     skills_native: true
     subagents: sequenced
@@ -58,14 +58,14 @@ clis:
     hooks_supported: false
     skills_native: true
     subagents: none
-    install: "copilot plugin marketplace add jokerman89/lintel  then  copilot plugin install lintel@jokerman-lintel"
+    install: "copilot plugin marketplace add jokerman89/lintel  then  copilot plugin install li@jokerman-lintel"
   droid:
     label: "Factory Droid"
     tier: supported
     hooks_supported: false
     skills_native: true
     subagents: none
-    install: "droid plugin marketplace add jokerman89/lintel  then  droid plugin install lintel@jokerman-lintel"
+    install: "droid plugin marketplace add jokerman89/lintel  then  droid plugin install li@jokerman-lintel"
   other:
     label: "Cline / Continue / Aider"
     tier: best-effort
