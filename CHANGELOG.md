@@ -2,6 +2,28 @@
 
 All notable changes to this repo are tracked here. Format is loose — date headings + bulleted changes. Major behavior changes to the canonical instructions are also logged in `scaffolding/EVOLUTION-LOG.md` (which travels with each scaffolded repo).
 
+## 5.3.0 — 2026-06-13
+
+Multi-CLI hardening · issue-mining · prompt-craft v2. ADR-0014.
+
+### Prompt craft (ADR-0014, docs/concepts/prompt-house-style.md)
+- Skill `description:` fields rewritten to TRIGGER form ("Use when…") across 43 high-traffic skills — descriptions are the auto-invocation mechanism; a workflow-summary makes Claude follow the summary instead of the body (superpowers' measured regression). New guard tests/shape/skill-descriptions-trigger.sh
+- 20 review/audit/architecture agents gained Core-principles + Behavioral-traits + trigger descriptions + tool-scoping rationale (wshobson's consistency engine)
+- House-style v2: dial back ALL-CAPS MUST/NEVER (current models overtrigger — Anthropic yellow flag), positive framing, one worked example, persona-as-voice-not-accuracy, one verifier-anchored self-critique, structural anti-sycophancy
+
+### Security + reliability (issue-mining)
+- Block hooks made fail-closed: dropped `set -e` (under it an upstream non-zero exited before the blocking `exit 2`, silently downgrading to non-blocking — claude-code #60490) + a fail-closed guard when the scanner can't load
+- lib/auto-decide.sh: mechanical one-way-door guard so `--auto` can't auto-decide an irreversible/sovereignty change (gstack #603)
+- PLAN: mechanical trio-completeness gate (plan.md+spec.md+prompt.md must all exist non-empty before BUILD — gstack #1127)
+- li-doctor names the Windows SessionStart-no-fire bug (claude-code #59072) in its digest check
+
+### Multi-CLI
+- Deleted fabricated `.copilot-plugin/` + `.droid-plugin/` (both CLIs read `.claude-plugin/` via interop); fixed cli-tiers `li@` typo + `codex.subagents: native`
+- instruction-parity-check repointed at the real shim files (was asserting 3 ghosts)
+
+### Numbers
+- 43 skill descriptions + 20 agents upgraded · 2 manifests deleted · 1 new guard test · suite green
+
 ## 5.2.0 — 2026-06-12
 
 Battletest remediation (six adversarial personas) + gstack de-heritage. ADR-0010/0011/0012.
