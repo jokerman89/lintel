@@ -317,8 +317,12 @@ cold resume (gstack #1127/#1791). Before declaring PLAN done, assert all three e
 non-trivial — this is a real check, not a prose promise:
 
 ```bash
-slug_dir=".claude/plans/$slug"
+# the plan dir just written (newest under .claude/plans/); the orchestrator may
+# also export LINTEL_PLAN_DIR — prefer it, else the most recent dir.
+slug_dir="${LINTEL_PLAN_DIR:-$(ls -dt .claude/plans/*/ 2>/dev/null | head -1)}"
+slug_dir="${slug_dir%/}"
 missing=""
+[ -n "$slug_dir" ] || { echo "PLAN BLOCKED: no plan dir under .claude/plans/"; exit 1; }
 for f in plan.md spec.md prompt.md; do
   [ -s "$slug_dir/$f" ] || missing="$missing $f"
 done
