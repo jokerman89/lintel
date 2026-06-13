@@ -78,6 +78,27 @@ out="$(render_cycle_footer --state "$TMP2")"
 has "$out" "no active cycle" && pass "complete: falls to thin ambient" || fail "complete→thin"
 rm -f "$TMP2"
 
+# ── multi-cycle ledger: a NEW cycle after a completed one must NOT render thin ──
+# (launch register B4 P0: whole-file last-match leaked the prior cycle's
+#  cycle_complete:true, mode and phase history into every later cycle)
+TMP5="$(mktemp 2>/dev/null || echo /tmp/cf-state5.$$)"
+printf -- '---\nphase: CYCLE\ncycle_id: one\ncycle_mode: hotfix\n---\nphase: SENSE\nstatus: DONE\n---\nphase: CAPTURE\nstatus: DONE\ncycle_complete: true\n---\nphase: CYCLE\ncycle_id: two\ncycle_mode: meta-infra\n---\nphase: SENSE\nstatus: DONE\nnext_recommended: DISCOVER\n' > "$TMP5"
+out="$(render_cycle_footer --state "$TMP5")"
+has "$out" "SENSE 📍" && pass "multi-cycle: new cycle resolves here=SENSE" || fail "multi-cycle here (prior cycle leaked)"
+! has "$out" "no active cycle" && pass "multi-cycle: completed cycle 1 does not force thin" || fail "multi-cycle thin leak"
+has "$out" "mode \`meta-infra\`" && pass "multi-cycle: mode from current cycle, not cycle 1's hotfix" || fail "multi-cycle mode leak"
+has "$out" "Next:** \`DISCOVER\`" && pass "multi-cycle: next from current cycle" || fail "multi-cycle next"
+has "$out" "DEFINE ▢" && pass "multi-cycle: cycle-1 phases not marked done" || fail "multi-cycle done-marker leak"
+rm -f "$TMP5"
+
+# ── loop-back: BUILD blocked → re-entered PLAN means here=PLAN ──
+# (first-occurrence de-dup froze a revisited phase at its first position)
+TMP6="$(mktemp 2>/dev/null || echo /tmp/cf-state6.$$)"
+printf -- '---\nphase: PLAN\nstatus: DONE\n---\nphase: BUILD\nstatus: BLOCKED\n---\nphase: PLAN\nstatus: STARTING\nnext_recommended: BUILD\ncycle_mode: meta-infra\n' > "$TMP6"
+out="$(render_cycle_footer --state "$TMP6")"
+has "$out" "PLAN 📍" && pass "loop-back: re-entered phase is here" || fail "loop-back: here frozen at first occurrence"
+rm -f "$TMP6"
+
 # ── REVIEW-hardening regressions (close the ADR "fail-open" claim) ──
 # P0-A: a trailing value-flag with no value must not hang (shift-2 infinite loop).
 if command -v timeout >/dev/null 2>&1; then
