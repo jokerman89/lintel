@@ -90,16 +90,22 @@ for h in secret-scan-block customer-data-block; do
   grep -qE '^set -e' "$REPO_ROOT/hooks/shared/$h/run.sh" && fail "$h still uses set -e (I1 fail-open risk)" || pass "$h: no set -e"
   grep -q 'scanner unavailable' "$REPO_ROOT/hooks/shared/$h/run.sh" && pass "$h: fail-closed scanner guard present" || fail "$h: missing fail-closed guard"
 done
-# behavioral: a missing scanner must BLOCK (exit 2), not silently allow. Simulate by
-# running the hook with a _patterns.sh that defines nothing (PATTERNS_OVERRIDE shim).
+# behavioral: drive the REAL hook with a scanner-less _patterns.sh — it must exit 2.
+# Copy the hook tree to TMP with a stub _patterns that defines NO scan_secrets, preserving
+# the run.sh's BASH_SOURCE-relative source paths (../_patterns.sh, ../_input.sh, ../../../bin).
+HT="$TMP/ht/hooks/shared"; mkdir -p "$HT/secret-scan-block" "$TMP/ht/bin"
+cp "$REPO_ROOT/hooks/shared/secret-scan-block/run.sh" "$HT/secret-scan-block/run.sh"
+cp "$REPO_ROOT/hooks/shared/_input.sh" "$HT/_input.sh"
+cp "$REPO_ROOT/bin/_audit.sh" "$TMP/ht/bin/_audit.sh"
+printf '#!/usr/bin/env bash
+# stub: defines no scan_secrets — simulates a failed pattern load
+: 
+' > "$HT/_patterns.sh"
 SBX="$TMP/failclosed"; mkdir -p "$SBX"; ( cd "$SBX" && git init -q . && git -c user.email=t@t -c user.name=t commit --allow-empty -m i -q )
-# shadow _patterns by pointing HOME-resolved source at an empty stub is hard; instead assert the
-# guard's logic directly: with scan_secrets undefined, the guard's `command -v` is false → exit 2.
-rc=0; ( unset -f scan_secrets 2>/dev/null; bash -c '
-  command -v scan_secrets >/dev/null 2>&1 || exit 2
-  exit 0
-' ) || rc=$?
-[ "$rc" = "2" ] && pass "fail-closed: undefined scanner → exit 2 (block)" || fail "fail-closed logic wrong (rc=$rc)"
+printf 'leak ghp_%s
+' "$(printf 'a%.0s' {1..36})" > "$SBX/x.txt"; ( cd "$SBX" && git add x.txt )
+rc=0; ( cd "$SBX" && printf '{"tool_input":{"command":"git commit -m x"}}' | bash "$HT/secret-scan-block/run.sh" ) >/dev/null 2>&1 || rc=$?
+[ "$rc" = "2" ] && pass "fail-closed: REAL hook with broken scanner → exit 2 (block)" || fail "real-hook fail-closed broken (rc=$rc)"
 
 echo ""
 if [ "$FAILED" -eq 0 ]; then echo "ALL PASS"; else echo "FAILURES present"; exit 1; fi

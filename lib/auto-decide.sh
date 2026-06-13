@@ -17,7 +17,7 @@
 # Conservative by design: a false positive just means "ask the operator" (safe);
 # a false negative is the failure we're guarding, so the keyword set is broad.
 
-_ONE_WAY_DOOR_TERMS='delete|drop |drop table|truncate|rm -rf|force.?push|force-with-lease|rewrite history|reset --hard|push to main|merge to main|production|prod (db|database|deploy|mutation)|deploy|migrat|schema change|rename (the |a )?(table|column|skill|agent|hook)|remove (the |a )?(skill|agent|pack|hook)|secret|credential|rotate key|breaking change|drop support|public api|irreversible|one-way|cannot be undone|delete the'
+_ONE_WAY_DOOR_TERMS='delete|drop |drop table|truncate|wipe|overwrite|revoke|rm -rf|force.?push|force-with-lease|rewrite history|reset --hard|push to main|merge to main|production|prod (db|database|deploy|mutation)|deploy|migrat|schema change|rename (the |a )?(table|column|skill|agent|hook)|remove (the |a )?(skill|agent|pack|hook)|secret|credential|rotate key|breaking change|drop support|public api|irreversible|one-way|cannot be undone|delete the'
 
 is_one_way_door() {
   local text="$1"
