@@ -246,9 +246,11 @@ State writes/reads are mechanical since v5.0 (ADR-0008) — `_sl="${LINTEL_REPO_
 [ -f "$_sl" ] || _sl="$HOME/.lintel/lib/state.sh"; source "$_sl"   # installed by install.sh in consumer repos` once, then one command (`state_append` / `state_last`), not a YAML obligation.
 
 **Mode persistence (for the footer).** Once the phase list + mode are fixed (Step 3), run
-`state_append CYCLE STARTING cycle_id=<id> cycle_mode=<mode>` once at cycle start, so
-`render_cycle_footer` (and every phase skill that calls it) resolves the skipped-phase glyphs from
-state alone — no explicit `--mode` needed. See [ADR-0003](../../.claude/decisions/0003-cycle-position-footer.md).
+`state_append CYCLE STARTING cycle_id=<id> cycle_mode=<mode> branch=$(git branch --show-current) commit=$(git rev-parse --short HEAD)`
+once at cycle start, so `render_cycle_footer` (and every phase skill that calls it) resolves the
+skipped-phase glyphs from state alone — no explicit `--mode` needed — and `/li:resume`'s integrity
+check has real branch/commit values to compare (it reads the current cycle's segment).
+See [ADR-0003](../../.claude/decisions/0003-cycle-position-footer.md).
 
 **Phase-progress format** (printed to stdout at each phase boundary):
 
