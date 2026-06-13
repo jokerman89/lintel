@@ -1,5 +1,21 @@
 # todo — active initiatives
 
+## v5.4 design DNA — consume UI/UX Pro Max + anthropic-default profile (2026-06-13, branch feat/v5.4-design-dna)
+
+Design: docs/design/lintel-v5.4-design-dna-design.md (ADR-0015 + ADR-0016). Mode: meta-infra (M1-M4).
+Research: .claude/runtime/research/{A1,A2,B,C}*.md. Upstream: nextlevelbuilder/ui-ux-pro-max-skill @ MIT.
+
+- [ ] B1 corpus — skills/design-dna/{data,scripts}: copy UUPM canonical tree (minus google-fonts.csv/draft.csv/_sync_all.py), patch domain registry, attribution headers, ATTRIBUTION.md, smoke-run search + design-system compose
+- [ ] B2 profile — profiles/anthropic-default.yaml (7 canonical tokens + derived gap-fills, source-marked)
+- [ ] B3 skill — skills/design-dna/SKILL.md (module dispatch: search|system|persist|validate|profile; python-absent grep fallback documented)
+- [ ] B4 validator — scripts/validate_design.py adapted from UUPM html-token-validator.py (forbidden patterns + profile contrast pairs, exit 1)
+- [ ] B5 integration — frontend-design Step 1.5 (required DNA pass) + spec additive fields (palette/style/design_dna); frontend-typography + frontend-motion corpus-query steps; generate-web/generate-app stack-search + validate; frontend-design-review/design-review mandatory checklist
+- [ ] B6 agents — FrontendArchitect (two-pass doctrine + anti-cliché), TypographyCurator, MotionDirector, DesignSystemAuditor (validator-first) — judgment not bloat, ADR-0014 style
+- [ ] B7 tests — tests/shape/design-dna-corpus.sh + tests/unit/design-dna-search.sh + tests/unit/design-validator.sh; full suite green on committed tree (L-010)
+- [ ] B8 docs — ADR-0015 (consume UUPM, L-001 exception) + ADR-0016 (anthropic-default) + M1 structure-changes entry + M2 li-compat-audit + CHANGELOG
+- [ ] REVIEW — independent CodeReviewer on real diff (L-007); act on P1/P2
+- [ ] SHIP — push branch, PR against main; CAPTURE — working-state + lessons
+
 ## v5.2 battletest — newcomer-clarity doc fixes J1-J6 (2026-06-12, branch feat/v5.2-battletest)
 
 Source: docs/audit/2026-06-12-battletest-synthesis.md (JAB rows) + noob first-hour findings.
