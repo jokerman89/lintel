@@ -33,7 +33,7 @@ clis:
     install: "/plugins, search lintel, Install"
   cursor:
     label: "Cursor"
-    tier: supported
+    tier: full
     hooks_supported: false
     skills_native: true
     subagents: sequenced

@@ -46,7 +46,7 @@ for per-CLI install guides.
 |---|---|---|---|---|
 | Claude Code | full | native | native | yes |
 | Codex CLI / App | full | native | native | no (Claude Code only) |
-| Cursor | supported | native | sequenced | no (Claude Code only) |
+| Cursor | full | native | sequenced | no (Claude Code only) |
 | Gemini CLI | supported | manual | none | no (Claude Code only) |
 | OpenCode | supported | manual | none | no (Claude Code only) |
 | GitHub Copilot CLI | supported | native | none | no (Claude Code only) |
