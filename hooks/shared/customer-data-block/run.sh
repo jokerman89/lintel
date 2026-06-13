@@ -2,7 +2,11 @@
 # customer-data-block — Lintel JUSTIFIED-BLOCK hook
 # Blocks git commit/push if a customer-data pattern is in staged content.
 
-set -euo pipefail
+# NOT `set -e` (issue I1 / claude-code #60490): under -e an upstream grep/tr
+# returning non-zero would exit this script BEFORE the blocking `exit 2`, and
+# Claude Code treats any non-2 exit as NON-blocking — the secret commits through.
+# Explicit exits only (0 = allow, 2 = block); -u/pipefail kept for correctness.
+set -uo pipefail
 
 source "$(dirname "${BASH_SOURCE[0]}")/../_input.sh"
 CMD="$(hook_input command "${1:-}")"
@@ -15,6 +19,15 @@ mkdir -p "$LINTEL_HOME/audit"
 command -v audit_log >/dev/null 2>&1 || source "$(dirname "${BASH_SOURCE[0]}")/../../../bin/_audit.sh"
 # Shared customer-PII patterns (defined once in _patterns.sh).
 source "$(dirname "${BASH_SOURCE[0]}")/../_patterns.sh"
+
+# Fail-closed: a BLOCK hook that cannot scan must BLOCK, not silently allow
+# (a missing/failed scanner is exactly the silent-bypass we are guarding against).
+if ! command -v scan_customer >/dev/null 2>&1; then
+  echo "ERROR [Lintel hook]: customer-data-block scanner unavailable — blocking to be safe." >&2
+  echo "ERROR: source hooks/shared/_patterns.sh failed. Override only if you are certain:" >&2
+  echo "  LINTEL_OVERRIDE_CUSTOMER_DATA=1 LINTEL_OVERRIDE_CUSTOMER_DATA ... (see CLAUDE.md)" >&2
+  exit 2
+fi
 
 # Fire on any git commit/push however phrased (battletest K2 — the `^git` anchor
 # was bypassed by `git -C`, abs paths, `&&` chains).
@@ -31,11 +44,9 @@ if [ "${LINTEL_OVERRIDE_CUSTOMER_DATA:-}" = "1" ] || printf '%s' "$CMD" | grep -
   exit 0
 fi
 
-# Staged + unstaged-tracked (covers `commit -am`; battletest K2).
-STAGED="$(git diff --cached 2>/dev/null || true)"
-WORKTREE="$(git diff 2>/dev/null || true)"
-CONTENT="$STAGED
-$WORKTREE"
+# Added lines from staged + unstaged-tracked diffs, cwd + every `git -C`
+# target in the command (helper in ../_input.sh — rationale there).
+CONTENT="$(hook_git_gate_content "$CMD")"
 [ -z "$(printf '%s' "$CONTENT" | tr -d '[:space:]')" ] && exit 0
 
 joined="$(scan_customer "$CONTENT")"
