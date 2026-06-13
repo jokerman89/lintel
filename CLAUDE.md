@@ -94,7 +94,7 @@ circle of control (v5, ADR-0005): everything Lintel generates for this repo live
 | `.claude/runtime/{sessions,jobs,audit}/` | context-saves · job data · repo event log (gitignored) | written by skills/hooks |
 | `docs/v4.x/structure-changes/` | evolution log (Gate M1 artifacts) | per structural change |
 | `~/.lintel/profile.yaml` | active pack · mode · role · checkpoint mode | operator-global |
-| `~/.lintel/jobs/_active.md` | cross-repo jobs REGISTRY (data lives in each repo) | `/li:resume` reads it |
+| `~/.lintel/jobs/_active.md` | cross-repo jobs REGISTRY (data lives in each repo; created on first job — auto-spawn dormant, ADR-0008) | `/li:resume` reads it |
 
 The `session-digest` hook injects a compact view of the top rows at session-start; this table is the
 full map for on-demand reads + where to **write**.
