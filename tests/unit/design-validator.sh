@@ -31,10 +31,13 @@ cat > "$TMP/bad.html" <<'EOF'
 <button class="icon">🚀</button></body></html>
 EOF
 
+# Good HTML uses design tokens (var()) — the three-layer discipline (ADR-0017).
 cat > "$TMP/good.html" <<'EOF'
 <html><head><meta name="viewport" content="width=device-width, initial-scale=1"></head>
 <body><style>@media (prefers-reduced-motion: reduce){*{animation:none}}
-button:focus-visible{outline:2px solid #d97757}body{color:#141413;background:#faf9f5}</style>
+:root{--color-fg:#141413;--color-bg:#faf9f5;--color-primary:#d97757;--font-body:Lora,serif}
+button:focus-visible{outline:2px solid var(--color-primary)}
+body{color:var(--color-fg);background:var(--color-bg);font-family:var(--font-body)}</style>
 <button>Save changes</button></body></html>
 EOF
 
