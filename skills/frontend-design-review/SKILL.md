@@ -83,8 +83,9 @@ fi
 Before any agent judgment, run the cheap hard gate on HTML artifacts:
 
 ```bash
-python3 skills/design-dna/scripts/validate_design.py "$artifact" \
-  --profile "skills/design-dna/profiles/<active-profile>.yaml"
+dna="${LINTEL_SKILLS_DIR:-skills}/design-dna"
+python3 "$dna/scripts/validate_design.py" "$artifact" \
+  --profile "$dna/profiles/<active-profile>.yaml"
 ```
 
 Exit 1 → the run is **RED** regardless of dimension scores (the violations are objective:

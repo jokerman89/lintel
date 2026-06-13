@@ -72,12 +72,17 @@ Retrieval before generation. Resolve the active design profile and search the co
 design decision:
 
 ```bash
-dna="skills/design-dna"   # resolve via plugin base dir
+dna="${LINTEL_SKILLS_DIR:-skills}/design-dna"   # LINTEL_SKILLS_DIR = this skill's base-dir parent (plugin installs)
+source "${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}/lib/pack-resolver.sh" 2>/dev/null \
+  || source "$HOME/.lintel/lib/pack-resolver.sh" 2>/dev/null
 profile="$(resolve_pack_field design.profile 2>/dev/null)"
 [ -z "$profile" ] || [ "$profile" = "null" ] && profile="anthropic-default"
 python3 "$dna/scripts/search.py" "<product> <industry> <tone keywords from brief>" \
   --design-system -f markdown -p "<project>" > "$out_dir/design-dna.md"
 ```
+
+Resolver unsourceable → surface it before defaulting (a pack's declared profile is never
+silently ignored).
 
 Precedence: **brief > profile (`$dna/profiles/$profile.yaml`) > corpus hit** — the profile is the
 house default (anthropic-default: warm ink-and-paper); the corpus recommendation fills what the
@@ -178,9 +183,12 @@ Phase A1 NOTE: `--from-frontend-design` mode in generate-web ships in the Phase 
 The gate is no longer optional. Two parts, in order:
 
 ```bash
-# 1. Mechanical validator on every rendered HTML artifact (exit 1 blocks)
-python3 "$dna/scripts/validate_design.py" "$out_dir"/*.html \
-  --profile "$dna/profiles/$profile.yaml" || status=BLOCKED
+# 1. Mechanical validator on every rendered HTML artifact (exit 1 blocks).
+#    Spec-only runs have no HTML yet — the guard defers validation to generate-*.
+if compgen -G "$out_dir/*.html" > /dev/null; then
+  python3 "$dna/scripts/validate_design.py" "$out_dir"/*.html \
+    --profile "$dna/profiles/$profile.yaml" || status=BLOCKED
+fi
 
 # 2. Six-dimension audit
 /li:frontend-design-review "$out_dir"

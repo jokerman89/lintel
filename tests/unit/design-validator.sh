@@ -55,5 +55,38 @@ echo "$out" | grep -q "0 error(s), 0 warning(s)" && pass "good HTML fully clean"
 python3 "$V" "$TMP/nope.html" >/dev/null 2>&1; rc=$?
 [ $rc -eq 1 ] && pass "missing file exits 1" || fail "missing file exit $rc"
 
+# 4. No masking: a benign content emoji must NOT hide a later icon emoji (review P1)
+cat > "$TMP/mask.html" <<'EOF'
+<html><head><meta name="viewport" content="width=device-width"></head>
+<body><p>We launched 🎉 today</p><button class="icon">🔍</button></body></html>
+EOF
+python3 "$V" "$TMP/mask.html" >/dev/null 2>&1; rc=$?
+[ $rc -eq 1 ] && pass "content emoji does not mask icon emoji (gate stays closed)" || fail "icon emoji masked by earlier content emoji (rc=$rc)"
+
+# 5. HTML-entity emoji cannot sneak past the gate (review P1)
+cat > "$TMP/entity.html" <<'EOF'
+<html><head><meta name="viewport" content="width=device-width"></head>
+<body><button class="icon">&#x1F680;</button></body></html>
+EOF
+python3 "$V" "$TMP/entity.html" >/dev/null 2>&1; rc=$?
+[ $rc -eq 1 ] && pass "entity-encoded emoji icon still blocked" || fail "entity emoji bypassed the gate (rc=$rc)"
+
+# 6. A CSS comment cannot disarm the focus check (review P2)
+cat > "$TMP/focustrick.html" <<'EOF'
+<html><head><meta name="viewport" content="width=device-width"></head>
+<body><style>/* :focus */ button{outline:none}</style><button>Go</button></body></html>
+EOF
+python3 "$V" "$TMP/focustrick.html" >/dev/null 2>&1; rc=$?
+[ $rc -eq 1 ] && pass "commented-out :focus does not disarm the outline check" || fail "focus check disarmed by CSS comment (rc=$rc)"
+
+# 7. No false positives on legitimate typography: arrows + checkmarks pass (review P0)
+cat > "$TMP/arrows.html" <<'EOF'
+<html><head><meta name="viewport" content="width=device-width"></head>
+<body><a href="/next">Next →</a><ul><li>✓ Done</li><li>★ Featured</li></ul>
+<button>Save changes</button></body></html>
+EOF
+python3 "$V" "$TMP/arrows.html" >/dev/null 2>&1; rc=$?
+[ $rc -eq 0 ] && pass "arrows/checkmarks are NOT flagged (no false positive in a hard gate)" || fail "legitimate typography blocked (rc=$rc)"
+
 echo ""
 [ "$FAILED" -eq 0 ] && { echo "design-validator: ALL PASS"; exit 0; } || { echo "design-validator: FAILURES"; exit 1; }

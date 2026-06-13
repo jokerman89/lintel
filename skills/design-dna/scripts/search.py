@@ -42,10 +42,10 @@ def format_output(result):
 
     output = []
     if result.get("stack"):
-        output.append(f"## UI Pro Max Stack Guidelines")
+        output.append(f"## Design DNA Stack Guidelines")
         output.append(f"**Stack:** {result['stack']} | **Query:** {result['query']}")
     else:
-        output.append(f"## UI Pro Max Search Results")
+        output.append(f"## Design DNA Search Results")
         output.append(f"**Domain:** {result['domain']} | **Query:** {result['query']}")
     output.append(f"**Source:** {result['file']} | **Found:** {result['count']} results\n")
 
@@ -95,13 +95,13 @@ if __name__ == "__main__":
         if args.persist:
             project_slug = args.project_name.lower().replace(' ', '-') if args.project_name else "default"
             print("\n" + "=" * 60)
-            print(f"✅ Design system persisted to design-system/{project_slug}/")
-            print(f"   📄 design-system/{project_slug}/MASTER.md (Global Source of Truth)")
+            print(f"Design system persisted to design-system/{project_slug}/")
+            print(f"   design-system/{project_slug}/MASTER.md (Global Source of Truth)")
             if args.page:
                 page_filename = args.page.lower().replace(' ', '-')
-                print(f"   📄 design-system/{project_slug}/pages/{page_filename}.md (Page Overrides)")
+                print(f"   design-system/{project_slug}/pages/{page_filename}.md (Page Overrides)")
             print("")
-            print(f"📖 Usage: When building a page, check design-system/{project_slug}/pages/[page].md first.")
+            print(f"Usage: When building a page, check design-system/{project_slug}/pages/[page].md first.")
             print(f"   If exists, its rules override MASTER.md. Otherwise, use MASTER.md.")
             print("=" * 60)
     # Stack search

@@ -61,7 +61,7 @@ out="${OUT:-/dev/stdout}"
 Query the design corpus first (ADR-0015 — retrieval before generation):
 
 ```bash
-python3 skills/design-dna/scripts/search.py "<mood + audience keywords>" --domain typography -n 3
+python3 "${LINTEL_SKILLS_DIR:-skills}/design-dna/scripts/search.py" "<mood + audience keywords>" --domain typography -n 3
 ```
 
 The active design profile's font roles are the starting point (default anthropic-default:

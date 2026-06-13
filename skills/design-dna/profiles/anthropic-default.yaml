@@ -122,10 +122,11 @@ contrast_pairs:   # derived from sourced hexes — the allowed text/background m
 
 doctrine:   # sourced verbatim-distilled from the frontend-design skill (Apache-2.0)
   source: canonical
-  - "The hero is a thesis — open with the most characteristic thing in the subject's world"
-  - "Typography carries the personality of the page, not a neutral delivery vehicle"
-  - "Structure is information — numbering/dividers/labels encode something true, never decorate"
-  - "Spend your boldness in one place; keep everything around it quiet and disciplined"
-  - "Before leaving the house, remove one accessory"
-  - "Quality floor: responsive to mobile, visible keyboard focus, reduced motion respected"
-  - "UX copy: 'Save changes', not 'Submit'; errors state cause + fix, never apologize; sentence case"
+  rules:
+    - "The hero is a thesis — open with the most characteristic thing in the subject's world"
+    - "Typography carries the personality of the page, not a neutral delivery vehicle"
+    - "Structure is information — numbering/dividers/labels encode something true, never decorate"
+    - "Spend your boldness in one place; keep everything around it quiet and disciplined"
+    - "Before leaving the house, remove one accessory"
+    - "Quality floor: responsive to mobile, visible keyboard focus, reduced motion respected"
+    - "UX copy: 'Save changes', not 'Submit'; errors state cause + fix, never apologize; sentence case"

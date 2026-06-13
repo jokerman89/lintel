@@ -19,7 +19,7 @@ modification and redistribution; notices are preserved here per their terms.
 - Upstream re-sync: re-copy from `src/ui-ux-pro-max/{data,scripts}` (their canonical
   tree) and re-apply the registry patch documented in `scripts/core.py`.
 
-MIT License text: https://github.com/nextlevelbuilder/ui-ux-pro-max-skill/blob/main/LICENSE
+Full license text: [LICENSES/MIT-next-level-builder.txt](LICENSES/MIT-next-level-builder.txt)
 
 ## Anthropic example skills (anthropic-default profile)
 
@@ -36,4 +36,4 @@ MIT License text: https://github.com/nextlevelbuilder/ui-ux-pro-max-skill/blob/m
   No Anthropic marks are shipped; no endorsement is implied. Output produced with
   this profile must not be marketed as Anthropic-branded.
 
-Apache License 2.0 text: https://www.apache.org/licenses/LICENSE-2.0
+Full license text: [LICENSES/Apache-2.0-anthropic.txt](LICENSES/Apache-2.0-anthropic.txt)
