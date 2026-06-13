@@ -20,6 +20,48 @@ Cross-session working state (ej durable rules — that's [[lessons.md]]; ej pers
 **Last touched:** YYYY-MM-DD
 -->
 
+## v5.3-cli-and-craft — PR pending 2026-06-13
+
+**Status:** active — branch feat/v5.3-cli-and-craft pushed; PR not yet opened
+
+**What shipped (one meta-infra cycle, three operator workstreams):**
+- **Multi-CLI (subtraction):** deleted the two fabricated manifests (.copilot-plugin, .droid-plugin
+  — both ride .claude-plugin via interop); fixed cli-tiers.yaml (codex.subagents native, Copilot
+  install li@, Cursor stays tier full); repointed instruction-parity-check off 3 ghost files;
+  README CLI-TIERS table regenerated; li-doctor gained a Windows SessionStart-no-fire warn (#59072).
+- **Issue-mining → fixes:** docs/audit/2026-06-13-cli-issues-craft-synthesis.md (16 findings).
+  CRITICAL I1 — both BLOCK hooks ran `set -euo pipefail` with the blocking exit 2 LAST, so an
+  upstream non-zero exited first and silently downgraded the block (claude-code #60490). Fixed:
+  `set -uo pipefail` + a fail-closed scanner guard positioned after matcher+override + a behavioral
+  regression test driving the real hook with a scanner-less stub. I3 — lib/auto-decide.sh mechanical
+  one-way-door keyword guard + unit test.
+- **Prompt craft v2 (ADR-0014):** docs/concepts/prompt-house-style.md — description-as-trigger (not
+  workflow summary) + dial-back ALL-CAPS imperatives (current models overtrigger; Anthropic yellow
+  flag). 42 skill descriptions rewritten to trigger form; 20 agents gained Core-principles +
+  Behavioral-traits + tool-scoping rationale. New tests/shape/skill-descriptions-trigger.sh ratchet.
+
+**Honesty notes (in ADR-0014):** auto-decide is a real unit-tested function the cycle is TOLD to
+call, not yet a mechanical gate on the --auto path; the trigger-guard enforces opening-verb +
+no-archaeology, not trigger SUBSTANCE. Both staged with the eval-harness.
+
+**Suite:** 79/79. Reviewed by independent CodeReviewer (L-007): 1 P1 (PLAN trio gate undefined
+$slug → L-014) + 2 P2 + 6 P3, all acted on. Captured **L-013** (make-it-ours = reinvent, not
+de-heritage) + **L-014** (no unbound vars in illustrative skill bash — recurred from v5.2).
+
+**What's pending:**
+- Open the v5.3 PR to main; merge after #69.
+- OPERATOR DECISION: the `worktree-launch-waves` linked worktree (.claude/worktrees/, now
+  gitignored + untracked) holds its own UNMERGED branch (security newline-gate fix, state-ledger
+  scoping, cli-tiers revert) + uncommitted edits to AGENTS.md/CLAUDE.md/README/li-doctor. Decide
+  whether to fold that work in or discard the worktree before v5.3 lands.
+- STAGED (own ADRs already written): AGENTS.md-primary (ADR-0015), lintel-state MCP server
+  (ADR-0016), eval-harness (ADR-0017), per-CLI command-stub generator, field-wide
+  description-trigger + aggressive-language sweep of the remaining ~80 skills.
+
+**Last touched:** 2026-06-13
+
+---
+
 ## v5.2-battletest — PR #69 OPEN 2026-06-12
 
 **Status:** active — PR #69 to main (independent chain; #62-#68 already merged)
