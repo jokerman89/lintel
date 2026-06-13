@@ -232,6 +232,9 @@ if [ -n "$_digest_seen" ]; then
   ok "session-digest has fired (last: ${_last_fire:-unknown})"
 else
   warn "session-digest has NEVER left an audit record — registered is not firing"
+  case "$(uname -s 2>/dev/null)" in
+    *NT*|*MINGW*|*MSYS*|*CYGWIN*) echo "    Windows note: SessionStart hooks can silently no-fire on Claude Code for Windows (issue I2 / claude-code #59072). If you just started a fresh session and see this, that bug — not Lintel — is the cause." ;;
+  esac
   echo "    Verify: start a fresh session (or claude --debug), then re-run li-doctor."
 fi
 

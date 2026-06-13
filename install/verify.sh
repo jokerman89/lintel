@@ -319,7 +319,7 @@ cmd_tier_stamps() {
 # ===== Subcommand: --plugin-manifests (v3) ===================================
 
 cmd_plugin_manifests() {
-  hdr "Plugin manifests (v3)"
+  hdr "Plugin manifests"
   local manifests=(
     ".claude-plugin/plugin.json"
     ".claude-plugin/marketplace.json"
@@ -327,8 +327,6 @@ cmd_plugin_manifests() {
     ".cursor-plugin/plugin.json"
     "gemini-extension.json"
     ".opencode/INSTALL.md"
-    ".copilot-plugin/plugin.json"
-    ".droid-plugin/plugin.json"
   )
   local missing=0
   for m in "${manifests[@]}"; do
