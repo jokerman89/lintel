@@ -12,8 +12,8 @@ These are tips that only apply when running under Codex CLI. They do not overrid
 
 ### File locations
 
-- Codex reads `AGENTS.md` from repo root by convention. Symlink or copy this file to the repo root: `AGENTS.md → shims/AGENTS.md` (or just keep a copy in place at repo root).
-- Task files (`lessons.md`, `memory.md`, `personas.md`, `todo.md`) follow the same `tasks/` layout as Claude Code.
+- Codex reads `AGENTS.md` from repo root by convention. This repo's root already carries `AGENTS.md`; this shim is for scaffolded repos that lack one.
+- Memory + plans follow the same v5 layout as Claude Code (ADR-0005): `.claude/memory/{lessons,working-state,personas}.md` + `.claude/plans/todo.md`.
 
 ### Sub-agents
 

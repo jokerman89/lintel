@@ -20,6 +20,10 @@ jobs:
 
       - name: Generate CATALOG.md from frontmatter
         run: |
+          # UTF-8 locale so bash substring counts CHARACTERS, not bytes — head -c
+          # severed multibyte chars (em-dash, accented letters) mid-sequence,
+          # producing invalid-UTF-8 rows.
+          export LC_ALL=C.UTF-8 LANG=C.UTF-8
           {
             echo "# Lintel Skill Catalog"
             echo ""
@@ -39,7 +43,9 @@ jobs:
                 fm_layer=$(grep -m1 '^layer:' "$f" | sed 's/^layer:[ ]*//' | tr -d '\r')
                 if [ "$fm_layer" = "$layer" ]; then
                   name=$(grep -m1 '^name:' "$f" | sed 's/^name:[ ]*//' | tr -d '\r')
-                  description=$(grep -m1 '^description:' "$f" | sed 's/^description:[ ]*//' | tr -d '\r' | head -c 120)
+                  description=$(grep -m1 '^description:' "$f" | sed 's/^description:[ ]*//' | tr -d '\r')
+                  # character-safe truncation + ellipsis (NOT head -c, which counts bytes)
+                  if [ "${#description}" -gt 120 ]; then description="${description:0:119}…"; fi
                   section+="| \`/li:$name\` | $description |"$'\n'
                   count=$((count + 1))
                 fi

@@ -21,7 +21,7 @@ When Claude Code (or Codex, Cursor, Gemini, etc.) loads in your repo, Lintel ens
 1. **Reads canonical session instructions** — `AGENT-INSTRUCTIONS.md` (always loaded via per-CLI entrypoint file: CLAUDE.md / AGENTS.md / GEMINI.md).
 2. **Reviews accumulated lessons** — `tasks/lessons.md` so the agent doesn't repeat past mistakes.
 3. **Checks compliance posture** — `scaffolding/02-sdl/HARD-RULES.md` (5 always-on rules: no customer data, no secrets, no prod mutations without auth, MS SSO only, first-party first).
-4. **Scans existing ADRs** — `docs/adr/` for prior architectural decisions.
+4. **Scans existing ADRs** — `.claude/decisions/` (the v5 ADR home; `docs/adr/` is a redirect stub) for prior architectural decisions.
 5. **Loads persona context** — `tasks/personas.md` if engagement-specific personas defined.
 6. **Resolves agent precedence** — repo-local `.claude/agents/` overrides user-global `~/.claude/agents/`.
 7. **Sets voice tier** — internal / trailblazer / mixed per the engagement.
@@ -89,7 +89,7 @@ Generalizable lessons → promote to Lintel global via `bin/li-lessons-promote`.
 
 ### ADRs drafted
 
-Non-trivial architectural decisions → `docs/adr/NNNN-<slug>.md` via `bin/li-adr-new` or `/adr-new` skill. Travels with the repo.
+Non-trivial architectural decisions → `.claude/decisions/NNNN-<slug>.md` via `bin/li-adr-new` or `/adr-new` skill. Travels with the repo.
 
 ### EVOLUTION-LOG appended
 
@@ -123,7 +123,7 @@ Operator-opt-in via `bin/li-lessons-sync`. Private git repo holds lessons from m
 
 ### Cross-machine state
 
-`gstack-brain`-style pattern for syncing skill catalog updates + accumulated patterns across operator's machines.
+An opt-in sync pattern for skill-catalog updates + accumulated patterns across the operator's machines.
 
 ---
 
@@ -131,7 +131,7 @@ Operator-opt-in via `bin/li-lessons-sync`. Private git repo holds lessons from m
 
 Lintel ships TWO distinct categories:
 
-### Kategori A — Agent-invokable
+### Category A — Agent-invokable
 
 What the agent CLI sees via plugin manifest:
 - `skills/<name>/SKILL.md` — slash commands
@@ -140,10 +140,10 @@ What the agent CLI sees via plugin manifest:
 
 Lives at repo root. Discovered by Claude Code, Codex, Cursor, Gemini, etc. via their native plugin marketplaces.
 
-### Kategori B — Repo-scaffolding
+### Category B — Repo-scaffolding
 
 What gets copied INTO other repos via `li-scaffold init`:
-- `scaffolding/01-foundation/` — CLAUDE.md template, CORE-PRINCIPLES, EVOLUTION-LOG, tasks/, docs/adr/, .claude/agents/, TEMPLATE-skill.md, TEMPLATE-agent.md
+- `scaffolding/01-foundation/` — CLAUDE.md template, CORE-PRINCIPLES, EVOLUTION-LOG, .claude/memory/, .claude/plans/, .claude/decisions/, .claude/agents/, TEMPLATE-skill.md, TEMPLATE-agent.md
 - `scaffolding/02-sdl/` — compliance reference
 - `scaffolding/03-ms-team/` — voice corpus + doc-gen templates
 

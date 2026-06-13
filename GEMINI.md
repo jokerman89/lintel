@@ -14,13 +14,13 @@ Lintel is a company-neutral, pack-driven session harness — markdown scaffoldin
 - `agents/` — subagent roles organized per domain
 - `hooks/shared/` — compliance + workflow hooks
 - `scaffolding/` — templates copied INTO other repos
-- `docs/design/lintel-v3-plan.md` — current architecture
+- `docs/design/lintel-v4.0-reframe-design.md` — current architecture (decisions since: `.claude/decisions/`, ADR-0005..0017)
 
 ## Session start ritual
 
 1. Read [AGENT-INSTRUCTIONS.md](AGENT-INSTRUCTIONS.md) (canonical, applies to all CLIs)
-2. Review `scaffolding/01-foundation/.claude/memory/lessons.md` for accumulated lessons
-3. Check `docs/design/lintel-v3-plan.md` for current phase
+2. Review `.claude/memory/lessons.md` for accumulated lessons
+3. Check `docs/design/lintel-v4.0-reframe-design.md` + recent ADRs in `.claude/decisions/` for current architecture state
 
 ## Gemini-specific notes
 
@@ -29,13 +29,13 @@ Lintel is a company-neutral, pack-driven session harness — markdown scaffoldin
 This repo is a Gemini extension (see `gemini-extension.json`). Install via:
 
 ```bash
-gemini extensions install https://github.com/jokerman89/jokerman-lintel
+gemini extensions install https://github.com/jokerman89/lintel
 ```
 
-Update via:
+Update via (the extension is named `li`):
 
 ```bash
-gemini extensions update lintel
+gemini extensions update li
 ```
 
 ### Skill discovery on Gemini
@@ -51,17 +51,17 @@ Follow instructions from skills/ship/SKILL.md and execute on the current branch.
 ### Available skill catalog
 
 Common skills (see `skills/` for full list):
-- `/qa` — run test suite, fix failures
-- `/cycle` — 9-step work cycle (sense→capture)
-- `/ship` — pre-flight checks + PR creation
-- `/investigate` — bug investigation
-- `/code-freeze` / `/code-unfreeze` — freeze controls
-- `/plan-eng-review`, `/plan-ceo-review`, `/plan-design-review`, `/plan-devex-review` — phased reviews
-- `/office-hours` — Socratic design refinement
-- `/ta`, `/da`, `/sc`, `/dh`, `/tq` — engineering-domain modules
-- `/compliance-gate` — runs the active pack's compliance gates
-- `/generate-ppt`, `/generate-word`, `/generate-web` — doc generation
-- `/scaffold`, `/scaffold-internal-tool`, `/scaffold-mvp` — repo scaffolds
+- `/li:qa` — run test suite, fix failures
+- `/li:cycle` — 9-step work cycle (sense→capture)
+- `/li:ship` — pre-flight checks + PR creation
+- `/li:investigate` — bug investigation
+- `/li:code-freeze` / `/li:code-unfreeze` — freeze controls
+- `/li:plan-eng-review`, `/li:plan-ceo-review`, `/li:plan-design-review`, `/li:plan-devex-review` — phased reviews
+- `/li:office-hours` — Socratic design refinement
+- `/li:ta`, `/li:da`, `/li:sc`, `/li:dh`, `/li:tq` — engineering-domain modules
+- `/li:compliance-gate` — runs the active pack's compliance gates
+- `/li:generate-ppt`, `/li:generate-word`, `/li:generate-web` — doc generation
+- `/li:scaffold`, `/li:scaffold-internal-tool`, `/li:scaffold-mvp` — repo scaffolds
 
 ### Subagents
 

@@ -38,8 +38,8 @@ Full on Claude Code, Codex, and Cursor; supported on four more; best-effort else
 **enforcement hooks fire only on Claude Code** — every other CLI still gets the skills, the
 9-step cycle discipline, and the pack-driven knowledge, just not the live hook gate. This
 table is generated from `lib/cli-tiers.yaml` (the single source); `/li:welcome` reads the same
-file to tell you, on first run, exactly what works on *your* CLI. See [docs/per-cli/](docs/per-cli/)
-for per-CLI install guides.
+file to tell you, on first run, exactly what works on *your* CLI. Per-CLI install commands are in
+the [Quick start](#quick-start) below and in [docs/getting-started.md](docs/getting-started.md#1-install-for-your-cli).
 
 <!-- CLI-TIERS:START — generated from lib/cli-tiers.yaml via cli_tiers_markdown_table; do not hand-edit. -->
 | CLI | Tier | Skills | Subagents | Hooks |
@@ -84,6 +84,13 @@ gemini extensions install https://github.com/jokerman89/lintel
 # Copilot CLI:
 copilot plugin marketplace add jokerman89/lintel
 copilot plugin install li@jokerman-lintel
+
+# Factory Droid:
+droid plugin marketplace add jokerman89/lintel
+droid plugin install li@jokerman-lintel
+
+# OpenCode:
+#   fetch and follow .opencode/INSTALL.md
 ```
 
 **Then run `/li:welcome`** in your CLI — it detects your CLI, shows your honest capability tier
@@ -153,7 +160,7 @@ stays local. Full map + lifecycle in [CLAUDE.md](CLAUDE.md#where-state-lives-the
 ## What you don't get
 
 - **No customer data.** This repo is for tooling. Customer artifacts never land here.
-- **No third-party code bundled.** v2 had install/upstream-sources.yaml for fetching upstream packs — v3 simplified, Lintel is now self-contained.
+- **No third-party code bundled.** `install/upstream-sources.yaml` still ships, but as an honest list-only stub — nothing is fetched or vendored from it; since v3 Lintel is self-contained.
 - **No runtime.** Lintel = markdown + bash. Your CLI executes — Lintel provides the patterns + scaffolding.
 - **No production cross-CLI parity for everything.** Hooks are Claude-Code-only mechanism. Subagent abstractions differ per CLI. We're honest about gaps; see [docs/multi-cli.md](docs/multi-cli.md).
 

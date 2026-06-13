@@ -32,7 +32,7 @@ Use Level 2 when:
 
 Agents listed in [promoted-agents.md](promoted-agents.md). The team has vetted these; they are the default for cross-project work.
 
-Promoted agents are typically installed from upstream (gstack skills, AgentShield, Trail of Bits, Anthropic). They are invoked via their installed path or registered name.
+Promoted agents are the team-vetted set listed in that doc — promotion is the explicit decision that lifted them. They are invoked via their registered name.
 
 Use Level 3 when:
 - No repo-level override applies

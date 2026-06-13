@@ -83,7 +83,7 @@ This document captures the actual plugin-manifest format per CLI as of v3 planni
     "developerName": "jokerman89",
     "category": "Coding",
     "capabilities": ["Interactive", "Read", "Write"],
-    "defaultPrompt": ["Hjälp mig med ett nytt customer engagement.", "Kör /qa på min branch."],
+    "defaultPrompt": ["Help me with a new customer engagement.", "Run /qa on my branch."],
     "websiteURL": "...",
     "privacyPolicyURL": "...",
     "termsOfServiceURL": "...",
