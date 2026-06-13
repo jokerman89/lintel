@@ -2,7 +2,7 @@
 name: plan
 layer: foundation
 workflow_root: true
-description: Phase 4 of Lintel cycle, ALSO callable standalone as a planner module (v3.8 Feature 2). Produces the cold-executor trio (plan.md + spec.md + prompt.md) BORN TOGETHER. Granularity hard-checked at ≤5min/task. Founder approval gate. Spawns a job when invoked standalone.
+description: Use after DISCOVER, or standalone when you have a design doc and need to break it into executable work, to produce the cold-executor trio (plan.md + spec.md + prompt.md) together. Tasks are granularity-checked to roughly five minutes each and gated on operator approval; invoked standalone it spawns a tracked job.
 color: cyan
 tools: Read, Write, Edit, Bash, Grep, Glob
 voice: internal
@@ -309,6 +309,27 @@ The trio (plan.md + spec.md + prompt.md) is the cold-executor handoff contract. 
 **.planner-checkpoint.md** (`.claude/runtime/state/`):
 - State for `/li:resume`
 - Includes plan.md path, current task pointer, build-log placeholder
+
+### Step 11a — Trio completeness gate (mechanical — issue I4)
+
+The trio is the cold-executor handoff contract; a 2-of-3 or empty member silently breaks every
+cold resume (gstack #1127/#1791). Before declaring PLAN done, assert all three exist and are
+non-trivial — this is a real check, not a prose promise:
+
+```bash
+slug_dir=".claude/plans/$slug"
+missing=""
+for f in plan.md spec.md prompt.md; do
+  [ -s "$slug_dir/$f" ] || missing="$missing $f"
+done
+if [ -n "$missing" ]; then
+  echo "PLAN BLOCKED: cold-executor trio incomplete —$missing missing or empty in $slug_dir"
+  state_append PLAN BLOCKED reason="trio_incomplete:$missing"
+  exit 1
+fi
+# Optional stronger check: if a cold_executor envelope was emitted, validate it against the schema
+[ -f "$slug_dir/handoff.envelope.yaml" ] && bin/li-envelope-validate "$slug_dir/handoff.envelope.yaml" --quiet   || true   # envelope is optional; the three-file gate above is the hard contract
+```
 
 ### Step 11b — Handoff-size check against the 500k cap (trio-emit gate, NON-BLOCKING)
 

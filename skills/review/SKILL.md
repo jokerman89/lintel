@@ -1,7 +1,7 @@
 ---
 name: review
 layer: foundation
-description: Phase 6 of Lintel cycle — adversarial review of BUILD output across 3 stages (spec compliance, code quality, the active pack's compliance gates). Cross-artifact consistency. P1 blocks SHIP.
+description: Use after BUILD, before SHIP, to adversarially review what was built — checks spec compliance, code quality, the active pack's compliance gates, and cross-artifact consistency. A P1 finding blocks SHIP until resolved.
 color: cyan
 tools: Read, Bash, Grep, Glob
 voice: internal

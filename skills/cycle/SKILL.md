@@ -2,7 +2,7 @@
 name: cycle
 layer: foundation
 workflow_root: true
-description: Lintel cycle orchestrator — runs full 9-step pipeline (SENSE → CAPTURE) or operator-specified subset. Mode presets, hop-in support, cost-estimate gate before BUILD. Spawns a job (v3.8 Feature 1) at invocation.
+description: Use to run a real multi-step task through the full SENSE-to-CAPTURE pipeline, or a chosen subset of phases. Supports mode presets and hopping in at any phase, gates on a cost estimate before BUILD, and spawns a tracked job at invocation. The default entry point for substantial work.
 color: cyan
 tools: Read, Write, Edit, Bash, Grep, Glob
 voice: internal
@@ -307,7 +307,16 @@ token-heavy phase — but it presents the **task count + uncalibrated estimate**
 dollar/duration figure. The estimate is `UNCALIBRATED` until CAPTURE has recorded actuals for this
 size (`lib/scale-estimator.sh` `scale_calibrated_prior`).
 
-If `--auto`: auto-decide the recommended option on reversible gates, but still STOP at one-way doors (BUILD cost gate over budget, production mutations, force-push). Operator can interrupt anytime. (Reinvented from the inherited blanket-YES — ADR-0011 C1.)
+If `--auto`: auto-decide the recommended option on reversible gates, but still stop at one-way doors. This is MECHANICAL, not a prose promise (issue I3): run each pending decision through `lib/auto-decide.sh` before auto-deciding —
+
+```bash
+source "$LINTEL_REPO_ROOT/lib/auto-decide.sh"
+if is_one_way_door "$decision_text"; then ask_operator; else auto_decide_recommended; fi
+```
+
+`is_one_way_door` flags the irreversible classes (delete/drop/migrate/schema-change/production/
+force-push/secret/rename-skill-agent/breaking-change) regardless of how the decision was framed, so
+`--auto` can't run past a sovereignty decision. Operator can interrupt anytime.
 
 ### Step 6 — Pause-points between phases (operator can interrupt)
 

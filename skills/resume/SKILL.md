@@ -1,7 +1,7 @@
 ---
 name: resume
 layer: foundation
-description: Resume Lintel cycle from prior session — reads 00-state.md, picks up at next-recommended phase or operator-specified. Handles cross-session continuity.
+description: Use at the start of a fresh session to pick up work left in flight — reads 00-state.md and resumes the cycle at the next recommended phase, or one you name. The cross-session continuity entry point when a prior task was interrupted mid-cycle.
 color: cyan
 tools: Read, Bash, Grep, Glob
 voice: internal

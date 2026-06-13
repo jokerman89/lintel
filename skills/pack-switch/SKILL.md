@@ -1,7 +1,7 @@
 ---
 name: pack-switch
 layer: foundation
-description: Switches the active pack — writes ~/.lintel/packs/active-pack, validates the target, audits the switch.
+description: Use to change which pack is active — switching the identity that drives voice, compliance, persona, and roles. Validates the target pack, records it as active, and audits the switch. Reach for it when work calls for a different company or compliance context than the one currently loaded.
 color: green
 tools: Read, Write, Bash
 voice: internal

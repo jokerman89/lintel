@@ -1,7 +1,7 @@
 ---
 name: capture
 layer: foundation
-description: Phase 8 of Lintel cycle — durable capture. Lessons updated, ADR drafted, EVOLUTION-LOG appended, cold-executor handoff trio REAFFIRMED against build evidence (trio born in PLAN per v3.8 Feature 2.2, not here). Cross-session continuity.
+description: Use after SHIP, at the end of a task, to make what was learned durable — updates lessons, drafts an ADR for any non-trivial decision, appends the evolution log, and reaffirms the cold-executor handoff trio against build evidence. The cycle's last step; carries continuity to the next session.
 color: cyan
 tools: Read, Write, Edit, Bash, Grep, Glob
 voice: internal

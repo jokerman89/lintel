@@ -1,7 +1,7 @@
 ---
 name: status
 layer: foundation
-description: Show what's open right now — alias for /li:jobs list. Single command for "where am I in flight?".
+description: Use to quickly check where you are in flight — shows what's open right now, an alias for listing jobs. The fast "what was I doing?" check at session start or any time you need orientation.
 color: yellow
 tools: Read, Bash
 voice: internal

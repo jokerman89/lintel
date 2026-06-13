@@ -1,7 +1,7 @@
 ---
 name: qa
 layer: foundation
-description: Run the full test suite, parse failures, fix common ones, re-run until clean or stuck.
+description: Use when you need to know whether the code works and to get the test suite green — runs the full suite, parses failures, fixes common ones, and re-runs until clean or genuinely stuck. Reach for it after making changes or when tests are failing and you want them resolved.
 color: yellow
 tools: Read, Bash, Edit, Grep, Glob
 voice: internal

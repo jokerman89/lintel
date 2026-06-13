@@ -1,7 +1,7 @@
 ---
 name: learn
 layer: foundation
-description: Record an insight, correction, or pattern as a lesson — readable at future session start.
+description: Use after a correction, insight, or recurring pattern worth remembering to record it as a lesson the next session will read at startup. Reach for it whenever the operator corrects you or you discover something that should prevent the same mistake recurring.
 color: blue
 tools: Read, Write, Edit, Bash
 voice: internal

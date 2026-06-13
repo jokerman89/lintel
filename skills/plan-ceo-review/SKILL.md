@@ -1,7 +1,7 @@
 ---
 name: plan-ceo-review
 layer: foundation
-description: Strategy + scope review. Surface product/business assumptions before architecture lands.
+description: Use before architecture lands to review a plan's strategy and scope — surfaces the product and business assumptions baked into it. Reach for it when you want the why and the scope challenged before committing engineering effort to the how.
 color: purple
 tools: Read, Bash, Grep, Glob
 voice: internal

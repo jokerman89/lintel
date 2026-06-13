@@ -1,7 +1,7 @@
 ---
 name: generate
 layer: foundation
-description: Multi-format document generation orchestrator. Chains shared content pipeline (outline → write → design → qa) + per-format builders. Each sub-skill solo-invokable.
+description: Use to produce a finished document or deliverable from a brief — drives outline, writing, design, and QA through to a built artifact in a chosen format such as slides, Word, web, or PDF. Reach for it when the ask is to generate a polished document rather than write code.
 color: orange
 tools: Read, Write, Bash, Glob
 voice: mixed

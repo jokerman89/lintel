@@ -1,7 +1,7 @@
 ---
 name: scope
 layer: foundation
-description: Phase 1.5 of Lintel cycle — runs between SENSE and DEFINE. Turns a raw request into a sized, disambiguated scope via the scale-estimator. Fires one clarifying gate only when bimodal, overrides a confidently-wrong orientator route, emits scope.md. Light, read-only, silent on clear small work.
+description: Use after SENSE, before DEFINE, when a request's size is ambiguous — turns a raw ask into a sized, disambiguated scope via the scale-estimator, asks one clarifying question only when the work could be small or large, overrides a confidently-wrong route, and emits scope.md. Light and read-only; stays silent on clearly small work.
 color: cyan
 tools: Read, Write, Edit, Bash, Grep, Glob
 voice: internal

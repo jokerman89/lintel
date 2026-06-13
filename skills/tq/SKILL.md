@@ -2,7 +2,7 @@
 name: tq
 layer: foundation
 workflow_root: true
-description: Phase 4 v4.5 — testing-qa module. Three granularities (full / loop / single). Capabilities dispatch to existing test agents (ADR-0009 dispatch table). 5 checkpoints, 6-dim scoring rubric, 3 warn-only hooks, profile-driven preferences. Final engineering-domain module of v4.x.
+description: Use for testing and QA-strategy depth — test-pyramid review, coverage audits, contract-test design, regression suites, flaky-test quarantine, perf budgets, and chaos plans. Reach for it when test strategy needs deliberate design rather than ad-hoc tests. Runs full, loop, or single-capability, dispatching to the test agents and scoring against a rubric.
 color: green
 tools: Read, Write, Edit, Bash, Grep, Glob
 voice: internal

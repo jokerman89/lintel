@@ -2,7 +2,7 @@
 name: da
 layer: foundation
 workflow_root: true
-description: Phase 4 v4.2 — data-architecture module. Three granularities (full / loop / single). Capabilities dispatch to existing data agents (ADR-0009 dispatch table). 5 checkpoints, 6-dim scoring rubric, 3 warn-only hooks, profile-driven preferences.
+description: Use for data-architecture depth — schema design, migrations, sharding and partitioning, query-pattern audits, retention policy, and analytics readiness. Reach for it when the work turns on the data model or storage. Runs full, loop, or single-capability, dispatching to the data agents and scoring against a rubric.
 color: blue
 tools: Read, Write, Edit, Bash, Grep, Glob
 voice: internal
