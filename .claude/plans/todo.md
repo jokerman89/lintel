@@ -1,5 +1,61 @@
 # todo — active initiatives
 
+## Launch readiness — v5.x old-school ready (2026-06-12/13, cycle launch-readiness-20260612)
+
+Register: docs/audit/2026-06-12-launch-readiness-register.md (bar §1, evidence §2, blockers §3-A,
+dated deferrals §3-B, waves §4). Mode meta-infra, --auto, founder gate at PLAN. Single-writer:
+the dead v5.3 session must not be resumed while BUILD runs.
+
+- [ ] Wave 0 — land 713388d (I1 hooks + 2 test files + auto-decide) + propagate manifest deletion
+      (plugin-manifests-valid, verify.sh:330, manifest-identity, SHIP-GATE:20, README:27, cli-tiers)
+      + ADR-0013 + truthful CHANGELOG 5.3.0 + atomic commits + suite green on COMMITTED tree (L-010)
+- [ ] Wave 1 — security: flatten-CMD fix in both BLOCK hooks + negative tests (line-continuation,
+      multiline override); git diff --no-ext-diff --no-textconv; push-path outgoing scan; read -t
+      integer fallback; audit-on-fail-closed exit
+- [ ] Wave 2 — footer/state class: state_cycle_segment in lib/state.sh; footer consumes; audit_log
+      cycle_id from ledger; resume last-match + CYCLE writes branch/commit; multi-cycle regression tests
+- [ ] Wave 3 — Windows/portability: install.ps1 (seed + lib/bin copy + shared/ layout + validation);
+      li-doctor bash-3.2 + stale path; verify.sh mapfile + coherence repoint + cli-matrix; lintel@→li@ ×4;
+      Cursor demote; fingerprint↔tiers map; .opencode/INSTALL.md rewrite (CAIP leak); exec bits; GEMINI slug
+- [ ] Wave 4 — docs truth: README/getting-started/AGENTS/GEMINI/shims/AGENT-INSTRUCTIONS/state-of-
+      the-harness/multi-cli/LAYERS/compliance sweep; dormancy qualifiers; Swedish ×3 + no-swedish scope;
+      CATALOG UTF-8 generator fix
+- [ ] Wave 5 — mechanism honesty: usage-log demote; cycle-runs via audit_log; granularity one-truth;
+      jobs claims demoted; 7 compliance streams → audit_log or cut; 6 bespoke >> writers → helper;
+      pack-resolver cache key + set -u leak; _audit.sh/state.sh hardening; li-doctor smoke +
+      customer-data-block/warn-hook execution tests
+- [ ] Wave 6 — release close: Upgrading & uninstalling section; migration-index dates reconciled;
+      working-state/MEMORY/TODOS-v2 hygiene; scaffolding tasks/ leftovers; M1 + M2 + M4 gate artifacts
+- [ ] Wave 7 — independent review (L-007, real diff) → act on findings → ship gate → PR to main
+
+ADR-0014 (prompt craft v2) + ADR-0012 (agent memory/model). House-style: docs/concepts/prompt-house-style.md "Writing agents".
+Goal: beat wshobson/VoltAgent on craft by adding JUDGMENT (Core principles + Behavioral traits + trigger-form descriptions) to ~20 review/audit/architecture agents. Tight — judgment not bloat, ~10-15 net lines each.
+
+Per agent (where missing): (1) trigger `description:` ending `Use proactively when …`/`Use after …`; (2) Core principles 2-4 lines after persona; (3) `## Behavioral traits` 5-8 bullets; (4) tool-scoping one-liner where read-only by contract; (5) memory:project agents → one trait recalls this repo's prior findings. Dial back ALL-CAPS (rule + why). Keep all existing frontmatter + sections.
+
+engineering:
+- [x] CodeReviewer (memory) · [x] Architect (Write) · [x] Refactorer (Edit) · [x] DebugForensics (memory) · [x] RegressionDetective (memory) · [x] SanityChecker (memory, ro) · [x] TestRunner (memory, ro) · [x] Explorer (mechanical — LIGHT) · [x] Planner (ro) · [x] SystemArchitect (ro, module) · [x] DatabaseDesigner (Write) · [x] APIDesigner (Write)
+
+security:
+- [x] SecurityAuditor (memory, ro) · [x] ThreatModelDrafter (memory) · [x] DependencyAuditor (memory, ro) · [x] JWTSecurityReviewer (memory, ro) · [x] OAuthFlowReviewer (memory, ro)
+
+compliance:
+- [x] GDPRReviewer (memory, ro) · [x] SOC2Reviewer (memory, ro) · [x] EUAIActReviewer (memory, ro)
+
+validate:
+- [x] frontmatter-lint-all.sh rc=0 · no-swedish.sh rc=0 · agents-categorized.sh rc=0 (all PASS, 0 FAIL lines)
+
+### Review (v5.3 craft raise)
+20 agents got Core principles + `## Behavioral traits` + a trigger-form `Use proactively when/before/after …`
+clause + a one-line tool-scoping rationale. Deltas +14..+17 each (net ~+15) — inside the "judgment not
+bloat" budget. The 10 `memory: project` agents each carry one trait that recalls this repo's prior findings
+(the differentiator vs wshobson/VoltAgent). No ALL-CAPS imperative introduced in any added line; existing
+STOP/BLOCK in untouched edge-case sections left intact per "keep all existing sections". Explorer got LIGHT
+treatment (mechanical, model: haiku, no memory — 4-bullet traits, no repo-memory trait). SystemArchitect
+adapted to its non-standard shape (Core principles after persona, traits before Output-shape, tool line by
+Voice). Tool-scoping lines distinguish read-only reviewers (no Edit/Write) from the Write/Edit design+migration
+agents (Architect/DatabaseDesigner/APIDesigner/Refactorer — scoped to artifacts, not live source/DB).
+
 ## v5.2 battletest — newcomer-clarity doc fixes J1-J6 (2026-06-12, branch feat/v5.2-battletest)
 
 Source: docs/audit/2026-06-12-battletest-synthesis.md (JAB rows) + noob first-hour findings.
