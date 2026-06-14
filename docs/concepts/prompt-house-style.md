@@ -80,4 +80,4 @@ The bar-raise adds judgment, not length:
 Every craft rule above should ultimately be decided by an **eval** (20-50 real tasks per critical
 skill, pass/fail verifier, positive + negative cases) — not by intuition. "Generically better"
 prompt edits can hurt a specific skill; only a task-suite tells you. The eval-harness is staged as
-ADR-0017; until it exists, this house-style is the best-evidence default, applied with judgment.
+ADR-0021; until it exists, this house-style is the best-evidence default, applied with judgment.

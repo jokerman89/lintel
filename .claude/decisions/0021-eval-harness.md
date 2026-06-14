@@ -1,4 +1,7 @@
-# ADR-0017: the eval-harness — decide prompt changes on evidence, not intuition
+# ADR-0021: the eval-harness — decide prompt changes on evidence, not intuition
+
+> Renumbered 0017 → 0021 (2026-06-14): 0017 collided with the design-parity ADR created
+> earlier (first claimant keeps the number); 0018 reserved for extension-pack-contract.
 
 **Status:** Accepted-direction, build staged (2026-06-13)
 **Implements:** battletest H1/H5 + the cli-issues-craft synthesis (the recurring "real unlock")

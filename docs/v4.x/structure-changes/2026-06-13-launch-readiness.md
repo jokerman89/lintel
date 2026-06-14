@@ -51,7 +51,7 @@ cycle-footer.sh, no external caller).
 
 No new operator migration rows — security auto-applies via plugin update; the v5.1 alias removal-date
 conflict was reconciled to the operative `config/aliases.yaml` (2026-09-12). The dated public-launch
-follow-ups (real git-hook install, ADR-0015/0016/0017, H17/H18) live in the launch register §3-B, not
+follow-ups (real git-hook install, ADR-0019/0016/0017, H17/H18) live in the launch register §3-B, not
 the migration index (they are forward work, not deprecations).
 
 ## Verification
@@ -70,5 +70,5 @@ helper is backward-compatible with single-cycle fixtures (whole-file when no `CY
 ## Planned (not in this change — own ADRs, dated in the launch register §3-B)
 
 Real git pre-commit/pre-push install (supersedes the command-string matcher, by 2026-07-15) ·
-ADR-0015 AGENTS.md-primary execution · ADR-0016 lintel-state MCP · ADR-0017 eval-harness ·
+ADR-0019 AGENTS.md-primary execution · ADR-0020 lintel-state MCP · ADR-0021 eval-harness ·
 H17 pack provenance · H18 plugin pinning · full-surface description→trigger sweep.

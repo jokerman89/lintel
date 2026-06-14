@@ -1,4 +1,7 @@
-# ADR-0016: a tools-only lintel-state MCP server for portable memory access
+# ADR-0020: a tools-only lintel-state MCP server for portable memory access
+
+> Renumbered 0016 → 0020 (2026-06-14): 0016 collided with the anthropic-default design ADR
+> created earlier (first claimant keeps the number); 0018 reserved for extension-pack-contract.
 
 **Status:** Accepted-direction, build staged (2026-06-13)
 **Implements:** docs/audit/2026-06-13-cli-issues-craft-synthesis.md (workstream 1)

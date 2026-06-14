@@ -73,7 +73,7 @@ and the remediation it found. ADRs 0013–0017.
 - pack-resolver: removed the `set -uo pipefail` that leaked into every caller; session cache key no longer collapses to a constant + mtime-invalidates on pack.yaml edits
 
 ### Decided this cycle (build staged with dates — see the launch register §3-B)
-- ADR-0015 AGENTS.md-primary · ADR-0016 lintel-state MCP server · ADR-0017 eval-harness
+- ADR-0019 AGENTS.md-primary · ADR-0020 lintel-state MCP server · ADR-0021 eval-harness (renumbered from 0015/0016/0017 on 2026-06-14 — collided with the design ADRs created earlier)
 
 ### Numbers
 - 43 skill descriptions + 20 agents upgraded · 2 manifests deleted · exec bits corrected on 5 scripts · 5 new behavior tests (hook-gate newline cases, customer-data gate, context-checkpoint roundtrip, li-doctor smoke, auto-decide one-way-door) · suite 82/82 on the committed tree
