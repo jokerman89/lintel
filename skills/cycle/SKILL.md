@@ -2,7 +2,7 @@
 name: cycle
 layer: foundation
 workflow_root: true
-description: Use to run a real multi-step task through the full SENSE-to-CAPTURE pipeline, or a chosen subset of phases. Supports mode presets and hopping in at any phase, gates on a cost estimate before BUILD, and spawns a tracked job at invocation. The default entry point for substantial work.
+description: Use to run a real multi-step task through the full SENSE-to-CAPTURE pipeline, or a chosen subset of phases. Supports mode presets, hopping in at any phase, and a cost-estimate gate before BUILD. The default entry point for substantial work.
 color: cyan
 tools: Read, Write, Edit, Bash, Grep, Glob
 voice: internal
@@ -358,26 +358,17 @@ After last phase DONE:
 - Surface cycle summary (per CAPTURE phase output if CAPTURE ran)
 - If CAPTURE didn't run (e.g., custom subset without CAPTURE): write light summary
 - `state_append CYCLE DONE cycle_complete=true` (CAPTURE's own entry covers this when CAPTURE ran)
+- Telemetry — one mechanical line via the unified writer (ts/operator/cycle_id come from the envelope):
 
-### Step 9 — Telemetry (operator-opt-in)
-
-Append to `.claude/runtime/audit/cycle-runs.jsonl`:
-```json
-{
-  "ts": "<>",
-  "cycle_id": "<>",
-  "mode": "<>",
-  "phases_run": [...],
-  "duration_total_minutes": <>,
-  "tokens_used_total": <>,
-  "outcome": "DONE | DONE_WITH_CONCERNS | BLOCKED | ABORTED",
-  "operator": "<whoami>"
-}
+```bash
+source "$(git rev-parse --show-toplevel)/bin/_audit.sh"
+audit_log cycle cycle_complete mode=<mode> phases=<n> outcome=<DONE|DONE_WITH_CONCERNS|BLOCKED|ABORTED>
+# → .claude/runtime/audit/cycle.jsonl
 ```
 
-> `tokens_used_total` is a real post-run measurement — this is the actuals stream that
-> `scale_calibrated_prior` reads to retire the UNCALIBRATED label. No `cost_estimate_dollars`
-> field: Lintel has no pricing table, so a dollar figure here would be fabricated (K6).
+> No `cost_estimate_dollars` field: Lintel has no pricing table, so a dollar figure here would be
+> fabricated (K6). Token actuals for estimator calibration are CAPTURE Step 1b's stream
+> (`granularity.jsonl` — dormant by decision, ADR-0008), not this one.
 
 ## Status protocol
 
@@ -413,7 +404,7 @@ If dependency not met: surface, ask operator to satisfy or pick different `--fro
 
 **Writes:**
 - `.claude/runtime/state/00-state.md` (orchestrator entries per phase)
-- `.claude/runtime/audit/cycle-runs.jsonl`
+- `.claude/runtime/audit/cycle.jsonl` (one `audit_log cycle ...` line at cycle complete; failure events use the same stream)
 
 **Triggers:**
 - Each phase-skill in sequence: `/li:sense`, `/li:scope`, `/li:define`, etc.
@@ -435,7 +426,7 @@ If dependency not met: surface, ask operator to satisfy or pick different `--fro
 4. If loop-back: re-invoke target earlier phase with corrected input
 5. If abort: clean state, save resume point, exit
 
-Failure events logged to `.claude/runtime/audit/cycle-failures.jsonl` for audit.
+Failure events get one line in the same stream as Step 8 — `audit_log cycle cycle_failure phase=<phase> action=<retry|skip|loop-back|abort>` → `.claude/runtime/audit/cycle.jsonl`.
 
 ## Voice tier behavior
 

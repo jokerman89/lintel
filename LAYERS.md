@@ -14,8 +14,9 @@ Lintel is now built from **two parts**: a stable **foundation** and one active *
 ├─────────────────────────────────────────────────────────────┤
 │  Foundation — discipline, stable (scaffolding/01-foundation)│
 │    CORE-PRINCIPLES, EVOLUTION, EVOLUTION-LOG,               │
-│    tasks/{lessons,memory,personas,todo},                    │
-│    docs/adr/ templates, .claude/agents/, CLAUDE.md.template │
+│    .claude/memory/{lessons,working-state,personas}.md,      │
+│    .claude/plans/, .claude/decisions/ templates,            │
+│    .claude/agents/, CLAUDE.md.template                      │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -25,8 +26,8 @@ Lintel is now built from **two parts**: a stable **foundation** and one active *
 
 - `CORE-PRINCIPLES.md` — the load-bearing rules, read at session-start.
 - `EVOLUTION.md` + `EVOLUTION-LOG.md` — the change process for foundation itself and the log of decisions taken.
-- `tasks/{lessons,memory,personas,todo}.md` — ephemeral working memory templates (lessons, long-running state, operator calibration, the active todo).
-- `docs/adr/` templates — architecture decision record scaffolding.
+- `.claude/memory/{lessons,working-state,personas}.md` + `.claude/plans/todo.md` — working memory templates (lessons, long-running state, operator calibration, the active todo).
+- `.claude/decisions/` templates — architecture decision record scaffolding.
 - `.claude/agents/` — per-repo subagent override slot.
 - `CLAUDE.md.template` — the session entrypoint a new repo starts from.
 

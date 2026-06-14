@@ -1,6 +1,6 @@
 # Agent instructions — Lintel canonical navigation pointer
 
-Read this file at session start. Each agent CLI (Claude Code, GitHub Copilot Enterprise, Codex, others) has a shim that points here.
+Read this file at session start. Every supported agent CLI (see `lib/cli-tiers.yaml`) reaches it through its root entry file (CLAUDE.md / AGENTS.md / GEMINI.md) or a shim under `shims/` that points here.
 
 This file is **navigation, not content.** Load-bearing content lives in the layer files below. Follow the order; each layer file is short and authoritative.
 
@@ -92,7 +92,7 @@ Voice tier is the per-agent honest split between external voice (for customers) 
 
 ---
 
-## Self-maintenance — context-bloat watchers (Layer 4, opt-in)
+## Self-maintenance — context-bloat watchers (opt-in)
 
 If activated (operator symlinks from `~/.lintel/hooks/` to `~/.claude/hooks/`), the watchers print soft warnings when:
 
@@ -109,12 +109,10 @@ Configure thresholds in `~/.lintel/config.yaml`.
 
 Lintel ships with honest degradation. Not every skill works on every CLI.
 
-- **Claude Code:** full support — skills + agents + hooks + slash commands.
-- **GitHub Copilot Enterprise (with Opus picker):** degraded — `.github/copilot-instructions.md` reads canonical instructions; no skill mechanism, no subagent delegation. Skills that depend on these degrade to "operator-runs-manually."
-- **Codex CLI:** degraded — `AGENTS.md` reads canonical instructions; no first-class skills; subagents sequentialize.
-- **Other CLIs:** capability TBD per CLI. Run `verify.sh --cli-matrix` for the up-to-date table.
-
-Every skill / agent in Lintel declares `cli_support` in YAML frontmatter. `verify.sh --cli-matrix` prints the table.
+The per-CLI truth is `lib/cli-tiers.yaml` (the single source); the README's capability table is
+generated from it. Run `/li:welcome` for your CLI's live tier. Every skill / agent declares
+`cli_support` in YAML frontmatter; `install/verify.sh` prints counts — the per-CLI table lives in
+the README, generated from `lib/cli-tiers.yaml`.
 
 ---
 

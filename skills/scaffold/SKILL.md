@@ -39,7 +39,7 @@ This is how new repos get Lintel defaults inside 30 seconds.
 
 3. **Locate Lintel scaffolding source.**
    - Primary: `~/.lintel/scaffolding/01-foundation/`
-   - Fallback: clone or fetch from `jokerman89/jokerman-lintel`
+   - Fallback: clone or fetch from `jokerman89/lintel`
 
 4. **Gather repo-specific variables (AskUserQuestion):**
    - Repo name
@@ -116,7 +116,7 @@ Next steps:
 ## Edge cases
 
 - **Existing CLAUDE.md** — backup first, merge interactively, OR offer dry-run preview.
-- **No Lintel scaffolding source available** — recommend `git clone jokerman89/jokerman-lintel ~/.lintel`.
+- **No Lintel scaffolding source available** — recommend `git clone jokerman89/lintel ~/.lintel`.
 - **Non-git directory** — recommend `git init` first.
 - **Customer wants to fork Lintel** — see `docs/compliance.md` for what they'd need to change.
 

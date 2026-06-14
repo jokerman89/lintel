@@ -19,13 +19,20 @@ for f in "$EVALS" "$FORGE"; do
   [ -f "$f" ] || { fail "$f MISSING"; exit 1; }
 done
 
+# Sandbox the audit seams BEFORE sourcing: lib/brief-forge.sh sources bin/_audit.sh,
+# which mkdirs $LINTEL_AUDIT_DIR at source time — without these seams the test
+# touches the real ~/.lintel/audit.
+SANDBOX=$(mktemp -d)
+export LINTEL_HOME="$SANDBOX/lintel-home"
+export LINTEL_AUDIT_DIR="$SANDBOX/audit"
+
 # shellcheck disable=SC1090
 source "$EVALS"
 # shellcheck disable=SC1090
 source "$FORGE"
 
 TMP=$(mktemp)
-trap 'rm -f "$TMP" "$TMP.evil" "$TMP.bad-brief" "$TMP.tb"' EXIT
+trap 'rm -rf "$SANDBOX"; rm -f "$TMP" "$TMP.evil" "$TMP.bad-brief" "$TMP.tb"' EXIT
 
 # ─── Scenario 1: clean brief envelope passes all evaluators ─────────────
 echo ""

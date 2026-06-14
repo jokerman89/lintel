@@ -57,7 +57,8 @@ The only mechanism in Lintel that compounds learning across fresh sessions. With
    {"date": "YYYY-MM-DD", "type": "...", "source": "...", "body": "...", "repo": "..."}
    ```
 4. **Append.** Atomic write (read existing, append entry, write back).
-5. **Audit log.** Append to `.claude/runtime/audit/lessons.jsonl`.
+5. **Audit log.** One line via the unified writer:
+   `source "$(git rev-parse --show-toplevel)/bin/_audit.sh"; audit_log lessons lesson_recorded scope=<project|global> id=<L-NNN> classification=<add|update|supersede>` → `.claude/runtime/audit/lessons.jsonl`.
 6. **Report.**
 
 ## Report format

@@ -3,8 +3,8 @@
 **Last updated:** 2026-05-28
 **Status:** Concept doc — referenced by LAYERS.md + skills/cycle/SKILL.md
 
-> Encodes "when to spawn a dedicated subagent vs run inline" rule som Lintel
-> redan tillämpar ad-hoc per run. Going-forward: this doc är canonical.
+> Encodes the "when to spawn a dedicated subagent vs run inline" rule that Lintel
+> already applied ad-hoc per run. Going-forward: this doc is canonical.
 
 ## The rule (2 conditions for dedicated, 2 for inline)
 

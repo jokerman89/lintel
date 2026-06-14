@@ -26,6 +26,15 @@ command -v audit_log >/dev/null 2>&1 || source "$(dirname "${BASH_SOURCE[0]}")/.
 # Shared detection patterns (defined once). Block hook → strict `tier1` (high-confidence only).
 source "$(dirname "${BASH_SOURCE[0]}")/../_patterns.sh"
 
+# Fail-closed: a BLOCK hook that cannot scan must BLOCK, not silently allow
+# (a missing/failed scanner is exactly the silent-bypass we are guarding against).
+if ! command -v scan_secrets >/dev/null 2>&1; then
+  echo "ERROR [Lintel hook]: secret-scan-block scanner unavailable — blocking to be safe." >&2
+  echo "ERROR: source hooks/shared/_patterns.sh failed. Override only if you are certain:" >&2
+  echo "  LINTEL_OVERRIDE_SECRET=1 LINTEL_OVERRIDE_SECRET ... (see CLAUDE.md)" >&2
+  exit 2
+fi
+
 # Fire on any git commit/push, however the command is phrased: `git commit`,
 # `git -C path commit`, `/usr/bin/git push`, `true && git commit`, `cd x && git
 # commit -am`. The old `^git` anchor was trivially bypassed (security battletest

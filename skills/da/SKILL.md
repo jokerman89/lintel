@@ -80,11 +80,11 @@ agents at invocation (spawned via `/li:brief-forge subagent_spawn`); each emits
 | Capability | Dispatches to (agents) | Produces | Raise-help / notes |
 |---|---|---|---|
 | `schema-design` | DatabaseDesigner (+ SchemaArchitect when `primary_store=mixed`) | versioned schema spec `schema-<ts>.{sql\|cql\|json}` with relationships + index strategy | prefs: `primary_store` (postgres\|mongodb\|cassandra\|clickhouse\|mixed), `schema_versioning` (timestamp-prefix); validation checklist below |
-| `migration-plan` | MigrationPlanner + Migrator | migration plan + per-step `up.sql`/`down.sql` | RAISE_HELP when affected rows > `review_threshold` (default 100000) — downtime-window confirmation (BLOCKED); prefs: `migration_window` (zero-downtime-required\|maintenance-window-ok\|tolerated), `review_threshold`; pairs with `da-migration-irreversible-warn` hook; acceptance below |
-| `retention-policy` | DatabaseDesigner + Architect | per-data-class retention + archival + deletion policy | RAISE_HELP when pack compliance hooks match gdpr/pii AND `retention_default` > 365 days (BLOCKED); classes: PII / customer-data / operational-telemetry / aggregate-only; lifecycle: active → warm → cold → archived → deleted; pairs with `da-retention-violation-warn` hook |
+| `migration-plan` | MigrationPlanner + Migrator | migration plan + per-step `up.sql`/`down.sql` | RAISE_HELP when affected rows > `review_threshold` (default 100000) — downtime-window confirmation (BLOCKED); prefs: `migration_window` (zero-downtime-required\|maintenance-window-ok\|tolerated), `review_threshold`; pairs with `da-migration-irreversible-warn` hook (opt-in, not auto-registered — ADR-0008); acceptance below |
+| `retention-policy` | DatabaseDesigner + Architect | per-data-class retention + archival + deletion policy | RAISE_HELP when pack compliance hooks match gdpr/pii AND `retention_default` > 365 days (BLOCKED); classes: PII / customer-data / operational-telemetry / aggregate-only; lifecycle: active → warm → cold → archived → deleted; pairs with `da-retention-violation-warn` hook (opt-in, not auto-registered — ADR-0008) |
 | `query-pattern-audit` | Explorer + DatabaseDesigner | read/write ratios, hot paths (top-5 by frequency), index gaps, N+1 candidates | no prefs; output reused by sharding-plan + analytics-readiness; index gaps = DONE_WITH_CONCERNS |
 | `sharding-plan` | SchemaArchitect + DatabaseDesigner | partition strategy + rebalancing playbook + cross-shard query workarounds | partition key: cardinality + co-location; tenant-isolation → shard-per-tenant; per-store mechanics (postgres → declarative/Citus; mongodb → zone tags; cassandra → token-aware); reuses query-pattern-audit + TA scaling-plan <1 day old; no sharding below single-machine Postgres <1TB |
-| `data-contract-collision` | DatabaseDesigner + Architect (when breaking > 0) | schema change impact across consumers + migration plan | RAISE_HELP at ≥3 breaking consumers (BLOCKED); breaking = column drop / type narrowing / null→not-null; prefer expand-and-contract (add → backfill → switch reads → drop); grace window from pack `data_architecture.deprecation_window_days`; triggered by `da-schema-drift-warn` hook |
+| `data-contract-collision` | DatabaseDesigner + Architect (when breaking > 0) | schema change impact across consumers + migration plan | RAISE_HELP at ≥3 breaking consumers (BLOCKED); breaking = column drop / type narrowing / null→not-null; prefer expand-and-contract (add → backfill → switch reads → drop); grace window from pack `data_architecture.deprecation_window_days`; triggered by `da-schema-drift-warn` hook (opt-in, not auto-registered — ADR-0008) |
 | `analytics-readiness` | DataPipelineDesigner + SchemaArchitect | OLAP path (warehouse + CDC/batch ingestion + refresh cadence) + dimensional model | NEEDS_CONTEXT without business questions (arg, `$BUSINESS_QUESTIONS`, or `business-questions.md`); pref: `primary_store`; reuses query-pattern-audit <7 days old; dimensional rules below |
 
 ### schema-design — validation checklist
@@ -251,11 +251,13 @@ Full-pass exit: every dimension ≥ 80 OR explicit operator override.
 
 ### Step 6 — Audit + emit ship report
 
+One line via the unified writer (ts/operator/cycle_id come from the envelope):
+
 ```bash
-ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-printf '{"ts":"%s","kind":"da_module_complete","granularity":"%s","score":%d,"checkpoints_passed":%d,"primary_store":"%s","operator":"%s"}\n' \
-  "$ts" "$granularity" "$score" "$passed_count" "$primary_store" "$(whoami 2>/dev/null || echo unknown)" \
-  >> ".claude/runtime/audit/da-decisions.jsonl"
+source "$(git rev-parse --show-toplevel)/bin/_audit.sh"
+audit_log da-decisions da_module_complete "granularity=$granularity" "score=$score" \
+  "checkpoints_passed=$passed_count" "primary_store=$primary_store"
+# → .claude/runtime/audit/da-decisions.jsonl
 ```
 
 ## Status protocol
@@ -288,7 +290,7 @@ printf '{"ts":"%s","kind":"da_module_complete","granularity":"%s","score":%d,"ch
 - BUILD phase: invokes as sub-module when data-model intent detected
 - `/li:full-engineering-pass`: parallel branch with SC in the composition DAG (after TA)
 
-**Hooks:**
+**Hooks** (dormant by decision, ADR-0008 — ship in `hooks/shared/` but are opt-in, not auto-registered):
 - `hooks/shared/da-schema-drift-warn/` (pre-edit on schema-ADR-claimed files)
 - `hooks/shared/da-migration-irreversible-warn/` (pre-commit on migration without rollback)
 - `hooks/shared/da-retention-violation-warn/` (pre-edit on data-access code skipping retention)

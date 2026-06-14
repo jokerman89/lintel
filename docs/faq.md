@@ -42,7 +42,7 @@ Treat it as an incident:
 
 No. The install scripts make `git clone` calls to public GitHub repos. That is the entire network surface. No telemetry to MS or to anyone else.
 
-(The upstream tools you install — gstack, GSD, AgentShield, etc. — may have their own telemetry. Check each upstream's docs.)
+(Lintel bundles no third-party tools — `install/upstream-sources.yaml` is a list-only stub and nothing is fetched from it. Anything you install separately has its own telemetry story; check that tool's docs.)
 
 ## Updates + maintenance
 
@@ -139,7 +139,7 @@ The third option is the most robust for long-term enterprise use but adds mainte
 
 ### Q: Two CLIs are looking at the same repo. Whose state wins?
 
-The state is in files (`tasks/`, `docs/adr/`, `CLAUDE.md`). Both CLIs read the same files. Whoever writes last wins, last-writer-wins style.
+The state is in files (`.claude/memory/`, `.claude/plans/`, `.claude/decisions/`, `CLAUDE.md`). Both CLIs read the same files. Whoever writes last wins, last-writer-wins style.
 
 If two CLIs are operating on the same repo simultaneously: that's a coordination problem you have to solve manually. The scaffolding does not mediate.
 

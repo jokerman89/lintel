@@ -57,7 +57,6 @@ for dir in $SEARCH_DIRS; do
   [ -d "$TESTS_DIR/$dir" ] || continue
   while IFS= read -r test_file; do
     [ -f "$test_file" ] || continue
-    [ -x "$test_file" ] || chmod +x "$test_file"
     total=$((total + 1))
 
     # Set tag filter env var if provided

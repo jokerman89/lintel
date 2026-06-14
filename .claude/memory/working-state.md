@@ -48,6 +48,39 @@ Cross-session working state (ej durable rules — that's [[lessons.md]]; ej pers
 
 ---
 
+## launch-readiness — v5.x "old-school ready", folded into PR #73 2026-06-13
+
+**Status:** active — merged into `feat/v5.3-cli-and-craft` (PR #73), suite 82/82 on the merged tree.
+
+**What this drive added (waves 3–7, on top of the v5.3-cli-and-craft work below):** an 8-audit
+launch-readiness register (docs/audit/2026-06-12-launch-readiness-register.md — bar §1, evidence §2,
+blockers §3-A, dated deferrals §3-B, waves §4) + the remediation it found.
+- **Security (ADR-0013):** newline-class gate bypasses closed (line-continuation matcher evasion +
+  newline-forged `-m` override — L-012 class), each with an adversarial test; gate diffs textconv-safe;
+  push scans the outgoing range; macOS bash-3.2 `read -t` fallback. (Converged with the other session's
+  fail-closed positioning in the merge.)
+- **State (register B4):** `state_cycle_segment` — the footer/resume/`cycle_id` were poisoned by
+  prior-cycle entries in the append-only ledger; now scoped to the current cycle. Multi-cycle + loop-back
+  regression tests.
+- **Windows/portability (B5):** install.ps1 full parity (seed identity + lib/bin copy + shared/ hooks);
+  li-doctor bash-3.2-safe; `.opencode/INSTALL.md` rewritten neutral; `lintel@`→`li@` everywhere;
+  fingerprint↔tiers id-normalization; exec bits.
+- **Docs truth (B6):** ~30 files swept (v3-plan/`tasks/`/`docs/adr`/gstack/v5.0 residue); dormancy
+  qualifiers; no-swedish now covers docs+README; CATALOG generator char-safe (flake fixed).
+- **Mechanism honesty (B7):** usage-log/telemetry/compliance prose → real `audit_log`; pack-resolver
+  set-leak + cache-key fixes; 4 new behaviour tests.
+- **Release (B8):** truthful CHANGELOG 5.3.0, migration date reconcile, M1 artifact
+  (docs/v4.x/structure-changes/2026-06-13-launch-readiness.md). CODEOWNERS de-CAIP'd.
+
+**What's pending:**
+- Operator: merge PR #73 → main (the git-push-to-main gate stays yours).
+- Public-launch-tier items remain DATED-not-blocking in the register §3-B: real git pre-commit/pre-push
+  install (by 2026-07-15, supersedes the command-string matcher), ADR-0015 AGENTS.md-primary, ADR-0016
+  MCP, ADR-0017 eval-harness, H17/H18, marketplace (post legal). v6 shrink-to-kernel decided after the eval.
+- `gh` couldn't auth to jokerman89/lintel from the build session — PR view/merge is operator-side.
+
+**Last touched:** 2026-06-13
+
 ## v5.3-cli-and-craft — PR #73 OPEN 2026-06-13
 
 **Status:** active — PR #73 to main (independent; #69 already merged). launch-waves wave folded in.
@@ -94,6 +127,28 @@ auto-merged to a no-op. Suite 79/79 on the merged tree.
 - STAGED (own ADRs already written): AGENTS.md-primary (ADR-0015), lintel-state MCP server
   (ADR-0016), eval-harness (ADR-0017), per-CLI command-stub generator, field-wide
   description-trigger + aggressive-language sweep of the remaining ~80 skills.
+## v5.4-design-dna — PR OPEN 2026-06-13
+
+**Status:** active — branch feat/v5.4-design-dna (worktree E:\Workspace\_wt-design-dna), rebased on main@5.2.1
+
+**What shipped:** ADR-0015 (consume nextlevelbuilder/ui-ux-pro-max-skill v2.5.0, MIT — corpus of
+84 styles, 161 palettes, 161 reasoning rules, 73 font pairings, 99 UX rules, 16 stack files + BM25
+stdlib search; explicit L-001 exception: third-party reference data) + ADR-0016 (anthropic-default
+design profile — 7 canonical tokens + Poppins/Lora, Apache-2.0 attributed, derived gap-fills
+source-marked; pack seam `design.profile`, contract untouched). New module skill
+`skills/design-dna/` (search|system|stack|persist|validate|profile) + `validate_design.py` hard
+gate; retrieval wired into frontend-design (required Step 1.5), typography/motion, generate-web/app
+(Gate 0), both review skills; doctrine into 4 frontend agents. 3 new tests; L-007 independent
+review SHIP-WITH-FIXES — P0 (emoji false-positive on arrows) + 4 P1 all fixed + 4 negative
+regression assertions (L-012). M2 GREEN. Manifests 5.4.0.
+
+**What's pending:**
+- Merge PR; CATALOG regen is automatic on main push
+- Known pre-existing red: tests/shape/skill-descriptions-trigger.sh fails 43x on clean main
+  (owned by the in-flight v5.3 craft branch) — zero failures reference v5.4 files
+- Follow-ups parked: slide decision-engine (emotion-to-layout CSVs) for generate-ppt; upstream
+  corpus re-sync per ATTRIBUTION.md; pack-schema-level `design.profile` validation if a second
+  profile consumer appears
 
 **Last touched:** 2026-06-13
 

@@ -1,8 +1,8 @@
 # Compliance
 
-The rule set that the canonical session instructions enforce. Tuned for the Microsoft Sweden CAIP SE team. If you are outside that team, audit this doc against your own constraints before relying on it.
+The rule set that the canonical session instructions enforce. The neutral baseline below applies everywhere; tiered, team-specific rules come from the active **pack**. Audit this doc against your own constraints before relying on it.
 
-> **Status note.** This document codifies the 5-step session-start check from `AGENT-INSTRUCTIONS.md` and lists 15 hard rules. The hard rules below are **derived** from common MS Layer 2 patterns (data sovereignty, customer data, secrets, shared infrastructure). Before using this in a customer-adjacent context, verify against your team's authoritative Layer 2 source and replace any rule that is wrong for your tenant.
+> **Status note.** This document codifies the 5-step session-start check from `AGENT-INSTRUCTIONS.md` and lists 15 hard rules. The hard rules below are **derived** from common enterprise compliance patterns (data sovereignty, customer data, secrets, shared infrastructure). Tiered rules are pack-driven — before using this in a customer-adjacent context, verify against your pack's authoritative compliance source and replace any rule that is wrong for your tenant.
 
 ## The 5-step session-start check
 
