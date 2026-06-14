@@ -63,7 +63,7 @@ Files created (v5 .claude/ home layout, ADR-0005):
   CLAUDE.md (rendered from template), CORE-PRINCIPLES.md, EVOLUTION.md,
   EVOLUTION-LOG.md, .claude/memory/{MEMORY,lessons,working-state,personas}.md,
   .claude/plans/todo.md, .claude/decisions/{README,TEMPLATE}.md,
-  .claude/agents/ (4 templates), .claude/SUBAGENT-GUIDE.md,
+  .claude/SUBAGENT-GUIDE.md (subagents come from the plugin fleet — no repo-local agents),
   .claude/lintel-layout.yaml, TEMPLATE-skill.md, TEMPLATE-agent.md
 
 Examples:
@@ -229,16 +229,8 @@ RULESEOF
     echo "  ⚠ not a git repo — skipped layout marker/auto-memory stamping (run li-migrate-claude-home after git init)"
   fi
 
-  # .claude/
-  mkdir -p .claude/agents
-  for f in "$SCAFFOLDING_SRC"/.claude/agents/*.md; do
-    [ -f "$f" ] || continue
-    name=$(basename "$f")
-    if [ ! -f ".claude/agents/$name" ]; then
-      cp "$f" .claude/agents/
-      echo "  ✓ .claude/agents/$name"
-    fi
-  done
+  # .claude/ — note: no .claude/agents/ is scaffolded. The subagent fleet ships with the
+  # plugin; a repo-local agent would shadow the fleet's same-named one (2026-06-14, ADR-0015).
   if [ -f "$SCAFFOLDING_SRC/.claude/SUBAGENT-GUIDE.md" ] && [ ! -f ".claude/SUBAGENT-GUIDE.md" ]; then
     cp "$SCAFFOLDING_SRC/.claude/SUBAGENT-GUIDE.md" .claude/
     echo "  ✓ .claude/SUBAGENT-GUIDE.md"

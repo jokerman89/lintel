@@ -12,7 +12,7 @@ You are the li-scaffold skill.
 
 ## What this skill does
 
-Sets up a new repo (or initializes scaffolding in existing repo) with Lintel's Category B templates: CLAUDE.md (from template + repo-specific variables), CORE-PRINCIPLES.md, EVOLUTION.md, EVOLUTION-LOG.md, .claude/memory/{lessons,working-state,personas}.md, .claude/plans/todo.md, .claude/decisions/{README,TEMPLATE}.md, .claude/agents/, TEMPLATE-skill.md.
+Sets up a new repo (or initializes scaffolding in existing repo) with Lintel's Category B templates: CLAUDE.md (from template + repo-specific variables), CORE-PRINCIPLES.md, EVOLUTION.md, EVOLUTION-LOG.md, .claude/memory/{lessons,working-state,personas}.md, .claude/plans/todo.md, .claude/decisions/{README,TEMPLATE}.md, TEMPLATE-skill.md. (Subagents come from the plugin fleet — no repo-local `.claude/agents/`.)
 
 This is how new repos get Lintel defaults inside 30 seconds.
 
@@ -56,12 +56,13 @@ This is how new repos get Lintel defaults inside 30 seconds.
    cp scaffolding/01-foundation/CORE-PRINCIPLES.md .
    cp scaffolding/01-foundation/EVOLUTION.md .
    cp scaffolding/01-foundation/EVOLUTION-LOG.md .
-   mkdir -p .claude/memory .claude/plans .claude/decisions docs/personas .claude/agents
+   mkdir -p .claude/memory .claude/plans .claude/decisions docs/personas
    cp scaffolding/01-foundation/.claude/memory/* .claude/memory/
    cp scaffolding/01-foundation/.claude/plans/* .claude/plans/
    cp scaffolding/01-foundation/.claude/decisions/* .claude/decisions/
    cp scaffolding/01-foundation/docs/personas/* docs/personas/
-   cp scaffolding/01-foundation/.claude/agents/* .claude/agents/
+   # No .claude/agents/ — the subagent fleet ships with the plugin; a repo-local agent
+   # would shadow the fleet's same-named one (removed 2026-06-14, ADR-0015 subtraction).
    cp scaffolding/01-foundation/.claude/SUBAGENT-GUIDE.md .claude/
    cp scaffolding/01-foundation/TEMPLATE-skill.md .
    cp scaffolding/01-foundation/TEMPLATE-agent.md .
@@ -97,8 +98,7 @@ Files created:
 - ✓ .claude/plans/todo.md
 - ✓ .claude/decisions/{README,TEMPLATE}.md
 - ✓ docs/personas/EXAMPLE.md
-- ✓ .claude/agents/ (4 template subagents)
-- ✓ .claude/SUBAGENT-GUIDE.md
+- ✓ .claude/SUBAGENT-GUIDE.md (subagents come from the plugin fleet — no repo-local agents)
 - ✓ TEMPLATE-skill.md, TEMPLATE-agent.md
 
 If the active pack ships compliance scaffolding:

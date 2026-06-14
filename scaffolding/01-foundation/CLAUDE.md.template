@@ -86,11 +86,7 @@ The `session-digest` hook injects the top rows at session-start; this table is t
 - Offload research, exploration, and parallel analysis to subagents
 - For complex problems: throw more compute at it via subagents
 - One task per subagent for focused execution
-- Pre-defined subagents in `.claude/agents/`:
-  - `ReadOnly` — read-only research tasks
-  - `CodeReviewer` — review of staged/working changes
-  - `TestRunner` — runs the test suite and reports failures
-  - `SanityChecker` — cross-component architecture audit
+- The subagent fleet ships with the Lintel plugin (engineering · security · compliance · devops · customer · communication · doc-gen · frontend) — run `/li:help` or `/li:catalog` to list them and dispatch by name (e.g. `CodeReviewer`, `SecurityAuditor`, `TestRunner`). Add a repo-local `.claude/agents/<Name>.md` ONLY for a genuinely project-specific agent — a repo-level agent shadows the plugin fleet's same-named one.
   <!-- PROJECT:START -->
   - {{Add project-specific subagents here as you create them, e.g. `ADRReader`, `MigrationAuditor`, etc.}}
   <!-- PROJECT:END -->
