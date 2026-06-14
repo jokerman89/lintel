@@ -2,6 +2,23 @@
 
 All notable changes to this repo are tracked here. Format is loose — date headings + bulleted changes. Major behavior changes to the canonical instructions are also logged in `scaffolding/EVOLUTION-LOG.md` (which travels with each scaffolded repo).
 
+## 5.4.0 — 2026-06-13
+
+Design DNA: retrieval-augmented design + the anthropic-default profile. ADR-0015/0016.
+
+### Added
+- `skills/design-dna/` — module skill (search | system | stack | persist | validate | profile): BM25 search (stdlib python, grep fallback) over a consumed corpus — 84 UI styles, 161 WCAG-audited palettes, 161 product reasoning rules with anti-patterns, 73 font pairings, 99 UX guidelines, 16 per-stack rule files (from nextlevelbuilder/ui-ux-pro-max-skill v2.5.0, MIT, attributed; google-fonts/draft/design ballast dropped)
+- `profiles/anthropic-default.yaml` — the house design default: 7 canonical Anthropic tokens + Poppins/Lora (Apache-2.0, attributed) + source-marked derived gap-fills (type scale, spacing, radius, motion tokens, dark mode, semantic states, contrast-pair matrix). Pack-overridable via `design.profile` (additive seam — pack contract untouched)
+- `scripts/validate_design.py` — mechanical pre-delivery gate (exit 1): zoom-disable, killed focus, emoji-as-icon, off-palette drift, sub-12px text, missing reduced-motion
+- 3 tests: corpus shape (37 assertions), search behavior, validator behavior (positive + negative per L-012)
+
+### Changed
+- `frontend-design`: required Step 1.5 DNA pass (precedence brief > profile > corpus); spec gains additive `palette`/`style`/`design_dna` fields (schema_version stays 1); Step 7 stub → mandatory gate
+- `frontend-typography`/`frontend-motion`: corpus query + profile defaults before agent pick
+- `generate-web`/`generate-app`: per-stack guidance pass + mechanical Gate 0
+- `frontend-design-review`/`design-review`: validator pre-pass (exit 1 = RED/auto-P1); profile as brand reference when no baseline
+- Frontend agent fleet (FrontendArchitect, TypographyCurator, MotionDirector, DesignSystemAuditor): two-pass token-plan doctrine, anti-cliché calibration, profile-first defaults, validator-first auditing
+
 ## 5.3.0 — 2026-06-13
 
 Launch-readiness drive: prompt-craft v2 · multi-CLI hardening · issue-mining · a full
@@ -46,6 +63,18 @@ and the remediation it found. ADRs 0013–0017.
 ### Numbers
 - 43 skill descriptions + 20 agents upgraded · 2 manifests deleted · exec bits corrected on 5 scripts · 5 new behavior tests (hook-gate newline cases, customer-data gate, context-checkpoint roundtrip, li-doctor smoke, auto-decide one-way-door) · suite 82/82 on the committed tree
 
+## 5.2.1 — 2026-06-13
+
+Patch: hook gate fix delivery (PR #70 merged content-only — without a version bump the
+plugin marketplaces report "up to date" and never refetch, so the fix could not reach
+installed plugins).
+
+- Block gates (secret-scan, customer-data) scan **added lines only** — git's own diff
+  metadata (`new file mode 100644`, `index <hash>..<hash>`) matched the phone regex and
+  blocked every new-file commit once the v5.2 matcher fix made the hooks actually fire
+- Gates follow every `git -C <path>` target in the command (cwd alone scanned the wrong repo)
+- New shared helper `hook_git_gate_content` in `hooks/shared/_input.sh`; regression-locked
+  in `tests/unit/hook-gate-content.sh`
 ## 5.2.0 — 2026-06-12
 
 Battletest remediation (six adversarial personas) + gstack de-heritage. ADR-0010/0011/0012.
