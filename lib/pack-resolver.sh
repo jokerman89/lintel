@@ -82,6 +82,27 @@ _pack_dir() {
   fi
 }
 
+# Extract a field from the `extension:` block of a SPECIFIC manifest file.
+# Block-scoped (only lines under `extension:` until the next top-level key),
+# comment-stripped, whitespace-trimmed. Used by validate_pack (pre-cache, so it
+# cannot use resolve_pack_field) AND surfaced for pack-switch's target preview, so
+# all extension-parse sites agree (shared-schema discipline). Echoes ""/value.
+_pack_ext_field() {
+  local manifest="$1" field="$2"
+  [ -f "$manifest" ] || return 0
+  awk -v f="$field" '
+    /^extension:/ { inb=1; next }
+    inb && /^[A-Za-z_]/ { inb=0 }
+    inb && $0 ~ "^[[:space:]]*"f":" {
+      v=$0
+      sub("^[[:space:]]*"f":[[:space:]]*", "", v)
+      sub(/[[:space:]]*#.*$/, "", v)
+      gsub(/^[[:space:]]+|[[:space:]]+$/, "", v)
+      print v; exit
+    }
+  ' "$manifest"
+}
+
 # ─── Pack validation (called at SENSE Step 1) ──────────────────────────────
 validate_pack() {
   # Args: <pack-name>
@@ -104,6 +125,28 @@ validate_pack() {
       return 1
     fi
   done
+
+  # Failure mode 2b: an extension pack MUST declare a namespace + workflow (ADR-0018)
+  # — without them Lintel cannot route to or surface the pack's executable surface.
+  # Read the manifest directly (validate_pack runs INSIDE cache priming, so
+  # resolve_pack_field is unavailable). Detect truthy is_extension with the SAME
+  # semantics as pack_field_is_true (true|yes|on) so a yes/on form can't skip 2b
+  # while the runtime still treats the pack as an extension. Block-scoped extraction
+  # (_pack_ext_field) so a namespace:/workflow: under another block can't satisfy it.
+  local is_ext
+  is_ext=$(_pack_ext_field "$manifest" is_extension)
+  case "$is_ext" in
+    true|yes|on)
+      local ext_field ext_val
+      for ext_field in namespace workflow; do
+        ext_val=$(_pack_ext_field "$manifest" "$ext_field")
+        if [ -z "$ext_val" ] || [ "$ext_val" = "null" ]; then
+          _resolver_fail "extension pack=$name: is_extension is true but extension.${ext_field} is unset (required, ADR-0018)"
+          return 1
+        fi
+      done
+      ;;
+  esac
 
   # Failure mode 3: extends: cycle (depth-limited shallow check)
   local visited=":$name:"
@@ -323,6 +366,16 @@ pack_field_is_true() {
   [ "$v" = "true" ] || [ "$v" = "yes" ] || [ "$v" = "on" ]
 }
 
+# ─── Extension-pack awareness (ADR-0018) ───────────────────────────────────
+# An extension pack ships its own skills/agents/hooks (as a plugin) + a workflow.
+# These helpers let identity-aware skills (pack-switch, orientator, doctor) treat
+# such a pack as more than identity, without re-implementing plugin discovery.
+pack_is_extension() { pack_field_is_true extension.is_extension; }   # 0/true if active pack ships surface
+# namespace/workflow: normalize the literal YAML `null` (identity-pack default) to ""
+# so callers can use `[ -z "$(pack_namespace)" ]` to gate extension behavior.
+pack_namespace() { local v; v=$(resolve_pack_field extension.namespace); [ "$v" = "null" ] && v=""; printf '%s' "$v"; }  # e.g. "s4l"; "" for identity packs
+pack_workflow()  { local v; v=$(resolve_pack_field extension.workflow);  [ "$v" = "null" ] && v=""; printf '%s' "$v"; }  # e.g. "s4l-forge"; "" otherwise
+
 # List the loaded pack name (operator visibility)
 get_loaded_pack() {
   _prime_cache_for_session 2>/dev/null || true
@@ -350,4 +403,7 @@ if [ "${BASH_SOURCE[0]}" = "$0" ]; then
   echo "  compliance.mode = $(resolve_pack_field compliance.mode)"
   echo "  navigation.default_workflow = $(resolve_pack_field navigation.default_workflow)"
   echo "  brief_forge_handoffs.budget_tokens = $(resolve_pack_field brief_forge_handoffs.budget_tokens)"
+  echo "  extension.is_extension = $(resolve_pack_field extension.is_extension)"
+  echo "  pack_is_extension = $(pack_is_extension && echo yes || echo no)"
+  echo "  pack_namespace = $(pack_namespace)"
 fi

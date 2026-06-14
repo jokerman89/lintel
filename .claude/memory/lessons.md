@@ -306,3 +306,28 @@ or a deterministic source and BLOCK if it's empty —
 
 Related: [[L-007]] independent review before SHIP — both reviews earned their keep by catching
 exactly this; the lesson is to stop manufacturing the finding for them.
+
+## L-016 — Running /li:cycle means running its machinery, not just its work
+
+**Rule:** When you invoke `/li:cycle` (or any cycle), instantiate it in the state ledger at the
+START — `state_append CYCLE STARTING cycle_id=… cycle_mode=…` — and render `render_cycle_footer`
+at every phase/wave boundary and gate, with explicit `[N/M] PHASE → next` hand-offs. Doing the
+cycle's *work* (explore, decide, build) without its *machinery* (ledger segment + footer +
+hand-offs) leaves the operator blind to position and breaks `/li:resume`.
+
+**Why:** During the S4L build I drove SENSE→…→BUILD directly and never wrote a `CYCLE STARTING`
+marker. The ledger still showed the previous (v5.3) cycle `cycle_complete:true`, so
+`render_cycle_footer` found no active segment and fell to the thin "no active cycle" line — the
+operator asked why there was no footer / no clear hand-off. The footer was not broken; I never
+started the cycle in the ledger. Reinforced by 7ece1f4 ("scope ledger resolution to the current
+cycle segment") — the footer needs a CYCLE STARTING marker to define the segment.
+
+**How to apply:**
+- First action of any cycle: `source lib/state.sh && state_append CYCLE STARTING cycle_id=<id> cycle_mode=<mode> branch=… commit=…`.
+- Append a per-phase ledger entry at each boundary; render the footer at gates + completion.
+- For long multi-wave BUILDs, treat each wave as a hand-off boundary: render the footer + name the next wave.
+- "Did the work" ≠ "ran the cycle." The ceremony is the operator's visibility + the resume contract.
+
+Related: [[L-013]] (do the real work, not the work-shaped gesture) — here the inverse: I did the
+substance but skipped the visible contract. NOTE: L-015 is reserved for the parallel
+launch-waves wave (avoids a merge collision).
