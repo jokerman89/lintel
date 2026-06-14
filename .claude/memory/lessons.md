@@ -420,3 +420,32 @@ define the segment.
 Related: [[L-013]] (do the real work, not the work-shaped gesture) — here the inverse: I did the
 substance but skipped the visible contract; and [[L-016]] (enforce continuity with hooks, not prose)
 — the deeper, hook-based fix for the same silent-mid-cycle failure.
+
+## L-019 — Consume the source's KNOW-HOW; produce the user's VALUE — never port its mechanism
+
+**Rule:** When converting an external system (a course, a Notion/spreadsheet "system", a prompt
+pack) into a Lintel pack, take the *expertise* (frameworks, copy logic, psychology, the prompts'
+reasoning) and deliver it as skills that GENERATE the actual deliverables the user wants. Do NOT
+replicate the source's internal plumbing — its bookkeeping objects, setup tabs, "command center",
+copy-paste hand-off blocks — as if those were features. Those are how a humans-in-a-spreadsheet
+system carried state; an agentic skill pack carries state natively (session + real artifacts in the
+user's project + the ledger/memory).
+
+**Why:** Building the S4L pack I designed the cycle around faithfully reproducing the source's "28
+Vault Objects", the Command Center, and AI-Stack-Setup tabs. The operator stopped it: "vi skiter i
+vault objects och command center … målet är innehållet som genereras … värdet som användaren får
+ut." The vault-object paste-chain was the source's mechanism for manual state transfer; porting it
+would have produced object-shaped ceremony instead of sales pages, VSLs, emails, and offers. The
+goal is the generated content (the value), not artifacts that mirror the source's tooling.
+
+**How to apply:**
+- Frame every phase/skill by the DELIVERABLE it produces ("a sales page", "a 7-email sequence"),
+  not by a source step name or an intermediate object schema.
+- State compounds "our way": skills write real artifacts to the user's workspace and read prior
+  ones; the cycle tracks progress in the Lintel ledger. No paste-block objects.
+- Keep ALL the know-how (every framework/formula/example) in skills + knowhow; drop the form.
+- Consolidate many source prompts into fewer capable skills (e.g. 13 ad-story prompts → one
+  `/s4l:ads` that can produce any of them), backed by the full reference — subtraction bias.
+
+Related: [[L-013]] (make-it-ours = reinvent the substance) — L-019 is the sharp instance: reinvent
+toward the OUTCOME, and explicitly discard the source's mechanism rather than dignifying it as a feature.
