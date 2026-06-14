@@ -20,6 +20,34 @@ Cross-session working state (ej durable rules — that's [[lessons.md]]; ej pers
 **Last touched:** YYYY-MM-DD
 -->
 
+## s4l-extension-pack — extension-pack contract pushed + S4L pack built 2026-06-14
+
+**Status:** active — lintel branch pushed (PR pending); s4l-pack built locally (operator creates remote)
+
+**Two-part initiative (operator: build a Set4Life marketing pack as a first-class Lintel extension):**
+- **Lintel (meta-infra):** the **extension-pack contract** (ADR-0018) — packs can ship
+  skills/agents/hooks/workflow. `packs/_default` `extension:` block (flat 2-level), pack-resolver
+  enforcement + shared `_pack_ext_field` parser + helpers, `bin/li-pack-scaffold`, pack-switch
+  awareness, `tests/shape/extension-pack-contract.sh`, M1/M2 docs. 2 adversarial reviews → all fixed.
+  Branch `feat/extension-pack-contract` (stacked on v5.3 #73) pushed; **needs a PR to main** (after #73).
+- **S4L pack** (separate repo `E:\Workspace\s4l-pack`, 9 commits, local only): `s4l-forge` cycle +
+  23 skills + 6 marketing agents + 7 knowhow databases + direct-response voice tier + claim-honesty
+  advisory hook + marketplace.json. Built by 3 ultracode generation workflows (generate→verify→fix);
+  independent review = ship-with-fixes → all P1/P2 fixed. PII + source-archaeology clean; full source
+  know-how preserved; source mechanism dropped (L-017).
+
+**What's pending:**
+- **OPERATOR (hard guardrail):** create the GitHub remote for s4l-pack + first push + `/plugin
+  marketplace add` + `/plugin install s4l-pack@set4life`. I build + git-init locally only.
+- Open the lintel `feat/extension-pack-contract` PR to main (stacked on #73 — merge #73 first).
+- Known S4L gaps (absent from source, not porting errors): TAB 12 (Scale+Defend) → candidate future
+  `/s4l:scale`; TAB 6.4 covered by `/s4l:objections`.
+- Captured L-016 (run the cycle's machinery, not just its work) + L-017 (consume know-how, produce value).
+
+**Last touched:** 2026-06-14
+
+---
+
 ## v5.3-cli-and-craft — PR #73 OPEN 2026-06-13
 
 **Status:** active — PR #73 to main (independent; #69 already merged). launch-waves wave folded in.
