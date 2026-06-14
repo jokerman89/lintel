@@ -2,6 +2,27 @@
 
 All notable changes to this repo are tracked here. Format is loose — date headings + bulleted changes. Major behavior changes to the canonical instructions are also logged in `scaffolding/EVOLUTION-LOG.md` (which travels with each scaffolded repo).
 
+## 5.6.0 — 2026-06-14
+
+Setup-hardening: self-healing cycle continuity + agent/CLAUDE.md/ADR cleanup. ADR-0022 (delivery bump for PR #75).
+
+### Added
+- **`cycle-incomplete-warn` Stop hook** — the first Stop hook in the fleet. At turn end, if a cycle is open mid-flight, it surfaces the position footer (warn-only: stdout + exit 0, never blocks; silent outside a cycle). The mechanical backstop for the footer convention, which until now was 100% model-discipline (the recurring "did lots of work then total silence, no footer" symptom — L-008/L-016).
+- `tests/unit/cycle-continuity.sh` (10 assertions) + `tests/shape/adr-numbers-unique.sh` (fails CI on the next ADR-number collision).
+
+### Changed
+- `session-digest` re-injects `Current cycle: phase X · next Y` so fresh/resumed/compacted sessions recover position.
+- `lib/cycle-footer.sh`: a just-started cycle renders the stepper instead of the thin "no active cycle" line.
+- `skills/cycle/SKILL.md`: `CYCLE STARTING` is now the explicit non-negotiable first action.
+
+### Removed
+- The 4 repo + 4 scaffolding-template subagents (CodeReviewer/ReadOnly/SanityChecker/TestRunner) — thin duplicates that *shadowed* the richer plugin fleet (project beats plugin). CLAUDE.md/template repoint to the 69-agent fleet (ADR-0015 subtraction).
+
+### Fixed
+- ADR numbering collision: 0015/0016/0017 each had two members on main (two branches collided + merge kept both). Renumbered the later trio → 0019/0020/0021 (git timestamps: design-dna was first; 0018 left for extension-pack-contract).
+- Global `~/.claude/CLAUDE.md` (operator file) de-staled — `tasks/*` / `docs/adr` pointers were dead stubs; now defer to each repo's layout.
+- working-state: one CURRENT pointer ends the 7-active-initiative fresh-session confusion.
+
 ## 5.5.0 — 2026-06-13
 
 Design parity: close the two UUPM gaps an adversarial audit found. ADR-0017 (amends ADR-0015).
