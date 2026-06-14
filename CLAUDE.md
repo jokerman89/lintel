@@ -114,8 +114,7 @@ full map for on-demand reads + where to **write**.
 
 ### 2. Subagent Strategy
 - Use subagents liberally to keep the main context window clean — offload research, exploration, parallel analysis. One task per subagent.
-- Pre-defined subagents in `.claude/agents/`: `ReadOnly`, `CodeReviewer`, `TestRunner`, `SanityChecker`.
-  Repo also exposes the full `agents/` fleet via the plugin manifest.
+- The full subagent fleet (69 agents across engineering · security · compliance · devops · customer · communication · doc-gen · frontend) ships via the plugin manifest under `agents/` — run `/li:help` or `/li:catalog` to list them, dispatch by name (e.g. `CodeReviewer`, `SecurityAuditor`, `TestRunner`). There are **no** repo-local `.claude/agents/` overrides: a repo-level agent *shadows* the plugin fleet by name (project beats plugin), and the four legacy copies were thinner duplicates of the fleet versions — removed 2026-06-14 so dispatch resolves to the richer agent (ADR-0015 subtraction). Add a repo-local override only for a genuinely project-specific agent.
 - When in doubt, prefer a subagent over polluting main context.
 
 ### 3. Self-Improvement Loop
