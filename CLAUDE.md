@@ -188,6 +188,15 @@ Same skills/agents/hooks work across 8 CLIs via per-CLI manifests. See [docs/per
 - Conventional Commits, atomic, one logical change per commit. End commit messages with the Co-Authored-By trailer.
 - Non-trivial decision → ADR. Structural change → meta-infra `structure-changes/` entry.
 
+### Factory exception to the global "no tooling in repos" rule
+The operator's global `~/.claude/CLAUDE.md` says tooling (agents, skills, packs, hooks) installs
+user-global and **never** into a project repo. **This repo is the exception, by design:** Lintel
+IS the tooling — it ships `agents/`, `skills/`, `hooks/`, `packs/`, `lib/`, `scaffolding/` and its
+own `.claude/` as its product. The global no-tooling-in-repos rule is correct for every *other*
+repo and does not apply here (a documented, motivated deviation per CORE-PRINCIPLES). Note: this
+repo ships **no** `.claude/agents/` — subagents come from the plugin fleet (removed 2026-06-14,
+ADR-0015); a repo-local agent would shadow the fleet's same-named one.
+
 <!-- PROJECT:END -->
 
 ---
