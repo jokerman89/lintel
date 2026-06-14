@@ -32,9 +32,9 @@ Three findings dominate, one per workstream:
 | Delete `.copilot-plugin/` (fabricated path) + `.droid-plugin/` (wrong name) — both read `.claude-plugin/` via interop | **FIX NOW** (Wave B) |
 | `lib/cli-tiers.yaml` Copilot install `lintel@` → `li@`; `codex.subagents: sequenced → native` | **FIX NOW** (Wave B) |
 | `instruction-parity-check` asserts 3 ghost files (.claude/AGENTS.md, .codex/CLAUDE.md, .github/copilot-instructions.md) that don't exist — repoint to real files | **FIX NOW** (Wave B) |
-| AGENTS.md becomes the canonical instruction substance; CLAUDE.md a pointer (it's a LF standard read by Codex/Cursor/Copilot/Droid/Gemini/opencode/Zed/Windsurf) | **PLAN** ADR-0015 (file moves; do carefully) |
+| AGENTS.md becomes the canonical instruction substance; CLAUDE.md a pointer (it's a LF standard read by Codex/Cursor/Copilot/Droid/Gemini/opencode/Zed/Windsurf) | **PLAN** ADR-0019 (file moves; do carefully) |
 | TOML/command stubs for Gemini `commands/`, Cursor `.cursor/commands/`, Codex `prompts/` — flips `skills_native` true; one generator from skill frontmatter | **PLAN** (generator) |
-| `lintel-state` tools-only MCP server (state/lessons/jobs as TOOLS not resources → ~10 clients, more reach than 6 manifests) | **PLAN** ADR-0016 |
+| `lintel-state` tools-only MCP server (state/lessons/jobs as TOOLS not resources → ~10 clients, more reach than 6 manifests) | **PLAN** ADR-0020 |
 | scaffold emits `.cursor/rules/` + `GEMINI.md` so scaffolded repos aren't Claude-only | **PLAN** |
 
 ## Workstream 2 — issues we'll share (16 findings; TIER-1 here)
@@ -66,7 +66,7 @@ rules-format authors + 2026 prompt SOTA). Ranked:
 6. **Word/instruction budgets** — spine skills are 300-487 lines; field budgets are <500 lines /
    ~150 instructions. Subtraction already started (ADR-0009); continue with the budget stated.
 7. **Eval-driven iteration** — the real unlock, and the thing most likely missing. 20-50 tasks
-   per critical skill, pass/fail verifier, positive+negative. **PLAN** ADR-0017 (battletest H1/H5).
+   per critical skill, pass/fail verifier, positive+negative. **PLAN** ADR-0021 (battletest H1/H5).
 8. **Anti-sycophancy structurally** — fresh-context judge agents + question-reframing beat "be
    harsh"; our subagent review already fits. House-style note.
 9. **Persona-for-accuracy is overrated** — roles steer voice/behavior, not correctness. House-style.
@@ -79,8 +79,8 @@ rules-format authors + 2026 prompt SOTA). Ranked:
 - **Wave C (prompt craft, ADR-0014 craft):** house-style v2 doc; MISSING_TRIGGER shape guard;
   description→trigger rewrite (highest-traffic skills first); agent Behavioral-Traits/Core-Principles;
   dial-back aggressive language in the spine.
-- **PLANNED (own ADRs):** AGENTS.md-primary (ADR-0015) · lintel-state MCP server (ADR-0016) ·
-  eval-harness (ADR-0017) · Subtraction-Bias data-modeling exception · the field-wide
+- **PLANNED (own ADRs):** AGENTS.md-primary (ADR-0019) · lintel-state MCP server (ADR-0020) ·
+  eval-harness (ADR-0021) · Subtraction-Bias data-modeling exception · the field-wide
   aggressive-language sweep · per-CLI command-stub generator.
 
 ## The strategic through-line (all three workstreams agree)

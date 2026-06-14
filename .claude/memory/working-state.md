@@ -8,6 +8,27 @@ Cross-session working state (ej durable rules — that's [[lessons.md]]; ej pers
 
 ---
 
+## ▶ CURRENT — read this first (reconciled 2026-06-14)
+
+One answer to "what am I doing", so a fresh session doesn't drown in the entries below. Most of
+those are **DONE** — their PRs are merged. As of 2026-06-14:
+
+- **Merged to main (treat as history, not in-flight):** the whole v5.x chain — vault sink, v5.0
+  `.claude/` home, memory v2, Obsidian, v5.1 subtraction, v5.2 battletest (#62–#69), v5.3
+  cli-and-craft + launch-readiness (#73), v5.4 design-dna (#72), v5.5 design-parity (#74). If an
+  entry below says "PR #NN OPEN", it's almost certainly merged — verify with `gh pr view NN`.
+- **In-flight branches (NOT on main yet):** `feat/extension-pack-contract` (ADR-0018 — `00-state`
+  shows it mid-BUILD: "implemented; adversarial review done; pending final suite+commit"; resume or
+  close it deliberately, don't let SENSE resurrect stale intent) · `feat/setup-hardening` (this —
+  cycle-continuity self-heal, repo-agent removal, CLAUDE.md fixes, ADR-collision renumber).
+- **Staged designs, not built:** ADR-0019 AGENTS.md-primary · ADR-0020 lintel-state MCP · ADR-0021
+  eval-harness (renumbered from 0015/0016/0017 on 2026-06-14).
+
+When in doubt about "is this PR still open?", `gh pr list --state open` is the source of truth, not
+the entries below.
+
+---
+
 <!--
 ## entry-id — short title
 
@@ -47,8 +68,8 @@ blockers §3-A, dated deferrals §3-B, waves §4) + the remediation it found.
 **What's pending:**
 - Operator: merge PR #73 → main (the git-push-to-main gate stays yours).
 - Public-launch-tier items remain DATED-not-blocking in the register §3-B: real git pre-commit/pre-push
-  install (by 2026-07-15, supersedes the command-string matcher), ADR-0015 AGENTS.md-primary, ADR-0016
-  MCP, ADR-0017 eval-harness, H17/H18, marketplace (post legal). v6 shrink-to-kernel decided after the eval.
+  install (by 2026-07-15, supersedes the command-string matcher), ADR-0019 AGENTS.md-primary, ADR-0020
+  MCP, ADR-0021 eval-harness, H17/H18, marketplace (post legal). v6 shrink-to-kernel decided after the eval.
 - `gh` couldn't auth to jokerman89/lintel from the build session — PR view/merge is operator-side.
 
 **Last touched:** 2026-06-13
@@ -96,8 +117,8 @@ auto-merged to a no-op. Suite 79/79 on the merged tree.
   UNCOMMITTED craft-sweep WIP** (+690/−464: ~16 skills, a new tests/shape/no-swedish.sh, AGENTS/
   CLAUDE/README/li-doctor). A merge can't capture uncommitted work — preserved untouched, fragile.
   Decide: commit-on-branch (durable) or fold into a follow-up cycle. NOT discarded.
-- STAGED (own ADRs already written): AGENTS.md-primary (ADR-0015), lintel-state MCP server
-  (ADR-0016), eval-harness (ADR-0017), per-CLI command-stub generator, field-wide
+- STAGED (own ADRs already written): AGENTS.md-primary (ADR-0019), lintel-state MCP server
+  (ADR-0020), eval-harness (ADR-0021), per-CLI command-stub generator, field-wide
   description-trigger + aggressive-language sweep of the remaining ~80 skills.
 ## v5.4-design-dna — PR OPEN 2026-06-13
 

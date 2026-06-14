@@ -114,8 +114,7 @@ full map for on-demand reads + where to **write**.
 
 ### 2. Subagent Strategy
 - Use subagents liberally to keep the main context window clean — offload research, exploration, parallel analysis. One task per subagent.
-- Pre-defined subagents in `.claude/agents/`: `ReadOnly`, `CodeReviewer`, `TestRunner`, `SanityChecker`.
-  Repo also exposes the full `agents/` fleet via the plugin manifest.
+- The full subagent fleet (69 agents across engineering · security · compliance · devops · customer · communication · doc-gen · frontend) ships via the plugin manifest under `agents/` — run `/li:help` or `/li:catalog` to list them, dispatch by name (e.g. `CodeReviewer`, `SecurityAuditor`, `TestRunner`). There are **no** repo-local `.claude/agents/` overrides: a repo-level agent *shadows* the plugin fleet by name (project beats plugin), and the four legacy copies were thinner duplicates of the fleet versions — removed 2026-06-14 so dispatch resolves to the richer agent (ADR-0015 subtraction). Add a repo-local override only for a genuinely project-specific agent.
 - When in doubt, prefer a subagent over polluting main context.
 
 ### 3. Self-Improvement Loop
@@ -188,6 +187,15 @@ Same skills/agents/hooks work across 8 CLIs via per-CLI manifests. See [docs/per
 - Feature branch → PR against `main`. Local verification (shape + unit tests green) before push.
 - Conventional Commits, atomic, one logical change per commit. End commit messages with the Co-Authored-By trailer.
 - Non-trivial decision → ADR. Structural change → meta-infra `structure-changes/` entry.
+
+### Factory exception to the global "no tooling in repos" rule
+The operator's global `~/.claude/CLAUDE.md` says tooling (agents, skills, packs, hooks) installs
+user-global and **never** into a project repo. **This repo is the exception, by design:** Lintel
+IS the tooling — it ships `agents/`, `skills/`, `hooks/`, `packs/`, `lib/`, `scaffolding/` and its
+own `.claude/` as its product. The global no-tooling-in-repos rule is correct for every *other*
+repo and does not apply here (a documented, motivated deviation per CORE-PRINCIPLES). Note: this
+repo ships **no** `.claude/agents/` — subagents come from the plugin fleet (removed 2026-06-14,
+ADR-0015); a repo-local agent would shadow the fleet's same-named one.
 
 <!-- PROJECT:END -->
 

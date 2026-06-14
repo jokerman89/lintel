@@ -409,7 +409,7 @@ entire enforcement layer is Claude-Code-only.*
 
 **ADRs** (`.claude/decisions/` — the live home since v5; `docs/adr/` is a redirect stub): the series
 opened with ADR-0001 (dogfood the scaffolding) and ADR-0002 (session-digest auto-load) and has since
-grown through ADR-0017; the README codifies "ADR for any non-trivial, hard-to-reverse choice, not for bug fixes."
+grown through ADR-0021; the README codifies "ADR for any non-trivial, hard-to-reverse choice, not for bug fixes."
 **Evolution log** (`docs/v4.x/structure-changes/`): Gate-M1 artifacts for structural changes (phase2-packs-
 envelope, phase3-nav-forge-wiki, spine-extraction-audit, caip-pack-extraction).
 

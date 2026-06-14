@@ -477,10 +477,6 @@ cmd_scaffolding_coherence() {
     "scaffolding/01-foundation/.claude/plans/todo.md"
     "scaffolding/01-foundation/.claude/decisions/README.md"
     "scaffolding/01-foundation/.claude/decisions/TEMPLATE.md"
-    "scaffolding/01-foundation/.claude/agents/ReadOnly.md"
-    "scaffolding/01-foundation/.claude/agents/CodeReviewer.md"
-    "scaffolding/01-foundation/.claude/agents/TestRunner.md"
-    "scaffolding/01-foundation/.claude/agents/SanityChecker.md"
     "scaffolding/01-foundation/TEMPLATE-skill.md"
     "scaffolding/01-foundation/TEMPLATE-agent.md"
   )
