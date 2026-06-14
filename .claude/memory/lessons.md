@@ -340,3 +340,59 @@ everything. Two independent reviews (theirs + mine) made the result stronger tha
 Related: [[L-010]] green-on-committed-tree — the gate is the merged tree, not either parent;
 [[L-007]] independent review — two parallel sessions yield two independent reviews, a feature not a
 bug if you merge rather than overwrite.
+
+## L-016 — A harness convention the model must remember is no convention: enforce continuity with hooks, not prose
+
+**Rule:** When a harness needs something to happen reliably across a long session (render the
+position footer, append state, continue to the next phase), it cannot live only as SKILL.md prose
+the model chooses to execute. Across long BUILDs, subagent returns, and context compaction, that
+adherence decays and the turn ends silently. Put the load-bearing guarantee in the deterministic
+substrate — a hook — and keep the prose thin.
+
+**Why:** The operator reported a recurring "did a lot of work, then total silence, no footer, as if
+the session forgot it was mid-cycle" across many sessions. A 7-agent diagnosis + adversarial verify
+found: the footer renderer works fine (a live BUILD/STARTING cycle was frozen on disk) — but
+*nothing invoked it*. Only SessionStart/Pre/PostToolUse hooks existed; no Stop hook, no PreCompact
+hook. ADR-0003 even cited "invisible discipline is indistinguishable from no discipline," then
+shipped a footer whose content was visible but whose invocation was invisible. The fix (ADR-0022):
+a warn-only Stop hook surfaces the footer at turn end; the digest re-injects cycle position; the
+renderer handles a just-started cycle. Stricter prose was explicitly rejected — it is what already
+failed.
+
+**How to apply:**
+- Claude Code reality (verify, don't assume): there is NO PreCompact hook (compaction is
+  non-hookable); a Stop hook can warn (stdout, exit 0) or block (exit 2) but CANNOT inject context
+  to resume. Project-root CLAUDE.md + auto-memory ARE re-injected after compaction — so durable
+  recovery state goes there + in `.claude/memory/`, and a SessionStart digest re-injects it.
+- A Stop hook that enforces continuity must be warn-only (stdout + exit 0), never a block decision
+  (forcing continuation can infinite-loop), and silent when there is nothing to surface.
+- Honest scope: hooks are Claude-Code-only. Other CLIs keep the prose convention as fallback — so
+  the prose can't be deleted, only demoted to the non-enforced path.
+
+Related: [[L-008]] dogfood-the-footer (the convention shipped but wasn't followed — because nothing
+enforced it); [[L-012]] the negative test matters (the Stop hook's "silent when not in a cycle" path
+is the one that keeps it from being a per-turn nuisance).
+
+## L-017 — The inline secret/PII override must be the LEADING token of the command, not after `cd … &&`
+
+**Rule:** The block hooks honor the inline override only as a *leading* env-assignment prefix of the
+command string (the L-012 anti-forgery property). So a command that starts with `cd /repo && ` and
+only THEN has the override does NOT override — the leading token is `cd`. Put the override first and
+use the directory flag (`-C <repo>`) instead of a `cd` prefix.
+
+**Why:** During the setup-hardening ship, the customer-data hook fired on a verified false positive
+(the loose phone regex matched a generated audit filename's numeric timestamp suffix). The override
+kept being ignored until I read the hook: its override regex is anchored to the start of the command
+(`^[[:space:]]*(VAR=val )*LINTEL_OVERRIDE_…=1`), so a `cd … &&` prefix breaks the anchor. With the
+override leading and the directory flag, it worked. Two follow-ups surfaced: the phone regex
+over-matches numeric date/timestamp strings (false-positives on audit/compat filenames), and the
+block hook's git-command matcher fires when ordinary text merely CONTAINS the words "git push/commit"
+— so a lesson documenting the override can itself trip the hook (write such text via the Edit tool,
+not a Bash heredoc).
+
+**How to apply:** Override pushes/commits with the env-assignment as the absolute first token, no
+`cd` prefix. Always verify the match is genuinely benign first (grep the diff for the regex) and
+record the specific benign string in the reason — never override blind.
+
+Related: [[L-012]] the override is honored only as a leading prefix precisely so attacker-influenced
+text can't forge it — the same property that makes a `cd &&` prefix fail.
