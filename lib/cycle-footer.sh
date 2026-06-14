@@ -131,6 +131,13 @@ EOF_HIST
   [ -z "$mode" ] && mode="${LINTEL_CYCLE_MODE:-}"
   local complete; complete="$(printf '%s\n' "$seg" | _cf_state_last cycle_complete)"
 
+  # A cycle with a CYCLE STARTING block but no canonical phase closed yet is ACTIVE,
+  # but `here` is empty. Without this, auto/full tier fell to the thin "no active
+  # cycle" line at the exact moment a cycle kicks off — the compact tier already
+  # handled this case (ADR-0003 follow-up, setup-hardening 2026-06-14).
+  local started=0
+  [ -z "$here" ] && [ "$complete" != "true" ] && [ -n "$history" ] && started=1
+
   # normalize phase tokens to first-word UPPER-CASE — consistent with cycle_mode_skips /
   # cycle_phase_known, since state or operator input may be lowercase or multi-word.
   here="$(printf '%s' "$here" | awk '{print toupper($1)}')"
@@ -149,9 +156,19 @@ EOF_HIST
   # known-but-non-terminal position never mislabels itself "cycle complete".
   [ -z "$next" ] && [ -n "$here" ] && next="$(_cf_next_after "$here" "$skips")"
 
-  # auto tier → thin when there is no active cycle
+  # stepper position: a started-but-no-phase-closed cycle marks the first non-skipped
+  # phase (SENSE in every shipping mode) so the stepper shows the here-glyph, not all-pending.
+  local _mark="$here"
+  if [ "$started" = "1" ] && [ -z "$here" ]; then
+    for p in $(cycle_phases); do _cf_in_list "$p" "$skips" || { _mark="$p"; break; }; done
+  fi
+
+  # auto tier → thin only when there is genuinely no active cycle. A freshly STARTED
+  # cycle (started=1) keeps the full footer instead of falling to thin.
   if [ "$tier" = "auto" ]; then
-    if [ -z "$here" ] || [ "$complete" = "true" ]; then tier="thin"; else tier="full"; fi
+    if [ "$complete" = "true" ]; then tier="thin"
+    elif [ -n "$here" ] || [ "$started" = "1" ]; then tier="full"
+    else tier="thin"; fi
   fi
 
   # ── thin ambient footer (outside the cycle) ──
@@ -172,11 +189,11 @@ EOF_HIST
   # history or an explicit --here. Skip takes precedence over done (a skipped phase
   # before `here` — e.g. SCOPE in research-dive — renders ⊘, not ✅).
   local here_idx=0 idx=0 p
-  for p in $(cycle_phases); do idx=$((idx+1)); [ "$p" = "$here" ] && here_idx=$idx; done
+  for p in $(cycle_phases); do idx=$((idx+1)); [ "$p" = "$_mark" ] && here_idx=$idx; done
   local stepper="" first=1 g; idx=0
   for p in $(cycle_phases); do
     idx=$((idx+1))
-    if   [ "$p" = "$here" ]; then g="$g_here"
+    if   [ "$p" = "$_mark" ]; then g="$g_here"
     elif _cf_in_list "$p" "$skips"; then g="$g_skip"
     elif [ "$here_idx" -gt 0 ] && [ "$idx" -lt "$here_idx" ]; then g="$g_done"
     else g="$g_pend"; fi
@@ -211,6 +228,12 @@ EOF_HIST
     return 0
   fi
 
+  if [ "$started" = "1" ] && [ -z "$here" ]; then
+    local _ml; _ml="$(printf '%s' "$_mark" | tr '[:upper:]' '[:lower:]')"
+    printf '> **%s You are here:** `%s` (cycle starting)\n' "$g_here" "$_mark"
+    printf '> **%s Next:** run `%s` — say `go` or `/li:%s`.\n' "$nextmark" "$_mark" "$_ml"
+    return 0
+  fi
   printf '> **%s You are here:** `%s`\n' "$g_here" "${here:-?}"
   if [ -n "$next" ]; then
     printf '> **%s Next:** `%s`\n>\n' "$nextmark" "$next"

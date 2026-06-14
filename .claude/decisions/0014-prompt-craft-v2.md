@@ -27,7 +27,7 @@ models OVERTRIGGER on it. Both are cheap, high-leverage, evidence-backed fixes.
 4. **Positive over negative framing; one excellent worked example; word/instruction budgets;**
    persona-as-voice-not-accuracy; no hand-prescribed CoT for capable models; one verifier-anchored
    self-critique pass; structural anti-sycophancy. All codified in docs/concepts/prompt-house-style.md.
-5. **Evidence over intuition (staged).** The eval-harness (ADR-0017) is the real arbiter; until it
+5. **Evidence over intuition (staged).** The eval-harness (ADR-0021) is the real arbiter; until it
    exists this house-style is the best-evidence default, applied with judgment.
 
 ## Honesty notes (from the v5.3 independent review)
@@ -36,7 +36,7 @@ models OVERTRIGGER on it. Both are cheap, high-leverage, evidence-backed fixes.
   The cycle skill instructs the agent to call it before auto-deciding, but the live `--auto` path
   is still LLM-executed prose, not hard control flow — the guard is "a real function the agent is
   told to call", not yet a mechanical gate that runs regardless. Full wiring is staged with the
-  eval-harness (ADR-0017), which is what would let us prove the gate fires.
+  eval-harness (ADR-0021), which is what would let us prove the gate fires.
 - The trigger-description guard (tests/shape/skill-descriptions-trigger.sh) enforces opening-verb
   + no-archaeology, not trigger SUBSTANCE — a cleverly-worded summary that opens with "Use to" can
   still pass. It is a ratchet against regression, not a substance judge; substance is settled by

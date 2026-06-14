@@ -1,4 +1,7 @@
-# ADR-0015: AGENTS.md as the primary cross-CLI instruction layer
+# ADR-0019: AGENTS.md as the primary cross-CLI instruction layer
+
+> Renumbered 0015 → 0019 (2026-06-14): 0015 collided with the design-dna ADR created
+> 4 min earlier (first claimant keeps the number); 0018 reserved for extension-pack-contract.
 
 **Status:** Accepted-direction, build staged (2026-06-13)
 **Implements:** docs/audit/2026-06-13-cli-issues-craft-synthesis.md (workstream 1, H13)

@@ -98,7 +98,7 @@ Gemini, Copilot) · **VAPOR-leaning 2** (Droid, OpenCode — actively broken) ·
 honest. The flagship install string `lintel@jokerman-lintel` is wrong (plugin is `li`) in
 cli-tiers:26,68 + SHIP-GATE:71,244. Fingerprint vocabulary can only produce 4 of 8 tier keys →
 welcome's honest-tier display can't work on 4 CLIs. Manifest deletion not propagated to 5
-contract surfaces (tests/verify/SHIP-GATE/README/cli-tiers). ADR-0015 (AGENTS.md-primary) is
+contract surfaces (tests/verify/SHIP-GATE/README/cli-tiers). ADR-0019 (AGENTS.md-primary) is
 right and staged; real scope quantified: 3 competing canonicals, 775 lines across 7 files, 10
 factual drifts listed.
 
@@ -138,12 +138,12 @@ largest undated security promise = real git pre-commit/pre-push install. ADR num
 | Item | ADR/source | Date |
 |---|---|---|
 | Real git pre-commit/pre-push install (structural close for ALL matcher residuals) | ADR-0010 staged → needs ADR stub | **stub this cycle; build by 2026-07-15** |
-| ADR-0015 AGENTS.md-primary execution (the inversion, scaffold side, parity collapse) | ADR-0015 | 2026-07-15 |
-| ADR-0017 eval-harness (the recurring "real unlock"; gates I5, v6 question) | ADR-0017 | 2026-07-31 |
-| ADR-0016 lintel-state MCP server | ADR-0016 | 2026-08-15 |
+| ADR-0019 AGENTS.md-primary execution (the inversion, scaffold side, parity collapse) | ADR-0019 | 2026-07-15 |
+| ADR-0021 eval-harness (the recurring "real unlock"; gates I5, v6 question) | ADR-0021 | 2026-07-31 |
+| ADR-0020 lintel-state MCP server | ADR-0020 | 2026-08-15 |
 | H17 pack provenance + H18 plugin pinning (public-launch tier) + append-only audit sink | ADR-0010 staged | 2026-08-31 |
 | Full-surface description→trigger sweep + aggressive-language dial-back | ADR-0014 follow-ups | 2026-07-31 |
-| Per-CLI command-stub generator (Gemini/Cursor/Codex `skills_native`) | craft synthesis | with ADR-0015 |
+| Per-CLI command-stub generator (Gemini/Cursor/Codex `skills_native`) | craft synthesis | with ADR-0019 |
 | JSTACK env-alias removal | aliases.yaml:8 | **2026-06-28** |
 | match→skill-router alias (08-29) · context-budgetwatch (09-10) · 44 aliases + post-grace v5 sweep + dual-accept removal | aliases.yaml, ADR-0005/0009/0011 | 2026-09-12 → removal sweep 2026-12-12 |
 | I7 Subtraction-Bias data-modeling exception ADR · J9 jsonl-vs-OTel · J10 plan-mode | syntheses | 2026-08-31 or cut |
