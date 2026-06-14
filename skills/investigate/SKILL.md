@@ -1,7 +1,7 @@
 ---
 name: investigate
 layer: foundation
-description: Hypothesis-driven bug investigation — minimum repro, eliminate variables, root cause.
+description: Use when something is broken and you don't yet know why — drives a hypothesis-led investigation that builds a minimum repro, eliminates variables, and isolates the root cause. Reach for it for "why is this failing?" before attempting a fix.
 color: orange
 tools: Read, Bash, Grep, Glob
 voice: internal

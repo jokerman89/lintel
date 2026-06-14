@@ -1,7 +1,7 @@
 ---
 name: resume
 layer: foundation
-description: Resume Lintel cycle from prior session — reads 00-state.md, picks up at next-recommended phase or operator-specified. Handles cross-session continuity.
+description: Use at the start of a fresh session to pick up work left in flight — reads 00-state.md and resumes the cycle at the next recommended phase, or one you name. The cross-session continuity entry point when a prior task was interrupted mid-cycle.
 color: cyan
 tools: Read, Bash, Grep, Glob
 voice: internal
@@ -101,10 +101,17 @@ Then branch on what exists:
 Before trusting 00-state.md, validate it. Defensive guard against state-drift / wrong-branch / stale state.
 
 ```bash
-# Read recorded branch + commit + timestamp from 00-state.md (parse YAML-frontmatter or top entry)
-state_branch=$(grep -m1 '^branch:' "$STATE_FILE" | awk '{print $2}')
-state_commit=$(grep -m1 '^commit:' "$STATE_FILE" | awk '{print $2}')
-state_ts=$(grep -m1 '^ts:' "$STATE_FILE" | awk '{print $2}')
+# Read recorded branch + commit + timestamp from the CURRENT cycle's segment.
+# The ledger is append-only across many cycles: a first-match (-m1) grep read
+# the OLDEST cycle, so resume false-warned "stale" on any week-old file.
+# state_cycle_segment (lib/state.sh) scopes to the last CYCLE block; the
+# last match inside it is the current truth. The CYCLE entry records
+# branch/commit since v5.3 (skills/cycle Step 4) — empty on older ledgers,
+# and an empty value skips that check rather than warning.
+seg="$(source "$(git rev-parse --show-toplevel)/lib/state.sh" 2>/dev/null && state_cycle_segment "$STATE_FILE")"
+state_branch=$(printf '%s\n' "$seg" | grep '^branch:' | tail -1 | awk '{print $2}')
+state_commit=$(printf '%s\n' "$seg" | grep '^commit:' | tail -1 | awk '{print $2}')
+state_ts=$(printf '%s\n' "$seg" | grep '^ts:' | tail -1 | awk '{print $2}')
 
 # Current state
 current_branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo unknown)

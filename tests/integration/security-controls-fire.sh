@@ -85,4 +85,27 @@ rc=0; ( cd "$SC" && LINTEL_HOME="$TMP/.lintel" SCAFFOLDING_SRC="$SC/src" \
 [ -f "$SC/CLAUDE.md" ] && grep -q 'X/;e touch' "$SC/CLAUDE.md" && pass "hostile name written literally" || pass "scaffold completed without injection"
 
 echo ""
+echo "[I1] block hooks fail-closed under error (no set -e silent downgrade)"
+for h in secret-scan-block customer-data-block; do
+  grep -qE '^set -e' "$REPO_ROOT/hooks/shared/$h/run.sh" && fail "$h still uses set -e (I1 fail-open risk)" || pass "$h: no set -e"
+  grep -q 'scanner unavailable' "$REPO_ROOT/hooks/shared/$h/run.sh" && pass "$h: fail-closed scanner guard present" || fail "$h: missing fail-closed guard"
+done
+# behavioral: drive the REAL hook with a scanner-less _patterns.sh — it must exit 2.
+# Copy the hook tree to TMP with a stub _patterns that defines NO scan_secrets, preserving
+# the run.sh's BASH_SOURCE-relative source paths (../_patterns.sh, ../_input.sh, ../../../bin).
+HT="$TMP/ht/hooks/shared"; mkdir -p "$HT/secret-scan-block" "$TMP/ht/bin"
+cp "$REPO_ROOT/hooks/shared/secret-scan-block/run.sh" "$HT/secret-scan-block/run.sh"
+cp "$REPO_ROOT/hooks/shared/_input.sh" "$HT/_input.sh"
+cp "$REPO_ROOT/bin/_audit.sh" "$TMP/ht/bin/_audit.sh"
+printf '#!/usr/bin/env bash
+# stub: defines no scan_secrets — simulates a failed pattern load
+: 
+' > "$HT/_patterns.sh"
+SBX="$TMP/failclosed"; mkdir -p "$SBX"; ( cd "$SBX" && git init -q . && git -c user.email=t@t -c user.name=t commit --allow-empty -m i -q )
+printf 'leak ghp_%s
+' "$(printf 'a%.0s' {1..36})" > "$SBX/x.txt"; ( cd "$SBX" && git add x.txt )
+rc=0; ( cd "$SBX" && printf '{"tool_input":{"command":"git commit -m x"}}' | bash "$HT/secret-scan-block/run.sh" ) >/dev/null 2>&1 || rc=$?
+[ "$rc" = "2" ] && pass "fail-closed: REAL hook with broken scanner → exit 2 (block)" || fail "real-hook fail-closed broken (rc=$rc)"
+
+echo ""
 if [ "$FAILED" -eq 0 ]; then echo "ALL PASS"; else echo "FAILURES present"; exit 1; fi

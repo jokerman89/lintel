@@ -1,7 +1,7 @@
 ---
 name: define
 layer: foundation
-description: Phase 2 of Lintel cycle — clarify intent, lock premises, force alternatives, pick wedge. Office-hours-style forcing questions with role-lens overlay. Produces APPROVED design doc.
+description: Use after SCOPE, before DISCOVER, to turn a sized request into an approved design — clarifies intent, locks premises, forces alternatives, and picks the wedge through forcing questions under the active role's lens. Produces the APPROVED design doc that PLAN and BUILD build from.
 color: cyan
 tools: Read, Write, Edit, Bash, Grep, Glob
 voice: mixed

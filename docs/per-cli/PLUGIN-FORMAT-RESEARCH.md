@@ -1,10 +1,18 @@
 # Per-CLI plugin format research (Phase 0)
 
+> **HISTORICAL — Phase-0 research, superseded by the shipped manifests.** This captured the
+> format exploration that produced the manifests; it is **not** an install guide and its
+> commands/slugs/manifest names are from v3 planning (e.g. the inferred `.copilot-plugin/` and
+> `.droid-plugin/` were never needed — Copilot and Droid read `.claude-plugin/` via interop, and
+> the repo slug is `jokerman89/lintel`, plugin `li@jokerman-lintel`). **For current install steps
+> see [README](../../README.md#quick-start) + [getting-started](../getting-started.md).** Kept for
+> the format-research context only.
+
 **Date:** 2026-05-27
 **Researcher:** Claude Code (Opus 4.7)
 **Sources:** Official Anthropic docs + obra/superpowers production plugin manifests + per-CLI marketplace docs.
 
-This document captures the actual plugin-manifest format per CLI as of v3 planning. It's the source-of-truth that drives the manifests we ship.
+This document captures the plugin-manifest format research per CLI as of v3 planning — the exploration that drove the manifests we ship.
 
 ---
 
@@ -83,7 +91,7 @@ This document captures the actual plugin-manifest format per CLI as of v3 planni
     "developerName": "jokerman89",
     "category": "Coding",
     "capabilities": ["Interactive", "Read", "Write"],
-    "defaultPrompt": ["Hjälp mig med ett nytt customer engagement.", "Kör /qa på min branch."],
+    "defaultPrompt": ["Help me with a new customer engagement.", "Run /qa on my branch."],
     "websiteURL": "...",
     "privacyPolicyURL": "...",
     "termsOfServiceURL": "...",

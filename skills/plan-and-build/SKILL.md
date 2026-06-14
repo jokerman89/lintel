@@ -1,7 +1,7 @@
 ---
 name: plan-and-build
 layer: foundation
-description: Composite shortcut PLAN + BUILD — for when DEFINE+DISCOVER are done (have design doc) but PLAN and BUILD still need execution. Skips REVIEW/SHIP/CAPTURE.
+description: Use when you already have an approved design doc and just need to plan and implement it — runs PLAN then BUILD and skips review, ship, and capture. Reach for it after DEFINE and DISCOVER are done and the remaining work is breaking the design into tasks and writing the code.
 color: cyan
 tools: Read, Bash, Grep, Glob
 voice: internal

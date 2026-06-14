@@ -83,6 +83,29 @@ _audit_out_dir() {
 
 _audit_iso_now() { date -u +"%Y-%m-%dT%H:%M:%SZ"; }
 
+# Cycle correlation: env wins (zero fork); else derive once per source from
+# the repo ledger's last `cycle_id:` line. Nothing ever exported LINTEL_CYCLE_ID
+# (each tool call is a fresh process), so 100% of records said "unknown" while
+# the ledger had the answer all along (launch register B4).
+_AUDIT_CYCLE_ID=""
+_audit_init_cycle_id() {
+  _AUDIT_CYCLE_ID="${LINTEL_CYCLE_ID:-${CYCLE_ID:-}}"
+  [ -n "$_AUDIT_CYCLE_ID" ] && return 0
+  local root f
+  root="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}"
+  [ -n "$root" ] || { _AUDIT_CYCLE_ID="unknown"; return 0; }
+  f="$root/.claude/runtime/state/00-state.md"
+  [ -f "$f" ] || f="$root/.lintel/state/00-state.md"
+  if [ -f "$f" ]; then
+    _AUDIT_CYCLE_ID="$(awk '
+      { sub(/\r$/,""); line=$0; sub(/^[ \t]+/,"",line)
+        if (index(line,"cycle_id:")==1) { v=substr(line,10); gsub(/^[ \t]+|[ \t]+$/,"",v); last=v } }
+      END { print last }' "$f" 2>/dev/null)"
+  fi
+  [ -n "$_AUDIT_CYCLE_ID" ] || _AUDIT_CYCLE_ID="unknown"
+}
+_audit_init_cycle_id
+
 # Escape a value for JSON, assigning the result to the variable _AUDIT_ESC.
 # Pure-bash parameter expansion with an out-variable — no subprocess fork at
 # all (neither a sed pipe nor a $(...) command-substitution subshell). Hooks
@@ -115,7 +138,7 @@ audit_log() {
   out="$(_audit_out_dir "$category_file")/${category_file}.jsonl"
   local ts cycle_id operator
   ts=$(_audit_iso_now)
-  cycle_id="${LINTEL_CYCLE_ID:-${CYCLE_ID:-unknown}}"
+  cycle_id="${LINTEL_CYCLE_ID:-${CYCLE_ID:-$_AUDIT_CYCLE_ID}}"
   # Prefer env-provided identity (zero fork). Fall back to whoami only if no
   # env var is set — hooks fire on hot paths and a whoami fork per write is
   # expensive on some platforms.
@@ -142,7 +165,10 @@ audit_log() {
 
   rec="${rec}}"
 
-  printf '%s\n' "$rec" >> "$out" 2>/dev/null || true
+  # Fail-open by design, but never SILENTLY: a dropped record on a full disk /
+  # bad permission must leave at least a stderr trace (the audit trail's value
+  # is that absence of a record means absence of an event).
+  printf '%s\n' "$rec" >> "$out" 2>/dev/null || echo "WARN [lintel/audit]: failed to write $out" >&2
 }
 
 # Count records by kind across a category (reads the scope-routed file; falls
@@ -162,7 +188,9 @@ audit_count() {
   fi
 
   if [ -z "$since_iso" ]; then
-    grep -c "\"kind\":\"${kind}\"" "$out" 2>/dev/null || printf '0'
+    # grep -c prints its own "0" on no-match (rc 1) — an `|| printf '0'`
+    # fallback DOUBLED the output to "0\n0", breaking numeric consumers.
+    grep -c "\"kind\":\"${kind}\"" "$out" 2>/dev/null || true
     return 0
   fi
 

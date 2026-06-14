@@ -1,7 +1,7 @@
 ---
 name: doctor
 layer: foundation
-description: Cross-CLI health check — verifies which CLIs are installed, plugin install status, Lintel version, and surfaces drift.
+description: Use when something seems off with the Lintel install, or to confirm it's healthy, to run a cross-CLI health check — verifies which CLIs are installed, plugin install status, the Lintel version, and surfaces drift. Reach for it to diagnose setup problems before blaming the work.
 color: cyan
 tools: Read, Bash, Grep, Glob
 voice: internal

@@ -123,15 +123,14 @@ fi
 
 ### Step 5 — Audit + emit recommendation
 
-```bash
-ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-operator=$(whoami 2>/dev/null || echo unknown)
-audit_path=".claude/runtime/audit/orientator-decisions.jsonl"
-mkdir -p "$(dirname "$audit_path")"
+One line via the unified writer (ts/operator/cycle_id come from the envelope):
 
-printf '{"ts":"%s","kind":"orientator_decision","intent":"%s","workflow":"%s","risk":"%s","confidence":"%s","decision":"%s","budget_used":%d,"escalated":%s,"operator":"%s"}\n' \
-  "$ts" "$intent" "$recommended_workflow" "$risk" "$confidence" "$decision" "${budget_used:-0}" "${should_escalate:-false}" "$operator" \
-  >> "$audit_path"
+```bash
+source "$(git rev-parse --show-toplevel)/bin/_audit.sh"
+audit_log orientator-decisions orientator_decision "intent=$intent" "workflow=$recommended_workflow" \
+  "risk=$risk" "confidence=$confidence" "decision=$decision" \
+  "budget_used=${budget_used:-0}" "escalated=${should_escalate:-false}"
+# → .claude/runtime/audit/orientator-decisions.jsonl
 ```
 
 ### Step 6 — Output format

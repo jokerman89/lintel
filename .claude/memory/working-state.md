@@ -20,6 +20,85 @@ Cross-session working state (ej durable rules — that's [[lessons.md]]; ej pers
 **Last touched:** YYYY-MM-DD
 -->
 
+## launch-readiness — v5.x "old-school ready", folded into PR #73 2026-06-13
+
+**Status:** active — merged into `feat/v5.3-cli-and-craft` (PR #73), suite 82/82 on the merged tree.
+
+**What this drive added (waves 3–7, on top of the v5.3-cli-and-craft work below):** an 8-audit
+launch-readiness register (docs/audit/2026-06-12-launch-readiness-register.md — bar §1, evidence §2,
+blockers §3-A, dated deferrals §3-B, waves §4) + the remediation it found.
+- **Security (ADR-0013):** newline-class gate bypasses closed (line-continuation matcher evasion +
+  newline-forged `-m` override — L-012 class), each with an adversarial test; gate diffs textconv-safe;
+  push scans the outgoing range; macOS bash-3.2 `read -t` fallback. (Converged with the other session's
+  fail-closed positioning in the merge.)
+- **State (register B4):** `state_cycle_segment` — the footer/resume/`cycle_id` were poisoned by
+  prior-cycle entries in the append-only ledger; now scoped to the current cycle. Multi-cycle + loop-back
+  regression tests.
+- **Windows/portability (B5):** install.ps1 full parity (seed identity + lib/bin copy + shared/ hooks);
+  li-doctor bash-3.2-safe; `.opencode/INSTALL.md` rewritten neutral; `lintel@`→`li@` everywhere;
+  fingerprint↔tiers id-normalization; exec bits.
+- **Docs truth (B6):** ~30 files swept (v3-plan/`tasks/`/`docs/adr`/gstack/v5.0 residue); dormancy
+  qualifiers; no-swedish now covers docs+README; CATALOG generator char-safe (flake fixed).
+- **Mechanism honesty (B7):** usage-log/telemetry/compliance prose → real `audit_log`; pack-resolver
+  set-leak + cache-key fixes; 4 new behaviour tests.
+- **Release (B8):** truthful CHANGELOG 5.3.0, migration date reconcile, M1 artifact
+  (docs/v4.x/structure-changes/2026-06-13-launch-readiness.md). CODEOWNERS de-CAIP'd.
+
+**What's pending:**
+- Operator: merge PR #73 → main (the git-push-to-main gate stays yours).
+- Public-launch-tier items remain DATED-not-blocking in the register §3-B: real git pre-commit/pre-push
+  install (by 2026-07-15, supersedes the command-string matcher), ADR-0015 AGENTS.md-primary, ADR-0016
+  MCP, ADR-0017 eval-harness, H17/H18, marketplace (post legal). v6 shrink-to-kernel decided after the eval.
+- `gh` couldn't auth to jokerman89/lintel from the build session — PR view/merge is operator-side.
+
+**Last touched:** 2026-06-13
+
+## v5.3-cli-and-craft — PR #73 OPEN 2026-06-13
+
+**Status:** active — PR #73 to main (independent; #69 already merged). launch-waves wave folded in.
+
+**What shipped (one meta-infra cycle, three operator workstreams):**
+- **Multi-CLI (subtraction):** deleted the two fabricated manifests (.copilot-plugin, .droid-plugin
+  — both ride .claude-plugin via interop); fixed cli-tiers.yaml (codex.subagents native, Copilot
+  install li@, Cursor stays tier full); repointed instruction-parity-check off 3 ghost files;
+  README CLI-TIERS table regenerated; li-doctor gained a Windows SessionStart-no-fire warn (#59072).
+- **Issue-mining → fixes:** docs/audit/2026-06-13-cli-issues-craft-synthesis.md (16 findings).
+  CRITICAL I1 — both BLOCK hooks ran `set -euo pipefail` with the blocking exit 2 LAST, so an
+  upstream non-zero exited first and silently downgraded the block (claude-code #60490). Fixed:
+  `set -uo pipefail` + a fail-closed scanner guard positioned after matcher+override + a behavioral
+  regression test driving the real hook with a scanner-less stub. I3 — lib/auto-decide.sh mechanical
+  one-way-door keyword guard + unit test.
+- **Prompt craft v2 (ADR-0014):** docs/concepts/prompt-house-style.md — description-as-trigger (not
+  workflow summary) + dial-back ALL-CAPS imperatives (current models overtrigger; Anthropic yellow
+  flag). 42 skill descriptions rewritten to trigger form; 20 agents gained Core-principles +
+  Behavioral-traits + tool-scoping rationale. New tests/shape/skill-descriptions-trigger.sh ratchet.
+
+**Honesty notes (in ADR-0014):** auto-decide is a real unit-tested function the cycle is TOLD to
+call, not yet a mechanical gate on the --auto path; the trigger-guard enforces opening-verb +
+no-archaeology, not trigger SUBSTANCE. Both staged with the eval-harness.
+
+**Suite:** 79/79. Reviewed by independent CodeReviewer (L-007): 1 P1 (PLAN trio gate undefined
+$slug → L-014) + 2 P2 + 6 P3, all acted on. Captured **L-013** (make-it-ours = reinvent, not
+de-heritage) + **L-014** (no unbound vars in illustrative skill bash — recurred from v5.2).
+
+**Folded in (merge 02e916e, per "don't discard anything"):** the launch-waves wave forked from
+0042312 in parallel and had unique COMMITTED work this branch lacked — **ADR-0013** (fail-closed
+block gates, fills the empty 0013 slot) + **5 security hardenings** (macOS bash-3.2 fail-open
+fallback, push outgoing-range scan, --no-ext-diff/--no-textconv textconv-RCE guard, newline-flatten
+anti-forgery, audit-on-scanner-unavailable) + the **state-ledger scoping fix** (7ece1f4). Hook
+conflict resolved to the override-reachable fail-closed position (after matcher+override) + their
+audit/message/CMD_FLAT; security behavior tests prove the union still blocks. Cursor-full revert
+auto-merged to a no-op. Suite 79/79 on the merged tree.
+
+**What's pending:**
+- Merge PR #73 to main.
+- OPERATOR DECISION (unchanged): the `worktree-launch-waves` worktree still holds a **58-file
+  UNCOMMITTED craft-sweep WIP** (+690/−464: ~16 skills, a new tests/shape/no-swedish.sh, AGENTS/
+  CLAUDE/README/li-doctor). A merge can't capture uncommitted work — preserved untouched, fragile.
+  Decide: commit-on-branch (durable) or fold into a follow-up cycle. NOT discarded.
+- STAGED (own ADRs already written): AGENTS.md-primary (ADR-0015), lintel-state MCP server
+  (ADR-0016), eval-harness (ADR-0017), per-CLI command-stub generator, field-wide
+  description-trigger + aggressive-language sweep of the remaining ~80 skills.
 ## v5.4-design-dna — PR OPEN 2026-06-13
 
 **Status:** active — branch feat/v5.4-design-dna (worktree E:\Workspace\_wt-design-dna), rebased on main@5.2.1

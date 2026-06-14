@@ -20,8 +20,8 @@
   "agents": "./agents/",
   "interface": {
     "displayName": "Lintel",
-    "shortDescription": "Lintel — pack-driven AI-CLI session harness with 8-phase cycle + role-lifting",
-    "longDescription": "Lintel is a company-neutral, pack-driven session harness for agent-based development. 8-phase cycle (SENSE→DEFINE→DISCOVER→PLAN→BUILD→REVIEW→SHIP→CAPTURE). Role-lifting for persona context. Context-warming for 1M-window utilization. Pack-driven compliance gates, voice calibration, doc-gen for PPT/Word/Web, and repo scaffolding for new engagements. Company identity (voice, compliance, persona, brand) is resolved from the active pack, not hardcoded. Multi-CLI: Claude Code, Codex, Cursor, Gemini, OpenCode, Copilot CLI, Factory Droid.",
+    "shortDescription": "Lintel — pack-driven AI-CLI session harness with 9-step cycle + role-lifting",
+    "longDescription": "Lintel is a company-neutral, pack-driven session harness for agent-based development. 9-step cycle (8 core phases + SCOPE: SENSE→SCOPE→DEFINE→DISCOVER→PLAN→BUILD→REVIEW→SHIP→CAPTURE). Role-lifting for persona context. Context-warming for 1M-window utilization. Pack-driven compliance gates, voice calibration, doc-gen for PPT/Word/Web, and repo scaffolding for new engagements. Company identity (voice, compliance, persona, brand) is resolved from the active pack, not hardcoded. Multi-CLI (8 CLIs): Claude Code, Codex, Cursor, Gemini, OpenCode, Copilot CLI, Factory Droid, plus best-effort fallback (Cline/Continue/Aider).",
     "developerName": "jokerman89",
     "category": "Coding",
     "capabilities": ["Interactive", "Read", "Write"],

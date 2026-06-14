@@ -50,7 +50,8 @@ droid plugin install li@jokerman-lintel
 #   fetch and follow .opencode/INSTALL.md
 ```
 
-Per-CLI install guides: [docs/per-cli/](per-cli/).
+The install commands above are the per-CLI path; the capability table (what works where) is in the
+[README](../README.md#multi-cli-support-honest-table), generated from `lib/cli-tiers.yaml`.
 
 ## 2. See it work — `/li:welcome`
 
@@ -127,7 +128,7 @@ A rough mental map by purpose so you know what to reach for:
 - **context** — manage the session window: `/li:context-warm`, `/li:context-save`, `/li:context-restore`, `/li:context-budget`.
 - **doc-gen** — produce artifacts: `/li:generate-ppt`, `/li:generate-word`, `/li:generate-web`, `/li:document-generate`.
 - **frontend** — design work: `/li:frontend-design`, `/li:design-review`, `/li:generate-app`.
-- **pack / identity** — who the harness is being right now: `/li:pack-list`, `/li:pack-switch`, `/li:pack-create`, `/li:role-activate`.
+- **pack / identity** — who the harness is being right now: `/li:pack-list`, `/li:pack-switch`, `/li:pack-create`, `/li:role`.
 - **meta** — the harness on itself: `/li:doctor`, `/li:welcome`, `/li:scaffold`, `/li:adr-new`, `/li:learn`, `/li:catalog`.
 
 ## 4. Make it yours — packs

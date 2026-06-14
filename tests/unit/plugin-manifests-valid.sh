@@ -39,8 +39,6 @@ MANIFESTS=(
   "$REPO_ROOT/.codex-plugin/plugin.json"
   "$REPO_ROOT/.cursor-plugin/plugin.json"
   "$REPO_ROOT/gemini-extension.json"
-  "$REPO_ROOT/.copilot-plugin/plugin.json"
-  "$REPO_ROOT/.droid-plugin/plugin.json"
 )
 
 for m in "${MANIFESTS[@]}"; do

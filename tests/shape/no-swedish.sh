@@ -33,11 +33,28 @@ is_allowlisted() {
     # which the customer-data hooks source — so only this file needs the allowlist.
     hooks/shared/_patterns.sh) return 0 ;;
     skills/CATALOG.md) return 0 ;;
+    # docs/ is scanned for the shipped EXPLAINER surface (README, getting-started,
+    # GLOSSARY, concept guides). These prefixes are exempt by kind, not laziness:
+    #   docs/audit/**   — historical audit records that quote the operator's own
+    #                     Swedish motto; translating them would falsify the record
+    #   docs/design/**  — design rationale quoting the operator's actual words
+    #                     (the "smoking-gun trace") — same historical-record reason
+    #   docs/wiki/**    — generated from frontmatter; the source files are scanned
+    #   docs/concepts/orientator.md — documents the Swedish INTENT KEYWORDS the
+    #                     orientator matches against Swedish operator input
+    #                     (functional, like lib/orientator-routing.sh)
+    docs/audit/*) return 0 ;;
+    docs/design/*) return 0 ;;
+    docs/wiki/*) return 0 ;;
+    docs/concepts/orientator.md) return 0 ;;
   esac
   return 1
 }
 
-SCAN_DIRS=(skills agents hooks install .github .codex-plugin seeds)
+# Shipped surface: agent-invokable trees + the installer + the first-touch docs.
+# README.md + docs/ are included so stray Swedish in a user-facing explainer is
+# caught; the historical/generated/functional paths above are exempt.
+SCAN_DIRS=(skills agents hooks install .github .codex-plugin seeds docs README.md)
 # UTF-8 byte pattern for å ä ö Å Ä Ö (each is C3 followed by one of these bytes).
 CHAR_RE=$'[\xc3][\xa5\xa4\xb6\x85\x84\x96]'
 # High-signal Swedish words with no English collision (word-bounded, case-insensitive).

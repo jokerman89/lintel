@@ -12,16 +12,16 @@ All v3.5 directories populated as intended:
 
 | Path | v3.5 target | Verify command |
 |---|---|---|
-| `skills/` | 165 skills | `bash install/verify.sh --counts` |
-| `agents/` | 70 agents across 8 categories | `bash install/verify.sh --agents-categorized` |
-| `hooks/shared/` | 29 hooks | `find hooks/shared -name HOOK.md \| wc -l` |
+| `skills/` | 124 skills | `bash install/verify.sh --counts` |
+| `agents/` | 69 agents across 8 categories | `bash install/verify.sh --agents-categorized` |
+| `hooks/shared/` | 31 hooks | `find hooks/shared -name HOOK.md \| wc -l` |
 | `scaffolding/01-foundation/` | base templates intact | `bash install/verify.sh --scaffolding-coherence` |
 | `packs/_default/` | neutral baseline pack | `bash install/verify.sh --packs` |
-| `.claude-plugin/`, `.codex-plugin/`, `.cursor-plugin/`, `.opencode/`, `.copilot-plugin/`, `.droid-plugin/`, `gemini-extension.json` | 7 plugin manifests valid JSON | `bash install/verify.sh --plugin-manifests` |
+| `.claude-plugin/`, `.codex-plugin/`, `.cursor-plugin/`, `.opencode/`, `gemini-extension.json` | 5 plugin manifests valid JSON (Copilot/Droid read `.claude-plugin/` via interop) | `bash install/verify.sh --plugin-manifests` |
 | `CLAUDE.md`, `AGENTS.md`, `GEMINI.md` at root | 3 entrypoint files | included in `--plugin-manifests` |
-| `bin/` | 6 operator-side utilities | `ls bin/` |
+| `bin/` | 16 operator-side `li-*` utilities | `ls bin/li-*` |
 
-**Aggregate target:** 165 skills + 70 agents + 29 hooks + 7 plugin manifests + 3 entrypoint files + 7 bin scripts + 3 default public roles + intact scaffolding templates.
+**Aggregate target:** 124 skills + 69 agents + 31 hooks + 5 plugin manifests + 3 entrypoint files + 16 li-* bin scripts + intact scaffolding templates (roles are pack-supplied, none ship in the neutral spine).
 
 **v3.5-specific subset:**
 - 8 phase-skills: li-sense, li-define, li-discover, li-plan, li-build, li-review, li-ship, li-capture
@@ -68,7 +68,7 @@ Each plugin manifest installs into its CLI's plugin system and the operator can 
 
 | CLI | Verification |
 |---|---|
-| Claude Code | `claude plugin validate .claude-plugin/` passes, then `/plugin install lintel@jokerman-lintel` works, `/li:qa` invokable |
+| Claude Code | `claude plugin validate .claude-plugin/` passes, then `/plugin install li@jokerman-lintel` works, `/li:qa` invokable |
 | Codex CLI | `/plugins` → search lintel → Install Plugin works, 3 skill invocations succeed |
 | Cursor | `/add-plugin lintel` works, 3 skill invocations succeed |
 | Gemini CLI | `gemini extensions install <url>` works, GEMINI.md loads |
@@ -240,8 +240,8 @@ bash tests/unit/agents-categorized.sh
 
 # Gate 4 (per-CLI smoke test)
 # Install plugin into each CLI you have:
-#   Claude Code:    /plugin marketplace add jokerman89/jokerman-lintel
-#                   /plugin install lintel@jokerman-lintel
+#   Claude Code:    /plugin marketplace add jokerman89/lintel
+#                   /plugin install li@jokerman-lintel
 #   Codex:          /plugins → search → install
 #   Cursor:         /add-plugin lintel
 #   Gemini:         gemini extensions install <url>

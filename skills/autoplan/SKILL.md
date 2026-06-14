@@ -1,7 +1,7 @@
 ---
 name: autoplan
 layer: foundation
-description: Chains office-hours → ceo-review → eng-review → design-review. End-to-end plan pipeline.
+description: Use to run a problem statement through the full planning pipeline in one shot — chains the design doc, strategy review, engineering review, and design review end to end. Reach for it when you want a plan taken from raw problem to fully reviewed without driving each review step by hand.
 color: purple
 tools: Read, Bash, Edit
 voice: internal

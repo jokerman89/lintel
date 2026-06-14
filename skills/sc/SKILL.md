@@ -2,7 +2,7 @@
 name: sc
 layer: foundation
 workflow_root: true
-description: Phase 4 v4.3 — security-compliance module. Three granularities (full / loop / single). Capabilities dispatch to existing security agents (ADR-0009 dispatch table). 5 checkpoints, 6-dim scoring rubric, 3 warn-only hooks, profile-driven preferences.
+description: Use for security and compliance depth — threat models, auth flows, secret management, dependency-security audits, compliance evidence, and incident runbooks. Reach for it when a change has a security or regulatory surface. Runs full, loop, or single-capability, dispatching to the security agents and scoring against a rubric.
 color: red
 tools: Read, Write, Edit, Bash, Grep, Glob
 voice: internal
@@ -278,7 +278,7 @@ printf '{"ts":"%s","kind":"sc_module_complete","granularity":"%s","score":%d,"ch
 - BUILD phase: invokes as sub-module when auth/compliance intent detected
 - `/li:full-engineering-pass`: parallel branch with DA after TA
 
-**Hooks:**
+**Hooks** (dormant by decision, ADR-0008 — ship in `hooks/shared/` but are opt-in, not auto-registered):
 - `hooks/shared/sc-threat-coverage-warn/` (pre-edit on auth/data files not covered by threat model)
 - `hooks/shared/sc-auth-bypass-warn/` (pre-edit on auth-flow files with high-risk patterns)
 - `hooks/shared/sc-compliance-gap-warn/` (pre-edit on regulated-data paths)

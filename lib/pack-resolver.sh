@@ -10,15 +10,19 @@
 # - Refuse activation on extends: cycle
 # - Reject load on missing required field
 # - Fall back to _default on internal bug + warn
-# - Cached value immutable for current cycle (mid-cycle pack-switch deferred)
+# - Cached value immutable for current cycle (mid-cycle pack-switch deferred);
+#   exception: a pack.yaml whose mtime is NEWER than the cache re-resolves —
+#   manifest edits must not be invisible until a manual clear_pack_cache
 #
 # Usage (sourced by skills):
 #   source "$(dirname "$0")/../../lib/pack-resolver.sh"
 #   voice_tier=$(resolve_pack_field voice.default_tier)
 #   compliance_mode=$(resolve_pack_field compliance.mode)
 #   workflow=$(resolve_pack_field navigation.default_workflow)
-
-set -uo pipefail
+#
+# NOTE: no `set -uo pipefail` here — this file is SOURCED; setting shell options
+# in a sourced library leaks them into every caller (skills, hooks, tests).
+# Positional params are hardened with ${1:-} instead.
 
 LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
 LINTEL_REPO_ROOT="${LINTEL_REPO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." 2>/dev/null && pwd)}"
@@ -26,8 +30,12 @@ LINTEL_PACKS_DIR="${LINTEL_PACKS_DIR:-$LINTEL_HOME/packs}"
 LINTEL_ACTIVE_PACK_FILE="${LINTEL_ACTIVE_PACK_FILE:-$LINTEL_PACKS_DIR/active-pack}"
 LINTEL_AUDIT_DIR="${LINTEL_AUDIT_DIR:-$LINTEL_HOME/audit}"
 
-# Per-session cache (lives at ~/.lintel/sessions/<id>-pack-cache.yaml)
-LINTEL_SESSION_ID="${LINTEL_SESSION_ID:-${PPID:-$$}}"
+# Per-session cache (lives at ~/.lintel/sessions/<id>-pack-cache.yaml).
+# Key precedence: explicit LINTEL_SESSION_ID (the documented test seam — must
+# out-rank ambient CLI env or sandboxed tests break) > the CLI's session id >
+# PPID-$$. Bare PPID was a CONSTANT on platforms where every tool call spawns
+# from PID 1 → one permanent shared cache, pack.yaml edits invisible.
+LINTEL_SESSION_ID="${LINTEL_SESSION_ID:-${CLAUDE_SESSION_ID:-${PPID:-1}-$$}}"
 PACK_CACHE_FILE="${LINTEL_HOME}/sessions/${LINTEL_SESSION_ID}-pack-cache.yaml"
 
 mkdir -p "$LINTEL_AUDIT_DIR" "${LINTEL_HOME}/sessions" 2>/dev/null || true
@@ -70,7 +78,7 @@ get_active_pack_name() {
 
 # Resolve a pack's directory — checks ~/.lintel/packs/<name>/ first, then repo packs/<name>/
 _pack_dir() {
-  local name="$1"
+  local name="${1:-}"
   local home_path="$LINTEL_PACKS_DIR/$name"
   local repo_path="$LINTEL_REPO_ROOT/packs/$name"
   if [ -d "$home_path" ]; then
@@ -134,7 +142,7 @@ validate_pack() {
 # Does NOT auto-prepend _default — _default is the resolver's fallback layer
 # for missing fields, not an explicit extends target.
 _resolve_extends_chain() {
-  local name="$1"
+  local name="${1:-}"
   local chain="$name"
   local current="$name"
   local depth=0
@@ -156,7 +164,7 @@ _resolve_extends_chain() {
 # packs in the chain override earlier ones (child overrides parent).
 # Per design doc §1.3: nested blocks REPLACE wholesale, not deep-merge.
 _merge_packs_into_cache() {
-  local chain="$1"      # space-separated, root → leaf
+  local chain="${1:-}"  # space-separated, root → leaf
   local out="$PACK_CACHE_FILE"
   : > "$out"
 
@@ -197,7 +205,22 @@ _prime_cache_for_session() {
   # Reads active pack, validates, copies merged manifest to cache.
   # Run once per session. Subsequent resolve_pack_field calls hit cache.
   if [ -f "$PACK_CACHE_FILE" ]; then
-    return 0  # already primed
+    # mtime invalidation: a pack.yaml edited AFTER the cache was primed must not
+    # stay invisible until a manual clear_pack_cache. The active-pack POINTER is
+    # deliberately not checked — mid-session pack-switch keeps the cached value
+    # per the §2.4 contract (fallback-harness scenario 7); a deleted pack keeps
+    # the cache too (scenario 8: _pack_dir fails → manifest not checked).
+    local _name _p _pd _stale=0
+    _name=$(get_active_pack_name)
+    for _p in $(_resolve_extends_chain "$_name"); do
+      _pd=$(_pack_dir "$_p" 2>/dev/null) || continue
+      [ "$_pd/pack.yaml" -nt "$PACK_CACHE_FILE" ] && _stale=1
+    done
+    if [ "$_stale" = 0 ]; then
+      return 0  # already primed and fresh
+    fi
+    _resolver_audit cache_invalidated "pack=$_name reason=manifest-newer-than-cache session=$LINTEL_SESSION_ID"
+    rm -f "$PACK_CACHE_FILE" 2>/dev/null || true
   fi
 
   local name
@@ -319,7 +342,7 @@ resolve_pack_field() {
 # Boolean helper: returns 0 (true) if resolved value is "true", else 1
 pack_field_is_true() {
   local v
-  v=$(resolve_pack_field "$1")
+  v=$(resolve_pack_field "${1:-}")
   [ "$v" = "true" ] || [ "$v" = "yes" ] || [ "$v" = "on" ]
 }
 

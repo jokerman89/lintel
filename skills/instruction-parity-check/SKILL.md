@@ -20,9 +20,9 @@ Lintel ships 6 instruction files so different CLIs read the same Lintel rules:
 - `CLAUDE.md` (claude-code root)
 - `AGENTS.md` (codex root)
 - `GEMINI.md` (gemini root)
-- `.claude/AGENTS.md` (claude-code shim)
-- `.codex/CLAUDE.md` (codex shim)
-- `.github/copilot-instructions.md` (copilot)
+- `shims/AGENTS.md` (codex/cross-CLI shim)
+- `shims/CLAUDE.md` (claude shim)
+- `shims/copilot-instructions.md` (copilot)
 
 Per v3.6 backlog 6.2: "They will drift — a Copilot colleague gets different rules than a Claude-Code colleague. This is the multi-CLI promise's weak point."
 
@@ -55,9 +55,9 @@ INSTR_FILES=(
   "$REPO_ROOT/CLAUDE.md"
   "$REPO_ROOT/AGENTS.md"
   "$REPO_ROOT/GEMINI.md"
-  "$REPO_ROOT/.claude/AGENTS.md"
-  "$REPO_ROOT/.codex/CLAUDE.md"
-  "$REPO_ROOT/.github/copilot-instructions.md"
+  "$REPO_ROOT/shims/AGENTS.md"
+  "$REPO_ROOT/shims/CLAUDE.md"
+  "$REPO_ROOT/shims/copilot-instructions.md"
 )
 
 missing=0

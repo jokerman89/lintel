@@ -1,7 +1,7 @@
 ---
 name: build
 layer: foundation
-description: Phase 5 of Lintel cycle — execute plan via TDD + subagent-driven-development. Fresh subagent per task with two-stage review (spec compliance then quality). Per-task status protocol.
+description: Use to implement an approved plan task by task. Trigger after PLAN is approved and a plan.md exists with code to write — each task gets a fresh implementer subagent and two-stage review, spec compliance then quality, with a per-task status protocol.
 color: cyan
 tools: Read, Write, Edit, Bash, Grep, Glob
 voice: internal

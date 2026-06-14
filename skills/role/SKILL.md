@@ -1,7 +1,7 @@
 ---
 name: role
 layer: foundation
-description: Role lifecycle — activate a role (default, lightweight ~500-token load), deactivate (--off), swap mid-session (--rotate), apply the role's lens to an artifact (--frame), load the full role file on-demand (--deep-dive). One role active at a time.
+description: Use to take on or change a working role — activate one for a lightweight lens, turn it off, swap mid-session, apply its lens to an artifact, or load its full definition on demand. Reach for it when work would benefit from a specific role's perspective; one role is active at a time.
 color: cyan
 tools: Read, Bash, Edit, Grep, Glob
 voice: internal

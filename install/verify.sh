@@ -3,7 +3,7 @@
 #
 # Subcommands:
 #   --frontmatter   validate skill + agent frontmatter
-#   --cli-matrix    print CLI support matrix
+#   --cli-matrix    per-skill/agent cli_support matrix (root skills/ + agents/)
 #   --layers        validate scaffolding structure
 #   --hooks         check hook activation state (symlinks)
 #   --upstream      check upstream-sources.yaml
@@ -81,21 +81,64 @@ cmd_frontmatter() {
 }
 
 # ===== Subcommand: --cli-matrix ==============================================
+# Per-skill/agent cli_support aggregator over repo-root skills/ + agents/
+# (scaffolding/ only as v2 fallback). Frontmatter ships in two styles, both
+# parsed (the old single-line grep missed the block style entirely):
+#   inline:  cli_support: [claude-code, codex]
+#   block:   cli_support:
+#              - cli: claude-code
+#                level: full
 
 cmd_cli_matrix() {
-  hdr "CLI support matrix"
-  printf "%-50s | %-12s | %-7s | %-8s\n" "skill/agent" "claude-code" "codex" "copilot"
-  printf "%-50s-+-%-12s-+-%-7s-+-%-8s\n" "$(printf '%.0s-' {1..50})" "$(printf '%.0s-' {1..12})" "$(printf '%.0s-' {1..7})" "$(printf '%.0s-' {1..8})"
+  hdr "CLI support matrix (declared cli_support per skill/agent)"
 
+  local search_paths=()
+  [ -d "$REPO_ROOT/skills" ] && search_paths+=("$REPO_ROOT/skills")
+  [ -d "$REPO_ROOT/agents" ] && search_paths+=("$REPO_ROOT/agents")
+  if [ "${#search_paths[@]}" -eq 0 ] && [ -d "$REPO_ROOT/scaffolding" ]; then
+    search_paths+=("$REPO_ROOT/scaffolding")
+  fi
+  if [ "${#search_paths[@]}" -eq 0 ]; then
+    warn "no skills/ or agents/ (or scaffolding/) found — nothing to aggregate"
+    return
+  fi
+
+  printf "%-44s | %s\n" "skill/agent" "cli_support"
+  printf "%-44s-+-%s\n" "$(printf '%.0s-' {1..44})" "$(printf '%.0s-' {1..30})"
+
+  local f name clis
   while IFS= read -r f; do
     name=$(grep -m1 '^name:' "$f" | sed 's/^name:[ ]*//' | tr -d '\r')
-    cli_line=$(grep -m1 '^cli_support:' "$f" | sed 's/^cli_support:[ ]*//' | tr -d '\r')
-    cc="no"; cx="no"; cp="no"
-    [[ "$cli_line" == *"claude-code"* ]] && cc="yes"
-    [[ "$cli_line" == *"codex"* ]] && cx="yes"
-    [[ "$cli_line" == *"copilot"* ]] && cp="yes"
-    printf "%-50s | %-12s | %-7s | %-8s\n" "$name" "$cc" "$cx" "$cp"
-  done < <(find "$REPO_ROOT/scaffolding" \( -path '*/skills/*/SKILL.md' -o -path '*/agents/*.md' \) 2>/dev/null | grep -v README | sort)
+    clis=$(awk '
+      { sub(/\r$/, "") }
+      NR == 1 && /^---[ \t]*$/ { fm = 1; next }
+      fm && /^---[ \t]*$/ { exit }                 # frontmatter only
+      fm && /^cli_support:/ {
+        rest = $0; sub(/^cli_support:[ \t]*/, "", rest)
+        if (rest != "") { inline = rest } else { blk = 1 }
+        next
+      }
+      blk && /^[A-Za-z_-]+:/ { blk = 0 }           # next top-level key ends the block
+      blk {
+        line = $0
+        if (match(line, /-[ \t]*cli:[ \t]*/)) {
+          v = substr(line, RSTART + RLENGTH)
+          sub(/[ \t].*$/, "", v); gsub(/[",]/, "", v)
+          if (v != "") out = out (out == "" ? "" : ", ") v
+        }
+      }
+      END {
+        if (inline != "") {
+          gsub(/[]["]/, "", inline)
+          gsub(/,[ \t]*/, ", ", inline)
+          print inline
+        } else {
+          print out
+        }
+      }
+    ' "$f")
+    printf "%-44s | %s\n" "$name" "${clis:--}"
+  done < <(find "${search_paths[@]}" \( -name 'SKILL.md' -o -path '*/agents/*.md' -o -path '*/agents/*/*.md' \) 2>/dev/null | grep -v README | sort)
 }
 
 # ===== Subcommand: --layers ==================================================
@@ -239,11 +282,19 @@ cmd_upstream() {
     return
   fi
   if command -v yq >/dev/null 2>&1; then
-    mapfile -t sources < <(yq '.sources | keys | .[]' "$SOURCES_FILE" 2>/dev/null)
+    # while-read instead of mapfile: stock macOS bash 3.2 has no mapfile
+    # (same portability rule as bin/li-uniformity's mapfile_compat).
+    sources=()
+    while IFS= read -r _s; do
+      [ -n "$_s" ] && sources+=("$_s")
+    done < <(yq '.sources | keys | .[]' "$SOURCES_FILE" 2>/dev/null)
     ok "${#sources[@]} upstream sources declared"
-    for s in "${sources[@]}"; do
-      info "  · $s"
-    done
+    # guard the expansion: "${sources[@]}" on an empty array is a set -u error on bash < 4.4
+    if [ "${#sources[@]}" -gt 0 ]; then
+      for s in "${sources[@]}"; do
+        info "  · $s"
+      done
+    fi
   else
     warn "yq not available — listing skipped"
   fi
@@ -319,7 +370,7 @@ cmd_tier_stamps() {
 # ===== Subcommand: --plugin-manifests (v3) ===================================
 
 cmd_plugin_manifests() {
-  hdr "Plugin manifests (v3)"
+  hdr "Plugin manifests"
   local manifests=(
     ".claude-plugin/plugin.json"
     ".claude-plugin/marketplace.json"
@@ -327,8 +378,6 @@ cmd_plugin_manifests() {
     ".cursor-plugin/plugin.json"
     "gemini-extension.json"
     ".opencode/INSTALL.md"
-    ".copilot-plugin/plugin.json"
-    ".droid-plugin/plugin.json"
   )
   local missing=0
   for m in "${manifests[@]}"; do
@@ -412,19 +461,26 @@ cmd_agents_categorized() {
 # ===== Subcommand: --scaffolding-coherence (v3) ==============================
 
 cmd_scaffolding_coherence() {
-  hdr "Scaffolding coherence (v3 Category B)"
+  hdr "Scaffolding coherence (v5 .claude/ home layout — ADR-0005)"
   local missing=0
+  # What 01-foundation actually ships post-ADR-0005: knowledge templates under
+  # .claude/ (memory/, decisions/, plans/, agents/) — the old tasks/* and
+  # docs/adr/* template paths were removed in the v5 migration.
   local required=(
     "scaffolding/01-foundation/CORE-PRINCIPLES.md"
     "scaffolding/01-foundation/EVOLUTION.md"
     "scaffolding/01-foundation/EVOLUTION-LOG.md"
     "scaffolding/01-foundation/CLAUDE.md.template"
-    "scaffolding/01-foundation/tasks/lessons.md"
-    "scaffolding/01-foundation/tasks/memory.md"
-    "scaffolding/01-foundation/tasks/personas.md"
-    "scaffolding/01-foundation/tasks/todo.md"
-    "scaffolding/01-foundation/docs/adr/README.md"
-    "scaffolding/01-foundation/docs/adr/TEMPLATE.md"
+    "scaffolding/01-foundation/.claude/memory/lessons.md"
+    "scaffolding/01-foundation/.claude/memory/working-state.md"
+    "scaffolding/01-foundation/.claude/memory/personas.md"
+    "scaffolding/01-foundation/.claude/plans/todo.md"
+    "scaffolding/01-foundation/.claude/decisions/README.md"
+    "scaffolding/01-foundation/.claude/decisions/TEMPLATE.md"
+    "scaffolding/01-foundation/.claude/agents/ReadOnly.md"
+    "scaffolding/01-foundation/.claude/agents/CodeReviewer.md"
+    "scaffolding/01-foundation/.claude/agents/TestRunner.md"
+    "scaffolding/01-foundation/.claude/agents/SanityChecker.md"
     "scaffolding/01-foundation/TEMPLATE-skill.md"
     "scaffolding/01-foundation/TEMPLATE-agent.md"
   )
@@ -488,7 +544,7 @@ Usage: verify.sh [--subcommand]
 
 Subcommands:
   --frontmatter   validate skill + agent frontmatter
-  --cli-matrix    print CLI support matrix
+  --cli-matrix    per-skill/agent cli_support matrix (root skills/ + agents/)
   --layers        validate scaffolding structure
   --hooks         check hook activation state (symlinks)
   --upstream      check upstream-sources.yaml
@@ -498,7 +554,7 @@ Subcommands:
   --context-engine (v2) CONTEXT-ENGINE.md + context-budget/warmup/perf-mode
   --plugin-manifests       (v3) validate JSON + presence of per-CLI plugin manifests
   --agents-categorized     (v3) verify all agents have category frontmatter
-  --scaffolding-coherence  (v3) verify scaffolding Category B templates present
+  --scaffolding-coherence  verify foundation templates present (v5 .claude/ layout)
   --all            run everything + aggregate verdict
 HELP
     ;;

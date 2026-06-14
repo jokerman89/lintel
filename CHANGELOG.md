@@ -19,6 +19,50 @@ Design DNA: retrieval-augmented design + the anthropic-default profile. ADR-0015
 - `frontend-design-review`/`design-review`: validator pre-pass (exit 1 = RED/auto-P1); profile as brand reference when no baseline
 - Frontend agent fleet (FrontendArchitect, TypographyCurator, MotionDirector, DesignSystemAuditor): two-pass token-plan doctrine, anti-cliché calibration, profile-first defaults, validator-first auditing
 
+## 5.3.0 — 2026-06-13
+
+Launch-readiness drive: prompt-craft v2 · multi-CLI hardening · issue-mining · a full
+launch-readiness audit (8 parallel audits → docs/audit/2026-06-12-launch-readiness-register.md)
+and the remediation it found. ADRs 0013–0017.
+
+### Prompt craft (ADR-0014, docs/concepts/prompt-house-style.md)
+- Skill `description:` fields rewritten to TRIGGER form ("Use when…") across 43 high-traffic skills — descriptions are the auto-invocation mechanism; a workflow-summary makes Claude follow the summary instead of the body (superpowers' measured regression). New guard tests/shape/skill-descriptions-trigger.sh
+- 20 review/audit/architecture agents gained Core-principles + Behavioral-traits + trigger descriptions + tool-scoping rationale (wshobson's consistency engine)
+- House-style v2: dial back ALL-CAPS MUST/NEVER (current models overtrigger — Anthropic yellow flag), positive framing, one worked example, persona-as-voice-not-accuracy, one verifier-anchored self-critique, structural anti-sycophancy
+
+### Security + reliability (ADR-0013, issue-mining)
+- Block hooks made fail-closed: dropped `set -e` (under it an upstream non-zero exited before the blocking `exit 2`, silently downgrading to non-blocking — claude-code #60490) + a fail-closed guard (which now also audit-logs) when the scanner can't load
+- Closed the newline-class gate bypasses (L-012): a line-continuation between `git` and the subcommand, and a newline-forged override token inside a `-m` message, both defeated the line-oriented matcher — the command is flattened before matching now. Each closure ships with its adversarial regression test (tests/unit/hook-gate-content.sh)
+- Gate diffs run `--no-ext-diff --no-textconv` (a hostile repo's textconv driver can no longer execute when the gate scans); `git push` now scans the outgoing commit range (an already-committed secret was a push no-op before)
+- Block hooks hold on stock macOS bash 3.2: the stdin reader's fractional `read -t` falls back to an integer timeout instead of failing open
+- lib/auto-decide.sh: mechanical one-way-door guard so `--auto` can't auto-decide an irreversible/sovereignty change (gstack #603)
+- PLAN: mechanical trio-completeness gate (plan.md+spec.md+prompt.md must all exist non-empty before BUILD — gstack #1127)
+
+### State + footer correctness (launch register B4)
+- The cycle ledger is append-only across many cycles, but every reader assumed a single-cycle file. `lib/state.sh` gains `state_cycle_segment` (one shared parser); the footer, `/li:resume` integrity, and `cycle_id` derivation now resolve from the current cycle's segment — a prior cycle's `cycle_complete: true` no longer renders "no active cycle" for every later cycle, and audit records carry the real `cycle_id` (was "unknown" since v4.0)
+- `bin/_audit.sh`: dropped audit writes warn on stderr instead of vanishing; `audit_count` no longer doubles its `0` on no-match
+- `lib/state.sh`: CR/LF stripped from phase/status/keys (not just values)
+
+### Multi-CLI
+- Deleted fabricated `.copilot-plugin/` + `.droid-plugin/` (both CLIs read `.claude-plugin/` via interop); propagated the deletion to all five asserting surfaces (manifest tests, verify.sh, SHIP-GATE, README, cli-tiers); fixed the `lintel@`→`li@` install string everywhere; `codex.subagents: native`
+- instruction-parity-check repointed at the real shim files (was asserting 3 ghosts)
+- Windows parity (install.ps1): seeds identity (profile.yaml + active-pack), copies lib/bin/templates, uses the v5 `hooks/shared/` layout, validates the real skill/agent surface
+- li-doctor: bash-3.2-safe (no `declare -A`), names the Windows SessionStart-no-fire bug (claude-code #59072), fixed Claude-install detection; first smoke test
+- `.opencode/INSTALL.md` rewritten neutral + current (was frozen at v3 with Microsoft-CAIP identity); fingerprint↔tiers id-normalization so `/li:welcome`'s honest-tier display reaches all CLIs
+
+### Docs truth + mechanism honesty
+- Swept stale claims across README, getting-started, AGENTS/GEMINI/shims, AGENT-INSTRUCTIONS, LAYERS, session-harness, multi-cli, compliance and the state-of-the-harness doc (v3-plan-as-current, `tasks/`/`docs/adr` paths, gstack recommendations, the v5.0 version string); dormancy qualifiers (ADR-0008) added at the point of sale
+- usage-log demoted from a phantom auto-writer to an honest manual one-liner; cycle/qa/ship/careful/compliance prose "audit trails" converted to real `audit_log` calls or labeled dormant; six bespoke `>>` writers routed through the unified audit helper
+- `no-swedish.sh` now scans docs + README (historical/generated/functional paths exempt); three concept docs translated
+- CATALOG generator truncates by character not byte (was emitting invalid-UTF-8 rows); CATALOG regenerated clean
+- pack-resolver: removed the `set -uo pipefail` that leaked into every caller; session cache key no longer collapses to a constant + mtime-invalidates on pack.yaml edits
+
+### Decided this cycle (build staged with dates — see the launch register §3-B)
+- ADR-0015 AGENTS.md-primary · ADR-0016 lintel-state MCP server · ADR-0017 eval-harness
+
+### Numbers
+- 43 skill descriptions + 20 agents upgraded · 2 manifests deleted · exec bits corrected on 5 scripts · 5 new behavior tests (hook-gate newline cases, customer-data gate, context-checkpoint roundtrip, li-doctor smoke, auto-decide one-way-door) · suite 82/82 on the committed tree
+
 ## 5.2.1 — 2026-06-13
 
 Patch: hook gate fix delivery (PR #70 merged content-only — without a version bump the
@@ -31,7 +75,6 @@ installed plugins).
 - Gates follow every `git -C <path>` target in the command (cwd alone scanned the wrong repo)
 - New shared helper `hook_git_gate_content` in `hooks/shared/_input.sh`; regression-locked
   in `tests/unit/hook-gate-content.sh`
-
 ## 5.2.0 — 2026-06-12
 
 Battletest remediation (six adversarial personas) + gstack de-heritage. ADR-0010/0011/0012.

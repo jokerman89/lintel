@@ -104,3 +104,7 @@ SCRATCH.md
 
 # Lintel runtime state (v5 layout) — local only, never committed
 .claude/runtime/
+
+# Linked git worktrees live here (operator-local); never track them in the main
+# index — git would record each as a gitlink/embedded repo, not its contents.
+.claude/worktrees/

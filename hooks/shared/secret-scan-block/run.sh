@@ -12,6 +12,12 @@ source "$(dirname "${BASH_SOURCE[0]}")/../_input.sh"
 CMD="$(hook_input command "${1:-}")"
 [ -z "$CMD" ] && exit 0
 
+# Match against a FLATTENED copy: a line-continuation newline between `git` and
+# the subcommand defeats a line-oriented grep (silent fail-open), and a newline
+# inside -m lets the second line forge the '^'-anchored override token (L-012
+# class). Content scanning below still sees the real multi-line diff.
+CMD_FLAT="$(printf '%s' "$CMD" | tr '\n\r' '  ')"
+
 LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
 mkdir -p "$LINTEL_HOME/audit"
 
@@ -33,7 +39,7 @@ fi
 # `git -C path commit`, `/usr/bin/git push`, `true && git commit`, `cd x && git
 # commit -am`. The old `^git` anchor was trivially bypassed (security battletest
 # K2). Word-boundary match on both `git` and the subcommand.
-if ! printf '%s' "$CMD" | grep -qE '(^|[^A-Za-z0-9_-])git([[:space:]]|$).*\b(commit|push)\b'; then
+if ! printf '%s' "$CMD_FLAT" | grep -qE '(^|[^A-Za-z0-9_-])git([[:space:]]|$).*\b(commit|push)\b'; then
   exit 0
 fi
 
@@ -45,7 +51,7 @@ fi
 # command (`LINTEL_OVERRIDE_SECRET=1 [VAR=v ...] git commit …`) — NEVER the token
 # appearing inside a quoted arg / -m message (review P0: that re-opened a
 # forgeable fail-open). The anchored prefix is what the operator actually types.
-if [ "${LINTEL_OVERRIDE_SECRET:-}" = "1" ] || printf '%s' "$CMD" | grep -qE '^[[:space:]]*([A-Za-z_][A-Za-z0-9_]*=[^[:space:]]*[[:space:]]+)*LINTEL_OVERRIDE_SECRET=1([[:space:]]|=|$)'; then
+if [ "${LINTEL_OVERRIDE_SECRET:-}" = "1" ] || printf '%s' "$CMD_FLAT" | grep -qE '^[[:space:]]*([A-Za-z_][A-Za-z0-9_]*=[^[:space:]]*[[:space:]]+)*LINTEL_OVERRIDE_SECRET=1([[:space:]]|=|$)'; then
   reason="${LINTEL_OVERRIDE_REASON:-no-reason-given}"
   audit_log "hooks" "secret_scan_block" "hook=secret-scan-block" "tier=OVERRIDDEN" "override=true" "reason=$reason" "blocked=false"
   echo "INFO [Lintel hook]: secret-scan-block OVERRIDDEN by operator (reason: $reason). Audit-logged."
@@ -56,7 +62,21 @@ fi
 # target in the command (helper in ../_input.sh — rationale there). Union
 # covers `commit -am` (stages tracked edits AFTER this hook; battletest K2);
 # push is covered by staged.
-CONTENT="$(hook_git_gate_content "$CMD")"
+# Fail-closed (issue I1 / ADR-0013): the matcher fired (a git commit/push is in
+# flight) and it was not overridden — if the scanner failed to load, BLOCK rather
+# than silently allow. Positioned AFTER matcher+override (not after the patterns
+# source) so a broken scanner blocks the real threat (git commits) while non-git
+# commands pass and the documented override stays reachable — ADR-0013 requires
+# the error to name a USABLE override. Audit the block (launch-waves wave).
+if ! command -v scan_secrets >/dev/null 2>&1; then
+  command -v audit_log >/dev/null 2>&1 && audit_log "hooks" "secret_scan_block" "hook=secret-scan-block" "tier=BLOCK" "blocked=true" "reason=scanner-unavailable"
+  echo "ERROR [Lintel hook]: secret-scan-block scanner unavailable — blocking to be safe." >&2
+  echo "ERROR: source hooks/shared/_patterns.sh failed. Override only if you are certain:" >&2
+  echo '  LINTEL_OVERRIDE_SECRET=1 LINTEL_OVERRIDE_REASON="<reason>" git commit ...' >&2
+  exit 2
+fi
+
+CONTENT="$(hook_git_gate_content "$CMD_FLAT")"
 [ -z "$(printf '%s' "$CONTENT" | tr -d '[:space:]')" ] && exit 0
 
 joined="$(scan_secrets tier1 "$CONTENT")"

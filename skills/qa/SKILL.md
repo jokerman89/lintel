@@ -1,7 +1,7 @@
 ---
 name: qa
 layer: foundation
-description: Run the full test suite, parse failures, fix common ones, re-run until clean or stuck.
+description: Use when you need to know whether the code works and to get the test suite green — runs the full suite, parses failures, fixes common ones, and re-runs until clean or genuinely stuck. Reach for it after making changes or when tests are failing and you want them resolved.
 color: yellow
 tools: Read, Bash, Edit, Grep, Glob
 voice: internal
@@ -72,7 +72,8 @@ Remaining: 2
 
 - Sanity-scan on every Edit before applying (no secrets/customer-data in fix payload).
 - If auto-fix would touch a frozen-zone path (per project CLAUDE.md): block + escalate.
-- Audit-log every auto-fix to `.claude/runtime/audit/qa-fixes.jsonl` (Layer 2 traceability).
+- Audit-log every auto-fix mechanically (Layer 2 traceability):
+  `source "$(git rev-parse --show-toplevel)/bin/_audit.sh"; audit_log qa-fixes auto_fix file=<path> fix_kind=<lint|snapshot|import|assertion>` → `.claude/runtime/audit/qa-fixes.jsonl`.
 
 ## Failure modes
 
