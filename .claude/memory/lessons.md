@@ -396,3 +396,27 @@ record the specific benign string in the reason — never override blind.
 
 Related: [[L-012]] the override is honored only as a leading prefix precisely so attacker-influenced
 text can't forge it — the same property that makes a `cd &&` prefix fail.
+## L-018 — Running /li:cycle means running its machinery, not just its work
+
+**Rule:** When you invoke `/li:cycle` (or any cycle), instantiate it in the state ledger at the
+START — `state_append CYCLE STARTING cycle_id=… cycle_mode=…` — and render `render_cycle_footer`
+at every phase/wave boundary and gate, with explicit `[N/M] PHASE → next` hand-offs. Doing the
+cycle's *work* (explore, decide, build) without its *machinery* (ledger segment + footer +
+hand-offs) leaves the operator blind to position and breaks `/li:resume`.
+
+**Why:** During the S4L build I drove SENSE→…→BUILD directly and never wrote a `CYCLE STARTING`
+marker. The ledger still showed the previous cycle `cycle_complete:true`, so `render_cycle_footer`
+found no active segment and fell to the thin "no active cycle" line — the operator asked why there
+was no footer / no clear hand-off. The footer was not broken; I never started the cycle in the
+ledger. Reinforced by the ledger-segment scoping fix — the footer needs a CYCLE STARTING marker to
+define the segment.
+
+**How to apply:**
+- First action of any cycle: `source lib/state.sh && state_append CYCLE STARTING cycle_id=<id> cycle_mode=<mode> branch=… commit=…`.
+- Append a per-phase ledger entry at each boundary; render the footer at gates + completion.
+- For long multi-wave BUILDs, treat each wave as a hand-off boundary: render the footer + name the next wave.
+- "Did the work" ≠ "ran the cycle." The ceremony is the operator's visibility + the resume contract.
+
+Related: [[L-013]] (do the real work, not the work-shaped gesture) — here the inverse: I did the
+substance but skipped the visible contract; and [[L-016]] (enforce continuity with hooks, not prose)
+— the deeper, hook-based fix for the same silent-mid-cycle failure.
