@@ -115,6 +115,18 @@ def check(content, path, profile_hexes, verbose=False):
             sample = ", ".join(sorted(off_palette)[:6])
             warnings.append(f"{len(off_palette)} hex value(s) outside the active profile palette: {sample}")
 
+    # Token discipline (warnings — a single-file artifact may legitimately inline values;
+    # never a hard gate, per the false-positive-in-gate lesson L-012).
+    if styles.strip():
+        var_uses = len(re.findall(r"var\(\s*--", styles))
+        raw_hexes = len([h for h in HEX_RE.findall(styles) if h.lower() not in NEUTRAL_HEX])
+        if var_uses == 0 and raw_hexes >= 3:
+            warnings.append(f"no var(--token) usage but {raw_hexes} raw colors — consider emit_tokens.py + design tokens (three-layer discipline)")
+        for m in re.finditer(r"font-family\s*:\s*([^;}{]+)", styles_lower):
+            if "var(" not in m.group(1):
+                warnings.append("hardcoded font-family (no var(--font-…)) — bind type to tokens for theme-switching")
+                break
+
     return errors, warnings
 
 

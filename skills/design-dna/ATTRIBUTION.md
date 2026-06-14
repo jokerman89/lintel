@@ -9,8 +9,12 @@ modification and redistribution; notices are preserved here per their terms.
 - License: MIT License, Copyright (c) 2024 Next Level Builder
 - Consumed: `data/*.csv` + `data/stacks/*.csv` (the curated design corpus: styles,
   palettes, products, reasoning rules, font pairings, UX guidelines, charts, landing
-  patterns, icons, per-stack rules) and `scripts/{core,search,design_system}.py`
-  (BM25 search + design-system composition + master/overrides persistence).
+  patterns, icons, per-stack rules), `data/slides/*.csv` (the 8-CSV slide decision
+  engine: emotion→color, goal→layout, narrative strategies with Duarte sparkline-beats,
+  copy formulas — ADR-0017), `references/{token-architecture,primitive,semantic,component}.md`
+  (the three-layer token doctrine), and `scripts/{core,search,design_system}.py`
+  (BM25 search + design-system composition + master/overrides persistence). `scripts/emit_tokens.py`
+  is a Lintel rewrite of the three-layer concept (reads a Lintel profile → layered CSS), not a copy.
 - Modifications (ADR-0015): `google-fonts` domain removed (728K lookup ballast;
   typography keyword routing widened to compensate); `design.csv`, `draft.csv`,
   `_sync_all.py` and the Gemini-keyed generation skills not consumed; structured

@@ -2,6 +2,21 @@
 
 All notable changes to this repo are tracked here. Format is loose — date headings + bulleted changes. Major behavior changes to the canonical instructions are also logged in `scaffolding/EVOLUTION-LOG.md` (which travels with each scaffolded repo).
 
+## 5.5.0 — 2026-06-13
+
+Design parity: close the two UUPM gaps an adversarial audit found. ADR-0017 (amends ADR-0015).
+
+### Added
+- **Slide decision engine** — 8 vendored slide CSVs (`data/slides/`, MIT-attributed): emotion→color, goal→layout, narrative strategies with Duarte sparkline-beats, copy formulas. New `--slide <strategy|layout|layout-logic|color-logic|typography|copy|background|chart>` search domain; `generate-ppt` Step 2b now queries it (retrieval-grounded slide design). Controlled emotion/goal vocabulary documented in design-dna SKILL.md.
+- **Three-layer token system** — `emit_tokens.py` reads the active profile → layered `design-tokens.css` (primitive → semantic → component), stdlib-only YAML-subset parser. Vendored token-architecture reference docs.
+- 1 new test (`design-tokens-emit.sh`) + slide assertions in `design-dna-search.sh`.
+
+### Changed
+- `validate_design.py` gains two token-discipline **warnings** (no var() usage with raw colors; hardcoded font-family) — advisory, never hard-gate (L-012).
+
+### Deliberately scoped out (ADR-0017, not gaps)
+- Individual Google-Fonts catalog lookup (73 pairings + the typography agent cover selection; a 745K catalog is subtraction-bias ballast) and the Gemini-keyed logo/CIP/banner/social generators (L-001: Lintel ships structure + retrieval, not external-key content generators).
+
 ## 5.4.0 — 2026-06-13
 
 Design DNA: retrieval-augmented design + the anthropic-default profile. ADR-0015/0016.

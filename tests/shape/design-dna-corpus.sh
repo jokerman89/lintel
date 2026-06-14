@@ -29,9 +29,15 @@ done
 grep -q '"google-fonts"' "$DNA/scripts/core.py" && fail "core.py still registers google-fonts domain" || pass "core.py registry matches the corpus"
 
 # 3. Scripts present
-for s in core.py search.py design_system.py validate_design.py; do
+for s in core.py search.py design_system.py validate_design.py emit_tokens.py; do
   [ -f "$DNA/scripts/$s" ] && pass "scripts/$s present" || fail "scripts/$s MISSING"
 done
+
+# 3b. Slide decision engine (ADR-0017): 8 slide CSVs + token-architecture references
+slide_count=$(find "$DNA/data/slides" -name "slide-*.csv" 2>/dev/null | wc -l)
+[ "$slide_count" -eq 8 ] && pass "8 slide-decision CSVs present" || fail "expected 8 slide CSVs, found $slide_count"
+[ -f "$DNA/references/token-architecture.md" ] && pass "token-architecture reference present" || fail "token-architecture.md MISSING"
+grep -q 'SLIDE_CONFIG' "$DNA/scripts/core.py" && pass "core.py registers slide domains" || fail "slide domains not registered in core.py"
 
 # 4. anthropic-default profile: the 7 canonical tokens, exact values
 PROFILE="$DNA/profiles/anthropic-default.yaml"
