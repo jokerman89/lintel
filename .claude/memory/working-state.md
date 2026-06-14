@@ -8,6 +8,27 @@ Cross-session working state (ej durable rules — that's [[lessons.md]]; ej pers
 
 ---
 
+## ▶ CURRENT — read this first (reconciled 2026-06-14)
+
+One answer to "what am I doing", so a fresh session doesn't drown in the entries below. Most of
+those are **DONE** — their PRs are merged. As of 2026-06-14:
+
+- **Merged to main (treat as history, not in-flight):** the whole v5.x chain — vault sink, v5.0
+  `.claude/` home, memory v2, Obsidian, v5.1 subtraction, v5.2 battletest (#62–#69), v5.3
+  cli-and-craft + launch-readiness (#73), v5.4 design-dna (#72), v5.5 design-parity (#74). If an
+  entry below says "PR #NN OPEN", it's almost certainly merged — verify with `gh pr view NN`.
+- **In-flight branches (NOT on main yet):** `feat/extension-pack-contract` (ADR-0018 — `00-state`
+  shows it mid-BUILD: "implemented; adversarial review done; pending final suite+commit"; resume or
+  close it deliberately, don't let SENSE resurrect stale intent) · `feat/setup-hardening` (this —
+  cycle-continuity self-heal, repo-agent removal, CLAUDE.md fixes, ADR-collision renumber).
+- **Staged designs, not built:** ADR-0019 AGENTS.md-primary · ADR-0020 lintel-state MCP · ADR-0021
+  eval-harness (renumbered from 0015/0016/0017 on 2026-06-14).
+
+When in doubt about "is this PR still open?", `gh pr list --state open` is the source of truth, not
+the entries below.
+
+---
+
 <!--
 ## entry-id — short title
 
