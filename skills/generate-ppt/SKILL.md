@@ -83,10 +83,23 @@ Operator-CLI stays non-breaking. Existing workflow-scripts are unaffected.
    - 3-5 substantive sections
    - Opening hook + closing CTA
 
+2b. **Design DNA slide pass (ADR-0017 — retrieval before slide design).** Query the slide
+   decision engine so the arc is grounded in the corpus, not invented:
+   ```bash
+   dna="${LINTEL_SKILLS_DIR:-skills}/design-dna"
+   python3 "$dna/scripts/search.py" "<deck goal / pitch type>" --slide strategy -n 1   # narrative arc + sparkline-beats
+   # then per slide, by the slide's emotion (trust|urgency|confidence…) and goal (hook|proof|cta…):
+   python3 "$dna/scripts/search.py" "<emotion>" --slide color-logic -n 1   # background/text/accent + full-bleed
+   python3 "$dna/scripts/search.py" "<goal>"    --slide layout-logic -n 1  # layout pattern + break-pattern
+   python3 "$dna/scripts/search.py" "<slide-type>" --slide copy -n 1       # headline formula
+   ```
+   Feed the strategy's `sparkline_beats` + `emotion_arc` to PPTNarrativeArchitect as the arc spine.
+   python3 absent → Read `design-dna/data/slides/*.csv` directly (controlled vocabulary in design-dna SKILL.md).
+
 3. **Invoke `PPTNarrativeArchitect` agent** to design slide arc:
-   - Slide-by-slide content goals
-   - Mode tags per slide (Reveal / Inspire / Provoke / Neutral)
-   - Layout suggestions per slide
+   - Slide-by-slide content goals — seeded by the slide-strategy `sparkline_beats`
+   - Mode tags per slide (Reveal / Inspire / Provoke / Neutral) — aligned to the slide's emotion
+   - Layout suggestions per slide — from `--slide layout-logic` (pattern + break-pattern at 1/3, 2/3)
    - Asset suggestions (from the active pack's asset library, if one is configured)
 
 4. **Generate slides via pptx-genjs:**

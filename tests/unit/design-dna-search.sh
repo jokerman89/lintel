@@ -48,5 +48,16 @@ done
 out=$(python3 "$S" "anything" --stack not-a-stack 2>&1); rc=$?
 [ $rc -ne 0 ] && pass "unknown stack rejected (rc=$rc)" || fail "unknown stack accepted silently"
 
+# 6. Slide decision engine (ADR-0017): emotion → color, goal → layout, strategy w/ sparkline-beats
+out=$(python3 "$S" "confidence" --slide color-logic -n 1 2>&1); rc=$?
+[ $rc -eq 0 ] && echo "$out" | grep -qi "background:" && pass "slide color-logic by emotion" || fail "slide color-logic broken (rc=$rc)"
+out=$(python3 "$S" "proof" --slide layout-logic -n 1 2>&1)
+echo "$out" | grep -qi "layout_pattern:" && pass "slide layout-logic by goal" || fail "slide layout-logic broken"
+out=$(python3 "$S" "investor pitch" --slide strategy -n 1 2>&1)
+echo "$out" | grep -qi "sparkline_beats:" && pass "slide strategy carries Duarte sparkline-beats" || fail "slide strategy missing sparkline-beats"
+# negative: unknown slide domain rejected
+out=$(python3 "$S" "x" --slide not-a-slide 2>&1); rc=$?
+[ $rc -ne 0 ] && pass "unknown slide domain rejected" || fail "unknown slide domain accepted silently"
+
 echo ""
 [ "$FAILED" -eq 0 ] && { echo "design-dna-search: ALL PASS"; exit 0; } || { echo "design-dna-search: FAILURES"; exit 1; }

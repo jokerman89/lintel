@@ -25,7 +25,7 @@ Persistence (Master + Overrides pattern):
 import argparse
 import sys
 import io
-from core import CSV_CONFIG, AVAILABLE_STACKS, MAX_RESULTS, search, search_stack
+from core import CSV_CONFIG, AVAILABLE_STACKS, AVAILABLE_SLIDE_DOMAINS, MAX_RESULTS, search, search_stack, search_slide
 from design_system import generate_design_system, persist_design_system
 
 # Force UTF-8 for stdout/stderr to handle emojis on Windows (cp1252 default)
@@ -44,6 +44,9 @@ def format_output(result):
     if result.get("stack"):
         output.append(f"## Design DNA Stack Guidelines")
         output.append(f"**Stack:** {result['stack']} | **Query:** {result['query']}")
+    elif result.get("slide"):
+        output.append(f"## Design DNA Slide Decision")
+        output.append(f"**Slide domain:** {result['slide']} | **Query:** {result['query']}")
     else:
         output.append(f"## Design DNA Search Results")
         output.append(f"**Domain:** {result['domain']} | **Query:** {result['query']}")
@@ -66,6 +69,7 @@ if __name__ == "__main__":
     parser.add_argument("query", help="Search query")
     parser.add_argument("--domain", "-d", choices=list(CSV_CONFIG.keys()), help="Search domain")
     parser.add_argument("--stack", "-s", choices=AVAILABLE_STACKS, help=f"Stack-specific search. Available: {', '.join(AVAILABLE_STACKS)}")
+    parser.add_argument("--slide", choices=AVAILABLE_SLIDE_DOMAINS, help=f"Slide-design decision domain. Available: {', '.join(AVAILABLE_SLIDE_DOMAINS)}")
     parser.add_argument("--max-results", "-n", type=int, default=MAX_RESULTS, help="Max results (default: 3)")
     parser.add_argument("--json", action="store_true", help="Output as JSON")
     # Design system generation
@@ -104,6 +108,14 @@ if __name__ == "__main__":
             print(f"Usage: When building a page, check design-system/{project_slug}/pages/[page].md first.")
             print(f"   If exists, its rules override MASTER.md. Otherwise, use MASTER.md.")
             print("=" * 60)
+    # Slide-decision search
+    elif args.slide:
+        result = search_slide(args.query, args.slide, args.max_results)
+        if args.json:
+            import json
+            print(json.dumps(result, indent=2, ensure_ascii=False))
+        else:
+            print(format_output(result))
     # Stack search
     elif args.stack:
         result = search_stack(args.query, args.stack, args.max_results)

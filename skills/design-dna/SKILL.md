@@ -49,11 +49,17 @@ All searches: python3, stdlib-only, exit 0 + markdown to stdout.
 | `system` | `python3 "<base>/scripts/search.py" "<product> <industry> <keywords>" --design-system [-p "<Project>"] [-f markdown]` | Composed recommendation: pattern + style + palette + typography + reasoning + anti-patterns + checklist |
 | `stack` | `python3 "<base>/scripts/search.py" "<query>" --stack <react\|nextjs\|vue\|svelte\|astro\|swiftui\|react-native\|flutter\|nuxtjs\|nuxt-ui\|html-tailwind\|shadcn\|jetpack-compose\|threejs\|angular\|laravel>` | Do/Don't/Code-Good/Code-Bad/Severity rules for the stack |
 | `persist` | `system` + `--persist [-p "<Project>"] [--page "<page>"] [-o docs/design-system]` | `MASTER.md` + `pages/<page>.md` with self-describing precedence (page overrides master) |
-| `validate` | `python3 "<base>/scripts/validate_design.py" <file.html> [--profile "<base>/profiles/<id>.yaml"]` | Exit 1 on hard violations (zoom-disable, killed focus, emoji icons…); warnings listed |
-| `profile` | Read `<base>/profiles/<id>.yaml` (resolution below) | The active token set + doctrine |
+| `slide` | `python3 "<base>/scripts/search.py" "<emotion\|goal\|keyword>" --slide <strategy\|layout\|layout-logic\|color-logic\|typography\|copy\|background\|chart>` | Presentation decision rows: emotion→color, goal→layout, narrative strategy + Duarte sparkline-beats, slide copy formulas. Consumed by generate-ppt |
+| `tokens` | `python3 "<base>/scripts/emit_tokens.py" --profile "<base>/profiles/<id>.yaml" [--out design-tokens.css]` | Three-layer design-tokens.css (primitive → semantic → component) from the active profile |
+| `validate` | `python3 "<base>/scripts/validate_design.py" <file.html> [--profile "<base>/profiles/<id>.yaml"]` | Exit 1 on hard violations (zoom-disable, killed focus, emoji icons…); warnings (off-palette, token discipline) listed |
+| `profile` | Read `<base>/profiles/<id>.yaml` (resolution below) + `references/token-architecture.md` for the layering doctrine | The active token set + doctrine |
 
 Domain auto-detects from the query when `--domain` is omitted. Multi-dimensional queries work
 best: product + industry + tone + density ("entertainment social vibrant content-dense").
+
+**Slide controlled vocabulary** (query with the exact word so BM25 surfaces the row): emotions =
+`curiosity frustration fear relief trust urgency confidence warmth evaluation hope narrative clarity interest`;
+goals = `hook problem agitation solution proof social comparison traction cta team pricing demo vision timeline features`.
 
 ## Profile resolution
 

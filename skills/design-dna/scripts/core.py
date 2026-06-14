@@ -102,6 +102,39 @@ _STACK_COLS = {
 
 AVAILABLE_STACKS = list(STACK_CONFIG.keys())
 
+# Slide-design decision engine (ADR-0017): emotion/goal → layout/color/type mapping
+# for presentation design, consumed by generate-ppt. Each domain is a searchable CSV;
+# the emotion/goal-keyed ones (color-logic, layout-logic, typography) are best queried
+# with the emotion/goal word as the query so BM25 surfaces the matching row.
+SLIDE_CONFIG = {
+    "strategy":    {"file": "slides/slide-strategies.csv",
+                    "search_cols": ["strategy_name", "keywords", "goal", "audience", "tone", "narrative_arc"],
+                    "output_cols": ["strategy_name", "slide_count", "structure", "goal", "audience", "tone", "narrative_arc", "emotion_arc", "sparkline_beats", "key_metrics", "sources"]},
+    "layout":      {"file": "slides/slide-layouts.csv",
+                    "search_cols": ["layout_name", "keywords", "use_case", "recommended_for"],
+                    "output_cols": ["layout_name", "use_case", "content_zones", "visual_weight", "cta_placement", "recommended_for", "avoid_for", "css_structure", "metric_style", "quote_style", "grid_columns", "visual_treatment", "animation_class"]},
+    "layout-logic":{"file": "slides/slide-layout-logic.csv",
+                    "search_cols": ["goal", "emotion", "layout_pattern", "visual_weight"],
+                    "output_cols": ["goal", "emotion", "layout_pattern", "direction", "visual_weight", "break_pattern", "use_bg_image"]},
+    "color-logic": {"file": "slides/slide-color-logic.csv",
+                    "search_cols": ["emotion", "accent_usage", "card_style"],
+                    "output_cols": ["emotion", "background", "text_color", "accent_usage", "use_full_bleed", "gradient", "card_style"]},
+    "typography":  {"file": "slides/slide-typography.csv",
+                    "search_cols": ["content_type"],
+                    "output_cols": ["content_type", "primary_size", "secondary_size", "accent_size", "weight_contrast", "letter_spacing", "line_height"]},
+    "copy":        {"file": "slides/slide-copy.csv",
+                    "search_cols": ["formula_name", "keywords", "use_case", "emotion_trigger", "slide_type"],
+                    "output_cols": ["formula_name", "components", "use_case", "example_template", "emotion_trigger", "slide_type", "source"]},
+    "background":  {"file": "slides/slide-backgrounds.csv",
+                    "search_cols": ["slide_type", "image_category", "search_keywords"],
+                    "output_cols": ["slide_type", "image_category", "overlay_style", "text_placement", "image_sources", "search_keywords"]},
+    "chart":       {"file": "slides/slide-charts.csv",
+                    "search_cols": ["chart_type", "keywords", "best_for", "data_type", "slide_context"],
+                    "output_cols": ["chart_type", "keywords", "best_for", "data_type", "when_to_use", "when_to_avoid", "max_categories", "slide_context", "css_implementation", "accessibility_notes"]},
+}
+
+AVAILABLE_SLIDE_DOMAINS = list(SLIDE_CONFIG.keys())
+
 
 # ============ BM25 IMPLEMENTATION ============
 class BM25:
@@ -259,6 +292,29 @@ def search_stack(query, stack, max_results=MAX_RESULTS):
         "stack": stack,
         "query": query,
         "file": STACK_CONFIG[stack]["file"],
+        "count": len(results),
+        "results": results
+    }
+
+
+def search_slide(query, slide_domain, max_results=MAX_RESULTS):
+    """Search a slide-design decision domain (ADR-0017)."""
+    if slide_domain not in SLIDE_CONFIG:
+        return {"error": f"Unknown slide domain: {slide_domain}. Available: {', '.join(AVAILABLE_SLIDE_DOMAINS)}"}
+
+    config = SLIDE_CONFIG[slide_domain]
+    filepath = DATA_DIR / config["file"]
+
+    if not filepath.exists():
+        return {"error": f"Slide file not found: {filepath}", "slide": slide_domain}
+
+    results = _search_csv(filepath, config["search_cols"], config["output_cols"], query, max_results)
+
+    return {
+        "domain": "slide",
+        "slide": slide_domain,
+        "query": query,
+        "file": config["file"],
         "count": len(results),
         "results": results
     }
