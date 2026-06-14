@@ -52,6 +52,6 @@ git revert; the guard test reverts with it.
 
 ## Planned (own ADRs)
 
-AGENTS.md-primary portability (ADR-0015) · lintel-state MCP server (ADR-0016) · eval-harness
-(ADR-0017) · Subtraction-Bias data-modeling exception · per-CLI command-stub generator · the
+AGENTS.md-primary portability (ADR-0019) · lintel-state MCP server (ADR-0020) · eval-harness
+(ADR-0021) · Subtraction-Bias data-modeling exception · per-CLI command-stub generator · the
 field-wide description-trigger + aggressive-language sweep (remaining ~80 skills).

@@ -47,8 +47,8 @@ blockers §3-A, dated deferrals §3-B, waves §4) + the remediation it found.
 **What's pending:**
 - Operator: merge PR #73 → main (the git-push-to-main gate stays yours).
 - Public-launch-tier items remain DATED-not-blocking in the register §3-B: real git pre-commit/pre-push
-  install (by 2026-07-15, supersedes the command-string matcher), ADR-0015 AGENTS.md-primary, ADR-0016
-  MCP, ADR-0017 eval-harness, H17/H18, marketplace (post legal). v6 shrink-to-kernel decided after the eval.
+  install (by 2026-07-15, supersedes the command-string matcher), ADR-0019 AGENTS.md-primary, ADR-0020
+  MCP, ADR-0021 eval-harness, H17/H18, marketplace (post legal). v6 shrink-to-kernel decided after the eval.
 - `gh` couldn't auth to jokerman89/lintel from the build session — PR view/merge is operator-side.
 
 **Last touched:** 2026-06-13
@@ -96,8 +96,8 @@ auto-merged to a no-op. Suite 79/79 on the merged tree.
   UNCOMMITTED craft-sweep WIP** (+690/−464: ~16 skills, a new tests/shape/no-swedish.sh, AGENTS/
   CLAUDE/README/li-doctor). A merge can't capture uncommitted work — preserved untouched, fragile.
   Decide: commit-on-branch (durable) or fold into a follow-up cycle. NOT discarded.
-- STAGED (own ADRs already written): AGENTS.md-primary (ADR-0015), lintel-state MCP server
-  (ADR-0016), eval-harness (ADR-0017), per-CLI command-stub generator, field-wide
+- STAGED (own ADRs already written): AGENTS.md-primary (ADR-0019), lintel-state MCP server
+  (ADR-0020), eval-harness (ADR-0021), per-CLI command-stub generator, field-wide
   description-trigger + aggressive-language sweep of the remaining ~80 skills.
 ## v5.4-design-dna — PR OPEN 2026-06-13
 
