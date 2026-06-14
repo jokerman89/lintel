@@ -115,6 +115,29 @@ if [ -n "$REPO_ROOT" ] && [ -d "$REPO_ROOT/docs/v4.x/migrations" ]; then
   [ "${mig:-0}" -gt 0 ] 2>/dev/null && add "Pending migrations: $mig (see docs/v4.x/migrations/)"
 fi
 
+# Current cycle position (setup-hardening 2026-06-14) — re-inject "where you were in the
+# loop" so a fresh/resumed/compacted session never loses the thread. Reuses the ONE
+# canonical segment selector (state_cycle_segment) — a second ledger parser here is the
+# shared-schema violation cycle-footer.sh warns about; we only read scalar fields off it.
+_state_lib="$(dirname "${BASH_SOURCE[0]}")/../../../lib/state.sh"
+[ -f "$_state_lib" ] || _state_lib="$LINTEL_HOME/lib/state.sh"
+if [ -n "$REPO_ROOT" ] && [ -f "$_state_lib" ]; then
+  cyc="$( (
+    cd "$REPO_ROOT" 2>/dev/null || exit 0
+    # shellcheck disable=SC1090
+    source "$_state_lib" 2>/dev/null || exit 0
+    f="$(state_file 2>/dev/null)"; [ -f "$f" ] || exit 0
+    seg="$(state_cycle_segment "$f" 2>/dev/null)"; [ -n "$seg" ] || exit 0
+    printf '%s' "$seg" | grep -qE 'cycle_complete:[[:space:]]*true' && exit 0   # cycle closed → no line
+    ph="$(printf '%s\n' "$seg" | grep -E '^phase:' | grep -viE '^phase:[[:space:]]*CYCLE' | tail -1 | sed -E 's/^phase:[[:space:]]*//; s/[[:space:]]*$//')"
+    nx="$(printf '%s\n' "$seg" | grep -E '^next_recommended:' | tail -1 | sed -E 's/^next_recommended:[[:space:]]*//; s/[[:space:]]*$//')"
+    md="$(printf '%s\n' "$seg" | grep -E '^cycle_mode:' | tail -1 | sed -E 's/^cycle_mode:[[:space:]]*//; s/[[:space:]]*$//')"
+    if [ -z "$ph" ]; then printf 'starting → SENSE%s' "${md:+ · mode $md}"
+    else printf 'phase %s%s%s' "$ph" "${nx:+ · next $nx}" "${md:+ · mode $md}"; fi
+  ) 2>/dev/null )"
+  [ -n "$cyc" ] && add "Current cycle: $cyc — /li:resume to continue, or /li:status"
+fi
+
 # Nothing but the identity line and no repo context? Still worth emitting identity.
 [ -z "$lines" ] && exit 0
 

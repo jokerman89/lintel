@@ -56,6 +56,17 @@
           }
         ]
       }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/shared/cycle-incomplete-warn/run.sh\"",
+            "timeout": 5
+          }
+        ]
+      }
     ]
   }
 }
