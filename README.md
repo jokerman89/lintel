@@ -2,7 +2,7 @@
 
 **Company-neutral, pack-driven session harness for agent-based development.** Markdown + bash scaffolding that any modern AI CLI loads as a plugin. No runtime, no daemons — your CLI handles execution. Identity (voice, compliance, personas, brand) is supplied by an installable **pack**; the harness ships only the neutral `_default` pack.
 
-**Status:** v5.0 — company-neutral, pack-driven harness with the `.claude/` home layout (ADR-0005), mechanical memory (ADR-0006) and zero-setup hook activation (plugin install) (ADR-0008 — bare installs arm hooks manually; see [How hook activation works](docs/getting-started.md#how-hook-activation-works)). The Microsoft CAIP-SE identity has been extracted to the separate [lintel-caip-pack](https://github.com/jokerman89/lintel-caip-pack); Lintel ships only the neutral `_default` pack. See [CHANGELOG.md](CHANGELOG.md) for release notes and [SHIP-GATE.md](SHIP-GATE.md) for readiness gates. New to Lintel? Start with the **[glossary](docs/GLOSSARY.md)** and [getting-started](docs/getting-started.md). Current architecture lives at [docs/design/lintel-v4.0-reframe-design.md](docs/design/lintel-v4.0-reframe-design.md).
+**Status:** v5.3 — company-neutral, pack-driven harness with the `.claude/` home layout (ADR-0005), mechanical memory (ADR-0006), zero-setup hook activation (plugin install) (ADR-0008 — bare installs arm hooks manually; see [How hook activation works](docs/getting-started.md#how-hook-activation-works)) and trigger-form prompt craft (ADR-0014). The Microsoft CAIP-SE identity has been extracted to the separate [lintel-caip-pack](https://github.com/jokerman89/lintel-caip-pack); Lintel ships only the neutral `_default` pack. See [CHANGELOG.md](CHANGELOG.md) for release notes and [SHIP-GATE.md](SHIP-GATE.md) for readiness gates. New to Lintel? Start with the **[glossary](docs/GLOSSARY.md)** and [getting-started](docs/getting-started.md). Current architecture lives at [docs/design/lintel-v4.0-reframe-design.md](docs/design/lintel-v4.0-reframe-design.md).
 
 Lintel ships **124 skills + 69 agents + 1 pack (`_default`)** organized for the plugin-manifest pattern across 8 CLIs. Plus the foundation scaffolding-template system (CORE-PRINCIPLES, EVOLUTION-LOG, .claude/memory/lessons.md, decision-record templates) that gets copied into new repos via `bin/li-scaffold`. The engineering-domain modules (`/li:ta`, `/li:da`, `/li:sc`, `/li:dh`, `/li:tq`) plus the 9-step cycle (8 core phases + SCOPE) are the core.
 
@@ -24,7 +24,7 @@ Two distinct categories, both shipped in this repo:
 
 Company-specific scaffolding (compliance reference, voice corpus, doc-gen templates) is supplied by an installable pack — Lintel ships only the neutral `_default` pack. See the [lintel-caip-pack](https://github.com/jokerman89/lintel-caip-pack) example for the Microsoft CAIP-SE identity.
 
-The architecture: write skills/agents once at repo root, ship tiny per-CLI plugin manifests (`.claude-plugin/`, `.codex-plugin/`, `.cursor-plugin/`, `.opencode/`, `gemini-extension.json`, `.copilot-plugin/`, `.droid-plugin/`) that all point at the same `./skills/` and `./agents/` directories. Each CLI's native plugin marketplace handles discovery + invocation.
+The architecture: write skills/agents once at repo root, ship tiny per-CLI plugin manifests (`.claude-plugin/`, `.codex-plugin/`, `.cursor-plugin/`, `.opencode/`, `gemini-extension.json`) that all point at the same `./skills/` and `./agents/` directories. Copilot CLI and Factory Droid read the `.claude-plugin/` manifest directly via Claude-plugin interop — no separate manifest needed. Each CLI's native plugin marketplace handles discovery + invocation; AGENTS.md carries the instructions to every CLI natively.
 
 ## Who this is for
 
@@ -38,14 +38,14 @@ Full on Claude Code, Codex, and Cursor; supported on four more; best-effort else
 **enforcement hooks fire only on Claude Code** — every other CLI still gets the skills, the
 9-step cycle discipline, and the pack-driven knowledge, just not the live hook gate. This
 table is generated from `lib/cli-tiers.yaml` (the single source); `/li:welcome` reads the same
-file to tell you, on first run, exactly what works on *your* CLI. See [docs/per-cli/](docs/per-cli/)
-for per-CLI install guides.
+file to tell you, on first run, exactly what works on *your* CLI. Per-CLI install commands are in
+the [Quick start](#quick-start) below and in [docs/getting-started.md](docs/getting-started.md#1-install-for-your-cli).
 
 <!-- CLI-TIERS:START — generated from lib/cli-tiers.yaml via cli_tiers_markdown_table; do not hand-edit. -->
 | CLI | Tier | Skills | Subagents | Hooks |
 |---|---|---|---|---|
 | Claude Code | full | native | native | yes |
-| Codex CLI / App | full | native | sequenced | no (Claude Code only) |
+| Codex CLI / App | full | native | native | no (Claude Code only) |
 | Cursor | full | native | sequenced | no (Claude Code only) |
 | Gemini CLI | supported | manual | none | no (Claude Code only) |
 | OpenCode | supported | manual | none | no (Claude Code only) |
@@ -84,6 +84,13 @@ gemini extensions install https://github.com/jokerman89/lintel
 # Copilot CLI:
 copilot plugin marketplace add jokerman89/lintel
 copilot plugin install li@jokerman-lintel
+
+# Factory Droid:
+droid plugin marketplace add jokerman89/lintel
+droid plugin install li@jokerman-lintel
+
+# OpenCode:
+#   fetch and follow .opencode/INSTALL.md
 ```
 
 **Then run `/li:welcome`** in your CLI — it detects your CLI, shows your honest capability tier
@@ -153,7 +160,7 @@ stays local. Full map + lifecycle in [CLAUDE.md](CLAUDE.md#where-state-lives-the
 ## What you don't get
 
 - **No customer data.** This repo is for tooling. Customer artifacts never land here.
-- **No third-party code bundled.** v2 had install/upstream-sources.yaml for fetching upstream packs — v3 simplified, Lintel is now self-contained.
+- **No third-party code bundled.** `install/upstream-sources.yaml` still ships, but as an honest list-only stub — nothing is fetched or vendored from it; since v3 Lintel is self-contained.
 - **No runtime.** Lintel = markdown + bash. Your CLI executes — Lintel provides the patterns + scaffolding.
 - **No production cross-CLI parity for everything.** Hooks are Claude-Code-only mechanism. Subagent abstractions differ per CLI. We're honest about gaps; see [docs/multi-cli.md](docs/multi-cli.md).
 
@@ -188,7 +195,7 @@ Lessons learned go in `scaffolding/01-foundation/.claude/memory/lessons.md`. Pro
 
 ## Versioning
 
-Semantic versioning since v3; the current line is v5.0. Releases ship when [SHIP-GATE.md](SHIP-GATE.md) gates are all green.
+Semantic versioning since v3; the current line is v5.3. Releases ship when [SHIP-GATE.md](SHIP-GATE.md) gates are all green.
 Pre-v3 used date-based versioning — see [CHANGELOG.md](CHANGELOG.md).
 
 ---

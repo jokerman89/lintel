@@ -80,7 +80,13 @@ tokens_added: <approx>
 ts: <timestamp>
 ```
 
-Audit log for compliance trail: `.claude/runtime/audit/url-fetches.jsonl`.
+Audit log for the compliance trail — one line via the unified writer:
+
+```bash
+source "$(git rev-parse --show-toplevel)/bin/_audit.sh"
+audit_log url-fetches fetch url=<url> domain=<domain> compliance_check=<pass|skipped>
+# → .claude/runtime/audit/url-fetches.jsonl
+```
 
 ## Integration
 

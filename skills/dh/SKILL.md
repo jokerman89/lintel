@@ -2,7 +2,7 @@
 name: dh
 layer: foundation
 workflow_root: true
-description: Phase 4 v4.4 — devops-hosting module. Three granularities (full / loop / single). Capabilities dispatch to existing ops agents (ADR-0009 dispatch table). 5 checkpoints, 6-dim scoring rubric, 3 warn-only hooks, profile-driven preferences.
+description: Use for devops and hosting depth — deployment plans, rollback strategy, observability specs, SLI/SLO budgets, capacity headroom, cost projection, and on-call playbooks. Reach for it when the work turns on how the system runs in production. Runs full, loop, or single-capability, dispatching to the ops agents and scoring against a rubric.
 color: purple
 tools: Read, Write, Edit, Bash, Grep, Glob
 voice: internal
@@ -85,7 +85,7 @@ agents at invocation (spawned via `/li:brief-forge subagent_spawn`); each emits
 | `observability-spec` | ObservabilityArchitect + Architect | metrics + traces + logs + dashboards + alert routing per component | pref: `stack` (default otel); signals spec below; reads TA dependency-graph <7 days old |
 | `sli-slo-spec` | ObservabilityArchitect + SystemArchitect | SLI definitions + SLO budgets + error budget policy + burn-rate alerts | RAISE_HELP when any SLO budget < 99% over the window — the 30-day minimum (BLOCKED); pref: `error_budget_window` (default 30 days); burn-rate alerts at 1h/6h/24h windows; explicit budget-exhaustion policy (freeze deploys, page leadership, …); reads TA quality-attributes <30 days old |
 | `cost-projection` | CostAnalyzer + CapacityPlanner | per-component monthly $ projection + anomaly-detection thresholds | RAISE_HELP when projected monthly cost > `threshold` (profile `cost_budget_monthly_usd_threshold`, default $10,000) (BLOCKED); prefs: `cloud`, `threshold`; per-SKU line items with confidence high/medium/low; bounded-by-capacity vs unbounded items; NEEDS_CONTEXT without a TA scaling plan <30 days old |
-| `rollback-strategy` | ReleaseEngineer + SecurityAuditor | per-failure-mode rollback path + blast-radius + revoke paths | RAISE_HELP when any failure mode's rollback path is none/irreversible (BLOCKED); per mode: revert \| rollback \| hot-swap \| feature-flag-off + time-to-rollback + data implications (schema, in-flight transactions); revoke path per security-sensitive change; blast-radius: users, data, downtime if rollback fails; pairs with `dh-deploy-without-rollback-warn` hook |
+| `rollback-strategy` | ReleaseEngineer + SecurityAuditor | per-failure-mode rollback path + blast-radius + revoke paths | RAISE_HELP when any failure mode's rollback path is none/irreversible (BLOCKED); per mode: revert \| rollback \| hot-swap \| feature-flag-off + time-to-rollback + data implications (schema, in-flight transactions); revoke path per security-sensitive change; blast-radius: users, data, downtime if rollback fails; pairs with `dh-deploy-without-rollback-warn` hook (opt-in, not auto-registered — ADR-0008) |
 | `capacity-headroom` | CapacityPlanner + LatencyAnalyzer | per-component headroom margins + alert thresholds + scaling triggers | vertical (per-instance) vs horizontal (instance-count) headroom; alert threshold at the utilization level BEFORE p99 degradation; scaling trigger = signal + duration; factor known peak patterns; reads TA scaling-plan <30 days + observability spec <7 days old |
 | `on-call-playbook` | ReleaseEngineer + SecurityAuditor | per-failure-mode runbook + escalation matrix + security cross-reference | BLOCKED without an observability spec; per failure mode: detection signal (alert/SLI burn), first-5-minute actions, decision tree; escalation matrix severity → who pages → when to escalate; merges overlapping paths with `/li:sc incident-runbook` (security vs operational on-call) |
 
@@ -232,11 +232,13 @@ Full-pass exit: every dimension ≥ 80 OR explicit operator override.
 
 ### Step 6 — Audit + emit ship report
 
+One line via the unified writer (ts/operator/cycle_id come from the envelope):
+
 ```bash
-ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-printf '{"ts":"%s","kind":"dh_module_complete","granularity":"%s","score":%d,"checkpoints_passed":%d,"cloud":"%s","deployment_pattern":"%s","operator":"%s"}\n' \
-  "$ts" "$granularity" "$score" "$passed_count" "$cloud" "$deployment_pattern" "$(whoami 2>/dev/null || echo unknown)" \
-  >> ".claude/runtime/audit/dh-decisions.jsonl"
+source "$(git rev-parse --show-toplevel)/bin/_audit.sh"
+audit_log dh-decisions dh_module_complete "granularity=$granularity" "score=$score" \
+  "checkpoints_passed=$passed_count" "cloud=$cloud" "deployment_pattern=$deployment_pattern"
+# → .claude/runtime/audit/dh-decisions.jsonl
 ```
 
 ## Status protocol
@@ -270,7 +272,7 @@ printf '{"ts":"%s","kind":"dh_module_complete","granularity":"%s","score":%d,"ch
 - BUILD phase: invokes as sub-module when deployment intent detected
 - `/li:full-engineering-pass`: third stage in composition DAG (after TA + DA + SC)
 
-**Hooks:**
+**Hooks** (dormant by decision, ADR-0008 — ship in `hooks/shared/` but are opt-in, not auto-registered):
 - `hooks/shared/dh-deploy-without-rollback-warn/` (pre-commit on deploy/IaC w/o rollback)
 - `hooks/shared/dh-observability-gap-warn/` (pre-edit on new service paths w/o instrumentation)
 - `hooks/shared/dh-cost-budget-warn/` (pre-commit on IaC changes exceeding cost threshold)

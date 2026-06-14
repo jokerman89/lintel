@@ -110,12 +110,13 @@ Return code: 0 (green), 1 (yellow), 2 (red).
 
 ### Step 5 — Audit-log
 
+One line via the unified writer (ts/operator/cycle_id come from the envelope):
+
 ```bash
-jq -nc --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-  --arg plan "$PLAN_FILE" --arg mode "$mode" \
-  --arg total "$total_tokens" --arg verdict "$verdict" \
-  '{ts:$ts, plan:$plan, mode:$mode, total_tokens:$total|tonumber, verdict:$verdict}' \
-  >> .claude/runtime/audit/handoff-size-checks.jsonl
+source "$(git rev-parse --show-toplevel)/bin/_audit.sh"
+audit_log handoff-size-checks size_check "plan=$PLAN_FILE" "mode=$mode" \
+  "total_tokens=$total_tokens" "verdict=$verdict"
+# → .claude/runtime/audit/handoff-size-checks.jsonl
 ```
 
 ## Status protocol

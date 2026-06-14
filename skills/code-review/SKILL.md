@@ -1,7 +1,7 @@
 ---
 name: code-review
 layer: foundation
-description: Diff-scoped pre-landing code review. Lighter than /plan-eng-review, focused on changed code only.
+description: Use before landing a change to review just the diff — focused on the changed code only, lighter than a full engineering review. Reach for it when you have uncommitted or unmerged changes and want a correctness and quality pass before they land.
 color: red
 tools: Read, Bash, Grep, Glob
 voice: internal

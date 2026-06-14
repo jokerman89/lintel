@@ -2,7 +2,7 @@
 name: tq
 layer: foundation
 workflow_root: true
-description: Phase 4 v4.5 — testing-qa module. Three granularities (full / loop / single). Capabilities dispatch to existing test agents (ADR-0009 dispatch table). 5 checkpoints, 6-dim scoring rubric, 3 warn-only hooks, profile-driven preferences. Final engineering-domain module of v4.x.
+description: Use for testing and QA-strategy depth — test-pyramid review, coverage audits, contract-test design, regression suites, flaky-test quarantine, perf budgets, and chaos plans. Reach for it when test strategy needs deliberate design rather than ad-hoc tests. Runs full, loop, or single-capability, dispatching to the test agents and scoring against a rubric.
 color: green
 tools: Read, Write, Edit, Bash, Grep, Glob
 voice: internal
@@ -81,9 +81,9 @@ agents at invocation (spawned via `/li:brief-forge subagent_spawn`); each emits
 
 | Capability | Dispatches to (agents) | Produces | Raise-help / notes |
 |---|---|---|---|
-| `coverage-audit` | TestRunner + Architect | per-component line/branch/mutation coverage + gap analysis + backfill priority | RAISE_HELP when any critical path below `critical_path` threshold (default 100%) (BLOCKED); prefs: `target` (default 80), `critical_path` (default 100); per-language tools below; reads TA boundary-review <30 days old; pairs with `tq-coverage-drop-warn` hook |
-| `perf-budget-spec` | LatencyAnalyzer + PerfBudgetEnforcer | per-journey p50/p95/p99 budgets + regression alert thresholds + enforcement mode | pref: `p95` (default 200ms); budgets must be tighter than SLO to allow burndown; regression detection: % drift, sample-window size, alarm fan-out; enforcement: CI gate (block PR) \| warn-only \| off; BLOCKED without inferable baseline; reads DH sli-slo-spec <30 days + `perf-baseline.md`; pairs with `tq-perf-regression-warn` hook |
-| `contract-test-design` | APIDesigner + ContractTestArchitect | contract surface + consumer-driven tests + version compatibility matrix | RAISE_HELP when any contract breaks an active consumer (BLOCKED); pref: `framework` (pact \| consumer-driven-internal \| none, default pact); pairs with `tq-contract-break-warn` hook |
+| `coverage-audit` | TestRunner + Architect | per-component line/branch/mutation coverage + gap analysis + backfill priority | RAISE_HELP when any critical path below `critical_path` threshold (default 100%) (BLOCKED); prefs: `target` (default 80), `critical_path` (default 100); per-language tools below; reads TA boundary-review <30 days old; pairs with `tq-coverage-drop-warn` hook (opt-in, not auto-registered — ADR-0008) |
+| `perf-budget-spec` | LatencyAnalyzer + PerfBudgetEnforcer | per-journey p50/p95/p99 budgets + regression alert thresholds + enforcement mode | pref: `p95` (default 200ms); budgets must be tighter than SLO to allow burndown; regression detection: % drift, sample-window size, alarm fan-out; enforcement: CI gate (block PR) \| warn-only \| off; BLOCKED without inferable baseline; reads DH sli-slo-spec <30 days + `perf-baseline.md`; pairs with `tq-perf-regression-warn` hook (opt-in, not auto-registered — ADR-0008) |
+| `contract-test-design` | APIDesigner + ContractTestArchitect | contract surface + consumer-driven tests + version compatibility matrix | RAISE_HELP when any contract breaks an active consumer (BLOCKED); pref: `framework` (pact \| consumer-driven-internal \| none, default pact); pairs with `tq-contract-break-warn` hook (opt-in, not auto-registered — ADR-0008) |
 | `regression-suite` | RegressionDetective + TestRunner | fix-to-test mapping + golden-path suite + execution health | scans fix commits 90 days back (top 50); per fix: caught-by-existing \| needs-new-test \| impossible-to-test; ≥1 happy-path + 1 edge-case test per golden path; 1-3 uncovered fixes = DONE_WITH_CONCERNS; BLOCKED on golden-path failures |
 | `chaos-plan` | SecurityAuditor + SystemArchitect | failure-injection scenarios + dependency-chaos matrix + recovery criteria | exits early with a DONE_WITH_CONCERNS stub when `chaos_active=false` (pref: `active`); per dependency: kill / latency-spike / partial-failure; per scenario: RTO + RPO + auto-vs-manual recovery; game-day cadence + abort conditions; BLOCKED without SC threat model or DH on-call playbook (<30 days old) |
 | `flaky-quarantine` | TestRunner + RegressionDetective | flake list + per-test remediation + quarantine durations | pref: `threshold` (default 3 — flake = inconsistent across ≥3 runs on same code); root cause: timing-race \| external-dep \| order-dependent \| env-specific \| unknown; remediation: deflake \| rewrite \| delete \| accept-flake; quarantine cap 14 days; >5 quarantined = DONE_WITH_CONCERNS (systemic); BLOCKED without test history/CI logs |
@@ -270,7 +270,7 @@ printf '{"ts":"%s","kind":"tq_module_complete","granularity":"%s","score":%d,"ch
 - BUILD phase: invokes as sub-module when quality-validation intent detected
 - `/li:full-engineering-pass`: final stage in composition DAG (after DH)
 
-**Hooks:**
+**Hooks** (dormant by decision, ADR-0008 — ship in `hooks/shared/` but are opt-in, not auto-registered):
 - `hooks/shared/tq-coverage-drop-warn/` (pre-commit on coverage drops)
 - `hooks/shared/tq-perf-regression-warn/` (pre-commit on changes affecting perf-budget paths)
 - `hooks/shared/tq-contract-break-warn/` (pre-commit on provider changes breaking consumer contracts)

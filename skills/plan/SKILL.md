@@ -2,7 +2,7 @@
 name: plan
 layer: foundation
 workflow_root: true
-description: Phase 4 of Lintel cycle, ALSO callable standalone as a planner module (v3.8 Feature 2). Produces the cold-executor trio (plan.md + spec.md + prompt.md) BORN TOGETHER. Granularity hard-checked at ≤5min/task. Founder approval gate. Spawns a job when invoked standalone.
+description: Use after DISCOVER, or standalone when you have a design doc and need to break it into executable work, to produce the cold-executor trio (plan.md + spec.md + prompt.md) together. Tasks are granularity-checked to roughly five minutes each and gated on operator approval.
 color: cyan
 tools: Read, Write, Edit, Bash, Grep, Glob
 voice: internal
@@ -310,6 +310,31 @@ The trio (plan.md + spec.md + prompt.md) is the cold-executor handoff contract. 
 - State for `/li:resume`
 - Includes plan.md path, current task pointer, build-log placeholder
 
+### Step 11a — Trio completeness gate (mechanical — issue I4)
+
+The trio is the cold-executor handoff contract; a 2-of-3 or empty member silently breaks every
+cold resume (gstack #1127/#1791). Before declaring PLAN done, assert all three exist and are
+non-trivial — this is a real check, not a prose promise:
+
+```bash
+# the plan dir just written (newest under .claude/plans/); the orchestrator may
+# also export LINTEL_PLAN_DIR — prefer it, else the most recent dir.
+slug_dir="${LINTEL_PLAN_DIR:-$(ls -dt .claude/plans/*/ 2>/dev/null | head -1)}"
+slug_dir="${slug_dir%/}"
+missing=""
+[ -n "$slug_dir" ] || { echo "PLAN BLOCKED: no plan dir under .claude/plans/"; exit 1; }
+for f in plan.md spec.md prompt.md; do
+  [ -s "$slug_dir/$f" ] || missing="$missing $f"
+done
+if [ -n "$missing" ]; then
+  echo "PLAN BLOCKED: cold-executor trio incomplete —$missing missing or empty in $slug_dir"
+  state_append PLAN BLOCKED reason="trio_incomplete:$missing"
+  exit 1
+fi
+# Optional stronger check: if a cold_executor envelope was emitted, validate it against the schema
+[ -f "$slug_dir/handoff.envelope.yaml" ] && bin/li-envelope-validate "$slug_dir/handoff.envelope.yaml" --quiet   || true   # envelope is optional; the three-file gate above is the hard contract
+```
+
 ### Step 11b — Handoff-size check against the 500k cap (trio-emit gate, NON-BLOCKING)
 
 The trio (plan.md + spec.md + prompt.md) now exists on disk — this is the cold-executor handoff payload. Before recommending BUILD, run the existing cap check so the trio + warming context can't silently exceed the 500k cap (the v4.9 audit's PARTIALLY-UPHELD Promise 6: cap logic existed but was invoked at no handoff).
@@ -428,6 +453,8 @@ PLAN is no longer just Phase 4 of `cycle` — it's a callable planner-module tha
 /li:plan <design.md>
    ↓
    workflow_root: true → spawns own job at .claude/runtime/jobs/plan-<stamp>-<hash>/
+       (job auto-spawn is dormant by decision, ADR-0008 — the job-begin hook is
+        not auto-registered; the trio + approval gate below run regardless)
    produces: plan.md + spec.md + prompt.md (the trio)
    handoff-size-check against 500k cap (trio + warming)
    founder approval gate

@@ -2,7 +2,7 @@
 name: cycle
 layer: foundation
 workflow_root: true
-description: Lintel cycle orchestrator — runs full 9-step pipeline (SENSE → CAPTURE) or operator-specified subset. Mode presets, hop-in support, cost-estimate gate before BUILD. Spawns a job (v3.8 Feature 1) at invocation.
+description: Use to run a real multi-step task through the full SENSE-to-CAPTURE pipeline, or a chosen subset of phases. Supports mode presets, hopping in at any phase, and a cost-estimate gate before BUILD. The default entry point for substantial work.
 color: cyan
 tools: Read, Write, Edit, Bash, Grep, Glob
 voice: internal
@@ -246,9 +246,11 @@ State writes/reads are mechanical since v5.0 (ADR-0008) — `_sl="${LINTEL_REPO_
 [ -f "$_sl" ] || _sl="$HOME/.lintel/lib/state.sh"; source "$_sl"   # installed by install.sh in consumer repos` once, then one command (`state_append` / `state_last`), not a YAML obligation.
 
 **Mode persistence (for the footer).** Once the phase list + mode are fixed (Step 3), run
-`state_append CYCLE STARTING cycle_id=<id> cycle_mode=<mode>` once at cycle start, so
-`render_cycle_footer` (and every phase skill that calls it) resolves the skipped-phase glyphs from
-state alone — no explicit `--mode` needed. See [ADR-0003](../../.claude/decisions/0003-cycle-position-footer.md).
+`state_append CYCLE STARTING cycle_id=<id> cycle_mode=<mode> branch=$(git branch --show-current) commit=$(git rev-parse --short HEAD)`
+once at cycle start, so `render_cycle_footer` (and every phase skill that calls it) resolves the
+skipped-phase glyphs from state alone — no explicit `--mode` needed — and `/li:resume`'s integrity
+check has real branch/commit values to compare (it reads the current cycle's segment).
+See [ADR-0003](../../.claude/decisions/0003-cycle-position-footer.md).
 
 **Phase-progress format** (printed to stdout at each phase boundary):
 
@@ -307,7 +309,16 @@ token-heavy phase — but it presents the **task count + uncalibrated estimate**
 dollar/duration figure. The estimate is `UNCALIBRATED` until CAPTURE has recorded actuals for this
 size (`lib/scale-estimator.sh` `scale_calibrated_prior`).
 
-If `--auto`: auto-decide the recommended option on reversible gates, but still STOP at one-way doors (BUILD cost gate over budget, production mutations, force-push). Operator can interrupt anytime. (Reinvented from the inherited blanket-YES — ADR-0011 C1.)
+If `--auto`: auto-decide the recommended option on reversible gates, but still stop at one-way doors. This is MECHANICAL, not a prose promise (issue I3): run each pending decision through `lib/auto-decide.sh` before auto-deciding —
+
+```bash
+source "$LINTEL_REPO_ROOT/lib/auto-decide.sh"
+if is_one_way_door "$decision_text"; then ask_operator; else auto_decide_recommended; fi
+```
+
+`is_one_way_door` flags the irreversible classes (delete/drop/migrate/schema-change/production/
+force-push/secret/rename-skill-agent/breaking-change) regardless of how the decision was framed, so
+`--auto` can't run past a sovereignty decision. Operator can interrupt anytime.
 
 ### Step 6 — Pause-points between phases (operator can interrupt)
 
@@ -347,26 +358,17 @@ After last phase DONE:
 - Surface cycle summary (per CAPTURE phase output if CAPTURE ran)
 - If CAPTURE didn't run (e.g., custom subset without CAPTURE): write light summary
 - `state_append CYCLE DONE cycle_complete=true` (CAPTURE's own entry covers this when CAPTURE ran)
+- Telemetry — one mechanical line via the unified writer (ts/operator/cycle_id come from the envelope):
 
-### Step 9 — Telemetry (operator-opt-in)
-
-Append to `.claude/runtime/audit/cycle-runs.jsonl`:
-```json
-{
-  "ts": "<>",
-  "cycle_id": "<>",
-  "mode": "<>",
-  "phases_run": [...],
-  "duration_total_minutes": <>,
-  "tokens_used_total": <>,
-  "outcome": "DONE | DONE_WITH_CONCERNS | BLOCKED | ABORTED",
-  "operator": "<whoami>"
-}
+```bash
+source "$(git rev-parse --show-toplevel)/bin/_audit.sh"
+audit_log cycle cycle_complete mode=<mode> phases=<n> outcome=<DONE|DONE_WITH_CONCERNS|BLOCKED|ABORTED>
+# → .claude/runtime/audit/cycle.jsonl
 ```
 
-> `tokens_used_total` is a real post-run measurement — this is the actuals stream that
-> `scale_calibrated_prior` reads to retire the UNCALIBRATED label. No `cost_estimate_dollars`
-> field: Lintel has no pricing table, so a dollar figure here would be fabricated (K6).
+> No `cost_estimate_dollars` field: Lintel has no pricing table, so a dollar figure here would be
+> fabricated (K6). Token actuals for estimator calibration are CAPTURE Step 1b's stream
+> (`granularity.jsonl` — dormant by decision, ADR-0008), not this one.
 
 ## Status protocol
 
@@ -402,7 +404,7 @@ If dependency not met: surface, ask operator to satisfy or pick different `--fro
 
 **Writes:**
 - `.claude/runtime/state/00-state.md` (orchestrator entries per phase)
-- `.claude/runtime/audit/cycle-runs.jsonl`
+- `.claude/runtime/audit/cycle.jsonl` (one `audit_log cycle ...` line at cycle complete; failure events use the same stream)
 
 **Triggers:**
 - Each phase-skill in sequence: `/li:sense`, `/li:scope`, `/li:define`, etc.
@@ -424,7 +426,7 @@ If dependency not met: surface, ask operator to satisfy or pick different `--fro
 4. If loop-back: re-invoke target earlier phase with corrected input
 5. If abort: clean state, save resume point, exit
 
-Failure events logged to `.claude/runtime/audit/cycle-failures.jsonl` for audit.
+Failure events get one line in the same stream as Step 8 — `audit_log cycle cycle_failure phase=<phase> action=<retry|skip|loop-back|abort>` → `.claude/runtime/audit/cycle.jsonl`.
 
 ## Voice tier behavior
 

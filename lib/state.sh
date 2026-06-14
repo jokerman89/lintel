@@ -33,6 +33,10 @@ state_append() {
   local phase="${1:?usage: state_append <PHASE> <STATUS> [next=X] [k=v ...]}"
   local status="${2:?usage: state_append <PHASE> <STATUS> [next=X] [k=v ...]}"
   shift 2
+  # Strip CR/LF from phase/status too (H8 applied this to values only): a
+  # newline in either would forge ledger lines the footer + resume parse.
+  phase="${phase//$'\r'/ }"; phase="${phase//$'\n'/ }"
+  status="${status//$'\r'/ }"; status="${status//$'\n'/ }"
   local f
   f="$(state_file)" || { echo "WARN [lintel/state]: no repo — state entry skipped" >&2; return 0; }
   mkdir -p "$(dirname "$f")" 2>/dev/null || true
@@ -50,6 +54,7 @@ state_append() {
         continue ;;
       esac
       k="${kv%%=*}"; v="${kv#*=}"
+      k="${k//$'\r'/}"; k="${k//$'\n'/}"
       [ "$k" = "next" ] && k="next_recommended"
       # Strip CR/LF from the value (battletest H8): a raw newline would inject
       # forged ledger lines / `---` block boundaries that state_last + the footer
@@ -73,6 +78,25 @@ state_last() {
   else
     printf '%s' "$block" | grep -E "^${field}:" | head -1 | sed -E "s/^${field}:[[:space:]]*//"
   fi
+}
+
+# state_cycle_segment [file] — print the ledger from the LAST `phase: CYCLE`
+# block onward: the current cycle's segment. Multi-cycle ledgers are the
+# normal state of a working repo, and resolving position / mode / completeness
+# across cycle boundaries poisons every consumer — a prior cycle's
+# `cycle_complete: true` rendered the "no active cycle" footer for every later
+# cycle (launch register B4). Whole file when no CYCLE block exists
+# (single-cycle fixtures, fresh repos, hand-written state).
+state_cycle_segment() {
+  local f="${1:-$(state_file 2>/dev/null)}"
+  [ -n "$f" ] && [ -f "$f" ] || return 0
+  awk '
+    { sub(/\r$/,""); line=$0; sub(/^[ \t]+/,"",line)
+      if (index(line,"phase:")==1) { v=substr(line,7); gsub(/^[ \t]+|[ \t]+$/,"",v)
+        if (toupper(v) ~ /^CYCLE/) start=NR }
+      buf[NR]=$0 }
+    END { if (!start) start=1; for (i=start;i<=NR;i++) print buf[i] }
+  ' "$f"
 }
 
 # Self-test

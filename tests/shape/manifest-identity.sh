@@ -46,9 +46,7 @@ if command -v jq >/dev/null 2>&1; then
     .claude-plugin/plugin.json
     .claude-plugin/marketplace.json
     .codex-plugin/plugin.json
-    .copilot-plugin/plugin.json
     .cursor-plugin/plugin.json
-    .droid-plugin/plugin.json
     gemini-extension.json
   )
   for m in "${VERSION_MANIFESTS[@]}"; do
@@ -66,7 +64,7 @@ else
 fi
 
 # Drift tripwires: no stale identity anywhere on the shipped surface (jq-free).
-SURFACE=(.claude-plugin .codex-plugin .copilot-plugin .cursor-plugin .droid-plugin gemini-extension.json install .opencode bin)
+SURFACE=(.claude-plugin .codex-plugin .cursor-plugin gemini-extension.json install .opencode bin)
 for bad in 'jokerman89/jokerman-lintel' 'Azureflipper/jokerman-session-setup' '3.5.0-dev' 'akerman@microsoft.com'; do
   if git grep -qF "$bad" -- "${SURFACE[@]}" 2>/dev/null; then
     fail "stale identity '$bad' still present: $(git grep -lF "$bad" -- "${SURFACE[@]}" 2>/dev/null | tr '\n' ' ')"

@@ -2,7 +2,7 @@
 name: full-engineering-pass
 layer: foundation
 workflow_root: true
-description: v4.6 (v4.x feature-complete) — composes all 5 engineering-domain modules in DAG order (TA → DA‖SC → DH → TQ). Single invocation produces architecture decisions + data model + security posture + ops plan + quality validation for a customer engagement or major release.
+description: Use for a customer engagement or major release that needs the whole engineering picture at once — composes all five domain modules (architecture, data, security, devops, testing) in dependency order. One invocation produces architecture decisions, a data model, a security posture, an ops plan, and quality validation together.
 color: cyan
 tools: Read, Write, Edit, Bash, Grep, Glob
 voice: internal
@@ -182,8 +182,8 @@ fi
 ```bash
 mkdir -p .claude/runtime/state/full-engineering-pass
 state_file=".claude/runtime/state/full-engineering-pass/00-state.md"
-audit=".claude/runtime/audit/full-engineering-pass.jsonl"
-mkdir -p "$(dirname "$audit")"
+# Unified audit writer → .claude/runtime/audit/full-engineering-pass.jsonl
+source "$(git rev-parse --show-toplevel)/bin/_audit.sh"
 
 declare -A module_score
 declare -A module_status
@@ -288,9 +288,9 @@ out=".claude/runtime/state/full-engineering-pass/composition-report-$ts.md"
   echo "- .claude/runtime/state/tq/ (coverage, perf budget, contracts, regression, chaos)"
 } > "$out"
 
-printf '{"ts":"%s","kind":"full_engineering_pass_complete","aggregate_score":%d,"modules_run":%d,"modules_missing":%d,"verdict":"%s","operator":"%s"}\n' \
-  "$ts" "$aggregate_score" "${#final_modules[@]}" "${#missing_modules[@]}" "$ship_verdict" "$(whoami 2>/dev/null || echo unknown)" \
-  >> "$audit"
+# One line via the unified writer (ts/operator/cycle_id come from the envelope)
+audit_log full-engineering-pass full_engineering_pass_complete "aggregate_score=$aggregate_score" \
+  "modules_run=${#final_modules[@]}" "modules_missing=${#missing_modules[@]}" "verdict=$ship_verdict"
 
 echo ""
 echo "════════════════════════════════════════════════════"

@@ -22,6 +22,8 @@ CLI detection runtime that feeds the portability shim. **Foundational** — ever
 
 P1 fix T2 (eng-review): Phase B sub-step 0. Without reliable detection the shim layer is guessed.
 
+Detected IDs (the enum): `claude-code`, `codex`, `copilot-cli`, `copilot-app`, `cursor`, `gemini`, `opencode`, `droid`. For capability-tier lookups the ID is normalized onto the 8 rows of `lib/cli-tiers.yaml` via `cli_tier_normalize` (`lib/cli-tiers.sh`): `copilot-cli`/`copilot-app` → `copilot`; anything unrecognized → `other`. That mapping is what lets `/li:welcome`'s honest-tier banner reach every row.
+
 ## When to use
 
 - Session start (auto-run by `/help` and other entry skills)
@@ -54,8 +56,12 @@ P1 fix T2 (eng-review): Phase B sub-step 0. Without reliable detection the shim 
    - Check `$0` / `process.argv0` for known binary patterns:
      - `claude-code`, `claude` → `claude-code`
      - `codex`, `codex exec` → `codex`
-     - `gh-copilot`, `gh copilot` → `copilot-cli`
+     - `gh-copilot`, `gh copilot`, `copilot` → `copilot-cli`
      - GitHub Copilot App native bundle paths → `copilot-app`
+     - `cursor`, `cursor-agent` → `cursor`
+     - `gemini` → `gemini`
+     - `opencode` → `opencode`
+     - `droid` → `droid`
    - Check parent process tree (1 level up) for the same patterns. Some CLIs spawn shells that obscure $0.
 
 3. **Tool-availability probe.**
@@ -63,9 +69,17 @@ P1 fix T2 (eng-review): Phase B sub-step 0. Without reliable detection the shim 
      - `CLAUDE_CODE_VERSION` (or `ANTHROPIC_*`) → `claude-code`
      - `CODEX_*` → `codex`
      - `GH_TOKEN` + `gh copilot` subcommand available → `copilot-cli`
-   - Check for CLI-specific filesystem markers:
-     - `~/.claude/config.json` exists → suggests `claude-code` (weak signal — could be stale)
+     - `CURSOR_TRACE_ID` (or other `CURSOR_*`) → `cursor`
+     - `GEMINI_CLI` / `GEMINI_*` → `gemini`
+     - `OPENCODE_*` → `opencode`
+     - `FACTORY_*` → `droid`
+   - Check for CLI-specific filesystem markers (all weak signals — could be stale installs):
+     - `~/.claude/config.json` exists → suggests `claude-code`
      - `~/.codex/config.toml` exists → suggests `codex`
+     - `~/.cursor/` exists → suggests `cursor`
+     - `~/.gemini/settings.json` exists → suggests `gemini`
+     - `~/.config/opencode/` exists → suggests `opencode`
+     - `~/.factory/` exists → suggests `droid`
 
 4. **Operator-declared fallback.**
    - Read `~/.lintel/cli-id.txt` if exists
@@ -78,7 +92,8 @@ P1 fix T2 (eng-review): Phase B sub-step 0. Without reliable detection the shim 
      to apply the correct shim behavior.
 
      Set LINTEL_CLI env var:
-       export LINTEL_CLI=claude-code   # or codex / copilot-cli / copilot-app
+       export LINTEL_CLI=claude-code
+       # or: codex / copilot-cli / copilot-app / cursor / gemini / opencode / droid
 
      Or declare via skill:
        /li:cli-fingerprint --declare <cli-id>
@@ -123,7 +138,7 @@ Shim behavior for this CLI:
 ## Failure modes
 
 - **Detection cascade falls through to step 5:** refuse + clear instructions. Don't guess.
-- **Env var contains invalid CLI ID:** validate against enum (`claude-code`, `codex`, `copilot-cli`, `copilot-app`); reject unknown values with error.
+- **Env var contains invalid CLI ID:** validate against the enum (`claude-code`, `codex`, `copilot-cli`, `copilot-app`, `cursor`, `gemini`, `opencode`, `droid`); reject unknown values with error.
 - **Cache file unreadable / corrupted:** delete cache + re-run detection. Should be transparent to operator.
 - **Process inspection finds multiple matches (claude-code + codex both in process tree):** prefer the one with shorter PID distance to current process. If tie: prefer claude-code (most common case).
 - **Conflicting signals (env var says codex, process says claude-code):** env var wins. Log conflict to audit.
@@ -160,6 +175,7 @@ Subsequent detections will use this declared value (step 4) if no env var or pro
 
 ## See also
 
+- `lib/cli-tiers.sh` — `cli_tier_normalize` maps these IDs onto the 8 `lib/cli-tiers.yaml` rows for the honest-tier lookup (`/li:welcome`)
 - `CLI-SUPPORT-V2-SCHEMA.md` — schema this skill's output feeds
 - `~/.lintel/config.yaml` — operator overrides per-skill cli_support
 - `verify.sh --portability` — schema validation

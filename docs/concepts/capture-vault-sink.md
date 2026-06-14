@@ -22,7 +22,7 @@ deeper nesting). Disable by setting `vault_sink_enabled: false` in the active pa
 ## Behavior
 
 - One file per session: `<path>/YYYY-MM-DD-<repo>-<short-slug>.md`, frontmatter + four sections
-  (Vad gjordes / Beslut / Öppna trådar / Pekare). Full template in `skills/capture/SKILL.md`
+  (What was done / Decisions / Open threads / Pointers). Full template in `skills/capture/SKILL.md`
   Step 7b.
 - **A missing vault never fails a session.** If the path does not exist at runtime, CAPTURE logs
   one WARN line, writes `vault_sink_skipped` to `.claude/runtime/audit/`, and moves on.

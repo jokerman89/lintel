@@ -1,7 +1,7 @@
 ---
 name: fix
 layer: foundation
-description: Composite shortcut for hotfix workflow — runs SENSE + BUILD + REVIEW + SHIP, skipping DEFINE/DISCOVER/PLAN/CAPTURE. For known bugs + clear fix path + ship now.
+description: Use for a known bug with a clear fix path that needs to ship now — runs the abbreviated SENSE, BUILD, REVIEW, SHIP path and skips design, discovery, and planning. The hotfix shortcut; reach for it when the diagnosis is already done and only the fix remains.
 color: cyan
 tools: Read, Bash, Grep, Glob
 voice: internal

@@ -1,7 +1,7 @@
 ---
 name: context-restore
 layer: foundation
-description: Restore session state from a checkpoint file. Run at start of a fresh session that continues prior work.
+description: Use at the start of a fresh session that continues prior work to restore session state from a checkpoint file. Reach for it when a previous session saved a checkpoint and you want to resume with that context loaded rather than starting cold.
 color: blue
 tools: Read, Bash, Grep, Glob
 voice: internal

@@ -151,7 +151,8 @@ Return code: 0 (green), 1 (yellow), 2 (red).
 - Each pack-gate's PASS/FAIL output
 
 **Writes:**
-- `.claude/runtime/audit/compliance-gates.jsonl` (per-run audit-trail)
+- `.claude/runtime/audit/compliance-gates.jsonl` — one line per run via the unified writer:
+  `source "$(git rev-parse --show-toplevel)/bin/_audit.sh"; audit_log compliance-gates verdict verdict=<green|yellow|red> gates_run=<n> overridden=<true|false>`
 - stdout (verdict report)
 - Exit code (CI consumption)
 

@@ -1,7 +1,7 @@
 ---
 name: discover
 layer: foundation
-description: Phase 3 of Lintel cycle — map codebase, surface ADRs, apply lessons, identify reusable patterns + agents/skills relevant to the wedge. Read-only context preparation for PLAN.
+description: Use after DEFINE, before PLAN, to gather context before planning — maps the codebase, surfaces relevant ADRs and lessons, and identifies reusable patterns, agents, and skills for the chosen wedge. Read-only; produces the grounding PLAN needs so it does not reinvent or contradict prior decisions.
 color: cyan
 tools: Read, Bash, Grep, Glob
 voice: internal

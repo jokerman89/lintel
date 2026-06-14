@@ -1,7 +1,7 @@
 ---
 name: jobs
 layer: foundation
-description: Curated-flow lifecycle controller — list / continue / replan / abort / branch in-flight Lintel jobs. Single source of truth for "what's open right now."
+description: Use to see and steer in-flight Lintel jobs — list what's open, continue, replan, abort, or branch a job. The single source of truth for "what's open right now"; reach for it when you've lost track of running work or need to redirect it.
 color: yellow
 tools: Read, Write, Bash, Glob
 voice: internal
