@@ -259,6 +259,26 @@ else
   echo "    Verify: start a fresh session (or claude --debug), then re-run li-doctor."
 fi
 
+# Proof of life (ADR-0023): the turn-start continuity driver. It only fires INSIDE a cycle,
+# so absence isn't necessarily a fault — but a STALE installed plugin that lacks the hook is.
+_inject_seen=""
+for _aud in "$repo_root/.claude/runtime/audit/hooks.jsonl" "$LINTEL_HOME/audit/hooks.jsonl"; do
+  [ -f "$_aud" ] && grep -q 'cycle_position_inject' "$_aud" 2>/dev/null && _inject_seen=1
+done
+[ -n "$_inject_seen" ] && ok "cycle-position-inject (turn-start continuity) has fired"
+# Staleness: does the INSTALLED plugin actually carry the continuity driver (li >= 5.7.0)?
+_has_inject=""; _any_cache=""
+for _h in "$HOME/.claude/plugins/cache"/*/li/*/hooks/hooks.json; do
+  [ -f "$_h" ] || continue
+  _any_cache=1
+  grep -q 'cycle-position-inject' "$_h" 2>/dev/null && _has_inject=1
+done
+if [ -n "$_has_inject" ]; then
+  ok "installed plugin carries the continuity driver (cycle-position-inject)"
+elif [ -n "$_any_cache" ]; then
+  warn "installed plugin is STALE — no cycle-position-inject hook (needs li >= 5.7.0). Update via /plugin, or the cycle footer won't re-assert per turn (the 'lose the thread mid-cycle' symptom)."
+fi
+
 # session-digest (REQUIRED, ADR-0002): auto-registered via plugin hooks.json (v5+),
 # or present in ~/.lintel/hooks/ AND merged as SessionStart (legacy path)
 if [ -f "$LINTEL_HOME/hooks/shared/session-digest/run.sh" ] || [ -n "$_plugin_hooks" ]; then
