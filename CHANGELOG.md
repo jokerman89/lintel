@@ -2,6 +2,17 @@
 
 All notable changes to this repo are tracked here. Format is loose — date headings + bulleted changes. Major behavior changes to the canonical instructions are also logged in `scaffolding/EVOLUTION-LOG.md` (which travels with each scaffolded repo).
 
+## 5.7.0 — 2026-06-17
+
+Delivery bump so the marketplace refetches the extension-pack contract (PR #78 landed it on main after PR #77 stranded it on the v5.3 branch).
+
+### Added
+- **Extension-pack contract (ADR-0018):** packs can now ship `skills/agents/hooks/workflows`, not just identity (voice/compliance/brand). `lib/pack-resolver.sh`, `packs/_default/pack.yaml`, `skills/pack-switch/SKILL.md`, new `bin/li-pack-scaffold`, new `tests/shape/extension-pack-contract.sh`. Foundation for capability-shipping external packs (e.g. lintel-caip-pack).
+- Lessons L-018 (running /li:cycle means running its machinery, not just its work) + L-019 (consume the source's know-how, produce the user's value — never port its mechanism).
+
+### Fixed
+- Block-hook dedup: removed a duplicate scanner-unavailable fail-closed guard (a launch-waves + v5.3 merge artifact with a garbled override hint) from both block hooks. The proper ADR-0013 fail-closed guard remains in each — verified present + `security-controls-fire` green; no security regression.
+
 ## 5.6.0 — 2026-06-14
 
 Setup-hardening: self-healing cycle continuity + agent/CLAUDE.md/ADR cleanup. ADR-0022 (delivery bump for PR #75).
