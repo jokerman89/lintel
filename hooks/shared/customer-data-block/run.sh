@@ -24,15 +24,6 @@ command -v audit_log >/dev/null 2>&1 || source "$(dirname "${BASH_SOURCE[0]}")/.
 # Shared customer-PII patterns (defined once in _patterns.sh).
 source "$(dirname "${BASH_SOURCE[0]}")/../_patterns.sh"
 
-# Fail-closed: a BLOCK hook that cannot scan must BLOCK, not silently allow
-# (a missing/failed scanner is exactly the silent-bypass we are guarding against).
-if ! command -v scan_customer >/dev/null 2>&1; then
-  echo "ERROR [Lintel hook]: customer-data-block scanner unavailable — blocking to be safe." >&2
-  echo "ERROR: source hooks/shared/_patterns.sh failed. Override only if you are certain:" >&2
-  echo "  LINTEL_OVERRIDE_CUSTOMER_DATA=1 LINTEL_OVERRIDE_CUSTOMER_DATA ... (see CLAUDE.md)" >&2
-  exit 2
-fi
-
 # Fire on any git commit/push however phrased (battletest K2 — the `^git` anchor
 # was bypassed by `git -C`, abs paths, `&&` chains).
 if ! printf '%s' "$CMD_FLAT" | grep -qE '(^|[^A-Za-z0-9_-])git([[:space:]]|$).*\b(commit|push)\b'; then

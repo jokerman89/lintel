@@ -1,0 +1,155 @@
+#!/usr/bin/env bash
+# li-pack-scaffold — scaffold a Lintel EXTENSION PACK (plugin + pack hybrid).
+#
+# component: li-pack-scaffold
+# implements: ADR-0018 (extension-pack contract)
+# intent: .claude/plans/s4l-extension-pack/todo.md
+# last_intent_review: 2026-06-14
+#
+# An extension pack is a repo that is BOTH a Claude Code plugin (ships
+# skills/agents/hooks via its own manifest — the host CLI does discovery +
+# namespacing + hook registration) AND a Lintel pack (pack.yaml identity, with
+# the `extension:` block declaring its namespace + workflow so Lintel is aware).
+#
+# Usage:
+#   li-pack-scaffold <name> --namespace <ns> --workflow <wf> [options]
+#
+# Options:
+#   --target <path>   parent dir to create <name>/ inside (default: cwd).
+#                     Use --in-place to scaffold INTO <target> directly (no <name>/ subdir).
+#   --in-place        scaffold into --target itself (for an existing empty-ish repo dir)
+#   --title "<text>"  human title for README/manifest (default: derived from name)
+#   --description "<text>"  one-line plugin description
+#
+# Safe-by-construction:
+#   - name/namespace/workflow are charset-validated (kebab/alnum) before use and
+#     passed to awk as DATA via -v (never as code) — no sed-with-user-input (K1 RCE class).
+#   - the free-text title/description are SANITIZED (control chars stripped) and the
+#     description is JSON-ESCAPED before it enters plugin.json, so a stray quote/backslash
+#     cannot corrupt or inject keys into the manifest the consuming CLI loads.
+
+set -uo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+DEFAULT_PACK_YAML="$REPO_ROOT/packs/_default/pack.yaml"
+
+die() { echo "ERROR [li-pack-scaffold]: $1" >&2; exit 1; }
+
+usage() {
+  sed -n '2,30p' "$0" | sed 's/^# \{0,1\}//'
+  exit "${1:-0}"
+}
+
+# ── Parse args ──────────────────────────────────────────────────────────────
+[ $# -ge 1 ] || usage 2
+NAME=""; NS=""; WF=""; TARGET="$(pwd)"; IN_PLACE=0; TITLE=""; DESC=""
+NAME="$1"; shift
+case "$NAME" in -h|--help|help|"") usage 0 ;; esac
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --namespace) NS="${2:-}"; shift 2 ;;
+    --workflow)  WF="${2:-}"; shift 2 ;;
+    --target)    TARGET="${2:-}"; shift 2 ;;
+    --in-place)  IN_PLACE=1; shift ;;
+    --title)     TITLE="${2:-}"; shift 2 ;;
+    --description) DESC="${2:-}"; shift 2 ;;
+    -h|--help)   usage 0 ;;
+    *) die "unknown arg: $1 (see --help)" ;;
+  esac
+done
+
+# ── Validate (strict — rejects injection vectors before any use) ─────────────
+echo "$NAME" | grep -qE '^[a-z][a-z0-9-]*$' || die "pack name must be kebab-case [a-z0-9-], got: '$NAME'"
+[ -n "$NS" ] || die "--namespace is required (e.g. s4l)"
+echo "$NS"   | grep -qE '^[a-z][a-z0-9]*$'  || die "--namespace must be lowercase alnum [a-z0-9], got: '$NS'"
+[ -n "$WF" ] || die "--workflow is required (e.g. ${NS}-forge)"
+echo "$WF"   | grep -qE '^[a-z][a-z0-9-]*$' || die "--workflow must be kebab-case, got: '$WF'"
+[ -f "$DEFAULT_PACK_YAML" ] || die "_default pack.yaml not found at $DEFAULT_PACK_YAML"
+[ -n "$TITLE" ] || TITLE="$NAME"
+[ -n "$DESC" ]  || DESC="Lintel extension pack: $NAME (namespace /$NS:)"
+
+# Sanitize the free-text fields (not charset-restricted, so they must be made safe
+# for their sinks). Strip control chars (newline/CR/tab → space) from both; JSON-escape
+# the description (\ and " ) before it enters plugin.json — manifest-injection guard.
+TITLE=$(printf '%s' "$TITLE" | tr '\n\r\t' '   ')
+DESC=$(printf '%s' "$DESC" | tr '\n\r\t' '   ')
+DESC_JSON=$(printf '%s' "$DESC" | sed 's/\\/\\\\/g; s/"/\\"/g')
+
+# ── Resolve destination ─────────────────────────────────────────────────────
+if [ "$IN_PLACE" -eq 1 ]; then DEST="$TARGET"; else DEST="$TARGET/$NAME"; fi
+mkdir -p "$DEST" || die "cannot create $DEST"
+# Refuse to clobber an existing pack.yaml unless it's our own re-run
+[ -f "$DEST/pack.yaml" ] && die "pack.yaml already exists at $DEST — refusing to overwrite"
+
+# ── Directory skeleton ──────────────────────────────────────────────────────
+for d in skills agents hooks/shared knowhow lib tests/shape tests/unit \
+         .claude-plugin .claude/decisions .claude/memory .claude/plans source; do
+  mkdir -p "$DEST/$d"
+done
+
+# ── pack.yaml: copy _default, then set name + extension block (awk -v = data) ─
+awk -v name="$NAME" -v ns="$NS" -v wf="$WF" '
+  /^name:/        { print "name: " name; next }
+  /^[[:space:]]*is_extension:/ { print "  is_extension: true"; next }
+  /^[[:space:]]*namespace:/    { print "  namespace: " ns; next }
+  /^[[:space:]]*workflow:/     { print "  workflow: " wf; next }
+  /^[[:space:]]*provides_skills:/ { print "  provides_skills: true"; next }
+  /^[[:space:]]*provides_agents:/ { print "  provides_agents: true"; next }
+  /^[[:space:]]*provides_hooks:/  { print "  provides_hooks: true"; next }
+  /^navigation:/  { print; in_nav=1; next }
+  in_nav && /^[[:space:]]+default_workflow:/ { print "  default_workflow: " wf; in_nav=0; next }
+  /^[A-Za-z_]/    { in_nav=0; print; next }
+  { print }
+' "$DEFAULT_PACK_YAML" > "$DEST/pack.yaml" || die "failed to render pack.yaml"
+
+# ── Plugin manifest (Claude Code; other CLIs read .claude-plugin via interop) ─
+cat > "$DEST/.claude-plugin/plugin.json" <<JSON
+{
+  "name": "$NAME",
+  "version": "0.1.0",
+  "description": "$DESC_JSON",
+  "namespace": "$NS"
+}
+JSON
+
+# ── README + CLAUDE.md stubs ────────────────────────────────────────────────
+cat > "$DEST/README.md" <<MD
+# $TITLE
+
+A Lintel **extension pack** (plugin + pack hybrid). Ships its own skills, agents,
+hooks, and the \`$WF\` workflow under the \`/$NS:\` namespace.
+
+## Install
+\`\`\`bash
+/plugin install $NAME@<marketplace>
+/li:pack-switch $NAME
+\`\`\`
+
+## Run
+- \`/$NS:$WF\` — the full workflow (its own cycle, with mode presets).
+- Individual skills: \`/$NS:<skill>\`.
+
+> Built on the Lintel extension-pack contract (ADR-0018). \`pack.yaml\` declares
+> identity + the \`extension:\` block; \`.claude-plugin/\` declares the executable surface.
+MD
+
+cat > "$DEST/CLAUDE.md" <<MD
+# CLAUDE.md — $TITLE (Lintel extension pack)
+
+This repo is a Lintel extension pack: a Claude Code plugin (\`skills/ agents/ hooks/\`)
+plus a \`pack.yaml\` identity manifest with an \`extension:\` block (namespace \`$NS\`,
+workflow \`$WF\`). It installs on top of Lintel and is activated with
+\`/li:pack-switch $NAME\`.
+
+- Skills live in \`skills/<name>/SKILL.md\`, namespaced \`/$NS:<name>\`.
+- Agents in \`agents/<category>/<Name>.md\`. Hooks in \`hooks/shared/\`.
+- Reusable reference knowledge in \`knowhow/\`.
+- Source material (if any) under \`source/\` (never shipped to consumers).
+MD
+
+# ── Result ──────────────────────────────────────────────────────────────────
+echo "✓ Extension pack scaffolded at: $DEST"
+echo "  namespace: /$NS:   workflow: $WF"
+echo "  next: validate with — source lib/pack-resolver.sh && validate_pack $NAME"
+echo "  (move source files into $DEST/source/, then build skills under $DEST/skills/)"

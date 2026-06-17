@@ -95,6 +95,23 @@ Effective field changes (next session):
 
 Operator sees what changes before living with the new pack.
 
+### Step 5b — Surface extension-pack surface (ADR-0018)
+
+If the target is an **extension pack** it brings its OWN skills/agents/hooks + a workflow — not just identity. Read the TARGET manifest with the shared `_pack_ext_field` parser (block-scoped + comment-stripped + truthy-alias aware — one parser, not three; `resolve_pack_field`/`pack_is_extension` read the *active* cached pack, which is not the target until next session):
+
+```bash
+tgt_dir=$(_pack_dir "$target") && tgt="$tgt_dir/pack.yaml"
+case "$(_pack_ext_field "$tgt" is_extension)" in true|yes|on)
+  ns=$(_pack_ext_field "$tgt" namespace)
+  wf=$(_pack_ext_field "$tgt" workflow)
+  echo "Extension pack '$target' — brings its own surface (active next session):"
+  echo "  namespace: /$ns:    workflow: /$ns:$wf  (run the full pack cycle)"
+  echo "  ships: skills + agents + hooks"
+;; esac
+```
+
+> An extension pack must ALSO be installed as a plugin (`/plugin install <name>`) for its skills/agents/hooks to load. `pack-switch` activates its identity and makes Lintel aware of it; the plugin install provides the executable surface.
+
 ## Pause-points
 
 - Step 3: confirm switch when current ≠ target (skipped with `--auto`)
