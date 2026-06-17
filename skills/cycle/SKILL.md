@@ -249,15 +249,17 @@ State writes/reads are mechanical since v5.0 (ADR-0008) — `_sl="${LINTEL_REPO_
 list + mode are fixed (Step 3), and before running any phase, run ONCE:
 `state_append CYCLE STARTING cycle_id=<id> cycle_mode=<mode> branch=$(git branch --show-current) commit=$(git rev-parse --short HEAD)`
 
-This is not bookkeeping — it is load-bearing. Two mechanisms now DEPEND on it (setup-hardening
-2026-06-14): (1) the `cycle-incomplete-warn` **Stop hook** fires at turn end and surfaces the
-position footer only if a cycle is marked active — so if you skip this, a turn that ends mid-work
-stays silent (the exact L-008/L-016 "did lots of work, then total silence" failure); (2) the
-`session-digest` re-injects "Current cycle: phase X · next Y" only when this segment exists, so a
-compacted or resumed session that skipped the marker cannot recover where it was. `render_cycle_footer`
-and `/li:resume` also read this segment for the stepper glyphs + integrity check. **Skipping
-`CYCLE STARTING` is the single most common way the harness loses the thread — write it first.**
-See [ADR-0003](../../.claude/decisions/0003-cycle-position-footer.md) + L-016.
+This is not bookkeeping — it is load-bearing. Three mechanisms now DEPEND on it: (1) the
+`cycle-incomplete-warn` **Stop hook** fires at turn end and surfaces the position footer only if a
+cycle is marked active — so if you skip this, a turn that ends mid-work stays silent (the exact
+L-008/L-016 "did lots of work, then total silence" failure); (2) the `session-digest` re-injects
+"Current cycle: phase X · next Y" only when this segment exists, so a compacted or resumed session
+that skipped the marker cannot recover where it was; (3) the `cycle-position-inject` **UserPromptSubmit
+hook** (ADR-0023) re-asserts your position at the START of every turn and reminds you to render the
+footer + advance — but only if this marker exists. `render_cycle_footer` and `/li:resume` also read
+this segment for the stepper glyphs + integrity check. **Skipping `CYCLE STARTING` is the single most
+common way the harness loses the thread — write it first.**
+See [ADR-0003](../../.claude/decisions/0003-cycle-position-footer.md) + [ADR-0023](../../.claude/decisions/0023-turn-start-continuity-inject.md) + L-016/L-018.
 
 **Phase-progress format** (printed to stdout at each phase boundary):
 
