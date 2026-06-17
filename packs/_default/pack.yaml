@@ -95,5 +95,20 @@ brief_forge_handoffs:
   override_allowed: true
   override_requires_audit: true
 
+# ─── Extension (pack ships its own skills/agents/hooks/workflow) ────────────
+# An EXTENSION PACK is also a Claude Code plugin: it ships skills/agents/hooks
+# via its own plugin manifest (the host CLI does discovery, namespacing, and
+# hook registration) and declares them here so Lintel is AWARE of them
+# (pack-switch surfaces them; the orientator can route to the pack's workflow).
+# Fields are FLAT (two-level) on purpose — resolve_pack_field is a two-level
+# resolver (ADR-0018). The neutral _default is NOT an extension pack.
+extension:
+  is_extension: false        # true → this pack ships executable surface (skills/agents/hooks)
+  namespace: null            # skill/agent prefix, e.g. s4l → /s4l:forge (REQUIRED when is_extension)
+  workflow: null             # the pack's own cycle/workflow id, e.g. s4l-forge (REQUIRED when is_extension)
+  provides_skills: false     # awareness flag: ships a skills/ tree
+  provides_agents: false     # awareness flag: ships an agents/ tree
+  provides_hooks: false      # awareness flag: ships a hooks/ tree
+
 # ─── Compatibility ─────────────────────────────────────────────────────────
 requires_lintel: ">=4.0.0"
