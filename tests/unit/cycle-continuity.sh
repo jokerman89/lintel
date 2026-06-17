@@ -63,11 +63,37 @@ dg="$(bash hooks/shared/session-digest/run.sh 2>/dev/null)"
 case "$dg" in *"Current cycle"*) fail "digest emits cycle line for a COMPLETED cycle" ;;
   *) pass "digest omits cycle line when cycle is complete" ;; esac
 
+# ── 5. cycle-position-inject (UserPromptSubmit): injects compact position on an active cycle ──
+UPS="hooks/shared/cycle-position-inject/run.sh"
+[ -x "$UPS" ] && pass "cycle-position-inject hook is executable" || fail "$UPS missing or not executable"
+cp "$MID" "$LIVE"
+o="$(printf '{"prompt":"continue"}' | bash "$UPS" 2>&1)"; rc=$?
+[ $rc -eq 0 ] && pass "UPS hook exits 0 (never blocks the prompt)" || fail "UPS hook exit $rc — must be 0"
+case "$o" in *additionalContext*BUILD*) pass "UPS hook injects compact position on active cycle" ;;
+  *) fail "UPS hook did not inject position on active cycle: $o" ;; esac
+case "$o" in *'"decision":"block"'*|*'"decision": "block"'*) fail "UPS hook must NEVER block the prompt" ;;
+  *) pass "UPS hook never emits decision:block" ;; esac
+
+# ── 6. UPS hook: SILENT (empty stdout) when no cycle is active (zero-overhead path) ──
+cp "$DONE" "$LIVE"
+o="$(printf '{"prompt":"just chatting"}' | bash "$UPS" 2>/dev/null)"; rc=$?
+{ [ -z "$o" ] && [ $rc -eq 0 ]; } && pass "UPS hook silent on completed cycle" || fail "UPS hook not silent on completed cycle: $o"
+rm -f "$LIVE"
+o="$(printf '{"prompt":"just chatting"}' | bash "$UPS" 2>/dev/null)"
+[ -z "$o" ] && pass "UPS hook silent when no cycle state exists" || fail "UPS hook noisy with no state: $o"
+
+# ── 7. gap-A: a cycle is invoked but no ledger exists → nudge to write CYCLE STARTING ──
+o="$(printf '{"prompt":"/li:cycle build the thing"}' | bash "$UPS" 2>&1)"; rc=$?
+[ $rc -eq 0 ] && pass "UPS nudge exits 0" || fail "UPS nudge exit $rc"
+case "$o" in *"CYCLE STARTING"*) pass "UPS nudges to write CYCLE STARTING on cycle-invocation with no ledger" ;;
+  *) fail "UPS did not nudge on cycle invocation: $o" ;; esac
+
 # restore live state
 rm -f "$LIVE"; [ -n "$BAK" ] && cp "$BAK" "$LIVE"
 
-# ── 4. the Stop hook is registered in hooks.json ──
+# ── 4. the continuity hooks are registered in hooks.json ──
 grep -q "cycle-incomplete-warn" hooks/hooks.json && pass "Stop hook registered in hooks.json" || fail "Stop hook not registered in hooks.json"
+grep -q "cycle-position-inject" hooks/hooks.json && pass "UserPromptSubmit hook registered in hooks.json" || fail "cycle-position-inject not registered in hooks.json"
 
 echo ""
 [ "$FAILED" -eq 0 ] && { echo "cycle-continuity: ALL PASS"; exit 0; } || { echo "cycle-continuity: FAILURES"; exit 1; }

@@ -67,6 +67,22 @@
           }
         ]
       }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/shared/cycle-position-inject/run.sh\"",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/shared/no-customer-data-in-message/run.sh\"",
+            "timeout": 5
+          }
+        ]
+      }
     ]
   }
 }
