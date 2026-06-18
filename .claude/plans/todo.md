@@ -1,5 +1,25 @@
 # todo — active initiatives
 
+## Launch readiness — PUBLIC launch (2026-06-18, cycle launch-readiness, branch feat/launch-readiness)
+
+Mode meta-infra (M1–M4). Inventory @ v5.7.1: 125 skills, 69 agents, 33 hooks, 14 lib, 21 bin,
+25 ADRs, 93 tests. Goal: audit everything, learn from comparable repos (obra/superpowers,
+github/spec-kit, GSD/gstack), enhance depth/quality, apply subtraction to the command surface,
+bring all publishing (README/guides/help/wiki/marketplace) current. Extends — does not replace —
+the v5.x register at docs/audit/2026-06-12-launch-readiness-register.md.
+
+- [x] SENSE — inventory captured; on feat/launch-readiness; cycle ledger written
+- [x] DISCOVER — 10-agent read-only fan-out complete (A1–A8 internal + B1–B2 external)
+- [x] DEFINE — register v2 written: docs/audit/2026-06-18-launch-readiness-register-v2.md
+- [ ] GATE — 3 strategic decisions + build authorization (awaiting operator)
+- [ ] PLAN/BUILD — waves W1–W7 (W1-W4,W7 mechanical; W5-W6 scoped by gate)
+- [ ] PLAN — prioritized fix waves
+- [ ] BUILD — execute waves (operator gate before)
+- [ ] REVIEW — M2 compat audit + M3 shape tests + independent review (L-007)
+- [ ] SHIP — PR to main · CAPTURE — lessons + migrations index (M4)
+
+---
+
 ## Launch readiness — v5.x old-school ready (2026-06-12/13, cycle launch-readiness-20260612)
 
 Register: docs/audit/2026-06-12-launch-readiness-register.md (bar §1, evidence §2, blockers §3-A,

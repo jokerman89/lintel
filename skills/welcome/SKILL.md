@@ -142,12 +142,35 @@ differently. Branch on `$hooks` and the install state:
   still get the skills, the cycle discipline, and the pack-driven knowledge — just not the
   live hook gate."
 
-### Step 5 — Point at the next step
+### Step 5 — Point at the next step (lead with the light path, not the full surface)
 
-- `/li:catalog` — browse all skills.
-- `/li:cycle` — run a real cycle on your own task (this time for real).
+Lintel ships a large surface (125 skills, 69 agents). Do **not** open with `/li:catalog` — a wall of
+125 commands is the fastest way to lose a first-time operator. Lead with the **core "start here" set**
+— the handful you actually use day one — and make the *small-work* path loud, because the #1 reason
+people abandon structured harnesses is "too heavy for a quick task":
+
+```
+Start here (the daily drivers):
+  /li:fix          quick bug fix — skips the heavy ceremony (use this for small work!)
+  /li:cycle        the full SENSE→CAPTURE workflow — for substantial features
+  /li:investigate  "why is this broken" — hypothesis-driven debugging
+  /li:qa           "does it work" — run + verify
+  /li:review       pre-ship review of a diff
+  /li:resume       pick up where you left off
+  /li:doctor       health check (is everything installed + firing?)
+  /li:catalog      …and when you want the *full* surface, it's all here
+
+Small task? → /li:fix or just work directly. The 9-phase cycle is for substantial work — you
+don't pay its ceremony on a one-line change. SCOPE stays silent on small asks; phases are skippable
+(`/li:cycle --from … --to …`); modes (`--mode hotfix`) trim the path.
+```
+
+Then the deeper pointers:
 - `docs/getting-started.md` — the per-CLI install + first-task walkthrough.
 - `/li:pack-list` / `/li:pack-switch` — switch identity/compliance per repo (corp vs private).
+- **At-rest cost:** Lintel's always-loaded surface (skill + agent descriptions) is ~10k tokens; skill
+  and agent *bodies* load only when invoked, and heavy work is delegated to subagents — so a large
+  catalog does not mean a large per-turn tax.
 
 ## Voice
 

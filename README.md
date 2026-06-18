@@ -2,11 +2,11 @@
 
 **Company-neutral, pack-driven session harness for agent-based development.** Markdown + bash scaffolding that any modern AI CLI loads as a plugin. No runtime, no daemons — your CLI handles execution. Identity (voice, compliance, personas, brand) is supplied by an installable **pack**; the harness ships only the neutral `_default` pack.
 
-**Status:** v5.3 — company-neutral, pack-driven harness with the `.claude/` home layout (ADR-0005), mechanical memory (ADR-0006), zero-setup hook activation (plugin install) (ADR-0008 — bare installs arm hooks manually; see [How hook activation works](docs/getting-started.md#how-hook-activation-works)) and trigger-form prompt craft (ADR-0014). The Microsoft CAIP-SE identity has been extracted to the separate [lintel-caip-pack](https://github.com/jokerman89/lintel-caip-pack); Lintel ships only the neutral `_default` pack. See [CHANGELOG.md](CHANGELOG.md) for release notes and [SHIP-GATE.md](SHIP-GATE.md) for readiness gates. New to Lintel? Start with the **[glossary](docs/GLOSSARY.md)** and [getting-started](docs/getting-started.md). Current architecture lives at [docs/design/lintel-v4.0-reframe-design.md](docs/design/lintel-v4.0-reframe-design.md).
+**Status:** v5.8 — company-neutral, pack-driven harness with the `.claude/` home layout (ADR-0005), mechanical memory (ADR-0006), zero-setup hook activation (plugin install) (ADR-0008 — bare installs arm hooks manually; see [How hook activation works](docs/getting-started.md#how-hook-activation-works)) and trigger-form prompt craft (ADR-0014). The Microsoft CAIP-SE identity has been extracted to the separate [lintel-caip-pack](https://github.com/jokerman89/lintel-caip-pack); Lintel ships only the neutral `_default` pack. See [CHANGELOG.md](CHANGELOG.md) for release notes and [SHIP-GATE.md](SHIP-GATE.md) for readiness gates. New to Lintel? Run **`/li:welcome`** for the five-minute guided tour, or start with the **[glossary](docs/GLOSSARY.md)** and [getting-started](docs/getting-started.md). The live architecture is described in [AGENT-INSTRUCTIONS.md](AGENT-INSTRUCTIONS.md) and [CLAUDE.md](CLAUDE.md).
 
-Lintel ships **124 skills + 69 agents + 1 pack (`_default`)** organized for the plugin-manifest pattern across 8 CLIs. Plus the foundation scaffolding-template system (CORE-PRINCIPLES, EVOLUTION-LOG, .claude/memory/lessons.md, decision-record templates) that gets copied into new repos via `bin/li-scaffold`. The engineering-domain modules (`/li:ta`, `/li:da`, `/li:sc`, `/li:dh`, `/li:tq`) plus the 9-step cycle (8 core phases + SCOPE) are the core.
+Lintel ships **125 skills + 69 agents + 1 pack (`_default`)** organized for the plugin-manifest pattern across 8 CLIs. Plus the foundation scaffolding-template system (CORE-PRINCIPLES, EVOLUTION-LOG, .claude/memory/lessons.md, decision-record templates) that gets copied into new repos via `bin/li-scaffold`. The engineering-domain modules (`/li:ta`, `/li:da`, `/li:sc`, `/li:dh`, `/li:tq`) plus the 9-step cycle (8 core phases + SCOPE) are the core.
 
-Lintel is the **complete session harness** — not just a skill catalog. It manages the full lifecycle: session-start ritual → mid-session interventions (hooks, voice gates, compliance) → end-of-session capture (lessons, ADR drafting, EVOLUTION-LOG) → cross-session continuity (memory, lessons-sync). See [docs/session-harness.md](docs/session-harness.md) for the full mental model.
+Lintel is the **complete session harness** — not just a skill catalog. It manages the full lifecycle: session-start ritual → mid-session interventions (hooks, voice gates, compliance) → end-of-session capture (lessons, ADR drafting, EVOLUTION-LOG) → cross-session continuity (memory, lessons-sync). See [AGENT-INSTRUCTIONS.md](AGENT-INSTRUCTIONS.md) for the full mental model.
 
 ---
 
@@ -195,7 +195,7 @@ Lessons learned go in `scaffolding/01-foundation/.claude/memory/lessons.md`. Pro
 
 ## Versioning
 
-Semantic versioning since v3; the current line is v5.3. Releases ship when [SHIP-GATE.md](SHIP-GATE.md) gates are all green.
+Semantic versioning since v3; the current line is v5.8. Releases ship when [SHIP-GATE.md](SHIP-GATE.md) gates are all green.
 Pre-v3 used date-based versioning — see [CHANGELOG.md](CHANGELOG.md).
 
 ---
