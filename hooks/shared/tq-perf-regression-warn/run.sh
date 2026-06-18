@@ -33,7 +33,7 @@ fi
 # Check perf-budget spec for explicit path mentions
 tq_state_dir=".claude/runtime/state/tq"
 [ -d "$tq_state_dir" ] || tq_state_dir=".lintel/state/tq" # legacy-fallback-ok
-budget_spec=$(find "$tq_state_dir" -name "perf-budget-*.md" -mtime -30 2>/dev/null | sort | tail -1)
+budget_spec=$(find "$tq_state_dir" -name "perf-budget-*.md" -mtime -30 2>/dev/null | sort | tail -1) || true
 if [ "$matches_perf" -eq 0 ] && [ -n "$budget_spec" ] && [ -f "$budget_spec" ]; then
   if grep -qF "$file_edited" "$budget_spec" 2>/dev/null; then
     matches_perf=1

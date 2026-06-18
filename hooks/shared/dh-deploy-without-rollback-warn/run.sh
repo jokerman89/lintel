@@ -40,7 +40,7 @@ fi
 # Check for rollback declaration: recent rollback-strategy file or rollback field in file itself
 dh_state_dir=".claude/runtime/state/dh"
 [ -d "$dh_state_dir" ] || dh_state_dir=".lintel/state/dh" # legacy-fallback-ok
-rollback_strategy=$(find "$dh_state_dir" -name "rollback-strategy-*.md" -type f -mtime -7 2>/dev/null | sort | tail -1)
+rollback_strategy=$(find "$dh_state_dir" -name "rollback-strategy-*.md" -type f -mtime -7 2>/dev/null | sort | tail -1) || true
 rollback_age_days=-1
 has_rollback=false
 

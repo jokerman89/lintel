@@ -41,7 +41,7 @@ fi
 # Find latest threat model
 sc_state_dir=".claude/runtime/state/sc"
 [ -d "$sc_state_dir" ] || sc_state_dir=".lintel/state/sc" # legacy-fallback-ok
-latest_model=$(find "$sc_state_dir" -name "threat-model-*.md" -type f 2>/dev/null | sort | tail -1)
+latest_model=$(find "$sc_state_dir" -name "threat-model-*.md" -type f 2>/dev/null | sort | tail -1) || true
 
 threat_model_age_days=-1
 file_in_model=false
