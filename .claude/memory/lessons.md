@@ -475,3 +475,57 @@ uninstalled," and a same-version overwrite is a silent way to stay uninstalled. 
 
 Related: [[L-016]] enforce continuity with hooks — but a hook only fires once deployed; ADR-0022 /
 ADR-0023 both make deployment part of the fix.
+
+## L-021 — `git commit` after `git rm --cached` sweeps the staged deletions; partial-pathspec commits re-add on-disk files
+
+**Why:** During launch-readiness I ran `git rm -r --cached docs/audit …` (staged 31 deletions), then
+later `git add <test>` + `git commit` — the commit swept in the 31 staged deletions, producing a
+non-atomic "test" commit. I split it with `git reset --soft HEAD~1`, then committed the move with
+`git commit -- <paths>` — but a partial-pathspec commit RE-READS the working tree for those paths,
+and since `git rm --cached` left the files on disk, git saw them as PRESENT and committed them as
+present (the staged deletion was lost). Net: the "public-tree move" commit changed only `.gitignore`;
+the docs stayed tracked. The adversarial review (not my own check) caught it.
+
+**How to apply:**
+- `git commit` (no pathspec) commits the ENTIRE index — never assume a preceding `git add X` scopes it.
+- After staging deletions, verify with `git show --stat HEAD` (or `git status` before commit) that the
+  commit's contents match intent.
+- To untrack-but-keep-on-disk: `git rm --cached <files>` then a PLAIN `git commit` with a clean index
+  — do NOT use `git commit -- <pathspec>` (it re-reads the working tree and un-stages the deletion).
+
+Related: [[L-010]] verify on the committed tree, not the working tree.
+
+## L-022 — Never run two full test suites concurrently; they share `.claude/runtime/state/00-state.md`
+
+**Why:** I launched several `tests/runner/run-all.sh` runs in parallel to "save time." The
+cycle-footer + cycle-continuity tests `cp` fixtures into the live `.claude/runtime/state/00-state.md`
+and restore it — concurrent runs clobbered each other's live-state manipulation, producing a spurious
+`cycle-footer: FAILURES` in one run while a solo run of the same test was `ALL PASS`. Hours lost
+chasing a "regression" that was a test-harness race. Compounded by Windows Git Bash being ~30x slower
+under host memory pressure (≈6 GB free), so the aggregate suite timed out even though every test
+passed individually.
+
+**How to apply:**
+- Run the suite SOLO. One `run-all.sh` at a time. If you need a fast signal, run `--scope unit` or a
+  single test file, not a second full suite.
+- When the aggregate is slow/times out under load, verify correctness per-test (each file passes
+  individually) rather than trusting/distrusting the timed-out aggregate.
+- Tests that touch shared live state (`00-state.md`, audit files) are not concurrency-safe.
+
+## L-023 — Untracking a docs dir needs a live-dependency + `# intent:`-header check first
+
+**Why:** The plan was to move internal docs (`docs/audit/`) out of the public tree. The adversarial
+review found `docs/audit/uniformity-matrix.md` is a LIVE dependency (`bin/li-uniformity` writes it;
+`skills/uniformity` + `tests/shape/uniformity-coverage.sh` read it) and two audit records are cited by
+`# intent:` structured-comment headers in `lib/state.sh` + `lib/auto-decide.sh`. Untracking the dir
+would 404 the dashboard on a fresh clone and break intent-resolution — invisible to a check that only
+greps for markdown links. Reverted; kept docs tracked; cleaned residue in place instead.
+
+**How to apply:**
+- Before untracking/moving any file, grep the whole repo (code + `# intent:`/`# constraints:` headers +
+  tests) for references, not just doc links. A generated/consumed artifact in a "docs" dir is still a
+  runtime dependency.
+- A content-filter aside from the same cycle: generating the full Contributor-Covenant CoC text trips
+  output content-filtering (it enumerates harassment/abuse terms) — adopt the Covenant by reference.
+
+Related: [[L-019]] produce value, not the source's mechanism.

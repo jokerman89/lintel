@@ -8,7 +8,21 @@ Cross-session working state (ej durable rules — that's [[lessons.md]]; ej pers
 
 ---
 
-## ▶ CURRENT — read this first (reconciled 2026-06-14)
+## ▶ CURRENT — read this first (reconciled 2026-06-18)
+
+**Launch-readiness (2026-06-18, branch `feat/launch-readiness`, cycle launch-readiness):** PUBLIC-launch
+pass, BUILD+REVIEW done, **15 commits, v5.8.0**, NOT yet pushed. A full audit (10-agent fan-out:
+docs/audit/2026-06-18-launch-readiness-register-v2.md) → fixes across W1–W7 (broken command refs;
+substrate set-u/hook guards; output-dep docs; 19-agent craft-raise; company-neutral publishing +
+CoC/templates; hooks-registration-safe guard; welcome light-path) + an adversarial review workflow
+(L-007, 16 confirmed findings, all P0/P1/P2 + cheap P3 acted on). Verification GREEN: M3 shape 36/36,
+security-controls-fire + session-leaves-traces ALL PASS, M2 RED-override-accepted (4 sourced-lib set-u
+removals, documented in the M1 entry). **SHIP BLOCKER:** `gh` is authed as `jokerman_microsoft` and
+canNOT resolve `jokerman89/lintel` (private; wrong account) — branch push + PR must be done by the
+operator (or after `gh auth switch` to jokerman89). **Deferred follow-ups:** (1) the public-tree move
+was reverted — docs kept tracked because `docs/audit/uniformity-matrix.md` is a live dep + `# intent:`
+headers cite audit records (L-023); a real relocation needs uniformity-matrix moved out first. (2) P3
+agent-craft cosmetics (keyword-tail loss on 3 agents, tool-scope heading style) accepted as-is.
 
 One answer to "what am I doing", so a fresh session doesn't drown in the entries below. Most of
 those are **DONE** — their PRs are merged. As of 2026-06-14:
