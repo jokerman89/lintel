@@ -28,7 +28,7 @@ Closes out a cycle that was previously plan-and-built.
 
 - BUILD complete (code shipped to feature branch), ready for review + ship
 - Pre-PR finalization
-- Composing with `/li-plan-and-build` for split-session work (plan+build session 1, review+ship+capture session 2)
+- Composing with `/li:plan-and-build` for split-session work (plan+build session 1, review+ship+capture session 2)
 - Cost expectation: ~5-15k tokens, 15-45 min
 
 ## When NOT to use
@@ -36,7 +36,7 @@ Closes out a cycle that was previously plan-and-built.
 - BUILD not complete — return to BUILD or `/li:cycle --from BUILD`
 - Just want review — use `/li:review` standalone
 - Just want ship — use `/li:ship` standalone
-- Hotfix — use `/li-fix` (skips heavy REVIEW + CAPTURE)
+- Hotfix — use `/li:fix` (skips heavy REVIEW + CAPTURE)
 
 ## Workflow
 

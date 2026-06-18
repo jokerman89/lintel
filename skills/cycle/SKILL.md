@@ -16,7 +16,7 @@ navigation:
     - operator wants the full path with gates between phases
     - resume from prior state via /li:resume
   sibling_workflows:
-    - /li:hotfix — bug fix without DESIGN/PLAN gates
+    - /li:fix — bug fix without DESIGN/PLAN gates
     - /li:plan — standalone planner (subset of cycle)
     - /li:review — standalone review (subset of cycle)
   risk_level: medium

@@ -29,7 +29,7 @@ Mechanical-first: keyword + path heuristics get the route 80% of the time withou
 
 ## When NOT to use
 
-- Operator already typed an explicit workflow (`/li:cycle`, `/li:hotfix`) — orientator skipped
+- Operator already typed an explicit workflow (`/li:cycle`, `/li:fix`) — orientator skipped
 - Mid-cycle (orientator is for cycle entry, not phase transitions)
 - Without a valid active pack (need `navigation.default_workflow` to anchor)
 

@@ -72,5 +72,5 @@ Delegates to `/li:cycle --mode hotfix`. No new behavior beyond that.
 
 ## Anti-patterns
 
-- **Using /li-fix for new feature work** — bypass DEFINE/PLAN = guaranteed scope drift
+- **Using /li:fix for new feature work** — bypass DEFINE/PLAN = guaranteed scope drift
 - **Skipping CAPTURE when fix reveals durable lesson** — soft-prompted post-hoc, don't ignore

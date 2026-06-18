@@ -25,7 +25,7 @@ Per v3.6 backlog 3.2 — complements 3.1 elephant-hint + 2.1 500k cap as **the s
 
 ## When to use
 
-- **Post-PLAN-phase auto** — `/li:cycle` invokes this after PLAN.md is done
+- **Post-PLAN-phase auto** — `/li:cycle` invokes this after plan.md is done
 - **Standalone audit** — `/li:handoff-size-check <plan.md>` → check a specific plan
 - **Pre-cold-executor-handoff** — verifies trio + warming total < cap
 
@@ -40,7 +40,7 @@ Per v3.6 backlog 3.2 — complements 3.1 elephant-hint + 2.1 500k cap as **the s
 ### Step 1 — Locate plan + warming-manifest
 
 ```bash
-PLAN_FILE="${1:-.claude/runtime/state/PLAN.md}"
+PLAN_FILE="${1:-.claude/runtime/state/plan.md}"
 WARMING_FILE=".claude/runtime/state/warming-manifest.md"  # from context-warm-* invocations
 [ -f "$PLAN_FILE" ] || { echo "No plan found at $PLAN_FILE"; exit 2; }
 ```
@@ -135,7 +135,7 @@ audit_log handoff-size-checks size_check "plan=$PLAN_FILE" "mode=$mode" \
 ## Integration
 
 **Reads:**
-- `.claude/runtime/state/PLAN.md` (or `--plan <path>` override)
+- `.claude/runtime/state/plan.md` (or `--plan <path>` override)
 - `.claude/runtime/state/spec.md`, `prompt.md` (cold-executor trio)
 - `.claude/runtime/state/warming-manifest.md`
 - `~/.lintel/profile.yaml` (current mode → cap)

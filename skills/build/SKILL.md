@@ -89,7 +89,7 @@ Spawn fresh subagent with:
 
 #### 3b — Implementer executes (TDD red-green-refactor)
 
-Per `/li:tdd-cycle`:
+The TDD red-green-refactor discipline:
 1. **Red:** Write failing test first (REQUIRED — code without failing test = block)
 2. **Green:** Write minimum code to pass
 3. **Refactor:** Improve while tests still pass

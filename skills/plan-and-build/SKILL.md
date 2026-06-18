@@ -33,8 +33,8 @@ For incremental development where operator wants to plan + execute but defer rev
 ## When NOT to use
 
 - No APPROVED design doc — use `/li:cycle` or `/li:define` first
-- Ready to ship — use `/li:cycle` (full) or compose with `/li-review-and-ship` after
-- Hotfix — use `/li-fix` (skips PLAN's heavy ceremony)
+- Ready to ship — use `/li:cycle` (full) or compose with `/li:review-and-ship` after
+- Hotfix — use `/li:fix` (skips PLAN's heavy ceremony)
 - Just plan, no build — use `/li:plan` standalone
 
 ## Workflow
@@ -90,5 +90,5 @@ Delegates to `/li:cycle --from PLAN --to BUILD`.
 ## Anti-patterns
 
 - **Skipping REVIEW indefinitely** — fine to defer one cycle, dangerous as habit
-- **Treating this as faster /li-cycle** — it just skips review/ship/capture; total cost similar minus those phases
+- **Treating this as faster /li:cycle** — it just skips review/ship/capture; total cost similar minus those phases
 - **Running on main** — same hard rule as BUILD, never on main without consent

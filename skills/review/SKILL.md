@@ -114,8 +114,7 @@ Run the active pack's compliance gates (`resolve_pack_field compliance.hooks`; n
 - Log AI-assisted-generation provenance
 - Append to repo's provenance log
 
-**`/li:dependency-audit`** (ships with Lintel, always available):
-- Dispatch DependencyAuditor agent
+**Dependency audit** (dispatch the `DependencyAuditor` agent — ships with the plugin fleet):
 - CVE check, license compatibility, supply-chain risk
 - P1: critical CVE or license blocker → BLOCK
 - P2: outdated lib with known issues → fix recommended
