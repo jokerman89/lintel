@@ -2,6 +2,48 @@
 
 All notable changes to this repo are tracked here. Format is loose — date headings + bulleted changes. Major behavior changes to the canonical instructions are also logged in `scaffolding/EVOLUTION-LOG.md` (which travels with each scaffolded repo).
 
+## 5.8.0 — 2026-06-18
+
+Public-launch readiness pass — a full audit of every skill, agent, hook, and the publishing
+surface, plus lessons folded in from comparable harnesses (obra/superpowers, github/spec-kit, GSD).
+
+### Fixed
+- **Broken command refs:** namespaced `autoplan`/`careful`, repaired hyphen-form invocations
+  (`/li-fix` → `/li:fix` etc.), killed dead cross-refs (`/li:dependency-audit`, `/li:tdd-cycle`,
+  `/li:hotfix`, `/release-ev2`×8), and fixed the silently-dead post-PLAN cycle gate
+  (`handoff-size-check` read `PLAN.md`; PLAN writes `plan.md`).
+- **Substrate:** dropped `set -uo pipefail` from 4 *sourced* libs (it leaked into the caller shell
+  on the universal SENSE/SCOPE path); guarded `$LINTEL_REPO_ROOT` under `set -u` in 10 module
+  warn-hooks (were fail-closed); fixed a `grep -c || echo 0` arithmetic crash in 3 hooks.
+- **Honesty:** global-lessons reader path (`/li:lessons` now reads what `/li:learn` writes);
+  `scaffold` SKILL.md matches `bin/li-scaffold`; `catalog` points at the real generator; `help`
+  rewritten to the plugin model; ta/sc/tq module audit → repo-local `audit_log` (ADR-0005);
+  `JSTACK-DOCTOR`/`JSTACK-SCAFFOLD` → `LINTEL-*`.
+
+### Added
+- **generate-ppt/word prerequisites + graceful degradation** (correct package names: `pptxgenjs`,
+  `docxtemplater`/`docx`) — two flagship deliverable skills could not run for a fresh user.
+- **Craft-raise of 19 customer-facing agents** (customer/communication/devops/doc-gen) to the
+  engineering bar — trigger-form descriptions, Core principles, Behavioral traits, tool-scoping.
+- **`tests/shape/hooks-registration-safe.sh`** — guards hook registration against the silent
+  cross-platform breakage that bit superpowers (single-quoted `${CLAUDE_PLUGIN_ROOT}`, `.cmd`
+  wrapper, `-l` flag, missing/non-exec `run.sh`).
+- **Newcomer light-path:** `/li:welcome` leads with a curated "start here" core set + `/li:fix` for
+  small work (not a 125-skill wall), plus an honest at-rest cost stat.
+
+### Changed
+- **Company-neutral publishing hygiene:** rewrote `CONTRIBUTING.md`/`SECURITY.md`/`SHIP-GATE.md`
+  current + neutral; genericized Microsoft residue in `docs/compliance.md`, `docs/faq.md`, and two
+  spine agents; removed the disabled `/onecs-check` CI job; added `CODE_OF_CONDUCT.md`, issue + PR
+  templates. Moved internal-only docs (audit records, feature backlog, v3 fossils) out of the
+  public tree. README counts/version corrected; all 5 CLI manifests aligned to 5.8.0.
+
+## 5.7.1 — 2026-06-17
+
+Turn-start cycle-continuity hook (`cycle-position-inject`, ADR-0023) re-asserts cycle position on
+every prompt so the position footer + per-phase reports stop decaying after 2–3 phases. Unique
+delivery bump after a version collision with PR #79's 5.7.0.
+
 ## 5.7.0 — 2026-06-17
 
 Delivery bump so the marketplace refetches the extension-pack contract (PR #78 landed it on main after PR #77 stranded it on the v5.3 branch).
