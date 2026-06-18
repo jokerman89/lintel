@@ -56,11 +56,10 @@ This is how new repos get Lintel defaults inside 30 seconds.
    cp scaffolding/01-foundation/CORE-PRINCIPLES.md .
    cp scaffolding/01-foundation/EVOLUTION.md .
    cp scaffolding/01-foundation/EVOLUTION-LOG.md .
-   mkdir -p .claude/memory .claude/plans .claude/decisions docs/personas
-   cp scaffolding/01-foundation/.claude/memory/* .claude/memory/
+   mkdir -p .claude/memory .claude/plans .claude/decisions
+   cp scaffolding/01-foundation/.claude/memory/* .claude/memory/   # lessons + working-state + personas + personas-example
    cp scaffolding/01-foundation/.claude/plans/* .claude/plans/
    cp scaffolding/01-foundation/.claude/decisions/* .claude/decisions/
-   cp scaffolding/01-foundation/docs/personas/* docs/personas/
    # No .claude/agents/ — the subagent fleet ships with the plugin; a repo-local agent
    # would shadow the fleet's same-named one (removed 2026-06-14, ADR-0015 subtraction).
    cp scaffolding/01-foundation/.claude/SUBAGENT-GUIDE.md .claude/
@@ -70,7 +69,7 @@ This is how new repos get Lintel defaults inside 30 seconds.
 
 7. **Initial commit (interactive — confirm with operator):**
    ```bash
-   git add CLAUDE.md CORE-PRINCIPLES.md EVOLUTION.md EVOLUTION-LOG.md docs/ .claude/ TEMPLATE-*.md
+   git add CLAUDE.md CORE-PRINCIPLES.md EVOLUTION.md EVOLUTION-LOG.md .claude/ TEMPLATE-*.md
    git commit -m "chore: scaffold Lintel base via li-scaffold"
    ```
 
@@ -81,7 +80,7 @@ This is how new repos get Lintel defaults inside 30 seconds.
 ## Output format
 
 ```
-JSTACK-SCAFFOLD: <repo name>
+LINTEL-SCAFFOLD: <repo name>
 
 Variables collected:
 - Repo: <name>
@@ -97,7 +96,7 @@ Files created:
 - ✓ .claude/memory/{lessons,working-state,personas}.md
 - ✓ .claude/plans/todo.md
 - ✓ .claude/decisions/{README,TEMPLATE}.md
-- ✓ docs/personas/EXAMPLE.md
+- ✓ .claude/memory/personas-example.md
 - ✓ .claude/SUBAGENT-GUIDE.md (subagents come from the plugin fleet — no repo-local agents)
 - ✓ TEMPLATE-skill.md, TEMPLATE-agent.md
 

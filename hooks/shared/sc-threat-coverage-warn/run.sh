@@ -3,6 +3,7 @@
 # Surfaces when an Edit/Write touches a security-surface file with no recent threat-model coverage.
 
 set -euo pipefail
+LINTEL_REPO_ROOT="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}"  # guard: unset under set -u aborts the hook (fail-closed)
 
 LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
 mkdir -p "$LINTEL_HOME/audit"

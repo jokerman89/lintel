@@ -141,7 +141,7 @@ flaky_threshold="${flaky_threshold:-3}"
 
 ```bash
 mkdir -p .claude/runtime/state/tq
-audit="$LINTEL_HOME/audit/tq-decisions.jsonl"
+audit=".claude/runtime/audit/tq-decisions.jsonl"
 mkdir -p "$(dirname "$audit")"
 
 for checkpoint in coverage_targets_met perf_budgets_locked contract_tests_complete regression_suite_curated chaos_scenarios_documented; do
@@ -231,11 +231,13 @@ Full-pass exit: every dimension ≥ 80 OR explicit operator override.
 
 ### Step 6 — Audit + emit ship report
 
+One line via the unified writer (ts/operator/cycle_id come from the envelope):
+
 ```bash
-ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-printf '{"ts":"%s","kind":"tq_module_complete","granularity":"%s","score":%d,"checkpoints_passed":%d,"coverage_target":%d,"operator":"%s"}\n' \
-  "$ts" "$granularity" "$score" "$passed_count" "$coverage_target" "$(whoami 2>/dev/null || echo unknown)" \
-  >> "$LINTEL_HOME/audit/tq-decisions.jsonl"
+source "$(git rev-parse --show-toplevel)/bin/_audit.sh"
+audit_log tq-decisions tq_module_complete "granularity=$granularity" "score=$score" \
+  "checkpoints_passed=$passed_count" "coverage_target=$coverage_target"
+# → .claude/runtime/audit/tq-decisions.jsonl
 ```
 
 ## Status protocol

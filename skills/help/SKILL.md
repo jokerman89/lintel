@@ -1,23 +1,32 @@
 ---
 name: help
 layer: foundation
-description: List installed Lintel skills + agents + hooks. Filter by category, voice tier, or CLI support.
+description: List the Lintel skills + agents + hooks available in this session. Filter by category, voice tier, or CLI support.
 color: blue
 tools: Read, Bash, Grep, Glob
 voice: internal
-cli_support: [claude-code, codex, copilot]
+cli_support:
+  - cli: claude-code
+    level: full
+  - cli: codex
+    level: degraded
+  - cli: copilot
+    level: degraded
 ---
 
-# /help
+# /li:help
 
-Meta-skill. Lists what Lintel has installed on this machine so the operator knows what's available without grep-ing `~/.claude/skills/`.
+Meta-skill. Lists what Lintel makes available in this session so the operator knows what they can
+run, without grepping the plugin tree. A quick in-session lister; for the full generated reference
+see `/li:catalog` (it builds `skills/CATALOG.md` from frontmatter), and for install/version health
+see `/li:doctor`.
 
 ## When to use
 
 - First session after install — discover what's there
 - Picking the right skill for a task (filter by category)
 - Onboarding a teammate to Lintel
-- Debugging "is this skill installed?" / "is it the right CLI?"
+- Debugging "is this skill available?" / "is it the right CLI?"
 
 ## Inputs
 
@@ -31,13 +40,16 @@ No arguments: full list grouped by category, one line per skill.
 
 ## Workflow
 
-1. Read `INSTALL-MANIFEST.json` if present at `~/.claude-scaffolding/` to confirm install version.
-2. Glob `~/.claude/skills/li:*/SKILL.md` for installed skills.
-3. Glob `~/.claude/agents/*.md` for installed agents (filter to Lintel-relevant: check for `cli_support` field).
+Lintel ships as a plugin, so skills/agents/hooks are resolved from the installed plugin — not from a
+hand-managed `~/.claude/` tree.
+
+1. Resolve the plugin root: `${CLAUDE_PLUGIN_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}`.
+2. Glob `"$root"/skills/*/SKILL.md` for the available skills (they are invoked namespaced as `/li:<name>`).
+3. Glob `"$root"/agents/*/*.md` for the subagent fleet (resolve by name via the Agent tool).
 4. For each skill/agent, parse YAML frontmatter for: name, description, voice, cli_support, color.
 5. Filter per operator's flags.
 6. Group by category (heuristic from skill name: `plan-*` → plan, `qa*` → qa, etc.).
-7. Output structured list.
+7. Output structured list. Read the plugin version from `"$root"/.claude-plugin/plugin.json`.
 
 ## Report format
 
@@ -46,66 +58,62 @@ No arguments: full list grouped by category, one line per skill.
 Lintel v<version> — <N skills>, <M agents>, <K hooks>
 
 ## Plan (<count>)
-- /plan-ceo-review     [internal, all CLIs] — Strategy & scope review
-- /plan-eng-review     [internal, all CLIs] — Architecture & tests review
-- /plan-design-review  [internal, claude-code] — UI/UX gaps
-- /plan-devex-review   [internal, all CLIs] — DX gaps
+- /li:plan-ceo-review     [internal, all CLIs] — Strategy & scope review
+- /li:plan-eng-review     [internal, all CLIs] — Architecture & tests review
+- /li:plan-design-review  [internal, claude-code] — UI/UX gaps
+- /li:plan-devex-review   [internal, all CLIs] — DX gaps
 
 ## QA + debug (<count>)
-- /qa                  [internal, claude-code] — Real-browser testing
-- /qa-only             [internal, claude-code] — Test-only flow
-- /investigate         [internal, all CLIs] — Bug forensics
-- /review              [internal, all CLIs] — Diff-scoped pre-ship review
+- /li:qa                  [internal, claude-code] — Real-browser testing
+- /li:qa-only             [internal, claude-code] — Test-only flow
+- /li:investigate         [internal, all CLIs] — Bug forensics
+- /li:review              [internal, all CLIs] — Diff-scoped pre-ship review
 
 ## Voice (<count>)
-- /li:eval             [internal, claude-code] — Calibrate the pack's voice corpus
+- /li:eval               [internal, claude-code] — Calibrate the pack's voice corpus
 
 ## Compliance (<count>)
-- /compliance-check    [internal, all CLIs] — Run the active pack's compliance gates
+- /li:compliance-gate    [internal, all CLIs] — Run the active pack's compliance gates
 
 ## Meta + ops (<count>)
-- /context-save        [internal, claude-code] — Save checkpoint
-- /context-restore     [internal, claude-code] — Read checkpoint
-- /clean               [internal, claude-code] — Manual self-maintenance
-- /help                [internal, all CLIs] — This skill
-- /health              [internal, all CLIs] — Install/upstream status check
+- /li:context-save       [internal, claude-code] — Save checkpoint
+- /li:context-restore    [internal, claude-code] — Read checkpoint
+- /li:clean              [internal, claude-code] — Manual self-maintenance
+- /li:help               [internal, all CLIs] — This skill
+- /li:doctor             [internal, all CLIs] — Install/version/hook health check
 
-## Agents available at user-global
-- AgentShield          [Level 3, permissive, claude-code]
-- CodeReviewer         [Level 4, internal, claude-code]
-- ...
+## Agents (the plugin fleet)
+- CodeReviewer           [engineering, claude-code] — Reviews diffs for correctness/quality/security
+- SecurityAuditor        [security, claude-code] — Injection/secret/auth-bypass audit
+- ...  (run /li:catalog for the full list)
 
-## Hooks at ~/.lintel/hooks/ (activate via symlink to ~/.claude/hooks/)
-- li-token-watcher       [warn-only, INACTIVE]
-- li-secret-scan         [block, INACTIVE]
-- li-customer-data-block [block, INACTIVE]
-- ...
-
-Manifest: ~/.claude-scaffolding/INSTALL-MANIFEST.json (v1.0.0, installed 2026-05-27)
+## Hooks (activation per ADR-0008)
+- Auto-registered on plugin install (9): session-digest, secret-scan-block, customer-data-block,
+  no-secrets-in-edit, no-direct-main-push, memory-budget-warn, cycle-incomplete-warn,
+  cycle-position-inject, no-customer-data-in-message
+- Opt-in module warn-hooks (24): the ta/da/sc/dh/tq-* warn hooks — enable via a `~/.lintel/hooks`
+  symlink. Run /li:hooks-status for live state.
 ```
 
 **Filtered by category:**
 ```
-> /help --category qa
+> /li:help --category qa
 QA + debug skills:
-- /qa            [internal, claude-code]
-- /qa-only       [internal, claude-code]
-- /investigate   [internal, all CLIs]
-- /review        [internal, all CLIs]
+- /li:qa            [internal, claude-code]
+- /li:qa-only       [internal, claude-code]
+- /li:investigate   [internal, all CLIs]
+- /li:review        [internal, all CLIs]
 ```
 
 **Filtered by CLI (Copilot user):**
 ```
-> /help --cli copilot
+> /li:help --cli copilot
 Lintel skills supported on Copilot Enterprise:
-- /plan-ceo-review     [internal]
-- /plan-eng-review     [internal]
-- /investigate         [internal]
-- /help                [internal]
-- /health              [internal]
-
-NOT supported on Copilot (Claude Code only):
-- /qa, /qa-only, /design-review, /context-save, /clean, ...
+- /li:plan-ceo-review   [internal]
+- /li:plan-eng-review   [internal]
+- /li:investigate       [internal]
+- /li:help              [internal]
+- /li:doctor            [internal]
 
 Copilot has no slash-command mechanism. Use the canonical-instructions
 shim at .github/copilot-instructions.md for the parts that DO port.
@@ -113,36 +121,37 @@ shim at .github/copilot-instructions.md for the parts that DO port.
 
 ## Edge cases
 
-- **No Lintel installed:** report "Lintel not detected at ~/.claude-scaffolding/. Run `bash install/install.sh` from the Lintel repo first."
-- **Skill missing frontmatter fields:** flag the skill (`⚠ li-X: missing cli_support`) — operator should re-install or report.
+- **Plugin root not resolvable:** report "Lintel plugin not detected — install via `/plugin install li@jokerman-lintel`, then restart the session."
+- **Skill missing frontmatter fields:** flag the skill (`⚠ <name>: missing cli_support`) — report it.
 - **Filter matches zero skills:** report "no skills match these filters" + suggest dropping a flag.
-- **Multiple Lintel versions installed (manifest + filesystem disagree):** flag drift.
+- **Version drift across CLIs:** defer to `/li:doctor`, which is the cross-CLI drift checker.
 
 ## Failure modes
 
-- **`~/.claude/skills/` doesn't exist:** report "no Claude Code skills directory found."
+- **No `skills/` under the plugin root:** report "no Lintel skills found at the plugin root."
 - **Frontmatter parse error in a skill:** skip that skill, report which one was unparseable.
 
 ## Examples
 
 ```
-> /help
+> /li:help
 [full list output]
 
-> /help --category compliance --verbose
+> /li:help --category compliance --verbose
 Lintel compliance skills:
-- /compliance-check  [internal, all CLIs]
+- /li:compliance-gate  [internal, all CLIs]
     Runs the active pack's compliance gates (`resolve_pack_field
     compliance.hooks`; none by default). Surfaces results; does NOT
     enforce — operator confirms.
 
-> /help --voice customer
+> /li:help --voice customer
 Lintel customer-voice skills:
 - /li:eval  [claude-code]
 ```
 
 ## See also
 
-- `/health` — install + upstream status (sibling skill)
-- `LAYERS.md` at repo root — architecture overview
-- `AGENT-INSTRUCTIONS.md` — canonical session-start
+- `/li:catalog` — the full generated skill reference (built from frontmatter)
+- `/li:doctor` — install + version + hook-firing health (cross-CLI)
+- `/li:hooks-status` — live hook activation state
+- `AGENT-INSTRUCTIONS.md` — canonical session-start ritual

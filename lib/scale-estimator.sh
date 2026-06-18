@@ -34,7 +34,7 @@
 # (graceful fallback) — `classify_size` + `scale_ambiguous` are always usable
 # on their own.
 
-set -uo pipefail
+# sourced library: no 'set -uo pipefail' here (shell opts leak into every caller — skills/hooks/tests); functions guard their own vars
 
 # ─── Domain lexicon ──────────────────────────────────────────────────────────
 # Bimodal-prone nouns: present without a size qualifier ⇒ the request could be

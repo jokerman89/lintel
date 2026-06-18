@@ -3,6 +3,7 @@
 # Surfaces when an Edit/Write hits a file with declared consumers.
 
 set -euo pipefail
+LINTEL_REPO_ROOT="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}"  # guard: unset under set -u aborts the hook (fail-closed)
 
 LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
 mkdir -p "$LINTEL_HOME/audit"
@@ -40,7 +41,7 @@ consumer_count=0
 registry=".claude/runtime/state/ta/consumer-registry.json"
 [ -f "$registry" ] || registry=".lintel/state/ta/consumer-registry.json" # legacy-fallback-ok
 if [ -f "$registry" ]; then
-  consumer_count=$(grep -c "\"interface\":\"$file_edited\"" "$registry" 2>/dev/null || echo 0)
+  consumer_count=$(grep -c "\"interface\":\"$file_edited\"" "$registry" 2>/dev/null) || consumer_count=0
 fi
 
 if [ "$matches_interface" -eq 1 ] || [ "$consumer_count" -gt 0 ]; then
