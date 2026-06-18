@@ -127,7 +127,7 @@ JWTSecurityReviewer: <project>
 
 - **Encrypted JWT (JWE)** — note adds complexity; verify both signing and encryption chains.
 - **Long-lived tokens (>1h)** — flag as anti-pattern; recommend short-lived + refresh.
-- **Custom JWT library** — recommend battle-tested library (Microsoft.IdentityModel, jose-jwt).
+- **Custom JWT library** — recommend a battle-tested library (e.g. jose, or your platform's standard JWT library).
 
 ## Voice tier behavior
 

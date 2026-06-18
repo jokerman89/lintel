@@ -1,29 +1,29 @@
-# Ship Gate — Lintel v3.5.0 prerequisites
+# Ship Gate — Lintel v5.7.x prerequisites
 
-13 gates that must pass before tagging v3.5.0. v3 (10 gates) + 3 new v3.5 gates covering cycle, role-lifting, and context-warming infrastructure.
+13 gates that must pass before tagging a release on the v5.7.x line. 10 core structural/quality gates + 3 covering cycle, role-lifting, and context-warming infrastructure.
 
-Updated for v3.5 cycle architecture (8 phases, role-lifting, context-warming, mode presets). Voice calibration + marketplace submission remain operator-driven.
+Covers the current cycle architecture (the 9-step SENSE→CAPTURE loop, role-lifting, context-warming, mode presets). Voice calibration + marketplace submission remain operator-driven.
 
 ---
 
-## Gate 1 — Structural (v3.5 layout)
+## Gate 1 — Structural (v5 layout)
 
-All v3.5 directories populated as intended:
+All v5 directories populated as intended:
 
-| Path | v3.5 target | Verify command |
+| Path | v5 target | Verify command |
 |---|---|---|
-| `skills/` | 124 skills | `bash install/verify.sh --counts` |
+| `skills/` | 125 skills | `bash install/verify.sh --counts` |
 | `agents/` | 69 agents across 8 categories | `bash install/verify.sh --agents-categorized` |
-| `hooks/shared/` | 31 hooks | `find hooks/shared -name HOOK.md \| wc -l` |
+| `hooks/shared/` | 33 hooks | `find hooks/shared -name HOOK.md \| wc -l` |
 | `scaffolding/01-foundation/` | base templates intact | `bash install/verify.sh --scaffolding-coherence` |
 | `packs/_default/` | neutral baseline pack | `bash install/verify.sh --packs` |
 | `.claude-plugin/`, `.codex-plugin/`, `.cursor-plugin/`, `.opencode/`, `gemini-extension.json` | 5 plugin manifests valid JSON (Copilot/Droid read `.claude-plugin/` via interop) | `bash install/verify.sh --plugin-manifests` |
 | `CLAUDE.md`, `AGENTS.md`, `GEMINI.md` at root | 3 entrypoint files | included in `--plugin-manifests` |
 | `bin/` | 16 operator-side `li-*` utilities | `ls bin/li-*` |
 
-**Aggregate target:** 124 skills + 69 agents + 31 hooks + 5 plugin manifests + 3 entrypoint files + 16 li-* bin scripts + intact scaffolding templates (roles are pack-supplied, none ship in the neutral spine).
+**Aggregate target:** 125 skills + 69 agents + 33 hooks + 5 plugin manifests + 3 entrypoint files + 16 li-* bin scripts + intact scaffolding templates (roles are pack-supplied, none ship in the neutral spine).
 
-**v3.5-specific subset:**
+**v5-specific subset:**
 - 8 phase-skills: li-sense, li-define, li-discover, li-plan, li-build, li-review, li-ship, li-capture
 - 2 orchestrator: li-cycle, li-resume
 - 4 composites: li-fix, li-research, li-plan-and-build, li-review-and-ship
@@ -130,7 +130,7 @@ Before tagging v3.0.0:
 ## Gate 9 — CI matrix green
 
 `.github/workflows/ci.yml` runs on every PR + push. For v3.0.0 tag:
-- Latest commit on `main` (after v3-dev merge) must have CI green across:
+- Latest commit on `main` (after the release branch merges) must have CI green across:
   - `verify-linux` (with v3 paths in --layers, --frontmatter, --counts)
   - `install-linux` (install.sh against test LINTEL_HOME with v3 paths)
   - `verify-windows` (install.ps1 + bash verify on Windows)
@@ -152,7 +152,7 @@ Before tagging v3.0.0:
 
 ---
 
-## Gate 11 (NEW v3.5) — Cycle infrastructure
+## Gate 11 (v5) — Cycle infrastructure
 
 Lintel 9-step cycle (8 core phases + SCOPE) ships with full depth:
 - All 9 phase-skills present + valid frontmatter
@@ -174,7 +174,7 @@ bash tests/unit/cycle-skills-present.sh
 
 ---
 
-## Gate 12 (NEW v3.5) — Role-lifting infrastructure
+## Gate 12 (v5) — Role-lifting infrastructure
 
 Role-lifting capability operational:
 - All 8 role-skills present + valid frontmatter
@@ -198,7 +198,7 @@ bash tests/unit/role-files-valid.sh
 
 ---
 
-## Gate 13 (NEW v3.5) — Context-warming infrastructure
+## Gate 13 (v5) — Context-warming infrastructure
 
 On-demand 1M-context utilization beyond session-start:
 - All 10 context-warm skills present + valid frontmatter

@@ -1,100 +1,137 @@
 # Contributing to Lintel
 
-Thanks for considering a contribution. Lintel is curated tooling for Microsoft Sweden CAIP-SE — we keep scope tight and quality high.
+Thanks for considering a contribution. Lintel is a company-neutral, pack-driven session harness for
+agent-based development — markdown + bash scaffolding that any modern AI CLI loads as a plugin. We keep
+scope tight and quality high, but contributions that fill a genuine gap are very welcome.
+
+## This repo IS the tooling
+
+One thing to understand up front: Lintel is the tooling, so it ships `skills/`, `agents/`, `hooks/`,
+`packs/`, `lib/`, and `scaffolding/` as its product. That is the opposite of a normal project repo —
+elsewhere, agents and skills live user-global and never inside a project. Here they are the deliverable.
+Keep the spine **company-neutral**: identity (voice, compliance, brand, roles) is resolved from the
+active pack, never hardcoded into skills, agents, or hooks.
 
 ## Before you contribute
 
-- **Read [AGENT-INSTRUCTIONS.md](AGENT-INSTRUCTIONS.md)** for the session-harness model Lintel follows.
-- **Read [docs/session-harness.md](docs/session-harness.md)** for the architecture mental model.
-- **Read [docs/design/lintel-v3-plan.md](docs/design/lintel-v3-plan.md)** for the current architecture phase.
-- **Check existing skills/agents** — your contribution may already exist (or be deliberately scoped out).
+- Read [AGENT-INSTRUCTIONS.md](AGENT-INSTRUCTIONS.md) for the cross-CLI session-harness model.
+- Read [docs/session-harness.md](docs/session-harness.md) for the architecture mental model.
+- Skim [scaffolding/01-foundation/CORE-PRINCIPLES.md](scaffolding/01-foundation/CORE-PRINCIPLES.md) — the load-bearing rules.
+- Check existing skills/agents (`/li:catalog` or `skills/CATALOG.md`) — your contribution may already exist, or be deliberately scoped out.
 
-## Contribution types
+## How to propose a change
 
-### New skill
-
-Each skill lives in `skills/<kebab-case-name>/SKILL.md`. Use [scaffolding/01-foundation/TEMPLATE-skill.md](scaffolding/01-foundation/TEMPLATE-skill.md) as starting point.
-
-Frontmatter must include:
-- `name` (matches dir name, prefix `li-` for namespacing)
-- `layer` (foundation | ms-team)
-- `description` (one-line for discoverability)
-- `color`, `tools`, `voice`, `cli_support`
-
-Skill body sections: What this skill does / When to use / When NOT to use / Workflow / Output format / Edge cases.
-
-### New agent
-
-Each agent lives in `agents/<category>/<CamelCase>.md`. Use [scaffolding/01-foundation/TEMPLATE-agent.md](scaffolding/01-foundation/TEMPLATE-agent.md).
-
-Frontmatter must include:
-- `name` (CamelCase, matches filename)
-- `category` (matches dir: ms-specific | engineering | security | compliance | devops | customer | communication | voice | doc-gen)
-- `description`, `color`, `tools`, `voice`, `cli_support`, `tier`
-
-### New hook
-
-Each hook lives in `hooks/shared/<kebab-case>/HOOK.md` + `hooks/shared/<kebab-case>/run.sh`. Hooks are opt-in via symlinks operators activate per-machine.
-
-### New compliance rule
-
-Goes into `scaffolding/02-sdl/`. Coordinate with @jokerman89 — compliance changes require legal review for customer-facing engagements.
-
-### New language/CLI plugin
-
-If adding support for a new AI CLI:
-1. Create `<.cli-name-plugin>/plugin.json` (or per-CLI's manifest format)
-2. Add `docs/per-cli/<cli>.md` with install guide
-3. Update README "Multi-CLI support" table
-4. Add `tests/e2e/<cli>-smoke.md` (operator checklist)
-
-## Pull request process
-
-1. **Branch from `main` (or `v3-dev` during v3 development)**:
+1. **Open an issue first** for anything non-trivial, so we can agree the change is wanted before you build it.
+2. **Branch from `main`:**
    ```bash
    git checkout -b feat/<short-name>
    ```
+3. **Make your change.** Atomic — one logical change per branch.
+4. **Run the tests** (see below) and confirm they pass.
+5. **Open a pull request against `main`** and fill in the PR template.
 
-2. **Make your change**. Atomic — one logical change per PR.
+## Running the tests
 
-3. **Verify locally**:
-   ```bash
-   bash install/verify.sh --all
-   bash tests/runner/run-all.sh
-   ```
+The full suite runs through one entry point:
 
-4. **Commit using Conventional Commits**:
-   ```
-   feat(skills): add /<skill-name> for <use case>
-   fix(agents): correct <CategoryName>/<AgentName> frontmatter
-   docs(per-cli): add Cursor install guide
-   chore(deps): bump <pkg> to <version>
-   ```
+```bash
+bash tests/runner/run-all.sh
+```
 
-5. **Open PR against `main`** (or `v3-dev`). Fill PR template completely.
+You can scope it while iterating:
+
+```bash
+bash tests/runner/run-all.sh --scope shape   # structural contracts (incl. the English-only tripwire)
+bash tests/runner/run-all.sh --scope unit     # unit tests
+```
+
+Everything must be **English only** — a shape test fails the build on non-English words.
+
+## Commit style
+
+Use [Conventional Commits](https://www.conventionalcommits.org/) — atomic, one logical change per commit:
+
+```
+feat(skills): add /<skill-name> for <use case>
+fix(agents): correct <category>/<AgentName> frontmatter
+docs(per-cli): add Cursor install guide
+chore(lib): tidy pack-resolver error message
+```
+
+End each commit message with the `Co-Authored-By:` trailer if an AI assistant co-authored it.
+
+## Record decisions (ADRs)
+
+Any non-trivial decision gets an Architecture Decision Record at
+[.claude/decisions/](.claude/decisions/), numbered `NNNN-short-title.md` from
+[.claude/decisions/TEMPLATE.md](.claude/decisions/TEMPLATE.md). A structural change to
+`skills/`/`agents/`/`hooks/`/`lib/` also gets an evolution-log entry under
+[docs/v4.x/structure-changes/](docs/v4.x/structure-changes/). Capturing the *why* is the discipline
+that keeps the harness coherent across contributors and sessions.
+
+## Frontmatter contracts
+
+These are enforced by shape/unit tests — get them right or CI fails.
+
+### New skill
+
+Each skill lives in `skills/<kebab-case-name>/SKILL.md`. Start from
+[scaffolding/01-foundation/TEMPLATE-skill.md](scaffolding/01-foundation/TEMPLATE-skill.md).
+
+Required frontmatter:
+- `name` (matches the directory name)
+- `layer` — the skill-layer contract
+- `cli_support` — which CLIs the skill targets
+- plus `description`, `color`, `tools`, `voice`
+
+Body sections: What this skill does / When to use / When NOT to use / Workflow / Output format / Edge cases.
+
+### New agent
+
+Each agent lives in `agents/<category>/<CamelCase>.md`. Start from
+[scaffolding/01-foundation/TEMPLATE-agent.md](scaffolding/01-foundation/TEMPLATE-agent.md).
+
+Required frontmatter:
+- `name` (CamelCase, matches the filename)
+- `category` (matches the directory: engineering | security | compliance | devops | customer | communication | doc-gen | frontend)
+- `tier` — the trust/permission tier
+- `cli_support`
+- plus `description`, `color`, `tools`, `voice`
+
+### New hook
+
+Each hook lives in `hooks/shared/<kebab-case>/HOOK.md` + `hooks/shared/<kebab-case>/run.sh`.
+Hooks run with operator privileges — keep them minimal, side-effect-aware, and well-commented.
+
+### New CLI plugin support
+
+If adding support for a new AI CLI:
+1. Add the per-CLI manifest in that CLI's expected format.
+2. Add `docs/per-cli/<cli>.md` with an install guide.
+3. Add a smoke checklist under `tests/e2e/<cli>-smoke.md`.
 
 ## What we accept
 
-- **Skills/agents that fill genuine gaps** in MS-CAIP-SE workflows
-- **Bug fixes** with reproducer
-- **Documentation improvements**
-- **New CLI plugin support** (with smoke test)
-- **Compliance refinements** with explicit rationale
+- Skills, agents, or hooks that fill a genuine gap.
+- Bug fixes with a reproducer.
+- Documentation improvements.
+- New CLI plugin support (with a smoke test).
 
 ## What we don't accept
 
-- **Third-party-code vendoring.** Lintel ships only operator-authored content.
+- **Third-party-code vendoring.** Lintel ships only original, MIT-licensed content.
+- **Company-specific identity in the spine.** Voice, compliance, and brand belong in a pack, not in skills/agents/hooks.
 - **Speculative changes.** Solve a real problem someone hit.
-- **Stylistic refactors** without behavior change unless coordinated.
-- **PRs without local verify pass.**
-- **Customer-specific content.** That belongs in customer engagement repos, not here.
+- **Stylistic refactors** without behavior change unless coordinated first.
+- **PRs with the test suite red.**
 
 ## Lessons-learned mechanism
 
-When a PR is merged that includes a lesson-learned (something a future contributor should know), update `scaffolding/01-foundation/tasks/lessons.md`. This file travels into every scaffolded repo as baseline.
-
-Use `bin/li-lessons-promote` to interactively promote a lesson from a customer repo to the Lintel global lessons file.
+When a PR teaches something a future contributor should know, capture it in
+[.claude/memory/lessons.md](.claude/memory/lessons.md) as a rule (`L-NNN`) that prevents the mistake
+recurring. Use `bin/li-lessons-sync` to promote a repo-local lesson into the scaffolding baseline so
+every future scaffolded repo inherits it.
 
 ## Questions
 
-Open an issue. Tag @jokerman89. Be specific about the problem you're solving.
+Open an issue. Be specific about the problem you're solving.

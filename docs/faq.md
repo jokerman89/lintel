@@ -18,7 +18,7 @@ No. The PowerShell installer uses the `powershell-yaml` module (auto-installed f
 
 ### Q: Where does the scaffolding actually land after install?
 
-`~/.claude-scaffolding/`. The upstream tools land at the install paths declared in `install/upstream-sources.yaml` (typically under `~/.claude/skills/` or `~/.claude/`).
+`~/.lintel/`. The upstream tools land at the install paths declared in `install/upstream-sources.yaml` (typically under `~/.claude/skills/` or `~/.claude/`).
 
 ## Customer-data + compliance
 
@@ -33,7 +33,7 @@ Customer-data work happens in a customer-scoped repo with its own `CLAUDE.md` th
 Treat it as an incident:
 
 1. Stop. Do not push.
-2. If already pushed: contact MS-internal security following standard incident procedure.
+2. If already pushed: follow your organization's security incident procedure (or open a private GitHub security advisory).
 3. Rewrite history with `git filter-branch` or BFG, but only after security has acknowledged. Do not silently rewrite.
 4. Add a lesson to `tasks/lessons.md`.
 5. Audit why it happened — the compliance check at step 2 should have caught it.
@@ -66,7 +66,7 @@ git pull
 bash install/install.sh
 ```
 
-The installer overwrites `~/.claude-scaffolding/` from the repo. **It does not touch per-repo `CLAUDE.md` files** — your project-specific customizations are safe.
+The installer overwrites `~/.lintel/` from the repo. **It does not touch per-repo `CLAUDE.md` files** — your project-specific customizations are safe.
 
 ### Q: An upstream source has disappeared / been deleted. Now what?
 
@@ -84,7 +84,7 @@ Fallback strategies for high-importance sources are written into [promoted-agent
 
 ### Q: How do I contribute back?
 
-PR against `main`. Reviewers: anyone on the CAIP SE team listed in `CODEOWNERS` (TBD when published). Typical PRs:
+PR against `main`. Reviewers: a maintainer listed in `CODEOWNERS`. Typical PRs:
 
 - Adding a new agent to [promoted-agents.md](promoted-agents.md). Follow the promotion process.
 - Updating canonical instructions in `AGENT-INSTRUCTIONS.md`. Log the change in `scaffolding/EVOLUTION-LOG.md`.
@@ -93,7 +93,7 @@ PR against `main`. Reviewers: anyone on the CAIP SE team listed in `CODEOWNERS` 
 
 ### Q: Can I add my own customizations without PRing?
 
-Yes, with the standard trade-off: customizations that live only in your local `~/.claude-scaffolding/` will be overwritten the next time you run the installer. Either:
+Yes, with the standard trade-off: customizations that live only in your local `~/.lintel/` will be overwritten the next time you run the installer. Either:
 
 - PR the change so it lands canonically, or
 - Maintain a separate fork (only worth it for major divergence).
@@ -129,7 +129,7 @@ For the install: only public GitHub access (which `git clone` over HTTPS provide
 
 If GitHub is blocked, the install will fail at the `git clone` step. Options:
 
-- Use a personal machine + Microsoft SSO from there.
+- Use a personal machine.
 - Set up a corporate-network proxy that allows GitHub access for engineering tools.
 - Mirror the upstream repos to an internal GitHub Enterprise instance and edit `upstream-sources.yaml` to point at the mirrors.
 
@@ -162,4 +162,4 @@ If still wrong: file an issue with the specific CLI + shim file + agent behavior
 
 ### Q: I'm getting lost. Where do I start over?
 
-Read [README.md](../README.md), then [getting-started.md](getting-started.md), then the doc closest to what you are trying to do. If still stuck, post in `#caip-se-tooling` (or your team's equivalent) with what you've already tried.
+Read [README.md](../README.md), then [getting-started.md](getting-started.md), then the doc closest to what you are trying to do. If still stuck, post in your team's support channel with what you've already tried.

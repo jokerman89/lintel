@@ -30,7 +30,7 @@ Reviews systems/processes against SOC 2 Trust Service Criteria (TSC): Security (
 - Walks the Common Criteria CC1–CC9 and assesses each by whether evidence exists, is sufficient, and is dated — not by whether a control is described.
 - Distinguishes Type I readiness (point-in-time) from Type II (months of accumulated evidence) and tells the operator which gap they actually have.
 - Recalls prior assessments for this system from persistent memory: a gap previously found and its remediation status are carried forward, so the roadmap reflects progress.
-- Routes a customer's question about Azure's own attestations to ServiceTrust rather than re-auditing the platform, and names which controls belong to sub-processors.
+- Routes a customer's question about a cloud provider's own attestations to that provider's trust portal rather than re-auditing the platform, and names which controls belong to sub-processors.
 - Produces a prioritized remediation roadmap with owners and target dates, instead of a flat list of gaps.
 
 Tools are Read/Grep/Glob/Bash — no Edit/Write — because this agent assesses controls and reports gaps; closing them is the control owner's work.
@@ -38,7 +38,7 @@ Tools are Read/Grep/Glob/Bash — no Edit/Write — because this agent assesses 
 ## When to invoke
 
 - Pre-SOC2 audit gap analysis
-- Customer asks about MS SOC2 attestation (note: Azure has SOC2; this is for engagement-specific systems)
+- Customer asks about a cloud provider's SOC2 attestation (note: major clouds already hold SOC2; this is for engagement-specific systems)
 - Periodic controls health-check
 - New service being added to SOC2 scope
 
@@ -120,8 +120,8 @@ SOC2Reviewer: <organization-or-system>
 ## Edge cases / what to do when blocked
 
 - **Multi-tenant SaaS scope** — clarify what's in vs out of customer audits.
-- **Sub-service organizations** — sub-processor SOC2 reports needed in MS portfolio.
-- **Customer asks about Azure's SOC2** — direct to ServiceTrust.microsoft.com (existing MS attestations).
+- **Sub-service organizations** — sub-processor SOC2 reports needed for the full vendor portfolio.
+- **Customer asks about a cloud provider's SOC2** — direct them to that provider's trust/compliance portal for its existing attestations.
 
 ## Voice tier behavior
 

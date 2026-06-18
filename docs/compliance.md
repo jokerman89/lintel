@@ -22,7 +22,7 @@ Is the work the operator is asking for inside this repo's authorized scope?
 Any path, secret, or content involved in this work that could be customer data?
 
 - Customer data = anything tied to a named customer account, tenant, or end-user.
-- Internal MS engineering data (process docs, code conventions) is NOT customer data.
+- Internal engineering data (process docs, code conventions) is NOT customer data.
 - Synthetic / public sample data is NOT customer data.
 
 **Fail action:** halt immediately. Do not read further. Escalate to operator.
@@ -43,7 +43,7 @@ Any secret being introduced into code, logs, commit messages, or shared chat?
 - "Secret" = API key, OAuth token, connection string with credentials, private cert, SSH key.
 - Public IDs (account names, org slugs) are not secrets.
 
-**Fail action:** halt. Request a secret-store path (Key Vault, environment variable name, secret-manager reference) instead.
+**Fail action:** halt. Request a secret-store path (a managed vault, environment variable name, or secret-manager reference) instead.
 
 ### Step 5 — Hard-rule check
 
@@ -60,12 +60,12 @@ These rules are non-negotiable in auto-mode. The operator can grant an explicit 
 ### Data sovereignty
 
 1. **EU customer data stays in EU regions.** Reads, writes, exports, transient processing — all in-region. Cross-region transfer requires explicit operator + customer authorization.
-2. **Customer data does not leave the customer's tenant boundary.** No copying customer artifacts into MS-internal repos, no sample-extraction into shared workspaces.
+2. **Customer data does not leave the customer's tenant boundary.** No copying customer artifacts into internal repos, no sample-extraction into shared workspaces.
 3. **No customer data in this scaffolding repo, ever.** Issue templates, ADRs, example files — all must use synthetic or public-domain data.
 
 ### Secrets and credentials
 
-4. **No secrets in code, comments, or commit messages.** Use environment variables that resolve from a secret store (Key Vault preferred for Azure, internal secret-manager for MS-internal services).
+4. **No secrets in code, comments, or commit messages.** Use environment variables that resolve from a secret store (e.g. a managed secret store / vault).
 5. **No secrets in logs.** Redact before logging. If you find a secret in a log, treat it as a confirmed incident.
 6. **No secrets in chat or shared channels.** Including Slack, Teams, GitHub issue comments, PR descriptions.
 
@@ -108,7 +108,7 @@ Some repos have additional rules (e.g., regulated-industry customer work). Those
 
 This list should be reviewed at least every 6 months, and whenever:
 
-- A new Microsoft policy lands that affects agent-based development.
+- A new organizational policy lands that affects agent-based development.
 - An incident reveals a rule that should be added.
 - A rule has been overridden three times in a quarter (signal that it is wrong or unrealistic).
 
