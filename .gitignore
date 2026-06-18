@@ -109,9 +109,3 @@ SCRATCH.md
 # index — git would record each as a gitlink/embedded repo, not its contents.
 .claude/worktrees/
 
-# Internal-only docs — kept on the maintainer's disk, out of the public tree (launch-readiness 2026-06-18)
-docs/audit/
-docs/feature-requests/
-docs/lintel-state-of-the-harness.md
-docs/session-harness.md
-docs/per-cli/PLUGIN-FORMAT-RESEARCH.md

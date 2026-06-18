@@ -10,7 +10,7 @@ affected_paths:
   - lib/ (orientator-routing, scale-estimator, brief-forge, brief-forge-evaluators — set -u removal)
   - tests/shape/hooks-registration-safe.sh (NEW)
   - publishing (README, CONTRIBUTING, SECURITY, SHIP-GATE, CODE_OF_CONDUCT, .github templates, CHANGELOG, 5 manifests → 5.8.0)
-  - docs/ (audit/, feature-requests/, lintel-state-of-the-harness.md, session-harness.md, per-cli/PLUGIN-FORMAT-RESEARCH.md untracked)
+  - docs/ (internal-doc relocation attempted then reverted — kept tracked; see "Public-tree move" below)
 risk_class: medium
 breaking_change: false
 ---
@@ -31,9 +31,15 @@ changed. The shape deltas are:
   guard line near the top; replaced `grep -c … || echo 0` with `var=$(grep -c …) || var=0` in 3.
 - **NEW shape test** `tests/shape/hooks-registration-safe.sh` — a structural invariant (hooks.json
   registration safety). Additive.
-- **Internal docs untracked** (gitignored, kept on disk): `docs/audit/`, `docs/feature-requests/`,
-  `docs/lintel-state-of-the-harness.md`, `docs/session-harness.md`,
-  `docs/per-cli/PLUGIN-FORMAT-RESEARCH.md`.
+- **Public-tree move — NOT done (reverted).** The plan was to untrack internal-only docs. An
+  adversarial review of the diff found this was unsafe: `docs/audit/uniformity-matrix.md` is a LIVE
+  dependency (`bin/li-uniformity` writes it, `skills/uniformity` + `tests/shape/uniformity-coverage.sh`
+  read it), and two audit records are referenced by `# intent:` structured-comment headers in
+  `lib/state.sh` + `lib/auto-decide.sh` (the comment contract). Untracking `docs/audit/` would 404
+  the dashboard on a fresh clone and break `# intent:` resolution. Decision: keep the internal docs
+  TRACKED; achieve a clean public face by repointing README's architecture links (done) + genericizing
+  residue in place instead. **Follow-up (operator):** a proper relocation needs `uniformity-matrix.md`
+  moved out of `docs/audit/` + the `# intent:` headers + shipped-doc citations repointed first.
 - **Version:** all 5 CLI manifests 5.7.x → 5.8.0.
 
 ## Backward-compat
@@ -41,8 +47,8 @@ changed. The shape deltas are:
 Fully backward-compatible. Every existing callsite continues to work: the 4 libs expose the same
 functions; the hooks behave identically except they no longer fail-closed on an unset env var; the
 new shape test only adds coverage. Skills whose command refs were repaired now resolve where they
-previously 404'd — strictly an improvement. Untracking internal docs does not affect any tracked
-code path (verified: no skill/lib/test/bin references them).
+previously 404'd — strictly an improvement. Internal docs were KEPT tracked (the public-tree move
+was reverted — see above), so no tracked code path, `# intent:` header, or doc link is broken.
 
 ## Migration path
 
@@ -76,5 +82,5 @@ motivated deviation. Report: `docs/v4.x/compatibility-audits/2026-06-18-*.md`.
 ## Rollback procedure
 
 `git revert` the launch-readiness commit range (9c3a71f..HEAD on `feat/launch-readiness`), or revert
-individual atomic commits — each wave is its own commit. Untracked internal docs are recoverable
-from git history (they were removed with `git rm --cached`, not deleted from disk).
+individual atomic commits — each wave is its own commit. No docs were removed from tracking (the
+public-tree move was reverted), so there is nothing to recover there.
