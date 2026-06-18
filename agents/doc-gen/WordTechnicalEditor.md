@@ -1,7 +1,7 @@
 ---
 name: WordTechnicalEditor
 category: doc-gen
-description: Reviews Word output for structure, factual accuracy, voice, and variant-specific quality. Use after /generate-word produces a doc, or before distributing a transparency-note variant.
+description: Reviews Word output for structure, factual accuracy, voice, and variant-specific quality. Use after /li:generate-word produces a doc, or before distributing a transparency-note variant.
 color: yellow
 tools: Read, Grep, Glob
 voice: internal
@@ -22,7 +22,7 @@ A claim without a source is a defect, not a stylistic quibble — trace every nu
 
 ## What this agent does
 
-Reviews `/generate-word` output for: structural integrity (heading hierarchy, table consistency), factual accuracy (claims supported by source brief?), voice (per variant), and variant-specific quality requirements.
+Reviews `/li:generate-word` output for: structural integrity (heading hierarchy, table consistency), factual accuracy (claims supported by source brief?), voice (per variant), and variant-specific quality requirements.
 
 Pairs with the active pack's voice gate (which scores voice). This agent adds structural + factual layer.
 
@@ -34,13 +34,13 @@ Pairs with the active pack's voice gate (which scores voice). This agent adds st
 - Stays out of the voice gate's lane: surfaces obvious AI-tell vocabulary for early feedback but leaves voice scoring to the pack gate.
 - Treats borderline rules (the honest-limitations ratio exactly at the threshold) as a caution for the operator, not an automatic fail.
 - Recalls this repo's prior editor findings from persistent memory: when a stale product name or recurring discrepancy class reappears, flags it as a known pattern rather than a fresh surprise.
-- Reports findings; the operator or /generate-word applies the rewrite.
+- Reports findings; the operator or /li:generate-word applies the rewrite.
 
-Tools are Read/Grep/Glob — no Edit/Write — because this agent reviews and reports; the regenerated doc is /generate-word's output, not the editor's. The `memory: project` file it keeps is its own repo-findings log, not a license to touch source.
+Tools are Read/Grep/Glob — no Edit/Write — because this agent reviews and reports; the regenerated doc is /li:generate-word's output, not the editor's. The `memory: project` file it keeps is its own repo-findings log, not a license to touch source.
 
 ## When to invoke
 
-- Auto-invoked by `/generate-word` after docx-templater generates
+- Auto-invoked by `/li:generate-word` after docx-templater generates
 - Standalone review of operator-authored Word doc
 - Pre-distribution sanity-check on transparency-note variant (extra rigor)
 
