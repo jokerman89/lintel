@@ -1,7 +1,7 @@
 ---
 name: generate-ppt
 layer: foundation
-description: Produce brand-compliant PowerPoint deck via pptx-genjs, 4-gate quality pipeline.
+description: Produce brand-compliant PowerPoint deck via pptxgenjs, 4-gate quality pipeline.
 color: orange
 tools: Read, Write, Bash, Glob
 voice: mixed
@@ -20,9 +20,15 @@ license_note: produces customer-bound output; honors the active pack's complianc
 
 # /generate-ppt
 
-Produces a brand-compliant PowerPoint deck (.pptx) for customer engagements. Uses pptx-genjs under the hood. Pulls templates from `~/.lintel/brand/ppt-templates/` (or falls back to in-repo defaults if brand not pulled). Compliance-gated before distribution.
+Produces a brand-compliant PowerPoint deck (.pptx) for customer engagements. Uses pptxgenjs under the hood. Pulls templates from `~/.lintel/brand/ppt-templates/` (or falls back to in-repo defaults if brand not pulled). Compliance-gated before distribution.
 
-Phase F of v2 build.
+## Prerequisites
+
+This skill renders `.pptx` via the Node library [`pptxgenjs`](https://www.npmjs.com/package/pptxgenjs).
+If it is not installed, set it up first: `npm i pptxgenjs` (project-local) or `npm i -g pptxgenjs`.
+**Graceful degradation if it cannot be installed** (no Node toolchain / offline): fall back to
+`/li:generate-web` → `/li:make-pdf` for a rendered deliverable, or emit the slide content as
+markdown. Do not silently produce nothing — state which path you took.
 
 ## When to use
 
@@ -102,7 +108,7 @@ Operator-CLI stays non-breaking. Existing workflow-scripts are unaffected.
    - Layout suggestions per slide — from `--slide layout-logic` (pattern + break-pattern at 1/3, 2/3)
    - Asset suggestions (from the active pack's asset library, if one is configured)
 
-4. **Generate slides via pptx-genjs:**
+4. **Generate slides via pptxgenjs:**
    - Apply template
    - Add slides per architect's arc
    - Populate text with brief-derived content
@@ -171,7 +177,7 @@ Audience: mid-market public sector IT leadership
   4-8. Substantive: feature surface mapped to operational pain
   9. Close: Inspire/Marvel — what becomes possible
 
-## Generation (pptx-genjs)
+## Generation (pptxgenjs)
   9 slides generated. 6 service icons resolved from the active pack's asset library.
   142 KB output → ~/.lintel/draft/customer-A-arc-pitch.pptx
 
@@ -200,7 +206,7 @@ Distribution: operator-driven. Verify the provenance chain (PROV-7f8a2) before s
 
 ## Failure modes
 
-- **pptx-genjs runtime error** (lib bug, malformed template) — surface error, keep work-in-progress in `~/.lintel/draft/.work/`, allow operator manual debug
+- **pptxgenjs runtime error** (lib bug, malformed template) — surface error, keep work-in-progress in `~/.lintel/draft/.work/`, allow operator manual debug
 - **Brand template missing AND --use-defaults not set** — surface options: pull brand, use defaults, abort
 - **Voice gate fails after 2 regen attempts** — keep draft, surface specific slide failures with fix recommendations
 - **Asset library returns 0 results for slide concept** — surface to operator, allow them to provide path manually OR skip the asset for that slide
@@ -211,7 +217,7 @@ Distribution: operator-driven. Verify the provenance chain (PROV-7f8a2) before s
 **Standard pitch deck:**
 ```
 > /generate-ppt --brief docs/engagement/customer-A-pitch-brief.md --template pitch-deck --audience "Nordic public sector CIO"
-[Architect designs, pptx-genjs generates, 4 gates pass]
+[Architect designs, pptxgenjs generates, 4 gates pass]
 ✓ Deck at ./customer-A-arc-pitch.pptx. Provenance PROV-7f8a2.
 ```
 
