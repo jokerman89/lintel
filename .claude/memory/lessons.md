@@ -449,3 +449,29 @@ goal is the generated content (the value), not artifacts that mirror the source'
 
 Related: [[L-013]] (make-it-ours = reinvent the substance) — L-019 is the sharp instance: reinvent
 toward the OUTCOME, and explicitly discard the source's mechanism rather than dignifying it as a feature.
+
+## L-020 — A plugin version must bump for EVERY deployable change; never reuse a version a parallel PR already shipped
+
+**Rule:** When a fix must reach installed sessions (a hook, a plugin-loaded skill/agent), its PR MUST
+carry a UNIQUE version bump in `.claude-plugin/plugin.json` + `marketplace.json`. If a parallel/earlier
+PR already bumped to that version, your change needs a FURTHER bump (5.7.0 → 5.7.1), not the same one.
+Plugin/marketplace updates are version-gated: reusing an already-shipped version means the installed
+plugin never re-pulls your change — the code is on main, but the operator still can't get it.
+
+**Why:** The cycle-continuity hook (ADR-0023, PR #80) bumped 5.6.0→5.7.0 — but PR #79 had ALREADY
+shipped 5.7.0 (extension-pack delivery) before #80 landed. When the operator ran `/plugin marketplace
+update`, the cache held a 5.7.0 that predated #80 → no `cycle-position-inject` hook. main had the hook
+at 5.7.0, but the version string couldn't distinguish #79's 5.7.0 from #80's, so no re-pull fired.
+li-doctor's new staleness check (presence of the capability in the installed cache, not the version
+string) caught it. This is the ADR-0022/L-016 deployment trap recurring — "the fix is worthless
+uninstalled," and a same-version overwrite is a silent way to stay uninstalled. Fixed with 5.7.1.
+
+**How to apply:**
+- Every PR touching plugin-loaded surface (hooks.json, hooks/, skills/, agents/) ends with a UNIQUE
+  version bump. Before merge, confirm the version isn't already taken by a recently-merged/parallel PR
+  (check `marketplace.json` on main / the merged PR list); if taken, bump PAST it.
+- Trust a capability-presence check (does the installed cache contain the new hook/skill?) over the
+  version string — li-doctor's staleness probe is the backstop.
+
+Related: [[L-016]] enforce continuity with hooks — but a hook only fires once deployed; ADR-0022 /
+ADR-0023 both make deployment part of the fix.

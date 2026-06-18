@@ -6,14 +6,14 @@
   },
   "metadata": {
     "description": "Lintel — company-neutral, pack-driven session harness marketplace",
-    "version": "5.7.0"
+    "version": "5.7.1"
   },
   "plugins": [
     {
       "name": "li",
       "source": "./",
       "description": "Lintel — 8-phase cycle (SENSE→CAPTURE) + role-lifting + context-warming + specialized agents + compliance tiering + multi-CLI",
-      "version": "5.7.0",
+      "version": "5.7.1",
       "category": "workflow",
       "tags": ["lintel", "session-harness", "compliance", "scaffolding", "workflow"],
       "strict": false
