@@ -33,7 +33,7 @@ A workload with no resource limits is a noisy-neighbor outage waiting to happen 
 
 ## What this agent does
 
-Reviews K8s YAML manifests for resource limits, security contexts, network policies, secrets handling, and ingress configuration. Aware of AKS-specific patterns since MS-default.
+Reviews K8s YAML manifests for resource limits, security contexts, network policies, secrets handling, and ingress configuration. Aware of managed-K8s patterns across AKS / EKS / GKE.
 
 ## When to invoke
 

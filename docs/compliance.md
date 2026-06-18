@@ -83,7 +83,7 @@ These rules are non-negotiable in auto-mode. The operator can grant an explicit 
 
 ### Tooling and supply chain
 
-13. **No third-party code bundled into MS-licensed projects without LICENSE check.** Use this scaffolding's `install/` pattern (install from upstream, do not vendor).
+13. **No third-party code bundled into your projects without a LICENSE check.** Use this scaffolding's `install/` pattern (install from upstream, do not vendor).
 14. **No skill or agent installed from an un-vetted source.** Only sources listed in [promoted-agents.md](promoted-agents.md) and `install/upstream-sources.yaml`.
 
 ### Audit

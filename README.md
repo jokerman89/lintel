@@ -123,7 +123,7 @@ cd ~/new-repo
 li-scaffold init --mode internal-tool --pack _default
 ```
 
-That creates CLAUDE.md, CORE-PRINCIPLES.md, and .claude/ (memory, plans, decisions, agents) with neutral defaults. Activate a company pack (e.g. `caip-se`) for team-specific voice/compliance.
+That creates CLAUDE.md, CORE-PRINCIPLES.md, and .claude/ (memory, plans, decisions) with neutral defaults. Activate a company pack (e.g. `caip-se`) for team-specific voice/compliance.
 
 Full walkthrough: [docs/getting-started.md](docs/getting-started.md).
 

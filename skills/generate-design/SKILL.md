@@ -29,7 +29,7 @@ Used by `generate` orchestrator as Step 5, or solo when operator wants to re-des
 
 - Third step of `/li:generate` orchestrator chain (after write)
 - Operator wants to retarget existing content to different formats
-- Brand-palette swap (re-design with `--palette nordic-minimal` vs `ms-default`)
+- Brand-palette swap (re-design with `--palette nordic-minimal` vs `default`)
 - A/B-test layout strategies for same content
 
 ## When NOT to use
@@ -42,7 +42,7 @@ Used by `generate` orchestrator as Step 5, or solo when operator wants to re-des
 
 - Required `--content <path>` — content.md from generate-write
 - Required `--target-formats <ppt,web,word,...>` — per-format spec generated for each
-- Optional `--palette <name>` — palette JSON name (default: `ms-default`)
+- Optional `--palette <name>` — palette JSON name (default: `default`)
 - Optional `--brand-templates-dir <path>` — `~/.lintel/brand/` (default)
 - Optional `--logo <path>` — explicit logo override
 - Optional `--out <path>` — output path (default: `${run_dir}/design-spec.json`)
@@ -55,7 +55,7 @@ Used by `generate` orchestrator as Step 5, or solo when operator wants to re-des
   "generated_at": "<iso-8601>",
   "source_content_hash": "<sha256 of content.md>",
   "palette": {
-    "name": "ms-default",
+    "name": "default",
     "primary": "#0078D4",
     "secondary": "#50E6FF",
     "accent": "#FFB900",
@@ -71,12 +71,12 @@ Used by `generate` orchestrator as Step 5, or solo when operator wants to re-des
     "body_size": 14
   },
   "logo": {
-    "path": "~/.lintel/brand/logos/ms-default.png",
+    "path": "~/.lintel/brand/logos/default.png",
     "position": "top-right"
   },
   "per_format": {
     "ppt": {
-      "template_path": "~/.lintel/brand/ppt-templates/ms-default.pptx",
+      "template_path": "~/.lintel/brand/ppt-templates/default.pptx",
       "layouts": [
         {
           "section_ref": "§1",
@@ -137,7 +137,7 @@ Parse content.md frontmatter + per-section HTML-comment annotations (`<!-- type:
 
 ### Step 2 — Load palette + brand templates
 
-Resolve `--palette` to `~/.lintel/brand/palettes/<name>.json`. Read palette. If missing: fall back to `ms-default` palette (in-repo).
+Resolve `--palette` to `~/.lintel/brand/palettes/<name>.json`. Read palette. If missing: fall back to `default` palette (in-repo).
 
 For each format in `--target-formats`: locate template at `~/.lintel/brand/<format>-templates/<default>.<ext>`. Surface staleness warning if template > 90 days old. Fall back to blank if missing and `--use-defaults` set.
 
@@ -169,7 +169,7 @@ Write to `--out`. Surface summary (per-format layout count, palette used, font b
 
 ## Pause-points
 
-- Palette missing for `--palette <custom>` name: offer fallback to ms-default or surface upload-instruction
+- Palette missing for `--palette <custom>` name: offer fallback to default or surface upload-instruction
 - Layout-mapping ambiguous for §N (multiple valid layouts): surface options + recommendation
 
 ## Integration
@@ -196,7 +196,7 @@ Write to `--out`. Surface summary (per-format layout count, palette used, font b
 
 ## Failure recovery
 
-- Palette resolution fails on `--palette <name>`: fall back to ms-default, flag in design-spec frontmatter
+- Palette resolution fails on `--palette <name>`: fall back to default, flag in design-spec frontmatter
 - Template missing + no `--use-defaults`: exit BLOCKED with instruction to drop template in `~/.lintel/brand/<format>-templates/`
 - Validation rotation-rule violation: regenerate affected sections with varied layouts, flag if repeats
 

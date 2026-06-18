@@ -19,7 +19,7 @@ The list is intentionally short. Every promoted agent has earned its slot. New a
 
 ### From Trail of Bits — `trailofbits/skills` (CC-BY-SA-4.0 — restricted)
 
-> **License note.** All Trail of Bits skills below are CC-BY-SA-4.0. Invoking them from the install path is fine. Copy-pasting any of their content into an MS-internal repo would require that repo's derivative work to also be CC-BY-SA-4.0 — which is **incompatible with our MIT-default**. Use them as installed tools, never as code to inline.
+> **License note.** All Trail of Bits skills below are CC-BY-SA-4.0. Invoking them from the install path is fine. Copy-pasting any of their content into an MIT-licensed repo would require that derivative work to also be CC-BY-SA-4.0 — **incompatible with MIT**. Use them as installed tools, never as code to inline.
 
 **2. differential-review**
 - **Install path:** `~/.claude/skills/trailofbits/plugins/differential-review/`
@@ -77,7 +77,7 @@ A new agent reaches "promoted" status by passing the bar below and getting a PR 
 
 1. File a PR adding the agent here with: install path, what it does, why promoted, when to invoke, license note if needed.
 2. Update `install/upstream-sources.yaml` if the new agent is not from an already-installed upstream.
-3. Tag two reviewers from the CAIP SE team.
+3. Tag two reviewers (e.g. the maintainers listed in CODEOWNERS).
 4. Once merged: next `bash install/install.sh` run picks it up.
 
 ### Demotion
