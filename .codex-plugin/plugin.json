@@ -1,6 +1,6 @@
 {
   "name": "li",
-  "version": "5.8.0",
+  "version": "0.9.0",
   "description": "Lintel — company-neutral, pack-driven session harness for OpenAI Codex with 8-phase cycle + role-lifting",
   "author": {
     "name": "jokerman89",

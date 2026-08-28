@@ -96,7 +96,7 @@ Generated: 2026-06-17T12:03:34Z
 | `/li:pack-switch` | Use to change which pack is active — switching the identity that drives voice, compliance, persona, and roles. Validate… |
 | `/li:pack-validate` | Validates a pack manifest against lib/pack-schema.yaml — required fields, extends-chain, version compatibility. Reports… |
 | `/li:pair-agent` | Pair with a named subagent in the loop — explicit two-mind collaboration on a focused task. |
-| `/li:perf-mode` | Activate 1M context-budget mode for the session — "tuffa faser" preset. |
+| `/li:perf-mode` | Activate the 1M context-budget mode for a session — the high-intensity preset for long, heavy phases. |
 | `/li:perfbench` | Measure performance — runtime, memory, cold-start — and detect regressions vs baseline. |
 | `/li:personas-rotate` | Load persona context from .claude/memory/personas.md for demo-prep, workshop-facilitation, or audience-aware writing. |
 | `/li:plan-and-build` | Use when you already have an approved design doc and just need to plan and implement it — runs PLAN then BUILD and skip… |
