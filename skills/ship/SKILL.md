@@ -149,7 +149,7 @@ gh pr create --title "<short title>" --body "$(cat <<'EOF'
 [1-3 bullets from design doc]
 
 ## Design + Plan
-- Design: <docs/design/lintel-*-design-*.md>
+- Design: <.claude/engineering/design-archive/lintel-*-design-*.md>
 - Plan: <plan.md>
 - Review report: <review-report.md>
 - Compliance report: <compliance-report.md if applicable>
@@ -157,12 +157,9 @@ gh pr create --title "<short title>" --body "$(cat <<'EOF'
 ## Test plan
 [Bulleted checklist from plan.md acceptance criteria]
 
-## Provenance
-AI-assisted via /li:cycle
-Phases: DEFINE → PLAN → BUILD → REVIEW → SHIP
-Operator review: passed REVIEW phase
-
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
+## Process
+Phases run: DEFINE → PLAN → BUILD → REVIEW → SHIP
+Review: passed
 EOF
 )"
 ```

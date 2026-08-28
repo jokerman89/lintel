@@ -2,8 +2,8 @@
 # tests/unit/v37-closeout-additions-present.sh
 #
 # Verifies v3.7 closeout — all 9 skills + 5 agents + 1 hook + canonical pattern
-# + install-bootstrap from Fas A1+A2+B+C on plats.
-# Pattern följer tests/unit/closeout-additions-present.sh (v3.6 closeout).
+# + install-bootstrap from phases A1+A2+B+C in place.
+# Pattern follows tests/unit/closeout-additions-present.sh (v3.6 closeout).
 # tag: v3.7 closeout
 
 set -uo pipefail
@@ -17,10 +17,10 @@ fail() { echo "  FAIL: $1"; FAILED=1; }
 echo "tests/unit/v37-closeout-additions-present.sh"
 echo "============================================"
 
-# --- 9 skills (Fas A1 + A2 + B) ---
-# Fas A1: frontend-design + frontend-typography + frontend-motion
-# Fas A2: frontend-shader + frontend-style-extract + frontend-design-review
-# Fas B:  generate-app (NEW skill, M-2 resolution) + generate-web (extended)
+# --- 9 skills (phases A1 + A2 + B) ---
+# phase A1: frontend-design + frontend-typography + frontend-motion
+# phase A2: frontend-shader + frontend-style-extract + frontend-design-review
+# phase B:  generate-app (NEW skill, M-2 resolution) + generate-web (extended)
 V37_SKILLS=(frontend-design frontend-typography frontend-motion frontend-shader frontend-style-extract frontend-design-review generate-app)
 for s in "${V37_SKILLS[@]}"; do
   f="$REPO_ROOT/skills/$s/SKILL.md"
@@ -31,15 +31,15 @@ for s in "${V37_SKILLS[@]}"; do
   fi
 done
 
-# generate-web extended med --from-frontend-design (Fas B)
+# generate-web extended with --from-frontend-design (phase B)
 GW="$REPO_ROOT/skills/generate-web/SKILL.md"
 if [ -f "$GW" ] && grep -q "from-frontend-design" "$GW"; then
-  pass "generate-web extended with --from-frontend-design mode (Fas B)"
+  pass "generate-web extended with --from-frontend-design mode (phase B)"
 else
-  fail "generate-web missing --from-frontend-design mode (Fas B contract)"
+  fail "generate-web missing --from-frontend-design mode (phase B contract)"
 fi
 
-# --- 5 agents i agents/frontend/ category (Fas A1 + A2) ---
+# --- 5 agents in agents/frontend/ category (phases A1 + A2) ---
 V37_AGENTS=(FrontendArchitect MotionDirector TypographyCurator ShaderEngineer DesignSystemAuditor)
 for a in "${V37_AGENTS[@]}"; do
   f="$REPO_ROOT/agents/frontend/$a.md"
@@ -50,7 +50,7 @@ for a in "${V37_AGENTS[@]}"; do
   fi
 done
 
-# --- 1 hook (Fas C) ---
+# --- 1 hook (phase C) ---
 HOOK_DIR="$REPO_ROOT/hooks/shared/frontend-design-surface"
 if [ -d "$HOOK_DIR" ] && [ -f "$HOOK_DIR/HOOK.md" ] && [ -f "$HOOK_DIR/run.sh" ]; then
   pass "v3.7 hook present: frontend-design-surface (HOOK.md + run.sh)"
@@ -58,7 +58,7 @@ else
   fail "v3.7 hook missing: frontend-design-surface"
 fi
 
-# --- Canonical pattern seed (Fas A2) ---
+# --- Canonical pattern seed (phase A2) ---
 SEED="$REPO_ROOT/seeds/brand/design-patterns/ultra-modern-lovable-style"
 if [ -d "$SEED" ]; then
   pass "canonical pattern seed present: ultra-modern-lovable-style"
@@ -80,7 +80,7 @@ if [ -d "$SEED" ]; then
   fi
 fi
 
-# --- Install scripts bootstrap brand-asset slots (Fas A2) ---
+# --- Install scripts bootstrap brand-asset slots (phase A2) ---
 for installer in install/install.sh install/install.ps1; do
   f="$REPO_ROOT/$installer"
   if [ -f "$f" ] && grep -qE "design-patterns|motion-libraries|shader-snippets" "$f"; then
@@ -114,12 +114,12 @@ else
   fail "working-state.md missing PR #21 reviewer-concern tracking"
 fi
 
-# --- LAYERS.md reflects v3.7 separation-of-concerns lesson ---
-LAYERS="$REPO_ROOT/LAYERS.md"
+# --- docs/architecture.md reflects v3.7 separation-of-concerns lesson ---
+LAYERS="$REPO_ROOT/docs/architecture.md"
 if [ -f "$LAYERS" ] && grep -qiE "v3.7|design-director|rendering-engine" "$LAYERS"; then
-  pass "LAYERS.md reflects v3.7 architectural learning"
+  pass "docs/architecture.md reflects v3.7 architectural learning"
 else
-  fail "LAYERS.md missing v3.7 reflection"
+  fail "docs/architecture.md missing v3.7 reflection"
 fi
 
 echo ""

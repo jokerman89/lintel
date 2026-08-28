@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 # tests/integration/frontend-design-roundtrip.sh
 #
-# Minimum-viable roundtrip test för v3.7 Fas A1 (M-6 resolution from /plan-eng-review).
+# Minimum-viable roundtrip test for v3.7 phase A1 (M-6 resolution from /plan-eng-review).
 #
 # Validates contract: a hand-crafted frontend-design-spec.json (matching the
-# Step 5 schema specced i skills/frontend-design/SKILL.md) MUST be readable
-# + actionable by future generate-web --from-frontend-design mode (Fas B).
+# Step 5 schema specced in skills/frontend-design/SKILL.md) MUST be readable
+# + actionable by future generate-web --from-frontend-design mode (phase B).
 #
-# Fas A1 scope: this test verifies SCHEMA SHAPE, not actual rendering.
-# Fas B will extend this test to invoke generate-web and assert HTML output.
+# Phase A1 scope: this test verifies SCHEMA SHAPE, not actual rendering.
+# Phase B will extend this test to invoke generate-web and assert HTML output.
 #
-# tag: v3.7 fas-a1 m-6-resolution
+# tag: v3.7 phase-a1 m-6-resolution
 
 set -uo pipefail
 
@@ -32,7 +32,7 @@ cat > "$SPEC" <<'JSON'
 {
   "schema_version": 1,
   "generated_at": "2026-05-28T12:00:00Z",
-  "brief_hash": "test-hash-fas-a1",
+  "brief_hash": "test-hash-phase-a1",
   "source": "frontend-design",
   "target_format": "single-file",
   "typography": {
@@ -179,17 +179,17 @@ if [ -f "$SKILL" ]; then
   done
 fi
 
-# Step 9 — Fas B: verify generate-web + generate-app skills consume frontend-design-spec.json
-# (full HTML/JSX output assertion deferred till Fas D operator-dogfood — skills are scaffolding,
+# Step 9 — Phase B: verify generate-web + generate-app skills consume frontend-design-spec.json
+# (full HTML/JSX output assertion deferred to phase D operator-dogfood — skills are scaffolding,
 # agents produce content at invocation per L-001).
 
 # generate-web SKILL.md documents --from-frontend-design mode
 GENERATE_WEB="$REPO_ROOT/skills/generate-web/SKILL.md"
 if [ -f "$GENERATE_WEB" ]; then
   if grep -q "from-frontend-design" "$GENERATE_WEB"; then
-    pass "generate-web SKILL.md documents --from-frontend-design mode (Fas B)"
+    pass "generate-web SKILL.md documents --from-frontend-design mode (phase B)"
   else
-    fail "generate-web SKILL.md missing --from-frontend-design mode (Fas B contract)"
+    fail "generate-web SKILL.md missing --from-frontend-design mode (phase B contract)"
   fi
 
   if grep -q "frontend-design-spec.json" "$GENERATE_WEB"; then
@@ -236,7 +236,7 @@ echo ""
 if [ "$FAILED" -eq 0 ]; then
   echo "All frontend-design-roundtrip tests PASSED"
   echo ""
-  echo "Fas B contract validated. Full HTML/JSX output assertion deferred to Fas D"
+  echo "Phase B contract validated. Full HTML/JSX output assertion deferred to phase D"
   echo "operator-dogfood — skills are scaffolding, agents produce content at invocation per L-001."
   exit 0
 else

@@ -7,7 +7,7 @@ If you find a security issue in Lintel itself (the scaffolding repo), please rep
 (`Security` tab → `Report a vulnerability`). This reaches the project maintainers without disclosing
 the issue publicly.
 
-If your active pack defines its own incident-response process (e.g. a corporate SDL), follow that as well.
+If your active pack defines its own incident-response process, follow that as well.
 
 Do not open public GitHub issues for security vulnerabilities.
 

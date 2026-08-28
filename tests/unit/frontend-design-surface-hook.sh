@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # tests/unit/frontend-design-surface-hook.sh
 #
-# Verifies v3.7 Fas C — frontend-design-surface hook structure + behavior.
-# tag: v3.7 fas-c passive-hook
+# Verifies the v3.7 phase C frontend-design-surface hook structure + behavior.
+# tag: v3.7 phase-c passive-hook
 
 set -uo pipefail
 
@@ -47,7 +47,7 @@ for field in name tier event fires_on override audit; do
   fi
 done
 
-# tier must be surface-only (Fas C convention; non-blocker)
+# tier must be surface-only (phase C convention; non-blocker)
 if grep -qE "^tier: surface-only" "$HOOK_MD"; then
   pass "HOOK.md tier: surface-only (non-blocker per design doc)"
 else

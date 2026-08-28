@@ -135,7 +135,7 @@ LEGACY_BUILDERS=(generate-ppt generate-web generate-word)
 for builder in "${LEGACY_BUILDERS[@]}"; do
   f="$REPO_ROOT/skills/$builder/SKILL.md"
   if [ -f "$f" ]; then
-    pass "legacy format-builder still present: $builder (refactor target for Fas 2)"
+    pass "legacy format-builder still present: $builder (refactor target for phase 2)"
   else
     fail "legacy format-builder unexpectedly removed: $builder"
   fi

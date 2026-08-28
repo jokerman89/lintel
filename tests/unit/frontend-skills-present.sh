@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # tests/unit/frontend-skills-present.sh
 #
-# Verifies v3.7 Fas A1 frontend-* family foundation: 3 skills + 3 agents
+# Verifies the v3.7 phase A1 frontend-* family foundation: 3 skills + 3 agents
 # + new agents/frontend/ category.
-# Pattern följer tests/unit/observation-spine-skills-present.sh + closeout-additions-present.sh.
-# tag: v3.7 fas-a1 frontend-foundation
+# Pattern follows tests/unit/observation-spine-skills-present.sh + closeout-additions-present.sh.
+# tag: v3.7 phase-a1 frontend-foundation
 
 set -uo pipefail
 
@@ -17,8 +17,8 @@ fail() { echo "  FAIL: $1"; FAILED=1; }
 echo "tests/unit/frontend-skills-present.sh"
 echo "====================================="
 
-# 6 frontend-* skills (Fas A1: design orchestrator + typography + motion;
-#                       Fas A2: shader + style-extract + design-review)
+# 6 frontend-* skills (phase A1: design orchestrator + typography + motion;
+#                       phase A2: shader + style-extract + design-review)
 FRONTEND_SKILLS=(frontend-design frontend-typography frontend-motion frontend-shader frontend-style-extract frontend-design-review)
 for skill in "${FRONTEND_SKILLS[@]}"; do
   f="$REPO_ROOT/skills/$skill/SKILL.md"
@@ -88,8 +88,8 @@ if [ -f "$ORCHESTRATOR" ]; then
   fi
 fi
 
-# 5 frontend agents (Fas A1: FrontendArchitect + MotionDirector + TypographyCurator;
-#                     Fas A2: ShaderEngineer + DesignSystemAuditor)
+# 5 frontend agents (phase A1: FrontendArchitect + MotionDirector + TypographyCurator;
+#                     phase A2: ShaderEngineer + DesignSystemAuditor)
 FRONTEND_AGENTS=(FrontendArchitect MotionDirector TypographyCurator ShaderEngineer DesignSystemAuditor)
 for agent in "${FRONTEND_AGENTS[@]}"; do
   f="$REPO_ROOT/agents/frontend/$agent.md"
@@ -134,15 +134,15 @@ fi
 if [ -d "$REPO_ROOT/agents/frontend" ]; then
   count=$(find "$REPO_ROOT/agents/frontend" -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
   if [ "$count" -ge 5 ]; then
-    pass "agents/frontend/ category present with $count agents (≥5 expected för Fas A2)"
+    pass "agents/frontend/ category present with $count agents (≥5 expected for phase A2)"
   else
-    fail "agents/frontend/ category has $count agents, expected ≥5 (Fas A2: 5 total)"
+    fail "agents/frontend/ category has $count agents, expected ≥5 (phase A2: 5 total)"
   fi
 else
   fail "agents/frontend/ directory missing"
 fi
 
-# Fas A2 — canonical pattern seed present in repo
+# phase A2 — canonical pattern seed present in repo
 SEED_DIR="$REPO_ROOT/seeds/brand/design-patterns/ultra-modern-lovable-style"
 if [ -d "$SEED_DIR" ]; then
   pass "canonical pattern seed present: ultra-modern-lovable-style"
@@ -176,7 +176,7 @@ else
   fail "canonical pattern seed missing: seeds/brand/design-patterns/ultra-modern-lovable-style/"
 fi
 
-# Fas A2 — frontend-design-review skill has explicit scoring rubric (resolves M-3 reviewer-concern)
+# phase A2 — frontend-design-review skill has explicit scoring rubric (resolves M-3 reviewer-concern)
 REVIEW_SKILL="$REPO_ROOT/skills/frontend-design-review/SKILL.md"
 if [ -f "$REVIEW_SKILL" ]; then
   if grep -qE "(≥|>=)?80.*green" "$REVIEW_SKILL" && grep -qE "60-79.*yellow" "$REVIEW_SKILL"; then
@@ -186,7 +186,7 @@ if [ -f "$REVIEW_SKILL" ]; then
   fi
 fi
 
-# Fas A2 — frontend-style-extract inherits --overwrite flag from generate-style-learn (m-3)
+# phase A2 — frontend-style-extract inherits --overwrite flag from generate-style-learn (m-3)
 EXTRACT_SKILL="$REPO_ROOT/skills/frontend-style-extract/SKILL.md"
 if [ -f "$EXTRACT_SKILL" ]; then
   if grep -q "overwrite" "$EXTRACT_SKILL"; then

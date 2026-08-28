@@ -45,7 +45,7 @@ markdown. Do not silently produce nothing — state which path you took.
 
 ## Inputs
 
-- Required `--brief <path|inline>` — content brief describing the deck purpose **OR** `--from-pipeline <dir>` (Fas 2: shared pipeline mode)
+- Required `--brief <path|inline>` — content brief describing the deck purpose **OR** `--from-pipeline <dir>` (shared pipeline mode)
 - Required `--template <name>` — PPT template name from `~/.lintel/brand/ppt-templates/` (e.g. `pitch-deck`, `workshop`)
 - Optional `--audience <text>` — primary audience (affects voice tier output)
 - Optional `--slide-count <N>` — target slide count (default: 20-30 based on duration)

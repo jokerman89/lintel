@@ -1,6 +1,6 @@
 # Shader snippets — ultra-modern-lovable-style
 
-Canonical mesh-gradient hero-background snippet bundled with Lintel v3.7 Fas A2.
+Canonical mesh-gradient hero-background snippet bundled with Lintel v3.7.
 
 ## Recommended approach: Paper Shaders (declarative React)
 

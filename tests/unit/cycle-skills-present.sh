@@ -2,7 +2,7 @@
 # tests/unit/cycle-skills-present.sh
 #
 # Verifies v3.5 Lintel cycle skills are present + valid frontmatter.
-# Post-Väg-A: skill names are bare (no li- prefix), invocation /li:<name>.
+# Bare-name form: skill names are bare (no li- prefix), invocation /li:<name>.
 # tag: v3.5 cycle
 
 set -uo pipefail

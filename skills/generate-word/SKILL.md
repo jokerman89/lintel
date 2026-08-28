@@ -49,7 +49,7 @@ nothing — state which path you took.
 
 ## Inputs
 
-- Required `--brief <path|inline>` — content brief or source markdown **OR** `--from-pipeline <dir>` (Fas 2: shared pipeline mode)
+- Required `--brief <path|inline>` — content brief or source markdown **OR** `--from-pipeline <dir>` (shared pipeline mode)
 - Required `--target <technical|customer-summary|transparency-note>` — variant
 - Optional `--template <name>` — explicit template (default: `<target>.docx` from brand)
 - Optional `--audience <text>` — primary audience

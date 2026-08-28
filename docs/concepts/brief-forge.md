@@ -44,7 +44,7 @@ Step 3: construct envelope
     │  BODY: content_type, content (from content_file)
     ▼
 Step 4: run evaluators (parallel where possible)
-    │  evaluator_security, _completeness, _stale, _sdl_compliance, _trailblazer_alignment
+    │  evaluator_completeness, evaluator_security, evaluator_stale
     │  each returns {score, budget_used, notes}
     │  stop on budget exhaustion
     ▼
@@ -88,17 +88,14 @@ Verifies `context_pointers` (file paths or URLs in the envelope's BODY) still ex
 
 Score impact: each missing pointer = -30, capped at 0.
 
-### sdl_compliance
+## Pack-contributed evaluators
 
-Verifies SDL hooks ran on the payload. Mechanical check: does the active pack's SDL audit log contain a recent invocation tied to the envelope's `from` or `to`? Used by `ms-internal` and `caip-se` packs.
+The neutral spine ships the three above and nothing else. A pack may contribute its own — a voice
+check tied to its corpus, a compliance check tied to its audit trail — and declare them in
+`pack.yaml.brief_forge_handoffs`. They run alongside the built-in three and score the same way.
 
-Score impact: no SDL audit log = 60 (acceptable for non-MS packs, fails for ms-internal); SDL invocation found = 100; no match = 70 (warn).
-
-### trailblazer_alignment
-
-Only runs when `head.voice_tier: trailblazer`. Mechanical voice check: scans for AI-corporate clichés (`delve into`, `crucial`, `robust`, `leverage`, `seamlessly integrate`) and em-dashes (per voice rules: no em-dashes).
-
-Score impact: cliché detected = -35, em-dash present = -10. Clean = 100. When voice_tier ≠ trailblazer: evaluator is no-op (returns 100).
+A pack-contributed evaluator is a no-op when the envelope does not carry the field it keys on, so a
+brief produced under the neutral pack is never penalised for a check that does not apply to it.
 
 ## Score aggregation
 
@@ -122,7 +119,7 @@ Either way, the bypass is audited so the trail survives. Operators inspecting `.
 
 ## Budget enforcement
 
-`pack.yaml.brief_forge_handoffs.budget_tokens` caps total budget per hand-off (default 5000; ms-internal 6000; caip-se 7000 for the extra Trailblazer evaluator).
+`pack.yaml.brief_forge_handoffs.budget_tokens` caps total budget per hand-off (default 5000). A pack that contributes extra evaluators raises its own budget.
 
 Each evaluator declares `budget_used` in its JSON return. Brief Forge sums consumption per hand-off and stops invoking further evaluators when the budget is exhausted. The completeness score reflects only the evaluators that ran.
 
@@ -140,17 +137,19 @@ Every envelope is appended to `.claude/runtime/audit/envelopes-<date>.jsonl` (pe
 
 Five events trigger Brief Forge. Each can be enabled/disabled per-pack:
 
-| Event | Trigger | Typical evaluators (default _default) | ms-internal adds | caip-se adds |
-|---|---|---|---|---|
-| `subagent_spawn` | Parent skill spawns subagent | [security, stale] | sdl_compliance | (inherited) |
-| `phase_transition` | Phase N → Phase N+1 | [completeness] | (inherited) | trailblazer_alignment |
-| `workflow_handoff` | One workflow → another | [completeness] | sdl_compliance | trailblazer_alignment |
-| `cold_executor` | plan + spec + prompt born together (v3.8) | [security, completeness] | sdl_compliance | (inherited) |
-| `operator_input` | Operator → skill | DISABLED (operator-curated) | — | — |
+| Event | Trigger | Evaluators under the neutral `_default` pack |
+|---|---|---|
+| `subagent_spawn` | a skill spawns a subagent | security, stale |
+| `phase_transition` | one cycle phase hands to the next | completeness |
+| `workflow_handoff` | one workflow hands to another | completeness |
+| `cold_executor` | the plan, spec and prompt trio is born | security, completeness |
+| `operator_input` | operator to skill | disabled — operator input is curated, not scored |
+
+A pack can add its own evaluators to any of these events, or disable an event outright.
 
 Per-pack overrides via `pack.yaml.brief_forge_handoffs.<event>.{enabled, evaluators}`.
 
-## Why this matters for v4.0
+## Why this matters
 
 Brief Forge is the **interlock that makes packs meaningful in practice**. Without it, packs declare their evaluator preferences in `pack.yaml.brief_forge_handoffs` but nothing enforces them. With Brief Forge as a mandatory gate, the pack's policy is what runs.
 

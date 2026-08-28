@@ -120,7 +120,7 @@ Token budget per design doc §5.2: 5 modules × ~80k = 400k. Plus overhead (cros
 For pack-specific overrides:
 - `_default`: 500k / 750k
 - `ms-internal`: same
-- `caip-se`: 750k / 1000k (customer-engagement-deep mode allowance)
+- a company pack may raise the allowance for its own deep-engagement mode
 
 Operator sees projected cost before Stage 1 starts.
 
@@ -151,11 +151,11 @@ operator: /li:full-engineering-pass
   → composition report: aggregate score + module breakdown
   → SHIP gate
 operator: /li:ship
-  → caip-se pack adds Trailblazer voice to customer-facing artifacts
+  → a company pack adds its voice tier to customer-facing artifacts
   → deliverable package ready
 ```
 
-Five modules + composition + customer-engagement mode + caip-se pack = the operator runs one command + decides at gates. Everything else is mechanical.
+Five modules + composition + a pack that supplies identity = the operator runs one command and decides at the gates. Everything else is mechanical.
 
 ## Anti-patterns
 

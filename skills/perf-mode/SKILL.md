@@ -1,7 +1,7 @@
 ---
 name: perf-mode
 layer: foundation
-description: Activate 1M context-budget mode for the session — "tuffa faser" preset.
+description: Activate the 1M context-budget mode for a session — the high-intensity preset for long, heavy phases.
 color: orange
 tools: Read, Write, Bash
 voice: internal

@@ -14,7 +14,7 @@ Pre-v4.0 routing happened three ways:
 
 Three failure modes:
 
-1. **No pack-awareness.** The hardcoded classifier couldn't honor pack-specific routing (a CAIP-SE pack wants different defaults from a hotfix-heavy internal-tool pack).
+1. **No pack-awareness.** The hardcoded classifier couldn't honor pack-specific routing (a customer-engagement pack wants different defaults from a hotfix-heavy internal-tool pack).
 2. **All-or-nothing LLM.** Either the LLM ran every time (expensive) or never (no escalation when needed).
 3. **No audit.** Routing decisions were ephemeral. Operators couldn't see what classifier produced what recommendation — no feedback loop.
 

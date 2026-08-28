@@ -23,7 +23,7 @@ Reads a brief (path or inline text) + audience + arc + target-format hints, then
 
 Used by `generate` orchestrator as Step 3, or solo when operator wants only an outline to fill in manually.
 
-Replaces brief-parsing logic previously inline in `generate-ppt` / `generate-web` / `generate-word` (Fas 2 refactor target).
+Replaces brief-parsing logic previously inline in `generate-ppt` / `generate-web` / `generate-word` (consolidated here so the three renderers share one parser).
 
 ## When to use
 
