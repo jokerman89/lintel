@@ -15,7 +15,6 @@
 .claude/cache/
 .claude/telemetry/
 .claude/session-env/
-.claude/plans/
 
 # ----- Generic session / scratch data -----
 session-data/

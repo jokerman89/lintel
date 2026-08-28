@@ -4,7 +4,7 @@
   Born in PLAN (v3.8 Feature 2.2), not CAPTURE. It is the IRREDUCIBLE handoff: a fresh
   AI session reading only this prompt + the linked spec.md + plan.md should be able to
   re-execute or extend the work without prior context.
-  Design: docs/design/lintel-scope-and-scaled-planning-design.md §3.3
+  Design: .claude/engineering/design-archive/lintel-scope-and-scaled-planning-design.md §3.3
 -->
 # Cold-Executor Prompt — <wedge title>
 

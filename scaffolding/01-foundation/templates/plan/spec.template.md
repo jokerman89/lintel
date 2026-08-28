@@ -3,7 +3,7 @@
   Source of truth for PLAN's spec.md (skills/plan/SKILL.md Step 11 references this file).
   Born in PLAN as part of the trio (plan.md + spec.md + prompt.md, born together —
   v3.8 Feature 2.2). CAPTURE re-affirms on cycle-end; it is no longer the birth point.
-  Design: docs/design/lintel-scope-and-scaled-planning-design.md §3.3
+  Design: .claude/engineering/design-archive/lintel-scope-and-scaled-planning-design.md §3.3
 -->
 # Spec: <wedge title>
 

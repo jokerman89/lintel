@@ -1,7 +1,7 @@
 <!--
   Canonical plan.md template — the cold-executor task breakdown.
   Source of truth for PLAN's plan.md (skills/plan/SKILL.md Step 11 references this file).
-  Design: docs/design/lintel-scope-and-scaled-planning-design.md §3.3
+  Design: .claude/engineering/design-archive/lintel-scope-and-scaled-planning-design.md §3.3
 
   This template is DEPTH-SCHEMA PARAMETRIC. PLAN reads `depth_schema` from scope.md
   (emitted by the SCOPE phase) and renders ONE of the three marked sections below:

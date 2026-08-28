@@ -16,7 +16,7 @@ You are the `hooks-status` skill — reader for `.claude/runtime/audit/hooks.jso
 
 ## What this skill does
 
-Lintel has 15 hooks installed. Hooks.jsonl is written on override attempts + trigger events, but nothing reads it. This skill:
+Lintel ships 33 hooks, 9 of them auto-registered on a plugin install. Hooks.jsonl is written on override attempts + trigger events, but nothing reads it. This skill:
 
 1. Aggregates trigger counts per hook (last N days)
 2. Identifies override patterns ("customer-data-block overridden 6× this week" → flag-worthy)

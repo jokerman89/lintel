@@ -1,8 +1,9 @@
-# Upstream sources installed by install.sh / install.ps1.
+# DECLARATION ONLY — nothing here is fetched, cloned, or bundled.
 #
-# Each entry points at an external public repo. We DO NOT bundle their code in this repo —
-# the install script clones from upstream at install time. License obligations follow
-# whatever the upstream repo specifies.
+# This file lists external projects that influenced or complement Lintel. The installer does NOT
+# act on it: install.sh reads the entries only to print a count ("this installer does not clone
+# them"). Lintel ships exclusively operator-authored content. If you want any of these tools,
+# install them yourself from their own repository, under their own license.
 #
 # Fields:
 #   repo            — git URL (HTTPS) of the upstream repo
