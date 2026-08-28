@@ -13,7 +13,7 @@
 #
 # Exit codes:
 #   0 = generation complete (or --check found no diffs)
-#   1 = --check found diffs (used by CI; warn-only in v4.0 per design doc §2.4)
+#   1 = --check found diffs (used by CI; warn-only)
 #   2 = invocation error
 
 set -uo pipefail
@@ -244,23 +244,14 @@ Generated: $ts by \`bin/li-wiki-gen\`.
 
 See [docs/concepts/](../concepts/) for canonical conceptual references:
 
-- pack-defaults
-- pack-resolver
-- pack-inheritance
-- envelope
-- brief-forge
-- orientator
-- wiki-generation
-- meta-infra-discipline
-- jobs-system
-- planner-as-module
-- agent-dispatch-rules
+$(for f in "$REPO_ROOT"/docs/concepts/*.md; do [ -f "$f" ] && printf -- '- [%s](../concepts/%s)
+' "$(basename "$f" .md)" "$(basename "$f")"; done)
 
 ## Hand-editing
 
 This wiki is regenerated from source. **Hand edits will be overwritten.** To change content, edit the source (frontmatter, pack.yaml, schema files) and re-run \`bin/li-wiki-gen\`.
 
-CI runs \`bin/li-wiki-gen --check\` and warns on diff. v4.0 = warn-only; v4.1 will fail builds.
+CI runs \`bin/li-wiki-gen --check\` and warns on a diff.
 EOF
   echo "wrote $out"
 }
@@ -333,14 +324,14 @@ gen_showcase() {
   </tbody>
 </table>
 
-<h2>v4.0 architecture</h2>
+<h2>Architecture</h2>
 
-<p>v4.0 makes Lintel pack-driven and company-neutral. Three contracts hold it together:</p>
+<p>Lintel is pack-driven and company-neutral. Three contracts hold it together:</p>
 
 <table>
   <thead><tr><th>Contract</th><th>What it does</th><th>Where</th></tr></thead>
   <tbody>
-    <tr><td>Pack manifest</td><td>Declarative configuration per customer/team domain</td><td>lib/pack-schema.yaml</td></tr>
+    <tr><td>Pack manifest</td><td>Declarative identity per team or domain</td><td>lib/pack-schema.yaml</td></tr>
     <tr><td>Envelope</td><td>Universal shape for every hand-off (HEAD + BODY + TAIL)</td><td>lib/envelope-schema.yaml</td></tr>
     <tr><td>Meta-infra discipline</td><td>4 mandatory gates (M1-M4) on scaffolding changes</td><td>skills/cycle, bin/li-compat-audit</td></tr>
   </tbody>
@@ -396,7 +387,7 @@ if [ "$CHECK" -eq 1 ]; then
     rm -f "$CUR_STATE" "$NEW_STATE" "$CUR_STRIP"
     exit 0
   else
-    echo "li-wiki-gen --check: DIFF (v4.0 warn-only; v4.1 will fail)"
+    echo "li-wiki-gen --check: DIFF (warn-only)"
     diff "$CUR_STRIP" "$NEW_STATE" || true
     rm -f "$CUR_STATE" "$NEW_STATE" "$CUR_STRIP"
     exit 1

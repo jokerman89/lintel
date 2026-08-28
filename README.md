@@ -1,45 +1,198 @@
-# lintel (Lintel)
+# Lintel
 
-**Company-neutral, pack-driven session harness for agent-based development.** Markdown + bash scaffolding that any modern AI CLI loads as a plugin. No runtime, no daemons — your CLI handles execution. Identity (voice, compliance, personas, brand) is supplied by an installable **pack**; the harness ships only the neutral `_default` pack.
+**A session harness for AI coding agents.** Markdown and bash — no runtime, no daemon, nothing to
+run. Your CLI executes; Lintel supplies the discipline: a nine-phase development cycle with real
+gates, memory that survives a context wipe, safety hooks that block rather than warn, and identity
+that plugs in as a swappable **pack**.
 
-**Status:** v5.8 — company-neutral, pack-driven harness with the `.claude/` home layout (ADR-0005), mechanical memory (ADR-0006), zero-setup hook activation (plugin install) (ADR-0008 — bare installs arm hooks manually; see [How hook activation works](docs/getting-started.md#how-hook-activation-works)) and trigger-form prompt craft (ADR-0014). The Microsoft CAIP-SE identity has been extracted to the separate [lintel-caip-pack](https://github.com/jokerman89/lintel-caip-pack); Lintel ships only the neutral `_default` pack. See [CHANGELOG.md](CHANGELOG.md) for release notes and [SHIP-GATE.md](SHIP-GATE.md) for readiness gates. New to Lintel? Run **`/li:welcome`** for the five-minute guided tour, or start with the **[glossary](docs/GLOSSARY.md)** and [getting-started](docs/getting-started.md). The live architecture is described in [AGENT-INSTRUCTIONS.md](AGENT-INSTRUCTIONS.md) and [CLAUDE.md](CLAUDE.md).
+> **Status: v0.9.0-beta.** The harness has been in daily use on its own repo since v1 — every
+> feature below is dogfooded here before it ships. Beta means the surface is stable and tested
+> (90 tests, CI on Ubuntu and Windows) but the public API is not yet frozen. Feedback wanted.
 
-Lintel ships **125 skills + 69 agents + 1 pack (`_default`)** organized for the plugin-manifest pattern across 8 CLIs. Plus the foundation scaffolding-template system (CORE-PRINCIPLES, EVOLUTION-LOG, .claude/memory/lessons.md, decision-record templates) that gets copied into new repos via `bin/li-scaffold`. The engineering-domain modules (`/li:ta`, `/li:da`, `/li:sc`, `/li:dh`, `/li:tq`) plus the 9-step cycle (8 core phases + SCOPE) are the core.
-
-Lintel is the **complete session harness** — not just a skill catalog. It manages the full lifecycle: session-start ritual → mid-session interventions (hooks, voice gates, compliance) → end-of-session capture (lessons, ADR drafting, EVOLUTION-LOG) → cross-session continuity (memory, lessons-sync). See [AGENT-INSTRUCTIONS.md](AGENT-INSTRUCTIONS.md) for the full mental model.
-
----
-
-## What Lintel is
-
-Two distinct categories, both shipped in this repo:
-
-**Category A — Agent-invokable** (what your CLI sees via plugin manifest):
-- `skills/` — slash-commands (9-step cycle + engineering modules + session-harness)
-- `agents/` — subagent roles organized per domain
-- `hooks/shared/` — compliance + workflow hooks
-
-**Category B — Repo-scaffolding** (copied INTO other repos via `li-scaffold`):
-- `scaffolding/01-foundation/` — CLAUDE.md template, CORE-PRINCIPLES, EVOLUTION/EVOLUTION-LOG, .claude/memory/{lessons,working-state,personas}.md, .claude/plans/todo.md, .claude/decisions/ templates, .claude/agents/ subagent overrides
-
-Company-specific scaffolding (compliance reference, voice corpus, doc-gen templates) is supplied by an installable pack — Lintel ships only the neutral `_default` pack. See the [lintel-caip-pack](https://github.com/jokerman89/lintel-caip-pack) example for the Microsoft CAIP-SE identity.
-
-The architecture: write skills/agents once at repo root, ship tiny per-CLI plugin manifests (`.claude-plugin/`, `.codex-plugin/`, `.cursor-plugin/`, `.opencode/`, `gemini-extension.json`) that all point at the same `./skills/` and `./agents/` directories. Copilot CLI and Factory Droid read the `.claude-plugin/` manifest directly via Claude-plugin interop — no separate manifest needed. Each CLI's native plugin marketplace handles discovery + invocation; AGENTS.md carries the instructions to every CLI natively.
-
-## Who this is for
-
-Anyone running an AI CLI who wants a disciplined session harness. The harness itself is company-neutral; team-specific compliance, voice, personas, and brand load from an installable pack. The Microsoft CAIP-SE identity (Trailblazer voice, RAIS/OneCS/AGT/SDL compliance, EV2/OneBranch) ships as the separate [lintel-caip-pack](https://github.com/jokerman89/lintel-caip-pack); build your own pack with `/li:pack-create`.
+```
+125 skills · 69 agents · 33 hooks · 1 neutral pack · 8 CLIs · 90 tests
+```
 
 ---
 
-## Multi-CLI support (honest table)
+## The problem
 
-Full on Claude Code, Codex, and Cursor; supported on four more; best-effort elsewhere. The
-**enforcement hooks fire only on Claude Code** — every other CLI still gets the skills, the
-9-step cycle discipline, and the pack-driven knowledge, just not the live hook gate. This
-table is generated from `lib/cli-tiers.yaml` (the single source); `/li:welcome` reads the same
-file to tell you, on first run, exactly what works on *your* CLI. Per-CLI install commands are in
-the [Quick start](#quick-start) below and in [docs/getting-started.md](docs/getting-started.md#1-install-for-your-cli).
+An AI coding session has no spine. The agent starts strong, drifts, and three compactions later has
+forgotten why the design was chosen. Nothing records the decision. Nothing notices that the plan was
+never reviewed. Nothing stops an auto-mode run from walking through a one-way door. The next session
+starts from zero and re-derives everything — badly.
+
+Lintel is the harness around that session. It does not replace your agent; it gives the agent a
+structure to work inside, a place to put what it learns, and gates it cannot silently skip.
+
+---
+
+## Quick start
+
+**1. Install for your CLI**
+
+```
+Claude Code         /plugin marketplace add jokerman89/lintel
+                    /plugin install li@jokerman-lintel
+Codex CLI / App     /plugins, search lintel, Install
+Cursor              /add-plugin lintel
+Gemini CLI          gemini extensions install https://github.com/jokerman89/lintel
+GitHub Copilot CLI  copilot plugin marketplace add jokerman89/lintel
+                    copilot plugin install li@jokerman-lintel
+Factory Droid       droid plugin marketplace add jokerman89/lintel
+                    droid plugin install li@jokerman-lintel
+OpenCode            fetch and follow .opencode/INSTALL.md
+```
+
+**2. Run `/li:welcome`**
+
+It detects your CLI, tells you honestly what works and what does not on that CLI, runs one cycle in
+dry-run so you feel the discipline without mutating anything, and demonstrates a safety hook firing.
+Five minutes, no commitment.
+
+**3. Do real work with `/li:cycle`**
+
+That is the whole onboarding. Everything below explains what you just used.
+
+Full walkthrough: **[docs/getting-started.md](docs/getting-started.md)**. New to the vocabulary?
+**[docs/GLOSSARY.md](docs/GLOSSARY.md)**.
+
+---
+
+## The cycle
+
+The centrepiece. Nine phases, each its own skill, each with a declared gate and a declared cost of
+being skipped:
+
+```
+SENSE → SCOPE → DEFINE → DISCOVER → PLAN → BUILD → REVIEW → SHIP → CAPTURE
+```
+
+| Phase | What it does | Produces | What skipping it costs you |
+|---|---|---|---|
+| **SENSE** | Silent one-screen diagnostic: intent, active pack and compliance mode, active role, prior cycle state, context budget | SENSE report + scale pre-read | every downstream phase is mis-scoped |
+| **SCOPE** | Sizes and disambiguates the request. Fires **at most one** clarifying question, and only when the request is genuinely bimodal | `scope.md` — size, depth schema, chosen reading | scale ambiguity is never resolved; PLAN picks the wrong template |
+| **DEFINE** | Forcing questions. Locks premises, forces alternatives, picks the wedge. Hard gate until you approve | approved design doc | PLAN and BUILD consume ad-hoc prose with nothing locked |
+| **DISCOVER** | Read-only map of the codebase, prior ADRs, past lessons, and reusable skills and agents touching the wedge | `discover-report.md` | the work reinvents or contradicts decisions already made |
+| **PLAN** | Cold-executor trio born together (`plan.md`, `spec.md`, `prompt.md`), five-minute task granularity, cost estimate, **mandatory approval gate** | the trio + a token estimate | BUILD runs against an unwritten, unreviewed plan |
+| **BUILD** | One fresh subagent per task, two-stage review each: spec compliance, then quality | code, atomic commits | no implementation is produced |
+| **REVIEW** | Adversarial three-stage: spec compliance, code quality, pack compliance. A P1 finding blocks SHIP | review + compliance reports | unreviewed code reaches SHIP with no signal |
+| **SHIP** | PR by default. Final compliance hard-stops, voice gates, CI validation, audit record | PR, release notes, audit log | no deploy validation, no rollback path, no audit trail |
+| **CAPTURE** | Durable close: lessons, an ADR for any non-trivial decision, evolution-log entry, working-state update | lessons, ADR, log entries | the next session re-derives everything from scratch |
+
+Not every job needs all nine. Mode presets pick the subset: `hotfix` runs SENSE → BUILD → REVIEW →
+SHIP; `research-dive` stops after DISCOVER; `meta-infra` runs everything and activates four extra
+gates for changes to the harness itself.
+
+```
+/li:cycle                    full pipeline
+/li:cycle --mode hotfix      known bug, fix path clear
+/li:cycle --from PLAN        hop in — dependencies are verified first
+/li:cycle --dry-run          show the plan and its cost, execute nothing
+/li:resume                   pick up where the last session stopped
+```
+
+### Why this is not just a checklist
+
+Because the position is **mechanical**, not remembered. Every phase appends to a state ledger, and
+three hooks read it:
+
+- **`session-digest`** (SessionStart) injects the active pack, recent lessons, open jobs and recent
+  decision records into a fresh session — so session two knows what session one learned.
+- **`cycle-position-inject`** (UserPromptSubmit) re-asserts your position at the *start* of every
+  turn: which phase is done, which is next.
+- **`cycle-incomplete-warn`** (Stop) fires when a turn ends mid-cycle, so work never goes quiet
+  without telling you where it stopped.
+
+The result is a footer you always get, wherever you entered the cycle:
+
+```
+Lintel cycle · mode meta-infra · done ✅ · skipped ⊘ · here 📍 · pending ▢
+
+SENSE ✅ → SCOPE ✅ → DEFINE ✅ → DISCOVER ✅ → PLAN 📍 → BUILD ▢ → REVIEW ▢ → SHIP ▢ → CAPTURE ▢
+
+▶ Awaiting your answer: Proceed with BUILD? [Y/n/edit-plan]
+```
+
+Deeper: **[docs/the-cycle.md](docs/the-cycle.md)**.
+
+---
+
+## Mechanical, not aspirational
+
+The rule the repo holds itself to: *if a guarantee is only prose, it is not a guarantee.* A few
+worth knowing about:
+
+| Guarantee | How it is actually enforced |
+|---|---|
+| Auto-mode never decides a one-way door | `lib/auto-decide.sh` — a deliberately broad keyword guard over the irreversible classes: delete, drop, migrate, schema change, production, force-push, secret, rename a skill or agent, breaking change. A false positive only means "ask the operator"; a false negative is the failure being guarded, so the set errs wide. |
+| Secrets and customer data never reach a commit | `secret-scan-block` and `customer-data-block` **block** at `git commit` and `git push`. They scan added lines only and follow `git -C` targets. Overriding one is possible and always audit-logged — the record captures the reason you give, or `no-reason-given` if you give none. |
+| The capability table cannot drift from reality | `lib/cli-tiers.yaml` is the single source; the table below is generated from it, and `tests/shape/cli-tiers-sync.sh` fails the build if the two disagree. |
+| Memory is code, not an obligation | `lib/memory.sh`, `lib/state.sh`, `lib/paths.sh` — one command per operation. A phase writes `state_append PHASE DONE`; it does not perform a YAML ritual it might forget. |
+| Structure cannot silently rot | 36 shape tests assert structural contracts: frontmatter fields, hook registration, path canonicality, decision-record number uniqueness, no non-English text in the public tree. |
+
+Nine hooks auto-register on a plugin install across five events — zero setup. On a bare install
+they ship inert until you arm them; Lintel never edits your `settings.json` behind your back.
+**Hooks are a Claude Code mechanism** — see the honest table below.
+
+---
+
+## Identity is a pack, not a hardcode
+
+The spine is company-neutral. Voice, compliance posture, personas, brand, roles and navigation
+policy are **not** written into the skills — they resolve at runtime from the active pack through a
+single accessor, `resolve_pack_field <dotted.path>` (`lib/pack-resolver.sh`).
+
+Lintel ships exactly one pack: `_default`, which enforces nothing. A company pack declares only what
+it changes and inherits the rest through `extends:`, with cycle detection and a loud failure if the
+neutral baseline itself is broken. Build your own with `/li:pack-create`.
+
+This is what makes the harness publishable: the company identity that used to be hardcoded was
+extracted wholesale into an external pack. Nothing company-specific remains in the spine, and a
+shape test keeps it that way.
+
+---
+
+## Engineering depth on demand
+
+Five composable domain modules, each an orchestrator plus sub-skills plus its own agent fleet:
+
+| Module | Domain | Reach for it when |
+|---|---|---|
+| **`/li:ta`** | tech architecture | quality attributes, boundary review, scaling plan |
+| **`/li:da`** | data architecture | schema design, migrations, sharding, retention, analytics readiness |
+| **`/li:sc`** | security and compliance | threat model, auth review, compliance evidence |
+| **`/li:dh`** | devops and hosting | deployment plan, rollback, observability, SLI/SLO, capacity, cost |
+| **`/li:tq`** | testing and quality | contract tests, perf budgets, coverage strategy |
+
+Each runs full, in a loop, or as a single capability. `/li:full-engineering-pass` composes all five
+in dependency order for a release or an engagement that needs the whole picture at once.
+
+---
+
+## The factory
+
+Lintel installs its own disciplines into *other* repos:
+
+```
+cd ~/new-repo
+li-scaffold init --mode internal-tool --pack _default
+```
+
+Thirty seconds later that repo has a `CLAUDE.md`, `CORE-PRINCIPLES.md`, and a `.claude/` home with
+memory (lessons, working-state, personas), plans, and decision-record templates.
+
+Lintel dogfoods this: **this repo's own `CLAUDE.md` is the instantiated form of the template it
+ships.**
+
+---
+
+## Multi-CLI support — the honest table
+
+Full on three CLIs, supported on four, best-effort elsewhere. The **enforcement hooks fire only on
+Claude Code**; every other CLI still gets the skills, the cycle discipline and the pack-driven
+knowledge, just not the live gate. This table is generated from `lib/cli-tiers.yaml` and shape-tested
+against it, so it cannot drift.
 
 <!-- CLI-TIERS:START — generated from lib/cli-tiers.yaml via cli_tiers_markdown_table; do not hand-edit. -->
 | CLI | Tier | Skills | Subagents | Hooks |
@@ -56,150 +209,67 @@ the [Quick start](#quick-start) below and in [docs/getting-started.md](docs/gett
 
 ---
 
-## Quick start
-
-### 1. Clone Lintel
-
-```bash
-git clone https://github.com/jokerman89/lintel ~/Workspace/lintel
-cd ~/Workspace/lintel
-```
-
-### 2. Install for your CLI
-
-```bash
-# Claude Code:
-#   /plugin marketplace add jokerman89/lintel
-#   /plugin install li@jokerman-lintel
-
-# Codex CLI:
-#   /plugins → search lintel → Install Plugin
-
-# Cursor:
-#   /add-plugin lintel
-
-# Gemini CLI:
-gemini extensions install https://github.com/jokerman89/lintel
-
-# Copilot CLI:
-copilot plugin marketplace add jokerman89/lintel
-copilot plugin install li@jokerman-lintel
-
-# Factory Droid:
-droid plugin marketplace add jokerman89/lintel
-droid plugin install li@jokerman-lintel
-
-# OpenCode:
-#   fetch and follow .opencode/INSTALL.md
-```
-
-**Then run `/li:welcome`** in your CLI — it detects your CLI, shows your honest capability tier
-(what works and what doesn't here), runs a dry-run cycle so you feel the 9-step discipline
-without mutating anything, and demonstrates a safety hook. The fastest way to see the harness work.
-
-### 3. Install scaffolding source (for `li-scaffold` in new repos)
-
-```bash
-# Set up local cache for scaffolding templates + bin/ scripts (run from your clone root)
-mkdir -p ~/.lintel
-ln -s "$PWD/scaffolding" ~/.lintel/scaffolding
-export PATH="$PWD/bin:$PATH"
-```
-
-### 4. Verify
-
-```bash
-li-doctor      # cross-CLI health check
-bash install/verify.sh
-```
-
-**Windows:** the bare installer is `install\install.ps1` (run it in PowerShell 7+) — `install/install.sh`
-is the bash/Linux/macOS/WSL/Git Bash path. A plugin install needs neither.
-
-### 5. Scaffold a new repo
-
-```bash
-cd ~/new-repo
-li-scaffold init --mode internal-tool --pack _default
-```
-
-That creates CLAUDE.md, CORE-PRINCIPLES.md, and .claude/ (memory, plans, decisions) with neutral defaults. Activate a company pack (e.g. `caip-se`) for team-specific voice/compliance.
-
-Full walkthrough: [docs/getting-started.md](docs/getting-started.md).
-
----
-
-## What you get
-
-- **Skills** for daily workflows: the 9-step `/li:cycle` (sense→capture), engineering-domain modules (`/li:ta`, `/li:da`, `/li:sc`, `/li:dh`, `/li:tq`), `/qa`, `/investigate`, `/plan-eng-review`, `/office-hours`, `/generate-ppt`, `/generate-word`, `/generate-web`, plus session-harness skills (`/skill-router`, `/li:doctor`, `/li:scaffold`, `/lessons-promote`, `/adr-new`, `/personas-rotate`, `/pack-create`, `/pack-switch`).
-- **Agents** organized per domain: engineering, security, compliance (generic frameworks — GDPR/SOC2/EU-AI-Act), devops, customer, communication, doc-gen, frontend. Company-specific agents load from a pack.
-- **Compliance hooks** — `customer-data-block`, `secret-scan-block`, `no-direct-main-push`, etc. Auto-registered on a plugin install; armed manually on a bare install. See [How hook activation works](docs/getting-started.md#how-hook-activation-works).
-- **Pack-driven compliance + voice**: the active pack declares its compliance gates and voice tier; the neutral `_default` pack enforces nothing. Company packs (e.g. lintel-caip-pack) supply tiered compliance and a calibrated voice corpus.
-- **Repo scaffolding mechanism** via `bin/li-scaffold` — 30-second new-repo setup.
-- **Cross-repo lessons sync** via `bin/li-lessons-sync` (operator-opt-in).
-- **Cross-CLI health check** via `bin/li-doctor`.
-
----
-
 ## Where things live
 
-Lintel writes to **four roots** — two machine-global, two in your repo:
+Four roots — two machine-global, two in your repo:
 
 | Root | Scope | Holds |
 |---|---|---|
-| `~/.lintel/` | machine-global | operator identity + cross-repo state — `profile.yaml` (active pack/mode/role), packs, cross-repo jobs registry, audit log |
-| `~/.claude/` | machine-global | Claude Code's own home — your `settings.json` and any hooks you symlinked in (bare install) |
-| `<repo>/.claude/` | per-repo, **committed** | knowledge that travels with the code — `memory/` (lessons, working-state, personas), `decisions/` (ADRs), `plans/` |
-| `<repo>/.claude/runtime/` | per-repo, **gitignored** | churn that shouldn't — cycle state, job data, session saves, repo event log |
+| `~/.lintel/` | machine-global | operator identity — active pack, mode and role, installed packs, cross-repo job registry, audit log |
+| `~/.claude/` | machine-global | your CLI's own home — `settings.json`, and any hooks you armed by hand on a bare install |
+| `<repo>/.claude/` | per-repo, **committed** | knowledge that travels with the code — `memory/`, `decisions/`, `plans/` |
+| `<repo>/.claude/runtime/` | per-repo, **gitignored** | churn that should not — cycle state, job data, session saves, event log |
 
-The committed/gitignored split is deliberate (ADR-0005): knowledge is shared in PRs, runtime noise
-stays local. Full map + lifecycle in [CLAUDE.md](CLAUDE.md#where-state-lives-the-memory-map).
+The committed/gitignored split is deliberate: knowledge is reviewed in pull requests, runtime noise
+stays local.
 
 ---
 
-## What you don't get
+## What you do not get
 
-- **No customer data.** This repo is for tooling. Customer artifacts never land here.
-- **No third-party code bundled.** `install/upstream-sources.yaml` still ships, but as an honest list-only stub — nothing is fetched or vendored from it; since v3 Lintel is self-contained.
-- **No runtime.** Lintel = markdown + bash. Your CLI executes — Lintel provides the patterns + scaffolding.
-- **No production cross-CLI parity for everything.** Hooks are Claude-Code-only mechanism. Subagent abstractions differ per CLI. We're honest about gaps; see [docs/multi-cli.md](docs/multi-cli.md).
+Stated plainly, because a launch page that hides its gaps is worth less than one that names them:
+
+- **Hooks on every CLI.** Enforcement is a Claude Code mechanism. Elsewhere the hooks do not fire.
+- **`/li:generate-pdf`, `/li:generate-xlsx`, `/li:generate-visio`** are self-labelled template-only
+  slots — structure without curated content.
+- **No runtime.** Markdown and bash. Your CLI is the execution engine.
+- **No bundled third-party code.** Lintel ships only operator-authored content.
+- **No customer data, ever.** This is tooling; customer artifacts never land here.
+
+---
+
+## Documentation
+
+**Start here**
+- [Getting started](docs/getting-started.md) — install, first cycle, where files land
+- [Glossary](docs/GLOSSARY.md) — pack, spine, cycle, trio, the load-bearing terms
+- [FAQ](docs/faq.md)
+
+**Understand it**
+- [The cycle](docs/the-cycle.md) — nine phases, gate by gate
+- [Architecture](docs/architecture.md) — spine, packs, navigation, depth
+- [Multi-CLI support](docs/multi-cli.md) — what degrades where, and why
+- [Precedence](docs/precedence.md) — which instruction file wins when they conflict
+
+**Use it deeply**
+- [Power user](docs/power-user.md) — context warming, roles, jobs, budgets
+- [Engineering modules](docs/concepts/engineering-modules.md) — TA, DA, SC, DH, TQ
+- [Pack resolution](docs/concepts/pack-resolver.md) — resolution, inheritance, defaults
+- [Compliance](docs/compliance.md) — the neutral baseline and what a pack can add
+- [Skill catalog](skills/CATALOG.md) — all 125 skills, auto-generated
+
+**Contribute**
+- [Contributing](CONTRIBUTING.md) · [Code of conduct](CODE_OF_CONDUCT.md) · [Security](SECURITY.md)
+- [Changelog](CHANGELOG.md)
+
+Full index: **[docs/README.md](docs/README.md)**.
 
 ---
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
-
-Lintel ships **only operator-authored content** (no vendored upstream). Permissive license throughout. The license-tier mechanism is preserved for any future upstream-derived agents.
-
----
-
-## Compliance
-
-See [docs/compliance.md](docs/compliance.md). Key rules (always-on):
-1. No customer data in prompts, files, or commits
-2. No secrets, credentials, tokens
-3. Production mutations require explicit per-call authorization
-
-Beyond these neutral baselines, tiered compliance (SSO policy, vendor preference, regulatory gates) is supplied by the active pack — see the lintel-caip-pack example for the Microsoft CAIP-SE ruleset.
-
----
-
-## Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md). PR-based against `main`.
-
-Lessons learned go in `scaffolding/01-foundation/.claude/memory/lessons.md`. Promote a lesson from a customer repo via `bin/li-lessons-promote`.
-
----
-
-## Versioning
-
-Semantic versioning since v3; the current line is v5.8. Releases ship when [SHIP-GATE.md](SHIP-GATE.md) gates are all green.
-Pre-v3 used date-based versioning — see [CHANGELOG.md](CHANGELOG.md).
-
----
+MIT — see [LICENSE](LICENSE). Lintel ships only operator-authored content; nothing is vendored.
 
 ## Security
 
-See [SECURITY.md](SECURITY.md). Report security concerns to johannes.akerman@gmail.com.
+See [SECURITY.md](SECURITY.md) for the disclosure process.

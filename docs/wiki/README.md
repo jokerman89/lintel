@@ -1,6 +1,6 @@
 # Lintel wiki — generated reference
 
-Generated: 2026-06-12T20:53:36Z by `bin/li-wiki-gen`.
+Generated: 2026-08-28T14:07:53Z by `bin/li-wiki-gen`.
 
 ## Indexes
 
@@ -13,20 +13,34 @@ Generated: 2026-06-12T20:53:36Z by `bin/li-wiki-gen`.
 
 See [docs/concepts/](../concepts/) for canonical conceptual references:
 
-- pack-defaults
-- pack-resolver
-- pack-inheritance
-- envelope
-- brief-forge
-- orientator
-- wiki-generation
-- meta-infra-discipline
-- jobs-system
-- planner-as-module
-- agent-dispatch-rules
+- [agent-dispatch-rules](../concepts/agent-dispatch-rules.md)
+- [agent-memory](../concepts/agent-memory.md)
+- [brief-forge](../concepts/brief-forge.md)
+- [capture-vault-sink](../concepts/capture-vault-sink.md)
+- [da-module](../concepts/da-module.md)
+- [dh-module](../concepts/dh-module.md)
+- [engineering-modules](../concepts/engineering-modules.md)
+- [envelope](../concepts/envelope.md)
+- [full-engineering-pass](../concepts/full-engineering-pass.md)
+- [jobs-system](../concepts/jobs-system.md)
+- [memory-v2](../concepts/memory-v2.md)
+- [meta-infra-discipline](../concepts/meta-infra-discipline.md)
+- [obsidian-integration](../concepts/obsidian-integration.md)
+- [orientator](../concepts/orientator.md)
+- [pack-defaults](../concepts/pack-defaults.md)
+- [pack-inheritance](../concepts/pack-inheritance.md)
+- [pack-resolver](../concepts/pack-resolver.md)
+- [planner-as-module](../concepts/planner-as-module.md)
+- [prompt-house-style](../concepts/prompt-house-style.md)
+- [sc-module](../concepts/sc-module.md)
+- [skill-protocol](../concepts/skill-protocol.md)
+- [ta-module](../concepts/ta-module.md)
+- [tq-module](../concepts/tq-module.md)
+- [uniformity-contract](../concepts/uniformity-contract.md)
+- [wiki-generation](../concepts/wiki-generation.md)
 
 ## Hand-editing
 
 This wiki is regenerated from source. **Hand edits will be overwritten.** To change content, edit the source (frontmatter, pack.yaml, schema files) and re-run `bin/li-wiki-gen`.
 
-CI runs `bin/li-wiki-gen --check` and warns on diff. v4.0 = warn-only; v4.1 will fail builds.
+CI runs `bin/li-wiki-gen --check` and warns on a diff.

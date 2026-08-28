@@ -1,118 +1,289 @@
 # Power-user patterns
 
-Patterns that pay off once the basic setup is running. Not required for everyday work — these are the "next level" once the muscle memory is there.
+The mechanisms on this page are optional. None of them are needed to run a cycle — see
+[getting-started.md](getting-started.md) for that, and [the-cycle.md](the-cycle.md) for the nine
+phases. What follows is the machinery that starts paying off when a task outlives a single session,
+when the context window becomes the binding constraint, or when you need to reconstruct six months
+later what the agent did and why.
 
-## 1. Cross-session memory protocols
+This is v0.9.0-beta. Several of the mechanisms below are partly wired; each one names its own gap
+rather than hiding it, and the gaps are collected at the end.
 
-`scaffolding/tasks/memory.md` is the canonical place for cross-session memory. Four sections: operator profile, project context, feedback patterns, external references.
+**Hooks fire on Claude Code only.** Everything else here is skills and files, which work on every
+CLI that can read markdown. See [multi-cli.md](multi-cli.md) for the per-CLI tier table.
 
-**Protocols that compound:**
+---
 
-- **Update on change, not on cadence.** Memory entries become noise if you write one per session. Write one when something changes — a new stakeholder, a new constraint, a feedback pattern that crystallizes.
-- **Date and source.** Every entry has the date you wrote it. If it came from a conversation, link / quote it. Memories without provenance become claims without evidence.
-- **Prune on session start.** When you read memory at session start, kill entries that are no longer true. Five lean memories beat fifty stale ones.
-- **Tier by recency.** Operator profile and project context are read every session. External references are read on demand. Structure the file so the high-traffic sections are at the top.
+## Context is a budget you spend on purpose
 
-## 2. Workflow templates per project type
+The default session-start load is roughly 5-15k tokens — the repo instruction file, the cross-CLI
+ritual, lessons, the memory index, recent decision records, the active role. Everything beyond that
+is an explicit choice.
 
-Different project shapes benefit from different scaffolding subsets.
+### Warming
 
-Common shapes the CAIP team encounters:
+Six skills load context deliberately. Each reports the tokens it added and appends the event to
+`.claude/runtime/state/context-budget.md`.
 
-- **PoC for customer demo.** Short-lived. ADRs are overkill. Keep `.claude/plans/todo.md` and `.claude/memory/lessons.md`, skip `.claude/decisions/`.
-- **Reference implementation.** Long-lived, externally-visible. Full scaffolding including ADRs, with extra weight on `.claude/memory/personas.md` (different consumers have different needs).
-- **Internal tool / utility.** Solo maintainership. Lean scaffolding: keep `.claude/memory/lessons.md` and `.claude/decisions/` for traceability, skip `.claude/memory/personas.md`.
-- **Customer engagement repo.** Customer-data-sensitive. Full scaffolding **plus** customized `CLAUDE.md` that hardens compliance for that customer's contract.
+| Skill | Loads |
+|---|---|
+| `/li:context-warm <paths>` | Named files or globs. The base the others build on. `--pattern` warms the repo's declared high-leverage set instead of an explicit target. |
+| `/li:context-warm-related <topic>` | Heuristic search across the working tree for the top N files matching a topic. |
+| `/li:context-warm-adrs <topic>` | Decision records from `.claude/decisions/` whose title or body matches a topic. |
+| `/li:context-warm-sessions [N]` | The last N session checkpoints on the current branch. |
+| `/li:context-warm-from-url <url>` | Fetches a documentation page or reference into context. |
+| `/li:context-warm-customer <name>` | Loads a separate engagement repo's instruction file, decisions and recent commits. |
 
-Make a template script (one per shape) under `install/templates/` once you have repeated a setup more than twice.
+Those six are the complete set. If you have seen another `context-warm-*` name in older notes, it
+does not exist as a skill.
 
-## 3. Custom hooks
+Warm before PLAN when discovery named specific files, and before REVIEW when the artifact under
+review references code that is not yet in the window. Warming after the fact costs the same tokens
+and buys less.
 
-Hooks intercept agent behavior at specific lifecycle points. Useful for:
+### Seeing the budget
 
-- **Pre-prompt context injection.** Before the agent acts, inject current branch state or open ticket context.
-- **Post-tool guard.** After a tool call, validate that the result is in scope.
-- **Session-start enforcement.** Run the compliance check programmatically rather than relying on the agent to do it.
+`/li:context-budget` breaks utilization down by source and recommends warming or cooling.
+`/li:context-budget --watch` runs the threshold check instead: soft at roughly 50k tokens or 80 tool
+calls, hard at 80k or 130, and it recommends `/li:clean` or `/li:context-save` when a line is crossed.
 
-Claude Code has first-class hooks (`~/.claude/hooks/`). Other CLIs vary. Hooks are powerful and easy to mis-configure — when a hook fires incorrectly it can break every session. Always test hooks against a throwaway repo before relying on them.
+Be clear about what this is: the numbers are **estimated** by summing the deltas in the budget log
+plus a per-turn guess for conversation history. It is not a reading of the CLI's actual context
+accounting. Treat it as a trend line, not a gauge.
 
-If you write a hook that is useful across the team: PR it into this repo under `scaffolding/.claude/hooks/` and document it in this file.
+### Cooling
 
-## 4. Multi-repo workspace patterns
+`/li:context-cool` exists because a context window is append-only — nothing can retract tokens
+mid-session. So cooling marks warmed sources as ignorable in
+`.claude/runtime/state/context-ignore.md`, which downstream skills and subagents respect, and clears
+the budget tracking. The only true reduction is the round trip: `/li:context-save`, restart the
+session, `/li:context-restore`, then warm back only what you still need.
 
-Working across multiple repos in one session (e.g., a backend + frontend pair, or a service + its consumers):
+### Raising the ceiling
 
-- **One CLI session per logical workspace, not per repo.** Switching agents loses cross-repo context. Open the parent directory and let the agent navigate.
-- **Shared `tasks/memory.md` at the parent level.** Symlink each repo's `tasks/memory.md` to a single source so insights about the system aggregate.
-- **Per-repo `CLAUDE.md` stays per-repo.** Repo-specific rules do not promote upward.
-- **ADRs that span repos go in the source-of-truth repo.** The other repo references via link in its own ADR ("see ADR-0042 in <other-repo>").
+`/li:perf-mode` lifts the session budget ceiling from the 200k default to 800k, configurable up to
+1M. It is for the moments where the outcome genuinely needs the whole picture loaded at once — a
+multi-week consolidation, or a decomposed task whose sub-tasks share deep context. It is not a
+substitute for warming the right ten files.
 
-This is harder than it sounds because most CLIs are repo-scoped by default. Worth the friction when the work genuinely spans multiple repos.
+---
 
-## 5. Audit-trail discipline
+## Checkpoints and resume
 
-A clean audit trail is what lets you reconstruct decisions 6 months later when nobody remembers.
+Two independent stores hold "where we were", and it matters which one you left behind.
 
-The four artifacts:
+**Checkpoints** come from `/li:context-save`. The skill writes
+`.claude/runtime/sessions/<branch>/<YYYYMMDD-HHMMSS>-<slug>[-<label>]-context-save.md` containing
+what the task is, what got done, what is in flight, what is next, decisions taken, **failed attempts**
+(so the next session does not retry them), and files touched. Pass a short label to name the
+snapshot. `/li:context-restore` reads the newest checkpoint for the current branch, re-reads every
+file it lists, and diffs the commits that landed since it was written.
 
-1. **Commits.** Atomic, conventional-commits format, one logical change per commit. PR-based merges to `main`.
-2. **ADRs.** Non-trivial decisions captured at the time the decision is made, not retroactively.
-3. **`tasks/lessons.md` entries.** Every correction generates a one-line rule.
-4. **`scaffolding/EVOLUTION-LOG.md` entries.** Every change to the canonical instructions is logged with date + reason.
+**Cycle state** is `.claude/runtime/state/00-state.md` — the phase ledger a running cycle appends to.
 
-Bypass any one of these and the chain breaks. Discipline beats tooling — no automation forces this; it has to be a habit.
+`/li:resume` checks both. A session that ended mid-cycle leaves cycle state; one that ended with a
+save leaves a checkpoint and no cycle state. Resume discovers whichever exists and either routes you
+to the next phase or hands off to `/li:context-restore`.
 
-## 6. Skill activation rules per harness-context
+**Continuous checkpointing** is off by default. Set `checkpoint_mode: continuous` in
+`~/.lintel/profile.yaml` and BUILD commits a work-in-progress checkpoint after each completed task,
+carrying a `[lintel-context]` block with the decisions made and what remains. It stages named files
+only — never `git add -A` — and never commits a broken state. Any of those commits is a resume point.
 
-A skill can behave differently depending on the harness running it. Examples:
+---
 
-- **Claude Code interactive session:** the skill can ask clarifying questions.
-- **Claude Code under `/loop`:** the skill should not ask; it should make the reasonable call and proceed.
-- **Codex CLI:** the skill cannot delegate to subagents; sequentialize.
-- **GitHub Copilot Enterprise:** the skill has a smaller context window; produce shorter outputs.
+## Roles load lazily
 
-If a skill has harness-conditional behavior, document the conditions in its SKILL.md frontmatter or body, and verify the skill detects the harness correctly.
+A role is a lens: identity, voice, and a per-phase outcome table. One is active at a time, and the
+loading is deliberately staged so the lens costs almost nothing until you need the depth.
 
-## 7. Cross-session lessons compounding
+| Invocation | Effect |
+|---|---|
+| `/li:role <id>` | Activate. Loads identity, voice and the outcome-lens summary — roughly 500 tokens. |
+| `/li:role --deep-dive [id]` | Load the full role file, roughly 2-3k tokens, on demand. |
+| `/li:role --rotate <id>` | Swap atomically. Verifies the new role file exists **before** deactivating the current one. |
+| `/li:role --frame <artifact>` | Apply the active role's outcome lens to an artifact. |
+| `/li:role --off` | Deactivate. Voice tier reverts to the mode default. |
 
-The compounding mechanism in this setup is `tasks/lessons.md`. To make it actually compound:
+Activation writes `role_active` to `~/.lintel/profile.yaml`, so it persists across sessions —
+including deactivation. Roles resolve from the active pack's role directory first, then
+`~/.lintel/roles/private/`, then `~/.lintel/roles/`. A role marked `sensitivity: private` prompts
+before activating and keeps its notes in repo runtime state rather than exporting them.
 
-- **Write the rule, not the incident.** "Don't run `--force` against shared registries" beats "yesterday I broke the registry".
-- **Generalize across sessions.** If the same shape of mistake happens twice from different operators, the rule is wrong or not visible enough. Fix the rule, or surface it earlier in the session-start.
-- **Re-read lessons on session start.** Not all of them — the most recent 10–15. Older ones are reference material.
-- **Demote lessons that have not bit in a year.** They have served their purpose; they are now noise.
+**The neutral default pack ships no roles**, and Lintel ships none of its own. `/li:roles-list` on a
+fresh install is empty. Write your own with `/li:role-new`, or install a pack that carries a set.
 
-`tasks/lessons.md` should be growable but not infinite. A team of 5–10 SEs working actively for a year should produce 30–60 lessons total, not 300.
+---
 
-## 8. Operator-specific routing
+## Jobs
 
-Different operators have different preferences. The `tasks/personas.md` file is where to capture them.
+A job is a curated flow with state — a cycle or a plan in flight. The store is repo-local:
 
-Patterns:
+```
+<repo>/.claude/runtime/jobs/
+├── _active.md                  regenerated on every state change
+├── <workflow>-<YYYYMMDD-HHMM>-<hash>/
+│   ├── job.yaml                workflow, current_step, waiting-on, timestamps
+│   ├── 00-state.md             the phase ledger, scoped to this job
+│   ├── outputs/                what this job produced
+│   └── inputs/                 references to upstream job outputs
+└── _archive/<date>/<job-id>/
+```
 
-- **One-operator repos:** one persona file, the operator. Simple.
-- **Team repos:** one persona per active contributor. The agent picks the right communication style based on who is at the keyboard.
-- **Customer-engagement repos:** add a persona for the customer's lead engineer if their style is known. The agent generates work-in-progress that anticipates their preferences.
+`~/.lintel/jobs/_active.md` is a thin cross-repo registry — one line per open job anywhere, each
+pointing at its owning repo — which is what gives `/li:resume` and `/li:status` a "what is open
+anywhere" view.
 
-Personas are not for hypothetical users. If you have not actually worked with the person, do not write a persona for them.
+`/li:jobs list` surfaces the store. `continue <id>` resumes at the job's current step, `replan <id>`
+re-runs it whole or `--from <step>`, `abort <id>` archives it with a reason, and `branch <id>` forks
+a parallel job from the same starting point — useful for trying a second approach without losing the
+first. `/li:status` is the shorter name for `list`.
 
-## 9. Scoping subagent context budgets
+**Gap:** job auto-spawn is dormant. The `job-begin` and `job-end` hooks exist under `hooks/shared/`
+but are not among the nine hooks that auto-register (ADR-0008), so nothing creates a job folder for
+you yet. Until that lands, `_active.md` may simply not exist, and `/li:status` says so rather than
+inventing state. Concept doc: [concepts/jobs-system.md](concepts/jobs-system.md).
 
-Subagents inherit a chunk of the main context. Long subagent prompts + large file reads = the subagent burns its budget before producing output.
+---
 
-Pattern:
-- Subagent prompts should be 200–400 words. Above that, the prompt has not been distilled enough.
-- Subagent file-read budget: 10–20 files max. More than that, the question is too broad — split into multiple subagents.
-- Subagent output budget: 500–1000 words. Above that, the subagent is doing the main agent's synthesis work.
+## Mode presets
 
-If a subagent consistently runs out of context: revise its description or split its responsibility.
+`/li:cycle --mode <preset>` picks a phase subset and a posture instead of running all nine phases.
 
-## 10. When to skip the scaffolding entirely
+| Preset | Phases | Rough cost | Use when |
+|---|---|---|---|
+| `hotfix` | SENSE, BUILD, REVIEW, SHIP | ~5k tokens, 10-30 min | The bug is diagnosed and the fix path is clear. |
+| `internal-tool` | All, with a lighter REVIEW | ~25-50k tokens, 45 min to 2 h | The default for ordinary feature work. |
+| `research-dive` | SENSE, DEFINE, DISCOVER | ~10-20k tokens, 20-40 min | Explore and understand; no code yet. |
+| `meta-infra` | All, with heavier REVIEW and CAPTURE | ~80-200k tokens, 2-6 h | The change modifies the harness itself. |
+| `auto` | SENSE recommends, you confirm | — | You are unsure which fits. |
 
-Some work genuinely does not benefit from this setup:
+Set the default for your machine with `default_mode` in `~/.lintel/profile.yaml`. `--from`, `--to`
+and `--skip` compose a custom subset when no preset matches; conflicting flags are surfaced rather
+than silently resolved. `/li:cycle --dry-run` prints the phase chain, the gates and the budget
+envelope without executing anything.
 
-- A throwaway exploration repo.
-- A spike that will be deleted in a week.
-- A pure data-analysis notebook (no production target).
+`meta-infra` is the interesting one. It is auto-detected from the paths in your working diff, and it
+activates four extra gates: a structure-impact entry written during DEFINE, a mechanical
+compatibility audit (`bin/li-compat-audit`, which sweeps frontmatter contracts, renames, changed
+defaults and shared-helper signatures) plus the shape tests during REVIEW, and a
+clarity-for-the-next-operator recap during CAPTURE. A red compatibility audit requires an explicit
+override, and the override is audit-logged.
 
-Forcing the scaffolding on a throwaway repo wastes time. Use judgment. If the work has zero audit-trail requirement and zero need for cross-session memory: skip.
+Packs can contribute their own modes with their own voice and compliance posture; the cycle merges
+them into the preset list at invocation. Nothing about audience or compliance is hardcoded — see
+[concepts/pack-resolver.md](concepts/pack-resolver.md).
+
+---
+
+## Code freeze
+
+`/li:code-freeze <paths> --reason "<why>" --until <session|eod|1h|timestamp>` marks paths
+do-not-modify for the session. Other skills read
+`.claude/runtime/state/code-freeze/<session-id>.yaml` before any Edit or Write and refuse a match.
+`/li:code-unfreeze` reverses it. Both actions are audit-logged.
+
+The honest description: this is **cooperative metadata, not a filesystem lock**. It works because the
+skills check it, so a raw editor or a direct tool call outside the harness is unaffected. It blocks
+writes only — reads are always allowed. It is session-scoped and expires; permanent policy belongs in
+a frozen-zones section of the repo instruction file instead. A `frozen-zone-warn` hook exists that
+surfaces the freeze at Edit time from both sources, but it is warn-only and not auto-registered — opt
+in by symlinking it.
+
+Worth it when a refactor has surgical scope, or when the agent has already wandered once.
+
+---
+
+## The audit trail
+
+Every audit record is a single JSON line written by one shared writer (`bin/_audit.sh`) into a
+`<category>.jsonl` file. The trail is split in two: repo events — cycle runs, jobs, compliance gates,
+hook triggers, capture — land in `<repo>/.claude/runtime/audit/`; operator events — pack lifecycle,
+pack resolution, migrations, usage — stay in `~/.lintel/audit/`.
+
+`/li:audit` reads both, repo first. It is strictly read-only.
+
+```
+/li:audit                                          every category with record counts
+/li:audit --category jobs --limit 20
+/li:audit --kind brief_forge_bypassed --since 7
+```
+
+`/li:hooks-status` reads `hooks.jsonl` specifically, and answers a question the raw log does not:
+which hooks are actually firing, which are dead, and what overrides have been used. Every block you
+override is recorded with the reason you gave.
+
+Two caveats. First, `.claude/runtime/` is gitignored — the trail is local to your machine, and it is
+not a shared or tamper-evident compliance record. Treat it as a debugging and reconstruction aid.
+Second, `/li:usage-log` has a writer mode but **no automatic trigger**: nothing records skill
+invocations for you, because the wrapper hook it was designed around was never built. Its reports
+cover only what you logged by hand.
+
+---
+
+## Memory that compounds
+
+Three files carry knowledge across sessions, all under `<repo>/.claude/memory/`:
+
+| File | Holds | Write when |
+|---|---|---|
+| `lessons.md` | Rules learned from corrections | After any correction, via `/li:learn` |
+| `working-state.md` | Durable cross-session state — what is in flight and why | When durable state changes |
+| `personas.md` | Operator calibration | When you learn how someone actually wants to be worked with |
+
+`MEMORY.md` alongside them is the index that loads automatically at session start. The full model is
+in [concepts/memory-v2.md](concepts/memory-v2.md).
+
+**Two budgets are enforced by a hook.** `MEMORY.md` is capped at 200 lines because native auto-load
+truncates beyond that — overflow is silently invisible, which is worse than absent. Active lessons
+carry a soft cap of 30. The `memory-budget-warn` hook checks both after edits, rate-limited to once
+per hour, and both caps are overridable by environment variable. When you hit the lessons cap the
+answer is consolidation, not a bigger cap: if the same shape of correction keeps recurring, the rule
+is wrong or it is not surfacing early enough.
+
+**Habits that make lessons actually compound:**
+
+- Write the rule, not the incident. "Never force-push a shared branch" beats "yesterday I broke the branch."
+- Supersede rather than delete. A retired lesson keeps its entry and gains a `superseded_by:` pointer, so the reasoning survives.
+- Run `/li:lessons-surface <topic>` before starting, not after finishing. A lesson read at the end of a task is a post-mortem, not a guardrail.
+- Personas are for people you have actually worked with. Do not write one for a hypothetical reader.
+
+**Two lessons tools that are not interchangeable:**
+
+- `bin/li-lessons-promote` lifts a repo-local lesson into the scaffolding baseline, so every repo scaffolded afterwards inherits it. Use it when the lesson is about how software gets built, not about this codebase.
+- `bin/li-lessons-sync` syncs **your own** lessons across your machines through a personal remote. Opt-in and private to you.
+
+Promoting a lesson that only applies to one repo pollutes every future repo. Syncing one that should
+have been promoted leaves every other repo without it.
+
+---
+
+## Where this is thin
+
+Naming these is cheaper than you discovering them:
+
+- **Hooks are Claude Code only.** The enforcement layer does not exist on the other seven CLIs. There, the same rules are text the agent is asked to follow, which is a real difference in strength.
+- **Job auto-spawn is dormant.** `/li:jobs` and `/li:status` read a store nothing populates automatically yet.
+- **Context budget numbers are estimates**, summed from an event log rather than read from the CLI.
+- **Cooling cannot actually shrink the window.** Only a save, restart and restore round trip does.
+- **`/li:usage-log` has no automatic trigger.** What it reports is what you logged by hand.
+- **`/li:code-freeze` is cooperative**, enforced by the skills that check it, not by the filesystem.
+- **The default pack ships no roles.** The role machinery works; the content is yours to write.
+- **The audit trail is local and gitignored.** It is not a shared compliance artifact.
+- **Lintel does not install, vendor, or update third-party tools.** The installer copies Lintel's own files and nothing else. There is no uninstall script; removal means deleting `~/.lintel/` and the plugin.
+
+---
+
+## When to skip all of this
+
+Some work genuinely does not benefit: a throwaway exploration repo, a spike that dies next week, a
+data-analysis notebook with no production target. If the work has no audit-trail requirement and no
+need for cross-session memory, the scaffolding is overhead. Use judgment — nothing here is
+load-bearing for a single-session task.
+
+---
+
+**Related:** [architecture.md](architecture.md) for where state lives and why ·
+[the-cycle.md](the-cycle.md) for the phases · [precedence.md](precedence.md) for which instruction
+wins when two conflict · [../skills/CATALOG.md](../skills/CATALOG.md) for the full skill list ·
+[README.md](README.md) for the documentation index.

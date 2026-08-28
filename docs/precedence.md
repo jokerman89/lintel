@@ -28,16 +28,16 @@ Use Level 2 when:
 - The repo's `CLAUDE.md` explicitly references an agent by name
 - The task scope is clearly inside this repo's domain
 
-### Level 3 — Promoted list
+### Level 3 — Pack-promoted
 
-Agents listed in [promoted-agents.md](promoted-agents.md). The team has vetted these; they are the default for cross-project work.
+Agents promoted by the **active pack**. A pack may ship its own agents and declare which of them take precedence over the user-global set, so a team's vetted roles win without anyone editing the repo.
 
-Promoted agents are the team-vetted set listed in that doc — promotion is the explicit decision that lifted them. They are invoked via their registered name.
+The neutral `_default` pack promotes nothing, so on a stock install this level is empty and selection falls through to Level 4.
 
 Use Level 3 when:
 - No repo-level override applies
-- The task matches a promoted agent's description
-- The work is something we would want consistent behavior across projects
+- The active pack promotes an agent whose description matches the task
+- The work should behave consistently across every repo using that pack
 
 ### Level 4 — User-global
 
@@ -45,7 +45,7 @@ Agents installed globally at `~/.claude/agents/` (or `~/.claude/skills/` for sla
 
 Use Level 4 when:
 - An operator has personal customizations they want available everywhere
-- The promoted list does not have a match but the user-global one does
+- The active pack promotes no match but a user-global agent fits
 
 ### Level 5 — Fallback
 
@@ -72,7 +72,7 @@ Two agents at the same level could each plausibly handle the task. The tie-break
 If the model says "use agent X" but X is clearly wrong for the current task, the issue is usually one of:
 
 - **Description rot.** X's description is outdated and no longer matches what it does. Fix the description; do not work around it.
-- **Promotion mistake.** X was promoted but its niche is too narrow. File a demotion PR.
+- **Promotion mistake.** The pack promotes X but its niche is too narrow. Change the pack's promotion list.
 - **Repo override mismatch.** This repo's `.claude/agents/X.md` is wrong for the current branch's reality. Update the agent.
 
 Don't bypass the precedence model silently. Bypassing once is fine if the override is explicit ("ignoring precedence — using Y because Z"). Bypassing twice without fixing the root cause is the failure mode.
@@ -96,7 +96,7 @@ Do not delegate when:
 The precedence model assumes the CLI supports subagents.
 
 - **Claude Code:** Full support. Apply as described.
-- **Codex:** No first-class subagent. Treat "delegate to agent X" as "spawn a new Codex run with the prompt agent X would have produced". Same selection logic, different mechanism.
-- **GitHub Copilot Enterprise:** No subagent equivalent. Sequentialize what would be parallel. Skip Level 3 in practice — promoted-list agents typically can't be invoked from Copilot.
+- **Codex:** native subagents, same as Claude Code. Apply the model as described.
+- **CLIs without subagents** (Gemini CLI, OpenCode, Copilot CLI, Factory Droid): sequentialize what would be parallel. The precedence model still decides *which prompt* to use, even when the delegation is manual.
 
 When operating on a degraded CLI, the precedence model still informs **which prompt to use** even if the delegation mechanism is manual.
