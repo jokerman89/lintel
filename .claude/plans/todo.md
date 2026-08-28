@@ -37,9 +37,9 @@ Operator decisions at the DEFINE gate: (1) rewrite all 250 commit messages in pl
 - [x] W3.3 Build the rewrite map: mechanical strip of `Co-Authored-By: Claude*` / `Generated with` / `Claude-Session:`
 - [x] W3.4 Hand-author replacement subjects for the 41 flagged commits (Swedish, veto/dirigering, gstack/JStack/CAIP/MS, "weapon")
 - [x] W3.5 Sweep bodies for `Per operator directive`, `operator-veto`, review-scoreboards
-- [ ] W3.6 Apply with `git filter-branch --msg-filter` over `--all`
-- [ ] W3.7 VERIFY: `git diff <old-head> <new-head>` must be EMPTY (content byte-identical)
-- [ ] W3.8 VERIFY: re-scan rewritten history for every marker class; zero hits
+- [x] W3.6 Apply with `git filter-branch --msg-filter` over `--all`
+- [x] W3.7 VERIFY: `git diff <old-head> <new-head>` must be EMPTY (content byte-identical)
+- [x] W3.8 VERIFY: re-scan rewritten history for every marker class; zero hits
 - [ ] W3.9 GATE — operator force-pushes `main` (or authorizes it explicitly)
 
 ### W4 — release mechanics
@@ -47,12 +47,28 @@ Operator decisions at the DEFINE gate: (1) rewrite all 250 commit messages in pl
 - [x] W4.2 CHANGELOG restart: `v0.9.0-beta` section + v3–v5 history compressed to one "Pre-beta" block
 - [x] W4.3 Regenerate `skills/CATALOG.md`
 - [x] W4.4 M1 structure-change entry for the docs relocation
-- [ ] W4.5 Full suite green (90 tests) + `li-doctor`
-- [ ] W4.6 Tag `v0.9.0-beta`
-- [ ] W4.7 CAPTURE — lessons, M4 future-operator recap, working-state
+- [x] W4.5 Full suite green (90 tests) + `li-doctor`
+- [x] W4.6 Tag `v0.9.0-beta`
+- [x] W4.7 CAPTURE — lessons, M4 future-operator recap, working-state
 
 ### Review
-_(filled at task end)_
+
+Done: 33 of 34 tasks. The one open item is W3.9 — the force-push — which was never mine to run.
+
+**What the plan did not anticipate.** Three things the recon found that the plan had no task for:
+- Generator WRITE paths into the directories being moved (`bin/li-uniformity`, `bin/li-compat-audit`
+  from two branches). The plan only listed readers. Recorded as L-024.
+- `skills/ship/SKILL.md` instructing every future PR to carry an AI-authorship trailer. Cleaning the
+  history without this would have been undone by the next ship. Recorded as L-025.
+- `.gitignore` silently untracking `.claude/plans/` — found by a subagent auditing a claim in a doc
+  it was rewriting, not by any planned check.
+
+**What cost the most time.** A naive repo-wide sed (17 patterns x ~1400 files) timed out at two
+minutes on Windows Git Bash; grep-then-sed ran in seconds. And two test suites ran concurrently for
+a while before I noticed I was reproducing L-022 myself.
+
+**Scope grew, correctly.** The widened English-only guard surfaced 87 hits in directories the guard
+had never scanned. Cleaning them was not in the plan but was clearly in the spirit of the request.
 
 ---
 

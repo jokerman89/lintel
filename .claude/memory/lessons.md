@@ -529,3 +529,68 @@ greps for markdown links. Reverted; kept docs tracked; cleaned residue in place 
   output content-filtering (it enumerates harassment/abuse terms) — adopt the Covenant by reference.
 
 Related: [[L-019]] produce value, not the source's mechanism.
+## L-024 — A relocation is safe only when the WRITE paths move too, not just the readers
+
+**Why:** [[L-023]] caught readers and `# intent:` headers and concluded the move was unsafe. That was
+the right call but an incomplete map. This cycle's read-only agent sweep found the class L-023
+missed: **generators that write into the directory being moved.** `bin/li-uniformity:28` writes
+`docs/audit/uniformity-matrix.md`; `bin/li-compat-audit` writes `docs/v4.x/compatibility-audits/`
+from two separate branches (`:53` and `:127`, so fixing one leaves half the invocations wrong). Left
+unrepointed, the public directories would have silently reappeared on the next `/li:uniformity` or
+the next meta-infra cycle — the move would have looked successful and then quietly undone itself.
+
+Two more classes in the same sweep that a markdown-link check cannot see: `install/verify.sh`
+resolved a moved file by path in a check that runs in three CI jobs on two operating systems and
+`fail`s hard on a miss; and `bin/li-uniformity`'s `usage()` is `head -22 "$0"`, so lines 1–22 of the
+script **are** the operator-facing help text — a path in a comment there is emitted, not inert.
+
+**How to apply:**
+- Before moving any tracked directory, enumerate four classes, not one: readers, **writers**,
+  CI-gating resolvers, and emitted text (help output, printed paths, error messages).
+- `grep -rn '<dir>'` over ALL file types, not just `*.md`. A hand grep of markdown found a fraction
+  of what a full-tree sweep found.
+- Fix every branch of a multi-branch writer. One repointed write path and one stale one is worse
+  than none, because the directory grows back intermittently and looks like a mystery.
+- The proof the move worked is the shape suite green **after** the move, not the move completing.
+
+Related: [[L-023]] the reader half of the same lesson.
+
+## L-025 — Clean the generator, not just the generated output
+
+**Why:** The task was "remove AI-authorship from the commit history." Rewriting 250 commit messages
+would have fixed the past and left the future broken: `skills/ship/SKILL.md` **instructs** every
+pull request to carry an `AI-assisted` provenance block and a generated-by trailer, so the very next
+`/li:ship` would have reintroduced exactly what the rewrite removed. The same shape appeared twice
+more in the same cycle — a Swedish phrase in `skills/perf-mode`'s frontmatter propagating verbatim
+into the generated public catalog, and `bin/li-wiki-gen` hardcoding a stale version heading and an
+11-of-25 subset of the concept list into every regeneration.
+
+**How to apply:**
+- For any cleanup, ask "what produces this?" before "how do I remove this?" If the answer is a
+  template, a skill instruction, or a generator, fix that first — the output is downstream.
+- Frontmatter is source for generated docs. A description field is public copy.
+- After fixing a generator, re-run it and diff, rather than hand-editing its output.
+
+## L-026 — A repo-wide path sed silently rewrites test assertions
+
+**Why:** Repointing ~230 references with a global `sed` over the tracked tree also rewrote the paths
+**inside test files**, which changed what those tests assert. `tests/unit/closeout-additions-present.sh`
+had checked that `LAYERS.md` carried the durable-principles reflection; after the sweep it checked
+`docs/architecture.md`, a brand-new file that never had that content, and failed. The failure looked
+like a pre-existing unrelated red, and a subagent reported it as such in good faith. It was neither:
+it was caused by the sweep, one step removed.
+
+Also: the naive form of that sweep — 17 `sed -e` patterns plus an `md5sum` per file across ~1400
+tracked files — timed out at two minutes on Windows Git Bash. `grep -rl` first, then `sed` only the
+matching files, ran in seconds.
+
+**How to apply:**
+- After any bulk path migration, re-read every changed line under `tests/` specifically. A test whose
+  target moved is now asserting something different, and it will either fail confusingly or, worse,
+  pass while checking the wrong thing.
+- When a test fails right after a sweep, assume the sweep caused it until proven otherwise —
+  "pre-existing" needs a `git stash` to confirm, not an assumption.
+- Filter the file list before the expensive per-file loop.
+
+Related: [[L-022]] on trusting a slow aggregate under Windows load.
+

@@ -8,38 +8,46 @@ Cross-session working state (ej durable rules — that's [[lessons.md]]; ej pers
 
 ---
 
-## ▶ CURRENT — read this first (reconciled 2026-06-18)
+## ▶ CURRENT — read this first (reconciled 2026-08-28)
 
-**Launch-readiness (2026-06-18, branch `feat/launch-readiness`, cycle launch-readiness):** PUBLIC-launch
-pass, BUILD+REVIEW done, **15 commits, v5.8.0**, NOT yet pushed. A full audit (10-agent fan-out:
-.claude/engineering/audits/2026-06-18-launch-readiness-register-v2.md) → fixes across W1–W7 (broken command refs;
-substrate set-u/hook guards; output-dep docs; 19-agent craft-raise; company-neutral publishing +
-CoC/templates; hooks-registration-safe guard; welcome light-path) + an adversarial review workflow
-(L-007, 16 confirmed findings, all P0/P1/P2 + cheap P3 acted on). Verification GREEN: M3 shape 36/36,
-security-controls-fire + session-leaves-traces ALL PASS, M2 RED-override-accepted (4 sourced-lib set-u
-removals, documented in the M1 entry). **SHIP BLOCKER:** `gh` is authed as `jokerman_microsoft` and
-canNOT resolve `jokerman89/lintel` (private; wrong account) — branch push + PR must be done by the
-operator (or after `gh auth switch` to jokerman89). **Deferred follow-ups:** (1) the public-tree move
-was reverted — docs kept tracked because `.claude/engineering/audits/uniformity-matrix.md` is a live dep + `# intent:`
-headers cite audit records (L-023); a real relocation needs uniformity-matrix moved out first. (2) P3
-agent-craft cosmetics (keyword-tail loss on 3 agents, tool-scope heading style) accepted as-is.
+**Beta release (2026-08-28, branch `feat/launch-readiness`, cycle `beta-release-docs`, mode meta-infra):**
+the repo is prepared for its FIRST PUBLIC RELEASE as **v0.9.0-beta**. Five commits on top of the
+launch-readiness work, then a full commit-message rewrite. Suite 90/90 (shape 36, unit 48,
+integration 4, behavior 1, e2e 1). **NOT pushed.**
 
-One answer to "what am I doing", so a fresh session doesn't drown in the entries below. Most of
-those are **DONE** — their PRs are merged. As of 2026-06-14:
+What landed:
+- **Published/internal split.** `docs/` is now the adopter surface only (130 → 44 files); audits,
+  Gate M1/M2 records and superseded design docs moved to `.claude/engineering/`. All 233 inbound
+  references repointed — including two CI-gating resolvers and three generator WRITE paths that
+  would have recreated the public dirs (see [[L-024]], the half [[L-023]] missed).
+- **Documentation rebuilt.** New `docs/README.md`, `docs/architecture.md`, `docs/the-cycle.md`;
+  README reframed as a landing page; 8 docs rewritten against verified ground truth; 74 stale claims
+  corrected; `LAYERS.md`, `docs/session-harness.md` retired and `SHIP-GATE.md` moved internal;
+  `docs/promoted-agents.md` deleted (described a vendoring mechanism the installer does not have).
+  257 links resolve, zero broken.
+- **Two real bugs, not doc bugs.** `.gitignore` was ignoring `.claude/plans/`, so every new plan and
+  trio was silently untracked. `skills/ship/SKILL.md` instructed every PR to carry an AI-authorship
+  trailer — the source of the leak, not just the symptom ([[L-025]]).
+- **History rewritten.** All 255 commits across 5 branches: AI-authorship trailers stripped, 144
+  messages hand-rewritten (Swedish, operator-direction phrasing, review scoreboards, heritage
+  references). Proven safe: trees byte-identical, `git diff` old↔new HEAD empty, commit counts
+  preserved, zero leaks in six classes. Old heads in `refs/original/`; full pre-rewrite history in
+  `../lintel-pre-beta-history.bundle` (verified complete).
 
-- **Merged to main (treat as history, not in-flight):** the whole v5.x chain — vault sink, v5.0
-  `.claude/` home, memory v2, Obsidian, v5.1 subtraction, v5.2 battletest (#62–#69), v5.3
-  cli-and-craft + launch-readiness (#73), v5.4 design-dna (#72), v5.5 design-parity (#74). If an
-  entry below says "PR #NN OPEN", it's almost certainly merged — verify with `gh pr view NN`.
-- **In-flight branches (NOT on main yet):** `feat/extension-pack-contract` (ADR-0018 — `00-state`
-  shows it mid-BUILD: "implemented; adversarial review done; pending final suite+commit"; resume or
-  close it deliberately, don't let SENSE resurrect stale intent) · `feat/setup-hardening` (this —
-  cycle-continuity self-heal, repo-agent removal, CLAUDE.md fixes, ADR-collision renumber).
-- **Staged designs, not built:** ADR-0019 AGENTS.md-primary · ADR-0020 lintel-state MCP · ADR-0021
-  eval-harness (renumbered from 0015/0016/0017 on 2026-06-14).
+**BLOCKERS before pushing — operator action required:**
+1. **Force-push.** All SHAs changed. `main` and `feat/launch-readiness` need `--force`. This was
+   never authorized for me to run.
+2. **Four orphaned tags.** `v3.6.0-dev`, `v3.6.1-dev`, `v3.6.2-dev`, `v3.7.0-dev` still point at
+   PRE-rewrite commits. Pushing with `--tags` publishes the leaky messages anyway. Delete them first
+   (`git tag -d`) — the classifier blocked me from doing it.
+3. **`docs-lintel-report`** (separate worktree at `E:/Workspace/lintel-report`) was deliberately not
+   rewritten and still holds old commits. Do not push it.
+4. `gh` is still authed to the wrong account for this repo.
 
-When in doubt about "is this PR still open?", `gh pr list --state open` is the source of truth, not
-the entries below.
+**Deferred, deliberately:** the `tasks/` root stubs stay until their documented 2026-09-12 window
+closes. `.claude/engineering/SHIP-GATE.md` moved internal but its gates are still largely broken —
+worth a rewrite, tracked as its own job. Version drops 5.8.0 → 0.9.0, so a marketplace install needs
+uninstall/reinstall rather than an update.
 
 ---
 
