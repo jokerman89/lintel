@@ -1,7 +1,7 @@
 # Agent Dispatch Rules — Dedicated-vs-Inline (v3.6 backlog item 2.4)
 
 **Last updated:** 2026-05-28
-**Status:** Concept doc — referenced by LAYERS.md + skills/cycle/SKILL.md
+**Status:** Concept doc — referenced by docs/architecture.md + skills/cycle/SKILL.md
 
 > Encodes the "when to spawn a dedicated subagent vs run inline" rule that Lintel
 > already applied ad-hoc per run. Going-forward: this doc is canonical.

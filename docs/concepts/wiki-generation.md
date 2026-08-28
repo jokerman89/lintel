@@ -81,7 +81,7 @@ Self-contained is important: the showcase can be opened from a USB stick, attach
 
 ## CI integration
 
-`bin/li-wiki-gen --check` exits 1 if regenerating would change anything. CI runs it on every PR:
+`bin/li-wiki-gen --check` exits 1 if regenerating would change anything. It is not currently wired into CI — run it manually, or before a release:
 
 - **v4.0:** warn-only (the workflow report says "wiki would change; consider regenerating")
 - **v4.1+:** block PRs (consistent with pack-version enforcement progression per design doc §1.3 C1-D2)
@@ -101,10 +101,10 @@ The two never overlap. Concept docs link into wiki tables for structural referen
 ## What does NOT regenerate
 
 - `docs/concepts/*.md` — hand-authored, not regenerated
-- `docs/design/*.md` — hand-authored design docs, not regenerated
-- `docs/audit/*.md` — review artifacts, not regenerated
-- `docs/v4.x/*` — meta-infra deliverables, not regenerated
-- `tasks/*.md` — operator's working memory, never regenerated
+- `.claude/engineering/design-archive/*.md` — hand-authored design docs, not regenerated
+- `.claude/engineering/audits/*.md` — review artifacts, not regenerated
+- `.claude/engineering/*` — internal meta-infra deliverables, not regenerated
+- `.claude/memory/*` and `.claude/plans/*` — working memory, never regenerated
 
 Only `docs/wiki/` and `docs/showcase/lintel-the-harness.html` regenerate. The split is intentional: hand-authored docs explain intent; generated docs surface state.
 

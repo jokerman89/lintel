@@ -32,7 +32,7 @@ The point: fast exploration before any framework commitment. Use for design conv
 - Required: brief (inline prose or path to markdown describing the target)
 - Optional `--reference <file|url>` — visual reference to anchor against (palette, type, layout style)
 - Optional `--tokens <file>` — design tokens to honor (default: read project tokens if `--inherit-project` flag)
-- Optional `--inherit-project` — read project's design system from `.lovable/memory/style/` or `docs/design/`
+- Optional `--inherit-project` — read project's design system from `.lovable/memory/style/` or `.claude/engineering/design-archive/`
 - Optional `--out <path>` — output HTML file (default: `~/.lintel/design-html/<slug>-<ts>.html`)
 - Optional `--copy-tier <internal|placeholder|pack-voice>` — what kind of copy to use (see voice section below)
 

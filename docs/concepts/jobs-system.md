@@ -141,13 +141,13 @@ was `docs/plans/<slug>/plan.md` pre-ADR-0005). The other two are **deprecated**
 |---|---|---|
 | `.claude/plans/<slug>/plan.md` (directory-per-plan) | **CANONICAL** | the trio + `spec.md` + `prompt.md` + `scope.md` all co-locate here; matches `job-end` promotion and `jobs-system.md` |
 | `docs/plans/<slug>-<datetime>.md` (flat file, slug+datetime) | **deprecated** | was `skills/plan/SKILL.md:198`; loses trio co-location |
-| root / cwd `plan.md` (or bare `docs/plans/`) | **deprecated** | was `skills/plan/SKILL.md:255,262` "root or …" + `docs/design/lintel-v3.5-cycle-and-roles.md`; ambiguous, collides across concurrent jobs |
+| root / cwd `plan.md` (or bare `docs/plans/`) | **deprecated** | was `skills/plan/SKILL.md:255,262` "root or …" + `.claude/engineering/design-archive/lintel-v3.5-cycle-and-roles.md`; ambiguous, collides across concurrent jobs |
 
 `<slug>` is the wedge/title slug. A directory (not a flat file) is canonical
 because the trio + scope + WBS must co-locate so resume, `handoff-size-check`, and
 the cold-executor handoff all find their siblings by a single path. The two
 deprecated forms remain readable for the grace window noted in
-`docs/v4.x/migrations/` but are no longer emitted.
+`docs/migrations/` but are no longer emitted.
 
 ## Mechanics
 

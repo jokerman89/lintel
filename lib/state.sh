@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # component: lintel-state
 # implements: ADR-0008
-# intent: docs/audit/2026-06-12-fable5-fit-audit.md (behavior-over-prose track)
+# intent: .claude/engineering/audits/2026-06-12-fable5-fit-audit.md (behavior-over-prose track)
 # constraints: one command per phase — if the ledger costs more than one line, it gets skipped
 # last_intent_review: 2026-06-12
 #

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # component: lintel-paths
 # implements: ADR-0005
-# intent: docs/design/lintel-v5-claude-home-memory-obsidian-design.md
+# intent: .claude/engineering/design-archive/lintel-v5-claude-home-memory-obsidian-design.md
 # constraints: frozen zone — ~30 skills + bin tools resolve paths through this contract
 # last_intent_review: 2026-06-12
 #

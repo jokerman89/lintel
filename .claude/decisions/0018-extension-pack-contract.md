@@ -74,7 +74,7 @@ already does that. `bin/li-pack-scaffold` scaffolds the extension-pack skeleton.
 
 ## Implementation notes
 
-Meta-infra (M1–M4): `docs/v4.x/structure-changes/<date>-extension-pack-contract.md`; `li-compat-audit`
+Meta-infra (M1–M4): `.claude/engineering/evolution/<date>-extension-pack-contract.md`; `li-compat-audit`
 (expect GREEN — additive, no default changed); shape test `tests/shape/extension-pack-contract.sh`
 (asserts the `extension:` block schema + that `_default` keeps it off + resolver tolerance); migration
 note (none required for existing packs). Sequencing: schema + resolver → pack-switch/catalog/doctor

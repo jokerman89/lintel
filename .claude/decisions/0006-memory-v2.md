@@ -2,7 +2,7 @@
 
 **Status:** Accepted (2026-06-12)
 **Decided by:** operator (D3 convergence + "allt vi lovar ska vara på riktigt" directive) + implementation session
-**Implements:** docs/design/lintel-v5-claude-home-memory-obsidian-design.md (workstream B)
+**Implements:** .claude/engineering/design-archive/lintel-v5-claude-home-memory-obsidian-design.md (workstream B)
 
 ## Context
 
@@ -41,4 +41,4 @@ Every memory promise becomes **mechanical or subtracted** — nothing stays pros
   CAPTURE classifies instead of appending.
 - 3 fewer skills (169 → 166); alias grace window to 2026-09-12.
 - bin/_context.sh + lib/memory.sh join lib/paths.sh in the handle-with-care helper contract (listed in CLAUDE.md frozen zones; pinned by tests/unit/memory-v2.sh + tests/shape/claude-home-paths.sh).
-- Concept doc: docs/concepts/memory-v2.md. Structure change: docs/v4.x/structure-changes/2026-06-12-memory-v2.md.
+- Concept doc: docs/concepts/memory-v2.md. Structure change: .claude/engineering/evolution/2026-06-12-memory-v2.md.

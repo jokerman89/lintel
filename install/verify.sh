@@ -158,7 +158,7 @@ cmd_layers() {
   if [ "$missing" -gt 0 ]; then EXIT_CODE=1; fi
 
   # Required files per layer
-  for f in LAYERS.md AGENT-INSTRUCTIONS.md; do
+  for f in docs/architecture.md AGENT-INSTRUCTIONS.md; do
     if [ -f "$REPO_ROOT/$f" ]; then
       ok "Root file present: $f"
     else
@@ -209,7 +209,7 @@ cmd_context_engine() {
   hdr "Context engine state"
   ROOT_DOC=""
   for candidate in \
-    "$REPO_ROOT/docs/design/CONTEXT-ENGINE.md" \
+    "$REPO_ROOT/.claude/engineering/design-archive/CONTEXT-ENGINE.md" \
     "$REPO_ROOT/CONTEXT-ENGINE.md"; do
     [ -f "$candidate" ] && { ROOT_DOC="$candidate"; break; }
   done
@@ -241,10 +241,10 @@ cmd_context_engine() {
 
 cmd_portability() {
   hdr "Portability shim (v2 legacy / v3 plugin-manifest)"
-  # v3: schema moved to docs/design/
+  # v3: schema moved to .claude/engineering/design-archive/
   SCHEMA=""
   for candidate in \
-    "$REPO_ROOT/docs/design/CLI-SUPPORT-V2-SCHEMA.md" \
+    "$REPO_ROOT/.claude/engineering/design-archive/CLI-SUPPORT-V2-SCHEMA.md" \
     "$REPO_ROOT/scaffolding/01-foundation/CLI-SUPPORT-V2-SCHEMA.md"; do
     [ -f "$candidate" ] && { SCHEMA="$candidate"; break; }
   done

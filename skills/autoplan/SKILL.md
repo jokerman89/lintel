@@ -37,7 +37,7 @@ Orchestrator skill. Chains the full plan pipeline: `/li:office-hours` (design do
 ## Workflow
 
 1. **Mode + skip decisions** — confirm what's in the chain via AskUserQuestion (one question listing the proposed chain).
-2. **Step 1: /li:office-hours** — runs full skill. Output: design doc at `docs/design/<slug>-design.md` with Status: APPROVED.
+2. **Step 1: /li:office-hours** — runs full skill. Output: design doc at `.claude/engineering/design-archive/<slug>-design.md` with Status: APPROVED.
 3. **Auto-detect scope changes** — if office-hours produced a design doc with major product-direction changes, ensure `/li:plan-ceo-review` is in the chain (override --skip if needed; explicit operator override allowed).
 4. **Step 2: /li:plan-ceo-review** — runs against the design doc. Output: CEO review log entry + verdict.
 5. **Step 3: /li:plan-eng-review** — runs against the design doc. Output: required Eng Review log entry + implementation task list + REPORT appended to design doc.
@@ -55,7 +55,7 @@ Chain: office-hours → plan-ceo-review → plan-eng-review → plan-design-revi
 Mode: full
 Skipped: plan-devex-review (default)
 
-Step 1/4 /li:office-hours: ✓ design doc APPROVED (docs/design/<slug>-design.md)
+Step 1/4 /li:office-hours: ✓ design doc APPROVED (.claude/engineering/design-archive/<slug>-design.md)
 Step 2/4 /li:plan-ceo-review: ✓ SCOPE LOCKED (3 forcing-questions answered, 5 premises agreed)
 Step 3/4 /li:plan-eng-review: ✓ ENG CLEARED (6 issues resolved, 2 critical gaps encoded as tasks)
 Step 4/4 /li:plan-design-review: ⏸ SKIPPED — no UI scope detected

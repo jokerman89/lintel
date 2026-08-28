@@ -12,7 +12,7 @@ Cross-session working state (ej durable rules — that's [[lessons.md]]; ej pers
 
 **Launch-readiness (2026-06-18, branch `feat/launch-readiness`, cycle launch-readiness):** PUBLIC-launch
 pass, BUILD+REVIEW done, **15 commits, v5.8.0**, NOT yet pushed. A full audit (10-agent fan-out:
-docs/audit/2026-06-18-launch-readiness-register-v2.md) → fixes across W1–W7 (broken command refs;
+.claude/engineering/audits/2026-06-18-launch-readiness-register-v2.md) → fixes across W1–W7 (broken command refs;
 substrate set-u/hook guards; output-dep docs; 19-agent craft-raise; company-neutral publishing +
 CoC/templates; hooks-registration-safe guard; welcome light-path) + an adversarial review workflow
 (L-007, 16 confirmed findings, all P0/P1/P2 + cheap P3 acted on). Verification GREEN: M3 shape 36/36,
@@ -20,7 +20,7 @@ security-controls-fire + session-leaves-traces ALL PASS, M2 RED-override-accepte
 removals, documented in the M1 entry). **SHIP BLOCKER:** `gh` is authed as `jokerman_microsoft` and
 canNOT resolve `jokerman89/lintel` (private; wrong account) — branch push + PR must be done by the
 operator (or after `gh auth switch` to jokerman89). **Deferred follow-ups:** (1) the public-tree move
-was reverted — docs kept tracked because `docs/audit/uniformity-matrix.md` is a live dep + `# intent:`
+was reverted — docs kept tracked because `.claude/engineering/audits/uniformity-matrix.md` is a live dep + `# intent:`
 headers cite audit records (L-023); a real relocation needs uniformity-matrix moved out first. (2) P3
 agent-craft cosmetics (keyword-tail loss on 3 agents, tool-scope heading style) accepted as-is.
 
@@ -60,7 +60,7 @@ the entries below.
 **Status:** active — merged into `feat/v5.3-cli-and-craft` (PR #73), suite 82/82 on the merged tree.
 
 **What this drive added (waves 3–7, on top of the v5.3-cli-and-craft work below):** an 8-audit
-launch-readiness register (docs/audit/2026-06-12-launch-readiness-register.md — bar §1, evidence §2,
+launch-readiness register (.claude/engineering/audits/2026-06-12-launch-readiness-register.md — bar §1, evidence §2,
 blockers §3-A, dated deferrals §3-B, waves §4) + the remediation it found.
 - **Security (ADR-0013):** newline-class gate bypasses closed (line-continuation matcher evasion +
   newline-forged `-m` override — L-012 class), each with an adversarial test; gate diffs textconv-safe;
@@ -77,7 +77,7 @@ blockers §3-A, dated deferrals §3-B, waves §4) + the remediation it found.
 - **Mechanism honesty (B7):** usage-log/telemetry/compliance prose → real `audit_log`; pack-resolver
   set-leak + cache-key fixes; 4 new behaviour tests.
 - **Release (B8):** truthful CHANGELOG 5.3.0, migration date reconcile, M1 artifact
-  (docs/v4.x/structure-changes/2026-06-13-launch-readiness.md). CODEOWNERS de-CAIP'd.
+  (.claude/engineering/evolution/2026-06-13-launch-readiness.md). CODEOWNERS de-CAIP'd.
 
 **What's pending:**
 - Operator: merge PR #73 → main (the git-push-to-main gate stays yours).
@@ -97,7 +97,7 @@ blockers §3-A, dated deferrals §3-B, waves §4) + the remediation it found.
   — both ride .claude-plugin via interop); fixed cli-tiers.yaml (codex.subagents native, Copilot
   install li@, Cursor stays tier full); repointed instruction-parity-check off 3 ghost files;
   README CLI-TIERS table regenerated; li-doctor gained a Windows SessionStart-no-fire warn (#59072).
-- **Issue-mining → fixes:** docs/audit/2026-06-13-cli-issues-craft-synthesis.md (16 findings).
+- **Issue-mining → fixes:** .claude/engineering/audits/2026-06-13-cli-issues-craft-synthesis.md (16 findings).
   CRITICAL I1 — both BLOCK hooks ran `set -euo pipefail` with the blocking exit 2 LAST, so an
   upstream non-zero exited first and silently downgraded the block (claude-code #60490). Fixed:
   `set -uo pipefail` + a fail-closed scanner guard positioned after matcher+override + a behavioral
@@ -165,7 +165,7 @@ regression assertions (L-012). M2 GREEN. Manifests 5.4.0.
 
 **Status:** active — PR #69 to main (independent chain; #62-#68 already merged)
 
-**What shipped:** 6-persona adversarial battletest (docs/audit/2026-06-12-battletest-synthesis.md,
+**What shipped:** 6-persona adversarial battletest (.claude/engineering/audits/2026-06-12-battletest-synthesis.md,
 6 KO + 24 HARD). ADR-0010 security (block-hook bypass + modern tokens + vault PII scan + sed RCE
 + CR/LF-safe audit/state), ADR-0011 gstack de-heritage (44 edits/30 files, zero loss, grace
 2026-09-12), ADR-0012 agent memory:/model: (23+4). Friction: resume↔context-restore, honest cost
@@ -212,7 +212,7 @@ L-011 captured (structural estimates are ceilings).
 
 **What's pending:**
 - ALSO open: **PR #66** (activation pass, ADR-0008) — stacked on #65. Fit audit
-  (docs/audit/2026-06-12-fable5-fit-audit.md) found ~3/14 mechanisms firing; #66 ships plugin
+  (.claude/engineering/audits/2026-06-12-fable5-fit-audit.md) found ~3/14 mechanisms firing; #66 ships plugin
   hook auto-registration + state ledger (lib/state.sh) + behavior tests + the exit-2 fix for
   the block hooks (they never actually blocked). After merge: verify li-doctor proof-of-life
   on first fresh session (digest audit record must appear).
@@ -243,9 +243,9 @@ L-011 captured (structural estimates are ceilings).
 **Open decisions:** 14 numbered (C1-D1 through C5-D2). All recommendations included; operator confirms or vetoes per-line.
 
 **Files:**
-- `docs/design/lintel-v4.0-reframe-design.md` (master doc)
-- `docs/feature-requests/lintel-feature-spine-packs-navigation.md` (canonical reference)
-- `docs/feature-requests/lintel-feature-brief-forge.md` (canonical reference)
+- `.claude/engineering/design-archive/lintel-v4.0-reframe-design.md` (master doc)
+- `.claude/engineering/design-archive/lintel-feature-spine-packs-navigation.md` (canonical reference)
+- `.claude/engineering/design-archive/lintel-feature-brief-forge.md` (canonical reference)
 
 **Last touched:** 2026-05-29
 
@@ -341,7 +341,7 @@ MINORs (#3-#7): all CLOSED via cohort-execution paths:
 - ~~#4 6.3 resume integrity spec~~ implemented in Cohort 1 PR #10 (resume Step 1.5)
 - ~~#5 6.6 shellcheck estimate~~ shipped warn-only in Cohort 1 (PR #10) per recommendation
 - ~~#6 L-002 grep-evidence for 4.3~~ context-family pair-by-pair verified in PR #27 WS-4a section (33 collisions enumerated)
-- ~~#7 M-3 LAYERS.md pre-baking~~ link-not-content approach used: LAYERS.md got L-001/L-002/L-003 (Cohort 1) + L-004 (v3.7 closeout) as durable principles with reference to lessons.md for incident-driven rationale
+- ~~#7 M-3 docs/architecture.md pre-baking~~ link-not-content approach used: docs/architecture.md got L-001/L-002/L-003 (Cohort 1) + L-004 (v3.7 closeout) as durable principles with reference to lessons.md for incident-driven rationale
 
 ### PR #21 (lintel-v3.7-frontend-design-system) — 7 of 9 concerns RESOLVED via implementation
 
@@ -375,10 +375,10 @@ Eng-review run 2026-05-28. v3.7 Fas A1+A2+B+C shipped i PR #22-#25, all merged 2
 **What's pending:**
 
 1. ~~**WS-4a + WS-4b naming-sessions**~~ ✅ AUTO-EXECUTED with operator-veto path 2026-05-29. WS-4a: NO renames (prefix-only disambiguation principle adopted). WS-4b: 4 renames (match→skill-router, setup-brain→gbrain-setup, sync-brain→gbrain-sync, agt-tier-stamp→agent-tier-stamp). Alias-mekanism + bin/_aliases.sh + tests shipped. Operator vetoes any line if disagreement.
-2. ~~**6.7 internal-voice consistency check** (D-5a)~~ ✅ INVESTIGATED 2026-05-29 — verdict: INTENDED, not drift. 125 internal / 14 mixed / 2 trailblazer distribution coherent. See [decisions-67-68 doc](docs/design/lintel-v3.6-decisions-67-68.md). Operator vetoes by reply "drift" if disagree.
+2. ~~**6.7 internal-voice consistency check** (D-5a)~~ ✅ INVESTIGATED 2026-05-29 — verdict: INTENDED, not drift. 125 internal / 14 mixed / 2 trailblazer distribution coherent. See [decisions-67-68 doc](.claude/engineering/design-archive/lintel-v3.6-decisions-67-68.md). Operator vetoes by reply "drift" if disagree.
 3. ~~**6.8 3-role validation** (D-5b)~~ ✅ INVESTIGATED 2026-05-29 — verdict: PATTERN VALIDATED. 3 role files structurally consistent (7/7 sections, 78-81 lines). Ready for role #4 — recommended `frontend-designer` to anchor v3.7 family. Operator vetoes by reply "not yet" or "go with X".
 4. **T0 voice corpus calibration** ($1.80-6 × 3-5 rundor)
-5. **Real-work `/li:cycle` dogfood** på faktisk Azure-engagement — synthetic pre-validation done 2026-05-29 (4 validations passed, 3 soft-findings logged). See [docs/design/lintel-v3.7-fas-d-dogfood-protocol.md](../docs/design/lintel-v3.7-fas-d-dogfood-protocol.md) for the 7-step operator checklist (15-30 min). Reduces operator-effort from multi-hour evaluation to focused validation.
+5. **Real-work `/li:cycle` dogfood** på faktisk Azure-engagement — synthetic pre-validation done 2026-05-29 (4 validations passed, 3 soft-findings logged). See [.claude/engineering/design-archive/lintel-v3.7-fas-d-dogfood-protocol.md](../.claude/engineering/design-archive/lintel-v3.7-fas-d-dogfood-protocol.md) for the 7-step operator checklist (15-30 min). Reduces operator-effort from multi-hour evaluation to focused validation.
 6. **Marketplace submission** (post MS legal review)
 7. **PR #14 merge** efter WS-4a/b + alias-implementation
 

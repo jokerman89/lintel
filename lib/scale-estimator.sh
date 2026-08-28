@@ -22,7 +22,7 @@
 #   scale_estimate <prompt>        → emits the scope block (YAML) for the skill
 #   elephant_score <prompt>        → alias of detect_breadth (back-compat)
 #
-# Design: docs/design/lintel-scope-and-scaled-planning-design.md §3.1
+# Design: .claude/engineering/design-archive/lintel-scope-and-scaled-planning-design.md §3.1
 # Decisions: 1B (AI-from-start — the agent judges ambiguity when escalate=yes;
 #            this lib emits the signal, SENSE step 0e handles the judgment),
 #            2A (this lib is the single source; elephant-hint calls it).

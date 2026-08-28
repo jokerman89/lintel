@@ -4,7 +4,7 @@
 > 4 min earlier (first claimant keeps the number); 0018 reserved for extension-pack-contract.
 
 **Status:** Accepted-direction, build staged (2026-06-13)
-**Implements:** docs/audit/2026-06-13-cli-issues-craft-synthesis.md (workstream 1, H13)
+**Implements:** .claude/engineering/audits/2026-06-13-cli-issues-craft-synthesis.md (workstream 1, H13)
 
 ## Context
 

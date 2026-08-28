@@ -2,7 +2,7 @@
 
 > ADR-0014. How Lintel writes skills and agents so they are sharper than the field and tuned to
 > the CURRENT model generation (Fable 5 / Opus 4.8+), not a 2024 one. Evidence base:
-> docs/audit/2026-06-13-cli-issues-craft-synthesis.md (Anthropic best-practices, superpowers,
+> .claude/engineering/audits/2026-06-13-cli-issues-craft-synthesis.md (Anthropic best-practices, superpowers,
 > wshobson/VoltAgent, the rules-format authors, 2026 prompt SOTA — all cited there). This is the
 > contract every new skill/agent follows and the bar existing ones are rewritten to.
 

@@ -12,7 +12,7 @@ You are the context-warm-related skill — topic-heuristic loading.
 
 ## What this skill does
 
-Given a topic (e.g., "rate limiter", "auth flow", "retry pattern"), heuristically finds the top N most-relevant files across cwd + `~/.lintel/scaffolding/` + `docs/design/` and loads them via `/li:context-warm`.
+Given a topic (e.g., "rate limiter", "auth flow", "retry pattern"), heuristically finds the top N most-relevant files across cwd + `~/.lintel/scaffolding/` + `.claude/engineering/design-archive/` and loads them via `/li:context-warm`.
 
 ## When to use
 
@@ -56,9 +56,9 @@ CANDIDATE FILES (related to "<topic>") — top <N> by relevance:
 
 | Score | File | Match type |
 |---|---|---|
-| 5 | docs/design/lintel-v3-plan.md | filename + 12 content |
+| 5 | .claude/engineering/design-archive/lintel-v3-plan.md | filename + 12 content |
 | 4 | src/lib/rate-limiter.ts | filename + 8 content |
-| 3 | docs/design/CONTEXT-ENGINE.md | 7 content |
+| 3 | .claude/engineering/design-archive/CONTEXT-ENGINE.md | 7 content |
 | ... | | |
 
 Estimated tokens to load all <N>: ~<X>k

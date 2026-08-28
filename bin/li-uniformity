@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# bin/li-uniformity — regenerates docs/audit/uniformity-matrix.md from the
+# bin/li-uniformity — regenerates .claude/engineering/audits/uniformity-matrix.md from the
 # frontmatter of every component (skills/, agents/, hooks/, packs/).
 #
 # This is the LIVING DASHBOARD for the uniformity-as-contract mechanism
@@ -12,7 +12,7 @@
 # same output, modulo the timestamp header which can be pinned via WGEN_TS).
 #
 # Usage:
-#   bin/li-uniformity                  # regenerate docs/audit/uniformity-matrix.md
+#   bin/li-uniformity                  # regenerate .claude/engineering/audits/uniformity-matrix.md
 #   bin/li-uniformity --check          # exit 1 if regen would change the matrix
 #   bin/li-uniformity --output <file>  # write to a custom path
 #   bin/li-uniformity --stdout         # print to stdout, write nothing
@@ -25,7 +25,7 @@
 set -uo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-OUT="$REPO_ROOT/docs/audit/uniformity-matrix.md"
+OUT="$REPO_ROOT/.claude/engineering/audits/uniformity-matrix.md"
 CHECK=0
 STDOUT=0
 

@@ -36,7 +36,7 @@ Pending migrations: <N>
 
 Sources (each optional — the hook degrades silently when absent, so it works in a fresh
 scaffolded repo): `~/.lintel/profile.yaml`, `.claude/memory/lessons.md`, `.claude/memory/working-state.md`,
-`~/.lintel/jobs/_active.md` (the cross-repo jobs registry), `.claude/decisions/`, `docs/v4.x/migrations/`.
+`~/.lintel/jobs/_active.md` (the cross-repo jobs registry), `.claude/decisions/`, `docs/migrations/`.
 
 ## Wiring (Claude Code)
 

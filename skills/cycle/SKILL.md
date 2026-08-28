@@ -88,7 +88,7 @@ meta-infra:
   cap_hard: 900k
   cost_estimate: ~80-200k tokens, 2-6 hours
   gates_active: [M1_structure_impact, M2_compatibility_audit, M3_shape_tests, M4_future_operator_clarity]
-  use_when: change touches skills/, agents/, hooks/, bin/_*.sh, install/, LAYERS.md, lib/, packs/, core templates
+  use_when: change touches skills/, agents/, hooks/, bin/_*.sh, install/, docs/architecture.md, lib/, packs/, core templates
   detection: auto-detected by SENSE Step 0c (path-glob on cwd diff); operator can override
 
 auto:
@@ -111,7 +111,7 @@ invocation; their voice/compliance behavior resolves through `resolve_pack_field
 `meta-infra` is the operator's mode when modifying Lintel itself (scaffolding). Lintel changes ripple across every downstream cycle, so REVIEW + CAPTURE run heavier and four meta-gates activate:
 
 **M1 — Structure-impact assessment** (in DEFINE)
-Before merging design, write a structure-changes/<date>-<slug>.md entry documenting: what changed, backward-compat, migration path, forward-compat, verification, rollback. Template: `docs/v4.x/structure-changes/_TEMPLATE.md`.
+Before merging design, write a structure-changes/<date>-<slug>.md entry documenting: what changed, backward-compat, migration path, forward-compat, verification, rollback. Template: `.claude/engineering/evolution/_TEMPLATE.md`.
 
 **M2 — Compatibility audit** (in REVIEW)
 Run `bin/li-compat-audit` to produce mechanical GREEN/YELLOW/RED sweep across four questions:
@@ -120,13 +120,13 @@ Run `bin/li-compat-audit` to produce mechanical GREEN/YELLOW/RED sweep across fo
 3. Did defaults change for any existing field?
 4. Did any shared helper signature change? (lib/*.sh)
 
-Output: `docs/v4.x/compatibility-audits/<date>-<slug>.md`. RED requires explicit override.
+Output: `.claude/engineering/compat-audits/<date>-<slug>.md`. RED requires explicit override.
 
 **M3 — Shape-tests** (in REVIEW)
 Run `bash tests/runner/run-all.sh --shape-only`. The 8 shape-tests assert structural invariants (see `tests/shape/_README.md`). Any FAIL blocks SHIP.
 
 **M4 — Future-operator clarity** (in CAPTURE)
-CAPTURE writes a recap that future-operator (or future-you) can use cold. Specifically: surface every migration that future operators need to run, every new convention introduced, every deprecated path. Append to `docs/v4.x/migrations/_INDEX.md` if any migration ships.
+CAPTURE writes a recap that future-operator (or future-you) can use cold. Specifically: surface every migration that future operators need to run, every new convention introduced, every deprecated path. Append to `docs/migrations/_INDEX.md` if any migration ships.
 
 ## Workflow
 

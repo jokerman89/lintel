@@ -2,7 +2,7 @@
 
 **Status:** Accepted (2026-06-12)
 **Decided by:** operator ("gör en refactor på allt som är gstack … bli egna … aldrig sämre")
-**Implements:** docs/audit/2026-06-12-battletest-synthesis.md (gstack section)
+**Implements:** .claude/engineering/audits/2026-06-12-battletest-synthesis.md (gstack section)
 
 ## Context
 

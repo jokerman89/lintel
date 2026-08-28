@@ -1,6 +1,6 @@
 # component: design-profile-anthropic-default
 # implements: ADR-0016
-# intent: docs/design/lintel-v5.4-design-dna-design.md
+# intent: .claude/engineering/design-archive/lintel-v5.4-design-dna-design.md
 # constraints: accents are graphic/display-only (~3:1 on paper — WCAG fail for body text)
 # last_intent_review: 2026-06-13
 # Derived from Anthropic's brand-guidelines + frontend-design skills

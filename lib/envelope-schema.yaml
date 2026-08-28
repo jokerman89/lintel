@@ -14,7 +14,7 @@
 # Versioning: schema_version is a string. Major bumps are breaking. Minor
 # bumps are additive (new optional fields allowed). Phase 2 ships v1.
 #
-# Ref: docs/design/lintel-v4.0-reframe-design.md §2.3 (FR-B envelope)
+# Ref: .claude/engineering/design-archive/lintel-v4.0-reframe-design.md §2.3 (FR-B envelope)
 #      docs/concepts/envelope.md
 
 schema_version: "1"

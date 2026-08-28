@@ -42,7 +42,7 @@ For incremental development where operator wants to plan + execute but defer rev
 ### Step 1 — Pre-flight
 
 Verify:
-- APPROVED design doc exists in docs/design/
+- APPROVED design doc exists in .claude/engineering/design-archive/
 - Operator on feature branch (not main)
 - Context available for PLAN
 

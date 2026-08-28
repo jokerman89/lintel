@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # component: lintel-auto-decide
 # implements: ADR-0014 (issue I3 — gstack #603 sovereignty incident)
-# intent: docs/audit/2026-06-13-cli-issues-craft-synthesis.md
+# intent: .claude/engineering/audits/2026-06-13-cli-issues-craft-synthesis.md
 # constraints: --auto must never silently decide a one-way door
 # last_intent_review: 2026-06-13
 #

@@ -53,7 +53,7 @@ required from this decision forward (no retroactive backfill of pre-v4.8 decisio
 - **Negative:** Two instruction surfaces now coexist — the root CLAUDE.md and `AGENT-INSTRUCTIONS.md`.
   They must stay coherent (CLAUDE.md owns the per-repo discipline; AGENT-INSTRUCTIONS owns cross-CLI
   bootstrap). Modest ongoing overhead: an ADR per non-trivial decision.
-- **Neutral:** Lintel's evolution log remains `docs/v4.x/structure-changes/` (the meta-infra Gate-M1
+- **Neutral:** Lintel's evolution log remains `.claude/engineering/evolution/` (the meta-infra Gate-M1
   artifacts), not a separate root `EVOLUTION-LOG.md`, to avoid a third parallel log.
 
 ## Implementation notes
@@ -69,4 +69,4 @@ required from this decision forward (no retroactive backfill of pre-v4.8 decisio
 
 - `scaffolding/01-foundation/` (the foundation templates)
 - `~/.claude/CLAUDE.md` (operator global protocol — the source of the ADR/lessons mandate)
-- `docs/v4.x/structure-changes/2026-06-03-caip-pack-extraction.md` (the initiative that exposed the gap)
+- `.claude/engineering/evolution/2026-06-03-caip-pack-extraction.md` (the initiative that exposed the gap)

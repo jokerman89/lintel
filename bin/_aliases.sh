@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # bin/_aliases.sh — sourced helper for env-var alias resolution
 #
-# Per design: docs/design/lintel-v3.6-alias-mechanism.md
+# Per design: .claude/engineering/design-archive/lintel-v3.6-alias-mechanism.md
 # Used by bin/li-* scripts to honor deprecated env-var names during grace period.
 #
 # Usage (in bin/li-foo):

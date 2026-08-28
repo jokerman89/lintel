@@ -1,6 +1,6 @@
 # Uniformity-as-contract
 
-The system-wide uniformity audit (`docs/audit/lintel-uniformity-*`) defined 14
+The system-wide uniformity audit (`.claude/engineering/audits/lintel-uniformity-*`) defined 14
 uniformity dimensions (D1–D14) and ranked the top-20 findings. The audit was a
 one-time snapshot. This document turns that snapshot into a **continuous,
 machine-checked contract** — the parked `/autoplan` recommendation.
@@ -11,10 +11,10 @@ The contract has three moving parts, and this doc is the first:
 |---|---|---|
 | Contract (this doc) | `docs/concepts/uniformity-contract.md` | Defines the per-kind floor + what is tracked above it |
 | Floor enforcement | `tests/shape/uniformity-coverage.sh` | Gate-M3 shape-test; HARD-FAILS only on the floor |
-| Living dashboard | `bin/li-uniformity` → `docs/audit/uniformity-matrix.md` | Regenerable coverage matrix; replaces the static findings register |
+| Living dashboard | `bin/li-uniformity` → `.claude/engineering/audits/uniformity-matrix.md` | Regenerable coverage matrix; replaces the static findings register |
 
-References: `docs/audit/lintel-uniformity-MASTER.md` (top-20),
-`docs/audit/lintel-uniformity-cross-X5-necessity.md` (the necessity denominator
+References: `.claude/engineering/audits/lintel-uniformity-MASTER.md` (top-20),
+`.claude/engineering/audits/lintel-uniformity-cross-X5-necessity.md` (the necessity denominator
 and the REQUIRED/STRONGLY_RECOMMENDED/OPTIONAL distribution this contract
 adopts).
 
@@ -203,7 +203,7 @@ contract closes that for the uniformity audit itself:
 - a new component automatically appears in the matrix and is automatically held
   to its kind's floor.
 
-The static findings register (`docs/audit/lintel-uniformity-*`) remains the
+The static findings register (`.claude/engineering/audits/lintel-uniformity-*`) remains the
 *historical record* and the source of the dimension definitions. The matrix is
 the *living dashboard*.
 
@@ -211,8 +211,8 @@ the *living dashboard*.
 
 - `tests/shape/uniformity-coverage.sh` — the Gate-M3 floor enforcer + adoption reporter
 - `bin/li-uniformity` — the regenerable matrix generator
-- `docs/audit/uniformity-matrix.md` — the generated living dashboard
-- `docs/audit/lintel-uniformity-MASTER.md` — top-20 findings
-- `docs/audit/lintel-uniformity-cross-X5-necessity.md` — the necessity denominator + value distribution
+- `.claude/engineering/audits/uniformity-matrix.md` — the generated living dashboard
+- `.claude/engineering/audits/lintel-uniformity-MASTER.md` — top-20 findings
+- `.claude/engineering/audits/lintel-uniformity-cross-X5-necessity.md` — the necessity denominator + value distribution
 - `tests/shape/workflow-root-has-navigation.sh` — the sibling floor for `navigation:`
 - `tests/shape/frontmatter-lint-all.sh` — the D1/D8 frontmatter-completeness floor

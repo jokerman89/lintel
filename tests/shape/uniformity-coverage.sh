@@ -212,7 +212,7 @@ TRACK_PACK="necessity,pack_influence"
 
 echo ""
 echo "  (Adoption above the floor is tracked, not enforced. The living matrix is"
-echo "   docs/audit/uniformity-matrix.md — regenerate via bin/li-uniformity.)"
+echo "   .claude/engineering/audits/uniformity-matrix.md — regenerate via bin/li-uniformity.)"
 
 # ─── Verdict ───────────────────────────────────────────────────────────────────
 echo ""

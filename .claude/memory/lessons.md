@@ -478,7 +478,7 @@ ADR-0023 both make deployment part of the fix.
 
 ## L-021 — `git commit` after `git rm --cached` sweeps the staged deletions; partial-pathspec commits re-add on-disk files
 
-**Why:** During launch-readiness I ran `git rm -r --cached docs/audit …` (staged 31 deletions), then
+**Why:** During launch-readiness I ran `git rm -r --cached .claude/engineering/audits …` (staged 31 deletions), then
 later `git add <test>` + `git commit` — the commit swept in the 31 staged deletions, producing a
 non-atomic "test" commit. I split it with `git reset --soft HEAD~1`, then committed the move with
 `git commit -- <paths>` — but a partial-pathspec commit RE-READS the working tree for those paths,
@@ -514,8 +514,8 @@ passed individually.
 
 ## L-023 — Untracking a docs dir needs a live-dependency + `# intent:`-header check first
 
-**Why:** The plan was to move internal docs (`docs/audit/`) out of the public tree. The adversarial
-review found `docs/audit/uniformity-matrix.md` is a LIVE dependency (`bin/li-uniformity` writes it;
+**Why:** The plan was to move internal docs (`.claude/engineering/audits/`) out of the public tree. The adversarial
+review found `.claude/engineering/audits/uniformity-matrix.md` is a LIVE dependency (`bin/li-uniformity` writes it;
 `skills/uniformity` + `tests/shape/uniformity-coverage.sh` read it) and two audit records are cited by
 `# intent:` structured-comment headers in `lib/state.sh` + `lib/auto-decide.sh`. Untracking the dir
 would 404 the dashboard on a fresh clone and break intent-resolution — invisible to a check that only

@@ -63,7 +63,7 @@ After DISCOVER DONE, surface:
 RESEARCH COMPLETE — <wedge>
 
 Artifacts produced:
-  - Design doc: <docs/design/lintel-*-design-*.md> (APPROVED)
+  - Design doc: <.claude/engineering/design-archive/lintel-*-design-*.md> (APPROVED)
   - Discover report: <.claude/runtime/state/discover-report-*.md>
 
 Findings:
