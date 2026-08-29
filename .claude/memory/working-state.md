@@ -42,12 +42,17 @@ history is safe in `../lintel-pre-beta-history.bundle` (verified), which cannot 
 **Remote auth: FINE.** Active `gh` account is `azureflipper` with `repo` + `workflow` scopes; the
 remote is reachable. The earlier note about the wrong account was stale.
 
-**REMAINING BLOCKER — one, and it is the operator's.** `origin/main` is still the OLD `9c3a71f`
-carrying the leaky messages. The rewritten local `main` has a byte-identical tree (`6daac65d…`),
-verified immediately before the attempt, so replacing it changes messages only. The auto-mode
-classifier declines this class of irreversible remote mutation, correctly. It has to be run from the
-operator's own terminal, together with uploading `feat/launch-readiness` and, after any merge, the
-`v0.9.0-beta` tag.
+**SHIPPED (2026-08-29).** `origin/main` now carries the rewritten history at `ce8665d`, and
+`feat/launch-readiness` is up at `442b8ef`. **PR #82** is open: v0.9.0-beta — first public release.
+
+Verified on the remote after the upload, not just locally:
+- `origin/main` — 234 commits, **zero** leaks across all six classes
+- `origin/feat/launch-readiness` — 257 commits, **zero** leaks
+- `origin/main` tree is `6daac65d…`, byte-identical to the pre-rewrite tree. Messages changed;
+  content did not.
+
+Still to do: merge PR #82, then upload the `v0.9.0-beta` tag (it points at `442b8ef` on the branch,
+so a squash-merge would leave it off `main` — upload it after the merge, or re-tag the merge commit).
 
 **Do not upload `docs-lintel-report`** (separate worktree at `E:/Workspace/lintel-report`). It was
 deliberately left un-rewritten and still holds pre-rewrite commits; `origin` already has an old copy
