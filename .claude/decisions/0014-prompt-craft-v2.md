@@ -2,7 +2,7 @@
 
 **Status:** Accepted (2026-06-13)
 **Decided by:** operator ("raise the bar again … fixate on how competitors write agents/prompts/skills … flavour our own")
-**Implements:** docs/audit/2026-06-13-cli-issues-craft-synthesis.md (workstream 3)
+**Implements:** .claude/engineering/audits/2026-06-13-cli-issues-craft-synthesis.md (workstream 3)
 
 ## Context
 

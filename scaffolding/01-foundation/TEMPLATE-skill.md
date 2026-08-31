@@ -14,7 +14,7 @@ cli_support: [claude-code, codex, copilot] # REQUIRED: list of CLIs where this s
                                             #   - codex: degraded — operator sequentializes manually
                                             #   - copilot: degraded — no slash-command mechanism
                                             #   omit any CLI where the skill genuinely won't work
-license_note: <empty | "see promoted-agents.md before bundling">  # OPTIONAL: only if skill bundles restricted-tier upstream content
+license_note: <empty>                       # OPTIONAL: only if this skill bundles third-party content
 ---
 ```
 

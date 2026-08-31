@@ -2,7 +2,7 @@
 
 **Status:** Accepted (2026-06-12)
 **Decided by:** operator (battletest — "vad gör andra som vi inte gör")
-**Implements:** docs/audit/2026-06-12-battletest-synthesis.md (H4, H12)
+**Implements:** .claude/engineering/audits/2026-06-12-battletest-synthesis.md (H4, H12)
 
 ## Context
 

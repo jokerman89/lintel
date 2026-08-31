@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # tests/unit/cohort6-fas3-skills-present.sh
 #
-# Verifies v3.6 cohort 6 + v3.5 Fas 3 skills present + frontmatter.
+# Verifies v3.6 cohort 6 + v3.5 phase 3 skills present + frontmatter.
 # Cohort 6 ships: instruction-parity-check (6.2).
-# v3.5 Fas 3 ships: generate-style-learn (style extraction).
+# v3.5 phase 3 ships: generate-style-learn (style extraction).
 # tag: v3.6 cohort-6 fas3
 
 set -uo pipefail
@@ -17,7 +17,7 @@ fail() { echo "  FAIL: $1"; FAILED=1; }
 echo "tests/unit/cohort6-fas3-skills-present.sh"
 echo "========================================="
 
-# Cohort 6 + Fas 3 skills
+# Cohort 6 + phase 3 skills
 COHORT6_FAS3_SKILLS=(instruction-parity-check generate-style-learn)
 for skill in "${COHORT6_FAS3_SKILLS[@]}"; do
   f="$REPO_ROOT/skills/$skill/SKILL.md"
@@ -82,9 +82,9 @@ fi
 
 echo ""
 if [ "$FAILED" -eq 0 ]; then
-  echo "All cohort-6 + Fas 3 tests PASSED"
+  echo "All cohort-6 + phase 3 tests PASSED"
   exit 0
 else
-  echo "Some cohort-6 + Fas 3 tests FAILED"
+  echo "Some cohort-6 + phase 3 tests FAILED"
   exit 1
 fi

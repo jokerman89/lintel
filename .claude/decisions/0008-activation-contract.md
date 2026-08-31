@@ -2,7 +2,7 @@
 
 **Status:** Accepted (2026-06-12)
 **Decided by:** operator ("kör" on the fit-audit P0 recommendation, 2026-06-12)
-**Implements:** docs/audit/2026-06-12-fable5-fit-audit.md (P0 tracks 1-2)
+**Implements:** .claude/engineering/audits/2026-06-12-fable5-fit-audit.md (P0 tracks 1-2)
 
 ## Context
 
@@ -51,7 +51,7 @@ and nothing verified behavior.**
 
 - A fresh `/plugin install` gets digest + safety + budget hooks live with zero setup. THIS
   operator must remove the 4 manual hook entries from `~/.claude/settings.json` to avoid
-  double-fire (migration row in docs/v4.x/migrations/_INDEX.md).
+  double-fire (migration row in docs/migrations/_INDEX.md).
 - The footer/resume read a ledger that actually exists from now on.
 - Known dormant-by-decision (NOT activated here, awaiting evidence of need): brief-forge
   envelope construction, granularity calibration writes, jobs auto-spawn, 20+ module

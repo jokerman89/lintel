@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # cycle-position-inject — Lintel UserPromptSubmit turn-start continuity driver.
 # component: cycle-position-inject hook
-# implements: ADR-0023 (extends ADR-0022); intent: docs/v4.x/structure-changes; constraints: L-016, L-018
+# implements: ADR-0023 (extends ADR-0022); intent: .claude/engineering/evolution; constraints: L-016, L-018
 #
 # Re-asserts cycle position BEFORE the model responds, on EVERY turn a cycle is active — the
 # turn-START surface the continuity trifecta was missing (SessionStart digest = session edge,

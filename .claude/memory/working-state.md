@@ -8,24 +8,60 @@ Cross-session working state (ej durable rules — that's [[lessons.md]]; ej pers
 
 ---
 
-## ▶ CURRENT — read this first (reconciled 2026-06-14)
+## ▶ CURRENT — read this first (reconciled 2026-08-28)
 
-One answer to "what am I doing", so a fresh session doesn't drown in the entries below. Most of
-those are **DONE** — their PRs are merged. As of 2026-06-14:
+**Beta release (2026-08-28, branch `feat/launch-readiness`, cycle `beta-release-docs`, mode meta-infra):**
+the repo is prepared for its FIRST PUBLIC RELEASE as **v0.9.0-beta**. Five commits on top of the
+launch-readiness work, then a full commit-message rewrite. Suite 90/90 (shape 36, unit 48,
+integration 4, behavior 1, e2e 1). **NOT pushed.**
 
-- **Merged to main (treat as history, not in-flight):** the whole v5.x chain — vault sink, v5.0
-  `.claude/` home, memory v2, Obsidian, v5.1 subtraction, v5.2 battletest (#62–#69), v5.3
-  cli-and-craft + launch-readiness (#73), v5.4 design-dna (#72), v5.5 design-parity (#74). If an
-  entry below says "PR #NN OPEN", it's almost certainly merged — verify with `gh pr view NN`.
-- **In-flight branches (NOT on main yet):** `feat/extension-pack-contract` (ADR-0018 — `00-state`
-  shows it mid-BUILD: "implemented; adversarial review done; pending final suite+commit"; resume or
-  close it deliberately, don't let SENSE resurrect stale intent) · `feat/setup-hardening` (this —
-  cycle-continuity self-heal, repo-agent removal, CLAUDE.md fixes, ADR-collision renumber).
-- **Staged designs, not built:** ADR-0019 AGENTS.md-primary · ADR-0020 lintel-state MCP · ADR-0021
-  eval-harness (renumbered from 0015/0016/0017 on 2026-06-14).
+What landed:
+- **Published/internal split.** `docs/` is now the adopter surface only (130 → 44 files); audits,
+  Gate M1/M2 records and superseded design docs moved to `.claude/engineering/`. All 233 inbound
+  references repointed — including two CI-gating resolvers and three generator WRITE paths that
+  would have recreated the public dirs (see [[L-024]], the half [[L-023]] missed).
+- **Documentation rebuilt.** New `docs/README.md`, `docs/architecture.md`, `docs/the-cycle.md`;
+  README reframed as a landing page; 8 docs rewritten against verified ground truth; 74 stale claims
+  corrected; `LAYERS.md`, `docs/session-harness.md` retired and `SHIP-GATE.md` moved internal;
+  `docs/promoted-agents.md` deleted (described a vendoring mechanism the installer does not have).
+  257 links resolve, zero broken.
+- **Two real bugs, not doc bugs.** `.gitignore` was ignoring `.claude/plans/`, so every new plan and
+  trio was silently untracked. `skills/ship/SKILL.md` instructed every PR to carry an AI-authorship
+  trailer — the source of the leak, not just the symptom ([[L-025]]).
+- **History rewritten.** All 255 commits across 5 branches: AI-authorship trailers stripped, 144
+  messages hand-rewritten (Swedish, operator-direction phrasing, review scoreboards, heritage
+  references). Proven safe: trees byte-identical, `git diff` old↔new HEAD empty, commit counts
+  preserved, zero leaks in six classes. Old heads in `refs/original/`; full pre-rewrite history in
+  `../lintel-pre-beta-history.bundle` (verified complete).
 
-When in doubt about "is this PR still open?", `gh pr list --state open` is the source of truth, not
-the entries below.
+**Tag hazard: CLEARED (2026-08-28).** The four `v3.*-dev` tags and the two `archive/*` tags all
+pointed at pre-rewrite commits and would have republished the leaky messages on a `--tags` upload.
+All six are deleted. Only `v0.9.0-beta` remains, on the rewritten HEAD. The complete pre-rewrite
+history is safe in `../lintel-pre-beta-history.bundle` (verified), which cannot be uploaded by accident.
+
+**Remote auth: FINE.** Active `gh` account is `azureflipper` with `repo` + `workflow` scopes; the
+remote is reachable. The earlier note about the wrong account was stale.
+
+**SHIPPED (2026-08-29).** `origin/main` now carries the rewritten history at `ce8665d`, and
+`feat/launch-readiness` is up at `442b8ef`. **PR #82** is open: v0.9.0-beta — first public release.
+
+Verified on the remote after the upload, not just locally:
+- `origin/main` — 234 commits, **zero** leaks across all six classes
+- `origin/feat/launch-readiness` — 257 commits, **zero** leaks
+- `origin/main` tree is `6daac65d…`, byte-identical to the pre-rewrite tree. Messages changed;
+  content did not.
+
+Still to do: merge PR #82, then upload the `v0.9.0-beta` tag (it points at `442b8ef` on the branch,
+so a squash-merge would leave it off `main` — upload it after the merge, or re-tag the merge commit).
+
+**Do not upload `docs-lintel-report`** (separate worktree at `E:/Workspace/lintel-report`). It was
+deliberately left un-rewritten and still holds pre-rewrite commits; `origin` already has an old copy
+at `3bc8e47`.
+
+**Deferred, deliberately:** the `tasks/` root stubs stay until their documented 2026-09-12 window
+closes. `.claude/engineering/SHIP-GATE.md` moved internal but its gates are still largely broken —
+worth a rewrite, tracked as its own job. Version drops 5.8.0 → 0.9.0, so a marketplace install needs
+uninstall/reinstall rather than an update.
 
 ---
 
@@ -46,7 +82,7 @@ the entries below.
 **Status:** active — merged into `feat/v5.3-cli-and-craft` (PR #73), suite 82/82 on the merged tree.
 
 **What this drive added (waves 3–7, on top of the v5.3-cli-and-craft work below):** an 8-audit
-launch-readiness register (docs/audit/2026-06-12-launch-readiness-register.md — bar §1, evidence §2,
+launch-readiness register (.claude/engineering/audits/2026-06-12-launch-readiness-register.md — bar §1, evidence §2,
 blockers §3-A, dated deferrals §3-B, waves §4) + the remediation it found.
 - **Security (ADR-0013):** newline-class gate bypasses closed (line-continuation matcher evasion +
   newline-forged `-m` override — L-012 class), each with an adversarial test; gate diffs textconv-safe;
@@ -63,7 +99,7 @@ blockers §3-A, dated deferrals §3-B, waves §4) + the remediation it found.
 - **Mechanism honesty (B7):** usage-log/telemetry/compliance prose → real `audit_log`; pack-resolver
   set-leak + cache-key fixes; 4 new behaviour tests.
 - **Release (B8):** truthful CHANGELOG 5.3.0, migration date reconcile, M1 artifact
-  (docs/v4.x/structure-changes/2026-06-13-launch-readiness.md). CODEOWNERS de-CAIP'd.
+  (.claude/engineering/evolution/2026-06-13-launch-readiness.md). CODEOWNERS de-CAIP'd.
 
 **What's pending:**
 - Operator: merge PR #73 → main (the git-push-to-main gate stays yours).
@@ -83,7 +119,7 @@ blockers §3-A, dated deferrals §3-B, waves §4) + the remediation it found.
   — both ride .claude-plugin via interop); fixed cli-tiers.yaml (codex.subagents native, Copilot
   install li@, Cursor stays tier full); repointed instruction-parity-check off 3 ghost files;
   README CLI-TIERS table regenerated; li-doctor gained a Windows SessionStart-no-fire warn (#59072).
-- **Issue-mining → fixes:** docs/audit/2026-06-13-cli-issues-craft-synthesis.md (16 findings).
+- **Issue-mining → fixes:** .claude/engineering/audits/2026-06-13-cli-issues-craft-synthesis.md (16 findings).
   CRITICAL I1 — both BLOCK hooks ran `set -euo pipefail` with the blocking exit 2 LAST, so an
   upstream non-zero exited first and silently downgraded the block (claude-code #60490). Fixed:
   `set -uo pipefail` + a fail-closed scanner guard positioned after matcher+override + a behavioral
@@ -151,7 +187,7 @@ regression assertions (L-012). M2 GREEN. Manifests 5.4.0.
 
 **Status:** active — PR #69 to main (independent chain; #62-#68 already merged)
 
-**What shipped:** 6-persona adversarial battletest (docs/audit/2026-06-12-battletest-synthesis.md,
+**What shipped:** 6-persona adversarial battletest (.claude/engineering/audits/2026-06-12-battletest-synthesis.md,
 6 KO + 24 HARD). ADR-0010 security (block-hook bypass + modern tokens + vault PII scan + sed RCE
 + CR/LF-safe audit/state), ADR-0011 gstack de-heritage (44 edits/30 files, zero loss, grace
 2026-09-12), ADR-0012 agent memory:/model: (23+4). Friction: resume↔context-restore, honest cost
@@ -198,7 +234,7 @@ L-011 captured (structural estimates are ceilings).
 
 **What's pending:**
 - ALSO open: **PR #66** (activation pass, ADR-0008) — stacked on #65. Fit audit
-  (docs/audit/2026-06-12-fable5-fit-audit.md) found ~3/14 mechanisms firing; #66 ships plugin
+  (.claude/engineering/audits/2026-06-12-fable5-fit-audit.md) found ~3/14 mechanisms firing; #66 ships plugin
   hook auto-registration + state ledger (lib/state.sh) + behavior tests + the exit-2 fix for
   the block hooks (they never actually blocked). After merge: verify li-doctor proof-of-life
   on first fresh session (digest audit record must appear).
@@ -229,9 +265,9 @@ L-011 captured (structural estimates are ceilings).
 **Open decisions:** 14 numbered (C1-D1 through C5-D2). All recommendations included; operator confirms or vetoes per-line.
 
 **Files:**
-- `docs/design/lintel-v4.0-reframe-design.md` (master doc)
-- `docs/feature-requests/lintel-feature-spine-packs-navigation.md` (canonical reference)
-- `docs/feature-requests/lintel-feature-brief-forge.md` (canonical reference)
+- `.claude/engineering/design-archive/lintel-v4.0-reframe-design.md` (master doc)
+- `.claude/engineering/design-archive/lintel-feature-spine-packs-navigation.md` (canonical reference)
+- `.claude/engineering/design-archive/lintel-feature-brief-forge.md` (canonical reference)
 
 **Last touched:** 2026-05-29
 
@@ -327,7 +363,7 @@ MINORs (#3-#7): all CLOSED via cohort-execution paths:
 - ~~#4 6.3 resume integrity spec~~ implemented in Cohort 1 PR #10 (resume Step 1.5)
 - ~~#5 6.6 shellcheck estimate~~ shipped warn-only in Cohort 1 (PR #10) per recommendation
 - ~~#6 L-002 grep-evidence for 4.3~~ context-family pair-by-pair verified in PR #27 WS-4a section (33 collisions enumerated)
-- ~~#7 M-3 LAYERS.md pre-baking~~ link-not-content approach used: LAYERS.md got L-001/L-002/L-003 (Cohort 1) + L-004 (v3.7 closeout) as durable principles with reference to lessons.md for incident-driven rationale
+- ~~#7 M-3 docs/architecture.md pre-baking~~ link-not-content approach used: docs/architecture.md got L-001/L-002/L-003 (Cohort 1) + L-004 (v3.7 closeout) as durable principles with reference to lessons.md for incident-driven rationale
 
 ### PR #21 (lintel-v3.7-frontend-design-system) — 7 of 9 concerns RESOLVED via implementation
 
@@ -361,10 +397,10 @@ Eng-review run 2026-05-28. v3.7 Fas A1+A2+B+C shipped i PR #22-#25, all merged 2
 **What's pending:**
 
 1. ~~**WS-4a + WS-4b naming-sessions**~~ ✅ AUTO-EXECUTED with operator-veto path 2026-05-29. WS-4a: NO renames (prefix-only disambiguation principle adopted). WS-4b: 4 renames (match→skill-router, setup-brain→gbrain-setup, sync-brain→gbrain-sync, agt-tier-stamp→agent-tier-stamp). Alias-mekanism + bin/_aliases.sh + tests shipped. Operator vetoes any line if disagreement.
-2. ~~**6.7 internal-voice consistency check** (D-5a)~~ ✅ INVESTIGATED 2026-05-29 — verdict: INTENDED, not drift. 125 internal / 14 mixed / 2 trailblazer distribution coherent. See [decisions-67-68 doc](docs/design/lintel-v3.6-decisions-67-68.md). Operator vetoes by reply "drift" if disagree.
+2. ~~**6.7 internal-voice consistency check** (D-5a)~~ ✅ INVESTIGATED 2026-05-29 — verdict: INTENDED, not drift. 125 internal / 14 mixed / 2 trailblazer distribution coherent. See [decisions-67-68 doc](.claude/engineering/design-archive/lintel-v3.6-decisions-67-68.md). Operator vetoes by reply "drift" if disagree.
 3. ~~**6.8 3-role validation** (D-5b)~~ ✅ INVESTIGATED 2026-05-29 — verdict: PATTERN VALIDATED. 3 role files structurally consistent (7/7 sections, 78-81 lines). Ready for role #4 — recommended `frontend-designer` to anchor v3.7 family. Operator vetoes by reply "not yet" or "go with X".
 4. **T0 voice corpus calibration** ($1.80-6 × 3-5 rundor)
-5. **Real-work `/li:cycle` dogfood** på faktisk Azure-engagement — synthetic pre-validation done 2026-05-29 (4 validations passed, 3 soft-findings logged). See [docs/design/lintel-v3.7-fas-d-dogfood-protocol.md](../docs/design/lintel-v3.7-fas-d-dogfood-protocol.md) for the 7-step operator checklist (15-30 min). Reduces operator-effort from multi-hour evaluation to focused validation.
+5. **Real-work `/li:cycle` dogfood** på faktisk Azure-engagement — synthetic pre-validation done 2026-05-29 (4 validations passed, 3 soft-findings logged). See [.claude/engineering/design-archive/lintel-v3.7-fas-d-dogfood-protocol.md](../.claude/engineering/design-archive/lintel-v3.7-fas-d-dogfood-protocol.md) for the 7-step operator checklist (15-30 min). Reduces operator-effort from multi-hour evaluation to focused validation.
 6. **Marketplace submission** (post MS legal review)
 7. **PR #14 merge** efter WS-4a/b + alias-implementation
 

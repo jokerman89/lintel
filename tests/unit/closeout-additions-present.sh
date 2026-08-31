@@ -2,7 +2,7 @@
 # tests/unit/closeout-additions-present.sh
 #
 # Verifies v3.6 closeout additions: handoff-size-check (3.2) +
-# agent-dispatch-rules doc (2.4) + LAYERS.md L-trio reflection (M-3) +
+# agent-dispatch-rules doc (2.4) + the layer-model L-trio reflection (M-3) +
 # memory.md M-1 reviewer-concerns tracking.
 # tag: v3.6 closeout
 
@@ -50,14 +50,15 @@ else
   fail "agent-dispatch-rules concept doc missing"
 fi
 
-# M-3: LAYERS.md L-trio reflection
-LAYERS="$REPO_ROOT/LAYERS.md"
+# M-3: the layer-model L-trio reflection. LAYERS.md was retired to the design archive when
+# docs/architecture.md replaced it as the public reference; the historical record lives on there.
+LAYERS="$REPO_ROOT/.claude/engineering/design-archive/LAYERS.md"
 if [ -f "$LAYERS" ]; then
   for lesson in "L-001" "L-002" "L-003"; do
     if grep -q "$lesson" "$LAYERS"; then
-      pass "LAYERS.md reflects $lesson"
+      pass "archived LAYERS.md reflects $lesson"
     else
-      fail "LAYERS.md missing $lesson reflection"
+      fail "archived LAYERS.md missing $lesson reflection"
     fi
   done
 fi

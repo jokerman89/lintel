@@ -8,7 +8,12 @@ This file redirects to `AGENT-INSTRUCTIONS.md`, which is the canonical source fo
 
 ## Setup note
 
-GitHub Copilot Enterprise reads instructions from `.github/copilot-instructions.md` in the repo root. Two install options:
+> **Which Copilot is this for?** This shim targets **Copilot in the IDE** (Copilot Enterprise),
+> which reads `.github/copilot-instructions.md`. **GitHub Copilot CLI** is a different product and
+> needs no shim — it reads the `.claude-plugin/` manifest directly and gets skills natively. See
+> [docs/multi-cli.md](../docs/multi-cli.md).
+
+Copilot in the IDE reads instructions from `.github/copilot-instructions.md` in the repo root. Two install options:
 
 **Option A — symlink (recommended on macOS/Linux/WSL):**
 

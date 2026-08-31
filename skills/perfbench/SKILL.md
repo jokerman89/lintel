@@ -17,7 +17,7 @@ Not a profiler — that's `PerformanceAnalyzer` subagent territory. This skill i
 
 ## When to use
 
-- Pre-`/release-ev2` regression check on perf-sensitive code paths
+- Pre-`/li:ship` regression check on perf-sensitive code paths
 - After a hot-path refactor, confirm you didn't slow things down
 - Periodic baseline capture for trend monitoring
 - A teammate said "this feels slower" — instrument it
@@ -76,7 +76,7 @@ Baseline: 20260520-114000 (git: f19d388)
    Likely cause: src/components/portal/Cases.tsx (new render path)
 
 ## Recommendation
-Address P1 before /release-ev2. P2 acceptable if intentional — record reason in commit message.
+Address P1 before /li:ship. P2 acceptable if intentional — record reason in commit message.
 ```
 
 ## Compliance integration
@@ -99,7 +99,7 @@ Address P1 before /release-ev2. P2 acceptable if intentional — record reason i
 ```
 > /perfbench
 [5 scenarios × 5 iterations]
-3 regressions (1 P1, 1 P2). Address P1 before /release-ev2.
+3 regressions (1 P1, 1 P2). Address P1 before /li:ship.
 ```
 
 **Single scenario, deeper sampling:**
@@ -121,4 +121,4 @@ New baseline written. Prior baseline archived to .../baselines-archive/
 - `PerformanceAnalyzer` subagent — for finding the bottleneck once `/perfbench` flagged a regression
 - `/qa` — correctness; `/perfbench` is performance
 - `/investigate` — for hypothesis-driven follow-up on a regression
-- `/release-ev2` — reads benchmark results as advisory signal (regressions don't block by default; operator can opt-in)
+- `/li:ship` — reads benchmark results as advisory signal (regressions don't block by default; operator can opt-in)

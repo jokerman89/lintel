@@ -5,10 +5,16 @@ description: Slow-down mode for high-stakes work — extra gates, double-confirm
 color: red
 tools: Read, Bash, Grep, Glob, Edit
 voice: internal
-cli_support: [claude-code, codex]
+necessity: OPTIONAL
+gap_if_skipped: "High-stakes mutations run at normal cadence — no per-mutation confirm, no stated rollback path, no elevated audit. Fine for routine work; risky for irreversible or production-adjacent changes."
+cli_support:
+  - cli: claude-code
+    level: full
+  - cli: codex
+    level: degraded
 ---
 
-# /careful
+# /li:careful
 
 A mode-switching skill that wraps the current task in extra rigor: every mutation gets a pre-flight AskUserQuestion, every command is shown before execution, every assumption is named explicitly. Use when the work is production-adjacent, irreversible, or operating on data you cannot afford to corrupt.
 
@@ -26,12 +32,12 @@ Not a standalone workflow — invokes other skills (or your direct work) with el
 ## When NOT to use
 
 - Routine code edits — the overhead is wasted
-- Read-only investigation — `/investigate` already has the right cadence
-- Time-critical incident response — `/incident-respond` (Phase 3) handles urgency-with-rigor
+- Read-only investigation — `/li:investigate` already has the right cadence
+- Time-critical incident response — urgency-with-rigor is its own cadence; careful mode's per-step confirms can slow a live incident
 
 ## Inputs
 
-- Optional `--for <skill>` — wrap a specific skill invocation in careful mode (e.g. `/careful --for /ship`)
+- Optional `--for <skill>` — wrap a specific skill invocation in careful mode (e.g. `/li:careful --for /li:ship`)
 - Optional `--reason <text>` — operator's stated reason for elevation (logged to audit)
 - Optional `--off` — explicitly disable careful mode if it was auto-enabled by a watcher
 
@@ -73,32 +79,32 @@ Operator confirmed: yes (at 14:23:01)
 
 ## Compliance integration
 
-- Layer 2 production-mutation rules apply at maximum strictness — every per-call auth is explicit AND logged.
-- 5 always-on rules check on every mutation (not just session-start).
-- Sanity scan on every Edit payload (Layer 2 secret/customer-data patterns).
-- If `--for /ship` and the target is `main`: triple confirmation required.
+- The active pack's production-mutation rules apply at maximum strictness — every per-call auth is explicit AND logged (`resolve_pack_field compliance.hooks`; none in the neutral `_default` pack).
+- The pack's compliance gates re-check on every mutation (not just session-start).
+- The secret-scan-block + customer-data-block hooks scan every Edit payload (they already fire on `git commit`/`push`; careful mode surfaces them per-mutation).
+- If `--for /li:ship` and the target is `main`: triple confirmation required.
 
 ## Failure modes
 
 - **Operator declines a mutation mid-task:** stop cleanly. Report partial state: which mutations landed, which were aborted. Operator owns the next move.
 - **Mutation succeeds but verification fails:** state the divergence, name the rollback command, do NOT auto-rollback. Operator decides.
-- **Audit log unwriteable:** treat as a Layer 2 issue. Surface + ask whether to proceed without audit (default: NO).
+- **Audit log unwriteable:** treat as blocking. Surface + ask whether to proceed without audit (default: NO).
 - **Confirmation fatigue (operator hits "yes" reflexively):** if 5+ consecutive yeses without modification, surface "still in careful mode — confirming you want this cadence". Re-engage attention.
 
 ## Examples
 
-**Wrapping /ship for a high-stakes branch:**
+**Wrapping /li:ship for a high-stakes branch:**
 ```
-> /careful --for /ship --reason "merging to main, prod deploy follows"
+> /li:careful --for /li:ship --reason "merging to main, prod deploy follows"
 CAREFUL MODE ON — reason: merging to main, prod deploy follows
 Restated goal: ship branch feat/billing-refund-v2 via PR to main
 Operator confirmed: yes
-[/ship runs with per-step confirmation, takes ~3x longer]
+[/li:ship runs with per-step confirmation, takes ~3x longer]
 ```
 
 **Manual mutation flow:**
 ```
-> /careful --reason "editing frozen-zone PlatformScenes.tsx for tour-page work"
+> /li:careful --reason "editing frozen-zone PlatformScenes.tsx for tour-page work"
 CAREFUL MODE ON.
 Planned: Edit PlatformScenes.tsx lines 42-50.
 Rollback: git checkout HEAD -- src/components/PlatformScenes.tsx
@@ -107,13 +113,12 @@ Confirm? [yes/no]
 
 **Disable after auto-elevation:**
 ```
-> /careful --off
+> /li:careful --off
 CAREFUL MODE OFF. Back to normal cadence.
 ```
 
 ## See also
 
-- `/ship` — high-stakes invocation: prefer `/careful --for /ship`
-- `/land-and-deploy` — production deploy: prefer `/careful --for /land-and-deploy`
-- `/investigate` — read-only by default, careful mode is optional overlay for prod-data investigation
-- Layer 2 compliance — careful mode is the operator-side counterpart to Layer 2 auto-checks
+- `/li:ship` — high-stakes invocation: prefer `/li:careful --for /li:ship`
+- `/li:investigate` — read-only by default, careful mode is optional overlay for prod-data investigation
+- The active pack's compliance gates — careful mode is the operator-side counterpart to the pack's auto-checks

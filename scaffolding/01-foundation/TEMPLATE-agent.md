@@ -16,8 +16,7 @@ cli_support: [claude-code, codex, copilot] # REQUIRED: list of CLIs where this a
 tier: <permissive | restricted>             # REQUIRED FOR PROMOTED AGENTS ONLY: license tier of upstream this agent ports
                                             #   permissive: MIT/Apache — safe to bundle into any repo
                                             #   restricted: CC-BY-SA-4.0 / mixed / no-license — invoke from install path; NOT safe to copy-paste
-upstream_url: <github URL>                  # OPTIONAL: only when this agent ports/wraps an upstream
-upstream_sha: <40-char SHA pin>             # OPTIONAL: only when upstream_url is set
+upstream_url: <github URL>                  # OPTIONAL: only when this agent wraps third-party work
 last_verified: YYYY-MM-DD                   # OPTIONAL: only when upstream_url is set
 ---
 ```

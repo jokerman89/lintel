@@ -20,7 +20,7 @@ Operator-request 5.3 (post Cohort 2 dependency 1.1 usage-log landed): an on-dema
 
 1. **`--force-compact`** — clear excess context beyond what's already compacted. The operator allows heavy contexting for heavy tasks, then reclaims on demand.
 
-2. **`--monitor-paths`** — watch canonical paths for drift/missing. Would have caught 0.4 (tasks/personas+memory missing per LAYERS.md). Static-path verification.
+2. **`--monitor-paths`** — watch canonical paths for drift/missing. Would have caught 0.4 (tasks/personas+memory missing per docs/architecture.md). Static-path verification.
 
 3. **`--simulate-tokens <workflow>`** — "what would `/li:cycle --mode customer-engagement` cost?" Depends on 1.1 (usage-log) for real numbers; otherwise heuristics.
 
@@ -69,9 +69,9 @@ Static-path manifest (loaded from config or hard-coded):
 
 ```yaml
 load-bearing_paths:
-  - .claude/memory/lessons.md          # required per LAYERS.md
-  - .claude/memory/personas.md          # required per LAYERS.md (Cohort 1 0.4)
-  - .claude/memory/working-state.md            # required per LAYERS.md (Cohort 1 0.4)
+  - .claude/memory/lessons.md          # required per docs/architecture.md
+  - .claude/memory/personas.md          # required per docs/architecture.md (Cohort 1 0.4)
+  - .claude/memory/working-state.md            # required per docs/architecture.md (Cohort 1 0.4)
   - ~/.lintel/profile.yaml     # session-config
   - .claude/runtime/audit/     # observation spine writes here (usage-* stays in ~/.lintel/audit/)
   - skills/                    # canonical skill location

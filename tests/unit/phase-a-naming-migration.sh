@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# DESCRIPTION: Phase A naming migration sanity — all v2 skill names present (bare, post Väg A), v1 li-prefixed names absent from frontmatter
+# DESCRIPTION: Phase A naming migration sanity — all v2 skill names present (the bare-name form), v1 li-prefixed names absent from frontmatter
 # TAGS: claude-code-only,codex-compatible,unit
 #
-# Updated 2026-05-28 for Väg A: skill folder names are bare (no `li-` prefix);
+# Updated 2026-05-28 for the bare-name form: skill folder names are bare (no `li-` prefix);
 # the `li-` namespace lives in the plugin manifest, not in folder names. The
 # canonical skills directory is `skills/`, not `scaffolding/` (scaffolding/
 # now contains layered templates only).
@@ -19,7 +19,7 @@ fail() { printf "${c_red}FAIL${c_reset} %s :: %s\n" "$TEST_NAME" "$1"; FAILED=$(
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 SKILLS_DIR="$REPO_ROOT/skills"
 
-# All v2 skill names that should be present (renamed ones) — bare, post Väg A
+# All v2 skill names that should be present (renamed ones) — the bare-name form
 # Updated 2026-05-29 for v3.6 Cohort 4 WS-4b renames:
 #   setup-brain → gbrain-setup, sync-brain → gbrain-sync, agt-tier-stamp → agent-tier-stamp
 # CAIP-specific skills (release-ev2, rais-*, onecs-check, agent-tier-stamp,
@@ -33,7 +33,7 @@ V2_NAMES=(
 )
 
 # v1 li-prefixed names that should NEVER appear as canonical `name:` value.
-# Post Väg A no skill uses `li-` prefix in its name (the prefix lives in the
+# In the bare-name form no skill uses `li-` prefix in its name (the prefix lives in the
 # plugin namespace `/li:<skill>` instead). Keeping these to detect regression.
 V1_NAMES_TO_BE_GONE=(
   "li-ship" "li-land-and-deploy" "li-open-gstack-browser"
@@ -55,7 +55,7 @@ for v2_name in "${V2_NAMES[@]}"; do
   fi
 done
 
-# Verify li-prefixed v1 names never appear as canonical `name:` post Väg A
+# Verify li-prefixed v1 names never appear as canonical `name:` in the bare-name form
 for v1_name in "${V1_NAMES_TO_BE_GONE[@]}"; do
   if grep -r -l "^name: $v1_name$" "$SKILLS_DIR" >/dev/null 2>&1; then
     fail "v1 li-prefixed name STILL canonical: $v1_name"

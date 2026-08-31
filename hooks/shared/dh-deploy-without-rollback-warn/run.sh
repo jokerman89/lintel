@@ -3,6 +3,7 @@
 # Surfaces deploy/IaC commits without documented rollback.
 
 set -euo pipefail
+LINTEL_REPO_ROOT="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}"  # guard: unset under set -u aborts the hook (fail-closed)
 
 LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
 mkdir -p "$LINTEL_HOME/audit"
@@ -39,7 +40,7 @@ fi
 # Check for rollback declaration: recent rollback-strategy file or rollback field in file itself
 dh_state_dir=".claude/runtime/state/dh"
 [ -d "$dh_state_dir" ] || dh_state_dir=".lintel/state/dh" # legacy-fallback-ok
-rollback_strategy=$(find "$dh_state_dir" -name "rollback-strategy-*.md" -type f -mtime -7 2>/dev/null | sort | tail -1)
+rollback_strategy=$(find "$dh_state_dir" -name "rollback-strategy-*.md" -type f -mtime -7 2>/dev/null | sort | tail -1) || true
 rollback_age_days=-1
 has_rollback=false
 

@@ -8,19 +8,19 @@ For canonical session bootstrap, see [AGENT-INSTRUCTIONS.md](AGENT-INSTRUCTIONS.
 
 ## Repo overview
 
-Lintel is a company-neutral, pack-driven session harness — markdown scaffolding for agent-based development. Company identity (the Microsoft CAIP-SE workprofile) loads from the separate lintel-caip-pack.
+Lintel is a company-neutral, pack-driven session harness — markdown scaffolding for agent-based development. Company identity loads from a separate, installable pack.
 
 - `skills/` — slash-commands (9-step cycle + engineering modules + session-harness)
 - `agents/` — subagent roles organized per domain
 - `hooks/shared/` — compliance + workflow hooks
 - `scaffolding/` — templates copied INTO other repos
-- `docs/design/lintel-v4.0-reframe-design.md` — current architecture (decisions since: `.claude/decisions/`, ADR-0005..0017)
+- `docs/architecture.md` — the architecture reference (decisions: `.claude/decisions/`)
 
 ## Session start ritual
 
 1. Read [AGENT-INSTRUCTIONS.md](AGENT-INSTRUCTIONS.md) (canonical, applies to all CLIs)
 2. Review `.claude/memory/lessons.md` for accumulated lessons
-3. Check `docs/design/lintel-v4.0-reframe-design.md` + recent ADRs in `.claude/decisions/` for current architecture state
+3. Check [docs/architecture.md](docs/architecture.md) + recent ADRs in `.claude/decisions/` for current architecture state
 
 ## Codex-specific notes
 
@@ -54,7 +54,12 @@ Codex's tool-permission model is per-invocation. Auto-mode bounds in `AGENT-INST
 
 ### Skill discovery
 
-Skills at `skills/<name>/SKILL.md`. Codex doesn't have native slash-command discovery — operator references skills explicitly:
+Skills live at `skills/<name>/SKILL.md` and surface natively as `/li:<skill>` once the plugin is
+installed (`/plugins`, search lintel, Install). Codex is a **full-tier** CLI: native skills and
+native subagents. The one thing it does not get is the hook enforcement layer, which is a Claude
+Code mechanism.
+
+For a scripted one-shot run outside an interactive session:
 
 ```bash
 codex exec --prompt "$(cat skills/ship/SKILL.md). Execute on current branch."
@@ -62,4 +67,4 @@ codex exec --prompt "$(cat skills/ship/SKILL.md). Execute on current branch."
 
 ### Compliance
 
-Compliance is pack-driven (`resolve_pack_field compliance.*`). Neutral baselines apply across all Codex invocations: no customer data, no secrets, no prod mutations without auth. Tiered rules (SSO policy, vendor preference, regulatory gates) come from the active pack — see the lintel-caip-pack example for the Microsoft CAIP-SE ruleset.
+Compliance is pack-driven (`resolve_pack_field compliance.*`). Neutral baselines apply across all Codex invocations: no customer data, no secrets, no prod mutations without auth. Tiered rules (identity policy, vendor preference, regulatory gates) come from the active pack.

@@ -110,7 +110,7 @@ Deploy targets: staging, prod (stub written)
 - .github/workflows/compliance-check.yml — runs the active pack's compliance gates on PRs
 
 ## Next steps (suggested order)
-1. /office-hours to draft the design doc (lands in docs/design/)
+1. /office-hours to draft the design doc (lands in .claude/engineering/design-archive/)
 2. Fill the active pack's compliance DRAFT stubs, if any (/li:compliance-gate lists them)
 3. First feature implementation; then /qa + /review + /ship
 ```
@@ -148,6 +148,6 @@ Deploy targets: staging, prod (stub written)
 ## See also
 
 - `/scaffold-internal-tool` — lighter, no customer surface
-- `/office-hours` — first design doc lands in docs/design/
+- `/office-hours` — first design doc lands in .claude/engineering/design-archive/
 - `/li:compliance-gate` — runs the active pack's compliance gates
 - `/pack-switch` — activate a company pack for compliance/voice wiring

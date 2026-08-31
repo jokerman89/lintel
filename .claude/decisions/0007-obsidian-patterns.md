@@ -2,7 +2,7 @@
 
 **Status:** Accepted (2026-06-12)
 **Decided by:** operator (D4 gate: "the 4 verified patterns, pack-gated; write-only stays")
-**Implements:** docs/design/lintel-v5-claude-home-memory-obsidian-design.md (workstream C)
+**Implements:** .claude/engineering/design-archive/lintel-v5-claude-home-memory-obsidian-design.md (workstream C)
 
 ## Context
 

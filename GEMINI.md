@@ -8,19 +8,19 @@ For canonical session bootstrap, see [AGENT-INSTRUCTIONS.md](AGENT-INSTRUCTIONS.
 
 ## Repo overview
 
-Lintel is a company-neutral, pack-driven session harness — markdown scaffolding for agent-based development. Company identity (the Microsoft CAIP-SE workprofile) loads from the separate lintel-caip-pack.
+Lintel is a company-neutral, pack-driven session harness — markdown scaffolding for agent-based development. Company identity loads from a separate, installable pack.
 
 - `skills/` — slash-commands (9-step cycle + engineering modules + session-harness)
 - `agents/` — subagent roles organized per domain
 - `hooks/shared/` — compliance + workflow hooks
 - `scaffolding/` — templates copied INTO other repos
-- `docs/design/lintel-v4.0-reframe-design.md` — current architecture (decisions since: `.claude/decisions/`, ADR-0005..0017)
+- `docs/architecture.md` — the architecture reference (decisions: `.claude/decisions/`)
 
 ## Session start ritual
 
 1. Read [AGENT-INSTRUCTIONS.md](AGENT-INSTRUCTIONS.md) (canonical, applies to all CLIs)
 2. Review `.claude/memory/lessons.md` for accumulated lessons
-3. Check `docs/design/lintel-v4.0-reframe-design.md` + recent ADRs in `.claude/decisions/` for current architecture state
+3. Check [docs/architecture.md](docs/architecture.md) + recent ADRs in `.claude/decisions/` for current architecture state
 
 ## Gemini-specific notes
 
@@ -73,4 +73,4 @@ Compliance is pack-driven (`resolve_pack_field compliance.*`). Neutral baselines
 
 ### Voice corpus
 
-Voice is supplied by the active pack (`resolve_pack_field voice.corpus`; none in `_default`). The Microsoft CAIP-SE Trailblazer corpus ships in the lintel-caip-pack example.
+Voice is supplied by the active pack (`resolve_pack_field voice.corpus`; none in `_default`). A company pack supplies its own calibrated corpus.

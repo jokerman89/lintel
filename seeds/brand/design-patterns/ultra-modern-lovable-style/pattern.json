@@ -3,7 +3,7 @@
   "name": "ultra-modern-lovable-style",
   "version": "1.0.0",
   "generated_at": "2026-05-28T00:00:00Z",
-  "source_artifacts": ["canonical-bundled-Lintel-v3.7-Fas-A2"],
+  "source_artifacts": ["canonical-bundled-Lintel-v3.7-phase-A2"],
   "extraction_method": "hand-curated",
   "extraction_confidence": "high",
   "purpose": "Canonical reference pattern bundled with Lintel as schema-by-example. Serves as the baseline for operator-extracted patterns via /li:frontend-style-extract. L-001 trade-off explicitly acknowledged: re-evaluate after Phase D dogfood if operator-extracted patterns dominate the vault (>3 patterns), can demote to docs/samples/.",

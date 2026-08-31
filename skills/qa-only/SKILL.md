@@ -14,7 +14,7 @@ The verification-only sibling of `/qa`. Runs the test suite, parses results, sur
 
 ## When to use
 
-- Final pre-`/release-ev2` verification — want to know tests pass without any drive-by changes
+- Final pre-`/li:ship` verification — want to know tests pass without any drive-by changes
 - CI parity check — reproduce remote CI failure locally without polluting the branch
 - Sanity check after `/qa` to confirm the auto-fixes didn't introduce regressions
 - Anywhere a "fresh eyes" report is needed without skill-level mutation
@@ -28,7 +28,7 @@ The verification-only sibling of `/qa`. Runs the test suite, parses results, sur
 ## Inputs
 
 - Optional `--scope <path>` — restrict to a path subset
-- Optional `--json` — emit machine-readable JSON report (for piping into `/release-ev2` gate)
+- Optional `--json` — emit machine-readable JSON report (for piping into `/li:ship` gate)
 - Optional `--verbose` — include full stack traces for each failure (default: first 10 lines)
 
 ## Workflow
@@ -99,6 +99,6 @@ Exit: 1 (3 failures, 87 passes, 2 skipped)
 ## See also
 
 - `/qa` — active variant that auto-fixes
-- `/release-ev2` — calls `/qa-only --json` as a gate
+- `/li:ship` — calls `/qa-only --json` as a gate
 - `/investigate` — when a failure is product-logic
 - `/careful` — wraps `/qa-only` in extra confirmation when stakes are high

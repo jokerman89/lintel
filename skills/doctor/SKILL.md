@@ -57,7 +57,7 @@ You are the li-doctor skill.
 ## Output format
 
 ```
-JSTACK-DOCTOR: health check (date)
+LINTEL-DOCTOR: health check (date)
 
 ## CLIs detected
 | CLI | Path | Version | Lintel installed | Lintel version |

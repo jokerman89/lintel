@@ -2,7 +2,7 @@
 
 **Status:** Accepted (2026-06-12)
 **Decided by:** operator (D1–D4 gate, 2026-06-12) + implementation session
-**Implements:** docs/design/lintel-v5-claude-home-memory-obsidian-design.md (workstream A)
+**Implements:** .claude/engineering/design-archive/lintel-v5-claude-home-memory-obsidian-design.md (workstream A)
 
 ## Context
 

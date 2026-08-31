@@ -65,7 +65,7 @@ their own profile. Precedence everywhere: **brief > profile > corpus hit**.
 
 ## References
 
-- Design doc: `docs/design/lintel-v5.4-design-dna-design.md` · ADR-0015
+- Design doc: `.claude/engineering/design-archive/lintel-v5.4-design-dna-design.md` · ADR-0015
 - Research C: `.claude/runtime/research/C-anthropic-design-dna.md` (token cites BG:21-57,
   doctrine FD:9-43, license analysis)
 - Shape contract: `tests/shape/design-dna-corpus.sh` (asserts the 7 canonical hexes verbatim)

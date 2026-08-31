@@ -149,7 +149,7 @@ cognitive_budget="${cognitive_budget:-18}"
 
 ```bash
 mkdir -p .claude/runtime/state/ta
-audit="$LINTEL_HOME/audit/ta-decisions.jsonl"
+audit=".claude/runtime/audit/ta-decisions.jsonl"
 mkdir -p "$(dirname "$audit")"
 
 # Run checkpoint chain
@@ -253,11 +253,13 @@ Each dimension is scored by reading the artifact produced and counting positive 
 
 ### Step 6 — Audit + emit ship report
 
+One line via the unified writer (ts/operator/cycle_id come from the envelope):
+
 ```bash
-ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-printf '{"ts":"%s","kind":"ta_module_complete","granularity":"%s","score":%d,"checkpoints_passed":%d,"operator":"%s"}\n' \
-  "$ts" "$granularity" "$score" "$passed_count" "$(whoami 2>/dev/null || echo unknown)" \
-  >> "$LINTEL_HOME/audit/ta-decisions.jsonl"
+source "$(git rev-parse --show-toplevel)/bin/_audit.sh"
+audit_log ta-decisions ta_module_complete "granularity=$granularity" "score=$score" \
+  "checkpoints_passed=$passed_count"
+# → .claude/runtime/audit/ta-decisions.jsonl
 ```
 
 ## Status protocol

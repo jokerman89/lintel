@@ -126,24 +126,12 @@ If `--trends`:
 
 ## CI integration
 
-`.github/workflows/catalog.yml` (separate file):
+`skills/CATALOG.md` is regenerated automatically by `.github/workflows/catalog.yml` on every
+push to `main` that touches `skills/**/SKILL.md`. The generator is **inlined** in that workflow's
+`Generate CATALOG.md from frontmatter` step (a UTF-8-locale bash block that reads each skill's
+frontmatter and writes the catalog) — there is no separate generator script to maintain. The
+workflow then commits + pushes the regenerated file only if it changed.
 
-```yaml
-name: catalog-regenerate
-on: { push: { branches: [main] } }
-jobs:
-  regenerate:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - run: bash skills/catalog/bin/regenerate.sh
-      - name: Commit if diff
-        run: |
-          git config user.name "lintel-catalog-bot"
-          git config user.email "bot@lintel.local"
-          git add skills/CATALOG.md
-          git diff --staged --quiet || git commit -m "chore(catalog): auto-regenerate"
-          git push
-```
-
-Bin-script implementation lives at `skills/catalog/bin/regenerate.sh` — created separately at impl-time.
+To regenerate locally, run the same logic the workflow uses (or simply edit a skill's frontmatter
+and let the next push to `main` rebuild the catalog). Never hand-edit `skills/CATALOG.md` — it is a
+generated view; frontmatter is the source of truth.

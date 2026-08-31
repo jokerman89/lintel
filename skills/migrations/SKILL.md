@@ -34,13 +34,13 @@ No required args. Optional `--all` to include CLOSED migrations (last 30 days).
 ### Step 1 — Read tracker
 
 ```bash
-TRACKER="$(pwd)/docs/v4.x/migrations/_INDEX.md"
+TRACKER="$(pwd)/docs/migrations/_INDEX.md"
 [ -f "$TRACKER" ] || { echo "_No active migrations._"; exit 0; }
 ```
 
 ### Step 2 — Parse active entries
 
-Each migration file under `docs/v4.x/migrations/<date>-<slug>.md` declares grace + removal in its frontmatter. The `_INDEX.md` is the catalog. Read both.
+Each migration file under `docs/migrations/<date>-<slug>.md` declares grace + removal in its frontmatter. The `_INDEX.md` is the catalog. Read both.
 
 For each ACTIVE migration (grace_until > today):
 - Grep operator's repo for deprecated callsites
@@ -78,8 +78,8 @@ audit_log migration surfaced "active_count=$active_count"
 ## Integration
 
 **Reads:**
-- `docs/v4.x/migrations/_INDEX.md` (catalog)
-- `docs/v4.x/migrations/<date>-<slug>.md` (per-migration detail)
+- `docs/migrations/_INDEX.md` (catalog)
+- `docs/migrations/<date>-<slug>.md` (per-migration detail)
 
 **Writes:**
 - `~/.lintel/audit/migration.jsonl` (surface events, optional)
@@ -102,12 +102,12 @@ audit_log migration surfaced "active_count=$active_count"
 
 ## Recommended next steps after invocation
 
-- Per surfaced migration: read `docs/v4.x/migrations/<slug>.md` for full migration guide + rollback procedure
+- Per surfaced migration: read `docs/migrations/<slug>.md` for full migration guide + rollback procedure
 - After completing migration: file PR removing operator's old callsites
 - After grace expires + removal lands: `/li:migrations` no longer surfaces that entry
 
 ## See also
 
 - `/li:status` (sister — what's open right now)
-- `docs/v4.x/migrations/_INDEX.md` (tracker)
+- `docs/migrations/_INDEX.md` (tracker)
 - `docs/concepts/meta-infra-discipline.md` (Gate M3 enforcement context)

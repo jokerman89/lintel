@@ -1,7 +1,7 @@
 ---
 name: generate-word
 layer: foundation
-description: Produce brand-compliant Word doc via docx-templater — technical / customer-summary / transparency-note variants.
+description: Produce brand-compliant Word doc via docxtemplater — technical / customer-summary / transparency-note variants.
 color: orange
 tools: Read, Write, Bash, Glob
 voice: mixed
@@ -24,7 +24,16 @@ Brand-compliant Word document generation. Three target variants:
 - **`customer-summary`** — customer-bound engagement summary — voice: pack-resolved (customer-facing tier), gated
 - **`transparency-note`** — AI-feature transparency note — voice: pack-resolved (customer-facing tier), gated, includes honest-limitations check
 
-Uses docx-templater under the hood. Phase F of v2 build.
+Renders `.docx` via a Node library under the hood.
+
+## Prerequisites
+
+This skill produces `.docx` via a Node library — [`docxtemplater`](https://www.npmjs.com/package/docxtemplater)
+for filling brand `.docx` templates, or [`docx`](https://www.npmjs.com/package/docx) for programmatic
+generation. If neither is installed, set one up first (e.g. `npm i docxtemplater pizzip`).
+**Graceful degradation if it cannot be installed** (no Node toolchain / offline): fall back to
+`/li:make-pdf` from a markdown draft, or emit the document as markdown. Do not silently produce
+nothing — state which path you took.
 
 ## When to use
 
@@ -40,7 +49,7 @@ Uses docx-templater under the hood. Phase F of v2 build.
 
 ## Inputs
 
-- Required `--brief <path|inline>` — content brief or source markdown **OR** `--from-pipeline <dir>` (Fas 2: shared pipeline mode)
+- Required `--brief <path|inline>` — content brief or source markdown **OR** `--from-pipeline <dir>` (shared pipeline mode)
 - Required `--target <technical|customer-summary|transparency-note>` — variant
 - Optional `--template <name>` — explicit template (default: `<target>.docx` from brand)
 - Optional `--audience <text>` — primary audience
@@ -84,7 +93,7 @@ If invoked with `--from-pipeline <run-dir>` instead of `--brief`:
    - customer-summary → `WordTechnicalEditor` for structure; voice gate Gate 1 handles voice
    - transparency-note → both `WordTechnicalEditor` and explicit honest-limitations check
 
-4. **Generate via docx-templater:**
+4. **Generate via docxtemplater:**
    - Load template
    - Substitute placeholders with brief-derived content
    - Insert formatted blocks (tables, code, lists)
@@ -115,7 +124,7 @@ Voice tier: internal (pack-resolved)
 - Decision impact: medium (informational with human-in-loop)
 - Appeals + feedback: documented
 
-## Generation (docx-templater)
+## Generation (docxtemplater)
   Produced ~/.lintel/draft/case-analysis-ai-transparency-note.docx (47 KB)
 
 ## 4-Gate pipeline
@@ -139,7 +148,7 @@ For customer distribution: confirm the recorded provenance reference PROV-8b2c4.
 
 ## Failure modes
 
-- **docx-templater placeholder mismatch** (template + brief don't align) — surface diff, allow operator to align brief or pick different template
+- **docxtemplater placeholder mismatch** (template + brief don't align) — surface diff, allow operator to align brief or pick different template
 - **Honest-limitations fails** (limitations < capabilities − 2) — REJECT for transparency-note; force operator to expand limitations
 - **Voice gate fails after regen** — same as /generate-ppt
 - **Brand template absent** — fall back to default-word-template.json OR refuse if `--use-defaults` not set

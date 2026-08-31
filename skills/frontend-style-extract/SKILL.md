@@ -219,7 +219,7 @@ Next:
 - Audit-log: `.claude/runtime/audit/frontend-style-extract-runs.jsonl`
 
 **Calls into:**
-- `agents/frontend/FrontendArchitect.md` (synthesis-direction, reused from Fas A1)
+- `agents/frontend/FrontendArchitect.md` (synthesis-direction, shared with the design orchestrator)
 - `/li:generate-style-learn` (chained if `--with-palette` flag)
 - `/li:compliance-gate` (if --customer-share)
 

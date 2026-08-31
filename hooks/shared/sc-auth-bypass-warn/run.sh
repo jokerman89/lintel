@@ -3,6 +3,7 @@
 # Surfaces auth-flow edits introducing high-risk bypass patterns.
 
 set -euo pipefail
+LINTEL_REPO_ROOT="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}"  # guard: unset under set -u aborts the hook (fail-closed)
 
 LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
 mkdir -p "$LINTEL_HOME/audit"
@@ -57,10 +58,10 @@ if grep -inE '(role|isAdmin|is_admin|admin)[[:space:]]*=[[:space:]]*(true|"admin
 done; then :; fi
 
 # Simpler re-check (the while-pipe loop above can't actually populate the array — use direct grep counts)
-skip_auth_count=$(grep -cE '(skipAuth|skip_auth|disableAuth|bypassAuth)[[:space:]]*[:=][[:space:]]*(true|"true"|1)' "$file_edited" 2>/dev/null || echo 0)
-magic_cred_count=$(grep -cE '(username|user|email)[[:space:]]*[:=][[:space:]]*"(admin|root|test)"' "$file_edited" 2>/dev/null || echo 0)
-bypass_route_count=$(grep -cE '(/skip[_-]auth|/test[_-]login|/dev[_-]login|/impersonate)' "$file_edited" 2>/dev/null || echo 0)
-direct_role_count=$(grep -cE '(role|isAdmin|is_admin)[[:space:]]*=[[:space:]]*(true|"admin")' "$file_edited" 2>/dev/null || echo 0)
+skip_auth_count=$(grep -cE '(skipAuth|skip_auth|disableAuth|bypassAuth)[[:space:]]*[:=][[:space:]]*(true|"true"|1)' "$file_edited" 2>/dev/null) || skip_auth_count=0
+magic_cred_count=$(grep -cE '(username|user|email)[[:space:]]*[:=][[:space:]]*"(admin|root|test)"' "$file_edited" 2>/dev/null) || magic_cred_count=0
+bypass_route_count=$(grep -cE '(/skip[_-]auth|/test[_-]login|/dev[_-]login|/impersonate)' "$file_edited" 2>/dev/null) || bypass_route_count=0
+direct_role_count=$(grep -cE '(role|isAdmin|is_admin)[[:space:]]*=[[:space:]]*(true|"admin")' "$file_edited" 2>/dev/null) || direct_role_count=0
 
 total_findings=$((skip_auth_count + magic_cred_count + bypass_route_count + direct_role_count))
 

@@ -33,7 +33,7 @@ Distinct from `/design-review`: that one critiques what's built. This one shapes
 - Required: the question or proposal (inline prose or path to a markdown file)
 - Optional `--scope <area>` — narrow consultation to a specific area (e.g. "portal", "landing", "case-tabs")
 - Optional `--with-codex` — invoke `/codex` mid-consultation for an outside opinion
-- Optional `--read-design-system <dir>` — point at the project's design-system docs (default: `.lovable/memory/style/` if present, else `docs/design/`)
+- Optional `--read-design-system <dir>` — point at the project's design-system docs (default: `.lovable/memory/style/` if present, else `.claude/engineering/design-archive/`)
 
 ## Workflow
 

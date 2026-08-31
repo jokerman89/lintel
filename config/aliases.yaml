@@ -1,7 +1,7 @@
 # Lintel alias-mekanism — single source of truth
 #
-# Per design: docs/design/lintel-v3.6-alias-mechanism.md (Approach C — central dispatcher)
-# Naming decisions: docs/design/lintel-v3.6-cohort4-naming-decisions.md (WS-4a + WS-4b)
+# Per design: .claude/engineering/design-archive/lintel-v3.6-alias-mechanism.md (Approach C — central dispatcher)
+# Naming decisions: .claude/engineering/design-archive/lintel-v3.6-cohort4-naming-decisions.md (WS-4a + WS-4b)
 #
 # Three alias kinds: skill-folder, env-var, plugin-slug (last shape-supported but empty).
 # Default grace-period: 90 days. Operator-overridable per alias.

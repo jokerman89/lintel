@@ -2,7 +2,7 @@
 
 **Status:** Accepted (2026-06-12)
 **Decided by:** operator ("kör nästa" on the fit-audit P1 recommendation)
-**Implements:** docs/audit/2026-06-12-fable5-fit-audit.md (P1 track)
+**Implements:** .claude/engineering/audits/2026-06-12-fable5-fit-audit.md (P1 track)
 
 ## Context
 

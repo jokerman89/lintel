@@ -45,7 +45,7 @@ Read:
 - `git log --oneline -30`
 - `git diff origin/main --stat` if applicable
 - Codebase areas relevant to operator's request (Grep/Glob targeted)
-- Existing design docs for this project: `ls -t docs/design/*-design-*.md`
+- Existing design docs for this project: `ls -t .claude/engineering/design-archive/*-design-*.md`
 
 If design docs exist, list them: "Prior designs: [titles + dates]"
 
@@ -107,7 +107,7 @@ clearly-feature case — never a silent skip of due diligence on real design wor
 
 ### Step 2 — Related design discovery
 
-Extract 3-5 keywords from operator's intent. Grep across `docs/design/` for overlap.
+Extract 3-5 keywords from operator's intent. Grep across `.claude/engineering/design-archive/` for overlap.
 
 If matches found, read top match. AskUserQuestion: "Related design found — '{title}' from {date}. Build on this or start fresh?"
 
@@ -217,7 +217,7 @@ AskUserQuestion with all alternatives. Operator picks. STOP until response. Do N
 
 ### Step 10 — Design doc write
 
-Path: `docs/design/lintel-<branch>-design-<datetime>.md` (or `.claude/runtime/state/<slug>-design-<datetime>.md` if no docs/design/ exists).
+Path: `.claude/engineering/design-archive/lintel-<branch>-design-<datetime>.md` (or `.claude/runtime/state/<slug>-design-<datetime>.md` if no .claude/engineering/design-archive/ exists).
 
 Template (per design-doc-template in cycle-and-roles.md §2.2):
 - Problem Statement
@@ -306,13 +306,13 @@ Skip-conditions (DEFINE is skipped when):
 **Reads:**
 - `scope.md` (job dir if active, else `.claude/runtime/state/scope.md`) — `size` + `chosen_reading` + `intent`; selects FEATURE fast-path vs full treatment (Step 1.5)
 - CLAUDE.md, TODOS.md, recent git log
-- `docs/design/*-design-*.md` (related design discovery)
+- `.claude/engineering/design-archive/*-design-*.md` (related design discovery)
 - `.claude/memory/lessons.md`, `.claude/memory/working-state.md`
 - role file (if active, lens section)
 - WebSearch results (if Step 3 opt-in)
 
 **Writes:**
-- `docs/design/lintel-<branch>-design-<datetime>.md` (canonical)
+- `.claude/engineering/design-archive/lintel-<branch>-design-<datetime>.md` (canonical)
 - `.claude/runtime/state/role-lens-notes-<ts>.md` (if role sensitivity=private)
 - `.claude/runtime/audit/spec-review.jsonl`
 - `.claude/runtime/state/00-state.md` (DEFINE entry)

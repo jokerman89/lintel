@@ -163,7 +163,7 @@ stays 1; readers tolerate their absence (minor-additive per the schema-evolution
 
 **source-discriminator:** `"source": "frontend-design"` distinguishes from pipeline's `design-spec.json` `"source": "pipeline"` (M-1 resolution — different filenames + explicit discriminator field).
 
-### Step 6 — Call rendering-engine (Fas B integration)
+### Step 6 — Call rendering-engine
 
 ```bash
 case "$target_format" in

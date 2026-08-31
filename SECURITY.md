@@ -2,11 +2,12 @@
 
 ## Reporting security issues
 
-If you find a security issue in Lintel itself (the scaffolding repo), please report it privately to:
+If you find a security issue in Lintel itself (the scaffolding repo), please report it privately by
+**opening a private security advisory on the GitHub repository**
+(`Security` tab → `Report a vulnerability`). This reaches the project maintainers without disclosing
+the issue publicly.
 
-**johannes.akerman@gmail.com** (operator + Lintel maintainer)
-
-If your active pack defines its own incident-response process (e.g. a corporate SDL), follow that as well.
+If your active pack defines its own incident-response process, follow that as well.
 
 Do not open public GitHub issues for security vulnerabilities.
 
@@ -24,7 +25,7 @@ Lintel is **scaffolding** — markdown + bash scripts that an AI CLI loads as a 
 - ✗ No network calls in skill/agent execution (skill bodies are markdown instructions for the AI CLI, not network clients)
 - ✗ No data exfiltration (Lintel writes only locally, to operator-owned paths)
 - ✗ No credential capture (no auth flows in Lintel code)
-- ✗ No telemetry sent externally (v3 telemetry is local-only, opt-in)
+- ✗ No telemetry sent externally (any usage logging is local-only and opt-in)
 
 ## What Lintel DOES do that operators should review
 
@@ -46,9 +47,9 @@ These constraints apply to the Lintel repo itself (a company pack may add strict
 
 | Version | Supported |
 |---|---|
-| v3.x | ✓ active development on `v3-dev` |
-| v2.x | ✓ security fixes only |
-| v1.x | ✗ unsupported — upgrade to v2 |
+| 5.7.x | ✓ supported — current shipping line |
+| < 5.7 | ⚠ best-effort — upgrade to the current line for fixes |
+| ≤ 4.x | ✗ unsupported — upgrade to the current line |
 
 ## Response timeline
 

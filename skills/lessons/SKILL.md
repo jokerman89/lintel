@@ -34,7 +34,7 @@ You are the lessons skill.
 
 4. **Top 3-5 relevant lessons.** Surface with original text + 1-line "why this might apply now".
 
-5. **Plus global lessons (optional).** If operator opted in to `li-lessons-sync`, also surface from `~/.lintel/lessons/global.md`.
+5. **Plus operator-global lessons (optional).** Surface operator-level lessons written by `/li:learn --scope global` from `~/.lintel/lessons.jsonl` (the file `/li:learn` writes). If the operator also opted in to `li-lessons-sync`, additionally surface the synced per-repo files under `~/.lintel/lessons/*.md`.
 
 ## Output format
 

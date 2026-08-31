@@ -6,11 +6,20 @@
 # of high-signal Swedish words that never appear in English technical prose.
 #
 # These carry FUNCTIONAL Swedish (capability, not prose — translating them would
-# remove functionality) and are allowlisted or out of scan scope:
+# remove functionality) and are allowlisted:
 #   - hooks/shared/_patterns.sh         : customer-PII regex (ärende, ÅÄÖ,
 #                                         personnummer) sourced by the customer hooks
-#   - lib/orientator-routing.sh         : Swedish intent keywords (matches Swedish
-#                                         operator input) — out of scan scope (lib/)
+#   - lib/orientator-routing.sh         : the Swedish intent keywords the router
+#                                         matches Swedish operator input against —
+#                                         functional, not residue
+#   - tests/unit/orientator-mechanical-routing.sh
+#                                       : asserts that Swedish intent routing still
+#                                         works — functional, not residue
+#   - tests/unit/hook-patterns.sh       : asserts the Swedish personal-data tells
+#                                         (ärende, personnummer) stay detected —
+#                                         functional, not residue
+#   - tests/shape/no-swedish.sh         : this file — it carries the Swedish word list
+#                                         it searches for — functional, not residue
 #   - skills/CATALOG.md                  : generated from frontmatter; the source
 #                                         SKILL.md files are scanned instead
 #
@@ -33,18 +42,20 @@ is_allowlisted() {
     # which the customer-data hooks source — so only this file needs the allowlist.
     hooks/shared/_patterns.sh) return 0 ;;
     skills/CATALOG.md) return 0 ;;
+    # Swedish intent keywords the orientator matches operator input against.
+    lib/orientator-routing.sh) return 0 ;;
+    # Asserts that Swedish intent routing still resolves.
+    tests/unit/orientator-mechanical-routing.sh) return 0 ;;
+    # Asserts the Swedish personal-data tells (ärende, personnummer) stay detected.
+    tests/unit/hook-patterns.sh) return 0 ;;
+    # This guard itself — it carries the Swedish word list it searches for.
+    tests/shape/no-swedish.sh) return 0 ;;
     # docs/ is scanned for the shipped EXPLAINER surface (README, getting-started,
     # GLOSSARY, concept guides). These prefixes are exempt by kind, not laziness:
-    #   docs/audit/**   — historical audit records that quote the operator's own
-    #                     Swedish motto; translating them would falsify the record
-    #   docs/design/**  — design rationale quoting the operator's actual words
-    #                     (the "smoking-gun trace") — same historical-record reason
     #   docs/wiki/**    — generated from frontmatter; the source files are scanned
     #   docs/concepts/orientator.md — documents the Swedish INTENT KEYWORDS the
     #                     orientator matches against Swedish operator input
     #                     (functional, like lib/orientator-routing.sh)
-    docs/audit/*) return 0 ;;
-    docs/design/*) return 0 ;;
     docs/wiki/*) return 0 ;;
     docs/concepts/orientator.md) return 0 ;;
   esac
@@ -54,13 +65,13 @@ is_allowlisted() {
 # Shipped surface: agent-invokable trees + the installer + the first-touch docs.
 # README.md + docs/ are included so stray Swedish in a user-facing explainer is
 # caught; the historical/generated/functional paths above are exempt.
-SCAN_DIRS=(skills agents hooks install .github .codex-plugin seeds docs README.md)
+SCAN_DIRS=(skills agents hooks install .github .codex-plugin seeds docs lib bin shims scaffolding packs config tests README.md)
 # UTF-8 byte pattern for å ä ö Å Ä Ö (each is C3 followed by one of these bytes).
 CHAR_RE=$'[\xc3][\xa5\xa4\xb6\x85\x84\x96]'
 # High-signal Swedish words with no English collision (word-bounded, case-insensitive).
 # Includes ASCII-only Swedish words that the letter check above cannot catch
 # (kategori, mellan, ...). Conservative set — every entry is unambiguously Swedish.
-WORD_RE='(och|inte|eller|denna|detta|utan|finns|vilka|ingen|aldrig|samma|kategori|framtida|eftersom|mellan|genom|samt|endast|enbart|stycka|vilket)'
+WORD_RE='(och|inte|eller|denna|detta|utan|finns|vilka|ingen|aldrig|samma|kategori|framtida|eftersom|mellan|genom|samt|endast|enbart|stycka|vilket)|tuffa|fas|faser|fasen|gedigen|kraftfullt|maste|kravs'
 
 hits=0
 while IFS= read -r f; do
@@ -74,7 +85,7 @@ while IFS= read -r f; do
   done < <(grep -nwiE "$WORD_RE" "$f" 2>/dev/null)
 done < <(git ls-files "${SCAN_DIRS[@]}")
 
-[ "$hits" -eq 0 ] && pass "no Swedish in shipped surface (${SCAN_DIRS[*]}; 3 functional files allowlisted)"
+[ "$hits" -eq 0 ] && pass "no Swedish in shipped surface (${SCAN_DIRS[*]}; functional-Swedish files allowlisted)"
 
 echo ""
 [ "$FAILED" -eq 0 ] && { echo "no-swedish: ALL PASS"; exit 0; } || { echo "no-swedish: FAILURES ($hits hit(s))"; exit 1; }

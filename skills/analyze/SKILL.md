@@ -37,7 +37,7 @@ artifact — report honestly what could not be checked):
 
 | Artifact | Source |
 |---|---|
-| Design doc | newest `docs/design/*-design-*.md` or the doc named in `00-state.md` DEFINE entry |
+| Design doc | newest `.claude/engineering/design-archive/*-design-*.md` or the doc named in `00-state.md` DEFINE entry |
 | Cold-executor trio | `plan.md` + `spec.md` (paths from the `00-state.md` PLAN entry) + `prompt.md` (sibling in the same `.claude/plans/<slug>/` dir — the PLAN entry records only plan/spec paths) |
 | Discover report | newest `.claude/runtime/state/discover-report-*.md`, or the `report_path:` recorded in the `00-state.md` DISCOVER entry (ADR constraints list) |
 | Build evidence | build-log entries + `00-state.md` BUILD entry + `git log`/`git diff` over the cycle's commits |

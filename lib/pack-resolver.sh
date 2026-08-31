@@ -181,7 +181,7 @@ validate_pack() {
 }
 
 # ─── Inheritance chain resolution (extends: walk) ──────────────────────────
-# Returns space-separated chain ordered root → leaf, e.g. "ms-internal caip-se".
+# Returns space-separated chain ordered root → leaf, e.g. "base-pack team-pack".
 # Does NOT auto-prepend _default — _default is the resolver's fallback layer
 # for missing fields, not an explicit extends target.
 _resolve_extends_chain() {

@@ -7,7 +7,7 @@
 # Versioning: schema_version is a string. Major bumps are breaking. Minor bumps
 # are additive. Phase 2 ships v1.
 #
-# Ref: docs/design/lintel-v4.0-reframe-design.md §1.3 (pack architecture)
+# Ref: .claude/engineering/design-archive/lintel-v4.0-reframe-design.md §1.3 (pack architecture)
 
 schema_version: "1"
 schema_kind: pack-manifest

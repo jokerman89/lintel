@@ -9,7 +9,7 @@
 
 Every workflow in Lintel reads "pack-shaped" inputs — voice tier, compliance hooks, persona corpus, role inventory, brand language, knowhow domains, lessons surface, opinions, navigation tuning, brief-forge handoffs. Before v4.0 those values were inlined wherever they were needed:
 
-- Trailblazer voice references baked into customer-facing skill copy.
+- A specific company voice baked into customer-facing skill copy.
 - Compliance gate names hardcoded into REVIEW.
 - Persona corpus assumed by skills that referenced "Kennie" or "Lisa" by name.
 - Navigation budget assumed by orientator.

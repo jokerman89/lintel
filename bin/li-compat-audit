@@ -17,7 +17,7 @@
 #   bin/li-compat-audit --output <slug>            # custom output filename
 #
 # Default: compares working-tree vs HEAD; output to
-# docs/v4.x/compatibility-audits/<date>-<slug>.md
+# .claude/engineering/compat-audits/<date>-<slug>.md
 
 set -uo pipefail
 
@@ -50,7 +50,7 @@ fi
 
 # If no changes, output green-only audit
 if [ ! -s "$TMP_DIFF" ]; then
-  OUT="docs/v4.x/compatibility-audits/${DATE_STAMP}-${SLUG}.md"
+  OUT=".claude/engineering/compat-audits/${DATE_STAMP}-${SLUG}.md"
   mkdir -p "$(dirname "$OUT")"
   cat > "$OUT" <<EOF
 ---
@@ -124,7 +124,7 @@ else
 fi
 
 # ─── Write report ─────────────────────────────────────────────────────────
-OUT="docs/v4.x/compatibility-audits/${DATE_STAMP}-${SLUG}.md"
+OUT=".claude/engineering/compat-audits/${DATE_STAMP}-${SLUG}.md"
 mkdir -p "$(dirname "$OUT")"
 
 {

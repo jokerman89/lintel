@@ -88,4 +88,4 @@ uniqueness guard; add one CURRENT pointer to working-state.
 - ADR-0003 (cycle-position footer — the convention this enforces), ADR-0008 (state ledger),
   ADR-0015 (agent-surface subtraction), L-008 / L-016 (the recurring symptom)
 - Tests: `tests/unit/cycle-continuity.sh`, `tests/shape/adr-numbers-unique.sh`
-- Structure-change: `docs/v4.x/structure-changes/2026-06-14-setup-hardening.md`
+- Structure-change: `.claude/engineering/evolution/2026-06-14-setup-hardening.md`

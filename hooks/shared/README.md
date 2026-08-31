@@ -1,6 +1,9 @@
 # Lintel Hooks
 
-31 hooks: 24 warn-only + 2 justified-block + 2 surface-only + 2 lifecycle + 1 context-inject.
+33 hooks. **9 auto-register on a plugin install** via `hooks/hooks.json` — the session digest, the
+two block gates (secrets, customer data), the secret warn-on-edit, the direct-push warn, the memory
+budget warn, the two cycle-continuity hooks, and the prompt-scan. The remaining 24 — including all
+the module warn-hooks — ship inert and are opt-in.
 
 ## Activation model (per A1 design decision)
 

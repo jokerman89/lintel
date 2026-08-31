@@ -176,12 +176,3 @@ jobs:
 
       - name: Run shellcheck on tests/
         run: shellcheck --severity=warning tests/runner/*.sh tests/unit/*.sh || true
-
-  compliance-check:
-    name: /onecs-check (when implemented)
-    runs-on: ubuntu-latest
-    if: false   # enable once /onecs-check has CI-mode
-    steps:
-      - uses: actions/checkout@v4
-      - name: Placeholder
-        run: echo "onecs-check CI mode pending implementation"

@@ -3,6 +3,7 @@
 # Surfaces edits to regulated-data paths without current compliance evidence.
 
 set -euo pipefail
+LINTEL_REPO_ROOT="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}"  # guard: unset under set -u aborts the hook (fail-closed)
 
 LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
 PROFILE="$LINTEL_HOME/profile.yaml"
@@ -72,7 +73,7 @@ for fw in "${frameworks[@]}"; do
   [ "$age" -gt "$oldest_age" ] && oldest_age="$age"
 
   # Count known gaps in the evidence file (lines mentioning "gap")
-  gap_lines=$(grep -ciE 'verdict:[[:space:]]*gap' "$evidence_file" 2>/dev/null || echo 0)
+  gap_lines=$(grep -ciE 'verdict:[[:space:]]*gap' "$evidence_file" 2>/dev/null) || gap_lines=0
   total_gap=$((total_gap + gap_lines))
 done
 

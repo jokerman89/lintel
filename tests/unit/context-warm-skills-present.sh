@@ -2,7 +2,7 @@
 # tests/unit/context-warm-skills-present.sh
 #
 # Verifies v3.5 context-warming infrastructure: 10 skills present + valid.
-# Post-Väg-A: skill folder/name bare (no li- prefix), invocation /li:<name>.
+# Bare-name form: skill folder/name bare (no li- prefix), invocation /li:<name>.
 # tag: v3.5 context-warming
 
 set -uo pipefail

@@ -110,9 +110,9 @@ if [ -n "$DECISIONS_DIR" ] && [ -d "$DECISIONS_DIR" ]; then
 fi
 
 # Pending migrations
-if [ -n "$REPO_ROOT" ] && [ -d "$REPO_ROOT/docs/v4.x/migrations" ]; then
-  mig="$(find "$REPO_ROOT/docs/v4.x/migrations" -maxdepth 1 -name '*.md' ! -name '_*' 2>/dev/null | wc -l | tr -d ' ')"
-  [ "${mig:-0}" -gt 0 ] 2>/dev/null && add "Pending migrations: $mig (see docs/v4.x/migrations/)"
+if [ -n "$REPO_ROOT" ] && [ -d "$REPO_ROOT/docs/migrations" ]; then
+  mig="$(find "$REPO_ROOT/docs/migrations" -maxdepth 1 -name '*.md' ! -name '_*' 2>/dev/null | wc -l | tr -d ' ')"
+  [ "${mig:-0}" -gt 0 ] 2>/dev/null && add "Pending migrations: $mig (see docs/migrations/)"
 fi
 
 # Current cycle position (setup-hardening 2026-06-14) — re-inject "where you were in the

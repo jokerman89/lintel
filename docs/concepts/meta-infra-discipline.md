@@ -1,7 +1,7 @@
 # Meta-infra discipline — gates that activate when you edit Lintel itself
 
 **Last updated:** 2026-05-29 (v4.0 Phase 1)
-**Status:** Concept doc — referenced by `skills/cycle/SKILL.md` (mode preset), `skills/sense/SKILL.md` (Step 0c), `bin/li-compat-audit`, `tests/shape/_README.md`, `docs/v4.x/structure-changes/_TEMPLATE.md`, `docs/v4.x/migrations/_INDEX.md`
+**Status:** Concept doc — referenced by `skills/cycle/SKILL.md` (mode preset), `skills/sense/SKILL.md` (Step 0c), `bin/li-compat-audit`, `tests/shape/_README.md`, `.claude/engineering/evolution/_TEMPLATE.md`, `docs/migrations/_INDEX.md`
 
 > Lintel is scaffolding. Changes to scaffolding ripple to every downstream cycle on every pack on every operator's machine. A skill rename breaks every workflow that referenced the old name. A frontmatter contract change breaks every skill that didn't update. A `_default` field change shifts behavior for every pack that didn't override. Meta-infra discipline is the **set of four mandatory gates that fire when changes touch scaffolding**, plus the mode envelope that makes them visible to the operator before BUILD starts.
 
@@ -33,14 +33,14 @@ BUILD edits the scaffolding
     │
     ▼
 REVIEW runs Gate M2 (bin/li-compat-audit) + Gate M3 (shape-tests)
-    │  M2: 4-question GREEN/YELLOW/RED sweep → docs/v4.x/compatibility-audits/
+    │  M2: 4-question GREEN/YELLOW/RED sweep → .claude/engineering/compat-audits/
     │  M3: 8 shape-tests via tests/runner/run-all.sh --shape-only
     ▼
 SHIP blocked if M2=RED (without explicit override) or M3=FAIL
     │
     ▼
 CAPTURE runs Gate M4 (future-operator clarity)
-       updates docs/v4.x/migrations/_INDEX.md if a migration ships
+       updates docs/migrations/_INDEX.md if a migration ships
 ```
 
 The four gates are mandatory inside meta-infra mode and absent in every other mode.
@@ -51,7 +51,7 @@ The four gates are mandatory inside meta-infra mode and absent in every other mo
 
 **Trigger:** SENSE auto-detected scaffolding paths in diff, OR operator chose `--mode meta-infra`.
 
-**Action:** Before merging the design, the operator writes a `docs/v4.x/structure-changes/<date>-<slug>.md` entry using `_TEMPLATE.md`. Required sections:
+**Action:** Before merging the design, the operator writes a `.claude/engineering/evolution/<date>-<slug>.md` entry using `_TEMPLATE.md`. Required sections:
 
 - **What changed:** specific files, lines, and fields
 - **Backward-compat:** will existing workflows still function?
@@ -60,7 +60,7 @@ The four gates are mandatory inside meta-infra mode and absent in every other mo
 - **Verification:** how will REVIEW confirm the change holds?
 - **Rollback:** if SHIP discovers a regression, what reverts?
 
-**Output:** `docs/v4.x/structure-changes/<date>-<slug>.md`
+**Output:** `.claude/engineering/evolution/<date>-<slug>.md`
 
 **Why DEFINE and not PLAN:** if the structure change is wrong-shaped, the plan written against it will be wrong too. M1 forces the operator to think about ripple before tasks get cheap.
 
@@ -75,12 +75,12 @@ The four gates are mandatory inside meta-infra mode and absent in every other mo
 3. **New defaults** — did any existing field get a new default that changes behavior?
 4. **Shared helpers** — did any signature in `lib/*.sh` change?
 
-**Output:** `docs/v4.x/compatibility-audits/<date>-<slug>.md` with verdict:
+**Output:** `.claude/engineering/compat-audits/<date>-<slug>.md` with verdict:
 - **GREEN** — no contract changes
 - **YELLOW** — additive changes, backward-compatible
 - **RED** — breaking changes, downstream must migrate
 
-RED requires either: (a) a deprecated_aliases entry covering the rename, (b) a documented migration in `docs/v4.x/migrations/_INDEX.md`, or (c) explicit operator override in the audit doc.
+RED requires either: (a) a deprecated_aliases entry covering the rename, (b) a documented migration in `docs/migrations/_INDEX.md`, or (c) explicit operator override in the audit doc.
 
 **Why mechanical and not LLM:** at v4.0 the contract surface is well-defined. A grep-based audit catches every actual change, never misses, never hallucinates. LLM review is reserved for the rationale, not the detection.
 
@@ -109,11 +109,11 @@ RED requires either: (a) a deprecated_aliases entry covering the rename, (b) a d
 
 **Action:** CAPTURE writes a recap that a future operator (or future-you, six months from now) can use cold. Required surfaces:
 
-- Every migration that future operators need to run → appended to `docs/v4.x/migrations/_INDEX.md`
+- Every migration that future operators need to run → appended to `docs/migrations/_INDEX.md`
 - Every new convention introduced → recorded in the cycle's CAPTURE doc with a pointer
 - Every deprecated path with grace window → recorded in CAPTURE doc and migrations index
 
-**Output:** updated `docs/v4.x/migrations/_INDEX.md`; cycle CAPTURE doc.
+**Output:** updated `docs/migrations/_INDEX.md`; cycle CAPTURE doc.
 
 **Why CAPTURE and not REVIEW:** REVIEW verifies the change works. CAPTURE verifies the change is teachable. Both matter, but M4 specifically is about transmission to the next operator.
 
@@ -130,7 +130,7 @@ meta-infra:
   cap_soft: 600k
   cap_hard: 900k
   gates_active: [M1, M2, M3, M4]
-  use_when: change touches skills/, agents/, hooks/, bin/_*.sh, install/, LAYERS.md, lib/, packs/, core templates
+  use_when: change touches skills/, agents/, hooks/, bin/_*.sh, install/, docs/architecture.md, lib/, packs/, core templates
   detection: auto-detected by SENSE Step 0c
 ```
 
@@ -173,7 +173,7 @@ SENSE never blocks. The operator either accepts the recommendation or explicitly
 - Edits under `install/` (setup scripts)
 - Edits under `lib/` (shared utilities)
 - Edits under `packs/_default/pack.yaml` (neutral skeleton)
-- Edits to `LAYERS.md` (layer model)
+- Edits to `docs/architecture.md` (layer model)
 - Edits to core templates (anything under `templates/` referenced by workflow_root skills)
 
 **Does not activate:**
@@ -208,14 +208,14 @@ The four gates are not bureaucratic. M1 forces structural thinking before tasks 
 **Reads:**
 - `git diff --name-only HEAD` (SENSE Step 0c)
 - Operator's last message (SENSE Step 0c heuristic)
-- `docs/v4.x/structure-changes/_TEMPLATE.md` (M1)
+- `.claude/engineering/evolution/_TEMPLATE.md` (M1)
 - `tests/shape/*.sh` (M3)
 
 **Writes:**
 - `.claude/runtime/state/00-state.md` (`meta_infra_detected: true`)
-- `docs/v4.x/structure-changes/<date>-<slug>.md` (M1)
-- `docs/v4.x/compatibility-audits/<date>-<slug>.md` (M2)
-- `docs/v4.x/migrations/_INDEX.md` (M4 if migration ships)
+- `.claude/engineering/evolution/<date>-<slug>.md` (M1)
+- `.claude/engineering/compat-audits/<date>-<slug>.md` (M2)
+- `docs/migrations/_INDEX.md` (M4 if migration ships)
 - `${LINTEL_HOME}/audit/meta-infra-overrides.jsonl` (override trail)
 - `${LINTEL_HOME}/audit/shape-tests.jsonl` (M3 failures)
 

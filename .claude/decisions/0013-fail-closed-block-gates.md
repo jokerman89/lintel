@@ -2,7 +2,7 @@
 
 **Status:** Accepted (2026-06-13)
 **Decided by:** operator (cli-issues workstream 2: "issues we'll share — overcome them before they hit us")
-**Implements:** docs/audit/2026-06-13-cli-issues-craft-synthesis.md (workstream 2, I1/I3) — landed in 0042312
+**Implements:** .claude/engineering/audits/2026-06-13-cli-issues-craft-synthesis.md (workstream 2, I1/I3) — landed in 0042312
 **Note on numbering:** written after ADR-0014–0017; the security decision shipped under the
 synthesis's "ADR-0014" label while 0014 became prompt-craft. This record fills the gap so the
 control change has its own decision record (repo law: non-trivial decision → ADR).
@@ -40,7 +40,7 @@ AUTO_DECIDE let an agent auto-decide an irreversible change).
 - The I1 regression block in tests/integration/security-controls-fire.sh and
   tests/unit/hook-gate-content.sh keep the closures closed; skill-descriptions-trigger.sh
   guards ADR-0014's craft contract alongside.
-- Known residuals stay tracked in the launch register (docs/audit/2026-06-12-launch-readiness-
+- Known residuals stay tracked in the launch register (.claude/engineering/audits/2026-06-12-launch-readiness-
   register.md §3): newline/line-continuation matcher bypass + newline-forged override (fixed in
   the launch-readiness waves with negative tests), push-path scan of already-committed secrets,
   `git diff` textconv hardening, and the structural close — the real git pre-commit/pre-push

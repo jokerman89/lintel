@@ -22,7 +22,7 @@
 #   scale_estimate <prompt>        → emits the scope block (YAML) for the skill
 #   elephant_score <prompt>        → alias of detect_breadth (back-compat)
 #
-# Design: docs/design/lintel-scope-and-scaled-planning-design.md §3.1
+# Design: .claude/engineering/design-archive/lintel-scope-and-scaled-planning-design.md §3.1
 # Decisions: 1B (AI-from-start — the agent judges ambiguity when escalate=yes;
 #            this lib emits the signal, SENSE step 0e handles the judgment),
 #            2A (this lib is the single source; elephant-hint calls it).
@@ -34,7 +34,7 @@
 # (graceful fallback) — `classify_size` + `scale_ambiguous` are always usable
 # on their own.
 
-set -uo pipefail
+# sourced library: no 'set -uo pipefail' here (shell opts leak into every caller — skills/hooks/tests); functions guard their own vars
 
 # ─── Domain lexicon ──────────────────────────────────────────────────────────
 # Bimodal-prone nouns: present without a size qualifier ⇒ the request could be

@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # tests/behavior/build-pilot.sh
 #
-# v3.6 cohort 2 item 1.4 REPLACED: pilot behavior test på `build`-fasen.
+# v3.6 cohort 2 item 1.4 REPLACED: pilot behavior test for the `build` phase.
 # Skill mandates 100% test-coverage; current 11 unit tests check presence + frontmatter
-# not behavior. Behavior tests måste validera shape of artifacts producerade, ej bara
-# file-existence. Pilot på build eftersom generate-pipeline dogfoodas där.
+# not behavior. Behavior tests must validate the shape of the artifacts produced, not just
+# file-existence. Piloted on build because the generate-pipeline is dogfooded there.
 #
-# Pilot scope: given minimal fixture, build-fasen should produce documented artifact-shape.
-# If pilot succeeds, expand behavior-tests till other phases iteratively.
+# Pilot scope: given a minimal fixture, the build phase should produce a documented artifact-shape.
+# If the pilot succeeds, expand behavior-tests to other phases iteratively.
 #
 # tag: v3.6 cohort-2 behavior-test-pilot
 
@@ -27,28 +27,28 @@ BUILD_FILE="$REPO_ROOT/skills/build/SKILL.md"
 if [ -f "$BUILD_FILE" ]; then
   pass "skills/build/SKILL.md present"
 
-  # Behavior expectations från spec:
+  # Behavior expectations from spec:
   # - Workflow section present
-  # - Workflow declarerar artifact-shape (what gets produced)
+  # - Workflow declares artifact-shape (what gets produced)
   # - Status protocol documented (DONE / DONE_WITH_CONCERNS / BLOCKED / NEEDS_CONTEXT)
   # - Anti-patterns section present (negative-space spec)
 
   if grep -q "## Workflow" "$BUILD_FILE"; then
-    pass "build/SKILL.md har Workflow-sektion"
+    pass "build/SKILL.md has a Workflow section"
   else
-    fail "build/SKILL.md saknar Workflow-sektion"
+    fail "build/SKILL.md missing Workflow section"
   fi
 
   if grep -qE "DONE|DONE_WITH_CONCERNS|BLOCKED|NEEDS_CONTEXT" "$BUILD_FILE"; then
-    pass "build/SKILL.md har status protocol"
+    pass "build/SKILL.md has status protocol"
   else
-    fail "build/SKILL.md saknar status protocol"
+    fail "build/SKILL.md missing status protocol"
   fi
 
   if grep -q "## Anti-patterns" "$BUILD_FILE"; then
-    pass "build/SKILL.md har Anti-patterns-sektion"
+    pass "build/SKILL.md has an Anti-patterns section"
   else
-    fail "build/SKILL.md saknar Anti-patterns-sektion"
+    fail "build/SKILL.md missing Anti-patterns section"
   fi
 
   # v4.11: review is fail-closed on a no-op tree (superpowers #1701)
@@ -64,27 +64,27 @@ fi
 # 2. Build refers to artifact shape (not just "ships code")
 if [ -f "$BUILD_FILE" ]; then
   if grep -qE "artifact|commit|test.*pass|PR" "$BUILD_FILE"; then
-    pass "build/SKILL.md namnger producerad artifact-shape"
+    pass "build/SKILL.md names the artifact-shape it produces"
   else
-    fail "build/SKILL.md saknar artifact-shape-spec (vad produceras?)"
+    fail "build/SKILL.md missing artifact-shape spec (what gets produced?)"
   fi
 fi
 
 # 3. Build references upstream phase (PLAN) for context
 if [ -f "$BUILD_FILE" ]; then
   if grep -qiE "plan|design.doc|spec" "$BUILD_FILE"; then
-    pass "build/SKILL.md tar upstream context (PLAN/design-doc) som input"
+    pass "build/SKILL.md takes upstream context (PLAN/design-doc) as input"
   else
-    fail "build/SKILL.md saknar upstream-context-input — orphan phase risk"
+    fail "build/SKILL.md missing upstream-context input — orphan phase risk"
   fi
 fi
 
-# 4. Pilot scope validation — denna är ETT phase. Future expansion till other phases:
+# 4. Pilot scope validation — this covers ONE phase. Future expansion to other phases:
 echo ""
 echo "Pilot-scope notes:"
-echo "  - Detta test validates build-phase SHAPE-spec, ej runtime behavior"
-echo "  - Runtime behavior-tests kräver fixture + skill-execution sandbox (separat infrastructure)"
-echo "  - Om pilot passes → expand pattern till andra phases (sense, define, discover, etc) i v3.6+"
+echo "  - This test validates the build-phase SHAPE spec, not runtime behavior"
+echo "  - Runtime behavior-tests require a fixture + skill-execution sandbox (separate infrastructure)"
+echo "  - If the pilot passes, expand the pattern to other phases (sense, define, discover, etc) in v3.6+"
 
 echo ""
 if [ "$FAILED" -eq 0 ]; then

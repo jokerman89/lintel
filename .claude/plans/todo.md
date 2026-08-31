@@ -1,8 +1,101 @@
 # todo — active initiatives
 
+## Beta release — public docs + history sanitation (2026-08-28, cycle beta-release-docs, branch feat/launch-readiness)
+
+Mode meta-infra (M1/M3/M4). Ground truth @ this run: **125 skills · 69 agents · 33 hooks ·
+90 tests (36 shape / 48 unit / 4 integration / 1 behavior / 1 e2e) · 1 pack · 21 bin · 8 CLIs**.
+Operator decisions at the DEFINE gate: (1) rewrite all 250 commit messages in place,
+(2) move internal engineering artifacts out of the public tree into `.claude/`,
+(3) release as **v0.9.0-beta**.
+
+### W1 — cut the L-023 trap, then relocate internal docs
+- [x] W1.1 Inventory every live reference into `.claude/engineering/audits/`, `docs/v4.x/` (28 known callsites)
+- [x] W1.2 Repoint `tests/shape/uniformity-coverage.sh` + `tests/shape/no-swedish.sh` to new paths
+- [x] W1.3 Repoint `skills/uniformity/SKILL.md`, `lib/auto-decide.sh`, `lib/state.sh`
+- [x] W1.4 Repoint 9 ADRs + `.claude/memory/*` + `CHANGELOG.md` + 3 `docs/concepts/*`
+- [x] W1.5 `git mv .claude/engineering/audits/` (28) → `.claude/audit/`
+- [x] W1.6 `git mv .claude/engineering/compat-audits/` (13) → `.claude/audit/compat/`
+- [x] W1.7 `git mv .claude/engineering/evolution/` (22) → `.claude/evolution/`
+- [x] W1.8 `git mv` superseded design docs (v2/v3/v3.5/v3.6/v3.7/v4.0) → `.claude/design/archive/`
+- [x] W1.9 Retire `.claude/engineering/audits/lintel-state-of-the-harness.md` (v4.9 internal audit, stale counts) → `.claude/audit/`
+- [x] W1.10 Shape suite green (36/36) — proof the relocation broke nothing
+
+### W2 — the landing page + the documentation tree
+- [x] W2.1 Rewrite `README.md` — hero, thesis, 60-second install, the cycle showcased, honest tables, nav tree
+- [x] W2.2 New `docs/README.md` — the documentation index (the tree of connections)
+- [x] W2.3 New `docs/the-cycle.md` — the 9 phases broken down, gate by gate, with a worked example
+- [x] W2.4 New `docs/architecture.md` — public replacement for state-of-the-harness (spine/pack/nav/depth)
+- [x] W2.5 Refresh `docs/getting-started.md` — counts, paths, beta framing
+- [x] W2.6 Refresh `docs/multi-cli.md` + `docs/faq.md` + `docs/power-user.md` + `docs/GLOSSARY.md`
+- [x] W2.7 Fix `docs/showcase/README.md` (83→69 agents, remove Swedish "Fas D", L-001 internalese)
+- [x] W2.8 Sweep every relative link in the public tree; zero dead links
+- [x] W2.9 Refresh `CONTRIBUTING.md` + `SECURITY.md` + `CODE_OF_CONDUCT.md` for a public beta
+
+### W3 — commit-history sanitation (one-way door; force-push is operator-authorized)
+- [x] W3.1 Export all 250 messages to a working file; snapshot `git rev-parse --all` for rollback
+- [x] W3.2 Tag `archive/pre-beta-history` on current main as an escape hatch
+- [x] W3.3 Build the rewrite map: mechanical strip of `Co-Authored-By: Claude*` / `Generated with` / `Claude-Session:`
+- [x] W3.4 Hand-author replacement subjects for the 41 flagged commits (Swedish, veto/dirigering, gstack/JStack/CAIP/MS, "weapon")
+- [x] W3.5 Sweep bodies for `Per operator directive`, `operator-veto`, review-scoreboards
+- [x] W3.6 Apply with `git filter-branch --msg-filter` over `--all`
+- [x] W3.7 VERIFY: `git diff <old-head> <new-head>` must be EMPTY (content byte-identical)
+- [x] W3.8 VERIFY: re-scan rewritten history for every marker class; zero hits
+- [ ] W3.9 GATE — operator force-pushes `main` (or authorizes it explicitly)
+
+### W4 — release mechanics
+- [x] W4.1 Version → 0.9.0 across `.claude-plugin/plugin.json` + all per-CLI manifests + `gemini-extension.json`
+- [x] W4.2 CHANGELOG restart: `v0.9.0-beta` section + v3–v5 history compressed to one "Pre-beta" block
+- [x] W4.3 Regenerate `skills/CATALOG.md`
+- [x] W4.4 M1 structure-change entry for the docs relocation
+- [x] W4.5 Full suite green (90 tests) + `li-doctor`
+- [x] W4.6 Tag `v0.9.0-beta`
+- [x] W4.7 CAPTURE — lessons, M4 future-operator recap, working-state
+
+### Review
+
+Done: 33 of 34 tasks. The one open item is W3.9 — the force-push — which was never mine to run.
+
+**What the plan did not anticipate.** Three things the recon found that the plan had no task for:
+- Generator WRITE paths into the directories being moved (`bin/li-uniformity`, `bin/li-compat-audit`
+  from two branches). The plan only listed readers. Recorded as L-024.
+- `skills/ship/SKILL.md` instructing every future PR to carry an AI-authorship trailer. Cleaning the
+  history without this would have been undone by the next ship. Recorded as L-025.
+- `.gitignore` silently untracking `.claude/plans/` — found by a subagent auditing a claim in a doc
+  it was rewriting, not by any planned check.
+
+**What cost the most time.** A naive repo-wide sed (17 patterns x ~1400 files) timed out at two
+minutes on Windows Git Bash; grep-then-sed ran in seconds. And two test suites ran concurrently for
+a while before I noticed I was reproducing L-022 myself.
+
+**Scope grew, correctly.** The widened English-only guard surfaced 87 hits in directories the guard
+had never scanned. Cleaning them was not in the plan but was clearly in the spirit of the request.
+
+---
+
+
+## Launch readiness — PUBLIC launch (2026-06-18, cycle launch-readiness, branch feat/launch-readiness)
+
+Mode meta-infra (M1–M4). Inventory @ v5.7.1: 125 skills, 69 agents, 33 hooks, 14 lib, 21 bin,
+25 ADRs, 93 tests. Goal: audit everything, learn from comparable repos (obra/superpowers,
+github/spec-kit, GSD/gstack), enhance depth/quality, apply subtraction to the command surface,
+bring all publishing (README/guides/help/wiki/marketplace) current. Extends — does not replace —
+the v5.x register at .claude/engineering/audits/2026-06-12-launch-readiness-register.md.
+
+- [x] SENSE — inventory captured; on feat/launch-readiness; cycle ledger written
+- [x] DISCOVER — 10-agent read-only fan-out complete (A1–A8 internal + B1–B2 external)
+- [x] DEFINE — register v2 written: .claude/engineering/audits/2026-06-18-launch-readiness-register-v2.md
+- [ ] GATE — 3 strategic decisions + build authorization (awaiting operator)
+- [ ] PLAN/BUILD — waves W1–W7 (W1-W4,W7 mechanical; W5-W6 scoped by gate)
+- [ ] PLAN — prioritized fix waves
+- [ ] BUILD — execute waves (operator gate before)
+- [ ] REVIEW — M2 compat audit + M3 shape tests + independent review (L-007)
+- [ ] SHIP — PR to main · CAPTURE — lessons + migrations index (M4)
+
+---
+
 ## Launch readiness — v5.x old-school ready (2026-06-12/13, cycle launch-readiness-20260612)
 
-Register: docs/audit/2026-06-12-launch-readiness-register.md (bar §1, evidence §2, blockers §3-A,
+Register: .claude/engineering/audits/2026-06-12-launch-readiness-register.md (bar §1, evidence §2, blockers §3-A,
 dated deferrals §3-B, waves §4). Mode meta-infra, --auto, founder gate at PLAN. Single-writer:
 the dead v5.3 session must not be resumed while BUILD runs.
 
@@ -57,7 +150,7 @@ Voice). Tool-scoping lines distinguish read-only reviewers (no Edit/Write) from 
 agents (Architect/DatabaseDesigner/APIDesigner/Refactorer — scoped to artifacts, not live source/DB).
 ## v5.4 design DNA — consume UI/UX Pro Max + anthropic-default profile (2026-06-13, branch feat/v5.4-design-dna)
 
-Design: docs/design/lintel-v5.4-design-dna-design.md (ADR-0015 + ADR-0016). Mode: meta-infra (M1-M4).
+Design: .claude/engineering/design-archive/lintel-v5.4-design-dna-design.md (ADR-0015 + ADR-0016). Mode: meta-infra (M1-M4).
 Research: .claude/runtime/research/{A1,A2,B,C}*.md. Upstream: nextlevelbuilder/ui-ux-pro-max-skill @ MIT.
 
 - [ ] B1 corpus — skills/design-dna/{data,scripts}: copy UUPM canonical tree (minus google-fonts.csv/draft.csv/_sync_all.py), patch domain registry, attribution headers, ATTRIBUTION.md, smoke-run search + design-system compose
@@ -73,7 +166,7 @@ Research: .claude/runtime/research/{A1,A2,B,C}*.md. Upstream: nextlevelbuilder/u
 
 ## v5.2 battletest — newcomer-clarity doc fixes J1-J6 (2026-06-12, branch feat/v5.2-battletest)
 
-Source: docs/audit/2026-06-12-battletest-synthesis.md (JAB rows) + noob first-hour findings.
+Source: .claude/engineering/audits/2026-06-12-battletest-synthesis.md (JAB rows) + noob first-hour findings.
 SCOPE: README.md, docs/getting-started.md, skills/welcome/SKILL.md, CLAUDE.md, install/install.sh, NEW docs/GLOSSARY.md ONLY. Do NOT touch other skills/ or agents/.
 
 - [x] J1 — canonical hook-activation matrix added to getting-started ("How hook activation works", ADR-0008). README:5, welcome Step 4, install.sh header all point at it. No "inert" without "(bare install only)"; no "zero-setup" without "(plugin install)" — verified by grep.
@@ -100,7 +193,7 @@ new Windows line points newcomers at it, so it should get the same J5 treatment 
 - [x] 5 modules (ta/da/sc/dh/tq): add `## Sub-capability dispatch` table + short load-bearing subsections; `/li:<module> <capability>` shorthand; direct dispatch in single granularity; shed Pause-points/Hop-in/Voice boilerplate per docs/concepts/skill-protocol.md
 - [x] git rm -r the 35 sub-skill dirs
 - [x] config/aliases.yaml: 35 entries (deprecated 2026-06-12 → removal 2026-09-12, ADR-0009)
-- [x] Repoint live refs: hooks (HOOK.md + run.sh messages), agents/ (9 files), docs/concepts/{ta,da,sc,dh,tq}-module.md + engineering-modules.md + full-engineering-pass.md (NOT docs/design, docs/audit, CATALOG.md, docs/wiki [generated], CHANGELOG)
+- [x] Repoint live refs: hooks (HOOK.md + run.sh messages), agents/ (9 files), docs/concepts/{ta,da,sc,dh,tq}-module.md + engineering-modules.md + full-engineering-pass.md (NOT docs/design, .claude/engineering/audits, CATALOG.md, docs/wiki [generated], CHANGELOG)
 - [x] Rewrite tests/shape/{ta,da,sc,dh,tq}-module-contract.sh (dispatch-table assertions) + fix tests/unit/{ta,da,sc,dh,tq}-routing.sh Scenario 3 + sc/dh Scenario 9 (grepped deleted files)
 - [x] Green: 5 shape + 5 routing + frontmatter-lint-all = rc 0 each, 0 FAIL lines; no commit
 
@@ -133,7 +226,7 @@ Architect only (matches reality).
 - [ ] Operator: update plugin, remove 4 manual hook entries from ~/.claude/settings.json, re-run install.sh, verify with li-doctor
 
 
-Design: [docs/design/lintel-v5-claude-home-memory-obsidian-design.md](../docs/design/lintel-v5-claude-home-memory-obsidian-design.md)
+Design: [.claude/engineering/design-archive/lintel-v5-claude-home-memory-obsidian-design.md](../.claude/engineering/design-archive/lintel-v5-claude-home-memory-obsidian-design.md)
 Mode: meta-infra (Gates M1–M4). Decisions D1–D4 locked by operator 2026-06-12.
 (Previous initiative v4.11 closed 2026-06-10 — see git history of this file.)
 

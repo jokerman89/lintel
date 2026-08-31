@@ -2,7 +2,7 @@
 
 **Status:** Accepted (2026-06-12)
 **Decided by:** operator (battletest — security persona, "är en tjänst inte försvarbar då måste vi … överkomma")
-**Implements:** docs/audit/2026-06-12-battletest-synthesis.md (Wave S: K1-K4, H8, H16)
+**Implements:** .claude/engineering/audits/2026-06-12-battletest-synthesis.md (Wave S: K1-K4, H8, H16)
 
 ## Context
 

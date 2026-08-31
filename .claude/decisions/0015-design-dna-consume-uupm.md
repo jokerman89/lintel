@@ -70,7 +70,7 @@ attribution intact). Behavior: `tests/unit/design-dna-search.sh` +
 
 ## References
 
-- Design doc: `docs/design/lintel-v5.4-design-dna-design.md`
+- Design doc: `.claude/engineering/design-archive/lintel-v5.4-design-dna-design.md`
 - Research: `.claude/runtime/research/{A1,A2,B,C}*.md` (runtime, not committed)
 - ADR-0016 (anthropic-default profile), L-001, L-004 (split preserved: design-dna feeds the
   decision layer, decides nothing itself)

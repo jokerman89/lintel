@@ -76,7 +76,7 @@ This precedence is enforced by skill instructions — no runtime policy engine. 
 | Active pack | `packs/<name>/pack.yaml` (resolved) | Pack-driven | Every session-start (compliance + voice + persona) |
 | Neutral baseline | `packs/_default/pack.yaml` | Stable | Fallback when no company pack is active |
 
-Full architecture rationale in [`LAYERS.md`](LAYERS.md).
+Full architecture rationale in [docs/architecture.md](docs/architecture.md).
 
 ---
 
@@ -88,7 +88,7 @@ If this session generates customer-facing or official-communication content: the
 
 If the session is internal dev work (code review, planning, tests, install): `voice: internal` — direct, builder-talking-to-builder.
 
-Voice tier is the per-agent honest split between external voice (for customers) and engineering voice (for the team). The Microsoft CAIP-SE Trailblazer corpus ships in the lintel-caip-pack example.
+Voice tier is the per-agent honest split between external voice (for customers) and engineering voice (for the team). A company pack supplies its own calibrated corpus.
 
 ---
 
@@ -101,7 +101,7 @@ If activated (operator symlinks from `~/.lintel/hooks/` to `~/.claude/hooks/`), 
 
 The watchers do NOT auto-compact — Claude can't compact its own conversation. They surface the right move (`/context-save` + restart in a fresh session) before bloat hits productivity.
 
-Configure thresholds in `~/.lintel/config.yaml`.
+Configure thresholds in `~/.lintel/config.yaml` (the layer config the bare installer writes; operator identity lives in `~/.lintel/profile.yaml`).
 
 ---
 
@@ -190,7 +190,7 @@ For non-trivial work, the Lintel cycle provides an explicit 9-step pipeline (8 c
 - Compliance hard-stop in SHIP (if the active pack's compliance mode is `hard`)
 - Two-stage subagent review per BUILD task (spec then quality)
 
-See [docs/design/lintel-v3.5-cycle-and-roles.md](docs/design/lintel-v3.5-cycle-and-roles.md) for the full cycle specification.
+See [docs/the-cycle.md](docs/the-cycle.md) for the full cycle specification.
 
 ---
 
@@ -246,7 +246,7 @@ Compliance posture is declared by the active pack (`resolve_pack_field complianc
 - `voice.default_tier`: internal
 - Operator-driven gates only
 
-The lintel-caip-pack example sets `hard` mode with the Microsoft CAIP-SE ruleset (SSO policy, first-party preference, RAIS/OneCS/SDL gates, Trailblazer voice).
+A company pack typically sets `hard` mode and supplies its own gates, identity policy and voice corpus.
 
 **Profile fields:**
 ```yaml

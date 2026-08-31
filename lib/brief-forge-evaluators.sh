@@ -20,7 +20,7 @@
 #   evaluator_completeness <envelope_path>          → JSON result
 #   evaluator_stale <envelope_path>                 → JSON result
 
-set -uo pipefail
+# sourced library: no 'set -uo pipefail' here (shell opts leak into every caller — skills/hooks/tests); functions guard their own vars
 
 # ─── Pack resolution ───────────────────────────────────────────────────────
 # Resolve which evaluators to run for a given hand-off from the active pack.

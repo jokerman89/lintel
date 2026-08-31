@@ -17,9 +17,9 @@ These are tips that only apply when running under Codex CLI. They do not overrid
 
 ### Sub-agents
 
-Codex does not have a first-class subagent abstraction equivalent to Claude Code's. The closest pattern is invoking a separate Codex run with a scoped prompt. Treat agent precedence rules in `AGENT-INSTRUCTIONS.md` as guidance for how to scope those nested runs.
+Codex has native subagents (`lib/cli-tiers.yaml`: `subagents: native`), so the agent precedence rules in `AGENT-INSTRUCTIONS.md` apply directly. For a scripted one-shot outside an interactive session, a separate `codex exec` run with a scoped prompt is the equivalent.
 
-If a task in this repo lists a Claude Code subagent (e.g., "use the ReadOnly agent"), the Codex equivalent is to start a new Codex conversation with the prompt the subagent definition would have produced. The behavior is approximately the same; the mechanism differs.
+Skills surface natively as `/li:<skill>` once the plugin is installed. The one capability Codex does not get is the hook enforcement layer, which is a Claude Code mechanism.
 
 ### Plan mode
 

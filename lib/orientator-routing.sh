@@ -11,7 +11,7 @@
 #
 # Ref: docs/concepts/orientator.md
 
-set -uo pipefail
+# sourced library: no 'set -uo pipefail' here (shell opts leak into every caller — skills/hooks/tests); functions guard their own vars
 
 # ─── classify_intent ───────────────────────────────────────────────────────
 # Returns: build | fix | review | research | ship | deploy | scaffold | resume | unclear

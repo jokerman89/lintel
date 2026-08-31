@@ -149,4 +149,4 @@ Written to: voice-calibration.md
 - the pack's voice test rubric — the rubric
 - the calibration file — the output
 - the active pack's voice gate — reads calibration to decide whether to certify
-- `SHIP-GATE.md` — ship prerequisites
+- `.claude/engineering/SHIP-GATE.md` — ship prerequisites

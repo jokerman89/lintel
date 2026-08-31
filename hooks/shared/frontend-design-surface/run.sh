@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# frontend-design-surface — Lintel surface-only hook (v3.7 Fas C)
+# frontend-design-surface — Lintel surface-only hook
 # Passive surfacing of relevant design-patterns when operator opens/edits frontend files.
 # Per design doc: read-only recommendation, throttled, <200ms budget for vault of 1-3.
 
@@ -51,7 +51,7 @@ if [ -f "$marker" ] && grep -Fxq "$target_canonical" "$marker" 2>/dev/null; then
   exit 0  # Already surfaced this file this session
 fi
 
-# Collect relevant patterns (MVP: extension-bucket match; Fas C+1 will add brief-hash matching)
+# Collect relevant patterns (extension-bucket match; brief-hash matching is not implemented yet)
 # tsx/jsx → patterns that reference react in component-imports.json
 # svelte → patterns that reference svelte
 # vue → patterns that reference vue

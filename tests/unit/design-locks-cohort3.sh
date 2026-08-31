@@ -20,37 +20,37 @@ echo "================================="
 CB="$REPO_ROOT/skills/context-budget/SKILL.md"
 if [ -f "$CB" ]; then
   if grep -q "soft + 750k hard cap\|500k soft" "$CB"; then
-    pass "context-budget har 500k soft + 750k hard cap-logik (2.1)"
+    pass "context-budget has 500k soft + 750k hard cap logic (2.1)"
   else
-    fail "context-budget saknar 500k cap-logik"
+    fail "context-budget missing 500k cap logic"
   fi
 
   if grep -q "mode_envelopes\|hotfix:.*soft.*hard\|mode-aware" "$CB"; then
-    pass "context-budget har mode-aware envelopes (3.3)"
+    pass "context-budget has mode-aware envelopes (3.3)"
   else
-    fail "context-budget saknar mode-aware envelopes"
+    fail "context-budget missing mode-aware envelopes"
   fi
 
   if grep -q "[Ss]ynthetic.*[Rr]eal warming\|synthetic vs real" "$CB"; then
-    pass "context-budget har synthetic-vs-real warming distinction (2.3)"
+    pass "context-budget has synthetic-vs-real warming distinction (2.3)"
   else
-    fail "context-budget saknar synthetic-vs-real distinction"
+    fail "context-budget missing synthetic-vs-real distinction"
   fi
 fi
 
 # 3.1: sense elephant-hint detection
 SENSE="$REPO_ROOT/skills/sense/SKILL.md"
 if [ -f "$SENSE" ]; then
-  if grep -q "[Ee]lephant.*hint\|elephant_score\|Stycka elefanten" "$SENSE"; then
-    pass "sense har elephant-hint detection (3.1)"
+  if grep -q "[Ee]lephant.*hint\|elephant_score" "$SENSE"; then
+    pass "sense has elephant-hint detection (3.1)"
   else
-    fail "sense saknar elephant-hint detection"
+    fail "sense missing elephant-hint detection"
   fi
 
-  if grep -q "three paths\|Three paths\|3 paths\|Stycka elefanten now" "$SENSE"; then
-    pass "sense surface:ar 3-paths (A/B/C) per design"
+  if grep -q "three paths\|Three paths\|3 paths" "$SENSE"; then
+    pass "sense surfaces 3-paths (A/B/C) per design"
   else
-    fail "sense saknar 3-paths-surface"
+    fail "sense missing 3-paths surface"
   fi
 fi
 
@@ -58,9 +58,9 @@ fi
 CYCLE="$REPO_ROOT/skills/cycle/SKILL.md"
 if [ -f "$CYCLE" ]; then
   if grep -q "dry-run\|--dry-run\|DRY-RUN" "$CYCLE"; then
-    pass "cycle har --dry-run flag-stöd (2.5)"
+    pass "cycle has --dry-run flag support (2.5)"
   else
-    fail "cycle saknar --dry-run flag"
+    fail "cycle missing --dry-run flag"
   fi
 fi
 

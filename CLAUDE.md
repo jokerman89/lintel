@@ -9,7 +9,7 @@
 > Sections between `<!-- PROJECT:START -->` and `<!-- PROJECT:END -->` are Lintel-specific. The rest
 > is load-bearing, inherited from [scaffolding/01-foundation/CORE-PRINCIPLES.md](scaffolding/01-foundation/CORE-PRINCIPLES.md).
 > Change the load-bearing parts only with an ADR + an entry in the evolution log
-> ([docs/v4.x/structure-changes/](docs/v4.x/structure-changes/)).
+> ([.claude/engineering/evolution/](.claude/engineering/evolution/)).
 
 <!-- PROJECT:START -->
 
@@ -24,11 +24,11 @@ Clear ownership domains:
 - `skills/` — slash-commands (the 9-step `/li:cycle` (8 core phases + SCOPE) + engineering modules `ta`/`da`/`sc`/`dh`/`tq` + session-harness skills)
 - `agents/` — subagent roles per domain (engineering, security, compliance, devops, customer, communication, doc-gen, frontend)
 - `hooks/shared/` — pre/post hooks (compliance + workflow enforcement)
-- `packs/` — pack manifests; only the neutral `_default` ships here. Company identity (e.g. Microsoft CAIP-SE) installs as an external pack — see [lintel-caip-pack](https://github.com/jokerman89/lintel-caip-pack).
+- `packs/` — pack manifests; only the neutral `_default` ships here. Company identity installs as an external pack — see [lintel-caip-pack](https://github.com/jokerman89/lintel-caip-pack) for a worked example.
 - `lib/` — `pack-resolver.sh`, `brief-forge-evaluators.sh`, schemas — the runtime helpers skills source
 - `scaffolding/01-foundation/` — the templates this repo copies INTO other repos via `bin/li-scaffold`
 - `bin/` — operator-side utilities (`li-scaffold`, `li-doctor`, `li-lessons-sync`, …)
-- `docs/` — `design/` (architecture), `v4.x/structure-changes/` (the evolution log + Gate M1 artifacts), `v4.x/migrations/`, `GLOSSARY.md` (newcomer terms). ADRs (decision records) live at `.claude/decisions/` (v5 home, ADR-0005); `docs/adr/` is a redirect stub during the grace window.
+- `docs/` — the PUBLIC documentation surface only: `architecture.md`, `the-cycle.md`, `getting-started.md`, `GLOSSARY.md`, `concepts/`, `migrations/`, `wiki/`, `showcase/`. Internal engineering artifacts (audits, Gate M1/M2 records, superseded design docs) live under `.claude/engineering/`; ADRs at `.claude/decisions/` (v5 home, ADR-0005).
 - `tests/` — `shape/` (structural contracts), `unit/`, `integration/`, `e2e/`
 
 Frozen / handle-with-care zones:
@@ -56,7 +56,7 @@ Frozen / handle-with-care zones:
 5. Skim [.claude/memory/working-state.md](.claude/memory/working-state.md) — durable cross-session state.
 6. Load operator calibration from [.claude/memory/personas.md](.claude/memory/personas.md) and the active profile (`~/.lintel/profile.yaml`: active pack, mode, role).
 7. List [.claude/decisions/](.claude/decisions/) — read any ADR whose title is relevant to the task.
-8. Check [docs/v4.x/structure-changes/](docs/v4.x/structure-changes/) for recent structural decisions.
+8. Check [.claude/engineering/evolution/](.claude/engineering/evolution/) for recent structural decisions.
 
 ---
 
@@ -92,7 +92,7 @@ circle of control (v5, ADR-0005): everything Lintel generates for this repo live
 | `.claude/plans/` | todo.md + cold-executor trios (`<slug>/{plan,spec,prompt}.md`) | per initiative |
 | `.claude/runtime/state/` | per-repo cycle + module state (gitignored) | written by cycle/module skills |
 | `.claude/runtime/{sessions,jobs,audit}/` | context-saves · job data · repo event log (gitignored) | written by skills/hooks |
-| `docs/v4.x/structure-changes/` | evolution log (Gate M1 artifacts) | per structural change |
+| `.claude/engineering/` | internal engineering artifacts — `evolution/` (Gate M1), `compat-audits/` (Gate M2), `audits/`, `design-archive/` | per structural change |
 | `~/.lintel/profile.yaml` | active pack · mode · role · checkpoint mode | operator-global |
 | `~/.lintel/jobs/_active.md` | cross-repo jobs REGISTRY (data lives in each repo; created on first job — auto-spawn dormant, ADR-0008) | `/li:resume` reads it |
 
@@ -140,7 +140,7 @@ full map for on-demand reads + where to **write**.
 1. **Plan first** — `.claude/plans/todo.md`, checkable items.
 2. **Track progress** — mark items done as you go.
 3. **Capture lessons** — `.claude/memory/lessons.md` after corrections.
-4. **Record decisions** — write an ADR (`.claude/decisions/NNNN-short-title.md`, from `.claude/decisions/TEMPLATE.md`) for any non-trivial decision. Structural changes to `skills/`/`agents/`/`hooks/`/`lib/` also get a `docs/v4.x/structure-changes/<date>-<slug>.md` (Gate M1 artifact) under meta-infra discipline.
+4. **Record decisions** — write an ADR (`.claude/decisions/NNNN-short-title.md`, from `.claude/decisions/TEMPLATE.md`) for any non-trivial decision. Structural changes to `skills/`/`agents/`/`hooks/`/`lib/` also get a `.claude/engineering/evolution/<date>-<slug>.md` (Gate M1 artifact) under meta-infra discipline.
 5. **Review** — add a review section to `.claude/plans/todo.md` at task end.
 
 > **This is the discipline that was missing.** Lintel was built as the factory but never ran the
@@ -166,7 +166,7 @@ full map for on-demand reads + where to **write**.
 This repo IS a multi-CLI plugin (`.claude-plugin/plugin.json` + per-CLI manifests). Skills at `skills/<name>/SKILL.md`, agents at `agents/<category>/<Name>.md`. Operators install via `/plugin install li@jokerman-lintel`; skills become `/li:<skill>`.
 
 ### Pack system (v4.0+)
-Identity (voice, compliance, persona, brand, roles) is **not** hardcoded — it is resolved from the active pack via `resolve_pack_field <dotted.path>` (`lib/pack-resolver.sh`). The neutral `_default` pack enforces nothing. Never reintroduce hardcoded company/voice/compliance assumptions into the spine — that is what the v4.7 CAIP extraction removed.
+Identity (voice, compliance, persona, brand, roles) is **not** hardcoded — it is resolved from the active pack via `resolve_pack_field <dotted.path>` (`lib/pack-resolver.sh`). The neutral `_default` pack enforces nothing. Never reintroduce hardcoded company/voice/compliance assumptions into the spine — extracting them into a pack is what made this repo publishable.
 
 ### Local testing
 ```bash
@@ -181,11 +181,11 @@ Skills are namespaced `/li:qa`, `/li:cycle`, etc. Inside this repo they work dir
 `skills/CATALOG.md` is auto-generated on push to `main` (`.github/workflows/catalog.yml`). Edit frontmatter, not the catalog.
 
 ### Per-CLI portability
-Same skills/agents/hooks work across 8 CLIs via per-CLI manifests. See [docs/per-cli/](docs/per-cli/).
+Same skills/agents/hooks work across 8 CLIs via per-CLI manifests. See [docs/multi-cli.md](docs/multi-cli.md); per-CLI capability is declared once in `lib/cli-tiers.yaml`.
 
 ### How you work here
 - Feature branch → PR against `main`. Local verification (shape + unit tests green) before push.
-- Conventional Commits, atomic, one logical change per commit. End commit messages with the Co-Authored-By trailer.
+- Conventional Commits, atomic, one logical change per commit. Commit messages are English-only, describe what changed technically, and carry no AI-authorship trailers (see CONTRIBUTING.md).
 - Non-trivial decision → ADR. Structural change → meta-infra `structure-changes/` entry.
 
 ### Factory exception to the global "no tooling in repos" rule
@@ -247,7 +247,7 @@ If the instruction or spec does not match reality (external API, docs, existing 
 ## Lessons & evolution
 - `.claude/memory/lessons.md` — accumulated lessons. Review at session start; add after ANY correction.
 - `.claude/decisions/` — decision records (one per non-trivial decision).
-- `docs/v4.x/structure-changes/` — the evolution log for structural changes to the harness.
+- `.claude/engineering/evolution/` — the evolution log for structural changes to the harness.
 
 ---
 

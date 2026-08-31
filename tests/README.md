@@ -1,65 +1,65 @@
-# Lintel Tests
+# Tests
 
-Test infrastructure for Lintel v2.0+. Spec'd in v2 design as P1 fix T2 (eng-review).
-
-## Structure
-
-```
-tests/
-  unit/           per-component unit tests (TS or shell)
-  integration/    cross-component integration (shell)
-  e2e/            end-to-end multi-skill flow (shell)
-  fixtures/       sanitized test data
-  runner/         test runners (run-all.sh / run-unit.sh / run-e2e.sh)
-  conventions/    bash-test-template.sh + style rules
-```
-
-## Running tests
+Lintel is markdown and bash, so its tests answer two different questions: *is the structure still
+what everything else assumes?* and *does the mechanism actually fire?*
 
 ```bash
-bash tests/runner/run-all.sh         # everything (gated by tag availability)
-bash tests/runner/run-unit.sh        # unit only
-bash tests/runner/run-e2e.sh         # e2e only
-bash tests/runner/run-all.sh --tag claude-code-only  # filter by tag
+bash tests/runner/run-all.sh                 # everything
+bash tests/runner/run-all.sh --shape-only    # structural contracts only — fast
+bash tests/runner/run-all.sh --scope unit    # one tier
+bash tests/shape/no-swedish.sh               # one test directly
 ```
 
-## Conventions
+Every test is a standalone bash script that exits non-zero on failure. There is no framework and no
+build step. `tests/conventions/bash-test-template.sh` is the starting point for a new one.
 
-Bash tests follow `tests/conventions/bash-test-template.sh`. Each test declares:
+## The tiers
 
-- **Description** — one line at top of file
-- **Tags** — dependencies the test requires (`claude-code`, `codex`, `browser`)
-- **Setup** — fixtures or env vars needed
-- **Run** — the actual test
-- **Cleanup** — return repo to original state
+| Tier | Count | What it asserts |
+|---|---|---|
+| `shape/` | 36 | Structural contracts. Required frontmatter on every skill and agent, hook registration, canonical paths, decision-record number uniqueness, generated tables matching their source, no non-English text on the public surface. |
+| `unit/` | 48 | Helper behaviour in isolation — state ledger segmenting, memory operations, pack resolution and inheritance, one-way-door detection, alias resolution. |
+| `integration/` | 4 | Two or more components across a real boundary. |
+| `behavior/` | 1 | A mechanism exercised hermetically, to prove it *fires* rather than merely exists. |
+| `e2e/` | 1 | A full path through the harness. |
 
-Tests opt-in to "requires-claude-code" / "requires-codex" / "requires-browser" via the `# TAGS:` header line. Runner respects tags + skips tests whose deps are missing in the current environment.
+## Why the shape tier carries the most weight
 
-TS tests (where applicable, doc-gen) use vitest. Config at `tests/vitest.config.ts` (created in Phase F when doc-gen libs land).
+The failure this project actually suffers is not a broken function — it is **drift between the
+system and its own description**. A count in the README goes stale, a hook ships but is never
+registered, a skill is renamed and six documents keep the old name, a generated table is hand-edited.
+None of that breaks a unit test. All of it breaks trust.
 
-## Adding a new test
+So the shape tier asserts the things prose cannot be trusted to hold:
 
-1. Copy `tests/conventions/bash-test-template.sh` to your target dir
-2. Fill in DESCRIPTION, TAGS, SETUP, RUN, CLEANUP
-3. Add a meaningful assertion (use `assert_eq`, `assert_file_exists`, `assert_contains` helpers in template)
-4. Run locally: `bash tests/your-new-test.sh` to verify it passes
-5. Verify it's discovered by runner: `bash tests/runner/run-all.sh | grep your-test`
+- `cli-tiers-sync.sh` — the README capability table must match `lib/cli-tiers.yaml` exactly. It is
+  the anti-drift guard on the project's own honesty claim.
+- `claude-home-paths.sh` — no tooling hardcodes a legacy knowledge path, and this repo carries its
+  own layout marker. The factory has to pass its own inspection.
+- `adr-numbers-unique.sh` — written after two parallel branches each claimed the same decision
+  number and the merge kept both.
+- `bin-scripts-executable.sh` — a non-executable commit passes on Windows, where the filesystem has
+  no execute bit, and fails on Linux CI. Written after exactly that.
+- `no-swedish.sh` — Lintel ships English-only. The one allowlisted file carries functional
+  non-English text: regexes that detect Swedish personal data, which translating would break.
+- `uniformity-coverage.sh` — a deliberately small enforced floor, with adoption above it reported
+  rather than failed. Publishing the real number is the point.
 
-## CI integration
+Several of these exist because something went wrong first. The header comment on each names the
+incident.
 
-`.github/workflows/ci.yml` runs:
-- `unit-tests` (Linux + Windows) — `tests/unit/` + `tests/runner/run-unit.sh`
-- `e2e-claude-code-only` (Linux) — `tests/e2e/` with `--tag claude-code-only`
-- `e2e-cross-cli` (Linux) — full e2e when Codex available in CI environment
+## CI
 
-Phase G updates ship gate (`SHIP-GATE.md` Gate 9) to require all unit + e2e-claude-code-only jobs green before v2.0 tag.
+`.github/workflows/ci.yml` runs the suite on Ubuntu and Windows. Both must be green before a
+release.
 
-## What's NOT in scope here
+## Adding a test
 
-- LLM evaluation tests (those live in `eval/<feature>/` per component; see `/li:eval` skill)
-- Performance benchmarks (those use `/perfbench` skill, results in `~/.lintel/benchmarks/`)
-- Manual QA testing (operator-driven; see `/qa` and `/qa-only` skills)
-
-## Status
-
-Created in Phase A of Lintel v2.0 build. Currently contains scaffolding only — actual tests land in Phase A.8 onwards as components are built.
+1. Copy `tests/conventions/bash-test-template.sh`.
+2. Put it in the tier that matches the question it answers — structural contract, helper behaviour,
+   cross-component, does-it-fire, or full path.
+3. Write a header comment saying *why* it exists. If it is guarding against a specific past failure,
+   name that failure.
+4. Make it exit non-zero on failure and print enough to diagnose without re-running by hand.
+5. On Windows, commit it with the executable bit set (`git update-index --chmod=+x`) — Linux CI
+   depends on it.

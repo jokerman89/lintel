@@ -38,7 +38,7 @@ Distinct from `/codex` (outside-voice review post-hoc) and from spawning a subag
 
 ## Workflow
 
-1. **Resolve subagent.** Look up `--agent` in user-level (`~/.claude/agents/`) then repo-level (`.claude/agents/`). If not found: list available + exit.
+1. **Resolve subagent.** Look up `--agent` in the plugin's subagent fleet (run `/li:catalog` to list the available agents; a repo-local `.claude/agents/` override, if one exists, shadows the fleet by name). If not found: list available + exit.
 2. **State the task.** Print the task description so operator sees what both minds will work on.
 3. **Turn loop.**
    - **Main turn:** main agent proposes a step (a diff, a decision, an investigation move). Output is shown.
@@ -77,13 +77,13 @@ Recommendation: /qa-only before /ship.
 
 ## Compliance integration
 
-- Each main-agent Edit goes through normal Layer 2 sanity-scan.
+- Each main-agent Edit goes through the active pack's compliance gates + the secret/customer-data block hooks.
 - Subagent invocations logged to `.claude/runtime/audit/pair-agent.jsonl`.
 - Subagent inherits scope restriction from `--scope`; cannot read outside that set.
 
 ## Failure modes
 
-- **Subagent not found:** list registered agents from `~/.claude/agents/` and `.claude/agents/`, suggest one. Exit.
+- **Subagent not found:** list the plugin fleet's agents (`/li:catalog`), suggest one. Exit.
 - **Subagent disagrees fundamentally with main agent's first proposal:** stop, report the disagreement, ask operator which path to take. Do not auto-resolve.
 - **Operator rejects 3 turns in a row:** suspect the wrong specialist was paired. Suggest different `--agent` and exit.
 - **Turn budget exhausted, task incomplete:** report partial state. Operator can re-run with higher `--turns`.
@@ -128,7 +128,7 @@ Recommendation: /qa-only before /ship.
 
 ## See also
 
-- `/review` — post-hoc diff review (lighter than pair)
-- `/codex` — outside-voice review post-hoc
-- `~/.claude/agents/` — registered specialist subagents
-- `/skillify` — if pair-mode for a specific task becomes recurring, formalize as a skill
+- `/li:review` — post-hoc diff review (lighter than pair)
+- `/li:codex` — outside-voice review post-hoc
+- `/li:catalog` — lists the plugin's specialist subagent fleet
+- `/li:skillify` — if pair-mode for a specific task becomes recurring, formalize as a skill

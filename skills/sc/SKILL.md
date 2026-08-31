@@ -143,7 +143,7 @@ audit_retention="${audit_retention:-2555}"   # default 7 years
 
 ```bash
 mkdir -p .claude/runtime/state/sc
-audit="$LINTEL_HOME/audit/sc-decisions.jsonl"
+audit=".claude/runtime/audit/sc-decisions.jsonl"
 mkdir -p "$(dirname "$audit")"
 
 for checkpoint in threat_model_complete secrets_inventoried auth_flow_locked compliance_evidence_present audit_path_verified; do
@@ -239,11 +239,13 @@ Full-pass exit: every dimension ≥ 80 OR explicit operator override.
 
 ### Step 6 — Audit + emit ship report
 
+One line via the unified writer (ts/operator/cycle_id come from the envelope):
+
 ```bash
-ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-printf '{"ts":"%s","kind":"sc_module_complete","granularity":"%s","score":%d,"checkpoints_passed":%d,"frameworks":"%s","operator":"%s"}\n' \
-  "$ts" "$granularity" "$score" "$passed_count" "$compliance_frameworks" "$(whoami 2>/dev/null || echo unknown)" \
-  >> "$LINTEL_HOME/audit/sc-decisions.jsonl"
+source "$(git rev-parse --show-toplevel)/bin/_audit.sh"
+audit_log sc-decisions sc_module_complete "granularity=$granularity" "score=$score" \
+  "checkpoints_passed=$passed_count" "frameworks=$compliance_frameworks"
+# → .claude/runtime/audit/sc-decisions.jsonl
 ```
 
 ## Status protocol
