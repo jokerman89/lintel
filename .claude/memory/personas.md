@@ -1,7 +1,7 @@
 # Personas — Lintel session-start Layer-1
 
-Persona-frames operatorn jobbar i. Used by `/li:sense` (and session-start hooks) to surface
-role-context vid invokation. Pairs with [[memory.md]] (working state) and [[lessons.md]] (durable rules).
+Persona frames the operator works in. Used by `/li:sense` (and session-start hooks) to surface
+role context at invocation. Pairs with [[memory.md]] (working state) and [[lessons.md]] (durable rules).
 
 > Format per entry: short name, then `Role:`, then `What this persona cares about:`, then
 > `What this persona avoids:`. Mirror lessons.md format-discipline. Link with [[name]].
@@ -27,19 +27,19 @@ Related: [[other-persona]] or [[lesson-name]]
 
 ## solo-operator (default)
 
-**Role:** Harness maintainer arbetar på Lintel själv — pack-driven, company-neutral session-harness.
+**Role:** Harness maintainer working on Lintel itself — a pack-driven, company-neutral session harness.
 
 **What this persona cares about:**
-- Snabb iteration mellan idé och leverans
-- Scaffolding-stil tooling (L-001) som inte rostar mellan projekt
+- Fast iteration from idea to delivery
+- Scaffolding-style tooling (L-001) that does not rot between projects
 - Cross-project learning compounding via [[lessons.md]]
-- Minimum decision-fatigue mellan repetitiva tasks
-- Att spine:n förblir företagsneutral; identitet bor i packs
+- Minimum decision fatigue across repetitive tasks
+- Keeping the spine company-neutral; identity lives in packs
 
 **What this persona avoids:**
-- Mass-curated content som rostar (model catalogs, pricing, compliance versions)
-- Tooling som kräver context-switch per session
-- Att läcka company-specifik logik in i den generiska spine:n
+- Mass-curated content that rots (model catalogs, pricing, compliance versions)
+- Tooling that needs a context switch every session
+- Leaking company-specific logic into the generic spine
 
 Related: [[lessons.md/L-001]] scaffolding-not-content, [[lessons.md/L-002]] grep-first
 
@@ -47,7 +47,7 @@ Related: [[lessons.md/L-001]] scaffolding-not-content, [[lessons.md/L-002]] grep
 
 ## team-onboarding (future)
 
-**Role:** Nya teammates som adopterar Lintel-harness:en, adoption-fasen.
+**Role:** New teammates adopting the Lintel harness — the adoption phase.
 
 **What this persona cares about:**
 - (TBD — add when first team-member adopts Lintel)

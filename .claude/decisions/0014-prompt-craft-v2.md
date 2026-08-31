@@ -1,7 +1,7 @@
 # ADR-0014: prompt craft v2 — trigger-form descriptions, dial-back imperatives, judgment-first agents
 
 **Status:** Accepted (2026-06-13)
-**Decided by:** operator ("raise the bar again … fixate on how competitors write agents/prompts/skills … flavour our own")
+**Decided by:** operator — study how comparable harnesses write their agents, prompts and skills, then raise this repo's craft bar to match, in its own idiom
 **Implements:** .claude/engineering/audits/2026-06-13-cli-issues-craft-synthesis.md (workstream 3)
 
 ## Context

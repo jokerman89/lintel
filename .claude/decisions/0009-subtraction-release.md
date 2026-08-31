@@ -1,7 +1,7 @@
 # ADR-0009: the subtraction release — same capability, 60% of the surface
 
 **Status:** Accepted (2026-06-12)
-**Decided by:** operator ("kör nästa" on the fit-audit P1 recommendation)
+**Decided by:** operator — approved the fit-audit P1 recommendation
 **Implements:** .claude/engineering/audits/2026-06-12-fable5-fit-audit.md (P1 track)
 
 ## Context
@@ -26,7 +26,7 @@ discoverability noise. Lintel had no subtraction mechanism — it only grew.
    module (grace to 2026-09-12). Nobody solo-invoked them — the reference graph proved it.
 3. **0-ref pruning.** gbrain-setup + gbrain-sync removed (capability was honest-labeled
    "query loop not integrated"; nothing referenced them — the aliases pointing at them retire
-   with a comment, per the agt-tier-stamp precedent). WorkshopFacilitator agent removed
+   with a comment recording what they pointed at, the same way the WS-4b renames were handled). WorkshopFacilitator agent removed
    (zero dispatchers).
 4. **Role family 8 → 3.** `role` (lifecycle: activate/deactivate/rotate/frame/deep-dive),
    `role-new` (creation + update), `roles-list` (discovery). Six aliases.

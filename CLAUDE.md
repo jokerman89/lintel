@@ -24,7 +24,7 @@ Clear ownership domains:
 - `skills/` — slash-commands (the 9-step `/li:cycle` (8 core phases + SCOPE) + engineering modules `ta`/`da`/`sc`/`dh`/`tq` + session-harness skills)
 - `agents/` — subagent roles per domain (engineering, security, compliance, devops, customer, communication, doc-gen, frontend)
 - `hooks/shared/` — pre/post hooks (compliance + workflow enforcement)
-- `packs/` — pack manifests; only the neutral `_default` ships here. Company identity installs as an external pack — see [lintel-caip-pack](https://github.com/jokerman89/lintel-caip-pack) for a worked example.
+- `packs/` — pack manifests; only the neutral `_default` ships here. Company identity (voice, compliance gates, roles, brand) installs as a separate external pack and is resolved at runtime via `lib/pack-resolver.sh`.
 - `lib/` — `pack-resolver.sh`, `brief-forge-evaluators.sh`, schemas — the runtime helpers skills source
 - `scaffolding/01-foundation/` — the templates this repo copies INTO other repos via `bin/li-scaffold`
 - `bin/` — operator-side utilities (`li-scaffold`, `li-doctor`, `li-lessons-sync`, …)

@@ -12,12 +12,12 @@ Durable rules accumulated from corrections. Review at session start; add after a
 
 **Rule:** Lintel ships structure (templates, tests, agent-mapping, invocation skills) and **one** canonical deep example per pattern. Operator + AI generate the rest of the content at invocation time. Pre-building a catalog of curated content in the repo is anti-pattern.
 
-**Why:** During v3.5 az-tldr build I shipped `azure-openai.md` (268 lines, 15 sections + §16) as a "2nd weapon" after `expressroute.md`. Operator caught it: *"Behöver inte göra fler services, endast för mall och exempel … vi är scaffolding och ett system, vi är Lintel som skapar struktur så att ordning kan uppstå nedanför."* Pre-built content rots (model catalog moves in months, pricing in weeks), bloats the repo, and does the AI's job ahead of time — duplicating work that should happen at the moment of customer engagement.
+**Why:** During v3.5 az-tldr build I shipped `azure-openai.md` (268 lines, 15 sections + §16) as a "2nd weapon" after `expressroute.md`. Operator caught it — the correction was to stop at a template plus one example: Lintel is scaffolding and a system that creates the structure in which order can emerge beneath it, not a library of service write-ups. Pre-built content rots (model catalog moves in months, pricing in weeks), bloats the repo, and does the AI's job ahead of time — duplicating work that should happen at the moment of customer engagement.
 
 **How to apply:**
 - For any new toolbox (`az-tldr`, future siblings): ship template + structural test + **one** deep example (dogfood) + agent-mapping skeleton. Stop there.
 - If tempted to build a "2nd weapon" to "prove the pattern scales": instead write a one-paragraph note in the catalog README explaining how to add one. The pattern is proven by the *template + test + agent-mapping*, not by content count.
-- Content lives in two places, both NOT the repo: (a) operator's private notes (~/.lintel/private/), (b) generated fresh per invocation by agents reading current MS Learn / RAI standards / pricing pages.
+- Content lives in two places, both NOT the repo: (a) operator's private notes (~/.lintel/private/), (b) generated fresh per invocation by agents reading current vendor documentation / responsible-AI standards / pricing pages.
 - Catalog README's `⚠ template only` rows are a feature, not a gap — they signal that the slot exists and what agent dispatch it would use, without pre-paying the curation cost.
 - Same principle applies to any future "weapons catalog" pattern: roles, modes, voice cells, compliance gates. Ship the structure + one example.
 
@@ -77,9 +77,9 @@ Related: [[L-001]] scaffolding-not-content (frontend-* family ships scaffolding 
 
 ## L-005 — A removal/de-bias sweep is only as complete as its widest token set (v4.7)
 
-**Rule:** When grepping to find everything that references content you're extracting or genericizing, the FIRST grep must enumerate every shape the reference can take: lowercase skill-folder names AND their `RAIS`-style uppercase tokens AND bare agent/class names AND path strings. A token set that only has the "obvious" tokens will silently miss a whole class of callsites, and you'll discover them only when tests fail or a second sweep runs.
+**Rule:** When grepping to find everything that references content you're extracting or genericizing, the FIRST grep must enumerate every shape the reference can take: lowercase skill-folder names AND the uppercase acronym tokens they abbreviate AND bare agent/class names AND path strings. A token set that only has the "obvious" tokens will silently miss a whole class of callsites, and you'll discover them only when tests fail or a second sweep runs.
 
-**Why:** During the v4.7 CAIP extraction, my first sweep used tokens like `RAIS`, `Trailblazer`, `WorkProfile`, `first-party`. It matched ~437 lines across ~130 files — but `RAIS` is case-sensitive, so lowercase skill refs `/li:rais-customer-voice-check` did NOT match, and bare agent names like `AzureArchitect`/`FirstPartyMigrator` weren't in the set at all. ~25 files (more `generate-*`, all `frontend-*`, `discover`, `install.sh`, AGENT-INSTRUCTIONS Layer refs) were never assigned to a de-bias batch. A second, broader sweep (lowercase skill names + every removed agent name + paths) found them. This is L-003 applied to my own search: verify the search is complete before trusting "0 results."
+**Why:** During the v4.7 pack extraction, the first sweep used the obvious tokens — the uppercase compliance acronyms and programme names being extracted. It matched ~437 lines across ~130 files. But those tokens are case-sensitive, so a skill folder embedding the same acronym in lowercase (an `<acronym>-customer-voice-check` skill) did NOT match, and bare agent class names (the domain-specific `*Architect`/`*Migrator` agents leaving with the pack) were not in the set at all. Three shapes of the same reference; the sweep enumerated one. ~25 files (more `generate-*`, all `frontend-*`, `discover`, `install.sh`, AGENT-INSTRUCTIONS Layer refs) were never assigned to a de-bias batch. A second, broader sweep (lowercase skill names + every removed agent name + paths) found them. This is L-003 applied to my own search: verify the search is complete before trusting "0 results."
 
 **How to apply:**
 - Build the token set from the actual removed inventory: for every removed skill, add both `skill-folder-name` and any in-prose token; for every removed agent, add the exact `CamelCaseName`; for every removed dir, add the path.
@@ -99,9 +99,9 @@ someone notices the cobbler's children have no shoes.
 
 **Why:** Lintel ships `scaffolding/01-foundation/` (CLAUDE.md template, `.claude/agents/`, `docs/adr/`,
 CORE-PRINCIPLES) to install into other repos — but never ran `li-scaffold` on itself. So Lintel's own
-root had no `.claude/`, no `docs/adr/`, and a thin v3 CLAUDE.md. Throughout the large v4.7 CAIP
+root had no `.claude/`, no `docs/adr/`, and a thin v3 CLAUDE.md. Throughout the large v4.7 pack
 extraction I produced a structure-change doc + lessons + todo but **zero ADRs** for major decisions
-(pack-on-top vs fork, aggressive de-MS, clean-copy vs filter-repo), because the repo had no ADR
+(pack-on-top vs fork, aggressive de-branding, clean-copy vs filter-repo), because the repo had no ADR
 infrastructure and CLAUDE.md didn't enforce the ritual. The operator caught it. The factory works in
 sister repos (deeplex has scaffolded CLAUDE.md + living lessons + decisions) — it just never ran here.
 
@@ -265,11 +265,11 @@ model so the result would stand on its own with no ancestor. Deleting the word "
 the small one masquerades as the big one.
 
 **Why:** v5.3 lineage cleanup. I removed gstack references and reported the spine "ours." The
-operator caught it cold — "did you for example look at all gstack skills and rewrote everything
-end to end to make it ours?" — then escalated: "Everything should be done, we dont half-ass
-anything … Do the full engaged refactor … go all in here and do this the best way." I had done
-a find-and-replace and called it ownership. The actual work was reinventing 12 spine skills in
-Lintel's own idiom (ADR-0013). De-heritage is cheap and invisible; reinvention is the deliverable.
+operator caught it cold — the real test was whether every gstack-derived skill had been read and
+rewritten end to end — and escalated the scope: nothing half-done, a full engaged refactor, done
+properly. I had done a find-and-replace and called it ownership. The actual work was reinventing
+12 spine skills in Lintel's own idiom (ADR-0013). De-heritage is cheap and invisible; reinvention
+is the deliverable.
 
 **How to apply:**
 - Hear "make it ours / our vision / live up to the name" as a REINVENT verb. Scope the full
@@ -334,8 +334,9 @@ everything. Two independent reviews (theirs + mine) made the result stronger tha
   push (fast-forward only — a force-push is how you delete the other session's review fixes).
 - Re-run the FULL suite on the *merged* tree (L-010): the merge adds tests/behaviour neither branch
   tested alone (here, their `auto-decide.sh` → 81→82).
-- A guard you extend can catch your own prose: my `no-swedish` scope-widening flagged the literal
-  `å` in my own explanatory comment. Write guard rationale without trigger examples.
+- A guard you extend can catch your own prose: my `no-swedish` scope-widening flagged one of the
+  Swedish vowel characters it searches for, spelled out as an illustration inside my own
+  explanatory comment. Write guard rationale without trigger examples.
 
 Related: [[L-010]] green-on-committed-tree — the gate is the merged tree, not either parent;
 [[L-007]] independent review — two parallel sessions yield two independent reviews, a feature not a
@@ -432,11 +433,12 @@ system carried state; an agentic skill pack carries state natively (session + re
 user's project + the ledger/memory).
 
 **Why:** Building the S4L pack I designed the cycle around faithfully reproducing the source's "28
-Vault Objects", the Command Center, and AI-Stack-Setup tabs. The operator stopped it: "vi skiter i
-vault objects och command center … målet är innehållet som genereras … värdet som användaren får
-ut." The vault-object paste-chain was the source's mechanism for manual state transfer; porting it
-would have produced object-shaped ceremony instead of sales pages, VSLs, emails, and offers. The
-goal is the generated content (the value), not artifacts that mirror the source's tooling.
+Vault Objects", the Command Center, and AI-Stack-Setup tabs. That design was stopped: vault objects
+and a command center are not what the pack is for — the content it generates, and the value the
+user gets out of that content, is. The vault-object paste-chain was the source's mechanism for
+manual state transfer; porting it would have produced object-shaped ceremony instead of sales
+pages, VSLs, emails, and offers. The goal is the generated content (the value), not artifacts that
+mirror the source's tooling.
 
 **How to apply:**
 - Frame every phase/skill by the DELIVERABLE it produces ("a sales page", "a 7-email sequence"),

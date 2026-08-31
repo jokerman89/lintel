@@ -2,8 +2,8 @@
 
 - **Status:** Accepted
 - **Date:** 2026-06-13
-- **Deciders:** operator ("vår default design är anthropics designsystem, EXAKT det anthropic
-  har", 2026-06-12), Claude (execution)
+- **Deciders:** operator — adopt Anthropic's design system as the house default, matched exactly
+  (2026-06-12)
 - **Supersedes:** —
 - **Superseded by:** —
 

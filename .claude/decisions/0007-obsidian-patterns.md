@@ -1,7 +1,7 @@
 # ADR-0007: Obsidian integration — four patterns, write-only, pack-gated
 
 **Status:** Accepted (2026-06-12)
-**Decided by:** operator (D4 gate: "the 4 verified patterns, pack-gated; write-only stays")
+**Decided by:** operator (D4 gate — adopt the four verified patterns, pack-gated; the sink stays write-only)
 **Implements:** .claude/engineering/design-archive/lintel-v5-claude-home-memory-obsidian-design.md (workstream C)
 
 ## Context

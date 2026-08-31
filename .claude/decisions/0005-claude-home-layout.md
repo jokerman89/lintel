@@ -1,7 +1,7 @@
 # ADR-0005: the .claude/ home layout — one circle of control per repo
 
 **Status:** Accepted (2026-06-12)
-**Decided by:** operator (D1–D4 gate, 2026-06-12) + implementation session
+**Decided by:** operator (D1–D4 gate, 2026-06-12)
 **Implements:** .claude/engineering/design-archive/lintel-v5-claude-home-memory-obsidian-design.md (workstream A)
 
 ## Context
@@ -20,8 +20,8 @@ systems with no contract.
    - committed knowledge: `memory/` (MEMORY.md index + lessons.md + working-state.md +
      personas.md), `decisions/` (ADRs), `plans/` (todo.md + `<slug>/{plan,spec,prompt}.md` trios)
    - gitignored runtime: `runtime/{state,sessions,jobs,audit}/` (one .gitignore line)
-2. **Git policy** (D1): knowledge committed, runtime local-only ("backup räcker lokalt" applies to
-   runtime; knowledge compounds via git).
+2. **Git policy** (D1): knowledge committed, runtime local-only. A local backup is sufficient for
+   runtime churn; knowledge is what compounds, so it goes through git.
 3. **Native auto-memory convergence** (D3): `autoMemoryDirectory` points at the repo's
    `.claude/memory/` so native auto-memory and Lintel share ONE store. The key only accepts
    absolute paths → the pointer lives in `.claude/settings.local.json` (machine-local), written by
