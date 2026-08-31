@@ -147,7 +147,7 @@ If invoked with `--from-frontend-design <run-dir>` instead of `--brief` or `--fr
 ## Report format
 
 ```
-Generate Web: copilot-for-legal-demo
+Generate Web: legal-assistant-demo
 
 Variant: single-file
 Template: landing-single-file.html (~/.lintel/brand/web-templates/, brand 2026-Q2)
@@ -155,7 +155,7 @@ Theme: pack-default
 Voice tier: internal (pack-resolved)
 
 ## Structure (from brief)
-  Hero: "Lex Sweden gets a copilot"
+  Hero: "Every contract, answered in seconds"
     CTA: "Book the demo"
   Section 1: What changes for the lawyer
   Section 2: Where the AI helps + where it stops
@@ -168,7 +168,7 @@ Voice tier: internal (pack-resolved)
   Brand: pack palette applied ✓
 
 ## Generation
-  Produced ~/.lintel/draft/copilot-for-legal-demo.html (87 KB)
+  Produced ~/.lintel/draft/legal-assistant-demo.html (87 KB)
   6 SVGs embedded from the active pack's asset library
 
 ## 4-Gate pipeline
@@ -178,9 +178,9 @@ Voice tier: internal (pack-resolved)
   Gate 4 (proven):  ✓ PASS — PROV-c4d5 recorded
 
 ## Status
-ALL GATES PASS. Moving from draft → ./copilot-for-legal-demo.html.
+ALL GATES PASS. Moving from draft → ./legal-assistant-demo.html.
 
-Preview: /open-managed-browser file://~/.lintel/draft/copilot-for-legal-demo.html
+Preview: /open-managed-browser file://~/.lintel/draft/legal-assistant-demo.html
 ```
 
 ## Compliance integration
@@ -207,8 +207,8 @@ Preview: /open-managed-browser file://~/.lintel/draft/copilot-for-legal-demo.htm
 **Next.js scaffold:**
 ```
 > /generate-web --brief microsite-brief.md --variant nextjs-scaffold --use-defaults
-[Generates ./copilot-for-legal/ with package.json + src/]
-Run: cd copilot-for-legal && npm install && npm run dev
+[Generates ./legal-assistant/ with package.json + src/]
+Run: cd legal-assistant && npm install && npm run dev
 ```
 
 ## See also

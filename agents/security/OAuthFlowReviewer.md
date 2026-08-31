@@ -124,7 +124,7 @@ OAuthFlowReviewer: <project>
 ## Edge cases / what to do when blocked
 
 - **Cross-tenant scenarios** — verify Multi-Tenant App configuration; check audience claim.
-- **Custom claims** — review claim transformation rules in Entra ID.
+- **Custom claims** — review the claim transformation rules in your identity provider.
 - **Token caching libraries** — verify the token-cache library's encryption settings (e.g. MSAL, jose, or your IdP SDK).
 
 ## Voice tier behavior

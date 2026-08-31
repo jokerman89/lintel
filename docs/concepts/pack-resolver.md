@@ -8,7 +8,7 @@
 ## The problem
 
 Before the resolver, "read the active pack" meant either:
-- Inline `grep -E '^voice_tier:' packs/microsoft/pack.yaml` everywhere, or
+- Inline `grep -E '^voice_tier:' packs/<active>/pack.yaml` everywhere, or
 - A loose convention that each skill should look up its own values.
 
 That created three failure surfaces:
@@ -92,7 +92,7 @@ Why session-bound rather than cycle-bound? Sessions can run multiple cycles. The
 Every fallback, warning, and cache-prime event is appended to `${LINTEL_HOME}/audit/pack-resolver.jsonl`:
 
 ```jsonl
-{"ts":"2026-05-29T14:32:01Z","kind":"pack_resolver_cache_primed","msg":"pack=microsoft session=42071"}
+{"ts":"2026-05-29T14:32:01Z","kind":"pack_resolver_cache_primed","msg":"pack=acme-eng session=42071"}
 {"ts":"2026-05-29T14:35:18Z","kind":"pack_resolver_warn","msg":"active pack 'foo-corp' invalid; falling back to _default"}
 {"ts":"2026-05-29T14:35:19Z","kind":"pack_resolver_cache_primed","msg":"pack=_default session=42071"}
 ```

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # tests/unit/aliases-resolve.sh
 #
-# Verifies v3.6 Cohort 4 alias-mekanism:
+# Verifies the v3.6 Cohort 4 alias mechanism:
 # - config/aliases.yaml well-formed + populated with WS-4a/b decisions
 # - bin/_aliases.sh sources cleanly + resolve_env_var works
 # - All 4 renamed skills exist at new path + frontmatter name matches

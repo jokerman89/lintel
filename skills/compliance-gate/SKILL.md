@@ -18,7 +18,7 @@ You are the `compliance-gate` skill — an aggregator around the compliance gate
 
 Resolves which gates the active pack declares (`resolve_pack_field compliance.hooks`), runs the ones relevant to the current artifact/scope, and aggregates the verdict into ONE green/red status. Prevents the operator from missing a gate that applies but was not invoked manually.
 
-The skill is **pack-driven**: it hardcodes no gates. For the `_default` pack, `compliance.hooks` is empty (no gates) → green/no-op with a note that no compliance pack is active. When an external pack (e.g. installed via lintel-caip-pack) is active, the skill picks up that pack's gates.
+The skill is **pack-driven**: it hardcodes no gates. For the `_default` pack, `compliance.hooks` is empty (no gates) → green/no-op with a note that no compliance pack is active. When an installed pack declares gates of its own, the skill picks them up and runs them.
 
 ## When to use
 

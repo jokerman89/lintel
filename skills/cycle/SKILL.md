@@ -99,11 +99,11 @@ auto:
 ### Pack-contributed modes
 
 The presets above ship with Lintel and are company-neutral. A pack may contribute
-additional modes with their own voice/compliance posture — e.g. an external pack
-(installable via lintel-caip-pack) can add `customer-engagement` or `demo-prep`
-modes that set a customer audience, a non-internal voice tier, and the pack's
-compliance gates. CYCLE merges pack-contributed modes into the preset list at
-invocation; their voice/compliance behavior resolves through `resolve_pack_field`
+additional modes with their own voice/compliance posture — e.g. an installed
+company pack can add `customer-engagement` or `demo-prep` modes that set a
+customer audience, a non-internal voice tier, and the pack's compliance gates.
+CYCLE merges pack-contributed modes into the preset list at invocation; their
+voice/compliance behavior resolves through `resolve_pack_field`
 (voice.default_tier, voice.gates_active, compliance.hooks), never hardcoded here.
 
 ### Meta-infra mode mechanics

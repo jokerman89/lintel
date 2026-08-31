@@ -63,7 +63,7 @@ TMP2=$(make_temp_home)
 name: mock-test
 version: 1.0.0
 voice:
-  default_tier: trailblazer
+  default_tier: custom
 compliance:
   mode: hard
 navigation:
@@ -77,10 +77,10 @@ EOF
   # shellcheck disable=SC1090
   source "$RESOLVER"
   v=$(resolve_pack_field voice.default_tier)
-  if [ "$v" = "trailblazer" ]; then
-    echo "  PASS: voice.default_tier = trailblazer (pack-overridden)"
+  if [ "$v" = "custom" ]; then
+    echo "  PASS: voice.default_tier = custom (pack-overridden)"
   else
-    echo "  FAIL: got '$v', expected 'trailblazer'"
+    echo "  FAIL: got '$v', expected 'custom'"
     exit 1
   fi
 ) || FAILED=1
@@ -226,7 +226,7 @@ EOF
   cat > "$TMP7/.lintel/packs/pack-y/pack.yaml" <<'EOF'
 name: pack-y
 version: 1.0.0
-voice: {default_tier: trailblazer}
+voice: {default_tier: custom}
 compliance: {mode: hard}
 navigation: {default_workflow: cycle}
 EOF

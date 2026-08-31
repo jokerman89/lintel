@@ -33,7 +33,7 @@ Generated: 2026-08-31T10:49:04Z
 | `/li:context-restore` | Use at the start of a fresh session that continues prior work to restore session state from a checkpoint file. Reach fo… |
 | `/li:context-save` | Use before the context window fills up or before clearing the session to save the current state to a checkpoint file. R… |
 | `/li:context-warm-adrs` | Load topic-relevant ADRs into context — design constraints + prior decisions surfaced for current work. |
-| `/li:context-warm-customer` | Load customer-engagement repo state into context — customer's Bicep, their CLAUDE.md, their ADRs, recent commits. |
+| `/li:context-warm-customer` | Load customer-engagement repo state into context — their infrastructure-as-code, their CLAUDE.md, their ADRs, recent commits. |
 | `/li:context-warm-from-url` | Fetch URL + dump into context. Useful for loading documentation, blog posts, external references on-demand. |
 | `/li:context-warm-related` | Heuristic context warm — search codebase for files related to a topic, load top N most-relevant. |
 | `/li:context-warm-sessions` | Load last N session saves on current branch — cross-session continuity for resumed work. |

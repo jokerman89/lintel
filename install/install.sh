@@ -95,7 +95,7 @@ mkdir -p "$LINTEL_HOME/audit"
 mkdir -p "$LINTEL_HOME/sessions"
 mkdir -p "$LINTEL_HOME/provenance"
 mkdir -p "$LINTEL_HOME/freeze"
-# Compliance-artifact dirs (rai/dpia/dsb/entra) are pack concerns, NOT spine — a company pack
+# Compliance-artifact directories are pack concerns, NOT spine — a company pack
 # that needs them creates them on activation. The neutral installer stays company-neutral.
 mkdir -p "$LINTEL_HOME/review-log"
 mkdir -p "$LINTEL_HOME/benchmarks"

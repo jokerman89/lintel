@@ -21,10 +21,10 @@ SKILLS_DIR="$REPO_ROOT/skills"
 
 # All v2 skill names that should be present (renamed ones) — the bare-name form
 # Updated 2026-05-29 for v3.6 Cohort 4 WS-4b renames:
-#   setup-brain → gbrain-setup, sync-brain → gbrain-sync, agt-tier-stamp → agent-tier-stamp
-# CAIP-specific skills (release-ev2, rais-*, onecs-check, agent-tier-stamp,
-# cloudtest-eval-suite, onebranch-validate, scaffold-engagement-demo, etc.) were
-# moved to lintel-caip-pack in the v4.7 extraction. Only generic survivors remain.
+#   setup-brain → gbrain-setup, sync-brain → gbrain-sync, plus the agent tier-stamp skill
+# Company-specific skills — release pipelines, regulatory gates, build-system and
+# eval-suite checks, engagement scaffolds — moved out to a company pack in the v4.7
+# extraction. Only the generic survivors are asserted here.
 # 2026-06-10: context-budgetwatch removed — consolidated into context-budget --watch
 # (deprecated alias in config/aliases.yaml until 2026-09-10); no longer canonical.
 # 2026-06-12: gbrain-setup/gbrain-sync removed (ADR-0009 0-ref pruning) — no longer canonical.
@@ -65,20 +65,21 @@ for v1_name in "${V1_NAMES_TO_BE_GONE[@]}"; do
 done
 
 # Verify v1 names appear in alias arrays (v1_alias OR deprecated_aliases — v3.6 Cohort 4 added the new field).
-# Three v1_alias entries dropped in Cohort 4 (setup-brain/sync-brain/agt-tier-stamp renamed +
+# Three v1_alias entries dropped in Cohort 4 (the three renames listed at the top +
 # their li- aliases migrated to deprecated_aliases array on the new-name skill).
 V1_ALIAS_COUNT=$(grep -r "^v1_alias:" "$SKILLS_DIR" 2>/dev/null | wc -l | tr -d ' ')
 DEP_ALIAS_COUNT=$(grep -r "^deprecated_aliases:" "$SKILLS_DIR" 2>/dev/null | wc -l | tr -d ' ')
 TOTAL=$((V1_ALIAS_COUNT + DEP_ALIAS_COUNT))
-# Alias count dropped after the CAIP extraction (removed skills carried v1_alias entries).
+# Alias count dropped after the pack extraction (the removed skills carried v1_alias entries).
 if [ "$TOTAL" -ge 5 ]; then
   pass "alias entries present: $TOTAL (v1_alias=$V1_ALIAS_COUNT + deprecated_aliases=$DEP_ALIAS_COUNT; expected ≥5 post-extraction)"
 else
   fail "alias entries low: $TOTAL (v1_alias=$V1_ALIAS_COUNT + deprecated_aliases=$DEP_ALIAS_COUNT; expected ≥5)"
 fi
 
-# Post v4.7 CAIP extraction: company-specific scaffolding (02-sdl, 03-ms-team) moved
-# to lintel-caip-pack. Only 01-foundation remains; packs/_default is the neutral baseline.
+# Post v4.7 extraction: the company-specific scaffolding layers moved out to a
+# company pack; only 01-foundation remains, packs/_default is the neutral baseline.
+# The literal directory names below are the historical paths this guard detects.
 [ ! -d "$REPO_ROOT/scaffolding/02-sdl" ] && pass "scaffolding/02-sdl/ removed (extracted to pack)" || fail "scaffolding/02-sdl/ still present"
 [ ! -d "$REPO_ROOT/scaffolding/03-ms-team" ] && pass "scaffolding/03-ms-team/ removed (extracted to pack)" || fail "scaffolding/03-ms-team/ still present"
 [ -f "$REPO_ROOT/packs/_default/pack.yaml" ] && pass "packs/_default/ neutral baseline present" || fail "packs/_default/ MISSING"

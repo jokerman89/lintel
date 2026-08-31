@@ -56,7 +56,7 @@ If pre-flight fails: BLOCKED. Don't proceed.
 
 From mode + role:
 - audience: solo / team / customer
-- voice_tier: internal / mixed / trailblazer
+- voice_tier: internal / mixed / external
 - artifact_kind: code-only / docs / customer-deliverable / demo
 
 Determines which gates fire in subsequent steps.

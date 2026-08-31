@@ -28,7 +28,7 @@ Reads the repo-local `.claude/runtime/jobs/_active.md` (created and regenerated 
 ## When NOT to use
 
 - For task-level progress within a phase (read the phase's own audit log)
-- For external system status (Azure, MS portal, etc.)
+- For external system status (cloud-provider or vendor status pages)
 
 ## Inputs
 

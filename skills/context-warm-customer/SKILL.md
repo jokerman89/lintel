@@ -1,7 +1,7 @@
 ---
 name: context-warm-customer
 layer: foundation
-description: Load customer-engagement repo state into context — customer's Bicep, their CLAUDE.md, their ADRs, recent commits.
+description: Load customer-engagement repo state into context — their infrastructure-as-code, their CLAUDE.md, their ADRs, recent commits.
 color: cyan
 tools: Read, Bash, Glob
 voice: internal
@@ -52,7 +52,7 @@ If the active pack's compliance mode is `hard` (`resolve_pack_field compliance.m
 Default load set:
 - `CLAUDE.md`, `README.md` (context)
 - `.claude/decisions/[0-9]*.md` (top 10 most-recent)
-- `*.bicep`, `*.tf`, `*.bicepparam` (top 20 by file size)
+- `*.tf`, `*.bicep`, `*.bicepparam`, `*.yaml` infra manifests (top 20 by file size)
 - `recent git log --oneline -20`
 
 Operator can override with `--scope <pattern>` flag.

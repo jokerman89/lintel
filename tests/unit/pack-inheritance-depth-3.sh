@@ -69,7 +69,7 @@ name: leaf
 version: 1.0.0
 extends: middle
 voice:
-  default_tier: trailblazer
+  default_tier: custom
 compliance:
   mode: hard
 navigation:
@@ -96,10 +96,10 @@ EOF
 
   # Verify leaf's voice override wins
   v=$(resolve_pack_field voice.default_tier)
-  if [ "$v" = "trailblazer" ]; then
-    echo "  PASS: voice.default_tier = trailblazer (leaf overrides middle + root)"
+  if [ "$v" = "custom" ]; then
+    echo "  PASS: voice.default_tier = custom (leaf overrides middle + root)"
   else
-    echo "  FAIL: voice.default_tier = '$v' (expected 'trailblazer')"
+    echo "  FAIL: voice.default_tier = '$v' (expected 'custom')"
     exit 1
   fi
 
@@ -141,7 +141,7 @@ name: derived
 version: 1.0.0
 extends: base
 voice:
-  default_tier: trailblazer
+  default_tier: custom
 compliance:
   mode: hard
 navigation:
@@ -169,12 +169,12 @@ EOF
     exit 1
   fi
 
-  # voice.default_tier: derived's voice block replaced base's; trailblazer
+  # voice.default_tier: derived's voice block replaced base's, so its tier wins.
   v=$(resolve_pack_field voice.default_tier)
-  if [ "$v" = "trailblazer" ]; then
-    echo "  PASS: voice.default_tier = trailblazer (derived overrides)"
+  if [ "$v" = "custom" ]; then
+    echo "  PASS: voice.default_tier = custom (derived overrides)"
   else
-    echo "  FAIL: voice.default_tier = '$v' (expected 'trailblazer')"
+    echo "  FAIL: voice.default_tier = '$v' (expected 'custom')"
     exit 1
   fi
 ) || FAILED=1
