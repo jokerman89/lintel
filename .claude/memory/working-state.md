@@ -8,7 +8,33 @@ Cross-session working state (ej durable rules — that's [[lessons.md]]; ej pers
 
 ---
 
-## ▶ CURRENT — read this first (reconciled 2026-08-28)
+## CURRENT — independent enterprise value review (2026-09-08)
+
+**Status:** implementation and independent review complete on `codex/enterprise-value-review`,
+based on `6b10a84`, in `.claude/worktrees/enterprise-value-review`. Final focused checks passed;
+local feature commits are the reviewable delivery. The concurrent `codex/copilot-enterprise-launch` checkout
+was read only; do not overwrite or merge its uncommitted work from this task.
+
+The operator chose hybrid planning: short leaves, coherent package execution/review,
+per-leaf acceptance and evidence (ADR-0026). Pack inheritance, list/nested extraction,
+validation, risk routing and loaded identity are corrected. PLAN links applicable company
+requirements to existing work IDs and verification. No private profile or installation changed.
+
+**Evidence:** aggregate 93/93 scripts passed before final parser/cache repairs; final focused
+results are in `.claude/engineering/audits/2026-09-08-enterprise-value-review.md`. Independent
+pack and hybrid scenario reviewers closed their findings. No measured productivity claim or
+verified universal hook enforcement follows from these checks.
+
+**What's pending:** M2 is RED because shared contracts/helpers changed. Manual disposition
+is recorded, but the explicit operator override required by `docs/the-cycle.md` is pending
+before SHIP/publication. PR body is prepared with this task's handoff. Two baseline P1 Git
+collection defects (F05/F06) remain release-control blockers; prioritize them before an
+enterprise rollout. Older onboarding/installation/work-selection work overlaps the other task.
+
+**Next action:** read the review and M2 report, resolve that gate, then publish the reviewed
+feature commits through a PR. No direct main push, deployment or personal setup is authorized.
+
+## Prior release context (reconciled 2026-08-28)
 
 **Beta release (2026-08-28, branch `feat/launch-readiness`, cycle `beta-release-docs`, mode meta-infra):**
 the repo is prepared for its FIRST PUBLIC RELEASE as **v0.9.0-beta**. Five commits on top of the

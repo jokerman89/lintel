@@ -5,6 +5,17 @@ Notable changes to Lintel. Behaviour changes to the canonical agent instructions
 
 ---
 
+## 0.10.0 — unreleased
+
+- Preserve enterprise controls through block-list parsing, team-pack inheritance, required-field
+  validation and risk classification. Session digests show the actually loaded pack.
+- Keep short tasks while executing and reviewing bounded work packages (ADR-0026). Plans trace
+  applicable profile requirements to task acceptance and evidence; blocked BUILD resumes in BUILD.
+- Correct sizing false positives and expose whole-cycle estimate provenance without multiplying
+  the estimate by leaf count. New integration cases exercise actual helpers and skill snippets.
+- Document the enterprise profile value path and pilot metrics. Known Git collection, continuity
+  and platform-enforcement gaps remain documented; this is not an enterprise-control certification.
+
 ## 0.9.0-beta — 2026-08-28
 
 **First public release.** Lintel had been developed and used privately for three months before this

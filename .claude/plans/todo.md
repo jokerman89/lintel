@@ -313,3 +313,24 @@ bin/_audit.sh, lib/state.sh, secret/customer hooks, _patterns.sh, _input.sh) are
 audit-writes-via-helper.sh caught a raw-append contract violation (the only test I broke; now green).
 One deviation flagged for operator: plan-design-review:75 external gstack `design` binary — NOT in the
 ADR row list, already guarded/optional/off the required path; left intact pending decision.
+# Current: independent enterprise value review (2026-09-08)
+
+Isolated baseline `6b10a84`; parent checkout belongs to another active session.
+See [plan](enterprise-value-review/plan.md), [specification](enterprise-value-review/spec.md) and [handoff](enterprise-value-review/prompt.md).
+
+- [x] E1: isolate and read architecture, principles, memory and relevant ADRs.
+- [x] E2: synthesize independent audits with file-level evidence.
+- [x] E3: correct proven pack/profile defects and verify behavior.
+- [x] E4: improve planning consistency and pack-to-acceptance traceability.
+- [x] E5: document enterprise value scenario and remaining decisions.
+- [ ] E6: independent review, verification, commits and delivery.
+
+## Review — enterprise value
+
+Whole-system review and compatible corrections complete. Independent implementation and
+hybrid scenario reviews have no remaining findings. Aggregate suite passed 93/93; final
+focused regressions also pass. M2 remains RED pending explicit
+override before publication, so E6 is not marked fully delivered. Historical plans above
+remain context, not this initiative's authority.
+
+---

@@ -2,7 +2,7 @@
   "name": "li",
   "displayName": "Lintel",
   "description": "Lintel — company-neutral, pack-driven session harness with 8-phase cycle + role-lifting",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "author": {
     "name": "jokerman89",
     "email": "johannes.akerman@gmail.com"
