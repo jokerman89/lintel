@@ -1,5 +1,17 @@
 # Work index — current initiative and historical plans
 
+## First-class swarming work — 2026-09-08
+
+Active initiative: [work map](swarming-work/work.json), [plan](swarming-work/plan.md),
+[specification](swarming-work/spec.md), [handoff](swarming-work/prompt.md), and
+[swarm charter](swarming-work/swarm/charter.md).
+
+The operator authorized delivery from vision through reviewed PR merge to `main`. Swarming is an
+opt-in execution profile; ordinary BUILD stays sequential. Current phase: BUILD. The independent
+two-stage planning gate passed with no unresolved P0–P3 findings.
+
+---
+
 ## Copilot enterprise launch — 2026-09-08
 
 Completed initiative: [plan and build cards](copilot-enterprise-launch/plan.md), [spec](copilot-enterprise-launch/spec.md), [handoff](copilot-enterprise-launch/prompt.md). All seven build cards and 31 leaves delivered through [PR #83](https://github.com/jokerman89/lintel/pull/83), merged to main. See the [completion review](copilot-enterprise-launch/review.md) for exact CI evidence and environment-specific beta acceptance boundaries.

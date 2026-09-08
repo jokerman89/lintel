@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "initiative": "swarming-work",
+  "work_map": ".claude/plans/swarming-work/work.json",
+  "charter": ".claude/plans/swarming-work/swarm/charter.md",
+  "integration_branch": "codex/swarming-work",
+  "max_parallel": 2,
+  "scope_rules": {
+    "worker": "write_scope+own_report",
+    "reviewer": "own_review",
+    "reducers": "coordinator-only"
+  },
+  "lanes": [
+    {
+      "task_id": "BC2",
+      "wave": 1,
+      "role": "BackendArchitect",
+      "write_scope": ["lib/swarm-schema.json", "lib/swarm_contract.py", "bin/li-swarm", "bin/li-swarm.py", "scaffolding/01-foundation/templates/swarm", "tests/unit/swarm-contract.py"],
+      "brief": ".claude/plans/swarming-work/swarm/briefs/BC2.md",
+      "report": ".claude/plans/swarming-work/swarm/reports/BC2.md",
+      "review": ".claude/plans/swarming-work/swarm/reviews/BC2.md"
+    },
+    {
+      "task_id": "BC3",
+      "wave": 2,
+      "role": "Architect",
+      "write_scope": ["skills/swarm", "skills/plan/SKILL.md", "skills/build/SKILL.md", "skills/review/SKILL.md", "skills/resume/SKILL.md", "skills/capture/SKILL.md", "skills/cycle/SKILL.md", "skills/full-engineering-pass/SKILL.md", "skills/spec-kit/references/work-map.md", "bin/li-work-artifacts.py", "tests/shape/swarm-contract.sh", "tests/integration/swarm-workflow.py", "tests/integration/swarm-workflow.sh"],
+      "brief": ".claude/plans/swarming-work/swarm/briefs/BC3.md",
+      "report": ".claude/plans/swarming-work/swarm/reports/BC3.md",
+      "review": ".claude/plans/swarming-work/swarm/reviews/BC3.md"
+    },
+    {
+      "task_id": "BC4",
+      "wave": 3,
+      "role": "DevOpsToolchain",
+      "isolation": "git-worktree",
+      "write_scope": ["scaffolding/01-foundation/SESSION-PROTOCOL.md", "scaffolding/01-foundation/.claude/SUBAGENT-GUIDE.md", ".claude/SUBAGENT-GUIDE.md", "bin/li-scaffold", "bin/li-copilot.py", "tests/integration/copilot-kit.py"],
+      "brief": ".claude/plans/swarming-work/swarm/briefs/BC4.md",
+      "report": ".claude/plans/swarming-work/swarm/reports/BC4.md",
+      "review": ".claude/plans/swarming-work/swarm/reviews/BC4.md"
+    },
+    {
+      "task_id": "BC5",
+      "wave": 3,
+      "role": "DocWriter",
+      "isolation": "git-worktree",
+      "write_scope": ["docs/concepts/swarming-work.md", "docs/architecture.md", "docs/the-cycle.md", "docs/multi-cli.md", "docs/faq.md", "docs/GLOSSARY.md", "docs/README.md", "README.md", "skills/brief-forge/SKILL.md"],
+      "brief": ".claude/plans/swarming-work/swarm/briefs/BC5.md",
+      "report": ".claude/plans/swarming-work/swarm/reports/BC5.md",
+      "review": ".claude/plans/swarming-work/swarm/reviews/BC5.md"
+    }
+  ]
+}
