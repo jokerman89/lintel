@@ -53,3 +53,17 @@ review outcomes are recorded in the launch plan review rather than predicted her
 The first spec review rejected a prose-only Spec Kit bridge: canonical BUILD still required native plan approval/headings and task storage. The repaired workflow uses a committed work.json with one validated spec/design/tasks/handoff mapping. PLAN, BUILD and REVIEW consume original Spec Kit artifacts; RESUME selects committed work when local runtime state is absent. The helper rejects missing and escaping paths. Native plans use the same map without a second task file. A focused test exercises both modes without a local ledger.
 
 Canonical source-helper examples now prefer LINTEL_SOURCE_ROOT for bin/lib reads while preserving LINTEL_REPO_ROOT for project output. This removes the need for a first-time Copilot session to reinterpret a broken literal source path.
+
+## Hosted-platform follow-up
+
+PR #83's first hosted run passed all 101 tests on Ubuntu and macOS. macOS then correctly failed
+its committed wiki drift check: agent-name ordering inherited the host locale. The same single-file
+difference was reproduced locally with `LC_ALL=en_US.UTF-8` (AccessibilityChecker/ADRDrafter and
+DatabaseDesigner/DataPipelineDesigner ordering). The generator now fixes its own locale to `C`;
+the existing regression generates under `C` and verifies the same artifacts under `en_US.UTF-8`.
+This is process-scoped and does not change the operator's locale settings. The next exact-commit
+CI run must verify the repair before main integration.
+
+The generated showcase was visually inspected in a browser at desktop width and a 390-pixel
+mobile viewport. Text and navigation remain readable; wide table content scrolls within the table.
+The temporary viewport/tab/server were reset and closed after inspection.

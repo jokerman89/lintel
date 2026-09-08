@@ -4,8 +4,10 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
-bash "$ROOT/bin/li-wiki-gen" --output "$TMP" >/dev/null
-bash "$ROOT/bin/li-wiki-gen" --output "$TMP" --check
+# Build with byte ordering, then verify under a locale that collates PascalCase
+# agent names differently (e.g. AccessibilityChecker versus ADRDrafter on macOS).
+LC_ALL=C bash "$ROOT/bin/li-wiki-gen" --output "$TMP" >/dev/null
+LC_ALL=en_US.UTF-8 bash "$ROOT/bin/li-wiki-gen" --output "$TMP" --check
 # A changed artifact must fail verification without rewriting the baseline.
 printf '\nIntentional drift\n' >> "$TMP/docs/wiki/skills.md"
 if bash "$ROOT/bin/li-wiki-gen" --output "$TMP" --check > "$TMP/result"; then
