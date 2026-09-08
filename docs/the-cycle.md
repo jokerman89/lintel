@@ -104,6 +104,9 @@ PLAN writes the **cold-executor trio**, all three born together:
 Task granularity is hard-checked. PLAN also produces the cost estimate that the pre-BUILD gate uses.
 
 **Produces** the trio, plus `tasks_count` and a labelled token estimate written to the state ledger.
+When an approved plan has independent ownership domains, PLAN may offer the swarm execution profile.
+It adds swarm fields and topology only after explicit operator opt-in; the mapped task artifact stays
+authoritative.
 
 **Gate** **mandatory approval pause.** PLAN does not hand off to BUILD on its own.
 
@@ -113,10 +116,11 @@ Task granularity is hard-checked. PLAN also produces the cost estimate that the 
 
 ### 6. BUILD — implement
 
-Each task gets a **fresh subagent** — no accumulated context, no drift from earlier tasks — and each
-task passes two review stages before it counts as done: spec compliance first, then quality. Simple
-mechanical tasks review inline rather than spawning a reviewer; the escalation is complexity-gated,
-not unconditional.
+Ordinary BUILD gives each task to a fresh bounded implementer and runs spec-compliance then quality
+review before the task counts as done. A validated swarm work map changes the execution shape: the
+coordinator may dispatch dependency-ready lanes concurrently only when their scopes do not overlap
+and each writer has attributable isolation. Otherwise the same briefs run sequentially. Workers do
+not edit shared ledgers, generated reducers, commits or integration history.
 
 **Produces** implemented code in atomic commits.
 
@@ -136,6 +140,10 @@ of that size.
 
 A P1 finding blocks SHIP. The review is deliberately adversarial: a reviewer that agrees with the
 implementer is not a review.
+
+For a swarm, per-lane reviews must pass before fan-in, but they do not close the initiative. REVIEW
+runs again against the reconciled integrated tree so interactions between independently correct
+lanes are inspected.
 
 **Produces** review and compliance reports.
 
@@ -186,6 +194,19 @@ reaffirms the cold-executor trio against what was actually built.
 A pack can contribute its own modes with their own voice and compliance posture. The neutral spine
 ships the five above.
 
+### Swarming is a profile, not a mode or phase
+
+`/li:swarm` is an opt-in execution profile over PLAN → BUILD → REVIEW. Use it when an approved work
+map has dependency-independent ownership domains; keep sequential BUILD when shared files dominate
+or task boundaries are uncertain. The profile adds a coordination map, charter and per-lane
+brief/report/review evidence beside the trio without creating a second task list.
+
+On a native-subagent host, ready writer lanes may fan out only with disjoint scopes and attributable
+worktrees, patches or host-enforced sandboxes. A sequenced host replays identical briefs one at a
+time. A no-subagent host uses the main agent or exports replayable briefs and must not describe
+self-review as independent. See [swarming work](concepts/swarming-work.md) for selection, inspection,
+recovery and close procedures.
+
 **Composite shortcuts** are pure delegators to a subset:
 
 ```
@@ -205,7 +226,8 @@ The workflow defines these gates where the selected phases apply. They are agent
 2. **Approval at the end of PLAN** — a mandatory pause, not a notification.
 3. **Three-stage REVIEW** — spec, then quality, then compliance.
 4. **Compliance hard-stop in SHIP** — when the active pack sets `hard`.
-5. **Two-stage subagent review per BUILD task** — complexity-gated.
+5. **Two-stage review per BUILD task or swarm lane** — complexity-gated on ordinary BUILD;
+   independently evidenced for every lane before swarm fan-in.
 
 `meta-infra` mode adds four more, because changes to the harness ripple into every downstream cycle:
 
@@ -325,6 +347,7 @@ an artifact you can read afterwards.
 
 - [Getting started](getting-started.md) — install and first run
 - [Architecture](architecture.md) — how the cycle sits inside the spine-and-packs model
+- [Swarming work](concepts/swarming-work.md) — opt-in lane ownership, fan-out, recovery and fan-in
 - [Glossary](GLOSSARY.md) — trio, wedge, pack, depth schema
 - [Skill catalog](../skills/CATALOG.md) — every phase skill and its options
 

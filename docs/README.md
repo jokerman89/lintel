@@ -28,6 +28,7 @@ Internal engineering artifacts — audits, gate records, superseded design docs 
 | [The cycle](the-cycle.md) | The nine phases, phase by phase: what each does, what it produces, where the gates are, what skipping it costs |
 | [Architecture](architecture.md) | Spine and pack, the mechanical layer, navigation, depth modules, where state lives, tests as structural guarantee |
 | [Multi-CLI support](multi-cli.md) | One instruction source, per-CLI manifests, and exactly what degrades where |
+| [Swarming work](concepts/swarming-work.md) | Decide when to fan out an approved plan, inspect ownership, recover attempts and close the integrated result |
 | [Precedence](precedence.md) | Which agent gets picked, and which instruction file wins when two disagree |
 | [Compliance](compliance.md) | The neutral baseline, and what an installed pack can add on top |
 
@@ -41,6 +42,7 @@ Deeper treatment of individual mechanisms. Read on demand rather than in order.
 - [Skill protocol](concepts/skill-protocol.md) — the contract every skill declares
 - [Orientator](concepts/orientator.md) — how SENSE picks a workflow
 - [Planner as module](concepts/planner-as-module.md) — planning as a composable capability
+- [Swarming work](concepts/swarming-work.md) — opt-in lanes, coordinator ownership, evidence and host degradation
 - [Brief forge](concepts/brief-forge.md) · [Envelope](concepts/envelope.md) — the hand-off gate and its schema
 - [Jobs system](concepts/jobs-system.md) — tracking work that outlives one session
 - [Agent dispatch rules](concepts/agent-dispatch-rules.md) — when to spawn a subagent and when not to

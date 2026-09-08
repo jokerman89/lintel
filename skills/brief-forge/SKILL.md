@@ -1,27 +1,27 @@
 ---
 name: brief-forge
 layer: foundation
-description: Use whenever work hands off across a boundary — spawning a subagent, transitioning a phase, passing to a cold executor, or taking operator input — to build a structured envelope and run the active pack's evaluators on it. The universal hand-off gate that keeps context intact across the handoff.
+description: Use when a workflow explicitly hands work across a boundary — spawning a subagent, transitioning a phase, passing to a cold executor, or taking operator input — to build a structured envelope and run the active pack's evaluators on it.
 color: cyan
 tools: Read, Write, Bash
 voice: internal
 cli_support: [claude-code, codex]
 ---
 
-You are the BRIEF-FORGE — the universal hand-off gate at every workflow boundary.
+You are the BRIEF-FORGE — the explicit hand-off gate for workflow boundaries that invoke it.
 
 ## What this skill does
 
-Every time control passes from one component to another in Lintel, Brief Forge:
+When a workflow invokes Brief Forge before control passes to another component, it:
 1. **Constructs an envelope** per `lib/envelope-schema.yaml` (HEAD + BODY + TAIL)
 2. **Runs evaluators** per active pack's `brief_forge_handoffs.<event>.evaluators` list
 3. **Scores completeness** (0-100) and writes to `tail.completeness_score`
-4. **Audits the envelope** to `.claude/runtime/audit/envelopes-<date>.jsonl`
+4. **Audits the envelope** through Lintel's scope-routed audit directory
 5. **Surfaces escape hatches** the receiver can use if context is insufficient
 
-Five hand-off events trigger Brief Forge:
+Brief Forge supports five hand-off event kinds:
 
-| Event | Trigger | Default pack policy |
+| Event | Boundary represented | Default pack policy |
 |---|---|---|
 | `subagent_spawn` | Parent skill spawns a subagent | enabled, evaluators: [security, stale] |
 | `phase_transition` | Phase N → Phase N+1 within a cycle | enabled, evaluators: [completeness] |
@@ -29,12 +29,25 @@ Five hand-off events trigger Brief Forge:
 | `cold_executor` | plan + spec + prompt born together (v3.8) | enabled, evaluators: [security, completeness] |
 | `operator_input` | Operator → skill (curated input) | DISABLED by default (operator-curated) |
 
-Per-pack overrides in `brief_forge_handoffs.<event>.{enabled, evaluators}`.
+Per-pack overrides live in `brief_forge_handoffs.<event>.{enabled, evaluators}`. They configure an
+invocation; they do not cause the host to intercept a hand-off.
+
+## Activation reality
+
+The schema, helpers, evaluators and pack policy ship. Lintel does not currently register a universal
+pre-spawn or pre-phase hook for Brief Forge, and not every host exposes such a callback. A source
+workflow must invoke `/li:brief-forge` explicitly, or reproduce this skill's helper sequence and
+record the resulting audit evidence. `/li:swarm` does this explicitly before lane dispatch.
+
+If Brief Forge is unavailable, disabled by pack policy, or deliberately bypassed, record that exact
+condition. Do not call a hand-off forged merely because the active pack contains
+`brief_forge_handoffs` settings.
 
 ## When to use
 
-- AUTOMATICALLY: every hand-off in Lintel triggers Brief Forge unless the source skill declares `brief_forge_bypass: true` or operator passes `--no-brief-forge`
-- DIRECT: `/li:brief-forge <kind> <from> <to> <content_type> <content_file>` to construct an envelope manually (e.g. for testing)
+- EXPLICIT WORKFLOW CALL: a source skill invokes Brief Forge at its documented hand-off boundary.
+- DIRECT: `/li:brief-forge <kind> <from> <to> <content_type> <content_file>` constructs an envelope
+  for a named boundary, including tests and manual recovery.
 
 ## When NOT to use
 
@@ -51,6 +64,72 @@ source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/lib/pack-resolver.sh"
 source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/lib/brief-forge.sh"
 source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/lib/brief-forge-evaluators.sh"
 
+# PackResolver intentionally resolves top-level and two-level fields only.
+# Brief Forge owns this block-scoped reader for its three-level hand-off policy.
+# It reads PACK_CACHE_FILE after PackResolver has applied active-pack inheritance,
+# so the value comes from the same immutable session snapshot as other pack fields.
+# lintel-test:brief-forge-policy:start
+resolve_brief_forge_handoff_field() {
+  local handoff="${1:-}" field="${2:-}"
+  case "$handoff" in
+    on_subagent_spawn|on_phase_transition|on_workflow_handoff|on_cold_executor|on_operator_input|cold_path_bypass) ;;
+    *) return 2 ;;
+  esac
+  case "$handoff:$field" in
+    on_*:enabled|on_*:evaluators|cold_path_bypass:eligible_skills) ;;
+    *) return 2 ;;
+  esac
+
+  _prime_cache_for_session || return 1
+  awk -v handoff="$handoff" -v field="$field" '
+    /^[^[:space:]#][^:]*:/ {
+      if ($0 ~ /^brief_forge_handoffs:[[:space:]]*(#.*)?$/) {
+        in_root=1
+        next
+      }
+      if (in_root) exit
+    }
+    in_root && substr($0, 1, 2) == "  " && substr($0, 3, 1) != " " {
+      line=substr($0, 3)
+      key=line
+      sub(/:.*/, "", key)
+      in_handoff=(key == handoff)
+      next
+    }
+    in_handoff && substr($0, 1, 4) == "    " && substr($0, 5, 1) != " " {
+      line=substr($0, 5)
+      key=line
+      sub(/:.*/, "", key)
+      if (key == field) {
+        sub(/^[^:]*:[[:space:]]*/, "", line)
+        sub(/[[:space:]]*#.*$/, "", line)
+        gsub(/^[[:space:]]+|[[:space:]]+$/, "", line)
+        print line
+        exit
+      }
+    }
+  ' "$PACK_CACHE_FILE"
+}
+
+validate_brief_forge_evaluators() {
+  local names="${1:-}" name evaluator_fn
+  local -a configured_evaluators=()
+  IFS=',' read -ra configured_evaluators <<< "$names"
+  for name in "${configured_evaluators[@]}"; do
+    name=$(printf '%s' "$name" | tr -d '[:space:]')
+    [ -z "$name" ] && continue
+    evaluator_fn="evaluator_${name//-/_}"
+    if ! declare -F "$evaluator_fn" >/dev/null 2>&1; then
+      audit_log "brief-forge" "brief_forge_blocked" \
+        "event=$kind" "from=$from" "to=$to" \
+        "reason=unknown_evaluator" "evaluator=$name"
+      echo "BRIEF FORGE: BLOCKED — unknown evaluator '$name' is not loaded" >&2
+      return 1
+    fi
+  done
+}
+# lintel-test:brief-forge-policy:end
+
 kind="${1:?usage: brief-forge <kind> <from> <to> <content_type> <content_file>}"
 from="${2:?}"
 to="${3:?}"
@@ -58,17 +137,35 @@ content_type="${4:?}"
 content_file="${5:?}"
 
 event_field="on_${kind}"
-enabled=$(resolve_pack_field "brief_forge_handoffs.${event_field}.enabled")
-evaluators_csv=$(resolve_pack_field "brief_forge_handoffs.${event_field}.evaluators")
+enabled=$(resolve_brief_forge_handoff_field "$event_field" enabled) || {
+  echo "BRIEF FORGE: BLOCKED — invalid or unreadable hand-off policy '$event_field'" >&2
+  exit 1
+}
+evaluators_csv=$(resolve_brief_forge_handoff_field "$event_field" evaluators) || {
+  echo "BRIEF FORGE: BLOCKED — invalid or unreadable hand-off policy '$event_field'" >&2
+  exit 1
+}
+evaluators_csv=$(printf '%s' "$evaluators_csv" | tr -d '[][:space:]')
 budget=$(resolve_pack_field brief_forge_handoffs.budget_tokens)
 budget="${budget:-5000}"
+
+if [ -z "$enabled" ]; then
+  audit_log "brief-forge" "brief_forge_blocked" \
+    "event=$kind" "from=$from" "to=$to" "reason=missing_handoff_policy"
+  echo "BRIEF FORGE: BLOCKED — no enabled policy for '$event_field'" >&2
+  exit 1
+fi
 ```
 
 ### Step 2 — Cold-path-bypass check
 
 ```bash
 # Source skill frontmatter may declare brief_forge_bypass: true
-bypass_eligible_csv=$(resolve_pack_field brief_forge_handoffs.cold_path_bypass.eligible_skills)
+bypass_eligible_csv=$(resolve_brief_forge_handoff_field cold_path_bypass eligible_skills) || {
+  echo "BRIEF FORGE: BLOCKED — unreadable cold-path bypass policy" >&2
+  exit 1
+}
+bypass_eligible_csv=$(printf '%s' "$bypass_eligible_csv" | tr -d '[][:space:]')
 
 # Check if source ("from") is in eligible_skills CSV
 case ",$bypass_eligible_csv," in
@@ -84,6 +181,11 @@ if [ "$enabled" != "true" ]; then
   write_bypass_audit "$kind" "$from" "$to"
   exit 0
 fi
+
+# Validate every configured name before constructing or dispatching an envelope.
+# The default pack reaches this call with security/stale for subagent_spawn;
+# a merely declared but unloaded pack evaluator blocks here.
+validate_brief_forge_evaluators "$evaluators_csv" || exit 1
 ```
 
 ### Step 3 — Construct envelope (HEAD + BODY + TAIL)
@@ -139,14 +241,15 @@ for e in "${evaluators[@]}"; do
 done
 ```
 
-`run_evaluator <name> <envelope_path>` dispatches to `lib/brief-forge-evaluators.sh` functions:
+`lib/brief-forge-evaluators.sh` ships exactly three built-in evaluator functions:
 - `evaluator_security`
 - `evaluator_completeness`
 - `evaluator_stale`
-- `evaluator_compliance` (the active pack's compliance gates; none by default)
-- `evaluator_voice_alignment` (the active pack's voice tier)
 
-Each returns JSON `{score: 0-100, budget_used: N, notes: "..."}`.
+Each returns JSON `{score: 0-100, budget_used: N, notes: "..."}`. A pack-contributed evaluator runs
+only when trusted active-pack integration has sourced its library and defined the corresponding
+`evaluator_<name>` function before this dispatch. Listing its name in pack policy alone is not code
+loading; an undeclared function records `brief_forge_blocked` and stops the hand-off.
 
 ### Step 5 — Compose tail + finalize
 
@@ -157,8 +260,9 @@ completeness_score=$(aggregate_evaluator_scores "${evaluator_results[@]}")
 # Compose escape hatches (per content_type)
 escape_hatches=$(build_escape_hatches "$content_type" "$from")
 
-# Audit pointer
-audit_dir="${LINTEL_HOME:-$HOME/.lintel}/audit"
+# Audit pointer. _audit_out_dir applies: explicit LINTEL_AUDIT_DIR, then a
+# v5-layout repo's .claude/runtime/audit/, then the operator-global fallback.
+audit_dir="$(_audit_out_dir brief-forge)"
 audit_path="$audit_dir/envelopes-$(date -u +%Y-%m-%d).jsonl"
 mkdir -p "$audit_dir"
 
@@ -175,11 +279,11 @@ echo "$envelope_json" >> "$audit_path"
 # Emit envelope to stdout (for the receiver to consume)
 cat "$envelope_path"
 
-# Brief Forge stats
-ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-printf '{"ts":"%s","kind":"brief_forge_emitted","event":"%s","from":"%s","to":"%s","completeness":%d,"budget_used":%d,"evaluators_run":%d}\n' \
-  "$ts" "$kind" "$from" "$to" "$completeness_score" "$budget_used" "${#evaluators[@]}" \
-  >> "$audit_dir/brief-forge.jsonl"
+# Scope-routed stats use the same destination policy as the envelope pointer.
+audit_log "brief-forge" "brief_forge_emitted" \
+  "event=$kind" "from=$from" "to=$to" \
+  "completeness=$completeness_score" "budget_used=$budget_used" \
+  "evaluators_run=${#evaluator_results[@]}"
 ```
 
 ### Step 7 — Score-based decision
@@ -212,26 +316,37 @@ exit 0
 
 ## Hop-in support
 
-None — Brief Forge is invoked on hand-off events, not standalone.
+None — the caller supplies the complete boundary and content file in one invocation.
 
 ## Integration
 
 **Reads:**
 - `lib/envelope-schema.yaml` (envelope shape)
-- `lib/pack-resolver.sh` (pack policy)
+- `lib/pack-resolver.sh` (active-pack discovery, inheritance cache and two-level pack policy)
+- the skill-local block-scoped reader (three-level event and cold-path fields under
+  `brief_forge_handoffs`)
 - `lib/brief-forge.sh` (envelope helpers)
-- `lib/brief-forge-evaluators.sh` (5 evaluators)
+- `lib/brief-forge-evaluators.sh` (security, completeness and stale built-ins)
+- any trusted active-pack evaluator library explicitly sourced before dispatch
 - Content file passed in (varies by content_type)
 
 **Writes:**
-- `.claude/runtime/audit/envelopes-<date>.jsonl` (per-envelope audit)
-- `.claude/runtime/audit/brief-forge.jsonl` (per-forge stats)
+- the scope-routed `envelopes-<date>.jsonl` (per-envelope audit)
+- the scope-routed `brief-forge.jsonl` (per-forge emitted, bypassed or blocked events)
 - stdout (the envelope, for receiver consumption)
 
-**Triggered by:**
-- Every skill's hand-off operation
-- `hooks/shared/brief-forge-pre-spawn.sh` (auto-fire before subagent spawn)
-- `hooks/shared/brief-forge-pre-phase.sh` (auto-fire on phase transition)
+For v5-layout repository work, the routed directory is `.claude/runtime/audit/`. An explicitly set
+`LINTEL_AUDIT_DIR` overrides that destination; work without a migrated repository falls back to
+`~/.lintel/audit/`. The runnable sequence above and these write declarations use the same unified
+router from `bin/_audit.sh`.
+
+**Invoked by:**
+- Source workflows that explicitly call `/li:brief-forge` at a documented boundary
+- Direct operator or test invocations
+
+No `brief-forge-pre-spawn` or `brief-forge-pre-phase` hook is registered in the shipped hook
+bundle. Treat any future host callback as inactive until its registration and firing evidence are
+verified on that host.
 
 ## Anti-patterns
 
