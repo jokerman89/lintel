@@ -38,6 +38,11 @@ establish that an organization's client settings, entitlement or policies permit
 Record live VS Code, CLI and cloud-agent acceptance separately; use the
 [release checklist](../.claude/engineering/SHIP-GATE.md).
 
+`shape/build-workflow-contract.sh` checks BUILD's instruction structure. Its old location
+under `behavior/build-pilot.sh` overstated that evidence. The enterprise integration tests
+execute actual workflow snippets and pack consumers; neither test category proves a live
+model follows the complete cycle or establishes measured enterprise productivity.
+
 CI runs every tier on Ubuntu, macOS and Windows, with explicit Python and jq preflight. Actions
 use reviewed commit pins and read-only repository tokens. Catalog drift checks never push a
 follow-up commit to the default branch. Native Windows install/reinstall tests require no Pester

@@ -103,6 +103,14 @@ written during a project belongs to the project, not to an upstream template upd
 For a bare global installation, `~/.lintel/` additionally holds profile settings, packs and
 helper resources. That is an optional installation route, not a Copilot kit prerequisite.
 
+Pack selection normally lives in `~/.lintel/packs/active-pack`; `profile.yaml`
+stores preferences such as mode and role. A bare-install pack switch therefore
+affects subsequent sessions sharing that operator home, not just the current
+repository. The current session keeps its cached identity. Repository adapters
+can configure separate roots through `LINTEL_HOME`, `LINTEL_PACKS_DIR` and
+`LINTEL_ACTIVE_PACK_FILE`; inspect the resolved paths before changing a pack.
+See [pack resolution](concepts/pack-resolver.md) for source and target precedence.
+
 ## How hook activation works
 
 | Install route | Lintel hook behavior |

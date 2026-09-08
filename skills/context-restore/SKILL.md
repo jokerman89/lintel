@@ -30,7 +30,7 @@ Read a checkpoint file (written by `/context-save`) into a fresh session. Output
 
 ## Workflow
 
-1. **Resolve slug + branch** via `_context_repo_slug` (from `bin/_context.sh`, native — basename of the repo root; no external binary) + `git branch --show-current`.
+1. **Resolve slug + branch** via `_context_repo_slug` and `_context_branch` from `bin/_context.sh`; both use the selected target repository.
 2. **Find checkpoint** via the mechanical core (no raw `ls`/`find`):
 
    ```bash
@@ -40,7 +40,7 @@ Read a checkpoint file (written by `/context-save`) into a fresh session. Output
    ```
 
    - If argument provided: validate the path exists, read it (skip discovery).
-   - Else: read `$(context_latest)`. Discovery already includes the legacy `~/.lintel/sessions/<branch>/` fallback (read-only; grace window to 2026-09-12).
+   - Else: read `$(context_latest)`. Discovery includes only legacy files whose repository key or explicit `**Repository:**` line matches this repository (read-only; grace window to 2026-09-12). Unattributed legacy files remain available through an explicitly selected path; never infer ownership from the branch or basename alone.
 3. **Parse checkpoint structure** — extract: task description, done, in-flight, next, decisions, failed attempts, files touched.
 4. **Read referenced files** — for each file under "Files touched," `Read` it so subsequent edits land on accurate state (post-checkpoint changes may exist).
 5. **Diff check** — `git log <last-commit-in-checkpoint>..HEAD` to surface any commits landed since checkpoint was written.

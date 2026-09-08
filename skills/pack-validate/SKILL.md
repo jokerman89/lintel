@@ -1,152 +1,81 @@
 ---
 name: pack-validate
 layer: foundation
-description: Validates a pack manifest against lib/pack-schema.yaml — required fields, extends-chain, version compatibility. Reports per-rule pass/fail.
+description: Validate a pack before activation or after editing its manifest. Checks effective required fields and inheritance with the shared resolver, then reports schema and version compatibility limits.
 color: green
 tools: Read, Bash, Grep
 voice: internal
 cli_support: [claude-code, codex]
 ---
 
-You are the PACK-VALIDATE skill — runs the full validation rule-set against a pack.
-
-## What this skill does
-
-Invokes `validate_pack` from `lib/pack-resolver.sh`, then runs additional schema-level checks against `lib/pack-schema.yaml` that the resolver's lightweight runtime check doesn't perform.
-
-Three levels of validation:
-
-1. **Runtime check (resolver):** name + version + voice + compliance + navigation present; extends-chain resolves; no cycles
-2. **Schema check (this skill):** every declared field type-matches schema; nested-block required fields present
-3. **Compatibility check:** `requires_lintel` matches current Lintel version (warn-only in v4.0 per design doc §1.3 C1-D2)
-
-## When to use
-
-- After `/li:pack-create` to confirm new pack is sound
-- Before `/li:pack-switch` to avoid runtime fallback to _default
-- In CI to enforce that pack manifests stay valid as the schema evolves
-- During Phase 2+ meta-infra cycles touching pack files
-
-## When NOT to use
-
-- For quick yes/no check — `validate_pack <name>` from a shell is lighter
-- Inside the cycle (resolver runs validation at SENSE Step 1 already)
+Validate the target pack with the same parser and effective-field rules used at
+activation. Report what passed, what failed, and which compatibility checks remain
+manual. A child can inherit required policy blocks; an explicitly declared child
+block replaces its parent's whole block.
 
 ## Workflow
 
-### Step 1 — Resolve target pack
+### 1. Validate the effective manifest
 
 ```bash
-target="${1:-}"
-if [ -z "$target" ]; then
-  # Default: validate the active pack
-  source "$REPO_ROOT/lib/pack-resolver.sh"
-  target=$(get_active_pack_name)
-fi
-```
-
-### Step 2 — Runtime check
-
-```bash
-source "$REPO_ROOT/lib/pack-resolver.sh"
-echo "═══ Runtime check ═══"
-if validate_pack "$target" 2>&1; then
-  echo "  PASS: runtime validation"
+pack_source_root="${LINTEL_SOURCE_ROOT:-${REPO_ROOT:-${LINTEL_HOME:-$HOME/.lintel}}}"
+source "$pack_source_root/lib/pack-resolver.sh"
+target="${1:-$(get_active_pack_name)}"
+verdict=PASS
+if validate_pack "$target"; then
+  echo "PASS: manifest identity, required effective fields, extension fields and inheritance"
 else
-  echo "  FAIL: runtime validation rejected"
+  verdict=FAIL
+  audit_log pack-lifecycle pack_validated "name=$target" "verdict=$verdict"
+  echo "FAIL: pack cannot be activated; correct the diagnostic above."
   exit 1
 fi
 ```
 
-### Step 3 — Schema check
+Runtime validation covers nonempty name/version in each manifest, effective
+`voice.default_tier`, `compliance.mode`, `navigation.default_workflow`, required
+extension fields, missing parents, cycles and the ten-parent limit. It preserves
+legacy packs without `schema_version` or `requires_lintel`.
+
+The shared parser supports indented and flow mappings, plain or quoted scalar
+values, and scalar lists in block or flow form. Mapping keys must be unquoted
+identifiers (`[A-Za-z_][A-Za-z_0-9-]*`); root mappings start in column one.
+Anchors, tags, multiline scalars and
+complex list items are unsupported. These are runtime contract checks, not a
+general YAML-schema certification.
+Double-quoted escapes supported by the parser are `\\`, `\"`, `\n`, `\r`, and
+`\t`; use literal Unicode characters instead of Unicode escape sequences.
+
+### 2. Report schema and version compatibility
 
 ```bash
-SCHEMA="$REPO_ROOT/lib/pack-schema.yaml"
-pack_dir=$(_pack_dir "$target")
-manifest="$pack_dir/pack.yaml"
-
-echo ""
-echo "═══ Schema check (against lib/pack-schema.yaml v1) ═══"
-
-# Required top-level fields per schema
-for field in name version voice compliance navigation requires_lintel; do
-  if grep -qE "^${field}:" "$manifest"; then
-    echo "  PASS: top-level '$field' present"
-  else
-    echo "  FAIL: top-level '$field' MISSING"
-  fi
-done
-
-# Required nested fields
-for nested in "voice.default_tier" "compliance.mode" "navigation.default_workflow"; do
-  parent="${nested%.*}"; child="${nested#*.}"
-  # Check both block + inline-flow form
-  if awk -v p="$parent" -v c="$child" '
-    $0 ~ "^"p":[[:space:]]*\\{" { found=index($0, c":"); if (found>0) exit 0 }
-    $0 ~ "^"p":[[:space:]]*$" { in_p=1; next }
-    in_p && $0 ~ "^[[:space:]]+"c":" { exit 0 }
-    /^[A-Za-z_]/ { in_p=0 }
-    END { exit 1 }
-  ' "$manifest"; then
-    echo "  PASS: nested '$nested' present"
-  else
-    echo "  FAIL: nested '$nested' MISSING"
-  fi
-done
-
-# schema_version present
-if grep -qE "^schema_version:" "$manifest"; then
-  v=$(grep -E "^schema_version:" "$manifest" | head -1 | awk -F': *' '{print $2}' | tr -d '"' | tr -d "'" | tr -d '[:space:]')
-  echo "  PASS: schema_version: $v"
-else
-  echo "  WARN: schema_version not declared (Phase 2+ recommends)"
-fi
+chain=$(_resolve_extends_chain "$target")
+schema=$(_pack_chain_field "$chain" schema_version) || schema=""
+requires=$(_pack_chain_field "$chain" requires_lintel) || requires=""
+echo "Declared schema: ${schema:-not declared (legacy)}"
+echo "Required Lintel: ${requires:-not declared (legacy)}"
+echo "Compatibility: NOT VERIFIED by runtime validation."
+verdict=PASS_WITH_WARN
 ```
 
-### Step 4 — Compatibility check
+Read `lib/pack-schema.yaml` for the intended field contract and the installed
+plugin manifest for its actual version. If the pack declares a version range or
+schema unsupported by that installation, explain the mismatch before activation.
+Do not claim compatibility from a hardcoded version or a matching major-version
+prefix. This skill does not introduce a new version-enforcement policy.
+
+### 3. Audit and return the result
 
 ```bash
-requires=$(grep -E "^requires_lintel:" "$manifest" | head -1 | awk -F': *' '{print $2}' | tr -d '"' | tr -d "'" | tr -d '[:space:]')
-current_lintel="4.0.0"  # ship-time constant; future: read from a VERSION file
-
-echo ""
-echo "═══ Compatibility check ═══"
-if [ -z "$requires" ]; then
-  echo "  WARN: requires_lintel not declared"
-elif echo "$requires" | grep -qE '^>=4\.'; then
-  echo "  PASS: requires $requires (compatible with Lintel $current_lintel)"
-else
-  echo "  WARN: requires '$requires' — manual review needed (v4.0 ships warn-only)"
-fi
+audit_log pack-lifecycle pack_validated "name=$target" "verdict=$verdict"
+echo "$verdict: runtime contract passed; review compatibility before activation."
 ```
 
-### Step 5 — Audit + summary
-
-```bash
-ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-printf '{"ts":"%s","kind":"pack_validated","name":"%s","verdict":"%s","operator":"%s"}\n' \
-  "$ts" "$target" "$verdict" "$(whoami)" \
-  >> "$LINTEL_HOME/audit/pack-lifecycle.jsonl"
-```
-
-Summary line:
-- `PASS` — all checks pass
-- `PASS_WITH_WARN` — checks pass but compatibility warns
-- `FAIL` — at least one required check failed
+Use `FAIL` for runtime rejection and `PASS_WITH_WARN` while compatibility is
+unverified. Record any completed manual compatibility review and its evidence.
+Never report an unexecuted gate as passing or activate a pack as a side effect.
 
 ## Integration
 
-**Reads:**
-- `lib/pack-resolver.sh`
-- `lib/pack-schema.yaml`
-- `packs/<name>/pack.yaml`
-
-**Writes:**
-- stdout (verdict)
-- `~/.lintel/audit/pack-lifecycle.jsonl`
-
-## Anti-patterns
-
-- **Skipping the schema check** — runtime check is lightweight; schema check catches drift
-- **Treating warn as fail** — v4.0 is warn-only on compatibility; v4.1+ blocks
-- **Validating without auditing** — every validation event goes to pack-lifecycle.jsonl
+Reads `lib/pack-resolver.sh`, `lib/pack-schema.yaml`, and the target ancestry.
+Writes the verdict to stdout and the operator's pack lifecycle audit log.

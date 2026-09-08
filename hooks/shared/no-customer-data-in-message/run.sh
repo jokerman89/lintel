@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+# component: no-customer-data-in-message
+# implements: ADR-0013
+# intent: docs/compliance.md
+# constraints: pattern coverage and host activation limits in docs/compliance.md
+# last_intent_review: 2026-09-08
 # no-customer-data-in-message — Lintel warn-only hook
 # Scans operator prompt for customer-data tells.
 # Reads prompt content from $1 (Claude Code passes prompt as first arg).
@@ -17,7 +22,11 @@ command -v audit_log >/dev/null 2>&1 || source "$(dirname "${BASH_SOURCE[0]}")/.
 # Shared customer-PII patterns (defined once in _patterns.sh).
 source "$(dirname "${BASH_SOURCE[0]}")/../_patterns.sh"
 
-joined="$(scan_customer "$PROMPT")"
+if ! joined="$(scan_customer "$PROMPT")"; then
+  audit_log "hooks" "no_customer_data_in_message" "hook=no-customer-data-in-message" "tier=warn" "reason=scan-unavailable" || true
+  echo "WARN [Lintel hook]: no-customer-data-in-message pattern scan unavailable; prompt was not verified." >&2
+  exit 0
+fi
 
 if [ -n "$joined" ]; then
   audit_log "hooks" "no_customer_data_in_message" "hook=no-customer-data-in-message" "tier=warn" "patterns_matched=$joined"

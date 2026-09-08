@@ -301,12 +301,12 @@ cmd_counts() {
   agents_v3=0
   hooks_v3=0
   [ -d "$REPO_ROOT/skills" ] && skills_v3=$(find "$REPO_ROOT/skills" -name 'SKILL.md' 2>/dev/null | wc -l | tr -d ' ')
-  [ -d "$REPO_ROOT/agents" ] && agents_v3=$(find "$REPO_ROOT/agents" -name '*.md' 2>/dev/null | grep -cv README || echo 0)
+  [ -d "$REPO_ROOT/agents" ] && agents_v3=$(find "$REPO_ROOT/agents" -name '*.md' 2>/dev/null | awk 'index($0,"README")==0 {n++} END {print n+0}')
   [ -d "$REPO_ROOT/hooks/shared" ] && hooks_v3=$(find "$REPO_ROOT/hooks/shared" -name 'HOOK.md' 2>/dev/null | wc -l | tr -d ' ')
 
   # v2 fallback if v3 not present
   skills_v2=$(find "$REPO_ROOT/scaffolding" -path '*/skills/*/SKILL.md' 2>/dev/null | wc -l | tr -d ' ')
-  agents_v2=$(find "$REPO_ROOT/scaffolding" -path '*/agents/*.md' 2>/dev/null | grep -cv README || echo 0)
+  agents_v2=$(find "$REPO_ROOT/scaffolding" -path '*/agents/*.md' 2>/dev/null | awk 'index($0,"README")==0 {n++} END {print n+0}')
   hooks_v2_dir=""
   hooks_v2=0
   [ -n "$hooks_v2_dir" ] && hooks_v2=$(find "$hooks_v2_dir" -name 'HOOK.md' 2>/dev/null | wc -l | tr -d ' ')

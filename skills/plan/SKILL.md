@@ -2,7 +2,7 @@
 name: plan
 layer: foundation
 workflow_root: true
-description: Use after DISCOVER, or standalone when you have a design doc and need to break it into executable work, to produce the cold-executor trio (plan.md + spec.md + prompt.md) together. Tasks are granularity-checked to roughly five minutes each and gated on operator approval.
+description: Use after DISCOVER, or standalone with an approved design, to produce the cold-executor trio (plan.md + spec.md + prompt.md). Keep short, verifiable leaves and group connected work into bounded packages for implementation and review, with operator approval before BUILD.
 color: cyan
 tools: Read, Write, Edit, Bash, Grep, Glob
 voice: internal
@@ -30,8 +30,8 @@ You are the PLAN skill — Phase 4 of the Lintel cycle.
 
 Takes APPROVED design doc (from DEFINE) + discover-report.md (from DISCOVER) and produces:
 1. **plan.md** — task list with file paths + complete code (where prescriptive) + verification steps + dependencies + ordering
-2. **spec.md (draft)** — early version of cold-executor master spec (finalized in CAPTURE)
-3. **Plan signals** — tasks, phases and a labeled token estimate. Present before BUILD; no invented price.
+2. **spec.md + prompt.md** — the master spec and cold-executor handoff, reviewed with the plan
+3. **Plan signals** — tasks, phases and a labelled whole-cycle token estimate. Present before BUILD; no invented price.
 4. **Founder approval gate** — explicit pause before commit
 
 Adopted from speckit (cross-section Analyze), Architect image (cost-estimate gate, founder approval gate), and superpowers (two-stage subagent review).
@@ -64,6 +64,14 @@ Lintel approval heading inside Spec Kit plan.md or recreate its tasks through DE
 The remainder of the ordinary trio-generation steps applies only to Lintel-native plans.
 For native plans, also write work.json with `tasks` pointing to plan.md and link it from todo.md.
 
+For either workflow, select the initiative explicitly from operator intent or unambiguous
+committed work links. Set `LINTEL_WORK_MAP` to that work.json; for a newly created native
+plan, set `LINTEL_PLAN_DIR` to the exact directory being written. Never select by modification
+time. The completeness gate below validates this selection for both workflows. Record package
+membership in the existing design or linked handoff using the original task IDs; mapped work
+without grouping uses singleton packages, without a duplicate task list. Code/helpers live in
+`LINTEL_SOURCE_ROOT`; maps and their artifacts resolve relative to `LINTEL_REPO_ROOT`.
+
 
 **Existing authorization:** record the operator's authorized scope before the gates below.
 Present plan signals and a reviewable plan, but do not ask again for execution already explicitly
@@ -89,6 +97,14 @@ Then read:
 
 If design doc not APPROVED → BLOCKED, return to DEFINE.
 
+**Profile impact:** resolve the active pack through `resolve_pack_field` and read only the
+referenced policies or knowledge relevant to this design. In the template's Profile impact
+section, trace each applicable requirement to its exact pack field or source file/section,
+existing requirement ID, affected leaf IDs and verification evidence. State what changes in
+the deliverable because of that requirement. Keep advice distinct from mandatory policy;
+profile presence does not prove that a hook is installed or a control passed. For `_default`
+or no applicable requirement, record that outcome without inventing enterprise controls.
+
 ### Step 2 — Plan-eng-review (engineering plan)
 
 Invoke `/li:plan-eng-review` skill (or inline equivalent).
@@ -96,14 +112,34 @@ Invoke `/li:plan-eng-review` skill (or inline equivalent).
 Output: task list with for each task:
 - Task ID
 - Title (verb + object)
-- Target file path(s)
+- Target file path(s), one accountable implementer/owner and the permitted edit boundary
+- Requirement IDs from the approved design/spec (including applicable profile requirements)
 - Dependency on prior tasks
-- Acceptance criteria (test or verify command)
-- Estimated tokens + minutes
+- Observable acceptance outcome, verification command/procedure and expected evidence
+- Estimated tokens; keep the granularity time check internal unless time was requested
 - Complexity (mechanical / multi-file / architecture)
-- Recommended subagent (per discover-report's mapping)
+- Recommended implementer role (per discover-report's mapping; shared by its work package)
 
 Rule (from superpowers): each task should be 2-5 minutes of implementer time. Bigger = decompose.
+
+Group leaves into **work packages** (`P1`, `P2`, …) using the
+[planner module contract](../../docs/concepts/planner-as-module.md#work-packages).
+Each package has one outcome, the same write owner and edit boundary, connected dependencies
+and acceptance evidence mapped back to its unchanged leaf IDs. The template carries the
+package table; keep leaf detail separate. Split at owner, security, irreversible-decision or
+independent rollback boundaries. Choose boundaries from the work, not a fixed leaf count or
+duration. An existing ungrouped plan uses one package per leaf without renumbering its tasks.
+
+BUILD executes packages sequentially, their leaves in dependency order, and applies spec then
+quality review to the combined package once, with findings and evidence mapped to leaves.
+A package cannot be DONE until every leaf is verified. Determine review depth from the whole
+package: several small edits can still form a substantive integration. Packaging changes the
+execution/review unit; the ≤5-minute leaf check and approval gates remain.
+
+Instantiate the trio from the canonical templates as **DRAFT** before the following reviews;
+keep those drafts current as tasks change. A verification command alone is not an acceptance
+criterion: name the behavior it must demonstrate and its expected result. Link existing
+authoritative requirements instead of copying them into a competing specification.
 
 ### Step 3 — Plan-design-review (if frontend in scope)
 
@@ -132,14 +168,17 @@ Iterate until plan is internally consistent.
 
 ### Step 6 — Dependency graph
 
-For each task, identify upstream blocking tasks. Visualize:
+For each leaf, identify upstream blocking leaves, then derive package dependencies from those
+edges. A package must not hide a dependency on a leaf in a later package. Visualize:
 
 ```
 T1 (setup) → T2 (schema) → T3 (api) → T5 (test-e2e)
                        ↘ T4 (ui) ↗
 ```
 
-Detect cycles. Detect impossible-orderings. Surface blockers explicitly.
+Detect cycles and impossible orderings in both views. Keep leaf IDs authoritative; the package
+table is a grouping in plan.md, not a new job-state schema or an automatic dispatch service.
+Surface blockers explicitly.
 
 ### Step 7 — Cost estimate (MANDATORY GATE)
 
@@ -153,21 +192,25 @@ labelled token estimate** — and does **not** present a dollar number the syste
 
 ```yaml
 # Plan signals (honest — task count + phases + labelled token estimate)
-total_tasks: N
+total_tasks: N   # unchanged leaf count
+work_packages: N
 phases: [<phase list from the plan — what BUILD will actually run>]
 size: <XS|S|M|L|XL from scope.md>
-model_mix:
-  - Haiku (mechanical): <% tasks>
-  - Sonnet (multi-file): <% tasks>
-  - Opus (architecture): <% tasks>
+execution_roles: [<roles selected for package complexity and review independence>]
+# model_configuration: <actual available host configuration, only when known>
 
 token_estimate:
-  value: <scale_calibrated_prior <size>, summed across tasks>
-  basis: CALIBRATED      # when CAPTURE history exists for this size
-  # basis: UNCALIBRATED  # no actuals recorded yet — value is size_default_prior (a hardcoded guess),
-  #                        not a measurement. See lib/scale-estimator.sh. Do NOT imply precision.
+  value: <tokens from scale_token_estimate <size>, once for the whole cycle>
+  basis: <calibrated|uncalibrated from the same helper result>
+  samples: <matching measured cycles from the same helper result>
+  scope: cycle
 # estimated_time: <sum minutes>     # only when --with-time
 ```
+
+`scale_token_estimate <size>` returns `tokens basis samples` in one read; the numeric
+`scale_calibrated_prior` API remains available. CAPTURE records whole-cycle actuals, so never
+multiply this prior by the number of tasks or sum it once per leaf. Calibration writes remain
+opt-in under ADR-0008; no usable actuals means `uncalibrated`, even if a log file exists.
 
 AskUserQuestion (MANDATORY):
 "Plan ready: <N> tasks across <phase list>, est. ~<tokens> tokens (<CALIBRATED | UNCALIBRATED — no actuals recorded yet>). Proceed?"  (append ", ~<duration>" only when `--with-time`; **never** a `$` figure)
@@ -198,7 +241,8 @@ Dispatch CodeReviewer subagent (or general-purpose) with plan.md path:
 If Stage 1 finds issues: fix (Edit tool), re-dispatch. Max 3 iterations.
 
 **Stage 2 — Quality review (only after Stage 1 PASS):**
-"Are tasks well-decomposed? Deps correct? Costs realistic? Test coverage adequate? Edge cases addressed?"
+"Are leaves well-decomposed, package boundaries coherent and aggregate review depth appropriate?
+Are dependencies correct, estimates grounded, acceptance and evidence complete for every leaf?"
 
 If Stage 2 finds issues: fix, re-dispatch. Max 3 iterations.
 
@@ -215,7 +259,8 @@ AskUserQuestion (per Architect image):
 - C) PAUSE — save state for later, don't proceed
 - D) ABORT — close plan, status BLOCKED
 
-If A: write plan.md final + checkpoint, status DONE.
+If A: mark the reviewed trio APPROVED, finalize it and write the checkpoint. Only declare
+status DONE after the artifact checks below pass. Until approval, all three remain DRAFT.
 
 ### Step 11 — Write artifacts
 
@@ -225,14 +270,14 @@ If A: write plan.md final + checkpoint, status DONE.
 - `scaffolding/01-foundation/templates/plan/spec.template.md` — engineering master spec.
 - `scaffolding/01-foundation/templates/plan/prompt.template.md` — cold-executor handoff.
 
-Read the template, strip the comment header + the unused `depth_schema` sections (for plan.template.md), fill the placeholders, and write the result to the output path. The template files replace the previously-inline skeletons; if the scaffolding tree isn't present (e.g. a bare target repo before `bin/li-scaffold`), fall back to the structures documented below.
+Read the template, strip the comment header + the unused `depth_schema` sections (for plan.template.md), fill the placeholders, and write the result to the output path. Preserve the approval status established at Step 10 when finalizing the drafts. If the scaffolding tree is absent, locate these templates in the installed Lintel source; if unavailable there too, retain the essential task fields from Step 2 and depth structure below, and record that the canonical template was unavailable.
 
 **plan.md** (canonical, `.claude/plans/<slug>/plan.md`) — from `plan.template.md`:
 ```markdown
 # Plan: <wedge title>   (size: <XS|S|M|L|XL> · schema: <flat|phased|tree>)
 
 **Generated by:** /li:plan on <date>
-**Status:** APPROVED
+**Status:** DRAFT (APPROVED only after Step 10)
 **Design doc:** <path>
 **Discover report:** <path>
 **Scope:** <path to scope.md>
@@ -255,23 +300,9 @@ Read the template, strip the comment header + the unused `depth_schema` sections
 - **`phased`** (M): phases with tasks, numbered `1, 1.1 / 2, 2.1`.
 - **`tree`** (L/XL): phases → tasks → subtasks + milestone checkpoints, `1 / 1.1 / 1.1.a` (Slice 2 — see below).
 
-```markdown
-<!-- depth_schema: flat -->
-## Task list
-| ID | Title | Files | Deps | Subagent | Tokens | Min |
-|---|---|---|---|---|---|---|
-| T1 | <title> | <paths> | - | TestRunner | 2k | 4 |
-| T2 | ... | | T1 | BackendArchitect | 8k | 15 |
-
-<!-- depth_schema: phased -->
-## Phase 1 — <name>   [milestone: <pass criterion>]
-| ID | Title | Files | Deps | Subagent | Tokens | Min |
-|---|---|---|---|---|---|---|
-| 1.1 | <title> | <paths> | - | <agent> | 2k | 4 |
-| 1.2 | ... | | 1.1 | <agent> | 4k | 5 |
-## Phase 2 — <name>   [milestone]
-| 2.1 | ... | | 1.2 | <agent> | | |
-```
+Use the matching tables and per-leaf detail from `plan.template.md`; it is the source of
+truth for ownership, requirement tracing, acceptance, verification and evidence fields.
+Only add a minutes column when the operator requested time estimates.
 
 **`depth_schema: tree` — WBS rendering for L/XL (Slice 2 — design §3.3).** Renders phase → task → subtask with milestone checkpoints. This replaces Slice 1's fallback (where `tree` degraded to `phased`).
 
@@ -280,36 +311,9 @@ Read the template, strip the comment header + the unused `depth_schema` sections
 - **Task** — `1.1`, `1.2` / `2.1`, `2.2` (the `<phase>.<task>` tier).
 - **Subtask** — `1.1.a`, `1.1.b` / `1.2.a` (the `<phase>.<task>.<letter>` tier; lowercase letters).
 
-The **subtask is the LEAF** at tree depth — the cold-executor unit. The 2-5 min granularity rule applies to the subtask (`1.1.a`), NOT the task or phase. Milestone checkpoints sit at the **phase** level: they are the resume-points the operator/jobs can resume to (Slice 3 keys node-path resume to these), and add coarse structure without weakening the per-leaf granularity discipline.
-
-```markdown
-<!-- depth_schema: tree -->
-## Phase 1 — <name>   [milestone-checkpoint: <pass criterion>]
-### 1.1 <task>   (files · deps · subagent · est_tokens)
-   - 1.1.a <subtask — the leaf, ≤5 min>   (files · subagent · est_tokens)
-   - 1.1.b <subtask — ≤5 min>
-### 1.2 <task>
-   - 1.2.a <subtask — ≤5 min>
-## Phase 2 — <name>   [milestone-checkpoint: <pass criterion>]
-### 2.1 <task>
-   - 2.1.a <subtask — ≤5 min>
-```
+The **subtask is the LEAF** at tree depth — the verification and progress unit. The 2-5 min granularity rule applies to the subtask (`1.1.a`), NOT the task or phase. Work packages group these leaves for execution and review while retaining leaf evidence and status. Milestone checkpoints stay at the **phase** level; packaging does not replace existing resume pointers.
 
 **`--lazy` (optional, opt-in — design §5 Approach-C graft):** for very large XL trees, the subtask leaves (`1.1.a`) under a phase MAY be elaborated **just-in-time** when BUILD reaches that phase, rather than all up front. When `--lazy` is set, render the phases + tasks now and mark each phase's subtasks `(lazy: elaborated at BUILD)`; the per-leaf ≤5 min rule still applies once a leaf is elaborated. Opt-in only — the default renders the full tree up front (preserves the trio's born-together contract; `--lazy` is the escape hatch for genuinely huge greenfield work where up-front elaboration would be wasteful).
-
-```markdown
-## Per-task detail
-### <T1 | 1.1 | 1.1.a>: <title>
-**Files:** <paths>
-**Dependencies:** none
-**Subagent:** <name>
-**Acceptance:** <verify command or test>
-**Estimated tokens:** <N>
-
-[Complete code or detailed spec here — implementer reads this verbatim]
-
-### <next leaf>: ...
-```
 
 **spec.md** (canonical, `.claude/plans/<slug>/spec.md`) — from `spec.template.md`:
 - Master engineering specification — born in PLAN (v3.8 Feature 2.2: trio born together)
@@ -330,27 +334,53 @@ The trio (plan.md + spec.md + prompt.md) is the cold-executor handoff contract. 
 
 ### Step 11a — Trio completeness gate (mechanical — issue I4)
 
-The trio is the cold-executor handoff contract; a 2-of-3 or empty member silently breaks every
-cold resume (gstack #1127/#1791). Before declaring PLAN done, assert all three exist and are
-non-trivial — this is a real check, not a prose promise:
+The selected work map is the handoff contract for native and Spec Kit work. Before declaring
+PLAN done, validate its paths, approval status and nonempty artifacts through the shared
+validator. This proves selection and structural completeness; the preceding reviews must
+also verify that requirements, leaf acceptance and handoff context are substantive, with no
+unfilled template placeholders. Structural validation alone does not prove those semantics.
 
 ```bash
-# the plan dir just written (newest under .claude/plans/); the orchestrator may
-# also export LINTEL_PLAN_DIR — prefer it, else the most recent dir.
-slug_dir="${LINTEL_PLAN_DIR:-$(ls -dt .claude/plans/*/ 2>/dev/null | head -1)}"
-slug_dir="${slug_dir%/}"
-missing=""
-[ -n "$slug_dir" ] || { echo "PLAN BLOCKED: no plan dir under .claude/plans/"; exit 1; }
-for f in plan.md spec.md prompt.md; do
-  [ -s "$slug_dir/$f" ] || missing="$missing $f"
-done
-if [ -n "$missing" ]; then
-  echo "PLAN BLOCKED: cold-executor trio incomplete —$missing missing or empty in $slug_dir"
-  state_append PLAN BLOCKED reason="trio_incomplete:$missing"
-  exit 1
+working_repo="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}"
+lintel_source="${LINTEL_SOURCE_ROOT:-$working_repo}"
+selected_work_map="${LINTEL_WORK_MAP:-}"
+if [ -z "$selected_work_map" ] && [ -n "${LINTEL_PLAN_DIR:-}" ]; then
+  selected_work_map="${LINTEL_PLAN_DIR%/}/work.json"
 fi
+[ -n "$selected_work_map" ] || {
+  echo "PLAN BLOCKED: select the initiative's work.json or exact LINTEL_PLAN_DIR" >&2
+  exit 1
+}
+case "$selected_work_map" in
+  /*|[A-Za-z]:/*) : ;;
+  *) selected_work_map="$working_repo/$selected_work_map" ;;
+esac
+"${PYTHON:-python3}" - "$lintel_source/bin/li-work-artifacts.py" "$working_repo" "$selected_work_map" <<'PY'
+from pathlib import Path
+import runpy
+import sys
+
+helper, repo, selected = sys.argv[1:]
+try:
+    contract = runpy.run_path(helper)
+    root = Path(repo).resolve()
+    work = contract["load_work_map"](root, Path(selected))
+    if work["status"] != "APPROVED":
+        raise ValueError("selected work must be APPROVED before BUILD")
+    for field in contract["REQUIRED_ARTIFACTS"]:
+        path = contract["artifact_path"](root, work[field])
+        if not path.read_text(encoding="utf-8-sig").strip():
+            raise ValueError(f"selected {field} artifact is empty: {work[field]}")
+except (OSError, ValueError, TypeError) as error:
+    print(f"PLAN BLOCKED: {error}", file=sys.stderr)
+    sys.exit(1)
+print("PASS: explicitly selected approved work map and nonempty artifacts")
+PY
+gate_status=$?
+[ "$gate_status" -eq 0 ] || exit "$gate_status"
+slug_dir="$(dirname "$selected_work_map")"
 # Optional stronger check: if a cold_executor envelope was emitted, validate it against the schema
-[ -f "$slug_dir/handoff.envelope.yaml" ] && bin/li-envelope-validate "$slug_dir/handoff.envelope.yaml" --quiet   || true   # envelope is optional; the three-file gate above is the hard contract
+[ -f "$slug_dir/handoff.envelope.yaml" ] && "$lintel_source/bin/li-envelope-validate" "$slug_dir/handoff.envelope.yaml" --quiet || true
 ```
 
 ### Step 11b — Handoff-size check against the 500k cap (trio-emit gate, NON-BLOCKING)
@@ -439,7 +469,7 @@ Skip-conditions:
 - **Skipping two-stage review because "it's a simple plan"** — simple plans hide assumption gaps
 - **Ignoring ADRs identified in DISCOVER** — they're constraints, not advisory
 - **Task decomposition too coarse** — 2-5 min per task (superpowers rule); bigger = decompose
-- **All tasks assigned to Opus** — model selection by complexity (mechanical → Haiku)
+- **Invented model availability** — select roles by package complexity and honor the current host's actual model configuration
 - **Plan finalized without founder gate** — gate is MANDATORY per Architect image pattern
 
 ## Failure recovery

@@ -1,6 +1,6 @@
 # Pack inheritance — shallow merge with explicit precedence
 
-**Last updated:** 2026-05-29 (v4.0 Phase 2)
+**Last updated:** 2026-09-08
 **Status:** Concept doc — referenced by `lib/pack-resolver.sh` (`_resolve_extends_chain`, `_merge_packs_into_cache`), `lib/pack-schema.yaml`, `tests/unit/pack-inheritance-depth-3.sh`
 
 > Pack ecosystems have variation: two packs from the same organisation share a set of defaults (compliance hooks, regulatory gates, audit paths) but differ on voice, persona, brand. Without inheritance, every new pack restates the shared defaults — drift becomes inevitable. With inheritance, the shared defaults live in a base pack (`acme-base`) and concrete packs (`acme-eng`, `acme-sales`) extend it. The mechanism is **shallow merge with explicit child-over-parent precedence**.
@@ -76,13 +76,18 @@ voice:
 
 The cost: every block-level field in a child pack must restate what the operator wants from the parent. The benefit: the child manifest is self-documenting. You read `acme-eng/pack.yaml` and see exactly what is active.
 
-### The one exception
+### Evaluator lists follow the same rule
 
-`brief_forge_handoffs.<event>.evaluators` arrays merge by concatenation + dedup. Reason: evaluators are additive by nature — a child rarely wants to remove a parent's evaluator, but often wants to add its own. Concatenation matches operator intent without the deep-merge surprise. This exception is documented in `lib/pack-schema.yaml` and tested in the inheritance unit harness.
+Declaring `brief_forge_handoffs` replaces that entire parent block, including its
+evaluator lists. Lists are not concatenated or deduplicated. A child adding an
+evaluator must declare every hand-off setting and evaluator it intends to retain.
+Omitting the whole block inherits it unchanged. This is the same whole-block rule
+described in [the architecture](../architecture.md#resolution-and-inheritance).
 
 ## Chain depth + cycle detection
 
-Maximum chain depth: 10. A pack that declares `extends: <name>` triggers the resolver to walk up the chain until it finds a root (a pack without `extends:`) or hits depth 10.
+Maximum ancestry: ten parent links. The resolver rejects a chain needing an
+eleventh link instead of loading a truncated policy.
 
 Cycle detection: if pack A declares `extends: B` and pack B declares `extends: A` (or any longer cycle through the chain), `validate_pack` refuses activation and falls back to `_default`. Audited.
 
@@ -106,7 +111,11 @@ Two distinct failures:
 
 **Missing parent:** `acme-eng extends acme-base` but `acme-base/pack.yaml` doesn't exist. `validate_pack acme-eng` fails (audited), resolver falls back to `_default`.
 
-**Missing field in chain:** chain resolves but no pack in the chain declares `voice.corpus`. Resolver returns empty (or hardcoded fallback if `voice.corpus` is in the known-critical list). Workflow that needs this field decides what to do — surface or substitute.
+**Missing field in chain:** the resolver uses that field's neutral `_default`
+value; `voice.corpus`, for example, resolves to `null`. Explicit `null`, `false`
+and `[]` remain explicit. A field absent from both the effective pack and the
+neutral pack returns empty. Required policy fields must exist in the effective
+ancestry before activation; fallback does not make an incomplete policy valid.
 
 ## Audit trail
 
@@ -116,13 +125,14 @@ Cache priming with an inheritance chain logs the chain to `${LINTEL_HOME}/audit/
 {"ts":"2026-05-29T15:00:00Z","kind":"pack_resolver_cache_primed","msg":"pack=acme-eng chain=acme-base acme-eng session=42071"}
 ```
 
-The chain field surfaces in `bin/li-doctor --packs` for operator inspection.
+The chain is recorded by the shared audit writer and can be inspected in the pack
+resolver audit log. `LINTEL_AUDIT_DIR` can select a different audit destination.
 
 ## When inheritance is the wrong tool
 
 Inheritance is for shared baseline values across packs that have a common ancestor concept (an organisation's shared defaults, customer-engagement work). It is NOT for:
 
-- **Per-workflow overrides** — use `--mode` or `--pack <name>` flags on `/li:cycle`
+- **Per-workflow overrides** — use the supported `--mode` or phase-range flags on `/li:cycle`
 - **One-off field tweaks** — edit the pack manifest directly
 - **Pack composition** — Lintel v4.0 does not support multi-parent inheritance. A pack has 0 or 1 parents. Multi-parent (diamond inheritance) is rejected by `validate_pack` if attempted via two `extends:` declarations.
 

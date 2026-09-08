@@ -3,13 +3,13 @@
   "owner": { "name": "jokerman89", "email": "johannes.akerman@gmail.com" },
   "metadata": {
     "description": "Lintel session workflows for GitHub Copilot teams",
-    "version": "0.9.0"
+    "version": "0.10.0"
   },
   "plugins": [
     {
       "name": "li",
       "source": "./",
-      "version": "0.9.0",
+      "version": "0.10.0",
       "description": "Specs, build cards, reviews and durable session memory for GitHub Copilot.",
       "category": "workflow",
       "tags": ["copilot", "lintel", "enterprise", "spec-driven"]

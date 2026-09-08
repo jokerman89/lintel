@@ -202,7 +202,7 @@ For non-trivial work, the Lintel cycle provides an explicit 9-step pipeline (8 c
 - Founder approval gate at end of PLAN (MANDATORY pause)
 - 3-stage review in REVIEW (spec compliance → quality → compliance)
 - Compliance hard-stop in SHIP (if the active pack's compliance mode is `hard`)
-- Two-stage subagent review per BUILD task (spec then quality)
+- Two-stage review per BUILD work package (spec then quality), covering every short leaf (ADR-0026)
 
 See [docs/the-cycle.md](docs/the-cycle.md) for the full cycle specification.
 

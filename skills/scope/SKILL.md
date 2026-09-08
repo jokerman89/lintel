@@ -51,12 +51,19 @@ SENSE  →  [SCOPE]  →  DEFINE  →  DISCOVER  →  PLAN  →  ...
 SCOPE runs **after** SENSE, so the orientator's route already exists (SENSE step 0d). Read it so SCOPE can override a confidently-wrong one.
 
 ```bash
-source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/lib/scale-estimator.sh"
+scope_source="${LINTEL_SOURCE_ROOT:-${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}}"
+source "$scope_source/lib/scale-estimator.sh"
+source "$scope_source/lib/paths.sh"
 
 prompt_text="<operator's last message>"
 
 # The orientator route SENSE recorded (intent + workflow). SCOPE may override it.
-intent=$(grep -E '^intent_detected:' .claude/runtime/state/00-state.md 2>/dev/null | tail -1 | awk '{print $2}')
+scope_state_dir="${LINTEL_STATE_DIR:-$(lintel_state_dir)}"
+case "$scope_state_dir" in
+  /*|[A-Za-z]:/*) : ;;
+  *) scope_state_dir="$(lintel_repo_root)/$scope_state_dir" ;;
+esac
+intent=$(grep -E '^intent_detected:' "$scope_state_dir/00-state.md" 2>/dev/null | tail -1 | awk '{print $2}' | tr -d '\r' || true)
 intent="${intent:-unclear}"
 
 escalation=$(resolve_pack_field navigation.escalation_threshold); escalation="${escalation:-medium}"
@@ -98,12 +105,15 @@ If the orientator route (from SENSE) conflicts with the resolved scale, **overri
 
 ```bash
 override_route=""
+resolved_intent="$intent"
+# The agent sets has_artifact=yes only after identifying the requested deliverable
+# and recording its path/ref in the SCOPE report. A branch name alone is not evidence.
+has_artifact="${has_artifact:-no}"
 if { [ "$scale_size" = "L" ] || [ "$scale_size" = "XL" ]; } \
    && { [ "$intent" = "ship" ] || [ "$intent" = "deploy" ]; }; then
-  # Greenfield check: is there anything to ship? (no build artifact / branch ahead)
-  has_artifact=$(git rev-parse --abbrev-ref HEAD 2>/dev/null | grep -qvE '^(main|master)$' && echo yes || echo no)
-  if [ "$has_artifact" = "no" ]; then
+  if [ "$has_artifact" != "yes" ]; then
     override_route="DEFINE"   # full cycle from DEFINE, not SHIP
+    resolved_intent="build"
   fi
 fi
 ```
@@ -114,13 +124,32 @@ SCOPE has **override authority** over a confidently-wrong orientator route (desi
 
 Write the resolved scope so DEFINE inherits the wedge and PLAN reads `depth_schema`. Canonical home: the job dir (`.claude/runtime/jobs/<id>/scope.md`) when a job is active, else `.claude/runtime/state/scope.md`.
 
+An explicitly selected `LINTEL_SCOPE_PATH` takes precedence. Persist `scope_out` in the SCOPE
+ledger entry and link it from the selected native plan or mapped handoff. RESUME uses that
+explicit link or the same job directory; the shared jobs parent is never a scope source.
+
 ```bash
-scope_out="${LINTEL_JOB_DIR:-${LINTEL_STATE_DIR:-.claude/runtime/state}}/scope.md"
+scope_source="${LINTEL_SOURCE_ROOT:-${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}}"
+source "$scope_source/lib/paths.sh"
+if [ -n "${LINTEL_SCOPE_PATH:-}" ]; then
+  scope_out="$LINTEL_SCOPE_PATH"  # explicitly selected scope for this initiative
+elif [ -n "${LINTEL_JOB_DIR:-}" ]; then
+  scope_out="$LINTEL_JOB_DIR/scope.md"
+elif [ -n "${JOB_ID:-}" ]; then
+  source "$scope_source/bin/_jobs.sh"
+  scope_out="$(job_path "$JOB_ID")/scope.md"
+else
+  scope_out="${LINTEL_STATE_DIR:-$(lintel_state_dir)}/scope.md"
+fi
+case "$scope_out" in
+  /*|[A-Za-z]:/*) : ;;
+  *) scope_out="$(lintel_repo_root)/$scope_out" ;;
+esac
 mkdir -p "$(dirname "$scope_out")"
 cat > "$scope_out" <<EOF
 # Scope: $prompt_text
 size: $scale_size
-intent: ${override_route:+build (overrode $intent→build)}${override_route:-$intent}
+intent: $resolved_intent
 ambiguous: ${scale_amb}${chosen_reading:+ → resolved}
 chosen_reading: "${chosen_reading:-$prompt_text}"
 surface: [<agent fills from signals: infra/ci/auth/data/api/network>]
@@ -147,7 +176,7 @@ Mechanical since v5.0 (ADR-0008) — one command, not a YAML obligation:
 ```bash
 _sl="${LINTEL_SOURCE_ROOT:-${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}}/lib/state.sh"
 [ -f "$_sl" ] || _sl="$HOME/.lintel/lib/state.sh"; source "$_sl"   # installed by install.sh in consumer repos
-state_append SCOPE DONE next=DEFINE size=$scale_size ambiguous=$scale_amb depth_schema=$depth_schema intent="${override_route:+build}${override_route:-$intent}" route_override="${override_route:-none}" scope_path="$scope_out"
+state_append SCOPE DONE next=DEFINE size=$scale_size ambiguous=$scale_amb depth_schema=$depth_schema intent="$resolved_intent" route_override="${override_route:-none}" scope_path="$scope_out"
 ```
 
 ## Output format

@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+# component: shared-pattern-scanner
+# implements: ADR-0013
+# intent: docs/compliance.md
+# constraints: pattern coverage and host activation limits in docs/compliance.md
+# last_intent_review: 2026-09-08
 # hooks/shared/_patterns.sh — detection patterns defined once, composed per hook.
 #
 # The secret + customer-data hooks previously each inlined their own copy of the
@@ -56,11 +61,20 @@ P
 }
 
 # _scan_pats <pattern-lines> <text> → comma-joined names of patterns that hit.
+# rc0 means a completed scan (possibly empty); rc2 means no reliable result.
+# Read all input without a producer pipe: grep -q can otherwise cause SIGPIPE
+# under pipefail when a large payload matches before printf finishes writing.
 _scan_pats() {
-  local pats="$1" text="$2" name re; local -a hits=()
+  local pats="$1" text="$2" name re rc; local -a hits=()
   while IFS=$'\t' read -r name re; do
     [ -z "$name" ] && continue
-    printf '%s' "$text" | grep -qE "$re" && hits+=("$name")
+    rc=0
+    grep -E -- "$re" <<< "$text" >/dev/null || rc=$?
+    case "$rc" in
+      0) hits+=("$name") ;;
+      1) ;; # valid pattern, no match
+      *) printf 'ERROR [Lintel hook]: pattern scan failed for %s.\n' "$name" >&2; return 2 ;;
+    esac
   done <<< "$pats"
   [ "${#hits[@]}" -eq 0 ] && return 0
   local IFS=,; printf '%s' "${hits[*]}"

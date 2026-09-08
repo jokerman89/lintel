@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 # session-digest — Lintel SessionStart hook (v4.8, ADR-0002)
+# component: session-digest
+# implements: ADR-0002
+# intent: docs/concepts/pack-resolver.md
+# constraints: none; profile and pack reads use the installed trusted resolver
+# last_intent_review: 2026-09-08
 # Injects a compact memory digest into a fresh Claude Code session.
 # Fail-open: any error or empty digest → exit 0 with no output (never blocks a session).
 
@@ -28,8 +33,9 @@ _yaml() { # _yaml <file> <key>  → scalar value or empty
 lines=""
 add() { lines="${lines}$1"$'\n'; }
 
-# Identity from profile (+ optional compliance.mode via pack-resolver)
-pack="$(_yaml "$PROFILE" active_pack)";    pack="${pack:-_default}"
+# Mode and role remain operator preferences. Pack identity and compliance come
+# from the same effective session cache, including invalid-pack fallback.
+pack="_default"
 mode="$(_yaml "$PROFILE" default_mode)";   mode="${mode:-internal-tool}"
 role="$(_yaml "$PROFILE" role_active)";    role="${role:-none}"
 compliance=""
@@ -39,7 +45,12 @@ compliance=""
 _resolver="$(dirname "${BASH_SOURCE[0]}")/../../../lib/pack-resolver.sh"
 [ -f "$_resolver" ] || _resolver="$LINTEL_HOME/lib/pack-resolver.sh"
 if [ -f "$_resolver" ]; then
-  compliance="$( ( source "$_resolver" 2>/dev/null && resolve_pack_field compliance.mode 2>/dev/null ) | tr -d '[:space:]' )"
+  identity="$( (
+    source "$_resolver" 2>/dev/null || exit 0
+    printf '%s\n%s' "$(get_loaded_pack)" "$(resolve_pack_field compliance.mode)"
+  ) 2>/dev/null )"
+  pack="$(printf '%s\n' "$identity" | head -1)"; pack="${pack:-_default}"
+  compliance="$(printf '%s\n' "$identity" | sed -n '2p')"
 fi
 [ -n "$compliance" ] && compliance=" · compliance: $compliance"
 add "Pack: ${pack} · mode: ${mode} · role: ${role}${compliance}"

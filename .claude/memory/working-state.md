@@ -8,7 +8,34 @@ Cross-session working state (not durable rules — that's [[lessons.md]]; not pe
 
 ---
 
-## ▶ CURRENT — Copilot enterprise launch (2026-09-08)
+## CURRENT — enterprise review completion (2026-09-08)
+
+**Status:** implementation and independent review complete on `codex/enterprise-value-review`;
+integrated strict verification and delivery to main in progress through
+[PR #84](https://github.com/jokerman89/lintel/pull/84). All 22 original findings have current
+dispositions in [the completion review](../engineering/audits/2026-09-08-enterprise-value-completion.md).
+The earlier draft was not completion. The operator explicitly authorized finishing all repairs,
+integrating main and merging the verified result. Follow
+[the completion plan](../plans/enterprise-value-review/completion.md).
+
+The isolated worktree integrates main `e9911fc`, including PR #83's source/target, Copilot and
+Spec Kit contracts. The other checkout was not edited. ADR-0026 retains short leaves with
+coherent package execution, aggregate risk, independent review and per-leaf evidence. Effective
+pack requirements affect routing and acceptance. Full selected Git history is inspected and
+collection errors block; checkpoints and review state resolve to the target repository; shared
+registry replacement is serialized and preserves bytes on failure.
+
+**Evidence:** focused regressions and native PowerShell install/reinstall passed. Independent
+review closed all seven integrated findings (five P2, two P1). Strict suite and hosted results
+are recorded in the completion review when available; old 93/93 evidence is historical only.
+No real private pack, production change, universal host enforcement or measured ROI is claimed.
+
+**Next action:** finish strict local checks, record the current compatibility disposition, push
+the integration, verify hosted CI for the exact candidate and merge PR #84. Its remote merge
+record supplies the authoritative main commit. No release/tag, deployment, personal installation
+or authenticated enterprise model evaluation is included in this batch.
+
+## Completed — Copilot enterprise launch (2026-09-08)
 
 **Status:** COMPLETE — all seven build cards and 31 leaves delivered through PR #83, merged to main
 as `52c7b3857f86fb7d118c9f2811cc914f667b1150`. Hosted Ubuntu, macOS and Windows each passed

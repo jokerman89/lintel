@@ -208,7 +208,7 @@ Four roots. Two are machine-global, two live in your repo:
 
 | Root | Scope | Holds |
 |---|---|---|
-| `~/.lintel/` | machine-global | operator identity — `profile.yaml` (active pack, mode, role), installed packs, cross-repo job registry, operator audit log |
+| `~/.lintel/` | machine-global (configurable with `LINTEL_HOME`) | operator preferences in `profile.yaml` (mode, role); active pack selected by `packs/active-pack`; installed packs, cross-repo job registry, operator audit log |
 | `~/.claude/` | machine-global | your CLI's own home — `settings.json`, and hooks you armed by hand on a bare install |
 | `<repo>/.claude/` | per-repo, **committed** | `memory/` (lessons, working state, personas), `decisions/`, `plans/` |
 | `<repo>/.claude/runtime/` | per-repo, **gitignored** | cycle state, job data, session saves, repo event log |

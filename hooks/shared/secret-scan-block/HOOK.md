@@ -11,7 +11,7 @@ audit: .claude/runtime/audit/hooks.jsonl
 
 # secret-scan-block (JUSTIFIED-BLOCK)
 
-The companion to `no-secrets-in-edit` (warn). This hook fires at COMMIT time and BLOCKS the commit if Tier 1 secret patterns are in the staged content.
+The companion to `no-secrets-in-edit` (warn). This hook blocks recognized commit/push tool calls when inspected added content contains Tier 1 secret patterns or collection fails.
 
 ## Why this is justified-block
 
@@ -24,13 +24,19 @@ Same Tier 1 pattern set as `no-secrets-in-edit`:
 - Private key headers
 - Hardcoded passwords (heuristic)
 
-Reads staged content via `git diff --cached`.
+Commit checks inspect staged and unstaged tracked additions. Push checks inspect the full
+selected source history, including content later removed and merge-resolution additions.
+Local tracking refs and replacement objects cannot hide original source content. Unsupported
+command forms and Git read failures block explicitly. Binary content and commit/tag messages
+remain outside this pattern scanner. See [control boundaries](../../../docs/compliance.md).
 
 ## Override
 
 `LINTEL_OVERRIDE_SECRET=1 LINTEL_OVERRIDE_REASON="explanation" git commit ...`
 
-Both env vars required. Reason logged to audit log. Use only when: known-false-positive (placeholder secret in docs/tests), explicit operator decision with reason.
+Use an explicit operator decision with a reason for a known false positive. The flag permits
+the override; the implementation records a supplied reason but does not mechanically require
+it. Local audit writes are best effort, not immutable authorization evidence.
 
 ## Audit
 

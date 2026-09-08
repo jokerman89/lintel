@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+# component: secret-scan-block
+# implements: ADR-0013
+# intent: docs/compliance.md
+# constraints: pattern coverage and host activation limits in docs/compliance.md
+# last_intent_review: 2026-09-08
 # secret-scan-block — Lintel JUSTIFIED-BLOCK hook
 # Blocks git commit/push if Tier 1 secret pattern in staged content.
 
@@ -49,10 +54,8 @@ if [ "${LINTEL_OVERRIDE_SECRET:-}" = "1" ] || printf '%s' "$CMD_FLAT" | grep -qE
   exit 0
 fi
 
-# Added lines from staged + unstaged-tracked diffs, cwd + every `git -C`
-# target in the command (helper in ../_input.sh — rationale there). Union
-# covers `commit -am` (stages tracked edits AFTER this hook; battletest K2);
-# push is covered by staged.
+# The shared collector follows the literal Git target. Commits scan staged +
+# tracked edits (including commit -a); pushes scan the selected commit histories.
 # Fail-closed (issue I1 / ADR-0013): the matcher fired (a git commit/push is in
 # flight) and it was not overridden — if the scanner failed to load, BLOCK rather
 # than silently allow. Positioned AFTER matcher+override (not after the patterns
@@ -67,10 +70,20 @@ if ! command -v scan_secrets >/dev/null 2>&1; then
   exit 2
 fi
 
-CONTENT="$(hook_git_gate_content "$CMD_FLAT")"
+if ! CONTENT="$(hook_git_gate_content "$CMD")"; then
+  audit_log "hooks" "secret_scan_block" "hook=secret-scan-block" "tier=BLOCK" "blocked=true" "reason=collection-unavailable"
+  echo "ERROR [Lintel hook]: secret-scan-block could not inspect the Git operation; blocked." >&2
+  echo 'Use a literal Git command, or the existing LINTEL_OVERRIDE_SECRET=1 override with LINTEL_OVERRIDE_REASON.' >&2
+  exit 2
+fi
 [ -z "$(printf '%s' "$CONTENT" | tr -d '[:space:]')" ] && exit 0
 
-joined="$(scan_secrets tier1 "$CONTENT")"
+if ! joined="$(scan_secrets tier1 "$CONTENT")"; then
+  audit_log "hooks" "secret_scan_block" "hook=secret-scan-block" "tier=BLOCK" "blocked=true" "reason=scan-unavailable"
+  echo "ERROR [Lintel hook]: secret-scan-block pattern scan failed; blocked." >&2
+  echo 'Use the existing LINTEL_OVERRIDE_SECRET=1 override with LINTEL_OVERRIDE_REASON only after review.' >&2
+  exit 2
+fi
 
 if [ -n "$joined" ]; then
   audit_log "hooks" "secret_scan_block" "hook=secret-scan-block" "tier=BLOCK" "patterns_matched=$joined" "blocked=true"

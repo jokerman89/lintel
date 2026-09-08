@@ -600,6 +600,23 @@ matching files, ran in seconds.
 
 Related: [[L-022]] on trusting a slow aggregate under Windows load.
 
+## L-028 — Keep short-task traceability while sharing coherent execution context
+
+**Date:** 2026-09-08
+
+**Context:** During the independent enterprise review, the operator chose hybrid planning:
+short leaves with combined execution and review per work package (ADR-0026).
+
+**Correction:** Treating the old per-leaf dispatch/review rule as a permanent requirement
+would retain avoidable repeated setup. Short task size and dispatch size are different choices.
+
+**Rule:** Preserve leaf IDs, dependencies and evidence; group coherent work under one owner
+and review the package's aggregate risk. Do not let an aggregate diff hide a failed leaf,
+or mark an open package complete. Record the actual next repair action for a cold session.
+
+**How to apply:** Use the canonical package table and singleton fallback for legacy plans.
+The operator's hybrid decision supersedes per-leaf dispatch, not acceptance or authorization.
+
 
 ## L-027 — Repeat the complete session protocol where a fresh host starts
 
@@ -624,3 +641,19 @@ publish private paths or copy host-specific assumptions as cross-host facts. Wor
 not outrank architecture, and existing explicit authorization remains valid within its scope.
 
 Related: [[L-025]] fix the source; ADR-0025 and the session-protocol coverage map.
+
+## L-029 — Completion follows the user's outcome, not a draft-delivery milestone
+
+**Date:** 2026-09-08
+
+**Context:** The operator asked whether the enterprise review had fixed everything, then
+explicitly requested completion and delivery to main.
+
+**Mistake:** The review plan was marked complete at draft publication while nine findings,
+one partial correction and integration verification remained. That narrower milestone did
+not establish the intended finished result.
+
+**Rule:** Track every finding and integration requirement to verified closure. A review or
+draft PR can be a milestone; it is not completion when the operator expects functioning,
+integrated improvements. Reopen the ledger when new main changes invalidate the verified
+baseline, and do not claim the final outcome before the required remote merge is confirmed.

@@ -11,7 +11,8 @@ audit: .claude/runtime/audit/hooks.jsonl
 
 # customer-data-block (JUSTIFIED-BLOCK)
 
-Companion to `no-customer-data-in-message` (warn). Fires at COMMIT time and BLOCKS the commit if Tier 1 customer-data patterns are in the staged content.
+Companion to `no-customer-data-in-message` (warn). Blocks recognized commit/push tool calls
+when inspected additions contain Tier 1 customer-data patterns or inspection fails.
 
 ## Why justified-block
 
@@ -25,6 +26,11 @@ Same Tier 1 customer-data patterns:
 - Swedish personnummer (YYMMDD-NNNN)
 - Names paired with case identifiers
 
+Commit checks inspect staged and unstaged tracked additions. Push checks inspect every
+selected source commit, including later-removed and merge-resolution additions. Git read
+errors and unsupported commands block. Binary content and commit/tag messages are outside
+the scanner; see [control boundaries](../../../docs/compliance.md).
+
 ## Override
 
 `LINTEL_OVERRIDE_CUSTOMER_DATA=1 LINTEL_OVERRIDE_REASON="explanation" git commit ...`
@@ -34,7 +40,8 @@ Use only when:
 - Data is sanitized placeholder that LOOKS like real but isn't
 - Test fixture explicitly marked
 
-Reason logged to audit. Pattern + override pair surfaces in the next compliance audit.
+The override flag permits the exception. A supplied reason is recorded but is not mechanically
+required. Audit writes are best effort; a missing record does not prove no operation occurred.
 
 ## Audit
 

@@ -1,6 +1,6 @@
 # Agent Dispatch Rules — Dedicated-vs-Inline (v3.6 backlog item 2.4)
 
-**Last updated:** 2026-05-28
+**Last updated:** 2026-09-08 (hybrid execution, ADR-0026)
 **Status:** Concept doc — referenced by docs/architecture.md + skills/cycle/SKILL.md
 
 > Encodes the "when to spawn a dedicated subagent vs run inline" rule that Lintel
@@ -80,7 +80,7 @@ Does the step need conversation context to make sense?
 | DEFINE | inline (rule d) | Builds on SENSE output |
 | DISCOVER | dedicated (rule a) | Open-ended codebase exploration |
 | PLAN | inline (rule d) | Synthesizes prior phases |
-| BUILD | dedicated per task (rule a) | Each task = fresh implementer (superpowers SDD pattern) |
+| BUILD | one implementer per bounded package (rule a) | Related short leaves share context; independent spec and quality review cover all leaves and integration |
 | REVIEW | dedicated (rule b) | Adversarial — fresh context is the point |
 | SHIP | inline (rule c) | Cheap: git ops + verify |
 | CAPTURE | inline (rule d) | Synthesizes what just happened |
@@ -91,6 +91,11 @@ Does the step need conversation context to make sense?
 `/li:cycle --dedicated-all` forces all phases dedicated (rare; usually wasteful).
 
 Default is per-phase rule above.
+
+For BUILD, assess the aggregate package's complexity. Several small leaves across a
+substantive integration still require independent review. Inline execution controls cannot
+silently turn a required independent review into implementer self-review. If that reviewer
+is unavailable, retain evidence and keep the package open.
 
 ## Token-cost implication
 
@@ -103,6 +108,6 @@ If phase work > 15k tokens AND independence-or-cleanliness matters, dedicated wi
 ## References
 
 - Backlog item 2.4 (concept doc requirement)
-- subagent-driven development — fresh subagent per task + two-stage review; implemented in `/li:build`
+- ADR-0026 — one implementer and two review stages per bounded package, with leaf evidence; implemented in `/li:build`
 - Lintel cycle SKILL.md `/li:cycle` Step 4 (phase execution)
 - `[[L-001]]` scaffolding-not-content — this doc IS the scaffolding for the rule

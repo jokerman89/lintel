@@ -34,6 +34,13 @@ The architecture-and-tests gate before build — the one review Lintel requires.
 - Optional path to a plan/design doc. Auto-discovers from `~/.lintel/projects/<slug>/*-design-*.md` if not provided.
 - Optional `--scope diff` — review the current branch's diff instead of a plan doc (degrades to `/review` semantics).
 
+For mapped work, validate the explicitly selected work.json with `bin/li-work-artifacts.py`
+and use the [shared work-map contract](../spec-kit/references/work-map.md). Read design from
+`plan`, requirements from `spec` and leaf IDs/checkboxes from `tasks`. Package membership in
+the design or linked handoff references those original IDs; do not generate a parallel task
+list or require a Lintel approval heading inside Spec Kit's technical plan. Ungrouped tasks
+use singleton packages. Honor the same selection as PLAN/BUILD, never the newest directory.
+
 ## Workflow
 
 ### Step 0: Scope Challenge (BLOCKING — no review-section work until this resolves)
@@ -46,20 +53,30 @@ The architecture-and-tests gate before build — the one review Lintel requires.
 4. **TODOS.md cross-reference:** any deferred items now blocking? Any items the plan SHOULD subsume?
 5. **Completeness check:** is plan doing the complete version or a shortcut? With AI-assisted coding, completeness cost is 10-100x cheaper than human-team — recommend the lake, not the puddle.
 6. **Distribution check:** new artifact type (binary, package, container)? CI/CD pipeline included or deferred?
-7. **Granularity hard check (v3.8 Feature 2.3, LOCKED at 2–5 min per cold-subagent task):**
-   For each task in plan.md, estimate cold-subagent implementation time. Apply the superpowers rule:
-   - **Target: 2–5 minutes per task**, implementable by a single cold-subagent reading only the task spec + the spec.md + the prompt.md (no prior conversation context).
-   - **Any task estimated >5 min** → AskUserQuestion with two options:
+7. **Granularity hard check (2–5 min per verifiable leaf):**
+   For every leaf in plan.md, estimate implementation time from its specification and linked context:
+   - **Target: 2–5 minutes per leaf**, described precisely enough to implement without prior conversation context.
+   - **Any leaf estimated >5 min** → AskUserQuestion with two options:
      - A) **Decompose now** — split the task into 2-N smaller tasks ≤5 min each. Preferred.
      - B) **Accept with concern** — keep the task; log the concern in plan.md "Reviewer Concerns" section.
    - Tasks <2 min are fine (combinable if useful, but no hard rule).
-   - **This is mechanical — apply per task, no batching.**
+   - Evaluate every leaf; grouping into a work package does not waive this check.
 
-   Rationale: small tasks = clean handoff = fewer errors. Source: superpowers SDD pattern + Architect-blueprint discipline. The cold-executor trio (plan.md + spec.md + prompt.md) lives or dies on per-task granularity.
+8. **Work-package review:** apply the [shared package contract](../../docs/concepts/planner-as-module.md#work-packages).
+   Verify one outcome, common write owner/edit boundary, connected dependencies and acceptance
+   evidence for every unchanged leaf ID. Split across different owners, security boundaries,
+   irreversible decisions or independent rollback boundaries. No arbitrary package size limit.
+   Check aggregate complexity: a multi-file package cannot be classified mechanical solely
+   because its leaves are small. Packages execute sequentially, their leaves in dependency order;
+   one package spec review precedes one quality review, with findings mapped back to leaves.
+   A package is incomplete while any leaf lacks verification. Older ungrouped plans use singleton
+   packages. The plan table does not create new job state or claim automatic enforcement.
 
 ### Sections 1-4 (after scope agreed)
 
-Each section: ONE AskUserQuestion per issue. Never batch. Each option labeled by issue NUMBER + option LETTER.
+Use numbered findings and label decision options by issue NUMBER + option LETTER. Present
+related findings together and request only unresolved decisions; retain each finding's affected
+package/leaf IDs so a shared review cannot hide gaps.
 
 1. **Architecture** — system design, dependency graph, data flow, scaling, security boundaries, ASCII diagrams worth embedding in code comments.
 2. **Code quality** — DRY (aggressively flag), error handling, technical debt, over/under-engineering.
@@ -91,17 +108,23 @@ After all 4 sections: offer codex (or Claude subagent if codex unavailable) for 
 
 Persist via first-party `bin/li-review-log`:
 ```bash
-bin/li-review-log '{"skill":"plan-eng-review","timestamp":"...","status":"...","unresolved":N,"critical_gaps":N,"issues_found":N,"mode":"FULL_REVIEW","commit":"..."}'
+review_source="${LINTEL_SOURCE_ROOT:-${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}}"
+"$review_source/bin/li-review-log" '{"skill":"plan-eng-review","timestamp":"...","status":"...","unresolved":N,"critical_gaps":N,"issues_found":N,"mode":"FULL_REVIEW","commit":"..."}'
+"$review_source/bin/li-review-read"
 ```
+
+Run both helpers from the selected source bundle. `LINTEL_REPO_ROOT` selects the
+working repository for audit data, commit matching and legacy import; it does not
+select helper code. If unset, the helpers use the current working repository.
 
 ## Required outputs
 
 - **NOT in scope** section — explicit deferrals with one-line rationale.
 - **What already exists** — reuse map.
-- **TODOS.md updates** — one AskUserQuestion per proposed TODO (never batch).
+- **TODOS.md updates** — trace proposed deferrals to their findings and resolve any missing scope decision.
 - **Failure modes** — per new codepath: realistic failure + test? + err handling? + silent vs visible. Critical gaps flagged.
 - **Worktree parallelization** — dependency table + lanes + execution order + conflict flags.
-- **Implementation Tasks** — flat list, each derived from a finding (no padding). JSONL artifact via `jq -nc` for /autoplan aggregation.
+- **Implementation Tasks** — unchanged leaf IDs, each derived from a finding (no padding), grouped by bounded work package in the plan. Keep the existing flat JSONL artifact via `jq -nc` for /autoplan aggregation; packaging adds no job schema.
 - **Completion Summary** — section-by-section issue counts + Lake Score (X/Y recommendations chose complete).
 
 ## Compliance integration

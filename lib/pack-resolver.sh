@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 # lib/pack-resolver.sh — Lintel PackResolver (v4.0 Phase 1)
+# component: pack-resolver
+# implements: ADR-0018
+# intent: docs/concepts/pack-resolver.md
+# constraints: none; parses local pack data without executing manifest values
+# last_intent_review: 2026-09-08
 #
 # Critical-path interface used by 30+ skills. Reads identity-bound state
 # from the active pack with explicit failure semantics + per-session cache.
@@ -80,6 +85,7 @@ get_active_pack_name() {
 # Resolve a pack directory: configured packs, working repository, bundled source.
 _pack_dir() {
   local name="${1:-}"
+  [[ "$name" =~ ^[A-Za-z_][A-Za-z_0-9-]*$ ]] || return 1
   local home_path="$LINTEL_PACKS_DIR/$name"
   local repo_path="$LINTEL_REPO_ROOT/packs/$name"
   local source_path="$LINTEL_SOURCE_ROOT/packs/$name"
@@ -94,115 +100,232 @@ _pack_dir() {
   fi
 }
 
-# Extract a field from the `extension:` block of a SPECIFIC manifest file.
-# Block-scoped (only lines under `extension:` until the next top-level key),
-# comment-stripped, whitespace-trimmed. Used by validate_pack (pre-cache, so it
-# cannot use resolve_pack_field) AND surfaced for pack-switch's target preview, so
-# all extension-parse sites agree (shared-schema discipline). Echoes ""/value.
-_pack_ext_field() {
-  local manifest="$1" field="$2"
-  [ -f "$manifest" ] || return 0
-  awk -v f="$field" '
-    /^extension:/ { inb=1; next }
-    inb && /^[A-Za-z_]/ { inb=0 }
-    inb && $0 ~ "^[[:space:]]*"f":" {
-      v=$0
-      sub("^[[:space:]]*"f":[[:space:]]*", "", v)
-      sub(/[[:space:]]*#.*$/, "", v)
-      gsub(/^[[:space:]]+|[[:space:]]+$/, "", v)
-      print v; exit
+# One data-only extractor for runtime reads, validation and target previews.
+# Supported manifest syntax: indented mappings, flow mappings, scalar lists in
+# block/flow form, and plain/single/double-quoted scalar values. Mapping keys are
+# plain identifiers; root mappings start in column one. Lists retain the existing
+# [a, b] accessor contract. Absent field => 1; unsupported/malformed syntax => 2.
+# Anchors, tags and multiline scalars are intentionally outside this contract.
+_pack_yaml_field() {
+  local manifest="${1:-}" field="${2:-}"
+  [ -f "$manifest" ] || return 1
+  [[ "$field" =~ ^[A-Za-z_][A-Za-z_0-9-]*(\.[A-Za-z_][A-Za-z_0-9-]*)*$ ]] || return 2
+  awk -v wanted="$field" '
+    function trim(s) { gsub(/^[[:space:]]+|[[:space:]]+$/, "", s); return s }
+    # Find a delimiter outside quoted strings and nested flow collections.
+    function delimiter(s, sep, i,c,q,depth,escaped) {
+      q=""; depth=0; escaped=0
+      for (i=1; i<=length(s); i++) {
+        c=substr(s,i,1)
+        if (q!="") {
+          if (escaped) { escaped=0; continue }
+          if (q=="\"" && c=="\\") { escaped=1; continue }
+          if (c==q) {
+            if (q==sprintf("%c",39) && substr(s,i+1,1)==q) { i++; continue }
+            q=""
+          }
+          continue
+        }
+        if ((c=="\"" || c==sprintf("%c",39)) && (i==1 || substr(s,i-1,1) ~ /[[:space:]:,\[{]/)) { q=c; continue }
+        if (c==sep && depth==0 && (sep!="#" || i==1 || substr(s,i-1,1) ~ /[[:space:]]/)) return i
+        if (c=="[" || c=="{") depth++
+        if (c=="]" || c=="}") depth--
+        if (depth<0) bad=1
+      }
+      if (q!="" || depth!=0) bad=1
+      return 0
     }
+    function scalar(s, q,i,c,out) {
+      s=trim(s); q=substr(s,1,1)
+      if (q=="\"" || q==sprintf("%c",39)) {
+        if (substr(s,length(s),1)!=q || length(s)<2) { bad=1; return "" }
+        s=substr(s,2,length(s)-2)
+        if (q==sprintf("%c",39)) gsub(/\047\047/, "\047", s)
+        else {
+          out=""
+          for (i=1; i<=length(s); i++) {
+            c=substr(s,i,1)
+            if (c=="\\") {
+              c=substr(s,++i,1)
+              if (c=="n") c="\n"
+              else if (c=="r") c="\r"
+              else if (c=="t") c="\t"
+              else if (c!="\\" && c!="\"") bad=1
+            }
+            out=out c
+          }
+          s=out
+        }
+      } else if (s ~ /^[&*!|>]/) bad=1
+      return s
+    }
+    function list(s, out,pos,item) {
+      out=""
+      while (length(s)) {
+        pos=delimiter(s,",")
+        item=trim(pos ? substr(s,1,pos-1) : s)
+        if (item ~ /^[\[{]/) bad=1
+        out=out (out!="" ? ", " : "") scalar(item)
+        if (!pos) break
+        s=trim(substr(s,pos+1))
+      }
+      return "[" out "]"
+    }
+    function value(path,s, inner,pos,part,colon,key) {
+      s=trim(s)
+      if (seen[path]++) bad=1
+      if (path==wanted) { found=1; result=scalar(s) }
+      if (substr(s,1,1)=="{") {
+        if (substr(s,length(s),1)!="}") { bad=1; return }
+        inner=trim(substr(s,2,length(s)-2))
+        while (length(inner)) {
+          pos=delimiter(inner,",")
+          part=trim(pos ? substr(inner,1,pos-1) : inner)
+          colon=delimiter(part,":")
+          if (!colon) { bad=1; return }
+          key=trim(substr(part,1,colon-1))
+          if (key !~ /^[A-Za-z_][A-Za-z_0-9-]*$/) { bad=1; return }
+          value(path "." key,substr(part,colon+1))
+          if (!pos) break
+          inner=trim(substr(inner,pos+1))
+        }
+      } else if (substr(s,1,1)=="[") {
+        if (substr(s,length(s),1)!="]") { bad=1; return }
+        inner=list(trim(substr(s,2,length(s)-2)))
+        if (path==wanted) result=inner
+      } else scalar(s)
+    }
+    {
+      sub(/\r$/, "")
+      if ($0 ~ /^[ ]*\t/) { bad=1; next }
+      line=$0
+      # A YAML comment starts with # only outside quotes, after whitespace.
+      comment=delimiter(line,"#")
+      if (comment && (comment==1 || substr(line,comment-1,1) ~ /[[:space:]]/)) line=substr(line,1,comment-1)
+      if (trim(line)=="" || trim(line)=="---" || trim(line)=="...") next
+      indent=match(line,/[^ ]/)-1; line=trim(line)
+      # YAML permits a block sequence at the same indentation as its field.
+      # Keep that pending field as owner for sequence items; sibling mappings
+      # still close it. Losing the owner would silently erase required gates.
+      is_item=(line ~ /^-[[:space:]]/)
+      while (depth>0 && (indent<indents[depth] || (indent==indents[depth] && !is_item))) depth--
+      if (line ~ /^-[[:space:]]/) {
+        if (!depth) { bad=1; next }
+        if (collection[paths[depth]]=="mapping") bad=1
+        collection[paths[depth]]="sequence"
+        if (trim(substr(line,3)) ~ /^[\[{]|^[A-Za-z_][A-Za-z_0-9-]*:[[:space:]]/) bad=1
+        item=scalar(substr(line,3))
+        if (paths[depth]==wanted) {
+          result=(count++ ? substr(result,1,length(result)-1) ", " : "[") item "]"
+          found=1
+        }
+        next
+      }
+      colon=delimiter(line,":")
+      if (!colon) { bad=1; next }
+      key=trim(substr(line,1,colon-1))
+      if (key !~ /^[A-Za-z_][A-Za-z_0-9-]*$/) { bad=1; next }
+      if (!depth && indent!=0) { bad=1; next }
+      if (depth) {
+        if (collection[paths[depth]]=="sequence") bad=1
+        collection[paths[depth]]="mapping"
+      }
+      path=(depth ? paths[depth] "." : "") key
+      val=trim(substr(line,colon+1))
+      value(path,val)
+      if (val=="") { depth++; indents[depth]=indent; paths[depth]=path }
+    }
+    END { if (bad) exit 2; if (!found) exit 1; printf "%s", result }
   ' "$manifest"
+}
+
+_pack_ext_field() { _pack_yaml_field "${1:-}" "extension.${2:-}"; }
+
+# A child owns an entire top-level block. Resolve that owner before looking up a
+# nested field; this preserves whole-block replacement during pre-cache validation.
+_pack_chain_field() {
+  local chain="$1" field="$2" name dir owner="" top="${2%%.*}" rc
+  for name in $chain; do
+    dir=$(_pack_dir "$name") || return 1
+    rc=0; _pack_yaml_field "$dir/pack.yaml" "$top" >/dev/null || rc=$?
+    [ "$rc" -eq 2 ] && return 2
+    [ "$rc" -eq 0 ] && owner="$dir/pack.yaml"
+  done
+  [ -n "$owner" ] || return 1
+  _pack_yaml_field "$owner" "$field"
 }
 
 # ─── Pack validation (called at SENSE Step 1) ──────────────────────────────
 validate_pack() {
-  # Args: <pack-name>
-  # Returns: 0 if valid; 1 if reject (with audit + stderr message)
-  local name="${1:-_default}"
-  local pack_dir
-  pack_dir=$(_pack_dir "$name") || { _resolver_fail "pack not found: $name"; return 1; }
-  local manifest="$pack_dir/pack.yaml"
-
-  # Failure mode 1: file missing
-  if [ ! -f "$manifest" ]; then
-    _resolver_fail "pack.yaml missing for pack=$name (looked at $manifest)"
-    return 1
-  fi
-
-  # Failure mode 2: required fields absent
-  for required in "^name:" "^version:" "^voice:" "^compliance:" "^navigation:"; do
-    if ! grep -qE "$required" "$manifest"; then
-      _resolver_fail "pack=$name missing required top-level: ${required#^}"
-      return 1
+  local name="${1:-_default}" chain pack dir field v
+  chain=$(_resolve_extends_chain "$name") || return 1
+  # Identity belongs to each manifest; policy blocks may be inherited. Validate
+  # effective blocks, so a minimal team overlay retains its enterprise base.
+  for pack in $chain; do
+    dir=$(_pack_dir "$pack") || return 1
+    for field in name version; do
+      v=$(_pack_yaml_field "$dir/pack.yaml" "$field") || {
+        _resolver_fail "pack=$pack missing or unsupported field: $field"; return 1;
+      }
+      if [ -z "$v" ] || [ "$v" = null ] || [ "$v" = '~' ] || [[ "$v" = \[* || "$v" = \{* ]]; then
+        _resolver_fail "pack=$pack required field is empty: $field"; return 1
+      fi
+    done
+  done
+  for field in voice.default_tier compliance.mode navigation.default_workflow; do
+    v=$(_pack_chain_field "$chain" "$field") || {
+      _resolver_fail "pack=$name missing or unsupported required field: $field"; return 1;
+    }
+    if [ -z "$v" ] || [ "$v" = null ] || [ "$v" = '~' ] || [[ "$v" = \[* || "$v" = \{* ]]; then
+      _resolver_fail "pack=$name required scalar is empty or invalid: $field"; return 1
+    fi
+    if [ "$field" = compliance.mode ]; then
+      case "$v" in hard|advisory|off) ;; *)
+        _resolver_fail "pack=$name unsupported compliance.mode: $v"; return 1 ;;
+      esac
     fi
   done
-
-  # Failure mode 2b: an extension pack MUST declare a namespace + workflow (ADR-0018)
-  # — without them Lintel cannot route to or surface the pack's executable surface.
-  # Read the manifest directly (validate_pack runs INSIDE cache priming, so
-  # resolve_pack_field is unavailable). Detect truthy is_extension with the SAME
-  # semantics as pack_field_is_true (true|yes|on) so a yes/on form can't skip 2b
-  # while the runtime still treats the pack as an extension. Block-scoped extraction
-  # (_pack_ext_field) so a namespace:/workflow: under another block can't satisfy it.
-  local is_ext
-  is_ext=$(_pack_ext_field "$manifest" is_extension)
-  case "$is_ext" in
-    true|yes|on)
-      local ext_field ext_val
-      for ext_field in namespace workflow; do
-        ext_val=$(_pack_ext_field "$manifest" "$ext_field")
-        if [ -z "$ext_val" ] || [ "$ext_val" = "null" ]; then
-          _resolver_fail "extension pack=$name: is_extension is true but extension.${ext_field} is unset (required, ADR-0018)"
-          return 1
-        fi
-      done
-      ;;
-  esac
-
-  # Failure mode 3: extends: cycle (depth-limited shallow check)
-  local visited=":$name:"
-  local current="$name"
-  local depth=0
-  while [ "$depth" -lt 10 ]; do
-    local pack_dir_cur
-    pack_dir_cur=$(_pack_dir "$current") || break
-    local ext
-    ext=$(grep -E '^extends:' "$pack_dir_cur/pack.yaml" 2>/dev/null | head -1 | awk '{print $2}')
-    [ -z "$ext" ] && break
-    case "$visited" in
-      *:"$ext":*)
-        _resolver_fail "pack=$name extends: cycle detected at $ext (chain: ${visited//:/, })"
+  v=$(_pack_chain_field "$chain" extension.is_extension) || v=""
+  case "$v" in true|yes|on)
+    for field in extension.namespace extension.workflow; do
+      v=$(_pack_chain_field "$chain" "$field") || v=""
+      if [ -z "$v" ] || [ "$v" = null ] || [ "$v" = '~' ] || [[ "$v" = \[* || "$v" = \{* ]]; then
+        _resolver_fail "extension pack=$name: $field is unset (required, ADR-0018)"
         return 1
-        ;;
-    esac
-    visited="${visited}${ext}:"
-    current="$ext"
-    depth=$((depth + 1))
-  done
-
+      fi
+    done
+  ;; esac
   return 0
 }
 
-# ─── Inheritance chain resolution (extends: walk) ──────────────────────────
-# Returns space-separated chain ordered root → leaf, e.g. "base-pack team-pack".
-# Does NOT auto-prepend _default — _default is the resolver's fallback layer
-# for missing fields, not an explicit extends target.
+# Root-to-leaf ancestry. Validate every link, including a missing terminal parent
+# and chains exceeding the documented ten-parent limit. No partial chain loads.
 _resolve_extends_chain() {
-  local name="${1:-}"
-  local chain="$name"
-  local current="$name"
-  local depth=0
-  while [ "$depth" -lt 10 ]; do
-    local pack_dir
-    pack_dir=$(_pack_dir "$current") || break
-    local ext
-    ext=$(grep -E '^extends:' "$pack_dir/pack.yaml" 2>/dev/null | head -1 | awk '{print $2}')
-    [ -z "$ext" ] && break
-    # Prepend parent (walk leaf → root, reverse implicit through prepend)
-    chain="$ext $chain"
-    current="$ext"
-    depth=$((depth + 1))
+  local name="${1:-}" chain="${1:-}" current="${1:-}" visited=":${1:-}:"
+  local depth=0 dir ext rc
+  while :; do
+    dir=$(_pack_dir "$current") || {
+      _resolver_fail "pack=$name parent or pack not found: $current"; return 1;
+    }
+    [ -f "$dir/pack.yaml" ] || {
+      _resolver_fail "pack.yaml missing for pack=$current"; return 1;
+    }
+    rc=0; ext=$(_pack_yaml_field "$dir/pack.yaml" extends) || rc=$?
+    if [ "$rc" -eq 2 ]; then
+      _resolver_fail "pack=$current has unsupported or malformed manifest syntax"; return 1
+    fi
+    [ -z "$ext" ] || [ "$ext" = null ] || [ "$ext" = '~' ] || {
+      case "$visited" in *:"$ext":*)
+        _resolver_fail "pack=$name extends: cycle detected at $ext"; return 1 ;;
+      esac
+      if [ "$depth" -ge 10 ]; then
+        _resolver_fail "pack=$name extends: exceeds maximum depth 10"; return 1
+      fi
+      visited="$visited$ext:"; chain="$ext $chain"; current="$ext"
+      depth=$((depth + 1))
+      continue
+    }
+    break
   done
   printf '%s' "$chain"
 }
@@ -228,14 +351,14 @@ _merge_packs_into_cache() {
 
     # Extract this manifest's top-level keys
     local keys
-    keys=$(grep -E '^[A-Za-z_][A-Za-z_0-9]*:' "$manifest" | awk -F: '{print $1}' | sort -u)
+    keys=$(grep -E '^[A-Za-z_][A-Za-z_0-9-]*[[:space:]]*:' "$manifest" | awk -F: '{sub(/[[:space:]]+$/, "", $1); print $1}' | sort -u)
 
     # For each key in this manifest, remove the corresponding block from $out
     for key in $keys; do
       [ -z "$key" ] && continue
       awk -v key="$key" '
         BEGIN { skip=0 }
-        $0 ~ "^"key":" { skip=1; next }
+        $0 ~ "^"key"[[:space:]]*:" { skip=1; next }
         skip && /^[A-Za-z_]/ { skip=0 }
         !skip { print }
       ' "$out" > "$out.tmp2" 2>/dev/null && mv "$out.tmp2" "$out"
@@ -257,16 +380,26 @@ _prime_cache_for_session() {
     # deliberately not checked — mid-session pack-switch keeps the cached value
     # per the §2.4 contract (fallback-harness scenario 7); a deleted pack keeps
     # the cache too (scenario 8: _pack_dir fails → manifest not checked).
-    local _name _p _pd _stale=0
+    local _name _p _pd _chain _stale=0 _reason=manifest-newer-than-cache
     _name=$(get_active_pack_name)
-    for _p in $(_resolve_extends_chain "$_name"); do
-      _pd=$(_pack_dir "$_p" 2>/dev/null) || continue
-      [ "$_pd/pack.yaml" -nt "$PACK_CACHE_FILE" ] && _stale=1
-    done
+    if _pack_dir "$_name" >/dev/null 2>&1; then
+      if _chain=$(_resolve_extends_chain "$_name"); then
+        for _p in $_chain; do
+          _pd=$(_pack_dir "$_p" 2>/dev/null) || continue
+          [ "$_pd/pack.yaml" -nt "$PACK_CACHE_FILE" ] && _stale=1
+        done
+      else
+        # A rejected edited manifest/ancestor is not proof of cache freshness.
+        # A different active pointer still takes effect at the next cycle.
+        if [ "$_name" = "$(_pack_yaml_field "$PACK_CACHE_FILE" name)" ]; then
+          _stale=1; _reason=invalid-manifest-or-ancestry
+        fi
+      fi
+    fi
     if [ "$_stale" = 0 ]; then
       return 0  # already primed and fresh
     fi
-    _resolver_audit cache_invalidated "pack=$_name reason=manifest-newer-than-cache session=$LINTEL_SESSION_ID"
+    _resolver_audit cache_invalidated "pack=$_name reason=$_reason session=$LINTEL_SESSION_ID"
     rm -f "$PACK_CACHE_FILE" 2>/dev/null || true
   fi
 
@@ -336,54 +469,22 @@ resolve_pack_field() {
     return 0
   }
 
-  # Walk dotted path through YAML using awk
-  local parent="${path%.*}"
-  local key="${path##*.}"
-
-  # Simple two-level resolver (parent.key)
-  if [ "$parent" = "$path" ]; then
-    # Top-level scalar
-    grep -E "^${key}:" "$PACK_CACHE_FILE" | head -1 | awk -F': *' '{print $2}' | tr -d '[:space:]'
-  else
-    # Nested: handle both block form and inline-flow form
-    #   block:        parent:\n  key: value
-    #   flow inline:  parent: {key: value, key2: value2}
-    awk -v parent="$parent" -v key="$key" '
-      BEGIN { in_parent=0 }
-      # Inline flow form on single line
-      $0 ~ "^"parent":[[:space:]]*\\{" {
-        line = $0
-        sub("^"parent":[[:space:]]*\\{[[:space:]]*", "", line)
-        sub("[[:space:]]*\\}[[:space:]]*$", "", line)
-        sub("[[:space:]]*#.*$", "", line)
-        n = split(line, pairs, ",")
-        for (i = 1; i <= n; i++) {
-          gsub(/^[[:space:]]+|[[:space:]]+$/, "", pairs[i])
-          pos = index(pairs[i], ":")
-          if (pos > 0) {
-            k = substr(pairs[i], 1, pos - 1)
-            v = substr(pairs[i], pos + 1)
-            gsub(/^[[:space:]]+|[[:space:]]+$/, "", k)
-            gsub(/^[[:space:]]+|[[:space:]]+$/, "", v)
-            if (k == key) { print v; exit }
-          }
-        }
-        next
-      }
-      # Block form: parent: on its own (no opening brace)
-      /^[A-Za-z_]/ {
-        if ($0 ~ "^"parent":[[:space:]]*$") { in_parent=1; next }
-        if (in_parent) in_parent=0
-      }
-      in_parent && $0 ~ "^[[:space:]]+"key":" {
-        sub("^[[:space:]]+"key":[[:space:]]*", "")
-        sub("[[:space:]]*#.*$", "")    # strip trailing comments
-        gsub(/^[[:space:]]+|[[:space:]]+$/, "")
-        print
-        exit
-      }
-    ' "$PACK_CACHE_FILE"
+  local value rc default_dir
+  rc=0; value=$(_pack_yaml_field "$PACK_CACHE_FILE" "$path") || rc=$?
+  if [ "$rc" -eq 0 ]; then
+    printf '%s' "$value"
+    return 0
   fi
+  if [ "$rc" -eq 2 ]; then
+    _resolver_fail "unsupported manifest syntax or field path: $path"
+    return 1
+  fi
+  # Missing fields use the neutral manifest; explicit null/false/[] stay explicit.
+  # This is a field fallback, not deep inheritance from a parent block.
+  default_dir=$(_pack_dir _default) || return 1
+  rc=0; value=$(_pack_yaml_field "$default_dir/pack.yaml" "$path") || rc=$?
+  [ "$rc" -eq 2 ] && return 1
+  printf '%s' "$value"
 }
 
 # Boolean helper: returns 0 (true) if resolved value is "true", else 1
@@ -407,7 +508,7 @@ pack_workflow()  { local v; v=$(resolve_pack_field extension.workflow);  [ "$v" 
 get_loaded_pack() {
   _prime_cache_for_session 2>/dev/null || true
   if [ -f "$PACK_CACHE_FILE" ]; then
-    grep -E '^name:' "$PACK_CACHE_FILE" | head -1 | awk '{print $2}'
+    _pack_yaml_field "$PACK_CACHE_FILE" name
   else
     printf '_default'
   fi

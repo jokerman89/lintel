@@ -1,7 +1,7 @@
 ---
 name: pack-create
 layer: foundation
-description: Scaffolds a new Lintel pack — copies _default pack.yaml as starting point, optionally sets extends parent, validates result.
+description: Use to create a blank, inherited, or cloned Lintel pack and validate it before activation.
 color: green
 tools: Read, Write, Edit, Bash
 voice: internal
@@ -15,7 +15,7 @@ You are the PACK-CREATE skill — scaffolds a new pack in `<repo>/packs/<name>/`
 Creates a new pack directory + manifest. Three modes:
 
 - **Blank pack:** starts from `packs/_default/pack.yaml` skeleton (every field declared with neutral value)
-- **Extending pack:** starts from `packs/_default/pack.yaml` + sets `extends: <parent-name>` (validates parent exists)
+- **Extending pack:** declares its identity and `extends: <parent-name>`; inherits the parent's blocks and declares only intentional overrides
 - **Cloned pack:** copies an existing pack as a starting point (operator edits per their needs)
 
 ## When to use
@@ -35,14 +35,21 @@ Creates a new pack directory + manifest. Three modes:
 
 ```bash
 LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
-REPO_PACKS="$(git rev-parse --show-toplevel 2>/dev/null)/packs"
-HOME_PACKS="$LINTEL_HOME/packs"
+pack_source_root="${LINTEL_SOURCE_ROOT:-${REPO_ROOT:-$LINTEL_HOME}}"
+target_repo="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || true)}"
+[ -n "$target_repo" ] && LINTEL_REPO_ROOT="$target_repo"
+source "$pack_source_root/lib/pack-resolver.sh"
+REPO_PACKS="${target_repo:+$target_repo/packs}"
+HOME_PACKS="$LINTEL_PACKS_DIR"
 
-# Operator chooses scope: repo (shared via git) or home (personal)
+# Operator chooses scope: repo or configured pack store (normally ~/.lintel/packs).
 # Default: repo if invoked inside a git repo with packs/ dir; else home
 ```
 
-If operator didn't specify `--scope repo|home`: ask once.
+Use the authorized `--scope repo|home`; if the destination remains ambiguous, ask
+once and show the resolved path. `home` follows `LINTEL_PACKS_DIR` when configured.
+Repo scope requires a working repository. Resolve helper paths from the installed
+source bundle, not from the target repository; Copilot supplies `LINTEL_SOURCE_ROOT`.
 
 ### Step 2 — Validate name + check existing
 
@@ -55,9 +62,18 @@ echo "$name" | grep -qE '^[a-z][a-z0-9-]*$' || { echo "ERROR: name must be kebab
 
 ### Step 3 — Resolve template
 
+Set `extends` from `--extends`, defaulting to empty. Resolve `target_dir` from the
+scope already chosen. Use either `--from` or `--extends`: cloning copies explicit
+overrides, while inheritance tracks its parent. A template is needed only for a blank
+or cloned pack.
+
 ```bash
-template="$REPO_PACKS/_default/pack.yaml"
-[ -f "$template" ] || { echo "ERROR: _default pack missing"; exit 1; }
+if [ -z "${extends:-}" ]; then
+  template_name="${from_pack:-_default}" # from_pack is the parsed --from argument
+  template_dir=$(_pack_dir "$template_name") || { echo "ERROR: template pack missing"; exit 1; }
+  template="$template_dir/pack.yaml"
+  [ -f "$template" ] || { echo "ERROR: template manifest missing"; exit 1; }
+fi
 ```
 
 If `--from <existing-pack>`: use that pack's manifest as template instead.
@@ -65,8 +81,7 @@ If `--from <existing-pack>`: use that pack's manifest as template instead.
 ### Step 4 — Validate parent (if --extends)
 
 ```bash
-if [ -n "$extends" ]; then
-  source "$REPO_ROOT/lib/pack-resolver.sh"
+if [ -n "${extends:-}" ]; then
   if ! validate_pack "$extends" 2>/dev/null; then
     echo "ERROR: parent pack '$extends' does not exist or fails validation"
     exit 1
@@ -78,41 +93,33 @@ fi
 
 ```bash
 mkdir -p "$target_dir/$name"
-cp "$template" "$target_dir/$name/pack.yaml"
-
-# Replace name: line
-sed -i.bak "s/^name: .*/name: $name/" "$target_dir/$name/pack.yaml"
-rm -f "$target_dir/$name/pack.yaml.bak"
-
-# Add extends: if requested
-if [ -n "$extends" ]; then
-  # Insert after `version:` line
-  awk -v ext="$extends" '
-    /^version:/ { print; print "extends: " ext; next }
+if [ -n "${extends:-}" ]; then
+  # A copied neutral compliance block would replace the enterprise parent's rules.
+  # Omitted blocks inherit; an explicit child block replaces the whole parent block.
+  printf 'schema_version: "1"\nname: %s\nversion: 1.0.0\nextends: %s\n' \
+    "$name" "$extends" > "$target_dir/$name/pack.yaml"
+else
+  awk -v name="$name" '
+    /^name:/ { print "name: " name; next }
     { print }
-  ' "$target_dir/$name/pack.yaml" > "$target_dir/$name/pack.yaml.tmp"
-  mv "$target_dir/$name/pack.yaml.tmp" "$target_dir/$name/pack.yaml"
+  ' "$template" > "$target_dir/$name/pack.yaml"
 fi
 ```
 
 ### Step 6 — Validate result
 
 ```bash
-source "$REPO_ROOT/lib/pack-resolver.sh"
 if validate_pack "$name" 2>&1; then
   echo "✓ Pack '$name' created at $target_dir/$name/"
 else
-  echo "WARN: pack created but validation failed — review pack.yaml"
+  echo "ERROR: pack created but validation failed — review pack.yaml"; exit 1
 fi
 ```
 
 ### Step 7 — Audit + surface next steps
 
 ```bash
-ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-printf '{"ts":"%s","kind":"pack_created","name":"%s","extends":"%s","scope":"%s","operator":"%s"}\n' \
-  "$ts" "$name" "${extends:-none}" "$scope" "$(whoami)" \
-  >> "$LINTEL_HOME/audit/pack-lifecycle.jsonl"
+audit_log pack-lifecycle pack_created "name=$name" "extends=${extends:-none}" "scope=$scope"
 ```
 
 Surface:
@@ -143,4 +150,5 @@ Surface:
 
 - **Creating a pack to override one field** — edit `pack.yaml` of an existing pack instead
 - **Not validating extends parent** — broken extends silently degrades to _default at runtime
+- **Copying neutral blocks into an inherited pack** — child blocks replace the parent's complete block; only declare an override when the change is intentional
 - **Auto-activating after create** — operator decides when to switch (avoids surprise behavior changes mid-session)

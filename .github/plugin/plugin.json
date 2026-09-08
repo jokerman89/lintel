@@ -1,6 +1,6 @@
 {
   "name": "li",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "description": "Lintel: repeatable GitHub Copilot sessions with specs, build cards, review evidence and team-owned memory.",
   "author": { "name": "jokerman89", "email": "johannes.akerman@gmail.com" },
   "homepage": "https://github.com/jokerman89/lintel",

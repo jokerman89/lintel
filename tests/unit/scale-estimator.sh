@@ -39,6 +39,22 @@ expect_size "deploy the static landing page to azure"    S     # small qualifier
 expect_size "stand up a full landing zone with CI/CD on azure" XL  # large qualifier
 expect_size "rename a single file"                       XS
 expect_size "add an oauth login flow"                    M     # one high-surface
+expect_size "add multi-tenant support"                    L     # isolation crosses boundaries
+expect_size "add multi tenant support"                    L
+expect_size "add auth, database and API support"           XL    # preserve multi-surface sizing
+expect_size "edit the capital letter in the title"        S     # capital is not API
+expect_size "small wording change"                        XS    # small is not all
+expect_size "update the forest heading"                   S     # forest is not REST
+expect_size "update the draws label"                      S     # draws is not AWS
+expect_size "add an API endpoint"                         M     # complete uppercase word still matches
+expect_size "update the deployment notes"                 S     # deploy is not deployment
+
+got_breadth=$(detect_breadth "small wording change")
+[ "$got_breadth" = 0 ] && pass "small wording change has no broad-scope signal" \
+                      || fail "small wording change breadth=$got_breadth, want 0"
+got_surfaces=$(detect_surface_count "edit the capital letter in the title")
+[ "$got_surfaces" = 0 ] && pass "capital letter has no API surface" \
+                       || fail "capital letter surfaces=$got_surfaces, want 0"
 
 # ─── T9: ambiguity = the gate-fire signal ────────────────────────────────────
 echo ""
@@ -47,6 +63,8 @@ expect_amb "deploy a website to azure"                   yes   # bimodal, no qua
 expect_amb "deploy the static landing page to azure"     no    # qualifier present → silent
 expect_amb "stand up a full landing zone on azure"       no    # qualifier present → silent
 expect_amb "fix the typo in README"                      no    # not infra → silent
+expect_amb "add multi-tenant support"                     no    # large but unambiguous
+expect_amb "update the draws label"                       no    # no accidental AWS gate
 # escalate tracks ambiguity: yes ⇒ gate fires, no ⇒ SENSE stays silent
 for p in "deploy a website to azure" "fix the typo in README"; do
   amb=$(scale_ambiguous "$p"); esc=$(scale_escalate "$p" medium)

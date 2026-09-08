@@ -1,15 +1,10 @@
 #!/usr/bin/env bash
-# tests/behavior/build-pilot.sh
+# tests/shape/build-workflow-contract.sh
 #
-# v3.6 cohort 2 item 1.4 REPLACED: pilot behavior test for the `build` phase.
-# Skill mandates 100% test-coverage; current 11 unit tests check presence + frontmatter
-# not behavior. Behavior tests must validate the shape of the artifacts produced, not just
-# file-existence. Piloted on build because the generate-pipeline is dogfooded there.
+# Structural checks on BUILD instructions. Executable helper/snippet coverage lives
+# in tests/integration/enterprise-workflow-snippets.sh; this test never invokes an agent.
 #
-# Pilot scope: given a minimal fixture, the build phase should produce a documented artifact-shape.
-# If the pilot succeeds, expand behavior-tests to other phases iteratively.
-#
-# tag: v3.6 cohort-2 behavior-test-pilot
+# tag: shape build-workflow-contract
 
 set -uo pipefail
 
@@ -19,7 +14,7 @@ FAILED=0
 pass() { echo "  PASS: $1"; }
 fail() { echo "  FAIL: $1"; FAILED=1; }
 
-echo "tests/behavior/build-pilot.sh — v3.6 cohort 2 item 1.4 pilot"
+echo "tests/shape/build-workflow-contract.sh"
 echo "=============================================================="
 
 # 1. skills/build/SKILL.md exists + has expected workflow structure
@@ -27,7 +22,7 @@ BUILD_FILE="$REPO_ROOT/skills/build/SKILL.md"
 if [ -f "$BUILD_FILE" ]; then
   pass "skills/build/SKILL.md present"
 
-  # Behavior expectations from spec:
+  # Instruction contract expectations:
   # - Workflow section present
   # - Workflow declares artifact-shape (what gets produced)
   # - Status protocol documented (DONE / DONE_WITH_CONCERNS / BLOCKED / NEEDS_CONTEXT)
@@ -79,18 +74,18 @@ if [ -f "$BUILD_FILE" ]; then
   fi
 fi
 
-# 4. Pilot scope validation — this covers ONE phase. Future expansion to other phases:
+# 4. Evidence boundary
 echo ""
-echo "Pilot-scope notes:"
+echo "Evidence boundary:"
 echo "  - This test validates the build-phase SHAPE spec, not runtime behavior"
-echo "  - Runtime behavior-tests require a fixture + skill-execution sandbox (separate infrastructure)"
-echo "  - If the pilot passes, expand the pattern to other phases (sense, define, discover, etc) in v3.6+"
+echo "  - Executable workflow snippets have separate integration tests"
+echo "  - Model-driven execution is not exercised by this shape check"
 
 echo ""
 if [ "$FAILED" -eq 0 ]; then
-  echo "All behavior-pilot tests PASSED"
+  echo "All build workflow contract checks PASSED"
   exit 0
 else
-  echo "Some behavior-pilot tests FAILED"
+  echo "Some build workflow contract checks FAILED"
   exit 1
 fi

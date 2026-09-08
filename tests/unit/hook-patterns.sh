@@ -55,5 +55,24 @@ CE=$(scan_customer 'John Smith, case #99')
 has "$CE" name-with-case-id && pass "customer detects name + English case id"  || fail "english case-id ($CE)"
 [ -z "$(scan_customer 'ordinary text, nothing sensitive')" ] && pass "clean text → no customer hits" || fail "false positive on clean customer text"
 
+# A no-match is successful, but a failed regex/grep must not publish even a
+# partial list of matches as a completed scan.
+scan_rc=0
+scan_result=$(_scan_pats $'first\tmarker\nbroken\t[' 'marker' 2>/dev/null) || scan_rc=$?
+if [ "$scan_rc" -eq 2 ] && [ -z "$scan_result" ]; then
+  pass 'invalid pattern fails explicitly without partial matches'
+else fail "invalid pattern looked successful (rc=$scan_rc, result=$scan_result)"; fi
+scan_rc=0
+scan_result=$(_scan_pats $'plain\tabsent' 'ordinary text') || scan_rc=$?
+if [ "$scan_rc" -eq 0 ] && [ -z "$scan_result" ]; then
+  pass 'genuine no-match preserves rc0 and empty output'
+else fail "no-match contract changed (rc=$scan_rc)"; fi
+printf -v large_text '%*s' 262144 ''
+scan_rc=0
+scan_result=$(_scan_pats $'plain\tmarker' "marker$large_text") || scan_rc=$?
+if [ "$scan_rc" -eq 0 ] && [ "$scan_result" = plain ]; then
+  pass 'large early match does not fail through a producer SIGPIPE'
+else fail "large match failed (rc=$scan_rc)"; fi
+
 echo ""
 [ "$FAILED" -eq 0 ] && { echo "hook-patterns: ALL PASS"; exit 0; } || { echo "hook-patterns: FAILURES"; exit 1; }

@@ -1,9 +1,14 @@
 #!/usr/bin/env bash
 # lib/orientator-routing.sh — mechanical routing helpers for skills/orientator
+# component: orientator-routing
+# implements: none; preserves the existing pack navigation contract
+# intent: docs/concepts/orientator.md
+# constraints: none; recommendations do not execute workflows
+# last_intent_review: 2026-09-08
 #
 # Sourced by skills/orientator/SKILL.md. Provides:
 #   classify_intent <prompt>        → intent enum
-#   match_workflow <intent> <default> → workflow string
+#   match_workflow <intent> <default> [namespace] → workflow string
 #   assess_risk <workflow> <high_risk_csv> → risk enum
 #   score_confidence <intent> <workflow> → confidence enum
 #   check_escalation_threshold <confidence> <threshold> → yes|no
@@ -39,12 +44,25 @@ classify_intent() {
 }
 
 # ─── match_workflow ────────────────────────────────────────────────────────
-# Maps intent → workflow string. `default` used for `unclear`.
+# Generic new work and unclear requests use the pack default. Specific operations
+# retain their canonical routes; a pack default must not turn "review" into BUILD.
+_workflow_command() {
+  local workflow="${1:-cycle}" namespace="${2:-}"
+  case "$workflow" in
+    /*|bin/*) printf '%s' "$workflow"; return ;;
+    *:*) printf '/%s' "$workflow"; return ;;
+  esac
+  if [ -z "$namespace" ] && declare -F pack_is_extension >/dev/null 2>&1 && pack_is_extension; then
+    namespace=$(pack_namespace)
+  fi
+  printf '/%s:%s' "${namespace:-li}" "$workflow"
+}
+
 match_workflow() {
   local intent="${1:-unclear}"
   local default="${2:-cycle}"
   case "$intent" in
-    build)    printf '/li:cycle' ;;
+    build)    _workflow_command "$default" "${3:-}" ;;
     fix)      printf '/li:cycle --mode hotfix' ;;
     review)   printf '/li:review' ;;
     research) printf '/li:cycle --mode research-dive' ;;
@@ -52,7 +70,7 @@ match_workflow() {
     deploy)   printf '/li:cycle --from SHIP' ;;
     scaffold) printf 'bin/li-scaffold init' ;;
     resume)   printf '/li:resume' ;;
-    unclear|*) printf '/li:%s' "$default" ;;
+    unclear|*) _workflow_command "$default" "${3:-}" ;;
   esac
 }
 
@@ -64,18 +82,27 @@ assess_risk() {
   local high_risk_csv="${2:-}"
 
   # Strip flags/args from workflow for matching
-  local base_workflow
-  base_workflow=$(printf '%s' "$workflow" | awk '{print $1}' | sed 's|^/li:||' | sed 's|^bin/||')
+  local base_workflow short_workflow declared
+  base_workflow="${workflow%%[[:space:]]*}"
+  base_workflow="${base_workflow#/}"; base_workflow="${base_workflow#bin/}"
+  short_workflow="${base_workflow##*:}"
 
   # Default high-risk if not specified by pack
   if [ -z "$high_risk_csv" ]; then
     high_risk_csv="cycle,plan,ship"
   fi
 
-  # CSV match
-  case ",$high_risk_csv," in
-    *",$base_workflow,"*) printf 'high'; return 0 ;;
-  esac
+  # Resolver lists use [a, b]; legacy callers pass CSV or newline-separated IDs.
+  # Match normalized complete IDs, so YAML punctuation cannot lower declared risk.
+  high_risk_csv=$(printf '%s' "$high_risk_csv" | tr '\n' ',' | tr -d '[]"\047[:space:]')
+  # A qualified ID matches only that namespace; a bare ID applies to any namespace.
+  # Preserve the legacy `cycle` spelling while supporting `/team:deliver` policies.
+  for declared in ${high_risk_csv//,/ }; do
+    declared="${declared#/}"; declared="${declared#bin/}"
+    if [ "$declared" = "$base_workflow" ] || [ "$declared" = "$short_workflow" ]; then
+      printf 'high'; return 0
+    fi
+  done
 
   # Hotfix is medium (touches code without full review)
   case "$workflow" in

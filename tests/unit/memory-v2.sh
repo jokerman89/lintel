@@ -76,7 +76,7 @@ latest=$( cd "$SB" && LINTEL_REPO_ROOT="$SB" LINTEL_HOME="$TMP/.lintel" bash -c 
 echo ""
 echo "[5] legacy checkpoint dir included read-only (grace window)"
 mkdir -p "$TMP/.lintel/sessions/feat/test-branch"
-printf 'old\n' > "$TMP/.lintel/sessions/feat/test-branch/20200101-000000-old-context-save.md"
+printf '**Repository:** %s\nold\n' "$(cd "$SB" && pwd -P)" > "$TMP/.lintel/sessions/feat/test-branch/20200101-000000-old-context-save.md"
 n=$( cd "$SB" && LINTEL_REPO_ROOT="$SB" LINTEL_HOME="$TMP/.lintel" bash -c "source '$REPO_ROOT/bin/_context.sh'; context_list | wc -l" | tr -d ' ' )
 [ "$n" = "2" ] && pass "list merges new + legacy (2 checkpoints)" || fail "list count=$n expected 2"
 

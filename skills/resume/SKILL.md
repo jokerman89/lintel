@@ -36,6 +36,12 @@ Not a true phase — utility skill that lands the operator in the right phase.
 
 ### Step 1 — Locate state
 
+First honor an operator-selected work map or unambiguous committed active-work links using
+Step 1c, even when local runtime files exist. A checkpoint/ledger from a different initiative
+cannot override that selection. Reconcile the selected task source and evidence with the
+checkout before using its runtime resume hints. Helpers load from `LINTEL_SOURCE_ROOT`;
+all selected work-artifact paths resolve inside `LINTEL_REPO_ROOT`.
+
 RESUME has **three** prior-work sources: committed work maps/plans, local cycle ledgers and checkpoints. The committed fallback below survives a fresh clone. Historically there were only two sources, and historically it only saw one of them: the
 cycle ledger (`00-state.md`). The other is a `/li:context-save` **checkpoint** — written
 to `.claude/runtime/sessions/<branch>/`. A session that ended with `/li:context-save` (not
@@ -43,7 +49,10 @@ mid-cycle) leaves a checkpoint but no `00-state.md` entry; resume must discover 
 hand off to `/li:context-restore` rather than misdirect the operator to a fresh cycle.
 
 ```bash
-STATE_FILE=".claude/runtime/state/00-state.md"
+resume_source="${LINTEL_SOURCE_ROOT:-${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}}"
+source "$resume_source/lib/paths.sh"
+resume_working_repo="$(lintel_repo_root)"
+STATE_FILE="${LINTEL_STATE_DIR:-$(lintel_state_dir)}/00-state.md"
 if [ ! -f "$STATE_FILE" ]; then
   # No state from this repo
   echo "NO_PRIOR_STATE_LOCAL"
@@ -68,10 +77,10 @@ checkpoint=""
 if [ -f "$_ctx" ]; then
   # shellcheck disable=SC1090
   source "$_ctx"
-  checkpoint="$(context_latest 2>/dev/null || true)"   # newest checkpoint for current branch (newest-first)
+  checkpoint="$(cd "$resume_working_repo" && context_latest 2>/dev/null || true)"   # current target branch only
 else
-  branch="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo no-branch)"
-  checkpoint="$(ls -t ".claude/runtime/sessions/$branch/"*-context-save.md 2>/dev/null | head -1)"
+  branch="$(git -C "$resume_working_repo" rev-parse --abbrev-ref HEAD 2>/dev/null || echo no-branch)"
+  checkpoint="$(ls -t "$(lintel_sessions_dir)/$branch/"*-context-save.md 2>/dev/null | head -1 || true)"
 fi
 ```
 
@@ -134,8 +143,8 @@ state_commit=$(printf '%s\n' "$seg" | grep '^commit:' | tail -1 | awk '{print $2
 state_ts=$(printf '%s\n' "$seg" | grep '^ts:' | tail -1 | awk '{print $2}')
 
 # Current state
-current_branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo unknown)
-current_commit=$(git rev-parse HEAD 2>/dev/null || echo unknown)
+current_branch=$(git -C "$resume_working_repo" rev-parse --abbrev-ref HEAD 2>/dev/null || echo unknown)
+current_commit=$(git -C "$resume_working_repo" rev-parse HEAD 2>/dev/null || echo unknown)
 
 issues=()
 
@@ -146,7 +155,7 @@ fi
 
 # Check 2: commit reachable (state's commit should be in current branch's history)
 if [ -n "$state_commit" ] && [ "$state_commit" != "$current_commit" ]; then
-  if ! git merge-base --is-ancestor "$state_commit" HEAD 2>/dev/null; then
+  if ! git -C "$resume_working_repo" merge-base --is-ancestor "$state_commit" HEAD 2>/dev/null; then
     issues+=("commit-unreachable: state's commit $state_commit not in current branch history")
   fi
 fi
@@ -205,19 +214,32 @@ incomplete-and-startable step `name`; for a tree job that name *is* the
 node-path:
 
 ```bash
-source "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/bin/_jobs.sh"   # or ~/.lintel/scaffolding/bin
-schema=$(grep -m1 '^depth_schema:' "$(job_path "$JOB_ID")/../scope.md" 2>/dev/null | awk '{print $2}')
+resume_source="${LINTEL_SOURCE_ROOT:-${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel)}}"
+source "$resume_source/bin/_jobs.sh"
+resume_job_dir="$(job_path "${JOB_ID:?select the job to resume}")"
+# SCOPE writes inside the selected job, never in the shared jobs parent directory.
+# An explicitly linked scope path may override it; absence must not select another job.
+resume_scope="${LINTEL_SCOPE_PATH:-$resume_job_dir/scope.md}"
+case "$resume_scope" in
+  /*|[A-Za-z]:/*) : ;;
+  *) resume_scope="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel)}/$resume_scope" ;;
+esac
+if [ -n "${LINTEL_SCOPE_PATH:-}" ] && [ ! -s "$resume_scope" ]; then
+  echo "RESUME BLOCKED: selected scope is missing or empty: $resume_scope" >&2
+  exit 1
+fi
+schema=$(awk '/^depth_schema:/ { sub(/\r$/, ""); print $2; exit }' "$resume_scope" 2>/dev/null || true)
 
 if [ "$schema" = "tree" ]; then
   node=$(job_resume_point "$JOB_ID")           # e.g. "1.1.a"  (deepest incomplete leaf)
   if [ -n "$node" ]; then
     resume_target="$node"                       # land on the exact subtask
   else
-    resume_target=$(grep -m1 '^current_step:' "$(job_path "$JOB_ID")/job.yaml" | awk '{print $2}')
+    resume_target=$(awk '/^current_step:/ { sub(/\r$/, ""); print $2; exit }' "$resume_job_dir/job.yaml")
   fi
 else
   # flat / phased (or no scope.md): unchanged — resume to current_step.
-  resume_target=$(grep -m1 '^current_step:' "$(job_path "$JOB_ID")/job.yaml" | awk '{print $2}')
+  resume_target=$(awk '/^current_step:/ { sub(/\r$/, ""); print $2; exit }' "$resume_job_dir/job.yaml")
 fi
 ```
 
@@ -262,7 +284,11 @@ AskUserQuestion to operator.
 Before invoking next phase, verify resume preconditions:
 
 For BUILD resume:
-- plan.md exists and APPROVED ✓
+- The explicitly selected map validates and its original spec/design/tasks are approved for
+  the authorized scope, or an explicitly selected legacy native plan is approved. Spec Kit's
+  implementation plan does not require Lintel's APPROVED heading.
+- Resume the ready original leaf and its package; preserve completed evidence and recheck the
+  affected package. An absent package table means singleton packages, not a duplicated backlog.
 - Branch state OK (no surprise commits) ✓
 - Test suite passes baseline ✓
 
@@ -327,7 +353,8 @@ n/a — RESUME is itself the hop-in mechanism.
 - `.claude/runtime/sessions/<branch>/*-context-save.md` (checkpoint discovery via `context_latest` — routes to `/li:context-restore`)
 - `~/.lintel/lessons-vault/00-state-<repo>-*.md` (cross-machine fallback)
 - `.claude/runtime/jobs/<id>/job.yaml` `steps[]` (job-scoped resume — node-path via `job_resume_point`)
-- `.claude/plans/<slug>/scope.md` `depth_schema` (selects node-path vs current_step resume)
+- The explicitly linked `LINTEL_SCOPE_PATH`, else the selected job's `scope.md` (the SCOPE
+  writer's path); no jobs-parent or newest-directory lookup
 - `plan.md`, `spec.md`, `review-report.md` (for precondition checks)
 - recent git log
 

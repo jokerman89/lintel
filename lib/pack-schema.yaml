@@ -1,8 +1,8 @@
 # Lintel pack schema v1 — declarative contract for what a pack manifest may declare.
 #
-# Single source of truth. Pack-resolver validates against this. Wiki generator
-# reads this. Operators authoring new packs copy `packs/_default/pack.yaml`,
-# which is itself an instance of this schema.
+# Authoring reference, read by the wiki generator and pack-validation skill.
+# Runtime checks are implemented in lib/pack-resolver.sh; it does not interpret
+# this file as an executable YAML schema. See validation behavior below.
 #
 # Versioning: schema_version is a string. Major bumps are breaking. Minor bumps
 # are additive. Phase 2 ships v1.
@@ -11,9 +11,11 @@
 
 schema_version: "1"
 schema_kind: pack-manifest
-as_of: 2026-05-29
+as_of: 2026-09-08
 
-# Required top-level fields every pack manifest must declare.
+# Authoring contract for a complete pack. A derived pack may inherit policy
+# blocks; runtime requires name/version per manifest and effective required
+# policy fields. Legacy manifests may omit requires_lintel/schema_version.
 required_fields:
   - name              # string: unique identifier (filesystem-safe, kebab-case)
   - version           # string: semver, e.g. "1.0.0"
@@ -35,6 +37,7 @@ optional_fields:
   - brief_forge_handoffs   # block (see brief_forge_handoffs schema)
   - description       # string: one-line operator-facing summary
   - maintainers       # list[string]: GitHub handles or contact pointers
+  - extension         # optional executable-surface declaration (ADR-0018)
 
 # ─── Nested block schemas ──────────────────────────────────────────────────
 
@@ -113,6 +116,15 @@ brief_forge_handoffs:
     - override_allowed            # bool — default true
     - override_requires_audit     # bool — default true
 
+extension:
+  optional:
+    - is_extension               # bool: pack ships its own plugin surface
+    - namespace                  # string: required when is_extension is true
+    - workflow                   # string: required when is_extension is true
+    - provides_skills            # bool: awareness flag, not host discovery
+    - provides_agents            # bool: awareness flag, not host discovery
+    - provides_hooks             # bool: awareness flag, not hook activation
+
 # ─── Inheritance semantics ─────────────────────────────────────────────────
 #
 # `extends:` triggers shallow merge of parent pack into child.
@@ -123,9 +135,8 @@ brief_forge_handoffs:
 # states that are hard to predict; whole-block replacement is the operator's
 # explicit choice.
 #
-# Exception: list fields under brief_forge_handoffs evaluators arrays merge by
-# concatenation + dedup, so a child can opt in to additional evaluators
-# without restating the parent's list.
+# No list exception: declaring brief_forge_handoffs replaces the whole parent
+# block. To add an evaluator, restate the settings/evaluators to retain.
 #
 # Cycle detection: max-depth 10. If `pack-a extends: pack-b` and
 # `pack-b extends: pack-a`, validation rejects.
@@ -136,18 +147,19 @@ brief_forge_handoffs:
 #
 # Pack-resolver invokes validate_pack() at SENSE Step 1:
 #   1. Manifest file exists
-#   2. All required_fields present at top level
-#   3. All required sub-fields present in nested blocks (voice.default_tier,
-#      compliance.mode, navigation.default_workflow)
-#   4. extends: chain resolves (parent exists) + no cycle
-#   5. schema_version is a known version (Phase 2 accepts "1")
+#   2. Nonempty scalar name/version in each manifest
+#   3. Required effective fields present after whole-block inheritance:
+#      voice.default_tier, compliance.mode, navigation.default_workflow
+#   4. Every parent exists, no cycle, at most ten parent links
+#   5. compliance.mode is hard/advisory/off; enabled extensions have namespace/workflow
+# Supported parsing syntax and limits: skills/pack-validate/SKILL.md.
+# Optional field types and schema/semver compatibility are not fully validated.
 #
 # On failure: warn + audit + fall back to _default.
 # On success: cache merged manifest for session lifetime.
 
 # ─── Version compatibility ─────────────────────────────────────────────────
 #
-# Pack declares `requires_lintel: ">=4.0.0"`. Resolver compares against
-# current Lintel version at validation. Mismatch handling:
-#   v4.0: warn-only (per design doc §1.3 C1-D2)
-#   v4.1+: block-on-incompatible
+# Pack may declare `requires_lintel: ">=4.0.0"`. Runtime does not evaluate the
+# range. pack-validate reports compatibility as NOT VERIFIED until reviewed
+# against the installed version; it must not report an unexecuted check as PASS.

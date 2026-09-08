@@ -72,16 +72,20 @@ confidence=$(score_confidence "$intent" "$recommended_workflow")
 
 | Intent | Workflow |
 |---|---|
-| build | `/li:cycle` |
+| build | Configured pack default; `/li:cycle` for the neutral pack |
 | fix | `/li:cycle --mode hotfix` |
 | review | `/li:review` |
 | research | `/li:cycle --mode research-dive` |
 | ship | `/li:cycle --from SHIP` |
 | scaffold | `bin/li-scaffold init` |
 | resume | `/li:resume` |
-| unclear | `<default_workflow>` (from pack) |
+| unclear | Configured pack default |
 
 `assess_risk` returns `low | medium | high` based on whether recommended workflow is in `high_risk_workflows` list.
+
+Bare extension defaults use the active pack's namespace; already qualified commands keep
+their namespace. The recommendation still needs actual host discovery before execution.
+Explicit operations such as fix, review and research retain their canonical workflows.
 
 `score_confidence` returns `low | medium | high` based on:
 - High: explicit keyword match (e.g. "bug" → fix, confidence high)

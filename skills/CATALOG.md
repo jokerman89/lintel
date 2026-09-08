@@ -17,7 +17,7 @@ Total skills: 126
 | [`/li:autoplan`](autoplan/SKILL.md) | Use to run a problem statement through the full planning pipeline in one shot — chains the design doc, strategy review,… |
 | [`/li:brief-forge`](brief-forge/SKILL.md) | Use whenever work hands off across a boundary — spawning a subagent, transitioning a phase, passing to a cold executor,… |
 | [`/li:browse`](browse/SKILL.md) | Drive a headless Chromium to a URL — screenshot, extract DOM, click, fill forms, verify UI. |
-| [`/li:build`](build/SKILL.md) | Use to implement an approved plan task by task. Trigger after PLAN is approved and a plan.md exists with code to write … |
+| [`/li:build`](build/SKILL.md) | Use to execute an approved plan in bounded work packages, preserving short task IDs and acceptance evidence while revie… |
 | [`/li:capture`](capture/SKILL.md) | Use after SHIP, at the end of a task, to make what was learned durable — updates lessons, drafts an ADR for any non-tri… |
 | [`/li:careful`](careful/SKILL.md) | Slow-down mode for high-stakes work — extra gates, double-confirm before mutations. |
 | [`/li:catalog`](catalog/SKILL.md) | Use to discover Lintel skills by name, purpose or family, or regenerate the committed skill catalog after frontmatter c… |
@@ -91,15 +91,15 @@ Total skills: 126
 | [`/li:office-hours`](office-hours/SKILL.md) | Use to turn a rough problem statement into a structured, decision-gated design doc ready for engineering review. Reach … |
 | [`/li:open-managed-browser`](open-managed-browser/SKILL.md) | Open the Lintel-managed Chromium in headed mode — interactive operator session. |
 | [`/li:orientator`](orientator/SKILL.md) | Phase 3 v4.0 — lightweight routing agent invoked at SENSE. Reads operator prompt + active pack's navigation policy, rec… |
-| [`/li:pack-create`](pack-create/SKILL.md) | Scaffolds a new Lintel pack — copies _default pack.yaml as starting point, optionally sets extends parent, validates re… |
+| [`/li:pack-create`](pack-create/SKILL.md) | Use to create a blank, inherited, or cloned Lintel pack and validate it before activation. |
 | [`/li:pack-list`](pack-list/SKILL.md) | Lists every pack discoverable in ~/.lintel/packs/ and repo packs/ — shows name, extends, voice tier, compliance mode, a… |
 | [`/li:pack-switch`](pack-switch/SKILL.md) | Use to change which pack is active — switching the identity that drives voice, compliance, persona, and roles. Validate… |
-| [`/li:pack-validate`](pack-validate/SKILL.md) | Validates a pack manifest against lib/pack-schema.yaml — required fields, extends-chain, version compatibility. Reports… |
+| [`/li:pack-validate`](pack-validate/SKILL.md) | Validate a pack before activation or after editing its manifest. Checks effective required fields and inheritance with … |
 | [`/li:pair-agent`](pair-agent/SKILL.md) | Pair with a named subagent in the loop — explicit two-mind collaboration on a focused task. |
 | [`/li:perf-mode`](perf-mode/SKILL.md) | Activate the 1M context-budget mode for a session — the high-intensity preset for long, heavy phases. |
 | [`/li:perfbench`](perfbench/SKILL.md) | Measure performance — runtime, memory, cold-start — and detect regressions vs baseline. |
 | [`/li:personas-rotate`](personas-rotate/SKILL.md) | Load persona context from .claude/memory/personas.md for demo-prep, workshop-facilitation, or audience-aware writing. |
-| [`/li:plan`](plan/SKILL.md) | Use after DISCOVER, or standalone when you have a design doc and need to break it into executable work, to produce the … |
+| [`/li:plan`](plan/SKILL.md) | Use after DISCOVER, or standalone with an approved design, to produce the cold-executor trio (plan.md + spec.md + promp… |
 | [`/li:plan-and-build`](plan-and-build/SKILL.md) | Use when you already have an approved design doc and just need to plan and implement it — runs PLAN then BUILD and skip… |
 | [`/li:plan-ceo-review`](plan-ceo-review/SKILL.md) | Use before architecture lands to review a plan's strategy and scope — surfaces the product and business assumptions bak… |
 | [`/li:plan-design-review`](plan-design-review/SKILL.md) | UI/UX gaps review for plans with a frontend surface. Skip for backend/infra/CLI-only work. |

@@ -36,14 +36,21 @@ actual Lintel integration is described by the generated
 
 `secret-scan-block` and `customer-data-block` run on the Claude Code `PreToolUse` Bash event.
 They recognize command strings containing Git commit/push operations, including selected `git -C`
-and chained forms. They inspect added lines from staged and unstaged tracked changes; push
-inspection additionally considers the outgoing commit range, with a bounded fallback when there
-is no upstream. The implementation is in `hooks/shared/_input.sh` and `_patterns.sh`.
+and selected literal wrappers. Commit inspection scans added lines from staged and unstaged
+tracked changes. Push inspection scans every commit in each selected source ref's ancestry,
+including additions later deleted and merge resolutions. It does not trust local tracking refs
+as proof of remote history and ignores local replacement objects, as Git transfer does. There is
+no commit-count cutoff. The implementation is in `hooks/shared/_input.sh` and `_patterns.sh`.
 
 The scanners use regular expressions for selected token and personal-data formats. They do not
-provide complete history scanning, entropy detection or universal recognition of private data.
+inspect binary content or commit/tag messages, provide entropy detection, or universally recognize private data.
 Novel credential formats may pass, and benign contact details may trigger the customer-data
-scanner. Scanner loading failure blocks recognized Git operations unless explicitly overridden.
+scanner. Scanner or Git collection failure blocks recognized Git operations unless explicitly
+overridden. Unknown wrappers, dynamic shell syntax and unsupported refspec forms also block;
+split them into supported literal commands for inspection. Input is never evaluated as shell code.
+
+Full ancestry is rescanned for each selected source and each hook. Large histories may therefore
+be expensive; no enterprise-scale latency result or remote-aware cache is claimed.
 
 These are agent tool-call interceptors, not installed Git pre-commit/pre-push hooks. Direct human
 terminal commands, IDE operations and indirect command execution may bypass them. The hook's

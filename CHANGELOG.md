@@ -5,7 +5,18 @@ Notable changes to Lintel. Behaviour changes to the canonical agent instructions
 
 ---
 
-## Unreleased
+## 0.10.0 — unreleased
+
+- Preserve enterprise controls through block-list parsing, team-pack inheritance, required-field
+  validation and risk classification. Session digests show the actually loaded pack.
+- Keep short tasks while executing and reviewing bounded work packages (ADR-0026). Plans trace
+  applicable profile requirements to task acceptance and evidence; blocked BUILD resumes in BUILD.
+- Correct sizing false positives and expose whole-cycle estimate provenance without multiplying
+  the estimate by leaf count. New integration cases exercise actual helpers and skill snippets.
+- Inspect complete selected push history and block collection failures, unsupported wrappers and
+  replacement-object bypasses. Preserve checkpoints by repository and serialize registry updates.
+- Select explicit work artifacts and keep review/scope state in the target repository, including
+  installed-source workflows. Document profile value and pilot metrics without claiming certification.
 
 ### Added
 
@@ -26,7 +37,7 @@ Notable changes to Lintel. Behaviour changes to the canonical agent instructions
 - Generated catalogs and integration checks are part of launch verification; inventory counts are
   no longer repeated as fixed promises throughout adopter documentation.
 
-These changes prepare the existing 0.9.0 beta line for adoption. They do not claim a completed
+These changes extend the beta line for adoption. They do not claim a completed
 enterprise pilot, compliance certification or a published 1.0 release.
 
 ---

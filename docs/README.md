@@ -30,6 +30,7 @@ Internal engineering artifacts — audits, gate records, superseded design docs 
 | [Multi-CLI support](multi-cli.md) | One instruction source, per-CLI manifests, and exactly what degrades where |
 | [Precedence](precedence.md) | Which agent gets picked, and which instruction file wins when two disagree |
 | [Compliance](compliance.md) | The neutral baseline, and what an installed pack can add on top |
+| [Enterprise profile value](enterprise-profile-value.md) | How pack requirements change tasks, controls and evidence, and how to measure the benefit |
 
 ---
 
