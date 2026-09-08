@@ -5,7 +5,7 @@ description: Use to review a plan or change for engineering soundness before it 
 color: red
 tools: Read, Bash, Grep, Glob, Edit
 voice: internal
-cli_support: [claude-code, codex]
+cli_support: [claude-code, codex, copilot]
 hop_in: no
 ---
 

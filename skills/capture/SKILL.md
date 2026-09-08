@@ -5,7 +5,7 @@ description: Use after SHIP, at the end of a task, to make what was learned dura
 color: cyan
 tools: Read, Write, Edit, Bash, Grep, Glob
 voice: internal
-cli_support: [claude-code, codex]
+cli_support: [claude-code, codex, copilot]
 necessity: STRONGLY_RECOMMENDED
 gap_if_skipped: "Lessons, ADRs, and EVOLUTION-LOG entries are never written and the cold-executor trio is never reaffirmed against build evidence; cross-session continuity is lost and the next operator re-derives everything."
 ---
@@ -107,7 +107,7 @@ Examples NOT lesson-worthy:
 failure mode of file-based memory. For each candidate, grep what already exists:
 
 ```bash
-source "$LINTEL_REPO_ROOT/lib/memory.sh"
+source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/lib/memory.sh"
 lessons_find_related <candidate keywords>    # all related active lessons, ranked
 ```
 
@@ -223,7 +223,7 @@ layer. The repo's own capture artifacts (Steps 1–7) are unaffected — this is
 sink, not a move. Nothing is ever read back from the vault into the repo.
 
 ```bash
-source "$LINTEL_REPO_ROOT/lib/pack-resolver.sh"
+source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/lib/pack-resolver.sh"
 sink_enabled=$(resolve_pack_field capture.vault_sink_enabled)
 sink_path=$(resolve_pack_field capture.vault_sink_path)    # relative to repo root
 
@@ -341,7 +341,7 @@ is the real feedback loop and stays.
 Mechanical since v5.0 (ADR-0008) — one command, not a YAML obligation. No `next=`: the cycle is complete (`/li:resume` keys off `cycle_complete: true`); the full artifact list lives in the Step 11 closing message:
 
 ```bash
-_sl="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}/lib/state.sh"
+_sl="${LINTEL_SOURCE_ROOT:-${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}}/lib/state.sh"
 [ -f "$_sl" ] || _sl="$HOME/.lintel/lib/state.sh"; source "$_sl"   # installed by install.sh in consumer repos
 state_append CAPTURE DONE cycle_complete=true outcome=<DONE|DONE_WITH_CONCERNS|BLOCKED> lessons_captured=<count> adrs_drafted=<count> total_tokens=<N> cost_estimate=<$X>
 ```
@@ -454,7 +454,7 @@ Close your report with the shared position footer so the operator always knows w
 cycle and the one logical next action — whether this phase ran standalone or inside `/li:cycle`:
 
 ```bash
-source "$LINTEL_REPO_ROOT/lib/cycle-footer.sh"   # fallback: "$(git rev-parse --show-toplevel)/lib/cycle-footer.sh"
+source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/lib/cycle-footer.sh"   # fallback: "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/lib/cycle-footer.sh"
 render_cycle_footer                               # reads .claude/runtime/state/00-state.md; --compact for short replies
 ```
 

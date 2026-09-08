@@ -83,7 +83,7 @@ ts: <timestamp>
 Audit log for the compliance trail — one line via the unified writer:
 
 ```bash
-source "$(git rev-parse --show-toplevel)/bin/_audit.sh"
+source "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/bin/_audit.sh"
 audit_log url-fetches fetch url=<url> domain=<domain> compliance_check=<pass|skipped>
 # → .claude/runtime/audit/url-fetches.jsonl
 ```

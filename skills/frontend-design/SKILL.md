@@ -73,7 +73,7 @@ design decision:
 
 ```bash
 dna="${LINTEL_SKILLS_DIR:-skills}/design-dna"   # LINTEL_SKILLS_DIR = this skill's base-dir parent (plugin installs)
-source "${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}/lib/pack-resolver.sh" 2>/dev/null \
+source "${LINTEL_SOURCE_ROOT:-${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}}/lib/pack-resolver.sh" 2>/dev/null \
   || source "$HOME/.lintel/lib/pack-resolver.sh" 2>/dev/null
 profile="$(resolve_pack_field design.profile 2>/dev/null)"
 [ -z "$profile" ] || [ "$profile" = "null" ] && profile="anthropic-default"

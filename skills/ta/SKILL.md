@@ -128,7 +128,7 @@ fi
 ### Step 2 — Read pack + profile preferences
 
 ```bash
-source "$LINTEL_REPO_ROOT/lib/pack-resolver.sh"
+source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/lib/pack-resolver.sh"
 voice=$(resolve_pack_field voice.default_tier)
 
 # Profile preferences (engineering.tech_architecture.*)
@@ -256,7 +256,7 @@ Each dimension is scored by reading the artifact produced and counting positive 
 One line via the unified writer (ts/operator/cycle_id come from the envelope):
 
 ```bash
-source "$(git rev-parse --show-toplevel)/bin/_audit.sh"
+source "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/bin/_audit.sh"
 audit_log ta-decisions ta_module_complete "granularity=$granularity" "score=$score" \
   "checkpoints_passed=$passed_count"
 # → .claude/runtime/audit/ta-decisions.jsonl

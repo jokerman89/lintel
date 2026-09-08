@@ -108,15 +108,14 @@ QA + debug skills:
 **Filtered by CLI (Copilot user):**
 ```
 > /li:help --cli copilot
-Lintel skills supported on Copilot Enterprise:
+Lintel workflows supported on GitHub Copilot:
 - /li:plan-ceo-review   [internal]
 - /li:plan-eng-review   [internal]
 - /li:investigate       [internal]
 - /li:help              [internal]
 - /li:doctor            [internal]
 
-Copilot has no slash-command mechanism. Use the canonical-instructions
-shim at .github/copilot-instructions.md for the parts that DO port.
+Use native li-* skills from .github/skills (for example /li-plan where slash discovery is available), or ask Copilot to load the matching skill. The CLI plugin supplies the same adapters. Lintel hooks are not ported.
 ```
 
 ## Edge cases

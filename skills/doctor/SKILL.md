@@ -5,7 +5,7 @@ description: Use when something seems off with the Lintel install, or to confirm
 color: cyan
 tools: Read, Bash, Grep, Glob
 voice: internal
-cli_support: [claude-code, codex]
+cli_support: [claude-code, codex, copilot]
 ---
 
 You are the li-doctor skill.
@@ -39,7 +39,7 @@ You are the li-doctor skill.
    - Cursor: `~/.cursor/extensions/` or similar
    - Gemini: `gemini extensions list | grep lintel`
    - OpenCode: `.opencode/plugins/lintel/`
-   - Copilot: `copilot plugin list | grep lintel`
+   - Copilot: `copilot plugin list (look for li@jokerman-lintel); for a repository adapter, run bash bin/li-copilot check --target . from the Lintel source, or bash .github/lintel/bin/li-copilot check --target . in a consumer repo`
    - Droid: `droid plugin list | grep lintel`
 
 3. **Per install, read version** (from plugin.json in each CLI's plugin dir).
@@ -72,7 +72,7 @@ LINTEL-DOCTOR: health check (date)
 
 ## Drift detected
 - Copilot CLI on Lintel v2.0.5 vs others on v3.0.0
-  → Action: `copilot plugin update lintel`
+  → Action: `copilot plugin update li@jokerman-lintel`
 
 ## Scaffolding
 - ~/.lintel/scaffolding/: ✓ present, last updated <date>

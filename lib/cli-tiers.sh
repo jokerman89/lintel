@@ -23,7 +23,7 @@ _CLI_TIERS_YAML="${_CLI_TIERS_YAML:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd
 cli_tier_normalize() {
   case "${1:-}" in
     claude|claude-code)                 printf 'claude-code' ;;
-    copilot|copilot-cli|copilot-app)    printf 'copilot' ;;
+    copilot|copilot-cli|copilot-app|copilot-vscode|copilot-cloud|copilot-coding-agent) printf 'copilot' ;;
     droid|factory-droid)                printf 'droid' ;;
     codex|cursor|gemini|opencode|other) printf '%s' "$1" ;;
     *)                                  printf 'other' ;;
@@ -38,7 +38,7 @@ cli_tier_field() {
   # locked by tests/unit/cli-tiers.sh) instead of borrowing the `other` row's.
   case "$cli" in
     claude)                  cli="claude-code" ;;
-    copilot-cli|copilot-app) cli="copilot" ;;
+    copilot-cli|copilot-app|copilot-vscode|copilot-cloud|copilot-coding-agent) cli="copilot" ;;
     factory-droid)           cli="droid" ;;
   esac
   if [ -f "$_CLI_TIERS_YAML" ]; then
@@ -88,7 +88,7 @@ cli_tier_list() {
 # so the "honest table" can never silently drift from reality again.
 cli_tiers_markdown_table() {
   local c label tier sk sub hk
-  printf '| CLI | Tier | Skills | Subagents | Hooks |\n'
+  printf '| CLI | Tier | Skills | Subagents | Lintel hooks |\n'
   printf '|---|---|---|---|---|\n'
   for c in $(cli_tier_list); do
     label=$(cli_tier_field "$c" label)
@@ -96,7 +96,7 @@ cli_tiers_markdown_table() {
     sk=$(cli_tier_field "$c" skills_native);   [ "$sk" = "true" ] && sk="native" || sk="manual"
     sub=$(cli_tier_field "$c" subagents)
     hk=$(cli_tier_field "$c" hooks_supported)
-    if [ "$hk" = "true" ]; then hk="yes"; else hk="no (Claude Code only)"; fi
+    if [ "$hk" = "true" ]; then hk="yes"; else hk="not ported"; fi
     printf '| %s | %s | %s | %s | %s |\n' "$label" "$tier" "$sk" "$sub" "$hk"
   done
 }

@@ -17,6 +17,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+source "$REPO_ROOT/lib/frontmatter.sh"
 SOURCES_FILE="$SCRIPT_DIR/upstream-sources.yaml"
 LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
 
@@ -39,20 +40,10 @@ cmd_frontmatter() {
 
   validate() {
     local file="$1"
-    local missing=()
-    head -1 "$file" | grep -q '^---$' || { fail "$file: missing frontmatter start"; return 1; }
-    grep -q '^name:' "$file" || missing+=("name")
-    grep -q '^description:' "$file" || missing+=("description")
-    grep -q '^color:' "$file" || missing+=("color")
-    grep -q '^tools:' "$file" || missing+=("tools")
-    grep -q '^voice:' "$file" || missing+=("voice")
-    grep -q '^cli_support:' "$file" || missing+=("cli_support")
-    # v3.6 cohort 1 item 6.4: lock layer-field discipline (SKILL.md only — agents don't carry layer)
-    if [[ "$file" == *SKILL.md ]]; then
-      grep -q '^layer:' "$file" || missing+=("layer")
-    fi
-    if [ ${#missing[@]} -gt 0 ]; then
-      fail "$file: missing ${missing[*]}"
+    local kind=agent issue
+    [[ "$file" == *SKILL.md ]] && kind=skill
+    if ! issue=$(validate_lintel_frontmatter "$file" "$kind"); then
+      fail "$file: $issue"
       return 1
     fi
     return 0
@@ -376,6 +367,8 @@ cmd_plugin_manifests() {
     ".claude-plugin/marketplace.json"
     ".codex-plugin/plugin.json"
     ".cursor-plugin/plugin.json"
+    ".github/plugin/plugin.json"
+    ".github/plugin/marketplace.json"
     "gemini-extension.json"
     ".opencode/INSTALL.md"
   )
@@ -399,7 +392,8 @@ cmd_plugin_manifests() {
             missing=$((missing + 1))
           fi
         else
-          ok "$m (present, JSON syntax not checked — no python3/jq)"
+          fail "$m: JSON validation requires python3 or jq"
+          missing=$((missing + 1))
         fi
       else
         ok "$m"
@@ -497,6 +491,7 @@ cmd_scaffolding_coherence() {
 cmd_all() {
   cmd_layers
   cmd_counts
+  cmd_cli_matrix
   cmd_frontmatter
   cmd_hooks
   cmd_upstream

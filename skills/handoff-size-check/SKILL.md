@@ -113,7 +113,7 @@ Return code: 0 (green), 1 (yellow), 2 (red).
 One line via the unified writer (ts/operator/cycle_id come from the envelope):
 
 ```bash
-source "$(git rev-parse --show-toplevel)/bin/_audit.sh"
+source "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/bin/_audit.sh"
 audit_log handoff-size-checks size_check "plan=$PLAN_FILE" "mode=$mode" \
   "total_tokens=$total_tokens" "verdict=$verdict"
 # → .claude/runtime/audit/handoff-size-checks.jsonl

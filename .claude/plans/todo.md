@@ -1,4 +1,20 @@
-# todo — active initiatives
+# Work index — current initiative and historical plans
+
+## Copilot enterprise launch — 2026-09-08
+
+Active initiative: [plan and build cards](copilot-enterprise-launch/plan.md), [spec](copilot-enterprise-launch/spec.md), [handoff](copilot-enterprise-launch/prompt.md). Branch: codex/copilot-enterprise-launch. Operator authorized execution through main integration. See initiative plan for live progress and review evidence.
+
+Active committed work map: [copilot-enterprise-launch/work.json](copilot-enterprise-launch/work.json).
+
+## Historical plans — superseded as current work
+
+The entries below preserve earlier decisions and execution history. Their headings, unchecked
+boxes and old operator authorizations are historical snapshots, not current assignments or
+standing permission. In particular, do not repeat old force-push, history-rewrite, tag, release
+or PR operations. Inspect the current initiative above and actual Git/GitHub state first.
+Only a current operator request can reactivate a historical task with the necessary authority.
+
+---
 
 ## Beta release — public docs + history sanitation (2026-08-28, cycle beta-release-docs, branch feat/launch-readiness)
 

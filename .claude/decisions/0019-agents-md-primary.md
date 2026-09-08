@@ -3,7 +3,7 @@
 > Renumbered 0015 → 0019 (2026-06-14): 0015 collided with the design-dna ADR created
 > 4 min earlier (first claimant keeps the number); 0018 reserved for extension-pack-contract.
 
-**Status:** Accepted-direction, build staged (2026-06-13)
+**Status:** Superseded by ADR-0025 (2026-09-08). The user explicitly requested self-contained repeated startup disciplines; one canonical source now generates inline blocks across entry files instead of making CLAUDE.md a thin pointer.
 **Implements:** .claude/engineering/audits/2026-06-13-cli-issues-craft-synthesis.md (workstream 1, H13)
 
 ## Context

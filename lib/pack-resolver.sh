@@ -25,7 +25,8 @@
 # Positional params are hardened with ${1:-} instead.
 
 LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
-LINTEL_REPO_ROOT="${LINTEL_REPO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." 2>/dev/null && pwd)}"
+LINTEL_SOURCE_ROOT="${LINTEL_SOURCE_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." 2>/dev/null && pwd)}"
+LINTEL_REPO_ROOT="${LINTEL_REPO_ROOT:-$LINTEL_SOURCE_ROOT}"
 LINTEL_PACKS_DIR="${LINTEL_PACKS_DIR:-$LINTEL_HOME/packs}"
 LINTEL_ACTIVE_PACK_FILE="${LINTEL_ACTIVE_PACK_FILE:-$LINTEL_PACKS_DIR/active-pack}"
 LINTEL_AUDIT_DIR="${LINTEL_AUDIT_DIR:-$LINTEL_HOME/audit}"
@@ -41,7 +42,7 @@ PACK_CACHE_FILE="${LINTEL_HOME}/sessions/${LINTEL_SESSION_ID}-pack-cache.yaml"
 mkdir -p "$LINTEL_AUDIT_DIR" "${LINTEL_HOME}/sessions" 2>/dev/null || true
 
 # Unified audit writer (resolved via repo-root). Idempotent source.
-command -v audit_log >/dev/null 2>&1 || source "${LINTEL_REPO_ROOT}/bin/_audit.sh"
+command -v audit_log >/dev/null 2>&1 || source "${LINTEL_SOURCE_ROOT}/bin/_audit.sh"
 
 # ─── Internal logging ──────────────────────────────────────────────────────
 _resolver_audit() {
@@ -76,15 +77,18 @@ get_active_pack_name() {
   return 0
 }
 
-# Resolve a pack's directory — checks ~/.lintel/packs/<name>/ first, then repo packs/<name>/
+# Resolve a pack directory: configured packs, working repository, bundled source.
 _pack_dir() {
   local name="${1:-}"
   local home_path="$LINTEL_PACKS_DIR/$name"
   local repo_path="$LINTEL_REPO_ROOT/packs/$name"
+  local source_path="$LINTEL_SOURCE_ROOT/packs/$name"
   if [ -d "$home_path" ]; then
     printf '%s' "$home_path"
   elif [ -d "$repo_path" ]; then
     printf '%s' "$repo_path"
+  elif [ -d "$source_path" ]; then
+    printf '%s' "$source_path"
   else
     return 1
   fi

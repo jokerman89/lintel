@@ -23,6 +23,13 @@ $RepoRoot = Split-Path -Parent $ScriptDir
 $LayerConfigExample = Join-Path $ScriptDir "layer-config.yaml.example"
 
 $LintelHome = if ($env:LINTEL_HOME) { $env:LINTEL_HOME } else { Join-Path $HOME ".lintel" }
+$LintelHome = [IO.Path]::GetFullPath($LintelHome).TrimEnd('\', '/')
+$sourceRoot = [IO.Path]::GetFullPath($RepoRoot).TrimEnd('\', '/')
+if ($LintelHome.Equals($sourceRoot, [StringComparison]::OrdinalIgnoreCase) -or
+    $LintelHome.StartsWith($sourceRoot + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase) -or
+    $sourceRoot.StartsWith($LintelHome + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)) {
+  throw 'LINTEL_HOME must be separate from the source checkout (neither inside it nor an ancestor).'
+}
 $LintelScaffolding = Join-Path $LintelHome "scaffolding"
 $LintelHooks = Join-Path $LintelHome "hooks"
 $LintelConfig = Join-Path $LintelHome "config.yaml"
@@ -33,6 +40,26 @@ function Warn($t){ Write-Host "[WARN] $t" -ForegroundColor Yellow }
 function Fail($t){ Write-Host "[FAIL] $t" -ForegroundColor Red }
 function Info($t){ Write-Host "       $t" -ForegroundColor Gray }
 
+function Assert-UnlinkedInstallTree($path) {
+  if (-not (Test-Path -LiteralPath $path)) { return }
+  $pending = New-Object 'System.Collections.Generic.Stack[string]'
+  $pending.Push($path)
+  while ($pending.Count -gt 0) {
+    $item = Get-Item -LiteralPath $pending.Pop() -Force
+    if ($item.Attributes -band [IO.FileAttributes]::ReparsePoint) {
+      throw "Linked install entry refused before writes: $($item.FullName)"
+    }
+    if ($item.PSIsContainer) {
+      foreach ($child in Get-ChildItem -LiteralPath $item.FullName -Force) {
+        if ($child.Attributes -band [IO.FileAttributes]::ReparsePoint) {
+          throw "Linked install entry refused before writes: $($child.FullName)"
+        }
+        if ($child.PSIsContainer) { $pending.Push($child.FullName) }
+      }
+    }
+  }
+}
+
 # Copy the CONTENTS of $src into $dst, replacing $dst first. PowerShell's
 # Copy-Item nests a source dir INSIDE an existing same-named target dir on
 # re-runs (unlike `cp -r src/* dst/`), so replace-then-copy is the only way to
@@ -40,7 +67,21 @@ function Info($t){ Write-Host "       $t" -ForegroundColor Gray }
 # (never operator state); a full ~\.lintel\ backup is taken at install start,
 # before any copy runs.
 function Copy-TreeContents($src, $dst) {
-  if (Test-Path $dst) { Remove-Item -Path $dst -Recurse -Force }
+  $resolvedHome = [IO.Path]::GetFullPath($LintelHome).TrimEnd('\', '/')
+  $resolvedDst = [IO.Path]::GetFullPath($dst)
+  if (-not $resolvedDst.StartsWith($resolvedHome + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)) {
+    throw "Refusing to replace a directory outside LINTEL_HOME: $resolvedDst"
+  }
+  # Do not follow an operator-created junction/symlink while replacing a tree.
+  $checkPath = $resolvedDst
+  while ($checkPath -and $checkPath.Length -ge $resolvedHome.Length) {
+    if ((Test-Path -LiteralPath $checkPath) -and
+        ((Get-Item -LiteralPath $checkPath -Force).Attributes -band [IO.FileAttributes]::ReparsePoint)) {
+      throw "Refusing to replace a linked install directory: $checkPath"
+    }
+    $checkPath = Split-Path -Parent $checkPath
+  }
+  if (Test-Path -LiteralPath $resolvedDst) { Remove-Item -LiteralPath $resolvedDst -Recurse -Force }
   New-Item -ItemType Directory -Path $dst -Force | Out-Null
   Copy-Item -Path (Join-Path $src "*") -Destination $dst -Recurse -Force
 }
@@ -59,6 +100,7 @@ try {
 }
 
 # Backup existing
+Assert-UnlinkedInstallTree $LintelHome
 Hdr "Backing up existing ~\.lintel\ (if any)"
 if (Test-Path $LintelHome) {
   $backup = "$LintelHome-backup-$(Get-Date -Format 'yyyyMMdd-HHmmss')"
@@ -112,6 +154,14 @@ if (-not (Test-Path $activePackPath)) {
   Ok "active-pack seeded (_default)"
 }
 
+# Keep the installed resolver independent of this checkout. Never overwrite an
+# operator's neutral-pack customization on reinstall.
+$defaultPackPath = Join-Path $packsDir "_default"
+if (-not (Test-Path -LiteralPath $defaultPackPath)) {
+  Copy-Item -LiteralPath (Join-Path $RepoRoot "packs\_default") -Destination $defaultPackPath -Recurse
+  Ok "Neutral pack installed"
+}
+
 # Copy scaffolding
 Hdr "Copying scaffolding to ~\.lintel\scaffolding\"
 Copy-TreeContents (Join-Path $RepoRoot "scaffolding") $LintelScaffolding
@@ -120,11 +170,15 @@ Ok "Foundation scaffolding copied"
 # Shared runtime helpers (lib/ + bin/ + templates/) - the hooks installed under
 # ~\.lintel\hooks resolve lib/memory.sh + bin/_jobs.sh here when no repo
 # checkout is present (ADR-0006).
-foreach ($d in @("lib", "bin", "templates")) {
+foreach ($d in @("lib", "bin", "templates", "skills", "agents", "shims", "docs")) {
   $src = Join-Path $RepoRoot $d
-  if (Test-Path $src) { Copy-TreeContents $src (Join-Path $LintelHome $d) }
+  if (-not (Test-Path -LiteralPath $src)) { throw "Required runtime source missing: $src" }
+  Copy-TreeContents $src (Join-Path $LintelHome $d)
 }
-Ok "Runtime helpers copied (lib/ + bin/ + templates/)"
+foreach ($file in @("LICENSE", "AGENT-INSTRUCTIONS.md")) {
+  Copy-Item -LiteralPath (Join-Path $RepoRoot $file) -Destination $LintelHome -Force
+}
+Ok "Runtime helpers and Copilot source assets copied"
 
 # v3.7 brand-seeds (idempotent) - copies canonical design-patterns from seeds/
 $seedsBrand = Join-Path $RepoRoot "seeds\brand"
@@ -163,11 +217,10 @@ if (Test-Path $hookSource) {
   Copy-TreeContents $hookSource $sharedDst
   # Drop any pre-v5 flat copies (hooks\<name>\run.sh directly under hooks\)
   # so the layout is unambiguous
-  Get-ChildItem -Path $LintelHooks -Directory -ErrorAction SilentlyContinue |
-    Where-Object { $_.Name -ne 'shared' -and (Test-Path (Join-Path $_.FullName 'run.sh')) } |
-    Remove-Item -Recurse -Force
+  # Keep legacy inert copies: an installer must not guess which custom hook
+  # directories belong to the operator. Only hooks/shared is harness-managed.
   Ok "Hooks copied to $sharedDst (Claude Code: auto-registered via the plugin's hooks/hooks.json)"
-  Info "Other CLIs / non-plugin installs: register manually - see $sharedDst\README.md"
+  Info "Claude Code bare installs: register manually - see $sharedDst\README.md"
   # session-digest is REQUIRED (ADR-0002): auto-loads the memory snowball at SessionStart.
   if (Test-Path (Join-Path $sharedDst "session-digest\run.sh")) {
     Info "Non-plugin installs: merge $RepoRoot\hooks\claude-code\session-digest.settings.json"
@@ -188,9 +241,17 @@ function Test-Frontmatter($file) {
   if (-not (($content | Select-Object -First 1) -match '^---$')) {
     return @{ ok = $false; reason = "missing frontmatter start" }
   }
+  $end = -1
+  for ($i = 1; $i -lt $content.Count; $i++) {
+    if ($content[$i] -eq '---') { $end = $i; break }
+  }
+  if ($end -lt 0) { return @{ ok = $false; reason = 'missing frontmatter end' } }
+  $frontmatter = @($content | Select-Object -Skip 1 -First ($end - 1))
   $missing = @()
-  foreach ($field in 'name', 'description', 'color', 'tools', 'voice', 'cli_support') {
-    if (-not ($content -match "^${field}:")) { $missing += $field }
+  $required = @('name', 'description', 'color', 'tools', 'voice', 'cli_support')
+  if ((Split-Path -Leaf $file) -eq 'SKILL.md') { $required += 'layer' }
+  foreach ($field in $required) {
+    if (-not ($frontmatter -match "^${field}:")) { $missing += $field }
   }
   if ($missing.Count -gt 0) {
     return @{ ok = $false; reason = "missing fields: $($missing -join ', ')" }
@@ -242,9 +303,10 @@ Write-Host "  1. Review config: notepad $LintelConfig"
 Write-Host "  2. Hooks: a plugin install auto-registers them (zero setup);"
 Write-Host "     bare installs merge the settings snippet - see $LintelHooks\shared\README.md"
 Write-Host "  3. Verify: bash $ScriptDir\verify.sh --all (from WSL or Git Bash)"
-Write-Host "  4. Read: type $RepoRoot\LAYERS.md"
+Write-Host "  4. Read: type $RepoRoot\docs\architecture.md"
 Write-Host ""
-Write-Host "v5 plugin install (zero-setup path, per CLI):"
+Write-Host "Plugin install (per CLI):"
+Write-Host "  Copilot:      see $RepoRoot\docs\copilot.md"
 Write-Host "  Claude Code:  /plugin marketplace add jokerman89/lintel"
 Write-Host "                /plugin install li@jokerman-lintel"
 Write-Host "  Codex CLI:    /plugins -> search lintel -> Install"

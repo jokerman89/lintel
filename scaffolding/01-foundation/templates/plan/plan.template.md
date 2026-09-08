@@ -28,12 +28,13 @@
 
 <2-3 sentences: what this plan delivers and why.>
 
-## Cost estimate
+## Plan signals
 
 - Tasks: <N>
 - Size: <XS|S|M|L|XL from scope.md>
-- Tokens: <total>
-- Cost: $<estimate>
+- Phases: <phase list>
+- Token estimate: <total> (<CALIBRATED from recorded actuals | UNCALIBRATED planning guess>)
+<!-- No dollar estimate without verified pricing and an explicit token/model basis. -->
 <!-- - Duration: <time>   ← only emit when --with-time (design §3.7) -->
 
 ---

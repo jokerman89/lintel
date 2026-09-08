@@ -47,6 +47,8 @@ if command -v jq >/dev/null 2>&1; then
     .claude-plugin/marketplace.json
     .codex-plugin/plugin.json
     .cursor-plugin/plugin.json
+    .github/plugin/plugin.json
+    .github/plugin/marketplace.json
     gemini-extension.json
   )
   for m in "${VERSION_MANIFESTS[@]}"; do

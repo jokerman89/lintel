@@ -22,7 +22,7 @@ CLI detection runtime that feeds the portability shim. **Foundational** — ever
 
 P1 fix T2 (eng-review): Phase B sub-step 0. Without reliable detection the shim layer is guessed.
 
-Detected IDs (the enum): `claude-code`, `codex`, `copilot-cli`, `copilot-app`, `cursor`, `gemini`, `opencode`, `droid`. For capability-tier lookups the ID is normalized onto the 8 rows of `lib/cli-tiers.yaml` via `cli_tier_normalize` (`lib/cli-tiers.sh`): `copilot-cli`/`copilot-app` → `copilot`; anything unrecognized → `other`. That mapping is what lets `/li:welcome`'s honest-tier banner reach every row.
+Detected IDs (the enum): `claude-code`, `codex`, `copilot`, `copilot-cli`, `copilot-app`, `copilot-vscode`, `copilot-cloud`, `copilot-coding-agent`, `cursor`, `gemini`, `opencode`, `droid`. For capability-tier lookups the ID is normalized onto the 8 rows of `lib/cli-tiers.yaml` via `cli_tier_normalize` (`lib/cli-tiers.sh`): `copilot-cli`/`copilot-app` → `copilot`; anything unrecognized → `other`. That mapping is what lets `/li:welcome`'s honest-tier banner reach every row.
 
 ## When to use
 
@@ -56,7 +56,7 @@ Detected IDs (the enum): `claude-code`, `codex`, `copilot-cli`, `copilot-app`, `
    - Check `$0` / `process.argv0` for known binary patterns:
      - `claude-code`, `claude` → `claude-code`
      - `codex`, `codex exec` → `codex`
-     - `gh-copilot`, `gh copilot`, `copilot` → `copilot-cli`
+     - `copilot` → `copilot-cli`; the retired `gh copilot` extension is not evidence of the current agent CLI
      - GitHub Copilot App native bundle paths → `copilot-app`
      - `cursor`, `cursor-agent` → `cursor`
      - `gemini` → `gemini`
@@ -68,7 +68,7 @@ Detected IDs (the enum): `claude-code`, `codex`, `copilot-cli`, `copilot-app`, `
    - Check for CLI-specific env vars:
      - `CLAUDE_CODE_VERSION` (or `ANTHROPIC_*`) → `claude-code`
      - `CODEX_*` → `codex`
-     - `GH_TOKEN` + `gh copilot` subcommand available → `copilot-cli`
+     - `COPILOT_CLI` or an active Copilot process → `copilot-cli`; `GH_TOKEN` alone is not host evidence and must never be read or printed
      - `CURSOR_TRACE_ID` (or other `CURSOR_*`) → `cursor`
      - `GEMINI_CLI` / `GEMINI_*` → `gemini`
      - `OPENCODE_*` → `opencode`
@@ -138,9 +138,9 @@ Shim behavior for this CLI:
 ## Failure modes
 
 - **Detection cascade falls through to step 5:** refuse + clear instructions. Don't guess.
-- **Env var contains invalid CLI ID:** validate against the enum (`claude-code`, `codex`, `copilot-cli`, `copilot-app`, `cursor`, `gemini`, `opencode`, `droid`); reject unknown values with error.
+- **Env var contains invalid CLI ID:** validate against the enum (`claude-code`, `codex`, `copilot`, `copilot-cli`, `copilot-app`, `copilot-vscode`, `copilot-cloud`, `copilot-coding-agent`, `cursor`, `gemini`, `opencode`, `droid`); reject unknown values with error.
 - **Cache file unreadable / corrupted:** delete cache + re-run detection. Should be transparent to operator.
-- **Process inspection finds multiple matches (claude-code + codex both in process tree):** prefer the one with shorter PID distance to current process. If tie: prefer claude-code (most common case).
+- **Process inspection finds multiple matches (claude-code + codex both in process tree):** prefer the one with shorter PID distance to current process. If tied, treat detection as uncertain and ask for or use the explicit host declaration; never prefer a vendor by popularity.
 - **Conflicting signals (env var says codex, process says claude-code):** env var wins. Log conflict to audit.
 
 ## Examples

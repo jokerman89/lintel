@@ -42,7 +42,7 @@ Critical: L-001 (scaffolding ≠ content) + L-002 (grep first) were created in t
 The scoring is implemented in bash, not prose. Run it:
 
 ```bash
-source "$LINTEL_REPO_ROOT/lib/memory.sh"   # sources lib/paths.sh for the lessons location
+source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/lib/memory.sh"   # sources lib/paths.sh for the lessons location
 
 # Keyword mode (--keyword "<text>"):
 lessons_surface <keyword tokens>

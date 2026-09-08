@@ -168,7 +168,7 @@ if [ "$DRY" = 1 ]; then
   say "set autoMemoryDirectory=$MEMABS in $SLOCAL"
 else
   if command -v jq >/dev/null 2>&1 && [ -f "$SLOCAL" ]; then
-    jq --arg d "$MEMABS" '. + {autoMemoryDirectory: $d}' "$SLOCAL" > "$SLOCAL.tmp" && mv "$SLOCAL.tmp" "$SLOCAL"
+    jq -b --arg d "$MEMABS" '. + {autoMemoryDirectory: $d}' "$SLOCAL" > "$SLOCAL.tmp" && mv "$SLOCAL.tmp" "$SLOCAL"
   elif [ ! -f "$SLOCAL" ]; then
     printf '{\n  "autoMemoryDirectory": "%s"\n}\n' "$MEMABS" > "$SLOCAL"
   else

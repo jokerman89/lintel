@@ -5,7 +5,7 @@ description: Use after SENSE, before DEFINE, when a request's size is ambiguous 
 color: cyan
 tools: Read, Write, Edit, Bash, Grep, Glob
 voice: internal
-cli_support: [claude-code, codex]
+cli_support: [claude-code, codex, copilot]
 necessity: STRONGLY_RECOMMENDED
 gap_if_skipped: "Scale ambiguity is never resolved — a request like 'deploy a website to azure' routes as a confident SHIP (XS) and skips DEFINE/DISCOVER/PLAN; PLAN has no depth_schema so an L/XL plan renders flat; scope.md never exists, so DEFINE inherits no wedge and PLAN no depth signal."
 ---
@@ -51,7 +51,7 @@ SENSE  →  [SCOPE]  →  DEFINE  →  DISCOVER  →  PLAN  →  ...
 SCOPE runs **after** SENSE, so the orientator's route already exists (SENSE step 0d). Read it so SCOPE can override a confidently-wrong one.
 
 ```bash
-source "$LINTEL_REPO_ROOT/lib/scale-estimator.sh"
+source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/lib/scale-estimator.sh"
 
 prompt_text="<operator's last message>"
 
@@ -145,7 +145,7 @@ EOF
 Mechanical since v5.0 (ADR-0008) — one command, not a YAML obligation:
 
 ```bash
-_sl="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}/lib/state.sh"
+_sl="${LINTEL_SOURCE_ROOT:-${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}}/lib/state.sh"
 [ -f "$_sl" ] || _sl="$HOME/.lintel/lib/state.sh"; source "$_sl"   # installed by install.sh in consumer repos
 state_append SCOPE DONE next=DEFINE size=$scale_size ambiguous=$scale_amb depth_schema=$depth_schema intent="${override_route:+build}${override_route:-$intent}" route_override="${override_route:-none}" scope_path="$scope_out"
 ```
@@ -237,7 +237,7 @@ Close your report with the shared position footer so the operator always knows w
 cycle and the one logical next action — whether this phase ran standalone or inside `/li:cycle`:
 
 ```bash
-source "$LINTEL_REPO_ROOT/lib/cycle-footer.sh"   # fallback: "$(git rev-parse --show-toplevel)/lib/cycle-footer.sh"
+source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/lib/cycle-footer.sh"   # fallback: "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/lib/cycle-footer.sh"
 render_cycle_footer                               # reads .claude/runtime/state/00-state.md; --compact for short replies
 ```
 

@@ -1,7 +1,7 @@
 {
   "name": "li",
   "version": "0.9.0",
-  "description": "Lintel — company-neutral, pack-driven session harness for OpenAI Codex with 8-phase cycle + role-lifting",
+  "description": "Lintel — company-neutral, pack-driven session harness for OpenAI Codex with 9-step cycle + role-lifting",
   "author": {
     "name": "jokerman89",
     "email": "johannes.akerman@gmail.com",
@@ -21,17 +21,17 @@
   "interface": {
     "displayName": "Lintel",
     "shortDescription": "Lintel — pack-driven AI-CLI session harness with 9-step cycle + role-lifting",
-    "longDescription": "Lintel is a company-neutral, pack-driven session harness for agent-based development. 9-step cycle (8 core phases + SCOPE: SENSE→SCOPE→DEFINE→DISCOVER→PLAN→BUILD→REVIEW→SHIP→CAPTURE). Role-lifting for persona context. Context-warming for 1M-window utilization. Pack-driven compliance gates, voice calibration, doc-gen for PPT/Word/Web, and repo scaffolding for new engagements. Company identity (voice, compliance, persona, brand) is resolved from the active pack, not hardcoded. Multi-CLI (8 CLIs): Claude Code, Codex, Cursor, Gemini, OpenCode, Copilot CLI, Factory Droid, plus best-effort fallback (Cline/Continue/Aider).",
+    "longDescription": "Lintel is a company-neutral, pack-driven session harness for agent-based development. 9-step cycle (8 core phases + SCOPE: SENSE→SCOPE→DEFINE→DISCOVER→PLAN→BUILD→REVIEW→SHIP→CAPTURE). Role-lifting for persona context. Explicit context loading within the active model budget. Pack-driven compliance gates, voice calibration, doc-gen for PPT/Word/Web, and repo scaffolding for new engagements. Company identity (voice, compliance, persona, brand) is resolved from the active pack, not hardcoded. Multi-CLI (8 CLIs): Claude Code, Codex, Cursor, Gemini, OpenCode, Copilot CLI, Factory Droid, plus best-effort fallback (Cline/Continue/Aider).",
     "developerName": "jokerman89",
     "category": "Coding",
     "capabilities": ["Interactive", "Read", "Write"],
     "defaultPrompt": [
-      "Help me with a new customer engagement.",
-      "Run /li:cycle --mode customer-engagement.",
+      "Help me plan and build a repository change.",
+      "Run /li:cycle --mode internal-tool.",
       "Validate my copy against the active pack's voice."
     ],
     "websiteURL": "https://github.com/jokerman89/lintel",
-    "privacyPolicyURL": "https://github.com/jokerman89/lintel/issues",
+    "privacyPolicyURL": "https://github.com/jokerman89/lintel/blob/main/SECURITY.md",
     "termsOfServiceURL": "https://github.com/jokerman89/lintel/blob/main/LICENSE",
     "brandColor": "#0078D4"
   }

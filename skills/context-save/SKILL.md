@@ -41,7 +41,7 @@ Save the current session's load-bearing state to a checkpoint file so a fresh se
 2. Compute the checkpoint path via the mechanical core (`bin/_context.sh` owns naming + directory creation; checkpoint CONTENT stays LLM-written):
 
    ```bash
-   source "$LINTEL_REPO_ROOT/bin/_context.sh"   # fallback: "$(git rev-parse --show-toplevel)/bin/_context.sh"
+   source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/bin/_context.sh"   # fallback: "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/bin/_context.sh"
    path=$(context_save_path [label])
    ```
 

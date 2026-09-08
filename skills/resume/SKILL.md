@@ -5,7 +5,7 @@ description: Use at the start of a fresh session to pick up work left in flight 
 color: cyan
 tools: Read, Bash, Grep, Glob
 voice: internal
-cli_support: [claude-code, codex]
+cli_support: [claude-code, codex, copilot]
 ---
 
 You are the RESUME skill — cross-session continuity for Lintel cycle.
@@ -36,7 +36,7 @@ Not a true phase — utility skill that lands the operator in the right phase.
 
 ### Step 1 — Locate state
 
-RESUME has **two** prior-work sources, and historically it only saw one of them: the
+RESUME has **three** prior-work sources: committed work maps/plans, local cycle ledgers and checkpoints. The committed fallback below survives a fresh clone. Historically there were only two sources, and historically it only saw one of them: the
 cycle ledger (`00-state.md`). The other is a `/li:context-save` **checkpoint** — written
 to `.claude/runtime/sessions/<branch>/`. A session that ended with `/li:context-save` (not
 mid-cycle) leaves a checkpoint but no `00-state.md` entry; resume must discover it and
@@ -62,7 +62,7 @@ fi
 
 # ALSO discover the newest context-save checkpoint for this branch. The mechanical
 # core owns path + discovery (no raw glob); fall back to a bare glob if it's absent.
-_ctx="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}/bin/_context.sh"
+_ctx="${LINTEL_SOURCE_ROOT:-${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}}/bin/_context.sh"
 [ -f "$_ctx" ] || _ctx="$HOME/.lintel/bin/_context.sh"
 checkpoint=""
 if [ -f "$_ctx" ]; then
@@ -89,13 +89,33 @@ Then branch on what exists:
   (Or start fresh: /li:cycle for new work · /li:sense for a diagnostic.)
   ```
 
-- **Neither present** → surface "No prior state found. Run `/li:cycle` for new work or
+- **Neither local source present** → first run Step 1c below. Only if it finds no committed work, surface "No prior state found. Run `/li:cycle` for new work or
   `/li:sense` for diagnostic."
 
 > **Paired with `/li:context-save`.** Resume discovers the checkpoints that `/li:context-save`
 > writes; `/li:context-restore` is the skill that reads one back in. Resume *routes* to restore —
 > it does not re-implement checkpoint parsing.
 
+### Step 1c — Resume from committed work in a fresh clone
+
+The local ledger and session saves are gitignored. Their absence is expected on another
+machine and does not mean the initiative is new. Follow the
+[shared work-map contract](../spec-kit/references/work-map.md): use an operator-named map,
+then an unambiguous active map linked from `.claude/plans/todo.md` or working-state.md.
+Validate it with `bin/li-work-artifacts.py --repo <working-repo> --map <selected-path>`.
+
+If no map exists, inspect explicit links to committed plan/spec/prompt artifacts in todo.md
+and working-state.md. Follow one unambiguous unfinished initiative; ask when several remain.
+Never choose by newest timestamp. Read its real tasks, decisions and recorded authorization;
+write a map when useful within scope. For Spec Kit, tasks.md owns checkbox state and task IDs.
+
+Compare completed cards against committed code and referenced verification evidence. Identify
+the first unfinished card whose dependencies are satisfied, or REVIEW if all cards are built.
+Report any missing evidence rather than converting checked boxes into a claim that tests ran.
+Recreate only local runtime bookkeeping after reconciling the selected work with the checkout.
+An APPROVED map records prior scope; verify current user authority before external actions.
+Continue at the selected BUILD/REVIEW phase using the mapped artifacts, without requiring an
+old machine's 00-state.md, private checkpoint or a duplicate Lintel task list.
 ### Step 1.5 — Integrity check (v3.6 cohort 1 item 6.3)
 
 Before trusting 00-state.md, validate it. Defensive guard against state-drift / wrong-branch / stale state.
@@ -108,7 +128,7 @@ Before trusting 00-state.md, validate it. Defensive guard against state-drift / 
 # last match inside it is the current truth. The CYCLE entry records
 # branch/commit since v5.3 (skills/cycle Step 4) — empty on older ledgers,
 # and an empty value skips that check rather than warning.
-seg="$(source "$(git rev-parse --show-toplevel)/lib/state.sh" 2>/dev/null && state_cycle_segment "$STATE_FILE")"
+seg="$(source "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/lib/state.sh" 2>/dev/null && state_cycle_segment "$STATE_FILE")"
 state_branch=$(printf '%s\n' "$seg" | grep '^branch:' | tail -1 | awk '{print $2}')
 state_commit=$(printf '%s\n' "$seg" | grep '^commit:' | tail -1 | awk '{print $2}')
 state_ts=$(printf '%s\n' "$seg" | grep '^ts:' | tail -1 | awk '{print $2}')
@@ -185,7 +205,7 @@ incomplete-and-startable step `name`; for a tree job that name *is* the
 node-path:
 
 ```bash
-source "$(git rev-parse --show-toplevel)/bin/_jobs.sh"   # or ~/.lintel/scaffolding/bin
+source "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/bin/_jobs.sh"   # or ~/.lintel/scaffolding/bin
 schema=$(grep -m1 '^depth_schema:' "$(job_path "$JOB_ID")/../scope.md" 2>/dev/null | awk '{print $2}')
 
 if [ "$schema" = "tree" ]; then
@@ -279,7 +299,7 @@ Based on operator's choice (Step 3 + 4):
 RESUME is a utility, not a cycle phase. Mechanical since v5.0 (ADR-0008) — one command, not a YAML obligation:
 
 ```bash
-_sl="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}/lib/state.sh"
+_sl="${LINTEL_SOURCE_ROOT:-${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}}/lib/state.sh"
 [ -f "$_sl" ] || _sl="$HOME/.lintel/lib/state.sh"; source "$_sl"   # installed by install.sh in consumer repos
 state_append RESUME DONE prior_last_phase=<phase> operator_choice=<A|B|C|D|E> next_invoked=<phase> cross_machine=<yes|no>
 ```
@@ -347,7 +367,7 @@ so the "you are here → next" block is the natural closing line (inside a cycle
 position; with none active, the thin ambient line):
 
 ```bash
-source "$LINTEL_REPO_ROOT/lib/cycle-footer.sh"   # fallback: "$(git rev-parse --show-toplevel)/lib/cycle-footer.sh"
+source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/lib/cycle-footer.sh"   # fallback: "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/lib/cycle-footer.sh"
 render_cycle_footer                               # auto: thin when no cycle, full/--compact when in one
 ```
 

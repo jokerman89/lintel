@@ -3,8 +3,7 @@
 > **Lintel dogfoods its own scaffolding.** This file is the self-contained per-repo
 > instruction set that Lintel installs into other repos (`scaffolding/01-foundation/CLAUDE.md.template`),
 > instantiated here for Lintel itself. It is **self-sufficient**: an agent can follow it without the
-> operator's global `~/.claude/CLAUDE.md` present. The global protocol takes precedence where both
-> apply; this file restates the load-bearing parts so the repo works standalone.
+> operator's global `~/.claude/CLAUDE.md` present. Repository-specific instructions take precedence over generic user-global defaults; the inline protocol makes the repo work standalone. Current explicit user authorization applies to its stated scope.
 >
 > Sections between `<!-- PROJECT:START -->` and `<!-- PROJECT:END -->` are Lintel-specific. The rest
 > is load-bearing, inherited from [scaffolding/01-foundation/CORE-PRINCIPLES.md](scaffolding/01-foundation/CORE-PRINCIPLES.md).
@@ -33,7 +32,7 @@ Clear ownership domains:
 
 Frozen / handle-with-care zones:
 
-- `packs/_default/pack.yaml` and `lib/pack-resolver.sh` — the pack contract; ~30 skills depend on it. Change behind a shape-test.
+- `packs/_default/pack.yaml` and `lib/pack-resolver.sh` — the pack contract; many skills depend on it. Change behind a shape-test.
 - `lib/paths.sh`, `lib/memory.sh`, `bin/_context.sh` — the v5 path/memory contract (ADR-0005/0006). Change behind tests/shape/claude-home-paths.sh + tests/unit/memory-v2.sh.
 - Frontmatter contracts (skills: `layer` + `cli_support`; agents: `category` + `tier` + `cli_support`) — changing them is a meta-infra change touching every skill/agent.
 - `AGENT-INSTRUCTIONS.md` — the canonical cross-CLI session ritual.
@@ -79,7 +78,7 @@ not an exhaustive map — run `/li:catalog` to discover the full set.
 ## Where state lives (the memory map)
 
 Lintel's snowball — read on demand, **write after corrections/decisions** so it compounds. One
-circle of control (v5, ADR-0005): everything Lintel generates for this repo lives under `.claude/`
+circle of control (v5, ADR-0005): shared knowledge and runtime state live under `.claude/`; Copilot discovery and managed resources live under `.github/`
 — knowledge committed, runtime gitignored. Operator identity stays in `~/.lintel/`.
 
 | Store | Holds | Lifecycle |
@@ -105,59 +104,6 @@ full map for on-demand reads + where to **write**.
 
 ---
 
-## Workflow Orchestration
-
-### 1. Plan Mode Default
-- Enter plan mode for ANY non-trivial task (3+ steps or an architectural decision).
-- If something goes wrong mid-task: STOP and re-plan. Do not push through a broken plan.
-- Write the plan to `.claude/plans/todo.md` as checkable items; pause-report before implementing complex work.
-
-### 2. Subagent Strategy
-- Use subagents liberally to keep the main context window clean — offload research, exploration, parallel analysis. One task per subagent.
-- The full subagent fleet (69 agents across engineering · security · compliance · devops · customer · communication · doc-gen · frontend) ships via the plugin manifest under `agents/` — run `/li:help` or `/li:catalog` to list them, dispatch by name (e.g. `CodeReviewer`, `SecurityAuditor`, `TestRunner`). There are **no** repo-local `.claude/agents/` overrides: a repo-level agent *shadows* the plugin fleet by name (project beats plugin), and the four legacy copies were thinner duplicates of the fleet versions — removed 2026-06-14 so dispatch resolves to the richer agent (ADR-0015 subtraction). Add a repo-local override only for a genuinely project-specific agent.
-- When in doubt, prefer a subagent over polluting main context.
-
-### 3. Self-Improvement Loop
-- After ANY correction from the operator: record the pattern in `.claude/memory/lessons.md` as a rule that prevents recurrence.
-- Review lessons at session start. This is the only mechanism that compounds learning across fresh sessions.
-
-### 4. Verification Before Done
-- Never mark work complete without proof. Green tests are the floor, not the ceiling.
-- Run `tests/shape/` + `tests/unit/`; diff behaviour vs main when relevant. Apply the "would a staff engineer approve this?" bar.
-- If you stub/mock instead of building the real thing, flag it explicitly as "deferred to phase X".
-
-### 5. Subtraction Bias
-- Before finishing a non-trivial change, ask "is there a simpler form?" — fewer parts, not more abstraction. Not a licence to add structure in the name of elegance.
-
-### 6. Autonomous Bug Fixing Within Authorized Scope
-- Bugs INSIDE an authorized initiative: fix directly, no hand-holding. Point at logs/errors/failing tests, solve them.
-- Bugs OUTSIDE current authority: surface, do not act unbidden. No standing licence to "just fix CI".
-
----
-
-## Task & decision management
-
-1. **Plan first** — `.claude/plans/todo.md`, checkable items.
-2. **Track progress** — mark items done as you go.
-3. **Capture lessons** — `.claude/memory/lessons.md` after corrections.
-4. **Record decisions** — write an ADR (`.claude/decisions/NNNN-short-title.md`, from `.claude/decisions/TEMPLATE.md`) for any non-trivial decision. Structural changes to `skills/`/`agents/`/`hooks/`/`lib/` also get a `.claude/engineering/evolution/<date>-<slug>.md` (Gate M1 artifact) under meta-infra discipline.
-5. **Review** — add a review section to `.claude/plans/todo.md` at task end.
-
-> **This is the discipline that was missing.** Lintel was built as the factory but never ran the
-> factory on itself: until v4.8 the repo had no `.claude/`, no `docs/adr/`, and a thin CLAUDE.md, so
-> ADRs and lessons did not happen. Do not let that recur — every non-trivial decision gets an ADR.
-
----
-
-## Core Principles
-- **Simplicity first.** Minimal-impact changes — touch only what is necessary.
-- **No laziness.** Find root causes. No temporary patches. Senior-developer standards.
-- **Subtraction bias.** Fewer parts beats more abstraction.
-
-(Full set: [scaffolding/01-foundation/CORE-PRINCIPLES.md](scaffolding/01-foundation/CORE-PRINCIPLES.md).)
-
----
-
 <!-- PROJECT:START -->
 
 ## How Lintel works (project specifics)
@@ -178,69 +124,26 @@ claude --plugin-dir "$PWD"
 Skills are namespaced `/li:qa`, `/li:cycle`, etc. Inside this repo they work directly via the plugin manifest.
 
 ### Catalog
-`skills/CATALOG.md` is auto-generated on push to `main` (`.github/workflows/catalog.yml`). Edit frontmatter, not the catalog.
+`skills/CATALOG.md` is generated with `python3 bin/li-catalog.py` and checked for drift in CI. Edit frontmatter, then regenerate; do not hand-edit the catalog.
 
 ### Per-CLI portability
-Same skills/agents/hooks work across 8 CLIs via per-CLI manifests. See [docs/multi-cli.md](docs/multi-cli.md); per-CLI capability is declared once in `lib/cli-tiers.yaml`.
+Canonical skills and agents are shared through client-specific adapters. Copilot native core skills use `li-*`; the Claude hook bundle is not translated to Copilot. See [docs/multi-cli.md](docs/multi-cli.md); per-CLI capability is declared once in `lib/cli-tiers.yaml`.
 
 ### How you work here
-- Feature branch → PR against `main`. Local verification (shape + unit tests green) before push.
+- Feature branch → PR against `main`. Run relevant shape and unit checks during development; release validation uses `bash tests/runner/run-all.sh --require-all` with the required toolchain. Verify before pushing.
 - Conventional Commits, atomic, one logical change per commit. Commit messages are English-only, describe what changed technically, and carry no AI-authorship trailers (see CONTRIBUTING.md).
-- Non-trivial decision → ADR. Structural change → meta-infra `structure-changes/` entry.
+- Non-trivial decision → ADR. Structural change → `.claude/engineering/evolution/` entry plus compatibility and shape checks.
 
-### Factory exception to the global "no tooling in repos" rule
-The operator's global `~/.claude/CLAUDE.md` says tooling (agents, skills, packs, hooks) installs
-user-global and **never** into a project repo. **This repo is the exception, by design:** Lintel
-IS the tooling — it ships `agents/`, `skills/`, `hooks/`, `packs/`, `lib/`, `scaffolding/` and its
-own `.claude/` as its product. The global no-tooling-in-repos rule is correct for every *other*
-repo and does not apply here (a documented, motivated deviation per CORE-PRINCIPLES). Note: this
-repo ships **no** `.claude/agents/` — subagents come from the plugin fleet (removed 2026-06-14,
-ADR-0015); a repo-local agent would shadow the fleet's same-named one.
+### Tooling installation scope
+
+Lintel is tooling: this repository intentionally ships canonical skills, agents, hooks, packs and
+installers. The Copilot repository kit is also an explicitly supported shared installation.
+Personal tooling otherwise follows the host's authorized user-global scope. The default Claude
+agent fleet comes from the plugin; add a `.claude/agents/` override only for a project-specific
+reason. Copilot's generated `.github/agents/` profiles are native adapters, not shadow copies of
+the entire Claude fleet.
 
 <!-- PROJECT:END -->
-
----
-
-## Shared schema discipline
-When two or more components communicate (events, APIs, IPC, the pack contract): define the schema ONCE in a shared location (`lib/*-schema.yaml`), both sides import it, never reinterpret it differently, write at least one integration/shape test per link.
-
----
-
-## Structured comment format
-
-Meaningful code/spec files carry a header linking back to intent (adjust comment syntax to language):
-
-```
-# component: <name>
-# implements: <ADR-IDs comma-separated>
-# intent: docs/<file>.md
-# constraints: docs/risks/<RISK-IDs>
-# last_intent_review: YYYY-MM-DD
-```
-
-Explains *why*, not *what*. Lets a reader trace any file back to the decision that created it.
-
----
-
-## Auto-mode boundaries
-
-**OK without extra prompt:** file edits in the repo · `git commit`/`git push` to feature branches · local tests/builds/lints · read-only external queries · local container builds · subagent invocations.
-
-**Requires explicit per-call authorization:** mutations against live/shared/production resources · secrets/access-policies/firewall rules · DB DDL/DML outside migrations against a live DB · image push to a live registry · deploy-pipeline triggers · `git push` to `main` · **creating a new remote repo or bulk-pushing a tree to a fresh remote** (a hard guardrail — surface it, the operator runs it).
-
-**Borderline — ask first:** production audit events · production data access (even read-only) · branch builds wired to a live deploy.
-
-When a boundary is crossed: stop, verify state read-only, report honestly, propose options with trade-offs, wait for authorization.
-
----
-
-## Direct-push to main
-PR-based by default. Direct-push to `main` is allowed only with explicit authorization for one specific commit batch. The next batch needs fresh approval.
-
----
-
-## Deviation flagging
-If the instruction or spec does not match reality (external API, docs, existing code): STOP, pause-report (what you found with file:line, three alternatives + trade-offs, your recommendation), wait for a decision. Do not silently "fix" it.
 
 ---
 
@@ -258,3 +161,184 @@ See [.claude/SUBAGENT-GUIDE.md](.claude/SUBAGENT-GUIDE.md) for how to add or rev
 
 ## Voice
 Voice is pack-driven. The active pack's voice tier (`resolve_pack_field voice.default_tier`; neutral default `internal`) sets the style; a pack may supply a corpus + critic. Internal dev agents declare `voice: internal`. When in doubt, internal is the default.
+
+<!-- LINTEL:SESSION-PROTOCOL:START -->
+## Session protocol
+
+This protocol is repeated in repository entry files so a fresh agent can work without a
+personal home directory or a previous chat. The repository's explicit context and paths take
+precedence over generic user-global defaults. Current user authorization applies to its stated
+scope; do not ask again for an action already authorized. Host permissions still apply.
+
+### Role and authority
+
+Execute the agreed architectural intent with initiative inside the authorized task. The operator
+owns strategic choices and material scope changes. Surface those choices explicitly; do not
+choose a new initiative, alter governance, or act outside the repository's authorized scope.
+Changes to constitutional or governance documents need explicit instruction.
+
+Authoritative architecture, constitution/charter, specifications, current documentation and
+accepted ADRs outrank planning notes, lessons and remembered conversations. Use working notes
+for continuity, never as permission to override an accepted decision. Follow the repository's
+declared document hierarchy and actual code state. Treat external strategy context as the
+session's intent, then reconcile it with authoritative repository documents before implementation.
+
+### Before non-trivial work
+
+For work with three or more steps or an architectural decision:
+
+1. Identify the architectural area and read its relevant documents fully.
+2. Inspect accepted ADRs and known risks in the repository's declared locations, commonly
+   `.claude/decisions/` and `docs/risks/`.
+3. Read `.claude/memory/MEMORY.md`, recent `.claude/memory/lessons.md`, current
+   `.claude/memory/working-state.md` and `.claude/memory/personas.md` when present.
+4. Establish task authority, customer-data handling, production impact, secrets exposure and
+   active pack requirements. Resolve material uncertainty before the dependent action.
+5. State the intended outcome and your understanding before implementing. Ask only for missing
+   decisions that the documents and existing authorization do not settle.
+
+Use the repository's documented paths on legacy layouts rather than inventing a second store.
+Keep trivial corrections proportionate; a clear typo or bounded authorized bug fix does not
+need a planning ceremony. Hooks or auto-loaded summaries supplement this read, never replace
+it when they are unavailable or have not been verified in the current host.
+
+### Plan, execute and re-plan
+
+Write a checkable plan to `.claude/plans/todo.md` or the repository's declared equivalent. Define
+the specification, acceptance criteria, dependency-ordered build cards and verification before
+implementation. A larger task needs an execution handoff a fresh session can follow. Existing
+Spec Kit or other specification artifacts remain authoritative; map their paths and task IDs
+rather than creating a competing backlog.
+
+Review the plan against the authorized scope and required approvals before BUILD. Use native
+plan mode where available; otherwise perform the same planning explicitly. Plan verification
+work as well as implementation. Track completion card by card, explain material changes, and
+add a review section at task end. If evidence invalidates the plan, stop the affected work and
+re-plan instead of pushing through. Continue independent authorized work when it remains valid.
+
+### Subagents and independent review
+
+Delegate bounded research, exploration, review and parallel analysis when this preserves context
+or improves the result. Give each subagent one task, explicit inputs, file ownership, acceptance
+criteria and a report contract. Use the minimum required tools. Default research/review roles
+to read-only; explain and scope write access for implementers. Use native delegation when the
+host provides it; otherwise sequence roles and disclose the lack of independent context.
+
+Choose an explicitly named agent first, then a repository-specific override, an active-pack
+promoted role, a user-global role, or the main-agent fallback. A same-named repository agent may
+shadow a global/plugin role under the host's discovery rules; verify what was actually selected.
+Do not assume another workstation's agent inventory is installed.
+
+Subagents report; the coordinating agent decides. Review subagents must not fix their own
+findings. Reports include severity counts, actionable findings with file:line citations,
+verification evidence and limitations. Keep implementation and independent review separate.
+Coordinate shared task-state writes rather than having parallel agents overwrite one ledger.
+
+### Authorized bug fixing
+
+Fix bugs inside the authorized initiative directly. Use logs, errors and failing tests to find
+and correct the root cause, then verify the result. Surface unrelated bugs rather than assuming
+a standing license to repair adjacent systems or CI outside the task. Escalate only the part
+that actually needs a new decision or permission.
+
+### Verification and simplicity
+
+Do not mark a card or initiative complete without evidence that it works. Tests and builds are
+the floor; inspect behavior, logs and the diff against the prior state where relevant. Apply
+the standard of a careful senior reviewer. State skipped checks, unavailable host validation,
+and any mock or stub explicitly as deferred work with its intended phase.
+
+Before finishing non-trivial work, ask whether fewer parts would solve the problem. Prefer
+removal and root-cause fixes over added abstraction, temporary patches or speculative structure.
+Challenge assumptions and simplify an awkward design within scope. Do not over-engineer an
+obvious fix or generate verbose documentation unrelated to the task. Optimize for long-term
+health, not only the current delivery.
+
+### Engineering and code style
+
+Match the repository's naming, architecture, terminology and brand. Where no local convention
+exists: Python uses snake_case, typed public interfaces and explicit failures; TypeScript uses
+camelCase variables, PascalCase components and strict checking; document/config filenames use
+kebab-case and Python modules use snake_case. Markdown headings use sentence case.
+
+Meaningful code files carry structured intent comments in the language's comment syntax:
+
+```text
+# component: <name>
+# implements: <ADR-IDs comma-separated>
+# intent: <existing architecture or specification path>
+# constraints: <existing risk records, or none with a reason>
+# last_intent_review: YYYY-MM-DD
+```
+
+Explain why, not an obvious restatement of the code. Keep intent and risk references valid;
+validate them in an appropriate check when maintaining that contract. A recommendation to add
+a pre-commit check is not evidence that such a hook is already installed.
+
+When components communicate through events, APIs, databases or IPC, define the schema once in
+a shared location, have both sides consume it, avoid divergent interpretations, and include
+at least one integration test per communication link.
+
+### Tool installation and host boundaries
+
+Respect the authorized installation scope. Personal tooling normally uses the host's user-global
+locations; a requested shared repository kit is an explicit repository-scoped installation.
+Lintel itself is tooling and intentionally contains canonical skills, agents and installers.
+Do not add project-specific agent overrides or dependency content without a task-related reason.
+Inspect provenance, licenses and selected components rather than enabling entire marketplaces
+or copying a personal machine's approved-tool list to a team.
+
+Use the client's real discovery and permission APIs. Do not hardcode model choices, assume
+parallel agents exist, or claim hooks run because their files exist. Lintel's Claude Code hooks
+require compatible registration; its Copilot kit does not translate that hook bundle. Mandatory
+enterprise controls belong in separately configured and verified platform policies and CI.
+
+### Delivery and auto-mode boundaries
+
+Use a feature branch and a pull request against the repository's default branch. Verify locally
+before pushing. Write atomic Conventional Commits, one logical change per commit, and an ADR
+for non-trivial decisions. Follow repository-specific authorship and release conventions.
+
+Within the authorized task, no extra prompt is needed for repository file edits, feature-branch
+commits/pushes, local tests/builds/lints, scoped read-only queries, local container builds without
+publication, or subagent work.
+
+Explicit authorization is required for live/shared/production mutations; credentials, access
+policies, roles or firewall changes; live database DDL/DML outside the approved migration path;
+container pushes to a live registry; deployment triggers; creating a remote repository or
+publishing a tree to a new remote; and direct pushes to the default branch. Default-branch
+authorization covers only the specified commit batch. It is not standing permission for later
+batches. Do not send external messages or perform external mutations without authorization.
+
+Resolve production audit effects, sensitive production reads and branch builds wired to live
+deployments before acting. Do not bypass a required approval or silently expand its scope.
+
+### Deviations, decisions and recovery
+
+When the specification, authoritative instruction or external interface disagrees with reality,
+stop the affected implementation and report evidence, alternatives with trade-offs, and a
+recommendation. For a material architectural decision, present three viable alternatives where
+they exist. State why a decision is needed, the specific constraint and the risk being addressed.
+Wait for the unresolved decision; do not silently reinterpret the requirement. Existing explicit
+authorization can settle a routine implementation correction within scope.
+
+If a boundary has been crossed: stop immediately, verify state with read-only checks, report
+what happened and its risks, propose concrete recovery options, and wait for authorization
+before rollback or continuation. A hoped-for successful result does not erase an unauthorized
+action. Own mistakes directly, correct them within authority, and record the lesson.
+
+Raise a disagreement before implementing a request that conflicts with accepted architecture or
+constraints. Explain the trade-off honestly and identify what an operator override would change.
+
+### Capture and fresh-session continuity
+
+After any operator correction, record a dated rule in `.claude/memory/lessons.md` with the
+context, mistake and preventive action. Review recent lessons at session start and refine the
+rules when evidence changes. Lessons preserve learning; they do not override authoritative docs.
+
+Before ending, update plan checkboxes and review evidence, the durable working state and relevant
+ADRs. Leave the next action and any blocker explicit. Store reviewed knowledge in the repository;
+keep runtime churn under gitignored `.claude/runtime/`. Start each new session from these files
+and current code, not a remembered chat. Optional vault exports, private packs and cross-repository
+sync need their own configured, authorized destinations; never copy personal paths by default.
+<!-- LINTEL:SESSION-PROTOCOL:END -->

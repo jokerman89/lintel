@@ -50,7 +50,7 @@ Not a standalone workflow — invokes other skills (or your direct work) with el
 5. **One-thing-at-a-time.** No batched mutations. Each Edit, each command, is a separate confirmation cycle.
 6. **End-of-task verification.** Read-only verification step before declaring done — re-read the changed files, run smoke tests, confirm state matches intent.
 7. **Audit log.** After each confirmed mutation, one line via the unified writer (ts/operator/cycle_id come from the envelope):
-   `source "$(git rev-parse --show-toplevel)/bin/_audit.sh"; audit_log careful-mode mutation_confirmed reason=<reason> command=<command>` → `.claude/runtime/audit/careful-mode.jsonl`.
+   `source "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/bin/_audit.sh"; audit_log careful-mode mutation_confirmed reason=<reason> command=<command>` → `.claude/runtime/audit/careful-mode.jsonl`.
 
 ## Report format
 

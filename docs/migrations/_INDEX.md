@@ -1,5 +1,7 @@
 # Migrations
 
+Current public releases use the 0.9.0 beta line. Older 3.x–5.x labels below record historical engineering transitions; they are not current minimum install versions. For the Copilot repository kit, adopt or upgrade through a reviewed `li-copilot init` change and verify with `check`. See [Copilot](../copilot.md#upgrade-and-rollback).
+
 Every change that may need action from you, with its grace window. `/li:migrations` reads this file
 at session start and surfaces anything still open for your repo; you can also just read it.
 

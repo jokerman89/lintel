@@ -118,7 +118,7 @@ fi
 ### Step 2 — Read pack + profile preferences
 
 ```bash
-source "$LINTEL_REPO_ROOT/lib/pack-resolver.sh"
+source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/lib/pack-resolver.sh"
 
 PROFILE="$LINTEL_HOME/profile.yaml"
 coverage_target=$(grep -A30 '^engineering:' "$PROFILE" 2>/dev/null | grep -A10 'testing_qa:' | grep 'coverage_target:' | head -1 | awk -F': *' '{print $2}' | tr -d '[:space:]')
@@ -234,7 +234,7 @@ Full-pass exit: every dimension ≥ 80 OR explicit operator override.
 One line via the unified writer (ts/operator/cycle_id come from the envelope):
 
 ```bash
-source "$(git rev-parse --show-toplevel)/bin/_audit.sh"
+source "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/bin/_audit.sh"
 audit_log tq-decisions tq_module_complete "granularity=$granularity" "score=$score" \
   "checkpoints_passed=$passed_count" "coverage_target=$coverage_target"
 # → .claude/runtime/audit/tq-decisions.jsonl

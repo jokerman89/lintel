@@ -8,7 +8,33 @@ Cross-session working state (not durable rules — that's [[lessons.md]]; not pe
 
 ---
 
-## ▶ CURRENT — read this first (reconciled 2026-08-28)
+## ▶ CURRENT — Copilot enterprise launch (2026-09-08)
+
+**Status:** implementation and independent review complete; integration evidence is maintained in
+[the launch plan](../plans/copilot-enterprise-launch/plan.md) and
+[review](../plans/copilot-enterprise-launch/review.md). Use their current checkboxes and Git refs.
+
+The active work map is [work.json](../plans/copilot-enterprise-launch/work.json). It gives one
+explicit source for requirements, design, task IDs and handoff; a new clone needs no local ledger.
+Native Copilot adapters provide 13 skills and three focused agents. The company-neutral bundle
+includes its source and foundation; generated instructions do not claim Claude hook enforcement.
+
+The complete engineering startup protocol lives in
+`scaffolding/01-foundation/SESSION-PROTOCOL.md` and is repeated inline in AGENTS.md, CLAUDE.md and
+both entry templates. Edit that source, run `python3 bin/li-instructions.py sync`, then regenerate
+and verify the Copilot kit. Preserve surrounding project text. See ADR-0025 and the coverage map.
+
+**Remaining acceptance boundary:** version 0.9.0 beta; CLI plugin/skill discovery has been observed,
+but authenticated model work, VS Code/cloud-agent behavior and enterprise tenant controls require
+the actual environment's acceptance evidence. No release/tag or marketplace publication is implied.
+
+The entries below are historical snapshots. Their old PR, tag, authentication and history-rewrite
+instructions are superseded as current action items; inspect actual Git/GitHub state before acting.
+Do not repeat old publication or destructive history operations based on those notes.
+
+---
+
+## Historical snapshot — beta preparation (2026-08-28; superseded as current state)
 
 **Beta release (2026-08-28, branch `feat/launch-readiness`, cycle `beta-release-docs`, mode meta-infra):**
 the repo is prepared for its FIRST PUBLIC RELEASE as **v0.9.0-beta**. Five commits on top of the
@@ -397,10 +423,10 @@ Eng-review run 2026-05-28. v3.7 phases A1+A2+B+C shipped in PR #22-#25, all merg
 **What's pending:**
 
 1. ~~**WS-4a + WS-4b naming-sessions**~~ ✅ RESOLVED 2026-05-29. WS-4a: no renames — the prefix-only disambiguation principle was adopted instead. WS-4b: four renames — `match`→`skill-router`, `setup-brain`→`gbrain-setup`, `sync-brain`→`gbrain-sync`, and one abbreviated compliance-skill prefix expanded to `agent-tier-stamp`. The alias mechanism, `bin/_aliases.sh` and its tests shipped alongside.
-2. ~~**6.7 internal-voice consistency check** (D-5a)~~ ✅ INVESTIGATED 2026-05-29 — verdict: INTENDED, not drift. 125 internal / 14 mixed / 2 customer-facing distribution coherent. See [decisions-67-68 doc](.claude/engineering/design-archive/lintel-v3.6-decisions-67-68.md). Operator vetoes by reply "drift" if disagree.
+2. ~~**6.7 internal-voice consistency check** (D-5a)~~ ✅ INVESTIGATED 2026-05-29 — verdict: INTENDED, not drift. 125 internal / 14 mixed / 2 customer-facing distribution coherent. See [decisions-67-68 doc](../engineering/design-archive/lintel-v3.6-decisions-67-68.md). Operator vetoes by reply "drift" if disagree.
 3. ~~**6.8 3-role validation** (D-5b)~~ ✅ INVESTIGATED 2026-05-29 — verdict: PATTERN VALIDATED. 3 role files structurally consistent (7/7 sections, 78-81 lines). Ready for role #4 — recommended `frontend-designer` to anchor v3.7 family. Operator vetoes by reply "not yet" or "go with X".
 4. **T0 voice corpus calibration** ($1.80-6 × 3-5 rounds)
-5. **Real-work `/li:cycle` dogfood** on a real Azure engagement — synthetic pre-validation done 2026-05-29 (4 validations passed, 3 soft-findings logged). See [.claude/engineering/design-archive/lintel-v3.7-fas-d-dogfood-protocol.md](../.claude/engineering/design-archive/lintel-v3.7-fas-d-dogfood-protocol.md) for the 7-step operator checklist (15-30 min). Reduces operator-effort from multi-hour evaluation to focused validation.
+5. **Real-work `/li:cycle` dogfood** on a real Azure engagement — synthetic pre-validation done 2026-05-29 (4 validations passed, 3 soft-findings logged). See [.claude/engineering/design-archive/lintel-v3.7-fas-d-dogfood-protocol.md](../engineering/design-archive/lintel-v3.7-fas-d-dogfood-protocol.md) for the 7-step operator checklist (15-30 min). Reduces operator-effort from multi-hour evaluation to focused validation.
 6. **Marketplace submission** (post legal review)
 7. **PR #14 merge** after WS-4a/b + the alias implementation
 

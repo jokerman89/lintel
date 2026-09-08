@@ -107,6 +107,20 @@ Configure thresholds in `~/.lintel/config.yaml` (the layer config the bare insta
 
 ## Per-CLI capability matrix
 
+### GitHub Copilot invocation
+
+Copilot's native entrypoints are `li-*` skills from `.github/skills/`, installed through the
+Copilot plugin or `bin/li-copilot`. The `/li:<skill>` spelling elsewhere is the canonical
+Lintel workflow name; use `/li-<skill>` where the host exposes it, or load the named canonical
+SKILL.md from the adapter's source root. Translate abstract operations (`Read`, `Bash`,
+`AskUserQuestion`, `Task`) to available host tools. Delegate only when the host exposes an
+agent tool; otherwise sequence the same scoped work and report that limitation.
+
+Keep source paths separate from target-repository state: the adapter identifies the Lintel
+source bundle while `LINTEL_REPO_ROOT` identifies the repository being worked on. Resolve
+helper paths from that bundle before executing shared examples. Lintel's Claude hook JSON
+is not a Copilot hook configuration; host policy and repository CI enforce enterprise controls.
+
 Lintel ships with honest degradation. Not every skill works on every CLI.
 
 The per-CLI truth is `lib/cli-tiers.yaml` (the single source); the README's capability table is

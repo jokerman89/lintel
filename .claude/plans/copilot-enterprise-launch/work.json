@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "workflow": "lintel",
+  "status": "APPROVED",
+  "spec": ".claude/plans/copilot-enterprise-launch/spec.md",
+  "plan": ".claude/plans/copilot-enterprise-launch/plan.md",
+  "tasks": ".claude/plans/copilot-enterprise-launch/plan.md",
+  "prompt": ".claude/plans/copilot-enterprise-launch/prompt.md"
+}

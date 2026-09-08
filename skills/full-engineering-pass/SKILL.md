@@ -126,7 +126,7 @@ stages:
 mode="${1:-full}"               # full | resume | dry-run
 skip_modules="${SKIP_MODULES:-}" # CSV of module names to skip
 
-source "$LINTEL_REPO_ROOT/lib/pack-resolver.sh"
+source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/lib/pack-resolver.sh"
 voice=$(resolve_pack_field voice.default_tier)
 
 # Activate customer-engagement-deep mode if pack defines it
@@ -183,7 +183,7 @@ fi
 mkdir -p .claude/runtime/state/full-engineering-pass
 state_file=".claude/runtime/state/full-engineering-pass/00-state.md"
 # Unified audit writer → .claude/runtime/audit/full-engineering-pass.jsonl
-source "$(git rev-parse --show-toplevel)/bin/_audit.sh"
+source "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/bin/_audit.sh"
 
 declare -A module_score
 declare -A module_status

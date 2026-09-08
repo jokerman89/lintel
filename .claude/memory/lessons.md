@@ -513,6 +513,10 @@ passed individually.
 - When the aggregate is slow/times out under load, verify correctness per-test (each file passes
   individually) rather than trusting/distrusting the timed-out aggregate.
 - Tests that touch shared live state (`00-state.md`, audit files) are not concurrency-safe.
+- Freeze executing scripts for the duration of a verification run. On 2026-09-08, editing the
+  running Bash runner invalidated baseline evidence because Bash read later script chunks after
+  the edit. Discard that run and rerun the stable candidate; do not combine its partial output
+  with later targeted checks and call it an aggregate pass.
 
 ## L-023 — Untracking a docs dir needs a live-dependency + `# intent:`-header check first
 
@@ -596,3 +600,27 @@ matching files, ran in seconds.
 
 Related: [[L-022]] on trusting a slow aggregate under Windows load.
 
+
+## L-027 — Repeat the complete session protocol where a fresh host starts
+
+**Date:** 2026-09-08
+
+**Context:** The operator asked for the reusable disciplines in their user-global engineering
+protocol to be present at repository/project level, especially for GitHub Copilot adoption.
+
+**What went wrong:** Pointer-first portability and a short six-rule summary were treated as a
+sufficient replacement for the full startup protocol. They left discipline dependent on a
+personal home directory and omitted document authority, agent report boundaries, structured
+comments, decision communication and other reusable requirements.
+
+**What should have happened:** Read the complete protocol, map every source heading, distinguish
+reusable behavior from personal machine configuration, and repeat all reusable requirements
+inline at each startup entry while keeping one canonical source.
+
+**Rule:** When self-contained startup is requested, use a shared source plus synchronized inline
+blocks in AGENTS.md, CLAUDE.md and scaffolded equivalents. Preserve unique project context,
+consolidate duplicate rules within a file, test block equality and non-clobber updates, and never
+publish private paths or copy host-specific assumptions as cross-host facts. Working notes do
+not outrank architecture, and existing explicit authorization remains valid within its scope.
+
+Related: [[L-025]] fix the source; ADR-0025 and the session-protocol coverage map.

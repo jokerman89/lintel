@@ -50,8 +50,8 @@ wgen_count() {
   find "$dir" -name "$pattern" -type f 2>/dev/null | wc -l | tr -d ' '
 }
 
-# Generate a deterministic timestamp for output headers (defaults to now,
+# Generate a deterministic timestamp for output headers (stable by default,
 # can be overridden via WGEN_TS env var for reproducible builds).
 wgen_ts() {
-  printf '%s' "${WGEN_TS:-$(date -u +%Y-%m-%dT%H:%M:%SZ)}"
+  printf '%s' "${WGEN_TS:-source snapshot; see Git history}"
 }

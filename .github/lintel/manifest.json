@@ -1,0 +1,26 @@
+{
+  "blocks": {},
+  "files": {
+    ".github/agents/lintel-builder.agent.md": "d799f5f015841e79e44adebcf339c0b715187cd421082f71788a5d52435bb32f",
+    ".github/agents/lintel-planner.agent.md": "deae9d1d4a0b0839961a8be1aebba9dc98b62a3959d87d368891c208d921359c",
+    ".github/agents/lintel-reviewer.agent.md": "9d09f41ba6be5b5b69e3397597584028b74a22155d5e44648fb62aa7f545884b",
+    ".github/copilot-instructions.md": "25f792a39be017734e0703500d3c6b3d578edfa09dad4a5baf66a598e2502e1c",
+    ".github/instructions/lintel-session.instructions.md": "3704b500acc26fd7cb3ba18feaa4cbe91767f4cb2b236313c9846ddf3c017d1c",
+    ".github/skills/li-build/SKILL.md": "4f2ef0a8564b5c438c7406a0cbd650c2ae5d6dc508db993c0c1cd2f8ebe4166e",
+    ".github/skills/li-capture/SKILL.md": "f0823a733b0b8b48fef155645db5d1d21f8163fa4517dc91aa48de9f1111f362",
+    ".github/skills/li-cycle/SKILL.md": "cc6c8fe33ecaac7fdbf7c15275646d43a12bb85fbd1b190506047ed34e12314b",
+    ".github/skills/li-define/SKILL.md": "d53ff680ceec81c0db4b1427b4e6f722360286958c3b9cb8897b1e390c1501e8",
+    ".github/skills/li-discover/SKILL.md": "b902e6f92e4ddcb7a006e43e5224d2aad8249c08e02a494c070e4c82ad4ed848",
+    ".github/skills/li-plan/SKILL.md": "d8dbac53f7a77c8b84d4e813d5b53dd3d32c390a92a8b6c52137b7291cf68a62",
+    ".github/skills/li-resume/SKILL.md": "666bf389a67cb734e6ee49cd69a82972f52b678899237f18588ce71fd7a85081",
+    ".github/skills/li-review/SKILL.md": "128c1f0a0dccb421216c1c249b63de0c7c16e36b038f62ec3cdc40469f7846ea",
+    ".github/skills/li-scope/SKILL.md": "127dc85d8997f2f7be9cdd01af16fd20eeb913f058b2e829317cfaa5913c7dec",
+    ".github/skills/li-sense/SKILL.md": "3f0e753b831f25ac5b0b8638e2c3d5713b5281202391f0e17ddc2111f956a5ff",
+    ".github/skills/li-ship/SKILL.md": "09845090db1e0c3f07de0b90eb16dfbce8373a1295e07954edd183f7f2a9946e",
+    ".github/skills/li-spec-kit/SKILL.md": "fa2ae01bc7ef2a05f5c815f2799c49ed0d2e23a4b157dcdd97a14f46af5a794c",
+    ".github/skills/li-welcome/SKILL.md": "365bf59901a08ea6124b9ac73867215c06722fc84e5e4ee290308adb6cfc749b"
+  },
+  "hooks_installed": false,
+  "schema_version": 1,
+  "source_mode": "repository"
+}

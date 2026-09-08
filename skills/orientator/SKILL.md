@@ -38,8 +38,8 @@ Mechanical-first: keyword + path heuristics get the route 80% of the time withou
 ### Step 1 — Read inputs
 
 ```bash
-source "$LINTEL_REPO_ROOT/lib/pack-resolver.sh"
-source "$LINTEL_REPO_ROOT/lib/orientator-routing.sh"
+source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/lib/pack-resolver.sh"
+source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/lib/orientator-routing.sh"
 
 prompt_text="${1:-}"   # operator's last message
 [ -z "$prompt_text" ] && prompt_text="$(cat .claude/runtime/state/00-state.md 2>/dev/null | tail -20)"
@@ -126,7 +126,7 @@ fi
 One line via the unified writer (ts/operator/cycle_id come from the envelope):
 
 ```bash
-source "$(git rev-parse --show-toplevel)/bin/_audit.sh"
+source "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/bin/_audit.sh"
 audit_log orientator-decisions orientator_decision "intent=$intent" "workflow=$recommended_workflow" \
   "risk=$risk" "confidence=$confidence" "decision=$decision" \
   "budget_used=${budget_used:-0}" "escalated=${should_escalate:-false}"

@@ -73,7 +73,7 @@ Remaining: 2
 - Sanity-scan on every Edit before applying (no secrets/customer-data in fix payload).
 - If auto-fix would touch a frozen-zone path (per project CLAUDE.md): block + escalate.
 - Audit-log every auto-fix mechanically (Layer 2 traceability):
-  `source "$(git rev-parse --show-toplevel)/bin/_audit.sh"; audit_log qa-fixes auto_fix file=<path> fix_kind=<lint|snapshot|import|assertion>` → `.claude/runtime/audit/qa-fixes.jsonl`.
+  `source "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/bin/_audit.sh"; audit_log qa-fixes auto_fix file=<path> fix_kind=<lint|snapshot|import|assertion>` → `.claude/runtime/audit/qa-fixes.jsonl`.
 
 ## Failure modes
 

@@ -43,7 +43,7 @@ Manual companion to the Layer 4 context-bloat watchers. Operator runs this when 
    - Skills invoked count
    - Time elapsed since session start
 2. **Read recent checkpoint:**
-   - `source "$LINTEL_REPO_ROOT/bin/_context.sh"; context_latest` (checkpoints live at `.claude/runtime/sessions/<branch>/`)
+   - `source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/bin/_context.sh"; context_latest` (checkpoints live at `.claude/runtime/sessions/<branch>/`)
    - If exists: timestamp, age in minutes
 3. **Read watcher thresholds** from `~/.lintel/config.yaml`:
    - `watchers.token_watcher.warn_threshold` (default 50000)

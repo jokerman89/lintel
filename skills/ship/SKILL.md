@@ -5,7 +5,7 @@ description: Use after REVIEW passes, when reviewed work is ready to land, to op
 color: cyan
 tools: Read, Bash, Edit, Grep, Glob
 voice: mixed
-cli_support: [claude-code, codex]
+cli_support: [claude-code, codex, copilot]
 necessity: REQUIRED
 gap_if_skipped: "No deployment validation, rollback plan, or audit log; production mutations without authorization."
 ---
@@ -81,7 +81,7 @@ If ANY gate violation:
 - Log the stop mechanically (one line; ts/operator/cycle_id come from the envelope):
 
 ```bash
-source "$(git rev-parse --show-toplevel)/bin/_audit.sh"
+source "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/bin/_audit.sh"
 audit_log compliance-stops gate_violation gate=<gate> file=<file:line> resolution=<fixed|overridden>
 # → .claude/runtime/audit/compliance-stops.jsonl
 ```
@@ -107,7 +107,7 @@ If the active pack activates a provenance gate (`resolve_pack_field compliance.h
 - Log AI-assistance provenance for the shipped artifact — one line via the unified writer (ts/operator/cycle_id come from the envelope; the audit dir is already repo-scoped in v5 repos, so no `<repo>-` prefix in the filename):
 
 ```bash
-source "$(git rev-parse --show-toplevel)/bin/_audit.sh"
+source "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/bin/_audit.sh"
 audit_log provenance-log shipped branch=<branch> commit_range=<sha>..<sha> ai_assistance=lintel-cycle \
   phases=<DEFINE,PLAN,BUILD,REVIEW,SHIP> audience=<audience> voice_tier=<tier> gates_passed=<gate1,gate2>
 # → .claude/runtime/audit/provenance-log.jsonl
@@ -245,7 +245,7 @@ If shipping tags release version:
 Mechanical since v5.0 (ADR-0008) — one command, not a YAML obligation. `hard_rule_violations` must be 0 to reach here; gate detail lives in the compliance/provenance logs:
 
 ```bash
-_sl="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}/lib/state.sh"
+_sl="${LINTEL_SOURCE_ROOT:-${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}}/lib/state.sh"
 [ -f "$_sl" ] || _sl="$HOME/.lintel/lib/state.sh"; source "$_sl"   # installed by install.sh in consumer repos
 state_append SHIP <DONE|DONE_WITH_CONCERNS|BLOCKED> next=CAPTURE ship_path=<pr|direct_main|demo> pr_url=<url-if-PR> commit_range=<sha>..<sha> hard_rule_violations=0
 ```
@@ -351,7 +351,7 @@ Close your report with the shared position footer so the operator always knows w
 cycle and the one logical next action — whether this phase ran standalone or inside `/li:cycle`:
 
 ```bash
-source "$LINTEL_REPO_ROOT/lib/cycle-footer.sh"   # fallback: "$(git rev-parse --show-toplevel)/lib/cycle-footer.sh"
+source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/lib/cycle-footer.sh"   # fallback: "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/lib/cycle-footer.sh"
 render_cycle_footer                               # reads .claude/runtime/state/00-state.md; --compact for short replies
 ```
 

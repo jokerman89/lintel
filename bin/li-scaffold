@@ -13,11 +13,11 @@
 
 set -euo pipefail
 
-LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
-SCAFFOLDING_SRC="${LINTEL_HOME}/scaffolding/01-foundation"
 # Absolute sibling-tool dir, resolved BEFORE any cd (a relative $0 would
 # otherwise resolve against the target repo after `cd "$TARGET"`).
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+LINTEL_HOME="${LINTEL_HOME:-$(cd "$SCRIPT_DIR/.." && pwd)}"
+SCAFFOLDING_SRC="${LINTEL_HOME}/scaffolding/01-foundation"
 
 CMD="${1:-help}"
 shift || true
@@ -28,18 +28,29 @@ PACK="_default"
 MODE="internal-tool"
 VOICE_TIER="internal"
 COMPLIANCE_LEVEL="standard"
+COPILOT=0
+COPILOT_UNSUPPORTED=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --target) TARGET="$2"; shift 2 ;;
-    --name) NAME="$2"; shift 2 ;;
-    --pack) PACK="$2"; shift 2 ;;
-    --mode) MODE="$2"; shift 2 ;;
-    --voice) VOICE_TIER="$2"; shift 2 ;;
-    --compliance) COMPLIANCE_LEVEL="$2"; shift 2 ;;
+    --copilot) COPILOT=1; shift ;;
+    --target|--name|--pack|--mode|--voice|--compliance)
+      [ -n "${2:-}" ] || { echo "ERROR: $1 requires a value" >&2; exit 2; }
+      [ "$1" = --target ] || COPILOT_UNSUPPORTED="$COPILOT_UNSUPPORTED $1"
+      case "$1" in
+        --target) TARGET="$2" ;; --name) NAME="$2" ;; --pack) PACK="$2" ;;
+        --mode) MODE="$2" ;; --voice) VOICE_TIER="$2" ;; --compliance) COMPLIANCE_LEVEL="$2" ;;
+      esac
+      shift 2 ;;
     *) echo "Unknown arg: $1" >&2; exit 2 ;;
   esac
 done
+
+if [ "$COPILOT" = 1 ] && [ -n "$COPILOT_UNSUPPORTED" ]; then
+  echo "ERROR: --copilot supports --target only; unsupported options:$COPILOT_UNSUPPORTED" >&2
+  echo "Initialize the neutral kit, then configure project instructions and any company pack explicitly." >&2
+  exit 2
+fi
 
 [ -z "$NAME" ] && NAME="$(basename "$TARGET")"
 
@@ -58,6 +69,7 @@ Options:
   --mode <type>            hotfix | internal-tool | mvp | research-dive (default: internal-tool)
   --voice <tier>           voice tier from the active pack (default: internal)
   --compliance <level>     full | standard | minimal (default: standard)
+  --copilot               Install the portable Copilot kit (combine with --target only)
 
 Files created (v5 .claude/ home layout, ADR-0005):
   CLAUDE.md (rendered from template), CORE-PRINCIPLES.md, EVOLUTION.md,
@@ -94,6 +106,10 @@ check_collisions() {
 }
 
 cmd_check() {
+  if [ "$COPILOT" = 1 ]; then
+    bash "$SCRIPT_DIR/li-copilot" check --target "$TARGET"
+    return
+  fi
   echo "Lintel scaffold check: $TARGET"
   echo ""
   echo "Scaffolding source: $SCAFFOLDING_SRC"
@@ -124,6 +140,11 @@ cmd_check() {
 }
 
 cmd_init() {
+  # Validate the complete Copilot target before writing any scaffold files.
+  if [ "$COPILOT" = 1 ]; then
+    bash "$SCRIPT_DIR/li-copilot" init --target "$TARGET"
+    return
+  fi
   check_source
   echo "li-scaffold: initializing $TARGET"
   echo "  name=$NAME pack=$PACK mode=$MODE voice=$VOICE_TIER compliance=$COMPLIANCE_LEVEL"
@@ -152,18 +173,16 @@ cmd_init() {
     fi
   fi
 
-  # AGENTS.md — the cross-CLI instruction standard (agents.md). A pointer file:
-  # the 7 non-Claude CLIs read it natively; content lives in CLAUDE.md.
-  if [ ! -f "AGENTS.md" ] && [ -f "CLAUDE.md" ]; then
-    cat > AGENTS.md <<'AGENTSEOF'
-# Agent instructions
-
-The canonical instructions for this repo live in [CLAUDE.md](CLAUDE.md) — read it fully.
-It covers the session-start ritual, the memory map (.claude/memory/, .claude/decisions/,
-.claude/plans/), workflow orchestration, and auto-mode boundaries. This file exists so
-every AGENTS.md-aware CLI finds them natively.
-AGENTSEOF
-    echo "  ✓ AGENTS.md (pointer)"
+  # Both entry files carry the complete shared session protocol. Existing project
+  # entries remain user-owned; the Copilot installer supports managed block updates.
+  if [ ! -f "AGENTS.md" ] && [ -f "$SCAFFOLDING_SRC/AGENTS.md.template" ]; then
+    _render="$(cat "$SCAFFOLDING_SRC/AGENTS.md.template")"
+    _render="${_render//\{\{REPO_NAME\}\}/$NAME}"
+    _render="${_render//\{\{PACK\}\}/$PACK}"
+    _render="${_render//\{\{MODE\}\}/$MODE}"
+    _render="${_render//\{\{VOICE_TIER\}\}/$VOICE_TIER}"
+    printf '%s\n' "$_render" > AGENTS.md
+    echo "  ✓ AGENTS.md (full session protocol)"
   fi
 
   # .claude/rules/ — path-scoped rules (Claude Code loads paths:-scoped rules
@@ -192,7 +211,7 @@ RULESEOF
   fi
 
   # Copy static templates
-  for f in CORE-PRINCIPLES.md EVOLUTION.md EVOLUTION-LOG.md TEMPLATE-skill.md TEMPLATE-agent.md; do
+  for f in CORE-PRINCIPLES.md SESSION-PROTOCOL.md EVOLUTION.md EVOLUTION-LOG.md TEMPLATE-skill.md TEMPLATE-agent.md; do
     if [ -f "$SCAFFOLDING_SRC/$f" ] && [ ! -f "$f" ]; then
       cp "$SCAFFOLDING_SRC/$f" .
       echo "  ✓ $f"
@@ -224,7 +243,7 @@ RULESEOF
   # one implementation: the idempotent migration tool no-ops the moves on a
   # fresh repo and stamps the rest.
   if git rev-parse --show-toplevel >/dev/null 2>&1; then
-    "$SCRIPT_DIR/li-migrate-claude-home" --repo . | sed 's/^/  /'
+    bash "$SCRIPT_DIR/li-migrate-claude-home" --repo . | sed 's/^/  /'
   else
     echo "  ⚠ not a git repo — skipped layout marker/auto-memory stamping (run li-migrate-claude-home after git init)"
   fi

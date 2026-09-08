@@ -2,9 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Lintel — the harness</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Open-source session workflows for GitHub Copilot teams: specs, build cards, reviews and durable memory.">
+<title>Lintel — repeatable GitHub Copilot sessions</title>
 <style>
-  :root { --bg: #0a0a0a; --fg: #e8e8e8; --accent: #00ff9c; --muted: #6a6a6a; }
+  :root { --bg: #0a0a0a; --fg: #e8e8e8; --accent: #00ff9c; --muted: #a0a0a0; }
   * { box-sizing: border-box; }
   body { background: var(--bg); color: var(--fg); font-family: ui-monospace, SFMono-Regular, Consolas, monospace; margin: 0; padding: 4rem 6rem; line-height: 1.6; }
   h1 { font-size: 3rem; letter-spacing: -0.04em; color: var(--accent); margin: 0 0 0.5rem; }
@@ -18,17 +20,22 @@
   th, td { text-align: left; padding: 0.5rem 1rem; border-bottom: 1px solid var(--muted); }
   th { color: var(--accent); }
   .meta { color: var(--muted); font-size: 0.85rem; margin-top: 4rem; }
-  .meta a { color: var(--accent); }
+  a { color: var(--accent); }
+  a:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+  @media (max-width: 700px) { body { padding: 2rem 1rem; } .grid { grid-template-columns: 1fr; gap: 1rem; } table { display: block; overflow-x: auto; } }
 </style>
 </head>
 <body>
 
 <h1>Lintel</h1>
-<div class="tagline">the harness — scaffolding that makes AI-augmented engineering compound</div>
+<div class="tagline">Repeatable GitHub Copilot sessions for teams.</div>
+<p>Turn an approved spec into build cards, reviewed changes and reusable session memory. Keep team standards in a versioned pack and project decisions in your repository.</p>
+<nav aria-label="Get started"><a href="https://github.com/jokerman89/lintel/blob/main/docs/getting-started.md">Get started</a> · <a href="https://github.com/jokerman89/lintel/blob/main/docs/copilot.md">Copilot guide</a> · <a href="https://github.com/jokerman89/lintel/blob/main/docs/enterprise-adoption.md">Enterprise adoption</a> · <a href="https://github.com/jokerman89/lintel/blob/main/docs/spec-kit.md">Spec Kit</a></nav>
+<p>Public beta. Native Copilot adapters support CLI, VS Code and GitHub cloud workflows. Lintel hooks are currently implemented for Claude Code; enforce organization controls through host policies and CI.</p>
 
 <div class="grid">
   <div class="stat">
-    <div class="stat-n">125</div>
+    <div class="stat-n">126</div>
     <div class="stat-label">Skills</div>
   </div>
   <div class="stat">
@@ -46,7 +53,7 @@
 <table>
   <thead><tr><th>Layer</th><th>What lives here</th></tr></thead>
   <tbody>
-    <tr><td>foundation</td><td>cycle, plan, sense, define, discover, build, review, ship, capture</td></tr>
+    <tr><td>foundation</td><td>cycle, sense, scope, define, discover, plan, build, review, ship, capture</td></tr>
     <tr><td>workflow</td><td>orientator, brief-forge, pack-*, v4-migrate</td></tr>
     <tr><td>schemas</td><td>pack-schema.yaml, envelope-schema.yaml</td></tr>
     <tr><td>tools</td><td>li-envelope-validate, li-envelope-replay, li-wiki-gen, li-compat-audit</td></tr>
@@ -62,13 +69,13 @@
   <thead><tr><th>Contract</th><th>What it does</th><th>Where</th></tr></thead>
   <tbody>
     <tr><td>Pack manifest</td><td>Declarative identity per team or domain</td><td>lib/pack-schema.yaml</td></tr>
-    <tr><td>Envelope</td><td>Universal shape for every hand-off (HEAD + BODY + TAIL)</td><td>lib/envelope-schema.yaml</td></tr>
+    <tr><td>Envelope</td><td>Optional structure for hand-offs (HEAD + BODY + TAIL)</td><td>lib/envelope-schema.yaml</td></tr>
     <tr><td>Meta-infra discipline</td><td>4 mandatory gates (M1-M4) on scaffolding changes</td><td>skills/cycle, bin/li-compat-audit</td></tr>
   </tbody>
 </table>
 
 <div class="meta">
-Generated: 2026-08-28T14:08:06Z by <a href="https://github.com/jokerman89/lintel/blob/main/bin/li-wiki-gen">bin/li-wiki-gen</a>.
+Generated: source snapshot; see Git history by <a href="https://github.com/jokerman89/lintel/blob/main/bin/li-wiki-gen">bin/li-wiki-gen</a>.
 Hand edits will be overwritten on next regen. Source: skills/, agents/, packs/, lib/.
 </div>
 

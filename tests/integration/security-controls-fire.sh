@@ -93,10 +93,11 @@ done
 # behavioral: drive the REAL hook with a scanner-less _patterns.sh — it must exit 2.
 # Copy the hook tree to TMP with a stub _patterns that defines NO scan_secrets, preserving
 # the run.sh's BASH_SOURCE-relative source paths (../_patterns.sh, ../_input.sh, ../../../bin).
-HT="$TMP/ht/hooks/shared"; mkdir -p "$HT/secret-scan-block" "$TMP/ht/bin"
+HT="$TMP/ht/hooks/shared"; mkdir -p "$HT/secret-scan-block" "$TMP/ht/bin" "$TMP/ht/lib"
 cp "$REPO_ROOT/hooks/shared/secret-scan-block/run.sh" "$HT/secret-scan-block/run.sh"
 cp "$REPO_ROOT/hooks/shared/_input.sh" "$HT/_input.sh"
 cp "$REPO_ROOT/bin/_audit.sh" "$TMP/ht/bin/_audit.sh"
+cp "$REPO_ROOT/lib/paths.sh" "$TMP/ht/lib/paths.sh"
 printf '#!/usr/bin/env bash
 # stub: defines no scan_secrets — simulates a failed pattern load
 : 

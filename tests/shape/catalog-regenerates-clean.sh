@@ -30,8 +30,11 @@ else
   fail "skills/CATALOG.md missing"
 fi
 
-# Full idempotency test handled by CI workflow .github/workflows/catalog.yml.
-pass "(idempotency test deferred to CI workflow catalog.yml)"
+if command -v python3 >/dev/null 2>&1; then
+  python3 "$REPO_ROOT/bin/li-catalog.py" --check && pass "catalog matches deterministic generator" || fail "catalog has drifted"
+else
+  echo '  SKIP: python3 required for catalog drift verification'
+fi
 
 echo ""
 if [ "$FAILED" -eq 0 ]; then echo "All catalog-regenerates-clean assertions PASSED"; exit 0
