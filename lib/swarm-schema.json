@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lintel.dev/schemas/swarm-coordination-v1.json",
+  "title": "Lintel swarm coordination contract",
+  "description": "Execution topology for an explicitly opted-in Lintel work map. Semantic path, overlap, isolation, and evidence checks are implemented by lib/swarm_contract.py.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "initiative",
+    "work_map",
+    "charter",
+    "integration_branch",
+    "max_parallel",
+    "scope_rules",
+    "lanes"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 1
+    },
+    "initiative": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]{0,62}$"
+    },
+    "work_map": {
+      "$ref": "#/$defs/repositoryPath"
+    },
+    "charter": {
+      "$ref": "#/$defs/repositoryPath"
+    },
+    "integration_branch": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 255
+    },
+    "max_parallel": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 64
+    },
+    "scope_rules": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["worker", "reviewer", "reducers"],
+      "properties": {
+        "worker": {"const": "write_scope+own_report"},
+        "reviewer": {"const": "own_review"},
+        "reducers": {"const": "coordinator-only"}
+      }
+    },
+    "lanes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/lane"}
+    }
+  },
+  "$defs": {
+    "repositoryPath": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*\\\\)(?!.*:).+$"
+    },
+    "lane": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "task_id",
+        "wave",
+        "role",
+        "write_scope",
+        "brief",
+        "report",
+        "review"
+      ],
+      "properties": {
+        "task_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9._-]{0,63}$"
+        },
+        "wave": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "role": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "isolation": {
+          "type": "string",
+          "enum": ["git-worktree", "isolated-patch", "host-scoped-write"]
+        },
+        "write_scope": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/repositoryPath"}
+        },
+        "brief": {"$ref": "#/$defs/repositoryPath"},
+        "report": {"$ref": "#/$defs/repositoryPath"},
+        "review": {"$ref": "#/$defs/repositoryPath"}
+      }
+    }
+  }
+}
