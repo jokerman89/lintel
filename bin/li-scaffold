@@ -13,11 +13,11 @@
 
 set -euo pipefail
 
-# Absolute sibling-tool dir, resolved BEFORE any cd (a relative $0 would
-# otherwise resolve against the target repo after `cd "$TARGET"`).
+# Prefer the adapter-supplied installed bundle. Executable-relative discovery
+# remains the standalone fallback and is resolved before any target `cd`.
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-LINTEL_HOME="${LINTEL_HOME:-$(cd "$SCRIPT_DIR/.." && pwd)}"
-SCAFFOLDING_SRC="${LINTEL_HOME}/scaffolding/01-foundation"
+LINTEL_SCAFFOLD_SOURCE_ROOT="${LINTEL_SOURCE_ROOT:-$(cd "$SCRIPT_DIR/.." && pwd)}"
+SCAFFOLDING_SRC="${LINTEL_SCAFFOLD_SOURCE_ROOT}/scaffolding/01-foundation"
 
 CMD="${1:-help}"
 shift || true
@@ -76,6 +76,7 @@ Files created (v5 .claude/ home layout, ADR-0005):
   EVOLUTION-LOG.md, .claude/memory/{MEMORY,lessons,working-state,personas}.md,
   .claude/plans/todo.md, .claude/decisions/{README,TEMPLATE}.md,
   .claude/SUBAGENT-GUIDE.md (subagents come from the plugin fleet — no repo-local agents),
+  .claude/templates/swarm/{charter,coordination,agent-brief,agent-report,agent-review}.template.*,
   .claude/lintel-layout.yaml, TEMPLATE-skill.md, TEMPLATE-agent.md
 
 Examples:
@@ -88,10 +89,16 @@ EOF
 check_source() {
   if [ ! -d "$SCAFFOLDING_SRC" ]; then
     echo "ERROR: Lintel scaffolding source not found at $SCAFFOLDING_SRC" >&2
-    echo "Set LINTEL_HOME env var or run Lintel installer first." >&2
+    echo "Set LINTEL_SOURCE_ROOT to a trusted installed Lintel bundle, or run this helper from a complete source checkout." >&2
     echo "  install: bash <(curl -fsSL https://raw.githubusercontent.com/jokerman89/lintel/main/install/install.sh)" >&2
     exit 3
   fi
+  for template in charter.template.md coordination.template.json agent-brief.template.md agent-report.template.md agent-review.template.md; do
+    if [ ! -f "$SCAFFOLDING_SRC/templates/swarm/$template" ]; then
+      echo "ERROR: required swarm template missing: $SCAFFOLDING_SRC/templates/swarm/$template" >&2
+      exit 3
+    fi
+  done
 }
 
 check_collisions() {
@@ -121,7 +128,7 @@ cmd_check() {
   echo ""
   echo "Target state:"
   local existing=0
-  for f in CLAUDE.md CORE-PRINCIPLES.md EVOLUTION.md EVOLUTION-LOG.md .claude/memory/lessons.md .claude/decisions/README.md; do
+  for f in CLAUDE.md CORE-PRINCIPLES.md EVOLUTION.md EVOLUTION-LOG.md .claude/memory/lessons.md .claude/decisions/README.md .claude/templates/swarm/coordination.template.json; do
     if [ -e "$TARGET/$f" ]; then
       echo "  ✓ $f"
       existing=$((existing+1))
@@ -254,6 +261,18 @@ RULESEOF
     cp "$SCAFFOLDING_SRC/.claude/SUBAGENT-GUIDE.md" .claude/
     echo "  ✓ .claude/SUBAGENT-GUIDE.md"
   fi
+
+  # Swarm templates are repo-local seeds, not agent definitions. They let a fresh
+  # scaffold create durable briefs and evidence without shadowing the plugin fleet.
+  mkdir -p .claude/templates/swarm
+  for f in "$SCAFFOLDING_SRC"/templates/swarm/*; do
+    [ -f "$f" ] || continue
+    name=$(basename "$f")
+    if [ ! -f ".claude/templates/swarm/$name" ]; then
+      cp "$f" ".claude/templates/swarm/$name"
+      echo "  ✓ .claude/templates/swarm/$name"
+    fi
+  done
 
   echo ""
   echo "li-scaffold: done."

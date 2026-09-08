@@ -76,6 +76,33 @@ class CopilotKit(unittest.TestCase):
         result = subprocess.run([sys.executable, str(clone / ".github/lintel/bin/li-copilot.py"), "check", "--target", str(clone)], env=no_home, capture_output=True, text=True)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
+    def test_swarm_wrapper_and_complete_source_resource_inventory(self):
+        self.run_cli()
+        wrapper = self.target / ".github/skills/li-swarm/SKILL.md"
+        self.assertTrue(wrapper.is_file())
+        self.assertIn("../../lintel/skills/swarm/SKILL.md", wrapper.read_text(encoding="utf-8"))
+        inventory = json.loads((self.target / adapter.INVENTORY).read_text(encoding="utf-8"))["files"]
+        for relative in adapter.SWARM_RESOURCES:
+            installed = f"{adapter.BUNDLE}/{relative}"
+            self.assertIn(installed, inventory)
+            self.assertTrue((self.target / installed).is_file(), installed)
+
+    def test_missing_mandatory_swarm_dependency_refuses_before_writes(self):
+        broken = self.base / "missing-swarm-dependency-source"
+        shutil.copytree(self.source, broken)
+        before = self.snapshot()
+        for relative in adapter.SWARM_RESOURCES:
+            with self.subTest(relative=relative):
+                path = broken / relative
+                content = path.read_bytes()
+                path.unlink()
+                try:
+                    result = self.run_cli(success=False, source=broken)
+                    self.assertIn(f"Required source file is missing: {path}", result.stderr)
+                    self.assertEqual(before, self.snapshot())
+                finally:
+                    path.write_bytes(content)
+
     def test_preserves_existing_project_instructions_and_memory(self):
         (self.target / ".github").mkdir()
         (self.target / ".github/copilot-instructions.md").write_text("Team policy stays.\n")
@@ -226,6 +253,9 @@ test "$(resolve_pack_field compliance.mode)" = advisory
 source "$LINTEL_SOURCE_ROOT/lib/paths.sh"
 test "$(lintel_plans_dir)" = "$PWD/.claude/plans"
 test "$LINTEL_SOURCE_ROOT" = "$PWD/.github/lintel"
+test -f "$LINTEL_SOURCE_ROOT/bin/li-swarm.py"
+test -f "$LINTEL_SOURCE_ROOT/lib/swarm-schema.json"
+test -f "$LINTEL_SOURCE_ROOT/scaffolding/01-foundation/templates/swarm/agent-brief.template.md"
 test "$LINTEL_HOME" = "$PWD/.claude/runtime/lintel-home"
 '''
         result = subprocess.run([bash, "-c", script], cwd=self.target, env=env, capture_output=True, text=True)
@@ -271,6 +301,9 @@ test "$LINTEL_HOME" = "$PWD/.claude/runtime/lintel-home"
         for relative in ("AGENTS.md", "CLAUDE.md"):
             self.assertIn(canonical, (self.target / relative).read_bytes().replace(b"\r\n", b"\n"))
         self.assertEqual(canonical, (self.target / "SESSION-PROTOCOL.md").read_bytes().replace(b"\r\n", b"\n").strip())
+        for name in ("charter.template.md", "coordination.template.json", "agent-brief.template.md",
+                     "agent-report.template.md", "agent-review.template.md"):
+            self.assertTrue((self.target / ".claude/templates/swarm" / name).is_file(), name)
 
     def test_copilot_scaffold_rejects_unsupported_options_before_writes(self):
         bash = os.environ.get("LINTEL_TEST_BASH") or shutil.which("bash")
@@ -298,6 +331,24 @@ test "$LINTEL_HOME" = "$PWD/.claude/runtime/lintel-home"
         result = subprocess.run([bash, str(bundle / "bin/li-scaffold"), "init", "--target", str(legacy)], env=env, capture_output=True, text=True)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertTrue((legacy / ".claude/lintel-layout.yaml").is_file())
+
+    def test_bundled_scaffold_prefers_installed_source_root_over_runtime_home(self):
+        self.run_cli()
+        bash = os.environ.get("LINTEL_TEST_BASH") or shutil.which("bash")
+        self.assertTrue(bash)
+        env = {key: value for key, value in os.environ.items() if not key.startswith("LINTEL_")}
+        script = '''set -e
+source .github/lintel/lib/copilot-env.sh
+lintel_copilot_env "$PWD"
+test "$LINTEL_HOME" = "$PWD/.claude/runtime/lintel-home"
+mkdir downstream-scaffold
+bash "$LINTEL_SOURCE_ROOT/bin/li-scaffold" init --target "$PWD/downstream-scaffold" --name downstream
+'''
+        result = subprocess.run([bash, "-c", script], cwd=self.target, env=env, capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        downstream = self.target / "downstream-scaffold"
+        self.assertTrue((downstream / ".claude/templates/swarm/coordination.template.json").is_file())
+        self.assertFalse((self.target / ".claude/runtime/lintel-home/scaffolding").exists())
 
     def test_bundled_envelope_validator_cannot_be_silently_skipped(self):
         self.run_cli()

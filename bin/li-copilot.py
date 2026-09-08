@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # component: copilot-repository-adapter
-# implements: ADR-0024, ADR-0025
-# intent: .claude/plans/copilot-enterprise-launch/spec.md
+# implements: ADR-0024, ADR-0025, ADR-0026
+# intent: .claude/plans/swarming-work/spec.md
 # constraints: stdlib only, no network, preserve project prose, preflight all writes
 # last_intent_review: 2026-09-08
 """Deterministic Copilot adapter; standard library only, no network or shell calls."""
@@ -24,7 +24,8 @@ PROTOCOL_END = b"<!-- LINTEL:SESSION-PROTOCOL:END -->"
 COMPONENTS = ("bin", "lib", "skills", "agents", "templates", "scaffolding/01-foundation", "packs/_default")
 DOCS = ("docs/the-cycle.md", "docs/precedence.md", "docs/compliance.md", "docs/architecture.md",
         "docs/GLOSSARY.md", "docs/spec-kit.md", "docs/getting-started.md", "docs/copilot.md",
-        "docs/concepts/planner-as-module.md", "docs/concepts/agent-dispatch-rules.md", "docs/concepts/orientator.md")
+        "docs/concepts/planner-as-module.md", "docs/concepts/agent-dispatch-rules.md", "docs/concepts/orientator.md",
+        "docs/concepts/swarming-work.md")
 TEXT_SUFFIXES = {".md", ".sh", ".bash", ".py", ".json", ".yaml", ".yml", ".csv", ".tsv", ".txt", ".template", ".base"}
 ATTRIBUTES = (
     ".github/lintel/** text=auto eol=lf",
@@ -46,12 +47,36 @@ WORKFLOWS = {
     "capture": "Use after delivery to record evidence, durable lessons and the next-session handoff.",
     "resume": "Use to resume an interrupted initiative from its saved plan, state and handoff.",
     "spec-kit": "Use when a project uses GitHub Spec Kit to connect its requirements and tasks to Lintel build and review evidence.",
+    "swarm": "Use when an approved mapped plan opts in to coordinated multi-agent execution with explicit ownership, attributable isolation and durable evidence.",
 }
 AGENTS = {
     "planner": ("Plan requirements, specifications and executable build cards for a scoped initiative.", "plan"),
     "builder": ("Implement an authorized build card and produce verification evidence with focused changes.", "build"),
     "reviewer": ("Review a change independently for specification compliance, correctness and missing evidence.", "review"),
 }
+SWARM_RESOURCES = (
+    "skills/swarm/SKILL.md",
+    "skills/brief-forge/SKILL.md",
+    "bin/li-swarm",
+    "bin/li-swarm.py",
+    "bin/li-work-artifacts.py",
+    "bin/_audit.sh",
+    "lib/copilot-env.sh",
+    "lib/swarm-schema.json",
+    "lib/swarm_contract.py",
+    "lib/cli-tiers.yaml",
+    "lib/brief-forge.sh",
+    "lib/brief-forge-evaluators.sh",
+    "lib/envelope-schema.yaml",
+    "lib/pack-resolver.sh",
+    "lib/paths.sh",
+    "packs/_default/pack.yaml",
+    "scaffolding/01-foundation/templates/swarm/charter.template.md",
+    "scaffolding/01-foundation/templates/swarm/coordination.template.json",
+    "scaffolding/01-foundation/templates/swarm/agent-brief.template.md",
+    "scaffolding/01-foundation/templates/swarm/agent-report.template.md",
+    "scaffolding/01-foundation/templates/swarm/agent-review.template.md",
+)
 
 
 def digest(data: bytes) -> str:
@@ -113,6 +138,13 @@ def generate(source: Path, target: Path) -> tuple[dict[str, bytes], dict[str, by
                 files[f"{BUNDLE}/{relative}"] = read_file(source, relative)
         bridge = "shims/copilot/COPILOT.md" if (source / "shims/copilot/COPILOT.md").is_file() else "COPILOT.md"
         files[f"{BUNDLE}/COPILOT.md"] = read_file(source, bridge)
+    # These are the direct workflow, validation, handoff, policy, audit/path and
+    # template dependencies needed by the swarm entry point. Fail generation if
+    # the installed source is incomplete instead of deferring failure to dispatch.
+    for relative in SWARM_RESOURCES:
+        data = read_file(source, relative)
+        if not local and files.get(f"{BUNDLE}/{relative}") != data:
+            raise ValueError(f"Swarm resource was not bundled: {relative}")
     # File-relative Markdown links work after copying and in clean cloud clones.
     skill_source = "../../.." if local else "../../lintel"
     bridge_skill = "../../../shims/copilot/COPILOT.md" if local else "../../lintel/COPILOT.md"
