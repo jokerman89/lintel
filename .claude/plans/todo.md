@@ -242,7 +242,7 @@ Architect only (matches reality).
 - [ ] Operator: update plugin, remove 4 manual hook entries from ~/.claude/settings.json, re-run install.sh, verify with li-doctor
 
 
-Design: [.claude/engineering/design-archive/lintel-v5-claude-home-memory-obsidian-design.md](../.claude/engineering/design-archive/lintel-v5-claude-home-memory-obsidian-design.md)
+Design: [.claude/engineering/design-archive/lintel-v5-claude-home-memory-obsidian-design.md](../engineering/design-archive/lintel-v5-claude-home-memory-obsidian-design.md)
 Mode: meta-infra (Gates M1–M4). Decisions D1–D4 locked by operator 2026-06-12.
 (Previous initiative v4.11 closed 2026-06-10 — see git history of this file.)
 

@@ -86,6 +86,7 @@ Acceptance: a fresh project clone with an empty user home gets planning, subagen
 verification, simplicity, authority, schema, communication and safety disciplines directly in
 its project entry files. Personal machine state, private data and marketplace grants are not
 promoted into reusable policy. This is deliberate source-generated repetition, not manual drift.
+
 ## Review
 
 Independent spec review found and drove repairs to mapped Spec Kit BUILD approval/task sources, committed-work resume, missing ignore verification and CI adapter drift detection. Independent quality/security review passed after installer, consumer execution and compatibility-audit fixes. Final local aggregate passed: 101 tests, zero skips/failures/partial assertions. Hosted integration evidence is in progress. Local tests do not establish tenant entitlement, live agent behavior or
