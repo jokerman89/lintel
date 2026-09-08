@@ -187,3 +187,10 @@ Published as [draft PR #84](https://github.com/jokerman89/lintel/pull/84) on 202
 from `codex/enterprise-value-review` to `main`. The operator's exception is limited to
 this draft publication. CI and final integration review remain visible in the PR; F05/F06
 remain release-control limitations. The concurrent checkout was not modified.
+
+Concurrent integration event: PR #83 merged into main during publication (`52c7b38`,
+followed by `e9911fc`). GitHub reported this draft as conflicting with that updated base.
+No integration merge was included in the approved draft-publication batch. Reconcile the
+overlap and release-version metadata, reassess baseline findings against the merged Copilot
+fixes, and verify the combined tree before merge. The current review/test evidence is scoped
+to this branch and its stated baselines; no combined-tree CI result is claimed.

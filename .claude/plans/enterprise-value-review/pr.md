@@ -27,3 +27,8 @@ The operator approved the documented M2 exception for draft-PR publication on 20
 The mechanical RED and rollout limitations remain recorded. See the manual compatibility
 disposition and `.claude/engineering/audits/2026-09-08-enterprise-value-review.md` for evidence,
 remaining findings and rollout steps. Version 0.10.0 is unreleased.
+
+Integration status at publication: Copilot PR #83 merged into main while this draft was
+being published. GitHub reports conflicts with the updated base. Reconcile the overlapping
+runtime, planning, documentation and release metadata before merge, then validate the
+combined tree. The tests above describe this review branch; no combined-tree CI pass is claimed.

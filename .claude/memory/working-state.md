@@ -34,7 +34,9 @@ Publication evidence is recorded in the review report. Two baseline P1 Git
 collection defects (F05/F06) remain release-control blockers; prioritize them before an
 enterprise rollout. Older onboarding/installation/work-selection work overlaps the other task.
 
-**Next action:** follow draft PR #84's review and CI before combining changes.
+**Next action:** PR #83 merged into main during publication; GitHub reports conflicts
+for draft PR #84. Reconcile overlapping files and release versions, reassess baseline
+findings against those Copilot fixes, then run verification on the combined tree.
 No direct main push, deployment or personal setup is authorized.
 
 ## Prior release context (reconciled 2026-08-28)

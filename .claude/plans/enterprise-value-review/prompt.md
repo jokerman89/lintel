@@ -19,3 +19,5 @@ trying to create another one. The prepared PR body is `pr.md` beside this file.
 Delivery is [draft PR #84](https://github.com/jokerman89/lintel/pull/84). Eight targeted
 scripts passed after the rebase. Follow CI and review there; release blockers remain
 documented separately from this completed draft-publication task.
+PR #83 merged into main during publication. Draft #84 has conflicts; resolve overlap and
+release metadata against current main and re-verify the combined tree before merge.

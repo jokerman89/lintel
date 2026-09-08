@@ -21,6 +21,8 @@ changed implementation; aggregate verification passed 93/93 scripts. Final edge 
 also pass, with evidence recorded in the whole-system review. The operator explicitly
 approved the M2 exception for draft-PR publication on 2026-09-08. Eight targeted scripts
 passed again after the rebase; CI and final integration review remain with the draft PR.
+PR #83 merged into main during publication, creating conflicts for #84. Resolving the
+overlap and validating the combined tree is the next integration action before merge.
 
 The concurrent checkout has substantial uncommitted Copilot changes. This branch starts from
 the inspected baseline `6b10a84`; its review commits are rebased onto main `9a024c0` so the
