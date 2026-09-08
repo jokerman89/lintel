@@ -28,7 +28,7 @@ Reads the repo-local `.claude/runtime/jobs/_active.md` (created and regenerated 
 ## When NOT to use
 
 - For task-level progress within a phase (read the phase's own audit log)
-- For external system status (Azure, MS portal, etc.)
+- For external system status (cloud-provider or vendor status pages)
 
 ## Inputs
 
@@ -104,7 +104,7 @@ Close your report with the shared position footer. Outside an active cycle it re
 ambient line; inside one it shows the operator's position + next step:
 
 ```bash
-source "$LINTEL_REPO_ROOT/lib/cycle-footer.sh"   # fallback: "$(git rev-parse --show-toplevel)/lib/cycle-footer.sh"
+source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/lib/cycle-footer.sh"   # fallback: "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/lib/cycle-footer.sh"
 render_cycle_footer                               # auto: thin when no cycle, full/--compact when in one
 ```
 

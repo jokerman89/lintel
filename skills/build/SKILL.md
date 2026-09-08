@@ -5,7 +5,7 @@ description: Use to implement an approved plan task by task. Trigger after PLAN 
 color: cyan
 tools: Read, Write, Edit, Bash, Grep, Glob
 voice: internal
-cli_support: [claude-code, codex]
+cli_support: [claude-code, codex, copilot]
 necessity: REQUIRED
 gap_if_skipped: "No implementation is produced; the plan's tasks are never executed."
 ---
@@ -18,8 +18,8 @@ Executes plan.md task-by-task using superpowers' Subagent-Driven Development pat
 1. Read plan.md, extract all tasks with full text
 2. Create TodoWrite for tasks
 3. Per task: dispatch fresh implementer subagent → implementer executes (TDD red-green-refactor) → two-stage review (spec compliance THEN code quality) → fix loop if needed → mark complete
-4. The active pack's compliance hooks fire automatically (`resolve_pack_field compliance.hooks`; none by default)
-5. The active pack's voice gates fire on customer-facing artifacts (`resolve_pack_field voice.gates_active`; none by default)
+4. Check which compliance controls are actually active on this host (`resolve_pack_field compliance.hooks`; none by default). Lintel's Claude hooks do not fire on Copilot.
+5. Apply configured voice review on customer-facing artifacts (`resolve_pack_field voice.gates_active`; none by default); do not claim automatic enforcement where no adapter is installed.
 6. Continuous checkpoint (if checkpoint_mode=continuous)
 7. Final code review after all tasks
 
@@ -33,17 +33,36 @@ This phase is where most token spend happens. Cost-estimate from PLAN sets expec
 
 ## When NOT to use
 
-- No APPROVED plan.md → return to PLAN
+- No approved native plan or authorized mapped work → return to PLAN
 - intent=review-only → use REVIEW directly
 - intent=research-only → research mode ends at DISCOVER
 - Trivial single-file edits — operator just edits directly
 
 ## Workflow
 
+### Mapped work takes precedence over the legacy plan.md shorthand
+
+Before the checks below, inspect an explicitly selected committed work.json using the
+[shared work-map contract](../spec-kit/references/work-map.md) and `bin/li-work-artifacts.py`.
+For mapped work, the map's `status` records plan approval within the operator's authorized
+scope. Read requirements from `spec`, design from `plan`, and extract/update card IDs,
+dependencies and checkboxes from `tasks`. Spec Kit plan.md is an implementation design and
+need not contain Lintel's APPROVED heading or the task list. Throughout the steps below,
+“plan.md task” means the mapped `tasks` artifact. Send its complete card text to reviewers
+and implementers; never copy those tasks into a second Lintel plan. Native work without a
+map keeps the existing plan.md path. Missing artifacts or draft scope return to planning.
+
+
+**Host portability:** `TodoWrite`, `Task`, `Read` and `Bash` below describe operations, not
+requirements for tool names. Use available host tools, a file checklist if no todo tool exists,
+and the current host's configured model. Haiku/Sonnet/Opus labels express complexity tiers;
+they are not required model IDs on Copilot. If native delegation is unavailable, sequence
+scoped implementation and review and record that the review was not an independent subagent.
+
 ### Step 1 — Pre-flight checks
 
 Verify:
-- plan.md exists and is APPROVED status
+- Approved native plan.md exists, or the validated work map selects the authorized spec/design/tasks
 - Current branch is NOT main/master (if no explicit user consent for main)
 - Active pack's compliance hooks status (`resolve_pack_field compliance.hooks`; none by default — when present, e.g. customer-data-block + secret-scan-block, they must be activated)
 - Git worktree state clean OR operator confirms WIP state OK
@@ -219,7 +238,7 @@ After last task DONE:
 Mechanical since v5.0 (ADR-0008) — one command, not a YAML obligation (per-task metrics live in build-log.md, Step 5):
 
 ```bash
-_sl="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}/lib/state.sh"
+_sl="${LINTEL_SOURCE_ROOT:-${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}}/lib/state.sh"
 [ -f "$_sl" ] || _sl="$HOME/.lintel/lib/state.sh"; source "$_sl"   # installed by install.sh in consumer repos
 state_append BUILD <DONE|DONE_WITH_CONCERNS|BLOCKED> next=REVIEW plan_path=<path> tasks_completed=<N> tasks_blocked=<count>
 ```
@@ -322,7 +341,7 @@ Close your report with the shared position footer so the operator always knows w
 cycle and the one logical next action — whether this phase ran standalone or inside `/li:cycle`:
 
 ```bash
-source "$LINTEL_REPO_ROOT/lib/cycle-footer.sh"   # fallback: "$(git rev-parse --show-toplevel)/lib/cycle-footer.sh"
+source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/lib/cycle-footer.sh"   # fallback: "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/lib/cycle-footer.sh"
 render_cycle_footer                               # reads .claude/runtime/state/00-state.md; --compact for short replies
 ```
 

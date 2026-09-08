@@ -6,7 +6,7 @@ description: Use after DISCOVER, or standalone when you have a design doc and ne
 color: cyan
 tools: Read, Write, Edit, Bash, Grep, Glob
 voice: internal
-cli_support: [claude-code, codex]
+cli_support: [claude-code, codex, copilot]
 necessity: REQUIRED
 gap_if_skipped: "BUILD runs against an unwritten/unreviewed plan; the cold-executor trio (plan.md/spec.md/prompt.md) never exists, so CAPTURE and cold executors have nothing to read."
 navigation:
@@ -31,7 +31,7 @@ You are the PLAN skill — Phase 4 of the Lintel cycle.
 Takes APPROVED design doc (from DEFINE) + discover-report.md (from DISCOVER) and produces:
 1. **plan.md** — task list with file paths + complete code (where prescriptive) + verification steps + dependencies + ordering
 2. **spec.md (draft)** — early version of cold-executor master spec (finalized in CAPTURE)
-3. **Cost estimate** — tokens × phase × model = $-estimate. MANDATORY gate before BUILD starts.
+3. **Plan signals** — tasks, phases and a labeled token estimate. Present before BUILD; no invented price.
 4. **Founder approval gate** — explicit pause before commit
 
 Adopted from speckit (cross-section Analyze), Architect image (cost-estimate gate, founder approval gate), and superpowers (two-stage subagent review).
@@ -51,6 +51,24 @@ Adopted from speckit (cross-section Analyze), Architect image (cost-estimate gat
 - intent=research-dive → no PLAN needed (research mode ends at DISCOVER)
 
 ## Workflow
+
+### Existing Spec Kit plan branch
+
+When the operator selects existing Spec Kit artifacts, use the
+[shared work-map contract](../spec-kit/references/work-map.md) before the ordinary template
+pipeline below. Read the original spec.md, implementation plan.md and tasks.md, check their
+coverage/dependencies and record missing decisions. Preserve their structure and task IDs.
+Write the exact-path handoff and work.json, then validate it with `bin/li-work-artifacts.py`; Lintel plan.md/spec.md companions, if needed, are
+reference-only. Existing authorization can approve this mapped scope; do not require a new
+Lintel approval heading inside Spec Kit plan.md or recreate its tasks through DEFINE/PLAN.
+The remainder of the ordinary trio-generation steps applies only to Lintel-native plans.
+For native plans, also write work.json with `tasks` pointing to plan.md and link it from todo.md.
+
+
+**Existing authorization:** record the operator's authorized scope before the gates below.
+Present plan signals and a reviewable plan, but do not ask again for execution already explicitly
+authorized in this session. Ask once when a material scope/authority decision remains unanswered.
+Approval does not extend to production actions, secrets or unrelated work.
 
 ### Step 1 — Load context
 
@@ -352,7 +370,7 @@ Invoke the existing mechanism — do **not** rebuild it:
 Mechanical since v5.0 (ADR-0008) — one command, not a YAML obligation:
 
 ```bash
-_sl="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}/lib/state.sh"
+_sl="${LINTEL_SOURCE_ROOT:-${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}}/lib/state.sh"
 [ -f "$_sl" ] || _sl="$HOME/.lintel/lib/state.sh"; source "$_sl"   # installed by install.sh in consumer repos
 state_append PLAN DONE next=BUILD plan_path=<path> spec_draft_path=<path> tasks_count=<N> tokens_est=<total> tokens_est_basis=<calibrated|uncalibrated>
 ```
@@ -507,7 +525,7 @@ Close your report with the shared position footer so the operator always knows w
 cycle and the one logical next action — whether this phase ran standalone or inside `/li:cycle`:
 
 ```bash
-source "$LINTEL_REPO_ROOT/lib/cycle-footer.sh"   # fallback: "$(git rev-parse --show-toplevel)/lib/cycle-footer.sh"
+source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/lib/cycle-footer.sh"   # fallback: "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/lib/cycle-footer.sh"
 render_cycle_footer                               # reads .claude/runtime/state/00-state.md; --compact for short replies
 ```
 

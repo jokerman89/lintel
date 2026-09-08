@@ -139,7 +139,7 @@ nc=$(grep -cE '"name":' "$PJ" 2>/dev/null || echo 0)
 grep -qE '"name":[[:space:]]*"poison"' "$PJ" 2>/dev/null && pass "manifest name is the real pack name" || fail "manifest name hijacked"
 if command -v jq >/dev/null 2>&1; then
   jq . "$PJ" >/dev/null 2>&1 && pass "plugin.json parses as valid JSON (jq)" || fail "plugin.json invalid JSON after hostile --description"
-  [ "$(jq -r .name "$PJ" 2>/dev/null)" = "poison" ] && pass "jq .name == poison (not hijacked)" || fail "jq .name was hijacked"
+  [ "$(jq -b -r .name "$PJ" 2>/dev/null)" = "poison" ] && pass "jq .name == poison (not hijacked)" || fail "jq .name was hijacked"
 else
   echo "  SKIP: jq not present — structural name-key checks only"
 fi

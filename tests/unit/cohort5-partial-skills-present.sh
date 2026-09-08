@@ -2,8 +2,8 @@
 # tests/unit/cohort5-partial-skills-present.sh
 #
 # Verifies v3.6 cohort 5-partial skills present + frontmatter.
-# Cohort 5-partial ships: safe-install (5.1) + az-discover-presale (5.4-slot) +
-# security-genomlysning (5.5-slot) + compliance-gate (6.10).
+# Cohort 5-partial ships: safe-install (5.1) + two engagement-specific slots that now
+# live in a company pack rather than the spine + compliance-gate (6.10).
 # tag: v3.6 cohort-5-partial
 
 set -uo pipefail
@@ -17,8 +17,8 @@ fail() { echo "  FAIL: $1"; FAILED=1; }
 echo "tests/unit/cohort5-partial-skills-present.sh"
 echo "==========================================="
 
-# Generic cohort-5 skills that stay (az-discover-presale + security-genomlysning
-# moved to lintel-caip-pack in the v4.7 CAIP extraction)
+# The generic cohort-5 skills Lintel ships. Engagement-specific variants come
+# from a company pack and are tested with that pack.
 COHORT5_SKILLS=(safe-install compliance-gate)
 for skill in "${COHORT5_SKILLS[@]}"; do
   f="$REPO_ROOT/skills/$skill/SKILL.md"

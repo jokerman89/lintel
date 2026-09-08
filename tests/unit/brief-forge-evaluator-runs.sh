@@ -132,8 +132,8 @@ else
   fail "completeness missed gap → score=$score (expected ≤80)"
 fi
 
-# ─── Scenario 4 removed: trailblazer_alignment evaluator moved to an external
-#     pack (lintel-caip-pack) in the v4.7 CAIP extraction. The pack repo tests it. ───
+# ─── Scenario 4 removed: it exercised a pack-supplied voice evaluator. Such
+#     evaluators are tested alongside the pack that defines them. ───
 
 # ─── Scenario 5: envelope construction roundtrip ─────────────────────────
 echo ""

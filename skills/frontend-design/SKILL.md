@@ -28,7 +28,7 @@ Reads operator brief → dispatches typography + motion sub-skills **in parallel
 
 ## When to use
 
-- "Lex Sweden gets a copilot landing page" — full end-to-end mode for production-ready design
+- "A landing page for our legal-research assistant" — full end-to-end mode for production-ready design
 - Customer demo that must look Awwwards-grade
 - Internal microsite where visual quality affects adoption
 - Multi-format engagement where /li:cycle BUILD-phase produces an app + design must match the pitch
@@ -73,7 +73,7 @@ design decision:
 
 ```bash
 dna="${LINTEL_SKILLS_DIR:-skills}/design-dna"   # LINTEL_SKILLS_DIR = this skill's base-dir parent (plugin installs)
-source "${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}/lib/pack-resolver.sh" 2>/dev/null \
+source "${LINTEL_SOURCE_ROOT:-${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}}/lib/pack-resolver.sh" 2>/dev/null \
   || source "$HOME/.lintel/lib/pack-resolver.sh" 2>/dev/null
 profile="$(resolve_pack_field design.profile 2>/dev/null)"
 [ -z "$profile" ] || [ "$profile" = "null" ] && profile="anthropic-default"

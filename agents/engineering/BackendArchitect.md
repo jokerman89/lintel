@@ -81,7 +81,7 @@ Cost: high
 - Bulkhead: per-service connection pool
 
 ## Observability
-- Tracing: OpenTelemetry SDK, export to Azure Monitor
+- Tracing: OpenTelemetry SDK, exported to whichever backend the project uses
 - Metrics: RED (Rate, Errors, Duration) per endpoint
 - Structured logs: JSON, correlation ID per request
 

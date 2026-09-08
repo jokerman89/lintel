@@ -216,7 +216,7 @@ Distribution: operator-driven. Verify the provenance chain (PROV-7f8a2) before s
 
 **Standard pitch deck:**
 ```
-> /generate-ppt --brief docs/engagement/customer-A-pitch-brief.md --template pitch-deck --audience "Nordic public sector CIO"
+> /generate-ppt --brief docs/engagement/customer-A-pitch-brief.md --template pitch-deck --audience "public-sector CIO"
 [Architect designs, pptxgenjs generates, 4 gates pass]
 ✓ Deck at ./customer-A-arc-pitch.pptx. Provenance PROV-7f8a2.
 ```

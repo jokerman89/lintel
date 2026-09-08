@@ -6,17 +6,20 @@
 #
 # Usage:
 #   bin/li-wiki-gen                       # regenerate both outputs
-#   bin/li-wiki-gen --check               # exit 1 if regen would change anything
+#   bin/li-wiki-gen --check               # exit 1 if generated output has drifted
 #   bin/li-wiki-gen --wiki-only           # only docs/wiki/
 #   bin/li-wiki-gen --showcase-only       # only docs/showcase/
 #   bin/li-wiki-gen --output <dir>        # custom output base
 #
 # Exit codes:
 #   0 = generation complete (or --check found no diffs)
-#   1 = --check found diffs (used by CI; warn-only)
+#   1 = --check found diffs (used by CI)
 #   2 = invocation error
 
 set -uo pipefail
+
+# Generated reference order must not depend on the operator/runner locale.
+export LC_ALL=C
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 OUTPUT_BASE="$REPO_ROOT"
@@ -58,6 +61,8 @@ mkdir -p "$WIKI_DIR" "$(dirname "$SHOWCASE_FILE")" 2>/dev/null
 get_fm_field() {
   local file="$1" field="$2"
   awk -v field="$field" '
+    { sub(/\r$/, "" ) }
+    { sub(/\r$/, "") }
     /^---$/ { if (++fm == 2) exit; next }
     fm == 1 && $0 ~ "^"field":" {
       sub("^"field":[[:space:]]*", "")
@@ -80,22 +85,39 @@ get_fm_fields_batch() {
       n = split(fields, fnames, " ")
       for (i = 1; i <= n; i++) want[fnames[i]] = 1
     }
-    /^---$/ { if (++fm == 2) exit; next }
+    { sub(/\r$/, "") }
+    /^---$/ {
+      if (++fm == 2) {
+        if (cli_block) print "cli_support=[" clis "]"
+        exit
+      }
+      next
+    }
     fm == 1 {
+      if (cli_block) {
+        if ($0 ~ /^[[:space:]]+- cli:/) {
+          v=$0; sub(/^[[:space:]]+- cli:[[:space:]]*/, "", v)
+          clis=clis (clis == "" ? "" : ", ") v
+          next
+        }
+        if ($0 ~ /^[^[:space:]]/) {
+          print "cli_support=[" clis "]"; cli_block=0
+        } else next
+      }
       for (f in want) {
         if ($0 ~ "^"f":") {
-          v = $0
+          v=$0
           sub("^"f":[[:space:]]*", "", v)
           sub("[[:space:]]*#.*$", "", v)
           gsub(/^[[:space:]]+|[[:space:]]+$/, "", v)
-          print f "=" v
           delete want[f]
+          if (f == "cli_support" && v == "") { cli_block=1; next }
+          print f "=" v
         }
       }
     }
   ' "$file"
 }
-
 # ─── Generate wiki: skills index ──────────────────────────────────────────
 gen_wiki_skills() {
   local out="$WIKI_DIR/skills.md"
@@ -227,7 +249,7 @@ gen_wiki_schemas() {
 gen_wiki_readme() {
   local out="$WIKI_DIR/README.md"
   local ts
-  ts="${WGEN_TS:-$(date -u +"%Y-%m-%dT%H:%M:%SZ")}"
+  ts="${WGEN_TS:-source snapshot; see Git history}"
   cat > "$out" <<EOF
 # Lintel wiki — generated reference
 
@@ -260,7 +282,7 @@ EOF
 gen_showcase() {
   local out="$SHOWCASE_FILE"
   local ts
-  ts="${WGEN_TS:-$(date -u +"%Y-%m-%dT%H:%M:%SZ")}"
+  ts="${WGEN_TS:-source snapshot; see Git history}"
 
   local skill_count agent_count pack_count
   skill_count=$(find "$REPO_ROOT/skills" -name "SKILL.md" -type f 2>/dev/null | wc -l | tr -d ' ')
@@ -272,9 +294,11 @@ gen_showcase() {
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Lintel — the harness</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Open-source session workflows for GitHub Copilot teams: specs, build cards, reviews and durable memory.">
+<title>Lintel — repeatable GitHub Copilot sessions</title>
 <style>
-  :root { --bg: #0a0a0a; --fg: #e8e8e8; --accent: #00ff9c; --muted: #6a6a6a; }
+  :root { --bg: #0a0a0a; --fg: #e8e8e8; --accent: #00ff9c; --muted: #a0a0a0; }
   * { box-sizing: border-box; }
   body { background: var(--bg); color: var(--fg); font-family: ui-monospace, SFMono-Regular, Consolas, monospace; margin: 0; padding: 4rem 6rem; line-height: 1.6; }
   h1 { font-size: 3rem; letter-spacing: -0.04em; color: var(--accent); margin: 0 0 0.5rem; }
@@ -288,13 +312,18 @@ gen_showcase() {
   th, td { text-align: left; padding: 0.5rem 1rem; border-bottom: 1px solid var(--muted); }
   th { color: var(--accent); }
   .meta { color: var(--muted); font-size: 0.85rem; margin-top: 4rem; }
-  .meta a { color: var(--accent); }
+  a { color: var(--accent); }
+  a:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+  @media (max-width: 700px) { body { padding: 2rem 1rem; } .grid { grid-template-columns: 1fr; gap: 1rem; } table { display: block; overflow-x: auto; } }
 </style>
 </head>
 <body>
 
 <h1>Lintel</h1>
-<div class="tagline">the harness — scaffolding that makes AI-augmented engineering compound</div>
+<div class="tagline">Repeatable GitHub Copilot sessions for teams.</div>
+<p>Turn an approved spec into build cards, reviewed changes and reusable session memory. Keep team standards in a versioned pack and project decisions in your repository.</p>
+<nav aria-label="Get started"><a href="https://github.com/jokerman89/lintel/blob/main/docs/getting-started.md">Get started</a> · <a href="https://github.com/jokerman89/lintel/blob/main/docs/copilot.md">Copilot guide</a> · <a href="https://github.com/jokerman89/lintel/blob/main/docs/enterprise-adoption.md">Enterprise adoption</a> · <a href="https://github.com/jokerman89/lintel/blob/main/docs/spec-kit.md">Spec Kit</a></nav>
+<p>Public beta. Native Copilot adapters support CLI, VS Code and GitHub cloud workflows. Lintel hooks are currently implemented for Claude Code; enforce organization controls through host policies and CI.</p>
 
 <div class="grid">
   <div class="stat">
@@ -316,7 +345,7 @@ gen_showcase() {
 <table>
   <thead><tr><th>Layer</th><th>What lives here</th></tr></thead>
   <tbody>
-    <tr><td>foundation</td><td>cycle, plan, sense, define, discover, build, review, ship, capture</td></tr>
+    <tr><td>foundation</td><td>cycle, sense, scope, define, discover, plan, build, review, ship, capture</td></tr>
     <tr><td>workflow</td><td>orientator, brief-forge, pack-*, v4-migrate</td></tr>
     <tr><td>schemas</td><td>pack-schema.yaml, envelope-schema.yaml</td></tr>
     <tr><td>tools</td><td>li-envelope-validate, li-envelope-replay, li-wiki-gen, li-compat-audit</td></tr>
@@ -332,7 +361,7 @@ gen_showcase() {
   <thead><tr><th>Contract</th><th>What it does</th><th>Where</th></tr></thead>
   <tbody>
     <tr><td>Pack manifest</td><td>Declarative identity per team or domain</td><td>lib/pack-schema.yaml</td></tr>
-    <tr><td>Envelope</td><td>Universal shape for every hand-off (HEAD + BODY + TAIL)</td><td>lib/envelope-schema.yaml</td></tr>
+    <tr><td>Envelope</td><td>Optional structure for hand-offs (HEAD + BODY + TAIL)</td><td>lib/envelope-schema.yaml</td></tr>
     <tr><td>Meta-infra discipline</td><td>4 mandatory gates (M1-M4) on scaffolding changes</td><td>skills/cycle, bin/li-compat-audit</td></tr>
   </tbody>
 </table>
@@ -349,51 +378,46 @@ EOF
 }
 
 # ─── Main ─────────────────────────────────────────────────────────────────
+# Regenerate README's capability section from the single source, preserving prose.
+gen_cli_table() {
+  source "$REPO_ROOT/lib/cli-tiers.sh"
+  local readme="$OUTPUT_BASE/README.md"
+  [ -f "$readme" ] || readme="$REPO_ROOT/README.md"
+  cli_tiers_markdown_table > "$TMP_DIR/cli-table.md"
+  awk -v table="$TMP_DIR/cli-table.md" '
+    /CLI-TIERS:START/ { print; while ((getline line < table) > 0) print line; close(table); skip=1; starts++; next }
+    /CLI-TIERS:END/ { skip=0; ends++ }
+    !skip { print }
+    END { if (starts != 1 || ends != 1) exit 2 }
+  ' "$readme" > "$TMP_DIR/readme-generated.md" || return 2
+  cp "$TMP_DIR/readme-generated.md" "$OUTPUT_BASE/README.md"
+}
+
 if [ "$CHECK" -eq 1 ]; then
-  # Compare against current; exit 1 if anything would change.
-  # Snapshot current state
-  CUR_STATE=$(mktemp)
-  trap 'rm -f "$CUR_STATE"; rm -rf "$TMP_DIR"' EXIT
-  {
-    find "$WIKI_DIR" -type f -exec md5sum {} \; 2>/dev/null
-    [ -f "$SHOWCASE_FILE" ] && md5sum "$SHOWCASE_FILE"
-  } | sort > "$CUR_STATE"
-
-  # Regen to a tmp output base
-  OUTPUT_BASE="$TMP_DIR"
-  WIKI_DIR="$TMP_DIR/docs/wiki"
-  SHOWCASE_FILE="$TMP_DIR/docs/showcase/lintel-the-harness.html"
+  BASELINE="$OUTPUT_BASE"
+  OUTPUT_BASE="$TMP_DIR/generated"
+  WIKI_DIR="$OUTPUT_BASE/docs/wiki"
+  SHOWCASE_FILE="$OUTPUT_BASE/docs/showcase/lintel-the-harness.html"
   mkdir -p "$WIKI_DIR" "$(dirname "$SHOWCASE_FILE")"
-
+  [ ! -f "$BASELINE/README.md" ] || cp "$BASELINE/README.md" "$OUTPUT_BASE/README.md"
   gen_wiki_readme >/dev/null
   gen_wiki_skills >/dev/null
   gen_wiki_agents >/dev/null
   gen_wiki_packs >/dev/null
   gen_wiki_schemas >/dev/null
   gen_showcase >/dev/null
-
-  NEW_STATE=$(mktemp)
-  {
-    find "$WIKI_DIR" -type f -exec md5sum {} \; 2>/dev/null | sed "s|$TMP_DIR/||"
-    [ -f "$SHOWCASE_FILE" ] && md5sum "$SHOWCASE_FILE" | sed "s|$TMP_DIR/||"
-  } | sort > "$NEW_STATE"
-
-  # Strip path prefix from CUR_STATE for comparison
-  CUR_STRIP=$(mktemp)
-  sed "s|$OUTPUT_BASE/||g" "$CUR_STATE" | sort > "$CUR_STRIP"
-
-  if diff -q "$CUR_STRIP" "$NEW_STATE" >/dev/null 2>&1; then
-    echo "li-wiki-gen --check: clean (no regeneration needed)"
-    rm -f "$CUR_STATE" "$NEW_STATE" "$CUR_STRIP"
-    exit 0
-  else
-    echo "li-wiki-gen --check: DIFF (warn-only)"
-    diff "$CUR_STRIP" "$NEW_STATE" || true
-    rm -f "$CUR_STATE" "$NEW_STATE" "$CUR_STRIP"
-    exit 1
-  fi
+  gen_cli_table || exit 2
+  CHANGED=0
+  for relative in README.md docs/wiki/README.md docs/wiki/skills.md docs/wiki/agents.md docs/wiki/packs.md docs/wiki/schemas.md docs/showcase/lintel-the-harness.html; do
+    if [ ! -f "$BASELINE/$relative" ] || ! diff -q <(tr -d '\r' < "$BASELINE/$relative") <(tr -d '\r' < "$OUTPUT_BASE/$relative") >/dev/null; then
+      echo "STALE: $relative (run bash bin/li-wiki-gen)"
+      CHANGED=1
+    fi
+  done
+  [ "$CHANGED" -eq 0 ] || exit 1
+  echo 'li-wiki-gen --check: clean'
+  exit 0
 fi
-
 if [ "$WIKI_ONLY" -eq 0 ] && [ "$SHOWCASE_ONLY" -eq 0 ]; then
   WIKI_ONLY=1
   SHOWCASE_ONLY=1
@@ -412,4 +436,5 @@ if [ "$SHOWCASE_ONLY" -eq 1 ]; then
 fi
 
 echo ""
+gen_cli_table || exit 2
 echo "li-wiki-gen: complete"

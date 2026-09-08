@@ -56,7 +56,7 @@ source "$AUDIT_LIB"
 _json_field() {
   local key="$1"
   if command -v jq >/dev/null 2>&1; then
-    printf '%s' "$INPUT" | jq -r --arg k "$key" '.[$k] // empty' 2>/dev/null
+    printf '%s' "$INPUT" | jq -b -r --arg k "$key" '.[$k] // empty' 2>/dev/null
     return 0
   fi
   # Regex fallback: quoted string value

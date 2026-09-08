@@ -18,7 +18,7 @@ This skill is a **scaffolding slot** per L-001 (Lintel = scaffolding, not curate
 
 ## Why a slot exists
 
-PDF is a common terminal artifact (kund-leverans, archival), but typically generated FROM another format (PPT export → PDF, DOCX export → PDF, web print → PDF). Having a slot here is signal that operator-AI may be asked to handle this case; pre-baking content would violate L-001 because PDF-generation strategy depends on the source format chosen at invocation time.
+PDF is a common terminal artifact (client deliverable, archival), but typically generated FROM another format (PPT export → PDF, DOCX export → PDF, web print → PDF). Having a slot here is signal that operator-AI may be asked to handle this case; pre-baking content would violate L-001 because PDF-generation strategy depends on the source format chosen at invocation time.
 
 ## At-invocation contract
 

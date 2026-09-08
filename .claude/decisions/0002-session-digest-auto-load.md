@@ -2,7 +2,7 @@
 
 - **Status:** Accepted
 - **Date:** 2026-06-05
-- **Deciders:** jokerman89 (operator), Claude Code (implementer)
+- **Deciders:** jokerman89 (operator)
 - **Supersedes:** —
 - **Superseded by:** —
 

@@ -1,4 +1,4 @@
-# Lintel alias-mekanism — single source of truth
+# Lintel alias mechanism — single source of truth
 #
 # Per design: .claude/engineering/design-archive/lintel-v3.6-alias-mechanism.md (Approach C — central dispatcher)
 # Naming decisions: .claude/engineering/design-archive/lintel-v3.6-cohort4-naming-decisions.md (WS-4a + WS-4b)
@@ -26,7 +26,8 @@ skill_aliases:
     removal_at: 2026-09-10
     reason: "T19 consolidation completed — the check lives at /li:context-budget --watch; the thin delegator skill is removed (punch-list §18 #6)"
 
-  # (agt-tier-stamp → agent-tier-stamp alias removed with the skill — now in lintel-caip-pack)
+  # (the tier-stamp alias retired together with the skill it pointed at; that whole surface is
+  #  pack-supplied now, so neither the alias nor its target belongs in the spine)
   # (setup-brain/sync-brain → gbrain-* aliases retired with the skills — ADR-0009 0-ref pruning;
   #  gbrain's query loop was never integrated and nothing referenced the setup/sync surface)
 

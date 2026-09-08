@@ -15,8 +15,8 @@
 
 set -uo pipefail
 
-REPO_ROOT="${LINTEL_REPO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." 2>/dev/null && pwd)}"
-SCHEMA="$REPO_ROOT/lib/envelope-schema.yaml"
+SOURCE_ROOT="${LINTEL_SOURCE_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." 2>/dev/null && pwd)}"
+SCHEMA="$SOURCE_ROOT/lib/envelope-schema.yaml"
 QUIET=0
 INPUT=""
 STDIN_MODE=0

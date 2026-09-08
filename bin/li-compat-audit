@@ -13,7 +13,6 @@
 #
 # Usage:
 #   bin/li-compat-audit --against <ref>            # compare HEAD vs git ref
-#   bin/li-compat-audit --diff <patch-file>        # apply patch + audit
 #   bin/li-compat-audit --output <slug>            # custom output filename
 #
 # Default: compares working-tree vs HEAD; output to
@@ -28,8 +27,8 @@ AGAINST=""
 
 while [ $# -gt 0 ]; do
   case "$1" in
-    --against) AGAINST="$2"; shift 2 ;;
-    --output)  SLUG="$2"; shift 2 ;;
+    --against) [ $# -ge 2 ] && [ -n "$2" ] || { echo "--against requires a ref" >&2; exit 2; }; AGAINST="$2"; shift 2 ;;
+    --output)  [ $# -ge 2 ] && [ -n "$2" ] || { echo "--output requires a slug" >&2; exit 2; }; SLUG="$2"; shift 2 ;;
     -h|--help)
       sed -n '2,20p' "$0"; exit 0 ;;
     *) echo "Unknown arg: $1" >&2; exit 2 ;;
@@ -37,16 +36,25 @@ while [ $# -gt 0 ]; do
 done
 
 cd "$REPO_ROOT" || exit 1
+case "$SLUG" in
+  ""|[!a-zA-Z0-9]*|*[!a-zA-Z0-9_-]*) echo "Invalid output slug: $SLUG" >&2; exit 2 ;;
+esac
 
 # Build the diff source
 TMP_DIFF=$(mktemp)
 trap 'rm -f "$TMP_DIFF"' EXIT
 
+# Use one range for every question. Without a ref this includes both staged and
+# unstaged changes; with a ref it reviews committed branch changes. Callers should
+# stage new files first so the compatibility inventory includes them.
+DIFF_RANGE=(HEAD)
 if [ -n "$AGAINST" ]; then
-  git diff "$AGAINST"...HEAD --name-only > "$TMP_DIFF" 2>/dev/null
-else
-  git diff --name-only HEAD > "$TMP_DIFF" 2>/dev/null
+  git rev-parse --verify "${AGAINST}^{commit}" >/dev/null 2>&1 || {
+    echo "Unknown comparison ref: $AGAINST" >&2; exit 2;
+  }
+  DIFF_RANGE=("${AGAINST}...HEAD")
 fi
+git diff --no-ext-diff --no-textconv "${DIFF_RANGE[@]}" --name-only > "$TMP_DIFF" || exit 1
 
 # If no changes, output green-only audit
 if [ ! -s "$TMP_DIFF" ]; then
@@ -72,11 +80,10 @@ fi
 # ─── Q1: frontmatter contract changes ────────────────────────────────────
 Q1_FILES=()
 while IFS= read -r file; do
-  [ -f "$file" ] || continue
   case "$file" in
     skills/*/SKILL.md|agents/*/*.md|hooks/*/HOOK.md)
       # Check if the change touches frontmatter (lines 1-15 typically)
-      if git diff -- "$file" 2>/dev/null | grep -E "^[+-][a-z_]+:" | grep -qv "^[+-][+-][+-]"; then
+      if git diff --no-ext-diff --no-textconv "${DIFF_RANGE[@]}" -- "$file" | grep -E "^[+-][a-z_]+:" | grep -qv "^[+-][+-][+-]"; then
         Q1_FILES+=("$file")
       fi
       ;;
@@ -85,18 +92,16 @@ done < "$TMP_DIFF"
 
 # ─── Q2: renames/moves ────────────────────────────────────────────────────
 Q2_FILES=()
-if [ -n "$AGAINST" ]; then
-  while IFS= read -r line; do
-    Q2_FILES+=("$line")
-  done < <(git diff "$AGAINST"...HEAD --name-status 2>/dev/null | grep -E "^R" | awk '{print $2 " → " $3}')
-fi
+while IFS= read -r line; do
+  Q2_FILES+=("$line")
+done < <(git diff --no-ext-diff --no-textconv "${DIFF_RANGE[@]}" --name-status | grep -E "^R" | awk '{print $2 " → " $3}')
 
 # ─── Q3: new-default on previously-optional fields ────────────────────────
 Q3_FILES=()
 while IFS= read -r file; do
   case "$file" in
     skills/*/SKILL.md|agents/*/*.md|hooks/*/HOOK.md|packs/*/pack.yaml|lib/*.yaml)
-      if git diff -- "$file" 2>/dev/null | grep -qE "^[+][a-z_]+:[[:space:]]+[^[:space:]]"; then
+      if git diff --no-ext-diff --no-textconv "${DIFF_RANGE[@]}" -- "$file" | grep -qE "^[+][a-z_]+:[[:space:]]+[^[:space:]]"; then
         Q3_FILES+=("$file")
       fi
       ;;

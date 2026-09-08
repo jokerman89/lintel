@@ -1,269 +1,133 @@
-# Compliance
+# Compliance and control boundaries
 
-Lintel ships a **small neutral baseline**: three rules, two of which are enforced mechanically. Everything
-stricter — regulated-industry gates, data-residency rules, voice enforcement — comes from an installed
-**pack**, not from the harness. The harness itself is company-neutral and asserts no regulatory posture.
+Lintel provides workflow instructions and a small set of local checks. Organisation-specific
+policy references and gates belong in an installed pack. Lintel itself asserts no regulatory
+posture and provides no certification, attestation or data-loss-prevention guarantee.
 
-Read this page as a description of a mechanism, not as a compliance claim. Lintel is not a certification,
-an attestation, or a data-loss-prevention system. It is a set of narrow, auditable checks that make the
-common mistakes harder to make by accident.
+## Neutral baseline
 
----
+The shared instructions establish three basic rules:
 
-## The neutral baseline
+1. Keep customer and sensitive personal information out of this public tooling repository.
+2. Keep credentials out of code, logs, commits and shared prompts; use approved secret mechanisms.
+3. Obtain the required authorization before production mutations or changes to shared access.
 
-Three rules apply on every install, with no pack and no configuration:
+A downstream project must add its own data classification, authority and handling rules. The
+neutral `_default` pack uses `compliance.mode: advisory` and no company-specific gate list.
+That is a starting point, not a substitute for the organisation's policy.
 
-1. **No customer data in the repo.** Anything tied to a named customer, tenant, or end user stays out of
-   source control. Synthetic and public-domain data is fine.
-2. **No secrets in code, logs, commits, or chat.** API keys, tokens, connection strings with credentials,
-   private keys. Use an environment variable that resolves from a secret store.
-3. **Production mutations need explicit per-call authorization.** Live database changes outside the
-   migrations pipeline, deploy-pipeline triggers, image pushes to a live registry, role and firewall
-   changes. Auto-mode covers local work; it does not cover these.
+## Instructions versus controls
 
-That is the whole baseline. It is deliberately short — a longer neutral list would be guessing at
-constraints Lintel cannot know.
-
----
-
-## What is enforced, and what is only advice
-
-| Baseline rule | Mechanism | Effect |
+| Mechanism | Behavior | Activation and limitation |
 |---|---|---|
-| No customer data | `customer-data-block` hook | **Blocks** `git commit` / `git push` |
-| No secrets | `secret-scan-block` hook | **Blocks** `git commit` / `git push` |
-| No secrets (earlier) | `no-secrets-in-edit` hook | Warns at `Edit` / `Write`, does not block |
-| No customer data (earlier) | `no-customer-data-in-message` hook | Warns on your prompt text, does not block |
-| Production mutations | none auto-registered | **Advice only.** A warn-only hook exists but is opt-in |
+| Session checklist | Agent checks authority, sensitive data, production impact and secrets | Instruction-driven; not a tool permission system |
+| Pack gate list | Workflow resolves declared checks and reports their outcomes | Pack must supply usable checks; invocation depends on the workflow |
+| Claude Code secret/customer-data hooks | Pattern scans recognized Git commit/push tool calls | Selected hooks registered by Claude plugin; limited coverage and explicit overrides |
+| Claude Code warning/context hooks | Surface edits, prompts, state and workflow warnings | Warning does not block; not every hook is registered by default |
+| Copilot repository kit | Native workflow skills and specialist agent profiles | No Lintel hook adapter installed |
+| Repository protection and CI | Team-owned merge, test and access controls | Configure and validate independently of Lintel |
 
-The honest summary: rules 1 and 2 have teeth at the commit boundary. Rule 3 is a checklist item the agent
-is instructed to respect. An opt-in hook, `no-production-mutation-without-auth`, pattern-matches a handful
-of shapes — a `kubectl` call against a production namespace, `terraform apply` against a production
-workspace, a production database client — and warns. It never blocks, and it is off unless you arm it.
+Copilot supports native hooks, but Lintel's existing Claude Code hook bundle is not translated to
+that API in this release. See [Copilot](copilot.md#hooks-and-security-controls). Other clients'
+actual Lintel integration is described by the generated
+[capability table](../README.md#multi-cli-support).
 
-**Hooks fire on Claude Code only.** `lib/cli-tiers.yaml` is the source of truth, and Claude Code is the one
-CLI with `hooks_supported: true`. On Codex, Cursor, Gemini CLI, OpenCode, GitHub Copilot CLI, Factory
-Droid, and everything else, the baseline is instruction text the agent is asked to follow — nothing
-intercepts a command. See [multi-CLI support](multi-cli.md) for the full degradation table.
+## Claude Code block hooks
 
----
+`secret-scan-block` and `customer-data-block` run on the Claude Code `PreToolUse` Bash event.
+They recognize command strings containing Git commit/push operations, including selected `git -C`
+and chained forms. They inspect added lines from staged and unstaged tracked changes; push
+inspection additionally considers the outgoing commit range, with a bounded fallback when there
+is no upstream. The implementation is in `hooks/shared/_input.sh` and `_patterns.sh`.
 
-## How the two block hooks work
+The scanners use regular expressions for selected token and personal-data formats. They do not
+provide complete history scanning, entropy detection or universal recognition of private data.
+Novel credential formats may pass, and benign contact details may trigger the customer-data
+scanner. Scanner loading failure blocks recognized Git operations unless explicitly overridden.
 
-Both run as a `PreToolUse` hook on the `Bash` tool and exit non-zero to stop the call.
+These are agent tool-call interceptors, not installed Git pre-commit/pre-push hooks. Direct human
+terminal commands, IDE operations and indirect command execution may bypass them. The hook's
+exit code is meaningful in Claude Code's protocol; copying the script to another client's hook
+configuration does not establish equivalent behavior.
 
-**When they fire.** Only when the command contains a `git` invocation with `commit` or `push`. The match
-is word-boundary based and survives `git -C some/path commit`, an absolute path to the binary, a
-`cd x && git commit` chain, and a newline continuation between `git` and the subcommand.
+## Overrides and local evidence
 
-**What they read.** The added lines of the staged diff plus unstaged changes to tracked files, in the
-working directory and in every `git -C` target named on the command line. Not the whole repo, and not
-history — a secret already sitting in an earlier commit is not detected.
-
-**What they look for.** Fixed regular expressions, defined once in `hooks/shared/_patterns.sh`:
-
-- Secrets, high-confidence set only: GitHub tokens and fine-grained personal access tokens, OpenAI and
-  Anthropic keys, Slack tokens, AWS access key ids, Google API keys, Stripe keys, GitLab personal access
-  tokens, storage account keys, and PEM private-key headers.
-- Customer data: email addresses, phone numbers, national identity numbers, and a
-  person-name-plus-case-id shape.
-
-The warn-only edit hook uses a broader set that adds two heuristics — a hardcoded-password shape and a
-shared-access-key prefix. Those are excluded from the blocking hooks on purpose: they false-positive often
-enough that blocking on them would be worse than useless.
-
-**What they miss.** There is no entropy scanning and no model in the loop. A credential that does not match
-one of those shapes — a bespoke internal token format, a password in an unusually named field — passes
-through. Equally, the email pattern is broad: any address in a diff trips the customer-data block,
-including a maintainer address in a changelog. Expect to override that one.
-
-**They fail closed.** If the pattern library fails to load while a commit is in flight, the hooks block
-rather than allow, and the error message names the override you need.
-
-**They do not see commits you make yourself.** The hook intercepts the agent's `Bash` tool calls. A commit
-typed in your own terminal, made from an IDE, or made inside a script the agent merely launches is never
-inspected. This is a guardrail on the agent, not on the repository.
-
----
-
-## Overriding a block
-
-An override is one environment flag on the command, plus a reason, plus an audit record:
+A permitted exception can use the hook's explicit override flag, for example:
 
 ```bash
-LINTEL_OVERRIDE_SECRET=1 LINTEL_OVERRIDE_REASON="known test fixture, not a live key" git commit -m "test: add fixture"
-
-LINTEL_OVERRIDE_CUSTOMER_DATA=1 LINTEL_OVERRIDE_REASON="maintainer address in changelog" git commit -m "docs: changelog"
+LINTEL_OVERRIDE_SECRET=1 LINTEL_OVERRIDE_REASON="synthetic test fixture" git commit -m "test: add fixture"
 ```
 
-Three things worth knowing:
+The customer-data equivalent is `LINTEL_OVERRIDE_CUSTOMER_DATA=1`. Overrides can be supplied in
+the hook environment or a leading command assignment; a token in a commit-message argument
+must not count as authorization. The hook attempts to append an override event to its local
+audit file. Reasons are useful context but are not a required mechanical precondition.
 
-- **The flag must be a leading environment assignment**, or already set in the hook's own environment. The
-  same token appearing inside a quoted argument — a commit message, for instance — does not count. That
-  was a real bypass, and closing it was deliberate.
-- **The reason is recorded, not required.** Omit `LINTEL_OVERRIDE_REASON` and the audit record reads
-  `no-reason-given`. The flag alone unblocks; the reason is what makes the record useful later.
-- **The override is checked before the scan**, so an override always leaves a record — including when the
-  content would not have tripped a pattern anyway.
+Audit records live under `.claude/runtime/audit/` for the current repository layout, with a
+machine-global fallback under `~/.lintel/audit/`. They are ordinary files: an owner can edit them,
+and a failed write can leave an action unrecorded. Use `/li:audit` or `/li:hooks-status` on a
+supported full catalog installation to inspect evidence; do not treat absence of a record as
+proof that an operation did not happen.
 
-Every fire and every override appends a JSON line to `hooks.jsonl` in the audit trail:
-`<repo>/.claude/runtime/audit/` on a repo using the current layout, otherwise `~/.lintel/audit/`. Read it
-with `/li:audit` for raw records, or `/li:hooks-status` for the roll-up of which hooks are firing and how
-often they are overridden.
+## Hook activation
 
-The audit trail is an append-only local file. It is not tamper-evident and it is not shipped anywhere:
-anyone who can write to the repo can edit it. Writes fail open — a full disk produces a warning on stderr
-rather than a failed commit — so absence of a record is weaker evidence than presence of one.
+The authoritative Claude Code registrations are in `hooks/hooks.json`. A Claude plugin install
+registers those selected hooks. Other hook directories are opt-in and need both a reachable
+script and host registration. The bare installer copies hook resources without automatically
+merging the operator's settings. The Copilot repository kit installs no hook configuration.
+[Getting started](getting-started.md#how-hook-activation-works) compares the routes.
 
----
+Neither installing a pack nor selecting `compliance.mode: hard` automatically ports or registers
+an executable hook. Pack compliance configuration and host hook activation are separate layers.
 
-## Which hooks are on by default
+## Pack compliance fields
 
-The repo carries **33 hooks**. On a plugin install, **9 auto-register** through `hooks/hooks.json` with no
-setup on your part:
+The schema of record is `lib/pack-schema.yaml`. A pack can declare a compliance mode, named gates,
+audit-related settings and data-residency metadata. Resolve values using `resolve_pack_field`
+instead of duplicating policy defaults in skills.
 
-| Hook | Trigger | Kind |
-|---|---|---|
-| `secret-scan-block` | Bash | **block** |
-| `customer-data-block` | Bash | **block** |
-| `no-direct-main-push` | Bash | warn |
-| `no-secrets-in-edit` | Edit / Write | warn |
-| `no-customer-data-in-message` | your prompt | warn |
-| `cycle-incomplete-warn` | turn end | warn |
-| `memory-budget-warn` | Edit / Write | warn |
-| `session-digest` | session start | context |
-| `cycle-position-inject` | your prompt | context |
+- `advisory` asks the workflow to surface gate outcomes without making them delivery blockers.
+- `hard` asks the workflow to stop on a failing declared compliance gate.
+- `off` turns off the pack's compliance workflow; it does not disable separately activated hooks.
 
-The other 24 ship inert — including `no-production-mutation-without-auth`, `no-merge-without-review`,
-`frozen-zone-warn`, and the per-module warning hooks for architecture, data, security, devops, and
-testing. Arm one by symlinking its `run.sh` into your hooks directory and adding a matching entry to your
-CLI settings. Nothing edits your settings file for you.
+The current baseline block scripts do not change their behavior based on the active pack's mode.
+A data-residency label describes intent; it does not configure the model endpoint, provider
+retention, region or network access. A strict requirement needs a corresponding control that
+security/platform owners can verify outside the agent's prose.
 
-A bare install from `install/install.sh` copies every hook inert; **nothing auto-registers on that path**.
-[How hook activation works](getting-started.md#how-hook-activation-works) is the canonical explanation and
-wins over any other description, including this one.
+An extension pack may include executable hooks or tools. Review their source, licenses,
+permissions, host compatibility and failure behavior before enabling them. See
+[pack defaults](concepts/pack-defaults.md) and [pack resolution](concepts/pack-resolver.md).
 
----
+## Before a non-trivial action
 
-## Advisory and hard mode
+The canonical session checklist in [AGENT-INSTRUCTIONS.md](../AGENT-INSTRUCTIONS.md) asks the
+agent to establish task authority, customer-data handling, production impact, secrets exposure
+and active pack requirements. Existing explicit authorization applies to its stated scope;
+resolve a material uncertainty before the dependent action.
 
-The active pack declares a compliance posture in one field, `compliance.mode`, with three values:
-`advisory`, `hard`, or `off`. The neutral `_default` pack is `advisory`.
+For Copilot, keep concise repository guidance in `.github/copilot-instructions.md` and relevant
+path-scoped instructions. Other clients use their own entry files. Reconcile shared Lintel
+workflow rules with the host's actual loading behavior; see [precedence](precedence.md).
 
-**Advisory** — what you get out of the box. SENSE reports the mode at the start of a cycle. The pack's
-gates, if it declares any, are surfaced but not blocking. `_default` declares none, so
-`/li:compliance-gate` returns green with a note that no compliance pack is active.
+## Incident handling
 
-**Hard** — only reachable by installing a pack that sets it. The pack's declared gates become enforced
-rather than advisory; SHIP runs them as a stop the cycle will not proceed past; the pack's voice tier
-applies automatically to customer-facing output; and customer-repo context loads and URL fetches are
-audit-logged.
+If sensitive material is exposed, stop further publication and follow your organisation's
+incident process. Revoke or rotate exposed credentials through the authorized process, preserve
+needed evidence, and make any history rewrite an explicit coordinated action. A local deletion
+alone does not retract material already shared.
 
-**One thing the mode does not change: the two block hooks.** No hook reads the active pack. They block
-under `advisory`, under `hard`, and under `off` alike. Hook activation is an install-time and
-settings-level decision, entirely separate from pack compliance mode. Making hook behaviour pack-driven is
-a known open gap, not a shipped feature — do not plan around it.
+For a vulnerability in Lintel, use [SECURITY.md](../SECURITY.md). Capture a sanitized lesson and
+review why the existing checks missed the problem.
 
----
+## Enterprise evaluation
 
-## What a pack can add
+Review which requirements rely on agent cooperation, which have executable checks and which are
+owned by platform controls. Test the actual Copilot client and environment; a passing installation
+check does not prove compliant execution. Keep project-specific data handling, customer work and
+private pack content in their approved environments.
 
-Compliance fields available to a pack manifest, from the schema of record in `lib/pack-schema.yaml`:
-
-| Field | Required | Meaning |
-|---|---|---|
-| `mode` | yes | `hard` / `advisory` / `off` |
-| `hooks` | no | Named gates the pack contributes. `_default` declares an empty list |
-| `audit_paths` | no | Where the pack's compliance audits are written |
-| `data_residency` | no | `us` / `eu` / `apac` / `none` — default `none` |
-| `workprofile_default` | no | `on` / `off`. A legacy carry-over: SENSE surfaces it, nothing in the neutral spine acts on it. A pack that sets it defines what it means |
-
-`compliance.hooks` is the main extension point. `/li:compliance-gate` resolves that list and runs all of it
-as one green-or-red verdict, so you do not have to remember which gates apply to a given artifact. No gate
-names are built into Lintel; each pack owns its own list.
-
-A pack is also a plugin, so an extension pack can ship its own `hooks/` tree that the host CLI registers
-alongside Lintel's — that is how a pack adds genuine enforcement rather than instructions.
-
-What a pack **cannot** do: switch off the two baseline block hooks, or make anything fire on a CLI that
-does not run hooks. See [pack defaults](concepts/pack-defaults.md) for the full neutral baseline and
-[pack resolver](concepts/pack-resolver.md) for how a field is looked up.
-
----
-
-## The session-start check
-
-Separate from the hooks, and applying on every CLI: the agent is instructed to walk a short checklist
-before any non-trivial action. It is operator-confirmed, not automated — the harness surfaces the items,
-you confirm them.
-
-1. **Authority scope** — is this work inside what the repo's instruction file or the operator authorized?
-   If unclear, ask. Scope does not silently extend to adjacent repos.
-2. **Customer data** — could anything here be customer data? If yes: stop, do not read further, escalate.
-3. **Production mutation** — will this change a shared or live system? If yes: get per-call authorization.
-4. **Secrets** — is a secret entering code, logs, a commit message, or shared chat? If yes: stop and ask
-   for a secret-store reference instead.
-5. **The active pack's gates** — none under `_default`.
-
-Trivial work — a typo fix, a question, a documentation edit — skips it.
-[AGENT-INSTRUCTIONS.md](../AGENT-INSTRUCTIONS.md) is the canonical form of this ritual.
-
----
-
-## When a rule has been broken
-
-The same cleanup pattern the core principles apply to any crossed boundary:
-
-1. Stop. Do not push on hoping the next step undoes it.
-2. Verify current state with read-only checks.
-3. Report honestly — what was done, the state now, the risks.
-4. Propose concrete options with trade-offs. Do not ask for absolution.
-5. Wait for explicit authorization before rolling back or continuing.
-
----
-
-## Adding rules for your own repo
-
-Repo-specific rules go in that repo's own `CLAUDE.md`, or as a path-scoped rule under `.claude/rules/` when
-they apply only to a subtree. They **add** to the baseline; they do not subtract from it. Where two
-instruction sources disagree, [precedence](precedence.md) decides.
-
-Traceability is what makes the rest reviewable: atomic commits, a decision record in `.claude/decisions/`
-for anything non-obvious, and corrections captured in `.claude/memory/lessons.md`. A reviewer should be
-able to reconstruct the reasoning without asking you.
-
----
-
-## What Lintel does not do
-
-Stated plainly, because these are the questions a skeptical evaluator asks:
-
-- **No third-party code is installed, vendored, or updated.** Lintel ships only its own content. The
-  installer clones nothing — `install/upstream-sources.yaml` is a declaration file that the installer
-  reads and counts, and the installer's own output says so. There is consequently no upstream update
-  workflow, no re-verification schedule, and no third-party license obligation passed on to you beyond
-  Lintel's own `LICENSE`.
-- **No uninstall script.** Removing a bare install means deleting `~/.lintel/` and any hook symlinks you
-  created yourself.
-- **No network egress control.** Nothing stops an agent from calling an external service with data it
-  should not send. Rules 1 and 2 are checked at the commit boundary, not at the socket.
-- **No enforcement outside Claude Code.** Repeated because it is the single most important limitation.
-- **No secret rotation and no incident response.** If a secret does reach a remote, treat it as compromised
-  and rotate it. [SECURITY.md](../SECURITY.md) covers reporting a vulnerability in Lintel itself.
-
----
-
-## Reviewing this baseline
-
-Revisit it when a new policy lands that affects agent-based development, when an incident reveals a missing
-rule, or when a rule has been overridden repeatedly — a frequently overridden rule is usually wrong rather
-than usefully strict. `/li:hooks-status` gives you the override counts to make that call on evidence.
-
-Changes to the baseline are load-bearing: record them in `scaffolding/01-foundation/EVOLUTION-LOG.md` as a
-`CORE` entry, since that log travels with the scaffolding into every repo it has been installed in.
-
----
-
-Related: [architecture](architecture.md) for where hooks sit in the system ·
-[the cycle](the-cycle.md) for where the gates fall in a run · [documentation index](README.md).
+Lintel does not provide egress filtering, secret rotation, immutable audit storage, platform role
+management or incident response. Bundled third-party resources have retained notices in
+[design-dna attribution](../skills/design-dna/ATTRIBUTION.md). See
+[enterprise adoption](enterprise-adoption.md) for rollout evidence and ownership.

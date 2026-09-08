@@ -21,7 +21,7 @@ Two modes:
 **Writer mode (manual, operator-invoked):** records one JSONL line per invocation the operator wants counted, via the unified audit writer. There is NO automatic at-skill-invocation trigger — nothing fires this for you (the wrapper-hook this was originally designed around was never built):
 
 ```bash
-source "$(git rev-parse --show-toplevel)/bin/_audit.sh"
+source "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/bin/_audit.sh"
 audit_log usage-skill invocation skill=<name>     # optional: mode=<mode> tokens_est=<n> cli=<cli>
 ```
 
@@ -75,7 +75,7 @@ The foundation that `/li:maintenance` (5.3) and `/li:catalog` (1.6 trends) build
 Run the one-liner from "What this skill does". That is the whole writer — no script, no hook:
 
 ```bash
-source "$(git rev-parse --show-toplevel)/bin/_audit.sh"
+source "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/bin/_audit.sh"
 audit_log usage-skill invocation skill=research mode=full tokens_est=3500 cli=claude-code
 ```
 

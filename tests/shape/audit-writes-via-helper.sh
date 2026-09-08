@@ -55,8 +55,7 @@ _is_shell_script() {
 #   FORM 1 — literal path: the redirect target on the same line names a .jsonl
 #     file directly.  e.g.  printf '{...}' >> "$DIR/foo.jsonl"
 #     (the form the first migration pass removed from bin/_jobs.sh,
-#      bin/_aliases.sh, lib/pack-resolver.sh, lib/brief-forge.sh,
-#      hooks/.../no-trailblazer-without-corpus)
+#      bin/_aliases.sh, lib/pack-resolver.sh, and lib/brief-forge.sh)
 #
 #   FORM 2 — variable indirection: a variable is assigned a value containing a
 #     .jsonl path ANYWHERE in the same file, and the append redirects to that

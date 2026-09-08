@@ -109,7 +109,7 @@ Tools are Read/Bash/Grep/Glob — no Edit/Write — because this agent inspects 
 ## Report format
 
 ```
-WebExperienceCritic: copilot-for-legal-demo.html
+WebExperienceCritic: legal-assistant-demo.html
 
 Variant: single-file
 Audience: legal-tech CIOs

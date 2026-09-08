@@ -58,7 +58,8 @@ hook_input() {
       prompt)    jqf='.prompt // .user_prompt // .message // empty' ;;
       payload|*) jqf='[.tool_input.content?, .tool_input.new_string?, .tool_input.old_string?, .tool_input.command?, .tool_input.file_path?, .prompt?, .message?] | map(select(. != null and . != "")) | join("\n")' ;;
     esac
-    extracted="$(printf '%s' "$json" | jq -r "$jqf" 2>/dev/null || true)"
+    # -b preserves LF on native jq.exe; otherwise MSYS gets CR-suffixed paths.
+    extracted="$(printf '%s' "$json" | jq -b -r "$jqf" 2>/dev/null || true)"
     if [ -n "$extracted" ]; then printf '%s' "$extracted"; return 0; fi
     # jq present but the field was empty: for payload, the raw JSON is still
     # greppable (secret scanners); for a specific field, fall through to argv1.

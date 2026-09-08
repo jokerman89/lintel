@@ -5,7 +5,7 @@ description: Use to check that PLAN and BUILD still match the approved DEFINE de
 color: red
 tools: Read, Bash, Grep, Glob, Write
 voice: internal
-cli_support: [claude-code, codex]
+cli_support: [claude-code, codex, copilot]
 necessity: RECOMMENDED
 gap_if_skipped: "Plan revisions and BUILD deviations go unreconciled against the design doc — drift between what was approved and what shipped is detected only by accident (the spec-kit /analyze hole, Convergent #6)."
 ---
@@ -105,7 +105,7 @@ Close your report with the shared position footer. Outside an active cycle it re
 ambient line; inside one it shows the operator's position + next step:
 
 ```bash
-source "$LINTEL_REPO_ROOT/lib/cycle-footer.sh"   # fallback: "$(git rev-parse --show-toplevel)/lib/cycle-footer.sh"
+source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/lib/cycle-footer.sh"   # fallback: "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/lib/cycle-footer.sh"
 render_cycle_footer                               # auto: thin when no cycle, full/--compact when in one
 ```
 

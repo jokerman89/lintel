@@ -51,8 +51,8 @@ if [ "$mismatch" = "0" ]; then
   pass "all agents' category matches their directory"
 fi
 
-# Expected categories present (company-neutral set; ms-specific + voice moved to
-# external packs, e.g. lintel-caip-pack, as of v4.7 CAIP extraction)
+# Expected categories present — the company-neutral set Lintel ships. A pack may
+# add categories of its own; those ship with the pack, not here.
 EXPECTED_CATEGORIES=(engineering security compliance devops customer communication doc-gen frontend)
 for cat in "${EXPECTED_CATEGORIES[@]}"; do
   if [ -d "$REPO_ROOT/agents/$cat" ]; then

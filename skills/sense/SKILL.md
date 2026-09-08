@@ -5,7 +5,7 @@ description: Use at the very start of a task to read the situation before decidi
 color: cyan
 tools: Read, Bash, Grep, Glob
 voice: internal
-cli_support: [claude-code, codex]
+cli_support: [claude-code, codex, copilot]
 necessity: REQUIRED
 gap_if_skipped: "Cycle runs with no intent detection, mode recommendation, prior-session state, or context-budget read; every downstream phase is mis-scoped and the operator gets no orientation screen."
 ---
@@ -58,7 +58,7 @@ Before reading configuration, scan operator's prompt for breadth-signals indicat
 ```bash
 prompt_text="<operator's last message>"
 
-source "$LINTEL_REPO_ROOT/lib/scale-estimator.sh"
+source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/lib/scale-estimator.sh"
 elephant_score=$(elephant_score "$prompt_text")   # single source (was inline; now lib/scale-estimator.sh detect_breadth)
 ```
 
@@ -143,7 +143,7 @@ Invoke the lightweight orientator agent to recommend a workflow based on operato
 ```bash
 # Run only when operator didn't already specify --mode/--from explicitly
 if [ -z "${flag_mode:-}" ] && [ -z "${flag_from:-}" ]; then
-  source "$LINTEL_REPO_ROOT/lib/orientator-routing.sh"
+  source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/lib/orientator-routing.sh"
 
   intent=$(classify_intent "$prompt_text")
   default_workflow=$(resolve_pack_field navigation.default_workflow)
@@ -175,7 +175,7 @@ Surfaces in SENSE report (Step 7 output) as recommended workflow. Per auto-mode 
 Runs **after** step 0d (so the orientator's route is available to surface alongside size). Mechanical only — no question is ever asked here.
 
 ```bash
-source "$LINTEL_REPO_ROOT/lib/scale-estimator.sh"
+source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/lib/scale-estimator.sh"
 
 scale_size=$(classify_size "$prompt_text")
 scale_amb=$(scale_ambiguous "$prompt_text")
@@ -287,7 +287,7 @@ Approximate current context window utilization. If detectable from prior turns +
 Mechanical since v5.0 (ADR-0008) — one command, not a YAML obligation:
 
 ```bash
-_sl="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}/lib/state.sh"
+_sl="${LINTEL_SOURCE_ROOT:-${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}}/lib/state.sh"
 [ -f "$_sl" ] || _sl="$HOME/.lintel/lib/state.sh"; source "$_sl"   # installed by install.sh in consumer repos
 state_append SENSE DONE next=SCOPE mode_recommended=$recommended_mode intent_detected="$intent" role=$role_active voice_tier=$effective_voice_tier compliance_mode=$compliance_mode meta_infra_detected=$meta_infra_detected meta_paths_changed=$meta_total
 ```
@@ -388,7 +388,7 @@ Close your report with the shared position footer so the operator always knows w
 cycle and the one logical next action — whether this phase ran standalone or inside `/li:cycle`:
 
 ```bash
-source "$LINTEL_REPO_ROOT/lib/cycle-footer.sh"   # fallback: "$(git rev-parse --show-toplevel)/lib/cycle-footer.sh"
+source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/lib/cycle-footer.sh"   # fallback: "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/lib/cycle-footer.sh"
 render_cycle_footer                               # reads .claude/runtime/state/00-state.md; --compact for short replies
 ```
 

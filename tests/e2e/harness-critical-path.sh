@@ -3,14 +3,14 @@
 #              _default pack field through the real parse path, render the cycle
 #              footer from a fixture state. The first real e2e: closes the
 #              "empty tests/e2e/ runs vacuously green" hole (punch-list #5 / P1-3).
-# TAGS: claude-code-only,e2e
+# TAGS: codex-compatible,copilot-compatible,e2e
 # Tags catalog: claude-code-only, codex-compatible, browser-required,
 #               unit, integration, e2e, slow
 
 set -euo pipefail
 
 TEST_NAME="$(basename "${BASH_SOURCE[0]}" .sh)"
-TEST_TMP="$(mktemp -d "/tmp/li:test-${TEST_NAME}-XXXXXX")"
+TEST_TMP="$(mktemp -d "${TMPDIR:-/tmp}/li-test-${TEST_NAME}-XXXXXX")"
 FAILED=0
 
 c_green='\033[32m'; c_red='\033[31m'; c_yellow='\033[33m'; c_reset='\033[0m'
@@ -80,10 +80,11 @@ assert_dir_exists "$SANDBOX_HOME/hooks"
 #    fallback list — a correct value here proves pack.yaml was actually parsed.
 resolver_probe() {
   LINTEL_HOME="$SANDBOX_HOME" \
-  LINTEL_PACKS_DIR="$REPO_ROOT/packs" \
+  LINTEL_PACKS_DIR="$SANDBOX_HOME/packs" \
+  LINTEL_REPO_ROOT="$SANDBOX_HOME" \
   LINTEL_ACTIVE_PACK_FILE="$TEST_TMP/active-pack" \
   LINTEL_SESSION_ID="e2e-$$" \
-  bash -c 'source "'"$REPO_ROOT"'/lib/pack-resolver.sh" && resolve_pack_field "$1"' _ "$1" 2>/dev/null
+  bash -c 'source "$LINTEL_HOME/lib/pack-resolver.sh" && resolve_pack_field "$1"' _ "$1" 2>/dev/null
 }
 printf '_default\n' > "$TEST_TMP/active-pack"
 assert_eq "internal" "$(resolver_probe voice.default_tier)" "resolve voice.default_tier"
@@ -93,9 +94,26 @@ assert_eq "none" "$(resolver_probe voice.enforce)" "resolve voice.enforce (real 
 #    LINTEL_HOME pinned to the sandbox so a pack-sensitive footer change can never
 #    make this test depend on the operator's real ~/.lintel.
 printf 'phase: PLAN\nstatus: DONE\n\nphase: BUILD\nstatus: IN_PROGRESS\nnext_recommended: REVIEW\ncycle_mode: meta-infra\n' > "$TEST_TMP/00-state.md"
-footer_out=$(LINTEL_HOME="$SANDBOX_HOME" bash -c 'source "'"$REPO_ROOT"'/lib/cycle-footer.sh" && render_cycle_footer --ascii --state "'"$TEST_TMP"'/00-state.md"' 2>&1 </dev/null)
+footer_out=$(LINTEL_HOME="$SANDBOX_HOME" bash -c 'source "$LINTEL_HOME/lib/cycle-footer.sh" && render_cycle_footer --ascii --state "$1"' _ "$TEST_TMP/00-state.md" 2>&1 </dev/null)
 assert_contains "$footer_out" "BUILD" "footer: you-are-here phase rendered"
 assert_contains "$footer_out" "/li:review" "footer: next-command derived from state"
+
+# 4. Generate and verify a downstream Copilot repo using only installed assets.
+# This catches wrappers that accidentally resolve skills/shims from the checkout.
+if command -v python3 >/dev/null 2>&1; then
+  fixture="$TEST_TMP/copilot repo"
+  mkdir -p "$fixture"
+  copilot_rc=0
+  copilot_out=$(LINTEL_HOME="$SANDBOX_HOME" bash "$SANDBOX_HOME/bin/li-copilot" init --target "$fixture" 2>&1) || copilot_rc=$?
+  [ "$copilot_rc" -eq 0 ] || printf '%s\n' "$copilot_out"
+  assert_eq "0" "$copilot_rc" "installed Copilot init"
+  copilot_rc=0
+  copilot_out=$(LINTEL_HOME="$SANDBOX_HOME" bash "$SANDBOX_HOME/bin/li-copilot" check --target "$fixture" 2>&1) || copilot_rc=$?
+  [ "$copilot_rc" -eq 0 ] || printf '%s\n' "$copilot_out"
+  assert_eq "0" "$copilot_rc" "installed Copilot check"
+else
+  echo '  SKIP: python3 required for installed Copilot adapter assertions'
+fi
 
 # --- EXIT ---
 if [ "$FAILED" -gt 0 ]; then

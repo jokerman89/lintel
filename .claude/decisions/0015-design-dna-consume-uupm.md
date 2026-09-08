@@ -2,7 +2,7 @@
 
 - **Status:** Accepted
 - **Date:** 2026-06-13
-- **Deciders:** operator (mandate 2026-06-12), Claude (execution)
+- **Deciders:** operator (mandate 2026-06-12)
 - **Supersedes:** —
 - **Superseded by:** —
 
@@ -39,8 +39,8 @@ gained additive optional fields (`palette`, `style`, `design_dna`); `schema_vers
 
 ## Alternatives considered
 
-- **Build our own corpus from scratch**: months of curation for a worse v1; the operator's
-  mandate was explicitly to reuse ("allt är MIT-licens... återbruka det man vill"). Rejected.
+- **Build our own corpus from scratch**: months of curation for a worse v1, when the source is
+  MIT-licensed and explicitly meant to be reused. Rejected.
 - **Keep UUPM as an external dependency (install their skill alongside)**: no integration with
   Lintel's spec contract, pack system, or gates; their own repo shows data-drift between its
   three copies. Rejected — consume once into a single canonical tree.

@@ -1,7 +1,7 @@
 # ADR-0011: gstack de-heritage — grow fully into our own system
 
 **Status:** Accepted (2026-06-12)
-**Decided by:** operator ("gör en refactor på allt som är gstack … bli egna … aldrig sämre")
+**Decided by:** operator — refactor every inherited pattern into something native, without losing capability
 **Implements:** .claude/engineering/audits/2026-06-12-battletest-synthesis.md (gstack section)
 
 ## Context

@@ -2,7 +2,7 @@
 
 - **Status:** Accepted
 - **Date:** 2026-06-04
-- **Deciders:** jokerman89 (operator), Claude Code (implementer)
+- **Deciders:** jokerman89 (operator)
 - **Supersedes:** —
 - **Superseded by:** —
 
@@ -18,8 +18,8 @@ time" outcome the scaffolding exists to produce.
 Lintel itself never ran the factory on itself. Before this change its root had **no `.claude/`,
 no `docs/adr/`, no root CORE-PRINCIPLES/EVOLUTION-LOG, and a thin 61-line v3-era CLAUDE.md** that was
 plugin-developer notes pointing at `AGENT-INSTRUCTIONS.md` — not the scaffolded instruction set. The
-consequence surfaced during the large v4.7 CAIP-extraction initiative: major decisions (pack-on-top vs
-fork, aggressive de-MS, clean-copy vs `filter-repo`) were executed without ADRs, because there was no
+consequence surfaced during the large v4.7 pack-extraction initiative: major decisions (pack-on-top vs
+fork, aggressive de-branding, clean-copy vs `filter-repo`) were executed without ADRs, because there was no
 ADR infrastructure in the repo and nothing in CLAUDE.md enforcing the ritual. The operator caught this
 and asked why the meta-process that works elsewhere did not work in Lintel's own workshop.
 
@@ -42,7 +42,7 @@ required from this decision forward (no retroactive backfill of pre-v4.8 decisio
 - **Leave Lintel un-scaffolded; rely on `AGENT-INSTRUCTIONS.md`.** Rejected: AGENT-INSTRUCTIONS is the
   cross-CLI session ritual, not the per-repo discipline doc, and it did not produce ADRs/lessons in
   practice. The gap was real, not theoretical.
-- **Backfill ADRs for the whole CAIP initiative.** Rejected by operator: set up the infrastructure and
+- **Backfill ADRs for the whole pack-extraction initiative.** Rejected by operator: set up the infrastructure and
   apply the discipline going forward, rather than reconstructing past decisions retroactively.
 
 ## Consequences
@@ -69,4 +69,4 @@ required from this decision forward (no retroactive backfill of pre-v4.8 decisio
 
 - `scaffolding/01-foundation/` (the foundation templates)
 - `~/.claude/CLAUDE.md` (operator global protocol — the source of the ADR/lessons mandate)
-- `.claude/engineering/evolution/2026-06-03-caip-pack-extraction.md` (the initiative that exposed the gap)
+- the 2026-06-03 pack-extraction entry in `.claude/engineering/evolution/` (the initiative that exposed the gap)

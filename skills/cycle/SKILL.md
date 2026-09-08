@@ -6,7 +6,7 @@ description: Use to run a real multi-step task through the full SENSE-to-CAPTURE
 color: cyan
 tools: Read, Write, Edit, Bash, Grep, Glob
 voice: internal
-cli_support: [claude-code, codex]
+cli_support: [claude-code, codex, copilot]
 necessity: STRONGLY_RECOMMENDED
 gap_if_skipped: "Ad-hoc phase sequencing without cost-estimate gate, founder-approval gate, or compliance gates between REVIEW and SHIP."
 navigation:
@@ -99,11 +99,11 @@ auto:
 ### Pack-contributed modes
 
 The presets above ship with Lintel and are company-neutral. A pack may contribute
-additional modes with their own voice/compliance posture — e.g. an external pack
-(installable via lintel-caip-pack) can add `customer-engagement` or `demo-prep`
-modes that set a customer audience, a non-internal voice tier, and the pack's
-compliance gates. CYCLE merges pack-contributed modes into the preset list at
-invocation; their voice/compliance behavior resolves through `resolve_pack_field`
+additional modes with their own voice/compliance posture — e.g. an installed
+company pack can add `customer-engagement` or `demo-prep` modes that set a
+customer audience, a non-internal voice tier, and the pack's compliance gates.
+CYCLE merges pack-contributed modes into the preset list at invocation; their
+voice/compliance behavior resolves through `resolve_pack_field`
 (voice.default_tier, voice.gates_active, compliance.hooks), never hardcoded here.
 
 ### Meta-infra mode mechanics
@@ -129,6 +129,11 @@ Run `bash tests/runner/run-all.sh --shape-only`. The 8 shape-tests assert struct
 CAPTURE writes a recap that future-operator (or future-you) can use cold. Specifically: surface every migration that future operators need to run, every new convention introduced, every deprecated path. Append to `docs/migrations/_INDEX.md` if any migration ships.
 
 ## Workflow
+
+**Host and authorization:** use the active host's native tools and model choice. On Copilot,
+`li-*` adapters map these workflows to canonical skills; see `.github/copilot-instructions.md`.
+Record existing operator authorization before phase gates and avoid repeating the same approval
+question. A new scope or irreversible action still requires authorization for that action.
 
 ### Step 0 — Dry-run mode (v3.6 cohort 3 item 2.5)
 
@@ -219,7 +224,7 @@ Cycle plan:
   Mode: <preset>
   Phases to run: [<list>]
   Phases skipped: [<list>]
-  Estimated cost: <X tokens / Y min / $Z>
+  Token estimate: <X tokens; CALIBRATED actuals or UNCALIBRATED planning guess>
   
   Proceed? [Y/n/edit]
 ```
@@ -242,7 +247,7 @@ For each phase in phases_to_run order:
 7. If status=NEEDS_CONTEXT: pause, gather, re-invoke phase
 ```
 
-State writes/reads are mechanical since v5.0 (ADR-0008) — `_sl="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}/lib/state.sh"
+State writes/reads are mechanical since v5.0 (ADR-0008) — `_sl="${LINTEL_SOURCE_ROOT:-${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}}/lib/state.sh"
 [ -f "$_sl" ] || _sl="$HOME/.lintel/lib/state.sh"; source "$_sl"   # installed by install.sh in consumer repos` once, then one command (`state_append` / `state_last`), not a YAML obligation.
 
 **Mark the cycle started — the FIRST mechanical action, non-negotiable.** The moment the phase
@@ -288,7 +293,7 @@ orchestrator does **not** double-render between phases; it renders the footer on
 gates** (mode-confirm, the cost-estimate gate) and at **cycle completion**:
 
 ```bash
-source "$LINTEL_REPO_ROOT/lib/cycle-footer.sh"   # or: git rev-parse --show-toplevel
+source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/lib/cycle-footer.sh"   # or: git rev-parse --show-toplevel
 render_cycle_footer --awaiting "Proceed with BUILD? [Y/n/edit-plan]"   # at a gate
 render_cycle_footer                                                    # at completion
 ```
@@ -321,7 +326,7 @@ size (`lib/scale-estimator.sh` `scale_calibrated_prior`).
 If `--auto`: auto-decide the recommended option on reversible gates, but still stop at one-way doors. This is MECHANICAL, not a prose promise (issue I3): run each pending decision through `lib/auto-decide.sh` before auto-deciding —
 
 ```bash
-source "$LINTEL_REPO_ROOT/lib/auto-decide.sh"
+source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/lib/auto-decide.sh"
 if is_one_way_door "$decision_text"; then ask_operator; else auto_decide_recommended; fi
 ```
 
@@ -370,7 +375,7 @@ After last phase DONE:
 - Telemetry — one mechanical line via the unified writer (ts/operator/cycle_id come from the envelope):
 
 ```bash
-source "$(git rev-parse --show-toplevel)/bin/_audit.sh"
+source "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/bin/_audit.sh"
 audit_log cycle cycle_complete mode=<mode> phases=<n> outcome=<DONE|DONE_WITH_CONCERNS|BLOCKED|ABORTED>
 # → .claude/runtime/audit/cycle.jsonl
 ```

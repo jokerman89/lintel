@@ -21,8 +21,9 @@ labels: bug
 
 ## Environment
 
-- CLI + version (e.g. Claude Code 2.x):
-- Lintel version (run `/li:doctor`, or check `.claude-plugin/plugin.json`):
+- Copilot surface (CLI / VS Code / GitHub cloud agent), or other host, plus version:
+- Lintel version and installation route (repository kit / plugin / bare install):
+- Adapter check output (`li-copilot check --target <repo>`, if applicable):
 - OS (Windows / macOS / Linux):
 - Active pack (run `/li:pack-list`, default is `_default`):
 

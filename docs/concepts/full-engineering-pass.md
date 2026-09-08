@@ -117,10 +117,8 @@ This is critical because the composition is expensive: 500k tokens soft cap, 750
 
 Token budget per design doc §5.2: 5 modules × ~80k = 400k. Plus overhead (cross-module brief forge handoffs, aggregate scoring) = ~500k soft cap. Hard cap 750k accommodates re-runs of low-score checkpoints.
 
-For pack-specific overrides:
-- `_default`: 500k / 750k
-- `ms-internal`: same
-- a company pack may raise the allowance for its own deep-engagement mode
+Packs can override both caps. The neutral `_default` sets 500k soft / 750k hard; a pack that
+defines a deeper engagement mode typically raises them.
 
 Operator sees projected cost before Stage 1 starts.
 
@@ -128,7 +126,7 @@ Operator sees projected cost before Stage 1 starts.
 
 Between stages, Brief Forge emits a `phase_transition` envelope. Each handoff:
 - Carries the completed module's output paths
-- Runs evaluators per pack policy (security + sdl_compliance + completeness)
+- Runs evaluators per pack policy (security + completeness, plus any the active pack adds)
 - Surfaces gaps before the next module starts
 
 This means each module's input is validated; if the prior module produced low-completeness output, the next module gets the warning + can choose to refine first.

@@ -65,7 +65,7 @@ DataPipelineDesigner: <pipeline goal>
 2. Transform: dbt models in Snowflake (bronze → silver → gold)
 3. Quality: dbt tests on each layer (not_null, unique, referential integrity)
 4. Orchestration: Airflow daily DAG, hourly mini-DAG for near-real-time
-5. Serving: gold tables exposed via Power BI + Application Insights for ops
+5. Serving: gold tables exposed to the BI layer, with operational metrics alongside
 
 ## Compliance
 - PII: silver layer hashes user_id; downstream only sees hash
@@ -82,7 +82,7 @@ DataPipelineDesigner: <pipeline goal>
 1. Run the active pack's compliance gates for the pipeline (`resolve_pack_field compliance.hooks`; none by default)
 2. Implement bronze layer first (ingestion + simple dedupe)
 3. Build silver layer with dbt tests
-4. Gold layer aggregations + Power BI connection
+4. Gold layer aggregations + BI-tool connection
 ```
 
 ## Edge cases / what to do when blocked

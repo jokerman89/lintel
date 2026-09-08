@@ -69,8 +69,8 @@ Read the tier from the single source (`lib/cli-tiers.yaml` via its lookup helper
 a short, honest banner. Do NOT hardcode any of these values:
 
 ```bash
-source "$LINTEL_REPO_ROOT/lib/cli-tiers.sh" 2>/dev/null \
-  || source "$(git rev-parse --show-toplevel 2>/dev/null)/lib/cli-tiers.sh"
+source "${LINTEL_SOURCE_ROOT:-${LINTEL_HOME:-$LINTEL_REPO_ROOT}}/lib/cli-tiers.sh" 2>/dev/null \
+  || source "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}/lib/cli-tiers.sh"
 
 cli="${cli:-other}"
 label=$(cli_tier_field "$cli" label)
@@ -195,7 +195,7 @@ Close your report with the shared position footer. Outside an active cycle it re
 ambient line; inside one it shows the operator's position + next step:
 
 ```bash
-source "$LINTEL_REPO_ROOT/lib/cycle-footer.sh"   # fallback: "$(git rev-parse --show-toplevel)/lib/cycle-footer.sh"
+source "${LINTEL_SOURCE_ROOT:-${LINTEL_HOME:-$LINTEL_REPO_ROOT}}/lib/cycle-footer.sh"   # fallback: "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/lib/cycle-footer.sh"
 render_cycle_footer                               # auto: thin when no cycle, full/--compact when in one
 ```
 

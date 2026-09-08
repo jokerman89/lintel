@@ -34,7 +34,7 @@ Read a checkpoint file (written by `/context-save`) into a fresh session. Output
 2. **Find checkpoint** via the mechanical core (no raw `ls`/`find`):
 
    ```bash
-   source "$LINTEL_REPO_ROOT/bin/_context.sh"   # fallback: "$(git rev-parse --show-toplevel)/bin/_context.sh"
+   source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/bin/_context.sh"   # fallback: "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/bin/_context.sh"
    path=$(context_latest)        # newest checkpoint for the current branch
    context_list [branch]         # all checkpoints newest-first, when the operator wants to pick one
    ```

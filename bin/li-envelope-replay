@@ -18,10 +18,13 @@
 
 set -uo pipefail
 
-REPO_ROOT="${LINTEL_REPO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." 2>/dev/null && pwd)}"
+SOURCE_ROOT="${LINTEL_SOURCE_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." 2>/dev/null && pwd)}"
 LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
 GLOBAL_AUDIT_DIR="${LINTEL_AUDIT_DIR:-$LINTEL_HOME/audit}"
-command -v audit_log >/dev/null 2>&1 || source "$REPO_ROOT/bin/_audit.sh"
+command -v audit_log >/dev/null 2>&1 || source "$SOURCE_ROOT/bin/_audit.sh" || {
+  echo "ERROR: replay audit helper is missing or could not be loaded" >&2
+  exit 2
+}
 # Repo-scoped audit dir on the v5 layout (.claude/runtime/audit/); _audit_out_dir
 # falls back to the global dir for un-migrated repos.
 AUDIT_DIR="$(_audit_out_dir envelope-replay)"
@@ -70,12 +73,14 @@ else
 fi
 
 # ─── Validate first ──────────────────────────────────────────────────────
-VALIDATOR="$REPO_ROOT/bin/li-envelope-validate"
-if [ -x "$VALIDATOR" ]; then
-  if ! "$VALIDATOR" --quiet "$TMP_ENV"; then
-    echo "REFUSED: envelope failed validation. Run li-envelope-validate for details." >&2
-    exit 1
-  fi
+VALIDATOR="$SOURCE_ROOT/bin/li-envelope-validate"
+if [ ! -f "$VALIDATOR" ]; then
+  echo "REFUSED: required envelope validator is missing: $VALIDATOR" >&2
+  exit 1
+fi
+if ! bash "$VALIDATOR" --quiet "$TMP_ENV"; then
+  echo "REFUSED: envelope failed validation. Run li-envelope-validate for details." >&2
+  exit 1
 fi
 
 # ─── Read replay metadata ────────────────────────────────────────────────

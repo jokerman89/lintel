@@ -120,7 +120,7 @@ fi
 ### Step 2 — Read pack + profile preferences
 
 ```bash
-source "$LINTEL_REPO_ROOT/lib/pack-resolver.sh"
+source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/lib/pack-resolver.sh"
 
 # Profile preferences (engineering.devops_hosting.*)
 PROFILE="$LINTEL_HOME/profile.yaml"
@@ -235,7 +235,7 @@ Full-pass exit: every dimension ≥ 80 OR explicit operator override.
 One line via the unified writer (ts/operator/cycle_id come from the envelope):
 
 ```bash
-source "$(git rev-parse --show-toplevel)/bin/_audit.sh"
+source "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/bin/_audit.sh"
 audit_log dh-decisions dh_module_complete "granularity=$granularity" "score=$score" \
   "checkpoints_passed=$passed_count" "cloud=$cloud" "deployment_pattern=$deployment_pattern"
 # → .claude/runtime/audit/dh-decisions.jsonl
