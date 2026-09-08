@@ -1,6 +1,6 @@
 # Plan: Copilot enterprise launch (size: XL · schema: tree)
 
-**Status:** APPROVED — execution and main integration explicitly requested 2026-09-08.
+**Status:** COMPLETE — all seven build cards delivered and merged through PR #83 on 2026-09-08.
 **Spec:** [spec.md](spec.md)
 **Prompt:** [prompt.md](prompt.md)
 **Baseline:** 6b10a84; main was two commits ahead of origin/main. Branch: codex/copilot-enterprise-launch.
@@ -65,8 +65,8 @@ Acceptance: complete suite plus installer verification; no silent copy errors or
 
 - [x] 6.1 Cross-review each card for spec compliance then correctness/security; resolve findings.
 - [x] 6.2 Run final full verification, compatibility audit and generated-artifact check.
-- [ ] 6.3 Commit atomic changes, integrate to main, push authorized main and inspect remote CI.
-- [ ] 6.4 Capture final evidence, actual launch limitations and future-operator instructions.
+- [x] 6.3 Commit atomic changes, integrate to main, push authorized main and inspect remote CI.
+- [x] 6.4 Capture final evidence, actual launch limitations and future-operator instructions.
 
 Acceptance: verified Git refs, green required checks and a self-contained completion record.
 
@@ -89,5 +89,10 @@ promoted into reusable policy. This is deliberate source-generated repetition, n
 
 ## Review
 
-Independent spec review found and drove repairs to mapped Spec Kit BUILD approval/task sources, committed-work resume, missing ignore verification and CI adapter drift detection. Independent quality/security review passed after installer, consumer execution and compatibility-audit fixes. Final local aggregate passed: 101 tests, zero skips/failures/partial assertions. Hosted integration evidence is in progress. Local tests do not establish tenant entitlement, live agent behavior or
-marketplace listing. These must be reported explicitly rather than rounded up to “validated.”
+Independent spec review found and drove repairs to mapped Spec Kit BUILD approval/task sources, committed-work resume, missing ignore verification and CI adapter drift detection. Independent quality/security review passed after installer, consumer execution and compatibility-audit fixes. Final local aggregate passed: 101 tests, zero skips/failures/partial assertions. Hosted CI for `da938538972e49d214a7188e99cbc2c159bbefa5` passed the same complete suite on Ubuntu, macOS and Windows, plus native installation, syntax and generated-artifact checks. [PR #83](https://github.com/jokerman89/lintel/pull/83) merged to main as `52c7b3857f86fb7d118c9f2811cc914f667b1150`.
+
+The [completion review](review.md) records exact hosted runs, resolved findings and acceptance
+boundaries. Version 0.9.0 remains beta: authenticated model work, VS Code/cloud-agent behavior,
+enterprise tenant controls and marketplace listing have no acceptance evidence from this batch.
+This completed plan is a delivery record, not continuing permission for new main pushes,
+publication or data transfer. New work requires a current operator request.

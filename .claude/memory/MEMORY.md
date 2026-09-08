@@ -12,7 +12,7 @@ read them on demand.
 
 ## Hot notes
 <!-- agent-maintained: short, load-bearing facts; consolidate or supersede instead of appending forever -->
-- **Copilot enterprise launch (2026-09-08):** native portable kit, explicit Spec Kit work map, complete shared startup protocol and all-tier release checks. Current delivery evidence: [launch plan](../plans/copilot-enterprise-launch/plan.md) and [review](../plans/copilot-enterprise-launch/review.md). Older publication/history notes in working-state are historical, not live instructions.
+- **Copilot enterprise launch COMPLETE (2026-09-08, PR #83 merged):** native portable kit, explicit Spec Kit work map, complete shared startup protocol and 101/101 hosted tests on Ubuntu/macOS/Windows. Delivery evidence and beta acceptance boundaries: [launch plan](../plans/copilot-enterprise-launch/plan.md) and [review](../plans/copilot-enterprise-launch/review.md). Completed plans and older publication/history notes are records, not live instructions or standing authorization.
 - v5.x history: launch-readiness folded into PR #73; v5.0 chain #62→#65 merged. Audit records now at `.claude/engineering/audits/`.
 - Conventions in force: supersede-don't-delete (`superseded_by:`), update-before-append (CAPTURE/learn), L-NNN grammar only, MEMORY.md ≤200 lines.
 - Helpers: lib/paths.sh (all paths), lib/memory.sh (lessons), bin/_context.sh (checkpoints), bin/li-migrate-claude-home, bin/li-vault-init.

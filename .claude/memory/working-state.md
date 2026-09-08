@@ -10,12 +10,16 @@ Cross-session working state (not durable rules — that's [[lessons.md]]; not pe
 
 ## ▶ CURRENT — Copilot enterprise launch (2026-09-08)
 
-**Status:** implementation and independent review complete; integration evidence is maintained in
+**Status:** COMPLETE — all seven build cards and 31 leaves delivered through PR #83, merged to main
+as `52c7b3857f86fb7d118c9f2811cc914f667b1150`. Hosted Ubuntu, macOS and Windows each passed
+101/101 tests with zero skips, failures or partial assertions. Exact evidence is maintained in
 [the launch plan](../plans/copilot-enterprise-launch/plan.md) and
-[review](../plans/copilot-enterprise-launch/review.md). Use their current checkboxes and Git refs.
+[review](../plans/copilot-enterprise-launch/review.md). Inspect actual Git refs for later changes.
 
-The active work map is [work.json](../plans/copilot-enterprise-launch/work.json). It gives one
+The completed work map is [work.json](../plans/copilot-enterprise-launch/work.json). It gives one
 explicit source for requirements, design, task IDs and handoff; a new clone needs no local ledger.
+Do not re-execute this completed batch or treat its authority as permission for new main pushes,
+publication or data transfer. New work requires a current operator request.
 Native Copilot adapters provide 13 skills and three focused agents. The company-neutral bundle
 includes its source and foundation; generated instructions do not claim Claude hook enforcement.
 
@@ -27,6 +31,8 @@ and verify the Copilot kit. Preserve surrounding project text. See ADR-0025 and 
 **Remaining acceptance boundary:** version 0.9.0 beta; CLI plugin/skill discovery has been observed,
 but authenticated model work, VS Code/cloud-agent behavior and enterprise tenant controls require
 the actual environment's acceptance evidence. No release/tag or marketplace publication is implied.
+Automatic approval review blocked the optional authenticated model smoke test pending specific
+authorization for sending generated instructions to GitHub Copilot; it has not executed.
 
 The entries below are historical snapshots. Their old PR, tag, authentication and history-rewrite
 instructions are superseded as current action items; inspect actual Git/GitHub state before acting.

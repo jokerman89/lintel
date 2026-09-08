@@ -2,9 +2,9 @@
 
 ## Copilot enterprise launch — 2026-09-08
 
-Active initiative: [plan and build cards](copilot-enterprise-launch/plan.md), [spec](copilot-enterprise-launch/spec.md), [handoff](copilot-enterprise-launch/prompt.md). Branch: codex/copilot-enterprise-launch. Operator authorized execution through main integration. See initiative plan for live progress and review evidence.
+Completed initiative: [plan and build cards](copilot-enterprise-launch/plan.md), [spec](copilot-enterprise-launch/spec.md), [handoff](copilot-enterprise-launch/prompt.md). All seven build cards and 31 leaves delivered through [PR #83](https://github.com/jokerman89/lintel/pull/83), merged to main. See the [completion review](copilot-enterprise-launch/review.md) for exact CI evidence and environment-specific beta acceptance boundaries.
 
-Active committed work map: [copilot-enterprise-launch/work.json](copilot-enterprise-launch/work.json).
+Completed committed work map: [copilot-enterprise-launch/work.json](copilot-enterprise-launch/work.json). Do not re-execute this batch or carry its authorization into new work.
 
 ## Historical plans — superseded as current work
 
