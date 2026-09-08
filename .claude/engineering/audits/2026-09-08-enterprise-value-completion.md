@@ -83,7 +83,7 @@ specialist prompt or every host's model behavior.
   Earlier 93/93 results belong to the historical baseline only.
 - PASS: catalogue, wiki/capability table, canonical instruction and Copilot inventory checks. The verifier's optional
   upstream listing skipped without yq; its legacy hook-activation diagnostic does not establish
-  actual host registration. Native stock Bash 3.2 and hosted CI remain pending remote validation.
+  actual host registration. Hosted CI passed on `b61bc409046e487d2e55549df761cfeb968592c5`: Linux, macOS and Windows each run the strict 109-script suite; stock macOS Bash 3.2 installation and Windows PowerShell installation/reinstall also passed. [CI evidence](https://github.com/jokerman89/lintel/actions/runs/34242067367).
 
 ## Operational limits
 
@@ -99,5 +99,4 @@ are best effort. Shared checkpoint ownership changes discovery, not the saved fi
 
 ## Delivery
 
-Pending strict checks and exact-head hosted CI, then merge PR #84. Its merge record is the
-authoritative main commit; no tag, deployment or marketplace release is part of this batch.
+COMPLETE: [PR #84](https://github.com/jokerman89/lintel/pull/84) merged to main at `bb1a16cdf3ce2d53f75623d30d37b528b9bb9393` on 2026-09-08T15:15:12Z, after every candidate check passed. Remote merge state and local ancestry were verified. All C1–C6 cards are complete; this record closes the repository review batch. No tag, deployment or marketplace release was created.

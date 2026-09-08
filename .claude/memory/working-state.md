@@ -8,32 +8,28 @@ Cross-session working state (not durable rules — that's [[lessons.md]]; not pe
 
 ---
 
-## CURRENT — enterprise review completion (2026-09-08)
+## Completed — enterprise value review (2026-09-08)
 
-**Status:** implementation and independent review complete on `codex/enterprise-value-review`;
-integrated strict verification and delivery to main in progress through
-[PR #84](https://github.com/jokerman89/lintel/pull/84). All 22 original findings have current
-dispositions in [the completion review](../engineering/audits/2026-09-08-enterprise-value-completion.md).
-The earlier draft was not completion. The operator explicitly authorized finishing all repairs,
-integrating main and merging the verified result. Follow
-[the completion plan](../plans/enterprise-value-review/completion.md).
+**Status:** COMPLETE. [PR #84](https://github.com/jokerman89/lintel/pull/84) merged to main at `bb1a16cdf3ce2d53f75623d30d37b528b9bb9393` on 2026-09-08T15:15:12Z.
+All 22 original findings and eight subsequent integrated review findings are closed. C1–C6
+and evidence are in [the completion plan](../plans/enterprise-value-review/completion.md) and
+[review](../engineering/audits/2026-09-08-enterprise-value-completion.md).
 
-The isolated worktree integrates main `e9911fc`, including PR #83's source/target, Copilot and
-Spec Kit contracts. The other checkout was not edited. ADR-0026 retains short leaves with
-coherent package execution, aggregate risk, independent review and per-leaf evidence. Effective
-pack requirements affect routing and acceptance. Full selected Git history is inspected and
-collection errors block; checkpoints and review state resolve to the target repository; shared
-registry replacement is serialized and preserves bytes on failure.
+Company requirements now affect effective pack resolution, routing, acceptance and evidence.
+ADR-0026 keeps short leaves with coherent package execution, aggregate risk and independent
+review. Copilot source/target and original Spec Kit artifacts remain authoritative. Git history
+and scanner failures, target context/review state and concurrent registry updates are corrected.
 
-**Evidence:** focused regressions and native PowerShell install/reinstall passed. Independent
-review closed all seven integrated findings (five P2, two P1). Strict suite and hosted results
-are recorded in the completion review when available; old 93/93 evidence is historical only.
-No real private pack, production change, universal host enforcement or measured ROI is claimed.
+**Evidence:** local 109/109 strict scripts plus final scanner regressions; hosted Linux, macOS
+and Windows suites passed on `b61bc409046e487d2e55549df761cfeb968592c5`. Native PowerShell installation/reinstall and
+stock macOS Bash 3.2 installation passed. [Hosted CI](https://github.com/jokerman89/lintel/actions/runs/34242067367). Independent reviewers have
+no open findings in their scoped passes. The other checkout and personal packs were not changed.
 
-**Next action:** finish strict local checks, record the current compatibility disposition, push
-the integration, verify hosted CI for the exact candidate and merge PR #84. Its remote merge
-record supplies the authoritative main commit. No release/tag, deployment, personal installation
-or authenticated enterprise model evaluation is included in this batch.
+**What's pending:** no implementation or delivery work remains in this authorized review batch.
+Actual private-pack/model acceptance, measured enterprise value and host policy enforcement
+require their own environment evidence; no certification, ROI result, release/tag or deployment
+is claimed. Do not re-execute completed cards or treat this batch's authorization as permission
+for future main pushes. Inspect current Git refs for later documentation or feature commits.
 
 ## Completed — Copilot enterprise launch (2026-09-08)
 
