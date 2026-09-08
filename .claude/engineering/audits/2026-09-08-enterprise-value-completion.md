@@ -81,7 +81,7 @@ specialist prompt or every host's model behavior.
   preceded the last scanner repair; final `hook-patterns` and `hook-push-history` reruns cover
   that repair, both actual block hooks, all three warning hooks, overrides and audit records.
   Earlier 93/93 results belong to the historical baseline only.
-- PASS: catalogue, canonical instruction and Copilot inventory checks. The verifier's optional
+- PASS: catalogue, wiki/capability table, canonical instruction and Copilot inventory checks. The verifier's optional
   upstream listing skipped without yq; its legacy hook-activation diagnostic does not establish
   actual host registration. Native stock Bash 3.2 and hosted CI remain pending remote validation.
 

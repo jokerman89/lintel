@@ -32,6 +32,7 @@ schedulers, governance rules or a duplicate model-evaluation framework.
 ## Review
 
 Implementation and generated integration are complete. Independent review closed five P2
-source/target, ownership and registry issues plus two P1 Git-collection bypasses. Focused
-regressions and native PowerShell installation passed. Strict aggregate verification and
-hosted CI are pending; C5/C6 remain open. See the current completion audit for each finding.
+source/target, ownership and registry issues, two P1 Git-collection bypasses and a final scanner
+failure-propagation defect. Local strict verification passed 109/109 scripts with zero skips
+or partial assertions; final scanner regressions and native PowerShell installation passed.
+Hosted CI and merge remain pending; C5/C6 stay open until evidenced. See the completion audit.
