@@ -207,6 +207,32 @@ Invoke the existing mechanism — do **not** rebuild it:
 - **SURFACE, don't block.** A yellow/red verdict warns ("finalized trio yields ~Nk handoff, near cap") and notes the durable handoff is large — the operator decides whether to trim before it becomes the cross-session record. It does NOT halt CAPTURE.
 - **Off-switch:** `--skip-handoff-size-check` (or `SKIP_HANDOFF_SIZE_CHECK=1`) skips the gate entirely. Silent when skipped, and silent on a green pass.
 
+### Step 6a — Reaffirm swarm evidence and future-operator clarity
+
+When the selected work map opts into swarming, resolve helpers only from explicit
+`LINTEL_SOURCE_ROOT`, then Claude's `CLAUDE_PLUGIN_ROOT`; other adapters export their known installed
+bundle. Without either trusted root return `NEEDS_CONTEXT`. Run `li-work-artifacts.py` and
+`li-swarm.py verify` with the working repo only as `--repo`. Tests/self-checks export
+`LINTEL_SOURCE_ROOT` explicitly. Preserve the work map, charter, briefs, worker reports, and
+independent reviews with the trio; they are the cold-resume evidence for topology and ownership.
+Do not copy task text, dependencies, status, or acceptance into coordination.
+
+Only the coordinator may set the work-map status to `COMPLETE`, and only after all lane evidence,
+serial integration, final integrated REVIEW, and SHIP evidence pass. Local runtime attempt files and
+abandoned worktrees are not durable completion evidence.
+
+For meta-infra M4, the future-operator recap must name:
+
+- the explicit opt-in fields and coordination path;
+- the actual host tier used (`native`, `sequenced`, or `none`) and whether writers really ran
+  concurrently;
+- the isolation/attribution method and deterministic integration order;
+- lane reports/reviews plus final integrated review evidence;
+- any lost attempts, sequenced fallback, migration, deprecation, or unverified host behavior.
+
+Never claim independent review when the same identity implemented and reviewed a lane. Honest
+degradation is part of the durable outcome, not a concern to hide.
+
 ### Step 7 — Role debrief (if role was active)
 
 If role was active during cycle:
@@ -399,6 +425,7 @@ YES — standalone post-implementation reflection. Useful if operator forgot CAP
 - `.claude/runtime/state/review-report-*.md`
 - `.claude/runtime/state/compliance-report-*.md` (if the active pack defines compliance gates)
 - design doc, plan.md (DRAFT), spec.md (DRAFT)
+- selected work.json and optional swarm coordination/charter/brief/report/review evidence
 - Cycle's git diff for change scope
 - role file (if active)
 
@@ -409,6 +436,7 @@ YES — standalone post-implementation reflection. Useful if operator forgot CAP
 - `spec.md` (FINALIZED from PLAN's draft)
 - `plan.md` (FINALIZED with post-verification status)
 - `prompt.md` (NEW — cold-executor handoff)
+- swarm work map and evidence artifacts (reaffirmed when the execution profile was selected)
 - `.claude/memory/retros/<date>-<cycle-id>.md` (optional)
 - `~/.lintel/roles/<id>.md` (update if role active + insights to add)
 - `.claude/runtime/state/00-state.md` (CAPTURE final entry)
@@ -436,6 +464,8 @@ YES — standalone post-implementation reflection. Useful if operator forgot CAP
 - **Polluting role-file with session-specific data** — role files are persistent identity, not session log
 - **Forgetting the granularity calibration record (Step 1b)** — it is the surviving cross-session feedback loop (the operator-profile append was removed in v5, ADR-0006); skipping it leaves the scale estimator on its default prior
 - **Long retro write-up when cycle was small** — retro is optional + light
+- **Reducing a swarm to runtime history** — preserve committed topology, briefs, reports, reviews,
+  integration order, and honest host limitations for cold resume
 
 ## Failure recovery
 

@@ -106,6 +106,19 @@ CYCLE merges pack-contributed modes into the preset list at invocation; their
 voice/compliance behavior resolves through `resolve_pack_field`
 (voice.default_tier, voice.gates_active, compliance.hooks), never hardcoded here.
 
+### Swarm is an execution profile, not a phase
+
+`/li:cycle --swarm` records the operator's request for PLAN to evaluate and emit the optional
+swarm artifacts. It does not add a phase, skip the PLAN approval gates, or make parallel execution
+the default. The phase chain remains SENSE → SCOPE → DEFINE → DISCOVER → PLAN → BUILD → REVIEW →
+SHIP → CAPTURE.
+
+The profile becomes active only when the approved schema-version-1 work map contains both
+`execution_mode: "swarm"` and a valid `coordination` pointer. BUILD then follows `/li:swarm run`,
+REVIEW applies the integrated close gate, and CAPTURE preserves the evidence. Without both fields,
+CYCLE invokes ordinary sequential BUILD exactly as before. Sequenced/no-subagent hosts consume the
+same artifacts serially and report the actual limitation.
+
 ### Meta-infra mode mechanics
 
 `meta-infra` is the operator's mode when modifying Lintel itself (scaffolding). Lintel changes ripple across every downstream cycle, so REVIEW + CAPTURE run heavier and four meta-gates activate:
@@ -171,6 +184,7 @@ from_phase="${flag_from:-SENSE}" # --from <phase>
 to_phase="${flag_to:-CAPTURE}"   # --to <phase>
 skip_phases="${flag_skip:-}"     # --skip PHASE1,PHASE2
 auto_decide="${flag_auto:-no}"   # --auto (skip pause gates at recommended choice)
+execution_profile="${flag_execution_profile:-sequential}" # --swarm requests PLAN opt-in
 ```
 
 If conflicting flags (e.g., --mode hotfix AND --from DEFINE): surface conflict, ask operator.
@@ -222,6 +236,7 @@ Surface to operator:
 ```
 Cycle plan:
   Mode: <preset>
+  Execution profile requested: <sequential|swarm>
   Phases to run: [<list>]
   Phases skipped: [<list>]
   Token estimate: <X tokens; CALIBRATED actuals or UNCALIBRATED planning guess>
@@ -323,6 +338,16 @@ token-heavy phase — but it presents the **task count + uncalibrated estimate**
 dollar/duration figure. The estimate is `UNCALIBRATED` until CAPTURE has recorded actuals for this
 size (`lib/scale-estimator.sh` `scale_calibrated_prior`).
 
+If the approved work map selected the swarm profile, validate it and its coordination document at
+this same boundary, surface the ready frontier and actual host tier, then hand BUILD to
+`/li:swarm run`. Validation failure blocks BUILD and returns to PLAN. If no valid swarm fields are
+present, invoke ordinary BUILD; a `--swarm` request alone never enables fan-out.
+
+Helper validation uses explicit `LINTEL_SOURCE_ROOT`, then Claude's `CLAUDE_PLUGIN_ROOT`; every
+other adapter exports its known installed bundle. If no trusted source root exists, return
+`NEEDS_CONTEXT`. The working repository is only a `--repo` argument. Tests/self-checks export
+`LINTEL_SOURCE_ROOT` explicitly.
+
 If `--auto`: auto-decide the recommended option on reversible gates, but still stop at one-way doors. This is MECHANICAL, not a prose promise (issue I3): run each pending decision through `lib/auto-decide.sh` before auto-deciding —
 
 ```bash
@@ -415,6 +440,7 @@ If dependency not met: surface, ask operator to satisfy or pick different `--fro
 - `~/.lintel/profile.yaml` (defaults)
 - `.claude/runtime/state/00-state.md` (resume state)
 - Each phase's outputs as inputs to next
+- optional approved work map and swarm coordination emitted by PLAN
 
 **Writes:**
 - `.claude/runtime/state/00-state.md` (orchestrator entries per phase)
@@ -431,6 +457,8 @@ If dependency not met: surface, ask operator to satisfy or pick different `--fro
 - **Nesting cycles** — one cycle at a time, no recursive /li:cycle from within
 - **Ignoring phase BLOCKED status** — never silently continue past a blocked phase
 - **Losing operator's --skip choice** — respect operator decisions, don't override "for safety"
+- **Treating swarm as a tenth phase or a default** — it is an opt-in PLAN/BUILD/REVIEW profile and
+  the sequential phase chain stays intact
 
 ## Failure recovery (per Architect FAILURE RECOVERY PROTOCOL)
 

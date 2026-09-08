@@ -45,6 +45,39 @@ ID and acceptance check. All “plan.md requirements/tasks” below refer to the
 reference-only Lintel companions are navigation, not duplicate specifications. Compare actual
 code and evidence to the original Spec Kit tasks. A work-map approval never replaces review.
 
+### Swarm integrated-tree close gate
+
+When the validated work map explicitly selects `execution_mode: "swarm"`, REVIEW starts only on
+the reconciled integration branch declared by the coordination document:
+
+```bash
+repo="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel)}"
+if [ -n "${LINTEL_SOURCE_ROOT:-}" ]; then
+  source_root="$LINTEL_SOURCE_ROOT"
+elif [ -n "${CLAUDE_PLUGIN_ROOT:-}" ]; then
+  source_root="$CLAUDE_PLUGIN_ROOT"
+else
+  echo "NEEDS_CONTEXT: trusted Lintel source root unavailable; set LINTEL_SOURCE_ROOT" >&2
+  exit 1
+fi
+[ -f "$source_root/bin/li-swarm.py" ] || { echo "NEEDS_CONTEXT: trusted swarm helper missing" >&2; exit 1; }
+python3 "$source_root/bin/li-swarm.py" verify --repo "$repo" --coord "$coordination"
+```
+
+Other host adapters substitute/export their installed bundle path as `LINTEL_SOURCE_ROOT`; tests and
+self-checks set it explicitly. The working repository is data supplied only through `--repo`, never
+an executable-source fallback.
+
+The gate requires every worker report and distinct two-stage lane review to be structurally valid
+and PASS. Also confirm that each attributable passing change set is present on the declared
+integration branch, generated reducers were rebuilt after producer fan-in, and focused integration
+checks passed there. Evidence left only in an isolated worktree is not integrated completion.
+
+After this gate, run all three ordinary REVIEW stages across the full integrated diff. Per-lane
+reviews reduce fan-in risk but never replace specification, quality, compliance, or security review
+of the reconciled system. A missing independent lane review stays BLOCKED on every host; sequenced or
+no-subagent execution changes concurrency only, not evidence requirements.
+
 
 ### Step 1 — Load context
 
@@ -235,6 +268,7 @@ Skip-conditions: intent=research-only, intent=docs-only.
 
 **Reads:**
 - BUILD output (git diff)
+- optional swarm coordination plus all lane reports/reviews and integration attribution
 - plan.md (PLAN phase)
 - design doc (DEFINE phase)
 - build-log.md (BUILD phase)
@@ -296,6 +330,9 @@ Skip-conditions: intent=research-only, intent=docs-only.
 - **Bundling all 3 stages into one subagent call** — separate dispatches give cleaner findings
 - **Logging P3 findings without surfacing** — operator should see them even if not blocking
 - **Outside-voice Codex review as default** — gated, costs tokens, only when adds clear value
+- **Reviewing isolated lanes instead of the reconciled branch** — run the swarm close gate, confirm
+  integration, then review the complete integrated diff
+- **Treating lane review as final REVIEW** — both per-lane and integrated review are required
 
 ## Failure recovery
 
