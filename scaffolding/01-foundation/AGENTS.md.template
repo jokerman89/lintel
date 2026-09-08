@@ -102,6 +102,26 @@ findings. Reports include severity counts, actionable findings with file:line ci
 verification evidence and limitations. Keep implementation and independent review separate.
 Coordinate shared task-state writes rather than having parallel agents overwrite one ledger.
 
+When an approved plan opts in to swarm execution, use one coordinator and the committed swarm
+artifacts under `.claude/plans/<initiative>/swarm/`. The mapped task artifact remains authoritative
+for card text, dependencies, status and acceptance; coordination metadata adds only waves, roles,
+write scopes, isolation and evidence pointers. The coordinator alone writes shared plan/runtime
+state, generated reducers, commits and integration history. A worker writes only its declared
+scope plus its own report, and an independent reviewer writes only that lane's review artifact.
+
+Run writer lanes concurrently only when each change set is attributable through a separate Git
+worktree, isolated patch or equivalent host-enforced scoped-write sandbox, and same-wave write
+scopes do not overlap. A shared-tree union diff is not attribution. If the host cannot provide
+that evidence, execute the same briefs sequentially without weakening dependency, scope or review
+gates. On a host without subagents, the main agent may replay the briefs serially, but must label
+implementation and self-review honestly rather than claiming independent work.
+
+Recover a swarm from committed maps, briefs, reports, reviews and attributable Git evidence, not
+from chat memory or a process-status label. Missing runtime state cancels an attempt, not verified
+committed work. Preserve and quarantine an out-of-scope or unreviewed change set until the
+coordinator can re-plan, re-run or reconcile it. Lane reviews never replace the final independent
+review of the reconciled integration branch.
+
 ### Authorized bug fixing
 
 Fix bugs inside the authorized initiative directly. Use logs, errors and failing tests to find

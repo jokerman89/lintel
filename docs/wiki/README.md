@@ -34,6 +34,7 @@ See [docs/concepts/](../concepts/) for canonical conceptual references:
 - [prompt-house-style](../concepts/prompt-house-style.md)
 - [sc-module](../concepts/sc-module.md)
 - [skill-protocol](../concepts/skill-protocol.md)
+- [swarming-work](../concepts/swarming-work.md)
 - [ta-module](../concepts/ta-module.md)
 - [tq-module](../concepts/tq-module.md)
 - [uniformity-contract](../concepts/uniformity-contract.md)

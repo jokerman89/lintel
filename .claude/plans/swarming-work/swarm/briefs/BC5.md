@@ -30,6 +30,7 @@ reducers remain coordinator-owned.
 - A new operator can select, inspect, recover, and close a swarm from the docs alone.
 - Docs do not claim concurrency, hooks, independent review, or persistent memory on unsupported hosts.
 - Brief Forge's automatic/dormant wording is reconciled with actual activation.
+- Nested default handoff policy and unknown-evaluator blocking are proven by executable tests.
 - Public prose is company-neutral and English.
 
 ## Report

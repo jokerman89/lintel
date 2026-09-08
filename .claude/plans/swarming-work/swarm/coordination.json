@@ -44,7 +44,7 @@
       "wave": 3,
       "role": "DocWriter",
       "isolation": "git-worktree",
-      "write_scope": ["docs/concepts/swarming-work.md", "docs/architecture.md", "docs/the-cycle.md", "docs/multi-cli.md", "docs/faq.md", "docs/GLOSSARY.md", "docs/README.md", "README.md", "skills/brief-forge/SKILL.md"],
+      "write_scope": ["docs/concepts/swarming-work.md", "docs/architecture.md", "docs/the-cycle.md", "docs/multi-cli.md", "docs/faq.md", "docs/GLOSSARY.md", "docs/README.md", "README.md", "skills/brief-forge/SKILL.md", "tests/unit/brief-forge-evaluator-runs.sh"],
       "brief": ".claude/plans/swarming-work/swarm/briefs/BC5.md",
       "report": ".claude/plans/swarming-work/swarm/reports/BC5.md",
       "review": ".claude/plans/swarming-work/swarm/reviews/BC5.md"

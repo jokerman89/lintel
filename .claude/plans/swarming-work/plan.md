@@ -47,94 +47,94 @@ seed isolated implementation worktrees.
 
 ### BC2 — Build the swarm contract and deterministic gates (depends BC1; R2–R6)
 
-- [ ] 2.1 Define schema identity, required root keys, and version bounds.
-- [ ] 2.2 Define safe repository-relative path fields in the schema.
-- [ ] 2.3 Define lane, wave, isolation, report, and review fields in the schema.
-- [ ] 2.4 Add the stdlib coordination-file loader and structured diagnostics.
-- [ ] 2.5 Add repository-relative path validation without artifact execution.
-- [ ] 2.6 Add duplicate task/lane detection.
-- [ ] 2.7 Add same-wave write-scope overlap detection.
-- [ ] 2.8 Add parallel-writer isolation validation and sequenced fallback diagnostics.
-- [ ] 2.9 Expose the shared parser entry point that BC3 will call from the work-map validator.
-- [ ] 2.10 Add the CLI `validate` operation.
-- [ ] 2.11 Add the CLI `wave` ready-frontier operation.
-- [ ] 2.12 Add `check-scope` for one attributable patch/change set.
-- [ ] 2.13 Make `check-scope` allow only lane `write_scope + own report`.
-- [ ] 2.14 Add the CLI `status` operation.
-- [ ] 2.15 Add the CLI `verify` close-evidence operation.
-- [ ] 2.16 Add the charter template.
-- [ ] 2.17 Add the coordination JSON template.
-- [ ] 2.18 Add the worker brief template.
-- [ ] 2.19 Add the worker report template.
-- [ ] 2.20 Add the independent review template.
-- [ ] 2.21 Test invalid paths and duplicate lanes.
-- [ ] 2.22 Test overlap and missing isolation.
-- [ ] 2.23 Test per-patch scope plus own-report allowance and review-path rejection.
-- [ ] 2.24 Test incomplete evidence and old-map compatibility.
+- [x] 2.1 Define schema identity, required root keys, and version bounds.
+- [x] 2.2 Define safe repository-relative path fields in the schema.
+- [x] 2.3 Define lane, wave, isolation, report, and review fields in the schema.
+- [x] 2.4 Add the stdlib coordination-file loader and structured diagnostics.
+- [x] 2.5 Add repository-relative path validation without artifact execution.
+- [x] 2.6 Add duplicate task/lane detection.
+- [x] 2.7 Add same-wave write-scope overlap detection.
+- [x] 2.8 Add parallel-writer isolation validation and sequenced fallback diagnostics.
+- [x] 2.9 Expose the shared parser entry point that BC3 will call from the work-map validator.
+- [x] 2.10 Add the CLI `validate` operation.
+- [x] 2.11 Add the CLI `wave` ready-frontier operation.
+- [x] 2.12 Add `check-scope` for one attributable patch/change set.
+- [x] 2.13 Make `check-scope` allow only lane `write_scope + own report`.
+- [x] 2.14 Add the CLI `status` operation.
+- [x] 2.15 Add the CLI `verify` close-evidence operation.
+- [x] 2.16 Add the charter template.
+- [x] 2.17 Add the coordination JSON template.
+- [x] 2.18 Add the worker brief template.
+- [x] 2.19 Add the worker report template.
+- [x] 2.20 Add the independent review template.
+- [x] 2.21 Test invalid paths and duplicate lanes.
+- [x] 2.22 Test overlap and missing isolation.
+- [x] 2.23 Test per-patch scope plus own-report allowance and review-path rejection.
+- [x] 2.24 Test incomplete evidence and old-map compatibility.
 
 Acceptance: focused unit tests prove the validator fails closed and the current initiative's swarm
 contract validates.
 
 ### BC3 — Integrate swarming into the Lintel workflow (depends BC2; R1, R3, R5–R9)
 
-- [ ] 3.1 Add `/li:swarm` frontmatter, purpose, and explicit opt-in rules.
-- [ ] 3.2 Document `init` artifact creation and authority boundaries.
-- [ ] 3.3 Document `run` readiness, Brief Forge dispatch, and coordinator ownership.
-- [ ] 3.4 Document `status` and `resume` output contracts.
-- [ ] 3.5 Document `verify` scope/evidence gates and serial integration.
-- [ ] 3.6 Add PLAN's independent-domain detection rule.
-- [ ] 3.7 Add PLAN's operator opt-in and additive work-map emission rule.
-- [ ] 3.8 Add BUILD's mapped-swarm entry condition.
-- [ ] 3.9 Add BUILD's dependency-ready wave dispatch rule.
-- [ ] 3.10 Add BUILD's worker startup, scope, acceptance, and report requirements.
-- [ ] 3.11 Add BUILD's per-lane spec and quality review requirements.
-- [ ] 3.12 Add REVIEW's integrated-tree close gate.
-- [ ] 3.13 Add RESUME's frontier and lost-attempt recovery rules.
-- [ ] 3.14 Add CAPTURE's durable evidence and M4 rules.
-- [ ] 3.15 Link the profile from CYCLE without adding a phase.
-- [ ] 3.16 Route full-engineering-pass DA/SC work through the host-aware profile.
-- [ ] 3.17 Document additive fields in the canonical work-map reference.
-- [ ] 3.18 Wire swarm validation into `li-work-artifacts.py`.
-- [ ] 3.19 Add shape assertions for workflow links and unique task authority.
-- [ ] 3.20 Add the integration fixture for safe wave and close evidence.
-- [ ] 3.21 Add a discovered `tests/integration/swarm-workflow.sh` wrapper.
-- [ ] 3.22 Run focused swarm tests and legacy BUILD/work-map fixtures.
+- [x] 3.1 Add `/li:swarm` frontmatter, purpose, and explicit opt-in rules.
+- [x] 3.2 Document `init` artifact creation and authority boundaries.
+- [x] 3.3 Document `run` readiness, Brief Forge dispatch, and coordinator ownership.
+- [x] 3.4 Document `status` and `resume` output contracts.
+- [x] 3.5 Document `verify` scope/evidence gates and serial integration.
+- [x] 3.6 Add PLAN's independent-domain detection rule.
+- [x] 3.7 Add PLAN's operator opt-in and additive work-map emission rule.
+- [x] 3.8 Add BUILD's mapped-swarm entry condition.
+- [x] 3.9 Add BUILD's evidence/topology candidate wave plus authoritative prerequisite gate.
+- [x] 3.10 Add BUILD's worker startup, scope, acceptance, and report requirements.
+- [x] 3.11 Add BUILD's per-lane spec and quality review requirements.
+- [x] 3.12 Add REVIEW's integrated-tree close gate.
+- [x] 3.13 Add RESUME's frontier and lost-attempt recovery rules.
+- [x] 3.14 Add CAPTURE's durable evidence and M4 rules.
+- [x] 3.15 Link the profile from CYCLE without adding a phase.
+- [x] 3.16 Route full-engineering-pass DA/SC work through the host-aware profile.
+- [x] 3.17 Document additive fields in the canonical work-map reference.
+- [x] 3.18 Wire swarm validation into `li-work-artifacts.py`.
+- [x] 3.19 Add shape assertions for workflow links and unique task authority.
+- [x] 3.20 Add the integration fixture for safe wave and close evidence.
+- [x] 3.21 Add a discovered `tests/integration/swarm-workflow.sh` wrapper.
+- [x] 3.22 Run focused swarm tests and legacy BUILD/work-map fixtures.
 
 Acceptance: one fixture traverses plan map → safe wave → reports/reviews → integrated close gate;
 legacy BUILD fixtures remain green.
 
 ### BC4 — Propagate the contract through scaffolding and adapters (depends BC3; R5, R6, R8, R10)
 
-- [ ] 4.1 Add coordinator/single-writer rules to the canonical session protocol.
-- [ ] 4.2 Add attributable isolation and sequenced fallback to the protocol.
-- [ ] 4.3 Add swarm recovery and honest review-degradation rules to the protocol.
-- [ ] 4.4 Correct the repository subagent guide's discovery and ownership wording.
-- [ ] 4.5 Correct the scaffolded subagent guide to match the canonical contract.
-- [ ] 4.6 Teach the scaffold factory to install swarm templates.
-- [ ] 4.7 Add `swarm` to the Copilot workflow selection list.
-- [ ] 4.8 Add the canonical swarm skill/templates to Copilot resources.
-- [ ] 4.9 Extend the Copilot integration test with swarm workflow/resource assertions.
-- [ ] 4.10 Run the focused scaffold and Copilot generator tests.
-- [ ] 4.11 Hand canonical-source changes to the coordinator for protocol synchronization.
-- [ ] 4.12 Let the coordinator regenerate and check Copilot managed outputs.
-- [ ] 4.13 Let the coordinator verify a temporary consumer checkout after fan-in.
+- [x] 4.1 Add coordinator/single-writer rules to the canonical session protocol.
+- [x] 4.2 Add attributable isolation and sequenced fallback to the protocol.
+- [x] 4.3 Add swarm recovery and honest review-degradation rules to the protocol.
+- [x] 4.4 Correct the repository subagent guide's discovery and ownership wording.
+- [x] 4.5 Correct the scaffolded subagent guide to match the canonical contract.
+- [x] 4.6 Teach the scaffold factory to install swarm templates.
+- [x] 4.7 Add `swarm` to the Copilot workflow selection list.
+- [x] 4.8 Add the canonical swarm skill/templates to Copilot resources.
+- [x] 4.9 Extend the Copilot integration test with swarm workflow/resource assertions.
+- [x] 4.10 Run the focused scaffold and Copilot generator tests.
+- [x] 4.11 Hand canonical-source changes to the coordinator for protocol synchronization.
+- [x] 4.12 Let the coordinator regenerate and check Copilot managed outputs.
+- [x] 4.13 Let the coordinator verify a temporary consumer checkout after fan-in.
 
 Acceptance: protocol parity, scaffold checks, Copilot init/check, and generated drift tests pass.
 
 ### BC5 — Make swarming understandable from every public angle (depends BC3; R1–R10)
 
-- [ ] 5.1 Add the concept guide's decision and non-goal sections.
-- [ ] 5.2 Add the concept guide's artifact tree and authority table.
-- [ ] 5.3 Add the concept guide's lifecycle and recovery sections.
-- [ ] 5.4 Add the concept guide's cross-CLI degradation and examples.
-- [ ] 5.5 Link the guide from the documentation index.
-- [ ] 5.6 Add the execution profile to architecture and cycle documentation.
-- [ ] 5.7 Add native/sequenced/none behavior to multi-CLI documentation.
-- [ ] 5.8 Add operator decision/recovery answers to the FAQ.
-- [ ] 5.9 Add swarm terminology to the glossary.
-- [ ] 5.10 Add concise capability entry points to the root README.
-- [ ] 5.11 Correct Brief Forge automatic-hook claims to match verified runtime reality.
-- [ ] 5.12 Hand catalog/wiki reducer work to the coordinator after documentation fan-in.
+- [x] 5.1 Add the concept guide's decision and non-goal sections.
+- [x] 5.2 Add the concept guide's artifact tree and authority table.
+- [x] 5.3 Add the concept guide's lifecycle and recovery sections.
+- [x] 5.4 Add the concept guide's cross-CLI degradation and examples.
+- [x] 5.5 Link the guide from the documentation index.
+- [x] 5.6 Add the execution profile to architecture and cycle documentation.
+- [x] 5.7 Add native/sequenced/none behavior to multi-CLI documentation.
+- [x] 5.8 Add operator decision/recovery answers to the FAQ.
+- [x] 5.9 Add swarm terminology to the glossary.
+- [x] 5.10 Add concise capability entry points to the root README.
+- [x] 5.11 Correct Brief Forge automatic-hook claims to match verified runtime reality.
+- [x] 5.12 Hand catalog/wiki reducer work to the coordinator after documentation fan-in.
 
 Acceptance: a new operator can decide when to swarm, inspect ownership, recover a run, and
 understand host limitations without reading implementation code.
