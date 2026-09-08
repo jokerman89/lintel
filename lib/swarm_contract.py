@@ -157,6 +157,7 @@ def _safe_repo_path(
         or value.endswith("/")
         or "\\" in value
         or ":" in value
+        or any(character in "*?[" for character in value)
         or "//" in value
         or any(ord(char) < 32 or ord(char) == 127 for char in value)
     ):

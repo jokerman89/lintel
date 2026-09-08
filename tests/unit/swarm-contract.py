@@ -236,6 +236,15 @@ class SwarmContractTests(unittest.TestCase):
         result = self.fixture.validate()
         self.assertFalse(result.ok)
         self.assertIn("path.unsafe", diagnostic_codes(result))
+
+        for wildcard_path in ("src/*", "src/file?.py", "src/[ab].py"):
+            with self.subTest(wildcard_path=wildcard_path):
+                self.fixture = SwarmFixture(self.fixture.root)
+                self.fixture.coordination["lanes"][0]["write_scope"] = [wildcard_path]
+                result = self.fixture.validate()
+                self.assertFalse(result.ok)
+                self.assertIn("path.unsafe", diagnostic_codes(result))
+
         raw = '{"schema_version":1,"schema_version":1}'
         self.fixture._write(self.fixture.coordination_path, raw)
         result = swarm.validate_coordination(self.fixture.root, self.fixture.coordination_path)

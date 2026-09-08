@@ -2,7 +2,7 @@
 
 ## Lintel startup
 
-Read `AGENT-INSTRUCTIONS.md`, `scaffolding/01-foundation/CORE-PRINCIPLES.md`, current
+Read `AGENT-INSTRUCTIONS.md`, `CORE-PRINCIPLES.md`, current
 `.claude/memory/{MEMORY,working-state,personas}.md`, recent lessons, relevant accepted ADRs, and
 `docs/architecture.md`. Resolve the active pack and compliance checklist. This brief narrows
 ownership; it does not replace repository authority or safety rules.

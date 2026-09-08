@@ -304,6 +304,10 @@ test "$LINTEL_HOME" = "$PWD/.claude/runtime/lintel-home"
         for name in ("charter.template.md", "coordination.template.json", "agent-brief.template.md",
                      "agent-report.template.md", "agent-review.template.md"):
             self.assertTrue((self.target / ".claude/templates/swarm" / name).is_file(), name)
+        brief = (self.target / ".claude/templates/swarm/agent-brief.template.md").read_text(encoding="utf-8")
+        self.assertTrue((self.target / "CORE-PRINCIPLES.md").is_file())
+        self.assertIn("`CORE-PRINCIPLES.md`", brief)
+        self.assertNotIn("scaffolding/01-foundation/CORE-PRINCIPLES.md", brief)
 
     def test_copilot_scaffold_rejects_unsupported_options_before_writes(self):
         bash = os.environ.get("LINTEL_TEST_BASH") or shutil.which("bash")
