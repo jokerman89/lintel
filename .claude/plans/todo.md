@@ -323,14 +323,15 @@ See [plan](enterprise-value-review/plan.md), [specification](enterprise-value-re
 - [x] E3: correct proven pack/profile defects and verify behavior.
 - [x] E4: improve planning consistency and pack-to-acceptance traceability.
 - [x] E5: document enterprise value scenario and remaining decisions.
-- [ ] E6: independent review, verification, commits and delivery.
+- [x] E6: independent review, verification, commits and draft-PR delivery.
 
 ## Review — enterprise value
 
 Whole-system review and compatible corrections complete. Independent implementation and
 hybrid scenario reviews have no remaining findings. Aggregate suite passed 93/93; final
-focused regressions also pass. M2 remains RED pending explicit
-override before publication, so E6 is not marked fully delivered. Historical plans above
+focused regressions also pass. The operator approved the M2 exception for draft-PR
+publication on 2026-09-08. Delivered as [draft PR #84](https://github.com/jokerman89/lintel/pull/84),
+with eight targeted scripts passing after the rebase. CI and integration review remain in the PR. Historical plans above
 remain context, not this initiative's authority.
 
 ---

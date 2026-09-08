@@ -10,9 +10,11 @@ Cross-session working state (ej durable rules — that's [[lessons.md]]; ej pers
 
 ## CURRENT — independent enterprise value review (2026-09-08)
 
-**Status:** implementation and independent review complete on `codex/enterprise-value-review`,
-based on `6b10a84`, in `.claude/worktrees/enterprise-value-review`. Final focused checks passed;
-local feature commits are the reviewable delivery. The concurrent `codex/copilot-enterprise-launch` checkout
+**Status:** delivered as [draft PR #84](https://github.com/jokerman89/lintel/pull/84)
+from `codex/enterprise-value-review`,
+inspected at `6b10a84`, in `.claude/worktrees/enterprise-value-review`. For publication, only
+the review commits were rebased onto main `9a024c0`; the implementation is unchanged.
+The concurrent `codex/copilot-enterprise-launch` checkout
 was read only; do not overwrite or merge its uncommitted work from this task.
 
 The operator chose hybrid planning: short leaves, coherent package execution/review,
@@ -25,14 +27,15 @@ results are in `.claude/engineering/audits/2026-09-08-enterprise-value-review.md
 pack and hybrid scenario reviewers closed their findings. No measured productivity claim or
 verified universal hook enforcement follows from these checks.
 
-**What's pending:** M2 is RED because shared contracts/helpers changed. Manual disposition
-is recorded, but the explicit operator override required by `docs/the-cycle.md` is pending
-before SHIP/publication. PR body is prepared with this task's handoff. Two baseline P1 Git
+**What's pending:** the operator explicitly approved the documented M2 exception for
+feature-branch push and draft-PR publication on 2026-09-08. The mechanical RED remains.
+Eight targeted scripts passed after the rebase; CI and integration review remain in the draft PR.
+Publication evidence is recorded in the review report. Two baseline P1 Git
 collection defects (F05/F06) remain release-control blockers; prioritize them before an
 enterprise rollout. Older onboarding/installation/work-selection work overlaps the other task.
 
-**Next action:** read the review and M2 report, resolve that gate, then publish the reviewed
-feature commits through a PR. No direct main push, deployment or personal setup is authorized.
+**Next action:** follow draft PR #84's review and CI before combining changes.
+No direct main push, deployment or personal setup is authorized.
 
 ## Prior release context (reconciled 2026-08-28)
 

@@ -15,14 +15,17 @@ These are coordination cards, not five-minute cold-subagent leaves. Exact implem
 
 ## Review
 
-E1–E5 are complete. E6 independent reviews are complete with no remaining findings on the
+E1–E6 are complete through publication as [draft PR #84](https://github.com/jokerman89/lintel/pull/84).
+Independent reviews are complete with no remaining findings on the
 changed implementation; aggregate verification passed 93/93 scripts. Final edge regressions
-also pass, with evidence recorded in the whole-system review. Publication waits on the
-explicit M2 override required by `docs/the-cycle.md`; the prepared PR body is beside this file.
+also pass, with evidence recorded in the whole-system review. The operator explicitly
+approved the M2 exception for draft-PR publication on 2026-09-08. Eight targeted scripts
+passed again after the rebase; CI and final integration review remain with the draft PR.
 
 The concurrent checkout has substantial uncommitted Copilot changes. This branch starts from
-the committed baseline; conflicts must be reviewed before merging efforts. No private pack,
-personal setup, production service or remote branch has been changed by this review.
+the inspected baseline `6b10a84`; its review commits are rebased onto main `9a024c0` so the
+two earlier unpublished commits are excluded. Conflicts must be reviewed before combining
+efforts. No private pack, personal setup or production service was changed by this review.
 
 The broad review found 22 initial issues: 12 addressed, one partially addressed in the new
 guide, and nine open or separate work. Five further implementation/scenario findings and a

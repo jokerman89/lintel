@@ -3,6 +3,8 @@
 Date: 2026-09-08. Baseline: `6b10a84`. Independent branch: `codex/enterprise-value-review`.
 This review excludes the concurrent Copilot session's uncommitted changes from its baseline.
 Findings below cite baseline locations; fixes are assessed through this branch's diff and tests.
+For publication, only the review commits were rebased onto remote main `9a024c0`.
+The two earlier unpublished commits in the inspected baseline are excluded from the PR.
 
 ## Assessment
 
@@ -157,18 +159,31 @@ repaired them and added regressions. Final bounded code review: **P0/P1/P2/P3 = 
 Reviewers made no repairs to their own findings. These clean diff reviews do not close
 the baseline findings explicitly left open in the whole-system table.
 
-M2 remains **RED pending explicit operator override**. The generated report includes a
-manual disposition of each affected contract; a clean test suite does not grant that override.
+M2's mechanical verdict remains **RED**. On 2026-09-08 the operator explicitly approved
+the documented exception for feature-branch push and draft-PR publication. The report
+retains the manual contract disposition and the scope of that approval.
 
 ## Delivery and next action
 
-The review and compatible improvements are verified on the isolated feature branch. Obtain
-the explicit M2 disposition before publishing the prepared PR. Reconcile overlapping changes with the
+The review and compatible improvements are verified on the isolated feature branch. The
+operator approved publication as a draft PR. Reconcile overlapping changes with the
 Copilot branch before combining them. Address F05 and F06 before treating local Git hooks as
 a reliable enterprise release control. Then run the measured pack pilot; evaluate further
 complexity only against its results.
 
-Implementation commits: `edcb2b8` (effective enterprise packs) and `8676097`
-(hybrid planning and execution). Review evidence, onboarding guidance and unreleased
-manifest/catalogue updates are in the following documentation commit. No remote branch,
-PR, release, personal installation or production environment was changed.
+After rebasing onto `9a024c0`, implementation commits are `86b1eaf` (effective enterprise
+packs) and `8b6a053` (hybrid planning and execution); `5d24c02` records review evidence,
+guidance and unreleased metadata. Independent comparison verified that the implementation
+and new tests match the previously tested tree. Only the generated catalogue conflicted;
+it was rebuilt from the canonical generator. Follow-up publication evidence is recorded below.
+
+Post-rebase verification passed on `9a024c0`: enterprise pack resolution, the nine fallback
+scenarios, three-level inheritance, scale estimation, scale calibration, the extension
+contract and both enterprise integrations (eight targeted scripts). The extension script's
+internal jq-dependent JSON assertion remains skipped on this host. The earlier 93/93
+aggregate run belongs to the inspected baseline; CI will verify the published branch.
+
+Published as [draft PR #84](https://github.com/jokerman89/lintel/pull/84) on 2026-09-08,
+from `codex/enterprise-value-review` to `main`. The operator's exception is limited to
+this draft publication. CI and final integration review remain visible in the PR; F05/F06
+remain release-control limitations. The concurrent checkout was not modified.

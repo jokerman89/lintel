@@ -8,6 +8,14 @@ Use temporary LINTEL_HOME and synthetic packs. Run suites sequentially: some mut
 
 Implementation and independent reviews are complete. Read the whole-system audit and M2
 manual disposition before doing more work. The aggregate suite passed 93/93; final focused
-edge regressions also passed. Changes are locally committed, with no remote publication.
-M2 remains RED pending explicit operator override; the prepared PR body is `pr.md` beside
-this file. Do not infer that override from elapsed time or from passing tests.
+edge regressions also passed. The operator explicitly approved the M2 exception for
+feature-branch push and draft-PR publication on 2026-09-08. The mechanical RED remains;
+the exception and rollout limits are recorded in the compatibility audit.
+
+Publication uses main `9a024c0` as base; only this review's commits were rebased from the
+inspected `6b10a84` baseline. The implementation is unchanged, and the generated catalogue
+was rebuilt. Read the review's publication evidence and inspect the existing PR before
+trying to create another one. The prepared PR body is `pr.md` beside this file.
+Delivery is [draft PR #84](https://github.com/jokerman89/lintel/pull/84). Eight targeted
+scripts passed after the rebase. Follow CI and review there; release blockers remain
+documented separately from this completed draft-publication task.

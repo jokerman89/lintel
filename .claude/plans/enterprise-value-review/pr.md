@@ -15,11 +15,15 @@ hybrid scenario reviews closed their findings. Internal jq assertions still need
 private company profile, live hook registration or measured productivity pilot was tested.
 Manifest JSON/version parity and Bash syntax passed. `install/verify.sh --all` returned 0;
 its missing-yq skip and existing legacy-count diagnostic are documented in the review.
+After isolating the commits onto main, all eight targeted pack, scale and integration
+scripts passed again. The 93-script aggregate result is from the original inspected base.
 
-This branch starts at `6b10a84` independently of the active Copilot work. Reconcile overlapping
-changes before combining them. The review records two pre-existing P1 Git collection defects
+The review used baseline `6b10a84`; its commits were isolated onto main `9a024c0` for this PR,
+excluding two earlier unpublished commits. Reconcile overlapping Copilot changes before
+combining them. The review records two pre-existing P1 Git collection defects
 (F05/F06); this PR does not establish readiness as an enterprise enforcement layer.
 
-M2 is RED pending explicit operator override before publication. See the manual compatibility
+The operator approved the documented M2 exception for draft-PR publication on 2026-09-08.
+The mechanical RED and rollout limitations remain recorded. See the manual compatibility
 disposition and `.claude/engineering/audits/2026-09-08-enterprise-value-review.md` for evidence,
 remaining findings and rollout steps. Version 0.10.0 is unreleased.

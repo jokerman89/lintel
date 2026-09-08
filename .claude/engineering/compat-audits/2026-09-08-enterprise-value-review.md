@@ -44,7 +44,10 @@ _None._
 
 The mechanical RED remains visible; it is not a failing regression or an operator
 override. `docs/the-cycle.md` gate M2 requires an explicit override before SHIP.
-Local commits and the prepared PR body are review artifacts; publication is pending.
+The operator explicitly approved the M2 exception on 2026-09-08 in response to the
+request to publish this reviewed change as a draft PR with its limitations documented.
+Scope: feature-branch push and draft-PR publication. The mechanical verdict stays RED;
+release readiness still requires resolution of the documented rollout risks.
 
 | Question | Reviewed impact | Evidence and migration |
 |---|---|---|
@@ -58,3 +61,13 @@ whitespace-alignment findings after coordinator repairs. The hybrid workflow rev
 closed control-capability, hardcoded-model and BLOCKED-routing findings. Neither review
 supplies the operator's M2 override. Existing Git collection defects F05/F06 remain
 release-control limitations, recorded separately from the compatibility of this diff.
+
+## Publication provenance
+
+The inspected baseline was `6b10a84`. Before publication, only this review's three
+commits were rebased onto remote main `9a024c0`; the two earlier unpublished baseline
+commits are excluded. The generated catalogue was rebuilt to resolve the only conflict.
+Independent comparison found the runtime/planning implementation and new tests unchanged.
+The reviewed tree remains available locally as `codex/enterprise-value-review-tested-base`.
+Published as [draft PR #84](https://github.com/jokerman89/lintel/pull/84) with the approved
+exception and the retained compatibility/rollout limitations in its description.
