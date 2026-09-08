@@ -1,15 +1,18 @@
 # Planner-as-module — plan is a callable sub-workflow
 
-**Last updated:** 2026-05-29 (v3.8 Feature 2 implementation)
+**Last updated:** 2026-09-08 (short leaves, bounded work packages)
 **Status:** Concept doc — referenced by skills/plan/SKILL.md, skills/plan-eng-review/SKILL.md, skills/capture/SKILL.md, skills/cycle/SKILL.md
 
-> Before v3.8, `plan` was Phase 4 of `cycle`. The cold-executor trio (plan.md + spec.md + prompt.md) was split — plan/spec born in PLAN, prompt born in CAPTURE. Standalone `/li:plan` invocations got 2/3 of a handoff. This concept doc captures v3.8 Feature 2's four sharpenings that make `plan` industry-best AND module-callable from other workflows.
+PLAN is callable on its own or within a cycle. It produces the complete cold-executor trio
+(plan.md + spec.md + prompt.md), preserves short, verifiable leaves and groups connected work
+into bounded packages for execution and review.
 
 ## The four sharpenings
 
 ### 2.1 — `workflow_root: true` on plan's frontmatter
 
-One-line frontmatter change in `skills/plan/SKILL.md`. Effect: PLAN becomes a first-class job when invoked standalone via the jobs system (Feature 1) — its own job folder, its own state, its own resumability.
+The frontmatter in `skills/plan/SKILL.md` declares PLAN eligible to own a job when invoked
+through the jobs system. It does not itself create a job or register a host hook.
 
 ```yaml
 ---
@@ -20,9 +23,12 @@ description: ...
 ---
 ```
 
-When operator runs `/li:plan <design.md>` outside a cycle, `job-begin` hook fires, spawns `.claude/runtime/jobs/plan-<stamp>-<hash>/`, PLAN proceeds with full job tracking.
+When invoked through an active jobs integration, standalone PLAN can use its own job folder
+and tracking. Automatic job spawning remains opt-in under ADR-0008; do not claim a hook fired
+merely because `workflow_root: true` is present.
 
-When PLAN runs INSIDE `/li:cycle` (Phase 4), the caller passes `--no-job` (or `NO_JOB=1`) so the hook short-circuits and no nested job is spawned.
+Inside a cycle, reuse the caller's active job rather than creating a nested job. Existing
+integrations may pass `--no-job` (or `NO_JOB=1`) for this purpose.
 
 ### 2.2 — Move `prompt.md` generation from CAPTURE to PLAN
 
@@ -50,20 +56,46 @@ After (v3.8):
 
 CAPTURE's new job for the trio: REAFFIRM. Verify spec.md still matches implementation. Annotate plan.md tasks with actual STATUS from build-log. Add post-build "What you DON'T need to know" entries to prompt.md. CAPTURE doesn't regenerate; it witnesses.
 
-### 2.3 — Granularity hard check (LOCKED at 2–5 min per cold-subagent task)
+### 2.3 — Short, verifiable leaves
 
-Across cold-handoff systems, the magic sauce is not plan depth — it's task size. Small tasks = clean handoff = fewer errors. Operator-locked rule: **2–5 minutes per cold-subagent task, decompose otherwise.**
+Each leaf remains targeted at **2–5 minutes of implementation**. At flat/phased depth a task
+is a leaf; at tree depth a subtask is a leaf. Every leaf retains its ID, owner/edit boundary,
+requirements, dependencies, observable acceptance, verification procedure and evidence.
 
-Implementation: `plan-eng-review` Step 0 (which is BLOCKING — already part of the plan-review flow) extended with a per-task time estimate + AskUserQuestion gate.
+`plan-eng-review` Step 0 evaluates every leaf. A leaf estimated above five minutes must be
+decomposed or explicitly accepted with its concern recorded, using the existing gate.
+This is an instruction-driven judgment, not a timed runtime validator. Grouping leaves does
+not weaken the check. Time estimates appear in output only when requested.
 
-For each task in plan.md:
-- Estimate cold-subagent implementation time (assuming subagent reads only the task spec + spec.md + prompt.md, no prior conversation).
-- If estimate ≤5 min → PASS.
-- If estimate >5 min → AskUserQuestion with two options:
-  - **A) Decompose now** (preferred) — split into 2-N smaller tasks ≤5 min each.
-  - **B) Accept with concern** — keep task; log concern in plan.md "Reviewer Concerns" section.
+### Work packages
 
-No batching. Per task. Mechanical.
+The operator-selected hybrid model keeps leaves as the verification/progress unit and uses
+packages (`P1`, `P2`, …) as the execution/review unit. A package has:
+
+- One observable outcome, with acceptance evidence mapped to every included leaf.
+- The same accountable write owner and permitted edit boundary across its leaves.
+- Connected dependencies, with leaf IDs unchanged and internal execution in dependency order.
+
+Split packages at different owners, security boundaries, irreversible decisions or independent
+rollback boundaries. Choose boundaries from the work; no fixed count or duration makes a package
+appropriate. A single leaf is a valid package. For existing plans with no grouping, treat each
+leaf as a singleton package without rewriting IDs or creating a second task list.
+
+The canonical plan template records package ID, outcome, leaf IDs, owner/edit boundary,
+dependencies and acceptance evidence. Every leaf belongs to exactly one package. Derive package
+dependencies from the leaf graph and check both for cycles or hidden later-package dependencies.
+Packages execute sequentially; this grouping does not authorize concurrent editors.
+
+BUILD performs one spec-compliance pass followed by one quality pass for the combined package;
+review findings reference the affected leaf IDs. Judge complexity on the complete package,
+not the apparent simplicity of each leaf. Recheck affected work after corrections. A package
+cannot be DONE until every leaf's acceptance is verified with evidence and the package reviews
+pass. Unverified or blocked leaves cannot disappear behind an aggregate success label.
+
+This is a planning and dispatch instruction contract. The package table and optional package
+annotation in build-log do not add a new job schema, automated dispatcher, approval gate or
+replacement for existing leaf statuses/resume pointers. The implementation role and review
+separation follow the host's actual capabilities and the BUILD skill.
 
 ### 2.4 — Module-callable from other workflows
 
@@ -71,7 +103,7 @@ With 2.1 + 2.2 + 2.3, PLAN becomes a callable sub-workflow:
 
 #### Inside cycle (Phase 4)
 ```
-/li:cycle → SENSE → DEFINE → DISCOVER → PLAN → BUILD → REVIEW → SHIP → CAPTURE
+/li:cycle → SENSE → SCOPE → DEFINE → DISCOVER → PLAN → BUILD → REVIEW → SHIP → CAPTURE
                                           ▲
                                   reads DEFINE + DISCOVER from job dir
                                   --no-job to avoid nested job
@@ -81,7 +113,7 @@ With 2.1 + 2.2 + 2.3, PLAN becomes a callable sub-workflow:
 ```
 /li:plan <design.md>
    ↓
-   workflow_root: true → job-begin → .claude/runtime/jobs/plan-<stamp>-<hash>/
+   workflow_root: true (job tracking only when invoked through an active integration)
    produces: plan.md + spec.md + prompt.md (the trio)
    handoff-size-check against 500k cap
    founder approval gate
@@ -107,7 +139,7 @@ The calling workflow passes:
 #### Output contract (deterministic for callers)
 
 PLAN always emits at `<run-dir>/`:
-- `plan.md` — task breakdown
+- `plan.md` — short leaves, bounded package grouping, acceptance and evidence mapping
 - `spec.md` — engineering master spec
 - `prompt.md` — cold-executor handoff prose
 
@@ -125,9 +157,9 @@ Callers can rely on these paths existing post-DONE. CAPTURE re-affirms but doesn
 ## What this explicitly does NOT do
 
 - Does not add new agents; reuses existing CodeReviewer / Architect / ReadOnly.
-- Does not change cycle's overall flow — only re-points where prompt.md is born.
+- Does not change the cycle's phase order or its approval gates.
 - Does not invent new gate types; granularity check piggybacks plan-eng-review Step 0.
-- Does not auto-decompose; operator decides at each >5min task.
+- Does not hide oversized leaves inside a package; the existing decomposition/concern gate applies.
 
 ## Operator validation criteria
 

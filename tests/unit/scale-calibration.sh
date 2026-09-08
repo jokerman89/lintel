@@ -24,6 +24,7 @@ echo "==============================="
 TMP_HOME="$(mktemp -d 2>/dev/null || mktemp -d -t lintel-calib)"
 trap 'rm -rf "$TMP_HOME"' EXIT
 export LINTEL_HOME="$TMP_HOME"
+export LINTEL_REPO_ROOT="$TMP_HOME/repo" # never read the running checkout's real calibration
 unset LINTEL_AUDIT_DIR 2>/dev/null || true   # let it derive from LINTEL_HOME
 AUDIT_DIR="$LINTEL_HOME/audit"
 mkdir -p "$AUDIT_DIR"
@@ -43,6 +44,9 @@ for sz in XS S M L XL; do
     && pass "no-history prior($sz)=$got equals mechanical default" \
     || fail "no-history prior($sz)=$got, want default $want"
 done
+got=$(scale_token_estimate S)
+[ "$got" = "12000 uncalibrated 0" ] && pass "no-history estimate includes basis and sample count" \
+                                    || fail "no-history estimate=$got"
 
 # ─── C1: history present → median actual_tokens for the matching size ─────────
 echo ""
@@ -62,6 +66,9 @@ JSONL
 got=$(scale_calibrated_prior "XL")
 [ "$got" = "110000" ] && pass "XL median actual = $got (corrected from default 120000)" \
                       || fail "XL prior = $got, want median 110000"
+got=$(scale_token_estimate XL)
+[ "$got" = "110000 calibrated 3" ] && pass "XL estimate carries its measured sample count" \
+                                   || fail "XL provenance=$got"
 
 got=$(scale_calibrated_prior "M")
 [ "$got" = "30000" ] && pass "M median actual = $got (even count → midpoint)" \
@@ -96,6 +103,28 @@ done
 emitted=$(printf '%s' "$blk" | grep 'est_tokens:' | tr -dc '0-9')
 [ "$emitted" = "110000" ] && pass "scale_estimate est_tokens=$emitted (calibrated XL prior)" \
                           || fail "scale_estimate est_tokens=$emitted, want calibrated 110000"
+for field in 'est_tokens_basis: calibrated' 'est_tokens_samples: 3' 'est_tokens_scope: cycle'; do
+  printf '%s' "$blk" | grep -q "$field" && pass "scope block has $field" || fail "scope block missing $field"
+done
+
+# A value equal to the default is still measured; provenance cannot be inferred by comparison.
+# Accept whitespace/quoted integers, ignore unusable or partial numeric readings.
+cat > "$GRAN" <<'JSONL'
+{"size": "S", "actual_tokens": 12000}
+{"size":"S","actual_tokens":"12000"}
+{"size":"S","actual_tokens":1.5}
+{"size":"S","actual_tokens":"9unknown"}
+{"size":"S","actual_tokens":-2}
+{"size":"S","actual_tokens":0}
+{"size":"S","actual_tokens":null}
+{"size":"S"}
+JSONL
+got=$(scale_token_estimate S)
+[ "$got" = "12000 calibrated 2" ] && pass "basis follows valid samples even when median equals default" \
+                                  || fail "equal-to-default or invalid-sample handling=$got"
+got=$(scale_token_estimate L)
+[ "$got" = "70000 uncalibrated 0" ] && pass "unmatched size retains uncalibrated provenance" \
+                                    || fail "unmatched-size provenance=$got"
 
 # And with the log removed, scale_estimate falls back cleanly to the default.
 rm -f "$GRAN"
@@ -103,7 +132,9 @@ blk2=$(scale_estimate "stand up a full landing zone with CI/CD on azure" medium)
 emitted2=$(printf '%s' "$blk2" | grep 'est_tokens:' | tr -dc '0-9')
 def2=$(size_default_prior "XL")
 [ "$emitted2" = "$def2" ] && pass "no-history scale_estimate est_tokens=$emitted2 (mechanical default)" \
-                          || fail "no-history est_tokens=$emitted2, want default $def2"
+                         || fail "no-history est_tokens=$emitted2, want default $def2"
+printf '%s' "$blk2" | grep -q 'est_tokens_basis: uncalibrated' \
+  && pass "scope block labels absent history uncalibrated" || fail "missing uncalibrated label"
 
 echo ""
 [ "$FAILED" -eq 0 ] && { echo "scale-calibration: ALL PASS"; exit 0; } || { echo "scale-calibration: FAILURES"; exit 1; }

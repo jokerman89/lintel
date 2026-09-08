@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+# component: lintel-scale-estimator
+# implements: ADR-0008
+# intent: .claude/engineering/design-archive/lintel-scope-and-scaled-planning-design.md
+# constraints: preserve leaf granularity and dormant calibration writes; estimate whole cycles
+# last_intent_review: 2026-09-08
 # lib/scale-estimator.sh — mechanical scale estimation for SENSE (Slice 1)
 #
 # Sourced by skills/sense/SKILL.md (step 0b + step 0e). Provides the SIZE axis
@@ -19,6 +24,7 @@
 #   scale_calibrated_prior <size>  → integer est_tokens, corrected from history
 #                                    (Slice 4 calibration loop; falls back to
 #                                     size_default_prior when no history exists)
+#   scale_token_estimate <size>    → tokens basis samples (space-separated; whole cycle)
 #   scale_estimate <prompt>        → emits the scope block (YAML) for the skill
 #   elephant_score <prompt>        → alias of detect_breadth (back-compat)
 #
@@ -48,14 +54,19 @@ SCALE_LARGE_QUALIFIER="${SCALE_LARGE_QUALIFIER:-platform|enterprise|production.?
 
 _scale_lc() { printf '%s' "${1:-}" | tr '[:upper:]' '[:lower:]'; }
 
+# Match complete words/phrases: api in "capital" and all in "small" are not signals.
+_scale_matches() {
+  printf '%s' "${1:-}" | grep -qiE "(^|[^[:alnum:]_])(${2:-})([^[:alnum:]_]|$)"
+}
+
 # ─── detect_breadth ──────────────────────────────────────────────────────────
 # Absorbs the elephant-hint corpus (was skills/sense step 0b). Single source.
 detect_breadth() {
   local p; p="$(_scale_lc "${1:-}")"
   local score=0
-  printf '%s' "$p" | grep -qiE "entire|all |every|whole|full system|complete rewrite|across all" && score=$((score+2))
-  printf '%s' "$p" | grep -qiE "redesign|refactor everything|new architecture|from scratch" && score=$((score+2))
-  printf '%s' "$p" | grep -qiE "and also|while we'?re at it|maybe also|could we also" && score=$((score+1))
+  _scale_matches "$p" "entire|all|every|whole|full system|complete rewrite|across all" && score=$((score+2))
+  _scale_matches "$p" "redesign|refactor everything|new architecture|from scratch" && score=$((score+2))
+  _scale_matches "$p" "and also|while we'?re at it|maybe also|could we also" && score=$((score+1))
   local wc; wc=$(printf '%s' "$p" | wc -w | tr -d ' ')
   [ "${wc:-0}" -gt 80 ] 2>/dev/null && score=$((score+1))
   printf '%s' "$score"
@@ -69,8 +80,8 @@ elephant_score() { detect_breadth "${1:-}"; }
 # bimodal → infra/hosting noun present (could be a static page or a cluster).
 detect_depth() {
   local p; p="$(_scale_lc "${1:-}")"
-  if printf '%s' "$p" | grep -qiE "$SCALE_BIMODAL_LEXICON"; then printf 'bimodal'; return 0; fi
-  if printf '%s' "$p" | grep -qiE "$SCALE_SURFACE_LEXICON"; then printf 'high'; return 0; fi
+  if _scale_matches "$p" "$SCALE_BIMODAL_LEXICON"; then printf 'bimodal'; return 0; fi
+  if _scale_matches "$p" "$SCALE_SURFACE_LEXICON"; then printf 'high'; return 0; fi
   printf 'shallow'
 }
 
@@ -79,17 +90,17 @@ detect_depth() {
 detect_surface_count() {
   local p; p="$(_scale_lc "${1:-}")"
   local n=0
-  printf '%s' "$p" | grep -qiE "auth|oauth|login|sso|rbac|permission" && n=$((n+1))
-  printf '%s' "$p" | grep -qiE "database|schema|migration|data model|sql" && n=$((n+1))
-  printf '%s' "$p" | grep -qiE "api|endpoint|rest|graphql|grpc" && n=$((n+1))
-  printf '%s' "$p" | grep -qiE "network|vnet|dns|firewall|front.?door|cdn|waf" && n=$((n+1))
-  printf '%s' "$p" | grep -qiE "payment|billing" && n=$((n+1))
-  printf '%s' "$p" | grep -qiE "multi.?tenant|tenant" && n=$((n+1))
+  _scale_matches "$p" "auth|oauth|login|sso|rbac|permission" && n=$((n+1))
+  _scale_matches "$p" "database|schema|migration|data model|sql" && n=$((n+1))
+  _scale_matches "$p" "api|endpoint|rest|graphql|grpc" && n=$((n+1))
+  _scale_matches "$p" "network|vnet|dns|firewall|front.?door|cdn|waf" && n=$((n+1))
+  _scale_matches "$p" "payment|billing" && n=$((n+1))
+  _scale_matches "$p" "multi.?tenant|tenant" && n=$((n+1))
   printf '%s' "$n"
 }
 
-_has_small_qual() { printf '%s' "$(_scale_lc "${1:-}")" | grep -qiE "$SCALE_SMALL_QUALIFIER"; }
-_has_large_qual() { printf '%s' "$(_scale_lc "${1:-}")" | grep -qiE "$SCALE_LARGE_QUALIFIER"; }
+_has_small_qual() { _scale_matches "${1:-}" "$SCALE_SMALL_QUALIFIER"; }
+_has_large_qual() { _scale_matches "${1:-}" "$SCALE_LARGE_QUALIFIER"; }
 
 # ─── classify_size ───────────────────────────────────────────────────────────
 # XS | S | M | L | XL. Threshold table — design §3.1.
@@ -112,6 +123,8 @@ classify_size() {
 
   # Non-infra: combine breadth + surface + qualifier
   if [ "$surfaces" -ge 3 ] 2>/dev/null; then printf 'XL'; return 0; fi
+  # Tenant isolation crosses boundaries even when the short request names one surface.
+  if _scale_matches "$p" 'multi[[:space:]_-]?tenant'; then printf 'L'; return 0; fi
   if [ "$breadth" -ge 4 ] 2>/dev/null || [ "$surfaces" -ge 2 ] 2>/dev/null; then printf 'L'; return 0; fi
   if [ "$breadth" -ge 2 ] 2>/dev/null || [ "$surfaces" -ge 1 ] 2>/dev/null || [ "$depth" = "high" ]; then printf 'M'; return 0; fi
   if _has_small_qual "$p"; then printf 'XS'; return 0; fi
@@ -175,11 +188,12 @@ size_default_prior() {
   esac
 }
 
-# ─── scale_calibrated_prior ───────────────────────────────────────────────────
+# ─── scale_token_estimate ────────────────────────────────────────────────────
 # The compounding edge (design §3.5): correct the token prior for a given size
 # from recorded actual-vs-estimated history instead of the hardcoded guess.
 #
-#   scale_calibrated_prior <size>  → integer est_tokens
+#   scale_token_estimate <size> → tokens calibrated|uncalibrated sample_count
+# These are whole-cycle actuals, not per-task costs. Never multiply by leaf count.
 #
 # Reads CAPTURE's append-only log at .claude/runtime/audit/granularity.jsonl
 # (written via `audit_log granularity ...`, scope-routed by bin/_audit.sh). For every record whose `size`
@@ -192,33 +206,35 @@ size_default_prior() {
 # size_default_prior — the exact mechanical guess used before this slice. This
 # function is purely additive: callers that never had history simply get the
 # old number.
-scale_calibrated_prior() {
+scale_token_estimate() {
   local size="${1:-S}"
-  local home="${LINTEL_HOME:-$HOME/.lintel}"
+  local lintel_home="${LINTEL_HOME:-$HOME/.lintel}"
   local root
   root="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}"
   local log="$root/.claude/runtime/audit/granularity.jsonl"
-  [ -r "$log" ] || log="${LINTEL_AUDIT_DIR:-$home/audit}/granularity.jsonl" # legacy-fallback-ok
+  [ -r "$log" ] || log="${LINTEL_AUDIT_DIR:-$lintel_home/audit}/granularity.jsonl" # legacy-fallback-ok
 
   # No history → mechanical default (the Slice-1 guess).
-  [ -r "$log" ] || { size_default_prior "$size"; return 0; }
+  [ -r "$log" ] || { printf '%s uncalibrated 0' "$(size_default_prior "$size")"; return 0; }
 
   # Collect actual_tokens for records matching this size. Pure awk: match the
   # size field exactly, pull the numeric actual_tokens, sort, take the median.
   # If nothing matches, awk prints the empty string and we fall back.
-  local median
-  median=$(awk -v want="$size" '
+  local estimate
+  estimate=$(awk -v want="$size" '
     {
       # size field: "size":"<value>"
-      if (match($0, /"size":"[^"]*"/)) {
-        s = substr($0, RSTART+8, RLENGTH-9)
+      if (match($0, /"size"[[:space:]]*:[[:space:]]*"[^"]*"/)) {
+        s = substr($0, RSTART, RLENGTH)
+        sub(/^"size"[[:space:]]*:[[:space:]]*"/, "", s)
+        sub(/"$/, "", s)
       } else { s = "" }
       if (s != want) next
       # actual_tokens field: "actual_tokens":"<n>" or :<n>
-      if (match($0, /"actual_tokens":"?[0-9]+"?/)) {
+      if (match($0, /"actual_tokens"[[:space:]]*:[[:space:]]*("[0-9]+"|[0-9]+)[[:space:]]*[,}]/)) {
         t = substr($0, RSTART, RLENGTH)
         gsub(/[^0-9]/, "", t)
-        if (t != "") vals[n++] = t + 0
+        if (t + 0 > 0) vals[n++] = t + 0
       }
     }
     END {
@@ -229,12 +245,21 @@ scale_calibrated_prior() {
         while (j >= 0 && vals[j] > v) { vals[j+1] = vals[j]; j-- }
         vals[j+1] = v
       }
-      if (n % 2) print vals[(n-1)/2]
-      else       print int((vals[n/2-1] + vals[n/2]) / 2)
+      if (n % 2) median = vals[(n-1)/2]
+      else       median = int((vals[n/2-1] + vals[n/2]) / 2)
+      printf "%.0f calibrated %d", median, n
     }
   ' "$log" 2>/dev/null)
 
-  if [ -n "$median" ]; then printf '%s' "$median"; else size_default_prior "$size"; fi
+  if [ -n "$estimate" ]; then printf '%s' "$estimate"
+  else printf '%s uncalibrated 0' "$(size_default_prior "$size")"; fi
+}
+
+# Back-compatible numeric accessor; value and provenance come from the same history read.
+scale_calibrated_prior() {
+  local estimate
+  estimate=$(scale_token_estimate "${1:-S}")
+  printf '%s' "${estimate%% *}"
 }
 
 # ─── scale_estimate ──────────────────────────────────────────────────────────
@@ -242,7 +267,7 @@ scale_calibrated_prior() {
 # refines `readings` when escalate=yes (decision 1B).
 scale_estimate() {
   local p="${1:-}" thr="${2:-medium}"
-  local size amb conf esc schema breadth depth surfaces est_tokens
+  local size amb conf esc schema breadth depth surfaces est_tokens est_basis est_samples
   size=$(classify_size "$p")
   amb=$(scale_ambiguous "$p")
   conf=$(scale_confidence "$p")
@@ -251,7 +276,7 @@ scale_estimate() {
   # est_tokens: calibrated from CAPTURE history when present, else the
   # mechanical default (Slice 4, design §3.5). Additive — never changes the
   # pre-existing keys, only adds one informed by the calibration loop.
-  est_tokens=$(scale_calibrated_prior "$size")
+  read -r est_tokens est_basis est_samples <<< "$(scale_token_estimate "$size")"
   breadth=$(detect_breadth "$p"); depth=$(detect_depth "$p"); surfaces=$(detect_surface_count "$p")
   cat <<EOF
 scale:
@@ -261,6 +286,9 @@ scale:
   escalate: $esc
   depth_schema: $schema
   est_tokens: $est_tokens
+  est_tokens_basis: $est_basis
+  est_tokens_samples: $est_samples
+  est_tokens_scope: cycle
   signals: { breadth: $breadth, depth: $depth, surfaces: $surfaces }
 EOF
 }

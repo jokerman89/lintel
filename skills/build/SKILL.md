@@ -1,7 +1,7 @@
 ---
 name: build
 layer: foundation
-description: Use to implement an approved plan task by task. Trigger after PLAN is approved and a plan.md exists with code to write — each task gets a fresh implementer subagent and two-stage review, spec compliance then quality, with a per-task status protocol.
+description: Use to execute an approved plan in bounded work packages, preserving short task IDs and acceptance evidence while reviewing each package for spec compliance and quality.
 color: cyan
 tools: Read, Write, Edit, Bash, Grep, Glob
 voice: internal
@@ -14,12 +14,12 @@ You are the BUILD skill — Phase 5 of the Lintel cycle.
 
 ## What this skill does
 
-Executes plan.md task-by-task using superpowers' Subagent-Driven Development pattern:
+Executes plan.md with the hybrid contract in ADR-0026:
 1. Read plan.md, extract all tasks with full text
 2. Create TodoWrite for tasks
-3. Per task: dispatch fresh implementer subagent → implementer executes (TDD red-green-refactor) → two-stage review (spec compliance THEN code quality) → fix loop if needed → mark complete
-4. The active pack's compliance hooks fire automatically (`resolve_pack_field compliance.hooks`; none by default)
-5. The active pack's voice gates fire on customer-facing artifacts (`resolve_pack_field voice.gates_active`; none by default)
+3. Per work package: dispatch one implementer with all member leaves → implement in dependency order → review the package for spec compliance THEN quality → fix findings → record evidence and completion for every leaf
+4. Verify which requested compliance controls actually run on this host (`resolve_pack_field compliance.hooks`; none by default)
+5. Apply configured voice review to customer-facing artifacts (`resolve_pack_field voice.gates_active`; none by default)
 6. Continuous checkpoint (if checkpoint_mode=continuous)
 7. Final code review after all tasks
 
@@ -45,7 +45,11 @@ This phase is where most token spend happens. Cost-estimate from PLAN sets expec
 Verify:
 - plan.md exists and is APPROVED status
 - Current branch is NOT main/master (if no explicit user consent for main)
-- Active pack's compliance hooks status (`resolve_pack_field compliance.hooks`; none by default — when present, e.g. customer-data-block + secret-scan-block, they must be activated)
+- Resolve requested controls and the pack's mode/policy. Classify each as a compatible
+  registered hook, an equivalent accepted by that policy with recorded evidence, or an
+  unsatisfied requirement. An unavailable mandatory control blocks its affected action;
+  continue independent authorized preparation. Advisory gaps remain explicit concerns.
+  Recording a missing capability never counts as satisfying a mandatory requirement.
 - Git worktree state clean OR operator confirms WIP state OK
 
 If on main without consent: HARD STOP per superpowers rule. AskUserQuestion: "Switch to feature branch / proceed on main with confirmation / abort?"
@@ -62,30 +66,37 @@ Read entire plan.md once. Extract:
 - All task titles + IDs
 - Dependencies between tasks
 - Acceptance criteria
-- Recommended subagent per task
-- Model selection per task
+- Package membership, outcome, owner/edit boundary and review scope
+- Recommended subagent and the available host's model configuration
 
-Create TodoWrite with tasks. Mark T1 as in_progress.
+Track existing leaf IDs in TodoWrite or the plan checklist. An old plan without packages
+treats each leaf as a singleton package; no migration or new job-state schema is required.
+Check that each leaf belongs to exactly one package and all external dependencies are met.
+Execute packages sequentially by default. Group only leaves that deliver one outcome under
+one write owner and compatible boundaries; separate different approval, risk or rollback
+boundaries. Package membership cannot hide an unresolved dependency or scope change.
 
-### Step 3 — Per-task execution cycle
+### Step 3 — Per-package execution cycle
 
-For each task in dependency order:
+For each ready package, execute its short leaves in dependency order. Preserve the 2–5 minute
+leaf constraint; grouping reduces repeated context loading, not acceptance coverage.
 
 #### 3a — Dispatch implementer subagent
 
-**Record the task's start ref first:** note the current `HEAD` sha (one `git rev-parse HEAD`)
-in the build-log entry for this task — 3b-guard diffs against it after the implementer returns.
+**Record the package's start ref first:** note `HEAD`, the owned paths and any authorized
+pre-existing diff. Review only attributable package changes; unrelated work in a shared
+checkout is not evidence. Use an isolated worktree when overlapping writers would prevent
+reliable attribution. Leaf log entries reference the same package start ref.
 
-Spawn fresh subagent with:
-- **Full task text** from plan.md (verbatim, not "read plan.md")
+Spawn one fresh implementer for the package with:
+- **Full text of every member leaf**, stable IDs, package outcome and dependency order
 - **Scene-setting context** (what came before this task, why, what's expected)
 - **Acceptance criteria** (test or verify command)
 - **Companion skills**: TDD discipline, verification-before-completion
 - **Tool restrictions**: scoped per task (e.g., only Read+Write+Edit+Bash for code, no Grep needed)
-- **Model selection** per task complexity:
-  - Mechanical (single-file edit) → Haiku
-  - Multi-file integration → Sonnet
-  - Architecture / design judgment → Opus
+- **Host capability and model configuration:** use the available host tools and configured
+  model; do not invent access to a named model. If delegation is unavailable, execute the
+  same bounded package in the coordinator and disclose that limitation.
 
 #### 3b — Implementer executes (TDD red-green-refactor)
 
@@ -93,21 +104,28 @@ The TDD red-green-refactor discipline:
 1. **Red:** Write failing test first (REQUIRED — code without failing test = block)
 2. **Green:** Write minimum code to pass
 3. **Refactor:** Improve while tests still pass
-4. **Commit:** WIP commit with task ID in message (per continuous-checkpoint if mode on)
+4. **Checkpoint:** retain leaf results; make an atomic package commit only when the logical
+   change and its verification are coherent (per continuous-checkpoint if enabled)
 
 Implementer self-reviews. Returns status:
-- **DONE** — task complete, tests pass, ready for spec review
+- **DONE** — implementation ready for review, with an evidence result for every leaf; final leaf completion waits for both package reviews
 - **DONE_WITH_CONCERNS** — concerns logged in implementer message
 - **NEEDS_CONTEXT** — implementer asked for info, provide + re-dispatch
 - **BLOCKED** — implementer can't proceed, root-cause hypothesis, escalate to operator
 
 #### 3b-guard — Empty-diff check (fail-closed, v4.11)
 
-Before dispatching ANY review — inline or dedicated — verify the implementer actually changed
-the tree. Compare against the task's start ref recorded in 3a: `git diff <start_ref>` covers
+Before dispatching review, verify the package produced its planned changes and evidence.
+Compare owned changes against the package start ref recorded in 3a: `git diff <start_ref>` covers
 both committed (WIP commits) and uncommitted work; if the start ref is somehow missing, fall
 back to `git status --porcelain` + `git diff HEAD` AND check `git log` for WIP commits carrying
-this task's ID before concluding "no change".
+the package's leaf IDs before concluding "no change". A nonempty aggregate diff cannot
+prove every member leaf was implemented: check each leaf's own acceptance and evidence.
+
+For a task explicitly planned as verification-only, review its recorded command, result and
+evidence against acceptance criteria; no source diff is expected. This exception must be in
+the approved task, not invented after an implementation task produces no changes. Keep the
+empty-diff block below for tasks whose acceptance requires a code or artifact change.
 
 - **Diff is empty or whitespace-only** (`git diff -w <start_ref>` produces nothing) → the review
   MUST NOT run and the task CANNOT be marked DONE. Treat as **BLOCKED**: the implementer
@@ -120,17 +138,22 @@ this task's ID before concluding "no change".
 
 **Review-routing gate (per `docs/concepts/agent-dispatch-rules.md` rule (c) — inline when cheap + deterministic):**
 
-Route the review by the task's complexity tier (the same tier that drove model selection in 3a):
+Route review by the **aggregate package** complexity and risk, not by the smallest leaf:
 
-- **Mechanical / Haiku-tier leaf task** (single-file edit, rename, add a log line, a trivial test) → **inline review.** The implementer's own diff + acceptance command is reviewed inline in the main thread; a dedicated reviewer subagent is skipped (its base-context warmup cost exceeds the review value for a one-file mechanical change — rule (c)). Still apply both lenses inline: spec-compliance THEN quality. Note in the build-log that the review was inline.
-- **Substantive task** (multi-file integration / Sonnet, or architecture/design-judgment / Opus) → **full two-stage dedicated review below** (UNCHANGED). Fresh reviewer context is the point (rule (b)); never inline these.
+- **Mechanical package** (a bounded deterministic change with no substantive integration or
+  risk boundary) → coordinator reviews spec compliance then quality inline; log that mode.
+- **Substantive package** (multi-file integration, architecture or security-sensitive work)
+  → dedicated independent review in the two stages below. Several small leaves do not make
+  the combined change mechanical. Implementer self-review cannot replace this review.
 
 This is an off-switch for trivial tasks ONLY — it does NOT remove the two-stage review for substantive work. When in doubt about a task's tier, default to the full two-stage dedicated review.
 
 **Stage 1 — Spec compliance review (substantive tasks — dedicated; mechanical tasks — inline):**
 
 Dispatch reviewer subagent (CodeReviewer or general-purpose):
-"Does the implementation match task requirements EXACTLY? List any deviations. Be strict — 'close enough' is not acceptable."
+"Review this package against every member leaf's requirements and evidence. Map findings
+to leaf IDs, identify missing acceptance and cross-leaf integration gaps, and report the
+package verdict. Review only the supplied owned diff and relevant surrounding code."
 
 If Stage 1 FAILS:
 - Fix the gaps (Edit tool, or re-dispatch implementer with specific fix-list)
@@ -147,9 +170,13 @@ If Stage 2 FAILS:
 - Re-dispatch
 - Max 3 iterations
 
-#### 3e — Compliance hooks (auto-fire per active pack)
+#### 3e — Compliance controls available on the host
 
-The active pack's hooks (`resolve_pack_field compliance.hooks`; none by default) run automatically on every edit/commit when present. Example hooks a pack may activate:
+The active pack's hook list (`resolve_pack_field compliance.hooks`; none by default) declares
+requested controls. Automatic execution requires compatible registered hooks on the current
+host; Lintel's hook bundle implements the Claude Code protocol. On another host, record the
+available policy-accepted equivalent and its evidence, or retain the unsatisfied requirement
+under the preflight rule. A pack label or hook file is not proof of execution. Example controls:
 - `customer-data-block`: BLOCKS commit with customer-PII patterns
 - `secret-scan-block`: BLOCKS commit with detected secrets
 - `no-direct-main-push`: WARNS on direct main push
@@ -165,19 +192,22 @@ If task produces customer-facing output (docs, copy, demo content):
 
 #### 3g — Mark complete
 
-TodoWrite mark task as completed. Move to next task.
+After both review stages pass, record every leaf's acceptance evidence and final status.
+Mark the package complete only when every member is verified and no blocking finding remains.
+If one leaf fails, keep the package open; retain completed evidence and retry the affected
+leaves and their impacted verification. Do not repeat unrelated checks without a reason.
 
 ### Step 4 — Continuous checkpoint (if checkpoint_mode=continuous)
 
-After each task DONE:
+After a coherent package passes review:
 ```bash
 git add <intentional files only — NEVER git add -A>
-git commit -m "WIP: <task title>
+git commit -m "<type>: <package outcome>
 
 [lintel-context]
 Decisions: <key choices made>
 Remaining: <what's left in logical unit>
-Skill: /li:build (task T<N> of plan.md)
+Skill: /li:build (package P<N>, leaves <IDs> in plan.md)
 [/lintel-context]"
 ```
 
@@ -190,11 +220,14 @@ If `checkpoint_push: true`: also push WIP to origin.
 Append to `.claude/runtime/state/build-log.md`:
 ```yaml
 task: T<N>
+package_id: P<N>                  # annotation, not a new job/state schema
 title: <title>
 start_ref: <HEAD sha at 3a dispatch>   # 3b-guard diffs against this
 status: DONE | DONE_WITH_CONCERNS | BLOCKED
 implementer_status: <as returned>
-review_mode: dedicated | inline   # inline for mechanical/Haiku-tier leaf tasks (3c gate)
+acceptance_evidence: <command/result or reviewed artifact reference for this leaf>
+package_review: <report reference covering all member leaves>
+review_mode: dedicated | inline   # based on aggregate package complexity (3c)
 spec_review_iterations: <N>
 quality_review_iterations: <N>
 voice_gate_score: <% if applicable>
@@ -221,8 +254,22 @@ Mechanical since v5.0 (ADR-0008) — one command, not a YAML obligation (per-tas
 ```bash
 _sl="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}/lib/state.sh"
 [ -f "$_sl" ] || _sl="$HOME/.lintel/lib/state.sh"; source "$_sl"   # installed by install.sh in consumer repos
-state_append BUILD <DONE|DONE_WITH_CONCERNS|BLOCKED> next=REVIEW plan_path=<path> tasks_completed=<N> tasks_blocked=<count>
+# Set these from the reviewed package/leaf results, never from an intended outcome.
+case "${build_status:?set actual BUILD status}" in
+  DONE|DONE_WITH_CONCERNS) build_next=REVIEW ;;
+  BLOCKED) build_next=BUILD; : "${build_next_action:?record blocked package/leaf repair step}" ;;
+  *) echo "Unsupported BUILD status" >&2; exit 1 ;;
+esac
+state_append BUILD "$build_status" next="$build_next" \
+  plan_path="${plan_path:?set approved plan path}" \
+  tasks_completed="${tasks_completed:?set verified leaf count}" \
+  tasks_blocked="${tasks_blocked:?set blocked leaf count}" \
+  note="${build_next_action:-review completed implementation}"
 ```
+
+For BLOCKED, set `build_next_action` to the unresolved package/leaf and its repair step;
+preserve its owned diff, acceptance results and review evidence for a cold session. Emit
+DONE_WITH_CONCERNS only when all required leaf acceptance and reviews have passed.
 
 ## Status protocol
 
@@ -234,8 +281,8 @@ state_append BUILD <DONE|DONE_WITH_CONCERNS|BLOCKED> next=REVIEW plan_path=<path
 ## Pause-points
 
 - Before BUILD starts: pre-flight checks (branch state, hooks active)
-- After each task review-pass: TodoWrite mark complete (no operator pause unless concerns)
-- Every Nth task (N=5 default): optional summary report
+- After each package review-pass: record leaf completion and package evidence (no extra approval unless a boundary requires it)
+- At meaningful package milestones: concise progress report
 - On BLOCKED: pause, root-cause hypothesis, operator decision
 - On a blocking compliance hook fire: hard stop, never silently proceed
 - On voice gate fail: surface, operator decides override or re-write
@@ -265,7 +312,7 @@ Skip-conditions: intent=review-only, intent=research-only, intent=plan-only.
 
 **Triggers:**
 - `/li:review` next (or REVIEW in /li:cycle)
-- Hook execution (settings.json hooks fire on edit/commit events)
+- Registered compatible hook execution on supported hosts
 
 ## Recommended subagents per task (from plan.md mapping)
 
@@ -283,12 +330,12 @@ Skip-conditions: intent=review-only, intent=research-only, intent=plan-only.
 - **Starting on main/master without explicit user consent** — hard rule
 - **Skipping review entirely** because "task is simple" — never. Mechanical tasks get INLINE review (3c gate), not NO review; substantive tasks keep the full two-stage dedicated review.
 - **Proceeding with unfixed P1 issues** — never
-- **Dispatching multiple implementers in parallel within one phase** — sequential (gives reviewer context)
+- **Splitting one package across competing implementers** — one write owner; packages run sequentially by default
 - **Making subagent read plan.md** — give them task text directly (subagent has no plan-context unless given)
 - **Skipping scene-setting context for implementer** — they need to understand WHY this task
 - **Ignoring subagent questions** — answer + re-dispatch, don't proceed without
 - **Accepting "close enough" on spec compliance** — Stage 1 must PASS exactly
-- **Skipping review loops** — minimum 1 spec + 1 quality per task (inline for mechanical tasks, dedicated for substantive — but both lenses always apply)
+- **Skipping leaf coverage in a package review** — one spec stage + one quality stage per package, covering every leaf and their integration
 - **Letting implementer self-review replace actual review** — never
 - **Starting code quality review before spec compliance is ✅** — order matters
 
@@ -299,18 +346,18 @@ Skip-conditions: intent=review-only, intent=research-only, intent=plan-only.
   - Missing context (deps not built) → check task order, reschedule
   - Complexity underestimated → decompose into subtasks, update plan
   - Plan correct but environment broken → escalate to operator
-- **Reviewer subagent unavailable**: skip review, note in build-log "unreviewed task". Status: DONE_WITH_CONCERNS.
+- **Reviewer unavailable**: preserve implementation evidence; keep a substantive package open
+  until independent review is available. For an eligible mechanical package, the coordinator
+  can apply the documented inline review. Never label missing review as completed review.
 - **Test suite breaks during task**: revert task, mark BLOCKED, investigate via `/li:investigate`.
 - **A blocking compliance hook fires repeatedly**: STOP. Investigate why operator's content keeps triggering. Likely real issue.
 - **Voice gate fails 3x for same artifact**: surface to operator, decide accept-with-caveat or re-write from scratch.
 
-## Model selection strategy (from superpowers)
+## Model selection
 
-- **Mechanical task** (rename variable, add log line, single-file edit, simple test): Haiku
-- **Multi-file integration** (add new endpoint touching 3-5 files): Sonnet
-- **Architecture/design judgment** (changing data model, new module structure, security-critical): Opus
-
-Plan.md should specify which model per task. If not specified, default Sonnet.
+Match package complexity to the current host's available configuration. Honor an explicit
+operator model choice. Record actual usage when available; do not infer model access or cost
+from a complexity label.
 
 ## Voice tier behavior
 

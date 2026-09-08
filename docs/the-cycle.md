@@ -97,7 +97,7 @@ PLAN writes the **cold-executor trio**, all three born together:
 
 | File | Holds |
 |---|---|
-| `plan.md` | the task breakdown, checkable, roughly five minutes per task |
+| `plan.md` | short checkable tasks grouped into bounded work packages with owners and acceptance evidence |
 | `spec.md` | what "done" means for each task |
 | `prompt.md` | enough context for a fresh agent with no history to execute it |
 
@@ -113,10 +113,11 @@ Task granularity is hard-checked. PLAN also produces the cost estimate that the 
 
 ### 6. BUILD — implement
 
-Each task gets a **fresh subagent** — no accumulated context, no drift from earlier tasks — and each
-task passes two review stages before it counts as done: spec compliance first, then quality. Simple
-mechanical tasks review inline rather than spawning a reviewer; the escalation is complexity-gated,
-not unconditional.
+Each **work package** gets one implementer with the full text of its short member tasks.
+It passes two review stages: spec compliance for every leaf and their integration, then quality.
+Review depth follows aggregate package complexity; substantive packages require independent
+review and mechanical packages can be reviewed by the coordinator inline. Every leaf retains
+its acceptance evidence. Missing evidence or a blocked leaf keeps the package open.
 
 **Produces** implemented code in atomic commits.
 
@@ -205,7 +206,7 @@ Five gates are always enforced, whatever the mode:
 2. **Approval at the end of PLAN** — a mandatory pause, not a notification.
 3. **Three-stage REVIEW** — spec, then quality, then compliance.
 4. **Compliance hard-stop in SHIP** — when the active pack sets `hard`.
-5. **Two-stage subagent review per BUILD task** — complexity-gated.
+5. **Two-stage review per BUILD work package** — complexity-gated, with every leaf covered.
 
 `meta-infra` mode adds four more, because changes to the harness ripple into every downstream cycle:
 

@@ -98,12 +98,15 @@ If the orientator route (from SENSE) conflicts with the resolved scale, **overri
 
 ```bash
 override_route=""
+resolved_intent="$intent"
+# The agent sets has_artifact=yes only after identifying the requested deliverable
+# and recording its path/ref in the SCOPE report. A branch name alone is not evidence.
+has_artifact="${has_artifact:-no}"
 if { [ "$scale_size" = "L" ] || [ "$scale_size" = "XL" ]; } \
    && { [ "$intent" = "ship" ] || [ "$intent" = "deploy" ]; }; then
-  # Greenfield check: is there anything to ship? (no build artifact / branch ahead)
-  has_artifact=$(git rev-parse --abbrev-ref HEAD 2>/dev/null | grep -qvE '^(main|master)$' && echo yes || echo no)
-  if [ "$has_artifact" = "no" ]; then
+  if [ "$has_artifact" != "yes" ]; then
     override_route="DEFINE"   # full cycle from DEFINE, not SHIP
+    resolved_intent="build"
   fi
 fi
 ```
@@ -120,7 +123,7 @@ mkdir -p "$(dirname "$scope_out")"
 cat > "$scope_out" <<EOF
 # Scope: $prompt_text
 size: $scale_size
-intent: ${override_route:+build (overrode $intent→build)}${override_route:-$intent}
+intent: $resolved_intent
 ambiguous: ${scale_amb}${chosen_reading:+ → resolved}
 chosen_reading: "${chosen_reading:-$prompt_text}"
 surface: [<agent fills from signals: infra/ci/auth/data/api/network>]
@@ -147,7 +150,7 @@ Mechanical since v5.0 (ADR-0008) — one command, not a YAML obligation:
 ```bash
 _sl="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}/lib/state.sh"
 [ -f "$_sl" ] || _sl="$HOME/.lintel/lib/state.sh"; source "$_sl"   # installed by install.sh in consumer repos
-state_append SCOPE DONE next=DEFINE size=$scale_size ambiguous=$scale_amb depth_schema=$depth_schema intent="${override_route:+build}${override_route:-$intent}" route_override="${override_route:-none}" scope_path="$scope_out"
+state_append SCOPE DONE next=DEFINE size=$scale_size ambiguous=$scale_amb depth_schema=$depth_schema intent="$resolved_intent" route_override="${override_route:-none}" scope_path="$scope_out"
 ```
 
 ## Output format

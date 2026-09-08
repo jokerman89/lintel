@@ -23,6 +23,16 @@ Types:
 
 ---
 
+## 2026-09-08 — short leaves with work packages
+
+**Type:** TEMPLATE
+**What changed:** The plan template groups short tasks into bounded packages and records owner,
+requirements, dependencies and acceptance evidence. BUILD executes one package with one owner
+and reviews every leaf plus integration in spec/quality stages (Lintel ADR-0026).
+**Why:** The operator selected hybrid execution to reduce repeated setup while retaining traceability.
+**Impact on existing repos:** Existing leaf IDs and job state remain valid. An ungrouped plan uses
+singleton packages. No migration, new scheduler or automatic company policy is introduced.
+
 ## 2026-06-12 — v5 `.claude/` home for scaffolded state
 
 **Type:** TEMPLATE
