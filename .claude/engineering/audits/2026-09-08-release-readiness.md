@@ -76,3 +76,16 @@ Action revisions were resolved from official releases: [checkout v6.0.2](https:/
 and [setup-python v6.1.0](https://github.com/actions/setup-python/releases/tag/v6.1.0).
 Native jq behavior follows the [jq manual's binary-output option](https://jqlang.org/manual/#invoking-jq);
 the local binary came from the [official jq 1.8.1 release](https://github.com/jqlang/jq/releases/tag/jq-1.8.1).
+
+## Hosted Windows test-harness follow-up
+
+The first locale-corrected candidate ran all 101 tests on every hosted platform: Ubuntu/macOS
+passed, while Windows passed 100 and failed the new compatibility-audit fixture before its first
+report could be read. That fixture asked native Python to resolve bare `bash`, unlike the passing
+Copilot integration's explicit parent-interpreter handoff. The original failure captured no stdout,
+so WSL launcher selection is a supported diagnosis, not a directly observed executable identity.
+
+The fixture now exports and invokes the actual parent Bash, avoiding native Windows PATH ambiguity,
+and includes interpreter, return code, stdout and stderr on failure. All staged/committed/rename
+and invalid-input assertions remain unchanged. The real local Git fixture and syntax check passed;
+independent review approved the fix. A fresh full hosted run is required before integration.

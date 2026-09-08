@@ -2,6 +2,8 @@
 # tag: unit compatibility release
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+# Native Windows Python can otherwise resolve System32's WSL launcher as bash.
+export LINTEL_TEST_BASH="$BASH"
 python3 - "$ROOT" <<'PY'
 from pathlib import Path
 import os
@@ -11,6 +13,7 @@ import sys
 import tempfile
 
 source = Path(sys.argv[1]).resolve() / "bin/li-compat-audit"
+bash_program = os.environ["LINTEL_TEST_BASH"]
 with tempfile.TemporaryDirectory(prefix="lintel-compat-") as directory:
     repo = Path(directory)
     env = dict(os.environ, GIT_AUTHOR_NAME="Test", GIT_AUTHOR_EMAIL="test@example.invalid",
@@ -30,10 +33,12 @@ with tempfile.TemporaryDirectory(prefix="lintel-compat-") as directory:
     skill.write_text(skill.read_text().replace("layer: foundation", "layer: workflows"))
     git("add", "skills")
     def audit(*args):
-        return subprocess.run(["bash", "bin/li-compat-audit", *args], cwd=repo,
+        return subprocess.run([bash_program, "bin/li-compat-audit", *args], cwd=repo,
                               env=env, capture_output=True, text=True)
     def report(result):
-        assert result.returncode == 0, result.stderr
+        assert result.returncode == 0, (
+            f"bash={bash_program!r} rc={result.returncode}\n"
+            f"stdout={result.stdout}\nstderr={result.stderr}")
         return (repo / result.stdout.strip()).read_text(encoding="utf-8")
     staged = report(audit("--output", "staged"))
     assert "Q1 — Frontmatter contract changes (1)" in staged, staged
