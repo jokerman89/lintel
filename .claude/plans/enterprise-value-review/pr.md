@@ -1,34 +1,12 @@
-Company profiles could lose inherited controls or return empty hook lists, and the planning
-workflow repeated execution and review setup for every small task. This change preserves
-effective enterprise requirements and applies the approved hybrid plan: short tasks with
-individual evidence, executed and reviewed in coherent work packages.
+Company profiles could lose inherited requirements or return empty gate lists, while execution repeated setup and review for every tiny task. This change preserves effective pack requirements and makes their effect traceable through routing, plan acceptance and evidence. Short 2–5 minute leaves run and receive independent review in coherent work packages, with aggregate risk and per-leaf proof (ADR-0026).
 
-The shared pack reader now handles the documented scalar/list/nested subset consistently,
-checks inherited requirements and rejects invalid ancestry. Team creation retains parent
-policy, risk routing consumes list values, and session digests show the loaded identity.
-Plans connect applicable company requirements to work IDs, acceptance and evidence; estimates
-state their basis without multiplying a whole-cycle prior by the number of leaves.
+- Correct pack extraction, inheritance, validation, extension routing, loaded identity and whole-cycle estimates.
+- Integrate current main's Copilot source/target and Spec Kit contracts; select explicit work artifacts and keep scope/review/resume state in the target repository.
+- Inspect complete selected push history, including merge additions and replacement-hidden originals. Git/scanner failures and unsupported matched commands block; warning hooks retain warning-only behavior.
+- Isolate shared checkpoints by repository and serialize registry updates while preserving old bytes on failures.
 
-Validation: 93/93 scripts passed in the aggregate run, with focused final parser/cache and
-workflow regressions recorded in the review report. Independent pack implementation and
-hybrid scenario reviews closed their findings. Internal jq assertions still need CI; no
-private company profile, live hook registration or measured productivity pilot was tested.
-Manifest JSON/version parity and Bash syntax passed. `install/verify.sh --all` returned 0;
-its missing-yq skip and existing legacy-count diagnostic are documented in the review.
-After isolating the commits onto main, all eight targeted pack, scale and integration
-scripts passed again. The 93-script aggregate result is from the original inspected base.
+All 22 original review findings have current dispositions in `.claude/engineering/audits/2026-09-08-enterprise-value-completion.md`. Independent reviews closed the subsequent correctness findings; no open P0/P1/P2/P3 remains in their reviewed scope.
 
-The review used baseline `6b10a84`; its commits were isolated onto main `9a024c0` for this PR,
-excluding two earlier unpublished commits. Reconcile overlapping Copilot changes before
-combining them. The review records two pre-existing P1 Git collection defects
-(F05/F06); this PR does not establish readiness as an enterprise enforcement layer.
+Validation: 109/109 integrated local scripts with `--require-all`, zero skips/failures/partial assertions, followed by final scanner regressions using jq. Native PowerShell install/reinstall passed. Repository verification, generated catalog/instruction/Copilot checks and diff checks passed. Hosted Linux/macOS/Windows verification is recorded by this PR's checks. The optional upstream inventory listing requires yq; it is not a skipped test assertion.
 
-The operator approved the documented M2 exception for draft-PR publication on 2026-09-08.
-The mechanical RED and rollout limitations remain recorded. See the manual compatibility
-disposition and `.claude/engineering/audits/2026-09-08-enterprise-value-review.md` for evidence,
-remaining findings and rollout steps. Version 0.10.0 is unreleased.
-
-Integration status at publication: Copilot PR #83 merged into main while this draft was
-being published. GitHub reports conflicts with the updated base. Reconcile the overlapping
-runtime, planning, documentation and release metadata before merge, then validate the
-combined tree. The tests above describe this review branch; no combined-tree CI pass is claimed.
+The reviewed M2 compatibility disposition remains explicit, including the operator's authorization to complete and merge this batch. Version 0.10.0 is unreleased. No private company profile, production mutation or authenticated model cycle was used; no measured ROI or enterprise certification is claimed. Host hook registration and actual enterprise pilot acceptance remain environment-specific.

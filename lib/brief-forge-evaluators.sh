@@ -25,9 +25,9 @@
 # ─── Pack resolution ───────────────────────────────────────────────────────
 # Resolve which evaluators to run for a given hand-off from the active pack.
 # Reads brief_forge_handoffs.<handoff_key>.evaluators via resolve_pack_field.
-# For the _default pack this yields only the generic evaluators; an external
-# pack (e.g. lintel-caip-pack) may declare its own additional evaluators that
-# it ships under packs/<pack>/brief-forge/evaluators/.
+# For the _default pack this yields only the generic evaluators; an installed
+# pack may declare additional evaluators of its own, shipped under
+# packs/<pack>/brief-forge/evaluators/.
 _BFE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" 2>/dev/null && pwd)"
 if [ -f "$_BFE_DIR/pack-resolver.sh" ]; then
   # shellcheck source=lib/pack-resolver.sh

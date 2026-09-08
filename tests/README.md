@@ -1,65 +1,71 @@
 # Tests
 
-Lintel is markdown and bash, so its tests answer two different questions: *is the structure still
-what everything else assumes?* and *does the mechanism actually fire?*
+Lintel tests check both repository structure and executable behavior. Run the release suite with
+Bash, Git, Python 3.9+ and jq installed:
 
 ```bash
-bash tests/runner/run-all.sh                 # everything
-bash tests/runner/run-all.sh --shape-only    # structural contracts only — fast
-bash tests/runner/run-all.sh --scope unit    # one tier
-bash tests/shape/no-swedish.sh               # one test directly
+bash tests/runner/run-all.sh --require-all   # every tier; skipped coverage fails
+bash tests/runner/run-all.sh --scope unit    # one tier during development
+bash tests/runner/run-all.sh --shape-only    # structural contracts
+bash tests/integration/copilot-kit.sh       # portable Copilot behavior
 ```
 
-Every test is a standalone bash script that exits non-zero on failure. There is no framework and no
-build step. `tests/conventions/bash-test-template.sh` is the starting point for a new one.
+The full developer suite needs Bash 4+ because several existing routing tests and developer
+utilities use associative arrays. On macOS, install modern Bash for the suite. CI separately
+checks the bare installer with the stock `/bin/bash` 3.2. On Windows, use Git Bash; native
+PowerShell installer verification is `./tests/runner/check-install.ps1`.
+
+Each test has a shell entry point and exits nonzero on failure. Some entry points execute Python
+standard-library unittest suites. The runner discovers current tests instead of relying on a
+fixed test count. It prints each test as it starts, aggregates failures, reports skipped coverage,
+and rejects an empty run. Use `--require-all` for release evidence.
 
 ## The tiers
 
-| Tier | Count | What it asserts |
-|---|---|---|
-| `shape/` | 36 | Structural contracts. Required frontmatter on every skill and agent, hook registration, canonical paths, decision-record number uniqueness, generated tables matching their source, no non-English text on the public surface. |
-| `unit/` | 48 | Helper behaviour in isolation — state ledger segmenting, memory operations, pack resolution and inheritance, one-way-door detection, alias resolution. |
-| `integration/` | 4 | Two or more components across a real boundary. |
-| `behavior/` | 1 | A mechanism exercised hermetically, to prove it *fires* rather than merely exists. |
-| `e2e/` | 1 | A full path through the harness. |
+| Tier | What it verifies |
+|---|---|
+| `shape/` | Required metadata, generated artifact drift, hook registration, canonical paths, unique decision numbers and public-language contracts. |
+| `unit/` | State, pack resolution, memory, routing, installer metadata validation, catalog generation and test-runner behavior. |
+| `integration/` | Real boundaries: Copilot repo generation and conflict refusal, security hooks, session traces, wiki output and startup protocol generation. |
+| `behavior/` | A mechanism actually firing in isolation, including installer failure reporting. |
+| `e2e/` | Install into an isolated home, resolve its pack and footer, then create/check a consumer Copilot repo from installed assets. |
 
-## Why the shape tier carries the most weight
+## What a green run establishes
 
-The failure this project actually suffers is not a broken function — it is **drift between the
-system and its own description**. A count in the README goes stale, a hook ships but is never
-registered, a skill is renamed and six documents keep the old name, a generated table is hand-edited.
-None of that breaks a unit test. All of it breaks trust.
+The suite verifies portable files, parser contracts and local runtime behavior. Copilot tests use
+real temporary repositories and filesystem operations. They do not make paid model calls or
+establish that an organization's client settings, entitlement or policies permit a live task.
+Record live VS Code, CLI and cloud-agent acceptance separately; use the
+[release checklist](../.claude/engineering/SHIP-GATE.md).
 
-So the shape tier asserts the things prose cannot be trusted to hold:
+`shape/build-workflow-contract.sh` checks BUILD's instruction structure. Its old location
+under `behavior/build-pilot.sh` overstated that evidence. The enterprise integration tests
+execute actual workflow snippets and pack consumers; neither test category proves a live
+model follows the complete cycle or establishes measured enterprise productivity.
 
-- `cli-tiers-sync.sh` — the README capability table must match `lib/cli-tiers.yaml` exactly. It is
-  the anti-drift guard on the project's own honesty claim.
-- `claude-home-paths.sh` — no tooling hardcodes a legacy knowledge path, and this repo carries its
-  own layout marker. The factory has to pass its own inspection.
-- `adr-numbers-unique.sh` — written after two parallel branches each claimed the same decision
-  number and the merge kept both.
-- `bin-scripts-executable.sh` — a non-executable commit passes on Windows, where the filesystem has
-  no execute bit, and fails on Linux CI. Written after exactly that.
-- `no-swedish.sh` — Lintel ships English-only. The one allowlisted file carries functional
-  non-English text: regexes that detect Swedish personal data, which translating would break.
-- `uniformity-coverage.sh` — a deliberately small enforced floor, with adoption above it reported
-  rather than failed. Publishing the real number is the point.
-
-Several of these exist because something went wrong first. The header comment on each names the
-incident.
-
-## CI
-
-`.github/workflows/ci.yml` runs the suite on Ubuntu and Windows. Both must be green before a
-release.
+CI runs every tier on Ubuntu, macOS and Windows, with explicit Python and jq preflight. Actions
+use reviewed commit pins and read-only repository tokens. Catalog drift checks never push a
+follow-up commit to the default branch. Native Windows install/reinstall tests require no Pester
+installation and assert preservation of operator profile, packs and custom hooks.
 
 ## Adding a test
 
-1. Copy `tests/conventions/bash-test-template.sh`.
-2. Put it in the tier that matches the question it answers — structural contract, helper behaviour,
-   cross-component, does-it-fire, or full path.
-3. Write a header comment saying *why* it exists. If it is guarding against a specific past failure,
-   name that failure.
-4. Make it exit non-zero on failure and print enough to diagnose without re-running by hand.
-5. On Windows, commit it with the executable bit set (`git update-index --chmod=+x`) — Linux CI
-   depends on it.
+1. Start from `tests/conventions/bash-test-template.sh`, or wrap a Python unittest module in a
+   shell entry point when filesystem scenarios are clearer in Python.
+2. Choose a tier based on the contract under test. Explain the failure the test prevents.
+3. Use an isolated temporary repository/home. Keep secrets, customer data and the operator's
+   actual installed state out of fixtures.
+4. Exercise a meaningful negative case as well as success. A file's existence alone does not
+   prove that an installer, gate or generator works.
+5. Return nonzero and print the cause on failure. Report unavailable coverage explicitly.
+6. Record executable mode for new invokable `bin/li-*` tools with `git update-index --chmod=+x`
+   before the final suite. Linux and the executable-mode shape test enforce the committed mode.
+
+For generated files, fix the source and regenerate before running drift checks:
+
+```bash
+python3 bin/li-catalog.py
+python3 bin/li-instructions.py sync
+bash bin/li-wiki-gen
+bash bin/li-copilot init --target .
+```

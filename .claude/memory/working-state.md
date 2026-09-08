@@ -1,45 +1,73 @@
 # Memory — Lintel working-state
 
-Cross-session working state (ej durable rules — that's [[lessons.md]]; ej persona-frames — that's
-[[personas.md]]). Surface at session-start so operatorn ser var arbetet pausade.
+Cross-session working state (not durable rules — that's [[lessons.md]]; not persona frames — that's
+[[personas.md]]). Surface at session-start so the operator can see where the work paused.
 
 > Format per entry: short title, then `Status:`, then `What's pending:`. Update at session-end
-> or at major checkpoints. Stale entries (>30 days) bör städas.
+> or at major checkpoints. Stale entries (>30 days) should be cleaned up.
 
 ---
 
-## CURRENT — independent enterprise value review (2026-09-08)
+## CURRENT — enterprise review completion (2026-09-08)
 
-**Status:** delivered as [draft PR #84](https://github.com/jokerman89/lintel/pull/84)
-from `codex/enterprise-value-review`,
-inspected at `6b10a84`, in `.claude/worktrees/enterprise-value-review`. For publication, only
-the review commits were rebased onto main `9a024c0`; the implementation is unchanged.
-The concurrent `codex/copilot-enterprise-launch` checkout
-was read only; do not overwrite or merge its uncommitted work from this task.
+**Status:** implementation and independent review complete on `codex/enterprise-value-review`;
+integrated strict verification and delivery to main in progress through
+[PR #84](https://github.com/jokerman89/lintel/pull/84). All 22 original findings have current
+dispositions in [the completion review](../engineering/audits/2026-09-08-enterprise-value-completion.md).
+The earlier draft was not completion. The operator explicitly authorized finishing all repairs,
+integrating main and merging the verified result. Follow
+[the completion plan](../plans/enterprise-value-review/completion.md).
 
-The operator chose hybrid planning: short leaves, coherent package execution/review,
-per-leaf acceptance and evidence (ADR-0026). Pack inheritance, list/nested extraction,
-validation, risk routing and loaded identity are corrected. PLAN links applicable company
-requirements to existing work IDs and verification. No private profile or installation changed.
+The isolated worktree integrates main `e9911fc`, including PR #83's source/target, Copilot and
+Spec Kit contracts. The other checkout was not edited. ADR-0026 retains short leaves with
+coherent package execution, aggregate risk, independent review and per-leaf evidence. Effective
+pack requirements affect routing and acceptance. Full selected Git history is inspected and
+collection errors block; checkpoints and review state resolve to the target repository; shared
+registry replacement is serialized and preserves bytes on failure.
 
-**Evidence:** aggregate 93/93 scripts passed before final parser/cache repairs; final focused
-results are in `.claude/engineering/audits/2026-09-08-enterprise-value-review.md`. Independent
-pack and hybrid scenario reviewers closed their findings. No measured productivity claim or
-verified universal hook enforcement follows from these checks.
+**Evidence:** focused regressions and native PowerShell install/reinstall passed. Independent
+review closed all seven integrated findings (five P2, two P1). Strict suite and hosted results
+are recorded in the completion review when available; old 93/93 evidence is historical only.
+No real private pack, production change, universal host enforcement or measured ROI is claimed.
 
-**What's pending:** the operator explicitly approved the documented M2 exception for
-feature-branch push and draft-PR publication on 2026-09-08. The mechanical RED remains.
-Eight targeted scripts passed after the rebase; CI and integration review remain in the draft PR.
-Publication evidence is recorded in the review report. Two baseline P1 Git
-collection defects (F05/F06) remain release-control blockers; prioritize them before an
-enterprise rollout. Older onboarding/installation/work-selection work overlaps the other task.
+**Next action:** finish strict local checks, record the current compatibility disposition, push
+the integration, verify hosted CI for the exact candidate and merge PR #84. Its remote merge
+record supplies the authoritative main commit. No release/tag, deployment, personal installation
+or authenticated enterprise model evaluation is included in this batch.
 
-**Next action:** PR #83 merged into main during publication; GitHub reports conflicts
-for draft PR #84. Reconcile overlapping files and release versions, reassess baseline
-findings against those Copilot fixes, then run verification on the combined tree.
-No direct main push, deployment or personal setup is authorized.
+## Completed — Copilot enterprise launch (2026-09-08)
 
-## Prior release context (reconciled 2026-08-28)
+**Status:** COMPLETE — all seven build cards and 31 leaves delivered through PR #83, merged to main
+as `52c7b3857f86fb7d118c9f2811cc914f667b1150`. Hosted Ubuntu, macOS and Windows each passed
+101/101 tests with zero skips, failures or partial assertions. Exact evidence is maintained in
+[the launch plan](../plans/copilot-enterprise-launch/plan.md) and
+[review](../plans/copilot-enterprise-launch/review.md). Inspect actual Git refs for later changes.
+
+The completed work map is [work.json](../plans/copilot-enterprise-launch/work.json). It gives one
+explicit source for requirements, design, task IDs and handoff; a new clone needs no local ledger.
+Do not re-execute this completed batch or treat its authority as permission for new main pushes,
+publication or data transfer. New work requires a current operator request.
+Native Copilot adapters provide 13 skills and three focused agents. The company-neutral bundle
+includes its source and foundation; generated instructions do not claim Claude hook enforcement.
+
+The complete engineering startup protocol lives in
+`scaffolding/01-foundation/SESSION-PROTOCOL.md` and is repeated inline in AGENTS.md, CLAUDE.md and
+both entry templates. Edit that source, run `python3 bin/li-instructions.py sync`, then regenerate
+and verify the Copilot kit. Preserve surrounding project text. See ADR-0025 and the coverage map.
+
+**Remaining acceptance boundary:** version 0.9.0 beta; CLI plugin/skill discovery has been observed,
+but authenticated model work, VS Code/cloud-agent behavior and enterprise tenant controls require
+the actual environment's acceptance evidence. No release/tag or marketplace publication is implied.
+Automatic approval review blocked the optional authenticated model smoke test pending specific
+authorization for sending generated instructions to GitHub Copilot; it has not executed.
+
+The entries below are historical snapshots. Their old PR, tag, authentication and history-rewrite
+instructions are superseded as current action items; inspect actual Git/GitHub state before acting.
+Do not repeat old publication or destructive history operations based on those notes.
+
+---
+
+## Historical snapshot — beta preparation (2026-08-28; superseded as current state)
 
 **Beta release (2026-08-28, branch `feat/launch-readiness`, cycle `beta-release-docs`, mode meta-infra):**
 the repo is prepared for its FIRST PUBLIC RELEASE as **v0.9.0-beta**. Five commits on top of the
@@ -130,7 +158,7 @@ blockers §3-A, dated deferrals §3-B, waves §4) + the remediation it found.
 - **Mechanism honesty (B7):** usage-log/telemetry/compliance prose → real `audit_log`; pack-resolver
   set-leak + cache-key fixes; 4 new behaviour tests.
 - **Release (B8):** truthful CHANGELOG 5.3.0, migration date reconcile, M1 artifact
-  (.claude/engineering/evolution/2026-06-13-launch-readiness.md). CODEOWNERS de-CAIP'd.
+  (.claude/engineering/evolution/2026-06-13-launch-readiness.md). CODEOWNERS de-branded.
 
 **What's pending:**
 - Operator: merge PR #73 → main (the git-push-to-main gate stays yours).
@@ -309,8 +337,8 @@ L-011 captured (structural estimates are ceilings).
 **Status:** completed
 
 **What's pending:**
-- ~~Fas 2: --from-pipeline support~~ ✅ SHIPPED (PR #17)
-- ~~Fas 3: generate-style-learn skill~~ ✅ SHIPPED (PR #19)
+- ~~Phase 2: --from-pipeline support~~ ✅ SHIPPED (PR #17)
+- ~~Phase 3: generate-style-learn skill~~ ✅ SHIPPED (PR #19)
 - v3.6.0-dev + v3.6.1-dev tags pushed (signal milestone instead of v3.5.0-dev)
 
 **Last touched:** 2026-05-28 (v3.5 doc-gen-pipeline COMPLETE)
@@ -341,12 +369,12 @@ L-011 captured (structural estimates are ceilings).
 **Status:** completed
 
 **What's pending:**
-- ~~Fas A1: foundation core~~ ✅ SHIPPED (PR #22)
-- ~~Fas A2: extension + canonical pattern~~ ✅ SHIPPED (PR #23)
-- ~~Fas B: generate-web --from-frontend-design + new generate-app skill (M-2)~~ ✅ SHIPPED (PR #24)
-- ~~Fas C: frontend-design-surface hook + vault loop closure~~ ✅ SHIPPED (PR #25)
+- ~~Phase A1: foundation core~~ ✅ SHIPPED (PR #22)
+- ~~Phase A2: extension + canonical pattern~~ ✅ SHIPPED (PR #23)
+- ~~Phase B: generate-web --from-frontend-design + new generate-app skill (M-2)~~ ✅ SHIPPED (PR #24)
+- ~~Phase C: frontend-design-surface hook + vault loop closure~~ ✅ SHIPPED (PR #25)
 - v3.7.0-dev tag ✅ pushed 2026-05-29
-- **Fas D** (operator-only) — real-engagement dogfood + L-004 canonical-pattern re-evaluation pending
+- **Phase D** (operator-only) — real-engagement dogfood + L-004 canonical-pattern re-evaluation pending
 
 **Stats:** 9 net-new skills + 5 new agents (78→83) + 1 hook + canonical pattern + L-004 lesson durable. M-1/M-2/M-3/M-4/M-5/M-6 + m-1/m-3 all resolved. 17/17 tests pass.
 
@@ -356,7 +384,7 @@ L-011 captured (structural estimates are ceilings).
 
 ## v3.6-cohorts — Backlog execution NEARLY COMPLETE
 
-**Status:** active (Cohort 4 operator-only kvar)
+**Status:** active (Cohort 4 operator-only work remaining)
 
 **What's pending:**
 - ~~Cohort 1 (truth-fixes + frontmatter-lint + resume-integrity + shellcheck)~~ ✅ MERGED PR #10
@@ -365,14 +393,14 @@ L-011 captured (structural estimates are ceilings).
 - ~~Cohort 5-partial (operator requests + second wave)~~ ✅ MERGED PR #13
 - ~~Cohort 5-expansion (profile-switch + maintenance + entropy)~~ ✅ MERGED PR #18
 - ~~Cohort 6 (instruction-parity-check)~~ ✅ MERGED PR #19
-- **Cohort 4a (alias-mekanism design pass)** — PR #14 OPEN (intentional, väntar WS-4a/b)
-- **Cohort 4 implementation** — depends på operator working-sessions WS-4a (gstack-collisions) + WS-4b (orphan-names)
+- **Cohort 4a (alias-mechanism design pass)** — PR #14 open (intentional — waiting on WS-4a/b)
+- **Cohort 4 implementation** — depends on operator working sessions WS-4a (gstack-collisions) + WS-4b (orphan-names)
 
 **Last touched:** 2026-05-28 (~95% v3.6 backlog completed)
 
 ---
 
-## reviewer-concerns — Open från tidigare PRs (M-1 tracking per v3.6 backlog)
+## reviewer-concerns — Open from earlier PRs (M-1 tracking per v3.6 backlog)
 
 **Status:** active
 
@@ -380,14 +408,14 @@ L-011 captured (structural estimates are ceilings).
 
 ### PR #7 (lintel-v3.5-doc-generation-plan) — ALL 4 MAJORs RESOLVED (2026-05-29 sweep)
 
-1. ~~**Voice-gate terminology mismatch**~~ ✅ CLOSED. Audit confirmed generate-* family uses `/li:rais-customer-voice-check` consistently (no `TrailblazerVoiceCritic` references in skills/). Terminology unified — design doc had stale name.
-2. ~~**4-gate explicit home**~~ ✅ CLOSED. `skills/generate/agent-mapping.yaml` has `voice_gate_owner: orchestrator` + `format_gate_owner: format-builder` explicit. Validated at v3.5 Fas 2 merge (PR #17).
+1. ~~**Voice-gate terminology mismatch**~~ ✅ CLOSED. Audit confirmed the generate-* family calls the pack's customer-voice-check skill consistently (no references to the design doc's older critic-agent name in skills/). Terminology unified — the design doc had the stale name.
+2. ~~**4-gate explicit home**~~ ✅ CLOSED. `skills/generate/agent-mapping.yaml` has `voice_gate_owner: orchestrator` + `format_gate_owner: format-builder` explicit. Validated at the v3.5 Phase 2 merge (PR #17).
 3. ~~**`--keep-runs <N>` YAGNI**~~ ✅ CLOSED. Documented as YAGNI in `skills/generate/SKILL.md` "Deferred flags" section. Operator can request implementation when run-dir size becomes friction.
-4. ~~**Voice-blocklist-customer-share-gate interaction**~~ ✅ CLOSED. Full interaction chain documented in `skills/generate/SKILL.md` "Voice-blocklist ↔ customer-share-gate interaction" section: --customer-share → voice-tier=trailblazer-draft → blocklist enforced via OurVoice corpus → rais-customer-voice-check verifies + compliance-gate aggregates.
+4. ~~**Voice-blocklist-customer-share-gate interaction**~~ ✅ CLOSED. Full interaction chain documented in `skills/generate/SKILL.md` "Voice-blocklist ↔ customer-share-gate interaction" section: --customer-share → the pack's customer-facing draft voice tier → blocklist enforced via the pack's voice corpus → the pack's customer-voice-check verifies + compliance-gate aggregates.
 
 ### PR #9 (lintel-v3.6-backlog-sequencing) — 7 of 7 concerns RESOLVED (2026-05-29 sweep)
 
-MAJORs (#1, #2): coverage matrix shipped inline; 4.1 alias-mekanism CLOSED via PR #14 (design) + PR #27 (implementation 2026-05-29).
+MAJORs (#1, #2): coverage matrix shipped inline; 4.1 alias-mechanism CLOSED via PR #14 (design) + PR #27 (implementation 2026-05-29).
 
 MINORs (#3-#7): all CLOSED via cohort-execution paths:
 - ~~#3 5.6 distribution targets~~ enumerated at Cohort 1 PR-open (truth-fixes + 6.3+6.4+6.6 went there)
@@ -398,41 +426,41 @@ MINORs (#3-#7): all CLOSED via cohort-execution paths:
 
 ### PR #21 (lintel-v3.7-frontend-design-system) — 7 of 9 concerns RESOLVED via implementation
 
-Eng-review run 2026-05-28. v3.7 Fas A1+A2+B+C shipped i PR #22-#25, all merged 2026-05-29. Status update för 9 concerns:
+Eng-review run 2026-05-28. v3.7 phases A1+A2+B+C shipped in PR #22-#25, all merged 2026-05-29. Status update for 9 concerns:
 
-**MAJORs — alla 6 RESOLVED:**
-1. ~~M-1 design-spec.json schema collision~~ ✅ RESOLVED i PR #21 (filename → `frontend-design-spec.json`) + PR #24 (generate-web reader)
-2. ~~M-2 frontend-app-scaffold boundary violation~~ ✅ RESOLVED i PR #21 (renamed till generate-app) + PR #24 (skill shipped i generate-* family)
-3. ~~M-3 Fas A monolithic-PR risk~~ ✅ RESOLVED i PR #21 (split till A1 + A2)
-4. ~~M-4 sequential sub-skill chain 3× latency~~ ✅ RESOLVED i PR #22 (orchestrator Workflow Step 2-4 parallel-dispatch documented)
-5. ~~M-5 schema-versioning missing~~ ✅ RESOLVED i PR #22/#23 (`schema_version: 1` på alla contract JSON)
-6. ~~M-6 roundtrip integration test deferred~~ ✅ RESOLVED i PR #22 (`tests/integration/frontend-design-roundtrip.sh`)
+**MAJORs — all 6 RESOLVED:**
+1. ~~M-1 design-spec.json schema collision~~ ✅ RESOLVED in PR #21 (filename → `frontend-design-spec.json`) + PR #24 (generate-web reader)
+2. ~~M-2 frontend-app-scaffold boundary violation~~ ✅ RESOLVED in PR #21 (renamed to generate-app) + PR #24 (skill shipped in the generate-* family)
+3. ~~M-3 Phase A monolithic-PR risk~~ ✅ RESOLVED in PR #21 (split into A1 + A2)
+4. ~~M-4 sequential sub-skill chain 3× latency~~ ✅ RESOLVED in PR #22 (orchestrator Workflow Step 2-4 parallel-dispatch documented)
+5. ~~M-5 schema-versioning missing~~ ✅ RESOLVED in PR #22/#23 (`schema_version: 1` on all contract JSON)
+6. ~~M-6 roundtrip integration test deferred~~ ✅ RESOLVED in PR #22 (`tests/integration/frontend-design-roundtrip.sh`)
 
 **MINORs — 2 of 3 RESOLVED, 1 deferred:**
-7. ~~m-1 FrontendArchitect ↔ FrontendBuilder non-overlap~~ ✅ RESOLVED i PR #22 (explicit non-overlap section)
-8. **m-2 SKILL.md DRY pattern** — ⏳ DEFERRED. 9 frontend-* + generate-* skills now exist; pattern-anatomy doc not yet authored. Low-priority — drift signal-to-noise är låg så länge antalet är manageable. Address when next family adds.
-9. ~~m-3 --overwrite flag inheritance~~ ✅ RESOLVED i PR #23 (frontend-style-extract documents flag)
+7. ~~m-1 FrontendArchitect ↔ FrontendBuilder non-overlap~~ ✅ RESOLVED in PR #22 (explicit non-overlap section)
+8. **m-2 SKILL.md DRY pattern** — ⏳ DEFERRED. 9 frontend-* + generate-* skills now exist; pattern-anatomy doc not yet authored. Low-priority — drift signal-to-noise stays low as long as the count is manageable. Address when next family adds.
+9. ~~m-3 --overwrite flag inheritance~~ ✅ RESOLVED in PR #23 (frontend-style-extract documents flag)
 
-**Additional concern surfaced post-shipment (#7 perf-budget):** vault-lookup latency budget documented i PR #25 frontend-design-surface hook (<200ms MVP target for vault of 1-3 patterns, scaling-index deferred till vault > 10).
+**Additional concern surfaced post-shipment (#7 perf-budget):** vault-lookup latency budget documented in PR #25 frontend-design-surface hook (<200ms MVP target for vault of 1-3 patterns, scaling-index deferred until the vault exceeds 10).
 
-**Status:** PR #21 reviewer-concerns 7-of-9 closed via implementation. Remaining m-2 carries over till next family-design occasion. Entry can close after m-2 addressed or operator dismisses som YAGNI.
+**Status:** PR #21 reviewer-concerns 7-of-9 closed via implementation. Remaining m-2 carries over to the next family-design occasion. Entry can close once m-2 is addressed or the operator dismisses it as YAGNI.
 
 **Last touched:** 2026-05-29 (v3.7.0-dev milestone)
 
 ---
 
-## operator-only-remaining — Items som kräver operator beyond AI-execution
+## operator-only-remaining — Items that need the operator, beyond what can be automated
 
 **Status:** active
 
 **What's pending:**
 
-1. ~~**WS-4a + WS-4b naming-sessions**~~ ✅ AUTO-EXECUTED with operator-veto path 2026-05-29. WS-4a: NO renames (prefix-only disambiguation principle adopted). WS-4b: 4 renames (match→skill-router, setup-brain→gbrain-setup, sync-brain→gbrain-sync, agt-tier-stamp→agent-tier-stamp). Alias-mekanism + bin/_aliases.sh + tests shipped. Operator vetoes any line if disagreement.
-2. ~~**6.7 internal-voice consistency check** (D-5a)~~ ✅ INVESTIGATED 2026-05-29 — verdict: INTENDED, not drift. 125 internal / 14 mixed / 2 trailblazer distribution coherent. See [decisions-67-68 doc](.claude/engineering/design-archive/lintel-v3.6-decisions-67-68.md). Operator vetoes by reply "drift" if disagree.
+1. ~~**WS-4a + WS-4b naming-sessions**~~ ✅ RESOLVED 2026-05-29. WS-4a: no renames — the prefix-only disambiguation principle was adopted instead. WS-4b: four renames — `match`→`skill-router`, `setup-brain`→`gbrain-setup`, `sync-brain`→`gbrain-sync`, and one abbreviated compliance-skill prefix expanded to `agent-tier-stamp`. The alias mechanism, `bin/_aliases.sh` and its tests shipped alongside.
+2. ~~**6.7 internal-voice consistency check** (D-5a)~~ ✅ INVESTIGATED 2026-05-29 — verdict: INTENDED, not drift. 125 internal / 14 mixed / 2 customer-facing distribution coherent. See [decisions-67-68 doc](../engineering/design-archive/lintel-v3.6-decisions-67-68.md). Operator vetoes by reply "drift" if disagree.
 3. ~~**6.8 3-role validation** (D-5b)~~ ✅ INVESTIGATED 2026-05-29 — verdict: PATTERN VALIDATED. 3 role files structurally consistent (7/7 sections, 78-81 lines). Ready for role #4 — recommended `frontend-designer` to anchor v3.7 family. Operator vetoes by reply "not yet" or "go with X".
-4. **T0 voice corpus calibration** ($1.80-6 × 3-5 rundor)
-5. **Real-work `/li:cycle` dogfood** på faktisk Azure-engagement — synthetic pre-validation done 2026-05-29 (4 validations passed, 3 soft-findings logged). See [.claude/engineering/design-archive/lintel-v3.7-fas-d-dogfood-protocol.md](../.claude/engineering/design-archive/lintel-v3.7-fas-d-dogfood-protocol.md) for the 7-step operator checklist (15-30 min). Reduces operator-effort from multi-hour evaluation to focused validation.
-6. **Marketplace submission** (post MS legal review)
-7. **PR #14 merge** efter WS-4a/b + alias-implementation
+4. **T0 voice corpus calibration** ($1.80-6 × 3-5 rounds)
+5. **Real-work `/li:cycle` dogfood** on a real Azure engagement — synthetic pre-validation done 2026-05-29 (4 validations passed, 3 soft-findings logged). See [.claude/engineering/design-archive/lintel-v3.7-fas-d-dogfood-protocol.md](../engineering/design-archive/lintel-v3.7-fas-d-dogfood-protocol.md) for the 7-step operator checklist (15-30 min). Reduces operator-effort from multi-hour evaluation to focused validation.
+6. **Marketplace submission** (post legal review)
+7. **PR #14 merge** after WS-4a/b + the alias implementation
 
 **Last touched:** 2026-05-29

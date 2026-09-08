@@ -1,5 +1,7 @@
 # Migrations
 
+Current public releases use the 0.9.0 beta line. Older 3.x–5.x labels below record historical engineering transitions; they are not current minimum install versions. For the Copilot repository kit, adopt or upgrade through a reviewed `li-copilot init` change and verify with `check`. See [Copilot](../copilot.md#upgrade-and-rollback).
+
 Every change that may need action from you, with its grace window. `/li:migrations` reads this file
 at session start and surfaces anything still open for your repo; you can also just read it.
 
@@ -11,7 +13,7 @@ as `<date>-<slug>.md`.
 
 | Slug | Started | Grace until | Removal at | Description |
 |---|---|---|---|---|
-| v3-trailblazer-spine-references | 2026-05-29 | 2026-08-29 | 2026-11-29 | Voice, persona and corpus content lifted out of the spine into an installable pack. Repos on the older layout keep working through a warn-only fallback; activate a pack with `/li:pack-switch <name>`. |
+| v3-voice-spine-references | 2026-05-29 | 2026-08-29 | 2026-11-29 | Voice, persona and corpus content lifted out of the spine into an installable pack. Repos on the older layout keep working through a warn-only fallback; activate a pack with `/li:pack-switch <name>`. |
 | v3-workprofile-profile-field | 2026-05-29 | 2026-08-29 | 2026-11-29 | `~/.lintel/profile.yaml` `workprofile:` field migrated to `pack.compliance.workprofile_default`. Profile field still read for backward-compat; pack value overrides. Detect: `grep '^workprofile:' ~/.lintel/profile.yaml`. |
 | v3-skill-rename-grace | 2026-05-29 | 2026-08-29 | 2026-11-29 | Skill renames (`match` → `skill-router`) are covered by `config/aliases.yaml`, so the old names still resolve. Amended 2026-06-12: two skills were retired early along with their targets and no longer resolve at all; one moved into an external pack. |
 | pack-version-warn-only | 2026-05-29 | 2026-11-29 | 2027-02-28 | v4.0 ships `requires_lintel` enforcement as warn-only; a later release will block on an incompatible pack. Pack authors should declare `requires_lintel: ">=4.0.0"` now to avoid the future warn-storm. |

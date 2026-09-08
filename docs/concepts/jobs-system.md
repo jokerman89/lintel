@@ -102,6 +102,13 @@ Single command, single purpose: show what's open right now. `cat ~/.lintel/jobs/
 
 ### `bin/_jobs.sh` — sourced helper
 
+Cross-repository registry updates hold an exclusive directory lock across reading and
+replacing the derived view. Readers see an atomically replaced complete file. A writer
+that cannot acquire the lock reports failure and preserves the existing registry; it
+does not remove another writer's lock. After an interrupted process, verify no writer
+remains before removing its empty `_active.md.lock` directory and regenerating the view.
+The per-repository job files remain authoritative.
+
 Functions used by hooks + skills:
 
 - `job_create <workflow> <mode> [<step-spec> ...]` → new job; optional inline step contracts

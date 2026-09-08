@@ -13,9 +13,34 @@ Notable changes to Lintel. Behaviour changes to the canonical agent instructions
   applicable profile requirements to task acceptance and evidence; blocked BUILD resumes in BUILD.
 - Correct sizing false positives and expose whole-cycle estimate provenance without multiplying
   the estimate by leaf count. New integration cases exercise actual helpers and skill snippets.
-- Document the enterprise profile value path and pilot metrics. Known Git collection, continuity
-  and platform-enforcement gaps remain documented; this is not an enterprise-control certification.
+- Inspect complete selected push history and block collection failures, unsupported wrappers and
+  replacement-object bypasses. Preserve checkpoints by repository and serialize registry updates.
+- Select explicit work artifacts and keep review/scope state in the target repository, including
+  installed-source workflows. Document profile value and pilot metrics without claiming certification.
 
+### Added
+
+- A portable GitHub Copilot repository kit with native core workflow skills, planner/builder/reviewer
+  profiles, self-contained resources, managed-file integrity checks and conflict-safe updates.
+- A dedicated Copilot plugin manifest for the native core adapters, preserving the existing Claude
+  Code integration and keeping the wider canonical catalog available as source content.
+- An optional Spec Kit workflow bridge that references existing specifications, plans and task IDs
+  while preserving a single authoritative task list.
+- Copilot onboarding, enterprise pilot and rollout guidance, and an evidence-based release checklist.
+
+### Changed
+
+- Copilot-first public positioning and documentation, with explicit distinctions between host
+  capabilities, installed Lintel adapters and live client validation.
+- Security and compliance documentation now states scanner limitations, unsupported Copilot hook
+  translation, best-effort maintenance and retained third-party license notices.
+- Generated catalogs and integration checks are part of launch verification; inventory counts are
+  no longer repeated as fixed promises throughout adopter documentation.
+
+These changes extend the beta line for adoption. They do not claim a completed
+enterprise pilot, compliance certification or a published 1.0 release.
+
+---
 ## 0.9.0-beta — 2026-08-28
 
 **First public release.** Lintel had been developed and used privately for three months before this
@@ -63,7 +88,7 @@ that preceded it is summarised below.
   longer part of the published surface.
 
 ### Known limitations
-Named rather than hidden — see [README](README.md#what-you-do-not-get) for the full list.
+For current support boundaries and limitations, see the [FAQ](docs/faq.md).
 
 - Enforcement hooks are a Claude Code mechanism and do not fire on the other seven supported CLIs.
 - `/li:generate-pdf`, `/li:generate-xlsx` and `/li:generate-visio` are template-only slots.

@@ -64,7 +64,7 @@ All four parameters live in `pack.yaml.navigation.*`:
 
 | Field | Type | Default | What it controls |
 |---|---|---|---|
-| `default_workflow` | string | `cycle` | Fallback workflow when intent unclear |
+| `default_workflow` | string | `cycle` | Workflow for generic build or unclear intent |
 | `high_risk_workflows` | list[string] | `[cycle, plan, ship]` | Workflows that always require confirm |
 | `orientator_budget_tokens` | int | 2000 | LLM budget cap when escalating |
 | `orientator_max_output_tokens` | int | 200 | LLM output cap |
@@ -92,7 +92,7 @@ Swedish + English keywords reflect operator language. Adding a language is one P
 
 | Intent | Workflow |
 |---|---|
-| build | `/li:cycle` |
+| build | Configured pack default; `/li:cycle` for the neutral pack |
 | fix | `/li:cycle --mode hotfix` |
 | review | `/li:review` |
 | research | `/li:cycle --mode research-dive` |
@@ -100,6 +100,11 @@ Swedish + English keywords reflect operator language. Adding a language is one P
 | scaffold | `bin/li-scaffold init` |
 | resume | `/li:resume` |
 | unclear | `<pack.navigation.default_workflow>` |
+
+Bare extension defaults are qualified using the active pack's namespace. Already qualified
+commands keep their namespace. Explicit fix/review/research/ship/scaffold/resume intents keep
+their canonical operations. A recommendation declares intent; the host must still discover
+the requested installed workflow before execution.
 
 The mapping is hardcoded in `lib/orientator-routing.sh::match_workflow`. Operators wanting to override per-pack add a `pack.yaml.navigation.intent_overrides:` block (Phase 4 enhancement; v4.0 ships with the hardcoded mapping).
 

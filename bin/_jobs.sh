@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 # bin/_jobs.sh — sourced helper for jobs system (v3.8 Feature 1)
+# component: lintel-jobs
+# implements: ADR-0005
+# intent: docs/concepts/jobs-system.md
+# constraints: registry is a derived cross-repository view; job files remain authoritative
+# last_intent_review: 2026-09-08
 #
 # Lifecycle:
 #   job_create <workflow> <mode>     → creates ~/.lintel/jobs/<id>/{job.yaml,outputs,inputs} + regenerates _active.md
@@ -379,16 +384,42 @@ regenerate_active() {
 # or "global" for legacy ~/.lintel/jobs data); syncing = drop this scope's
 # lines, re-append the current ones, preserve everyone else's.
 # Args: <scope-tag> (repo root path, or "global")
-_registry_sync() {
+_registry_sync() (
   local scope_tag="${1:-$_JOBS_REPO_ROOT}"
   local reg="$LINTEL_JOBS_REGISTRY"
-  mkdir -p "$(dirname "$reg")" 2>/dev/null || true
+  mkdir -p "$(dirname "$reg")" 2>/dev/null || return 1
 
-  local marker="<!-- repo:$scope_tag -->"
-  local tmp="$reg.tmp.$$"
+  # Serialize the complete read/replace operation across processes, on every host.
+  # A timeout preserves the previous view; never guess that another writer is dead.
+  local lock="$reg.lock" attempts=0 limit="${LINTEL_REGISTRY_LOCK_ATTEMPTS:-300}" tmp=""
+  case "$limit" in ''|*[!0-9]*|0) echo '[lintel/_jobs] invalid registry lock limit' >&2; return 1 ;; esac
+  until mkdir "$lock" 2>/dev/null; do
+    attempts=$((attempts + 1))
+    if [ "$attempts" -ge "$limit" ]; then
+      echo "[lintel/_jobs] registry sync unavailable: lock $lock; job files are unchanged" >&2
+      return 1
+    fi
+    sleep 0.1
+  done
+  trap 'rm -f -- "$tmp"; rmdir -- "$lock" 2>/dev/null || true' EXIT
+  trap 'exit 1' HUP INT TERM
+  tmp=$(mktemp "$reg.tmp.XXXXXX") || return 1
+
+  local marker="<!-- repo:$scope_tag -->" registry_format=1
+  if [ -e "$reg" ]; then
+    grep -q '^# Lintel jobs registry' "$reg" && registry_format=0 || registry_format=$?
+    if [ "$registry_format" -gt 1 ]; then
+      echo "[lintel/_jobs] cannot read registry $reg; previous view preserved" >&2
+      return 1
+    fi
+  fi
   {
-    if [ -f "$reg" ] && grep -q '^# Lintel jobs registry' "$reg" 2>/dev/null; then
-      grep -vF "$marker" "$reg" | grep -v '^_No open jobs' || true
+    if [ "$registry_format" -eq 0 ]; then
+      # ENVIRON preserves literal scope paths (including backslashes). An input
+      # error must fail the update, even after the header was read successfully.
+      LINTEL_REGISTRY_MARKER="$marker" awk '
+        !index($0, ENVIRON["LINTEL_REGISTRY_MARKER"]) && !/^_No open jobs/
+      ' "$reg" || return 1
     else
       # Fresh registry (or first write over a legacy-format file — legacy
       # entries reappear on that scope's next regenerate_active).
@@ -408,14 +439,17 @@ _registry_sync() {
       printf -- '- `%s` · %s · %s · step:%s · %s %s\n' \
         "$id" "$workflow" "$status" "$current_step" "$scope_tag" "$marker"
     done
-  } > "$tmp"
+  } > "$tmp" || return 1
 
   # No job lines at all? Keep an explicit empty marker line for readers.
-  if ! grep -qE '^- ' "$tmp" 2>/dev/null; then
+  local jobs_present=0
+  grep -qE '^- ' "$tmp" || jobs_present=$?
+  [ "$jobs_present" -le 1 ] || return 1
+  if [ "$jobs_present" -eq 1 ]; then
     printf '_No open jobs anywhere._\n' >> "$tmp"
   fi
-  mv "$tmp" "$reg" || echo "[lintel/_jobs] WARN: registry sync failed for $reg" >&2
-}
+  mv "$tmp" "$reg" || { echo "[lintel/_jobs] registry sync failed for $reg" >&2; return 1; }
+)
 
 # Print all jobs
 list_jobs() {

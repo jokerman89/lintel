@@ -1,7 +1,7 @@
 # ADR-0012: agent persistent memory + model routing as frontmatter
 
 **Status:** Accepted (2026-06-12)
-**Decided by:** operator (battletest — "vad gör andra som vi inte gör")
+**Decided by:** operator — battletest, competitor-gap question: what do comparable harnesses do that this one does not
 **Implements:** .claude/engineering/audits/2026-06-12-battletest-synthesis.md (H4, H12)
 
 ## Context

@@ -146,7 +146,7 @@ if command -v jq >/dev/null 2>&1; then
   fi
 
   # Step 7 — Validate font_stacks have license-field per entry
-  license_missing=$(jq '[.typography.font_stacks[] | select(.license == null)] | length' "$SPEC" 2>/dev/null || echo 1)
+  license_missing=$(jq -b '[.typography.font_stacks[] | select(.license == null)] | length' "$SPEC" 2>/dev/null || echo 1)
   if [ "$license_missing" = "0" ]; then
     pass "all typography font_stacks have license field"
   else

@@ -12,7 +12,7 @@
     {
       "name": "li",
       "source": "./",
-      "description": "Lintel — 8-phase cycle (SENSE→CAPTURE) + role-lifting + context-warming + specialized agents + compliance tiering + multi-CLI",
+      "description": "Lintel — 9-step cycle (SENSE→CAPTURE) + role-lifting + context-warming + specialized agents + compliance tiering + multi-CLI",
       "version": "0.10.0",
       "category": "workflow",
       "tags": ["lintel", "session-harness", "compliance", "scaffolding", "workflow"],

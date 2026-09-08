@@ -15,14 +15,14 @@ You are the V4-MIGRATE skill — surfaces what changes between v3.x and v4.0 for
 Detects v3.x usage signals in the operator's local state + repo + audit log, surfaces the migration plan, and (with `--apply`) writes the active-pack file + any other safe migrations.
 
 Detection signals checked:
-1. **Compliance hooks invoked** under v3.x names (e.g. `sdl_threat_model` without pack scope)
+1. **Compliance hooks invoked** under v3.x names (e.g. a bare `*_threat_model` hook without pack scope)
 2. **Voice-tier references** in operator's own state files (any non-internal tier)
 3. **Domain-shaped state** (`compliance.workprofile: on` baked into profile.yaml)
 4. **Compliance-mode defaults** in `~/.lintel/profile.yaml`
 5. **Hardcoded paths** referencing pre-v4.0 layout
 
 Recommendation per signal:
-- Strong domain signals → recommend the operator's installed domain pack (e.g. the external `caip-se` pack from `lintel-caip-pack`, if present); otherwise the closest installed pack
+- Strong domain signals → recommend the operator's installed domain pack, if present; otherwise the closest installed pack
 - Partial compliance signals → recommend the operator's installed compliance pack, if present
 - No signals → recommend keeping `_default` (no migration needed)
 
@@ -77,7 +77,7 @@ fi
 ```bash
 # LINTEL_DOMAIN_PACK / LINTEL_COMPLIANCE_PACK are the operator's installed
 # pack names (set in profile/config). If unset, fall back to _default.
-# An external pack such as caip-se (from lintel-caip-pack) sets these.
+# An installed company pack sets these.
 domain_pack="${LINTEL_DOMAIN_PACK:-_default}"
 compliance_pack="${LINTEL_COMPLIANCE_PACK:-_default}"
 
@@ -107,7 +107,7 @@ Detected signals (4 checked):
   ✓ compliance hook invocations in audit log
   ✗ .lintel/state/ pre-v4.0 layout
 
-Recommendation: activate `<domain-pack>` (e.g. caip-se from lintel-caip-pack, if installed)
+Recommendation: activate `<domain-pack>` (the operator's installed domain pack)
 Reason: Strong v3.x domain signals (non-internal voice + compliance hooks + workprofile)
 
 What happens on apply:

@@ -5,7 +5,7 @@ description: Use to execute an approved plan in bounded work packages, preservin
 color: cyan
 tools: Read, Write, Edit, Bash, Grep, Glob
 voice: internal
-cli_support: [claude-code, codex]
+cli_support: [claude-code, codex, copilot]
 necessity: REQUIRED
 gap_if_skipped: "No implementation is produced; the plan's tasks are never executed."
 ---
@@ -19,7 +19,7 @@ Executes plan.md with the hybrid contract in ADR-0026:
 2. Create TodoWrite for tasks
 3. Per work package: dispatch one implementer with all member leaves → implement in dependency order → review the package for spec compliance THEN quality → fix findings → record evidence and completion for every leaf
 4. Verify which requested compliance controls actually run on this host (`resolve_pack_field compliance.hooks`; none by default)
-5. Apply configured voice review to customer-facing artifacts (`resolve_pack_field voice.gates_active`; none by default)
+5. Apply configured voice review on customer-facing artifacts (`resolve_pack_field voice.gates_active`; none by default); do not claim automatic enforcement where no adapter is installed.
 6. Continuous checkpoint (if checkpoint_mode=continuous)
 7. Final code review after all tasks
 
@@ -33,17 +33,46 @@ This phase is where most token spend happens. Cost-estimate from PLAN sets expec
 
 ## When NOT to use
 
-- No APPROVED plan.md → return to PLAN
+- No approved native plan or authorized mapped work → return to PLAN
 - intent=review-only → use REVIEW directly
 - intent=research-only → research mode ends at DISCOVER
 - Trivial single-file edits — operator just edits directly
 
 ## Workflow
 
+### Mapped work takes precedence over the legacy plan.md shorthand
+
+Before the checks below, inspect an explicitly selected committed work.json using the
+[shared work-map contract](../spec-kit/references/work-map.md) and `bin/li-work-artifacts.py`.
+For mapped work, the map's `status` records plan approval within the operator's authorized
+scope. Read requirements from `spec`, design from `plan`, and extract/update card IDs,
+dependencies and checkboxes from `tasks`. Spec Kit plan.md is an implementation design and
+need not contain Lintel's APPROVED heading or the task list. Throughout the steps below,
+“plan.md task” means the mapped `tasks` artifact. Send its complete card text to reviewers
+and implementers; never copy those tasks into a second Lintel plan. Native work without a
+map keeps the existing plan.md path. Missing artifacts or draft scope return to planning.
+
+Use package grouping from the mapped implementation plan or its explicitly linked handoff;
+membership references the original `tasks` IDs without copying their text or checkboxes.
+An ungrouped mapped feature uses singleton packages. Read acceptance from the original spec
+and tasks; an APPROVED map is not evidence that a leaf was verified. Preserve the selected
+work-map path through BUILD and RESUME. Helpers load from `LINTEL_SOURCE_ROOT`; artifact paths
+resolve inside `LINTEL_REPO_ROOT`, the working repository.
+Set `plan_path` and `tasks_path` from the validated map's original `plan` and `tasks` fields,
+and retain `LINTEL_WORK_MAP` as the selected map path. Native work without a map uses plan.md
+for both paths. Record these references in the ledger with the leaf results.
+
+
+**Host portability:** `TodoWrite`, `Task`, `Read` and `Bash` below describe operations, not
+requirements for tool names. Use available host tools, a file checklist if no todo tool exists,
+and the current host's configured model. Haiku/Sonnet/Opus labels express complexity tiers;
+they are not required model IDs on Copilot. If native delegation is unavailable, sequence
+scoped implementation and review and record that the review was not an independent subagent.
+
 ### Step 1 — Pre-flight checks
 
 Verify:
-- plan.md exists and is APPROVED status
+- Approved native plan.md exists, or the validated work map selects the authorized spec/design/tasks
 - Current branch is NOT main/master (if no explicit user consent for main)
 - Resolve requested controls and the pack's mode/policy. Classify each as a compatible
   registered hook, an equivalent accepted by that policy with recorded evidence, or an
@@ -62,7 +91,8 @@ Before reading the plan and dispatching implementers, invoke `/li:lessons-surfac
 
 Invocation: `/li:lessons-surface --keyword "implementation testing subagent"` (a portable skill call; silent if no relevant matches).
 
-Read entire plan.md once. Extract:
+Read the selected design and authoritative task artifact once (native plan.md or mapped
+`plan` and `tasks`). Extract:
 - All task titles + IDs
 - Dependencies between tasks
 - Acceptance criteria
@@ -101,7 +131,7 @@ Spawn one fresh implementer for the package with:
 #### 3b — Implementer executes (TDD red-green-refactor)
 
 The TDD red-green-refactor discipline:
-1. **Red:** Write failing test first (REQUIRED — code without failing test = block)
+1. **Red:** For a behavior-changing code leaf, write the regression test first where executable testing applies. A verification-only leaf runs its approved checks; a documentation or configuration leaf uses its planned validation. Do not manufacture code changes or tests unrelated to acceptance.
 2. **Green:** Write minimum code to pass
 3. **Refactor:** Improve while tests still pass
 4. **Checkpoint:** retain leaf results; make an atomic package commit only when the logical
@@ -252,7 +282,7 @@ After last task DONE:
 Mechanical since v5.0 (ADR-0008) — one command, not a YAML obligation (per-task metrics live in build-log.md, Step 5):
 
 ```bash
-_sl="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}/lib/state.sh"
+_sl="${LINTEL_SOURCE_ROOT:-${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}}/lib/state.sh"
 [ -f "$_sl" ] || _sl="$HOME/.lintel/lib/state.sh"; source "$_sl"   # installed by install.sh in consumer repos
 # Set these from the reviewed package/leaf results, never from an intended outcome.
 case "${build_status:?set actual BUILD status}" in
@@ -262,6 +292,7 @@ case "${build_status:?set actual BUILD status}" in
 esac
 state_append BUILD "$build_status" next="$build_next" \
   plan_path="${plan_path:?set approved plan path}" \
+  work_map_path="${LINTEL_WORK_MAP:-}" tasks_path="${tasks_path:-$plan_path}" \
   tasks_completed="${tasks_completed:?set verified leaf count}" \
   tasks_blocked="${tasks_blocked:?set blocked leaf count}" \
   note="${build_next_action:-review completed implementation}"
@@ -369,7 +400,7 @@ Close your report with the shared position footer so the operator always knows w
 cycle and the one logical next action — whether this phase ran standalone or inside `/li:cycle`:
 
 ```bash
-source "$LINTEL_REPO_ROOT/lib/cycle-footer.sh"   # fallback: "$(git rev-parse --show-toplevel)/lib/cycle-footer.sh"
+source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/lib/cycle-footer.sh"   # fallback: "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/lib/cycle-footer.sh"
 render_cycle_footer                               # reads .claude/runtime/state/00-state.md; --compact for short replies
 ```
 

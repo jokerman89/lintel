@@ -5,7 +5,7 @@ description: Use to review a plan or change for engineering soundness before it 
 color: red
 tools: Read, Bash, Grep, Glob, Edit
 voice: internal
-cli_support: [claude-code, codex]
+cli_support: [claude-code, codex, copilot]
 hop_in: no
 ---
 
@@ -33,6 +33,13 @@ The architecture-and-tests gate before build — the one review Lintel requires.
 
 - Optional path to a plan/design doc. Auto-discovers from `~/.lintel/projects/<slug>/*-design-*.md` if not provided.
 - Optional `--scope diff` — review the current branch's diff instead of a plan doc (degrades to `/review` semantics).
+
+For mapped work, validate the explicitly selected work.json with `bin/li-work-artifacts.py`
+and use the [shared work-map contract](../spec-kit/references/work-map.md). Read design from
+`plan`, requirements from `spec` and leaf IDs/checkboxes from `tasks`. Package membership in
+the design or linked handoff references those original IDs; do not generate a parallel task
+list or require a Lintel approval heading inside Spec Kit's technical plan. Ungrouped tasks
+use singleton packages. Honor the same selection as PLAN/BUILD, never the newest directory.
 
 ## Workflow
 
@@ -101,8 +108,14 @@ After all 4 sections: offer codex (or Claude subagent if codex unavailable) for 
 
 Persist via first-party `bin/li-review-log`:
 ```bash
-bin/li-review-log '{"skill":"plan-eng-review","timestamp":"...","status":"...","unresolved":N,"critical_gaps":N,"issues_found":N,"mode":"FULL_REVIEW","commit":"..."}'
+review_source="${LINTEL_SOURCE_ROOT:-${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}}"
+"$review_source/bin/li-review-log" '{"skill":"plan-eng-review","timestamp":"...","status":"...","unresolved":N,"critical_gaps":N,"issues_found":N,"mode":"FULL_REVIEW","commit":"..."}'
+"$review_source/bin/li-review-read"
 ```
+
+Run both helpers from the selected source bundle. `LINTEL_REPO_ROOT` selects the
+working repository for audit data, commit matching and legacy import; it does not
+select helper code. If unset, the helpers use the current working repository.
 
 ## Required outputs
 

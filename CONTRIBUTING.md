@@ -1,7 +1,7 @@
 # Contributing to Lintel
 
 Lintel is in its **first public beta**. It is a company-neutral, pack-driven session harness for
-agent-based development: markdown and bash that a modern AI CLI loads as a plugin. There is no
+agent-based development: markdown, Bash and Python resources exposed through native client adapters. There is no
 compiled artifact and no runtime service — the product is text that agents read plus shell scripts
 that hooks run.
 
@@ -11,8 +11,7 @@ send. Contributions that fix something real are very welcome. Speculative expans
 ## This repo is the tooling
 
 Lintel ships `skills/`, `agents/`, `hooks/`, `packs/`, `lib/`, and `scaffolding/` as its product.
-That is the opposite of a normal project repo — elsewhere agents and skills live user-global and
-never inside a project. Here they are the deliverable.
+Repository-scoped agent instructions and skills are also a supported downstream installation. Here the canonical content and its generators are the deliverable.
 
 The rule that governs all of it: **keep the spine company-neutral.** Identity — voice, compliance,
 brand, roles — is resolved at runtime from the active pack via `resolve_pack_field`
@@ -25,7 +24,7 @@ pack ships here; company identity installs as a separate pack.
 - [docs/architecture.md](docs/architecture.md) — spine and pack, the mechanical layer, where state lives.
 - [docs/the-cycle.md](docs/the-cycle.md) — the nine phases, in depth.
 - [scaffolding/01-foundation/CORE-PRINCIPLES.md](scaffolding/01-foundation/CORE-PRINCIPLES.md) — the load-bearing rules.
-- [skills/CATALOG.md](skills/CATALOG.md) — all 125 skills, generated from frontmatter. Your idea may
+- [skills/CATALOG.md](skills/CATALOG.md) — canonical skills, generated from frontmatter. Your idea may
   already exist, or be deliberately scoped out.
 
 [docs/README.md](docs/README.md) indexes the rest of the published documentation.
@@ -36,14 +35,11 @@ Roughly in order of usefulness:
 
 1. **Bug reports with a reproducer.** Which CLI, which skill or hook, what you ran, what happened.
    A failing shell command beats a paragraph.
-2. **Reports of a skill or agent that reads well but does not work.** The surface is large — 125
-   skills, 69 agents, 33 hooks — and prose drifting away from behavior is the failure mode this
+2. **Reports of a skill or agent that reads well but does not work.** Prose drifting away from behavior is a failure mode this
    project is most exposed to. Finding one is a real contribution even without a fix.
 3. **Documentation fixes.** Wrong paths, dead links, stale counts, instructions that do not survive
    a literal reading.
-4. **Coverage reports for a CLI other than Claude Code.** Hooks fire on Claude Code only; everything
-   else is markdown that other CLIs read to varying degrees. Tell us where the degradation is worse
-   than [docs/multi-cli.md](docs/multi-cli.md) admits.
+4. **Copilot pilot reports.** Include the exact client/version, kit or plugin installation route, skill discovery, task execution and fresh-session resume. Lintel does not port Claude hooks to Copilot; report the actual integration against [docs/copilot.md](docs/copilot.md).
 5. **A skill, agent, or hook that fills a genuine gap** — open an issue first, so we can agree the
    gap is real before you build.
 6. **New CLI support**, following [adding a new CLI](docs/multi-cli.md#adding-a-new-cli).
@@ -74,7 +70,7 @@ public issues — see [SECURITY.md](SECURITY.md).
 Everything runs through one entry point:
 
 ```bash
-bash tests/runner/run-all.sh
+bash tests/runner/run-all.sh --require-all
 ```
 
 Scope it while iterating:
@@ -87,19 +83,18 @@ bash tests/runner/run-all.sh --scope e2e          # end to end
 bash tests/runner/run-all.sh --tag claude-code-only
 ```
 
-The four tiers, and what each is for:
+The five test tiers, and what each is for:
 
-| Tier | Count | What it asserts |
-|---|---|---|
-| `tests/shape/` | 36 | structural contracts — frontmatter completeness, path layout, generated files still regenerate clean, no non-English text on the shipped surface |
-| `tests/unit/` | 48 | helpers in `lib/` and `bin/`, and per-skill logic |
-| `tests/integration/` | 4 | cross-component behavior, such as a session actually leaving the traces it claims to |
-| `tests/e2e/` | 1 | the harness critical path, end to end |
+| Tier | What it asserts |
+|---|---|
+| `tests/shape/` | structural contracts — frontmatter completeness, path layout, generated files still regenerate clean, no non-English text on the shipped surface |
+| `tests/unit/` | helpers in `lib/` and `bin/`, and per-skill logic |
+| `tests/integration/` | cross-component behavior, such as a session actually leaving the traces it claims to |
+| `tests/e2e/` | the harness critical path, end to end |
+| `tests/behavior/` | executable mechanisms exercised with isolated fixtures |
 
 The runner is fail-closed: zero tests discovered, or a filter matching nothing, exits non-zero. A
-green run has to assert something. Bash and `git` are the only hard requirements; a handful of tests
-reach for `jq`, `node`, or `python3` and skip or degrade when those are absent, so install them
-before trusting a local green.
+green run has to assert something. Use Bash, Git, Python 3.9+, Node and jq for the complete suite. Review skipped tests and missing prerequisites before treating a local run as release evidence.
 
 One more check CI runs, worth running locally before you push:
 
@@ -110,10 +105,7 @@ bash install/verify.sh --all
 New tests follow `tests/conventions/bash-test-template.sh`. Copy it, fill in the description, tags,
 setup, run, and cleanup, then confirm the runner discovers it.
 
-CI ([.github/workflows/ci.yml](.github/workflows/ci.yml)) runs the `install/verify.sh` subcommands,
-the unit tier on both Ubuntu and Windows, the shape tier, and the Claude-Code-tagged e2e tier. A
-shellcheck job runs warn-only. The suite is noticeably slower on Windows under Git Bash than on
-Linux — budget minutes, not seconds.
+CI configuration lives in [.github/workflows/ci.yml](.github/workflows/ci.yml). Review which tiers and operating systems it actually runs; hermetic tests do not authenticate a live Copilot session. Report Windows Git Bash and Linux evidence separately, and retain any untested surface in the release notes.
 
 ## Commit and pull request style
 
@@ -126,8 +118,7 @@ docs(multi-cli): document Factory Droid install
 chore(lib): tidy pack-resolver error message
 ```
 
-Two hard rules on commit messages. Both are new for the public beta, neither is machine-enforced
-yet, and existing history violates both in places:
+Two rules on commit messages:
 
 - **English only.** No other language in subjects or bodies — the same rule the shipped tree is
   already tested for.
@@ -189,20 +180,13 @@ Lives at `hooks/shared/<kebab-case>/HOOK.md` plus `hooks/shared/<kebab-case>/run
 declares at least `name`, `tier`, `event`, `fires_on`, `override`, and what breaks if the hook is
 skipped.
 
-Two things to know before writing one. **Hooks fire on Claude Code only** — every other CLI ignores
-them, so a hook can never be the only thing between a user and a mistake. And of the 33 hook
-directories here, 9 auto-register through `hooks/hooks.json` when the plugin is installed; the rest
-are opt-in. Adding a directory does not make a hook fire.
+The current hook bundle targets Claude Code. Copilot supports hooks but needs a separate protocol adapter; no such Lintel adapter ships in the repository kit. Registered hooks are listed in `hooks/hooks.json`; adding a directory does not make a hook execute. Add behavioral tests for the actual host input, output and blocking exit contract.
 
-Hooks run with the operator's privileges. Keep them minimal, fail open when expected state is
-missing rather than blocking the session, and never write outside the repo's `.claude/runtime/` or
-`~/.lintel/`.
+Hooks run with the operator's privileges. Keep them minimal. Warning hooks may fail open when optional state is missing; security block hooks must preserve their documented fail-closed behavior. Review and test every write destination, normally `.claude/runtime/` or `~/.lintel/`.
 
 ## What is not accepted
 
-- **Third-party code.** Lintel ships only original, MIT-licensed content. The installer does not
-  clone, vendor, or update anything — `install/upstream-sources.yaml` is a declaration list that
-  nothing acts on. Do not add code you did not write.
+- **Unreviewed third-party content.** Existing design resources retain their [attribution and license notices](skills/design-dna/ATTRIBUTION.md). New dependencies or copied resources need provenance, a reviewed license, retained notices and an update owner; do not describe the repository as original-only or MIT throughout.
 - **Company-specific identity in the spine.** Voice, compliance, and brand belong in a pack, not in
   `skills/`, `agents/`, or `hooks/`.
 - **Internal jargon in user-facing text.** If a newcomer cannot decode it without reading this
@@ -222,3 +206,10 @@ operator's lessons across their own machines, and is not part of this workflow.)
 ## Questions
 
 Open an issue. Be specific about the problem you are solving.
+
+## Copilot adapter changes
+
+Edit canonical skills, `shims/copilot/` templates and the adapter generator rather than generated `.github/skills/` output. Run the adapter's repository generation/check path and the relevant installation tests. A discovery test must cover valid native frontmatter, portable referenced resources and non-clobber behavior. Document host validation separately from static or hermetic checks. [The Copilot guide](docs/copilot.md) defines the shipped integration scope.
+
+
+Shared startup disciplines are authored in `scaffolding/01-foundation/SESSION-PROTOCOL.md`. Run `python3 bin/li-instructions.py sync` after an approved change, then `check`. Keep all four generated entry blocks identical, preserve project-owned prose and update the protocol coverage map when changing the reusable contract.

@@ -5,174 +5,88 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  verify-linux:
-    name: verify.sh on Ubuntu
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install yq
-        run: |
-          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
-          sudo chmod +x /usr/local/bin/yq
-          yq --version
-
-      - name: Run verify.sh --layers
-        run: bash install/verify.sh --layers
-
-      - name: Run verify.sh --frontmatter
-        run: bash install/verify.sh --frontmatter
-
-      - name: Run verify.sh --counts
-        run: bash install/verify.sh --counts
-
-      - name: Run verify.sh --agents-categorized
-        run: bash install/verify.sh --agents-categorized
-
-      - name: Run verify.sh --scaffolding-coherence
-        run: bash install/verify.sh --scaffolding-coherence
-
-      - name: Run verify.sh --tier-stamps
-        run: bash install/verify.sh --tier-stamps
-
-      - name: Run verify.sh --upstream
-        run: bash install/verify.sh --upstream
-
-      - name: Run verify.sh --cli-matrix
-        run: bash install/verify.sh --cli-matrix
-
-      - name: Run verify.sh --all (final aggregate)
-        run: bash install/verify.sh --all
-
-  install-linux:
-    name: install.sh on Ubuntu (dry-run)
-    runs-on: ubuntu-latest
-    needs: verify-linux
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install yq
-        run: |
-          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
-          sudo chmod +x /usr/local/bin/yq
-
-      - name: Run install.sh (against test LINTEL_HOME)
-        env:
-          LINTEL_HOME: /tmp/lintel:li-test
-        run: bash install/install.sh
-
-      - name: Verify install
-        env:
-          LINTEL_HOME: /tmp/lintel:li-test
-        run: |
-          bash install/verify.sh --all
-          test -d /tmp/lintel:li-test/scaffolding
-          test -d /tmp/lintel:li-test/hooks
-          test -f /tmp/lintel:li-test/config.yaml
-
-  verify-windows:
-    name: install.ps1 on Windows
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Run install.ps1
-        env:
-          LINTEL_HOME: C:\li-test
-        shell: pwsh
-        run: install/install.ps1
-
-      - name: Confirm structure
-        env:
-          LINTEL_HOME: C:\li-test
-        shell: pwsh
-        run: |
-          Test-Path C:\li-test\scaffolding | Should -Be $true
-          Test-Path C:\li-test\hooks | Should -Be $true
-          Test-Path C:\li-test\config.yaml | Should -Be $true
-
-      - name: Run verify.sh via Git Bash
-        env:
-          LINTEL_HOME: C:\li-test
+  suite:
+    name: Full suite (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    defaults:
+      run:
         shell: bash
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6.1.0
+        with:
+          python-version: '3.12'
+      - name: Use modern Bash for the full developer suite on macOS
+        if: runner.os == 'macOS'
+        run: |
+          brew list bash >/dev/null 2>&1 || brew install bash
+          echo "$(brew --prefix bash)/bin" >> "$GITHUB_PATH"
+      - name: Expose the selected Python as python3 on every platform
+        run: |
+          mkdir -p "$RUNNER_TEMP/lintel-ci-bin"
+          printf '#!/usr/bin/env bash\nexec python "$@"\n' > "$RUNNER_TEMP/lintel-ci-bin/python3"
+          chmod +x "$RUNNER_TEMP/lintel-ci-bin/python3"
+          echo "$RUNNER_TEMP/lintel-ci-bin" >> "$GITHUB_PATH"
+      - name: Check verification dependencies
+        run: |
+          git --version
+          python3 --version
+          jq --version
+      - name: Verify repository structure
         run: bash install/verify.sh --all
+      - name: Run every test tier, including security behavior and Copilot adapters
+        run: bash tests/runner/run-all.sh --require-all
+      - name: Exercise bare installation with stock macOS Bash 3.2
+        if: runner.os == 'macOS'
+        run: LINTEL_HOME="$RUNNER_TEMP/lintel-bash32" /bin/bash install/install.sh
+      - name: Exercise PowerShell installation and reinstall
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: ./tests/runner/check-install.ps1
+      - name: Verify catalog drift
+        run: python3 bin/li-catalog.py --check
+      - name: Verify canonical startup instructions
+        run: python3 bin/li-instructions.py check
+      - name: Verify committed Copilot adapters and inventory
+        run: python3 bin/li-copilot.py check --target . --source .
+      - name: Verify generated wiki and capability table
+        run: bash bin/li-wiki-gen --check
 
-  unit-tests-linux:
-    name: tests/unit on Ubuntu
+  syntax:
+    name: Shell and Python syntax
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Run unit tests
-        run: bash tests/runner/run-unit.sh
-
-  unit-tests-windows:
-    name: tests/unit on Windows
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Run unit tests via Git Bash
-        shell: bash
-        run: bash tests/runner/run-unit.sh
-
-  shape-tests:
-    name: tests/shape on Ubuntu
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install yq
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6.1.0
+        with:
+          python-version: '3.12'
+      - name: Parse shipped shell scripts
         run: |
-          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
-          sudo chmod +x /usr/local/bin/yq
-
-      - name: Run shape tests (structural contracts incl. English-only tripwire)
-        run: bash tests/runner/run-all.sh --scope shape
-
-  e2e-claude-code-only:
-    name: tests/e2e claude-code-only on Ubuntu
-    runs-on: ubuntu-latest
-    needs: unit-tests-linux
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Run e2e tests (claude-code-only filter)
-        run: bash tests/runner/run-e2e.sh --tag claude-code-only
-
-  e2e-cross-cli:
-    name: tests/e2e cross-CLI on Ubuntu
-    runs-on: ubuntu-latest
-    if: false   # enable when Codex CLI is available in CI runner
-    needs: e2e-claude-code-only
-    steps:
-      - uses: actions/checkout@v4
-      - name: Run e2e tests (cross-CLI)
-        run: bash tests/runner/run-e2e.sh
-
-  shellcheck-lint:
-    # v3.6 cohort 1 item 6.6: shellcheck over bin/ + install/ + run.sh + hooks/.
-    # Warn-only initially (continue-on-error: true) — promote to required after a clean baseline is established.
-    name: shellcheck (warn-only)
-    runs-on: ubuntu-latest
-    continue-on-error: true
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install shellcheck
-        run: sudo apt-get install -y shellcheck
-
-      - name: Run shellcheck on bin/
-        run: shellcheck --severity=warning bin/li-* || true
-
-      - name: Run shellcheck on install/
-        run: shellcheck --severity=warning install/*.sh || true
-
-      - name: Run shellcheck on run.sh (if exists)
-        run: |
-          if [ -f run.sh ]; then shellcheck --severity=warning run.sh || true; fi
-
-      - name: Run shellcheck on tests/
-        run: shellcheck --severity=warning tests/runner/*.sh tests/unit/*.sh || true
+          while IFS= read -r script; do
+            case "$script" in
+              *.sh) bash -n "$script" ;;
+              bin/*) if head -1 "$script" | grep -q bash; then bash -n "$script"; fi ;;
+            esac
+          done < <(git ls-files '*.sh' 'bin/*')
+      - name: Compile Python source
+        run: python3 -m compileall -q bin lib skills/design-dna/scripts

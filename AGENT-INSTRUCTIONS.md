@@ -18,7 +18,7 @@ Do NOT re-state the rules inline here. They live in CORE-PRINCIPLES.md and chang
 
 ### 2. Run the compliance checklist
 
-**Compliance — pack-driven.** The active pack declares its compliance posture (`resolve_pack_field compliance.mode|compliance.hooks`). The neutral `_default` pack enforces only the baseline below; a company pack (e.g. lintel-caip-pack) adds tiered gates.
+**Compliance — pack-driven.** The active pack declares its compliance posture (`resolve_pack_field compliance.mode|compliance.hooks`). The neutral `_default` pack enforces only the baseline below; a company pack layers its own tiered gates on top.
 
 A clean pass on the neutral baseline is the floor for any non-trivial action. Trivial actions (typo fix, doc edit, question) can skip. The baseline steps:
 
@@ -107,6 +107,20 @@ Configure thresholds in `~/.lintel/config.yaml` (the layer config the bare insta
 
 ## Per-CLI capability matrix
 
+### GitHub Copilot invocation
+
+Copilot's native entrypoints are `li-*` skills from `.github/skills/`, installed through the
+Copilot plugin or `bin/li-copilot`. The `/li:<skill>` spelling elsewhere is the canonical
+Lintel workflow name; use `/li-<skill>` where the host exposes it, or load the named canonical
+SKILL.md from the adapter's source root. Translate abstract operations (`Read`, `Bash`,
+`AskUserQuestion`, `Task`) to available host tools. Delegate only when the host exposes an
+agent tool; otherwise sequence the same scoped work and report that limitation.
+
+Keep source paths separate from target-repository state: the adapter identifies the Lintel
+source bundle while `LINTEL_REPO_ROOT` identifies the repository being worked on. Resolve
+helper paths from that bundle before executing shared examples. Lintel's Claude hook JSON
+is not a Copilot hook configuration; host policy and repository CI enforce enterprise controls.
+
 Lintel ships with honest degradation. Not every skill works on every CLI.
 
 The per-CLI truth is `lib/cli-tiers.yaml` (the single source); the README's capability table is
@@ -171,7 +185,7 @@ For non-trivial work, the Lintel cycle provides an explicit 9-step pipeline (8 c
 
 **Canonical invocation:**
 - `/li:cycle` — full cycle SENSE → SCOPE → DEFINE → DISCOVER → PLAN → BUILD → REVIEW → SHIP → CAPTURE (8 core phases + the light, skippable SCOPE phase between SENSE and DEFINE)
-- `/li:cycle --mode <preset>` — apply preset. Neutral spine presets: hotfix / internal-tool / research-dive / meta-infra. Pack-contributed presets (customer-engagement, demo-prep) are supplied by an active pack (e.g. lintel-caip-pack), not by the neutral spine.
+- `/li:cycle --mode <preset>` — apply preset. Neutral spine presets: hotfix / internal-tool / research-dive / meta-infra. Pack-contributed presets (customer-engagement, demo-prep, …) are supplied by whichever pack is active, not by the neutral spine.
 - `/li:cycle --from <phase> --to <phase>` — custom subset
 - `/li:resume` — pick up at next phase based on `.claude/runtime/state/00-state.md`
 
@@ -205,7 +219,7 @@ Expert personas as lightweight session context layers. Voice + outcome-lens + de
 **Deep-dive on-demand (~2-3k tokens):**
 - `/li:role --deep-dive <role-id>` — load full role-file (COLD KNOWLEDGE, DECISION CRITERIA, INSIGHTS)
 
-**Roles load from the active pack** (`resolve_pack_field roles.source`; none in `_default`). A company pack supplies its own role set — e.g. the lintel-caip-pack example ships `field-cto`, `solution-architect`, `engineering-manager`.
+**Roles load from the active pack** (`resolve_pack_field roles.source`; none in `_default`). A company pack supplies its own role set — a field-facing pack might ship `field-cto`, `solution-architect`, `engineering-manager`.
 
 **Private roles:** Operator can scaffold custom roles via `/li:role-new`. Private roles store at `~/.lintel/roles/private/` (gitignored). Sync via `bin/li-roles-sync` to operator's private repo (never team-wide, never public marketplace).
 

@@ -97,6 +97,11 @@ The precedence model assumes the CLI supports subagents.
 
 - **Claude Code:** Full support. Apply as described.
 - **Codex:** native subagents, same as Claude Code. Apply the model as described.
-- **CLIs without subagents** (Gemini CLI, OpenCode, Copilot CLI, Factory Droid): sequentialize what would be parallel. The precedence model still decides *which prompt* to use, even when the delegation is manual.
+- **GitHub Copilot:** use native custom agents when available; the portable kit exposes planner, builder and reviewer profiles. Host discovery and permissions still apply.
+- **Adapters without delegation** (the declared Gemini CLI, OpenCode and Factory Droid integrations): sequentialize what would be parallel. The precedence model still decides *which prompt* to use, even when the delegation is manual.
 
 When operating on a degraded CLI, the precedence model still informs **which prompt to use** even if the delegation mechanism is manual.
+
+## Host instruction loading
+
+This precedence is a Lintel workflow convention. Each host controls which repository, user and organization instructions it loads. In Copilot, use `.github/copilot-instructions.md` and the host-supported scoped instructions; do not assume Claude file discovery or tool permissions apply. Resolve a conflict explicitly against the task authority and the host's rules. See [Copilot](copilot.md).

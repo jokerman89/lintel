@@ -28,7 +28,7 @@ Everything else in this document is a consequence of that split.
 │  SPINE — execution, stable                                   │
 │    skills/   the nine-phase cycle, modules, session harness  │
 │    agents/   subagent role definitions, eight categories     │
-│    hooks/    enforcement, Claude Code mechanism              │
+│    hooks/    selected checks, Claude Code adapter              │
 │    lib/      the mechanical helpers everything else sources  │
 │    scaffolding/01-foundation/  what gets installed elsewhere │
 └──────────────────────────────────────────────────────────────┘
@@ -45,7 +45,7 @@ publishing the harness possible at all.
 
 ### `skills/` — what your CLI can invoke
 
-125 skills, each `skills/<name>/SKILL.md`, namespaced `/li:<name>`. They fall into clusters:
+Canonical skills live at `skills/<name>/SKILL.md`. Claude plugin workflows use `/li:<name>`; the Copilot repository kit exposes native core adapters as `li-<name>`. They fall into clusters:
 
 | Cluster | What it holds |
 |---|---|
@@ -63,7 +63,7 @@ anti-drift principle as the capability table.
 
 ### `agents/` — delegated roles
 
-69 agent definitions across eight categories: engineering, security, compliance, devops, customer,
+Agent definitions span eight categories: engineering, security, compliance, devops, customer,
 communication, doc-gen and frontend. Each is a markdown role definition with uniform frontmatter
 (`name`, `category`, `description`, `tools`, `voice`, `tier`, `cli_support`).
 
@@ -75,7 +75,7 @@ Agent selection follows a five-level precedence model; see [precedence](preceden
 
 ### `hooks/` — enforcement
 
-33 hook definitions. Eight of them auto-register on a plugin install across five events:
+Selected hooks register on a Claude Code plugin install through `hooks/hooks.json`:
 
 | Event | Hook | Behaviour |
 |---|---|---|
@@ -97,19 +97,19 @@ environment flag, and every one is written to an audit log with whatever reason 
 **warn-hooks fail open:** a missing state directory produces no output rather than an error, so a
 half-configured install degrades quietly instead of breaking your session.
 
-Hooks are a **Claude Code mechanism**. On every other CLI they do not fire, by design.
+This hook bundle implements the **Claude Code protocol**. Copilot has its own hook API, but Lintel does not ship that translation. The Copilot kit installs native skills and agents without hooks; see [Copilot](copilot.md).
 
 ### `lib/` — the mechanical layer
 
 This is where the repo's central rule lives: *if a guarantee is only prose, it is not a guarantee.*
 
-| Helper | Guarantees |
+| Helper | Responsibility |
 |---|---|
 | `paths.sh` | one canonical answer for every path, so no skill hand-rolls a location |
 | `state.sh` | the cycle ledger. `state_append` / `state_last`, with resolution scoped to the current cycle segment so a prior cycle's entries cannot poison the footer or a resume |
 | `memory.sh` | lessons and memory operations as commands, not as a format a skill has to remember |
 | `pack-resolver.sh` | `resolve_pack_field <dotted.path>` — the single accessor for all identity |
-| `auto-decide.sh` | `is_one_way_door` — makes "auto-mode never decides an irreversible thing" mechanical |
+| `auto-decide.sh` | `is_one_way_door` — classifies selected irreversible decision patterns when the workflow calls it |
 | `cycle-footer.sh` | `render_cycle_footer` — the position footer, mode-aware, with an ASCII fallback |
 | `scale-estimator.sh` | sizing, and the calibration path that turns token estimates from guesses into measurements |
 | `cli-tiers.sh` | generates the capability table from `cli-tiers.yaml`; a shape test fails the build if the README disagrees |
@@ -133,7 +133,7 @@ A pack is `packs/<name>/pack.yaml` plus any corpus files it references. It decla
 | `navigation` | default and high-risk workflows, orientator token budget |
 | `brief_forge_handoffs` | which evaluators fire at each hand-off boundary |
 
-The neutral `_default` pack sets all of these to off or null. It enforces nothing — which is the
+The neutral `_default` pack supplies advisory defaults and no company-specific policy gates. That is the
 point: the harness works out of the box without imposing anyone's opinions.
 
 ### Resolution and inheritance
@@ -208,7 +208,7 @@ Four roots. Two are machine-global, two live in your repo:
 
 | Root | Scope | Holds |
 |---|---|---|
-| `~/.lintel/` | machine-global | operator identity — `profile.yaml` (active pack, mode, role), installed packs, cross-repo job registry, operator audit log |
+| `~/.lintel/` | machine-global (configurable with `LINTEL_HOME`) | operator preferences in `profile.yaml` (mode, role); active pack selected by `packs/active-pack`; installed packs, cross-repo job registry, operator audit log |
 | `~/.claude/` | machine-global | your CLI's own home — `settings.json`, and hooks you armed by hand on a bare install |
 | `<repo>/.claude/` | per-repo, **committed** | `memory/` (lessons, working state, personas), `decisions/`, `plans/` |
 | `<repo>/.claude/runtime/` | per-repo, **gitignored** | cycle state, job data, session saves, repo event log |
@@ -225,13 +225,9 @@ still uses the legacy locations.
 
 Two mechanisms, one source each:
 
-1. **Instructions** — one canonical file, `AGENT-INSTRUCTIONS.md`, reached through whatever root
-   file each CLI reads (`CLAUDE.md`, `AGENTS.md`, `GEMINI.md`). Those root files are pointers plus a
-   short CLI-specific notes section. They never override the canonical file; if a CLI quirk forces
-   different behaviour, the canonical file changes.
+1. **Instructions** — the shared `SESSION-PROTOCOL.md` is repeated inline in AGENTS.md, CLAUDE.md and both scaffold templates. `bin/li-instructions.py` keeps those marked blocks identical while preserving unique project context. `AGENT-INSTRUCTIONS.md` supplies the navigation/read order; personal global files are unnecessary for the reusable protocol. This deliberate repetition supersedes the older pointer-only direction.
 2. **Skills and agents** — written once at the repo root, shipped through small per-CLI plugin
-   manifests that all point at the same `./skills/` and `./agents/`. Some CLIs read the Claude plugin
-   manifest directly through interop, so they need no manifest of their own.
+   manifests and generated adapters that reference shared canonical content. Copilot uses generated native core adapters and a dedicated manifest; the portable installer bundles referenced resources for other checkouts. Other adapters may use manifest interoperability.
 
 Per-CLI capability is declared once in `lib/cli-tiers.yaml` and everything else generates from it —
 the README table, and the honest tier message `/li:welcome` prints on first run.
@@ -248,17 +244,17 @@ Lintel dogfoods this. This repo's own `CLAUDE.md` is the instantiated form of th
 
 ---
 
-## Tests as structural guarantee
+## Tests as structural checks
 
-90 tests, in five tiers:
+The test runner discovers checks in five tiers. Counts change as contracts are added:
 
-| Tier | Count | Asserts |
-|---|---|---|
-| **shape** | 36 | structural contracts — required frontmatter fields, hook registration, canonical paths, decision-record number uniqueness, generated-table sync, no non-English or company-specific text in the public tree |
-| **unit** | 48 | helper behaviour — state segmenting, memory operations, pack resolution and inheritance, one-way-door detection |
-| **integration** | 4 | cross-component links |
-| **end-to-end** | 1 | a full path through the harness |
-| **behavior** | 1 | a mechanism exercised hermetically, to prove it fires rather than merely exists |
+| Tier | Asserts |
+|---|---|
+| **shape** | structural contracts — required frontmatter fields, hook registration, canonical paths, decision-record number uniqueness, generated-table sync, no non-English or company-specific text in the public tree |
+| **unit** | helper behaviour — state segmenting, memory operations, pack resolution and inheritance, one-way-door detection |
+| **integration** | cross-component links |
+| **end-to-end** | a full path through the harness |
+| **behavior** | a mechanism exercised hermetically, to prove it fires rather than merely exists |
 
 The shape tier is the interesting one. It is what stops the system drifting from its own
 self-description — historically this repo's dominant failure mode, and the reason the tier exists.
@@ -270,3 +266,7 @@ self-description — historically this repo's dominant failure mode, and the rea
 - [The cycle](the-cycle.md) · [Getting started](getting-started.md) · [Glossary](GLOSSARY.md)
 - [Multi-CLI support](multi-cli.md) · [Precedence](precedence.md) · [Compliance](compliance.md)
 - Decision records: `.claude/decisions/`
+
+## Copilot repository boundary
+
+The portable kit adds native core skills under `.github/skills/li-*` and three custom agent profiles under `.github/agents/`. Installed repositories carry workflow resources under `.github/lintel/` so a new checkout does not depend on the originating workstation. Installation records managed artifacts and refuses local-edit conflicts. It does not provision accounts, enable enterprise policies, install private packs or adapt Claude hooks. See [Copilot](copilot.md) and [enterprise adoption](enterprise-adoption.md).

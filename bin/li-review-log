@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 # bin/li-review-log — native review-log writer
+# component: lintel-review-log
+# implements: ADR-0005, ADR-0024
+# intent: docs/spec-kit.md
+# constraints: helper code comes from the source bundle; audit data and Git state belong to the target repository
+# last_intent_review: 2026-09-08
 #
 # Lintel's review skills (plan-ceo-review, plan-eng-review, plan-design-review,
 # plan-devex-review, code-review, codex) call this on the execution path. It takes
@@ -28,7 +33,7 @@
 
 set -euo pipefail
 
-REPO_ROOT="${LINTEL_REPO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." 2>/dev/null && pwd)}"
+SOURCE_ROOT="${LINTEL_SOURCE_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." 2>/dev/null && pwd)}"
 
 usage() {
   head -33 "$0" | sed 's/^# \{0,1\}//' | sed '1d'
@@ -46,7 +51,15 @@ done
 
 [ -n "$INPUT" ] || { echo "li-review-log: JSON argument required" >&2; usage 2; }
 
-AUDIT_LIB="$REPO_ROOT/bin/_audit.sh"
+PATHS_LIB="$SOURCE_ROOT/lib/paths.sh"
+[ -f "$PATHS_LIB" ] || { echo "li-review-log: paths helper missing: $PATHS_LIB" >&2; exit 2; }
+source "$PATHS_LIB"
+REPO_ROOT="$(lintel_repo_root)"
+[ -n "$REPO_ROOT" ] && [ -d "$REPO_ROOT" ] || { echo "li-review-log: working repository required" >&2; exit 2; }
+REPO_ROOT="$(cd "$REPO_ROOT" && pwd -P)" || exit 2
+export LINTEL_REPO_ROOT="$REPO_ROOT"
+
+AUDIT_LIB="$SOURCE_ROOT/bin/_audit.sh"
 [ -f "$AUDIT_LIB" ] || { echo "li-review-log: audit helper missing: $AUDIT_LIB" >&2; exit 2; }
 # shellcheck source=/dev/null
 source "$AUDIT_LIB"
@@ -56,7 +69,7 @@ source "$AUDIT_LIB"
 _json_field() {
   local key="$1"
   if command -v jq >/dev/null 2>&1; then
-    printf '%s' "$INPUT" | jq -r --arg k "$key" '.[$k] // empty' 2>/dev/null
+    printf '%s' "$INPUT" | jq -b -r --arg k "$key" '.[$k] // empty' 2>/dev/null
     return 0
   fi
   # Regex fallback: quoted string value
@@ -87,7 +100,7 @@ SKILL="${SKILL:-unknown}"
 # Resolve commit to current short HEAD when the skill passed a placeholder/empty.
 case "$COMMIT" in
   ""|"..."|"<commit>"|"unknown")
-    COMMIT="$(git rev-parse --short HEAD 2>/dev/null || echo unknown)"
+    COMMIT="$(git -C "$REPO_ROOT" rev-parse --short HEAD 2>/dev/null || echo unknown)"
     ;;
 esac
 

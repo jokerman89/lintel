@@ -2,7 +2,7 @@
 
 - **Status:** Accepted
 - **Date:** 2026-06-13
-- **Deciders:** operator ("our design tools must be better than UI/UX Pro Max — that's the requirement", 2026-06-13), Claude (execution)
+- **Deciders:** operator — the design tooling must beat the best comparable offering, not merely match it (2026-06-13)
 - **Supersedes:** —
 - **Superseded by:** —
 - **Amends:** ADR-0015 (records two additional consumed subsystems + the deliberate scope-outs)

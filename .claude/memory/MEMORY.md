@@ -12,7 +12,7 @@ read them on demand.
 
 ## Hot notes
 <!-- agent-maintained: short, load-bearing facts; consolidate or supersede instead of appending forever -->
-- **v0.9.0-beta (2026-08-28): first public release prepared, NOT pushed.** Branch `feat/launch-readiness`, suite 90/90. Public docs 130→44 files; internal artifacts now under `.claude/engineering/`. All 255 commits rewritten (messages only — trees proven byte-identical). Pre-rewrite history in `../lintel-pre-beta-history.bundle`. **Four `v3.*-dev` tags still point at pre-rewrite commits — delete before pushing tags.** See [[working-state]] for the full blocker list.
+- **Copilot enterprise launch COMPLETE (2026-09-08, PR #83 merged):** native portable kit, explicit Spec Kit work map, complete shared startup protocol and 101/101 hosted tests on Ubuntu/macOS/Windows. Delivery evidence and beta acceptance boundaries: [launch plan](../plans/copilot-enterprise-launch/plan.md) and [review](../plans/copilot-enterprise-launch/review.md). Completed plans and older publication/history notes are records, not live instructions or standing authorization.
 - v5.x history: launch-readiness folded into PR #73; v5.0 chain #62→#65 merged. Audit records now at `.claude/engineering/audits/`.
 - Conventions in force: supersede-don't-delete (`superseded_by:`), update-before-append (CAPTURE/learn), L-NNN grammar only, MEMORY.md ≤200 lines.
 - Helpers: lib/paths.sh (all paths), lib/memory.sh (lessons), bin/_context.sh (checkpoints), bin/li-migrate-claude-home, bin/li-vault-init.

@@ -5,7 +5,7 @@ description: Use after SENSE, before DEFINE, when a request's size is ambiguous 
 color: cyan
 tools: Read, Write, Edit, Bash, Grep, Glob
 voice: internal
-cli_support: [claude-code, codex]
+cli_support: [claude-code, codex, copilot]
 necessity: STRONGLY_RECOMMENDED
 gap_if_skipped: "Scale ambiguity is never resolved — a request like 'deploy a website to azure' routes as a confident SHIP (XS) and skips DEFINE/DISCOVER/PLAN; PLAN has no depth_schema so an L/XL plan renders flat; scope.md never exists, so DEFINE inherits no wedge and PLAN no depth signal."
 ---
@@ -51,12 +51,19 @@ SENSE  →  [SCOPE]  →  DEFINE  →  DISCOVER  →  PLAN  →  ...
 SCOPE runs **after** SENSE, so the orientator's route already exists (SENSE step 0d). Read it so SCOPE can override a confidently-wrong one.
 
 ```bash
-source "$LINTEL_REPO_ROOT/lib/scale-estimator.sh"
+scope_source="${LINTEL_SOURCE_ROOT:-${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}}"
+source "$scope_source/lib/scale-estimator.sh"
+source "$scope_source/lib/paths.sh"
 
 prompt_text="<operator's last message>"
 
 # The orientator route SENSE recorded (intent + workflow). SCOPE may override it.
-intent=$(grep -E '^intent_detected:' .claude/runtime/state/00-state.md 2>/dev/null | tail -1 | awk '{print $2}')
+scope_state_dir="${LINTEL_STATE_DIR:-$(lintel_state_dir)}"
+case "$scope_state_dir" in
+  /*|[A-Za-z]:/*) : ;;
+  *) scope_state_dir="$(lintel_repo_root)/$scope_state_dir" ;;
+esac
+intent=$(grep -E '^intent_detected:' "$scope_state_dir/00-state.md" 2>/dev/null | tail -1 | awk '{print $2}' | tr -d '\r' || true)
 intent="${intent:-unclear}"
 
 escalation=$(resolve_pack_field navigation.escalation_threshold); escalation="${escalation:-medium}"
@@ -117,8 +124,27 @@ SCOPE has **override authority** over a confidently-wrong orientator route (desi
 
 Write the resolved scope so DEFINE inherits the wedge and PLAN reads `depth_schema`. Canonical home: the job dir (`.claude/runtime/jobs/<id>/scope.md`) when a job is active, else `.claude/runtime/state/scope.md`.
 
+An explicitly selected `LINTEL_SCOPE_PATH` takes precedence. Persist `scope_out` in the SCOPE
+ledger entry and link it from the selected native plan or mapped handoff. RESUME uses that
+explicit link or the same job directory; the shared jobs parent is never a scope source.
+
 ```bash
-scope_out="${LINTEL_JOB_DIR:-${LINTEL_STATE_DIR:-.claude/runtime/state}}/scope.md"
+scope_source="${LINTEL_SOURCE_ROOT:-${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}}"
+source "$scope_source/lib/paths.sh"
+if [ -n "${LINTEL_SCOPE_PATH:-}" ]; then
+  scope_out="$LINTEL_SCOPE_PATH"  # explicitly selected scope for this initiative
+elif [ -n "${LINTEL_JOB_DIR:-}" ]; then
+  scope_out="$LINTEL_JOB_DIR/scope.md"
+elif [ -n "${JOB_ID:-}" ]; then
+  source "$scope_source/bin/_jobs.sh"
+  scope_out="$(job_path "$JOB_ID")/scope.md"
+else
+  scope_out="${LINTEL_STATE_DIR:-$(lintel_state_dir)}/scope.md"
+fi
+case "$scope_out" in
+  /*|[A-Za-z]:/*) : ;;
+  *) scope_out="$(lintel_repo_root)/$scope_out" ;;
+esac
 mkdir -p "$(dirname "$scope_out")"
 cat > "$scope_out" <<EOF
 # Scope: $prompt_text
@@ -148,7 +174,7 @@ EOF
 Mechanical since v5.0 (ADR-0008) — one command, not a YAML obligation:
 
 ```bash
-_sl="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}/lib/state.sh"
+_sl="${LINTEL_SOURCE_ROOT:-${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}}/lib/state.sh"
 [ -f "$_sl" ] || _sl="$HOME/.lintel/lib/state.sh"; source "$_sl"   # installed by install.sh in consumer repos
 state_append SCOPE DONE next=DEFINE size=$scale_size ambiguous=$scale_amb depth_schema=$depth_schema intent="$resolved_intent" route_override="${override_route:-none}" scope_path="$scope_out"
 ```
@@ -240,7 +266,7 @@ Close your report with the shared position footer so the operator always knows w
 cycle and the one logical next action — whether this phase ran standalone or inside `/li:cycle`:
 
 ```bash
-source "$LINTEL_REPO_ROOT/lib/cycle-footer.sh"   # fallback: "$(git rev-parse --show-toplevel)/lib/cycle-footer.sh"
+source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/lib/cycle-footer.sh"   # fallback: "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/lib/cycle-footer.sh"
 render_cycle_footer                               # reads .claude/runtime/state/00-state.md; --compact for short replies
 ```
 

@@ -1,5 +1,9 @@
 # Lintel whole-system enterprise value review
 
+> Historical draft review. Current finding dispositions and integrated verification are in
+> [the completion review](2026-09-08-enterprise-value-completion.md). Open-status statements
+> below describe the earlier draft and are superseded by that record.
+
 Date: 2026-09-08. Baseline: `6b10a84`. Independent branch: `codex/enterprise-value-review`.
 This review excludes the concurrent Copilot session's uncommitted changes from its baseline.
 Findings below cite baseline locations; fixes are assessed through this branch's diff and tests.

@@ -2,7 +2,7 @@
 
 - **Status:** Accepted
 - **Date:** 2026-06-14
-- **Deciders:** operator (setup-hardening cycle, signoff 2026-06-14), Claude (diagnosis + execution)
+- **Deciders:** operator (setup-hardening cycle, signoff 2026-06-14)
 - **Supersedes:** —
 - **Superseded by:** —
 

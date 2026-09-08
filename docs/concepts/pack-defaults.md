@@ -11,10 +11,10 @@ Every workflow in Lintel reads "pack-shaped" inputs — voice tier, compliance h
 
 - A specific company voice baked into customer-facing skill copy.
 - Compliance gate names hardcoded into REVIEW.
-- Persona corpus assumed by skills that referenced "Kennie" or "Lisa" by name.
+- A persona corpus assumed present, with skills referring to personas by name.
 - Navigation budget assumed by orientator.
 
-That meant Lintel-the-harness and Microsoft-the-pack were tangled. Two consequences:
+That meant Lintel-the-harness and one company's identity were tangled. Two consequences:
 
 1. A second pack (e.g. Foo Corp) could not be added without forking Lintel.
 2. A first-time operator on a clean repo with no active pack would crash on missing values instead of getting a sane neutral fallback.
@@ -25,8 +25,8 @@ That meant Lintel-the-harness and Microsoft-the-pack were tangled. Two consequen
 packs/
 ├── _default/
 │   └── pack.yaml          ← neutral skeleton, lives in the harness, never edited per-customer
-├── microsoft/
-│   └── pack.yaml          ← Trailblazer + Compliance + Personas + Voice corpus
+├── <company>/
+│   └── pack.yaml          ← voice corpus + compliance gates + personas + brand
 └── <future-pack>/
     └── pack.yaml
 ```
@@ -42,7 +42,7 @@ schema_version: "4.0"
 requires_lintel: ">=4.0.0"
 
 voice:
-  tier_default: internal          # internal | trailblazer | mixed
+  tier_default: internal          # internal | mixed | custom | <pack-defined>
   corpus: []                       # no brand corpus by default
   gates_active: []                 # no voice gates unless pack opts in
 

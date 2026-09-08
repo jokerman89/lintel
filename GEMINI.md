@@ -69,7 +69,7 @@ Gemini's subagent model differs from Claude Code's Task tool. For multi-agent wo
 
 ### Compliance
 
-Compliance is pack-driven (`resolve_pack_field compliance.*`). Neutral baselines: no customer data, no secrets in prompts, no prod mutations without auth. Tiered rules (SSO policy, vendor preference, regulatory gates) come from the active pack — see the lintel-caip-pack example.
+Compliance is pack-driven (`resolve_pack_field compliance.*`). Neutral baselines: no customer data, no secrets in prompts, no prod mutations without auth. Tiered rules (identity policy, vendor preference, regulatory gates) come from the active pack.
 
 ### Voice corpus
 

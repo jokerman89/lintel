@@ -10,7 +10,7 @@
 #   jokerman89/lintel              (the actual git remote — ground truth)
 #   jokerman89/jokerman-lintel     (all 8 plugin manifests + install)
 #   Azureflipper/jokerman-session-setup (bin/li-doctor, li-scaffold, li-update)
-# plus a stale 3.5.0-dev version and an @microsoft.com email that disagreed with
+# plus a stale 3.5.0-dev version and a maintainer email that disagreed with
 # the git identity. Reconciled to the observable remote; this guard prevents
 # silent re-drift the next time a manifest is added.
 # tag: hygiene identity manifests
@@ -47,6 +47,8 @@ if command -v jq >/dev/null 2>&1; then
     .claude-plugin/marketplace.json
     .codex-plugin/plugin.json
     .cursor-plugin/plugin.json
+    .github/plugin/plugin.json
+    .github/plugin/marketplace.json
     gemini-extension.json
   )
   for m in "${VERSION_MANIFESTS[@]}"; do
@@ -64,6 +66,8 @@ else
 fi
 
 # Drift tripwires: no stale identity anywhere on the shipped surface (jq-free).
+# The literals in the loops below are the historical strings being DETECTED —
+# each must stay byte-identical or the guard stops biting.
 SURFACE=(.claude-plugin .codex-plugin .cursor-plugin gemini-extension.json install .opencode bin)
 for bad in 'jokerman89/jokerman-lintel' 'Azureflipper/jokerman-session-setup' '3.5.0-dev' 'akerman@microsoft.com'; do
   if git grep -qF "$bad" -- "${SURFACE[@]}" 2>/dev/null; then

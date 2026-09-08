@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 # bin/li-review-read — native review-log reader for the release gate
+# component: lintel-review-read
+# implements: ADR-0005, ADR-0024
+# intent: docs/spec-kit.md
+# constraints: helper code comes from the source bundle; audit data and Git state belong to the target repository
+# last_intent_review: 2026-09-08
 #
 # The release gate's "Review readiness check" calls this. It reads Lintel's own
 # audit log at .claude/runtime/audit/reviews.jsonl (with a global ~/.lintel/audit/
@@ -30,27 +35,10 @@
 
 set -uo pipefail
 
-REPO_ROOT="${LINTEL_REPO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." 2>/dev/null && pwd)}"
+SOURCE_ROOT="${LINTEL_SOURCE_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." 2>/dev/null && pwd)}"
 
 LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
 LINTEL_AUDIT_DIR="${LINTEL_AUDIT_DIR:-$LINTEL_HOME/audit}"
-
-# Source the unified audit helper so the legacy one-time import below routes
-# through audit_log() (the single sanctioned JSONL writer) and so the reader and
-# writer agree on the reviews-log path via _audit_out_dir.
-AUDIT_LIB="$REPO_ROOT/bin/_audit.sh"
-# shellcheck source=/dev/null
-[ -f "$AUDIT_LIB" ] && source "$AUDIT_LIB"
-
-# Canonical reviews log. _audit_out_dir routes to <repo>/.claude/runtime/audit/
-# on the v5 layout, else ~/.lintel/audit/ (global fallback for un-migrated repos).
-if command -v _audit_out_dir >/dev/null 2>&1; then
-  REVIEWS_LOG="$(_audit_out_dir reviews)/reviews.jsonl"
-else
-  WORK_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || echo "$PWD")"
-  REVIEWS_LOG="$WORK_ROOT/.claude/runtime/audit/reviews.jsonl"
-  [ -f "$REVIEWS_LOG" ] || REVIEWS_LOG="$LINTEL_AUDIT_DIR/reviews.jsonl" # legacy-fallback-ok
-fi
 
 GATE_SKILL="plan-eng-review"
 DAYS=7
@@ -72,20 +60,34 @@ while [ $# -gt 0 ]; do
   esac
 done
 
-HEAD_SHORT="$(git rev-parse --short HEAD 2>/dev/null || echo unknown)"
+PATHS_LIB="$SOURCE_ROOT/lib/paths.sh"
+[ -f "$PATHS_LIB" ] || { echo "li-review-read: paths helper missing: $PATHS_LIB" >&2; exit 2; }
+source "$PATHS_LIB" || exit 2
+REPO_ROOT="$(lintel_repo_root)"
+[ -n "$REPO_ROOT" ] && [ -d "$REPO_ROOT" ] || { echo "li-review-read: working repository required" >&2; exit 2; }
+REPO_ROOT="$(cd "$REPO_ROOT" && pwd -P)" || exit 2
+export LINTEL_REPO_ROOT="$REPO_ROOT"
+
+# Both commands use the source bundle's audit helper and its target-path routing.
+AUDIT_LIB="$SOURCE_ROOT/bin/_audit.sh"
+[ -f "$AUDIT_LIB" ] || { echo "li-review-read: audit helper missing: $AUDIT_LIB" >&2; exit 2; }
+source "$AUDIT_LIB" || exit 2
+REVIEWS_LOG="$(_audit_out_dir reviews)/reviews.jsonl"
+
+HEAD_SHORT="$(git -C "$REPO_ROOT" rev-parse --short HEAD 2>/dev/null || echo unknown)"
 
 # ── Derive the legacy review path (slug + branch) for the one-time import ──
 # Mirrors the historical slug derivation: sanitized to [a-zA-Z0-9._-]. Used only
 # by the grace-window import below, not on the steady-state read path.
 _legacy_review_file() {
   local slug branch remote raw
-  remote="$(git remote get-url origin 2>/dev/null || echo "")"
+  remote="$(git -C "$REPO_ROOT" remote get-url origin 2>/dev/null || echo "")"
   if [ -n "$remote" ]; then
     raw="$(printf '%s' "$remote" | sed 's|.*[:/]\([^/]*/[^/]*\)\.git$|\1|;s|.*[:/]\([^/]*/[^/]*\)$|\1|' | tr '/' '-')"
     slug="$(printf '%s' "$raw" | tr -cd 'a-zA-Z0-9._-')"
   fi
-  slug="${slug:-$(basename "$PWD" | tr -cd 'a-zA-Z0-9._-')}"
-  branch="$(git rev-parse --abbrev-ref HEAD 2>/dev/null | tr -cd 'a-zA-Z0-9._-')"
+  slug="${slug:-$(basename "$REPO_ROOT" | tr -cd 'a-zA-Z0-9._-')}"
+  branch="$(git -C "$REPO_ROOT" rev-parse --abbrev-ref HEAD 2>/dev/null | tr -cd 'a-zA-Z0-9._-')"
   branch="${branch:-unknown}"
   printf '%s/projects/%s/%s-reviews.jsonl' "${GSTACK_HOME:-$HOME/.gstack}" "$slug" "$branch"
 }

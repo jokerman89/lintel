@@ -84,7 +84,7 @@ DevOpsToolchain: <scope>
 2. Dockerfile: multi-stage build, alpine runtime, non-root user
 3. src/api/health.ts: /healthz endpoint
 4. src/lib/logger.ts: pino-based structured logger, redact PII
-5. Application Insights: instrumentation key in env, custom metric emission
+5. APM backend: instrumentation key in env, custom metric emission
 
 ## Diffs
 [Dockerfile + ci.yml + new health endpoint + logger module — proposed file contents listed]

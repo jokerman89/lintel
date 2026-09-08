@@ -35,14 +35,21 @@ Creates a new pack directory + manifest. Three modes:
 
 ```bash
 LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
-REPO_PACKS="$(git rev-parse --show-toplevel 2>/dev/null)/packs"
-HOME_PACKS="$LINTEL_HOME/packs"
+pack_source_root="${LINTEL_SOURCE_ROOT:-${REPO_ROOT:-$LINTEL_HOME}}"
+target_repo="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || true)}"
+[ -n "$target_repo" ] && LINTEL_REPO_ROOT="$target_repo"
+source "$pack_source_root/lib/pack-resolver.sh"
+REPO_PACKS="${target_repo:+$target_repo/packs}"
+HOME_PACKS="$LINTEL_PACKS_DIR"
 
-# Operator chooses scope: repo (shared via git) or home (personal)
+# Operator chooses scope: repo or configured pack store (normally ~/.lintel/packs).
 # Default: repo if invoked inside a git repo with packs/ dir; else home
 ```
 
-If operator didn't specify `--scope repo|home`: ask once.
+Use the authorized `--scope repo|home`; if the destination remains ambiguous, ask
+once and show the resolved path. `home` follows `LINTEL_PACKS_DIR` when configured.
+Repo scope requires a working repository. Resolve helper paths from the installed
+source bundle, not from the target repository; Copilot supplies `LINTEL_SOURCE_ROOT`.
 
 ### Step 2 — Validate name + check existing
 
@@ -62,8 +69,10 @@ or cloned pack.
 
 ```bash
 if [ -z "${extends:-}" ]; then
-  template="$REPO_PACKS/_default/pack.yaml"
-  [ -f "$template" ] || { echo "ERROR: _default pack missing"; exit 1; }
+  template_name="${from_pack:-_default}" # from_pack is the parsed --from argument
+  template_dir=$(_pack_dir "$template_name") || { echo "ERROR: template pack missing"; exit 1; }
+  template="$template_dir/pack.yaml"
+  [ -f "$template" ] || { echo "ERROR: template manifest missing"; exit 1; }
 fi
 ```
 
@@ -73,7 +82,6 @@ If `--from <existing-pack>`: use that pack's manifest as template instead.
 
 ```bash
 if [ -n "${extends:-}" ]; then
-  source "$REPO_ROOT/lib/pack-resolver.sh"
   if ! validate_pack "$extends" 2>/dev/null; then
     echo "ERROR: parent pack '$extends' does not exist or fails validation"
     exit 1
@@ -101,7 +109,6 @@ fi
 ### Step 6 — Validate result
 
 ```bash
-source "$REPO_ROOT/lib/pack-resolver.sh"
 if validate_pack "$name" 2>&1; then
   echo "✓ Pack '$name' created at $target_dir/$name/"
 else
@@ -112,10 +119,7 @@ fi
 ### Step 7 — Audit + surface next steps
 
 ```bash
-ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-printf '{"ts":"%s","kind":"pack_created","name":"%s","extends":"%s","scope":"%s","operator":"%s"}\n' \
-  "$ts" "$name" "${extends:-none}" "$scope" "$(whoami)" \
-  >> "$LINTEL_HOME/audit/pack-lifecycle.jsonl"
+audit_log pack-lifecycle pack_created "name=$name" "extends=${extends:-none}" "scope=$scope"
 ```
 
 Surface:

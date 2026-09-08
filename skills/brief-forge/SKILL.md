@@ -47,9 +47,9 @@ Per-pack overrides in `brief_forge_handoffs.<event>.{enabled, evaluators}`.
 ### Step 1 — Resolve pack policy
 
 ```bash
-source "$LINTEL_REPO_ROOT/lib/pack-resolver.sh"
-source "$LINTEL_REPO_ROOT/lib/brief-forge.sh"
-source "$LINTEL_REPO_ROOT/lib/brief-forge-evaluators.sh"
+source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/lib/pack-resolver.sh"
+source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/lib/brief-forge.sh"
+source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/lib/brief-forge-evaluators.sh"
 
 kind="${1:?usage: brief-forge <kind> <from> <to> <content_type> <content_file>}"
 from="${2:?}"

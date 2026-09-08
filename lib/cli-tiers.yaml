@@ -12,7 +12,7 @@
 #                    Claude-Code-only — this is the load-bearing honesty flag that
 #                    /li:welcome uses to decide whether the live "watch a hook fire"
 #                    demo is even possible.
-#   skills_native    does the CLI invoke /li:<skill> natively (vs operator-runs-manually)?
+#   skills_native    does the CLI discover native skills (host-specific invocation)?
 #   subagents        native | sequenced | none
 #   install          the one install incantation for that CLI
 schema_version: 1
@@ -57,7 +57,7 @@ clis:
     tier: supported
     hooks_supported: false
     skills_native: true
-    subagents: none
+    subagents: native
     install: "copilot plugin marketplace add jokerman89/lintel  then  copilot plugin install li@jokerman-lintel"
   droid:
     label: "Factory Droid"

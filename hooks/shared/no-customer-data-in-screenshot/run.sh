@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+# component: no-customer-data-in-screenshot
+# implements: ADR-0013
+# intent: docs/compliance.md
+# constraints: pattern coverage and host activation limits in docs/compliance.md
+# last_intent_review: 2026-09-08
 # no-customer-data-in-screenshot — Lintel warn-only hook
 set -euo pipefail
 
@@ -19,7 +24,11 @@ source "$(dirname "${BASH_SOURCE[0]}")/../_patterns.sh"
 DOM="$ARTIFACT_DIR/dom.html"
 [ ! -f "$DOM" ] && exit 0
 
-joined="$(scan_customer "$(cat "$DOM" 2>/dev/null || true)")"
+if ! joined="$(scan_customer "$(cat "$DOM" 2>/dev/null || true)")"; then
+  audit_log "hooks" "no_customer_data_in_screenshot" "hook=no-customer-data-in-screenshot" "tier=warn" "reason=scan-unavailable" || true
+  echo "WARN [Lintel hook]: no-customer-data-in-screenshot pattern scan unavailable; DOM was not verified." >&2
+  exit 0
+fi
 
 if [ -n "$joined" ]; then
   audit_log "hooks" "no_customer_data_in_screenshot" "hook=no-customer-data-in-screenshot" "tier=warn" "artifact_dir=$ARTIFACT_DIR" "patterns_matched=$joined"

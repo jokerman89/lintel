@@ -1,351 +1,129 @@
-# FAQ
+# Frequently asked questions
 
-Short answers. Every claim here was checked against the repo it ships with; where the answer is
-"no, that doesn't exist yet", it says so.
+## What is Lintel?
 
-If you are entirely new, read [getting started](getting-started.md) first — this page assumes you
-know roughly what Lintel is.
+A repository-based session workflow for AI coding agents: instructions, skills, specialist roles,
+plans, lessons and decisions. The core workflow takes a request through scope, specification,
+planning, implementation, review, delivery and capture. Local helpers support the workflow;
+there is no hosted Lintel service. See [architecture](architecture.md).
 
----
+## Is GitHub Copilot a first-class adoption route?
 
-## Getting oriented
+Yes. The [Copilot repository kit](copilot.md) supplies native `li-*` core workflow skills,
+planner/builder/reviewer profiles and portable resources. Start with [getting started](getting-started.md).
+Client discovery and enterprise policies still need validation in your environment.
 
-### Q: What is Lintel, in one paragraph?
+The CLI plugin is optional. Installing it locally does not provision a GitHub cloud agent or
+other developers; commit the repository kit for shared adoption.
 
-A session harness for AI coding agents: markdown and bash that your CLI loads as a plugin. It gives
-you a nine-phase development cycle (`/li:cycle`), 125 skills, 69 subagents across 8 categories,
-33 hooks, and a per-repo memory layout so lessons and decisions survive a fresh session. There is no
-runtime and no service — your CLI is the execution engine. See [architecture](architecture.md) for
-how the pieces fit.
+## Do I need Claude Code?
 
-### Q: What does "beta" mean here?
+No. Copilot, Claude Code and Codex have different integration paths. The generated
+[capability table](../README.md#multi-cli-support) and [multi-CLI guide](multi-cli.md) state what
+Lintel's adapters provide. `.claude/` is the shared knowledge/state directory name, including
+on Copilot; it does not require a Claude subscription.
 
-This is **v0.9.0-beta**, the first public release. Concretely:
+## What does beta mean?
 
-- The shape is stable enough to use daily — 90 tests (36 structural, 48 unit, 4 integration,
-  1 behavior, 1 end-to-end)
-  guard the contracts that skills depend on.
-- Paths, skill names, and the pack schema may still move before 1.0. When they do, a migration note
-  lands in [migrations](migrations/_INDEX.md), and deprecated names alias for a grace window rather
-  than breaking on the spot.
-- There is no uninstall script yet (see below), and three doc-generation skills
-  (`/li:generate-pdf`, `/li:generate-xlsx`, `/li:generate-visio`) are self-labelled template-only
-  slots — structure without curated content.
-- Breaking changes are logged in the [changelog](../CHANGELOG.md).
+The current line is 0.9.0 beta. Interfaces, generated artifacts and pack schema may change before
+1.0. Local tests cover structural and behavioral contracts; they do not prove every model follows
+every instruction or every Copilot surface has passed a live pilot. Review
+[release notes](../CHANGELOG.md) and [migration notes](migrations/_INDEX.md) on upgrade.
 
-### Q: Do I need Claude Code specifically?
+## What is a pack?
 
-No, but capability varies. `lib/cli-tiers.yaml` is the single source of truth, and the table in
-[multi-cli](multi-cli.md#the-capability-table) is generated from it:
+A separate set of organisation-owned context and policy settings: voice, roles, standards and
+references. `_default` provides neutral advisory settings. A private company pack is optional;
+its owner must arrange distribution to each execution environment. A local profile is not
+inherited by a cloud agent. See [pack resolution](concepts/pack-resolver.md).
 
-| CLI | Tier | Skills | Subagents | Hooks |
-|---|---|---|---|---|
-| Claude Code | full | native | native | **yes** |
-| Codex CLI / App | full | native | native | no |
-| Cursor | full | native | sequenced | no |
-| Gemini CLI | supported | manual | none | no |
-| OpenCode | supported | manual | none | no |
-| GitHub Copilot CLI | supported | native | none | no |
-| Factory Droid | supported | native | none | no |
-| Cline / Continue / Aider | best-effort | manual | none | no |
+## Does it enforce our compliance policy?
 
-The one load-bearing caveat: **hooks fire on Claude Code only.** Every other CLI gets the skills,
-the cycle discipline, the memory layout and the pack-driven knowledge — but not the enforcement
-layer. That is a limit of what those CLIs expose, not a roadmap item being hidden.
+A pack can tell workflow skills which checks to perform. Mandatory controls still need independent
+implementation and verification. Lintel is not a certification or data-loss-prevention system.
+Its pattern scanners have bounded coverage, and its local audit files are editable.
+See [compliance](compliance.md) and [enterprise adoption](enterprise-adoption.md).
 
-"Skills: manual" means the CLI does not surface `/li:<skill>` as a command; you point the agent at
-`skills/<name>/SKILL.md` and it follows the instructions there. "Subagents: sequenced" means Cursor
-runs delegated roles one after another rather than in parallel.
+## Does Copilot get Lintel's safety hooks?
 
-### Q: What actually happens on a CLI without hook support?
+No. Copilot supports native hooks, but this release does not translate Lintel's Claude Code hooks
+into Copilot's protocol. The repository kit installs no hooks. Use GitHub policies, CI and
+organisation controls for checks that must hold independently of agent instructions.
 
-You lose enforcement, not function. The nine hooks that auto-register on a Claude Code plugin
-install are: the session digest, a secret-scan warning on edits, secret-scan and customer-data
-blocks at `git commit` and `push`, a direct-push-to-main warning, a memory-budget warning, a
-cycle-position injector, a stop-time warning when a turn ends mid-cycle, and a customer-data check
-on outgoing messages.
+The Claude Code plugin registers selected hooks; bare installs leave hook files inert until
+configured. [Hook activation](getting-started.md#how-hook-activation-works) explains the boundary.
 
-Elsewhere those same rules exist as *instructions* the agent is told to follow — read at session
-start from `AGENT-INSTRUCTIONS.md` and the repo's `CLAUDE.md` — rather than as a mechanism that can
-refuse the command. An instruction an agent can talk itself out of is weaker than a hook that
-returns a non-zero exit code. Judge accordingly.
+## Does Lintel send data anywhere?
 
-33 hook directories ship in `hooks/shared/`; 9 auto-register. The rest are opt-in, armed by
-symlinking them into your Claude Code hooks directory. See
-[getting started](getting-started.md#how-hook-activation-works) for the activation matrix.
+There is no hosted Lintel collector. Your agent client, connected tools and invoked workflows
+control external activity: browsing, dependency downloads, Git operations and optional sync/export
+can use external services. Review those permissions and your provider's data-handling policy.
+Do not interpret a local-first installation as network isolation. See [SECURITY.md](../SECURITY.md).
 
-### Q: What is a pack, and do I need one?
+## Can I put customer data in this repository?
 
-A pack is the **identity layer**: voice, compliance mode, personas, brand assets, roles. None of it
-is hardcoded in the skills — every skill that needs an identity value resolves it at runtime through
-`resolve_pack_field` (`lib/pack-resolver.sh`). That separation is what keeps the core
-company-neutral.
+No. This public repository is tooling. Keep customer artifacts in an approved, scoped environment;
+sanitize reports, examples and lessons before sharing them upstream. Lintel's scanner is not a
+complete classifier for sensitive data.
 
-**You do not need one.** Lintel ships exactly one pack, `_default`, and it is the neutral baseline:
-voice tier `internal`, compliance mode `advisory`, no compliance hooks activated, no brand, no
-roles, session-summary export to an external vault off. It enforces nothing. You can use Lintel
-indefinitely without ever touching packs.
+## Where does project knowledge live?
 
-Write a pack when you want the harness to carry your own organisation's voice and rules — then
-`/li:pack-switch` activates it and every skill picks it up. See
-[pack defaults](concepts/pack-defaults.md), [pack resolver](concepts/pack-resolver.md), and the
-[packs reference](wiki/packs.md).
+Committed `.claude/memory/`, `.claude/plans/` and `.claude/decisions/` keep the lessons, plan and
+decisions with the project. Gitignored `.claude/runtime/` holds local session state. The Copilot
+kit's managed resources live under `.github/`. See
+[the path map](getting-started.md#where-things-live).
 
----
+## Does it work with Spec Kit?
 
-## Install, files, and updates
+Yes, through an optional [workflow bridge](spec-kit.md). Keep existing `spec.md`, `plan.md` and
+`tasks.md` authoritative, with one active executor. Lintel records the artifact mapping and session
+handoff; it should not create a second competing task list or reinitialize an existing feature.
 
-### Q: Where do my files go?
+## How do I update or roll back?
 
-Four roots, two machine-global and two in your repo:
+For the Copilot kit, use an upgrade branch, run `li-copilot init` from the next approved source,
+then `check` and your pilot checks. Locally edited managed files cause a conflict instead of silent
+overwrite. Review the diff before merging. Roll back the adoption/upgrade with a reviewed Git
+change, preserving project knowledge.
 
-| Root | Scope | Holds |
-|---|---|---|
-| `~/.lintel/` | machine-global | `profile.yaml` (active pack, mode, role), packs, cross-repo job registry, operator audit log |
-| `~/.claude/` | machine-global | your CLI's own home — `settings.json`, hooks you symlinked in on a bare install |
-| `<repo>/.claude/` | per-repo, **committed** | `memory/` (lessons, working state, personas), `decisions/` (ADRs), `plans/` |
-| `<repo>/.claude/runtime/` | per-repo, **gitignored** | cycle state, job data, session checkpoints, repo event log |
+For plugins, use the installed client's plugin manager. For bare installations, review the
+installer's machine-level paths and backups. There is no universal uninstall command. Never
+remove whole `.github/`, `.claude/` or `~/.lintel/` directories without checking the project
+knowledge, private packs and local edits they contain.
 
-The specific files you will look for most:
+## Does it bundle third-party content?
 
-- `<repo>/.claude/memory/lessons.md` — accumulated corrections, read at session start
-- `<repo>/.claude/memory/working-state.md` — what is in flight across sessions
-- `<repo>/.claude/plans/todo.md` — the current plan
-- `<repo>/.claude/decisions/` — decision records
-- `<repo>/.claude/runtime/state/00-state.md` — where the current cycle is
-- `~/.lintel/profile.yaml` — active pack, default mode, active role
+Some design resources do. Their notices are retained in
+[design-dna attribution](../skills/design-dna/ATTRIBUTION.md). Lintel's original code is MIT;
+retained upstream license terms still apply. Spec Kit is not bundled by this workflow bridge.
 
-The committed/gitignored split is deliberate: knowledge travels in pull requests, runtime churn
-stays local. A bare (non-plugin) install additionally copies `scaffolding/` and helper scripts into
-`~/.lintel/`. Full detail in [getting started](getting-started.md#where-things-live).
+## Which skills should I use first?
 
-### Q: Do I need `yq`?
+Start with `/li-welcome`, `/li-plan`, `/li-build`, `/li-review` and `/li-resume` in the portable
+Copilot kit. Use `/li-cycle` for the broader workflow. Explore the
+[full catalog](../skills/CATALOG.md) when you need specialist depth. A native `li-*` name differs
+from the `/li:*` notation used by existing Claude plugin workflows.
 
-Only for one cosmetic step. `install/install.sh` warns if `yq` is missing and skips listing the
-entries in `install/upstream-sources.yaml` — that listing is the only thing `yq` is used for, and it
-does nothing but print names. Everything else in the installer runs without it.
+## What if the agent ignores the instructions?
 
-`install/install.ps1` parses no YAML at all, so the PowerShell path has no YAML dependency and no
-module to install. (An earlier version of this FAQ claimed it used `powershell-yaml`. It does not.)
+Verify the exact client/version, repository trust and customization policy. Check that the entry
+file and referenced resources exist, then ask the agent to cite the instructions and active plan.
+Check for conflicting repository or user-level instructions. If discovery or behavior still fails,
+report a sanitized reproduction with the installation route and actual file path.
 
-Both installers require `git`.
+## Can two agents use the same repository?
 
-### Q: Does Lintel install, vendor, or update third-party tools?
+The knowledge is shared files; Lintel does not mediate concurrent writes. Assign separate file
+ownership, branches or worktrees. Keep one writer responsible for the active task list and session
+ledger, especially when mixing Spec Kit and Lintel workflows.
 
-**No.** This is the most common wrong assumption, and earlier docs made it worse.
+## How do I customize or contribute?
 
-`install/install.sh` ships only operator-authored content. `install/upstream-sources.yaml` is a
-list-only stub: the installer counts the entries and prints their names, alongside the literal
-message "this installer does not clone them". Nothing is fetched, nothing is vendored, nothing is
-pinned.
+Keep project-specific guidance in project-owned instruction files, and shared company context in
+a private pack. Propose reusable fixes upstream through a pull request. Generated catalogs and
+managed adapter files should be changed through their sources, not patched as final output.
+[CONTRIBUTING.md](../CONTRIBUTING.md) covers contracts and verification.
 
-Consequently there is no upstream-update workflow, no re-verification schedule, and no third-party
-license obligation passed on to you. If you want a skill or agent from somewhere else, you install
-it yourself, under your own CLI's rules.
-
-### Q: How do I update?
-
-Through your CLI's plugin manager — Lintel is distributed as a plugin, not as a vendored tree.
-`bin/li-update` detects which CLIs you have and prints or runs the right command for each:
-
-```
-/plugin update li@jokerman-lintel        # Claude Code
-gemini extensions update li              # Gemini CLI
-copilot plugin update li@jokerman-lintel # GitHub Copilot CLI
-```
-
-Run `bin/li-update --dry-run` to see what it would do first. If a release needs a manual step, it is
-listed in [migrations](migrations/_INDEX.md).
-
-Updating never touches your repo's `CLAUDE.md`, `.claude/memory/`, `.claude/decisions/`, or
-`.claude/plans/`. Those are yours.
-
-### Q: How do I uninstall?
-
-**There is no uninstall script.** Honestly: `grep -ri uninstall` across this repo turns up the
-`/li:safe-install` skill admitting the same thing. Manual removal:
-
-1. Remove the plugin through your CLI's plugin manager, the same place you installed it from.
-2. `rm -rf ~/.lintel/` — this deletes your profile, packs, and operator audit log.
-3. On a bare install, remove any hook symlinks you added under `~/.claude/hooks/` and the matching
-   entries from `~/.claude/settings.json`.
-4. Per-repo `.claude/` directories are ordinary files in your repo. Delete or keep them — the
-   lessons and decision records are readable markdown and stay useful without Lintel.
-
-The installer backs up an existing `~/.lintel/` to `~/.lintel-backup-<timestamp>` before writing, so
-step 2 usually has a recoverable copy beside it. A real uninstall path is an open gap for 1.0.
-
-### Q: How do I check the install worked?
-
-`install/verify.sh --all` for a bare install, or `/li:doctor` from inside the CLI — it reports which
-CLIs it can see, plugin install status, the Lintel version, and any drift it finds.
-
----
-
-## Data, privacy, and compliance
-
-### Q: Is my data sent anywhere?
-
-Not by Lintel. It is markdown and bash: no telemetry, no analytics, no callback. The shipped scripts
-under `bin/`, `lib/`, `hooks/`, and `install/` contain no outbound HTTP call — the only `curl` in the
-tree sits inside a printed help message suggesting the public install one-liner.
-
-What this does **not** cover, and you should account for:
-
-- **Your CLI vendor still sees your prompts and files.** Lintel runs inside your agent CLI; whatever
-  that CLI sends to its own provider is unchanged. Check that vendor's policy.
-- **A few skills reach the network by design when you invoke them** — `/li:browse` drives a headless
-  Chromium, `/li:research` does web lookups, `/li:scrape` fetches pages. They only do this when you
-  call them.
-- **The session-summary export is off by default.** The CAPTURE phase can additionally write a short
-  session summary into an external notes vault, but `vault_sink_enabled` is `false` in the neutral
-  pack, and even when switched on it writes to a local path you specify — it is write-only and
-  transmits nothing.
-
-### Q: Can I use this repo with customer data?
-
-**No.** Lintel is tooling; customer artifacts never land in it. Customer-facing work belongs in a
-customer-scoped repo with its own `CLAUDE.md` layering rules on top of the baseline.
-
-On Claude Code, two hooks back this up mechanically: `customer-data-block` blocks a `git commit` or
-`push` that introduces customer data, and `no-customer-data-in-message` checks outgoing messages.
-Both are overridable with an explicit environment flag, and every override is written to
-`~/.lintel/audit/`. On other CLIs this is instruction-level only.
-
-### Q: What compliance rules does it enforce out of the box?
-
-A neutral baseline plus whatever your active pack adds — there is no fixed corporate rule set built
-in. The `_default` pack ships `compliance.mode: advisory` with no compliance hooks activated, which
-means the baseline advises, while the safety hooks (secrets, customer data, direct pushes to the
-default branch) still block on Claude Code.
-
-The baseline rules are documented in [compliance](compliance.md). Read them critically: they are
-derived from common enterprise patterns, not from your organisation's policy. If you need real
-compliance behaviour, encode it in a pack and verify it against your own authoritative source.
-
-### Q: What if I accidentally committed customer data?
-
-Treat it as an incident, not a cleanup task:
-
-1. Stop. Do not push.
-2. If it is already pushed, follow your organisation's security incident procedure. For a problem in
-   Lintel itself, see [SECURITY.md](../SECURITY.md).
-3. Rewrite history only after security has acknowledged. Never silently.
-4. Record a lesson in `<repo>/.claude/memory/lessons.md` (`/li:learn` writes it for you) so the next
-   session starts knowing.
-5. Ask why the check did not catch it — if you were on Claude Code and the hook did not fire,
-   `/li:doctor` will say whether hooks are registered at all.
-
----
-
-## Using it
-
-### Q: 125 skills is a lot. Where do I start?
-
-Five, in this order:
-
-- `/li:welcome` — detects your CLI, states its honest tier, runs a dry cycle
-- `/li:cycle "<your task>"` — the main loop; everything else is a detour off it
-- `/li:learn` — record a correction so the next session inherits it
-- `/li:catalog` — the generated index, when you want to browse
-- `/li:doctor` — when something looks wrong with the install rather than the work
-
-The other 120 are depth you reach for when you need it. [The cycle](the-cycle.md) explains the nine
-phases; [power user](power-user.md) covers context warming, roles, jobs, budgets, and checkpoints;
-the full list with triggers is [skills/CATALOG.md](../skills/CATALOG.md), generated from frontmatter.
-
-### Q: Two CLIs are looking at the same repo. Whose state wins?
-
-The last writer. All state is plain files under `<repo>/.claude/` and both CLIs read the same ones.
-Lintel does not lock, merge, or mediate. If you run two agents against one repo simultaneously, that
-coordination problem is yours to solve.
-
-### Q: A skill works in Claude Code but not somewhere else. Why?
-
-Check the tier table above first. If the CLI is `skills: manual`, it has no slash-command discovery
-— the skill still works, you just have to point the agent at `skills/<name>/SKILL.md` yourself.
-
-If the skill depends on parallel subagents, it degrades on `subagents: sequenced` (Cursor, one at a
-time) and to inline work on `subagents: none`. If it depends on a hook, it does not enforce anywhere
-but Claude Code.
-
-Note that Codex is a **full** tier with native skills *and* native subagents — if something fails
-there it is a bug worth reporting, not an expected degradation.
-
-### Q: The agent is ignoring the instructions. What do I check?
-
-In order:
-
-1. Did the plugin actually install? Run `/li:doctor`.
-2. Does the CLI read a per-repo instruction file at all, or only a user-global one? Some only do the
-   latter — [multi-cli](multi-cli.md) lists the per-CLI entry points.
-3. Does that entry file resolve to a real [AGENT-INSTRUCTIONS.md](../AGENT-INSTRUCTIONS.md)?
-   Relative-path handling differs across CLIs.
-4. Is a rule in the repo's own `CLAUDE.md` overriding it? Repo rules win — that is intended. See
-   [precedence](precedence.md) for the full order, including which agent gets picked when several
-   match.
-
-If it still misbehaves, open an issue naming the CLI, its version, and the exact file it should have
-read.
-
-### Q: There are two lessons tools. Which is which?
-
-They are not interchangeable:
-
-- `bin/li-lessons-promote` — promotes a lesson from this repo's `.claude/memory/lessons.md` into the
-  scaffolding baseline, so every repo you scaffold afterwards inherits it.
-- `bin/li-lessons-sync` — syncs your own lessons across your machines through a personal git remote.
-  Opt-in and private to you; nothing to do with the baseline.
-
-How the memory layer works is covered in [memory v2](concepts/memory-v2.md).
-
-### Q: I want a skill that doesn't exist.
-
-Write it. A skill is a directory with a `SKILL.md` and frontmatter — the contract is in
-[skill protocol](concepts/skill-protocol.md). Keep it in your own project first; once it has earned
-its place across a few different tasks, a pull request is the way to bring it in.
-
----
-
-## Contributing
-
-### Q: How do I contribute?
-
-Feature branch, pull request against `main`, reviewers per `CODEOWNERS`. Conventional Commits,
-atomic, one logical change per commit. Local tests green before you push:
-
-```bash
-bash tests/runner/run-all.sh
-```
-
-Typical contributions: a new skill or agent, a new CLI shim under `shims/`, corrections to
-`AGENT-INSTRUCTIONS.md`, or fixing wrong paths in the docs. Full conventions in
-[CONTRIBUTING.md](../CONTRIBUTING.md).
-
-Note that `skills/CATALOG.md` and the files under `docs/wiki/` are generated — edit the frontmatter
-they are built from, not the output.
-
-### Q: Can I customise without opening a pull request?
-
-Yes. Three places, in increasing order of durability:
-
-- **Your repo's `CLAUDE.md` and `.claude/`** — never touched by an update. This is the right home
-  for anything project-specific.
-- **Your own pack** — the supported way to change voice, compliance, roles, and brand without
-  forking anything.
-- **`~/.lintel/` edits** — an installer run can overwrite these. Fine for experiments, wrong for
-  anything you want to keep.
-
-Fork only for genuine divergence from the design.
-
----
-
-## Still stuck
-
-Read the [documentation index](README.md), then the page closest to your problem:
-[getting started](getting-started.md) to install and run the first cycle,
-[architecture](architecture.md) for how it is built, and
-[the glossary](GLOSSARY.md) when a term is unfamiliar.
-
-If the docs are wrong, that is a bug — say so in an issue. Wrong documentation is how this file got
-rewritten.
+Two lesson utilities have different purposes: `li-lessons-promote` promotes a lesson into the
+scaffolding baseline; `li-lessons-sync` synchronizes an operator's lessons through a configured
+private Git repository. Review the destinations before using either.

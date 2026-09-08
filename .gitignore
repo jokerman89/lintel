@@ -15,6 +15,7 @@
 .claude/cache/
 .claude/telemetry/
 .claude/session-env/
+.claude/settings.local.json
 
 # ----- Generic session / scratch data -----
 session-data/

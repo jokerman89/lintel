@@ -29,8 +29,8 @@ for lib in lib/brief-forge.sh lib/brief-forge-evaluators.sh; do
   fi
 done
 
-# Generic default evaluators (sdl_compliance + trailblazer_alignment moved to
-# external packs, e.g. lintel-caip-pack, in v4.7 CAIP extraction)
+# The generic evaluators Lintel ships by default; a pack may contribute
+# additional evaluators of its own.
 for e in security completeness stale; do
   if grep -qE "^evaluator_${e}\(\)" "$REPO_ROOT/lib/brief-forge-evaluators.sh" 2>/dev/null; then
     pass "evaluator_${e} declared"

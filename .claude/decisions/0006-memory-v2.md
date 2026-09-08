@@ -1,7 +1,7 @@
 # ADR-0006: memory v2 — mechanical-or-subtracted
 
 **Status:** Accepted (2026-06-12)
-**Decided by:** operator (D3 convergence + "allt vi lovar ska vara på riktigt" directive) + implementation session
+**Decided by:** operator (D3 gate — every promise the harness makes must be real)
 **Implements:** .claude/engineering/design-archive/lintel-v5-claude-home-memory-obsidian-design.md (workstream B)
 
 ## Context

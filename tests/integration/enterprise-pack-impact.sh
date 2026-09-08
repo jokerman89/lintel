@@ -39,6 +39,10 @@ navigation:
   default_workflow: delivery
   high_risk_workflows: [cycle, plan, ship]
   auto_mode_eligible: true
+extension:
+  is_extension: true
+  namespace: enterprise
+  workflow: delivery
 brief_forge_handoffs:
   on_subagent_spawn:
     enabled: true
@@ -69,12 +73,26 @@ gates=$(resolve_pack_field compliance.hooks | tr -d '[]' | tr ',' ' ')
 read -r -a gate_ids <<< "$gates"
 assert_eq 2 "${#gate_ids[@]}" 'aggregator receives both required gates instead of GREEN no-op'
 assert_eq evidence-check "${gate_ids[0]:-}" 'first gate identity reaches aggregator'
+assert_eq '/enterprise:delivery' "$(match_workflow build "$(resolve_pack_field navigation.default_workflow)")" 'generic build follows enterprise default and namespace'
+assert_eq '/enterprise:delivery' "$(match_workflow unclear "$(resolve_pack_field navigation.default_workflow)")" 'unclear intent uses the enterprise namespace'
+assert_eq '/li:cycle' "$(match_workflow build '/li:cycle')" 'explicit neutral default is not requalified'
+assert_eq '/other:flow' "$(match_workflow unclear 'other:flow')" 'already namespaced default keeps its namespace'
+assert_eq '/li:review' "$(match_workflow review delivery)" 'explicit review stays a review'
+assert_eq high "$(assess_risk '/enterprise:delivery' '[delivery]')" 'bare risk ID covers extension workflow'
+assert_eq high "$(assess_risk '/enterprise:delivery' '[/enterprise:delivery]')" 'qualified risk ID covers its extension'
+assert_eq medium "$(assess_risk '/other:delivery' '[/enterprise:delivery]')" 'qualified risk ID does not collide with another namespace'
 workflow=$(match_workflow research "$(resolve_pack_field navigation.default_workflow)")
 risk=$(assess_risk "$workflow" "$(resolve_pack_field navigation.high_risk_workflows)")
 assert_eq high "$risk" 'pack high-risk rule wins over read-only heuristic'
 assert_eq high "$(assess_risk '/li:cycle' $'cycle\nplan\nship')" 'legacy newline risk list'
 assert_eq high "$(assess_risk '/li:cycle' 'cycle,plan,ship')" 'legacy CSV risk list'
 assert_eq 'security  stale' "$(evaluators_for_handoff on_subagent_spawn)" 'existing evaluator consumer receives nested list'
+cat >> "$LINTEL_PACKS_DIR/team/pack.yaml" <<'YAML'
+brief_forge_handoffs:
+  on_subagent_spawn: {enabled: true, evaluators: [completeness]}
+YAML
+clear_pack_cache
+assert_eq completeness "$(evaluators_for_handoff on_subagent_spawn)" 'child handoff block replaces evaluator list without concatenation'
 digest=$(bash "$REPO_ROOT/hooks/shared/session-digest/run.sh")
 case "$digest" in *'Pack: team'*'compliance: hard'*) printf 'PASS: digest reports loaded pack and its compliance\n' ;;
   *) printf 'FAIL: digest disagrees with loaded enterprise identity\n'; failed=1 ;; esac

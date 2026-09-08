@@ -119,7 +119,7 @@ fi
 ### Step 2 — Read pack + profile preferences
 
 ```bash
-source "$LINTEL_REPO_ROOT/lib/pack-resolver.sh"
+source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/lib/pack-resolver.sh"
 
 # Pack policy provides hard gates (the active pack's compliance gates; none by default)
 compliance_hooks=$(resolve_pack_field compliance.hooks 2>/dev/null || true)
@@ -242,7 +242,7 @@ Full-pass exit: every dimension ≥ 80 OR explicit operator override.
 One line via the unified writer (ts/operator/cycle_id come from the envelope):
 
 ```bash
-source "$(git rev-parse --show-toplevel)/bin/_audit.sh"
+source "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/bin/_audit.sh"
 audit_log sc-decisions sc_module_complete "granularity=$granularity" "score=$score" \
   "checkpoints_passed=$passed_count" "frameworks=$compliance_frameworks"
 # → .claude/runtime/audit/sc-decisions.jsonl

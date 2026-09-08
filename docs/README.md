@@ -12,7 +12,10 @@ Internal engineering artifacts — audits, gate records, superseded design docs 
 
 | Doc | What it gives you |
 |---|---|
-| [Getting started](getting-started.md) | Install for your CLI, run your first cycle, understand where files land |
+| [Getting started](getting-started.md) | Install the Copilot repository kit and finish one verified build card |
+| [GitHub Copilot](copilot.md) | Native skills, custom agents, CLI plugin and cloud-agent boundaries |
+| [Enterprise adoption](enterprise-adoption.md) | Pilot criteria, ownership, policy boundaries, upgrades and rollback |
+| [Spec Kit](spec-kit.md) | Keep existing specifications and tasks authoritative while adding session continuity |
 | [Glossary](GLOSSARY.md) | One screen. Pack, spine, cycle, trio, depth schema — the terms you meet before they are defined |
 | [FAQ](faq.md) | Short answers, with links into the deeper pages |
 
@@ -71,7 +74,7 @@ Deeper treatment of individual mechanisms. Read on demand rather than in order.
 | Doc | What it covers |
 |---|---|
 | [Power user](power-user.md) | Context warming, roles, jobs, budgets, checkpoints |
-| [Skill catalog](../skills/CATALOG.md) | All 125 skills with their triggers — generated from frontmatter |
+| [Skill catalog](../skills/CATALOG.md) | Canonical skills with their triggers — generated from frontmatter |
 | [Agents](wiki/agents.md) · [Skills](wiki/skills.md) · [Packs](wiki/packs.md) · [Schemas](wiki/schemas.md) | Generated reference |
 | [Showcase](showcase/README.md) | A single-file HTML system map you can open in a browser |
 

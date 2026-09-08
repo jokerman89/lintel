@@ -15,6 +15,10 @@ These are coordination cards, not five-minute cold-subagent leaves. Exact implem
 
 ## Review
 
+This section records the earlier draft milestone. The operator's subsequent instruction to
+complete every finding and merge to main is tracked in [completion.md](completion.md), with
+current dispositions in [the completion review](../../engineering/audits/2026-09-08-enterprise-value-completion.md).
+
 E1–E6 are complete through publication as [draft PR #84](https://github.com/jokerman89/lintel/pull/84).
 Independent reviews are complete with no remaining findings on the
 changed implementation; aggregate verification passed 93/93 scripts. Final edge regressions

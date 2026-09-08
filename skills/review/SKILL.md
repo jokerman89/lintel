@@ -5,7 +5,7 @@ description: Use after BUILD, before SHIP, to adversarially review what was buil
 color: cyan
 tools: Read, Bash, Grep, Glob
 voice: internal
-cli_support: [claude-code, codex]
+cli_support: [claude-code, codex, copilot]
 necessity: STRONGLY_RECOMMENDED
 gap_if_skipped: "Unreviewed code reaches SHIP with no signal; spec-compliance and compliance gates never fire yet a ship-ready verdict is asserted."
 ---
@@ -35,6 +35,16 @@ Three-stage discipline (extends superpowers' two-stage with compliance):
 - Before BUILD complete (mid-task reviews happen in BUILD's two-stage cycle, not REVIEW phase)
 
 ## Workflow
+
+### Resolve authoritative artifacts before review
+
+If this initiative has a committed work.json, validate the explicit map with
+`bin/li-work-artifacts.py` using the [shared work-map contract](../spec-kit/references/work-map.md).
+Use mapped `spec` for requirements, `plan` for technical decisions, and `tasks` for every task
+ID and acceptance check. All “plan.md requirements/tasks” below refer to these mapped sources;
+reference-only Lintel companions are navigation, not duplicate specifications. Compare actual
+code and evidence to the original Spec Kit tasks. A work-map approval never replaces review.
+
 
 ### Step 1 — Load context
 
@@ -193,7 +203,7 @@ If unavailable: skip silently.
 Mechanical since v5.0 (ADR-0008) — one command, not a YAML obligation. `next=` is SHIP, or BUILD on loop-back, or DEFINE on scope gap; per-stage detail lives in review-report.md:
 
 ```bash
-_sl="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}/lib/state.sh"
+_sl="${LINTEL_SOURCE_ROOT:-${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}}/lib/state.sh"
 [ -f "$_sl" ] || _sl="$HOME/.lintel/lib/state.sh"; source "$_sl"   # installed by install.sh in consumer repos
 state_append REVIEW <DONE|DONE_WITH_CONCERNS|BLOCKED> next=<SHIP|BUILD|DEFINE> review_report_path=<path> p1_findings=<count> p2_findings=<count> p3_findings=<count> ship_ready=<yes|no|yes-with-caveats>
 ```
@@ -304,7 +314,7 @@ Close your report with the shared position footer so the operator always knows w
 cycle and the one logical next action — whether this phase ran standalone or inside `/li:cycle`:
 
 ```bash
-source "$LINTEL_REPO_ROOT/lib/cycle-footer.sh"   # fallback: "$(git rev-parse --show-toplevel)/lib/cycle-footer.sh"
+source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/lib/cycle-footer.sh"   # fallback: "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/lib/cycle-footer.sh"
 render_cycle_footer                               # reads .claude/runtime/state/00-state.md; --compact for short replies
 ```
 

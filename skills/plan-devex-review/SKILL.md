@@ -5,7 +5,7 @@ description: Developer experience gaps review. Slow CI, painful deploys, bad loc
 color: orange
 tools: Read, Bash, Grep, Glob
 voice: internal
-cli_support: [claude-code, codex]
+cli_support: [claude-code, codex, copilot]
 hop_in: no
 ---
 

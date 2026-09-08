@@ -25,7 +25,15 @@
 LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
 
 lintel_repo_root() {
-  printf '%s' "${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}"
+  local root
+  root="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}"
+  # Git for Windows returns C:/... paths; the shell's writable temp mount is
+  # /tmp/... and must remain in that namespace for mkdir/redirection to agree.
+  case "$root" in
+    [A-Za-z]:*)
+      if command -v cygpath >/dev/null 2>&1; then root="$(cygpath -u "$root")" || return 1; fi ;;
+  esac
+  printf '%s' "$root"
 }
 
 # A repo is "migrated" when the layout marker declares layout_version >= 5.

@@ -23,6 +23,13 @@ duplication.
 
 ## Conventions
 
+Automatic checkpoint discovery is repository-scoped. Shared legacy directories require
+a matching repository key in new filenames or an explicit canonical `**Repository:**`
+line in older files. Same branch names and same repository basenames are insufficient.
+Unattributed old files can be selected explicitly for inspection, never automatically
+loaded into a different repository. Repository-local checkpoints retain their ownership
+through their directory, including older filenames.
+
 - **Supersede, don't delete.** A contradicted lesson gets `superseded_by: L-NNN (YYYY-MM-DD)`
   as its first body line; surfacing skips it; git keeps the history. Never edit a lesson away.
 - **Update before append.** CAPTURE classifies every candidate against existing lessons —

@@ -9,7 +9,7 @@ later what the agent did and why.
 This is v0.9.0-beta. Several of the mechanisms below are partly wired; each one names its own gap
 rather than hiding it, and the gaps are collected at the end.
 
-**Hooks fire on Claude Code only.** Everything else here is skills and files, which work on every
+**The hooks described here use Lintel's Claude Code adapter.** The Copilot kit does not install them. Other features here are canonical skills and files available through the appropriate integration on each
 CLI that can read markdown. See [multi-cli.md](multi-cli.md) for the per-CLI tier table.
 
 ---
@@ -234,7 +234,7 @@ Three files carry knowledge across sessions, all under `<repo>/.claude/memory/`:
 `MEMORY.md` alongside them is the index that loads automatically at session start. The full model is
 in [concepts/memory-v2.md](concepts/memory-v2.md).
 
-**Two budgets are enforced by a hook.** `MEMORY.md` is capped at 200 lines because native auto-load
+**Two budget thresholds are checked by a warning hook.** `MEMORY.md` is capped at 200 lines because native auto-load
 truncates beyond that — overflow is silently invisible, which is worse than absent. Active lessons
 carry a soft cap of 30. The `memory-budget-warn` hook checks both after edits, rate-limited to once
 per hour, and both caps are overridable by environment variable. When you hit the lessons cap the
@@ -262,7 +262,7 @@ have been promoted leaves every other repo without it.
 
 Naming these is cheaper than you discovering them:
 
-- **Hooks are Claude Code only.** The enforcement layer does not exist on the other seven CLIs. There, the same rules are text the agent is asked to follow, which is a real difference in strength.
+- **Lintel's hook bundle targets Claude Code.** Copilot has a native hook API, but this release does not adapt the bundle. Treat unregistered checks as instructions and validate mandatory controls independently.
 - **Job auto-spawn is dormant.** `/li:jobs` and `/li:status` read a store nothing populates automatically yet.
 - **Context budget numbers are estimates**, summed from an event log rather than read from the CLI.
 - **Cooling cannot actually shrink the window.** Only a save, restart and restore round trip does.

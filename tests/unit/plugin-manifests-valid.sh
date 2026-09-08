@@ -38,6 +38,8 @@ MANIFESTS=(
   "$REPO_ROOT/.claude-plugin/marketplace.json"
   "$REPO_ROOT/.codex-plugin/plugin.json"
   "$REPO_ROOT/.cursor-plugin/plugin.json"
+  "$REPO_ROOT/.github/plugin/plugin.json"
+  "$REPO_ROOT/.github/plugin/marketplace.json"
   "$REPO_ROOT/gemini-extension.json"
 )
 

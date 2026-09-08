@@ -18,7 +18,8 @@ block replaces its parent's whole block.
 ### 1. Validate the effective manifest
 
 ```bash
-source "$REPO_ROOT/lib/pack-resolver.sh"
+pack_source_root="${LINTEL_SOURCE_ROOT:-${REPO_ROOT:-${LINTEL_HOME:-$HOME/.lintel}}}"
+source "$pack_source_root/lib/pack-resolver.sh"
 target="${1:-$(get_active_pack_name)}"
 verdict=PASS
 if validate_pack "$target"; then
@@ -48,9 +49,9 @@ Double-quoted escapes supported by the parser are `\\`, `\"`, `\n`, `\r`, and
 ### 2. Report schema and version compatibility
 
 ```bash
-pack_dir=$(_pack_dir "$target")
-schema=$(_pack_yaml_field "$pack_dir/pack.yaml" schema_version) || schema=""
-requires=$(_pack_yaml_field "$pack_dir/pack.yaml" requires_lintel) || requires=""
+chain=$(_resolve_extends_chain "$target")
+schema=$(_pack_chain_field "$chain" schema_version) || schema=""
+requires=$(_pack_chain_field "$chain" requires_lintel) || requires=""
 echo "Declared schema: ${schema:-not declared (legacy)}"
 echo "Required Lintel: ${requires:-not declared (legacy)}"
 echo "Compatibility: NOT VERIFIED by runtime validation."

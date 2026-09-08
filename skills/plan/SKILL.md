@@ -6,7 +6,7 @@ description: Use after DISCOVER, or standalone with an approved design, to produ
 color: cyan
 tools: Read, Write, Edit, Bash, Grep, Glob
 voice: internal
-cli_support: [claude-code, codex]
+cli_support: [claude-code, codex, copilot]
 necessity: REQUIRED
 gap_if_skipped: "BUILD runs against an unwritten/unreviewed plan; the cold-executor trio (plan.md/spec.md/prompt.md) never exists, so CAPTURE and cold executors have nothing to read."
 navigation:
@@ -31,7 +31,7 @@ You are the PLAN skill — Phase 4 of the Lintel cycle.
 Takes APPROVED design doc (from DEFINE) + discover-report.md (from DISCOVER) and produces:
 1. **plan.md** — task list with file paths + complete code (where prescriptive) + verification steps + dependencies + ordering
 2. **spec.md + prompt.md** — the master spec and cold-executor handoff, reviewed with the plan
-3. **Plan signals** — tasks, phases and a labelled whole-cycle token estimate. MANDATORY gate before BUILD starts; no invented price.
+3. **Plan signals** — tasks, phases and a labelled whole-cycle token estimate. Present before BUILD; no invented price.
 4. **Founder approval gate** — explicit pause before commit
 
 Adopted from speckit (cross-section Analyze), Architect image (cost-estimate gate, founder approval gate), and superpowers (two-stage subagent review).
@@ -51,6 +51,32 @@ Adopted from speckit (cross-section Analyze), Architect image (cost-estimate gat
 - intent=research-dive → no PLAN needed (research mode ends at DISCOVER)
 
 ## Workflow
+
+### Existing Spec Kit plan branch
+
+When the operator selects existing Spec Kit artifacts, use the
+[shared work-map contract](../spec-kit/references/work-map.md) before the ordinary template
+pipeline below. Read the original spec.md, implementation plan.md and tasks.md, check their
+coverage/dependencies and record missing decisions. Preserve their structure and task IDs.
+Write the exact-path handoff and work.json, then validate it with `bin/li-work-artifacts.py`; Lintel plan.md/spec.md companions, if needed, are
+reference-only. Existing authorization can approve this mapped scope; do not require a new
+Lintel approval heading inside Spec Kit plan.md or recreate its tasks through DEFINE/PLAN.
+The remainder of the ordinary trio-generation steps applies only to Lintel-native plans.
+For native plans, also write work.json with `tasks` pointing to plan.md and link it from todo.md.
+
+For either workflow, select the initiative explicitly from operator intent or unambiguous
+committed work links. Set `LINTEL_WORK_MAP` to that work.json; for a newly created native
+plan, set `LINTEL_PLAN_DIR` to the exact directory being written. Never select by modification
+time. The completeness gate below validates this selection for both workflows. Record package
+membership in the existing design or linked handoff using the original task IDs; mapped work
+without grouping uses singleton packages, without a duplicate task list. Code/helpers live in
+`LINTEL_SOURCE_ROOT`; maps and their artifacts resolve relative to `LINTEL_REPO_ROOT`.
+
+
+**Existing authorization:** record the operator's authorized scope before the gates below.
+Present plan signals and a reviewable plan, but do not ask again for execution already explicitly
+authorized in this session. Ask once when a material scope/authority decision remains unanswered.
+Approval does not extend to production actions, secrets or unrelated work.
 
 ### Step 1 — Load context
 
@@ -308,27 +334,53 @@ The trio (plan.md + spec.md + prompt.md) is the cold-executor handoff contract. 
 
 ### Step 11a — Trio completeness gate (mechanical — issue I4)
 
-The trio is the cold-executor handoff contract; a 2-of-3 or empty member silently breaks every
-cold resume (gstack #1127/#1791). Before declaring PLAN done, assert all three exist and are
-non-trivial — this is a real check, not a prose promise:
+The selected work map is the handoff contract for native and Spec Kit work. Before declaring
+PLAN done, validate its paths, approval status and nonempty artifacts through the shared
+validator. This proves selection and structural completeness; the preceding reviews must
+also verify that requirements, leaf acceptance and handoff context are substantive, with no
+unfilled template placeholders. Structural validation alone does not prove those semantics.
 
 ```bash
-# the plan dir just written (newest under .claude/plans/); the orchestrator may
-# also export LINTEL_PLAN_DIR — prefer it, else the most recent dir.
-slug_dir="${LINTEL_PLAN_DIR:-$(ls -dt .claude/plans/*/ 2>/dev/null | head -1)}"
-slug_dir="${slug_dir%/}"
-missing=""
-[ -n "$slug_dir" ] || { echo "PLAN BLOCKED: no plan dir under .claude/plans/"; exit 1; }
-for f in plan.md spec.md prompt.md; do
-  [ -s "$slug_dir/$f" ] || missing="$missing $f"
-done
-if [ -n "$missing" ]; then
-  echo "PLAN BLOCKED: cold-executor trio incomplete —$missing missing or empty in $slug_dir"
-  state_append PLAN BLOCKED reason="trio_incomplete:$missing"
-  exit 1
+working_repo="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}"
+lintel_source="${LINTEL_SOURCE_ROOT:-$working_repo}"
+selected_work_map="${LINTEL_WORK_MAP:-}"
+if [ -z "$selected_work_map" ] && [ -n "${LINTEL_PLAN_DIR:-}" ]; then
+  selected_work_map="${LINTEL_PLAN_DIR%/}/work.json"
 fi
+[ -n "$selected_work_map" ] || {
+  echo "PLAN BLOCKED: select the initiative's work.json or exact LINTEL_PLAN_DIR" >&2
+  exit 1
+}
+case "$selected_work_map" in
+  /*|[A-Za-z]:/*) : ;;
+  *) selected_work_map="$working_repo/$selected_work_map" ;;
+esac
+"${PYTHON:-python3}" - "$lintel_source/bin/li-work-artifacts.py" "$working_repo" "$selected_work_map" <<'PY'
+from pathlib import Path
+import runpy
+import sys
+
+helper, repo, selected = sys.argv[1:]
+try:
+    contract = runpy.run_path(helper)
+    root = Path(repo).resolve()
+    work = contract["load_work_map"](root, Path(selected))
+    if work["status"] != "APPROVED":
+        raise ValueError("selected work must be APPROVED before BUILD")
+    for field in contract["REQUIRED_ARTIFACTS"]:
+        path = contract["artifact_path"](root, work[field])
+        if not path.read_text(encoding="utf-8-sig").strip():
+            raise ValueError(f"selected {field} artifact is empty: {work[field]}")
+except (OSError, ValueError, TypeError) as error:
+    print(f"PLAN BLOCKED: {error}", file=sys.stderr)
+    sys.exit(1)
+print("PASS: explicitly selected approved work map and nonempty artifacts")
+PY
+gate_status=$?
+[ "$gate_status" -eq 0 ] || exit "$gate_status"
+slug_dir="$(dirname "$selected_work_map")"
 # Optional stronger check: if a cold_executor envelope was emitted, validate it against the schema
-[ -f "$slug_dir/handoff.envelope.yaml" ] && bin/li-envelope-validate "$slug_dir/handoff.envelope.yaml" --quiet   || true   # envelope is optional; the three-file gate above is the hard contract
+[ -f "$slug_dir/handoff.envelope.yaml" ] && "$lintel_source/bin/li-envelope-validate" "$slug_dir/handoff.envelope.yaml" --quiet || true
 ```
 
 ### Step 11b — Handoff-size check against the 500k cap (trio-emit gate, NON-BLOCKING)
@@ -348,7 +400,7 @@ Invoke the existing mechanism — do **not** rebuild it:
 Mechanical since v5.0 (ADR-0008) — one command, not a YAML obligation:
 
 ```bash
-_sl="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}/lib/state.sh"
+_sl="${LINTEL_SOURCE_ROOT:-${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}}/lib/state.sh"
 [ -f "$_sl" ] || _sl="$HOME/.lintel/lib/state.sh"; source "$_sl"   # installed by install.sh in consumer repos
 state_append PLAN DONE next=BUILD plan_path=<path> spec_draft_path=<path> tasks_count=<N> tokens_est=<total> tokens_est_basis=<calibrated|uncalibrated>
 ```
@@ -503,7 +555,7 @@ Close your report with the shared position footer so the operator always knows w
 cycle and the one logical next action — whether this phase ran standalone or inside `/li:cycle`:
 
 ```bash
-source "$LINTEL_REPO_ROOT/lib/cycle-footer.sh"   # fallback: "$(git rev-parse --show-toplevel)/lib/cycle-footer.sh"
+source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/lib/cycle-footer.sh"   # fallback: "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/lib/cycle-footer.sh"
 render_cycle_footer                               # reads .claude/runtime/state/00-state.md; --compact for short replies
 ```
 

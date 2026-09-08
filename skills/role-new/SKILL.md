@@ -40,7 +40,7 @@ One at a time:
 2. **Display name**: e.g., "CIO of Acme Corp"
 3. **Sensitivity**: public OR private (customer-specific = always private; never default — must be explicit)
 4. **Scope** (one line): e.g., "customer-facing, sales-tech, enterprise-strategy"
-5. **Voice tier**: internal / trailblazer / mixed
+5. **Voice tier**: internal / external / mixed
 
 ### Step 2 — Identity paragraph
 

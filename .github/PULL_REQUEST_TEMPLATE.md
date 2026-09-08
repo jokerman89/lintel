@@ -14,9 +14,12 @@
 
 ## Verification
 
-- [ ] `bash tests/runner/run-all.sh` is green on the committed tree
+- [ ] `bash tests/runner/run-all.sh --require-all` is green on the committed tree
 - [ ] For meta-infra: shape tests pass and `bin/li-compat-audit` is not RED
 - [ ] Frontmatter contracts intact (skills: `layer` + `cli_support`; agents: `category` + `tier` + `cli_support`)
+
+- [ ] Generated catalog, documentation and startup instructions are current
+- [ ] Copilot changes: adapter init/check and consumer-clone tests pass; live-client evidence is stated separately
 
 ## Decisions & compatibility
 

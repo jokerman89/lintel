@@ -38,8 +38,8 @@ Mechanical-first: keyword + path heuristics get the route 80% of the time withou
 ### Step 1 — Read inputs
 
 ```bash
-source "$LINTEL_REPO_ROOT/lib/pack-resolver.sh"
-source "$LINTEL_REPO_ROOT/lib/orientator-routing.sh"
+source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/lib/pack-resolver.sh"
+source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/lib/orientator-routing.sh"
 
 prompt_text="${1:-}"   # operator's last message
 [ -z "$prompt_text" ] && prompt_text="$(cat .claude/runtime/state/00-state.md 2>/dev/null | tail -20)"
@@ -72,16 +72,20 @@ confidence=$(score_confidence "$intent" "$recommended_workflow")
 
 | Intent | Workflow |
 |---|---|
-| build | `/li:cycle` |
+| build | Configured pack default; `/li:cycle` for the neutral pack |
 | fix | `/li:cycle --mode hotfix` |
 | review | `/li:review` |
 | research | `/li:cycle --mode research-dive` |
 | ship | `/li:cycle --from SHIP` |
 | scaffold | `bin/li-scaffold init` |
 | resume | `/li:resume` |
-| unclear | `<default_workflow>` (from pack) |
+| unclear | Configured pack default |
 
 `assess_risk` returns `low | medium | high` based on whether recommended workflow is in `high_risk_workflows` list.
+
+Bare extension defaults use the active pack's namespace; already qualified commands keep
+their namespace. The recommendation still needs actual host discovery before execution.
+Explicit operations such as fix, review and research retain their canonical workflows.
 
 `score_confidence` returns `low | medium | high` based on:
 - High: explicit keyword match (e.g. "bug" → fix, confidence high)
@@ -126,7 +130,7 @@ fi
 One line via the unified writer (ts/operator/cycle_id come from the envelope):
 
 ```bash
-source "$(git rev-parse --show-toplevel)/bin/_audit.sh"
+source "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/bin/_audit.sh"
 audit_log orientator-decisions orientator_decision "intent=$intent" "workflow=$recommended_workflow" \
   "risk=$risk" "confidence=$confidence" "decision=$decision" \
   "budget_used=${budget_used:-0}" "escalated=${should_escalate:-false}"

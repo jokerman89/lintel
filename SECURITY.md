@@ -1,63 +1,84 @@
-# Security Policy
+# Security policy
 
-## Reporting security issues
+Lintel is a public beta. Its instructions and local utilities run inside the agent environment
+you choose, with that environment's permissions. Review both the installed resources and the
+client's access policies before adoption.
 
-If you find a security issue in Lintel itself (the scaffolding repo), please report it privately by
-**opening a private security advisory on the GitHub repository**
-(`Security` tab → `Report a vulnerability`). This reaches the project maintainers without disclosing
-the issue publicly.
+## Reporting a vulnerability
 
-If your active pack defines its own incident-response process, follow that as well.
+Report a vulnerability privately through the repository's
+[security reporting page](https://github.com/jokerman89/lintel/security/advisories/new).
+If private reporting is unavailable, contact the maintainer at
+[johannes.akerman@gmail.com](mailto:johannes.akerman@gmail.com) to arrange a private channel.
+Do not post a vulnerability, live credential or sensitive customer material in a public issue.
 
-Do not open public GitHub issues for security vulnerabilities.
+Include the affected Lintel revision, client/version, installation route, impact and a sanitized
+reproduction. Use synthetic fixtures. If the finding affects a company pack, follow its owner's
+incident-response process as well.
 
-## Scope
+## Supported release line
 
-Lintel is **scaffolding** — markdown + bash scripts that an AI CLI loads as a plugin. The security surface is:
+The current public line is **0.9.0 beta**. Earlier 3.x–5.x version labels describe pre-public
+engineering iterations; they are not maintained parallel release lines. Check the
+[changelog](CHANGELOG.md) and [releases](https://github.com/jokerman89/lintel/releases) for published
+fixes and upgrade notes.
 
-1. **Plugin manifest content.** Per-CLI plugin.json files point at skills/agents directories. A malicious modification could redirect to attacker-controlled content.
-2. **Hook scripts** (`hooks/shared/*/run.sh`). Bash scripts that run with operator privileges. A malicious modification could execute arbitrary code.
-3. **bin/ scripts** (`bin/li-*`). Bash utilities operators install in PATH. Same risk.
-4. **install/install.sh + install/install.ps1.** Installer scripts run with operator privileges.
+Maintainers handle reports on a best-effort basis, prioritize by impact, and coordinate disclosure
+with the reporter. There is no contracted response or remediation SLA. Do not wait for an upstream
+fix to revoke an exposed credential or contain an incident in your own environment.
 
-## What Lintel itself does NOT do (by design)
+## Reviewable attack surface
 
-- ✗ No network calls in skill/agent execution (skill bodies are markdown instructions for the AI CLI, not network clients)
-- ✗ No data exfiltration (Lintel writes only locally, to operator-owned paths)
-- ✗ No credential capture (no auth flows in Lintel code)
-- ✗ No telemetry sent externally (any usage logging is local-only and opt-in)
-
-## What Lintel DOES do that operators should review
-
-- ✓ Hook scripts can run shell commands when triggered by the agent CLI's hook system (Claude Code settings.json hooks)
-- ✓ Install scripts modify ~/.lintel/, ~/.claude/, or per-CLI config dirs
-- ✓ `bin/li-scaffold` writes to target repo paths
-- ✓ `bin/li-lessons-sync` reads/writes a git repo the operator configures
-
-## Compliance constraints
-
-These constraints apply to the Lintel repo itself (a company pack may add stricter ones):
-
-- **No customer data anywhere in Lintel repo.** Lessons learned must be sanitized before commit (no customer names, no project codenames, no PII).
-- **No secrets in skill/agent bodies.** Examples use placeholders.
-- **Authentication policy is pack-defined** — the neutral spine mandates none; a company pack may require SSO or vendor restrictions.
-- **Only operator-authored content is vendored** — no restricted-tier upstream (CC-BY-SA-4.0, etc.); Lintel ships MIT throughout.
-
-## Supported versions
-
-| Version | Supported |
+| Surface | Why it matters |
 |---|---|
-| 5.7.x | ✓ supported — current shipping line |
-| < 5.7 | ⚠ best-effort — upgrade to the current line for fixes |
-| ≤ 4.x | ✗ unsupported — upgrade to the current line |
+| Instructions, skills and agent profiles | Influence which files and tools the agent uses and which actions it proposes |
+| Plugin manifests and generated repository kit | Determine which resources the host discovers |
+| `hooks/shared/` | Execute shell commands with the host process's privileges when registered |
+| `bin/`, `lib/` and skill scripts | Read and write local files and may invoke external tools |
+| Installers | Create or update machine-level resources or repository-managed files |
+| Packs and optional synchronization | Introduce external context, executable content or configured destinations |
 
-## Response timeline
+The Copilot repository installer is local and does not fetch dependencies. It preserves unowned
+files and refuses conflicting managed-file edits. That behavior does not make an unreviewed
+source checkout trustworthy. Pin and review the source, inspect the adoption diff, and run the
+installation checks before enabling it for a team.
 
-Security reports acknowledged within 3 business days. Fix timeline depends on severity:
-- Critical (RCE, secret leak): 72 hours
-- High (privilege escalation, data exposure): 7 days
-- Medium / Low: 30 days
+## Controls and limits
 
-## Acknowledgments
+Lintel's Claude Code plugin registers selected hooks. Its secret and customer-data scanners use
+patterns over selected Git content when recognized agent tool calls occur. They can miss novel
+formats, do not inspect every way of executing Git, and support explicit overrides. They are not
+repository-wide data-loss prevention. See [the exact boundary](docs/compliance.md).
 
-Security researchers who report responsibly will be credited in CHANGELOG.md (unless they prefer anonymous).
+**The Copilot kit does not install Lintel hooks.** Copilot has a different hook protocol; Lintel's
+Claude Code hook bundle is not a compatible Copilot security gate. Workflow approvals, policy
+references and review steps remain cooperative agent instructions on this route.
+
+For mandatory protections, use independently configured repository policies, CI, access controls
+and secret scanning. Local audit records are ordinary editable files, not tamper-evident evidence.
+A declared pack compliance mode or data-residency field does not configure model hosting,
+network isolation or platform authorization.
+
+## Data and external activity
+
+Lintel has no central service collecting session telemetry. The agent client and connected tools
+retain their own data-handling behavior. Invoked workflows can browse, download dependencies,
+use APIs, synchronize a configured Git repository or push authorized changes. Lintel does not
+provide network egress control or guarantee that no data leaves the environment.
+
+Keep credentials in approved secret mechanisms. Do not commit customer data, private policy
+corpora or live secrets to this public repository. Sanitize examples, issue reports and lessons.
+Review optional exports and private pack distribution separately from the core installation.
+
+## Third-party resources
+
+Lintel's original code is MIT. The bundled design resources retain MIT and Apache-2.0 notices in
+[design-dna attribution](skills/design-dna/ATTRIBUTION.md) and its linked license files.
+Preserve those notices when redistributing the affected resources. A company pack's own contents
+and dependencies need their own review.
+
+## Coordinated disclosure
+
+Agree on publication timing with maintainers while affected users can mitigate the issue.
+Researchers may be credited in release notes with their consent. For adoption and operational
+ownership, see [enterprise adoption](docs/enterprise-adoption.md).

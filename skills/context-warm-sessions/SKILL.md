@@ -26,16 +26,14 @@ You are the context-warm-sessions skill.
 ### Step 1 — Find context saves
 
 ```bash
-branch=$(git branch --show-current)
+source_root="${LINTEL_SOURCE_ROOT:-${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel)}}"
+source "$source_root/bin/_context.sh"
+branch=$(_context_branch)
 N="${1:-3}"  # default last 3
-
-# Context saves stored in either:
-# - .claude/runtime/sessions/<branch>/<datetime>-context-save.md (repo-local)
-# - ~/.lintel/lessons-vault/sessions/<branch>/... (cross-machine sync)
-
-# Legacy ~/.lintel/sessions/<branch>/ included read-only for pre-v5 checkpoints (grace to 2026-09-12)
-candidates=$(find .claude/runtime/sessions/$branch ~/.lintel/sessions/$branch -name "*-context-save.md" 2>/dev/null \
-  | sort -r | head -$N)
+case "$N" in [1-5]) ;; *) echo 'Choose 1–5 sessions.' >&2; exit 1 ;; esac
+# Shared legacy checkpoints must belong to the selected repository. Filter
+# ownership before choosing the newest N, just as context-restore does.
+candidates=$(context_list "$branch" | sed -n "1,${N}p")
 ```
 
 ### Step 2 — Estimate tokens

@@ -1,4 +1,20 @@
-# todo — active initiatives
+# Work index — current initiative and historical plans
+
+## Copilot enterprise launch — 2026-09-08
+
+Completed initiative: [plan and build cards](copilot-enterprise-launch/plan.md), [spec](copilot-enterprise-launch/spec.md), [handoff](copilot-enterprise-launch/prompt.md). All seven build cards and 31 leaves delivered through [PR #83](https://github.com/jokerman89/lintel/pull/83), merged to main. See the [completion review](copilot-enterprise-launch/review.md) for exact CI evidence and environment-specific beta acceptance boundaries.
+
+Completed committed work map: [copilot-enterprise-launch/work.json](copilot-enterprise-launch/work.json). Do not re-execute this batch or carry its authorization into new work.
+
+## Historical plans — superseded as current work
+
+The entries below preserve earlier decisions and execution history. Their headings, unchecked
+boxes and old operator authorizations are historical snapshots, not current assignments or
+standing permission. In particular, do not repeat old force-push, history-rewrite, tag, release
+or PR operations. Inspect the current initiative above and actual Git/GitHub state first.
+Only a current operator request can reactivate a historical task with the necessary authority.
+
+---
 
 ## Beta release — public docs + history sanitation (2026-08-28, cycle beta-release-docs, branch feat/launch-readiness)
 
@@ -34,8 +50,8 @@ Operator decisions at the DEFINE gate: (1) rewrite all 250 commit messages in pl
 ### W3 — commit-history sanitation (one-way door; force-push is operator-authorized)
 - [x] W3.1 Export all 250 messages to a working file; snapshot `git rev-parse --all` for rollback
 - [x] W3.2 Tag `archive/pre-beta-history` on current main as an escape hatch
-- [x] W3.3 Build the rewrite map: mechanical strip of `Co-Authored-By: Claude*` / `Generated with` / `Claude-Session:`
-- [x] W3.4 Hand-author replacement subjects for the 41 flagged commits (Swedish, veto/dirigering, gstack/JStack/CAIP/MS, "weapon")
+- [x] W3.3 Build the rewrite map: mechanical strip of the AI-authorship trailer lines
+- [x] W3.4 Hand-author replacement subjects for the 41 flagged commits (Swedish, veto/dirigering, gstack/JStack, company-identity markers, "weapon")
 - [x] W3.5 Sweep bodies for `Per operator directive`, `operator-veto`, review-scoreboards
 - [x] W3.6 Apply with `git filter-branch --msg-filter` over `--all`
 - [x] W3.7 VERIFY: `git diff <old-head> <new-head>` must be EMPTY (content byte-identical)
@@ -109,7 +125,7 @@ the dead v5.3 session must not be resumed while BUILD runs.
       cycle_id from ledger; resume last-match + CYCLE writes branch/commit; multi-cycle regression tests
 - [ ] Wave 3 — Windows/portability: install.ps1 (seed + lib/bin copy + shared/ layout + validation);
       li-doctor bash-3.2 + stale path; verify.sh mapfile + coherence repoint + cli-matrix; lintel@→li@ ×4;
-      Cursor demote; fingerprint↔tiers map; .opencode/INSTALL.md rewrite (CAIP leak); exec bits; GEMINI slug
+      Cursor demote; fingerprint↔tiers map; .opencode/INSTALL.md rewrite (company-pack leak); exec bits; GEMINI slug
 - [ ] Wave 4 — docs truth: README/getting-started/AGENTS/GEMINI/shims/AGENT-INSTRUCTIONS/state-of-
       the-harness/multi-cli/LAYERS/compliance sweep; dormancy qualifiers; Swedish ×3 + no-swedish scope;
       CATALOG UTF-8 generator fix
@@ -173,7 +189,7 @@ SCOPE: README.md, docs/getting-started.md, skills/welcome/SKILL.md, CLAUDE.md, i
 - [x] J2 — "168 skills" de-hardcoded in welcome (frontmatter + body) → "the full skill set". README/getting-started counts already 124/69 (correct); getting-started finding-skills section de-hardcodes (compute at runtime).
 - [x] J3 — CLAUDE.md:31 stale `adr/` listing → points at .claude/decisions/ + names docs/adr as redirect stub. 4-root "Where things live" map added to README + getting-started. (CLAUDE.md state map + ritual were already v5-correct — confirmed, not manufactured.)
 - [x] J4 — getting-started "Finding skills" section: /li:help + /li:catalog + 7-bucket prose purpose-grouping.
-- [x] J5 — install.sh: /tier-stamp-agents line removed; entra/+rai/dpia/dsb mkdir removed (pack concern); header honest about upstream stub (lists, does not clone); upstream-step message says "listed only". README+getting-started got the "Windows: install\install.ps1" line.
+- [x] J5 — install.sh: /tier-stamp-agents line removed; pack-specific compliance/identity dir mkdirs removed (pack concern); header honest about upstream stub (lists, does not clone); upstream-step message says "listed only". README+getting-started got the "Windows: install\install.ps1" line.
 - [x] J6 — docs/GLOSSARY.md created (12 terms, one screen); linked from README first section + getting-started top; "the 9-step cycle: 8 core phases + SCOPE" phrasing used consistently.
 - [x] VALIDATE — grep clean (no 168 / inert always qualified / no stale docs/adr mis-pointers); no-swedish.sh RC=0.
 
@@ -184,9 +200,9 @@ docs/getting-started.md#how-hook-activation-works; README/welcome/install.sh all
 rather than restating. Found the branch's CLAUDE.md was already largely v5-correct (state map +
 ritual cited .claude/decisions and .claude/runtime/state) — the J3 instruction assumed more drift
 than exists; corrected only the one genuinely stale ref (line 31) and did not manufacture changes.
-DEVIATION FLAGGED: install.ps1:53 still creates the Microsoft-specific entra/ dir (same ghost
-removed from install.sh) — install.ps1 was NOT in authorized scope, so surfaced not fixed; the
-new Windows line points newcomers at it, so it should get the same J5 treatment in a follow-up.
+DEVIATION FLAGGED at the time: install.ps1 was not in authorized scope, so the pack-specific
+identity directory was surfaced rather than fixed. (Re-checked 2026-08-31: resolved — neither
+installer creates it any more.)
 
 ## v5.1 subtraction — ADR-0009 sub-skill collapse (2026-06-12, branch feat/v5.1-subtraction)
 
@@ -212,7 +228,7 @@ Architect only (matches reality).
 
 # todo — v5.0 claude-home + memory v2 + Obsidian (2026-06-12)
 
-## Initiative 2 — P0 activation pass (2026-06-12, operator: "kör")
+## Initiative 2 — P0 activation pass (2026-06-12)
 
 - [x] hooks/hooks.json — plugin auto-registration (digest + 4 safety + memory-budget-warn), exec form, schema verified against official docs
 - [x] session-digest.settings.json path fixed (missing shared/) + repositioned as non-plugin fallback
@@ -226,7 +242,7 @@ Architect only (matches reality).
 - [ ] Operator: update plugin, remove 4 manual hook entries from ~/.claude/settings.json, re-run install.sh, verify with li-doctor
 
 
-Design: [.claude/engineering/design-archive/lintel-v5-claude-home-memory-obsidian-design.md](../.claude/engineering/design-archive/lintel-v5-claude-home-memory-obsidian-design.md)
+Design: [.claude/engineering/design-archive/lintel-v5-claude-home-memory-obsidian-design.md](../engineering/design-archive/lintel-v5-claude-home-memory-obsidian-design.md)
 Mode: meta-infra (Gates M1–M4). Decisions D1–D4 locked by operator 2026-06-12.
 (Previous initiative v4.11 closed 2026-06-10 — see git history of this file.)
 
@@ -324,6 +340,10 @@ See [plan](enterprise-value-review/plan.md), [specification](enterprise-value-re
 - [x] E4: improve planning consistency and pack-to-acceptance traceability.
 - [x] E5: document enterprise value scenario and remaining decisions.
 - [x] E6: independent review, verification, commits and draft-PR delivery.
+
+The subsequent full-completion/main instruction is tracked in
+[completion.md](enterprise-value-review/completion.md); the draft milestone above does not
+close that outcome. Current evidence is in the enterprise completion audit.
 
 ## Review — enterprise value
 

@@ -173,7 +173,7 @@ for f in pattern.json typography.json motion.json component-imports.json; do
 done
 
 # Log to audit via the unified writer (ts/operator/cycle_id come from the envelope)
-source "$(git rev-parse --show-toplevel)/bin/_audit.sh"
+source "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/bin/_audit.sh"
 audit_log frontend-style-extract-runs pattern_extracted "name=$name" "artifacts=${artifacts[*]}"
 # → .claude/runtime/audit/frontend-style-extract-runs.jsonl
 ```

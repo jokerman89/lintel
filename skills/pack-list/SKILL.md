@@ -21,7 +21,7 @@ acme-internal             (none)        mixed       hard        >=4.0.0
 acme-customer             acme-internal customer    hard        >=4.0.0
 ```
 
-`*` marks the active pack. Only `_default` ships with Lintel; other packs are installed by the operator (e.g. the external `lintel-caip-pack` contributes a `caip-se` pack).
+`*` marks the active pack. Only `_default` ships with Lintel; other packs are installed by the operator — a company pack contributes its own voice, compliance, and roles on top of `_default`.
 
 ## When to use
 

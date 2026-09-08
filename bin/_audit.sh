@@ -24,6 +24,8 @@
 # historical global path unchanged.
 
 LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
+# Use the same native-to-shell root normalization as the state/memory writers.
+command -v lintel_repo_root >/dev/null 2>&1 || source "$(dirname "${BASH_SOURCE[0]}")/../lib/paths.sh"
 # An EXPLICIT caller-set LINTEL_AUDIT_DIR is a hard override for ALL categories
 # (the documented test seam — mirrors _jobs.sh's LINTEL_JOBS_DIR behavior).
 # "Explicit" = set to something OTHER than the computed default; several sibling
@@ -47,7 +49,7 @@ _AUDIT_GLOBAL_CATEGORIES="pack-lifecycle pack-resolver migration migrations self
 _AUDIT_REPO_AUDIT_DIR=""
 _audit_init_repo_scope() {
   local root
-  root="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}"
+  root="$(lintel_repo_root)"
   [ -n "$root" ] || return 0
   if [ -f "$root/.claude/lintel-layout.yaml" ]; then
     local v
@@ -92,7 +94,7 @@ _audit_init_cycle_id() {
   _AUDIT_CYCLE_ID="${LINTEL_CYCLE_ID:-${CYCLE_ID:-}}"
   [ -n "$_AUDIT_CYCLE_ID" ] && return 0
   local root f
-  root="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}"
+  root="$(lintel_repo_root)"
   [ -n "$root" ] || { _AUDIT_CYCLE_ID="unknown"; return 0; }
   f="$root/.claude/runtime/state/00-state.md"
   [ -f "$f" ] || f="$root/.lintel/state/00-state.md"

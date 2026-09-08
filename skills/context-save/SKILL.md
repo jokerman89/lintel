@@ -41,11 +41,11 @@ Save the current session's load-bearing state to a checkpoint file so a fresh se
 2. Compute the checkpoint path via the mechanical core (`bin/_context.sh` owns naming + directory creation; checkpoint CONTENT stays LLM-written):
 
    ```bash
-   source "$LINTEL_REPO_ROOT/bin/_context.sh"   # fallback: "$(git rev-parse --show-toplevel)/bin/_context.sh"
+   source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/bin/_context.sh"   # fallback: "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/bin/_context.sh"
    path=$(context_save_path [label])
    ```
 
-   `context_save_path` echoes `.claude/runtime/sessions/<branch>/<YYYYMMDD-HHMMSS>-<slug>[-<label>]-context-save.md` and creates the directory. The filename ends `-context-save.md` so `/context-restore` and `/context-warm-sessions` globs match.
+   `context_save_path` echoes `.claude/runtime/sessions/<branch>/<YYYYMMDD-HHMMSS>-r<repository-key>-<slug>[-<label>]-context-save.md` and creates the directory. The key identifies the canonical repository path, including in the shared legacy directory. The filename ends `-context-save.md` so restore/warm globs match.
 3. Gather:
    - **What the task is** — one-line description (operator-provided or inferred from recent turns).
    - **What got done** — bulleted from todo-list completed items + recent commit messages on this branch.
@@ -60,6 +60,7 @@ Save the current session's load-bearing state to a checkpoint file so a fresh se
 # Checkpoint — <one-line task description>
 
 **Slug:** <slug>
+**Repository:** <canonical absolute repository root from _context_repo_identity>
 **Branch:** <branch>
 **Timestamp:** <ISO 8601>
 **Last commit:** <sha> — <message>

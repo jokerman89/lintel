@@ -3,7 +3,7 @@
 # v4.0 Phase 2 (schema_version added) · 2026-05-29
 #
 # This pack ships with Lintel and represents the neutral-everything baseline.
-# Operators create their own pack (or activate caip-se / future packs) on top.
+# Operators layer their own pack on top — authored locally or installed.
 # Every field below documents the v2.0 design doc's neutral default.
 
 schema_version: "1"

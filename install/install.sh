@@ -17,8 +17,9 @@
 
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd -P)"
+source "$REPO_ROOT/lib/frontmatter.sh"
 SOURCES_FILE="$SCRIPT_DIR/upstream-sources.yaml"
 LAYER_CONFIG_EXAMPLE="$SCRIPT_DIR/layer-config.yaml.example"
 
@@ -49,6 +50,33 @@ expand_path() {
   if [[ "$p" == "~"* ]]; then echo "${HOME}${p:1}"; else echo "$p"; fi
 }
 
+canonical_destination() {
+  local path="$1" parent suffix="" part
+  local -a components=()
+  case "$path" in [A-Za-z]:*)
+    command -v cygpath >/dev/null 2>&1 && path="$(cygpath -u "$path")" ;;
+  esac
+  case "$path" in /*) ;; *) path="$PWD/$path" ;; esac
+  # Normalize lexical traversal before resolving the nearest existing parent.
+  local -a raw=()
+  IFS=/ read -r -a raw <<< "$path"
+  for part in "${raw[@]}"; do
+    case "$part" in
+      ''|.) ;;
+      ..) [ ${#components[@]} -eq 0 ] || unset "components[$((${#components[@]} - 1))]" ;;
+      *) components+=("$part") ;;
+    esac
+  done
+  path="$(IFS=/; printf '/%s' "${components[*]}")"
+  while [ ! -d "$path" ]; do
+    suffix="/$(basename "$path")$suffix"
+    parent="$(dirname "$path")"
+    [ "$parent" != "$path" ] || return 1
+    path="$parent"
+  done
+  printf '%s%s' "$(cd "$path" && pwd -P)" "$suffix"
+}
+
 # ----- pre-flight -------------------------------------------------------------
 
 hdr "Lintel installer"
@@ -60,6 +88,31 @@ if ! command -v git >/dev/null 2>&1; then
   exit 1
 fi
 ok "git found ($(git --version))"
+
+# Validate every destination before backup or writes. A self-install may copy
+# onto its own source, and cp follows pre-existing destination symlinks.
+LINTEL_HOME="$(canonical_destination "$LINTEL_HOME")"
+LINTEL_SCAFFOLDING="$LINTEL_HOME/scaffolding"
+LINTEL_HOOKS="$LINTEL_HOME/hooks"
+LINTEL_CONFIG="$LINTEL_HOME/config.yaml"
+source_compare="${REPO_ROOT%/}/"
+destination_compare="${LINTEL_HOME%/}/"
+case "${OSTYPE:-}" in msys*|cygwin*)
+  source_compare="$(printf '%s' "$source_compare" | tr '[:upper:]' '[:lower:]')"
+  destination_compare="$(printf '%s' "$destination_compare" | tr '[:upper:]' '[:lower:]')" ;;
+esac
+case "$destination_compare" in "$source_compare"*)
+  fail "LINTEL_HOME must be separate from the source checkout"; exit 1 ;; esac
+case "$source_compare" in "$destination_compare"*)
+  fail "LINTEL_HOME must not be an ancestor of the source checkout"; exit 1 ;; esac
+if [ -d "$LINTEL_HOME" ]; then
+  linked_entry="$(find "$LINTEL_HOME" -type l -print -quit)"
+  if [ -n "$linked_entry" ]; then
+    fail "Linked install entry refused before writes: $linked_entry"
+    fail "Use a dedicated install home without symlinks; existing links were preserved."
+    exit 1
+  fi
+fi
 
 YQ_AVAILABLE=0
 if command -v yq >/dev/null 2>&1; then
@@ -95,7 +148,7 @@ mkdir -p "$LINTEL_HOME/audit"
 mkdir -p "$LINTEL_HOME/sessions"
 mkdir -p "$LINTEL_HOME/provenance"
 mkdir -p "$LINTEL_HOME/freeze"
-# Compliance-artifact dirs (rai/dpia/dsb/entra) are pack concerns, NOT spine — a company pack
+# Compliance-artifact directories are pack concerns, NOT spine — a company pack
 # that needs them creates them on activation. The neutral installer stays company-neutral.
 mkdir -p "$LINTEL_HOME/review-log"
 mkdir -p "$LINTEL_HOME/benchmarks"
@@ -118,7 +171,7 @@ mkdir -p "$LINTEL_HOME/brand/palettes"
 mkdir -p "$LINTEL_HOME/brand/fonts"
 
 chmod 700 "$LINTEL_HOME/browser-profiles"   # secrets-adjacent
-chmod 700 "$LINTEL_HOME/audit"               # tamper-evident
+chmod 700 "$LINTEL_HOME/audit"               # operator-private on POSIX
 
 ok "Lintel home structure created"
 
@@ -152,10 +205,23 @@ ok "Foundation scaffolding copied"
 # ~/.lintel/hooks resolve lib/memory.sh + bin/_jobs.sh here when no repo
 # checkout is present (ADR-0006).
 mkdir -p "$LINTEL_HOME/lib" "$LINTEL_HOME/bin" "$LINTEL_HOME/templates"
-cp -r "$REPO_ROOT/lib/"* "$LINTEL_HOME/lib/" 2>/dev/null || true
-cp -r "$REPO_ROOT/bin/"* "$LINTEL_HOME/bin/" 2>/dev/null || true
-cp -r "$REPO_ROOT/templates/"* "$LINTEL_HOME/templates/" 2>/dev/null || true
+cp -R "$REPO_ROOT/lib/." "$LINTEL_HOME/lib/"
+cp -R "$REPO_ROOT/bin/." "$LINTEL_HOME/bin/"
+cp -R "$REPO_ROOT/templates/." "$LINTEL_HOME/templates/"
 ok "Runtime helpers copied (lib/ + bin/ + templates/)"
+for asset in skills agents shims docs; do
+  mkdir -p "$LINTEL_HOME/$asset"
+  cp -R "$REPO_ROOT/$asset/." "$LINTEL_HOME/$asset/"
+done
+cp "$REPO_ROOT/LICENSE" "$REPO_ROOT/AGENT-INSTRUCTIONS.md" "$LINTEL_HOME/"
+ok "Copilot source assets copied (skills/ + agents/ + shims/ + docs/)"
+
+# The installed resolver must work without this checkout. Seed only missing
+# neutral identity; a local _default pack can contain operator customizations.
+if [ ! -d "$LINTEL_HOME/packs/_default" ]; then
+  cp -R "$REPO_ROOT/packs/_default" "$LINTEL_HOME/packs/_default"
+  ok "Neutral pack installed"
+fi
 
 # ----- v3.7 brand-seeds (idempotent) -----------------------------------------
 
@@ -200,15 +266,12 @@ if [ -n "$HOOK_SRC" ]; then
   # shared/ layout (ADR-0008): matches the repo tree, the settings snippet, li-doctor's
   # drift check, and the scripts' BASH_SOURCE-relative ../_input.sh + ../../../bin lookups.
   mkdir -p "$LINTEL_HOOKS/shared"
-  cp -r "$HOOK_SRC/"* "$LINTEL_HOOKS/shared/" 2>/dev/null || true
-  # Drop any pre-v5 flat copies so the layout is unambiguous
-  for d in "$LINTEL_HOOKS"/*/; do
-    case "$d" in */shared/) : ;; *) [ -f "${d}run.sh" ] && rm -rf "$d" ;; esac
-  done
+  cp -R "$HOOK_SRC/." "$LINTEL_HOOKS/shared/"
+  # Preserve legacy inert copies: custom hook directories belong to the operator.
   # Ensure scripts are executable
   find "$LINTEL_HOOKS" -name '*.sh' -exec chmod +x {} + 2>/dev/null || true
   ok "Hooks copied to $LINTEL_HOOKS/shared (Claude Code: auto-registered via the plugin's hooks/hooks.json)"
-  info "Other CLIs / non-plugin installs: register manually — see $LINTEL_HOOKS/shared/README.md"
+  info "Claude Code bare installs: register manually — see $LINTEL_HOOKS/shared/README.md"
   # session-digest is REQUIRED (ADR-0002): auto-loads the memory snowball at SessionStart.
   if [ -f "$LINTEL_HOOKS/shared/session-digest/run.sh" ]; then
     info "Non-plugin installs: merge $REPO_ROOT/hooks/claude-code/session-digest.settings.json"
@@ -229,23 +292,9 @@ validate_frontmatter() {
   local file="$1"
   local kind="$2"  # skill | agent
 
-  # Frontmatter must start with `---`
-  if ! head -1 "$file" | grep -q '^---$'; then
-    INVALID_FILES+=("$file: missing frontmatter start")
-    return 1
-  fi
-
-  # Required fields
-  local missing=()
-  grep -q '^name:' "$file" || missing+=("name")
-  grep -q '^description:' "$file" || missing+=("description")
-  grep -q '^color:' "$file" || missing+=("color")
-  grep -q '^tools:' "$file" || missing+=("tools")
-  grep -q '^voice:' "$file" || missing+=("voice")
-  grep -q '^cli_support:' "$file" || missing+=("cli_support")
-
-  if [ ${#missing[@]} -gt 0 ]; then
-    INVALID_FILES+=("$file: missing fields: ${missing[*]}")
+  local issue
+  if ! issue=$(validate_lintel_frontmatter "$file" "$kind"); then
+    INVALID_FILES+=("$file: $issue")
     return 1
   fi
   return 0
@@ -296,7 +345,11 @@ if [ "$YQ_AVAILABLE" = "1" ]; then
   info "Reading $SOURCES_FILE..."
   # Real install would iterate sources and clone each per upstream-sources.yaml
   # Stub: just confirm file readable + list source names
-  if mapfile -t SOURCE_NAMES < <(yq '.sources | keys | .[]' "$SOURCES_FILE" 2>/dev/null); then
+  if source_names=$(yq '.sources | keys | .[]' "$SOURCES_FILE" 2>/dev/null); then
+    SOURCE_NAMES=()
+    while IFS= read -r source_name; do
+      [ -n "$source_name" ] && SOURCE_NAMES+=("$source_name")
+    done <<< "$source_names"
     ok "${#SOURCE_NAMES[@]} upstream sources declared (listed only — this installer does not clone them)"
     for n in "${SOURCE_NAMES[@]}"; do
       info "  · $n"
@@ -314,19 +367,20 @@ say "Lintel installed at: $LINTEL_HOME"
 say ""
 say "Next steps:"
 say "  1. Review config:           ${c_bold}\$EDITOR $LINTEL_CONFIG${c_reset}"
-say "  2. Activate hooks (opt-in): see $LINTEL_HOOKS/README.md"
+say "  2. Claude Code hooks (opt-in): see $LINTEL_HOOKS/shared/README.md"
 say "  3. Verify install:          ${c_bold}$SCRIPT_DIR/verify.sh --all${c_reset}"
 say "  4. Read Lintel overview:    ${c_bold}cat $REPO_ROOT/docs/architecture.md${c_reset}"
 say ""
-say "v5 plugin install (per CLI):"
+say "Plugin install (per CLI):"
+say "  Copilot:      see $REPO_ROOT/docs/copilot.md"
 say "  Claude Code:  ${c_bold}/plugin marketplace add jokerman89/lintel${c_reset}"
 say "                ${c_bold}/plugin install li@jokerman-lintel${c_reset}"
 say "  Codex CLI:    ${c_bold}/plugins${c_reset} -> search lintel -> Install"
 say "  Cursor:       ${c_bold}/add-plugin lintel${c_reset}"
 say "  Gemini CLI:   ${c_bold}gemini extensions install https://github.com/jokerman89/lintel${c_reset}"
 say ""
-say "v3 operator utilities (add to PATH):"
-say "  ${c_bold}export PATH=\"\$PATH:$REPO_ROOT/bin\"${c_reset}"
+say "Operator utilities (add to PATH):"
+say "  ${c_bold}export PATH=\"\$PATH:$LINTEL_HOME/bin\"${c_reset}"
 say "  Available: li-scaffold, li-doctor, li-lessons-sync,"
 say "             li-lessons-promote, li-adr-new, li-update"
 say ""

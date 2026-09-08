@@ -1,7 +1,7 @@
 # ADR-0008: the activation contract — shipped means fires, tested means behaved
 
 **Status:** Accepted (2026-06-12)
-**Decided by:** operator ("kör" on the fit-audit P0 recommendation, 2026-06-12)
+**Decided by:** operator — approved the fit-audit P0 recommendation, 2026-06-12
 **Implements:** .claude/engineering/audits/2026-06-12-fable5-fit-audit.md (P0 tracks 1-2)
 
 ## Context

@@ -200,7 +200,7 @@ ships the five above.
 
 ## The gates, in one list
 
-Five gates are always enforced, whatever the mode:
+The workflow defines these gates where the selected phases apply. They are agent instructions unless a specific executable check is invoked and validated:
 
 1. **Cost estimate before BUILD** — the token-heavy phase never starts unconfirmed.
 2. **Approval at the end of PLAN** — a mandatory pause, not a notification.
@@ -219,10 +219,10 @@ Five gates are always enforced, whatever the mode:
 
 ---
 
-## Auto-mode cannot walk through a one-way door
+## Auto-mode and irreversible decisions
 
 `--auto` decides the recommended option at reversible gates so you are not confirming trivia. It
-still stops at irreversible ones — and that distinction is **mechanical, not a promise in prose**:
+must still stop at irreversible ones. A helper classifies selected patterns when the workflow calls it:
 
 ```bash
 source lib/auto-decide.sh
@@ -231,14 +231,14 @@ if is_one_way_door "$decision_text"; then ask_operator; else auto_decide_recomme
 
 `is_one_way_door` matches a deliberately broad set of irreversible classes — delete, drop, truncate,
 migrate, schema change, production, force-push, rewrite history, secret, rotate key, rename a skill
-or agent, breaking change — regardless of how the decision was phrased. A false positive costs one
+or agent, breaking change — using keyword patterns. Unrecognized wording may not match; it is not a host permission gate. A false positive costs one
 question. A false negative is the failure being guarded against, so the guard errs wide.
 
 ---
 
 ## Keeping your position
 
-Long sessions lose the thread. The cycle's answer is a state ledger plus three hooks, so position
+Long sessions lose the thread. The cycle uses a state ledger and, on Claude Code, three hooks, so position
 survives compaction, a fresh session, and your own attention.
 
 Every phase appends one mechanical line:
@@ -256,8 +256,8 @@ Then:
   turn.
 - **`cycle-incomplete-warn`** (Stop) fires when a turn ends mid-cycle, so work never goes silent.
 
-And every phase closes with the same footer, so you always know where you are and what the one
-logical next action is:
+Skills are instructed to close each phase with a footer. On the Copilot kit, explicit state reads and writes provide continuity; automatic Claude hook injection is unavailable. The footer shows the
+next action:
 
 ```
 Lintel cycle · mode meta-infra · done ✅ · skipped ⊘ · here 📍 · pending ▢
@@ -328,3 +328,7 @@ an artifact you can read afterwards.
 - [Architecture](architecture.md) — how the cycle sits inside the spine-and-packs model
 - [Glossary](GLOSSARY.md) — trio, wedge, pack, depth schema
 - [Skill catalog](../skills/CATALOG.md) — every phase skill and its options
+
+## Copilot and existing specifications
+
+The portable Copilot kit exposes these phases as native `li-*` skills. Where subagents are available, separate implementation from review; otherwise report sequential review honestly. Existing Spec Kit artifacts can satisfy planning through reference-only handoffs while retaining one authoritative task list. See [Copilot](copilot.md) and [Spec Kit](spec-kit.md).
