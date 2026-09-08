@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 # lib/orientator-routing.sh — mechanical routing helpers for skills/orientator
+# component: orientator-routing
+# implements: none; preserves the existing pack navigation contract
+# intent: docs/concepts/orientator.md
+# constraints: none; recommendations do not execute workflows
+# last_intent_review: 2026-09-08
 #
 # Sourced by skills/orientator/SKILL.md. Provides:
 #   classify_intent <prompt>        → intent enum
@@ -72,6 +77,9 @@ assess_risk() {
     high_risk_csv="cycle,plan,ship"
   fi
 
+  # Resolver lists use [a, b]; legacy callers pass CSV or newline-separated IDs.
+  # Match normalized complete IDs, so YAML punctuation cannot lower declared risk.
+  high_risk_csv=$(printf '%s' "$high_risk_csv" | tr '\n' ',' | tr -d '[]"\047[:space:]')
   # CSV match
   case ",$high_risk_csv," in
     *",$base_workflow,"*) printf 'high'; return 0 ;;

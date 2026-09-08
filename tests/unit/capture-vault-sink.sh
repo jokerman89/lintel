@@ -73,9 +73,9 @@ extends: _default
 voice:
   default_tier: internal
 compliance:
-  mode: none
+  mode: off
 navigation:
-  default_route: cycle
+  default_workflow: cycle
 capture:
   vault_sink_enabled: true   # operator opt-in
   vault_sink_path: ../my-vault/50-sessions  # relative to repo root
