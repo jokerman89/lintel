@@ -308,6 +308,7 @@ class ProfileConfig:
     context_id: str = ""
     context_file: Path | None = None
     explicit_pack: str = ""
+    expected_reference: dict | None = None
 
     def __post_init__(self):
         for name in ("source", "repo", "home", "packs", "pointer"):
@@ -316,6 +317,8 @@ class ProfileConfig:
             object.__setattr__(self, "context_file", Path(self.context_file).resolve())
         if not isinstance(self.context_id, str) or not isinstance(self.explicit_pack, str):
             raise ProfileError("PROFILE_INPUT", "context ID and explicit pack must be strings")
+        if self.expected_reference is not None:
+            validate_profile_reference(self.expected_reference)
 
     @property
     def requirements(self) -> Path:
@@ -637,6 +640,8 @@ def _context_id(value: str) -> str:
 
 
 def context_path(config: ProfileConfig) -> Path:
+    if config.expected_reference is not None:
+        config = _reference_selection(config.expected_reference, config)
     if config.context_file is not None:
         path = config.context_file.resolve()
     else:
@@ -766,6 +771,8 @@ def _verify_record(config: ProfileConfig, record: dict) -> dict:
 
 def load_profile_context(config: ProfileConfig, *, create: bool = False) -> dict:
     """Load/verify an existing pin, or explicitly allow first binding."""
+    if config.expected_reference is not None:
+        return verify_profile_reference(config.expected_reference, config)
     if not config.context_id and config.context_file is None:
         if create:
             return _record(resolve_profile(config))
@@ -783,21 +790,26 @@ def load_profile_context(config: ProfileConfig, *, create: bool = False) -> dict
         return record
 
 
-def verify_profile_reference(reference: dict, config: ProfileConfig) -> dict:
-    """Verify both live policy inputs and the expected producer identity, without rebinding."""
+def _reference_selection(reference: dict, config: ProfileConfig) -> ProfileConfig:
     validate_profile_reference(reference)
     if config.context_id and config.context_id != reference["context_id"]:
         raise ProfileError("PROFILE_REFERENCE_MISMATCH", "handoff names a different context")
-    selected = replace(config, context_id=reference["context_id"])
+    return replace(config, context_id=reference["context_id"], expected_reference=None)
+
+
+def verify_profile_reference(reference: dict, config: ProfileConfig) -> dict:
+    """Verify both live policy inputs and the expected producer identity, without rebinding."""
+    selected = _reference_selection(reference, config)
     record = load_profile_context(selected)
     if profile_reference(record) != reference:
-        raise ProfileError("PROFILE_REFERENCE_MISMATCH", "handoff profile generation or content differs")
+        raise ProfileError("PROFILE_REFERENCE_MISMATCH", "handoff profile generation or content differs",
+                           required=record["profile"]["selection"]["mode"] == "required")
     return record
 
 
 def bootstrap_profile_context(config: ProfileConfig) -> dict:
     """Select a durable repository work context when the host supplies no stable ID."""
-    if config.context_id or config.context_file:
+    if config.context_id or config.context_file or config.expected_reference is not None:
         return load_profile_context(config, create=True)
     with _lock(config, config.selected):
         if config.selected.exists():
@@ -808,27 +820,47 @@ def bootstrap_profile_context(config: ProfileConfig) -> dict:
         return record
 
 
+def _history_path(current: Path, reference: dict) -> Path:
+    return current.parent / "history" / f"{reference['generation']}-{reference['digest'][7:]}.json"
+
+
 def rebind_profile_context(config: ProfileConfig, reason: str) -> dict:
     if not reason.strip() or len(reason) > 1000:
         raise ProfileError("PROFILE_INPUT", "rebind requires a nonempty reason (at most 1000 characters)")
+    expected = config.expected_reference
+    if expected is not None:
+        config = _reference_selection(expected, config)
     path = context_path(config)
-    with _lock(config, path):
-        if not path.is_file():
-            raise ProfileError("PROFILE_CONTEXT_MISSING", "cannot rebind a missing context; bind first")
-        old = _load_record(path)
-        if config.context_id and old["context_id"] != config.context_id:
-            raise ProfileError("PROFILE_REFERENCE_MISMATCH", "rebind names a different context")
-        profile = resolve_profile(_restore_selection(config, old))
-        previous = profile_reference(old)
-        new = _record(profile, old["context_id"], old["generation"] + 1, previous, reason)
-        archive = path.parent / "history" / f"{old['generation']}-{old['digest'][7:]}.json"
-        if archive.exists() and _load_record(archive) != old:
-            raise ProfileError("PROFILE_CONTEXT_INVALID", "existing history conflicts; evidence is preserved")
-        _write_json(config, archive, old)
-        _write_json(config, path, new)
-    if config.selected.is_file():
-        with _lock(config, config.selected):
-            if _load_json_file(config.selected) == previous:
+    # Match bootstrap's lock order. No successful rebind may expose an older
+    # selected generation after a later context writer has committed.
+    with _lock(config, config.selected):
+        with _lock(config, path):
+            if not path.is_file():
+                raise ProfileError("PROFILE_CONTEXT_MISSING", "cannot rebind a missing context; bind first")
+            old = _load_record(path)
+            previous = profile_reference(old)
+            if expected is not None and previous != expected:
+                raise ProfileError("PROFILE_REFERENCE_MISMATCH", "rebind must name the current generation",
+                                   required=old["profile"]["selection"]["mode"] == "required")
+            if config.context_id and old["context_id"] != config.context_id:
+                raise ProfileError("PROFILE_REFERENCE_MISMATCH", "rebind names a different context")
+            update_selection = False
+            if config.selected.exists():
+                selected = validate_profile_reference(_load_json_file(config.selected))
+                update_selection = selected["context_id"] == old["context_id"]
+                if update_selection and selected != previous:
+                    historical = _history_path(path, selected)
+                    if not historical.is_file() or profile_reference(_load_record(historical)) != selected:
+                        raise ProfileError("PROFILE_REFERENCE_MISMATCH",
+                                           "selected reference is not backed by this context's history")
+            profile = resolve_profile(_restore_selection(config, old))
+            new = _record(profile, old["context_id"], old["generation"] + 1, previous, reason)
+            archive = _history_path(path, previous)
+            if archive.exists() and _load_record(archive) != old:
+                raise ProfileError("PROFILE_CONTEXT_INVALID", "existing history conflicts; evidence is preserved")
+            _write_json(config, archive, old)
+            _write_json(config, path, new)
+            if update_selection:
                 _write_json(config, config.selected, profile_reference(new))
     return new
 
@@ -861,6 +893,7 @@ def main() -> int:
     parser.add_argument("--context", default="")
     parser.add_argument("--context-file", default="")
     parser.add_argument("--pack", default="")
+    parser.add_argument("--reference", default="")
     parser.add_argument("operation", choices=(
         "field", "field-json", "provenance", "true", "nullable", "loaded", "selected",
         "validate", "compatibility", "chain", "chain-field", "dir", "yaml-field",
@@ -871,6 +904,8 @@ def main() -> int:
     config = _config(args)
     operation, arguments = args.operation, args.arguments
     try:
+        if args.reference:
+            config = replace(config, expected_reference=read_json(args.reference))
         counts = {
             "field": (1,), "field-json": (1,), "provenance": (1,), "true": (1,), "nullable": (1,),
             "loaded": (0,), "selected": (0,), "validate": (0, 1), "compatibility": (0, 1),
@@ -891,7 +926,9 @@ def main() -> int:
             print(pack_directory(config, arguments[0]).as_posix(), end="")
             return 0
         if operation == "selected":
-            print(select_profile(config, Inputs())["requested"], end="")
+            selection = load_profile_context(config)["profile"]["selection"] \
+                if config.expected_reference is not None else select_profile(config, Inputs())
+            print(selection["requested"], end="")
             return 0
         if operation in ("validate", "compatibility", "chain", "chain-field"):
             if arguments and not arguments[0].strip():
@@ -919,7 +956,7 @@ def main() -> int:
         if operation == "bind":
             if len(arguments) != 1:
                 raise ProfileError("PROFILE_CONTEXT_REQUIRED", "bind requires a stable context ID")
-            config = replace(config, context_id=_context_id(arguments[0]))
+            config = replace(config, context_id=_context_id(arguments[0]), expected_reference=None)
             record = load_profile_context(config, create=True)
         elif operation == "verify":
             record = verify_profile_reference(_load_json_file(Path(arguments[0])), config) if arguments \
@@ -957,7 +994,8 @@ def main() -> int:
         return 0
     except ProfileError as exc:
         if operation == "required-policy":
-            required = exc.required or config.requirements.exists() or bool(config.explicit_pack)
+            # Losing a selected reference cannot prove its policy was optional.
+            required = exc.required or config.requirements.exists() or bool(config.explicit_pack) or bool(args.reference)
             print(canonical({"required": required, "status": "error",
                              "source": config.requirements.as_posix() if config.requirements.exists()
                              else "invocation" if config.explicit_pack else "profile-context",

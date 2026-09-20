@@ -87,14 +87,31 @@ approved source/target/home roots. In a fresh process:
 ```bash
 source "$LINTEL_SOURCE_ROOT/lib/pack-resolver.sh"
 verify_profile_context "$handoff_reference_file" || exit $?
+profile_required_policy || exit $?
+resolve_pack_field compliance.mode || exit $?
 ```
 
 Verification does not create a missing context or replace an expected generation.
+On success, the shell helper exports the exact verified JSON as
+`LINTEL_PROFILE_REFERENCE`. Subsequent accessors, a re-sourced resolver and newly
+spawned child processes verify that same context, generation and digest. The shared
+parser consumes this transport; callers must not reinterpret or manually edit it.
+Call `verify_profile_context` directly in the shell that will perform the work,
+not inside command substitution or a pipeline whose exports cannot reach its parent.
+Redirecting its output to a file does not prevent propagation.
+
 The explicit reference selects its work identity over a new ambient host session.
 A contradictory explicit `LINTEL_PROFILE_CONTEXT` remains an error. An original
 explicit pack request is retained in the binding when a fresh consumer does not
-repeat it. A reference does not grant permission to change target repositories,
-activate hooks or claim independent review.
+repeat it. Failed verification does not replace an already verified selection.
+A later generation or lost pin blocks subsequent accessors instead of resolving
+neutral data. A lost/malformed required reference is unresolved policy, not evidence
+that the policy was optional. Valid neutral/advisory profiles retain their ordinary
+non-required control status.
+
+A reference does not grant permission to change target repositories, activate hooks
+or claim independent review. Approved policy source/target roots must still match;
+an isolated worktree is not automatic cross-target profile transfer.
 
 ## Drift and rebind
 
@@ -118,6 +135,17 @@ rebind_profile_context "approved policy update; replan affected work"
 The new generation is validated first. The old record is retained in `history/`,
 old references stop matching, and the repository selected reference is updated
 only if it names this context. Replan/review dependent work against the new reference.
+Rebind holds the repository selection lock before the context lock and publishes
+both records before releasing the transaction. Concurrent successful rebinds cannot
+leave `selected.json` behind the current generation. An explicit rebind can repair
+a stale same-context selection only when its reference is corroborated by retained
+history; it neither fabricates history nor takes another context's selection.
+An interrupted write that did not return success remains an explicit recovery case.
+
+Successful shell bind/rebind updates `LINTEL_PROFILE_REFERENCE` in the caller;
+already-running consumers retain their old generation and must explicitly verify
+the newly approved reference before continuing. Do not silently clear a stale
+expected reference to bypass review or policy drift.
 `clear_pack_cache` is a compatibility spelling for this explicit rebind; it no
 longer deletes evidence. Interrupted-writer locks fail visibly rather than being
 stolen by guessing that a process is dead.
@@ -176,6 +204,8 @@ not parse cache storage. There is no second YAML parser in shell.
 `profile_required_policy` emits exactly `{required,status,source,version,applicability}`.
 Required load is `loaded`/`applicable`; optional/neutral is `not_required`/
 `not_applicable`. Unresolved load/drift emits `error`/`unknown` **and exits nonzero**.
+When a transported reference is lost or invalid, policy applicability is unknown
+and `required` remains true; absence of the pin cannot erase a prior requirement.
 This bridge is for P05's control result, not a claim that loaded controls passed.
 Mandatory missing/error/unverified evidence still blocks in the consuming workflow.
 

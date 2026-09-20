@@ -13,7 +13,9 @@ from pathlib import Path
 import re
 import shutil
 import subprocess
+import sys
 import tempfile
+import time
 import unittest
 
 
@@ -293,6 +295,114 @@ class ProfileLifecycle(unittest.TestCase):
             'verify_profile_context "$HANDOFF"', env=env,
         ).stdout), first)
 
+    def assert_reference_resume_controls_following_reads(self, host_session=None):
+        self.pack("strict")
+        producer_env = dict(self.env, LINTEL_PROFILE_PACK="strict")
+        reference = json.loads(self.shell("profile_context_reference", env=producer_env).stdout)
+        handoff = self.target / "required-reference.json"
+        handoff.write_text(json.dumps(reference), encoding="utf-8")
+        env = dict(self.env, HANDOFF=handoff.as_posix())
+        env.pop("LINTEL_PROFILE_CONTEXT")
+        if host_session is not None:
+            env["CLAUDE_SESSION_ID"] = host_session
+        result = self.shell(
+            'verify_profile_context "$HANDOFF" || exit $?\n'
+            'profile_required_policy || exit $?\n'
+            'resolve_pack_field compliance.mode || exit $?\n'
+            'printf "\\n"\n'
+            'profile_context_reference || exit $?\n'
+            'bash -c \'source "$LINTEL_SOURCE_ROOT/lib/pack-resolver.sh"\n'
+            'profile_required_policy || exit $?\n'
+            'resolve_pack_field compliance.mode || exit $?\n'
+            'printf "\\n"\n'
+            'profile_context_reference || exit $?\n'
+            'get_active_pack_name || exit $?\n'
+            'printf "\\n"\n'
+            'get_loaded_pack || exit $?\'',
+            env=env,
+        )
+        lines = result.stdout.splitlines()
+        self.assertEqual(len(lines), 9, result.stdout)
+        for index in (0, 3, 6):
+            self.assertEqual(json.loads(lines[index]), reference)
+        for index in (1, 4):
+            policy = json.loads(lines[index])
+            self.assertIs(policy["required"], True)
+            self.assertEqual(policy["status"], "loaded")
+            self.assertEqual(policy["source"], "invocation:LINTEL_PROFILE_PACK")
+            self.assertEqual(policy["applicability"], "applicable")
+            self.assertEqual(policy["version"], reference["version"])
+        self.assertEqual(lines[2], "hard")
+        self.assertEqual(lines[5], "hard")
+        self.assertEqual(lines[7:], ["strict", "strict"])
+        self.assertEqual(len(list((self.home / "sessions").glob("**/current-profile.json"))), 1)
+
+    def test_reference_only_resume_controls_accessors_and_inherited_process_without_host_id(self):
+        self.assert_reference_resume_controls_following_reads()
+
+    def test_reference_only_resume_controls_accessors_and_inherited_process_with_new_host_id(self):
+        self.assert_reference_resume_controls_following_reads("different-real-host-session")
+
+    def test_resumed_reference_rejects_later_generation_and_missing_pin(self):
+        self.pack("strict")
+        producer_env = dict(self.env, LINTEL_PROFILE_PACK="strict")
+        reference = json.loads(self.shell("profile_context_reference", env=producer_env).stdout)
+        pin = Path(self.shell("_profile_cli context-path", env=producer_env).stdout)
+        handoff = self.target / "required-reference.json"
+        handoff.write_text(json.dumps(reference), encoding="utf-8")
+        error_policy = self.target / "missing-pin-policy.json"
+        env = dict(self.env, HANDOFF=handoff.as_posix(), PIN=pin.as_posix(),
+                   ERROR_POLICY=error_policy.as_posix())
+        env.pop("LINTEL_PROFILE_CONTEXT")
+        result = self.shell(
+            'verify_profile_context "$HANDOFF" >/dev/null || exit $?\n'
+            'bash -c \'source "$LINTEL_SOURCE_ROOT/lib/pack-resolver.sh"\n'
+            'rebind_profile_context "explicit child-process replan" >/dev/null\' || exit $?\n'
+            'resolve_pack_field compliance.mode',
+            env=env, success=False,
+        )
+        self.assertIn("PROFILE_REFERENCE_MISMATCH", result.stderr)
+        updated = json.loads(self.shell("profile_context_reference", env=producer_env).stdout)
+        handoff.write_text(json.dumps(updated), encoding="utf-8")
+        result = self.shell(
+            'verify_profile_context "$HANDOFF" >/dev/null || exit $?\n'
+            'rm -- "$PIN" || exit $?\n'
+            'if profile_required_policy >"$ERROR_POLICY"; then exit 90; fi\n'
+            'resolve_pack_field compliance.mode',
+            env=env, success=False,
+        )
+        self.assertIn("PROFILE_CONTEXT_MISSING", result.stderr)
+        policy = json.loads(error_policy.read_text(encoding="utf-8"))
+        self.assertIs(policy["required"], True)
+        self.assertEqual(policy["status"], "error")
+        self.assertEqual(policy["applicability"], "unknown")
+        self.assertFalse(pin.exists())
+
+    def test_failed_resume_keeps_the_previous_verified_selection(self):
+        self.pack("strict")
+        producer_env = dict(self.env, LINTEL_PROFILE_PACK="strict")
+        reference = json.loads(self.shell("profile_context_reference", env=producer_env).stdout)
+        handoff = self.target / "required-reference.json"
+        rejected = self.target / "rejected-reference.json"
+        handoff.write_text(json.dumps(reference), encoding="utf-8")
+        rejected.write_text(json.dumps(dict(reference, digest="sha256:" + "0" * 64)), encoding="utf-8")
+        env = dict(self.env, HANDOFF=handoff.as_posix(), REJECTED=rejected.as_posix())
+        env.pop("LINTEL_PROFILE_CONTEXT")
+        result = self.shell(
+            'verify_profile_context "$HANDOFF" >/dev/null || exit $?\n'
+            'if verify_profile_context "$REJECTED"; then exit 90; fi\n'
+            'profile_required_policy || exit $?\n'
+            'profile_context_reference || exit $?\n'
+            'resolve_pack_field compliance.mode',
+            env=env,
+        )
+        lines = result.stdout.splitlines()
+        self.assertIn("PROFILE_REFERENCE_MISMATCH", result.stderr)
+        self.assertEqual(json.loads(lines[0])["status"], "loaded")
+        self.assertIs(json.loads(lines[0])["required"], True)
+        self.assertEqual(json.loads(lines[1]), reference)
+        self.assertEqual(lines[2], "hard")
+
     def test_explicit_context_file_and_tampered_context_refuse_replacement(self):
         first = self.reference()
         path = Path(self.shell("_profile_cli context-path").stdout)
@@ -370,6 +480,146 @@ class ProfileLifecycle(unittest.TestCase):
         self.assertIn("PROFILE_REFERENCE_MISMATCH", self.shell(
             'verify_profile_context "$HANDOFF"', env=env, success=False,
         ).stderr)
+
+    def test_concurrent_rebinds_publish_current_and_selected_as_one_transaction(self):
+        self.pack("strict")
+        self.require("strict")
+        env = dict(self.env)
+        env.pop("LINTEL_PROFILE_CONTEXT")
+        original = json.loads(self.shell(BOOTSTRAP, env=env, source_resolver=False).stdout)
+        script = r'''
+import json
+from contextlib import contextmanager
+from pathlib import Path
+import sys
+import time
+sys.path.insert(0, sys.argv[1])
+import profile_context as profile
+source, repo, home, context, label, schedule = sys.argv[2:]
+source, repo, home, schedule = map(Path, (source, repo, home, schedule))
+config = profile.ProfileConfig(source, repo, home, home / "packs",
+                               home / "packs/active-pack", context_id=context)
+original_lock = profile._lock
+@contextmanager
+def scheduled_lock(config, path):
+    if label == "B" and path.with_name(path.name + ".lock").exists():
+        (schedule / "release-a").touch()
+    with original_lock(config, path):
+        yield
+    if label == "A" and path == profile.context_path(config):
+        (schedule / "a-context-released").touch()
+        deadline = time.monotonic() + 15
+        while not (schedule / "release-a").exists():
+            if time.monotonic() >= deadline:
+                raise RuntimeError("test scheduling barrier timed out")
+            time.sleep(0.01)
+profile._lock = scheduled_lock
+try:
+    result = profile.rebind_profile_context(config, "synthetic concurrent replan " + label)
+    print(json.dumps(profile.profile_reference(result)))
+finally:
+    if label == "B":
+        (schedule / "release-a").touch()
+'''
+        arguments = [
+            sys.executable, "-c", script, str(self.source / "lib"), str(self.source),
+            str(self.target), str(self.home), original["context_id"],
+        ]
+        a = subprocess.Popen(
+            arguments + ["A", str(self.base)], cwd=self.target, env=env,
+            text=True, encoding="utf-8", stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        )
+        processes = [a]
+        try:
+            deadline = time.monotonic() + 15
+            marker = self.base / "a-context-released"
+            while not marker.exists():
+                if a.poll() is not None or time.monotonic() >= deadline:
+                    stdout, stderr = a.communicate(timeout=5)
+                    self.fail("first rebind did not reach scheduling barrier: " + stderr + stdout)
+                time.sleep(0.01)
+            b = subprocess.Popen(
+                arguments + ["B", str(self.base)], cwd=self.target, env=env,
+                text=True, encoding="utf-8", stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            )
+            processes.append(b)
+            references = []
+            for process in processes:
+                stdout, stderr = process.communicate(timeout=25)
+                self.assertEqual(process.returncode, 0, stderr + stdout)
+                references.append(json.loads(stdout))
+        finally:
+            (self.base / "release-a").touch()
+            for process in processes:
+                if process.poll() is None:
+                    process.kill()
+                    process.communicate()
+        self.assertEqual(sorted(ref["generation"] for ref in references), [2, 3])
+        latest = max(references, key=lambda ref: ref["generation"])
+        selected = self.target / ".claude/runtime/profiles/selected.json"
+        self.assertEqual(json.loads(selected.read_text(encoding="utf-8")), latest)
+        resumed = json.loads(self.shell(BOOTSTRAP, env=env, source_resolver=False).stdout)
+        self.assertEqual(resumed, latest)
+        history = sorted(json.loads(path.read_text(encoding="utf-8"))["generation"]
+                         for path in (self.home / "sessions").glob("**/history/*.json"))
+        self.assertEqual(history, [1, 2])
+
+    def test_rebind_recovers_history_backed_stale_selected_reference(self):
+        self.pack("strict")
+        self.require("strict")
+        env = dict(self.env)
+        env.pop("LINTEL_PROFILE_CONTEXT")
+        original = json.loads(self.shell(BOOTSTRAP, env=env, source_resolver=False).stdout)
+        rebind_env = dict(env, LINTEL_PROFILE_CONTEXT=original["context_id"])
+        second = json.loads(self.shell(
+            "rebind_profile_context 'synthetic first replan'", env=rebind_env,
+        ).stdout)
+        selected = self.target / ".claude/runtime/profiles/selected.json"
+        selected.write_text(json.dumps(original), encoding="utf-8")
+        self.assertIn("PROFILE_REFERENCE_MISMATCH", self.shell(
+            BOOTSTRAP, env=env, success=False, source_resolver=False,
+        ).stderr)
+        recovered = json.loads(self.shell(
+            "rebind_profile_context 'recover interrupted selected-reference publication'",
+            env=rebind_env,
+        ).stdout)
+        self.assertEqual(recovered["generation"], second["generation"] + 1)
+        self.assertEqual(json.loads(selected.read_text(encoding="utf-8")), recovered)
+        self.assertEqual(json.loads(self.shell(
+            BOOTSTRAP, env=env, source_resolver=False,
+        ).stdout), recovered)
+        history = sorted(json.loads(path.read_text(encoding="utf-8"))["generation"]
+                         for path in (self.home / "sessions").glob("**/history/*.json"))
+        self.assertEqual(history, [1, 2])
+
+    def test_rebind_preserves_other_selection_and_rejects_unbacked_recovery(self):
+        self.pack("strict")
+        self.require("strict")
+        env = dict(self.env)
+        env.pop("LINTEL_PROFILE_CONTEXT")
+        original = json.loads(self.shell(BOOTSTRAP, env=env, source_resolver=False).stdout)
+        selected = self.target / ".claude/runtime/profiles/selected.json"
+        self.shell("bind_profile_context independent-work", env=env)
+        self.shell(
+            "rebind_profile_context 'independent work replan'",
+            env=dict(env, LINTEL_PROFILE_CONTEXT="independent-work"),
+        )
+        self.assertEqual(json.loads(selected.read_text(encoding="utf-8")), original)
+        rebind_env = dict(env, LINTEL_PROFILE_CONTEXT=original["context_id"])
+        pin = Path(self.shell("_profile_cli context-path", env=rebind_env).stdout)
+        before = pin.read_bytes()
+        selected.write_text(json.dumps(dict(original, generation=99)), encoding="utf-8")
+        result = self.shell(
+            "rebind_profile_context 'reject fabricated selection history'",
+            env=rebind_env, success=False,
+        )
+        self.assertIn("PROFILE_REFERENCE_MISMATCH", result.stderr)
+        self.assertEqual(pin.read_bytes(), before)
+        self.assertEqual(json.loads(selected.read_text(encoding="utf-8"))["generation"], 99)
+        selected.write_text(json.dumps(original), encoding="utf-8")
+        self.assertEqual(json.loads(self.shell(
+            BOOTSTRAP, env=env, source_resolver=False,
+        ).stdout), original)
 
     def test_compatibility_axes_and_legacy_marker_are_independent(self):
         self.pack("legacy", 'requires_lintel: ">=4.0.0"\n')

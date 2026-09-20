@@ -52,11 +52,14 @@ _profile_python() {
 
 _profile_cli() {
   _profile_python || return $?
-  local rc=0
+  local rc=0 context="${LINTEL_PROFILE_CONTEXT:-}"
+  if [ -z "$context" ] && [ -z "${LINTEL_PROFILE_REFERENCE:-}" ]; then
+    context="${LINTEL_SESSION_ID:-}"
+  fi
   "$_LINTEL_PROFILE_PYTHON" "$LINTEL_SOURCE_ROOT/lib/profile_context.py" \
     --source "$LINTEL_SOURCE_ROOT" --repo "$LINTEL_REPO_ROOT" --home "$LINTEL_HOME" \
     --packs "$LINTEL_PACKS_DIR" --pointer "$LINTEL_ACTIVE_PACK_FILE" \
-    --context "${LINTEL_PROFILE_CONTEXT:-${LINTEL_SESSION_ID:-}}" \
+    --context "$context" --reference "${LINTEL_PROFILE_REFERENCE:-}" \
     --context-file "${LINTEL_PROFILE_CONTEXT_FILE:-}" --pack "${LINTEL_PROFILE_PACK:-}" \
     "$@" || rc=$?
   if [ "$rc" -gt 1 ]; then
@@ -80,18 +83,24 @@ profile_context_json() { _profile_cli context; }
 profile_context_reference() { _profile_cli reference; }
 profile_required_policy() { _profile_cli required-policy; }
 verify_profile_context() {
+  local reference
   if [ "$#" -gt 0 ] && [ -z "${LINTEL_PROFILE_CONTEXT:-}" ]; then
     # An explicit cold-resume reference outranks the new host's ambient session.
-    LINTEL_SESSION_ID="" _profile_cli verify "$@"
+    reference=$(LINTEL_SESSION_ID="" LINTEL_PROFILE_REFERENCE="" _profile_cli verify "$@") || return $?
   else
-    _profile_cli verify "$@"
+    reference=$(_profile_cli verify "$@") || return $?
   fi
+  # Carry the exact verified generation into following calls and child processes,
+  # not just the single verification subprocess. The shared parser owns this data.
+  export LINTEL_PROFILE_REFERENCE="$reference"
+  printf '%s\n' "$reference"
 }
 
 bind_profile_context() {
   local reference
   reference=$(_profile_cli bind "${1:-}") || return $?
   export LINTEL_PROFILE_CONTEXT="$1"
+  export LINTEL_PROFILE_REFERENCE="$reference"
   PACK_CACHE_FILE="$(_profile_cli context-path)" || return $?
   _resolver_audit context_bound "context=$LINTEL_PROFILE_CONTEXT"
   printf '%s\n' "$reference"
@@ -100,6 +109,7 @@ bind_profile_context() {
 rebind_profile_context() {
   local reference
   reference=$(_profile_cli rebind "${1:-}") || return $?
+  export LINTEL_PROFILE_REFERENCE="$reference"
   _resolver_audit context_rebound "context=${LINTEL_PROFILE_CONTEXT:-${LINTEL_SESSION_ID:-explicit-file}}"
   printf '%s\n' "$reference"
 }
@@ -107,7 +117,7 @@ rebind_profile_context() {
 # Compatibility entry point: intentional re-resolution retains the old generation.
 # It must not delete evidence or silently clear another process's selected policy.
 clear_pack_cache() {
-  if [ -z "${LINTEL_PROFILE_CONTEXT:-${LINTEL_SESSION_ID:-}}" ] &&
+  if [ -z "${LINTEL_PROFILE_CONTEXT:-${LINTEL_SESSION_ID:-}${LINTEL_PROFILE_REFERENCE:-}}" ] &&
     [ -z "${LINTEL_PROFILE_CONTEXT_FILE:-}" ]; then
     _resolver_warn "no bound profile context to clear; one-shot reads are not pinned"
     return 0
@@ -141,7 +151,7 @@ _resolve_extends_chain() { _profile_cli chain "${1:-}"; }
 
 _prime_cache_for_session() {
   _profile_cli context >/dev/null || return $?
-  if [ -n "${LINTEL_PROFILE_CONTEXT:-${LINTEL_SESSION_ID:-}${LINTEL_PROFILE_CONTEXT_FILE:-}}" ]; then
+  if [ -n "${LINTEL_PROFILE_CONTEXT:-${LINTEL_SESSION_ID:-}${LINTEL_PROFILE_CONTEXT_FILE:-}${LINTEL_PROFILE_REFERENCE:-}}" ]; then
     PACK_CACHE_FILE="$(_profile_cli context-path)" || return $?
   fi
 }
