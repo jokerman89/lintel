@@ -129,6 +129,44 @@ reuse evidence; code, HTML, comments, ordinary continuations and unproven conten
 remain bound. Task text, IDs, criteria, non-task checkboxes and map approval still bind.
 Updating a progress box never supplies missing review or acceptance evidence.
 
+For an excerpt of the mapped `tasks` file, the manifest's `sha256` binds both the
+normalized text and the full-source permission to normalize it. Its exact preimage is:
+
+```python
+b"lintel:task-excerpt\0" + canonical_json({
+    "text": normalized_excerpt,
+    "progress_spans": progress_spans,
+    "end_progress_span": end_progress_span,
+}).encode("utf-8")
+```
+
+`canonical_json` uses sorted keys, separators `(",", ":")`, `ensure_ascii=True`
+and `allow_nan=False`. The domain prefix includes one zero byte.
+`progress_spans` is the sorted list of `[relative_start, relative_end]` pairs for
+eligible one-character, half-open Unicode codepoint spans inside the selected text,
+relative to the excerpt's start.
+An empty list is explicit evidence of no normalization permission. The exclusive
+end delimiter is not text in the excerpt, but its eligible progress span is bound
+separately because that permission participates in delimiter matching. That span
+uses the same origin and may be beyond the selected text's length; absent permission
+is JSON `null`. No absolute offsets, parse-local IDs or unrelated parent text enter
+the preimage.
+
+An enclosing fence or raw PRE that removes task eligibility therefore changes the
+identity even if every selected checkbox is a space or a formerly normalized `x`
+becomes a literal space. Real task progress and unrelated prefix/suffix changes
+retain identity when the selected text and eligibility are unchanged. Whole-file
+task selections still hash their normalized UTF-8 bytes; other acceptance sources
+and their excerpts still hash unnormalized bytes. Explicit product snapshots remain
+raw-content-bound.
+
+Old byte-only mapped-excerpt hashes remain inspectable history but cannot grant
+clearance, even on otherwise unchanged text. Prepare the selected context anew,
+obtain fresh independent review/corroboration and produce fresh QA. Never rewrite
+old digests or carry old approval into the revised binding. This is a hash-preimage
+correction: public fields/signatures and review/context/QA v2 remain unchanged,
+as do the separate work-map, profile, corroboration and provider versions.
+
 Only `record_path` (one pure review JSON under `.claude/runtime/reviews/`) and the
 native review audit file self-exclude. Existing record content must validate as
 review evidence. No arbitrary plan, report directory, config or `.claude/` subtree

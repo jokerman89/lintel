@@ -1098,14 +1098,20 @@ class ReviewEvidence(Fixture):
 
 
 class MarkdownBoundaryEvidence(Fixture):
-    def prepare_pipeline(self, source, *, acceptance=None):
+    def prepare_pipeline(self, source, *, acceptance=None, progress_spans=(), end_progress_span=None):
         (self.repo / "plan.md").write_bytes(source.encode("utf-8"))
         self.prepare()
         selected = next(item for item in self.expected["work"]["acceptance_manifest"] if item["path"] == "plan.md")
         if acceptance is None and selected["start"] is None:
             acceptance = source
         if acceptance is not None:
-            self.assertEqual(selected["sha256"], hashlib.sha256(acceptance.encode("utf-8")).hexdigest())
+            preimage = acceptance.encode("utf-8")
+            if selected["start"] is not None:
+                preimage = b"lintel:task-excerpt\0" + encoded({
+                    "text": acceptance, "progress_spans": list(progress_spans),
+                    "end_progress_span": end_progress_span,
+                }).encode("utf-8")
+            self.assertEqual(selected["sha256"], hashlib.sha256(preimage).hexdigest())
         self.record()
         self.log()
         self.corroborate()
@@ -1209,7 +1215,10 @@ class MarkdownBoundaryEvidence(Fixture):
         self.request["acceptance_paths"] = [
             "spec.md", {"path": "plan.md", "start": "    - [x] A1 Real task", "end": "# End"},
         ]
-        self.prepare_pipeline(original, acceptance="    - [ ] A1 Real task\n    - [ ] A2 Real sibling\n")
+        self.prepare_pipeline(
+            original, acceptance="    - [ ] A1 Real task\n    - [ ] A2 Real sibling\n",
+            progress_spans=[[7, 8], [30, 31]],
+        )
         self.consume_changed(
             original.replace("[x] A1", "[ ] A1").replace("[ ] A2", "[X] A2"), literal=False,
         )
@@ -1289,7 +1298,10 @@ class MarkdownBoundaryEvidence(Fixture):
         self.request["acceptance_paths"] = [
             "spec.md", {"path": "plan.md", "start": "# P1", "end": "- [x] A2 Boundary"},
         ]
-        self.prepare_pipeline(original, acceptance="# P1\n- [ ] A1 Real task\n")
+        self.prepare_pipeline(
+            original, acceptance="# P1\n- [ ] A1 Real task\n",
+            progress_spans=[[8, 9]], end_progress_span=[27, 28],
+        )
         self.consume_changed(
             original.replace("[ ] A1", "[x] A1").replace("[x] A2", "[ ] A2"), literal=False,
         )
@@ -1301,6 +1313,118 @@ class MarkdownBoundaryEvidence(Fixture):
         ]
         self.prepare_pipeline(original, acceptance="    - [x] A1 Required literal\n")
         self.consume_changed(original.replace("[x]", "[ ]"), literal=True)
+
+    def excerpt_context_transition(self, before, after, *, literal=True):
+        from review_contract import bind_work
+        self.request["acceptance_paths"] = [
+            "spec.md", {"path": "plan.md", "start": "# P1", "end": "# End"},
+        ]
+        self.prepare_pipeline(
+            before, acceptance="# P1\n- [ ] A1 Required task\n- [ ] A2 Required task\n",
+            progress_spans=[[8, 9], [31, 32]],
+        )
+        (self.repo / "plan.md").write_bytes(after.encode("utf-8"))
+        work = self.expected["work"]
+        current = bind_work(
+            self.repo, work_map=work["work_map"], package_id=work["package_id"],
+            leaf_ids=work["leaf_ids"], acceptance_paths=work["acceptance_paths"],
+        )
+        with self.subTest(check="work identity"):
+            self.assertEqual(current == work, not literal)
+        self.consume_changed(after, literal=literal)
+
+    def test_excerpt_context_all_space_into_fence_blocks(self):
+        before = "# P1\n- [ ] A1 Required task\n- [ ] A2 Required task\n# End\n"
+        self.excerpt_context_transition(before, "```markdown\n" + before + "```\n")
+
+    def test_excerpt_context_fence_retains_literal_x_blocks(self):
+        before = "# P1\n- [x] A1 Required task\n- [ ] A2 Required task\n# End\n"
+        self.excerpt_context_transition(before, "```markdown\n" + before + "```\n")
+
+    def test_excerpt_context_fence_literal_space_cannot_collide(self):
+        before = "# P1\n- [x] A1 Required task\n- [ ] A2 Required task\n# End\n"
+        self.excerpt_context_transition(before, "```markdown\n" + before.replace("[x]", "[ ]") + "```\n")
+
+    def test_excerpt_context_pre_literal_space_cannot_collide(self):
+        before = "# P1\n- [x] A1 Required task\n- [ ] A2 Required task\n# End\n"
+        self.excerpt_context_transition(before, "<pre>\n" + before.replace("[x]", "[ ]") + "</pre>\n")
+
+    def test_excerpt_context_genuine_progress_keeps_identity(self):
+        before = "# P1\n- [x] A1 Required task\n- [ ] A2 Required task\n# End\n"
+        self.excerpt_context_transition(before, before.replace("[x]", "[X]"), literal=False)
+
+    def test_excerpt_context_unrelated_prefix_suffix_and_commit_keep_identity(self):
+        before = "# P1\n- [x] A1 Required task\n- [ ] A2 Required task\n# End\n"
+        after = (
+            "# Unselected\n- Other list\n  - [x] A1 Outside selection\n\n"
+            + before.replace("[x]", "[X]")
+            + "\n<pre>\n- [ ] A2 Outside literal\n</pre>\n"
+        )
+        self.excerpt_context_transition(before, after, literal=False)
+        self.git("add", "plan.md")
+        self.git("commit", "-qm", "unrelated bookkeeping and task progress")
+        self.consume_changed(after, literal=False)
+
+    def test_excerpt_context_nested_unicode_crlf_progress_uses_relative_codepoints(self):
+        before = "- Parent\r\n    - [x] A1 \u03bb \U0001f600 task\r\n    - [ ] A2 Required task\r\n# End"
+        self.request["acceptance_paths"] = [
+            "spec.md", {"path": "plan.md", "start": "    - [x] A1 \u03bb \U0001f600 task", "end": "# End"},
+        ]
+        canonical = "    - [ ] A1 \u03bb \U0001f600 task\r\n    - [ ] A2 Required task\r\n"
+        self.prepare_pipeline(before, acceptance=canonical, progress_spans=[[7, 8], [30, 31]])
+        after = "# Unselected \u03bc\r\n- Earlier list\r\n\r\n" + before.replace("[x]", "[X]").replace("[ ] A2", "[x] A2")
+        self.consume_changed(after, literal=False)
+        for changed in (after.replace("\u03bb", "\u03bc"), after.replace("\r\n", "\n")):
+            with self.subTest(changed=changed):
+                self.consume_changed(changed, literal=True)
+
+    def test_excerpt_context_end_marker_eligibility_remains_bound(self):
+        before = "# P1\nRequired criterion.\n- [ ] A1 Boundary\n"
+        self.request["acceptance_paths"] = [
+            "spec.md", {"path": "plan.md", "start": "# P1", "end": "- [ ] A1 Boundary"},
+        ]
+        self.prepare_pipeline(
+            before, acceptance="# P1\nRequired criterion.\n", end_progress_span=[28, 29],
+        )
+        self.consume_changed("```markdown\n" + before + "```\n", literal=True)
+        self.consume_changed(before.replace("[ ]", "[X]"), literal=False)
+
+    def test_excerpt_context_literal_to_structural_space_is_not_same_identity(self):
+        before = "```markdown\n# P1\n- [ ] A1 Required task\n- [ ] A2 Required task\n# End\n```\n"
+        self.request["acceptance_paths"] = [
+            "spec.md", {"path": "plan.md", "start": "# P1", "end": "# End"},
+        ]
+        self.prepare_pipeline(
+            before, acceptance="# P1\n- [ ] A1 Required task\n- [ ] A2 Required task\n",
+        )
+        self.consume_changed(before.removeprefix("```markdown\n").removesuffix("```\n"), literal=True)
+
+    def test_excerpt_context_old_byte_only_receipt_needs_fresh_review(self):
+        before = "# P1\n- [x] A1 Required task\n- [ ] A2 Required task\n# End\n"
+        canonical = "# P1\n- [ ] A1 Required task\n- [ ] A2 Required task\n"
+        self.request["acceptance_paths"] = [
+            "spec.md", {"path": "plan.md", "start": "# P1", "end": "# End"},
+        ]
+        self.prepare_pipeline(before, acceptance=canonical, progress_spans=[[8, 9], [31, 32]])
+        old_qa = json.loads(self.qa_file.read_text(encoding="utf-8"))
+        work = self.expected["work"]
+        entry = next(item for item in work["acceptance_manifest"] if item["path"] == "plan.md")
+        byte_only_hash = hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+        self.assertNotEqual(entry["sha256"], byte_only_hash)
+        entry["sha256"] = byte_only_hash
+        work["acceptance_digest"] = digest(work["acceptance_manifest"])
+        self.expected_file.write_text(encoded(self.expected), encoding="utf-8")
+        self.record()
+        self.log()
+        self.corroborate()
+        old_qa["context_digest"] = digest(self.expected)
+        self.qa_file.write_text(encoded(old_qa), encoding="utf-8")
+        self.consume_changed(before, literal=True)
+        history = self.run_command(["bash", SOURCE / "bin" / "li-review-read", "--json"], ok=0)
+        self.assertIn(byte_only_hash, history.stdout)
+        self.prepare_pipeline(before, acceptance=canonical, progress_spans=[[8, 9], [31, 32]])
+        history = self.run_command(["bash", SOURCE / "bin" / "li-review-read", "--json"], ok=0)
+        self.assertIn(byte_only_hash, history.stdout)
 
     def test_criteria_ids_and_approval_remain_bound_in_all_consumers(self):
         original = "- [ ] A1 Real task\n- [ ] A2 Real sibling\n"

@@ -511,8 +511,22 @@ def bind_work(
                 ends = [i for i in range(len(source.lines)) if matches(i, end)]
                 if len(starts) != 1 or len(ends) != 1 or starts[0] >= ends[0]:
                     raise ContractError(f"Acceptance excerpt boundaries missing, repeated or reversed: {name}")
-                normalized = normalized[source.lines[starts[0]].start:source.lines[ends[0]].start]
+                lower, upper = source.lines[starts[0]].start, source.lines[ends[0]].start
+                normalized = normalized[lower:upper]
             data = normalized.encode("utf-8")
+            if name == task_path and start is not None:
+                # Bind normalization permission, including the exclusive end marker.
+                end_span = progress_spans.get(ends[0])
+                data = b"lintel:task-excerpt\0" + canonical_json({
+                    "text": normalized,
+                    "progress_spans": [
+                        [span.start - lower, span.end - lower]
+                        for span in sorted(progress_spans.values()) if lower <= span.start < upper
+                    ],
+                    "end_progress_span": (
+                        [end_span.start - lower, end_span.end - lower] if end_span is not None else None
+                    ),
+                }).encode("utf-8")
         manifest.append({"path": name, "start": start, "end": end, "sha256": hashlib.sha256(data).hexdigest()})
     result = {
         "work_map": work_map, "map_digest": map_digest, "package_id": package_id,
