@@ -18,7 +18,21 @@ shared control definitions. IDs are unique and mandatory QA IDs belong to requir
 controls; typed review and QA declarations cannot contradict the approved inventory.
 QA observations cannot omit, retype, downgrade or reclassify an obligation. Genuine
 docs-only scopes declare their actual documentation checks and grounded test N/A, not
-a fictitious universal test requirement. Exact final producer sample is pending P05.
+a fictitious universal test requirement.
+
+Candidate producer seam: prepare's input retains its old fields plus `qa_requirements`
+(no input version flag). It emits context version 2; the decision and QA receipt also
+use version 2. A mandatory QA ID such as `tests` must appear in `required_controls`,
+the review's typed controls, and each selected leaf's coverage. The typed obligation
+is not reconstructed from observed results. Profile references, work maps, corroboration
+and the standalone control-outcome envelope retain version 1.
+
+`CONTRACT_VERSION=2` is scoped to the bound review/context/QA contract.
+`validate_decision(record, history=...)` preserves strict historical-v1 inspection, not
+clearance. `select_latest` keeps its existing keyword arguments and accepts decoded
+mappings or ordered `ContractError` candidates; an invalid latest applicable candidate
+cannot be discarded into an older PASS. The final source-owned example is
+`skills/review/references/evidence.md` at the forthcoming immutable P05 repair.
 
 `lib/review_contract.py` (stdlib): `ContractError`, `load_json(text)`,
 `validate_control(control)`, `evaluate_controls(controls, required_policy=...)`,
