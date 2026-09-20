@@ -33,11 +33,29 @@ The verification-only sibling of `/qa`. Runs the test suite, parses results, sur
 
 ## Workflow
 
+Without an initiative map, run read-only QA normally and preserve its useful
+failure report. Do not create a redundant plan/backlog. Bind the observed controls
+to an explicit snapshot with the shared
+[inspection mode](../review/references/evidence.md#unmapped-inspection); that result
+is explicitly NON-release-clearance. The full expected-context/SHIP path below is
+for mapped authorized work, not a prerequisite for getting test feedback.
+
 1. **Detect test runner** — same logic as `/qa`. If ambiguous: ask once via AskUserQuestion.
-2. **Single run** — execute test command, capture stdout/stderr/exit code. No retry-on-flake (operator can run again if they suspect flake).
+2. **Single run** — use the reviewed expected context from the
+   [shared evidence procedure](../review/references/evidence.md). Execute the real
+   test command, capture stdout/stderr, command/environment inputs, actual
+   executed/failed/skipped counts and exit code. No retry-on-flake or auto-fixes.
 3. **Parse + classify** — same buckets as `/qa` (snapshot / lint / type / assertion / flaky), but no fix attempt. Classification informs the report's recommendation column.
 4. **Report** — structured failure list with file:line, category, and a one-line cause hypothesis.
-5. **Exit code** — 0 if clean, 1 if any failures. Suitable for shell-piping.
+5. **Evidence and exit code** — emit the shared QA record with `context_digest`,
+   observed test controls and hashed evidence files via `li-review-evidence.py qa`.
+   The helper validates observations; it does not run tests. Exit 0 requires
+   nonzero verified required coverage, 3 means unresolved/blocked acceptance.
+   Runner failures remain visible in the test control's actual exit code.
+6. **Recheck identity** — SHIP consumes this exact context and the latest applicable
+   independent review through `li-review-evidence.py ship`. Relevant source,
+   config, dependency, document or acceptance changes require new affected checks.
+   A run ten minutes ago is neither automatically valid nor automatically stale.
 
 ## Report format
 
@@ -72,7 +90,11 @@ Exit: 1 (3 failures, 87 passes, 2 skipped)
 
 ## Failure modes
 
-- **No tests found in scope:** report explicitly ("0 tests matched scope") + exit 0. Empty scope is not a failure.
+- **No tests found in scope:** report "0 tests matched scope", record `unverified`
+  and exit 3 for required acceptance. Never turn an empty error count into a pass.
+- **Required tests skipped or browser/renderer unavailable:** record what was not
+  observed and block the affected requirement; static checks may continue but do
+  not prove runtime behavior.
 - **Runner crashes:** report stderr + exit 2 (distinct from test-failure exit 1).
 - **Network/db dependency unavailable:** report dependency missing + exit 3. Do not retry.
 
@@ -81,7 +103,8 @@ Exit: 1 (3 failures, 87 passes, 2 skipped)
 **Clean:**
 ```
 > /qa-only
-✓ pytest: 87 pass / 0 fail / 2 skip (exit 0)
+pytest: 87 pass / 0 fail / 2 skip. Required skipped coverage remains unverified;
+only explicitly grounded out-of-scope checks can be not applicable.
 ```
 
 **Failures, JSON output:**

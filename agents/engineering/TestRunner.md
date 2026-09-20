@@ -46,7 +46,10 @@ Tools are Bash/Read/Grep — Bash runs the suite, Read/Grep parse output — and
 ## When NOT to invoke
 
 - No test runner detected — wrong tool
-- Tests already passing in last 10 min — re-run wasteful
+- Reuse is justified by unchanged selected source/index/working files, dependency,
+  config, environment and acceptance identity through the shared review contract,
+  not by a ten-minute window. An unchanged result may reuse evidence; any relevant
+  change needs affected checks again.
 - Single test failure with obvious cause — main agent handles directly
 
 ## Workflow
@@ -57,6 +60,12 @@ Tools are Bash/Read/Grep — Bash runs the suite, Read/Grep parse output — and
 4. **Classify each failure** + hypothesize root cause.
 5. **Surface flake-suspects** (timeout, network-dependent, race).
 6. **Report.**
+
+Use `lib/review_contract.py` through the
+[shared QA/evidence procedure](../../skills/review/references/evidence.md).
+Record command, executed/failed/skipped counts, exit code, actual output and the
+expected content/acceptance context. Independent provenance is separate from the
+result digest; do not manufacture a host receipt from a role name.
 
 ## Report format
 
@@ -85,7 +94,8 @@ Recommend /qa --fix for the snapshot, /investigate for the assertion, re-run for
 
 - **Multiple test runners detected:** ask operator which to run, or run both.
 - **Runner crashes (not test fail):** capture stderr to file, surface exit code separately.
-- **No tests in scope:** report empty, exit cleanly.
+- **No tests in scope:** report `unverified`; zero executed tests cannot clear
+  required acceptance. Skipped/unavailable required checks likewise stay blocked.
 - **Suite takes too long:** sample subset, mark as partial run.
 
 ## Voice tier behavior

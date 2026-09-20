@@ -1,124 +1,51 @@
 #!/usr/bin/env bash
-# bin/li-review-log — native review-log writer
 # component: lintel-review-log
-# implements: ADR-0005, ADR-0024
-# intent: docs/spec-kit.md
-# constraints: helper code comes from the source bundle; audit data and Git state belong to the target repository
-# last_intent_review: 2026-09-08
-#
-# Lintel's review skills (plan-ceo-review, plan-eng-review, plan-design-review,
-# plan-devex-review, code-review, codex) call this on the execution path. It takes
-# a single JSON-object argument and appends one record via audit_log() to Lintel's
-# own audit log at .claude/runtime/audit/reviews.jsonl (scope-routed by bin/_audit.sh).
-#
-# Record fields: skill, status, commit, timestamp — plus any extra keys, preserved
-# verbatim under "raw". First-party by design: the review log stays on Lintel's own
-# execution path with no external binary dependency.
-#
-# Usage:
-#   bin/li-review-log '{"skill":"plan-eng-review","timestamp":"...","status":"CLEAR","commit":"7e7a021","mode":"FULL_REVIEW"}'
-#
-# Contract:
-#   - Single argument: a JSON object describing the review.
-#   - Recognised top-level keys: skill, status, commit, timestamp (+ any extras,
-#     which are preserved verbatim in the "raw" field).
-#   - Invalid JSON (best-effort check) is rejected with exit 1.
-#
-# Writes to: .claude/runtime/audit/reviews.jsonl  (category=reviews, kind=<skill>; scope-routed by _audit.sh)
-#
-# Exit codes:
-#   0 = record written
-#   1 = invalid / missing JSON input
-#   2 = invocation error (audit helper missing, etc.)
-
+# implements: ADR-0005, ADR-0024, ADR-0028
+# intent: .claude/plans/universal-implementation/packages/P05.md
+# constraints: trusted source code, target-owned audit; legacy history is not clearance
+# last_intent_review: 2026-09-20
 set -euo pipefail
-
-SOURCE_ROOT="${LINTEL_SOURCE_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." 2>/dev/null && pwd)}"
-
+SOURCE_ROOT="${LINTEL_SOURCE_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 usage() {
-  head -33 "$0" | sed 's/^# \{0,1\}//' | sed '1d'
-  exit "${1:-2}"
+  echo 'Usage: bash li-review-log <JSON> | --file <review.json> [--history]'
+  echo 'Strict version-1 evidence uses the shared contract. --history is inspection-only.'
 }
-
-INPUT=""
+input=()
+history=()
 while [ $# -gt 0 ]; do
   case "$1" in
-    -h|--help) usage 0 ;;
-    -*) echo "li-review-log: unknown flag: $1" >&2; usage 2 ;;
-    *) INPUT="$1"; shift ;;
+    -h|--help) usage; exit 0 ;;
+    --file) [ $# -ge 2 ] && [ "${#input[@]}" -eq 0 ] || { usage >&2; exit 2; }
+            input=(--file "$2"); shift 2 ;;
+    --history) history=(--history); shift ;;
+    -*) echo "li-review-log: unknown flag: $1" >&2; exit 2 ;;
+    *) [ "${#input[@]}" -eq 0 ] || { echo 'li-review-log: one input required' >&2; exit 2; }
+       input=(--input "$1"); shift ;;
   esac
 done
-
-[ -n "$INPUT" ] || { echo "li-review-log: JSON argument required" >&2; usage 2; }
-
-PATHS_LIB="$SOURCE_ROOT/lib/paths.sh"
-[ -f "$PATHS_LIB" ] || { echo "li-review-log: paths helper missing: $PATHS_LIB" >&2; exit 2; }
-source "$PATHS_LIB"
-REPO_ROOT="$(lintel_repo_root)"
-[ -n "$REPO_ROOT" ] && [ -d "$REPO_ROOT" ] || { echo "li-review-log: working repository required" >&2; exit 2; }
-REPO_ROOT="$(cd "$REPO_ROOT" && pwd -P)" || exit 2
-export LINTEL_REPO_ROOT="$REPO_ROOT"
-
-AUDIT_LIB="$SOURCE_ROOT/bin/_audit.sh"
-[ -f "$AUDIT_LIB" ] || { echo "li-review-log: audit helper missing: $AUDIT_LIB" >&2; exit 2; }
-# shellcheck source=/dev/null
-source "$AUDIT_LIB"
-
-# ── Extract a string field from the JSON object (jq if available, else regex) ──
-# Best-effort, dependency-light: matches "key":"value" or "key": value (number).
-_json_field() {
-  local key="$1"
-  if command -v jq >/dev/null 2>&1; then
-    printf '%s' "$INPUT" | jq -b -r --arg k "$key" '.[$k] // empty' 2>/dev/null
-    return 0
-  fi
-  # Regex fallback: quoted string value
-  printf '%s' "$INPUT" | sed -n "s/.*\"$key\"[[:space:]]*:[[:space:]]*\"\([^\"]*\)\".*/\1/p" | head -1
-}
-
-# ── Validate input is parseable JSON (matches legacy reject-on-malformed) ──
-if command -v jq >/dev/null 2>&1; then
-  if ! printf '%s' "$INPUT" | jq -e . >/dev/null 2>&1; then
-    echo "li-review-log: invalid JSON, skipping" >&2
-    exit 1
-  fi
-else
-  # Minimal shape check without jq: must look like a JSON object.
-  case "$INPUT" in
-    \{*\}) : ;;
-    *) echo "li-review-log: input does not look like a JSON object, skipping" >&2; exit 1 ;;
-  esac
+[ "${#input[@]}" -gt 0 ] || { usage >&2; exit 2; }
+python="${LINTEL_PYTHON:-python3}"
+if ! "$python" -c 'import sys; assert sys.version_info >= (3, 9)' >/dev/null 2>&1; then
+  python=python
 fi
-
-SKILL="$(_json_field skill)"
-STATUS="$(_json_field status)"
-COMMIT="$(_json_field commit)"
-TIMESTAMP="$(_json_field timestamp)"
-
-SKILL="${SKILL:-unknown}"
-
-# Resolve commit to current short HEAD when the skill passed a placeholder/empty.
-case "$COMMIT" in
-  ""|"..."|"<commit>"|"unknown")
-    COMMIT="$(git -C "$REPO_ROOT" rev-parse --short HEAD 2>/dev/null || echo unknown)"
-    ;;
-esac
-
-# audit_log stamps its own ts; preserve the skill-supplied timestamp too when given
-# (drop placeholder "..."), so reviews.jsonl carries the review's own time.
-case "$TIMESTAMP" in
-  ""|"...") TIMESTAMP="" ;;
-esac
-
-# Preserve the full original JSON payload verbatim for replay / downstream parsing.
-RAW_ONE_LINE="$(printf '%s' "$INPUT" | tr '\n' ' ')"
-
-# Write the audit record:
-#   category=reviews  kind=<skill>  status=... commit=... [review_ts=...] raw=<payload>
-set -- "status=$STATUS" "commit=$COMMIT"
-[ -n "$TIMESTAMP" ] && set -- "$@" "review_ts=$TIMESTAMP"
-set -- "$@" "raw=$RAW_ONE_LINE"
-
-audit_log reviews "$SKILL" "$@"
-
-echo "li-review-log: recorded ${SKILL} status=${STATUS:-?} commit=${COMMIT} → $(_audit_out_dir reviews)/reviews.jsonl"
+"$python" -c 'import sys; assert sys.version_info >= (3, 9)' >/dev/null 2>&1 || {
+  echo 'li-review-log: Python 3.9+ is required for strict JSON parsing' >&2; exit 2;
+}
+helper="$SOURCE_ROOT/bin/li-review-evidence.py"
+[ -f "$helper" ] || { echo "li-review-log: trusted evidence helper missing: $helper" >&2; exit 2; }
+source "$SOURCE_ROOT/lib/paths.sh"
+REPO_ROOT="$(lintel_repo_root)"
+[ -n "$REPO_ROOT" ] && [ -d "$REPO_ROOT" ] || { echo 'li-review-log: working repository required' >&2; exit 2; }
+export LINTEL_REPO_ROOT="$REPO_ROOT"
+validated="$("$python" "$helper" log-input --repo "$REPO_ROOT" "${input[@]}" "${history[@]}")" || exit 1
+skill="${validated%%$'\n'*}"; validated="${validated#*$'\n'}"
+status="${validated%%$'\n'*}"; validated="${validated#*$'\n'}"
+commit="${validated%%$'\n'*}"; validated="${validated#*$'\n'}"
+format="${validated%%$'\n'*}"; raw="${validated#*$'\n'}"
+source "$SOURCE_ROOT/bin/_audit.sh"
+log="$(_audit_out_dir reviews)/reviews.jsonl"
+offset=0
+if [ -f "$log" ]; then offset="$(wc -c < "$log" | tr -d '[:space:]')"; fi
+audit_log reviews "$skill" "status=$status" "commit=$commit" "format=$format" "raw=$raw"
+printf '%s' "$raw" | "$python" "$helper" audit-check --log "$log" --offset "$offset" || exit 1
+echo "li-review-log: recorded $skill status=$status commit=$commit -> $log"

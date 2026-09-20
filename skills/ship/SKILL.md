@@ -35,7 +35,7 @@ The active pack's voice gates (`resolve_pack_field voice.gates_active`; none by 
 - REVIEW returned BLOCKED (P1 unfixed) → fix loop, then ship
 - intent=research-only — no ship
 - intent=local-dev-only — operator works locally, no ship
-- intent=draft-PR-only — use lighter PR-open without compliance gates
+- intent=draft-PR-only — retain draft labeling and every applicable mandatory policy boundary
 
 ## Workflow
 
@@ -44,13 +44,26 @@ The active pack's voice gates (`resolve_pack_field voice.gates_active`; none by 
 Verify ship-readiness:
 - `git status` is clean OR operator confirms uncommitted is intentional
 - Current branch is NOT main (unless explicit per-batch direct-push auth)
-- All tests pass (run `/li:qa` if not already passed in REVIEW)
-- review-report.md shows PASS (or operator overrides with documented rationale)
-- compliance-report.md shows PASS (if the active pack defines compliance gates)
+- Run `/li:qa-only`, never fixing `/li:qa` after review. Require actual nonzero
+  executed acceptance and explicit skipped/unavailable coverage.
+- Consume the [shared content-bound gate](../review/references/evidence.md) with
+  the selected context, actual independent corroboration and read-only QA record.
+  `li-review-evidence.py ship` invokes the real audit reader, selects the latest
+  applicable decision before verdict, and revalidates content/acceptance/profile.
+- Human-readable review/compliance reports remain supporting evidence. PASS text,
+  an old commit-only review, elapsed time or an operator note is not a substitute
+  for sufficient current evidence.
 - `.claude/runtime/state/analyze-report.md` verdict surfaced if present (ADR-0004; advisory — RED/YELLOW
   goes to the operator with the findings table, it does not auto-block)
 
 If pre-flight fails: BLOCKED. Don't proceed.
+
+Intentional dirty work must be in the reviewed explicit selection, including new
+files, deletions, documents and config. Staging, committing or editing selected
+content after review requires a newly verified context and affected review/QA.
+Unrelated files/commits outside selection do not alone invalidate unchanged evidence.
+The helper verifies readiness only; it grants no push, merge, release or deployment
+permission and does not authenticate the reviewer from a digest.
 
 ### Step 2 — Audience + voice classification
 
@@ -63,7 +76,11 @@ Determines which gates fire in subsequent steps.
 
 ### Step 3 — Compliance hard-stop check (active pack's gates)
 
-Run the active pack's compliance gates (`resolve_pack_field compliance.hooks`; none by default). NEVER bypassable when present. Re-verify even if REVIEW passed (last-second pre-ship sanity). Example gates a pack may activate:
+Resolve the required profile successfully, then run its applicable controls using
+the shared `mandatory`/`advisory` model. A mandatory fail/error/unverified or unknown
+required policy blocks even if every advisory score is green. Advisory issues do
+not become hard stops merely because a gate exists. Re-verify the same context even
+if REVIEW passed. Example checks a pack may require:
 
 ```bash
 # Customer data
@@ -77,12 +94,13 @@ gitleaks detect --staged
 If ANY gate violation:
 - HARD STOP
 - Surface to operator: violation + file:line + recommended fix
-- Operator MUST fix or explicitly override (rarely warranted)
+- Fix the violation or obtain a policy-authorized scope change and re-plan/review.
+  An override note cannot relabel a failed mandatory control as passed or N/A.
 - Log the stop mechanically (one line; ts/operator/cycle_id come from the envelope):
 
 ```bash
 source "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/bin/_audit.sh"
-audit_log compliance-stops gate_violation gate=<gate> file=<file:line> resolution=<fixed|overridden>
+audit_log compliance-stops gate_violation gate=<gate> file=<file:line> resolution=<open|fixed|policy-replan>
 # → .claude/runtime/audit/compliance-stops.jsonl
 ```
 
@@ -275,7 +293,9 @@ Skip-conditions: intent=research-only, intent=local-dev-only, intent=draft-only.
 
 **Reads:**
 - the active pack's compliance gates (`resolve_pack_field compliance.hooks`; none by default)
-- review-report.md (must show PASS)
+- latest applicable structured review decision, selected expected context and independent corroboration
+- same-context QA record with actual executed/failed/skipped coverage
+- review-report.md (human-readable supporting evidence, not standalone clearance)
 - compliance-report.md (if the active pack defines compliance gates)
 - brand assets (`resolve_pack_field brand.templates` if doc-gen)
 - the active pack's voice corpus (`resolve_pack_field voice.corpus`; none by default — if voice gate)

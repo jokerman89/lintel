@@ -48,7 +48,9 @@ Tools are Read/Grep/Glob/Bash — no Edit/Write — because this agent reviews a
 ## When NOT to invoke
 
 - Single-line change — main agent reads directly
-- Diff already reviewed within 24h with no new commits
+- The shared reader confirms unchanged selected content and acceptance with no
+  later rejection. A 24-hour window or "no new commits" cannot establish that:
+  staged, dirty, new, deleted, config and document inputs may have changed.
 - The change is in a frozen-zone — review is moot until unfrozen
 
 ## Workflow
@@ -63,6 +65,13 @@ Tools are Read/Grep/Glob/Bash — no Edit/Write — because this agent reviews a
    - Conventions — naming case, file location, comment discipline
 4. **Cross-file:** consistency across the change. Same concept named different things? Repeated pattern not extracted?
 5. **Per-finding:** severity (P1 blocks ship, P2 should-fix-before-ship, P3 nit), confidence (1-10), file:line, suggested fix.
+
+Bind the decision through the [shared evidence contract](../../skills/review/references/evidence.md):
+selected work/package/leaves, acceptance, attempt, base/result manifest and actual
+builder/reviewer contexts. Cover every required control for every selected leaf.
+Keep actor declarations distinct from separately supplied host/human corroboration.
+Report findings without fixing them; repairs invalidate affected evidence and return
+to review. Historical PASS text does not authorize a changed result.
 
 ## Report format
 

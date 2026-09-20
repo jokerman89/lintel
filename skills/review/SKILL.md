@@ -31,7 +31,7 @@ Three-stage discipline (extends superpowers' two-stage with compliance):
 ## When NOT to use
 
 - intent=research-only (no code to review)
-- intent=docs-only (lighter review path — invoke `/li:docs-review` if exists, or skip)
+- intent=docs-only may use proportionate inline review, but selected documents still bind to acceptance and delivery evidence
 - Before BUILD complete (mid-task reviews happen in BUILD's two-stage cycle, not REVIEW phase)
 
 ## Workflow
@@ -44,6 +44,13 @@ Use mapped `spec` for requirements, `plan` for technical decisions, and `tasks` 
 ID and acceptance check. All “plan.md requirements/tasks” below refer to these mapped sources;
 reference-only Lintel companions are navigation, not duplicate specifications. Compare actual
 code and evidence to the original Spec Kit tasks. A work-map approval never replaces review.
+
+Before reviewing, follow [the shared evidence procedure](references/evidence.md):
+prepare an explicit selection and immutable context with package/leaf acceptance,
+base, staged/unstaged/new/deleted content, attempt, profile and required controls.
+Use the actual builder and reviewer invocation identities. Substantive work requires
+separately corroborated independent review; missing delegation means a durable manual
+handoff, not role-play. A reviewer reports findings and never repairs their own findings.
 
 ### Swarm integrated-tree close gate
 
@@ -96,7 +103,8 @@ Then read:
 - the active pack's compliance gates (`resolve_pack_field compliance.hooks`; none by default)
 
 Identify scope of review:
-- Files changed in BUILD (`git diff <plan-start-sha>..HEAD --name-only`)
+- The prepared snapshot's selected files and states, including dirty/new files and deletions;
+  a commit-range diff is supporting context, not the complete review boundary
 - Subset of plan tasks (if --tasks flag) or all
 - Default: full BUILD output
 
@@ -109,6 +117,10 @@ Prompt:
 - Per-task: PASS or list deviations with file:line + suggested fix
 - Aggregate: total tasks PASS / total deviations / spec-compliance score
 Be terse. Don't praise."
+
+Record exact `pass`, `fail`, `unverified` or `error` per acceptance control and map
+every selected leaf to its evidence. A missing acceptance result blocks that leaf;
+scores cannot average it away.
 
 If Stage 1 FAILS:
 - Surface per-task deviations
@@ -137,7 +149,11 @@ If Stage 2 FAILS:
 
 ### Step 4 — Stage 3: Compliance gates (fires per the active pack + voice + audience)
 
-Run the active pack's compliance gates (`resolve_pack_field compliance.hooks`; none by default). Each blocks if it fails. A pack contributes its own gate skills/agents; Lintel ships none by default. Typical pack-contributed gates:
+Resolve required-policy status before using the active pack's controls. Use
+`evaluate_controls` / `li-review-evidence.py controls`, not failure counts or an
+average. Each applicable **mandatory** fail/error/unverified result blocks; advisory
+findings remain advisory. Unknown applicability or a failed required profile load is
+not a neutral exemption. A pack contributes its own gate skills/agents; examples:
 
 **Pack compliance audit** (if the pack defines one):
 - Pack-specific compliance sweep (hard-rules + on-demand items as the pack configures)
@@ -183,7 +199,8 @@ If YES:
 - Surface output verbatim under "OUTSIDE VOICE (Codex):" header
 - Cross-synthesize with internal findings
 
-If unavailable: skip silently.
+If unavailable: record the optional pass as unverified. It cannot replace the
+required independent reviewer or supply a fictitious observation.
 
 ### Step 7 — Write artifacts
 
@@ -231,6 +248,12 @@ If unavailable: skip silently.
 - Per-gate breakdown for audit trail
 - Path: `.claude/runtime/state/compliance-report-<datetime>.md`
 
+Keep these human-readable artifacts and persist the version-1 decision using the
+[shared writer/reader](references/evidence.md). Include unverified/error and grounded
+not-applicable controls, full leaf coverage, content-hashed evidence links and
+declared actor provenance. Only the shared reader's strict result can set ship-ready;
+a heading in this report or a historical positive string cannot.
+
 ### Step 8 — 00-state.md append
 
 Mechanical since v5.0 (ADR-0008) — one command, not a YAML obligation. `next=` is SHIP, or BUILD on loop-back, or DEFINE on scope gap; per-stage detail lives in review-report.md:
@@ -243,9 +266,9 @@ state_append REVIEW <DONE|DONE_WITH_CONCERNS|BLOCKED> next=<SHIP|BUILD|DEFINE> r
 
 ## Status protocol
 
-- **DONE** — all stages PASS, P1 findings addressed, ship-ready
+- **DONE** — all required stages and leaf acceptance verified for the selected result, strict reader clear
 - **DONE_WITH_CONCERNS** — P2/P3 findings noted, voice gate <100% but ≥85%
-- **BLOCKED** — P1 unfixed OR a blocking compliance gate failed
+- **BLOCKED** — any required failure/error/unverified result, stale content or outstanding independent review
 - **NEEDS_CONTEXT** — review can't proceed without more info (rare)
 
 ## Pause-points (MANDATORY)
