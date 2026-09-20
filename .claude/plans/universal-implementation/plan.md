@@ -437,7 +437,7 @@ Independent first-wave review outcomes:
 | P02 | `9bdaeb4` | PASS; original findings and staged-deletion repair verified | PASS; [final](reviews/P02-final.md) | Integrated `39561c0`; final initiative checks remain |
 | P03 | `500adb3` | PASS; original preservation findings verified | PASS; [final](reviews/P03-final.md) | Integrated `9a1cf17`; assigned downstream consumers remain |
 | P04 component | `aa73651` | PASS; all F01-F05 close | PASS; [final](reviews/P04-final.md) | Integrated `490a0f4` + reports `8964267`; final A22.7 open |
-| P05 | `9c8ef727` | FAIL Q01 excerpt context identity; [report](reviews/P05-shared-boundary-final.md) | Started/stopped on spec counterexample, not passed | Original owner repairs consumer only; provider remains accepted |
+| P05 | `b023e8c` | Independent Q01 re-review pending; [prior rejection](reviews/P05-shared-boundary-final.md) retained | First whole bounded quality remains incomplete until spec passes | Frozen report `ec90b609`; same reviewer, exact accepted provider unchanged |
 | P06 | `7425960` | PASS; C01-C07 closed | PASS; [final](reviews/P06-provider-repair-final.md) | Integrated `36593cd`; later shared-consumer and live gates open |
 | P07 | `4d001463` | Independent long-path repair review pending; earlier `a8de574` remains accepted | Pending repair quality; earlier [bounded pass](reviews/P07-windows-final.md) | Frozen report `da614cad`; same reviewer, no new integration or acceptance |
 

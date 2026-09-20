@@ -34,7 +34,7 @@ from the reviewed historical merge `40c2795`. Current implementation ownership:
 | P02 sync binding | `2e21aa98-3b40-46e7-885d-2ec4161ec35d` | ACCEPTED and integrated `39561c0`; idle, no real private sync activated |
 | P03 context safety | `9f06eebf-a3ee-4867-95ad-eb6e1d22a6d5` | ACCEPTED and integrated `9a1cf17`; idle, downstream consumer/host gates separate |
 | P04 Swarming | `a8960a09-fcd7-4652-a9b6-74ad6a94a029` | Component ACCEPTED/integrated `490a0f4` + report history `8964267`; idle until explicit A22.7 |
-| P05 review evidence | `2329e71f-cd9e-473b-94cf-41c579c29a88` | `9c8ef727` rejected for Q01 excerpt-context identity; original owner receives bounded consumer repair |
+| P05 review evidence | `2329e71f-cd9e-473b-94cf-41c579c29a88` | Frozen Q01 product `b023e8c`, report `ec90b609`; same-reviewer complete spec then first whole bounded quality |
 | P06 host adapters | `324863ff-e7cf-4abf-b449-04dd0f096170` | Component ACCEPTED/integrated `36593cd`; provider `7425960`, final review `1067da29`; idle |
 | P07 profile context | `b9352dfe-1c1e-4ea3-b7d9-0fd008d39b3d` | Frozen long-path product `4d001463`, report `da614cad`; same-reviewer independent repair spec/quality |
 | P10 installer lifecycle | `5ea6c88c-68c1-4712-8f55-adecdfe0061f` | Implementing approved native/runtime split from `0df1042`; dependencies `98ad7ed` / `ca28074`, no Python install prerequisite |
@@ -53,7 +53,7 @@ repair their own findings. All prior reports remain preserved in `reviews/` and 
 | P02 | Final `1b6153f`; SPEC/QUALITY PASS at `9bdaeb4`; idle | `da23fa6f-499b-4011-b39b-a632312a8800` |
 | P03 | Final `2840012`; SPEC/QUALITY PASS at `500adb3`; idle | `efd3f877-550a-4ef0-9009-ed71b95b01ab` |
 | P04 | Final `279dfc9`; component SPEC/QUALITY PASS at `aa73651`; A22.7 open | `ed672f58-2e85-42e2-b1b2-0635ba5b2325` |
-| P05 | Rejection `0cdbf596`, report-only integrated `29ae5d9`; Q01 consumer repair next | `6ed9c7df-4845-4d70-88c7-f0746ab28059` |
+| P05 | Current `b023e8c` / report `ec90b609` under review; rejection `0cdbf596` retained | `6ed9c7df-4845-4d70-88c7-f0746ab28059` |
 | P06 | Final `1067da29`; complete component SPEC/QUALITY PASS at `7425960`; integrated | `d2a89ac3-151a-4dc0-ab09-1f3a62465cab` |
 | P07 | Current repair `4d001463` / report `da614cad` under review; earlier `a8de574` accepted by `3d8e715` | `a7d78944-c02c-4909-a060-2c4f2a754b00` |
 
@@ -191,6 +191,15 @@ identity. The provider is correct and stays frozen. The same P05 owner must bind
 selection-relative context, preserving genuine progress and unrelated outside edits.
 Spec is FAIL; first full quality started/stopped, not passed.
 
+New Q01 candidate: product `b023e8c25a922ffc536ffde6dd911865bf2eea21`, report-only
+child `ec90b609423418ee4136f9fe425dfada11a08fae`. The coordinator checked its parents,
+three owned product paths and unchanged provider blob, read the repair evidence, and
+dispatched the same reviewer `6ed9c7df`. Builder-only final evidence is one combined
+91-method run (81 retained plus 10 new), 12 controls, source-target/hook and focused
+shape checks, zero skips. The mapped-excerpt hash now binds relative normalization
+permission plus text, with explicit old-receipt invalidation. Neither the new source
+nor report is integrated; Q01 and complete owned spec/quality remain independently open.
+
 P05's unchanged real four-case producer/reader/SHIP bridge passed with P07 `d02bb24`
 and again with `56981ed` (P05 `54147fd`),
 including saved-reference shell paths, but did not exercise the defective ordinary
@@ -227,12 +236,13 @@ No new authorization for main merge, releases, production, hook activation or pr
 
 ## Next action
 
-P05 Q01, P07 long-path and P10 lifecycle implementation are actively dispatched under
-`0ecdb520`. P07 preserved its old branch and continued from that exact integrated base;
-its unchanged installed-consumer RED was reproduced. P05's chosen repair binds
+P05 Q01 and P07 long-path candidates are frozen under their original independent
+reviewers; P10 continues implementation under `0ecdb520`. P07 preserved its old branch
+and continued from that exact integrated base; its unchanged installed-consumer RED
+was reproduced. P05's chosen repair binds
 selection-relative normalization eligibility and delimiter participation, not whole
-unselected task text. Await their immutable results instead of polling or duplicating
-their code investigation. Obtain same-reviewer independent spec/quality for P05/P07
+unselected task text. Await the review results and P10's immutable candidate instead of
+polling or duplicating their code investigation. Obtain same-reviewer independent spec/quality for P05/P07
 and a separate independent P10 reviewer, then integrate exact accepted deltas. The
 coordinator retains generated outputs and final fan-in. No navigation/provider or P05
 policy/schema workaround is authorized; all final joined/delivery gates remain open.

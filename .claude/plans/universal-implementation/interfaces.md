@@ -33,6 +33,14 @@ snapshot `9c8ef727` were rejected by independent `0cdbf596` for Q01 excerpt-cont
 identity. All 81 actual evidence methods passed on that paired source; those fixtures
 did not cover the new transition. P05 now owns the approved selection-relative context
 binding repair in the shared-boundary card. No provider/API change is authorized.
+The new frozen consumer is `b023e8c` with report-only snapshot `ec90b609`, currently
+under independent review. Its mapped-task excerpt digest uses domain-separated
+canonical JSON of normalized text, sorted eligible codepoint spans relative to the
+selection, and exclusive end-marker eligibility (pair or null). Old byte-only
+mapped-excerpt receipts remain history, not clearance; fresh preparation/review/QA
+is required. Other hash domains and public field/version shapes are unchanged.
+Read the exact candidate evidence reference before implementing dependent consumers;
+this describes the frozen candidate, not an acceptance or authorization to import it.
 
 ## P05 review and controls
 
