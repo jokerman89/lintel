@@ -196,3 +196,8 @@ meta.tsv/plan.tsv, per-file phases and aggregate incomplete/complete/recovered s
 the native installer does not call Python or an audit writer. P08 must coordinate
 the exact frozen shapes and real producer fixtures before its A13 integration, retain
 the native no-Python boundary, and distinguish observations from independent verification.
+
+P08 currently reports a new, uncommitted trusted `lib/workflow.sh` reference consumer.
+Its final accepted source must join the explicit installed-resource preflight as well
+as ordinary lib copying. Do not import this WIP or make its absent file a prerequisite
+for P10's current freeze; the coordinator reconciles that dependency after acceptance.
