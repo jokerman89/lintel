@@ -18,6 +18,16 @@ requires verified `jokerman89` authentication, unavailable at bootstrap.
 No action is done merely because its worker finished. Completion requires leaf acceptance,
 preserved behavior, independent package review and applicable integration evidence.
 
+## Plan signals
+
+All 26 outcomes are in scope, grouped into 15 accountable packages. The current task list
+contains 129 checkboxes including compound parents and their stable sub-leaves.
+Remaining phases: BUILD, REVIEW, authorized SHIP, CAPTURE. The repository's XL prior
+reports 120,000 tokens, **uncalibrated, zero measured samples**, for the whole cycle.
+This is a planning prior, not a usage measurement, deadline or spending ceiling.
+Existing explicit execution authorization is retained; no new approval is inferred
+for the external boundaries in the specification.
+
 ## Packages and ownership
 
 Each package has one implementer and a separate read-only reviewer. Child sessions use
@@ -79,7 +89,11 @@ retain its parent acceptance. Do not renumber or replace the original A-ID.
   - [ ] A01.2.c Implement restore preflight and conflict-preserving application.
 - [ ] A01.3 Test spaces, metacharacters, stale snapshots and interrupted recovery.
 - [ ] A01.4 Isolate bisect/refactor trials and preserve unrelated user changes.
+  - [ ] A01.4.a Verify isolated bisect and restored exit state.
+  - [ ] A01.4.b Verify owned refactor/migration failure boundaries.
 - [ ] A01.5 Enforce exact/wildcard URL hosts and redirect revalidation with negative fixtures.
+  - [ ] A01.5.a Parse exact versus explicit-wildcard host policy.
+  - [ ] A01.5.b Revalidate each redirect before following its destination.
 Acceptance: audited A01 cases; unrelated files and unauthorized destinations remain untouched.
 
 ### A02 Mandatory control outcomes (P05; R02)
@@ -286,3 +300,8 @@ authorized identity is available. No main merge or production authorization is i
 Plan review: native independent `lintel-reviewer` instance `universal-plan-review`
 returned no P1 findings and one P2 dispatch-binding condition, addressed by packages/P01-P04.
 The work-map validator passed. The review was documentary, not product acceptance.
+
+Scoped coordination: P01 may add minimal optional-metadata guards to its already-owned
+tq-perf-regression hook, with absence/presence regression cases, to preserve the trusted
+policy warning rather than losing it under shell errexit. P03's A01.4/A01.5 sub-leaves
+were approved before implementation. These do not authorize broader domain changes.

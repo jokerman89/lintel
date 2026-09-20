@@ -18,9 +18,24 @@ Updated 2026-09-20 by MasterSession.
 
 ## Active work
 
-The approved implementation trio and work map now exist. First wave dispatch follows
-validation and commit: P01 trusted helpers, P02 sync binding, P03 safe context/recovery,
-P04 preserved Swarming merge and repairs. No package is complete yet.
+The approved implementation trio, concrete first-wave cards and work map are committed
+as `21261f1`. Independent plan review identified one P2 missing-dispatch-binding condition;
+MasterSession supplied per-leaf dependencies, paths and executable checks before dispatch.
+The reviewer was a synchronous native task; follow-up messaging to that instance is not
+supported, so no second independent pass is claimed.
+
+First wave is running in isolated app-native worktrees from `21261f1`:
+
+| Package | Session ID | Current boundary |
+|---|---|---|
+| P01 trusted helpers | `b3853be7-dbbe-4161-9566-7e7d2c50e05e` | A04/A25 local implementation and tests; no shared generators |
+| P02 sync binding | `2e21aa98-3b40-46e7-885d-2ec4161ec35d` | A26 synthetic local remotes only |
+| P03 context safety | `9f06eebf-a3ee-4867-95ad-eb6e1d22a6d5` | A01/A11; existing context ownership retained |
+| P04 Swarming | `a8960a09-fcd7-4652-a9b6-74ad6a94a029` | Early real merge and SW repairs; final A22.7 remains dependent |
+
+All are `lintel-builder` sessions with explicit ownership, acceptance, local commits,
+report paths and no remote authorization. MasterSession must arrange separate spec and
+quality review after results arrive. No package is complete yet.
 
 ## Blockers and boundaries
 
@@ -33,6 +48,7 @@ No new authorization for main merge, releases, production, hook activation or pr
 
 ## Next action
 
-Validate work.json, review the plan against the audit, commit the shared plan, then launch
-the four bounded first-wave worktrees. Record their session IDs and exact baseline here.
+While first-wave work runs, prepare shared P05-P08 contracts and executable cards, keeping
+product edits off P04's historical merge paths until its checkpoint is ready. Integrate
+the history-preserving merge first; review and integrate other package results in order.
 Use host-native delegation until Swarming's authority/evidence defects are corrected.
