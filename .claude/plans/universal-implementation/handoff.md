@@ -10,7 +10,8 @@ Updated 2026-09-20 by MasterSession.
 - Local separate SHA-256 backup and verified full-history Swarming bundle exist in the
   MasterSession's private session artifacts; no personal paths or credentials are needed
   to use the committed evidence.
-- Baseline `origin/main`: `28061e434be455ca02f135b73244eaf4f73f3a69` (local ref, not freshly fetched).
+- Baseline `origin/main`: `28061e434be455ca02f135b73244eaf4f73f3a69`; anonymous public
+  API verification confirmed that same current main on 2026-09-20 without credentials.
 - Swarming: `codex/swarming-work` at `275a35447c4ad271e05816ade43ac48f1acec24f`;
   original main checkout and four older Swarming worker worktrees remain untouched.
 - Integration branch: `jokerman-microsoft-lintel-harness-preview`. Its historical branch
@@ -24,48 +25,91 @@ MasterSession supplied per-leaf dependencies, paths and executable checks before
 The reviewer was a synchronous native task; follow-up messaging to that instance is not
 supported, so no second independent pass is claimed.
 
-First wave is running in isolated app-native worktrees from `21261f1`:
+P01-P04 started in isolated app-native worktrees from `21261f1`; P05-P07 started
+from the reviewed historical merge `40c2795`. Current implementation ownership:
 
 | Package | Session ID | Current boundary |
 |---|---|---|
-| P01 trusted helpers | `b3853be7-dbbe-4161-9566-7e7d2c50e05e` | A04/A25 local implementation and tests; no shared generators |
-| P02 sync binding | `2e21aa98-3b40-46e7-885d-2ec4161ec35d` | A26 synthetic local remotes only |
-| P03 context safety | `9f06eebf-a3ee-4867-95ad-eb6e1d22a6d5` | A01/A11; existing context ownership retained |
-| P04 Swarming | `a8960a09-fcd7-4652-a9b6-74ad6a94a029` | Early real merge and SW repairs; final A22.7 remains dependent |
-| P05 review evidence | `2329e71f-cd9e-473b-94cf-41c579c29a88` | A02/A03; exact shared review/control API sent before consumer binding |
-| P06 host adapters | `324863ff-e7cf-4abf-b449-04dd0f096170` | A05/A06; now owns Copilot generator adaptation and targeted tests |
-| P07 profile context | `b9352dfe-1c1e-4ea3-b7d9-0fd008d39b3d` | A07/A20 compatibility; independent parser/pinning now, final contract integration later |
+| P01 trusted helpers | `b3853be7-dbbe-4161-9566-7e7d2c50e05e` | ACCEPTED and integrated `a2ef318`; idle, combined P07 gate remains |
+| P02 sync binding | `2e21aa98-3b40-46e7-885d-2ec4161ec35d` | ACCEPTED and integrated `39561c0`; idle, no real private sync activated |
+| P03 context safety | `9f06eebf-a3ee-4867-95ad-eb6e1d22a6d5` | ACCEPTED and integrated `9a1cf17`; idle, downstream consumer/host gates separate |
+| P04 Swarming | `a8960a09-fcd7-4652-a9b6-74ad6a94a029` | Frozen `28fc0df` / product `dca635d`; component re-review running; A22.7 remains open |
+| P05 review evidence | `2329e71f-cd9e-473b-94cf-41c579c29a88` | Replanning immutable QA obligations and literal-Markdown identity after second spec rejection at `e5b92a4` |
+| P06 host adapters | `324863ff-e7cf-4abf-b449-04dd0f096170` | Frozen navigation repair `be69648`; same-reviewer spec then first quality running |
+| P07 profile context | `b9352dfe-1c1e-4ea3-b7d9-0fd008d39b3d` | Frozen `56981ed` / report `1e9a26b`; third spec then first quality running |
 
-All are `lintel-builder` sessions with explicit ownership, acceptance, local commits,
-report paths and no remote authorization. MasterSession must arrange separate spec and
-quality review after results arrive. No package is complete yet.
+All are `lintel-builder` sessions with explicit ownership, local commits, report paths
+and no remote authorization. Only P01/P02/P03 and the historical P04 checkpoint are accepted.
+Do not merge another product batch merely because its original tests are green.
 
-Initial reviewed candidates (rejected versions remain preserved for audit):
+Reuse these independent reviewer sessions for the next immutable candidate; they never
+repair their own findings. All prior reports remain preserved in `reviews/` and Git:
 
-| Package | Candidate | Independent reviewer session |
+| Package | Current review target / next gate | Independent reviewer session |
 |---|---|---|
-| P01 | `d6820a1b9fd8d92ed019e9eab25128b2c7699e0d` (product `c4542e4`) | `d699f463-ee4d-4950-9b9d-98f35e96f689` |
-| P02 | `a8b36a983499d5e2bcdd7968fd452156eac8442f` (product/tests `53b9462`) | `da23fa6f-499b-4011-b39b-a632312a8800` |
+| P01 | Final `f078165`; SPEC/QUALITY PASS at `041417a`; idle | `d699f463-ee4d-4950-9b9d-98f35e96f689` |
+| P02 | Final `1b6153f`; SPEC/QUALITY PASS at `9bdaeb4`; idle | `da23fa6f-499b-4011-b39b-a632312a8800` |
+| P03 | Final `2840012`; SPEC/QUALITY PASS at `500adb3`; idle | `efd3f877-550a-4ef0-9009-ed71b95b01ab` |
+| P04 | `28fc0dfcc5fd703237e944369951b41b2d90c183`; component spec then first quality | `ed672f58-2e85-42e2-b1b2-0635ba5b2325` |
+| P05 | New spec failures at `e5b92a4` / `54147fd`; recheck report pending | `6ed9c7df-4845-4d70-88c7-f0746ab28059` |
+| P06 | `be696488fb88ac23eea4269233f5a9fd32b45e02`; spec then first quality | `d2a89ac3-151a-4dc0-ab09-1f3a62465cab` |
+| P07 | `1e9a26b11a39a0945e34003089d61aaf354a9c55` / product `56981ed`; spec then first quality | `a7d78944-c02c-4909-a060-2c4f2a754b00` |
 
-P01's independent spec/preservation review failed with three P2 findings: ADR commit
-sweeps unrelated staged work; malformed p95 values are accepted by prefix; literal
-metacharacter filenames are interpreted as regex. Quality was not run. Report source
-`4e848a9` is preserved on master as `8450263`. The original P01 worker is repairing,
-not frozen. Request re-review from the same independent reviewer on the new exact SHA.
+## Accepted local integrations
 
-P02's independent spec review failed with three P1 findings: file-URL fragments are
-normalized differently from Git and redirect a push to an unapproved local destination;
-configured fetch refspec overwrites pending HEAD/index/worktree before a failed pull;
-raw source aliases collapse distinct projects into one lesson record. Report source
-`2d6030d` is preserved as `93c3dd4`. The worker reproduced all classes and is repairing.
-Its earlier 539 green assertions did not cover these failures; no quality pass is claimed.
+P01: complete worker/final-review history merged as `a2ef318`. Source matches independently
+reviewed `041417a`; all eight leaves passed spec and full bounded quality. The reviewer
+ran 51 tests plus corrected numeric/record probes and new failure/ownership probes.
+Eight selected joined-tree tests passed with jq: hostile resolvers, retained policy,
+numeric/path metadata, vault, ADR index ownership and updater failure/fallback.
+Registration is unchanged and dormant hooks remain dormant. P07's changed resolver is
+not yet on the integration branch, so that combined gate remains open.
 
-P03 repaired the fail-closed Windows publication error in `aa7fad4`, but independent
-spec review of `5c52f2f` found four more concrete defects despite the green original
-32-test matrix: interrupted restore overwrites a between-invocation edit (P1), detached
-HEAD checkpoint regression, Windows case-alias exclusion bypass and file-prefix glob
-overselection (three P2). Reviewer `efd3f877-550a-4ef0-9009-ed71b95b01ab` is finalizing
-the report without quality review. Original builder is repairing only its owned paths.
+P02: complete worker and final-review history merged as `39561c0`. Source exactly matches
+independently reviewed `9bdaeb4`; 60 scenarios/875 assertions passed independently.
+Joined A26.4 run completed with 31 scenarios/278 assertions/zero skips. Wrong destination,
+fetch refmap, source alias and staged-role deletion findings are all closed. Actual
+private endpoints, credentials and non-Windows runtimes remain untested.
+
+P03: complete worker/final-review history merged as `9a1cf17`. Source matches reviewed
+`500adb3`; 51 product tests, original checkpoints and 182,520 finite matcher comparisons
+passed independently. Joined checkpoint ownership/roundtrip, URL-policy and executable-mode
+checks passed. Catalog regenerated from actual frontmatter and its drift check passed.
+Unsafe restore resume, detached HEAD, case aliases, prefix globs and exponential matching
+are closed. Live transport/client/installer and remaining P08/P09 consumers are separate.
+
+Coordinator A08.1 routing slice: `b72ab47` plus `1d40193` (caller IFS isolation), 33 new
+assertions and all old routing scenarios passed; independent P08 acceptance remains open.
+Provenance slice `9f49e26` awaits P13 independent/selection acceptance.
+
+## Current repair gates
+
+- P01's former staging/metadata/record defects are all closed in P01-final.md. The old
+  overrestrictive decimal oracle remains historical, not authoritative. Do not re-open
+  accepted behavior merely because its earlier rejected reports are still present.
+- P04 `02be6cb` failed physical hardlink ownership, optional YAML constructor stderr
+  confidentiality and root package-boundary parsing. `dca635d` proposes repairs with real
+  hardlink/constructor/root-path cases. Historical preservation acceptance is unchanged;
+  current component and final A22.7 are still unaccepted.
+- P05's first four findings led to `54147fd` / `e5b92a4`, but re-review reproduced new
+  false clearance: submitted QA can omit/relabel/change the kind of bound test obligations,
+  and indented literal Markdown checkbox examples are treated as progress. Fix the shared
+  expectation/identity invariants, preserving true docs-only acceptance and task progress.
+  A shared-schema/API change must be coordinated before dependent consumers assume it.
+- P06's seven omitted public targets led to `be69648`. Real clone/transitive navigation,
+  missing-source/drift and no-private-copy cases passed in its own checks; independent
+  repaired spec and first full component quality review are still pending.
+- P07's first two defects (reference-only reads and concurrent rebind publication) closed
+  individually at `d02bb24`, but ordinary ID-only bootstrap still recreated lost pins or
+  silently adopted a generation. `56981ed` unifies expected-reference publication across
+  all selectors and distinguishes genuine first bind from retained loss. Its committed
+  43-case matrix and nine preserved scripts passed; independent spec/quality remain required.
+
+P05's unchanged real four-case producer/reader/SHIP bridge passed with P07 `d02bb24`
+and again with `56981ed` (P05 `54147fd`),
+including saved-reference shell paths, but did not exercise the defective ordinary
+bootstrap path. Keep those scopes distinct and re-run the appropriate chain on the final
+P07 candidate. Candidate archives/compositions are tests, not acceptance of their source.
 
 ## Continuation gate
 
@@ -91,15 +135,15 @@ No new authorization for main merge, releases, production, hook activation or pr
 
 ## Next action
 
-While first-wave work runs, prepare shared P05-P08 contracts and executable cards, keeping
-product edits off P04's historical merge paths until its checkpoint is ready. Integrate
-the history-preserving merge first; review and integrate other package results in order.
-Use host-native delegation until Swarming's authority/evidence defects are corrected.
+Collect the current immutable rechecks, return remaining findings to the original owners,
+and integrate only accepted products plus their reports. P01/P02/P03 are not to be rebuilt.
+Use host-native delegation while Swarming component/final gates remain open.
 
 Prepared successors: P05-P07 contracts and official host-source report committed in
-`3f584c8`; A08.1 routing correction committed in `b72ab47` (30 new assertions plus all
-prior routing cases pass; independent P08 acceptance pending). P08-P14 dispatch cards
-are being supplied before their dependent writers start.
+`3f584c8`; all P08-P14 dispatch cards already committed in `76e9e80`. P08 requires the
+accepted shared P05/P06/P07 contracts; its context-file ownership is now released by P03.
+Continue P08-P14 and final P04 A22.7 binding in dependency order, then final independent
+integrated review, strict suite, authorized-account PR/CI and durable capture.
 
 P04's historical merge checkpoint is `e74849db6b33c7b93baadb86206009cb9f9eb6d5`
 (parents `21261f1` and original Swarming `275a354`). Independent merge-only reviewer
@@ -118,9 +162,8 @@ Required jq was absent (exit 127). A checksum-verified official jq 1.8.2 executa
 restored only under master `.claude/runtime/tools/jq-1.8.2/`; see reports/toolchain.md.
 Use a per-process PATH prefix for required tests; no global setting or account changed.
 
-P07's own 21-case matrix and nine affected existing scripts passed, including the actual
-P04 accessor dependency and jq-backed checks. Its direct producer-to-P05 policy bridge
-still needs the frozen P05 source; no final integration or independent approval yet.
-P05's unnecessary Python 3.10 requirement was rejected and is being restored to the
-existing 3.9 floor. The one canonical required_policy schema and exact CLI are recorded
-in interfaces.md; P06 must consume them rather than inventing another clearance reader.
+P05 restored the existing Python 3.9 floor. Real Python 3.9/other-platform execution is
+not established by grammar checks. The one required_policy schema, host transport and
+profile reference APIs are in interfaces.md; final implementations and integration tests
+must consume them consistently. Do not import an unreviewed dependency into another
+writer's authored batch just to make a test green.

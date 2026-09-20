@@ -28,14 +28,14 @@ Total skills: 127
 | [`/li:code-unfreeze`](code-unfreeze/SKILL.md) | Remove a path from session freeze — other skills can write to it again. |
 | [`/li:codex`](codex/SKILL.md) | Outside-voice second opinion via Codex CLI. Independent review of diff, plan, or hypothesis. |
 | [`/li:compliance-gate`](compliance-gate/SKILL.md) | Compliance-gate aggregator — runs all gates the active pack declares (compliance.hooks) as ONE green/red verdict. Embar… |
-| [`/li:context-budget`](context-budget/SKILL.md) | Show current context utilization, recommend warm/cool, surface budget breakdown by source. `--watch` runs the threshold… |
-| [`/li:context-cool`](context-cool/SKILL.md) | Selectively drop context from session — free budget for further warming. Operator picks what to keep. |
+| [`/li:context-budget`](context-budget/SKILL.md) | Show observed context capacity and usage where available, clearly labeled input estimates otherwise; --watch compares a… |
+| [`/li:context-cool`](context-cool/SKILL.md) | Exclude explicitly selected files from future context reads without claiming to remove already-sent conversation conten… |
 | [`/li:context-restore`](context-restore/SKILL.md) | Use at the start of a fresh session that continues prior work to restore session state from a checkpoint file. Reach fo… |
 | [`/li:context-save`](context-save/SKILL.md) | Use before the context window fills up or before clearing the session to save the current state to a checkpoint file. R… |
-| [`/li:context-warm`](context-warm/SKILL.md) | Use to deliberately load specific files into context before working on them, reporting tokens added and budget impact. … |
+| [`/li:context-warm`](context-warm/SKILL.md) | Use to deliberately load a bounded set of literal files or globs, showing selected sources and estimated input size bef… |
 | [`/li:context-warm-adrs`](context-warm-adrs/SKILL.md) | Load topic-relevant ADRs into context — design constraints + prior decisions surfaced for current work. |
 | [`/li:context-warm-customer`](context-warm-customer/SKILL.md) | Load customer-engagement repo state into context — their infrastructure-as-code, their CLAUDE.md, their ADRs, recent co… |
-| [`/li:context-warm-from-url`](context-warm-from-url/SKILL.md) | Fetch URL + dump into context. Useful for loading documentation, blog posts, external references on-demand. |
+| [`/li:context-warm-from-url`](context-warm-from-url/SKILL.md) | Retrieve bounded external reference text only through explicit host policy and redirect checks, preserving source prove… |
 | [`/li:context-warm-related`](context-warm-related/SKILL.md) | Heuristic context warm — search codebase for files related to a topic, load top N most-relevant. |
 | [`/li:context-warm-sessions`](context-warm-sessions/SKILL.md) | Load last N session saves on current branch — cross-session continuity for resumed work. |
 | [`/li:cycle`](cycle/SKILL.md) | Use to run a real multi-step task through the full SENSE-to-CAPTURE pipeline, or a chosen subset of phases. Supports mo… |
@@ -96,7 +96,7 @@ Total skills: 127
 | [`/li:pack-switch`](pack-switch/SKILL.md) | Use to change which pack is active — switching the identity that drives voice, compliance, persona, and roles. Validate… |
 | [`/li:pack-validate`](pack-validate/SKILL.md) | Validate a pack before activation or after editing its manifest. Checks effective required fields and inheritance with … |
 | [`/li:pair-agent`](pair-agent/SKILL.md) | Pair with a named subagent in the loop — explicit two-mind collaboration on a focused task. |
-| [`/li:perf-mode`](perf-mode/SKILL.md) | Activate the 1M context-budget mode for a session — the high-intensity preset for long, heavy phases. |
+| [`/li:perf-mode`](perf-mode/SKILL.md) | Advise on bounded working sets, context observations and checkpoint strategy for heavy phases; never changes model capa… |
 | [`/li:perfbench`](perfbench/SKILL.md) | Measure performance — runtime, memory, cold-start — and detect regressions vs baseline. |
 | [`/li:personas-rotate`](personas-rotate/SKILL.md) | Load persona context from .claude/memory/personas.md for demo-prep, workshop-facilitation, or audience-aware writing. |
 | [`/li:plan`](plan/SKILL.md) | Use after DISCOVER, or standalone with an approved design, to produce the cold-executor trio (plan.md + spec.md + promp… |
@@ -117,7 +117,7 @@ Total skills: 127
 | [`/li:role`](role/SKILL.md) | Use to take on or change a working role — activate one for a lightweight lens, turn it off, swap mid-session, apply its… |
 | [`/li:role-new`](role-new/SKILL.md) | Scaffold a new role file from template via guided interview — IDENTITY, COLD KNOWLEDGE, DECISION CRITERIA, OUTCOME LENS… |
 | [`/li:roles-list`](roles-list/SKILL.md) | List all available roles (public + private, if accessible). Shows id, display name, scope, sensitivity, last-updated. |
-| [`/li:safe-install`](safe-install/SKILL.md) | Safe-install wrapper for Lintel — version-before-every-change + uninstall-with-restore + visible-announce backup. Opera… |
+| [`/li:safe-install`](safe-install/SKILL.md) | Protect explicitly owned installation files with verified snapshots and conflict-preserving restore; announce recovery … |
 | [`/li:sc`](sc/SKILL.md) | Use for security and compliance depth — threat models, auth flows, secret management, dependency-security audits, compl… |
 | [`/li:scaffold`](scaffold/SKILL.md) | Use when setting up a new or existing repo to work with Lintel to install the base templates interactively — the repo i… |
 | [`/li:scaffold-internal-tool`](scaffold-internal-tool/SKILL.md) | Initialize an internal-tooling repo — CI, README, pack compliance hooks, no customer surface. |

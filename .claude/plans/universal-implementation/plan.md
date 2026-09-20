@@ -83,21 +83,25 @@ retain its parent acceptance. Do not renumber or replace the original A-ID.
 ## Action leaves
 
 ### A01 Safe execution and recovery (P03; R01)
-- [ ] A01.1 Replace context eval with literal path/glob selection and hostile-input fixtures.
-  - [ ] A01.1.a Define literal selector API and hostile-input fixture.
-  - [ ] A01.1.b Wire warm entry points to the selector and verify its output.
-- [ ] A01.2 Implement owned snapshot manifest and verified, non-clobber restore.
-  - [ ] A01.2.a Define snapshot ownership/digest manifest and path refusal.
-  - [ ] A01.2.b Implement snapshot creation and verify copied bytes.
-  - [ ] A01.2.c Implement restore preflight and conflict-preserving application.
-- [ ] A01.3 Test spaces, metacharacters, stale snapshots and interrupted recovery.
-- [ ] A01.4 Isolate bisect/refactor trials and preserve unrelated user changes.
-  - [ ] A01.4.a Verify isolated bisect and restored exit state.
-  - [ ] A01.4.b Verify owned refactor/migration failure boundaries.
-- [ ] A01.5 Enforce exact/wildcard URL hosts and redirect revalidation with negative fixtures.
-  - [ ] A01.5.a Parse exact versus explicit-wildcard host policy.
-  - [ ] A01.5.b Revalidate each redirect before following its destination.
+- [x] A01.1 Replace context eval with literal path/glob selection and hostile-input fixtures.
+  - [x] A01.1.a Define literal selector API and hostile-input fixture.
+  - [x] A01.1.b Wire warm entry points to the selector and verify its output.
+- [x] A01.2 Implement owned snapshot manifest and verified, non-clobber restore.
+  - [x] A01.2.a Define snapshot ownership/digest manifest and path refusal.
+  - [x] A01.2.b Implement snapshot creation and verify copied bytes.
+  - [x] A01.2.c Implement restore preflight and conflict-preserving application.
+- [x] A01.3 Test spaces, metacharacters, stale snapshots and interrupted recovery.
+- [x] A01.4 Isolate bisect/refactor trials and preserve unrelated user changes.
+  - [x] A01.4.a Verify isolated bisect and restored exit state.
+  - [x] A01.4.b Verify owned refactor/migration failure boundaries.
+- [x] A01.5 Enforce exact/wildcard URL hosts and redirect revalidation with negative fixtures.
+  - [x] A01.5.a Parse exact versus explicit-wildcard host policy.
+  - [x] A01.5.b Revalidate each redirect before following its destination.
 Acceptance: audited A01 cases; unrelated files and unauthorized destinations remain untouched.
+Evidence: [independent P03 final review](reviews/P03-final.md), product `500adb3`,
+integrated `9a1cf17`; 51 actual tests and preserved checkpoint semantics. The URL-policy
+transport probes are synthetic; actual browser/provider integration remains A16/P11,
+not silently counted as a live host test here.
 
 ### A02 Mandatory control outcomes (P05; R02)
 - [ ] A02.1 Define and validate mandatory/advisory, applicability and outcome fields once.
@@ -115,10 +119,12 @@ Acceptance: no mandatory failure or absent evidence becomes verified green.
 Acceptance: audited A03; reviewer never fixes their own findings.
 
 ### A04 Helper failure semantics (P01; R01)
-- [ ] A04.1 Repair ADR title/status argument handling.
-- [ ] A04.2 Test documented creation in empty and existing fixture repositories.
-- [ ] A04.3 Preserve failed updater exit codes and verify actual fallback results.
+- [x] A04.1 Repair ADR title/status argument handling.
+- [x] A04.2 Test documented creation in empty and existing fixture repositories.
+- [x] A04.3 Preserve failed updater exit codes and verify actual fallback results.
 Acceptance: documented commands work; failed subprocess cannot produce false success.
+Evidence: [independent P01 final review](reviews/P01-final.md), product `041417a`,
+integrated `a2ef318`; dirty index/worktree and forced-failure preservation were verified.
 
 ### A05 Universal product identity (P06; R03)
 - [ ] A05.1 Center README/start/enterprise adoption on shared outcomes before client choice.
@@ -166,11 +172,15 @@ Acceptance: every required domain result remains visible; no averaging away fail
 Acceptance: equivalent entry points preserve artifacts/status without repeated interview.
 
 ### A11 Honest context capacity (P03; R05)
-- [ ] A11.1 Share context selection/save/restore readers and show bounded sources.
-- [ ] A11.2 Keep unknown capacity unknown and label estimates.
-- [ ] A11.3 Preserve perf-mode entry as resource advice, not fake capacity control.
-- [ ] A11.4 Distinguish disk cleanup, future exclusions and already-sent model context.
+- [x] A11.1 Share context selection/save/restore readers and show bounded sources.
+- [x] A11.2 Keep unknown capacity unknown and label estimates.
+- [x] A11.3 Preserve perf-mode entry as resource advice, not fake capacity control.
+- [x] A11.4 Distinguish disk cleanup, future exclusions and already-sent model context.
 Acceptance: owned checkpoint behavior survives and unsupported context changes are not claimed.
+P03 core-method acceptance is recorded in [its final review](reviews/P03-final.md).
+Cross-surface consistency still requires the assigned P08 maintenance/budget consumers
+and P09 ContextBudgetAdvisor work; those separate leaves remain open. Do not claim
+initiative-wide capacity/host acceptance from these component checkboxes.
 
 ### A12 Owned installer lifecycle (P10; R01)
 - [ ] A12.1 Route lifecycle skills through tested helpers with source/target separation.
@@ -282,26 +292,35 @@ Acceptance: evidence category and limitations are explicit; existing useful test
 Acceptance: proportional process and traceable profile effects; no fictional ROI or unrun client claim.
 
 ### A25 Trusted implementation source (P01; R01)
-- [ ] A25.1 Enumerate optional-hook/vault executable resolver lookup and use trusted source only.
-  - [ ] A25.1.a Add failing hostile-target resolver fixtures and list affected callers.
-  - [ ] A25.1.b Correct domain-hook source resolution without changing registration.
-  - [ ] A25.1.c Correct vault implementation lookup and retain config-as-data behavior.
-- [ ] A25.2 Preserve target configuration as data and keep dormant hooks dormant.
-- [ ] A25.3 Test hostile target resolver never executes and synthetic policy still affects results.
+- [x] A25.1 Enumerate optional-hook/vault executable resolver lookup and use trusted source only.
+  - [x] A25.1.a Add failing hostile-target resolver fixtures and list affected callers.
+  - [x] A25.1.b Correct domain-hook source resolution without changing registration.
+  - [x] A25.1.c Correct vault implementation lookup and retain config-as-data behavior.
+- [x] A25.2 Preserve target configuration as data and keep dormant hooks dormant.
+- [x] A25.3 Test hostile target resolver never executes and synthetic policy still affects results.
 Acceptance: installed implementation never sources executable code from inspected target.
+P01 final spec/quality pass covers all 51 tests plus source-contract and quality probes.
+Eight selected joined-tree boundary tests passed with restored jq and exact reviewed blobs.
+No dormant hook, real vault or global update was activated. P07's new resolver still
+requires its assigned combined source/profile integration check before release.
 
 ### A26 Explicit private-sync destination (P02; R10)
-- [ ] A26.1 Bind setup and actual origin; detect/reconcile a requested destination change.
-- [ ] A26.2 Require enabled matching binding for push/pull; forget disables without deleting content.
-- [ ] A26.3 Distinguish stable project identities with equal basenames and preserve prior records.
-- [ ] A26.4 Exercise two local remotes, destination drift, forget and collision-free round trips.
+- [x] A26.1 Bind setup and actual origin; detect/reconcile a requested destination change.
+- [x] A26.2 Require enabled matching binding for push/pull; forget disables without deleting content.
+- [x] A26.3 Distinguish stable project identities with equal basenames and preserve prior records.
+- [x] A26.4 Exercise two local remotes, destination drift, forget and collision-free round trips.
 Acceptance: no network/private sync activation is needed for fixture verification.
+Evidence: [independent P02 final review](reviews/P02-final.md), product `9bdaeb4`,
+integrated `39561c0`. Independent full run: 60 scenarios/875 assertions/zero skips.
+Joined-tree A26.4: 31 scenarios/278 assertions/zero skips; exact reviewed product blobs
+match. Real private destinations, credentials and non-Windows runtime remain untested.
 
 ## Review and delivery
 
-Accepted so far: only the separately reviewed P04 historical preservation checkpoint
-(A22.1/A22.2). Pending: substantive defect fixes, remaining independent package reviews
-and final integrated acceptance.
+Accepted so far: P04 historical preservation (A22.1/A22.2), P01 trusted tools (A04/A25),
+P02 private sync (A26), and P03 context/snapshot core (A01/A11 with explicit downstream boundaries).
+Pending: remaining independent package reviews, assigned cross-surface migrations
+and final integrated acceptance. Accepted packages must not be reimplemented.
 Keep each action open until all its leaves and preservation evidence are linked. P04's
 early merge is not A22 completion. P15 remains blocked for remote refresh/PR/CI until the
 authorized identity is available. No main merge or production authorization is implied.
@@ -319,9 +338,9 @@ Independent first-wave review outcomes:
 
 | Package | Exact reviewed product | Spec/preservation | Quality | Next owner |
 |---|---|---|---|---|
-| P01 | `c4542e4` | FAIL: three P2; [report](reviews/P01.md) | Not run | Original builder repairs R1-R3; same reviewer then rechecks immutable result |
-| P02 | `53b9462` | FAIL: three P1; [report](reviews/P02.md) | Not reached | Original builder repairs all three local-fixture failures |
-| P03 | `aa7fad4` | FAIL: one P1 and three P2 reproduced; report pending | Not run | Original builder repairs restore progress, detached HEAD, exclusion aliases and glob semantics |
+| P01 | `041417a` | PASS; source contract and ADR ownership preserved | PASS; [final](reviews/P01-final.md) | Integrated `a2ef318`; joined P07 check remains |
+| P02 | `9bdaeb4` | PASS; original findings and staged-deletion repair verified | PASS; [final](reviews/P02-final.md) | Integrated `39561c0`; final initiative checks remain |
+| P03 | `500adb3` | PASS; original preservation findings verified | PASS; [final](reviews/P03-final.md) | Integrated `9a1cf17`; assigned downstream consumers remain |
 
 No rejected product batch was integrated. Green original test counts are retained as
 limited evidence, not substituted for the newly failing acceptance cases.

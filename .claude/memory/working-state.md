@@ -24,14 +24,18 @@ merge at `e74849d`; report `4bf5315` and both ancestries are integrated in `40c2
 delta destinations are preserved and 17 historical topology/brief/report/review artifacts
 are unchanged. This closes only A22.1/A22.2, not the SW fixes or final A22 integration.
 
-**What's pending:** independent P01/P02 spec reviews rejected their first candidates (three
-P2 and three P1 findings respectively). P03's supplemental review found one P1 restore-progress
-defect and three P2 preservation/selector defects after the Windows publication repair.
-All three original builders are repairing, and quality review has not passed. P04 continues
-SW/envelope repairs. P05/P06/P07 implement shared review, host and profile contracts in separate
-worktrees. Coordinator routing (`b72ab47`) and provenance (`9f49e26`) slices await their owning
-package reviews. All successor cards and interface agreements are committed; read the handoff
-for exact worker IDs rather than redispatching duplicate work.
+**Accepted products:** after scoped repairs and independent spec then quality review,
+P01 trusted helpers, P02 private sync and P03 context/recovery are integrated at `a2ef318`,
+`39561c0` and `9a1cf17`. Exact reviewed blobs and selected joined consumers passed; source
+catalog was regenerated and checked. Earlier rejected reports remain history, not current
+verdicts. P07 combination, remaining role/browser consumers and final platform checks are open.
+
+**What's pending:** P04 repaired component, P06 navigation repair and P07 full-reference
+invariant are in independent re-review; P05 is correcting immutable QA obligations and
+literal Markdown identity after its second spec rejection. P08-P14 await accepted shared
+contracts and will continue the full 26-action scope. Coordinator routing (`b72ab47` plus
+`1d40193`) and provenance (`9f49e26`) await their owning package reviews. All successor cards
+and interface agreements are committed; use the handoff's exact IDs, do not duplicate workers.
 
 Original Swarming worktree remains at `275a354`. Anonymous public API access with no credentials
 confirmed main is still `28061e4`; authenticated PR/push/CI awaits verified `jokerman89` credentials.

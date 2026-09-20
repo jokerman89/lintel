@@ -702,3 +702,17 @@ failure boundary, and test missing-dependency cases before output or side effect
 **Verification:** Grammar checks are not a real minimum-runtime execution. Record those levels
 separately, propagate loader/parser failures, and run producer/consumer tests against the same
 canonical schema instead of independently interpreting message examples.
+
+## L-034 - Test oracles must follow the producer contract
+
+**Date:** 2026-09-20
+
+**Context:** Universal P01's metadata repair and an initial reviewer oracle treated fractional
+p95 budgets as invalid, although the unchanged producer declared `<number>`. Passing that
+oracle narrowed useful input instead of fixing the defective original regex.
+
+**Rule:** Trace accepted values and ownership to the authoritative producer/requirement before
+changing a consumer or an assertion. Green tests cannot justify narrowing the contract through
+new documentation. Correct an overrestrictive oracle openly, retain the historical report,
+and add source-grounded positive, malformed and decoy cases. Verify real consumers and retained
+user value, not agreement between two copies of the same mistaken assumption.
