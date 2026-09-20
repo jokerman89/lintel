@@ -36,12 +36,16 @@ commit sequence integrated through `62ca389` without replaying P04's dependency.
 source comparisons and selected joined consumers pass. P01's copied fixture needed real
 profile dependencies after that join; `d7eb92f` corrects the fixture only and six tests pass.
 
-**What's pending:** P04 final A22.7 and P07 full-consumer gates remain open. P05's v2 QA
-inventory/migration is individually reviewed, but literal Markdown identity and P06 source
-navigation need one stateless shared boundary model with explicit spans/opaque facts.
-P06 owns the proposed helper extraction, P05 its later selected-leaf consumer; neither may
-assume the current internal line projection is sufficient. P08-P14 await accepted shared
-contracts and will continue the full 26-action scope. Coordinator routing (`b72ab47` plus
+P06 provider/adapters are also independently accepted: exact product `7425960`, report
+`1067da29`, integrated `36593cd`. C01-C07 are closed. Joined regeneration exposed and
+repaired a wiki schema-reader mismatch (JSON envelope, optional legacy pack field);
+actual source-derived metadata, error refusal, idempotency and local adapter checks pass.
+
+**What's pending:** P04 final A22.7 and P07 full-consumer gates remain open. P05's frozen
+`9c8ef727` consumer uses the exact accepted provider but still needs its own independent
+spec and first full quality verdict. P10's prerequisites are now integrated; shared
+resource preflight remains coordinator-owned. Continue P08-P14 in dependency order,
+not a new audit or partial delivery. Coordinator routing (`b72ab47` plus
 `1d40193`) and provenance (`9f49e26`) await their owning package reviews. All successor cards
 and interface agreements are committed; use the handoff's exact IDs, do not duplicate workers.
 

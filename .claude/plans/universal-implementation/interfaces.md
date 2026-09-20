@@ -11,7 +11,9 @@ Current provider checkpoint: `74259605c1a172a444d1d4d2e838aea2b120ef92`, owned b
 The earlier `09148b7` is rejected history: it falsely identified an ordered-2 paragraph
 continuation as an item and lost multiline inline-code precedence.
 `lib/markdown_source.py` implements the exact immutable types and stateless
-`classify_markdown(str)` API. Independent provider/adapter acceptance remains pending.
+`classify_markdown(str)` API. Independent complete provider/adapter spec and first
+whole bounded quality passed in `1067da29`; integrated as `36593cd`. P05 and final
+joined consumers remain separate gates.
 
 P05 is authorized to import only the exact helper bytes as an explicitly attributed
 dependency-only commit, not to edit or fork the helper. It then owns its selected-leaf,
@@ -57,8 +59,8 @@ and the standalone control-outcome envelope retain version 1.
 `validate_decision(record, history=...)` preserves strict historical-v1 inspection, not
 clearance. `select_latest` keeps its existing keyword arguments and accepts decoded
 mappings or ordered `ContractError` candidates; an invalid latest applicable candidate
-cannot be discarded into an older PASS. The final source-owned example is
-`skills/review/references/evidence.md` at the forthcoming immutable P05 repair.
+cannot be discarded into an older PASS. The frozen source-owned example is
+`skills/review/references/evidence.md` at P05's `9c8ef727` checkpoint.
 
 `lib/review_contract.py` (stdlib): `ContractError`, `load_json(text)`,
 `validate_control(control)`, `evaluate_controls(controls, required_policy=...)`,

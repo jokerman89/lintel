@@ -15,7 +15,8 @@ preserves Swarming and its four worker branches with complete ancestry.
 No whole-initiative acceptance is claimed. Anonymous public API verification confirmed
 current main remains `28061e4`; authenticated delivery still requires `jokerman89`.
 The independently reviewed Swarming historical checkpoint is integrated in `40c2795`,
-preserving both ancestries. Other first-wave fixes remain under implementation/review.
+preserving both ancestries. P01-P03 and owned P04/P06/P07 components are accepted and
+integrated; P05's frozen consumer remains under independent review.
 
 No action is done merely because its worker finished. Completion requires leaf acceptance,
 preserved behavior, independent package review and applicable integration evidence.
@@ -131,21 +132,21 @@ Evidence: [independent P01 final review](reviews/P01-final.md), product `041417a
 integrated `a2ef318`; dirty index/worktree and forced-failure preservation were verified.
 
 ### A05 Universal product identity (P06; R03)
-- [ ] A05.1 Center README/start/enterprise adoption on shared outcomes before client choice.
-- [ ] A05.2 Preserve Copilot and Claude routes with equivalent discoverable client guides.
-  - [ ] A05.2.m1 Reproduce valid EOF references and quoted indented-code navigation failures.
-  - [ ] A05.2.m2 Define one source-span/container/EOF boundary model.
-  - [ ] A05.2.m3 Use that model consistently across reference, inline and code consumers.
-  - [ ] A05.2.m4 Verify an independently expected Markdown boundary grid.
-  - [ ] A05.2.m5 Verify actual install/check/clone/drift/refusal without private-data copying.
-  - [ ] A05.2.m6 Retain all earlier adapter, navigation and temporary generation checks.
-  - [ ] A05.2.m7 Obtain narrowed spec and first whole-component quality acceptance.
-  - [ ] A05.2.s1 Define independently expected shared source spans and classification.
-  - [ ] A05.2.s2 Extract and refine one stateless Markdown boundary helper without policy changes.
-  - [ ] A05.2.s3 Verify real generator, preflight and installed-source use of the same helper.
-  - [ ] A05.2.s4 Obtain independent shared-provider and complete adapter acceptance.
-- [ ] A05.3 Remove neutral-core company/vendor/retention/venture assumptions without losing optional lenses.
-- [ ] A05.4 Reconcile architecture and synchronized entry-source truth.
+- [x] A05.1 Center README/start/enterprise adoption on shared outcomes before client choice.
+- [x] A05.2 Preserve Copilot and Claude routes with equivalent discoverable client guides.
+  - [x] A05.2.m1 Reproduce valid EOF references and quoted indented-code navigation failures.
+  - [x] A05.2.m2 Define one source-span/container/EOF boundary model.
+  - [x] A05.2.m3 Use that model consistently across reference, inline and code consumers.
+  - [x] A05.2.m4 Verify an independently expected Markdown boundary grid.
+  - [x] A05.2.m5 Verify actual install/check/clone/drift/refusal without private-data copying.
+  - [x] A05.2.m6 Retain all earlier adapter, navigation and temporary generation checks.
+  - [x] A05.2.m7 Obtain narrowed spec and first whole-component quality acceptance.
+  - [x] A05.2.s1 Define independently expected shared source spans and classification.
+  - [x] A05.2.s2 Extract and refine one stateless Markdown boundary helper without policy changes.
+  - [x] A05.2.s3 Verify real generator, preflight and installed-source use of the same helper.
+  - [x] A05.2.s4 Obtain independent shared-provider and complete adapter acceptance.
+- [x] A05.3 Remove neutral-core company/vendor/retention/venture assumptions without losing optional lenses.
+- [x] A05.4 Reconcile architecture and synchronized entry-source truth.
 Acceptance: promises map to actual implementation or explicit unverified boundary.
 The [Markdown repair checkpoint](packages/P06-markdown-repair.md) is an explicit
 bounded re-plan after three P06 spec iterations; it does not waive the earlier
@@ -153,12 +154,16 @@ navigation/privacy contract or permit private resource bundling.
 The [shared boundary checkpoint](packages/P05-P06-markdown-boundary.md) coordinates
 P06's one classifier and P05's later exact progress consumer. It supersedes duplicate
 partial block parsing, not the original action or existing source-authority requirements.
+Owned component acceptance: [P06 provider and component final](reviews/P06-provider-repair-final.md),
+product `7425960`, report `1067da29`, integrated `36593cd`. C01-C07 are closed.
+This does not accept P05's consumer, later shared-resource preflight, whole-workflow
+profile pinning, the final integrated tree or an unrun live client.
 
 ### A06 Honest host capabilities (P06; R03)
-- [ ] A06.1 Define neutral operation contract and separate CLI/desktop/IDE/cloud surfaces.
-- [ ] A06.2 Record official capability sources, shipped integration and tested scenarios separately.
-- [ ] A06.3 Adapt questions/delegation/isolation/browser fallbacks to actual available tools.
-- [ ] A06.4 Remove fictional plugin/model controls and test supported/unsupported paths.
+- [x] A06.1 Define neutral operation contract and separate CLI/desktop/IDE/cloud surfaces.
+- [x] A06.2 Record official capability sources, shipped integration and tested scenarios separately.
+- [x] A06.3 Adapt questions/delegation/isolation/browser fallbacks to actual available tools.
+- [x] A06.4 Remove fictional plugin/model controls and test supported/unsupported paths.
 Acceptance: alternate question tools work; no fabricated independence or host control.
 
 ### A07 Stable effective profile (P07; R04)
@@ -218,9 +223,19 @@ initiative-wide capacity/host acceptance from these component checkboxes.
 
 ### A12 Owned installer lifecycle (P10; R01)
 - [ ] A12.1 Route lifecycle skills through tested helpers with source/target separation.
+  - [ ] A12.1.a Bind scaffold/doctor/health to explicit installed source and working target.
+  - [ ] A12.1.b Route pack/profile lifecycle through the accepted structured profile contract.
+  - [ ] A12.1.c Preserve role/persona lifecycle and configured private-data boundaries.
+  - [ ] A12.1.d Route explicit migration/recovery through owned helpers rather than unsafe recipes.
 - [ ] A12.2 Preserve consumer customizations through install/update/conflict.
+  - [ ] A12.2.a Verify fresh and repeated install in an independent consumer.
+  - [ ] A12.2.b Refuse conflicting updates while retaining user prose, config and local extensions.
 - [ ] A12.3 Verify interrupted operations and owned rollback in a separate consumer repository.
+  - [ ] A12.3.a Diagnose interrupted writes without success-shaped partial state.
+  - [ ] A12.3.b Apply explicit recovery only to verified owned bytes.
 - [ ] A12.4 Document real uninstall and historical migration boundaries.
+  - [ ] A12.4.a Distinguish supported client operations and actual uninstall limits.
+  - [ ] A12.4.b Preserve opt-in historical aliases and document recoverability evidence.
 Acceptance: a success message corresponds to a verified change in the intended host/target.
 
 ### A13 Observable learning and status (P08; R05)
@@ -324,8 +339,23 @@ actors are not independently corroborated people; final A22.7 explicitly remains
 - [ ] A23.2 Exercise profile/work/result/review/resume producer-consumer links together.
 - [ ] A23.3 Refuse zero-run/skipped/unverified results as full acceptance.
 - [ ] A23.4 Run stable-tree generated checks, strict suite and separate consumer installation.
+  - [x] A23.4.g1 Render schema references from actual pack/envelope contracts; reject invalid source rather than emitting empty or stale metadata.
+  - [x] A23.4.g2 Regenerate and check the joined catalog, wiki, README and repository adapter without hand-editing their output.
+  - [ ] A23.4.g3 Preflight accepted shared helper dependencies before consumer writes and exercise installed-source failures.
 - [ ] A23.5 Obtain independent final spec/quality review of exact integrated content.
 Acceptance: evidence category and limitations are explicit; existing useful tests remain.
+Coordinator integration refinement: g1/g2 repair the observed JSON-envelope/YAML-only
+wiki mismatch and optional pack-field drift after P04/P07/P06 fan-in. Reuse the accepted
+data parsers, preserve schema versions, and run generator idempotency, malformed-source
+and schema-shape cases. g3 follows each accepted helper batch; pending P05 bytes must
+not be treated as accepted merely to complete a bundle.
+g1/g2 evidence: pre-fix wiki unit and schema shape both failed; repaired stdlib parsing
+passes dynamic YAML-pack/compact-JSON-envelope values, six malformed-input cases and
+missing-schema refusal before writes. Wiki idempotency/drift, schema/wiki shapes,
+instruction sync/check, catalog generation/check, wiki generation/check and actual
+repository adapter init/check pass on the joined source. This bounded deterministic
+repair received coordinator spec/quality review, not a new independent package verdict.
+The source repair and refreshed generated outputs are committed in `80f36fb`.
 
 ### A24 Observable enterprise profile value (P14; R04/R11)
 - [ ] A24.1 Define identical synthetic task under neutral, rapid-development and strict-change profiles.
@@ -361,7 +391,7 @@ match. Real private destinations, credentials and non-Windows runtime remain unt
 ## Review and delivery
 
 Accepted so far: P01 trusted tools (A04/A25), P02 private sync (A26), P03 context/snapshot
-core (A01/A11), and owned P04/P07 components (A21, A22.1-.6, A07/A20.3), with their
+core (A01/A11), and owned P04/P06/P07 components (A21, A22.1-.6, A05/A06, A07/A20.3), with their
 explicit downstream, profile-value and live-platform boundaries.
 Pending: remaining independent package reviews, assigned cross-surface migrations
 and final integrated acceptance. Accepted packages must not be reimplemented.
@@ -386,8 +416,8 @@ Independent first-wave review outcomes:
 | P02 | `9bdaeb4` | PASS; original findings and staged-deletion repair verified | PASS; [final](reviews/P02-final.md) | Integrated `39561c0`; final initiative checks remain |
 | P03 | `500adb3` | PASS; original preservation findings verified | PASS; [final](reviews/P03-final.md) | Integrated `9a1cf17`; assigned downstream consumers remain |
 | P04 component | `aa73651` | PASS; all F01-F05 close | PASS; [final](reviews/P04-final.md) | Integrated `490a0f4` + reports `8964267`; final A22.7 open |
-| P05 | `54147fd` | FAIL: QA obligations and literal Markdown acceptance; [recheck](reviews/P05-recheck.md) | Not run | Original builder implements coordinated v2 contract |
-| P06 | `be69648` | FAIL: HTML/Markdown resource parsing; [recheck](reviews/P06-recheck.md) | Not run | Original builder repairs valid local-navigation semantics |
+| P05 | `9c8ef727` | Pending independent shared-consumer review; earlier rejections retained | First full pass pending | Frozen owned consumer `fd63e690`, exact provider dependency `bd96a477` |
+| P06 | `7425960` | PASS; C01-C07 closed | PASS; [final](reviews/P06-provider-repair-final.md) | Integrated `36593cd`; later shared-consumer and live gates open |
 | P07 | `a8de574` | PASS; all F01-F04 close | PASS; [final](reviews/P07-windows-final.md) | Own history integrated through `62ca389`; joined consumer/profile-value gates open |
 
 No rejected product batch was integrated. Green original test counts are retained as

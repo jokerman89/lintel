@@ -35,11 +35,11 @@ from the reviewed historical merge `40c2795`. Current implementation ownership:
 | P03 context safety | `9f06eebf-a3ee-4867-95ad-eb6e1d22a6d5` | ACCEPTED and integrated `9a1cf17`; idle, downstream consumer/host gates separate |
 | P04 Swarming | `a8960a09-fcd7-4652-a9b6-74ad6a94a029` | Component ACCEPTED/integrated `490a0f4` + report history `8964267`; idle until explicit A22.7 |
 | P05 review evidence | `2329e71f-cd9e-473b-94cf-41c579c29a88` | Frozen `9c8ef727` / owned `fd63e690`, dependency `bd96a477` exactly 742 helper; same-reviewer spec/first quality |
-| P06 host adapters | `324863ff-e7cf-4abf-b449-04dd0f096170` | Frozen repaired shared provider `7425960`; same-reviewer helper + complete adapter spec/first quality |
+| P06 host adapters | `324863ff-e7cf-4abf-b449-04dd0f096170` | Component ACCEPTED/integrated `36593cd`; provider `7425960`, final review `1067da29`; idle |
 | P07 profile context | `b9352dfe-1c1e-4ea3-b7d9-0fd008d39b3d` | Component ACCEPTED: own commits integrated through `62ca389`; idle, final consumers remain open |
 
 All are `lintel-builder` sessions with explicit ownership, local commits, report paths
-and no remote authorization. P01/P02/P03 plus the owned P04/P07 components are accepted.
+and no remote authorization. P01/P02/P03 plus the owned P04/P06/P07 components are accepted.
 P04 A22.7 and the final cross-component/client requirements remain open.
 Do not merge another product batch merely because its original tests are green.
 
@@ -53,7 +53,7 @@ repair their own findings. All prior reports remain preserved in `reviews/` and 
 | P03 | Final `2840012`; SPEC/QUALITY PASS at `500adb3`; idle | `efd3f877-550a-4ef0-9009-ed71b95b01ab` |
 | P04 | Final `279dfc9`; component SPEC/QUALITY PASS at `aa73651`; A22.7 open | `ed672f58-2e85-42e2-b1b2-0635ba5b2325` |
 | P05 | Current `9c8ef727ba66a2ed574022143b4827cd83dca8b5`; exact helper dependency and shared consumer | `6ed9c7df-4845-4d70-88c7-f0746ab28059` |
-| P06 | Current `74259605c1a172a444d1d4d2e838aea2b120ef92`; 091 rejected in `96fdcc4` | `d2a89ac3-151a-4dc0-ab09-1f3a62465cab` |
+| P06 | Final `1067da29`; complete component SPEC/QUALITY PASS at `7425960`; integrated | `d2a89ac3-151a-4dc0-ab09-1f3a62465cab` |
 | P07 | Final `3d8e715`; owned SPEC/QUALITY PASS at `a8de574`; final joins open | `a7d78944-c02c-4909-a060-2c4f2a754b00` |
 
 ## Accepted local integrations
@@ -63,8 +63,8 @@ reviewed `041417a`; all eight leaves passed spec and full bounded quality. The r
 ran 51 tests plus corrected numeric/record probes and new failure/ownership probes.
 Eight selected joined-tree tests passed with jq: hostile resolvers, retained policy,
 numeric/path metadata, vault, ADR index ownership and updater failure/fallback.
-Registration is unchanged and dormant hooks remain dormant. P07's changed resolver is
-not yet on the integration branch, so that combined gate remains open.
+Registration is unchanged and dormant hooks remain dormant. P07 is now integrated;
+the copied-fixture repair and joined source/profile checks are recorded below.
 
 P02: complete worker and final-review history merged as `39561c0`. Source exactly matches
 independently reviewed `9bdaeb4`; 60 scenarios/875 assertions passed independently.
@@ -98,6 +98,22 @@ schemas, causing 11 failures; `d7eb92f` fixes only that fixture resource list, w
 weakened assertion or fake dependency. Six real source/home-fallback/hook/vault tests
 then passed. Final P05-v2, P06/P08/P14 and live-platform gates remain open.
 
+P06: product `7425960` and independent report `1067da29` are integrated as `36593cd`.
+Complete owned spec then first whole bounded quality passed, closing C01-C07 with
+99 repository methods, 12 independent fact probes and actual installed/clone refusal
+and preservation cases. Key provider/generator/library blobs match the reviewed product.
+P05 consumer acceptance and final joined preflight/profile/workflow gates remain separate.
+
+Coordinator regeneration exposed a real joined schema-consumer mismatch: the envelope
+contract is JSON-compatible YAML, but the wiki grepped YAML-only version headers and
+hardcoded the now-optional requires_lintel pack field. A23.4.g1/g2 repair the renderer
+using the accepted stdlib parser, test dynamic metadata and fail malformed/missing
+schemas before output. Unit/schema-shape RED was reproduced; repaired unit, schema/wiki
+shapes, instruction/catalog/wiki checks and repository adapter init/check all pass.
+Source repair and generated outputs are committed in `80f36fb`. They are refreshed
+from source, not hand-edited. This is a bounded
+coordinator-reviewed repair, not final independent integrated acceptance.
+
 ## Current repair gates
 
 - P01's former staging/metadata/record defects are all closed in P01-final.md. The old
@@ -119,20 +135,16 @@ then passed. Final P05-v2, P06/P08/P14 and live-platform gates remain open.
   but compound-list fences/raw PRE literals still permit acceptance normalization.
   P05 now consumes the approved shared stateless Markdown-boundary checkpoint, not more
   local block parsing. Its exact helper dependency must remain separately attributable.
-- P06's C01-C03 close individually. Its C04 EOF-title and C05 quoted-indented-code
-  boundaries are addressed under approved `e76ed6c` in immutable `9f6b69d`, with local
-  27 nav/16 registry/14 Universal/22 Copilot methods passing; not independent acceptance.
-  Its current internal MarkdownSource lacks explicit raw/quote/task-marker facts P05 needs.
-  MasterSession approved shared `lib/markdown_source.py` in `7a892b4`: P06 is sole classifier
-  owner and P05 the one-character progress consumer. Provider `09148b7` failed C06 false
-  structural-item facts and C07 multiline inline-code classification; current repair is
-  `7425960`. Exact API and dependency-only import are approved, independent acceptance is not.
-  No external parser dependency, shared task schema, scheduler or silent eligibility.
+- P06's C01-C07 now close in the independent `P06-provider-repair-final.md` at `7425960`.
+  Older C04/C05 and `09148b7` C06/C07 reports remain rejected history. P06 retains sole
+  ownership of the stateless provider; P05 owns only its one-character progress consumer.
+  No external parser dependency, shared task schema, scheduler or silent eligibility
+  was added. Do not re-open the accepted component or infer P05 acceptance from it.
 
 P05's owned consumer now passes 35 boundary plus 46 prior evidence methods using exact
 742 helper bytes, with all existing control/hook/source-target gates retained. This
-closes the implementer's measured C06 failure but does not replace provider or consumer
-independent review. Do not import an earlier 091 helper or conflate dependency commits
+closes the implementer's measured C06 failure but does not replace consumer independent
+review. The provider gate is now independently accepted. Do not import an earlier 091 helper or conflate dependency commits
 with P05 authorship. See interfaces.md for exact Git blob and checksum.
 - P07's four owned findings close in P07-windows-final.md. Preserve its native versus
   injected/UNC/other-OS evidence boundary and original approved policy target; no automatic
@@ -146,8 +158,9 @@ P07 candidate. Candidate archives/compositions are tests, not acceptance of thei
 
 ## Continuation gate
 
-All useful independent coordinator preparation is committed. Await worker/reviewer
-notifications rather than polling or duplicating their code investigation. On a package
+Continue ready independent work: P10's P01/P03/P06/P07 prerequisites are integrated.
+P05 remains frozen under independent review; await its reviewer notification rather than
+polling or duplicating its code investigation. On a package
 review rejection, return exact findings to its original builder, keep the package open,
 and request re-review of the repaired immutable commit. On PASS, integrate only the
 reviewed candidate and report, rerun the smallest joined checks and update its leaf
@@ -170,9 +183,11 @@ No new authorization for main merge, releases, production, hook activation or pr
 
 ## Next action
 
-Coordinate and approve the P05/P06 common boundary facts/card, then sequence its one
-writer and consumer. Obtain their same-reviewer spec/quality evidence before integration.
-P01/P02/P03 and owned P04/P07 are not to be rebuilt.
+Dispatch P10's authorized installer/lifecycle card from the committed joined generator
+baseline in an isolated child. Coordinator owns shared-source preflight
+A23.4.g3; do not let the new worker change the accepted navigation/provider or P05's
+pending evidence contract. Integrate P05 only after its same-reviewer spec/first quality
+verdict. P01/P02/P03 and owned P04/P06/P07 are not to be rebuilt.
 Use host-native delegation while Swarming component/final gates remain open.
 
 Prepared successors: P05-P07 contracts and official host-source report committed in
