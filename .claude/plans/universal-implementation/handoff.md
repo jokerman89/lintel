@@ -34,8 +34,8 @@ from the reviewed historical merge `40c2795`. Current implementation ownership:
 | P02 sync binding | `2e21aa98-3b40-46e7-885d-2ec4161ec35d` | ACCEPTED and integrated `39561c0`; idle, no real private sync activated |
 | P03 context safety | `9f06eebf-a3ee-4867-95ad-eb6e1d22a6d5` | ACCEPTED and integrated `9a1cf17`; idle, downstream consumer/host gates separate |
 | P04 Swarming | `a8960a09-fcd7-4652-a9b6-74ad6a94a029` | Component ACCEPTED/integrated `490a0f4` + report history `8964267`; idle until explicit A22.7 |
-| P05 review evidence | `2329e71f-cd9e-473b-94cf-41c579c29a88` | Paused at `5a4933e` / product `3adae4b`; v2 QA closes, literal-boundary repair waits for coordinated shared facts |
-| P06 host adapters | `324863ff-e7cf-4abf-b449-04dd0f096170` | Frozen narrow nav checkpoint `9f6b69d`; shared boundary extraction API/card being coordinated before any new edits |
+| P05 review evidence | `2329e71f-cd9e-473b-94cf-41c579c29a88` | Authorized consumer BUILD under `7a892b4`, exact `09148b7` helper dependency-only import; no helper edits |
+| P06 host adapters | `324863ff-e7cf-4abf-b449-04dd0f096170` | Frozen shared provider `09148b7`; independent helper + complete adapter spec/quality running |
 | P07 profile context | `b9352dfe-1c1e-4ea3-b7d9-0fd008d39b3d` | Component ACCEPTED: own commits integrated through `62ca389`; idle, final consumers remain open |
 
 All are `lintel-builder` sessions with explicit ownership, local commits, report paths
@@ -117,15 +117,16 @@ then passed. Final P05-v2, P06/P08/P14 and live-platform gates remain open.
   log poisoning. The actual v2 source is now `3adae4b`, canonical example in
   skills/review/references/evidence.md. Its QA/migration invariants close individually,
   but compound-list fences/raw PRE literals still permit acceptance normalization.
-  P05 is paused for a shared stateless Markdown-boundary checkpoint, not more local regexes.
+  P05 now consumes the approved shared stateless Markdown-boundary checkpoint, not more
+  local block parsing. Its exact helper dependency must remain separately attributable.
 - P06's C01-C03 close individually. Its C04 EOF-title and C05 quoted-indented-code
   boundaries are addressed under approved `e76ed6c` in immutable `9f6b69d`, with local
   27 nav/16 registry/14 Universal/22 Copilot methods passing; not independent acceptance.
   Its current internal MarkdownSource lacks explicit raw/quote/task-marker facts P05 needs.
-  MasterSession chose a shared trusted `lib/markdown_source.py` direction, with P06 as sole
-  classifier owner and P05 as the later one-character progress consumer. Exact API, supported/
-  opaque spans and ownership card must be approved BEFORE extraction/import. No external
-  parser dependency, shared task schema, scheduler or silent eligibility assumptions.
+  MasterSession approved shared `lib/markdown_source.py` in `7a892b4`: P06 is sole classifier
+  owner and P05 the one-character progress consumer. The immutable provider is `09148b7`;
+  exact API and dependency-only import are approved, but independent acceptance is not.
+  No external parser dependency, shared task schema, scheduler or silent eligibility.
 - P07's four owned findings close in P07-windows-final.md. Preserve its native versus
   injected/UNC/other-OS evidence boundary and original approved policy target; no automatic
   cross-target transfer or enterprise enforcement claim follows.

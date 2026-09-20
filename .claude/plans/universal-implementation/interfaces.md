@@ -4,6 +4,24 @@ Coordinator-owned agreements for dependent packages. These signatures are propos
 accepted for implementation; code and contract tests at exact package revisions establish
 their final availability. No second task/status ledger is introduced here.
 
+## Shared Markdown source boundaries
+
+Approved contract/ownership: `packages/P05-P06-markdown-boundary.md` at `7a892b4`.
+Provider checkpoint: `09148b71cb57df0a5bb5cc21f3f1681d6715390e`, owned by P06.
+`lib/markdown_source.py` implements the exact immutable types and stateless
+`classify_markdown(str)` API. Independent provider/adapter acceptance remains pending.
+
+P05 is authorized to import only the exact helper bytes as an explicitly attributed
+dependency-only commit, not to edit or fork the helper. It then owns its selected-leaf,
+single ASCII progress-character/excerpt consumer and actual clearance regressions.
+Classify full supplied text; use original Unicode codepoint spans. A prose item describes
+its start context, not permission over later literal spans. The actual checkbox location
+must be eligible; quote/literal/opaque/unknown content remains identity-bearing.
+
+No shared semantic task schema, normalization, I/O, policy or clearance belongs in this
+provider. Missing installed helper must fail before writes, not fall back to a second
+parser or a target-supplied module. Both independent consumer gates and final fan-in remain.
+
 ## P05 review and controls
 
 **Coordinated format revision:** the affected bound review/context/QA contract moves
