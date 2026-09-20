@@ -314,3 +314,14 @@ Scoped coordination: P01 may add minimal optional-metadata guards to its already
 tq-perf-regression hook, with absence/presence regression cases, to preserve the trusted
 policy warning rather than losing it under shell errexit. P03's A01.4/A01.5 sub-leaves
 were approved before implementation. These do not authorize broader domain changes.
+
+Independent first-wave review outcomes:
+
+| Package | Exact reviewed product | Spec/preservation | Quality | Next owner |
+|---|---|---|---|---|
+| P01 | `c4542e4` | FAIL: three P2; [report](reviews/P01.md) | Not run | Original builder repairs R1-R3; same reviewer then rechecks immutable result |
+| P02 | `53b9462` | FAIL: three P1; [report](reviews/P02.md) | Not reached | Original builder repairs all three local-fixture failures |
+| P03 | `aa7fad4` | FAIL: one P1 and three P2 reproduced; report pending | Not run | Original builder repairs restore progress, detached HEAD, exclusion aliases and glob semantics |
+
+No rejected product batch was integrated. Green original test counts are retained as
+limited evidence, not substituted for the newly failing acceptance cases.

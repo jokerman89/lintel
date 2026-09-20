@@ -21,8 +21,24 @@ actors/result; a checksum does not authenticate an actor. Relevant unchanged inp
 reuse evidence; arbitrary new files, acceptance changes and dirty content cannot hide.
 
 Required-policy bridge: `required` boolean, status loaded/unverified/error/not_required,
-source, version and applicability. Required unknown/failure blocks. Optional neutral
-context is no-applicable-controls, not verified enterprise compliance.
+`source` and `version` string or null, applicability applicable/not_applicable/unknown.
+`reason` is optional nonblank text. Required loaded policy needs nonblank source/version
+and known applicability; unresolved data does not pass. Optional neutral context is
+no-applicable-controls, not verified enterprise compliance. P05 owns this schema;
+P07 must not declare a second interpretation. Every selected leaf covers every declared
+required control, including both spec and quality where those are mandatory.
+
+The existing Python 3.9+ product floor remains. P05's temporary 3.10 prerequisite was
+rejected as an unnecessary support regression; the worker is correcting annotations,
+preflight and documentation rather than silently changing compatibility.
+
+Concrete P05 candidate CLI: `prepare --repo --request` emits immutable context;
+`validate --record` is structural only; `li-review-log --file` records the decision;
+`li-review-read --skill --expected --corroboration --gate-json` selects latest applicable
+clearance. Standalone `verify --repo --record --expected --corroboration` cannot establish
+latest-log status. `qa --repo --expected --input` validates recorded checks, without
+running/repairing code. `ship --repo --skill --expected --corroboration --qa` invokes
+the actual shared reader and same-context QA, never publication/deployment.
 
 ## P07 profile context
 

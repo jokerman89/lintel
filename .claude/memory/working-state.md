@@ -24,8 +24,10 @@ merge at `e74849d`; report `4bf5315` and both ancestries are integrated in `40c2
 delta destinations are preserved and 17 historical topology/brief/report/review artifacts
 are unchanged. This closes only A22.1/A22.2, not the SW fixes or final A22 integration.
 
-**What's pending:** P01/P02 candidate commits are frozen in independent review; P03 is fixing
-a fail-closed Windows snapshot-publication error found after its first commit. P04 continues
+**What's pending:** independent P01/P02 spec reviews rejected their first candidates (three
+P2 and three P1 findings respectively). P03's supplemental review found one P1 restore-progress
+defect and three P2 preservation/selector defects after the Windows publication repair.
+All three original builders are repairing, and quality review has not passed. P04 continues
 SW/envelope repairs. P05/P06/P07 implement shared review, host and profile contracts in separate
 worktrees. Coordinator routing (`b72ab47`) and provenance (`9f49e26`) slices await their owning
 package reviews. All successor cards and interface agreements are committed; read the handoff

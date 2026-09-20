@@ -684,3 +684,21 @@ every host has identical tools or that a manifest proves runtime support.
 - Context: operator explicitly requires all Swarming branch work to be preserved as far as feasible; swarming or practical facilitation is a desired capability.
 - Risk to prevent: treating review findings, hybrid integration or missing host concurrency as a reason to discard the initiative or defer it indefinitely. No branch work was changed or removed.
 - Rule: preserve implementation, knowledge, tests, reports, history and useful entry points; trace every valuable delta into the reconciled result. Adapt execution to native isolated, sequential or explicit external/manual handoff modes. Keep true independent review requirements visible. Escalate an actual unavoidable loss with concrete alternatives before dropping value.
+
+## L-033 - Preserve declared runtime and dependency contracts
+
+**Date:** 2026-09-20
+
+**Context:** The Universal implementation introduced shared review/profile/envelope helpers.
+One candidate unnecessarily raised the documented Python 3.9 floor to 3.10; another initially
+relied on a YAML library available on the development machine without establishing consumer
+availability. Both assumptions were corrected before integrated acceptance.
+
+**Rule:** A shared helper must preserve the published runtime floor unless an explicit
+compatibility decision changes it. Developer-installed packages are not proof of clean-client
+dependencies. Keep default paths dependency-light, declare optional dependencies and their
+failure boundary, and test missing-dependency cases before output or side effects.
+
+**Verification:** Grammar checks are not a real minimum-runtime execution. Record those levels
+separately, propagate loader/parser failures, and run producer/consumer tests against the same
+canonical schema instead of independently interpreting message examples.
