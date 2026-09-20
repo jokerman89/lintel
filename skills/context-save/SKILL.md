@@ -14,7 +14,7 @@ Save the current session's load-bearing state to a checkpoint file so a fresh se
 
 ## When to use
 
-- Token watcher fired a warning (~50k tokens or more) and you want to restart in a fresh session
+- An actually available watcher or host observation suggests checkpointing before a fresh session
 - You're ending a multi-day task mid-flight and the next session needs the full picture
 - You're handing the session off to a teammate
 - Before running `/clean` (it offers to call this first)
@@ -41,11 +41,11 @@ Save the current session's load-bearing state to a checkpoint file so a fresh se
 2. Compute the checkpoint path via the mechanical core (`bin/_context.sh` owns naming + directory creation; checkpoint CONTENT stays LLM-written):
 
    ```bash
-   source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/bin/_context.sh"   # fallback: "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/bin/_context.sh"
-   path=$(context_save_path [label])
+   source "${LINTEL_SOURCE_ROOT:?Set the trusted Lintel source root}/bin/_context.sh"
+   path=$(context_save_path "${label:-}") || exit 1
    ```
 
-   `context_save_path` echoes `.claude/runtime/sessions/<branch>/<YYYYMMDD-HHMMSS>-r<repository-key>-<slug>[-<label>]-context-save.md` and creates the directory. The key identifies the canonical repository path, including in the shared legacy directory. The filename ends `-context-save.md` so restore/warm globs match.
+   `context_save_path` reserves an empty file at `.claude/runtime/sessions/<branch>/<YYYYMMDD-HHMMSS>-r<repository-key>-<slug>[-<label>]-context-save.md` and creates the directory. It refuses unsafe directories and chooses a collision suffix instead of overwriting. The key identifies the canonical repository path, including the shared legacy directory. The filename ends `-context-save.md` so restore/warm readers match; empty reservations are not discoverable checkpoints.
 3. Gather:
    - **What the task is** — one-line description (operator-provided or inferred from recent turns).
    - **What got done** — bulleted from todo-list completed items + recent commit messages on this branch.
@@ -54,6 +54,10 @@ Save the current session's load-bearing state to a checkpoint file so a fresh se
    - **Decisions taken** — surface any AskUserQuestion answers from the session (operator-noted).
    - **Failed attempts** — patterns/approaches tried that didn't work (so next session doesn't re-try).
    - **Files touched** — `git diff --name-only HEAD` + any uncommitted-but-staged files.
+   - **Bounded restart sources** — explicit relative paths for the next step, not every file
+     mentioned in the conversation. Use `context_select` to preview their actual sizes and
+     missing/excluded files. Preserve any already-selected work/spec/task artifact references;
+     do not guess a different initiative or create a second task source.
 4. Write the checkpoint content to `$path` with this structure:
 
 ```markdown
@@ -104,7 +108,10 @@ Save the current session's load-bearing state to a checkpoint file so a fresh se
 To restore this session: `/context-restore <checkpoint-path>` OR paste this file into a fresh session.
 ```
 
-5. Print the path so operator can copy/share it.
+5. Confirm the write succeeded and is nonempty, then run `context_checkpoint "$path"` to
+   verify the owned read path and show its size/digest. Only then report a saved checkpoint.
+   This reads metadata; the checkpoint content remains agent-written and must also be reviewed.
+   Print the exact path so the operator can resume it.
 
 ## Report format
 
@@ -117,9 +124,10 @@ To restore this session: `/context-restore <checkpoint-path>` OR paste this file
 
 ## Edge cases
 
-- **No git repo:** still save, but `branch` field is `no-git`. Slug derived from cwd basename.
+- **No git repo:** still save using the installed Git hashing tool, with branch `no-branch`.
+  Slug derives from the explicit root/cwd basename. An unborn Git branch retains its actual name.
 - **No `.claude/runtime/sessions/<branch>/`:** `context_save_path` creates it.
-- **Existing checkpoint with same timestamp:** suffix with `-2`, `-3`, etc. Never overwrite.
+- **Existing checkpoint with same timestamp:** reserve a `-copyNNNN` suffix. Never overwrite.
 - **Operator pastes recent turns inline:** capture them verbatim under a `## Recent turns (operator-pasted)` section.
 
 ## Compliance integration
@@ -130,9 +138,11 @@ This skill writes a checkpoint outside the committed tree (to the gitignored `.c
 
 ## Failure modes
 
-- **Write fails (disk full / permission denied):** report error, print checkpoint content to stdout so operator can copy it manually.
+- **Write fails (disk full / permission denied):** report failure and preserve any local draft;
+  do not claim success or dump possibly sensitive checkpoint content to another surface.
 - **Slug resolution fails:** fall back to `unknown-project`.
-- **Branch resolution fails:** `no-git` placeholder.
+- **No Git branch:** `no-branch` placeholder; a detached committed checkout uses `HEAD`.
+  A missing Git/Python tool or invalid directory is an explicit failure, not a saved checkpoint.
 
 ## Examples
 
@@ -157,3 +167,8 @@ This skill writes a checkpoint outside the committed tree (to the gitignored `.c
 - `/li:resume` — **paired with this skill**: resume discovers these checkpoints (newest-first via `context_latest`) and, when no cycle ledger exists, offers `/li:context-restore <path>` instead of misdirecting to a fresh cycle
 - `/clean` — manual self-maintenance trigger (offers to call this first)
 - Layer 4 `li-token-watcher` hook — surfaces this skill when token thresholds hit
+
+This saves continuity notes, not a backup of source bytes or a change to the host's active
+context. Owned file rollback uses `bin/li-snapshot.py` through `/li:safe-install`; never
+confuse it with reading a Markdown checkpoint. Hook references above apply only when that
+host integration was actually configured and observed.

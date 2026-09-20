@@ -1,100 +1,58 @@
 ---
 name: context-cool
 layer: foundation
-description: Selectively drop context from session — free budget for further warming. Operator picks what to keep.
+description: Exclude explicitly selected files from future context reads without claiming to remove already-sent conversation content.
 color: cyan
 tools: Read, Bash, Grep
 voice: internal
 cli_support: [claude-code, codex]
 ---
 
-You are the context-cool skill — selective context dropping.
+# Context cool
 
-## What this skill does
-
-In Claude Code, context isn't directly mutable mid-session — it's append-only. So "cooling" here means: signal to subsequent skills/agents to IGNORE specific loaded content + clean up budget tracking + recommend session-restart if true reduction needed.
-
-For real budget reduction: operator can `/li:context-save` then restart session, then `/li:context-restore` selectively.
-
-## When to use
-
-- Budget tight, need to free for new heavy load
-- Specific loaded files no longer relevant (different phase shifted scope)
-- Operator wants to declutter conversation context
-
-## When NOT to use
-
-- True early-session (let context grow organically)
-- Mid-task (interruption cost > benefit)
+Reduce the next working set when the task changes. Cooling cannot remove messages already
+sent to the model. It performs no disk cleanup and cannot enlarge or reset a context window.
+For an actual smaller conversation, save a checkpoint and use the host's new-session
+operation, then restore only needed references.
 
 ## Workflow
 
-### Step 1 — Surface what's loaded
+1. Read the available source history (`.claude/runtime/state/context-budget.md`) and
+   current selection manifests. Distinguish recorded reads from assumed active context.
+2. Let the operator select literal paths or bounded globs to exclude. Reuse explicit
+   authorization, but do not infer that an entire customer, repository or phase can be
+   discarded from a vague "cool" request. Essential task/authority context must be retained.
+3. Apply future exclusions through the shared reader:
 
-Read `.claude/runtime/state/context-budget.md` to see what was warmed:
-
-```
-CURRENTLY LOADED (from context-warm events):
-
-| Source | Files | Tokens (est) | Last accessed |
-|---|---|---|---|
-| context-warm "ExpressRoute" | 8 files | 12k | 30 min ago |
-| context-warm-adrs "networking" | 5 ADRs | 8k | 45 min ago |
-| context-warm-customer "acme" | 18 files | 25k | 1 hour ago |
-
-Total warmed: 45k tokens
+```bash
+source_root="${LINTEL_SOURCE_ROOT:?Set the trusted Lintel source root}"
+source "$source_root/bin/_context.sh"
+context_cool "$@"
 ```
 
-### Step 2 — Operator selects what to drop
+Examples of argument arrays: `--path 'docs/old notes.md'`, `--glob 'experiments/**/*.md'`,
+or `--clear` to allow those sources again. The helper writes the root-bound JSON file
+`context-ignore.json` in the directory returned by `lintel_state_dir`. `context_select`
+actually consumes it; a malformed or foreign record fails rather than silently losing
+the exclusions. Show the exact source root and the resulting path/pattern list.
 
-AskUserQuestion:
-- A) Mark all customer-acme files as IGNORE
-- B) Mark all ADR loads as IGNORE  
-- C) Keep highest-relevance subset (operator-driven)
-- D) Restart session (true cool — operator does manually)
+Historical `context-ignore.md` notes remain readable, but are not parsed as executable
+selection policy. Review their literal paths and explicitly migrate the intended choices
+with this command; never assert that an unconsumed old marker was enforced.
 
-### Step 3 — Apply marker
+## Result and recovery
 
-For selected items, add to `.claude/runtime/state/context-ignore.md`:
-```yaml
-- source: context-warm "ExpressRoute"
-  files: [...]
-  ignore_from: <timestamp>
-  reason: <operator note or "scope shift">
-```
+Report **future exclusions applied**, zero current-context tokens removed and zero disk
+bytes removed. Do not subtract excluded-file estimates from observed or historical usage.
+The policy applies to the selected repository's shared selector, not arbitrary host reads,
+other agents or other repositories. Include it explicitly in a delegated retrieval handoff.
 
-Subsequent skills/agents reading the IGNORE list will downweight or skip these in their reasoning.
+If saving state helps:
 
-(Note: Claude Code's actual context isn't trimmed; this is a coordination signal only.)
+1. `/li:context-save <label>` preserves decisions and next work.
+2. Start a fresh session using the actual host operation.
+3. `/li:context-restore` reads the owned checkpoint and a bounded current-file set.
+4. `/li:context-warm` previews only still-needed sources.
 
-### Step 4 — Surface result + recommendation
-
-```
-CONTEXT COOL — applied
-
-Marked for IGNORE: <N> file(s)
-Effective budget freed: ~<X>k (when subagents respect IGNORE)
-
-True budget reduction requires session restart:
-  1. /li:context-save
-  2. Restart session
-  3. /li:context-restore <checkpoint>
-  4. /li:context-warm (only what's still needed)
-```
-
-### Step 5 — 00-state.md append
-
-```yaml
-event: context_cool
-ts: <timestamp>
-items_marked: <N>
-```
-
-## Integration
-
-Reads `.claude/runtime/state/context-budget.md`. Writes `.claude/runtime/state/context-ignore.md` for coordination.
-
-## Anti-patterns
-
-- **Treating "cool" as true budget reduction** — it's coordination, not memory cleanup
-- **Cooling too aggressively** — operator loses access if they need files later (would need re-warm)
+On a failed exclusions write, report failure; leave previous exclusions intact. Do not
+delete source files, archives or checkpoints as a substitute for cooling.

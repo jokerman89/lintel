@@ -12,7 +12,10 @@ You are the context-warm-related skill — topic-heuristic loading.
 
 ## What this skill does
 
-Given a topic (e.g., "rate limiter", "auth flow", "retry pattern"), heuristically finds the top N most-relevant files across cwd + `~/.lintel/scaffolding/` + `.claude/engineering/design-archive/` and loads them via `/li:context-warm`.
+Given a literal topic (e.g., "rate limiter", "auth flow", "retry pattern"), rank files
+within an explicitly selected root and bounded patterns, then load them via `/li:context-warm`.
+Repository, installed scaffolding and design-archive comparisons remain available, but no
+personal home or external repository is searched implicitly.
 
 ## When to use
 
@@ -30,24 +33,33 @@ Given a topic (e.g., "rate limiter", "auth flow", "retry pattern"), heuristicall
 ### Step 1 — Topic + scope
 
 ```bash
-topic="$1"
-scope="${2:-cwd}"  # cwd | repo | lintel-home | all
+source "${LINTEL_SOURCE_ROOT:?Set the trusted Lintel source root}/bin/_context.sh"
+topic="${1:?Supply a literal topic}"
+pattern="${2:?Supply a bounded relative glob}"
 limit="${3:-10}"
+context_select --glob "$pattern" --topic "$topic" --limit "$limit"
 ```
 
 ### Step 2 — Heuristic search
 
-Multi-source search:
-- Filename match: `find . -iname "*<topic>*"`
-- Content match: `grep -rli "<topic>" --include='*.md' --include='*.ts' --include='*.py' --include='*.go'`
-- Frontmatter match (for skills/agents): `grep -li "<topic>" skills/*/SKILL.md agents/*/*.md`
+The selector searches literal topic occurrences in filenames and bounded file contents,
+including frontmatter when skill/agent files are selected. The topic is not a shell command
+or a regex. Links/reparse escapes, ignored paths and byte/file limits use the base reader.
+For multiple patterns, pass each as a separate `--glob`; never join filenames into one string.
+
+The familiar `cwd`, `repo`, `lintel-home` and `all` scope choices are requests to identify
+explicit roots, not recursive scans of a user's workspace. For `lintel-home`, select the
+authorized installed scaffolding root only. For `all`, preview each authorized root
+separately, preserving its source identity and exclusions. Missing scope is a decision,
+not permission to inspect private trees.
 
 Score files:
 - 3 points: filename match
 - 2 points: ≥5 content matches
 - 1 point: 1-4 content matches
 
-Top N by score.
+Top N by score, with deterministic path tie-breaking and an explicit omitted count.
+The helper implements this ranking; the preview lists actual paths and byte estimates.
 
 ### Step 3 — Surface candidate list
 
@@ -68,10 +80,9 @@ Load all? (Y / select subset / cancel)
 
 ### Step 4 — Delegate to context-warm
 
-If operator selects all or subset:
-```bash
-/li:context-warm <space-separated-paths>
-```
+If the operator selects all or a subset, pass each manifest path as a separate literal
+`--path` to `/li:context-warm` in the same explicit root. Recheck changed sources before
+reading. State unknown capacity as unknown; ranking is not a headroom measurement.
 
 ### Step 5 — 00-state.md append
 
@@ -81,7 +92,7 @@ ts: <timestamp>
 topic: <topic>
 candidates_surfaced: <N>
 loaded: <count>
-tokens_added: <approx>
+estimated_input_tokens: <source-byte heuristic, not measured active usage>
 ```
 
 ## Integration
