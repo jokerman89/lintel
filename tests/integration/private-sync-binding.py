@@ -421,6 +421,52 @@ class PrivateSyncTests(unittest.TestCase):
         f.reject_without_transfer("push")
         self.equal(f.git(remote, "rev-parse", "HEAD"), head, "unrelated staging is not published")
 
+    def test_a26_4_unrelated_staged_changes_and_deletions_remain_unpublished(self):
+        f = self.fixture
+        remote = f.remote("unrelated-index-changes")
+        f.setup(remote)
+        f.content(b"# Selected record stays private until authorized push.\n")
+        if self.kind == "roles":
+            (f.cache / "retired.md").write_bytes(b"# Owned role selected for deletion.\n")
+        f.cli("push")
+        unrelated = f.cache / "unrelated.txt"
+        unrelated.write_bytes(b"Previously committed unrelated content.\n")
+        f.git(f.cache, "add", "--", "unrelated.txt")
+        f.git(f.cache, "commit", "-qm", "fixture unrelated tracked file")
+        f.git(f.cache, "push", "-q", "origin", "HEAD")
+        remote_head = f.git(remote, "rev-parse", "HEAD")
+        f.content(b"# Pending selected record update.\n")
+        if self.kind == "roles":
+            f.git(f.cache, "rm", "--", "retired.md")
+        unrelated.write_bytes(b"Unrelated staged modification.\n")
+        f.git(f.cache, "add", "--", "unrelated.txt")
+        f.reject_without_transfer("push")
+        self.equal(f.git(remote, "rev-parse", "HEAD"), remote_head,
+                   "owned role changes do not permit unrelated staged modifications")
+        f.git(f.cache, "rm", "-f", "--", "unrelated.txt")
+        f.reject_without_transfer("push")
+        self.equal(f.git(remote, "rev-parse", "HEAD"), remote_head,
+                   "owned role deletion does not permit unrelated staged deletion")
+        self.equal(f.git(remote, "show", "HEAD:unrelated.txt"),
+                   "Previously committed unrelated content.",
+                   "rejected staged deletion retains the unrelated remote content")
+
+    def test_a26_4_renaming_an_unrelated_file_to_markdown_does_not_grant_ownership(self):
+        f = self.fixture
+        remote = f.remote("unrelated-rename")
+        f.setup(remote)
+        f.content(b"# Published private record.\n")
+        f.cli("push")
+        (f.cache / "unrelated.txt").write_bytes(b"Unrelated tracked bytes.\n")
+        f.git(f.cache, "add", "--", "unrelated.txt")
+        f.git(f.cache, "commit", "-qm", "fixture unrelated file before rename")
+        f.git(f.cache, "push", "-q", "origin", "HEAD")
+        remote_head = f.git(remote, "rev-parse", "HEAD")
+        f.git(f.cache, "mv", "--", "unrelated.txt", "renamed-role.md")
+        f.reject_without_transfer("push")
+        self.equal(f.git(remote, "rev-parse", "HEAD"), remote_head,
+                   "rename detection cannot hide an unrelated staged deletion")
+
     def test_a26_4_two_machine_push_pull_and_explicit_origin(self):
         f = self.fixture
         a, b = f.remote("round-trip"), f.remote("decoy")
@@ -629,6 +675,71 @@ class PrivateSyncTests(unittest.TestCase):
 
 class RolesSyncTests(PrivateSyncTests):
     kind = "roles"
+
+    def role_deletion_round_trip(self, staged, remove_all=False):
+        f = self.fixture
+        remote = f.remote("role-deletions")
+        f.setup(remote)
+        f.content(b"# Active architect role.\n")
+        retired = {"retired.md": b"# Retired role.\n",
+                   "nested/retired-reviewer.md": b"# Retired nested role.\n"}
+        for relative, content in retired.items():
+            role = f.cache / relative
+            role.parent.mkdir(parents=True, exist_ok=True)
+            role.write_bytes(content)
+        f.cli("push")
+        published = f.git(remote, "rev-parse", "HEAD")
+        bob = Fixture(self, self.base / "deletion-reader", "roles")
+        bob.setup(remote)
+        if remove_all:
+            retired["architect.md"] = b"# Active architect role.\n"
+        if staged:
+            f.git(f.cache, "rm", "--", *retired)
+        else:
+            for relative in retired:
+                (f.cache / relative).unlink()
+        f.cli("push")
+        self.equal(f.git(remote, "rev-parse", "HEAD"), f.git(f.cache, "rev-parse", "HEAD"),
+                   "role deletion is committed and delivered to the bound remote")
+        for relative, content in retired.items():
+            self.equal(f.git(remote, "ls-tree", "HEAD", "--", relative), "",
+                       "retired Markdown is removed from the remote tip")
+            self.equal(f.git(remote, "show", f"{published}:{relative}"), content.decode().strip(),
+                       "deleted role remains preserved in published Git history")
+        if not remove_all:
+            self.equal(f.git(remote, "show", "HEAD:architect.md"), "# Active architect role.",
+                       "deletion preserves the active architect role")
+        self.equal(f.git(f.cache, "diff", "--cached", "--name-only"), "",
+                   "intended deletions leave a committed index")
+        bob.cli("pull")
+        self.equal(snapshot(bob.cache), snapshot(f.cache),
+                   "deletions round-trip to the other private cache")
+
+    def test_a26_4_staged_owned_role_deletions_round_trip(self):
+        self.role_deletion_round_trip(staged=True)
+
+    def test_a26_4_unstaged_owned_role_deletions_round_trip(self):
+        self.role_deletion_round_trip(staged=False)
+
+    def test_a26_4_staged_deletion_of_all_roles_round_trips(self):
+        self.role_deletion_round_trip(staged=True, remove_all=True)
+
+    def test_a26_4_staged_role_deletion_does_not_readd_a_retained_local_copy(self):
+        f = self.fixture
+        remote = f.remote("retained-local-role")
+        f.setup(remote)
+        f.content(b"# Architect remains synchronized.\n")
+        retired = f.cache / "retired.md"
+        retired.write_bytes(b"# Locally retained role bytes.\n")
+        f.cli("push")
+        f.git(f.cache, "rm", "--cached", "--", "retired.md")
+        f.cli("push")
+        self.equal(f.git(remote, "ls-tree", "HEAD", "--", "retired.md"), "",
+                   "an explicit staged deletion wins over an untracked local copy")
+        self.equal(retired.read_bytes(), b"# Locally retained role bytes.\n",
+                   "publishing the index deletion does not delete the retained local copy")
+        self.equal(f.git(remote, "show", "HEAD:architect.md"), "# Architect remains synchronized.",
+                   "the unrelated active role remains synchronized")
 
     def test_a26_4_git_symlink_records_retain_their_type(self):
         f = self.fixture

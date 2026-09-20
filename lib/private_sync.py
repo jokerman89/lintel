@@ -251,24 +251,32 @@ def current_branch(directory: Path) -> str:
 def push(kind: str, directory: Path, path: Path, project: Path | None, lessons: Path | None) -> None:
     require_binding(path, directory)
     branch = current_branch(directory)
+    deleted_roles: set[str] = set()
     if kind == "lessons":
         if project is None or lessons is None or not lessons.is_file():
             raise SyncError("No lessons file in the selected repository.")
         selected = [project_record(project)]
     else:
+        # Deleted index entries retain their ownership through the HEAD-to-index diff.
+        deleted_roles = set(filter(None, git(
+            directory, "diff", "--cached", "--no-renames", "--diff-filter=D",
+            "--name-only", "-z", "--", "*.md"
+        ).split("\0")))
         selected = sorted(set(filter(None, git(
             directory, "ls-files", "-z", "--cached", "--others", "--exclude-standard", "--", "*.md"
-        ).split("\0"))))
-    staged = set(filter(None, git(directory, "diff", "--cached", "--name-only", "-z").split("\0")))
-    if staged.difference(selected):
+        ).split("\0"))) - deleted_roles)
+    staged = set(filter(None, git(
+        directory, "diff", "--cached", "--no-renames", "--name-only", "-z"
+    ).split("\0")))
+    if staged.difference(set(selected) | deleted_roles):
         raise SyncError("Unrelated staged files in the cache; commit or unstage them before private sync.")
     if kind == "lessons":
         replace_file(directory / selected[0], lessons.read_bytes())
     if selected:
         git(directory, "--literal-pathspecs", "add", "--all", "--", *selected)
-        changed = git(directory, "diff", "--cached", "--name-only")
-        if changed:
-            git(directory, "commit", "--quiet", "-m", f"sync private {kind}")
+    changed = git(directory, "diff", "--cached", "--name-only")
+    if changed:
+        git(directory, "commit", "--quiet", "-m", f"sync private {kind}")
     git(directory, "rev-parse", "--verify", "HEAD")
     require_binding(path, directory)
     # Always attempt the push: a prior failed transport may have left a local commit.
