@@ -64,10 +64,8 @@ source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/lib/pack-resolver.sh"
 source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/lib/brief-forge.sh"
 source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/lib/brief-forge-evaluators.sh"
 
-# PackResolver intentionally resolves top-level and two-level fields only.
-# Brief Forge owns this block-scoped reader for its three-level hand-off policy.
-# It reads PACK_CACHE_FILE after PackResolver has applied active-pack inheritance,
-# so the value comes from the same immutable session snapshot as other pack fields.
+# The public profile accessor owns cache format, inheritance and session identity.
+# Read nested policy through it and propagate errors without inspecting its cache.
 # lintel-test:brief-forge-policy:start
 resolve_brief_forge_handoff_field() {
   local handoff="${1:-}" field="${2:-}"
@@ -80,35 +78,7 @@ resolve_brief_forge_handoff_field() {
     *) return 2 ;;
   esac
 
-  _prime_cache_for_session || return 1
-  awk -v handoff="$handoff" -v field="$field" '
-    /^[^[:space:]#][^:]*:/ {
-      if ($0 ~ /^brief_forge_handoffs:[[:space:]]*(#.*)?$/) {
-        in_root=1
-        next
-      }
-      if (in_root) exit
-    }
-    in_root && substr($0, 1, 2) == "  " && substr($0, 3, 1) != " " {
-      line=substr($0, 3)
-      key=line
-      sub(/:.*/, "", key)
-      in_handoff=(key == handoff)
-      next
-    }
-    in_handoff && substr($0, 1, 4) == "    " && substr($0, 5, 1) != " " {
-      line=substr($0, 5)
-      key=line
-      sub(/:.*/, "", key)
-      if (key == field) {
-        sub(/^[^:]*:[[:space:]]*/, "", line)
-        sub(/[[:space:]]*#.*$/, "", line)
-        gsub(/^[[:space:]]+|[[:space:]]+$/, "", line)
-        print line
-        exit
-      }
-    }
-  ' "$PACK_CACHE_FILE"
+  resolve_pack_field "brief_forge_handoffs.${handoff}.${field}"
 }
 
 validate_brief_forge_evaluators() {
