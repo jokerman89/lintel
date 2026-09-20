@@ -201,3 +201,11 @@ P08 currently reports a new, uncommitted trusted `lib/workflow.sh` reference con
 Its final accepted source must join the explicit installed-resource preflight as well
 as ordinary lib copying. Do not import this WIP or make its absent file a prerequisite
 for P10's current freeze; the coordinator reconciles that dependency after acceptance.
+
+P10 has identified its proposed authority locations as `docs/native-installation.md`
+(native TSV v1), `install/native.sh` / `install/native.ps1` (performers), and
+`docs/lifecycle.md` / `lib/managed_transaction.py` / `bin/li-lifecycle.py` (runtime
+transaction and result surface). None has an immutable P10 product checkpoint yet.
+Dependency HEAD `fb96f713` is not that checkpoint. A13.1/.2/.4 remain paused until
+the exact product/contract hashes and real fixture selectors are supplied and the
+coordinator explicitly releases the shared interface.
