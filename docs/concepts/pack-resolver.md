@@ -62,9 +62,19 @@ a known stable work context. Otherwise the helper honors `LINTEL_PROFILE_CONTEXT
 explicit `LINTEL_SESSION_ID`, a real `CLAUDE_SESSION_ID`, or an existing
 `LINTEL_PROFILE_CONTEXT_FILE`. **No PID/PPID fallback exists.** With no supplied ID,
 bootstrap atomically creates or verifies `.claude/runtime/profiles/selected.json`
-and exports its durable context ID. Two fresh shells therefore consume the same
+and exports its durable context ID **and exact canonical `LINTEL_PROFILE_REFERENCE`**.
+Two fresh shells therefore consume the same
 selected work profile. This is repository work selection, not a claimed host session
 identity; give separate concurrent initiatives explicit work IDs.
+
+Bootstrap, bind, verify, rebind and the compatibility cache-clear operation use one
+reference-publication helper. Successful selection always carries context, generation
+and digest to subsequent calls and inherited processes. Repeating bootstrap or binding
+the same ID does not discard an already expected generation. A caller cannot silently
+adopt a child process's rebind; it must explicitly verify that approved new reference.
+Even an invocation-scoped `LINTEL_PROFILE_PACK=strict lintel_copilot_env "$PWD"` retains
+the required profile afterward. The internal bootstrap CLI also returns the complete
+reference, not an ID-only continuation token.
 
 Direct accessor calls without bootstrap/ID still support one-shot neutral or pack
 reads, but cannot emit a pinned reference. Lifecycle producers must bootstrap or
@@ -132,7 +142,13 @@ After an authorized profile change, explicitly run:
 rebind_profile_context "approved policy update; replan affected work"
 ```
 
-The new generation is validated first. The old record is retained in `history/`,
+The new generation is validated first. Every published record, including the initial
+and current generations, is retained immutably in `history/` using the same record
+schema. A missing current record is not evidence of first use: `create=True` refuses
+to recreate it when history or the selected reference shows prior binding. A current
+record replaced by an older or conflicting retained generation also fails.
+
+The old record is retained in `history/`,
 old references stop matching, and the repository selected reference is updated
 only if it names this context. Replan/review dependent work against the new reference.
 Rebind holds the repository selection lock before the context lock and publishes
@@ -141,6 +157,15 @@ leave `selected.json` behind the current generation. An explicit rebind can repa
 a stale same-context selection only when its reference is corroborated by retained
 history; it neither fabricates history nor takes another context's selection.
 An interrupted write that did not return success remains an explicit recovery case.
+
+For a missing current record, a reason-bearing `rebind_profile_context` can recover
+from the unambiguous latest retained record and publish the **next** generation.
+It preserves that record's required invocation selection and never restarts at
+generation 1. A supplied expected reference must match the retained generation.
+Missing, incomplete, conflicting or corrupt history is not sufficient recovery
+evidence; preserve it and restore a verified record rather than fabricating one.
+A genuinely unused explicit work ID can still be bound normally. This is new work,
+not permission to reset or silently replace a lost existing context.
 
 Successful shell bind/rebind updates `LINTEL_PROFILE_REFERENCE` in the caller;
 already-running consumers retain their old generation and must explicitly verify

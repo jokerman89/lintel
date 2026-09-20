@@ -9,7 +9,7 @@
 _LINTEL_COPILOT_SOURCE="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 lintel_copilot_env() {
-  local repo context
+  local repo context reference
   repo="$(cd "${1:-${LINTEL_REPO_ROOT:-.}}" && pwd)" || return 1
   [ -f "$repo/AGENTS.md" ] || {
     echo "ERROR: expected a scaffolded working repository at $repo" >&2
@@ -21,15 +21,14 @@ lintel_copilot_env() {
   export LINTEL_HOME="${LINTEL_HOME:-$repo/.claude/runtime/lintel-home}"
   export LINTEL_PACKS_DIR="${LINTEL_PACKS_DIR:-$LINTEL_HOME/packs}"
   export LINTEL_AUDIT_DIR="${LINTEL_AUDIT_DIR:-$repo/.claude/runtime/audit}"
-  if [ -n "${2:-}" ]; then export LINTEL_PROFILE_CONTEXT="$2"; fi
+  context="${2:-${LINTEL_PROFILE_CONTEXT:-}}"
   [ -f "$LINTEL_SOURCE_ROOT/lib/profile_context.py" ] || {
     echo "ERROR: structured profile helper missing from approved source bundle" >&2
     return 2
   }
-  source "$LINTEL_SOURCE_ROOT/lib/pack-resolver.sh"
+  source "$LINTEL_SOURCE_ROOT/lib/pack-resolver.sh" || return $?
   # No host ID means one explicitly selected repository work context, not a new
   # process-derived session on each call. Drift blocks before lifecycle work.
-  context=$(_profile_cli bootstrap) || return $?
-  export LINTEL_PROFILE_CONTEXT="$context"
-  PACK_CACHE_FILE="$(_profile_cli context-path)" || return $?
+  reference=$(LINTEL_PROFILE_CONTEXT="$context" _profile_cli bootstrap) || return $?
+  _profile_accept_reference "$reference" "$context"
 }

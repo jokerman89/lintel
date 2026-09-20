@@ -82,6 +82,17 @@ pack_workflow() { _profile_cli nullable extension.workflow; }
 profile_context_json() { _profile_cli context; }
 profile_context_reference() { _profile_cli reference; }
 profile_required_policy() { _profile_cli required-policy; }
+
+_profile_accept_reference() {
+  local reference="${1:-}" context="${2:-${LINTEL_PROFILE_CONTEXT:-}}" path
+  context=$(LINTEL_PROFILE_CONTEXT="$context" LINTEL_PROFILE_REFERENCE="$reference" \
+    _profile_cli context-id) || return $?
+  path=$(LINTEL_PROFILE_CONTEXT="$context" LINTEL_PROFILE_REFERENCE="$reference" \
+    _profile_cli context-path) || return $?
+  export LINTEL_PROFILE_CONTEXT="$context" LINTEL_PROFILE_REFERENCE="$reference"
+  PACK_CACHE_FILE="$path"
+}
+
 verify_profile_context() {
   local reference
   if [ "$#" -gt 0 ] && [ -z "${LINTEL_PROFILE_CONTEXT:-}" ]; then
@@ -92,16 +103,14 @@ verify_profile_context() {
   fi
   # Carry the exact verified generation into following calls and child processes,
   # not just the single verification subprocess. The shared parser owns this data.
-  export LINTEL_PROFILE_REFERENCE="$reference"
+  _profile_accept_reference "$reference" || return $?
   printf '%s\n' "$reference"
 }
 
 bind_profile_context() {
   local reference
   reference=$(_profile_cli bind "${1:-}") || return $?
-  export LINTEL_PROFILE_CONTEXT="$1"
-  export LINTEL_PROFILE_REFERENCE="$reference"
-  PACK_CACHE_FILE="$(_profile_cli context-path)" || return $?
+  _profile_accept_reference "$reference" "$1" || return $?
   _resolver_audit context_bound "context=$LINTEL_PROFILE_CONTEXT"
   printf '%s\n' "$reference"
 }
@@ -109,7 +118,7 @@ bind_profile_context() {
 rebind_profile_context() {
   local reference
   reference=$(_profile_cli rebind "${1:-}") || return $?
-  export LINTEL_PROFILE_REFERENCE="$reference"
+  _profile_accept_reference "$reference" || return $?
   _resolver_audit context_rebound "context=${LINTEL_PROFILE_CONTEXT:-${LINTEL_SESSION_ID:-explicit-file}}"
   printf '%s\n' "$reference"
 }
@@ -124,12 +133,13 @@ clear_pack_cache() {
   fi
   # Existing callers also clear before their first read. Bind that first generation
   # explicitly; a missing resume file remains an error in the shared implementation.
-  local path
+  local path reference
   path=$(_profile_cli context-path) || return $?
   if [ -f "$path" ]; then
     rebind_profile_context "explicit legacy clear_pack_cache; replan dependent work" >/dev/null
   else
-    _profile_cli context >/dev/null
+    reference=$(_profile_cli reference) || return $?
+    _profile_accept_reference "$reference"
   fi
 }
 
@@ -150,9 +160,12 @@ _pack_chain_field() { _profile_cli chain-field "${1:-}" "${2:-}"; }
 _resolve_extends_chain() { _profile_cli chain "${1:-}"; }
 
 _prime_cache_for_session() {
-  _profile_cli context >/dev/null || return $?
+  local reference
   if [ -n "${LINTEL_PROFILE_CONTEXT:-${LINTEL_SESSION_ID:-}${LINTEL_PROFILE_CONTEXT_FILE:-}${LINTEL_PROFILE_REFERENCE:-}}" ]; then
-    PACK_CACHE_FILE="$(_profile_cli context-path)" || return $?
+    reference=$(_profile_cli reference) || return $?
+    _profile_accept_reference "$reference"
+  else
+    _profile_cli context >/dev/null
   fi
 }
 

@@ -282,6 +282,365 @@ class ProfileLifecycle(unittest.TestCase):
         self.assertIn("PROFILE_REQUIRED", result.stderr)
         self.assertFalse((self.target / ".claude/runtime/profiles/selected.json").exists())
 
+    def assert_bootstrap_missing_pin_is_not_first_use(self, *, repository_required=False):
+        self.pack("strict")
+        if repository_required:
+            self.require("strict")
+        env = dict(self.env, RESULT_DIR=self.target.as_posix())
+        env.pop("LINTEL_PROFILE_CONTEXT")
+        invocation = "" if repository_required else "LINTEL_PROFILE_PACK=strict "
+        result = self.shell(
+            'source "$LINTEL_SOURCE_ROOT/lib/copilot-env.sh"\n'
+            + invocation + 'lintel_copilot_env "$LINTEL_REPO_ROOT" || exit $?\n'
+            'source "$LINTEL_SOURCE_ROOT/lib/pack-resolver.sh"\n'
+            'profile_required_policy >"$RESULT_DIR/before-policy.json" || exit $?\n'
+            'profile_context_reference >"$RESULT_DIR/before-reference.json" || exit $?\n'
+            'pin=$(_profile_cli context-path) || exit $?\n'
+            'printf "%s" "$pin" >"$RESULT_DIR/pin-path"\n'
+            'rm -- "$pin" || exit $?\n'
+            'policy_rc=0; profile_required_policy >"$RESULT_DIR/after-policy.json" || policy_rc=$?\n'
+            'field_rc=0; resolve_pack_field compliance.mode >"$RESULT_DIR/after-field" || field_rc=$?\n'
+            'printf "%s %s\\n" "$policy_rc" "$field_rc"\n',
+            env=env, source_resolver=False,
+        )
+        policy_before = json.loads((self.target / "before-policy.json").read_text(encoding="utf-8"))
+        self.assertIs(policy_before["required"], True)
+        self.assertEqual(policy_before["status"], "loaded")
+        self.assertEqual(result.stdout.strip(), "2 2", result.stderr)
+        policy_after = json.loads((self.target / "after-policy.json").read_text(encoding="utf-8"))
+        self.assertIs(policy_after["required"], True)
+        self.assertEqual(policy_after["status"], "error")
+        self.assertEqual(policy_after["applicability"], "unknown")
+        self.assertEqual((self.target / "after-field").read_text(encoding="utf-8"), "")
+        self.assertFalse(Path((self.target / "pin-path").read_text(encoding="utf-8")).exists())
+
+    def test_invocation_scoped_documented_bootstrap_cannot_recreate_lost_pin(self):
+        self.assert_bootstrap_missing_pin_is_not_first_use()
+
+    def test_repo_required_documented_bootstrap_cannot_recreate_lost_pin(self):
+        self.assert_bootstrap_missing_pin_is_not_first_use(repository_required=True)
+
+    def selection_entrypoint(self, entry):
+        self.pack("strict")
+        env = dict(self.env, RESULT_DIR=self.target.as_posix())
+        env.pop("LINTEL_PROFILE_CONTEXT")
+        if entry == "bootstrap":
+            return env, (
+                'source "$LINTEL_SOURCE_ROOT/lib/copilot-env.sh"\n'
+                'LINTEL_PROFILE_PACK=strict lintel_copilot_env "$LINTEL_REPO_ROOT" || exit $?\n'
+                'source "$LINTEL_SOURCE_ROOT/lib/pack-resolver.sh"\n'
+            )
+        if entry in ("bind", "clear"):
+            env["LINTEL_PROFILE_CONTEXT"] = "matrix-" + entry
+            command = 'bind_profile_context "$LINTEL_PROFILE_CONTEXT"' if entry == "bind" else "clear_pack_cache"
+            return env, (
+                'source "$LINTEL_SOURCE_ROOT/lib/pack-resolver.sh"\n'
+                f'LINTEL_PROFILE_PACK=strict {command} >/dev/null || exit $?\n'
+            )
+        producer = dict(self.env, LINTEL_PROFILE_PACK="strict", LINTEL_PROFILE_CONTEXT="matrix-" + entry)
+        reference = json.loads(self.shell("profile_context_reference", env=producer).stdout)
+        handoff = self.target / ("matrix-" + entry + ".json")
+        handoff.write_text(json.dumps(reference), encoding="utf-8")
+        env["HANDOFF"] = handoff.as_posix()
+        if entry == "verify":
+            return env, (
+                'source "$LINTEL_SOURCE_ROOT/lib/pack-resolver.sh"\n'
+                'verify_profile_context "$HANDOFF" >/dev/null || exit $?\n'
+            )
+        self.assertEqual(entry, "rebind")
+        env["LINTEL_PROFILE_CONTEXT"] = reference["context_id"]
+        return env, (
+            'source "$LINTEL_SOURCE_ROOT/lib/pack-resolver.sh"\n'
+            'rebind_profile_context "explicit matrix replan" >/dev/null || exit $?\n'
+        )
+
+    def test_all_selection_entrypoints_export_exact_reference_to_actual_child(self):
+        for entry in ("bootstrap", "bind", "verify", "rebind", "clear"):
+            with self.subTest(entrypoint=entry):
+                env, selection = self.selection_entrypoint(entry)
+                result = self.shell(
+                    selection
+                    + 'printf "%s\\n" "${LINTEL_PROFILE_REFERENCE:-}"\n'
+                    'profile_context_reference || exit $?\n'
+                    'profile_required_policy || exit $?\n'
+                    'bash -c \'source "$LINTEL_SOURCE_ROOT/lib/pack-resolver.sh"\n'
+                    'profile_context_reference || exit $?\n'
+                    'profile_required_policy || exit $?\n'
+                    'resolve_pack_field compliance.mode || exit $?\'',
+                    env=env, source_resolver=False,
+                )
+                lines = result.stdout.splitlines()
+                self.assertEqual(len(lines), 6, result.stdout)
+                self.assertTrue(lines[0], "selection exported no exact reference")
+                reference = json.loads(lines[0])
+                self.assertEqual(reference, json.loads(lines[1]))
+                self.assertEqual(reference, json.loads(lines[3]))
+                for index in (2, 4):
+                    policy = json.loads(lines[index])
+                    self.assertIs(policy["required"], True)
+                    self.assertEqual(policy["status"], "loaded")
+                self.assertEqual(lines[5], "hard")
+
+    def test_cli_bootstrap_returns_complete_reference_not_an_id_only_binding(self):
+        self.pack("strict")
+        env = dict(self.env, LINTEL_PROFILE_PACK="strict")
+        env.pop("LINTEL_PROFILE_CONTEXT")
+        result = self.shell("_profile_cli bootstrap", env=env)
+        reference = json.loads(result.stdout)
+        self.assertEqual(set(reference),
+                         {"schema_version", "context_id", "generation", "digest", "name", "version"})
+        self.assertEqual(reference["name"], "strict")
+        self.assertEqual(reference["generation"], 1)
+        consumer = dict(env, LINTEL_PROFILE_REFERENCE=json.dumps(reference))
+        consumer.pop("LINTEL_PROFILE_PACK")
+        self.assertEqual(json.loads(self.shell("profile_context_reference", env=consumer).stdout), reference)
+        self.assertEqual(self.shell("resolve_pack_field compliance.mode", env=consumer).stdout, "hard")
+
+    def test_all_selection_entrypoints_reject_child_rebind_until_explicit_verify(self):
+        for entry in ("bootstrap", "bind", "verify", "rebind", "clear"):
+            with self.subTest(entrypoint=entry):
+                env, selection = self.selection_entrypoint(entry)
+                result = self.shell(
+                    selection
+                    + 'profile_context_reference >"$RESULT_DIR/parent-reference.json" || exit $?\n'
+                    'bash -c \'source "$LINTEL_SOURCE_ROOT/lib/pack-resolver.sh"\n'
+                    'rebind_profile_context "explicit child replan"\' >"$RESULT_DIR/child-reference.json" || exit $?\n'
+                    'rc=0; resolve_pack_field compliance.mode >"$RESULT_DIR/stale-field" || rc=$?\n'
+                    'printf "%s\\n" "$rc"\n'
+                    'if [ "$rc" -eq 0 ]; then exit 0; fi\n'
+                    'verify_profile_context "$RESULT_DIR/child-reference.json" >/dev/null || exit $?\n'
+                    'profile_context_reference || exit $?\n'
+                    'profile_required_policy || exit $?\n'
+                    'resolve_pack_field compliance.mode || exit $?\n',
+                    env=env, source_resolver=False,
+                )
+                lines = result.stdout.splitlines()
+                self.assertEqual(lines[0], "2", result.stdout)
+                self.assertEqual((self.target / "stale-field").read_text(encoding="utf-8"), "")
+                child = json.loads((self.target / "child-reference.json").read_text(encoding="utf-8"))
+                parent = json.loads((self.target / "parent-reference.json").read_text(encoding="utf-8"))
+                self.assertEqual(child["generation"], parent["generation"] + 1)
+                self.assertEqual(json.loads(lines[1]), child)
+                self.assertIs(json.loads(lines[2])["required"], True)
+                self.assertEqual(lines[3], "hard")
+
+    def test_same_id_bind_does_not_clear_expected_generation(self):
+        env, selection = self.selection_entrypoint("bind")
+        result = self.shell(
+            selection
+            + 'bash -c \'source "$LINTEL_SOURCE_ROOT/lib/pack-resolver.sh"\n'
+            'rebind_profile_context "explicit independent generation"\' >/dev/null || exit $?\n'
+            'bind_profile_context "$LINTEL_PROFILE_CONTEXT"',
+            env=env, source_resolver=False, success=False,
+        )
+        self.assertIn("PROFILE_REFERENCE_MISMATCH", result.stderr)
+
+    def test_id_only_create_cannot_reset_missing_context_with_retained_history(self):
+        self.pack("strict")
+        env = dict(self.env, LINTEL_PROFILE_PACK="strict")
+        first = json.loads(self.shell("profile_context_reference", env=env).stdout)
+        second = json.loads(self.shell("rebind_profile_context 'recorded generation two'", env=env).stdout)
+        path = Path(self.shell("_profile_cli context-path", env=env).stdout)
+        path.unlink()
+        history_before = {item.name: item.read_bytes() for item in path.parent.glob("history/*.json")}
+        self.assertTrue(history_before)
+        resumed = dict(self.env)
+        for command in (
+            "get_loaded_pack", 'bind_profile_context "$LINTEL_PROFILE_CONTEXT"',
+            "clear_pack_cache",
+            'source "$LINTEL_SOURCE_ROOT/lib/copilot-env.sh"\nlintel_copilot_env "$LINTEL_REPO_ROOT"',
+        ):
+            with self.subTest(command=command):
+                result = self.shell(command, env=resumed, success=False)
+                self.assertIn("PROFILE_CONTEXT_MISSING", result.stderr)
+                self.assertFalse(path.exists())
+                self.assertEqual({item.name: item.read_bytes() for item in path.parent.glob("history/*.json")},
+                                 history_before)
+        self.assertEqual(second["generation"], first["generation"] + 1)
+
+    def test_first_generation_history_blocks_id_only_recreation_and_unknown_policy_is_required(self):
+        self.pack("strict")
+        env, selection = self.selection_entrypoint("bind")
+        self.shell(selection, env=env, source_resolver=False)
+        pin = Path(self.shell("_profile_cli context-path", env=env).stdout)
+        pin.unlink()
+        result = self.shell("profile_required_policy", env=env, success=False, error_data=True)
+        policy = json.loads(result.stdout)
+        self.assertIs(policy["required"], True)
+        self.assertEqual(policy["status"], "error")
+        self.assertEqual(policy["applicability"], "unknown")
+        self.assertIn("PROFILE_CONTEXT_MISSING", result.stderr)
+        self.assertFalse(pin.exists())
+        self.assertEqual(len(list(pin.parent.glob("history/*.json"))), 1)
+
+    def test_all_selection_entrypoints_reject_missing_and_replaced_pin_in_parent_and_child(self):
+        replacement = self.target / "replacement-neutral.json"
+        neutral = self.shell(
+            "profile_context_json", env=dict(self.env, LINTEL_PROFILE_CONTEXT="replacement-fixture"),
+        ).stdout
+        replacement.write_text(neutral, encoding="utf-8")
+        for entry in ("bootstrap", "bind", "verify", "rebind", "clear"):
+            with self.subTest(entrypoint=entry):
+                env, selection = self.selection_entrypoint(entry)
+                env["REPLACEMENT"] = replacement.as_posix()
+                result = self.shell(
+                    selection
+                    + 'pin=$(_profile_cli context-path) || exit $?\n'
+                    'cp -- "$pin" "$RESULT_DIR/original-current.json" || exit $?\n'
+                    'for change in missing replacement; do\n'
+                    '  if [ "$change" = missing ]; then rm -- "$pin"; else cp -- "$REPLACEMENT" "$pin"; fi\n'
+                    '  policy_rc=0; profile_required_policy >"$RESULT_DIR/$change-parent-policy.json" || policy_rc=$?\n'
+                    '  field_rc=0; resolve_pack_field compliance.mode >"$RESULT_DIR/$change-parent-field" || field_rc=$?\n'
+                    '  printf "%s %s\\n" "$policy_rc" "$field_rc"\n'
+                    '  CHANGE="$change" bash -c \'source "$LINTEL_SOURCE_ROOT/lib/pack-resolver.sh"\n'
+                    '    policy_rc=0; profile_required_policy >"$RESULT_DIR/$CHANGE-child-policy.json" || policy_rc=$?\n'
+                    '    field_rc=0; resolve_pack_field compliance.mode >"$RESULT_DIR/$CHANGE-child-field" || field_rc=$?\n'
+                    '    printf "%s %s\\n" "$policy_rc" "$field_rc"\'\n'
+                    '  cp -- "$RESULT_DIR/original-current.json" "$pin" || exit $?\n'
+                    'done\n'
+                    'resolve_pack_field compliance.mode || exit $?\n',
+                    env=env, source_resolver=False,
+                )
+                self.assertEqual(result.stdout.splitlines(), ["2 2", "2 2", "2 2", "2 2", "hard"])
+                for change in ("missing", "replacement"):
+                    for consumer in ("parent", "child"):
+                        policy = json.loads((self.target / f"{change}-{consumer}-policy.json").read_text(encoding="utf-8"))
+                        self.assertIs(policy["required"], True)
+                        self.assertEqual(policy["status"], "error")
+                        self.assertEqual(policy["applicability"], "unknown")
+                        self.assertEqual((self.target / f"{change}-{consumer}-field").read_text(encoding="utf-8"), "")
+
+    def test_python_create_true_distinguishes_initial_binding_from_lost_history(self):
+        self.pack("strict")
+        script = r'''
+import json
+from dataclasses import replace
+from pathlib import Path
+import sys
+sys.path.insert(0, sys.argv[1])
+import profile_context as profile
+source, repo, home = map(Path, sys.argv[2:])
+config = profile.ProfileConfig(source, repo, home, home / "packs", home / "packs/active-pack",
+                               context_id="python-work", explicit_pack="strict")
+first = profile.load_profile_context(config, create=True)
+reference = profile.profile_reference(first)
+pin = profile.context_path(config)
+pin.unlink()
+try:
+    profile.load_profile_context(replace(config, explicit_pack=""), create=True)
+except profile.ProfileError as error:
+    assert error.code == "PROFILE_CONTEXT_MISSING", error.code
+else:
+    raise AssertionError("create=True recreated a previously bound context")
+assert not pin.exists()
+recovered = profile.rebind_profile_context(
+    replace(config, explicit_pack="", expected_reference=reference),
+    "explicit recovery of missing first published generation",
+)
+assert recovered["generation"] == 2
+assert profile.required_policy(recovered)["required"] is True
+assert recovered["profile"]["values"]["compliance"]["mode"] == "hard"
+print(json.dumps(profile.profile_reference(recovered)))
+'''
+        result = subprocess.run(
+            [sys.executable, "-c", script, str(self.source / "lib"), str(self.source),
+             str(self.target), str(self.home)], cwd=self.target, env=self.env,
+            text=True, encoding="utf-8", capture_output=True, timeout=45,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(json.loads(result.stdout)["generation"], 2)
+
+    def test_bootstrap_rebind_explicitly_recovers_latest_required_pin_and_updates_children(self):
+        env, selection = self.selection_entrypoint("bootstrap")
+        result = self.shell(
+            selection
+            + 'profile_context_reference || exit $?\n'
+            'for iteration in first second; do\n'
+            '  pin=$(_profile_cli context-path) || exit $?\n'
+            '  rm -- "$pin" || exit $?\n'
+            '  rebind_profile_context "explicit latest-pin recovery $iteration" || exit $?\n'
+            '  profile_required_policy || exit $?\n'
+            '  bash -c \'source "$LINTEL_SOURCE_ROOT/lib/pack-resolver.sh"\n'
+            '    profile_context_reference || exit $?\n'
+            '    resolve_pack_field compliance.mode || exit $?\'\n'
+            '  printf "\\n"\n'
+            'done\n',
+            env=env, source_resolver=False,
+        )
+        lines = result.stdout.splitlines()
+        references = [json.loads(lines[index]) for index in (0, 1, 5)]
+        self.assertEqual([ref["generation"] for ref in references], [1, 2, 3])
+        for offset in (1, 5):
+            self.assertIs(json.loads(lines[offset + 1])["required"], True)
+            self.assertEqual(json.loads(lines[offset + 1])["status"], "loaded")
+            self.assertEqual(json.loads(lines[offset + 2]), json.loads(lines[offset]))
+            self.assertEqual(lines[offset + 3], "hard")
+        selected = self.target / ".claude/runtime/profiles/selected.json"
+        self.assertEqual(json.loads(selected.read_text(encoding="utf-8")), references[-1])
+        history = sorted(json.loads(path.read_text(encoding="utf-8"))["generation"]
+                         for path in (self.home / "sessions").glob("**/history/*.json"))
+        self.assertEqual(history, [1, 2, 3])
+
+    def test_retained_latest_generation_rejects_current_rollback_without_expected_reference(self):
+        self.pack("strict")
+        env = dict(self.env, LINTEL_PROFILE_PACK="strict")
+        self.shell("profile_context_reference", env=env)
+        pin = Path(self.shell("_profile_cli context-path", env=env).stdout)
+        old_bytes = pin.read_bytes()
+        current = json.loads(self.shell("rebind_profile_context 'publish generation two'", env=env).stdout)
+        pin.write_bytes(old_bytes)
+        history_before = {path.name: path.read_bytes() for path in pin.parent.glob("history/*.json")}
+        for command in ("profile_context_reference", "get_loaded_pack"):
+            with self.subTest(command=command):
+                result = self.shell(command, env=self.env, success=False)
+                self.assertIn("PROFILE_REFERENCE_MISMATCH", result.stderr)
+                self.assertEqual(pin.read_bytes(), old_bytes)
+                self.assertEqual({path.name: path.read_bytes() for path in pin.parent.glob("history/*.json")},
+                                 history_before)
+        self.assertEqual(current["generation"], 2)
+
+    def test_explicit_recovery_requires_unambiguous_untampered_history(self):
+        self.pack("strict")
+        env = dict(self.env, LINTEL_PROFILE_PACK="strict")
+        self.shell("profile_context_reference", env=env)
+        pin = Path(self.shell("_profile_cli context-path", env=env).stdout)
+        archives = list(pin.parent.glob("history/*.json"))
+        self.assertEqual(len(archives), 1)
+        before = archives[0].read_bytes()
+        pin.unlink()
+        archives[0].write_text("{}", encoding="utf-8")
+        result = self.shell("rebind_profile_context 'reject corrupted recovery'", env=env, success=False)
+        self.assertIn("PROFILE_CONTEXT_INVALID", result.stderr)
+        self.assertFalse(pin.exists())
+        archives[0].write_bytes(before)
+        duplicate = archives[0].with_name("1-" + "0" * 64 + ".json")
+        duplicate.write_bytes(before)
+        result = self.shell("rebind_profile_context 'reject ambiguous recovery'", env=env, success=False)
+        self.assertIn("PROFILE_CONTEXT_INVALID", result.stderr)
+        self.assertFalse(pin.exists())
+
+    def test_failed_bootstrap_preserves_binding_and_explicit_new_work_still_initializes(self):
+        env, selection = self.selection_entrypoint("bind")
+        result = self.shell(
+            selection
+            + 'profile_context_reference >"$RESULT_DIR/initial.json" || exit $?\n'
+            'source "$LINTEL_SOURCE_ROOT/lib/copilot-env.sh"\n'
+            'if lintel_copilot_env "$LINTEL_REPO_ROOT" conflicting-context; then exit 90; fi\n'
+            'profile_context_reference || exit $?\n'
+            'profile_required_policy || exit $?\n'
+            'bind_profile_context genuinely-new-work || exit $?\n'
+            'profile_required_policy || exit $?\n',
+            env=env, source_resolver=False,
+        )
+        lines = result.stdout.splitlines()
+        self.assertEqual(json.loads(lines[0]), json.loads((self.target / "initial.json").read_text(encoding="utf-8")))
+        self.assertIs(json.loads(lines[1])["required"], True)
+        new = json.loads(lines[2])
+        self.assertEqual(new["context_id"], "genuinely-new-work")
+        self.assertEqual(new["generation"], 1)
+        self.assertEqual(new["name"], "_default")
+        self.assertEqual(json.loads(lines[3])["status"], "not_required")
+
     def test_explicit_invocation_selection_survives_reference_only_resume(self):
         self.pack("strict")
         env = dict(self.env, LINTEL_PROFILE_PACK="strict")
@@ -474,8 +833,11 @@ class ProfileLifecycle(unittest.TestCase):
         self.assertEqual(second["name"], "second")
         self.assertNotEqual(second["digest"], first["digest"])
         archives = list((self.home / "sessions").glob("**/history/*.json"))
-        self.assertEqual(len(archives), 1)
-        self.assertEqual(json.loads(archives[0].read_text(encoding="utf-8"))["digest"], first["digest"])
+        self.assertEqual(len(archives), 2)
+        history = {json.loads(path.read_text(encoding="utf-8"))["generation"]:
+                   json.loads(path.read_text(encoding="utf-8")) for path in archives}
+        self.assertEqual(history[1]["digest"], first["digest"])
+        self.assertEqual(history[2]["digest"], second["digest"])
         env = dict(self.env, HANDOFF=handoff.as_posix())
         self.assertIn("PROFILE_REFERENCE_MISMATCH", self.shell(
             'verify_profile_context "$HANDOFF"', env=env, success=False,
@@ -562,7 +924,7 @@ finally:
         self.assertEqual(resumed, latest)
         history = sorted(json.loads(path.read_text(encoding="utf-8"))["generation"]
                          for path in (self.home / "sessions").glob("**/history/*.json"))
-        self.assertEqual(history, [1, 2])
+        self.assertEqual(history, [1, 2, 3])
 
     def test_rebind_recovers_history_backed_stale_selected_reference(self):
         self.pack("strict")
@@ -590,7 +952,7 @@ finally:
         ).stdout), recovered)
         history = sorted(json.loads(path.read_text(encoding="utf-8"))["generation"]
                          for path in (self.home / "sessions").glob("**/history/*.json"))
-        self.assertEqual(history, [1, 2])
+        self.assertEqual(history, [1, 2, 3])
 
     def test_rebind_preserves_other_selection_and_rejects_unbacked_recovery(self):
         self.pack("strict")

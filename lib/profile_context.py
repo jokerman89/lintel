@@ -714,6 +714,36 @@ def _load_record(path: Path) -> dict:
         raise ProfileError("PROFILE_CONTEXT_INVALID", f"cannot verify stored profile context: {exc}") from exc
 
 
+def _latest_history_record(current: Path, context_id: str) -> dict | None:
+    history = current.parent / "history"
+    if not history.exists():
+        return None
+    records = {}
+    for path in history.iterdir():
+        if not path.is_file() or path.suffix != ".json":
+            raise ProfileError("PROFILE_CONTEXT_INVALID", "context history contains an incomplete record")
+        record = _load_record(path)
+        reference = profile_reference(record)
+        if record["context_id"] != context_id or path != _history_path(current, reference):
+            raise ProfileError("PROFILE_CONTEXT_INVALID", "context history identity or filename differs")
+        if record["generation"] in records:
+            raise ProfileError("PROFILE_CONTEXT_INVALID", "context history has conflicting generations")
+        records[record["generation"]] = record
+    return records[max(records)] if records else None
+
+
+def _load_current_record(path: Path) -> dict:
+    record = _load_record(path)
+    latest = _latest_history_record(path, record["context_id"])
+    if latest is not None and (
+        latest["generation"] > record["generation"]
+        or latest["generation"] == record["generation"] and latest != record
+    ):
+        raise ProfileError("PROFILE_REFERENCE_MISMATCH", "current profile differs from retained generation",
+                           required=latest["profile"]["selection"]["mode"] == "required")
+    return record
+
+
 @contextmanager
 def _lock(config: ProfileConfig, path: Path):
     _runtime_path(config, path)
@@ -750,6 +780,15 @@ def _write_json(config: ProfileConfig, path: Path, value: dict) -> None:
             temporary.unlink()
 
 
+def _retain_record(config: ProfileConfig, path: Path, record: dict) -> None:
+    archive = _history_path(path, profile_reference(record))
+    if archive.exists():
+        if _load_record(archive) != record:
+            raise ProfileError("PROFILE_CONTEXT_INVALID", "existing history conflicts; evidence is preserved")
+        return
+    _write_json(config, archive, record)
+
+
 def _restore_selection(config: ProfileConfig, record: dict) -> ProfileConfig:
     explicit = record["profile"]["selection"].get("explicit_pack")
     return replace(config, explicit_pack=explicit) if not config.explicit_pack and explicit else config
@@ -779,13 +818,23 @@ def load_profile_context(config: ProfileConfig, *, create: bool = False) -> dict
         raise ProfileError("PROFILE_CONTEXT_REQUIRED", "bootstrap or select a stable profile context first")
     path = context_path(config)
     if path.is_file():
-        return _verify_record(config, _load_record(path))
+        return _verify_record(config, _load_current_record(path))
     if not create or config.context_file is not None:
         raise ProfileError("PROFILE_CONTEXT_MISSING", "selected context is missing; bind explicitly, not as resume")
     with _lock(config, path):
         if path.is_file():
-            return _verify_record(config, _load_record(path))
+            return _verify_record(config, _load_current_record(path))
+        history = path.parent / "history"
+        retained = history.exists() and any(history.iterdir())
+        if config.selected.exists():
+            selected = validate_profile_reference(_load_json_file(config.selected))
+            retained = retained or selected["context_id"] == config.context_id
+        if retained:
+            raise ProfileError("PROFILE_CONTEXT_MISSING",
+                               "context was already bound; explicit history-backed recovery is required",
+                               required=True)
         record = _record(resolve_profile(config), _context_id(config.context_id), 1, reason="initial binding")
+        _retain_record(config, path, record)
         _write_json(config, path, record)
         return record
 
@@ -835,9 +884,13 @@ def rebind_profile_context(config: ProfileConfig, reason: str) -> dict:
     # selected generation after a later context writer has committed.
     with _lock(config, config.selected):
         with _lock(config, path):
-            if not path.is_file():
-                raise ProfileError("PROFILE_CONTEXT_MISSING", "cannot rebind a missing context; bind first")
-            old = _load_record(path)
+            if path.is_file():
+                old = _load_current_record(path)
+            else:
+                old = _latest_history_record(path, config.context_id)
+                if old is None:
+                    raise ProfileError("PROFILE_CONTEXT_MISSING",
+                                       "cannot recover a missing context without retained history")
             previous = profile_reference(old)
             if expected is not None and previous != expected:
                 raise ProfileError("PROFILE_REFERENCE_MISMATCH", "rebind must name the current generation",
@@ -855,10 +908,8 @@ def rebind_profile_context(config: ProfileConfig, reason: str) -> dict:
                                            "selected reference is not backed by this context's history")
             profile = resolve_profile(_restore_selection(config, old))
             new = _record(profile, old["context_id"], old["generation"] + 1, previous, reason)
-            archive = _history_path(path, previous)
-            if archive.exists() and _load_record(archive) != old:
-                raise ProfileError("PROFILE_CONTEXT_INVALID", "existing history conflicts; evidence is preserved")
-            _write_json(config, archive, old)
+            _retain_record(config, path, old)
+            _retain_record(config, path, new)
             _write_json(config, path, new)
             if update_selection:
                 _write_json(config, config.selected, profile_reference(new))
@@ -897,7 +948,8 @@ def main() -> int:
     parser.add_argument("operation", choices=(
         "field", "field-json", "provenance", "true", "nullable", "loaded", "selected",
         "validate", "compatibility", "chain", "chain-field", "dir", "yaml-field",
-        "context", "reference", "bind", "verify", "rebind", "bootstrap", "context-path", "required-policy",
+        "context", "reference", "bind", "verify", "rebind", "bootstrap",
+        "context-id", "context-path", "required-policy",
     ))
     parser.add_argument("arguments", nargs="*")
     args = parser.parse_args()
@@ -911,7 +963,7 @@ def main() -> int:
             "loaded": (0,), "selected": (0,), "validate": (0, 1), "compatibility": (0, 1),
             "chain": (1,), "chain-field": (2,), "dir": (1,), "yaml-field": (2,), "context": (0,),
             "reference": (0,), "bind": (1,), "verify": (0, 1), "rebind": (1,), "bootstrap": (0,),
-            "context-path": (0,), "required-policy": (0,),
+            "context-id": (0,), "context-path": (0,), "required-policy": (0,),
         }
         if len(arguments) not in counts[operation]:
             raise ProfileError("PROFILE_INPUT", "invalid operation arguments")
@@ -950,13 +1002,21 @@ def main() -> int:
         if operation == "context-path":
             print(context_path(config).as_posix(), end="")
             return 0
-        if operation == "bootstrap":
-            print(bootstrap_profile_context(config)["context_id"], end="")
+        if operation == "context-id":
+            if config.expected_reference is None:
+                raise ProfileError("PROFILE_CONTEXT_REQUIRED", "context identity requires a verified reference")
+            print(_reference_selection(config.expected_reference, config).context_id, end="")
             return 0
-        if operation == "bind":
+        if operation == "bootstrap":
+            record = bootstrap_profile_context(config)
+        elif operation == "bind":
             if len(arguments) != 1:
                 raise ProfileError("PROFILE_CONTEXT_REQUIRED", "bind requires a stable context ID")
-            config = replace(config, context_id=_context_id(arguments[0]), expected_reference=None)
+            target = _context_id(arguments[0])
+            expected = config.expected_reference
+            if expected is not None and target != expected["context_id"]:
+                expected = None
+            config = replace(config, context_id=target, expected_reference=expected)
             record = load_profile_context(config, create=True)
         elif operation == "verify":
             record = verify_profile_reference(_load_json_file(Path(arguments[0])), config) if arguments \
@@ -969,7 +1029,7 @@ def main() -> int:
         if selection["status"] == "fallback":
             print("[lintel/profile] OPTIONAL_PROFILE_FALLBACK: optional preference did not load; "
                   "using validated neutral baseline", file=sys.stderr)
-        if operation in ("bind", "verify", "rebind", "reference"):
+        if operation in ("bind", "verify", "rebind", "reference", "bootstrap"):
             print(canonical(profile_reference(record)).decode("utf-8"))
         elif operation == "context":
             print(canonical(record).decode("utf-8"))
@@ -995,7 +1055,10 @@ def main() -> int:
     except ProfileError as exc:
         if operation == "required-policy":
             # Losing a selected reference cannot prove its policy was optional.
-            required = exc.required or config.requirements.exists() or bool(config.explicit_pack) or bool(args.reference)
+            required = (
+                exc.required or config.requirements.exists() or bool(config.explicit_pack)
+                or bool(args.reference) or bool(config.context_id or config.context_file)
+            )
             print(canonical({"required": required, "status": "error",
                              "source": config.requirements.as_posix() if config.requirements.exists()
                              else "invocation" if config.explicit_pack else "profile-context",
