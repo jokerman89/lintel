@@ -42,6 +42,13 @@ class CopilotKit(unittest.TestCase):
     def tearDownClass(cls):
         # TemporaryDirectory owns this exact sandbox; no user path is deleted.
         assert cls.base.name.startswith("lintel-copilot-tests-")
+        assert Path(cls.sandbox.name).resolve() == cls.base
+        if os.name == "nt":
+            # Retain TemporaryDirectory's readonly handling for long native paths.
+            directory = str(cls.base)
+            if not directory.startswith("\\\\?\\"):
+                directory = "\\\\?\\UNC\\" + directory[2:] if directory.startswith("\\\\") else "\\\\?\\" + directory
+            cls.sandbox.name = directory
         cls.sandbox.cleanup()
 
     def setUp(self):
