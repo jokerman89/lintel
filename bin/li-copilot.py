@@ -8,16 +8,19 @@
 import argparse
 import hashlib
 import html
+from html.parser import HTMLParser
 import json
 import os
 from pathlib import Path, PurePosixPath
 import posixpath
 import re
 import shutil
+import string
 import subprocess
 import sys
 import tempfile
 from urllib.parse import quote, unquote, urlsplit
+from typing import Optional
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
 from client_capabilities import load_registry, surface_id
@@ -143,65 +146,374 @@ def text_bytes(value: str) -> bytes:
     return value.rstrip().encode("utf-8") + b"\n"
 
 
-def document_links(data: bytes, *, markdown: bool = True) -> list[tuple[int, int, str]]:
-    """Return literal destination spans, excluding comments, code and template examples."""
-    text = data.decode("utf-8")
-    def mask(value: str) -> str:
-        return re.sub(r"[^\r\n]", " ", value)
+def html_token(text: str, start: int) -> tuple[int, str, bool]:
+    """Find a complete tag token without mistaking quoted delimiters for its end."""
+    prefix = re.match(r"</?([A-Za-z][A-Za-z0-9:-]*)(?=[\s/>])", text[start:])
+    if not prefix:
+        return start, "", False
+    cursor, quoted = start + prefix.end(), ""
+    while cursor < len(text):
+        char = text[cursor]
+        if quoted:
+            if char == quoted:
+                quoted = ""
+        elif char in "\"'":
+            quoted = char
+        elif char == ">":
+            return cursor + 1, prefix[1].lower(), text.startswith("</", start)
+        cursor += 1
+    return start, "", False
 
-    masked = re.sub(r"<!--.*?-->", lambda match: mask(match[0]), text, flags=re.S)
-    masked = re.sub(r"<(pre|code|script|style)\b[^>]*>.*?</\1\s*>",
-                    lambda match: mask(match[0]), masked, flags=re.S | re.I)
-    if markdown:
-        lines, fence = [], None
-        list_indent, previous_blank, indented_code = 0, True, False
-        for line in masked.splitlines(keepends=True):
-            marker = re.match(r"^[ ]{0,3}(?:>[ ]*)?(`{3,}|~{3,})(.*)", line)
+
+def html_attribute_spans(token: str) -> list[tuple[str, int, int]]:
+    """Locate values inside a start tag already accepted by HTMLParser."""
+    prefix = re.match(r"<[^\s/>]+", token)
+    cursor = prefix.end() if prefix else len(token)
+    spans = []
+    while cursor < len(token):
+        while cursor < len(token) and token[cursor] in " \t\r\n\f/":
+            cursor += 1
+        if cursor == len(token) or token[cursor] == ">":
+            break
+        start = cursor
+        while cursor < len(token) and token[cursor] not in " \t\r\n\f/=>":
+            cursor += 1
+        name = token[start:cursor].lower()
+        if cursor == start:
+            cursor += 1
+            continue
+        while cursor < len(token) and token[cursor].isspace():
+            cursor += 1
+        if cursor == len(token) or token[cursor] != "=":
+            continue
+        cursor += 1
+        while cursor < len(token) and token[cursor].isspace():
+            cursor += 1
+        quoted = token[cursor] if cursor < len(token) and token[cursor] in "\"'" else ""
+        if quoted:
+            cursor += 1
+        start = cursor
+        while cursor < len(token) and (
+                token[cursor] != quoted if quoted else token[cursor] not in " \t\r\n\f>"):
+            cursor += 1
+        spans.append((name, start, cursor))
+        if quoted:
+            cursor += 1
+    return spans
+
+
+class HTMLNavigation(HTMLParser):
+    """HTML grammar owns tags, quoted attributes, comments and raw script/style data."""
+    def __init__(self, text: str, *, stop_element: str = "") -> None:
+        super().__init__(convert_charrefs=False)
+        self.text = text
+        self.line_offsets = [0] + [match.end() for match in re.finditer("\n", text)]
+        self.links: list[tuple[int, int, str]] = []
+        self.code_stack: list[str] = []
+        self.stop_element, self.depth, self.element_end = stop_element, 0, 0
+
+    def source_position(self) -> int:
+        line, column = self.getpos()
+        return self.line_offsets[line - 1] + column
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, Optional[str]]]) -> None:
+        if self.element_end:
+            return
+        if tag == self.stop_element:
+            self.depth += 1
+        if self.code_stack or tag in ("pre", "code"):
+            if tag in ("pre", "code"):
+                self.code_stack.append(tag)
+            return
+        first = {}
+        for name, value in attrs:
+            first.setdefault(name, value)
+        seen = set()
+        for name, start, end in html_attribute_spans(self.get_starttag_text()):
+            if name in ("href", "src") and name not in seen and isinstance(first.get(name), str):
+                self.links.append((self.source_position() + start, self.source_position() + end, first[name]))
+            seen.add(name)
+
+    def handle_startendtag(self, tag: str, attrs: list[tuple[str, Optional[str]]]) -> None:
+        self.handle_starttag(tag, attrs)
+        self.handle_endtag(tag)
+
+    def handle_endtag(self, tag: str) -> None:
+        if self.element_end:
+            return
+        if self.code_stack and tag == self.code_stack[-1]:
+            self.code_stack.pop()
+        if tag == self.stop_element:
+            self.depth -= 1
+            if self.depth == 0:
+                self.element_end = self.text.find(">", self.source_position()) + 1
+
+
+def html_element_end(text: str, start: int, tag: str) -> int:
+    parser = HTMLNavigation(text[start:], stop_element=tag)
+    for line in text[start:].splitlines(keepends=True):
+        parser.feed(line)
+        if parser.element_end:
+            return start + parser.element_end
+    return len(text)
+
+
+def markdown_unescape(value: str) -> str:
+    value = re.sub(r"\\([" + re.escape(string.punctuation) + r"])", r"\1", value)
+    return re.sub(r"&(?:#[xX][0-9a-fA-F]+|#[0-9]+|[A-Za-z][A-Za-z0-9]+);",
+                  lambda match: html.unescape(match[0]), value)
+
+
+def markdown_code_end(text: str, start: int) -> int:
+    run = re.match(r"`+", text[start:])[0]
+    remaining = text[start + len(run):]
+    paragraph_end = re.search(r"\n[ \t\r]*\n", remaining)
+    if paragraph_end:
+        remaining = remaining[:paragraph_end.start()]
+    for match in re.finditer(r"`+", remaining):
+        if match[0] == run:
+            return start + len(run) + match.end()
+    return start
+
+
+def markdown_label_end(text: str, start: int) -> int:
+    depth, cursor = 1, start + 1
+    while cursor < len(text):
+        char = text[cursor]
+        if char == "\\" and cursor + 1 < len(text) and text[cursor + 1] in string.punctuation:
+            cursor += 2
+            continue
+        if char == "`":
+            end = markdown_code_end(text, cursor)
+            if end != cursor:
+                cursor = end
+                continue
+        if char == "<":
+            if text.startswith("<!--", cursor):
+                end = text.find("-->", cursor + 4)
+                if end < 0:
+                    return start
+                cursor = end + 3
+                continue
+            end, _, _ = html_token(text, cursor)
+            if end != cursor:
+                cursor = end
+                continue
+        if char == "\n" and re.match(r"\n[ \t\r]*\n", text[cursor:]):
+            return start
+        if char == "[":
+            depth += 1
+        elif char == "]":
+            depth -= 1
+            if depth == 0:
+                return cursor
+        cursor += 1
+    return start
+
+
+def markdown_space_end(text: str, start: int) -> int:
+    cursor = start
+    while cursor < len(text) and text[cursor] in " \t\r\n":
+        cursor += 1
+    return start if re.search(r"\n[ \t\r]*\n", text[start:cursor]) else cursor
+
+
+def markdown_destination(text: str, start: int) -> tuple[int, int, int]:
+    cursor, depth = start, 0
+    angle = cursor < len(text) and text[cursor] == "<"
+    if angle:
+        start = cursor = cursor + 1
+    while cursor < len(text):
+        char = text[cursor]
+        if char == "\\" and cursor + 1 < len(text) and text[cursor + 1] in string.punctuation:
+            cursor += 2
+            continue
+        if angle:
+            if char == ">":
+                return start, cursor, cursor + 1
+            if char in "\r\n<":
+                return start, start, start
+        else:
+            if char.isspace() or ord(char) < 32:
+                break
+            if char == "(":
+                depth += 1
+            elif char == ")":
+                if depth == 0:
+                    break
+                depth -= 1
+        cursor += 1
+    if angle or depth:
+        return start, start, start
+    return start, cursor, cursor
+
+
+def markdown_title_end(text: str, start: int) -> int:
+    if start == len(text) or text[start] not in "\"'(":
+        return start
+    delimiter = ")" if text[start] == "(" else text[start]
+    cursor = start + 1
+    while cursor < len(text):
+        if text[cursor] == "\\" and cursor + 1 < len(text) and text[cursor + 1] in string.punctuation:
+            cursor += 2
+            continue
+        if text[cursor] == delimiter:
+            return cursor + 1
+        if text[cursor] == "\n" and re.match(r"\n[ \t\r]*\n", text[cursor:]):
+            break
+        cursor += 1
+    return start
+
+
+def markdown_fence(line: str, list_indent: int = 0) -> Optional[re.Match]:
+    body = re.sub(r"^(?:[ ]{0,3}>[ \t]?)+", "", line)
+    item = re.match(r"^[ ]{0,3}(?:[-+*]|\d+[.)])[ \t]+", body)
+    if item:
+        body = body[item.end():]
+    elif list_indent and body.startswith(" " * list_indent):
+        body = body[list_indent:]
+    return re.match(r"^[ ]{0,3}(`{3,}|~{3,})(.*)", body)
+
+
+def markdown_tokens(text: str, definitions: dict) -> tuple[list[tuple[int, int, str]], list[tuple[int, int]], dict]:
+    """Lex links, code and definitions without treating punctuation as a filesystem path."""
+    links, excluded, references, suffixes = [], [], set(), {}
+    cursor, list_indent, indented_code = 0, 0, False
+    while cursor < len(text):
+        if cursor in suffixes:
+            end = suffixes[cursor]
+            excluded.append((cursor, end))
+            cursor = end
+            continue
+        if cursor == 0 or text[cursor - 1] == "\n":
+            end = text.find("\n", cursor)
+            end = len(text) if end < 0 else end + 1
+            line = text[cursor:end]
             indent = len(line) - len(line.lstrip(" "))
             item = re.match(r"^[ ]{0,3}(?:[-+*]|\d+[.)])[ \t]+", line)
             if item:
                 list_indent = item.end()
             elif line.strip() and indent < list_indent:
                 list_indent = 0
-            if fence:
-                if marker and marker[1][0] == fence[0] and len(marker[1]) >= len(fence) and not marker[2].strip():
-                    fence = None
-                lines.append(mask(line))
-            elif marker:
-                fence = marker[1]
-                lines.append(mask(line))
-            elif (previous_blank or indented_code) and (indent >= list_indent + 4 or line.startswith("\t")):
-                indented_code = True
-                lines.append(mask(line))
-            else:
-                indented_code = False
-                lines.append(line)
-            previous_blank = not line.strip()
-        masked = "".join(lines)
-        masked = re.sub(r"(`+)(?!`)([\s\S]*?)(?<!`)\1(?!`)",
-                        lambda match: mask(match[0]), masked)
-    destination = r"(?P<url><[^>\n]*>|(?:\\.|[^\s()\\]|\((?:\\.|[^()\\])*\))+)"
-    patterns = [r"""<[A-Za-z][^<>]*?\b(?:href|src)\s*=\s*(?:(?P<quote>["'])(?P<url>.*?)(?P=quote)|(?P<bare>[^\s>]+))"""]
-    if markdown:
-        patterns.extend((
-            r"\[(?:\\.|[^\]\\\n])*\]\(\s*" + destination
-            + r"""(?:\s+(?:"[^"\n]*"|'[^'\n]*'|\([^)\n]*\)))?\s*\)""",
-            r"^[ ]{0,3}\[[^\]\n]+\]:[ \t]*" + destination,
-        ))
-    links = {}
-    for pattern in patterns:
-        for match in re.finditer(pattern, masked, flags=re.M | re.I):
-            group = "url" if match["url"] is not None else "bare"
-            start, end = match.span(group)
-            value = text[start:end]
-            if value.startswith("<") and value.endswith(">"):
-                start, end = start + 1, end - 1
-                value = value[1:-1]
-            value = html.unescape(re.sub(r"\\([\\ ()])", r"\1", value))
-            if any(marker in unquote(value) for marker in ("<", ">", "{", "}", "*", "$")):
+            marker = markdown_fence(line, list_indent)
+            if marker and not (marker[1][0] == "`" and "`" in marker[2]):
+                fence_end = end
+                for following in text[end:].splitlines(keepends=True):
+                    fence_end += len(following)
+                    close = markdown_fence(following, list_indent)
+                    if (close and not close[2].strip() and close[1][0] == marker[1][0]
+                            and len(close[1]) >= len(marker[1])):
+                        break
+                excluded.append((cursor, fence_end))
+                cursor = fence_end
                 continue
-            links[(start, end)] = value
-    return [(start, end, value) for (start, end), value in sorted(links.items())]
+            previous_start = text.rfind("\n", 0, max(0, cursor - 1)) + 1
+            previous_blank = not text[previous_start:cursor].strip()
+            if (previous_blank or indented_code) and (indent >= list_indent + 4 or line.startswith("\t")):
+                indented_code = True
+                excluded.append((cursor, end))
+                cursor = end
+                continue
+            if line.strip():
+                indented_code = False
+        char = text[cursor]
+        if char == "\\" and cursor + 1 < len(text) and text[cursor + 1] in string.punctuation:
+            excluded.append((cursor, cursor + 2))
+            cursor += 2
+            continue
+        if char == "`":
+            end = markdown_code_end(text, cursor)
+            if end != cursor:
+                excluded.append((cursor, end))
+                cursor = end
+                continue
+        if text.startswith("<!--", cursor):
+            end = text.find("-->", cursor + 4)
+            cursor = len(text) if end < 0 else end + 3
+            continue
+        if char == "<":
+            end, tag, closing = html_token(text, cursor)
+            if end != cursor:
+                if not closing and tag in ("pre", "code", "script", "style") and not text[cursor:end].endswith("/>"):
+                    end = html_element_end(text, cursor, tag)
+                cursor = end
+                continue
+        if char == "[":
+            close = markdown_label_end(text, cursor)
+            if close != cursor:
+                label = " ".join(markdown_unescape(text[cursor + 1:close]).split()).casefold()
+                after = close + 1
+                line_start = text.rfind("\n", 0, cursor) + 1
+                prefix = text[line_start:cursor]
+                is_definition = prefix.strip() == "" and len(prefix) <= 3 and text[after:after + 1] == ":"
+                if text[after:after + 1] == "(" or is_definition:
+                    destination_start = markdown_space_end(text, after + 1)
+                    start, finish, end = markdown_destination(text, destination_start)
+                    separated = markdown_space_end(text, end)
+                    if separated > end and text[separated:separated + 1] in ("'", '"', "("):
+                        title_end = markdown_title_end(text, separated)
+                        if title_end != separated:
+                            separated = markdown_space_end(text, title_end)
+                    if is_definition and finish > start:
+                        line_end = text.find("\n", finish)
+                        line_end = len(text) if line_end < 0 else line_end
+                        if end == line_end or not text[end:line_end].strip() or separated > line_end:
+                            definitions.setdefault(label, (start, finish, markdown_unescape(text[start:finish])))
+                            cursor = max(line_end + 1, separated)
+                            excluded.append((line_start, cursor))
+                            continue
+                    elif not is_definition and text[separated:separated + 1] == ")":
+                        links.append((start, finish, markdown_unescape(text[start:finish])))
+                        suffixes[after] = separated + 1
+                        cursor += 1
+                        continue
+                second_start = markdown_space_end(text, after)
+                if text[second_start:second_start + 1] == "[":
+                    second_end = markdown_label_end(text, second_start)
+                    if second_end != second_start:
+                        reference = " ".join(markdown_unescape(text[second_start + 1:second_end]).split()).casefold()
+                        reference = reference or label
+                        if reference in definitions:
+                            references.add(reference)
+                            suffixes[after] = second_end + 1
+                        else:
+                            references.add(label)
+                    else:
+                        references.add(label)
+                else:
+                    references.add(label)
+        cursor += 1
+    links.extend(definitions[label] for label in references if label in definitions)
+    return links, excluded, definitions
+
+
+def markdown_navigation(text: str) -> tuple[list[tuple[int, int, str]], list[tuple[int, int]]]:
+    # Resolve forward reference labels before deciding whether adjacent brackets form a link.
+    _, _, definitions = markdown_tokens(text, {})
+    links, excluded, _ = markdown_tokens(text, definitions)
+    return links, excluded
+
+
+def document_links(data: bytes, *, markdown: bool = True) -> list[tuple[int, int, str]]:
+    """Return source spans for real Markdown/HTML destinations without running either."""
+    text = data.decode("utf-8")
+    links, excluded = markdown_navigation(text) if markdown else ([], [])
+    characters = list(text)
+    for start, end in excluded:
+        for position in range(start, min(end, len(text))):
+            if characters[position] not in "\r\n":
+                characters[position] = " "
+    parser = HTMLNavigation("".join(characters))
+    parser.feed(parser.text)
+    parser.close()
+    links.extend(parser.links)
+    result = {}
+    for start, end, value in links:
+        decoded = unquote(value)
+        if "*" in decoded or re.search(r"<[^<>]*>|\{[^{}]*\}", decoded):
+            continue
+        result[(start, end)] = value
+    return [(start, end, value) for (start, end), value in sorted(result.items())]
 
 
 def local_link(relative: str, link: str) -> str:

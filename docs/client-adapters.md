@@ -120,5 +120,13 @@ hidden documentation folders or `.claude/` knowledge/runtime content.
 
 The local navigation check covers literal Markdown inline/reference destinations and HTML
 `href`/`src` paths in the public guides, not examples inside code/comments or placeholder paths.
+HTML tags and attributes are parsed structurally: a script's opening `src` is retained,
+its body is not executed or scanned as navigation, and quoted `>` characters do not end a
+tag. Markdown destinations follow escaped punctuation, balanced/wrapped labels and reference
+definitions rather than a substring match; an escaped opening bracket is plain text.
+Only a used reference definition contributes a destination, with the first matching definition
+retained. Code contexts and source spans stay separate so rewriting a source-only destination
+does not rewrite its surrounding examples or markup. Text assets use LF; binary assets retain
+their source bytes.
 It verifies file/directory targets, not external URL availability, heading fragments, rendered
 layout or arbitrary HTML/CSS/JavaScript execution. A complete client pilot remains separate.

@@ -47,6 +47,19 @@ class UniversalAdapters(unittest.TestCase):
         return {p.relative_to(self.target).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
                 for p in self.target.rglob("*") if p.is_file() and not p.is_symlink()}
 
+    def clone_project(self, project, clone):
+        git = shutil.which("git")
+        self.assertTrue(git, "Git is required for the real fresh navigation clone")
+        env = dict(os.environ, HOME=str(self.home), USERPROFILE=str(self.home),
+                   GIT_CONFIG_GLOBAL=os.devnull, GIT_CONFIG_NOSYSTEM="1", GIT_TERMINAL_PROMPT="0")
+        for arguments in (("init", "-q"), ("config", "core.autocrlf", "true"), ("add", "."),
+                          ("-c", "user.name=Lintel Test", "-c", "user.email=lintel-test@example.invalid",
+                           "-c", "commit.gpgsign=false", "commit", "-qm", "test: preserve bundled navigation",
+                           "-m", "Co-authored-by: Copilot App <223556219+Copilot@users.noreply.github.com>"),
+                          ("-c", "core.autocrlf=true", "clone", "-q", str(project), str(clone))):
+            result = subprocess.run([git, *arguments], cwd=project, env=env, capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
     def test_each_surface_generates_its_route_and_real_source_consumers(self):
         clients = sorted(self.registry["surfaces"])
         self.run_cli(extra=tuple(value for client in clients for value in ("--client", client)))
@@ -152,17 +165,7 @@ class UniversalAdapters(unittest.TestCase):
     def test_manual_readme_navigation_survives_installed_source_clone(self):
         self.run_cli(client="other")
         clone = self.base / "navigation-clone"
-        git = shutil.which("git")
-        self.assertTrue(git, "Git is required for the real fresh navigation clone")
-        env = dict(os.environ, HOME=str(self.home), USERPROFILE=str(self.home),
-                   GIT_CONFIG_GLOBAL=os.devnull, GIT_CONFIG_NOSYSTEM="1", GIT_TERMINAL_PROMPT="0")
-        for arguments in (("init", "-q"), ("add", "."),
-                          ("-c", "user.name=Lintel Test", "-c", "user.email=lintel-test@example.invalid",
-                           "-c", "commit.gpgsign=false", "commit", "-qm", "test: preserve bundled navigation",
-                           "-m", "Co-authored-by: Copilot App <223556219+Copilot@users.noreply.github.com>"),
-                          ("clone", "-q", str(self.target), str(clone))):
-            result = subprocess.run([git, *arguments], cwd=self.target, env=env, capture_output=True, text=True)
-            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.clone_project(self.target, clone)
         required = (
             "docs/README.md", "docs/faq.md", "docs/concepts/engineering-modules.md",
             "docs/concepts/pack-resolver.md", "CONTRIBUTING.md", "CODE_OF_CONDUCT.md", "CHANGELOG.md",
@@ -234,6 +237,100 @@ class UniversalAdapters(unittest.TestCase):
         result = self.run_cli(client="other", source=source, target=downstream, success=False)
         self.assertIn("Modified managed file", result.stderr)
         self.assertEqual(installed.read_bytes(), original + b"\nProject-owned change must survive.\n")
+
+    def test_c02_literal_html_dependencies_survive_init_check_and_clone(self):
+        self.run_cli(client="other")
+        source = self.target / ".github/lintel"
+        faq = source / "docs/faq.md"
+        with faq.open("a", encoding="utf-8") as output:
+            output.write("\n[Public asset page](review-fixture/page.html)\n")
+        fixture = source / "docs/review-fixture"
+        fixture.mkdir()
+        (fixture / "page.html").write_text(
+            '<!doctype html>\n<html><body><script src="app.js"></script>\n'
+            '<a title="1 > 0" href="guide.md">Guide</a></body></html>\n', encoding="utf-8")
+        expected = {"app.js": b"window.fixture = true;", "guide.md": b"# Real local guide"}
+        for name, content in expected.items():
+            (fixture / name).write_bytes(content)
+        consumer = self.base / "c02-consumer"
+        consumer.mkdir()
+        self.run_cli(client="other", source=source, target=consumer)
+        self.run_cli("check", source=consumer / ".github/lintel", target=consumer)
+        clone = self.base / "c02-clone"
+        self.clone_project(consumer, clone)
+        self.run_cli("check", source=clone / ".github/lintel", target=clone)
+        for target in (consumer, clone):
+            manifest = json.loads((target / ".github/lintel/manifest.json").read_text())["files"]
+            for name, content in expected.items():
+                relative = f".github/lintel/docs/review-fixture/{name}"
+                self.assertEqual((target / relative).read_bytes(), content)
+                self.assertEqual(manifest[relative], hashlib.sha256(content).hexdigest())
+        for name, content in expected.items():
+            with self.subTest(missing_source=name):
+                (fixture / name).unlink()
+                refused = self.base / ("c02-missing-" + name)
+                refused.mkdir()
+                (refused / "keep.txt").write_bytes(b"unchanged")
+                result = self.run_cli(client="other", source=source, target=refused, success=False)
+                self.assertIn(name, result.stderr)
+                self.assertEqual([(p.name, p.read_bytes()) for p in refused.iterdir()], [("keep.txt", b"unchanged")])
+                (fixture / name).write_bytes(content)
+        bundle = clone / ".github/lintel"
+        manifest_path = bundle / "manifest.json"
+        original_manifest = manifest_path.read_bytes()
+        for name, content in expected.items():
+            with self.subTest(missing_installed=name):
+                path = bundle / "docs/review-fixture" / name
+                path.unlink()
+                manifest = json.loads(original_manifest)
+                del manifest["files"][f".github/lintel/docs/review-fixture/{name}"]
+                manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+                result = self.run_cli("check", source=bundle, target=clone, success=False)
+                self.assertIn(name, result.stderr)
+                self.assertFalse(path.exists())
+                path.write_bytes(content)
+                manifest_path.write_bytes(original_manifest)
+
+    def test_c03_exact_markdown_escapes_and_wrapped_labels_in_real_consumers(self):
+        self.run_cli(client="other")
+        source = self.target / ".github/lintel"
+        faq = source / "docs/faq.md"
+        original = faq.read_text(encoding="utf-8")
+        fixture = source / "docs/review-fixture"
+        fixture.mkdir()
+        guide = fixture / "a_b.md"
+        guide.write_text("# Real local guide", encoding="utf-8")
+        cases = (
+            ("opener", r"\[Example, not a link](review-fixture/does-not-exist.md)", False),
+            ("destination", r"[Guide](review-fixture/a\_b.md)", True),
+            ("wrapped", "[Read the\nwrapped guide](review-fixture/a_b.md)", True),
+        )
+        for name, text, included in cases:
+            with self.subTest(case=name):
+                faq.write_text(original + "\n" + text + "\n", encoding="utf-8")
+                consumer = self.base / ("c03-" + name)
+                consumer.mkdir()
+                (consumer / "keep.txt").write_bytes(b"unchanged")
+                self.run_cli(client="other", source=source, target=consumer)
+                bundle = consumer / ".github/lintel"
+                self.run_cli("check", source=bundle, target=consumer)
+                manifest = json.loads((bundle / "manifest.json").read_text())["files"]
+                self.assertEqual((bundle / "docs/review-fixture/a_b.md").is_file(), included)
+                self.assertEqual(".github/lintel/docs/review-fixture/a_b.md" in manifest, included)
+                self.assertFalse((bundle / "docs/review-fixture/does-not-exist.md").exists())
+                self.assertEqual((consumer / "keep.txt").read_bytes(), b"unchanged")
+                if included:
+                    guide.unlink()
+                    refused = self.base / ("c03-missing-" + name)
+                    refused.mkdir()
+                    result = self.run_cli(client="other", source=source, target=refused, success=False)
+                    self.assertIn("a_b.md", result.stderr)
+                    self.assertEqual(list(refused.iterdir()), [])
+                    guide.write_text("# Real local guide", encoding="utf-8")
+        clone = self.base / "c03-clone"
+        self.clone_project(consumer, clone)
+        self.run_cli("check", source=clone / ".github/lintel", target=clone)
+        self.assertEqual((clone / ".github/lintel/docs/review-fixture/a_b.md").read_bytes(), guide.read_bytes())
 
     def test_unknown_client_and_fictional_controls_refuse_before_writes(self):
         for client, extra in (("fictional", ()), ("codex-cli", ("--enable",)),

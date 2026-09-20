@@ -43,6 +43,34 @@ class AdapterNavigation(unittest.TestCase):
             "docs/guide(v2).md", "docs/reference.md", "docs/html-guide.md", "docs/image.png",
         ])
 
+    def test_html_opening_resources_survive_quoted_delimiters_and_raw_text(self):
+        content = b"""<script data-note="1 > 0" src="docs/script.js">
+const sample = '<a href="docs/not-a-guide.md">';
+</script>
+<a title="1 > 0" href="docs/html-guide.md">Guide</a>
+<link title='a > b' href=docs/site.css rel="stylesheet">
+<img alt="`example` > [not a link](docs/not-an-image.md)" src="docs/chart.png">
+<pre><script src="docs/not-a-script.js"></script></pre>
+"""
+        for markdown in (False, True):
+            with self.subTest(markdown=markdown):
+                self.assertEqual([url for _, _, url in adapter.document_links(content, markdown=markdown)],
+                                 ["docs/script.js", "docs/html-guide.md", "docs/site.css", "docs/chart.png"])
+
+    def test_markdown_links_respect_escapes_balancing_and_wrapped_labels(self):
+        content = b"""[Escaped punctuation](docs/under\\_score.md)
+[A wrapped
+label](docs/wrapped.md)
+\\[Example, not a link](docs/not-a-link.md)
+[An escaped \\] label](docs/escaped.md)
+[Nested [label] text](docs/nested.md)
+[Balanced](docs/nested(a(b)c).md "title")
+"""
+        self.assertEqual([url for _, _, url in adapter.document_links(content)], [
+            "docs/under_score.md", "docs/wrapped.md", "docs/escaped.md", "docs/nested.md",
+            "docs/nested(a(b)c).md",
+        ])
+
     def test_code_comments_and_placeholders_are_not_bundle_resources(self):
         content = b"""`[Inline example](docs/no-inline.md)`
 ``[Backtick ` example](docs/no-backtick.md)``
@@ -70,10 +98,92 @@ The attribute example href="docs/no-prose.md" is not a tag.
 
     [Real continuation](docs/list.md)
 
+[Actual]
+
 [actual]: docs/actual.md
 """
         self.assertEqual([url for _, _, url in adapter.document_links(content)],
                          ["docs/list.md", "docs/actual.md"])
+
+    def test_markdown_reference_forms_and_literal_punctuation_are_preserved(self):
+        content = b"""[First][wrapped
+label]
+[Collapsed][]
+[Shortcut]
+[Literal dollar](docs/price$.md)
+[Escaped delimiters](docs/guide\\(v2\\)\\!.md)
+[Angle](<docs/spaced guide.md> "title")
+
+[wrapped label]:
+  docs/reference.md
+  "wrapped title"
+[collapsed]: docs/collapsed.md
+[shortcut]: docs/shortcut.md
+[SHORTCUT]: docs/not-selected.md
+[unused]: docs/not-used.md
+"""
+        links = adapter.document_links(content)
+        self.assertEqual([url for _, _, url in links], [
+            "docs/price$.md", "docs/guide(v2)!.md", "docs/spaced guide.md",
+            "docs/reference.md", "docs/collapsed.md", "docs/shortcut.md",
+        ])
+        for start, end, value in links:
+            self.assertEqual(adapter.markdown_unescape(content.decode()[start:end]), value)
+
+    def test_html_attribute_source_spans_are_exact_and_entities_decode_once(self):
+        content = (
+            '<a title="price > cost" HREF="docs/a&amp;b.md" data-example="not a link">A</a>\n'
+            '<script\n src = \'docs/app.js\' data-note=">">\n[example](docs/not.md)\n</script>\n'
+            '<img src="docs/first.png" src="docs/not-selected.png">\n'
+        )
+        links = adapter.document_links(content.encode(), markdown=False)
+        self.assertEqual([url for _, _, url in links], ["docs/a&b.md", "docs/app.js", "docs/first.png"])
+        self.assertEqual([content[start:end] for start, end, _ in links],
+                         ["docs/a&amp;b.md", "docs/app.js", "docs/first.png"])
+
+    def test_markdown_code_containers_and_comments_do_not_hide_real_navigation(self):
+        content = b"""- ```md
+  [List code](docs/not-list-code.md)
+  ```
+
+> > ~~~html
+> > <script src="docs/not-quoted-code.js"></script>
+> > ~~~
+
+An unmatched ` backtick cannot cross a paragraph.
+
+[Real guide](docs/real.md) and a later unmatched `.
+
+[A <!-- ] [Example](docs/not-comment.md) --> label](docs/comment-label.md)
+[A `]` label](docs/code-label.md)
+
+<script src="docs/live.js">
+// ``` is script body text, not a Markdown block.
+const example = '[not a guide](docs/not-script.md)';
+</script>
+[After script](docs/after.md)
+"""
+        self.assertEqual([url for _, _, url in adapter.document_links(content)], [
+            "docs/real.md", "docs/comment-label.md", "docs/code-label.md",
+            "docs/live.js", "docs/after.md",
+        ])
+
+    def test_markdown_literal_grammar_composes_without_syntax_specific_fallbacks(self):
+        labels = (
+            "Guide", "Read the\nwrapped guide", "Nested [label]", r"An escaped \] label",
+            "Code `]` label", "A <!-- bracket ] --> label", "**Emphasized** guide",
+        )
+        destinations = (
+            ("docs/a_b.md", "docs/a_b.md"), (r"docs/a\_b.md", "docs/a_b.md"),
+            ("<docs/a_b.md>", "docs/a_b.md"), ("<docs/a b.md>", "docs/a b.md"),
+            (r"docs/a\(b\).md", "docs/a(b).md"), ("docs/a(b(c)).md", "docs/a(b(c)).md"),
+        )
+        for label in labels:
+            for written, actual in destinations:
+                for title in ("", ' "Title > detail"', r" (Escaped \) title)"):
+                    text = f"[{label}]({written}{title})"
+                    with self.subTest(text=text):
+                        self.assertEqual([url for _, _, url in adapter.document_links(text.encode())], [actual])
 
     def test_public_links_close_transitively_without_glob_copy(self):
         self.write("README.md", "[First](docs/one.md)\n")
