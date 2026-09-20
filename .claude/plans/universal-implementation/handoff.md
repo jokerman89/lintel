@@ -34,8 +34,8 @@ from the reviewed historical merge `40c2795`. Current implementation ownership:
 | P02 sync binding | `2e21aa98-3b40-46e7-885d-2ec4161ec35d` | ACCEPTED and integrated `39561c0`; idle, no real private sync activated |
 | P03 context safety | `9f06eebf-a3ee-4867-95ad-eb6e1d22a6d5` | ACCEPTED and integrated `9a1cf17`; idle, downstream consumer/host gates separate |
 | P04 Swarming | `a8960a09-fcd7-4652-a9b6-74ad6a94a029` | Component ACCEPTED/integrated `490a0f4` + report history `8964267`; idle until explicit A22.7 |
-| P05 review evidence | `2329e71f-cd9e-473b-94cf-41c579c29a88` | Authorized consumer BUILD under `7a892b4`, exact `09148b7` helper dependency-only import; no helper edits |
-| P06 host adapters | `324863ff-e7cf-4abf-b449-04dd0f096170` | Frozen shared provider `09148b7`; independent helper + complete adapter spec/quality running |
+| P05 review evidence | `2329e71f-cd9e-473b-94cf-41c579c29a88` | Frozen `9c8ef727` / owned `fd63e690`, dependency `bd96a477` exactly 742 helper; same-reviewer spec/first quality |
+| P06 host adapters | `324863ff-e7cf-4abf-b449-04dd0f096170` | Frozen repaired shared provider `7425960`; same-reviewer helper + complete adapter spec/first quality |
 | P07 profile context | `b9352dfe-1c1e-4ea3-b7d9-0fd008d39b3d` | Component ACCEPTED: own commits integrated through `62ca389`; idle, final consumers remain open |
 
 All are `lintel-builder` sessions with explicit ownership, local commits, report paths
@@ -52,8 +52,8 @@ repair their own findings. All prior reports remain preserved in `reviews/` and 
 | P02 | Final `1b6153f`; SPEC/QUALITY PASS at `9bdaeb4`; idle | `da23fa6f-499b-4011-b39b-a632312a8800` |
 | P03 | Final `2840012`; SPEC/QUALITY PASS at `500adb3`; idle | `efd3f877-550a-4ef0-9009-ed71b95b01ab` |
 | P04 | Final `279dfc9`; component SPEC/QUALITY PASS at `aa73651`; A22.7 open | `ed672f58-2e85-42e2-b1b2-0635ba5b2325` |
-| P05 | Third rejection `85e8d90` at `5a4933e` / `3adae4b`; literal repair re-planned | `6ed9c7df-4845-4d70-88c7-f0746ab28059` |
-| P06 | Third rejection `6b874c7`; new `9f6b69d` m1-m6 checkpoint not independently accepted | `d2a89ac3-151a-4dc0-ab09-1f3a62465cab` |
+| P05 | Current `9c8ef727ba66a2ed574022143b4827cd83dca8b5`; exact helper dependency and shared consumer | `6ed9c7df-4845-4d70-88c7-f0746ab28059` |
+| P06 | Current `74259605c1a172a444d1d4d2e838aea2b120ef92`; 091 rejected in `96fdcc4` | `d2a89ac3-151a-4dc0-ab09-1f3a62465cab` |
 | P07 | Final `3d8e715`; owned SPEC/QUALITY PASS at `a8de574`; final joins open | `a7d78944-c02c-4909-a060-2c4f2a754b00` |
 
 ## Accepted local integrations
@@ -124,9 +124,16 @@ then passed. Final P05-v2, P06/P08/P14 and live-platform gates remain open.
   27 nav/16 registry/14 Universal/22 Copilot methods passing; not independent acceptance.
   Its current internal MarkdownSource lacks explicit raw/quote/task-marker facts P05 needs.
   MasterSession approved shared `lib/markdown_source.py` in `7a892b4`: P06 is sole classifier
-  owner and P05 the one-character progress consumer. The immutable provider is `09148b7`;
-  exact API and dependency-only import are approved, but independent acceptance is not.
+  owner and P05 the one-character progress consumer. Provider `09148b7` failed C06 false
+  structural-item facts and C07 multiline inline-code classification; current repair is
+  `7425960`. Exact API and dependency-only import are approved, independent acceptance is not.
   No external parser dependency, shared task schema, scheduler or silent eligibility.
+
+P05's owned consumer now passes 35 boundary plus 46 prior evidence methods using exact
+742 helper bytes, with all existing control/hook/source-target gates retained. This
+closes the implementer's measured C06 failure but does not replace provider or consumer
+independent review. Do not import an earlier 091 helper or conflate dependency commits
+with P05 authorship. See interfaces.md for exact Git blob and checksum.
 - P07's four owned findings close in P07-windows-final.md. Preserve its native versus
   injected/UNC/other-OS evidence boundary and original approved policy target; no automatic
   cross-target transfer or enterprise enforcement claim follows.

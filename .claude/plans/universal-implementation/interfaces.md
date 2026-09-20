@@ -7,7 +7,9 @@ their final availability. No second task/status ledger is introduced here.
 ## Shared Markdown source boundaries
 
 Approved contract/ownership: `packages/P05-P06-markdown-boundary.md` at `7a892b4`.
-Provider checkpoint: `09148b71cb57df0a5bb5cc21f3f1681d6715390e`, owned by P06.
+Current provider checkpoint: `74259605c1a172a444d1d4d2e838aea2b120ef92`, owned by P06.
+The earlier `09148b7` is rejected history: it falsely identified an ordered-2 paragraph
+continuation as an item and lost multiline inline-code precedence.
 `lib/markdown_source.py` implements the exact immutable types and stateless
 `classify_markdown(str)` API. Independent provider/adapter acceptance remains pending.
 
@@ -21,6 +23,12 @@ must be eligible; quote/literal/opaque/unknown content remains identity-bearing.
 No shared semantic task schema, normalization, I/O, policy or clearance belongs in this
 provider. Missing installed helper must fail before writes, not fall back to a second
 parser or a target-supplied module. Both independent consumer gates and final fan-in remain.
+
+Exact 742 provider: Git blob `0b3da55046358864fcd3075ba5bfb6c2348b1fec`, 19,988 bytes,
+SHA-256 `331c1c62e932b5555089336d1fdcc7031f545780508f1d0f2e11bd9f2a7a8ebf`.
+P05 dependency-only import is `bd96a477`; its owned consumer `fd63e690` and report-only
+snapshot `9c8ef727` are frozen for independent review. All 81 actual evidence methods
+passed on that paired source in the implementer's run; this is not independent acceptance.
 
 ## P05 review and controls
 
