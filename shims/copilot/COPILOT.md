@@ -1,7 +1,7 @@
 # Lintel adapter for GitHub Copilot
 
-This contract adapts Lintel's canonical workflows to Copilot CLI, VS Code and the
-GitHub cloud agent. A workflow is an instruction, not a runtime guarantee. Host
+This contract adapts Lintel's canonical workflows to Copilot CLI, Copilot App, VS Code
+and the GitHub cloud agent as distinct surfaces. A workflow is an instruction, not a runtime guarantee. Host
 capabilities and enterprise policies remain authoritative.
 
 ## Bootstrap and paths
@@ -51,14 +51,24 @@ locates bundled helpers; `LINTEL_REPO_ROOT` locates the working project.
 
 ## Tool and workflow adaptation
 
+Read the shared Universal contract at `shims/universal/ADAPTER.md` in the source checkout,
+or `ADAPTER.md` beside this file in an installed bundle. The canonical registry
+`lib/cli-tiers.yaml` separates vendor, delivered and observed facts per surface. Inspect
+actual tools and permissions; `bin/li-client-capabilities.py resolve` selects declared
+bindings but never executes tools or clears independent review.
+
 - `Read`, `Grep`, `Glob`: use available file-reading and search tools.
 - `Write`, `Edit`: use the host's file editing tools.
 - `Bash`: use an approved terminal tool; identify missing Bash/Python dependencies.
 - `TodoWrite`: keep checkboxes and status in `.claude/plans/todo.md` and the initiative plan.
-- `AskUserQuestion`: ask directly only when information or authorization is actually missing.
+- `AskUserQuestion`: use the host's actual question tool (for example `ask_user`) only
+  when information or authorization is missing. Use conversation only when no question
+  tool exists; never route around a denied permission.
 - `Task` or named agents: use available native subagent delegation. Copilot CLI, VS Code
   and cloud have different capabilities; never invent a tool or claim a delegated run
-  happened. If unavailable, execute sequentially and label self-review accurately.
+  happened. Without attributable parallel isolation, serialize. Without delegation,
+  preserve a usable external/manual brief and label self-review accurately; required
+  independent review stays outstanding.
 - `/li:<name>`: invoke `/li-<name>` when a native wrapper exists, otherwise read the
   canonical skill file. Native skill names contain hyphens, not a colon namespace.
 - Claude-specific model names, context commands, plugin syntax, `voice` metadata,

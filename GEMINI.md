@@ -40,7 +40,10 @@ gemini extensions update li
 
 ### Skill discovery on Gemini
 
-Gemini CLI extensions are simpler than Claude Code plugins — they rely on this context file (GEMINI.md) plus markdown content. There's no explicit skill-discovery mechanism.
+The existing extension/context-file route is retained. Current Gemini CLI documentation also
+defines workspace skills under `.gemini/skills` (and `.agents/skills`). The repository adapter
+can generate `li-*` wrappers there without changing personal settings or installing a client.
+Inspect actual discovery and activation consent; documentation is not a live session test.
 
 To invoke a skill on Gemini, reference the file path:
 
@@ -65,7 +68,11 @@ Common skills (see `skills/` for full list):
 
 ### Subagents
 
-Gemini's subagent model differs from Claude Code's Task tool. For multi-agent workflows, run Gemini in interactive mode and ask it to consult `agents/<category>/<Name>.md` for role context.
+Gemini documents subagents with surface/version restrictions, including no nested subagents.
+Use actual available delegation tools rather than Claude tool names. Keep canonical role methods
+as scoped inputs; missing delegation retains serial/manual handoff, not fictional independence.
+Experimental worktrees or browser agents need their own availability and permission evidence.
+See the Universal contract at `shims/universal/ADAPTER.md` and `lib/cli-tiers.yaml`.
 
 ### Compliance
 

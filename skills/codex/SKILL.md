@@ -1,112 +1,117 @@
 ---
 name: codex
 layer: foundation
-description: Outside-voice second opinion via Codex CLI. Independent review of diff, plan, or hypothesis.
+description: Use for an explicitly authorized Codex outside opinion on a diff, plan, code or hypothesis, retaining actual actor and content-bound review evidence.
 color: purple
 tools: Bash, Read
 voice: internal
-cli_support: [claude-code]
+cli_support: [claude-code, codex, copilot, cursor, gemini, opencode, droid]
 ---
 
-# /codex
+# Outside opinion with Codex
 
-Invokes the Codex CLI as an independent reviewer. Codex sees the same files but not this session's prior context — that disconnect is the point. Use when you want a second opinion uncontaminated by the framing already in this conversation.
-
-The skill itself runs in Claude Code (which is why `cli_support: [claude-code]` is single-entry). Codex is invoked as a subprocess; its output is parsed and surfaced back here.
+Preserve the useful second-opinion method: a separate context challenges a scoped diff,
+plan or hypothesis and reports agreement, disagreement and new findings. Any host with
+an authorized execution or external handoff path can coordinate it; it is not Claude-only.
+The name retains the Codex route, not a requirement to change the current session's model.
 
 ## When to use
 
-- Pre-`/ship` outside-voice review on a non-trivial diff
-- `/investigate` produced a confident root cause and you want it independently challenged
-- A design decision was made in conversation and you want a fresh-eyes critique
-- `/plan-eng-review` cleared with caveats — use Codex to triangulate the caveats
-
-## When NOT to use
-
-- The work is trivial — Codex tokens cost real money
-- You've already disagreed with Codex twice on this same diff — escalate to a human reviewer instead
-- Codex CLI isn't installed — surface that as a setup gap, do not silently fall back to "Claude reviewing itself"
+Use for a consequential diff, contested root cause or design decision that benefits from
+separate reasoning. For a trivial task, avoid unnecessary external cost. If two rounds
+produce unresolved disagreement on the same content, retain the disagreement and escalate
+to a human decision rather than repeating the same framing.
 
 ## Inputs
 
-- Required: target (one of `--diff`, `--plan <file>`, `--code <file>`, `--hypothesis "<text>"`)
-- Optional `--prompt-style <strict|exploratory>` — strict = "find what's wrong", exploratory = "what would you do differently"
-- Optional `--budget <tokens>` — cap Codex call (default: 50k tokens)
+- Target: `--diff`, `--plan <file>`, `--code <file>` or `--hypothesis <text>`.
+- Optional review style: strict defect-finding or exploratory alternatives.
+- Optional budget: an operator constraint, not an invented token-limit CLI flag.
+- For mapped delivery: the original work map, package/leaf IDs, acceptance and effective
+  profile reference. A genuine ad-hoc inspection does not require a new plan or backlog.
 
-## Workflow
+These are workflow inputs, not a claim that Codex accepts identically named flags.
 
-1. **Preflight.** Verify `codex` is on PATH. If not: report missing setup + exit. No fallback.
-2. **Construct prompt.** Inject the target (diff, plan body, code excerpt, hypothesis statement). Wrap in a directive: "You are reviewing this independently. The author has their own reasoning; surface what you'd push back on."
-3. **Run Codex.** `codex exec --quiet --output json --prompt-file <tmp>` (or equivalent — adjust to current Codex CLI flags). Capture stdout, stderr, exit code.
-4. **Parse output.** Codex returns structured findings (severity, location, claim, evidence). Normalize to Lintel's P1/P2/P3 severity.
-5. **Compare to local reasoning.** If invoked mid-`/investigate` or post-`/review`: explicitly diff Codex's findings against what was already concluded. Surface AGREEMENT and DISAGREEMENT separately.
-6. **Persist via `bin/li-review-log`** with `skill: codex` so downstream `/ship` can read.
-7. **Report.**
+## Procedure
 
-## Report format
+1. **Establish authority.** A subprocess can transmit code and spend credits. Verify the
+   requested client, destination, scope and allowed data before any invocation. Do not
+   install a client, read credentials or silently substitute a paid provider.
+2. **Inspect the real API.** When authorized, inspect the installed `codex --help` and
+   `codex exec --help`, exact version, permission/sandbox settings and supported output
+   options. Do not use guessed `--prompt-file`, `--output json`, `--quiet` or model flags.
+   Native host delegation is an alternative only if it supplies the requested separate
+   context and the operator's selection permits it.
+3. **Prepare the scope and identity.** Freeze the reviewed selection and read the shared
+   `lib/review-schema.json` from the trusted source. Form the request from that schema,
+   not a second skill-specific JSON contract. For mapped delivery, the shared command is:
 
-```
-Codex Review: <target>
+   ```bash
+   python3 "$LINTEL_SOURCE_ROOT/bin/li-review-evidence.py" prepare \
+     --repo "$LINTEL_REPO_ROOT" --request "$request_file"
+   ```
 
-Codex CLI: codex@1.4.2 (exec mode, exploratory style, budget 50k)
-Tokens used: 31,400 / 50,000
+   Retain its immutable context JSON as the expected identity. Include full original
+   acceptance and selected paths/revision, not the author's preferred conclusion.
+   If the evidence helper/schema is unavailable in this source version, report the
+   review handoff as unverified; do not manufacture clearance with a legacy positive string.
 
-## Findings from Codex (3)
+   For an ad-hoc diff, code or hypothesis inspection without a work map, use the shared
+   `snapshot --repo --base --select` contract from the installed helper's help/schema.
+   Then `inspect --repo --snapshot <snapshot.json> --input <inspection-input.json>` binds
+   controls, required-policy observations and evidence. Its result has
+   `purpose: inspection` and `release_clearance: false`. Do not create a synthetic work
+   map or promote that inspection into release clearance. Exact selection and input
+   shapes belong to the shared implementation, not this skill.
+4. **Run the authorized review or hand it off.** Give the external actor read-only scope,
+   separate context, the content selection and a severity/location/evidence report
+   contract. Capture actual stdout, stderr and exit status. Missing client/tools leave a
+   replayable manual brief; main-agent role-play is not a substitute. Do not let the
+   reviewer repair its own findings or run concurrent writers against shared files.
+5. **Compare findings.** Cite reviewed files and evidence. Separate agreement, disagreement
+   and new findings; follow disputed claims to the actual code. Out-of-scope references
+   need clarification, not automatic suppression. Measured usage is recorded only if the
+   host supplies it; a requested budget is not proof it was enforced.
+6. **Record through the shared evidence interface.** Preserve ad-hoc inspection output as
+   non-release evidence. For mapped delivery, populate the decision record according
+   to the shared schema, preserving actor/context, attempt, work and exact result identity.
+   Structural `validate --record` checks shape only. With `LINTEL_REPO_ROOT` set:
 
-[P1] (Codex confidence: 9/10) src/lib/dlxClient.ts:87
-   "The retry logic creates an AbortController but never resets between attempts. Second retry will abort itself."
-   ← AGREES with /investigate root cause from this session.
+   ```bash
+   bash "$LINTEL_SOURCE_ROOT/bin/li-review-log" --file "$decision_file"
+   bash "$LINTEL_SOURCE_ROOT/bin/li-review-read" --skill codex \
+     --expected "$expected_context" --corroboration "$actual_receipt" --gate-json
+   ```
 
-[P2] (Codex confidence: 7/10) src/lib/dlxClient.ts:42
-   "Error handling swallows the original stack trace. Hard to debug downstream."
-   ← NEW finding, not raised in local review.
+   The latest applicable log decision, not an arbitrary old pass, governs clearance.
+   The expected context and corroboration must be actual retained artifacts, not invented
+   strings. Missing real host/human corroboration blocks required independent review.
+   `--json` is history only; direct `verify` of one record cannot establish latest-log
+   status. The reader's exit status and exact result remain authoritative.
+7. **Report and hand back.** Summarize actual actor/client/version, target identity,
+   findings by severity, agreements/disagreements, commands run, unrun checks and limits.
+   A changed acceptance, configuration or selected content requires re-evaluation.
+   QA/evidence preparation does not run tests, and SHIP evidence does not push or deploy.
 
-[P3] (Codex confidence: 6/10) src/lib/dlxClient.ts:120
-   "Magic number 30000 should be a named constant."
-   ← Style nit, agree.
+## Failure and data handling
 
-## Synthesis
-- 1 finding agrees with local conclusion (strengthens confidence)
-- 1 new finding (P2) — recommend addressing before /ship
-- 1 style nit (P3) — defer or include in same diff
-```
+Missing authorization, unavailable client, nonzero exit, malformed result, changed content
+or absent corroboration remains explicit. Preserve useful partial findings without labeling
+them verified clearance. Do not log raw sensitive prompts or tool output into public artifacts.
+A read-only flag is a requested scope, not proof that the external host enforced it.
 
-## Compliance integration
-
-- Codex sees code. Per Layer 2: code is not customer-data, so no auth gate. But: if the target includes a fixture path containing customer-data patterns, BLOCK the Codex call and surface (Codex would receive that data).
-- Token spend logged to `.claude/runtime/audit/codex-spend.jsonl`.
-- The active pack may route Codex calls via a configured gateway per `~/.lintel/config.yaml` (none by default).
-
-## Failure modes
-
-- **Codex CLI missing:** report + exit. No fallback to Claude self-review (that defeats the purpose).
-- **Codex returns malformed output:** capture raw stdout to `.claude/runtime/audit/codex-raw-<ts>.txt`, report parse failure, exit.
-- **Budget exceeded mid-call:** Codex's own truncation kicks in. Report partial findings + budget overflow.
-- **Codex output contains a finding referencing a file we never sent:** flag as hallucination, suppress from main report, log to debug appendix.
+For manual recovery of mapped work, retain the work map, original leaf text, acceptance, trusted source,
+effective profile reference, exact reviewed selection, next action and outstanding independent
+review. For an ad-hoc inspection, retain its selected snapshot, scope, findings and limitations
+without inventing work identity. No background process or special model is required.
 
 ## Examples
 
-**Outside opinion on a diff:**
-```
-> /codex --diff
-Codex found 2 P2 findings the local review missed. Recommend addressing before /ship.
-```
+`codex --diff` requests an authorized outside opinion on the selected diff. A hypothesis
+request asks the separate actor to test the claim against evidence, not merely agree.
+A code-only exploratory request can identify alternatives without authorizing edits.
+In every case, actual command syntax comes from the installed host and shared evidence
+schema, not from this workflow-input shorthand.
 
-**Challenge a hypothesis:**
-```
-> /codex --hypothesis "retry abort controller bug at dlxClient:87"
-Codex agrees (9/10 confidence). Strengthens the root cause.
-```
-
-**Style-only review:**
-```
-> /codex --code src/components/case/AgentModeChip.tsx --prompt-style exploratory
-3 stylistic suggestions, no correctness issues.
-```
-
-## See also
-
-- `/review` — local diff review (use `/codex` as a follow-up for important diffs)
-- `/investigate` — `--with-codex` flag chains automatically
-- `/plan-eng-review` — uses `/codex` internally as the outside-voice step
-- `/ship` — reads codex review-log entries as part of clearance check
+See `review`, `investigate`, `plan-eng-review` and `ship` for the surrounding canonical
+workflows and [the Universal adapter](../../shims/universal/ADAPTER.md) for host fallbacks.

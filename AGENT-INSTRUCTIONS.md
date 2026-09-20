@@ -123,10 +123,12 @@ is not a Copilot hook configuration; host policy and repository CI enforce enter
 
 Lintel ships with honest degradation. Not every skill works on every CLI.
 
-The per-CLI truth is `lib/cli-tiers.yaml` (the single source); the README's capability table is
-generated from it. Run `/li:welcome` for your CLI's live tier. Every skill / agent declares
-`cli_support` in YAML frontmatter; `install/verify.sh` prints counts — the per-CLI table lives in
-the README, generated from `lib/cli-tiers.yaml`.
+The per-surface registry is `lib/cli-tiers.yaml` (the single source); the README view is
+generated from it. It distinguishes dated vendor capabilities, delivered bindings and
+observed execution for CLI, desktop, IDE and cloud. `/li:welcome` starts with the task and
+inspects actual tools/permissions; it does not infer a live tier from a manifest.
+Canonical `cli_support` metadata remains a discovery hint, not runtime evidence.
+Read `shims/universal/ADAPTER.md` for the common operation/fallback contract.
 
 ---
 

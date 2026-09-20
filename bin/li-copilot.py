@@ -1,20 +1,24 @@
 #!/usr/bin/env python3
 # component: copilot-repository-adapter
-# implements: ADR-0024, ADR-0025, ADR-0027
-# intent: .claude/plans/swarming-work/spec.md
+# implements: ADR-0024, ADR-0025, ADR-0027, ADR-0028
+# intent: .claude/plans/universal-implementation/spec.md
 # constraints: stdlib only, no network, preserve project prose, preflight all writes
-# last_intent_review: 2026-09-08
-"""Deterministic Copilot adapter; standard library only, no network or shell calls."""
+# last_intent_review: 2026-09-20
+"""Shared repository adapter generator; preserves the Copilot entry and managed ownership."""
 import argparse
 import hashlib
 import json
 import os
 from pathlib import Path, PurePosixPath
+import posixpath
 import re
 import shutil
 import subprocess
 import sys
 import tempfile
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
+from client_capabilities import load_registry, surface_id
 
 SCHEMA = 1
 INVENTORY = ".github/lintel/manifest.json"
@@ -22,10 +26,12 @@ BUNDLE = ".github/lintel"
 PROTOCOL_START = b"<!-- LINTEL:SESSION-PROTOCOL:START -->"
 PROTOCOL_END = b"<!-- LINTEL:SESSION-PROTOCOL:END -->"
 COMPONENTS = ("bin", "lib", "skills", "agents", "templates", "scaffolding/01-foundation", "packs/_default")
-DOCS = ("docs/the-cycle.md", "docs/precedence.md", "docs/compliance.md", "docs/architecture.md",
+DOCS = ("README.md", "SECURITY.md", "docs/the-cycle.md", "docs/precedence.md", "docs/compliance.md", "docs/architecture.md",
         "docs/GLOSSARY.md", "docs/spec-kit.md", "docs/getting-started.md", "docs/copilot.md",
+        "docs/claude-code.md", "docs/multi-cli.md", "docs/client-adapters.md", "docs/enterprise-adoption.md",
         "docs/concepts/planner-as-module.md", "docs/concepts/agent-dispatch-rules.md", "docs/concepts/orientator.md",
         "docs/concepts/swarming-work.md")
+SOURCE_METADATA = (".claude-plugin/plugin.json",)
 TEXT_SUFFIXES = {".md", ".sh", ".bash", ".py", ".json", ".yaml", ".yml", ".csv", ".tsv", ".txt", ".template", ".base"}
 ATTRIBUTES = (
     ".github/lintel/** text=auto eol=lf",
@@ -60,6 +66,8 @@ SWARM_RESOURCES = (
     "bin/li-swarm",
     "bin/li-swarm.py",
     "bin/li-work-artifacts.py",
+    "bin/li-envelope-validate",
+    "bin/li-envelope-replay",
     "bin/_audit.sh",
     "lib/copilot-env.sh",
     "lib/swarm-schema.json",
@@ -76,6 +84,10 @@ SWARM_RESOURCES = (
     "scaffolding/01-foundation/templates/swarm/agent-brief.template.md",
     "scaffolding/01-foundation/templates/swarm/agent-report.template.md",
     "scaffolding/01-foundation/templates/swarm/agent-review.template.md",
+)
+ADAPTER_RESOURCES = (
+    "lib/client_capabilities.py", "lib/cli-tiers.yaml", "lib/cli-tiers.sh",
+    "bin/li-client-capabilities.py", "bin/li-adapter.py", "lib/pack-schema.yaml",
 )
 
 
@@ -118,8 +130,12 @@ def text_bytes(value: str) -> bytes:
     return value.rstrip().encode("utf-8") + b"\n"
 
 
-def generate(source: Path, target: Path) -> tuple[dict[str, bytes], dict[str, bytes], str]:
+def generate(source: Path, target: Path,
+             clients: tuple[str, ...] = ("copilot-cli",)) -> tuple[dict[str, bytes], dict[str, bytes], str]:
     local = source == target
+    registry = load_registry(safe_path(source, "lib/cli-tiers.yaml"))
+    records = [registry["surfaces"][surface_id(registry, client)] for client in clients]
+    copilot = any(record["discovery"]["kind"] == "copilot" for record in records)
     files = {}
     # A deliberately scoped source bundle: never copy .git, user packs, runtime,
     # customer material, host settings, hooks, or this generated bundle recursively.
@@ -136,8 +152,14 @@ def generate(source: Path, target: Path) -> tuple[dict[str, bytes], dict[str, by
         for relative in ("LICENSE",) + DOCS:
             if (source / relative).is_file():
                 files[f"{BUNDLE}/{relative}"] = read_file(source, relative)
-        bridge = "shims/copilot/COPILOT.md" if (source / "shims/copilot/COPILOT.md").is_file() else "COPILOT.md"
-        files[f"{BUNDLE}/COPILOT.md"] = read_file(source, bridge)
+        for canonical, entry in (("shims/copilot/COPILOT.md", "COPILOT.md"),
+                                 ("shims/universal/ADAPTER.md", "ADAPTER.md")):
+            bridge = canonical if (source / canonical).is_file() else entry
+            data = read_file(source, bridge)
+            files[f"{BUNDLE}/{entry}"] = data
+            files[f"{BUNDLE}/{canonical}"] = data
+        for relative in SOURCE_METADATA:
+            files[f"{BUNDLE}/{relative}"] = read_file(source, relative)
     # These are the direct workflow, validation, handoff, policy, audit/path and
     # template dependencies needed by the swarm entry point. Fail generation if
     # the installed source is incomplete instead of deferring failure to dispatch.
@@ -145,6 +167,10 @@ def generate(source: Path, target: Path) -> tuple[dict[str, bytes], dict[str, by
         data = read_file(source, relative)
         if not local and files.get(f"{BUNDLE}/{relative}") != data:
             raise ValueError(f"Swarm resource was not bundled: {relative}")
+    for relative in ADAPTER_RESOURCES:
+        data = read_file(source, relative)
+        if not local and files.get(f"{BUNDLE}/{relative}") != data:
+            raise ValueError(f"Adapter resource was not bundled: {relative}")
     # File-relative Markdown links work after copying and in clean cloud clones.
     skill_source = "../../.." if local else "../../lintel"
     bridge_skill = "../../../shims/copilot/COPILOT.md" if local else "../../lintel/COPILOT.md"
@@ -204,6 +230,62 @@ Read project memory and relevant decisions before edits. Verify actual behavior 
 report checks, outcomes and limitations. Keep secrets and customer data out of artifacts.
 Repository instructions do not replace enterprise policy, tool permissions or human review.
 """)
+    if not copilot:
+        for relative in tuple(files):
+            if (relative.startswith((".github/skills/", ".github/agents/", ".github/instructions/"))
+                    or relative == ".github/copilot-instructions.md"):
+                del files[relative]
+    universal_bridge = "shims/universal/ADAPTER.md" if local else f"{BUNDLE}/ADAPTER.md"
+    canonical_root = "" if local else BUNDLE + "/"
+    for record in records:
+        discovery = record["discovery"]
+        if discovery["kind"] != "skills":
+            continue
+        for name, description in WORKFLOWS.items():
+            relative = f"{discovery['root']}/li-{name}/SKILL.md"
+            parent = posixpath.dirname(relative)
+            bridge_link = posixpath.relpath(universal_bridge, parent)
+            workflow_link = posixpath.relpath(f"{canonical_root}skills/{name}/SKILL.md", parent)
+            project_link = posixpath.relpath("AGENTS.md", parent)
+            files[relative] = text_bytes(f"""---
+name: li-{name}
+description: {description}
+---
+
+# Lintel {name}
+
+Read the [project instructions]({project_link}) and [Universal adapter]({bridge_link}),
+then execute the [canonical {name} workflow]({workflow_link}) for the user's request.
+Use actual available host tools and permissions, not vendor-specific examples as commands.
+Resolve source resources relative to the canonical workflow; write state to the working
+repository. Missing delegation preserves serial/manual handoff and outstanding independent
+review. This file supplies native discovery format, not evidence of live host execution.
+""")
+    start_parent = BUNDLE
+    routes = "\n".join(f"- `{client}`: " + (
+        f"native-format files at `{registry['surfaces'][client]['discovery']['root']}/li-*/SKILL.md`."
+        if registry["surfaces"][client]["discovery"]["root"] else
+        "manual canonical-file handoff; native discovery is unverified.")
+        for client in clients)
+    files[f"{BUNDLE}/START.md"] = text_bytes(f"""# Start from your task
+
+Read the [project instructions]({posixpath.relpath('AGENTS.md', start_parent)}) and
+[Universal operation adapter]({posixpath.relpath(universal_bridge, start_parent)}).
+Choose the relevant [plan]({posixpath.relpath(canonical_root + 'skills/plan/SKILL.md', start_parent)}),
+[build]({posixpath.relpath(canonical_root + 'skills/build/SKILL.md', start_parent)}),
+[review]({posixpath.relpath(canonical_root + 'skills/review/SKILL.md', start_parent)}) or
+[resume]({posixpath.relpath(canonical_root + 'skills/resume/SKILL.md', start_parent)}) workflow
+by explicit file read if it is not discovered by your host.
+
+## Selected surfaces
+
+{routes}
+
+This is a repository-local source bundle and manual entry, not a plugin activation API.
+No hooks, clients, credentials, global configuration or model settings were installed.
+Record actual tool/session/version evidence separately. Keep the selected work map and
+effective profile reference in package handoffs. Missing independent review stays open.
+""")
     # Foundation seed files are user-owned immediately; never upgrade or hash them.
     seeds = {
         "AGENTS.md": text_bytes("""# Repository agent instructions
@@ -233,17 +315,21 @@ Add project-specific commands and motivated deviations outside its marked block.
     return files, seeds, "repository" if local else "vendored"
 
 
-def load_inventory(target: Path) -> tuple[dict[str, str], dict[str, str]]:
+def load_inventory(target: Path, registry: dict) -> tuple[dict[str, str], dict[str, str], list[str]]:
     path = safe_path(target, INVENTORY)
     if not path.exists():
-        return {}, {}
+        return {}, {}, []
     value = json.loads(path.read_text(encoding="utf-8"))
     if (not isinstance(value, dict) or type(value.get("schema_version")) is not int
             or value["schema_version"] != SCHEMA or not isinstance(value.get("files"), dict)):
         raise ValueError("Unsupported or malformed Copilot inventory")
+    roots = {record["discovery"]["root"] for record in registry["surfaces"].values()
+             if record["discovery"]["root"]}
     for relative, sha in value["files"].items():
         safe_path(target, relative)
-        if not (relative.startswith(".github/lintel/") or relative.startswith(".github/skills/li-") or relative.startswith(".github/agents/lintel-") or relative in (".github/copilot-instructions.md", ".github/instructions/lintel-session.instructions.md")):
+        native_skill = any(re.fullmatch(re.escape(root) + r"/li-[a-z0-9-]+/SKILL\.md", relative)
+                           for root in roots)
+        if not (relative.startswith(".github/lintel/") or native_skill or relative.startswith(".github/agents/lintel-") or relative in (".github/copilot-instructions.md", ".github/instructions/lintel-session.instructions.md")):
             raise ValueError(f"Inventory path outside managed namespaces: {relative}")
         if not isinstance(sha, str) or not re.fullmatch(r"[0-9a-f]{64}", sha):
             raise ValueError(f"Invalid inventory hash: {relative}")
@@ -253,7 +339,12 @@ def load_inventory(target: Path) -> tuple[dict[str, str], dict[str, str]]:
     for relative, sha in blocks.items():
         if relative not in ("AGENTS.md", "CLAUDE.md") or not isinstance(sha, str) or not re.fullmatch(r"[0-9a-f]{64}", sha):
             raise ValueError(f"Invalid protocol block inventory: {relative}")
-    return value["files"], blocks
+    clients = value.get("clients", ["copilot-cli"])
+    if (not isinstance(clients, list) or not clients or not all(isinstance(client, str) for client in clients)
+            or len(set(clients)) != len(clients)
+            or any(client not in registry["surfaces"] for client in clients)):
+        raise ValueError("Malformed adapter client inventory")
+    return value["files"], blocks, clients
 
 
 def protocol_updates(source: Path, target: Path, seeds: dict[str, bytes],
@@ -295,7 +386,8 @@ def protocol_updates(source: Path, target: Path, seeds: dict[str, bytes],
 def verify_links(files: dict[str, bytes], target: Path) -> list[str]:
     missing = []
     for relative, data in files.items():
-        if not (relative.startswith(".github/skills/li-") or relative.startswith(".github/agents/lintel-") or relative in (".github/copilot-instructions.md", ".github/instructions/lintel-session.instructions.md")):
+        native_skill = re.fullmatch(r"\.[a-z][a-z0-9-]*/skills/li-[a-z0-9-]+/SKILL\.md", relative)
+        if not (native_skill or relative.startswith(".github/agents/lintel-") or relative in (".github/copilot-instructions.md", ".github/instructions/lintel-session.instructions.md", f"{BUNDLE}/START.md")):
             continue
         for link in re.findall(r"\]\(([^)#]+)(?:#[^)]*)?\)", data.decode("utf-8")):
             resolved = (target / relative).parent.joinpath(link).resolve()
@@ -335,11 +427,12 @@ def runtime_ignore_errors(target: Path, ignore_text: str) -> list[str]:
     return []
 
 
-def main() -> None:
+def main(universal: bool = False) -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("command", choices=("init", "check"))
     parser.add_argument("--target", type=Path, default=Path.cwd())
     parser.add_argument("--source", type=Path, default=None)
+    parser.add_argument("--client", action="append", help="Exact surface ID or alias; repeat for a team; no global installation")
     args = parser.parse_args()
     target = args.target.resolve()
     # Executable-relative source is stable even after copilot-env sets LINTEL_HOME
@@ -347,8 +440,16 @@ def main() -> None:
     source = (args.source or Path(__file__).resolve().parent.parent).resolve()
     if not target.is_dir():
         raise ValueError(f"Target directory does not exist: {target}")
-    files, seeds, mode = generate(source, target)
-    old, old_blocks = load_inventory(target)
+    if target in (Path(target.anchor), Path.home().resolve()):
+        raise ValueError("Target must be a project directory, not a filesystem or user-home root")
+    registry = load_registry(safe_path(source, "lib/cli-tiers.yaml"))
+    old, old_blocks, old_clients = load_inventory(target, registry)
+    if universal and args.command == "init" and not args.client:
+        parser.error("--client is required for init; use other for a manual canonical-file handoff")
+    requested = [surface_id(registry, client) for client in args.client] if args.client else (
+        ["copilot-cli"] if args.command == "init" or not old_clients else [])
+    clients = sorted(set(old_clients + requested))
+    files, seeds, mode = generate(source, target, tuple(clients))
     errors = []
     block_updates, block_hashes = {}, {}
     if mode == "vendored":
@@ -369,8 +470,12 @@ def main() -> None:
     # carries the Lintel pointer instead; unowned files are never adopted silently.
     entry = ".github/copilot-instructions.md"
     if safe_path(target, entry).exists() and entry not in old:
-        files.pop(entry)
-    attribute_rules = list(ATTRIBUTES)
+        files.pop(entry, None)
+    roots = sorted({registry["surfaces"][client]["discovery"]["root"] for client in clients
+                    if registry["surfaces"][client]["discovery"]["root"]})
+    attribute_rules = [ATTRIBUTES[0]] + [f"{root}/li-*/** text=auto eol=lf" for root in roots]
+    if any(registry["surfaces"][client]["discovery"]["kind"] == "copilot" for client in clients):
+        attribute_rules.extend(ATTRIBUTES[2:])
     if entry in files:
         attribute_rules.append(".github/copilot-instructions.md text eol=lf")
     for relative in sorted(set(files) | set(old) | set(seeds)):
@@ -398,15 +503,15 @@ def main() -> None:
             if not safe_path(target, relative).is_file():
                 errors.append(f"Missing foundation file: {relative}")
         if not old:
-            errors.append("Copilot inventory is missing; run init")
+            errors.append("Adapter inventory is missing; run init")
         errors.extend(runtime_ignore_errors(target, existing_ignore))
         if any(rule not in existing_attributes.splitlines() for rule in attribute_rules):
-            errors.append("Missing Copilot .gitattributes rules; run init")
+            errors.append("Missing adapter .gitattributes rules; run init")
     errors.extend(verify_links({**files, **seeds}, target))
     if errors:
         raise ValueError("\n".join(errors))
     if args.command == "check":
-        print(f"Copilot kit verified: {len(files)} managed files; {mode} source; no live-host validation.")
+        print(f"Lintel kit verified: {len(files)} managed files; {mode} source; clients={','.join(clients)}; no live-host validation.")
         return
     # Everything above is read-only. Only write after the entire update passes.
     for relative, data in sorted(files.items()):
@@ -431,13 +536,14 @@ def main() -> None:
     missing_rules = [rule for rule in attribute_rules if rule not in existing_attributes.splitlines()]
     if missing_rules:
         separator = "\n" if existing_attributes.endswith("\n") else "\n\n"
-        atomic_write(attributes, (existing_attributes + separator + "# Lintel portable Copilot kit\n" + "\n".join(missing_rules) + "\n").encode("utf-8"))
+        atomic_write(attributes, (existing_attributes + separator + "# Lintel portable adapter kit\n" + "\n".join(missing_rules) + "\n").encode("utf-8"))
     inventory = {"schema_version": SCHEMA, "source_mode": mode, "hooks_installed": False,
+                 "clients": clients,
                  "blocks": block_hashes,
                  "files": {relative: digest(data) for relative, data in sorted(files.items())}}
     atomic_write(safe_path(target, INVENTORY), text_bytes(json.dumps(inventory, indent=2, sort_keys=True)))
-    print(f"Copilot kit ready: {len(files)} managed files; {mode} source. Commit .github/ and foundation files.")
-    print("Start a new Copilot session; inspect /skills and select /li-welcome. No hooks or host permissions were changed.")
+    print(f"Lintel kit ready: {len(files)} managed files; {mode} source; clients={','.join(clients)}. Review the managed inventory and foundation diff.")
+    print("Start a new host session and inspect its discovery UI, or read .github/lintel/START.md explicitly. No hooks or host permissions were changed.")
 
 
 if __name__ == "__main__":

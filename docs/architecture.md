@@ -7,9 +7,9 @@ How Lintel is put together, and why. If you want the workflow rather than the st
 
 ## One sentence
 
-Lintel is a **spine** — a company-neutral execution engine of skills, agents and hooks — plus one
-active **pack** that supplies identity. The spine decides *how* work runs; the pack decides *what
-counts as correct* for your team.
+Lintel is a **spine** of company-neutral workflows and local helpers, plus an active **pack**
+for team identity and policy. Thin client adapters bind workflow operations to actual host
+tools. The spine is not a universal execution engine: the host owns execution and permissions.
 
 Everything else in this document is a consequence of that split.
 
@@ -112,7 +112,7 @@ This is where the repo's central rule lives: *if a guarantee is only prose, it i
 | `auto-decide.sh` | `is_one_way_door` — classifies selected irreversible decision patterns when the workflow calls it |
 | `cycle-footer.sh` | `render_cycle_footer` — the position footer, mode-aware, with an ASCII fallback |
 | `scale-estimator.sh` | sizing, and the calibration path that turns token estimates from guesses into measurements |
-| `cli-tiers.sh` | generates the capability table from `cli-tiers.yaml`; a shape test fails the build if the README disagrees |
+| `client_capabilities.py` and `cli-tiers.sh` | one validated surface/operation registry, explicit session-binding selection and conservative legacy/table views |
 | `swarm_contract.py` and `li-swarm.py` | validate opt-in swarm topology, per-lane scope and close evidence without executing artifact content |
 
 ---
@@ -164,8 +164,9 @@ Every skill that owns a job declares `workflow_root: true` in frontmatter, along
 exit conditions. At SENSE an **orientator** reads the request, the active pack's navigation policy
 and any open jobs, then recommends a workflow, an entry phase and a risk level.
 
-It is mechanical-first: cheap pattern matching decides the common cases, and only an ambiguous one
-escalates to a model call, inside a pack-overridable token budget.
+It is mechanical-first: pattern matching recommends common routes. An ambiguous result needs
+explicit clarification or judgment; a configured budget or staged escalation path is not evidence
+that an additional model call occurred.
 
 ## Swarming as an execution profile
 
@@ -247,11 +248,22 @@ still uses the legacy locations.
 Two mechanisms, one source each:
 
 1. **Instructions** — the shared `SESSION-PROTOCOL.md` is repeated inline in AGENTS.md, CLAUDE.md and both scaffold templates. `bin/li-instructions.py` keeps those marked blocks identical while preserving unique project context. `AGENT-INSTRUCTIONS.md` supplies the navigation/read order; personal global files are unnecessary for the reusable protocol. This deliberate repetition supersedes the older pointer-only direction.
-2. **Skills and agents** — written once at the repo root, shipped through small per-CLI plugin
-   manifests and generated adapters that reference shared canonical content. Copilot uses generated native core adapters and a dedicated manifest; the portable installer bundles referenced resources for other checkouts. Other adapters may use manifest interoperability.
+2. **Skills and agents** — written once at the repo root, exposed through native plugins,
+   generated discovery wrappers or explicit manual handoff. Existing Claude skills/agents/hooks,
+   Copilot native kit and other useful routes remain. `li-adapter.py` delegates to the same
+   `li-copilot.py` source-bundling and ownership engine rather than duplicating an installer.
 
-Per-CLI capability is declared once in `lib/cli-tiers.yaml` and everything else generates from it —
-the README table, and the honest tier message `/li:welcome` prints on first run.
+`lib/cli-tiers.yaml` is schema-version-2 JSON-compatible YAML, read by the standard-library
+`client_capabilities.py`. Every CLI/desktop/IDE/cloud surface keeps vendor documentation,
+delivered integration and observed execution distinct per operation. The installer, generated
+README and compatibility shell API consume that source. Exact IDs and legacy aliases never
+collapse neighboring surfaces.
+
+Current session bindings select actual tool names, availability, permissions and attributable
+isolation. The selector does not execute tools, grant permission or clear independent review.
+Unknown/denied capabilities remain explicit; manual/serial handoffs retain the original map,
+acceptance and effective profile reference. See [Universal support](multi-cli.md) and the
+[adapter contract](../shims/universal/ADAPTER.md).
 
 ---
 
@@ -288,6 +300,14 @@ self-description — historically this repo's dominant failure mode, and the rea
 - [Multi-CLI support](multi-cli.md) · [Precedence](precedence.md) · [Compliance](compliance.md)
 - Decision records: `.claude/decisions/`
 
-## Copilot repository boundary
+## Portable repository boundary
 
-The portable kit adds native core skills under `.github/skills/li-*` and three custom agent profiles under `.github/agents/`. Installed repositories carry workflow resources under `.github/lintel/` so a new checkout does not depend on the originating workstation. Installation records managed artifacts and refuses local-edit conflicts. It does not provision accounts, enable enterprise policies, install private packs or adapt Claude hooks. See [Copilot](copilot.md) and [enterprise adoption](enterprise-adoption.md).
+Selected clients receive core wrappers only under their documented repository discovery roots,
+or an explicit manual `START.md` route. Copilot retains `.github/skills/li-*` and its three
+`.github/agents/` profiles. All use one `.github/lintel/` bundle, including actual source product
+metadata, so another checkout does not depend on the originating workstation.
+
+Installation records managed files, selected surfaces and protocol blocks, preserves project prose
+and refuses local-edit conflicts before writes. It does not provision accounts, enable policies,
+install private packs, change models or activate/adapt hooks. Local integrity is not live client
+acceptance. See [client adapters](client-adapters.md) and [enterprise adoption](enterprise-adoption.md).

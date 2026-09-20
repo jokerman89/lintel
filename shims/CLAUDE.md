@@ -10,6 +10,11 @@ This file redirects to `AGENT-INSTRUCTIONS.md`, which is the canonical source fo
 
 These are tips that only apply when running under Claude Code. They do not override `AGENT-INSTRUCTIONS.md` — they layer on top.
 
+CLI and Desktop Code local are separate surface records. Read `universal/ADAPTER.md` for
+actual tool/permission binding and manual/serial fallback. Preserve Claude-native methods
+where available; do not turn optional host memory, model choices or hook files into a
+cross-host guarantee.
+
 ### File locations
 
 - **Memory + plans** live under `.claude/` (v5 layout, ADR-0005): `.claude/memory/{lessons,working-state,personas}.md` + `.claude/plans/todo.md`.

@@ -15,7 +15,7 @@
 ## What this repo is
 
 Lintel is a **company-neutral, pack-driven session harness** for agent-based development — markdown +
-bash scaffolding that any modern AI CLI loads as a plugin. It is also the **factory** that installs the
+local helpers exposed through documented native adapters or explicit file handoff. It is also the **factory** that installs the
 very disciplines in this file into other repos.
 
 Clear ownership domains:
@@ -127,7 +127,11 @@ Skills are namespaced `/li:qa`, `/li:cycle`, etc. Inside this repo they work dir
 `skills/CATALOG.md` is generated with `python3 bin/li-catalog.py` and checked for drift in CI. Edit frontmatter, then regenerate; do not hand-edit the catalog.
 
 ### Per-CLI portability
-Canonical skills and agents are shared through client-specific adapters. Copilot native core skills use `li-*`; the Claude hook bundle is not translated to Copilot. See [docs/multi-cli.md](docs/multi-cli.md); per-CLI capability is declared once in `lib/cli-tiers.yaml`.
+Canonical skills and agents are shared through client-specific adapters. The existing Claude
+plugin, skills, agents and optional hooks remain; portable repository wrappers use `li-*`.
+The hook bundle is not translated to other clients. See [docs/multi-cli.md](docs/multi-cli.md).
+`lib/cli-tiers.yaml` separates vendor, delivered and observed facts for every CLI/desktop/IDE/cloud
+surface; current tool bindings and permissions, not a static tier, govern execution.
 
 ### How you work here
 - Feature branch → PR against `main`. Run relevant shape and unit checks during development; release validation uses `bash tests/runner/run-all.sh --require-all` with the required toolchain. Verify before pushing.
