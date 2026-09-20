@@ -34,6 +34,16 @@ HOOKS = {
     "tq-contract-break-warn": "testing_qa.provider_glob",
     "tq-perf-regression-warn": "testing_qa.perf_path_glob",
 }
+RESOLVER_RESOURCES = (
+    "bin/_audit.sh",
+    "lib/pack-resolver.sh",
+    "lib/paths.sh",
+    "lib/profile_context.py",
+    "lib/profile-context-schema.json",
+    "lib/pack-schema.yaml",
+    "packs/_default/pack.yaml",
+    ".claude-plugin/plugin.json",
+)
 CUSTOM_PATH = "custom/change.txt"
 RISK_CONTENT = "DROP TABLE fixture_records;\nreplicas: 8\nskipAuth = true\n"
 HOSTILE_RESOLVER = """\
@@ -136,13 +146,10 @@ class Fixture(unittest.TestCase):
 
     def copy_source(self) -> None:
         paths = [
-            "bin/_audit.sh",
+            *RESOLVER_RESOURCES,
             "bin/li-adr-new",
             "bin/li-update",
             "bin/li-vault-init",
-            "lib/pack-resolver.sh",
-            "lib/paths.sh",
-            "packs/_default/pack.yaml",
             "templates/obsidian/sessions.base",
             "hooks/shared/_input.sh",
             "hooks/hooks.json",
@@ -181,8 +188,7 @@ class Fixture(unittest.TestCase):
 
     def install_resolver_fallback(self) -> None:
         (self.source / "lib/pack-resolver.sh").unlink()
-        for relative in ("lib/pack-resolver.sh", "lib/paths.sh", "bin/_audit.sh",
-                         "packs/_default/pack.yaml"):
+        for relative in RESOLVER_RESOURCES:
             dest = self.lintel_home / relative
             dest.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(ROOT / relative, dest)
