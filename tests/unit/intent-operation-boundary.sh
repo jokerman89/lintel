@@ -49,6 +49,13 @@ expect_intent unclear 'What should I do?'
 expect_intent unclear ''
 expect_intent unclear '   '
 
+original_ifs="$IFS"
+IFS=:
+expect_intent review 'review the broken release'
+expect_intent research 'research deployment options only'
+expect_intent build 'build a code review service'
+IFS="$original_ifs"
+
 for request in 'review the release plan' 'research deployment options only'; do
   workflow=$(match_workflow "$(classify_intent "$request")" delivery)
   case "$workflow" in

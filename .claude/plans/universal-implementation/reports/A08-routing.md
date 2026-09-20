@@ -22,7 +22,13 @@ Verification commands:
 - `bash tests/unit/intent-operation-boundary.sh`
 - `bash tests/unit/orientator-mechanical-routing.sh`
 
-Final execution: **30 assertions, zero failures**, and all existing mechanical-routing
+Initial execution: **30 assertions, zero failures**, and all existing mechanical-routing
 scenarios passed. `git diff --check` passed. Natural-language routing remains heuristic;
 compound/ambiguous requests still
 require the host's intent/scope judgment rather than permission inferred from keywords.
+
+Coordinator follow-up found the new word splitter inherited a caller's nonstandard IFS.
+Three added cases reproduced review-to-fix and research/build-to-unclear misrouting with
+`IFS=:`. The reader now sets its separator only for the read operation, preserving the
+caller's environment. The extended **33 assertions passed with zero failures**, alongside all existing
+mechanical-routing scenarios. Independent P08 package acceptance remains pending.

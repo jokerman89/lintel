@@ -29,7 +29,7 @@ classify_intent() {
   lp=$(printf '%s' "$p" | tr '[:upper:]' '[:lower:]')
   lp="${lp//don\'t/do not}"
   normalized=$(printf '%s' "$lp" | tr '[:space:][:punct:]' ' ')
-  read -r -a words <<< "$normalized"
+  IFS=' ' read -r -a words <<< "$normalized"
 
   case "${words[0]:-}" in
     how|why) printf 'research'; return 0 ;;
