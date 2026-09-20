@@ -75,8 +75,12 @@ def load_text(text: str) -> Any:
             if any(isinstance(token, (yaml.tokens.AliasToken, yaml.tokens.AnchorToken)) for token in yaml.scan(text)):
                 raise EnvelopeError("YAML aliases and anchors are not supported")
             return yaml.load(text, Loader=StrictLoader)
-        except yaml.YAMLError as error:
-            raise EnvelopeError("Malformed YAML or unsupported YAML tag") from error
+        except EnvelopeError:
+            raise
+        except (yaml.YAMLError, LookupError, ValueError, TypeError, AttributeError, OverflowError, RecursionError):
+            # SafeLoader scalar constructors also raise built-in exceptions whose
+            # messages can contain the original scalar; never expose that context.
+            raise EnvelopeError("Malformed YAML, invalid scalar or unsupported YAML tag") from None
 
 
 def load_document(path: Path) -> Any:

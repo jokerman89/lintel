@@ -98,6 +98,9 @@ original text is retained under `original_markdown`. The Swarm adapter adds auth
 work-map/package/leaf/scope references and the acceptance digest. No text is executed.
 Real structured parsing rejects duplicate keys, YAML aliases, non-finite values, missing/nested
 lookalike fields and wrong types before a payload reaches receiver output or audit.
+Malformed YAML scalar constructors, including invalid explicitly tagged booleans/numbers/timestamps,
+are translated into payload-free errors. The optional parser's exception messages and tracebacks
+are not diagnostics suitable for a handoff caller.
 
 ## Event policies
 

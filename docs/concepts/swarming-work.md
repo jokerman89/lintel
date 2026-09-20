@@ -70,12 +70,21 @@ A worker may write only its declared `write_scope` plus its own report. A review
 lane's review. Generated catalogs, synchronized instruction blocks and other fan-in reducers stay
 coordinator-owned even when a worker edits their canonical sources.
 Declare those project outputs in `coordinator_paths`; protection covers scopes and handoff artifacts,
-including aliases and parent directories. Reports cannot claim a mapped plan as their own output.
+including aliases and parent directories. Existing hard-linked files share physical ownership even
+when their resolved names differ, including links inside directory scopes. Identity inspection errors
+block rather than granting a scope. Reports cannot claim a mapped plan as their own output.
 
 An optional package `Review` column selects `substantive` (default) or `mechanical`; optional
 `Result` selects `change` or `verification-only`. Each member leaf must exist exactly once, keep
 its dependencies/acceptance and have passing evidence before the package closes. No product edit
 is invented for an explicitly verification-only package.
+
+Explicit `Owner / edit boundary` values contain literal repository paths, for example
+`builder; README.md, src`. The optional owner precedes the first semicolon; remaining paths are
+comma/semicolon separated. Backticks quote individual paths containing spaces. Root files and
+directories, new paths and a single trailing directory slash are supported. Empty or uninterpretable
+limits, globs and placeholders fail validation rather than disappearing into an unrestricted lane.
+An older package without this column still uses its required lane write scope.
 
 ## Start and inspect a swarm
 

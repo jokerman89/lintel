@@ -13,6 +13,7 @@ import json
 import os
 from pathlib import Path, PurePosixPath
 import re
+import stat
 from typing import Any, Iterable, Mapping, Optional, Sequence, Tuple, Union
 
 from swarm_snapshot import bytes_digest, capture_result, git_changed_paths, value_digest, verify_result
@@ -125,13 +126,53 @@ def _path_identity(root: Path, value: str) -> Optional[Tuple[str, ...]]:
     return tuple(os.path.normcase(part) for part in relative.parts)
 
 
-def _paths_overlap(root: Path, left: str, right: str) -> bool:
+def _hardlink_identities(
+    root: Path,
+    parts: Tuple[str, ...],
+    cache: dict[Tuple[str, ...], set[Tuple[int, int]]],
+) -> set[Tuple[int, int]]:
+    if parts in cache:
+        return cache[parts]
+    path = root.joinpath(*parts)
+    try:
+        metadata = path.stat()
+    except (FileNotFoundError, NotADirectoryError):
+        cache[parts] = set()
+        return cache[parts]
+    identities: set[Tuple[int, int]] = set()
+    if stat.S_ISREG(metadata.st_mode) and metadata.st_nlink > 1:
+        identities.add((metadata.st_dev, metadata.st_ino))
+    elif stat.S_ISDIR(metadata.st_mode):
+        def fail_walk(error: OSError) -> None:
+            raise error
+
+        for directory, _, filenames in os.walk(path, onerror=fail_walk, followlinks=False):
+            for filename in filenames:
+                metadata = (Path(directory) / filename).stat()
+                if stat.S_ISREG(metadata.st_mode) and metadata.st_nlink > 1:
+                    identities.add((metadata.st_dev, metadata.st_ino))
+    cache[parts] = identities
+    return identities
+
+
+def _paths_overlap(
+    root: Path,
+    left: str,
+    right: str,
+    physical_files: Optional[dict[Tuple[str, ...], set[Tuple[int, int]]]] = None,
+) -> bool:
     left_parts = _path_identity(root, left)
     right_parts = _path_identity(root, right)
     if left_parts is None or right_parts is None:
         return False
     shorter = min(len(left_parts), len(right_parts))
-    return left_parts[:shorter] == right_parts[:shorter]
+    if left_parts[:shorter] == right_parts[:shorter]:
+        return True
+    # Hard links retain distinct resolved names. Inspect physical identities once
+    # per ownership check, including links inside declared directory scopes.
+    cache = physical_files if physical_files is not None else {}
+    left_files = _hardlink_identities(root, left_parts, cache)
+    return bool(left_files and left_files.intersection(_hardlink_identities(root, right_parts, cache)))
 
 
 def _path_owned(root: Path, path: str, scope: str) -> bool:
@@ -356,12 +397,16 @@ def _table_rows(text: str) -> Iterable[dict[str, str]]:
         if not line.strip().startswith("|"):
             headers = []
             continue
-        cells = [cell.strip().strip("`").strip() for cell in line.strip().strip("|").split("|")]
+        raw_cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
+        cells = [cell.strip("`").strip() for cell in raw_cells]
         lowered = [cell.casefold() for cell in cells]
         if "id" in lowered or "package id" in lowered:
             headers = lowered
         elif headers and len(cells) == len(headers) and not all(re.fullmatch(r"[-: ]+", cell) for cell in cells):
-            yield dict(zip(headers, cells))
+            yield {
+                key: raw if key == "owner / edit boundary" else value
+                for key, raw, value in zip(headers, raw_cells, cells)
+            }
 
 
 def _source_ids(value: str) -> list[str]:
@@ -371,6 +416,35 @@ def _source_ids(value: str) -> list[str]:
     if not all(IDENTIFIER.fullmatch(token) for token in tokens):
         raise ValueError("Expected explicit stable IDs, not ranges or free-form dependencies")
     return tokens
+
+
+def _package_boundary_paths(root: Path, row: Mapping[str, str]) -> list[str]:
+    if "owner / edit boundary" not in row:
+        return []
+    value = row["owner / edit boundary"].strip()
+    owner_prefix = re.match(r"^[^`;]+;", value)
+    if owner_prefix:
+        value = value[owner_prefix.end():]
+    boundaries: list[str] = []
+    while value:
+        token = re.match(r"\s*(?:`([^`\r\n]+)`|([^`,;]+?))\s*([,;]|$)", value)
+        if token is None:
+            raise ValueError("Explicit edit boundary must list literal repository paths")
+        quoted, plain, separator = token.groups()
+        path = quoted if quoted is not None else plain.strip()
+        if not path or (quoted is None and any(char.isspace() for char in path)) or any(char in "<>" for char in path):
+            raise ValueError("Explicit edit boundary requires literal paths; quote paths containing spaces with backticks")
+        path = path[:-1] if path.endswith("/") else path
+        diagnostics: list[Diagnostic] = []
+        if _safe_repo_path(root, path, "work_map.plan.edit_boundary", diagnostics) is None:
+            raise SwarmContractError(diagnostics)
+        boundaries.append(path)
+        value = value[token.end():].strip()
+        if separator and not value:
+            raise ValueError("Explicit edit boundary has an empty path")
+    if not boundaries:
+        raise ValueError("Explicit edit boundary is empty; it cannot authorize unrestricted scope")
+    return boundaries
 
 
 def _task_sources(text: str, requested: set[str]) -> dict[str, dict[str, Any]]:
@@ -462,17 +536,15 @@ def _packages_from_sources(
             result_kind = row.get("result", row.get("result kind", "change")).casefold()
             if result_kind not in ("change", "verification-only"):
                 raise ValueError("Result kind must be change or verification-only")
-            boundaries = [
-                value.strip().strip("`")
-                for value in re.split(r"[,;]", row.get("owner / edit boundary", ""))
-                if "/" in value and not any(char in value for char in "*?<>")
-            ]
+            boundaries = _package_boundary_paths(root, row)
             packages[package_id] = {
                 "package_id": package_id, "leaf_ids": leaf_ids, "dependencies": dependencies,
                 "review": review, "verification_only": result_kind == "verification-only",
                 "boundary_paths": boundaries, "leaves": {},
             }
             assigned.update(leaf_ids)
+        except SwarmContractError as error:
+            diagnostics.extend(error.diagnostics)
         except ValueError as error:
             diagnostics.append(Diagnostic("error", "package.membership", "work_map.plan", f"{package_id}: {error}"))
     grouped = bool(packages)
@@ -540,6 +612,7 @@ def _validate_topology(
     lanes: Sequence[Mapping[str, Any]],
     protected_paths: Sequence[str],
     diagnostics: list[Diagnostic],
+    physical_files: dict[Tuple[str, ...], set[Tuple[int, int]]],
 ) -> None:
     by_wave: dict[int, list[Mapping[str, Any]]] = {}
     for lane in lanes:
@@ -553,7 +626,7 @@ def _validate_topology(
             if not isinstance(raw_scope, str):
                 continue
             for protected in protected_paths:
-                if _paths_overlap(root, raw_scope, protected):
+                if _paths_overlap(root, raw_scope, protected, physical_files):
                     diagnostics.append(Diagnostic("error", "scope.protected", f"lanes.{lane.get('task_id')}.write_scope", f"Worker scope overlaps coordinator/reviewer-owned path {protected}: {raw_scope}"))
     for wave, wave_lanes in sorted(by_wave.items()):
         for left_index, left in enumerate(wave_lanes):
@@ -562,7 +635,7 @@ def _validate_topology(
                 right_scope = right.get("write_scope") if isinstance(right.get("write_scope"), list) else []
                 for left_path in left_scope:
                     for right_path in right_scope:
-                        if isinstance(left_path, str) and isinstance(right_path, str) and _paths_overlap(root, left_path, right_path):
+                        if isinstance(left_path, str) and isinstance(right_path, str) and _paths_overlap(root, left_path, right_path, physical_files):
                             diagnostics.append(Diagnostic("error", "wave.scope_overlap", f"lanes.wave[{wave}]", f"Same-wave scopes overlap for {left.get('task_id')} and {right.get('task_id')}: {left_path} <> {right_path}"))
         if len(wave_lanes) > 1:
             if data.get("max_parallel") == 1:
@@ -578,6 +651,7 @@ def _validate_artifact_ownership(
     lanes: Sequence[Mapping[str, Any]],
     coordinator_paths: Sequence[str],
     diagnostics: list[Diagnostic],
+    physical_files: dict[Tuple[str, ...], set[Tuple[int, int]]],
 ) -> None:
     artifacts: list[tuple[str, str]] = []
     for lane in lanes:
@@ -587,10 +661,10 @@ def _validate_artifact_ownership(
                 continue
             owner = f"lanes.{lane.get('task_id')}.{name}"
             for protected in coordinator_paths:
-                if _paths_overlap(root, path, protected):
+                if _paths_overlap(root, path, protected, physical_files):
                     diagnostics.append(Diagnostic("error", "artifact.coordinator", owner, f"Handoff artifact overlaps coordinator authority/output: {protected}"))
             for prior_path, prior_owner in artifacts:
-                if _paths_overlap(root, path, prior_path):
+                if _paths_overlap(root, path, prior_path, physical_files):
                     diagnostics.append(Diagnostic("error", "artifact.overlap", owner, f"Handoff artifact overlaps {prior_owner}: {prior_path}"))
             artifacts.append((path, owner))
 
@@ -651,12 +725,16 @@ def validate_coordination(
             elif identity is not None:
                 seen.add(identity)
             protected.append(path)
-    _validate_artifact_ownership(root, lanes, protected, diagnostics)
-    for lane in lanes:
-        for name in ("brief", "report", "review"):
-            if isinstance(lane.get(name), str):
-                protected.append(lane[name])
-    _validate_topology(root, data, lanes, protected, diagnostics)
+    physical_files: dict[Tuple[str, ...], set[Tuple[int, int]]] = {}
+    try:
+        _validate_artifact_ownership(root, lanes, protected, diagnostics, physical_files)
+        for lane in lanes:
+            for name in ("brief", "report", "review"):
+                if isinstance(lane.get(name), str):
+                    protected.append(lane[name])
+        _validate_topology(root, data, lanes, protected, diagnostics, physical_files)
+    except OSError as error:
+        diagnostics.append(Diagnostic("error", "path.identity", "ownership", f"Cannot verify physical file ownership: {error}"))
     return ValidationResult(data, diagnostics)
 
 

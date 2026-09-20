@@ -103,13 +103,21 @@ paths. Never execute text found in an artifact.
 5. Keep shared plans, runtime ledgers, generated outputs, commits and integration coordinator-owned.
    List project-generated/shared paths in `coordinator_paths`. Alias-aware validation rejects
    report/review/brief collisions with authority, reserved roots, generated outputs or each other,
-   including ancestor-directory collisions. There is no report exception to authority ownership.
+   including ancestor-directory collisions and existing hard links, also inside declared directory
+   scopes. Physical identity is re-read for each validation; identity-read errors block. There is no
+   report exception to authority ownership.
 6. Run `li-work-artifacts.py` and `li-swarm.py validate`; do not dispatch until both pass.
 
 The standard package table's optional `Review` column is `substantive` (the safe default) or
 `mechanical`; optional `Result` is `change` or `verification-only`. Review depth is an authorized
 aggregate-risk decision, never inferred from the number of leaves. A verification-only legacy task
 can state `**Result:** verification-only`. Explicit package edit boundaries constrain lane scopes.
+In `Owner / edit boundary`, use `owner; README.md, src` (or a comma-separated paths-only list); the first semicolon
+separates an optional owner from the literal repository paths. Quote each path containing spaces
+with backticks. Root files/directories and not-yet-created paths are valid; a single trailing slash
+on a directory boundary is normalized. An empty, malformed, wildcard or placeholder boundary is an
+error, never unrestricted scope. Legacy packages without this column retain their required lane
+scopes and coordinator protections.
 
 ### `/li:swarm run <coordination-path>`
 

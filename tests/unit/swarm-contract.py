@@ -436,6 +436,71 @@ class SwarmContractTests(unittest.TestCase):
         self.fixture.coordination["lanes"][0]["report"] = "review-alias/BC2.md"
         self.assertIn("artifact.overlap", diagnostic_codes(self.fixture.validate()))
 
+    def test_hardlinked_handoff_authority_is_rejected_by_validation_and_both_actors(self) -> None:
+        for artifact, actor in (("report", "worker"), ("review", "reviewer")):
+            with self.subTest(artifact=artifact), tempfile.TemporaryDirectory(prefix="lintel-hardlink-authority-") as temporary:
+                fixture = SwarmFixture(Path(temporary))
+                lane = fixture.coordination["lanes"][0]
+                authority = fixture.root / "plan.md"
+                before = authority.read_bytes()
+                alias = fixture.root / lane[artifact]
+                alias.parent.mkdir(parents=True, exist_ok=True)
+                os.link(authority, alias)
+                self.assertTrue(os.path.samefile(authority, alias))
+                self.assertFalse(swarm.validate_coordination(fixture.root, fixture.coordination_path).ok)
+                self.assertFalse(swarm.check_lane_scope(
+                    fixture.root, fixture.coordination_path, "BC1", [lane[artifact]], actor=actor,
+                ).ok)
+                for arguments in (
+                    ["validate"],
+                    ["check-scope", "--task", "BC1", "--actor", actor, "--changed", lane[artifact]],
+                ):
+                    actual = subprocess.run(
+                        [sys.executable, str(REPO_ROOT / "bin/li-swarm.py"), *arguments,
+                         "--repo", str(fixture.root), "--coord", fixture.coordination_path],
+                        capture_output=True, text=True, check=False,
+                    )
+                    self.assertEqual(actual.returncode, 1, actual.stderr + actual.stdout)
+                    self.assertFalse(json.loads(actual.stdout)["ok"])
+                self.assertEqual(authority.read_bytes(), before, "the probe must not write through an alias")
+                alias.unlink()
+                self.assertTrue(swarm.validate_coordination(fixture.root, fixture.coordination_path).ok)
+
+    def test_hardlinked_scope_and_reducer_descendants_cannot_cross_ownership(self) -> None:
+        for scope_alias in (False, True):
+            with self.subTest(scope_alias=scope_alias), tempfile.TemporaryDirectory(prefix="lintel-hardlink-scope-") as temporary:
+                fixture = SwarmFixture(Path(temporary))
+                fixture._write("generated/catalog.md", "coordinator result\n")
+                fixture.coordination["coordinator_paths"] = ["generated"]
+                fixture.save()
+                lane = fixture.coordination["lanes"][0]
+                relative = "src/core/alias.md" if scope_alias else lane["report"]
+                alias = fixture.root / relative
+                alias.parent.mkdir(parents=True, exist_ok=True)
+                os.link(fixture.root / "generated/catalog.md", alias)
+                self.assertFalse(swarm.validate_coordination(fixture.root, fixture.coordination_path).ok)
+                self.assertFalse(swarm.check_lane_scope(
+                    fixture.root, fixture.coordination_path, "BC1", [relative],
+                ).ok)
+                self.assertEqual((fixture.root / "generated/catalog.md").read_text(encoding="utf-8"), "coordinator result\n")
+
+    def test_hardlinked_artifacts_and_same_wave_scopes_are_not_independent(self) -> None:
+        lane = self.fixture.coordination["lanes"][0]
+        self.fixture._write(lane["report"], "report content\n")
+        other_review = self.fixture.root / self.fixture.coordination["lanes"][1]["review"]
+        other_review.parent.mkdir(parents=True, exist_ok=True)
+        os.link(self.fixture.root / lane["report"], other_review)
+        self.assertIn("artifact.overlap", diagnostic_codes(self.fixture.validate()))
+        other_review.unlink()
+        self.fixture._write("src/adapter/shared.txt", "shared physical file\n")
+        alias = self.fixture.root / "docs/swarm/shared.txt"
+        alias.parent.mkdir(parents=True, exist_ok=True)
+        os.link(self.fixture.root / "src/adapter/shared.txt", alias)
+        self.assertIn("wave.scope_overlap", diagnostic_codes(self.fixture.validate()))
+        alias.unlink()
+        self.fixture._write("docs/swarm/shared.txt", "shared physical file\n")
+        self.assertTrue(self.fixture.validate().ok, "equal bytes in separate files do not imply shared ownership")
+
     def test_project_coordinator_outputs_protect_scopes_and_handoffs(self) -> None:
         for actor_path in ("write_scope", "brief", "report", "review"):
             for path in ("skills/CATALOG.md", "skills", "generated/schema.json"):
@@ -552,6 +617,48 @@ class SwarmContractTests(unittest.TestCase):
     def test_grouped_lane_cannot_widen_the_authoritative_edit_boundary(self) -> None:
         self._grouped_fixture()
         self.fixture.coordination["lanes"][0]["write_scope"] = ["src"]
+        self.assertIn("package.scope", diagnostic_codes(self.fixture.validate()))
+
+    def test_root_file_and_directory_package_boundaries_are_not_dropped(self) -> None:
+        for boundary, allowed in (("README.md", "README.md"), ("src", "src/core"), ("src/core", "src/core")):
+            with self.subTest(boundary=boundary):
+                self._grouped_fixture()
+                plan = self.fixture.root / "plan.md"
+                plan.write_text(plan.read_text(encoding="utf-8").replace("builder; src/core", "builder; " + boundary), encoding="utf-8")
+                self.fixture.coordination["lanes"][0]["write_scope"] = [allowed]
+                self.assertTrue(self.fixture.validate().ok)
+                self.fixture.coordination["lanes"][0]["write_scope"] = ["docs/output"]
+                result = self.fixture.validate()
+                self.assertFalse(result.ok)
+                self.assertIn("package.scope", diagnostic_codes(result))
+                cli = subprocess.run(
+                    [sys.executable, str(REPO_ROOT / "bin/li-swarm.py"), "validate",
+                     "--repo", str(self.fixture.root), "--coord", self.fixture.coordination_path],
+                    capture_output=True, text=True, check=False,
+                )
+                self.assertEqual(cli.returncode, 1, cli.stderr + cli.stdout)
+
+    def test_explicit_unparseable_package_boundaries_fail_closed(self) -> None:
+        for boundary in ("", "builder; ", "builder; <allowed paths>", "builder; src/*", "builder; ../outside",
+                         "builder; .", "builder; src/core, <unknown>", "builder; `unterminated", "builder; src and docs"):
+            with self.subTest(boundary=boundary):
+                self._grouped_fixture()
+                plan = self.fixture.root / "plan.md"
+                plan.write_text(plan.read_text(encoding="utf-8").replace("builder; src/core", boundary), encoding="utf-8")
+                self.assertFalse(self.fixture.validate().ok, "explicit limits must not disappear into unrestricted scope")
+
+    def test_explicit_boundary_list_preserves_root_paths_quoted_spaces_and_new_paths(self) -> None:
+        self._grouped_fixture()
+        plan = self.fixture.root / "plan.md"
+        plan.write_text(plan.read_text(encoding="utf-8").replace(
+            "builder; src/core", "builder; `README.md`, `new source`, src/",
+        ), encoding="utf-8")
+        self.fixture.coordination["lanes"][0]["write_scope"] = ["README.md", "new source/module.py", "src/core"]
+        result = self.fixture.validate()
+        self.assertTrue(result.ok, [item.as_dict() for item in result.diagnostics])
+        paths = swarm.package_sources(self.fixture.root, result.contract)["P1"]["boundary_paths"]
+        self.assertEqual(paths, ["README.md", "new source", "src"])
+        self.fixture.coordination["lanes"][0]["write_scope"] = ["docs"]
         self.assertIn("package.scope", diagnostic_codes(self.fixture.validate()))
 
     def test_real_brief_template_adapts_with_work_package_and_original_data(self) -> None:

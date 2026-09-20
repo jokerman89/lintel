@@ -210,6 +210,36 @@ class BriefForgeBoundaryTests(unittest.TestCase):
             self.assertEqual(result.stdout, "")
             self.assertNotIn(marker, result.stderr + self.audit_text())
 
+    def test_yaml_scalar_constructor_failures_are_sanitized_at_public_boundaries(self) -> None:
+        marker = "sk-" + "z" * 45
+        for field, tag, value in (
+            ("task", "bool", marker),
+            ("unexpected", "bool", marker),
+            ("task", "int", marker),
+            ("task", "float", marker),
+            ("task", "timestamp", marker),
+            ("task", "int", "''"),
+            ("task", "float", "''"),
+        ):
+            with self.subTest(field=field, tag=tag, empty=value == "''"):
+                self.content.write_text(
+                    f"{field}: !!{tag} {value}\nconstraints: [local only]\nacceptance: [reject without echo]\n",
+                    encoding="utf-8",
+                )
+                results = [
+                    self.forge(),
+                    subprocess.run(
+                        ["bash", str(ROOT / "bin/li-envelope-validate"), str(self.content)],
+                        env=self.env, capture_output=True, text=True, check=False,
+                    ),
+                ]
+                for result in results:
+                    self.assertEqual(result.returncode, 1)
+                    self.assertEqual(result.stdout, "")
+                    self.assertNotIn(marker, result.stderr + self.audit_text())
+                    self.assertNotIn("Traceback", result.stderr)
+                    self.assertIn("ENVELOPE BLOCKED:", result.stderr)
+
     def test_disabled_policy_is_explicit_bypass_not_forged_success(self) -> None:
         result = self.forge(kind="operator_input")
         self.assertEqual(result.returncode, 3, result.stderr)
