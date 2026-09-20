@@ -33,7 +33,9 @@ The active-QA skill. Runs the repo's test suite, parses failures, applies target
 ## Workflow
 
 1. **Detect test runner** — read `package.json` / `pyproject.toml` / `Cargo.toml` / equivalent. Pick the canonical script (`npm test`, `pytest`, `cargo test`). If multiple: ask via AskUserQuestion.
-2. **Baseline run** — execute, capture stdout/stderr + exit code. If clean: report + exit.
+2. **Baseline run** — execute, capture stdout/stderr, command, environment/config
+   inputs, executed/failed/skipped counts and exit code. Zero executed tests or
+   unavailable coverage is unverified, not clean.
 3. **Failure classification** — group failures into buckets:
    - Snapshot drift (stable diff, no logic change) → auto-fix candidate
    - Lint / format nit → auto-fix candidate
@@ -42,7 +44,15 @@ The active-QA skill. Runs the repo's test suite, parses failures, applies target
    - Flaky / timeout → retry once, then escalate
 4. **Auto-fix cycle** — for each auto-fix candidate, apply the targeted Edit. Group fixes into one commit-able batch. NEVER touch product code without explicit operator confirmation.
 5. **Re-run** — repeat steps 2-4 up to `--max-iterations`.
-6. **Final state** — either CLEAN PASS or STUCK with structured report.
+6. **Final state** — publish observed controls using the
+   [shared result/snapshot contract](../review/references/evidence.md). Mandatory
+   missing/error/failed checks keep acceptance open. A pass covers only the tested
+   context; any fix invalidates affected earlier review/QA. Return to independent
+   review after fixes, rather than silently carrying the old PASS into SHIP.
+
+No initiative map is required for useful ad-hoc QA. Use the shared snapshot-bound
+inspection mode and label it NON-release-clearance rather than manufacturing a
+second plan/backlog. Strict SHIP separately requires mapped implementation authority.
 
 ## Report format
 
@@ -78,6 +88,9 @@ Remaining: 2
 ## Failure modes
 
 - **No test runner detected:** report + ask operator to declare via `package.json` scripts or `~/.lintel/qa.yaml`.
+- **Zero tests or skipped required checks:** record `unverified`, retain the reason,
+  and block required acceptance. A documented not-applicable criterion is distinct
+  from an empty successful process.
 - **Runner crashes (not test failure, runner itself):** report + exit. Do not retry blindly.
 - **Max iterations hit with failures remaining:** STUCK state — surface full failure list + recommendations. Operator chooses next move.
 - **Auto-fix introduces a NEW failure:** revert the fix, mark that failure non-auto-fixable, continue with remaining.
@@ -111,4 +124,4 @@ Iteration 3: 2 failures remaining (non-auto-fixable)
 - `/qa-only` — read-only variant for ship-gate verification
 - `/investigate` — when QA finds a real product-logic bug
 - `/review` — runs after QA clean for diff-scoped review
-- `/ship` — reads QA status as a pre-flight gate
+- `/ship` — uses `/qa-only` and the shared content-bound gate, never invokes fixing QA after review

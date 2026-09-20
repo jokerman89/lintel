@@ -37,10 +37,14 @@ Reviews SBOM files (SPDX, CycloneDX) for license compliance (per the project's l
 
 1. **Locate SBOM.** sbom.spdx.json / cyclonedx.json. Generate via syft if missing.
 2. **License audit:**
-   - Permissive (MIT, Apache-2.0, BSD-3) — green
-   - Copyleft weak (LGPL, MPL) — yellow (must surface)
-   - Copyleft strong (GPL, AGPL) — red for permissively-licensed (e.g. MIT) repos
-   - Custom/unknown — red, escalate
+   - Collect exact package/version/SPDX expression, dependency path, isolated
+     tool versus runtime use, linking/combination, distribution and network exposure.
+   - Compare actual obligations with the approved project license policy. A
+     permissive/copy-left label is descriptive, not an automatic green/red gate.
+   - Reuse DependencyAuditor's evidence-based license method; an isolated GPL tool,
+     a redistributed combined work and unknown terms need different outcomes.
+   - Missing/custom/unparsed terms are `unverified`, not presumed compatible.
+     Mandatory unresolved policy blocks; purely advisory preferences remain advisory.
 3. **Vulnerability audit:** Cross-reference SBOM with CVE feed (NVD, GHSA). Flag known criticals.
 4. **Supply-chain risk:**
    - Orphan packages (no maintainer activity 12+ months)
@@ -48,6 +52,11 @@ Reviews SBOM files (SPDX, CycloneDX) for license compliance (per the project's l
    - Typo-squatting candidates (similar names to popular packages)
    - Unsigned/unverifiable packages
 5. **Reproducibility:** Pinned versions vs ranges. Lockfile present?
+
+Emit findings through the [shared control contract](../../skills/review/references/evidence.md)
+with policy source/version/applicability and evidence links. Preserve the SBOM
+format, generator/version and package provenance; counts by license label do not
+establish coverage or legal clearance.
 
 ## Report format
 
@@ -69,7 +78,7 @@ SBOMAuditor: <repo>
 | Strong copyleft (GPL/AGPL) | N | <list> |
 | Unknown/custom | N | <list> |
 
-## License blockers (for MIT-tier repo)
+## Verified obligation or project-policy conflicts
 | Package | License | Use case | Action |
 |---|---|---|---|
 | <name> | <SPDX-id> | <prod/dev/test> | replace / remove / accept-as-isolated-tool |
