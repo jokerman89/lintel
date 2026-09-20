@@ -1,224 +1,152 @@
 #!/usr/bin/env bash
-# lib/brief-forge.sh — envelope construction helpers for skills/brief-forge.
-#
-# Sourced by skills/brief-forge/SKILL.md. Provides:
-#   forge_envelope_head <kind> <from> <to>             → HEAD YAML
-#   forge_envelope_body <content_type> <content_file>  → BODY YAML
-#   forge_envelope_tail <score> <evaluators...> <hatches> <audit_pointer> → TAIL YAML
-#   forge_envelope <kind> <from> <to> <ctype> <cfile>  → full envelope
-#   generate_envelope_id                                → ULID-shaped id
-#   write_bypass_audit <kind> <from> <to>              → bypass-stub audit
-#   yaml_to_json <file>                                → JSON line
-#   build_escape_hatches <ctype> <from>                → escape-hatch list
-#   aggregate_evaluator_scores <results...>            → min score
-#
-# Ref: lib/envelope-schema.yaml v1
-#      docs/concepts/envelope.md
-#      docs/concepts/brief-forge.md
+# component: brief-forge
+# implements: ADR-0008, ADR-0027
+# intent: .claude/plans/universal-implementation/packages/P04.md
+# constraints: explicit opt-in; source implementation from this bundle; validate before audit/output
+# last_intent_review: 2026-09-20
+# Public helpers retain their historical signatures. forge_handoff is the release gate;
+# constructing a head/body/tail fragment alone is not an evaluated or dispatched handoff.
 
-# sourced library: no 'set -uo pipefail' here (shell opts leak into every caller — skills/hooks/tests); functions guard their own vars
+_BF_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$_BF_DIR/pack-resolver.sh" || return 1
+command -v audit_log >/dev/null 2>&1 || source "$_BF_DIR/../bin/_audit.sh" || return 1
 
-LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
-LINTEL_AUDIT_DIR="${LINTEL_AUDIT_DIR:-$LINTEL_HOME/audit}"
-
-# Unified audit writer (lib/ → repo-root → bin/). Idempotent source.
-command -v audit_log >/dev/null 2>&1 || source "$(dirname "${BASH_SOURCE[0]}")/../bin/_audit.sh"
-
-# ─── generate_envelope_id ──────────────────────────────────────────────────
-# Returns a sortable, unique id. ULID-like: 26 char Base32.
-# Phase 3 uses a simple sortable id; Phase 4 may upgrade to full ULID.
-generate_envelope_id() {
-  local ts rand
-  ts=$(date -u +%Y%m%d%H%M%S)
-  rand=$(printf '%s' "$RANDOM$RANDOM$$" | head -c 12)
-  printf '01J%s%s' "$ts" "$rand"
-}
-
-# ─── forge_envelope_head ───────────────────────────────────────────────────
-forge_envelope_head() {
-  local kind="${1:?}"
-  local from="${2:?}"
-  local to="${3:?}"
-  local envelope_id ts pack operator voice_tier cycle_id
-  envelope_id=$(generate_envelope_id)
-  ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-  pack="${LINTEL_ACTIVE_PACK:-${active_pack:-_default}}"
-  operator=$(whoami 2>/dev/null || echo unknown)
-  voice_tier="${VOICE_TIER:-internal}"
-  cycle_id="${CYCLE_ID:-}"
-
-  cat <<EOF
-head:
-  envelope_id: "$envelope_id"
-  envelope_schema_version: "1"
-  kind: $kind
-  from: $from
-  to: $to
-  issued_at: "$ts"
-  pack: $pack
-  operator: $operator
-  voice_tier: $voice_tier
-EOF
-  [ -n "$cycle_id" ] && echo "  cycle_id: $cycle_id"
-}
-
-# ─── forge_envelope_body ───────────────────────────────────────────────────
-forge_envelope_body() {
-  local content_type="${1:?}"
-  local content_file="${2:?}"
-
-  if [ ! -f "$content_file" ]; then
-    echo "ERROR: content_file '$content_file' not found" >&2
-    return 1
+_brief_forge_python() {
+  local python
+  if command -v python3 >/dev/null 2>&1; then python=python3
+  elif command -v python >/dev/null 2>&1; then python=python
+  else echo "BRIEF FORGE: Python 3.9+ is required" >&2; return 1
   fi
-
-  cat <<EOF
-body:
-  content_type: $content_type
-  content:
-EOF
-
-  # Indent content file with 4 spaces (since body.content is at column 2)
-  sed 's/^/    /' "$content_file"
+  "$python" "$_BF_DIR/envelope_contract.py" "$@"
 }
 
-# ─── forge_envelope_tail ───────────────────────────────────────────────────
-forge_envelope_tail() {
-  local score="${1:?}"
-  shift
-  # Remaining args: evaluator-results... escape_hatches audit_pointer
-  # We pull audit_pointer (last) and escape_hatches (second-to-last) off.
-  local audit_pointer="${!#}"
-  local args=("$@")
-  local n="${#args[@]}"
-  local escape_hatches="${args[$((n - 2))]}"
-  # Evaluator names = args 0..n-3
-  local evaluator_names=()
-  local i=0
-  while [ "$i" -lt "$((n - 2))" ]; do
-    # evaluator_results have format "name:json" — split
-    local entry="${args[$i]}"
-    evaluator_names+=("${entry%%:*}")
-    i=$((i + 1))
-  done
+generate_envelope_id() { _brief_forge_python id; }
+forge_envelope_head() { _brief_forge_python head "$@"; }
+forge_envelope_body() { _brief_forge_python body "$@"; }
+forge_envelope_tail() { _brief_forge_python tail "$@"; }
+forge_envelope() { _brief_forge_python construct "$@"; }
+yaml_to_json() { _brief_forge_python json "$@"; }
+aggregate_evaluator_scores() { _brief_forge_python aggregate "$@"; }
 
-  cat <<EOF
-tail:
-  completeness_score: $score
-  evaluators_run:
-EOF
-  for e in "${evaluator_names[@]}"; do
-    echo "    - $e"
-  done
-  cat <<EOF
-  escape_hatches:
-EOF
-  # escape_hatches comes as newline-separated string
-  printf '%s\n' "$escape_hatches" | while IFS= read -r line; do
-    [ -n "$line" ] && echo "    - $line"
-  done
-  echo "  audit_pointer: $audit_pointer"
-}
+build_escape_hatches() { _brief_forge_python escape-hatches "$@"; }
 
-# ─── forge_envelope (composes head + body + tail) ──────────────────────────
-forge_envelope() {
-  local kind="${1:?}" from="${2:?}" to="${3:?}" content_type="${4:?}" content_file="${5:?}"
-  forge_envelope_head "$kind" "$from" "$to"
-  forge_envelope_body "$content_type" "$content_file"
-  # Tail is added by caller after running evaluators
-}
-
-# ─── write_bypass_audit ────────────────────────────────────────────────────
-# Unified writer → .claude/runtime/audit/brief-forge.jsonl (scope-routed by
-# _audit.sh; operator field now supplied by audit_log itself, no longer inlined here).
-write_bypass_audit() {
-  local kind="${1:?}" from="${2:?}" to="${3:?}"
-  audit_log "brief-forge" "brief_forge_bypassed" "event=$kind" "from=$from" "to=$to"
-}
-
-# ─── yaml_to_json ──────────────────────────────────────────────────────────
-# Best-effort YAML-to-JSON conversion for audit line. Falls back to base64
-# if no YAML parser available, so the audit line is always a valid JSON.
-yaml_to_json() {
-  local file="${1:?}"
-  if command -v yq >/dev/null 2>&1; then
-    yq -o=json '.' "$file" 2>/dev/null | tr -d '\n'
-  elif command -v python3 >/dev/null 2>&1; then
-    python3 -c "
-import sys, json
-try:
-    import yaml
-    print(json.dumps(yaml.safe_load(open('$file'))))
-except ImportError:
-    import base64
-    print(json.dumps({'_raw_yaml_b64': base64.b64encode(open('$file','rb').read()).decode()}))
-" 2>/dev/null
-  else
-    # Last resort: emit as raw base64-wrapped JSON
-    local raw
-    raw=$(base64 -w0 < "$file" 2>/dev/null || base64 < "$file" | tr -d '\n')
-    printf '{"_raw_yaml_b64":"%s"}' "$raw"
-  fi
-}
-
-# ─── build_escape_hatches ──────────────────────────────────────────────────
-build_escape_hatches() {
-  local content_type="${1:?}"
-  local from="${2:?}"
-
-  case "$content_type" in
-    brief)
-      printf 'Re-invoke source skill %s with --more-detail flag\n' "$from"
-      printf 'Read .claude/runtime/state/00-state.md for full prior context\n'
-      printf 'Ask operator for elaboration if score < 60\n'
-      ;;
-    spec)
-      printf 'Read full design doc referenced in content.intent\n'
-      printf 'Cross-check inputs against DISCOVER report\n'
-      ;;
-    plan)
-      printf 'Re-run /li:plan with smaller granularity\n'
-      printf 'Read prior cycle CAPTURE for lessons\n'
-      ;;
-    *)
-      printf 'Request additional context from source: %s\n' "$from"
-      ;;
+resolve_brief_forge_handoff_field() {
+  local handoff="${1:-}" field="${2:-}" value
+  case "$handoff" in
+    on_subagent_spawn|on_phase_transition|on_workflow_handoff|on_cold_executor|on_operator_input|cold_path_bypass) ;;
+    *) return 2 ;;
   esac
+  case "$handoff:$field" in
+    on_*:enabled|on_*:evaluators|cold_path_bypass:eligible_skills) ;;
+    *) return 2 ;;
+  esac
+  if declare -F resolve_pack_field_json >/dev/null 2>&1; then
+    value=$(resolve_pack_field_json "brief_forge_handoffs.$handoff.$field") || return 1
+    _brief_forge_python policy-value "$field" "$value"
+  else
+    value=$(resolve_pack_field "brief_forge_handoffs.$handoff.$field") || return 1
+    _brief_forge_python policy-value "$field" "$value" --legacy-accessor
+  fi
 }
 
-# ─── aggregate_evaluator_scores ────────────────────────────────────────────
-# Args: name:json-result name:json-result ...
-# Returns: minimum score across evaluators (worst evaluator wins).
-aggregate_evaluator_scores() {
-  local min=100
-  for entry in "$@"; do
-    local json="${entry#*:}"
-    local score
-    score=$(printf '%s' "$json" | grep -oE '"score"[[:space:]]*:[[:space:]]*[0-9]+' | head -1 | grep -oE '[0-9]+' | head -1)
-    score="${score:-100}"
-    if [ "$score" -lt "$min" ]; then
-      min="$score"
+_brief_forge_audit() {
+  local directory receipt_id decision="${1:?}" reason="${2:?}" evaluator="${4:-}"
+  case "$decision:$reason" in
+    blocked:invalid_policy|blocked:unknown_evaluator|blocked:invalid_content|blocked:evaluation_failed|blocked:release_failed|bypassed:disabled|bypassed:eligible) ;;
+    *) echo "BRIEF FORGE: invalid audit outcome" >&2; return 1 ;;
+  esac
+  directory="$(_audit_out_dir brief-forge)" || return 1
+  receipt_id=$(generate_envelope_id) || return 1
+  local -a fields=("reason=$reason" "audit_receipt=$receipt_id")
+  if [ -n "$evaluator" ]; then
+    _brief_forge_python policy-value evaluators "[$evaluator]" --legacy-accessor >/dev/null || return 1
+    fields+=("evaluator=$evaluator")
+  fi
+  audit_log brief-forge "brief_forge_$decision" "${fields[@]}" || return 1
+  _brief_forge_python receipt "$directory" "$receipt_id" "brief_forge_$decision"
+}
+
+write_bypass_audit() { _brief_forge_audit bypassed "${4:-eligible}"; }
+
+validate_brief_forge_evaluators() {
+  local names="${1:-}" name evaluator_fn
+  local -a configured=()
+  IFS=',' read -ra configured <<< "$names"
+  for name in "${configured[@]}"; do
+    [ -z "$name" ] && continue
+    if [[ ! "$name" =~ ^[a-z][a-z0-9_-]*$ ]]; then
+      echo "BRIEF FORGE: invalid evaluator identifier" >&2
+      return 1
+    fi
+    evaluator_fn="evaluator_${name//-/_}"
+    if ! declare -F "$evaluator_fn" >/dev/null 2>&1; then
+      _brief_forge_audit blocked unknown_evaluator --evaluator "$name" || return 1
+      echo "BRIEF FORGE: BLOCKED - unknown evaluator '$name' is not loaded" >&2
+      return 1
     fi
   done
-  printf '%d' "$min"
 }
 
-# ─── Self-test mode ────────────────────────────────────────────────────────
-if [ "${BASH_SOURCE[0]}" = "$0" ]; then
-  echo "brief-forge.sh self-test:"
-  tmp_content=$(mktemp)
-  cat > "$tmp_content" <<'EOF'
-task: Sample task for self-test
-constraints:
-  - no scope creep
-acceptance:
-  - reviewer surfaces specific concerns or APPROVES
-EOF
-  echo "--- HEAD ---"
-  forge_envelope_head subagent_spawn plan PlanReviewer
-  echo "--- BODY ---"
-  forge_envelope_body brief "$tmp_content"
-  echo "--- TAIL ---"
-  forge_envelope_tail 85 "security:{\"score\":95}" "completeness:{\"score\":85}" "$(build_escape_hatches brief plan)" "/tmp/audit.jsonl"
-  rm -f "$tmp_content"
-fi
+_brief_forge_block() {
+  _brief_forge_audit blocked "$1" || return 1
+  echo "BRIEF FORGE: BLOCKED - $1; no envelope released" >&2
+  return 1
+}
+
+forge_handoff() (
+  [ "$#" -eq 5 ] || { echo "Usage: forge_handoff <kind> <from> <to> <content_type> <content_file>" >&2; return 2; }
+  local kind="$1" from="$2" to="$3" content_type="$4" content_file="$5"
+  local enabled raw_evaluators evaluators_csv bypass budget audit_dir temporary candidate ready results errors name result seen
+  local fields identity digest ctype score ran
+  local -a configured=()
+  source "$_BF_DIR/brief-forge-evaluators.sh" || return 1
+  enabled=$(resolve_brief_forge_handoff_field "on_$kind" enabled) || { _brief_forge_block invalid_policy; return 1; }
+  raw_evaluators=$(resolve_brief_forge_handoff_field "on_$kind" evaluators) || { _brief_forge_block invalid_policy; return 1; }
+  case "$enabled" in true|false) ;; *) _brief_forge_block invalid_policy; return 1 ;; esac
+  [ -n "$raw_evaluators" ] || { _brief_forge_block invalid_policy; return 1; }
+  evaluators_csv=$(printf '%s' "$raw_evaluators" | tr -d '[][:space:]')
+  bypass=$(resolve_brief_forge_handoff_field cold_path_bypass eligible_skills) || { _brief_forge_block invalid_policy; return 1; }
+  bypass=$(printf '%s' "$bypass" | tr -d '[][:space:]')
+  if [ "$enabled" = false ]; then
+    write_bypass_audit "$kind" "$from" "$to" disabled || return 1
+    return 3
+  fi
+  case ",$bypass," in
+    *",$from,"*) write_bypass_audit "$kind" "$from" "$to" eligible || return 1; return 3 ;;
+  esac
+  validate_brief_forge_evaluators "$evaluators_csv" || return 1
+  budget=$(resolve_pack_field brief_forge_handoffs.budget_tokens) || { _brief_forge_block invalid_policy; return 1; }
+  [[ "$budget" =~ ^[0-9]+$ ]] || { _brief_forge_block invalid_policy; return 1; }
+  audit_dir="$(_audit_out_dir brief-forge)" || return 1
+  umask 077
+  temporary=$(mktemp -d) || return 1
+  candidate="$temporary/candidate.json"
+  ready="$temporary/ready.json"
+  results="$temporary/evaluator-results.data"
+  errors="$temporary/evaluator-error.txt"
+  trap 'rm -f "$candidate" "$ready" "$results" "$errors"; rmdir "$temporary"' EXIT
+  forge_envelope "$kind" "$from" "$to" "$content_type" "$content_file" > "$candidate" || {
+    _brief_forge_block invalid_content; return 1;
+  }
+  : > "$results"
+  IFS=',' read -ra configured <<< "security,$evaluators_csv"
+  seen=","
+  for name in "${configured[@]}"; do
+    [ -n "$name" ] || continue
+    case "$seen" in *",$name,"*) continue ;; esac
+    seen="$seen$name,"
+    result=$(run_evaluator "$name" "$candidate" 2>"$errors") || { _brief_forge_block evaluation_failed; return 1; }
+    _brief_forge_python wrap-result "$name" "$result" >> "$results" || { _brief_forge_block evaluation_failed; return 1; }
+  done
+  _brief_forge_python finalize "$candidate" "$results" "$budget" "$audit_dir" > "$ready" || {
+    _brief_forge_block release_failed; return 1;
+  }
+  fields=$(_brief_forge_python audit-fields "$ready") || { _brief_forge_block release_failed; return 1; }
+  IFS='|' read -r identity digest ctype score ran <<< "$fields"
+  audit_log brief-forge brief_forge_emitted "decision=validated-not-dispatched" \
+    "envelope_id=$identity" "envelope_digest=$digest" "content_type=$ctype" \
+    "score=$score" "evaluators_run=$ran" || return 1
+  _brief_forge_python release "$ready" "$audit_dir" || {
+    _brief_forge_block release_failed; return 1;
+  }
+)

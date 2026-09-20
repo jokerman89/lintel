@@ -1,150 +1,139 @@
-# Lintel envelope schema v1 — standardized hand-off payload.
-#
-# Every Brief Forge hand-off, workflow_root invocation, and cold-executor
-# spawn carries an envelope. The envelope has THREE parts:
-#
-#   HEAD — metadata (6 required fields)
-#   BODY — payload, free-form by `content_type` discriminator
-#   TAIL — closing context (4 required fields)
-#
-# Operators who replay envelopes (li-envelope-replay) see exactly what was
-# handed off. Operators who audit hand-offs (Brief Forge audit log) see the
-# same shape. The envelope is the universal contract.
-#
-# Versioning: schema_version is a string. Major bumps are breaking. Minor
-# bumps are additive (new optional fields allowed). Phase 2 ships v1.
-#
-# Ref: .claude/engineering/design-archive/lintel-v4.0-reframe-design.md §2.3 (FR-B envelope)
-#      docs/concepts/envelope.md
-
-schema_version: "1"
-schema_kind: envelope
-as_of: 2026-05-29
-
-# ─── HEAD — required metadata ──────────────────────────────────────────────
-head:
-  required:
-    - envelope_id           # string: ULID or UUIDv7, sortable, globally unique
-    - envelope_schema_version  # string: must equal this schema's version ("1")
-    - kind                  # enum: see kinds below
-    - from                  # string: source — skill name, agent name, "operator", "external"
-    - to                    # string: destination — skill name, agent name, "operator"
-    - issued_at             # string: ISO 8601 UTC timestamp
-
-  optional:
-    - cycle_id              # string|null: if envelope is inside a cycle
-    - job_id                # string|null: if envelope is inside a job (v3.8)
-    - parent_envelope_id    # string|null: if this envelope replies to another
-    - pack                  # string|null: active pack name at issue time
-    - operator              # string|null: $(whoami) at issue time
-    - voice_tier            # enum|null: internal | mixed | external | custom
-    - cost_estimate_tokens  # int|null: predicted token cost of consuming this envelope
-
-# ─── kinds (HEAD.kind enum values) ─────────────────────────────────────────
-kinds:
-  - subagent_spawn          # parent skill spawns a subagent
-  - phase_transition        # phase → next phase within a cycle
-  - workflow_handoff        # workflow_root → workflow_root
-  - cold_executor           # plan + spec + prompt born together (v3.8)
-  - operator_input          # operator → skill (curated input)
-  - reply                   # subagent → parent (parent_envelope_id required)
-  - audit                   # observability emission, no consumer expected
-
-# ─── BODY — payload, shape per `content_type` ──────────────────────────────
-body:
-  required:
-    - content_type          # enum: see content_types below
-    - content               # the actual payload (shape varies)
-
-  optional:
-    - context_pointers      # list[string]: pointers to additional context (files, urls)
-    - guardrails            # list[string]: evaluator names that ran on this body
-
-content_types:
-  brief:
-    # Structured brief from Brief Forge — task + constraints + acceptance
-    required:
-      - task                # string: one-sentence statement of what to do
-      - constraints         # list[string]: non-negotiable constraints
-      - acceptance          # list[string]: how we know it's done
-    optional:
-      - prior_work          # list[string]: pointers to prior artifacts
-      - persona             # string|null: persona this brief targets
-      - voice               # string|null: voice tier override
-
-  spec:
-    # Structured spec — design contract for the build
-    required:
-      - intent              # string
-      - inputs              # list[{name, type, source}]
-      - outputs             # list[{name, type, sink}]
-    optional:
-      - assumptions
-      - non_goals
-
-  plan:
-    # Structured plan — task breakdown
-    required:
-      - tasks               # list[{id, content, status}]
-    optional:
-      - dependencies
-      - cost_estimate
-
-  payload_freeform:
-    # Catch-all for content that isn't brief/spec/plan
-    required: []
-    optional:
-      - notes
-
-# ─── TAIL — required closing context ───────────────────────────────────────
-tail:
-  required:
-    - completeness_score    # int 0-100: how complete is this envelope? (Brief Forge writes)
-    - evaluators_run        # list[string]: evaluator names that ran on this envelope
-    - escape_hatches        # list[string]: how the receiver can request more context
-    - audit_pointer         # string: jsonl path where this envelope is logged
-
-  optional:
-    - replay_safe           # bool: can this envelope be re-executed via --apply?
-                            # default false (require explicit op-in)
-    - deprecated_after      # string|null: ISO 8601, after which replay rejects
-    - sensitive             # bool: contains sensitive data → audit retention rules apply
-
-# ─── Validation behavior ───────────────────────────────────────────────────
-#
-# bin/li-envelope-validate runs the following checks:
-#   1. Top-level structure: head, body, tail present
-#   2. envelope_schema_version matches a known version (Phase 2 accepts "1")
-#   3. All HEAD.required fields present
-#   4. HEAD.kind is one of the documented kinds
-#   5. BODY.content_type is one of the documented content_types
-#   6. For each content_type, the type-specific required fields are present
-#   7. All TAIL.required fields present
-#   8. completeness_score is in [0, 100]
-#
-# Errors are returned as a list of {field, severity, message} so the caller
-# can decide whether to surface, retry, or fail.
-
-# ─── Replay semantics ──────────────────────────────────────────────────────
-#
-# bin/li-envelope-replay defaults to --dry-run:
-#   - Read envelope from disk or audit log
-#   - Re-construct invocation: which skill/agent, what brief, what context
-#   - Surface to operator: "this is what would run; current state of world is X"
-#   - Operator inspects + decides
-#
-# bin/li-envelope-replay --apply:
-#   - Same as dry-run PLUS actually re-invoke the skill/agent with the brief
-#   - Requires: envelope.tail.replay_safe == true (or --force override + audit)
-#   - Requires: now < deprecated_after (if set)
-#   - Writes audit entry "envelope_replay_applied" with original envelope_id
-#
-# Reason: envelopes capture state at hand-off time. The world may have moved
-# on. Dry-run + diff against now lets the operator decide.
-
-# ─── Schema version compatibility ──────────────────────────────────────────
-#
-# Phase 2 ships v1. Future versions:
-#   v1 (this) — additive optional fields allowed
-#   v2 — breaking changes (e.g. renaming a HEAD field) → validator handles both
-#        until v2 ships are dominant, then v1 grace ends per migration index
+{
+  "schema_version": "1",
+  "schema_kind": "envelope",
+  "as_of": "2026-09-20",
+  "description": "Canonical JSON serialization is also valid YAML. Default envelope operations need only the Python standard library. Legacy YAML input requires the optional parser in envelope-requirements.txt.",
+  "documentation": "docs/concepts/envelope.md",
+  "activation": "Explicit opt-in only under ADR-0008; the caller owns actual dispatch.",
+  "head": {
+    "description": "Boundary identity and source context. envelope_id is a sortable ULID from the producer; older nonempty stable IDs remain readable. issued_at is ISO UTC.",
+    "required": ["envelope_id", "envelope_schema_version", "kind", "from", "to", "issued_at"],
+    "optional": ["cycle_id", "job_id", "parent_envelope_id", "pack", "operator", "voice_tier", "cost_estimate_tokens"],
+    "types": {
+      "envelope_id": "string",
+      "envelope_schema_version": "string",
+      "kind": "string",
+      "from": "string",
+      "to": "string",
+      "issued_at": "string",
+      "cycle_id": "nullable_string",
+      "job_id": "nullable_string",
+      "parent_envelope_id": "nullable_string",
+      "pack": "nullable_string",
+      "operator": "nullable_string",
+      "voice_tier": "nullable_string",
+      "cost_estimate_tokens": "nullable_integer"
+    }
+  },
+  "kinds": ["subagent_spawn", "phase_transition", "workflow_handoff", "cold_executor", "operator_input", "reply", "audit"],
+  "body": {
+    "description": "Typed payload plus context pointers and evaluator names. Payload text is data, never executable.",
+    "required": ["content_type", "content"],
+    "optional": ["context_pointers", "guardrails"],
+    "types": {
+      "content_type": "string",
+      "context_pointers": "string_list",
+      "guardrails": "string_list"
+    }
+  },
+  "content_types": {
+    "brief": {
+      "description": "Task, non-negotiable constraints and observable acceptance. Rich Markdown is retained unabridged as data. Work references do not become another backlog.",
+      "required": ["task", "constraints", "acceptance"],
+      "optional": ["prior_work", "persona", "voice", "original_markdown", "work_map", "package_id", "leaf_ids", "write_scope", "acceptance_digest"],
+      "types": {
+        "task": "string",
+        "constraints": "nonempty_string_list",
+        "acceptance": "nonempty_string_list",
+        "prior_work": "string_list",
+        "persona": "nullable_string",
+        "voice": "nullable_string",
+        "original_markdown": "string",
+        "work_map": "string",
+        "package_id": "string",
+        "leaf_ids": "nonempty_string_list",
+        "write_scope": "nonempty_string_list",
+        "acceptance_digest": "string"
+      }
+    },
+    "spec": {
+      "description": "Design intent and explicitly named input/output contracts.",
+      "required": ["intent", "inputs", "outputs"],
+      "optional": ["assumptions", "non_goals"],
+      "types": {"intent": "string", "inputs": "object_list", "outputs": "object_list"},
+      "items": {
+        "inputs": {
+          "required": ["name", "type", "source"],
+          "types": {"name": "string", "type": "string", "source": "string"}
+        },
+        "outputs": {
+          "required": ["name", "type", "sink"],
+          "types": {"name": "string", "type": "string", "sink": "string"}
+        }
+      }
+    },
+    "plan": {
+      "description": "A serialized task handoff, not permission to replace the original authoritative task source.",
+      "required": ["tasks"],
+      "optional": ["dependencies", "cost_estimate"],
+      "types": {"tasks": "object_list"},
+      "items": {
+        "tasks": {
+          "required": ["id", "content", "status"],
+          "types": {"id": "string", "content": "string", "status": "string"}
+        }
+      }
+    },
+    "payload_freeform": {
+      "description": "Any JSON value; still subject to forbidden-content and handoff gates.",
+      "required": [],
+      "optional": ["notes"]
+    }
+  },
+  "tail": {
+    "description": "Minimum evaluator score, complete evaluator list, escape hatches and metadata-only audit pointer. Audit never stores the raw or base64 payload.",
+    "required": ["completeness_score", "evaluators_run", "escape_hatches", "audit_pointer"],
+    "optional": ["replay_safe", "deprecated_after", "sensitive"],
+    "types": {
+      "completeness_score": "integer",
+      "evaluators_run": "string_list",
+      "escape_hatches": "string_list",
+      "audit_pointer": "string",
+      "replay_safe": "boolean",
+      "deprecated_after": "nullable_string",
+      "sensitive": "boolean"
+    }
+  },
+  "validation": [
+    "Exactly head, body and tail; schema version 1; known kind and content type.",
+    "Exact structured required fields and types; duplicate keys, non-finite values, YAML aliases and unsupported tags are rejected.",
+    "Replies require parent_envelope_id; issued_at is UTC; completeness_score is an integer from 0 through 100.",
+    "Validate structure and forbidden content before audit/output; all configured evaluators must complete within budget.",
+    "A mandatory failure is not averaged away; diagnostics never echo a rejected payload.",
+    "Audit receipt must match the exact released envelope digest; only the caller performs dispatch."
+  ],
+  "replay": {
+    "default": "Read-only inspection of an explicitly supplied envelope artifact.",
+    "apply": "Records intent for the operator's session, not automatic agent execution. Requires replay_safe or explicit force and an unexpired deprecated_after.",
+    "audit_only": "An identity/digest record cannot reconstruct a payload. Supply the original artifact; never invent or decode a fallback payload."
+  },
+  "escape_hatches": {
+    "brief": [
+      "Ask source {source} for a more detailed brief",
+      "Read the selected work map and original task context",
+      "Ask the operator only for an unresolved requirement or permission"
+    ],
+    "spec": [
+      "Read the full design context behind content.intent",
+      "Cross-check inputs against the DISCOVER report"
+    ],
+    "plan": [
+      "Revisit leaf granularity with /li:plan while preserving original task IDs",
+      "Read prior CAPTURE evidence and relevant lessons"
+    ],
+    "payload_freeform": [
+      "Request additional context from source {source}"
+    ]
+  },
+  "versioning": "The retained .yaml path uses JSON, a YAML subset. Version 1 permits documented additive fields; breaking renames require a new major schema and an explicit compatibility window."
+}

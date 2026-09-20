@@ -143,16 +143,8 @@ fi
 echo ""
 echo "[4] Nested hand-off policy → default enabled; unknown evaluator blocks"
 
-# Execute the exact policy helpers shipped in SKILL.md so this regression test
-# cannot silently drift from the agent-facing runnable sequence.
-policy_helpers="$SANDBOX/brief-forge-policy.sh"
-awk '
-  /# lintel-test:brief-forge-policy:start/ { capture=1; next }
-  /# lintel-test:brief-forge-policy:end/ { capture=0 }
-  capture { print }
-' "$SKILL" > "$policy_helpers"
-# shellcheck disable=SC1090
-source "$policy_helpers"
+# The skill now invokes the same library functions instead of duplicating a recipe.
+grep -q 'forge_handoff "$@"' "$SKILL" || { fail "skill does not invoke the shared release gate"; exit 1; }
 
 kind=subagent_spawn
 from=plan
@@ -231,7 +223,7 @@ EOF
 head_out=$(forge_envelope_head subagent_spawn plan PlanReviewer)
 if printf '%s' "$head_out" | grep -qE '^head:' && \
    printf '%s' "$head_out" | grep -qE 'envelope_id:' && \
-   printf '%s' "$head_out" | grep -qE 'kind: subagent_spawn'; then
+   printf '%s' "$head_out" | grep -qE 'kind: "?subagent_spawn'; then
   pass "forge_envelope_head produces valid HEAD"
 else
   fail "forge_envelope_head output invalid"
@@ -239,7 +231,7 @@ fi
 
 body_out=$(forge_envelope_body brief "$content_file")
 if printf '%s' "$body_out" | grep -qE '^body:' && \
-   printf '%s' "$body_out" | grep -qE 'content_type: brief'; then
+   printf '%s' "$body_out" | grep -qE 'content_type: "?brief'; then
   pass "forge_envelope_body produces valid BODY"
 else
   fail "forge_envelope_body output invalid"

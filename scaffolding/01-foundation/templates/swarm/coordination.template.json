@@ -5,6 +5,7 @@
   "charter": ".claude/plans/replace-me/swarm/charter.md",
   "integration_branch": "codex/replace-me",
   "max_parallel": 2,
+  "coordinator_paths": ["path/to/project-generated-output"],
   "scope_rules": {
     "worker": "write_scope+own_report",
     "reviewer": "own_review",
@@ -12,23 +13,23 @@
   },
   "lanes": [
     {
-      "task_id": "BC1",
+      "task_id": "P1",
       "wave": 1,
       "role": "Implementer",
-      "write_scope": ["path/owned-by-bc1"],
-      "brief": ".claude/plans/replace-me/swarm/briefs/BC1.md",
-      "report": ".claude/plans/replace-me/swarm/reports/BC1.md",
-      "review": ".claude/plans/replace-me/swarm/reviews/BC1.md"
+      "write_scope": ["path/owned-by-p1"],
+      "brief": ".claude/plans/replace-me/swarm/briefs/P1.md",
+      "report": ".claude/plans/replace-me/swarm/reports/P1.md",
+      "review": ".claude/plans/replace-me/swarm/reviews/P1.md"
     },
     {
-      "task_id": "BC2",
+      "task_id": "P2",
       "wave": 2,
       "role": "Implementer",
       "isolation": "git-worktree",
-      "write_scope": ["path/owned-by-bc2"],
-      "brief": ".claude/plans/replace-me/swarm/briefs/BC2.md",
-      "report": ".claude/plans/replace-me/swarm/reports/BC2.md",
-      "review": ".claude/plans/replace-me/swarm/reviews/BC2.md"
+      "write_scope": ["path/owned-by-p2"],
+      "brief": ".claude/plans/replace-me/swarm/briefs/P2.md",
+      "report": ".claude/plans/replace-me/swarm/reports/P2.md",
+      "review": ".claude/plans/replace-me/swarm/reviews/P2.md"
     }
   ]
 }
