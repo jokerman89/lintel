@@ -12,8 +12,10 @@
 Audit and continuity: preserved in commit `74290e0`; original audit worktree untouched.
 All 25 source files were hash-verified before import. A separate local verified Git bundle
 preserves Swarming and its four worker branches with complete ancestry.
-Implementation has not yet been verified. Local `origin/main` is `28061e4`; remote refresh
-requires verified `jokerman89` authentication, unavailable at bootstrap.
+No whole-initiative acceptance is claimed. Anonymous public API verification confirmed
+current main remains `28061e4`; authenticated delivery still requires `jokerman89`.
+The independently reviewed Swarming historical checkpoint is integrated in `40c2795`,
+preserving both ancestries. Other first-wave fixes remain under implementation/review.
 
 No action is done merely because its worker finished. Completion requires leaf acceptance,
 preserved behavior, independent package review and applicable integration evidence.
@@ -21,7 +23,8 @@ preserved behavior, independent package review and applicable integration eviden
 ## Plan signals
 
 All 26 outcomes are in scope, grouped into 15 accountable packages. The current task list
-contains 129 checkboxes including compound parents and their stable sub-leaves.
+contains checkable compound parents and stable sub-leaves; coordinator-approved splits
+retain the original A-IDs rather than renumbering existing tasks.
 Remaining phases: BUILD, REVIEW, authorized SHIP, CAPTURE. The repository's XL prior
 reports 120,000 tokens, **uncalibrated, zero measured samples**, for the whole cycle.
 This is a planning prior, not a usage measurement, deadline or spending ceiling.
@@ -242,12 +245,12 @@ Acceptance: no attribution loss, no ungrounded legal or quality guarantee.
 Acceptance: rejected payload produces neither full sensitive audit content nor successful handoff.
 
 ### A22 Preserved Swarming integration (P04; R09)
-- [ ] A22.1 Merge branch ancestry with current local main; preserve all 76 delta paths.
-  - [ ] A22.1.a Inspect both parents and create an ancestry-preserving merge in the isolated lane.
-  - [ ] A22.1.b Reconcile authority/protocol/template conflicts without regressing main.
-  - [ ] A22.1.c Reconcile helper/work-map conflicts and record merge parents.
-  - [ ] A22.1.d Map each of the 76 original delta paths to its retained destination.
-- [ ] A22.2 Resolve ADR number collision as ADR-0027 without discarding the old decision.
+- [x] A22.1 Merge branch ancestry with current local main; preserve all 76 delta paths.
+  - [x] A22.1.a Inspect both parents and create an ancestry-preserving merge in the isolated lane.
+  - [x] A22.1.b Reconcile authority/protocol/template conflicts without regressing main.
+  - [x] A22.1.c Reconcile helper/work-map conflicts and record merge parents.
+  - [x] A22.1.d Map each of the 76 original delta paths to its retained destination.
+- [x] A22.2 Resolve ADR number collision as ADR-0027 without discarding the old decision.
 - [ ] A22.3 Repair coordinator/report/review/generated-path collisions and reviewer scope checks.
   - [ ] A22.3.a Validate all artifact ownership classes and alias collisions.
   - [ ] A22.3.b Enforce coordinator-generated reducers and reviewer-specific attribution.
@@ -258,6 +261,10 @@ Acceptance: rejected payload produces neither full sensitive audit content nor s
 - [ ] A22.6 Exercise native isolated, sequential and manual-review recovery paths.
 - [ ] A22.7 Reconcile P05/P08/P09 contracts and verify joined enterprise/hybrid/swarm behavior.
 Acceptance: complete preservation map plus SW-01..06 regressions and actual Git fan-in fixture.
+Early acceptance evidence only: [P04 merge review](reviews/P04-merge.md) at `e74849d`,
+report commit `4bf5315`, integrated as `40c2795`; [76-path map](reports/P04-preservation.md).
+All 17 historical topology/brief/report/review artifacts are preserved byte-for-byte.
+Final A22 remains open pending the unchecked repairs and combined-contract verification.
 
 ### A23 Boundary regression evidence (all owners; P14; R11)
 - [ ] A23.1 Attach a discriminating negative and preserved-behavior case to every corrected mechanism.
@@ -292,7 +299,9 @@ Acceptance: no network/private sync activation is needed for fixture verificatio
 
 ## Review and delivery
 
-Pending: all product changes, independent package reviews and final integrated acceptance.
+Accepted so far: only the separately reviewed P04 historical preservation checkpoint
+(A22.1/A22.2). Pending: substantive defect fixes, remaining independent package reviews
+and final integrated acceptance.
 Keep each action open until all its leaves and preservation evidence are linked. P04's
 early merge is not A22 completion. P15 remains blocked for remote refresh/PR/CI until the
 authorized identity is available. No main merge or production authorization is implied.

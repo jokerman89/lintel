@@ -32,10 +32,25 @@ First wave is running in isolated app-native worktrees from `21261f1`:
 | P02 sync binding | `2e21aa98-3b40-46e7-885d-2ec4161ec35d` | A26 synthetic local remotes only |
 | P03 context safety | `9f06eebf-a3ee-4867-95ad-eb6e1d22a6d5` | A01/A11; existing context ownership retained |
 | P04 Swarming | `a8960a09-fcd7-4652-a9b6-74ad6a94a029` | Early real merge and SW repairs; final A22.7 remains dependent |
+| P05 review evidence | `2329e71f-cd9e-473b-94cf-41c579c29a88` | A02/A03; exact shared review/control API sent before consumer binding |
+| P06 host adapters | `324863ff-e7cf-4abf-b449-04dd0f096170` | A05/A06; now owns Copilot generator adaptation and targeted tests |
+| P07 profile context | `b9352dfe-1c1e-4ea3-b7d9-0fd008d39b3d` | A07/A20 compatibility; independent parser/pinning now, final contract integration later |
 
 All are `lintel-builder` sessions with explicit ownership, acceptance, local commits,
 report paths and no remote authorization. MasterSession must arrange separate spec and
 quality review after results arrive. No package is complete yet.
+
+Frozen first-wave candidates now in independent review:
+
+| Package | Candidate | Independent reviewer session |
+|---|---|---|
+| P01 | `d6820a1b9fd8d92ed019e9eab25128b2c7699e0d` (product `c4542e4`) | `d699f463-ee4d-4950-9b9d-98f35e96f689` |
+| P02 | `a8b36a983499d5e2bcdd7968fd452156eac8442f` (product/tests `53b9462`) | `da23fa6f-499b-4011-b39b-a632312a8800` |
+
+P03 reported an intermittent Windows snapshot publication rename error during
+committed-tree verification. `775d334` is NOT its final review candidate. The failure
+preserved source/pending state; the worker is testing a bounded retry and persistent-error
+refusal. Wait for its frozen verified candidate before assigning independent review.
 
 ## Blockers and boundaries
 
@@ -62,5 +77,7 @@ are being supplied before their dependent writers start.
 
 P04's historical merge checkpoint is `e74849db6b33c7b93baadb86206009cb9f9eb6d5`
 (parents `21261f1` and original Swarming `275a354`). Independent merge-only reviewer
-session: `ed672f58-2e85-42e2-b1b2-0635ba5b2325`. Do not confuse that checkpoint with
+session: `ed672f58-2e85-42e2-b1b2-0635ba5b2325`, PASS spec then quality with zero new
+findings. Its report-only commit `4bf5315` and ancestry were merged as `40c2795`.
+P05-P07 started from that combined baseline. Do not confuse this checkpoint with
 post-merge SW/A21 fixes still being built in P04's session.
