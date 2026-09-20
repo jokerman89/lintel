@@ -44,6 +44,14 @@ fresh shells or clearly fail required lifecycle use. Drift and required-load err
 not silently downgrade policy. P05/P08/P04 carry digest/context/generation, not name alone.
 
 Consumers never parse PACK_CACHE_FILE directly. P04 replaces its raw YAML/awk snippet.
+P07's implemented Python names (candidate verification still in progress) are
+`ProfileConfig`, `resolve_profile`, `load_profile_context`, `profile_reference`,
+`validate_profile_reference`, `verify_profile_reference`, `bootstrap_profile_context`,
+`rebind_profile_context` and `required_policy`. `profile_required_policy` emits an error
+bridge with nonzero status on load/drift failure, not success-shaped field defaults.
+The no-host-ID Copilot bootstrap uses a durable selected repository work context, explicitly
+not an invented host-session identifier, and verifies it across fresh subprocesses.
+
 Source bundles need the Python helper, profile schema and pack schema. Explicit product
 constraints need actual source product metadata, not an invented version. Missing product
 identity cannot satisfy such a constraint.
@@ -60,6 +68,13 @@ No structured question tool may use conversation where the host permits; denied
 permission stays blocked. Lack of safe attributable write isolation selects serial,
 lack of delegation selects durable external/manual handoff. Independent review remains
 outstanding until separately corroborated. Data selection never grants tool permission.
+
+P06's current candidate Python interface is `load_registry`, `surface_id`, `describe`
+and `resolve`. CLI: `bin/li-client-capabilities.py` validate/list/show/resolve/field/
+normalize/table. Session binding schema separates tool availability, permission and
+attributable isolation; `work_map` and `profile_ref` pass through unchanged. Resolution
+reports `executed:false`, `declared-session-bindings` and independent review outstanding.
+`bin/li-adapter.py` is a thin entry into the existing Copilot engine, not a second installer.
 
 ## P04 swarm and envelopes
 
