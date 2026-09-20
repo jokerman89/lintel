@@ -21,6 +21,7 @@ import subprocess
 from typing import Any, Optional, Union
 
 Json = dict[str, Any]
+CONTRACT_VERSION = 2
 AUDIT_RECORD = ".claude/runtime/audit/reviews.jsonl"
 
 
@@ -330,7 +331,7 @@ def _record_path(repo: Path, value: Optional[str]) -> Optional[str]:
     if path.is_symlink():
         raise ContractError("A review record cannot be a symlink")
     if path.exists():
-        validate_review(load_json(path.read_text(encoding="utf-8")))
+        _validate_versioned_review(load_json(path.read_text(encoding="utf-8")))
     return value
 
 
@@ -420,25 +421,69 @@ def snapshot(
     return result
 
 
-def _task_acceptance(data: bytes, leaf_ids: Sequence[str]) -> bytes:
+def _task_progress_pattern(leaf_ids: Sequence[str]) -> re.Pattern[str]:
     identifiers = "|".join(re.escape(leaf) for leaf in leaf_ids)
-    progress = re.compile(
+    return re.compile(
         rf"^([ \t]*(?:[-*+]|\d+[.)])[ \t]+)\[[ xX]\]"
         rf"(?=[ \t]+(?:\*\*|`)?(?:{identifiers})(?:\*\*|`)?(?:[ \t:\r\n]|$))"
     )
+
+
+def _task_acceptance(data: bytes, leaf_ids: Sequence[str], progress_rows: Optional[set[int]] = None) -> bytes:
+    progress = _task_progress_pattern(leaf_ids)
     lines = []
     fence = ""
-    for line in data.decode("utf-8").splitlines(keepends=True):
-        marker = re.match(r"^[ \t]*(`{3,}|~{3,})", line)
-        if marker:
-            token = marker.group(1)
-            if not fence:
-                fence = token
-            elif token[0] == fence[0] and len(token) >= len(fence) and not line[marker.end():].strip():
+    fence_container = 0
+    containers: list[int] = []
+    paragraph = False
+    blank = False
+    for index, line in enumerate(data.decode("utf-8").splitlines(keepends=True)):
+        text = line.lstrip(" \t")
+        indent = len(line[:len(line) - len(text)].expandtabs(4))
+        if fence:
+            closing = re.match(r"(`{3,}|~{3,})[ \t]*(?:\r?\n)?$", text)
+            if (
+                closing and fence_container <= indent <= fence_container + 3
+                and closing.group(1)[0] == fence[0] and len(closing.group(1)) >= len(fence)
+            ):
                 fence = ""
-        elif not fence:
-            line = progress.sub(r"\1[ ]", line, count=1)
+            lines.append(line)
+            paragraph = False
+            blank = not text.strip()
+            continue
+        if not text.strip():
+            lines.append(line)
+            blank = True
+            continue
+        item = re.match(r"^([ \t]*)([-*+]|\d{1,9}[.)])([ \t]+)(.*)", line)
+        block = re.match(r"(?:#{1,6}(?:[ \t]|$)|>|`{3,}|~{3,}|(?:[-*_][ \t]*){3,}$)", text.rstrip("\r\n"))
+        lazy = containers and indent < containers[-1] and paragraph and not blank and not item and not block
+        if not lazy:
+            while containers and indent < containers[-1]:
+                containers.pop()
+        container = containers[-1] if containers else 0
+        # Code indentation is relative to a list's content column, not the page.
+        if indent >= container + 4:
+            paragraph = False
+        elif item:
+            content_column = len(line[:item.start(4)].expandtabs(4))
+            padding = content_column - indent - len(item.group(2))
+            containers.append(content_column if padding <= 4 else indent + len(item.group(2)) + 1)
+            opening = re.match(r"(`{3,}|~{3,})", item.group(4)) if padding <= 4 else None
+            if opening:
+                fence, fence_container = opening.group(1), content_column
+            elif padding <= 4:
+                if progress_rows is not None and progress.match(line):
+                    progress_rows.add(index)
+                line = progress.sub(r"\1[ ]", line, count=1)
+            paragraph = padding <= 4 and not opening
+        else:
+            opening = re.match(r"(`{3,}|~{3,})", text)
+            if opening:
+                fence, fence_container = opening.group(1), container
+            paragraph = not block
         lines.append(line)
+        blank = False
     return "".join(lines).encode("utf-8")
 
 
@@ -484,15 +529,16 @@ def bind_work(
         if name == AUDIT_RECORD or name.startswith(".claude/runtime/reviews/"):
             raise ContractError("Review storage is not an acceptance source")
         data = _path(repo, name, regular=True).read_bytes()
+        progress_rows: set[int] = set()
         if name == task_path:
-            data = _task_acceptance(data, leaf_ids)
+            data = _task_acceptance(data, leaf_ids, progress_rows)
         start, end = (None, None) if isinstance(ref, str) else (ref["start"], ref["end"])
         if start is not None:
             lines = data.decode("utf-8").splitlines(keepends=True)
-            start_line = _task_acceptance(start.encode("utf-8"), leaf_ids).decode("utf-8") if name == task_path else start
-            end_line = _task_acceptance(end.encode("utf-8"), leaf_ids).decode("utf-8") if name == task_path else end
-            starts = [i for i, line in enumerate(lines) if line.rstrip("\r\n") == start_line]
-            ends = [i for i, line in enumerate(lines) if line.rstrip("\r\n") == end_line]
+            progress = _task_progress_pattern(leaf_ids)
+            start_line, end_line = progress.sub(r"\1[ ]", start, count=1), progress.sub(r"\1[ ]", end, count=1)
+            starts = [i for i, line in enumerate(lines) if line.rstrip("\r\n") == (start_line if i in progress_rows else start)]
+            ends = [i for i, line in enumerate(lines) if line.rstrip("\r\n") == (end_line if i in progress_rows else end)]
             if len(starts) != 1 or len(ends) != 1 or starts[0] >= ends[0]:
                 raise ContractError(f"Acceptance excerpt boundaries missing, repeated or reversed: {name}")
             data = "".join(lines[starts[0]:ends[0]]).encode("utf-8")
@@ -507,7 +553,19 @@ def bind_work(
 
 
 def validate_context(context: Json) -> None:
-    validate_shape(context, "context")
+    _validate_context(context, legacy=False)
+
+
+def _validate_context(context: Json, *, legacy: bool) -> None:
+    validate_shape(context, "contextV1" if legacy else "context")
+    if not legacy:
+        qa_ids = [item["id"] for item in context["qa_requirements"]]
+        if len(qa_ids) != len(set(qa_ids)):
+            raise ContractError("Duplicate accepted QA requirement IDs")
+        for requirement in context["qa_requirements"]:
+            mandatory = requirement["requirement"] == "mandatory"
+            if mandatory != (requirement["id"] in context["required_controls"]):
+                raise ContractError(f"QA requirement {requirement['id']} disagrees with required_controls")
     snap, work = context["snapshot"], context["work"]
     if snap["result_digest"] != _snapshot_digest(snap):
         raise ContractError("Snapshot digest does not bind its manifest")
@@ -540,11 +598,20 @@ def validate_context(context: Json) -> None:
 
 def validate_review(record: Mapping[str, Any]) -> Json:
     """Pure shape and internal-binding validation; a valid record is not clearance."""
+    return _validate_review(record, legacy=False)
+
+
+def _validate_versioned_review(record: Mapping[str, Any]) -> Json:
+    legacy = type(record.get("schema_version")) is int and record["schema_version"] == 1
+    return _validate_review(record, legacy=legacy)
+
+
+def _validate_review(record: Mapping[str, Any], *, legacy: bool) -> Json:
     if not isinstance(record, Mapping):
         raise ContractError("A review must be an object")
     result = deepcopy(dict(record))
-    validate_shape(result, "review")
-    validate_context(result["context"])
+    validate_shape(result, "reviewV1" if legacy else "review")
+    _validate_context(result["context"], legacy=legacy)
     try:
         timestamp = datetime.fromisoformat(result["timestamp"].replace("Z", "+00:00"))
     except ValueError as error:
@@ -552,6 +619,12 @@ def validate_review(record: Mapping[str, Any]) -> Json:
     if timestamp.tzinfo is None:
         raise ContractError("Review timestamp must include its timezone")
     controls = evaluate_controls(result["controls"], required_policy=result["context"]["required_policy"])["controls"]
+    if not legacy:
+        _match_qa_requirements(result["controls"], result["context"], exact=False)
+        qa_ids = {item["id"] for item in result["context"]["qa_requirements"]}
+        for item in result["controls"]:
+            if item["id"] in result["context"]["required_controls"] and item["id"] not in qa_ids and item["kind"] != "check":
+                raise ContractError(f"Bound typed validation {item['id']} is missing from accepted QA requirements")
     ids = {control["id"] for control in controls}
     if set(result["coverage"]) != set(result["context"]["work"]["leaf_ids"]):
         raise ContractError("Review coverage must name every selected leaf, and no other leaves")
@@ -577,21 +650,28 @@ def validate_review(record: Mapping[str, Any]) -> Json:
 
 
 def select_latest(
-    records: Sequence[Mapping[str, Any]], *, skill: str, work_map: Optional[str], package_id: str,
+    records: Sequence[Union[Mapping[str, Any], ContractError]], *, skill: str, work_map: Optional[str], package_id: str,
 ) -> Optional[Json]:
     """Validate active decisions, then select scope/append order before evaluating verdict."""
-    latest = None
+    latest: Optional[Union[Json, ContractError]] = None
     for record in records:
-        decision = validate_decision(record)
-        context = decision.get("context")
-        scope = None
-        if context is not None:
-            work = context["work"]
-            scope_map = relative_path(work["work_map"]) if work["work_map"] is not None else None
-            scope = (scope_map, work["package_id"])
-        if decision["skill"] != skill or (scope is not None and scope != (work_map, package_id)):
-            continue
-        latest = decision
+        try:
+            if isinstance(record, ContractError):
+                raise record
+            decision = validate_decision(record)
+            context = decision.get("context")
+            scope = None
+            if context is not None:
+                work = context["work"]
+                scope_map = relative_path(work["work_map"]) if work["work_map"] is not None else None
+                scope = (scope_map, work["package_id"])
+            if decision["skill"] != skill or (scope is not None and scope != (work_map, package_id)):
+                continue
+            latest = decision
+        except ContractError as error:
+            latest = error
+    if isinstance(latest, ContractError):
+        raise latest
     return latest
 
 
@@ -601,7 +681,7 @@ def validate_decision(record: Mapping[str, Any], *, history: bool = False) -> Js
         raise ContractError("A review decision must be an object")
     current_fields = set(_schema()["$defs"]["review"]["required"]) - {"skill", "status", "timestamp", "reason"}
     if current_fields.intersection(record):
-        return validate_review(record)
+        return _validate_versioned_review(record)
     result = deepcopy(dict(record))
     if history:
         return result
@@ -711,10 +791,25 @@ def verify_qa(repo: Path, qa: Json, *, expected: Json) -> Json:
     verify_context(repo, expected)
     if qa["context_digest"] != content_digest(expected):
         raise ContractError("QA belongs to a different content/acceptance/attempt/profile context")
-    applicable = [c for c in qa["controls"] if c["requirement"] == "mandatory" and c["applicability"] == "applicable"]
+    _match_qa_requirements(qa["controls"], expected, exact=True)
+    applicable = [c for c in expected["qa_requirements"] if c["requirement"] == "mandatory" and c["applicability"] == "applicable"]
     if not applicable:
         raise ContractError("QA has no required applicable validation scope")
     result = evaluate_controls(qa["controls"], required_policy=expected["required_policy"])
     if evidence_manifest(repo, qa["controls"]) != sorted(qa["evidence"], key=lambda v: v["path"]):
         raise ContractError("QA evidence files changed")
     return result
+
+
+def _match_qa_requirements(controls: Sequence[Json], context: Json, *, exact: bool) -> None:
+    expected = {item["id"]: item for item in context["qa_requirements"]}
+    observed = {item["id"]: item for item in controls}
+    if len(observed) != len(controls):
+        raise ContractError("Duplicate observed control IDs")
+    if expected.keys() - observed.keys() or (exact and observed.keys() - expected.keys()):
+        raise ContractError("Observed QA control IDs differ from the accepted QA requirements")
+    fields = _schema()["$defs"]["qaRequirement"]["required"]
+    for id_, requirement in expected.items():
+        changed = [field for field in fields if observed[id_][field] != requirement[field]]
+        if changed:
+            raise ContractError(f"QA requirement {id_} changed immutable fields: {', '.join(changed)}")

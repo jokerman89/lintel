@@ -248,11 +248,14 @@ required independent reviewer or supply a fictitious observation.
 - Per-gate breakdown for audit trail
 - Path: `.claude/runtime/state/compliance-report-<datetime>.md`
 
-Keep these human-readable artifacts and persist the version-1 decision using the
+Keep these human-readable artifacts and persist the version-2 decision using the
 [shared writer/reader](references/evidence.md). Include unverified/error and grounded
 not-applicable controls, full leaf coverage, content-hashed evidence links and
 declared actor provenance. Only the shared reader's strict result can set ship-ready;
-a heading in this report or a historical positive string cannot.
+a heading in this report or a historical positive string cannot. The prepared
+`qa_requirements` owns QA IDs/kinds/mandatory applicability/policy; review results
+must match it, not redefine it. V1 evidence requires fresh preparation and review
+for v2 clearance, without rewriting its history.
 
 ### Step 8 — 00-state.md append
 

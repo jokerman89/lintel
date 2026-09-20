@@ -52,6 +52,10 @@ Verify ship-readiness:
   the selected context, actual independent corroboration and read-only QA record.
   `li-review-evidence.py ship` invokes the real audit reader, selects the latest
   applicable decision before verdict, and revalidates content/acceptance/profile.
+  Require v2 review/context/QA and exact accepted `qa_requirements`; a submitted
+  document pass cannot replace bound tests, and relabeling a result cannot alter
+  its mandatory/applicability/kind/policy contract. Older evidence remains history
+  until a fresh prepared context and independent review supersede it.
 - Human-readable review/compliance reports remain supporting evidence. PASS text,
   an old commit-only review, elapsed time or an operator note is not a substitute
   for sufficient current evidence.

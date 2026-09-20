@@ -91,7 +91,7 @@ Codex pass: optional, skipped this run
 Run /ship when P2+ resolved.
 ```
 
-Persist the full version-1 decision with `skill: code-review` through the shared
+Persist the full version-2 decision with `skill: code-review` through the shared
 writer, then consume the shared reader with the same expected context and actual
 host/human corroboration. The [procedure](../review/references/evidence.md) defines
 the executable commands. Missing/unverified mandatory controls block independently

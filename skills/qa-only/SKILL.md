@@ -44,13 +44,17 @@ for mapped authorized work, not a prerequisite for getting test feedback.
    runner as in `/qa` when tests apply. A docs-only package can instead require a
    real document/link/example check with source-grounded tests N/A; do not invent
    a universal software-test obligation.
+   The prepared v2 context's `qa_requirements` is the immutable inventory. Results
+   cannot omit IDs, change tests to generic checks, downgrade mandatory failures,
+   declare new N/A scope or change policy references. A scope change needs a new
+   prepared context and independent review, not revised observation labels.
 2. **Single run** — use the reviewed expected context from the
    [shared evidence procedure](../review/references/evidence.md). Execute the real
    test command, capture stdout/stderr, command/environment inputs, actual
    executed/failed/skipped counts and exit code. No retry-on-flake or auto-fixes.
 3. **Parse + classify** — same buckets as `/qa` (snapshot / lint / type / assertion / flaky), but no fix attempt. Classification informs the report's recommendation column.
 4. **Report** — structured failure list with file:line, category, and a one-line cause hypothesis.
-5. **Evidence and exit code** — emit the shared QA record with `context_digest`,
+5. **Evidence and exit code** — emit the shared v2 QA record with `context_digest`,
    observed test controls and hashed evidence files via `li-review-evidence.py qa`.
    The helper validates observations; it does not run tests or document checks.
    Exit 0 requires an observed applicable mandatory validation, not N/A-only or

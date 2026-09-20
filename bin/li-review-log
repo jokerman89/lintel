@@ -8,7 +8,7 @@ set -euo pipefail
 SOURCE_ROOT="${LINTEL_SOURCE_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 usage() {
   echo 'Usage: bash li-review-log <JSON> | --file <review.json> [--history]'
-  echo 'Strict version-1 evidence uses the shared contract. --history is inspection-only.'
+  echo 'Strict version-2 evidence uses the shared contract. --history is inspection-only.'
 }
 input=()
 history=()

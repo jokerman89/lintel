@@ -15,12 +15,12 @@ from pathlib import Path
 import re
 import subprocess
 import sys
-from typing import Any
+from typing import Any, Union
 
 SOURCE_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(SOURCE_ROOT / "lib"))
 from review_contract import (  # noqa: E402
-    ContractError, bind_work, canonical_json, content_digest, evaluate_controls,
+    CONTRACT_VERSION, ContractError, bind_work, canonical_json, content_digest, evaluate_controls,
     evidence_manifest, load_json, resolve_commit, select_latest, snapshot,
     validate_context, validate_decision, validate_review, validate_shape, verify_context, verify_qa, verify_review,
 )
@@ -38,16 +38,16 @@ def prepare(repo: Path, request: dict[str, Any]) -> dict[str, Any]:
     fields = {
         "work_map", "package_id", "leaf_ids", "acceptance_paths", "base", "selection",
         "record_path", "attempt_id", "builder", "independence_required", "purpose",
-        "profile", "required_policy", "required_controls",
+        "profile", "required_policy", "required_controls", "qa_requirements",
     }
     if set(request) != fields:
         raise ContractError(f"Request fields differ: {sorted(fields ^ set(request))}")
     context = {key: request[key] for key in (
         "attempt_id", "builder", "independence_required", "purpose", "profile",
-        "required_policy", "required_controls",
+        "required_policy", "required_controls", "qa_requirements",
     )}
     context.update({
-        "schema_version": 1,
+        "schema_version": CONTRACT_VERSION,
         "work": bind_work(repo, **{key: request[key] for key in (
             "work_map", "package_id", "leaf_ids", "acceptance_paths",
         )}),
@@ -57,15 +57,15 @@ def prepare(repo: Path, request: dict[str, Any]) -> dict[str, Any]:
     return context
 
 
-def audit_records(path: Path) -> list[dict[str, Any]]:
+def audit_records(path: Path) -> list[Union[dict[str, Any], ContractError]]:
     if not path.exists():
         return []
     records = []
-    for index, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+    for index, line in enumerate(path.read_bytes().split(b"\n"), 1):
         if not line.strip():
             continue
         try:
-            envelope = load_json(line)
+            envelope = load_json(line.decode("utf-8"))
             if "raw" not in envelope:
                 records.append(validate_decision(envelope))
                 continue
@@ -74,18 +74,18 @@ def audit_records(path: Path) -> list[dict[str, Any]]:
             if envelope.get("format") == "history":
                 # An explicit archive import is not a newly issued decision.
                 continue
-            elif envelope.get("format") == "review-v1" and raw.get("schema_version") != 1:
-                raise ContractError("Current review audit format requires a version-1 decision")
+            elif envelope.get("format", "").startswith("review-v") and envelope["format"] != f"review-v{raw.get('schema_version')}":
+                raise ContractError("Review audit format disagrees with its decision version")
             elif envelope.get("kind") != raw.get("skill"):
                 raise ContractError("Audit kind does not match the raw decision")
-            elif raw.get("schema_version") == 1:
+            elif raw.get("schema_version") in (1, CONTRACT_VERSION):
                 context = raw.get("context")
                 snap = context.get("snapshot") if isinstance(context, dict) else None
                 if not isinstance(snap, dict) or envelope.get("commit") != snap.get("head") or envelope.get("status") != raw.get("status"):
                     raise ContractError("Audit header does not match the raw decision binding")
             records.append(raw)
         except (ContractError, UnicodeError) as error:
-            raise ContractError(f"Review log line {index}: {error}") from error
+            records.append(ContractError(f"Review log line {index}: {error}"))
     return records
 
 
@@ -150,8 +150,8 @@ def log_input(args: argparse.Namespace) -> None:
     if args.history:
         status, commit, format_ = "historical", "", "history"
     elif "schema_version" in data:
-        validate_review(data)
-        status, commit, format_ = data["status"], data["context"]["snapshot"]["head"], "review-v1"
+        validate_decision(data)
+        status, commit, format_ = data["status"], data["context"]["snapshot"]["head"], f"review-v{data['schema_version']}"
         resolve_commit(args.repo, commit)
         resolve_commit(args.repo, data["context"]["snapshot"]["base"])
     else:
@@ -249,7 +249,7 @@ def main() -> int:
             expected, inputs = read_object(args.expected), read_object(args.input)
             verify_context(args.repo, expected)
             qa = {
-                "schema_version": 1, "context_digest": content_digest(expected),
+                "schema_version": CONTRACT_VERSION, "context_digest": content_digest(expected),
                 "controls": inputs["controls"], "evidence": evidence_manifest(args.repo, inputs["controls"]),
             }
             result = verify_qa(args.repo, qa, expected=expected)

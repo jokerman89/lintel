@@ -5,6 +5,11 @@ contract is `lib/review-schema.json`. All review, control, QA and SHIP consumers
 it. A human-readable report remains useful, but a PASS heading or old dashboard
 string is not clearance.
 
+Bound review, prepared context and QA records use **format v2**. Work maps,
+profile references and the unchanged corroboration envelope retain their own v1
+formats; host-registry versions are separate. Do not replace version numbers across
+these contracts. Old reviews remain inspectable but cannot grant v2 clearance.
+
 ## Prepare the selected context
 
 Resolve the trusted installed source and working repository separately. Require
@@ -44,9 +49,45 @@ references. This illustrative data is not evidence of a run:
     "applicability": "not_applicable",
     "reason": "No organizational policy was requested."
   },
-  "required_controls": ["spec", "quality"]
+  "required_controls": ["spec", "quality", "tests"],
+  "qa_requirements": [
+    {
+      "id": "tests",
+      "kind": "tests",
+      "requirement": "mandatory",
+      "applicability": "applicable",
+      "policy": {
+        "source": "spec.md",
+        "version": "<accepted specification version>",
+        "applicability": "Executable validation required by the selected acceptance.",
+        "jurisdiction": null,
+        "actor": null,
+        "effective_date": null
+      }
+    }
+  ]
 }
 ```
+
+The prepare request has no separate `schema_version` argument; the current helper
+emits a v2 context. `qa_requirements` is required, with unique IDs and exact
+`id`, `kind`, `requirement`, `applicability` and `policy` fields. Derive this inventory
+from accepted work/policy **before** collecting observations, not from their results.
+Every mandatory QA ID must be in `required_controls`; advisory QA IDs must not be.
+The review carries each declared QA control with the same immutable fields, and
+every selected leaf covers all `required_controls`. Mandatory review-only controls
+outside the QA inventory are generic `check` criteria, such as spec/quality review.
+Bound typed validations (`tests`, `browser`, `contrast`, `policy`) cannot be hidden
+as review-only; declare them in the QA inventory explicitly. IDs are labels, not
+keywords from which the helper guesses requirements.
+
+QA must report **exactly** the declared inventory and immutable fields. It may change
+only result data: status, reason, evidence, observations and advisory score. Missing
+controls, tests retyped as generic checks, failed requirements downgraded to advice,
+new N/A claims or policy-reference changes reject. An approved docs-only inventory
+may instead declare a mandatory applicable document `check`, with grounded tests N/A
+or no test obligation. Neither universal tests nor observation-chosen obligations
+are imposed.
 
 `profile` is null only when no profile reference is supplied. A supplied P07
 reference retains **all** fields: `schema_version`, `context_id`, `generation`,
@@ -76,8 +117,11 @@ The start line is included and the end line excluded. Boundaries must be unique 
 ordered. Select every relevant leaf/requirement; a range cannot excuse missing
 acceptance. A file also selected as product input still binds its entire content.
 Only recognized `[ ]`/`[x]`/`[X]` task-progress boxes for the selected leaf IDs in
-the map's `tasks` file are normalized for acceptance identity. Task text, IDs,
-criteria, non-task checkboxes, fenced examples and map approval still bind.
+the map's `tasks` file are normalized for acceptance identity. List content-column
+tracking distinguishes real nested tasks from four-space/tab-indented code and
+code within lists. Root and list-contained fences remain literal, including in
+excerpt boundaries. Task text, IDs, criteria, literal code, non-task checkboxes
+and map approval still bind.
 Updating a progress box never supplies missing review or acceptance evidence.
 
 Only `record_path` (one pure review JSON under `.claude/runtime/reviews/`) and the
@@ -102,11 +146,12 @@ not fabricated filenames to satisfy an implementation task.
 
 ## Record observed decisions, not intended outcomes
 
-A version-1 review has `skill`, exact `status` (`pass`, `fail`, `unverified`, `error`),
+A version-2 review has `skill`, exact `status` (`pass`, `fail`, `unverified`, `error`),
 timezone-bearing `timestamp`, `reason`, the prepared `context`, `reviewer`
 (`id`, `context`), `provenance: declared`, `controls`, `coverage` and `evidence`.
 `coverage` maps **every** selected leaf to all the context's required-control IDs:
-for example `{"A1":["spec","quality"]}`. Required IDs must be present and mandatory.
+for example `{"A1":["spec","quality","tests"]}` for the request above.
+Required IDs must be present and mandatory.
 Each leaf needs verified mandatory
 acceptance, not an aggregate score or another leaf's unexplained result.
 
@@ -171,13 +216,21 @@ bash "$src/bin/li-review-read" --skill "${review_skill:?set actual review skill}
 ```
 
 The reader structurally selects the **latest applicable decision in append order**
-before evaluating status, attempt, acceptance, freshness or snapshot. Every active
-decision first passes shared structural/internal-binding validation; malformed or
-uncorrelatable current records cannot vanish by failing a skill/scope filter.
-Only validated unrelated scopes can be ignored. Later rejection
-or malformed/unbound evidence never restores an older PASS. `--json` is raw history
-inspection only. Legacy writers need an explicit commit and exact legacy status;
-legacy records and explicit `GSTACK_HOME` imports cannot clear a strict gate.
+before evaluating status, attempt, acceptance, freshness or snapshot. Active
+decisions are validated before filtering. Malformed/uncorrelatable records remain
+ordered non-clearing candidates, not unrelated records or permanent global errors.
+Only validated unrelated scopes can be ignored. A later malformed/rejecting relevant
+candidate revokes earlier clearance; a newer valid applicable v2 decision can
+supersede older obsolete/invalid evidence after actual review. An unrelated valid
+decision cannot erase that blocker. Explicit valid historical imports are archives,
+not new decisions. `--json` remains raw history inspection.
+
+V1 records retain their historical shape and are never auto-upgraded. To migrate,
+prepare a v2 context with accepted QA obligations, obtain independent review again,
+and append the new bound v2 decision. Do not rewrite old history or change version
+numbers on old evidence. The later v2 decision can clear without old entries
+poisoning the log forever. Legacy writers still need explicit commits and exact
+statuses, but legacy/v1 results and v1 QA cannot grant strict v2 clearance.
 Optional `--days N` adds a maximum age, not a replacement for content identity.
 
 ## Unmapped inspection
@@ -210,7 +263,10 @@ the real repository command/output and actual counts. Build `qa_inputs` containi
 `{"controls":[<mandatory validation controls>]}`. An approved docs-only scope may
 use an observed document/link/example check plus grounded tests N/A. At least one
 mandatory validation must actually apply; exemptions or advisory checks alone do
-not establish QA. Zero/failed/skipped applicable required tests remain blocked.
+not establish QA. The observations must match the prepared `qa_requirements`
+exactly; do not choose obligations from submitted results. Zero/failed/skipped
+applicable required tests remain blocked. The emitted QA record is v2 and binds
+the complete v2 context digest.
 Unknown/unavailable coverage stays open. The helpers below consume evidence; they
 do not run tests, invoke browsers, make commits, push, deploy or authorize delivery.
 

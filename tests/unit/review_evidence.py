@@ -20,6 +20,7 @@ import unittest
 SOURCE = Path(__file__).resolve().parents[2]
 CLI = SOURCE / "bin" / "li-review-evidence.py"
 sys.path.insert(0, str(SOURCE / "lib"))
+from review_contract import CONTRACT_VERSION
 
 
 def encoded(value):
@@ -50,6 +51,18 @@ def neutral_policy():
         "version": None, "applicability": "not_applicable",
         "reason": "No organizational profile requested in this fixture.",
     }
+
+
+def qa_requirement(item):
+    return {key: deepcopy(item[key]) for key in ("id", "kind", "requirement", "applicability", "policy")}
+
+
+def observed_tests():
+    tests = control("tests", "tests")
+    tests["observation"] = {
+        "command": "fixture-test", "executed": 3, "failed": 0, "skipped": 0, "exit_code": 0,
+    }
+    return tests
 
 
 class Fixture(unittest.TestCase):
@@ -106,7 +119,8 @@ class Fixture(unittest.TestCase):
             "attempt_id": "attempt-1", "builder": {"id": "builder", "context": "build-1"},
             "independence_required": True, "purpose": "implementation",
             "profile": None, "required_policy": neutral_policy(),
-            "required_controls": ["spec", "quality"],
+            "required_controls": ["spec", "quality", "tests"],
+            "qa_requirements": [qa_requirement(observed_tests())],
         }
         self.expected_file = self.root / "expected.json"
         self.observed_file = self.root / "corroboration.json"
@@ -155,14 +169,21 @@ class Fixture(unittest.TestCase):
     def record(self, *, status="pass", controls=None):
         if not hasattr(self, "expected"):
             self.prepare()
+        controls = list(controls) if controls is not None else [control(), control("quality")]
+        fixture_tests = observed_tests()
+        if (
+            qa_requirement(fixture_tests) in self.expected["qa_requirements"]
+            and not any(item["id"] == fixture_tests["id"] for item in controls)
+        ):
+            controls.append(fixture_tests)
         self.review = {
-            "schema_version": 1, "skill": "review", "status": status,
+            "schema_version": CONTRACT_VERSION, "skill": "review", "status": status,
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "reason": "Synthetic decision used only by this regression test.",
             "context": deepcopy(self.expected),
             "reviewer": {"id": "reviewer", "context": "review-1"},
             "provenance": "declared",
-            "controls": controls if controls is not None else [control(), control("quality")],
+            "controls": controls,
             "coverage": {
                 leaf: list(self.expected["required_controls"])
                 for leaf in self.expected["work"]["leaf_ids"]
@@ -389,6 +410,64 @@ class ReviewEvidence(Fixture):
                 self.read(ok=3)
                 self.ship(ok=3)
 
+    def test_indented_and_list_fenced_examples_are_not_task_progress(self):
+        original = (
+            "# P1\n- [ ] A1 Main task\n    - [ ] A2 Nested task\n"
+            "\n# Literal examples\n\n"
+            "    - [ ] A1 Required literal code sample\n"
+            "\t- [ ] A2 Required tab-indented literal\n"
+            "\n- Example container:\n\n"
+            "      - [ ] A1 Code indented inside a list\n"
+            "\n- ```markdown\n"
+            "  - [ ] A2 Literal in a list fence\n"
+            "  ```\n"
+        )
+        self.write("plan.md", original)
+        self.good()
+        for text in (
+            original.replace("[ ] A1 Required literal", "[x] A1 Required literal"),
+            original.replace("[ ] A2 Required tab-indented", "[x] A2 Required tab-indented"),
+            original.replace("[ ] A1 Code indented", "[x] A1 Code indented"),
+            original.replace("[ ] A2 Literal in a list fence", "[x] A2 Literal in a list fence"),
+        ):
+            self.write("plan.md", text)
+            for consumer in ("reader", "ship"):
+                with self.subTest(literal=text, consumer=consumer):
+                    result = self.read(ok=None) if consumer == "reader" else self.ship(ok=None)
+                    self.assertEqual(result.returncode, 3, f"{consumer} accepted a changed literal example")
+        self.write("plan.md", original.replace("[ ] A1 Main task", "[x] A1 Main task").replace("[ ] A2 Nested task", "[X] A2 Nested task"))
+        self.read()
+        self.ship()
+
+    def test_real_nested_tasks_keep_progress_reuse(self):
+        for original in (
+            "- Parent group\n    - [ ] A1 Nested task\n    - [ ] A2 Nested sibling\n",
+            "1. Parent group\n   - Group\n       - [ ] A1 Nested task\n       - [ ] A2 Nested sibling\n",
+            "- Parent group\n\t- [ ] A1 Nested task\n\t- [ ] A2 Nested sibling\n",
+            "- Parent paragraph\nlazy continuation\n    - [ ] A1 Nested task\n    - [ ] A2 Nested sibling\n",
+        ):
+            with self.subTest(layout=original):
+                self.write("plan.md", original)
+                self.prepare()
+                self.record()
+                self.log()
+                self.corroborate()
+                self.assertEqual(self.qa().returncode, 0)
+                self.write("plan.md", original.replace("[ ] A1", "[x] A1").replace("[ ] A2", "[X] A2"))
+                self.read()
+                self.ship()
+
+    def test_nested_task_excerpt_markers_keep_their_real_list_context(self):
+        original = "- Parent\n    - [x] A1 Nested task\n    - [x] A2 Nested sibling\n# End\n"
+        self.write("plan.md", original)
+        self.request["acceptance_paths"] = [
+            "spec.md", {"path": "plan.md", "start": "    - [x] A1 Nested task", "end": "# End"},
+        ]
+        self.good()
+        self.write("plan.md", original.replace("[x] A1", "[ ] A1").replace("[x] A2", "[X] A2"))
+        self.read()
+        self.ship()
+
     def test_claude_selection_does_not_blanket_exclude_plans(self):
         self.request["selection"].append(".claude")
         self.good()
@@ -532,7 +611,7 @@ class ReviewEvidence(Fixture):
                 decision["skill"] = value
             malformed.append((f"skill-{value}", decision))
         for field, value in (
-            ("schema_version", None), ("schema_version", 2), ("context", None),
+            ("schema_version", None), ("schema_version", 99), ("context", None),
             ("controls", []), ("coverage", {}), ("status", "NOT PASS"),
             ("reviewer", None), ("timestamp", "not-a-timestamp"),
         ):
@@ -581,7 +660,7 @@ class ReviewEvidence(Fixture):
             decision = deepcopy(self.review)
             decision["status"] = "fail"
             envelope = {
-                "format": "review-v1", "status": "fail",
+                "format": f"review-v{CONTRACT_VERSION}", "status": "fail",
                 "commit": decision["context"]["snapshot"]["head"],
             }
             if label == "missing-skill-and-kind":
@@ -643,6 +722,49 @@ class ReviewEvidence(Fixture):
                 self.read()
                 self.ship()
         audit.write_bytes(previous)
+
+    def test_v1_history_and_older_invalid_records_do_not_poison_new_v2_review(self):
+        self.good()
+        audit = self.repo / ".claude/runtime/audit/reviews.jsonl"
+        current = audit.read_bytes()
+        legacy = deepcopy(self.review)
+        legacy["schema_version"] = 1
+        legacy["context"]["schema_version"] = 1
+        del legacy["context"]["qa_requirements"]
+        for prior in (
+            encoded(legacy),
+            '{"schema_version":1,"skill":null,"status":"fail"}',
+            '{"broken":',
+        ):
+            with self.subTest(earlier=prior):
+                audit.write_bytes((prior + "\n").encode() + current)
+                self.read()
+                self.ship()
+                audit.write_bytes(current + (prior + "\n").encode())
+                self.read(ok=3)
+                self.ship(ok=3)
+        audit.write_bytes(b"\xff\n" + current)
+        self.read()
+        self.ship()
+        audit.write_bytes(current + b"\xff\n")
+        self.read(ok=3)
+        self.ship(ok=3)
+        audit.write_bytes(current)
+        self.run_command([
+            "bash", SOURCE / "bin" / "li-review-log", "--history", encoded(legacy),
+        ], ok=0)
+        self.read()
+        self.ship()
+        history = self.run_command(["bash", SOURCE / "bin" / "li-review-read", "--json"], ok=0)
+        self.assertIn('"format":"history"', history.stdout)
+        legacy_context = self.root / "legacy-context.json"
+        legacy_context.write_text(encoded(legacy["context"]), encoding="utf-8")
+        self.cli("qa", "--repo", self.repo, "--expected", legacy_context, "--input", self.root / "qa-input.json", ok=1)
+        audit.write_bytes(current)
+        stale_qa = json.loads(self.qa_file.read_text(encoding="utf-8"))
+        stale_qa["schema_version"] = 1
+        self.qa_file.write_text(encoded(stale_qa), encoding="utf-8")
+        self.ship(ok=3)
 
     def test_writer_reports_failed_persistence(self):
         self.record()
@@ -737,6 +859,8 @@ class ReviewEvidence(Fixture):
     def test_expected_scope_attempt_profile_and_policy_cannot_be_rebound(self):
         self.good()
         original = deepcopy(self.expected)
+        different_qa = deepcopy(original["qa_requirements"])
+        different_qa[0]["kind"] = "check"
         for field, value in (
             ("attempt_id", "attempt-2"),
             ("profile", {
@@ -744,6 +868,7 @@ class ReviewEvidence(Fixture):
                 "name": "strict", "version": "1", "digest": "sha256:" + "a" * 64,
             }),
             ("required_controls", ["spec", "quality", "missing-control"]),
+            ("qa_requirements", different_qa),
         ):
             with self.subTest(field=field):
                 changed = deepcopy(original)
@@ -815,13 +940,14 @@ class ReviewEvidence(Fixture):
         self.write("guide.md", "# Guide\nDocumentation-only change.\n")
         self.write("spec.md", "# Acceptance\nA1: check document links.\nA2: check examples.\nTests: not applicable to this docs-only package.\n")
         self.request["selection"] = ["guide.md"]
-        self.request["required_controls"] += ["document", "tests"]
+        self.request["required_controls"].append("document")
         document = control("document")
         document["reason"] = "Fixture document links and examples were checked."
         document["observation"] = {"command": "fixture-document-check", "executed": 1}
         tests_na = control("tests", "tests", status="unverified")
         tests_na["applicability"] = "not_applicable"
         tests_na["reason"] = "Approved spec limits this package to checked documentation; executable tests do not apply."
+        self.request["qa_requirements"] = [qa_requirement(document), qa_requirement(tests_na)]
         self.record(controls=[control(), control("quality"), document, tests_na])
         self.log()
         self.corroborate()
@@ -835,7 +961,7 @@ class ReviewEvidence(Fixture):
             bad = deepcopy(tests_na)
             bad["policy"][missing] = None
             with self.subTest(unknown_policy=missing):
-                self.assertEqual(self.qa(controls=[document, bad]).returncode, 3)
+                self.assertNotEqual(self.qa(controls=[document, bad]).returncode, 0)
                 self.ship(ok=3)
         for counts in (
             {"executed": 0, "failed": 0, "skipped": 0, "exit_code": 0},
@@ -845,8 +971,118 @@ class ReviewEvidence(Fixture):
             required_test = control("tests", "tests")
             required_test["observation"] = {"command": "fixture-tests", **counts}
             with self.subTest(required_tests=counts):
-                self.assertEqual(self.qa(controls=[document, required_test]).returncode, 3)
+                self.assertNotEqual(self.qa(controls=[document, required_test]).returncode, 0)
                 self.ship(ok=3)
+
+    def test_qa_obligations_cannot_be_omitted_downgraded_or_retyped(self):
+        tests = observed_tests()
+        document = control("documentation")
+        self.request["required_controls"].append("documentation")
+        self.request["qa_requirements"] = [qa_requirement(tests), qa_requirement(document)]
+        self.record(controls=[control(), control("quality"), tests, document])
+        self.log()
+        self.corroborate()
+        self.read()
+        self.assertEqual(self.qa(controls=[tests, document]).returncode, 0)
+        self.ship()
+        omitted = [document]
+        advisory_failure = deepcopy(tests)
+        advisory_failure.update(requirement="advisory", status="fail")
+        retyped = deepcopy(tests)
+        retyped.update(kind="check", observation={})
+        not_applicable = deepcopy(tests)
+        not_applicable.update(applicability="not_applicable", status="unverified")
+        changed_policy = deepcopy(tests)
+        changed_policy["policy"]["version"] = "different-policy"
+        for label, controls in (
+            ("omitted", omitted), ("advisory-failure", [advisory_failure, document]),
+            ("retyped", [retyped, document]), ("not-applicable", [not_applicable, document]),
+            ("policy", [changed_policy, document]), ("duplicate", [tests, tests, document]),
+        ):
+            with self.subTest(case=label, consumer="qa"):
+                self.assertNotEqual(self.qa(controls=controls).returncode, 0)
+            forged = {
+                "schema_version": CONTRACT_VERSION, "context_digest": digest(self.expected),
+                "controls": controls, "evidence": [],
+            }
+            self.bind_evidence(forged)
+            self.qa_file.write_text(encoded(forged), encoding="utf-8")
+            with self.subTest(case=label, consumer="ship"):
+                self.read()
+                self.ship(ok=3)
+        failed_tests = deepcopy(tests)
+        failed_tests.update(status="fail")
+        failed_tests["observation"].update(failed=1, exit_code=1)
+        self.assertEqual(self.qa(controls=[failed_tests, document]).returncode, 3)
+        self.ship(ok=3)
+
+    def test_qa_contract_and_review_cannot_contradict_each_other(self):
+        self.record()
+        self.log()
+        self.corroborate()
+        self.assertEqual(self.qa().returncode, 0)
+        audit = self.repo / ".claude/runtime/audit/reviews.jsonl"
+        for field, value in (
+            ("kind", "check"), ("requirement", "advisory"), ("applicability", "not_applicable"),
+        ):
+            bad = deepcopy(self.review)
+            target = next(item for item in bad["controls"] if item["id"] == "tests")
+            target[field] = value
+            with self.subTest(review_field=field):
+                self.log(bad, ok=1)
+                self.log()
+                previous = audit.read_bytes()
+                audit.write_bytes(previous + (encoded(bad) + "\n").encode())
+                self.read(ok=3)
+                self.ship(ok=3)
+                audit.write_bytes(previous)
+        bad = deepcopy(self.review)
+        bad["controls"] = [item for item in bad["controls"] if item["id"] != "tests"]
+        self.log(bad, ok=1)
+        self.log()
+        original_request = deepcopy(self.request)
+        for case in ("missing-inventory", "duplicate-id", "mandatory-not-required", "advisory-marked-required"):
+            self.request = deepcopy(original_request)
+            if case == "missing-inventory":
+                del self.request["qa_requirements"]
+            elif case == "duplicate-id":
+                self.request["qa_requirements"] *= 2
+            elif case == "mandatory-not-required":
+                self.request["required_controls"].remove("tests")
+            else:
+                self.request["qa_requirements"][0]["requirement"] = "advisory"
+            request = self.root / "bad-qa-contract.json"
+            request.write_text(encoded(self.request), encoding="utf-8")
+            with self.subTest(context=case):
+                self.cli("prepare", "--repo", self.repo, "--request", request, ok=1)
+
+    def test_bound_typed_review_requirement_cannot_disappear_from_qa_contract(self):
+        document = control("documentation")
+        self.request["required_controls"].append("documentation")
+        self.request["qa_requirements"] = [qa_requirement(document)]
+        self.record(controls=[control(), control("quality"), observed_tests(), document])
+        self.log(ok=1)
+        audit = self.repo / ".claude/runtime/audit/reviews.jsonl"
+        audit.parent.mkdir(parents=True, exist_ok=True)
+        audit.write_text(encoded(self.review) + "\n", encoding="utf-8")
+        self.corroborate()
+        self.read(ok=3)
+        self.ship(ok=3)
+
+    def test_genuine_docs_only_contract_without_tests_and_advisory_failure(self):
+        document = control("document")
+        advice = control("wording", requirement="advisory", status="fail")
+        self.request["required_controls"] = ["spec", "quality", "document"]
+        self.request["qa_requirements"] = [qa_requirement(document), qa_requirement(advice)]
+        self.write("guide.md", "# Guide\nChecked document.\n")
+        self.write("spec.md", "# Acceptance\nOnly documentation checks apply; wording advice is not mandatory.\n")
+        self.request["selection"] = ["guide.md"]
+        self.record(controls=[control(), control("quality"), document, advice])
+        self.log()
+        self.corroborate()
+        self.read()
+        self.assertEqual(self.qa(controls=[document, advice]).returncode, 0)
+        self.ship()
 
     def test_qa_needs_actual_applicable_validation_not_only_exemptions(self):
         self.good()
