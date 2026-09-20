@@ -129,9 +129,19 @@ integrated `a2ef318`; dirty index/worktree and forced-failure preservation were 
 ### A05 Universal product identity (P06; R03)
 - [ ] A05.1 Center README/start/enterprise adoption on shared outcomes before client choice.
 - [ ] A05.2 Preserve Copilot and Claude routes with equivalent discoverable client guides.
+  - [ ] A05.2.m1 Reproduce valid EOF references and quoted indented-code navigation failures.
+  - [ ] A05.2.m2 Define one source-span/container/EOF boundary model.
+  - [ ] A05.2.m3 Use that model consistently across reference, inline and code consumers.
+  - [ ] A05.2.m4 Verify an independently expected Markdown boundary grid.
+  - [ ] A05.2.m5 Verify actual install/check/clone/drift/refusal without private-data copying.
+  - [ ] A05.2.m6 Retain all earlier adapter, navigation and temporary generation checks.
+  - [ ] A05.2.m7 Obtain narrowed spec and first whole-component quality acceptance.
 - [ ] A05.3 Remove neutral-core company/vendor/retention/venture assumptions without losing optional lenses.
 - [ ] A05.4 Reconcile architecture and synchronized entry-source truth.
 Acceptance: promises map to actual implementation or explicit unverified boundary.
+The [Markdown repair checkpoint](packages/P06-markdown-repair.md) is an explicit
+bounded re-plan after three P06 spec iterations; it does not waive the earlier
+navigation/privacy contract or permit private resource bundling.
 
 ### A06 Honest host capabilities (P06; R03)
 - [ ] A06.1 Define neutral operation contract and separate CLI/desktop/IDE/cloud surfaces.
