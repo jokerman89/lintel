@@ -254,6 +254,12 @@ accepted shared P05/P06/P07 contracts; its context-file ownership is now release
 Continue P08-P14 and final P04 A22.7 binding in dependency order, then final independent
 integrated review, strict suite, authorized-account PR/CI and durable capture.
 
+P10's native Bash fixture exposed a raw-drive ancestor termination bug and then exceeded
+600 seconds from per-file Git Bash overhead; no passing aggregate was claimed. The
+approved Windows entry may now use the already-present PowerShell performer, with no
+Python or permission bypass. Both native entry points need real verification; the
+POSIX/Bash 3.2 path remains separately required and cannot be inferred from Windows runs.
+
 P04's historical merge checkpoint is `e74849db6b33c7b93baadb86206009cb9f9eb6d5`
 (parents `21261f1` and original Swarming `275a354`). Independent merge-only reviewer
 session: `ed672f58-2e85-42e2-b1b2-0635ba5b2325`, PASS spec then quality with zero new
