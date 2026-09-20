@@ -38,8 +38,9 @@ plans. A file snapshot cannot undo their side effects.
 
 ## Snapshot and result binding
 
-Use Python 3.10+ (`python` where that is the Python 3 command). All paths below are
-quoted argument values. Callers must not paste untrusted strings into shell source.
+Use Python 3.9+ (`python` where that is the Python 3 command) for these snapshot
+operations. This is not a prerequisite for native bare installation. All paths below
+are quoted argument values; never paste untrusted strings into shell source.
 
 ```bash
 python3 "$LINTEL_SOURCE_ROOT/bin/li-snapshot.py" \

@@ -3,12 +3,14 @@
 # intent: .claude/plans/universal-implementation/packages/P03.md
 # constraints: stdlib, synthetic files and local Git only
 # last_intent_review: 2026-09-20
+import ast
 import json
 from contextlib import redirect_stderr, redirect_stdout
 import io
 import os
 from pathlib import Path
 import re
+import runpy
 import subprocess
 import sys
 import tempfile
@@ -31,6 +33,22 @@ class ContextSafetyTests(unittest.TestCase):
         (self.root / "docs" / "one file.md").write_text("architecture one")
         (self.root / "docs" / "two.md").write_text("architecture two")
         (self.root / "unrelated.txt").write_text("keep this")
+
+    def test_shared_helpers_defer_annotations_for_python39_syntax(self):
+        modules = (
+            (SOURCE / "lib/context_safety.py", vars(safety),
+             ("read_owned", "file_state", "atomic_write")),
+            (SOURCE / "bin/li-snapshot.py", runpy.run_path(str(SOURCE / "bin/li-snapshot.py")),
+             ("_state", "_entry_state", "create_snapshot", "bind_result", "restore_snapshot")),
+        )
+        for path, namespace, functions in modules:
+            ast.parse(path.read_text(encoding="utf-8"), feature_version=(3, 9))
+            for name in functions:
+                with self.subTest(module=path.name, function=name):
+                    annotations = namespace[name].__annotations__
+                    self.assertTrue(annotations)
+                    self.assertTrue(all(isinstance(value, str) for value in annotations.values()),
+                                    "Python 3.9 must not evaluate PEP 604 annotation unions")
 
     def test_literal_spaces_and_execution_text_are_data(self):
         hostile = "$(touch injected); echo not-code.md"

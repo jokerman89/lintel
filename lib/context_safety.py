@@ -4,6 +4,8 @@
 # constraints: stdlib; explicit roots; no shell evaluation or host-capacity mutation
 # last_intent_review: 2026-09-20
 """Bounded context manifests and owned-file primitives; never executes selected text."""
+from __future__ import annotations
+
 import argparse
 from fnmatch import fnmatchcase
 import hashlib
