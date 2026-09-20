@@ -6,6 +6,20 @@ their final availability. No second task/status ledger is introduced here.
 
 ## P05 review and controls
 
+**Coordinated format revision:** the affected bound review/context/QA contract moves
+to v2 for required immutable `qa_requirements`. Profile references remain v1; work-map,
+host registry and Swarming versions are independent. Do not silently reinterpret durable
+v1 records or auto-upgrade them to clearance. Preserve history and reprepare/review.
+An older obsolete/invalid record may be superseded by a newer valid applicable bound
+decision; a later malformed/rejecting relevant or uncorrelatable decision still revokes.
+
+Each QA requirement binds id, kind, requirement, applicability and policy using the
+shared control definitions. IDs are unique and mandatory QA IDs belong to required
+controls; typed review and QA declarations cannot contradict the approved inventory.
+QA observations cannot omit, retype, downgrade or reclassify an obligation. Genuine
+docs-only scopes declare their actual documentation checks and grounded test N/A, not
+a fictitious universal test requirement. Exact final producer sample is pending P05.
+
 `lib/review_contract.py` (stdlib): `ContractError`, `load_json(text)`,
 `validate_control(control)`, `evaluate_controls(controls, required_policy=...)`,
 `snapshot(repo, base=..., selection=..., record_path=...)`,

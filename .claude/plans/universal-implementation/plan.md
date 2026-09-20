@@ -144,9 +144,18 @@ Acceptance: alternate question tools work; no fabricated independence or host co
 - [ ] A07.1 Specify required-policy failure versus neutral first-use behavior in ADR-0029.
 - [ ] A07.2 Resolve structured inheritance and provenance with documented source precedence.
 - [ ] A07.3 Pin profile content/identity across calls, delegation and restart.
+  - [ ] A07.3.w1 Reproduce the native Windows extended-path concurrent bootstrap failure.
+  - [ ] A07.3.w2 Compare recognized equivalent filesystem spellings without changing I/O identity.
+  - [ ] A07.3.w3 Verify native ordinary/extended and concurrent bootstrap paths.
 - [ ] A07.4 Detect mid-task drift and failed mandatory load without silent advisory success.
+  - [ ] A07.4.w1 Preserve outside-root, device, traversal and reparse rejection under the repaired comparison.
+  - [ ] A07.4.w2 Run all retained lifecycle and source/target checks on the committed repair.
+  - [ ] A07.4.w3 Obtain independent repair acceptance before the first component quality pass.
 - [ ] A07.5 Exercise synthetic company decisions and separate schema/product compatibility.
 Acceptance: profile changes are observable and applicable requirements survive the lifecycle.
+The bounded [Windows repair checkpoint](packages/P07-windows-repair.md) is the explicit
+re-plan after three spec iterations. F01-F03 closures remain evidence; F04 reliability
+does not authorize weakening containment or proceeding without independent quality.
 
 ### A08 One lifecycle work map (P08; R05)
 - [ ] A08.1 Preserve requested operation separately from topic during routing.
