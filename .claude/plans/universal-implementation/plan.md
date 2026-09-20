@@ -113,6 +113,10 @@ Acceptance: no mandatory failure or absent evidence becomes verified green.
 ### A03 Content-bound independent review (P05; R02)
 - [ ] A03.1 Select latest applicable review before evaluating an exact status.
 - [ ] A03.2 Bind review to base/result, selected dirty/new files, work and leaf/package identity.
+  - [ ] A03.2.s1 Consume the approved shared source-boundary helper instead of a second block parser.
+  - [ ] A03.2.s2 Normalize only selected real task-progress character spans, also for excerpts.
+  - [ ] A03.2.s3 Verify literal/criteria/approval/product mutations and legitimate nested progress through real gates.
+  - [ ] A03.2.s4 Obtain independent consumer spec and first full owned quality acceptance.
 - [ ] A03.3 Require SHIP/QA to consume the same snapshot and real independent actor.
 - [ ] A03.4 Test stale acceptance/config/new-file changes and later rejection revocation.
 - [ ] A03.5 Verify unchanged relevant inputs reuse valid evidence without relying on age alone.
@@ -136,12 +140,19 @@ integrated `a2ef318`; dirty index/worktree and forced-failure preservation were 
   - [ ] A05.2.m5 Verify actual install/check/clone/drift/refusal without private-data copying.
   - [ ] A05.2.m6 Retain all earlier adapter, navigation and temporary generation checks.
   - [ ] A05.2.m7 Obtain narrowed spec and first whole-component quality acceptance.
+  - [ ] A05.2.s1 Define independently expected shared source spans and classification.
+  - [ ] A05.2.s2 Extract and refine one stateless Markdown boundary helper without policy changes.
+  - [ ] A05.2.s3 Verify real generator, preflight and installed-source use of the same helper.
+  - [ ] A05.2.s4 Obtain independent shared-provider and complete adapter acceptance.
 - [ ] A05.3 Remove neutral-core company/vendor/retention/venture assumptions without losing optional lenses.
 - [ ] A05.4 Reconcile architecture and synchronized entry-source truth.
 Acceptance: promises map to actual implementation or explicit unverified boundary.
 The [Markdown repair checkpoint](packages/P06-markdown-repair.md) is an explicit
 bounded re-plan after three P06 spec iterations; it does not waive the earlier
 navigation/privacy contract or permit private resource bundling.
+The [shared boundary checkpoint](packages/P05-P06-markdown-boundary.md) coordinates
+P06's one classifier and P05's later exact progress consumer. It supersedes duplicate
+partial block parsing, not the original action or existing source-authority requirements.
 
 ### A06 Honest host capabilities (P06; R03)
 - [ ] A06.1 Define neutral operation contract and separate CLI/desktop/IDE/cloud surfaces.
@@ -151,21 +162,25 @@ navigation/privacy contract or permit private resource bundling.
 Acceptance: alternate question tools work; no fabricated independence or host control.
 
 ### A07 Stable effective profile (P07; R04)
-- [ ] A07.1 Specify required-policy failure versus neutral first-use behavior in ADR-0029.
-- [ ] A07.2 Resolve structured inheritance and provenance with documented source precedence.
-- [ ] A07.3 Pin profile content/identity across calls, delegation and restart.
-  - [ ] A07.3.w1 Reproduce the native Windows extended-path concurrent bootstrap failure.
-  - [ ] A07.3.w2 Compare recognized equivalent filesystem spellings without changing I/O identity.
-  - [ ] A07.3.w3 Verify native ordinary/extended and concurrent bootstrap paths.
-- [ ] A07.4 Detect mid-task drift and failed mandatory load without silent advisory success.
-  - [ ] A07.4.w1 Preserve outside-root, device, traversal and reparse rejection under the repaired comparison.
-  - [ ] A07.4.w2 Run all retained lifecycle and source/target checks on the committed repair.
-  - [ ] A07.4.w3 Obtain independent repair acceptance before the first component quality pass.
-- [ ] A07.5 Exercise synthetic company decisions and separate schema/product compatibility.
+- [x] A07.1 Specify required-policy failure versus neutral first-use behavior in ADR-0029.
+- [x] A07.2 Resolve structured inheritance and provenance with documented source precedence.
+- [x] A07.3 Pin profile content/identity across calls, delegation and restart.
+  - [x] A07.3.w1 Reproduce the native Windows extended-path concurrent bootstrap failure.
+  - [x] A07.3.w2 Compare recognized equivalent filesystem spellings without changing I/O identity.
+  - [x] A07.3.w3 Verify native ordinary/extended and concurrent bootstrap paths.
+- [x] A07.4 Detect mid-task drift and failed mandatory load without silent advisory success.
+  - [x] A07.4.w1 Preserve outside-root, device, traversal and reparse rejection under the repaired comparison.
+  - [x] A07.4.w2 Run all retained lifecycle and source/target checks on the committed repair.
+  - [x] A07.4.w3 Obtain independent repair acceptance before the first component quality pass.
+- [x] A07.5 Exercise synthetic company decisions and separate schema/product compatibility.
 Acceptance: profile changes are observable and applicable requirements survive the lifecycle.
 The bounded [Windows repair checkpoint](packages/P07-windows-repair.md) is the explicit
 re-plan after three spec iterations. F01-F03 closures remain evidence; F04 reliability
 does not authorize weakening containment or proceeding without independent quality.
+Owned component acceptance: [P07 Windows final](reviews/P07-windows-final.md), product
+`a8de574`, integrated through `62ca389`; actual native and injected evidence are separated.
+These component results do not close A24's whole-workflow/profile-value scenario, P06/P08
+consumer migration, live company enforcement, or unrun runtime/platform evidence.
 
 ### A08 One lifecycle work map (P08; R05)
 - [ ] A08.1 Preserve requested operation separately from topic during routing.
@@ -262,16 +277,21 @@ Acceptance: every source skill has a documented disposition and discoverable ret
 ### A20 Provenance and versions (P07/P13; R04)
 - [ ] A20.1 Preserve sources/revisions/licenses/local adaptations and correct original-only claims.
 - [ ] A20.2 Explicitly retire synonym/similarity rewriting as a quality or rights method.
-- [ ] A20.3 Separate pack schema, capability and product versions with migration checks.
+- [x] A20.3 Separate pack schema, capability and product versions with migration checks.
 - [ ] A20.4 Verify external contribution and synthetic pack compatibility from recorded sources.
 Acceptance: no attribution loss, no ungrounded legal or quality guarantee.
+P07's synthetic pack compatibility is independently accepted; A20.4 remains open for
+P13's full external-contribution/provenance and selected-distribution verification.
 
 ### A21 Safe dormant handoff (P04; R08)
-- [ ] A21.1 Keep automatic envelope construction dormant under ADR0008.
-- [ ] A21.2 Validate/redact before audit/output and reject malformed/forbidden payloads.
-- [ ] A21.3 Adapt rich Markdown brief to exact structured payload with original text retained as data.
-- [ ] A21.4 Test real caller/validator/evaluator boundaries and identify actual dispatch owner.
+- [x] A21.1 Keep automatic envelope construction dormant under ADR0008.
+- [x] A21.2 Validate/redact before audit/output and reject malformed/forbidden payloads.
+- [x] A21.3 Adapt rich Markdown brief to exact structured payload with original text retained as data.
+- [x] A21.4 Test real caller/validator/evaluator boundaries and identify actual dispatch owner.
 Acceptance: rejected payload produces neither full sensitive audit content nor successful handoff.
+Evidence: [P04 final component review](reviews/P04-final.md), actual Forge/validator/
+audit failure and optional-parser cases; source `aa73651`, joined `490a0f4`.
+No future automatic hook or dispatcher activation is implied.
 
 ### A22 Preserved Swarming integration (P04; R09)
 - [x] A22.1 Merge branch ancestry with current local main; preserve all 76 delta paths.
@@ -280,20 +300,24 @@ Acceptance: rejected payload produces neither full sensitive audit content nor s
   - [x] A22.1.c Reconcile helper/work-map conflicts and record merge parents.
   - [x] A22.1.d Map each of the 76 original delta paths to its retained destination.
 - [x] A22.2 Resolve ADR number collision as ADR-0027 without discarding the old decision.
-- [ ] A22.3 Repair coordinator/report/review/generated-path collisions and reviewer scope checks.
-  - [ ] A22.3.a Validate all artifact ownership classes and alias collisions.
-  - [ ] A22.3.b Enforce coordinator-generated reducers and reviewer-specific attribution.
-- [ ] A22.4 Support package membership, numeric/tree leaves, Spec Kit and legacy singleton tasks.
-  - [ ] A22.4.a Parse accepted flat/phased/tree and Spec Kit task sources.
-  - [ ] A22.4.b Map package membership to unchanged leaves and required acceptance evidence.
-- [ ] A22.5 Bind attempt/result/report/review and acceptance identities; no fictitious product edits.
-- [ ] A22.6 Exercise native isolated, sequential and manual-review recovery paths.
+- [x] A22.3 Repair coordinator/report/review/generated-path collisions and reviewer scope checks.
+  - [x] A22.3.a Validate all artifact ownership classes and alias collisions.
+  - [x] A22.3.b Enforce coordinator-generated reducers and reviewer-specific attribution.
+- [x] A22.4 Support package membership, numeric/tree leaves, Spec Kit and legacy singleton tasks.
+  - [x] A22.4.a Parse accepted flat/phased/tree and Spec Kit task sources.
+  - [x] A22.4.b Map package membership to unchanged leaves and required acceptance evidence.
+- [x] A22.5 Bind attempt/result/report/review and acceptance identities; no fictitious product edits.
+- [x] A22.6 Exercise native isolated, sequential and manual-review recovery paths.
 - [ ] A22.7 Reconcile P05/P08/P09 contracts and verify joined enterprise/hybrid/swarm behavior.
 Acceptance: complete preservation map plus SW-01..06 regressions and actual Git fan-in fixture.
 Early acceptance evidence only: [P04 merge review](reviews/P04-merge.md) at `e74849d`,
 report commit `4bf5315`, integrated as `40c2795`; [76-path map](reports/P04-preservation.md).
 All 17 historical topology/brief/report/review artifacts are preserved byte-for-byte.
 Final A22 remains open pending the unchecked repairs and combined-contract verification.
+Owned F01-F05 are closed by [P04 final component review](reviews/P04-final.md);
+current scoped content/type/mode and data-only link identity, unmapped prerequisites,
+actual isolated Git fan-in/recovery and retained artifacts are verified. Synthetic
+actors are not independently corroborated people; final A22.7 explicitly remains open.
 
 ### A23 Boundary regression evidence (all owners; P14; R11)
 - [ ] A23.1 Attach a discriminating negative and preserved-behavior case to every corrected mechanism.
@@ -336,8 +360,9 @@ match. Real private destinations, credentials and non-Windows runtime remain unt
 
 ## Review and delivery
 
-Accepted so far: P04 historical preservation (A22.1/A22.2), P01 trusted tools (A04/A25),
-P02 private sync (A26), and P03 context/snapshot core (A01/A11 with explicit downstream boundaries).
+Accepted so far: P01 trusted tools (A04/A25), P02 private sync (A26), P03 context/snapshot
+core (A01/A11), and owned P04/P07 components (A21, A22.1-.6, A07/A20.3), with their
+explicit downstream, profile-value and live-platform boundaries.
 Pending: remaining independent package reviews, assigned cross-surface migrations
 and final integrated acceptance. Accepted packages must not be reimplemented.
 Keep each action open until all its leaves and preservation evidence are linked. P04's
@@ -360,10 +385,10 @@ Independent first-wave review outcomes:
 | P01 | `041417a` | PASS; source contract and ADR ownership preserved | PASS; [final](reviews/P01-final.md) | Integrated `a2ef318`; joined P07 check remains |
 | P02 | `9bdaeb4` | PASS; original findings and staged-deletion repair verified | PASS; [final](reviews/P02-final.md) | Integrated `39561c0`; final initiative checks remain |
 | P03 | `500adb3` | PASS; original preservation findings verified | PASS; [final](reviews/P03-final.md) | Integrated `9a1cf17`; assigned downstream consumers remain |
-| P04 component | `dca635d` | Original F01-F03 close; new acceptance counterexamples open | FAIL: type/mode identity and unmapped-package readiness; [recheck](reviews/P04-recheck.md) | Original builder repairs; final A22.7 still open |
+| P04 component | `aa73651` | PASS; all F01-F05 close | PASS; [final](reviews/P04-final.md) | Integrated `490a0f4` + reports `8964267`; final A22.7 open |
 | P05 | `54147fd` | FAIL: QA obligations and literal Markdown acceptance; [recheck](reviews/P05-recheck.md) | Not run | Original builder implements coordinated v2 contract |
 | P06 | `be69648` | FAIL: HTML/Markdown resource parsing; [recheck](reviews/P06-recheck.md) | Not run | Original builder repairs valid local-navigation semantics |
-| P07 | `56981ed` | F01-F03 close; FAIL native Windows F04; [report](reviews/P07-final.md) | Not run | Bounded Windows repair card approved before new checkpoint |
+| P07 | `a8de574` | PASS; all F01-F04 close | PASS; [final](reviews/P07-windows-final.md) | Own history integrated through `62ca389`; joined consumer/profile-value gates open |
 
 No rejected product batch was integrated. Green original test counts are retained as
 limited evidence, not substituted for the newly failing acceptance cases.

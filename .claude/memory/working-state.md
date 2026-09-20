@@ -30,11 +30,17 @@ P01 trusted helpers, P02 private sync and P03 context/recovery are integrated at
 catalog was regenerated and checked. Earlier rejected reports remain history, not current
 verdicts. P07 combination, remaining role/browser consumers and final platform checks are open.
 
-**What's pending:** P04 is repairing two quality findings in type/mode identity and
-unmapped-package readiness; P06 repairs standard HTML/Markdown navigation parsing after
-its second spec rejection; P07 has an explicit narrow Windows containment re-plan after
-native path-alias failure. P05 implements coordinated v2 immutable QA obligations and
-literal Markdown identity. P08-P14 await accepted shared
+**Further accepted components:** P04 final `279dfc9` accepts `aa73651`, integrated in
+`490a0f4` with report history `8964267`; P07 final `3d8e715` accepts `a8de574`, its owned
+commit sequence integrated through `62ca389` without replaying P04's dependency. Exact
+source comparisons and selected joined consumers pass. P01's copied fixture needed real
+profile dependencies after that join; `d7eb92f` corrects the fixture only and six tests pass.
+
+**What's pending:** P04 final A22.7 and P07 full-consumer gates remain open. P05's v2 QA
+inventory/migration is individually reviewed, but literal Markdown identity and P06 source
+navigation need one stateless shared boundary model with explicit spans/opaque facts.
+P06 owns the proposed helper extraction, P05 its later selected-leaf consumer; neither may
+assume the current internal line projection is sufficient. P08-P14 await accepted shared
 contracts and will continue the full 26-action scope. Coordinator routing (`b72ab47` plus
 `1d40193`) and provenance (`9f49e26`) await their owning package reviews. All successor cards
 and interface agreements are committed; use the handoff's exact IDs, do not duplicate workers.
