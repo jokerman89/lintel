@@ -125,7 +125,11 @@ its body is not executed or scanned as navigation, and quoted `>` characters do 
 tag. Markdown destinations follow escaped punctuation, balanced/wrapped labels and reference
 definitions rather than a substring match; an escaped opening bracket is plain text.
 Only a used reference definition contributes a destination, with the first matching definition
-retained. Code contexts and source spans stay separate so rewriting a source-only destination
+retained. One logical line/container view supplies code boundaries and residual indentation
+to reference, inline and HTML-exclusion processing. A titled reference can end at EOF just
+as at a line ending; quote/list prefixes do not erase the remaining indentation that makes
+an example code. Tabs are measured in columns without changing source bytes. No physical
+newline is added to make an otherwise valid file pass. Code contexts and source spans stay separate so rewriting a source-only destination
 does not rewrite its surrounding examples or markup. Text assets use LF; binary assets retain
 their source bytes.
 It verifies file/directory targets, not external URL availability, heading fragments, rendered

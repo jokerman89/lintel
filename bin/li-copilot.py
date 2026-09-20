@@ -6,6 +6,7 @@
 # last_intent_review: 2026-09-20
 """Shared repository adapter generator; preserves the Copilot entry and managed ownership."""
 import argparse
+from bisect import bisect_right
 import hashlib
 import html
 from html.parser import HTMLParser
@@ -20,7 +21,7 @@ import subprocess
 import sys
 import tempfile
 from urllib.parse import quote, unquote, urlsplit
-from typing import Optional
+from typing import NamedTuple, Optional
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
 from client_capabilities import load_registry, surface_id
@@ -264,43 +265,38 @@ def markdown_unescape(value: str) -> str:
                   lambda match: html.unescape(match[0]), value)
 
 
-def markdown_code_end(text: str, start: int) -> int:
+def markdown_code_end(text: str, start: int, limit: int) -> int:
     run = re.match(r"`+", text[start:])[0]
-    remaining = text[start + len(run):]
-    paragraph_end = re.search(r"\n[ \t\r]*\n", remaining)
-    if paragraph_end:
-        remaining = remaining[:paragraph_end.start()]
+    remaining = text[start + len(run):limit]
     for match in re.finditer(r"`+", remaining):
         if match[0] == run:
             return start + len(run) + match.end()
     return start
 
 
-def markdown_label_end(text: str, start: int) -> int:
+def markdown_label_end(text: str, start: int, limit: int) -> int:
     depth, cursor = 1, start + 1
-    while cursor < len(text):
+    while cursor < limit:
         char = text[cursor]
         if char == "\\" and cursor + 1 < len(text) and text[cursor + 1] in string.punctuation:
             cursor += 2
             continue
         if char == "`":
-            end = markdown_code_end(text, cursor)
+            end = markdown_code_end(text, cursor, limit)
             if end != cursor:
                 cursor = end
                 continue
         if char == "<":
             if text.startswith("<!--", cursor):
                 end = text.find("-->", cursor + 4)
-                if end < 0:
+                if end < 0 or end + 3 > limit:
                     return start
                 cursor = end + 3
                 continue
             end, _, _ = html_token(text, cursor)
-            if end != cursor:
+            if cursor < end <= limit:
                 cursor = end
                 continue
-        if char == "\n" and re.match(r"\n[ \t\r]*\n", text[cursor:]):
-            return start
         if char == "[":
             depth += 1
         elif char == "]":
@@ -311,19 +307,19 @@ def markdown_label_end(text: str, start: int) -> int:
     return start
 
 
-def markdown_space_end(text: str, start: int) -> int:
+def markdown_space_end(text: str, start: int, limit: int) -> int:
     cursor = start
-    while cursor < len(text) and text[cursor] in " \t\r\n":
+    while cursor < limit and text[cursor] in " \t\r\n":
         cursor += 1
-    return start if re.search(r"\n[ \t\r]*\n", text[start:cursor]) else cursor
+    return cursor
 
 
-def markdown_destination(text: str, start: int) -> tuple[int, int, int]:
+def markdown_destination(text: str, start: int, limit: int) -> tuple[int, int, int]:
     cursor, depth = start, 0
     angle = cursor < len(text) and text[cursor] == "<"
     if angle:
         start = cursor = cursor + 1
-    while cursor < len(text):
+    while cursor < limit:
         char = text[cursor]
         if char == "\\" and cursor + 1 < len(text) and text[cursor + 1] in string.punctuation:
             cursor += 2
@@ -348,81 +344,249 @@ def markdown_destination(text: str, start: int) -> tuple[int, int, int]:
     return start, cursor, cursor
 
 
-def markdown_title_end(text: str, start: int) -> int:
-    if start == len(text) or text[start] not in "\"'(":
+def markdown_title_end(text: str, start: int, limit: int) -> int:
+    if start >= limit or text[start] not in "\"'(":
         return start
     delimiter = ")" if text[start] == "(" else text[start]
     cursor = start + 1
-    while cursor < len(text):
+    while cursor < limit:
         if text[cursor] == "\\" and cursor + 1 < len(text) and text[cursor + 1] in string.punctuation:
             cursor += 2
             continue
         if text[cursor] == delimiter:
             return cursor + 1
-        if text[cursor] == "\n" and re.match(r"\n[ \t\r]*\n", text[cursor:]):
-            break
         cursor += 1
     return start
 
 
-def markdown_fence(line: str, list_indent: int = 0) -> Optional[re.Match]:
-    body = re.sub(r"^(?:[ ]{0,3}>[ \t]?)+", "", line)
-    item = re.match(r"^[ ]{0,3}(?:[-+*]|\d+[.)])[ \t]+", body)
-    if item:
-        body = body[item.end():]
-    elif list_indent and body.startswith(" " * list_indent):
-        body = body[list_indent:]
-    return re.match(r"^[ ]{0,3}(`{3,}|~{3,})(.*)", body)
+class MarkdownContainer(NamedTuple):
+    kind: str
+    width: int
+    identity: int
 
 
-def markdown_tokens(text: str, definitions: dict) -> tuple[list[tuple[int, int, str]], list[tuple[int, int]], dict]:
+class MarkdownLine(NamedTuple):
+    start: int
+    end: int
+    next_start: int
+    body_start: int
+    content_start: int
+    indent: int
+    context: tuple[int, ...]
+    kind: str
+
+
+def markdown_columns(line: str) -> tuple[str, list[int]]:
+    """Measure tabs at four-column stops without modifying the source or its offsets."""
+    expanded, positions = [], []
+    for position, char in enumerate(line):
+        width = 4 - len(expanded) % 4 if char == "\t" else 1
+        expanded.extend(" " * width if char == "\t" else char)
+        positions.extend([position] * width)
+    positions.append(len(line))
+    return "".join(expanded), positions
+
+
+def markdown_container(line: str, start: int) -> tuple[str, int, int]:
+    cursor = start
+    while cursor < len(line) and line[cursor] == " ":
+        cursor += 1
+    if cursor - start > 3:
+        return "", start, 0
+    if line[cursor:cursor + 1] == ">":
+        end = cursor + 1
+        if line[end:end + 1] == " ":
+            end += 1
+        return "quote", end, end - start
+    marker = re.match(r"(?:[-+*]|\d{1,9}[.)])(?= |$)", line[cursor:])
+    if marker:
+        end = cursor + marker.end()
+        padding_end = end
+        while padding_end < len(line) and line[padding_end] == " ":
+            padding_end += 1
+        padding = padding_end - end
+        padding = padding if 1 <= padding <= 4 else 1
+        return "list", min(end + padding, len(line)), end + padding - start
+    return "", start, 0
+
+
+class MarkdownSource:
+    """One original-span, logical-line and container boundary model for all consumers."""
+    def __init__(self, text: str) -> None:
+        self.original = text
+        self.lines: list[MarkdownLine] = []
+        characters = list(text)
+        containers: list[MarkdownContainer] = []
+        previous_context, paragraph, identity = (), False, 0
+        fence, raw_end = None, 0
+        offset = 0
+        for physical in re.findall(r"[^\r\n]*(?:\r\n|\r|\n|$)", text):
+            if not physical:
+                continue
+            start, next_start = offset, offset + len(physical)
+            body = physical.rstrip("\r\n")
+            end = start + len(body)
+            visual, positions = markdown_columns(body)
+            cursor, kept = 0, []
+            for container in containers:
+                if container.kind == "quote":
+                    kind, consumed, _ = markdown_container(visual, cursor)
+                    if kind != "quote":
+                        break
+                    cursor = consumed
+                else:
+                    available = len(visual[cursor:]) - len(visual[cursor:].lstrip(" "))
+                    if available < container.width:
+                        if visual[cursor:].strip():
+                            break
+                        cursor = len(visual)
+                    else:
+                        cursor += container.width
+                kept.append(container)
+            remainder = visual[cursor:]
+            opening = markdown_container(visual, cursor)[0]
+            block_start = re.match(r" {0,3}(?:`{3,}|~{3,}|#{1,6}(?: |$))", remainder)
+            lazy = (len(kept) != len(containers) and paragraph and bool(remainder.strip())
+                    and not opening and not block_start)
+            if lazy:
+                kept = containers[:]
+            containers = kept
+            context = tuple(container.identity for container in containers)
+            if fence and context != fence[2]:
+                fence = None
+            if not fence and start >= raw_end and not lazy:
+                while True:
+                    kind, consumed, width = markdown_container(visual, cursor)
+                    if not kind:
+                        break
+                    identity += 1
+                    containers.append(MarkdownContainer(kind, width, identity))
+                    cursor = consumed
+            context = tuple(container.identity for container in containers)
+            content = cursor
+            while content < len(visual) and visual[content] == " ":
+                content += 1
+            indent = content - cursor
+            marker = re.match(r"(`{3,}|~{3,})(.*)", visual[content:]) if indent <= 3 else None
+            if start < raw_end:
+                kind = "raw"
+            elif fence:
+                kind = "code"
+                if (marker and marker[1][0] == fence[0] and len(marker[1]) >= fence[1]
+                        and not marker[2].strip()):
+                    fence = None
+            elif marker and not (marker[1][0] == "`" and "`" in marker[2]):
+                kind, fence = "code", (marker[1][0], len(marker[1]), context)
+            elif not visual[content:]:
+                kind = "blank"
+            elif indent >= 4 and not (paragraph and context == previous_context):
+                kind = "code"
+            else:
+                kind = "prose"
+            body_start, content_start = start + positions[cursor], start + positions[content]
+            for position in range(start, end):
+                if kind == "code" or position < body_start:
+                    characters[position] = " "
+            for position in range(end, next_start):
+                if text[position] == "\r":
+                    characters[position] = " " if text[position:position + 2] == "\r\n" else "\n"
+            if kind == "prose":
+                probe = content_start
+                while probe < end:
+                    if text[probe] == "\\" and probe + 1 < end and text[probe + 1] in string.punctuation:
+                        probe += 2
+                        continue
+                    if text[probe] == "`":
+                        code_end = markdown_code_end(text, probe, end)
+                        if code_end != probe:
+                            probe = code_end
+                            continue
+                    if text.startswith("<!--", probe):
+                        closed = text.find("-->", probe + 4)
+                        raw_end = len(text) if closed < 0 else closed + 3
+                        probe = raw_end
+                        continue
+                    if text[probe] == "<":
+                        tag_end, tag, closing = html_token(text, probe)
+                        if tag_end != probe:
+                            if not closing and tag in ("pre", "code", "script", "style") \
+                                    and not text[probe:tag_end].endswith("/>"):
+                                raw_end = html_element_end(text, probe, tag)
+                                probe = raw_end
+                            else:
+                                probe = tag_end
+                            continue
+                    probe += 1
+            self.lines.append(MarkdownLine(start, end, next_start, body_start, content_start,
+                                           indent, context, kind))
+            paragraph = kind == "prose" and raw_end <= next_start
+            if re.match(r"#{1,6}(?: |$)", visual[content:]):
+                paragraph = False
+            previous_context, offset = context, next_start
+        self.text = "".join(characters)
+        self.starts = [line.start for line in self.lines]
+        self.limits = [line.end for line in self.lines]
+        for index in range(len(self.lines) - 2, -1, -1):
+            current, following = self.lines[index:index + 2]
+            if current.kind == following.kind == "prose" and current.context == following.context:
+                self.limits[index] = self.limits[index + 1]
+
+    def line_index(self, position: int) -> int:
+        return max(0, bisect_right(self.starts, min(position, max(0, len(self.text) - 1))) - 1)
+
+    def line_at(self, position: int) -> MarkdownLine:
+        return self.lines[self.line_index(position)]
+
+    def limit(self, position: int) -> int:
+        return self.limits[self.line_index(position)]
+
+    def definition_start(self, position: int) -> bool:
+        line = self.line_at(position)
+        return line.kind == "prose" and line.indent <= 3 and position == line.content_start
+
+    def reference_end(self, destination_end: int, limit: int) -> int:
+        """A consumed destination/title terminates at logical EOL or EOF, identically."""
+        line = self.line_at(max(0, destination_end - 1))
+        cursor = destination_end
+        while cursor < line.end and self.text[cursor] in " \t":
+            cursor += 1
+        if cursor == line.end:
+            candidate = markdown_space_end(self.text, line.next_start, limit)
+            if candidate < limit and self.text[candidate] in "\"'(":
+                title_end = markdown_title_end(self.text, candidate, limit)
+                if title_end != candidate:
+                    title_line = self.line_at(title_end - 1)
+                    if not self.text[title_end:title_line.end].strip(" \t"):
+                        return title_line.next_start
+            return line.next_start
+        if cursor == destination_end or self.text[cursor] not in "\"'(":
+            return -1
+        title_end = markdown_title_end(self.text, cursor, limit)
+        if title_end == cursor:
+            return -1
+        title_line = self.line_at(title_end - 1)
+        return title_line.next_start if not self.text[title_end:title_line.end].strip(" \t") else -1
+
+
+def markdown_tokens(source: MarkdownSource, definitions: dict) -> tuple[list[tuple[int, int, str]], list[tuple[int, int]], dict]:
     """Lex links, code and definitions without treating punctuation as a filesystem path."""
+    text = source.text
     links, excluded, references, suffixes = [], [], set(), {}
-    cursor, list_indent, indented_code = 0, 0, False
+    cursor = 0
     while cursor < len(text):
         if cursor in suffixes:
             end = suffixes[cursor]
             excluded.append((cursor, end))
             cursor = end
             continue
-        if cursor == 0 or text[cursor - 1] == "\n":
-            end = text.find("\n", cursor)
-            end = len(text) if end < 0 else end + 1
-            line = text[cursor:end]
-            indent = len(line) - len(line.lstrip(" "))
-            item = re.match(r"^[ ]{0,3}(?:[-+*]|\d+[.)])[ \t]+", line)
-            if item:
-                list_indent = item.end()
-            elif line.strip() and indent < list_indent:
-                list_indent = 0
-            marker = markdown_fence(line, list_indent)
-            if marker and not (marker[1][0] == "`" and "`" in marker[2]):
-                fence_end = end
-                for following in text[end:].splitlines(keepends=True):
-                    fence_end += len(following)
-                    close = markdown_fence(following, list_indent)
-                    if (close and not close[2].strip() and close[1][0] == marker[1][0]
-                            and len(close[1]) >= len(marker[1])):
-                        break
-                excluded.append((cursor, fence_end))
-                cursor = fence_end
-                continue
-            previous_start = text.rfind("\n", 0, max(0, cursor - 1)) + 1
-            previous_blank = not text[previous_start:cursor].strip()
-            if (previous_blank or indented_code) and (indent >= list_indent + 4 or line.startswith("\t")):
-                indented_code = True
-                excluded.append((cursor, end))
-                cursor = end
-                continue
-            if line.strip():
-                indented_code = False
+        limit = source.limit(cursor)
         char = text[cursor]
         if char == "\\" and cursor + 1 < len(text) and text[cursor + 1] in string.punctuation:
             excluded.append((cursor, cursor + 2))
             cursor += 2
             continue
         if char == "`":
-            end = markdown_code_end(text, cursor)
+            end = markdown_code_end(text, cursor, limit)
             if end != cursor:
                 excluded.append((cursor, end))
                 cursor = end
@@ -439,37 +603,36 @@ def markdown_tokens(text: str, definitions: dict) -> tuple[list[tuple[int, int, 
                 cursor = end
                 continue
         if char == "[":
-            close = markdown_label_end(text, cursor)
+            close = markdown_label_end(text, cursor, limit)
             if close != cursor:
                 label = " ".join(markdown_unescape(text[cursor + 1:close]).split()).casefold()
                 after = close + 1
-                line_start = text.rfind("\n", 0, cursor) + 1
-                prefix = text[line_start:cursor]
-                is_definition = prefix.strip() == "" and len(prefix) <= 3 and text[after:after + 1] == ":"
+                is_definition = source.definition_start(cursor) and text[after:after + 1] == ":"
                 if text[after:after + 1] == "(" or is_definition:
-                    destination_start = markdown_space_end(text, after + 1)
-                    start, finish, end = markdown_destination(text, destination_start)
-                    separated = markdown_space_end(text, end)
-                    if separated > end and text[separated:separated + 1] in ("'", '"', "("):
-                        title_end = markdown_title_end(text, separated)
-                        if title_end != separated:
-                            separated = markdown_space_end(text, title_end)
+                    destination_start = markdown_space_end(text, after + 1, limit)
+                    start, finish, end = markdown_destination(text, destination_start, limit)
                     if is_definition and finish > start:
-                        line_end = text.find("\n", finish)
-                        line_end = len(text) if line_end < 0 else line_end
-                        if end == line_end or not text[end:line_end].strip() or separated > line_end:
+                        reference_end = source.reference_end(end, limit)
+                        if reference_end >= end:
                             definitions.setdefault(label, (start, finish, markdown_unescape(text[start:finish])))
-                            cursor = max(line_end + 1, separated)
+                            line_start = source.line_at(cursor).start
+                            cursor = reference_end
                             excluded.append((line_start, cursor))
                             continue
-                    elif not is_definition and text[separated:separated + 1] == ")":
-                        links.append((start, finish, markdown_unescape(text[start:finish])))
-                        suffixes[after] = separated + 1
-                        cursor += 1
-                        continue
-                second_start = markdown_space_end(text, after)
+                    elif not is_definition:
+                        separated = markdown_space_end(text, end, limit)
+                        if separated > end and text[separated:separated + 1] in ("'", '"', "("):
+                            title_end = markdown_title_end(text, separated, limit)
+                            if title_end != separated:
+                                separated = markdown_space_end(text, title_end, limit)
+                        if text[separated:separated + 1] == ")":
+                            links.append((start, finish, markdown_unescape(text[start:finish])))
+                            suffixes[after] = separated + 1
+                            cursor += 1
+                            continue
+                second_start = markdown_space_end(text, after, limit)
                 if text[second_start:second_start + 1] == "[":
-                    second_end = markdown_label_end(text, second_start)
+                    second_end = markdown_label_end(text, second_start, limit)
                     if second_end != second_start:
                         reference = " ".join(markdown_unescape(text[second_start + 1:second_end]).split()).casefold()
                         reference = reference or label
@@ -487,18 +650,19 @@ def markdown_tokens(text: str, definitions: dict) -> tuple[list[tuple[int, int, 
     return links, excluded, definitions
 
 
-def markdown_navigation(text: str) -> tuple[list[tuple[int, int, str]], list[tuple[int, int]]]:
+def markdown_navigation(source: MarkdownSource) -> tuple[list[tuple[int, int, str]], list[tuple[int, int]]]:
     # Resolve forward reference labels before deciding whether adjacent brackets form a link.
-    _, _, definitions = markdown_tokens(text, {})
-    links, excluded, _ = markdown_tokens(text, definitions)
+    _, _, definitions = markdown_tokens(source, {})
+    links, excluded, _ = markdown_tokens(source, definitions)
     return links, excluded
 
 
 def document_links(data: bytes, *, markdown: bool = True) -> list[tuple[int, int, str]]:
     """Return source spans for real Markdown/HTML destinations without running either."""
     text = data.decode("utf-8")
-    links, excluded = markdown_navigation(text) if markdown else ([], [])
-    characters = list(text)
+    source = MarkdownSource(text) if markdown else None
+    links, excluded = markdown_navigation(source) if source else ([], [])
+    characters = list(source.text if source else text)
     for start, end in excluded:
         for position in range(start, min(end, len(text))):
             if characters[position] not in "\r\n":

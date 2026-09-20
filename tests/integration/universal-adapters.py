@@ -332,6 +332,101 @@ class UniversalAdapters(unittest.TestCase):
         self.run_cli("check", source=clone / ".github/lintel", target=clone)
         self.assertEqual((clone / ".github/lintel/docs/review-fixture/a_b.md").read_bytes(), guide.read_bytes())
 
+    def test_c04_titled_eof_reference_requires_guide_in_installed_clone(self):
+        self.run_cli(client="other")
+        source = self.target / ".github/lintel"
+        faq = source / "docs/faq.md"
+        original = faq.read_bytes()
+        fixture = b'\n[Guide][p06-eof]\n\n[p06-eof]: review-fixture/guide.md "Title"'
+        guide = source / "docs/review-fixture/guide.md"
+        guide.parent.mkdir()
+        guide.write_bytes(b"# Real local guide")
+        expected_guides = set()
+        for name, ending in (("eof", b""), ("lf", b"\n"), ("crlf", b"\r\n")):
+            with self.subTest(ending=name):
+                faq.write_bytes(original + fixture + ending)
+                consumer = self.base / ("c04-" + name)
+                consumer.mkdir()
+                self.run_cli(client="other", source=source, target=consumer)
+                bundle = consumer / ".github/lintel"
+                self.run_cli("check", source=bundle, target=consumer)
+                relative = ".github/lintel/docs/review-fixture/guide.md"
+                manifest = json.loads((bundle / "manifest.json").read_text())["files"]
+                self.assertIn(relative, manifest)
+                self.assertEqual((consumer / relative).read_bytes(), b"# Real local guide")
+                expected_guides.add(tuple(path for path in manifest if "review-fixture/" in path))
+                clone = self.base / ("c04-clone-" + name)
+                self.clone_project(consumer, clone)
+                self.run_cli("check", source=clone / ".github/lintel", target=clone)
+                self.assertEqual((clone / relative).read_bytes(), b"# Real local guide")
+                (clone / relative).unlink()
+                manifest_path = clone / ".github/lintel/manifest.json"
+                document = json.loads(manifest_path.read_text())
+                del document["files"][relative]
+                manifest_path.write_text(json.dumps(document), encoding="utf-8")
+                result = self.run_cli("check", source=clone / ".github/lintel", target=clone, success=False)
+                self.assertIn("guide.md", result.stderr)
+                self.assertFalse((clone / relative).exists())
+                guide.unlink()
+                refused = self.base / ("c04-missing-" + name)
+                refused.mkdir()
+                (refused / "keep.txt").write_bytes(b"unchanged")
+                result = self.run_cli(client="other", source=source, target=refused, success=False)
+                self.assertIn("guide.md", result.stderr)
+                self.assertEqual([(path.name, path.read_bytes()) for path in refused.iterdir()],
+                                 [("keep.txt", b"unchanged")])
+                guide.write_bytes(b"# Real local guide")
+                self.assertEqual(faq.read_bytes(), original + fixture + ending)
+        self.assertEqual(len(expected_guides), 1, "A final newline must not change selected resources")
+
+    def test_c05_quoted_code_is_not_a_dependency_but_real_guide_still_is(self):
+        self.run_cli(client="other")
+        source = self.target / ".github/lintel"
+        faq = source / "docs/faq.md"
+        original = faq.read_bytes()
+        fixture = (
+            b'>     [Code example](review-fixture/does-not-exist.md)\n\n'
+            b'[Real guide](review-fixture/guide.md)\n'
+        )
+        guide = source / "docs/review-fixture/guide.md"
+        guide.parent.mkdir()
+        guide.write_bytes(b"# Real local guide")
+        example = guide.with_name("does-not-exist.md")
+        for name, present, content in (
+                ("absent", False, fixture), ("present", True, fixture),
+                ("unquoted", False, fixture.replace(b"> ", b"", 1))):
+            with self.subTest(case=name):
+                if present:
+                    example.write_bytes(b"# Code-only example, not a dependency\n")
+                elif example.exists():
+                    example.unlink()
+                faq.write_bytes(original + b"\n" + content)
+                consumer = self.base / ("c05-" + name)
+                consumer.mkdir()
+                (consumer / "keep.txt").write_bytes(b"unchanged")
+                self.run_cli(client="other", source=source, target=consumer)
+                self.run_cli("check", source=consumer / ".github/lintel", target=consumer)
+                clone = self.base / ("c05-clone-" + name)
+                self.clone_project(consumer, clone)
+                self.run_cli("check", source=clone / ".github/lintel", target=clone)
+                for target in (consumer, clone):
+                    bundle = target / ".github/lintel"
+                    manifest = json.loads((bundle / "manifest.json").read_text())["files"]
+                    self.assertIn(".github/lintel/docs/review-fixture/guide.md", manifest)
+                    self.assertNotIn(".github/lintel/docs/review-fixture/does-not-exist.md", manifest)
+                    self.assertEqual((bundle / "docs/review-fixture/guide.md").read_bytes(), b"# Real local guide")
+                    self.assertFalse((bundle / "docs/review-fixture/does-not-exist.md").exists())
+                self.assertEqual((consumer / "keep.txt").read_bytes(), b"unchanged")
+                guide.unlink()
+                refused = self.base / ("c05-missing-guide-" + name)
+                refused.mkdir()
+                (refused / "keep.txt").write_bytes(b"unchanged")
+                result = self.run_cli(client="other", source=source, target=refused, success=False)
+                self.assertIn("guide.md", result.stderr)
+                self.assertEqual([(path.name, path.read_bytes()) for path in refused.iterdir()],
+                                 [("keep.txt", b"unchanged")])
+                guide.write_bytes(b"# Real local guide")
+
     def test_unknown_client_and_fictional_controls_refuse_before_writes(self):
         for client, extra in (("fictional", ()), ("codex-cli", ("--enable",)),
                               ("copilot-app", ("--model", "imaginary")), ("other", ("--global",))):

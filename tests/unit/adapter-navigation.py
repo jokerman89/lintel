@@ -185,6 +185,158 @@ const example = '[not a guide](docs/not-script.md)';
                     with self.subTest(text=text):
                         self.assertEqual([url for _, _, url in adapter.document_links(text.encode())], [actual])
 
+    def test_c04_reference_title_at_logical_eof(self):
+        text = '[Guide][p06-eof]\n\n[p06-eof]: review-fixture/guide.md "Title"'
+        expected = ["review-fixture/guide.md"]
+        for ending in ("", "\n", "\r\n"):
+            with self.subTest(ending=repr(ending)):
+                data = (text + ending).encode()
+                links = adapter.document_links(data)
+                self.assertEqual([value for _, _, value in links], expected)
+                self.assertEqual([data.decode()[start:end] for start, end, _ in links], expected)
+
+    def test_c05_blockquote_indented_code_preserves_residual_columns(self):
+        text = (
+            ">     [Code example](review-fixture/does-not-exist.md)\n\n"
+            "[Real guide](review-fixture/guide.md)\n"
+        )
+        for content in (text, text.replace("> ", "", 1)):
+            with self.subTest(content=content):
+                self.assertEqual([value for _, _, value in adapter.document_links(content.encode())],
+                                 ["review-fixture/guide.md"])
+
+    def test_logical_line_model_preserves_spans_bytes_and_eof(self):
+        text = "> \t  [Code](docs/no.md)\r\n>\r\n> [Guide](docs/yes.md)"
+        source = adapter.MarkdownSource(text)
+        self.assertEqual(source.original, text)
+        self.assertEqual(len(source.text), len(text))
+        self.assertEqual([line.kind for line in source.lines], ["code", "blank", "prose"])
+        self.assertEqual(source.lines[0].indent, 4)
+        self.assertEqual(source.lines[-1].end, len(text))
+        self.assertEqual(source.lines[-1].next_start, len(text))
+        links = adapter.document_links(text.encode())
+        self.assertEqual([value for _, _, value in links], ["docs/yes.md"])
+        self.assertEqual([text[start:end] for start, end, _ in links], ["docs/yes.md"])
+        self.assertNotIn("[Code]", source.text)
+        self.assertIn("[Guide]", source.text)
+
+    def test_reference_eof_title_grid_has_identical_manually_expected_resources(self):
+        references = ("[Guide][guide]", "[guide][]", "[guide]")
+        titles = ("", ' "Title"', " 'Title'", " (Title)",
+                  ' "Escaped \\" title"', '\n  "Next line title"')
+        for ending in ("", "\n", "\r\n"):
+            for eol in ("\n", "\r\n"):
+                for trailing in ("", " ", "\t"):
+                    for title in titles:
+                        for reference in references:
+                            text = (f"{reference}\n\n[guide]: docs/a\\_b.md{title}{trailing}").replace("\n", eol) + ending
+                            with self.subTest(ending=repr(ending), eol=repr(eol), trailing=repr(trailing),
+                                              title=title, reference=reference):
+                                links = adapter.document_links(text.encode())
+                                self.assertEqual([value for _, _, value in links], ["docs/a_b.md"])
+                                self.assertEqual([text[start:end] for start, end, _ in links], [r"docs/a\_b.md"])
+                                self.assertEqual(adapter.MarkdownSource(text).original, text)
+
+    def test_code_and_prose_use_one_container_relative_boundary_grid(self):
+        code = "[Code](docs/not-a-resource.md)"
+        real, after = "[Real](docs/real.md)", "[After](docs/after.md)"
+        cases = {
+            "root": f"    {code}\n\n{real}\n\n{after}",
+            "root-tab": f"\t{code}\n\n{real}\n\n{after}",
+            "quote": f">     {code}\n>\n> {real}\n\n{after}",
+            "quote-tab": f"> \t  {code}\n>\n> {real}\n\n{after}",
+            "nested-quote": f"> >     {code}\n> >\n> > {real}\n\n{after}",
+            "unordered-list": f"- Item\n\n      {code}\n\n  {real}\n\n{after}",
+            "ordered-list": f"10. Item\n\n        {code}\n\n    {real}\n\n{after}",
+            "list-tabs": f"- Item\n\n\t\t{code}\n\n  {real}\n\n{after}",
+            "quote-list": f"> - Item\n>\n>       {code}\n>\n>   {real}\n\n{after}",
+            "list-quote": f"- > Item\n  >\n  >     {code}\n  >\n  > {real}\n\n{after}",
+            "nested-list": f"- Item\n  - Nested\n\n        {code}\n\n    {real}\n\n{after}",
+            "root-fence": f"```md\n{code}\n```\n{real}\n\n{after}",
+            "quote-fence": f"> ```md\n> {code}\n> ```\n>\n> {real}\n\n{after}",
+            "list-fence": f"- ```md\n  {code}\n  ```\n\n  {real}\n\n{after}",
+            "quote-list-fence": f"> - ~~~md\n>   {code}\n>   ~~~\n>\n>   {real}\n\n{after}",
+        }
+        for name, fixture in cases.items():
+            for eol in ("\n", "\r\n"):
+                for ending in ("", eol):
+                    text = fixture.replace("\n", eol) + ending
+                    with self.subTest(case=name, eol=repr(eol), ending=repr(ending)):
+                        links = adapter.document_links(text.encode())
+                        self.assertEqual([value for _, _, value in links], ["docs/real.md", "docs/after.md"])
+                        self.assertEqual([text[start:end] for start, end, _ in links],
+                                         ["docs/real.md", "docs/after.md"])
+
+    def test_real_navigation_inside_containers_is_not_an_indented_code_false_positive(self):
+        real = "[Real](docs/real.md)"
+        cases = (
+            f"   {real}", f">    {real}", f"> >    {real}",
+            f"- Item\n\n     {real}", f"10. Item\n\n       {real}",
+            f"Paragraph\n    {real}", f"> Paragraph\n>     {real}",
+            f"- Paragraph\n      {real}", f"> Paragraph\n{real}",
+            f">     [Code](docs/no.md)\n{real}",
+            f"> ```md\n> [Code](docs/no.md)\n{real}",
+        )
+        for text in cases:
+            with self.subTest(text=text):
+                self.assertEqual([value for _, _, value in adapter.document_links(text.encode())], ["docs/real.md"])
+
+    def test_reference_definitions_share_container_and_code_boundaries(self):
+        code = "[ignore]: docs/no.md"
+        cases = (
+            f">     {code}\n>\n> [Guide][g]\n>\n> [g]: docs/yes.md \"Title\"",
+            f"> >     {code}\n> >\n> > [Guide][g]\n> >\n> > [g]: docs/yes.md \"Title\"",
+            f"- Item\n\n      {code}\n\n  [Guide][g]\n\n  [g]: docs/yes.md \"Title\"",
+            f"- >     {code}\n  >\n  > [Guide][g]\n  >\n  > [g]: docs/yes.md \"Title\"",
+        )
+        for text in cases:
+            with self.subTest(text=text):
+                links = adapter.document_links(text.encode())
+                self.assertEqual([value for _, _, value in links], ["docs/yes.md"])
+                self.assertEqual([text[start:end] for start, end, _ in links], ["docs/yes.md"])
+
+    def test_code_classification_masks_html_but_retains_real_script_attributes(self):
+        text = (
+            '>     <script src="docs/code-only.js"></script>\n>\n'
+            '> <script src="docs/actual.js">\n>     [Example](docs/raw-body.md)\n> </script>\n'
+            '> <a title="> quoted delimiter" href="docs/guide.md">Guide</a>\n'
+        )
+        self.assertEqual([value for _, _, value in adapter.document_links(text.encode())],
+                         ["docs/actual.js", "docs/guide.md"])
+
+    def test_invalid_reference_titles_do_not_weaken_definition_validation(self):
+        for title in ('"unterminated', '"Title" junk', "(unterminated", "'Title' junk"):
+            text = f'[Guide][g]\n\n[g]: docs/missing.md {title}'
+            with self.subTest(title=title):
+                self.assertEqual(adapter.document_links(text.encode()), [])
+
+    def test_closed_public_graph_never_reads_a_quoted_code_only_resource(self):
+        self.write("README.md", (
+            '>     [Example](docs/code-only.md)\n>\n> [Guide][g]\n>\n'
+            '> [g]: docs/real.md "Title"'))
+        self.write("docs/code-only.md", "SYNTHETIC-CODE-ONLY-CONTENT")
+        self.write("docs/real.md", "# Public guide")
+        files = {}
+        with patch.object(adapter, "read_file", wraps=adapter.read_file) as reads:
+            adapter.bundle_documentation(self.root, files)
+        self.assertNotIn("docs/code-only.md", {call.args[1] for call in reads.call_args_list})
+        self.assertNotIn(f"{adapter.BUNDLE}/docs/code-only.md", files)
+        self.assertIn(f"{adapter.BUNDLE}/docs/real.md", files)
+        self.assertNotIn(b"SYNTHETIC-CODE-ONLY-CONTENT", b"".join(files.values()))
+        self.assertEqual(adapter.verify_links(files, self.root), [])
+
+    def test_source_only_reference_rewrite_preserves_original_container_title_and_eof(self):
+        text = '> [Source][s]\n>\n> [s]: .claude/decisions/example.md "Original title"'
+        self.write("README.md", text)
+        files = {}
+        adapter.bundle_documentation(self.root, files)
+        result = files[f"{adapter.BUNDLE}/README.md"].decode()
+        destination = "https://github.com/jokerman89/lintel/blob/main/.claude/decisions/example.md"
+        self.assertTrue(result.endswith(text.replace(".claude/decisions/example.md", destination)))
+        self.assertFalse(result.endswith("\n"))
+        self.assertNotIn(f"{adapter.BUNDLE}/.claude/decisions/example.md", files)
+        self.assertEqual(adapter.verify_links(files, self.root), [])
+
     def test_public_links_close_transitively_without_glob_copy(self):
         self.write("README.md", "[First](docs/one.md)\n")
         self.write("docs/one.md", "[Second][two]\n\n[two]: nested/two.md\n")
