@@ -52,6 +52,17 @@ committed-tree verification. `775d334` is NOT its final review candidate. The fa
 preserved source/pending state; the worker is testing a bounded retry and persistent-error
 refusal. Wait for its frozen verified candidate before assigning independent review.
 
+## Continuation gate
+
+All useful independent coordinator preparation is committed. Await worker/reviewer
+notifications rather than polling or duplicating their code investigation. On a package
+review rejection, return exact findings to its original builder, keep the package open,
+and request re-review of the repaired immutable commit. On PASS, integrate only the
+reviewed candidate and report, rerun the smallest joined checks and update its leaf
+acceptance. Do not launch P08's dependent lifecycle implementation until its actual
+predecessor contracts and P03 ownership are available. Use the approved successor cards
+to continue P08-P14 and final P04 binding; do not stop the initiative at the first wave.
+
 ## Blockers and boundaries
 
 Only `jokerman89` may be used for authenticated GitHub operations. Local GitHub CLI and

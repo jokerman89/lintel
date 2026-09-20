@@ -19,10 +19,22 @@ stable profile/work/review contracts, short leaves with package execution, indep
 The [work map](../plans/universal-implementation/work.json) selects the sole task source.
 See [handoff](../plans/universal-implementation/handoff.md) for current worker and integration state.
 
-**What's pending:** first-wave P01-P04 implementation and all downstream acceptance. Original
-Swarming worktree remains at `275a354`; local main baseline is `28061e4`. Remote refresh/PR/CI
-await verified `jokerman89` credentials. Rejected credentials must not be used. No main merge,
-release, production change, private sync or dormant-hook activation is authorized.
+**Verified checkpoint:** independent spec and quality review accepted the historical Swarming
+merge at `e74849d`; report `4bf5315` and both ancestries are integrated in `40c2795`. All 76
+delta destinations are preserved and 17 historical topology/brief/report/review artifacts
+are unchanged. This closes only A22.1/A22.2, not the SW fixes or final A22 integration.
+
+**What's pending:** P01/P02 candidate commits are frozen in independent review; P03 is fixing
+a fail-closed Windows snapshot-publication error found after its first commit. P04 continues
+SW/envelope repairs. P05/P06/P07 implement shared review, host and profile contracts in separate
+worktrees. Coordinator routing (`b72ab47`) and provenance (`9f49e26`) slices await their owning
+package reviews. All successor cards and interface agreements are committed; read the handoff
+for exact worker IDs rather than redispatching duplicate work.
+
+Original Swarming worktree remains at `275a354`. Anonymous public API access with no credentials
+confirmed main is still `28061e4`; authenticated PR/push/CI awaits verified `jokerman89` credentials.
+Rejected credentials must not be used. No main merge, release, production change, private sync
+or dormant-hook activation is authorized.
 
 ## Completed — Universal whole-system quality audit (2026-09-20)
 
