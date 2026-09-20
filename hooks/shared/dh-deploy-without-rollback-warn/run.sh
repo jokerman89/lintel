@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 # dh-deploy-without-rollback-warn — Lintel warn-only hook
 # Surfaces deploy/IaC commits without documented rollback.
+# component: dh-deploy-without-rollback-warn
+# implements: ADR-0008
+# intent: .claude/plans/universal-implementation/packages/P01.md
+# constraints: opt-in warning; target policy is data, not implementation code
+# last_intent_review: 2026-09-20
 
 set -euo pipefail
 LINTEL_REPO_ROOT="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}"  # guard: unset under set -u aborts the hook (fail-closed)
@@ -23,8 +28,11 @@ case "$file_edited" in
   Dockerfile*|docker-compose*) matches_deploy=1 ;;
 esac
 
-if [ "$matches_deploy" -eq 0 ] && [ -f "$LINTEL_REPO_ROOT/lib/pack-resolver.sh" ]; then
-  source "$LINTEL_REPO_ROOT/lib/pack-resolver.sh" 2>/dev/null
+_resolver="$(dirname "${BASH_SOURCE[0]}")/../../../lib/pack-resolver.sh"
+[ -f "$_resolver" ] || _resolver="$LINTEL_HOME/lib/pack-resolver.sh"
+if [ "$matches_deploy" -eq 0 ] && [ -f "$_resolver" ]; then
+  LINTEL_SOURCE_ROOT="$(cd "$(dirname "$_resolver")/.." && pwd)"
+  source "$_resolver" 2>/dev/null
   deploy_glob=$(resolve_pack_field devops_hosting.deploy_path_glob 2>/dev/null || true)
   if [ -n "$deploy_glob" ]; then
     IFS=',' read -ra patterns <<< "$deploy_glob"

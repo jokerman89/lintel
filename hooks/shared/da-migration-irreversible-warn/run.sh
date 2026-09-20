@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 # da-migration-irreversible-warn — Lintel warn-only hook
 # Surfaces when a migration commit lacks a rollback path or includes destructive ops without documented data loss.
+# component: da-migration-irreversible-warn
+# implements: ADR-0008
+# intent: .claude/plans/universal-implementation/packages/P01.md
+# constraints: opt-in warning; target policy is data, not implementation code
+# last_intent_review: 2026-09-20
 
 set -euo pipefail
 LINTEL_REPO_ROOT="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}"  # guard: unset under set -u aborts the hook (fail-closed)
@@ -23,8 +28,11 @@ case "$file_edited" in
     ;;
   *)
     # Check pack policy for migration_glob
-    if [ -f "$LINTEL_REPO_ROOT/lib/pack-resolver.sh" ]; then
-      source "$LINTEL_REPO_ROOT/lib/pack-resolver.sh" 2>/dev/null
+    _resolver="$(dirname "${BASH_SOURCE[0]}")/../../../lib/pack-resolver.sh"
+    [ -f "$_resolver" ] || _resolver="$LINTEL_HOME/lib/pack-resolver.sh"
+    if [ -f "$_resolver" ]; then
+      LINTEL_SOURCE_ROOT="$(cd "$(dirname "$_resolver")/.." && pwd)"
+      source "$_resolver" 2>/dev/null
       mig_glob=$(resolve_pack_field data_architecture.migration_glob 2>/dev/null || true)
       if [ -n "$mig_glob" ]; then
         match=0
