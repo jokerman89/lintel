@@ -217,8 +217,12 @@ Git mode verifies real commit objects, ancestry, actual diff paths and current s
 including non-ignored untracked files. Ignored build churn is not a selected source result.
 UTF-8 text hashes normalize CRLF to LF; binary bytes are exact. Git object IDs retain the exact
 committed revision. File-only snapshots prove existence/content, not a base diff or native isolation.
-Git snapshot support covers regular files; links/submodules need an explicitly reviewed handling
-path. Record these limitations rather than claiming a broader observation.
+Result entries bind type, mode and content digest. Regular Git modes `100644`/`100755` use the
+index's executable bit where `core.filemode=false`. Scoped symbolic links (`120000`) bind the exact
+link target as data, without reading the target's contents; `core.symlinks=false` may represent that
+same link object as a file containing its target text. A type/mode/target change invalidates prior
+evidence. Targets must remain inside the repository; matching metadata grants no permission to
+follow them. Submodules (`160000`) remain outside the existing supported snapshot contract.
 
 Historical v1 reports/reviews remain readable history but cannot close a new attempt. Never inject
 new result IDs or PASS into historical records. The authoritative P05 review/control, P07 profile

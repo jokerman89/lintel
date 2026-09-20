@@ -211,7 +211,12 @@ the prior binding. Checkbox-only completion preserves unchanged acceptance.
 Git snapshots verify real base/head objects and changed paths, current scoped files and non-ignored
 untracked additions. Ignored build artifacts do not masquerade as delivered source. Text hashes
 normalize CRLF to LF for UTF-8 files; binary bytes are exact and Git IDs identify exact committed
-objects. The current Git snapshot path supports regular files, not symlinks/submodules.
+objects. Result entries also bind type and Git mode, using index metadata for the executable bit
+where `core.filemode=false`. Safe scoped symlinks (`120000`) retain their exact link target and
+digest as data without reading target contents. Under `core.symlinks=false`, a file containing that
+exact target text represents the same Git link object. Changed type/mode/target invalidates old
+evidence; an unchanged reviewed link remains valid. Outside-root targets are refused, metadata
+equality never permits following a target, and submodules (`160000`) retain their existing exclusion.
 File-only snapshots verify present content but cannot prove a base diff, host isolation or identity.
 Describe the level observed rather than converting a path string into an invented product change.
 

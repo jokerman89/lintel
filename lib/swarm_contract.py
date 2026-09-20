@@ -579,8 +579,13 @@ def _packages_from_sources(
                 elif dependency not in leaf_ids:
                     package["dependencies"].append(dependency)
         package["dependencies"] = list(dict.fromkeys(package["dependencies"]))
+    for package in packages.values():
         package["prerequisites"] = {
-            dependency: sources.get(dependency, {}).get("complete", False)
+            dependency: (
+                all(packages[dependency]["leaves"].get(leaf, {}).get("complete", False)
+                    for leaf in packages[dependency]["leaf_ids"])
+                if dependency in packages else sources.get(dependency, {}).get("complete", False)
+            )
             for dependency in package["dependencies"]
         }
     for lane in lanes:
@@ -1205,13 +1210,36 @@ def _dependency_blockers(
 ) -> dict[str, list[str]]:
     owners = {leaf: key for key, package in packages.items() for leaf in package["leaf_ids"]}
     by_id = {state["task_id"]: state["state"] for state in states}
+    external_leaves = {
+        dependency: complete
+        for package in packages.values() for dependency, complete in package["prerequisites"].items()
+        if dependency not in packages and dependency not in owners
+    }
+
+    def satisfied(dependency: str, visiting: frozenset[str]) -> bool:
+        if dependency in visiting:
+            return False
+        following = visiting | {dependency}
+        if dependency in packages:
+            package = packages[dependency]
+            complete = (
+                by_id[dependency] == "complete" if dependency in by_id else
+                all(package["leaves"][leaf]["complete"] for leaf in package["leaf_ids"])
+            )
+            return complete and all(satisfied(prerequisite, following) for prerequisite in package["dependencies"])
+        owner = owners.get(dependency)
+        if owner in by_id:
+            return satisfied(owner, following)
+        if owner is not None:
+            leaf = packages[owner]["leaves"][dependency]
+            return leaf["complete"] and all(satisfied(prerequisite, following) for prerequisite in leaf["dependencies"])
+        return external_leaves.get(dependency, False)
+
     blocked: dict[str, list[str]] = {}
     for task_id in by_id:
         package = packages[task_id]
         for dependency in package["dependencies"]:
-            owner = dependency if dependency in packages else owners.get(dependency)
-            satisfied = by_id.get(owner) == "complete" if owner in by_id else package["prerequisites"].get(dependency, False)
-            if not satisfied:
+            if not satisfied(dependency, frozenset({task_id})):
                 blocked.setdefault(task_id, []).append(dependency)
     return blocked
 

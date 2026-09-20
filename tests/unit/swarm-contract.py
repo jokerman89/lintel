@@ -112,15 +112,17 @@ class SwarmFixture:
         report_overrides: Optional[dict[str, object]] = None,
         review_overrides: Optional[dict[str, object]] = None,
         verification_only: bool = False,
+        base: Optional[str] = None,
+        head: Optional[str] = None,
     ) -> None:
         task_id = str(lane["task_id"])
         report_path = str(lane["report"])
         scope = str(lane["write_scope"][0])
         product_path = f"{scope}/file.py"
-        if not verification_only:
+        if not verification_only and head is None:
             self._write(product_path, f"observable result for {task_id}\n")
         changed = ([("outside/file.py" if out_of_scope else product_path)] if not verification_only else []) + [report_path]
-        snapshot = swarm.snapshot_lane(self.root, self.coordination_path, task_id, "attempt-1")
+        snapshot = swarm.snapshot_lane(self.root, self.coordination_path, task_id, "attempt-1", base=base, head=head)
         report = {
             "schema_version": swarm.EVIDENCE_VERSION,
             "artifact_kind": "swarm-report",
@@ -184,6 +186,46 @@ class SwarmContractTests(unittest.TestCase):
             )
             if created.returncode != 0:
                 self.skipTest(f"directory aliases unavailable: {created.stderr or created.stdout}")
+
+    def _git(self, *arguments: str) -> str:
+        env = {key: value for key, value in os.environ.items() if not key.startswith("GIT_")}
+        env.update(GIT_CONFIG_NOSYSTEM="1", GIT_CONFIG_GLOBAL=os.devnull, GIT_TERMINAL_PROMPT="0")
+        result = subprocess.run(
+            ["git", "-C", str(self.fixture.root), "-c", "commit.gpgsign=false",
+             "-c", "core.autocrlf=false", *arguments],
+            env=env, capture_output=True, text=True, check=False,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        return result.stdout.strip()
+
+    def _git_evidence(self) -> tuple[str, str]:
+        self.fixture.coordination["lanes"] = [self.fixture.coordination["lanes"][0]]
+        self.fixture.save()
+        self.fixture._write("src/core/copy.py", "observable result for BC1\n")
+        (self.fixture.root / "empty-hooks").mkdir()
+        self._git("init", "-q", "-b", "fixture")
+        self._git("config", "user.name", "Synthetic fixture")
+        self._git("config", "user.email", "fixture@example.invalid")
+        self._git("config", "core.hooksPath", str(self.fixture.root / "empty-hooks"))
+        self._git("config", "core.filemode", "false")
+        self._git("add", "--", ".claude", "plan.md", "spec.md", "prompt.md", "src/core/copy.py")
+        self._git("commit", "-qm", "test: baseline authority and same-content copy")
+        base = self._git("rev-parse", "HEAD")
+        self.fixture._write("src/core/file.py", "observable result for BC1\n")
+        self._git("add", "--", "src/core/file.py")
+        self._git("commit", "-qm", "test: original regular-file result")
+        head = self._git("rev-parse", "HEAD")
+        self.fixture.write_evidence(self.fixture.coordination["lanes"][0], base=base, head=head)
+        return base, head
+
+    def _cli(self, command: str, *arguments: str, expected: int = 0) -> dict:
+        result = subprocess.run(
+            [sys.executable, "-B", str(REPO_ROOT / "bin/li-swarm.py"), command,
+             "--repo", str(self.fixture.root), "--coord", self.fixture.coordination_path, *arguments],
+            capture_output=True, text=True, check=False,
+        )
+        self.assertEqual(result.returncode, expected, result.stderr + result.stdout)
+        return json.loads(result.stdout or result.stderr)
 
     def test_valid_contract_and_current_dogfood_contract(self) -> None:
         self.assertTrue(self.fixture.validate().ok)
@@ -880,6 +922,214 @@ class SwarmContractTests(unittest.TestCase):
         path = self.fixture.root / "plan.md"
         path.write_text(path.read_text(encoding="utf-8").replace("[x] T0", "[ ] T0"), encoding="utf-8")
         self.assertIn("close.prerequisites", diagnostic_codes(swarm.verify_close(self.fixture.root, self.fixture.coordination_path)[0]))
+
+    def test_git_mode_changes_revoke_bound_result_including_windows_metadata(self) -> None:
+        base, head = self._git_evidence()
+        self.assertTrue(self._cli("verify")["ok"])
+        self._cli("snapshot", "--task", "BC1", "--attempt", "probe", "--base", base, "--head", head)
+        self._git("update-index", "--chmod=+x", "--", "src/core/file.py")
+        self._cli("verify", expected=1)
+        self._git("commit", "-qm", "test: unreviewed executable mode only")
+        self.assertIn("100644 => 100755", self._git("diff", "--summary", head, "HEAD"))
+        self._cli("verify", expected=1)
+        self._cli("snapshot", "--task", "BC1", "--attempt", "probe", "--base", base, "--head", head, expected=1)
+        observed = self._cli("snapshot", "--task", "BC1", "--attempt", "changed-mode",
+                             "--base", base, "--head", self._git("rev-parse", "HEAD"))
+        self.assertEqual(observed["snapshot"]["result"]["files"]["src/core/file.py"]["mode"], "100755")
+        self._git("update-index", "--chmod=-x", "--", "src/core/file.py")
+        self._git("commit", "-qm", "test: restore reviewed regular-file mode")
+        self.assertTrue(self._cli("verify")["ok"])
+        if os.name != "nt":
+            self._git("config", "core.filemode", "true")
+            path = self.fixture.root / "src/core/file.py"
+            original_mode = path.stat().st_mode
+            path.chmod(original_mode | 0o100)
+            self._cli("verify", expected=1)
+            path.chmod(original_mode)
+            self.assertTrue(self._cli("verify")["ok"])
+
+    def test_git_same_content_symlink_and_gitlink_cannot_reuse_regular_result(self) -> None:
+        base, head = self._git_evidence()
+        self.assertTrue(self._cli("verify")["ok"])
+        path = self.fixture.root / "src/core/file.py"
+        content = path.read_bytes()
+        path.unlink()
+        os.symlink("copy.py", path)
+        self.assertTrue(path.is_symlink())
+        self.assertEqual(path.read_bytes(), content)
+        self._cli("verify", expected=1)
+        self._cli("snapshot", "--task", "BC1", "--attempt", "probe", "--base", base, "--head", head, expected=1)
+        path.unlink()
+        path.write_bytes(content)
+        self.assertTrue(self._cli("verify")["ok"])
+        self._git("update-index", "--add", "--cacheinfo", f"160000,{head},src/core/component")
+        self._cli("verify", expected=1)
+        self._git("update-index", "--force-remove", "--", "src/core/component")
+        self.assertTrue(self._cli("verify")["ok"])
+
+    def test_git_unchanged_scoped_result_survives_unrelated_commits_and_crlf(self) -> None:
+        self._git_evidence()
+        self.assertTrue(self._cli("verify")["ok"])
+        self.fixture._write("unrelated.txt", "not owned by the lane\n")
+        self._git("add", "--", "unrelated.txt")
+        self._git("commit", "-qm", "test: unrelated coordinator result")
+        self._git("update-index", "--chmod=+x", "--", "unrelated.txt")
+        self._git("commit", "-qm", "test: unrelated executable bit")
+        self.assertTrue(self._cli("verify")["ok"])
+        path = self.fixture.root / "src/core/file.py"
+        path.write_bytes(path.read_bytes().replace(b"\r\n", b"\n").replace(b"\n", b"\r\n"))
+        self.assertTrue(self._cli("verify")["ok"])
+
+    def test_file_only_snapshot_binds_regular_type_and_rejects_same_content_link(self) -> None:
+        self.fixture.coordination["lanes"] = [self.fixture.coordination["lanes"][0]]
+        self.fixture.save()
+        self.fixture._write("src/core/copy.py", "observable result for BC1\n")
+        self.fixture.write_evidence(self.fixture.coordination["lanes"][0])
+        self.assertTrue(self._cli("verify")["ok"])
+        captured = self._cli("snapshot", "--task", "BC1", "--attempt", "file-snapshot")
+        record = captured["snapshot"]["result"]["files"]["src/core/file.py"]
+        self.assertEqual(record["type"], "file")
+        self.assertIn(record["mode"], ("100644", "100755"))
+        self.assertEqual(len(record["digest"]), 64)
+        path = self.fixture.root / "src/core/file.py"
+        content = path.read_bytes()
+        path.unlink()
+        os.symlink("copy.py", path)
+        self._cli("verify", expected=1)
+        link = self._cli("snapshot", "--task", "BC1", "--attempt", "linked-snapshot")
+        record = link["snapshot"]["result"]["files"]["src/core/file.py"]
+        self.assertEqual((record["type"], record["mode"], record["target"]), ("symlink", "120000", "copy.py"))
+        path.unlink()
+        path.write_bytes(content)
+        self.assertTrue(self._cli("verify")["ok"])
+
+    def test_reviewed_git_symlink_object_survives_native_and_file_checkout(self) -> None:
+        base, _ = self._git_evidence()
+        self._git("config", "core.symlinks", "true")
+        path = self.fixture.root / "src/core/file.py"
+        path.unlink()
+        os.symlink("copy.py", path)
+        self._git("add", "--", "src/core/file.py")
+        self._git("commit", "-qm", "test: explicit symbolic-link result")
+        head = self._git("rev-parse", "HEAD")
+        self.assertTrue(self._git("ls-tree", head, "--", "src/core/file.py").startswith("120000 blob"))
+        observed = self._cli("snapshot", "--task", "BC1", "--attempt", "reviewed-link", "--base", base, "--head", head)
+        record = observed["snapshot"]["result"]["files"]["src/core/file.py"]
+        self.assertEqual((record["type"], record["mode"], record["target"]), ("symlink", "120000", "copy.py"))
+        self.fixture.write_evidence(self.fixture.coordination["lanes"][0], base=base, head=head)
+        self.assertTrue(self._cli("verify")["ok"])
+        path.unlink()
+        path.write_bytes(b"copy.py")
+        self._cli("verify", expected=1)
+        self._git("config", "core.symlinks", "false")
+        self.assertTrue(self._cli("verify")["ok"], "faithful Git link-file checkout preserves the reviewed object")
+        path.write_bytes(b"./copy.py")
+        self._cli("verify", expected=1)
+        path.write_bytes(b"copy.py")
+        self.assertTrue(self._cli("verify")["ok"])
+
+    def test_symlink_snapshot_records_directory_target_without_reading_its_contents(self) -> None:
+        self.fixture.coordination["lanes"] = [self.fixture.coordination["lanes"][0]]
+        self.fixture.save()
+        target = self.fixture.root / "shared"
+        target.mkdir()
+        (target / "not-owned.txt").write_text("target content is not this lane's payload", encoding="utf-8")
+        folder = self.fixture.root / "src/core"
+        folder.mkdir(parents=True)
+        target_text = os.path.join("..", "..", "shared")
+        os.symlink(target_text, folder / "link", target_is_directory=True)
+        result = self._cli("snapshot", "--task", "BC1", "--attempt", "directory-link")
+        files = result["snapshot"]["result"]["files"]
+        self.assertEqual(set(files), {"src/core/link"})
+        self.assertEqual(files["src/core/link"]["target"], target_text)
+        self.assertEqual(files["src/core/link"]["type"], "symlink")
+        (folder / "link").unlink()
+        with tempfile.TemporaryDirectory(prefix="lintel-outside-link-") as temporary:
+            os.symlink(temporary, folder / "link", target_is_directory=True)
+            self._cli("snapshot", "--task", "BC1", "--attempt", "escaping-link", expected=1)
+            (folder / "link").unlink()
+
+    def _unmapped_package_fixture(self, *, dependency: str = "P0", checked: bool = True, prerequisite: str = "-") -> None:
+        self.fixture.coordination["lanes"] = [self.fixture.coordination["lanes"][0]]
+        self.fixture.coordination["lanes"][0]["task_id"] = "P1"
+        self.fixture.coordination["max_parallel"] = 1
+        self.fixture._write(
+            "plan.md",
+            "# Plan\n\n## Work packages\n"
+            "| Package ID | Outcome | Leaf IDs (dependency order) | Owner / edit boundary | Dependencies | Acceptance evidence | Review |\n"
+            "|---|---|---|---|---|---|---|\n"
+            f"| P0 | Preparation | T0 | coordinator; setup | {prerequisite} | observed preparation | mechanical |\n"
+            f"| P1 | Core | T1 | builder; src/core | {dependency} | focused checks | substantive |\n"
+            "\n## Tasks\n"
+            f"- [{'x' if checked else ' '}] T0 Prepare baseline\n"
+            "- [ ] T1 Build result\n",
+        )
+        self.fixture.save()
+
+    def test_unmapped_completed_package_and_original_leaf_allow_frontier_and_close(self) -> None:
+        for dependency in ("P0", "T0"):
+            with self.subTest(dependency=dependency):
+                self._unmapped_package_fixture(dependency=dependency)
+                self.assertTrue(self._cli("validate")["ok"])
+                wave = self._cli("wave")["frontier"]
+                self.assertEqual(wave["dispatch_task_ids"], ["P1"])
+                self.assertEqual(wave["blocked_by"], {})
+                package = swarm.package_sources(self.fixture.root, self.fixture.coordination)["P0"]
+                self.assertEqual(package["leaf_ids"], ["T0"])
+                self.assertTrue(package["leaves"]["T0"]["complete"])
+                lane = self.fixture.coordination["lanes"][0]
+                self.fixture.write_evidence(lane)
+                self.assertTrue(self._cli("verify")["ok"])
+                (self.fixture.root / lane["report"]).unlink()
+                (self.fixture.root / lane["review"]).unlink()
+
+    def test_unmapped_package_incomplete_unknown_and_cyclic_prerequisites_stay_blocked(self) -> None:
+        for checked, dependency, prerequisite in (
+            (False, "P0", "-"), (True, "P-missing", "-"),
+            (True, "P0", "P-missing"), (True, "P0", "P1"),
+        ):
+            with self.subTest(checked=checked, dependency=dependency, prerequisite=prerequisite):
+                self._unmapped_package_fixture(dependency=dependency, checked=checked, prerequisite=prerequisite)
+                wave = self._cli("wave")["frontier"]
+                self.assertEqual(wave["dispatch_task_ids"], [])
+                self.assertEqual(wave["blocked_by"]["P1"], [dependency])
+                lane = self.fixture.coordination["lanes"][0]
+                self.fixture.write_evidence(lane)
+                closed = self._cli("verify", expected=1)
+                self.assertIn("close.prerequisites", {item["code"] for item in closed["diagnostics"]})
+                (self.fixture.root / lane["report"]).unlink()
+                (self.fixture.root / lane["review"]).unlink()
+
+    def test_unmapped_package_checks_all_members_and_mapped_prerequisite_evidence(self) -> None:
+        self._unmapped_package_fixture(prerequisite="P2")
+        path = self.fixture.root / "plan.md"
+        body = path.read_text(encoding="utf-8").replace(
+            "| T0 | coordinator", "| T0, T0b | coordinator",
+        ).replace("\n## Tasks", "| P2 | Prior result | T2 | builder; previous | - | real review | substantive |\n\n## Tasks")
+        body += "- [x] T0b Second preparation step\n- [x] T2 Prior result\n"
+        path.write_text(body, encoding="utf-8")
+        self.fixture.coordination["lanes"].append(self.fixture._lane("P2", 1, "previous"))
+        self.fixture._write(self.fixture.coordination["lanes"][1]["brief"], "# Prior package brief\n")
+        self.fixture.save()
+        wave = self._cli("wave")["frontier"]
+        self.assertEqual(wave["blocked_by"]["P1"], ["P0"], "checked mapped leaves cannot replace report/review")
+        self.fixture.write_evidence(self.fixture.coordination["lanes"][1])
+        self.assertEqual(self._cli("wave")["frontier"]["dispatch_task_ids"], ["P1"])
+        path.write_text(body.replace("[x] T0b", "[ ] T0b"), encoding="utf-8")
+        self.assertEqual(self._cli("wave")["frontier"]["dispatch_task_ids"], [])
+        self.fixture.write_evidence(self.fixture.coordination["lanes"][0])
+        self._cli("verify", expected=1)
+
+    def test_unmapped_package_leaf_dependencies_are_not_hidden_by_checked_status(self) -> None:
+        self._unmapped_package_fixture()
+        path = self.fixture.root / "plan.md"
+        body = path.read_text(encoding="utf-8") + "\n### T0: Prepare baseline\n**Dependencies:** unknown-prerequisite\n"
+        path.write_text(body, encoding="utf-8")
+        wave = self._cli("wave")["frontier"]
+        self.assertEqual(wave["dispatch_task_ids"], [])
+        self.assertEqual(wave["blocked_by"]["P1"], ["P0"])
+        self.fixture.write_evidence(self.fixture.coordination["lanes"][0])
+        self._cli("verify", expected=1)
 
     def test_only_explicit_mechanical_packages_allow_inline_review(self) -> None:
         self._grouped_fixture()
