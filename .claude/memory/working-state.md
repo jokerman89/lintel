@@ -30,9 +30,11 @@ P01 trusted helpers, P02 private sync and P03 context/recovery are integrated at
 catalog was regenerated and checked. Earlier rejected reports remain history, not current
 verdicts. P07 combination, remaining role/browser consumers and final platform checks are open.
 
-**What's pending:** P04 repaired component, P06 navigation repair and P07 full-reference
-invariant are in independent re-review; P05 is correcting immutable QA obligations and
-literal Markdown identity after its second spec rejection. P08-P14 await accepted shared
+**What's pending:** P04 is repairing two quality findings in type/mode identity and
+unmapped-package readiness; P06 repairs standard HTML/Markdown navigation parsing after
+its second spec rejection; P07 has an explicit narrow Windows containment re-plan after
+native path-alias failure. P05 implements coordinated v2 immutable QA obligations and
+literal Markdown identity. P08-P14 await accepted shared
 contracts and will continue the full 26-action scope. Coordinator routing (`b72ab47` plus
 `1d40193`) and provenance (`9f49e26`) await their owning package reviews. All successor cards
 and interface agreements are committed; use the handoff's exact IDs, do not duplicate workers.

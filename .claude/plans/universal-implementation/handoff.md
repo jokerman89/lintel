@@ -33,10 +33,10 @@ from the reviewed historical merge `40c2795`. Current implementation ownership:
 | P01 trusted helpers | `b3853be7-dbbe-4161-9566-7e7d2c50e05e` | ACCEPTED and integrated `a2ef318`; idle, combined P07 gate remains |
 | P02 sync binding | `2e21aa98-3b40-46e7-885d-2ec4161ec35d` | ACCEPTED and integrated `39561c0`; idle, no real private sync activated |
 | P03 context safety | `9f06eebf-a3ee-4867-95ad-eb6e1d22a6d5` | ACCEPTED and integrated `9a1cf17`; idle, downstream consumer/host gates separate |
-| P04 Swarming | `a8960a09-fcd7-4652-a9b6-74ad6a94a029` | Frozen `28fc0df` / product `dca635d`; component re-review running; A22.7 remains open |
-| P05 review evidence | `2329e71f-cd9e-473b-94cf-41c579c29a88` | Replanning immutable QA obligations and literal-Markdown identity after second spec rejection at `e5b92a4` |
-| P06 host adapters | `324863ff-e7cf-4abf-b449-04dd0f096170` | Frozen navigation repair `be69648`; same-reviewer spec then first quality running |
-| P07 profile context | `b9352dfe-1c1e-4ea3-b7d9-0fd008d39b3d` | Frozen `56981ed` / report `1e9a26b`; third spec then first quality running |
+| P04 Swarming | `a8960a09-fcd7-4652-a9b6-74ad6a94a029` | Repairing quality findings: file type/mode identity and unmapped package prerequisites; A22.7 remains open |
+| P05 review evidence | `2329e71f-cd9e-473b-94cf-41c579c29a88` | Implementing approved v2 immutable QA inventory and literal-Markdown identity after second spec rejection |
+| P06 host adapters | `324863ff-e7cf-4abf-b449-04dd0f096170` | Repairing HTML and escaped/wrapped Markdown navigation after second spec rejection at `be69648` |
+| P07 profile context | `b9352dfe-1c1e-4ea3-b7d9-0fd008d39b3d` | Approved Windows path-containment re-plan `c6736e5`; bounded fix and final matrix underway |
 
 All are `lintel-builder` sessions with explicit ownership, local commits, report paths
 and no remote authorization. Only P01/P02/P03 and the historical P04 checkpoint are accepted.
@@ -50,10 +50,10 @@ repair their own findings. All prior reports remain preserved in `reviews/` and 
 | P01 | Final `f078165`; SPEC/QUALITY PASS at `041417a`; idle | `d699f463-ee4d-4950-9b9d-98f35e96f689` |
 | P02 | Final `1b6153f`; SPEC/QUALITY PASS at `9bdaeb4`; idle | `da23fa6f-499b-4011-b39b-a632312a8800` |
 | P03 | Final `2840012`; SPEC/QUALITY PASS at `500adb3`; idle | `efd3f877-550a-4ef0-9009-ed71b95b01ab` |
-| P04 | `28fc0dfcc5fd703237e944369951b41b2d90c183`; component spec then first quality | `ed672f58-2e85-42e2-b1b2-0635ba5b2325` |
-| P05 | New spec failures at `e5b92a4` / `54147fd`; recheck report pending | `6ed9c7df-4845-4d70-88c7-f0746ab28059` |
-| P06 | `be696488fb88ac23eea4269233f5a9fd32b45e02`; spec then first quality | `d2a89ac3-151a-4dc0-ab09-1f3a62465cab` |
-| P07 | `1e9a26b11a39a0945e34003089d61aaf354a9c55` / product `56981ed`; spec then first quality | `a7d78944-c02c-4909-a060-2c4f2a754b00` |
+| P04 | Rejected `dca635d`; quality report `3b2ab12`; await immutable repair | `ed672f58-2e85-42e2-b1b2-0635ba5b2325` |
+| P05 | Rejected `e5b92a4` / `54147fd`; recheck `d83ed02`; await v2 repair | `6ed9c7df-4845-4d70-88c7-f0746ab28059` |
+| P06 | Rejected `be69648`; recheck `3e8abb9`; await parser repair | `d2a89ac3-151a-4dc0-ab09-1f3a62465cab` |
+| P07 | Rejected `56981ed`; native F04 report `e4285fd`; await narrow repair checkpoint | `a7d78944-c02c-4909-a060-2c4f2a754b00` |
 
 ## Accepted local integrations
 
@@ -87,23 +87,34 @@ Provenance slice `9f49e26` awaits P13 independent/selection acceptance.
 - P01's former staging/metadata/record defects are all closed in P01-final.md. The old
   overrestrictive decimal oracle remains historical, not authoritative. Do not re-open
   accepted behavior merely because its earlier rejected reports are still present.
-- P04 `02be6cb` failed physical hardlink ownership, optional YAML constructor stderr
-  confidentiality and root package-boundary parsing. `dca635d` proposes repairs with real
-  hardlink/constructor/root-path cases. Historical preservation acceptance is unchanged;
-  current component and final A22.7 are still unaccepted.
+- P04's hardlink, YAML diagnostic and root-package-boundary findings are closed at
+  `dca635d`, but its first quality pass found current file type/mode omitted from result
+  identity and completed unmapped coordinator-package prerequisites falsely blocked.
+  Repair binds Git/actual entry metadata without losing useful in-scope symlink behavior,
+  and uses original package members/status. Existing unsupported submodules stay explicitly
+  unsupported, not false-green. Historical preservation acceptance is unchanged.
 - P05's first four findings led to `54147fd` / `e5b92a4`, but re-review reproduced new
   false clearance: submitted QA can omit/relabel/change the kind of bound test obligations,
   and indented literal Markdown checkbox examples are treated as progress. Fix the shared
   expectation/identity invariants, preserving true docs-only acceptance and task progress.
-  A shared-schema/API change must be coordinated before dependent consumers assume it.
-- P06's seven omitted public targets led to `be69648`. Real clone/transitive navigation,
-  missing-source/drift and no-private-copy cases passed in its own checks; independent
-  repaired spec and first full component quality review are still pending.
+  Approved decision `c6736e5`: affected bound review/context/QA format is v2 with required
+  immutable qa_requirements. Profile refs/corroboration remain v1, CLI flags stay stable.
+  Preserve ordered non-clearing history, not silent v1 reinterpretation or permanent
+  log poisoning. Exact sample/API must reach P04/P06/P08 before consumer migration.
+- P06's seven omitted public targets closed at `be69648`, but real init/check still
+  silently omit script src/HTML href after quoted `>` and wrapped Markdown targets,
+  while valid Markdown escapes can falsely fail. Structured HTML/escape-aware Markdown
+  repair is underway within owned public-document boundaries. First quality has not run.
 - P07's first two defects (reference-only reads and concurrent rebind publication) closed
   individually at `d02bb24`, but ordinary ID-only bootstrap still recreated lost pins or
   silently adopted a generation. `56981ed` unifies expected-reference publication across
-  all selectors and distinguishes genuine first bind from retained loss. Its committed
-  43-case matrix and nine preserved scripts passed; independent spec/quality remain required.
+  all selectors and distinguishes genuine first bind from retained loss. Independent
+  F01-F03 replay now closes, but native concurrent bootstrap exposed Windows extended
+  path spelling rejected against the equivalent approved ordinary root (F04, P2).
+  After three spec iterations, MasterSession approved the separate bounded repair card
+  `packages/P07-windows-repair.md` in `c6736e5`. Keep realpath authorization, frozen roots,
+  actual I/O/provenance and device/junction/outside rejection; no retry masking.
+  Native and injected comparisons remain distinct. First quality still has not run.
 
 P05's unchanged real four-case producer/reader/SHIP bridge passed with P07 `d02bb24`
 and again with `56981ed` (P05 `54147fd`),
@@ -130,6 +141,8 @@ anonymous public API read (curl defaults disabled, no credentials supplied) veri
 current main is still `28061e434be455ca02f135b73244eaf4f73f3a69` on 2026-09-20.
 Push, PR and authenticated CI operations still require the authorized identity. Do not reuse the rejected injected
 credentials or revive the abandoned lintel-harness repository operation.
+An additional anonymous lookup did not establish the old local `azureflipper` label as
+the authorized account (404); no credential was retrieved or used on that basis.
 
 No new authorization for main merge, releases, production, hook activation or private sync.
 

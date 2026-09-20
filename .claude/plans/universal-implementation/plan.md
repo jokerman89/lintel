@@ -350,6 +350,10 @@ Independent first-wave review outcomes:
 | P01 | `041417a` | PASS; source contract and ADR ownership preserved | PASS; [final](reviews/P01-final.md) | Integrated `a2ef318`; joined P07 check remains |
 | P02 | `9bdaeb4` | PASS; original findings and staged-deletion repair verified | PASS; [final](reviews/P02-final.md) | Integrated `39561c0`; final initiative checks remain |
 | P03 | `500adb3` | PASS; original preservation findings verified | PASS; [final](reviews/P03-final.md) | Integrated `9a1cf17`; assigned downstream consumers remain |
+| P04 component | `dca635d` | Original F01-F03 close; new acceptance counterexamples open | FAIL: type/mode identity and unmapped-package readiness; [recheck](reviews/P04-recheck.md) | Original builder repairs; final A22.7 still open |
+| P05 | `54147fd` | FAIL: QA obligations and literal Markdown acceptance; [recheck](reviews/P05-recheck.md) | Not run | Original builder implements coordinated v2 contract |
+| P06 | `be69648` | FAIL: HTML/Markdown resource parsing; [recheck](reviews/P06-recheck.md) | Not run | Original builder repairs valid local-navigation semantics |
+| P07 | `56981ed` | F01-F03 close; FAIL native Windows F04; [report](reviews/P07-final.md) | Not run | Bounded Windows repair card approved before new checkpoint |
 
 No rejected product batch was integrated. Green original test counts are retained as
 limited evidence, not substituted for the newly failing acceptance cases.
