@@ -4,6 +4,8 @@
 # constraints: stdlib, synthetic files and local Git only
 # last_intent_review: 2026-09-20
 import json
+from contextlib import redirect_stderr, redirect_stdout
+import io
 import os
 from pathlib import Path
 import re
@@ -11,6 +13,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 SOURCE = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(SOURCE / "lib"))
@@ -69,6 +72,156 @@ class ContextSafetyTests(unittest.TestCase):
         exact = safety.select_files(self.root, patterns=["docs/two.md"])
         self.assertEqual([f["path"] for f in exact["files"]], ["docs/two.md"])
         self.assertEqual(len(safety.select_files(self.root, patterns=["docs/*.md"])["files"]), 2)
+
+    def test_globstar_comparisons_are_bounded_by_distinct_states(self):
+        parts = [f"level{number}" for number in range(20)] + ["leaf.txt"]
+        path = "/".join(parts)
+        for pattern, expected, comparisons in (
+                ("**/" * 12 + "missing.txt", False, len(parts)),
+                ("**/" * 12 + "leaf.txt", True, len(parts)),
+                ("**/*/" * 12 + "missing.txt", False, len(parts) * 13),
+                ("**/*/" * 12 + "leaf.txt", True, len(parts) * 13)):
+            with self.subTest(pattern=pattern):
+                count = 0
+                compare = safety.fnmatchcase
+
+                def bounded_compare(part, rule):
+                    nonlocal count
+                    count += 1
+                    self.assertLessEqual(count, comparisons,
+                                         "a path/rule state was compared repeatedly")
+                    return compare(part, rule)
+
+                with patch.object(safety, "fnmatchcase", side_effect=bounded_compare):
+                    self.assertEqual(safety.matches(path, pattern), expected)
+                self.assertGreater(count, 0)
+
+    def test_globstar_long_paths_and_rules_do_not_use_python_recursion(self):
+        path = "/".join(["level"] * 1500 + ["leaf.txt"])
+        for pattern, expected in (
+                ("**/leaf.txt", True),
+                ("**/missing.txt", False),
+                ("**/" * 1500 + "leaf.txt", True),
+                ("**/" * 1500 + "missing.txt", False),
+                (path, True),
+                (path + "/child", False)):
+            with self.subTest(pattern_length=len(pattern), expected=expected):
+                self.assertEqual(safety.matches(path, pattern), expected)
+        self.assertTrue(safety.matches("leaf.txt", "**/" * 1500 + "leaf.txt"))
+
+    def test_separated_globstar_states_are_compared_at_most_once(self):
+        parts = [f"level{number}" for number in range(20)] + ["leaf.txt"]
+        rules = ["level*", "le?el*", "l*vel*", "[l]evel*", "level[0-9]*", "leve?*", "missing.txt"]
+        pattern = "**/" + "/**/".join(rules)
+        compared = set()
+        compare = safety.fnmatchcase
+
+        def unique_state(part, rule):
+            state = (part, rule)
+            self.assertNotIn(state, compared, "distinct spellings identify a repeated matcher state")
+            compared.add(state)
+            return compare(part, rule)
+
+        with patch.object(safety, "fnmatchcase", side_effect=unique_state):
+            self.assertFalse(safety.matches("/".join(parts), pattern))
+        self.assertLessEqual(len(compared), len(parts) * len(rules))
+
+    def test_globstar_normalization_preserves_whole_path_matching(self):
+        cases = (
+            ("leaf.txt", "**/leaf.txt", True),
+            ("leaf.txt", "**/**/leaf.txt", True),
+            ("a/b/leaf.txt", "**/**/leaf.txt", True),
+            ("a/b/leaf.txt", "*/leaf.txt", False),
+            ("a/b/leaf.txt", "*/*/leaf.txt", True),
+            ("a/b/leaf.txt", "a/**/b/**/leaf.txt", True),
+            ("a/b/leaf.txt", "a/**/**/b/**/**/missing.txt", False),
+            ("a/b/leaf.txt", "**/[ab]/**/leaf.?xt", True),
+            ("a/b/leaf.txt", "**/[!ab]/**/leaf.txt", False),
+            ("a/b/leaf.txt", "**/a/**/a/**/leaf.txt", False),
+            ("a/a/leaf.txt", "**/a/**/a/**/leaf.txt", True),
+            ("a/b/leaf.txt", "**/**", True),
+            ("a/b/leaf.txt", "a/**/**", True),
+            ("a/b/leaf.txt", "a/**/**/b", False),
+            ("a/b/leaf.txt", "**/leaf.txt/**", True),
+            ("a/b/leaf.txt", "a/***/leaf.txt", True),
+            ("a/x/y/leaf.txt", "a/***/leaf.txt", False),
+            ("a/b/leaf.txt", "**/leaf.txt/**/child", False),
+            ("a/leaf.txt", "**/LEAF.TXT", False),
+        )
+        for path, pattern, expected in cases:
+            with self.subTest(path=path, pattern=pattern):
+                self.assertEqual(safety.matches(path, pattern), expected)
+
+    def _deep_glob_fixture(self):
+        root = self.base / "bounded-loader"
+        root.mkdir()
+        directory = root
+        for _ in range(20):
+            directory /= "d"
+            directory.mkdir()
+        file = directory / "leaf.txt"
+        file.write_bytes(b"x")
+        return root, file.relative_to(root).as_posix()
+
+    def test_globstar_selector_finishes_with_subprocess_timeout_backstop(self):
+        root, relative = self._deep_glob_fixture()
+        for pattern, expected in (("**/missing.txt", False),
+                                  ("**/" * 12 + "missing.txt", False),
+                                  ("**/" * 12 + "leaf.txt", True),
+                                  ("**/*/" * 12 + "missing.txt", False)):
+            with self.subTest(pattern=pattern):
+                run = subprocess.run(
+                    [sys.executable, "-B", str(SOURCE / "lib/context_safety.py"),
+                     "select", "--root", str(root), "--glob", pattern,
+                     "--max-files", "1", "--max-bytes", "1"],
+                    capture_output=True, text=True, timeout=5)
+                self.assertEqual(run.returncode, 0 if expected else 1, run.stderr)
+                result = json.loads(run.stdout)
+                self.assertEqual([f["path"] for f in result["files"]], [relative] if expected else [])
+                self.assertEqual(result["unmatched"], [] if expected else [pattern])
+
+    def test_persisted_cooling_globstars_are_bounded_on_every_selection(self):
+        root, relative = self._deep_glob_fixture()
+        ignore = root / ".claude/runtime/state/context-ignore.json"
+        missing = "**/" * 12 + "missing.txt"
+        safety.update_exclusions(root, ignore, [], [missing])
+        before = ignore.read_bytes()
+        for _ in range(3):
+            count = 0
+            compare = safety.fnmatchcase
+
+            def bounded_compare(part, rule):
+                nonlocal count
+                count += 1
+                self.assertLessEqual(count, 2 * len(relative.split("/")))
+                return compare(part, rule)
+
+            with patch.object(safety, "fnmatchcase", side_effect=bounded_compare):
+                result = safety.select_files(root, paths=[relative], exclude_file=ignore, max_bytes=1)
+            self.assertEqual([f["path"] for f in result["files"]], [relative])
+            self.assertEqual(ignore.read_bytes(), before)
+        for pattern, expected in ((missing, True), ("**/" * 12 + "leaf.txt", False)):
+            safety.update_exclusions(root, ignore, [], [pattern])
+            run = subprocess.run(
+                [sys.executable, "-B", str(SOURCE / "lib/context_safety.py"),
+                 "select", "--root", str(root), "--path", relative, "--exclude-file", str(ignore)],
+                capture_output=True, text=True, timeout=5)
+            self.assertEqual(run.returncode, 0 if expected else 1, run.stderr)
+            self.assertEqual([f["path"] for f in json.loads(run.stdout)["files"]], [relative] if expected else [])
+        self.assertEqual((root / relative).read_bytes(), b"x")
+
+    def test_matching_failure_is_not_reported_as_an_empty_selection(self):
+        error = ValueError("synthetic matching work bound exceeded")
+        with patch.object(safety, "matches", side_effect=error), self.assertRaisesRegex(ValueError, "work bound"):
+            safety.select_files(self.root, patterns=["**/*.md"])
+        stdout, stderr = io.StringIO(), io.StringIO()
+        args = ["context_safety.py", "select", "--root", str(self.root), "--glob", "**/*.md"]
+        with patch.object(safety, "matches", side_effect=error), patch.object(sys, "argv", args), \
+                redirect_stdout(stdout), redirect_stderr(stderr):
+            status = safety.main()
+        self.assertEqual(status, 2)
+        self.assertEqual(stdout.getvalue(), "")
+        self.assertIn("work bound", stderr.getvalue())
 
     def test_traversal_aliases_and_links_are_refused(self):
         for bad in ("../outside", "/outside", "C:/outside", "docs/../unrelated.txt",

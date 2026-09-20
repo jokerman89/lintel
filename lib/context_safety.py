@@ -157,7 +157,11 @@ def reserve_checkpoint(directory: Path, name: str) -> Path:
 
 
 def matches(path: str, pattern: str, *, root: Path | None = None) -> bool:
-    parts, rules = path.split("/"), pattern.split("/")
+    parts = path.split("/")
+    rules: list[str] = []
+    for rule in pattern.split("/"):
+        if rule != "**" or not rules or rules[-1] != "**":
+            rules.append(rule)
 
     def segment_matches(i: int, j: int) -> bool:
         if fnmatchcase(parts[i], rules[j]):
@@ -173,14 +177,23 @@ def matches(path: str, pattern: str, *, root: Path | None = None) -> bool:
         except FileNotFoundError:
             return False
 
-    def match(i: int, j: int) -> bool:
-        if j == len(rules):
-            return i == len(parts)
-        if rules[j] == "**":
-            return match(i, j + 1) or (i < len(parts) and match(i + 1, j))
-        return i < len(parts) and segment_matches(i, j) and match(i + 1, j + 1)
-
-    return match(0, 0)
+    # reachable[j] means the first j rules matched the consumed path prefix.
+    # Rolling rows evaluate each path/rule state once, without recursive backtracking.
+    reachable = [True] + [False] * len(rules)
+    for j, rule in enumerate(rules):
+        if rule == "**":
+            reachable[j + 1] = reachable[j]
+    for i in range(len(parts)):
+        following = [False] * (len(rules) + 1)
+        for j, rule in enumerate(rules):
+            if rule == "**":
+                following[j + 1] = following[j] or reachable[j + 1]
+            elif reachable[j]:
+                following[j + 1] = segment_matches(i, j)
+        reachable = following
+        if not any(reachable):
+            return False
+    return reachable[-1]
 
 
 def _glob_files(root: Path, pattern: str) -> list[str]:
