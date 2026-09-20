@@ -67,6 +67,15 @@ class _Active(NamedTuple):
     id: int
     kind: str
     width: int
+    style: str
+
+
+class _PhysicalLine(NamedTuple):
+    start: int
+    end: int
+    next_start: int
+    visual: str
+    positions: tuple[int, ...]
 
 
 _RAW_TAGS = frozenset(("pre", "code", "script", "style"))
@@ -99,7 +108,7 @@ def _container(line: str, start: int) -> tuple[str, int, int, int, int]:
         end = cursor + 1
         consumed = end + (line[end:end + 1] == " ")
         return "quote", consumed, consumed - start, cursor, end
-    marker = re.match(r"(?:[-+*]|\d{1,9}[.)])(?= |$)", line[cursor:])
+    marker = re.match(r"(?:[-+*]|[0-9]{1,9}[.)])(?= |$)", line[cursor:])
     if marker:
         end = cursor + marker.end()
         padding_end = end
@@ -109,6 +118,90 @@ def _container(line: str, start: int) -> tuple[str, int, int, int, int]:
         padding = padding if 1 <= padding <= 4 else 1
         return "list", min(end + padding, len(line)), end + padding - start, cursor, end
     return "", start, 0, start, start
+
+
+def _list_style(marker: str) -> str:
+    return "ordered" + marker[-1] if marker[0] in string.digits else marker
+
+
+def _container_interrupts(line: str, cursor: int) -> bool:
+    kind, consumed, _, start, end = _container(line, cursor)
+    if kind == "quote":
+        return True
+    if kind != "list" or not line[consumed:].strip():
+        return False
+    marker = line[start:end]
+    return marker[0] not in string.digits or int(marker[:-1]) == 1
+
+
+def _paragraph_block(line: str, cursor: int) -> bool:
+    body = line[cursor:]
+    indent = len(body) - len(body.lstrip(" "))
+    if indent > 3:
+        return False
+    body = body[indent:]
+    if re.match(r"(?:`{3,}|~{3,}|#{1,6}(?: |$))", body):
+        return True
+    if re.fullmatch(r"(?:=+|-+)[ \t]*", body) or any(
+            re.fullmatch(r"(?:" + re.escape(marker) + r"[ \t]*){3,}", body) for marker in "-*_"):
+        return True
+    if body.startswith(("<!--", "<!", "<?")):
+        return True
+    _, tag, closing = _html_token(body, 0)
+    return bool(tag in _BLOCK_TAGS or (tag in _RAW_TAGS and not closing))
+
+
+def _continue_containers(visual: str, active: list[_Active], paragraph: bool) -> tuple[int, list[_Active], bool]:
+    cursor, kept = 0, []
+    for container in active:
+        if container.kind == "quote":
+            kind, consumed, _, _, _ = _container(visual, cursor)
+            if kind != "quote":
+                break
+            cursor = consumed
+        else:
+            available = len(visual[cursor:]) - len(visual[cursor:].lstrip(" "))
+            if available < container.width:
+                if visual[cursor:].strip():
+                    break
+                cursor = len(visual)
+            else:
+                cursor += container.width
+        kept.append(container)
+    token_kind, _, _, marker_start, marker_end = _container(visual, cursor)
+    sibling = (len(kept) < len(active) and token_kind == "list"
+               and active[len(kept)].kind == "list"
+               and active[len(kept)].style == _list_style(visual[marker_start:marker_end]))
+    lazy = (len(kept) != len(active) and paragraph and bool(visual[cursor:].strip())
+            and not sibling and not _container_interrupts(visual, cursor)
+            and not _paragraph_block(visual, cursor))
+    return cursor, active[:] if lazy else kept, lazy
+
+
+def _physical_lines(text: str) -> list[_PhysicalLine]:
+    result = []
+    for match in re.finditer(r"[^\r\n]*(?:\r\n|\r|\n|$)", text):
+        if not match[0]:
+            continue
+        body = match[0].rstrip("\r\n")
+        visual, positions = _columns(body)
+        result.append(_PhysicalLine(match.start(), match.start() + len(body), match.end(),
+                                    visual, tuple(positions)))
+    return result
+
+
+def _paragraph_limit(physical: list[_PhysicalLine], index: int, active: list[_Active]) -> int:
+    """Use the same container/interruption rules before looking for an inline closer."""
+    limit = physical[index].end
+    for following in physical[index + 1:]:
+        cursor, kept, lazy = _continue_containers(following.visual, active, True)
+        if kept != active or not following.visual[cursor:].strip():
+            break
+        if not lazy and (_container_interrupts(following.visual, cursor)
+                         or _paragraph_block(following.visual, cursor)):
+            break
+        limit = following.end
+    return limit
 
 
 def _tag_end(text: str, start: int) -> int:
@@ -225,52 +318,30 @@ def classify_markdown(text: str) -> MarkdownBoundaries:
     active: list[_Active] = []
     regions: list[Region] = []
     candidates: list[ListItemOccurrence] = []
-    previous_context, paragraph, offset = (), False, 0
-    fence, literal_until, opaque_context = None, 0, None
-    for physical in re.findall(r"[^\r\n]*(?:\r\n|\r|\n|$)", text):
-        if not physical:
-            continue
-        start, next_start = offset, offset + len(physical)
-        body = physical.rstrip("\r\n")
-        end = start + len(body)
-        visual, positions = _columns(body)
-        cursor, kept = 0, []
-        for container in active:
-            if container.kind == "quote":
-                kind, consumed, _, _, _ = _container(visual, cursor)
-                if kind != "quote":
-                    break
-                cursor = consumed
-            else:
-                available = len(visual[cursor:]) - len(visual[cursor:].lstrip(" "))
-                if available < container.width:
-                    if visual[cursor:].strip():
-                        break
-                    cursor = len(visual)
-                else:
-                    cursor += container.width
-            kept.append(container)
-        opening = _container(visual, cursor)[0]
-        block_start = re.match(r" {0,3}(?:`{3,}|~{3,}|#{1,6}(?: |$))", visual[cursor:])
-        lazy = (len(kept) != len(active) and paragraph and bool(visual[cursor:].strip())
-                and not opening and not block_start)
-        if lazy:
-            kept = active[:]
-        active = kept
+    previous_context, paragraph = (), False
+    fence, literal_until, inline_until, opaque_context = None, 0, 0, None
+    physical = _physical_lines(text)
+    for line_index, physical_line in enumerate(physical):
+        start, end, next_start, visual, positions = physical_line
+        cursor, active, lazy = _continue_containers(visual, active, paragraph)
         context = tuple(container.id for container in active)
         if fence and context != fence[2]:
             fence = None
         if opaque_context is not None and (context != opaque_context or not visual[cursor:].strip()):
             opaque_context = None
-        if not fence and start >= literal_until and opaque_context is None and not lazy:
+        if not fence and start >= max(literal_until, inline_until) and opaque_context is None and not lazy:
             while True:
                 kind, consumed, width, marker_start, marker_end = _container(visual, cursor)
                 if not kind:
                     break
+                if paragraph and tuple(container.id for container in active) == previous_context \
+                        and not _container_interrupts(visual, cursor):
+                    break
                 identity = len(containers) + 1
                 marker = Span(start + positions[marker_start], start + positions[marker_end])
                 containers.append(Container(identity, active[-1].id if active else None, kind, marker, consumed))
-                active.append(_Active(identity, kind, width))
+                active.append(_Active(identity, kind, width,
+                                      _list_style(visual[marker_start:marker_end]) if kind == "list" else ">"))
                 if kind == "list":
                     candidates.append(ListItemOccurrence(marker, Span(start + positions[consumed], end),
                                       len(lines), tuple(container.id for container in active), "unknown"))
@@ -298,7 +369,7 @@ def classify_markdown(text: str) -> MarkdownBoundaries:
             kind = "indented_code"
         else:
             kind = "prose"
-        if kind == "prose" and text[content_start:content_start + 1] == "<":
+        if kind == "prose" and content_start >= inline_until and text[content_start:content_start + 1] == "<":
             tag_end, tag, _ = _html_token(text, content_start)
             standalone = tag_end > content_start and not text[tag_end:end].strip()
             if tag not in _RAW_TAGS and (tag in _BLOCK_TAGS or (standalone and not paragraph)):
@@ -308,14 +379,16 @@ def classify_markdown(text: str) -> MarkdownBoundaries:
         if any(containers[identity - 1].kind == "quote" for identity in context):
             regions.append(Region(Span(start, next_start), "quote", None))
         if kind in ("prose", "opaque"):
-            probe = content_start
+            probe = max(content_start, inline_until)
             while probe < end:
                 if text[probe] == "\\" and probe + 1 < end and text[probe + 1] in string.punctuation:
                     probe += 2
                     continue
                 if text[probe] == "`" and kind == "prose":
-                    code_end = _code_end(text, probe, end)
+                    code_end = _code_end(text, probe, _paragraph_limit(physical, line_index, active))
                     if code_end != probe:
+                        regions.append(Region(Span(probe, code_end), "inline_code", None))
+                        inline_until = max(inline_until, code_end)
                         probe = code_end
                         continue
                 if text[probe] == "<":
@@ -334,17 +407,13 @@ def classify_markdown(text: str) -> MarkdownBoundaries:
         paragraph = kind == "prose" and literal_until <= next_start
         if re.match(r"#{1,6}(?: |$)", visual[content:]):
             paragraph = False
-        previous_context, offset = context, next_start
+        previous_context = context
 
     projected = _projection(text, lines)
-    limits = [line.end for line in lines]
-    for index in range(len(lines) - 2, -1, -1):
-        current, following = lines[index:index + 2]
-        if current.kind == following.kind == "prose" and current.container_ids == following.container_ids:
-            limits[index] = limits[index + 1]
     starts = [line.start for line in lines]
     literal_spans = sorted((region.span for region in regions
-                            if region.kind in ("raw_html_body", "comment", "unknown")), key=lambda span: span.start)
+                            if region.kind in ("inline_code", "raw_html_body", "comment", "unknown")),
+                           key=lambda span: span.start)
     cursor, literal_index = 0, 0
     while cursor < len(projected):
         while literal_index < len(literal_spans) and literal_spans[literal_index].end <= cursor:
@@ -361,12 +430,6 @@ def classify_markdown(text: str) -> MarkdownBoundaries:
             regions.append(Region(Span(cursor, cursor + 2), "opaque", None))
             cursor += 2
             continue
-        if projected[cursor] == "`" and line.kind == "prose":
-            code_end = _code_end(projected, cursor, limits[index])
-            if code_end != cursor:
-                regions.append(Region(Span(cursor, code_end), "inline_code", None))
-                cursor = code_end
-                continue
         if projected[cursor] == "<":
             literal_end, found = _literal(projected, cursor)
             if literal_end != cursor:
