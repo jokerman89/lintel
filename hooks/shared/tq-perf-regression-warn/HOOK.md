@@ -20,26 +20,44 @@ Surfaces when an edit touches a perf-budget-bound path. Warning, not block — t
 
 ## Budget metadata
 
-Metadata lookup matches the edited path as literal text, never as a regular expression.
-For the first matching entry, `journey` is read from the preceding line and `p95_ms`
-from the following five lines, stopping before another `journey` or `path` entry.
-Missing fields do not borrow values from a neighboring entry.
+The [TQ dispatch](../../../skills/tq/SKILL.md) pairs this hook with
+[PerfBudgetEnforcer](../../../agents/engineering/PerfBudgetEnforcer.md), whose output
+declares `journey: <name>` and `budget.p95_ms: <number>`. The consumer does not narrow
+these to lowercase identifiers or whole milliseconds.
 
-This warning reads a bounded scalar format, not general YAML: an unquoted `journey`
-contains only lowercase letters and underscores (`[a-z_]+`); `p95_ms` contains only
-decimal digits (`[0-9]+`), representing nonnegative whole milliseconds. Values are
-preserved verbatim, including zero and leading zeros. Fractional values, numeric
-suffixes and journey suffixes outside these patterns are explicit errors, not
-truncated values.
+The reader selects the first record whose complete `path` scalar equals the edited
+path. Prefixes, suffixes, comments and other fields cannot select a record. Both
+budget-based applicability and metadata use that same selection; pack-only matches
+still warn when there is no record. Missing fields never borrow another record's
+values.
 
-Fields may be indented or prefixed with a YAML list marker (`- `). Spaces/tabs around
-the scalar and an inline `#` comment separated from it by whitespace are supported.
-Comment-only lines and differently named keys are not metadata fields.
+Per-journey block mappings start with `journey`; a path-only record may omit it.
+A new journey/path, sequence item, YAML document boundary or Markdown code fence
+ends the preceding record. Sequence records support either journey/path order.
+All fields in the selected record are considered, without a fixed line window.
+The producer's nested `budget.p95_ms` is preferred; the existing flat `p95_ms`
+annotation is still supported. SLO and other nested fields do not supply the budget.
+
+Numeric scalars retain their complete spelling, including fractions (`0.5`, `120.5`),
+signs, decimal exponents, zero/leading zeros and YAML hexadecimal/octal integers.
+Validation does not convert or round the number or impose a new budget-range policy.
+Malformed suffixes, empty values, strings in numeric fields and nonfinite tokens
+such as `.inf`/`.nan` are errors. A journey name may contain uppercase letters,
+digits, punctuation and spaces; its complete value is retained.
+
+This is a reader for the producer's single-line block fields, not a general YAML
+parser. Indentation, sequence markers, plain/single/double-quoted text scalars and
+whitespace-separated inline comments are supported. Quoted text supports doubled
+single quotes and escaped double quotes, backslashes, slashes and tabs. Multiline
+text/escape forms are not interpreted. Comment-only lines and differently named
+keys are not metadata fields. Invalid selected scalars and read/parser failures
+produce diagnostics and exit 1, not a successful metadata-absent warning.
 
 ```yaml
-journey: checkout
+journey: Checkout v2
 path: custom/[id].txt
-p95_ms: 120 # whole milliseconds
+budget:
+  p95_ms: 120.5 # fractional milliseconds are preserved
 ```
 
 ## Why warn-only

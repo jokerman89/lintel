@@ -221,6 +221,20 @@ class Fixture(unittest.TestCase):
 
 
 class TrustedHooks(Fixture):
+    def producer_budget(self, journey: str, p95: str) -> str:
+        producer = (ROOT / "agents/engineering/PerfBudgetEnforcer.md").read_text(
+            encoding="utf-8"
+        )
+        budget = producer.split("```yaml\n", 1)[1].split("\n```", 1)[0]
+        self.assertIn("journey: <name>", budget)
+        self.assertIn("budget:\n  p50_ms: <number>\n  p95_ms: <number>", budget)
+        return (
+            budget.replace("journey: <name>", f"journey: {journey}\npath: {CUSTOM_PATH}")
+            .replace("p95_ms: <number>", f"p95_ms: {p95}")
+            .replace("<number>", "200")
+            + "\n"
+        )
+
     def test_hostile_target_is_never_executed_by_any_resolver_caller(self) -> None:
         for hook in HOOKS:
             with self.subTest(hook=hook):
@@ -348,17 +362,25 @@ class TrustedHooks(Fixture):
     def test_performance_metadata_requires_complete_scalars(self) -> None:
         budget = self.target / ".claude/runtime/state/tq/perf-budget-fixture.md"
         cases = {
-            "p95_ms": ("120oops", "120 999", "120.5", "1e3", "120#comment", "", "# empty"),
-            "journey": ("checkout1", "checkout!", "checkout extra", "checkout#comment", ""),
+            "p95_ms": (
+                "120oops", "120 999", "120#comment", "1e", "1.2.3",
+                ".inf", "-.Inf", "+.INF", ".nan", "NaN", "Infinity",
+                "true", "null", '"120.5"', "", "# empty",
+            ),
+            "journey": (
+                "", "# empty", '""', "'unclosed", '"checkout" trailing',
+                "|", "[checkout]", "&name checkout",
+            ),
+            "path": ('"custom/change.txt', '""', '"custom/change.txt" trailing'),
         }
         for key, values in cases.items():
             for value in values:
                 with self.subTest(key=key, value=value):
-                    fields = {"journey": "checkout", "p95_ms": "120"}
+                    fields = {"journey": "checkout", "path": CUSTOM_PATH, "p95_ms": "120"}
                     fields[key] = value
                     write(
                         budget,
-                        f"journey: {fields['journey']}\npath: {CUSTOM_PATH}\n"
+                        f"journey: {fields['journey']}\npath: {fields['path']}\n"
                         f"p95_ms: {fields['p95_ms']}\n",
                     )
                     result = self.bash(
@@ -369,6 +391,42 @@ class TrustedHooks(Fixture):
                     self.assertIn(f"invalid {key} budget metadata", result.stderr)
                     self.assertNotIn("WARN: perf-budget-bound path", result.stdout)
                     self.assertFalse(self.marker.exists())
+
+    def test_performance_numeric_values_follow_unchanged_producer(self) -> None:
+        budget = self.target / ".claude/runtime/state/tq/perf-budget-fixture.md"
+        for value in (
+            "0.5", "120.5", ".5", "120.", "1e3", "1.205E+2", "+0.5", "-0.5",
+            "0x78", "0o170", "12345678901234567890.12345678901234567890", "1e-400",
+        ):
+            with self.subTest(value=value):
+                write(budget, self.producer_budget("checkout", value))
+                output = self.hook("tq-perf-regression-warn")
+                self.assertIn(
+                    f"WARN: perf-budget-bound path (journey: checkout), "
+                    f"p95 budget {value}ms\n",
+                    output,
+                )
+
+    def test_performance_journey_names_follow_unchanged_producer(self) -> None:
+        budget = self.target / ".claude/runtime/state/tq/perf-budget-fixture.md"
+        for scalar, name in (
+            ("Checkout-v2", "Checkout-v2"),
+            ("checkout1", "checkout1"),
+            ("checkout!", "checkout!"),
+            ("checkout extra", "checkout extra"),
+            ("checkout#mobile", "checkout#mobile"),
+            ('"Checkout: v2 # EU"', "Checkout: v2 # EU"),
+            ("'Member''s checkout'", "Member's checkout"),
+            ('"Checkout \\"mobile\\""', 'Checkout "mobile"'),
+        ):
+            with self.subTest(scalar=scalar):
+                write(budget, self.producer_budget(scalar, "120.5"))
+                output = self.hook("tq-perf-regression-warn")
+                self.assertIn(
+                    f"WARN: perf-budget-bound path (journey: {name}), "
+                    "p95 budget 120.5ms\n",
+                    output,
+                )
 
     def test_performance_metadata_preserves_valid_values_and_comments(self) -> None:
         budget = self.target / ".claude/runtime/state/tq/perf-budget-fixture.md"
@@ -429,6 +487,149 @@ class TrustedHooks(Fixture):
                 self.assertNotIn("journey: decoy", output)
                 self.assertNotIn("p95 budget", output)
 
+    def test_performance_metadata_selects_complete_path_values(self) -> None:
+        budget = self.target / ".claude/runtime/state/tq/perf-budget-fixture.md"
+        for path, decoy in (
+            ("custom/[id].txt", "custom/[id].txt.bak"),
+            ("custom/[id].txt", "other/custom/[id].txt"),
+            ("custom/[id].txt", "custom/[id].txt/child"),
+            ("001", "1"),
+        ):
+            write(self.target / path, "Complete path fixture.\n")
+            for policy in ("*", "unselected/*"):
+                with self.subTest(decoy=decoy, policy=policy):
+                    self.set_policy(policy)
+                    write(
+                        budget,
+                        f"journey: decoy\npath: {decoy}\np95_ms: 999\n\n"
+                        f"journey: checkout\npath: {path}\np95_ms: 120.5\n",
+                    )
+                    output = self.hook("tq-perf-regression-warn", path)
+                    self.assertIn(
+                        "WARN: perf-budget-bound path (journey: checkout), "
+                        "p95 budget 120.5ms\n",
+                        output,
+                    )
+                    self.assertNotIn("journey: decoy", output)
+                    self.assertNotIn("999ms", output)
+
+    def test_performance_non_records_do_not_supply_or_trigger_metadata(self) -> None:
+        budget = self.target / ".claude/runtime/state/tq/perf-budget-fixture.md"
+        decoys = (
+            f"journey: decoy\npath: {CUSTOM_PATH}.bak\np95_ms: 999\n",
+            f"journey: decoy\npath: other/{CUSTOM_PATH}\np95_ms: 999\n",
+            f"# Updated notes for {CUSTOM_PATH}\n",
+            f"# path: {CUSTOM_PATH}\n# p95_ms: 999\n",
+            f"journey: decoy\nnote: {CUSTOM_PATH}\np95_ms: 999\n",
+            f"journey: decoy\nnot_path: {CUSTOM_PATH}\np95_ms: 999\n",
+        )
+        for selected in (False, True):
+            self.set_policy(CUSTOM_PATH if selected else "unselected/*")
+            for decoy in decoys:
+                with self.subTest(selected=selected, decoy=decoy):
+                    write(budget, decoy)
+                    output = self.hook("tq-perf-regression-warn")
+                    if selected:
+                        self.assertIn("WARN: perf-budget-bound path\n", output)
+                    else:
+                        self.assertEqual(output, "")
+                    self.assertNotIn("journey: decoy", output)
+                    self.assertNotIn("p95 budget", output)
+
+    def test_performance_comments_and_other_fields_do_not_mask_record(self) -> None:
+        budget = self.target / ".claude/runtime/state/tq/perf-budget-fixture.md"
+        for notes in (
+            f"# Updated notes for {CUSTOM_PATH}\n",
+            f"note: {CUSTOM_PATH}\n",
+            f"journey: decoy\npath: unrelated.txt # {CUSTOM_PATH}\np95_ms: 999\n",
+        ):
+            with self.subTest(notes=notes):
+                write(budget, notes + "\n" + self.producer_budget("checkout", "120.5"))
+                output = self.hook("tq-perf-regression-warn")
+                self.assertIn(
+                    "WARN: perf-budget-bound path (journey: checkout), "
+                    "p95 budget 120.5ms\n",
+                    output,
+                )
+                self.assertNotIn("999ms", output)
+
+    def test_performance_path_scalars_are_data(self) -> None:
+        self.set_policy("custom/*")
+        budget = self.target / ".claude/runtime/state/tq/perf-budget-fixture.md"
+        for path, scalar in (
+            ("custom/[id].txt", "custom/[id].txt # exact path"),
+            ("custom/[id].txt", '"custom/[id].txt" # exact path'),
+            ("custom/a b.txt", "'custom/a b.txt'"),
+            ("custom/#name.txt", '"custom/#name.txt"'),
+            ("custom/it's.txt", "'custom/it''s.txt'"),
+        ):
+            with self.subTest(path=path, scalar=scalar):
+                write(self.target / path, "Scalar path fixture.\n")
+                write(
+                    budget,
+                    f"journey: checkout\npath: {scalar}\np95_ms: 120.5\n",
+                )
+                # MSYS native argv parsing removes apostrophes; pass path data via env.
+                result = self.bash(
+                    "-c", 'exec "$BASH" --noprofile --norc "$P01_HOOK" "$P01_PATH"',
+                    extra={
+                        "P01_HOOK": (
+                            self.source / "hooks/shared/tq-perf-regression-warn/run.sh"
+                        ).as_posix(),
+                        "P01_PATH": path,
+                    },
+                )
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                self.assertFalse(self.marker.exists())
+                output = result.stdout
+                self.assertIn("journey: checkout", output)
+                self.assertIn("p95 budget 120.5ms", output)
+
+    def test_performance_metadata_uses_whole_record_and_budget_namespace(self) -> None:
+        budget = self.target / ".claude/runtime/state/tq/perf-budget-fixture.md"
+        records = (
+            f"journey: checkout\npath: {CUSTOM_PATH}\n"
+            "slo:\n  p95_ms: 999\nbudget:\n"
+            "  # Enough budget detail to exceed the previous five-line window.\n"
+            "  p50_ms: 20\n  p99_ms: 140\n  burndown_pct: 10\n  p95_ms: 120.5\n",
+            f"journey: checkout\nbudget:\n  p95_ms: 120.5\npath: {CUSTOM_PATH}\n",
+            f"- journey: checkout\n  path: {CUSTOM_PATH}\n"
+            "  budget:\n    p50_ms: 20\n    p95_ms: 120.5\n",
+            f"- path: {CUSTOM_PATH}\n  journey: checkout\n"
+            "  budget:\n    p95_ms: 120.5\n",
+            "```yaml\n" + self.producer_budget("checkout", "120.5") + "```\n",
+        )
+        for record in records:
+            with self.subTest(record=record):
+                write(
+                    budget,
+                    "journey: earlier\npath: unrelated.txt\np95_ms: 999\n\n"
+                    + record
+                    + "\njourney: later\npath: another.txt\np95_ms: 888\n",
+                )
+                output = self.hook("tq-perf-regression-warn")
+                self.assertIn(
+                    "WARN: perf-budget-bound path (journey: checkout), "
+                    "p95 budget 120.5ms\n",
+                    output,
+                )
+                self.assertNotIn("999ms", output)
+                self.assertNotIn("888ms", output)
+
+    def test_performance_absent_budget_does_not_borrow_other_namespaces(self) -> None:
+        budget = self.target / ".claude/runtime/state/tq/perf-budget-fixture.md"
+        write(
+            budget,
+            "p95_ms: 666\n"
+            f"journey: checkout\npath: {CUSTOM_PATH}\n"
+            "slo:\n  p95_ms: 999\nbudget:\n  p50_ms: 20\n"
+            "regression_detection:\n  p95_ms: 888\n"
+            "journey: later\npath: unrelated.txt\nbudget:\n  p95_ms: 777\n",
+        )
+        output = self.hook("tq-perf-regression-warn")
+        self.assertIn("WARN: perf-budget-bound path (journey: checkout)\n", output)
+        self.assertNotIn("p95 budget", output)
+
     def test_performance_missing_metadata_does_not_borrow_adjacent_records(self) -> None:
         budget = self.target / ".claude/runtime/state/tq/perf-budget-fixture.md"
         for record, suffix in (
@@ -450,29 +651,35 @@ class TrustedHooks(Fixture):
     def test_performance_metadata_read_failure_is_not_empty_success(self) -> None:
         budget = self.target / ".claude/runtime/state/tq/perf-budget-fixture.md"
         write(budget, f"path: {CUSTOM_PATH}\np95_ms: 120\n")
-        real_grep = shutil.which("grep", path=str(Path(BASH).parent)) or shutil.which("grep")
-        self.assertIsNotNone(real_grep, "grep is required; no checks may be skipped")
-        stub = self.base / "read failure commands" / "grep"
-        write(
-            stub,
-            '#!/usr/bin/env bash\n'
-            'if [ "${1:-}" = "-B1" ]; then\n'
-            '  echo "synthetic metadata read failure" >&2; exit 2\n'
-            'fi\n'
-            'exec "$REAL_GREP" "$@"\n',
-        )
-        stub.chmod(0o755)
-        result = self.bash(
-            self.source / "hooks/shared/tq-perf-regression-warn/run.sh", CUSTOM_PATH,
-            extra={
-                "PATH": str(stub.parent) + os.pathsep + self.env["PATH"],
-                "REAL_GREP": Path(real_grep).as_posix(),
-            },
-        )
-        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
-        self.assertIn("cannot read budget metadata", result.stderr)
-        self.assertNotIn("WARN: perf-budget-bound path", result.stdout)
-        self.assertFalse(self.marker.exists())
+        commands = self.base / "read failure commands"
+        extra = {"PATH": str(commands) + os.pathsep + self.env["PATH"]}
+        for tool in ("cat", "awk", "grep"):
+            real = shutil.which(tool, path=str(Path(BASH).parent)) or shutil.which(tool)
+            self.assertIsNotNone(real, f"{tool} is required; no checks may be skipped")
+            extra[f"REAL_{tool.upper()}"] = Path(real).as_posix()
+            stub = commands / tool
+            write(
+                stub,
+                '#!/usr/bin/env bash\n'
+                'for arg in "$@"; do\n'
+                '  case "$arg" in *perf-budget-fixture.md)\n'
+                '    echo "synthetic metadata read failure" >&2; exit 2 ;;\n'
+                '  esac\n'
+                'done\n'
+                f'exec "$REAL_{tool.upper()}" "$@"\n',
+            )
+            stub.chmod(0o755)
+        for policy in (CUSTOM_PATH, "unselected/*"):
+            with self.subTest(policy=policy):
+                self.set_policy(policy)
+                result = self.bash(
+                    self.source / "hooks/shared/tq-perf-regression-warn/run.sh", CUSTOM_PATH,
+                    extra=extra,
+                )
+                self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+                self.assertIn("cannot read budget metadata", result.stderr)
+                self.assertNotIn("WARN: perf-budget-bound path", result.stdout)
+                self.assertFalse(self.marker.exists())
 
     def test_registration_is_unchanged_and_domain_hooks_remain_dormant(self) -> None:
         registration = ROOT / "hooks/hooks.json"
