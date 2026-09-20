@@ -1,0 +1,1889 @@
+{
+  "scope": {
+    "area": "All canonical agents",
+    "root": "E:/Workspace/jokerman-session-setup/.claude/worktrees/universal-audit-20260920",
+    "method": "Full semantic read of all69 agents/**/*.md. lines_read is the complete file length (lines1 throughN). Read canonical entry/protocol, architecture, relevant accepted ADRs, agent dispatch/memory concepts and relevant skill callsites; inspected shape/unit validation sources. Richness judged by decisions, evidence, scope and failure handling, not length.",
+    "role_guidance": [
+      "agents/engineering/CodeReviewer.md",
+      "agents/engineering/SystemArchitect.md"
+    ],
+    "review_mode": "Independent read-only audit; report only, no fixes."
+  },
+  "baseline": "28061e4",
+  "coverage": [
+    {
+      "name": "BlogPostDrafter",
+      "path": "agents/communication/BlogPostDrafter.md",
+      "lines_read": 119,
+      "quality": "strong",
+      "action": "pack",
+      "reason": "Useful evidence-led drafting and consent boundaries; move to optional communications pack. Preserve claim provenance; let the brief choose genre/length instead of mandatory humility and CTA.",
+      "evidence": [
+        {
+          "path": "agents/communication/BlogPostDrafter.md",
+          "line": 20
+        },
+        {
+          "path": "agents/communication/BlogPostDrafter.md",
+          "line": 44
+        }
+      ]
+    },
+    {
+      "name": "EmailCustomerDrafter",
+      "path": "agents/communication/EmailCustomerDrafter.md",
+      "lines_read": 113,
+      "quality": "strong",
+      "action": "pack",
+      "reason": "Clear draft-only boundary and audience-specific structure. Keep as a communications-pack mode; make one-ask and word-count rules defaults rather than universal constraints.",
+      "evidence": [
+        {
+          "path": "agents/communication/EmailCustomerDrafter.md",
+          "line": 40
+        },
+        {
+          "path": "agents/communication/EmailCustomerDrafter.md",
+          "line": 113
+        }
+      ]
+    },
+    {
+      "name": "LinkedInPostDrafter",
+      "path": "agents/communication/LinkedInPostDrafter.md",
+      "lines_read": 107,
+      "quality": "mixed",
+      "action": "pack",
+      "reason": "Medium-specific drafting is optional communications capability, not the execution spine. Replace fixed word bands and a 1000+ word post with live format constraints and distinguish article from post.",
+      "evidence": [
+        {
+          "path": "agents/communication/LinkedInPostDrafter.md",
+          "line": 24
+        },
+        {
+          "path": "agents/communication/LinkedInPostDrafter.md",
+          "line": 87
+        }
+      ]
+    },
+    {
+      "name": "SlideNarrationCritic",
+      "path": "agents/communication/SlideNarrationCritic.md",
+      "lines_read": 127,
+      "quality": "mixed",
+      "action": "merge",
+      "reason": "Merge into a phase-based presentation/narration reviewer while preserving independent review dispatch. Pacing and recovery checks are useful, but fixed 150wpm and vocabulary bans need audience/language evidence.",
+      "evidence": [
+        {
+          "path": "agents/communication/SlideNarrationCritic.md",
+          "line": 20
+        },
+        {
+          "path": "agents/communication/SlideNarrationCritic.md",
+          "line": 40
+        }
+      ]
+    },
+    {
+      "name": "EUAIActReviewer",
+      "path": "agents/compliance/EUAIActReviewer.md",
+      "lines_read": 141,
+      "quality": "weak",
+      "action": "rebuild",
+      "reason": "Rebuild as an evidence-led, optional regulatory module: jurisdiction, actor, system/model distinction, effective dates, source version, exceptions and counsel handoff. Flat risk tiers and remembered classifications cannot support EU-ready verdicts.",
+      "evidence": [
+        {
+          "path": "agents/compliance/EUAIActReviewer.md",
+          "line": 25
+        },
+        {
+          "path": "agents/compliance/EUAIActReviewer.md",
+          "line": 32
+        }
+      ]
+    },
+    {
+      "name": "GDPRReviewer",
+      "path": "agents/compliance/GDPRReviewer.md",
+      "lines_read": 146,
+      "quality": "mixed",
+      "action": "rebuild",
+      "reason": "Keep processing-map, legal-basis and DSR reasoning, but rebuild legal-source and applicability handling. The breach deadline conflates authority and subject notices, and customer ownership is not enough to determine controller/processor roles.",
+      "evidence": [
+        {
+          "path": "agents/compliance/GDPRReviewer.md",
+          "line": 71
+        },
+        {
+          "path": "agents/compliance/GDPRReviewer.md",
+          "line": 140
+        }
+      ]
+    },
+    {
+      "name": "SOC2Reviewer",
+      "path": "agents/compliance/SOC2Reviewer.md",
+      "lines_read": 128,
+      "quality": "strong",
+      "action": "pack",
+      "reason": "Strong distinction between boundary, selected criteria and Type I/II evidence. Package with compliance extensions; require current licensed framework references and evidence-period limits before a readiness claim.",
+      "evidence": [
+        {
+          "path": "agents/compliance/SOC2Reviewer.md",
+          "line": 29
+        },
+        {
+          "path": "agents/compliance/SOC2Reviewer.md",
+          "line": 66
+        }
+      ]
+    },
+    {
+      "name": "CustomerEmpathyCheck",
+      "path": "agents/customer/CustomerEmpathyCheck.md",
+      "lines_read": 99,
+      "quality": "strong",
+      "action": "pack",
+      "reason": "Distinct substance-preserving critique with useful cultural/audience calibration. Preserve in communications pack; remove the example's unsupported promise of no future delays.",
+      "evidence": [
+        {
+          "path": "agents/customer/CustomerEmpathyCheck.md",
+          "line": 20
+        },
+        {
+          "path": "agents/customer/CustomerEmpathyCheck.md",
+          "line": 73
+        }
+      ]
+    },
+    {
+      "name": "DemoNarrativeArc",
+      "path": "agents/customer/DemoNarrativeArc.md",
+      "lines_read": 109,
+      "quality": "mixed",
+      "action": "merge",
+      "reason": "Merge arc planning and arc critique as explicit modes of one narrative role. Currently reads an existing script while the narrator requires this reviewer to design the arc first.",
+      "evidence": [
+        {
+          "path": "agents/customer/DemoNarrativeArc.md",
+          "line": 24
+        },
+        {
+          "path": "agents/customer/DemoNarrativeArc.md",
+          "line": 54
+        }
+      ]
+    },
+    {
+      "name": "DemoNarratorJunior",
+      "path": "agents/customer/DemoNarratorJunior.md",
+      "lines_read": 124,
+      "quality": "mixed",
+      "action": "merge",
+      "reason": "Keep rehearsal cues, audience variants and recovery planning in a narration mode. Remove circular senior-role prerequisite, fixed Swedish/English pairing, and unverified recovery stories.",
+      "evidence": [
+        {
+          "path": "agents/customer/DemoNarratorJunior.md",
+          "line": 24
+        },
+        {
+          "path": "agents/customer/DemoNarratorJunior.md",
+          "line": 52
+        }
+      ]
+    },
+    {
+      "name": "ExecutiveBriefingDrafter",
+      "path": "agents/customer/ExecutiveBriefingDrafter.md",
+      "lines_read": 98,
+      "quality": "strong",
+      "action": "pack",
+      "reason": "Good claim-proof discipline and single-outcome brief. Retain in customer/communications pack; infer priorities from actual audience input, not title stereotypes alone.",
+      "evidence": [
+        {
+          "path": "agents/customer/ExecutiveBriefingDrafter.md",
+          "line": 24
+        },
+        {
+          "path": "agents/customer/ExecutiveBriefingDrafter.md",
+          "line": 51
+        }
+      ]
+    },
+    {
+      "name": "PostDemoFollowup",
+      "path": "agents/customer/PostDemoFollowup.md",
+      "lines_read": 118,
+      "quality": "mixed",
+      "action": "pack",
+      "reason": "Specific post-demo strategy is useful in a field/customer pack. Engagement and funding inferences need uncertainty and approved facts; fixed cadence and presumed CIO authority are not neutral defaults.",
+      "evidence": [
+        {
+          "path": "agents/customer/PostDemoFollowup.md",
+          "line": 24
+        },
+        {
+          "path": "agents/customer/PostDemoFollowup.md",
+          "line": 70
+        }
+      ]
+    },
+    {
+      "name": "ProposalDrafter",
+      "path": "agents/customer/ProposalDrafter.md",
+      "lines_read": 137,
+      "quality": "strong",
+      "action": "pack",
+      "reason": "Clear scoped deliverables, acceptance tests and no invented commitments. Move to customer-engagement extension; ensure internal review text cannot leak into customer artifact.",
+      "evidence": [
+        {
+          "path": "agents/customer/ProposalDrafter.md",
+          "line": 24
+        },
+        {
+          "path": "agents/customer/ProposalDrafter.md",
+          "line": 120
+        }
+      ]
+    },
+    {
+      "name": "RFPResponseDrafter",
+      "path": "agents/customer/RFPResponseDrafter.md",
+      "lines_read": 122,
+      "quality": "strong",
+      "action": "pack",
+      "reason": "Strong requirement-by-requirement coverage, evidence and honest capability gaps. Retain as an optional extension with requirement IDs and evidence freshness; factual verification belongs to the responding team before submission.",
+      "evidence": [
+        {
+          "path": "agents/customer/RFPResponseDrafter.md",
+          "line": 24
+        },
+        {
+          "path": "agents/customer/RFPResponseDrafter.md",
+          "line": 104
+        }
+      ]
+    },
+    {
+      "name": "DevOpsToolchain",
+      "path": "agents/devops/DevOpsToolchain.md",
+      "lines_read": 117,
+      "quality": "mixed",
+      "action": "refine",
+      "reason": "Keep implementation role for local CI/container/observability artifacts. Separate local verification from deploy-capable commands and reconcile proposal-first prose with implement-now workflow; do not call act a harmless dry-run.",
+      "evidence": [
+        {
+          "path": "agents/devops/DevOpsToolchain.md",
+          "line": 30
+        },
+        {
+          "path": "agents/devops/DevOpsToolchain.md",
+          "line": 94
+        }
+      ]
+    },
+    {
+      "name": "GHActionsReviewer",
+      "path": "agents/devops/GHActionsReviewer.md",
+      "lines_read": 125,
+      "quality": "mixed",
+      "action": "refine",
+      "reason": "Useful specialized CI threat review. Replace blanket absent-permissions-is-broad claim with effective repository/org/job permissions and add trigger/fork/artifact trust-chain evidence, runtime limitations and command provenance.",
+      "evidence": [
+        {
+          "path": "agents/devops/GHActionsReviewer.md",
+          "line": 26
+        },
+        {
+          "path": "agents/devops/GHActionsReviewer.md",
+          "line": 52
+        }
+      ]
+    },
+    {
+      "name": "K8sManifestReviewer",
+      "path": "agents/devops/K8sManifestReviewer.md",
+      "lines_read": 143,
+      "quality": "mixed",
+      "action": "refine",
+      "reason": "Useful rendered-manifest specialization. Replace fixed memory ratio, vendor registry and universal probe/security demands with workload, cluster-policy and runtime evidence; retain risk-based defaults.",
+      "evidence": [
+        {
+          "path": "agents/devops/K8sManifestReviewer.md",
+          "line": 57
+        },
+        {
+          "path": "agents/devops/K8sManifestReviewer.md",
+          "line": 71
+        }
+      ]
+    },
+    {
+      "name": "PerformanceAnalyzer",
+      "path": "agents/devops/PerformanceAnalyzer.md",
+      "lines_read": 105,
+      "quality": "strong",
+      "action": "keep",
+      "reason": "Strong measurement-first boundary, confidence and valid no-hotspot outcome. Retain as core performance diagnostic; absorb LatencyAnalyzer as a trace/distribution mode while requiring explicit profiling environment.",
+      "evidence": [
+        {
+          "path": "agents/devops/PerformanceAnalyzer.md",
+          "line": 20
+        },
+        {
+          "path": "agents/devops/PerformanceAnalyzer.md",
+          "line": 51
+        }
+      ]
+    },
+    {
+      "name": "TerraformReviewer",
+      "path": "agents/devops/TerraformReviewer.md",
+      "lines_read": 133,
+      "quality": "mixed",
+      "action": "refine",
+      "reason": "Keep state and IaC-specific review. Evaluate backend/locking and provider constraints by use and actual configuration; local state is not automatically a P1 for every module/example.",
+      "evidence": [
+        {
+          "path": "agents/devops/TerraformReviewer.md",
+          "line": 21
+        },
+        {
+          "path": "agents/devops/TerraformReviewer.md",
+          "line": 75
+        }
+      ]
+    },
+    {
+      "name": "PPTNarrativeArchitect",
+      "path": "agents/doc-gen/PPTNarrativeArchitect.md",
+      "lines_read": 114,
+      "quality": "strong",
+      "action": "refine",
+      "reason": "Useful content-goal and audience-first structure. Keep presentation planning, integrate demo/narration modes, and make duration checks derive from real delivery mode; example's slower pacing recommendation moves in the wrong direction.",
+      "evidence": [
+        {
+          "path": "agents/doc-gen/PPTNarrativeArchitect.md",
+          "line": 31
+        },
+        {
+          "path": "agents/doc-gen/PPTNarrativeArchitect.md",
+          "line": 77
+        }
+      ]
+    },
+    {
+      "name": "WebExperienceCritic",
+      "path": "agents/doc-gen/WebExperienceCritic.md",
+      "lines_read": 158,
+      "quality": "mixed",
+      "action": "merge",
+      "reason": "Merge post-generation scoring into one artifact-review contract with DesignSystemAuditor; retain pre-generation hierarchy critique as a distinct mode. Source HTML alone cannot prove visual/keyboard fidelity.",
+      "evidence": [
+        {
+          "path": "agents/doc-gen/WebExperienceCritic.md",
+          "line": 27
+        },
+        {
+          "path": "agents/doc-gen/WebExperienceCritic.md",
+          "line": 72
+        }
+      ]
+    },
+    {
+      "name": "WordTechnicalEditor",
+      "path": "agents/doc-gen/WordTechnicalEditor.md",
+      "lines_read": 139,
+      "quality": "mixed",
+      "action": "rebuild",
+      "reason": "Preserve factual and structural review but provide a real parse/render adapter and evidence coverage. Remove arbitrary limitation-count proxy and contradiction between every-claim verification and five-claim spot-check.",
+      "evidence": [
+        {
+          "path": "agents/doc-gen/WordTechnicalEditor.md",
+          "line": 55
+        },
+        {
+          "path": "agents/doc-gen/WordTechnicalEditor.md",
+          "line": 111
+        }
+      ]
+    },
+    {
+      "name": "AccessibilityChecker",
+      "path": "agents/engineering/AccessibilityChecker.md",
+      "lines_read": 89,
+      "quality": "mixed",
+      "action": "refine",
+      "reason": "Keep focused accessibility specialist. Separate static findings from rendered, keyboard and assistive-tech checks; require exact tested criteria and unknown coverage instead of broad AA verdicts. Recompute example contrast rather than copying claimed ratios.",
+      "evidence": [
+        {
+          "path": "agents/engineering/AccessibilityChecker.md",
+          "line": 46
+        },
+        {
+          "path": "agents/engineering/AccessibilityChecker.md",
+          "line": 74
+        }
+      ]
+    },
+    {
+      "name": "ADRDrafter",
+      "path": "agents/engineering/ADRDrafter.md",
+      "lines_read": 82,
+      "quality": "mixed",
+      "action": "merge",
+      "reason": "Merge formatting/numbering mode into adr-new/architectural decision capture. Respect existing ADR index and status authority; conflicting pre-decision invocation and wait-until-decided rules add avoidable ambiguity.",
+      "evidence": [
+        {
+          "path": "agents/engineering/ADRDrafter.md",
+          "line": 26
+        },
+        {
+          "path": "agents/engineering/ADRDrafter.md",
+          "line": 32
+        }
+      ]
+    },
+    {
+      "name": "APIDesigner",
+      "path": "agents/engineering/APIDesigner.md",
+      "lines_read": 111,
+      "quality": "mixed",
+      "action": "refine",
+      "reason": "Keep explicit contract/versioning specialization; support declared gRPC scope or reject it honestly. Align additive-first rule with examples, distinguish request/response compatibility, and run actual schema/consumer validation.",
+      "evidence": [
+        {
+          "path": "agents/engineering/APIDesigner.md",
+          "line": 20
+        },
+        {
+          "path": "agents/engineering/APIDesigner.md",
+          "line": 84
+        }
+      ]
+    },
+    {
+      "name": "Architect",
+      "path": "agents/engineering/Architect.md",
+      "lines_read": 121,
+      "quality": "strong",
+      "action": "keep",
+      "reason": "Retain component/interface design as a core role. Preserve simplicity, tradeoffs and scoped design writes; use three alternatives only when viable and inherit repository authority through host-neutral entry.",
+      "evidence": [
+        {
+          "path": "agents/engineering/Architect.md",
+          "line": 20
+        },
+        {
+          "path": "agents/engineering/Architect.md",
+          "line": 33
+        }
+      ]
+    },
+    {
+      "name": "BackendArchitect",
+      "path": "agents/engineering/BackendArchitect.md",
+      "lines_read": 104,
+      "quality": "mixed",
+      "action": "merge",
+      "reason": "Merge into Architect's distributed-systems mode unless measured evidence justifies separate dispatch. Much of the role repeats alternatives/topology/observability already owned by Architect, SystemArchitect and ObservabilityArchitect.",
+      "evidence": [
+        {
+          "path": "agents/engineering/BackendArchitect.md",
+          "line": 20
+        },
+        {
+          "path": "agents/engineering/BackendArchitect.md",
+          "line": 37
+        }
+      ]
+    },
+    {
+      "name": "CapacityPlanner",
+      "path": "agents/engineering/CapacityPlanner.md",
+      "lines_read": 119,
+      "quality": "mixed",
+      "action": "refine",
+      "reason": "Meaningful scaling projection distinct from profiling. Require measured baseline, model assumptions, workload scenarios and uncertainty; cloud manifests alone cannot establish actual dollar cost.",
+      "evidence": [
+        {
+          "path": "agents/engineering/CapacityPlanner.md",
+          "line": 22
+        },
+        {
+          "path": "agents/engineering/CapacityPlanner.md",
+          "line": 91
+        }
+      ]
+    },
+    {
+      "name": "ChangelogMaintainer",
+      "path": "agents/engineering/ChangelogMaintainer.md",
+      "lines_read": 80,
+      "quality": "mixed",
+      "action": "merge",
+      "reason": "Move mechanical release-history formatting into capture/release workflow mode. Avoid claimed conventional-commit hook automation and nonexistent-looking standalone agent slash command; preserve protected-section and history reconciliation checks.",
+      "evidence": [
+        {
+          "path": "agents/engineering/ChangelogMaintainer.md",
+          "line": 31
+        },
+        {
+          "path": "agents/engineering/ChangelogMaintainer.md",
+          "line": 68
+        }
+      ]
+    },
+    {
+      "name": "CodeReviewer",
+      "path": "agents/engineering/CodeReviewer.md",
+      "lines_read": 98,
+      "quality": "strong",
+      "action": "refine",
+      "reason": "Keep core independent reviewer with confidence, actionable severity and source scope. Add explicit spec/package/leaf traceability from ADR-0026 and tie prior review reuse to exact source state rather than clock/commits alone.",
+      "evidence": [
+        {
+          "path": "agents/engineering/CodeReviewer.md",
+          "line": 21
+        },
+        {
+          "path": "agents/engineering/CodeReviewer.md",
+          "line": 51
+        }
+      ]
+    },
+    {
+      "name": "ContextBudgetAdvisor",
+      "path": "agents/engineering/ContextBudgetAdvisor.md",
+      "lines_read": 108,
+      "quality": "weak",
+      "action": "rebuild",
+      "reason": "Rebuild from observed host context limits, usage and available controls. Current budgets/prices/perf-mode and decay recommendations treat a local ledger as model-window control and hardcode obsolete universal assumptions.",
+      "evidence": [
+        {
+          "path": "agents/engineering/ContextBudgetAdvisor.md",
+          "line": 42
+        },
+        {
+          "path": "agents/engineering/ContextBudgetAdvisor.md",
+          "line": 87
+        }
+      ]
+    },
+    {
+      "name": "ContractTestArchitect",
+      "path": "agents/engineering/ContractTestArchitect.md",
+      "lines_read": 105,
+      "quality": "mixed",
+      "action": "refine",
+      "reason": "Retain distinct consumer/provider verification design. Replace unconditional enum-addition compatibility with real consumer behavior; include non-HTTP links, concrete runnable verification and schema identity.",
+      "evidence": [
+        {
+          "path": "agents/engineering/ContractTestArchitect.md",
+          "line": 57
+        },
+        {
+          "path": "agents/engineering/ContractTestArchitect.md",
+          "line": 87
+        }
+      ]
+    },
+    {
+      "name": "CostAnalyzer",
+      "path": "agents/engineering/CostAnalyzer.md",
+      "lines_read": 121,
+      "quality": "mixed",
+      "action": "refine",
+      "reason": "Useful cloud/FinOps analysis separate from token budgeting. Require source/date/currency/commitment assumptions and safe authorized data access; fixed utilization and ROI examples should not become automatic deletion/rightsize advice.",
+      "evidence": [
+        {
+          "path": "agents/engineering/CostAnalyzer.md",
+          "line": 37
+        },
+        {
+          "path": "agents/engineering/CostAnalyzer.md",
+          "line": 42
+        }
+      ]
+    },
+    {
+      "name": "DatabaseDesigner",
+      "path": "agents/engineering/DatabaseDesigner.md",
+      "lines_read": 118,
+      "quality": "strong",
+      "action": "refine",
+      "reason": "Keep query-driven schema/migration specialization and explicit live-DB boundary. Delegate cross-store design, verify version-specific DDL/locking and actual query plans; illustrative indexes and migration recipes are not proof.",
+      "evidence": [
+        {
+          "path": "agents/engineering/DatabaseDesigner.md",
+          "line": 29
+        },
+        {
+          "path": "agents/engineering/DatabaseDesigner.md",
+          "line": 35
+        }
+      ]
+    },
+    {
+      "name": "DataPipelineDesigner",
+      "path": "agents/engineering/DataPipelineDesigner.md",
+      "lines_read": 97,
+      "quality": "mixed",
+      "action": "refine",
+      "reason": "Useful ingestion/lineage/orchestration specialty. Replace curated stack/cost recipes with evidence-based selection and add replay, late data, idempotency, deletion propagation and backfill verification contracts.",
+      "evidence": [
+        {
+          "path": "agents/engineering/DataPipelineDesigner.md",
+          "line": 39
+        },
+        {
+          "path": "agents/engineering/DataPipelineDesigner.md",
+          "line": 64
+        }
+      ]
+    },
+    {
+      "name": "DebugForensics",
+      "path": "agents/engineering/DebugForensics.md",
+      "lines_read": 99,
+      "quality": "strong",
+      "action": "keep",
+      "reason": "Retain direct-evidence hypothesis testing, minimal repro and uncertainty. Replace hardcoded outside-voice /codex escalation with discovered independent reviewer and isolate experimental artifacts.",
+      "evidence": [
+        {
+          "path": "agents/engineering/DebugForensics.md",
+          "line": 21
+        },
+        {
+          "path": "agents/engineering/DebugForensics.md",
+          "line": 37
+        }
+      ]
+    },
+    {
+      "name": "DeploymentEngineer",
+      "path": "agents/engineering/DeploymentEngineer.md",
+      "lines_read": 120,
+      "quality": "mixed",
+      "action": "refine",
+      "reason": "Useful cutover strategy separate from implementation. Qualify instant rollback and pattern-by-change recipes with data compatibility, traffic/state assumptions and measured recovery evidence.",
+      "evidence": [
+        {
+          "path": "agents/engineering/DeploymentEngineer.md",
+          "line": 35
+        },
+        {
+          "path": "agents/engineering/DeploymentEngineer.md",
+          "line": 41
+        }
+      ]
+    },
+    {
+      "name": "DocWriter",
+      "path": "agents/engineering/DocWriter.md",
+      "lines_read": 88,
+      "quality": "mixed",
+      "action": "refine",
+      "reason": "Keep maintenance-versus-authoring distinction and respect documented intent when code is wrong. Add executable example verification via capability adapter or declared handoff; rereading cannot substantiate running examples.",
+      "evidence": [
+        {
+          "path": "agents/engineering/DocWriter.md",
+          "line": 41
+        },
+        {
+          "path": "agents/engineering/DocWriter.md",
+          "line": 81
+        }
+      ]
+    },
+    {
+      "name": "Explorer",
+      "path": "agents/engineering/Explorer.md",
+      "lines_read": 87,
+      "quality": "strong",
+      "action": "keep",
+      "reason": "Retain evidence-only search distinct from synthesis. The bounded excerpt output and honest scope limits are substantive. Move model preference/tool metadata to host adapter without losing low-cost lookup intent.",
+      "evidence": [
+        {
+          "path": "agents/engineering/Explorer.md",
+          "line": 21
+        },
+        {
+          "path": "agents/engineering/Explorer.md",
+          "line": 32
+        }
+      ]
+    },
+    {
+      "name": "FrontendBuilder",
+      "path": "agents/engineering/FrontendBuilder.md",
+      "lines_read": 90,
+      "quality": "mixed",
+      "action": "refine",
+      "reason": "Keep implementation distinct from visual design. Consume the concrete frontend-design-spec contract, preserve existing stack, and report actual rendered/interaction evidence; example names an incorrect axe-core integration.",
+      "evidence": [
+        {
+          "path": "agents/engineering/FrontendBuilder.md",
+          "line": 37
+        },
+        {
+          "path": "agents/engineering/FrontendBuilder.md",
+          "line": 75
+        }
+      ]
+    },
+    {
+      "name": "LatencyAnalyzer",
+      "path": "agents/engineering/LatencyAnalyzer.md",
+      "lines_read": 107,
+      "quality": "strong",
+      "action": "merge",
+      "reason": "Merge as the trace/distribution mode of PerformanceAnalyzer. Valuable sample/time-window, multimodality and tail-sampling reasoning should survive; a separate agent duplicates measurement→hotspot→recommend→remeasure lifecycle.",
+      "evidence": [
+        {
+          "path": "agents/engineering/LatencyAnalyzer.md",
+          "line": 20
+        },
+        {
+          "path": "agents/engineering/LatencyAnalyzer.md",
+          "line": 101
+        }
+      ]
+    },
+    {
+      "name": "MigrationPlanner",
+      "path": "agents/engineering/MigrationPlanner.md",
+      "lines_read": 87,
+      "quality": "strong",
+      "action": "refine",
+      "reason": "Retain safety/sequencing role separate from executor, including per-step validation and recovery. Honor approved maintenance windows and represent irreversible recovery honestly instead of requiring a fictional inverse.",
+      "evidence": [
+        {
+          "path": "agents/engineering/MigrationPlanner.md",
+          "line": 22
+        },
+        {
+          "path": "agents/engineering/MigrationPlanner.md",
+          "line": 32
+        }
+      ]
+    },
+    {
+      "name": "Migrator",
+      "path": "agents/engineering/Migrator.md",
+      "lines_read": 87,
+      "quality": "weak",
+      "action": "rebuild",
+      "reason": "Rebuild around artifact-only versus authorized execution modes, exact environment, backup/restore evidence and scoped failure recovery. It currently auto-reverts partial failures and promises all migrations reversible/idempotent without proving conditions.",
+      "evidence": [
+        {
+          "path": "agents/engineering/Migrator.md",
+          "line": 20
+        },
+        {
+          "path": "agents/engineering/Migrator.md",
+          "line": 81
+        }
+      ]
+    },
+    {
+      "name": "ObservabilityArchitect",
+      "path": "agents/engineering/ObservabilityArchitect.md",
+      "lines_read": 120,
+      "quality": "mixed",
+      "action": "refine",
+      "reason": "Keep queryable SLI and signal-design specialty. Add privacy/cardinality/cost budgets and source-backed retention; seven-year audit logs and 100% critical-path sampling are policy choices, not neutral defaults.",
+      "evidence": [
+        {
+          "path": "agents/engineering/ObservabilityArchitect.md",
+          "line": 68
+        },
+        {
+          "path": "agents/engineering/ObservabilityArchitect.md",
+          "line": 89
+        }
+      ]
+    },
+    {
+      "name": "PerfBudgetEnforcer",
+      "path": "agents/engineering/PerfBudgetEnforcer.md",
+      "lines_read": 106,
+      "quality": "mixed",
+      "action": "refine",
+      "reason": "Retain budget design but rename to reflect specification rather than enforcement. Require benchmark environment, variance/statistical threshold rationale and implemented CI evidence; cron/batch criticality is contextual.",
+      "evidence": [
+        {
+          "path": "agents/engineering/PerfBudgetEnforcer.md",
+          "line": 22
+        },
+        {
+          "path": "agents/engineering/PerfBudgetEnforcer.md",
+          "line": 43
+        }
+      ]
+    },
+    {
+      "name": "Planner",
+      "path": "agents/engineering/Planner.md",
+      "lines_read": 114,
+      "quality": "mixed",
+      "action": "refine",
+      "reason": "Useful sequencing and explicit files/verification, but direct role lacks ADR-0026 leaf IDs/dependencies/acceptance and package ownership contract. Prefer mapped authoritative plans and only viable alternatives.",
+      "evidence": [
+        {
+          "path": "agents/engineering/Planner.md",
+          "line": 31
+        },
+        {
+          "path": "agents/engineering/Planner.md",
+          "line": 55
+        }
+      ]
+    },
+    {
+      "name": "ReadOnly",
+      "path": "agents/engineering/ReadOnly.md",
+      "lines_read": 72,
+      "quality": "strong",
+      "action": "keep",
+      "reason": "Retain codebase-answer synthesis distinct from evidence lookup and multi-source research. Good citations, confidence and unchecked-scope output; adapt tools/model and explicitly constrain shell side effects.",
+      "evidence": [
+        {
+          "path": "agents/engineering/ReadOnly.md",
+          "line": 39
+        },
+        {
+          "path": "agents/engineering/ReadOnly.md",
+          "line": 59
+        }
+      ]
+    },
+    {
+      "name": "Refactorer",
+      "path": "agents/engineering/Refactorer.md",
+      "lines_read": 91,
+      "quality": "mixed",
+      "action": "rebuild",
+      "reason": "Preserve behavior-preservation and separate commits, but rebuild safe ownership/recovery and baseline handling. Generic git checkout HEAD is not a scoped undo; automatic revert can conflict with shared work and unexplained red baseline.",
+      "evidence": [
+        {
+          "path": "agents/engineering/Refactorer.md",
+          "line": 28
+        },
+        {
+          "path": "agents/engineering/Refactorer.md",
+          "line": 84
+        }
+      ]
+    },
+    {
+      "name": "RegressionDetective",
+      "path": "agents/engineering/RegressionDetective.md",
+      "lines_read": 122,
+      "quality": "mixed",
+      "action": "refine",
+      "reason": "Strong causal validation beyond bisect result. Require disposable checkout, original-state capture, skip codes, bisect cleanup and explicit treatment of build/env failures before running its mutating investigation.",
+      "evidence": [
+        {
+          "path": "agents/engineering/RegressionDetective.md",
+          "line": 31
+        },
+        {
+          "path": "agents/engineering/RegressionDetective.md",
+          "line": 57
+        }
+      ]
+    },
+    {
+      "name": "ReleaseEngineer",
+      "path": "agents/engineering/ReleaseEngineer.md",
+      "lines_read": 80,
+      "quality": "mixed",
+      "action": "rebuild",
+      "reason": "Role needs explicit planning-only versus mutation modes and artifact/authorization ownership. Current multi-PR release flow does not define module-requested rollback/on-call/pipeline design and can imply deployments via vague pack targets.",
+      "evidence": [
+        {
+          "path": "agents/engineering/ReleaseEngineer.md",
+          "line": 20
+        },
+        {
+          "path": "agents/engineering/ReleaseEngineer.md",
+          "line": 45
+        }
+      ]
+    },
+    {
+      "name": "ResearchSynthesizer",
+      "path": "agents/engineering/ResearchSynthesizer.md",
+      "lines_read": 95,
+      "quality": "mixed",
+      "action": "refine",
+      "reason": "Keep cited synthesis, gaps and uncertainty. Correct code-over-accepted-ADR precedence and add primary-source freshness/capability contract; conflicting code is evidence of divergence, not authority to redefine intent.",
+      "evidence": [
+        {
+          "path": "agents/engineering/ResearchSynthesizer.md",
+          "line": 47
+        },
+        {
+          "path": "agents/engineering/ResearchSynthesizer.md",
+          "line": 89
+        }
+      ]
+    },
+    {
+      "name": "SanityChecker",
+      "path": "agents/engineering/SanityChecker.md",
+      "lines_read": 101,
+      "quality": "strong",
+      "action": "keep",
+      "reason": "Retain cross-component audit distinct from diff review. Legitimate synonyms, scoped sampling and deferred-decision history are strong; require evidence for dynamic reachability before declaring dead code.",
+      "evidence": [
+        {
+          "path": "agents/engineering/SanityChecker.md",
+          "line": 21
+        },
+        {
+          "path": "agents/engineering/SanityChecker.md",
+          "line": 33
+        }
+      ]
+    },
+    {
+      "name": "SchemaArchitect",
+      "path": "agents/engineering/SchemaArchitect.md",
+      "lines_read": 99,
+      "quality": "strong",
+      "action": "keep",
+      "reason": "Retain cross-store ownership, partitioning and dimensional reasoning distinct from single-store schema design. Extend artifact provenance and data consistency verification without adding another generic architect.",
+      "evidence": [
+        {
+          "path": "agents/engineering/SchemaArchitect.md",
+          "line": 35
+        },
+        {
+          "path": "agents/engineering/SchemaArchitect.md",
+          "line": 87
+        }
+      ]
+    },
+    {
+      "name": "SystemArchitect",
+      "path": "agents/engineering/SystemArchitect.md",
+      "lines_read": 119,
+      "quality": "strong",
+      "action": "refine",
+      "reason": "Retain NFR/invariant/emergent-system specialty. Add verification and source fields to emitted NFR schema, align actual boundary-review callsite and avoid summing per-component p99 values as an end-to-end percentile.",
+      "evidence": [
+        {
+          "path": "agents/engineering/SystemArchitect.md",
+          "line": 48
+        },
+        {
+          "path": "agents/engineering/SystemArchitect.md",
+          "line": 98
+        }
+      ]
+    },
+    {
+      "name": "TestRunner",
+      "path": "agents/engineering/TestRunner.md",
+      "lines_read": 93,
+      "quality": "strong",
+      "action": "refine",
+      "reason": "Retain independent run/classify/report boundary. Record exact source/environment/command scope and rerun when relevant input changes; ten-minute freshness is not evidence. Restrict suites with external effects.",
+      "evidence": [
+        {
+          "path": "agents/engineering/TestRunner.md",
+          "line": 21
+        },
+        {
+          "path": "agents/engineering/TestRunner.md",
+          "line": 49
+        }
+      ]
+    },
+    {
+      "name": "DesignSystemAuditor",
+      "path": "agents/frontend/DesignSystemAuditor.md",
+      "lines_read": 195,
+      "quality": "weak",
+      "action": "rebuild",
+      "reason": "Rebuild gate semantics around non-negotiable failures and measured/not-tested/N/A evidence. Current weighted scores can pass an AA failure, and screenshot/static degradation cannot establish dynamic behavior; merge duplicate final UX scoring.",
+      "evidence": [
+        {
+          "path": "agents/frontend/DesignSystemAuditor.md",
+          "line": 109
+        },
+        {
+          "path": "agents/frontend/DesignSystemAuditor.md",
+          "line": 189
+        }
+      ]
+    },
+    {
+      "name": "FrontendArchitect",
+      "path": "agents/frontend/FrontendArchitect.md",
+      "lines_read": 156,
+      "quality": "mixed",
+      "action": "refine",
+      "reason": "Preserve pre-render token plan, visual thesis and spec synthesis. Make framework/library and interaction choices derive from existing project and brief; remove default smooth-scroll and inaccurate cross-framework claim. Reconcile missing named synthesis dispatch.",
+      "evidence": [
+        {
+          "path": "agents/frontend/FrontendArchitect.md",
+          "line": 61
+        },
+        {
+          "path": "agents/frontend/FrontendArchitect.md",
+          "line": 73
+        }
+      ]
+    },
+    {
+      "name": "MotionDirector",
+      "path": "agents/frontend/MotionDirector.md",
+      "lines_read": 117,
+      "quality": "mixed",
+      "action": "rebuild",
+      "reason": "Keep cause-and-effect motion and reduced-motion floor, but replace stale library/license lookup tree and mandatory hero/3–5 animations with need-driven decisions. Current Club GSAP paid-license assertions are obsolete.",
+      "evidence": [
+        {
+          "path": "agents/frontend/MotionDirector.md",
+          "line": 62
+        },
+        {
+          "path": "agents/frontend/MotionDirector.md",
+          "line": 73
+        }
+      ]
+    },
+    {
+      "name": "ShaderEngineer",
+      "path": "agents/frontend/ShaderEngineer.md",
+      "lines_read": 118,
+      "quality": "mixed",
+      "action": "refine",
+      "reason": "Distinct specialist with valuable no-shader short circuit. Replace unmeasured device-safety/bundle claims and guessed draw-call ceilings with target-device profiling evidence and versioned fallback contracts.",
+      "evidence": [
+        {
+          "path": "agents/frontend/ShaderEngineer.md",
+          "line": 48
+        },
+        {
+          "path": "agents/frontend/ShaderEngineer.md",
+          "line": 104
+        }
+      ]
+    },
+    {
+      "name": "TypographyCurator",
+      "path": "agents/frontend/TypographyCurator.md",
+      "lines_read": 142,
+      "quality": "mixed",
+      "action": "refine",
+      "reason": "Keep readable role/axes/loading decisions but eliminate conflicting profile-first versus baked-in Inter defaults. Use script/language coverage, existing brand, license evidence and measured loading rather than finite font catalog.",
+      "evidence": [
+        {
+          "path": "agents/frontend/TypographyCurator.md",
+          "line": 20
+        },
+        {
+          "path": "agents/frontend/TypographyCurator.md",
+          "line": 63
+        }
+      ]
+    },
+    {
+      "name": "ComplianceOfficer",
+      "path": "agents/security/ComplianceOfficer.md",
+      "lines_read": 107,
+      "quality": "weak",
+      "action": "rebuild",
+      "reason": "Rebuild source/version/applicability/evidence mapping and unknown/NA verdicts. Cross-framework orchestration is valuable, but incorrect ISO2022 control count and generic framework inventory undermine trustworthy coverage.",
+      "evidence": [
+        {
+          "path": "agents/security/ComplianceOfficer.md",
+          "line": 45
+        },
+        {
+          "path": "agents/security/ComplianceOfficer.md",
+          "line": 57
+        }
+      ]
+    },
+    {
+      "name": "DependencyAuditor",
+      "path": "agents/security/DependencyAuditor.md",
+      "lines_read": 116,
+      "quality": "mixed",
+      "action": "refine",
+      "reason": "Retain native scanner interpretation, transitive paths and offline honesty. Replace license-label-only blockers with distribution/use/exception policy and confirm advisory relevance/current evidence.",
+      "evidence": [
+        {
+          "path": "agents/security/DependencyAuditor.md",
+          "line": 31
+        },
+        {
+          "path": "agents/security/DependencyAuditor.md",
+          "line": 62
+        }
+      ]
+    },
+    {
+      "name": "JWTSecurityReviewer",
+      "path": "agents/security/JWTSecurityReviewer.md",
+      "lines_read": 134,
+      "quality": "mixed",
+      "action": "rebuild",
+      "reason": "Rebuild on library/provider-specific validation and current RFC guidance, preserving token-versus-flow distinction. Fixed validation order, 24h JWKS maximum, annual key rotation and >1h blanket findings lack applicability/source contracts.",
+      "evidence": [
+        {
+          "path": "agents/security/JWTSecurityReviewer.md",
+          "line": 57
+        },
+        {
+          "path": "agents/security/JWTSecurityReviewer.md",
+          "line": 71
+        }
+      ]
+    },
+    {
+      "name": "OAuthFlowReviewer",
+      "path": "agents/security/OAuthFlowReviewer.md",
+      "lines_read": 132,
+      "quality": "mixed",
+      "action": "refine",
+      "reason": "Keep flow/scopes/redirect/token review and JWT handoff. Apply grant/client-specific requirements, native redirect exceptions, current BCP and evidence instead of universal state/https/storage rules.",
+      "evidence": [
+        {
+          "path": "agents/security/OAuthFlowReviewer.md",
+          "line": 53
+        },
+        {
+          "path": "agents/security/OAuthFlowReviewer.md",
+          "line": 61
+        }
+      ]
+    },
+    {
+      "name": "PrivacyBoundaryAudit",
+      "path": "agents/security/PrivacyBoundaryAudit.md",
+      "lines_read": 97,
+      "quality": "weak",
+      "action": "rebuild",
+      "reason": "Keep field-level boundary tracing but derive allowed flows from actual policy/contracts/jurisdiction. EU-only and imagined PII settings currently become blockers; require observed flow, uncertainty and transfer mechanism.",
+      "evidence": [
+        {
+          "path": "agents/security/PrivacyBoundaryAudit.md",
+          "line": 43
+        },
+        {
+          "path": "agents/security/PrivacyBoundaryAudit.md",
+          "line": 78
+        }
+      ]
+    },
+    {
+      "name": "SBOMAuditor",
+      "path": "agents/security/SBOMAuditor.md",
+      "lines_read": 110,
+      "quality": "mixed",
+      "action": "merge",
+      "reason": "Merge into DependencyAuditor as SBOM evidence mode with SPDX/CycloneDX validation, provenance/completeness and artifact digest. It duplicates license/CVE triage while adding largely heuristic maintenance scores.",
+      "evidence": [
+        {
+          "path": "agents/security/SBOMAuditor.md",
+          "line": 38
+        },
+        {
+          "path": "agents/security/SBOMAuditor.md",
+          "line": 44
+        }
+      ]
+    },
+    {
+      "name": "SecretsScanReviewer",
+      "path": "agents/security/SecretsScanReviewer.md",
+      "lines_read": 106,
+      "quality": "mixed",
+      "action": "rebuild",
+      "reason": "Keep triage and owner-based remediation, but rebuild redaction/retention and incident authority. Remove MS security, fixed rotation deadlines and false pre-commit-hook claim; never echo secret values or test live credentials without scope.",
+      "evidence": [
+        {
+          "path": "agents/security/SecretsScanReviewer.md",
+          "line": 49
+        },
+        {
+          "path": "agents/security/SecretsScanReviewer.md",
+          "line": 101
+        }
+      ]
+    },
+    {
+      "name": "SecurityAuditor",
+      "path": "agents/security/SecurityAuditor.md",
+      "lines_read": 99,
+      "quality": "strong",
+      "action": "refine",
+      "reason": "Retain exploit-path and uncertainty-driven independent audit. Normalize severity and evidence/coverage with general reviewer; add current source/tool evidence and avoid canned risk classification from examples.",
+      "evidence": [
+        {
+          "path": "agents/security/SecurityAuditor.md",
+          "line": 30
+        },
+        {
+          "path": "agents/security/SecurityAuditor.md",
+          "line": 77
+        }
+      ]
+    },
+    {
+      "name": "ThreatModelDrafter",
+      "path": "agents/security/ThreatModelDrafter.md",
+      "lines_read": 117,
+      "quality": "strong",
+      "action": "keep",
+      "reason": "Retain design-level trust-boundary and explicit residual-risk decisions distinct from implementation security review. Add revalidation triggers/owners/tests for accepted risk without replacing the compact useful contract.",
+      "evidence": [
+        {
+          "path": "agents/security/ThreatModelDrafter.md",
+          "line": 29
+        },
+        {
+          "path": "agents/security/ThreatModelDrafter.md",
+          "line": 64
+        }
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "AG-01",
+      "priority": "P1",
+      "title": "Give mutating investigation and recovery an attributable write boundary",
+      "problem": "Refactorer prescribes REVERT (git checkout HEAD) after any failure; RegressionDetective runs git bisect and a revert despite describing itself as a read-only locator. Neither captures dirty state, isolates the investigation, limits undo to its owned changes, or restores bisect state. Migrator separately auto-reverts partial forward failure without classifying recoverability.",
+      "impact": "A delegated role can move or modify the coordinator's checkout, interfere with concurrent work, lose uncommitted changes if it expands the stated revert into a tree reset, or compound a partial live migration. The shown checkout command is not a reliable scoped undo in its own right.",
+      "recommendation": "Use a disposable worktree or attributable patch for bisect and structural experiments; capture source/environment/dirty-state and owned paths, always reset bisect in that sandbox, and preserve findings rather than repairing them. Permit migration rollback only when the approved plan explicitly covers the exact failure state and authorization boundary.",
+      "evidence": [
+        {
+          "path": "agents/engineering/Refactorer.md",
+          "line": 84
+        },
+        {
+          "path": "agents/engineering/RegressionDetective.md",
+          "line": 36
+        },
+        {
+          "path": "agents/engineering/RegressionDetective.md",
+          "line": 57
+        },
+        {
+          "path": "agents/engineering/Migrator.md",
+          "line": 81
+        },
+        {
+          "path": "AGENTS.md",
+          "line": 142
+        }
+      ],
+      "verification": "Static full-role review plus callsites build:351–355 and da:83; no destructive command or migration executed. Acceptance: dirty-worktree and partial-migration fixtures prove original user changes remain intact and unsupported rollback stops.",
+      "confidence": "high"
+    },
+    {
+      "id": "AG-02",
+      "priority": "P1",
+      "title": "Research synthesis reverses the accepted document authority",
+      "problem": "ResearchSynthesizer resolves contradiction as usually code > docs > old ADRs. The current session protocol explicitly gives authoritative architecture/specifications/current documentation/accepted ADRs precedence over notes and requires deviations to be surfaced. Age alone does not supersede an accepted ADR.",
+      "impact": "DISCOVER can feed PLAN a synthesized 'canonical' position that silently reinterprets accepted architecture as whatever implementation currently does.",
+      "recommendation": "Load the repository's declared authority and status of each decision; report code/spec disagreement as a deviation requiring the documented resolution path. Preserve source provenance and separate observed behavior, intended behavior and proposed change.",
+      "evidence": [
+        {
+          "path": "agents/engineering/ResearchSynthesizer.md",
+          "line": 89
+        },
+        {
+          "path": "skills/discover/SKILL.md",
+          "line": 135
+        },
+        {
+          "path": "AGENTS.md",
+          "line": 90
+        },
+        {
+          "path": "AGENTS.md",
+          "line": 228
+        }
+      ],
+      "verification": "Compared full role with current AGENTS session protocol and concrete DISCOVER dispatch. Acceptance: fixture with buggy code contradicting an accepted ADR must report divergence rather than recommend changing the ADR to fit code.",
+      "confidence": "high"
+    },
+    {
+      "id": "AG-03",
+      "priority": "P1",
+      "title": "The visual quality gate can award GREEN to an accessibility failure",
+      "problem": "DesignSystemAuditor gives normal-text 4.5:1 contrast only 20 of 100 positive points, while the explicit critical-text penalty starts below 3:1. All other checks can therefore produce 80/GREEN when normal text is 3.5:1. It also permits static-only degradation while scoring live FPS, responsive fidelity, focus and keyboard behavior without a not-tested state.",
+      "impact": "The artifact can pass the customer-share gate despite failing its declared AA requirement or lacking the observations necessary to prove a pass.",
+      "recommendation": "Separate hard accessibility/functional failures from preference scores. Carry pass/fail/not-tested/not-applicable per criterion with command/browser/viewport/artifact evidence; any required unknown keeps completion open. Merge final WebExperienceCritic scoring into the same gate while retaining pre-design critique.",
+      "evidence": [
+        {
+          "path": "agents/frontend/DesignSystemAuditor.md",
+          "line": 109
+        },
+        {
+          "path": "agents/frontend/DesignSystemAuditor.md",
+          "line": 119
+        },
+        {
+          "path": "agents/frontend/DesignSystemAuditor.md",
+          "line": 156
+        },
+        {
+          "path": "agents/frontend/DesignSystemAuditor.md",
+          "line": 189
+        },
+        {
+          "path": "skills/frontend-design-review/SKILL.md",
+          "line": 206
+        },
+        {
+          "path": "agents/doc-gen/WebExperienceCritic.md",
+          "line": 106
+        }
+      ],
+      "verification": "Arithmetic counterexample from rubric (100−20=80) and full review of fallback semantics; no browser test was run. Acceptance: 3.5:1 normal text fails regardless of aesthetic points; absent browser cannot yield verified keyboard/FPS pass.",
+      "confidence": "high",
+      "sources": [
+        {
+          "title": "W3C understanding SC1.4.3",
+          "url": "https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html",
+          "accessed": "2026-09-20",
+          "note": "Normal text generally requires 4.5:1; large-text criterion differs."
+        }
+      ]
+    },
+    {
+      "id": "AG-04",
+      "priority": "P1",
+      "title": "Regulatory reviewers embed incorrect facts without source or applicability gates",
+      "problem": "GDPRReviewer states 72-hour notice to both authority and affected subjects. Official Articles33 and34 set different triggers and timing. ComplianceOfficer says Annex A has114 controls in the2022 revision; ISO's committee publication documents93. EUAIActReviewer carries forward classifications unless function changes but does not require legal-version/effective-date revalidation.",
+      "impact": "These roles emit compliant/EU-ready/covered verdicts and feed REVIEW/SC; wrong or stale rules can create false assurance or unnecessary blockers.",
+      "recommendation": "Rebuild regulatory specialization around current primary sources, exact jurisdiction/actor/version/effective date, applicable exceptions, evidence coverage, unknown verdicts and legal-review handoff. Keep generic control/evidence orchestration in core; distribute maintained regime modules as optional packs.",
+      "evidence": [
+        {
+          "path": "agents/compliance/GDPRReviewer.md",
+          "line": 71
+        },
+        {
+          "path": "agents/compliance/GDPRReviewer.md",
+          "line": 135
+        },
+        {
+          "path": "agents/security/ComplianceOfficer.md",
+          "line": 45
+        },
+        {
+          "path": "agents/compliance/EUAIActReviewer.md",
+          "line": 32
+        },
+        {
+          "path": "agents/compliance/EUAIActReviewer.md",
+          "line": 126
+        }
+      ],
+      "verification": "Verified GDPR against EUR-Lex Articles33–34 and ISO count against official SC27 journal pp13 and21 plus current ISO27001:2022 publication page. No advice on a real processing incident or legal classification was given. Acceptance: known-version fixtures and unknown-source refusal cases.",
+      "confidence": "high",
+      "sources": [
+        {
+          "title": "GDPR official text Articles33–34",
+          "url": "https://eur-lex.europa.eu/eli/reg/2016/679/oj/eng",
+          "accessed": "2026-09-20",
+          "note": "Authority notice generally within72h where feasible subject to Art33 conditions; subject communication uses high-risk trigger and without-undue-delay timing with Art34 exceptions."
+        },
+        {
+          "title": "ISO SC27 journal on2022 controls",
+          "url": "https://committee.iso.org/files/live/sites/jtc1sc27/files/resources/ISO-IECJTC1-SC27_N22394_SC%2027%20Journal%20Volume%202,%20Issue%202%20-%20Special%20issue%20on%20ISO-IEC%2027002.pdf",
+          "accessed": "2026-09-20",
+          "note": "Pages13/21 describe93 controls replacing114 and alignment to AnnexA."
+        },
+        {
+          "title": "ISO27001:2022 current publication",
+          "url": "https://www.iso.org/standard/27001",
+          "accessed": "2026-09-20",
+          "note": "Confirms2022 publication and2024 amendment; journal explains count."
+        }
+      ]
+    },
+    {
+      "id": "AG-05",
+      "priority": "P2",
+      "title": "Neutral core agents still impose company and local policy",
+      "problem": "SecretsScanReviewer routes incidents to MS security/MS incident response and calls no-secrets-in-edit a pre-commit hook. K8sManifestReviewer names ACR for MS. PrivacyBoundaryAudit presumes EU-only compute and even calls hypothetical PII passthrough a P1. ObservabilityArchitect inserts seven-year audit retention.",
+      "impact": "Users of a neutral default inherit nonexistent escalation contacts, misleading host-enforcement claims and unapproved residency/retention constraints.",
+      "recommendation": "Resolve policy owner, incident channel, allowed transfers, retention and vendor preferences from explicit repo/pack input. Distinguish absent policy from a detected violation. Keep a neutral local technical floor; move customer/comms/regulatory specializations into discoverable optional extensions.",
+      "evidence": [
+        {
+          "path": "agents/security/SecretsScanReviewer.md",
+          "line": 49
+        },
+        {
+          "path": "agents/security/SecretsScanReviewer.md",
+          "line": 95
+        },
+        {
+          "path": "agents/security/SecretsScanReviewer.md",
+          "line": 101
+        },
+        {
+          "path": "agents/devops/K8sManifestReviewer.md",
+          "line": 71
+        },
+        {
+          "path": "agents/security/PrivacyBoundaryAudit.md",
+          "line": 43
+        },
+        {
+          "path": "agents/security/PrivacyBoundaryAudit.md",
+          "line": 78
+        },
+        {
+          "path": "agents/engineering/ObservabilityArchitect.md",
+          "line": 89
+        },
+        {
+          "path": "docs/architecture.md",
+          "line": 37
+        }
+      ],
+      "verification": "Full source inspection; no company pack or private profile read. Current architecture lists no-secrets-in-edit as PreToolUse(Edit/Write) warning, not pre-commit enforcement. Acceptance: _default fixtures contain no vendor-specific contacts or unstated policy blockers.",
+      "confidence": "high"
+    },
+    {
+      "id": "AG-06",
+      "priority": "P2",
+      "title": "Canonical role metadata cannot express Universal capability contracts",
+      "problem": "Every one of69 roles lists only Claude Code/Codex with full support and Claude tool labels. Four pin a Claude model;23 have Claude-only native memory. The lint validates a fixed three-Claude-model allowlist, while role bodies ask to remember history, inspect rendered artifacts or verify web facts without portable capability requirements.",
+      "impact": "Universal delivery either drops useful abilities silently or overclaims equivalent behavior. Simply adding host names to full-support lists would conceal differences in delegation, tools, approvals and persistent memory.",
+      "recommendation": "Preserve ADR0012 as historical intentional adapter behavior and supersede it deliberately for Universal: define neutral operation/capability and output contracts, discover actual host/tools/model selection, render host-native declarations, provide honest inline/manual fallbacks, and return memory evidence through coordinator when native memory is unavailable.",
+      "evidence": [
+        {
+          "path": "agents/engineering/Explorer.md",
+          "line": 8
+        },
+        {
+          "path": "agents/engineering/Explorer.md",
+          "line": 14
+        },
+        {
+          "path": "agents/engineering/CodeReviewer.md",
+          "line": 14
+        },
+        {
+          "path": "docs/concepts/agent-memory.md",
+          "line": 3
+        },
+        {
+          "path": "tests/shape/frontmatter-lint-all.sh",
+          "line": 75
+        },
+        {
+          "path": ".claude/decisions/0012-agent-memory-and-model.md",
+          "line": 18
+        }
+      ],
+      "verification": "Full frontmatter inventory69/69; model pins4, memory23; source lint inspected. This is an explicit architectural adaptation proposal, not an unexpected regression against ADR0012. No live host acceptance claimed.",
+      "confidence": "high"
+    },
+    {
+      "id": "AG-07",
+      "priority": "P2",
+      "title": "Design decisions remain biased by stale catalogs and implicit effects",
+      "problem": "MotionDirector explicitly says Club GSAP plugins require commercial licenses even though GSAP's official3.13 announcement made bonus plugins free for commercial use in2025. It also requires hero reveal and3–5 animations. FrontendArchitect defaults smooth scrolling and asserts its default React-oriented stack works with any framework. TypographyCurator's profile-first rule conflicts with a later Inter-for90%-of-briefs default.",
+      "impact": "The role can waste time on obsolete license blockers, introduce unnecessary dependencies/motion, or override the actual project's framework/brand despite declaring brief>profile>corpus.",
+      "recommendation": "Keep the accepted design-profile and retrieval architecture (ADR0015/0016). Replace baked-in catalog advice with versioned source checks and a short need/risk/stack decision; zero added animation or dependency must be valid. Require visual thesis, accessibility, performance budget and artifact evidence.",
+      "evidence": [
+        {
+          "path": "agents/frontend/MotionDirector.md",
+          "line": 62
+        },
+        {
+          "path": "agents/frontend/MotionDirector.md",
+          "line": 73
+        },
+        {
+          "path": "agents/frontend/FrontendArchitect.md",
+          "line": 61
+        },
+        {
+          "path": "agents/frontend/FrontendArchitect.md",
+          "line": 73
+        },
+        {
+          "path": "agents/frontend/TypographyCurator.md",
+          "line": 20
+        },
+        {
+          "path": "agents/frontend/TypographyCurator.md",
+          "line": 63
+        }
+      ],
+      "verification": "Compared accepted ADR0015/0016 and full roles with GSAP official3.13 release dated2025-04-29. No library installation or generated site tested. Acceptance: plain existing-framework brief can select no extra libraries/motion and cites current license.",
+      "confidence": "high",
+      "sources": [
+        {
+          "title": "GSAP3.13 release",
+          "url": "https://gsap.com/blog/3-13/",
+          "accessed": "2026-09-20",
+          "note": "Bonus plugins including SplitText and MorphSVG became free including commercial use; do not imply MIT/open-source licensing from free pricing."
+        }
+      ]
+    },
+    {
+      "id": "AG-08",
+      "priority": "P2",
+      "title": "Specialist outputs do not carry a shared decision-to-verification contract",
+      "problem": "SystemArchitect requires a verification approach in prose but omits it from emitted NFR/invariant structures. Module specialists emit unrelated YAML shapes or Markdown tables with no common input revision, requirement IDs, assumptions, evidence completeness, owner or limitations. PerfBudgetEnforcer designs enforcement without proving an enforcement mechanism exists.",
+      "impact": "A coherent design red thread can be lost between spec, implementation and review. Presence of a file or populated table can look like completion despite unverified budgets and missing acceptance evidence.",
+      "recommendation": "Introduce a compact shared evidence envelope, not a new backlog: source/requirement/ADR IDs, scope/revision, decision/rationale, assumptions, required verification, observed result/unknowns, output paths and handoff owner. Preserve role-specific content and ADR0026's short leaves plus package execution/review.",
+      "evidence": [
+        {
+          "path": "agents/engineering/SystemArchitect.md",
+          "line": 48
+        },
+        {
+          "path": "agents/engineering/SystemArchitect.md",
+          "line": 59
+        },
+        {
+          "path": "agents/engineering/CapacityPlanner.md",
+          "line": 44
+        },
+        {
+          "path": "agents/engineering/ContractTestArchitect.md",
+          "line": 57
+        },
+        {
+          "path": "agents/engineering/PerfBudgetEnforcer.md",
+          "line": 22
+        },
+        {
+          "path": ".claude/decisions/0026-hybrid-work-packages.md",
+          "line": 17
+        }
+      ],
+      "verification": "Read all69 report formats and representative module dispatch tables. No parser/runtime guarantee asserted; acceptance should use integration fixtures tracing one requirement through specialist output→package leaf→independent review.",
+      "confidence": "high"
+    },
+    {
+      "id": "AG-09",
+      "priority": "P2",
+      "title": "Demo narrative roles have a circular start condition",
+      "problem": "DemoNarratorJunior takes its arc from DemoNarrativeArc, which is contracted to read and review an already written script and explicitly defers drafting. SHIP lists both but supplies no explicit artifact owner for the initial scenes/beats.",
+      "impact": "A cold execution can bounce between roles or fabricate the prerequisite arc; duplicate review/voice passes add overhead without a stronger result.",
+      "recommendation": "Use an explicit brief→arc plan→script→independent critique flow, ideally modes in a shared presentation/narrative capability. Keep recovery lines and timing, but do not merge implementer and independent-review execution context.",
+      "evidence": [
+        {
+          "path": "agents/customer/DemoNarratorJunior.md",
+          "line": 24
+        },
+        {
+          "path": "agents/customer/DemoNarratorJunior.md",
+          "line": 52
+        },
+        {
+          "path": "agents/customer/DemoNarrativeArc.md",
+          "line": 24
+        },
+        {
+          "path": "agents/customer/DemoNarrativeArc.md",
+          "line": 54
+        },
+        {
+          "path": "skills/ship/SKILL.md",
+          "line": 314
+        }
+      ],
+      "verification": "Both full role definitions and SHIP references reviewed. Acceptance: cold brief with no script yields a named arc artifact and then narration without circular delegation.",
+      "confidence": "high"
+    },
+    {
+      "id": "AG-10",
+      "priority": "P2",
+      "title": "Callsites and role contracts disagree about the work delegated",
+      "problem": "SystemArchitect claims TA boundary-review dispatch but that table selects BackendArchitect+Architect. FrontendArchitect claims automatic frontend-design Step5 invocation but the step directly synthesizes and never names the role. DH sends ReleaseEngineer to pipeline, rollback and on-call planning although that role defines PR/release execution playbooks. TA promises gRPC while APIDesigner limits itself to REST/GraphQL.",
+      "impact": "The specialist catalog describes capability that dispatch may not invoke, and some dispatches give an executor an under-specified planning assignment.",
+      "recommendation": "Choose one authoritative dispatch contract per capability: purpose, required inputs, output schema and evidence, selected role/mode and fallback. Generate or validate role descriptions/callsites against it; keep planning versus authorized execution modes explicit.",
+      "evidence": [
+        {
+          "path": "agents/engineering/SystemArchitect.md",
+          "line": 33
+        },
+        {
+          "path": "skills/ta/SKILL.md",
+          "line": 83
+        },
+        {
+          "path": "agents/frontend/FrontendArchitect.md",
+          "line": 40
+        },
+        {
+          "path": "skills/frontend-design/SKILL.md",
+          "line": 112
+        },
+        {
+          "path": "agents/engineering/ReleaseEngineer.md",
+          "line": 20
+        },
+        {
+          "path": "skills/dh/SKILL.md",
+          "line": 90
+        },
+        {
+          "path": "skills/ta/SKILL.md",
+          "line": 81
+        },
+        {
+          "path": "agents/engineering/APIDesigner.md",
+          "line": 24
+        }
+      ],
+      "verification": "Inventory searched all skills Markdown and inspected cited dispatch rows; name occurrence alone was not treated as actual delegation. Acceptance: structural route tests plus one scenario per mismatch prove correct role input/output, with no unintended mutation.",
+      "confidence": "high"
+    },
+    {
+      "id": "AG-11",
+      "priority": "P2",
+      "title": "Dependency reviewers confuse license labels with usage compatibility",
+      "problem": "DependencyAuditor hardcodes MIT+GPL/AGPL as incompatible and ship-blocking; SBOMAuditor repeats red-by-label triage. The relationship depends on actual license/version, combination/distribution, policy and exceptions. FSF identifies the Expat/MIT license as GPL-compatible; that does not mean a combined GPL-derived product may be distributed solely under MIT.",
+      "impact": "The current rubric can block isolated tooling or valid combinations and fails to express the real distribution obligations or approved project policy.",
+      "recommendation": "Merge SBOM mode into dependency review and collect package/version/SPDX expression, path, runtime/dev/tool usage, linking/distribution and project license policy. Classify obligation or policy conflict with evidence; use counsel for unresolved interpretation and never promise compatibility from labels alone.",
+      "evidence": [
+        {
+          "path": "agents/security/DependencyAuditor.md",
+          "line": 62
+        },
+        {
+          "path": "agents/security/DependencyAuditor.md",
+          "line": 96
+        },
+        {
+          "path": "agents/security/SBOMAuditor.md",
+          "line": 40
+        },
+        {
+          "path": "agents/security/SBOMAuditor.md",
+          "line": 75
+        }
+      ],
+      "verification": "Full roles compared with FSF primary license compatibility explanation. No legal conclusion about a real product or dependency made. Acceptance: isolated GPL build tool, redistributed combined work and unknown-license fixtures must produce different evidence-based outcomes.",
+      "confidence": "high",
+      "sources": [
+        {
+          "title": "GNU license list: Expat",
+          "url": "https://www.gnu.org/licenses/license-list.html.en#Expat",
+          "accessed": "2026-09-20",
+          "note": "Expat/MIT is GPL-compatible; compatibility is not permission to remove copyleft obligations."
+        },
+        {
+          "title": "GNU GPL FAQ compatibility",
+          "url": "https://www.gnu.org/licenses/gpl-faq.en.html#WhatDoesCompatMean",
+          "accessed": "2026-09-20",
+          "note": "Combining compatible licenses still requires satisfying the resulting work's applicable terms."
+        }
+      ]
+    },
+    {
+      "id": "AG-12",
+      "priority": "P2",
+      "title": "ContextBudgetAdvisor recommends model capacity from invented universal constants",
+      "problem": "The role classifies multi-file refactoring as a500k context budget, recommends perf-mode above400k, quotes fixed dollar ranges and invokes context-warm --pattern all. It does not query actual model/host capacity, pricing, compaction controls or measured usage. perf-mode itself writes a local active-state file.",
+      "impact": "Operators may be told a host has expanded context/decay behavior or affordability that the workflow cannot deliver, and tasks may preload excessive context.",
+      "recommendation": "Rebuild as resource/context advisor based on observed capabilities and measured budgets, keeping unknown capacity explicit. Distinguish working-set size, cumulative tokens, provider billing and local warning thresholds; recommend bounded retrieval/checkpointing and only controls the host actually exposes.",
+      "evidence": [
+        {
+          "path": "agents/engineering/ContextBudgetAdvisor.md",
+          "line": 42
+        },
+        {
+          "path": "agents/engineering/ContextBudgetAdvisor.md",
+          "line": 49
+        },
+        {
+          "path": "agents/engineering/ContextBudgetAdvisor.md",
+          "line": 80
+        },
+        {
+          "path": "agents/engineering/ContextBudgetAdvisor.md",
+          "line": 90
+        },
+        {
+          "path": "skills/perf-mode/SKILL.md",
+          "line": 50
+        }
+      ],
+      "verification": "Read full role and perf-mode skill; did not inspect private profiles or invoke paid model runs. Acceptance: hosts with different/unknown context windows cannot receive fabricated800k capacity or unsupported controls.",
+      "confidence": "high"
+    },
+    {
+      "id": "AG-13",
+      "priority": "P2",
+      "title": "Artifact reviewers lack a reliable inspection and coverage boundary",
+      "problem": "WordTechnicalEditor only declares Read/Grep/Glob but requires unspecified docx-parser and a Word-specific fidelity pass. It says every numeric claim is checked but example reports a random five-claim spot-check. WebExperienceCritic reads source HTML for visual findings and falls back to pre-generation mode when output is missing, while claiming post-generation review.",
+      "impact": "A draft or static view can be mistaken for verified final document/browser output. Factual or layout defects outside the spot-check remain invisible behind an apparently complete verdict.",
+      "recommendation": "Require discoverable parse/render/browser adapters or coordinator-supplied extracted/rendered evidence. Separate planned critique from artifact review; record all checked claims/pages/states, omissions and blockers. Remove arbitrary limitations-to-capabilities counts as a proxy for substantive honesty.",
+      "evidence": [
+        {
+          "path": "agents/doc-gen/WordTechnicalEditor.md",
+          "line": 6
+        },
+        {
+          "path": "agents/doc-gen/WordTechnicalEditor.md",
+          "line": 55
+        },
+        {
+          "path": "agents/doc-gen/WordTechnicalEditor.md",
+          "line": 74
+        },
+        {
+          "path": "agents/doc-gen/WordTechnicalEditor.md",
+          "line": 111
+        },
+        {
+          "path": "agents/doc-gen/WebExperienceCritic.md",
+          "line": 72
+        },
+        {
+          "path": "agents/doc-gen/WebExperienceCritic.md",
+          "line": 151
+        }
+      ],
+      "verification": "Full artifact roles and generation callsites inspected; no DOCX/browser artifact generated. Acceptance: missing parser or artifact yields explicit unverified status, and a claim outside a five-item sample cannot be reported checked.",
+      "confidence": "high"
+    },
+    {
+      "id": "AG-14",
+      "priority": "P2",
+      "title": "Contract compatibility examples assume consumers ignore new enum values",
+      "problem": "ContractTestArchitect declares added enum value backward-compatible because consumers ignore unknown values. That is an assumption to test, especially for generated clients or exhaustive switches. APIDesigner separately illustrates an additive change with a new version and fixed six-month sunset despite its additive-first principle.",
+      "impact": "The specialist may generate tests that approve the wrong behavior, miss client failures or add unnecessary API versions and migration burden.",
+      "recommendation": "Derive compatibility from actual consumers and transport/code-generation behavior, testing request versus response enum additions separately. Align API evolution examples with the selected audience's measured needs and verified deprecation agreement.",
+      "evidence": [
+        {
+          "path": "agents/engineering/ContractTestArchitect.md",
+          "line": 85
+        },
+        {
+          "path": "agents/engineering/ContractTestArchitect.md",
+          "line": 87
+        },
+        {
+          "path": "agents/engineering/APIDesigner.md",
+          "line": 20
+        },
+        {
+          "path": "agents/engineering/APIDesigner.md",
+          "line": 84
+        }
+      ],
+      "verification": "Compared full API/contract roles and Google AIP180 caution for response enums. Acceptance: a strict old client rejecting a new response enum must fail compatibility test; request-only enum extension handled separately.",
+      "confidence": "high",
+      "sources": [
+        {
+          "title": "Google AIP180 backwards compatibility",
+          "url": "https://google.aip.dev/180",
+          "accessed": "2026-09-20",
+          "note": "Guidance explicitly cautions that user code may not gracefully handle new response enum values."
+        }
+      ]
+    },
+    {
+      "id": "AG-15",
+      "priority": "P2",
+      "title": "Reuse of test and review evidence is keyed to elapsed time",
+      "problem": "TestRunner says not to invoke if tests passed within10minutes. CodeReviewer says no review for an already-reviewed diff within24h with no new commits; uncommitted changes and changed test inputs can still invalidate evidence.",
+      "impact": "A quick follow-up edit can inherit stale green status even though the relevant source, dependencies, configuration or generated artifact changed.",
+      "recommendation": "Key reuse to exact reviewed source/diff/artifact identity plus environment/dependency/config inputs and covered acceptance scope. Time can bound freshness of external data but cannot establish code equivalence.",
+      "evidence": [
+        {
+          "path": "agents/engineering/TestRunner.md",
+          "line": 49
+        },
+        {
+          "path": "agents/engineering/CodeReviewer.md",
+          "line": 51
+        },
+        {
+          "path": "agents/security/DependencyAuditor.md",
+          "line": 50
+        }
+      ],
+      "verification": "Static read of exclusion rules; no tests run. Acceptance: modify an uncommitted relevant file one minute after green and require revalidation, while unchanged inputs can reuse recorded evidence.",
+      "confidence": "high"
+    }
+  ],
+  "interactions": [
+    {
+      "topic": "Retention strategy",
+      "recommendation": "Keep a small core of evidence lookup, codebase synthesis, research synthesis, planning, architecture/NFRs, implementation, independent review, testing, diagnostics and capture. Package specialized data/security/operations/design modules as coherent optional families. Pack recommendations here are product-surface proposals, not claims that current company-neutral generic customer roles violate architecture merely by existing."
+    },
+    {
+      "topic": "Preserve real distinctions",
+      "recommendation": "Explorer locates, ReadOnly answers an area question, ResearchSynthesizer reconciles multiple sources. Architect designs component shape, SystemArchitect specifies system constraints, SchemaArchitect reasons across stores. MigrationPlanner designs safe execution; Migrator executes only an authorized plan. These differences are substantive and should survive simplification."
+    },
+    {
+      "topic": "Consolidation candidates",
+      "recommendation": "BackendArchitect→Architect distributed mode; LatencyAnalyzer→PerformanceAnalyzer distribution/trace mode; SBOMAuditor→DependencyAuditor artifact mode; ADRDrafter→adr-new capture mode; ChangelogMaintainer→release/capture mode. Consolidation is lower priority than unsafe contracts; validate task quality and dispatch cost before deleting aliases."
+    },
+    {
+      "topic": "Narrative and visual review",
+      "recommendation": "One arc-planning/script/rehearsal capability can replace the circular demo hierarchy, with separately dispatched critic mode. One final artifact gate should own pass/fail/unknown; WebExperienceCritic's pre-generation structure advice can remain a separate phase. Do not conflate independent context with separate Markdown role names."
+    },
+    {
+      "topic": "Universal execution",
+      "recommendation": "Host-neutral roles should describe operations and evidence, with adapters mapping actual APIs, available context, sandbox, optional memory and native delegation. No-subagent hosts may sequence equivalent analysis but must not claim independent review; ADR0026 substantive packages stay open where required review is unavailable."
+    },
+    {
+      "topic": "Design red thread",
+      "recommendation": "Keep brief→requirements/accepted decisions→retrieval/token plan→design spec→implementation→render/interaction evidence→independent review→capture. Carry stable requirement/leaf/package references through every specialist handoff; none should create a competing backlog."
+    },
+    {
+      "topic": "Accepted architectural exceptions",
+      "recommendation": "ADR0012's native Claude memory/model routing and ADR0016's anthropic-default profile are explicit accepted decisions, not accidental favoritism findings. Universal model/capability routing needs an explicit ADR evolution; retain the selectable profile and attribution unless operator directs a new house default."
+    },
+    {
+      "topic": "Verification evidence",
+      "recommendation": "Frontmatter shape tests prove fields/files and fixed allowlists, not judgment quality or host execution. ADR0021 explicitly stages broader model evaluation. Add bounded deterministic contract fixtures first (unsafe revert, authority conflict, stale evidence, false-green contrast, missing parser, enum break), then representative live host/model evaluation with separate authorization and measured cost."
+    }
+  ],
+  "limitations": [
+    "No complete test suite, product fixes, installs, private profiles, git mutations, production reads or external messages were performed. Only ignored audit helpers and this assigned report were written.",
+    "Static review and official-source spot verification do not establish live success on any CLI/desktop host. Root coordinator owns host/upstream comparisons and whole-repo synthesis.",
+    "All69 role files were read fully; initially truncated batches were reread for omitted role text. Source reads sometimes required approved elevation because the Windows sandbox returned apply-deny-read-ACL errors.",
+    "Skill reference inventory used name occurrences as discovery, then verified substantive cited callsites; counts are not execution traces and substring matches (for example Architect) are not distinct invocations.",
+    "Legal/security findings identify source-contract defects and verified examples, not a legal/compliance opinion on a real system. No exhaustive audit of every standard, pricing claim, library API or vendor policy was attempted.",
+    "Pack, merge and retirement recommendations are architectural proposals for the authorized Universal redesign. No role was retired merely because it is long or not on a core cycle; no wholesale deletion is proposed without route migration and acceptance fixtures.",
+    "docs/risks/ is absent on this baseline. Repository memory was reviewed as continuity context; it did not override accepted decisions.",
+    "No standalone role is recommended for outright retirement before replacement; merge recommendations retire redundant entrypoints only after mode/alias migration. Staged model evaluation remains staged per ADR0021."
+  ],
+  "summary": {
+    "agents": 69,
+    "total_lines_read": 7798,
+    "severity_counts": {
+      "P1": 4,
+      "P2": 11,
+      "P3": 0
+    },
+    "quality_counts": {
+      "strong": 23,
+      "mixed": 40,
+      "weak": 6,
+      "staged": 0
+    },
+    "action_counts": {
+      "keep": 8,
+      "refine": 30,
+      "merge": 9,
+      "rebuild": 13,
+      "retire": 0,
+      "pack": 9,
+      "staged": 0
+    }
+  }
+}

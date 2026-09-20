@@ -1,0 +1,1201 @@
+{
+  "scope": {
+    "kind": "audit-only",
+    "area": "All 46 assigned canonical workflow skills and directly needed contracts, resources, callers and tests",
+    "intent": "Universal CLI and desktop host value, substantive decisions and behavior evidence; no implementation or provider-first positioning",
+    "skill_count": 46,
+    "skill_lines_read": 9836
+  },
+  "baseline": {
+    "path": "E:/Workspace/jokerman-session-setup/.claude/worktrees/universal-audit-20260920",
+    "ref": "main",
+    "commit": "28061e4",
+    "excluded": "Original working directory's unmerged swarm branch; no swarm runtime feature is credited to this main baseline",
+    "architecture_constraint": "Preserve accepted ADR0026 hybrid short leaves/package execution/independent substantive review. Structural redesign suggestions are proposals, not authorization to supersede an ADR."
+  },
+  "coverage": [
+    {
+      "name": "adr-new",
+      "path": "skills/adr-new/SKILL.md",
+      "lines_read": 90,
+      "quality": "mixed",
+      "action": "refine",
+      "reason": "Keep the focused ADR creation contract and numbering. Resolve the repository's declared decision directory and current authorized branch; avoid creating a second convention or changing branches inside a running initiative.",
+      "evidence": [
+        {
+          "path": "skills/adr-new/SKILL.md",
+          "line": 47
+        }
+      ]
+    },
+    {
+      "name": "analyze",
+      "path": "skills/analyze/SKILL.md",
+      "lines_read": 112,
+      "quality": "mixed",
+      "action": "refine",
+      "reason": "Keep the three useful coverage/implementation/authority checks. Resolve the explicitly selected work map, preserve external task IDs, and distinguish incomplete evidence from a clean verdict instead of selecting the newest design and skipping missing legs.",
+      "evidence": [
+        {
+          "path": "skills/analyze/SKILL.md",
+          "line": 35
+        }
+      ]
+    },
+    {
+      "name": "autoplan",
+      "path": "skills/autoplan/SKILL.md",
+      "lines_read": 129,
+      "quality": "weak",
+      "action": "merge",
+      "reason": "Merge into the canonical PLAN orchestration as a convenience entry point. Its office-hours producer returns a different path/status, and READY TO IMPLEMENT does not establish PLAN's approved work-map contract.",
+      "evidence": [
+        {
+          "path": "skills/autoplan/SKILL.md",
+          "line": 40
+        }
+      ]
+    },
+    {
+      "name": "brief-forge",
+      "path": "skills/brief-forge/SKILL.md",
+      "lines_read": 242,
+      "quality": "staged",
+      "action": "staged",
+      "reason": "Keep envelope construction opt-in as ADR0008 requires. Rebuild its validation, hard-failure handling, audit minimization, and explicit receiver dispatch before considering activation; the current automatic-hook claims are unsupported.",
+      "evidence": [
+        {
+          "path": "skills/brief-forge/SKILL.md",
+          "line": 168
+        }
+      ]
+    },
+    {
+      "name": "build",
+      "path": "skills/build/SKILL.md",
+      "lines_read": 407,
+      "quality": "strong",
+      "action": "refine",
+      "reason": "Preserve ADR0026's short leaves, coherent packages, aggregate complexity, and independent substantive review. Complete the host capability preflight and evidence binding, and exercise cold restart/package failure scenarios without reintroducing per-leaf orchestration.",
+      "evidence": [
+        {
+          "path": "skills/build/SKILL.md",
+          "line": 65
+        }
+      ]
+    },
+    {
+      "name": "capture",
+      "path": "skills/capture/SKILL.md",
+      "lines_read": 461,
+      "quality": "mixed",
+      "action": "rebuild",
+      "reason": "Keep durable lessons, actual-build reconciliation, and configured export boundaries. Resolve the selected work map throughout, update authoritative external tasks rather than a competing plan backlog, and retain measured/unknown usage provenance.",
+      "evidence": [
+        {
+          "path": "skills/capture/SKILL.md",
+          "line": 179
+        }
+      ]
+    },
+    {
+      "name": "careful",
+      "path": "skills/careful/SKILL.md",
+      "lines_read": 124,
+      "quality": "mixed",
+      "action": "refine",
+      "reason": "Keep the opt-in higher-caution mode for genuinely consequential work. Replace unsupported hook/watcher assurances with verified host capabilities and consolidate repeated confirmations around actual unresolved authority.",
+      "evidence": [
+        {
+          "path": "skills/careful/SKILL.md",
+          "line": 84
+        }
+      ]
+    },
+    {
+      "name": "code-freeze",
+      "path": "skills/code-freeze/SKILL.md",
+      "lines_read": 117,
+      "quality": "weak",
+      "action": "rebuild",
+      "reason": "A cooperative frozen-path contract is useful, but the promise that other write skills refuse changes has no general consumer. Add one shared write-boundary contract or label the feature advisory until that integration exists.",
+      "evidence": [
+        {
+          "path": "skills/code-freeze/SKILL.md",
+          "line": 69
+        }
+      ]
+    },
+    {
+      "name": "code-review",
+      "path": "skills/code-review/SKILL.md",
+      "lines_read": 135,
+      "quality": "mixed",
+      "action": "merge",
+      "reason": "Retain a lightweight ad hoc review entry point, backed by the same evidence contract as REVIEW. Cover staged, unstaged and untracked content when requested; use risk and capabilities rather than Claude/Codex line-count routing.",
+      "evidence": [
+        {
+          "path": "skills/code-review/SKILL.md",
+          "line": 38
+        }
+      ]
+    },
+    {
+      "name": "code-unfreeze",
+      "path": "skills/code-unfreeze/SKILL.md",
+      "lines_read": 89,
+      "quality": "mixed",
+      "action": "merge",
+      "reason": "Retain removal, scope selection and audit semantics as operations of one freeze lifecycle. It cannot restore meaningful write permission until writers actually consume the shared freeze state.",
+      "evidence": [
+        {
+          "path": "skills/code-unfreeze/SKILL.md",
+          "line": 36
+        }
+      ]
+    },
+    {
+      "name": "compliance-gate",
+      "path": "skills/compliance-gate/SKILL.md",
+      "lines_read": 181,
+      "quality": "weak",
+      "action": "rebuild",
+      "reason": "Keep pack-declared controls, but aggregate by each control's mandatory/advisory policy and evidence state. One failed mandatory gate or unresolved required check must not become a yellow warning because the failure count is small.",
+      "evidence": [
+        {
+          "path": "skills/compliance-gate/SKILL.md",
+          "line": 101
+        }
+      ]
+    },
+    {
+      "name": "cycle",
+      "path": "skills/cycle/SKILL.md",
+      "lines_read": 447,
+      "quality": "mixed",
+      "action": "refine",
+      "reason": "Keep the lifecycle and bounded mode presets. Establish the cycle identity before phase writes, preserve explicit work selection, and verify that routing and skip behavior respect the user's research/review/build intent.",
+      "evidence": [
+        {
+          "path": "skills/cycle/SKILL.md",
+          "line": 1
+        }
+      ]
+    },
+    {
+      "name": "da",
+      "path": "skills/da/SKILL.md",
+      "lines_read": 305,
+      "quality": "mixed",
+      "action": "refine",
+      "reason": "Keep domain-specific schema, migration, retention and query-grain decisions. Replace the generic checkpoint pseudo-runner with an explicit agent procedure and persisted iteration contract, and obtain policy from resolved company context.",
+      "evidence": [
+        {
+          "path": "skills/da/SKILL.md",
+          "line": 1
+        }
+      ]
+    },
+    {
+      "name": "define",
+      "path": "skills/define/SKILL.md",
+      "lines_read": 354,
+      "quality": "mixed",
+      "action": "rebuild",
+      "reason": "Keep requirements, alternatives and a reviewable decision record. Route by decision type and existing evidence, use ordinary conversation when the host lacks AskUserQuestion, and make venture-founder interrogation optional instead of the fallback for large or unknown work.",
+      "evidence": [
+        {
+          "path": "skills/define/SKILL.md",
+          "line": 64
+        }
+      ]
+    },
+    {
+      "name": "devex-review",
+      "path": "skills/devex-review/SKILL.md",
+      "lines_read": 140,
+      "quality": "strong",
+      "action": "keep",
+      "reason": "The fresh-clone/developer-journey emphasis produces concrete, testable value beyond generic code review. Keep it as a targeted specialist review with reproducible observations and explicit unavailable checks.",
+      "evidence": [
+        {
+          "path": "skills/devex-review/SKILL.md",
+          "line": 103
+        }
+      ]
+    },
+    {
+      "name": "dh",
+      "path": "skills/dh/SKILL.md",
+      "lines_read": 289,
+      "quality": "mixed",
+      "action": "refine",
+      "reason": "Keep deployment, observability, rollback and on-call reasoning. Share the module execution/state contract, resolve the real service's SLO/cost constraints, and avoid treating default numbers or simulated command blocks as verified operations.",
+      "evidence": [
+        {
+          "path": "skills/dh/SKILL.md",
+          "line": 1
+        }
+      ]
+    },
+    {
+      "name": "discover",
+      "path": "skills/discover/SKILL.md",
+      "lines_read": 298,
+      "quality": "mixed",
+      "action": "refine",
+      "reason": "Keep the bounded code/ADR/role discovery map. Correct content globs and accepted-ADR parsing, use the installed Lintel source for reusable resources, and bind results to the selected initiative.",
+      "evidence": [
+        {
+          "path": "skills/discover/SKILL.md",
+          "line": 47
+        }
+      ]
+    },
+    {
+      "name": "eval",
+      "path": "skills/eval/SKILL.md",
+      "lines_read": 152,
+      "quality": "mixed",
+      "action": "pack",
+      "reason": "The current workflow evaluates pack voice, not overall workflow quality. Keep voice calibration as a pack capability, parameterize rubric/corpus completeness, and separate it from the staged general model-evaluation program.",
+      "evidence": [
+        {
+          "path": "skills/eval/SKILL.md",
+          "line": 53
+        }
+      ]
+    },
+    {
+      "name": "fix",
+      "path": "skills/fix/SKILL.md",
+      "lines_read": 76,
+      "quality": "mixed",
+      "action": "keep",
+      "reason": "Keep this useful short entry point for a known defect. Make its minimal approved bug-work contract compatible with BUILD and the cycle dependencies so a hotfix shortcut does not arrive at a missing-plan gate.",
+      "evidence": [
+        {
+          "path": "skills/fix/SKILL.md",
+          "line": 1
+        }
+      ]
+    },
+    {
+      "name": "full-engineering-pass",
+      "path": "skills/full-engineering-pass/SKILL.md",
+      "lines_read": 367,
+      "quality": "weak",
+      "action": "rebuild",
+      "reason": "Retain cross-domain reconciliation as the purpose. Define dispatch/result/state contracts, source-root discovery and per-domain acceptance before a composition can claim completeness or SHIP readiness; averages must not hide a failed domain.",
+      "evidence": [
+        {
+          "path": "skills/full-engineering-pass/SKILL.md",
+          "line": 180
+        }
+      ]
+    },
+    {
+      "name": "handoff-size-check",
+      "path": "skills/handoff-size-check/SKILL.md",
+      "lines_read": 173,
+      "quality": "weak",
+      "action": "rebuild",
+      "reason": "Keep payload budgeting, but measure the selected work-map artifacts and warming inputs. Current defaults read obsolete runtime paths and miss PLAN's actual trio; use one documented warning/blocking policy and known host budget.",
+      "evidence": [
+        {
+          "path": "skills/handoff-size-check/SKILL.md",
+          "line": 40
+        }
+      ]
+    },
+    {
+      "name": "investigate",
+      "path": "skills/investigate/SKILL.md",
+      "lines_read": 111,
+      "quality": "strong",
+      "action": "keep",
+      "reason": "The evidence-led reproduction, competing hypotheses and causal verification are distinct and useful. Keep the report-first boundary and mark unavailable reproduction evidence without manufacturing a root cause.",
+      "evidence": [
+        {
+          "path": "skills/investigate/SKILL.md",
+          "line": 1
+        }
+      ]
+    },
+    {
+      "name": "office-hours",
+      "path": "skills/office-hours/SKILL.md",
+      "lines_read": 154,
+      "quality": "mixed",
+      "action": "merge",
+      "reason": "Preserve structured exploration as an intake mode of DEFINE/PLAN. Its global project store and DRAFT output currently conflict with autoplan's repository-local APPROVED expectation and the durable canonical planning flow.",
+      "evidence": [
+        {
+          "path": "skills/office-hours/SKILL.md",
+          "line": 37
+        }
+      ]
+    },
+    {
+      "name": "orientator",
+      "path": "skills/orientator/SKILL.md",
+      "lines_read": 185,
+      "quality": "staged",
+      "action": "refine",
+      "reason": "Keep the fast explicit-rule route as a staged capability with honest confidence. Consolidate duplicated SENSE/SCOPE routing and validate ambiguous/read-only intents before any future LLM escalation or automatic phase choice.",
+      "evidence": [
+        {
+          "path": "skills/orientator/SKILL.md",
+          "line": 109
+        }
+      ]
+    },
+    {
+      "name": "perfbench",
+      "path": "skills/perfbench/SKILL.md",
+      "lines_read": 124,
+      "quality": "mixed",
+      "action": "refine",
+      "reason": "Retain reproducible before/after performance evidence. Record workload and environment comparability and calibrate sample counts/uncertainty; a few runs should not imply meaningful tail-latency precision.",
+      "evidence": [
+        {
+          "path": "skills/perfbench/SKILL.md",
+          "line": 1
+        }
+      ]
+    },
+    {
+      "name": "plan-and-build",
+      "path": "skills/plan-and-build/SKILL.md",
+      "lines_read": 94,
+      "quality": "mixed",
+      "action": "merge",
+      "reason": "Keep only as a named canonical CYCLE range. Remove a separate artifact/status interpretation and ensure the same approved work map, package review and resume contract applies.",
+      "evidence": [
+        {
+          "path": "skills/plan-and-build/SKILL.md",
+          "line": 75
+        }
+      ]
+    },
+    {
+      "name": "plan-ceo-review",
+      "path": "skills/plan-ceo-review/SKILL.md",
+      "lines_read": 108,
+      "quality": "mixed",
+      "action": "pack",
+      "reason": "Demand/wedge/premise analysis can help venture strategy but is not a universal engineering gate. Move it to an optional strategy lens and implement ADR0011's operator/pack framing instead of inferring founder traits.",
+      "evidence": [
+        {
+          "path": "skills/plan-ceo-review/SKILL.md",
+          "line": 38
+        }
+      ]
+    },
+    {
+      "name": "plan-design-review",
+      "path": "skills/plan-design-review/SKILL.md",
+      "lines_read": 117,
+      "quality": "mixed",
+      "action": "refine",
+      "reason": "Keep the UI states, accessibility and interaction review where UI is actually in scope. Resolve the selected plan and use host-neutral reporting; batch substantive decisions rather than imposing a generic score and repeated issue-level confirmations.",
+      "evidence": [
+        {
+          "path": "skills/plan-design-review/SKILL.md",
+          "line": 1
+        }
+      ]
+    },
+    {
+      "name": "plan-devex-review",
+      "path": "skills/plan-devex-review/SKILL.md",
+      "lines_read": 114,
+      "quality": "mixed",
+      "action": "refine",
+      "reason": "Keep the distinct review of planned developer workflows and operational friction. Make it conditional, use repository-specific acceptance evidence, and share the selected-plan/result contract with the other lenses.",
+      "evidence": [
+        {
+          "path": "skills/plan-devex-review/SKILL.md",
+          "line": 1
+        }
+      ]
+    },
+    {
+      "name": "plan-eng-review",
+      "path": "skills/plan-eng-review/SKILL.md",
+      "lines_read": 177,
+      "quality": "mixed",
+      "action": "refine",
+      "reason": "Keep architecture/code/test/performance review and the package-aware scrutiny. Replace freshest-global-context and ExitPlanMode assumptions with explicit work selection and host capabilities; use risk-based coverage expectations.",
+      "evidence": [
+        {
+          "path": "skills/plan-eng-review/SKILL.md",
+          "line": 135
+        }
+      ]
+    },
+    {
+      "name": "plan-tune",
+      "path": "skills/plan-tune/SKILL.md",
+      "lines_read": 141,
+      "quality": "weak",
+      "action": "staged",
+      "reason": "Preference tuning is useful only after stable question IDs and a shared consumer exist. Mark it staged, remove the current conflict-reconciliation caller, and do not claim that writes become active immediately without an actual reader.",
+      "evidence": [
+        {
+          "path": "skills/plan-tune/SKILL.md",
+          "line": 13
+        }
+      ]
+    },
+    {
+      "name": "plan",
+      "path": "skills/plan/SKILL.md",
+      "lines_read": 562,
+      "quality": "strong",
+      "action": "refine",
+      "reason": "Preserve explicit approved work maps, original task IDs, acceptance criteria and ADR0026 packages. Complete downstream map adoption, remove the unrelated plan-tune reconciliation call, and pass selected artifact paths to the budget check.",
+      "evidence": [
+        {
+          "path": "skills/plan/SKILL.md",
+          "line": 358
+        }
+      ]
+    },
+    {
+      "name": "qa-only",
+      "path": "skills/qa-only/SKILL.md",
+      "lines_read": 104,
+      "quality": "mixed",
+      "action": "refine",
+      "reason": "Keep a read-only verification gate with distinct runner/dependency failures. Treat zero matched tests as NO EVIDENCE for a required gate, and connect the canonical SHIP caller to this non-mutating contract.",
+      "evidence": [
+        {
+          "path": "skills/qa-only/SKILL.md",
+          "line": 73
+        }
+      ]
+    },
+    {
+      "name": "qa",
+      "path": "skills/qa/SKILL.md",
+      "lines_read": 114,
+      "quality": "mixed",
+      "action": "refine",
+      "reason": "Keep a scoped test-and-repair workflow separate from shipping verification. Require semantic justification for snapshot/baseline changes and re-review changed product behavior; passing after an automated rebaseline is not by itself regression evidence.",
+      "evidence": [
+        {
+          "path": "skills/qa/SKILL.md",
+          "line": 1
+        }
+      ]
+    },
+    {
+      "name": "research",
+      "path": "skills/research/SKILL.md",
+      "lines_read": 94,
+      "quality": "mixed",
+      "action": "rebuild",
+      "reason": "Research should produce sourced findings, uncertainties and options before requiring an approved design. Rework the current design-first cycle wrapper, remove redundant continuation confirmation, and honor read-only intent throughout routing.",
+      "evidence": [
+        {
+          "path": "skills/research/SKILL.md",
+          "line": 24
+        }
+      ]
+    },
+    {
+      "name": "resume",
+      "path": "skills/resume/SKILL.md",
+      "lines_read": 401,
+      "quality": "strong",
+      "action": "refine",
+      "reason": "Keep artifact-based recovery and explicit committed work-map selection as a core differentiator. Finish cross-host path/date portability and verify task/review evidence, including unavailable independent review, before resuming a phase.",
+      "evidence": [
+        {
+          "path": "skills/resume/SKILL.md",
+          "line": 1
+        }
+      ]
+    },
+    {
+      "name": "retro",
+      "path": "skills/retro/SKILL.md",
+      "lines_read": 124,
+      "quality": "mixed",
+      "action": "merge",
+      "reason": "Keep signal-based learning and the option to record no lesson. Expose it as a CAPTURE mode using the same durable evidence instead of a second overlapping ceremony with mandatory per-item confirmations.",
+      "evidence": [
+        {
+          "path": "skills/retro/SKILL.md",
+          "line": 93
+        }
+      ]
+    },
+    {
+      "name": "review-and-ship",
+      "path": "skills/review-and-ship/SKILL.md",
+      "lines_read": 91,
+      "quality": "mixed",
+      "action": "merge",
+      "reason": "Keep as a convenience alias over the canonical REVIEW→SHIP range. Inherit one immutable review scope, selected work map and publication authority rather than adding another gate interpretation.",
+      "evidence": [
+        {
+          "path": "skills/review-and-ship/SKILL.md",
+          "line": 1
+        }
+      ]
+    },
+    {
+      "name": "review",
+      "path": "skills/review/SKILL.md",
+      "lines_read": 321,
+      "quality": "strong",
+      "action": "refine",
+      "reason": "Keep spec compliance before independent quality and conditional specialist checks. Bind all stages to the actual selected package/diff, avoid treating commit-only ranges as the entire requested review, and expose missing host capability early.",
+      "evidence": [
+        {
+          "path": "skills/review/SKILL.md",
+          "line": 302
+        }
+      ]
+    },
+    {
+      "name": "sc",
+      "path": "skills/sc/SKILL.md",
+      "lines_read": 301,
+      "quality": "mixed",
+      "action": "refine",
+      "reason": "Keep threat-model, secrets, auth, evidence and audit-path reasoning. Remove universal SOC2/GDPR and seven-year retention assumptions; resolve validated company requirements and share the module state/result protocol.",
+      "evidence": [
+        {
+          "path": "skills/sc/SKILL.md",
+          "line": 128
+        }
+      ]
+    },
+    {
+      "name": "scope",
+      "path": "skills/scope/SKILL.md",
+      "lines_read": 273,
+      "quality": "strong",
+      "action": "refine",
+      "reason": "Keep the concise disambiguation, work-size assessment and artifact-aware routing. Carry its explicit output selection into DEFINE and test that inferred larger scope never grants additional authority.",
+      "evidence": [
+        {
+          "path": "skills/scope/SKILL.md",
+          "line": 1
+        }
+      ]
+    },
+    {
+      "name": "sense",
+      "path": "skills/sense/SKILL.md",
+      "lines_read": 395,
+      "quality": "mixed",
+      "action": "merge",
+      "reason": "Retain a cheap orientation summary, but consolidate overlapping route/size/profile discovery with SCOPE/orientator. Establish durable cycle identity before appending and report capability/context limits from the host rather than assumptions.",
+      "evidence": [
+        {
+          "path": "skills/sense/SKILL.md",
+          "line": 359
+        }
+      ]
+    },
+    {
+      "name": "ship",
+      "path": "skills/ship/SKILL.md",
+      "lines_read": 358,
+      "quality": "weak",
+      "action": "rebuild",
+      "reason": "Make delivery consume current verified review and compliance evidence for an exact content scope. Run non-mutating verification, preserve explicit publication authority, and remove contradictory override and dashboard-consumer claims.",
+      "evidence": [
+        {
+          "path": "skills/ship/SKILL.md",
+          "line": 42
+        }
+      ]
+    },
+    {
+      "name": "spec-kit",
+      "path": "skills/spec-kit/SKILL.md",
+      "lines_read": 90,
+      "quality": "strong",
+      "action": "refine",
+      "reason": "Keep the adapter that preserves external specification artifacts and task IDs. Extend its mapped-artifact contract to ANALYZE, CAPTURE and budgeting so adoption remains authoritative through the complete lifecycle.",
+      "evidence": [
+        {
+          "path": "skills/spec-kit/SKILL.md",
+          "line": 1
+        }
+      ]
+    },
+    {
+      "name": "ta",
+      "path": "skills/ta/SKILL.md",
+      "lines_read": 305,
+      "quality": "mixed",
+      "action": "refine",
+      "reason": "Keep the substantial architecture/API/NFR/complexity dispatch rows. Replace undefined checkpoint/state semantics with an explicit portable agent workflow; defaults should be resolved from the selected project rather than fragile profile-window parsing.",
+      "evidence": [
+        {
+          "path": "skills/ta/SKILL.md",
+          "line": 128
+        }
+      ]
+    },
+    {
+      "name": "tq",
+      "path": "skills/tq/SKILL.md",
+      "lines_read": 290,
+      "quality": "mixed",
+      "action": "refine",
+      "reason": "Keep the coverage, contract, regression, performance and reliability lenses. Resolve meaningful product risks and thresholds, make chaos/applicability explicit, and share the module execution and evidence contract.",
+      "evidence": [
+        {
+          "path": "skills/tq/SKILL.md",
+          "line": 1
+        }
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "WF-01",
+      "priority": "P1",
+      "title": "Mandatory compliance failures can be downgraded by failure count",
+      "problem": "The compliance verdict makes one non-customer-data FAIL yellow and multiple FAILs red. It does not aggregate mandatory/advisory mode or NEEDS_CONTEXT. SHIP simultaneously calls active gates never bypassable and permits an override.",
+      "impact": "A single failed required security or regulatory control can be presented as a warning; operators and downstream phases do not receive a consistent stop decision.",
+      "recommendation": "Define one per-control result contract with applicability, required/advisory policy, evidence, and error state. Block unresolved required failures regardless of count; make permitted overrides explicitly policy-derived. Distinguish no applicable controls from verified compliance.",
+      "evidence": [
+        {
+          "path": "skills/compliance-gate/SKILL.md",
+          "line": 85
+        },
+        {
+          "path": "skills/compliance-gate/SKILL.md",
+          "line": 101
+        },
+        {
+          "path": "skills/ship/SKILL.md",
+          "line": 66
+        },
+        {
+          "path": "skills/ship/SKILL.md",
+          "line": 77
+        }
+      ],
+      "verification": "Static truth-table trace: exactly one applicable non-customer-data FAIL matches yellow at line103; NEEDS_CONTEXT is counted at line89 but absent from verdict rules. No controls or private profiles were executed.",
+      "confidence": "high"
+    },
+    {
+      "id": "WF-02",
+      "priority": "P1",
+      "title": "Shipping can consume review evidence for different content",
+      "problem": "code-review advertises uncommitted/unmerged review but reads only base...HEAD. REVIEW's file list also uses a commit range. SHIP permits intentional uncommitted changes and accepts a PASS report without requiring the same content fingerprint, while its QA caller can repair files.",
+      "impact": "Uncommitted, newly added, or post-review changes can escape the review that appears to authorize delivery. Independent review loses practical meaning even when every phase reports success.",
+      "recommendation": "Use one review scope contract containing base/head, selected package/task IDs and the staged/unstaged/untracked content digest. Make SHIP consume fresh evidence for that exact scope and run qa-only. Invalidate affected checks after changes; preserve ADR0026 independent substantive review.",
+      "evidence": [
+        {
+          "path": "skills/code-review/SKILL.md",
+          "line": 38
+        },
+        {
+          "path": "skills/code-review/SKILL.md",
+          "line": 42
+        },
+        {
+          "path": "skills/review/SKILL.md",
+          "line": 66
+        },
+        {
+          "path": "skills/ship/SKILL.md",
+          "line": 45
+        },
+        {
+          "path": "skills/ship/SKILL.md",
+          "line": 47
+        },
+        {
+          "path": "skills/qa-only/SKILL.md",
+          "line": 102
+        }
+      ],
+      "verification": "Compared the documented diff commands with SHIP's preflight and qa-only's documented caller. Search for li-review-read in ship/code-review/plan-eng-review found only plan-eng-review; dashboard freshness is not consumed by SHIP's procedure. No delivery was run.",
+      "confidence": "high"
+    },
+    {
+      "id": "WF-03",
+      "priority": "P1",
+      "title": "The universal workflow has host-specific hard stops and reviewer assumptions",
+      "problem": "DEFINE is blocked whenever AskUserQuestion is unavailable even if the host can ask the user in normal conversation. plan-eng-review requires ExitPlanMode. code-review routes explicitly through Claude and Codex by changed-line count. BUILD already describes portable abstract operations, so the skills disagree on what a supported host can do.",
+      "impact": "A supported desktop/CLI host can reach a dead end before planning, or claim an unavailable reviewer path. Successful installation does not imply the core workflow can be completed.",
+      "recommendation": "Adopt a capability contract for questions, planning, tools and independent review. Use ordinary conversation for question tools; preserve unresolved decision gates. Check substantive independent-review capability before BUILD and support a configured independent reviewer or an explicit blocked handoff, never relabel self-review as independent.",
+      "evidence": [
+        {
+          "path": "skills/define/SKILL.md",
+          "line": 335
+        },
+        {
+          "path": "skills/plan-eng-review/SKILL.md",
+          "line": 135
+        },
+        {
+          "path": "skills/code-review/SKILL.md",
+          "line": 39
+        },
+        {
+          "path": "skills/build/SKILL.md",
+          "line": 65
+        },
+        {
+          "path": "skills/review/SKILL.md",
+          "line": 302
+        },
+        {
+          "path": ".claude/decisions/0026-hybrid-work-packages.md",
+          "line": 22
+        }
+      ],
+      "verification": "Cross-read the host-fallback and failure-recovery instructions of DEFINE, BUILD, REVIEW and review variants. This is a prompt-contract incompatibility; no unsupported host execution was claimed.",
+      "confidence": "high"
+    },
+    {
+      "id": "WF-04",
+      "priority": "P2",
+      "title": "Selected work-map authority stops before analysis and capture",
+      "problem": "PLAN/BUILD/REVIEW/RESUME support the selected mapped work contract, but ANALYZE still chooses the newest design and assumes tasks live in plan.md; missing artifacts skip legs. CAPTURE reaffirms and annotates native plan.md tasks and prompt.md directly. This bypasses externally mapped task/spec sources.",
+      "impact": "A Spec Kit or multi-initiative project can analyze the wrong design, update a competing task ledger, and produce a plausible handoff that does not describe the authoritative work.",
+      "recommendation": "Pass a single explicit work selection through every lifecycle phase. Resolve spec, tasks, handoff and design via that map, preserve original task IDs/statuses, and report required missing evidence as incomplete. Do not add a second backlog or replace ADR0026 grouping.",
+      "evidence": [
+        {
+          "path": "skills/analyze/SKILL.md",
+          "line": 35
+        },
+        {
+          "path": "skills/analyze/SKILL.md",
+          "line": 40
+        },
+        {
+          "path": "skills/analyze/SKILL.md",
+          "line": 49
+        },
+        {
+          "path": "skills/capture/SKILL.md",
+          "line": 179
+        },
+        {
+          "path": "skills/capture/SKILL.md",
+          "line": 188
+        },
+        {
+          "path": "skills/plan/SKILL.md",
+          "line": 358
+        }
+      ],
+      "verification": "Read the mapped-work adapter reference and all canonical phase bodies; traced ANALYZE/CAPTURE inputs and writes against PLAN's load_work_map gate. No artifact mutations performed.",
+      "confidence": "high"
+    },
+    {
+      "id": "WF-05",
+      "priority": "P2",
+      "title": "Parallel planning entry points do not share a producer/consumer contract",
+      "problem": "autoplan expects office-hours to return a repository-local APPROVED design, while office-hours writes a global DRAFT. autoplan can announce READY TO IMPLEMENT without canonical PLAN's approved map. Separately, PLAN calls plan-tune to reconcile review conflicts, but plan-tune only edits question preferences, and no other searched consumer reads its ledger.",
+      "impact": "Users choose a plausible entry point and get different artifact locations, approval meaning, and readiness. The conflict-resolution call performs unrelated work, and preference changes advertised as active may have no effect.",
+      "recommendation": "Make office-hours an exploratory intake mode and autoplan/plan-and-build/review-and-ship declarative aliases over the canonical flow. Give review reconciliation its actual operation. Keep question tuning staged until stable question IDs and a shared reader exist.",
+      "evidence": [
+        {
+          "path": "skills/autoplan/SKILL.md",
+          "line": 40
+        },
+        {
+          "path": "skills/autoplan/SKILL.md",
+          "line": 47
+        },
+        {
+          "path": "skills/office-hours/SKILL.md",
+          "line": 37
+        },
+        {
+          "path": "skills/office-hours/SKILL.md",
+          "line": 52
+        },
+        {
+          "path": "skills/plan/SKILL.md",
+          "line": 165
+        },
+        {
+          "path": "skills/plan-tune/SKILL.md",
+          "line": 13
+        },
+        {
+          "path": "skills/plan-tune/SKILL.md",
+          "line": 46
+        }
+      ],
+      "verification": "Read both complete producer/consumer skills. rg question-preferences over skills/lib/bin/hooks/docs returned only plan-tune lines39 and140; no runtime or skill consumer was found in that scope.",
+      "confidence": "high"
+    },
+    {
+      "id": "WF-06",
+      "priority": "P2",
+      "title": "Universal defaults still impose venture and company-policy assumptions",
+      "problem": "DEFINE falls back to founder questions for large/unknown work and when no scope exists. plan-ceo-review uses money/venture questions and founder-trait synthesis despite ADR0011's pack-driven operator framing. Security preferences default to SOC2/GDPR and seven-year retention, read through a fixed 30-line grep window rather than validated structured configuration.",
+      "impact": "Enterprise migrations, maintenance, open research and nonventure products pay irrelevant question overhead, while applicable company rules may be missed or replaced by arbitrary defaults. A pack can appear active without changing the engineering outcome correctly.",
+      "recommendation": "Route intake by decision type and available evidence. Put venture strategy in an optional pack lens. Resolve engineering requirements with structured parsing and documented project/pack/user precedence, recording the effective values and their source. Treat absent regulatory requirements as unknown/applicability decisions, not assumed compliance scope.",
+      "evidence": [
+        {
+          "path": "skills/define/SKILL.md",
+          "line": 66
+        },
+        {
+          "path": "skills/define/SKILL.md",
+          "line": 97
+        },
+        {
+          "path": "skills/plan-ceo-review/SKILL.md",
+          "line": 38
+        },
+        {
+          "path": "skills/plan-ceo-review/SKILL.md",
+          "line": 45
+        },
+        {
+          "path": "skills/sc/SKILL.md",
+          "line": 128
+        },
+        {
+          "path": "skills/ta/SKILL.md",
+          "line": 134
+        },
+        {
+          "path": ".claude/decisions/0011-gstack-de-heritage.md",
+          "line": 32
+        }
+      ],
+      "verification": "Cross-read intake routing and module profile access. Static counterexample: a valid security_compliance mapping beyond the first30 lines of engineering is not available to the shown grep pipeline. Pack-driven strategy is already accepted in ADR0011; any broader redesign remains a proposal.",
+      "confidence": "high"
+    },
+    {
+      "id": "WF-07",
+      "priority": "P2",
+      "title": "Engineering module loops lack an explicit executable or agent-owned state contract",
+      "problem": "TA/DA/SC/DH/TQ contain valuable domain dispatch tables, but full/loop paths use shell-looking run_checkpoint/apply_scoring_rubric operations without defining their mapping to agent tasks, persisted checkpoint results or iteration writes. Loop mode requires state/files that the full procedure does not explicitly produce. Composition mixes slash invocations into Bash and a read_module_score abstraction without a result schema.",
+      "impact": "An agent must invent orchestration, success criteria and recovery semantics. The promised repeatable loop and composition cannot be checked from the written contract, and host-specific improvisations can diverge.",
+      "recommendation": "Choose a clear portable agent protocol, with numbered checkpoint actions, ownership, input/output artifacts and failure/resume rules, backed by helpers only for mechanical work. Label pseudocode explicitly. Retain useful domain tables; do not introduce a new scheduler or replace ADR0026.",
+      "evidence": [
+        {
+          "path": "skills/ta/SKILL.md",
+          "line": 155
+        },
+        {
+          "path": "skills/ta/SKILL.md",
+          "line": 176
+        },
+        {
+          "path": "skills/ta/SKILL.md",
+          "line": 189
+        },
+        {
+          "path": "skills/sc/SKILL.md",
+          "line": 149
+        },
+        {
+          "path": "skills/sc/SKILL.md",
+          "line": 167
+        },
+        {
+          "path": "skills/full-engineering-pass/SKILL.md",
+          "line": 184
+        },
+        {
+          "path": "skills/full-engineering-pass/SKILL.md",
+          "line": 194
+        }
+      ],
+      "verification": "Full-read all five module skills and composition, plus ta-module concept and module contract/routing tests. rg run_checkpoint in lib/bin/tests returned no definition/reference. This is not a demand to implement every pseudo-operation as a shell function: the failure is the missing explicit agent procedure and state producer/consumer contract.",
+      "confidence": "high"
+    },
+    {
+      "id": "WF-08",
+      "priority": "P2",
+      "title": "Engineering composition can misreport availability and domain acceptance",
+      "problem": "Module discovery uses LINTEL_REPO_ROOT/skills rather than the installed source root. Per-module scores below80 only print FAIL before averaging; the SHIP verdict is green for an average at least80 unless a shell FAILED status was set. Report filenames contain colon-bearing timestamps, which are invalid on Windows.",
+      "impact": "Installed consumer repositories may find no modules; a weaker domain can be concealed by stronger scores when its status is not translated to FAILED; Windows report output can fail after work completes.",
+      "recommendation": "Discover modules through the canonical source path. Define a structured module result and require each applicable mandatory domain to meet its own acceptance/evidence threshold. Use filesystem-safe names and test the composition on a consumer repository, including partial/blocked and zero-module cases.",
+      "evidence": [
+        {
+          "path": "skills/full-engineering-pass/SKILL.md",
+          "line": 144
+        },
+        {
+          "path": "skills/full-engineering-pass/SKILL.md",
+          "line": 238
+        },
+        {
+          "path": "skills/full-engineering-pass/SKILL.md",
+          "line": 243
+        },
+        {
+          "path": "skills/full-engineering-pass/SKILL.md",
+          "line": 249
+        },
+        {
+          "path": "skills/full-engineering-pass/SKILL.md",
+          "line": 264
+        }
+      ],
+      "verification": "Static contract and arithmetic trace: scores70/90 average80; line238 prints the failing domain but lines249-255 do not lower verdict absent FAILED status. No claim that the incomplete pseudo-runner currently executes this scenario end to end.",
+      "confidence": "high"
+    },
+    {
+      "id": "WF-09",
+      "priority": "P1",
+      "title": "Dormant Brief Forge advertises automatic handoffs and allows unsafe envelope output",
+      "problem": "ADR0008 keeps envelope construction opt-in, but the skill claims every handoff and two automatic hooks trigger it. The written procedure appends the full envelope to audit and emits it before the score decision. A sole known-key-pattern security hit produces40, while only scores below40 block. Dispatch comments elsewhere describe spawning through Brief Forge although its contract emits an envelope rather than invoking the receiver.",
+      "impact": "If users follow the opt-in procedure, sensitive content can be copied into a global audit and emitted despite detection. Automatic-spawn claims can also leave a receiver task unperformed while the handoff appears complete.",
+      "recommendation": "Keep this staged under ADR0008. Before proposing activation, validate schema and explicit hard policy failures before persistence/output, minimize/redact audit content, specify actual receiver invocation separately, and prove the chosen host integration with behavior tests. Do not activate dormant hooks as an incidental fix.",
+      "evidence": [
+        {
+          "path": ".claude/decisions/0008-activation-contract.md",
+          "line": 56
+        },
+        {
+          "path": "skills/brief-forge/SKILL.md",
+          "line": 161
+        },
+        {
+          "path": "skills/brief-forge/SKILL.md",
+          "line": 168
+        },
+        {
+          "path": "skills/brief-forge/SKILL.md",
+          "line": 185
+        },
+        {
+          "path": "skills/brief-forge/SKILL.md",
+          "line": 231
+        },
+        {
+          "path": "lib/brief-forge-evaluators.sh",
+          "line": 68
+        },
+        {
+          "path": "skills/ta/SKILL.md",
+          "line": 199
+        }
+      ],
+      "verification": "Read complete brief-forge skill and both helper files. Derived100-60=40 from the known-key branch, then followed the less-than40 gate and pre-gate audit/output order. No real secrets or payloads were processed. Searched the claimed hook names in hooks and found no implementation.",
+      "confidence": "high"
+    },
+    {
+      "id": "WF-10",
+      "priority": "P2",
+      "title": "Freeze metadata has no general write-path enforcement consumer",
+      "problem": "code-freeze says other skills refuse modifications and instructs every write skill to check a session file, but the searched workflow/runtime surfaces have no shared reader. Only learn explicitly reacts; frozen-zone-warn is informational and assigns blocking to invoking skills.",
+      "impact": "An operator can freeze a teammate's files and then invoke BUILD/QA or another writer with false confidence that the frozen area is protected.",
+      "recommendation": "Consolidate freeze/unfreeze as one cooperative boundary contract and integrate it into actual write workflows and supported host checks. Until verified, state its limitation at invocation instead of promising universal refusal. Do not confuse advisory metadata with a filesystem lock.",
+      "evidence": [
+        {
+          "path": "skills/code-freeze/SKILL.md",
+          "line": 14
+        },
+        {
+          "path": "skills/code-freeze/SKILL.md",
+          "line": 69
+        },
+        {
+          "path": "skills/code-unfreeze/SKILL.md",
+          "line": 14
+        },
+        {
+          "path": "hooks/shared/frozen-zone-warn/HOOK.md",
+          "line": 23
+        },
+        {
+          "path": "skills/learn/SKILL.md",
+          "line": 91
+        }
+      ],
+      "verification": "rg code-freeze across skills/lib/bin/hooks/docs found freeze/unfreeze, learn, catalog/docs and the informational hook; no general writer consumer was found in that scope. No freeze or file mutation performed.",
+      "confidence": "high"
+    },
+    {
+      "id": "WF-11",
+      "priority": "P2",
+      "title": "Handoff budgeting reads obsolete paths and disagrees with its callers",
+      "problem": "PLAN and CAPTURE call handoff-size-check without a path and say it measures their trio non-blockingly. The checker defaults to runtime/state/plan.md and always reads runtime/state/spec.md and prompt.md, while canonical PLAN emits selected initiative artifacts elsewhere. The checker also has hard-red semantics that conflict with callers' warning-only language.",
+      "impact": "The check can report no plan or undercount the handoff, so its budget assurance and cold-session readiness signal are unreliable.",
+      "recommendation": "Make budgeting consume the selected work map and actual warming manifest. Centralize the warning/block policy and use a declared host/task context budget or explicit unknown value. Preserve size estimates as estimates; do not treat a passed obsolete-path check as evidence.",
+      "evidence": [
+        {
+          "path": "skills/handoff-size-check/SKILL.md",
+          "line": 43
+        },
+        {
+          "path": "skills/handoff-size-check/SKILL.md",
+          "line": 52
+        },
+        {
+          "path": "skills/plan/SKILL.md",
+          "line": 386
+        },
+        {
+          "path": "skills/plan/SKILL.md",
+          "line": 392
+        },
+        {
+          "path": "skills/plan/SKILL.md",
+          "line": 394
+        },
+        {
+          "path": "skills/capture/SKILL.md",
+          "line": 201
+        }
+      ],
+      "verification": "Compared all caller argument lists and checker path resolution after full reads. Static path trace suffices; no large payload or model-context experiment was run.",
+      "confidence": "high"
+    },
+    {
+      "id": "WF-12",
+      "priority": "P2",
+      "title": "Discovery's content and ADR-status queries can omit relevant evidence",
+      "problem": "DISCOVER supplies a quoted brace expression to grep --include, so ordinary .ts/.py/etc names do not match the intended extension alternatives. ADR status extraction expects status: at the start of a line, while accepted repository ADRs use bold Markdown Status.",
+      "impact": "Relevant files referenced only by contents can be omitted, and accepted decisions can lose their status in discovery. Plans may then be based on an incomplete code/authority map.",
+      "recommendation": "Use explicit supported globs or repository file enumeration and a parser that accepts the repository's actual ADR format. Verify content-only matches, unusual filenames, and accepted/proposed/superseded status handling on tiny fixtures.",
+      "evidence": [
+        {
+          "path": "skills/discover/SKILL.md",
+          "line": 47
+        },
+        {
+          "path": "skills/discover/SKILL.md",
+          "line": 63
+        },
+        {
+          "path": ".claude/decisions/0026-hybrid-work-packages.md",
+          "line": 3
+        }
+      ],
+      "verification": "Static inspection of the exact quoted glob and the ADR format; no destructive command or full test suite was run. This is a concrete command-contract issue, separate from the general quality of DISCOVER's reasoning.",
+      "confidence": "high"
+    },
+    {
+      "id": "WF-13",
+      "priority": "P2",
+      "title": "Workflow quality claims outrun the available outcome evidence",
+      "problem": "Module routing/contract tests mainly assert prompt strings, names and rubric presence; voice eval is a separate pack-specific workflow. These checks do not establish that a host selects the right task, performs a checkpoint, honors a gate, resumes the same work, or produces an independently reviewed result. A required QA check can also exit0 with zero matched tests.",
+      "impact": "A large green structural suite can coexist with broken user journeys and uncalibrated numerical scores, making prioritization by pass counts or prompt length misleading.",
+      "recommendation": "Keep structural tests as drift guards and add a small staged set of outcome scenarios: read-only intent, fresh consumer install, missing host question tool, external task map, dirty-content review, one failed mandatory gate, interrupted module/package, and cold-session resume. Record model/host, artifacts, gate decisions, usage and limitations. Keep ADR0021's staged evidence distinction and ADR0026's unmeasured-productivity caveat.",
+      "evidence": [
+        {
+          "path": "tests/unit/ta-routing.sh",
+          "line": 3
+        },
+        {
+          "path": "tests/unit/ta-routing.sh",
+          "line": 55
+        },
+        {
+          "path": "tests/unit/ta-routing.sh",
+          "line": 99
+        },
+        {
+          "path": "skills/qa-only/SKILL.md",
+          "line": 75
+        },
+        {
+          "path": ".claude/decisions/0008-activation-contract.md",
+          "line": 45
+        },
+        {
+          "path": ".claude/decisions/0008-activation-contract.md",
+          "line": 60
+        },
+        {
+          "path": ".claude/decisions/0026-hybrid-work-packages.md",
+          "line": 40
+        }
+      ],
+      "verification": "Read the TA routing/shape tests and skill trigger-shape tests alongside the workflow bodies. No paid model evaluations or full suite executed; helper-level behavior tests elsewhere are not discounted.",
+      "confidence": "high"
+    }
+  ],
+  "interactions": [
+    {
+      "journey": "New user on a desktop host asks for a bounded feature",
+      "observation": "SENSE/SCOPE can orient the work, but DEFINE's named question-tool dependency blocks a host that can still converse normally. Capability preflight belongs at entry, with ordinary conversation fallback and an explicit independent-review limit before substantive BUILD.",
+      "related_findings": [
+        "WF-03",
+        "WF-06"
+      ]
+    },
+    {
+      "journey": "Existing enterprise project asks for a large migration or research",
+      "observation": "Large/unknown scope selects founder questioning; research requires an approved design before discovery and adds continuation confirmation. A decision-type intake should gather missing enterprise constraints and evidence without assuming a venture or silently broadening read-only intent.",
+      "related_findings": [
+        "WF-05",
+        "WF-06",
+        "WF-13"
+      ]
+    },
+    {
+      "journey": "Team imports a Spec Kit initiative and later resumes",
+      "observation": "PLAN/BUILD/REVIEW/RESUME's explicit map is a good core. ANALYZE/CAPTURE/budgeting still interpret native trio paths and tasks, risking a second ledger or evidence from a neighboring initiative.",
+      "related_findings": [
+        "WF-04",
+        "WF-11"
+      ]
+    },
+    {
+      "journey": "Developer makes an additional edit after review and ships",
+      "observation": "Commit-only diff review plus unbound PASS report and potentially mutating QA do not prove the shipped content was independently reviewed. One evidence contract must span code-review, canonical REVIEW, aliases and SHIP.",
+      "related_findings": [
+        "WF-02"
+      ]
+    },
+    {
+      "journey": "Company enables one mandatory control and one optional check",
+      "observation": "Failure count is not policy. The mandatory failure must block; an optional warning must remain advisory. Resolved policy, applicability and evidence should be visible in the result so company configuration has a demonstrable effect.",
+      "related_findings": [
+        "WF-01",
+        "WF-06"
+      ]
+    },
+    {
+      "journey": "Consumer repository runs full engineering pass then loops one domain",
+      "observation": "The domain tables offer useful specialized reasoning, but source lookup, pseudo-dispatch, status schema, checkpoint persistence and score aggregation need one coherent contract. Consolidate mechanics while preserving distinct TA/DA/SC/DH/TQ decisions.",
+      "related_findings": [
+        "WF-07",
+        "WF-08"
+      ]
+    },
+    {
+      "journey": "Operator freezes a shared path then runs a fixing workflow",
+      "observation": "Session metadata alone is not consumed by general writers. Freeze/unfreeze needs integration and honest host limits before users rely on it to protect shared work.",
+      "related_findings": [
+        "WF-10"
+      ]
+    },
+    {
+      "journey": "Fresh session consumes the final handoff",
+      "observation": "A durable, explicitly selected work map plus authoritative task IDs, verified leaves/packages, actual review evidence, usage provenance and one next action is the strongest core. Keep hybrid packages and simplify overlapping intake/alias/capture surfaces around that object.",
+      "related_findings": [
+        "WF-04",
+        "WF-05",
+        "WF-11",
+        "WF-13"
+      ]
+    }
+  ],
+  "limitations": [
+    "Audit is static and read-only apart from this report and a unique ignored read helper. No source changes, installs, git mutations, external messages, production/private profile execution, or full test suite.",
+    "All 46 assigned SKILL.md files were read in full; line counts are file line counts, not estimates of instruction quality. Directly relevant reference documents, accepted ADRs, helpers, callers and tests were also read or searched.",
+    "Whole-repository source/provenance research and other tool/runtime surfaces are coordinated by the parent. This report does not claim a fresh direct upstream parity comparison beyond local accepted ADRs and source references.",
+    "Search-based absence claims state their inspected scope. Missing named shell functions alone is not treated as proof a markdown skill cannot work: findings identify missing agent procedure/state contracts or commands presented with concrete executable semantics.",
+    "Model-in-the-loop productivity, prompt reliability and host-specific independent-review execution were not measured. No invented success rates or comparative quality scores are reported.",
+    "ADR0008 explicitly stages Brief Forge and several hooks; no recommendation here authorizes activating them. ADR0021's staged model evaluation and ADR0026's chosen hybrid design remain authoritative.",
+    "Root is independently tracing cycle/state, router and pack/runtime behavior; those findings may overlap the per-skill recommendations and should be deduplicated in the final action list.",
+    "Potential CAPTURE usage/cost provenance issues were noted for parent follow-up but not elevated as a standalone verified finding without tracing the actual pricing and usage source."
+  ]
+}

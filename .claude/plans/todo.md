@@ -329,7 +329,7 @@ bin/_audit.sh, lib/state.sh, secret/customer hooks, _patterns.sh, _input.sh) are
 audit-writes-via-helper.sh caught a raw-append contract violation (the only test I broke; now green).
 One deviation flagged for operator: plan-design-review:75 external gstack `design` binary — NOT in the
 ADR row list, already guarded/optional/off the required path; left intact pending decision.
-# Current: independent enterprise value review (2026-09-08)
+# Historical: independent enterprise value review (2026-09-08)
 
 Isolated baseline `6b10a84`; parent checkout belongs to another active session.
 See [plan](enterprise-value-review/plan.md), [specification](enterprise-value-review/spec.md) and [handoff](enterprise-value-review/prompt.md).
@@ -355,3 +355,16 @@ with eight targeted scripts passing after the rebase. CI and integration review 
 remain context, not this initiative's authority.
 
 ---
+
+## Current: Universal whole-system quality audit (2026-09-20)
+
+- [x] Establish isolated main baseline and the review rubric.
+- [x] Audit every canonical skill and agent, cross-component contracts, runtime and documentation.
+- [x] Compare relevant original harnesses and current client surfaces using primary sources.
+- [x] Deliver an independently challenged action list with evidence and acceptance criteria.
+
+Authority: audit and recommendations only. [Execution plan](universal-quality-audit/plan.md).
+The unmerged swarm branch is a separate delta; this audit does not implement or merge it.
+The September 8 delivery remains complete.
+
+Review: audit complete, independently challenged and corrected. See [report](../engineering/audits/2026-09-20-universal-quality/report.md) and [26 proposed actions](../engineering/audits/2026-09-20-universal-quality/action-plan.md). Product implementation is not complete or authorized by this checklist. Preserve all valuable capabilities and the entire Swarming initiative as far as feasible.

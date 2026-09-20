@@ -8,6 +8,32 @@ Cross-session working state (not durable rules — that's [[lessons.md]]; not pe
 
 ---
 
+## Completed — Universal whole-system quality audit (2026-09-20)
+
+**Status:** COMPLETE as an audit and prioritized action list, not as implementation.
+Isolated worktree `.claude/worktrees/universal-audit-20260920`, branch
+`codex/universal-audit-20260920`, main baseline `28061e4`. Original `codex/swarming-work`
+checkout remains untouched. Audit artifacts and these continuity updates are local and uncommitted.
+
+**Outcome:** all126 canonical skill bodies and69 agent bodies read; all771 baseline files
+inventoried; runtime, current documentation, official client surfaces and pinned upstream methods
+reviewed. Independent synthesis review completed, with precision corrections applied.
+See [report](../engineering/audits/2026-09-20-universal-quality/report.md),
+[action list](../engineering/audits/2026-09-20-universal-quality/action-plan.md) and
+[verification](../engineering/audits/2026-09-20-universal-quality/verification.md).
+
+**Operator requirements:** Universal CLI and desktop support; preserve and enrich all valuable
+functionality/knowledge/use cases. Preserve the entire Swarming initiative as far as feasible,
+including planning/coordination/manual handoff when native concurrency is unavailable. All76
+branch-delta files are mapped in the [preservation record](../engineering/audits/2026-09-20-universal-quality/swarm-preservation.md).
+Keep ADR0026 short leaves plus coherent packages and independent substantive review.
+
+**What's pending:** separately scope implementation from the26 proposed outcomes. Prioritize unsafe
+recipes, stale/false clearance, trusted source boundaries, private sync destination, then Universal
+profile/work/evidence contracts and rich capability integration. No product fixes, source removals,
+private profile activation, full suite, paid model benchmark or complete host matrix occurred.
+Do not treat prior September8 main-delivery authorization as approval for a new merge batch.
+
 ## Completed — enterprise value review (2026-09-08)
 
 **Status:** COMPLETE. [PR #84](https://github.com/jokerman89/lintel/pull/84) merged to main at `bb1a16cdf3ce2d53f75623d30d37b528b9bb9393` on 2026-09-08T15:15:12Z.

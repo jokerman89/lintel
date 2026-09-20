@@ -657,3 +657,30 @@ not establish the intended finished result.
 draft PR can be a milestone; it is not completion when the operator expects functioning,
 integrated improvements. Reopen the ledger when new main changes invalidate the verified
 baseline, and do not claim the final outcome before the required remote merge is confirmed.
+
+## L-030 — Adding a client adapter must preserve Universal product identity
+
+**Date:** 2026-09-20
+
+**Context:** The operator corrected the Copilot-first documentation direction after asking
+for Copilot support. Lintel is intended for major coding CLIs and coding desktop applications.
+
+**Mistake:** A host integration became the product's default identity and onboarding story.
+The core remained partly tied to Claude-specific tools while public documentation favored Copilot.
+
+**Rule:** Keep common workflow, contracts and product documentation host-neutral. Put discovery,
+tool names, installation and activation differences in explicit client adapters. Separate host
+capability, shipped Lintel integration and verified session evidence. Universal does not mean
+every host has identical tools or that a manifest proves runtime support.
+
+## L-031 — Preserve value when consolidating the harness (2026-09-20)
+
+- Context: operator clarified the Universal quality audit must optimize, fix and deepen existing value.
+- Risk in the audit wording: merge/retire/staged labels could be read as a license to reduce capability or discard unfinished valuable work. No product capability was removed.
+- Rule: map each valuable use case, method and output to its retained owner and verify it before consolidation. Keep aliases where useful; optional packs remain discoverable and usable. Give unfinished valuable capability a completion path. Propose removal only with evidence of no unique value or a fully verified replacement; reducing file count is not a goal.
+
+## L-032 — Preserve the complete swarming initiative across feasible host modes (2026-09-20)
+
+- Context: operator explicitly requires all Swarming branch work to be preserved as far as feasible; swarming or practical facilitation is a desired capability.
+- Risk to prevent: treating review findings, hybrid integration or missing host concurrency as a reason to discard the initiative or defer it indefinitely. No branch work was changed or removed.
+- Rule: preserve implementation, knowledge, tests, reports, history and useful entry points; trace every valuable delta into the reconciled result. Adapt execution to native isolated, sequential or explicit external/manual handoff modes. Keep true independent review requirements visible. Escalate an actual unavoidable loss with concrete alternatives before dropping value.

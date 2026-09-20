@@ -12,6 +12,7 @@ read them on demand.
 
 ## Hot notes
 <!-- agent-maintained: short, load-bearing facts; consolidate or supersede instead of appending forever -->
+- **Universal audit COMPLETE (2026-09-20):** all126 skills/69 agents reviewed; [26 proposed actions](../engineering/audits/2026-09-20-universal-quality/action-plan.md). Preserve valuable capabilities and all Swarming work as far as feasible (L-030–L-032). Audit is local in the isolated review worktree; product fixes/merge are pending separately.
 - **Copilot enterprise launch COMPLETE (2026-09-08, PR #83 merged):** native portable kit, explicit Spec Kit work map, complete shared startup protocol and 101/101 hosted tests on Ubuntu/macOS/Windows. Delivery evidence and beta acceptance boundaries: [launch plan](../plans/copilot-enterprise-launch/plan.md) and [review](../plans/copilot-enterprise-launch/review.md). Completed plans and older publication/history notes are records, not live instructions or standing authorization.
 - v5.x history: launch-readiness folded into PR #73; v5.0 chain #62→#65 merged. Audit records now at `.claude/engineering/audits/`.
 - Conventions in force: supersede-don't-delete (`superseded_by:`), update-before-append (CAPTURE/learn), L-NNN grammar only, MEMORY.md ≤200 lines.
