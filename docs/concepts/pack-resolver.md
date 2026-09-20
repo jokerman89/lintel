@@ -178,6 +178,31 @@ stolen by guessing that a process is dead.
 These local records are consistency evidence, not tamper-resistant audit storage.
 Publish only approved non-secret reference/identity data, not entire runtime profiles.
 
+### Runtime filesystem identity
+
+Containment resolves the actual candidate and its existing link/junction ancestors
+before comparing complete path components against the approved home or target runtime.
+Approved roots are fixed when configuration loads; a subsequently redirected
+`.claude/runtime` is not resolved into a new authorization root.
+
+Windows can return the same filesystem path as `C:\...` or `\\?\C:\...`, and a UNC
+path as `\\server\share\...` or `\\?\UNC\server\share\...`. A comparison-only helper
+recognizes exactly those aliases, retaining drive/server/share/component boundaries.
+Resolved component casing is retained in an exact comparison key: a global Windows
+case-fold assumption must not admit a distinct case-sensitive sibling directory.
+An alias whose equivalence cannot be established from resolved identity is rejected
+conservatively, including unverified casing differences.
+It does not change the paths used for I/O, manifest provenance or content fingerprints.
+Other device namespaces, drive-relative paths, unresolved traversal, alternate data
+streams and ambiguous/reserved Windows components are refused, not stripped into
+apparently acceptable files. Resolving links remains necessary; lexical normalization
+is not a replacement for physical containment or a hostile-concurrency sandbox.
+
+`tests/unit/profile-path-identity.sh` separates pure UNC/namespace comparisons from
+actual native drive I/O and junction/symlink tests. UNC comparison coverage does not
+claim a live share was accessed. Repeated real three-process bootstrap scenarios also
+retain the same selected reference and required policy without ignoring failed attempts.
+
 ## Inheritance, types and compatibility
 
 Each manifest has its own matching directory/name and semantic `version`. A child

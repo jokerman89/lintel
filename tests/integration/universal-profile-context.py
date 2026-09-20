@@ -270,6 +270,52 @@ class ProfileLifecycle(unittest.TestCase):
         self.assertEqual(references[0]["generation"], 1)
         self.assertEqual(len(list((self.home / "sessions").glob("**/current-profile.json"))), 1)
 
+    def test_repeated_three_process_bootstrap_keeps_exact_required_profile(self):
+        self.pack("strict")
+        for round_number in range(12):
+            with self.subTest(round=round_number):
+                target = self.base / f"parallel-target-{round_number}"
+                home = self.base / f"parallel-home-{round_number}"
+                target.mkdir()
+                (target / "AGENTS.md").write_text("Synthetic parallel bootstrap.\n", encoding="utf-8")
+                (target / ".claude").mkdir()
+                (target / ".claude/profile-requirements.json").write_text(
+                    '{"schema_version":1,"required_pack":"strict"}', encoding="utf-8",
+                )
+                env = dict(self.env, LINTEL_REPO_ROOT=target.as_posix(), LINTEL_HOME=home.as_posix(),
+                           LINTEL_AUDIT_DIR=(home / "audit").as_posix())
+                env.pop("LINTEL_PROFILE_CONTEXT")
+                code = BOOTSTRAP + "\nprofile_required_policy || exit $?\nresolve_pack_field compliance.mode"
+                processes = [
+                    subprocess.Popen(
+                        [OPTIONS.bash, "-c", code], cwd=target, env=env, text=True, encoding="utf-8",
+                        stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                    ) for _ in range(3)
+                ]
+                references = []
+                try:
+                    for process in processes:
+                        stdout, stderr = process.communicate(timeout=45)
+                        self.assertEqual(process.returncode, 0, stderr + stdout)
+                        lines = stdout.splitlines()
+                        self.assertEqual(len(lines), 3, stdout)
+                        references.append(json.loads(lines[0]))
+                        policy = json.loads(lines[1])
+                        self.assertIs(policy["required"], True)
+                        self.assertEqual(policy["status"], "loaded")
+                        self.assertEqual(lines[2], "hard")
+                finally:
+                    for process in processes:
+                        if process.poll() is None:
+                            process.kill()
+                            process.communicate()
+                self.assertTrue(all(reference == references[0] for reference in references))
+                self.assertEqual(references[0]["generation"], 1)
+                self.assertEqual(json.loads(
+                    (target / ".claude/runtime/profiles/selected.json").read_text(encoding="utf-8"),
+                ), references[0])
+                self.assertEqual(len(list(home.glob("sessions/**/current-profile.json"))), 1)
+
     def test_bootstrap_required_load_failure_does_not_create_successful_selection(self):
         self.require("missing")
         env = dict(self.env)

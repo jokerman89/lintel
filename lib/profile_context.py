@@ -16,7 +16,7 @@ import hashlib
 import json
 import math
 import os
-from pathlib import Path
+from pathlib import Path, PurePath, PureWindowsPath
 import re
 import sys
 import tempfile
@@ -652,10 +652,48 @@ def context_path(config: ProfileConfig) -> Path:
     return path
 
 
+def _path_identity(path: PurePath) -> tuple[str, ...]:
+    """Compare filesystem spellings without changing the paths used for I/O."""
+    identity = path
+    if isinstance(path, PureWindowsPath):
+        text = str(path)
+        if text.startswith("\\\\?\\"):
+            suffix = text[4:]
+            if suffix[:4].lower() == "unc\\":
+                text = "\\\\" + suffix[4:]
+            elif re.match(r"^[A-Za-z]:\\", suffix):
+                text = suffix
+            else:
+                raise ProfileError("PROFILE_IO", "unsupported Windows filesystem namespace")
+        identity = PureWindowsPath(text)
+        components = identity.parts[1:]
+        if identity.drive.startswith("\\\\"):
+            share = identity.drive[2:].split("\\")
+            if len(share) != 2:
+                raise ProfileError("PROFILE_IO", "runtime UNC identity requires a server and share")
+            components = (*share, *components)
+        elif not re.fullmatch(r"[A-Za-z]:", identity.drive):
+            raise ProfileError("PROFILE_IO", "runtime identity requires an absolute filesystem drive")
+        if any(
+            part in ("", ".", "..") or part.endswith((".", " "))
+            or re.search(r'[\x00-\x1f<>:"|?*]', part)
+            or PureWindowsPath(part).is_reserved()
+            for part in components
+        ):
+            raise ProfileError("PROFILE_IO", "ambiguous or non-filesystem Windows path component")
+    if not identity.is_absolute() or ".." in identity.parts:
+        raise ProfileError("PROFILE_IO", "runtime identity must be absolute and traversal-free")
+    return identity.parts
+
+
 def _runtime_path(config: ProfileConfig, path: Path) -> None:
-    resolved = path.resolve()
-    if not (resolved.is_relative_to(config.home) or
-            resolved.is_relative_to(config.repo / ".claude/runtime")):
+    if isinstance(path, PureWindowsPath):
+        _path_identity(path)
+    resolved = _path_identity(path.resolve())
+    # Approved roots were resolved at configuration time. Do not follow a newly
+    # redirected boundary or case-fold distinct case-sensitive Windows siblings.
+    roots = (_path_identity(config.home), _path_identity(config.repo / ".claude/runtime"))
+    if not any(resolved[:len(root)] == root for root in roots):
         raise ProfileError("PROFILE_IO", "profile runtime must stay in selected LINTEL_HOME or target runtime")
 
 
