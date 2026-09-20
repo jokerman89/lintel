@@ -219,7 +219,13 @@ full workflow/profile-value gates remain open.
 ### A08 One lifecycle work map (P08; R05)
 - [ ] A08.1 Preserve requested operation separately from topic during routing.
 - [ ] A08.2 Start cycle identity before phases and prevent duplicate start phases.
+  - [ ] A08.2.a Implement cycle-start/phase-transition helpers and interrupted-state fixtures.
+  - [ ] A08.2.b Render footer state from actual STARTING/BLOCKED/DONE status, not next-phase metadata.
+  - [ ] A08.2.c Compose canonical phase entry without duplicate SENSE/SCOPE.
 - [ ] A08.3 Connect ANALYZE/CAPTURE/budget/resume to the same selected task source.
+  - [ ] A08.3.a Share the selected-map reader and bounded artifact manifest using accepted parsers/selectors.
+  - [ ] A08.3.b Persist selected-map/profile/required-policy resume identity without replacing original authority.
+  - [ ] A08.3.c Wire ANALYZE/CAPTURE/BUILD/budget consumers to original paths and IDs.
 - [ ] A08.4 Parse actual ADR conventions and retain overdue/blocked work.
 - [ ] A08.5 Test two initiatives, Spec Kit IDs and interrupted-cycle recovery.
 Acceptance: no write escalation of read intent, duplicate backlog or lost history.

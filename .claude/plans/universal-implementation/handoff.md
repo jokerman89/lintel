@@ -37,6 +37,7 @@ from the reviewed historical merge `40c2795`. Current implementation ownership:
 | P05 review evidence | `2329e71f-cd9e-473b-94cf-41c579c29a88` | ACCEPTED by `33eac071`, integrated `c5c8f86`; current profile/review and focused gates pass, idle |
 | P06 host adapters | `324863ff-e7cf-4abf-b449-04dd0f096170` | Component ACCEPTED/integrated `36593cd`; provider `7425960`, final review `1067da29`; idle |
 | P07 profile context | `b9352dfe-1c1e-4ea3-b7d9-0fd008d39b3d` | Long-path repair ACCEPTED by `a7450597`, integrated `c344133` with reports; joined checks pass, idle |
+| P08 work lifecycle | `f2c305ac-e8b0-4b02-b6cd-c7de598964cf` | Implementing ready A08/A10 from `5c3e753`; A13 installer observation waits for P10 seam/fixtures |
 | P10 installer lifecycle | `5ea6c88c-68c1-4712-8f55-adecdfe0061f` | Implementing approved native/runtime split from `0df1042`; dependencies `98ad7ed` / `ca28074`, no Python install prerequisite |
 
 All are `lintel-builder` sessions with explicit ownership, local commits, report paths
@@ -259,7 +260,8 @@ No new authorization for main merge, releases, production, hook activation or pr
 
 ## Next action
 
-P05/P06/P07 are accepted and integrated, so dispatch P08 from this committed core.
+P05/P06/P07 are accepted and integrated. P08 is dispatched in session `f2c305ac`
+from exact `5c3e7533335eeae15556aeabba422bfdbbe07f46` and has acknowledged its scope.
 Its work-map reader ownership is released by P04; preserve the existing task/package
 APIs. A08/A10 lifecycle work is ready. A13 installer observations await P10's actual
 producer/receipt seam and fixtures, not an invented event or an imported WIP dependency.
