@@ -6,6 +6,7 @@
 # last_intent_review: 2026-09-20
 
 import argparse
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -251,6 +252,34 @@ class PrivateSyncTests(unittest.TestCase):
         for command in ("push", "pull"):
             f.reject_without_transfer(command)
 
+    def test_a26_1_file_url_setup_retains_git_literal_suffix(self):
+        f = self.fixture
+        without_suffix = f.remote("literal")
+        selected = f.remote("literal.git#selected")
+        url = without_suffix.as_uri() + "#selected.git"
+        f.setup(url)
+        self.equal(json.loads(f.binding.read_text())["url"], url,
+                   "setup must not silently drop a suffix Git treats as part of the path")
+        f.content(b"# Explicitly selected literal file URL.\n")
+        f.cli("push")
+        self.equal(f.git(selected, "rev-parse", "HEAD"), f.git(f.cache, "rev-parse", "HEAD"),
+                   "Git receives the exact selected file URL")
+        bob = Fixture(self, self.base / "literal-url-reader", self.kind)
+        bob.setup(url)
+        f.content(b"# Updated literal file URL record.\n")
+        f.cli("push")
+        bob.cli("pull")
+        bob.record(b"# Updated literal file URL record.\n")
+        f.cli("setup", selected.as_uri())
+        self.equal(json.loads(f.binding.read_text())["url"], selected.as_uri(),
+                   "an explicitly selected percent-encoded URL is retained exactly")
+        f.content(b"# Explicitly selected encoded file URL.\n")
+        f.cli("push")
+        bob.cli("pull")
+        bob.record(b"# Explicitly selected encoded file URL.\n")
+        self.equal(f.git(without_suffix, "for-each-ref", "--format=%(refname)"), "",
+                   "normalizing a URL must not redirect setup to a different repository")
+
     def test_a26_2_binding_is_required_and_validated(self):
         f = self.fixture
         f.setup(f.remote("binding"))
@@ -285,17 +314,19 @@ class PrivateSyncTests(unittest.TestCase):
         f.setup(a)
         f.content(b"# Existing history.\n")
         f.cli("push")
+        bound_url = json.loads(f.binding.read_text())["url"]
         changes = (
             (("remote.origin.url", str(b)), "origin drift"),
             (("remote.origin.pushurl", str(b)), "pushurl drift"),
             (("remote.origin.url", str(b)), "multiple fetch URLs"),
-            (("remote.origin.pushurl", str(a)), "multiple push URLs"),
-            ((f"url.{b.as_posix()}.insteadOf", str(a)), "fetch URL rewrite"),
-            ((f"url.{b.as_posix()}.pushInsteadOf", str(a)), "push URL rewrite"),
+            (("remote.origin.pushurl", bound_url), "multiple push URLs"),
+            ((f"url.{b.as_posix()}.insteadOf", bound_url), "fetch URL rewrite"),
+            ((f"url.{b.as_posix()}.pushInsteadOf", bound_url), "push URL rewrite"),
         )
         for (key, value), label in changes:
             with self.subTest(drift=label):
-                f.git(f.cache, "config", "--local", "--replace-all", "remote.origin.url", str(a))
+                f.git(f.cache, "config", "--local", "--replace-all", "remote.origin.url", bound_url)
+                f.cli("status")
                 if label == "multiple push URLs":
                     f.git(f.cache, "config", "--local", "--add", key, str(b))
                 if label == "origin drift":
@@ -306,7 +337,31 @@ class PrivateSyncTests(unittest.TestCase):
                     with self.subTest(command=command):
                         f.reject_without_transfer(command)
                 f.git(f.cache, "config", "--local", "--unset-all", key)
-        f.git(f.cache, "config", "--local", "remote.origin.url", str(a))
+        f.git(f.cache, "config", "--local", "remote.origin.url", bound_url)
+
+    def test_a26_2_file_url_suffix_drift_cannot_select_another_remote(self):
+        f = self.fixture
+        approved = f.remote("approved")
+        obsolete = f.remote("approved.git#obsolete")
+        f.setup(approved)
+        f.content(b"# Approved remote revision.\n")
+        f.cli("push")
+        approved_head = f.git(approved, "rev-parse", "HEAD")
+        f.content(b"# Must not be published to the suffixed path.\n")
+        bound_url = json.loads(f.binding.read_text())["url"]
+        for key in ("remote.origin.url", "remote.origin.pushurl"):
+            for url in (approved.as_uri() + "#obsolete.git", obsolete.as_uri()):
+                f.git(f.cache, "config", "--local", "--replace-all", "remote.origin.url", bound_url)
+                f.git(f.cache, "config", "--local", "--unset-all", "remote.origin.pushurl", ok=False)
+                f.cli("status")
+                f.git(f.cache, "config", "--local", key, url)
+                for command in ("push", "pull", "status"):
+                    with self.subTest(key=key, url=url, command=command):
+                        f.reject_without_transfer(command)
+        self.equal(f.git(approved, "rev-parse", "HEAD"), approved_head,
+                   "rejected drift does not change the approved remote")
+        self.equal(f.git(obsolete, "for-each-ref", "--format=%(refname)"), "",
+                   "rejected drift never writes the distinct suffixed remote")
 
     def test_a26_2_forget_disables_without_deleting_any_content(self):
         f = self.fixture
@@ -464,6 +519,113 @@ class PrivateSyncTests(unittest.TestCase):
         self.equal(f.git(a, "rev-parse", "HEAD"), a_head, "old remote history is retained")
         self.equal(f.git(b, "rev-parse", "HEAD"), b_head, "selected remote is never force-pushed")
 
+    def test_a26_4_pull_refmap_preserves_pending_divergent_history(self):
+        f = self.fixture
+        remote = f.remote("refmap-divergent")
+        f.setup(remote)
+        f.content(b"# Common ancestor.\n")
+        f.cli("push")
+        bob = Fixture(self, self.base / "pending-bob", self.kind)
+        bob.setup(remote)
+        record = bob.record(b"# Common ancestor.\n")
+        record.write_bytes(b"# Bob's committed but unpublished private work.\n")
+        bob.git(bob.cache, "add", "--", record.name)
+        bob.git(bob.cache, "commit", "-qm", "fixture pending local work")
+        bob.git(bob.cache, "branch", "preserved-branch")
+        bob.git(bob.cache, "tag", "preserved-tag")
+        f.content(b"# Divergent remote content.\n")
+        f.cli("push")
+        for index, target in enumerate(("refs/heads/main", "refs/heads/preserved-branch",
+                                        "refs/tags/preserved-tag")):
+            bob.git(bob.cache, "config", "--local", "--replace-all" if index == 0 else "--add",
+                    "remote.origin.fetch", f"+refs/heads/main:{target}")
+        before = bob.state()
+        before_index = bob.git(bob.cache, "ls-files", "--stage")
+        before_refs = bob.git(bob.cache, "for-each-ref", "--format=%(refname) %(objectname)")
+        bob.cli("pull", ok=False)
+        self.equal(bob.state(), before, "failed fast-forward preserves pending HEAD and all content")
+        self.equal(bob.git(bob.cache, "ls-files", "--stage"), before_index,
+                   "configured fetch mappings cannot replace the local index")
+        self.equal(bob.git(bob.cache, "for-each-ref", "--format=%(refname) %(objectname)"),
+                   before_refs, "fetch changes no local branch, tag or tracking ref")
+
+    def test_a26_4_pull_ignores_configured_refmap_before_fast_forward(self):
+        f = self.fixture
+        remote = f.remote("refmap-forward")
+        f.setup(remote)
+        f.content(b"# Initial remote content.\n")
+        f.cli("push")
+        bob = Fixture(self, self.base / "forward-bob", self.kind)
+        bob.setup(remote)
+        bob.git(bob.cache, "branch", "preserved-branch")
+        bob.git(bob.cache, "tag", "preserved-tag")
+        protected = {
+            ref: bob.git(bob.cache, "rev-parse", ref)
+            for ref in ("refs/heads/preserved-branch", "refs/tags/preserved-tag",
+                        "refs/remotes/origin/main")
+        }
+        bob.git(bob.cache, "config", "--local", "--replace-all", "remote.origin.fetch",
+                "+refs/heads/main:refs/heads/preserved-branch")
+        bob.git(bob.cache, "config", "--local", "--add", "remote.origin.fetch",
+                "+refs/heads/main:refs/tags/preserved-tag")
+        bob.git(bob.cache, "config", "--local", "fetch.prune", "true")
+        bob.git(bob.cache, "config", "--local", "fetch.pruneTags", "true")
+        bob.git(bob.cache, "config", "--local", "remote.origin.tagOpt", "--tags")
+        f.content(b"# Verified fast-forward content.\n")
+        f.cli("push")
+        bob.cli("pull")
+        self.equal(bob.git(bob.cache, "rev-parse", "HEAD"), f.git(remote, "rev-parse", "HEAD"),
+                   "explicit verified fast-forward still updates the current branch")
+        bob.record(b"# Verified fast-forward content.\n")
+        for ref, old_value in protected.items():
+            with self.subTest(ref=ref):
+                self.equal(bob.git(bob.cache, "rev-parse", ref), old_value,
+                           "fetch ignores configured mappings and prune/tag settings")
+
+    def test_a26_4_pull_initializes_an_unborn_cache_without_overwriting_local_files(self):
+        f = self.fixture
+        remote = f.remote("unborn-cache")
+        f.setup(remote)
+        bob = Fixture(self, self.base / "unborn-bob", self.kind)
+        bob.setup(remote)
+        (bob.cache / "local-notes.txt").write_bytes(b"Local untracked notes.\n")
+        f.content(b"# First published record.\n")
+        f.cli("push")
+        bob.cli("pull")
+        bob.record(b"# First published record.\n")
+        self.equal((bob.cache / "local-notes.txt").read_bytes(), b"Local untracked notes.\n",
+                   "first pull preserves unrelated local files")
+        self.equal(bob.git(bob.cache, "rev-parse", "HEAD"), f.git(remote, "rev-parse", "HEAD"),
+                   "initial published commit becomes the local branch tip")
+
+    def test_a26_4_unborn_pull_preserves_conflicting_local_content(self):
+        f = self.fixture
+        remote = f.remote("unborn-conflict")
+        f.setup(remote)
+        bob = Fixture(self, self.base / "unborn-conflict-bob", self.kind)
+        bob.setup(remote)
+        f.content(b"# Remote first record.\n")
+        f.cli("push")
+        record_name = f.record(b"# Remote first record.\n").name
+        (bob.cache / record_name).write_bytes(b"# Uncommitted local record must survive.\n")
+        before = bob.state()
+        bob.cli("pull", ok=False)
+        self.equal(bob.state(), before, "first pull refuses a conflicting local file")
+
+    def test_a26_4_pull_keeps_commits_ahead_of_the_remote(self):
+        f = self.fixture
+        remote = f.remote("local-ahead")
+        f.setup(remote)
+        f.content(b"# Published record.\n")
+        f.cli("push")
+        record = f.record(b"# Published record.\n")
+        record.write_bytes(b"# Committed local work ahead of remote.\n")
+        f.git(f.cache, "add", "--", record.name)
+        f.git(f.cache, "commit", "-qm", "fixture unpublished commit")
+        before = f.state()
+        f.cli("pull")
+        self.equal(f.state(), before, "already-ahead pull is a non-destructive no-op")
+
 
 class RolesSyncTests(PrivateSyncTests):
     kind = "roles"
@@ -562,6 +724,71 @@ class LessonsSyncTests(PrivateSyncTests):
             records.append(f.record(content).name)
         self.check(records[0] != records[1], "distinct local origins retain distinct identities")
         self.equal(len(list(f.cache.glob("*.md"))), 2, "neither source record is overwritten")
+
+    def test_a26_3_effective_project_origins_separate_identical_rewritten_aliases(self):
+        f = self.fixture
+        f.setup(f.remote("alias-vault"))
+        alias = "review-alias:project"
+        old_name = "project--" + hashlib.sha256(("origin:" + alias).encode()).hexdigest() + ".md"
+        old_record = f.cache / old_name
+        old_record.write_bytes(b"# Historical ambiguous alias record.\n")
+        f.git(f.cache, "add", "--", old_name)
+        f.git(f.cache, "commit", "-qm", "fixture historical raw-alias identity")
+        records = []
+        projects = []
+        sources = []
+        for index in range(2):
+            source = f.base / f"endpoint-{index}" / "project.git"
+            source.mkdir(parents=True)
+            f.git(source, "init", "-q", "--bare", "-b", "main")
+            project = f.base / f"checkout-{index}" / "project"
+            f.make_project(project, origin=alias)
+            f.git(project, "config", "--local", f"url.{source.as_posix()}.insteadOf", alias)
+            self.equal(f.git(project, "remote", "get-url", "origin"), source.as_posix(),
+                       "fixture alias resolves to the distinct local Git endpoint")
+            content = f"# Effective source {index}.\n".encode()
+            f.content(content, project=project)
+            f.cli("push", cwd=project)
+            records.append(f.record(content).name)
+            projects.append(project)
+            sources.append(source)
+        self.check(records[0] != records[1], "identical aliases cannot overwrite distinct projects")
+        self.equal((f.cache / records[0]).read_bytes(), b"# Effective source 0.\n",
+                   "second effective origin preserves the first project's record")
+        self.equal(old_record.read_bytes(), b"# Historical ambiguous alias record.\n",
+                   "correcting source identity retains the old ambiguous record")
+        f.git(projects[0], "config", "--local", "remote.origin.url", "another-alias:project")
+        f.git(projects[0], "config", "--local", f"url.{sources[0].as_posix()}.insteadOf",
+              "another-alias:project")
+        f.content(b"# Same effective source, new alias.\n", project=projects[0])
+        f.cli("push", cwd=projects[0])
+        self.equal(f.record(b"# Same effective source, new alias.\n").name, records[0],
+                   "identity follows the effective origin rather than the raw alias")
+        bob = Fixture(self, self.base / "alias-reader", "lessons")
+        bob.setup(f.base / "alias-vault.git")
+        self.equal((bob.cache / records[0]).read_bytes(), b"# Same effective source, new alias.\n",
+                   "first effective project round-trips")
+        self.equal((bob.cache / records[1]).read_bytes(), b"# Effective source 1.\n",
+                   "second effective project round-trips independently")
+        self.equal((bob.cache / old_name).read_bytes(), b"# Historical ambiguous alias record.\n",
+                   "historical raw-alias record also survives the full round trip")
+
+    def test_a26_3_literal_file_url_suffixes_keep_distinct_project_identities(self):
+        f = self.fixture
+        f.setup(f.remote("literal-identity-vault"))
+        first = f.remote("project-origin")
+        f.remote("project-origin.git#distinct")
+        records = []
+        for index, url in enumerate((first.as_uri(), first.as_uri() + "#distinct.git")):
+            project = f.base / f"url-project-{index}"
+            f.make_project(project, origin=url)
+            content = f"# File transport project {index}.\n".encode()
+            f.content(content, project=project)
+            f.cli("push", cwd=project)
+            records.append(f.record(content).name)
+        self.check(records[0] != records[1], "Git-literal URL suffix changes the project identity")
+        self.equal((f.cache / records[0]).read_bytes(), b"# File transport project 0.\n",
+                   "a different file URL cannot replace the first project's lessons")
 
     def test_a26_3_linked_worktrees_share_the_canonical_project_identity(self):
         f = self.fixture

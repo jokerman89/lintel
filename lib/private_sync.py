@@ -44,13 +44,9 @@ def destination(value: str, base: Path) -> str:
         return Path(value).resolve().as_posix()
     if "://" in value:
         parsed = urlsplit(value)
-        if parsed.scheme == "file":
-            local = url2pathname(parsed.path)
-            if parsed.netloc and parsed.netloc != "localhost":
-                local = f"//{parsed.netloc}{local}"
-            return Path(local).resolve().as_posix()
         if parsed.password or (parsed.scheme in ("http", "https") and parsed.username):
             raise SyncError("Use a credential-free remote URL and Git's credential manager.")
+        # Git's file transport treats ? and # as path bytes, not URI suffixes.
         return value
     if re.match(r"^[^/\\:]+(?:@[^/\\:]+)?:", value):
         return value
@@ -121,9 +117,11 @@ def require_repository(directory: Path) -> None:
 
 def verify_origin(directory: Path, url: str) -> None:
     expected = destination(url, directory)
+    if expected != url:
+        raise SyncError("Binding is not an explicit absolute path or URL. Run setup <repo-url>.")
     for options in (("--all",), ("--push", "--all")):
         actual = git(directory, "remote", "get-url", *options, "origin").splitlines()
-        if len(actual) != 1 or destination(actual[0], directory) != expected:
+        if actual != [expected]:
             raise SyncError(
                 "Origin does not match the enabled destination (including push URLs and rewrites). "
                 "No sync performed; run setup <repo-url> to select the destination explicitly."
@@ -142,7 +140,7 @@ def require_binding(path: Path, directory: Path) -> Binding:
 def clone_preserving_files(directory: Path, url: str) -> None:
     directory.parent.mkdir(parents=True, exist_ok=True)
     effective = git(directory.parent, "ls-remote", "--get-url", url)
-    if destination(effective, directory.parent) != url:
+    if effective != url:
         raise SyncError("Git rewrites the selected destination. Use its explicit final URL.")
     with tempfile.TemporaryDirectory(prefix=".lintel-private-sync-", dir=directory.parent) as temporary:
         clone = Path(temporary) / "cache"
@@ -211,7 +209,16 @@ def project_record(project: Path) -> str:
     if len(origins) > 1:
         raise SyncError("Project has multiple origin URLs; select one stable project origin first.")
     if origins:
-        origin = destination(origins[0], root)
+        effective = git(root, "remote", "get-url", "--all", "origin").splitlines()
+        if len(effective) != 1:
+            raise SyncError("Project must have exactly one effective origin URL.")
+        origin = destination(effective[0], root)
+        if origin.startswith("file://"):
+            parsed = urlsplit(origin)
+            local = Path(url2pathname(parsed.path))
+            # Only a lossless canonical file URI may share a plain local-path key.
+            if not parsed.netloc and local.is_absolute() and local.as_uri() == origin:
+                origin = local.resolve().as_posix()
         if "://" in origin:
             name = unquote(urlsplit(origin).path).rstrip("/").rsplit("/", 1)[-1]
             identity = origin
@@ -272,9 +279,26 @@ def push(kind: str, directory: Path, path: Path, project: Path | None, lessons: 
 
 def pull(directory: Path, path: Path) -> None:
     require_binding(path, directory)
-    branch = current_branch(directory).removeprefix("refs/heads/")
-    git(directory, "-c", "merge.autoStash=false", "pull", "--ff-only", "--no-rebase",
-        "--no-autostash", "--no-recurse-submodules", "origin", branch)
+    branch = current_branch(directory)
+    before = git(directory, "rev-parse", "--verify", "--quiet", "HEAD", allowed=(0, 1))
+    # No destination ref: --refmap= suppresses even forced remote.origin.fetch mappings.
+    git(directory, "fetch", "--refmap=", "--no-tags", "--no-prune", "--no-prune-tags",
+        "--no-recurse-submodules", "--no-auto-maintenance", "origin", branch)
+    fetched = git(directory, "rev-parse", "--verify", "FETCH_HEAD^{commit}")
+    fast_forward = not before
+    if before:
+        common = git(directory, "merge-base", "--all", before, fetched, allowed=(0, 1)).splitlines()
+        fast_forward = before in common
+        if not fast_forward and fetched not in common:
+            raise SyncError("Pull is not a fast-forward. Local history, index and content are preserved.")
+    require_binding(path, directory)
+    if current_branch(directory) != branch or git(
+        directory, "rev-parse", "--verify", "--quiet", "HEAD", allowed=(0, 1)
+    ) != before:
+        raise SyncError("The local branch changed during fetch; refusing to apply fetched content.")
+    if fast_forward:
+        git(directory, "-c", "merge.autoStash=false", "merge", "--ff-only", "--no-autostash",
+            "--no-edit", "--no-overwrite-ignore", "--no-squash", fetched)
     print(f"Pulled private records from the verified origin into {directory}.")
 
 
