@@ -4,8 +4,10 @@
 # constraints: all mutation and failure injection uses disposable fixtures
 # last_intent_review: 2026-09-20
 from datetime import datetime, timedelta, timezone
+from contextlib import redirect_stderr
 import hashlib
 import importlib.util
+import io
 import json
 import os
 from pathlib import Path
@@ -174,6 +176,33 @@ class SnapshotOwnershipTests(unittest.TestCase):
                 self.create()
         self.assertEqual(list(self.store.glob("snapshot-*")), [])
         self.assertEqual((self.root / "b.txt").read_bytes(), b"original b\n")
+
+    def test_windows_publication_retry_is_bounded_and_attributable(self):
+        error = PermissionError("synthetic Windows activation lock")
+        error.winerror = 5
+        original = Path.rename
+        attempts = []
+
+        def transient(path, target):
+            attempts.append(target)
+            if len(attempts) == 1:
+                raise error
+            return original(path, target)
+
+        warnings = io.StringIO()
+        with patch.object(Path, "rename", transient), patch.object(snapshot.time, "sleep"), redirect_stderr(warnings):
+            created = self.create()
+        self.assertEqual(created["publication_retries"], 1)
+        self.assertIn("retry 1/4", warnings.getvalue())
+        self.assertEqual(snapshot.load_snapshot(self.root, self.store, created["id"])["state"], "complete")
+        before = set(self.store.glob("snapshot-*"))
+        with patch.object(Path, "rename", side_effect=error) as rename, \
+                patch.object(snapshot.time, "sleep"), redirect_stderr(warnings), self.assertRaises(OSError):
+            self.create()
+        self.assertEqual(rename.call_count, 5)
+        self.assertEqual(set(self.store.glob("snapshot-*")), before)
+        self.assertTrue(list(self.store.glob(".pending-*")))
+        self.assertEqual((self.root / "a file.txt").read_bytes(), b"original a\x00\n")
 
     def test_source_change_during_copy_never_publishes_stale_snapshot(self):
         original = snapshot.read_owned

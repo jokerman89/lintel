@@ -52,6 +52,10 @@ normalized paths, root identity, sizes, modes and SHA-256. It copies and verifie
 rechecks the source, then atomically activates a uniquely identified snapshot directory.
 An incomplete `.pending-*` copy is not a valid snapshot and is not automatically removed.
 Announce the returned exact ID/path and verified file/byte count before proceeding.
+Windows sharing/access errors during the unique directory's activation get at most four
+reported retries; the result includes the actual retry count. Persistent errors remain
+failures with the pending copy retained. Source-file restore conflicts are never retried
+as permission to overwrite a changed file.
 
 The authorized operation must record its **own post-images** as it changes the files.
 Use `file_state` only on outputs just produced by that operation in the quiescent target.

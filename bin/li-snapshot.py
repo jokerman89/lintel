@@ -13,6 +13,7 @@ import json
 from pathlib import Path
 import re
 import sys
+import time
 from typing import Sequence
 import uuid
 
@@ -123,6 +124,24 @@ def _operation_lock(folder: Path):
         lock.rmdir()
 
 
+def _publish_snapshot(pending: Path, target: Path) -> int:
+    # Windows can temporarily deny renaming a freshly closed directory. Retry only
+    # this unique, owned publication; never use retries to overwrite source files.
+    for attempt in range(5):
+        if target.exists() or is_link(target):
+            raise ValueError(f"Snapshot publication target already exists: {target}")
+        try:
+            pending.rename(target)
+            return attempt
+        except OSError as error:
+            if getattr(error, "winerror", None) not in (5, 32, 33) or attempt == 4:
+                raise
+            print(f"li-snapshot: Windows blocked snapshot activation; retry {attempt + 1}/4.",
+                  file=sys.stderr)
+            time.sleep(0.05 * (2 ** attempt))
+    raise AssertionError("Unreachable snapshot publication state")
+
+
 def create_snapshot(root: Path, store: Path, paths: Sequence[str], absent: Sequence[str] = ()) -> dict:
     root, store = _locations(root, store)
     existing = [selector_path(p) for p in paths]
@@ -160,10 +179,10 @@ def create_snapshot(root: Path, store: Path, paths: Sequence[str], absent: Seque
     manifest = {"schema_version": SCHEMA, "id": identifier, "owner": str(root), "state": "complete",
                 "created_at": datetime.now(timezone.utc).isoformat(), "files": files}
     atomic_write(pending, "manifest.json", json_bytes(manifest))
-    pending.rename(safe_path(store, identifier))
+    retries = _publish_snapshot(pending, safe_path(store, identifier))
     load_snapshot(root, store, identifier)
     return {"id": identifier, "path": str(store / identifier), "state": "complete",
-            "files": len(files), "bytes": total}
+            "files": len(files), "bytes": total, "publication_retries": retries}
 
 
 def _identity(folder: Path) -> str:
