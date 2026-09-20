@@ -29,8 +29,10 @@ parser or a target-supplied module. Both independent consumer gates and final fa
 Exact 742 provider: Git blob `0b3da55046358864fcd3075ba5bfb6c2348b1fec`, 19,988 bytes,
 SHA-256 `331c1c62e932b5555089336d1fdcc7031f545780508f1d0f2e11bd9f2a7a8ebf`.
 P05 dependency-only import is `bd96a477`; its owned consumer `fd63e690` and report-only
-snapshot `9c8ef727` are frozen for independent review. All 81 actual evidence methods
-passed on that paired source in the implementer's run; this is not independent acceptance.
+snapshot `9c8ef727` were rejected by independent `0cdbf596` for Q01 excerpt-context
+identity. All 81 actual evidence methods passed on that paired source; those fixtures
+did not cover the new transition. P05 now owns the approved selection-relative context
+binding repair in the shared-boundary card. No provider/API change is authorized.
 
 ## P05 review and controls
 
@@ -155,9 +157,24 @@ exact report_digest and attributable Git/snapshot information. Historical v1 rep
 remain unchanged, not silently upgraded. Final A22.7 consumes P05/P07/P08 contracts.
 
 New transitive source files include `lib/swarm_snapshot.py`,
-`lib/envelope_contract.py` and `bin/li-envelope-validate`. P06 owns consumer preflight.
+`lib/envelope_contract.py` and `bin/li-envelope-validate`. Joined preflight is committed
+as `98ad7ed`; P10 now owns only its approved transaction/CLI extension, not navigation
+or provider changes.
 Default generated envelopes and the canonical envelope-schema file use stdlib-readable
 JSON (also valid YAML). Legacy YAML parsing is optional/lazy with declared PyYAML
 dependency and missing-parser refusal before output/audit. The unified audit writer
 remains the writer; mandatory callers verify persisted receipt instead of trusting
 its advisory failure behavior. No automatic handoff/hook activation follows.
+
+## P10 installation and runtime boundaries
+
+ADR-0030 and packages/P10.md record the explicit no-Python bare-install decision and
+approved native receipt/runtime transaction split. Native Bash/PowerShell installation
+must not invoke the Python dispatcher or install an interpreter automatically.
+Already Python-based consumers retain the existing adapter inventory and ownership
+policy; the shared transaction primitive does not acquire ownership from a later scan.
+
+P03 compatibility dependency `ca28074` postpones annotation evaluation without changing
+function behavior or snapshot formats. Its 23 context plus 24 snapshot tests pass on
+Python 3.11.9, with a 3.9 grammar/annotation check; an actual 3.9 runtime is unavailable.
+Do not convert that syntax evidence into a minimum-runtime execution claim.

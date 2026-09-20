@@ -37,7 +37,7 @@ from the reviewed historical merge `40c2795`. Current implementation ownership:
 | P05 review evidence | `2329e71f-cd9e-473b-94cf-41c579c29a88` | `9c8ef727` rejected for Q01 excerpt-context identity; original owner receives bounded consumer repair |
 | P06 host adapters | `324863ff-e7cf-4abf-b449-04dd0f096170` | Component ACCEPTED/integrated `36593cd`; provider `7425960`, final review `1067da29`; idle |
 | P07 profile context | `b9352dfe-1c1e-4ea3-b7d9-0fd008d39b3d` | Earlier component accepted; new joined default-home Windows long-path failure assigned to same owner |
-| P10 installer lifecycle | `5ea6c88c-68c1-4712-8f55-adecdfe0061f` | Implementing from `0df1042`; native transaction seam being coordinated, no Python install prerequisite |
+| P10 installer lifecycle | `5ea6c88c-68c1-4712-8f55-adecdfe0061f` | Implementing approved native/runtime split from `0df1042`; dependencies `98ad7ed` / `ca28074`, no Python install prerequisite |
 
 All are `lintel-builder` sessions with explicit ownership, local commits, report paths
 and no remote authorization. P01/P02/P03 plus the owned P04/P06/P07 components are accepted.
@@ -124,6 +124,21 @@ did not fix it; direct installed Python invocation also reproduces it. P07's app
 long-path card preserves containment/identity and reopens the actual consumer gate.
 Exact frozen preflight/regression checkpoint: `98ad7edfaed7566848ecf26f2bbe563c0486e91d`.
 
+P03 compatibility correction `ca280747b9fe8c16ea54598c4192f40567b8430e` postpones
+annotation evaluation in context_safety.py and li-snapshot.py; no function behavior or
+snapshot format changed. The new annotation regression was RED before repair; all
+23 context and 24 snapshot methods pass afterward on Python 3.11.9. Python 3.9 grammar
+and postponed annotations are checked, but `py -3.9 --version` exits 103: actual 3.9
+execution remains unavailable. P10 may import this exact dependency; bare installation
+remains native and does not acquire a Python prerequisite.
+
+Cleanup-only dependency `0eab731c381985e21ef5b5520d7f93f49d3a8216` adapts the
+coordinator Copilot sandbox teardown to the same owned Windows long-path spelling.
+Actual long/readonly cleanup and unrelated sentinel preservation pass. P07's WIP had
+reached method-body OK but overall ERROR at ordinary cleanup; that is not acceptance.
+The method, default home and durable filenames remain unchanged. P07 and P10 were
+explicitly authorized to import this separate test dependency and rerun the whole case.
+
 ## Current repair gates
 
 - P01's former staging/metadata/record defects are all closed in P01-final.md. The old
@@ -177,8 +192,9 @@ P07 candidate. Candidate archives/compositions are tests, not acceptance of thei
 
 P10 is active in its isolated child from `0df1042`. The operator explicitly rejected
 Python as an installation prerequisite; ADR-0030 and the P10 card govern native bare
-installation versus already Python-based runtime operations. The current preflight
-batch must freeze before P10 receives the narrow adapter transaction seam. P07 long-path
+installation versus already Python-based runtime operations. The preflight
+batch is frozen in `98ad7ed`, and P10 has received only the narrow adapter transaction
+seam and related interruption tests. P07 long-path
 repair and P05 Q01 repair use the original owners and reviewers. On a package
 review rejection, return exact findings to its original builder, keep the package open,
 and request re-review of the repaired immutable commit. On PASS, integrate only the
@@ -202,11 +218,15 @@ No new authorization for main merge, releases, production, hook activation or pr
 
 ## Next action
 
-Freeze the current preflight/regression checkpoint and dispatch the documented bounded
-P05/P07 repairs; release only P10's approved transaction seam afterward. The coordinator
-owns integration and generated outputs. No navigation/provider or P05 policy/schema
-workaround is authorized. Obtain same-reviewer independent verdicts before accepting
-repairs. Preserve earlier accepted history; do not broadly rebuild those components.
+P05 Q01, P07 long-path and P10 lifecycle implementation are actively dispatched under
+`0ecdb520`. P07 preserved its old branch and continued from that exact integrated base;
+its unchanged installed-consumer RED was reproduced. P05's chosen repair binds
+selection-relative normalization eligibility and delimiter participation, not whole
+unselected task text. Await their immutable results instead of polling or duplicating
+their code investigation. Obtain same-reviewer independent spec/quality for P05/P07
+and a separate independent P10 reviewer, then integrate exact accepted deltas. The
+coordinator retains generated outputs and final fan-in. No navigation/provider or P05
+policy/schema workaround is authorized; all final joined/delivery gates remain open.
 Use host-native delegation while Swarming component/final gates remain open.
 
 Prepared successors: P05-P07 contracts and official host-source report committed in
