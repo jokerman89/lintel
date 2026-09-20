@@ -22,8 +22,11 @@ from context_safety import (atomic_write, checked_root, file_state, is_link, jso
                             read_owned, relative_path, safe_path, selector_path)
 
 SCHEMA = 1
+RESTORE_SCHEMA = 2
 ID_PATTERN = r"snapshot-[0-9a-f]{32}"
 MAX_BYTES = 128 * 1024 * 1024
+MAX_RESTORE_BYTES = 8 * 1024 * 1024
+OBSERVATION_FIELDS = ("st_dev", "st_ino", "st_size", "st_mtime_ns", "st_ctime_ns", "st_mode")
 
 
 def _locations(root: Path, store: Path) -> tuple[Path, Path]:
@@ -242,6 +245,70 @@ def _apply_restore(root: Path, folder: Path, entry: dict, expected: dict | None)
         raise ValueError(f"Restored file failed verification: {relative}")
 
 
+def _file_observation(root: Path, relative: str) -> dict | None:
+    path = safe_path(root, relative)
+    try:
+        before = path.lstat()
+    except FileNotFoundError:
+        return None
+    content = file_state(root, relative)
+    after = safe_path(root, relative).lstat()
+    identity = [getattr(before, field) for field in OBSERVATION_FIELDS]
+    if content is None or identity != [getattr(after, field) for field in OBSERVATION_FIELDS]:
+        raise ValueError(f"File changed while observing recovery ownership: {relative}")
+    return {"content": content, "identity": identity}
+
+
+def _observation_state(value: dict | None) -> dict | None:
+    if value is None:
+        return None
+    if (not isinstance(value, dict) or set(value) != {"content", "identity"}
+            or not isinstance(value["identity"], list)
+            or len(value["identity"]) != len(OBSERVATION_FIELDS)
+            or any(type(number) is not int for number in value["identity"])
+            or value["content"] is None):
+        raise ValueError("Invalid restore file observation.")
+    return _state(value["content"])
+
+
+def _read_restore_journal(folder: Path, manifest: dict, receipt: dict | None) -> dict | None:
+    if not safe_path(folder, "restore.json").exists():
+        return None
+    journal = json.loads(read_owned(folder, "restore.json", MAX_RESTORE_BYTES)[0])
+    if (not isinstance(journal, dict) or type(journal.get("schema_version")) is not int
+            or journal.get("schema_version") != RESTORE_SCHEMA):
+        raise ValueError("Unsupported restore journal; per-file ownership is unknown. Preserve for manual recovery.")
+    if (journal.get("snapshot_digest") != _identity(folder)
+            or journal.get("result_digest") != hashlib.sha256(json_bytes(receipt)).hexdigest()
+            or journal.get("state") not in ("in-progress", "complete")
+            or not isinstance(journal.get("files"), dict)
+            or set(journal["files"]) != {entry["path"] for entry in manifest["files"]}):
+        raise ValueError("Stale or invalid restore journal.")
+    for entry in manifest["files"]:
+        progress = journal["files"][entry["path"]]
+        if (not isinstance(progress, dict) or set(progress) != {"state", "before", "after"}
+                or progress["state"] not in ("pending", "applying", "restored")):
+            raise ValueError("Invalid per-file restore progress.")
+        before = _observation_state(progress["before"])
+        after = _observation_state(progress["after"])
+        original = _entry_state(entry)
+        expected = receipt["expected"][entry["path"]] if receipt else original
+        if progress["state"] == "restored":
+            if after != original or before not in (original, expected):
+                raise ValueError("Restored-file record does not match its snapshot/result.")
+        elif (receipt is None or before != expected or progress["after"] is not None
+              or journal["state"] == "complete"):
+            raise ValueError("Unfinished-file record does not match its result.")
+    return journal
+
+
+def _write_restore_journal(folder: Path, journal: dict) -> None:
+    data = json_bytes(journal)
+    if len(data) > MAX_RESTORE_BYTES:
+        raise ValueError("Restore journal exceeds its reader bound; preserve the existing recovery state.")
+    atomic_write(folder, "restore.json", data)
+
+
 def restore_snapshot(root: Path, store: Path, identifier: str) -> dict:
     root, store = _locations(root, store)
     folder = _folder(store, identifier)
@@ -249,38 +316,56 @@ def restore_snapshot(root: Path, store: Path, identifier: str) -> dict:
         manifest = load_snapshot(root, store, identifier)
         receipt = _read_result(folder, manifest)
         digest = _identity(folder)
-        journal = None
-        if safe_path(folder, "restore.json").exists():
-            journal = json.loads(read_owned(folder, "restore.json", 2 * 1024 * 1024)[0])
-            if (not isinstance(journal, dict) or type(journal.get("schema_version")) is not int
-                    or journal.get("schema_version") != SCHEMA or journal.get("snapshot_digest") != digest
-                    or journal.get("state") not in ("in-progress", "complete")
-                    or journal.get("result_digest") != hashlib.sha256(json_bytes(receipt)).hexdigest()):
-                raise ValueError("Stale or invalid restore journal.")
+        journal = _read_restore_journal(folder, manifest, receipt)
+        resuming = journal is not None
+        if journal is None:
+            journal = {"schema_version": RESTORE_SCHEMA, "snapshot_digest": digest,
+                       "result_digest": hashlib.sha256(json_bytes(receipt)).hexdigest(),
+                       "state": "in-progress", "files": {}}
         changes = []
         for entry in manifest["files"]:
-            current = file_state(root, entry["path"])
+            relative = entry["path"]
+            observed = _file_observation(root, relative)
+            current = _observation_state(observed)
             original = _entry_state(entry)
-            if current == original:
-                continue
-            if journal and journal["state"] == "complete":
-                raise ValueError(f"Snapshot was already restored; later changes are not owned: {entry['path']}")
-            if receipt is None or current != receipt["expected"][entry["path"]]:
-                raise ValueError(f"Restore conflict; current bytes preserved: {entry['path']}")
-            changes.append((entry, current))
-        journal = {"schema_version": SCHEMA, "snapshot_digest": digest,
-                   "result_digest": hashlib.sha256(json_bytes(receipt)).hexdigest(),
-                   "state": "in-progress"}
-        atomic_write(folder, "restore.json", json_bytes(journal))
-        for entry, expected in changes:
-            _apply_restore(root, folder, entry, expected)
-        # Recheck the entire owned set before reporting completion.
+            if not resuming:
+                if current != original and (receipt is None or current != receipt["expected"][relative]):
+                    raise ValueError(f"Restore conflict; current bytes preserved: {relative}")
+                journal["files"][relative] = {"state": "restored" if current == original else "pending",
+                                              "before": observed, "after": observed if current == original else None}
+            progress = journal["files"][relative]
+            if progress["state"] == "restored":
+                if observed != progress["after"]:
+                    raise ValueError(f"Restored file changed; prior write permission is consumed: {relative}")
+            elif observed == progress["before"]:
+                changes.append(entry)
+            elif progress["state"] == "applying" and current == original:
+                # The file replacement succeeded but its completion record did not.
+                # Accept only a verified original, never replay the old post-image.
+                progress.update(state="restored", after=observed)
+            else:
+                raise ValueError(f"Unfinished restore file changed; current bytes preserved: {relative}")
+        if journal["state"] == "complete":
+            return {"id": identifier, "state": "complete", "changed": []}
+        _write_restore_journal(folder, journal)
+        for entry in changes:
+            progress = journal["files"][entry["path"]]
+            progress["state"] = "applying"
+            _write_restore_journal(folder, journal)
+            if _file_observation(root, entry["path"]) != progress["before"]:
+                raise ValueError(f"File changed after restore preflight: {entry['path']}")
+            _apply_restore(root, folder, entry, _observation_state(progress["before"]))
+            observed = _file_observation(root, entry["path"])
+            if _observation_state(observed) != _entry_state(entry):
+                raise ValueError(f"Restored file failed verification: {entry['path']}")
+            progress.update(state="restored", after=observed)
+            _write_restore_journal(folder, journal)
         for entry in manifest["files"]:
-            if file_state(root, entry["path"]) != _entry_state(entry):
+            if _file_observation(root, entry["path"]) != journal["files"][entry["path"]]["after"]:
                 raise ValueError(f"Owned set changed before restore completion: {entry['path']}")
         journal["state"] = "complete"
-        atomic_write(folder, "restore.json", json_bytes(journal))
-        return {"id": identifier, "state": "complete", "changed": [e["path"] for e, _ in changes]}
+        _write_restore_journal(folder, journal)
+        return {"id": identifier, "state": "complete", "changed": [entry["path"] for entry in changes]}
 
 
 def retention_plan(root: Path, store: Path, *, keep: int = 5, days: int = 30,
@@ -299,8 +384,8 @@ def retention_plan(root: Path, store: Path, *, keep: int = 5, days: int = 30,
         if safe_path(folder, ".operation-lock").exists():
             protected.add(folder.name)
         if safe_path(folder, "restore.json").exists():
-            journal = json.loads(read_owned(folder, "restore.json", 2 * 1024 * 1024)[0])
-            if journal.get("state") != "complete":
+            journal = json.loads(read_owned(folder, "restore.json", MAX_RESTORE_BYTES)[0])
+            if journal.get("schema_version") != RESTORE_SCHEMA or journal.get("state") != "complete":
                 protected.add(folder.name)
     snapshots.sort(reverse=True)
     protected.update(name for _, name in snapshots[:keep])

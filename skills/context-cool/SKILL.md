@@ -35,6 +35,9 @@ or `--clear` to allow those sources again. The helper writes the root-bound JSON
 `context-ignore.json` in the directory returned by `lintel_state_dir`. `context_select`
 actually consumes it; a malformed or foreign record fails rather than silently losing
 the exclusions. Show the exact source root and the resulting path/pattern list.
+Literal exclusions also compare actual in-root file identity. Glob comparisons fold case
+only when a read-only filesystem probe confirms a case alias for that path component;
+case-sensitive directories retain distinct spelling, regardless of the operating system.
 
 Historical `context-ignore.md` notes remain readable, but are not parsed as executable
 selection policy. Review their literal paths and explicitly migrate the intended choices

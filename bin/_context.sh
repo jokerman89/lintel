@@ -40,6 +40,8 @@ _context_run() {
 }
 
 _context_valid_branch() {
+  # HEAD is the historical detached-checkout bucket, not a named branch ref.
+  [ "$1" = HEAD ] && return 0
   git check-ref-format --branch "$1" >/dev/null 2>&1 || {
     echo 'Invalid checkpoint branch; refusing path traversal.' >&2
     return 1

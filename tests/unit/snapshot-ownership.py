@@ -105,6 +105,8 @@ class SnapshotOwnershipTests(unittest.TestCase):
             snapshot.restore_snapshot(self.root, self.store, created["id"])
         journal = json.loads((self.store / created["id"] / "restore.json").read_text())
         self.assertEqual(journal["state"], "in-progress")
+        self.assertEqual(journal["files"]["a file.txt"]["state"], "restored")
+        self.assertEqual(journal["files"]["b.txt"]["state"], "applying")
         self.assertEqual((self.root / "unrelated.txt").read_text(), "user work")
         result = snapshot.restore_snapshot(self.root, self.store, created["id"])
         self.assertEqual(result["state"], "complete")
@@ -112,6 +114,184 @@ class SnapshotOwnershipTests(unittest.TestCase):
         (self.root / "a file.txt").write_text("new user change")
         with self.assertRaises(ValueError):
             snapshot.restore_snapshot(self.root, self.store, created["id"])
+
+    def test_resume_refuses_reedited_restored_file_even_if_bytes_match_old_result(self):
+        created = self.create()
+        self.change_and_bind(created["id"])
+        apply = snapshot._apply_restore
+
+        def stop_before_second(root, folder, entry, expected):
+            if entry["path"] == "b.txt":
+                raise OSError("stop after A was restored")
+            return apply(root, folder, entry, expected)
+
+        with patch.object(snapshot, "_apply_restore", side_effect=stop_before_second), self.assertRaises(OSError):
+            snapshot.restore_snapshot(self.root, self.store, created["id"])
+        self.assertEqual((self.root / "a file.txt").read_bytes(), b"original a\x00\n")
+        (self.root / "a file.txt").write_bytes(b"owned change a")
+        journal_path = self.store / created["id"] / "restore.json"
+        before_journal = journal_path.read_bytes()
+        before_files = {p.name: p.read_bytes() for p in self.root.iterdir()}
+        run = subprocess.run(
+            [sys.executable, str(SOURCE / "bin/li-snapshot.py"), "--root", str(self.root),
+             "--store", str(self.store), "restore", created["id"]],
+            env=dict(os.environ, PYTHONDONTWRITEBYTECODE="1"), capture_output=True, text=True)
+        self.assertNotEqual(run.returncode, 0, "resume reauthorized the old operation post-image")
+        self.assertEqual(before_files, {p.name: p.read_bytes() for p in self.root.iterdir()})
+        self.assertEqual(journal_path.read_bytes(), before_journal)
+        self.assertEqual(json.loads(before_journal)["state"], "in-progress")
+
+    def test_resume_refuses_reedit_after_apply_but_before_completion_record(self):
+        created = self.create()
+        self.change_and_bind(created["id"])
+        apply = snapshot._apply_restore
+
+        def stop_after_apply(*args):
+            apply(*args)
+            raise OSError("stop after file replacement, before completion record")
+
+        with patch.object(snapshot, "_apply_restore", side_effect=stop_after_apply), self.assertRaises(OSError):
+            snapshot.restore_snapshot(self.root, self.store, created["id"])
+        self.assertEqual((self.root / "a file.txt").read_bytes(), b"original a\x00\n")
+        (self.root / "a file.txt").write_bytes(b"owned change a")
+        with self.assertRaises(ValueError):
+            snapshot.restore_snapshot(self.root, self.store, created["id"])
+        self.assertEqual((self.root / "a file.txt").read_bytes(), b"owned change a")
+        self.assertEqual((self.root / "b.txt").read_bytes(), b"owned change b")
+
+    def test_resume_refuses_intervening_same_byte_edit_to_unfinished_file(self):
+        created = self.create()
+        self.change_and_bind(created["id"])
+        apply = snapshot._apply_restore
+
+        def stop_before_second(root, folder, entry, expected):
+            if entry["path"] == "b.txt":
+                raise OSError("stop before B changes")
+            return apply(root, folder, entry, expected)
+
+        with patch.object(snapshot, "_apply_restore", side_effect=stop_before_second), self.assertRaises(OSError):
+            snapshot.restore_snapshot(self.root, self.store, created["id"])
+        pending = self.root / "b.txt"
+        before = pending.stat()
+        pending.write_bytes(b"owned change b")
+        os.utime(pending, ns=(before.st_atime_ns, before.st_mtime_ns + 1_000_000_000))
+        with self.assertRaises(ValueError):
+            snapshot.restore_snapshot(self.root, self.store, created["id"])
+        self.assertEqual(pending.read_bytes(), b"owned change b")
+        self.assertEqual((self.root / "a file.txt").read_bytes(), b"original a\x00\n")
+
+    def test_resume_finishes_a_verified_apply_without_replaying_it(self):
+        created = self.create()
+        self.change_and_bind(created["id"])
+        apply = snapshot._apply_restore
+
+        def stop_after_apply(*args):
+            apply(*args)
+            raise OSError("stop after file replacement, before completion record")
+
+        with patch.object(snapshot, "_apply_restore", side_effect=stop_after_apply), self.assertRaises(OSError):
+            snapshot.restore_snapshot(self.root, self.store, created["id"])
+        with patch.object(snapshot, "_apply_restore", wraps=apply) as resumed:
+            result = snapshot.restore_snapshot(self.root, self.store, created["id"])
+        self.assertEqual(result["state"], "complete")
+        self.assertEqual([call.args[2]["path"] for call in resumed.call_args_list], ["b.txt"])
+        self.assertEqual((self.root / "a file.txt").read_bytes(), b"original a\x00\n")
+        self.assertEqual((self.root / "b.txt").read_bytes(), b"original b\n")
+
+    def test_resume_refuses_an_old_journal_without_per_file_progress(self):
+        created = self.create()
+        self.change_and_bind(created["id"])
+        apply = snapshot._apply_restore
+
+        def stop_after_apply(*args):
+            apply(*args)
+            raise OSError("stop before completion")
+
+        with patch.object(snapshot, "_apply_restore", side_effect=stop_after_apply), self.assertRaises(OSError):
+            snapshot.restore_snapshot(self.root, self.store, created["id"])
+        journal_path = self.store / created["id"] / "restore.json"
+        journal = json.loads(journal_path.read_text())
+        journal["schema_version"] = 1
+        journal.pop("files", None)
+        journal_path.write_text(json.dumps(journal))
+        before = {p.name: p.read_bytes() for p in self.root.iterdir()}
+        with self.assertRaises(ValueError):
+            snapshot.restore_snapshot(self.root, self.store, created["id"])
+        self.assertEqual(before, {p.name: p.read_bytes() for p in self.root.iterdir()})
+        self.assertEqual(snapshot.load_snapshot(self.root, self.store, created["id"])["state"], "complete")
+
+    def test_missing_or_invalid_progress_cannot_reauthorize_source_writes(self):
+        created = self.create()
+        self.change_and_bind(created["id"])
+        with patch.object(snapshot, "_apply_restore", side_effect=OSError("stop before apply")), self.assertRaises(OSError):
+            snapshot.restore_snapshot(self.root, self.store, created["id"])
+        journal_path = self.store / created["id"] / "restore.json"
+        valid = journal_path.read_text()
+        for mutation in ("missing-file", "unknown-state", "missing-identity", "premature-complete"):
+            with self.subTest(mutation=mutation):
+                journal = json.loads(valid)
+                if mutation == "missing-file":
+                    del journal["files"]["a file.txt"]
+                elif mutation == "unknown-state":
+                    journal["files"]["a file.txt"]["state"] = "start-over"
+                elif mutation == "missing-identity":
+                    del journal["files"]["a file.txt"]["before"]["identity"]
+                else:
+                    journal["state"] = "complete"
+                journal_path.write_text(json.dumps(journal))
+                with self.assertRaises(ValueError):
+                    snapshot.restore_snapshot(self.root, self.store, created["id"])
+                self.assertEqual((self.root / "a file.txt").read_bytes(), b"owned change a")
+                self.assertEqual((self.root / "b.txt").read_bytes(), b"owned change b")
+
+    def test_progress_must_persist_before_each_source_mutation(self):
+        created = self.create()
+        self.change_and_bind(created["id"])
+        original = snapshot.atomic_write
+
+        def fail_intent(root, relative, data, *args, **kwargs):
+            if root != self.root and relative == "restore.json":
+                progress = json.loads(data)["files"]["a file.txt"]
+                if progress["state"] == "applying":
+                    raise OSError("synthetic journal write failure before mutation")
+            return original(root, relative, data, *args, **kwargs)
+
+        with patch.object(snapshot, "atomic_write", side_effect=fail_intent), self.assertRaises(OSError):
+            snapshot.restore_snapshot(self.root, self.store, created["id"])
+        self.assertEqual((self.root / "a file.txt").read_bytes(), b"owned change a")
+        self.assertEqual((self.root / "b.txt").read_bytes(), b"owned change b")
+        result = snapshot.restore_snapshot(self.root, self.store, created["id"])
+        self.assertEqual(result["state"], "complete")
+
+    def test_unreadable_sized_progress_cannot_start_a_restore(self):
+        created = self.create()
+        self.change_and_bind(created["id"])
+        with patch.object(snapshot, "MAX_RESTORE_BYTES", 1), self.assertRaises(ValueError):
+            snapshot.restore_snapshot(self.root, self.store, created["id"])
+        self.assertEqual((self.root / "a file.txt").read_bytes(), b"owned change a")
+        self.assertEqual((self.root / "b.txt").read_bytes(), b"owned change b")
+        self.assertFalse((self.store / created["id"] / "restore.json").exists())
+
+    def test_failed_completion_write_does_not_reauthorize_reedited_output(self):
+        created = self.create()
+        self.change_and_bind(created["id"])
+        original = snapshot.atomic_write
+
+        def fail_completion(root, relative, data, *args, **kwargs):
+            if root != self.root and relative == "restore.json":
+                files = json.loads(data)["files"]
+                if files["a file.txt"]["state"] == "restored" and files["b.txt"]["state"] == "pending":
+                    raise OSError("synthetic journal completion failure after A mutation")
+            return original(root, relative, data, *args, **kwargs)
+
+        with patch.object(snapshot, "atomic_write", side_effect=fail_completion), self.assertRaises(OSError):
+            snapshot.restore_snapshot(self.root, self.store, created["id"])
+        self.assertEqual((self.root / "a file.txt").read_bytes(), b"original a\x00\n")
+        (self.root / "a file.txt").write_bytes(b"owned change a")
+        with self.assertRaises(ValueError):
+            snapshot.restore_snapshot(self.root, self.store, created["id"])
+        self.assertEqual((self.root / "a file.txt").read_bytes(), b"owned change a")
+        self.assertEqual((self.root / "b.txt").read_bytes(), b"owned change b")
 
     def test_tampered_partial_foreign_and_old_snapshots_are_refused(self):
         for mutation in ("path", "incomplete", "foreign", "version", "blob"):

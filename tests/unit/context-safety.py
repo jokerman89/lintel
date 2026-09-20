@@ -53,6 +53,23 @@ class ContextSafetyTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             safety.select_files(self.root, paths=["docs/two.md"], max_bytes=1)
 
+    def test_glob_with_file_prefix_never_selects_the_nonmatching_prefix(self):
+        for pattern in ("docs/two.md/*.txt", "docs/two.md/**/notes.md", "docs/two.md/**"):
+            with self.subTest(pattern=pattern):
+                result = safety.select_files(self.root, patterns=[pattern])
+                self.assertEqual(result["files"], [])
+                self.assertEqual(result["status"], "empty")
+                self.assertEqual(result["unmatched"], [pattern])
+                run = subprocess.run(
+                    [sys.executable, "-B", str(SOURCE / "lib/context_safety.py"),
+                     "select", "--root", str(self.root), "--glob", pattern],
+                    capture_output=True, text=True)
+                self.assertEqual(run.returncode, 1, run.stderr)
+                self.assertEqual(json.loads(run.stdout)["files"], [])
+        exact = safety.select_files(self.root, patterns=["docs/two.md"])
+        self.assertEqual([f["path"] for f in exact["files"]], ["docs/two.md"])
+        self.assertEqual(len(safety.select_files(self.root, patterns=["docs/*.md"])["files"]), 2)
+
     def test_traversal_aliases_and_links_are_refused(self):
         for bad in ("../outside", "/outside", "C:/outside", "docs/../unrelated.txt",
                     "docs/two.md.", "docs/two.md ", "CON.txt", "docs/bad\tname"):
@@ -92,6 +109,37 @@ class ContextSafetyTests(unittest.TestCase):
         ignore.write_text("{broken")
         with self.assertRaises(ValueError):
             safety.select_files(self.root, patterns=["docs/*.md"], exclude_file=ignore)
+
+    def test_cooling_exclusions_cover_native_case_aliases_without_hiding_distinct_files(self):
+        ignore = self.root / ".claude/runtime/state/context-ignore.json"
+        upper = self.root / "DOCS" / "TWO.MD"
+        aliases = upper.exists() and upper.samefile(self.root / "docs" / "two.md")
+        if not aliases:
+            upper.parent.mkdir(exist_ok=True)
+            upper.write_text("distinct case-sensitive source")
+        for paths, patterns in ((["docs/two.md"], []), ([], ["docs/*.md"])):
+            with self.subTest(paths=paths, patterns=patterns):
+                safety.update_exclusions(self.root, ignore, [], [], clear=True)
+                safety.update_exclusions(self.root, ignore, paths, patterns)
+                selected = safety.select_files(self.root, paths=["DOCS/TWO.MD"], exclude_file=ignore)
+                self.assertEqual(len(selected["files"]), 0 if aliases else 1)
+                self.assertEqual(selected["excluded"], ["DOCS/TWO.MD"] if aliases else [])
+        safety.update_exclusions(self.root, ignore, [], [], clear=True)
+        safety.update_exclusions(self.root, ignore, ["DOCS/TWO.MD"], [])
+        selected = safety.select_files(self.root, patterns=["docs/*.md"], exclude_file=ignore)
+        self.assertEqual([f["path"] for f in selected["files"]],
+                         ["docs/one file.md"] if aliases else ["docs/one file.md", "docs/two.md"])
+        self.assertTrue(upper.is_file())
+        print("PASS: native case-alias exclusion" if aliases else "PASS: distinct case-sensitive sources retained")
+
+    def test_glob_exclusions_do_not_assume_every_windows_directory_is_case_insensitive(self):
+        from unittest.mock import patch
+        ignore = self.root / ".claude/runtime/state/context-ignore.json"
+        safety.update_exclusions(self.root, ignore, [], ["DOCS/*.MD"])
+        # A case-sensitive directory reports different identities for a case variant.
+        with patch.object(Path, "samefile", return_value=False):
+            selected = safety.select_files(self.root, paths=["docs/two.md"], exclude_file=ignore)
+        self.assertEqual([f["path"] for f in selected["files"]], ["docs/two.md"])
 
     def test_capacity_unknown_estimated_and_observed_are_distinct(self):
         unknown = safety.context_budget(400, used_tokens=80, usage_kind="estimated",

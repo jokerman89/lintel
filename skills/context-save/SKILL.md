@@ -27,7 +27,8 @@ Save the current session's load-bearing state to a checkpoint file so a fresh se
 ## Inputs
 
 - **No required arguments.** The skill reads:
-  - Current branch via `git branch --show-current`
+  - Current checkpoint branch via `_context_branch` from `bin/_context.sh`, including
+    the historical `HEAD` bucket for a detached committed checkout
   - SLUG via `_context_repo_slug` from `bin/_context.sh` (native — basename of the repo root; no external binary)
   - Recent uncommitted work via `git status -s` + `git diff --stat HEAD`
   - Active TODOs (this skill's own TodoWrite state if available, else `.claude/plans/todo.md`)

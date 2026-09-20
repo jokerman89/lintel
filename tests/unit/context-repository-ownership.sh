@@ -106,3 +106,23 @@ unborn_save=$(in_repo "$unborn" context_save_path notes)
 printf 'unborn-branch checkpoint\n' > "$unborn_save"
 [ "$(in_repo "$unborn" context_latest)" = "$unborn_save" ]
 echo 'PASS: plain folders and unborn branches retain usable checkpoint paths'
+
+git -C "$a" checkout -q --detach HEAD
+[ "$(in_repo "$a" _context_branch)" = HEAD ]
+detached=$(in_repo "$a" context_save_path detached)
+case "$detached" in */HEAD/*-detached-context-save.md) ;; *)
+  echo 'FAIL: detached HEAD checkpoint has the wrong bucket'; exit 1 ;;
+esac
+printf 'detached checkpoint\n' > "$detached"
+[ "$(in_repo "$a" context_latest)" = "$detached" ]
+[ "$(in_repo "$a" context_list HEAD)" = "$detached" ]
+in_repo "$a" context_checkpoint "$detached" >/dev/null
+warm_output=$(cd "$b"; LINTEL_SOURCE_ROOT="$review_source" LINTEL_REPO_ROOT="$a" bash "$warm_script" 1)
+[ "$warm_output" = "$(printf 'HEAD\n%s' "$detached")" ]
+git -C "$a" checkout -q shared
+[ "$(in_repo "$a" context_latest)" = "$second" ]
+[ "$(in_repo "$a" context_list HEAD)" = "$detached" ]
+if in_repo "$a" context_list 'HEAD/../escape' >/dev/null 2>&1; then
+  echo 'FAIL: detached sentinel bypassed path validation'; exit 1
+fi
+echo 'PASS: detached HEAD save, discovery and warming preserve the historical HEAD bucket'

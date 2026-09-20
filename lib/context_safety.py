@@ -156,15 +156,29 @@ def reserve_checkpoint(directory: Path, name: str) -> Path:
     raise ValueError("Checkpoint name collision bound exceeded.")
 
 
-def matches(path: str, pattern: str) -> bool:
+def matches(path: str, pattern: str, *, root: Path | None = None) -> bool:
     parts, rules = path.split("/"), pattern.split("/")
+
+    def segment_matches(i: int, j: int) -> bool:
+        if fnmatchcase(parts[i], rules[j]):
+            return True
+        if root is None or not fnmatchcase(parts[i].lower(), rules[j].lower()):
+            return False
+        candidate = root.joinpath(*parts[:i + 1])
+        alias = candidate.with_name(parts[i].swapcase())
+        if alias.name == candidate.name or is_link(alias):
+            return False
+        try:
+            return candidate.samefile(alias)
+        except FileNotFoundError:
+            return False
 
     def match(i: int, j: int) -> bool:
         if j == len(rules):
             return i == len(parts)
         if rules[j] == "**":
             return match(i, j + 1) or (i < len(parts) and match(i + 1, j))
-        return i < len(parts) and fnmatchcase(parts[i], rules[j]) and match(i + 1, j + 1)
+        return i < len(parts) and segment_matches(i, j) and match(i + 1, j + 1)
 
     return match(0, 0)
 
@@ -180,7 +194,7 @@ def _glob_files(root: Path, pattern: str) -> list[str]:
         prefix.append(part)
     start = safe_path(root, "/".join(prefix)) if prefix else root
     if start.is_file():
-        return [start.relative_to(root).as_posix()]
+        return [start.relative_to(root).as_posix()] if len(prefix) == len(pattern.split("/")) else []
     if not start.exists():
         return []
     result, examined = [], 0
@@ -192,7 +206,7 @@ def _glob_files(root: Path, pattern: str) -> list[str]:
         for name in sorted(names):
             path = Path(folder) / name
             relative = path.relative_to(root).as_posix()
-            if not is_link(path) and matches(relative, pattern):
+            if not is_link(path) and matches(relative, pattern, root=root):
                 safe_path(root, relative)
                 result.append(relative)
     return result
@@ -224,6 +238,19 @@ def _exclusions(root: Path, path: Path | None) -> tuple[list[str], list[str]]:
                 raise ValueError("Context exclusions must be relative strings.")
             relative_path(value)
     return data["paths"], data["patterns"]
+
+
+def _excluded_identities(root: Path, paths: Sequence[str]) -> set[tuple[int, int]]:
+    identities = set()
+    for relative in paths:
+        path = safe_path(root, relative)
+        try:
+            info = path.lstat()
+        except FileNotFoundError:
+            continue
+        if stat.S_ISREG(info.st_mode):
+            identities.add((info.st_dev, info.st_ino))
+    return identities
 
 
 def update_exclusions(root: Path, path: Path, paths: Sequence[str] = (),
@@ -268,6 +295,7 @@ def select_files(root: Path, paths: Sequence[str] = (), patterns: Sequence[str] 
     if adr_status not in (None, "all", "active", "accepted"):
         raise ValueError("Unknown ADR status filter.")
     omitted_paths, omitted_globs = _exclusions(root, exclude_file)
+    omitted_keys = _excluded_identities(root, omitted_paths)
     omitted_globs += [selector_path(p) for p in excludes]
     candidates, unmatched, excluded = set(), [], []
     for value in paths:
@@ -286,8 +314,13 @@ def select_files(root: Path, paths: Sequence[str] = (), patterns: Sequence[str] 
         candidates.update(found)
     files, scanned_bytes = [], 0
     for relative in sorted(candidates):
-        if ({p.casefold() for p in PurePosixPath(relative).parts} & SKIP_DIRS or relative in omitted_paths
-                or any(matches(relative, p) for p in omitted_globs)):
+        alias_excluded = False
+        if omitted_keys:
+            info = safe_path(root, relative).lstat()
+            alias_excluded = (info.st_dev, info.st_ino) in omitted_keys
+        if ({p.casefold() for p in PurePosixPath(relative).parts} & SKIP_DIRS
+                or relative in omitted_paths or alias_excluded
+                or any(matches(relative, p, root=root) for p in omitted_globs)):
             excluded.append(relative)
             continue
         data, state = read_owned(root, relative, max_bytes)

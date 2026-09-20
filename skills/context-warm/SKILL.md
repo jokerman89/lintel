@@ -40,6 +40,9 @@ Defaults: 40 files and 262144 source bytes. These are selection limits, **not ho
 Narrow the request or explicitly approve a different bounded limit; never silently truncate.
 `.git`, dependency environments and configured future exclusions are not warmed.
 An empty/partial selection has a nonzero result and visible missing sources, not success.
+The whole glob must match: `notes.md/*.md` is unmatched when `notes.md` is a regular
+file, while the exact `notes.md` selector remains valid. Filesystem-identity checks are
+shared by matching and exclusions; differently cased aliases do not bypass cooling.
 
 `--pattern` retains declared-pattern preload: read the task's declared file patterns as
 data, preview the explicit list, then pass each as a separate `--glob`. If no declaration

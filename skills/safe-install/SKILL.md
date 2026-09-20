@@ -90,8 +90,21 @@ preserved. If a conflict exists, report it; there is no force/clobber option.
 
 Restored files are individually atomic and verified. A durable `restore.json` remains
 `in-progress` until the entire owned set verifies; a multi-file restore is **not** an
-all-or-nothing filesystem transaction. Rerun the same ID after an interruption: it
-preflights again and preserves later edits. A process crash may leave `.operation-lock`;
+all-or-nothing filesystem transaction. Its version-2 per-file journal records `pending`,
+`applying` and `restored` progress, content digests and filesystem observations. Intent
+is saved before each mutation and verified completion afterward. A restored file's write
+permission is consumed: resuming cannot reuse the old operation receipt to overwrite a
+later edit, even when the user saves bytes identical to that old operation's output.
+
+Rerun the same ID after an interruption: every recorded file is preflighted before any
+remaining mutation. An unfinished file must retain its recorded identity/state. If the
+replacement succeeded before its completion record was saved, an already verified original
+can be recognized without rewriting it; ambiguous changed states fail closed. An earlier
+aggregate-only version-1 journal cannot establish this ownership and is refused for
+automatic resume; preserve it and the verified snapshot for explicit manual recovery.
+Snapshots and result receipts retain their existing formats.
+
+A process crash may leave `.operation-lock`;
 verify that no operation is running before an operator removes that exact empty lock.
 Never automatically steal a lock or roll back the rollback.
 
@@ -104,7 +117,7 @@ merely because this skill was invoked.
 ## Retention and historical backups
 
 `list` computes the **union** of the newest five verified snapshots and every snapshot
-from the last thirty days. An in-progress/locked restore is also protected. Only IDs
+from the last thirty days. An in-progress/locked or unsupported-journal restore is also protected. Only IDs
 outside that union are eligible. It never deletes while listing.
 
 After specific deletion authorization, pass exact eligible IDs to `prune`. The helper
