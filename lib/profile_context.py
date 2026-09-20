@@ -336,7 +336,7 @@ class Inputs:
     def read(self, path: Path, *, optional: bool = False) -> bytes | None:
         path = path.resolve()
         try:
-            with path.open("rb") as stream:
+            with _native_io_path(path).open("rb") as stream:
                 data = stream.read(MAX_BYTES + 1)
         except FileNotFoundError as exc:
             self.files[path.as_posix()] = None
@@ -375,7 +375,7 @@ def pack_directory(config: ProfileConfig, name: str) -> Path:
         raise ProfileError("PACK_INVALID", "pack name must be a filesystem-safe identifier")
     for root in (config.packs, config.repo / "packs", config.source / "packs"):
         candidate = root / name
-        if candidate.is_dir():
+        if _native_io_path(candidate).is_dir():
             return candidate.resolve()
     raise ProfileError("PACK_INVALID", f"pack or parent not found: {name}")
 
@@ -689,7 +689,13 @@ def _path_identity(path: PurePath) -> tuple[str, ...]:
 def _runtime_path(config: ProfileConfig, path: Path) -> None:
     if isinstance(path, PureWindowsPath):
         _path_identity(path)
-    resolved = _path_identity(path.resolve())
+    # Legacy Windows directory APIs fail before MAX_PATH's 260-character limit.
+    # Resolve long ancestors natively too, so an unseen junction cannot pass as a
+    # merely missing lexical parent. Short-path resolution retains its prior form.
+    candidate = path
+    if os.name == "nt" and len(str(path).encode("utf-16-le")) // 2 >= 248:
+        candidate = _native_io_path(path)
+    resolved = _path_identity(candidate.resolve())
     # Approved roots were resolved at configuration time. Do not follow a newly
     # redirected boundary or case-fold distinct case-sensitive Windows siblings.
     roots = (_path_identity(config.home), _path_identity(config.repo / ".claude/runtime"))
@@ -697,7 +703,25 @@ def _runtime_path(config: ProfileConfig, path: Path) -> None:
         raise ProfileError("PROFILE_IO", "profile runtime must stay in selected LINTEL_HOME or target runtime")
 
 
-def _load_json_file(path: Path) -> dict:
+def _native_io_path(path: Path) -> Path:
+    """Use only a recognized same-location spelling; never store this I/O alias."""
+    if os.name != "nt":
+        return path
+    _path_identity(path)
+    text = str(path)
+    if text.startswith("\\\\?\\"):
+        return path
+    return Path("\\\\?\\UNC\\" + text[2:]) if path.drive.startswith("\\\\") else Path("\\\\?\\" + text)
+
+
+def _runtime_io_path(config: ProfileConfig, path: Path) -> Path:
+    _runtime_path(config, path)
+    return _native_io_path(path)
+
+
+def _load_json_file(path: Path, config: ProfileConfig | None = None) -> dict:
+    if config is not None:
+        _runtime_path(config, path)
     text = Inputs().text(path)
     return read_json(text)
 
@@ -733,9 +757,9 @@ def profile_reference(record: dict) -> dict:
     })
 
 
-def _load_record(path: Path) -> dict:
+def _load_record(path: Path, config: ProfileConfig) -> dict:
     try:
-        record = _load_json_file(path)
+        record = _load_json_file(path, config)
         if set(record) != {"schema_version", "context_id", "generation", "digest", "profile", "previous", "reason"} \
                 or type(record["schema_version"]) is not int or record["schema_version"] != 1 \
                 or not isinstance(record["profile"], dict) or not isinstance(record["reason"], str) \
@@ -752,15 +776,17 @@ def _load_record(path: Path) -> dict:
         raise ProfileError("PROFILE_CONTEXT_INVALID", f"cannot verify stored profile context: {exc}") from exc
 
 
-def _latest_history_record(current: Path, context_id: str) -> dict | None:
+def _latest_history_record(current: Path, context_id: str, config: ProfileConfig) -> dict | None:
     history = current.parent / "history"
-    if not history.exists():
+    history_io = _runtime_io_path(config, history)
+    if not history_io.exists():
         return None
     records = {}
-    for path in history.iterdir():
-        if not path.is_file() or path.suffix != ".json":
+    for entry in history_io.iterdir():
+        path = history / entry.name
+        if not _runtime_io_path(config, path).is_file() or path.suffix != ".json":
             raise ProfileError("PROFILE_CONTEXT_INVALID", "context history contains an incomplete record")
-        record = _load_record(path)
+        record = _load_record(path, config)
         reference = profile_reference(record)
         if record["context_id"] != context_id or path != _history_path(current, reference):
             raise ProfileError("PROFILE_CONTEXT_INVALID", "context history identity or filename differs")
@@ -770,9 +796,9 @@ def _latest_history_record(current: Path, context_id: str) -> dict | None:
     return records[max(records)] if records else None
 
 
-def _load_current_record(path: Path) -> dict:
-    record = _load_record(path)
-    latest = _latest_history_record(path, record["context_id"])
+def _load_current_record(path: Path, config: ProfileConfig) -> dict:
+    record = _load_record(path, config)
+    latest = _latest_history_record(path, record["context_id"], config)
     if latest is not None and (
         latest["generation"] > record["generation"]
         or latest["generation"] == record["generation"] and latest != record
@@ -785,12 +811,12 @@ def _load_current_record(path: Path) -> dict:
 @contextmanager
 def _lock(config: ProfileConfig, path: Path):
     _runtime_path(config, path)
-    path.parent.mkdir(parents=True, exist_ok=True)
+    _runtime_io_path(config, path.parent).mkdir(parents=True, exist_ok=True)
     lock = path.with_name(path.name + ".lock")
     deadline = time.monotonic() + 5
     while True:
         try:
-            lock.mkdir()
+            _runtime_io_path(config, lock).mkdir()
             break
         except FileExistsError as exc:
             if time.monotonic() >= deadline:
@@ -799,29 +825,30 @@ def _lock(config: ProfileConfig, path: Path):
     try:
         yield
     finally:
-        lock.rmdir()
+        _runtime_io_path(config, lock).rmdir()
 
 
 def _write_json(config: ProfileConfig, path: Path, value: dict) -> None:
     _runtime_path(config, path)
-    path.parent.mkdir(parents=True, exist_ok=True)
+    _runtime_io_path(config, path.parent).mkdir(parents=True, exist_ok=True)
     temporary = None
     try:
-        with tempfile.NamedTemporaryFile(mode="wb", dir=path.parent, prefix=".profile-", delete=False) as stream:
-            temporary = Path(stream.name)
+        with tempfile.NamedTemporaryFile(mode="wb", dir=_runtime_io_path(config, path.parent),
+                                         prefix=".profile-", delete=False) as stream:
+            temporary = path.parent / Path(stream.name).name
             stream.write(canonical(value) + b"\n")
             stream.flush()
             os.fsync(stream.fileno())
-        os.replace(temporary, path)
+        os.replace(_runtime_io_path(config, temporary), _runtime_io_path(config, path))
     finally:
-        if temporary is not None and temporary.exists():
-            temporary.unlink()
+        if temporary is not None and _runtime_io_path(config, temporary).exists():
+            _runtime_io_path(config, temporary).unlink()
 
 
 def _retain_record(config: ProfileConfig, path: Path, record: dict) -> None:
     archive = _history_path(path, profile_reference(record))
-    if archive.exists():
-        if _load_record(archive) != record:
+    if _runtime_io_path(config, archive).exists():
+        if _load_record(archive, config) != record:
             raise ProfileError("PROFILE_CONTEXT_INVALID", "existing history conflicts; evidence is preserved")
         return
     _write_json(config, archive, record)
@@ -855,17 +882,18 @@ def load_profile_context(config: ProfileConfig, *, create: bool = False) -> dict
             return _record(resolve_profile(config))
         raise ProfileError("PROFILE_CONTEXT_REQUIRED", "bootstrap or select a stable profile context first")
     path = context_path(config)
-    if path.is_file():
-        return _verify_record(config, _load_current_record(path))
+    if _runtime_io_path(config, path).is_file():
+        return _verify_record(config, _load_current_record(path, config))
     if not create or config.context_file is not None:
         raise ProfileError("PROFILE_CONTEXT_MISSING", "selected context is missing; bind explicitly, not as resume")
     with _lock(config, path):
-        if path.is_file():
-            return _verify_record(config, _load_current_record(path))
+        if _runtime_io_path(config, path).is_file():
+            return _verify_record(config, _load_current_record(path, config))
         history = path.parent / "history"
-        retained = history.exists() and any(history.iterdir())
-        if config.selected.exists():
-            selected = validate_profile_reference(_load_json_file(config.selected))
+        history_io = _runtime_io_path(config, history)
+        retained = history_io.exists() and any(history_io.iterdir())
+        if _runtime_io_path(config, config.selected).exists():
+            selected = validate_profile_reference(_load_json_file(config.selected, config))
             retained = retained or selected["context_id"] == config.context_id
         if retained:
             raise ProfileError("PROFILE_CONTEXT_MISSING",
@@ -899,8 +927,8 @@ def bootstrap_profile_context(config: ProfileConfig) -> dict:
     if config.context_id or config.context_file or config.expected_reference is not None:
         return load_profile_context(config, create=True)
     with _lock(config, config.selected):
-        if config.selected.exists():
-            return verify_profile_reference(_load_json_file(config.selected), config)
+        if _runtime_io_path(config, config.selected).exists():
+            return verify_profile_reference(_load_json_file(config.selected, config), config)
         selected = replace(config, context_id="repo-work:" + str(uuid.uuid4()))
         record = load_profile_context(selected, create=True)
         _write_json(config, config.selected, profile_reference(record))
@@ -922,10 +950,10 @@ def rebind_profile_context(config: ProfileConfig, reason: str) -> dict:
     # selected generation after a later context writer has committed.
     with _lock(config, config.selected):
         with _lock(config, path):
-            if path.is_file():
-                old = _load_current_record(path)
+            if _runtime_io_path(config, path).is_file():
+                old = _load_current_record(path, config)
             else:
-                old = _latest_history_record(path, config.context_id)
+                old = _latest_history_record(path, config.context_id, config)
                 if old is None:
                     raise ProfileError("PROFILE_CONTEXT_MISSING",
                                        "cannot recover a missing context without retained history")
@@ -936,12 +964,13 @@ def rebind_profile_context(config: ProfileConfig, reason: str) -> dict:
             if config.context_id and old["context_id"] != config.context_id:
                 raise ProfileError("PROFILE_REFERENCE_MISMATCH", "rebind names a different context")
             update_selection = False
-            if config.selected.exists():
-                selected = validate_profile_reference(_load_json_file(config.selected))
+            if _runtime_io_path(config, config.selected).exists():
+                selected = validate_profile_reference(_load_json_file(config.selected, config))
                 update_selection = selected["context_id"] == old["context_id"]
                 if update_selection and selected != previous:
                     historical = _history_path(path, selected)
-                    if not historical.is_file() or profile_reference(_load_record(historical)) != selected:
+                    if not _runtime_io_path(config, historical).is_file() \
+                            or profile_reference(_load_record(historical, config)) != selected:
                         raise ProfileError("PROFILE_REFERENCE_MISMATCH",
                                            "selected reference is not backed by this context's history")
             profile = resolve_profile(_restore_selection(config, old))
@@ -1094,11 +1123,11 @@ def main() -> int:
         if operation == "required-policy":
             # Losing a selected reference cannot prove its policy was optional.
             required = (
-                exc.required or config.requirements.exists() or bool(config.explicit_pack)
+                exc.required or _native_io_path(config.requirements).exists() or bool(config.explicit_pack)
                 or bool(args.reference) or bool(config.context_id or config.context_file)
             )
             print(canonical({"required": required, "status": "error",
-                             "source": config.requirements.as_posix() if config.requirements.exists()
+                             "source": config.requirements.as_posix() if _native_io_path(config.requirements).exists()
                              else "invocation" if config.explicit_pack else "profile-context",
                              "version": "unknown", "applicability": "unknown"}).decode("utf-8"))
         print(canonical({"schema_version": 1, "status": "error", "code": exc.code,

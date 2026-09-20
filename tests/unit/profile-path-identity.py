@@ -12,6 +12,7 @@ import ntpath
 import os
 from pathlib import Path, PureWindowsPath
 import subprocess
+import shutil
 import sys
 import tempfile
 import unittest
@@ -33,8 +34,8 @@ def extended(path):
 class ProfilePathIdentity(unittest.TestCase):
     def setUp(self):
         self.temporary = tempfile.TemporaryDirectory(prefix="lintel-profile-path-")
-        self.addCleanup(self.temporary.cleanup)
         self.root = Path(self.temporary.name).resolve()
+        self.addCleanup(self.cleanup)
         self.repo, self.home = self.root / "target", self.root / "home"
         self.repo.mkdir()
         self.home.mkdir()
@@ -44,6 +45,163 @@ class ProfilePathIdentity(unittest.TestCase):
             OPTIONS.root, self.repo, self.home, self.home / "packs",
             self.home / "packs/active-pack", context_id="path-fixture",
         )
+
+    def cleanup(self):
+        path = extended(self.root) if os.name == "nt" else self.root
+        if path.exists():
+            shutil.rmtree(path)
+        self.temporary.cleanup()
+
+    def long_runtime_path(self):
+        path = self.home
+        while len(str(path)) < 290:
+            path /= "runtime-segment-" + "x" * 45
+        return path / ("1-" + "d" * 64 + ".json")
+
+    @unittest.skipUnless(os.name == "nt", "native Windows legacy-length runtime I/O")
+    def test_long_parents_temporary_lock_and_destination_use_the_same_location(self):
+        path = self.long_runtime_path()
+        before = (str(self.config.repo), str(self.config.home), str(path))
+        observed = []
+        actual_replace = os.replace
+
+        def observe_replace(source, destination):
+            observed.append((str(source), str(destination)))
+            return actual_replace(source, destination)
+
+        with mock.patch.object(profile.os, "replace", observe_replace):
+            with profile._lock(self.config, path):
+                lock = path.with_name(path.name + ".lock")
+                self.assertGreater(len(str(path.parent)), 260)
+                self.assertGreater(len(str(lock)), 260)
+                self.assertTrue(extended(lock).is_dir())
+                profile._write_json(self.config, path, {"synthetic": "first"})
+                profile._write_json(self.config, path, {"synthetic": "second"})
+        self.assertEqual(json.loads(extended(path).read_text()), {"synthetic": "second"})
+        self.assertEqual(len(observed), 2)
+        for temporary, destination in observed:
+            self.assertGreater(len(temporary), 260)
+            self.assertGreater(len(destination), 260)
+            self.assertEqual(profile._path_identity(Path(destination)), profile._path_identity(path))
+        self.assertFalse(extended(lock).exists())
+        self.assertEqual([item.name for item in extended(path.parent).iterdir()], [path.name])
+        self.assertEqual((str(self.config.repo), str(self.config.home), str(path)), before)
+
+    @unittest.skipUnless(os.name == "nt", "native long-path profile persistence")
+    def test_existing_long_pin_and_retained_history_are_read_without_rebinding(self):
+        home = self.long_runtime_path().parent
+        extended(home).mkdir(parents=True)
+        config = replace(self.config, home=home, packs=home / "packs", pointer=home / "packs/active-pack")
+        original = profile._record(profile.resolve_profile(config), config.context_id, 7,
+                                   reason="synthetic existing pin")
+        reference = profile.profile_reference(original)
+        path = profile.context_path(config)
+        history = profile._history_path(path, reference)
+        self.assertGreater(len(str(history.parent)), 260)
+        for destination, value in ((path, original), (history, original), (config.selected, reference)):
+            native = extended(destination)
+            native.parent.mkdir(parents=True, exist_ok=True)
+            native.write_bytes(profile.canonical(value) + b"\n")
+        before = (extended(path).read_bytes(), extended(history).read_bytes(), config.selected.read_bytes())
+        for _ in range(2):
+            loaded = profile.bootstrap_profile_context(replace(config, context_id=""))
+            self.assertEqual(profile.profile_reference(loaded), reference)
+            self.assertEqual(loaded["profile"], original["profile"])
+        self.assertEqual((extended(path).read_bytes(), extended(history).read_bytes(), config.selected.read_bytes()),
+                         before)
+        self.assertEqual([item.name for item in extended(history.parent).iterdir()], [history.name])
+        extended(path).unlink()
+        with self.assertRaises(profile.ProfileError) as error:
+            profile.load_profile_context(config, create=True)
+        self.assertEqual(error.exception.code, "PROFILE_CONTEXT_MISSING")
+        self.assertFalse(extended(path).exists())
+        recovered = profile.rebind_profile_context(replace(config, expected_reference=reference),
+                                                  "explicit recovery at the unchanged long location")
+        self.assertEqual(recovered["generation"], 8)
+        self.assertEqual(recovered["digest"], reference["digest"])
+        self.assertEqual(extended(history).read_bytes(), before[1])
+        self.assertEqual(profile.profile_reference(profile.bootstrap_profile_context(
+            replace(config, context_id=""),
+        )), profile.profile_reference(recovered))
+
+    @unittest.skipUnless(os.name == "nt", "native long-path lock behavior")
+    def test_long_existing_lock_is_not_stolen_or_treated_as_absent(self):
+        path = self.long_runtime_path()
+        lock = path.with_name(path.name + ".lock")
+        extended(lock).mkdir(parents=True)
+        with self.assertRaises(profile.ProfileError) as error:
+            with profile._lock(self.config, path):
+                self.fail("existing long-path lock was acquired")
+        self.assertEqual(error.exception.code, "PROFILE_CONTEXT_BUSY")
+        self.assertTrue(extended(lock).is_dir())
+        self.assertFalse(extended(path).exists())
+        self.assertEqual(list(extended(lock).iterdir()), [])
+
+    @unittest.skipUnless(os.name == "nt", "native long-path atomic write cleanup")
+    def test_failed_long_replace_preserves_existing_bytes_and_cleans_owned_temporary(self):
+        path = self.long_runtime_path()
+        extended(path.parent).mkdir(parents=True)
+        original = b'{"existing":"preserve"}\n'
+        extended(path).write_bytes(original)
+        actual_replace = os.replace
+        observed = []
+
+        def fail_replace(source, destination):
+            observed.append((Path(source), Path(destination)))
+            raise PermissionError("synthetic replacement interruption")
+
+        with mock.patch.object(profile.os, "replace", fail_replace), self.assertRaises(PermissionError):
+            profile._write_json(self.config, path, {"replacement": True})
+        self.assertEqual(len(observed), 1)
+        self.assertGreater(len(str(observed[0][0])), 260)
+        self.assertFalse(observed[0][0].exists())
+        self.assertEqual(extended(path).read_bytes(), original)
+        self.assertEqual([item.name for item in extended(path.parent).iterdir()], [path.name])
+        self.assertIs(profile.os.replace, actual_replace)
+        profile._write_json(self.config, path, {"replacement": True})
+        self.assertEqual(json.loads(extended(path).read_text()), {"replacement": True})
+
+    @unittest.skipUnless(os.name == "nt", "native long-path namespace and containment refusals")
+    def test_long_io_alias_cannot_authorize_outside_device_ads_or_traversal(self):
+        valid = self.long_runtime_path()
+        for spelling in (valid, extended(valid), PureWindowsPath(r"\\server\share\directory\file.json")):
+            with self.subTest(valid=str(spelling)):
+                alias = profile._native_io_path(Path(spelling))
+                self.assertEqual(profile._path_identity(alias), profile._path_identity(spelling))
+        outside = self.outside.joinpath(*valid.relative_to(self.home).parts)
+        sibling = self.home.with_name("home-sibling").joinpath(*valid.relative_to(self.home).parts)
+        invalid = (
+            outside, extended(outside), sibling,
+            valid.parent / ".." / "escaped.json", Path(str(valid) + ":stream"),
+            Path(r"\\.\pipe\profile"), Path(r"\\?\GLOBALROOT\Device\HarddiskVolume1\record.json"),
+        )
+        with mock.patch.object(profile.tempfile, "NamedTemporaryFile",
+                               side_effect=AssertionError("invalid target reached temporary creation")):
+            for path in invalid:
+                with self.subTest(path=str(path)), self.assertRaises(profile.ProfileError) as error:
+                    profile._write_json(self.config, path, {"must_not_write": True})
+                self.assertEqual(error.exception.code, "PROFILE_IO")
+        self.assertEqual(list(self.outside.iterdir()), [])
+        self.assertFalse(extended(sibling.parent).exists())
+        self.assertFalse(extended(valid.parent).exists())
+
+    @unittest.skipUnless(os.name == "nt", "native symlink beyond legacy path length")
+    def test_long_runtime_resolution_follows_existing_link_ancestors_before_mutation(self):
+        parent = self.long_runtime_path().parent
+        extended(parent).mkdir(parents=True)
+        link = parent / "outside-link"
+        extended(link).symlink_to(self.outside, target_is_directory=True)
+        try:
+            path = link / "must-not-write.json"
+            self.assertGreater(len(str(path)), 260)
+            for spelling in (path, extended(path)):
+                with self.subTest(path=str(spelling)), self.assertRaises(profile.ProfileError) as error:
+                    profile._write_json(self.config, spelling, {"must_not_write": True})
+                self.assertEqual(error.exception.code, "PROFILE_IO")
+            self.assertFalse((self.outside / "must-not-write.json").exists())
+        finally:
+            extended(link).unlink()
+        self.assertEqual(list(self.outside.iterdir()), [])
 
     def test_windows_drive_and_unc_comparison_aliases(self):
         for normal, alias in (
@@ -229,10 +387,13 @@ class ProfilePathIdentity(unittest.TestCase):
         self.assertFalse(approved.samefile(outside), "fixture did not create distinct filesystem objects")
         config = replace(self.config, home=approved)
         profile._write_json(config, approved / "inside.json", {"allowed": True})
-        for candidate in (outside / "outside.json", extended(outside / "outside.json")):
+        long_outside = outside.joinpath(*self.long_runtime_path().relative_to(self.home).parts)
+        for candidate in (outside / "outside.json", extended(outside / "outside.json"),
+                          long_outside, extended(long_outside)):
             with self.subTest(path=str(candidate)), self.assertRaises(profile.ProfileError):
                 profile._write_json(config, candidate, {"must_not_write": True})
             self.assertFalse((outside / "outside.json").exists())
+            self.assertFalse(extended(long_outside).exists())
         self.assertEqual(json.loads((approved / "inside.json").read_text()), {"allowed": True})
 
     def test_real_symlink_escape_rejected_and_inside_link_remains_inside(self):
@@ -277,10 +438,13 @@ class ProfilePathIdentity(unittest.TestCase):
                 )
                 self.assertEqual(result.returncode, 0, result.stderr)
                 try:
-                    for candidate in (link / "escaped.json", extended(link / "escaped.json")):
+                    long_escape = link.joinpath(*self.long_runtime_path().relative_to(self.home).parts)
+                    for candidate in (link / "escaped.json", extended(link / "escaped.json"),
+                                      long_escape, extended(long_escape)):
                         with self.subTest(candidate=str(candidate)), self.assertRaises(profile.ProfileError):
                             profile._write_json(self.config, candidate, {"must_not_write": True})
                     self.assertFalse((self.outside / "escaped.json").exists())
+                    self.assertEqual(list(self.outside.iterdir()), [])
                 finally:
                     link.rmdir()
                 self.assertTrue(self.outside.is_dir())
