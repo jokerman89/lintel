@@ -49,7 +49,7 @@ bash bin/li-copilot check --target ../your-repo
 ```
 
 This exposes native `.github/skills/li-*/SKILL.md` workflows and
-`.github/agents/lintel-*.agent.md` profiles. Use `/li-plan`, `/li-build`, `/li-review` and
+`.github/agents/lintel-*.agent.md` profiles. Use `/li-plan`, `/li-build`, `/li-swarm`, `/li-review` and
 `/li-resume` where supported. The source kit is portable across machines and cloud checkouts.
 
 Copilot CLI also has a plugin route:
@@ -135,6 +135,28 @@ hooks, read state and rules explicitly at session start and preserve state at ha
 The shared `.claude/memory/`, `.claude/plans/` and `.claude/decisions/` files work across clients.
 Do not run simultaneous writers against the same task state without coordinating ownership.
 Use independent branches or worktrees for separate implementation tasks.
+
+## Swarm execution by subagent tier
+
+Every host reads the same approved work map, coordination file, charter and lane evidence. The
+`subagents` field in `lib/cli-tiers.yaml` changes how work is dispatched, not which dependency,
+ownership, review or close gates apply.
+
+| Declared tier | Swarm behavior | Honest limitation |
+|---|---|---|
+| `native` | Dispatch dependency-ready lanes up to the operator/topology cap when write scopes are disjoint and each writer has an attributable worktree, patch or host-enforced sandbox. Sequence writers when that evidence is unavailable. | Report concurrency and independent review only when the host produced their evidence. |
+| `sequenced` | Run the same briefs one at a time, with the same scope check, report and review artifacts. | Do not claim concurrent writers. |
+| `none` | Let the main agent execute cards serially or export replayable briefs for manual execution. | A self-review is not independent; a lane stays open until valid independent review exists. |
+
+Swarm helpers must come from a trusted installed Lintel source root, while `--repo` points at the
+working project. An adapter should export `LINTEL_SOURCE_ROOT`; Claude Code may provide
+`CLAUDE_PLUGIN_ROOT`. If neither trusted source is available, stop with `NEEDS_CONTEXT` instead of
+executing a helper copied into an untrusted target.
+
+Recovery is artifact-based on every tier: revalidate committed topology, inspect status, preserve
+any attributable change set, and replay the same brief when an attempt disappears. Missing runtime
+state never proves completion. See [swarming work](concepts/swarming-work.md) for the full operating
+procedure.
 
 ## Adding a new CLI
 

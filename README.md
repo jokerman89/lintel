@@ -13,7 +13,8 @@ same engineering workflow when teammates use Claude Code or Codex.
 > client and policies. See the [adoption guide](docs/enterprise-adoption.md) for acceptance criteria.
 
 [Get started](docs/getting-started.md) · [GitHub Copilot guide](docs/copilot.md) ·
-[Enterprise adoption](docs/enterprise-adoption.md) · [Use with Spec Kit](docs/spec-kit.md)
+[Enterprise adoption](docs/enterprise-adoption.md) · [Swarming work](docs/concepts/swarming-work.md) ·
+[Use with Spec Kit](docs/spec-kit.md)
 
 ## Give your team a repeatable session
 
@@ -25,6 +26,7 @@ that work a shared shape:
 | A consistent starting point | Repository instructions and skills that load the relevant workflow |
 | Clear scope before implementation | A specification, implementation plan and build cards with acceptance criteria |
 | Reviewable delivery | A review against the specification, quality checks and a documented release decision |
+| Safe multi-agent scale | An opt-in swarm profile with bounded ownership, attributable changes, lane evidence and serial fallback |
 | Continuity across sessions | Committed lessons, architecture decisions and a current working state |
 | Organisation-specific standards | A separate pack for policies, terminology, roles and reusable context |
 | Existing investment to carry forward | A workflow bridge for Spec Kit and shared source content for other agent clients |
@@ -83,6 +85,20 @@ These are agent instructions backed by local helpers. Workflow approvals and rev
 still depend on the agent following the instructions and the team enforcing its merge rules.
 [The cycle](docs/the-cycle.md) explains the phases and their artifacts.
 
+## Scale an approved plan with a swarm
+
+When a reviewed plan contains dependency-independent ownership domains, opt in with `/li:swarm`.
+Lintel adds a committed coordination map, charter and per-lane briefs, reports and reviews beside the
+existing task map. One coordinator owns shared state, generated outputs, commits and integration.
+
+Native-subagent hosts may fan out writers only when paths do not overlap and every change is
+attributable through an isolated worktree, patch or equivalent scoped sandbox. Sequenced hosts run
+the same briefs one at a time. Hosts without subagents use the main agent or export replayable briefs
+and do not claim independent review. The final REVIEW always runs on the reconciled branch.
+
+The [swarming guide](docs/concepts/swarming-work.md) covers when to select the profile, how to inspect
+ownership and status, failure recovery, trusted tool sources and the close gate.
+
 ## Make it your organisation's workflow
 
 A pack contains the standards your organisation owns: policy references, voice, roles and
@@ -138,7 +154,7 @@ provided by their host.
 ## Explore and contribute
 
 - [Documentation index](docs/README.md) · [FAQ](docs/faq.md) · [Glossary](docs/GLOSSARY.md)
-- [Architecture](docs/architecture.md) · [Engineering modules](docs/concepts/engineering-modules.md)
+- [Architecture](docs/architecture.md) · [Swarming work](docs/concepts/swarming-work.md) · [Engineering modules](docs/concepts/engineering-modules.md)
 - [Skill catalog](skills/CATALOG.md) · [Pack resolution](docs/concepts/pack-resolver.md)
 - [Contributing](CONTRIBUTING.md) · [Code of conduct](CODE_OF_CONDUCT.md) · [Changelog](CHANGELOG.md)
 
