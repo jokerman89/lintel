@@ -54,3 +54,45 @@ positive spelling comparison.
 
 Report exact new product/report commits, F01-F03 retained closures, F04 result and
 remaining P05/P06/P08/P14 gates. No final P07 acceptance follows from implementer tests.
+
+## Joined installed-source long-path repair
+
+**Status:** APPROVED bounded integration repair, 2026-09-20. The earlier w1-w3
+checkpoint is independently accepted at `a8de574` / report `3d8e715`. This new failure
+does not rewrite that evidence, but reopens A07.3/A07.4 joined behavior.
+
+Actual installed-source bootstrap with the default repository-local LINTEL_HOME fails
+on native Windows even with a short `profile-consumer` fixture name. A direct call to
+the installed `bootstrap_profile_context` reproduces the same error, excluding a
+Bash argument-conversion explanation. `_retain_record -> _write_json -> os.replace`
+fails with WinError 3: the temporary path is 220 characters and the history destination
+is 274. A longer original fixture failed with a filename-too-long error. Shortening
+the test again, overriding the documented default home, or treating this as a skip
+would hide the observed consumer failure.
+
+Same P07 owner, same independent reviewer; retain the ownership list above. Support
+the actual default pinned-profile flow at long native Windows paths while retaining
+ordinary stored roots/provenance/reference semantics. A recognized extended-length
+filesystem spelling may be used for I/O to that SAME verified location; it must not
+authorize another root, strip arbitrary device prefixes, follow redirected ancestry
+or case-fold distinct directories. Validate the actual target before mutation. Do not
+change system LongPathsEnabled, shorten or relocate the durable store, silently change
+history naming, rebind policy, or alter source/target identity.
+
+Alternatives: an explicit short home can work around the error but does not repair the
+documented default; shortening history names changes a durable format unnecessarily.
+Prefer a narrow Windows I/O adaptation that preserves the existing identity contract.
+If that cannot be established safely, stop with evidence rather than relaxing guards.
+
+Refinements in plan.md: A07.3.l1 preserves exact installed-source/default-home RED;
+l2 repairs same-location long-path I/O without data/identity migration; l3 verifies
+fresh-shell pin reuse, retained history, explicit rebind and same-mtime drift at paths
+over 260 characters. A07.4.l1 retains native/injected outside-root, case-sensitive,
+junction, namespace/ADS/traversal and lock/interruption refusals; l2 obtains independent
+repair spec/quality before joined acceptance. Include paths whose parent/temp/lock also
+exceed the legacy limit, not only the final filename. No live UNC share claim.
+
+The coordinator owns the new installed-consumer regression in
+`tests/integration/copilot-kit.py`. P07 adds focused cases to its own profile tests and
+returns an immutable repair; the coordinator reruns the actual bundled consumer after
+independent review. P05/P08/P10 and final A22.7/A24 remain separate.

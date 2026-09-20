@@ -118,6 +118,9 @@ Acceptance: no mandatory failure or absent evidence becomes verified green.
   - [ ] A03.2.s2 Normalize only selected real task-progress character spans, also for excerpts.
   - [ ] A03.2.s3 Verify literal/criteria/approval/product mutations and legitimate nested progress through real gates.
   - [ ] A03.2.s4 Obtain independent consumer spec and first full owned quality acceptance.
+  - [ ] A03.2.e1 Reproduce excerpt context transitions with unchanged or colliding checkbox bytes through actual gates.
+  - [ ] A03.2.e2 Bind relevant source interpretation into selected acceptance identity.
+  - [ ] A03.2.e3 Preserve structural progress and unrelated outside-selection edits while blocking literal-context transitions.
 - [ ] A03.3 Require SHIP/QA to consume the same snapshot and real independent actor.
 - [ ] A03.4 Test stale acceptance/config/new-file changes and later rejection revocation.
 - [ ] A03.5 Verify unchanged relevant inputs reuse valid evidence without relying on age alone.
@@ -169,14 +172,19 @@ Acceptance: alternate question tools work; no fabricated independence or host co
 ### A07 Stable effective profile (P07; R04)
 - [x] A07.1 Specify required-policy failure versus neutral first-use behavior in ADR-0029.
 - [x] A07.2 Resolve structured inheritance and provenance with documented source precedence.
-- [x] A07.3 Pin profile content/identity across calls, delegation and restart.
+- [ ] A07.3 Pin profile content/identity across calls, delegation and restart.
   - [x] A07.3.w1 Reproduce the native Windows extended-path concurrent bootstrap failure.
   - [x] A07.3.w2 Compare recognized equivalent filesystem spellings without changing I/O identity.
   - [x] A07.3.w3 Verify native ordinary/extended and concurrent bootstrap paths.
-- [x] A07.4 Detect mid-task drift and failed mandatory load without silent advisory success.
+  - [ ] A07.3.l1 Reproduce default installed-source history creation beyond native Windows legacy path limits.
+  - [ ] A07.3.l2 Repair long-path I/O without changing verified location, durable names or profile identity.
+  - [ ] A07.3.l3 Verify fresh-shell pin/history/rebind/drift at long paths, including long parents and lock paths.
+- [ ] A07.4 Detect mid-task drift and failed mandatory load without silent advisory success.
   - [x] A07.4.w1 Preserve outside-root, device, traversal and reparse rejection under the repaired comparison.
   - [x] A07.4.w2 Run all retained lifecycle and source/target checks on the committed repair.
   - [x] A07.4.w3 Obtain independent repair acceptance before the first component quality pass.
+  - [ ] A07.4.l1 Preserve containment, case-sensitive, namespace, link and interruption refusals with long-path I/O.
+  - [ ] A07.4.l2 Obtain same-reviewer independent long-path repair spec/quality and actual joined consumer acceptance.
 - [x] A07.5 Exercise synthetic company decisions and separate schema/product compatibility.
 Acceptance: profile changes are observable and applicable requirements survive the lifecycle.
 The bounded [Windows repair checkpoint](packages/P07-windows-repair.md) is the explicit
@@ -186,6 +194,9 @@ Owned component acceptance: [P07 Windows final](reviews/P07-windows-final.md), p
 `a8de574`, integrated through `62ca389`; actual native and injected evidence are separated.
 These component results do not close A24's whole-workflow/profile-value scenario, P06/P08
 consumer migration, live company enforcement, or unrun runtime/platform evidence.
+Joined verification now reopens A07.3/A07.4: the default installed-source bootstrap
+fails writing a 274-character Windows history destination. See the appended bounded
+repair in packages/P07-windows-repair.md; earlier component acceptance remains history.
 
 ### A08 One lifecycle work map (P08; R05)
 - [ ] A08.1 Preserve requested operation separately from topic during routing.
@@ -237,6 +248,9 @@ initiative-wide capacity/host acceptance from these component checkboxes.
   - [ ] A12.4.a Distinguish supported client operations and actual uninstall limits.
   - [ ] A12.4.b Preserve opt-in historical aliases and document recoverability evidence.
 Acceptance: a success message corresponds to a verified change in the intended host/target.
+Operator decision: bare installation must remain usable without Python. The approved
+native/runtime transaction split and exact shared ownership release are in packages/P10.md;
+no installer may turn a later operation's Python prerequisite into an install prerequisite.
 
 ### A13 Observable learning and status (P08; R05)
 - [ ] A13.1 Unify event producer/consumer fields and distinguish observation from verification.
@@ -356,6 +370,13 @@ instruction sync/check, catalog generation/check, wiki generation/check and actu
 repository adapter init/check pass on the joined source. This bounded deterministic
 repair received coordinator spec/quality review, not a new independent package verdict.
 The source repair and refreshed generated outputs are committed in `80f36fb`.
+g3 partial evidence: isolated RED proves five omitted required resources incorrectly
+permit init and installed check. Source preflight now includes them; installed checks
+also suppress bytecode writes before preflight. Seven of eight focused joined methods
+pass, including exact no-write refusals, inventory-removal negatives, portable repeat/
+clone, managed-edit preservation and actual stdlib Swarm/envelope consumers. The eighth,
+default installed-profile bootstrap, remains RED at the native 274-character history
+destination and is assigned to P07's long-path repair. No g3 completion is claimed.
 
 ### A24 Observable enterprise profile value (P14; R04/R11)
 - [ ] A24.1 Define identical synthetic task under neutral, rapid-development and strict-change profiles.
@@ -416,9 +437,9 @@ Independent first-wave review outcomes:
 | P02 | `9bdaeb4` | PASS; original findings and staged-deletion repair verified | PASS; [final](reviews/P02-final.md) | Integrated `39561c0`; final initiative checks remain |
 | P03 | `500adb3` | PASS; original preservation findings verified | PASS; [final](reviews/P03-final.md) | Integrated `9a1cf17`; assigned downstream consumers remain |
 | P04 component | `aa73651` | PASS; all F01-F05 close | PASS; [final](reviews/P04-final.md) | Integrated `490a0f4` + reports `8964267`; final A22.7 open |
-| P05 | `9c8ef727` | Pending independent shared-consumer review; earlier rejections retained | First full pass pending | Frozen owned consumer `fd63e690`, exact provider dependency `bd96a477` |
+| P05 | `9c8ef727` | FAIL Q01 excerpt context identity; [report](reviews/P05-shared-boundary-final.md) | Started/stopped on spec counterexample, not passed | Original owner repairs consumer only; provider remains accepted |
 | P06 | `7425960` | PASS; C01-C07 closed | PASS; [final](reviews/P06-provider-repair-final.md) | Integrated `36593cd`; later shared-consumer and live gates open |
-| P07 | `a8de574` | PASS; all F01-F04 close | PASS; [final](reviews/P07-windows-final.md) | Own history integrated through `62ca389`; joined consumer/profile-value gates open |
+| P07 | `a8de574` | Earlier owned component PASS; new joined long-path failure | Earlier bounded PASS; [final](reviews/P07-windows-final.md) | Own history integrated through `62ca389`; same owner repairs default installed-source Windows I/O |
 
 No rejected product batch was integrated. Green original test counts are retained as
 limited evidence, not substituted for the newly failing acceptance cases.

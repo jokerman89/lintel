@@ -106,3 +106,33 @@ A local Markdown renderer can corroborate interpretation, not replace span/behav
 Freeze exact provider and consumer commits, record actual dependency bytes, and keep
 both independent review gates open until verified. No global install, network or
 unrelated parser expansion is authorized.
+
+## Q01 consumer identity refinement
+
+The immutable independent rejection `0cdbf596` (report-only, parent `9c8ef727`;
+integrated report `29ae5d9`) reopens P05 specification. Its first full quality pass
+started but stopped on this counterexample; no quality approval exists.
+Provider `7425960` remains accepted and unchanged.
+
+P05 must bind the relevant full-source classification/normalization eligibility into
+acceptance identity, not merely use it before hashing the resulting excerpt bytes.
+Adding an enclosing fence or raw PRE outside the selected excerpt must invalidate old
+reader/QA/SHIP clearance even when every checkbox is already a space, or when a formerly
+normalized x is changed to a now-literal space. Keep full-source classification first,
+one exact provider and one-character progress eligibility.
+
+Use deterministic selection-relative facts: parse-local IDs or absolute offsets that
+change with unrelated text before the selection are not durable identities. Preserve
+genuine structural space/x/X progress, nested lists, Unicode/CRLF, unchanged acceptance
+and unrelated out-of-selection edits. Do not fix this by hashing the whole raw task file,
+by duplicating Markdown parsing, or by changing QA/policy/provenance rules. Existing
+public signatures and version domains remain unchanged. Document any revised hash
+preimage precisely; old insufficient receipts do not silently acquire new clearance.
+
+Refinements in plan.md: A03.2.e1 reproduces exact all-space, fence-retains-x,
+fence-literal-space and raw-PRE transitions with stale QA restored before SHIP;
+A03.2.e2 binds the relevant interpretation through the single consumer; A03.2.e3
+verifies those negatives and retained real-progress/outside-selection positives.
+The original A03.2.s4 still requires the same independent reviewer to pass complete
+owned spec, then finish the first whole bounded quality review on a new frozen SHA.
+Only the four existing consumer-owned paths plus P05's own report may change.
