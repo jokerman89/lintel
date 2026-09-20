@@ -285,7 +285,8 @@ YES — standalone for diff/PR review. Common use:
 - `/li:review --diff origin/main..HEAD` — review against main
 - `/li:review --pr 42` — review specific PR
 
-Skip-conditions: intent=research-only, intent=docs-only.
+Skip-condition: intent=research-only. Documentation-only work uses proportionate
+review, not an exemption from selected-content and acceptance binding.
 
 ## Integration
 
