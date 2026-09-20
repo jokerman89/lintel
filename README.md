@@ -150,16 +150,46 @@ parity. The generated view below comes from `lib/cli-tiers.yaml`; use
 and observation details. Static compatibility tiers are conservative hints, not runtime grants.
 
 <!-- CLI-TIERS:START — generated from lib/cli-tiers.yaml via cli_tiers_markdown_table; do not hand-edit. -->
-| CLI | Tier | Skills | Subagents | Lintel hooks |
-|---|---|---|---|---|
-| Claude Code | full | native | native | yes |
-| Codex CLI / App | full | native | native | not ported |
-| Cursor | full | native | sequenced | not ported |
-| Gemini CLI | supported | manual | none | not ported |
-| OpenCode | supported | manual | none | not ported |
-| GitHub Copilot CLI | supported | native | native | not ported |
-| Factory Droid | supported | native | none | not ported |
-| Cline / Continue / Aider | best-effort | manual | none | not ported |
+| Surface | Delivered discovery route | Vendor delegation | Live Lintel evidence |
+|---|---|---|---|
+| Claude Code CLI | .claude/skills | documented | not_run |
+| Claude Desktop Code local | .claude/skills | unknown | not_run |
+| GitHub Copilot CLI | .github/skills | documented | not_run |
+| GitHub Copilot App | .github/skills | conditional | partial session observations |
+| GitHub Copilot VS Code | .github/skills | conditional | not_run |
+| GitHub Copilot cloud agent | .github/skills | unknown | not_run |
+| Codex CLI | .agents/skills | conditional | not_run |
+| Codex desktop | .agents/skills | unknown | not_run |
+| Codex IDE extension | .agents/skills | unknown | not_run |
+| Codex cloud | manual canonical-file handoff | unknown | not_run |
+| Cursor CLI | .cursor/skills | conditional | not_run |
+| Cursor editor | .cursor/skills | conditional | not_run |
+| Cursor cloud | .cursor/skills | conditional | not_run |
+| Gemini CLI | .gemini/skills | conditional | not_run |
+| OpenCode CLI/TUI | .opencode/skills | documented | not_run |
+| OpenCode desktop | manual canonical-file handoff | unknown | not_run |
+| OpenCode IDE | manual canonical-file handoff | unknown | not_run |
+| Factory Droid CLI | .factory/skills | conditional | not_run |
+| Factory desktop | manual canonical-file handoff | unknown | not_run |
+| Factory web/cloud | manual canonical-file handoff | unknown | not_run |
+| Antigravity CLI | .agents/skills | unknown | not_run |
+| Antigravity desktop | .agents/skills | unknown | not_run |
+| Antigravity IDE | .agents/skills | unknown | not_run |
+| Kiro CLI | .kiro/skills | conditional | not_run |
+| Kiro IDE | .kiro/skills | conditional | not_run |
+| Kiro web | .kiro/skills | unknown | not_run |
+| Devin Desktop Cascade / Windsurf | .windsurf/skills | unknown | not_run |
+| Devin CLI | .devin/skills | conditional | not_run |
+| Devin Local | manual canonical-file handoff | unknown | not_run |
+| Devin cloud | manual canonical-file handoff | unknown | not_run |
+| JetBrains Junie CLI | .junie/skills | unknown | not_run |
+| JetBrains Junie IDE | manual canonical-file handoff | unknown | not_run |
+| Cline editor | .cline/skills | conditional | not_run |
+| Cline CLI | manual canonical-file handoff | conditional | not_run |
+| Continue IDE | manual canonical-file handoff | unknown | not_run |
+| Continue CLI | manual canonical-file handoff | unknown | not_run |
+| Aider CLI | manual canonical-file handoff | unknown | not_run |
+| Unidentified host (explicit manual route) | manual canonical-file handoff | unknown | not_run |
 <!-- CLI-TIERS:END -->
 
 See [multi-CLI support](docs/multi-cli.md) for invocation differences and activation boundaries.
