@@ -345,6 +345,108 @@ class TrustedHooks(Fixture):
         self.assertNotIn("WARN: perf-budget-bound path", result.stdout)
         self.assertFalse(self.marker.exists())
 
+    def test_performance_metadata_requires_complete_scalars(self) -> None:
+        budget = self.target / ".claude/runtime/state/tq/perf-budget-fixture.md"
+        cases = {
+            "p95_ms": ("120oops", "120 999", "120.5", "1e3", "120#comment", "", "# empty"),
+            "journey": ("checkout1", "checkout!", "checkout extra", "checkout#comment", ""),
+        }
+        for key, values in cases.items():
+            for value in values:
+                with self.subTest(key=key, value=value):
+                    fields = {"journey": "checkout", "p95_ms": "120"}
+                    fields[key] = value
+                    write(
+                        budget,
+                        f"journey: {fields['journey']}\npath: {CUSTOM_PATH}\n"
+                        f"p95_ms: {fields['p95_ms']}\n",
+                    )
+                    result = self.bash(
+                        self.source / "hooks/shared/tq-perf-regression-warn/run.sh",
+                        CUSTOM_PATH,
+                    )
+                    self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+                    self.assertIn(f"invalid {key} budget metadata", result.stderr)
+                    self.assertNotIn("WARN: perf-budget-bound path", result.stdout)
+                    self.assertFalse(self.marker.exists())
+
+    def test_performance_metadata_preserves_valid_values_and_comments(self) -> None:
+        budget = self.target / ".claude/runtime/state/tq/perf-budget-fixture.md"
+        for journey_line, p95_lines, journey, p95 in (
+            ("journey: checkout", "p95_ms: 120", "checkout", "120"),
+            (" \tjourney:\tcheckout_flow \t# owner",
+             "  p95_ms:\t000120 \t# milliseconds", "checkout_flow", "000120"),
+            ("- journey: checkout_", "  p95_ms: 0 # no allowance", "checkout_", "0"),
+            ("journey: checkout",
+             "  not_p95_ms: 999\n  # p95_ms: 777\n  p95_ms: 120", "checkout", "120"),
+            ("journey: checkout\r", "p95_ms: 120\r", "checkout", "120"),
+        ):
+            with self.subTest(journey=journey_line, p95=p95_lines):
+                write(budget, f"{journey_line}\npath: {CUSTOM_PATH}\n{p95_lines}\n")
+                output = self.hook("tq-perf-regression-warn")
+                self.assertIn(
+                    f"WARN: perf-budget-bound path (journey: {journey}), "
+                    f"p95 budget {p95}ms\n",
+                    output,
+                )
+
+    def test_performance_metadata_treats_filenames_literally(self) -> None:
+        self.set_policy("custom/*")
+        budget = self.target / ".claude/runtime/state/tq/perf-budget-fixture.md"
+        for path, decoy in (
+            ("custom/[id].txt", "custom/i.txt"),
+            ("custom/change.txt", "custom/changeXtxt"),
+            ("custom/^amount$.txt", "custom/amount.txt"),
+            ("custom/[open.txt", "custom/open.txt"),
+        ):
+            with self.subTest(path=path):
+                write(self.target / path, "Literal path fixture.\n")
+                write(
+                    budget,
+                    f"journey: decoy\npath: {decoy}\np95_ms: 999\n\n"
+                    f"journey: checkout\npath: {path}\np95_ms: 120\n",
+                )
+                output = self.hook("tq-perf-regression-warn", path)
+                self.assertIn(
+                    "WARN: perf-budget-bound path (journey: checkout), p95 budget 120ms\n",
+                    output,
+                )
+                self.assertNotIn("journey: decoy", output)
+                self.assertNotIn("999ms", output)
+
+    def test_performance_metadata_does_not_select_regex_decoys(self) -> None:
+        self.set_policy("custom/*")
+        budget = self.target / ".claude/runtime/state/tq/perf-budget-fixture.md"
+        for path, decoy in (
+            ("custom/[id].txt", "custom/i.txt"),
+            ("custom/change.txt", "custom/changeXtxt"),
+        ):
+            with self.subTest(path=path):
+                write(self.target / path, "No budget record for this literal path.\n")
+                write(budget, f"journey: decoy\npath: {decoy}\np95_ms: 999\n")
+                output = self.hook("tq-perf-regression-warn", path)
+                self.assertIn("WARN: perf-budget-bound path\n", output)
+                self.assertNotIn("journey: decoy", output)
+                self.assertNotIn("p95 budget", output)
+
+    def test_performance_missing_metadata_does_not_borrow_adjacent_records(self) -> None:
+        budget = self.target / ".claude/runtime/state/tq/perf-budget-fixture.md"
+        for record, suffix in (
+            (f"path: {CUSTOM_PATH}\n", ""),
+            (f"journey: checkout\npath: {CUSTOM_PATH}\n", " (journey: checkout)"),
+            (f"path: {CUSTOM_PATH}\np95_ms: 120\n", ", p95 budget 120ms"),
+        ):
+            with self.subTest(record=record):
+                write(
+                    budget,
+                    "journey: earlier\npath: custom/earlier.txt\np95_ms: 999\n\n"
+                    f"{record}\njourney: later\npath: custom/later.txt\np95_ms: 888\n",
+                )
+                output = self.hook("tq-perf-regression-warn")
+                self.assertIn(f"WARN: perf-budget-bound path{suffix}\n", output)
+                self.assertNotIn("999ms", output)
+                self.assertNotIn("888ms", output)
+
     def test_performance_metadata_read_failure_is_not_empty_success(self) -> None:
         budget = self.target / ".claude/runtime/state/tq/perf-budget-fixture.md"
         write(budget, f"path: {CUSTOM_PATH}\np95_ms: 120\n")
@@ -499,6 +601,44 @@ class Adr(Fixture):
             self.git("show", "HEAD:.claude/decisions/0001-choose-a-fixture.md"),
             content.strip(),
         )
+
+    def test_adr_commit_preserves_unrelated_index_and_worktree(self) -> None:
+        self.prepare_store()
+        operator_paths = ("operator.txt", "pending.txt", "removed.txt")
+        write(self.target / "operator.txt", "Operator baseline.\n")
+        write(self.target / "removed.txt", "Tracked baseline.\n")
+        self.git("add", "operator.txt", "removed.txt")
+        self.git("commit", "-q", "-m", "operator baseline")
+        write(self.target / "operator.txt", "Staged operator work.\n")
+        write(self.target / "pending.txt", "Staged new file.\n")
+        self.git("add", "operator.txt", "pending.txt")
+        self.git("rm", "-q", "removed.txt")
+        write(self.target / "operator.txt", "Unstaged operator work.\n")
+        write(self.target / "pending.txt", "Unstaged new-file version.\n")
+        write(self.target / "removed.txt", "Untracked replacement.\n")
+        index = self.git("ls-files", "--stage", "--", *operator_paths)
+        staged = self.git("diff", "--cached", "--binary", "--", *operator_paths)
+        unstaged = self.git("diff", "--binary", "--", *operator_paths)
+        worktree = {path: (self.target / path).read_bytes() for path in operator_paths}
+
+        result = self.bash(self.source / "bin/li-adr-new", "Owned decision")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(
+            {path: (self.target / path).read_bytes() for path in operator_paths}, worktree
+        )
+        with self.subTest(state="committed paths"):
+            self.assertEqual(
+                self.git("diff-tree", "--no-commit-id", "--name-only", "-r", "HEAD"),
+                ".claude/decisions/0001-owned-decision.md",
+            )
+        with self.subTest(state="index entries"):
+            self.assertEqual(self.git("ls-files", "--stage", "--", *operator_paths), index)
+        with self.subTest(state="staged diff"):
+            self.assertEqual(
+                self.git("diff", "--cached", "--binary", "--", *operator_paths), staged
+            )
+        with self.subTest(state="unstaged diff"):
+            self.assertEqual(self.git("diff", "--binary", "--", *operator_paths), unstaged)
 
     def test_existing_store_numbers_are_decimal_unique_and_status_is_parsed(self) -> None:
         directory = self.prepare_store()

@@ -18,6 +18,30 @@ Surfaces when an edit touches a perf-budget-bound path. Warning, not block — t
 - For matched files: WARN
 - Journey and p95 metadata are optional: a pack-only match still warns without a budget file or matching metadata. A failed metadata read or malformed present value is reported with non-blocking exit 1, not represented as a successful empty read.
 
+## Budget metadata
+
+Metadata lookup matches the edited path as literal text, never as a regular expression.
+For the first matching entry, `journey` is read from the preceding line and `p95_ms`
+from the following five lines, stopping before another `journey` or `path` entry.
+Missing fields do not borrow values from a neighboring entry.
+
+This warning reads a bounded scalar format, not general YAML: an unquoted `journey`
+contains only lowercase letters and underscores (`[a-z_]+`); `p95_ms` contains only
+decimal digits (`[0-9]+`), representing nonnegative whole milliseconds. Values are
+preserved verbatim, including zero and leading zeros. Fractional values, numeric
+suffixes and journey suffixes outside these patterns are explicit errors, not
+truncated values.
+
+Fields may be indented or prefixed with a YAML list marker (`- `). Spaces/tabs around
+the scalar and an inline `#` comment separated from it by whitespace are supported.
+Comment-only lines and differently named keys are not metadata fields.
+
+```yaml
+journey: checkout
+path: custom/[id].txt
+p95_ms: 120 # whole milliseconds
+```
+
 ## Why warn-only
 
 - Edit-time can't predict runtime perf

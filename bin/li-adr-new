@@ -37,7 +37,7 @@ What it does:
   3. Reads .claude/decisions/TEMPLATE.md, substitutes title + date + status literally
      (stock ADR placeholders or {{NNNN}}, {{TITLE}}, {{STATUS}}, {{DATE}})
   4. Writes .claude/decisions/<NNNN>-<slug>.md
-  5. git checkout -b adr-<NNNN>-<slug>, stage + commit
+  5. git checkout -b adr-<NNNN>-<slug>, stage + commit only the new ADR
 EOF
       exit 0 ;;
     -*) echo "Unknown arg: $1" >&2; exit 2 ;;
@@ -100,13 +100,13 @@ echo "✓ Created: $FILE"
 if git rev-parse --git-dir > /dev/null 2>&1; then
   branch="adr-${nnnn}-${slug}"
   git checkout -q -b "$branch" 2>/dev/null || git checkout -q "$branch"
-  git add "$FILE"
-  git commit -q -m "adr: $nnnn $TITLE"
+  git add -- "$FILE"
+  git commit -q --only -m "adr: $nnnn $TITLE" -- "$FILE"
   echo "✓ Committed on branch: $branch"
   echo ""
   echo "Next:"
   echo "  1. Edit $FILE — fill in Context, Decision, Consequences, Alternatives"
-  echo "  2. Re-commit as needed: git commit -am 'adr: $nnnn — details'"
+  echo "  2. Re-commit as needed: git commit --only -m 'adr: $nnnn — details' -- \"$FILE\""
   echo "  3. Push + PR: git push -u origin $branch"
 else
   echo "(not in a git repo — skipped commit)"

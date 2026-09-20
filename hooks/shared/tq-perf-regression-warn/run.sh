@@ -43,7 +43,7 @@ tq_state_dir=".claude/runtime/state/tq"
 [ -d "$tq_state_dir" ] || tq_state_dir=".lintel/state/tq" # legacy-fallback-ok
 budget_spec=$(find "$tq_state_dir" -name "perf-budget-*.md" -mtime -30 2>/dev/null | sort | tail -1) || true
 if [ "$matches_perf" -eq 0 ] && [ -n "$budget_spec" ] && [ -f "$budget_spec" ]; then
-  if grep -qF "$file_edited" "$budget_spec" 2>/dev/null; then
+  if grep -qF -- "$file_edited" "$budget_spec" 2>/dev/null; then
     matches_perf=1
   fi
 fi
@@ -53,20 +53,28 @@ fi
 # Missing advisory metadata is not a failed read or malformed present value.
 read_budget_field() {
   local context rc=0
-  context="$(grep "$1" -- "$file_edited" "$budget_spec")" || rc=$?
+  context="$(grep "$1" -F -m1 -- "$file_edited" "$budget_spec")" || rc=$?
   if [ "$rc" -gt 1 ]; then
     echo "WARN [Lintel hook tq-perf-regression-warn]: cannot read budget metadata: $budget_spec" >&2
     return 1
   fi
   printf '%s\n' "$context" | awk -v key="$2" -v value_pattern="$3" '
-    !found && match($0, key ":[[:space:]]*" value_pattern) {
-      value=substr($0, RSTART, RLENGTH)
-      sub("^" key ":[[:space:]]*", "", value)
-      print value; found=1; next
+    BEGIN {
+      prefix="^[[:space:]]*(-[[:space:]]+)?"
+      field=prefix key ":[[:space:]]*"
     }
-    !found && $0 ~ key ":" {
-      print "WARN [Lintel hook tq-perf-regression-warn]: invalid " key " budget metadata" > "/dev/stderr"
-      exit 1
+    key == "p95_ms" && NR > 1 && $0 ~ (prefix "(journey|path):") { exit }
+    $0 ~ field {
+      value=$0
+      sub(field, "", value)
+      sub("[[:space:]]+#.*$", "", value)
+      sub("[[:space:]]+$", "", value)
+      if (value !~ ("^" value_pattern "$")) {
+        print "WARN [Lintel hook tq-perf-regression-warn]: invalid " key " budget metadata" > "/dev/stderr"
+        exit 1
+      }
+      print value
+      exit
     }
   '
 }
