@@ -34,13 +34,13 @@ from the reviewed historical merge `40c2795`. Current implementation ownership:
 | P02 sync binding | `2e21aa98-3b40-46e7-885d-2ec4161ec35d` | ACCEPTED and integrated `39561c0`; idle, no real private sync activated |
 | P03 context safety | `9f06eebf-a3ee-4867-95ad-eb6e1d22a6d5` | ACCEPTED and integrated `9a1cf17`; idle, downstream consumer/host gates separate |
 | P04 Swarming | `a8960a09-fcd7-4652-a9b6-74ad6a94a029` | Component ACCEPTED/integrated `490a0f4` + report history `8964267`; idle until explicit A22.7 |
-| P05 review evidence | `2329e71f-cd9e-473b-94cf-41c579c29a88` | Frozen Q01 product `b023e8c`, report `ec90b609`; same-reviewer complete spec then first whole bounded quality |
+| P05 review evidence | `2329e71f-cd9e-473b-94cf-41c579c29a88` | ACCEPTED by `33eac071`, integrated `c5c8f86`; current profile/review and focused gates pass, idle |
 | P06 host adapters | `324863ff-e7cf-4abf-b449-04dd0f096170` | Component ACCEPTED/integrated `36593cd`; provider `7425960`, final review `1067da29`; idle |
 | P07 profile context | `b9352dfe-1c1e-4ea3-b7d9-0fd008d39b3d` | Long-path repair ACCEPTED by `a7450597`, integrated `c344133` with reports; joined checks pass, idle |
 | P10 installer lifecycle | `5ea6c88c-68c1-4712-8f55-adecdfe0061f` | Implementing approved native/runtime split from `0df1042`; dependencies `98ad7ed` / `ca28074`, no Python install prerequisite |
 
 All are `lintel-builder` sessions with explicit ownership, local commits, report paths
-and no remote authorization. P01/P02/P03 plus the owned P04/P06/P07 components are accepted.
+and no remote authorization. P01/P02/P03 plus the owned P04-P07 components are accepted.
 P04 A22.7 and the final cross-component/client requirements remain open.
 Do not merge another product batch merely because its original tests are green.
 
@@ -53,7 +53,7 @@ repair their own findings. All prior reports remain preserved in `reviews/` and 
 | P02 | Final `1b6153f`; SPEC/QUALITY PASS at `9bdaeb4`; idle | `da23fa6f-499b-4011-b39b-a632312a8800` |
 | P03 | Final `2840012`; SPEC/QUALITY PASS at `500adb3`; idle | `efd3f877-550a-4ef0-9009-ed71b95b01ab` |
 | P04 | Final `279dfc9`; component SPEC/QUALITY PASS at `aa73651`; A22.7 open | `ed672f58-2e85-42e2-b1b2-0635ba5b2325` |
-| P05 | Current `b023e8c` / report `ec90b609` under review; rejection `0cdbf596` retained | `6ed9c7df-4845-4d70-88c7-f0746ab28059` |
+| P05 | Final `33eac071` accepts `b023e8c`; integrated `c5c8f86`; earlier rejections retained | `6ed9c7df-4845-4d70-88c7-f0746ab28059` |
 | P06 | Final `1067da29`; complete component SPEC/QUALITY PASS at `7425960`; integrated | `d2a89ac3-151a-4dc0-ab09-1f3a62465cab` |
 | P07 | Final `a7450597` accepts `4d001463`; integrated through `56de830`, earlier `a8de574`/`3d8e715` preserved | `a7d78944-c02c-4909-a060-2c4f2a754b00` |
 
@@ -169,39 +169,32 @@ remain separate; no release or live-host acceptance follows.
   identity, original-member prerequisite readiness and all historical preservation are
   accepted; unsupported submodules and final independently corroborated shared binding
   remain explicit limits. Do not redo the accepted component.
-- P05's first four findings led to `54147fd` / `e5b92a4`, but re-review reproduced new
-  false clearance: submitted QA can omit/relabel/change the kind of bound test obligations,
-  and indented literal Markdown checkbox examples are treated as progress. Fix the shared
-  expectation/identity invariants, preserving true docs-only acceptance and task progress.
-  Approved decision `c6736e5`: affected bound review/context/QA format is v2 with required
-  immutable qa_requirements. Profile refs/corroboration remain v1, CLI flags stay stable.
-  Preserve ordered non-clearing history, not silent v1 reinterpretation or permanent
-  log poisoning. The actual v2 source is now `3adae4b`, canonical example in
-  skills/review/references/evidence.md. Its QA/migration invariants close individually,
-  but compound-list fences/raw PRE literals still permit acceptance normalization.
-  P05 now consumes the approved shared stateless Markdown-boundary checkpoint, not more
-  local block parsing. Its exact helper dependency must remain separately attributable.
+- P05's S01-S04/R01/R02/Q01 findings now close in `P05-excerpt-context-final.md`.
+  Bound review/context/QA remain v2 with immutable qa_requirements; profile/work-map/
+  corroboration domains are unchanged. The single provider and domain-separated
+  excerpt-permission preimage preserve literal identity, real progress, docs-only
+  validation and ordered historical recovery. Do not rebuild its accepted parser
+  consumer or silently upgrade older insufficient receipts.
 - P06's C01-C07 now close in the independent `P06-provider-repair-final.md` at `7425960`.
   Older C04/C05 and `09148b7` C06/C07 reports remain rejected history. P06 retains sole
   ownership of the stateless provider; P05 owns only its one-character progress consumer.
   No external parser dependency, shared task schema, scheduler or silent eligibility
   was added. Do not re-open the accepted component or infer P05 acceptance from it.
 
-P05's owned consumer now passes 35 boundary plus 46 prior evidence methods using exact
-742 helper bytes, with all existing control/hook/source-target gates retained. This
-closes the implementer's measured C06 failure but does not replace consumer independent
-review. The provider gate is now independently accepted. Do not import an earlier 091 helper or conflate dependency commits
-with P05 authorship. See interfaces.md for exact Git blob and checksum.
+P05's former 81-method candidate used exact 742 helper bytes but missed Q01.
+Its current accepted candidate retains those methods and adds ten new cases. Do not
+import the rejected 091 helper or conflate dependency commits with P05 authorship.
+See interfaces.md for the exact Git blob, checksum and accepted excerpt identity.
 - P07's four owned findings close in P07-windows-final.md. Preserve its native versus
   injected/UNC/other-OS evidence boundary and original approved policy target; no automatic
   cross-target transfer or enterprise enforcement claim follows.
 
-Current P05 rejection: report `0cdbf596` / integrated `29ae5d9` closes earlier individual
+Historical P05 rejection: report `0cdbf596` / integrated `29ae5d9` closes earlier individual
 cases but finds Q01. Wrapping a selected excerpt in an outer fence/raw PRE can retain
 its normalized bytes and old clearance because interpretation facts are not part of
-identity. The provider is correct and stays frozen. The same P05 owner must bind relevant
-selection-relative context, preserving genuine progress and unrelated outside edits.
-Spec is FAIL; first full quality started/stopped, not passed.
+identity. The provider is correct and stays frozen. The P05 owner subsequently bound relevant selection-relative context, preserving
+genuine progress and unrelated outside edits. The rejection's SPEC FAIL and started/
+stopped quality remain historical, not retroactively approved.
 
 New Q01 candidate: product `b023e8c25a922ffc536ffde6dd911865bf2eea21`, report-only
 child `ec90b609423418ee4136f9fe425dfada11a08fae`. The coordinator checked its parents,
@@ -209,14 +202,32 @@ three owned product paths and unchanged provider blob, read the repair evidence,
 dispatched the same reviewer `6ed9c7df`. Builder-only final evidence is one combined
 91-method run (81 retained plus 10 new), 12 controls, source-target/hook and focused
 shape checks, zero skips. The mapped-excerpt hash now binds relative normalization
-permission plus text, with explicit old-receipt invalidation. Neither the new source
-nor report is integrated; Q01 and complete owned spec/quality remain independently open.
+permission plus text, with explicit old-receipt invalidation.
+
+Independent `33eac071a26f5eb931c8ca7ed220fee91ea4469b` now passes complete owned
+spec and the first whole bounded quality review across 28 surfaces. It independently
+ran 91 evidence methods, 12 controls, two hooks and additional real-gate/oracle cases.
+Its separate source-target/shapes wrapper cleanup ERROR is retained, not claimed as a
+green aggregate. The coordinator later inspected and removed only the exact two empty
+ordinary fixture directories, nonrecursively; the immutable report was not amended.
+
+Accepted P05 history/report are merged in `c5c8f8638f4ae7a93331c4b615f3b9f275ab18ca`.
+All 29 product/provider paths equal reviewed `b023e8c`. Joined checks: ten Q01 methods
+149.835s, four actual current-P07 bridge methods 32.592s, 12 controls 35.430s, two hook
+methods 14.002s and source-target's three assertions pass. Four shapes and regenerated
+catalog/wiki/local-adapter checks also pass with no generated drift. A source diff
+command inherited fixture-only Git isolation and returned CRLF diagnostics; normal
+checkout checks and read-only ignore-CR comparison are clean, without source edits.
+The failed aggregate is not relabeled. Final ordinary workflow, mandatory installed
+resource closure and P04/P08/P10/P14/CI acceptance remain separate.
 
 P05's unchanged real four-case producer/reader/SHIP bridge passed with P07 `d02bb24`
 and again with `56981ed` (P05 `54147fd`),
 including saved-reference shell paths, but did not exercise the defective ordinary
 bootstrap path. Keep those scopes distinct and re-run the appropriate chain on the final
-P07 candidate. Candidate archives/compositions are tests, not acceptance of their source.
+P07 candidate. The four-case bridge has now passed on the actual joined current P05/P07
+source as recorded above. Its saved-reference path and the separately verified ordinary
+installed bootstrap remain distinct evidence, not a full live-client workflow claim.
 
 ## Continuation gate
 
@@ -248,14 +259,13 @@ No new authorization for main merge, releases, production, hook activation or pr
 
 ## Next action
 
-P05 Q01 is frozen under its original independent reviewer; P10 continues implementation
-under `0ecdb520` and may consume the accepted P07 repair. P07 preserved its old branch
-and continued from that exact integrated base; its unchanged installed-consumer RED
-was reproduced and repaired with independent and joined evidence. P05's chosen repair binds
-selection-relative normalization eligibility and delimiter participation, not whole
-unselected task text. Await the review results and P10's immutable candidate instead of
-polling or duplicating their code investigation. Obtain same-reviewer independent spec/quality for P05
-and a separate independent P10 reviewer, then integrate exact accepted deltas. The
+P05/P06/P07 are accepted and integrated, so dispatch P08 from this committed core.
+Its work-map reader ownership is released by P04; preserve the existing task/package
+APIs. A08/A10 lifecycle work is ready. A13 installer observations await P10's actual
+producer/receipt seam and fixtures, not an invented event or an imported WIP dependency.
+P10 continues native/runtime installer work and may consume accepted P05/P07.
+Await its immutable candidate rather than polling or duplicating investigation;
+assign a separate independent P10 reviewer then integrate exact accepted deltas. The
 coordinator retains generated outputs and final fan-in. No navigation/provider or P05
 policy/schema workaround is authorized; all final joined/delivery gates remain open.
 Use host-native delegation while Swarming component/final gates remain open.

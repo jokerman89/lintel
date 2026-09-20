@@ -33,14 +33,15 @@ snapshot `9c8ef727` were rejected by independent `0cdbf596` for Q01 excerpt-cont
 identity. All 81 actual evidence methods passed on that paired source; those fixtures
 did not cover the new transition. P05 now owns the approved selection-relative context
 binding repair in the shared-boundary card. No provider/API change is authorized.
-The new frozen consumer is `b023e8c` with report-only snapshot `ec90b609`, currently
-under independent review. Its mapped-task excerpt digest uses domain-separated
+The accepted consumer is `b023e8c` with report-only snapshot `ec90b609`, independently
+approved by `33eac071` and integrated as `c5c8f86`. Its mapped-task excerpt digest uses domain-separated
 canonical JSON of normalized text, sorted eligible codepoint spans relative to the
 selection, and exclusive end-marker eligibility (pair or null). Old byte-only
 mapped-excerpt receipts remain history, not clearance; fresh preparation/review/QA
 is required. Other hash domains and public field/version shapes are unchanged.
-Read the exact candidate evidence reference before implementing dependent consumers;
-this describes the frozen candidate, not an acceptance or authorization to import it.
+Read the exact accepted evidence reference before implementing dependent consumers.
+Downstream readers must use the shared implementation, not accept both hash domains
+or invent an automatic receipt upgrade. Final integrated/client acceptance remains separate.
 
 ## P05 review and controls
 
@@ -58,7 +59,7 @@ QA observations cannot omit, retype, downgrade or reclassify an obligation. Genu
 docs-only scopes declare their actual documentation checks and grounded test N/A, not
 a fictitious universal test requirement.
 
-Candidate producer seam: prepare's input retains its old fields plus `qa_requirements`
+Accepted producer seam: prepare's input retains its old fields plus `qa_requirements`
 (no input version flag). It emits context version 2; the decision and QA receipt also
 use version 2. A mandatory QA ID such as `tests` must appear in `required_controls`,
 the review's typed controls, and each selected leaf's coverage. The typed obligation
@@ -70,7 +71,7 @@ and the standalone control-outcome envelope retain version 1.
 clearance. `select_latest` keeps its existing keyword arguments and accepts decoded
 mappings or ordered `ContractError` candidates; an invalid latest applicable candidate
 cannot be discarded into an older PASS. The frozen source-owned example is
-`skills/review/references/evidence.md` at P05's `9c8ef727` checkpoint.
+`skills/review/references/evidence.md` at P05's accepted `b023e8c` / `ec90b609` checkpoint.
 
 `lib/review_contract.py` (stdlib): `ContractError`, `load_json(text)`,
 `validate_control(control)`, `evaluate_controls(controls, required_policy=...)`,
@@ -94,9 +95,9 @@ no-applicable-controls, not verified enterprise compliance. P05 owns this schema
 P07 must not declare a second interpretation. Every selected leaf covers every declared
 required control, including both spec and quality where those are mandatory.
 
-The existing Python 3.9+ product floor remains. P05's temporary 3.10 prerequisite was
-rejected as an unnecessary support regression; the worker is correcting annotations,
-preflight and documentation rather than silently changing compatibility.
+The Python 3.9+ product floor remains. P05's temporary 3.10 prerequisite was rejected
+and corrected in annotations, preflight and documentation. Actual 3.9 execution remains
+separate from grammar checks; no minimum-runtime pass is inferred.
 
 Concrete P05 candidate CLI: `prepare --repo --request` emits immutable context;
 `validate --record` is structural only; `li-review-log --file` records the decision;
@@ -126,7 +127,7 @@ fresh shells or clearly fail required lifecycle use. Drift and required-load err
 not silently downgrade policy. P05/P08/P04 carry digest/context/generation, not name alone.
 
 Consumers never parse PACK_CACHE_FILE directly. P04 replaces its raw YAML/awk snippet.
-P07's implemented Python names (candidate verification still in progress) are
+P07's accepted Python names (final workflow gates remain separate) are
 `ProfileConfig`, `resolve_profile`, `load_profile_context`, `profile_reference`,
 `validate_profile_reference`, `verify_profile_reference`, `bootstrap_profile_context`,
 `rebind_profile_context` and `required_policy`. `profile_required_policy` emits an error
@@ -151,7 +152,7 @@ permission stays blocked. Lack of safe attributable write isolation selects seri
 lack of delegation selects durable external/manual handoff. Independent review remains
 outstanding until separately corroborated. Data selection never grants tool permission.
 
-P06's current candidate Python interface is `load_registry`, `surface_id`, `describe`
+P06's accepted Python interface is `load_registry`, `surface_id`, `describe`
 and `resolve`. CLI: `bin/li-client-capabilities.py` validate/list/show/resolve/field/
 normalize/table. Session binding schema separates tool availability, permission and
 attributable isolation; `work_map` and `profile_ref` pass through unchanged. Resolution
@@ -186,3 +187,12 @@ P03 compatibility dependency `ca28074` postpones annotation evaluation without c
 function behavior or snapshot formats. Its 23 context plus 24 snapshot tests pass on
 Python 3.11.9, with a 3.9 grammar/annotation check; an actual 3.9 runtime is unavailable.
 Do not convert that syntax evidence into a minimum-runtime execution claim.
+
+P10's reported observation seams are still unaccepted implementation data, not an
+agreed replacement audit schema. Its helper currently reports operation profile
+reference, required caller policy, unbound target profile/selection and transaction
+identity/state/snapshot/change/store information. Native receipts use versioned
+meta.tsv/plan.tsv, per-file phases and aggregate incomplete/complete/recovered state;
+the native installer does not call Python or an audit writer. P08 must coordinate
+the exact frozen shapes and real producer fixtures before its A13 integration, retain
+the native no-Python boundary, and distinguish observations from independent verification.

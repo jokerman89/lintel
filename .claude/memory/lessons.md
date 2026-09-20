@@ -730,3 +730,17 @@ installation. Keep bare Bash/PowerShell installation usable without Python, docu
 later operation-specific prerequisites, and test the no-Python path. Share the ownership
 contract and behavioral cases across necessary native implementations rather than
 silently raising the installation floor or automatically installing an interpreter.
+
+## L-036 - Scope fixture Git isolation to fixture checks
+
+**Date:** 2026-09-20
+
+**Context:** Joined P05 tests passed with global/system Git configuration disabled
+for synthetic repositories. A later source diff check inherited that environment
+and treated the real Windows checkout's CRLF files as changed, returning a failed
+aggregate despite the passing test commands.
+
+**Rule:** Separate fixture isolation from source-checkout verification. Use the real
+checkout configuration or immutable Git-byte/EOL comparisons for source checks.
+Record each command and aggregate exit accurately; never normalize source files or
+weaken assertions merely to turn an environment-induced diagnostic green.
