@@ -33,10 +33,10 @@ from the reviewed historical merge `40c2795`. Current implementation ownership:
 | P01 trusted helpers | `b3853be7-dbbe-4161-9566-7e7d2c50e05e` | ACCEPTED and integrated `a2ef318`; idle, combined P07 gate remains |
 | P02 sync binding | `2e21aa98-3b40-46e7-885d-2ec4161ec35d` | ACCEPTED and integrated `39561c0`; idle, no real private sync activated |
 | P03 context safety | `9f06eebf-a3ee-4867-95ad-eb6e1d22a6d5` | ACCEPTED and integrated `9a1cf17`; idle, downstream consumer/host gates separate |
-| P04 Swarming | `a8960a09-fcd7-4652-a9b6-74ad6a94a029` | Repairing quality findings: file type/mode identity and unmapped package prerequisites; A22.7 remains open |
+| P04 Swarming | `a8960a09-fcd7-4652-a9b6-74ad6a94a029` | Frozen `aa73651` / report-only `39ebc26`; same-reviewer quality repair check; A22.7 remains open |
 | P05 review evidence | `2329e71f-cd9e-473b-94cf-41c579c29a88` | Implementing approved v2 immutable QA inventory and literal-Markdown identity after second spec rejection |
-| P06 host adapters | `324863ff-e7cf-4abf-b449-04dd0f096170` | Repairing HTML and escaped/wrapped Markdown navigation after second spec rejection at `be69648` |
-| P07 profile context | `b9352dfe-1c1e-4ea3-b7d9-0fd008d39b3d` | Approved Windows path-containment re-plan `c6736e5`; bounded fix and final matrix underway |
+| P06 host adapters | `324863ff-e7cf-4abf-b449-04dd0f096170` | Frozen `560e64a`; third spec then first bounded quality review |
+| P07 profile context | `b9352dfe-1c1e-4ea3-b7d9-0fd008d39b3d` | Frozen Windows repair `a8de574`; approved `c6736e5` checkpoint under same-reviewer spec/first quality |
 
 All are `lintel-builder` sessions with explicit ownership, local commits, report paths
 and no remote authorization. Only P01/P02/P03 and the historical P04 checkpoint are accepted.
@@ -50,10 +50,10 @@ repair their own findings. All prior reports remain preserved in `reviews/` and 
 | P01 | Final `f078165`; SPEC/QUALITY PASS at `041417a`; idle | `d699f463-ee4d-4950-9b9d-98f35e96f689` |
 | P02 | Final `1b6153f`; SPEC/QUALITY PASS at `9bdaeb4`; idle | `da23fa6f-499b-4011-b39b-a632312a8800` |
 | P03 | Final `2840012`; SPEC/QUALITY PASS at `500adb3`; idle | `efd3f877-550a-4ef0-9009-ed71b95b01ab` |
-| P04 | Rejected `dca635d`; quality report `3b2ab12`; await immutable repair | `ed672f58-2e85-42e2-b1b2-0635ba5b2325` |
+| P04 | Current `aa736513ffebf469cd2df355bbce5e139b03e206`; old quality report `3b2ab12` | `ed672f58-2e85-42e2-b1b2-0635ba5b2325` |
 | P05 | Rejected `e5b92a4` / `54147fd`; recheck `d83ed02`; await v2 repair | `6ed9c7df-4845-4d70-88c7-f0746ab28059` |
-| P06 | Rejected `be69648`; recheck `3e8abb9`; await parser repair | `d2a89ac3-151a-4dc0-ab09-1f3a62465cab` |
-| P07 | Rejected `56981ed`; native F04 report `e4285fd`; await narrow repair checkpoint | `a7d78944-c02c-4909-a060-2c4f2a754b00` |
+| P06 | Current `560e64ac70468b7c482085fcce08824145715103`; old recheck `3e8abb9` | `d2a89ac3-151a-4dc0-ab09-1f3a62465cab` |
+| P07 | Current `a8de5743987cc6ff6a78719d7822a15b8191ebbc`; narrow card `c6736e5`, old F04 report `e4285fd` | `a7d78944-c02c-4909-a060-2c4f2a754b00` |
 
 ## Accepted local integrations
 
