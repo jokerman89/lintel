@@ -394,7 +394,8 @@ class PrivateSyncTests(unittest.TestCase):
         if self.kind == "roles":
             record.write_bytes(b"# Bob revision three.\n")
         else:
-            bob.git(bob.project, "remote", "add", "origin", str(f.project))
+            source_remote = f.remote("bob-source-project")
+            bob.git(bob.project, "remote", "add", "origin", str(source_remote))
             bob.content(b"# Bob's distinct project lessons.\n")
         bob.cli("push")
         f.cli("pull")
