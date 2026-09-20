@@ -188,6 +188,86 @@ class MarkdownSourceContract(unittest.TestCase):
         self.assertFalse(any("continuation" in content for _, content, _ in actual))
         self.assertEqual(result.lines[-1].residual_indent, 4)
 
+    def test_ordered_marker_cannot_claim_a_noninterrupting_paragraph_continuation(self):
+        text = "Paragraph\n2. [ ] A05.2 ordinary continuation\n"
+        self.assertEqual(classify_markdown(text).list_items, ())
+        for control, marker in (
+                ("Paragraph\n\n2. [ ] A05.2 real item\n", Span(11, 13)),
+                ("Paragraph\n1. [ ] A05.2 real item\n", Span(10, 12))):
+            with self.subTest(control=control):
+                items = classify_markdown(control).list_items
+                self.assertEqual(len(items), 1)
+                self.assertEqual(items[0].marker, marker)
+                self.assertEqual(items[0].classification, "prose")
+        siblings = classify_markdown("1. First item\n2. [ ] genuine second item\n")
+        self.assertEqual(len(siblings.list_items), 2)
+        self.assertEqual([item.classification for item in siblings.list_items], ["prose", "prose"])
+
+    def test_multiline_inline_code_precedes_html_body_discovery(self):
+        text = '`<script src="review-fixture/code-only.js">\n</script>`\n\n[Real](review-fixture/guide.md)\n'
+        end = text.index("`\n\n") + 1
+        result = classify_markdown(text)
+        self.assertIn(Region(Span(0, end), "inline_code", None), result.regions)
+        self.assertFalse(any(region.kind in ("html_tag", "raw_html_body") and region.span.start < end
+                             for region in result.regions))
+        one_line = text.replace(">\n</script>", "></script>")
+        self.assertIn("inline_code", [region.kind for region in classify_markdown(one_line).regions])
+        self.assertEqual(result.original, text)
+
+    def test_paragraph_interruption_grid_preserves_real_siblings_and_blank_line_starts(self):
+        contexts = (
+            ("Paragraph", "", ""),
+            ("> Paragraph", "> ", ">"),
+            ("- Paragraph", "  ", ""),
+        )
+        for paragraph, prefix, blank in contexts:
+            for number in ("0", "1", "2", "01", "10", "999999999"):
+                for delimiter in (".", ")"):
+                    for eol in ("\n", "\r\n"):
+                        content = "[ ] selected continuation"
+                        direct = f"{paragraph}{eol}{prefix}{number}{delimiter} {content}"
+                        separated = f"{paragraph}{eol}{blank}{eol}{prefix}{number}{delimiter} {content}"
+                        with self.subTest(paragraph=paragraph, number=number, delimiter=delimiter, eol=repr(eol)):
+                            direct_items = [item for item in classify_markdown(direct).list_items
+                                            if direct[item.content.start:item.content.end] == content]
+                            blank_items = [item for item in classify_markdown(separated).list_items
+                                           if separated[item.content.start:item.content.end] == content]
+                            self.assertEqual(bool(direct_items), int(number) == 1)
+                            self.assertEqual(len(blank_items), 1)
+        for text in ("1. First\n2. [ ] sibling", "3) First\n4) [ ] sibling",
+                     "- Outer\n  1. First\n  2. [ ] sibling", "> 1. First\n> 2. [ ] sibling"):
+            with self.subTest(siblings=text):
+                self.assertTrue(any(text[item.content.start:item.content.end] == "[ ] sibling"
+                                    for item in classify_markdown(text).list_items))
+        for text in ("Paragraph\n-\ntext", "Paragraph\n2.\ntext", "\u0661. [ ] not ASCII digits",
+                     "1000000000. [ ] not a valid marker"):
+            with self.subTest(non_marker=text):
+                self.assertEqual(classify_markdown(text).list_items, ())
+
+    def test_multiline_code_uses_paragraph_boundaries_before_literal_html_rules(self):
+        for prefix in ("", "> ", "> > ", "  "):
+            for ticks in ("`", "``"):
+                for eol in ("\n", "\r\n"):
+                    opening = "- Item\n" if prefix == "  " else ""
+                    text = (opening + f'{prefix}{ticks}<script src="code-only.js">{eol}'
+                            f'{prefix}</script>{ticks}{eol}{prefix}{eol}'
+                            f'{prefix}[Real](guide.md)')
+                    with self.subTest(prefix=prefix, ticks=ticks, eol=repr(eol)):
+                        facts = classify_markdown(text)
+                        start = text.index(ticks + "<script")
+                        end = text.index("</script>" + ticks) + len("</script>" + ticks)
+                        self.assertIn(Region(Span(start, end), "inline_code", None), facts.regions)
+                        self.assertFalse(any(region.kind == "html_tag" and start <= region.span.start < end
+                                             for region in facts.regions))
+        for interrupt in ("1. [ ] actual", "> Quote", "# Heading", "```markdown\nliteral\n```"):
+            text = f"`unclosed paragraph\n{interrupt}\nclosing`"
+            with self.subTest(interrupt=interrupt):
+                self.assertFalse(any(region.kind == "inline_code" and region.span.start == 0
+                                     for region in classify_markdown(text).regions))
+        text = '`unclosed paragraph\n\n<script src="actual.js"></script>`'
+        self.assertTrue(any(region.kind == "html_tag" and region.tag == "script"
+                            for region in classify_markdown(text).regions))
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

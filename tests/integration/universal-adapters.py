@@ -476,6 +476,87 @@ class UniversalAdapters(unittest.TestCase):
         self.assertFalse(marker.exists())
         self.assertEqual(list(self.home.iterdir()), [])
 
+    def test_installed_provider_rejects_false_ordered_item_eligibility(self):
+        self.run_cli(client="other")
+        bundle = self.target / ".github/lintel"
+        script = (
+            "import json,sys; from pathlib import Path; sys.path.insert(0,str(Path(sys.argv[1])/'lib')); "
+            "from markdown_source import classify_markdown; "
+            "cases=['Paragraph\\n2. [ ] A05.2 ordinary continuation\\n',"
+            "'Paragraph\\n\\n2. [ ] A05.2 real item\\n',"
+            "'Paragraph\\n1. [ ] A05.2 real item\\n']; "
+            "print(json.dumps([[{'marker':list(i.marker),'content':list(i.content),"
+            "'classification':i.classification} for i in classify_markdown(t).list_items] for t in cases]))"
+        )
+        result = subprocess.run([sys.executable, "-B", "-S", "-c", script, str(bundle)],
+                                capture_output=True, text=True, encoding="utf-8",
+                                env=dict(os.environ, HOME=str(self.home), USERPROFILE=str(self.home),
+                                         PYTHONDONTWRITEBYTECODE="1"))
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(json.loads(result.stdout), [
+            [], [{"marker": [11, 13], "content": [14, 33], "classification": "prose"}],
+            [{"marker": [10, 12], "content": [13, 32], "classification": "prose"}],
+        ])
+        self.assertEqual(list(self.home.iterdir()), [])
+
+    def test_multiline_inline_script_example_is_not_a_consumer_dependency(self):
+        self.run_cli(client="other")
+        source = self.target / ".github/lintel"
+        faq = source / "docs/faq.md"
+        original = faq.read_bytes()
+        fixture = (
+            b'`<script src="review-fixture/code-only.js">\n</script>`\n\n'
+            b'[Real](review-fixture/guide.md)\n'
+        )
+        directory = source / "docs/review-fixture"
+        directory.mkdir()
+        guide, example = directory / "guide.md", directory / "code-only.js"
+        guide.write_bytes(b"# Real local guide")
+        example_bytes = b"SYNTHETIC-CODE-ONLY-SHOULD-NOT-BUNDLE\n"
+        for name, present, content in (
+                ("multiline-present", True, fixture), ("multiline-absent", False, fixture),
+                ("same-line", False, fixture.replace(b">\n</script>", b"></script>"))):
+            with self.subTest(case=name):
+                if present:
+                    example.write_bytes(example_bytes)
+                elif example.exists():
+                    example.unlink()
+                faq.write_bytes(original + b"\n" + content)
+                consumer = self.base / ("inline-" + name)
+                consumer.mkdir()
+                self.run_cli(client="other", source=source, target=consumer)
+                self.run_cli("check", source=consumer / ".github/lintel", target=consumer)
+                clone = self.base / ("inline-clone-" + name)
+                self.clone_project(consumer, clone)
+                self.run_cli("check", source=clone / ".github/lintel", target=clone)
+                for target in (consumer, clone):
+                    bundle = target / ".github/lintel"
+                    manifest = json.loads((bundle / "manifest.json").read_text())["files"]
+                    self.assertIn(".github/lintel/docs/review-fixture/guide.md", manifest)
+                    self.assertNotIn(".github/lintel/docs/review-fixture/code-only.js", manifest)
+                    self.assertEqual((bundle / "docs/review-fixture/guide.md").read_bytes(), b"# Real local guide")
+                    self.assertFalse((bundle / "docs/review-fixture/code-only.js").exists())
+                guide.unlink()
+                refused = self.base / ("inline-missing-guide-" + name)
+                refused.mkdir()
+                (refused / "keep.txt").write_bytes(b"unchanged")
+                result = self.run_cli(client="other", source=source, target=refused, success=False)
+                self.assertIn("guide.md", result.stderr)
+                self.assertEqual([(path.name, path.read_bytes()) for path in refused.iterdir()],
+                                 [("keep.txt", b"unchanged")])
+                guide.write_bytes(b"# Real local guide")
+        faq.write_bytes(original + b"\n" + fixture.replace(b"`", b""))
+        actual_html = self.base / "inline-actual-html"
+        actual_html.mkdir()
+        result = self.run_cli(client="other", source=source, target=actual_html, success=False)
+        self.assertIn("code-only.js", result.stderr)
+        self.assertEqual(list(actual_html.iterdir()), [])
+        example.write_bytes(example_bytes)
+        self.run_cli(client="other", source=source, target=actual_html)
+        self.run_cli("check", source=actual_html / ".github/lintel", target=actual_html)
+        self.assertEqual((actual_html / ".github/lintel/docs/review-fixture/code-only.js").read_bytes(),
+                         example_bytes)
+
     def test_unknown_client_and_fictional_controls_refuse_before_writes(self):
         for client, extra in (("fictional", ()), ("codex-cli", ("--enable",)),
                               ("copilot-app", ("--model", "imaginary")), ("other", ("--global",))):

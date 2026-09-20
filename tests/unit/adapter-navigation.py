@@ -347,6 +347,16 @@ const example = '[not a guide](docs/not-script.md)';
         self.assertEqual([value for _, _, value in adapter.document_links(text.encode())],
                          ["docs/actual.md", "docs/actual.js", "docs/guide.md"])
 
+    def test_multiline_inline_script_example_selects_only_the_real_guide(self):
+        text = '`<script src="review-fixture/code-only.js">\n</script>`\n\n[Real](review-fixture/guide.md)\n'
+        for variant in (text, text.replace(">\n</script>", "></script>")):
+            with self.subTest(variant=variant):
+                self.assertEqual([value for _, _, value in adapter.document_links(variant.encode())],
+                                 ["review-fixture/guide.md"])
+        genuine_html = text.replace("`", "")
+        self.assertEqual([value for _, _, value in adapter.document_links(genuine_html.encode())],
+                         ["review-fixture/code-only.js", "review-fixture/guide.md"])
+
     def test_public_links_close_transitively_without_glob_copy(self):
         self.write("README.md", "[First](docs/one.md)\n")
         self.write("docs/one.md", "[Second][two]\n\n[two]: nested/two.md\n")
