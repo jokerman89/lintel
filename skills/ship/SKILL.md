@@ -45,7 +45,9 @@ Verify ship-readiness:
 - `git status` is clean OR operator confirms uncommitted is intentional
 - Current branch is NOT main (unless explicit per-batch direct-push auth)
 - Run `/li:qa-only`, never fixing `/li:qa` after review. Require actual nonzero
-  executed acceptance and explicit skipped/unavailable coverage.
+  applicable validation and explicit skipped/unavailable coverage. An approved
+  docs-only package can use an observed mandatory document check with grounded
+  tests N/A; applicable required tests still need nonzero executed coverage.
 - Consume the [shared content-bound gate](../review/references/evidence.md) with
   the selected context, actual independent corroboration and read-only QA record.
   `li-review-evidence.py ship` invokes the real audit reader, selects the latest
@@ -91,12 +93,15 @@ gitleaks detect --staged
 # (operator-specific, check for prod-deploy commands or live-cloud-mutation)
 ```
 
-If ANY gate violation:
+If any applicable mandatory control fails, errors or remains unverified:
 - HARD STOP
 - Surface to operator: violation + file:line + recommended fix
 - Fix the violation or obtain a policy-authorized scope change and re-plan/review.
   An override note cannot relabel a failed mandatory control as passed or N/A.
 - Log the stop mechanically (one line; ts/operator/cycle_id come from the envelope):
+
+Retain advisory violations in the report without converting them into hard stops.
+A configured control is not automatically mandatory.
 
 ```bash
 source "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/bin/_audit.sh"
@@ -117,7 +122,9 @@ If `artifact_kind=customer-deliverable` (PPT/Word/Web):
   2. Brand-conformance (`resolve_pack_field brand.templates`; default-fallback if null)
   3. Honest-limitations (AI-disclaimer present?)
   4. Provenance (AI-assistance logged?)
-- All configured gates must PASS for customer-shippable
+- All applicable mandatory controls must pass for customer-shippable. Grounded N/A
+  and advisory findings retain their actual policy classification; configured
+  advisory scores do not become blocking acceptance by appearing in this list.
 
 ### Step 5 — Provenance tracking (if the active pack requires it)
 
@@ -270,15 +277,16 @@ state_append SHIP <DONE|DONE_WITH_CONCERNS|BLOCKED> next=CAPTURE ship_path=<pr|d
 
 ## Status protocol
 
-- **DONE** — PR opened / deployed / handoff complete, all gates PASS
+- **DONE** — PR opened / deployed / handoff complete, all applicable mandatory controls verified
 - **DONE_WITH_CONCERNS** — shipped with caveats (e.g., voice gate at 85%, P3 deferred)
-- **BLOCKED** — compliance-gate violation OR critical compliance failure
+- **BLOCKED** — applicable mandatory failure/error/unverified result or required policy unresolved
 - **NEEDS_CONTEXT** — deploy target unclear, or PR template not configured
 
 ## Pause-points (MANDATORY)
 
 1. Before PR open: confirm commit messages + branch state + base branch
-2. On ANY compliance-gate violation: full stop, never silently proceed (per CLAUDE.md)
+2. On an applicable mandatory failure/error/unverified control: stop the affected
+   action. Surface advisory findings without promoting them to hard stops.
 3. Per customer-deliverable: the pack-configured gates (voice + brand + honest-limitations + provenance) each fire
 4. PR creation confirmation: AskUserQuestion "Open PR now?" — last chance to cancel
 5. If direct-main path: AskUserQuestion explicit per-batch authorization required (per CLAUDE.md)
@@ -354,9 +362,11 @@ Skip-conditions: intent=research-only, intent=local-dev-only, intent=draft-only.
 
 ## Failure recovery
 
-- **Compliance-gate violation at pre-ship**: full stop. Operator fixes. Re-run SHIP from Step 3. Log to audit.
+- **Mandatory compliance control unresolved at pre-ship**: stop the affected action,
+  repair and re-run from Step 3. Log to audit. Advisory findings remain visible advice.
 - **gh CLI unavailable**: surface command, operator runs manually. Save state for resume.
-- **Voice gate fails after edits**: surface findings, operator decides accept-with-caveat or further edit + re-gate.
+- **Voice control fails after edits**: mandatory failure blocks and requires repair
+  or an authorized policy re-plan; advisory findings may remain documented concerns.
 - **Brand assets missing AND default templates failed**: surface, operator either pulls brand or accepts text-only output.
 - **Pack deploy validation fails**: BLOCKED. Fix infra config. Re-run.
 - **Customer wants to delay deliverable**: SHIP completes commit/PR but skips customer-handoff. Resume customer-handoff later via the doc-gen path (`/li:generate-ppt` / `-word` / `-web`).

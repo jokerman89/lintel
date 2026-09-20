@@ -75,6 +75,10 @@ unrelated bookkeeping invalidating acceptance, a selected source may instead be
 The start line is included and the end line excluded. Boundaries must be unique and
 ordered. Select every relevant leaf/requirement; a range cannot excuse missing
 acceptance. A file also selected as product input still binds its entire content.
+Only recognized `[ ]`/`[x]`/`[X]` task-progress boxes for the selected leaf IDs in
+the map's `tasks` file are normalized for acceptance identity. Task text, IDs,
+criteria, non-task checkboxes, fenced examples and map approval still bind.
+Updating a progress box never supplies missing review or acceptance evidence.
 
 Only `record_path` (one pure review JSON under `.claude/runtime/reviews/`) and the
 native review audit file self-exclude. Existing record content must validate as
@@ -167,7 +171,10 @@ bash "$src/bin/li-review-read" --skill "${review_skill:?set actual review skill}
 ```
 
 The reader structurally selects the **latest applicable decision in append order**
-before checking status, attempt, acceptance, freshness or snapshot. Later rejection
+before evaluating status, attempt, acceptance, freshness or snapshot. Every active
+decision first passes shared structural/internal-binding validation; malformed or
+uncorrelatable current records cannot vanish by failing a skill/scope filter.
+Only validated unrelated scopes can be ignored. Later rejection
 or malformed/unbound evidence never restores an older PASS. `--json` is raw history
 inspection only. Legacy writers need an explicit commit and exact legacy status;
 legacy records and explicit `GSTACK_HOME` imports cannot clear a strict gate.
@@ -198,8 +205,12 @@ neither this inspection envelope nor an unmapped review can replace it.
 
 ## Read-only QA and SHIP
 
-Run the real repository test command without fixes. Persist its output and actual
-counts. Build `qa_inputs` containing `{"controls":[<mandatory tests control>]}`.
+Run the applicable required validation without fixes. For executable tests, persist
+the real repository command/output and actual counts. Build `qa_inputs` containing
+`{"controls":[<mandatory validation controls>]}`. An approved docs-only scope may
+use an observed document/link/example check plus grounded tests N/A. At least one
+mandatory validation must actually apply; exemptions or advisory checks alone do
+not establish QA. Zero/failed/skipped applicable required tests remain blocked.
 Unknown/unavailable coverage stays open. The helpers below consume evidence; they
 do not run tests, invoke browsers, make commits, push, deploy or authorize delivery.
 

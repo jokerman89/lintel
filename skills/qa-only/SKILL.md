@@ -40,7 +40,10 @@ to an explicit snapshot with the shared
 is explicitly NON-release-clearance. The full expected-context/SHIP path below is
 for mapped authorized work, not a prerequisite for getting test feedback.
 
-1. **Detect test runner** — same logic as `/qa`. If ambiguous: ask once via AskUserQuestion.
+1. **Resolve applicable validation** — use approved acceptance. Detect the test
+   runner as in `/qa` when tests apply. A docs-only package can instead require a
+   real document/link/example check with source-grounded tests N/A; do not invent
+   a universal software-test obligation.
 2. **Single run** — use the reviewed expected context from the
    [shared evidence procedure](../review/references/evidence.md). Execute the real
    test command, capture stdout/stderr, command/environment inputs, actual
@@ -49,8 +52,10 @@ for mapped authorized work, not a prerequisite for getting test feedback.
 4. **Report** — structured failure list with file:line, category, and a one-line cause hypothesis.
 5. **Evidence and exit code** — emit the shared QA record with `context_digest`,
    observed test controls and hashed evidence files via `li-review-evidence.py qa`.
-   The helper validates observations; it does not run tests. Exit 0 requires
-   nonzero verified required coverage, 3 means unresolved/blocked acceptance.
+   The helper validates observations; it does not run tests or document checks.
+   Exit 0 requires an observed applicable mandatory validation, not N/A-only or
+   advisory-only output. When tests apply, zero/failed/skipped required tests
+   remain blocked even alongside a passing document check. Exit 3 means unresolved acceptance.
    Runner failures remain visible in the test control's actual exit code.
 6. **Recheck identity** — SHIP consumes this exact context and the latest applicable
    independent review through `li-review-evidence.py ship`. Relevant source,

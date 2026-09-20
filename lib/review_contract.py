@@ -420,11 +420,33 @@ def snapshot(
     return result
 
 
+def _task_acceptance(data: bytes, leaf_ids: Sequence[str]) -> bytes:
+    identifiers = "|".join(re.escape(leaf) for leaf in leaf_ids)
+    progress = re.compile(
+        rf"^([ \t]*(?:[-*+]|\d+[.)])[ \t]+)\[[ xX]\]"
+        rf"(?=[ \t]+(?:\*\*|`)?(?:{identifiers})(?:\*\*|`)?(?:[ \t:\r\n]|$))"
+    )
+    lines = []
+    fence = ""
+    for line in data.decode("utf-8").splitlines(keepends=True):
+        marker = re.match(r"^[ \t]*(`{3,}|~{3,})", line)
+        if marker:
+            token = marker.group(1)
+            if not fence:
+                fence = token
+            elif token[0] == fence[0] and len(token) >= len(fence) and not line[marker.end():].strip():
+                fence = ""
+        elif not fence:
+            line = progress.sub(r"\1[ ]", line, count=1)
+        lines.append(line)
+    return "".join(lines).encode("utf-8")
+
+
 def bind_work(
     repo: Path, *, work_map: Optional[str], package_id: str, leaf_ids: Sequence[str],
     acceptance_paths: Sequence[Union[str, Json]],
 ) -> Json:
-    """Bind chosen authority bytes or explicit unique start/end-line excerpts."""
+    """Bind acceptance, excluding only selected task checkbox progress in the mapped tasks."""
     repo = Path(repo).resolve()
     refs = deepcopy(list(acceptance_paths))
     if not refs:
@@ -436,6 +458,7 @@ def bind_work(
         if required_declaration not in refs:
             refs.append(required_declaration)
     map_digest = None
+    task_path = None
     if work_map is not None:
         work_map = relative_path(work_map)
         data = _path(repo, work_map, regular=True).read_bytes()
@@ -445,6 +468,7 @@ def bind_work(
         if mapping.get("status") not in ("APPROVED", "COMPLETE"):
             raise ContractError("Selected work map is not approved")
         map_digest = hashlib.sha256(data).hexdigest()
+        task_path = relative_path(mapping["tasks"])
         explicit = {ref if isinstance(ref, str) else ref["path"] for ref in refs}
         for role in ("spec", "plan", "tasks", "prompt"):
             path = relative_path(mapping.get(role))
@@ -460,11 +484,15 @@ def bind_work(
         if name == AUDIT_RECORD or name.startswith(".claude/runtime/reviews/"):
             raise ContractError("Review storage is not an acceptance source")
         data = _path(repo, name, regular=True).read_bytes()
+        if name == task_path:
+            data = _task_acceptance(data, leaf_ids)
         start, end = (None, None) if isinstance(ref, str) else (ref["start"], ref["end"])
         if start is not None:
             lines = data.decode("utf-8").splitlines(keepends=True)
-            starts = [i for i, line in enumerate(lines) if line.rstrip("\r\n") == start]
-            ends = [i for i, line in enumerate(lines) if line.rstrip("\r\n") == end]
+            start_line = _task_acceptance(start.encode("utf-8"), leaf_ids).decode("utf-8") if name == task_path else start
+            end_line = _task_acceptance(end.encode("utf-8"), leaf_ids).decode("utf-8") if name == task_path else end
+            starts = [i for i, line in enumerate(lines) if line.rstrip("\r\n") == start_line]
+            ends = [i for i, line in enumerate(lines) if line.rstrip("\r\n") == end_line]
             if len(starts) != 1 or len(ends) != 1 or starts[0] >= ends[0]:
                 raise ContractError(f"Acceptance excerpt boundaries missing, repeated or reversed: {name}")
             data = "".join(lines[starts[0]:ends[0]]).encode("utf-8")
@@ -487,6 +515,8 @@ def validate_context(context: Json) -> None:
         raise ContractError("Acceptance digest does not bind its manifest")
     if (work["work_map"] is None) != (work["map_digest"] is None):
         raise ContractError("Work-map identity is unbound")
+    if work["work_map"] is not None:
+        relative_path(work["work_map"])
     if work["package_id"] != work["package_id"].strip() or any(leaf != leaf.strip() for leaf in work["leaf_ids"]):
         raise ContractError("Package/leaf identities must not have surrounding whitespace")
     paths = [entry["path"] for entry in snap["entries"]]
@@ -549,25 +579,36 @@ def validate_review(record: Mapping[str, Any]) -> Json:
 def select_latest(
     records: Sequence[Mapping[str, Any]], *, skill: str, work_map: Optional[str], package_id: str,
 ) -> Optional[Json]:
-    """Select by append order and scope BEFORE status, age, attempt or digest checks."""
+    """Validate active decisions, then select scope/append order before evaluating verdict."""
     latest = None
     for record in records:
-        if record.get("skill", record.get("kind")) != skill:
+        decision = validate_decision(record)
+        context = decision.get("context")
+        scope = None
+        if context is not None:
+            work = context["work"]
+            scope_map = relative_path(work["work_map"]) if work["work_map"] is not None else None
+            scope = (scope_map, work["package_id"])
+        if decision["skill"] != skill or (scope is not None and scope != (work_map, package_id)):
             continue
-        context = record.get("context")
-        work = context.get("work") if isinstance(context, dict) else None
-        if isinstance(work, dict) and "work_map" in work and "package_id" in work:
-            try:
-                scope_map = relative_path(work["work_map"]) if work["work_map"] is not None else None
-                validate_shape(work["package_id"], "text")
-                scope_package = work["package_id"].strip()
-            except ContractError:
-                pass  # Invalid scope is unbound, not a reason to resurrect an older PASS.
-            else:
-                if (scope_map, scope_package) != (work_map, package_id):
-                    continue
-        latest = dict(record)
+        latest = decision
     return latest
+
+
+def validate_decision(record: Mapping[str, Any], *, history: bool = False) -> Json:
+    """Uncorrelatable/malformed current evidence cannot disappear during scope filtering."""
+    if not isinstance(record, Mapping):
+        raise ContractError("A review decision must be an object")
+    current_fields = set(_schema()["$defs"]["review"]["required"]) - {"skill", "status", "timestamp", "reason"}
+    if current_fields.intersection(record):
+        return validate_review(record)
+    result = deepcopy(dict(record))
+    if history:
+        return result
+    if "skill" not in result and "kind" in result:
+        result["skill"] = result["kind"]
+    validate_shape(result, "legacyDecision")
+    return result
 
 
 def evidence_manifest(repo: Path, controls: Sequence[Mapping[str, Any]]) -> list[Json]:
@@ -665,14 +706,14 @@ def verify_review(
 
 
 def verify_qa(repo: Path, qa: Json, *, expected: Json) -> Json:
-    """Read-only QA must cover nonzero tests and the same immutable context."""
+    """Read-only QA needs applicable mandatory validation for the same immutable context."""
     validate_shape(qa, "qa")
     verify_context(repo, expected)
     if qa["context_digest"] != content_digest(expected):
         raise ContractError("QA belongs to a different content/acceptance/attempt/profile context")
-    tests = [c for c in qa["controls"] if c["kind"] == "tests" and c["requirement"] == "mandatory" and c["applicability"] == "applicable"]
-    if not tests:
-        raise ContractError("QA has no required executed test scope")
+    applicable = [c for c in qa["controls"] if c["requirement"] == "mandatory" and c["applicability"] == "applicable"]
+    if not applicable:
+        raise ContractError("QA has no required applicable validation scope")
     result = evaluate_controls(qa["controls"], required_policy=expected["required_policy"])
     if evidence_manifest(repo, qa["controls"]) != sorted(qa["evidence"], key=lambda v: v["path"]):
         raise ContractError("QA evidence files changed")

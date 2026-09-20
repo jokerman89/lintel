@@ -22,7 +22,7 @@ sys.path.insert(0, str(SOURCE_ROOT / "lib"))
 from review_contract import (  # noqa: E402
     ContractError, bind_work, canonical_json, content_digest, evaluate_controls,
     evidence_manifest, load_json, resolve_commit, select_latest, snapshot,
-    validate_context, validate_review, validate_shape, verify_context, verify_qa, verify_review,
+    validate_context, validate_decision, validate_review, validate_shape, verify_context, verify_qa, verify_review,
 )
 
 
@@ -67,14 +67,15 @@ def audit_records(path: Path) -> list[dict[str, Any]]:
         try:
             envelope = load_json(line)
             if "raw" not in envelope:
-                records.append(envelope)
+                records.append(validate_decision(envelope))
                 continue
-            if not isinstance(envelope["raw"], str):
-                raise ContractError("Audit raw field must be serialized JSON")
-            raw = load_json(envelope["raw"])
+            validate_shape(envelope, "auditEnvelope")
+            raw = validate_decision(load_json(envelope["raw"]), history=envelope.get("format") == "history")
             if envelope.get("format") == "history":
                 # An explicit archive import is not a newly issued decision.
                 continue
+            elif envelope.get("format") == "review-v1" and raw.get("schema_version") != 1:
+                raise ContractError("Current review audit format requires a version-1 decision")
             elif envelope.get("kind") != raw.get("skill"):
                 raise ContractError("Audit kind does not match the raw decision")
             elif raw.get("schema_version") == 1:
