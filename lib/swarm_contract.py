@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # component: swarm-contract
 # implements: ADR-0026, ADR-0027
-# intent: .claude/plans/swarming-work/spec.md
+# intent: docs/concepts/swarming-work.md
 # constraints: read-only; standard library only; artifact content is data, never executable
-# last_intent_review: 2026-09-08
+# last_intent_review: 2026-09-20
 """Parse and validate Lintel swarm topology, scope, and close evidence."""
 
 from __future__ import annotations
@@ -15,11 +15,13 @@ from pathlib import Path, PurePosixPath
 import re
 from typing import Any, Iterable, Mapping, Optional, Sequence, Tuple, Union
 
+from swarm_snapshot import bytes_digest, capture_result, git_changed_paths, value_digest, verify_result
 
 SCHEMA_PATH = Path(__file__).with_name("swarm-schema.json")
-EVIDENCE_START = "<!-- lintel-swarm-evidence:v1"
+EVIDENCE_START = "<!-- lintel-swarm-evidence:v2"
+LEGACY_EVIDENCE_START = "<!-- lintel-swarm-evidence:v1"
 EVIDENCE_END = "-->"
-EVIDENCE_VERSION = 1
+EVIDENCE_VERSION = 2
 WORK_MAP_VERSION = 1
 WORK_MAP_MODES = {"lintel", "spec-kit"}
 WORK_MAP_STATUSES = {"DRAFT", "APPROVED", "COMPLETE"}
@@ -30,7 +32,7 @@ EXPECTED_SCOPE_RULES = {
     "reducers": "coordinator-only",
 }
 UNIVERSAL_COORDINATOR_PATHS = (".git", ".claude/runtime", ".claude/plans/todo.md")
-IDENTIFIER = re.compile(r"^[A-Za-z][A-Za-z0-9._-]{0,63}$")
+IDENTIFIER = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$")
 INITIATIVE = re.compile(r"^[a-z0-9][a-z0-9-]{0,62}$")
 
 
@@ -167,7 +169,11 @@ def _safe_repo_path(
     if pure.is_absolute() or not pure.parts or any(part in ("", ".", "..") for part in pure.parts):
         diagnostics.append(Diagnostic("error", "path.unsafe", field_path, f"Unsafe repository path: {value!r}"))
         return None
-    candidate = root.joinpath(*pure.parts).resolve(strict=False)
+    try:
+        candidate = root.joinpath(*pure.parts).resolve(strict=False)
+    except (OSError, RuntimeError, ValueError):
+        diagnostics.append(Diagnostic("error", "path.resolve", field_path, "Cannot resolve repository path"))
+        return None
     if not _inside(root, candidate):
         diagnostics.append(Diagnostic("error", "path.escape", field_path, f"Path resolves outside the repository: {value}"))
         return None
@@ -339,40 +345,193 @@ def _validate_lanes(
     return valid_lanes
 
 
-def _validate_task_authority(
+def _visible_markdown(text: str) -> str:
+    text = re.sub(r"<!--.*?-->", "", text, flags=re.DOTALL)
+    return re.sub(r"^(`{3,}|~{3,}).*?^\1[ \t]*$", "", text, flags=re.MULTILINE | re.DOTALL)
+
+
+def _table_rows(text: str) -> Iterable[dict[str, str]]:
+    headers: list[str] = []
+    for line in text.splitlines():
+        if not line.strip().startswith("|"):
+            headers = []
+            continue
+        cells = [cell.strip().strip("`").strip() for cell in line.strip().strip("|").split("|")]
+        lowered = [cell.casefold() for cell in cells]
+        if "id" in lowered or "package id" in lowered:
+            headers = lowered
+        elif headers and len(cells) == len(headers) and not all(re.fullmatch(r"[-: ]+", cell) for cell in cells):
+            yield dict(zip(headers, cells))
+
+
+def _source_ids(value: str) -> list[str]:
+    if value.strip().casefold() in ("", "-", "none", "n/a"):
+        return []
+    tokens = re.split(r"[,\s]+", value.replace("`", "").strip())
+    if not all(IDENTIFIER.fullmatch(token) for token in tokens):
+        raise ValueError("Expected explicit stable IDs, not ranges or free-form dependencies")
+    return tokens
+
+
+def _task_sources(text: str, requested: set[str]) -> dict[str, dict[str, Any]]:
+    visible = _visible_markdown(text)
+    definitions: dict[str, dict[str, list[str]]] = {}
+    completed: dict[str, bool] = {}
+    table_dependencies: dict[str, list[str]] = {}
+    token = r"([A-Za-z0-9][A-Za-z0-9._-]{0,63})(?=\s|:|[—–]|$)"
+    headings = list(re.finditer(r"^#{2,6}\s+" + token + r"[^\n]*", visible, re.MULTILINE))
+    for index, match in enumerate(headings):
+        task_id = match.group(1)
+        if not any(char.isdigit() for char in task_id) and task_id not in requested:
+            continue
+        next_heading = re.search(r"^#{1,6}\s+", visible[match.end():], re.MULTILINE)
+        end = match.end() + next_heading.start() if next_heading else len(visible)
+        body = visible[match.start():end]
+        definitions.setdefault(task_id, {}).setdefault("heading", []).append(body)
+        checkboxes = re.findall(r"^\s*[-*+]\s+\[([ xX])\]", body, re.MULTILINE)
+        if checkboxes:
+            completed[task_id] = all(mark.casefold() == "x" for mark in checkboxes)
+    for match in re.finditer(r"^\s*[-*+]\s+(?:\[([ xX])\]\s+)?" + token + r"[^\n]*", visible, re.MULTILINE):
+        task_id = match.group(2)
+        if not any(char.isdigit() for char in task_id) and task_id not in requested:
+            continue
+        definitions.setdefault(task_id, {}).setdefault("list", []).append(match.group(0))
+        if match.group(1) is not None:
+            completed[task_id] = match.group(1).casefold() == "x"
+    for row in _table_rows(visible):
+        task_id = row.get("id", "")
+        if not IDENTIFIER.fullmatch(task_id):
+            continue
+        definitions.setdefault(task_id, {}).setdefault("table", []).append(json.dumps(row, sort_keys=True))
+        table_dependencies[task_id] = _source_ids(row.get("deps", row.get("dependencies", "")))
+    sources: dict[str, dict[str, Any]] = {}
+    for task_id, kinds in definitions.items():
+        body = "\n".join(part for values in kinds.values() for part in values)
+        dependencies = list(table_dependencies.get(task_id, []))
+        for dependency_text in re.findall(r"^\s*\*{0,2}Dependencies:\*{0,2}\s*(.*)$", body, re.MULTILINE):
+            dependencies.extend(_source_ids(dependency_text))
+        for dependency_text in re.findall(r"\(depends ([^;)]+)", body):
+            dependencies.extend(_source_ids(dependency_text.replace(" and ", ",")))
+        sources[task_id] = {
+            "text": body,
+            "dependencies": list(dict.fromkeys(dependencies)),
+            "complete": completed.get(task_id, False),
+            "duplicate": any(len(values) > 1 for values in kinds.values()),
+            "verification_only": bool(re.search(r"\*{0,2}Result(?: kind)?:\*{0,2}\s*verification-only\b", body)),
+        }
+    return sources
+
+
+def _packages_from_sources(
     root: Path,
     work_map: Optional[Mapping[str, Any]],
     lanes: Sequence[Mapping[str, Any]],
     diagnostics: list[Diagnostic],
-) -> list[str]:
+) -> dict[str, dict[str, Any]]:
     if work_map is None:
-        return []
+        return {}
     tasks = _safe_repo_path(root, work_map.get("tasks"), "work_map.tasks", diagnostics, must_be_file=True)
-    if tasks is None:
-        return []
+    plan = _safe_repo_path(root, work_map.get("plan"), "work_map.plan", diagnostics, must_be_file=True)
+    if tasks is None or plan is None:
+        return {}
     try:
-        content = root.joinpath(*_path_parts(tasks)).read_text(encoding="utf-8-sig")
-    except OSError as error:
+        task_text = root.joinpath(*_path_parts(tasks)).read_text(encoding="utf-8-sig")
+        plan_text = root.joinpath(*_path_parts(plan)).read_text(encoding="utf-8-sig")
+        requested = {lane["task_id"] for lane in lanes if isinstance(lane.get("task_id"), str)}
+        sources = _task_sources(task_text, requested)
+    except (OSError, ValueError) as error:
         diagnostics.append(Diagnostic("error", "tasks.read", "work_map.tasks", f"Cannot read mapped tasks: {error}"))
-        return []
-    found: list[str] = []
+        return {}
+    packages: dict[str, dict[str, Any]] = {}
+    assigned: set[str] = set()
+    for row in _table_rows(_visible_markdown(plan_text)):
+        if "package id" not in row:
+            continue
+        package_id = row["package id"]
+        members = next((value for key, value in row.items() if key.startswith("leaf ids")), "")
+        try:
+            leaf_ids = _source_ids(members)
+            dependencies = _source_ids(row.get("dependencies", ""))
+            if not IDENTIFIER.fullmatch(package_id) or not leaf_ids or package_id in packages:
+                raise ValueError("Package ID must be unique and have explicit member leaves")
+            if len(set(leaf_ids)) != len(leaf_ids) or assigned.intersection(leaf_ids):
+                raise ValueError("Every leaf must have exactly one package membership")
+            review = row.get("review", row.get("review depth", "substantive")).casefold()
+            if review not in ("mechanical", "substantive"):
+                raise ValueError("Review depth must be mechanical or substantive")
+            result_kind = row.get("result", row.get("result kind", "change")).casefold()
+            if result_kind not in ("change", "verification-only"):
+                raise ValueError("Result kind must be change or verification-only")
+            boundaries = [
+                value.strip().strip("`")
+                for value in re.split(r"[,;]", row.get("owner / edit boundary", ""))
+                if "/" in value and not any(char in value for char in "*?<>")
+            ]
+            packages[package_id] = {
+                "package_id": package_id, "leaf_ids": leaf_ids, "dependencies": dependencies,
+                "review": review, "verification_only": result_kind == "verification-only",
+                "boundary_paths": boundaries, "leaves": {},
+            }
+            assigned.update(leaf_ids)
+        except ValueError as error:
+            diagnostics.append(Diagnostic("error", "package.membership", "work_map.plan", f"{package_id}: {error}"))
+    grouped = bool(packages)
+    if grouped:
+        leaves = {task_id for task_id in sources if not any(other.startswith(task_id + ".") for other in sources)}
+        for leaf_id in sorted(leaves - assigned):
+            diagnostics.append(Diagnostic("error", "package.unassigned", "work_map.plan", f"Leaf is not assigned to a package: {leaf_id}"))
+    else:
+        for task_id in requested:
+            if task_id in sources:
+                packages[task_id] = {
+                    "package_id": task_id, "leaf_ids": [task_id],
+                    "dependencies": [], "review": "substantive",
+                    "verification_only": sources[task_id]["verification_only"],
+                    "boundary_paths": [], "leaves": {},
+                }
+    for package in packages.values():
+        leaf_ids = package["leaf_ids"]
+        for index, leaf_id in enumerate(leaf_ids):
+            source = sources.get(leaf_id)
+            if source is None:
+                diagnostics.append(Diagnostic("error", "tasks.missing", "work_map.tasks", f"Package leaf is absent from mapped tasks: {leaf_id}"))
+                continue
+            if source["duplicate"]:
+                diagnostics.append(Diagnostic("error", "tasks.duplicate", "work_map.tasks", f"Task has multiple definitions of the same kind: {leaf_id}"))
+            if grouped and any(other.startswith(leaf_id + ".") for other in sources):
+                diagnostics.append(Diagnostic("error", "package.parent", "work_map.plan", f"Package membership must select leaves, not their parent: {leaf_id}"))
+            package["leaves"][leaf_id] = source
+            for dependency in source["dependencies"]:
+                if dependency in leaf_ids and leaf_ids.index(dependency) >= index:
+                    diagnostics.append(Diagnostic("error", "package.order", "work_map.plan", f"{leaf_id} precedes its prerequisite {dependency}"))
+                elif dependency not in leaf_ids:
+                    package["dependencies"].append(dependency)
+        package["dependencies"] = list(dict.fromkeys(package["dependencies"]))
+        package["prerequisites"] = {
+            dependency: sources.get(dependency, {}).get("complete", False)
+            for dependency in package["dependencies"]
+        }
     for lane in lanes:
         task_id = lane.get("task_id")
-        if type(task_id) is not str or not IDENTIFIER.fullmatch(task_id):
-            continue
-        escaped = re.escape(task_id)
-        patterns = (
-            re.compile(rf"^#{{2,6}}\s+{escaped}(?=\s|[-—–:]|$)", re.MULTILINE),
-            re.compile(rf"^\s*-\s+\[[ xX]\]\s+{escaped}(?=\s|[-—–:]|$)", re.MULTILINE),
-        )
-        count = sum(len(pattern.findall(content)) for pattern in patterns)
-        if count == 0:
-            diagnostics.append(Diagnostic("error", "tasks.missing", "work_map.tasks", f"Lane task_id is absent from mapped tasks: {task_id}"))
-        elif count > 1:
-            diagnostics.append(Diagnostic("error", "tasks.duplicate", "work_map.tasks", f"Lane task_id is defined more than once in mapped tasks: {task_id}"))
-        else:
-            found.append(task_id)
-    return found
+        package = packages.get(task_id)
+        if package is None:
+            diagnostics.append(Diagnostic("error", "tasks.missing", "work_map.tasks", f"Lane has no authoritative package/singleton: {task_id}"))
+        elif package["boundary_paths"] and isinstance(lane.get("write_scope"), list):
+            for scope in lane["write_scope"]:
+                if isinstance(scope, str) and not any(_path_owned(root, scope, boundary) for boundary in package["boundary_paths"]):
+                    diagnostics.append(Diagnostic("error", "package.scope", f"lanes.{task_id}.write_scope", "Lane scope exceeds the explicit package edit boundary"))
+    return packages
+
+
+def package_sources(repo: Union[Path, str], contract: Mapping[str, Any]) -> dict[str, dict[str, Any]]:
+    """Read package membership and original leaf definitions; never persist a second backlog."""
+    root = Path(repo).resolve()
+    diagnostics: list[Diagnostic] = []
+    work_map, _ = _load_work_map(root, contract.get("work_map"), diagnostics)
+    packages = _packages_from_sources(root, work_map, contract.get("lanes", []), diagnostics)
+    if any(item.severity == "error" for item in diagnostics):
+        raise SwarmContractError(diagnostics)
+    return packages
 
 
 def _validate_topology(
@@ -414,6 +573,28 @@ def _validate_topology(
                         diagnostics.append(Diagnostic("error", "wave.isolation_missing", f"lanes.{lane.get('task_id')}.isolation", "Every writer in a concurrent wave requires attributable isolation"))
 
 
+def _validate_artifact_ownership(
+    root: Path,
+    lanes: Sequence[Mapping[str, Any]],
+    coordinator_paths: Sequence[str],
+    diagnostics: list[Diagnostic],
+) -> None:
+    artifacts: list[tuple[str, str]] = []
+    for lane in lanes:
+        for name in ("brief", "report", "review"):
+            path = lane.get(name)
+            if not isinstance(path, str):
+                continue
+            owner = f"lanes.{lane.get('task_id')}.{name}"
+            for protected in coordinator_paths:
+                if _paths_overlap(root, path, protected):
+                    diagnostics.append(Diagnostic("error", "artifact.coordinator", owner, f"Handoff artifact overlaps coordinator authority/output: {protected}"))
+            for prior_path, prior_owner in artifacts:
+                if _paths_overlap(root, path, prior_path):
+                    diagnostics.append(Diagnostic("error", "artifact.overlap", owner, f"Handoff artifact overlaps {prior_owner}: {prior_path}"))
+            artifacts.append((path, owner))
+
+
 def validate_coordination(
     repo: Union[Path, str],
     coordination_path: str,
@@ -446,7 +627,7 @@ def validate_coordination(
             or _path_identity(root, work_map["coordination"]) != _path_identity(root, coordination_path)
         ):
             diagnostics.append(Diagnostic("error", "work_map.coordination", "work_map.coordination", "Referenced work map must point back to this coordination document"))
-    _validate_task_authority(root, work_map, lanes, diagnostics)
+    _packages_from_sources(root, work_map, lanes, diagnostics)
     protected: list[str] = [coordination_path, *UNIVERSAL_COORDINATOR_PATHS]
     for value in (data.get("work_map"), data.get("charter")):
         if isinstance(value, str):
@@ -455,6 +636,22 @@ def validate_coordination(
         for name in ("spec", "plan", "tasks", "prompt", "constitution"):
             if isinstance(work_map.get(name), str):
                 protected.append(work_map[name])
+    coordinator_paths = data.get("coordinator_paths", [])
+    if not isinstance(coordinator_paths, list):
+        diagnostics.append(Diagnostic("error", "coordinator_paths.type", "coordinator_paths", "Expected a list of coordinator-owned paths"))
+    else:
+        seen: set[Tuple[str, ...]] = set()
+        for index, value in enumerate(coordinator_paths):
+            path = _safe_repo_path(root, value, f"coordinator_paths[{index}]", diagnostics)
+            if path is None:
+                continue
+            identity = _path_identity(root, path)
+            if identity in seen:
+                diagnostics.append(Diagnostic("error", "coordinator_paths.duplicate", f"coordinator_paths[{index}]", "Duplicate coordinator-owned path or alias"))
+            elif identity is not None:
+                seen.add(identity)
+            protected.append(path)
+    _validate_artifact_ownership(root, lanes, protected, diagnostics)
     for lane in lanes:
         for name in ("brief", "report", "review"):
             if isinstance(lane.get(name), str):
@@ -501,6 +698,7 @@ def _lane_scope_diagnostics(
     contract: Mapping[str, Any],
     lane: Mapping[str, Any],
     changed_paths: Sequence[str],
+    actor: str = "worker",
 ) -> list[Diagnostic]:
     diagnostics: list[Diagnostic] = []
     task_id = str(lane.get("task_id"))
@@ -529,6 +727,10 @@ def _lane_scope_diagnostics(
         if path is None:
             continue
         identity = _path_identity(root, path)
+        if actor == "reviewer":
+            if identity != own_review_identity:
+                diagnostics.append(Diagnostic("error", "scope.reviewer", f"changed_paths[{index}]", f"Reviewer of {task_id} may change only its own review artifact"))
+            continue
         if any(_paths_overlap(root, path, protected) for protected in UNIVERSAL_COORDINATOR_PATHS):
             diagnostics.append(Diagnostic("error", "scope.universal", f"changed_paths[{index}]", f"Lane {task_id} may not change universal coordinator path: {path}"))
         elif identity == own_review_identity or identity in all_reviews or identity in all_briefs or identity in other_reports:
@@ -545,11 +747,16 @@ def check_lane_scope(
     coordination_path: str,
     task_id: str,
     changed_paths: Sequence[str],
+    *,
+    actor: str = "worker",
 ) -> ValidationResult:
     result = validate_coordination(repo, coordination_path)
     if not result.ok or result.contract is None:
         return result
     diagnostics = list(result.diagnostics)
+    if actor not in ("worker", "reviewer"):
+        diagnostics.append(Diagnostic("error", "scope.actor", "actor", "actor must be worker or reviewer"))
+        return ValidationResult(result.contract, diagnostics)
     lane = lane_by_task(result.contract, task_id)
     if lane is None:
         diagnostics.append(Diagnostic("error", "scope.unknown_lane", "task_id", f"Unknown lane: {task_id}"))
@@ -558,8 +765,86 @@ def check_lane_scope(
         diagnostics.append(Diagnostic("error", "scope.empty", "changed_paths", "At least one attributable changed path is required"))
         return ValidationResult(result.contract, diagnostics)
     root = Path(repo).resolve()
-    diagnostics.extend(_lane_scope_diagnostics(root, result.contract, lane, changed_paths))
+    diagnostics.extend(_lane_scope_diagnostics(root, result.contract, lane, changed_paths, actor))
     return ValidationResult(result.contract, diagnostics)
+
+
+def acceptance_digest(repo: Union[Path, str], contract: Mapping[str, Any], lane: Mapping[str, Any]) -> str:
+    root = Path(repo).resolve()
+    work_map = _read_json(root / contract["work_map"])
+    paths = {work_map[name] for name in ("spec", "plan", "tasks", "prompt")}
+    paths.update((contract["charter"], lane["brief"]))
+    if work_map.get("constitution"):
+        paths.add(work_map["constitution"])
+    sources = {}
+    for path in sorted(paths):
+        diagnostics: list[Diagnostic] = []
+        if _safe_repo_path(root, path, "acceptance", diagnostics, must_be_file=True) is None:
+            raise SwarmContractError(diagnostics)
+        text = (root / path).read_text(encoding="utf-8-sig")
+        sources[path] = re.sub(r"^(\s*[-*+]\s+)\[[ xX]\]", r"\1[ ]", text, flags=re.MULTILINE)
+    return value_digest({
+        "work_map": contract["work_map"],
+        "mapping": {key: value for key, value in work_map.items() if key != "status"},
+        "coordination": contract, "sources": sources,
+    })
+
+
+def snapshot_lane(
+    repo: Union[Path, str], coordination_path: str, task_id: str, attempt_id: str,
+    *, base: Optional[str] = None, head: Optional[str] = None,
+) -> dict[str, Any]:
+    """Capture observable inputs/results only; this does not author a PASS or run a reviewer."""
+    contract = load_swarm_contract(repo, coordination_path)
+    lane = lane_by_task(contract, task_id)
+    if lane is None or not isinstance(attempt_id, str) or not IDENTIFIER.fullmatch(attempt_id):
+        raise ValueError("A known lane and stable attempt_id are required")
+    package = package_sources(repo, contract)[task_id]
+    result = capture_result(Path(repo).resolve(), lane["write_scope"], base=base, head=head)
+    if result["kind"] == "git":
+        diagnostics = _lane_scope_diagnostics(Path(repo).resolve(), contract, lane, result["changes"])
+        if diagnostics:
+            raise SwarmContractError(diagnostics)
+    return {
+        "work_map": contract["work_map"], "package_id": task_id,
+        "leaf_ids": package["leaf_ids"], "attempt_id": attempt_id,
+        "acceptance_digest": acceptance_digest(repo, contract, lane),
+        "result": result, "result_digest": value_digest(result),
+    }
+
+
+def brief_payload(repo: Union[Path, str], coordination_path: str, task_id: str) -> dict[str, Any]:
+    """Adapt an existing rich brief to the shared envelope body without replacing task authority."""
+    from envelope_contract import markdown_brief, validate_content
+
+    contract = load_swarm_contract(repo, coordination_path)
+    lane = lane_by_task(contract, task_id)
+    if lane is None:
+        raise ValueError("Unknown package/singleton lane")
+    root = Path(repo).resolve()
+    package = package_sources(root, contract)[task_id]
+    original = (root / lane["brief"]).read_text(encoding="utf-8-sig")
+    content, pointers = markdown_brief(original)
+    content.update(
+        work_map=contract["work_map"], package_id=task_id, leaf_ids=package["leaf_ids"],
+        write_scope=lane["write_scope"], acceptance_digest=acceptance_digest(root, contract, lane),
+    )
+    work_map = _read_json(root / contract["work_map"])
+    pointers = list(dict.fromkeys([
+        contract["work_map"], *(work_map[name] for name in ("spec", "plan", "tasks", "prompt")),
+        contract["charter"], lane["brief"], *pointers,
+    ]))
+    validate_content("brief", content)
+    return {"content": content, "context_pointers": pointers}
+
+
+def review_binding(repo: Union[Path, str], lane: Mapping[str, Any], report: Mapping[str, Any]) -> dict[str, Any]:
+    return {
+        **{name: report.get(name) for name in (
+            "work_map", "package_id", "leaf_ids", "attempt_id", "acceptance_digest", "result_digest"
+        )},
+        "report_digest": bytes_digest((Path(repo) / lane["report"]).read_bytes()),
+    }
 
 
 def _read_evidence(path: Path, kind: str, task_id: str, diagnostics: list[Diagnostic]) -> Optional[dict[str, Any]]:
@@ -571,11 +856,12 @@ def _read_evidence(path: Path, kind: str, task_id: str, diagnostics: list[Diagno
     except OSError as error:
         diagnostics.append(Diagnostic("error", "evidence.read", str(path), f"Cannot read {kind} evidence: {error}"))
         return None
-    starts = text.count(EVIDENCE_START)
+    starts = text.count(EVIDENCE_START) + text.count(LEGACY_EVIDENCE_START)
     if starts != 1:
         diagnostics.append(Diagnostic("error", "evidence.marker", str(path), f"Expected exactly one {EVIDENCE_START} marker"))
         return None
-    start = text.index(EVIDENCE_START) + len(EVIDENCE_START)
+    marker = EVIDENCE_START if EVIDENCE_START in text else LEGACY_EVIDENCE_START
+    start = text.index(marker) + len(marker)
     end = text.find(EVIDENCE_END, start)
     if end < 0:
         diagnostics.append(Diagnostic("error", "evidence.marker", str(path), "Evidence marker is not closed"))
@@ -591,11 +877,13 @@ def _read_evidence(path: Path, kind: str, task_id: str, diagnostics: list[Diagno
         return None
     if (
         type(data.get("schema_version")) is not int
-        or data.get("schema_version") != EVIDENCE_VERSION
+        or data.get("schema_version") != (EVIDENCE_VERSION if marker == EVIDENCE_START else 1)
         or data.get("artifact_kind") != f"swarm-{kind}"
         or data.get("task_id") != task_id
     ):
         diagnostics.append(Diagnostic("error", "evidence.identity", str(path), f"Evidence identity does not match {kind} for {task_id}"))
+    if marker == LEGACY_EVIDENCE_START:
+        diagnostics.append(Diagnostic("error", "evidence.unbound", str(path), "Historical v1 evidence is preserved but cannot close a current content-bound attempt"))
     return data
 
 
@@ -630,10 +918,39 @@ def _report_evidence_diagnostics(
 ) -> list[Diagnostic]:
     task_id = str(lane["task_id"])
     diagnostics: list[Diagnostic] = []
+    package = package_sources(root, contract)[task_id]
     if type(report.get("status")) is not str or report.get("status") != "complete":
         diagnostics.append(Diagnostic("error", "report.incomplete", lane["report"], f"Report for {task_id} is not complete"))
     if type(report.get("worker")) is not str or not report["worker"].strip():
         diagnostics.append(Diagnostic("error", "report.worker", lane["report"], f"Report for {task_id} must name a nonempty worker identity"))
+    for field_name in ("actor_ref", "isolation_ref"):
+        if type(report.get(field_name)) is not str or not report[field_name].strip():
+            diagnostics.append(Diagnostic("error", "report.provenance", lane["report"], f"Report must declare {field_name}; a role name is not host attribution"))
+    if (
+        report.get("work_map") != contract["work_map"] or report.get("package_id") != task_id
+        or report.get("leaf_ids") != package["leaf_ids"]
+        or type(report.get("attempt_id")) is not str or not IDENTIFIER.fullmatch(report["attempt_id"])
+    ):
+        diagnostics.append(Diagnostic("error", "report.binding", lane["report"], "Work/package/leaf/attempt identity is missing or mismatched"))
+    try:
+        if report.get("acceptance_digest") != acceptance_digest(root, contract, lane):
+            diagnostics.append(Diagnostic("error", "report.acceptance", lane["report"], "Acceptance or handoff source changed; capture and review a new attempt"))
+        result = report.get("result")
+        if not isinstance(result, dict):
+            raise ValueError("Observable result snapshot is required")
+        verify_result(root, lane["write_scope"], result)
+        if report.get("result_digest") != value_digest(result):
+            raise ValueError("Result digest does not match the supplied result snapshot")
+        if result["kind"] == "git":
+            diagnostics.extend(_lane_scope_diagnostics(root, contract, lane, result["changes"]))
+    except (OSError, ValueError) as error:
+        diagnostics.append(Diagnostic("error", "report.result", lane["report"], str(error)))
+    leaf_results = report.get("leaf_results")
+    if (
+        not isinstance(leaf_results, dict) or set(leaf_results) != set(package["leaf_ids"])
+        or not all(_passing_checks(checks) for checks in leaf_results.values())
+    ):
+        diagnostics.append(Diagnostic("error", "report.leaves", lane["report"], "Every original member leaf needs nonempty passing acceptance checks"))
     changed_paths = report.get("changed_paths")
     if not _nonempty_string_list(changed_paths):
         diagnostics.append(Diagnostic("error", "report.changed_paths", lane["report"], f"Report for {task_id} needs a nonempty list of nonempty changed-path strings"))
@@ -652,9 +969,73 @@ def _report_evidence_diagnostics(
             identity != report_identity and any(_path_owned(root, path, scope) for scope in scopes)
             for path, identity in zip(changed_paths, changed_identities)
         )
-        if not has_product_change:
+        if not has_product_change and not package["verification_only"]:
             diagnostics.append(Diagnostic("error", "report.product_change", lane["report"], f"Report for {task_id} must include a changed path in declared write_scope in addition to its own report"))
+        result = report.get("result")
+        if isinstance(result, dict) and isinstance(result.get("files"), dict):
+            product_paths = {path for path in changed_paths if _path_identity(root, path) != report_identity}
+            if package["verification_only"] and product_paths:
+                diagnostics.append(Diagnostic("error", "report.verification_only", lane["report"], "Verification-only work cannot claim product edits"))
+            if result.get("kind") == "git" and isinstance(result.get("changes"), list):
+                observed = {path for path in result["changes"] if _path_identity(root, path) != report_identity}
+                if product_paths != observed:
+                    diagnostics.append(Diagnostic("error", "report.attribution", lane["report"], "Reported product paths differ from the actual Git base/head diff"))
+            elif any(path not in result["files"] for path in product_paths):
+                diagnostics.append(Diagnostic("error", "report.product_missing", lane["report"], "Claimed product path has no observable file; deletions require Git base/head evidence"))
     return diagnostics
+
+
+def _review_evidence_diagnostics(
+    root: Path, contract: Mapping[str, Any], lane: Mapping[str, Any],
+    report: Mapping[str, Any], review: Mapping[str, Any],
+) -> list[Diagnostic]:
+    diagnostics: list[Diagnostic] = []
+    paths = review.get("changed_paths")
+    if not _nonempty_string_list(paths):
+        diagnostics.append(Diagnostic("error", "review.changed_paths", lane["review"], "Reviewer must declare its attributable changed paths"))
+    else:
+        diagnostics.extend(_lane_scope_diagnostics(root, contract, lane, paths, "reviewer"))
+    if review.get("binding") != review_binding(root, lane, report):
+        diagnostics.append(Diagnostic("error", "review.binding", lane["review"], "Review does not bind this exact work, attempt, acceptance, result and report"))
+    package = package_sources(root, contract)[lane["task_id"]]
+    mode = review.get("mode")
+    if mode not in ("independent", "coordinator") or (mode == "coordinator" and package["review"] != "mechanical"):
+        diagnostics.append(Diagnostic("error", "review.mode", lane["review"], "Substantive packages require independent review; inline review must be explicitly mechanical"))
+    actor = review.get("actor_ref")
+    if not isinstance(actor, str) or not actor.strip() or (
+        mode == "independent" and actor.strip().casefold() == str(report.get("actor_ref", "")).strip().casefold()
+    ):
+        diagnostics.append(Diagnostic("error", "review.provenance", lane["review"], "Independent reviewer needs a distinct attributable actor reference"))
+    if review.get("base") is not None or review.get("head") is not None:
+        try:
+            observed = git_changed_paths(root, review.get("base"), review.get("head"))
+            diagnostics.extend(_lane_scope_diagnostics(root, contract, lane, observed, "reviewer"))
+            if observed != paths:
+                raise ValueError("Reviewer changed_paths differ from its actual Git diff")
+        except (OSError, ValueError) as error:
+            diagnostics.append(Diagnostic("error", "review.attribution", lane["review"], str(error)))
+    return diagnostics
+
+
+def review_input(repo: Union[Path, str], coordination_path: str, task_id: str) -> dict[str, Any]:
+    contract = load_swarm_contract(repo, coordination_path)
+    lane = lane_by_task(contract, task_id)
+    if lane is None:
+        raise ValueError("Unknown package/singleton lane")
+    root = Path(repo).resolve()
+    diagnostics: list[Diagnostic] = []
+    report = _read_evidence(root / lane["report"], "report", task_id, diagnostics)
+    if report is not None:
+        diagnostics.extend(_report_evidence_diagnostics(root, contract, lane, report))
+    if diagnostics or report is None:
+        raise SwarmContractError(diagnostics)
+    package = package_sources(root, contract)[task_id]
+    return {
+        "binding": review_binding(root, lane, report),
+        "report": lane["report"], "review": lane["review"], "review_requirement": package["review"],
+        "result": report["result"], "leaf_results": report["leaf_results"],
+        "independence": "A real independent actor must act; this export is not review evidence",
+    }
 
 
 def lane_states(repo: Union[Path, str], contract: Mapping[str, Any]) -> Tuple[list[dict[str, Any]], list[Diagnostic]]:
@@ -681,6 +1062,8 @@ def lane_states(repo: Union[Path, str], contract: Mapping[str, Any]) -> Tuple[li
             report_diagnostics.extend(_report_evidence_diagnostics(root, contract, lane, report))
         if review is not None and review.get("initiative") != contract.get("initiative"):
             review_diagnostics.append(Diagnostic("error", "evidence.initiative", lane["review"], f"Evidence initiative does not match coordination for {task_id}"))
+        if report is not None and review is not None:
+            review_diagnostics.extend(_review_evidence_diagnostics(root, contract, lane, report, review))
         local = report_diagnostics + review_diagnostics
         state = "not_started"
         if report_path.is_file() and (report is None or report_diagnostics):
@@ -707,7 +1090,7 @@ def lane_states(repo: Union[Path, str], contract: Mapping[str, Any]) -> Tuple[li
             elif (
                 type(review.get("reviewer")) is not str
                 or not review["reviewer"].strip()
-                or report["worker"].strip().casefold() == review["reviewer"].strip().casefold()
+                or (review.get("mode") != "coordinator" and report["worker"].strip().casefold() == review["reviewer"].strip().casefold())
             ):
                 state = "blocked"
                 local.append(Diagnostic("error", "review.independence", lane["review"], f"Review evidence for {task_id} must name a distinct reviewer"))
@@ -739,7 +1122,25 @@ def _contract_work_map_status(
     return work_map["status"]
 
 
-def ready_frontier(repo: Union[Path, str], coordination_path: str) -> Tuple[ValidationResult, dict[str, Any]]:
+def _dependency_blockers(
+    packages: Mapping[str, Mapping[str, Any]], states: Sequence[Mapping[str, Any]],
+) -> dict[str, list[str]]:
+    owners = {leaf: key for key, package in packages.items() for leaf in package["leaf_ids"]}
+    by_id = {state["task_id"]: state["state"] for state in states}
+    blocked: dict[str, list[str]] = {}
+    for task_id in by_id:
+        package = packages[task_id]
+        for dependency in package["dependencies"]:
+            owner = dependency if dependency in packages else owners.get(dependency)
+            satisfied = by_id.get(owner) == "complete" if owner in by_id else package["prerequisites"].get(dependency, False)
+            if not satisfied:
+                blocked.setdefault(task_id, []).append(dependency)
+    return blocked
+
+
+def ready_frontier(
+    repo: Union[Path, str], coordination_path: str, *, host_capability: Optional[str] = None,
+) -> Tuple[ValidationResult, dict[str, Any]]:
     result = validate_coordination(repo, coordination_path)
     if not result.ok or result.contract is None:
         return result, {"wave": None, "ready_task_ids": [], "dispatch_task_ids": [], "states": []}
@@ -757,16 +1158,29 @@ def ready_frontier(repo: Union[Path, str], coordination_path: str) -> Tuple[Vali
             "states": states,
         }
     incomplete = [state for state in states if state["state"] != "complete"]
+    blocked_by = _dependency_blockers(package_sources(repo, result.contract), states)
     if not incomplete:
-        return ValidationResult(result.contract, diagnostics), {"work_map_status": work_map_status, "wave": None, "ready_task_ids": [], "dispatch_task_ids": [], "states": states}
+        if blocked_by:
+            diagnostics.append(Diagnostic("error", "wave.prerequisites", "work_map.tasks", "Declared completion has unresolved authoritative prerequisites"))
+        return ValidationResult(result.contract, diagnostics), {"work_map_status": work_map_status, "wave": None, "ready_task_ids": [], "dispatch_task_ids": [], "blocked_by": blocked_by, "states": states}
     wave = min(state["wave"] for state in incomplete)
     frontier = [state["task_id"] for state in incomplete if state["wave"] == wave and state["state"] in ("not_started", "rework_required")]
+    frontier = [task_id for task_id in frontier if task_id not in blocked_by]
     capacity = result.contract.get("max_parallel", 1)
+    if host_capability not in (None, "native", "sequenced", "none"):
+        diagnostics.append(Diagnostic("error", "host.capability", "host_capability", "Expected native, sequenced or none"))
+        capacity = 0
+    elif host_capability in ("sequenced", "none"):
+        capacity = min(capacity, 1)
     return ValidationResult(result.contract, diagnostics), {
         "work_map_status": work_map_status,
         "wave": wave,
         "ready_task_ids": frontier,
         "dispatch_task_ids": frontier[:capacity],
+        "blocked_by": blocked_by,
+        "host_capability": host_capability or "unverified",
+        "capability_source": "caller-declared; not a probe of host tools",
+        "execution_mode": "manual" if host_capability == "none" else "sequenced" if capacity <= 1 else "isolation-required",
         "states": states,
     }
 
@@ -777,6 +1191,11 @@ def verify_close(repo: Union[Path, str], coordination_path: str) -> Tuple[Valida
         return result, []
     states, evidence_diagnostics = lane_states(repo, result.contract)
     diagnostics = list(result.diagnostics) + evidence_diagnostics
+    status = _contract_work_map_status(Path(repo).resolve(), result.contract, diagnostics)
+    if status not in ("APPROVED", "COMPLETE"):
+        diagnostics.append(Diagnostic("error", "close.work_map_status", "work_map.status", "Closing work requires current approval or a completed work map"))
+    for task_id, dependencies in _dependency_blockers(package_sources(repo, result.contract), states).items():
+        diagnostics.append(Diagnostic("error", "close.prerequisites", f"lanes.{task_id}", "Unresolved authoritative prerequisites: " + ", ".join(dependencies)))
     for state in states:
         if state["state"] != "complete":
             diagnostics.append(Diagnostic("error", "close.incomplete", f"lanes.{state['task_id']}", f"Lane is not closed: {state['state']}"))

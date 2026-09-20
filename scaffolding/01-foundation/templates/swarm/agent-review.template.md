@@ -1,28 +1,41 @@
-# Independent lane review: <task-id>
+# Lane review: <package-id>
 
-<!-- lintel-swarm-evidence:v1
+Use `li-swarm.py review-input` to obtain the exact binding, then perform the review. Exporting
+input is not review. Preserve the worker's report; an implementer repairs findings, not the reviewer.
+
+<!-- lintel-swarm-evidence:v2
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "artifact_kind": "swarm-review",
   "initiative": "replace-me",
-  "task_id": "BC1",
-  "status": "complete",
+  "task_id": "P1",
+  "status": "pending",
   "reviewer": "replace-with-independent-reviewer-identity",
-  "verdict": "PASS",
-  "stages": {
-    "spec": "PASS",
-    "quality": "PASS"
+  "actor_ref": "replace-with-observed-host-session-or-human-reference",
+  "mode": "independent",
+  "changed_paths": [".claude/plans/replace-me/swarm/reviews/P1.md"],
+  "binding": {
+    "work_map": ".claude/plans/replace-me/work.json",
+    "package_id": "P1",
+    "leaf_ids": [],
+    "attempt_id": "copy-from-review-input",
+    "acceptance_digest": "copy-from-review-input",
+    "result_digest": "copy-from-review-input",
+    "report_digest": "copy-from-review-input"
   },
-  "checks": [
-    {"name": "exact review command or inspection", "status": "PASS"}
-  ],
+  "verdict": "PENDING",
+  "stages": {
+    "spec": "PENDING",
+    "quality": "PENDING"
+  },
+  "checks": [],
   "limitations": []
 }
 -->
 
 ## Severity counts
 
-P0: 0 · P1: 0 · P2: 0 · P3: 0
+Pending review; do not prefill zero findings.
 
 ## Specification review
 
@@ -36,3 +49,9 @@ List findings with `file:line` citations, or `No findings`.
 
 Record exact evidence and anything the review could not prove. A reviewer reports; the coordinator
 decides and an implementer fixes accepted findings.
+
+Check the reviewer's actual changed paths with `check-scope --actor reviewer` after review.
+Use local Git base/head attribution where available. Only an explicitly mechanical package may
+record `mode: coordinator`; substantive work still needs a real independent actor. Distinct strings
+alone do not corroborate independence. Record the host/human evidence and retain the A22.7 shared
+corroboration gate rather than treating these local declarations as final delivery clearance.

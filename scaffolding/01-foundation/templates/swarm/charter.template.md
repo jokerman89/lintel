@@ -3,13 +3,16 @@
 ## Intent
 
 State why this initiative benefits from swarming. The mapped task artifact remains authoritative
-for card text, dependencies, status, and acceptance; this charter owns coordination behavior only.
+for leaf text, dependencies, status and acceptance; the mapped plan owns package membership and
+aggregate review depth. This charter owns coordination behavior only.
 
 ## Coordinator contract
 
 One coordinator is the sole writer for shared plan/runtime state, generated reducers, commits, and
 integration. A worker owns only its declared `write_scope` plus its own report. An independent
 reviewer owns only the reviewed lane's review artifact. Workers never author their own review.
+List project-generated/shared outputs in `coordinator_paths`; handoff paths may not alias them or
+mapped authority, directly or through an ancestor or filesystem alias.
 
 ## Scheduling
 
@@ -22,7 +25,8 @@ writers require disjoint scopes and attributable isolation (`git-worktree`, `iso
 - Validate topology before dispatch.
 - Validate each attributable change set before integration.
 - Integrate lanes serially and let the coordinator regenerate shared outputs.
-- Require per-lane spec and quality review before a dependent wave.
+- Require package spec and quality review covering every member leaf before a dependent wave.
+- Check worker and reviewer attribution separately and bind review to the exact attempt/report/result.
 - Run final REVIEW and the full suite on the reconciled integration branch.
 
 ## Conflict and recovery
@@ -36,3 +40,6 @@ lost attempt from committed maps, briefs, reports, reviews, and Git; do not inve
 Native hosts may run isolated lanes concurrently. Sequenced and no-subagent hosts replay the same
 briefs serially. Correctness and evidence stay fixed; only concurrency and independent-review claims
 may degrade to what the host actually proves.
+Export structured briefs and `review-input` on a no-subagent host. Substantive independent review
+stays open until a real reviewer acts. An explicitly mechanical package may record coordinator
+review, never relabel that as independent. Shared final binding remains an integration gate.

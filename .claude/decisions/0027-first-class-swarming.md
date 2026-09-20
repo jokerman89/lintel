@@ -22,6 +22,18 @@ Brief Forge remains explicit opt-in under ADR-0008. A rich Markdown brief is dat
 structured envelope, checked before audit/output; the caller, not the helper, owns actual dispatch.
 The shared P05/P08/P09 evidence/work/domain binding is pending A22.7, not implied by local P04 checks.
 
+The local v2 report records `work_map`, `package_id`, unchanged `leaf_ids`, `attempt_id`,
+`acceptance_digest` and `result_digest`; review also binds the exact `report_digest`.
+Git snapshots verify local base/head objects, actual changed paths and present scoped files.
+File-only snapshots prove present content, not a base diff or host isolation. Actor references are
+declared provenance, not independent corroboration. P05's caller-supplied host/human corroboration
+and P07's profile context/generation/digest must be joined in A22.7 before final clearance.
+
+Default handoffs use standard-library JSON, with the whole Markdown brief preserved as data.
+The retained `envelope-schema.yaml` is JSON (a YAML subset); legacy YAML parsing alone is optional
+under `lib/envelope-requirements.txt`. Public profile accessors own cache representation. Audit
+continues through the unified writer; a matching persisted digest receipt is required before output.
+
 The original context and decision below are retained; this reconciliation governs the older
 per-card/per-lane wording where it conflicts with the accepted package model.
 

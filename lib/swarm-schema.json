@@ -41,6 +41,12 @@
       "minimum": 1,
       "maximum": 64
     },
+    "coordinator_paths": {
+      "description": "Project-specific shared/generated outputs, owned only by the coordinator.",
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/repositoryPath"}
+    },
     "scope_rules": {
       "type": "object",
       "additionalProperties": false,
@@ -77,8 +83,9 @@
       ],
       "properties": {
         "task_id": {
+          "description": "Authoritative package ID, or original task ID for an ungrouped singleton.",
           "type": "string",
-          "pattern": "^[A-Za-z][A-Za-z0-9._-]{0,63}$"
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$"
         },
         "wave": {
           "type": "integer",

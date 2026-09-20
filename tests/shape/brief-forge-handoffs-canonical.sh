@@ -21,9 +21,9 @@ while IFS= read -r f; do
 done < <(grep -rln "^brief_forge:" "$REPO_ROOT/skills" "$REPO_ROOT/agents" "$REPO_ROOT/hooks" "$REPO_ROOT/packs" 2>/dev/null | grep -v "docs/" || true)
 
 if [ "${#LEGACY[@]}" -eq 0 ]; then
-  pass "No legacy `brief_forge:` field name in skills/agents/hooks/packs"
+  pass "No legacy 'brief_forge:' field name in skills/agents/hooks/packs"
 else
-  fail "Legacy `brief_forge:` field found in ${#LEGACY[@]} files:"
+  fail "Legacy 'brief_forge:' field found in ${#LEGACY[@]} files:"
   for f in "${LEGACY[@]}"; do echo "    - $f"; done
   echo "  Rename to canonical `brief_forge_handoffs:` per v4.0 §2.5 finding 2-P2.2"
 fi
@@ -34,7 +34,7 @@ while IFS= read -r f; do
   CANONICAL+=("$f")
 done < <(grep -rln "brief_forge_handoffs:" "$REPO_ROOT/skills" "$REPO_ROOT/agents" "$REPO_ROOT/hooks" "$REPO_ROOT/packs" 2>/dev/null || true)
 
-pass "Canonical `brief_forge_handoffs:` found in ${#CANONICAL[@]} file(s)"
+pass "Canonical 'brief_forge_handoffs:' found in ${#CANONICAL[@]} file(s)"
 
 echo ""
 if [ "$FAILED" -eq 0 ]; then echo "All brief-forge-handoffs-canonical assertions PASSED"; exit 0

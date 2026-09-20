@@ -7,8 +7,8 @@ Delta base: `e9911fcd448dc632bf2752c69304d2be80b7aa65`.
 Target first parent: `21261f1ff76be994246060a7817924f2893f2454`, which contains main
 `28061e434be455ca02f135b73244eaf4f73f3a69` and the authorized Universal plan.
 
-The historical checkpoint is a real two-parent merge, not copied history or a squash.
-Its exact SHA and subsequent P04 commits are recorded in [P04.md](P04.md). No source
+The historical checkpoint is real merge `e74849db6b33c7b93baadb86206009cb9f9eb6d5`,
+not copied history or a squash. Subsequent P04 commits are recorded in [P04.md](P04.md). No source
 worktree, source branch, default branch or remote is modified. Historical evidence
 describes its original attempt only; it is not evidence for this reconciled tree.
 
@@ -121,3 +121,21 @@ new negative and boundary tests. A22.7 shared P05/P08/P09 binding, independent p
 review, stable combined-tree regeneration and final integrated verification remain open.
 MasterSession owns common generated outputs; this lane reports their inputs rather than
 regenerating them after the checkpoint.
+
+## Runtime follow-up preservation
+
+The bounded follow-up keeps every destination above. It adds v2 bindings and negative cases
+without altering any historical brief/report/review, charter, original coordination or work map.
+Historic v1 evidence is available but deliberately cannot certify a new attempt.
+
+The old worker scope/API, legacy singleton plans, ordinary work maps, explicit native/serial/manual
+paths, public forge/evaluator helper names, envelope content types and replay inspection remain.
+Unsafe recipe steps are replaced by shared structured helpers, not discarded capabilities.
+Rich Markdown and content-specific escape hatches remain available; no audit stores raw/base64
+payload. The retained `.yaml` schema path now contains JSON, a YAML subset. Optional legacy
+YAML still has a declared parser path; default JSON/Markdown works with Python `-S`.
+
+New tests extend the retained parser/scope/evaluator/consumer cases and add actual Git worktrees,
+attribution, interrupted review, scope breach, serial fan-in and an unresolved merge conflict.
+`P04.md` maps every authorized leaf to its outcome, commands and limits. Shared actor/profile/
+work/domain binding, real independent review and final generated reducers are explicitly open.
