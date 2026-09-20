@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # tests/unit/pack-resolver-fallbacks.sh
-# The 9-scenario test harness for lib/pack-resolver.sh per v4.0 §2.2 A.7 + §2.4
+# The original nine scenarios with ADR-0029's explicit drift failures.
 # tag: v4.0 phase-1 pack-resolver
 
 set -uo pipefail
@@ -210,9 +210,9 @@ EOF
 ) || FAILED=1
 rm -rf "$TMP6"
 
-# ─── Scenario 7: pack-switch mid-cycle → cached value still in effect ───
+# ─── Scenario 7: pack-switch mid-cycle → explicit drift failure ─────────
 echo ""
-echo "[7] Pack-switch mid-cycle → cached value still in effect"
+echo "[7] Pack-switch mid-cycle → explicit drift failure"
 TMP7=$(make_temp_home)
 (
   mkdir -p "$TMP7/.lintel/packs/pack-x" "$TMP7/.lintel/packs/pack-y"
@@ -240,9 +240,11 @@ EOF
   v_before=$(resolve_pack_field voice.default_tier)
   # Switch active pack mid-session
   echo "pack-y" > "$TMP7/.lintel/packs/active-pack"
-  v_after=$(resolve_pack_field voice.default_tier)
-  if [ "$v_before" = "internal" ] && [ "$v_after" = "internal" ]; then
-    echo "  PASS: cached value preserved across mid-session switch"
+  rc=0
+  v_after=$(resolve_pack_field voice.default_tier 2>"$TMP7/drift.err") || rc=$?
+  if [ "$v_before" = "internal" ] && [ "$rc" -ne 0 ] && [ -z "$v_after" ] &&
+    grep -q PROFILE_DRIFT "$TMP7/drift.err"; then
+    echo "  PASS: pointer change blocks without silently replacing policy"
   else
     echo "  FAIL: cache invariant broken (before=$v_before after=$v_after)"
     exit 1
@@ -250,9 +252,9 @@ EOF
 ) || FAILED=1
 rm -rf "$TMP7"
 
-# ─── Scenario 8: pack file deleted after SENSE read → cached value works ─
+# ─── Scenario 8: pack file deleted after SENSE read → unresolved drift ───
 echo ""
-echo "[8] Pack file deleted post-SENSE → cached value remains valid"
+echo "[8] Pack file deleted post-SENSE → explicit drift failure"
 TMP8=$(make_temp_home)
 (
   mkdir -p "$TMP8/.lintel/packs/ephemeral"
@@ -273,10 +275,11 @@ EOF
   v_before=$(resolve_pack_field voice.default_tier)
   # Delete the pack
   rm -rf "$TMP8/.lintel/packs/ephemeral"
-  # Read again — cache should still hold
-  v_after=$(resolve_pack_field voice.default_tier)
-  if [ "$v_before" = "mixed" ] && [ "$v_after" = "mixed" ]; then
-    echo "  PASS: cache survives pack-file deletion"
+  rc=0
+  v_after=$(resolve_pack_field voice.default_tier 2>"$TMP8/drift.err") || rc=$?
+  if [ "$v_before" = "mixed" ] && [ "$rc" -ne 0 ] && [ -z "$v_after" ] &&
+    grep -q PROFILE_DRIFT "$TMP8/drift.err"; then
+    echo "  PASS: deletion blocks without neutral or stale success"
   else
     echo "  FAIL: cache invariant broken after deletion (before=$v_before after=$v_after)"
     exit 1

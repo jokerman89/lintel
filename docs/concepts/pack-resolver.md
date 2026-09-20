@@ -1,129 +1,186 @@
-# Pack resolution — one accessor and explicit failure behavior
+# Pack resolution and stable profile contexts
 
-**Last updated:** 2026-09-08
+**Last updated:** 2026-09-20
 
-Thirty-plus skills consume voice, compliance, navigation and hand-off settings.
-`lib/pack-resolver.sh` provides a shared parser and accessor so consumers agree
-on those values. It validates and caches the effective manifest, then extracts
-requested fields from that cache. Subsequent reads check manifest freshness;
-this is not a parse-once performance guarantee.
+`lib/pack-resolver.sh` preserves the shell accessor API over one structured
+implementation, `lib/profile_context.py` (Python 3.9+, standard library only).
+The same typed data supplies inheritance, validation, field provenance,
+compatibility and SHA-256 identity. Configuration is never executable.
+[ADR-0029](../../.claude/decisions/0029-required-profile-context.md) explicitly
+replaces emergency-success and implicit mid-work refresh behavior.
 
-## Source, target and profile roots
+## Selection and required policy
 
-`LINTEL_SOURCE_ROOT` identifies the installed Lintel bundle containing helpers
-and neutral defaults. `LINTEL_REPO_ROOT` identifies the repository being worked
-on. The Copilot adapter sets these separately; a consumer does not need top-level
-copies of Lintel's `lib/` or `packs/_default/`.
+A repository can require a pack without trusting that pack to load first. Commit
+this non-secret declaration as `.claude/profile-requirements.json`:
 
-For a named pack, lookup checks these directories in order:
+```json
+{"schema_version": 1, "required_pack": "example-strict"}
+```
 
-1. `${LINTEL_PACKS_DIR}/<name>` (normally `${LINTEL_HOME}/packs/<name>`).
-2. `${LINTEL_REPO_ROOT}/packs/<name>`.
-3. `${LINTEL_SOURCE_ROOT}/packs/<name>`.
+The declaration has only these two keys; malformed or duplicate-key declarations
+are unresolved requirements, not an absent policy. Selection precedence is:
 
-The active pointer is `LINTEL_ACTIVE_PACK_FILE`, defaulting to
-`${LINTEL_PACKS_DIR}/active-pack`. `profile.yaml` carries mode and role
-preferences; its legacy `active_pack` field is not the selector.
-`get_loaded_pack` reports the effective cached identity, including fallback.
-A shared operator home implies shared selection across repositories. Repository
-adapters can set separate roots; inspect resolved paths before switching.
+1. Repository-required pack. A conflicting explicit selection is an error.
+2. Explicit `LINTEL_PROFILE_PACK`. This is required, never an optional preference.
+3. `LINTEL_ACTIVE_PACK_FILE`, normally `${LINTEL_PACKS_DIR}/active-pack`.
+   This legacy pointer remains an **optional preference**.
+4. No selection: validated neutral `_default`, without a global installation.
 
-## Inheritance and validation
+A missing, malformed or incompatible required pack returns nonzero without a
+neutral value. An invalid optional preference can load validated `_default`,
+but emits `OPTIONAL_PROFILE_FALLBACK` and records `selection.status: fallback`.
+It is not successful activation of the requested company policy. An invalid
+neutral baseline, missing parser or unreadable input is an actual error.
+There are no hardcoded emergency policy values. `profile.yaml` continues to
+hold mode/role preferences; its historical `active_pack` is not a selector.
 
-A pack can declare one `extends:` parent. Each manifest needs its own name and
-version; policy blocks can be inherited. Validation checks the effective
-`voice.default_tier`, `compliance.mode` and `navigation.default_workflow`.
-Compliance mode must be `hard`, `advisory` or `off`; enabled extension packs
-must declare a namespace and workflow.
+For each named pack, directory precedence remains `${LINTEL_PACKS_DIR}/<name>`,
+`${LINTEL_REPO_ROOT}/packs/<name>`, then `${LINTEL_SOURCE_ROOT}/packs/<name>`.
+The source is the approved installed helper bundle; the target is the repository
+whose requirements and runtime are being used. Explicit approved roots are honored.
+Repository requirements constrain the selected name, not a second executable loader
+or a hidden override of the explicitly configured pack store.
 
-The chain is merged root to leaf. Every child top-level block replaces that
-parent block wholesale. This includes `brief_forge_handoffs`: evaluator lists
-are not concatenated or deduplicated. See [pack inheritance](pack-inheritance.md).
+## Bootstrap, handoff and resume
 
-Missing parents, cycles, ancestry exceeding ten parent links, missing required
-effective fields and unsupported manifest syntax reject activation.
-`lib/pack-schema.yaml` is an authoring reference; runtime does not interpret it
-as a complete executable schema. Optional field types and schema/semver
-compatibility are not fully verified. [Pack validation](../../skills/pack-validate/SKILL.md)
-reports that limitation instead of claiming an unexecuted check passed.
+For the portable Copilot kit, run the documented bootstrap in **each** fresh shell:
 
-## Field representation and fallback
+```bash
+source .github/lintel/lib/copilot-env.sh
+lintel_copilot_env "$PWD" || exit $?
+source "$LINTEL_SOURCE_ROOT/lib/pack-resolver.sh"
+profile_context_reference
+```
 
-`resolve_pack_field <dotted.path>` reads nested scalar values and scalar lists.
-Block and inline lists return the same `[a, b]` representation, including
-three-level hand-off evaluator lists. Quoted scalar values preserve spaces and
-literal hash characters. Mapping keys are plain identifiers; supported syntax
-and escape limits are documented in the validation skill.
+When developing Lintel itself, source `lib/copilot-env.sh`. It defaults to a local
+`.claude/runtime/lintel-home`, preserves explicitly configured roots and actually
+binds/verifies the profile before returning. A bootstrap failure blocks dependent work.
 
-Resolution follows these rules:
+An explicit optional second argument, `lintel_copilot_env "$PWD" work-42`, selects
+a known stable work context. Otherwise the helper honors `LINTEL_PROFILE_CONTEXT`,
+explicit `LINTEL_SESSION_ID`, a real `CLAUDE_SESSION_ID`, or an existing
+`LINTEL_PROFILE_CONTEXT_FILE`. **No PID/PPID fallback exists.** With no supplied ID,
+bootstrap atomically creates or verifies `.claude/runtime/profiles/selected.json`
+and exports its durable context ID. Two fresh shells therefore consume the same
+selected work profile. This is repository work selection, not a claimed host session
+identity; give separate concurrent initiatives explicit work IDs.
 
-1. Return a field explicitly present in the effective session manifest.
-   Explicit `null`, `false`, empty strings and `[]` remain explicit.
-2. For an absent field, read its neutral `_default` value. A field absent from
-   both manifests returns empty.
-3. If cache priming itself fails, emit diagnostics and return an emergency
-   neutral value for the known critical fields below; other paths return empty.
+Direct accessor calls without bootstrap/ID still support one-shot neutral or pack
+reads, but cannot emit a pinned reference. Lifecycle producers must bootstrap or
+call `bind_profile_context <stable-context-id>`; a reference records:
 
-| Emergency field | Value |
+```json
+{
+  "schema_version": 1,
+  "context_id": "work-42",
+  "generation": 1,
+  "digest": "sha256:<64 lowercase hexadecimal characters>",
+  "name": "example-strict",
+  "version": "1.2.3"
+}
+```
+
+Pass this JSON as data with a delegated or cold-executor handoff, retaining the
+approved source/target/home roots. In a fresh process:
+
+```bash
+source "$LINTEL_SOURCE_ROOT/lib/pack-resolver.sh"
+verify_profile_context "$handoff_reference_file" || exit $?
+```
+
+Verification does not create a missing context or replace an expected generation.
+The explicit reference selects its work identity over a new ambient host session.
+A contradictory explicit `LINTEL_PROFILE_CONTEXT` remains an error. An original
+explicit pack request is retained in the binding when a fresh consumer does not
+repeat it. A reference does not grant permission to change target repositories,
+activate hooks or claim independent review.
+
+## Drift and rebind
+
+Runtime records live at `${LINTEL_HOME}/sessions/profiles/<context-key>/current-profile.json`
+or an explicitly selected context file within that home or target `.claude/runtime/`.
+`profile-context-schema.json` defines the record/reference/requirements shapes.
+Records contain typed values, exact per-field manifest provenance, source/target
+roots, root-to-leaf ancestry, compatibility results and input content hashes.
+
+Each bound read rechecks **bytes**, not modification times. Pointer changes,
+same-mtime manifest/parent edits, deletion, required-declaration changes, a newly
+higher-precedence source and compatibility metadata drift return `PROFILE_DRIFT`.
+Even a now-invalid optional pack cannot silently replace a previously bound profile.
+
+After an authorized profile change, explicitly run:
+
+```bash
+rebind_profile_context "approved policy update; replan affected work"
+```
+
+The new generation is validated first. The old record is retained in `history/`,
+old references stop matching, and the repository selected reference is updated
+only if it names this context. Replan/review dependent work against the new reference.
+`clear_pack_cache` is a compatibility spelling for this explicit rebind; it no
+longer deletes evidence. Interrupted-writer locks fail visibly rather than being
+stolen by guessing that a process is dead.
+
+These local records are consistency evidence, not tamper-resistant audit storage.
+Publish only approved non-secret reference/identity data, not entire runtime profiles.
+
+## Inheritance, types and compatibility
+
+Each manifest has its own matching directory/name and semantic `version`. A child
+replaces every declared **top-level block wholesale**; lists are never concatenated.
+Required effective voice/compliance/navigation fields validate before neutral
+missing-field defaults. Explicit null, false, empty strings/lists and quoted string
+types remain explicit. A null block is not recursively filled with neutral subfields.
+See [inheritance](pack-inheritance.md) and [neutral defaults](pack-defaults.md).
+
+Supported YAML is indented/flow mappings and scalar lists, with plain identifier
+keys, root mappings in column one, and plain/single/double-quoted values. Duplicate
+keys, anchors, aliases, tags, multiline scalars, complex list items and multiple
+documents are errors. Double-quote escapes are `\\`, `\"`, `\n`, `\r`, `\t`.
+Unquoted `true`/`false` and `null`/`~` are typed; quoted forms are strings.
+Legacy boolean helper aliases `yes`/`on` remain supported.
+
+Compatibility axes are independent and checked for **every ancestor**:
+
+| Axis | Contract |
 |---|---|
-| `voice.default_tier` | `internal` |
-| `compliance.mode` | `advisory` |
-| `compliance.workprofile_default` | `off` |
-| `navigation.default_workflow` | `cycle` |
-| `navigation.orientator_budget_tokens` | `2000` |
-| `navigation.orientator_max_output_tokens` | `200` |
-| `navigation.escalation_threshold` | `medium` |
-| `brief_forge_handoffs.budget_tokens` | `5000` |
+| Pack schema | `schema_version: "1"`; absent is legacy schema 1; unsupported explicit versions fail |
+| Pack release | `version`, belonging to that pack, not the product |
+| Public product | `requires_lintel_product`, compared to source `.claude-plugin/plugin.json` |
+| Feature contracts | `requires_capabilities`, compared to `runtime_compatibility` in `lib/pack-schema.yaml` |
+| Historical marker | Exact `requires_lintel: ">=4.0.0"` means legacy pack-v1, **not public v4+** |
 
-Required policy fields must validate before activation. Field fallback does not
-make an incomplete policy block valid. An invalid active pack follows the
-existing documented behavior: warn, audit and load `_default`. Enterprise
-callers must surface that fallback; it is not successful enterprise activation.
+Product and feature ranges support full semantic versions with `=`, `==`, `<`,
+`<=`, `>`, `>=`, and space/comma-separated conjunctions. Unsupported syntax is an
+error. Other historical `requires_lintel` ranges must be explicitly migrated.
+Unknown product metadata cannot satisfy a declared product constraint. No product
+constraint means it is not checked, not that the product was verified. Extension
+capability declaration does not prove host discovery or control execution.
 
-## Workflow defaults
+## Public accessors and control bridge
 
-Generic build and unclear requests use `navigation.default_workflow`. A bare
-workflow in an extension pack is qualified with `extension.namespace`; a fully
-qualified `/namespace:workflow` stays unchanged. Explicit review, research, fix,
-ship and resume requests retain their dedicated routes. To select the neutral
-cycle from an extension pack, declare `/li:cycle` explicitly.
+Existing functions remain: `get_active_pack_name`, `get_loaded_pack`,
+`validate_pack <name>`, `resolve_pack_field <path>`, `pack_field_is_true <path>`,
+`pack_is_extension`, `pack_namespace`, `pack_workflow`, `clear_pack_cache`.
+Shell lists retain `[a, b]`; absent optional fields return empty. Errors return
+nonzero without success-shaped values. Use `resolve_pack_field_json` when quoting
+or null/string distinctions matter; its absent-field status is 1, explicit null is 0.
 
-High-risk rules can name a bare workflow ID (matching all namespaces) or a
-qualified command (matching that namespace only). Configured high-risk membership
-wins over lower-risk heuristics. Routing recommends a command; it does not install
-the extension plugin, prove host discovery or execute the workflow.
+New functions include `pack_compatibility <name>`, `profile_field_provenance <path>`,
+`profile_context_json`, `profile_context_reference`, `bind_profile_context`,
+`verify_profile_context`, `rebind_profile_context`, and `profile_required_policy`.
+`PACK_CACHE_FILE` is no longer a YAML document. Consumers must use shared accessors,
+not parse cache storage. There is no second YAML parser in shell.
 
-## Session cache and audit
+`profile_required_policy` emits exactly `{required,status,source,version,applicability}`.
+Required load is `loaded`/`applicable`; optional/neutral is `not_required`/
+`not_applicable`. Unresolved load/drift emits `error`/`unknown` **and exits nonzero**.
+This bridge is for P05's control result, not a claim that loaded controls passed.
+Mandatory missing/error/unverified evidence still blocks in the consuming workflow.
 
-The cache lives at `${LINTEL_HOME}/sessions/<session-id>-pack-cache.yaml`.
-Changing only the active pointer preserves the current session cache. A newer
-manifest or invalid edited ancestry invalidates the corresponding cached pack.
-Deleting a cached pack directory leaves its cache available for the current
-session. `clear_pack_cache` explicitly forces resolution again.
-
-A new session ID gets its own cache. The ID precedence is explicit
-`LINTEL_SESSION_ID`, then `CLAUDE_SESSION_ID`, then a process-derived fallback.
-Hosts without a stable session ID should supply one.
-
-The shared audit writer records cache priming, invalidation and fallback events
-in `${LINTEL_HOME}/audit/pack-resolver.jsonl`, or an explicitly configured
-`LINTEL_AUDIT_DIR`. These are local diagnostic records, not tamper-resistant
-enterprise audit storage.
-
-## Public functions and verification
-
-- `get_active_pack_name`: selected pointer value, or `_default`.
-- `get_loaded_pack`: effective cached identity.
-- `validate_pack <name>`: runtime contract checks without activation.
-- `resolve_pack_field <path>`: field value or empty.
-- `pack_field_is_true <path>`: success for `true`, `yes` or `on`.
-- `pack_is_extension`, `pack_namespace`, `pack_workflow`: extension awareness.
-- `clear_pack_cache`: explicit session-cache invalidation.
-
-The isolated fallback and inheritance unit tests cover neutral loading, malformed
-packs, missing fields, cycles, repeated reads, pointer switching and cached pack
-deletion. `tests/unit/enterprise-pack-resolution.sh` adds list/quoted-value
-parsing, inheritance boundaries and malformed-input regressions.
-`tests/integration/enterprise-pack-impact.sh` verifies values reaching gate-list
-consumers, routing and the session digest. Host discovery and live execution of
-pack-provided gates need separate acceptance evidence.
+`tests/integration/universal-profile-context.sh` exercises actual producer/fresh
+process/handoff/resume, no-ID bootstrap, required failures, same-time drift,
+provenance and independent compatibility. Existing pack, extension and source/target
+tests preserve their useful cases. Joined work/review/host consumers and actual
+company/renderer/model acceptance require their own integration evidence.

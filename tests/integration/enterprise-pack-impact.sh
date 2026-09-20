@@ -64,7 +64,13 @@ neutral_gates=$(resolve_pack_field compliance.hooks | tr -d '[]' | tr ',' ' ')
 assert_eq advisory "$neutral_mode" 'neutral baseline mode'
 assert_eq '' "$neutral_gates" 'neutral baseline has no pack gates'
 printf 'team\n' > "$LINTEL_ACTIVE_PACK_FILE"
-assert_eq _default "$(get_loaded_pack)" 'pack switch preserves current session cache'
+if get_loaded_pack >"$review_tmp/switched.out" 2>"$review_tmp/switched.err"; then
+  printf 'FAIL: pointer switch did not block the bound profile\n'; failed=1
+elif [ -s "$review_tmp/switched.out" ] || ! grep -q PROFILE_DRIFT "$review_tmp/switched.err"; then
+  printf 'FAIL: pointer switch lacked an explicit unresolved result\n'; failed=1
+else
+  printf 'PASS: pointer switch requires explicit rebind before enterprise activation\n'
+fi
 clear_pack_cache
 assert_eq hard "$(resolve_pack_field compliance.mode)" 'next cycle inherits enterprise requirements'
 # Exercise the actual input-normalization pipeline from compliance-gate, without

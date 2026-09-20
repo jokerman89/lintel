@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # component: enterprise-pack-resolution-test
-# implements: ADR-0018
+# implements: ADR-0018, ADR-0029
 # intent: docs/concepts/pack-resolver.md
 # constraints: none; fixtures, cache and audit are isolated from the operator home
-# last_intent_review: 2026-09-08
+# last_intent_review: 2026-09-20
 set -uo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 review_parent="$(cd "${TMPDIR:-/tmp}" && pwd -P)"
@@ -27,6 +27,16 @@ assert_eq() {
 reject() {
   if validate_pack "$1" 2>/dev/null; then printf 'FAIL: accepted %s\n' "$2"; failed=1;
   else printf 'PASS: rejected %s\n' "$2"; fi
+}
+reject_drift() {
+  local value
+  if value=$(get_loaded_pack 2>"$review_tmp/drift.err"); then
+    printf 'FAIL: accepted %s\n' "$1"; failed=1
+  elif [ -n "$value" ] || ! grep -q PROFILE_DRIFT "$review_tmp/drift.err"; then
+    printf 'FAIL: missing explicit drift failure for %s\n' "$1"; failed=1
+  else
+    printf 'PASS: rejected %s without neutral success\n' "$1"
+  fi
 }
 cat > "$LINTEL_PACKS_DIR/base/pack.yaml" <<'YAML'
 name: base
@@ -105,12 +115,12 @@ assert_eq '[]' "$(resolve_pack_field compliance.hooks)" 'explicit empty list sta
 cp "$LINTEL_PACKS_DIR/team/pack.yaml" "$review_tmp/valid-team.yaml"
 assert_eq team "$(get_loaded_pack)" 'cache is primed before malformed edit'
 printf 'broken: [unterminated\n' >> "$LINTEL_PACKS_DIR/team/pack.yaml"
-assert_eq _default "$(get_loaded_pack)" 'malformed edit invalidates an already primed cache'
+reject_drift 'malformed edit of a bound profile'
 cp "$review_tmp/valid-team.yaml" "$LINTEL_PACKS_DIR/team/pack.yaml"
 clear_pack_cache
 assert_eq team "$(get_loaded_pack)" 'valid team can be loaded again'
 printf 'name: team\nversion: 1.0.0\nextends: absent\n' > "$LINTEL_PACKS_DIR/team/pack.yaml"
-assert_eq _default "$(get_loaded_pack)" 'missing edited ancestor invalidates an already primed cache'
+reject_drift 'missing edited ancestor of a bound profile'
 cp "$review_tmp/valid-team.yaml" "$LINTEL_PACKS_DIR/team/pack.yaml"
 clear_pack_cache
 assert_eq team "$(get_loaded_pack)" 'cache is primed before pointer switch'
@@ -148,8 +158,9 @@ cp "$LINTEL_PACKS_DIR/base/pack.yaml" "$LINTEL_PACKS_DIR/bad/pack.yaml"
 printf 'version: 9.0.0\n' >> "$LINTEL_PACKS_DIR/bad/pack.yaml"
 reject bad 'duplicate manifest key'
 printf 'bad\n' > "$LINTEL_ACTIVE_PACK_FILE"
-assert_eq team "$(get_loaded_pack)" 'invalid pointer switch does not replace the current cycle cache'
+reject_drift 'invalid pointer switch of a bound profile'
 clear_pack_cache
-assert_eq _default "$(get_loaded_pack)" 'invalid active pack keeps documented neutral fallback'
+assert_eq _default "$(get_loaded_pack)" 'explicit rebind permits optional legacy neutral fallback'
 assert_eq advisory "$(resolve_pack_field compliance.mode)" 'fallback mode and identity agree'
+assert_eq '"fallback"' "$(_profile_cli context | "$_LINTEL_PROFILE_PYTHON" -c 'import json,sys; print(json.dumps(json.load(sys.stdin)["profile"]["selection"]["status"]))')" 'optional fallback is labeled, not required activation'
 exit "$failed"
