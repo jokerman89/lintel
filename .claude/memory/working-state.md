@@ -41,10 +41,13 @@ P06 provider/adapters are also independently accepted: exact product `7425960`, 
 repaired a wiki schema-reader mismatch (JSON envelope, optional legacy pack field);
 actual source-derived metadata, error refusal, idempotency and local adapter checks pass.
 
-**What's pending:** P04 final A22.7 and P07 full-consumer gates remain open. P05's frozen
-`9c8ef727` consumer uses the exact accepted provider but still needs its own independent
-spec and first full quality verdict. P10's prerequisites are now integrated; shared
-resource preflight remains coordinator-owned. Continue P08-P14 in dependency order,
+**What's pending:** P04 final A22.7 remains open. P05's `9c8ef727` consumer was rejected
+by report `0cdbf596` for lost excerpt-classification identity; the provider remains
+accepted. P07's default installed-source bootstrap now reproduces a native Windows
+274-character history-path failure. Original owners/reviewers handle both bounded
+repairs. Preflight checkpoint `98ad7ed` retains this RED case and seven passing joined
+cases; it is not combined acceptance. P10 is implementing in session `5ea6c88c`; the
+operator explicitly requires installation without Python (ADR-0030). Continue P08-P14 in dependency order,
 not a new audit or partial delivery. Coordinator routing (`b72ab47` plus
 `1d40193`) and provenance (`9f49e26`) await their owning package reviews. All successor cards
 and interface agreements are committed; use the handoff's exact IDs, do not duplicate workers.

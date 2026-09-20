@@ -716,3 +716,17 @@ changing a consumer or an assertion. Green tests cannot justify narrowing the co
 new documentation. Correct an overrestrictive oracle openly, retain the historical report,
 and add source-grounded positive, malformed and decoy cases. Verify real consumers and retained
 user value, not agreement between two copies of the same mistaken assumption.
+
+## L-035 - Preserve the install-time dependency floor
+
+**Date:** 2026-09-20
+
+**Context:** P10 proposed sharing Python transaction helpers across existing native bare
+installers and the Python-based repository adapter. The operator explicitly chose
+"keep installation without Python"; no installer prerequisite had been changed.
+
+**Rule:** A runtime helper's prerequisite does not authorize adding that dependency to
+installation. Keep bare Bash/PowerShell installation usable without Python, document
+later operation-specific prerequisites, and test the no-Python path. Share the ownership
+contract and behavioral cases across necessary native implementations rather than
+silently raising the installation floor or automatically installing an interpreter.
