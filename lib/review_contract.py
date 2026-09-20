@@ -20,6 +20,8 @@ import stat
 import subprocess
 from typing import Any, Optional, Union
 
+from markdown_source import MarkdownBoundaries, Span, classify_markdown
+
 Json = dict[str, Any]
 CONTRACT_VERSION = 2
 AUDIT_RECORD = ".claude/runtime/audit/reviews.jsonl"
@@ -421,70 +423,24 @@ def snapshot(
     return result
 
 
-def _task_progress_pattern(leaf_ids: Sequence[str]) -> re.Pattern[str]:
+def _task_progress_spans(source: MarkdownBoundaries, leaf_ids: Sequence[str]) -> dict[int, Span]:
     identifiers = "|".join(re.escape(leaf) for leaf in leaf_ids)
-    return re.compile(
-        rf"^([ \t]*(?:[-*+]|\d+[.)])[ \t]+)\[[ xX]\]"
+    progress = re.compile(
+        rf"\[[ xX]\]"
         rf"(?=[ \t]+(?:\*\*|`)?(?:{identifiers})(?:\*\*|`)?(?:[ \t:\r\n]|$))"
     )
-
-
-def _task_acceptance(data: bytes, leaf_ids: Sequence[str], progress_rows: Optional[set[int]] = None) -> bytes:
-    progress = _task_progress_pattern(leaf_ids)
-    lines = []
-    fence = ""
-    fence_container = 0
-    containers: list[int] = []
-    paragraph = False
-    blank = False
-    for index, line in enumerate(data.decode("utf-8").splitlines(keepends=True)):
-        text = line.lstrip(" \t")
-        indent = len(line[:len(line) - len(text)].expandtabs(4))
-        if fence:
-            closing = re.match(r"(`{3,}|~{3,})[ \t]*(?:\r?\n)?$", text)
-            if (
-                closing and fence_container <= indent <= fence_container + 3
-                and closing.group(1)[0] == fence[0] and len(closing.group(1)) >= len(fence)
-            ):
-                fence = ""
-            lines.append(line)
-            paragraph = False
-            blank = not text.strip()
+    spans = {}
+    for item in source.list_items:
+        if item.classification != "prose":
             continue
-        if not text.strip():
-            lines.append(line)
-            blank = True
+        match = progress.match(source.original, item.content.start, item.content.end)
+        if match is None:
             continue
-        item = re.match(r"^([ \t]*)([-*+]|\d{1,9}[.)])([ \t]+)(.*)", line)
-        block = re.match(r"(?:#{1,6}(?:[ \t]|$)|>|`{3,}|~{3,}|(?:[-*_][ \t]*){3,}$)", text.rstrip("\r\n"))
-        lazy = containers and indent < containers[-1] and paragraph and not blank and not item and not block
-        if not lazy:
-            while containers and indent < containers[-1]:
-                containers.pop()
-        container = containers[-1] if containers else 0
-        # Code indentation is relative to a list's content column, not the page.
-        if indent >= container + 4:
-            paragraph = False
-        elif item:
-            content_column = len(line[:item.start(4)].expandtabs(4))
-            padding = content_column - indent - len(item.group(2))
-            containers.append(content_column if padding <= 4 else indent + len(item.group(2)) + 1)
-            opening = re.match(r"(`{3,}|~{3,})", item.group(4)) if padding <= 4 else None
-            if opening:
-                fence, fence_container = opening.group(1), content_column
-            elif padding <= 4:
-                if progress_rows is not None and progress.match(line):
-                    progress_rows.add(index)
-                line = progress.sub(r"\1[ ]", line, count=1)
-            paragraph = padding <= 4 and not opening
-        else:
-            opening = re.match(r"(`{3,}|~{3,})", text)
-            if opening:
-                fence, fence_container = opening.group(1), container
-            paragraph = not block
-        lines.append(line)
-        blank = False
-    return "".join(lines).encode("utf-8")
+        # A prose item can contain later literal regions; only its actual checkbox is eligible.
+        if any(region.span.start < match.end() and match.start() < region.span.end for region in source.regions):
+            continue
+        spans[item.line_index] = Span(match.start() + 1, match.start() + 2)
+    return spans
 
 
 def bind_work(
@@ -529,19 +485,34 @@ def bind_work(
         if name == AUDIT_RECORD or name.startswith(".claude/runtime/reviews/"):
             raise ContractError("Review storage is not an acceptance source")
         data = _path(repo, name, regular=True).read_bytes()
-        progress_rows: set[int] = set()
-        if name == task_path:
-            data = _task_acceptance(data, leaf_ids, progress_rows)
         start, end = (None, None) if isinstance(ref, str) else (ref["start"], ref["end"])
-        if start is not None:
-            lines = data.decode("utf-8").splitlines(keepends=True)
-            progress = _task_progress_pattern(leaf_ids)
-            start_line, end_line = progress.sub(r"\1[ ]", start, count=1), progress.sub(r"\1[ ]", end, count=1)
-            starts = [i for i, line in enumerate(lines) if line.rstrip("\r\n") == (start_line if i in progress_rows else start)]
-            ends = [i for i, line in enumerate(lines) if line.rstrip("\r\n") == (end_line if i in progress_rows else end)]
-            if len(starts) != 1 or len(ends) != 1 or starts[0] >= ends[0]:
-                raise ContractError(f"Acceptance excerpt boundaries missing, repeated or reversed: {name}")
-            data = "".join(lines[starts[0]:ends[0]]).encode("utf-8")
+        if name == task_path or start is not None:
+            source = classify_markdown(data.decode("utf-8"))
+            progress_spans = _task_progress_spans(source, leaf_ids) if name == task_path else {}
+            characters = list(source.original)
+            for span in progress_spans.values():
+                characters[span.start] = " "
+            normalized = "".join(characters)
+            if start is not None:
+                def matches(index: int, marker: str) -> bool:
+                    line = source.lines[index]
+                    original = source.original[line.start:line.end]
+                    span = progress_spans.get(index)
+                    if span is None:
+                        return original == marker
+                    position = span.start - line.start
+                    return (
+                        len(marker) == len(original) and marker[position] in " xX"
+                        and original[:position] == marker[:position]
+                        and original[position + 1:] == marker[position + 1:]
+                    )
+
+                starts = [i for i in range(len(source.lines)) if matches(i, start)]
+                ends = [i for i in range(len(source.lines)) if matches(i, end)]
+                if len(starts) != 1 or len(ends) != 1 or starts[0] >= ends[0]:
+                    raise ContractError(f"Acceptance excerpt boundaries missing, repeated or reversed: {name}")
+                normalized = normalized[source.lines[starts[0]].start:source.lines[ends[0]].start]
+            data = normalized.encode("utf-8")
         manifest.append({"path": name, "start": start, "end": end, "sha256": hashlib.sha256(data).hexdigest()})
     result = {
         "work_map": work_map, "map_digest": map_digest, "package_id": package_id,

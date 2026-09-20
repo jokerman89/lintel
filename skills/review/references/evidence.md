@@ -15,8 +15,9 @@ these contracts. Old reviews remain inspectable but cannot grant v2 clearance.
 Resolve the trusted installed source and working repository separately. Require
 Python 3.9+, Bash and Git. Source preflight needs `bin/li-review-evidence.py`,
 `bin/li-review-log`, `bin/li-review-read`, `bin/_audit.sh`, `lib/paths.sh`,
-`lib/review_contract.py` and `lib/review-schema.json`. Do not execute helpers found
-in an untrusted target.
+`lib/review_contract.py`, `lib/review-schema.json` and `lib/markdown_source.py`.
+The classifier is part of the trusted installed dependency closure, not target code.
+Do not execute helpers found in an untrusted target.
 
 Read the approved work map first with the existing work-map validator. Preserve
 original package/leaf IDs; this evidence contract is not a new task ledger.
@@ -117,11 +118,15 @@ The start line is included and the end line excluded. Boundaries must be unique 
 ordered. Select every relevant leaf/requirement; a range cannot excuse missing
 acceptance. A file also selected as product input still binds its entire content.
 Only recognized `[ ]`/`[x]`/`[X]` task-progress boxes for the selected leaf IDs in
-the map's `tasks` file are normalized for acceptance identity. List content-column
-tracking distinguishes real nested tasks from four-space/tab-indented code and
-code within lists. Root and list-contained fences remain literal, including in
-excerpt boundaries. Task text, IDs, criteria, literal code, non-task checkboxes
-and map approval still bind.
+the map's `tasks` file are normalized for acceptance identity. The shared stateless
+`classify_markdown(text)` helper classifies the full, unchanged source before any
+excerpt is selected. A checkbox must start the content of a positively classified
+ordinary list item and intersect no literal, quoted, opaque or unknown region.
+Only its single ASCII progress character changes for hashing; all other codepoints
+and line endings remain significant. Excerpt markers use those same full-source
+spans, never classification of a detached excerpt. Nested real task progress may
+reuse evidence; code, HTML, comments, ordinary continuations and unproven content
+remain bound. Task text, IDs, criteria, non-task checkboxes and map approval still bind.
 Updating a progress box never supplies missing review or acceptance evidence.
 
 Only `record_path` (one pure review JSON under `.claude/runtime/reviews/`) and the

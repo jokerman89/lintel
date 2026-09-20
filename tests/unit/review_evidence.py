@@ -482,11 +482,13 @@ class ReviewEvidence(Fixture):
         for name in (
             "bin/li-review-log", "bin/li-review-read", "bin/li-review-evidence.py",
             "bin/_audit.sh", "lib/paths.sh", "lib/review_contract.py", "lib/review-schema.json",
+            "lib/markdown_source.py",
         ):
             target = installed / name
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(SOURCE / name, target)
         self.write("lib/review_contract.py", "raise RuntimeError('target code executed')\n")
+        self.write("lib/markdown_source.py", "raise RuntimeError('target classifier executed')\n")
         env = dict(self.env)
         env.pop("LINTEL_SOURCE_ROOT")
         command = "exec " + shlex.join([
@@ -1095,6 +1097,233 @@ class ReviewEvidence(Fixture):
         self.ship(ok=3)
 
 
+class MarkdownBoundaryEvidence(Fixture):
+    def prepare_pipeline(self, source, *, acceptance=None):
+        (self.repo / "plan.md").write_bytes(source.encode("utf-8"))
+        self.prepare()
+        selected = next(item for item in self.expected["work"]["acceptance_manifest"] if item["path"] == "plan.md")
+        if acceptance is None and selected["start"] is None:
+            acceptance = source
+        if acceptance is not None:
+            self.assertEqual(selected["sha256"], hashlib.sha256(acceptance.encode("utf-8")).hexdigest())
+        self.record()
+        self.log()
+        self.corroborate()
+        self.assertEqual(self.qa().returncode, 0)
+        self.read()
+        self.ship()
+
+    def consume_changed(self, source, *, literal):
+        preserved_qa = self.qa_file.read_bytes()
+        (self.repo / "plan.md").write_bytes(source.encode("utf-8"))
+        reader = self.read(ok=None)
+        qa = self.qa()
+        self.qa_file.write_bytes(preserved_qa)
+        ship = self.ship(ok=None)
+        for label, result, expected in (
+            ("reader", reader, 3 if literal else 0),
+            ("qa", qa, 1 if literal else 0),
+            ("ship", ship, 3 if literal else 0),
+        ):
+            with self.subTest(consumer=label):
+                self.assertEqual(result.returncode, expected, result.stdout + result.stderr)
+                if label != "qa":
+                    self.assertEqual(json.loads(result.stdout)["ok"], not literal)
+
+    def literal(self, sample):
+        original = "# P1\n- [ ] A1 Main\n- [ ] A2 Main\n\n# Literal examples\n\n" + sample
+        self.prepare_pipeline(original)
+        self.consume_changed(
+            original.replace("[ ] A1 Required literal", "[x] A1 Required literal"), literal=True,
+        )
+
+    def progress(self, original):
+        self.prepare_pipeline(original)
+        self.consume_changed(
+            original.replace("[ ] A1", "[x] A1").replace("[ ] A2", "[X] A2"), literal=False,
+        )
+
+    def test_literal_compound_fence(self):
+        self.literal("- - ```markdown\n    - [ ] A1 Required literal\n    ```\n")
+
+    def test_literal_ordered_compound_fence(self):
+        self.literal("1. - ```markdown\n     - [ ] A1 Required literal\n     ```\n")
+
+    def test_literal_raw_pre(self):
+        self.literal("<pre>\n- [ ] A1 Required literal\n</pre>\n")
+
+    def test_literal_raw_comment(self):
+        self.literal("<!--\n- [ ] A1 Required literal\n-->\n")
+
+    def test_literal_raw_script(self):
+        self.literal("<script>\n- [ ] A1 Required literal\n</script>\n")
+
+    def test_literal_raw_div(self):
+        self.literal("<div>\n- [ ] A1 Required literal\n</div>\n")
+
+    def test_literal_list_html(self):
+        self.literal("- <pre>\n  - [ ] A1 Required literal\n  </pre>\n")
+
+    def test_literal_quoted_fence(self):
+        self.literal("> ```markdown\n> - [ ] A1 Required literal\n> ```\n")
+
+    def test_literal_quoted_task(self):
+        self.literal("> - [ ] A1 Required literal\n")
+
+    def test_literal_indented(self):
+        self.literal("    - [ ] A1 Required literal\n")
+
+    def test_literal_list_indented(self):
+        self.literal("- Example\n\n      - [ ] A1 Required literal\n")
+
+    def test_progress_nested(self):
+        self.progress("- Parent\n    - [ ] A1 Real task\n    - [ ] A2 Real sibling\n")
+
+    def test_progress_ordered(self):
+        self.progress("1. Parent\n   - Group\n       - [ ] A1 Real task\n       - [ ] A2 Real sibling\n")
+
+    def test_progress_tab_nested(self):
+        self.progress("- Parent\n\t- [ ] A1 Real task\n\t- [ ] A2 Real sibling\n")
+
+    def test_progress_compound(self):
+        self.progress("- - [ ] A1 Real task\n  - [ ] A2 Real sibling\n")
+
+    def test_progress_crlf(self):
+        self.progress("- Parent\r\n    - [ ] A1 Real task\r\n    - [ ] A2 Real sibling\r\n")
+
+    def test_literal_excerpt_retains_outer_fence_context(self):
+        original = (
+            "# P1\n- [ ] A1 Main\n- [ ] A2 Main\n\n"
+            "- - ```markdown\n    BEGIN\n    - [ ] A1 Required literal\n    END\n    ```\n"
+        )
+        self.request["acceptance_paths"] = [
+            "spec.md", {"path": "plan.md", "start": "    BEGIN", "end": "    END"},
+        ]
+        self.prepare_pipeline(original, acceptance="    BEGIN\n    - [ ] A1 Required literal\n")
+        self.consume_changed(
+            original.replace("[ ] A1 Required literal", "[x] A1 Required literal"), literal=True,
+        )
+
+    def test_real_excerpt_marker_retains_outer_list_context(self):
+        original = "- Parent\n    - [x] A1 Real task\n    - [ ] A2 Real sibling\n# End\n"
+        self.request["acceptance_paths"] = [
+            "spec.md", {"path": "plan.md", "start": "    - [x] A1 Real task", "end": "# End"},
+        ]
+        self.prepare_pipeline(original, acceptance="    - [ ] A1 Real task\n    - [ ] A2 Real sibling\n")
+        self.consume_changed(
+            original.replace("[x] A1", "[ ] A1").replace("[ ] A2", "[X] A2"), literal=False,
+        )
+
+    def test_literal_raw_code(self):
+        self.literal("<code>\n- [ ] A1 Required literal\n</code>\n")
+
+    def test_literal_raw_style(self):
+        self.literal("<style>\n- [ ] A1 Required literal\n</style>\n")
+
+    def test_literal_same_line_html_and_comment(self):
+        for sample in (
+            "- Before <pre>- [ ] A1 Required literal</pre>\n",
+            "- <!-- [ ] A1 Required literal -->\n",
+        ):
+            with self.subTest(sample=sample):
+                self.literal(sample)
+
+    def test_literal_tab_indented(self):
+        self.literal("\t- [ ] A1 Required literal\n")
+
+    def test_literal_compound_quote(self):
+        self.literal("- > - [ ] A1 Required literal\n")
+
+    def test_literal_inline_code_and_multiline_script_example(self):
+        for sample in (
+            "- `- [ ] A1 Required literal`\n",
+            "Paragraph `\n<script>\n- [ ] A1 Required literal\n</script>\n`\n",
+        ):
+            with self.subTest(sample=sample):
+                self.literal(sample)
+
+    def test_literal_ordinary_item_continuation(self):
+        self.literal("- Parent paragraph\n  [ ] A1 Required literal\n")
+
+    def test_literal_ordered_non_one_paragraph_continuation(self):
+        self.literal("Paragraph\n2. [ ] A1 Required literal\n")
+
+    def test_progress_ordered_after_blank_line(self):
+        self.progress("Paragraph\n\n2. [ ] A1 Real task\n")
+
+    def test_progress_ordered_one_interrupts_paragraph(self):
+        self.progress("Paragraph\n1. [ ] A1 Real task\n")
+
+    def test_literal_opaque_and_unclosed_regions(self):
+        for sample in (
+            "<![CDATA[\n- [ ] A1 Required literal\n]]>\n",
+            "<!--\n- [ ] A1 Required literal",
+        ):
+            with self.subTest(sample=sample):
+                self.literal(sample)
+
+    def test_literal_escaped_checkbox(self):
+        self.literal("- \\[ ] A1 Required literal\n")
+
+    def test_progress_unicode_crlf_eof_and_exact_single_character_identity(self):
+        original = (
+            "# \u03bb \U0001f600\r\n\r\n- [x] **A1**: Real task\r\n"
+            "- [X] `A2`: Real sibling\r\n- [x] A1.1 Different leaf\r\n"
+            "<pre>- [x] A1 Literal</pre>"
+        )
+        normalized = original.replace("[x] **A1**", "[ ] **A1**").replace("[X] `A2`", "[ ] `A2`")
+        self.prepare_pipeline(original, acceptance=normalized)
+        self.consume_changed(normalized, literal=False)
+        for changed in (
+            normalized.replace("[x] A1.1", "[ ] A1.1"),
+            normalized.replace("[x] A1 Literal", "[ ] A1 Literal"),
+            normalized.replace("\r\n", "\n"),
+            normalized + "\n",
+            normalized.replace("\u03bb", "\u03bc"),
+        ):
+            with self.subTest(changed=changed):
+                self.consume_changed(changed, literal=True)
+
+    def test_real_excerpt_end_marker_uses_full_source_span(self):
+        original = "# P1\n- [ ] A1 Real task\n- [x] A2 Boundary\n# P2\n"
+        self.request["acceptance_paths"] = [
+            "spec.md", {"path": "plan.md", "start": "# P1", "end": "- [x] A2 Boundary"},
+        ]
+        self.prepare_pipeline(original, acceptance="# P1\n- [ ] A1 Real task\n")
+        self.consume_changed(
+            original.replace("[ ] A1", "[x] A1").replace("[x] A2", "[ ] A2"), literal=False,
+        )
+
+    def test_literal_excerpt_marker_never_normalizes_without_full_source_permission(self):
+        original = "- - ```markdown\n    - [x] A1 Required literal\n    END\n    ```\n"
+        self.request["acceptance_paths"] = [
+            "spec.md", {"path": "plan.md", "start": "    - [x] A1 Required literal", "end": "    END"},
+        ]
+        self.prepare_pipeline(original, acceptance="    - [x] A1 Required literal\n")
+        self.consume_changed(original.replace("[x]", "[ ]"), literal=True)
+
+    def test_criteria_ids_and_approval_remain_bound_in_all_consumers(self):
+        original = "- [ ] A1 Real task\n- [ ] A2 Real sibling\n"
+        self.prepare_pipeline(original)
+        for changed in (
+            original.replace("Real task", "Different criterion"),
+            original.replace("A1 ", "A3 "),
+            original.replace("[ ] A1", "[!] A1"),
+        ):
+            with self.subTest(changed=changed):
+                self.consume_changed(changed, literal=True)
+        mapping = json.loads((self.repo / "work.json").read_text(encoding="utf-8"))
+        mapping["status"] = "DRAFT"
+        self.write_json("work.json", mapping)
+        self.consume_changed(original, literal=True)
+
+    def test_raw_selected_document_progress_still_blocks_all_consumers(self):
+        original = "- [ ] A1 Real task\n- [ ] A2 Real sibling\n"
+        self.request["selection"].append("plan.md")
+        self.prepare_pipeline(original)
+        self.consume_changed(original.replace("[ ] A1", "[x] A1"), literal=True)
+
+
 class MandatoryControls(Fixture):
     def evaluate(self, controls, policy=None):
         from review_contract import evaluate_controls
@@ -1287,7 +1516,9 @@ class HookEvidence(Fixture):
 if __name__ == "__main__":
     suite_name = sys.argv.pop(1) if len(sys.argv) > 1 else "evidence"
     classes = {
-        "legacy": (LegacyRegressions,), "evidence": (LegacyRegressions, ReviewEvidence),
+        "legacy": (LegacyRegressions,),
+        "evidence": (LegacyRegressions, ReviewEvidence, MarkdownBoundaryEvidence),
+        "boundaries": (MarkdownBoundaryEvidence,),
         "controls": (MandatoryControls,), "hook": (HookEvidence,),
     }[suite_name]
     suite = unittest.TestSuite(unittest.defaultTestLoader.loadTestsFromTestCase(cls) for cls in classes)
