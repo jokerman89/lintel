@@ -272,6 +272,13 @@ coordinator retains generated outputs and final fan-in. No navigation/provider o
 policy/schema workaround is authorized; all final joined/delivery gates remain open.
 Use host-native delegation while Swarming component/final gates remain open.
 
+P08 cross-owner seam `c805849` changes only SHIP's advisory ANALYZE-report guidance:
+read the explicitly linked selected-work/cycle report and verify its identity; an
+unlinked global report is history. ADR-0004's advisory default and P05 mandatory
+controls are unchanged. The existing shape check passes; actual cross-initiative
+selector evidence remains P08 work. P10 owns CP-16 migration inventory and reports
+overdue/unknown/missing-catalog preservation cases; its final independent gate remains open.
+
 Prepared successors: P05-P07 contracts and official host-source report committed in
 `3f584c8`; all P08-P14 dispatch cards already committed in `76e9e80`. P08 requires the
 accepted shared P05/P06/P07 contracts; its context-file ownership is now released by P03.
