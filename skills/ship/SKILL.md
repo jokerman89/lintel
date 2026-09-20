@@ -59,8 +59,12 @@ Verify ship-readiness:
 - Human-readable review/compliance reports remain supporting evidence. PASS text,
   an old commit-only review, elapsed time or an operator note is not a substitute
   for sufficient current evidence.
-- `.claude/runtime/state/analyze-report.md` verdict surfaced if present (ADR-0004; advisory — RED/YELLOW
-  goes to the operator with the findings table, it does not auto-block)
+- Surface the ANALYZE verdict from the report explicitly linked to the selected
+  work/cycle, if available, after checking its work-map, profile and package/leaf
+  identity. An unlinked `.claude/runtime/state/analyze-report.md` is legacy history,
+  not current readiness evidence. ADR-0004 remains advisory by default: surface
+  RED/YELLOW findings to the operator, without automatic blocking or treating a
+  missing report as a pass. Declared mandatory controls still use the shared gate above.
 
 If pre-flight fails: BLOCKED. Don't proceed.
 
