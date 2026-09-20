@@ -1,6 +1,6 @@
 # Orientator — lightweight workflow routing at SENSE
 
-**Last updated:** 2026-05-29 (v4.0 Phase 3)
+**Last updated:** 2026-09-20 (operation/subject boundary)
 **Status:** Concept doc — referenced by `skills/orientator/SKILL.md`, `lib/orientator-routing.sh`, `skills/sense/SKILL.md` (Step 0d)
 
 > The operator types a prompt. Sometimes it's "fix the broken button" — obviously a hotfix. Sometimes it's "what should I do?" — genuinely ambiguous. The orientator is the **mechanical-first router** that turns prompts into workflow recommendations, escalates to LLM only when mechanical confidence falls below the pack's threshold, and writes every decision to an audit log the operator can inspect.
@@ -75,18 +75,20 @@ Per design doc §1.4: the tweak from operator's spec is that all four parameters
 
 ## Mechanical-first routing
 
-`classify_intent` returns one of eight intents using keyword heuristics. First match wins, so order matters:
+`classify_intent` distinguishes the requested operation from its subject before using
+symptom-only fallback. For example, "review the release plan" recommends review,
+"research deployment options only" recommends research, and "fix review comments"
+still recommends a fix. A negated operation is skipped rather than treated as permission.
 
-1. `fix` — keywords: bug, broken, error, crash, "fix", fixa, felsök
-2. `ship` — keywords: ship, release, deploy, shippa, landa
-3. `review` — keywords: review, audit, "check", granska
-4. `research` — keywords: research, explore, understand, utforska, förstå
-5. `scaffold` — keywords: scaffold, "new project", "new repo", nytt projekt, starta
-6. `resume` — keywords: resume, continue, "pick up", fortsätt
-7. `build` — keywords: build, add, implement, "new feature", bygg, lägg till
-8. `unclear` — none of the above; falls back to `pack.navigation.default_workflow`
+The nine results are `build`, `fix`, `review`, `research`, `ship`, `deploy`,
+`scaffold`, `resume` and `unclear`. Existing English and Swedish operation names remain
+available. Empty, unrecognized or only-negated requests return `unclear`; that low-confidence
+result requires scope judgment before a default workflow is executed.
 
-Swedish + English keywords reflect operator language. Adding a language is one PR per keyword block.
+This is a deterministic heuristic, not general language understanding or an authorization
+mechanism. The host must reconcile compound requests, read-only constraints and existing
+user authority before acting. The operation-boundary and mechanical-routing tests exercise
+both read-only negative cases and preserved direct mutation requests without executing them.
 
 ## Mapping intent → workflow
 
@@ -97,6 +99,7 @@ Swedish + English keywords reflect operator language. Adding a language is one P
 | review | `/li:review` |
 | research | `/li:cycle --mode research-dive` |
 | ship | `/li:cycle --from SHIP` |
+| deploy | `/li:cycle --from SHIP`, subject to SCOPE's existing route override and deployment authorization |
 | scaffold | `bin/li-scaffold init` |
 | resume | `/li:resume` |
 | unclear | `<pack.navigation.default_workflow>` |
