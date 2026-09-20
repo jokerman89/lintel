@@ -439,7 +439,7 @@ Independent first-wave review outcomes:
 | P04 component | `aa73651` | PASS; all F01-F05 close | PASS; [final](reviews/P04-final.md) | Integrated `490a0f4` + reports `8964267`; final A22.7 open |
 | P05 | `9c8ef727` | FAIL Q01 excerpt context identity; [report](reviews/P05-shared-boundary-final.md) | Started/stopped on spec counterexample, not passed | Original owner repairs consumer only; provider remains accepted |
 | P06 | `7425960` | PASS; C01-C07 closed | PASS; [final](reviews/P06-provider-repair-final.md) | Integrated `36593cd`; later shared-consumer and live gates open |
-| P07 | `a8de574` | Earlier owned component PASS; new joined long-path failure | Earlier bounded PASS; [final](reviews/P07-windows-final.md) | Own history integrated through `62ca389`; same owner repairs default installed-source Windows I/O |
+| P07 | `4d001463` | Independent long-path repair review pending; earlier `a8de574` remains accepted | Pending repair quality; earlier [bounded pass](reviews/P07-windows-final.md) | Frozen report `da614cad`; same reviewer, no new integration or acceptance |
 
 No rejected product batch was integrated. Green original test counts are retained as
 limited evidence, not substituted for the newly failing acceptance cases.

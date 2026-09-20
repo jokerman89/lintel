@@ -36,7 +36,7 @@ from the reviewed historical merge `40c2795`. Current implementation ownership:
 | P04 Swarming | `a8960a09-fcd7-4652-a9b6-74ad6a94a029` | Component ACCEPTED/integrated `490a0f4` + report history `8964267`; idle until explicit A22.7 |
 | P05 review evidence | `2329e71f-cd9e-473b-94cf-41c579c29a88` | `9c8ef727` rejected for Q01 excerpt-context identity; original owner receives bounded consumer repair |
 | P06 host adapters | `324863ff-e7cf-4abf-b449-04dd0f096170` | Component ACCEPTED/integrated `36593cd`; provider `7425960`, final review `1067da29`; idle |
-| P07 profile context | `b9352dfe-1c1e-4ea3-b7d9-0fd008d39b3d` | Earlier component accepted; new joined default-home Windows long-path failure assigned to same owner |
+| P07 profile context | `b9352dfe-1c1e-4ea3-b7d9-0fd008d39b3d` | Frozen long-path product `4d001463`, report `da614cad`; same-reviewer independent repair spec/quality |
 | P10 installer lifecycle | `5ea6c88c-68c1-4712-8f55-adecdfe0061f` | Implementing approved native/runtime split from `0df1042`; dependencies `98ad7ed` / `ca28074`, no Python install prerequisite |
 
 All are `lintel-builder` sessions with explicit ownership, local commits, report paths
@@ -55,7 +55,7 @@ repair their own findings. All prior reports remain preserved in `reviews/` and 
 | P04 | Final `279dfc9`; component SPEC/QUALITY PASS at `aa73651`; A22.7 open | `ed672f58-2e85-42e2-b1b2-0635ba5b2325` |
 | P05 | Rejection `0cdbf596`, report-only integrated `29ae5d9`; Q01 consumer repair next | `6ed9c7df-4845-4d70-88c7-f0746ab28059` |
 | P06 | Final `1067da29`; complete component SPEC/QUALITY PASS at `7425960`; integrated | `d2a89ac3-151a-4dc0-ab09-1f3a62465cab` |
-| P07 | Final `3d8e715`; owned SPEC/QUALITY PASS at `a8de574`; final joins open | `a7d78944-c02c-4909-a060-2c4f2a754b00` |
+| P07 | Current repair `4d001463` / report `da614cad` under review; earlier `a8de574` accepted by `3d8e715` | `a7d78944-c02c-4909-a060-2c4f2a754b00` |
 
 ## Accepted local integrations
 
@@ -138,6 +138,15 @@ Actual long/readonly cleanup and unrelated sentinel preservation pass. P07's WIP
 reached method-body OK but overall ERROR at ordinary cleanup; that is not acceptance.
 The method, default home and durable filenames remain unchanged. P07 and P10 were
 explicitly authorized to import this separate test dependency and rerun the whole case.
+
+P07's final frozen handoff is product `4d0014639204e5b5ad84838272a840c5283e28d0`
+and report-only child `da614cad615a06c52d2aefd32818c082f9557c0e`. The coordinator
+verified the four owned product paths and report-only parent, read the final evidence,
+and dispatched the same reviewer `a7d78944` for repair spec then quality. Builder-only
+final evidence: 45 lifecycle methods, 19 path methods, nine preservation scripts and
+the unchanged installed method including teardown pass, zero skips. None of this new
+product/report is integrated or independently accepted yet. Cleanup `28b49add` is
+byte-identical to the already integrated `0eab731`; do not replay it at fan-in.
 
 ## Current repair gates
 
