@@ -192,7 +192,9 @@ Resolved component casing is retained in an exact comparison key: a global Windo
 case-fold assumption must not admit a distinct case-sensitive sibling directory.
 An alias whose equivalence cannot be established from resolved identity is rejected
 conservatively, including unverified casing differences.
-It does not change the paths used for I/O, manifest provenance or content fingerprints.
+The comparison does not change logical path identity, manifest provenance or content
+fingerprints. Runtime I/O can use a recognized extended spelling of that same location,
+as described below; the spelling never becomes a different authorized root.
 Other device namespaces, drive-relative paths, unresolved traversal, alternate data
 streams and ambiguous/reserved Windows components are refused, not stripped into
 apparently acceptable files. Resolving links remains necessary; lexical normalization
@@ -202,6 +204,36 @@ is not a replacement for physical containment or a hostile-concurrency sandbox.
 actual native drive I/O and junction/symlink tests. UNC comparison coverage does not
 claim a live share was accessed. Repeated real three-process bootstrap scenarios also
 retain the same selected reference and required policy without ignoring failed attempts.
+
+### Native Windows long-path I/O
+
+The default repository-local home can put history filenames beyond Windows' legacy
+path limits even for an ordinary installed consumer. The runtime uses the same
+validated location through recognized extended drive/UNC filesystem spelling for
+native I/O. This is not a shorter store, a renamed history format or a system
+`LongPathsEnabled` change.
+
+Containment is checked before runtime mutations, including parent creation,
+temporary writes/replacement/cleanup and lock creation/removal. Long ancestors
+are themselves resolved with native spelling so a junction beyond the legacy
+limit cannot be mistaken for a nonexistent lexical parent. The same native path
+adapter covers runtime existence checks, file reads and history listings: an
+ordinary Windows `is_file()` false negative must not authorize a new binding.
+Unknown device namespaces, ADS, traversal, distinct case-sensitive siblings and
+outside-root link/junction targets remain refusals.
+
+Configuration, stored roots, provenance keys, profile digests and context/history
+names continue to use their logical paths. Directory listings map entry names back
+to those logical paths rather than persisting extended I/O aliases. Existing pins
+and history remain readable without a generation change; rebind remains explicit,
+and a failed replacement preserves prior bytes and cleans only its owned temporary.
+POSIX I/O is unchanged.
+
+The installed default-home consumer test and native profile tests exercise fresh
+shells, retained history, explicit rebind and same-mtime drift. Additional native
+fixtures place the parent, temporary and lock paths beyond the legacy limit, not
+only the final filename. Pure UNC spelling tests still do not establish live-share
+acceptance, and Python 3.9 grammar checks are not a minimum-runtime execution.
 
 ## Inheritance, types and compatibility
 

@@ -244,6 +244,92 @@ class ProfileLifecycle(unittest.TestCase):
             BOOTSTRAP, env=env, source_resolver=False,
         ).stdout), rebound)
 
+    @unittest.skipUnless(os.name == "nt", "native Windows default-home long-path lifecycle")
+    def test_default_home_long_runtime_keeps_fresh_shells_history_rebind_and_drift(self):
+        self.target = self.base / ("profile-consumer-" + "x" * 95)
+        self.target.mkdir()
+        (self.target / "AGENTS.md").write_text("Synthetic long-path consumer.\n", encoding="utf-8")
+        (self.target / ".claude").mkdir()
+        self.require("_default")
+        home = self.target / ".claude/runtime/lintel-home"
+        runtime = self.target / ".claude/runtime"
+
+        def native(path):
+            return Path("\\\\?\\" + str(path))
+
+        def cleanup_runtime():
+            if native(runtime).exists():
+                shutil.rmtree(native(runtime))
+
+        self.addCleanup(cleanup_runtime)
+        unused_home = self.base / "unused-operator-home"
+        unused_home.mkdir()
+        env = {key: value for key, value in self.env.items()
+               if not key.startswith(("LINTEL_", "CLAUDE_"))}
+        env.update(LINTEL_SOURCE_ROOT=self.source.as_posix(), LINTEL_REPO_ROOT=self.target.as_posix(),
+                   HOME=str(unused_home), USERPROFILE=str(unused_home))
+        first = json.loads(self.shell(BOOTSTRAP, env=env, source_resolver=False).stdout)
+        repeated = json.loads(self.shell(BOOTSTRAP, env=env, source_resolver=False).stdout)
+        self.assertEqual(repeated, first)
+        self.assertEqual(first["generation"], 1)
+        selected = self.target / ".claude/runtime/profiles/selected.json"
+        currents = list(native(home).glob("sessions/profiles/*/current-profile.json"))
+        self.assertEqual(len(currents), 1)
+        current = currents[0]
+        logical_current = Path(str(current)[4:])
+        history = current.parent / "history"
+        self.assertGreater(len(str(logical_current.parent)), 260)
+        self.assertGreater(len(str(logical_current.with_name(logical_current.name + ".lock"))), 260)
+        archives = list(history.iterdir())
+        self.assertEqual([item.name for item in archives], [f"1-{first['digest'][7:]}.json"])
+        self.assertGreater(len(str(archives[0].parent)), 260)
+        record = json.loads(current.read_text(encoding="utf-8"))
+        self.assertEqual(record["profile"]["roots"]["repo"], self.target.resolve().as_posix())
+        self.assertEqual(record["profile"]["roots"]["source"], self.source.resolve().as_posix())
+        for provenance in record["profile"]["provenance"].values():
+            self.assertFalse(provenance["path"].startswith("//?/"))
+        before = {path.name: path.read_bytes() for path in [current, selected, *archives]}
+        self.assertEqual(json.loads(self.shell(BOOTSTRAP, env=env, source_resolver=False).stdout), first)
+        self.assertEqual({path.name: path.read_bytes() for path in [current, selected, *archives]}, before)
+        reference_file = self.target / "handoff.json"
+        reference_file.write_text(json.dumps(first), encoding="utf-8")
+        verification_env = dict(env, HANDOFF=reference_file.as_posix())
+        resumed = self.shell(
+            'source "$LINTEL_SOURCE_ROOT/lib/copilot-env.sh"\n'
+            'lintel_copilot_env "$LINTEL_REPO_ROOT" || exit $?\n'
+            'verify_profile_context "$HANDOFF" || exit $?\n'
+            'profile_required_policy || exit $?\n',
+            env=verification_env, source_resolver=False,
+        )
+        self.assertEqual(json.loads(resumed.stdout.splitlines()[0]), first)
+        self.assertIs(json.loads(resumed.stdout.splitlines()[1])["required"], True)
+        rebound = json.loads(self.shell(
+            'source "$LINTEL_SOURCE_ROOT/lib/copilot-env.sh"\n'
+            'lintel_copilot_env "$LINTEL_REPO_ROOT" || exit $?\n'
+            'rebind_profile_context "explicit long-path replan"',
+            env=env, source_resolver=False,
+        ).stdout)
+        self.assertEqual(rebound["generation"], 2)
+        self.assertEqual(rebound["digest"], first["digest"])
+        self.assertEqual(archives[0].read_bytes(), before[archives[0].name])
+        self.assertEqual(sorted(path.name for path in history.iterdir()),
+                         [f"1-{first['digest'][7:]}.json", f"2-{first['digest'][7:]}.json"])
+        expected_bytes = {path.name: path.read_bytes() for path in [current, selected, *history.iterdir()]}
+        manifest = self.source / "packs/_default/pack.yaml"
+        data, stamp = manifest.read_bytes(), manifest.stat()
+        manifest.write_bytes(data + b"\n# Synthetic same-mtime long-path drift\n")
+        os.utime(manifest, ns=(stamp.st_atime_ns, stamp.st_mtime_ns))
+        refused = self.shell(BOOTSTRAP, env=env, source_resolver=False, success=False)
+        self.assertIn("PROFILE_DRIFT", refused.stderr)
+        self.assertEqual({path.name: path.read_bytes() for path in [current, selected, *history.iterdir()]},
+                         expected_bytes)
+        manifest.write_bytes(data)
+        os.utime(manifest, ns=(stamp.st_atime_ns, stamp.st_mtime_ns))
+        self.assertEqual(json.loads(self.shell(BOOTSTRAP, env=env, source_resolver=False).stdout), rebound)
+        self.assertEqual(list(unused_home.iterdir()), [])
+        self.assertFalse(list(native(home).rglob(".profile-*")))
+        self.assertFalse(list(native(home).rglob("*.lock")))
+
     def test_concurrent_no_id_bootstraps_share_one_binding(self):
         self.pack("strict")
         self.require("strict")
