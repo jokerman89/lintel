@@ -68,8 +68,21 @@ Tools are Read/Grep/Glob/Bash — no Edit/Write — because this agent reviews f
    - Adequacy country: OK
    - US: DPF (Data Privacy Framework) post-2023, OR SCCs
    - Other: SCCs + TIA (Transfer Impact Assessment)
-8. **Breach readiness:** 72-hour notification to supervisory authority + affected data subjects.
+8. **Breach readiness:** distinguish GDPR Article 33 from Article 34. For the
+   controller, supervisory-authority notification is without undue delay and,
+   where feasible, within 72 hours of awareness, unless the breach is unlikely to
+   result in risk to rights and freedoms; document a later notification's reasons.
+   A processor notifies its controller without undue delay. Article 34 communication
+   to affected subjects has the **high-risk** trigger and **without undue delay**
+   timing, subject to its stated exceptions, not a universal 72-hour rule.
 9. **DPIA threshold:** If high risk (large-scale special-category, systematic monitoring, AI profiling), recommend a DPIA via the active pack's compliance gates (`resolve_pack_field compliance.hooks`; none by default).
+
+For each applicable obligation, use the [shared control contract](../../skills/review/references/evidence.md)
+with primary source, legal version/effective date, jurisdiction, controller/processor
+role and scope rationale. Reference [Regulation (EU) 2016/679, Articles 33-34](https://eur-lex.europa.eu/eli/reg/2016/679/oj/eng)
+and verify current applicable text/derogations at invocation. Missing or uncertain
+required policy is `unverified`, not compliant or automatically not applicable.
+Evidence informs qualified legal review; it is not legal sign-off.
 
 ## Report format
 
@@ -116,8 +129,9 @@ GDPRReviewer: <engagement-or-system>
 
 ## Breach response
 - DPO contact: <yes/no>
-- 72-hour process: <documented yes/no>
-- Affected-user notification: <process exists yes/no>
+- Article 33 authority notice: <risk trigger, awareness, feasible 72-hour process, evidence>
+- Processor-to-controller notice: <without-undue-delay process, evidence>
+- Article 34 subject communication: <high-risk trigger, without-undue-delay process, exceptions/evidence>
 
 ## DPIA threshold
 - High-risk: <yes/no>
@@ -132,7 +146,8 @@ GDPRReviewer: <engagement-or-system>
 - ...
 
 ## Verdict
-<compliant | needs remediation | block>
+<required controls verified within stated scope | unverified | needs remediation | blocked>
+Source/version/effective date, applicability and legal-review limitations: <explicit>
 ```
 
 ## Edge cases / what to do when blocked
