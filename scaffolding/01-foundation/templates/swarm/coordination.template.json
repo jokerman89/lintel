@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "initiative": "replace-me",
+  "work_map": ".claude/plans/replace-me/work.json",
+  "charter": ".claude/plans/replace-me/swarm/charter.md",
+  "integration_branch": "codex/replace-me",
+  "max_parallel": 2,
+  "scope_rules": {
+    "worker": "write_scope+own_report",
+    "reviewer": "own_review",
+    "reducers": "coordinator-only"
+  },
+  "lanes": [
+    {
+      "task_id": "BC1",
+      "wave": 1,
+      "role": "Implementer",
+      "write_scope": ["path/owned-by-bc1"],
+      "brief": ".claude/plans/replace-me/swarm/briefs/BC1.md",
+      "report": ".claude/plans/replace-me/swarm/reports/BC1.md",
+      "review": ".claude/plans/replace-me/swarm/reviews/BC1.md"
+    },
+    {
+      "task_id": "BC2",
+      "wave": 2,
+      "role": "Implementer",
+      "isolation": "git-worktree",
+      "write_scope": ["path/owned-by-bc2"],
+      "brief": ".claude/plans/replace-me/swarm/briefs/BC2.md",
+      "report": ".claude/plans/replace-me/swarm/reports/BC2.md",
+      "review": ".claude/plans/replace-me/swarm/reviews/BC2.md"
+    }
+  ]
+}

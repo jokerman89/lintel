@@ -49,13 +49,15 @@ You are the FULL-ENGINEERING-PASS — the composition that runs all 5 engineerin
 
 ## What this skill does
 
-Orchestrates TA → DA‖SC → DH → TQ as a single end-to-end engineering pass. Produces the complete artifact set for a customer engagement or major release in one invocation.
+Orchestrates TA → DA‖SC → DH → TQ as a single end-to-end engineering pass. DA/SC are
+parallel-eligible through the host-aware swarm profile, not unconditionally concurrent. Produces the
+complete artifact set for a customer engagement or major release in one invocation.
 
 ```
 Stage 1: TA (tech-architecture)
   ↓ produces: system-arch + ADRs + contracts + dependency graph + NFRs
   ↓
-Stage 2: DA  +  SC   (run in parallel — independent concerns)
+Stage 2: DA  +  SC   (independent concerns; swarm when explicitly mapped and safe)
   ↓ DA produces: data-model + schema + migration + retention + query patterns
   ↓ SC produces: threat-model + secrets + auth + compliance + audit-path + runbook
   ↓
@@ -196,16 +198,29 @@ if [[ " ${final_modules[*]} " =~ " ta " ]]; then
   forge_envelope phase_transition full-engineering-pass ta--complete brief .claude/runtime/state/ta/...
 fi
 
-# ─── Stage 2: DA + SC (parallel) ──────────────────────
-echo "════ Stage 2: DA + SC (parallel) ════"
+# ─── Stage 2: DA + SC (parallel-eligible) ─────────────
+echo "════ Stage 2: DA + SC (parallel-eligible) ════"
 stage2_modules=()
 [[ " ${final_modules[*]} " =~ " da " ]] && stage2_modules+=(da)
 [[ " ${final_modules[*]} " =~ " sc " ]] && stage2_modules+=(sc)
 
+# If the selected approved work map explicitly opts into swarm execution and
+# assigns DA/SC to the current ready wave with disjoint scopes, delegate the
+# stage to `/li:swarm run <coordination-path>`. That profile validates host tier,
+# isolation, attribution, reports, and independent two-stage reviews.
+# Otherwise preserve the established serial fallback below on every host.
+if [ "${#stage2_modules[@]}" -gt 0 ] && [ "${LINTEL_EXECUTION_PROFILE:-sequential}" = "swarm" ] && [ -n "${LINTEL_SWARM_COORDINATION:-}" ]; then
+  if ! /li:swarm run "$LINTEL_SWARM_COORDINATION"; then
+    for module in "${stage2_modules[@]}"; do
+      module_status["$module"]="FAILED"
+    done
+  fi
+else
+  for module in "${stage2_modules[@]}"; do
+    /li:"$module" full || module_status["$module"]="FAILED"
+  done
+fi
 for module in "${stage2_modules[@]}"; do
-  # Phase 4 may upgrade to actual parallel execution via subagent fan-out;
-  # v4.6 ships sequential-within-stage with parallel-eligible marker
-  /li:"$module" full || module_status["$module"]="FAILED"
   module_score["$module"]=$(read_module_score "$module")
 done
 
@@ -329,6 +344,7 @@ YES via `--resume`:
 
 **Reads:**
 - All 5 module SKILL.md files (or as-many as exist)
+- optional approved work map and swarm coordination for the DA/SC ready wave
 - `lib/pack-resolver.sh` for pack policy
 - `~/.lintel/profile.yaml` `engineering.*` block (per-module preferences)
 
@@ -359,6 +375,8 @@ This handles the v4.x stacking-rollout window where SC + DH + TQ + composition l
 - **Skipping TA** — every downstream module depends on architecture decisions
 - **Running DA before TA** — DA reads TA's scaling-plan + boundary-review
 - **Parallel-stage modules accessing each other's mid-flight state** — DA + SC must be independent within Stage 2
+- **Assuming DA/SC run concurrently because the DAG says parallel** — only a validated opted-in
+  swarm with host-aware isolation may fan out; otherwise use the serial fallback
 - **Treating aggregate score as the only signal** — per-module dimension breakdown is the actionable view
 - **Hardcoding module list** — composition reads available modules from filesystem
 

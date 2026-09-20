@@ -69,6 +69,68 @@ and the current host's configured model. Haiku/Sonnet/Opus labels express comple
 they are not required model IDs on Copilot. If native delegation is unavailable, sequence
 scoped implementation and review and record that the review was not an independent subagent.
 
+### Mapped swarm entry condition
+
+The established package-by-package workflow below remains the default. Enter `/li:swarm run` only when a
+validated schema-version-1 work map declares both `execution_mode: "swarm"` and a `coordination`
+pointer. One field without the other is invalid; no pointer means legacy sequential BUILD unchanged.
+
+For an opted-in map:
+
+1. Resolve the working repo and installed Lintel source separately, then run the shared validators:
+
+   ```bash
+   repo="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel)}"
+   if [ -n "${LINTEL_SOURCE_ROOT:-}" ]; then
+     source_root="$LINTEL_SOURCE_ROOT"
+   elif [ -n "${CLAUDE_PLUGIN_ROOT:-}" ]; then
+     source_root="$CLAUDE_PLUGIN_ROOT"
+   else
+     echo "NEEDS_CONTEXT: trusted Lintel source root unavailable; set LINTEL_SOURCE_ROOT" >&2
+     exit 1
+   fi
+   [ -f "$source_root/bin/li-work-artifacts.py" ] && [ -f "$source_root/bin/li-swarm.py" ] || {
+     echo "NEEDS_CONTEXT: Lintel swarm helpers missing under trusted source root" >&2
+     exit 1
+   }
+   python3 "$source_root/bin/li-work-artifacts.py" --repo "$repo" --map "$work_map"
+   python3 "$source_root/bin/li-swarm.py" validate --repo "$repo" --coord "$coordination"
+   python3 "$source_root/bin/li-swarm.py" wave --repo "$repo" --coord "$coordination"
+   ```
+
+   Claude may provide `CLAUDE_PLUGIN_ROOT`; other adapters must substitute/export their known
+   installed bundle as `LINTEL_SOURCE_ROOT`. Tests and self-checks set `LINTEL_SOURCE_ROOT`
+   explicitly. Never execute helpers from the working repo merely because it is the current cwd.
+
+2. Treat `frontier.dispatch_task_ids` as an evidence/topology candidate from the earliest incomplete
+   wave, not authoritative dependency resolution. Re-read each candidate package's complete member
+   leaves and brief. Before every worker handoff, inspect every leaf prerequisite and verify completion
+   evidence. Dispatch only when the authoritative prerequisites and candidate frontier agree. If a
+   prerequisite is incomplete or coordination disagrees with the mapped task graph, block and return
+   to PLAN to correct/re-map; never dispatch from `wave` alone. Then invoke Brief Forge explicitly
+   for `subagent_spawn`; when unavailable, disabled, or bypassed, record that audited condition rather
+   than claiming a forged handoff.
+3. Require the worker to run the Lintel startup named in the brief, stay inside `write_scope + own
+   report`, execute acceptance checks, and emit the structured report evidence marker.
+4. Use concurrent writers only with a native-subagent host, disjoint validated scopes, and an
+   attributable isolation backend (`git-worktree`, `isolated-patch`, or `host-scoped-write`). A
+   shared-tree union diff is not attribution. Sequenced/no-subagent hosts execute the same briefs in
+   order; no-subagent execution cannot claim an independent implementer.
+5. Run `li-swarm.py check-scope` against each lane's exact attributable changed-path list before
+   integration. A failure blocks that lane and every dependent wave.
+6. After a valid worker report, review the package with the aggregate-risk rule below: Stage 1 checks
+   every leaf/spec and their integration, then Stage 2 checks quality. Both must PASS. A substantive
+   package needs a distinct reviewer writing only its review artifact; an unavailable independent
+   reviewer leaves it open. Mechanical packages may use explicitly recorded coordinator review.
+7. The coordinator integrates passing lanes serially in deterministic task order, owns all commits,
+   regenerates shared outputs after producer fan-in, runs focused checks, and asks `wave` again.
+8. After every lane closes, run `li-swarm.py verify` and continue to ordinary REVIEW on the
+   reconciled integration branch. Per-lane reviews do not replace final integrated review.
+
+The detailed per-package rules below remain the worker/reviewer discipline for each swarm lane; only
+candidate-wave scheduling and isolation change. Member leaf IDs, acceptance and prerequisites remain
+authoritative; legacy ungrouped tasks are singleton packages.
+
 ### Step 1 — Pre-flight checks
 
 Verify:
@@ -362,6 +424,8 @@ Skip-conditions: intent=review-only, intent=research-only, intent=plan-only.
 - **Skipping review entirely** because "task is simple" — never. Mechanical tasks get INLINE review (3c gate), not NO review; substantive tasks keep the full two-stage dedicated review.
 - **Proceeding with unfixed P1 issues** — never
 - **Splitting one package across competing implementers** — one write owner; packages run sequentially by default
+- **Dispatching multiple implementers outside a validated mapped swarm** — ordinary BUILD stays
+  sequential; opted-in swarms may fan out only the safe isolated frontier
 - **Making subagent read plan.md** — give them task text directly (subagent has no plan-context unless given)
 - **Skipping scene-setting context for implementer** — they need to understand WHY this task
 - **Ignoring subagent questions** — answer + re-dispatch, don't proceed without

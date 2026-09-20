@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # component: work-artifact-map
-# implements: ADR-0024
+# implements: ADR-0024, ADR-0027
 # intent: docs/spec-kit.md
 # constraints: read-only; paths must stay inside the working repository
 # last_intent_review: 2026-09-08
@@ -9,6 +9,12 @@ import argparse
 import json
 from pathlib import Path, PurePosixPath
 import sys
+
+SOURCE_ROOT = Path(__file__).resolve().parent.parent
+if str(SOURCE_ROOT / "lib") not in sys.path:
+    sys.path.insert(0, str(SOURCE_ROOT / "lib"))
+
+from swarm_contract import validate_work_map_swarm_fields  # noqa: E402
 
 SCHEMA_VERSION = 1
 REQUIRED_ARTIFACTS = ("spec", "plan", "tasks", "prompt")
@@ -42,6 +48,14 @@ def load_work_map(root: Path, map_path: Path) -> dict:
         artifact_path(root, data.get(field))
     if data.get("constitution") is not None:
         artifact_path(root, data["constitution"])
+    relative_map = map_path.relative_to(root).as_posix()
+    swarm_result = validate_work_map_swarm_fields(root, data, relative_map)
+    if not swarm_result.ok:
+        details = "; ".join(
+            f"{item.code} at {item.path}: {item.message}"
+            for item in swarm_result.diagnostics
+        )
+        raise ValueError(f"Invalid swarm work-map extension: {details}")
     return data
 
 

@@ -49,7 +49,7 @@ Canonical skills live at `skills/<name>/SKILL.md`. Claude plugin workflows use `
 
 | Cluster | What it holds |
 |---|---|
-| **Cycle** | the nine phase skills, the `cycle` orchestrator, four composite shortcuts, plus `resume`, `status`, `jobs` |
+| **Cycle** | the nine phase skills, the `cycle` orchestrator, the opt-in `swarm` execution profile, four composite shortcuts, plus `resume`, `status`, `jobs` |
 | **Engineering modules** | `ta`, `da`, `sc`, `dh`, `tq` — each an orchestrator plus sub-skills — and `full-engineering-pass`, which composes all five in dependency order |
 | **Generate** | a shared content pipeline (outline → write → design → QA) feeding per-format renderers |
 | **Frontend** | a design-director orchestrator over typography, motion and shader sub-skills, each emitting a JSON contract, plus a six-dimension review gate |
@@ -113,6 +113,7 @@ This is where the repo's central rule lives: *if a guarantee is only prose, it i
 | `cycle-footer.sh` | `render_cycle_footer` — the position footer, mode-aware, with an ASCII fallback |
 | `scale-estimator.sh` | sizing, and the calibration path that turns token estimates from guesses into measurements |
 | `cli-tiers.sh` | generates the capability table from `cli-tiers.yaml`; a shape test fails the build if the README disagrees |
+| `swarm_contract.py` and `li-swarm.py` | validate opt-in swarm topology, per-lane scope and close evidence without executing artifact content |
 
 ---
 
@@ -166,6 +167,24 @@ and any open jobs, then recommends a workflow, an entry phase and a risk level.
 It is mechanical-first: cheap pattern matching decides the common cases, and only an ambiguous one
 escalates to a model call, inside a pack-overridable token budget.
 
+## Swarming as an execution profile
+
+Swarming is an explicit profile over PLAN, BUILD and REVIEW, not a tenth phase. PLAN keeps one
+authoritative task map and adds a pointer to committed execution topology only after operator opt-in.
+BUILD can then fan out dependency-ready lanes whose write scopes are disjoint and whose changes are
+attributable to separate worktrees, patches or an equivalent host-enforced sandbox. If the host or
+isolation cannot prove that attribution, the same lane briefs run sequentially.
+
+Every swarm has one coordinator. Workers own only their declared paths and report; independent
+reviewers own only their lane reviews. The coordinator alone writes shared ledgers, generated
+reducers, commits and integration history. Passing lane reviews are inputs to fan-in; REVIEW still
+checks the reconciled branch across specification, quality and active-pack compliance.
+
+The committed contract lives beside the trio under
+`.claude/plans/<initiative>/swarm/`. Runtime attempts stay gitignored. This makes recovery depend on
+reviewable artifacts and attributable changes rather than chat memory or a still-running worker.
+See [swarming work](concepts/swarming-work.md) for the artifact tree and operating procedure.
+
 ---
 
 ## Depth — the engineering modules
@@ -193,8 +212,10 @@ security in parallel, then hosting, then testing.
 
 **Hand-off envelopes.** Work crossing a boundary — spawning a subagent, transitioning a phase,
 passing to a cold executor — can be wrapped in a standardised envelope and scored by the active
-pack's evaluators before it is allowed through. *Envelope construction is dormant by decision: it is
-opt-in, not auto-armed.* The schema and evaluators ship; the automatic gate does not.
+pack's evaluators before it is allowed through. The schema, helpers and evaluator policy ship, but
+there is no universal automatic interceptor: a workflow must invoke Brief Forge explicitly, as the
+swarm profile does before dispatch. Pack configuration selects behavior for an invocation; it does
+not install a host hook.
 
 **Meta-infra discipline.** Changes to the harness's own structure ripple into every downstream
 cycle, so they run under four extra gates — a structure-impact entry, a compatibility audit, the
@@ -210,7 +231,7 @@ Four roots. Two are machine-global, two live in your repo:
 |---|---|---|
 | `~/.lintel/` | machine-global (configurable with `LINTEL_HOME`) | operator preferences in `profile.yaml` (mode, role); active pack selected by `packs/active-pack`; installed packs, cross-repo job registry, operator audit log |
 | `~/.claude/` | machine-global | your CLI's own home — `settings.json`, and hooks you armed by hand on a bare install |
-| `<repo>/.claude/` | per-repo, **committed** | `memory/` (lessons, working state, personas), `decisions/`, `plans/` |
+| `<repo>/.claude/` | per-repo, **committed** | `memory/` (lessons, working state, personas), `decisions/`, `plans/` including optional swarm topology and evidence |
 | `<repo>/.claude/runtime/` | per-repo, **gitignored** | cycle state, job data, session saves, repo event log |
 
 The committed/gitignored split is the load-bearing part. Knowledge that should be reviewed in a pull

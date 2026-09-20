@@ -125,6 +125,45 @@ Recreate only local runtime bookkeeping after reconciling the selected work with
 An APPROVED map records prior scope; verify current user authority before external actions.
 Continue at the selected BUILD/REVIEW phase using the mapped artifacts, without requiring an
 old machine's 00-state.md, private checkpoint or a duplicate Lintel task list.
+
+#### Swarm-aware committed resume
+
+If the selected map declares `execution_mode: "swarm"` and `coordination`, use the same committed
+artifacts rather than reconstructing lane state from chat or the local ledger:
+
+```bash
+repo="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel)}"
+if [ -n "${LINTEL_SOURCE_ROOT:-}" ]; then
+  source_root="$LINTEL_SOURCE_ROOT"
+elif [ -n "${CLAUDE_PLUGIN_ROOT:-}" ]; then
+  source_root="$CLAUDE_PLUGIN_ROOT"
+else
+  echo "NEEDS_CONTEXT: trusted Lintel source root unavailable; set LINTEL_SOURCE_ROOT" >&2
+  exit 1
+fi
+[ -f "$source_root/bin/li-work-artifacts.py" ] && [ -f "$source_root/bin/li-swarm.py" ] || {
+  echo "NEEDS_CONTEXT: Lintel resume helpers missing under trusted source root" >&2
+  exit 1
+}
+python3 "$source_root/bin/li-work-artifacts.py" --repo "$repo" --map "$selected_map"
+python3 "$source_root/bin/li-swarm.py" status --repo "$repo" --coord "$coordination"
+python3 "$source_root/bin/li-swarm.py" wave --repo "$repo" --coord "$coordination"
+```
+
+Claude may provide `CLAUDE_PLUGIN_ROOT`; other adapters substitute/export their installed bundle as
+`LINTEL_SOURCE_ROOT`. Tests and self-checks set it explicitly. The working repo is only `--repo` and
+never a trusted helper source.
+
+Surface the lane states, earliest incomplete wave, ready task IDs, and actual host execution tier.
+`awaiting_review` resumes at the lane's independent review, while `rework_required` returns to the
+same card. A complete frontier routes to the integrated REVIEW close gate.
+
+Runtime loss cancels attempts, not committed work. Treat an unreported worker process as unfinished.
+If an isolated worktree or patch survives, preserve it, derive its exact changed paths, run
+`check-scope`, and finish the declared report/review. If the change cannot be attributed to one lane,
+surface the discrepancy and sequence a clean retry; never infer completion or silently discard it.
+Do not select another initiative by modification time.
+
 ### Step 1.5 — Integrity check (v3.6 cohort 1 item 6.3)
 
 Before trusting 00-state.md, validate it. Defensive guard against state-drift / wrong-branch / stale state.
@@ -294,6 +333,8 @@ For BUILD resume:
 
 For REVIEW resume:
 - BUILD output exists (commits since last DEFINE phase) ✓
+- If swarm mode: `li-swarm.py verify` passes and all lane changes are on the declared integration
+  branch ✓
 
 For SHIP resume:
 - REVIEW PASS ✓
@@ -356,6 +397,7 @@ n/a — RESUME is itself the hop-in mechanism.
 - The explicitly linked `LINTEL_SCOPE_PATH`, else the selected job's `scope.md` (the SCOPE
   writer's path); no jobs-parent or newest-directory lookup
 - `plan.md`, `spec.md`, `review-report.md` (for precondition checks)
+- selected `work.json` and optional swarm coordination/charter/briefs/reports/reviews
 - recent git log
 
 **Calls into:**
@@ -375,6 +417,8 @@ n/a — RESUME is itself the hop-in mechanism.
 - **Loading full prior session conversation history** — read just 00-state.md, not the whole context
 - **Ignoring stale state** (>30 days old) — surface age, ask operator if still valid
 - **Resuming with corrupt state file silently** — explicit error, don't guess
+- **Trusting a lost worker attempt as completed swarm work** — only attributable changes plus valid
+  committed report/review evidence advance the frontier
 
 ## Failure recovery
 

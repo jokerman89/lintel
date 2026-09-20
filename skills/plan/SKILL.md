@@ -33,6 +33,8 @@ Takes APPROVED design doc (from DEFINE) + discover-report.md (from DISCOVER) and
 2. **spec.md + prompt.md** — the master spec and cold-executor handoff, reviewed with the plan
 3. **Plan signals** — tasks, phases and a labelled whole-cycle token estimate. Present before BUILD; no invented price.
 4. **Founder approval gate** — explicit pause before commit
+5. **Optional swarm profile** — when independent domains exist and the operator opts in, add one
+   validated coordination pointer without duplicating task authority
 
 Adopted from speckit (cross-section Analyze), Architect image (cost-estimate gate, founder approval gate), and superpowers (two-stage subagent review).
 
@@ -179,6 +181,38 @@ T1 (setup) → T2 (schema) → T3 (api) → T5 (test-e2e)
 Detect cycles and impossible orderings in both views. Keep leaf IDs authoritative; the package
 table is a grouping in plan.md, not a new job-state schema or an automatic dispatch service.
 Surface blockers explicitly.
+
+### Step 6a — Detect swarm candidates without opting in automatically
+
+After the dependency graph is stable, identify whether two or more packages are dependency-independent
+and can own disjoint repository paths. Generated outputs, shared schemas, plan/runtime ledgers,
+commits, and integration are coordinator-owned reducers; do not count them as worker domains.
+
+If no independent ownership exists, keep ordinary sequential BUILD and emit no swarm fields. If it
+does exist, show the candidate waves, write scopes, expected isolation, `max_parallel`, and the
+current host's `subagents` tier from `lib/cli-tiers.yaml`. Ask whether to use the swarm profile unless
+the operator already requested it in the current authorized scope. This is an execution-profile
+choice, not approval for additional scope or external actions.
+
+When selected:
+
+1. Keep the existing mapped `tasks` artifact authoritative for card text, dependencies, checkboxes,
+   and acceptance.
+2. Add only `execution_mode: "swarm"` and a repository-relative `coordination` pointer to the
+   schema-version-1 work map.
+3. Instantiate the charter, coordination, brief, report, and review templates from
+   `scaffolding/01-foundation/templates/swarm/` under the initiative's committed plan directory.
+4. Give each package at most one lane, retaining its authoritative member leaf IDs and aggregate
+   review depth from the plan. Legacy ungrouped tasks are singleton packages. Coordination contains
+   topology and ownership only; it must not duplicate task prose, dependencies, status, or acceptance.
+5. Resolve helpers only from explicit `LINTEL_SOURCE_ROOT`, then `CLAUDE_PLUGIN_ROOT` when Claude
+   supplies it; other adapters export their installed bundle path. If neither trusted root exists,
+   return `NEEDS_CONTEXT`. Run `bin/li-work-artifacts.py` and `bin/li-swarm.py validate` from that
+   source with the working repo only as `--repo`. Validation must pass before the plan is presented
+   as swarm-ready. Tests/self-checks export `LINTEL_SOURCE_ROOT` explicitly.
+
+Sequenced and no-subagent hosts emit the same artifacts. They degrade execution speed, not the
+scope/evidence contract, and must not claim concurrency or independent review they did not perform.
 
 ### Step 7 — Cost estimate (MANDATORY GATE)
 
@@ -443,12 +477,15 @@ Skip-conditions:
 **Writes:**
 - `plan.md` (canonical)
 - `spec.md` (draft, finalized in CAPTURE)
+- `work.json` (schema version 1; optional additive swarm fields only after opt-in)
+- `.claude/plans/<initiative>/swarm/` (optional charter, topology, briefs, and evidence destinations)
 - `.claude/runtime/state/.planner-checkpoint.md`
 - `.claude/runtime/state/00-state.md` (PLAN entry)
 - `.claude/runtime/audit/plan-metrics.jsonl`
 
 **Triggers:**
 - BUILD with plan.md as canonical source
+- `/li:swarm` when the validated map explicitly selects the swarm profile
 
 ## Recommended agents to dispatch (from discover-report)
 
@@ -471,6 +508,10 @@ Skip-conditions:
 - **Task decomposition too coarse** — 2-5 min per task (superpowers rule); bigger = decompose
 - **Invented model availability** — select roles by package complexity and honor the current host's actual model configuration
 - **Plan finalized without founder gate** — gate is MANDATORY per Architect image pattern
+- **Treating parallelizable cards as automatic swarm consent** — surface the option; absence of both
+  swarm fields preserves sequential BUILD
+- **Repeating task prose/dependencies in coordination.json** — the mapped tasks artifact is the one
+  authority; coordination owns execution topology only
 
 ## Failure recovery
 
