@@ -42,12 +42,14 @@ repaired a wiki schema-reader mismatch (JSON envelope, optional legacy pack fiel
 actual source-derived metadata, error refusal, idempotency and local adapter checks pass.
 
 **What's pending:** P04 final A22.7 remains open. P05's `9c8ef727` consumer was rejected
-by report `0cdbf596` for lost excerpt-classification identity; the provider remains
-accepted. P07's default installed-source bootstrap now reproduces a native Windows
-274-character history-path failure. Original owners/reviewers handle both bounded
-repairs. Preflight checkpoint `98ad7ed` retains this RED case and seven passing joined
-cases; it is not combined acceptance. P10 is implementing in session `5ea6c88c`; the
-operator explicitly requires installation without Python (ADR-0030). Continue P08-P14 in dependency order,
+by report `0cdbf596` for lost excerpt-classification identity; new candidate `b023e8c`
+/ report `ec90b609` is under the same independent reviewer. The provider remains
+accepted. P07's native long-path repair `4d001463` passed independent spec/quality in
+`a7450597` and is integrated as `c344133` with reports through `56de830`; eight joined
+adapter methods and 19 path methods pass. P10 is implementing in session `5ea6c88c`;
+the operator requires installation without Python (ADR-0030) and explicitly approved
+existing PowerShell 7.6.6 for local verification with its existing RemoteSigned policy.
+Windows PowerShell 5.1 remains denied/unverified; no policy changed. Continue P08-P14 in dependency order,
 not a new audit or partial delivery. Coordinator routing (`b72ab47` plus
 `1d40193`) and provenance (`9f49e26`) await their owning package reviews. All successor cards
 and interface agreements are committed; use the handoff's exact IDs, do not duplicate workers.

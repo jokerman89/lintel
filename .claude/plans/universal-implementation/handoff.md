@@ -36,7 +36,7 @@ from the reviewed historical merge `40c2795`. Current implementation ownership:
 | P04 Swarming | `a8960a09-fcd7-4652-a9b6-74ad6a94a029` | Component ACCEPTED/integrated `490a0f4` + report history `8964267`; idle until explicit A22.7 |
 | P05 review evidence | `2329e71f-cd9e-473b-94cf-41c579c29a88` | Frozen Q01 product `b023e8c`, report `ec90b609`; same-reviewer complete spec then first whole bounded quality |
 | P06 host adapters | `324863ff-e7cf-4abf-b449-04dd0f096170` | Component ACCEPTED/integrated `36593cd`; provider `7425960`, final review `1067da29`; idle |
-| P07 profile context | `b9352dfe-1c1e-4ea3-b7d9-0fd008d39b3d` | Frozen long-path product `4d001463`, report `da614cad`; same-reviewer independent repair spec/quality |
+| P07 profile context | `b9352dfe-1c1e-4ea3-b7d9-0fd008d39b3d` | Long-path repair ACCEPTED by `a7450597`, integrated `c344133` with reports; joined checks pass, idle |
 | P10 installer lifecycle | `5ea6c88c-68c1-4712-8f55-adecdfe0061f` | Implementing approved native/runtime split from `0df1042`; dependencies `98ad7ed` / `ca28074`, no Python install prerequisite |
 
 All are `lintel-builder` sessions with explicit ownership, local commits, report paths
@@ -55,7 +55,7 @@ repair their own findings. All prior reports remain preserved in `reviews/` and 
 | P04 | Final `279dfc9`; component SPEC/QUALITY PASS at `aa73651`; A22.7 open | `ed672f58-2e85-42e2-b1b2-0635ba5b2325` |
 | P05 | Current `b023e8c` / report `ec90b609` under review; rejection `0cdbf596` retained | `6ed9c7df-4845-4d70-88c7-f0746ab28059` |
 | P06 | Final `1067da29`; complete component SPEC/QUALITY PASS at `7425960`; integrated | `d2a89ac3-151a-4dc0-ab09-1f3a62465cab` |
-| P07 | Current repair `4d001463` / report `da614cad` under review; earlier `a8de574` accepted by `3d8e715` | `a7d78944-c02c-4909-a060-2c4f2a754b00` |
+| P07 | Final `a7450597` accepts `4d001463`; integrated through `56de830`, earlier `a8de574`/`3d8e715` preserved | `a7d78944-c02c-4909-a060-2c4f2a754b00` |
 
 ## Accepted local integrations
 
@@ -115,13 +115,14 @@ Source repair and generated outputs are committed in `80f36fb`. They are refresh
 from source, not hand-edited. This is a bounded
 coordinator-reviewed repair, not final independent integrated acceptance.
 
-Shared preflight now rejects five previously omitted P04/P07 dependencies; actual
-installed checks no longer create Python bytecode before refusal. Seven of eight
-focused joined methods pass. The remaining installed-profile test reproduces a real
-native Windows default-home failure: history publication from a 220-character temp
+Shared preflight rejects five previously omitted P04/P07 dependencies; actual
+installed checks no longer create Python bytecode before refusal. Initially seven of
+eight focused joined methods passed. The remaining installed-profile test reproduced
+a real native Windows default-home failure: history publication from a 220-character temp
 path to a 274-character destination fails in os.replace. Shortening the fixture name
 did not fix it; direct installed Python invocation also reproduces it. P07's appended
-long-path card preserves containment/identity and reopens the actual consumer gate.
+long-path card preserved containment/identity and reopened the actual consumer gate,
+now closed by the independent repair and joined results below.
 Exact frozen preflight/regression checkpoint: `98ad7edfaed7566848ecf26f2bbe563c0486e91d`.
 
 P03 compatibility correction `ca280747b9fe8c16ea54598c4192f40567b8430e` postpones
@@ -144,9 +145,20 @@ and report-only child `da614cad615a06c52d2aefd32818c082f9557c0e`. The coordinato
 verified the four owned product paths and report-only parent, read the final evidence,
 and dispatched the same reviewer `a7d78944` for repair spec then quality. Builder-only
 final evidence: 45 lifecycle methods, 19 path methods, nine preservation scripts and
-the unchanged installed method including teardown pass, zero skips. None of this new
-product/report is integrated or independently accepted yet. Cleanup `28b49add` is
-byte-identical to the already integrated `0eab731`; do not replay it at fan-in.
+the unchanged installed method including teardown pass, zero skips.
+Independent report `a745059786933c049a9fa52b74c0d2f5a9d19da1` now accepts scoped
+spec then whole-repair quality, zero findings. Its own runs were 19 path methods,
+19 focused lifecycle methods, nine preservation scripts and the actual installed
+RED/GREEN pair, not the builder's 45-method run.
+
+Only owned product/report/review were cherry-picked as `c344133` / `991b99b` /
+`56de830`; all four product blobs equal the reviewed source. Cleanup `28b49add`
+equals the already integrated `0eab731` and was not replayed. All eight joined adapter
+methods now pass (253.575s); all 19 path methods pass (7.755s) via the canonical
+runner, and the local adapter check passes. A direct Python invocation between
+those runs omitted --root and executed no path tests; it was corrected, not hidden
+as a passing aggregate. P05/P08/P10, other runtimes/platforms and final A22.7/A24/P14
+remain separate; no release or live-host acceptance follows.
 
 ## Current repair gates
 
@@ -236,13 +248,13 @@ No new authorization for main merge, releases, production, hook activation or pr
 
 ## Next action
 
-P05 Q01 and P07 long-path candidates are frozen under their original independent
-reviewers; P10 continues implementation under `0ecdb520`. P07 preserved its old branch
+P05 Q01 is frozen under its original independent reviewer; P10 continues implementation
+under `0ecdb520` and may consume the accepted P07 repair. P07 preserved its old branch
 and continued from that exact integrated base; its unchanged installed-consumer RED
-was reproduced. P05's chosen repair binds
+was reproduced and repaired with independent and joined evidence. P05's chosen repair binds
 selection-relative normalization eligibility and delimiter participation, not whole
 unselected task text. Await the review results and P10's immutable candidate instead of
-polling or duplicating their code investigation. Obtain same-reviewer independent spec/quality for P05/P07
+polling or duplicating their code investigation. Obtain same-reviewer independent spec/quality for P05
 and a separate independent P10 reviewer, then integrate exact accepted deltas. The
 coordinator retains generated outputs and final fan-in. No navigation/provider or P05
 policy/schema workaround is authorized; all final joined/delivery gates remain open.
@@ -259,6 +271,11 @@ P10's native Bash fixture exposed a raw-drive ancestor termination bug and then 
 approved Windows entry may now use the already-present PowerShell performer, with no
 Python or permission bypass. Both native entry points need real verification; the
 POSIX/Bash 3.2 path remains separately required and cannot be inferred from Windows runs.
+Windows PowerShell 5.1 then refused script loading under Restricted. The operator
+explicitly approved using existing PowerShell 7.6.6 for local disposable verification;
+its already configured policy is RemoteSigned. Neither policy changed. The native
+selector is explicit, never an automatic fallback after denial, and 5.1 stays
+denied/unverified. No Python or other installation dependency was added.
 
 P04's historical merge checkpoint is `e74849db6b33c7b93baadb86206009cb9f9eb6d5`
 (parents `21261f1` and original Swarming `275a354`). Independent merge-only reviewer

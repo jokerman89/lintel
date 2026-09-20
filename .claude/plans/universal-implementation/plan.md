@@ -172,19 +172,19 @@ Acceptance: alternate question tools work; no fabricated independence or host co
 ### A07 Stable effective profile (P07; R04)
 - [x] A07.1 Specify required-policy failure versus neutral first-use behavior in ADR-0029.
 - [x] A07.2 Resolve structured inheritance and provenance with documented source precedence.
-- [ ] A07.3 Pin profile content/identity across calls, delegation and restart.
+- [x] A07.3 Pin profile content/identity across calls, delegation and restart.
   - [x] A07.3.w1 Reproduce the native Windows extended-path concurrent bootstrap failure.
   - [x] A07.3.w2 Compare recognized equivalent filesystem spellings without changing I/O identity.
   - [x] A07.3.w3 Verify native ordinary/extended and concurrent bootstrap paths.
-  - [ ] A07.3.l1 Reproduce default installed-source history creation beyond native Windows legacy path limits.
-  - [ ] A07.3.l2 Repair long-path I/O without changing verified location, durable names or profile identity.
-  - [ ] A07.3.l3 Verify fresh-shell pin/history/rebind/drift at long paths, including long parents and lock paths.
-- [ ] A07.4 Detect mid-task drift and failed mandatory load without silent advisory success.
+  - [x] A07.3.l1 Reproduce default installed-source history creation beyond native Windows legacy path limits.
+  - [x] A07.3.l2 Repair long-path I/O without changing verified location, durable names or profile identity.
+  - [x] A07.3.l3 Verify fresh-shell pin/history/rebind/drift at long paths, including long parents and lock paths.
+- [x] A07.4 Detect mid-task drift and failed mandatory load without silent advisory success.
   - [x] A07.4.w1 Preserve outside-root, device, traversal and reparse rejection under the repaired comparison.
   - [x] A07.4.w2 Run all retained lifecycle and source/target checks on the committed repair.
   - [x] A07.4.w3 Obtain independent repair acceptance before the first component quality pass.
-  - [ ] A07.4.l1 Preserve containment, case-sensitive, namespace, link and interruption refusals with long-path I/O.
-  - [ ] A07.4.l2 Obtain same-reviewer independent long-path repair spec/quality and actual joined consumer acceptance.
+  - [x] A07.4.l1 Preserve containment, case-sensitive, namespace, link and interruption refusals with long-path I/O.
+  - [x] A07.4.l2 Obtain same-reviewer independent long-path repair spec/quality and actual joined consumer acceptance.
 - [x] A07.5 Exercise synthetic company decisions and separate schema/product compatibility.
 Acceptance: profile changes are observable and applicable requirements survive the lifecycle.
 The bounded [Windows repair checkpoint](packages/P07-windows-repair.md) is the explicit
@@ -194,9 +194,14 @@ Owned component acceptance: [P07 Windows final](reviews/P07-windows-final.md), p
 `a8de574`, integrated through `62ca389`; actual native and injected evidence are separated.
 These component results do not close A24's whole-workflow/profile-value scenario, P06/P08
 consumer migration, live company enforcement, or unrun runtime/platform evidence.
-Joined verification now reopens A07.3/A07.4: the default installed-source bootstrap
-fails writing a 274-character Windows history destination. See the appended bounded
-repair in packages/P07-windows-repair.md; earlier component acceptance remains history.
+Joined verification reopened A07.3/A07.4 for a 274-character Windows history failure.
+The bounded repair `4d001463` now passes independent spec then quality in
+[P07 long-path final](reviews/P07-long-path-final.md), report `a7450597`, and is
+integrated as `c344133` with reports `991b99b` / `56de830`. Four owned product blobs
+match the reviewed source exactly; the existing cleanup dependency was not replayed.
+All eight joined adapter methods pass (including the unchanged default-home case),
+as do all 19 path methods and the local adapter check. Other platform/runtime and
+full workflow/profile-value gates remain open.
 
 ### A08 One lifecycle work map (P08; R05)
 - [ ] A08.1 Preserve requested operation separately from topic during routing.
@@ -373,10 +378,13 @@ The source repair and refreshed generated outputs are committed in `80f36fb`.
 g3 partial evidence: isolated RED proves five omitted required resources incorrectly
 permit init and installed check. Source preflight now includes them; installed checks
 also suppress bytecode writes before preflight. Seven of eight focused joined methods
-pass, including exact no-write refusals, inventory-removal negatives, portable repeat/
-clone, managed-edit preservation and actual stdlib Swarm/envelope consumers. The eighth,
-default installed-profile bootstrap, remains RED at the native 274-character history
-destination and is assigned to P07's long-path repair. No g3 completion is claimed.
+initially passed, including exact no-write refusals, inventory-removal negatives,
+portable repeat/clone, managed-edit preservation and actual stdlib Swarm/envelope
+consumers. After the independently accepted P07 repair, all eight pass on the joined
+tree (253.575s). All 19 path methods then pass (7.755s) via the canonical runner.
+An intervening direct Python test invocation omitted required --root and exited 2
+without running that path suite; it was corrected, not counted as a product failure
+or a passing aggregate. P05/P10 dependency additions still keep g3 open.
 
 ### A24 Observable enterprise profile value (P14; R04/R11)
 - [ ] A24.1 Define identical synthetic task under neutral, rapid-development and strict-change profiles.
@@ -439,7 +447,7 @@ Independent first-wave review outcomes:
 | P04 component | `aa73651` | PASS; all F01-F05 close | PASS; [final](reviews/P04-final.md) | Integrated `490a0f4` + reports `8964267`; final A22.7 open |
 | P05 | `b023e8c` | Independent Q01 re-review pending; [prior rejection](reviews/P05-shared-boundary-final.md) retained | First whole bounded quality remains incomplete until spec passes | Frozen report `ec90b609`; same reviewer, exact accepted provider unchanged |
 | P06 | `7425960` | PASS; C01-C07 closed | PASS; [final](reviews/P06-provider-repair-final.md) | Integrated `36593cd`; later shared-consumer and live gates open |
-| P07 | `4d001463` | Independent long-path repair review pending; earlier `a8de574` remains accepted | Pending repair quality; earlier [bounded pass](reviews/P07-windows-final.md) | Frozen report `da614cad`; same reviewer, no new integration or acceptance |
+| P07 | `4d001463` | PASS; long-path repair and retained invariants | PASS; [repair final](reviews/P07-long-path-final.md) | Integrated `c344133` + reports `991b99b`/`56de830`; eight joined consumers and 19 paths pass; final cross-component gates open |
 
 No rejected product batch was integrated. Green original test counts are retained as
 limited evidence, not substituted for the newly failing acceptance cases.
