@@ -8,6 +8,22 @@ Cross-session working state (not durable rules — that's [[lessons.md]]; not pe
 
 ---
 
+## Active - Universal implementation (2026-09-20)
+
+**Status:** approved implementation, not complete. MasterSession secured the 25 uncommitted
+audit/continuity files with SHA-256 verification and committed them as `74290e0`, preserving the
+source worktree. A separate verified Git bundle retains the complete Swarming history.
+
+**Scope:** all A01-A26, useful function/method preservation, actual Universal client boundaries,
+stable profile/work/review contracts, short leaves with package execution, independent review.
+The [work map](../plans/universal-implementation/work.json) selects the sole task source.
+See [handoff](../plans/universal-implementation/handoff.md) for current worker and integration state.
+
+**What's pending:** first-wave P01-P04 implementation and all downstream acceptance. Original
+Swarming worktree remains at `275a354`; local main baseline is `28061e4`. Remote refresh/PR/CI
+await verified `jokerman89` credentials. Rejected credentials must not be used. No main merge,
+release, production change, private sync or dormant-hook activation is authorized.
+
 ## Completed — Universal whole-system quality audit (2026-09-20)
 
 **Status:** COMPLETE as an audit and prioritized action list, not as implementation.

@@ -356,7 +356,7 @@ remain context, not this initiative's authority.
 
 ---
 
-## Current: Universal whole-system quality audit (2026-09-20)
+## Historical: Universal whole-system quality audit (2026-09-20)
 
 - [x] Establish isolated main baseline and the review rubric.
 - [x] Audit every canonical skill and agent, cross-component contracts, runtime and documentation.
@@ -368,3 +368,17 @@ The unmerged swarm branch is a separate delta; this audit does not implement or 
 The September 8 delivery remains complete.
 
 Review: audit complete, independently challenged and corrected. See [report](../engineering/audits/2026-09-20-universal-quality/report.md) and [26 proposed actions](../engineering/audits/2026-09-20-universal-quality/action-plan.md). Product implementation is not complete or authorized by this checklist. Preserve all valuable capabilities and the entire Swarming initiative as far as feasible.
+
+## Current: Universal implementation (2026-09-20)
+
+The operator now explicitly authorizes implementation of all 26 outcomes, preserving useful
+capabilities, Swarming history and ADR-0026 hybrid execution. The audit checklist above remains
+historical evidence, not implementation completion.
+
+Authoritative [work map](universal-implementation/work.json),
+[implementation plan](universal-implementation/plan.md),
+[specification](universal-implementation/spec.md) and
+[handoff](universal-implementation/handoff.md).
+MasterSession owns common state and integration; isolated workers implement bounded packages
+and separate reviewers inspect exact results. First wave: P01-P04. Remote delivery requires
+verified `jokerman89` credentials; no main merge or production action is authorized.
