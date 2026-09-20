@@ -23,6 +23,8 @@ import tempfile
 from urllib.parse import quote, unquote, urlsplit
 from typing import Optional
 
+# Installed-source checks must not create bytecode in the consumer before preflight.
+sys.dont_write_bytecode = True
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
 from client_capabilities import load_registry, surface_id
 _MARKDOWN_PROVIDER = Path(__file__).resolve().parents[1] / "lib/markdown_source.py"
@@ -94,10 +96,13 @@ SWARM_RESOURCES = (
     "lib/copilot-env.sh",
     "lib/swarm-schema.json",
     "lib/swarm_contract.py",
+    "lib/swarm_snapshot.py",
     "lib/cli-tiers.yaml",
     "lib/brief-forge.sh",
     "lib/brief-forge-evaluators.sh",
     "lib/envelope-schema.yaml",
+    "lib/envelope_contract.py",
+    "lib/envelope-requirements.txt",
     "lib/pack-resolver.sh",
     "lib/paths.sh",
     "packs/_default/pack.yaml",
@@ -110,7 +115,7 @@ SWARM_RESOURCES = (
 ADAPTER_RESOURCES = (
     "lib/client_capabilities.py", "lib/cli-tiers.yaml", "lib/cli-tiers.sh",
     "bin/li-client-capabilities.py", "bin/li-adapter.py", "lib/pack-schema.yaml",
-    "lib/markdown_source.py",
+    "lib/markdown_source.py", "lib/profile_context.py", "lib/profile-context-schema.json",
 )
 
 
