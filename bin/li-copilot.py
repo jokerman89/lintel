@@ -7,6 +7,7 @@
 """Shared repository adapter generator; preserves the Copilot entry and managed ownership."""
 import argparse
 import hashlib
+import html
 import json
 import os
 from pathlib import Path, PurePosixPath
@@ -16,6 +17,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+from urllib.parse import quote, unquote, urlsplit
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
 from client_capabilities import load_registry, surface_id
@@ -26,13 +28,24 @@ BUNDLE = ".github/lintel"
 PROTOCOL_START = b"<!-- LINTEL:SESSION-PROTOCOL:START -->"
 PROTOCOL_END = b"<!-- LINTEL:SESSION-PROTOCOL:END -->"
 COMPONENTS = ("bin", "lib", "skills", "agents", "templates", "scaffolding/01-foundation", "packs/_default")
-DOCS = ("README.md", "SECURITY.md", "docs/the-cycle.md", "docs/precedence.md", "docs/compliance.md", "docs/architecture.md",
+DOCS = ("README.md", "LICENSE", "SECURITY.md", "CONTRIBUTING.md", "CODE_OF_CONDUCT.md", "CHANGELOG.md",
+        "docs/README.md", "docs/the-cycle.md", "docs/precedence.md", "docs/compliance.md", "docs/architecture.md",
         "docs/GLOSSARY.md", "docs/spec-kit.md", "docs/getting-started.md", "docs/copilot.md",
         "docs/claude-code.md", "docs/multi-cli.md", "docs/client-adapters.md", "docs/enterprise-adoption.md",
         "docs/concepts/planner-as-module.md", "docs/concepts/agent-dispatch-rules.md", "docs/concepts/orientator.md",
         "docs/concepts/swarming-work.md")
+PUBLIC_ROOT_DOCS = frozenset(path for path in DOCS if "/" not in path)
+PUBLIC_DOC_SUFFIXES = frozenset((".md", ".html", ".htm", ".css", ".js", ".svg", ".png", ".jpg", ".jpeg", ".gif", ".webp"))
+PUBLIC_SOURCE_NOTE = (
+    "> **Bundled source guide:** GitHub source-repository links refer to material "
+    "outside this portable bundle, not files in the working project. "
+    "They follow the public `main` branch and are not fetched or live-verified "
+    "by the installer. Private packs, personal settings and `.claude/` "
+    "knowledge/runtime content are not copied.\n\n"
+)
 SOURCE_METADATA = (".claude-plugin/plugin.json",)
-TEXT_SUFFIXES = {".md", ".sh", ".bash", ".py", ".json", ".yaml", ".yml", ".csv", ".tsv", ".txt", ".template", ".base"}
+TEXT_SUFFIXES = {".md", ".sh", ".bash", ".py", ".json", ".yaml", ".yml", ".csv", ".tsv", ".txt",
+                 ".template", ".base", ".html", ".htm", ".css", ".js", ".svg"}
 ATTRIBUTES = (
     ".github/lintel/** text=auto eol=lf",
     ".github/skills/li-*/** text=auto eol=lf",
@@ -130,6 +143,141 @@ def text_bytes(value: str) -> bytes:
     return value.rstrip().encode("utf-8") + b"\n"
 
 
+def document_links(data: bytes, *, markdown: bool = True) -> list[tuple[int, int, str]]:
+    """Return literal destination spans, excluding comments, code and template examples."""
+    text = data.decode("utf-8")
+    def mask(value: str) -> str:
+        return re.sub(r"[^\r\n]", " ", value)
+
+    masked = re.sub(r"<!--.*?-->", lambda match: mask(match[0]), text, flags=re.S)
+    masked = re.sub(r"<(pre|code|script|style)\b[^>]*>.*?</\1\s*>",
+                    lambda match: mask(match[0]), masked, flags=re.S | re.I)
+    if markdown:
+        lines, fence = [], None
+        list_indent, previous_blank, indented_code = 0, True, False
+        for line in masked.splitlines(keepends=True):
+            marker = re.match(r"^[ ]{0,3}(?:>[ ]*)?(`{3,}|~{3,})(.*)", line)
+            indent = len(line) - len(line.lstrip(" "))
+            item = re.match(r"^[ ]{0,3}(?:[-+*]|\d+[.)])[ \t]+", line)
+            if item:
+                list_indent = item.end()
+            elif line.strip() and indent < list_indent:
+                list_indent = 0
+            if fence:
+                if marker and marker[1][0] == fence[0] and len(marker[1]) >= len(fence) and not marker[2].strip():
+                    fence = None
+                lines.append(mask(line))
+            elif marker:
+                fence = marker[1]
+                lines.append(mask(line))
+            elif (previous_blank or indented_code) and (indent >= list_indent + 4 or line.startswith("\t")):
+                indented_code = True
+                lines.append(mask(line))
+            else:
+                indented_code = False
+                lines.append(line)
+            previous_blank = not line.strip()
+        masked = "".join(lines)
+        masked = re.sub(r"(`+)(?!`)([\s\S]*?)(?<!`)\1(?!`)",
+                        lambda match: mask(match[0]), masked)
+    destination = r"(?P<url><[^>\n]*>|(?:\\.|[^\s()\\]|\((?:\\.|[^()\\])*\))+)"
+    patterns = [r"""<[A-Za-z][^<>]*?\b(?:href|src)\s*=\s*(?:(?P<quote>["'])(?P<url>.*?)(?P=quote)|(?P<bare>[^\s>]+))"""]
+    if markdown:
+        patterns.extend((
+            r"\[(?:\\.|[^\]\\\n])*\]\(\s*" + destination
+            + r"""(?:\s+(?:"[^"\n]*"|'[^'\n]*'|\([^)\n]*\)))?\s*\)""",
+            r"^[ ]{0,3}\[[^\]\n]+\]:[ \t]*" + destination,
+        ))
+    links = {}
+    for pattern in patterns:
+        for match in re.finditer(pattern, masked, flags=re.M | re.I):
+            group = "url" if match["url"] is not None else "bare"
+            start, end = match.span(group)
+            value = text[start:end]
+            if value.startswith("<") and value.endswith(">"):
+                start, end = start + 1, end - 1
+                value = value[1:-1]
+            value = html.unescape(re.sub(r"\\([\\ ()])", r"\1", value))
+            if any(marker in unquote(value) for marker in ("<", ">", "{", "}", "*", "$")):
+                continue
+            links[(start, end)] = value
+    return [(start, end, value) for (start, end), value in sorted(links.items())]
+
+
+def local_link(relative: str, link: str) -> str:
+    """Resolve URL paths lexically; never read a link target outside the selected source."""
+    parsed = urlsplit(link)
+    if parsed.scheme.lower() == "file" or re.match(r"^[A-Za-z]:", link) or "\\" in link:
+        raise ValueError(f"Non-portable local documentation link in {relative}")
+    if parsed.scheme or parsed.netloc or not parsed.path:
+        return ""
+    path = unquote(parsed.path)
+    if path.startswith(("/", "~")) or "\\" in path or ":" in path or "\x00" in path:
+        raise ValueError(f"Unsafe local documentation link in {relative}")
+    result = posixpath.normpath(posixpath.join(posixpath.dirname(relative), path))
+    if result == ".." or result.startswith("../"):
+        raise ValueError(f"Documentation link escapes source: {relative}")
+    return result
+
+
+def public_document(relative: str) -> bool:
+    parts = PurePosixPath(relative).parts
+    return relative in PUBLIC_ROOT_DOCS or (
+        len(parts) > 1 and parts[0] == "docs" and all(not part.startswith(".") for part in parts)
+        and PurePosixPath(relative).suffix.lower() in PUBLIC_DOC_SUFFIXES)
+
+
+def bundle_documentation(source: Path, files: dict[str, bytes]) -> None:
+    """Close public navigation only; repository-only links never expand the data bundle."""
+    metadata = json.loads(read_file(source, ".claude-plugin/plugin.json"))
+    repository = metadata.get("repository") if isinstance(metadata, dict) else None
+    if not isinstance(repository, str) or not re.fullmatch(r"https://github\.com/[\w.-]+/[\w.-]+", repository):
+        raise ValueError("Public source navigation requires the canonical GitHub repository URL")
+    pending, visited = list(DOCS), set()
+    while pending:
+        relative = pending.pop()
+        if relative in visited:
+            continue
+        if not public_document(relative):
+            raise ValueError(f"Documentation selection outside public boundary: {relative}")
+        visited.add(relative)
+        data = read_file(source, relative)
+        if PurePosixPath(relative).suffix.lower() in (".md", ".html", ".htm"):
+            text, replacements = data.decode("utf-8"), []
+            for start, end, link in document_links(data, markdown=relative.endswith(".md")):
+                target = local_link(relative, link)
+                if not target:
+                    continue
+                if public_document(target):
+                    pending.append(target)
+                elif (target == "docs" or target.startswith("docs/")) and urlsplit(link).path.endswith("/") \
+                        and all(not part.startswith(".") for part in PurePosixPath(target).parts):
+                    # A directory link must reach real bundled children; do not glob-copy it.
+                    for index in ("README.md", "_INDEX.md"):
+                        candidate = posixpath.join(target, index)
+                        if safe_path(source, candidate).is_file():
+                            pending.append(candidate)
+                            break
+                elif any(target == component or target.startswith(component + "/") for component in COMPONENTS):
+                    directory = urlsplit(link).path.endswith("/")
+                    if f"{BUNDLE}/{target}" not in files and not (
+                            directory and any(path.startswith(f"{BUNDLE}/{target}/") for path in files)):
+                        raise ValueError(f"Missing bundled source target: {relative} -> {link}")
+                elif f"{BUNDLE}/{target}" not in files:
+                    parsed = urlsplit(link)
+                    kind = "tree" if parsed.path.endswith("/") else "blob"
+                    url = f"{repository}/{kind}/main/{quote(target, safe='/')}"
+                    if parsed.fragment:
+                        url += "#" + quote(unquote(parsed.fragment), safe="-_")
+                    replacements.append((start, end, url))
+            for start, end, url in reversed(replacements):
+                text = text[:start] + url + text[end:]
+            if replacements and not text.startswith(PUBLIC_SOURCE_NOTE):
+                text = PUBLIC_SOURCE_NOTE + text
+            data = text.encode("utf-8")
+        files[f"{BUNDLE}/{relative}"] = data
+
+
 def generate(source: Path, target: Path,
              clients: tuple[str, ...] = ("copilot-cli",)) -> tuple[dict[str, bytes], dict[str, bytes], str]:
     local = source == target
@@ -149,9 +297,6 @@ def generate(source: Path, target: Path,
                 safe_path(source, relative)
                 if path.is_file() and "__pycache__" not in path.parts and path.suffix != ".pyc":
                     files[f"{BUNDLE}/{relative}"] = source_bytes(path)
-        for relative in ("LICENSE",) + DOCS:
-            if (source / relative).is_file():
-                files[f"{BUNDLE}/{relative}"] = read_file(source, relative)
         for canonical, entry in (("shims/copilot/COPILOT.md", "COPILOT.md"),
                                  ("shims/universal/ADAPTER.md", "ADAPTER.md")):
             bridge = canonical if (source / canonical).is_file() else entry
@@ -160,6 +305,7 @@ def generate(source: Path, target: Path,
             files[f"{BUNDLE}/{canonical}"] = data
         for relative in SOURCE_METADATA:
             files[f"{BUNDLE}/{relative}"] = read_file(source, relative)
+        bundle_documentation(source, files)
     # These are the direct workflow, validation, handoff, policy, audit/path and
     # template dependencies needed by the swarm entry point. Fail generation if
     # the installed source is incomplete instead of deferring failure to dispatch.
@@ -387,15 +533,23 @@ def verify_links(files: dict[str, bytes], target: Path) -> list[str]:
     missing = []
     for relative, data in files.items():
         native_skill = re.fullmatch(r"\.[a-z][a-z0-9-]*/skills/li-[a-z0-9-]+/SKILL\.md", relative)
-        if not (native_skill or relative.startswith(".github/agents/lintel-") or relative in (".github/copilot-instructions.md", ".github/instructions/lintel-session.instructions.md", f"{BUNDLE}/START.md")):
+        bundled_doc = relative.startswith(BUNDLE + "/") and public_document(relative[len(BUNDLE) + 1:])
+        if not (native_skill or bundled_doc or relative.startswith(".github/agents/lintel-") or relative in (".github/copilot-instructions.md", ".github/instructions/lintel-session.instructions.md", f"{BUNDLE}/START.md")):
             continue
-        for link in re.findall(r"\]\(([^)#]+)(?:#[^)]*)?\)", data.decode("utf-8")):
-            resolved = (target / relative).parent.joinpath(link).resolve()
-            if not resolved.is_relative_to(target):
-                missing.append(f"Escaping generated link: {relative} -> {link}")
+        if PurePosixPath(relative).suffix.lower() not in (".md", ".html", ".htm"):
+            continue
+        for _, _, link in document_links(data, markdown=relative.endswith(".md")):
+            key = local_link(relative, link)
+            if not key:
                 continue
-            key = resolved.relative_to(target).as_posix()
-            if key not in files and not resolved.is_file():
+            if bundled_doc and not key.startswith(BUNDLE + "/"):
+                missing.append(f"Bundled documentation link escapes source: {relative} -> {link}")
+                continue
+            if key.startswith(BUNDLE + "/"):
+                directory = urlsplit(link).path.endswith("/")
+                if key not in files and not (directory and any(path.startswith(key + "/") for path in files)):
+                    missing.append(f"Missing bundled documentation target: {relative} -> {link}")
+            elif key not in files and not safe_path(target, key).is_file():
                 missing.append(f"Missing generated link: {relative} -> {link}")
     return missing
 

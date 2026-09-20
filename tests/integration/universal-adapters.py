@@ -37,7 +37,8 @@ class UniversalAdapters(unittest.TestCase):
         if client:
             command_line += ["--client", client]
         result = subprocess.run(command_line + list(extra), capture_output=True, text=True, encoding="utf-8",
-                                env=dict(os.environ, HOME=str(self.home), USERPROFILE=str(self.home)))
+                                env=dict(os.environ, HOME=str(self.home), USERPROFILE=str(self.home),
+                                         PYTHONDONTWRITEBYTECODE="1"))
         self.assertEqual(result.returncode == 0, success, result.stdout + result.stderr)
         self.assertEqual(list(self.home.iterdir()), [], "Installer must not write user-global state")
         return result
@@ -147,6 +148,92 @@ class UniversalAdapters(unittest.TestCase):
             canonical = bundle / "skills" / workflow / "SKILL.md"
             self.assertIn("../../shims/universal/ADAPTER.md", canonical.read_text(encoding="utf-8"))
             self.assertTrue((canonical.parent / "../../shims/universal/ADAPTER.md").resolve().is_file())
+
+    def test_manual_readme_navigation_survives_installed_source_clone(self):
+        self.run_cli(client="other")
+        clone = self.base / "navigation-clone"
+        git = shutil.which("git")
+        self.assertTrue(git, "Git is required for the real fresh navigation clone")
+        env = dict(os.environ, HOME=str(self.home), USERPROFILE=str(self.home),
+                   GIT_CONFIG_GLOBAL=os.devnull, GIT_CONFIG_NOSYSTEM="1", GIT_TERMINAL_PROMPT="0")
+        for arguments in (("init", "-q"), ("add", "."),
+                          ("-c", "user.name=Lintel Test", "-c", "user.email=lintel-test@example.invalid",
+                           "-c", "commit.gpgsign=false", "commit", "-qm", "test: preserve bundled navigation",
+                           "-m", "Co-authored-by: Copilot App <223556219+Copilot@users.noreply.github.com>"),
+                          ("clone", "-q", str(self.target), str(clone))):
+            result = subprocess.run([git, *arguments], cwd=self.target, env=env, capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        required = (
+            "docs/README.md", "docs/faq.md", "docs/concepts/engineering-modules.md",
+            "docs/concepts/pack-resolver.md", "CONTRIBUTING.md", "CODE_OF_CONDUCT.md", "CHANGELOG.md",
+        )
+        transitive = ("docs/concepts/pack-inheritance.md", "docs/concepts/agent-memory.md",
+                      "docs/showcase/README.md", "docs/showcase/lintel-the-harness.html",
+                      "docs/wiki/skills.md", "docs/migrations/_INDEX.md",
+                      "LICENSE", "skills/design-dna/ATTRIBUTION.md")
+        for target in (self.target, clone):
+            bundle = target / ".github/lintel"
+            self.run_cli("check", target=target, source=bundle)
+            readme = (bundle / "README.md").read_text(encoding="utf-8")
+            for relative in required:
+                with self.subTest(target=target.name, link=relative):
+                    self.assertIn(f"]({relative})", readme)
+                    self.assertTrue((bundle / relative).is_file(), f"Missing bundled README target: {relative}")
+            for relative in transitive:
+                self.assertTrue((bundle / relative).is_file(), relative)
+            for relative in ("LICENSE", "CODE_OF_CONDUCT.md", "skills/design-dna/ATTRIBUTION.md"):
+                self.assertEqual((bundle / relative).read_bytes(),
+                                 (ROOT / relative).read_bytes().replace(b"\r\n", b"\n"), relative)
+            self.assertIn("source-repository links", (bundle / "CONTRIBUTING.md").read_text())
+            self.assertFalse((bundle / ".claude").exists())
+        bundle = clone / ".github/lintel"
+        missing = bundle / "docs/faq.md"
+        missing.unlink()
+        manifest_path = bundle / "manifest.json"
+        manifest = json.loads(manifest_path.read_text())
+        del manifest["files"][".github/lintel/docs/faq.md"]
+        manifest_path.write_text(json.dumps(manifest))
+        before = {str(path.relative_to(clone)): path.read_bytes() for path in clone.rglob("*")
+                  if path.is_file() and ".git" not in path.parts}
+        result = self.run_cli("check", target=clone, source=bundle, success=False)
+        self.assertIn("docs", result.stderr)
+        self.assertIn("faq.md", result.stderr)
+        self.assertEqual(before, {str(path.relative_to(clone)): path.read_bytes() for path in clone.rglob("*")
+                                 if path.is_file() and ".git" not in path.parts})
+
+    def test_transitive_public_link_missing_source_and_managed_drift(self):
+        self.run_cli(client="other")
+        source = self.target / ".github/lintel"
+        entry = source / "docs/faq.md"
+        with entry.open("a", encoding="utf-8") as output:
+            output.write("\n[Another public guide][next]\n\n[next]: extra/next.md\n")
+        downstream = self.base / "navigation-downstream"
+        downstream.mkdir()
+        (downstream / "keep.txt").write_text("Project content.\n")
+        result = self.run_cli(client="other", source=source, target=downstream, success=False)
+        self.assertIn("next.md", result.stderr)
+        self.assertEqual([p.name for p in downstream.iterdir()], ["keep.txt"])
+        next_guide = source / "docs/extra/next.md"
+        next_guide.parent.mkdir()
+        next_guide.write_text(
+            "[Image](chart.svg)\n\n```md\n[Example](not-a-resource.md)\n```\n"
+            "[Template](<name>.md)\n[Source only](../../.claude/runtime/not-copied.md)\n",
+            encoding="utf-8")
+        (next_guide.parent / "chart.svg").write_text('<svg xmlns="http://www.w3.org/2000/svg"/>\n')
+        self.run_cli(client="other", source=source, target=downstream)
+        self.run_cli("check", target=downstream, source=downstream / ".github/lintel")
+        installed = downstream / ".github/lintel/docs/extra/next.md"
+        self.assertTrue(installed.is_file())
+        self.assertTrue(installed.with_name("chart.svg").is_file())
+        self.assertIn("not fetched or live-verified", installed.read_text())
+        self.assertFalse((downstream / ".github/lintel/.claude").exists())
+        original = installed.read_bytes()
+        installed.write_bytes(original + b"\nProject-owned change must survive.\n")
+        result = self.run_cli("check", source=source, target=downstream, success=False)
+        self.assertIn("Modified managed file", result.stderr)
+        result = self.run_cli(client="other", source=source, target=downstream, success=False)
+        self.assertIn("Modified managed file", result.stderr)
+        self.assertEqual(installed.read_bytes(), original + b"\nProject-owned change must survive.\n")
 
     def test_unknown_client_and_fictional_controls_refuse_before_writes(self):
         for client, extra in (("fictional", ()), ("codex-cli", ("--enable",)),

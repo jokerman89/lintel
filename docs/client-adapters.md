@@ -101,3 +101,24 @@ The generator preserves unrelated files and project-owned knowledge, manages onl
 files/protocol blocks and refuses modified managed content before writes. Review upgrades
 and rollback through normal repository changes; never delete an entire host or knowledge
 directory. [Getting started](getting-started.md) gives the common first-task walkthrough.
+
+## Portable documentation boundary
+
+The source bundle keeps README, the standard notices and the public documentation reached
+through their literal local links, including transitive guides and linked public assets.
+`init` refuses an omitted public target before writing; `check` verifies those local targets
+against the managed bundle as well as checking file hashes. A stray project file cannot
+stand in for a missing bundled guide. The installed source can reproduce the same navigation
+in another checkout without reading the original workstation.
+
+Some public guides also cite source-repository-only instructions, CI or internal engineering
+records. Their bundled copies explicitly label that boundary and link to the canonical
+repository's public `main` branch instead of copying those records into your project.
+Those external links are navigation, not pinned acceptance evidence; the installer neither
+fetches nor live-verifies them. It does not follow links into personal settings, private packs,
+hidden documentation folders or `.claude/` knowledge/runtime content.
+
+The local navigation check covers literal Markdown inline/reference destinations and HTML
+`href`/`src` paths in the public guides, not examples inside code/comments or placeholder paths.
+It verifies file/directory targets, not external URL availability, heading fragments, rendered
+layout or arbitrary HTML/CSS/JavaScript execution. A complete client pilot remains separate.

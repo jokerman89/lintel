@@ -27,6 +27,7 @@ class CopilotKit(unittest.TestCase):
         # introduce unrelated source drift between init and check.
         for name in adapter.COMPONENTS:
             shutil.copytree(ROOT / name, cls.source / name, ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
+        shutil.copytree(ROOT / "docs", cls.source / "docs")
         for name in adapter.DOCS + adapter.SOURCE_METADATA + ("LICENSE", "shims/copilot/COPILOT.md", "shims/universal/ADAPTER.md"):
             if (ROOT / name).is_file():
                 (cls.source / name).parent.mkdir(parents=True, exist_ok=True)

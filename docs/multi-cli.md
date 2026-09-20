@@ -107,6 +107,8 @@ The old `cli_tier_*` functions remain a conservative reader over the same regist
 legacy ID warns and degrades to manual; explicit installer requests reject unknown IDs.
 The [swarm guide](concepts/swarming-work.md) retains the complete artifact and recovery method.
 
+<a id="adding-a-new-cli"></a>
+
 ## Adding or verifying a surface
 
 Add a distinct record with official sources, version conditions and a documented discovery
