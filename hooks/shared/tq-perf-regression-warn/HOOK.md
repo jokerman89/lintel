@@ -14,7 +14,9 @@ Surfaces when an edit touches a perf-budget-bound path. Warning, not block — t
 ## What it does
 
 - Detects perf-bound paths from `pack.testing_qa.perf_path_glob` or the latest perf-budget spec at `.claude/runtime/state/tq/perf-budget-*.md`
+- Loads resolver code from its own installation or `LINTEL_HOME`, never the inspected repository. Project pack files remain data; the hook remains opt-in.
 - For matched files: WARN
+- Journey and p95 metadata are optional: a pack-only match still warns without a budget file or matching metadata. A failed metadata read or malformed present value is reported with non-blocking exit 1, not represented as a successful empty read.
 
 ## Why warn-only
 

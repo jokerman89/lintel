@@ -2,21 +2,26 @@
 # li-adr-new — bootstrap a new ADR from .claude/decisions/TEMPLATE.md
 #
 # Usage: li-adr-new "<title>" [--status proposed|accepted]
+# component: li-adr-new
+# implements: ADR-0005
+# intent: .claude/plans/universal-implementation/packages/P01.md
+# constraints: render argument values literally; preserve repository templates
+# last_intent_review: 2026-09-20
 
 set -euo pipefail
 
-# Path contract (ADR-0005): decisions dir resolved via lib/paths.sh
-# (.claude/decisions/ on the v5 layout; un-migrated repos resolve to their legacy location).
-# shellcheck source=/dev/null
-source "$(dirname "${BASH_SOURCE[0]}")/../lib/paths.sh"
-ADR_DIR="$(lintel_decisions_dir)"
-
-TITLE="${1:-}"
+TITLE=""
 STATUS="proposed"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --status) STATUS="$2"; shift 2 ;;
+    --status)
+      [ $# -ge 2 ] || { echo "ERROR: --status requires proposed or accepted" >&2; exit 2; }
+      case "$2" in
+        proposed|accepted) STATUS="$2" ;;
+        *) echo "ERROR: --status requires proposed or accepted" >&2; exit 2 ;;
+      esac
+      shift 2 ;;
     --help|-h)
       cat <<EOF
 li-adr-new — bootstrap a new ADR
@@ -29,11 +34,13 @@ Usage:
 What it does:
   1. Finds next ADR number from .claude/decisions/NNNN-*.md
   2. Generates kebab-case slug from title
-  3. Reads .claude/decisions/TEMPLATE.md, substitutes title + date + status
+  3. Reads .claude/decisions/TEMPLATE.md, substitutes title + date + status literally
+     (stock ADR placeholders or {{NNNN}}, {{TITLE}}, {{STATUS}}, {{DATE}})
   4. Writes .claude/decisions/<NNNN>-<slug>.md
   5. git checkout -b adr-<NNNN>-<slug>, stage + commit
 EOF
       exit 0 ;;
+    -*) echo "Unknown arg: $1" >&2; exit 2 ;;
     *)
       if [ -z "$TITLE" ]; then
         TITLE="$1"
@@ -46,29 +53,46 @@ EOF
 done
 
 [ -n "$TITLE" ] || { echo "Title required. Usage: li-adr-new \"<title>\"" >&2; exit 2; }
+# Path contract (ADR-0005): retain the legacy location for un-migrated repos.
+# shellcheck source=/dev/null
+source "$(dirname "${BASH_SOURCE[0]}")/../lib/paths.sh"
+ADR_DIR="$(lintel_decisions_dir)"
 [ -d "$ADR_DIR" ] || { echo "$ADR_DIR not found — run li-scaffold init first" >&2; exit 3; }
 
 TEMPLATE="$ADR_DIR/TEMPLATE.md"
 [ -f "$TEMPLATE" ] || { echo "TEMPLATE missing: $TEMPLATE" >&2; exit 4; }
 
 # Find next number
-last_num=$(ls "$ADR_DIR"/[0-9]*-*.md 2>/dev/null | sed 's|.*/||; s|-.*||' | sort -n | tail -1 | sed 's/^0*//')
-last_num=${last_num:-0}
+last_num=0
+for existing in "$ADR_DIR"/[0-9]*-*.md; do
+  [ -f "$existing" ] || continue
+  number="${existing##*/}"; number="${number%%-*}"
+  [[ "$number" =~ ^[0-9]+$ ]] || continue
+  number=$((10#$number))
+  if [ "$number" -gt "$last_num" ]; then last_num="$number"; fi
+done
 next_num=$((last_num + 1))
 printf -v nnnn "%04d" "$next_num"
 
 # Slug
-slug=$(echo "$TITLE" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/--*/-/g' | sed 's/^-//; s/-$//' | cut -c1-40)
+slug=$(printf '%s' "$TITLE" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9' '-' | sed 's/^-//; s/-$//' | cut -c1-40)
+[ -n "$slug" ] || { echo "ERROR: title must contain a letter or digit" >&2; exit 2; }
 
 FILE="$ADR_DIR/${nnnn}-${slug}.md"
 [ -f "$FILE" ] && { echo "ADR already exists: $FILE" >&2; exit 5; }
 
-# Render from template
-sed -e "s|{{NNNN}}|$nnnn|g" \
-    -e "s|{{TITLE}}|$TITLE|g" \
-    -e "s|{{STATUS}}|$STATUS|g" \
-    -e "s|{{DATE}}|$(date +%Y-%m-%d)|g" \
-    "$TEMPLATE" > "$FILE"
+# Render both the shipped skeleton and token-based custom templates without eval/sed code.
+today="$(date +%Y-%m-%d)"
+case "$STATUS" in accepted) display_status="Accepted" ;; *) display_status="Proposed" ;; esac
+content="$(cat "$TEMPLATE")"
+content="${content//"# ADR-NNNN: <Short decision title>"/"# ADR-$nnnn: {{TITLE}}"}"
+content="${content//"- **Status:** Proposed"/"- **Status:** $display_status"}"
+content="${content//"YYYY-MM-DD"/"$today"}"
+content="${content//\{\{NNNN\}\}/"$nnnn"}"
+content="${content//\{\{STATUS\}\}/"$STATUS"}"
+content="${content//\{\{DATE\}\}/"$today"}"
+content="${content//\{\{TITLE\}\}/"$TITLE"}"
+printf '%s\n' "$content" > "$FILE"
 
 echo "✓ Created: $FILE"
 
