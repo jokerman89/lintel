@@ -427,6 +427,55 @@ class UniversalAdapters(unittest.TestCase):
                                  [("keep.txt", b"unchanged")])
                 guide.write_bytes(b"# Real local guide")
 
+    def test_installed_shared_provider_has_exact_bytes_and_no_target_import_fallback(self):
+        self.run_cli(client="other")
+        bundle = self.target / ".github/lintel"
+        relative = ".github/lintel/lib/markdown_source.py"
+        expected = (ROOT / "lib/markdown_source.py").read_bytes().replace(b"\r\n", b"\n")
+        self.assertEqual((self.target / relative).read_bytes(), expected)
+        manifest = json.loads((bundle / "manifest.json").read_text())["files"]
+        self.assertEqual(manifest[relative], hashlib.sha256(expected).hexdigest())
+        marker = self.target / "untrusted-import-executed"
+        untrusted = self.target / "lib"
+        untrusted.mkdir()
+        hostile = "from pathlib import Path\nPath(" + repr(str(marker)) + ").write_text('unexpected')\n"
+        (untrusted / "markdown_source.py").write_text(hostile, encoding="utf-8")
+        (self.target / "markdown_source.py").write_text(hostile, encoding="utf-8")
+        script = (
+            "import json,sys; from pathlib import Path; "
+            "sys.path.insert(0,str(Path(sys.argv[1])/'lib')); "
+            "from markdown_source import classify_markdown; "
+            "text='- - ```markdown\\n    - [x] literal\\n    ```\\n\\n<pre>- [x] raw</pre>\\n- [ ] actual'; "
+            "facts=classify_markdown(text); "
+            "print(json.dumps({'original':facts.original,'items':["
+            "{'content':text[i.content.start:i.content.end],'classification':i.classification} "
+            "for i in facts.list_items],'regions':[r.kind for r in facts.regions]}))"
+        )
+        env = dict(os.environ, HOME=str(self.home), USERPROFILE=str(self.home), PYTHONDONTWRITEBYTECODE="1",
+                   PYTHONPATH=str(untrusted))
+        result = subprocess.run([sys.executable, "-B", "-S", "-c", script, str(bundle)],
+                                cwd=self.target, env=env, capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        output = json.loads(result.stdout)
+        self.assertEqual([item["content"] for item in output["items"] if item["classification"] == "prose"],
+                         ["[ ] actual"])
+        self.assertIn("raw_html_body", output["regions"])
+        self.assertIn("fenced_code", output["regions"])
+        self.assertFalse(marker.exists())
+        self.run_cli("check", source=bundle)
+        (bundle / "lib/markdown_source.py").unlink()
+        before = self.snapshot()
+        result = subprocess.run([sys.executable, "-B", "-S", str(bundle / "bin/li-adapter.py"), "check",
+                                 "--target", str(self.target)], cwd=self.target, env=env,
+                                capture_output=True, text=True)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("ERROR: Required source file is missing:", result.stderr)
+        self.assertIn("markdown_source.py", result.stderr)
+        self.assertNotIn("Traceback", result.stderr)
+        self.assertEqual(before, self.snapshot())
+        self.assertFalse(marker.exists())
+        self.assertEqual(list(self.home.iterdir()), [])
+
     def test_unknown_client_and_fictional_controls_refuse_before_writes(self):
         for client, extra in (("fictional", ()), ("codex-cli", ("--enable",)),
                               ("copilot-app", ("--model", "imaginary")), ("other", ("--global",))):

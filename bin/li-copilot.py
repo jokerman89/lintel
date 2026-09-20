@@ -21,10 +21,15 @@ import subprocess
 import sys
 import tempfile
 from urllib.parse import quote, unquote, urlsplit
-from typing import NamedTuple, Optional
+from typing import Optional
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
 from client_capabilities import load_registry, surface_id
+_MARKDOWN_PROVIDER = Path(__file__).resolve().parents[1] / "lib/markdown_source.py"
+if not _MARKDOWN_PROVIDER.is_file():
+    print(f"ERROR: Required source file is missing: {_MARKDOWN_PROVIDER}", file=sys.stderr)
+    raise SystemExit(1)
+from markdown_source import LineBoundary, classify_markdown
 
 SCHEMA = 1
 INVENTORY = ".github/lintel/manifest.json"
@@ -105,6 +110,7 @@ SWARM_RESOURCES = (
 ADAPTER_RESOURCES = (
     "lib/client_capabilities.py", "lib/cli-tiers.yaml", "lib/cli-tiers.sh",
     "bin/li-client-capabilities.py", "bin/li-adapter.py", "lib/pack-schema.yaml",
+    "lib/markdown_source.py",
 )
 
 
@@ -147,25 +153,6 @@ def text_bytes(value: str) -> bytes:
     return value.rstrip().encode("utf-8") + b"\n"
 
 
-def html_token(text: str, start: int) -> tuple[int, str, bool]:
-    """Find a complete tag token without mistaking quoted delimiters for its end."""
-    prefix = re.match(r"</?([A-Za-z][A-Za-z0-9:-]*)(?=[\s/>])", text[start:])
-    if not prefix:
-        return start, "", False
-    cursor, quoted = start + prefix.end(), ""
-    while cursor < len(text):
-        char = text[cursor]
-        if quoted:
-            if char == quoted:
-                quoted = ""
-        elif char in "\"'":
-            quoted = char
-        elif char == ">":
-            return cursor + 1, prefix[1].lower(), text.startswith("</", start)
-        cursor += 1
-    return start, "", False
-
-
 def html_attribute_spans(token: str) -> list[tuple[str, int, int]]:
     """Locate values inside a start tag already accepted by HTMLParser."""
     prefix = re.match(r"<[^\s/>]+", token)
@@ -205,23 +192,18 @@ def html_attribute_spans(token: str) -> list[tuple[str, int, int]]:
 
 class HTMLNavigation(HTMLParser):
     """HTML grammar owns tags, quoted attributes, comments and raw script/style data."""
-    def __init__(self, text: str, *, stop_element: str = "") -> None:
+    def __init__(self, text: str) -> None:
         super().__init__(convert_charrefs=False)
         self.text = text
         self.line_offsets = [0] + [match.end() for match in re.finditer("\n", text)]
         self.links: list[tuple[int, int, str]] = []
         self.code_stack: list[str] = []
-        self.stop_element, self.depth, self.element_end = stop_element, 0, 0
 
     def source_position(self) -> int:
         line, column = self.getpos()
         return self.line_offsets[line - 1] + column
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, Optional[str]]]) -> None:
-        if self.element_end:
-            return
-        if tag == self.stop_element:
-            self.depth += 1
         if self.code_stack or tag in ("pre", "code"):
             if tag in ("pre", "code"):
                 self.code_stack.append(tag)
@@ -240,23 +222,8 @@ class HTMLNavigation(HTMLParser):
         self.handle_endtag(tag)
 
     def handle_endtag(self, tag: str) -> None:
-        if self.element_end:
-            return
         if self.code_stack and tag == self.code_stack[-1]:
             self.code_stack.pop()
-        if tag == self.stop_element:
-            self.depth -= 1
-            if self.depth == 0:
-                self.element_end = self.text.find(">", self.source_position()) + 1
-
-
-def html_element_end(text: str, start: int, tag: str) -> int:
-    parser = HTMLNavigation(text[start:], stop_element=tag)
-    for line in text[start:].splitlines(keepends=True):
-        parser.feed(line)
-        if parser.element_end:
-            return start + parser.element_end
-    return len(text)
 
 
 def markdown_unescape(value: str) -> str:
@@ -265,38 +232,20 @@ def markdown_unescape(value: str) -> str:
                   lambda match: html.unescape(match[0]), value)
 
 
-def markdown_code_end(text: str, start: int, limit: int) -> int:
-    run = re.match(r"`+", text[start:])[0]
-    remaining = text[start + len(run):limit]
-    for match in re.finditer(r"`+", remaining):
-        if match[0] == run:
-            return start + len(run) + match.end()
-    return start
-
-
-def markdown_label_end(text: str, start: int, limit: int) -> int:
+def markdown_label_end(source: "MarkdownSource", start: int, limit: int) -> int:
+    text = source.text
     depth, cursor = 1, start + 1
     while cursor < limit:
         char = text[cursor]
         if char == "\\" and cursor + 1 < len(text) and text[cursor + 1] in string.punctuation:
             cursor += 2
             continue
-        if char == "`":
-            end = markdown_code_end(text, cursor, limit)
-            if end != cursor:
-                cursor = end
-                continue
-        if char == "<":
-            if text.startswith("<!--", cursor):
-                end = text.find("-->", cursor + 4)
-                if end < 0 or end + 3 > limit:
-                    return start
-                cursor = end + 3
-                continue
-            end, _, _ = html_token(text, cursor)
-            if cursor < end <= limit:
-                cursor = end
-                continue
+        end = source.region_end(cursor)
+        if cursor < end:
+            if end > limit:
+                return start
+            cursor = end
+            continue
         if char == "[":
             depth += 1
         elif char == "]":
@@ -359,182 +308,47 @@ def markdown_title_end(text: str, start: int, limit: int) -> int:
     return start
 
 
-class MarkdownContainer(NamedTuple):
-    kind: str
-    width: int
-    identity: int
-
-
-class MarkdownLine(NamedTuple):
-    start: int
-    end: int
-    next_start: int
-    body_start: int
-    content_start: int
-    indent: int
-    context: tuple[int, ...]
-    kind: str
-
-
-def markdown_columns(line: str) -> tuple[str, list[int]]:
-    """Measure tabs at four-column stops without modifying the source or its offsets."""
-    expanded, positions = [], []
-    for position, char in enumerate(line):
-        width = 4 - len(expanded) % 4 if char == "\t" else 1
-        expanded.extend(" " * width if char == "\t" else char)
-        positions.extend([position] * width)
-    positions.append(len(line))
-    return "".join(expanded), positions
-
-
-def markdown_container(line: str, start: int) -> tuple[str, int, int]:
-    cursor = start
-    while cursor < len(line) and line[cursor] == " ":
-        cursor += 1
-    if cursor - start > 3:
-        return "", start, 0
-    if line[cursor:cursor + 1] == ">":
-        end = cursor + 1
-        if line[end:end + 1] == " ":
-            end += 1
-        return "quote", end, end - start
-    marker = re.match(r"(?:[-+*]|\d{1,9}[.)])(?= |$)", line[cursor:])
-    if marker:
-        end = cursor + marker.end()
-        padding_end = end
-        while padding_end < len(line) and line[padding_end] == " ":
-            padding_end += 1
-        padding = padding_end - end
-        padding = padding if 1 <= padding <= 4 else 1
-        return "list", min(end + padding, len(line)), end + padding - start
-    return "", start, 0
-
-
 class MarkdownSource:
-    """One original-span, logical-line and container boundary model for all consumers."""
+    """Navigation-only view over the shared provider's original-coordinate facts."""
     def __init__(self, text: str) -> None:
-        self.original = text
-        self.lines: list[MarkdownLine] = []
+        self.boundaries = classify_markdown(text)
+        self.original = self.boundaries.original
+        self.lines = self.boundaries.lines
         characters = list(text)
-        containers: list[MarkdownContainer] = []
-        previous_context, paragraph, identity = (), False, 0
-        fence, raw_end = None, 0
-        offset = 0
-        for physical in re.findall(r"[^\r\n]*(?:\r\n|\r|\n|$)", text):
-            if not physical:
-                continue
-            start, next_start = offset, offset + len(physical)
-            body = physical.rstrip("\r\n")
-            end = start + len(body)
-            visual, positions = markdown_columns(body)
-            cursor, kept = 0, []
-            for container in containers:
-                if container.kind == "quote":
-                    kind, consumed, _ = markdown_container(visual, cursor)
-                    if kind != "quote":
-                        break
-                    cursor = consumed
-                else:
-                    available = len(visual[cursor:]) - len(visual[cursor:].lstrip(" "))
-                    if available < container.width:
-                        if visual[cursor:].strip():
-                            break
-                        cursor = len(visual)
-                    else:
-                        cursor += container.width
-                kept.append(container)
-            remainder = visual[cursor:]
-            opening = markdown_container(visual, cursor)[0]
-            block_start = re.match(r" {0,3}(?:`{3,}|~{3,}|#{1,6}(?: |$))", remainder)
-            lazy = (len(kept) != len(containers) and paragraph and bool(remainder.strip())
-                    and not opening and not block_start)
-            if lazy:
-                kept = containers[:]
-            containers = kept
-            context = tuple(container.identity for container in containers)
-            if fence and context != fence[2]:
-                fence = None
-            if not fence and start >= raw_end and not lazy:
-                while True:
-                    kind, consumed, width = markdown_container(visual, cursor)
-                    if not kind:
-                        break
-                    identity += 1
-                    containers.append(MarkdownContainer(kind, width, identity))
-                    cursor = consumed
-            context = tuple(container.identity for container in containers)
-            content = cursor
-            while content < len(visual) and visual[content] == " ":
-                content += 1
-            indent = content - cursor
-            marker = re.match(r"(`{3,}|~{3,})(.*)", visual[content:]) if indent <= 3 else None
-            if start < raw_end:
-                kind = "raw"
-            elif fence:
-                kind = "code"
-                if (marker and marker[1][0] == fence[0] and len(marker[1]) >= fence[1]
-                        and not marker[2].strip()):
-                    fence = None
-            elif marker and not (marker[1][0] == "`" and "`" in marker[2]):
-                kind, fence = "code", (marker[1][0], len(marker[1]), context)
-            elif not visual[content:]:
-                kind = "blank"
-            elif indent >= 4 and not (paragraph and context == previous_context):
-                kind = "code"
-            else:
-                kind = "prose"
-            body_start, content_start = start + positions[cursor], start + positions[content]
-            for position in range(start, end):
-                if kind == "code" or position < body_start:
+        for line in self.lines:
+            for position in range(line.start, line.end):
+                if line.kind in ("fenced_code", "indented_code") or position < line.body.start:
                     characters[position] = " "
-            for position in range(end, next_start):
+            for position in range(line.end, line.next_start):
                 if text[position] == "\r":
                     characters[position] = " " if text[position:position + 2] == "\r\n" else "\n"
-            if kind == "prose":
-                probe = content_start
-                while probe < end:
-                    if text[probe] == "\\" and probe + 1 < end and text[probe + 1] in string.punctuation:
-                        probe += 2
-                        continue
-                    if text[probe] == "`":
-                        code_end = markdown_code_end(text, probe, end)
-                        if code_end != probe:
-                            probe = code_end
-                            continue
-                    if text.startswith("<!--", probe):
-                        closed = text.find("-->", probe + 4)
-                        raw_end = len(text) if closed < 0 else closed + 3
-                        probe = raw_end
-                        continue
-                    if text[probe] == "<":
-                        tag_end, tag, closing = html_token(text, probe)
-                        if tag_end != probe:
-                            if not closing and tag in ("pre", "code", "script", "style") \
-                                    and not text[probe:tag_end].endswith("/>"):
-                                raw_end = html_element_end(text, probe, tag)
-                                probe = raw_end
-                            else:
-                                probe = tag_end
-                            continue
-                    probe += 1
-            self.lines.append(MarkdownLine(start, end, next_start, body_start, content_start,
-                                           indent, context, kind))
-            paragraph = kind == "prose" and raw_end <= next_start
-            if re.match(r"#{1,6}(?: |$)", visual[content:]):
-                paragraph = False
-            previous_context, offset = context, next_start
         self.text = "".join(characters)
         self.starts = [line.start for line in self.lines]
         self.limits = [line.end for line in self.lines]
         for index in range(len(self.lines) - 2, -1, -1):
             current, following = self.lines[index:index + 2]
-            if current.kind == following.kind == "prose" and current.context == following.context:
+            if current.kind == following.kind == "prose" and current.container_ids == following.container_ids:
                 self.limits[index] = self.limits[index + 1]
+        self.region_ends = {}
+        for region in self.boundaries.regions:
+            if region.kind != "quote":
+                self.region_ends[region.span.start] = max(
+                    region.span.end, self.region_ends.get(region.span.start, region.span.start))
+        html_characters = [char if char in "\r\n" else " " for char in self.text]
+        literals = [region.span for region in self.boundaries.regions
+                    if region.kind in ("inline_code", "fenced_code", "indented_code", "raw_html_body", "comment")]
+        for region in self.boundaries.regions:
+            if region.kind == "html_tag" and not any(span.start <= region.span.start < span.end for span in literals):
+                html_characters[region.span.start:region.span.end] = self.text[region.span.start:region.span.end]
+        self.html_text = "".join(html_characters)
+
+    def region_end(self, position: int) -> int:
+        return self.region_ends.get(position, position)
 
     def line_index(self, position: int) -> int:
         return max(0, bisect_right(self.starts, min(position, max(0, len(self.text) - 1))) - 1)
 
-    def line_at(self, position: int) -> MarkdownLine:
+    def line_at(self, position: int) -> LineBoundary:
         return self.lines[self.line_index(position)]
 
     def limit(self, position: int) -> int:
@@ -542,7 +356,7 @@ class MarkdownSource:
 
     def definition_start(self, position: int) -> bool:
         line = self.line_at(position)
-        return line.kind == "prose" and line.indent <= 3 and position == line.content_start
+        return line.kind == "prose" and line.residual_indent <= 3 and position == line.content_start
 
     def reference_end(self, destination_end: int, limit: int) -> int:
         """A consumed destination/title terminates at logical EOL or EOF, identically."""
@@ -585,25 +399,12 @@ def markdown_tokens(source: MarkdownSource, definitions: dict) -> tuple[list[tup
             excluded.append((cursor, cursor + 2))
             cursor += 2
             continue
-        if char == "`":
-            end = markdown_code_end(text, cursor, limit)
-            if end != cursor:
-                excluded.append((cursor, end))
-                cursor = end
-                continue
-        if text.startswith("<!--", cursor):
-            end = text.find("-->", cursor + 4)
-            cursor = len(text) if end < 0 else end + 3
+        end = source.region_end(cursor)
+        if end > cursor:
+            cursor = end
             continue
-        if char == "<":
-            end, tag, closing = html_token(text, cursor)
-            if end != cursor:
-                if not closing and tag in ("pre", "code", "script", "style") and not text[cursor:end].endswith("/>"):
-                    end = html_element_end(text, cursor, tag)
-                cursor = end
-                continue
         if char == "[":
-            close = markdown_label_end(text, cursor, limit)
+            close = markdown_label_end(source, cursor, limit)
             if close != cursor:
                 label = " ".join(markdown_unescape(text[cursor + 1:close]).split()).casefold()
                 after = close + 1
@@ -632,7 +433,7 @@ def markdown_tokens(source: MarkdownSource, definitions: dict) -> tuple[list[tup
                             continue
                 second_start = markdown_space_end(text, after, limit)
                 if text[second_start:second_start + 1] == "[":
-                    second_end = markdown_label_end(text, second_start, limit)
+                    second_end = markdown_label_end(source, second_start, limit)
                     if second_end != second_start:
                         reference = " ".join(markdown_unescape(text[second_start + 1:second_end]).split()).casefold()
                         reference = reference or label
@@ -662,7 +463,7 @@ def document_links(data: bytes, *, markdown: bool = True) -> list[tuple[int, int
     text = data.decode("utf-8")
     source = MarkdownSource(text) if markdown else None
     links, excluded = markdown_navigation(source) if source else ([], [])
-    characters = list(source.text if source else text)
+    characters = list(source.html_text if source else text)
     for start, end in excluded:
         for position in range(start, min(end, len(text))):
             if characters[position] not in "\r\n":

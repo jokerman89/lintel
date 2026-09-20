@@ -134,3 +134,31 @@ does not rewrite its surrounding examples or markup. Text assets use LF; binary 
 their source bytes.
 It verifies file/directory targets, not external URL availability, heading fragments, rendered
 layout or arbitrary HTML/CSS/JavaScript execution. A complete client pilot remains separate.
+
+## Shared source-boundary facts
+
+`lib/markdown_source.py` supplies the stateless, standard-library
+`classify_markdown(text)` provider. Its immutable result types are defined in that one
+module. It receives the complete original Unicode string, never a rendered or pre-stripped
+excerpt, and reports logical lines, quote/list containers, literal regions and actual
+structural list-marker occurrences. Continuation lines and checkbox-shaped examples are
+not new item occurrences.
+
+Spans are zero-based, half-open Python Unicode-codepoint positions in the unchanged input,
+not UTF-8 byte offsets. CRLF occupies two positions. Line end excludes its terminator;
+next-start includes it, and both may equal EOF. Tabs use four-column stops; parse-local
+container IDs are not durable work identities. Region annotations can overlap.
+
+An item's `prose` classification describes its start context, not permission to reinterpret
+all later text in that item. Quote, code, raw HTML, comment, opaque and unknown facts remain
+significant. Consumers must use the actual marker/content occurrence and precise region
+spans for their own operation, and classify the full source before selecting excerpts.
+The helper knows no task IDs, checkbox-normalization policy, review clearance or credentials.
+It does not read files or execute/fetch content.
+
+Navigation consumes these shared boundaries while keeping destination parsing and safe
+source/target policy in the adapter. Recognized opening HTML tags may still provide resource
+attributes before raw body text is excluded. The portable bundle includes the exact provider
+and refuses a missing provider before writing; it does not import a replacement from the
+inspected target. This is a bounded static-source contract, not full CommonMark rendering
+or proof that another consumer's identity/clearance logic works.

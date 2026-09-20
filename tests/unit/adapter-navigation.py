@@ -210,8 +210,8 @@ const example = '[not a guide](docs/not-script.md)';
         source = adapter.MarkdownSource(text)
         self.assertEqual(source.original, text)
         self.assertEqual(len(source.text), len(text))
-        self.assertEqual([line.kind for line in source.lines], ["code", "blank", "prose"])
-        self.assertEqual(source.lines[0].indent, 4)
+        self.assertEqual([line.kind for line in source.lines], ["indented_code", "blank", "prose"])
+        self.assertEqual(source.lines[0].residual_indent, 4)
         self.assertEqual(source.lines[-1].end, len(text))
         self.assertEqual(source.lines[-1].next_start, len(text))
         links = adapter.document_links(text.encode())
@@ -336,6 +336,16 @@ const example = '[not a guide](docs/not-script.md)';
         self.assertFalse(result.endswith("\n"))
         self.assertNotIn(f"{adapter.BUNDLE}/.claude/decisions/example.md", files)
         self.assertEqual(adapter.verify_links(files, self.root), [])
+
+    def test_shared_opaque_html_facts_keep_literal_attributes_without_selecting_body_markdown(self):
+        text = (
+            '<div>\n[HTML body example](docs/not-a-markdown-resource.md)\n'
+            '<a title="quoted > delimiter" href="docs/actual.md">Guide</a>\n'
+            '<script src="docs/actual.js">const sample = "[x](docs/not-a-script-resource.md)";</script>\n'
+            '</div>\n\n[Markdown guide](docs/guide.md)\n'
+        )
+        self.assertEqual([value for _, _, value in adapter.document_links(text.encode())],
+                         ["docs/actual.md", "docs/actual.js", "docs/guide.md"])
 
     def test_public_links_close_transitively_without_glob_copy(self):
         self.write("README.md", "[First](docs/one.md)\n")
