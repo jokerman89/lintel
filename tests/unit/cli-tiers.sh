@@ -15,23 +15,28 @@ fail(){ echo "  FAIL: $1"; FAILED=1; }
 echo "tests/unit/cli-tiers.sh"
 echo "======================="
 
-# ── Claude Code: full + the only CLI with hooks ──
-[ "$(cli_tier_field claude-code tier)" = "full" ] && pass "claude-code tier=full" || fail "claude-code tier=$(cli_tier_field claude-code tier)"
+# The legacy tier describes delivered files, not complete host certification.
+[ "$(cli_tier_field claude-code tier)" = "supported" ] && pass "claude-code has a delivered route, not blanket full support" || fail "claude-code tier"
 [ "$(cli_tier_field claude-code hooks_supported)" = "true" ] && pass "claude-code hooks_supported=true" || fail "claude-code hooks"
-[ "$(cli_tier_field claude-code label)" = "Claude Code" ] && pass "claude-code label resolves" || fail "claude-code label"
+[ "$(cli_tier_field claude-code label)" = "Claude Code CLI" ] && pass "claude-code surface label resolves" || fail "claude-code label"
 
-# ── Codex: full tier but NO hooks (the load-bearing honesty flag) ──
-[ "$(cli_tier_field codex tier)" = "full" ] && pass "codex tier=full" || fail "codex tier"
+# Codex aliases only CLI; it does not imply app or IDE parity.
+[ "$(cli_tier_field codex tier)" = "supported" ] && pass "codex tier=supported" || fail "codex tier"
 [ "$(cli_tier_field codex hooks_supported)" = "false" ] && pass "codex hooks_supported=false (Claude-only enforcement)" || fail "codex hooks"
 
 # ── supported / best-effort tiers ──
 [ "$(cli_tier_field gemini tier)" = "supported" ] && pass "gemini tier=supported" || fail "gemini tier"
+[ "$(cli_tier_field gemini skills_native)" = "true" ] && pass "Gemini native-format route is delivered" || fail "gemini discovery"
 [ "$(cli_tier_field other tier)" = "best-effort" ] && pass "other tier=best-effort" || fail "other tier"
 
 # ── unknown CLI → safe defaults (degrade honestly, never over-claim) ──
 [ "$(cli_tier_field frobnicator tier)" = "best-effort" ] && pass "unknown CLI tier→best-effort" || fail "unknown tier"
 [ "$(cli_tier_field frobnicator hooks_supported)" = "false" ] && pass "unknown CLI hooks→false" || fail "unknown hooks"
 [ "$(cli_tier_field frobnicator label)" = "frobnicator" ] && pass "unknown CLI label→name" || fail "unknown label"
+[ "$(cli_tier_normalize frobnicator)" = "other" ] && pass "unknown legacy ID maps to manual other" || fail "unknown normalization"
+[ "$(cli_tier_normalize copilot-app)" = "copilot-app" ] && pass "desktop surface remains distinct" || fail "collapsed desktop"
+[ "$(cli_tier_normalize copilot-cloud)" = "copilot-cloud" ] && pass "cloud surface remains distinct" || fail "collapsed cloud"
+[ "$(cli_tier_field copilot-cli subagents)" = "sequenced" ] && pass "static compatibility hint cannot authorize concurrency" || fail "unsafe subagent tier"
 
 # ── exactly one CLI supports hooks (the enforcement layer is Claude-Code-only) ──
 hooks_clis=0

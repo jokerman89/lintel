@@ -27,7 +27,8 @@ class CopilotKit(unittest.TestCase):
         # introduce unrelated source drift between init and check.
         for name in adapter.COMPONENTS:
             shutil.copytree(ROOT / name, cls.source / name, ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
-        for name in adapter.DOCS + ("LICENSE", "shims/copilot/COPILOT.md"):
+        shutil.copytree(ROOT / "docs", cls.source / "docs")
+        for name in adapter.DOCS + adapter.SOURCE_METADATA + ("LICENSE", "shims/copilot/COPILOT.md", "shims/universal/ADAPTER.md"):
             if (ROOT / name).is_file():
                 (cls.source / name).parent.mkdir(parents=True, exist_ok=True)
                 shutil.copyfile(ROOT / name, cls.source / name)
@@ -82,7 +83,7 @@ class CopilotKit(unittest.TestCase):
         self.assertTrue(wrapper.is_file())
         self.assertIn("../../lintel/skills/swarm/SKILL.md", wrapper.read_text(encoding="utf-8"))
         inventory = json.loads((self.target / adapter.INVENTORY).read_text(encoding="utf-8"))["files"]
-        for relative in adapter.SWARM_RESOURCES:
+        for relative in adapter.SWARM_RESOURCES + adapter.ADAPTER_RESOURCES + adapter.SOURCE_METADATA:
             installed = f"{adapter.BUNDLE}/{relative}"
             self.assertIn(installed, inventory)
             self.assertTrue((self.target / installed).is_file(), installed)
@@ -91,14 +92,18 @@ class CopilotKit(unittest.TestCase):
         broken = self.base / "missing-swarm-dependency-source"
         shutil.copytree(self.source, broken)
         before = self.snapshot()
-        for relative in adapter.SWARM_RESOURCES:
+        for relative in adapter.SWARM_RESOURCES + adapter.ADAPTER_RESOURCES + adapter.SOURCE_METADATA:
             with self.subTest(relative=relative):
                 path = broken / relative
                 content = path.read_bytes()
                 path.unlink()
                 try:
                     result = self.run_cli(success=False, source=broken)
-                    self.assertIn(f"Required source file is missing: {path}", result.stderr)
+                    if relative == "lib/cli-tiers.yaml":
+                        self.assertIn("ERROR:", result.stderr)
+                        self.assertIn("cli-tiers.yaml", result.stderr)
+                    else:
+                        self.assertIn(f"Required source file is missing: {path}", result.stderr)
                     self.assertEqual(before, self.snapshot())
                 finally:
                     path.write_bytes(content)

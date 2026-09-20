@@ -1,7 +1,7 @@
 # Enterprise adoption
 
-Use Lintel to standardize how a team starts, plans, builds, reviews and resumes work with
-GitHub Copilot. The adoption unit is a reviewed repository change plus a team-owned operating
+Use Lintel to standardize how a team starts, plans, builds, reviews and resumes engineering
+work across its approved coding agents. The adoption unit is a reviewed repository change plus a team-owned operating
 agreement. Start with a pilot; expand when the evidence meets your team's bar.
 
 Lintel is a public beta maintained as an open-source project. It does not supply enterprise
@@ -18,21 +18,26 @@ It can help your existing platform team make engineering practice repeatable and
 | Private company pack | Reusable standards, terminology and policy references | Designated pack owner and policy reviewers |
 | CI and repository policies | Controls independent of agent cooperation | Security/platform administrators |
 
-The Copilot kit is a focused starting point. Specialist architecture, data, security, operations
+The common plan/build/review/resume path is a focused starting point, through a native
+adapter or explicit canonical-file handoff. Specialist architecture, data, security, operations
 and testing workflows can be introduced after the core workflow earns its place.
 
 ## Pilot one repository
 
-Choose a non-production-impacting change with clear acceptance criteria. Use an approved Copilot
-client, a reviewed Lintel commit, ordinary repository permissions and your existing CI.
+Choose a non-production-impacting change with clear acceptance criteria. Use an approved
+client surface, a reviewed Lintel commit, ordinary repository permissions and your existing CI.
+Keep research, maintenance, migrations and product work proportionate; a venture interview,
+particular vendor or arbitrary retention window is not a neutral prerequisite.
 
 1. **Record the baseline.** Capture how the team currently plans a comparable change, reviews it,
    verifies it and transfers work to another session. Decide which friction the pilot should reduce.
 2. **Install on an adoption branch.** Follow [getting started](getting-started.md). Record the source
-   commit, run `li-copilot check`, and inspect every generated instruction, agent and executable.
+   commit, run `python3 bin/li-adapter.py check --target <repo>` (or the preserved
+   `li-copilot check` route), and inspect every generated instruction, agent and executable.
 3. **Do a bounded task.** Discover the skills, write a specification and build cards, implement them,
    review against the specification, and capture a decision or lesson where warranted.
-4. **Hand off cold.** Start a new session, ideally with another developer, and use `/li-resume`.
+4. **Hand off cold.** Start a new session, ideally with another developer, and invoke the
+   discovered `li-resume` or read its canonical file explicitly.
    It should identify the completed work, remaining cards and verification evidence from files.
 5. **Review the evidence.** Compare against the agreed baseline and decide whether to adopt, adjust
    or remove the kit. Keep the decision in the repository.
@@ -48,7 +53,7 @@ that adopting a harness creates a particular productivity gain.
 | Client discovers the workflow | Exact client/version and observed skill/agent names |
 | Planning is useful | Specification, acceptance criteria, build cards and review comments |
 | Execution matches scope | Completed card references, changed files and targeted test output |
-| Review is independent when supported | Reviewer identity/context, actionable findings and resolutions |
+| Review is independent when required | A separately attributable reviewer/context and content-bound evidence; missing delegation leaves a manual review handoff open |
 | A fresh session resumes correctly | Handoff result citing the right plan, completed work and next action |
 | Existing controls still hold | Required CI checks, review policy and authorization behavior verified by owners |
 | The added process is proportionate | Time and interaction overhead compared with the agreed baseline |
@@ -63,10 +68,12 @@ references and roles that your pilot actually needs. Keep private corpora and in
 content in a private pack repository. Review a pack update like a code change: source, owner,
 license, affected workflows and rollback.
 
-The active pack configuration in `~/.lintel/profile.yaml` is machine-local. A cloud agent or a
-new teammate will not inherit it from another developer's workstation. Decide how approved pack
+An operator's pack selection and profile are not automatically portable. A cloud agent or a
+new teammate will not inherit them from another developer's workstation. Decide how approved pack
 content and the active pack setting reach each execution environment, and verify that setup in
-the pilot. Do not assume installing the repository kit distributes a private company pack.
+the pilot. Retain the effective profile reference with the selected work and session identity;
+unknown or missing required policy is not a neutral pass. Do not assume installing the repository
+kit distributes a private company pack. See [pack resolution](concepts/pack-resolver.md).
 
 `compliance.mode: hard` tells workflow skills to stop when the pack's declared gates fail; it is
 not a host permission control. Data-residency metadata does not configure where a model runs.
@@ -76,7 +83,7 @@ Map policy requirements to platform settings, CI checks, or independently tested
 ## Review the data boundary
 
 Lintel has no central service that receives sessions. Its scripts and generated resources run in
-your chosen environment; your Copilot and tool configuration governs what is sent to external
+your chosen environment; your client and tool configuration governs what is sent to external
 services. Invoked workflows can ask an agent to browse, use tools, fetch dependencies or push
 changes. Review those capabilities under existing organisation policies.
 
@@ -85,9 +92,10 @@ under gitignored `.claude/runtime/`. Local audit records are editable by their o
 operational evidence, not tamper-evident compliance records. Treat optional external exports,
 private pack sources and synchronization as separate integrations with their own owners.
 
-Lintel's Claude Code hooks are not adapted for Copilot in this release. Copilot rollout therefore
-needs your existing merge protections, CI, access controls and secret scanning to carry the
-mandatory controls. See the [Copilot guide](copilot.md#hooks-and-security-controls).
+Lintel's existing hook adapter uses Claude Code's event contract and needs separate activation
+and verification. The portable repository generator installs no hooks for any surface.
+Required controls must have a verified platform/CI mechanism or remain unsatisfied.
+See [Claude Code](claude-code.md) and [Copilot](copilot.md#hooks-and-security-controls).
 
 ## Scale through reviewed changes
 
@@ -113,6 +121,11 @@ A concise adoption decision should name:
 - Evidence: installation checks, pilot artifacts, verification and fresh-session handoff.
 - Limits: untested surfaces, unsupported hooks, required manual review and known beta changes.
 - Maintenance: next review date, upgrade policy and rollback procedure.
+
+Record vendor-documented capability, locally tested adapter artifacts and observed host
+execution separately. A source URL is not a pilot run; `check` is not live discovery.
+Unknown versions, unrun clients, missing browser evidence and outstanding independent review
+remain explicit limitations, not a blanket "full support" tier.
 
 Use [GitHub issues](https://github.com/jokerman89/lintel/issues) for sanitized reproductions and
 feature requests. Sensitive vulnerabilities follow [SECURITY.md](../SECURITY.md). Existing
