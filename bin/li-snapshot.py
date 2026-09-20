@@ -5,6 +5,8 @@
 # constraints: explicit owned files, quiescent root, no network or whole-tree replacement
 # last_intent_review: 2026-09-20
 """Verified file snapshots and attributable, resumable restore; not a live-system rollback."""
+from __future__ import annotations
+
 import argparse
 from contextlib import contextmanager
 from datetime import datetime, timedelta, timezone
