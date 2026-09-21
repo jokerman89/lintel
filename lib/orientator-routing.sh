@@ -19,12 +19,12 @@
 # sourced library: no 'set -uo pipefail' here (shell opts leak into every caller — skills/hooks/tests); functions guard their own vars
 
 # ─── classify_intent ───────────────────────────────────────────────────────
-# Returns: build | fix | review | research | ship | deploy | scaffold | resume | unclear
+# Returns: build | fix | plan | review | research | ship | deploy | scaffold | resume | unclear
 classify_intent() {
   local p="${1:-}"
   [ -z "$p" ] && { printf 'unclear'; return 0; }
 
-  local lp normalized token next intent negated=0 saw_negation=0 i
+  local lp normalized token next intent suffix negated=0 saw_negation=0 skipped_negation=0 i
   local -a words
   lp=$(printf '%s' "$p" | tr '[:upper:]' '[:lower:]')
   lp="${lp//don\'t/do not}"
@@ -32,11 +32,15 @@ classify_intent() {
   IFS=' ' read -r -a words <<< "$normalized"
 
   case "${words[0]:-}" in
-    how|why) printf 'research'; return 0 ;;
+    how|why|should) printf 'research'; return 0 ;;
     what|where|when|who)
-      case "${words[1]:-}" in
-        is|are|does|do) printf 'research'; return 0 ;;
-      esac ;;
+      if [ "${#words[@]}" -eq 4 ] && [ "${words[1]}" = should ] &&
+          [ "${words[2]}" = i ] && [ "${words[3]}" = do ]; then
+        printf 'unclear'
+      else
+        printf 'research'
+      fi
+      return 0 ;;
   esac
 
   # An operation precedes its subject: "review the release" is not SHIP, but
@@ -46,11 +50,15 @@ classify_intent() {
     next="${words[$((i + 1))]:-}"
     case "$token" in
       not|never|without) negated=1; saw_negation=1; continue ;;
+      and|or) [ "$skipped_negation" -eq 0 ] || negated=1; continue ;;
+      but|instead) negated=0; skipped_negation=0; continue ;;
     esac
     intent=""
     case "$token" in
-      review|audit|check|granska) intent=review ;;
-      research|explore|understand|explain|read|utforska|förstå) intent=research ;;
+      review|audit|check|inspect|examine|analyze|analyse|granska) intent=review ;;
+      research|explore|understand|explain|describe|read|compare|summarize|summarise|show|list|utforska|förstå) intent=research ;;
+      plan|design|outline) intent=plan ;;
+      tell) [ "$next" != me ] || intent=research ;;
       fix|fixa|felsök) intent=fix ;;
       deploy|deploya|provision|driftsätt) intent=deploy ;;
       ship|release|shippa|landa) intent=ship ;;
@@ -70,6 +78,7 @@ classify_intent() {
     esac
     if [ "$negated" -eq 1 ]; then
       negated=0
+      skipped_negation=1
       continue
     fi
     if [ "$token" = create ]; then
@@ -77,6 +86,13 @@ classify_intent() {
         "a new project"|"a new repo"|"a new repository"|"new project "*|"new repo "*|"new repository "*)
           intent=scaffold ;;
       esac
+    fi
+    # A sequence is not one high-confidence operation. Explanations of a
+    # sequence remain read-only; an actual "review then deploy" needs scoping.
+    suffix=$(printf '%s ' "${words[@]:$((i + 1))}")
+    if [ "$intent" != research ] && [[ " $suffix " =~ [[:space:]]then[[:space:]]+(review|audit|check|research|explore|fix|deploy|ship|release|build|add|implement|create|edit|change|modify|write)[[:space:]] ]]; then
+      printf 'unclear'
+      return 0
     fi
     printf '%s' "$intent"
     return 0
@@ -112,6 +128,7 @@ match_workflow() {
   case "$intent" in
     build)    _workflow_command "$default" "${3:-}" ;;
     fix)      printf '/li:cycle --mode hotfix' ;;
+    plan)     printf '/li:plan' ;;
     review)   printf '/li:review' ;;
     research) printf '/li:cycle --mode research-dive' ;;
     ship)     printf '/li:cycle --from SHIP' ;;
@@ -145,6 +162,7 @@ assess_risk() {
   high_risk_csv=$(printf '%s' "$high_risk_csv" | tr '\n' ',' | tr -d '[]"\047[:space:]')
   # A qualified ID matches only that namespace; a bare ID applies to any namespace.
   # Preserve the legacy `cycle` spelling while supporting `/team:deliver` policies.
+  local IFS=' '
   for declared in ${high_risk_csv//,/ }; do
     declared="${declared#/}"; declared="${declared#bin/}"
     if [ "$declared" = "$base_workflow" ] || [ "$declared" = "$short_workflow" ]; then
@@ -174,7 +192,7 @@ score_confidence() {
 
   case "$intent" in
     unclear) printf 'low' ;;
-    build|fix|review|research|ship|deploy|scaffold|resume) printf 'high' ;;
+    build|fix|plan|review|research|ship|deploy|scaffold|resume) printf 'high' ;;
     *) printf 'medium' ;;
   esac
 }

@@ -17,7 +17,7 @@ You are the SENSE skill — Phase 1 of the Lintel cycle.
 Reads operator state silently and surfaces a one-screen diagnostic. NOT exploratory. NOT questioning. Pure read.
 
 SENSE answers four things before the operator commits to a phase:
-1. What's the operator's intent likely to be? (build / fix / review / research / ship / scaffold / unclear)
+1. What operation was requested? (build / fix / plan / review / research / ship / scaffold / unclear)
 2. What's the current configuration? (pack compliance mode, role active, voice tier, mode default)
 3. Where did the last session leave off? (00-state.md from cwd, if present)
 4. What's the context budget? (current tokens used, headroom for warm-up)
@@ -40,6 +40,12 @@ Output: a SENSE report. Operator decides next move based on it.
 
 ## Workflow
 
+Use the [shared work-map contract](../spec-kit/references/work-map.md) and
+[task-relevant intake](../define/references/intake.md). During a cycle, its identity
+and verified profile/work references are established before SENSE. On standalone
+diagnosis do not invent a cycle or claim resumable execution; report unbound state
+explicitly. Required-policy load/drift errors remain errors, not neutral defaults.
+
 ### Step 0a — Surface relevant lessons (v3.6 cohort 2 item 1.3)
 
 Before reading configuration, invoke `/li:lessons-surface` so future session work starts with relevant lessons from `.claude/memory/lessons.md`. Closes the L-001/L-002 loop (lessons are written but never read without this step).
@@ -58,7 +64,7 @@ Before reading configuration, scan operator's prompt for breadth-signals indicat
 ```bash
 prompt_text="<operator's last message>"
 
-source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/lib/scale-estimator.sh"
+source "${LINTEL_SOURCE_ROOT:?select trusted source}/lib/scale-estimator.sh"
 elephant_score=$(elephant_score "$prompt_text")   # single source (was inline; now lib/scale-estimator.sh detect_breadth)
 ```
 
@@ -127,7 +133,7 @@ harness): surface to operator in the SENSE report (never block):
    Diff touches: <list of scaffolding paths>
    Recommendation: --mode meta-infra (activates Gates M1-M4)
    Override: --mode <other> if change is content-only or test-only
-   Cap: 600k soft / 900k hard (heavier REVIEW + CAPTURE)
+   Resource estimate: advisory; actual host capacity/usage remains unknown unless supplied
 ```
 
 If `is_lintel_repo=false` (a plain consumer repo): meta-infra is **not** recommended even when the
@@ -138,12 +144,16 @@ DEFINE phase reads `meta_infra_detected` from 00-state.md and pre-fills the stru
 
 ### Step 0d — Orientator invocation (v4.0 Phase 3)
 
-Invoke the lightweight orientator agent to recommend a workflow based on operator's prompt + active pack's `navigation.*` block. Mechanical-first; LLM escalation only when mechanical confidence falls below pack's `escalation_threshold`. See [orientator concept doc](../../docs/concepts/orientator.md).
+Use the mechanical orientator over the requested operation and verified pack
+navigation. Low confidence calls for explicit judgment or a missing-decision question;
+`invoke_llm_orientation` is a dormant stub, not evidence of a paid/native model call.
+See [orientator](../../docs/concepts/orientator.md).
 
 ```bash
 # Run only when operator didn't already specify --mode/--from explicitly
 if [ -z "${flag_mode:-}" ] && [ -z "${flag_from:-}" ]; then
-  source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/lib/orientator-routing.sh"
+  source "${LINTEL_SOURCE_ROOT:?select trusted source}/lib/orientator-routing.sh"
+  verify_profile_context >/dev/null || exit $?
 
   intent=$(classify_intent "$prompt_text")
   default_workflow=$(resolve_pack_field navigation.default_workflow)
@@ -156,13 +166,9 @@ if [ -z "${flag_mode:-}" ] && [ -z "${flag_from:-}" ]; then
   escalation=$(resolve_pack_field navigation.escalation_threshold)
   escalation="${escalation:-medium}"
 
-  # Audit
-  ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-  audit_path="${LINTEL_HOME:-$HOME/.lintel}/audit/orientator-decisions.jsonl"
-  mkdir -p "$(dirname "$audit_path")"
-  printf '{"ts":"%s","kind":"orientator_decision","intent":"%s","workflow":"%s","risk":"%s","confidence":"%s","operator":"%s"}\n' \
-    "$ts" "$intent" "$workflow" "$risk" "$confidence" "$(whoami 2>/dev/null || echo unknown)" \
-    >> "$audit_path"
+  source "${LINTEL_SOURCE_ROOT:?select trusted source}/bin/_audit.sh"
+  audit_log orientator-decisions orientator_decision "intent=$intent" \
+    "workflow=$workflow" "risk=$risk" "confidence=$confidence"
 fi
 ```
 
@@ -175,7 +181,7 @@ Surfaces in SENSE report (Step 7 output) as recommended workflow. Per auto-mode 
 Runs **after** step 0d (so the orientator's route is available to surface alongside size). Mechanical only — no question is ever asked here.
 
 ```bash
-source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/lib/scale-estimator.sh"
+source "${LINTEL_SOURCE_ROOT:?select trusted source}/lib/scale-estimator.sh"
 
 scale_size=$(classify_size "$prompt_text")
 scale_amb=$(scale_ambiguous "$prompt_text")
@@ -220,7 +226,10 @@ workprofile=$(resolve_pack_field compliance.workprofile_default)   # off by defa
 voice_default=$(resolve_pack_field voice.default_tier)             # internal by default
 ```
 
-If profile missing → prompt operator via AskUserQuestion: "Lintel can run with or without compliance gates. The active pack drives this (`resolve_pack_field compliance.mode`); the `_default` pack is advisory + workprofile off. Pick a pack if you want stricter gates."
+An absent optional preference file is not a mandatory setup interview. The verified
+P07 selection distinguishes neutral first use from missing required policy. Offer
+pack configuration only if the task needs an unresolved policy decision; never
+treat a required load error as permission to select `_default`.
 
 ### Step 2 — Read prior 00-state.md
 
@@ -235,18 +244,24 @@ else
 fi
 ```
 
-### Step 3 — Detect intent from operator's last message + cwd
+### Step 3 — Preserve the requested operation separately from its topic
 
-Heuristics (apply in order, first match wins):
-- Operator message contains "fix" / "bug" / "broken" → intent: fix → recommend `mode=hotfix`
-- Operator message contains "ship" / "release" / "deploy" → intent: ship → recommend hop to SHIP
-- Operator message contains "review" / "audit" / "check" → intent: review → recommend `/li:review`
-- Operator message contains "research" / "explore" / "understand" → intent: research → recommend `mode=research-dive`
-- Operator message contains "scaffold" / "new project" / "new repo" → intent: scaffold → recommend `bin/li-scaffold init`
-- Operator message contains "build" / "add" / "implement" → intent: build → recommend full cycle
-- cwd has uncommitted changes + recent commits with WIP prefix → likely BUILD continuation
-- cwd is freshly cloned (1 commit) → likely scaffolding-needed
-- Otherwise → intent: unclear → recommend `/li:cycle --mode auto` or operator-decide
+Reuse Step 0d's `classify_intent` and `match_workflow` result; do not run a second
+keyword-priority classifier. For an explicit mode/from invocation still classify the
+request to check the proposed range, not to silently override it.
+
+```bash
+source "${LINTEL_SOURCE_ROOT:?select the trusted source}/lib/orientator-routing.sh"
+intent=$(classify_intent "$prompt_text")
+```
+
+Record the requested operation and the topic separately. "Review the release plan"
+is REVIEW of a release topic, not SHIP; "research deployment options" cannot authorize
+BUILD or deployment. Direct "fix review comments" remains FIX. Explicit compound
+sequences such as "review then deploy" require scope/authority resolution rather than
+one high-confidence route. Unknown intent stays unknown; a default-workflow
+recommendation is not permission to execute it. A dirty tree, fresh clone or inferred
+large size never grants implementation authority.
 
 ### Step 4 — Lightweight role load (if active)
 
@@ -277,19 +292,21 @@ Do NOT load the content. Just signal availability.
 
 ### Step 6 — Context budget snapshot
 
-Approximate current context window utilization. If detectable from prior turns + loaded files. Report:
-- Current ~tokens used / 1M
-- Headroom for warm-up
-- Recommend warm/cool if applicable
+Use P03 `context_budget` through `bin/_context.sh` (or `/li:context-budget`).
+Report actual host capacity/usage with provenance, explicitly labeled estimates, or
+unknown. Selected-file bytes alone cannot reveal current context utilization.
+Cooling changes future selection; it cannot delete already-sent conversation.
 
 ### Step 7 — Write 00-state.md entry + surface report
 
 Mechanical since v5.0 (ADR-0008) — one command, not a YAML obligation:
 
 ```bash
-_sl="${LINTEL_SOURCE_ROOT:-${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}}/lib/state.sh"
-[ -f "$_sl" ] || _sl="$HOME/.lintel/lib/state.sh"; source "$_sl"   # installed by install.sh in consumer repos
-state_append SENSE DONE next=SCOPE mode_recommended=$recommended_mode intent_detected="$intent" role=$role_active voice_tier=$effective_voice_tier compliance_mode=$compliance_mode meta_infra_detected=$meta_infra_detected meta_paths_changed=$meta_total
+source "${LINTEL_SOURCE_ROOT:?select the trusted source}/lib/state.sh"
+state_append SENSE DONE next=SCOPE "mode_recommended=$recommended_mode" \
+  "intent_detected=$intent" "role=$role_active" "voice_tier=$effective_voice_tier" \
+  "compliance_mode=$compliance_mode" "meta_infra_detected=$meta_infra_detected" \
+  "meta_paths_changed=$meta_total"
 ```
 
 ## Output format
@@ -317,7 +334,7 @@ Resources surfaced (not loaded):
   ADRs: <count>
   Related design docs: <count>
 
-Context budget: <X> / 1M (<%>) — <headroom note>
+Context budget: <observed/estimated usage and source, or unknown> — <reported headroom or unknown>
 
 Next options:
   • /li:cycle [--mode <preset>]   — full cycle from here
@@ -336,7 +353,8 @@ Next options:
 
 None. SENSE runs to completion silently or surfaces report.
 
-Exception: first-run case where `profile.yaml` doesn't exist → AskUserQuestion to set the active pack (per D9.3). This is a one-time setup pause, not a recurring SENSE behavior.
+No forced first-use interview. Unresolved mandatory policy is surfaced separately
+from optional operator preferences.
 
 ## Hop-in support
 
@@ -374,9 +392,11 @@ If operator explicitly asks for the SENSE report mid-session, re-run is allowed 
 
 ## Failure recovery
 
-- **profile.yaml malformed**: warn but continue with defaults (workprofile=off, voice=internal, mode=auto). Recommend `/li:doctor` for diagnosis.
+- **Optional preference malformed**: report the diagnostic; do not infer company
+  policy from it. A required P07 failure blocks affected policy-dependent work.
 - **00-state.md unreadable**: continue without prior state, NO_PRIOR_STATE flag in report.
-- **Permission errors on `.claude/runtime/state/`**: warn, write to `/tmp/lintel-state-<ts>.md` instead, surface path.
+- **State persistence failure**: surface the error and keep resumable execution
+  incomplete; do not silently switch ledgers to `/tmp`.
 
 ## Voice tier behavior
 
@@ -388,7 +408,7 @@ Close your report with the shared position footer so the operator always knows w
 cycle and the one logical next action — whether this phase ran standalone or inside `/li:cycle`:
 
 ```bash
-source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/lib/cycle-footer.sh"   # fallback: "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/lib/cycle-footer.sh"
+source "${LINTEL_SOURCE_ROOT:?select trusted source}/lib/cycle-footer.sh"
 render_cycle_footer                               # reads .claude/runtime/state/00-state.md; --compact for short replies
 ```
 

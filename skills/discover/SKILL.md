@@ -34,45 +34,47 @@ The principle: don't reinvent. Find what we have. Surface what constrains.
 
 ## Workflow
 
+Retain the explicitly selected [work map](../spec-kit/references/work-map.md) and
+verify its P07 reference before policy consumption. `bin/li-work-artifacts.py
+--view context` supplies the original specification/design/task paths. For research,
+the research question is sufficient input: no approved implementation design is
+required and no BUILD/SHIP authority follows.
+
 ### Step 1 — Codebase map (Grep/Glob, targeted)
 
-From DEFINE's design doc, extract 5-10 keywords (technology, domain, function names). Map:
+From the selected design or research question, extract a few focused keywords
+(technology, domain, function names). Use P03's bounded literal selector:
 
 ```bash
-# File presence
-for keyword in "${keywords[@]}"; do
-  # Find files matching keyword in path
-  glob_matches=$(find . -type f -name "*${keyword}*" 2>/dev/null | head -5)
-  # Find files containing keyword in content
-  grep_matches=$(grep -rl "$keyword" --include='*.{ts,js,py,go,rs,bicep,yml,yaml,md}' . 2>/dev/null | head -10)
-  # Report
-done
+source "${LINTEL_SOURCE_ROOT:?select trusted source}/bin/_context.sh"
+context_select --glob 'src/**/*.ts' --glob 'src/**/*.js' --glob 'src/**/*.py' \
+  --glob 'src/**/*.go' --glob 'src/**/*.rs' --glob 'docs/**/*.md' \
+  --topic "${keyword:?select a literal topic}" --limit 20
 ```
 
-Rule: cap at top 20 most-relevant files. Don't read every file — just identify.
+Substitute the repository's real directories/extensions and explicit glob arguments;
+do not pass a quoted brace expression to `grep --include`. This reader finds content-only
+matches too and reports unmatched selectors/omissions instead of manufacturing a complete
+map. It returns metadata; use permitted file reads for the relevant content.
 
 If wedge area is large (>1000 files match), surface to operator: "Scope is large. Narrow further or accept partial map?"
 
 ### Step 2 — ADR scan
 
 ```bash
-[ -d ".claude/decisions/" ] && {
-  for adr in .claude/decisions/[0-9]*-*.md; do
-    # Read title + status + summary
-    title=$(grep '^# ' "$adr" | head -1)
-    status=$(grep -i '^status:' "$adr" | head -1)
-    # Match keywords
-    for keyword in "${keywords[@]}"; do
-      grep -qi "$keyword" "$adr" && relevant_adrs+=("$adr")
-    done
-  done
-}
+source "${LINTEL_SOURCE_ROOT:?select trusted source}/bin/_context.sh"
+context_select --glob '.claude/decisions/[0-9]*-*.md' --adr-status all \
+  --topic "${keyword:?select a literal topic}" --limit 20
 ```
 
 For relevant ADRs:
 - Status: Accepted / Proposed / Deprecated / Superseded — report
 - If ADR contradicts the proposed approach, FLAG explicitly (don't bury)
 - Surface ADR-IDs that the new design must respect or supersede
+- P03's `adr_metadata` reads both YAML and actual Markdown `Status`/`Date`
+  conventions. Unknown status remains visible; deprecated/superseded documents
+  remain discoverable as history. Use the repository's declared legacy ADR directory
+  when applicable, never a second status parser.
 
 ### Step 3 — Lessons scan (filtered by relevance)
 
@@ -99,7 +101,7 @@ If wedge involves third-party libs:
 
 ```bash
 # Search skills/ for skills that overlap with the wedge
-for skill in skills/*/SKILL.md; do
+for skill in "${LINTEL_SOURCE_ROOT:?select trusted source}"/skills/*/SKILL.md; do
   description=$(grep '^description:' "$skill" | head -1)
   # If description contains wedge-keywords, surface
 done
@@ -116,9 +118,9 @@ Match wedge to existing agents that should be subagent-pulled in PLAN/BUILD:
 ```bash
 # For each agent category, score relevance to wedge
 # Categories are directory-derived so the scan can never drift from agents/.
-for cat_dir in agents/*/; do
+for cat_dir in "${LINTEL_SOURCE_ROOT:?select trusted source}"/agents/*/; do
   cat=$(basename "$cat_dir")
-  for agent in agents/$cat/*.md; do
+  for agent in "$cat_dir"*.md; do
     [ "$(basename "$agent")" = "_TEMPLATE.md" ] && continue
     [ "$(basename "$agent")" = "README.md" ] && continue
     name=$(basename "$agent" .md)
@@ -173,6 +175,9 @@ Operator decides whether to warm up before PLAN.
 ---
 phase: DISCOVER
 ts: <timestamp>
+cycle_id: <selected cycle>
+work_map: <selected work.json or explicitly unmapped research>
+profile: <verified P07 reference, not a pack name alone>
 wedge_keywords: [...]
 files_mapped: <count>
 adrs_relevant: <count>
@@ -223,9 +228,12 @@ skills_overlap: <count>
 Mechanical since v5.0 (ADR-0008) — one command, not a YAML obligation:
 
 ```bash
-_sl="${LINTEL_SOURCE_ROOT:-${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}}/lib/state.sh"
-[ -f "$_sl" ] || _sl="$HOME/.lintel/lib/state.sh"; source "$_sl"   # installed by install.sh in consumer repos
-state_append DISCOVER DONE next=PLAN report_path=.claude/runtime/state/discover-report-<datetime>.md files_mapped=<count> adrs_found=<count> lessons_applied=<count>
+source "${LINTEL_SOURCE_ROOT:?select the trusted source}/lib/state.sh"
+state_append DISCOVER "${discover_status:?set actual discovery status}" next=PLAN \
+  "report_path=${discover_report:?select the persisted report}" \
+  "files_mapped=${files_mapped:?record observed count}" \
+  "adrs_found=${adrs_found:?record observed count}" \
+  "lessons_applied=${lessons_applied:?record observed count}"
 ```
 
 ## Status protocol
@@ -278,7 +286,8 @@ Skip-conditions: intent=hotfix, intent=ship-existing-branch, known territory ope
 ## Failure recovery
 
 - **Scope too large** (>1000 file matches): surface to operator, ask to narrow or accept partial
-- **No ADRs found**: note "No related ADRs — design has no prior constraints from this area"
+- **No ADRs matched**: report the selectors and bounded coverage; missing/unreadable
+  metadata is not proof that no prior constraint exists
 - **Codebase has no convention**: surface honestly, don't fabricate patterns
 
 ## Voice tier behavior
@@ -291,7 +300,7 @@ Close your report with the shared position footer so the operator always knows w
 cycle and the one logical next action — whether this phase ran standalone or inside `/li:cycle`:
 
 ```bash
-source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/lib/cycle-footer.sh"   # fallback: "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/lib/cycle-footer.sh"
+source "${LINTEL_SOURCE_ROOT:?select trusted source}/lib/cycle-footer.sh"
 render_cycle_footer                               # reads .claude/runtime/state/00-state.md; --compact for short replies
 ```
 

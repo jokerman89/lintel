@@ -1,7 +1,7 @@
 ---
 name: plan-and-build
 layer: foundation
-description: Use when you already have an approved design doc and just need to plan and implement it — runs PLAN then BUILD and skips review, ship, and capture. Reach for it after DEFINE and DISCOVER are done and the remaining work is breaking the design into tasks and writing the code.
+description: Use to compose canonical PLAN and BUILD for an approved design or selected work map, retaining original tasks, package reviews and authority while deferring integrated REVIEW, SHIP and CAPTURE.
 color: cyan
 tools: Read, Bash, Grep, Glob
 voice: internal
@@ -22,6 +22,11 @@ Equivalent to:
 ```
 
 For incremental development where operator wants to plan + execute but defer review/ship.
+This defers the integrated REVIEW phase, not BUILD's required package spec/quality
+reviews. Follow [work-map.md](../spec-kit/references/work-map.md) and
+[task-relevant intake](../define/references/intake.md); `bin/li-work-artifacts.py`
+and `workflow_resume` keep artifact/status/profile selection identical to direct
+PLAN/BUILD. A mapped Spec Kit plan does not need a new native checklist.
 
 ## When to use
 
@@ -42,7 +47,7 @@ For incremental development where operator wants to plan + execute but defer rev
 ### Step 1 — Pre-flight
 
 Verify:
-- APPROVED design doc exists in .claude/engineering/design-archive/
+- An explicitly selected approved design or approved mapped spec/plan/tasks exists
 - Operator on feature branch (not main)
 - Context available for PLAN
 
@@ -51,10 +56,12 @@ If missing: surface, suggest `/li:define` first OR `/li:cycle` for full chain.
 ### Step 2 — Delegate
 
 ```bash
-/li:cycle --from PLAN --to BUILD --skip CAPTURE
+/li:cycle --from PLAN --to BUILD
 ```
 
-Note: only --skip CAPTURE; SENSE still runs (always, cheap) and verifies state.
+Read startup context once. Do not add another SENSE phase outside this range,
+restart the cycle identity, repeat answered approval questions or manufacture a
+separate alias status.
 
 ### Step 3 — Post-build
 
@@ -72,7 +79,7 @@ To finish cycle later:
 
 Artifacts:
   - plan.md (APPROVED)
-  - spec.md (DRAFT, finalized in CAPTURE)
+  - Original mapped spec/plan/tasks/prompt and their actual approval/evidence status
   - Code commits on current branch
   - build-log.md
 ```
@@ -80,7 +87,7 @@ Artifacts:
 ## Pause-points
 
 - PLAN cost-estimate gate + founder approval gate
-- Per-task two-stage review during BUILD
+- Per-package two-stage review during BUILD, covering each original leaf
 - HARD-RULE hooks if the active pack's compliance mode is `hard` (`resolve_pack_field compliance.mode`; advisory by default)
 
 ## Integration

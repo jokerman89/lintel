@@ -41,8 +41,13 @@ Plus role-debrief (if role active) and retro (optional).
 
 ### Step 1 — Cycle history aggregation
 
-Read entire cycle's `.claude/runtime/state/00-state.md` log. Extract:
-- Phases completed + their durations + token cost
+Follow the [shared work-map contract](../spec-kit/references/work-map.md), including
+actual P07 verification via `workflow_resume`, and read
+`bin/li-work-artifacts.py --repo <target> --map <selected> --view context`.
+Use `state_cycle_segment <ledger> <original-cycle-id>`, not the whole ledger or a
+newest-file guess. Read only reports/build-log entries linked to that work and its
+original package/leaf IDs. Extract:
+- Actual phase statuses and measured durations/usage where recorded; otherwise unknown
 - Corrections operator made during BUILD/REVIEW (from build-log)
 - Decisions taken (alternatives chosen in DEFINE, scope changes in PLAN)
 - Reviewer concerns from REVIEW
@@ -63,7 +68,7 @@ If — and only if — the loop is activated: read the planned scale from `scope
 # every other skill does ($LINTEL_REPO_ROOT), with a git fallback if it is unset.
 # Using $(dirname "$0") here made this calibration write silently no-op.
 REPO_ROOT="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}"
-source "$REPO_ROOT/bin/_audit.sh"
+source "${LINTEL_SOURCE_ROOT:?select the trusted source}/bin/_audit.sh"
 
 # From scope.md / SCOPE state entry (the plan's estimate):
 size="$SCOPE_SIZE"                 # XS | S | M | L | XL
@@ -107,7 +112,7 @@ Examples NOT lesson-worthy:
 failure mode of file-based memory. For each candidate, grep what already exists:
 
 ```bash
-source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/lib/memory.sh"
+source "${LINTEL_SOURCE_ROOT:?select trusted source}/lib/memory.sh"
 lessons_find_related <candidate keywords>    # all related active lessons, ranked
 ```
 
@@ -180,32 +185,38 @@ Auto-append (not optional) when CLAUDE.md changes — this is the audit trail fo
 
 **v3.8 change:** the trio (plan.md + spec.md + prompt.md) is now BORN TOGETHER in PLAN, not split across PLAN+CAPTURE. CAPTURE's job here is to RE-AFFIRM the trio against actual-build evidence — not generate.
 
-**`spec.md` reaffirm** (born in PLAN):
-- Verify spec.md still matches actual implementation
-- Update interfaces/contracts that drifted during BUILD (annotated as post-build-evidence)
+Read roles from the validated map, not fixed filenames or guessed siblings. For
+Spec Kit, `tasks.md` remains the original task source and `plan.md` remains design.
+The following familiar names describe roles, not a second native backlog.
+
+**Mapped `spec` reaffirm** (born in PLAN or owned by the original specification system):
+- Verify requirements still match actual implementation
+- Report implementation/spec drift; amend a requirement only within explicit scope
+  authorization, with affected review/QA evidence renewed
 - Status: APPROVED (from PLAN) — unchanged unless drift detected
 
-**`plan.md` reaffirm** (born in PLAN):
-- Annotate plan.md tasks with actual STATUS (DONE/SKIPPED/DEFERRED) from build-log
+**Mapped `tasks` reaffirm**:
+- Annotate the original tasks with actual verified status, preserving IDs and parser
+  structure. Missing/blocked/deferred work stays open; CAPTURE does not approve it
 - Acceptance criteria post-verification (which actually passed)
+- The mapped `plan` receives design reconciliation, never a duplicate task list
 
 **`prompt.md` reaffirm** (born in PLAN, v3.8 Feature 2.2 moved birth to PLAN):
 - Verify prompt.md still describes the work accurately
 - Add any "What you DON'T need to know" entries discovered during BUILD
-- Path: `.claude/plans/<slug>/prompt.md` (born by PLAN, lives there)
+- Path: the map's original `prompt` value, including non-sibling Spec Kit handoffs
 
 **Why moved to PLAN:** standalone `/li:plan <design.md>` (workflow_root post-v3.8) needs to produce the complete trio at PLAN-time. CAPTURE-only generation broke that — operator running PLAN solo got 2/3 of a handoff. Trio born together fixes this.
 
 AskUserQuestion: "Want to dogfood the trio? Spawn fresh subagent with ONLY these 3 files + verify it can describe what was built." (Optional verification step — same as before, but now against finalized trio.)
 
-**Handoff-size check against the 500k cap (NON-BLOCKING).** The reaffirmed trio is the durable cold-executor handoff — the artifact a fresh cold session reads to re-execute. Run the existing cap check so the finalized trio (now annotated with build evidence, possibly larger than at PLAN-time) plus any warming context can't silently exceed the 500k cap. This closes the second un-gated handoff the v4.9 audit flagged (Promise 6: cap logic existed but was invoked at no handoff).
-
-Invoke the existing mechanism — do **not** rebuild it:
-
-`/li:handoff-size-check` (a portable skill call; reads the reaffirmed trio + `.claude/runtime/state/warming-manifest.md`, applies the mode-aware cap from `/li:context-budget` mode_envelopes, default `customer-engagement: 500k soft / 750k hard`).
-
-- **SURFACE, don't block.** A yellow/red verdict warns ("finalized trio yields ~Nk handoff, near cap") and notes the durable handoff is large — the operator decides whether to trim before it becomes the cross-session record. It does NOT halt CAPTURE.
-- **Off-switch:** `--skip-handoff-size-check` (or `SKIP_HANDOFF_SIZE_CHECK=1`) skips the gate entirely. Silent when skipped, and silent on a green pass.
+**Handoff-size check (advisory).** Invoke `/li:handoff-size-check --map <same map>`
+with explicitly selected P03 warming inputs. It measures the actual distinct
+artifacts and uses `context_budget`, not a fictional 500k mode capacity. Unknown
+capacity/usage stays unknown. An unavailable input is INCOMPLETE, not a zero-byte
+success. This advisory estimate does not halt CAPTURE. The retained
+`--skip-handoff-size-check` / `SKIP_HANDOFF_SIZE_CHECK=1` records that the estimate
+was not run; it does not waive a declared required limit or host refusal.
 
 ### Step 6a — Reaffirm swarm evidence and future-operator clarity
 
@@ -249,7 +260,7 @@ layer. The repo's own capture artifacts (Steps 1–7) are unaffected — this is
 sink, not a move. Nothing is ever read back from the vault into the repo.
 
 ```bash
-source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/lib/pack-resolver.sh"
+source "${LINTEL_SOURCE_ROOT:?select trusted source}/lib/pack-resolver.sh"
 sink_enabled=$(resolve_pack_field capture.vault_sink_enabled)
 sink_path=$(resolve_pack_field capture.vault_sink_path)    # relative to repo root
 
@@ -321,7 +332,7 @@ rendered note body programmatically before writing, and ABORT the export (warn, 
 CAPTURE) on any hit:
 
 ```bash
-source "$LINTEL_REPO_ROOT/hooks/shared/_patterns.sh"
+source "${LINTEL_SOURCE_ROOT:?select the trusted source}/hooks/shared/_patterns.sh"
 note_body="$(cat "$rendered_note")"
 sec_hits="$(scan_secrets all "$note_body")"
 pii_hits="$(scan_customer "$note_body")"
@@ -343,7 +354,8 @@ cycle_id: <id>
 duration_human: <hours>
 duration_cc: <minutes>
 tokens_used: <approx>
-cost_estimate_dollars: <X>
+usage_provenance: observed | estimated | unknown
+# billing: <actual supplied billing evidence only; omit when unknown>
 
 what_worked:
   - <thing>
@@ -364,12 +376,19 @@ is the real feedback loop and stays.
 
 ### Step 10 — 00-state.md final entry
 
-Mechanical since v5.0 (ADR-0008) — one command, not a YAML obligation. No `next=`: the cycle is complete (`/li:resume` keys off `cycle_complete: true`); the full artifact list lives in the Step 11 closing message:
+Capture can record an unfinished cycle without marking it complete. Set the actual
+outcome from verified evidence; preserve its original unfinished phase when blocked:
 
 ```bash
-_sl="${LINTEL_SOURCE_ROOT:-${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}}/lib/state.sh"
-[ -f "$_sl" ] || _sl="$HOME/.lintel/lib/state.sh"; source "$_sl"   # installed by install.sh in consumer repos
-state_append CAPTURE DONE cycle_complete=true outcome=<DONE|DONE_WITH_CONCERNS|BLOCKED> lessons_captured=<count> adrs_drafted=<count> total_tokens=<N> cost_estimate=<$X>
+source "${LINTEL_SOURCE_ROOT:?select the trusted source}/lib/state.sh"
+case "${capture_outcome:?set actual objective outcome}" in
+  DONE|DONE_WITH_CONCERNS)
+    state_append CAPTURE DONE cycle_complete=true "outcome=$capture_outcome" ;;
+  BLOCKED|IN_PROGRESS)
+    state_append CAPTURE DONE cycle_complete=false "outcome=$capture_outcome" \
+      "next=${capture_resume_phase:?set original unfinished phase}" ;;
+  *) echo "CAPTURE: unknown outcome; completion not recorded" >&2; exit 1 ;;
+esac
 ```
 
 ### Step 11 — Closing message
@@ -377,10 +396,10 @@ state_append CAPTURE DONE cycle_complete=true outcome=<DONE|DONE_WITH_CONCERNS|B
 Tight closing — terse artifact list + operator-pattern observations, no motivational filler:
 
 ```
-LINTEL CYCLE COMPLETE — <wedge title>
+LINTEL CAPTURE — <wedge title and actual objective status>
 
 Duration: <hours human / <minutes> CC
-Cost: $<X> | Tokens: <N>
+Usage: <observed/estimated value with source, or unknown>
 Outcome: <DONE / DONE_WITH_CONCERNS / BLOCKED>
 
 Artifacts produced:
@@ -402,7 +421,8 @@ Next actions:
 
 ## Status protocol
 
-- **DONE** — all artifacts written, profile updated
+- **DONE** — authorized capture artifacts persisted; cycle completion is reported
+  separately and requires actual objective evidence, not a profile mutation
 - **DONE_WITH_CONCERNS** — captured but operator deferred ADR draft or lessons capture
 - **BLOCKED** — only if filesystem unavailable (rare)
 
@@ -433,9 +453,9 @@ YES — standalone post-implementation reflection. Useful if operator forgot CAP
 - `.claude/memory/lessons.md` (append per captured lesson)
 - `.claude/decisions/NNNN-<slug>.md` (new ADR if drafted)
 - `EVOLUTION-LOG.md` (if CLAUDE.md changed)
-- `spec.md` (FINALIZED from PLAN's draft)
-- `plan.md` (FINALIZED with post-verification status)
-- `prompt.md` (NEW — cold-executor handoff)
+- Mapped `spec`/`plan` (reconciled only within original authority)
+- Mapped `tasks` (original IDs and evidence-backed status; unresolved work stays open)
+- Mapped `prompt` (reaffirmed, not recreated)
 - swarm work map and evidence artifacts (reaffirmed when the execution profile was selected)
 - `.claude/memory/retros/<date>-<cycle-id>.md` (optional)
 - `~/.lintel/roles/<id>.md` (update if role active + insights to add)
@@ -462,7 +482,8 @@ YES — standalone post-implementation reflection. Useful if operator forgot CAP
 - **Drafting ADR for trivial decisions** — ADR has overhead, reserve for decisions worth preserving
 - **Skipping cold-executor trio because "we shipped already"** — the trio is the durable artifact, more valuable than the PR after months pass
 - **Polluting role-file with session-specific data** — role files are persistent identity, not session log
-- **Forgetting the granularity calibration record (Step 1b)** — it is the surviving cross-session feedback loop (the operator-profile append was removed in v5, ADR-0006); skipping it leaves the scale estimator on its default prior
+- **Activating granularity writes as bookkeeping** — Step 1b stays dormant without
+  its own authorization/behavior evidence; unknown usage is not an invented sample
 - **Long retro write-up when cycle was small** — retro is optional + light
 - **Reducing a swarm to runtime history** — preserve committed topology, briefs, reports, reviews,
   integration order, and honest host limitations for cold resume
@@ -484,7 +505,7 @@ Close your report with the shared position footer so the operator always knows w
 cycle and the one logical next action — whether this phase ran standalone or inside `/li:cycle`:
 
 ```bash
-source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/lib/cycle-footer.sh"   # fallback: "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/lib/cycle-footer.sh"
+source "${LINTEL_SOURCE_ROOT:?select trusted source}/lib/cycle-footer.sh"
 render_cycle_footer                               # reads .claude/runtime/state/00-state.md; --compact for short replies
 ```
 

@@ -4,7 +4,7 @@
 # implements: ADR-0005
 # intent: docs/concepts/jobs-system.md
 # constraints: registry is a derived cross-repository view; job files remain authoritative
-# last_intent_review: 2026-09-08
+# last_intent_review: 2026-09-20
 #
 # Lifecycle:
 #   job_create <workflow> <mode>     → creates ~/.lintel/jobs/<id>/{job.yaml,outputs,inputs} + regenerates _active.md
@@ -46,12 +46,17 @@ LINTEL_JOBS_ARCHIVE="${LINTEL_JOBS_ARCHIVE:-$LINTEL_JOBS_DIR/_archive}"
 LINTEL_JOBS_REGISTRY="${LINTEL_JOBS_REGISTRY:-$LINTEL_HOME/jobs/_active.md}"
 LINTEL_AUDIT_DIR="${LINTEL_AUDIT_DIR:-$LINTEL_HOME/audit}"
 
-# Unified audit writer (sibling in bin/). Idempotent source.
-command -v audit_log >/dev/null 2>&1 || source "$(dirname "${BASH_SOURCE[0]}")/_audit.sh"
+# Read-only inspection must not initialize audit/registry directories.
+_JOBS_BIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+_jobs_audit() {
+  command -v audit_log >/dev/null 2>&1 || source "$_JOBS_BIN_DIR/_audit.sh"
+  audit_log "$@"
+}
 
 # LINTEL_JOBS_NO_INIT=1 -> read-only source (the session digest sources this
 # just to call job_ready; a digest must not create directories as a side effect)
 if [ -z "${LINTEL_JOBS_NO_INIT:-}" ]; then
+  command -v audit_log >/dev/null 2>&1 || source "$_JOBS_BIN_DIR/_audit.sh"
   mkdir -p "$LINTEL_JOBS_DIR" "$LINTEL_JOBS_ARCHIVE" "$LINTEL_AUDIT_DIR" 2>/dev/null || true
 fi
 
@@ -106,7 +111,7 @@ EOF
   : > "$dir/00-state.md"
 
   # Audit (unified writer → ~/.lintel/audit/jobs.jsonl)
-  audit_log "jobs" "job_begin" "job_id=$id" "workflow=$workflow" "mode=$mode"
+  _jobs_audit "jobs" "job_begin" "job_id=$id" "workflow=$workflow" "mode=$mode"
 
   # Optional inline step contracts (design §3.4 — per-step consumes/produces).
   if [ "$#" -gt 0 ]; then
@@ -226,7 +231,7 @@ job_set_steps() {
 
   mv "$dir/job.yaml.tmp" "$dir/job.yaml"
 
-  audit_log "jobs" "job_set_steps" "job_id=$id" "count=$#"
+  _jobs_audit "jobs" "job_set_steps" "job_id=$id" "count=$#"
 }
 
 # Read one named step's status. Echoes the status (e.g. DONE) or empty if absent.
@@ -285,7 +290,7 @@ job_update() {
     { print }
   ' "$dir/job.yaml" > "$dir/job.yaml.tmp" && mv "$dir/job.yaml.tmp" "$dir/job.yaml"
 
-  audit_log "jobs" "job_update" "job_id=$id" "step=$step" "status=$status"
+  _jobs_audit "jobs" "job_update" "job_id=$id" "step=$step" "status=$status"
 
   regenerate_active
 }
@@ -322,7 +327,7 @@ job_archive() {
   # Move to archive (mv across paths)
   mv "$dir" "$archive_dir/" 2>/dev/null || true
 
-  audit_log "jobs" "job_end" "job_id=$id" "result=$result"
+  _jobs_audit "jobs" "job_end" "job_id=$id" "result=$result"
 
   regenerate_active
 }
@@ -453,32 +458,73 @@ _registry_sync() (
 
 # Print all jobs
 list_jobs() {
+  if [ "${1:-}" = --read-only ]; then
+    local d f id status step touched count=0 failed=0
+    printf '# Recorded jobs in the selected repository\n\n'
+    for d in "$LINTEL_JOBS_DIR"/*/; do
+      [ -d "$d" ] || continue
+      [ "$d" != "$LINTEL_JOBS_ARCHIVE/" ] || continue
+      f="$d/job.yaml"
+      if [ ! -f "$f" ]; then
+        printf -- '- `%s`: metadata missing; state unknown\n' "$(basename "$d")"
+        failed=1; continue
+      fi
+      id=$(_jobs_field "$f" job_id) || return 1
+      status=$(_jobs_field "$f" status) || return 1
+      step=$(_jobs_field "$f" current_step) || return 1
+      touched=$(_jobs_field "$f" last_touched) || return 1
+      if [ -z "$id" ] || [ -z "$status" ] || [ -z "$step" ]; then
+        printf 'WARN [lintel/jobs]: incomplete metadata in %s\n' "$f" >&2
+        failed=1
+      fi
+      printf -- '- `%s`: %s; step `%s`; last observation `%s`\n' \
+        "${id:-$(basename "$d")}" "${status:-UNKNOWN}" "${step:-unknown}" "${touched:-unknown}"
+      count=$((count+1))
+    done
+    if [ "$count" -eq 0 ]; then
+      printf 'No job records observed. Auto-spawn is dormant; this is not proof of no open mapped work.\n'
+    fi
+    return "$failed"
+  fi
   [ -f "$LINTEL_JOBS_ACTIVE" ] || regenerate_active
   cat "$LINTEL_JOBS_ACTIVE"
+}
+
+_jobs_field() {
+  awk -v key="$2:" '
+    { sub(/\r$/, "") }
+    index($0,key)==1 { value=substr($0,length(key)+1); sub(/^[ \t]+/,"",value); print value; exit }
+  ' "$1"
 }
 
 # Find jobs untouched > N hours
 # Args: <hours> (default 24)
 stale_jobs() {
   local hours="${1:-24}"
+  case "$hours" in ''|*[!0-9]*) echo "ERROR [lintel/jobs]: hours must be a nonnegative integer" >&2; return 2 ;; esac
   local now_epoch
   now_epoch=$(_jobs_epoch_now)
-  local threshold=$((hours * 3600))
+  local threshold=$((10#$hours * 3600))
 
   for d in "$LINTEL_JOBS_DIR"/*/; do
     [ -d "$d" ] || continue
     local f="$d/job.yaml"
     [ -f "$f" ] || continue
     local id last_touched
-    id=$(grep '^job_id:' "$f" | head -1 | awk '{print $2}')
-    last_touched=$(grep '^last_touched:' "$f" | head -1 | awk '{print $2}')
-    [ -z "$last_touched" ] && continue
+    id=$(_jobs_field "$f" job_id) || return 1
+    last_touched=$(_jobs_field "$f" last_touched) || return 1
+    if [ -z "$last_touched" ]; then
+      printf '%s\tage-unknown (missing timestamp)\n' "${id:-$(basename "$d")}"
+      continue
+    fi
 
     # Convert ISO-8601 to epoch (portable-ish via date -d / -j)
     local lt_epoch
-    lt_epoch=$(date -d "$last_touched" +%s 2>/dev/null || \
-               date -j -f "%Y-%m-%dT%H:%M:%SZ" "$last_touched" +%s 2>/dev/null || \
-               echo "$now_epoch")
+    if ! lt_epoch=$(date -d "$last_touched" +%s 2>/dev/null ||
+        date -j -u -f "%Y-%m-%dT%H:%M:%SZ" "$last_touched" +%s 2>/dev/null); then
+      printf '%s\tage-unknown (unparsed timestamp)\n' "${id:-$(basename "$d")}"
+      continue
+    fi
     local age=$((now_epoch - lt_epoch))
     if [ "$age" -gt "$threshold" ]; then
       local age_hours=$((age / 3600))
@@ -593,7 +639,7 @@ job_resume_point() {
     [ -n "$name" ] || continue
     st=$(job_step_status "$id" "$name")
     if [ "$st" != "DONE" ]; then
-      can=$(job_can_start "$id" "$name")
+      can=$(job_can_start "$id" "$name") || can=no
       if [ "$can" = "yes" ]; then
         printf '%s\n' "$name"
         return 0

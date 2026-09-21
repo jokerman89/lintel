@@ -21,7 +21,16 @@ Research-dive workflow: explore + understand, no code yet. Equivalent to:
 
 Runs 3 phases (SENSE → DEFINE → DISCOVER). Skips PLAN/BUILD/REVIEW/SHIP/CAPTURE.
 
-Output: APPROVED design doc + discover-report.md. Operator can later resume with `/li:resume` to PLAN if research validates the direction.
+Output: sourced findings, explicit uncertainties and options, plus a discover report
+when artifact writing is authorized. DEFINE frames the research question and source
+boundary; it does not demand an APPROVED implementation design or venture interview.
+Later implementation needs its own scoped design/PLAN approval.
+
+Follow [task-relevant intake](../define/references/intake.md) and the
+[work-map contract](../spec-kit/references/work-map.md). Preserve an existing selected
+map through `bin/li-work-artifacts.py`; do not create a competing implementation
+backlog for an investigation. If all writes were forbidden, report findings without
+creating runtime or design files.
 
 ## When to use
 
@@ -42,7 +51,9 @@ Output: APPROVED design doc + discover-report.md. Operator can later resume with
 
 ### Step 1 — Pre-flight
 
-AskUserQuestion (brief): "Research mode produces design doc + discover-report but no code. Continue? (Y/n)"
+Use the requested research scope. Ask only missing source-access or material
+research questions through the host's actual channel; do not ask again whether to
+perform the research the operator just requested.
 
 ### Step 2 — Delegate to /li:cycle
 
@@ -53,7 +64,7 @@ AskUserQuestion (brief): "Research mode produces design doc + discover-report bu
 Mode preset handles:
 - audience=solo
 - voice_tier=internal
-- compliance=none (read-only, no compliance gates apply)
+- Applicable read/data-handling policy still applies; read-only is not a policy exemption
 - Cost expectation pre-set medium
 
 ### Step 3 — Post-research output
@@ -63,7 +74,7 @@ After DISCOVER DONE, surface:
 RESEARCH COMPLETE — <wedge>
 
 Artifacts produced:
-  - Design doc: <.claude/engineering/design-archive/lintel-*-design-*.md> (APPROVED)
+  - Research brief: <explicit selected path, if writing was authorized> (findings, not implementation approval)
   - Discover report: <.claude/runtime/state/discover-report-*.md>
 
 Findings:
@@ -73,16 +84,15 @@ Findings:
   - Recommended agents for future PLAN: <list>
 
 Next options:
-  • /li:resume → continue to PLAN if direction validated
+  • PLAN can use the findings after implementation scope is actually authorized
   • /li:capture → write findings as standalone artifact (no full cycle)
   • Decide later — design doc + discover-report persist
 ```
 
 ## Pause-points
 
-- Initial mode-confirmation
-- DEFINE forcing questions (all 6, per office-hours discipline)
-- Premise check + alternatives + design doc approval gate
+- Only unresolved research questions, missing access authority or genuinely
+  contested premises. Optional strategy questions require the selected venture lens.
 
 ## Integration
 
@@ -91,4 +101,5 @@ Delegates to `/li:cycle --mode research-dive`.
 ## Anti-patterns
 
 - **Research-then-immediate-build without re-running PLAN** — research validates direction, PLAN turns it into tasks
-- **Skipping the design doc approval gate because "this is just research"** — design doc commits to a wedge, gate confirms it
+- **Treating research completion as an approved design or permission to build/ship** —
+  preserve the requested read operation, findings and uncertainty
