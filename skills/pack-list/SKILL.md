@@ -1,7 +1,7 @@
 ---
 name: pack-list
 layer: foundation
-description: Lists every pack discoverable in ~/.lintel/packs/ and repo packs/ — shows name, extends, voice tier, compliance mode, active flag.
+description: List configured-store, repository and installed-source packs with resolver precedence, validation results and the actual effective profile.
 color: green
 tools: Read, Bash, Glob
 voice: internal
@@ -12,13 +12,15 @@ You are the PACK-LIST skill — surfaces every pack available on this machine.
 
 ## What this skill does
 
-Walks `~/.lintel/packs/` + `<repo>/packs/`, parses each pack.yaml, prints a table:
+Calls `bin/li-lifecycle.py pack-list` with the [configured roots](../../docs/lifecycle.md).
+The helper inventories configured-store, target-repository and trusted-source packs with
+the same structured resolver as consumers. Render its actual results as a table:
 
 ```
-PACK              ACTIVE  EXTENDS       VOICE       COMPLIANCE  REQUIRES
-_default          *                     internal    advisory    >=4.0.0
-acme-internal             (none)        mixed       hard        >=4.0.0
-acme-customer             acme-internal customer    hard        >=4.0.0
+PACK       ORIGIN       SELECTED SOURCE  VALID  EFFECTIVE
+_default   source       yes              yes    yes
+example    repository   no (shadowed)    yes    no
+example    store        yes              yes    no
 ```
 
 `*` marks the active pack. Only `_default` ships with Lintel; other packs are installed by the operator — a company pack contributes its own voice, compliance, and roles on top of `_default`.
@@ -32,83 +34,36 @@ acme-customer             acme-internal customer    hard        >=4.0.0
 
 ## When NOT to use
 
-- Mid-cycle (no need; the cached pack is what matters)
+- To infer which host plugins or hooks are active; manifest discovery does not prove that
 - For pack-content introspection — read the pack.yaml directly
 
 ## Workflow
 
-### Step 1 — Discover pack directories
-
 ```bash
-LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
-REPO_PACKS="$(git rev-parse --show-toplevel 2>/dev/null)/packs"
-HOME_PACKS="$LINTEL_HOME/packs"
-
-packs=()
-for base in "$HOME_PACKS" "$REPO_PACKS"; do
-  [ -d "$base" ] || continue
-  while IFS= read -r d; do
-    [ -f "$d/pack.yaml" ] && packs+=("$(basename "$d"):$base")
-  done < <(find "$base" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sort)
-done
+bash "$LINTEL_SOURCE_ROOT/bin/li-lifecycle" \
+  --source "$LINTEL_SOURCE_ROOT" --repo "$LINTEL_REPO_ROOT" pack-list
 ```
 
-### Step 2 — Read active pack
+Keep the historical skill `--validate` spelling as a request to show the helper's
+per-row validation/compatibility details; the helper always checks them. Include:
+origin, selected versus shadowed source, validity and diagnostics, pack release and
+separate schema/product/feature compatibility. Do not equate `requires_lintel` with
+the public product version.
 
-```bash
-ACTIVE_FILE="$LINTEL_HOME/packs/active-pack"
-active="_default"
-[ -f "$ACTIVE_FILE" ] && active=$(head -1 "$ACTIVE_FILE" | tr -d '[:space:]')
-```
+Report `effective_pack` and the exact bound reference if present. `reference: null`
+means an unbound read, not a stable handoff. Distinguish optional fallback diagnostics
+from valid neutral first use; a broken required profile or drift is an error.
 
-### Step 3 — Parse each pack + emit table
-
-For each pack, extract:
-- `name`
-- `extends` (or `(none)`)
-- `voice.default_tier`
-- `compliance.mode`
-- `requires_lintel`
-
-Emit aligned table to stdout. Mark active pack with `*`.
-
-### Step 4 — Validation indicator (optional, --validate)
-
-If `--validate` flag: invoke `validate_pack` per row, print `OK` or `FAIL` in extra column.
-
-```bash
-if [ "$VALIDATE" = "1" ]; then
-  source "$REPO_ROOT/lib/pack-resolver.sh"
-  for row in "${packs[@]}"; do
-    name="${row%%:*}"
-    if validate_pack "$name" 2>/dev/null; then
-      echo "  $name: VALID"
-    else
-      echo "  $name: INVALID — run /li:pack-validate $name for details"
-    fi
-  done
-fi
-```
-
-### Step 5 — Surface counts + footer
-
-```
-Total: 3 packs (1 active)
-Sources: ~/.lintel/packs (2), <repo>/packs (1)
-```
-
-Footer:
-- "Switch active: `/li:pack-switch <name>`"
-- "Create new: `/li:pack-create <name>`"
-- "Validate all: `/li:pack-list --validate`"
+Retain duplicate names as shadowed rows instead of hiding them. Listing never binds a
+context, changes a pointer, installs an extension or inspects private role bodies.
+Use `/li:pack-validate <name>` for effective field details and `/li:pack-switch <name>`
+for an explicit policy-context change.
 
 ## Integration
 
 **Reads:**
-- `~/.lintel/packs/<name>/pack.yaml` for every pack
-- `<repo>/packs/<name>/pack.yaml` for every pack
-- `~/.lintel/packs/active-pack`
-- Optionally `lib/pack-resolver.sh` (--validate mode)
+- Configured pack store, selected target and trusted installed source manifests
+- Configured active pointer, repository requirements and any selected profile reference
 
 **Writes:**
 - stdout only — no state mutation
@@ -117,4 +72,4 @@ Footer:
 
 - **Hardcoding pack list** — always re-discover (operators add packs frequently)
 - **Hiding home-packs** — both scopes count; surface both
-- **Suppressing pack collisions** — if `~/.lintel/packs/foo` AND `<repo>/packs/foo` both exist, flag it (home wins per resolver order)
+- **Suppressing pack collisions** — configured store wins over target and source; show all origins

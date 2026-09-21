@@ -1,128 +1,67 @@
 ---
 name: scaffold-internal-tool
 layer: foundation
-description: Initialize an internal-tooling repo — CI, README, pack compliance hooks, no customer surface.
+description: Create a working internal CLI, service, dashboard or script using the common owned foundation initializer and the project's chosen toolchain.
 color: green
 tools: Read, Write, Bash, Glob
 voice: internal
 cli_support: [claude-code, codex]
 ---
 
-# /scaffold-internal-tool
+# Scaffold an internal tool
 
-Initializes an internal-tooling repo (CLI, dashboard, automation script, ops utility). Distinct from `/scaffold-mvp` (product-grade) and from any customer-bearing scaffold a pack may provide. Internal-tool scaffold is leaner — no customer-voice gates, but it still applies the active pack's compliance hooks (none by default).
+Retain the CLI, service, dashboard and automation-script use cases, with a leaner
+application scope than an MVP. Reuse [scaffold](../scaffold/SKILL.md) for Lintel's
+foundation; do not reimplement instruction, memory or migration copying.
 
-## When to use
+## Establish the requested flow
 
-- New CLI / utility / automation script for the team
-- Internal dashboard or monitoring tool
-- One-off engineering helper that may evolve into something bigger
-- Pre-MVP exploration before deciding whether to productize
+Reuse the supplied `--name`, `--path`, `--language`, `--type` and `--ci` choices. A path
+means the explicit working target, not a guess from its name. Support the chosen
+TypeScript, Python, Go or Rust toolchain where available; ask about an unknown stack
+instead of silently falling back. Prefer existing manifests and framework-native
+generators. Do not choose a license, data classification, vendor, cloud or CI platform
+without a project/brief basis.
 
-## When NOT to use
+Define one useful end-to-end acceptance case and its principal failure case:
 
-- Customer-bearing artifact — use `/scaffold-mvp` (or a pack-provided customer-bearing scaffold)
-- Adding to existing repo — that's not scaffolding, that's a new module
-- Test-only scratch project — overkill
+- CLI: real arguments/input, observable result, invalid-input exit and actionable error.
+- Service: actual request/response contract, health behavior, validation and failure handling.
+- Dashboard: the requested data/action flow, loading/empty/error states and accessible UI.
+- Script/automation: explicit inputs/destination, deterministic output and safe failure/retry.
 
-## Inputs
+An internal audience is not evidence that the tool never handles customer or sensitive
+data. Load actual pack requirements and keep secrets/private state out of starter fixtures.
 
-- Required `--name <slug>` — kebab-case name
-- Optional `--path <dir>` — where to create (default: cwd / `<name>`)
-- Optional `--language <ts|py|go|rs>` — primary language (default: ts)
-- Optional `--type <cli|service|dashboard|script>` — tool shape (default: cli)
-- Optional `--ci <github|azure-devops|none>` — CI setup (default: github)
+## Implement the base and application
 
-## Workflow
+Create only the authorized target using the selected ecosystem's tooling. Then dispatch:
 
-1. **Create base structure** (language + type dependent):
-   - `cli`: `src/index.ts` + `bin/<name>.js` (or equivalent for other languages)
-   - `service`: `src/server.ts` + Dockerfile + health endpoint stub
-   - `dashboard`: `src/index.html` + minimal Vite/Next setup
-   - `script`: single-file `<name>.{ts,py,go,rs}` + minimal config
-2. **Standard files:**
-   - `README.md` — purpose, install, usage, contributing
-   - `CLAUDE.md` — internal-tool defaults
-   - `.gitignore`, `LICENSE` (MIT default)
-   - `.editorconfig`
-   - `tests/` directory with one starter test
-3. **Language-specific:**
-   - `ts`: `package.json` + `tsconfig.json` (strict) + `vitest.config.ts`
-   - `py`: `pyproject.toml` + `ruff` config + `pytest.ini`
-   - `go`: `go.mod` + standard layout
-   - `rs`: `Cargo.toml` + `src/main.rs`
-4. **CI setup** (if not `--ci none`):
-   - `github`: `.github/workflows/ci.yml` with lint + test
-   - `azure-devops`: `azure-pipelines.yml`
-5. **Compliance pre-wiring:**
-   - `compliance/data-class.md` — declares this is internal-tool (no customer-data surface by default)
-   - Preferred-vendor baseline (pack-configurable; none by default — no third-party SDKs pre-added)
-6. **Git init + first commit.**
-7. **Report.**
-
-## Report format
-
-```
-Scaffold internal-tool: log-replay-checker
-
-Path: /e/Workspace/log-replay-checker
-Language: ts
-Type: cli
-CI: github
-
-## Created
-- src/index.ts, bin/log-replay-checker
-- package.json (tsc strict, vitest)
-- tsconfig.json (strict mode)
-- tests/index.test.ts
-- README.md (template populated)
-- CLAUDE.md (internal-tool defaults)
-- .github/workflows/ci.yml
-- compliance/data-class.md (internal-tool default: non-business)
-
-## Next steps
-1. Edit src/index.ts — implement the CLI entry
-2. Run `npm install` (or your package manager)
-3. Edit README.md to describe purpose + usage
-4. First test: `npm test`
-5. First push: feature branch + PR
+```bash
+bash "$LINTEL_SOURCE_ROOT/bin/li-scaffold" init \
+  --target "$target" --name "$name" --mode internal-tool
 ```
 
-## Compliance integration
+Follow its source/target/profile, collision and recovery contract. Existing prose, configs,
+roles and extensions must survive. A bound parent profile stays an operation constraint;
+the child is not silently bootstrapped or activated.
 
-- Pre-declares a data class of non-business (internal-tool default — operator changes if the tool processes higher-sensitivity data).
-- Pre-wires a preferred-vendor baseline (pack-configurable; none by default): no third-party SDKs added by default.
-- No voice gates (this is internal-tool, no customer surface).
+Add the actual application entry, typed boundaries, minimal configuration and tests for
+the requested flow. Preserve the useful language-specific methods: strict TypeScript
+checking, Python package/lint/test configuration, Go's module/layout conventions, or
+Rust's Cargo entry and tests. Use the repository's selected runner instead of installing
+another one reflexively. Dependency installation follows a changed manifest or a real
+missing-dependency failure, not speculative setup.
 
-## Failure modes
+Keep purpose/install/usage docs, ignore rules and editor conventions useful and specific.
+Add GitHub/Azure DevOps CI only when selected, exercising real commands; never claim a
+comment, a no-op gate or a slash command in YAML is enforced CI. Preserve existing
+governance and do not register pack hooks automatically.
 
-- **Path exists + not empty:** ask whether to merge or pick new path.
-- **Language not supported:** list supported, exit.
-- **Type not supported:** list valid types, exit.
-- **CI selected but template missing for that platform:** fall back to none + warn.
-- **Package manager not installed:** create files, skip install, surface manual next steps.
+## Acceptance and handoff
 
-## Examples
-
-**TypeScript CLI:**
-```
-> /scaffold-internal-tool --name log-replay-checker --language ts --type cli
-✓ Scaffolded. Run `npm install` then implement src/index.ts.
-```
-
-**Python script:**
-```
-> /scaffold-internal-tool --name daily-status-emitter --language py --type script --ci azure-devops
-✓ Scaffolded with Azure Pipelines CI.
-```
-
-**Go service:**
-```
-> /scaffold-internal-tool --name metrics-aggregator --language go --type service
-✓ Scaffolded with Dockerfile + health endpoint.
-```
-
-## See also
-
-- `/scaffold-mvp` — for product-grade scaffolds
-- `/health` — validate scaffolded structure post-creation
+Run the smallest relevant build/type/lint checks and both actual flow cases. Report
+placeholders, unconfigured dependencies, unavailable tools and unrun host/CI checks
+explicitly; a skeleton is not a working tool. Preserve source/target hashes and the
+foundation transaction receipt where recovery matters. Commit only within current
+authority and never imply deployment, publication or private synchronization.

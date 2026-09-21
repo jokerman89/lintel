@@ -120,6 +120,22 @@ Run `init` from the next approved Lintel revision on an upgrade branch. Managed 
 unchanged may refresh; local edits or conflicting files require review before an update proceeds.
 Run `check`, inspect the diff, and repeat your pilot task before merging.
 
+`init` records an owned file transaction with an explicit separate recovery store.
+Its reported default is a compact full-target-bound sibling; `--store` or
+`LINTEL_RECOVERY_STORE` overrides it exactly. Interruption is not completion and blocks
+a new init until explicitly reconciled. To inspect or reverse verified owned bytes:
+
+```bash
+python3 "$LINTEL_SOURCE_ROOT/bin/li-copilot.py" inspect \
+  --target "$target" --store "$store" --transaction "$id"
+python3 "$LINTEL_SOURCE_ROOT/bin/li-copilot.py" recover \
+  --target "$target" --store "$store" --transaction "$id"
+```
+
+Recovery refuses later edits, foreign/corrupt receipts and reuse of consumed restore
+permission. It does not reactivate/deactivate a host or roll back external effects.
+See [lifecycle operations](lifecycle.md) for source/profile boundaries and limitations.
+
 Rollback the adoption or upgrade through a reviewed Git change, retaining project lessons,
 plans and decisions. The installer has no remove command; consult its inventory and remove
 only files introduced by that installation after checking for subsequent edits. Avoid deleting

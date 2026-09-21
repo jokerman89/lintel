@@ -16,6 +16,11 @@ JOINED_RUNTIME_RESOURCES = (
     "lib/profile_context.py", "lib/profile-context-schema.json", "lib/pack-schema.yaml",
     ".claude-plugin/plugin.json",
 )
+REVIEW_RUNTIME_RESOURCES = (
+    "bin/li-review-evidence.py", "bin/li-review-log", "bin/li-review-read",
+    "lib/review_contract.py", "lib/review-schema.json",
+    "lib/markdown_source.py", "bin/_audit.sh", "lib/paths.sh",
+)
 spec = importlib.util.spec_from_file_location("li_copilot", ROOT / "bin/li-copilot.py")
 adapter = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(adapter)
@@ -70,6 +75,59 @@ class CopilotKit(unittest.TestCase):
         root = target or self.target
         return {p.relative_to(root).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
                 for p in root.rglob("*") if p.is_file() and not p.is_symlink()}
+
+    def test_interrupted_adapter_publication_requires_explicit_owned_recovery(self):
+        (self.target / "AGENTS.md").write_bytes(b"Consumer-owned prose.\r\n")
+        (self.target / "custom.json").write_bytes(b'{"owned":"consumer"}\n')
+        before = self.snapshot()
+        store = self.base / "adapter-interruption-store"
+        script = r'''
+import importlib.util,sys
+from pathlib import Path
+sys.dont_write_bytecode=True
+source,target,store=map(Path,sys.argv[1:])
+sys.path.insert(0,str(source/"lib"))
+import managed_transaction as transaction
+original=transaction._write_change
+writes=[]
+def interrupted(root,relative,data,mode,expected):
+    original(root,relative,data,mode,expected)
+    writes.append(relative)
+    if len(writes)==1:
+        raise OSError("synthetic failure after adapter publication")
+transaction._write_change=interrupted
+spec=importlib.util.spec_from_file_location("adapter",source/"bin/li-copilot.py")
+adapter=importlib.util.module_from_spec(spec)
+spec.loader.exec_module(adapter)
+sys.argv=["li-copilot","init","--source",str(source),"--target",str(target),"--store",str(store)]
+try:
+    adapter.main()
+except (ValueError,OSError) as error:
+    print(error,file=sys.stderr)
+    raise SystemExit(17)
+'''
+        result = subprocess.run([sys.executable, "-c", script, str(self.source), str(self.target), str(store)],
+                                capture_output=True, text=True, encoding="utf-8")
+        self.assertEqual(result.returncode, 17, result.stdout + result.stderr)
+        self.assertIn("synthetic failure", result.stderr)
+        self.assertNotIn("Lintel kit ready", result.stdout)
+        self.assertFalse((self.target / adapter.INVENTORY).exists())
+        receipts = list((store / "transactions").iterdir())
+        self.assertEqual(len(receipts), 1)
+        identifier = receipts[0].name
+        retry = subprocess.run([sys.executable, str(self.source / "bin/li-copilot.py"), "init",
+                                "--source", str(self.source), "--target", str(self.target), "--store", str(store)],
+                               capture_output=True, text=True, encoding="utf-8")
+        self.assertNotEqual(retry.returncode, 0, retry.stdout)
+        self.assertIn("incomplete", retry.stderr.lower())
+        recovered = subprocess.run([sys.executable, str(self.source / "bin/li-copilot.py"), "recover",
+                                    "--source", str(self.source), "--target", str(self.target),
+                                    "--store", str(store), "--transaction", identifier],
+                                   capture_output=True, text=True, encoding="utf-8")
+        self.assertEqual(recovered.returncode, 0, recovered.stdout + recovered.stderr)
+        self.assertEqual(self.snapshot(), before)
+        self.run_cli()
+        self.run_cli("check")
 
     def test_fresh_portable_clone_and_idempotence(self):
         self.run_cli()
@@ -139,6 +197,54 @@ class CopilotKit(unittest.TestCase):
                     self.assertEqual(before, self.snapshot(target))
                 finally:
                     path.write_bytes(content)
+
+    def test_review_closure_is_declared_and_missing_source_refuses_before_writes(self):
+        declared = set(adapter.SWARM_RESOURCES + adapter.ADAPTER_RESOURCES)
+        self.assertTrue(set(REVIEW_RUNTIME_RESOURCES) <= declared,
+                        sorted(set(REVIEW_RUNTIME_RESOURCES) - declared))
+        broken = self.base / "missing-review-source"
+        shutil.copytree(self.source, broken)
+        for index, relative in enumerate(REVIEW_RUNTIME_RESOURCES):
+            with self.subTest(relative=relative):
+                target = self.target / str(index)
+                target.mkdir()
+                (target / "user.txt").write_bytes(b"unaltered consumer evidence\r\n")
+                before = self.snapshot(target)
+                path = broken / relative
+                content = path.read_bytes()
+                path.unlink()
+                try:
+                    result = self.run_cli(source=broken, target=target, success=False)
+                    self.assertIn(f"Required source file is missing: {path}", result.stderr)
+                    self.assertEqual(self.snapshot(target), before)
+                finally:
+                    path.write_bytes(content)
+
+    def test_installed_review_controls_use_real_schema_and_reject_required_failure(self):
+        self.run_cli()
+        bundle = self.target / adapter.BUNDLE
+        for relative in REVIEW_RUNTIME_RESOURCES:
+            self.assertTrue((bundle / relative).is_file(), relative)
+        request = self.target / "control-input.json"
+        control = {
+            "id": "synthetic-evidence", "kind": "check", "requirement": "mandatory",
+            "applicability": "applicable", "status": "pass",
+            "reason": "Synthetic installed-consumer observation.",
+            "policy": {"source": "spec.md", "version": "fixture-1", "applicability": "Synthetic package",
+                       "jurisdiction": None, "actor": None, "effective_date": None},
+            "evidence": ["checks.txt"], "observation": {},
+        }
+        policy = {"required": False, "status": "not_required", "source": None,
+                  "version": None, "applicability": "not_applicable"}
+        for status, code in (("pass", 0), ("fail", 3), ("unverified", 3)):
+            control["status"] = status
+            request.write_text(json.dumps({"controls": [control], "required_policy": policy}), encoding="utf-8")
+            result = subprocess.run([sys.executable, "-I", "-B", "-S",
+                                     str(bundle / "bin/li-review-evidence.py"), "controls",
+                                     "--repo", str(self.target), "--input", str(request)],
+                                    capture_output=True, text=True, encoding="utf-8")
+            self.assertEqual(result.returncode, code, result.stdout + result.stderr)
+            self.assertEqual(json.loads(result.stdout)["blocked"], status != "pass")
 
     def test_joined_installed_dependencies_cannot_be_hidden_by_inventory_removal(self):
         self.run_cli()

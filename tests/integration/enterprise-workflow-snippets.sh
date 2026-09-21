@@ -27,7 +27,7 @@ extract_step() {
   test -s "$3"
 }
 extract_step "$ROOT/skills/scope/SKILL.md" '### Step 4 ' "$TMP/scope.sh"
-extract_step "$ROOT/skills/pack-create/SKILL.md" '### Step 5 ' "$TMP/create.sh"
+extract_step "$ROOT/skills/pack-create/SKILL.md" '### 2. Dispatch' "$TMP/create.sh"
 
 # A fresh feature branch is not evidence of an existing deliverable.
 git() { printf 'codex/new-feature\n'; }
@@ -57,18 +57,19 @@ compliance:
 navigation:
   default_workflow: cycle
 EOF
-name=team extends=base target_dir="$LINTEL_PACKS_DIR"
+bash "$ROOT/bin/li-lifecycle" profile-bind > "$TMP/initial-profile.json"
+name=team parent=base template_pack='' scope=home target_dir="$LINTEL_PACKS_DIR"
 source "$TMP/create.sh"
 # No neutral override may silently replace inherited enterprise rules.
 ! grep -q '^compliance:' "$target_dir/team/pack.yaml"
 source "$ROOT/lib/pack-resolver.sh"
 validate_pack team
-printf 'team\n' > "$LINTEL_PACKS_DIR/active-pack"
+bash "$ROOT/bin/li-lifecycle" pack-switch team --reason 'synthetic inheritance check' > "$TMP/switched-profile.json"
 test "$(resolve_pack_field compliance.mode)" = hard
 test "$(resolve_pack_field compliance.hooks)" = '[secret-scan-block]'
 
 # Blank/clone mode still copies the selected template, replacing only identity.
-name=copy extends='' template="$LINTEL_PACKS_DIR/base/pack.yaml"
+name=copy parent='' template_pack=base
 source "$TMP/create.sh"
 validate_pack copy
 test "$(_pack_yaml_field "$target_dir/copy/pack.yaml" name)" = copy

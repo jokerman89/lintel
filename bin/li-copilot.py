@@ -116,6 +116,12 @@ ADAPTER_RESOURCES = (
     "lib/client_capabilities.py", "lib/cli-tiers.yaml", "lib/cli-tiers.sh",
     "bin/li-client-capabilities.py", "bin/li-adapter.py", "lib/pack-schema.yaml",
     "lib/markdown_source.py", "lib/profile_context.py", "lib/profile-context-schema.json",
+    "lib/context_safety.py", "lib/managed_transaction.py",
+    "bin/li-snapshot.py", "bin/li-managed-transaction.py",
+    "bin/li-review-evidence.py", "bin/li-review-log", "bin/li-review-read",
+    "lib/review_contract.py", "lib/review-schema.json",
+    "bin/li-lifecycle", "bin/li-lifecycle.py", "bin/li-scaffold", "bin/li-doctor",
+    "bin/li-migrate-claude-home", "bin/li-pack-scaffold",
 )
 
 
@@ -865,10 +871,12 @@ def runtime_ignore_errors(target: Path, ignore_text: str) -> list[str]:
 
 def main(universal: bool = False) -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("command", choices=("init", "check"))
+    parser.add_argument("command", choices=("init", "check", "inspect", "recover"))
     parser.add_argument("--target", type=Path, default=Path.cwd())
     parser.add_argument("--source", type=Path, default=None)
     parser.add_argument("--client", action="append", help="Exact surface ID or alias; repeat for a team; no global installation")
+    parser.add_argument("--store", type=Path, help="Separate owned recovery store; defaults to a reported target sibling")
+    parser.add_argument("--transaction", help="Exact transaction ID for inspect or explicit recovery")
     args = parser.parse_args()
     target = args.target.resolve()
     # Executable-relative source is stable even after copilot-env sets LINTEL_HOME
@@ -878,6 +886,17 @@ def main(universal: bool = False) -> None:
         raise ValueError(f"Target directory does not exist: {target}")
     if target in (Path(target.anchor), Path.home().resolve()):
         raise ValueError("Target must be a project directory, not a filesystem or user-home root")
+    store = args.store or (Path(os.environ["LINTEL_RECOVERY_STORE"]) if os.environ.get("LINTEL_RECOVERY_STORE") else None)
+    if args.command in ("inspect", "recover"):
+        if not args.transaction:
+            parser.error("--transaction is required for inspect/recover")
+        for relative in ADAPTER_RESOURCES:
+            read_file(source, relative)
+        from managed_transaction import default_store, inspect_transaction, recover_transaction
+        store = store or default_store(target)
+        operation = inspect_transaction if args.command == "inspect" else recover_transaction
+        print(json.dumps(operation(target, store, args.transaction), indent=2))
+        return
     registry = load_registry(safe_path(source, "lib/cli-tiers.yaml"))
     old, old_blocks, old_clients = load_inventory(target, registry)
     if universal and args.command == "init" and not args.client:
@@ -886,6 +905,10 @@ def main(universal: bool = False) -> None:
         ["copilot-cli"] if args.command == "init" or not old_clients else [])
     clients = sorted(set(old_clients + requested))
     files, seeds, mode = generate(source, target, tuple(clients))
+    from context_safety import file_state
+    from managed_transaction import apply_files, assert_ready, default_store
+    store = store or default_store(target)
+    assert_ready(target, store)
     errors = []
     block_updates, block_hashes = {}, {}
     if mode == "vendored":
@@ -949,35 +972,47 @@ def main(universal: bool = False) -> None:
     if args.command == "check":
         print(f"Lintel kit verified: {len(files)} managed files; {mode} source; clients={','.join(clients)}; no live-host validation.")
         return
-    # Everything above is read-only. Only write after the entire update passes.
+    # The adapter still owns selection and protected-file policy. The shared
+    # primitive receives only this fully preflighted, exact byte mutation plan.
+    changes = {}
     for relative, data in sorted(files.items()):
         path = safe_path(target, relative)
         if not path.exists() or path.read_bytes() != data:
-            atomic_write(path, data)
+            changes[relative] = data
     for relative, data in block_updates.items():
         path = safe_path(target, relative)
         if not path.exists() or path.read_bytes() != data:
-            atomic_write(path, data)
+            changes[relative] = data
     for relative, data in seeds.items():
         path = safe_path(target, relative)
-        if not path.exists():
-            atomic_write(path, data)
+        if not path.exists() and relative not in block_updates:
+            changes[relative] = data
     for relative in sorted(set(old) - set(files)):
         path = safe_path(target, relative)
         if path.exists():
-            path.unlink()
+            changes[relative] = None
     if ".claude/runtime/" not in existing_ignore.splitlines():
         separator = "\n" if existing_ignore.endswith("\n") else "\n\n"
-        atomic_write(ignore, (existing_ignore + separator + "# Lintel local session state\n.claude/runtime/\n").encode("utf-8"))
+        changes[".gitignore"] = (existing_ignore + separator + "# Lintel local session state\n.claude/runtime/\n").encode("utf-8")
     missing_rules = [rule for rule in attribute_rules if rule not in existing_attributes.splitlines()]
     if missing_rules:
         separator = "\n" if existing_attributes.endswith("\n") else "\n\n"
-        atomic_write(attributes, (existing_attributes + separator + "# Lintel portable adapter kit\n" + "\n".join(missing_rules) + "\n").encode("utf-8"))
+        changes[".gitattributes"] = (existing_attributes + separator + "# Lintel portable adapter kit\n" + "\n".join(missing_rules) + "\n").encode("utf-8")
     inventory = {"schema_version": SCHEMA, "source_mode": mode, "hooks_installed": False,
                  "clients": clients,
                  "blocks": block_hashes,
                  "files": {relative: digest(data) for relative, data in sorted(files.items())}}
-    atomic_write(safe_path(target, INVENTORY), text_bytes(json.dumps(inventory, indent=2, sort_keys=True)))
+    inventory_bytes = text_bytes(json.dumps(inventory, indent=2, sort_keys=True))
+    inventory_path = safe_path(target, INVENTORY)
+    if not inventory_path.is_file() or inventory_path.read_bytes() != inventory_bytes:
+        changes[INVENTORY] = inventory_bytes
+    expected = {relative: file_state(target, relative) for relative in changes}
+    modes = {relative: None if data is None else expected[relative]["mode"] if expected[relative] else 0o600
+             for relative, data in changes.items()}
+    result = apply_files(target, store, changes, expected, modes, label="repository adapter publication",
+                         final_paths=[INVENTORY] if INVENTORY in changes else [])
+    if result["id"]:
+        print(f"Verified file transaction: {result['id']}; recovery store: {result['store']}")
     print(f"Lintel kit ready: {len(files)} managed files; {mode} source; clients={','.join(clients)}. Review the managed inventory and foundation diff.")
     print("Start a new host session and inspect its discovery UI, or read .github/lintel/START.md explicitly. No hooks or host permissions were changed.")
 

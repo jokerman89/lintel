@@ -33,6 +33,11 @@ Loads persona definitions from the active pack's persona source (`resolve_pack_f
    - Operator-local: `.claude/memory/personas.md` (list of personas this repo cares about)
    - Detailed: `docs/personas/<Name>.md` (one file per persona)
 
+   Use `bin/li-lifecycle.py persona-sources` with the trusted `--source` and selected
+   `--repo` from [lifecycle paths](../../docs/lifecycle.md). It resolves relative pack
+   paths at the defining manifest and verifies existing profile pins. Do not search
+   another repository or a private home to make a missing persona look available.
+
 2. **List available personas.** Output names + 1-line description per persona.
 
 3. **Operator selects persona.** Via AskUserQuestion or command argument (`/personas-rotate CIO-Acme`).
@@ -47,7 +52,10 @@ Loads persona definitions from the active pack's persona source (`resolve_pack_f
 
 5. **Inject into session context.** Tell the agent: "For the next interactions, optimize for this persona: <full detail>."
 
-6. **Persist for session.** Note persona name in session memory (`.claude/memory/working-state.md` short-term context) so subagents inherit.
+6. **Keep it conversational.** This audience overlay lasts only in the current conversation.
+   Do not write it to durable working-state, `profile.yaml`, a pack or a host setting.
+   `--clear` stops applying it to future responses; it cannot erase earlier conversation
+   content. Give a delegate only the explicitly authorized audience summary it needs.
 
 ## Output format
 
@@ -61,7 +69,7 @@ Loaded:
 - Decision criteria: <list>
 
 Active for session: yes
-Subagents will inherit: yes
+Delegated handoff: only when explicitly supplied
 
 To rotate: /personas-rotate <other-name>
 To clear: /personas-rotate --clear

@@ -102,6 +102,12 @@ files/protocol blocks and refuses modified managed content before writes. Review
 and rollback through normal repository changes; never delete an entire host or knowledge
 directory. [Getting started](getting-started.md) gives the common first-task walkthrough.
 
+Repository publication also records an exact owned transaction. `inspect` and explicit
+`recover` use its target/store/ID; partial writes never become a successful re-init by
+adopting current bytes. The original inventory and client/protocol ownership remain with
+this generator. See [lifecycle and recovery](lifecycle.md); bare native installation
+remains a [separate Python-free operation](native-installation.md).
+
 ## Portable documentation boundary
 
 The source bundle keeps README, the standard notices and the public documentation reached

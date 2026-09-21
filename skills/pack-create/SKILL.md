@@ -31,116 +31,62 @@ Creates a new pack directory + manifest. Three modes:
 
 ## Workflow
 
-### Step 1 — Resolve target location
+### 1. Select the authorized scope and source
+
+Follow [lifecycle paths](../../docs/lifecycle.md). Use `--scope repo|home` explicitly:
+`repo` means the selected working repository's `packs/`; `home` means the configured
+`LINTEL_PACKS_DIR`, not an assumed personal directory. Keep private identity out of
+repository/public outputs unless that exact transfer is authorized.
+
+Gather only missing facts: safe pack name, scope, and blank/inherited/cloned-manifest
+intent. Do not invent policy, company identity or a compliance posture.
+
+### 2. Dispatch through the structured helper
 
 ```bash
-LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
-pack_source_root="${LINTEL_SOURCE_ROOT:-${REPO_ROOT:-$LINTEL_HOME}}"
-target_repo="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || true)}"
-[ -n "$target_repo" ] && LINTEL_REPO_ROOT="$target_repo"
-source "$pack_source_root/lib/pack-resolver.sh"
-REPO_PACKS="${target_repo:+$target_repo/packs}"
-HOME_PACKS="$LINTEL_PACKS_DIR"
-
-# Operator chooses scope: repo or configured pack store (normally ~/.lintel/packs).
-# Default: repo if invoked inside a git repo with packs/ dir; else home
+create_args=("$name" --scope "$scope")
+[ -z "${parent:-}" ] || create_args+=(--extends "$parent")
+[ -z "${template_pack:-}" ] || create_args+=(--from "$template_pack")
+bash "$LINTEL_SOURCE_ROOT/bin/li-lifecycle" \
+  --source "$LINTEL_SOURCE_ROOT" --repo "$LINTEL_REPO_ROOT" \
+  pack-create "${create_args[@]}"
 ```
 
-Use the authorized `--scope repo|home`; if the destination remains ambiguous, ask
-once and show the resolved path. `home` follows `LINTEL_PACKS_DIR` when configured.
-Repo scope requires a working repository. Resolve helper paths from the installed
-source bundle, not from the target repository; Copilot supplies `LINTEL_SOURCE_ROOT`.
+Set `parent` for inheritance or `template_pack` for a cloned manifest, otherwise leave
+both empty. These options are mutually exclusive. The helper stages and
+validates the manifest and ancestry with the same profile API used by consumers, then
+publishes one verified file without replacing existing content.
 
-### Step 2 — Validate name + check existing
+An inherited child declares only identity and its parent. It does not copy neutral
+blocks over company policy. Cloning copies the manifest as an editable starting point,
+**not** referenced private corpora, credentials, executable extensions or hook settings.
+Inspect and explicitly configure referenced resources before claiming they are usable.
 
-```bash
-# Name must be kebab-case, filesystem-safe, not already taken
-name="${1:?usage: /li:pack-create <name> [--extends <parent>]}"
-echo "$name" | grep -qE '^[a-z][a-z0-9-]*$' || { echo "ERROR: name must be kebab-case"; exit 1; }
-[ -d "$REPO_PACKS/$name" ] || [ -d "$HOME_PACKS/$name" ] && { echo "ERROR: pack '$name' already exists"; exit 1; }
-```
+### 3. Verify and report
 
-### Step 3 — Resolve template
+Run `pack-validate "$name"` through that helper. Report the actual destination, effective
+inherited fields, checked compatibility and unresolved resource/host boundaries. No
+automatic activation or private synchronization follows creation. `/li:pack-switch`
+is the separately authorized activation path.
 
-Set `extends` from `--extends`, defaulting to empty. Resolve `target_dir` from the
-scope already chosen. Use either `--from` or `--extends`: cloning copies explicit
-overrides, while inheritance tracks its parent. A template is needed only for a blank
-or cloned pack.
-
-```bash
-if [ -z "${extends:-}" ]; then
-  template_name="${from_pack:-_default}" # from_pack is the parsed --from argument
-  template_dir=$(_pack_dir "$template_name") || { echo "ERROR: template pack missing"; exit 1; }
-  template="$template_dir/pack.yaml"
-  [ -f "$template" ] || { echo "ERROR: template manifest missing"; exit 1; }
-fi
-```
-
-If `--from <existing-pack>`: use that pack's manifest as template instead.
-
-### Step 4 — Validate parent (if --extends)
-
-```bash
-if [ -n "${extends:-}" ]; then
-  if ! validate_pack "$extends" 2>/dev/null; then
-    echo "ERROR: parent pack '$extends' does not exist or fails validation"
-    exit 1
-  fi
-fi
-```
-
-### Step 5 — Write manifest
-
-```bash
-mkdir -p "$target_dir/$name"
-if [ -n "${extends:-}" ]; then
-  # A copied neutral compliance block would replace the enterprise parent's rules.
-  # Omitted blocks inherit; an explicit child block replaces the whole parent block.
-  printf 'schema_version: "1"\nname: %s\nversion: 1.0.0\nextends: %s\n' \
-    "$name" "$extends" > "$target_dir/$name/pack.yaml"
-else
-  awk -v name="$name" '
-    /^name:/ { print "name: " name; next }
-    { print }
-  ' "$template" > "$target_dir/$name/pack.yaml"
-fi
-```
-
-### Step 6 — Validate result
-
-```bash
-if validate_pack "$name" 2>&1; then
-  echo "✓ Pack '$name' created at $target_dir/$name/"
-else
-  echo "ERROR: pack created but validation failed — review pack.yaml"; exit 1
-fi
-```
-
-### Step 7 — Audit + surface next steps
-
-```bash
-audit_log pack-lifecycle pack_created "name=$name" "extends=${extends:-none}" "scope=$scope"
-```
-
-Surface:
-- Path to new pack
-- "Activate with: `/li:pack-switch $name`"
-- "List all packs: `/li:pack-list`"
+For an extension-plugin skeleton, retain `bin/li-pack-scaffold` with the explicit
+namespace/workflow and destination. This creates source files, not a running plugin;
+host installation/discovery still needs its own supported operation and evidence.
 
 ## Pause-points
 
 - Step 1 if scope ambiguous: ask `repo` or `home`
-- After Step 6 if validation fails: surface, ask to retry or abandon
+- On validation failure: retain the diagnostic, do not claim a created/usable pack
 
 ## Integration
 
 **Reads:**
 - `packs/_default/pack.yaml` (template)
-- `lib/pack-resolver.sh` (validation)
+- `bin/li-lifecycle.py` and the shared structured profile implementation
 
 **Writes:**
 - `<scope>/packs/<name>/pack.yaml`
-- `~/.lintel/audit/pack-lifecycle.jsonl`
+- The helper's observed result; no independent handwritten audit schema
 
 **Triggers (recommends):**
 - `/li:pack-switch <name>` to activate the new pack
@@ -149,6 +95,6 @@ Surface:
 ## Anti-patterns
 
 - **Creating a pack to override one field** — edit `pack.yaml` of an existing pack instead
-- **Not validating extends parent** — broken extends silently degrades to _default at runtime
+- **Not validating extends parent** — a broken explicit/required parent is an error
 - **Copying neutral blocks into an inherited pack** — child blocks replace the parent's complete block; only declare an override when the change is intentional
 - **Auto-activating after create** — operator decides when to switch (avoids surprise behavior changes mid-session)

@@ -31,7 +31,11 @@ Two modes:
 
 ## Create (default mode)
 
-Operator answers guided questions; the skill renders a structured role file into the active pack's role directory (`resolve_pack_field roles.source`) for public roles, or `~/.lintel/roles/private/<id>.md` for private ones.
+Use an adaptive interview: reuse facts already supplied and ask only for missing
+decisions. The expert-content sections below are retained, but ten facts or one question
+per phase are prompts for depth, not mandatory filler. Render a reviewed draft, then
+let `bin/li-lifecycle.py role-write` own publication under the
+[configured lifecycle roots](../../docs/lifecycle.md).
 
 ### Step 1 — Basic identity (AskUserQuestion sequence)
 
@@ -60,7 +64,9 @@ One at a time:
 
 ### Step 6 — Outcome lens per phase
 
-For each cycle phase (SENSE, DEFINE, DISCOVER, PLAN, BUILD, REVIEW, SHIP, CAPTURE): "What does <role-name> want from <PHASE>? One line." — 8 questions, batchable.
+For each relevant cycle phase (including SCOPE when used), capture what this role needs
+from its outcome. One concise statement per phase is sufficient; do not repeat questions
+when the brief already supplies the answer.
 
 ### Step 7 — Role-specific insights
 
@@ -72,7 +78,9 @@ For each cycle phase (SENSE, DEFINE, DISCOVER, PLAN, BUILD, REVIEW, SHIP, CAPTUR
 
 ### Step 9 — Sensitive context (private roles only)
 
-"Sensitive context — customer-internal info, specific projects, named people. Stays in the private role file only, NEVER ships to a public marketplace."
+Capture only explicitly authorized, necessary context. Never solicit credentials,
+customer PII or unnecessary named-person detail. Private storage is not permission to
+collect or publish sensitive data.
 
 Warn explicitly: this section is NOT loaded into session by default (only via `/li:role --deep-dive` with confirmation).
 
@@ -120,26 +128,27 @@ companion_agents: [<list>]
 <free-form or omitted>
 ```
 
-Save location:
+Publish the reviewed draft through the helper:
 
 ```bash
-if sensitivity == public:
-  PACK_ROLES_DIR="$(resolve_pack_field roles.source)"
-  if [ -z "$PACK_ROLES_DIR" ]; then
-    echo "No pack role directory configured (roles.source is null in _default)."
-    echo "Activate a pack that provides roles, or save this role as private."
-    exit 1
-  fi
-  target="$PACK_ROLES_DIR/<id>.md"; mkdir -p "$PACK_ROLES_DIR"
-else:
-  target="$LINTEL_HOME/roles/private/<id>.md"; mkdir -p "$LINTEL_HOME/roles/private"
+bash "$LINTEL_SOURCE_ROOT/bin/li-lifecycle" \
+  --source "$LINTEL_SOURCE_ROOT" --repo "$LINTEL_REPO_ROOT" \
+  role-write "$role_id" --file "$reviewed_draft" --scope "$sensitivity"
 ```
 
-Duplicate role-id: ask overwrite / rename / cancel. If the operator abandons mid-interview: save the partial role to `~/.lintel/roles/draft/<id>-draft.md` and prompt to resume next session.
+The helper validates metadata, identity, sensitivity and all specialist sections before
+writing. Private roles use `LINTEL_PRIVATE_ROLES_DIR` or the configured home's private
+roles directory. Public roles use the defining pack's role directory, or explicitly
+selected public home storage when no pack directory is configured. Show that resolved
+destination before publication. A duplicate requires a reviewed-digest update, never an
+unqualified overwrite. Incomplete drafts stay at the explicitly selected draft path and
+must not appear as ready roles.
 
 ### Step 11 — Surface result + offer activation
 
-"ROLE CREATED: <display-name> at <path>. Activate now?" — if yes: `/li:role <id>`. Append `event: role_created` (role_id, sensitivity, path) to `.claude/runtime/state/00-state.md`.
+Report the verified path and SHA-256, with activation and synchronization both false.
+Activate only if separately requested, via `/li:role <id>`. Do not automatically append
+private paths or content to committed/shared evidence.
 
 ## --update <id> — evolve an existing role
 
@@ -156,10 +165,16 @@ Targeted edits, not rewrites (wholesale rewrite = re-scaffold via create mode). 
 3. **Sensitivity check**:
    - Private role: confirm "Update saved to the private role file, not pushed to a public marketplace. Continue?"
    - Public role: confirm no PII; soft-scan the update text for PII patterns — warn + refuse on detection.
-4. **Apply**: append to the relevant section, update the `last_updated:` frontmatter field, preserve formatting. For C also update the VOICE + COMMUNICATION block.
-5. **Verify integrity**: re-read; frontmatter must still parse (`head -1` is `---`). If corrupt: revert the edit (git or backup), surface the error.
-6. **Sync**: if the role is private and `bin/li-roles-sync` is configured, push to the operator's private repo. If the push fails: surface, retain the local change, retry later.
-7. Append `event: role_updated` (role_id, update_type, section_updated, sensitivity) to 00-state.
+4. **Prepare**: edit a reviewed draft of the relevant section, update `last_updated`,
+   and preserve other expertise/formatting. Retain the original SHA-256 from `role-show`;
+   private body reads still require consent.
+5. **Publish**: run `role-write` with the same ID/scope and
+   `--expected-sha256 "$reviewed_sha256"`. Changed originals, malformed drafts and
+   sensitivity changes are refused before overwriting. Report the verified new digest.
+6. **Sync boundary**: configuration alone is not permission to publish. Invoke the
+   accepted `bin/li-roles-sync` only on a separate explicit request for its current
+   configured private destination. Local creation/update never activates private sync.
+7. Keep sensitive update evidence private; no fabricated work-ledger event is required.
 
 If the operator is unsure an update is durable: capture it as PROVISIONAL with a low-confidence flag — promotable later.
 

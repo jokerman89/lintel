@@ -1,0 +1,1033 @@
+# component: universal-lifecycle-scenarios
+# implements: ADR-0028, ADR-0029
+# intent: .claude/plans/universal-implementation/packages/P10.md
+# constraints: synthetic fixtures only; no host activation or real home mutation
+# last_intent_review: 2026-09-20
+"""Behavioral lifecycle acceptance using the actual source-owned entry points."""
+import argparse
+import hashlib
+import json
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+import tempfile
+import unittest
+
+
+PARSER = argparse.ArgumentParser()
+PARSER.add_argument("--root", type=Path, required=True)
+PARSER.add_argument("--bash", required=True)
+PARSER.add_argument("--native-small", action="store_true")
+PARSER.add_argument("--native-performer", choices=("auto", "bash"), default="auto")
+OPTIONS, TEST_ARGS = PARSER.parse_known_args()
+ROOT = OPTIONS.root.resolve()
+
+
+def hashes(root):
+    return {path.relative_to(root).as_posix(): hashlib.sha256(path.read_bytes()).hexdigest()
+            for path in sorted(root.rglob("*")) if path.is_file() and not path.is_symlink()}
+
+
+class LifecycleFixture(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory(prefix="lintel-lifecycle-")
+        self.addCleanup(self.tmp.cleanup)
+        self.base = Path(self.tmp.name)
+        self.source = self.base / "trusted source"
+        self.target = self.base / "consumer"
+        self.home = self.base / "installed data"
+        self.store = self.base / "configured packs"
+        self.pointer = self.base / "selection" / "active-pack"
+        for directory in (self.source, self.target, self.home, self.store, self.pointer.parent):
+            directory.mkdir()
+        (self.target / "AGENTS.md").write_text("Consumer-owned instructions.\n", encoding="utf-8")
+        for relative in (
+            "bin/li-lifecycle", "bin/li-lifecycle.py", "bin/li-doctor",
+            "lib/profile_context.py", "lib/profile-context-schema.json",
+            "lib/pack-schema.yaml", "lib/context_safety.py", "lib/client_capabilities.py",
+            "lib/cli-tiers.yaml", "lib/markdown_source.py", "packs/_default/pack.yaml",
+            ".claude-plugin/plugin.json", "docs/migrations/_INDEX.md",
+            "lib/managed_transaction.py", "bin/li-snapshot.py",
+        ):
+            origin = ROOT / relative
+            if origin.exists():
+                destination = self.source / relative
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copyfile(origin, destination)
+        self.env = {key: value for key, value in os.environ.items()
+                    if not key.startswith(("LINTEL_", "CLAUDE_")) and key != "PACK_CACHE_FILE"}
+        self.env.update({
+            "HOME": str(self.base / "fake user"),
+            "USERPROFILE": str(self.base / "fake user"),
+            "LINTEL_SOURCE_ROOT": str(self.source),
+            "LINTEL_REPO_ROOT": str(self.target),
+            "LINTEL_HOME": str(self.home),
+            "LINTEL_PACKS_DIR": str(self.store),
+            "LINTEL_ACTIVE_PACK_FILE": str(self.pointer),
+            "PYTHONDONTWRITEBYTECODE": "1",
+        })
+
+    def run_helper(self, *args, success=True, env=None):
+        result = subprocess.run(
+            [sys.executable, str(self.source / "bin/li-lifecycle.py"), *args],
+            env=env or self.env, cwd=self.target, text=True, encoding="utf-8",
+            capture_output=True, timeout=45,
+        )
+        if success:
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        else:
+            self.assertNotEqual(result.returncode, 0, result.stdout)
+        return result
+
+    def result(self, *args, **kwargs):
+        return json.loads(self.run_helper(*args, **kwargs).stdout)
+
+    def pack(self, name, *, root=None, extra=""):
+        directory = (root or self.store) / name
+        directory.mkdir(parents=True, exist_ok=True)
+        (directory / "pack.yaml").write_text(
+            f"name: {name}\nversion: 1.0.0\n"
+            "voice: {default_tier: internal}\n"
+            "compliance: {mode: advisory}\n"
+            "navigation: {default_workflow: cycle}\n" + extra, encoding="utf-8")
+        return directory
+
+    def require(self, name):
+        directory = self.target / ".claude"
+        directory.mkdir(exist_ok=True)
+        (directory / "profile-requirements.json").write_text(
+            json.dumps({"schema_version": 1, "required_pack": name}), encoding="utf-8")
+
+    def role(self, directory, name="advisor", sensitivity="public"):
+        directory.mkdir(parents=True, exist_ok=True)
+        path = directory / f"{name}.md"
+        path.write_text(
+            f"---\nrole_id: {name}\ndisplay_name: Synthetic advisor\nscope: engineering\n"
+            f"audience: maintainers\nvoice_tier: internal\nsensitivity: {sensitivity}\n"
+            "last_updated: 2026-09-20\n---\n"
+            "# IDENTITY\nJudge requirements against evidence.\n"
+            "# COLD KNOWLEDGE\nprivate-cold-knowledge-sentinel\n"
+            "# DECISION CRITERIA\nPreserve consumer choices.\n"
+            "# VOICE + COMMUNICATION\nDirect and precise.\n"
+            "# OUTCOME LENS\n- BUILD: working behavior.\n"
+            "# ROLE-SPECIFIC INSIGHTS\nDo not infer activation from files.\n"
+            "# COMPANION SKILLS\n- review\n"
+            "# SENSITIVE CONTEXT\nprivate-body-sentinel\n", encoding="utf-8")
+        return path
+
+
+class ProfileLifecycle(LifecycleFixture):
+    def test_pack_switch_uses_configured_pointer_and_fresh_process_pin(self):
+        self.pack("alpha")
+        self.pack("beta")
+        self.pointer.write_text("alpha\n", encoding="utf-8")
+        before = self.result("profile-bind")["reference"]
+        legacy = self.home / "packs/active-pack"
+        legacy.parent.mkdir()
+        legacy.write_text("user-owned-legacy\n", encoding="utf-8")
+        switched = self.result("pack-switch", "beta", "--reason", "explicit synthetic switch")
+        self.assertEqual(self.pointer.read_text(encoding="utf-8"), "beta\n")
+        self.assertEqual(legacy.read_text(encoding="utf-8"), "user-owned-legacy\n")
+        after = switched["reference"]
+        self.assertEqual(after["name"], "beta")
+        self.assertEqual(after["context_id"], before["context_id"])
+        self.assertEqual(after["generation"], before["generation"] + 1)
+        self.assertNotEqual(after["digest"], before["digest"])
+        self.assertEqual(set(after), {"schema_version", "context_id", "generation", "digest", "name", "version"})
+        self.assertEqual(self.result("profile-status")["reference"], after)
+        again = self.result("pack-switch", "beta", "--reason", "already selected")
+        self.assertFalse(again["changed"])
+        self.assertEqual(again["reference"], after)
+        stale = dict(self.env, LINTEL_PROFILE_REFERENCE=json.dumps(before))
+        self.assertIn("PROFILE_REFERENCE_MISMATCH", self.run_helper(
+            "profile-status", env=stale, success=False).stderr)
+
+    def test_required_or_invalid_switch_refuses_before_any_writes(self):
+        self.pack("required")
+        self.pack("different")
+        self.require("required")
+        self.pointer.write_text("required\n", encoding="utf-8")
+        self.result("profile-bind")
+        before = hashes(self.base)
+        self.assertIn("PROFILE_REQUIRED", self.run_helper(
+            "pack-switch", "different", "--reason", "not authorized to replace requirement",
+            success=False).stderr)
+        self.assertEqual(hashes(self.base), before)
+        self.assertIn("PROFILE_REQUIRED", self.run_helper(
+            "pack-switch", "missing", "--reason", "invalid target", success=False).stderr)
+        self.assertEqual(hashes(self.base), before)
+
+    def test_invalid_switch_reason_is_rejected_before_pointer_mutation(self):
+        self.pack("alpha")
+        self.pack("beta")
+        self.pointer.write_text("alpha\n", encoding="utf-8")
+        self.result("profile-bind")
+        before = hashes(self.base)
+        self.run_helper("pack-switch", "beta", "--reason", "x" * 1001, success=False)
+        self.assertEqual(hashes(self.base), before)
+
+    def test_drift_and_missing_pin_require_explicit_history_backed_rebind(self):
+        pack = self.pack("alpha")
+        self.pointer.write_text("alpha\n", encoding="utf-8")
+        before = self.result("profile-bind")["reference"]
+        path = pack / "pack.yaml"
+        path.write_text(path.read_text(encoding="utf-8") + "# changed input\n", encoding="utf-8")
+        changed = hashes(self.base)
+        self.assertIn("PROFILE_DRIFT", self.run_helper("profile-bind", success=False).stderr)
+        self.assertEqual(hashes(self.base), changed)
+        rebound = self.result("profile-rebind", "--reason", "reviewed manifest change")["reference"]
+        self.assertEqual(rebound["generation"], before["generation"] + 1)
+        current = next((self.home / "sessions/profiles").glob("*/current-profile.json"))
+        current.unlink()
+        missing = hashes(self.base)
+        self.assertIn("PROFILE_CONTEXT_MISSING", self.run_helper("profile-bind", success=False).stderr)
+        self.assertEqual(hashes(self.base), missing)
+        recovered = self.result("profile-rebind", "--reason", "recover exact retained context")["reference"]
+        self.assertEqual(recovered["generation"], rebound["generation"] + 1)
+
+    def test_pack_inventory_uses_resolver_precedence_without_binding(self):
+        self.pack("shared")
+        self.pack("shared", root=self.target / "packs")
+        self.pack("local", root=self.target / "packs")
+        self.pack("bundled", root=self.source / "packs")
+        self.pointer.write_text("shared\n", encoding="utf-8")
+        before = hashes(self.base)
+        result = self.result("pack-list")
+        shared = [row for row in result["packs"] if row["name"] == "shared"]
+        self.assertEqual(len(shared), 2)
+        self.assertEqual(sum(row["selected_source"] for row in shared), 1)
+        self.assertEqual(next(row["path"] for row in shared if row["selected_source"]),
+                         str(self.store / "shared"))
+        self.assertEqual(result["effective_pack"], "shared")
+        self.assertTrue({"_default", "local", "bundled"} <= {row["name"] for row in result["packs"]})
+        self.assertEqual(hashes(self.base), before, "read-only inventory bound or rewrote context")
+
+    def test_pack_validation_defaults_to_required_target_without_binding(self):
+        self.pack("required")
+        self.require("required")
+        self.env["LINTEL_PROFILE_CONTEXT"] = "not-yet-bound"
+        before = hashes(self.base)
+        result = self.result("pack-validate")
+        self.assertEqual(result["name"], "required")
+        self.assertIsNone(result["profile_reference"])
+        self.assertEqual(hashes(self.base), before)
+        (self.target / ".claude/profile-requirements.json").write_text(
+            '{"schema_version":1,"required_pack":null}', encoding="utf-8")
+        before = hashes(self.base)
+        failed = self.run_helper("pack-validate", "required", success=False)
+        self.assertIn("PROFILE_REQUIRED", failed.stderr)
+        self.assertEqual(hashes(self.base), before)
+
+    def test_pack_creation_uses_requested_scope_and_preserves_inheritance(self):
+        parent = self.pack("policy")
+        text = (parent / "pack.yaml").read_text(encoding="utf-8").replace("mode: advisory", "mode: hard")
+        (parent / "pack.yaml").write_text(text, encoding="utf-8")
+        result = self.result("pack-create", "child", "--scope", "home", "--extends", "policy")
+        manifest = self.store / "child/pack.yaml"
+        self.assertEqual(result["status"], "created")
+        self.assertTrue(manifest.is_file())
+        self.assertNotIn("compliance:", manifest.read_text(encoding="utf-8"))
+        self.assertFalse(self.pointer.exists())
+        self.assertEqual(self.result("pack-validate", "child")["values"]["compliance"]["mode"], "hard")
+        self.result("pack-create", "blank", "--scope", "repo")
+        self.assertTrue((self.target / "packs/blank/pack.yaml").is_file())
+        self.result("pack-create", "cloned", "--scope", "repo", "--from", "policy")
+        self.assertEqual(self.result("pack-validate", "cloned")["values"]["compliance"]["mode"], "hard")
+        before = hashes(self.base)
+        self.run_helper("pack-create", "child", "--scope", "home", success=False)
+        self.assertEqual(hashes(self.base), before)
+        self.run_helper("pack-create", "bad", "--scope", "home", "--extends", "missing", success=False)
+        self.assertEqual(hashes(self.base), before)
+
+    def test_profile_switch_failure_is_visible_and_rebind_is_explicit(self):
+        self.pack("alpha")
+        self.pack("beta")
+        self.pointer.write_text("alpha\n", encoding="utf-8")
+        before = self.result("profile-bind")["reference"]
+        script = (
+            "import importlib.util,sys\n"
+            "spec=importlib.util.spec_from_file_location('lifecycle',sys.argv[1])\n"
+            "module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)\n"
+            "def interrupted(*args,**kwargs): raise OSError('synthetic interruption after pointer')\n"
+            "module.rebind_profile_context=interrupted\n"
+            "sys.argv=['li-lifecycle','pack-switch','beta','--reason','synthetic interruption']\n"
+            "raise SystemExit(module.main())\n"
+        )
+        result = subprocess.run(
+            [sys.executable, "-c", script, str(self.source / "bin/li-lifecycle.py")],
+            cwd=self.target, env=self.env, text=True, encoding="utf-8", capture_output=True, timeout=45,
+        )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("PROFILE_SWITCH_INCOMPLETE", result.stderr)
+        self.assertEqual(result.stdout.strip(), "")
+        self.assertEqual(self.pointer.read_text(encoding="utf-8"), "beta\n")
+        self.assertIn("PROFILE_DRIFT", self.run_helper("profile-bind", success=False).stderr)
+        recovered = self.result("profile-rebind", "--reason", "explicit interrupted-switch recovery", "--pack", "beta")
+        self.assertEqual(recovered["reference"]["name"], "beta")
+        self.assertEqual(recovered["reference"]["generation"], before["generation"] + 1)
+
+    def test_role_paths_refuse_traversal_and_symlink_escape(self):
+        directory = self.pack("team", extra="roles: {source: ../outside}\n")
+        self.pointer.write_text("team\n", encoding="utf-8")
+        before = hashes(self.base)
+        self.run_helper("role-list", success=False)
+        self.assertEqual(hashes(self.base), before)
+        (directory / "pack.yaml").write_text(
+            (directory / "pack.yaml").read_text(encoding="utf-8").replace("../outside", "roles"),
+            encoding="utf-8",
+        )
+        outside = self.role(self.base / "outside")
+        (directory / "roles").mkdir()
+        os.symlink(outside, directory / "roles/advisor.md")
+        before = hashes(self.base)
+        refused = self.run_helper("role-set", "advisor", success=False)
+        self.assertIn("refused", refused.stderr.lower())
+        self.assertEqual(hashes(self.base), before)
+        self.assertFalse((self.home / "profile.yaml").exists())
+
+    def test_unsupported_host_profile_is_not_a_marker_file_success(self):
+        before = hashes(self.base)
+        result = self.run_helper("host-profile", "dormant", "--client", "copilot-app", success=False)
+        self.assertIn("UNSUPPORTED_HOST_OPERATION", result.stderr)
+        self.assertNotIn("Lintel dormant", result.stdout)
+        self.assertEqual(hashes(self.base), before)
+        self.assertFalse(list(self.base.rglob(".disabled")))
+        self.assertFalse(list(self.base.rglob(".active-profile")))
+
+    def test_pack_relative_roles_and_preferences_preserve_custom_fields(self):
+        directory = self.pack("team", extra="roles: {source: roles}\n")
+        self.role(directory / "roles")
+        self.pointer.write_text("team\n", encoding="utf-8")
+        profile = self.home / "profile.yaml"
+        original = "# keep this comment\ncustom: [a, b]\ndefault_mode: hotfix\n"
+        profile.write_text(original, encoding="utf-8")
+        result = self.result("role-set", "advisor")
+        self.assertEqual(result["role"]["role_id"], "advisor")
+        self.assertIsNotNone(result["profile_reference"])
+        self.assertEqual(result["profile_reference"], self.result("profile-status")["reference"])
+        self.assertIn("Judge requirements", result["summary"])
+        self.assertNotIn("private-cold-knowledge-sentinel", result["summary"])
+        self.assertNotIn("private-body-sentinel", result["summary"])
+        self.assertTrue(profile.read_text(encoding="utf-8").startswith(original))
+        self.assertEqual(self.result("role-list")["active_role"], "advisor")
+        self.result("role-off")
+        self.assertTrue(profile.read_text(encoding="utf-8").startswith(original))
+        self.assertIsNone(self.result("role-list")["active_role"])
+
+    def test_role_switch_preserves_inline_preference_comments(self):
+        directory = self.pack("team", extra="roles: {source: roles}\n")
+        self.role(directory / "roles")
+        self.pointer.write_text("team\n", encoding="utf-8")
+        profile = self.home / "profile.yaml"
+        profile.write_text('role_active: null  # preserve this operator note\ncustom: "a # literal"\n', encoding="utf-8")
+        self.result("role-set", "advisor")
+        self.assertIn('role_active: "advisor"  # preserve this operator note', profile.read_text(encoding="utf-8"))
+        self.result("role-off")
+        self.assertIn("role_active: null  # preserve this operator note", profile.read_text(encoding="utf-8"))
+
+    def test_private_role_read_is_explicit_and_malformed_preferences_are_preserved(self):
+        self.role(self.home / "roles/private", sensitivity="private")
+        profile = self.home / "profile.yaml"
+        profile.write_text("role_active: old\nrole_active: duplicate\n", encoding="utf-8")
+        before = hashes(self.base)
+        self.run_helper("role-set", "advisor", success=False)
+        self.assertEqual(hashes(self.base), before)
+        refused = self.run_helper("role-set", "advisor", "--allow-private", success=False)
+        self.assertIn("duplicate", refused.stderr.lower())
+        self.assertEqual(hashes(self.base), before)
+        profile.write_text("role_active: null\n", encoding="utf-8")
+        listed = self.result("role-list", "--include-private")
+        self.assertEqual(listed["roles"][0]["sensitivity"], "private")
+        self.assertNotIn("private-body-sentinel", json.dumps(listed))
+        result = self.result("role-set", "advisor", "--allow-private")
+        self.assertNotIn("private-body-sentinel", result["summary"])
+        self.assertIn("private-body-sentinel", self.result(
+            "role-show", "advisor", "--deep", "--allow-private")["content"])
+
+    def test_role_creation_is_explicit_and_does_not_sync_or_activate(self):
+        draft = self.role(self.base / "draft", name="new-role", sensitivity="private")
+        created = self.result("role-write", "new-role", "--file", str(draft), "--scope", "private")
+        destination = self.home / "roles/private/new-role.md"
+        self.assertEqual(destination.read_bytes(), draft.read_bytes())
+        self.assertEqual(created["status"], "created")
+        self.assertFalse((self.home / "profile.yaml").exists())
+        before = hashes(self.base)
+        self.run_helper("role-write", "new-role", "--file", str(draft), "--scope", "private", success=False)
+        self.assertEqual(hashes(self.base), before)
+        self.assertFalse((self.home / "sync").exists())
+
+    def test_role_summary_handles_literal_delimiters_and_nested_expertise(self):
+        directory = self.pack("team", extra="roles: {source: roles}\n")
+        path = self.role(directory / "roles")
+        text = path.read_text(encoding="utf-8").replace(
+            "Synthetic advisor", '"Synthetic --- advisor"').replace(
+            "Direct and precise.", "Direct and precise.\n## Vocabulary\nEvidence first.")
+        path.write_text(text, encoding="utf-8")
+        self.pointer.write_text("team\n", encoding="utf-8")
+        result = self.result("role-show", "advisor")
+        self.assertEqual(result["role"]["display_name"], "Synthetic --- advisor")
+        self.assertIn("Evidence first.", result["summary"])
+        self.assertNotIn("private-cold-knowledge-sentinel", result["summary"])
+        self.assertNotIn("private-body-sentinel", result["summary"])
+
+    def test_persona_sources_are_pack_relative_and_never_persist_an_overlay(self):
+        directory = self.pack("team", extra="persona: {source: personas/audience.md}\n")
+        (directory / "personas").mkdir()
+        (directory / "personas/audience.md").write_text("Synthetic audience.\n", encoding="utf-8")
+        self.pointer.write_text("team\n", encoding="utf-8")
+        memory = self.target / ".claude/memory"
+        memory.mkdir(parents=True)
+        (memory / "personas.md").write_text("Repository audience.\n", encoding="utf-8")
+        (memory / "working-state.md").write_text("User-owned working state.\n", encoding="utf-8")
+        before = hashes(self.base)
+        result = self.result("persona-sources")
+        self.assertEqual(result["lifetime"], "current conversation only")
+        self.assertIn(str(directory / "personas/audience.md"), [row["path"] for row in result["sources"]])
+        self.assertEqual(hashes(self.base), before)
+
+    def test_migrations_use_source_catalog_and_keep_overdue_unknown_states(self):
+        catalog = self.source / "docs/migrations/_INDEX.md"
+        catalog.write_text(
+            "# Migrations\n\n## Active migrations\n\n"
+            "| Slug | Started | Grace until | Removal at | Description |\n"
+            "|---|---|---|---|---|\n"
+            "| v5-claude-home-layout | 2026-06-12 | 2026-09-12 | 2026-12-12 | Layout |\n"
+            "| unknown-detector | 2026-06-12 | 2026-09-12 | none | Preserve unknown |\n\n"
+            "```\n| fake-row | 2026-01-01 | 2026-02-01 | none | Not metadata |\n```\n\n"
+            "## Archived migrations\n\n"
+            "| Slug | Started | Closed | Outcome |\n|---|---|---|---|\n"
+            "| historic | 2026-01-01 | 2026-02-01 | Retained guide |\n", encoding="utf-8")
+        (self.target / "tasks").mkdir()
+        (self.target / "tasks/lessons.md").write_text("Legacy lessons.\n", encoding="utf-8")
+        poison = self.target / "docs/migrations"
+        poison.mkdir(parents=True)
+        (poison / "_INDEX.md").write_text("Wrong repository catalog.\n", encoding="utf-8")
+        before = hashes(self.base)
+        result = self.result("migrations", "--today", "2026-09-20")
+        self.assertEqual({row["slug"] for row in result["migrations"]},
+                         {"v5-claude-home-layout", "unknown-detector"})
+        self.assertTrue(all(row["schedule"] == "overdue" for row in result["migrations"]))
+        by_slug = {row["slug"]: row for row in result["migrations"]}
+        self.assertEqual(by_slug["v5-claude-home-layout"]["observation"], "needs_migration")
+        self.assertEqual(by_slug["unknown-detector"]["observation"], "unknown")
+        self.assertIn("historic", {row["slug"] for row in self.result(
+            "migrations", "--today", "2026-09-20", "--all")["migrations"]})
+        self.assertEqual(hashes(self.base), before)
+
+    def test_missing_migration_catalog_is_unknown_not_no_pending_work(self):
+        (self.source / "docs/migrations/_INDEX.md").unlink()
+        before = hashes(self.base)
+        result = self.run_helper("migrations", success=False)
+        self.assertIn("MIGRATION_CATALOG_MISSING", result.stderr)
+        self.assertEqual(result.stdout.strip(), "")
+        self.assertEqual(hashes(self.base), before)
+
+    def test_malformed_migration_metadata_is_not_silently_dropped(self):
+        catalog = self.source / "docs/migrations/_INDEX.md"
+        original = catalog.read_text(encoding="utf-8")
+        catalog.write_text(original.replace("2026-09-12", "not-a-date"), encoding="utf-8")
+        before = hashes(self.base)
+        result = self.run_helper("migrations", success=False)
+        self.assertEqual(result.stdout, "")
+        self.assertEqual(hashes(self.base), before)
+        catalog.write_text("# Missing active table\n", encoding="utf-8")
+        result = self.run_helper("migrations", success=False)
+        self.assertIn("MIGRATION_CATALOG_INVALID", result.stderr)
+
+    def test_source_verifier_does_not_claim_hook_activation_from_links(self):
+        hooks = self.home / "hooks/shared/synthetic"
+        hooks.mkdir(parents=True)
+        (hooks / "run.sh").write_bytes(b"echo inert fixture\n")
+        host_hooks = Path(self.env["HOME"]) / ".claude/hooks"
+        host_hooks.mkdir(parents=True)
+        os.symlink(hooks / "run.sh", host_hooks / "synthetic.sh")
+        result = subprocess.run([OPTIONS.bash, str(ROOT / "install/verify.sh"), "--hooks"],
+                                cwd=self.target, env=self.env, text=True, encoding="utf-8",
+                                capture_output=True, timeout=30)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertNotIn("hooks activated", result.stdout)
+        self.assertNotIn("Activated:", result.stdout)
+        self.assertIn("unverified", result.stdout)
+
+    def test_doctor_reports_bytes_not_hook_counts_or_historic_host_activity(self):
+        source_hook = self.source / "hooks/shared/session-digest/run.sh"
+        installed_hook = self.home / "hooks/shared/session-digest/run.sh"
+        for path, content in ((source_hook, "echo current\n"), (installed_hook, "echo customized\n")):
+            path.parent.mkdir(parents=True)
+            path.write_text(content, encoding="utf-8")
+        home = Path(self.env["HOME"])
+        for version in ("0.8.0", "0.9.0"):
+            manifest = home / f".claude/plugins/cache/vendor/li/{version}/.claude-plugin/plugin.json"
+            manifest.parent.mkdir(parents=True)
+            manifest.write_text(json.dumps({"name": "li", "version": version}), encoding="utf-8")
+        audit = self.target / ".claude/runtime/audit/hooks.jsonl"
+        audit.parent.mkdir(parents=True)
+        audit.write_text('{"event":"session_digest","ts":"2000-01-01T00:00:00Z"}\n', encoding="utf-8")
+        before = hashes(self.base)
+        result = self.run_helper("doctor", "--json", success=False)
+        self.assertEqual(result.returncode, 1, result.stderr)
+        report = json.loads(result.stdout)
+        self.assertIn("shared/session-digest/run.sh", report["hooks"]["modified"])
+        self.assertEqual(report["host_activation"], "unverified")
+        self.assertEqual(len(report["cached_plugins"]), 2)
+        self.assertTrue(all(row["activation"] == "unverified" for row in report["cached_plugins"]))
+        self.assertEqual(report["hook_execution"], "unverified")
+        self.assertEqual(hashes(self.base), before)
+
+    def test_shell_lifecycle_preserves_configured_paths_across_native_python_boundary(self):
+        self.pack("alpha")
+        self.pointer.write_text("alpha\n", encoding="utf-8")
+        before = hashes(self.base)
+        script = r'''
+set -e
+cd "$LIFECYCLE_TEST_BASE"
+export LINTEL_SOURCE_ROOT="$PWD/trusted source"
+export LINTEL_REPO_ROOT="$PWD/consumer"
+export LINTEL_HOME="$PWD/installed data"
+export LINTEL_PACKS_DIR="$PWD/configured packs"
+export LINTEL_ACTIVE_PACK_FILE="$PWD/selection/active-pack"
+bash "$LINTEL_SOURCE_ROOT/bin/li-lifecycle" pack-list
+'''
+        result = subprocess.run([OPTIONS.bash, "-c", script], cwd=self.target,
+                                env=dict(self.env, LIFECYCLE_TEST_BASE=self.base.as_posix()),
+                                text=True, encoding="utf-8", capture_output=True, timeout=45)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(json.loads(result.stdout)["effective_pack"], "alpha")
+        self.assertEqual(hashes(self.base), before)
+
+
+class NativeInstallLifecycle(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory(prefix="lintel-native-lifecycle-")
+        self.addCleanup(self.tmp.cleanup)
+        self.base = Path(self.tmp.name)
+        self.source = self.base / "trusted source"
+        self.home = self.base / "installed data"
+        self.consumer = self.base / "consumer"
+        self.source.mkdir()
+        self.consumer.mkdir()
+        components = ("install", "bin", "lib", "templates", "scaffolding", "skills", "agents",
+                      "shims", "docs", "hooks", "seeds", "packs/_default", ".claude-plugin")
+        if OPTIONS.native_small:
+            for relative in components:
+                (self.source / relative).mkdir(parents=True, exist_ok=True)
+            for relative in ("install/install.sh", "install/native.sh", "install/install.ps1",
+                             "install/native.ps1", "install/layer-config.yaml.example",
+                             "install/directories.txt",
+                             "lib/frontmatter.sh", "lib/paths.sh", "packs/_default/pack.yaml",
+                             ".claude-plugin/plugin.json"):
+                shutil.copyfile(ROOT / relative, self.source / relative)
+            sample = self.source / "skills/sample/SKILL.md"
+            sample.parent.mkdir()
+            sample.write_text("---\nname: sample\ndescription: Synthetic fixture\ncolor: green\n"
+                              "tools: Read\nvoice: internal\nlayer: foundation\ncli_support: [claude-code]\n"
+                              "---\nSynthetic native byte contract.\n", encoding="utf-8")
+        else:
+            for relative in components:
+                shutil.copytree(ROOT / relative, self.source / relative,
+                                ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
+        for relative in ("LICENSE", "AGENT-INSTRUCTIONS.md", "README.md", "SECURITY.md",
+                         "CONTRIBUTING.md", "CODE_OF_CONDUCT.md", "CHANGELOG.md"):
+            shutil.copyfile(ROOT / relative, self.source / relative)
+        self.env = {key: value for key, value in os.environ.items()
+                    if not key.startswith(("LINTEL_", "CLAUDE_")) and key != "PACK_CACHE_FILE"}
+        self.env.update({"HOME": str(self.base / "fake user"), "USERPROFILE": str(self.base / "fake user"),
+                         "LINTEL_HOME": str(self.home), "PYTHONDONTWRITEBYTECODE": "1",
+                         "GIT_CONFIG_GLOBAL": str(self.base / "git-config"), "GIT_CONFIG_NOSYSTEM": "1"})
+        if os.environ.get("LINTEL_POWERSHELL"):
+            self.env["LINTEL_POWERSHELL"] = os.environ["LINTEL_POWERSHELL"]
+        for repo in (self.source, self.consumer):
+            result = subprocess.run(["git", "init", "-q", str(repo)], env=self.env, capture_output=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+
+    def install(self, *args, powershell=False, success=True, env=None):
+        if powershell:
+            executable = self.env.get("LINTEL_POWERSHELL") or shutil.which("pwsh") or shutil.which("powershell")
+            self.assertIsNotNone(executable, "Native PowerShell verification needs an installed interpreter.")
+            command = [executable, "-NoProfile", "-File", str(self.source / "install/install.ps1")]
+        else:
+            if OPTIONS.native_performer == "bash":
+                command = [OPTIONS.bash, "-c", 'set -euo pipefail; source "$1"; shift; lintel_native_main "$@"',
+                           "native-contract-test", str(self.source / "install/native.sh")]
+            else:
+                command = [OPTIONS.bash, str(self.source / "install/install.sh")]
+        result = subprocess.run([*command, *args], cwd=self.consumer, env=env or self.env, text=True, encoding="utf-8",
+                                errors="replace", capture_output=True, timeout=600)
+        if success:
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        else:
+            self.assertNotEqual(result.returncode, 0, "Installer accepted a conflicting candidate.")
+            self.assertNotIn("Install complete", result.stdout)
+        return result
+
+    def customize(self):
+        files = {
+            "profile.yaml": "# operator preference\nrole_active: custom\n",
+            "config.yaml": "# operator configuration\nlayers: custom\n",
+            "hooks/shared/operator-extra/run.sh": "echo inert custom hook\n",
+            "lib/operator-extension.sh": "echo custom extension\n",
+            "roles/private/operator.md": "private synthetic sentinel\n",
+        }
+        for relative, text in files.items():
+            path = self.home / relative
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(text, encoding="utf-8")
+        neutral = self.home / "packs/_default/pack.yaml"
+        neutral.write_text(neutral.read_text(encoding="utf-8") + "# operator neutral customization\n",
+                           encoding="utf-8")
+        return {relative: hashlib.sha256((self.home / relative).read_bytes()).hexdigest()
+                for relative in (*files, "packs/_default/pack.yaml")}
+
+    def test_bash_reinstall_preserves_seeds_and_rejects_managed_conflicts(self):
+        self.install()
+        custom = self.customize()
+        self.install()
+        for relative, digest in custom.items():
+            self.assertEqual(hashlib.sha256((self.home / relative).read_bytes()).hexdigest(), digest)
+        managed = self.home / "lib/paths.sh"
+        managed.write_bytes(managed.read_bytes() + b"\n# local managed-file customization\n")
+        before = hashes(self.home)
+        self.install(success=False)
+        self.assertEqual(hashes(self.home), before)
+
+    def test_invalid_candidate_is_rejected_before_existing_install_changes(self):
+        self.install()
+        self.customize()
+        before = hashes(self.home)
+        candidate = self.source / ("skills/sample/SKILL.md" if OPTIONS.native_small else "skills/pack-list/SKILL.md")
+        candidate.write_text("---\nname: invalid-only\n---\nBroken candidate.\n", encoding="utf-8")
+        self.install(success=False)
+        self.assertEqual(hashes(self.home), before)
+
+    def test_bash_update_removes_only_owned_obsolete_files(self):
+        obsolete = self.source / "lib/lifecycle-obsolete.sh"
+        obsolete.write_text("echo old managed content\n", encoding="utf-8")
+        self.install()
+        custom = self.customize()
+        obsolete.unlink()
+        self.install()
+        self.assertFalse((self.home / "lib/lifecycle-obsolete.sh").exists())
+        for relative, digest in custom.items():
+            self.assertEqual(hashlib.sha256((self.home / relative).read_bytes()).hexdigest(), digest)
+
+    def test_runtime_and_brand_directory_slots_are_retained_without_clobbering(self):
+        font = self.home / "brand/fonts/operator.font"
+        font.parent.mkdir(parents=True)
+        font.write_bytes(b"operator asset")
+        self.install()
+        for relative in ("audit", "sessions", "provenance", "freeze", "review-log", "benchmarks",
+                         "calibrations", "browse-runs", "scrape-runs", "design-runs", "design-html",
+                         "design-shotgun", "browser-profiles", "quarantine", "frontend-runs",
+                         "brand/design-patterns", "brand/motion-libraries", "brand/shader-snippets",
+                         "brand/palettes", "brand/fonts"):
+            self.assertTrue((self.home / relative).is_dir(), relative)
+        self.assertEqual(font.read_bytes(), b"operator asset")
+
+    def test_powershell_reinstall_keeps_operator_files_inside_managed_trees(self):
+        self.install(powershell=True)
+        custom = self.customize()
+        self.install(powershell=True)
+        for relative, digest in custom.items():
+            self.assertTrue((self.home / relative).is_file(), relative)
+            self.assertEqual(hashlib.sha256((self.home / relative).read_bytes()).hexdigest(), digest)
+
+    def interruption_recovery(self, powershell):
+        self.home.mkdir()
+        (self.home / "operator.txt").write_bytes(b"untouched operator state\n")
+        before = hashes(self.home)
+        windows_performer = powershell or (os.name == "nt" and OPTIONS.native_performer == "auto")
+        wrapper = self.source / ("install/install.ps1" if windows_performer else "install/native.sh")
+        original = wrapper.read_text(encoding="utf-8")
+        fault = r'''
+    $script:OriginalNativeWrite = ${function:Write-NativeAtomic}
+    $script:NativeFaultCount = 0
+    function Write-NativeAtomic([string]$Root, [string]$Relative, $Expected, $After) {
+        & $script:OriginalNativeWrite $Root $Relative $Expected $After
+        $script:NativeFaultCount++
+        if ($script:NativeFaultCount -eq 1) { throw [IO.IOException]::new('synthetic interrupted publication') }
+    }
+'''
+        if windows_performer:
+            injected = original.replace("    Invoke-NativeInstall", fault + "\n    Invoke-NativeInstall")
+        else:
+            injected = original.replace("native_atomic() {", "native_original_atomic() {") + '''
+native_atomic() {
+  native_original_atomic "$@"
+  native_die 'synthetic interrupted publication'
+}
+'''
+        wrapper.write_text(injected, encoding="utf-8")
+        interrupted = self.install(powershell=powershell, success=False)
+        self.assertIn("synthetic interrupted publication", interrupted.stderr)
+        wrapper.write_text(original, encoding="utf-8")
+        store = Path(str(self.home) + "-recovery")
+        receipts = list(store.glob("txn-*"))
+        self.assertEqual(len(receipts), 1)
+        receipt = receipts[0]
+        self.assertEqual((receipt / "state").read_text(encoding="utf-8").strip(), "applying")
+        self.assertFalse((self.home / ".lintel-install.tsv").exists())
+        partial = hashes(self.home)
+        refused = self.install(powershell=powershell, success=False)
+        self.assertIn("ncomplete", refused.stderr)
+        self.assertEqual(hashes(self.home), partial)
+        row = (receipt / "plan.tsv").read_text(encoding="utf-8").splitlines()[0].split("\t")
+        output = self.home / row[7]
+        output.write_bytes(b"user change after interruption")
+        edited = hashes(self.home)
+        self.install("--recover", receipt.name, powershell=powershell, success=False)
+        self.assertEqual(hashes(self.home), edited)
+        output.write_bytes((receipt / "after" / row[0]).read_bytes())
+        self.install("--recover", receipt.name, powershell=powershell)
+        self.assertEqual(hashes(self.home), before)
+        self.assertEqual((receipt / "state").read_text(encoding="utf-8").strip(), "recovered")
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_bytes((receipt / "after" / row[0]).read_bytes())
+        replay = hashes(self.home)
+        self.install("--recover", receipt.name, powershell=powershell, success=False)
+        self.assertEqual(hashes(self.home), replay, "recovery reused consumed permission over a later user file")
+
+    def test_bash_entry_interruption_recovery_and_consumed_permission(self):
+        self.interruption_recovery(False)
+
+    def test_powershell_entry_interruption_recovery_and_consumed_permission(self):
+        self.interruption_recovery(True)
+
+    def test_native_install_has_no_python_on_its_path(self):
+        if os.name == "nt":
+            powershell = self.env.get("LINTEL_POWERSHELL") or shutil.which("powershell") or shutil.which("pwsh")
+            self.assertTrue(powershell, "An authorized native PowerShell executable is required.")
+            bash_directory = Path(OPTIONS.bash).resolve().parent
+            git = shutil.which("git")
+            self.assertIsNotNone(git)
+            directories = [Path(git).resolve().parent, bash_directory,
+                           bash_directory.parent / "usr/bin", Path(powershell).parent,
+                           Path(os.environ["SystemRoot"]) / "System32"]
+            path = os.pathsep.join(str(directory) for directory in directories if directory.is_dir())
+            probe_command = [powershell, "-NoProfile", "-Command",
+                             "if (Get-Command python,python3,py -ErrorAction SilentlyContinue) { exit 19 }; exit 0"]
+        else:
+            tools = self.base / "native-tools"
+            tools.mkdir()
+            for name in ("bash", "git", "awk", "cat", "cp", "mv", "rm", "rmdir", "mkdir", "chmod", "cmp", "find",
+                         "sort", "grep", "head", "tail", "cut", "wc", "tr", "stat", "date", "dirname",
+                         "basename", "mktemp", "sha256sum", "shasum", "openssl"):
+                executable = shutil.which(name)
+                if executable:
+                    os.symlink(executable, tools / name)
+            path = str(tools)
+            probe_command = [OPTIONS.bash, "-c",
+                             'for name in python python3 py; do if command -v "$name"; then exit 19; fi; done']
+        env = dict(self.env, PATH=path, BASH_ENV="", ENV="")
+        probe = subprocess.run(probe_command, cwd=self.consumer, env=env, capture_output=True)
+        self.assertEqual(probe.returncode, 0, "Python is still discoverable in the native fixture.")
+        self.install(env=env)
+        self.install("--check", powershell=os.name == "nt", env=env)
+        if not OPTIONS.native_small:
+            self.assertTrue((self.home / "lib/profile_context.py").is_file())
+        self.assertFalse((self.home / "lib/__pycache__").exists())
+
+    def test_corrupt_and_foreign_native_receipts_preserve_current_bytes(self):
+        native_windows = os.name == "nt"
+        self.install(powershell=native_windows)
+        store = Path(str(self.home) + "-recovery")
+        receipt = next(store.glob("txn-*"))
+        before = hashes(self.home)
+        original = (receipt / "plan.tsv").read_bytes()
+        (receipt / "plan.tsv").write_bytes(original + b"corrupt row\n")
+        self.install("--recover", receipt.name, powershell=native_windows, success=False)
+        self.assertEqual(hashes(self.home), before)
+        (receipt / "plan.tsv").write_bytes(original)
+        state = (receipt / "state").read_bytes()
+        (receipt / "state").write_bytes(b"unknown-state\n")
+        self.install("--recover", receipt.name, powershell=native_windows, success=False)
+        self.assertEqual(hashes(self.home), before)
+        (receipt / "state").write_bytes(state)
+        other = self.base / "different install"
+        other.mkdir()
+        (other / "user.txt").write_bytes(b"foreign root sentinel")
+        foreign = hashes(other)
+        self.install("--home", str(other), "--store", str(store), "--recover", receipt.name,
+                     powershell=native_windows, success=False)
+        self.assertEqual(hashes(other), foreign)
+        self.assertEqual(hashes(self.home), before)
+
+    def test_closed_native_receipt_requires_matching_per_file_evidence(self):
+        self.install()
+        store = Path(str(self.home) + "-recovery")
+        receipt = next(store.glob("txn-*"))
+        (receipt / "phase/000000").write_bytes(b"pending\n")
+        before = hashes(self.home)
+        self.install("--check", success=False)
+        self.install(success=False)
+        self.assertEqual(hashes(self.home), before)
+
+
+class ScaffoldMigrationLifecycle(LifecycleFixture):
+    def setUp(self):
+        super().setUp()
+        for relative in ("bin/li-scaffold", "bin/li-migrate-claude-home", "bin/li-pack-scaffold",
+                         "bin/li-snapshot.py", "bin/li-managed-transaction.py", "lib/managed_transaction.py"):
+            target = self.source / relative
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(ROOT / relative, target)
+        shutil.copytree(ROOT / "scaffolding", self.source / "scaffolding")
+        result = subprocess.run(["git", "init", "-q", str(self.target)], capture_output=True, env=self.env)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.recovery = self.base / "recovery"
+        self.env["LINTEL_RECOVERY_STORE"] = str(self.recovery)
+
+    def shell_helper(self, name, *args, success=True):
+        result = subprocess.run([OPTIONS.bash, str(self.source / "bin" / name), *args],
+                                cwd=self.target, env=self.env, text=True, encoding="utf-8",
+                                capture_output=True, timeout=120)
+        if success:
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        else:
+            self.assertNotEqual(result.returncode, 0, result.stdout)
+        return result
+
+    def test_scaffold_preserves_user_prose_and_is_repeatable_in_separate_consumer(self):
+        original = (self.target / "AGENTS.md").read_bytes()
+        memory = self.target / ".claude/memory"
+        memory.mkdir(parents=True)
+        (memory / "lessons.md").write_text("Operator lessons.\n", encoding="utf-8")
+        self.shell_helper("li-scaffold", "init", "--target", str(self.target),
+                          "--name", "Literal $(not-a-command); name")
+        self.assertEqual((self.target / "AGENTS.md").read_bytes(), original)
+        self.assertEqual((memory / "lessons.md").read_text(encoding="utf-8"), "Operator lessons.\n")
+        for relative in (".claude/memory/MEMORY.md", ".claude/lintel-layout.yaml",
+                         ".claude/templates/swarm/coordination.template.json", "CLAUDE.md"):
+            self.assertTrue((self.target / relative).is_file(), relative)
+        before = hashes(self.target)
+        self.shell_helper("li-scaffold", "init", "--target", str(self.target))
+        self.assertEqual(hashes(self.target), before)
+
+    def test_scaffold_refuses_late_link_before_any_seed_writes(self):
+        outside = self.base / "outside"
+        outside.mkdir()
+        (self.target / ".claude").mkdir()
+        os.symlink(outside, self.target / ".claude/memory", target_is_directory=True)
+        before = hashes(self.target)
+        self.shell_helper("li-scaffold", "init", "--target", str(self.target), success=False)
+        self.assertEqual(hashes(self.target), before)
+        self.assertEqual(list(outside.iterdir()), [])
+
+    def test_legacy_compliance_flag_cannot_claim_an_unimplemented_policy_change(self):
+        before = hashes(self.target)
+        self.shell_helper("li-scaffold", "init", "--target", str(self.target),
+                          "--compliance", "full", success=False)
+        self.assertEqual(hashes(self.target), before)
+
+    def test_extension_scaffold_refuses_existing_prose_before_any_mutation(self):
+        (self.target / "README.md").write_bytes(b"User-owned README.\n")
+        before = hashes(self.target)
+        self.shell_helper("li-pack-scaffold", "demo-pack", "--namespace", "demo",
+                          "--workflow", "demo-forge", "--target", str(self.target),
+                          "--in-place", success=False)
+        self.assertEqual(hashes(self.target), before)
+
+    def test_extension_scaffold_validates_actual_output_and_never_activates(self):
+        self.shell_helper("li-pack-scaffold", "demo-pack", "--namespace", "demo",
+                          "--workflow", "demo-forge", "--target", str(self.store),
+                          "--description", 'literal ", "name": "not-the-name')
+        path = self.store / "demo-pack"
+        manifest = json.loads((path / ".claude-plugin/plugin.json").read_text(encoding="utf-8"))
+        self.assertEqual(manifest["name"], "demo-pack")
+        self.assertEqual(self.result("pack-validate", "demo-pack")["status"], "valid")
+        for relative in ("skills", "agents", "hooks", "knowhow"):
+            self.assertTrue((path / relative).is_dir())
+        self.assertFalse(self.pointer.exists())
+
+    def test_runtime_migration_collision_preserves_all_bytes_and_does_not_stamp_marker(self):
+        old = self.target / ".lintel/state"
+        new = self.target / ".claude/runtime/state"
+        old.mkdir(parents=True)
+        new.mkdir(parents=True)
+        (old / "00-state.md").write_text("Legacy state.\n", encoding="utf-8")
+        (new / "00-state.md").write_text("New user state.\n", encoding="utf-8")
+        before = hashes(self.target)
+        self.shell_helper("li-migrate-claude-home", "--repo", str(self.target), success=False)
+        self.assertEqual(hashes(self.target), before)
+        self.assertFalse((self.target / ".claude/lintel-layout.yaml").exists())
+
+    def test_migration_moves_hidden_runtime_preserves_stubs_and_repairs_local_pointer(self):
+        old = self.target / "tasks"
+        old.mkdir()
+        (old / "lessons.md").write_bytes(b"Preserve real legacy lessons.\n")
+        state = self.target / ".lintel/state/nested"
+        state.mkdir(parents=True)
+        (state / ".hidden.json").write_bytes(b'{"retain":true}\n')
+        self.shell_helper("li-migrate-claude-home", "--repo", str(self.target))
+        self.assertEqual((self.target / ".claude/memory/lessons.md").read_bytes(), b"Preserve real legacy lessons.\n")
+        self.assertIn("Moved to", (old / "lessons.md").read_text(encoding="utf-8"))
+        self.assertEqual((self.target / ".claude/runtime/state/nested/.hidden.json").read_bytes(), b'{"retain":true}\n')
+        self.assertFalse((state / ".hidden.json").exists())
+        settings = self.target / ".claude/settings.local.json"
+        settings.write_text('{"custom": [1, 2], "autoMemoryDirectory": "old location"}\n', encoding="utf-8")
+        self.shell_helper("li-migrate-claude-home", "--repo", str(self.target), "--repair-pointer")
+        content = json.loads(settings.read_text(encoding="utf-8"))
+        self.assertEqual(content["custom"], [1, 2])
+        self.assertEqual(Path(content["autoMemoryDirectory"]).resolve(), (self.target / ".claude/memory").resolve())
+        self.assertIn('"custom": [1, 2]', settings.read_text(encoding="utf-8"))
+        before = hashes(self.target)
+        self.shell_helper("li-migrate-claude-home", "--repo", str(self.target))
+        self.assertEqual(hashes(self.target), before)
+
+    def test_interrupted_migration_is_diagnosed_and_explicitly_recovers_original_bytes(self):
+        legacy = self.target / "tasks"
+        legacy.mkdir()
+        (legacy / "lessons.md").write_bytes(b"original legacy knowledge\n")
+        before = hashes(self.target)
+        script = r'''
+import importlib.util,sys
+from pathlib import Path
+source=Path(sys.argv[1])
+sys.dont_write_bytecode=True
+sys.path.insert(0,str(source/"lib"))
+import managed_transaction as transaction
+original=transaction._write_change
+def interrupted(root,relative,data,mode,expected):
+    original(root,relative,data,mode,expected)
+    raise OSError("synthetic migration interruption")
+transaction._write_change=interrupted
+spec=importlib.util.spec_from_file_location("lifecycle",source/"bin/li-lifecycle.py")
+module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
+sys.argv=["li-lifecycle","migrate"]
+raise SystemExit(module.main())
+'''
+        interrupted = subprocess.run([sys.executable, "-c", script, str(self.source)],
+                                     cwd=self.target, env=self.env, text=True, encoding="utf-8",
+                                     capture_output=True, timeout=60)
+        self.assertNotEqual(interrupted.returncode, 0)
+        self.assertIn("synthetic migration interruption", interrupted.stderr)
+        self.assertFalse((self.target / ".claude/lintel-layout.yaml").exists())
+        partial = hashes(self.target)
+        diagnosed = self.run_helper("doctor", "--json", success=False)
+        self.assertEqual(json.loads(diagnosed.stdout)["transaction"]["status"], "error")
+        self.assertEqual(hashes(self.target), partial)
+        self.shell_helper("li-migrate-claude-home", "--repo", str(self.target), success=False)
+        identifier = next((self.recovery / "transactions").iterdir()).name
+        recovered = subprocess.run([sys.executable, str(self.source / "bin/li-managed-transaction.py"),
+                                   "recover", identifier, "--root", str(self.target), "--store", str(self.recovery)],
+                                  cwd=self.target, env=self.env, text=True, encoding="utf-8", capture_output=True)
+        self.assertEqual(recovered.returncode, 0, recovered.stdout + recovered.stderr)
+        self.assertEqual(hashes(self.target), before)
+
+    def test_malformed_local_settings_refuse_all_migration_writes(self):
+        (self.target / "tasks").mkdir()
+        (self.target / "tasks/lessons.md").write_bytes(b"legacy content")
+        (self.target / ".claude").mkdir()
+        (self.target / ".claude/settings.local.json").write_bytes(b'{"custom":1,"custom":2}')
+        before = hashes(self.target)
+        self.shell_helper("li-migrate-claude-home", "--repo", str(self.target), success=False)
+        self.assertEqual(hashes(self.target), before)
+
+    def child(self, name="child consumer"):
+        target = self.base / name
+        target.mkdir()
+        (target / "unrelated.txt").write_bytes(b"untouched child data\n")
+        return target
+
+    def bind_caller(self):
+        reference = self.result("profile-bind")["reference"]
+        self.env["LINTEL_PROFILE_REFERENCE"] = json.dumps(reference)
+        return reference
+
+    def test_neutral_caller_pin_is_not_transferred_to_explicit_child(self):
+        reference = self.bind_caller()
+        child = self.child()
+        parent_before, home_before = hashes(self.target), hashes(self.home)
+        result = json.loads(self.shell_helper("li-scaffold", "init", "--target", str(child)).stdout)
+        self.assertEqual(result["operation_profile_reference"], reference)
+        self.assertIsNone(result["target_profile_reference"])
+        self.assertEqual(hashes(self.target), parent_before)
+        self.assertEqual(hashes(self.home), home_before)
+        self.assertEqual((child / "unrelated.txt").read_bytes(), b"untouched child data\n")
+        self.assertFalse((child / ".claude/runtime/profiles/selected.json").exists())
+
+    def test_required_caller_policy_is_verified_as_an_operation_constraint(self):
+        self.pack("required")
+        self.require("required")
+        reference = self.bind_caller()
+        child = self.child()
+        before = hashes(self.home)
+        result = json.loads(self.shell_helper("li-scaffold", "init", "--target", str(child)).stdout)
+        self.assertTrue(result["required_caller_policy"])
+        self.assertEqual(result["operation_profile_reference"], reference)
+        self.assertEqual(result["target_selection"]["requested"], "required")
+        self.assertIsNone(result["target_profile_reference"])
+        self.assertEqual(hashes(self.home), before)
+        self.assertFalse((child / ".claude/profile-requirements.json").exists())
+        self.assertFalse((child / "packs").exists())
+
+    def test_neutral_caller_cannot_hide_missing_target_required_policy(self):
+        self.bind_caller()
+        child = self.child()
+        (child / ".claude").mkdir()
+        (child / ".claude/profile-requirements.json").write_text(
+            json.dumps({"schema_version": 1, "required_pack": "not-installed"}), encoding="utf-8")
+        before = hashes(child)
+        result = self.shell_helper("li-scaffold", "init", "--target", str(child), success=False)
+        self.assertIn("PROFILE_REQUIRED", result.stderr)
+        self.assertEqual(hashes(child), before)
+
+    def test_missing_or_drifted_caller_pin_refuses_child_writes(self):
+        self.pack("required")
+        self.require("required")
+        self.bind_caller()
+        child = self.child()
+        current = next((self.home / "sessions/profiles").glob("*/current-profile.json"))
+        saved = current.read_bytes()
+        current.unlink()
+        before = hashes(child)
+        self.shell_helper("li-scaffold", "init", "--target", str(child), success=False)
+        self.assertEqual(hashes(child), before)
+        current.write_bytes(saved)
+        manifest = self.store / "required/pack.yaml"
+        manifest.write_bytes(manifest.read_bytes() + b"# policy drift\n")
+        self.shell_helper("li-scaffold", "init", "--target", str(child), success=False)
+        self.assertEqual(hashes(child), before)
+
+    def test_conflicting_target_policy_and_same_name_different_content_are_refused(self):
+        self.pack("required", root=self.target / "packs")
+        self.pack("different")
+        self.require("required")
+        self.bind_caller()
+        child = self.child()
+        (child / ".claude").mkdir()
+        declaration = child / ".claude/profile-requirements.json"
+        declaration.write_text(json.dumps({"schema_version": 1, "required_pack": "different"}), encoding="utf-8")
+        before = hashes(child)
+        self.shell_helper("li-scaffold", "init", "--target", str(child), success=False)
+        self.assertEqual(hashes(child), before)
+        declaration.write_text(json.dumps({"schema_version": 1, "required_pack": "required"}), encoding="utf-8")
+        self.pack("required", root=child / "packs", extra="roles: {source: different-source}\n")
+        before = hashes(child)
+        refused = self.shell_helper("li-scaffold", "init", "--target", str(child), success=False)
+        self.assertIn("source/content", refused.stderr)
+        self.assertEqual(hashes(child), before)
+
+
+def load_tests(loader, tests, pattern):
+    if os.name == "nt":
+        return tests
+    windows_only = {
+        "test_powershell_reinstall_keeps_operator_files_inside_managed_trees",
+        "test_powershell_entry_interruption_recovery_and_consumed_permission",
+    }
+
+    def cases(suite):
+        for item in suite:
+            if isinstance(item, unittest.TestSuite):
+                yield from cases(item)
+            else:
+                yield item
+
+    print("UNVERIFIED: Windows-only native performer cases require a Windows job; POSIX cases remain scheduled.")
+    return unittest.TestSuite(case for case in cases(tests) if case._testMethodName not in windows_only)
+
+
+if __name__ == "__main__":
+    unittest.main(argv=[sys.argv[0], *TEST_ARGS])

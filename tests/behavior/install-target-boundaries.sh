@@ -7,6 +7,8 @@ trap 'rm -rf "$TMP"' EXIT
 source_root="$TMP/source"
 mkdir -p "$source_root/install" "$source_root/lib"
 cp "$ROOT/install/install.sh" "$source_root/install/install.sh"
+cp "$ROOT/install/native.sh" "$source_root/install/native.sh"
+cp "$ROOT/install/install.ps1" "$ROOT/install/native.ps1" "$source_root/install/"
 cp "$ROOT/lib/frontmatter.sh" "$source_root/lib/frontmatter.sh"
 for destination in "$source_root" "$source_root/nested" "$source_root/nested/.." "$TMP" /; do
   rc=0
