@@ -202,10 +202,12 @@ Its final accepted source must join the explicit installed-resource preflight as
 as ordinary lib copying. Do not import this WIP or make its absent file a prerequisite
 for P10's current freeze; the coordinator reconciles that dependency after acceptance.
 
-P10 has identified its proposed authority locations as `docs/native-installation.md`
+P10's frozen, still-unreviewed authority locations are `docs/native-installation.md`
 (native TSV v1), `install/native.sh` / `install/native.ps1` (performers), and
 `docs/lifecycle.md` / `lib/managed_transaction.py` / `bin/li-lifecycle.py` (runtime
-transaction and result surface). None has an immutable P10 product checkpoint yet.
-Dependency HEAD `fb96f713` is not that checkpoint. A13.1/.2/.4 remain paused until
-the exact product/contract hashes and real fixture selectors are supplied and the
-coordinator explicitly releases the shared interface.
+transaction and result surface). Product `a73cf9ee`, report-only `1117b9b` and all seven
+declared contract hashes have been verified against Git; this is identity verification,
+not specification/quality acceptance. `fb96f713` remains the dependency base, not product.
+A narrow P07 fixture follow-up is pending under the P10 card. A13.1/.2/.4 stay paused
+until the resulting exact contract/fixtures are reviewed and the coordinator explicitly
+releases the shared interface; no WIP import or second interpretation is authorized.

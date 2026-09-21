@@ -38,7 +38,7 @@ from the reviewed historical merge `40c2795`. Current implementation ownership:
 | P06 host adapters | `324863ff-e7cf-4abf-b449-04dd0f096170` | Component ACCEPTED/integrated `36593cd`; provider `7425960`, final review `1067da29`; idle |
 | P07 profile context | `b9352dfe-1c1e-4ea3-b7d9-0fd008d39b3d` | Long-path repair ACCEPTED by `a7450597`, integrated `c344133` with reports; joined checks pass, idle |
 | P08 work lifecycle | `f2c305ac-e8b0-4b02-b6cd-c7de598964cf` | Implementing ready A08/A10 from `5c3e753`; A13 installer observation waits for P10 seam/fixtures |
-| P10 installer lifecycle | `5ea6c88c-68c1-4712-8f55-adecdfe0061f` | Implementing approved native/runtime split from `0df1042`; dependencies `98ad7ed` / `ca28074`, no Python install prerequisite |
+| P10 installer lifecycle | `5ea6c88c-68c1-4712-8f55-adecdfe0061f` | Frozen `a73cf9ee` / report `1117b9b`; narrow validation-fixture follow-up before independent review; not accepted |
 
 All are `lintel-builder` sessions with explicit ownership, local commits, report paths
 and no remote authorization. P01/P02/P03 plus the owned P04-P07 components are accepted.
@@ -278,6 +278,21 @@ unlinked global report is history. ADR-0004's advisory default and P05 mandatory
 controls are unchanged. The existing shape check passes; actual cross-initiative
 selector evidence remains P08 work. P10 owns CP-16 migration inventory and reports
 overdue/unknown/missing-catalog preservation cases; its final independent gate remains open.
+
+P08 boundary incident (2026-09-21): cycle-continuity ran without a synthetic outer
+home; session-digest may have read or initialized user-global state. Effects remain
+unverified, no real-home inspection/rollback occurred, and the run is invalid evidence.
+The operator explicitly approved resuming only with verified per-process synthetic
+home/derived-path isolation. P08 acknowledged and continues ready work under that
+boundary; A13.1/.2/.4 remains separately gated. See L-037.
+
+P10's first frozen handoff is product `a73cf9ee38977501c201225d8269dac3668c1080`,
+report `1117b9b54a55105d7202f92141a670f7b0cff578`, owned base `fb96f713`.
+Its 48-path scope and seven contract hashes were verified from Git, not accepted
+as product correctness. The strict run is 120/128, with zero skips/partial; later
+owned 46-case and seven-runtime-case passes are separate. A narrow P07 copied-fixture/
+single-method follow-up is authorized by the P10 card; a new frozen checkpoint is
+required before independent review. Do not import the product or release A13 yet.
 
 Prepared successors: P05-P07 contracts and official host-source report committed in
 `3f584c8`; all P08-P14 dispatch cards already committed in `76e9e80`. P08 requires the

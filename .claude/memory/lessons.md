@@ -744,3 +744,21 @@ aggregate despite the passing test commands.
 checkout configuration or immutable Git-byte/EOL comparisons for source checks.
 Record each command and aggregate exit accurately; never normalize source files or
 weaken assertions merely to turn an environment-induced diagnostic green.
+
+## L-037 - Verify hook-test home isolation before execution
+
+**Date:** 2026-09-21
+
+**Context:** P08 ran cycle-continuity.sh without an outer synthetic home. Its direct
+session-digest calls could use Git Bash's USERPROFILE-derived home and inspect or
+initialize user-global profile, jobs and audit state. Actual effects were not verified;
+the worker stopped and the run was excluded from authorized evidence.
+
+**Rule:** Before tests that invoke hooks or global-path helpers, construct and verify
+per-process HOME, USERPROFILE, LINTEL_HOME and all derived pack, audit, profile and
+registry paths inside the explicit fixture; clear inherited redirects. Unset values
+are not isolation. After a boundary incident, stop and escalate before continuing.
+
+**Recovery authority:** the operator approved synthetic-only continuation and rerunning
+affected checks, with no real-home access or rollback. That approval does not establish
+what the invalid run did, authorize inspection/recovery, or make its results valid.
