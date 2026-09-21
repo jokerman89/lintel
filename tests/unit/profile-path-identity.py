@@ -6,6 +6,7 @@
 """Discriminate Windows namespace spelling from physical runtime containment."""
 
 import argparse
+import ast
 from dataclasses import replace
 import json
 import ntpath
@@ -32,6 +33,25 @@ def extended(path):
 
 
 class ProfilePathIdentity(unittest.TestCase):
+    def test_shared_path_exports_are_pure_and_keep_profile_error_mapping(self):
+        shared = profile._native_paths
+        self.assertEqual(shared.__all__, ("path_identity", "native_io_path"))
+        ast.parse((OPTIONS.root / "lib/native_paths.py").read_text(encoding="utf-8"), feature_version=(3, 9))
+        sample = Path(self.home / "record.json")
+        with mock.patch.object(Path, "resolve", side_effect=AssertionError("representation resolved a path")), \
+                mock.patch.object(Path, "open", side_effect=AssertionError("representation opened a file")), \
+                mock.patch.object(os, "stat", side_effect=AssertionError("representation inspected a path")):
+            self.assertEqual(shared.path_identity(PureWindowsPath(r"C:\Root\record")),
+                             shared.path_identity(PureWindowsPath(r"\\?\C:\Root\record")))
+            self.assertEqual(shared.path_identity(shared.native_io_path(sample)), shared.path_identity(sample))
+        invalid = PureWindowsPath(r"\\?\GLOBALROOT\Device\Disk\file")
+        with self.assertRaises(ValueError) as error:
+            shared.path_identity(invalid)
+        self.assertNotIsInstance(error.exception, profile.ProfileError)
+        with self.assertRaises(profile.ProfileError) as error:
+            profile._path_identity(invalid)
+        self.assertEqual(error.exception.code, "PROFILE_IO")
+
     def setUp(self):
         self.temporary = tempfile.TemporaryDirectory(prefix="lintel-profile-path-")
         self.root = Path(self.temporary.name).resolve()
@@ -431,7 +451,7 @@ class ProfilePathIdentity(unittest.TestCase):
                 link.parent.mkdir(parents=True, exist_ok=True)
                 env = dict(os.environ, PROFILE_TEST_LINK=str(link), PROFILE_TEST_DEST=str(self.outside))
                 result = subprocess.run(
-                    ["powershell", "-NoProfile", "-NonInteractive", "-Command",
+                    [os.environ.get("LINTEL_POWERSHELL", "powershell"), "-NoProfile", "-NonInteractive", "-Command",
                      "$ErrorActionPreference='Stop'; New-Item -ItemType Junction "
                      "-Path $env:PROFILE_TEST_LINK -Target $env:PROFILE_TEST_DEST | Out-Null"],
                     env=env, capture_output=True, text=True, timeout=30,

@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # component: owned-file-snapshot
-# implements: ADR-0005, ADR-0010
+# implements: ADR-0005, ADR-0010, ADR-0031
 # intent: .claude/plans/universal-implementation/packages/P03.md
 # constraints: explicit owned files, quiescent root, no network or whole-tree replacement
-# last_intent_review: 2026-09-20
+# last_intent_review: 2026-09-21
 """Verified file snapshots and attributable, resumable restore; not a live-system rollback."""
 from __future__ import annotations
 
@@ -21,7 +21,8 @@ import uuid
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
 from context_safety import (atomic_write, checked_root, file_state, is_link, json_bytes, path_key,
-                            read_owned, relative_path, safe_path, selector_path)
+                            native_io_path, read_owned, relative_path, safe_path, selector_path,
+                            _path_is_within)
 
 SCHEMA = 1
 RESTORE_SCHEMA = 2
@@ -32,10 +33,10 @@ OBSERVATION_FIELDS = ("st_dev", "st_ino", "st_size", "st_mtime_ns", "st_ctime_ns
 
 
 def _locations(root: Path, store: Path) -> tuple[Path, Path]:
-    if is_link(Path(root)) or is_link(Path(store)):
-        raise ValueError("Snapshot roots cannot be links or reparse points.")
     root, store = checked_root(root), checked_root(store)
-    if root.is_relative_to(store) or store.is_relative_to(root):
+    if is_link(root) or is_link(store):
+        raise ValueError("Snapshot roots cannot be links or reparse points.")
+    if _path_is_within(root, store) or _path_is_within(store, root):
         raise ValueError("Source and snapshot store must be separate, non-overlapping directories.")
     return root, store
 
@@ -44,7 +45,7 @@ def _folder(store: Path, identifier: str) -> Path:
     if not re.fullmatch(ID_PATTERN, identifier):
         raise ValueError("Unsupported snapshot ID/legacy format; retain it for explicit manual recovery.")
     folder = safe_path(store, identifier)
-    if not folder.is_dir():
+    if not native_io_path(folder).is_dir():
         raise ValueError(f"Snapshot does not exist: {identifier}")
     return folder
 
@@ -120,23 +121,23 @@ def load_snapshot(root: Path, store: Path, identifier: str) -> dict:
 def _operation_lock(folder: Path):
     lock = safe_path(folder, ".operation-lock")
     try:
-        lock.mkdir()
+        native_io_path(lock).mkdir()
     except FileExistsError as error:
         raise ValueError("Snapshot is locked. Verify no operation is running before recovering a stale lock.") from error
     try:
         yield
     finally:
-        lock.rmdir()
+        native_io_path(lock).rmdir()
 
 
 def _publish_snapshot(pending: Path, target: Path) -> int:
     # Windows can temporarily deny renaming a freshly closed directory. Retry only
     # this unique, owned publication; never use retries to overwrite source files.
     for attempt in range(5):
-        if target.exists() or is_link(target):
+        if native_io_path(target).exists() or is_link(target):
             raise ValueError(f"Snapshot publication target already exists: {target}")
         try:
-            pending.rename(target)
+            native_io_path(pending).rename(native_io_path(target))
             return attempt
         except OSError as error:
             if getattr(error, "winerror", None) not in (5, 32, 33) or attempt == 4:
@@ -158,7 +159,7 @@ def create_snapshot(root: Path, store: Path, paths: Sequence[str], absent: Seque
         raise ValueError("Git-internal paths are not owned snapshot content.")
     identifier = "snapshot-" + uuid.uuid4().hex
     pending = safe_path(store, ".pending-" + identifier)
-    pending.mkdir(mode=0o700)
+    native_io_path(pending).mkdir(mode=0o700)
     files, total = [], 0
     for relative in sorted(names):
         if relative in absent:
@@ -172,7 +173,7 @@ def create_snapshot(root: Path, store: Path, paths: Sequence[str], absent: Seque
         if total > MAX_BYTES:
             raise ValueError(f"Snapshot byte bound exceeded; partial copy retained at {pending}")
         blob = "blobs/" + state["sha256"]
-        if not safe_path(pending, blob).exists():
+        if not native_io_path(safe_path(pending, blob)).exists():
             atomic_write(pending, blob, data)
         copied, _ = read_owned(pending, blob, MAX_BYTES)
         if copied != data:
@@ -195,7 +196,7 @@ def _identity(folder: Path) -> str:
 
 
 def _read_result(folder: Path, manifest: dict) -> dict | None:
-    if not safe_path(folder, "result.json").exists():
+    if not native_io_path(safe_path(folder, "result.json")).exists():
         return None
     result = json.loads(read_owned(folder, "result.json", 2 * 1024 * 1024)[0])
     if (not isinstance(result, dict) or type(result.get("schema_version")) is not int
@@ -217,7 +218,8 @@ def bind_result(root: Path, store: Path, identifier: str, expected: dict) -> dic
     folder = _folder(store, identifier)
     with _operation_lock(folder):
         manifest = load_snapshot(root, store, identifier)
-        if safe_path(folder, "result.json").exists() or safe_path(folder, "restore.json").exists():
+        if (native_io_path(safe_path(folder, "result.json")).exists()
+                or native_io_path(safe_path(folder, "restore.json")).exists()):
             raise ValueError("Result already bound/recovery started; refusing to reauthorize changed files.")
         if not isinstance(expected, dict) or set(expected) != {f["path"] for f in manifest["files"]}:
             raise ValueError("Expected states must cover exactly the snapshot's owned paths.")
@@ -237,7 +239,7 @@ def _apply_restore(root: Path, folder: Path, entry: dict, expected: dict | None)
         raise ValueError(f"File changed after restore preflight: {relative}")
     original = _entry_state(entry)
     if original is None:
-        safe_path(root, relative).unlink()
+        native_io_path(safe_path(root, relative)).unlink()
     else:
         data, copied = read_owned(folder, "blobs/" + original["sha256"], MAX_BYTES)
         if copied["sha256"] != original["sha256"] or copied["size"] != original["size"]:
@@ -250,11 +252,11 @@ def _apply_restore(root: Path, folder: Path, entry: dict, expected: dict | None)
 def _file_observation(root: Path, relative: str) -> dict | None:
     path = safe_path(root, relative)
     try:
-        before = path.lstat()
+        before = native_io_path(path).lstat()
     except FileNotFoundError:
         return None
     content = file_state(root, relative)
-    after = safe_path(root, relative).lstat()
+    after = native_io_path(safe_path(root, relative)).lstat()
     identity = [getattr(before, field) for field in OBSERVATION_FIELDS]
     if content is None or identity != [getattr(after, field) for field in OBSERVATION_FIELDS]:
         raise ValueError(f"File changed while observing recovery ownership: {relative}")
@@ -274,7 +276,7 @@ def _observation_state(value: dict | None) -> dict | None:
 
 
 def _read_restore_journal(folder: Path, manifest: dict, receipt: dict | None) -> dict | None:
-    if not safe_path(folder, "restore.json").exists():
+    if not native_io_path(safe_path(folder, "restore.json")).exists():
         return None
     journal = json.loads(read_owned(folder, "restore.json", MAX_RESTORE_BYTES)[0])
     if (not isinstance(journal, dict) or type(journal.get("schema_version")) is not int
@@ -377,15 +379,16 @@ def retention_plan(root: Path, store: Path, *, keep: int = 5, days: int = 30,
         raise ValueError("Retention must keep at least one snapshot and one recent day.")
     now = now or datetime.now(timezone.utc)
     snapshots, protected, unsupported = [], set(), []
-    for folder in sorted(store.iterdir()):
+    for child in sorted(native_io_path(store).iterdir()):
+        folder = store / child.name
         if not re.fullmatch(ID_PATTERN, folder.name):
             unsupported.append(folder.name)
             continue
         manifest = load_snapshot(root, store, folder.name)
         snapshots.append((_timestamp(manifest["created_at"]), folder.name))
-        if safe_path(folder, ".operation-lock").exists():
+        if native_io_path(safe_path(folder, ".operation-lock")).exists():
             protected.add(folder.name)
-        if safe_path(folder, "restore.json").exists():
+        if native_io_path(safe_path(folder, "restore.json")).exists():
             journal = json.loads(read_owned(folder, "restore.json", MAX_RESTORE_BYTES)[0])
             if journal.get("schema_version") != RESTORE_SCHEMA or journal.get("state") != "complete":
                 protected.add(folder.name)
@@ -410,14 +413,15 @@ def prune_snapshots(root: Path, store: Path, identifiers: Sequence[str], *,
         expected = {"manifest.json"}
         expected.update("blobs/" + e["sha256"] for e in manifest["files"] if e["sha256"])
         for optional in ("result.json", "restore.json"):
-            if safe_path(folder, optional).exists():
+            if native_io_path(safe_path(folder, optional)).exists():
                 expected.add(optional)
         actual = set()
-        for path in folder.rglob("*"):
-            safe_path(folder, path.relative_to(folder).as_posix())
-            if path.is_file():
-                actual.add(path.relative_to(folder).as_posix())
-            elif path != folder / "blobs":
+        for entry in native_io_path(folder).rglob("*"):
+            relative = entry.relative_to(native_io_path(folder)).as_posix()
+            path = safe_path(folder, relative)
+            if native_io_path(path).is_file():
+                actual.add(relative)
+            elif relative != "blobs":
                 raise ValueError("Unexpected snapshot directory; refusing pruning.")
         if actual != expected:
             raise ValueError("Unexpected/unowned snapshot content; refusing pruning.")
@@ -425,11 +429,11 @@ def prune_snapshots(root: Path, store: Path, identifiers: Sequence[str], *,
     for folder, files in inventories:
         with _operation_lock(folder):
             for relative in sorted(files):
-                safe_path(folder, relative).unlink()
+                native_io_path(safe_path(folder, relative)).unlink()
             blobs = safe_path(folder, "blobs")
-            if blobs.exists():
-                blobs.rmdir()
-        folder.rmdir()
+            if native_io_path(blobs).exists():
+                native_io_path(blobs).rmdir()
+        native_io_path(folder).rmdir()
     return {"pruned": identifiers}
 
 

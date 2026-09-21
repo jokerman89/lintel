@@ -27,7 +27,7 @@ spec.loader.exec_module(snapshot)
 class SnapshotOwnershipTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory(prefix="lintel-snapshot-")
-        self.addCleanup(self.temp.cleanup)
+        self.addCleanup(self.cleanup)
         self.base = Path(self.temp.name).resolve()
         self.root = self.base / "owned root"
         self.root.mkdir()
@@ -37,6 +37,85 @@ class SnapshotOwnershipTests(unittest.TestCase):
         (self.root / "b.txt").write_bytes(b"original b\n")
         (self.root / "unrelated.txt").write_text("user work")
 
+    def cleanup(self):
+        root = Path(self.temp.name).absolute()
+        self.assertEqual(root, self.base)
+        self.assertTrue(root.name.startswith("lintel-snapshot-"))
+        if os.name == "nt":
+            self.temp.name = "\\\\?\\" + str(root)
+        self.temp.cleanup()
+
+    @unittest.skipUnless(os.name == "nt", "native Windows full snapshot I/O")
+    def test_native_long_snapshot_lifecycle_keeps_records_and_consumed_permission(self):
+        self.store = self.base / "recovery-store"
+        while len(str(self.store)) < 290:
+            self.store /= "store-segment-" + "x" * 30
+        Path("\\\\?\\" + str(self.store)).mkdir(parents=True)
+        created = self.create(["new.txt"])
+        manifest = snapshot.load_snapshot(self.root, self.store, created["id"])
+        self.assertEqual(manifest["owner"], str(self.root))
+        self.assertEqual(created["path"], str(self.store / created["id"]))
+        (self.root / "a file.txt").write_bytes(b"operation")
+        (self.root / "b.txt").unlink()
+        (self.root / "new.txt").write_bytes(b"new operation")
+        snapshot.bind_result(self.root, self.store, created["id"],
+                             {p: snapshot.file_state(self.root, p) for p in ("a file.txt", "b.txt", "new.txt")})
+        receipt_path = Path("\\\\?\\" + str(self.store / created["id"] / "result.json"))
+        receipt = receipt_path.read_bytes()
+        apply = snapshot._apply_restore
+
+        def interrupt(root, folder, entry, expected):
+            if entry["path"] == "b.txt":
+                raise OSError("long-path interruption after first file")
+            return apply(root, folder, entry, expected)
+
+        with patch.object(snapshot, "_apply_restore", side_effect=interrupt), self.assertRaises(OSError):
+            snapshot.restore_snapshot(self.root, self.store, created["id"])
+        self.assertEqual(snapshot.restore_snapshot(self.root, self.store, created["id"])["state"], "complete")
+        self.assertEqual(receipt_path.read_bytes(), receipt)
+        self.assertFalse((self.root / "new.txt").exists())
+        (self.root / "a file.txt").write_bytes(b"operation")
+        with self.assertRaises(ValueError):
+            snapshot.restore_snapshot(self.root, self.store, created["id"])
+        self.assertEqual((self.root / "a file.txt").read_bytes(), b"operation")
+        self.assertEqual((self.root / "unrelated.txt").read_text(), "user work")
+        self.assertIn(created["id"], snapshot.retention_plan(self.root, self.store)["keep"])
+        explicit_store = Path("\\\\?\\" + str(self.store))
+        self.assertEqual(snapshot.load_snapshot(self.root, explicit_store, created["id"]), manifest)
+
+    @unittest.skipUnless(os.name == "nt", "native long retention, locks and explicit roots")
+    def test_native_long_retention_locks_and_explicit_root_records(self):
+        self.store = self.base / ("store-" + "x" * 70) / ("store-" + "y" * 70)
+        Path("\\\\?\\" + str(self.store)).mkdir(parents=True)
+        explicit_root = Path("\\\\?\\" + str(self.root))
+        now = datetime(2026, 9, 21, tzinfo=timezone.utc)
+        ids = []
+        for age in range(7):
+            created = snapshot.create_snapshot(explicit_root, self.store, ["a file.txt", "b.txt"])
+            ids.append(created["id"])
+            path = Path("\\\\?\\" + str(self.store / created["id"] / "manifest.json"))
+            manifest = json.loads(path.read_bytes())
+            self.assertEqual(manifest["owner"], str(explicit_root))
+            manifest["created_at"] = (now - timedelta(days=40 + age)).isoformat()
+            path.write_text(json.dumps(manifest))
+        old = ids[-1]
+        before = snapshot.load_snapshot(explicit_root, self.store, old)
+        lock = Path("\\\\?\\" + str(self.store / old / ".operation-lock"))
+        lock.mkdir()
+        with self.assertRaises(ValueError):
+            snapshot.restore_snapshot(explicit_root, self.store, old)
+        self.assertTrue(lock.exists())
+        self.assertIn(old, snapshot.retention_plan(explicit_root, self.store, now=now)["keep"])
+        lock.rmdir()
+        with self.assertRaises(ValueError):
+            snapshot.load_snapshot(self.root, self.store, old)
+        self.assertEqual(snapshot.load_snapshot(explicit_root, self.store, old), before)
+        self.assertIn(old, snapshot.retention_plan(explicit_root, self.store, now=now)["eligible"])
+        self.assertEqual(snapshot.prune_snapshots(explicit_root, self.store, [old], now=now)["pruned"], [old])
+        self.assertFalse(Path("\\\\?\\" + str(self.store / old)).exists())
+        with self.assertRaises(ValueError):
+            snapshot.create_snapshot(self.root, Path("\\\\?\\" + str(self.root)), ["b.txt"])
+        self.assertEqual((self.root / "unrelated.txt").read_text(), "user work")
     def create(self, absent=()):
         return snapshot.create_snapshot(self.root, self.store, ["a file.txt", "b.txt"], absent)
 
@@ -425,7 +504,7 @@ class SnapshotOwnershipTests(unittest.TestCase):
         link = self.root / "escape"
         if os.name == "nt":
             env = dict(os.environ, LINTEL_TEST_LINK=str(link), LINTEL_TEST_TARGET=str(outside))
-            made = subprocess.run(["powershell", "-NoProfile", "-NonInteractive", "-Command",
+            made = subprocess.run([os.environ.get("LINTEL_POWERSHELL", "powershell"), "-NoProfile", "-NonInteractive", "-Command",
                                    "New-Item -ItemType Junction -Path $env:LINTEL_TEST_LINK "
                                    "-Target $env:LINTEL_TEST_TARGET -ErrorAction Stop | Out-Null"],
                                   env=env, capture_output=True)
@@ -489,6 +568,17 @@ class SnapshotOwnershipTests(unittest.TestCase):
         self.assertEqual(run("verify", created["id"])["owner"], str(self.root))
         self.assertEqual(run("restore", created["id"])["state"], "complete")
         self.assertEqual((self.root / "a file.txt").read_bytes(), b"original a\x00\n")
+
+    def test_cli_relative_selected_roots_keep_existing_resolution(self):
+        run = subprocess.run(
+            [sys.executable, "-B", str(SOURCE / "bin/li-snapshot.py"),
+             "--root", self.root.name, "--store", self.store.name,
+             "create", "--path", "b.txt"],
+            cwd=self.base, env=dict(os.environ, PYTHONDONTWRITEBYTECODE="1"),
+            capture_output=True, text=True)
+        self.assertEqual(run.returncode, 0, run.stderr)
+        created = json.loads(run.stdout)
+        self.assertEqual(snapshot.load_snapshot(self.root, self.store, created["id"])["owner"], str(self.root))
 
     def test_refactor_restore_preserves_preexisting_index_and_worktree_changes(self):
         env = dict(os.environ, HOME=str(self.base), GIT_CONFIG_NOSYSTEM="1",

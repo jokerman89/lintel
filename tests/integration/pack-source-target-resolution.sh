@@ -18,6 +18,7 @@ installed="$test_dir/installed source"
 target_repo="$test_dir/consumer"
 mkdir -p "$installed/lib" "$installed/bin" "$installed/packs" "$target_repo/packs/base"
 cp "$ROOT/lib/pack-resolver.sh" "$ROOT/lib/paths.sh" "$ROOT/lib/profile_context.py" \
+  "$ROOT/lib/native_paths.py" \
   "$ROOT/lib/profile-context-schema.json" "$ROOT/lib/pack-schema.yaml" "$ROOT/lib/copilot-env.sh" "$installed/lib/"
 cp "$ROOT/bin/_audit.sh" "$installed/bin/"
 cp -R "$ROOT/packs/_default" "$installed/packs/"

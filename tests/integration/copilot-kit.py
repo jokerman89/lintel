@@ -14,6 +14,7 @@ ROOT = Path(__file__).resolve().parents[2]
 JOINED_RUNTIME_RESOURCES = (
     "lib/swarm_snapshot.py", "lib/envelope_contract.py", "lib/envelope-requirements.txt",
     "lib/profile_context.py", "lib/profile-context-schema.json", "lib/pack-schema.yaml",
+    "lib/native_paths.py",
     ".claude-plugin/plugin.json",
 )
 spec = importlib.util.spec_from_file_location("li_copilot", ROOT / "bin/li-copilot.py")
