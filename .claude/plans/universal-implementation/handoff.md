@@ -381,6 +381,16 @@ I/O consumer/fixture changes to its original owner, not a receipt/inventory rede
 Default init/check/recovery and the canonical caller/child path still require new
 exact-dependency evidence and complete independent P10 review. No A13 release.
 
+P10 reports separate dependency imports `bc0863a8` (core `ce7415f`) and `8097ba2c`
+(fixture `5fc657f`), with only additive resource-list conflict resolutions.
+The coordinator inspected the unchanged frozen `c1de05c7` implementations of
+`protocol_updates`, `verify_links`, `bundle_documentation` and `runtime_ignore_errors`.
+Their remaining metadata/read operands are now explicitly released in the P10 card,
+using the reviewed native spelling without changing protocol/navigation/Git behavior.
+The owner continues the same consumer unit; no new writer, product acceptance,
+completion credit or A13 release follows. Freeze one attributed combined candidate
+with the additional long-path preservation evidence for the existing reviewer.
+
 P08 report `9faebd2b7d027283a21a470c8e81473e39bd7a23` is preserved as `a56aab4`:
 F01/F02 P1 negation/safety questions can recommend SHIP; F03 P2 PLAN still names the
 global analysis output. No workflow executed. `04e0ba9` authorizes only the original
@@ -403,6 +413,12 @@ selection is accepted when present or absent. The original owner has only a
 design-only request for positive operation/request-head recognition and one
 native-aware report identity check; no new string patches or source edits are
 authorized before a bounded root re-plan is committed.
+
+That root re-plan is now authorized by `679c6b8`: positively identified governing
+request heads and one native-aware internal report-path guard. P08 is implementing
+on `8bde7005` without importing the shared core. Reported focused RED/GREEN work is
+builder evidence only; F01/F02/F03, inherited preservation, A13 and quality remain
+open until the separately frozen candidate and the existing reviewer's recheck.
 
 P10 F01 repair `4407827f563fecac2ac6bf04a6bd0fc9cdd05641` / report-only
 `c1de05c7f18770f34f950a8c4d4e194892da3291` changes only the existing migration

@@ -53,9 +53,10 @@ unchanged and accepted. P07's native long-path repair `4d001463` passed independ
 adapter methods and 19 path methods pass. P10 is implementing in session `5ea6c88c`;
 the operator requires installation without Python (ADR-0030) and explicitly approved
 existing PowerShell 7.6.6 for local verification with its existing RemoteSigned policy.
-Windows PowerShell 5.1 remains denied/unverified; no policy changed. P08's partial
-candidate is in a narrow routing/PLAN repair after independent SPEC FAIL. P10's
-migration F01 is in same-reviewer recheck; default-store/cleanup acceptance is blocked.
+Windows PowerShell 5.1 remains denied/unverified; no policy changed. P08's root
+routing/PLAN repair is authorized by `679c6b8` after the second independent SPEC FAIL;
+no new immutable candidate is accepted. P10's migration F01 is independently closed
+by `00a0bef`; default-store/cleanup and whole-package acceptance remain blocked.
 A13 remains gated.
 
 Joined investigation `990b0daa` reopens A01.2/A01.4/A11.1: ordinary Python long-path
@@ -69,7 +70,9 @@ Core checkpoint/snapshot/bisect leaves are reclosed, restoring 52/113 original i
 The classic adapter's 256->263 publication and full P10 default init/check/recovery
 remain blocked under their separate consumer gate. P10's original owner has a bounded
 exact-dependency/direct-I/O follow-up; no inventory/schema/store-policy redesign or
-A13 release. Earlier failed and diagnostic-only evidence is preserved.
+A13 release. Its four additional adapter metadata/read sites are explicitly scoped
+in the P10 card; both active streams still require immutable product/review checkpoints.
+Earlier failed and diagnostic-only evidence is preserved.
 Continue P08-P14 in dependency order,
 not a new audit or partial delivery. Coordinator routing (`b72ab47` plus
 `1d40193`) and provenance (`9f49e26`) await their owning package reviews. All successor cards
