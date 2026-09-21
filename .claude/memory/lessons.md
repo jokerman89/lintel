@@ -782,3 +782,12 @@ oracle or trying configuration variants. Preserve original required dimensions a
 all failed evidence; never silently skip verification or label an unavailable host
 operation successful. A changed support boundary needs explicit authority, accurate
 diagnostics, negative preservation evidence and independent review.
+
+**Product-focus correction, 2026-09-21:** the operator challenged why path handling
+had become the apparent deliverable instead of useful team-ready skills. The initial
+default-installation failures needed repair; the subsequent compatibility and fixture
+work consumed disproportionate coordination. Tie each new blocker to an original
+user outcome before opening another repair card. Finish the already bounded safe
+installation/workflow corrections, then advance dependency-ready skill content and
+client experience. Infrastructure verification supports that outcome; it must not
+become a separate, expanding product. This does not waive existing safety or review gates.

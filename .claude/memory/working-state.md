@@ -84,6 +84,11 @@ independent acceptance. After failed bounded Git-root/setup variants, the operat
 selected documented pre-write refusal for unverifiable Git operations, not expanded
 compatibility work. The P10 card now scopes that final error/preflight/doc follow-up;
 original default/classic/canonical dimensions and independent gates stay unchanged.
+The operator challenged the prolonged pathing focus on 2026-09-21. The target is
+useful, team-ready Universal skills, not a general Windows/Git compatibility layer.
+Close only the bounded active P08/P10 corrections and required review, then advance
+dependency-ready skill depth and client experience. Reconcile any newly proposed
+infrastructure blocker with the original outcome before expanding scope (L-038).
 Continue P08-P14 in dependency order,
 not a new audit or partial delivery. Coordinator routing (`b72ab47` plus
 `1d40193`) and provenance (`9f49e26`) await their owning package reviews. All successor cards
