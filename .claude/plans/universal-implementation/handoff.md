@@ -38,7 +38,7 @@ from the reviewed historical merge `40c2795`. Current implementation ownership:
 | P06 host adapters | `324863ff-e7cf-4abf-b449-04dd0f096170` | Component ACCEPTED/integrated `36593cd`; provider `7425960`, final review `1067da29`; idle |
 | P07 profile context | `b9352dfe-1c1e-4ea3-b7d9-0fd008d39b3d` | Long-path repair ACCEPTED by `a7450597`, integrated `c344133` with reports; joined checks pass, idle |
 | P08 work lifecycle | `f2c305ac-e8b0-4b02-b6cd-c7de598964cf` | Implementing ready A08/A10 from `5c3e753`; A13 installer observation waits for P10 seam/fixtures |
-| P10 installer lifecycle | `5ea6c88c-68c1-4712-8f55-adecdfe0061f` | Frozen `a73cf9ee` / report `1117b9b`; narrow validation-fixture follow-up before independent review; not accepted |
+| P10 installer lifecycle | `5ea6c88c-68c1-4712-8f55-adecdfe0061f` | Frozen snapshot `a400c03` / report `62ffb9a`; independent reviewer `1578dfd8`, not accepted |
 
 All are `lintel-builder` sessions with explicit ownership, local commits, report paths
 and no remote authorization. P01/P02/P03 plus the owned P04-P07 components are accepted.
@@ -57,6 +57,7 @@ repair their own findings. All prior reports remain preserved in `reviews/` and 
 | P05 | Final `33eac071` accepts `b023e8c`; integrated `c5c8f86`; earlier rejections retained | `6ed9c7df-4845-4d70-88c7-f0746ab28059` |
 | P06 | Final `1067da29`; complete component SPEC/QUALITY PASS at `7425960`; integrated | `d2a89ac3-151a-4dc0-ab09-1f3a62465cab` |
 | P07 | Final `a7450597` accepts `4d001463`; integrated through `56de830`, earlier `a8de574`/`3d8e715` preserved | `a7d78944-c02c-4909-a060-2c4f2a754b00` |
+| P10 | Current `a400c03` / report `62ffb9a`; complete spec then first whole quality pending | `1578dfd8-f239-4eba-989b-3c4bde3e5792` |
 
 ## Accepted local integrations
 
@@ -293,6 +294,17 @@ as product correctness. The strict run is 120/128, with zero skips/partial; late
 owned 46-case and seven-runtime-case passes are separate. A narrow P07 copied-fixture/
 single-method follow-up is authorized by the P10 card; a new frozen checkpoint is
 required before independent review. Do not import the product or release A13 yet.
+
+That follow-up is now frozen in `acf97f1`, only the copied-source list and the
+authorized validation method. Snapshot `a400c03d384be29879644ec11214f0eeadafe7df`
+also carries separately attributed coordinator dependencies; report-only tip
+`62ffb9a072c3314b97e015e0f8f98b7f64459fc8` records targeted 8/8 and committed 1/1
+fixture evidence without relabeling the failed aggregate. All seven producer hashes
+and shared P07/provider bytes remain unchanged. The coordinator verified identity and
+launched distinct reviewer `1578dfd8-f239-4eba-989b-3c4bde3e5792` on exact `62ffb9a`.
+Review covers original 48 owned paths plus the authorized fixture and the canonical
+installed caller/child bridge. P10 source is frozen; no master import, A13 release or
+completion credit is given before the independent verdict.
 
 Coordinator repairs for P10's reported shared-suite failures are committed separately:
 `d53dc38` changes only the reviewed evidence CLI's Git mode to 100755, preserving its
