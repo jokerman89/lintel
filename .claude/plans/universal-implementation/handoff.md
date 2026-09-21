@@ -400,6 +400,14 @@ change only if valid/negated exits 0/1 and caller-state preservation are establi
 No persistent Git configuration, other argv/root changes or acceptance waiver.
 The original-dimension/default/canonical work continues independently.
 
+That flag-only diagnostic failed on actual Git 2.55.0.windows.3: both long-root
+cases still exit 128; short 0/1 controls and malformed-HEAD refusal behave correctly,
+with state preserved. No product option was added. The P10 card now scopes the next
+diagnostic to the reviewed same-location native `-C` operand, without the option
+first and with it only if necessary, requiring actual root/Git-directory identity,
+directory/worktree-file cases and the same preservation gate before implementation.
+No runtime retry chain, Git redirection, shorter root or persistent setting is allowed.
+
 P08 report `9faebd2b7d027283a21a470c8e81473e39bd7a23` is preserved as `a56aab4`:
 F01/F02 P1 negation/safety questions can recommend SHIP; F03 P2 PLAN still names the
 global analysis output. No workflow executed. `04e0ba9` authorizes only the original

@@ -48,11 +48,20 @@ P10's native metadata repair exposed a distinct Git boundary: its owner reports
 exit 128 reading `.git` at target256/`.git`261 for both valid and negated ignore rules.
 The P10 card releases one same-location diagnostic and, only if it preserves state
 and distinguishes exits 0/1 correctly, the Windows-only per-command option in
-`li-copilot.py`'s `runtime_ignore_errors`. All other arguments, non-Windows behavior
-and explicit error handling stay unchanged. This applies the existing process-local
+`li-copilot.py`'s `runtime_ignore_errors`. Non-Windows behavior and explicit error
+handling stay unchanged. This applies the existing process-local
 approach to one named consumer; it is not permission for a global option, a general
 Git wrapper, path relocation or other command changes. Until verified, this remains
 an implementation direction, not evidence of consumer acceptance.
+
+The flag-only P10 diagnostic subsequently failed on Git for Windows 2.55.0.windows.3;
+no product Git option was added. The P10 card separately allows the reviewed
+same-location native spelling for this command's Windows `-C` I/O operand, with
+the option only if the no-option variant fails. Actual filesystem and Git-selected
+root identities, directory/worktree-file forms, positive/negative/error behavior
+and preserved state must pass before selecting a fixed invocation. Persisted and
+diagnostic roots stay logical; this is not a new root, a fallback chain or permission
+to change other commands. Failed alternatives remain evidence, not acceptance.
 
 ## Alternatives and trade-offs
 
