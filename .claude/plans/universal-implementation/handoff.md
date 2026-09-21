@@ -32,7 +32,7 @@ from the reviewed historical merge `40c2795`. Current implementation ownership:
 |---|---|---|
 | P01 trusted helpers | `b3853be7-dbbe-4161-9566-7e7d2c50e05e` | ACCEPTED and integrated `a2ef318`; idle, combined P07 gate remains |
 | P02 sync binding | `2e21aa98-3b40-46e7-885d-2ec4161ec35d` | ACCEPTED and integrated `39561c0`; idle, no real private sync activated |
-| P03 context safety | `9f06eebf-a3ee-4867-95ad-eb6e1d22a6d5` | Core `ce7415f` frozen; separate fixture follow-up/report pending under `67d39f1`; no acceptance |
+| P03 context safety | `9f06eebf-a3ee-4867-95ad-eb6e1d22a6d5` | Frozen core `ce7415f` + fixture `5fc657f`, report `8170c8e`; original reviewer `efd3f877`, no acceptance |
 | P04 Swarming | `a8960a09-fcd7-4652-a9b6-74ad6a94a029` | Component ACCEPTED/integrated `490a0f4` + report history `8964267`; idle until explicit A22.7 |
 | P05 review evidence | `2329e71f-cd9e-473b-94cf-41c579c29a88` | ACCEPTED by `33eac071`, integrated `c5c8f86`; current profile/review and focused gates pass, idle |
 | P06 host adapters | `324863ff-e7cf-4abf-b449-04dd0f096170` | Component ACCEPTED/integrated `36593cd`; provider `7425960`, final review `1067da29`; idle |
@@ -54,7 +54,7 @@ repair their own findings. All prior reports remain preserved in `reviews/` and 
 |---|---|---|
 | P01 | Final `f078165`; SPEC/QUALITY PASS at `041417a`; idle | `d699f463-ee4d-4950-9b9d-98f35e96f689` |
 | P02 | Final `1b6153f`; SPEC/QUALITY PASS at `9bdaeb4`; idle | `da23fa6f-499b-4011-b39b-a632312a8800` |
-| P03 | Final `2840012`; SPEC/QUALITY PASS at `500adb3`; idle | `efd3f877-550a-4ef0-9009-ed71b95b01ab` |
+| P03 | Current `8170c8e` / `417edac..5fc657f` core review; historical `500adb3`/`2840012` retained | `efd3f877-550a-4ef0-9009-ed71b95b01ab` |
 | P04 | Final `279dfc9`; component SPEC/QUALITY PASS at `aa73651`; A22.7 open | `ed672f58-2e85-42e2-b1b2-0635ba5b2325` |
 | P05 | Final `33eac071` accepts `b023e8c`; integrated `c5c8f86`; earlier rejections retained | `6ed9c7df-4845-4d70-88c7-f0746ab28059` |
 | P06 | Final `1067da29`; complete component SPEC/QUALITY PASS at `7425960`; integrated | `d2a89ac3-151a-4dc0-ab09-1f3a62465cab` |
@@ -355,6 +355,14 @@ earlier cleanup errors/timeouts remain. Classic adapter long-template publicatio
 is still blocked outside this unit. A frozen-P10 composition's successful default
 init remains diagnostic only; no check/recovery or complete P10 acceptance follows.
 
+Final report-only core checkpoint `8170c8e86d6d830c6b194ca48879504e3826d425` is over
+tested tree `5fc657f14123daca9ec126cadc1e9d64ee60691c`. The coordinator verified the
+16-path range, separate one-file fixture follow-up and protected-source equality,
+read the report, and dispatched original reviewer `efd3f877`. The P10 diagnostic
+preceded the final snapshot relative-root correction: it is not evidence for the
+final four-file composition. The reviewer must retain that and the blocked classic
+adapter selector; no dependency is released to P08/P10 yet.
+
 P08 report `9faebd2b7d027283a21a470c8e81473e39bd7a23` is preserved as `a56aab4`:
 F01/F02 P1 negation/safety questions can recommend SHIP; F03 P2 PLAN still names the
 global analysis output. No workflow executed. `04e0ba9` authorizes only the original
@@ -366,6 +374,11 @@ original report prefix were verified; the delta is four authorized paths only.
 The same reviewer is checking F01/F02/F03 closure, not granting whole-P08 quality
 or waiving inherited preservation. The 183/8/33 bounded self-results and prior
 failed/invalid runs remain separately attributed; no product is integrated.
+Interim independent recheck passes the original six inputs but finds four failures
+in 21 bounded nearby cases, still promoting subjects/prohibitions/assessments to
+SHIP/deploy/high. No workflow ran. F01/F02 remain open at class level; the builder
+is frozen pending the immutable recheck and a root correction, not more string
+exceptions. Quality remains NOT STARTED.
 
 P10 F01 repair `4407827f563fecac2ac6bf04a6bd0fc9cdd05641` / report-only
 `c1de05c7f18770f34f950a8c4d4e194892da3291` changes only the existing migration
