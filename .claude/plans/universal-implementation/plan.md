@@ -245,6 +245,8 @@ full workflow/profile-value gates remain open.
     - [ ] A08.3.c.r2 Verify actual PLAN present/absent/spelling and distinct-location refusal/preservation cases.
 - [ ] A08.4 Parse actual ADR conventions and retain overdue/blocked work.
 - [ ] A08.5 Test two initiatives, Spec Kit IDs and interrupted-cycle recovery.
+  - [ ] A08.5.j1 Join the exact reviewed native-path dependency and public-helper fixture consumer without altering the frozen root correction.
+  - [ ] A08.5.j2 Verify original-dimension preservation and the final combined lifecycle candidate before the same reviewer's selected-subset SPEC/QUALITY.
 Acceptance: no write escalation of read intent, duplicate backlog or lost history.
 
 ### A09 Concrete specialist modules (P09; R06)

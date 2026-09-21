@@ -37,7 +37,7 @@ from the reviewed historical merge `40c2795`. Current implementation ownership:
 | P05 review evidence | `2329e71f-cd9e-473b-94cf-41c579c29a88` | ACCEPTED by `33eac071`, integrated `c5c8f86`; current profile/review and focused gates pass, idle |
 | P06 host adapters | `324863ff-e7cf-4abf-b449-04dd0f096170` | Component ACCEPTED/integrated `36593cd`; provider `7425960`, final review `1067da29`; idle |
 | P07 profile context | `b9352dfe-1c1e-4ea3-b7d9-0fd008d39b3d` | Long-path repair ACCEPTED by `a7450597`, integrated `c344133` with reports; joined checks pass, idle |
-| P08 work lifecycle | `f2c305ac-e8b0-4b02-b6cd-c7de598964cf` | Root grammar/native-report guard repair authorized `679c6b8`; prior findings and wider gates remain open |
+| P08 work lifecycle | `f2c305ac-e8b0-4b02-b6cd-c7de598964cf` | Root `171daa8` / report `723b067f` frozen, intake verified; bounded reviewed-core join authorized before combined review |
 | P10 installer lifecycle | `5ea6c88c-68c1-4712-8f55-adecdfe0061f` | Accepted-core consumer follow-up authorized `2180b55`, acknowledged; F01 closed, D01/D03/whole quality still open |
 
 All are `lintel-builder` sessions with explicit ownership, local commits, report paths
@@ -436,6 +436,29 @@ request heads and one native-aware internal report-path guard. P08 is implementi
 on `8bde7005` without importing the shared core. Reported focused RED/GREEN work is
 builder evidence only; F01/F02/F03, inherited preservation, A13 and quality remain
 open until the separately frozen candidate and the existing reviewer's recheck.
+
+Root product `171daa8d44f8e758bc1f6e98ff1c3a11a477ea18`, report-only
+`723b067f1bbfe4f0cbd2b86614973b4c556f36c7`, is now frozen over `8bde7005`.
+The coordinator verified parents, exact five paths, modes, the separate report
+and preserved 805-line prefix, and read the full 283-line append. Builder results
+are 574 routing assertions, eight mechanical scenarios and 39 lifecycle methods;
+case-distinct native execution remains unverified and denied identity was injected.
+No finding or acceptance leaf closes from those self-results.
+
+Report Git LF bytes hash to
+`e0c526966a504d88fbbf4ac1ff470ff12b0f4463f09f8bd5018053633eb3d96b`;
+its read-only CRLF projection matches reported raw
+`bb856f2f8ff6f41493dd3965f4847d6e019e7146b671474c261a47a9471596ac`.
+An initial cross-EOL hash assertion failed; this corrected identity comparison
+changed no source and supplies no additional runtime evidence.
+
+The P08 card now releases exact accepted core/fixture imports plus only the two
+private-path-alias fixture consumers, in separately attributed commits. Original
+p8r5/p8r6 dimensions and final joined lifecycle/observation checks precede a new
+frozen combined candidate for the same reviewer. The root implementation stays
+unchanged during this join. Defer a duplicate root-only rerun so complete selected
+SPEC and then eligible QUALITY can assess one combined source. All three findings,
+historical failures, A13, host/semantic limits and final integration remain open.
 
 P10 F01 repair `4407827f563fecac2ac6bf04a6bd0fc9cdd05641` / report-only
 `c1de05c7f18770f34f950a8c4d4e194892da3291` changes only the existing migration

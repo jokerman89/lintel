@@ -54,8 +54,10 @@ adapter methods and 19 path methods pass. P10 is implementing in session `5ea6c8
 the operator requires installation without Python (ADR-0030) and explicitly approved
 existing PowerShell 7.6.6 for local verification with its existing RemoteSigned policy.
 Windows PowerShell 5.1 remains denied/unverified; no policy changed. P08's root
-routing/PLAN repair is authorized by `679c6b8` after the second independent SPEC FAIL;
-no new immutable candidate is accepted. P10's migration F01 is independently closed
+routing/PLAN product `171daa8` / report `723b067f` is frozen after the second
+independent SPEC FAIL. Intake is verified, not acceptance; an exact reviewed-core
+join and two fixture consumer migrations precede combined review.
+P10's migration F01 is independently closed
 by `00a0bef`; default-store/cleanup and whole-package acceptance remain blocked.
 A13 remains gated.
 
