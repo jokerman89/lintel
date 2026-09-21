@@ -280,17 +280,20 @@ analyze_cycle_id="${LINTEL_CYCLE_ID:?select the original cycle}"
 analyze_work_map="${LINTEL_WORK_MAP:?select the original work map}"
 workflow_resume "$analyze_cycle_id" "$analyze_work_map" >/dev/null || exit $?
 analyze_state_dir="$(dirname "$(state_file)")"
-analyze_report_path="$(state_cycle_field analyze_report_path)" || exit $?
-if [ "$analyze_report_path" = .claude/runtime/state/analyze-report.md ] ||
-   { [ "${analyze_report_path##*/}" = analyze-report.md ] &&
-     [ "$(dirname "$analyze_report_path")" -ef "$analyze_state_dir" ]; }; then
-  echo "INCOMPLETE [lintel/plan]: legacy global analysis is history; reconcile its cycle link" >&2
-  exit 2
+analyze_candidate_path="$(state_cycle_field analyze_report_path)" || exit $?
+if [ -z "$analyze_candidate_path" ]; then
+  analyze_candidate_path="$analyze_state_dir/$analyze_cycle_id-analyze-report.md"
 fi
-if [ -z "$analyze_report_path" ]; then
-  analyze_report_path="$analyze_state_dir/$analyze_cycle_id-analyze-report.md"
-fi
+_workflow_guard_analyze_report_path "$analyze_candidate_path" "$analyze_state_dir" || exit $?
+analyze_report_path="$analyze_candidate_path"
 ```
+
+The identity guard anchors relative input to the explicit working target and
+honors the already declared state root. It refuses global history in native or
+portable spelling even before that file exists. Unsupported, inaccessible or
+uncertain identity is INCOMPLETE, not permission to select a fallback or create
+a directory. Existing distinct locations retain their filesystem identity;
+the guard neither rewrites stored paths nor authorizes a candidate's parent.
 
 Invoke `/li:analyze` with trigger `plan-step8`, this exact report path, original
 map/artifact paths and package/leaf IDs, and the verified `LINTEL_PROFILE_REFERENCE`

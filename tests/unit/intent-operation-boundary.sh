@@ -168,5 +168,103 @@ expect_route research '/li:cycle --mode research-dive' high 'Do not change the r
 expect_route research '/li:cycle --mode research-dive' high 'Is it safe to deploy this release?'
 IFS="$original_ifs"
 
+printf 'retained intent-operation-boundary: %s assertions, %s failures\n' "$checked" "$failed"
+
+expect_safe_route() {
+  local request="$1" actual workflow confidence
+  actual=$(classify_intent "$request")
+  workflow=$(match_workflow "$actual" cycle)
+  confidence=$(score_confidence "$actual" "$workflow")
+  checked=$((checked + 1))
+  printf 'safe routing: %s -> %s / %s / %s\n' "$request" "$actual" "$workflow" "$confidence"
+  case "$actual|$workflow|$confidence" in
+    'research|/li:cycle --mode research-dive|high'|'review|/li:review|high'|'unclear|/li:cycle|low') ;;
+    *) printf 'FAIL: topic or assessment supplied action authority: %s\n' "$request" >&2
+       failed=$((failed + 1)) ;;
+  esac
+}
+
+# The independent matrix retains its original safe-result alternatives.
+expect_route research '/li:cycle --mode research-dive' high 'Do not change the release plan; explain it.'
+expect_route research '/li:cycle --mode research-dive' high 'Do not edit the deployment code; describe the release process.'
+expect_route research '/li:cycle --mode research-dive' high 'Is it safe to deploy this release?'
+expect_route unclear '/li:cycle' low 'Do not build the release.'
+expect_route review '/li:review' high 'Review the release plan.'
+expect_route deploy '/li:cycle --from SHIP' high 'Deploy the reviewed release.'
+expect_safe_route 'The release must not be deployed; explain the plan.'
+expect_safe_route 'Release notes: explain the deployment process.'
+expect_safe_route 'I want to know whether it is safe to deploy this release.'
+expect_safe_route 'I need advice on whether to deploy this release.'
+expect_safe_route 'Do not change the release plan, but explain the deployment process.'
+expect_safe_route "Don't change the build or release notes; review the plan."
+expect_safe_route 'Is the plan ready for release, or does it need review?'
+expect_safe_route 'Could you deploy the reviewed release?'
+expect_route unclear '/li:cycle' low 'Review the change then deploy it.'
+expect_route build '/li:cycle' high 'Implement release-note validation.'
+expect_route fix '/li:cycle --mode hotfix' high 'Fix review comments.'
+expect_route ship '/li:cycle --from SHIP' high 'Release v2.'
+expect_route deploy '/li:cycle --from SHIP' high 'Please deploy the reviewed release.'
+original_ifs="$IFS"
+IFS=:
+expect_safe_route 'Do not change the release plan; explain it.'
+expect_route deploy '/li:cycle --from SHIP' high 'Deploy the reviewed release.'
+ifs_probe=$(classify_intent 'Deploy the reviewed release.'; printf '|%s' "$IFS")
+[ "$ifs_probe" = 'deploy|:' ] || {
+  printf 'FAIL: direct classifier invocation changed caller IFS\n' >&2
+  failed=$((failed + 1))
+}
+checked=$((checked + 1))
+IFS="$original_ifs"
+
+for operation in build deploy release; do
+  case "$operation" in
+    build) direct_intent=build; direct_workflow='/li:cycle' ;;
+    deploy) direct_intent=deploy; direct_workflow='/li:cycle --from SHIP' ;;
+    release) direct_intent=ship; direct_workflow='/li:cycle --from SHIP' ;;
+  esac
+  for subject in 'release plan' 'build script' 'review checklist'; do
+    expect_route "$direct_intent" "$direct_workflow" high "$operation the $subject."
+    expect_route "$direct_intent" "$direct_workflow" high "Please $operation the $subject."
+    expect_route "$direct_intent" "$direct_workflow" high "I need you to $operation the $subject."
+    expect_route research '/li:cycle --mode research-dive' high \
+      "I want to know whether to $operation the $subject."
+    expect_route research '/li:cycle --mode research-dive' high \
+      "I need advice on whether to $operation the $subject."
+    expect_route research '/li:cycle --mode research-dive' high \
+      "$subject: explain how to $operation it."
+    expect_route research '/li:cycle --mode research-dive' high \
+      "The $subject must not be changed; explain how to $operation it."
+    expect_route review '/li:review' high "Do not $operation the $subject; review it."
+    expect_route research '/li:cycle --mode research-dive' high \
+      "Explain the example \"$operation the $subject\"."
+    expect_route unclear '/li:cycle' low "\"$operation the $subject\""
+  done
+done
+expect_route review '/li:review' high $'# Release the build\nReview the deployment plan.'
+expect_route research '/li:cycle --mode research-dive' high 'I would like to understand how to release the build.'
+expect_route build '/li:cycle' high 'I want to build a review service.'
+expect_route build '/li:cycle' high 'Help me build a review service.'
+expect_route build '/li:cycle' high 'Implement audit and review logging.'
+expect_route unclear '/li:cycle' low 'Build the service and deploy it.'
+expect_route unclear '/li:cycle' low 'Build the service; deploy it.'
+expect_route unclear '/li:cycle' low 'Build the service; edit its configuration.'
+expect_route unclear '/li:cycle' low 'Build the service; build its documentation.'
+expect_route unclear '/li:cycle' low 'Release plan: deploy it.'
+expect_route unclear '/li:cycle' low 'Do not change the release: deploy it.'
+expect_route research '/li:cycle --mode research-dive' high 'Explain this command: deploy the release.'
+expect_route research '/li:cycle --mode research-dive' high 'Is this command safe: deploy the release?'
+expect_route research '/li:cycle --mode research-dive' high 'I need advice: build the service or release it.'
+expect_route unclear '/li:cycle' low 'Release notes are ready.'
+expect_route unclear '/li:cycle' low 'Release notes'
+expect_route unclear '/li:cycle' low 'Deploy the release if the checks pass.'
+expect_route unclear '/li:cycle' low 'Please deploy the release, but do not deploy it.'
+expect_route unclear '/li:cycle' low '`release v2` is an example, not a request.'
+expect_route review '/li:review' high 'Review `release v2` without executing it.'
+expect_route review '/li:review' high 'Granska den trasiga releasen.'
+expect_route deploy '/li:cycle --from SHIP' high 'Driftsätt till produktion.'
+expect_route build '/li:cycle' high 'Bygg en ny funktion.'
+expect_route scaffold 'bin/li-scaffold init' high 'Nytt projekt.'
+expect_route resume '/li:resume' high 'Fortsätt med granskningen.'
+
 printf 'intent-operation-boundary: %s assertions, %s failures\n' "$checked" "$failed"
 [ "$failed" -eq 0 ]

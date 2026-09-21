@@ -3,7 +3,7 @@
 # implements: ADR-0026, ADR-0028, ADR-0029
 # intent: skills/spec-kit/references/work-map.md
 # constraints: references in the existing ledger only; no execution, approval or new backlog
-# last_intent_review: 2026-09-20
+# last_intent_review: 2026-09-21
 
 _WORKFLOW_SOURCE="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "$_WORKFLOW_SOURCE/lib/state.sh"
@@ -39,6 +39,75 @@ print(value if isinstance(value, str) else json.dumps(value, sort_keys=True, sep
 
 _workflow_same_json() {
   "$_LINTEL_PROFILE_PYTHON" -c 'import json,sys; sys.exit(json.loads(sys.argv[1]) != json.loads(sys.argv[2]))' "$1" "$2"
+}
+
+_workflow_guard_analyze_report_path() {
+  PYTHONDONTWRITEBYTECODE=1 "${_LINTEL_PROFILE_PYTHON:?verify workflow context first}" - \
+    "$_WORKFLOW_SOURCE/lib" "${LINTEL_REPO_ROOT:?select the working target}" "${2:-}" "${1:-}" <<'PY'
+from pathlib import Path
+import stat
+import sys
+
+sys.path.insert(0, sys.argv[1])
+from context_safety import checked_root, safe_path
+
+
+def anchored(value, root):
+    if not value:
+        raise ValueError("An explicit report/state path is required")
+    path = Path(value)
+    if (path.drive or path.root) and not path.is_absolute():
+        raise ValueError("Drive-relative or incompletely rooted paths are unsupported")
+    return path if path.is_absolute() else root / path
+
+
+def leaf_stat(path):
+    try:
+        result = path.lstat()
+    except FileNotFoundError:
+        return None
+    if not stat.S_ISREG(result.st_mode):
+        raise ValueError("Analysis report is not a regular file")
+    return result
+
+
+try:
+    target = checked_root(Path(sys.argv[2]))
+    state = checked_root(anchored(sys.argv[3], target))
+    candidate = anchored(sys.argv[4], target)
+    for root in (target, state):
+        try:
+            relative = candidate.relative_to(root)
+        except ValueError:
+            continue
+        checked = safe_path(root, relative.as_posix())
+        if not checked.parent.samefile(candidate.parent):
+            raise ValueError("Report parent identity disagrees with the declared root")
+        break
+    else:
+        raise ValueError("Analysis report is outside the declared target/state roots")
+    history = safe_path(state, "analyze-report.md")
+    if not stat.S_ISDIR(candidate.parent.stat().st_mode):
+        raise ValueError("Analysis report parent is not an existing directory")
+    current, previous = leaf_stat(candidate), leaf_stat(history)
+    if current is not None and previous is not None:
+        is_history = candidate.samefile(history)
+    else:
+        same_parent = candidate.parent.samefile(history.parent)
+        is_history = same_parent and candidate.name == history.name
+        # A case-only absent leaf is uncertainty, not proof of equivalence.
+        # Never fold whole paths or override existing-file identity above.
+        if (same_parent and current is None and previous is None and not is_history
+                and candidate.name.casefold() == history.name.casefold()):
+            raise ValueError("Absent report names may alias the global history location")
+    if is_history:
+        print("INCOMPLETE [lintel/plan]: legacy global analysis is history; reconcile its cycle link",
+              file=sys.stderr)
+        raise SystemExit(2)
+except (OSError, ValueError) as exc:
+    print(f"INCOMPLETE [lintel/plan]: analysis report identity unresolved: {exc}", file=sys.stderr)
+    raise SystemExit(2)
+PY
 }
 
 _workflow_profile() {

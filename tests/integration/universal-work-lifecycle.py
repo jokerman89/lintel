@@ -374,6 +374,7 @@ workflow_inspect "$LINTEL_WORK_MAP" --package T014 --leaf T014 --acceptance "$re
         blocks = re.findall(r"```bash\n(.*?)\n```", section, re.S)
         self.assertEqual(len(blocks), 2, "PLAN Step 8 needs selected request and persisted-link blocks")
         self.assertNotIn("persists `.claude/runtime/state/analyze-report.md`", section)
+        self.assertEqual(blocks[0].count("_workflow_guard_analyze_report_path "), 1)
         return blocks
 
     def produce_plan_analysis(self, cycle, selected):
@@ -528,7 +529,7 @@ workflow_begin first full {selected}
         for present in (False, True):
             if present:
                 legacy.write_text("GREEN from unrelated global history\n")
-            for path in (legacy.relative_to(self.repo).as_posix(), legacy.as_posix()):
+            for path in (legacy.relative_to(self.repo).as_posix(), legacy.as_posix(), str(legacy)):
                 with self.subTest(path=path, present=present):
                     self.env["LEGACY_REPORT"] = path
                     self.shell('state_append ANALYZE DONE analyze_report_path="$LEGACY_REPORT"\n')
@@ -537,6 +538,183 @@ workflow_begin first full {selected}
                     self.assertIn("legacy global analysis is history", self.last_stderr)
                     self.assertEqual(before, {p: p.read_bytes() for p in ledger.parent.iterdir()
                                               if p.is_file()})
+
+    def test_plan_analysis_identity_keeps_distinct_same_basename_parent(self):
+        prepare, _ = self.plan_analysis_blocks()
+        selected, _ = self.make_map("chosen")
+        alternate = self.repo / "reports/analyze-report.md"
+        alternate.parent.mkdir()
+        legacy = self.repo / ".claude/runtime/state/analyze-report.md"
+        legacy.parent.mkdir(parents=True)
+        legacy.write_text("GREEN from unrelated global history\n")
+        self.shell(f"""
+source "$LINTEL_SOURCE_ROOT/lib/copilot-env.sh"
+lintel_copilot_env "$LINTEL_REPO_ROOT"
+source "$LINTEL_SOURCE_ROOT/lib/workflow.sh"
+workflow_begin first full {selected}
+""")
+        self.env.update(LINTEL_CYCLE_ID="first", LINTEL_WORK_MAP=selected)
+        for present in (False, True):
+            if present:
+                alternate.write_text("INCOMPLETE selected report in a distinct directory\n")
+            for path in (alternate.relative_to(self.repo).as_posix(), alternate.as_posix(), str(alternate)):
+                with self.subTest(path=path, present=present):
+                    self.env["SELECTED_REPORT"] = path
+                    self.shell('state_append ANALYZE INCOMPLETE "analyze_report_path=$SELECTED_REPORT"\n')
+                    before = {p: p.read_bytes() for p in self.repo.rglob("*") if p.is_file()}
+                    out = self.shell('cd "$LINTEL_HOME"\n' + prepare +
+                                     '\nprintf "%s" "$analyze_report_path"\n')
+                    self.assertEqual(out, path)
+                    self.assertFalse(alternate.parent.samefile(legacy.parent))
+                    self.assertEqual(before, {p: p.read_bytes() for p in self.repo.rglob("*") if p.is_file()})
+
+    def test_plan_analysis_identity_refuses_unproven_or_undeclared_parent(self):
+        prepare, _ = self.plan_analysis_blocks()
+        selected, _ = self.make_map("chosen")
+        outside = Path(self.temp.name) / "not-an-authorized-report-root"
+        outside.mkdir()
+        self.shell(f"""
+source "$LINTEL_SOURCE_ROOT/lib/copilot-env.sh"
+lintel_copilot_env "$LINTEL_REPO_ROOT"
+source "$LINTEL_SOURCE_ROOT/lib/workflow.sh"
+workflow_begin first full {selected}
+""")
+        self.env.update(LINTEL_CYCLE_ID="first", LINTEL_WORK_MAP=selected)
+        for path in ((outside / "analyze-report.md").as_posix(),
+                     "not-created/selected-analyze-report.md"):
+            with self.subTest(path=path):
+                self.env["SELECTED_REPORT"] = path
+                self.shell('state_append ANALYZE INCOMPLETE "analyze_report_path=$SELECTED_REPORT"\n')
+                before = {p: p.read_bytes() for p in self.repo.rglob("*") if p.is_file()}
+                self.assertEqual(self.shell(prepare, expected=2), "")
+                self.assertIn("INCOMPLETE", self.last_stderr)
+                self.assertEqual(before, {p: p.read_bytes() for p in self.repo.rglob("*") if p.is_file()})
+                self.assertFalse((self.repo / "not-created").exists())
+                self.assertEqual(list(outside.iterdir()), [])
+
+    def test_plan_analysis_identity_uses_existing_case_identity(self):
+        prepare, _ = self.plan_analysis_blocks()
+        selected, _ = self.make_map("chosen")
+        legacy = self.repo / ".claude/runtime/state/analyze-report.md"
+        legacy.parent.mkdir(parents=True)
+        legacy.write_text("GREEN from unrelated global history\n")
+        alternate = legacy.with_name("ANALYZE-REPORT.md")
+        case_sensitive = not alternate.exists()
+        if case_sensitive:
+            alternate.write_text("INCOMPLETE distinct case-sensitive selected report\n")
+        self.assertEqual(alternate.samefile(legacy), not case_sensitive)
+        print(f"PLAN case-sensitive existing pair observed: {case_sensitive}", flush=True)
+        self.shell(f"""
+source "$LINTEL_SOURCE_ROOT/lib/copilot-env.sh"
+lintel_copilot_env "$LINTEL_REPO_ROOT"
+source "$LINTEL_SOURCE_ROOT/lib/workflow.sh"
+workflow_begin first full {selected}
+""")
+        self.env.update(LINTEL_CYCLE_ID="first", LINTEL_WORK_MAP=selected,
+                        SELECTED_REPORT=alternate.as_posix())
+        self.shell('state_append ANALYZE INCOMPLETE "analyze_report_path=$SELECTED_REPORT"\n')
+        before = {p: p.read_bytes() for p in self.repo.rglob("*") if p.is_file()}
+        out = self.shell(prepare + '\nprintf "%s" "$analyze_report_path"\n',
+                         expected=0 if case_sensitive else 2)
+        if case_sensitive:
+            self.assertEqual(out, alternate.as_posix())
+        else:
+            self.assertEqual(out, "")
+            self.assertIn("legacy global analysis is history", self.last_stderr)
+        self.assertEqual(before, {p: p.read_bytes() for p in self.repo.rglob("*") if p.is_file()})
+
+    def test_plan_analysis_identity_refuses_denied_probe(self):
+        prepare, _ = self.plan_analysis_blocks()
+        selected, _ = self.make_map("chosen")
+        report = self.repo / "reports/selected.md"
+        report.parent.mkdir()
+        self.shell(f"""
+source "$LINTEL_SOURCE_ROOT/lib/copilot-env.sh"
+lintel_copilot_env "$LINTEL_REPO_ROOT"
+source "$LINTEL_SOURCE_ROOT/lib/workflow.sh"
+workflow_begin first full {selected}
+""")
+        bootstrap = Path(self.temp.name) / "deny_identity.py"
+        bootstrap.write_text('''import os
+from pathlib import Path
+import sys
+script = sys.stdin.read()
+sys.argv = sys.argv[1:]
+parent = Path(sys.argv[4]).parent
+real_stat = os.stat
+def deny(path, *args, **kwargs):
+    if isinstance(path, (str, os.PathLike)) and Path(path) == parent:
+        raise PermissionError("synthetic identity access denied")
+    return real_stat(path, *args, **kwargs)
+os.stat = deny
+exec(compile(script, "<actual workflow identity guard>", "exec"), {"__name__": "__main__"})
+''', encoding="utf-8")
+        wrapper = Path(self.temp.name) / "deny-identity.sh"
+        wrapper.write_bytes(b'''#!/usr/bin/env bash
+if [ "${1:-}" = - ]; then
+  exec "$LINTEL_PYTHON" "$IDENTITY_FAULT_BOOTSTRAP" "$@"
+fi
+exec "$LINTEL_PYTHON" "$@"
+''')
+        wrapper.chmod(0o700)
+        self.env.update(LINTEL_CYCLE_ID="first", LINTEL_WORK_MAP=selected,
+                        SELECTED_REPORT=report.as_posix())
+        self.shell('state_append ANALYZE INCOMPLETE "analyze_report_path=$SELECTED_REPORT"\n')
+        self.env.update(_LINTEL_PROFILE_PYTHON=wrapper.as_posix(),
+                        IDENTITY_FAULT_BOOTSTRAP=bootstrap.as_posix())
+        before = {p: p.read_bytes() for p in self.repo.rglob("*") if p.is_file()}
+        self.assertEqual(self.shell(prepare, expected=2), "")
+        self.assertIn("INCOMPLETE", self.last_stderr)
+        self.assertIn("synthetic identity access denied", self.last_stderr)
+        self.assertEqual(before, {p: p.read_bytes() for p in self.repo.rglob("*") if p.is_file()})
+
+    def test_plan_analysis_identity_handles_absent_native_case_alias(self):
+        prepare, _ = self.plan_analysis_blocks()
+        selected, _ = self.make_map("chosen")
+        legacy = self.repo / ".claude/runtime/state/analyze-report.md"
+        alternate = legacy.with_name("ANALYZE-REPORT.md")
+        self.shell(f"""
+source "$LINTEL_SOURCE_ROOT/lib/copilot-env.sh"
+lintel_copilot_env "$LINTEL_REPO_ROOT"
+source "$LINTEL_SOURCE_ROOT/lib/workflow.sh"
+workflow_begin first full {selected}
+""")
+        self.env.update(LINTEL_CYCLE_ID="first", LINTEL_WORK_MAP=selected,
+                        SELECTED_REPORT=str(alternate))
+        self.shell('state_append ANALYZE INCOMPLETE "analyze_report_path=$SELECTED_REPORT"\n')
+        before = {p: p.read_bytes() for p in self.repo.rglob("*") if p.is_file()}
+        out = self.shell(prepare + '\nprintf "%s" "$analyze_report_path"\n',
+                         expected=2)
+        self.assertEqual(out, "")
+        self.assertIn("Absent report names may alias", self.last_stderr)
+        self.assertEqual(before, {p: p.read_bytes() for p in self.repo.rglob("*") if p.is_file()})
+        self.assertFalse(legacy.exists())
+        self.assertFalse(alternate.exists())
+
+    def test_plan_analysis_identity_honors_declared_state_root(self):
+        prepare, _ = self.plan_analysis_blocks()
+        selected, _ = self.make_map("chosen")
+        declared = Path(self.temp.name) / "declared-state"
+        self.env["LINTEL_STATE_DIR"] = declared.as_posix()
+        self.shell(f"""
+source "$LINTEL_SOURCE_ROOT/lib/copilot-env.sh"
+lintel_copilot_env "$LINTEL_REPO_ROOT"
+source "$LINTEL_SOURCE_ROOT/lib/workflow.sh"
+workflow_begin first full {selected}
+""")
+        self.env.update(LINTEL_CYCLE_ID="first", LINTEL_WORK_MAP=selected)
+        before = {p: p.read_bytes() for p in declared.iterdir() if p.is_file()}
+        out = self.shell(prepare + '\nprintf "%s" "$analyze_report_path"\n')
+        self.assertEqual(Path(out), declared / "first-analyze-report.md")
+        self.assertEqual(before, {p: p.read_bytes() for p in declared.iterdir() if p.is_file()})
+        legacy = declared / "analyze-report.md"
+        self.env["SELECTED_REPORT"] = str(legacy)
+        self.shell('state_append ANALYZE INCOMPLETE "analyze_report_path=$SELECTED_REPORT"\n')
+        before = {p: p.read_bytes() for p in declared.iterdir() if p.is_file()}
+        self.assertEqual(self.shell(prepare, expected=2), "")
+        self.assertIn("legacy global analysis is history", self.last_stderr)
+        self.assertEqual(before, {p: p.read_bytes() for p in declared.iterdir() if p.is_file()})
+        self.assertFalse(legacy.exists())
 
     def test_plan_analysis_link_refuses_missing_persistence(self):
         prepare, link = self.plan_analysis_blocks()
