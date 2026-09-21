@@ -415,6 +415,13 @@ new fixture's controller under its verified base109, preserving the exact consum
 `.git`261 path and basename. No setup flag or product change is authorized by this
 layout decision; preserve the setup failure and require the unchanged two-form gate.
 
+The fresh layout reached controller118/admin221 but ordinary setup then failed at
+consumer256/`.git`261 itself. No native-operand comparison ran. The card now
+separately permits the accepted P03 Windows per-command `core.longpaths=true`
+pattern only for that synthetic `worktree add`, with all paths unchanged and no
+persisted option. Plain `.git`-directory diagnostics proceed independently, while
+product eligibility still requires both forms and all preservation controls.
+
 P08 report `9faebd2b7d027283a21a470c8e81473e39bd7a23` is preserved as `a56aab4`:
 F01/F02 P1 negation/safety questions can recommend SHIP; F03 P2 PLAN still names the
 global analysis output. No workflow executed. `04e0ba9` authorizes only the original
