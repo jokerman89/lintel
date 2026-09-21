@@ -39,6 +39,7 @@ RESOLVER_RESOURCES = (
     "lib/pack-resolver.sh",
     "lib/paths.sh",
     "lib/profile_context.py",
+    "lib/native_paths.py",
     "lib/profile-context-schema.json",
     "lib/pack-schema.yaml",
     "packs/_default/pack.yaml",

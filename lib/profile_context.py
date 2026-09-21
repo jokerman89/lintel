@@ -13,6 +13,7 @@ from contextlib import contextmanager
 from copy import deepcopy
 from dataclasses import dataclass, replace
 import hashlib
+import importlib.util
 import json
 import math
 import os
@@ -23,6 +24,17 @@ import tempfile
 import time
 from typing import Union
 import uuid
+
+_NATIVE_PATHS = Path(__file__).resolve().with_name("native_paths.py")
+if not _NATIVE_PATHS.is_file():
+    raise ImportError(f"Required trusted source helper is missing: {_NATIVE_PATHS}")
+if _NATIVE_PATHS.is_symlink() or getattr(_NATIVE_PATHS.lstat(), "st_file_attributes", 0) & 0x400:
+    raise ImportError(f"Linked trusted source helper is refused: {_NATIVE_PATHS}")
+_native_spec = importlib.util.spec_from_file_location("lintel_profile_native_paths", _NATIVE_PATHS)
+if _native_spec is None or _native_spec.loader is None:
+    raise ImportError(f"Cannot load required trusted source helper: {_NATIVE_PATHS}")
+_native_paths = importlib.util.module_from_spec(_native_spec)
+_native_spec.loader.exec_module(_native_paths)
 
 
 Json = Union[None, bool, int, float, str, list["Json"], dict[str, "Json"]]
@@ -653,37 +665,10 @@ def context_path(config: ProfileConfig) -> Path:
 
 
 def _path_identity(path: PurePath) -> tuple[str, ...]:
-    """Compare filesystem spellings without changing the paths used for I/O."""
-    identity = path
-    if isinstance(path, PureWindowsPath):
-        text = str(path)
-        if text.startswith("\\\\?\\"):
-            suffix = text[4:]
-            if suffix[:4].lower() == "unc\\":
-                text = "\\\\" + suffix[4:]
-            elif re.match(r"^[A-Za-z]:\\", suffix):
-                text = suffix
-            else:
-                raise ProfileError("PROFILE_IO", "unsupported Windows filesystem namespace")
-        identity = PureWindowsPath(text)
-        components = identity.parts[1:]
-        if identity.drive.startswith("\\\\"):
-            share = identity.drive[2:].split("\\")
-            if len(share) != 2:
-                raise ProfileError("PROFILE_IO", "runtime UNC identity requires a server and share")
-            components = (*share, *components)
-        elif not re.fullmatch(r"[A-Za-z]:", identity.drive):
-            raise ProfileError("PROFILE_IO", "runtime identity requires an absolute filesystem drive")
-        if any(
-            part in ("", ".", "..") or part.endswith((".", " "))
-            or re.search(r'[\x00-\x1f<>:"|?*]', part)
-            or PureWindowsPath(part).is_reserved()
-            for part in components
-        ):
-            raise ProfileError("PROFILE_IO", "ambiguous or non-filesystem Windows path component")
-    if not identity.is_absolute() or ".." in identity.parts:
-        raise ProfileError("PROFILE_IO", "runtime identity must be absolute and traversal-free")
-    return identity.parts
+    try:
+        return _native_paths.path_identity(path)
+    except ValueError as exc:
+        raise ProfileError("PROFILE_IO", str(exc)) from exc
 
 
 def _runtime_path(config: ProfileConfig, path: Path) -> None:
@@ -704,14 +689,10 @@ def _runtime_path(config: ProfileConfig, path: Path) -> None:
 
 
 def _native_io_path(path: Path) -> Path:
-    """Use only a recognized same-location spelling; never store this I/O alias."""
-    if os.name != "nt":
-        return path
-    _path_identity(path)
-    text = str(path)
-    if text.startswith("\\\\?\\"):
-        return path
-    return Path("\\\\?\\UNC\\" + text[2:]) if path.drive.startswith("\\\\") else Path("\\\\?\\" + text)
+    try:
+        return _native_paths.native_io_path(path)
+    except ValueError as exc:
+        raise ProfileError("PROFILE_IO", str(exc)) from exc
 
 
 def _runtime_io_path(config: ProfileConfig, path: Path) -> Path:

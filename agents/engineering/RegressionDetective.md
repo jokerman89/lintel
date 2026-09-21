@@ -88,11 +88,13 @@ reproducer="${4:?trusted standalone reproducer path}"
 trial="${5:?new authorized trial directory}"
 git -C "$source_repo" merge-base --is-ancestor "$good" "$bad"
 [ ! -e "$trial" ] && [ ! -L "$trial" ] || { echo 'Trial path already exists.' >&2; exit 1; }
-git -C "$source_repo" worktree add --detach "$trial" "$bad"
+trial_git_options=()
+case "$(uname -s)" in MINGW*|MSYS*|CYGWIN*) trial_git_options=(-c core.longpaths=true) ;; esac
+git "${trial_git_options[@]}" -C "$source_repo" worktree add --detach "$trial" "$bad"
 finish_bisect() {
   rc=$?
   trap - EXIT HUP INT TERM
-  if ! git -C "$trial" bisect reset; then
+  if ! git "${trial_git_options[@]}" -C "$trial" bisect reset; then
     echo "Bisect cleanup failed; preserve and inspect the trial: $trial" >&2
     rc=1
   fi
@@ -102,15 +104,19 @@ trap finish_bisect EXIT
 trap 'exit 129' HUP
 trap 'exit 130' INT
 trap 'exit 143' TERM
-git -C "$trial" bisect start "$bad" "$good"
-git -C "$trial" bisect run bash "$reproducer"
-git -C "$trial" bisect log
+git "${trial_git_options[@]}" -C "$trial" bisect start "$bad" "$good"
+git "${trial_git_options[@]}" -C "$trial" bisect run bash "$reproducer"
+git "${trial_git_options[@]}" -C "$trial" bisect log
 ```
 
 The EXIT/signal trap covers ordinary failures, not process kill or machine loss. On an
 interrupted session, inspect the recorded trial and run `git -C "$trial" bisect reset`
 there before reuse; never run it in the coordinator's checkout. Preserve reports and
 local changes before explicitly authorized removal of that exact worktree.
+For a Windows trial, retain the same per-command `-c core.longpaths=true` option during
+that reset. The option applies only to the owned trial/admin operations above, not to
+unrelated caller commands. Never persist it in local/global Git config or export a
+session-wide override. Record caller config/index/content bytes and modes before/after.
 
 ## Report format
 
