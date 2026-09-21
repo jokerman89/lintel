@@ -40,21 +40,23 @@ for skill in "${COHORT6_FAS3_SKILLS[@]}"; do
   fi
 done
 
-# instruction-parity-check references all 6 instruction files
+# ADR-0025 supersedes six similar files with one exact shared protocol and adapters.
 IPC="$REPO_ROOT/skills/instruction-parity-check/SKILL.md"
 if [ -f "$IPC" ]; then
-  for ref in "CLAUDE.md" "AGENTS.md" "GEMINI.md" "copilot-instructions.md"; do
-    if grep -q "$ref" "$IPC"; then
+  for ref in "ADR-0025" "scaffolding/01-foundation/SESSION-PROTOCOL.md" \
+    "CLAUDE.md" "AGENTS.md" "bin/li-instructions.py check" \
+    ".github/lintel/bin/li-adapter.py check --target ." "session-protocol-parity.sh"; do
+    if grep -Fq "$ref" "$IPC"; then
       pass "instruction-parity-check references $ref"
     else
       fail "instruction-parity-check missing reference: $ref"
     fi
   done
 
-  # 4 key sections mentioned
-  for section in "compliance" "voice tier" "scaffolding" "auto"; do
-    if grep -qi "$section" "$IPC"; then
-      pass "instruction-parity-check checks $section section"
+  for section in "match it exactly" "read-only verification" "project prose" \
+    "malformed-marker" "permission boundaries" "No missing or unreadable entry"; do
+    if grep -Fqi "$section" "$IPC"; then
+      pass "instruction-parity-check preserves $section"
     else
       fail "instruction-parity-check missing $section check"
     fi
