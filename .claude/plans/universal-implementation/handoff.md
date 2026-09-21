@@ -422,6 +422,28 @@ pattern only for that synthetic `worktree add`, with all paths unchanged and no
 persisted option. Plain `.git`-directory diagnostics proceed independently, while
 product eligibility still requires both forms and all preservation controls.
 
+The final bounded Git gate also failed: native-C directory `rev-parse` returned
+128 with/without the option, and flagged linked setup returned `$GIT_DIR too big`.
+No product Git argument changed. Verified release source shows separate Git-directory
+size and pre-configuration path-conversion boundaries; see ADR-0031.
+The operator explicitly chose "document the limitation, stop safely and continue
+the remaining fixes". The current P10 card supersedes further Git compatibility
+experiments with accurate pre-write refusal and clearly labelled supported controls.
+This is a changed diagnostic acceptance boundary, not a passing historical run.
+
+P10 product `a31c5eb9fe5a910f2f3d27b6079c144313f80b6c` / report-only
+`f7d2151d9596377e1023c01ed99269b3cb0a999f` is frozen. Intake verified the exact
+five owned paths, sole parents, report hash, four final-core runtime blobs and
+all 29 original Copilot test method ASTs. The report's 24 earlier-line updates
+correct current status/attribution while preserving failures and old Git reports;
+it did not claim P08's append-only prefix contract. An initial coordinator prefix
+assertion applied that wrong assumption and failed; the subsequent diff inspection
+and exact Git-byte hash verification resolved it without a source change.
+Builder-only final evidence is seven installed/default/canonical cases, nine
+transaction cases, the actual validation method and four policy/metadata cases.
+No D01/D03/full SPEC/QUALITY closure follows. The operator-selected refusal follow-up
+must freeze before the original reviewer completes those gates.
+
 P08 report `9faebd2b7d027283a21a470c8e81473e39bd7a23` is preserved as `a56aab4`:
 F01/F02 P1 negation/safety questions can recommend SHIP; F03 P2 PLAN still names the
 global analysis output. No workflow executed. `04e0ba9` authorizes only the original

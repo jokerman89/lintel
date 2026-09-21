@@ -762,3 +762,23 @@ are not isolation. After a boundary incident, stop and escalate before continuin
 **Recovery authority:** the operator approved synthetic-only continuation and rerunning
 affected checks, with no real-home access or rollback. That approval does not establish
 what the invalid run did, authorize inspection/recovery, or make its results valid.
+
+## L-038 - Reconcile external-tool limits before extending an acceptance oracle
+
+**Date:** 2026-09-21
+
+**Context:** Additional P10 long-root diagnostics required Git itself to initialize
+repositories beyond its observed setup boundaries, although the original installer/
+recovery cases were already passing builder checks. Repeated bounded flag, spelling
+and fixture changes failed before the intended Git verification could run.
+
+**Correction:** The operator chose documented pre-write refusal for the observed
+Git limitation and continuation of the remaining fixes, not expanded Git support.
+Primary Git release source confirmed distinct setup and pre-configuration boundaries.
+
+**Rule:** Separate the adapter's owned I/O obligation from an external executable's
+capability. Check the producer contract/source before repeatedly enlarging a new
+oracle or trying configuration variants. Preserve original required dimensions and
+all failed evidence; never silently skip verification or label an unavailable host
+operation successful. A changed support boundary needs explicit authority, accurate
+diagnostics, negative preservation evidence and independent review.

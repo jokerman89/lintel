@@ -38,15 +38,15 @@ No third-party runtime dependency or Python requirement for native installation.
 
 Git handling is a separate bounded Windows subcase: a per-invocation
 `-c core.longpaths=true` may be used only in the attributable owned bisect trial/admin
-flow, including error cleanup, and the separately scoped P10 read-only `check-ignore`
-consumer described below. Never write global/local persistent Git configuration
+flow, including error cleanup. The P10 attempts below remain diagnostic history,
+not permission to add an option to its product command. Never write global/local persistent Git configuration
 or change unrelated caller operations. Preserve caller HEAD/index/config and all
 staged/unstaged/untracked content. Fixture cleanup is another separate, fixture-owned
 subcase, limited to the exact proven temporary root.
 
 P10's native metadata repair exposed a distinct Git boundary: its owner reports
 exit 128 reading `.git` at target256/`.git`261 for both valid and negated ignore rules.
-The P10 card releases one same-location diagnostic and, only if it preserves state
+The P10 card released one same-location diagnostic and, only if it preserved state
 and distinguishes exits 0/1 correctly, the Windows-only per-command option in
 `li-copilot.py`'s `runtime_ignore_errors`. Non-Windows behavior and explicit error
 handling stay unchanged. This applies the existing process-local
@@ -55,13 +55,35 @@ Git wrapper, path relocation or other command changes. Until verified, this rema
 an implementation direction, not evidence of consumer acceptance.
 
 The flag-only P10 diagnostic subsequently failed on Git for Windows 2.55.0.windows.3;
-no product Git option was added. The P10 card separately allows the reviewed
+no product Git option was added. The P10 card separately allowed the reviewed
 same-location native spelling for this command's Windows `-C` I/O operand, with
 the option only if the no-option variant fails. Actual filesystem and Git-selected
 root identities, directory/worktree-file forms, positive/negative/error behavior
 and preserved state must pass before selecting a fixed invocation. Persisted and
 diagnostic roots stay logical; this is not a new root, a fallback chain or permission
 to change other commands. Failed alternatives remain evidence, not acceptance.
+
+### Observed external Git limit
+
+The subsequent native-C comparison and all linked-worktree setup variants also
+failed before Git-selected identity/ignore results could be established. The
+release source corroborates distinct initialization boundaries:
+[setup.c](https://github.com/git-for-windows/git/blob/v2.55.0.windows.3/setup.c)
+checks an explicit Git-directory length against `PATH_MAX - 40` before reading
+the Git file; [compat/mingw.c](https://github.com/git-for-windows/git/blob/v2.55.0.windows.3/compat/mingw.c)
+defaults long-path conversion to false while repository configuration is not
+initialized. These do not establish a universal numeric limit or prove every
+possible invocation impossible; they invalidate assuming that an I/O alias or
+one option automatically makes repository setup accessible.
+
+The operator explicitly selected documented, fail-closed behavior rather than
+expanded Git compatibility work. Preserve the supported original installation/
+recovery cases and logical paths. A required Git verification error must stop its
+operation before writes with an accurate diagnostic; it is neither a successful
+ignore check nor necessarily a conflicting ignore rule. Do not mask the error,
+hardcode a path-length ban, relocate the target or change Git settings/arguments.
+Long linked-worktree positive acceptance remains unverified. Earlier failed runs
+stay failed; P10 independently reviews this bounded behavior before acceptance.
 
 ## Alternatives and trade-offs
 

@@ -75,6 +75,11 @@ exact-dependency/direct-I/O follow-up; no inventory/schema/store-policy redesign
 A13 release. Its four additional adapter metadata/read sites are explicitly scoped
 in the P10 card; both active streams still require immutable product/review checkpoints.
 Earlier failed and diagnostic-only evidence is preserved.
+P10 consumer `a31c5eb` / report `f7d2151` is frozen with new builder passes, not
+independent acceptance. After failed bounded Git-root/setup variants, the operator
+selected documented pre-write refusal for unverifiable Git operations, not expanded
+compatibility work. The P10 card now scopes that final error/preflight/doc follow-up;
+original default/classic/canonical dimensions and independent gates stay unchanged.
 Continue P08-P14 in dependency order,
 not a new audit or partial delivery. Coordinator routing (`b72ab47` plus
 `1d40193`) and provenance (`9f49e26`) await their owning package reviews. All successor cards
