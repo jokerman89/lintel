@@ -294,6 +294,17 @@ owned 46-case and seven-runtime-case passes are separate. A narrow P07 copied-fi
 single-method follow-up is authorized by the P10 card; a new frozen checkpoint is
 required before independent review. Do not import the product or release A13 yet.
 
+Coordinator repairs for P10's reported shared-suite failures are committed separately:
+`d53dc38` changes only the reviewed evidence CLI's Git mode to 100755, preserving its
+content blob; `aa56a67` preserves literal runner failure text instead of interpreting
+backslash escapes; `935b640` restores the actual trusted welcome footer invocation
+and updates the obsolete six-file parity oracle to accepted ADR-0025. All original
+failures were reproduced; focused runner/cohort/footer/protocol/executable checks pass.
+The exact welcome snippet also passed synthetic no-state/no-write and missing-helper
+checks. Neither P10's 120/128 aggregate nor P08's invalid isolation run is relabeled.
+These dependency commits may be imported separately; generated drift and the narrow
+P07 validation fixture still require their recorded follow-up/fan-in.
+
 Prepared successors: P05-P07 contracts and official host-source report committed in
 `3f584c8`; all P08-P14 dispatch cards already committed in `76e9e80`. P08 requires the
 accepted shared P05/P06/P07 contracts; its context-file ownership is now released by P03.
