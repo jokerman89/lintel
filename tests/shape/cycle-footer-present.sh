@@ -41,5 +41,12 @@ for s in $ENTRY_SKILLS; do
   if grep -q "render_cycle_footer" "$f"; then pass "$s: renders cycle footer"; else fail "$s: missing render_cycle_footer"; fi
 done
 
+if grep -Fq 'source "$footer_source/lib/cycle-footer.sh" || exit $?' skills/welcome/SKILL.md &&
+   grep -Fq 'UNVERIFIED: shared cycle-position footer is unavailable' skills/welcome/SKILL.md; then
+  pass "welcome uses the trusted helper with an explicit missing-source diagnostic"
+else
+  fail "welcome lacks the trusted footer invocation or missing-source diagnostic"
+fi
+
 echo ""
 [ "$FAILED" -eq 0 ] && { echo "cycle-footer-present: ALL PASS"; exit 0; } || { echo "cycle-footer-present: FAILURES"; exit 1; }

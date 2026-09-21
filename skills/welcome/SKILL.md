@@ -119,3 +119,16 @@ affected action. Missing independent actor: leave a usable review handoff outsta
 
 Use the shared `lib/cycle-footer.sh` from the trusted source when available. Do not invent
 state or claim completion from a position label.
+
+```bash
+footer_source="${LINTEL_SOURCE_ROOT:?approved installed Lintel source is required}"
+if [ -f "$footer_source/lib/cycle-footer.sh" ]; then
+  source "$footer_source/lib/cycle-footer.sh" || exit $?
+  render_cycle_footer
+else
+  printf '%s\n' "UNVERIFIED: shared cycle-position footer is unavailable" >&2
+fi
+```
+
+This reads existing state only. Do not create a cycle or profile merely to render
+an orientation footer.
