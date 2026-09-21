@@ -1,7 +1,8 @@
 # ADR-0031: Native path spelling without changing caller authority
 
-**Status:** Accepted implementation direction, 2026-09-21; repair acceptance is pending.
-**Scope:** Existing A01/A11/A23 Windows integration requirements, not new host permissions.
+**Status:** Accepted direction, 2026-09-21; scoped core accepted by `062d0f20`;
+P10 consumer acceptance remains pending.
+**Scope:** Existing A01/A11/A12/A23 Windows integration requirements, not new host permissions.
 
 ## Context
 
@@ -37,10 +38,21 @@ No third-party runtime dependency or Python requirement for native installation.
 
 Git handling is a separate bounded Windows subcase: a per-invocation
 `-c core.longpaths=true` may be used only in the attributable owned bisect trial/admin
-flow, including error cleanup. Never write global/local persistent Git configuration
+flow, including error cleanup, and the separately scoped P10 read-only `check-ignore`
+consumer described below. Never write global/local persistent Git configuration
 or change unrelated caller operations. Preserve caller HEAD/index/config and all
 staged/unstaged/untracked content. Fixture cleanup is another separate, fixture-owned
 subcase, limited to the exact proven temporary root.
+
+P10's native metadata repair exposed a distinct Git boundary: its owner reports
+exit 128 reading `.git` at target256/`.git`261 for both valid and negated ignore rules.
+The P10 card releases one same-location diagnostic and, only if it preserves state
+and distinguishes exits 0/1 correctly, the Windows-only per-command option in
+`li-copilot.py`'s `runtime_ignore_errors`. All other arguments, non-Windows behavior
+and explicit error handling stay unchanged. This applies the existing process-local
+approach to one named consumer; it is not permission for a global option, a general
+Git wrapper, path relocation or other command changes. Until verified, this remains
+an implementation direction, not evidence of consumer acceptance.
 
 ## Alternatives and trade-offs
 

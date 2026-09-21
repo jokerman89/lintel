@@ -391,6 +391,15 @@ The owner continues the same consumer unit; no new writer, product acceptance,
 completion credit or A13 release follows. Freeze one attributed combined candidate
 with the additional long-path preservation evidence for the existing reviewer.
 
+The owner subsequently reports all four metadata REDs at real 256-character roots.
+After native operands, three self-pass; the fourth now correctly reaches Git but
+returns 128 for both valid/negated ignore rules at `.git`261. The P10 card and
+ADR-0031 separately release a same-location `check-ignore` diagnostic using only
+Windows per-invocation `-c core.longpaths=true`, followed by that one call-site
+change only if valid/negated exits 0/1 and caller-state preservation are established.
+No persistent Git configuration, other argv/root changes or acceptance waiver.
+The original-dimension/default/canonical work continues independently.
+
 P08 report `9faebd2b7d027283a21a470c8e81473e39bd7a23` is preserved as `a56aab4`:
 F01/F02 P1 negation/safety questions can recommend SHIP; F03 P2 PLAN still names the
 global analysis output. No workflow executed. `04e0ba9` authorizes only the original
