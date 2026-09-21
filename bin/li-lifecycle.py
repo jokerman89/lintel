@@ -522,14 +522,22 @@ def migration_inventory(config: ProfileConfig, *, include_archived: bool, today:
             found = found or section == "active migrations"
         if section not in ("active migrations", "archived migrations") or not line.startswith("|"):
             continue
-        cells = [cell.strip() for cell in line.strip("|").split("|", 4)]
-        if len(cells) < 4 or cells[0] in ("Slug", "_none yet_") or set(cells[0]) <= {"-", ":"}:
-            continue
         archived = section == "archived migrations"
         if archived and not include_archived:
             continue
+        header = (["Slug", "Started", "Closed", "Outcome"] if archived else
+                  ["Slug", "Started", "Grace until", "Removal at", "Description"])
+        body = line[1:-1] if line.endswith("|") else line[1:]
+        # Preserve empty cells and any additional pipes in the final prose field.
+        cells = [cell.strip() for cell in body.split("|", len(header) - 1)]
+        if len(cells) != len(header) or not all(cells):
+            raise ValueError(
+                f"MIGRATION_CATALOG_INVALID: {section} row requires {len(header)} nonempty fields: {cells[0]!r}")
+        if (cells == header or all(re.fullmatch(r":?-+:?", cell) for cell in cells)
+                or cells == ["_none yet_", *(["\u2014"] * (len(header) - 1))]):
+            continue
         if not re.fullmatch(r"[a-z0-9][a-z0-9.-]*", cells[0]):
-            raise ValueError(f"Malformed migration row: {cells[0]}")
+            raise ValueError(f"MIGRATION_CATALOG_INVALID: malformed {section} row: {cells[0]!r}")
         date.fromisoformat(cells[1])
         deadline = None if cells[2] == "none" else date.fromisoformat(cells[2])
         row = {"slug": cells[0], "started": cells[1], "grace_until": None if archived else cells[2],

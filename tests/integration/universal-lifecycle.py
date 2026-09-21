@@ -498,6 +498,224 @@ bash "$LINTEL_SOURCE_ROOT/bin/li-lifecycle" pack-list
         self.assertEqual(hashes(self.base), before)
 
 
+class MigrationInventory(LifecycleFixture):
+    active_header = (
+        "# Migrations\n\n## Active migrations\n\n"
+        "| Slug | Started | Grace until | Removal at | Description |\n"
+        "|---|---|---|---|---|\n"
+    )
+    valid_row = "| overdue-work | 2026-06-12 | 2026-09-12 | none | Pending consumer work |\n"
+    archived_header = (
+        "\n## Archived migrations\n\n"
+        "| Slug | Started | Closed | Outcome |\n|---|---|---|---|\n"
+    )
+
+    def setUp(self):
+        super().setUp()
+        self.catalog = self.source / "docs/migrations/_INDEX.md"
+        skill = self.source / "skills/migrations/SKILL.md"
+        skill.parent.mkdir(parents=True)
+        shutil.copyfile(ROOT / "skills/migrations/SKILL.md", skill)
+        for path in self.source.rglob("*"):
+            if path.is_file():
+                self.assertEqual(path.read_bytes(), (ROOT / path.relative_to(self.source)).read_bytes())
+        blocks = skill.read_text(encoding="utf-8").split("```bash\n")
+        self.assertEqual(len(blocks), 2)
+        self.skill_block = blocks[1].split("```", 1)[0]
+        self.caller = self.base / "unrelated caller"
+        self.caller.mkdir()
+        (self.caller / "unrelated.txt").write_bytes(b"Caller-owned content.\n")
+        user = self.base / "fake user"
+        user.mkdir()
+        (user / "personal.txt").write_bytes(b"Synthetic personal content.\n")
+        (self.home / "customization.txt").write_bytes(b"Installed user customization.\n")
+        temp = self.base / "temp"
+        temp.mkdir()
+        for key in ("BASH_ENV", "ENV", "CDPATH", "HOMEDRIVE", "HOMEPATH"):
+            self.env.pop(key, None)
+        self.env.update({
+            "APPDATA": str(user / "AppData/Roaming"),
+            "LOCALAPPDATA": str(user / "AppData/Local"),
+            "XDG_CONFIG_HOME": str(user / ".config"),
+            "XDG_CACHE_HOME": str(user / ".cache"),
+            "XDG_DATA_HOME": str(user / ".local/share"),
+            "XDG_STATE_HOME": str(user / ".local/state"),
+            "TEMP": str(temp), "TMP": str(temp), "TMPDIR": str(temp),
+            "LINTEL_PRIVATE_ROLES_DIR": str(self.home / "private/roles"),
+            "LINTEL_RECOVERY_STORE": str(self.base / "recovery"),
+            "LINTEL_AUDIT_DIR": str(self.target / ".claude/runtime/audit"),
+            "LINTEL_JOBS_DIR": str(self.target / ".claude/runtime/jobs"),
+            "GIT_CONFIG_NOSYSTEM": "1", "GIT_CONFIG_GLOBAL": str(user / ".gitconfig"),
+        })
+
+    def run_inventory(self, *args):
+        for key, value in self.env.items():
+            if key.startswith(("LINTEL_", "XDG_")) or key in (
+                "HOME", "USERPROFILE", "APPDATA", "LOCALAPPDATA", "TEMP", "TMP", "TMPDIR",
+            ):
+                self.assertIn(self.base.resolve(), Path(value).resolve().parents, key)
+        for path in (self.home / "profile.yaml", self.home / "profile-context",
+                     self.home / "jobs/_active.md", self.target / ".claude/runtime", self.caller):
+            self.assertIn(self.base.resolve(), path.resolve().parents)
+        before = hashes(self.base)
+        modes = {path.relative_to(self.base).as_posix(): path.stat().st_mode
+                 for path in self.base.rglob("*")}
+        block = self.skill_block if not args else self.skill_block.rstrip() + ' "$@"\n'
+        result = subprocess.run(
+            [OPTIONS.bash, "--noprofile", "--norc", "-c",
+             "set -euo pipefail\n" + block, "migrations-skill", *args],
+            cwd=self.caller, env=self.env, capture_output=True, text=True, encoding="utf-8", timeout=45,
+        )
+        self.assertEqual(hashes(self.base), before, result.stdout + result.stderr)
+        self.assertEqual({path.relative_to(self.base).as_posix(): path.stat().st_mode
+                          for path in self.base.rglob("*")}, modes, result.stdout + result.stderr)
+        return result
+
+    def inventory(self, *args):
+        result = self.run_inventory(*args)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(result.stderr, "")
+        value = json.loads(result.stdout)
+        self.assertEqual(Path(value["catalog"]), self.catalog)
+        self.assertEqual(Path(value["target"]), self.target)
+        return value["migrations"]
+
+    def assert_invalid_catalog(self, *args):
+        result = self.run_inventory(*args)
+        self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+        self.assertEqual(result.stdout, "")
+        self.assertIn("MIGRATION_CATALOG_INVALID", result.stderr)
+
+    def test_exact_review_catalogs_through_real_skill(self):
+        fixtures = (
+            (self.active_header + self.valid_row, 192,
+             "4ca4751d30a521d13c18f0608d255960563c28a0de770882e37dfccbb737b7b0"),
+            (self.active_header + "| overdue-work | 2026-06-12 | 2026-09-12 |\n", 161,
+             "35adc26d85f0221cfb57f7de68e9823d4fbc371ba6992fc6dfeb8144b4a431c7"),
+        )
+        for text, length, digest in fixtures:
+            with self.subTest(catalog=digest):
+                payload = text.encode("utf-8")
+                self.assertEqual(len(payload), length)
+                self.assertEqual(hashlib.sha256(payload).hexdigest(), digest)
+                self.catalog.write_bytes(payload)
+                if length == 192:
+                    row, = self.inventory()
+                    self.assertEqual(row["slug"], "overdue-work")
+                    self.assertEqual(row["observation"], "unknown")
+                    self.assertEqual(row["description"], "Pending consumer work")
+                else:
+                    self.assert_invalid_catalog()
+
+    def test_active_rows_cannot_hide_as_short_or_ignorable_metadata(self):
+        rows = (
+            "| overdue-work |",
+            "| overdue-work | 2026-06-12 | 2026-09-12 | none |",
+            "| overdue-work | 2026-06-12 | 2026-09-12 | none ||",
+            "| overdue-work | 2026-06-12 | 2026-09-12 | none | |",
+            "| overdue-work | 2026-06-12 | 2026-09-12 | | Pending |",
+            "| overdue-work | 2026-06-12 | | none | Pending |",
+            "| overdue-work || 2026-09-12 | none | Pending |",
+            "|| 2026-06-12 | 2026-09-12 | none | Pending |",
+            "| | 2026-06-12 | 2026-09-12 | none | Pending |",
+            "|",
+            "| Slug | Started |",
+            "| Slug | 2026-06-12 | 2026-09-12 | none | Pending |",
+            "|---|---|---|",
+            "|---|2026-06-12|2026-09-12|none|Pending|",
+            "|:|:|:|:|:|",
+            "| _none yet_ | 2026-06-12 | 2026-09-12 | none | Pending |",
+        )
+        for row in rows:
+            with self.subTest(row=row):
+                self.catalog.write_text(self.active_header + row + "\n", encoding="utf-8")
+                self.assert_invalid_catalog()
+
+    def test_malformed_archived_rows_fail_only_when_requested(self):
+        rows = (
+            "| historic | 2026-01-01 | 2026-02-01 |",
+            "| historic | 2026-01-01 | 2026-02-01 ||",
+            "| historic | 2026-01-01 | | Retained guide |",
+            "|| 2026-01-01 | 2026-02-01 | Retained guide |",
+            "| Slug | Started | Closed |",
+            "|---|2026-01-01|2026-02-01|Retained guide|",
+            "| _none yet_ | 2026-01-01 | 2026-02-01 | Retained guide |",
+        )
+        for row in rows:
+            with self.subTest(row=row):
+                self.catalog.write_text(
+                    self.active_header + self.valid_row + self.archived_header + row + "\n", encoding="utf-8")
+                self.assertEqual([item["slug"] for item in self.inventory()], ["overdue-work"])
+                self.assert_invalid_catalog("--all")
+
+    def test_valid_overdue_unknown_archive_pipes_and_literal_rows_are_preserved(self):
+        self.catalog.write_text(
+            self.active_header.replace("|---|---|---|---|---|", "|:---|---:|:---:|---|---|")
+            + self.valid_row
+            + "| v5-claude-home-layout | 2026-06-12 | 2026-09-12 | 2026-12-12 | Layout |\n"
+            + "| future-work | 2026-06-12 | 2099-09-12 | none-removed | Keep open\n"
+            + "| no-deadline | 2026-06-12 | none | none | Choice a | choice b |\n"
+            + "\n```markdown\n## Archived migrations\n| bad-fenced-row |\n```\n\n"
+            + "> | bad-quoted-row |\n\n"
+            + self.archived_header.replace("|---|---|---|---|", "|:---|---:|:---:|---|")
+            + "| historic | 2026-01-01 | 2026-02-01 | Outcome a | outcome b |\n",
+            encoding="utf-8")
+        (self.target / "tasks").mkdir()
+        (self.target / "tasks/lessons.md").write_bytes(b"Legacy consumer lessons.\n")
+        for location in (self.target, self.caller):
+            poison = location / "docs/migrations/_INDEX.md"
+            poison.parent.mkdir(parents=True)
+            poison.write_bytes(b"Not the selected source catalog.\n")
+        rows = {row["slug"]: row for row in self.inventory("--today", "2026-09-21")}
+        self.assertEqual(set(rows), {"overdue-work", "v5-claude-home-layout", "future-work", "no-deadline"})
+        self.assertEqual((rows["overdue-work"]["schedule"], rows["overdue-work"]["observation"]),
+                         ("overdue", "unknown"))
+        self.assertEqual(rows["v5-claude-home-layout"]["observation"], "needs_migration")
+        self.assertEqual(rows["future-work"]["schedule"], "open")
+        self.assertEqual(rows["no-deadline"]["schedule"], "open")
+        self.assertEqual(rows["no-deadline"]["description"], "Choice a | choice b")
+        archived = {row["slug"]: row for row in self.inventory("--today", "2026-09-21", "--all")}
+        self.assertEqual(set(archived), set(rows) | {"historic"})
+        self.assertEqual(archived["historic"]["schedule"], "archived")
+        self.assertEqual(archived["historic"]["observation"], "unknown")
+        self.assertIsNone(archived["historic"]["grace_until"])
+        self.assertEqual(archived["historic"]["description"], "Outcome a | outcome b")
+
+    def test_complete_headers_separators_and_placeholders_remain_empty(self):
+        self.catalog.write_text(
+            self.active_header + "| _none yet_ | \u2014 | \u2014 | \u2014 | \u2014 |\n"
+            + self.archived_header + "| _none yet_ | \u2014 | \u2014 | \u2014 |\n", encoding="utf-8")
+        self.assertEqual(self.inventory(), [])
+        self.assertEqual(self.inventory("--all"), [])
+
+    def test_missing_catalog_active_section_and_date_errors_remain_explicit(self):
+        self.catalog.unlink()
+        result = self.run_inventory()
+        self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+        self.assertEqual(result.stdout, "")
+        self.assertIn("MIGRATION_CATALOG_MISSING", result.stderr)
+        self.catalog.write_text("# Missing active table\n", encoding="utf-8")
+        self.assert_invalid_catalog()
+        for started, deadline in (("not-a-date", "2026-09-12"), ("2026-06-12", "2026-02-30")):
+            for archived in (False, True):
+                with self.subTest(started=started, deadline=deadline, archived=archived):
+                    text = self.active_header
+                    if archived:
+                        text += self.valid_row + self.archived_header
+                    text += f"| invalid-date | {started} | {deadline} | "
+                    text += "Retained guide |\n" if archived else "none | Pending work |\n"
+                    self.catalog.write_text(text, encoding="utf-8")
+                    result = self.run_inventory("--all")
+                    self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+                    self.assertEqual(result.stdout, "")
+                    self.assertIn("li-lifecycle:", result.stderr)
+
+    def test_current_source_catalog_remains_readable(self):
+        rows = self.inventory("--today", "2026-09-21")
+        self.assertIn("v5-claude-home-layout", {row["slug"] for row in rows})
+        self.assertEqual(self.inventory("--today", "2026-09-21", "--all"), rows)
+
+
 class NativeInstallLifecycle(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory(prefix="lintel-native-lifecycle-")
