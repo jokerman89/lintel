@@ -116,7 +116,7 @@ for dir in $SEARCH_DIRS; do
       fi
     else
       failed=$((failed + 1))
-      FAIL_LOG+=("$test_file:\n$output\n")
+      FAIL_LOG+=("$test_file:"$'\n'"$output")
     fi
   done < <(find "$TESTS_DIR/$dir" -name '*.sh' -type f 2>/dev/null | sort)
 done
@@ -132,7 +132,7 @@ printf "Partial: %d (passed tests with skipped assertions)\n" "$partial"
 
 if [ "$failed" -gt 0 ]; then
   printf "\n${c_red}== Failure details ==${c_reset}\n"
-  for entry in "${FAIL_LOG[@]}"; do printf "%b\n" "$entry"; done
+  for entry in "${FAIL_LOG[@]}"; do printf '%s\n\n' "$entry"; done
   exit 1
 fi
 
