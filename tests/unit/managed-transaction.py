@@ -18,14 +18,27 @@ parser.add_argument("--root", type=Path, required=True)
 options, remaining = parser.parse_known_args()
 sys.dont_write_bytecode = True
 sys.path.insert(0, str(options.root.resolve() / "lib"))
-from context_safety import file_state
+from context_safety import file_state, native_io_path
 
 
 class ManagedTransaction(unittest.TestCase):
     def setUp(self):
         self.module = importlib.import_module("managed_transaction")
         self.tmp = tempfile.TemporaryDirectory(prefix="lintel-txn-")
-        self.addCleanup(self.tmp.cleanup)
+        created_name = self.tmp.name
+        created_root = Path(created_name).resolve()
+
+        def cleanup():
+            self.assertEqual(self.tmp.name, created_name)
+            self.assertEqual(Path(self.tmp.name).resolve(), created_root)
+            self.assertTrue(created_root.name.startswith("lintel-txn-"))
+            self.tmp.name = str(native_io_path(created_root))
+            try:
+                self.tmp.cleanup()
+            finally:
+                self.tmp.name = created_name
+
+        self.addCleanup(cleanup)
         self.base = Path(self.tmp.name)
         self.root = self.base / "consumer"
         self.store = self.base / "store"
@@ -155,6 +168,100 @@ class ManagedTransaction(unittest.TestCase):
         path.write_text(json.dumps(journal), encoding="utf-8")
         with self.assertRaises(ValueError):
             self.module.assert_ready(self.root, self.store)
+
+    def long_paths(self):
+        parent = self.base / "deep consumer and store"
+        while len(str(parent)) < 275:
+            parent /= "same-location-" + "x" * 40
+        self.root, self.store = parent / "consumer", parent / "owned store"
+        native_io_path(self.root).mkdir(parents=True)
+        for name, content in (("a.txt", b"before a"), ("b.txt", b"before b"),
+                              ("custom.txt", b"never owned")):
+            native_io_path(self.root / name).write_bytes(content)
+        self.expected = {name: file_state(self.root, name) for name in self.changes}
+        self.modes = {name: self.expected["a.txt"]["mode"] for name in self.changes}
+        self.assertGreater(len(str(self.root)), 275)
+        self.assertGreater(len(str(self.store)), 275)
+        self.assertFalse(str(self.root).startswith("\\\\?\\"))
+        self.assertFalse(str(self.store).startswith("\\\\?\\"))
+
+    def native_files(self):
+        return {path.name: path.read_bytes() for path in native_io_path(self.root).iterdir()
+                if path.is_file()}
+
+    def test_long_native_io_preserves_logical_receipts_and_exact_recovery(self):
+        self.long_paths()
+        self.changes["b.txt"] = None
+        self.modes["b.txt"] = None
+        before = self.native_files()
+        result = self.apply()
+        self.assertEqual(result["state"], "complete")
+        self.assertEqual(result["store"], str(self.store))
+        self.assertEqual(self.native_files(), {"a.txt": b"after a", "new.txt": b"created",
+                                              "custom.txt": b"never owned"})
+        folder = self.store / "transactions" / result["id"]
+        plan = json.loads(native_io_path(folder / "plan.json").read_bytes())
+        marker = json.loads(native_io_path(self.store / self.module.MARKER).read_bytes())
+        snapshot = json.loads(native_io_path(
+            self.store / "snapshots" / result["snapshot_id"] / "manifest.json").read_bytes())
+        self.assertEqual(plan["owner"], str(self.root))
+        self.assertEqual(marker["owner"], str(self.root))
+        self.assertEqual(snapshot["owner"], str(self.root))
+        self.module.assert_ready(self.root, self.store)
+        inspected = self.module.inspect_transaction(self.root, self.store, result["id"])
+        self.assertEqual(inspected["state"], "complete")
+        self.assertFalse(native_io_path(self.store / ".operation-lock").exists())
+        recovered = self.module.recover_transaction(self.root, self.store, result["id"])
+        self.assertEqual(recovered["state"], "recovered")
+        self.assertEqual(recovered["store"], str(self.store))
+        self.assertEqual(self.native_files(), before)
+        self.module.assert_ready(self.root, self.store)
+        native_io_path(self.root / "a.txt").write_bytes(b"after a")
+        edited = self.native_files()
+        with self.assertRaises(ValueError):
+            self.module.recover_transaction(self.root, self.store, result["id"])
+        self.assertEqual(self.native_files(), edited)
+
+    def test_long_native_interruption_conflict_lock_and_foreign_store_refuse(self):
+        self.long_paths()
+        before = self.native_files()
+        original = self.module._write_change
+
+        def interrupted(*args):
+            original(*args)
+            raise OSError("synthetic long-path interruption after real write")
+
+        with patch.object(self.module, "_write_change", side_effect=interrupted):
+            with self.assertRaisesRegex(OSError, "synthetic long-path interruption"):
+                self.apply()
+        identifier, = [path.name for path in native_io_path(self.store / "transactions").iterdir()]
+        with self.assertRaisesRegex(ValueError, "incomplete"):
+            self.module.assert_ready(self.root, self.store)
+        native_io_path(self.root / "b.txt").write_bytes(b"user edit after interruption")
+        edited = self.native_files()
+        with self.assertRaisesRegex(ValueError, "conflict"):
+            self.module.recover_transaction(self.root, self.store, identifier)
+        self.assertEqual(self.native_files(), edited)
+        native_io_path(self.root / "b.txt").write_bytes(before["b.txt"])
+        lock = native_io_path(self.store / ".operation-lock")
+        lock.mkdir()
+        with self.assertRaisesRegex(ValueError, "locked"):
+            self.module.recover_transaction(self.root, self.store, identifier)
+        self.assertTrue(lock.is_dir())
+        lock.rmdir()
+        foreign = self.root.parent / "foreign consumer"
+        native_io_path(foreign).mkdir()
+        with self.assertRaisesRegex(ValueError, "foreign"):
+            self.module.recover_transaction(foreign, self.store, identifier)
+        self.module.recover_transaction(self.root, self.store, identifier)
+        self.assertEqual(self.native_files(), before)
+        unowned = self.root.parent / "unowned store"
+        native_io_path(unowned).mkdir()
+        with self.assertRaisesRegex(ValueError, "Unowned"):
+            self.module.apply_files(self.root, unowned, self.changes, self.expected,
+                                    self.modes, label="not authorized by existence")
+        self.assertEqual(list(native_io_path(unowned).iterdir()), [])
+        self.assertEqual(self.native_files(), before)
 
 
 if __name__ == "__main__":

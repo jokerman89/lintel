@@ -19,7 +19,7 @@ from typing import Mapping, Optional, Sequence
 import uuid
 
 sys.dont_write_bytecode = True
-from context_safety import (atomic_write, checked_root, file_state, is_link, json_bytes,
+from context_safety import (atomic_write, checked_root, file_state, is_link, json_bytes, native_io_path,
                             path_key, read_owned, relative_path, safe_path)
 
 SOURCE = Path(__file__).resolve().parents[1]
@@ -79,12 +79,12 @@ def _roots(root: Path, store: Path) -> tuple[Path, Path]:
         raise ValueError("Pass --store as a native Windows argument; do not reinterpret an MSYS environment path.")
     store = Path(os.path.abspath(store))
     for parent in (store, *store.parents):
-        if is_link(parent) or (parent.exists() and not parent.is_dir()):
+        if is_link(parent) or (native_io_path(parent).exists() and not native_io_path(parent).is_dir()):
             raise ValueError(f"Unsafe recovery store: {parent}")
     if root.is_relative_to(store) or store.is_relative_to(root) or SOURCE.is_relative_to(store) or store.is_relative_to(SOURCE):
         raise ValueError("Recovery store must be separate from the source and target.")
-    if store.exists():
-        if not safe_path(store, MARKER).is_file():
+    if native_io_path(store).exists():
+        if not native_io_path(safe_path(store, MARKER)).is_file():
             raise ValueError("Unowned recovery store; preserve it rather than adopting existing directories.")
         marker, _ = _json(store, MARKER)
         if marker != {"schema_version": SCHEMA, "owner": str(root)}:
@@ -93,14 +93,15 @@ def _roots(root: Path, store: Path) -> tuple[Path, Path]:
 
 
 def _pending(root: Path, store: Path, *, locked: bool = False) -> None:
-    if not store.exists():
+    if not native_io_path(store).exists():
         return
-    if not locked and safe_path(store, ".operation-lock").exists():
+    if not locked and native_io_path(safe_path(store, ".operation-lock")).exists():
         raise ValueError("Recovery store is locked; verify no operation is running before removing that exact empty lock.")
     folder = safe_path(store, "transactions")
-    if folder.exists():
-        for entry in sorted(folder.iterdir()):
-            if not entry.is_dir() or not ID.fullmatch(entry.name):
+    if native_io_path(folder).exists():
+        for candidate in sorted(native_io_path(folder).iterdir()):
+            entry = folder / candidate.name
+            if not native_io_path(entry).is_dir() or not ID.fullmatch(entry.name):
                 raise ValueError("Unknown/incomplete transaction evidence; preserve it for inspection.")
             _, journal, _ = _receipt(root, store, entry.name)
             if journal["state"] not in ("complete", "recovered"):
@@ -110,7 +111,7 @@ def _pending(root: Path, store: Path, *, locked: bool = False) -> None:
 @contextmanager
 def _lock(root: Path, store: Path):
     try:
-        store.mkdir(parents=True, exist_ok=False, mode=0o700)
+        native_io_path(store).mkdir(parents=True, exist_ok=False, mode=0o700)
     except FileExistsError:
         _roots(root, store)
     else:
@@ -118,20 +119,20 @@ def _lock(root: Path, store: Path):
                      expected=None, check_expected=True)
     lock = safe_path(store, ".operation-lock")
     try:
-        lock.mkdir(mode=0o700)
+        native_io_path(lock).mkdir(mode=0o700)
     except FileExistsError as error:
         raise ValueError("Recovery store is locked; no automatic lock stealing.") from error
     try:
         yield
     finally:
-        lock.rmdir()
+        native_io_path(lock).rmdir()
 
 
 def _write_change(root: Path, relative: str, data: Optional[bytes], mode: Optional[int], expected) -> None:
     if not _same(file_state(root, relative), expected):
         raise ValueError(f"Target changed before publication: {relative}")
     if data is None:
-        safe_path(root, relative).unlink()
+        native_io_path(safe_path(root, relative)).unlink()
     else:
         atomic_write(root, relative, data, mode, expected=expected, check_expected=True)
 
@@ -260,7 +261,7 @@ def apply_files(root: Path, store: Path, changes: Mapping[str, Optional[bytes]],
     with _lock(root, store):
         _pending(root, store, locked=True)
         snapshots = safe_path(store, "snapshots")
-        snapshots.mkdir(exist_ok=True, mode=0o700)
+        native_io_path(snapshots).mkdir(exist_ok=True, mode=0o700)
         created = snapshot.create_snapshot(root, snapshots,
                                            [path for path in selected if expected[path] is not None],
                                            [path for path in selected if expected[path] is None])
@@ -269,7 +270,7 @@ def apply_files(root: Path, store: Path, changes: Mapping[str, Optional[bytes]],
                 raise ValueError(f"Expected ownership changed during snapshot: {relative}; preserve {created['id']}.")
         identifier = "transaction-" + uuid.uuid4().hex
         folder = safe_path(store, "transactions/" + identifier)
-        folder.mkdir(parents=True, mode=0o700)
+        native_io_path(folder).mkdir(parents=True, mode=0o700)
         files = {}
         for index, (relative, data) in enumerate(sorted(selected.items())):
             blob, after = None, None
@@ -336,9 +337,9 @@ def recover_transaction(root: Path, store: Path, identifier: str) -> dict:
                 expected[relative] = entry["after"]
             else:
                 raise ValueError(f"Recovery conflict; current bytes preserved: {relative}")
-        if safe_path(snapshots, result_path).exists():
+        if native_io_path(safe_path(snapshots, result_path)).exists():
             result, _ = _json(snapshots, result_path)
-            if safe_path(folder, "recovery-binding.json").exists():
+            if native_io_path(safe_path(folder, "recovery-binding.json")).exists():
                 binding, _ = _json(folder, "recovery-binding.json")
                 if binding != {"plan_digest": journal["plan_digest"], "expected": result.get("expected")}:
                     raise ValueError("Recovery result does not match the retained binding.")
@@ -346,7 +347,7 @@ def recover_transaction(root: Path, store: Path, identifier: str) -> dict:
                 raise ValueError("Result does not match the planned publication.")
         else:
             binding = {"plan_digest": journal["plan_digest"], "expected": expected}
-            if safe_path(folder, "recovery-binding.json").exists():
+            if native_io_path(safe_path(folder, "recovery-binding.json")).exists():
                 prior, _ = _json(folder, "recovery-binding.json")
                 if not _same(prior, binding):
                     raise ValueError("Recovery binding changed; preserve current files.")

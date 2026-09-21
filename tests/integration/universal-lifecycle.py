@@ -30,10 +30,30 @@ def hashes(root):
             for path in sorted(root.rglob("*")) if path.is_file() and not path.is_symlink()}
 
 
+def register_temporary_cleanup(case, temporary, prefix):
+    created_name = temporary.name
+    created_root = Path(created_name).resolve()
+
+    def cleanup():
+        case.assertEqual(temporary.name, created_name)
+        case.assertEqual(Path(temporary.name).resolve(), created_root)
+        case.assertTrue(created_root.name.startswith(prefix))
+        directory = str(created_root)
+        if os.name == "nt" and not directory.startswith("\\\\?\\"):
+            directory = "\\\\?\\UNC\\" + directory[2:] if directory.startswith("\\\\") else "\\\\?\\" + directory
+        temporary.name = directory
+        try:
+            temporary.cleanup()
+        finally:
+            temporary.name = created_name
+
+    case.addCleanup(cleanup)
+
+
 class LifecycleFixture(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory(prefix="lintel-lifecycle-")
-        self.addCleanup(self.tmp.cleanup)
+        register_temporary_cleanup(self, self.tmp, "lintel-lifecycle-")
         self.base = Path(self.tmp.name)
         self.source = self.base / "trusted source"
         self.target = self.base / "consumer"
@@ -46,7 +66,7 @@ class LifecycleFixture(unittest.TestCase):
         for relative in (
             "bin/li-lifecycle", "bin/li-lifecycle.py", "bin/li-doctor",
             "lib/profile_context.py", "lib/profile-context-schema.json",
-            "lib/pack-schema.yaml", "lib/context_safety.py", "lib/client_capabilities.py",
+            "lib/pack-schema.yaml", "lib/context_safety.py", "lib/native_paths.py", "lib/client_capabilities.py",
             "lib/cli-tiers.yaml", "lib/markdown_source.py", "packs/_default/pack.yaml",
             ".claude-plugin/plugin.json", "docs/migrations/_INDEX.md",
             "lib/managed_transaction.py", "bin/li-snapshot.py",
@@ -719,7 +739,7 @@ class MigrationInventory(LifecycleFixture):
 class NativeInstallLifecycle(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory(prefix="lintel-native-lifecycle-")
-        self.addCleanup(self.tmp.cleanup)
+        register_temporary_cleanup(self, self.tmp, "lintel-native-lifecycle-")
         self.base = Path(self.tmp.name)
         self.source = self.base / "trusted source"
         self.home = self.base / "installed data"

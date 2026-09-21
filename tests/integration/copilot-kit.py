@@ -4,6 +4,7 @@ import importlib.util
 import json
 import os
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import sys
@@ -76,6 +77,565 @@ class CopilotKit(unittest.TestCase):
         root = target or self.target
         return {p.relative_to(root).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
                 for p in root.rglob("*") if p.is_file() and not p.is_symlink()}
+
+    def test_native_publication_keeps_the_original_263_character_destination(self):
+        parent_length = 239
+        padding = parent_length - len(str(self.target)) - len("\\publication-")
+        self.assertGreater(padding, 0, "Run at the declared fixture depth; never shorten an existing target.")
+        folder = self.target / ("publication-" + "x" * padding)
+        folder.mkdir()
+        destination = folder / "agent-brief.template.md"
+        self.assertEqual(len(str(folder)), 239)
+        self.assertEqual(len(str(destination)), 263)
+        relative = destination.relative_to(self.target).as_posix()
+        self.assertEqual(adapter.safe_path(self.target, relative), destination)
+        adapter.atomic_write(destination, b"exact long destination\r\n")
+        self.assertEqual(adapter.native_io_path(destination).read_bytes(), b"exact long destination\r\n")
+        self.assertEqual(adapter.read_file(self.target, relative), b"exact long destination\n")
+        self.assertEqual(sorted(path.name for path in folder.iterdir()), ["agent-brief.template.md"])
+        self.assertFalse(str(adapter.safe_path(self.target, relative)).startswith("\\\\?\\"))
+
+    def test_missing_native_helper_cannot_fall_back_to_target_pythonpath(self):
+        broken = self.base / "source without native helper"
+        shutil.copytree(self.source, broken)
+        helper = broken / "lib/native_paths.py"
+        helper.unlink()
+        (self.target / "native_paths.py").write_text(
+            "raise RuntimeError('target native helper executed')\n", encoding="utf-8")
+        before = self.snapshot()
+        result = subprocess.run(
+            [sys.executable, str(broken / "bin/li-copilot.py"), "init",
+             "--source", str(broken), "--target", str(self.target)],
+            cwd=self.target, env=dict(os.environ, PYTHONPATH=str(self.target)),
+            text=True, encoding="utf-8", capture_output=True,
+        )
+        self.assertNotEqual(result.returncode, 0, result.stdout)
+        self.assertIn(f"Required source file is missing: {helper}", result.stderr)
+        self.assertNotIn("target native helper executed", result.stderr)
+        self.assertEqual(result.stdout, "")
+        self.assertEqual(self.snapshot(), before)
+
+    def default_consumer(self):
+        parent = Path(tempfile.gettempdir()).resolve()
+        padding = 94 - len(str(parent)) - 1 - len("p10np-") - 8
+        self.assertGreaterEqual(padding, 0, "The exact default fixture must not relocate a longer TEMP.")
+        temporary = tempfile.TemporaryDirectory(prefix="p10np-" + "x" * padding, dir=parent)
+        created_name = temporary.name
+        base = Path(created_name).resolve()
+
+        def cleanup():
+            self.assertEqual(temporary.name, created_name)
+            self.assertEqual(Path(temporary.name).resolve(), base)
+            self.assertTrue(base.name.startswith("p10np-"))
+            temporary.name = str(adapter.native_io_path(base))
+            try:
+                temporary.cleanup()
+            finally:
+                temporary.name = created_name
+
+        self.addCleanup(cleanup)
+        source = base / "exact-source"
+        target = base / "installed consumer"
+        shutil.copytree(self.source, source)
+        target.mkdir()
+        (target / "AGENTS.md").write_bytes(b"Consumer AGENTS.md.\n")
+        (target / "unrelated.txt").write_bytes(b"Unrelated consumer-owned data\n")
+        self.assertEqual((len(str(base)), len(str(target))), (94, 113))
+        env = {key: value for key, value in os.environ.items()
+               if not key.startswith(("LINTEL_", "CLAUDE_", "GSTACK_"))
+               and key not in ("PACK_CACHE_FILE", "BASH_ENV", "ENV", "CDPATH", "PYTHONPATH")}
+        for name in ("HOME", "USERPROFILE", "TEMP", "TMP", "TMPDIR"):
+            self.assertIn(parent.parent, Path(env[name]).resolve().parents, name)
+        self.assertNotIn("LINTEL_RECOVERY_STORE", env)
+        self.assertNotIn("LINTEL_HOME", env)
+        return base, source, target, env
+
+    def native_snapshot(self, root):
+        native = adapter.native_io_path(root)
+        return {path.relative_to(native).as_posix():
+                (hashlib.sha256(path.read_bytes()).hexdigest(), path.stat().st_mode)
+                for path in native.rglob("*") if path.is_file() and not path.is_symlink()}
+
+    def long_metadata_root(self):
+        padding = 256 - len(str(self.target)) - len("\\metadata-")
+        self.assertGreater(padding, 0, "Keep the declared fixture depth; do not relocate a long parent.")
+        root = self.target / ("metadata-" + "x" * padding)
+        adapter.native_io_path(root).mkdir()
+        self.assertEqual(len(str(root)), 256)
+        return root
+
+    def test_long_protocol_metadata_preserves_prose_eol_and_modified_block_refusal(self):
+        target = self.long_metadata_root()
+        payload = adapter.read_file(self.source, "scaffolding/01-foundation/SESSION-PROTOCOL.md").strip()
+        block = adapter.PROTOCOL_START + b"\n" + payload + b"\n" + adapter.PROTOCOL_END
+        original = b"User prose before.\r\n" + block.replace(b"\n", b"\r\n") + b"\r\nUser prose after.\r\n"
+        agents = adapter.native_io_path(target / "AGENTS.md")
+        agents.write_bytes(original)
+        seeds = {"AGENTS.md": b"not the existing user prose\n", "CLAUDE.md": b"fresh seed\n"}
+        old = {"AGENTS.md": adapter.digest(block)}
+        before = self.native_snapshot(target)
+        updates, hashes, errors = adapter.protocol_updates(self.source, target, seeds, old, False)
+        self.assertEqual(errors, [])
+        self.assertTrue(updates["AGENTS.md"].startswith(b"User prose before.\r\n"))
+        self.assertTrue(updates["AGENTS.md"].endswith(b"\r\nUser prose after.\r\n"))
+        self.assertEqual(hashes["AGENTS.md"], old["AGENTS.md"])
+        self.assertEqual(self.native_snapshot(target), before)
+        agents.write_bytes(original.replace(b"## ", b"## User changed ", 1))
+        edited = self.native_snapshot(target)
+        _, _, errors = adapter.protocol_updates(self.source, target, seeds, old, False)
+        self.assertIn("Modified session protocol block (preserved): AGENTS.md", errors)
+        self.assertEqual(self.native_snapshot(target), edited)
+
+    def test_long_generated_link_metadata_checks_real_missing_and_linked_targets(self):
+        target = self.long_metadata_root()
+        guide = adapter.native_io_path(target / "user-guide.md")
+        guide.write_bytes(b"User-owned guide.\n")
+        files = {".github/skills/li-sense/SKILL.md": b"[Guide](../../../user-guide.md)\n"}
+        before = self.native_snapshot(target)
+        self.assertEqual(adapter.verify_links(files, target), [])
+        self.assertEqual(self.native_snapshot(target), before)
+        guide.unlink()
+        self.assertEqual(adapter.verify_links(files, target),
+                         ["Missing generated link: .github/skills/li-sense/SKILL.md -> ../../../user-guide.md"])
+        outside = self.base / "outside-guide.md"
+        outside.write_bytes(b"Outside selected target.\n")
+        os.symlink(outside, guide)
+        with self.assertRaisesRegex(ValueError, "Symlink/reparse"):
+            adapter.verify_links(files, target)
+        self.assertEqual(outside.read_bytes(), b"Outside selected target.\n")
+
+    def test_long_public_directory_index_is_selected_from_the_real_source(self):
+        source = self.long_metadata_root()
+        shutil.copytree(self.source, adapter.native_io_path(source), dirs_exist_ok=True)
+        readme = adapter.native_io_path(source / "README.md")
+        readme.write_bytes(readme.read_bytes() + b"\n[Long directory index](docs/native-path-index/)\n")
+        index = adapter.native_io_path(source / "docs/native-path-index/README.md")
+        index.parent.mkdir()
+        index.write_bytes(b"# Real selected directory index\n")
+        before = self.native_snapshot(source)
+        files, seeds, mode = adapter.generate(source, self.target)
+        self.assertEqual(mode, "vendored")
+        self.assertEqual(files[".github/lintel/docs/native-path-index/README.md"], index.read_bytes())
+        self.assertEqual(adapter.verify_links({**files, **seeds}, self.target), [])
+        self.assertEqual(self.native_snapshot(source), before)
+        index.unlink()
+        files, seeds, _ = adapter.generate(source, self.target)
+        self.assertTrue(any("docs/native-path-index/" in error
+                            for error in adapter.verify_links({**files, **seeds}, self.target)))
+
+    def test_long_git_metadata_runs_real_effective_ignore_validation(self):
+        target = self.long_metadata_root()
+        shallow = self.target / "git-source"
+        shallow.mkdir()
+        git = shutil.which("git")
+        self.assertTrue(git)
+        version = subprocess.run([git, "--version"], capture_output=True, text=True, encoding="utf-8")
+        self.assertEqual(version.returncode, 0, version.stderr)
+        result = subprocess.run([git, "init", "--quiet", str(shallow)],
+                                capture_output=True, text=True, encoding="utf-8")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        for name in ("staged.txt", "unstaged.txt"):
+            (shallow / name).write_bytes(b"Original indexed bytes.\r\n")
+        result = subprocess.run([git, "-C", str(shallow), "add", "--", "staged.txt", "unstaged.txt"],
+                                capture_output=True, text=True, encoding="utf-8")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        (shallow / "unstaged.txt").write_bytes(b"Retain the unstaged edit.\r\n")
+        (shallow / "untracked.txt").write_bytes(b"Retain the untracked file.\r\n")
+        shutil.copytree(shallow, adapter.native_io_path(target), dirs_exist_ok=True)
+        self.assertEqual(len(str(target / ".git")), 261)
+        self.assertTrue(adapter.native_io_path(target / ".git").is_dir())
+        failure = ["Git does not confirm .claude/runtime/ is ignored; review conflicting ignore rules"]
+        for current in (target, shallow):
+            for name in (".git/HEAD", ".git/index", ".git/config"):
+                self.assertTrue(adapter.native_io_path(current / name).is_file(), name)
+            for content, code in ((".claude/runtime/\n", 0),
+                                  (".claude/runtime/\n!.claude/runtime/\n!.claude/runtime/**\n", 1)):
+                with self.subTest(root=str(current), ignored=code == 0):
+                    adapter.native_io_path(current / ".gitignore").write_text(content, encoding="utf-8")
+                    before = self.native_snapshot(current)
+                    windows = ["-c", "core.longpaths=true"] if os.name == "nt" else []
+                    argv = [git, "-c", "core.fsmonitor=false", *windows, "-C", str(current),
+                            "check-ignore", "--no-index", "--quiet", ".claude/runtime/.lintel-ignore-check"]
+                    observed = subprocess.run(argv, capture_output=True, text=True, encoding="utf-8")
+                    preserved = self.native_snapshot(current) == before
+                    print(json.dumps({"git_version": version.stdout.strip(), "effective_ignore_argv": argv,
+                                      "expected_exit": code, "returncode": observed.returncode,
+                                      "stderr": observed.stderr, "bytes_modes_preserved": preserved,
+                                      "head_index_config": {name: before[name] for name in
+                                                            (".git/HEAD", ".git/index", ".git/config")}}))
+                    self.assertEqual(observed.returncode, code, observed.stderr)
+                    self.assertTrue(preserved)
+                    self.assertEqual(adapter.runtime_ignore_errors(current, content), [] if code == 0 else failure)
+                    self.assertEqual(self.native_snapshot(current), before)
+            adapter.native_io_path(current / ".git/HEAD").write_bytes(b"not a Git HEAD\n")
+            before = self.native_snapshot(current)
+            observed = subprocess.run(argv, capture_output=True, text=True, encoding="utf-8")
+            print(json.dumps({"invalid_git_argv": argv, "returncode": observed.returncode,
+                              "stderr": observed.stderr, "bytes_modes_preserved": self.native_snapshot(current) == before}))
+            self.assertGreater(observed.returncode, 1, observed.stdout + observed.stderr)
+            self.assertEqual(adapter.runtime_ignore_errors(current, content), failure)
+            self.assertEqual(self.native_snapshot(current), before)
+
+    def test_native_git_operand_directory_and_linked_worktree_gate(self):
+        directory = self.long_metadata_root()
+        worktree = directory.with_name("worktree-" + "x" * (len(directory.name) - len("worktree-")))
+        main = self.base / "git-main"
+        admin = main / ".git/worktrees" / worktree.name
+        self.assertEqual(len(str(self.base)), 109)
+        self.assertFalse(main.exists())
+        self.assertEqual((len(str(directory)), len(str(worktree / ".git"))), (256, 261))
+        print(json.dumps({"fixture_preflight": {
+            "controller": [str(main), len(str(main))], "admin": [str(admin), len(str(admin))],
+            "consumer": [str(worktree), len(str(worktree))],
+            "git_entry": [str(worktree / ".git"), len(str(worktree / ".git"))],
+        }}))
+        main.mkdir()
+        git = shutil.which("git")
+        self.assertTrue(git)
+        env = dict(os.environ, GIT_AUTHOR_NAME="Synthetic fixture", GIT_COMMITTER_NAME="Synthetic fixture",
+                   GIT_AUTHOR_EMAIL="fixture@example.invalid", GIT_COMMITTER_EMAIL="fixture@example.invalid")
+
+        def command(*argv):
+            return subprocess.run([git, *argv], env=env, text=True, encoding="utf-8", capture_output=True)
+
+        initialized = command("init", "--quiet", str(main))
+        self.assertEqual(initialized.returncode, 0, initialized.stderr)
+        for name in ("staged.txt", "unstaged.txt"):
+            (main / name).write_bytes(b"Committed fixture content.\r\n")
+        added = command("-C", str(main), "add", "--", "staged.txt", "unstaged.txt")
+        self.assertEqual(added.returncode, 0, added.stderr)
+        committed = command("-C", str(main), "commit", "--quiet", "-m", "fixture: seed native Git probe")
+        self.assertEqual(committed.returncode, 0, committed.stderr)
+        (main / "staged.txt").write_bytes(b"Staged fixture edit.\r\n")
+        added = command("-C", str(main), "add", "--", "staged.txt")
+        self.assertEqual(added.returncode, 0, added.stderr)
+        (main / "unstaged.txt").write_bytes(b"Unstaged fixture edit.\r\n")
+        (main / "untracked.txt").write_bytes(b"Untracked fixture bytes.\r\n")
+        shutil.copytree(main, adapter.native_io_path(directory), dirs_exist_ok=True)
+        self.assertTrue(adapter.native_io_path(directory / ".git").is_dir())
+        self.assertEqual((len(str(directory)), len(str(worktree))), (256, 256))
+        version = command("--version")
+        self.assertEqual(version.returncode, 0, version.stderr)
+        observed_gate = []
+        linked_attempted, linked_available, directory_without_option = False, False, False
+        for options in ([], ["-c", "core.longpaths=true"]):
+            if options and os.name != "nt":
+                break
+            if options and linked_attempted and not linked_available and directory_without_option:
+                break
+            passed = True
+            for root in (directory, worktree):
+                if root == worktree:
+                    if not linked_attempted:
+                        linked_attempted = True
+                        before_setup = self.native_snapshot(main)
+                        setup_options = ["-c", "core.longpaths=true"] if os.name == "nt" else []
+                        linked = command(*setup_options, "-C", str(main), "worktree", "add",
+                                         "--detach", str(worktree), "HEAD")
+                        after_setup = self.native_snapshot(main)
+                        self.assertEqual(after_setup[".git/config"], before_setup[".git/config"])
+                        print(json.dumps({"fixture_worktree_argv": linked.args, "returncode": linked.returncode,
+                                          "stdout": linked.stdout, "stderr": linked.stderr,
+                                          "controller_config_preserved": True,
+                                          "setup_created": sorted(set(after_setup) - set(before_setup))}))
+                        linked_available = linked.returncode == 0
+                    if not linked_available:
+                        passed = False
+                        continue
+                    self.assertTrue(adapter.native_io_path(worktree / ".git").is_file())
+                io_root = adapter.native_io_path(root)
+                self.assertTrue(root.samefile(io_root))
+                self.assertEqual((root.stat().st_dev, root.stat().st_ino),
+                                 (io_root.stat().st_dev, io_root.stat().st_ino))
+                identity = command("-c", "core.fsmonitor=false", *options, "-C", str(io_root),
+                                   "rev-parse", "--show-toplevel", "--absolute-git-dir")
+                if identity.returncode:
+                    print(json.dumps({"identity_argv": identity.args, "returncode": identity.returncode,
+                                      "stderr": identity.stderr}))
+                    passed = False
+                    continue
+                top, git_dir_text = identity.stdout.splitlines()
+                git_dir = Path(git_dir_text)
+                self.assertTrue(io_root.samefile(adapter.native_io_path(Path(top))))
+                self.assertTrue(adapter.native_io_path(git_dir).is_dir())
+                if root == directory:
+                    self.assertTrue(adapter.native_io_path(git_dir).samefile(adapter.native_io_path(root / ".git")))
+                else:
+                    for name in ("staged.txt", "unstaged.txt", "untracked.txt"):
+                        adapter.native_io_path(root / name).write_bytes((main / name).read_bytes())
+                    adapter.native_io_path(git_dir / "index").write_bytes((main / ".git/index").read_bytes())
+                for text, expected in ((".claude/runtime/\n", 0),
+                                       (".claude/runtime/\n!.claude/runtime/\n!.claude/runtime/**\n", 1)):
+                    adapter.native_io_path(root / ".gitignore").write_text(text, encoding="utf-8")
+                    before_root, before_admin, before_main = (self.native_snapshot(path)
+                                                              for path in (root, git_dir, main))
+                    result = command("-c", "core.fsmonitor=false", *options, "-C", str(io_root),
+                                     "check-ignore", "--no-index", "--quiet", ".claude/runtime/.lintel-ignore-check")
+                    preserved = (self.native_snapshot(root) == before_root
+                                 and self.native_snapshot(git_dir) == before_admin
+                                 and self.native_snapshot(main) == before_main)
+                    self.assertTrue(preserved)
+                    observation = {"version": version.stdout.strip(), "form": "directory" if root == directory else "worktree-file",
+                                   "logical_root": str(root), "io_root": str(io_root),
+                                   "lengths": [len(str(root)), len(str(root / ".git"))],
+                                   "identity_argv": identity.args, "git_top": top, "git_dir": git_dir_text,
+                                   "argv": result.args, "expected": expected, "returncode": result.returncode,
+                                   "stderr": result.stderr, "state_preserved": preserved,
+                                   "filesystem_identity": [root.stat().st_dev, root.stat().st_ino],
+                                   "head_index_config": {
+                                       "HEAD": before_admin["HEAD"], "index": before_admin["index"],
+                                       "config": before_admin.get("config", before_main[".git/config"]),
+                                   },
+                                   "seeded_content": {name: before_root[name] for name in
+                                                      ("staged.txt", "unstaged.txt", "untracked.txt")}}
+                    observed_gate.append(observation)
+                    print(json.dumps(observation))
+                    passed = passed and result.returncode == expected
+                head = adapter.native_io_path(git_dir / "HEAD")
+                original = head.read_bytes()
+                head.write_bytes(b"invalid fixture HEAD\n")
+                try:
+                    before_root, before_admin, before_main = (self.native_snapshot(path)
+                                                              for path in (root, git_dir, main))
+                    invalid = command("-c", "core.fsmonitor=false", *options, "-C", str(io_root),
+                                      "check-ignore", "--no-index", "--quiet", ".claude/runtime/.lintel-ignore-check")
+                    print(json.dumps({"invalid_argv": invalid.args, "returncode": invalid.returncode,
+                                      "stderr": invalid.stderr}))
+                    self.assertGreater(invalid.returncode, 1)
+                    self.assertEqual(self.native_snapshot(root), before_root)
+                    self.assertEqual(self.native_snapshot(git_dir), before_admin)
+                    self.assertEqual(self.native_snapshot(main), before_main)
+                finally:
+                    head.write_bytes(original)
+                if root == directory and not options:
+                    directory_without_option = passed
+            if passed:
+                print(json.dumps({"eligible_fixed_variant": {"native_C_operand": True, "extra_options": options},
+                                  "observations": len(observed_gate)}))
+                return
+        self.fail("Neither explicitly authorized native Git operand variant passed both forms.")
+
+    def default_cli(self, source, target, env, command="init", *, transaction=None, trace=None, success=True):
+        argv = [str(source / "bin/li-adapter.py"), command, "--source", str(source), "--target", str(target)]
+        if command == "init":
+            argv += ["--client", "copilot-cli"]
+        if transaction:
+            argv += ["--transaction", transaction]
+        if trace:
+            observer = r'''
+import json,runpy,sys
+events=[]
+def observe(event,values):
+    if event == "os.rename":
+        events.append([str(values[0]),str(values[1])])
+sys.addaudithook(observe)
+trace=sys.argv[1]
+sys.argv=sys.argv[2:]
+try:
+    runpy.run_path(sys.argv[0],run_name="__main__")
+finally:
+    with open(trace,"x",encoding="utf-8") as handle:
+        json.dump(events,handle)
+'''
+            argv = ["-c", observer, str(trace), *argv]
+        result = subprocess.run([sys.executable, "-B", *argv], cwd=target, env=env,
+                                text=True, encoding="utf-8", capture_output=True, timeout=300)
+        if success:
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        else:
+            self.assertNotEqual(result.returncode, 0, result.stdout)
+        return result
+
+    def test_original_default_113_128_paths_init_check_and_owned_recovery(self):
+        base, source, target, env = self.default_consumer()
+        before, source_before = self.native_snapshot(target), self.native_snapshot(source)
+        trace = base / "actual-publication-operands.json"
+        result = self.default_cli(source, target, env, trace=trace)
+        match = re.search(r"Verified file transaction: (transaction-[a-f0-9]{32}); recovery store: ([^\r\n]+)",
+                          result.stdout)
+        self.assertIsNotNone(match, result.stdout)
+        identifier, store = match.group(1), Path(match.group(2))
+        self.assertEqual(store.parent, base)
+        self.assertEqual(len(str(store)), 128)
+        self.assertTrue(store.name.startswith(".lintel-recovery-"))
+        pairs = [(str(Path(*adapter.path_identity(Path(first)))),
+                  str(Path(*adapter.path_identity(Path(second)))))
+                 for first, second in json.loads(trace.read_bytes())]
+        blobs = [(first, second) for first, second in pairs
+                 if ".pending-snapshot-" in first and Path(first).parent.name == "blobs"]
+        self.assertIn((218, 260), [(len(first), len(second)) for first, second in blobs])
+        installed = self.native_snapshot(target)
+        inventory = json.loads((target / adapter.INVENTORY).read_bytes())
+        self.assertIn(".github/lintel/lib/native_paths.py", inventory["files"])
+        self.default_cli(target / adapter.BUNDLE, target, env, "check")
+        self.default_cli(source, target, env)
+        self.assertEqual(self.native_snapshot(target), installed)
+        plan = json.loads((store / "transactions" / identifier / "plan.json").read_bytes())
+        self.assertEqual(plan["owner"], str(target))
+        self.assertEqual(plan["source"], str(source))
+        published = (target / "AGENTS.md").read_bytes()
+        recovery = json.loads(self.default_cli(source, target, env, "recover", transaction=identifier).stdout)
+        self.assertEqual(recovery["state"], "recovered")
+        self.assertEqual(recovery["store"], str(store))
+        self.assertEqual(self.native_snapshot(target), before)
+        (target / "AGENTS.md").write_bytes(published)
+        edited = self.native_snapshot(target)
+        self.default_cli(source, target, env, "recover", transaction=identifier, success=False)
+        self.assertEqual(self.native_snapshot(target), edited)
+        self.assertEqual(self.native_snapshot(source), source_before)
+        print("Observed default dimensions: fixture=94 target=113 store=128; snapshot publication=218->260.")
+
+    def test_canonical_default_caller_child_keeps_verified_parent_and_unbound_child(self):
+        base, source, target, env = self.default_consumer()
+        self.default_cli(source, target, env)
+        bundle = target / adapter.BUNDLE
+        for relative in ("bin/li-scaffold", "bin/li-lifecycle.py", "lib/native_paths.py",
+                         "lib/context_safety.py", "lib/profile_context.py", "lib/managed_transaction.py"):
+            self.assertEqual((bundle / relative).read_bytes(), adapter.source_bytes(source / relative))
+        bash = shutil.which("bash")
+        self.assertTrue(bash)
+        home = target / ".claude/runtime/lintel-home"
+        script = r'''set -euo pipefail
+source .github/lintel/lib/copilot-env.sh
+lintel_copilot_env "$PWD"
+printf '%s\n' "$LINTEL_PROFILE_REFERENCE"
+'''
+        bound = subprocess.run([bash, "--noprofile", "--norc", "-c", script],
+                               cwd=target, env=env, text=True, encoding="utf-8", capture_output=True, timeout=60)
+        self.assertEqual(bound.returncode, 0, bound.stdout + bound.stderr)
+        reference = json.loads(bound.stdout)
+        self.assertEqual(reference["generation"], 1)
+        parent_before, home_before = self.native_snapshot(target), self.native_snapshot(home)
+        source_before, user_before = self.native_snapshot(source), self.native_snapshot(Path(env["USERPROFILE"]))
+        child = base / "child consumer"
+        child.mkdir()
+        (child / "unrelated.txt").write_bytes(b"Child-owned data.\r\n")
+        bridge = r'''set -euo pipefail
+source .github/lintel/lib/copilot-env.sh
+lintel_copilot_env "$PWD"
+bash "$LINTEL_SOURCE_ROOT/bin/li-scaffold" init --target "$1"
+'''
+        result = subprocess.run([bash, "--noprofile", "--norc", "-c", bridge, "caller-child", str(child)],
+                                cwd=target, env=env, text=True, encoding="utf-8", capture_output=True, timeout=120)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        value = json.loads(result.stdout)
+        self.assertEqual(value["operation_profile_reference"], reference)
+        self.assertIsNone(value["target_profile_reference"])
+        self.assertFalse(value["required_caller_policy"])
+        self.assertEqual(self.native_snapshot(target), parent_before)
+        self.assertEqual(self.native_snapshot(home), home_before)
+        self.assertEqual(self.native_snapshot(source), source_before)
+        self.assertEqual(self.native_snapshot(Path(env["USERPROFILE"])), user_before)
+        self.assertEqual((child / "unrelated.txt").read_bytes(), b"Child-owned data.\r\n")
+        self.assertFalse((child / ".claude/runtime/profiles").exists())
+        self.assertFalse((child / ".claude/runtime/lintel-home").exists())
+        self.assertFalse((child / ".claude/profile-requirements.json").exists())
+        self.assertFalse((child / "packs").exists())
+        history = [path for path in adapter.native_io_path(home).rglob("*.json") if path.parent.name == "history"]
+        self.assertTrue(history)
+        print("Observed canonical default caller/child; longest retained history path:",
+              max(len(str(Path(*adapter.path_identity(path)))) for path in history))
+
+    def test_canonical_required_caller_policy_refuses_missing_drifted_and_conflicting_context(self):
+        base, source, target, env = self.default_consumer()
+        self.default_cli(source, target, env)
+        home = target / ".claude/runtime/lintel-home"
+        for name in ("strict", "different"):
+            pack = home / "packs" / name / "pack.yaml"
+            pack.parent.mkdir(parents=True)
+            pack.write_text(
+                f"name: {name}\nversion: 1.0.0\nvoice: {{default_tier: internal}}\n"
+                "compliance: {mode: hard}\nnavigation: {default_workflow: cycle}\n", encoding="utf-8")
+        (target / ".claude/profile-requirements.json").write_text(
+            json.dumps({"schema_version": 1, "required_pack": "strict"}), encoding="utf-8")
+        bash = shutil.which("bash")
+        self.assertTrue(bash)
+        bootstrap = r'''set -euo pipefail
+source .github/lintel/lib/copilot-env.sh
+lintel_copilot_env "$PWD"
+'''
+        bound = subprocess.run([bash, "--noprofile", "--norc", "-c",
+                                bootstrap + 'printf \'%s\\n\' "$LINTEL_PROFILE_REFERENCE"\n'],
+                               cwd=target, env=env, text=True, encoding="utf-8", capture_output=True, timeout=60)
+        self.assertEqual(bound.returncode, 0, bound.stdout + bound.stderr)
+        reference = json.loads(bound.stdout)
+        self.assertEqual(reference["name"], "strict")
+        bridge = bootstrap + 'bash "$LINTEL_SOURCE_ROOT/bin/li-scaffold" init --target "$1"\n'
+
+        def run_child(name, *, required=None, success=True, resolver_failure=False):
+            child = base / name
+            child.mkdir()
+            (child / "unrelated.txt").write_bytes(b"Retain child-owned bytes.\n")
+            if required:
+                (child / ".claude").mkdir()
+                (child / ".claude/profile-requirements.json").write_text(
+                    json.dumps({"schema_version": 1, "required_pack": required}), encoding="utf-8")
+            before = self.native_snapshot(child)
+            parent_before, home_before = self.native_snapshot(target), self.native_snapshot(home)
+            source_before = self.native_snapshot(source)
+            user_before = self.native_snapshot(Path(env["USERPROFILE"]))
+            audit_relative = ".claude/runtime/audit/pack-resolver.jsonl"
+            audit_path = target / audit_relative
+            audit_before = audit_path.read_bytes() if audit_path.exists() else b""
+            result = subprocess.run([bash, "--noprofile", "--norc", "-c", bridge, "caller-child", str(child)],
+                                    cwd=target, env=env, text=True, encoding="utf-8", capture_output=True, timeout=120)
+            parent_after = self.native_snapshot(target)
+            if resolver_failure:
+                # The accepted shell bootstrap audits refusal without changing the caller pin or home.
+                audit_after = audit_path.read_bytes()
+                self.assertTrue(audit_after.startswith(audit_before))
+                record, = [json.loads(line) for line in audit_after[len(audit_before):].splitlines()]
+                self.assertEqual(record["kind"], "pack_resolver_fail")
+                self.assertEqual(record["msg"], "operation=bootstrap profile-context-unresolved")
+                if audit_relative in parent_before:
+                    self.assertEqual(parent_after[audit_relative][1], parent_before[audit_relative][1])
+                parent_before.pop(audit_relative, None)
+                parent_after.pop(audit_relative)
+            self.assertEqual(parent_after, parent_before)
+            self.assertEqual(self.native_snapshot(home), home_before)
+            self.assertEqual(self.native_snapshot(source), source_before)
+            self.assertEqual(self.native_snapshot(Path(env["USERPROFILE"])), user_before)
+            self.assertFalse((child / ".claude/runtime/profiles").exists())
+            self.assertFalse((child / ".claude/runtime/lintel-home").exists())
+            self.assertFalse((child / "packs").exists())
+            if success:
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                value = json.loads(result.stdout)
+                self.assertTrue(value["required_caller_policy"])
+                self.assertEqual(value["operation_profile_reference"], reference)
+                self.assertIsNone(value["target_profile_reference"])
+                self.assertEqual(value["target_selection"]["requested"], "strict")
+                self.assertEqual((child / "unrelated.txt").read_bytes(), b"Retain child-owned bytes.\n")
+                self.assertEqual((child / ".claude/profile-requirements.json").exists(), bool(required))
+            else:
+                self.assertNotEqual(result.returncode, 0, result.stdout)
+                self.assertEqual(result.stdout, "")
+                self.assertEqual(self.native_snapshot(child), before)
+            return result
+
+        run_child("neutral child")
+        run_child("matching child", required="strict")
+        run_child("conflicting child", required="different", success=False)
+        current, = adapter.native_io_path(home).rglob("current-profile.json")
+        pin = current.read_bytes()
+        current.unlink()
+        try:
+            missing = run_child("missing caller", success=False, resolver_failure=True)
+            self.assertIn("PROFILE_", missing.stderr)
+            self.assertFalse(current.exists())
+        finally:
+            current.write_bytes(pin)
+        manifest = home / "packs/strict/pack.yaml"
+        content, times = manifest.read_bytes(), manifest.stat()
+        manifest.write_bytes(content + b"# same-mtime required policy drift\n")
+        os.utime(manifest, ns=(times.st_atime_ns, times.st_mtime_ns))
+        try:
+            drifted = run_child("drifted caller", success=False, resolver_failure=True)
+            self.assertIn("PROFILE_", drifted.stderr)
+        finally:
+            manifest.write_bytes(content)
+            os.utime(manifest, ns=(times.st_atime_ns, times.st_mtime_ns))
+        run_child("retained caller")
 
     def test_interrupted_adapter_publication_requires_explicit_owned_recovery(self):
         (self.target / "AGENTS.md").write_bytes(b"Consumer-owned prose.\r\n")

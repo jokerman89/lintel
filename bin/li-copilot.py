@@ -10,6 +10,7 @@ from bisect import bisect_right
 import hashlib
 import html
 from html.parser import HTMLParser
+import importlib.util
 import json
 import os
 from pathlib import Path, PurePosixPath
@@ -32,6 +33,22 @@ if not _MARKDOWN_PROVIDER.is_file():
     print(f"ERROR: Required source file is missing: {_MARKDOWN_PROVIDER}", file=sys.stderr)
     raise SystemExit(1)
 from markdown_source import LineBoundary, classify_markdown
+
+_NATIVE_PROVIDER = Path(__file__).resolve().parents[1] / "lib/native_paths.py"
+if not _NATIVE_PROVIDER.is_file():
+    print(f"ERROR: Required source file is missing: {_NATIVE_PROVIDER}", file=sys.stderr)
+    raise SystemExit(1)
+if _NATIVE_PROVIDER.is_symlink() or getattr(_NATIVE_PROVIDER.lstat(), "st_file_attributes", 0) & 0x400:
+    print(f"ERROR: Linked trusted source helper is refused: {_NATIVE_PROVIDER}", file=sys.stderr)
+    raise SystemExit(1)
+_native_spec = importlib.util.spec_from_file_location("lintel_adapter_native_paths", _NATIVE_PROVIDER)
+if _native_spec is None or _native_spec.loader is None:
+    print(f"ERROR: Cannot load required source helper: {_NATIVE_PROVIDER}", file=sys.stderr)
+    raise SystemExit(1)
+_native_paths = importlib.util.module_from_spec(_native_spec)
+_native_spec.loader.exec_module(_native_paths)
+native_io_path = _native_paths.native_io_path
+path_identity = _native_paths.path_identity
 
 SCHEMA = 1
 INVENTORY = ".github/lintel/manifest.json"
@@ -138,24 +155,26 @@ def safe_path(root: Path, relative: str) -> Path:
     path = root
     for part in rel.parts:
         path = path / part
-        if path.is_symlink() or (path.exists() and getattr(path.lstat(), "st_file_attributes", 0) & 0x400):
+        native = native_io_path(path)
+        if native.is_symlink() or (native.exists() and getattr(native.lstat(), "st_file_attributes", 0) & 0x400):
             raise ValueError(f"Symlink/reparse point refused: {path}")
-        if path != root / relative and path.exists() and not path.is_dir():
+        if path != root / relative and native.exists() and not native.is_dir():
             raise ValueError(f"Parent is not a directory: {path}")
-    if not path.resolve().is_relative_to(root):
+    resolved = Path(*path_identity(native_io_path(path).resolve()))
+    if not resolved.is_relative_to(Path(*path_identity(root))):
         raise ValueError(f"Path escapes target: {relative}")
     return path
 
 
 def read_file(root: Path, relative: str) -> bytes:
     path = safe_path(root, relative)
-    if not path.is_file():
+    if not native_io_path(path).is_file():
         raise ValueError(f"Required source file is missing: {path}")
     return source_bytes(path)
 
 
 def source_bytes(path: Path) -> bytes:
-    data = path.read_bytes()
+    data = native_io_path(path).read_bytes()
     if path.suffix in TEXT_SUFFIXES or not path.suffix:
         data = data.replace(b"\r\n", b"\n")
     return data
@@ -544,7 +563,7 @@ def bundle_documentation(source: Path, files: dict[str, bytes]) -> None:
                     # A directory link must reach real bundled children; do not glob-copy it.
                     for index in ("README.md", "_INDEX.md"):
                         candidate = posixpath.join(target, index)
-                        if safe_path(source, candidate).is_file():
+                        if native_io_path(safe_path(source, candidate)).is_file():
                             pending.append(candidate)
                             break
                 elif any(target == component or target.startswith(component + "/") for component in COMPONENTS):
@@ -570,7 +589,7 @@ def bundle_documentation(source: Path, files: dict[str, bytes]) -> None:
 def generate(source: Path, target: Path,
              clients: tuple[str, ...] = ("copilot-cli",)) -> tuple[dict[str, bytes], dict[str, bytes], str]:
     local = source == target
-    registry = load_registry(safe_path(source, "lib/cli-tiers.yaml"))
+    registry = load_registry(native_io_path(safe_path(source, "lib/cli-tiers.yaml")))
     records = [registry["surfaces"][surface_id(registry, client)] for client in clients]
     copilot = any(record["discovery"]["kind"] == "copilot" for record in records)
     files = {}
@@ -579,16 +598,18 @@ def generate(source: Path, target: Path,
     if not local:
         for component in COMPONENTS:
             folder = safe_path(source, component)
-            if not folder.is_dir():
+            native_folder = native_io_path(folder)
+            if not native_folder.is_dir():
                 raise ValueError(f"Missing source component: {component}")
-            for path in sorted(folder.rglob("*")):
+            for candidate in sorted(native_folder.rglob("*")):
+                path = folder / candidate.relative_to(native_folder)
                 relative = path.relative_to(source).as_posix()
                 safe_path(source, relative)
-                if path.is_file() and "__pycache__" not in path.parts and path.suffix != ".pyc":
+                if native_io_path(path).is_file() and "__pycache__" not in path.parts and path.suffix != ".pyc":
                     files[f"{BUNDLE}/{relative}"] = source_bytes(path)
         for canonical, entry in (("shims/copilot/COPILOT.md", "COPILOT.md"),
                                  ("shims/universal/ADAPTER.md", "ADAPTER.md")):
-            bridge = canonical if (source / canonical).is_file() else entry
+            bridge = canonical if native_io_path(source / canonical).is_file() else entry
             data = read_file(source, bridge)
             files[f"{BUNDLE}/{entry}"] = data
             files[f"{BUNDLE}/{canonical}"] = data
@@ -752,9 +773,9 @@ Add project-specific commands and motivated deviations outside its marked block.
 
 def load_inventory(target: Path, registry: dict) -> tuple[dict[str, str], dict[str, str], list[str]]:
     path = safe_path(target, INVENTORY)
-    if not path.exists():
+    if not native_io_path(path).exists():
         return {}, {}, []
-    value = json.loads(path.read_text(encoding="utf-8"))
+    value = json.loads(native_io_path(path).read_text(encoding="utf-8"))
     if (not isinstance(value, dict) or type(value.get("schema_version")) is not int
             or value["schema_version"] != SCHEMA or not isinstance(value.get("files"), dict)):
         raise ValueError("Unsupported or malformed Copilot inventory")
@@ -790,10 +811,10 @@ def protocol_updates(source: Path, target: Path, seeds: dict[str, bytes],
     updates, hashes, errors = {}, {}, []
     for relative in ("AGENTS.md", "CLAUDE.md"):
         path = safe_path(target, relative)
-        if path.exists() and not path.is_file():
+        if native_io_path(path).exists() and not native_io_path(path).is_file():
             errors.append(f"Not a regular protocol file: {relative}")
             continue
-        original = path.read_bytes() if path.exists() else seeds[relative]
+        original = native_io_path(path).read_bytes() if native_io_path(path).exists() else seeds[relative]
         starts, ends = original.count(PROTOCOL_START), original.count(PROTOCOL_END)
         if starts == ends == 0:
             if checking:
@@ -838,21 +859,22 @@ def verify_links(files: dict[str, bytes], target: Path) -> list[str]:
                 directory = urlsplit(link).path.endswith("/")
                 if key not in files and not (directory and any(path.startswith(key + "/") for path in files)):
                     missing.append(f"Missing bundled documentation target: {relative} -> {link}")
-            elif key not in files and not safe_path(target, key).is_file():
+            elif key not in files and not native_io_path(safe_path(target, key)).is_file():
                 missing.append(f"Missing generated link: {relative} -> {link}")
     return missing
 
 
 def atomic_write(path: Path, data: bytes) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    fd, tmp = tempfile.mkstemp(prefix=".lintel-", dir=path.parent)
+    native_io_path(path.parent).mkdir(parents=True, exist_ok=True)
+    fd, tmp = tempfile.mkstemp(prefix=".lintel-", dir=native_io_path(path.parent))
+    temporary = path.parent / Path(tmp).name
     try:
         with os.fdopen(fd, "wb") as handle:
             handle.write(data)
-        os.replace(tmp, path)
+        os.replace(native_io_path(temporary), native_io_path(path))
     finally:
-        if os.path.exists(tmp):
-            os.unlink(tmp)
+        if native_io_path(temporary).exists():
+            native_io_path(temporary).unlink()
 
 
 def runtime_ignore_errors(target: Path, ignore_text: str) -> list[str]:
@@ -860,7 +882,7 @@ def runtime_ignore_errors(target: Path, ignore_text: str) -> list[str]:
     if ".claude/runtime/" not in ignore_text.splitlines():
         return ["Missing .claude/runtime/ ignore rule; run init"]
     git = shutil.which("git")
-    if git and (target / ".git").exists():
+    if git and native_io_path(target / ".git").exists():
         result = subprocess.run(
             [git, "-c", "core.fsmonitor=false", "-C", str(target), "check-ignore",
              "--no-index", "--quiet", ".claude/runtime/.lintel-ignore-check"],
@@ -879,11 +901,17 @@ def main(universal: bool = False) -> None:
     parser.add_argument("--store", type=Path, help="Separate owned recovery store; defaults to a reported target sibling")
     parser.add_argument("--transaction", help="Exact transaction ID for inspect or explicit recovery")
     args = parser.parse_args()
-    target = args.target.resolve()
+    target_argument = args.target.absolute()
+    target = native_io_path(target_argument).resolve()
+    if target_argument.anchor == path_identity(target_argument)[0]:
+        target = Path(*path_identity(target))
     # Executable-relative source is stable even after copilot-env sets LINTEL_HOME
     # to project runtime storage. A source override is explicit, never ambient.
-    source = (args.source or Path(__file__).resolve().parent.parent).resolve()
-    if not target.is_dir():
+    source_argument = (args.source or Path(__file__).resolve().parent.parent).absolute()
+    source = native_io_path(source_argument).resolve()
+    if source_argument.anchor == path_identity(source_argument)[0]:
+        source = Path(*path_identity(source))
+    if not native_io_path(target).is_dir():
         raise ValueError(f"Target directory does not exist: {target}")
     if target in (Path(target.anchor), Path.home().resolve()):
         raise ValueError("Target must be a project directory, not a filesystem or user-home root")
@@ -898,7 +926,7 @@ def main(universal: bool = False) -> None:
         operation = inspect_transaction if args.command == "inspect" else recover_transaction
         print(json.dumps(operation(target, store, args.transaction), indent=2))
         return
-    registry = load_registry(safe_path(source, "lib/cli-tiers.yaml"))
+    registry = load_registry(native_io_path(safe_path(source, "lib/cli-tiers.yaml")))
     old, old_blocks, old_clients = load_inventory(target, registry)
     if universal and args.command == "init" and not args.client:
         parser.error("--client is required for init; use other for a manual canonical-file handoff")
@@ -917,19 +945,19 @@ def main(universal: bool = False) -> None:
         errors.extend(block_errors)
     # Preflight this user-owned file too, before any managed content is written.
     ignore = safe_path(target, ".gitignore")
-    if ignore.exists() and not ignore.is_file():
+    if native_io_path(ignore).exists() and not native_io_path(ignore).is_file():
         raise ValueError(".gitignore is not a regular file")
-    existing_ignore = ignore.read_text(encoding="utf-8") if ignore.exists() else ""
+    existing_ignore = native_io_path(ignore).read_text(encoding="utf-8") if native_io_path(ignore).exists() else ""
     if args.command == "init" and ".claude/runtime/" in existing_ignore.splitlines():
         errors.extend(runtime_ignore_errors(target, existing_ignore))
     attributes = safe_path(target, ".gitattributes")
-    if attributes.exists() and not attributes.is_file():
+    if native_io_path(attributes).exists() and not native_io_path(attributes).is_file():
         raise ValueError(".gitattributes is not a regular file")
-    existing_attributes = attributes.read_text(encoding="utf-8") if attributes.exists() else ""
+    existing_attributes = native_io_path(attributes).read_text(encoding="utf-8") if native_io_path(attributes).exists() else ""
     # Preserve a team's existing instruction file. A path-scoped additive entry
     # carries the Lintel pointer instead; unowned files are never adopted silently.
     entry = ".github/copilot-instructions.md"
-    if safe_path(target, entry).exists() and entry not in old:
+    if native_io_path(safe_path(target, entry)).exists() and entry not in old:
         files.pop(entry, None)
     roots = sorted({registry["surfaces"][client]["discovery"]["root"] for client in clients
                     if registry["surfaces"][client]["discovery"]["root"]})
@@ -940,12 +968,12 @@ def main(universal: bool = False) -> None:
         attribute_rules.append(".github/copilot-instructions.md text eol=lf")
     for relative in sorted(set(files) | set(old) | set(seeds)):
         path = safe_path(target, relative)
-        if path.exists() and not path.is_file():
+        if native_io_path(path).exists() and not native_io_path(path).is_file():
             errors.append(f"Not a regular file: {relative}")
             continue
         if relative in seeds:
             continue
-        actual = digest(path.read_bytes()) if path.is_file() else None
+        actual = digest(native_io_path(path).read_bytes()) if native_io_path(path).is_file() else None
         if relative in old and actual not in (None, old[relative]):
             errors.append(f"Modified managed file (preserved): {relative}")
         elif relative not in old and actual is not None:
@@ -960,7 +988,7 @@ def main(universal: bool = False) -> None:
                 errors.append(f"Obsolete managed file: {relative}")
     if args.command == "check":
         for relative in seeds:
-            if not safe_path(target, relative).is_file():
+            if not native_io_path(safe_path(target, relative)).is_file():
                 errors.append(f"Missing foundation file: {relative}")
         if not old:
             errors.append("Adapter inventory is missing; run init")
@@ -978,19 +1006,19 @@ def main(universal: bool = False) -> None:
     changes = {}
     for relative, data in sorted(files.items()):
         path = safe_path(target, relative)
-        if not path.exists() or path.read_bytes() != data:
+        if not native_io_path(path).exists() or native_io_path(path).read_bytes() != data:
             changes[relative] = data
     for relative, data in block_updates.items():
         path = safe_path(target, relative)
-        if not path.exists() or path.read_bytes() != data:
+        if not native_io_path(path).exists() or native_io_path(path).read_bytes() != data:
             changes[relative] = data
     for relative, data in seeds.items():
         path = safe_path(target, relative)
-        if not path.exists() and relative not in block_updates:
+        if not native_io_path(path).exists() and relative not in block_updates:
             changes[relative] = data
     for relative in sorted(set(old) - set(files)):
         path = safe_path(target, relative)
-        if path.exists():
+        if native_io_path(path).exists():
             changes[relative] = None
     if ".claude/runtime/" not in existing_ignore.splitlines():
         separator = "\n" if existing_ignore.endswith("\n") else "\n\n"
@@ -1005,7 +1033,7 @@ def main(universal: bool = False) -> None:
                  "files": {relative: digest(data) for relative, data in sorted(files.items())}}
     inventory_bytes = text_bytes(json.dumps(inventory, indent=2, sort_keys=True))
     inventory_path = safe_path(target, INVENTORY)
-    if not inventory_path.is_file() or inventory_path.read_bytes() != inventory_bytes:
+    if not native_io_path(inventory_path).is_file() or native_io_path(inventory_path).read_bytes() != inventory_bytes:
         changes[INVENTORY] = inventory_bytes
     expected = {relative: file_state(target, relative) for relative in changes}
     modes = {relative: None if data is None else expected[relative]["mode"] if expected[relative] else 0o600
