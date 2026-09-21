@@ -483,7 +483,7 @@ Independent first-wave review outcomes:
 |---|---|---|---|---|
 | P01 | `041417a` | PASS; source contract and ADR ownership preserved | PASS; [final](reviews/P01-final.md) | Integrated `a2ef318`; joined P07 check remains |
 | P02 | `9bdaeb4` | PASS; original findings and staged-deletion repair verified | PASS; [final](reviews/P02-final.md) | Integrated `39561c0`; final initiative checks remain |
-| P03 | `500adb3` | PASS; original preservation findings verified | PASS; [final](reviews/P03-final.md) | Integrated `9a1cf17`; assigned downstream consumers remain |
+| P03 core | `5fc657f` | PASS; native core, compatibility and original preservation | PASS; [joined core](reviews/P03-joined-path-final.md) | Integrated `1d44d2a`; classic/P10 default consumer gate remains separate |
 | P04 component | `aa73651` | PASS; all F01-F05 close | PASS; [final](reviews/P04-final.md) | Integrated `490a0f4` + reports `8964267`; final A22.7 open |
 | P05 | `b023e8c` | PASS; prior closures and Q01 retained | PASS; [first whole final](reviews/P05-excerpt-context-final.md) | Integrated `c5c8f86`; joined focused gates pass, downstream migrations/preflight remain |
 | P06 | `7425960` | PASS; C01-C07 closed | PASS; [final](reviews/P06-provider-repair-final.md) | Integrated `36593cd`; later shared-consumer and live gates open |

@@ -37,8 +37,8 @@ from the reviewed historical merge `40c2795`. Current implementation ownership:
 | P05 review evidence | `2329e71f-cd9e-473b-94cf-41c579c29a88` | ACCEPTED by `33eac071`, integrated `c5c8f86`; current profile/review and focused gates pass, idle |
 | P06 host adapters | `324863ff-e7cf-4abf-b449-04dd0f096170` | Component ACCEPTED/integrated `36593cd`; provider `7425960`, final review `1067da29`; idle |
 | P07 profile context | `b9352dfe-1c1e-4ea3-b7d9-0fd008d39b3d` | Long-path repair ACCEPTED by `a7450597`, integrated `c344133` with reports; joined checks pass, idle |
-| P08 work lifecycle | `f2c305ac-e8b0-4b02-b6cd-c7de598964cf` | `af5c939` keeps F01/F02/F03 open; `44e2ef7` frozen, design-only root re-plan requested |
-| P10 installer lifecycle | `5ea6c88c-68c1-4712-8f55-adecdfe0061f` | F01 closed by `00a0bef` on `4407827`; frozen awaiting reviewed path dependency; whole spec/D01/D03/quality blocked |
+| P08 work lifecycle | `f2c305ac-e8b0-4b02-b6cd-c7de598964cf` | Root grammar/native-report guard repair authorized `679c6b8`; prior findings and wider gates remain open |
+| P10 installer lifecycle | `5ea6c88c-68c1-4712-8f55-adecdfe0061f` | Accepted-core consumer follow-up authorized `2180b55`, acknowledged; F01 closed, D01/D03/whole quality still open |
 
 All are `lintel-builder` sessions with explicit ownership, local commits, report paths
 and no remote authorization. P01/P02 and the owned P04-P07 components are accepted.
