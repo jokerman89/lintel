@@ -35,7 +35,7 @@ BOOTSTRAP = (
 class ProfileLifecycle(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory(prefix="lintel-profile-")
-        self.addCleanup(self.tmp.cleanup)
+        self.addCleanup(self.cleanup)
         self.base = Path(self.tmp.name)
         self.source = self.base / "installed source"
         self.target = self.base / "target"
@@ -46,7 +46,7 @@ class ProfileLifecycle(unittest.TestCase):
         (self.target / ".claude").mkdir()
         self.store.mkdir(parents=True)
         for relative in (
-            "lib/pack-resolver.sh", "lib/profile_context.py",
+            "lib/pack-resolver.sh", "lib/profile_context.py", "lib/native_paths.py",
             "lib/profile-context-schema.json", "lib/pack-schema.yaml",
             "lib/copilot-env.sh", "lib/paths.sh", "lib/orientator-routing.sh", "bin/_audit.sh",
             "lib/context_safety.py", "bin/li-lifecycle", "bin/li-lifecycle.py",
@@ -69,6 +69,14 @@ class ProfileLifecycle(unittest.TestCase):
             "LINTEL_PROFILE_CONTEXT": "synthetic-work",
             "PYTHONDONTWRITEBYTECODE": "1",
         })
+
+    def cleanup(self):
+        root = Path(self.tmp.name).absolute()
+        self.assertEqual(root, self.base.absolute())
+        self.assertTrue(root.name.startswith("lintel-profile-"))
+        if os.name == "nt":
+            self.tmp.name = "\\\\?\\" + str(root)
+        self.tmp.cleanup()
 
     def shell(self, code, *, env=None, success=True, error_data=False, source_resolver=True):
         preamble = 'source "$LINTEL_SOURCE_ROOT/lib/pack-resolver.sh"\n' if source_resolver else ""

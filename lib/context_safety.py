@@ -1,14 +1,15 @@
 # component: context-safety
-# implements: ADR-0005, ADR-0006, ADR-0010
+# implements: ADR-0005, ADR-0006, ADR-0010, ADR-0031
 # intent: .claude/plans/universal-implementation/packages/P03.md
 # constraints: stdlib; explicit roots; no shell evaluation or host-capacity mutation
-# last_intent_review: 2026-09-20
+# last_intent_review: 2026-09-21
 """Bounded context manifests and owned-file primitives; never executes selected text."""
 from __future__ import annotations
 
 import argparse
 from fnmatch import fnmatchcase
 import hashlib
+import importlib.util
 import json
 import os
 from pathlib import Path, PurePosixPath
@@ -19,13 +20,43 @@ import tempfile
 from typing import Sequence
 import unicodedata
 
+_NATIVE_PATHS = Path(__file__).resolve().with_name("native_paths.py")
+if not _NATIVE_PATHS.is_file():
+    raise ImportError(f"Required trusted source helper is missing: {_NATIVE_PATHS}")
+if _NATIVE_PATHS.is_symlink() or getattr(_NATIVE_PATHS.lstat(), "st_file_attributes", 0) & 0x400:
+    raise ImportError(f"Linked trusted source helper is refused: {_NATIVE_PATHS}")
+_native_spec = importlib.util.spec_from_file_location("lintel_context_native_paths", _NATIVE_PATHS)
+if _native_spec is None or _native_spec.loader is None:
+    raise ImportError(f"Cannot load required trusted source helper: {_NATIVE_PATHS}")
+_native_paths = importlib.util.module_from_spec(_native_spec)
+_native_spec.loader.exec_module(_native_paths)
+native_io_path = _native_paths.native_io_path
+path_identity = _native_paths.path_identity
+
 SKIP_DIRS = {".git", ".hg", ".svn", ".venv", "node_modules", "__pycache__"}
 MAX_CANDIDATES = 10000
 
 
 def is_link(path: Path) -> bool:
-    return path.is_symlink() or bool(path.exists() and
-                                    getattr(path.lstat(), "st_file_attributes", 0) & 0x400)
+    try:
+        info = native_io_path(path).lstat()
+    except FileNotFoundError:
+        return False
+    return stat.S_ISLNK(info.st_mode) or bool(getattr(info, "st_file_attributes", 0) & 0x400)
+
+
+def _resolved_logical(path: Path) -> Path:
+    resolved = native_io_path(path).resolve()
+    # Preserve a caller-selected extended root, but never introduce that I/O
+    # spelling into an ordinary logical root or serialized ownership record.
+    if os.name == "nt" and path.anchor == path_identity(path)[0]:
+        return Path(*path_identity(resolved))
+    return resolved
+
+
+def _path_is_within(path: Path, root: Path) -> bool:
+    parent = path_identity(root)
+    return path_identity(path)[:len(parent)] == parent
 
 
 def checked_root(value: Path) -> Path:
@@ -33,9 +64,9 @@ def checked_root(value: Path) -> Path:
     for part in (root, *root.parents):
         if is_link(part):
             raise ValueError(f"Symlink/reparse root refused: {part}")
-    if not root.is_dir() or root == Path(root.anchor):
+    if not native_io_path(root).is_dir() or root == Path(root.anchor):
         raise ValueError(f"An explicit non-root directory is required: {root}")
-    return root.resolve()
+    return _resolved_logical(root)
 
 
 def relative_path(value: str) -> str:
@@ -69,25 +100,25 @@ def safe_path(root: Path, relative: str) -> Path:
         path = path / part
         if is_link(path):
             raise ValueError(f"Symlink/reparse path refused: {path}")
-        if path != root / relative and path.exists() and not path.is_dir():
+        if path != root / relative and native_io_path(path).exists() and not native_io_path(path).is_dir():
             raise ValueError(f"Parent is not a directory: {path}")
-    if not path.resolve().is_relative_to(root):
+    if not _path_is_within(_resolved_logical(path), root):
         raise ValueError(f"Path escapes root: {relative}")
     return path
 
 
 def read_owned(root: Path, relative: str, max_bytes: int | None = None) -> tuple[bytes, dict]:
     path = safe_path(root, relative)
-    before = path.lstat()
+    before = native_io_path(path).lstat()
     if not stat.S_ISREG(before.st_mode):
         raise ValueError(f"Not a regular file: {path}")
     if max_bytes is not None and before.st_size > max_bytes:
         raise ValueError(f"File exceeds byte bound: {relative}")
     flags = os.O_RDONLY | getattr(os, "O_BINARY", 0) | getattr(os, "O_NOFOLLOW", 0)
-    with os.fdopen(os.open(path, flags), "rb") as stream:
+    with os.fdopen(os.open(native_io_path(path), flags), "rb") as stream:
         data = stream.read() if max_bytes is None else stream.read(max_bytes + 1)
         opened = os.fstat(stream.fileno())
-    after = safe_path(root, relative).lstat()
+    after = native_io_path(safe_path(root, relative)).lstat()
     identity = lambda s: (s.st_dev, s.st_ino, s.st_size, s.st_mtime_ns, s.st_mode)
     if identity(before) != identity(opened) or identity(before) != identity(after):
         raise ValueError(f"File changed while reading: {relative}")
@@ -99,7 +130,7 @@ def read_owned(root: Path, relative: str, max_bytes: int | None = None) -> tuple
 
 def file_state(root: Path, relative: str) -> dict | None:
     path = safe_path(root, relative)
-    if not path.exists():
+    if not native_io_path(path).exists():
         return None
     return read_owned(root, relative)[1]
 
@@ -107,23 +138,23 @@ def file_state(root: Path, relative: str) -> dict | None:
 def atomic_write(root: Path, relative: str, data: bytes, mode: int = 0o600, *,
                  expected: dict | None = None, check_expected: bool = False) -> None:
     path = safe_path(root, relative)
-    path.parent.mkdir(parents=True, exist_ok=True)
+    native_io_path(path.parent).mkdir(parents=True, exist_ok=True)
     path = safe_path(root, relative)
-    fd, name = tempfile.mkstemp(prefix=".lintel-write-", dir=path.parent)
-    temporary = Path(name)
+    fd, name = tempfile.mkstemp(prefix=".lintel-write-", dir=native_io_path(path.parent))
+    temporary = path.parent / Path(name).name
     try:
         with os.fdopen(fd, "wb") as stream:
             stream.write(data)
             stream.flush()
             os.fsync(stream.fileno())
-        temporary.chmod(mode)
+        native_io_path(temporary).chmod(mode)
         safe_path(root, relative)
         if check_expected and file_state(root, relative) != expected:
             raise ValueError(f"File changed while staging its replacement: {relative}")
-        os.replace(temporary, path)
+        os.replace(native_io_path(temporary), native_io_path(path))
     finally:
-        if temporary.exists():
-            temporary.unlink()
+        if native_io_path(temporary).exists():
+            native_io_path(temporary).unlink()
 
 
 def json_bytes(value: dict) -> bytes:
@@ -133,10 +164,10 @@ def json_bytes(value: dict) -> bytes:
 def checkpoint_directory(directory: Path, *, create=False) -> Path:
     directory = Path(os.path.abspath(directory))
     for parent in (directory, *directory.parents):
-        if is_link(parent) or (parent.exists() and not parent.is_dir()):
+        if is_link(parent) or (native_io_path(parent).exists() and not native_io_path(parent).is_dir()):
             raise ValueError(f"Unsafe checkpoint directory: {parent}")
     if create:
-        directory.mkdir(parents=True, exist_ok=True)
+        native_io_path(directory).mkdir(parents=True, exist_ok=True)
     return checked_root(directory)
 
 
@@ -150,7 +181,7 @@ def reserve_checkpoint(directory: Path, name: str) -> Path:
                      name.removesuffix("-context-save.md") + f"-copy{number:04d}-context-save.md")
         path = safe_path(directory, candidate)
         try:
-            with path.open("xb"):
+            with native_io_path(path).open("xb"):
                 pass
             return path
         except FileExistsError:
@@ -175,7 +206,7 @@ def matches(path: str, pattern: str, *, root: Path | None = None) -> bool:
         if alias.name == candidate.name or is_link(alias):
             return False
         try:
-            return candidate.samefile(alias)
+            return native_io_path(candidate).samefile(native_io_path(alias))
         except FileNotFoundError:
             return False
 
@@ -208,19 +239,19 @@ def _glob_files(root: Path, pattern: str) -> list[str]:
             break
         prefix.append(part)
     start = safe_path(root, "/".join(prefix)) if prefix else root
-    if start.is_file():
+    if native_io_path(start).is_file():
         return [start.relative_to(root).as_posix()] if len(prefix) == len(pattern.split("/")) else []
-    if not start.exists():
+    if not native_io_path(start).exists():
         return []
     result, examined = [], 0
-    for folder, dirs, names in os.walk(start, followlinks=False, onerror=raise_walk_error):
+    for folder, dirs, names in os.walk(native_io_path(start), followlinks=False, onerror=raise_walk_error):
         dirs[:] = sorted(d for d in dirs if d.casefold() not in SKIP_DIRS and not is_link(Path(folder) / d))
         examined += len(dirs) + len(names)
         if examined > MAX_CANDIDATES:
             raise ValueError("Context search exceeds 10000 entries; narrow the glob.")
         for name in sorted(names):
             path = Path(folder) / name
-            relative = path.relative_to(root).as_posix()
+            relative = path.relative_to(native_io_path(root)).as_posix()
             if not is_link(path) and matches(relative, pattern, root=root):
                 safe_path(root, relative)
                 result.append(relative)
@@ -229,16 +260,16 @@ def _glob_files(root: Path, pattern: str) -> list[str]:
 
 def _root_relative(root: Path, path: Path) -> str:
     absolute = Path(os.path.abspath(path))
-    if not absolute.is_relative_to(root):
+    if not _path_is_within(_resolved_logical(absolute), root):
         raise ValueError(f"State path is outside the selected root: {path}")
-    return relative_path(absolute.relative_to(root).as_posix())
+    return relative_path(PurePosixPath(*path_identity(absolute)[len(path_identity(root)):]).as_posix())
 
 
 def _exclusions(root: Path, path: Path | None) -> tuple[list[str], list[str]]:
     if path is None:
         return [], []
     relative = _root_relative(root, path)
-    if not safe_path(root, relative).exists():
+    if not native_io_path(safe_path(root, relative)).exists():
         return [], []
     data = json.loads(read_owned(root, relative, 65536)[0])
     if (not isinstance(data, dict) or type(data.get("schema_version")) is not int
@@ -260,7 +291,7 @@ def _excluded_identities(root: Path, paths: Sequence[str]) -> set[tuple[int, int
     for relative in paths:
         path = safe_path(root, relative)
         try:
-            info = path.lstat()
+            info = native_io_path(path).lstat()
         except FileNotFoundError:
             continue
         if stat.S_ISREG(info.st_mode):
@@ -316,9 +347,9 @@ def select_files(root: Path, paths: Sequence[str] = (), patterns: Sequence[str] 
     for value in paths:
         relative = selector_path(value)
         path = safe_path(root, relative)
-        if not path.exists():
+        if not native_io_path(path).exists():
             unmatched.append(value)
-        elif not path.is_file():
+        elif not native_io_path(path).is_file():
             raise ValueError(f"Literal target is not a file; use a bounded glob: {value}")
         else:
             candidates.add(relative)
@@ -331,7 +362,7 @@ def select_files(root: Path, paths: Sequence[str] = (), patterns: Sequence[str] 
     for relative in sorted(candidates):
         alias_excluded = False
         if omitted_keys:
-            info = safe_path(root, relative).lstat()
+            info = native_io_path(safe_path(root, relative)).lstat()
             alias_excluded = (info.st_dev, info.st_ino) in omitted_keys
         if ({p.casefold() for p in PurePosixPath(relative).parts} & SKIP_DIRS
                 or relative in omitted_paths or alias_excluded

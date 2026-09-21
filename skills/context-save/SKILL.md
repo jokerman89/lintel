@@ -129,6 +129,9 @@ To restore this session: `/context-restore <checkpoint-path>` OR paste this file
   Slug derives from the explicit root/cwd basename. An unborn Git branch retains its actual name.
 - **No `.claude/runtime/sessions/<branch>/`:** `context_save_path` creates it.
 - **Existing checkpoint with same timestamp:** reserve a `-copyNNNN` suffix. Never overwrite.
+- **Long Windows paths:** the shared helper checks ancestry and reserves/reads through a
+  same-location native I/O spelling, while returning the unchanged logical checkpoint
+  path. It does not shorten repository keys, labels or roots, or alter OS/global Git settings.
 - **Operator pastes recent turns inline:** capture them verbatim under a `## Recent turns (operator-pasted)` section.
 
 ## Compliance integration

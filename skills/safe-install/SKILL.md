@@ -23,6 +23,15 @@ This is a local file safeguard, not a universal transactional installer. Product
 services, external hooks, credentials, databases and host settings need their own approved
 plans. A file snapshot cannot undo their side effects.
 
+Windows file operations use the trusted shared `lib/native_paths.py` representation
+helper after P03's ownership, containment and link checks. Reads, metadata, parents,
+temporary files, both publication operands, locks and owned cleanup use the same-location
+native spelling; this is not a shorter store or a host-policy change. The logical roots,
+filenames, manifest/result/restore formats and explicit caller-selected spellings remain
+unchanged. A missing or linked source helper is an error before mutation, never a reason
+to load code from the target or `PYTHONPATH`. Other installers and their direct I/O need
+their own verified integration; this helper does not establish blanket default-install support.
+
 ## Preflight and ownership
 
 1. Resolve the trusted Lintel **source** bundle and the separately authorized **target**

@@ -116,6 +116,7 @@ ADAPTER_RESOURCES = (
     "lib/client_capabilities.py", "lib/cli-tiers.yaml", "lib/cli-tiers.sh",
     "bin/li-client-capabilities.py", "bin/li-adapter.py", "lib/pack-schema.yaml",
     "lib/markdown_source.py", "lib/profile_context.py", "lib/profile-context-schema.json",
+    "lib/native_paths.py",
     "lib/context_safety.py", "lib/managed_transaction.py",
     "bin/li-snapshot.py", "bin/li-managed-transaction.py",
     "bin/li-review-evidence.py", "bin/li-review-log", "bin/li-review-read",
