@@ -32,13 +32,13 @@ from the reviewed historical merge `40c2795`. Current implementation ownership:
 |---|---|---|
 | P01 trusted helpers | `b3853be7-dbbe-4161-9566-7e7d2c50e05e` | ACCEPTED and integrated `a2ef318`; idle, combined P07 gate remains |
 | P02 sync binding | `2e21aa98-3b40-46e7-885d-2ec4161ec35d` | ACCEPTED and integrated `39561c0`; idle, no real private sync activated |
-| P03 context safety | `9f06eebf-a3ee-4867-95ad-eb6e1d22a6d5` | Earlier product ACCEPTED/integrated `9a1cf17`; new joined path investigation is read-only, no repair authority |
+| P03 context safety | `9f06eebf-a3ee-4867-95ad-eb6e1d22a6d5` | Earlier product accepted; investigation `990b0daa` preserved `7516db4`; design-only shared-path seam pending, no repair authority |
 | P04 Swarming | `a8960a09-fcd7-4652-a9b6-74ad6a94a029` | Component ACCEPTED/integrated `490a0f4` + report history `8964267`; idle until explicit A22.7 |
 | P05 review evidence | `2329e71f-cd9e-473b-94cf-41c579c29a88` | ACCEPTED by `33eac071`, integrated `c5c8f86`; current profile/review and focused gates pass, idle |
 | P06 host adapters | `324863ff-e7cf-4abf-b449-04dd0f096170` | Component ACCEPTED/integrated `36593cd`; provider `7425960`, final review `1067da29`; idle |
 | P07 profile context | `b9352dfe-1c1e-4ea3-b7d9-0fd008d39b3d` | Long-path repair ACCEPTED by `a7450597`, integrated `c344133` with reports; joined checks pass, idle |
-| P08 work lifecycle | `f2c305ac-e8b0-4b02-b6cd-c7de598964cf` | Frozen PARTIAL `8d477701` / report `062ffc6c`; independent reviewer `9dbf0a9b`, no acceptance |
-| P10 installer lifecycle | `5ea6c88c-68c1-4712-8f55-adecdfe0061f` | `62ffb9a` rejected by `1d871338`; original owner receives bounded F01 migration-row repair |
+| P08 work lifecycle | `f2c305ac-e8b0-4b02-b6cd-c7de598964cf` | `9faebd2b` SPEC FAIL; narrow F01/F02/F03 repair under `04e0ba9`; no acceptance |
+| P10 installer lifecycle | `5ea6c88c-68c1-4712-8f55-adecdfe0061f` | Frozen F01 repair `4407827` / report `c1de05c7`; same-reviewer F01-only recheck; D01/D03 and quality blocked |
 
 All are `lintel-builder` sessions with explicit ownership, local commits, report paths
 and no remote authorization. P01/P02/P03 plus the owned P04-P07 components are accepted.
@@ -57,8 +57,8 @@ repair their own findings. All prior reports remain preserved in `reviews/` and 
 | P05 | Final `33eac071` accepts `b023e8c`; integrated `c5c8f86`; earlier rejections retained | `6ed9c7df-4845-4d70-88c7-f0746ab28059` |
 | P06 | Final `1067da29`; complete component SPEC/QUALITY PASS at `7425960`; integrated | `d2a89ac3-151a-4dc0-ab09-1f3a62465cab` |
 | P07 | Final `a7450597` accepts `4d001463`; integrated through `56de830`, earlier `a8de574`/`3d8e715` preserved | `a7d78944-c02c-4909-a060-2c4f2a754b00` |
-| P08 partial | Current `8d477701` / report `062ffc6c`; A08/A10/advisory A13.3 only, preservation blockers retained | `9dbf0a9b-750d-45c2-968c-41a5acb11c92` |
-| P10 | Report `1d871338` SPEC FAIL/F01; quality NOT STARTED; new repair checkpoint pending | `1578dfd8-f239-4eba-989b-3c4bde3e5792` |
+| P08 partial | Report `9faebd2b` SPEC FAIL, quality NOT STARTED; new repair checkpoint pending | `9dbf0a9b-750d-45c2-968c-41a5acb11c92` |
+| P10 | `c1de05c7` / `4407827` F01-only recheck; complete spec/default preservation and quality remain blocked | `1578dfd8-f239-4eba-989b-3c4bde3e5792` |
 
 ## Accepted local integrations
 
@@ -332,6 +332,25 @@ Only `reports/P03-joined-path-investigation.md` may be written; no product chang
 global long-path settings, shorter acceptance paths or actual-home access. Await its
 evidence and repair alternatives before issuing a single bounded implementation card.
 Do not duplicate the investigation in P08/P10 or treat inheritance as acceptance.
+
+That investigation is frozen in report-only `990b0daa752fc36b1612e9c897f128bb1ca4cf88`,
+preserved as `7516db4`. It separates ordinary Python I/O failures at 260+ characters,
+Git's 283-character ref handling, and external stdlib cleanup. Same-location native
+syscalls and per-command Git options are diagnostic controls only. The coordinator
+selected preservation of full/default paths as the planning direction and requested
+an exact design-only shared spelling/API/ownership proposal from P03. No product,
+P07 extraction, settings change or path-shortening repair is authorized yet.
+
+P08 report `9faebd2b7d027283a21a470c8e81473e39bd7a23` is preserved as `a56aab4`:
+F01/F02 P1 negation/safety questions can recommend SHIP; F03 P2 PLAN still names the
+global analysis output. No workflow executed. `04e0ba9` authorizes only the original
+owner's routing/PLAN/focused-test/report repairs; all preservation/A13 gates remain.
+
+P10 F01 repair `4407827f563fecac2ac6bf04a6bd0fc9cdd05641` / report-only
+`c1de05c7f18770f34f950a8c4d4e194892da3291` changes only the existing migration
+parser and focused tests. Its new producer hash and unchanged contracts/providers
+were verified. The same reviewer is rechecking F01 only; default-store D01 and cleanup
+D03 still prevent complete spec/quality acceptance. No P10 product is integrated.
 
 Coordinator repairs for P10's reported shared-suite failures are committed separately:
 `d53dc38` changes only the reviewed evidence CLI's Git mode to 100755, preserving its
