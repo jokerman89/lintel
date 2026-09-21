@@ -45,7 +45,7 @@ grep -qx 'Structure: HEAD (2 required) + BODY (content_type discriminator; 3 req
 # A malformed contract must fail before touching an existing output tree.
 mkdir -p "$TMP/source/bin" "$TMP/source/lib"
 cp "$ROOT/bin/li-wiki-gen" "$TMP/source/bin/"
-cp "$ROOT/lib/wiki-gen.sh" "$ROOT/lib/profile_context.py" "$ROOT/lib/pack-schema.yaml" "$TMP/source/lib/"
+cp "$ROOT/lib/wiki-gen.sh" "$ROOT/lib/profile_context.py" "$ROOT/lib/native_paths.py" "$ROOT/lib/pack-schema.yaml" "$TMP/source/lib/"
 cp "$TMP/envelope.yaml" "$TMP/source/lib/envelope-schema.yaml"
 printf 'keep this output\n' > "$TMP/docs/wiki/schemas.md"
 cp "$TMP/docs/wiki/schemas.md" "$TMP/schema-sentinel"

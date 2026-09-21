@@ -39,6 +39,7 @@ RESOLVER_RESOURCES = (
     "lib/pack-resolver.sh",
     "lib/paths.sh",
     "lib/profile_context.py",
+    "lib/native_paths.py",
     "lib/profile-context-schema.json",
     "lib/pack-schema.yaml",
     "packs/_default/pack.yaml",
@@ -95,7 +96,23 @@ def snapshot(path: Path) -> dict[str, bytes]:
 class Fixture(unittest.TestCase):
     def setUp(self) -> None:
         self.temp = tempfile.TemporaryDirectory(prefix="lintel-p01-")
-        self.addCleanup(self.temp.cleanup)
+        created_name = self.temp.name
+        created_root = Path(created_name).resolve()
+
+        def cleanup() -> None:
+            self.assertEqual(self.temp.name, created_name)
+            self.assertEqual(str(Path(self.temp.name).resolve()), str(created_root))
+            self.assertTrue(created_root.name.startswith("lintel-p01-"))
+            directory = str(created_root)
+            if os.name == "nt" and not directory.startswith("\\\\?\\"):
+                directory = "\\\\?\\UNC\\" + directory[2:] if directory.startswith("\\\\") else "\\\\?\\" + directory
+            self.temp.name = directory
+            try:
+                self.temp.cleanup()
+            finally:
+                self.temp.name = created_name
+
+        self.addCleanup(cleanup)
         self.base = Path(self.temp.name)
         self.source = self.base / "trusted source"
         self.target = self.base / "target project"

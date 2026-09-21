@@ -10,11 +10,13 @@ import io
 import os
 from pathlib import Path
 import re
+import shutil
 import runpy
 import subprocess
 import sys
 import tempfile
 import unittest
+import uuid
 from unittest.mock import patch
 
 SOURCE = Path(__file__).resolve().parents[2]
@@ -25,7 +27,7 @@ import context_safety as safety
 class ContextSafetyTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory(prefix="lintel-context-safety-")
-        self.addCleanup(self.temp.cleanup)
+        self.addCleanup(self.cleanup)
         self.base = Path(self.temp.name).resolve()
         self.root = self.base / "project with spaces"
         self.root.mkdir()
@@ -34,8 +36,153 @@ class ContextSafetyTests(unittest.TestCase):
         (self.root / "docs" / "two.md").write_text("architecture two")
         (self.root / "unrelated.txt").write_text("keep this")
 
+    def cleanup(self):
+        root = Path(self.temp.name).absolute()
+        self.assertEqual(root, self.base)
+        self.assertTrue(root.name.startswith("lintel-context-safety-"))
+        if os.name == "nt":
+            self.temp.name = "\\\\?\\" + str(root)
+        self.temp.cleanup()
+
+    @unittest.skipUnless(os.name == "nt", "native Windows default-length checkpoint I/O")
+    def test_native_checkpoint_thresholds_keep_logical_paths_and_owned_bytes(self):
+        name = "20260921-120000-r" + "a" * 40 + "-repo-mywork-context-save.md"
+        for length in (259, 260, 268, 278, 277, 290):
+            with self.subTest(length=length):
+                base = self.base / f"cp{length}"
+                suffix = ".claude/runtime/sessions/main/" + name
+                padding = length - len(str(base)) - len(suffix) - 2
+                self.assertGreater(padding, 0, "fixture depth cannot represent the required exact length")
+                directory = base / ("x" * padding) / ".claude/runtime/sessions/main"
+                expected = directory / name
+                self.assertEqual(len(str(expected)), length)
+                path = safety.reserve_checkpoint(directory, name)
+                self.assertEqual(str(path), str(expected))
+                self.assertFalse(str(path).startswith("\\\\?\\"))
+                safety.atomic_write(directory, name, b"owned checkpoint\n")
+                self.assertEqual(safety.read_owned(directory, name)[0], b"owned checkpoint\n")
+                self.assertNotEqual(safety.reserve_checkpoint(directory, name), path)
+
+    @unittest.skipUnless(os.name == "nt", "native long parent/selection I/O")
+    def test_native_long_parents_read_select_cool_and_case_identity(self):
+        root = self.base
+        while len(str(root)) < 285:
+            root /= "nested-runtime-" + "x" * 35
+        native = Path("\\\\?\\" + str(root))
+        native.mkdir(parents=True)
+        before = str(root)
+        safety.atomic_write(root, "docs/Notes.md", b"actual source\n")
+        self.assertEqual(safety.checked_root(root), root)
+        selected = safety.select_files(root, patterns=["docs/**/*.md"])
+        self.assertEqual(selected["source_root"], before)
+        self.assertEqual([f["path"] for f in selected["files"]], ["docs/Notes.md"])
+        policy = root / ".claude/runtime/state/context-ignore.json"
+        safety.update_exclusions(root, policy, ["DOCS/NOTES.MD"])
+        self.assertEqual(safety.select_files(root, patterns=["docs/*.md"], exclude_file=policy)["files"], [])
+        self.assertEqual(safety.read_owned(root, "docs/Notes.md")[0], b"actual source\n")
+        explicit = Path("\\\\?\\" + str(root))
+        self.assertEqual(safety.select_files(explicit, paths=["docs/Notes.md"])["source_root"], str(explicit))
+        self.assertEqual(str(root), before)
+
+    def test_required_native_module_never_loads_a_target_or_pythonpath_substitute(self):
+        source = self.base / "source"
+        source.mkdir()
+        target = self.base / "target"
+        target.mkdir()
+        marker = target / "untrusted-module-executed"
+        (target / "native_paths.py").write_text(
+            "from pathlib import Path\nPath('untrusted-module-executed').write_text('bad')\n")
+        env = dict(os.environ, PYTHONPATH=str(target), PYTHONDONTWRITEBYTECODE="1")
+        for helper in ("context_safety.py", "profile_context.py"):
+            shutil.copyfile(SOURCE / "lib" / helper, source / helper)
+            run = subprocess.run([sys.executable, "-B", str(source / helper), "--help"],
+                                 cwd=target, env=env, capture_output=True, text=True)
+            self.assertNotEqual(run.returncode, 0)
+            self.assertIn("native_paths.py", run.stderr)
+            self.assertFalse(marker.exists(), helper)
+        self.assertEqual(sorted(p.name for p in target.iterdir()), ["native_paths.py"])
+        shutil.copyfile(SOURCE / "lib/native_paths.py", source / "native_paths.py")
+        for helper in ("context_safety.py", "profile_context.py"):
+            run = subprocess.run([sys.executable, "-B", str(source / helper), "--help"],
+                                 cwd=target, env=env, capture_output=True, text=True)
+            self.assertEqual(run.returncode, 0, run.stderr)
+            self.assertFalse(marker.exists(), helper)
+        (source / "native_paths.py").unlink()
+        (source / "native_paths.py").symlink_to(target / "native_paths.py")
+        for helper in ("context_safety.py", "profile_context.py"):
+            run = subprocess.run([sys.executable, "-B", str(source / helper), "--help"],
+                                 cwd=target, env=env, capture_output=True, text=True)
+            self.assertNotEqual(run.returncode, 0)
+            self.assertFalse(marker.exists(), helper)
+
+    @unittest.skipUnless(os.name == "nt", "native Windows exact snapshot publication operands")
+    def test_native_snapshot_atomic_publication_uses_218_to_260_without_shortening(self):
+        parent = self.base.parent
+        count = 94 - len(str(parent)) - 1
+        self.assertGreater(count, 0, "exact fixture requires an authorized temp parent below 94 characters")
+        self.assertLessEqual(count, 64)
+        base = parent / (uuid.uuid4().hex * 2)[:count]
+        base.mkdir()
+
+        def cleanup():
+            self.assertEqual(base.parent, parent)
+            self.assertEqual(len(str(base)), 94)
+            shutil.rmtree(Path("\\\\?\\" + str(base)))
+        self.addCleanup(cleanup)
+        root = base / (".lintel-recovery-" + "a" * 16) / "snapshots" / (
+            ".pending-snapshot-" + "b" * 32)
+        root.mkdir(parents=True)
+        relative = "blobs/" + "c" * 64
+        destination = root / relative
+        self.assertEqual(len(str(destination)), 260)
+        original_replace = os.replace
+        calls = []
+
+        def observe(source, target):
+            calls.append((Path(source), Path(target)))
+            return original_replace(source, target)
+
+        with patch.object(safety.os, "replace", side_effect=observe):
+            safety.atomic_write(root, relative, b"original snapshot bytes\n")
+        self.assertEqual(len(calls), 1)
+        self.assertEqual(len(str(Path(*safety.path_identity(calls[0][0])))), 218)
+        self.assertEqual(len(str(Path(*safety.path_identity(calls[0][1])))), 260)
+        self.assertEqual(safety.read_owned(root, relative)[0], b"original snapshot bytes\n")
+        before = safety.file_state(root, relative)
+        with patch.object(safety.os, "replace", side_effect=OSError("injected replace failure")), self.assertRaises(OSError):
+            safety.atomic_write(root, relative, b"must not replace", expected=before, check_expected=True)
+        self.assertEqual(safety.file_state(root, relative), before)
+        self.assertEqual([p.name for p in Path("\\\\?\\" + str(destination.parent)).iterdir()], ["c" * 64])
+
+    @unittest.skipUnless(os.name == "nt", "native long path ancestry and namespace refusals")
+    def test_native_long_link_escape_and_namespace_refusals_precede_temp_creation(self):
+        root = self.base / "long-ancestry"
+        while len(str(root)) < 285:
+            root /= "parent-segment-" + "x" * 35
+        Path("\\\\?\\" + str(root)).mkdir(parents=True)
+        outside = self.base / "outside"
+        outside.mkdir()
+        link = Path("\\\\?\\" + str(root / "linked"))
+        link.symlink_to(outside, target_is_directory=True)
+        try:
+            with patch.object(safety.tempfile, "mkstemp", side_effect=AssertionError("unsafe temp creation")):
+                for selected in (root, Path("\\\\?\\" + str(root))):
+                    with self.assertRaises(ValueError):
+                        safety.atomic_write(selected, "linked/escape.txt", b"must not escape")
+                    for relative in ("../outside", "doc:stream", "NUL", "trailing.", "trailing "):
+                        with self.subTest(relative=relative), self.assertRaises(ValueError):
+                            safety.atomic_write(selected, relative, b"refused")
+                for invalid in (Path(r"\\.\pipe\context"), Path(r"\\?\GLOBALROOT\Device\Disk\file")):
+                    with self.assertRaises(ValueError):
+                        safety.checked_root(invalid)
+            self.assertEqual(list(outside.iterdir()), [])
+        finally:
+            link.unlink()
+
     def test_shared_helpers_defer_annotations_for_python39_syntax(self):
         modules = (
+            (SOURCE / "lib/native_paths.py", runpy.run_path(str(SOURCE / "lib/native_paths.py")),
+             ("path_identity", "native_io_path")),
             (SOURCE / "lib/context_safety.py", vars(safety),
              ("read_owned", "file_state", "atomic_write")),
             (SOURCE / "bin/li-snapshot.py", runpy.run_path(str(SOURCE / "bin/li-snapshot.py")),
@@ -444,8 +591,14 @@ class ContextSafetyTests(unittest.TestCase):
         self.assertEqual((self.root / "unrelated.txt").read_text(), "keep this")
 
     def test_isolated_bisect_recipe_preserves_dirty_source_on_success_and_error(self):
+        if os.name == "nt":
+            base = self.base / "long-source"
+            long_root = base / ("x" * (191 - len(str(base)) - 1))
+            self.assertEqual(len(str(long_root)), 191)
+            shutil.copytree(self.root, long_root)
+            self.root = long_root
         env = dict(os.environ, HOME=str(self.base), GIT_CONFIG_NOSYSTEM="1",
-                   GIT_CONFIG_GLOBAL=str(self.base / "no-global-config"))
+                   GIT_CONFIG_GLOBAL=str(self.base / "no-global-config"), GIT_OPTIONAL_LOCKS="0")
 
         def git(*args):
             result = subprocess.run(["git", "-C", str(self.root), *args], env=env,
@@ -470,6 +623,9 @@ class ContextSafetyTests(unittest.TestCase):
         target.write_text("user unstaged\n")
         before = (git("status", "--porcelain=v1", "-z"), git("diff", "--binary"),
                   git("diff", "--cached", "--binary"), git("rev-parse", "HEAD"))
+        caller_files = (".git/config", ".git/index", "value.txt", "unrelated.txt")
+        caller_state = {name: ((self.root / name).read_bytes(), (self.root / name).stat().st_mode & 0o777)
+                        for name in caller_files}
         body = (SOURCE / "agents/engineering/RegressionDetective.md").read_text(encoding="utf-8")
         recipe = re.search(r"```bash\n(# lintel-isolated-bisect.*?)\n```", body, re.S)
         self.assertIsNotNone(recipe)
@@ -479,6 +635,9 @@ class ContextSafetyTests(unittest.TestCase):
         repro.write_text('test "$(cat value.txt)" = good\n')
         for name, command, expected in (("success", repro, 0), ("failure", self.base / "missing", 1)):
             trial = self.base / ("trial-" + name)
+            lock = self.root / ".git/worktrees" / trial.name / "refs/bisect" / ("good-" + good + ".lock")
+            if os.name == "nt":
+                self.assertEqual(len(str(lock)), 283)
             result = subprocess.run(["bash", str(script), str(self.root), bad, good,
                                      str(command), str(trial)], env=env, capture_output=True)
             self.assertEqual(result.returncode == 0, expected == 0, result.stderr)
@@ -496,6 +655,9 @@ class ContextSafetyTests(unittest.TestCase):
             self.assertEqual(before, (git("status", "--porcelain=v1", "-z"), git("diff", "--binary"),
                                       git("diff", "--cached", "--binary"), git("rev-parse", "HEAD")))
             self.assertEqual((self.root / "unrelated.txt").read_text(), "keep this")
+            self.assertEqual(caller_state, {
+                name: ((self.root / name).read_bytes(), (self.root / name).stat().st_mode & 0o777)
+                for name in caller_files})
             git("worktree", "remove", str(trial))
 
 
