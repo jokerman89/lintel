@@ -223,197 +223,269 @@ class CopilotKit(unittest.TestCase):
         self.assertTrue(any("docs/native-path-index/" in error
                             for error in adapter.verify_links({**files, **seeds}, self.target)))
 
+    def _git_fixture(self):
+        home, self._git_caller, temporary = (self.target / name for name in ("home", "caller", "temp"))
+        for path in (home, self._git_caller, temporary):
+            path.mkdir()
+            (path / "unrelated-sentinel.txt").write_bytes(b"Retain this fixture-owned sentinel.\r\n")
+        self._git_empty_path = temporary / "no-git"
+        self._git_empty_path.mkdir()
+        self._git_env = {key: os.environ[key] for key in
+                         ("SystemRoot", "WINDIR", "COMSPEC", "SYSTEMDRIVE", "PATHEXT", "PATH")
+                         if key in os.environ}
+        self._git_env.update({
+            "HOME": str(home), "USERPROFILE": str(home), "HOMEDRIVE": home.drive,
+            "HOMEPATH": str(home)[len(home.drive):],
+            "APPDATA": str(home / "AppData/Roaming"), "LOCALAPPDATA": str(home / "AppData/Local"),
+            "XDG_CONFIG_HOME": str(home / ".config"), "XDG_CACHE_HOME": str(home / ".cache"),
+            "XDG_DATA_HOME": str(home / ".local/share"), "XDG_STATE_HOME": str(home / ".local/state"),
+            "TEMP": str(temporary), "TMP": str(temporary), "TMPDIR": str(temporary),
+            "CLAUDE_CONFIG_DIR": str(home / ".claude"), "COPILOT_HOME": str(home / ".copilot"),
+            "GSTACK_STATE_DIR": str(home / ".gstack"),
+            "LINTEL_SOURCE_ROOT": str(self.source), "LINTEL_REPO_ROOT": str(self._git_caller),
+            "LINTEL_HOME": str(home / "lintel"), "LINTEL_PACKS_DIR": str(home / "lintel/packs"),
+            "LINTEL_ACTIVE_PACK_FILE": str(home / "lintel/packs/active-pack"),
+            "LINTEL_AUDIT_DIR": str(self._git_caller / ".claude/runtime/audit"),
+            "LINTEL_JOBS_DIR": str(self._git_caller / ".claude/runtime/jobs"),
+            "LINTEL_JOBS_ACTIVE": str(self._git_caller / ".claude/runtime/jobs/_active.md"),
+            "LINTEL_JOBS_ARCHIVE": str(self._git_caller / ".claude/runtime/jobs/_archive"),
+            "LINTEL_JOBS_REGISTRY": str(home / "lintel/jobs/_active.md"),
+            "LINTEL_PRIVATE_ROLES_DIR": str(home / "lintel/private/roles"),
+            "PACK_CACHE_FILE": str(home / "lintel/cache.json"), "LINTEL_JOBS_NO_INIT": "1",
+            "GIT_CONFIG_NOSYSTEM": "1", "GIT_CONFIG_GLOBAL": str(home / ".gitconfig"),
+            "GIT_TERMINAL_PROMPT": "0", "GIT_AUTHOR_NAME": "Synthetic fixture",
+            "GIT_COMMITTER_NAME": "Synthetic fixture", "GIT_AUTHOR_EMAIL": "fixture@example.invalid",
+            "GIT_COMMITTER_EMAIL": "fixture@example.invalid", "PYTHONDONTWRITEBYTECODE": "1",
+            "PYTHONUTF8": "1", "PYTHONIOENCODING": "utf-8",
+        })
+        self._git_executable = shutil.which("git", path=self._git_env["PATH"])
+        self.assertTrue(self._git_executable, "Real Git is required; an unavailable control is not a skip.")
+        version = self._git_run([self._git_executable, "--version"])
+        self.assertEqual(version.returncode, 0, version.stderr)
+        self._git_version = version.stdout.strip()
+
+    def _git_run(self, argv, env=None):
+        env = env or self._git_env
+        nonpaths = {"LINTEL_JOBS_NO_INIT"}
+        for key, value in env.items():
+            if (key.startswith(("LINTEL_", "XDG_")) and key not in nonpaths) or key in (
+                    "HOME", "USERPROFILE", "APPDATA", "LOCALAPPDATA", "TEMP", "TMP", "TMPDIR",
+                    "CLAUDE_CONFIG_DIR", "COPILOT_HOME", "GSTACK_STATE_DIR", "PACK_CACHE_FILE",
+                    "GIT_CONFIG_GLOBAL"):
+                self.assertTrue(Path(value).is_relative_to(self.base), (key, value))
+        home, caller = Path(env["LINTEL_HOME"]), Path(env["LINTEL_REPO_ROOT"])
+        for path in (home / "profile.yaml", home / "sessions/profiles", home / "audit",
+                     caller / ".claude/runtime", caller / ".claude/runtime/profiles"):
+            self.assertTrue(path.is_relative_to(self.base), path)
+        self.assertNotIn("LINTEL_RECOVERY_STORE", env)
+        self.assertTrue(self._git_caller.is_relative_to(self.base))
+        return subprocess.run(argv, cwd=self._git_caller, env=env, text=True, encoding="utf-8",
+                              capture_output=True, timeout=300)
+
+    def _git_fixture_state(self):
+        native = adapter.native_io_path(self.base)
+        return {path.relative_to(native).as_posix():
+                (path.lstat().st_mode, hashlib.sha256(path.read_bytes()).hexdigest() if path.is_file() else None)
+                for path in (native, *native.rglob("*"))}
+
+    def _git_operation(self, target, command, *, installed=False, available=True, expected=None):
+        from managed_transaction import default_store
+
+        self.assertTrue(target.is_relative_to(self.base))
+        store = default_store(target)
+        self.assertTrue(store.is_relative_to(self.base))
+        source = target / adapter.BUNDLE if installed else self.source
+        env = dict(self._git_env, LINTEL_SOURCE_ROOT=str(source))
+        if not available:
+            env["PATH"] = str(self._git_empty_path)
+        before = self._git_fixture_state()
+        git_required = adapter.native_io_path(target / ".git").exists()
+        observed = None
+        if available:
+            argv = [self._git_executable, "-c", "core.fsmonitor=false", "-C", str(target),
+                    "check-ignore", "--no-index", "--quiet", ".claude/runtime/.lintel-ignore-check"]
+            if git_required:
+                observed = self._git_run(argv, env)
+                if expected == "error":
+                    self.assertNotIn(observed.returncode, (0, 1), observed.stdout + observed.stderr)
+                elif expected is not None:
+                    self.assertEqual(observed.returncode, expected, observed.stdout + observed.stderr)
+        else:
+            lookup = self._git_run([sys.executable, "-I", "-B", "-c",
+                                   "import shutil; print(shutil.which('git'))"], env)
+            self.assertEqual((lookup.returncode, lookup.stdout), (0, "None\n"), lookup.stderr)
+        self.assertEqual(self._git_fixture_state(), before, "The independent producer must be read-only.")
+        ignore = adapter.native_io_path(target / ".gitignore")
+        original_ignore = ignore.read_text(encoding="utf-8") if ignore.exists() else ""
+        has_rule = ".claude/runtime/" in original_ignore.splitlines()
+        verification_error = git_required and (not available or observed.returncode not in (0, 1))
+        negated = git_required and available and observed.returncode == 1 and has_rule
+        missing = command == "check" and not has_rule
+        failure = verification_error or negated or missing
+        result = self._git_run(
+            [sys.executable, "-B", str(source / "bin/li-copilot.py"), command,
+             "--target", str(target), "--source", str(source)], env)
+        after = self._git_fixture_state()
+        state_hash = lambda state: hashlib.sha256(json.dumps(state, sort_keys=True).encode()).hexdigest()
+        changed = sorted(path for path in before.keys() | after.keys() if before.get(path) != after.get(path))
+        print(json.dumps({
+            "git_version": self._git_version, "target": str(target),
+            "lengths": [len(str(target)), len(str(target / ".git"))],
+            "producer": {"argv": observed.args, "exit": observed.returncode, "stdout": observed.stdout,
+                         "stderr": observed.stderr} if observed is not None else
+                        {"available": available, "required": git_required},
+            "adapter": {"argv": result.args, "exit": result.returncode,
+                        "stdout": result.stdout, "stderr": result.stderr},
+            "state_before": state_hash(before), "state_after": state_hash(after),
+            "all_paths_bytes_modes_preserved": before == after, "changed_paths": changed,
+            "head_index_config": {path: value for path, value in before.items()
+                                 if "/.git/" in path and Path(path).name in ("HEAD", "index", "config")},
+        }))
+        self.assertNotIn("Traceback", result.stderr)
+        if failure:
+            self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+            self.assertEqual(result.stdout, "")
+            self.assertEqual(after, before, "Refusal must precede target, inventory, receipt and store writes.")
+            if verification_error:
+                if available:
+                    self.assertIn("Git ignore verification failed", result.stderr)
+                    self.assertIn(f"exit {observed.returncode}", result.stderr)
+                    if observed.stderr.strip():
+                        self.assertIn(observed.stderr.strip(), result.stderr)
+                else:
+                    self.assertIn("Git ignore verification unavailable", result.stderr)
+                    self.assertIn("git executable not found", result.stderr)
+                self.assertIn(str(target), result.stderr)
+                self.assertNotIn("review conflicting ignore rules", result.stderr)
+            elif negated:
+                self.assertIn("Git does not confirm", result.stderr)
+            else:
+                self.assertIn("Missing .claude/runtime/ ignore rule", result.stderr)
+        else:
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            self.assertIn("Lintel kit verified:" if command == "check" else "Lintel kit ready:", result.stdout)
+            if command == "check":
+                self.assertEqual(after, before)
+            else:
+                allowed = tuple(path.relative_to(self.base).as_posix() for path in (target, store))
+                protected = lambda path: not any(path == prefix or path.startswith(prefix + "/") for prefix in allowed)
+                self.assertEqual({key: value for key, value in after.items() if protected(key)},
+                                 {key: value for key, value in before.items() if protected(key)})
+                entry = (target / ".git").relative_to(self.base).as_posix()
+                self.assertEqual({key: value for key, value in after.items() if key == entry or key.startswith(entry + "/")},
+                                 {key: value for key, value in before.items() if key == entry or key.startswith(entry + "/")})
+                for name in ("staged.txt", "unstaged.txt", "untracked.txt"):
+                    key = (target / name).relative_to(self.base).as_posix()
+                    self.assertEqual(after.get(key), before.get(key), name)
+                self.assertTrue(ignore.read_text(encoding="utf-8").startswith(original_ignore))
+                self.assertIn(".claude/runtime/", ignore.read_text(encoding="utf-8").splitlines())
+                self.assertTrue(adapter.native_io_path(target / adapter.INVENTORY).is_file())
+        return observed
+
     def test_long_git_metadata_runs_real_effective_ignore_validation(self):
+        self._git_fixture()
         target = self.long_metadata_root()
         shallow = self.target / "git-source"
         shallow.mkdir()
-        git = shutil.which("git")
-        self.assertTrue(git)
-        version = subprocess.run([git, "--version"], capture_output=True, text=True, encoding="utf-8")
-        self.assertEqual(version.returncode, 0, version.stderr)
-        result = subprocess.run([git, "init", "--quiet", str(shallow)],
-                                capture_output=True, text=True, encoding="utf-8")
-        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        initialized = self._git_run([self._git_executable, "init", "--quiet", str(shallow)])
+        self.assertEqual(initialized.returncode, 0, initialized.stderr)
         for name in ("staged.txt", "unstaged.txt"):
             (shallow / name).write_bytes(b"Original indexed bytes.\r\n")
-        result = subprocess.run([git, "-C", str(shallow), "add", "--", "staged.txt", "unstaged.txt"],
-                                capture_output=True, text=True, encoding="utf-8")
-        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        added = self._git_run([self._git_executable, "-C", str(shallow), "add", "--", "staged.txt", "unstaged.txt"])
+        self.assertEqual(added.returncode, 0, added.stderr)
         (shallow / "unstaged.txt").write_bytes(b"Retain the unstaged edit.\r\n")
         (shallow / "untracked.txt").write_bytes(b"Retain the untracked file.\r\n")
         shutil.copytree(shallow, adapter.native_io_path(target), dirs_exist_ok=True)
-        self.assertEqual(len(str(target / ".git")), 261)
+        self.assertEqual((len(str(target)), len(str(target / ".git"))), (256, 261))
         self.assertTrue(adapter.native_io_path(target / ".git").is_dir())
-        failure = ["Git does not confirm .claude/runtime/ is ignored; review conflicting ignore rules"]
-        for current in (target, shallow):
-            for name in (".git/HEAD", ".git/index", ".git/config"):
-                self.assertTrue(adapter.native_io_path(current / name).is_file(), name)
-            for content, code in ((".claude/runtime/\n", 0),
-                                  (".claude/runtime/\n!.claude/runtime/\n!.claude/runtime/**\n", 1)):
-                with self.subTest(root=str(current), ignored=code == 0):
-                    adapter.native_io_path(current / ".gitignore").write_text(content, encoding="utf-8")
-                    before = self.native_snapshot(current)
-                    windows = ["-c", "core.longpaths=true"] if os.name == "nt" else []
-                    argv = [git, "-c", "core.fsmonitor=false", *windows, "-C", str(current),
-                            "check-ignore", "--no-index", "--quiet", ".claude/runtime/.lintel-ignore-check"]
-                    observed = subprocess.run(argv, capture_output=True, text=True, encoding="utf-8")
-                    preserved = self.native_snapshot(current) == before
-                    print(json.dumps({"git_version": version.stdout.strip(), "effective_ignore_argv": argv,
-                                      "expected_exit": code, "returncode": observed.returncode,
-                                      "stderr": observed.stderr, "bytes_modes_preserved": preserved,
-                                      "head_index_config": {name: before[name] for name in
-                                                            (".git/HEAD", ".git/index", ".git/config")}}))
-                    self.assertEqual(observed.returncode, code, observed.stderr)
-                    self.assertTrue(preserved)
-                    self.assertEqual(adapter.runtime_ignore_errors(current, content), [] if code == 0 else failure)
-                    self.assertEqual(self.native_snapshot(current), before)
-            adapter.native_io_path(current / ".git/HEAD").write_bytes(b"not a Git HEAD\n")
-            before = self.native_snapshot(current)
-            observed = subprocess.run(argv, capture_output=True, text=True, encoding="utf-8")
-            print(json.dumps({"invalid_git_argv": argv, "returncode": observed.returncode,
-                              "stderr": observed.stderr, "bytes_modes_preserved": self.native_snapshot(current) == before}))
-            self.assertGreater(observed.returncode, 1, observed.stdout + observed.stderr)
-            self.assertEqual(adapter.runtime_ignore_errors(current, content), failure)
-            self.assertEqual(self.native_snapshot(current), before)
+        self.assertFalse(adapter.native_io_path(target / ".gitignore").exists())
+        for content in (None, ".claude/runtime/\n",
+                        ".claude/runtime/\n!.claude/runtime/\n!.claude/runtime/**\n"):
+            if content is not None:
+                adapter.native_io_path(target / ".gitignore").write_text(content, encoding="utf-8")
+            for command in ("init", "check"):
+                with self.subTest(command=command, ignore=content):
+                    self._git_operation(target, command)
+        adapter.native_io_path(target / ".gitignore").write_text(".claude/runtime/\n", encoding="utf-8")
+        adapter.native_io_path(target / ".git/HEAD").write_bytes(b"not a Git HEAD\n")
+        for command in ("init", "check"):
+            with self.subTest(command=command, invalid_git=True):
+                self._git_operation(target, command, expected="error")
+        print(json.dumps({"long_linked_worktree_positive": "UNVERIFIED; no setup or compatibility retry attempted"}))
 
-    def test_native_git_operand_directory_and_linked_worktree_gate(self):
-        directory = self.long_metadata_root()
-        worktree = directory.with_name("worktree-" + "x" * (len(directory.name) - len("worktree-")))
-        main = self.base / "git-main"
-        admin = main / ".git/worktrees" / worktree.name
-        self.assertEqual(len(str(self.base)), 109)
-        self.assertFalse(main.exists())
-        self.assertEqual((len(str(directory)), len(str(worktree / ".git"))), (256, 261))
-        print(json.dumps({"fixture_preflight": {
-            "controller": [str(main), len(str(main))], "admin": [str(admin), len(str(admin))],
-            "consumer": [str(worktree), len(str(worktree))],
-            "git_entry": [str(worktree / ".git"), len(str(worktree / ".git"))],
-        }}))
+    def test_git_verification_directory_linked_and_plain_folder_controls(self):
+        self._git_fixture()
+        main, linked, plain = (self.base / name for name in ("git-main", "git-linked-control", "git-plain-control"))
         main.mkdir()
-        git = shutil.which("git")
-        self.assertTrue(git)
-        env = dict(os.environ, GIT_AUTHOR_NAME="Synthetic fixture", GIT_COMMITTER_NAME="Synthetic fixture",
-                   GIT_AUTHOR_EMAIL="fixture@example.invalid", GIT_COMMITTER_EMAIL="fixture@example.invalid")
-
-        def command(*argv):
-            return subprocess.run([git, *argv], env=env, text=True, encoding="utf-8", capture_output=True)
-
-        initialized = command("init", "--quiet", str(main))
+        initialized = self._git_run([self._git_executable, "init", "--quiet", str(main)])
         self.assertEqual(initialized.returncode, 0, initialized.stderr)
         for name in ("staged.txt", "unstaged.txt"):
             (main / name).write_bytes(b"Committed fixture content.\r\n")
-        added = command("-C", str(main), "add", "--", "staged.txt", "unstaged.txt")
+        added = self._git_run([self._git_executable, "-C", str(main), "add", "--", "staged.txt", "unstaged.txt"])
         self.assertEqual(added.returncode, 0, added.stderr)
-        committed = command("-C", str(main), "commit", "--quiet", "-m", "fixture: seed native Git probe")
+        committed = self._git_run([self._git_executable, "-C", str(main), "commit", "--quiet",
+                                   "-m", "fixture: seed supported Git controls"])
         self.assertEqual(committed.returncode, 0, committed.stderr)
-        (main / "staged.txt").write_bytes(b"Staged fixture edit.\r\n")
-        added = command("-C", str(main), "add", "--", "staged.txt")
-        self.assertEqual(added.returncode, 0, added.stderr)
-        (main / "unstaged.txt").write_bytes(b"Unstaged fixture edit.\r\n")
-        (main / "untracked.txt").write_bytes(b"Untracked fixture bytes.\r\n")
-        shutil.copytree(main, adapter.native_io_path(directory), dirs_exist_ok=True)
-        self.assertTrue(adapter.native_io_path(directory / ".git").is_dir())
-        self.assertEqual((len(str(directory)), len(str(worktree))), (256, 256))
-        version = command("--version")
-        self.assertEqual(version.returncode, 0, version.stderr)
-        observed_gate = []
-        linked_attempted, linked_available, directory_without_option = False, False, False
-        for options in ([], ["-c", "core.longpaths=true"]):
-            if options and os.name != "nt":
-                break
-            if options and linked_attempted and not linked_available and directory_without_option:
-                break
-            passed = True
-            for root in (directory, worktree):
-                if root == worktree:
-                    if not linked_attempted:
-                        linked_attempted = True
-                        before_setup = self.native_snapshot(main)
-                        setup_options = ["-c", "core.longpaths=true"] if os.name == "nt" else []
-                        linked = command(*setup_options, "-C", str(main), "worktree", "add",
-                                         "--detach", str(worktree), "HEAD")
-                        after_setup = self.native_snapshot(main)
-                        self.assertEqual(after_setup[".git/config"], before_setup[".git/config"])
-                        print(json.dumps({"fixture_worktree_argv": linked.args, "returncode": linked.returncode,
-                                          "stdout": linked.stdout, "stderr": linked.stderr,
-                                          "controller_config_preserved": True,
-                                          "setup_created": sorted(set(after_setup) - set(before_setup))}))
-                        linked_available = linked.returncode == 0
-                    if not linked_available:
-                        passed = False
-                        continue
-                    self.assertTrue(adapter.native_io_path(worktree / ".git").is_file())
-                io_root = adapter.native_io_path(root)
-                self.assertTrue(root.samefile(io_root))
-                self.assertEqual((root.stat().st_dev, root.stat().st_ino),
-                                 (io_root.stat().st_dev, io_root.stat().st_ino))
-                identity = command("-c", "core.fsmonitor=false", *options, "-C", str(io_root),
-                                   "rev-parse", "--show-toplevel", "--absolute-git-dir")
-                if identity.returncode:
-                    print(json.dumps({"identity_argv": identity.args, "returncode": identity.returncode,
-                                      "stderr": identity.stderr}))
-                    passed = False
-                    continue
-                top, git_dir_text = identity.stdout.splitlines()
-                git_dir = Path(git_dir_text)
-                self.assertTrue(io_root.samefile(adapter.native_io_path(Path(top))))
-                self.assertTrue(adapter.native_io_path(git_dir).is_dir())
-                if root == directory:
-                    self.assertTrue(adapter.native_io_path(git_dir).samefile(adapter.native_io_path(root / ".git")))
-                else:
-                    for name in ("staged.txt", "unstaged.txt", "untracked.txt"):
-                        adapter.native_io_path(root / name).write_bytes((main / name).read_bytes())
-                    adapter.native_io_path(git_dir / "index").write_bytes((main / ".git/index").read_bytes())
-                for text, expected in ((".claude/runtime/\n", 0),
-                                       (".claude/runtime/\n!.claude/runtime/\n!.claude/runtime/**\n", 1)):
-                    adapter.native_io_path(root / ".gitignore").write_text(text, encoding="utf-8")
-                    before_root, before_admin, before_main = (self.native_snapshot(path)
-                                                              for path in (root, git_dir, main))
-                    result = command("-c", "core.fsmonitor=false", *options, "-C", str(io_root),
-                                     "check-ignore", "--no-index", "--quiet", ".claude/runtime/.lintel-ignore-check")
-                    preserved = (self.native_snapshot(root) == before_root
-                                 and self.native_snapshot(git_dir) == before_admin
-                                 and self.native_snapshot(main) == before_main)
-                    self.assertTrue(preserved)
-                    observation = {"version": version.stdout.strip(), "form": "directory" if root == directory else "worktree-file",
-                                   "logical_root": str(root), "io_root": str(io_root),
-                                   "lengths": [len(str(root)), len(str(root / ".git"))],
-                                   "identity_argv": identity.args, "git_top": top, "git_dir": git_dir_text,
-                                   "argv": result.args, "expected": expected, "returncode": result.returncode,
-                                   "stderr": result.stderr, "state_preserved": preserved,
-                                   "filesystem_identity": [root.stat().st_dev, root.stat().st_ino],
-                                   "head_index_config": {
-                                       "HEAD": before_admin["HEAD"], "index": before_admin["index"],
-                                       "config": before_admin.get("config", before_main[".git/config"]),
-                                   },
-                                   "seeded_content": {name: before_root[name] for name in
-                                                      ("staged.txt", "unstaged.txt", "untracked.txt")}}
-                    observed_gate.append(observation)
-                    print(json.dumps(observation))
-                    passed = passed and result.returncode == expected
-                head = adapter.native_io_path(git_dir / "HEAD")
-                original = head.read_bytes()
-                head.write_bytes(b"invalid fixture HEAD\n")
-                try:
-                    before_root, before_admin, before_main = (self.native_snapshot(path)
-                                                              for path in (root, git_dir, main))
-                    invalid = command("-c", "core.fsmonitor=false", *options, "-C", str(io_root),
-                                      "check-ignore", "--no-index", "--quiet", ".claude/runtime/.lintel-ignore-check")
-                    print(json.dumps({"invalid_argv": invalid.args, "returncode": invalid.returncode,
-                                      "stderr": invalid.stderr}))
-                    self.assertGreater(invalid.returncode, 1)
-                    self.assertEqual(self.native_snapshot(root), before_root)
-                    self.assertEqual(self.native_snapshot(git_dir), before_admin)
-                    self.assertEqual(self.native_snapshot(main), before_main)
-                finally:
-                    head.write_bytes(original)
-                if root == directory and not options:
-                    directory_without_option = passed
-            if passed:
-                print(json.dumps({"eligible_fixed_variant": {"native_C_operand": True, "extra_options": options},
-                                  "observations": len(observed_gate)}))
-                return
-        self.fail("Neither explicitly authorized native Git operand variant passed both forms.")
+        config = (main / ".git/config").read_bytes()
+        setup = self._git_run([self._git_executable, "-C", str(main), "worktree", "add", "--detach", str(linked), "HEAD"])
+        self.assertEqual(setup.returncode, 0, setup.stdout + setup.stderr)
+        self.assertEqual((main / ".git/config").read_bytes(), config)
+        self.assertTrue((main / ".git").is_dir())
+        self.assertTrue((linked / ".git").is_file())
+        print(json.dumps({"supported_control_setup": setup.args, "exit": setup.returncode,
+                          "controller_config_preserved": True, "not_long_linked_acceptance": True}))
+        for root in (main, linked):
+            before = self._git_fixture_state()
+            identity = self._git_run([self._git_executable, "-c", "core.fsmonitor=false", "-C", str(root),
+                                      "rev-parse", "--show-toplevel", "--absolute-git-dir"])
+            self.assertEqual(identity.returncode, 0, identity.stderr)
+            self.assertEqual(self._git_fixture_state(), before)
+            top, git_dir_text = identity.stdout.splitlines()
+            git_dir = Path(git_dir_text)
+            self.assertTrue(root.samefile(Path(top)))
+            self.assertTrue(git_dir.is_dir())
+            if root == main:
+                self.assertTrue(git_dir.samefile(root / ".git"))
+            else:
+                self.assertTrue(git_dir.is_relative_to(main / ".git/worktrees"))
+            print(json.dumps({"supported_control_identity": identity.args, "top": top, "git_dir": git_dir_text,
+                              "lengths": [len(str(root)), len(str(root / ".git")), len(str(git_dir))]}))
+            (root / "staged.txt").write_bytes(b"Staged fixture edit.\r\n")
+            added = self._git_run([self._git_executable, "-C", str(root), "add", "--", "staged.txt"])
+            self.assertEqual(added.returncode, 0, added.stderr)
+            (root / "unstaged.txt").write_bytes(b"Unstaged fixture edit.\r\n")
+            (root / "untracked.txt").write_bytes(b"Untracked fixture bytes.\r\n")
+            ignore = root / ".gitignore"
+            ignore.write_text("# User ignores\n*.local\n", encoding="utf-8")
+            self._git_operation(root, "check", expected=1)
+            self._git_operation(root, "init", expected=1)
+            self._git_operation(root, "check", installed=True, expected=0)
+            valid = ignore.read_text(encoding="utf-8")
+            ignore.write_text(valid + "!.claude/runtime/\n!.claude/runtime/**\n", encoding="utf-8")
+            for command in ("init", "check"):
+                with self.subTest(root=root.name, command=command, negated=True):
+                    self._git_operation(root, command, installed=True, expected=1)
+            ignore.write_text(valid, encoding="utf-8")
+            head = git_dir / "HEAD"
+            saved_head = head.read_bytes()
+            head.write_bytes(b"invalid fixture HEAD\n")
+            try:
+                for command in ("init", "check"):
+                    with self.subTest(root=root.name, command=command, invalid_git=True):
+                        self._git_operation(root, command, installed=True, expected="error")
+            finally:
+                head.write_bytes(saved_head)
+            for content in ("# Missing required rule\n", valid):
+                ignore.write_text(content, encoding="utf-8")
+                for command in ("init", "check"):
+                    with self.subTest(root=root.name, command=command, unavailable_git=True, ignore=content):
+                        self._git_operation(root, command, installed=True, available=False)
+            ignore.write_text(valid, encoding="utf-8")
+            self._git_operation(root, "check", installed=True, expected=0)
+        plain.mkdir()
+        (plain / ".gitignore").write_text("# Plain folder custom rule\n*.local\n", encoding="utf-8")
+        self._git_operation(plain, "init", available=False)
+        self._git_operation(plain, "check", installed=True, available=False)
 
     def default_cli(self, source, target, env, command="init", *, transaction=None, trace=None, success=True):
         argv = [str(source / "bin/li-adapter.py"), command, "--source", str(source), "--target", str(target)]

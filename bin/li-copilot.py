@@ -877,18 +877,28 @@ def atomic_write(path: Path, data: bytes) -> None:
             native_io_path(temporary).unlink()
 
 
-def runtime_ignore_errors(target: Path, ignore_text: str) -> list[str]:
-    """Check the required rule and, in Git repos, its effective negation behavior."""
-    if ".claude/runtime/" not in ignore_text.splitlines():
-        return ["Missing .claude/runtime/ ignore rule; run init"]
-    git = shutil.which("git")
-    if git and native_io_path(target / ".git").exists():
-        result = subprocess.run(
-            [git, "-c", "core.fsmonitor=false", "-C", str(target), "check-ignore",
-             "--no-index", "--quiet", ".claude/runtime/.lintel-ignore-check"],
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
-        if result.returncode:
+def runtime_ignore_errors(target: Path, ignore_text: str, *, allow_missing_rule: bool = False) -> list[str]:
+    """Verify Git before allowing init to repair a missing required rule."""
+    has_rule = ".claude/runtime/" in ignore_text.splitlines()
+    if native_io_path(target / ".git").exists():
+        git = shutil.which("git")
+        if not git:
+            return [f"Git ignore verification unavailable for {target}: git executable not found"]
+        try:
+            result = subprocess.run(
+                [git, "-c", "core.fsmonitor=false", "-C", str(target), "check-ignore",
+                 "--no-index", "--quiet", ".claude/runtime/.lintel-ignore-check"],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
+        except OSError as error:
+            return [f"Git ignore verification unavailable for {target}: {error}"]
+        if result.returncode not in (0, 1):
+            details = b"\n".join(output for output in (result.stderr, result.stdout) if output)
+            diagnostic = details.decode("utf-8", errors="replace").strip() or "no diagnostic output"
+            return [f"Git ignore verification failed for {target} (exit {result.returncode}): {diagnostic}"]
+        if result.returncode == 1 and has_rule:
             return ["Git does not confirm .claude/runtime/ is ignored; review conflicting ignore rules"]
+    if not has_rule and not allow_missing_rule:
+        return ["Missing .claude/runtime/ ignore rule; run init"]
     return []
 
 
@@ -948,8 +958,8 @@ def main(universal: bool = False) -> None:
     if native_io_path(ignore).exists() and not native_io_path(ignore).is_file():
         raise ValueError(".gitignore is not a regular file")
     existing_ignore = native_io_path(ignore).read_text(encoding="utf-8") if native_io_path(ignore).exists() else ""
-    if args.command == "init" and ".claude/runtime/" in existing_ignore.splitlines():
-        errors.extend(runtime_ignore_errors(target, existing_ignore))
+    if args.command == "init":
+        errors.extend(runtime_ignore_errors(target, existing_ignore, allow_missing_rule=True))
     attributes = safe_path(target, ".gitattributes")
     if native_io_path(attributes).exists() and not native_io_path(attributes).is_file():
         raise ValueError(".gitattributes is not a regular file")

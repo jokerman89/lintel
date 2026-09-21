@@ -64,6 +64,29 @@ client setting alone. A pointer does not prove actual host memory activation.
 `li-pack-scaffold` validates an extension skeleton before publishing its files and refuses
 existing README/config/manifest collisions; a skeleton is not an implemented extension.
 
+## Repository Git verification
+
+Repository adapter `init` and `check` verify the effective runtime ignore rule when the
+target has a `.git` directory or linked-worktree file. Git exit 0 confirms the probe is
+ignored; exit 1 means it is not ignored. `init` may add a missing literal rule after
+either supported result, while `check` reports the missing rule. An existing rule that
+is effectively negated is refused rather than overwritten. Plain folders without
+`.git` metadata do not require Git.
+
+Missing Git, a launch error or any other exit is a verification failure, not evidence
+of conflicting ignore rules. The diagnostic retains the logical target and actual
+exit/error context. Refusal precedes managed-file, inventory, receipt and recovery-store
+writes, including fresh initialization before adding the rule. Explicit `inspect` and
+`recover` operations keep their existing independent ownership checks.
+
+Git for Windows 2.55.0.windows.3 failed this read-only operation with exit 128 in the
+observed 256-character target / 261-character `.git` fixture, even though Python could
+access the same files. These are observed fixture dimensions, not a universal cutoff.
+The corresponding long linked-worktree positive case remains unverified. The adapter
+does not change Git options, redirect the target or retry another path spelling.
+Preserve the refused state and resolve the external Git operation limit before retrying;
+Python native-path support alone does not establish Git compatibility.
+
 ## Python-runtime file transactions
 
 The adapter retains its existing manifest, selected clients, managed blocks, line-ending
