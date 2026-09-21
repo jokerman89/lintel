@@ -32,12 +32,12 @@ from the reviewed historical merge `40c2795`. Current implementation ownership:
 |---|---|---|
 | P01 trusted helpers | `b3853be7-dbbe-4161-9566-7e7d2c50e05e` | ACCEPTED and integrated `a2ef318`; idle, combined P07 gate remains |
 | P02 sync binding | `2e21aa98-3b40-46e7-885d-2ec4161ec35d` | ACCEPTED and integrated `39561c0`; idle, no real private sync activated |
-| P03 context safety | `9f06eebf-a3ee-4867-95ad-eb6e1d22a6d5` | Earlier bounded result retained; ADR-0031/card authorizes staged shared-path core repair, independent acceptance pending |
+| P03 context safety | `9f06eebf-a3ee-4867-95ad-eb6e1d22a6d5` | Core `ce7415f` frozen; separate fixture follow-up/report pending under `67d39f1`; no acceptance |
 | P04 Swarming | `a8960a09-fcd7-4652-a9b6-74ad6a94a029` | Component ACCEPTED/integrated `490a0f4` + report history `8964267`; idle until explicit A22.7 |
 | P05 review evidence | `2329e71f-cd9e-473b-94cf-41c579c29a88` | ACCEPTED by `33eac071`, integrated `c5c8f86`; current profile/review and focused gates pass, idle |
 | P06 host adapters | `324863ff-e7cf-4abf-b449-04dd0f096170` | Component ACCEPTED/integrated `36593cd`; provider `7425960`, final review `1067da29`; idle |
 | P07 profile context | `b9352dfe-1c1e-4ea3-b7d9-0fd008d39b3d` | Long-path repair ACCEPTED by `a7450597`, integrated `c344133` with reports; joined checks pass, idle |
-| P08 work lifecycle | `f2c305ac-e8b0-4b02-b6cd-c7de598964cf` | `9faebd2b` SPEC FAIL; narrow F01/F02/F03 repair under `04e0ba9`; no acceptance |
+| P08 work lifecycle | `f2c305ac-e8b0-4b02-b6cd-c7de598964cf` | Frozen repair `44e2ef7` / report `8bde7005`; same-reviewer F01/F02/F03-only recheck; wider gates open |
 | P10 installer lifecycle | `5ea6c88c-68c1-4712-8f55-adecdfe0061f` | F01 closed by `00a0bef` on `4407827`; frozen awaiting reviewed path dependency; whole spec/D01/D03/quality blocked |
 
 All are `lintel-builder` sessions with explicit ownership, local commits, report paths
@@ -59,7 +59,7 @@ repair their own findings. All prior reports remain preserved in `reviews/` and 
 | P05 | Final `33eac071` accepts `b023e8c`; integrated `c5c8f86`; earlier rejections retained | `6ed9c7df-4845-4d70-88c7-f0746ab28059` |
 | P06 | Final `1067da29`; complete component SPEC/QUALITY PASS at `7425960`; integrated | `d2a89ac3-151a-4dc0-ab09-1f3a62465cab` |
 | P07 | Final `a7450597` accepts `4d001463`; integrated through `56de830`, earlier `a8de574`/`3d8e715` preserved | `a7d78944-c02c-4909-a060-2c4f2a754b00` |
-| P08 partial | Report `9faebd2b` SPEC FAIL, quality NOT STARTED; new repair checkpoint pending | `9dbf0a9b-750d-45c2-968c-41a5acb11c92` |
+| P08 partial | `8bde7005` / `44e2ef7` narrow findings recheck; quality and inherited/A13 gates remain open | `9dbf0a9b-750d-45c2-968c-41a5acb11c92` |
 | P10 | `00a0bef` closes F01 only, preserved `ab91c36`; complete spec/default preservation blocked, quality NOT STARTED | `1578dfd8-f239-4eba-989b-3c4bde3e5792` |
 
 ## Accepted local integrations
@@ -347,10 +347,25 @@ P10 direct consumers stay with their owner after an independently reviewed depen
 P08 routing/A13 remain separate. No global setting, shorter default or real-home
 recovery is authorized. The three original leaves remain open until new evidence.
 
+P03 core `ce7415f6342220e49746880dd7338a6e7d9294ed` is frozen but not accepted.
+The exact-root P01 fixture cleanup and existing native case-sensitive fixture
+allowance in `67d39f1` are a separate follow-up, not an amendment or global change.
+Same-depth four-consumer cleanup and the separate native case test now self-pass;
+earlier cleanup errors/timeouts remain. Classic adapter long-template publication
+is still blocked outside this unit. A frozen-P10 composition's successful default
+init remains diagnostic only; no check/recovery or complete P10 acceptance follows.
+
 P08 report `9faebd2b7d027283a21a470c8e81473e39bd7a23` is preserved as `a56aab4`:
 F01/F02 P1 negation/safety questions can recommend SHIP; F03 P2 PLAN still names the
 global analysis output. No workflow executed. `04e0ba9` authorizes only the original
 owner's routing/PLAN/focused-test/report repairs; all preservation/A13 gates remain.
+
+The resulting product `44e2ef7d77ee1d9d68e466f2c7b11cd58be0d148` and report-only
+`8bde7005a1c6408f66c8656dc2e8a2923044b005` are frozen. Parent/scope and the unchanged
+original report prefix were verified; the delta is four authorized paths only.
+The same reviewer is checking F01/F02/F03 closure, not granting whole-P08 quality
+or waiving inherited preservation. The 183/8/33 bounded self-results and prior
+failed/invalid runs remain separately attributed; no product is integrated.
 
 P10 F01 repair `4407827f563fecac2ac6bf04a6bd0fc9cdd05641` / report-only
 `c1de05c7f18770f34f950a8c4d4e194892da3291` changes only the existing migration
