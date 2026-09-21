@@ -24,38 +24,57 @@ classify_intent() {
   local p="${1:-}"
   [ -z "$p" ] && { printf 'unclear'; return 0; }
 
-  local lp normalized token next intent suffix negated=0 saw_negation=0 skipped_negation=0 i
+  local lp normalized token next intent suffix negated=0 saw_negation=0 clause_start=1 question_request=0 i
   local -a words
   lp=$(printf '%s' "$p" | tr '[:upper:]' '[:lower:]')
-  lp="${lp//don\'t/do not}"
-  normalized=$(printf '%s' "$lp" | tr '[:space:][:punct:]' ' ')
+  lp="${lp//’/\'}"
+  lp="${lp//n\'t/ not}"
+  normalized=$(printf '%s' "$lp" |
+    sed -E 's/[;!?]/ & /g; s/\.([[:space:]]|$)/ .\1 /g; s/[^[:alnum:][:space:];.!?]/ /g' |
+    tr '[:space:]' ' ')
   IFS=' ' read -r -a words <<< "$normalized"
 
-  case "${words[0]:-}" in
-    how|why|should) printf 'research'; return 0 ;;
-    what|where|when|who)
-      if [ "${#words[@]}" -eq 4 ] && [ "${words[1]}" = should ] &&
-          [ "${words[2]}" = i ] && [ "${words[3]}" = do ]; then
-        printf 'unclear'
-      else
-        printf 'research'
-      fi
-      return 0 ;;
-  esac
-
   # An operation precedes its subject: "review the release" is not SHIP, but
-  # "fix review comments" remains FIX. Negated operations grant no write intent.
+  # "fix review comments" remains FIX. Negation covers the clause, not just
+  # its first verb; a negated operation's subject cannot supply write intent.
   for ((i=0; i<${#words[@]}; i++)); do
     token="${words[$i]}"
     next="${words[$((i + 1))]:-}"
     case "$token" in
-      not|never|without) negated=1; saw_negation=1; continue ;;
-      and|or) [ "$skipped_negation" -eq 0 ] || negated=1; continue ;;
-      but|instead) negated=0; skipped_negation=0; continue ;;
+      ';'|'.'|'!'|'?'|but|instead)
+        negated=0; clause_start=1; question_request=0; continue ;;
+      not|never|without|no|avoid|skip) negated=1; saw_negation=1; clause_start=0; continue ;;
+      and|or|please|kindly) continue ;;
     esac
+    if [ "$clause_start" -eq 1 ]; then
+      clause_start=0
+      case "$token" in
+        how|why|should|is|are|am|was|were|has|have|had|does|did)
+          printf 'research'; return 0 ;;
+        what|where|when|who|which|whose)
+          if [ "$token" = what ] && [ "$next" = should ] &&
+              [ "${words[$((i + 2))]:-}" = i ] && [ "${words[$((i + 3))]:-}" = do ]; then
+            case "${words[$((i + 4))]:-}" in
+              ''|';'|'.'|'!'|'?') printf 'unclear'; return 0 ;;
+            esac
+          fi
+          printf 'research'; return 0 ;;
+        do)
+          case "$next" in
+            i|we|you|they|he|she|it|this|that|these|those|the)
+              printf 'research'; return 0 ;;
+          esac ;;
+        can|could|would|will|may|might|must)
+          if [ "$next" = you ]; then
+            question_request=1
+          else
+            printf 'research'; return 0
+          fi ;;
+      esac
+    fi
     intent=""
     case "$token" in
-      review|audit|check|inspect|examine|analyze|analyse|granska) intent=review ;;
+      review|audit|check|inspect|examine|analyze|analyse|assess|evaluate|granska) intent=review ;;
       research|explore|understand|explain|describe|read|compare|summarize|summarise|show|list|utforska|förstå) intent=research ;;
       plan|design|outline) intent=plan ;;
       tell) [ "$next" != me ] || intent=research ;;
@@ -76,11 +95,7 @@ classify_intent() {
       build:is|build:was|build:has|build:error|build:broken|build:crash)
         continue ;;
     esac
-    if [ "$negated" -eq 1 ]; then
-      negated=0
-      skipped_negation=1
-      continue
-    fi
+    [ "$negated" -eq 0 ] || continue
     if [ "$token" = create ]; then
       case "${words[$((i + 1))]:-} ${words[$((i + 2))]:-} ${words[$((i + 3))]:-}" in
         "a new project"|"a new repo"|"a new repository"|"new project "*|"new repo "*|"new repository "*)
@@ -90,10 +105,21 @@ classify_intent() {
     # A sequence is not one high-confidence operation. Explanations of a
     # sequence remain read-only; an actual "review then deploy" needs scoping.
     suffix=$(printf '%s ' "${words[@]:$((i + 1))}")
-    if [ "$intent" != research ] && [[ " $suffix " =~ [[:space:]]then[[:space:]]+(review|audit|check|research|explore|fix|deploy|ship|release|build|add|implement|create|edit|change|modify|write)[[:space:]] ]]; then
+    if [ "$intent" != research ] && [[ " $suffix " =~ [[:space:]]then[[:space:]]+(review|audit|check|assess|evaluate|research|explore|fix|deploy|ship|release|build|add|implement|create|edit|change|modify|write)[[:space:]] ]]; then
       printf 'unclear'
       return 0
     fi
+    case "$intent" in
+      research|review) ;;
+      *)
+        # A later clause does not mechanically establish mutation authority
+        # after a prohibition; read-only follow-ups remain unambiguous.
+        if [ "$saw_negation" -eq 1 ] || [ "$question_request" -eq 1 ] ||
+            [[ " $suffix " == *" ? "* ]]; then
+          printf 'unclear'
+          return 0
+        fi ;;
+    esac
     printf '%s' "$intent"
     return 0
   done

@@ -368,6 +368,193 @@ workflow_inspect "$LINTEL_WORK_MAP" --package T014 --leaf T014 --acceptance "$re
         (reports / "first.md").write_text("# Changed selected analysis\n")
         self.assertNotEqual(json.loads(self.shell(inspect))["binding"], before)
 
+    def plan_analysis_blocks(self):
+        text = (ROOT / "skills/plan/SKILL.md").read_text(encoding="utf-8")
+        section = text.split("### Step 8 ", 1)[1].split("\n### Step 9 ", 1)[0]
+        blocks = re.findall(r"```bash\n(.*?)\n```", section, re.S)
+        self.assertEqual(len(blocks), 2, "PLAN Step 8 needs selected request and persisted-link blocks")
+        self.assertNotIn("persists `.claude/runtime/state/analyze-report.md`", section)
+        return blocks
+
+    def produce_plan_analysis(self, cycle, selected):
+        prepare, link = self.plan_analysis_blocks()
+        self.env.update(LINTEL_CYCLE_ID=cycle, LINTEL_WORK_MAP=selected)
+        # Only report prose is synthetic; selection, profile verification and linking are real.
+        producer = r'''
+workflow_inspect "$LINTEL_WORK_MAP" |
+  "$LINTEL_PYTHON" -c '
+import json, pathlib, sys
+work = json.load(sys.stdin)
+assert work["tasks"]["T014"] == work["packages"]["T014"]["leaves"]["T014"]
+assert work["binding"] is None and work["release_clearance"] is False
+identity = dict(report=sys.argv[1], work_map=work["work_map"], artifacts=work["artifacts"],
+                package_id="T014", leaf_ids=["T014"], profile=json.loads(sys.argv[2]),
+                required_policy=json.loads(sys.argv[3]))
+report = pathlib.Path(sys.argv[1])
+report.write_text("# analyze-report\ntrigger: plan-step8\n" +
+                  "\n".join(key + ": " + json.dumps(value, sort_keys=True)
+                            for key, value in identity.items() if key != "report") +
+                  "\nlegs_checked: []\nlegs_incomplete: [synthetic prose; no semantic analysis]\n"
+                  "verdict: INCOMPLETE\n", encoding="utf-8")
+print(json.dumps(identity, sort_keys=True))
+' "$analyze_report_path" "$LINTEL_PROFILE_REFERENCE" "$LINTEL_REQUIRED_POLICY"
+'''
+        result = json.loads(self.shell(prepare + "\n" + producer))
+        self.env.update(analyze_cycle_id=cycle, analyze_work_map=selected,
+                        analyze_report_path=result["report"], analyze_status="INCOMPLETE",
+                        LINTEL_PROFILE_REFERENCE=json.dumps(result["profile"]),
+                        LINTEL_REQUIRED_POLICY=json.dumps(result["required_policy"]))
+        self.shell(link)
+        return result
+
+    def test_plan_analysis_caller_produces_selected_reports_and_retains_history(self):
+        first, _ = self.make_map("first")
+        second, second_map = self.make_map("second")
+        second_map["status"] = "DRAFT"
+        (self.repo / second).write_text(json.dumps(second_map))
+        originals = {p: p.read_bytes() for p in (self.repo / "specs").rglob("*") if p.is_file()}
+        legacy = self.repo / ".claude/runtime/state/analyze-report.md"
+        legacy.parent.mkdir(parents=True)
+        legacy.write_text("GREEN from unrelated global history; not current evidence\n")
+        legacy_before = legacy.read_bytes()
+        self.shell(f"""
+source "$LINTEL_SOURCE_ROOT/lib/copilot-env.sh"
+lintel_copilot_env "$LINTEL_REPO_ROOT"
+source "$LINTEL_SOURCE_ROOT/lib/workflow.sh"
+workflow_begin first full {first} operation=plan
+state_phase_begin PLAN next=BUILD
+workflow_begin second full {second} operation=plan
+state_phase_begin PLAN next=BUILD
+test -z "$(state_cycle_field analyze_report_path "$(state_file)" first)"
+test -z "$(state_cycle_field analyze_report_path "$(state_file)" second)"
+""")
+        first_result = self.produce_plan_analysis("first", first)
+        first_report = Path(first_result["report"])
+        first_bytes = first_report.read_bytes()
+        second_result = self.produce_plan_analysis("second", second)
+        second_report = Path(second_result["report"])
+        second_bytes = second_report.read_bytes()
+        self.assertEqual(first_report.name, "first-analyze-report.md")
+        self.assertEqual(second_report.name, "second-analyze-report.md")
+        self.assertEqual(first_report.parent, legacy.parent)
+        self.assertEqual(second_report.parent, legacy.parent)
+        self.assertEqual(first_bytes, first_report.read_bytes())
+        self.assertEqual(legacy_before, legacy.read_bytes())
+        for result, selected in ((first_result, first), (second_result, second)):
+            self.assertEqual(result["work_map"], selected)
+            self.assertEqual(result["artifacts"]["tasks"], selected.replace("work.json", "tasks.md"))
+            self.assertEqual(result["leaf_ids"], ["T014"])
+            self.assertEqual(result["profile"]["generation"], 1)
+            self.assertFalse(result["required_policy"]["required"])
+        self.shell("""
+test "$(state_cycle_field analyze_report_path "$(state_file)" first)" != \
+     "$(state_cycle_field analyze_report_path "$(state_file)" second)"
+test "$(state_resume_phase "$(state_file)" first)" = PLAN
+test "$(state_resume_phase "$(state_file)" second)" = PLAN
+test "$(grep -c '^phase: CYCLE$' "$(state_file)")" = 2
+test "$(grep -c '^phase: ANALYZE$' "$(state_file)")" = 2
+test "$(state_cycle_field status "$(state_file)" first)" = INCOMPLETE
+test "$(state_cycle_field status "$(state_file)" second)" = INCOMPLETE
+""")
+        repeated = self.produce_plan_analysis("first", first)
+        self.assertEqual(repeated, first_result)
+        self.assertEqual(second_bytes, second_report.read_bytes())
+        self.assertEqual(legacy_before, legacy.read_bytes())
+        self.assertEqual(originals, {p: p.read_bytes() for p in (self.repo / "specs").rglob("*")
+                                     if p.is_file()})
+        acceptance = first_report.relative_to(self.repo).as_posix()
+        self.env["ANALYZE_ACCEPTANCE"] = acceptance
+        context = json.loads(self.shell("""
+source "$LINTEL_SOURCE_ROOT/lib/workflow.sh"
+workflow_resume first >/dev/null
+workflow_inspect "$LINTEL_WORK_MAP" --package T014 --leaf T014 \
+  --acceptance "$ANALYZE_ACCEPTANCE"
+"""))
+        from review_contract import bind_work
+        self.assertEqual(context["binding"], bind_work(
+            self.repo, work_map=first, package_id="T014", leaf_ids=["T014"],
+            acceptance_paths=[acceptance]))
+        self.assertNotIn(str(legacy.relative_to(self.repo)).replace("\\", "/"),
+                         context["binding"]["acceptance_paths"])
+        self.assertFalse(context["release_clearance"])
+
+    def test_plan_analysis_caller_refuses_map_mismatch_and_required_profile_drift(self):
+        prepare, _ = self.plan_analysis_blocks()
+        selected, _ = self.make_map("chosen")
+        decoy, _ = self.make_map("decoy")
+        pack = Path(self.env["LINTEL_HOME"]) / "packs/strict/pack.yaml"
+        pack.parent.mkdir(parents=True)
+        pack.write_text("name: strict\nversion: 1.0.0\n"
+                        "compliance: {mode: hard, hooks: [synthetic-check]}\n"
+                        "voice: {default_tier: internal}\n"
+                        "navigation: {default_workflow: cycle}\n")
+        (self.repo / ".claude/profile-requirements.json").write_text(
+            '{"schema_version":1,"required_pack":"strict"}')
+        self.shell(f"""
+source "$LINTEL_SOURCE_ROOT/lib/copilot-env.sh"
+lintel_copilot_env "$LINTEL_REPO_ROOT"
+source "$LINTEL_SOURCE_ROOT/lib/workflow.sh"
+workflow_begin first full {selected}
+""")
+        ledger = self.repo / ".claude/runtime/state/00-state.md"
+        before = ledger.read_bytes()
+        self.env.update(LINTEL_CYCLE_ID="first", LINTEL_WORK_MAP=decoy)
+        self.assertEqual(self.shell(prepare, expected=2), "")
+        self.assertIn("different initiative", self.last_stderr)
+        self.assertEqual(before, ledger.read_bytes())
+        self.env["LINTEL_WORK_MAP"] = selected
+        self.shell(prepare + '\ntest "$LINTEL_REQUIRED_POLICY" != "{}"\n')
+        stamp = pack.stat()
+        pack.write_text(pack.read_text().replace("hard", "off"))
+        os.utime(pack, ns=(stamp.st_atime_ns, stamp.st_mtime_ns))
+        self.assertEqual(self.shell(prepare, expected=2), "")
+        self.assertIn("PROFILE_DRIFT", self.last_stderr)
+        self.assertEqual(before, ledger.read_bytes())
+        self.assertFalse(list(ledger.parent.glob("*analyze-report.md")))
+
+    def test_plan_analysis_caller_refuses_legacy_global_link(self):
+        prepare, _ = self.plan_analysis_blocks()
+        selected, _ = self.make_map("chosen")
+        legacy = self.repo / ".claude/runtime/state/analyze-report.md"
+        legacy.parent.mkdir(parents=True)
+        self.shell(f"""
+source "$LINTEL_SOURCE_ROOT/lib/copilot-env.sh"
+lintel_copilot_env "$LINTEL_REPO_ROOT"
+source "$LINTEL_SOURCE_ROOT/lib/workflow.sh"
+workflow_begin first full {selected}
+""")
+        self.env.update(LINTEL_CYCLE_ID="first", LINTEL_WORK_MAP=selected)
+        ledger = legacy.parent / "00-state.md"
+        for present in (False, True):
+            if present:
+                legacy.write_text("GREEN from unrelated global history\n")
+            for path in (legacy.relative_to(self.repo).as_posix(), legacy.as_posix()):
+                with self.subTest(path=path, present=present):
+                    self.env["LEGACY_REPORT"] = path
+                    self.shell('state_append ANALYZE DONE analyze_report_path="$LEGACY_REPORT"\n')
+                    before = {p: p.read_bytes() for p in ledger.parent.iterdir() if p.is_file()}
+                    self.assertEqual(self.shell(prepare, expected=2), "")
+                    self.assertIn("legacy global analysis is history", self.last_stderr)
+                    self.assertEqual(before, {p: p.read_bytes() for p in ledger.parent.iterdir()
+                                              if p.is_file()})
+
+    def test_plan_analysis_link_refuses_missing_persistence(self):
+        prepare, link = self.plan_analysis_blocks()
+        selected, _ = self.make_map("chosen")
+        self.shell(f"""
+source "$LINTEL_SOURCE_ROOT/lib/copilot-env.sh"
+lintel_copilot_env "$LINTEL_REPO_ROOT"
+source "$LINTEL_SOURCE_ROOT/lib/workflow.sh"
+workflow_begin first full {selected}
+""")
+        ledger = self.repo / ".claude/runtime/state/00-state.md"
+        before = ledger.read_bytes()
+        self.env.update(LINTEL_CYCLE_ID="first", LINTEL_WORK_MAP=selected)
+        self.assertEqual(self.shell(prepare + "\nanalyze_status=INCOMPLETE\n" + link, expected=2), "")
+        self.assertIn("analysis report was not persisted", self.last_stderr)
+        self.assertEqual(before, ledger.read_bytes())
+        self.assertFalse(list(ledger.parent.glob("*analyze-report.md")))
+
 
 class LifecycleRecoveryTests(FixtureCase):
     def test_resume_uses_selected_range_not_a_phase_default_hint(self):

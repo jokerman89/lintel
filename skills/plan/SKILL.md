@@ -270,10 +270,64 @@ If A: continue to Step 8. If B/C: loop back. If D: status BLOCKED, no advance.
 
 ### Step 8 — Cross-section-analyze (delegates to /li:analyze, ADR-0004)
 
-Invoke `/li:analyze` with trigger `plan-step8` — it runs the DEFINE↔PLAN and authority legs
-(coverage, traceability, LOCKED-decision contradictions, discover-report ADR constraints) and
-persists `.claude/runtime/state/analyze-report.md`. One implementation, shared with BUILD's final pass
-and standalone runs; do not re-implement the checks inline.
+Prepare the selected cycle's request, verifying its original map and actual P07
+reference before consuming policy or selecting a report. Do not bootstrap a missing
+context, adopt the latest cycle, or infer an initiative from a global report:
+
+```bash
+source "${LINTEL_SOURCE_ROOT:?select trusted source}/lib/workflow.sh"
+analyze_cycle_id="${LINTEL_CYCLE_ID:?select the original cycle}"
+analyze_work_map="${LINTEL_WORK_MAP:?select the original work map}"
+workflow_resume "$analyze_cycle_id" "$analyze_work_map" >/dev/null || exit $?
+analyze_state_dir="$(dirname "$(state_file)")"
+analyze_report_path="$(state_cycle_field analyze_report_path)" || exit $?
+if [ "$analyze_report_path" = .claude/runtime/state/analyze-report.md ] ||
+   { [ "${analyze_report_path##*/}" = analyze-report.md ] &&
+     [ "$(dirname "$analyze_report_path")" -ef "$analyze_state_dir" ]; }; then
+  echo "INCOMPLETE [lintel/plan]: legacy global analysis is history; reconcile its cycle link" >&2
+  exit 2
+fi
+if [ -z "$analyze_report_path" ]; then
+  analyze_report_path="$analyze_state_dir/$analyze_cycle_id-analyze-report.md"
+fi
+```
+
+Invoke `/li:analyze` with trigger `plan-step8`, this exact report path, original
+map/artifact paths and package/leaf IDs, and the verified `LINTEL_PROFILE_REFERENCE`
+and unchanged `LINTEL_REQUIRED_POLICY`. Carry these selections explicitly across
+delegation or a fresh tool process. ANALYZE runs the DEFINE↔PLAN and authority legs
+(coverage, traceability, LOCKED-decision contradictions, discover-report ADR constraints).
+Keep that one implementation, shared with BUILD's final pass and standalone runs;
+do not re-implement its checks inline.
+
+ANALYZE writes the selected report with the identity and incomplete-leg fields from
+its [report contract](../analyze/SKILL.md#report-format-persisted). Before reusing a
+linked report, check its map/profile/package/leaf identity; a mismatch is INCOMPLETE
+and requires reconciliation, not permission to overwrite another initiative.
+Retain other cycles' reports and the old global `analyze-report.md` as history only.
+A rerun supersedes this selected report while retaining its operator-accepted findings.
+
+As ANALYZE's persistence handoff, after verifying the written report's identity,
+record its actual status and exact path once using the shared writer below. This is
+ANALYZE's existing persistence step, not a second entry on return to PLAN. Missing or
+incomplete analysis is not GREEN. This utility entry does not complete PLAN or move
+the canonical phase:
+
+```bash
+source "${LINTEL_SOURCE_ROOT:?select trusted source}/lib/workflow.sh"
+workflow_resume "${analyze_cycle_id:?}" "${analyze_work_map:?}" >/dev/null || exit $?
+if [ ! -s "${analyze_report_path:?}" ]; then
+  echo "INCOMPLETE [lintel/plan]: analysis report was not persisted" >&2
+  exit 2
+fi
+state_append ANALYZE "${analyze_status:?set the actual analysis status}" \
+  "analyze_report_path=$analyze_report_path" || exit $?
+```
+
+Consumers resume the same cycle and read `state_cycle_field analyze_report_path`,
+then check that report's identity rather than falling back to a global GREEN.
+The verdict remains advisory under ADR-0004; declared mandatory controls and P05's
+immutable evidence/QA obligations remain unchanged. A report pointer is not release clearance.
 
 If the report has findings: surface the gap-list, ask operator: defer to backlog / add to plan /
 accept gap (record the acceptance in the report).
