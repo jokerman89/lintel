@@ -57,6 +57,10 @@ Windows PowerShell 5.1 remains denied/unverified; no policy changed. P08's root
 routing/PLAN product `171daa8` / report `723b067f` is frozen after the second
 independent SPEC FAIL. Intake is verified, not acceptance; an exact reviewed-core
 join and two fixture consumer migrations precede combined review.
+Joined product `2f4cc38` preserves the frozen root/core blobs. Its verification
+stopped on synthetic Git-ancestor discovery and two unrepresentable exact-size
+fixtures; only the private harness correction in the P08 card is released.
+The interrupted aggregate and uninspected host output capture are not acceptance.
 P10's migration F01 is independently closed
 by `00a0bef`; default-store/cleanup and whole-package acceptance remain blocked.
 A13 remains gated.

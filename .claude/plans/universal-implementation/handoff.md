@@ -496,6 +496,22 @@ unchanged during this join. Defer a duplicate root-only rerun so complete select
 SPEC and then eligible QUALITY can assess one combined source. All three findings,
 historical failures, A13, host/semantic limits and final integration remain open.
 
+The joined P08 product is now `2f4cc38077f547bc0ab006ecf9c90d6ba727db7a`,
+with attributed imports `7a4fcdba` / `1bb75560` and only the +5/-4 public-helper
+fixture migration. Root/core blobs and report `723b067f` are unchanged. p8j0's
+focused unlink/cleanup passes. p8j1 remains INCOMPLETE: first18 FAILED16/18,
+c19 passed, c20 interrupted, c21 not run. The newly reached failures are outer
+Git ancestor discovery in c4 and unrepresentable padding for two new c6 probes,
+not the original failed checkpoint operations. Original 268/278/277/290 checkpoint
+paths and the 283-character bisect case now have passing individual evidence.
+
+The P08 card releases private harness-only discovery ceilings, an explicit 26-deep/
+two-exact-size split with unchanged tested lengths and test source, and bounded
+outer output redirected to in-repository logs. The reported automatic AppData
+output spill remains uninspected; no actual-home inspection/rollback or wider
+mutation is authorized. The interrupted run stays incomplete. Final joined
+verification and a report-only checkpoint are required before the same reviewer.
+
 P10 F01 repair `4407827f563fecac2ac6bf04a6bd0fc9cdd05641` / report-only
 `c1de05c7f18770f34f950a8c4d4e194892da3291` changes only the existing migration
 parser and focused tests. Its new producer hash and unchanged contracts/providers
