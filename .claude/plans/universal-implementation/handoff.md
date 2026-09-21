@@ -38,7 +38,7 @@ from the reviewed historical merge `40c2795`. Current implementation ownership:
 | P06 host adapters | `324863ff-e7cf-4abf-b449-04dd0f096170` | Component ACCEPTED/integrated `36593cd`; provider `7425960`, final review `1067da29`; idle |
 | P07 profile context | `b9352dfe-1c1e-4ea3-b7d9-0fd008d39b3d` | Long-path repair ACCEPTED by `a7450597`, integrated `c344133` with reports; joined checks pass, idle |
 | P08 work lifecycle | `f2c305ac-e8b0-4b02-b6cd-c7de598964cf` | `9faebd2b` SPEC FAIL; narrow F01/F02/F03 repair under `04e0ba9`; no acceptance |
-| P10 installer lifecycle | `5ea6c88c-68c1-4712-8f55-adecdfe0061f` | Frozen F01 repair `4407827` / report `c1de05c7`; same-reviewer F01-only recheck; D01/D03 and quality blocked |
+| P10 installer lifecycle | `5ea6c88c-68c1-4712-8f55-adecdfe0061f` | F01 closed by `00a0bef` on `4407827`; frozen awaiting reviewed path dependency; whole spec/D01/D03/quality blocked |
 
 All are `lintel-builder` sessions with explicit ownership, local commits, report paths
 and no remote authorization. P01/P02 and the owned P04-P07 components are accepted.
@@ -60,7 +60,7 @@ repair their own findings. All prior reports remain preserved in `reviews/` and 
 | P06 | Final `1067da29`; complete component SPEC/QUALITY PASS at `7425960`; integrated | `d2a89ac3-151a-4dc0-ab09-1f3a62465cab` |
 | P07 | Final `a7450597` accepts `4d001463`; integrated through `56de830`, earlier `a8de574`/`3d8e715` preserved | `a7d78944-c02c-4909-a060-2c4f2a754b00` |
 | P08 partial | Report `9faebd2b` SPEC FAIL, quality NOT STARTED; new repair checkpoint pending | `9dbf0a9b-750d-45c2-968c-41a5acb11c92` |
-| P10 | `c1de05c7` / `4407827` F01-only recheck; complete spec/default preservation and quality remain blocked | `1578dfd8-f239-4eba-989b-3c4bde3e5792` |
+| P10 | `00a0bef` closes F01 only, preserved `ab91c36`; complete spec/default preservation blocked, quality NOT STARTED | `1578dfd8-f239-4eba-989b-3c4bde3e5792` |
 
 ## Accepted local integrations
 
@@ -355,8 +355,11 @@ owner's routing/PLAN/focused-test/report repairs; all preservation/A13 gates rem
 P10 F01 repair `4407827f563fecac2ac6bf04a6bd0fc9cdd05641` / report-only
 `c1de05c7f18770f34f950a8c4d4e194892da3291` changes only the existing migration
 parser and focused tests. Its new producer hash and unchanged contracts/providers
-were verified. The same reviewer is rechecking F01 only; default-store D01 and cleanup
-D03 still prevent complete spec/quality acceptance. No P10 product is integrated.
+were verified. The same reviewer's report `00a0bef938a4da3f09064b6be88b8bad89ec897d`,
+preserved report-only as `ab91c36`, closes F01 through 40 candidate cases, two exact
+rejected-baseline controls and seven migration tests. Default-store D01 and cleanup
+D03 still prevent complete specification/preservation acceptance; quality is NOT
+STARTED. No P10 product is integrated and A13 remains closed.
 
 Coordinator repairs for P10's reported shared-suite failures are committed separately:
 `d53dc38` changes only the reviewed evidence CLI's Git mode to 100755, preserving its
