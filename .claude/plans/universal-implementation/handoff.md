@@ -408,6 +408,13 @@ first and with it only if necessary, requiring actual root/Git-directory identit
 directory/worktree-file cases and the same preservation gate before implementation.
 No runtime retry chain, Git redirection, shorter root or persistent setting is allowed.
 
+The next linked-worktree fixture failed during ordinary `worktree add`, before
+the native-operand comparison: its test-method-nested controlling main produced
+an overlong Git admin path. The P10 card releases only fresh placement of this
+new fixture's controller under its verified base109, preserving the exact consumer256/
+`.git`261 path and basename. No setup flag or product change is authorized by this
+layout decision; preserve the setup failure and require the unchanged two-form gate.
+
 P08 report `9faebd2b7d027283a21a470c8e81473e39bd7a23` is preserved as `a56aab4`:
 F01/F02 P1 negation/safety questions can recommend SHIP; F03 P2 PLAN still names the
 global analysis output. No workflow executed. `04e0ba9` authorizes only the original
