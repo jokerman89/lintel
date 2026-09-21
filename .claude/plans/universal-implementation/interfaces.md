@@ -211,3 +211,19 @@ not specification/quality acceptance. `fb96f713` remains the dependency base, no
 A narrow P07 fixture follow-up is pending under the P10 card. A13.1/.2/.4 stay paused
 until the resulting exact contract/fixtures are reviewed and the coordinator explicitly
 releases the shared interface; no WIP import or second interpretation is authorized.
+
+## Coordinated native-path representation
+
+ADR-0031 and the appended P03 repair card authorize one staged implementation:
+`lib/native_paths.py` exposes only `path_identity(PurePath)` and
+`native_io_path(Path)`, moving accepted P07 representation logic without policy.
+P03 and P07 retain their different containment/link/ownership rules; logical
+serialized paths, identities and version domains must not change.
+
+The P03 owner writes the core and narrow P07 wrappers/resource plumbing first,
+then freezes for independent spec/quality. P10 direct installer/runtime I/O remains
+with its original owner for a later accepted-dependency handoff; P08 owns its own
+fixture imports. No concurrent installer-engine edit, WIP dependency import,
+global setting, shortened default, real-home recovery or A13 release follows.
+Git per-command handling and fixture cleanup are separate bounded subcases, not
+extra authority supplied by a native filesystem spelling.

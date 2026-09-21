@@ -53,8 +53,18 @@ unchanged and accepted. P07's native long-path repair `4d001463` passed independ
 adapter methods and 19 path methods pass. P10 is implementing in session `5ea6c88c`;
 the operator requires installation without Python (ADR-0030) and explicitly approved
 existing PowerShell 7.6.6 for local verification with its existing RemoteSigned policy.
-Windows PowerShell 5.1 remains denied/unverified; no policy changed. P08 can now start
-on the accepted core, with P10's real observation/receipt seam gating A13 integration.
+Windows PowerShell 5.1 remains denied/unverified; no policy changed. P08's partial
+candidate is in a narrow routing/PLAN repair after independent SPEC FAIL. P10's
+migration F01 is in same-reviewer recheck; default-store/cleanup acceptance is blocked.
+A13 remains gated.
+
+Joined investigation `990b0daa` reopens A01.2/A01.4/A11.1: ordinary Python long-path
+I/O, Git ref handling and fixture cleanup are distinct boundaries. ADR-0031 and the
+P03 card authorize a first shared-path core/extraction unit, followed by separately
+owned P10 consumer work after independent acceptance. No global settings, shortened
+defaults, identity/schema migration or real-home inspection/rollback is authorized.
+The accepted original-item count is now 49/113; earlier bounded evidence is preserved,
+not erased or treated as proof for these failed joined cases.
 Continue P08-P14 in dependency order,
 not a new audit or partial delivery. Coordinator routing (`b72ab47` plus
 `1d40193`) and provenance (`9f49e26`) await their owning package reviews. All successor cards

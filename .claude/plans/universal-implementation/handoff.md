@@ -32,7 +32,7 @@ from the reviewed historical merge `40c2795`. Current implementation ownership:
 |---|---|---|
 | P01 trusted helpers | `b3853be7-dbbe-4161-9566-7e7d2c50e05e` | ACCEPTED and integrated `a2ef318`; idle, combined P07 gate remains |
 | P02 sync binding | `2e21aa98-3b40-46e7-885d-2ec4161ec35d` | ACCEPTED and integrated `39561c0`; idle, no real private sync activated |
-| P03 context safety | `9f06eebf-a3ee-4867-95ad-eb6e1d22a6d5` | Earlier product accepted; investigation `990b0daa` preserved `7516db4`; design-only shared-path seam pending, no repair authority |
+| P03 context safety | `9f06eebf-a3ee-4867-95ad-eb6e1d22a6d5` | Earlier bounded result retained; ADR-0031/card authorizes staged shared-path core repair, independent acceptance pending |
 | P04 Swarming | `a8960a09-fcd7-4652-a9b6-74ad6a94a029` | Component ACCEPTED/integrated `490a0f4` + report history `8964267`; idle until explicit A22.7 |
 | P05 review evidence | `2329e71f-cd9e-473b-94cf-41c579c29a88` | ACCEPTED by `33eac071`, integrated `c5c8f86`; current profile/review and focused gates pass, idle |
 | P06 host adapters | `324863ff-e7cf-4abf-b449-04dd0f096170` | Component ACCEPTED/integrated `36593cd`; provider `7425960`, final review `1067da29`; idle |
@@ -41,7 +41,9 @@ from the reviewed historical merge `40c2795`. Current implementation ownership:
 | P10 installer lifecycle | `5ea6c88c-68c1-4712-8f55-adecdfe0061f` | Frozen F01 repair `4407827` / report `c1de05c7`; same-reviewer F01-only recheck; D01/D03 and quality blocked |
 
 All are `lintel-builder` sessions with explicit ownership, local commits, report paths
-and no remote authorization. P01/P02/P03 plus the owned P04-P07 components are accepted.
+and no remote authorization. P01/P02 and the owned P04-P07 components are accepted.
+P03's earlier bounded acceptance is preserved, but A01.2/A01.4/A11.1 are reopened
+for the demonstrated joined-path failures.
 P04 A22.7 and the final cross-component/client requirements remain open.
 Do not merge another product batch merely because its original tests are green.
 
@@ -325,21 +327,25 @@ and advisory A13.3; the 14/18 preservation failure and 22/23 context-safety fail
 are not waived. A13.1/.2/.4, shell27 INVALID/unknown real-home effects and the two
 post-run cycle sentences remain explicit in that review.
 
-Coordinator `1105ebe` assigns the original P03 owner one read-only investigation of
+Coordinator `1105ebe` assigned the original P03 owner one read-only investigation of
 the inherited Python checkpoint/snapshot, Git ref-lock and cleanup observations.
 Current main's relevant P03 helpers/tests match the reported dependency baseline.
-Only `reports/P03-joined-path-investigation.md` may be written; no product changes,
-global long-path settings, shorter acceptance paths or actual-home access. Await its
-evidence and repair alternatives before issuing a single bounded implementation card.
+That scope allowed only `reports/P03-joined-path-investigation.md`, not product changes,
+global long-path settings, shorter acceptance paths or actual-home access.
 Do not duplicate the investigation in P08/P10 or treat inheritance as acceptance.
 
 That investigation is frozen in report-only `990b0daa752fc36b1612e9c897f128bb1ca4cf88`,
 preserved as `7516db4`. It separates ordinary Python I/O failures at 260+ characters,
 Git's 283-character ref handling, and external stdlib cleanup. Same-location native
 syscalls and per-command Git options are diagnostic controls only. The coordinator
-selected preservation of full/default paths as the planning direction and requested
-an exact design-only shared spelling/API/ownership proposal from P03. No product,
-P07 extraction, settings change or path-shortening repair is authorized yet.
+selected preservation of full/default paths and obtained the exact design-only seam.
+ADR-0031 and the appended P03 card now authorize the first implementation unit:
+one pure native-path representation module, P03 I/O consumers and narrow P07 wrapper/
+fixture/resource plumbing. Caller policy and persisted identity remain unchanged.
+Git per-command handling and exact-root fixture cleanup are separate subcases.
+P10 direct consumers stay with their owner after an independently reviewed dependency;
+P08 routing/A13 remain separate. No global setting, shorter default or real-home
+recovery is authorized. The three original leaves remain open until new evidence.
 
 P08 report `9faebd2b7d027283a21a470c8e81473e39bd7a23` is preserved as `a56aab4`:
 F01/F02 P1 negation/safety questions can recommend SHIP; F03 P2 PLAN still names the

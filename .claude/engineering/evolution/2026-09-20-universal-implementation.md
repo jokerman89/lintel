@@ -23,6 +23,13 @@ performers, and reuses owned-snapshot primitives only in already Python-based op
 The adapter retains its existing inventory and protected-file semantics. This is approved
 direction, not completed implementation or an independent acceptance claim.
 
+ADR-0031 separates pure filesystem spelling from caller-owned authority. The first
+repair unit reuses P07's representation logic for P03 without changing identities,
+formats or global settings; Git handling and fixture cleanup remain distinct. P10
+direct consumers follow an independently reviewed dependency under their original
+owner, avoiding concurrent edits to the installer engine. Failed joined evidence
+reopens the affected leaves and is not relabeled as historical success.
+
 ## Verification
 
 Per-package negative and preservation tests; independent package review; exact-result review
