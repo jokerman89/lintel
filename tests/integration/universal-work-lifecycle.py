@@ -50,8 +50,8 @@ class FixtureCase(unittest.TestCase):
             self.env.pop(name, None)
 
     def cleanup(self):
-        from profile_context import _native_io_path
-        root = _native_io_path(Path(self.temp.name))
+        from native_paths import native_io_path
+        root = native_io_path(Path(self.temp.name))
         if root.exists():
             shutil.rmtree(root)
         self.temp.cleanup()
@@ -294,12 +294,13 @@ lintel_copilot_env "$LINTEL_REPO_ROOT"
 source "$LINTEL_SOURCE_ROOT/lib/workflow.sh"
 workflow_begin first full {selected}
 """)
-        from profile_context import ProfileConfig, context_path, _native_io_path
+        from native_paths import native_io_path
+        from profile_context import ProfileConfig, context_path
         ref = json.loads(self.shell("state_cycle_field profile_reference"))
         home = Path(self.env["LINTEL_HOME"])
         config = ProfileConfig(ROOT, self.repo, home, home / "packs", home / "packs/active-pack",
                                context_id=ref["context_id"])
-        current = _native_io_path(context_path(config))
+        current = native_io_path(context_path(config))
         current.unlink()
         self.assertEqual(self.shell("""
 source "$LINTEL_SOURCE_ROOT/lib/workflow.sh"
