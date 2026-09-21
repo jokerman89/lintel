@@ -37,7 +37,7 @@ from the reviewed historical merge `40c2795`. Current implementation ownership:
 | P05 review evidence | `2329e71f-cd9e-473b-94cf-41c579c29a88` | ACCEPTED by `33eac071`, integrated `c5c8f86`; current profile/review and focused gates pass, idle |
 | P06 host adapters | `324863ff-e7cf-4abf-b449-04dd0f096170` | Component ACCEPTED/integrated `36593cd`; provider `7425960`, final review `1067da29`; idle |
 | P07 profile context | `b9352dfe-1c1e-4ea3-b7d9-0fd008d39b3d` | Long-path repair ACCEPTED by `a7450597`, integrated `c344133` with reports; joined checks pass, idle |
-| P08 work lifecycle | `f2c305ac-e8b0-4b02-b6cd-c7de598964cf` | Frozen repair `44e2ef7` / report `8bde7005`; same-reviewer F01/F02/F03-only recheck; wider gates open |
+| P08 work lifecycle | `f2c305ac-e8b0-4b02-b6cd-c7de598964cf` | `af5c939` keeps F01/F02/F03 open; `44e2ef7` frozen, design-only root re-plan requested |
 | P10 installer lifecycle | `5ea6c88c-68c1-4712-8f55-adecdfe0061f` | F01 closed by `00a0bef` on `4407827`; frozen awaiting reviewed path dependency; whole spec/D01/D03/quality blocked |
 
 All are `lintel-builder` sessions with explicit ownership, local commits, report paths
@@ -54,12 +54,12 @@ repair their own findings. All prior reports remain preserved in `reviews/` and 
 |---|---|---|
 | P01 | Final `f078165`; SPEC/QUALITY PASS at `041417a`; idle | `d699f463-ee4d-4950-9b9d-98f35e96f689` |
 | P02 | Final `1b6153f`; SPEC/QUALITY PASS at `9bdaeb4`; idle | `da23fa6f-499b-4011-b39b-a632312a8800` |
-| P03 | Current `8170c8e` / `417edac..5fc657f` core review; historical `500adb3`/`2840012` retained | `efd3f877-550a-4ef0-9009-ed71b95b01ab` |
+| P03 | Current `8170c8e` core SPEC pass, quality running; classic long consumer remains separate; historical results retained | `efd3f877-550a-4ef0-9009-ed71b95b01ab` |
 | P04 | Final `279dfc9`; component SPEC/QUALITY PASS at `aa73651`; A22.7 open | `ed672f58-2e85-42e2-b1b2-0635ba5b2325` |
 | P05 | Final `33eac071` accepts `b023e8c`; integrated `c5c8f86`; earlier rejections retained | `6ed9c7df-4845-4d70-88c7-f0746ab28059` |
 | P06 | Final `1067da29`; complete component SPEC/QUALITY PASS at `7425960`; integrated | `d2a89ac3-151a-4dc0-ab09-1f3a62465cab` |
 | P07 | Final `a7450597` accepts `4d001463`; integrated through `56de830`, earlier `a8de574`/`3d8e715` preserved | `a7d78944-c02c-4909-a060-2c4f2a754b00` |
-| P08 partial | `8bde7005` / `44e2ef7` narrow findings recheck; quality and inherited/A13 gates remain open | `9dbf0a9b-750d-45c2-968c-41a5acb11c92` |
+| P08 partial | `af5c939` SPEC FAIL preserved `92502e6`; same three findings open, quality NOT STARTED | `9dbf0a9b-750d-45c2-968c-41a5acb11c92` |
 | P10 | `00a0bef` closes F01 only, preserved `ab91c36`; complete spec/default preservation blocked, quality NOT STARTED | `1578dfd8-f239-4eba-989b-3c4bde3e5792` |
 
 ## Accepted local integrations
@@ -362,6 +362,13 @@ read the report, and dispatched original reviewer `efd3f877`. The P10 diagnostic
 preceded the final snapshot relative-root correction: it is not evidence for the
 final four-file composition. The reviewer must retain that and the blocked classic
 adapter selector; no dependency is released to P08/P10 yet.
+The reviewer now reports scoped core SPEC pass and is completing quality. Its
+shallow classic 3/3 remains a control. Original retained classic dimensions were
+relayed: outer 109, source 116, target 182, bundle 197, publication parent 239,
+temporary 256 -> destination 263. This is classic adapter I/O, not a snapshot store.
+That original run was pre-commit working source over `417edac`; relevant engine/test
+bytes match the frozen core, but its whole manifest predates the snapshot correction.
+Do not substitute P10's distinct 113/128 and 218->260 dimensions.
 
 P08 report `9faebd2b7d027283a21a470c8e81473e39bd7a23` is preserved as `a56aab4`:
 F01/F02 P1 negation/safety questions can recommend SHIP; F03 P2 PLAN still names the
@@ -379,6 +386,12 @@ in 21 bounded nearby cases, still promoting subjects/prohibitions/assessments to
 SHIP/deploy/high. No workflow ran. F01/F02 remain open at class level; the builder
 is frozen pending the immutable recheck and a root correction, not more string
 exceptions. Quality remains NOT STARTED.
+The immutable recheck is `af5c93999b5e83357ae337d92cfd4abde872e235`, preserved
+report-only as `92502e6`. It also confirms F03: native-backslash global report
+selection is accepted when present or absent. The original owner has only a
+design-only request for positive operation/request-head recognition and one
+native-aware report identity check; no new string patches or source edits are
+authorized before a bounded root re-plan is committed.
 
 P10 F01 repair `4407827f563fecac2ac6bf04a6bd0fc9cdd05641` / report-only
 `c1de05c7f18770f34f950a8c4d4e194892da3291` changes only the existing migration
