@@ -227,3 +227,11 @@ fixture imports. No concurrent installer-engine edit, WIP dependency import,
 global setting, shortened default, real-home recovery or A13 release follows.
 Git per-command handling and fixture cleanup are separate bounded subcases, not
 extra authority supplied by a native filesystem spelling.
+
+The first core unit is now independently accepted by `062d0f20` and integrated
+as `1d44d2a`. Exact product dependency is `ce7415f` plus fixture `5fc657f`;
+`lib/native_paths.py` Git-byte SHA-256 is
+`b4b8f541c91c40563f9cabfab433d3216e3d58e1167b357141b008e4769a90ed`.
+The P10 card separately authorizes direct consumer I/O after importing that exact
+dependency. Classic adapter/P10 default check/recovery and A13 are not cleared by
+the core verdict or its earlier diagnostic composition.

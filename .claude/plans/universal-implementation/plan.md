@@ -88,18 +88,18 @@ retain its parent acceptance. Do not renumber or replace the original A-ID.
 - [x] A01.1 Replace context eval with literal path/glob selection and hostile-input fixtures.
   - [x] A01.1.a Define literal selector API and hostile-input fixture.
   - [x] A01.1.b Wire warm entry points to the selector and verify its output.
-- [ ] A01.2 Implement owned snapshot manifest and verified, non-clobber restore.
+- [x] A01.2 Implement owned snapshot manifest and verified, non-clobber restore.
   - [x] A01.2.a Define snapshot ownership/digest manifest and path refusal.
   - [x] A01.2.b Implement snapshot creation and verify copied bytes.
   - [x] A01.2.c Implement restore preflight and conflict-preserving application.
-  - [ ] A01.2.w1 Share checked native path spelling without changing P07 identity or caller authority.
-  - [ ] A01.2.w2 Verify complete long-path snapshot I/O with original ownership/interruption/replay protection.
-  - [ ] A01.2.w3 Preserve exact-root fixture cleanup and mandatory trusted-source dependency closure.
+  - [x] A01.2.w1 Share checked native path spelling without changing P07 identity or caller authority.
+  - [x] A01.2.w2 Verify complete long-path snapshot I/O with original ownership/interruption/replay protection.
+  - [x] A01.2.w3 Preserve exact-root fixture cleanup and mandatory trusted-source dependency closure.
 - [x] A01.3 Test spaces, metacharacters, stale snapshots and interrupted recovery.
-- [ ] A01.4 Isolate bisect/refactor trials and preserve unrelated user changes.
+- [x] A01.4 Isolate bisect/refactor trials and preserve unrelated user changes.
   - [x] A01.4.a Verify isolated bisect and restored exit state.
   - [x] A01.4.b Verify owned refactor/migration failure boundaries.
-  - [ ] A01.4.w1 Verify long-ref Windows bisect with per-command handling and unchanged caller/config state.
+  - [x] A01.4.w1 Verify long-ref Windows bisect with per-command handling and unchanged caller/config state.
 - [x] A01.5 Enforce exact/wildcard URL hosts and redirect revalidation with negative fixtures.
   - [x] A01.5.a Parse exact versus explicit-wildcard host policy.
   - [x] A01.5.b Revalidate each redirect before following its destination.
@@ -108,10 +108,15 @@ Evidence: [independent P03 final review](reviews/P03-final.md), product `500adb3
 integrated `9a1cf17`; 51 actual tests and preserved checkpoint semantics. The URL-policy
 transport probes are synthetic; actual browser/provider integration remains A16/P11,
 not silently counted as a live host test here.
-Joined evidence `reports/P03-joined-path-investigation.md` reopens A01.2/A01.4 and
-A11.1 for concrete default-path failures. Earlier bounded passes remain historical;
-ADR-0031 and the appended P03 card govern the staged repair without global settings
-or shorter-path acceptance substitutes.
+Joined evidence `reports/P03-joined-path-investigation.md` reopened A01.2/A01.4 and
+A11.1 for concrete default-path failures. The scoped core is now independently
+accepted in [P03 joined-path final](reviews/P03-joined-path-final.md), report `062d0f20`,
+and integrated as `1d44d2a` with all 16 reviewed paths matching `5fc657f`. Actual
+long checkpoint/snapshot/bisect and old-record/identity preservation are verified;
+current local adapter/dependency and copied wiki checks pass. A01.2.w3/A23.4.p1
+cover the assigned core/source seam only: the classic adapter's 256->263 publication
+and full P10 default init/check/recovery remain OPEN under A23.4.p2. Earlier failed
+and shallow-control evidence is not relabeled.
 
 ### A02 Mandatory control outcomes (P05; R02)
 - [x] A02.1 Define and validate mandatory/advisory, applicability and outcome fields once.
@@ -258,8 +263,8 @@ Acceptance: every required domain result remains visible; no averaging away fail
 Acceptance: equivalent entry points preserve artifacts/status without repeated interview.
 
 ### A11 Honest context capacity (P03; R05)
-- [ ] A11.1 Share context selection/save/restore readers and show bounded sources.
-  - [ ] A11.1.w1 Verify real checkpoint ownership/roundtrip/memory consumers at unchanged long default paths.
+- [x] A11.1 Share context selection/save/restore readers and show bounded sources.
+  - [x] A11.1.w1 Verify real checkpoint ownership/roundtrip/memory consumers at unchanged long default paths.
 - [x] A11.2 Keep unknown capacity unknown and label estimates.
 - [x] A11.3 Preserve perf-mode entry as resource advice, not fake capacity control.
 - [x] A11.4 Distinguish disk cleanup, future exclusions and already-sent model context.
@@ -393,7 +398,7 @@ actors are not independently corroborated people; final A22.7 explicitly remains
   - [x] A23.4.g1 Render schema references from actual pack/envelope contracts; reject invalid source rather than emitting empty or stale metadata.
   - [x] A23.4.g2 Regenerate and check the joined catalog, wiki, README and repository adapter without hand-editing their output.
   - [ ] A23.4.g3 Preflight accepted shared helper dependencies before consumer writes and exercise installed-source failures.
-  - [ ] A23.4.p1 Independently accept the shared native-path core/extraction and its source closure.
+  - [x] A23.4.p1 Independently accept the shared native-path core/extraction and its source closure.
   - [ ] A23.4.p2 Verify accepted P10 direct consumers and full default installed init/check/recovery at original paths.
 - [ ] A23.5 Obtain independent final spec/quality review of exact integrated content.
 Acceptance: evidence category and limitations are explicit; existing useful tests remain.

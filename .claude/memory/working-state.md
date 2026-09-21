@@ -63,8 +63,13 @@ I/O, Git ref handling and fixture cleanup are distinct boundaries. ADR-0031 and 
 P03 card authorize a first shared-path core/extraction unit, followed by separately
 owned P10 consumer work after independent acceptance. No global settings, shortened
 defaults, identity/schema migration or real-home inspection/rollback is authorized.
-The accepted original-item count is now 49/113; earlier bounded evidence is preserved,
-not erased or treated as proof for these failed joined cases.
+The reviewed core `ce7415f` + fixture `5fc657f` now passes independent spec/quality
+in `062d0f20` and is integrated as `1d44d2a`, with all 16 product paths exact.
+Core checkpoint/snapshot/bisect leaves are reclosed, restoring 52/113 original items.
+The classic adapter's 256->263 publication and full P10 default init/check/recovery
+remain blocked under their separate consumer gate. P10's original owner has a bounded
+exact-dependency/direct-I/O follow-up; no inventory/schema/store-policy redesign or
+A13 release. Earlier failed and diagnostic-only evidence is preserved.
 Continue P08-P14 in dependency order,
 not a new audit or partial delivery. Coordinator routing (`b72ab47` plus
 `1d40193`) and provenance (`9f49e26`) await their owning package reviews. All successor cards

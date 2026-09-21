@@ -32,7 +32,7 @@ from the reviewed historical merge `40c2795`. Current implementation ownership:
 |---|---|---|
 | P01 trusted helpers | `b3853be7-dbbe-4161-9566-7e7d2c50e05e` | ACCEPTED and integrated `a2ef318`; idle, combined P07 gate remains |
 | P02 sync binding | `2e21aa98-3b40-46e7-885d-2ec4161ec35d` | ACCEPTED and integrated `39561c0`; idle, no real private sync activated |
-| P03 context safety | `9f06eebf-a3ee-4867-95ad-eb6e1d22a6d5` | Frozen core `ce7415f` + fixture `5fc657f`, report `8170c8e`; original reviewer `efd3f877`, no acceptance |
+| P03 context safety | `9f06eebf-a3ee-4867-95ad-eb6e1d22a6d5` | Scoped core accepted `062d0f20`, integrated `1d44d2a`; P10 direct-consumer gate remains open |
 | P04 Swarming | `a8960a09-fcd7-4652-a9b6-74ad6a94a029` | Component ACCEPTED/integrated `490a0f4` + report history `8964267`; idle until explicit A22.7 |
 | P05 review evidence | `2329e71f-cd9e-473b-94cf-41c579c29a88` | ACCEPTED by `33eac071`, integrated `c5c8f86`; current profile/review and focused gates pass, idle |
 | P06 host adapters | `324863ff-e7cf-4abf-b449-04dd0f096170` | Component ACCEPTED/integrated `36593cd`; provider `7425960`, final review `1067da29`; idle |
@@ -42,8 +42,9 @@ from the reviewed historical merge `40c2795`. Current implementation ownership:
 
 All are `lintel-builder` sessions with explicit ownership, local commits, report paths
 and no remote authorization. P01/P02 and the owned P04-P07 components are accepted.
-P03's earlier bounded acceptance is preserved, but A01.2/A01.4/A11.1 are reopened
-for the demonstrated joined-path failures.
+P03's earlier bounded acceptance is preserved; its reopened core A01.2/A01.4/A11.1
+now close through the independently reviewed native-path repair. P10 direct consumers
+and final installed/default acceptance remain separate.
 P04 A22.7 and the final cross-component/client requirements remain open.
 Do not merge another product batch merely because its original tests are green.
 
@@ -54,7 +55,7 @@ repair their own findings. All prior reports remain preserved in `reviews/` and 
 |---|---|---|
 | P01 | Final `f078165`; SPEC/QUALITY PASS at `041417a`; idle | `d699f463-ee4d-4950-9b9d-98f35e96f689` |
 | P02 | Final `1b6153f`; SPEC/QUALITY PASS at `9bdaeb4`; idle | `da23fa6f-499b-4011-b39b-a632312a8800` |
-| P03 | Current `8170c8e` core SPEC pass, quality running; classic long consumer remains separate; historical results retained | `efd3f877-550a-4ef0-9009-ed71b95b01ab` |
+| P03 | Final `062d0f20` accepts scoped `417edac..5fc657f`, integrated `1d44d2a`; classic/P10 consumers separate | `efd3f877-550a-4ef0-9009-ed71b95b01ab` |
 | P04 | Final `279dfc9`; component SPEC/QUALITY PASS at `aa73651`; A22.7 open | `ed672f58-2e85-42e2-b1b2-0635ba5b2325` |
 | P05 | Final `33eac071` accepts `b023e8c`; integrated `c5c8f86`; earlier rejections retained | `6ed9c7df-4845-4d70-88c7-f0746ab28059` |
 | P06 | Final `1067da29`; complete component SPEC/QUALITY PASS at `7425960`; integrated | `d2a89ac3-151a-4dc0-ab09-1f3a62465cab` |
@@ -369,6 +370,16 @@ temporary 256 -> destination 263. This is classic adapter I/O, not a snapshot st
 That original run was pre-commit working source over `417edac`; relevant engine/test
 bytes match the frozen core, but its whole manifest predates the snapshot correction.
 Do not substitute P10's distinct 113/128 and 218->260 dimensions.
+
+The complete independent report `062d0f20f41f33db437324d2d9094ab418338e2c` now
+passes CORE spec then whole-core quality, zero findings, with that exact final-tree
+classic failure retained. Accepted history is integrated in
+`1d44d2a3419e84674ff896379462db0c27fbaa65`; all 16 product paths equal `5fc657f`.
+Current local adapter check and copied-parser wiki/idempotence checks pass.
+The P10 card now releases the exact reviewed dependency and narrowly named direct
+I/O consumer/fixture changes to its original owner, not a receipt/inventory redesign.
+Default init/check/recovery and the canonical caller/child path still require new
+exact-dependency evidence and complete independent P10 review. No A13 release.
 
 P08 report `9faebd2b7d027283a21a470c8e81473e39bd7a23` is preserved as `a56aab4`:
 F01/F02 P1 negation/safety questions can recommend SHIP; F03 P2 PLAN still names the
