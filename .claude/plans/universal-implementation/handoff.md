@@ -32,12 +32,12 @@ from the reviewed historical merge `40c2795`. Current implementation ownership:
 |---|---|---|
 | P01 trusted helpers | `b3853be7-dbbe-4161-9566-7e7d2c50e05e` | ACCEPTED and integrated `a2ef318`; idle, combined P07 gate remains |
 | P02 sync binding | `2e21aa98-3b40-46e7-885d-2ec4161ec35d` | ACCEPTED and integrated `39561c0`; idle, no real private sync activated |
-| P03 context safety | `9f06eebf-a3ee-4867-95ad-eb6e1d22a6d5` | ACCEPTED and integrated `9a1cf17`; idle, downstream consumer/host gates separate |
+| P03 context safety | `9f06eebf-a3ee-4867-95ad-eb6e1d22a6d5` | Earlier product ACCEPTED/integrated `9a1cf17`; new joined path investigation is read-only, no repair authority |
 | P04 Swarming | `a8960a09-fcd7-4652-a9b6-74ad6a94a029` | Component ACCEPTED/integrated `490a0f4` + report history `8964267`; idle until explicit A22.7 |
 | P05 review evidence | `2329e71f-cd9e-473b-94cf-41c579c29a88` | ACCEPTED by `33eac071`, integrated `c5c8f86`; current profile/review and focused gates pass, idle |
 | P06 host adapters | `324863ff-e7cf-4abf-b449-04dd0f096170` | Component ACCEPTED/integrated `36593cd`; provider `7425960`, final review `1067da29`; idle |
 | P07 profile context | `b9352dfe-1c1e-4ea3-b7d9-0fd008d39b3d` | Long-path repair ACCEPTED by `a7450597`, integrated `c344133` with reports; joined checks pass, idle |
-| P08 work lifecycle | `f2c305ac-e8b0-4b02-b6cd-c7de598964cf` | Implementing ready A08/A10 from `5c3e753`; A13 installer observation waits for P10 seam/fixtures |
+| P08 work lifecycle | `f2c305ac-e8b0-4b02-b6cd-c7de598964cf` | Frozen PARTIAL `8d477701` / report `062ffc6c`; independent reviewer `9dbf0a9b`, no acceptance |
 | P10 installer lifecycle | `5ea6c88c-68c1-4712-8f55-adecdfe0061f` | `62ffb9a` rejected by `1d871338`; original owner receives bounded F01 migration-row repair |
 
 All are `lintel-builder` sessions with explicit ownership, local commits, report paths
@@ -57,6 +57,7 @@ repair their own findings. All prior reports remain preserved in `reviews/` and 
 | P05 | Final `33eac071` accepts `b023e8c`; integrated `c5c8f86`; earlier rejections retained | `6ed9c7df-4845-4d70-88c7-f0746ab28059` |
 | P06 | Final `1067da29`; complete component SPEC/QUALITY PASS at `7425960`; integrated | `d2a89ac3-151a-4dc0-ab09-1f3a62465cab` |
 | P07 | Final `a7450597` accepts `4d001463`; integrated through `56de830`, earlier `a8de574`/`3d8e715` preserved | `a7d78944-c02c-4909-a060-2c4f2a754b00` |
+| P08 partial | Current `8d477701` / report `062ffc6c`; A08/A10/advisory A13.3 only, preservation blockers retained | `9dbf0a9b-750d-45c2-968c-41a5acb11c92` |
 | P10 | Report `1d871338` SPEC FAIL/F01; quality NOT STARTED; new repair checkpoint pending | `1578dfd8-f239-4eba-989b-3c4bde3e5792` |
 
 ## Accepted local integrations
@@ -315,6 +316,22 @@ snapshot blob destination; the separately successful explicit-store neutral brid
 does not replace that default case. D03's one-test cleanup ERROR is also not green.
 Neither observation is assigned to F01 or authorized as a P03/P07/global-setting
 repair. A13 and product integration remain closed.
+
+P08 partial product `8d477701bf05c545790d4c5fdbdc84945dd130db`, report-only
+`062ffc6cc0cfecee80646fda2a54bad4db837fad`, parent/control `f9685530`, is frozen.
+The coordinator read the complete report and verified its 46-path scope and unchanged
+gated/shared implementations. Distinct reviewer `9dbf0a9b` assesses only ready A08/A10
+and advisory A13.3; the 14/18 preservation failure and 22/23 context-safety failure
+are not waived. A13.1/.2/.4, shell27 INVALID/unknown real-home effects and the two
+post-run cycle sentences remain explicit in that review.
+
+Coordinator `1105ebe` assigns the original P03 owner one read-only investigation of
+the inherited Python checkpoint/snapshot, Git ref-lock and cleanup observations.
+Current main's relevant P03 helpers/tests match the reported dependency baseline.
+Only `reports/P03-joined-path-investigation.md` may be written; no product changes,
+global long-path settings, shorter acceptance paths or actual-home access. Await its
+evidence and repair alternatives before issuing a single bounded implementation card.
+Do not duplicate the investigation in P08/P10 or treat inheritance as acceptance.
 
 Coordinator repairs for P10's reported shared-suite failures are committed separately:
 `d53dc38` changes only the reviewed evidence CLI's Git mode to 100755, preserving its
