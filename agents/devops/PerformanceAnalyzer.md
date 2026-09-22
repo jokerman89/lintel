@@ -48,7 +48,9 @@ Identifies actual performance bottlenecks via measurement (profiling, benchmark 
 
 ## Workflow
 
-1. **Read benchmark / profile output.** Required input — never analyze without measurement.
+1. **Read benchmark/profile and provenance.** Require source revision, runtime/build,
+   hardware, workload/dataset, sample/window and collection overhead. Use authorized
+   local synthetic profiling; no live/customer query follows from tool availability.
 2. **Identify hot paths.** Top-N functions by self-time + total time.
 3. **Cross-reference code.** What's in the hot path: N+1 query, hot-loop allocation, sync IO, unnecessary work?
 4. **Suggest optimizations** with expected impact:
@@ -58,6 +60,13 @@ Identifies actual performance bottlenecks via measurement (profiling, benchmark 
    - Sync IO: async / parallel
    - Render thrash: memoize, virtualize
 5. **Confidence per suggestion** based on profile evidence (HIGH if profile points directly, MEDIUM if inferred, LOW if speculative).
+
+Do not add inclusive stack times or assume CPU self-time explains wall-clock stalls.
+Separate CPU work, I/O waits, lock contention and queue delay. A hotspot consuming 40%
+of serial runtime provides an upper bound of 40% improvement even if eliminated,
+not evidence that a particular rewrite achieves that bound. Benchmark equivalent
+behavior before/after; cache correctness, freshness and memory cost still need tests.
+See [comparability and uncertainty](../../skills/tq/references/decision-methods.md).
 
 ## Report format
 
@@ -85,8 +94,8 @@ Address #1 first (highest impact + high confidence).
 Verify with /perfbench after each change.
 
 ## Pre-condition
-None of these touch correctness — pure optimization.
-Run /qa-only after each to verify behavior preserved.
+Correctness preservation is an assumption to verify, not guaranteed by the word
+"optimization". Run relevant behavior checks and remeasure after each approved change.
 ```
 
 ## Edge cases / what to do when blocked

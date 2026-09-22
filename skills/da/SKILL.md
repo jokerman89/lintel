@@ -49,6 +49,9 @@ You are the DA (data-architecture) module — Phase 4 v4.2 of Lintel.
 
 Produces schema-grade decisions and migration safety when work touches data models. Three granularities — full pass for new datastores, loop iteration for schema refinement, single action for targeted ops.
 
+For locking, recoverable migration states, replay/late data and lineage, read
+[data decision methods](references/decision-methods.md).
+
 | Entry | When | Outputs |
 |---|---|---|
 | `/li:da full` | new datastore / major migration | `data-model.md` + schema definitions + migration plan + retention policy + access patterns |

@@ -25,9 +25,12 @@ Core principles (the doctrine — ADR-0016, derived from Anthropic's frontend-de
 
 Synthesizes per-axis design-decisions (typography from `frontend-typography` → motion from `frontend-motion` → shader from `frontend-shader` in A2) into a **`frontend-design-spec.json`** (schema_version: 1).
 
-Picks **component-library** (shadcn primitives + Aceternity/Magic UI/Park UI for motion-enhanced + Vaul/cmdk for UX-utilities), **layout-grammar** (max-width, section-spacing, grid system), **interaction-signature** (scroll-smoothing, hover-intent, page-transitions), and **visual-thesis** (one-paragraph synthesis).
+Picks a justified component/library strategy compatible with the existing framework,
+layout grammar, interaction signature and visual thesis. Existing primitives or
+plain semantic HTML may be enough; a design brief is not permission to replace the stack.
 
-Does NOT write code. Does NOT generate HTML. Calls into rendering-engine via `/li:generate-web --from-frontend-design` (Phase B) or `/li:generate-app --from-frontend-design` (Phase B).
+Does NOT write code or generate HTML. Returns the spec to the caller for the existing
+renderer/FrontendBuilder handoff; it does not claim that a renderer was invoked.
 
 ## Non-overlap with existing agents (m-1 resolution)
 
@@ -37,7 +40,8 @@ Does NOT write code. Does NOT generate HTML. Calls into rendering-engine via `/l
 
 ## When to invoke
 
-- Auto-invoked by `/li:frontend-design` Workflow Step 5 (synthesis)
+- Suitable for frontend-design synthesis when the actual caller delegates it;
+  source role presence is not evidence of automatic invocation
 - Solo: operator has typography.json + motion.json (e.g., from prior parallel runs) and wants design-spec synthesized
 - Pre-`/li:frontend-design-review` standalone consultation
 
@@ -58,8 +62,11 @@ Does NOT write code. Does NOT generate HTML. Calls into rendering-engine via `/l
    - Original brief (for context)
 
 2. **Pick component-library mix:**
-   - Base primitives: `shadcn/ui` (default — Radix + Tailwind + works with any framework)
-   - Motion-enhanced: ONE of `aceternity-ui` (bento + bg-gradient + tracing-beam) | `magic-ui` (text-effects + cards) | `park-ui` (Panda CSS variant)
+   - Start with the installed framework and design system. shadcn/ui's React
+     components are not automatically usable in every framework; verify a compatible
+     implementation rather than assuming a same-named port has identical behavior.
+   - Motion-enhanced candidates, only if needed: `aceternity-ui`, `magic-ui` or
+     `park-ui`; check actual framework, accessibility, dependency and license fit
    - UX-utilities: `vaul` (mobile drawer) + `cmdk` (command palette) — opt-in based on brief
    - Justify pick: brief mentions complex animation → Aceternity. Brief emphasizes typography → Magic UI. Brief wants Panda CSS → Park UI.
 
@@ -70,7 +77,8 @@ Does NOT write code. Does NOT generate HTML. Calls into rendering-engine via `/l
    - Container query strategy: opt-in if brief mentions multi-context-rendering
 
 4. **Pick interaction-signature:**
-   - scroll-smoothing: true (Lenis default), false (override for perf-critical)
+   - scroll-smoothing: false unless an explicit interaction need justifies it and
+     native keyboard, anchor, focus and reduced-motion behavior remain usable
    - hover-intent: subtle | pronounced | none
    - page-transitions: fade-or-slide | view-transitions-api | none
    - cursor: default | custom-blob (rare, only if motion.energy_level === kinetic)
@@ -91,6 +99,9 @@ Does NOT write code. Does NOT generate HTML. Calls into rendering-engine via `/l
 
 ## Report format
 
+Illustrative React-based selection only; populate these existing fields from the
+actual brief, profile and installed stack, not as a mandatory library bundle.
+
 ```yaml
 frontend_design_spec:
   schema_version: 1
@@ -107,7 +118,7 @@ frontend_design_spec:
   component_libraries:
     - name: shadcn
       kind: primitive
-      install: "npx shadcn-ui@latest init"
+      install: "<verified command/version for the selected framework; not executed by this role>"
     - name: aceternity-ui
       kind: motion-enhanced
       install: "manual copy from ui.aceternity.com (component-by-component)"
@@ -123,7 +134,7 @@ frontend_design_spec:
     container_queries: false
 
   interaction_signature:
-    scroll_smoothing: true
+    scroll_smoothing: false
     hover_intent: subtle
     page_transitions: fade-or-slide
     cursor: default
@@ -144,6 +155,13 @@ frontend_design_spec:
 - **Producing spec without schema_version** — M-5 compliance.
 
 ## Failure recovery
+
+Example: for an existing Vue settings screen with a pinned brand and no motion
+requirement, retain its components/tokens and propose no new animation library.
+If an existing output schema cannot express the desired no-motion choice, report
+the exact consumer/schema seam; do not invent a new format or claim integration.
+The original ADR-0016 doctrine/provenance above remains; boldness is craft within
+the brief, not a requirement to change vendor, palette or runtime.
 
 - Input typography.json or motion.json missing required fields → BLOCKED, surface missing fields
 - Brief unparsable for visual-thesis → NEEDS_CONTEXT with specific clarification (audience, aesthetic-direction, energy)

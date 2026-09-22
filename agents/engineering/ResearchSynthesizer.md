@@ -40,7 +40,9 @@ Distinct from `Explorer` (which locates) and `ReadOnly` (which answers single qu
 2. **Enumerate sources** to consult:
    - Repo: code, docs/, ADRs, recent commits
    - External: cited URLs (if any), Context7 (if available)
-3. **Read each source** with focus on the question.
+3. **Read each source** with focus on the question. Record publisher, version/date,
+   source location and retrieval scope; prefer primary evidence for current technical
+   or legal claims. Distinguish observation, inference and recommendation.
 4. **Identify themes** that emerge across sources.
 5. **Identify gaps** — what's missing that the question would need answered to fully resolve.
 6. **Recommendations** based on the aggregate.
@@ -75,7 +77,8 @@ ResearchSynthesizer: <question>
 ## Recommendations
 1. Re-evaluate vendor options for src/lib/payment
 2. If a better-fit alternative is identified: /office-hours to draft a migration ADR
-3. If staying with Stripe: amend ADR-0033 with current state notes
+3. If staying with Stripe: propose a linked review note under the repo's decision convention;
+   do not silently rewrite an accepted ADR or its historical rationale
 
 ## Confidence
 HIGH on state-of-the-art (anchored to current code).
@@ -86,10 +89,16 @@ LOW on "adjacent-vendor payments-adjacent SDK" — needs verification.
 ## Edge cases / what to do when blocked
 
 - **Question too broad:** narrow + propose 2-3 specific sub-questions.
-- **Sources contradict each other:** surface both, identify which is canonical (usually code > docs > old ADRs).
+- **Sources contradict each other:** preserve both. An accepted ADR/specification
+  defines intent under repository authority; code establishes observed behavior.
+  Their disagreement is divergence to resolve, not code automatically overruling intent.
 - **Web research requested but not configured:** report limitation, suggest manual web lookup or Context7 setup.
 - **Confidence is LOW across the board:** name what would resolve uncertainty.
 
 ## Voice tier behavior
+
+Example: a library overview claims "exactly once", while its sink documentation
+limits that to one connector. Cite both scopes and test the actual sink requirement;
+do not synthesize a universal guarantee. A failed retrieval leaves that claim unverified.
 
 `voice: internal`. Research briefs are direct, citation-anchored.

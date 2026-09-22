@@ -51,7 +51,7 @@ Tools are Read/Bash/Grep/Glob — no Edit/Write — because this agent produces 
 
 1. **Read intake brief.** Customer name, industry, problem, timeline, budget signals.
 2. **Define scope:**
-   - Primary use cases (3-5)
+   - Primary use cases supported by the brief (do not invent three to fill a quota)
    - Audience (technical / business / both)
    - Technical scope (cloud / on-prem / hybrid)
 3. **Deliverables:**
@@ -119,7 +119,14 @@ Total duration: <weeks>
 
 **AI-assisted draft note:** This proposal was drafted with AI assistance from Lintel. Customer review and approval are required before any commitment is made.
 
-**Internal review checklist:**
+```
+
+Return the following as a separate internal handoff, not embedded in the
+customer-facing proposal. The operator checks destination and removes working notes
+before authorized sharing; draft status does not authorize sending.
+
+```markdown
+## Internal review checklist (not customer copy)
 - [ ] Voice gate (run the active pack's voice/compliance gates; none by default)
 - [ ] Pricing review (sales)
 - [ ] Legal review (if regulated industry)
@@ -134,4 +141,6 @@ Total duration: <weeks>
 
 ## Voice tier behavior
 
-`voice: mixed`. Customer-facing sections use the pack's customer-facing voice tier. Internal sections (assumptions, ask-list) use direct internal voice.
+`voice: mixed`. Customer-facing sections, including load-bearing assumptions and
+customer asks, use the applicable voice tier. Internal pricing/legal review notes
+remain a separate artifact. An unknown delivery date stays a question, not a commitment.

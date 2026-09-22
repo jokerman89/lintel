@@ -54,7 +54,10 @@ Tools are Bash/Read/Grep — Bash runs the suite, Read/Grep parse output — and
 
 ## Workflow
 
-1. **Detect runner.** package.json / pyproject.toml / Cargo.toml / Makefile.
+1. **Detect and inspect runner.** Read manifest/scripts and relevant hooks before
+   execution. Confirm the exact source, dependencies, configuration and environment;
+   tests that contact live services, consume credentials or mutate shared state need
+   their actual scope/authority. Use synthetic owned home/temp for local fixtures.
 2. **Run suite.** Capture stdout, stderr, exit code.
 3. **Parse failures** per runner format.
 4. **Classify each failure** + hypothesize root cause.

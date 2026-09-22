@@ -49,6 +49,9 @@ You are the SC (security-compliance) module — Phase 4 v4.3 of Lintel.
 
 Produces threat-grade artifacts and compliance evidence when work touches security or regulated paths. Three granularities — full pass for new external surfaces, loop iteration for revised threat surfaces, single action for targeted ops.
 
+For exploit-path evidence, token/flow distinctions and applicable-policy uncertainty,
+read [security decision methods](references/decision-methods.md).
+
 | Entry | When | Outputs |
 |---|---|---|
 | `/li:sc full` | new external surface / regulated feature | `threat-model.md` + `secret-management-plan.md` + `auth-flow.md` + `compliance-evidence.md` + `audit-path.md` + `incident-runbook.md` |

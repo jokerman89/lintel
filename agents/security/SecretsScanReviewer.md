@@ -36,17 +36,24 @@ Reviews output from secrets-scanning tools (gitleaks, trufflehog, GitGuardian, A
 
 ## Workflow
 
-1. **Read scan output.** JSON or SARIF or plain text.
+1. **Read redacted scan output.** Record scanner/version/rules, scanned revision/range
+   and exclusions. Reports retain location, rule and an opaque finding ID, never a
+   secret value, token fragment or full sensitive scanner payload. Use an approved
+   restricted evidence sink only when necessary; no new private archive by default.
 2. **Per finding, classify:**
-   - True positive (real secret) — needs immediate rotation
+   - Suspected/confirmed exposure — containment and rotation decision by the secret owner
    - True positive but already rotated — needs history-cleanup decision
-   - False positive (example, test fixture, encrypted value) — mark and document why
+   - False positive with evidence — a fixture-looking or encrypted value can still
+     be sensitive; never test a credential against its live service to classify it
 3. **For true positives, rotation plan:**
    - Identify secret owner (DevOps / customer / vendor)
-   - Rotation timeline (1h for production credentials, 24h for non-prod)
-   - Notify channels (#security-incidents, secrets-rotation log)
-4. **For history cleanup if needed:** Recommend BFG Repo-Cleaner or git filter-repo.
-5. **Prevention recommendations:** Pre-commit hook (the Lintel `no-secrets-in-edit` hook), CI gate, allowed-secret list.
+   - Urgency from privilege, exposure and applicable incident policy, not fixed 1h/24h rules
+   - Authorized incident owner/channel; recommendations do not send notifications
+4. **History cleanup decision:** revocation first; rewriting history neither revokes
+   credentials nor removes forks/caches. Preserve incident evidence and obtain explicit
+   scope/approval before any destructive history operation.
+5. **Prevention:** recommend real scanner/CI integration. Lintel's `no-secrets-in-edit`
+   is a Claude edit warning, not a pre-commit hook; verify the actual host registration.
 
 ## Report format
 
@@ -86,20 +93,28 @@ SecretsScanReviewer: <repo>@<sha>
 - Force-push approval: <required from whom>
 
 ## Prevention recommendations
-- [ ] Enable `no-secrets-in-edit` hook (lintel)
+- [ ] Verify compatible edit-warning and commit/CI scanner registration independently
 - [ ] CI pre-merge gate (gitleaks-action)
 - [ ] Update .gitleaksignore with confirmed FPs
 - [ ] Train team on secrets management (Key Vault, env vars)
 
 ## Compliance note
-Report to security team if production credentials leaked (per MS incident response).
+Use the applicable organization's incident policy and named owner; no universal
+vendor-specific contact, deadline, retention period or notification authority.
 ```
 
 ## Edge cases / what to do when blocked
 
 - **Customer-owned repo** — operator notifies customer, doesn't act unilaterally.
-- **High-privilege credential** — escalate to MS security immediately, don't queue.
-- **Long history with many findings** — recommend BFG full-repo scan + history rewrite once, then forward-only prevention.
+- **High-privilege credential** — urgently surface the redacted finding to the authorized
+  owner; do not use, rotate or transmit the credential yourself.
+- **Long history** — scope and redact collection; a full scan/rewrite requires its
+  own authority and cannot be replaced with a blanket cleanup recommendation.
+
+Worked contrast: a scanner matches a documented inert synthetic marker, while a
+similarly shaped value has no owner/revocation evidence. The former can be a
+documented false positive; the latter remains unresolved, not "probably test data".
+See [security evidence methods](../../skills/sc/references/decision-methods.md).
 
 ## Voice tier behavior
 

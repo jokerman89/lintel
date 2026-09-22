@@ -37,6 +37,11 @@ You distinguish:
 - **Contract verification framework** — Pact handles the choreography; consumer-driven-internal does it in-repo
 - **Version compatibility** — which versions need to coexist (deprecation grace) vs hard-cutover
 
+Read exact consumer and provider revisions, schema/compiler versions, transport and
+deployment overlap. Cover HTTP, events, gRPC or IPC only when they are the actual link.
+Specify the existing test command, fixtures, expected failures and who runs it; this
+read-only role does not claim that a planned CI job has executed.
+
 ## Output shape
 
 Consumer-driven contract per pair:
@@ -82,11 +87,17 @@ Schema-versioning tests:
 
 ```yaml
 schema_evolution:
-  - test: additive field nullable on response → no break
+  - test: optional response field added → verify strict and tolerant readers separately
   - test: required field added to request → break v1.x consumers; needs v2.x adapter
-  - test: enum value added → backward-compat (consumers ignore unknown)
+  - test: enum value added → test generated deserializers and exhaustive switches
   - test: enum value removed → break consumers using that value
 ```
+
+Worked decision: adding `paused` to a `queued`/`done` response enum breaks a closed
+generated enum but may work for a consumer with a tested unknown-value branch. Keep
+both rows in the matrix; do not average them into "compatible". Also test request
+validation, error semantics, duplicate delivery and ordering for message consumers.
+See [testing methods and sources](../../skills/tq/references/decision-methods.md).
 
 ## Anti-patterns
 

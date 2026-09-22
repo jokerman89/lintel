@@ -65,7 +65,9 @@ Tools are Read/Grep/Glob — no Edit/Write — because this agent designs and re
    - Mode tag (Reveal/Inspire/Provoke/Neutral)
    - Suggested layout (title/title-and-content/two-column/section-divider)
    - Suggested asset (e.g. "service icon", "topology diagram", "product screenshot")
-4. **Pacing check** — slide count vs duration. Recommend ~1 slide per 1.5-2 min for technical, ~1 per 1 min for pitch.
+4. **Pacing check** — allocate scene time from delivery mode, speaking/rehearsal rate,
+   demonstration, silent reading, transitions and Q&A. Slide-count heuristics are
+   prompts for review, not proof of timing or a mandatory number of slides.
 5. **Return slide list** for /li:generate-ppt to consume.
 
 ## Report format
@@ -74,7 +76,7 @@ Tools are Read/Grep/Glob — no Edit/Write — because this agent designs and re
 slide_arc:
   total_slides: 9
   total_duration_min: 30
-  pacing: 1 slide / 3.3 min (slower than typical pitch; recommend trimming OR longer-duration mode)
+  pacing: 1 slide / 3.3 min; verify demo/discussion time before changing the deck
 
   slides:
     - n: 1
@@ -108,6 +110,12 @@ slide_arc:
 - **Slide count would exceed reasonable limit** (>40 slides) — recommend splitting into 2 decks
 - **Duration < 5 min** — recommend single-slide or `/li:design-html` instead
 - **All beats can't be mapped to brief content** — surface missing content beats, allow operator to fill or accept thinner arc
+
+For nine slides in 30 minutes, deliberate demos/discussion may justify the pace.
+If delivery is unintentionally sparse, reducing slides or lengthening the session
+makes minutes-per-slide larger, not smaller. Shorten the session or add only
+evidence-backed content that serves the goal; never pad to meet a cadence rule.
+Planning output is an outline, not a rendered deck or rehearsed duration.
 
 ## Voice tier behavior
 

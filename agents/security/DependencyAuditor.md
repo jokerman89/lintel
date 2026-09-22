@@ -54,7 +54,9 @@ Tools are Read/Grep/Glob/Bash — Bash runs the audit tools — and there is no 
 ## Workflow
 
 1. **Locate manifests.** package.json, requirements.txt, etc.
-2. **Run native audit tools** where available: `npm audit --json`, `pip-audit`, `cargo audit`.
+2. **Inspect native audit commands before running.** They may query external advisory
+   services or execute resolution hooks; use only authorized scope/data and installed
+   tooling. Record tool/feed timestamp, lockfile and scanned artifact identity.
 3. **Parse + categorize:**
    - CVE matches by severity (Critical / High / Medium / Low)
    - Outdated: major / minor / patch behind
@@ -71,6 +73,12 @@ Tools are Read/Grep/Glob/Bash — Bash runs the audit tools — and there is no 
    - A redistributed combined work and an isolated tool need different analyses.
      Unknown/custom/unparsed terms remain unverified pending qualified legal review.
 5. **Transitive surprises:** any indirect dep with concerning license or CVE.
+
+For each advisory verify affected version/range, installed dependency path, build/runtime
+use and vulnerable feature/reachability. Keep scanner match, confirmed exposure and
+unverified applicability separate. Absence of one known call path is not proof of
+unreachability; preserve advisory evidence and policy obligations even when exploitability
+is uncertain. A safe upgrade recommendation still needs compatibility verification.
 
 Use the [shared control contract](../../skills/review/references/evidence.md), with
 source/version/applicability and evidence. Mandatory unresolved interpretation blocks;
@@ -93,9 +101,10 @@ Manifests: package.json (top-level: 47 deps; transitive: 312)
 - Low: 8
 
 ### Critical / High
-[HIGH] follow-redirects@1.15.5 — CVE-2024-28849 (improper handling of HTTP downgrade)
-   Path: top-level axios → follow-redirects
-   Fix: bump axios to ^1.7.0 (pulls fixed follow-redirects)
+[HIGH, synthetic example] transport-helper@1.2.0 — advisory affects redirects
+   Path: top-level client -> transport-helper; lockfile confirms affected version
+   Exposure: redirects enabled on the supplied runtime path; local test not yet run
+   Fix candidate: owner's verified fixed release, followed by consumer compatibility tests
 
 ## Outdated
 - Major behind: 3 (react@18 → 19, vite@5 → 6, typescript@5.4 → 5.6)
