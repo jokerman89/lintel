@@ -92,6 +92,9 @@ standalone brief/content/Word/PPT routes can now be implemented against accepted
 core/role contracts without forking the shared design schema. Its shared-pipeline
 binding, PDF/XLSX/Visio implementation, P13 and other cross-component gates retain
 their dependencies and specific later release.
+P13 may separately implement its compact metadata/catalog/helper first unit against
+existing accepted frontmatter/registry contracts; final optional installation,
+capability maturity/version mapping and generated reconciliation remain gated.
 
 Each leaf below is a bounded change or scenario, intended for a short implementation
 step. If an actual leaf needs splitting, append stable sub-IDs before starting it and
