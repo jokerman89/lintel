@@ -51,6 +51,15 @@ Current actionable checkpoints supersede the older chronological entries below:
   for the already approved additive selection/preservation unit. Installed closure
   and final P13 parents remain open.
 
+Later P13 source checkpoint: A+B `72253ed` passes `7bf3f253`, integrated `895bb35`.
+All 19 joined source-selection methods pass. The new actual installed selection
+case passes init/check/repeat, alias/demo-role queries from unrelated cwd, exact
+alias/provenance/notices and a managed-files-only clone with empty synthetic home.
+Missing PyYAML visibly refuses; no source/home fallback or query write occurs.
+This is accepted-P06-engine evidence, not P10 linked/default transaction acceptance.
+The remaining eight discovery/authoring consumers and existing template are
+released to the original P13 owner with explicit status/welcome ownership.
+
 Dependency-ready releases are committed, not new proposals awaiting an operator:
 `bdfd127` releases P04's accepted-provider shared-evidence consumer and conditionally
 releases P13 additive source selection/preservation after compact acceptance.
