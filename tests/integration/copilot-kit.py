@@ -18,6 +18,7 @@ JOINED_RUNTIME_RESOURCES = (
     "lib/context_safety.py", "lib/review_contract.py", "lib/review-schema.json",
     "bin/li-review-evidence.py", "bin/li-review-log", "bin/li-review-read",
     "bin/li-domain-result.py", "lib/domain_result.py", "lib/domain-result-schema.json",
+    "lib/state.sh", "lib/cycle-modes.sh", "lib/cycle-footer.sh", "lib/workflow.sh",
     ".claude-plugin/plugin.json",
 )
 spec = importlib.util.spec_from_file_location("li_copilot", ROOT / "bin/li-copilot.py")
