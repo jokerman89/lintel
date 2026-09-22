@@ -1,112 +1,104 @@
 ---
 name: setup-browser-cookies
 layer: foundation
-description: Bootstrap auth cookies for the managed Chromium profile — operator-driven, one-time per service.
+description: Use to keep login on the user's chosen browser surface and verify authorized signed-in state without copying cookies or credentials.
 color: orange
 tools: Read, Bash, Edit
 voice: internal
-cli_support: [claude-code]
+cli_support: [claude-code, codex, copilot]
 ---
 
 # /setup-browser-cookies
 
-Establishes authenticated cookies in the Lintel-managed Chromium profile so that subsequent `/browse` and `/scrape` runs can hit logged-in pages without re-auth.
-
-Operator-driven by design: the skill launches a headed (visible) browser, the operator logs in manually using their actual SSO or password manager, and on close the cookies persist in the managed user-data-dir. No password ever enters this skill's prompt.
+Preserved authentication entry point for `/browse` and `/scrape`, using the
+[shared browser operations](../browse/references/browser-operations.md). The name
+does **not** authorize cookie export/import. Authentication remains on the user's
+chosen browser/provider surface, with the user entering credentials and MFA.
 
 ## When to use
 
-- First time you need `/browse` or `/scrape` against a page behind login
-- After cookie expiry (typically every 7-30 days depending on the service)
-- After a password rotation that invalidated old sessions
-- Switching managed profile (e.g. personal vs work account separation)
+- First authorized visit to a test or other permitted authenticated service.
+- Revalidation after session expiry or account changes.
+- Explicit separation of two user-selected test accounts/surfaces.
 
-## When NOT to use
-
-- The service has API tokens — use the API instead; cookies are fragile and short-lived
-- Production customer-bearing system — STOP. Layer 2 customer-data gate blocks; the right move is sanitized fixtures
-- Service requires MFA on every login and you can't store an MFA token — skill won't help; live `/browse` with manual MFA each time is the workflow
+Prefer a supported authorized API when browser sessions are unsuitable. Customer
+systems and production data are not substitutes for sanitized fixtures. Session
+setup does not authorize later reads, form submissions or scraping.
 
 ## Inputs
 
-- Required `--service <name>` — friendly name for the service (used in cookie store labeling)
-- Required `--login-url <url>` — the URL where login lives
-- Optional `--profile <name>` — managed profile to use (default: `default`)
-- Optional `--check` — verify existing cookies are still valid (visits a known authed page, checks for redirect)
+- `--service <name>`: non-secret friendly label.
+- `--login-url <url>`: user-selected login destination, when login is requested.
+- `--profile <name>`: optional opaque session label resolved only by the chosen
+  provider/user; never a path to search in personal browser storage.
+- `--check`: recheck **only** the explicitly selected authorized session.
+- Validation URL plus expected visible signed-in marker: ask if not already known.
+  A 200 response, cookie file or populated profile directory is not that marker.
 
-## Workflow
+## Establish authentication
 
-1. **Compliance gate.** Hostname checked against Layer 2 prod-host list. If matched: BLOCK.
-2. **Launch headed Chromium.** With persistent user-data-dir at `~/.lintel/browser-profiles/<profile>/`.
-3. **Operator login.** Browser navigates to `--login-url`. Skill prints "Waiting for operator login. Press Enter here when logged in."
-4. **Verify.** When operator confirms, skill navigates to a service-known authed URL (per `~/.lintel/browser-profiles/services.yaml`) and checks for non-login response.
-5. **Persist + close.** Cookies are already on disk (persistent profile); skill just confirms presence + closes browser.
-6. **Register service.** Append metadata to `~/.lintel/browser-profiles/services.yaml`: service name, last-validated-at, login URL, validation URL.
-7. **Report.** Confirmation + expiry estimate (read from cookie max-age if available).
+1. Resolve the approved work/profile/policy and intended account/service scope.
+   Ask which surface the user wants when not already selected: their own browser,
+   a host-managed visible session, or a fresh isolated provider context.
+2. Inspect the actual provider's isolation, visibility and persistence API before
+   opening anything. If it cannot demonstrably use that chosen surface, stop only
+   automated authentication and give a manual handoff. Do not switch surfaces or
+   copy cookies to make the workflow appear successful.
+3. Validate login and validation URLs through P03. Identity-provider redirects
+   need explicit authorized hosts/origins too. Do not learn an allowlist by first
+   visiting an unapproved redirect target.
+4. The **user** logs in using their normal password manager/SSO/MFA flow. Never ask
+   for a password/token, capture login keystrokes, inspect the password store, save
+   storage-state files or submit credential changes. Stop automated snapshots,
+   console/DOM capture and traces while the user is authenticating.
+5. After the user confirms, use only a permitted non-sensitive marker or their
+   explicit attestation to assess sign-in. Distinguish `observed in selected
+   context` from `user-reported; automation unverified`. A login redirect or
+   missing marker is stale/unverified, not proof of which account is present.
+6. Retain only necessary non-secret metadata in the selected work's gitignored
+   runtime: service label, provider/context owner, authorized validation URL,
+   checked time, observed marker/result and persistence limitations. Do not create
+   a fictional global `services.yaml`, inspect cookies for expiry or invent a
+   "30 day" freshness estimate.
+7. Keep or close the session according to the user's choice and provider's real
+   lifetime. Do not claim a closed ephemeral context retains authentication.
 
-## Workflow (--check mode)
+## `--check` mode
 
-1. Launch headless Chromium with same profile.
-2. Navigate to the service's validation URL.
-3. If logged in: print OK + report cookie freshness.
-4. If redirected to login: print STALE + recommend re-run without `--check`.
+Use the already selected context only if its owner authorized this check and the
+provider proves that same context is accessible. Validate the destination and all
+redirects before following them. Observe the agreed non-secret signed-in marker.
+Return one of: observed signed-in, observed login/stale, user-attested only,
+blocked, or unverified with the exact reason.
 
-## Report format
+If only a profile directory remains, engine execution and sign-in are both
+unverified. Do not launch another browser, reuse a personal session, or inspect
+cookie databases to repair that gap.
 
-```
-Setup browser cookies: github.com
+## Concrete local-provider boundary
 
-Profile: default (~/.lintel/browser-profiles/default/)
-Login URL: https://github.com/login
-Validation URL: https://github.com/settings/profile
+`skills/browse/scripts/chromium.mjs` requires a fresh isolated context and declares
+an optional headed launch. Headless operations and password/HTTP-auth refusals
+were observed on a synthetic fixture; headed mode and real login were not.
+A subsequent startup failed and native execution stopped again. Do not treat
+these source methods or the headless observations as verified login support.
+Its methods refuse password/file inputs and HTTP
+authentication challenges and never supply credentials. It implements no
+persistent profile reuse, SSO transfer, cookie export/import or global service registry.
 
-[Headed browser launched. Operator logged in at 16:14:03.]
+A user may choose that visible ephemeral surface for a permitted manual login
+with separately scoped observation afterward. They may instead keep login in
+their ordinary browser and supply non-sensitive manual evidence. Neither choice
+is silently converted into authenticated automation on another surface.
 
-✓ Validated — settings page loaded as logged-in user
-Cookies persisted to profile
-Estimated expiry: ~30 days (based on max-age headers)
-Service registered in services.yaml
-```
+## Failure handling and report
 
-## Compliance integration
+If the user does not confirm within the agreed waiting period, report no
+confirmation; do not close their own browser or infer saved cookies. On crash,
+expiry, MFA challenge or unknown persistence, retain the exact limitation and
+offer the same chosen-surface workflow, not a cookie-copy recipe.
 
-- Layer 2 prod-host gate ALWAYS applies — you cannot bootstrap cookies against a customer-data-bearing prod host through this skill. Use sanitized staging/test environments.
-- Profile dir permissions: `~/.lintel/browser-profiles/` should be `chmod 700` (skill verifies + warns if loose).
-- NEVER prompts operator for passwords. NEVER captures keystrokes. NEVER reads the browser's password autofill store.
-- Cookie store excluded from any lessons/memory sync by default (Layer 2 secrets-rule). If a sync is enabled, the secrets hook blocks.
-
-## Failure modes
-
-- **Operator never confirms login:** 5-minute timeout, then skill closes browser + reports no-confirmation. Cookies that ARE present will still persist.
-- **Validation URL fails (got redirected to login):** report STALE state. Operator can retry, possibly with a different account.
-- **Profile dir permissions too open:** print chmod 700 fix command + ask whether to apply.
-- **Browser crash during login:** report + ask operator to retry. Cookies from a clean shutdown will persist; from a crash may not.
-- **Service has rotating cookies (every request):** cookies persist but may not survive idle time. Note this limitation; operator should run `--check` more often.
-
-## Examples
-
-**First-time setup for GitHub:**
-```
-> /setup-browser-cookies --service github --login-url https://github.com/login
-[Headed browser opens. Operator logs in.]
-✓ Validated. Cookies stored, est. 30 days.
-```
-
-**Check existing:**
-```
-> /setup-browser-cookies --service github --check
-✓ Cookies fresh, last validated 4h ago, settings page loaded.
-```
-
-**Stale cookies:**
-```
-> /setup-browser-cookies --service github --check
-✗ STALE — redirected to /login. Re-run without --check to refresh.
-```
-
-## See also
-
-- `/browse` — uses the cookies set up here
-- `/scrape` — same
-- `/open-managed-browser` — manual interactive session in the same profile
-- Layer 2 compliance — secrets handling, profile permissions
+Report service/surface choice, owner, actual provider operation (or none),
+validation observation/attestation, lifetime and unresolved checks. No cookie
+contents, credential values, account identifiers or personal profile paths belong
+in evidence, memory, sync or committed artifacts.
