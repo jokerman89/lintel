@@ -107,10 +107,15 @@ useful, team-ready Universal skills, not a general Windows/Git compatibility lay
 Close only the bounded active P08/P10 corrections and required review, then advance
 dependency-ready skill depth and client experience. Reconcile any newly proposed
 infrastructure blocker with the original outcome before expanding scope (L-038).
-P09 knowledge/preservation is now active in `0fe8dc1e`; P11's disjoint A16 browser
-unit is active in `f413bdcb`, both from `56df03d`. P08 and P10 are with their original
-independent reviewers. P09 runtime binding and P11 A14/design/agent work retain
-their predecessor gates; no new whole-package acceptance is implied.
+P09's content unit is independently accepted by `19eb776` and integrated in
+`4983af2`: 61 improved/eight retained roles, all 69 frontmatters and five domain
+references. Joined 12-method/catalog checks pass and reviewed source identity is
+exact. Original owner `0fe8dc1e` may design the remaining binding, not implement it.
+P08 is repairing F04/F05 and planning the original semantic/host evidence; P10 is
+repairing F02 under the clarified consumer-admission/write-set contract.
+P11 owner `f413bdcb` has frozen blocked A16 source and only the bounded native
+location/conditional owned-fixture scope. P09 runtime and P11 A14/design/agent work
+retain their predecessor gates; no whole-package acceptance is implied.
 Continue P08-P14 in dependency order,
 not a new audit or partial delivery. Coordinator routing (`b72ab47` plus
 `1d40193`) and provenance (`9f49e26`) await their owning package reviews. All successor cards
