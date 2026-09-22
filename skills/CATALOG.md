@@ -16,7 +16,7 @@ Total skills: 127
 | [`/li:audit`](audit/SKILL.md) | Read the unified Lintel audit trail — surface .claude/runtime/audit/ (repo events) and ~/.lintel/audit/ (operator event… |
 | [`/li:autoplan`](autoplan/SKILL.md) | Use to run a problem statement through the full planning pipeline in one shot — chains the design doc, strategy review,… |
 | [`/li:brief-forge`](brief-forge/SKILL.md) | Use when a workflow explicitly hands work across a boundary — spawning a subagent, transitioning a phase, passing to a … |
-| [`/li:browse`](browse/SKILL.md) | Drive a headless Chromium to a URL — screenshot, extract DOM, click, fill forms, verify UI. |
+| [`/li:browse`](browse/SKILL.md) | Use to open, read and interact with an authorized page using an observed browser provider, retaining screenshots, print… |
 | [`/li:build`](build/SKILL.md) | Use to execute an approved plan in bounded work packages, preserving short task IDs and acceptance evidence while revie… |
 | [`/li:capture`](capture/SKILL.md) | Use after SHIP, at the end of a task, to make what was learned durable — updates lessons, drafts an ADR for any non-tri… |
 | [`/li:careful`](careful/SKILL.md) | Use for high-stakes work that needs explicit mutation boundaries, attributable recovery and verification before continu… |
@@ -89,7 +89,7 @@ Total skills: 127
 | [`/li:make-pdf`](make-pdf/SKILL.md) | Convert URL, markdown file, or HTML to PDF via managed Chromium. |
 | [`/li:migrations`](migrations/SKILL.md) | Surface pending v4.x migrations at SENSE. Sister to /li:status. Read-only — surfaces operator-callsites still on deprec… |
 | [`/li:office-hours`](office-hours/SKILL.md) | Use to turn a rough problem statement into a structured, decision-gated design doc ready for engineering review. Reach … |
-| [`/li:open-managed-browser`](open-managed-browser/SKILL.md) | Open the Lintel-managed Chromium in headed mode — interactive operator session. |
+| [`/li:open-managed-browser`](open-managed-browser/SKILL.md) | Use to open an explicitly owned browser session for operator debugging, or check a real provider without touching perso… |
 | [`/li:orientator`](orientator/SKILL.md) | Phase 3 v4.0 — lightweight routing agent invoked at SENSE. Reads operator prompt + active pack's navigation policy, rec… |
 | [`/li:pack-create`](pack-create/SKILL.md) | Use to create a blank, inherited, or cloned Lintel pack and validate it before activation. |
 | [`/li:pack-list`](pack-list/SKILL.md) | Lists every pack discoverable in ~/.lintel/packs/ and repo packs/ — shows name, extends, voice tier, compliance mode, a… |
@@ -123,9 +123,9 @@ Total skills: 127
 | [`/li:scaffold-internal-tool`](scaffold-internal-tool/SKILL.md) | Initialize an internal-tooling repo — CI, README, pack compliance hooks, no customer surface. |
 | [`/li:scaffold-mvp`](scaffold-mvp/SKILL.md) | Initialize a product-MVP repo — full structure + pack-driven compliance/voice/deploy wiring. |
 | [`/li:scope`](scope/SKILL.md) | Use after SENSE, before DEFINE, when a request's size is ambiguous — turns a raw ask into a sized, disambiguated scope … |
-| [`/li:scrape`](scrape/SKILL.md) | Extract structured data from one or more pages — declarative selector schema, JSON output. |
+| [`/li:scrape`](scrape/SKILL.md) | Use to extract structured data from authorized pages with selector schemas, explicit pacing, visible failures and prior… |
 | [`/li:sense`](sense/SKILL.md) | Use at the very start of a task to read the situation before deciding how to work — detects operator intent, the active… |
-| [`/li:setup-browser-cookies`](setup-browser-cookies/SKILL.md) | Bootstrap auth cookies for the managed Chromium profile — operator-driven, one-time per service. |
+| [`/li:setup-browser-cookies`](setup-browser-cookies/SKILL.md) | Use to keep login on the user's chosen browser surface and verify authorized signed-in state without copying cookies or… |
 | [`/li:ship`](ship/SKILL.md) | Use after REVIEW passes, when reviewed work is ready to land, to open a PR, deploy, or hand off to a customer — runs th… |
 | [`/li:skill-router`](skill-router/SKILL.md) | Semantic skill router — given free-text user intent, suggests top 3 matching Lintel skills with rationale. |
 | [`/li:skillify`](skillify/SKILL.md) | Turn a recurring task or pattern into a new Lintel skill — scaffolds SKILL.md from TEMPLATE. |

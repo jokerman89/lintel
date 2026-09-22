@@ -101,6 +101,14 @@ or reached through COM/shell/alternate-launch workarounds. Original native
 content/editability, cache-error and formula-error evidence remains useful but
 does not establish full workbook/page layout acceptance.
 
+Selected native PPT now passes actual SPEC and QUALITY in `5858268` for
+`32dac88` and the distinct `7c130a2` evidence packet. The reviewer's optional
+private decision-data command was denied before execution; no structured P05
+decision/corroboration exists. A focused permission request returned user
+unavailable, not approval. Do not retry or delegate that denied persistence.
+The existing source/artifact/QA/review evidence remains valid; strict publication,
+Word/joint and parent acceptance remain distinct.
+
 P10's same reviewer closed the native F03 pair, then found a producer-grounded
 F04: canonical redirects with missing destinations are called current even
 though actual migration dry-run refuses them. The original owner has proposed
