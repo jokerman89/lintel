@@ -155,6 +155,14 @@ an evidenced argument-quoting/splitting defect and identified the unobserved nat
 Windows default-folder dependency. Only the card's bounded native location-metadata
 observation is now allowed; no new browser launch or personal-folder inspection.
 
+That original metadata comparison returned `0x80070002` for both fresh declared
+shapes; neither error buffer was used and no path was disclosed/accessed. The
+card now allows one documented DONT_VERIFY computed-location diagnostic, not a
+replacement for Chrome's check. Only a proven in-owned missing folder can be
+created, followed by a successful ordinary CURRENT check before conditional
+normal-pipeline continuation. Outside/unresolved results stop; no actual-home,
+policy or startup-variant work is authorized.
+
 ## Accepted local integrations
 
 Latest P08 independent report `402fd80417c2aa08193a460045168d8bb562793d` is
