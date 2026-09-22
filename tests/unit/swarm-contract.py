@@ -4,7 +4,7 @@
 # intent: .claude/plans/swarming-work/spec.md
 # constraints: hermetic temporary repositories; standard library only
 # last_intent_review: 2026-09-20
-"""Focused regression tests for the Lintel swarm contract."""
+"""Retained local-observation regressions; shared clearance is tested separately."""
 
 from __future__ import annotations
 
@@ -316,7 +316,7 @@ class SwarmContractTests(unittest.TestCase):
                 structural = swarm.validate_coordination(self.fixture.root, self.fixture.coordination_path)
                 self.assertTrue(structural.ok)
 
-                result, frontier = swarm.ready_frontier(self.fixture.root, self.fixture.coordination_path)
+                result, frontier = swarm.inspect_local_frontier(self.fixture.root, self.fixture.coordination_path)
                 self.assertFalse(result.ok)
                 self.assertIn("wave.work_map_status", diagnostic_codes(result))
                 self.assertEqual(frontier["work_map_status"], status)
@@ -415,7 +415,7 @@ class SwarmContractTests(unittest.TestCase):
             lane,
             report_overrides={"changed_paths": ["runtime-alias/attempt.json", lane["report"]]},
         )
-        close, states = swarm.verify_close(self.fixture.root, self.fixture.coordination_path)
+        close, states = swarm.inspect_local(self.fixture.root, self.fixture.coordination_path)
         self.assertFalse(close.ok)
         self.assertIn("scope.universal", diagnostic_codes(close))
         self.assertEqual(states[0]["state"], "invalid_report")
@@ -652,7 +652,7 @@ class SwarmContractTests(unittest.TestCase):
         self.fixture.coordination["lanes"][2]["wave"] = 3
         self.fixture._write("plan.md", "# Plan\n### BC1 Core\n### BC2 Adapter\n**Dependencies:** BC1\n### BC3 Docs\n")
         self.fixture.save()
-        result, frontier = swarm.ready_frontier(self.fixture.root, self.fixture.coordination_path)
+        result, frontier = swarm.inspect_local_frontier(self.fixture.root, self.fixture.coordination_path)
         self.assertEqual(frontier["dispatch_task_ids"], [])
         self.assertIn("BC1", frontier["blocked_by"]["BC2"])
 
@@ -763,14 +763,14 @@ class SwarmContractTests(unittest.TestCase):
         self.assertIn("scope.outside", diagnostic_codes(outside))
 
     def test_ready_frontier_waits_for_review(self) -> None:
-        result, frontier = swarm.ready_frontier(self.fixture.root, self.fixture.coordination_path)
+        result, frontier = swarm.inspect_local_frontier(self.fixture.root, self.fixture.coordination_path)
         self.assertTrue(result.ok)
         self.assertEqual(frontier["wave"], 1)
         self.assertEqual(frontier["ready_task_ids"], ["BC1"])
         lane = self.fixture.coordination["lanes"][0]
         self.fixture.write_evidence(lane)
         (self.fixture.root / lane["review"]).unlink()
-        result, frontier = swarm.ready_frontier(self.fixture.root, self.fixture.coordination_path)
+        result, frontier = swarm.inspect_local_frontier(self.fixture.root, self.fixture.coordination_path)
         self.assertTrue(result.ok)
         self.assertEqual(frontier["wave"], 1)
         self.assertEqual(frontier["ready_task_ids"], [])
@@ -780,7 +780,7 @@ class SwarmContractTests(unittest.TestCase):
         lane = self.fixture.coordination["lanes"][0]
         self.fixture.write_evidence(lane)
         (self.fixture.root / str(lane["review"])).unlink()
-        result, frontier = swarm.ready_frontier(self.fixture.root, self.fixture.coordination_path)
+        result, frontier = swarm.inspect_local_frontier(self.fixture.root, self.fixture.coordination_path)
         self.assertTrue(result.ok)
         self.assertEqual(frontier["states"][0]["state"], "awaiting_review")
 
@@ -796,19 +796,19 @@ class SwarmContractTests(unittest.TestCase):
             with self.subTest(expected=expected):
                 self.fixture.write_evidence(lane, report_overrides=overrides)
                 (self.fixture.root / str(lane["review"])).unlink()
-                result, frontier = swarm.ready_frontier(self.fixture.root, self.fixture.coordination_path)
+                result, frontier = swarm.inspect_local_frontier(self.fixture.root, self.fixture.coordination_path)
                 self.assertFalse(result.ok)
                 self.assertIn(expected, diagnostic_codes(result))
                 self.assertEqual(frontier["states"][0]["state"], "invalid_report")
                 self.assertNotEqual(frontier["states"][0]["state"], "awaiting_review")
 
     def test_close_evidence_fails_incomplete_then_passes(self) -> None:
-        result, states = swarm.verify_close(self.fixture.root, self.fixture.coordination_path)
+        result, states = swarm.inspect_local(self.fixture.root, self.fixture.coordination_path)
         self.assertFalse(result.ok)
         self.assertEqual(states[0]["state"], "not_started")
         for lane in self.fixture.coordination["lanes"]:
             self.fixture.write_evidence(lane)
-        result, states = swarm.verify_close(self.fixture.root, self.fixture.coordination_path)
+        result, states = swarm.inspect_local(self.fixture.root, self.fixture.coordination_path)
         self.assertTrue(result.ok, [item.as_dict() for item in result.diagnostics])
         self.assertTrue(all(state["state"] == "complete" for state in states))
 
@@ -830,7 +830,7 @@ class SwarmContractTests(unittest.TestCase):
                     else:
                         path = fixture.root / lane["report"]
                         path.write_text(path.read_text(encoding="utf-8").replace("attempt-1", "attempt-2"), encoding="utf-8")
-                    result, _ = swarm.verify_close(fixture.root, fixture.coordination_path)
+                    result, _ = swarm.inspect_local(fixture.root, fixture.coordination_path)
                     self.assertFalse(result.ok, mutation)
 
     def test_nonexistent_product_path_is_not_evidence(self) -> None:
@@ -840,14 +840,14 @@ class SwarmContractTests(unittest.TestCase):
         path = self.fixture.root / "src/core/file.py"
         if path.exists():
             path.unlink()
-        result, _ = swarm.verify_close(self.fixture.root, self.fixture.coordination_path)
+        result, _ = swarm.inspect_local(self.fixture.root, self.fixture.coordination_path)
         self.assertFalse(result.ok, "a claimed path with no observable result cannot close")
 
     def test_all_package_leaves_need_acceptance_evidence(self) -> None:
         self._grouped_fixture()
         lane = self.fixture.coordination["lanes"][0]
         self.fixture.write_evidence(lane, report_overrides={"leaf_results": {"1.1.a": [{"name": "test", "status": "PASS"}]}})
-        result, _ = swarm.verify_close(self.fixture.root, self.fixture.coordination_path)
+        result, _ = swarm.inspect_local(self.fixture.root, self.fixture.coordination_path)
         self.assertFalse(result.ok)
 
     def test_reviewer_scope_and_identity_bind_the_report(self) -> None:
@@ -860,7 +860,7 @@ class SwarmContractTests(unittest.TestCase):
                 for lane in self.fixture.coordination["lanes"]:
                     self.fixture.write_evidence(lane)
                 self.fixture.write_evidence(self.fixture.coordination["lanes"][0], review_overrides=overrides)
-                result, _ = swarm.verify_close(self.fixture.root, self.fixture.coordination_path)
+                result, _ = swarm.inspect_local(self.fixture.root, self.fixture.coordination_path)
                 self.assertFalse(result.ok)
 
     def test_manual_review_export_never_creates_clearance(self) -> None:
@@ -871,7 +871,7 @@ class SwarmContractTests(unittest.TestCase):
         self.assertEqual(exported["binding"]["package_id"], "BC1")
         self.assertNotIn("verdict", exported)
         self.assertIn("not review evidence", exported["independence"])
-        result, frontier = swarm.ready_frontier(self.fixture.root, self.fixture.coordination_path, host_capability="none")
+        result, frontier = swarm.inspect_local_frontier(self.fixture.root, self.fixture.coordination_path, host_capability="none")
         self.assertTrue(result.ok)
         self.assertEqual(frontier["states"][0]["state"], "awaiting_review")
 
@@ -885,7 +885,7 @@ class SwarmContractTests(unittest.TestCase):
         ), encoding="utf-8")
         self.fixture.save()
         self.fixture.write_evidence(self.fixture.coordination["lanes"][0], verification_only=True)
-        result, states = swarm.verify_close(self.fixture.root, self.fixture.coordination_path)
+        result, states = swarm.inspect_local(self.fixture.root, self.fixture.coordination_path)
         self.assertTrue(result.ok, [item.as_dict() for item in result.diagnostics])
         self.assertEqual(states[0]["state"], "complete")
 
@@ -897,7 +897,7 @@ class SwarmContractTests(unittest.TestCase):
         body = path.read_text(encoding="utf-8").replace(swarm.EVIDENCE_START, swarm.LEGACY_EVIDENCE_START)
         body = body.replace('"schema_version": 2', '"schema_version": 1')
         path.write_text(body, encoding="utf-8")
-        result, _ = swarm.verify_close(self.fixture.root, self.fixture.coordination_path)
+        result, _ = swarm.inspect_local(self.fixture.root, self.fixture.coordination_path)
         self.assertFalse(result.ok)
         self.assertIn("evidence.unbound", diagnostic_codes(result))
 
@@ -906,86 +906,86 @@ class SwarmContractTests(unittest.TestCase):
         self.fixture.write_evidence(self.fixture.coordination["lanes"][0])
         path = self.fixture.root / "plan.md"
         path.write_text(path.read_text(encoding="utf-8").replace("- [ ]", "- [x]"), encoding="utf-8")
-        result, _ = swarm.verify_close(self.fixture.root, self.fixture.coordination_path)
+        result, _ = swarm.inspect_local(self.fixture.root, self.fixture.coordination_path)
         self.assertTrue(result.ok, [item.as_dict() for item in result.diagnostics])
 
     def test_withdrawn_approval_or_external_prerequisite_prevents_close(self) -> None:
         self.fixture._write("plan.md", "# Plan\n- [x] T0 Baseline\n### BC1 Core\n**Dependencies:** T0\n### BC2 Adapter\n### BC3 Docs\n")
         for lane in self.fixture.coordination["lanes"]:
             self.fixture.write_evidence(lane)
-        self.assertTrue(swarm.verify_close(self.fixture.root, self.fixture.coordination_path)[0].ok)
+        self.assertTrue(swarm.inspect_local(self.fixture.root, self.fixture.coordination_path)[0].ok)
         self.fixture.work_map["status"] = "DRAFT"
         self.fixture.save()
-        self.assertIn("close.work_map_status", diagnostic_codes(swarm.verify_close(self.fixture.root, self.fixture.coordination_path)[0]))
+        self.assertIn("close.work_map_status", diagnostic_codes(swarm.inspect_local(self.fixture.root, self.fixture.coordination_path)[0]))
         self.fixture.work_map["status"] = "APPROVED"
         self.fixture.save()
         path = self.fixture.root / "plan.md"
         path.write_text(path.read_text(encoding="utf-8").replace("[x] T0", "[ ] T0"), encoding="utf-8")
-        self.assertIn("close.prerequisites", diagnostic_codes(swarm.verify_close(self.fixture.root, self.fixture.coordination_path)[0]))
+        self.assertIn("close.prerequisites", diagnostic_codes(swarm.inspect_local(self.fixture.root, self.fixture.coordination_path)[0]))
 
     def test_git_mode_changes_revoke_bound_result_including_windows_metadata(self) -> None:
         base, head = self._git_evidence()
-        self.assertTrue(self._cli("verify")["ok"])
+        self.assertTrue(self._cli("inspect", "--check-complete")["ok"])
         self._cli("snapshot", "--task", "BC1", "--attempt", "probe", "--base", base, "--head", head)
         self._git("update-index", "--chmod=+x", "--", "src/core/file.py")
-        self._cli("verify", expected=1)
+        self._cli("inspect", "--check-complete", expected=1)
         self._git("commit", "-qm", "test: unreviewed executable mode only")
         self.assertIn("100644 => 100755", self._git("diff", "--summary", head, "HEAD"))
-        self._cli("verify", expected=1)
+        self._cli("inspect", "--check-complete", expected=1)
         self._cli("snapshot", "--task", "BC1", "--attempt", "probe", "--base", base, "--head", head, expected=1)
         observed = self._cli("snapshot", "--task", "BC1", "--attempt", "changed-mode",
                              "--base", base, "--head", self._git("rev-parse", "HEAD"))
         self.assertEqual(observed["snapshot"]["result"]["files"]["src/core/file.py"]["mode"], "100755")
         self._git("update-index", "--chmod=-x", "--", "src/core/file.py")
         self._git("commit", "-qm", "test: restore reviewed regular-file mode")
-        self.assertTrue(self._cli("verify")["ok"])
+        self.assertTrue(self._cli("inspect", "--check-complete")["ok"])
         if os.name != "nt":
             self._git("config", "core.filemode", "true")
             path = self.fixture.root / "src/core/file.py"
             original_mode = path.stat().st_mode
             path.chmod(original_mode | 0o100)
-            self._cli("verify", expected=1)
+            self._cli("inspect", "--check-complete", expected=1)
             path.chmod(original_mode)
-            self.assertTrue(self._cli("verify")["ok"])
+            self.assertTrue(self._cli("inspect", "--check-complete")["ok"])
 
     def test_git_same_content_symlink_and_gitlink_cannot_reuse_regular_result(self) -> None:
         base, head = self._git_evidence()
-        self.assertTrue(self._cli("verify")["ok"])
+        self.assertTrue(self._cli("inspect", "--check-complete")["ok"])
         path = self.fixture.root / "src/core/file.py"
         content = path.read_bytes()
         path.unlink()
         os.symlink("copy.py", path)
         self.assertTrue(path.is_symlink())
         self.assertEqual(path.read_bytes(), content)
-        self._cli("verify", expected=1)
+        self._cli("inspect", "--check-complete", expected=1)
         self._cli("snapshot", "--task", "BC1", "--attempt", "probe", "--base", base, "--head", head, expected=1)
         path.unlink()
         path.write_bytes(content)
-        self.assertTrue(self._cli("verify")["ok"])
+        self.assertTrue(self._cli("inspect", "--check-complete")["ok"])
         self._git("update-index", "--add", "--cacheinfo", f"160000,{head},src/core/component")
-        self._cli("verify", expected=1)
+        self._cli("inspect", "--check-complete", expected=1)
         self._git("update-index", "--force-remove", "--", "src/core/component")
-        self.assertTrue(self._cli("verify")["ok"])
+        self.assertTrue(self._cli("inspect", "--check-complete")["ok"])
 
     def test_git_unchanged_scoped_result_survives_unrelated_commits_and_crlf(self) -> None:
         self._git_evidence()
-        self.assertTrue(self._cli("verify")["ok"])
+        self.assertTrue(self._cli("inspect", "--check-complete")["ok"])
         self.fixture._write("unrelated.txt", "not owned by the lane\n")
         self._git("add", "--", "unrelated.txt")
         self._git("commit", "-qm", "test: unrelated coordinator result")
         self._git("update-index", "--chmod=+x", "--", "unrelated.txt")
         self._git("commit", "-qm", "test: unrelated executable bit")
-        self.assertTrue(self._cli("verify")["ok"])
+        self.assertTrue(self._cli("inspect", "--check-complete")["ok"])
         path = self.fixture.root / "src/core/file.py"
         path.write_bytes(path.read_bytes().replace(b"\r\n", b"\n").replace(b"\n", b"\r\n"))
-        self.assertTrue(self._cli("verify")["ok"])
+        self.assertTrue(self._cli("inspect", "--check-complete")["ok"])
 
     def test_file_only_snapshot_binds_regular_type_and_rejects_same_content_link(self) -> None:
         self.fixture.coordination["lanes"] = [self.fixture.coordination["lanes"][0]]
         self.fixture.save()
         self.fixture._write("src/core/copy.py", "observable result for BC1\n")
         self.fixture.write_evidence(self.fixture.coordination["lanes"][0])
-        self.assertTrue(self._cli("verify")["ok"])
+        self.assertTrue(self._cli("inspect", "--check-complete")["ok"])
         captured = self._cli("snapshot", "--task", "BC1", "--attempt", "file-snapshot")
         record = captured["snapshot"]["result"]["files"]["src/core/file.py"]
         self.assertEqual(record["type"], "file")
@@ -995,13 +995,13 @@ class SwarmContractTests(unittest.TestCase):
         content = path.read_bytes()
         path.unlink()
         os.symlink("copy.py", path)
-        self._cli("verify", expected=1)
+        self._cli("inspect", "--check-complete", expected=1)
         link = self._cli("snapshot", "--task", "BC1", "--attempt", "linked-snapshot")
         record = link["snapshot"]["result"]["files"]["src/core/file.py"]
         self.assertEqual((record["type"], record["mode"], record["target"]), ("symlink", "120000", "copy.py"))
         path.unlink()
         path.write_bytes(content)
-        self.assertTrue(self._cli("verify")["ok"])
+        self.assertTrue(self._cli("inspect", "--check-complete")["ok"])
 
     def test_reviewed_git_symlink_object_survives_native_and_file_checkout(self) -> None:
         base, _ = self._git_evidence()
@@ -1017,16 +1017,16 @@ class SwarmContractTests(unittest.TestCase):
         record = observed["snapshot"]["result"]["files"]["src/core/file.py"]
         self.assertEqual((record["type"], record["mode"], record["target"]), ("symlink", "120000", "copy.py"))
         self.fixture.write_evidence(self.fixture.coordination["lanes"][0], base=base, head=head)
-        self.assertTrue(self._cli("verify")["ok"])
+        self.assertTrue(self._cli("inspect", "--check-complete")["ok"])
         path.unlink()
         path.write_bytes(b"copy.py")
-        self._cli("verify", expected=1)
+        self._cli("inspect", "--check-complete", expected=1)
         self._git("config", "core.symlinks", "false")
-        self.assertTrue(self._cli("verify")["ok"], "faithful Git link-file checkout preserves the reviewed object")
+        self.assertTrue(self._cli("inspect", "--check-complete")["ok"], "faithful Git link-file checkout preserves the reviewed object")
         path.write_bytes(b"./copy.py")
-        self._cli("verify", expected=1)
+        self._cli("inspect", "--check-complete", expected=1)
         path.write_bytes(b"copy.py")
-        self.assertTrue(self._cli("verify")["ok"])
+        self.assertTrue(self._cli("inspect", "--check-complete")["ok"])
 
     def test_symlink_snapshot_records_directory_target_without_reading_its_contents(self) -> None:
         self.fixture.coordination["lanes"] = [self.fixture.coordination["lanes"][0]]
@@ -1071,7 +1071,7 @@ class SwarmContractTests(unittest.TestCase):
             with self.subTest(dependency=dependency):
                 self._unmapped_package_fixture(dependency=dependency)
                 self.assertTrue(self._cli("validate")["ok"])
-                wave = self._cli("wave")["frontier"]
+                wave = self._cli("inspect")["frontier"]
                 self.assertEqual(wave["dispatch_task_ids"], ["P1"])
                 self.assertEqual(wave["blocked_by"], {})
                 package = swarm.package_sources(self.fixture.root, self.fixture.coordination)["P0"]
@@ -1079,7 +1079,7 @@ class SwarmContractTests(unittest.TestCase):
                 self.assertTrue(package["leaves"]["T0"]["complete"])
                 lane = self.fixture.coordination["lanes"][0]
                 self.fixture.write_evidence(lane)
-                self.assertTrue(self._cli("verify")["ok"])
+                self.assertTrue(self._cli("inspect", "--check-complete")["ok"])
                 (self.fixture.root / lane["report"]).unlink()
                 (self.fixture.root / lane["review"]).unlink()
 
@@ -1090,12 +1090,12 @@ class SwarmContractTests(unittest.TestCase):
         ):
             with self.subTest(checked=checked, dependency=dependency, prerequisite=prerequisite):
                 self._unmapped_package_fixture(dependency=dependency, checked=checked, prerequisite=prerequisite)
-                wave = self._cli("wave")["frontier"]
+                wave = self._cli("inspect")["frontier"]
                 self.assertEqual(wave["dispatch_task_ids"], [])
                 self.assertEqual(wave["blocked_by"]["P1"], [dependency])
                 lane = self.fixture.coordination["lanes"][0]
                 self.fixture.write_evidence(lane)
-                closed = self._cli("verify", expected=1)
+                closed = self._cli("inspect", "--check-complete", expected=1)
                 self.assertIn("close.prerequisites", {item["code"] for item in closed["diagnostics"]})
                 (self.fixture.root / lane["report"]).unlink()
                 (self.fixture.root / lane["review"]).unlink()
@@ -1111,49 +1111,49 @@ class SwarmContractTests(unittest.TestCase):
         self.fixture.coordination["lanes"].append(self.fixture._lane("P2", 1, "previous"))
         self.fixture._write(self.fixture.coordination["lanes"][1]["brief"], "# Prior package brief\n")
         self.fixture.save()
-        wave = self._cli("wave")["frontier"]
+        wave = self._cli("inspect")["frontier"]
         self.assertEqual(wave["blocked_by"]["P1"], ["P0"], "checked mapped leaves cannot replace report/review")
         self.fixture.write_evidence(self.fixture.coordination["lanes"][1])
-        self.assertEqual(self._cli("wave")["frontier"]["dispatch_task_ids"], ["P1"])
+        self.assertEqual(self._cli("inspect")["frontier"]["dispatch_task_ids"], ["P1"])
         path.write_text(body.replace("[x] T0b", "[ ] T0b"), encoding="utf-8")
-        self.assertEqual(self._cli("wave")["frontier"]["dispatch_task_ids"], [])
+        self.assertEqual(self._cli("inspect")["frontier"]["dispatch_task_ids"], [])
         self.fixture.write_evidence(self.fixture.coordination["lanes"][0])
-        self._cli("verify", expected=1)
+        self._cli("inspect", "--check-complete", expected=1)
 
     def test_unmapped_package_leaf_dependencies_are_not_hidden_by_checked_status(self) -> None:
         self._unmapped_package_fixture()
         path = self.fixture.root / "plan.md"
         body = path.read_text(encoding="utf-8") + "\n### T0: Prepare baseline\n**Dependencies:** unknown-prerequisite\n"
         path.write_text(body, encoding="utf-8")
-        wave = self._cli("wave")["frontier"]
+        wave = self._cli("inspect")["frontier"]
         self.assertEqual(wave["dispatch_task_ids"], [])
         self.assertEqual(wave["blocked_by"]["P1"], ["P0"])
         self.fixture.write_evidence(self.fixture.coordination["lanes"][0])
-        self._cli("verify", expected=1)
+        self._cli("inspect", "--check-complete", expected=1)
 
     def test_only_explicit_mechanical_packages_allow_inline_review(self) -> None:
         self._grouped_fixture()
         lane = self.fixture.coordination["lanes"][0]
         overrides = {"mode": "coordinator", "reviewer": "worker-P1", "actor_ref": "synthetic:worker-P1"}
         self.fixture.write_evidence(lane, review_overrides=overrides)
-        result, _ = swarm.verify_close(self.fixture.root, self.fixture.coordination_path)
+        result, _ = swarm.inspect_local(self.fixture.root, self.fixture.coordination_path)
         self.assertFalse(result.ok)
         self.assertIn("review.mode", diagnostic_codes(result))
         path = self.fixture.root / "plan.md"
         path.write_text(path.read_text(encoding="utf-8").replace("| substantive |", "| mechanical |"), encoding="utf-8")
         self.fixture.write_evidence(lane, review_overrides=overrides)
-        result, _ = swarm.verify_close(self.fixture.root, self.fixture.coordination_path)
+        result, _ = swarm.inspect_local(self.fixture.root, self.fixture.coordination_path)
         self.assertTrue(result.ok, [item.as_dict() for item in result.diagnostics])
 
     def test_close_rejects_failed_review_and_out_of_scope_report(self) -> None:
         for lane in self.fixture.coordination["lanes"]:
             self.fixture.write_evidence(lane)
         self.fixture.write_evidence(self.fixture.coordination["lanes"][0], stage="FAIL")
-        result, _ = swarm.verify_close(self.fixture.root, self.fixture.coordination_path)
+        result, _ = swarm.inspect_local(self.fixture.root, self.fixture.coordination_path)
         self.assertFalse(result.ok)
         self.assertIn("close.incomplete", diagnostic_codes(result))
         self.fixture.write_evidence(self.fixture.coordination["lanes"][0], out_of_scope=True)
-        result, _ = swarm.verify_close(self.fixture.root, self.fixture.coordination_path)
+        result, _ = swarm.inspect_local(self.fixture.root, self.fixture.coordination_path)
         self.assertFalse(result.ok)
         self.assertIn("scope.outside", diagnostic_codes(result))
 
@@ -1180,7 +1180,7 @@ class SwarmContractTests(unittest.TestCase):
                     report_overrides=report_overrides,
                     review_overrides=review_overrides,
                 )
-                result, _ = swarm.verify_close(self.fixture.root, self.fixture.coordination_path)
+                result, _ = swarm.inspect_local(self.fixture.root, self.fixture.coordination_path)
                 self.assertFalse(result.ok)
                 self.assertIn(expected, diagnostic_codes(result))
 
@@ -1188,12 +1188,12 @@ class SwarmContractTests(unittest.TestCase):
         for item in self.fixture.coordination["lanes"]:
             self.fixture.write_evidence(item)
         self.fixture.write_evidence(lane, report_overrides={"changed_paths": [lane["report"]]})
-        result, _ = swarm.verify_close(self.fixture.root, self.fixture.coordination_path)
+        result, _ = swarm.inspect_local(self.fixture.root, self.fixture.coordination_path)
         self.assertFalse(result.ok)
         self.assertIn("report.product_change", diagnostic_codes(result))
 
         self.fixture.write_evidence(lane, report_overrides={"changed_paths": ["src/core/file.py"]})
-        result, _ = swarm.verify_close(self.fixture.root, self.fixture.coordination_path)
+        result, _ = swarm.inspect_local(self.fixture.root, self.fixture.coordination_path)
         self.assertFalse(result.ok)
         self.assertIn("report.own_report", diagnostic_codes(result))
 
@@ -1228,6 +1228,15 @@ class SwarmContractTests(unittest.TestCase):
         whitespace_result = json.loads(whitespace.stdout)
         self.assertFalse(whitespace_result["ok"])
         self.assertIn("path.unsafe", {item["code"] for item in whitespace_result["diagnostics"]})
+
+    def test_local_fixture_is_never_automatically_shared_clearance(self) -> None:
+        for lane in self.fixture.coordination["lanes"]:
+            self.fixture.write_evidence(lane)
+        result, states = swarm.verify_close(self.fixture.root, self.fixture.coordination_path)
+        self.assertFalse(result.ok)
+        self.assertTrue(all(state["local_state"] == "complete" for state in states))
+        self.assertTrue(all(state["state"] == "awaiting_shared_evidence" for state in states))
+        self.assertIn("shared.blocked", diagnostic_codes(result))
 
 
 if __name__ == "__main__":

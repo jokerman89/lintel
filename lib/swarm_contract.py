@@ -14,7 +14,10 @@ import os
 from pathlib import Path, PurePosixPath
 import re
 import stat
-from typing import Any, Iterable, Mapping, Optional, Sequence, Tuple, Union
+from typing import TYPE_CHECKING, Any, Iterable, Mapping, Optional, Sequence, Tuple, Union
+
+if TYPE_CHECKING:
+    from profile_context import ProfileConfig
 
 from swarm_snapshot import bytes_digest, capture_result, git_changed_paths, value_digest, verify_result
 
@@ -35,6 +38,7 @@ EXPECTED_SCOPE_RULES = {
 UNIVERSAL_COORDINATOR_PATHS = (".git", ".claude/runtime", ".claude/plans/todo.md")
 IDENTIFIER = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$")
 INITIATIVE = re.compile(r"^[a-z0-9][a-z0-9-]{0,62}$")
+SHARED_POINTERS = ("context", "review", "qa", "corroboration", "domain_request")
 
 
 class DuplicateKeyError(ValueError):
@@ -383,6 +387,25 @@ def _validate_lanes(
                 diagnostics.append(Diagnostic("error", "lane.artifact_duplicate", f"{prefix}.{artifact}", f"Artifact path is already owned by {prior}: {path}"))
             else:
                 seen_artifacts[identity] = f"{task_id}.{artifact}"
+        shared = lane.get("shared_evidence")
+        if "shared_evidence" in lane:
+            definition = schema.get("$defs", {}).get("sharedEvidence", {})
+            if not isinstance(shared, dict) or set(shared) != set(definition.get("required", [])):
+                diagnostics.append(Diagnostic("error", "shared.shape", prefix, "Shared evidence needs exactly the declared external pointer fields"))
+                continue
+            skill = shared.get("review_skill")
+            if not isinstance(skill, str) or not IDENTIFIER.fullmatch(skill):
+                diagnostics.append(Diagnostic("error", "shared.skill", prefix, "Shared review_skill must be a stable identifier"))
+            for name in SHARED_POINTERS:
+                if name in ("corroboration", "domain_request") and shared[name] is None:
+                    continue
+                path = _safe_repo_path(root, shared[name], f"{prefix}.shared_evidence.{name}", diagnostics)
+                if path is not None and not path.endswith(".json"):
+                    diagnostics.append(Diagnostic("error", "shared.path", prefix, "Shared provider artifacts must name individual JSON files"))
+                if name == "review" and path is not None and not re.fullmatch(
+                    r"\.claude/runtime/reviews/[A-Za-z0-9._-]+\.json", path,
+                ):
+                    diagnostics.append(Diagnostic("error", "shared.review_owner", prefix, "Reviewer-owned JSON must be a single record in .claude/runtime/reviews"))
     return valid_lanes
 
 
@@ -651,6 +674,17 @@ def _validate_topology(
                         diagnostics.append(Diagnostic("error", "wave.isolation_missing", f"lanes.{lane.get('task_id')}.isolation", "Every writer in a concurrent wave requires attributable isolation"))
 
 
+def _lane_artifacts(lane: Mapping[str, Any]) -> Iterable[tuple[str, str]]:
+    for name in ("brief", "report", "review"):
+        if isinstance(lane.get(name), str):
+            yield name, lane[name]
+    if isinstance(lane.get("shared_evidence"), dict):
+        for name in SHARED_POINTERS:
+            path = lane["shared_evidence"].get(name)
+            if isinstance(path, str):
+                yield "shared_evidence." + name, path
+
+
 def _validate_artifact_ownership(
     root: Path,
     lanes: Sequence[Mapping[str, Any]],
@@ -660,12 +694,11 @@ def _validate_artifact_ownership(
 ) -> None:
     artifacts: list[tuple[str, str]] = []
     for lane in lanes:
-        for name in ("brief", "report", "review"):
-            path = lane.get(name)
-            if not isinstance(path, str):
-                continue
+        for name, path in _lane_artifacts(lane):
             owner = f"lanes.{lane.get('task_id')}.{name}"
             for protected in coordinator_paths:
+                if name.startswith("shared_evidence.") and protected == ".claude/runtime":
+                    continue
                 if _paths_overlap(root, path, protected, physical_files):
                     diagnostics.append(Diagnostic("error", "artifact.coordinator", owner, f"Handoff artifact overlaps coordinator authority/output: {protected}"))
             for prior_path, prior_owner in artifacts:
@@ -734,9 +767,7 @@ def validate_coordination(
     try:
         _validate_artifact_ownership(root, lanes, protected, diagnostics, physical_files)
         for lane in lanes:
-            for name in ("brief", "report", "review"):
-                if isinstance(lane.get(name), str):
-                    protected.append(lane[name])
+            protected.extend(path for _, path in _lane_artifacts(lane))
         _validate_topology(root, data, lanes, protected, diagnostics, physical_files)
     except OSError as error:
         diagnostics.append(Diagnostic("error", "path.identity", "ownership", f"Cannot verify physical file ownership: {error}"))
@@ -790,6 +821,14 @@ def _lane_scope_diagnostics(
     own_review = lane.get("review")
     own_report_identity = _path_identity(root, own_report) if isinstance(own_report, str) else None
     own_review_identity = _path_identity(root, own_review) if isinstance(own_review, str) else None
+    shared = lane.get("shared_evidence", {})
+    own_shared_review = shared.get("review") if isinstance(shared, dict) else None
+    own_shared_review_identity = _path_identity(root, own_shared_review) if isinstance(own_shared_review, str) else None
+    shared_artifacts = {
+        _path_identity(root, path)
+        for item in contract.get("lanes", []) if isinstance(item, Mapping)
+        for name, path in _lane_artifacts(item) if name.startswith("shared_evidence.")
+    }
     all_reviews = {
         _path_identity(root, item["review"])
         for item in contract.get("lanes", [])
@@ -811,12 +850,12 @@ def _lane_scope_diagnostics(
             continue
         identity = _path_identity(root, path)
         if actor == "reviewer":
-            if identity != own_review_identity:
+            if identity not in (own_review_identity, own_shared_review_identity):
                 diagnostics.append(Diagnostic("error", "scope.reviewer", f"changed_paths[{index}]", f"Reviewer of {task_id} may change only its own review artifact"))
             continue
         if any(_paths_overlap(root, path, protected) for protected in UNIVERSAL_COORDINATOR_PATHS):
             diagnostics.append(Diagnostic("error", "scope.universal", f"changed_paths[{index}]", f"Lane {task_id} may not change universal coordinator path: {path}"))
-        elif identity == own_review_identity or identity in all_reviews or identity in all_briefs or identity in other_reports:
+        elif identity == own_review_identity or identity in all_reviews or identity in all_briefs or identity in other_reports or identity in shared_artifacts:
             diagnostics.append(Diagnostic("error", "scope.reserved", f"changed_paths[{index}]", f"Lane {task_id} may not change reserved handoff/review path: {path}"))
         elif identity == own_report_identity:
             continue
@@ -1117,11 +1156,13 @@ def review_input(repo: Union[Path, str], coordination_path: str, task_id: str) -
         "binding": review_binding(root, lane, report),
         "report": lane["report"], "review": lane["review"], "review_requirement": package["review"],
         "result": report["result"], "leaf_results": report["leaf_results"],
+        "shared_evidence": lane.get("shared_evidence"),
+        "verification": "local_observations_only", "release_clearance": False,
         "independence": "A real independent actor must act; this export is not review evidence",
     }
 
 
-def lane_states(repo: Union[Path, str], contract: Mapping[str, Any]) -> Tuple[list[dict[str, Any]], list[Diagnostic]]:
+def local_lane_states(repo: Union[Path, str], contract: Mapping[str, Any]) -> Tuple[list[dict[str, Any]], list[Diagnostic]]:
     root = Path(repo).resolve()
     diagnostics: list[Diagnostic] = []
     states: list[dict[str, Any]] = []
@@ -1186,6 +1227,43 @@ def lane_states(repo: Union[Path, str], contract: Mapping[str, Any]) -> Tuple[li
     return states, diagnostics
 
 
+def lane_states(
+    repo: Union[Path, str], contract: Mapping[str, Any], *, coordination_path: Optional[str] = None,
+    profile_config: Optional[ProfileConfig] = None,
+) -> Tuple[list[dict[str, Any]], list[Diagnostic]]:
+    states, diagnostics = local_lane_states(repo, contract)
+    for state in states:
+        state["local_state"] = state["state"]
+        state["verification"] = "local_observations_only"
+        if state["state"] != "complete":
+            continue
+        lane = lane_by_task(contract, state["task_id"])
+        local_diagnostics: list[Diagnostic] = []
+        try:
+            from swarm_evidence import verify_shared_lane
+            root = Path(repo).resolve()
+            report = _read_evidence(root / lane["report"], "report", lane["task_id"], local_diagnostics)
+            review = _read_evidence(root / lane["review"], "review", lane["task_id"], local_diagnostics)
+            if report is None or review is None or local_diagnostics:
+                raise ValueError("Local report/review changed during shared consumption")
+            if coordination_path is None:
+                mapping = _read_json(root / contract["work_map"])
+                coordination_path = mapping["coordination"]
+            shared = verify_shared_lane(
+                root, coordination_path, contract, lane, package_sources(root, contract)[lane["task_id"]],
+                report, review, profile_config=profile_config,
+            )
+        except (ImportError, OSError, ValueError) as error:
+            shared = {"ok": False, "status": "unverified", "problems": [str(error)], "release_clearance": False}
+        state["shared_evidence"] = shared
+        if not shared["ok"]:
+            state["state"] = "awaiting_shared_evidence"
+            diagnostics.append(Diagnostic("error", "shared.blocked", f"lanes.{lane['task_id']}", "; ".join(shared["problems"])))
+        else:
+            state["verification"] = "current_shared_evidence"
+    return states, diagnostics
+
+
 def _contract_work_map_status(
     root: Path,
     contract: Mapping[str, Any],
@@ -1244,13 +1322,17 @@ def _dependency_blockers(
     return blocked
 
 
-def ready_frontier(
+def _frontier(
     repo: Union[Path, str], coordination_path: str, *, host_capability: Optional[str] = None,
+    profile_config: Optional[ProfileConfig] = None, local_observations: bool = False,
 ) -> Tuple[ValidationResult, dict[str, Any]]:
     result = validate_coordination(repo, coordination_path)
     if not result.ok or result.contract is None:
         return result, {"wave": None, "ready_task_ids": [], "dispatch_task_ids": [], "states": []}
-    states, evidence_diagnostics = lane_states(repo, result.contract)
+    states, evidence_diagnostics = (
+        local_lane_states(repo, result.contract) if local_observations else
+        lane_states(repo, result.contract, coordination_path=coordination_path, profile_config=profile_config)
+    )
     diagnostics = list(result.diagnostics) + evidence_diagnostics
     work_map_status = _contract_work_map_status(Path(repo).resolve(), result.contract, diagnostics)
     if work_map_status != "APPROVED":
@@ -1291,11 +1373,32 @@ def ready_frontier(
     }
 
 
-def verify_close(repo: Union[Path, str], coordination_path: str) -> Tuple[ValidationResult, list[dict[str, Any]]]:
+def ready_frontier(
+    repo: Union[Path, str], coordination_path: str, *, host_capability: Optional[str] = None,
+    profile_config: Optional[ProfileConfig] = None,
+) -> Tuple[ValidationResult, dict[str, Any]]:
+    return _frontier(repo, coordination_path, host_capability=host_capability, profile_config=profile_config)
+
+
+def inspect_local_frontier(
+    repo: Union[Path, str], coordination_path: str, *, host_capability: Optional[str] = None,
+) -> Tuple[ValidationResult, dict[str, Any]]:
+    result, frontier = _frontier(repo, coordination_path, host_capability=host_capability, local_observations=True)
+    frontier.update(verification="local_observations_only", release_clearance=False)
+    return result, frontier
+
+
+def _close(
+    repo: Union[Path, str], coordination_path: str, *, profile_config: Optional[ProfileConfig] = None,
+    local_observations: bool = False,
+) -> Tuple[ValidationResult, list[dict[str, Any]]]:
     result = validate_coordination(repo, coordination_path)
     if not result.ok or result.contract is None:
         return result, []
-    states, evidence_diagnostics = lane_states(repo, result.contract)
+    states, evidence_diagnostics = (
+        local_lane_states(repo, result.contract) if local_observations else
+        lane_states(repo, result.contract, coordination_path=coordination_path, profile_config=profile_config)
+    )
     diagnostics = list(result.diagnostics) + evidence_diagnostics
     status = _contract_work_map_status(Path(repo).resolve(), result.contract, diagnostics)
     if status not in ("APPROVED", "COMPLETE"):
@@ -1306,3 +1409,14 @@ def verify_close(repo: Union[Path, str], coordination_path: str) -> Tuple[Valida
         if state["state"] != "complete":
             diagnostics.append(Diagnostic("error", "close.incomplete", f"lanes.{state['task_id']}", f"Lane is not closed: {state['state']}"))
     return ValidationResult(result.contract, diagnostics), states
+
+
+def verify_close(
+    repo: Union[Path, str], coordination_path: str, *, profile_config: Optional[ProfileConfig] = None,
+) -> Tuple[ValidationResult, list[dict[str, Any]]]:
+    return _close(repo, coordination_path, profile_config=profile_config)
+
+
+def inspect_local(repo: Union[Path, str], coordination_path: str) -> Tuple[ValidationResult, list[dict[str, Any]]]:
+    """Validate retained local observations only; this never supplies shared acceptance."""
+    return _close(repo, coordination_path, local_observations=True)

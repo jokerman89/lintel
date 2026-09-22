@@ -108,7 +108,22 @@
         },
         "brief": {"$ref": "#/$defs/repositoryPath"},
         "report": {"$ref": "#/$defs/repositoryPath"},
-        "review": {"$ref": "#/$defs/repositoryPath"}
+        "review": {"$ref": "#/$defs/repositoryPath"},
+        "shared_evidence": {"$ref": "#/$defs/sharedEvidence"}
+      }
+    },
+    "sharedEvidence": {
+      "description": "Explicit external provider artifacts; these pointers never create or corroborate evidence.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["context", "review", "qa", "corroboration", "domain_request", "review_skill"],
+      "properties": {
+        "context": {"$ref": "#/$defs/repositoryPath"},
+        "review": {"$ref": "#/$defs/repositoryPath"},
+        "qa": {"$ref": "#/$defs/repositoryPath"},
+        "corroboration": {"anyOf": [{"$ref": "#/$defs/repositoryPath"}, {"type": "null"}]},
+        "domain_request": {"anyOf": [{"$ref": "#/$defs/repositoryPath"}, {"type": "null"}]},
+        "review_skill": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9._-]{0,63}$"}
       }
     }
   }

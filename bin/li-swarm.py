@@ -22,6 +22,9 @@ from swarm_contract import (  # noqa: E402
     brief_payload,
     check_lane_scope,
     git_changed_paths,
+    inspect_local,
+    inspect_local_frontier,
+    local_lane_states,
     lane_states,
     ready_frontier,
     review_input,
@@ -35,6 +38,10 @@ from swarm_contract import (  # noqa: E402
 def _common(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--repo", type=Path, default=Path.cwd(), help="working repository root")
     parser.add_argument("--coord", required=True, help="repository-relative coordination.json path")
+    parser.add_argument("--profile-home", type=Path)
+    parser.add_argument("--profile-packs", type=Path)
+    parser.add_argument("--profile-pointer", type=Path)
+    parser.add_argument("--profile-context-file", type=Path)
 
 
 def _emit(result: ValidationResult, **payload: object) -> int:
@@ -75,6 +82,9 @@ def main() -> int:
 
     verify_parser = subparsers.add_parser("verify", help="fail unless every lane has complete independent evidence")
     _common(verify_parser)
+    inspect_parser = subparsers.add_parser("inspect", help="retain local observation inspection without shared acceptance")
+    _common(inspect_parser)
+    inspect_parser.add_argument("--check-complete", action="store_true", help="require all local reports/reviews, still not shared clearance")
 
     scope_parser = subparsers.add_parser("check-scope", help="validate one attributable lane change set")
     _common(scope_parser)
@@ -100,22 +110,43 @@ def main() -> int:
 
     args = parser.parse_args()
     try:
+        config = None
+        locations = (args.profile_home, args.profile_packs, args.profile_pointer)
+        if any(value is not None for value in locations) or args.profile_context_file is not None:
+            if any(value is None for value in locations):
+                raise ValueError("Explicit --profile-home, --profile-packs and --profile-pointer are required together")
+            from profile_context import ProfileConfig
+            config = ProfileConfig(
+                source=ROOT, repo=args.repo, home=args.profile_home, packs=args.profile_packs,
+                pointer=args.profile_pointer, context_file=args.profile_context_file,
+            )
         if args.command == "validate":
             result = validate_coordination(args.repo, args.coord)
             return _emit(result)
         if args.command in ("wave", "resume"):
-            result, frontier = ready_frontier(args.repo, args.coord, host_capability=args.host_capability)
-            return _emit(result, frontier=frontier)
+            result, frontier = ready_frontier(args.repo, args.coord, host_capability=args.host_capability, profile_config=config)
+            return _emit(result, frontier=frontier, verification="shared_evidence", release_clearance=False)
         if args.command == "status":
             result = validate_coordination(args.repo, args.coord)
             states = []
             if result.ok and result.contract is not None:
-                states, evidence = lane_states(args.repo, result.contract)
+                states, evidence = lane_states(args.repo, result.contract, coordination_path=args.coord, profile_config=config)
                 result.diagnostics.extend(evidence)
-            return _emit(result, lanes=states)
+            return _emit(result, lanes=states, verification="shared_evidence", release_clearance=False)
         if args.command == "verify":
-            result, states = verify_close(args.repo, args.coord)
-            return _emit(result, lanes=states)
+            result, states = verify_close(args.repo, args.coord, profile_config=config)
+            return _emit(result, lanes=states, verification="shared_evidence", release_clearance=False)
+        if args.command == "inspect":
+            if args.check_complete:
+                result, states = inspect_local(args.repo, args.coord)
+            else:
+                result = validate_coordination(args.repo, args.coord)
+                states = []
+                if result.ok and result.contract is not None:
+                    states, diagnostics = local_lane_states(args.repo, result.contract)
+                    result.diagnostics.extend(diagnostics)
+            _, frontier = inspect_local_frontier(args.repo, args.coord)
+            return _emit(result, lanes=states, frontier=frontier, verification="local_observations_only", release_clearance=False)
         if args.command == "check-scope":
             paths = _changed_paths(args)
             if args.base or args.head:
@@ -126,7 +157,7 @@ def main() -> int:
             return _emit(result, task_id=args.task)
         if args.command == "snapshot":
             snapshot = snapshot_lane(args.repo, args.coord, args.task, args.attempt, base=args.base, head=args.head)
-            return _emit(ValidationResult(), snapshot=snapshot)
+            return _emit(ValidationResult(), snapshot=snapshot, verification="local_observations_only", release_clearance=False)
         if args.command == "brief":
             print(json.dumps(brief_payload(args.repo, args.coord, args.task), indent=2, ensure_ascii=True))
             return 0
