@@ -86,9 +86,13 @@ Current actionable checkpoints supersede the older chronological entries below:
   plus six pure Node print-request tests pass, without new native operations.
   Exact `81c5b01` integration is thirteen format-source paths and six report
   paths; its commit prose's seven-report count was an arithmetic error.
-  `98895a0` releases the read-only pipeline input join. New ten-path product
-  `d4e9188`, report `7c0ae29`, is frozen with SAME31 for SPEC then QUALITY.
-  Standalone defaults, all old native observations and denied record routes remain.
+  `98895a0` releases the read-only pipeline input join. Ten-path product
+  `d4e9188` / report `7c0ae29` fails complete source SPEC in `e85f70a`,
+  preserved `42abfcb`: P2 B01 admits literal anchors and rejects real anchors
+  beside examples. Whole QUALITY has not started. The original owner is
+  repairing only candidate-anchor eligibility through the existing classifier
+  under `12a40cc`; standalone defaults, all old native observations and denied
+  record routes remain.
 - P13: ambiguity repair `b1d4caf` passes independent whole first-unit SPEC/QUALITY
   in `09a3c6ec`, integrated with original history as `03df1db`; joined 31 metadata
   methods pass and all eight product blobs match. The original owner is released
@@ -100,7 +104,19 @@ Current actionable checkpoints supersede the older chronological entries below:
   exposed stale template evidence; `678ae22` deliberately uses the existing
   unknown/null representation for PDF/XLSX and retains Visio's staged proof.
   Current 33 consumer, 20 selection and 31 metadata methods plus catalog check
-  pass. No reader/schema or maturity promotion was introduced.
+  pass. No reader/schema or maturity promotion was introduced. `a426242` now
+  releases the remaining ten source-family records and exact preservation-map
+  refresh to SAMEc4, using accepted `42abfcb` without the rejected pipeline.
+  Descriptor/reference/tests/map only; SAME486 review remains required.
+- P14: original core-profile experiment preparation is owned by
+  `8fa44739-f562-4213-a6c4-fb7719fc8c9e`, branch
+  `jokerman-microsoft-universal-profile-scenarios`, from `9f8885b`.
+  It prepares one identical offline inventory-reconciliation task under neutral,
+  rapid and strict profiles. No native scenario actor is released yet.
+  The owner reports 14 preparation methods passing at its explicit owned root,
+  but the separate no-argument shell entry fails one Git-object write at its
+  deeper generated root. Await its exact frozen source/report before any
+  bounded correction or native release; do not substitute the passing root.
 
 Later P13 source checkpoint: A+B `72253ed` passes `7bf3f253`, integrated `895bb35`.
 All 19 joined source-selection methods pass. The new actual installed selection
@@ -168,6 +184,18 @@ fixture pointer; corrected launchers let the unchanged test select its own
 pointer/state. The first finite-mode receipt check incorrectly compared the
 audit envelope to a raw decision; inspecting the actual `raw` field resolved
 that collector assumption without changing any producer or evidence.
+
+On exact accepted `42abfcb`, the complete **shape-only** runner now passes
+`--scope shape --require-all`: 39 pass, zero failures/skips/partial suites,
+348.813 seconds, under `accepted-shape-contracts-02`. This is not the full
+unit/behavior/integration/e2e suite. The first aggregate was 38/39 because the
+outer launcher still exported a packs directory while the original fallback
+fixture selected a new home. The unchanged test passes once its own derived
+packs/pointer/state selectors are honored; no product, assertion, path length
+or policy was changed. The original failure is retained. The private launcher's
+failure-tail printing also hit the Windows console code page; raw logs/result
+were already safely saved, and only the private stdout/stderr encoding was
+corrected. The isolated test-source worktree stayed clean and is disposable.
 
 Dependency-ready releases are committed, not new proposals awaiting an operator:
 `bdfd127` releases P04's accepted-provider shared-evidence consumer and conditionally
