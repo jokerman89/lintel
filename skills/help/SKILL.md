@@ -34,6 +34,7 @@ Optional flags:
 - `--category <name>` — exact display category (`plan`, `qa`, `ship`, `compliance`, `voice`, `meta`, `ops`, or an agent category)
 - `--voice <internal|customer|mixed>` — filter by voice tier
 - `--cli <surface-or-alias>` — filter declared hints through the accepted surface registry, not measured support
+- `--selection <id>` — use an existing additive source selection; no installation change
 - `--verbose` — include description per entry (default: one-line entries)
 
 No arguments: source-declared skills and agents grouped by category. Counts come from the
@@ -47,9 +48,9 @@ returned inventory, not a hardcoded fleet or hook count.
 2. Use an available permitted shell and Python 3.9+ to read metadata:
 
    ```bash
-   python3 "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --kind=all
-   python3 "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --kind=all --category=qa
-   python3 "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --kind=all --voice=internal --cli=copilot
+   python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --kind=all
+   python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --kind=all --category=qa
+   python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --kind=all --voice=internal --cli=copilot
    ```
 
    Pass only supplied filters, as separate quoted literal arguments. `--verbose` changes
@@ -68,6 +69,30 @@ returned inventory, not a hardcoded fleet or hook count.
    evidence only when requested and permitted. The catalog does not inventory activated
    hooks. Missing observations stay unverified; use `/li:hooks-status` through its actual
    adapter or explicit canonical-file fallback rather than making up counts or enablement.
+
+### Selected capability
+
+For an explicitly selected capability, use this instead of the ordinary all-kind query.
+`selection` is a literal ID, such as `demo-script`, not command text. `python_cmd` may
+name the inspected Python 3 executable when it is not `python3`.
+
+```bash
+: "${LINTEL_SOURCE_ROOT:?select the trusted Lintel source}"
+: "${selection:?select a nonempty capability ID}"
+"${python_cmd:-python3}" -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" \
+  --json --selection="$selection"
+```
+
+Use catalog's `--json --list-selections` to discover IDs separately. Repeat `--selection`
+only for distinct explicitly requested IDs; never expand a wildcard or concatenate a shell
+command. Existing filters may narrow this query's entries, but its shared core, dependency,
+resource and provenance closure remains required. See the
+[single selection reference](../catalog/references/selections.md).
+
+For the demo-script example, present DemoNarrativeArc, DemoNarratorJunior and
+SlideNarrationCritic as source methods. Read only the selected role after the operator's
+Plan/draft/critique need is known; listing the closure does not load unrelated bodies.
+Missing delegation retains a manual method and an outstanding independent-review gate.
 
 ## Report format
 

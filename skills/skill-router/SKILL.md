@@ -33,9 +33,9 @@ You are the skill-router skill — Lintel's smart router. (Previously named `mat
    Use an available permitted shell and Python 3.9+:
 
    ```bash
-   python3 "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --query="$keyword"
-   python3 "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --family=context
-   python3 "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --name=match
+   python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --query="$keyword"
+   python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --family=context
+   python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --name=match
    ```
 
    Select a nonempty keyword from the intent, not a fabricated regex or shell fragment.
@@ -44,6 +44,19 @@ You are the skill-router skill — Lintel's smart router. (Previously named `mat
    or request `--json` without filters: that still returns metadata, not prompt bodies.
    Use the [single metadata contract](../catalog/references/metadata.md); do not glob
    and parse the corpus separately.
+
+   If the request already names a capability selection, use its existing projection:
+
+   ```bash
+   python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --selection="$selection"
+   ```
+
+   `selection` is an exact nonempty ID from `--json --list-selections`, not an inferred
+   installation or policy choice. Keep ordinary routing unchanged without it. Follow
+   the [selection contract](../catalog/references/selections.md); do not turn its
+   closure into a second routing graph or read every dependency body. A role-oriented
+   selection such as `demo-script` uses help's agent-selection path rather than
+   relabeling roles as skills. Invalid selection data stops the affected discovery.
 
 3. **Shortlist at most three skills.** Match names, descriptions, families and existing
    aliases. This is model judgment over source metadata, not a new routing engine or a
