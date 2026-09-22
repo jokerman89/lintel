@@ -82,11 +82,12 @@ else
   fail "concept doc MISSING engineering-modules reference"
 fi
 
-# Concept doc marks v4.x feature-complete
-if grep -qiE "v4\.x feature.complete|feature-complete" "$REPO_ROOT/docs/concepts/full-engineering-pass.md" 2>/dev/null; then
-  pass "concept doc marks v4.x feature-complete"
+# Concept doc separates data inspection, review and release authority.
+if grep -q 'release_clearance: false' "$REPO_ROOT/docs/concepts/full-engineering-pass.md" &&
+   grep -q 'actual SHIP\|Actual SHIP' "$REPO_ROOT/docs/concepts/full-engineering-pass.md"; then
+  pass "concept doc separates observed data from SHIP clearance"
 else
-  fail "concept doc MISSING v4.x feature-complete marker"
+  fail "concept doc MISSING explicit clearance boundary"
 fi
 
 # Color cyan (composition / orchestration color, distinct from module colors)

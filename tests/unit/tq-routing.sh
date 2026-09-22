@@ -56,7 +56,7 @@ done
 
 # Scenario 5: 3 raise-help triggers
 echo ""; echo "[5] Raise-help triggers"
-for trigger in critical_path_coverage_below_threshold perf_regression_above_budget contract_break_against_active_consumer; do
+for trigger in critical_requirement_unverified perf_regression_exceeds_approved_budget active_consumer_break; do
   if grep -q "$trigger" "$TQ"; then pass "raise-help: $trigger"
   else fail "raise-help MISSING: $trigger"; fi
 done

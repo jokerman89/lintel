@@ -1,199 +1,74 @@
-# Full engineering pass — the v4.x composition
+# Full engineering pass
 
-**Last updated:** 2026-06-02 (v4.6, v4.x feature-complete)
-**Status:** Concept doc — referenced by `skills/full-engineering-pass/SKILL.md`
+The [canonical composition](../../skills/full-engineering-pass/SKILL.md) coordinates
+the five [engineering modules](engineering-modules.md) in dependency order without
+introducing an execution engine.
 
-> The 5 engineering-domain modules (TA, DA, SC, DH, TQ) shipped one at a time across v4.1-v4.5. Each module runs standalone for targeted depth. The **full-engineering-pass** is the composition: a single invocation orchestrates all 5 in DAG order (TA → DA‖SC → DH → TQ) and produces the complete engineering artifact set for a customer engagement or major release. **This is the final v4.x ship event — v4.x is feature-complete with v4.6.**
+| Stage | Why this order | Handoff |
+|---|---|---|
+| TA first | component/consumer boundaries constrain later decisions | architecture, contracts, NFRs and scaling assumptions |
+| DA and SC after TA | data and security use those boundaries | schema/recovery/retention and threats/auth/applicable controls |
+| DH after TA/DA/SC | rollout must fit state, threats and workload | deployment/recovery, observability/SLOs, cost and on-call |
+| TQ last | verifies actual promises of the prior domains | consumer contracts, perf/coverage/regression and recovery evidence |
 
-## The problem
+DA/SC are not always independent: privacy/retention or shared artifact decisions
+can couple them. Default to serial. Concurrency requires an already opted-in
+validated Swarm map, disjoint writes and actual attributable isolation. Reuse that
+contract; neither an environment variable nor `parallel: true` proves it happened.
 
-5 modules ship as standalone workflows — operators can invoke `/li:ta full` for architecture-only work, `/li:dh full` for ops-only work, etc. That's the right shape for routine depth.
+## Invocation
 
-But high-stakes engagements (new service production-ready, customer audit prep, major release) need **all 5 modules in coordinated DAG order**. Pre-v4.6, the operator had to run each module manually, in the right order, with manual handoffs. Three failure modes:
+Use for the explicitly requested cross-domain outcome. For a bounded API decision,
+use TA single capability; for a data-only question use DA. No mandatory founder
+interview or company-deep mode is required to make the neutral harness useful.
+Full/`--resume`/dry-run retain their meanings; dry-run does not fabricate artifacts.
 
-1. **Wrong order** — operator runs DH before TA, DH can't read scaling-plan, produces qualitative-only cost projection
-2. **Missed handoffs** — TQ runs without reading SC threat-model, chaos scenarios don't validate security-incident response
-3. **Aggregate score invisible** — 5 individual scores; no per-engagement view of overall engineering health
+Discovery reads the trusted installed **source**, not `<target>/skills`.
+Before work, the caller fixes original map/package/leaves, mandatory domains and QA
+obligations, verified P07 context and explicit advisory inputs. Actual role receivers
+get exact modes/scopes and checkable outputs. Follow the
+[shared caller procedure](../../skills/full-engineering-pass/references/domain-handoff.md#module-caller-procedure).
 
-The full-engineering-pass fixes all three by being **the single orchestration**.
+## No average-based acceptance
 
-## The DAG
+Retain six advisory dimensions per module (30 total) with evidence and uncertainty.
+Four domains scoring 100 cannot clear a missing or failed mandatory fifth.
+Missing required modules/artifacts/checkpoints block dependent work. Optional
+exclusions need an explicit grounded decision; `--skip-module` cannot remove an
+approved obligation. Changing acceptance requires a new bound decision/evidence.
 
-```
-Stage 1: TA (architecture decisions first; everything depends on these)
-  ↓
-  ↓ produces: system-arch + ADRs + contracts + dependency graph + NFRs
-  ↓
-Stage 2: DA  ‖  SC   (parallel — independent concerns at this layer)
-  │            │
-  │            └─ produces: threat-model + secrets + auth + compliance + audit-path + runbook
-  │
-  └─ produces: data-model + schema + migration + retention + query patterns + sharding + analytics
-  ↓
-  ↓ DA + SC both complete (synchronization point)
-  ↓
-Stage 3: DH (reads TA scaling-plan, DA migration-plan, SC threat-model + audit-path)
-  ↓
-  ↓ produces: deployment plan + observability + SLI/SLO + cost projection + rollback + on-call
-  ↓
-Stage 4: TQ (reads everything above; validates the assertions)
-  ↓
-  ↓ produces: coverage + perf budget + contract tests + regression suite + chaos plan + flaky quarantine + test pyramid
-  ↓
-SHIP gate: aggregate 30-dim score (6 dims × 5 modules)
-```
+GREEN/YELLOW/RED are presentation only: observed required gates/independent
+acceptance, advisory residuals, or blocked required work respectively. The data core
+always returns `release_clearance: false`. Actual SHIP still consumes the latest
+P05 review and same-context QA and requires separate publication authority.
 
-## Why this DAG
+## Persistence and cold continuation
 
-### Stage 1 alone: TA
+Use immutable requests/start/results under
+`.claude/runtime/state/domains/<operation>/iNNNN/` and explicitly named domain
+artifacts. Timestamps belong in fields, not unsafe Windows filenames. Record
+original preimages before publication; later user edits remain conflicts.
 
-Architecture decisions constrain every downstream choice. Schema design (DA) depends on data-model boundary from architecture. Auth flow (SC) depends on API design. Deployment pattern (DH) depends on scaling-plan. Test pyramid (TQ) depends on component boundaries.
+The selected handoff carries cycle ID, original map/tasks, request/contexts,
+observed last checkpoint, pending output/review, next owner and unknown side effects.
+`workflow_resume` verifies the existing cycle/profile/map; it does not create a
+new initiative. The agent reads actual saved evidence to identify the first unmet
+checkpoint. Start without result is interrupted, never implicit permission to
+repeat migration, deployment or side-effecting tests.
 
-Without TA going first, every downstream module operates on incomplete inputs.
+A loop creates an explicitly revised attempt/iteration and compares prior decisions;
+reuse only unchanged relevant evidence. No automatic rollback/reset. Resume is a
+utility, not a phase; the canonical nine-phase lifecycle is unchanged.
 
-### Stage 2 parallel: DA ‖ SC
+## Limits
 
-Data design and security posture are **independent concerns at this layer**:
-- DA reasons about: schemas, migrations, retention, query patterns
-- SC reasons about: threats, secrets, auth, compliance, audit
+The historic 500k/750k module planning hints are uncalibrated estimates, not host
+context limits, measured cost or paid-execution authority. Optional Brief Forge and
+audit invocation must actually occur before it can be claimed; no dormant hook is
+activated by this procedure. Installed-resource closure and native-client behavior
+need separate evidence. Historical v4.x feature-complete labels are not acceptance.
 
-Neither needs the other's mid-flight state. Both consume TA's output (architecture + contracts). Running them in parallel halves wall-clock time for this stage.
-
-(Implementation note: v4.6 ships sequential-within-parallel-stage. Phase 5+ may upgrade to subagent fan-out for actual concurrency.)
-
-### Stage 3 after: DH
-
-DH reads outputs from all three prior modules:
-- TA scaling-plan → cost projection, capacity headroom
-- DA migration-plan → deployment-pattern selection (zero-downtime migration constrains blue-green vs canary)
-- SC threat-model → on-call playbook security overlap
-- SC audit-path → observability event coverage
-
-Running DH before DA + SC means DH operates on TA-only context, missing data + security implications.
-
-### Stage 4 last: TQ
-
-TQ validates everything the prior 4 modules asserted:
-- TA contracts → contract tests (consumer-driven, version compatibility)
-- DA query patterns → coverage of hot paths
-- SC threat model → chaos scenarios (failure injection mapped to threats)
-- DH SLO → perf budget alignment (budget tighter than SLO)
-
-TQ runs last because it consumes everything above. Running TQ earlier means validating assertions that haven't been made yet.
-
-## Aggregate scoring
-
-Each module ships its own 6-dimensional scoring rubric (per `docs/concepts/engineering-modules.md`). Full-engineering-pass aggregates to **30 dimensions across 5 modules**:
-
-| Module | Dimensions |
-|---|---|
-| TA | Decisions documented, Contracts locked, Complexity within budget, Non-functionals specified, Consumer impact analyzed, Alternatives considered |
-| DA | Data model completeness, Schema locked, Migration safety, Retention specified, Query patterns documented, Consumer impact analyzed |
-| SC | Threat model coverage, Mitigations declared, Secrets inventoried + rotation, Auth flow review verdict, Compliance evidence, Audit path verified |
-| DH | Deployment + rollback locked, Observability instrumentation, SLI/SLO definitions, Cost projection, Capacity headroom, On-call playbook |
-| TQ | Critical-path coverage, Perf budgets locked, Contract tests complete, Regression suite curated, Chaos scenarios documented, Test pyramid healthy |
-
-**SHIP gate:** per-module score ≥ 80 AND aggregate ≥ 80. Either condition failed → SHIP verdict YELLOW or RED.
-
-## Graceful degradation
-
-v4.x has stacking-rollout windows where some module PRs are open and some merged. The composition handles partial state:
-
-1. Scans `skills/` for which of `ta/`, `da/`, `sc/`, `dh/`, `tq/` exist
-2. Surfaces missing modules to operator before running
-3. Asks confirmation to proceed with partial pass
-4. Runs available modules in DAG order, skipping missing ones (audit logs the gap)
-5. SHIP verdict YELLOW even with full pass if modules were skipped (operator can override)
-
-When all 5 are present on main, composition runs the full DAG. During v4.6 rollout window (this PR stacks on v4.5 which stacks on v4.4 which stacks on v4.3), composition gracefully handles partial state.
-
-## Resume semantics
-
-The composition saves stage-by-stage state to `.claude/runtime/state/full-engineering-pass/00-state.md`. After interruption (operator pause, network failure, pre-checkpoint review), `/li:full-engineering-pass --resume` continues from the last-completed stage.
-
-This is critical because the composition is expensive: 500k tokens soft cap, 750k hard cap. Re-running from scratch wastes prior module output.
-
-## Cap + cost
-
-Token budget per design doc §5.2: 5 modules × ~80k = 400k. Plus overhead (cross-module brief forge handoffs, aggregate scoring) = ~500k soft cap. Hard cap 750k accommodates re-runs of low-score checkpoints.
-
-Packs can override both caps. The neutral `_default` sets 500k soft / 750k hard; a pack that
-defines a deeper engagement mode typically raises them.
-
-Operator sees projected cost before Stage 1 starts.
-
-## Cross-module Brief Forge handoffs
-
-Between stages, Brief Forge emits a `phase_transition` envelope. Each handoff:
-- Carries the completed module's output paths
-- Runs evaluators per pack policy (security + completeness, plus any the active pack adds)
-- Surfaces gaps before the next module starts
-
-This means each module's input is validated; if the prior module produced low-completeness output, the next module gets the warning + can choose to refine first.
-
-## What this enables
-
-Customer engagement workflow:
-
-```
-operator: /li:cycle --mode customer-engagement
-  → SENSE detects deep scope
-  → SENSE recommends /li:full-engineering-pass
-operator: /li:full-engineering-pass
-  → Stage 1: TA runs (architecture artifacts produced)
-  → operator inspects, optionally re-loops
-  → Stage 2: DA + SC run (data + security)
-  → operator inspects
-  → Stage 3: DH runs (deployment + ops)
-  → Stage 4: TQ runs (validation)
-  → composition report: aggregate score + module breakdown
-  → SHIP gate
-operator: /li:ship
-  → a company pack adds its voice tier to customer-facing artifacts
-  → deliverable package ready
-```
-
-Five modules + composition + a pack that supplies identity = the operator runs one command and decides at the gates. Everything else is mechanical.
-
-## Anti-patterns
-
-- **Running composition for hotfix-shaped work** — use `/li:cycle --mode hotfix`
-- **Skipping TA** — no module operates correctly without TA's architecture decisions
-- **Treating aggregate score as the only signal** — per-module dimension breakdown is the actionable view
-- **Hardcoding module list** — composition reads available modules from filesystem (handles v4.x stacking-rollout)
-- **Skipping the resume mechanism** — re-running 500k tokens wastes operator + cost
-- **Running parallel-stage modules with shared mid-flight state** — DA + SC must be independent within Stage 2
-
-## What this closes
-
-With v4.6 shipping (this composition skill), **v4.x is feature-complete**:
-
-- v4.0: harness with packs + orientator + Brief Forge + wiki
-- v4.1: TA (tech-architecture) — first engineering-domain module
-- v4.2: DA (data-architecture)
-- v4.3: SC (security-compliance)
-- v4.4: DH (devops-hosting)
-- v4.5: TQ (testing-qa) — final engineering-domain module
-- **v4.6: full-engineering-pass — composition skill that runs all 5 in DAG order**
-
-Per design doc §5.2 total estimate: 17-27 CC-days for v4.0 ship + ~10-15 CC-days for engineering-depth = ~30-40 CC-days for complete v4.x.
-
-What remains after v4.6 is operational: pack-specific tuning, additional module capabilities as operator needs surface, future v5.x design decisions.
-
-## Integration points
-
-**Reads:**
-- All 5 module SKILL.md files (or as-many-as-exist for graceful degradation)
-- `lib/pack-resolver.sh` for pack policy
-- `~/.lintel/profile.yaml` `engineering.*` block
-- All 5 modules' state directories (`.claude/runtime/state/{ta,da,sc,dh,tq}/`) for cross-module brief handoffs
-
-**Writes:**
-- `.claude/runtime/state/full-engineering-pass/composition-report-<ts>.md`
-- `.claude/runtime/state/full-engineering-pass/00-state.md` (resume state)
-- `.claude/runtime/audit/full-engineering-pass.jsonl`
-- Brief Forge `phase_transition` envelopes between stages
-
-**Tested by:**
-- `tests/shape/full-engineering-pass-contract.sh`
-- `tests/unit/full-engineering-pass-dag.sh`
+Check declarations with `tests/shape/full-engineering-pass-contract.sh` and
+`tests/unit/full-engineering-pass-dag.sh`; actual mechanical consumption is covered
+by `tests/integration/domain-module-consumers.sh`, while native handoff reports
+identify the actual actors/tools and their limits. Reviewers never repair their findings.
