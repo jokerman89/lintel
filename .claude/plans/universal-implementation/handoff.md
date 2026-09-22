@@ -1,6 +1,36 @@
 # Universal implementation handoff
 
-Updated 2026-09-22 by MasterSession.
+Updated 2026-09-22 by MasterSession's recovery coordinator.
+
+## Recovery checkpoint
+
+The operator transferred this initiative to session
+`88aecc43-40f9-41d4-8947-6c2fb0a55481` because MasterSession could no longer compact.
+Continue here, not in the broken original session. The clean original `5f3d885`
+history is preserved and fast-forwarded into `jokerman-microsoft-mastersession-recovery`.
+All original requirements, ownership, acceptance and current-batch delivery authority
+remain; original branches, reports, backups and unmerged work stay untouched.
+
+The existing P08/P09/P10/P11/P12/P13 owners have the new coordinator address.
+Use the app-surfaced session IDs, not differing IDs quoted inside worker messages.
+Current actionable checkpoints supersede the older chronological entries below:
+
+- P08: the same reviewer completed private native `main-review-02` planning SPEC
+  and QUALITY. This is draft-fixture review, not P08 acceptance or executed PLAN;
+  the actual fixture decision/controller transition remains next.
+- P09: data core is independently accepted and integrated through `6144721`.
+  The original owner retains the pending module-binding design.
+- P10: independent `c1f6bad1` / preserved `5f3d885` closes F02 but reports P2 F03,
+  false layout non-applicability. The appended P10 card releases only that reader
+  correction and focused original-dimension verification to its original owner.
+- P11: browser-only product `3115790`, report-only `043019a`, is frozen for its
+  first independent SPEC/QUALITY; original full source history must accompany it.
+- P12: original owner continues the released standalone content/Word/PPT unit.
+- P13: compact-discovery product `2a4ba25`, report-only `e20588d`, is frozen for
+  first-unit independent SPEC/QUALITY, not final optional-distribution acceptance.
+
+No original parent checkbox has been closed merely by recovering these candidates.
+Final design/module/format/selection integration, P04 binding, P14 and delivery remain.
 
 ## Durable state
 

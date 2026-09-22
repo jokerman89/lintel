@@ -5,9 +5,16 @@
 **Task source:** this file. **Work map:** [work.json](work.json).
 **Specification:** [spec.md](spec.md). **Execution handoff:** [prompt.md](prompt.md).
 **Acceptance source:** [A01-A26](../../engineering/audits/2026-09-20-universal-quality/action-plan.md).
-**Coordinator:** MasterSession.
+**Coordinator:** recovery session `88aecc43-40f9-41d4-8947-6c2fb0a55481`,
+continuing MasterSession's approved scope and original task source.
 
 ## Current state
+
+The operator explicitly transferred coordination from the broken MasterSession on
+2026-09-22. Its clean `5f3d885` checkpoint was fast-forwarded into
+`jokerman-microsoft-mastersession-recovery`; the original branch/worktree and all
+worker ownership are preserved. Current recovery routing is in [handoff.md](handoff.md).
+This is continuation of the same initiative, not a new audit or acceptance waiver.
 
 Audit and continuity: preserved in commit `74290e0`; original audit worktree untouched.
 All 25 source files were hash-verified before import. A separate local verified Git bundle
@@ -311,6 +318,8 @@ initiative-wide capacity/host acceptance from these component checkboxes.
 - [ ] A12.4 Document real uninstall and historical migration boundaries.
   - [ ] A12.4.a Distinguish supported client operations and actual uninstall limits.
   - [ ] A12.4.b Preserve opt-in historical aliases and document recoverability evidence.
+    - [ ] A12.4.b.o1 Correct native marker/legacy/type/enumeration observations without changing the migration schema.
+    - [ ] A12.4.b.o2 Verify the real short153/plain256 diagnostic pair, preserved inputs and explicit inspection failures; obtain the same reviewer's acceptance.
 Acceptance: a success message corresponds to a verified change in the intended host/target.
 Operator decision: bare installation must remain usable without Python. The approved
 native/runtime transaction split and exact shared ownership release are in packages/P10.md;

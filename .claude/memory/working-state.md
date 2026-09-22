@@ -10,6 +10,14 @@ Cross-session working state (not durable rules — that's [[lessons.md]]; not pe
 
 ## Active - Universal implementation (2026-09-20)
 
+**Recovery, 2026-09-22:** the operator transferred the broken MasterSession to
+`88aecc43-40f9-41d4-8947-6c2fb0a55481`. Exact `5f3d885` is preserved on the recovery
+branch `jokerman-microsoft-mastersession-recovery`; the original worktree was not
+changed. Continue from the [recovery checkpoint](../plans/universal-implementation/handoff.md#recovery-checkpoint)
+and original work map. Existing owners are retained; browser/discovery candidates
+await independent review and P10 has only its bounded F03 diagnostic correction
+released. No whole-initiative completion or main delivery is claimed.
+
 **Status:** approved implementation, not complete. MasterSession secured the 25 uncommitted
 audit/continuity files with SHA-256 verification and committed them as `74290e0`, preserving the
 source worktree. A separate verified Git bundle retains the complete Swarming history.
