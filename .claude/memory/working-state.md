@@ -64,6 +64,11 @@ The interrupted aggregate and uninspected host output capture are not acceptance
 Final report-only `8eb00b87` now records the corrected 22-command joined run on
 unchanged `2f4cc38`, with complete explicit 26+2 fixture coverage. Intake is verified
 and the original reviewer is completing selected-subset SPEC before eligible QUALITY.
+That review is now frozen as `402fd804`, preserved `26c80a0`: two P2 compound-head/
+newline findings, selected SPEC FAIL and QUALITY NOT STARTED. Mechanical F03 is
+closed from valid c20; q02 is INVALID and home effects UNKNOWN. The original P08
+owner has the bounded class repair and must plan actual semantic/host evidence,
+not substitute another mechanical-only pass for the remaining original controls.
 P10's migration F01 is independently closed
 by `00a0bef`; default-store/cleanup and whole-package acceptance remain blocked.
 A13 remains gated.

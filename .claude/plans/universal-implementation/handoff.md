@@ -41,7 +41,7 @@ from the reviewed historical merge `40c2795`. Current implementation ownership:
 | P05 review evidence | `2329e71f-cd9e-473b-94cf-41c579c29a88` | ACCEPTED by `33eac071`, integrated `c5c8f86`; current profile/review and focused gates pass, idle |
 | P06 host adapters | `324863ff-e7cf-4abf-b449-04dd0f096170` | Component ACCEPTED/integrated `36593cd`; provider `7425960`, final review `1067da29`; idle |
 | P07 profile context | `b9352dfe-1c1e-4ea3-b7d9-0fd008d39b3d` | Long-path repair ACCEPTED by `a7450597`, integrated `c344133` with reports; joined checks pass, idle |
-| P08 work lifecycle | `f2c305ac-e8b0-4b02-b6cd-c7de598964cf` | Combined `2f4cc38` / report `8eb00b87` frozen; intake verified; same-reviewer complete selected SPEC then eligible QUALITY dispatched |
+| P08 work lifecycle | `f2c305ac-e8b0-4b02-b6cd-c7de598964cf` | `402fd804` SPEC FAIL preserved `26c80a0`; bounded F04/F05 class repair authorized; original semantic/host evidence remains open |
 | P09 specialist depth | `0fe8dc1e-8c6f-4d4a-af68-80696067be27` | Knowledge product `4a9b946` / report `6581339` frozen; staged-content review dispatched; runtime binding still waits for P08 |
 | P10 installer lifecycle | `5ea6c88c-68c1-4712-8f55-adecdfe0061f` | `c1a38a03` SPEC FAIL P1 F02 preserved `3649dc5`; original owner's bounded producer-expectation repair is authorized |
 | P11 browser operations | `f413bdcb-e081-45e0-9524-7274b4391665` | A16 `d389905` / report `84f0d38` frozen BLOCKED; no native launch; bounded location-metadata observation only |
@@ -66,7 +66,7 @@ repair their own findings. All prior reports remain preserved in `reviews/` and 
 | P05 | Final `33eac071` accepts `b023e8c`; integrated `c5c8f86`; earlier rejections retained | `6ed9c7df-4845-4d70-88c7-f0746ab28059` |
 | P06 | Final `1067da29`; complete component SPEC/QUALITY PASS at `7425960`; integrated | `d2a89ac3-151a-4dc0-ab09-1f3a62465cab` |
 | P07 | Final `a7450597` accepts `4d001463`; integrated through `56de830`, earlier `a8de574`/`3d8e715` preserved | `a7d78944-c02c-4909-a060-2c4f2a754b00` |
-| P08 partial | Review exact `8eb00b87` / product `2f4cc38`; F01/F02/F03 and complete selected-subset gates remain open | `9dbf0a9b-750d-45c2-968c-41a5acb11c92` |
+| P08 partial | `402fd804`: F04/F05 P2, joint F01/F02 class open; bounded mechanical F03 closed; selected SPEC FAIL/QUALITY NOT STARTED | `9dbf0a9b-750d-45c2-968c-41a5acb11c92` |
 | P09 content | Review exact `6581339` / `4a9b946`, knowledge-only SPEC then eligible QUALITY; no runtime/parent clearance | `447d97f5-7919-4433-8f65-a64016c0dbdf` |
 | P10 | `c1a38a03` rejects exact `4c0519e3` / `a559c9f` for P1 F02; F01 closed; QUALITY NOT STARTED | `1578dfd8-f239-4eba-989b-3c4bde3e5792` |
 
@@ -156,6 +156,21 @@ Windows default-folder dependency. Only the card's bounded native location-metad
 observation is now allowed; no new browser launch or personal-folder inspection.
 
 ## Accepted local integrations
+
+Latest P08 independent report `402fd80417c2aa08193a460045168d8bb562793d` is
+preserved report-only as `26c80a0`. Its sole parent/path, 495 lines and LF SHA-256
+`1dc9ae7a...` were verified and the report read fully. F04 is inconsistent
+initial/conjunction head vocabulary; F05 loses an independent newline boundary.
+All original 21 cases pass, four of the added 12 fail. The P08 card releases a
+whole-class correction, not phrase exceptions; unchanged mechanical consumers
+retain their valid evidence. Actual orchestration/semantic/intake controls in
+the per-leaf matrix still need a separately bounded native evidence protocol.
+
+Reviewer q02 is INVALID/excluded: its direct P05 comparison escaped the recorded
+synthetic child environment. Effects remain UNKNOWN and no actual-home inspection/
+cleanup/replay is authorized. Valid c20 closes only mechanical F03 and valid
+preservation/26+2 controls remain separately attributable. No aggregate or QUALITY
+clearance was manufactured. The reviewer is stopped; the original owner repairs.
 
 P01: complete worker/final-review history merged as `a2ef318`. Source matches independently
 reviewed `041417a`; all eight leaves passed spec and full bounded quality. The reviewer

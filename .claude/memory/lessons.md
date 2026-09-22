@@ -763,6 +763,13 @@ are not isolation. After a boundary incident, stop and escalate before continuin
 affected checks, with no real-home access or rollback. That approval does not establish
 what the invalid run did, authorize inspection/recovery, or make its results valid.
 
+**Reviewer follow-up, 2026-09-22:** a P08 direct `bind_work` comparison ran in the
+outer reviewer Python process rather than its verified child. q02's apparent 47/47
+was excluded; effects remain unknown. The isolation boundary must cover EVERY
+product call, including inline comparisons and diagnostic imports, not just shell
+children. Keep parent collection code data-only or give it the same explicit
+verified synthetic environment before any product execution.
+
 ## L-038 - Reconcile external-tool limits before extending an acceptance oracle
 
 **Date:** 2026-09-21
