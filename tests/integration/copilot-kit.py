@@ -15,6 +15,9 @@ JOINED_RUNTIME_RESOURCES = (
     "lib/swarm_snapshot.py", "lib/envelope_contract.py", "lib/envelope-requirements.txt",
     "lib/profile_context.py", "lib/profile-context-schema.json", "lib/pack-schema.yaml",
     "lib/native_paths.py",
+    "lib/context_safety.py", "lib/review_contract.py", "lib/review-schema.json",
+    "bin/li-review-evidence.py", "bin/li-review-log", "bin/li-review-read",
+    "bin/li-domain-result.py", "lib/domain_result.py", "lib/domain-result-schema.json",
     ".claude-plugin/plugin.json",
 )
 spec = importlib.util.spec_from_file_location("li_copilot", ROOT / "bin/li-copilot.py")

@@ -24,10 +24,29 @@ Current actionable checkpoints supersede the older chronological entries below:
   false layout non-applicability. The appended P10 card releases only that reader
   correction and focused original-dimension verification to its original owner.
 - P11: browser-only product `3115790`, report-only `043019a`, is frozen for its
-  first independent SPEC/QUALITY; original full source history must accompany it.
-- P12: original owner continues the released standalone content/Word/PPT unit.
+  first independent SPEC/QUALITY in `1f655ca9-eb2b-4325-9996-72ed8539c13b`;
+  original full source history must accompany it.
+- P12: standalone product `cdb4ea6`, final report `30bd4e3`, is with independent
+  reviewer `31c39265-13e5-4057-9e78-49bf658749a5`. Word application access was
+  explicitly declined during recovery; no app launched. Page layout remains
+  permission-blocked, with no retry, COM/export or alternate-launch workaround.
+  The separate denied Copilot UI route and incomplete PPT visual observation also
+  remain unverified. These are not source defects or passing artifact QA.
 - P13: compact-discovery product `2a4ba25`, report-only `e20588d`, is frozen for
-  first-unit independent SPEC/QUALITY, not final optional-distribution acceptance.
+  first-unit independent SPEC/QUALITY in `4865e4f7-240b-4721-a64d-ce6df9a75a9c`,
+  not final optional-distribution acceptance.
+
+Coordinator A23.4.g3 now requires nine already accepted P05/P09 context, review
+and domain helper/schema/CLI resources during adapter source preflight. All old
+test-method ASTs are unchanged. The actual missing-resource regression initially
+failed nine new subcases because generation reached publication instead of
+refusing the missing source; the publication then hit the already gated native
+path limitation. After the constant-only correction, the complete 17-resource
+no-write refusal method passes. The separate installed-check method still needs
+accepted P10 publication before it can reach its assertion at these same fixture
+paths. Neither the failed two-method run nor this one-method pass is a complete
+installed-consumer or g3 acceptance result. Raw exits/logs are retained in this
+recovery session's `files/verification/closure-red` and `closure-green`.
 
 No original parent checkbox has been closed merely by recovering these candidates.
 Final design/module/format/selection integration, P04 binding, P14 and delivery remain.

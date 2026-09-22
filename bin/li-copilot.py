@@ -117,6 +117,9 @@ ADAPTER_RESOURCES = (
     "bin/li-client-capabilities.py", "bin/li-adapter.py", "lib/pack-schema.yaml",
     "lib/markdown_source.py", "lib/profile_context.py", "lib/profile-context-schema.json",
     "lib/native_paths.py",
+    "lib/context_safety.py", "lib/review_contract.py", "lib/review-schema.json",
+    "bin/li-review-evidence.py", "bin/li-review-log", "bin/li-review-read",
+    "bin/li-domain-result.py", "lib/domain_result.py", "lib/domain-result-schema.json",
 )
 
 
