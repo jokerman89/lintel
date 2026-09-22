@@ -63,12 +63,32 @@ An explicitly chosen Markdown/PDF alternative is not an editable DOCX substitute
 
 - Required `--brief <path|inline>` — content brief or source markdown **OR** `--from-pipeline <dir>` (shared pipeline mode)
 - Required `--target <technical|customer-summary|transparency-note>` — variant
-- Optional `--template <name|path>` — explicit template, or a name resolved within the verified pack's configured template directory
+- Optional `--template <name|path>` — explicit selection overrides the omitted-flag default `<target>.docx` in the verified configured brand directory
 - Optional `--audience <text>` — primary audience
 - Optional `--voice` — voice tier override (default per target)
 - Optional `--use-defaults` — use an available neutral template or an explicitly blank native document; never invent a missing bundled template
 - Optional `--ignore-stale-brand <reason>` — record an advisory staleness exception; cannot waive mandatory policy
 - Optional `--out <path>` — explicit new `.docx` output (default: `<brief-stem>.docx` in the working directory)
+
+### Standalone template selection
+
+Without `--template` and without `--use-defaults`, select `<target>.docx` from
+the already verified configured brand directory:
+
+| Target | Default template filename |
+|---|---|
+| `technical` | `technical.docx` |
+| `customer-summary` | `customer-summary.docx` |
+| `transparency-note` | `transparency-note.docx` |
+
+Explicit `--template` takes precedence over `<target>.docx` on this brand route:
+use its explicit path, or resolve its name inside that same verified directory.
+`--use-defaults` selects the explicit neutral/default route described above
+instead of the implicit brand-template lookup; required policy still applies.
+Omitting `--template` does not imply `--use-defaults`.
+No personal-directory scan is permitted. If the selected template/directory is
+unavailable, report that gap; do not silently choose another variant or claim a
+blank document satisfies required brand policy.
 
 ## From-pipeline mode (v3.5 Phase 2 — generate-pipeline integration)
 
@@ -103,7 +123,8 @@ contracts before consuming them. Do not fabricate design-spec.json to unblock it
 
 1. **Preflight and policy.** Follow the
    [P05/P07 fidelity and evidence procedure](../generate-write/references/fidelity-and-evidence.md).
-   Resolve explicit source, output and template paths; refuse unapproved replacement.
+   Resolve source/output paths and the standalone template selection above;
+   refuse unapproved replacement.
    Verify the pinned profile and requested controls. Use only configured brand/voice
    rules and their actual applicability. A required template, policy or inspection
    that is unavailable remains blocked. Neutral mode needs no personal brand scan.

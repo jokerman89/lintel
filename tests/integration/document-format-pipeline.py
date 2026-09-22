@@ -288,6 +288,44 @@ class SourceContracts(unittest.TestCase):
     def text(self, skill):
         return (ROOT / "skills" / skill / "SKILL.md").read_text(encoding="utf-8")
 
+    def test_word_omitted_template_maps_each_existing_variant(self):
+        text = self.text("generate-word")
+        for variant in ("technical", "customer-summary", "transparency-note"):
+            with self.subTest(variant=variant):
+                self.assertIn(f"| `{variant}` | `{variant}.docx` |", text)
+        self.assertIn("Without `--template` and without `--use-defaults`", text)
+        self.assertIn("verified configured brand directory", text)
+
+    def test_word_explicit_template_and_defaults_keep_distinct_precedence(self):
+        text = self.text("generate-word")
+        self.assertIn("Explicit `--template` takes precedence over `<target>.docx`", text)
+        self.assertIn("`--use-defaults` selects the explicit neutral/default route", text)
+        self.assertIn("Omitting `--template` does not imply `--use-defaults`", text)
+        self.assertIn("No personal-directory scan", text)
+        self.assertIn("required policy", text)
+
+    def test_outline_retains_ppt_only_advisory_starting_count(self):
+        text = self.text("generate-outline")
+        step = text.split("### Step 4", 1)[1].split("### Step 5", 1)[0]
+        self.assertIn("8-15 slides (default 12)", step)
+        self.assertIn("only when `ppt` is in `target_formats`", step)
+        self.assertIn("advisory", step)
+        self.assertLess(step.index("`--slide-count`"), step.index("8-15 slides"))
+        self.assertIn("brief/duration constraints", step)
+        self.assertIn("explained adjustment", step)
+        self.assertIn("no fixed section-count quota", step)
+        self.assertIn("never a mandatory count gate", step)
+
+    def test_direct_ppt_retains_its_distinct_duration_fallback(self):
+        text = self.text("generate-ppt")
+        self.assertIn("20-30 slides based on duration", text)
+        self.assertIn("Explicit `--slide-count` takes precedence", text)
+        self.assertIn("brief/duration constraints", text)
+        self.assertIn("explained adjustment", text)
+        self.assertIn("advisory fallback, not a mandatory gate", text)
+        self.assertIn("not a Word/web section quota", text)
+        self.assertIn("not the outline stage's 8-15/default-12 hint", text)
+
     def test_content_is_not_a_slide_budget(self):
         text = self.text("generate-write")
         for removed in ("max 40 words per section", "Max 40 words per section",

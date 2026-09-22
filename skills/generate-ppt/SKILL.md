@@ -59,7 +59,7 @@ editable PowerPoint or rendered PPTX evidence.
 - Required `--brief <path|inline>` — content brief describing the deck purpose **OR** `--from-pipeline <dir>` (shared pipeline mode)
 - Required `--template <name|path>` unless `--use-defaults` is selected — resolve names only within the verified configured template directory
 - Optional `--audience <text>` — primary audience (affects voice tier output)
-- Optional `--slide-count <N>` — presentation-view target based on material and duration, not a source-content cap
+- Optional `--slide-count <N>` — presentation-view target; retained advisory fallback is 20-30 slides based on duration, not a source-content cap
 - Optional `--duration <minutes>` — presentation duration (informs slide pacing)
 - Optional `--voice <tier>` — voice tier for slide content (default: the active pack's voice tier, `internal` by default)
 - Optional `--use-defaults` — available neutral template or explicitly blank native deck; do not invent a bundled template
@@ -113,6 +113,13 @@ that every host or shared-pipeline script has been executed.
    - All substantive sections, claims/evidence, tables, citations and material limitations
    - Opening context and closing decision/CTA where appropriate
    - Retain full source separately from the concise slide view
+
+   **Standalone count selection:** Explicit `--slide-count` takes precedence.
+   Honor brief/duration constraints before the retained 20-30 slides based on
+   duration starting range; material, audience and pacing can justify an
+   explained adjustment. This is an advisory fallback, not a mandatory gate,
+   not a Word/web section quota, and not the outline stage's 8-15/default-12 hint.
+   Surface conflicting explicit requirements without deleting source content.
 
 2b. **Design DNA slide pass (ADR-0017 — retrieval before slide design).** Query the slide
    decision engine so the arc is grounded in the corpus, not invented:

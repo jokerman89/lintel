@@ -44,7 +44,7 @@ Replaces brief-parsing logic previously inline in `generate-ppt` / `generate-web
 - Required `--target-formats <ppt,web,word,...>` — comma-separated format list (affects slide_count_target + arc choice)
 - Optional `--audience <text>` — primary audience (default: "general business")
 - Optional `--arc <name>` — narrative arc (see Arcs section)
-- Optional `--slide-count <N>` — target slide count (default: agent decides based on material volume)
+- Optional `--slide-count <N>` — presentation-view target; PPT-only advisory starting hint is 8-15 slides (default 12), subject to brief/duration constraints and explained adjustment
 - Optional `--language <language-tag|name>` — output language, including regional or multilingual requirements (default: match brief; respect applicable configured policy)
 - Optional `--out <path>` — output path (default: `${run_dir}/outline.md` or `./outline.md`)
 
@@ -122,10 +122,17 @@ If `--arc` provided: use it. Otherwise:
 ### Step 4 — Choose slide_count_target
 
 If `--slide-count` is provided, use it as the presentation-view target. Otherwise
-estimate from material, audience and duration. For Word/web, record the planned
-section count in the existing field rather than forcing a slide-sized structure.
-Split at reasoning boundaries. If the presentation target is tight, plan notes,
-appendices or linked long-form content; do not delete evidence to fit the target.
+honor the brief/duration constraints before applying a starting hint. Use the
+retained 8-15 slides (default 12) advisory fallback only when `ppt` is in `target_formats`.
+Material, audience and pacing may justify an explained adjustment outside that
+range; it is never a mandatory count gate or permission to trim source content.
+Conflicting explicit requirements need resolution, not silent substitution.
+
+For Word/web without PPT there is no fixed section-count quota: record the
+planned section count in the existing field rather than forcing a slide-sized
+structure. Split at reasoning boundaries. If the presentation target is tight,
+plan notes, appendices or linked long-form content; do not delete evidence to fit
+the target.
 
 ### Step 5 — Generate section/slide list
 
