@@ -26,10 +26,12 @@ Reads operator brief → outline → full written content → design → format-
 builders → actual artifact QA. Retain all original sources and long-form content.
 Use an explicitly owned run directory, not an implicit personal draft/profile scan.
 
-The released standalone `--brief` Word/PPT routes preserve content and use actual
-available native/library operations. They do not establish the A15.3.shared
-design/profile/work binding or the PDF/XLSX/Visio adapters. Keep those entry paths
-and gates visible; never fabricate a design-spec or report an unrun format ready.
+The standalone `--brief` Word/PPT routes preserve content and use actual available
+native/library operations. The existing pipeline now has a read-only
+[input admission procedure](../generate-write/references/fidelity-and-evidence.md#existing-pipeline-input-admission);
+that verifies original source/work/profile and document projections, not native
+artifact acceptance. A15.3.shared and the full format gates still need their
+joined outcomes; never fabricate a design-spec or report an unrun format ready.
 
 Designed for "write the script once, deliver to N formats without duplicate work." Per v3.5 doc-gen plan, replaces the prior pattern where operator invoked each `/li:generate-X` separately with different briefs.
 
@@ -100,10 +102,11 @@ Invoke `generate-design` sub-skill:
 - Input: `--content ${run_dir}/content.md --target-formats "${formats}" --palette "${palette}"`
 - Output: `${run_dir}/design-spec.json` (per-format layout-mappings)
 
-Consume only the released shared contract. Do not shrink canonical content to fit
-a slot or invent a second design schema. If shared binding is unavailable, retain
-the prepared content and use the explicitly supported standalone route where
-authorized, reporting that it does not verify this shared-pipeline step.
+Keep the existing v1.0 document projections; do not shrink canonical content to
+fit a slot or invent a second design schema. Document-only inputs use P11
+compatibility plus format-owned reference checks under the external P05/P07/P08
+input context. Genuine mixed web/document input also needs full P11 `load_design`.
+An unresolved web binding cannot become a document-only success.
 
 ### Step 6 — Compliance gate (orchestrator-level if --customer-share)
 
@@ -117,11 +120,23 @@ This is the orchestrator-level gate. Format-builders still apply their own brand
 ### Step 7 — Per-format build (chained)
 
 For each format in `--formats`:
+- Before a Word/PPT/PDF/XLSX consumer reads the run, call
+  `scripts/pipeline_inputs.py` with the selected format, explicit original
+  package/leaves, external **input** context and live profile configuration.
+  Select canonical sibling files, source evidence and every template/config
+  override. Preserve complete returned source and existing design projections;
+  the helper neither invokes a builder nor requires a future artifact's QA.
+- Read original prerequisites and actual acceptance evidence; source checkboxes
+  from the work reader cannot authorize execution. Selected upstream P09 data
+  retains its own request/context/profile, not the document's new QA inventory.
 - Invoke format-builder with `--from-pipeline ${run_dir}` flag:
   - `ppt` → `/li:generate-ppt --from-pipeline ${run_dir} --template ${template}`
   - `web` → `/li:generate-web --from-pipeline ${run_dir} --variant single-file`
   - `word` → `/li:generate-word --from-pipeline ${run_dir} --target ${target}`
-  - `pdf` / `xlsx` / `visio` → retain their planned adapter and specific activation gates; no implemented claim without actual writer and format-appropriate inspection
+  - `pdf` / `xlsx` → pass admitted full source to their existing standalone
+    production procedures; retain converter/print or formula/cache/reopen gates,
+    without inventing document layout projections
+  - `visio` → actual writer/editor seam still required; no image-as-VSDX substitution
 - Each format-builder writes its output to `${run_dir}/<format>/<artifact>.<ext>`
 
 Builders retain brand, honest-limitations and provenance categories with actual
@@ -139,6 +154,9 @@ Compare each saved artifact with the full source and inspect its actual availabl
 render/reopen layer. Auto-fixes must preserve meaning and invalidate affected
 pre-edit evidence. A missing renderer or dropped qualification cannot be averaged
 away by a score or an otherwise empty issue list.
+Prepare the final external P05 context after changed artifacts exist. Input
+admission is not final QA, and `qa-report.json` remains the existing presentation
+report rather than a replacement evidence envelope.
 
 ### Step 9 — Output + telemetry
 

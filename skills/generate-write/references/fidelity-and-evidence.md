@@ -2,7 +2,98 @@
 
 Use the existing brief -> outline.md -> content.md -> speaker-notes.md chain.
 This procedure does not introduce a domain envelope, design schema or task ledger.
-The shared pipeline/theme binding remains a separately released integration.
+The shared source-input binding below is separate from native artifact acceptance.
+
+## Existing pipeline input admission
+
+For `--from-pipeline`, use the read-only
+[`pipeline_inputs.py`](../../generate/scripts/pipeline_inputs.py) from the trusted
+source before a document builder consumes the run. It returns the original complete
+Markdown/notes and design object with current-input diagnostics; do not save that
+result as a new interchange file or treat it as rendered output.
+
+Prepare an external **input** P05 v2 context selecting the actual canonical
+`<run>/brief.md`, `outline.md`, `content.md`, `design-spec.json`, and
+`speaker-notes.md` for PPT. Include original claim/evidence sources and every
+selected template, logo, print CSS or other configuration input. An identical
+file at another path is not the file the builder will read. Hashes retain their
+existing actual-byte meanings; neither newline normalization nor a regenerated
+summary can replace them.
+
+Use the original map/package/leaves and accepted sources in that context. The
+helper calls the accepted P08 `work_context` and compares its P05 binding with
+the external context. Recognized package membership must match. For an original
+package grouped only by a linked handoff, `--linked-authority` must name that
+explicit whole-file acceptance source; its existence is not inferred membership
+or approval. The caller still reads the original assignment and verifies actual
+prerequisite acceptance. Returned prerequisite checkboxes are **source-status-only**,
+not execution authority or independent evidence.
+
+Example argument shape, using actual selected values and the host's path syntax:
+
+```text
+python <trusted-source>\skills\generate\scripts\pipeline_inputs.py --repo <target> --from-pipeline <relative-run> --expected <external-input-context.json> --package <original-package> --leaf <original-leaf> --format word --format ppt --profile-home <owned-home> --profile-packs <owned-packs> --profile-pointer <owned-pointer>
+```
+
+Repeat `--leaf`, `--format` and `--selected-input <relative-path>` as needed.
+`--profile-context-file` retains an explicitly selected P07 context file.
+Other data paths are literal target-relative paths, with Windows separators
+accepted at the input boundary. Single-valued options cannot repeat. There is no
+`--out`, renderer command, installation or review-record writer.
+
+The Python entry is `load_pipeline_inputs(repo, run_dir, *, expected,
+profile_config, package_id, leaf_ids, formats, selected_inputs=(),
+linked_authority=None, upstream_request=None, upstream_expected=None,
+upstream_profile=None)`. It uses P03 rooted reads, P05 strict JSON/current
+context, P07 live reference/policy and the shared Markdown source classifier.
+It recognizes only the existing section/field markers in eligible source
+positions; fenced/quoted/raw/comment examples do not become section definitions.
+Complete source, including those literal examples, remains in the returned inputs.
+Each read is bounded to 2 MiB with explicit failure, never truncation.
+
+Document-only `version: "1.0"` design files use P11 compatibility validation
+plus the existing Word/PPT projection checks. Word retains `sections`,
+`section_ref`, `heading_level` and `elements`; PPT retains `layouts`,
+`layout_name`, `layout_index` and `elements`. References must name actual source
+sections and present Title/Subtitle/Body/Bullets/Data-viz fields. Word's semantic
+destinations are `heading`/`body`; PPT's are `title`/`subtitle`/`body` (bullets
+and other body material can use `body`). Unknown/duplicate destinations, missing
+section coverage and wrong format hooks refuse. Multiple continuation layouts
+may reference the same original section. This does not prove that a selected
+native template implements a slot, or permit dropping unmapped source detail.
+
+A genuinely mixed web/document design also runs P11's full `load_design` with
+the exact sibling `content.md` binding. Legacy unresolved web data is not
+silently treated as document-only. Do not add a fake web design to a Word/PPT
+run, widen the web renderer registry, or reinterpret its result as document
+layout inspection. PDF/XLSX reuse the admitted full source and their existing
+format methods without invented `per_format.pdf`/`.xlsx` projections.
+
+Explicit template/config overrides must be selected in the new input context
+and passed as `--selected-input`; any template/logo referenced by the selected
+document projection must also be selected. Preserve the standalone template/
+default decision and revalidate its actual slot mapping. An omitted design
+template is not implicit `--use-defaults` or a required-brand waiver.
+
+For a selected upstream domain operation, pass its original request, its own
+external final P05 context and its explicit original live profile configuration.
+The helper calls P09 `verify_result`, not a copied result flag. At the CLI these
+are `--upstream-request`, `--upstream-expected`, `--upstream-profile-home`,
+`--upstream-profile-packs`, `--upstream-profile-pointer` and optionally
+`--upstream-profile-context-file`. Request/start/result/artifact/evidence bytes
+must also be selected downstream. Never graft document QA onto the domain's
+original request, create a document domain, or publish a checkpoint just to
+generate a standalone document. Upstream `review: not_evaluated` and
+`release_clearance: false` stay explicit.
+
+Exit 0 verifies current **inputs only**; exit 2 reports invalid, missing,
+unselected, drifted or blocked inputs. The result always has `executed: false`
+and `release_clearance: false`. Input admission does not require a finished
+artifact's QA: declare its obligations now, create the artifact through an
+authorized format operation, then externally prepare its final context and
+collect actual QA. Missing mandatory observations remain unverified in P05,
+never cleared by input admission. Keep contexts/QA outside their selected files;
+the explicit decision/corroboration persistence denial is not changed.
 
 ## Source before presentation
 

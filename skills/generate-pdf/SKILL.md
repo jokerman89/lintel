@@ -24,9 +24,11 @@ source even though PDF editing is not promised.
 - `--brief <path|inline>` or `--input <path|url>` selects the complete source.
   Retain inline input as an owned file. HTML and Markdown paths use the procedure
   below; URL input uses an actually authorized guarded browser route.
-- `--from-pipeline <run-dir>` is retained. Consume released content/design/profile/
-  work contracts only; do not fabricate design-spec.json or assume another
-  format's presence establishes its export capability.
+- `--from-pipeline <run-dir>` uses the
+  [existing input admission](../generate-write/references/fidelity-and-evidence.md#existing-pipeline-input-admission)
+  with `--format pdf`, external input context, original package/leaves and live
+  profile. Retain the full content and design bytes without inventing a
+  `per_format.pdf` layout. Input admission is not a conversion or PDF inspection.
 - Preserve `--out`, `--format <a4|letter|custom>`, `--orientation`,
   `--header-footer <yaml>`, `--print-css` and `--no-background` from
   [make-pdf](../make-pdf/SKILL.md).
@@ -66,6 +68,9 @@ through COM, another launcher, provider or export tool.
 1. Read the whole brief and source ledger. Preserve evidence, qualifications,
    tables/units, code and material limitations. Retain the editable source and
    explain transformations; do not shorten it to meet a page-count target.
+   In pipeline mode, use the admitted full content through the same explicit
+   HTML or available converter route. Keep source-to-HTML/print-CSS provenance,
+   select CSS/config overrides, and retain a missing converter as a real gap.
 2. Resolve explicit owned input/output/CSS/header-footer paths. Verify current
    P07 reference/policy and selected work identity. Declare P05 fidelity, print,
    text/page and complete visual requirements before observing them. Neutral
