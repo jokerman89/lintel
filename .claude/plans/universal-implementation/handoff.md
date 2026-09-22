@@ -51,6 +51,27 @@ P12 may use the native Excel canvas, not start an Office app or invent a recalc 
 Final P08 binding, installed closure, A14.5, Word/PPT layout, PDF/Visio and final
 integrated acceptance remain separately tracked in their original cards.
 
+The original MasterSession briefly resumed and sent two duplicate continuation
+messages. It confirmed no new writes, decisions, executions or commits and is
+now explicitly parked; recovery `88aecc43` remains the sole coordinator.
+The original P08 owner confirmed its three frozen mechanical providers are
+separable from pending semantic controls; its card now permits the SAME reviewer
+to accept that provider checkpoint before dependent P09/P04 work.
+
+P10 F03 is frozen as `036e9033` / `50e654af` and dispatched to its SAME reviewer.
+Report intake's initial append-only assumption was corrected after inspecting
+the whole diff: status/seals were updated truthfully, old outcomes and Git history
+remain. P11 Q1 correction is released by `d3f94db`. P12 independent `dfb5cdd0`
+(`ee3ed5e` here) found a bounded standalone-default regression; its repair card
+preserves current content improvements and the two still-open inspection gates.
+
+Delivery permission boundary: the host rejected a recovery command that would
+retrieve the account-selected GitHub token. That command did not execute; no
+token or authenticated request was obtained. Do not retry token acquisition or
+substitute a different identity/tool to bypass that decision. Prior batch merge
+authority remains, but the current host credential permission is unresolved.
+Continue local implementation/review; remote delivery needs its permitted path.
+
 Coordinator A23.4.g3 now requires nine already accepted P05/P09 context, review
 and domain helper/schema/CLI resources during adapter source preflight. All old
 test-method ASTs are unchanged. The actual missing-resource regression initially
