@@ -125,7 +125,10 @@ class CatalogSelection(unittest.TestCase):
         self.assertEqual([item["id"] for item in value["selections"]], ["core", "demo-script"])
         stages = {item["id"]: item for item in value["source_stages"]}
         self.assertEqual(set(stages), {"skill:generate-pdf", "skill:generate-visio", "skill:generate-xlsx"})
-        self.assertTrue(all(item["status"] == "staged" for item in stages.values()))
+        self.assertEqual(stages["skill:generate-visio"]["status"], "staged")
+        for member in ("skill:generate-pdf", "skill:generate-xlsx"):
+            self.assertEqual(stages[member]["status"], "unknown")
+            self.assertIsNone(stages[member]["evidence"])
         self.assertFalse(value["executed"])
 
     def test_closure_is_deterministic_deduplicated_and_explained(self):
@@ -321,6 +324,27 @@ class CatalogSelection(unittest.TestCase):
         path = self.source / "skills/staged/SKILL.md"
         path.write_text(path.read_text().replace("unimplemented example", "changed source description"))
         self.refused()
+
+    def test_unknown_stage_after_source_implementation_does_not_promote_maturity(self):
+        path = self.source / "skills/staged/SKILL.md"
+        path.write_text(path.read_text().replace(
+            "TEMPLATE ONLY - unimplemented example",
+            "Source method available; native validation remains unverified",
+        ))
+        self.refused()
+        self.descriptor["source_stages"]["skill:staged"] = {"status": "unknown", "evidence": None}
+        self.save()
+        before = support.files_snapshot(self.base)
+        result = self.cli("--json", "--selection=pilot")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        value = json.loads(result.stdout)
+        stages = {item["id"]: item for item in value["selection"]["source_stages"]}
+        self.assertEqual(stages["skill:staged"], {
+            "id": "skill:staged", "status": "unknown", "evidence": None,
+        })
+        self.assertTrue(all(entry["maturity"] == "unknown" for entry in value["entries"]))
+        self.assertFalse(value["executed"])
+        self.assertEqual(support.files_snapshot(self.base), before)
 
     def provenance(self):
         notice = self.write("skills/alpha/NOTICE.txt", "Synthetic fixture notice; no imported content.\n")

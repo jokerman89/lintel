@@ -186,7 +186,7 @@ class CatalogMetadata(unittest.TestCase):
         self.assertFalse(result["executed"])
 
     def test_template_and_full_hints_are_not_maturity_or_execution(self):
-        result = self.catalog.metadata(ROOT, name="generate-pdf")
+        result = self.catalog.metadata(ROOT, name="generate-visio")
         self.assertEqual(result["matched"], 1)
         record = result["entries"][0]
         self.assertIn("TEMPLATE ONLY", record["description"])

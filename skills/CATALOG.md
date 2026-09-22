@@ -64,15 +64,15 @@ Total skills: 127
 | [`/li:generate-app`](generate-app/SKILL.md) | Full-app scaffold-orchestrator. Reads frontend-design-spec.json + generates vite-react/next-app/svelte-kit project skel… |
 | [`/li:generate-design`](generate-design/SKILL.md) | Produce design-spec.json (per-format layout-mappings + palette + fonts + asset placements) from content.md. Shared cont… |
 | [`/li:generate-outline`](generate-outline/SKILL.md) | Produce outline.md (structured presentation/document skeleton) from a brief. Shared content-pipeline sub-skill, solo-in… |
-| [`/li:generate-pdf`](generate-pdf/SKILL.md) | ⚠ TEMPLATE ONLY — Slot for PDF document generation. Content not curated. AI generates fresh at invocation per L-001. |
-| [`/li:generate-ppt`](generate-ppt/SKILL.md) | Produce brand-compliant PowerPoint deck via pptxgenjs, 4-gate quality pipeline. |
+| [`/li:generate-pdf`](generate-pdf/SKILL.md) | Produce a PDF through an available converter and accepted browser print operation, preserving source content and separa… |
+| [`/li:generate-ppt`](generate-ppt/SKILL.md) | Produce an editable PowerPoint deck through available native tools or pptxgenjs, retaining source detail in notes and i… |
 | [`/li:generate-qa`](generate-qa/SKILL.md) | Validate generated artifacts (any format) against brand, voice, readability, and structure standards. Auto-fixes where … |
 | [`/li:generate-style-learn`](generate-style-learn/SKILL.md) | Analyze .pptx/.docx/web-examples and extract a reusable style palette. v3.5 Phase 3 of the doc-generation-pipeline. |
 | [`/li:generate-visio`](generate-visio/SKILL.md) | ⚠ TEMPLATE ONLY — Slot for Visio diagram generation (architecture sketches, network topologies, process flows). Content… |
 | [`/li:generate-web`](generate-web/SKILL.md) | Produce brand-compliant static HTML or Next.js scaffold for demo/landing page. |
-| [`/li:generate-word`](generate-word/SKILL.md) | Produce brand-compliant Word doc via docxtemplater — technical / customer-summary / transparency-note variants. |
+| [`/li:generate-word`](generate-word/SKILL.md) | Produce an editable Word document through available native tools or a declared library, preserving source detail and re… |
 | [`/li:generate-write`](generate-write/SKILL.md) | Produce content.md (slide/section bodies + bullets + titles) and speaker-notes.md from outline.md. Applies voice corpus… |
-| [`/li:generate-xlsx`](generate-xlsx/SKILL.md) | ⚠ TEMPLATE ONLY — Slot for Excel spreadsheet generation (data + estimates + tables). Content not curated. AI generates … |
+| [`/li:generate-xlsx`](generate-xlsx/SKILL.md) | Produce an editable, source-backed workbook through available native tools, verifying formulas, actual recalculation, p… |
 | [`/li:handoff-size-check`](handoff-size-check/SKILL.md) | Handoff-size warning tied to the 500k cap. Per v3.6 backlog 3.2 — elephant-hint and token-cap as the same mechanism fro… |
 | [`/li:health`](health/SKILL.md) | Lintel install + upstream status check. Verifies layers, manifest, hooks, upstream pins, CLI shims. |
 | [`/li:help`](help/SKILL.md) | List the Lintel skills + agents + hooks available in this session. Filter by category, voice tier, or CLI support. |
@@ -86,7 +86,7 @@ Total skills: 127
 | [`/li:lessons-promote`](lessons-promote/SKILL.md) | Promote a repo-local lesson from .claude/memory/lessons.md to Lintel's global lessons (scaffolding/01-foundation/.claud… |
 | [`/li:lessons-surface`](lessons-surface/SKILL.md) | Use before or during a task to pull up prior lessons relevant to it — searches the lessons store by keyword and context… |
 | [`/li:maintenance`](maintenance/SKILL.md) | On-demand maintenance — force-compact + static-path monitoring + token-cost simulation. Operator-request 5.3. Builds on… |
-| [`/li:make-pdf`](make-pdf/SKILL.md) | Convert URL, markdown file, or HTML to PDF via managed Chromium. |
+| [`/li:make-pdf`](make-pdf/SKILL.md) | Convert an authorized URL, Markdown file or HTML through actual browser print, preserving source and separating text/pa… |
 | [`/li:migrations`](migrations/SKILL.md) | Surface pending v4.x migrations at SENSE. Sister to /li:status. Read-only — surfaces operator-callsites still on deprec… |
 | [`/li:office-hours`](office-hours/SKILL.md) | Use to turn a rough problem statement into a structured, decision-gated design doc ready for engineering review. Reach … |
 | [`/li:open-managed-browser`](open-managed-browser/SKILL.md) | Use to open an explicitly owned browser session for operator debugging, or check a real provider without touching perso… |

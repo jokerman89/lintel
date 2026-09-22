@@ -111,10 +111,13 @@ member's canonical source; SHA-256 must match its current full UTF-8 parsed desc
 the literal quote must still appear in that description. Only this bounded frontmatter
 evidence is consumed, not a corpus-wide scan of role/skill bodies.
 
-The descriptor currently records the exact `TEMPLATE ONLY` declarations for PDF, Visio
-and XLSX. A changed/missing description, wrong path/digest/quote or unknown member fails
-until the descriptor is deliberately reviewed and updated. `mature`, `implemented` and
-`verified` are not accepted stage statuses. A body repair alone does not upgrade maturity.
+The descriptor retains Visio's exact `TEMPLATE ONLY` declaration. PDF and XLSX now have
+implemented source methods, so their obsolete template evidence is deliberately replaced
+with explicit `unknown`/null evidence, not a readiness claim. Their native rendering,
+cache and inspection gates remain separate. A changed/missing description, wrong
+path/digest/quote or unknown member fails until the descriptor is deliberately reviewed
+and updated. `mature`, `implemented` and `verified` are not accepted stage statuses.
+A source repair alone does not upgrade maturity.
 The legacy `maturity` output remains `unknown`; a source-stage label is a declaration,
 not execution, independent review or a promised format capability.
 

@@ -79,12 +79,8 @@
   },
   "source_stages": {
     "skill:generate-pdf": {
-      "status": "staged",
-      "evidence": {
-        "path": "skills/generate-pdf/SKILL.md",
-        "quote": "TEMPLATE ONLY",
-        "description_sha256": "a50d6d2420a5aff09b537e49419eb3b75c307b309693a739a9d3991077986195"
-      }
+      "status": "unknown",
+      "evidence": null
     },
     "skill:generate-visio": {
       "status": "staged",
@@ -95,12 +91,8 @@
       }
     },
     "skill:generate-xlsx": {
-      "status": "staged",
-      "evidence": {
-        "path": "skills/generate-xlsx/SKILL.md",
-        "quote": "TEMPLATE ONLY",
-        "description_sha256": "ddc93c749bfe099fed84468acdcd718cdb3eef1cd09aeb8cc57437784c9ab1b7"
-      }
+      "status": "unknown",
+      "evidence": null
     }
   }
 }
