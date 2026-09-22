@@ -114,6 +114,12 @@ JSON files. `review` is the reviewer's canonical P05 JSON under `.claude/runtime
 `review_skill` selects the existing P05 log scope. Missing pointers do not revoke useful local
 inspection, but they cannot establish shared acceptance. Every pointer is covered by the same
 authority, parent, alias and hardlink collision checks as the original handoffs.
+Shared JSON destinations have an additional metadata-only rule: ordinary safe ancestors and an
+absent planned leaf or a regular single-link existing file. One P04 guard reuses the accepted
+P03 path/native helpers at validation, actual reviewer-path admission and consumption. A reviewer
+may write only the exact declared canonical slot, not another name resolving to it. Coordinator
+references remain references; they grant neither actor write access to runtime state/audit/jobs.
+This does not prohibit supported product-data symlinks or alter their snapshot semantics.
 
 The standard package table's optional `Review` column is `substantive` (the safe default) or
 `mechanical`; optional `Result` is `change` or `verification-only`. Review depth is an authorized
@@ -255,7 +261,12 @@ local report/review checks are complete. Supply the three explicit profile-locat
    review and QA are v2; profile/work map/corroboration and P09 wrappers keep their own v1 formats.
 2. Produce actual reports, evidence and optional domain results. After they exist, prepare an external
    final P05 context retaining the same non-snapshot fields and original base/input selection.
-   Include all declared product scopes, the exact local report/review files and actual evidence.
+   Cover all declared product scopes, the exact local report/review files and actual evidence.
+   A real selected parent directory such as `src` covers a lane's `src/core` and its future files;
+   redundant child selectors are unnecessary. Individual child files, sibling prefixes and a
+   selected file pretending to be a parent do not cover the whole scope. A deleted parent still
+   counts when the verified P05 snapshot binds its former tracked descendants; an unobserved
+   missing parent does not.
    Bind the full coordination, charter and brief as P05 acceptance sources. Do not embed the final
    context/digest in a report it hashes or exclude a whole report directory.
 3. The common gate checks map/package/leaf/attempt and actor consistency, invokes P07's actual

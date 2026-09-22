@@ -400,12 +400,12 @@ def _validate_lanes(
                 if name in ("corroboration", "domain_request") and shared[name] is None:
                     continue
                 path = _safe_repo_path(root, shared[name], f"{prefix}.shared_evidence.{name}", diagnostics)
-                if path is not None and not path.endswith(".json"):
-                    diagnostics.append(Diagnostic("error", "shared.path", prefix, "Shared provider artifacts must name individual JSON files"))
-                if name == "review" and path is not None and not re.fullmatch(
-                    r"\.claude/runtime/reviews/[A-Za-z0-9._-]+\.json", path,
-                ):
-                    diagnostics.append(Diagnostic("error", "shared.review_owner", prefix, "Reviewer-owned JSON must be a single record in .claude/runtime/reviews"))
+                if path is not None:
+                    try:
+                        from swarm_evidence import shared_metadata_path
+                        shared_metadata_path(root, name, path)
+                    except (ImportError, OSError, ValueError) as error:
+                        diagnostics.append(Diagnostic("error", "shared.destination", f"{prefix}.shared_evidence.{name}", str(error)))
     return valid_lanes
 
 
@@ -696,8 +696,18 @@ def _validate_artifact_ownership(
     for lane in lanes:
         for name, path in _lane_artifacts(lane):
             owner = f"lanes.{lane.get('task_id')}.{name}"
+            shared_slot = None
+            if name.startswith("shared_evidence."):
+                try:
+                    from swarm_evidence import shared_metadata_path
+                    shared_slot = shared_metadata_path(root, name.removeprefix("shared_evidence."), path)
+                except (ImportError, OSError, ValueError) as error:
+                    diagnostics.append(Diagnostic("error", "shared.destination", owner, str(error)))
+                    continue
             for protected in coordinator_paths:
-                if name.startswith("shared_evidence.") and protected == ".claude/runtime":
+                # Ordinary role-checked slots may reside in runtime. This does not
+                # exempt aliases or grant a lane ownership of coordinator inputs.
+                if protected == ".claude/runtime" and shared_slot is not None and shared_slot.is_relative_to(root / protected):
                     continue
                 if _paths_overlap(root, path, protected, physical_files):
                     diagnostics.append(Diagnostic("error", "artifact.coordinator", owner, f"Handoff artifact overlaps coordinator authority/output: {protected}"))
@@ -823,7 +833,6 @@ def _lane_scope_diagnostics(
     own_review_identity = _path_identity(root, own_review) if isinstance(own_review, str) else None
     shared = lane.get("shared_evidence", {})
     own_shared_review = shared.get("review") if isinstance(shared, dict) else None
-    own_shared_review_identity = _path_identity(root, own_shared_review) if isinstance(own_shared_review, str) else None
     shared_artifacts = {
         _path_identity(root, path)
         for item in contract.get("lanes", []) if isinstance(item, Mapping)
@@ -850,8 +859,17 @@ def _lane_scope_diagnostics(
             continue
         identity = _path_identity(root, path)
         if actor == "reviewer":
-            if identity not in (own_review_identity, own_shared_review_identity):
-                diagnostics.append(Diagnostic("error", "scope.reviewer", f"changed_paths[{index}]", f"Reviewer of {task_id} may change only its own review artifact"))
+            if path == own_shared_review:
+                try:
+                    from swarm_evidence import shared_metadata_path
+                    shared_metadata_path(root, "review", path)
+                except (ImportError, OSError, ValueError) as error:
+                    diagnostics.append(Diagnostic("error", "scope.reviewer", f"changed_paths[{index}]", str(error)))
+            elif identity != own_review_identity or any(
+                _path_parts(path)[:len(_path_parts(protected))] == _path_parts(protected)
+                for protected in UNIVERSAL_COORDINATOR_PATHS
+            ):
+                diagnostics.append(Diagnostic("error", "scope.reviewer", f"changed_paths[{index}]", f"Reviewer of {task_id} may change only its assigned review artifact or exact shared JSON slot"))
             continue
         if any(_paths_overlap(root, path, protected) for protected in UNIVERSAL_COORDINATOR_PATHS):
             diagnostics.append(Diagnostic("error", "scope.universal", f"changed_paths[{index}]", f"Lane {task_id} may not change universal coordinator path: {path}"))

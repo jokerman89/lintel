@@ -233,6 +233,12 @@ corroboration and domain request may be null when genuinely inapplicable. Contex
 corroboration and domain request are coordinator-owned; canonical shared review JSON is
 reviewer-owned under `.claude/runtime/reviews/`. No pointer can acquire mapped authority,
 another artifact, a reducer or an aliased physical file.
+All shared JSON slots use safe ordinary ancestors; an existing leaf must be a regular single-link
+file, while a missing planned leaf is allowed only through those safe ancestors. Symlink/reparse,
+hardlink, directory/special and uninspectable metadata paths fail before ownership is granted.
+The same guard checks the actual reviewer filename and consumption: an alternate name for the
+same file is not its assigned slot. Coordinator metadata references do not grant lane ownership
+of state/audit/jobs. Supported legacy product symlinks remain unaffected by this metadata rule.
 
 The caller creates actual provider artifacts, not Swarm lookalikes. Before observations it fixes
 P05 v2 work/QA obligations and the explicit P07 v1 reference. After reports/results exist it
@@ -240,6 +246,11 @@ externally prepares the final P05 context, retaining original inputs/base and ad
 outputs/evidence. That context binds the complete coordination/charter/brief and all product scopes,
 plus the raw local report/review. The final context itself is outside the content it hashes.
 The canonical P05 decision then binds that context and complete per-leaf/control coverage.
+A P05 selection of an actual parent directory covers the whole descendant lane scope, including
+future files; the consumer does not force a redundant exact child selector. Missing/partial child
+coverage, siblings, misleading textual prefixes and file-as-parent claims remain invalid.
+A parent deleted by the reviewed change remains covered when P05 binds its former tracked
+descendants; the consumer does not require recreating the directory or replacing valid evidence.
 
 `status`, `wave`, `resume` and `verify` consume one common gate: current P07 reference and exact
 required policy, actual P05 review validation, the existing log-backed latest-review reader, and

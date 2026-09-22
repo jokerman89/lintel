@@ -157,6 +157,13 @@ class SharedBinding(unittest.TestCase):
                           "--profile-pointer", self.config.pointer]
         return json.loads(self.run_process(arguments, expected=expected).stdout)
 
+    def scope_command(self, path, *, actor="reviewer", expected=0):
+        return self.run_process([
+            sys.executable, "-B", SOURCE / "bin/li-swarm.py", "check-scope",
+            "--repo", self.repo, "--coord", self.fixture.coordination_path,
+            "--task", "BC1", "--actor", actor, "--changed", path,
+        ], expected=expected)
+
     def observe(self):
         run = self.run_process([sys.executable, "-I", "-B", "-c",
                                "import unittest\nclass Check(unittest.TestCase):\n"
@@ -590,6 +597,229 @@ class SharedBinding(unittest.TestCase):
         receipt_path.unlink()
         self.consume(expected=1)
         self.assertFalse(self.consume("inspect", profile_args=False)["release_clearance"])
+
+    def test_review_runtime_aliases_reject_all_six_public_gate_cases_without_writes(self):
+        slot = self.repo / self.paths["review"]
+        slot.parent.mkdir(parents=True, exist_ok=True)
+        for target_name in (".claude/runtime/state/operation.json", ".claude/runtime/audit/reviews.jsonl",
+                            ".claude/runtime/jobs/current.json"):
+            self.write(target_name, '{"synthetic_sentinel":"must remain byte-identical"}\n')
+            target = self.repo / target_name
+            before = target.read_bytes()
+            for kind in ("hardlink", "symlink"):
+                with self.subTest(target=target_name, kind=kind):
+                    if kind == "hardlink":
+                        os.link(target, slot)
+                    else:
+                        os.symlink(os.path.relpath(target, slot.parent), slot)
+                    self.assertTrue(os.path.samefile(target, slot))
+                    try:
+                        validation = self.run_process([
+                            sys.executable, "-B", SOURCE / "bin/li-swarm.py", "validate",
+                            "--repo", self.repo, "--coord", self.fixture.coordination_path,
+                        ], expected=None)
+                        scoped = self.scope_command(self.paths["review"], expected=None)
+                        self.assertEqual(target.read_bytes(), before)
+                        self.assertEqual((validation.returncode, scoped.returncode), (1, 1),
+                                         validation.stdout + scoped.stdout)
+                        self.assertFalse(json.loads(validation.stdout)["ok"])
+                        self.assertFalse(json.loads(scoped.stdout)["ok"])
+                    finally:
+                        slot.unlink()
+                    self.assertEqual(target.read_bytes(), before)
+        self.assertTrue(self.consume("validate", profile_args=False)["ok"])
+        self.scope_command(self.paths["review"])
+
+    def test_shared_metadata_rejects_directory_leaves_and_linked_or_file_parents(self):
+        original = deepcopy(self.paths)
+        for field in ("context", "review", "qa", "corroboration", "domain_request"):
+            path = self.repo / (original[field] or ".claude/runtime/swarm/BC1/domain-request.json")
+            self.paths[field] = path.relative_to(self.repo).as_posix()
+            self.fixture.save()
+            path.mkdir(parents=True, exist_ok=True)
+            with self.subTest(field=field, kind="directory-leaf"):
+                self.consume("validate", profile_args=False, expected=1)
+                self.scope_command(self.paths[field], expected=1)
+            path.rmdir()
+            self.paths.update(original)
+        self.fixture.save()
+        review_parent = self.repo / ".claude/runtime/reviews"
+        review_parent.rmdir()
+        target = self.repo / ".claude/runtime/state/alternate-reviews"
+        target.mkdir()
+        for kind in ("symlink", "junction") if os.name == "nt" else ("symlink",):
+            with self.subTest(kind=kind, missing_leaf=True):
+                if kind == "junction":
+                    self.run_process(["cmd.exe", "/d", "/c", "mklink", "/J", review_parent, target])
+                else:
+                    os.symlink(target, review_parent, target_is_directory=True)
+                try:
+                    self.consume("validate", profile_args=False, expected=1)
+                    self.scope_command(self.paths["review"], expected=1)
+                    self.assertFalse((target / "swarm-BC1.json").exists())
+                finally:
+                    review_parent.rmdir() if kind == "junction" else review_parent.unlink()
+        review_parent.write_text("ordinary file, not a parent", encoding="utf-8")
+        self.consume("validate", profile_args=False, expected=1)
+        self.scope_command(self.paths["review"], expected=1)
+        review_parent.unlink()
+        self.assertTrue(self.consume("validate", profile_args=False)["ok"], "safe missing ancestors may be planned")
+
+    def test_reverse_review_alias_path_is_not_the_assigned_reviewer_slot(self):
+        slot = self.repo / self.paths["review"]
+        self.write_json(self.paths["review"], {"synthetic": "ordinary metadata"})
+        before = slot.read_bytes()
+        alias = slot.with_name("alternate-review.json")
+        for kind in ("symlink", "hardlink"):
+            with self.subTest(kind=kind):
+                os.symlink(slot.name, alias) if kind == "symlink" else os.link(slot, alias)
+                self.assertTrue(os.path.samefile(slot, alias))
+                try:
+                    self.scope_command(alias.relative_to(self.repo).as_posix(), expected=1)
+                    self.assertEqual(slot.read_bytes(), before)
+                finally:
+                    alias.unlink()
+        self.scope_command(self.paths["review"])
+
+    def test_ordinary_coordinator_references_never_grant_reviewer_or_worker_runtime_scope(self):
+        for field, path in (
+            ("context", ".claude/runtime/state/selected-context.json"),
+            ("qa", ".claude/runtime/swarm/BC1/qa.json"),
+            ("corroboration", ".claude/runtime/jobs/selected-attestation.json"),
+            ("domain_request", ".claude/runtime/state/domains/selected-request.json"),
+        ):
+            self.paths[field] = path
+            self.write_json(path, {"synthetic": "reference only"})
+        self.write_json(self.paths["review"], {"synthetic": "reviewer slot"})
+        self.fixture.save()
+        self.assertTrue(self.consume("validate", profile_args=False)["ok"])
+        self.scope_command(self.paths["review"])
+        for field in ("context", "qa", "corroboration", "domain_request"):
+            for actor in ("worker", "reviewer"):
+                with self.subTest(field=field, actor=actor):
+                    self.scope_command(self.paths[field], actor=actor, expected=1)
+        self.scope_command(self.paths["review"], actor="worker", expected=1)
+
+    def test_actual_p05_containing_directory_selection_covers_lane_and_future_files(self):
+        self.prepare()
+        self.request["selection"] = ["src" if path == "src/core" else path for path in self.request["selection"]]
+        self.finalize()
+        accepted = self.p05(
+            "ship", "--expected", self.repo / self.paths["context"],
+            "--corroboration", self.repo / self.paths["corroboration"],
+            "--qa", self.repo / self.paths["qa"], "--skill", "review",
+        )
+        self.assertTrue(accepted["ok"], "the real shared provider already accepts this complete parent")
+        unchanged_context = (self.repo / self.paths["context"]).read_bytes()
+        for command in ("status", "wave", "resume", "verify"):
+            with self.subTest(command=command):
+                self.assertTrue(self.consume(command)["ok"])
+        self.assertEqual((self.repo / self.paths["context"]).read_bytes(), unchanged_context)
+        self.write("src/core/future.txt", "new file is included by the selected parent\n")
+        self.consume(expected=1)
+        self.fixture.write_evidence(self.lane)
+        self.finalize()
+        self.assertTrue(self.consume()["ok"])
+        self.assertIn("src/core/future.txt", [entry["path"] for entry in self.context["snapshot"]["entries"]])
+
+    def test_partial_sibling_prefix_or_missing_selection_never_covers_full_lane(self):
+        self.prepare()
+        self.write("src/core-sibling/item.txt", "sibling")
+        self.write("sr/item.txt", "misleading prefix")
+        self.write("src2/item.txt", "different sibling")
+        metadata = [self.lane["report"], self.lane["review"], "evidence"]
+        for selection in ([], ["src/core/file.py"], ["src/core-sibling"], ["sr"], ["src2"]):
+            with self.subTest(selection=selection):
+                self.request["selection"] = [*selection, *metadata]
+                self.finalize()
+                self.consume(expected=1)
+        self.request["selection"] = ["src", *metadata]
+        self.finalize()
+        self.assertTrue(self.consume()["ok"])
+
+    def test_actual_p05_parent_selection_retains_a_tracked_directory_deletion(self):
+        self.prepare()
+        product = self.repo / "src/core/file.py"
+        product.unlink()
+        product.parent.rmdir()
+        product.parent.parent.rmdir()
+        self.git("add", "-u", "--", "src/core/file.py")
+        self.git("commit", "-qm", "test: reviewed deletion of the scoped directory content")
+        head = self.git("rev-parse", "HEAD").stdout.strip()
+        self.fixture.write_evidence(self.lane, base=self.base, head=head)
+        self.request["selection"] = ["src" if path == "src/core" else path for path in self.request["selection"]]
+        self.finalize()
+        accepted = self.p05(
+            "ship", "--expected", self.repo / self.paths["context"],
+            "--corroboration", self.repo / self.paths["corroboration"],
+            "--qa", self.repo / self.paths["qa"], "--skill", "review",
+        )
+        self.assertTrue(accepted["ok"])
+        for command in ("status", "wave", "resume", "verify"):
+            with self.subTest(command=command):
+                self.assertTrue(self.consume(command)["ok"])
+
+    def test_selected_ordinary_file_is_not_a_parent_for_future_scope(self):
+        from swarm_evidence import selection_covers_scope
+
+        self.prepare()
+        self.request["selection"] = ["src/core/file.py", self.lane["report"], self.lane["review"], "evidence"]
+        self.finalize()
+        selection = self.context["snapshot"]["selection"]
+        self.assertTrue(selection_covers_scope(self.repo, "src/core/file.py", selection))
+        self.assertFalse(selection_covers_scope(self.repo, "src/core/file.py/future", selection))
+        self.assertFalse(selection_covers_scope(self.repo, "src/core", selection))
+        self.consume(expected=1)
+        self.assertTrue(selection_covers_scope(self.repo, "src/core/future", ["src"]))
+        self.assertFalse(selection_covers_scope(self.repo, "not-created/future", ["not-created"]))
+
+    def test_shared_consumption_rechecks_regular_single_link_metadata(self):
+        from swarm_evidence import verify_shared_lane
+
+        self.prepare()
+        diagnostics = []
+        report = swarm._read_evidence(self.repo / self.lane["report"], "report", "BC1", diagnostics)
+        local_review = swarm._read_evidence(self.repo / self.lane["review"], "review", "BC1", diagnostics)
+        package = swarm.package_sources(self.repo, self.fixture.coordination)["BC1"]
+        self.assertEqual(diagnostics, [])
+        context = self.repo / self.paths["context"]
+        protected = self.repo / ".claude/runtime/state/operation.json"
+        retained = context.read_bytes()
+        protected.write_bytes(retained)
+        context.unlink()
+        os.link(protected, context)
+        try:
+            result = verify_shared_lane(
+                self.repo, self.fixture.coordination_path, self.fixture.coordination,
+                self.lane, package, report, local_review, profile_config=self.config,
+            )
+            self.assertFalse(result["ok"])
+            self.assertIn("single-link", " ".join(result["problems"]))
+            self.assertEqual(protected.read_bytes(), retained)
+        finally:
+            context.unlink()
+            context.write_bytes(retained)
+        self.assertTrue(self.consume()["ok"])
+
+    def test_shared_destination_inspection_errors_never_grant_scope(self):
+        self.assertTrue(self.consume("validate", profile_args=False)["ok"])
+        original = safety.safe_path
+
+        def refuse_inspection(*args, **kwargs):
+            raise PermissionError("synthetic inspection refusal")
+
+        safety.safe_path = refuse_inspection
+        try:
+            invalid = swarm.validate_coordination(self.repo, self.fixture.coordination_path)
+            self.assertFalse(invalid.ok)
+            self.assertIn("shared.destination", {item.code for item in invalid.diagnostics})
+            rejected = swarm.check_lane_scope(
+                self.repo, self.fixture.coordination_path, "BC1", [self.paths["review"]], actor="reviewer",
+            )
+            self.assertFalse(rejected.ok)
+        finally:
+            safety.safe_path = original
+        self.assertTrue(self.consume("validate", profile_args=False)["ok"])
 
 
 if __name__ == "__main__":
