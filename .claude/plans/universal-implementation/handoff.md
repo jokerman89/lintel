@@ -19,28 +19,30 @@ Current actionable checkpoints supersede the older chronological entries below:
   and QUALITY. The recovery coordinator read it and approved the corrected Alpha
   design and conditional local T011/T027 implementation. The original controller
   now owns actual DEFINE/DISCOVER/PLAN progression, native BUILD and cold resume;
-  no phase completion or P08 acceptance follows merely from that approval.
+  it reports actual PLAN completion and the original map approved. SAME reviewer
+  `9dbf0a9b` is reviewing exact mechanical providers first, then the three pinned
+  side-case planning packets. No whole-P08 acceptance follows from those checkpoints.
 - P09: data core is independently accepted and integrated through `6144721`.
   The original owner retains the pending module-binding design.
-- P10: independent `c1f6bad1` / preserved `5f3d885` closes F02 but reports P2 F03,
-  false layout non-applicability. The appended P10 card releases only that reader
-  correction and focused original-dimension verification to its original owner.
-- P11: browser-only product `3115790`, report-only `043019a`, is frozen for its
-  first independent SPEC/QUALITY in `1f655ca9-eb2b-4325-9996-72ed8539c13b`;
-  original full source history must accompany it. The reviewer reports SPEC PASS
-  followed by QUALITY P2: partial numeric extraction loses a decimal/sign.
-  Await its immutable report before the original owner's bounded correction.
-- P12: standalone product `cdb4ea6`, final report `30bd4e3`, is with independent
-  reviewer `31c39265-13e5-4057-9e78-49bf658749a5`. Word application access was
+- P10: `036e9033` / `50e654af` fixes F03; independent `131d3db` / `4b5f592`
+  closes it but finds canonical stranded redirects falsely reported current.
+  `b8f0cf7` releases the finite F04 class to the original owner and lets SAME
+  reviewer `1578dfd8` finish the unrelated original 18 adapter/profile controls.
+- P11: numeric product `14b419c` / `68a6084` closes Q1 but independent `4cf84d0`
+  / `44ba13e` finds Q2 combinatorial whitespace matching. `b8f0cf7` releases a
+  deterministic parser/test correction. Original headless SPEC remains valid.
+  SAME reviewer `1f655ca9` owns recheck; A14 work proceeds separately.
+- P12: defaults repair `32dac88` / `b270475` passes F01 recheck in `02e8028`
+  / `984bb72`. SAME reviewer `31c39265-13e5-4057-9e78-49bf658749a5` also accepts
+  actual six-slide visual observation. `69f2ef6` releases a distinct complete
+  PPT-only attempt without dropping the original joint controls. Word access was
   explicitly declined during recovery; no app launched. Page layout remains
   permission-blocked, with no retry, COM/export or alternate-launch workaround.
-  The separate denied Copilot UI route and incomplete PPT visual observation also
-  remain unverified. These are not source defects or passing artifact QA.
-- P13: compact-discovery product `2a4ba25`, report-only `e20588d`, is frozen for
-  first-unit independent SPEC/QUALITY in `4865e4f7-240b-4721-a64d-ce6df9a75a9c`,
-  not final optional-distribution acceptance. Preliminary SPEC findings concern
-  agent-alias collisions and ordinary generation with duplicate skill names;
-  await the immutable report and repair through the original owner.
+  The separate denied Copilot UI route stays closed. No full artifact QA follows.
+- P13: ambiguity repair `b1d4caf` / `204ea725` is with SAME independent reviewer
+  `4865e4f7-240b-4721-a64d-ce6df9a75a9c` for complete first-unit SPEC/QUALITY.
+  The original 198-line report and rejection `466a454b` remain unchanged.
+  Conditional additive selection/preservation starts only after actual PASS.
 
 Dependency-ready releases are committed, not new proposals awaiting an operator:
 `bdfd127` releases P04's accepted-provider shared-evidence consumer and conditionally
@@ -71,6 +73,11 @@ token or authenticated request was obtained. Do not retry token acquisition or
 substitute a different identity/tool to bypass that decision. Prior batch merge
 authority remains, but the current host credential permission is unresolved.
 Continue local implementation/review; remote delivery needs its permitted path.
+A subsequent `gh auth status` command returned only account metadata, not tokens,
+and reported an unauthorized injected account as active; `jokerman89` was stored
+but inactive. The CLI may validate accounts during that status operation, so do
+not call it proof of authorized-only remote access. No push, PR or merge occurred.
+No further GitHub/account operation is authorized by that observation.
 
 P12 source-default repair is frozen as `32dac88` / separate report `b270475`
 and with SAME reviewer `31c39265`. The coordinator rasterized all six exact
