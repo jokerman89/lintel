@@ -74,9 +74,17 @@ class Preparation(unittest.TestCase):
             PREP.prepare_document(self.document(), input_format="html", print_css="</style><p>unexpected")
 
     def test_comment_head_marker_is_not_the_insertion_point(self):
-        html = self.document().replace("<head>", "<!-- </head> --><head>")
-        output, _ = PREP.prepare_document(html, input_format="html")
-        self.assertTrue(output.index("<title>") < output.index('data-lintel-pdf="print"'))
+        for separator in ("\r\n", "\r", "\x0b", "\u2028"):
+            with self.subTest(separator=separator):
+                html = self.document().replace("<head>", "<!-- </head>" + separator + "comment -->\n<head>")
+                output, _ = PREP.prepare_document(html, input_format="html")
+                self.assertTrue(output.index("</title>") < output.index('data-lintel-pdf="print"'))
+                self.assertIn(html.split("</head>", 2)[-1], output)
+
+    def test_duplicate_heads_stop_at_the_first_ambiguous_boundary(self):
+        html = self.document().replace("</head>", "</head></head>" + "\n" * 4096)
+        with self.assertRaisesRegex(PREP.PreparationError, "multiple closing heads"):
+            PREP.prepare_document(html, input_format="html")
 
     def test_missing_converter_never_becomes_plain_text_success(self):
         with patch.dict(sys.modules, {"markdown_it": None}), self.assertRaisesRegex(PREP.PreparationError, "unavailable"):

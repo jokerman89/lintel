@@ -44,8 +44,14 @@ class DocumentHead(HTMLParser):
 
     def handle_endtag(self, tag: str) -> None:
         if tag == "head":
+            if self.head_ends:
+                raise PreparationError("HTML has multiple closing heads; source was not rewritten")
             line, column = self.getpos()
-            self.head_ends.append(sum(len(part) for part in self.text.splitlines(keepends=True)[:line - 1]) + column)
+            # HTMLParser counts LF only; locate this one boundary without copying every line.
+            offset = 0
+            for _ in range(line - 1):
+                offset = self.text.index("\n", offset) + 1
+            self.head_ends.append(offset + column)
         if tag == "title":
             self.in_title = False
 
