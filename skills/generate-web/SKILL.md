@@ -94,7 +94,11 @@ If invoked with `--from-frontend-design <run-dir>` instead of `--brief` or `--fr
    - Typography: emit `<link>` tags from `typography.font_stacks[].loading_strategy` + apply via Tailwind config
    - Motion: `none` emits no animation dependency; `css` emits only selected CSS;
      `library` imports only the selected, sourced library and justified configuration.
-   - Shader: if `shader != null` → emit Paper Shaders component or OGL canvas-mount
+   - Shader: emit a selected GPU component only when
+     `shader != null && shader.visual_thesis != "none" && shader.library != null`.
+     Both null and the accepted non-null `visual_thesis: none, library: null`
+     representation emit no GPU canvas, import or dependency. Apply the same
+     predicate to pipeline `web_design.shader`; do not substitute an artificial score.
    - Component libraries: preserve existing primitives; emit no setup/import when
      the selected list is empty. New library advice requires source/version/license evidence.
    - Layout: apply `layout_grammar.max_width` + grid-config to root layout

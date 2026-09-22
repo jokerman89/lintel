@@ -56,6 +56,10 @@ project's technology are constraints, not aesthetic defaults. A brief does not
 authorize replacing Vue with React. Existing `package.json` cannot be omitted
 from selected inputs by declaring a project new; unknown/incompatible frameworks
 block the requested renderer instead of falling back.
+Any present bound `package.json` supplies that constraint, independently of the
+caller-supplied `existing` flag. Unrecognized evidence such as a React/react-scripts
+project cannot become Next.js by setting the flag false. Genuinely new projects
+without a manifest and compatible supported manifests keep their existing routes.
 
 Motion is explicitly `none`, `css` or `library`. None permits empty libraries and
 animations, native scrolling and no page transition. CSS permits zero JS libraries
@@ -116,6 +120,10 @@ execute automatically:
 
 Pipeline web uses `--from-pipeline` instead. Pipeline-to-app is not an existing
 entry point: explicitly prepare a frontend envelope rather than inventing one.
+Directory-based handoff requires the exact canonical filename for its envelope:
+`frontend-design-spec.json` or `design-spec.json`. An alternate filename can be
+read/validated, but mapping rejects it rather than discarding its basename and
+making the renderer consume a different sibling. No new exact-file flag is invented.
 The brief is the bound input carried through the envelope, not a second conflicting
 `--brief` input alongside `--from-*`. Direct `generate-web --brief` remains useful;
 resolve that brief into the same contract before rendering. `--customer-share`

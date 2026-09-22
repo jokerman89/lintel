@@ -292,10 +292,12 @@ def _project(binding: dict, repo: Path, expected: dict) -> None:
     ):
         raise DesignError("The existing project package.json must be selected, not bypassed as a new project")
     stacks = set()
+    manifest_present = False
     for reference in project["manifests"]:
         raw = _bound(repo, reference, expected)
-        if Path(reference["path"]).name != "package.json":
+        if Path(reference["path"]).name.casefold() != "package.json":
             continue
+        manifest_present = True
         package = load_json(raw.decode("utf-8"))
         if any(not isinstance(package.get(key, {}), dict) for key in ("dependencies", "devDependencies")):
             raise DesignError("Project dependency fields must be mappings")
@@ -309,7 +311,7 @@ def _project(binding: dict, repo: Path, expected: dict) -> None:
         if "vue" in dependencies:
             stacks.add("vue")
     if (stacks and stacks != {project["stack"]}) or (
-        project["existing"] and not stacks and project["stack"] != "html"
+        (manifest_present or project["existing"]) and not stacks and project["stack"] != "html"
     ):
         raise DesignError("Selected project technology contradicts or lacks manifest evidence")
 
@@ -371,6 +373,9 @@ def renderer_args(loaded: dict, *, out: str) -> dict:
         raise DesignError("Renderer mapping requires freshly checked design inputs")
     design, binding = loaded["design"], loaded["binding"]
     _choices(design, binding)
+    filename = {"frontend": "frontend-design-spec.json", "pipeline": "design-spec.json"}.get(loaded["kind"])
+    if filename is None or Path(loaded["spec"]["path"]).name != filename:
+        raise DesignError("Renderer mapping requires the canonical filename for the selected envelope")
     output = safety.selector_path(out)
     run = str(Path(loaded["spec"]["path"]).parent).replace("\\", "/")
     renderer = _schema()["x-renderers"][design["target_format"]]

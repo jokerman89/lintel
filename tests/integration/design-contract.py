@@ -42,6 +42,8 @@ SEAL_PATHS = [
     "lib/profile_context.py", "lib/profile-context-schema.json", "lib/review_contract.py",
     "lib/review-schema.json", "lib/domain_result.py", "lib/domain-result-schema.json",
     "lib/markdown_source.py", "bin/li-review-evidence.py", "tests/integration/design-contract.py",
+    "skills/generate-web/SKILL.md", "skills/generate-app/SKILL.md",
+    "skills/design-dna/references/design-contract.md",
 ]
 
 
@@ -253,6 +255,111 @@ class DesignContract(unittest.TestCase):
         spec["binding"]["project"]["stack"] = "vue"
         with self.assertRaises(ValueError):
             self.load(spec)
+
+    def test_renderer_refuses_alternate_filenames_without_losing_canonical_routes(self):
+        for kind, filename, alternate_target, alternate_stack in (
+            ("frontend", "frontend-design-spec.json", "app", "vite-react"),
+            ("pipeline", "design-spec.json", "nextjs", "next-app"),
+        ):
+            directory = f"{kind} run with spaces"
+            if kind == "frontend":
+                canonical = deepcopy(self.spec)
+                alternate = deepcopy(canonical)
+                alternate["target_format"] = alternate_target
+            else:
+                web = deepcopy(self.spec)
+                binding = web.pop("binding")
+                del web["source"]
+                canonical = {
+                    "version": "1.0", "schema_version": 1, "source": "pipeline",
+                    "palette": {"text_dark": "#141413", "background": "#faf9f5"},
+                    "fonts": {"heading": "Poppins", "body": "Lora"},
+                    "per_format": {"web": {"sections": []}}, "web_design": web, "binding": binding,
+                }
+                alternate = deepcopy(canonical)
+                alternate["web_design"]["target_format"] = alternate_target
+            alternate["binding"]["project"]["stack"] = alternate_stack
+            self.write_json(f"{directory}/{filename}", canonical)
+            self.write_json(f"{directory}/alternate.json", alternate)
+            expected = self.prepare([directory])
+            selected = design.load_design(self.repo, f"{directory}/alternate.json",
+                                          expected=expected, profile_config=self.config)
+            with self.assertRaisesRegex(ValueError, "canonical"):
+                design.renderer_args(selected, out="output with spaces")
+            selected = design.load_design(self.repo, f"{directory}/{filename}",
+                                          expected=expected, profile_config=self.config)
+            mapped = design.renderer_args(selected, out="output with spaces")
+            self.assertEqual(mapped["skill"], "generate-web")
+            self.assertEqual(mapped["args"], [
+                "--from-frontend-design" if kind == "frontend" else "--from-pipeline",
+                directory, "--variant", "single-file", "--out", "output with spaces",
+            ])
+            self.assertEqual(selected["spec"], self.ref(f"{directory}/{filename}"))
+
+    def test_bound_manifest_cannot_be_bypassed_as_a_new_project(self):
+        self.assertEqual(design.renderer_args(self.load(), out="new output")["skill"], "generate-web")
+        self.write_json("nested/package.JSON", {"dependencies": {"react": "18.3.1", "react-scripts": "5.0.1"}})
+        self.prepare_input["selection"].append("nested")
+        nested = deepcopy(self.spec)
+        nested["target_format"] = "app"
+        nested["binding"]["project"] = {
+            "existing": False, "stack": "next-app", "manifests": [self.ref("nested/package.JSON")],
+        }
+        with self.assertRaisesRegex(ValueError, "technology"):
+            self.load(nested)
+        self.write_json("package.json", {"dependencies": {"react": "18.3.1", "react-scripts": "5.0.1"}})
+        self.prepare_input["selection"].append("package.json")
+        value = deepcopy(self.spec)
+        value["target_format"] = "app"
+        for existing in (False, True):
+            value["binding"]["project"] = {
+                "existing": existing, "stack": "next-app", "manifests": [self.ref("package.json")],
+            }
+            with self.assertRaisesRegex(ValueError, "technology"):
+                self.load(value)
+        for stack, dependencies, development in (
+            ("next-app", {"next": "15.0.0", "react": "19.0.0"}, {}),
+            ("vite-react", {"react": "19.0.0"}, {"vite": "6.0.0"}),
+            ("svelte-kit", {"@sveltejs/kit": "2.0.0"}, {}),
+        ):
+            self.write_json("package.json", {"dependencies": dependencies, "devDependencies": development})
+            for existing in (False, True):
+                value["binding"]["project"] = {
+                    "existing": existing, "stack": stack, "manifests": [self.ref("package.json")],
+                }
+                mapped = design.renderer_args(self.load(value), out="supported output")
+                self.assertEqual(mapped["args"][2:4], ["--stack", stack])
+
+    def test_web_and_app_methods_preserve_both_no_shader_forms(self):
+        for shader in (None, {"schema_version": 1, "visual_thesis": "none", "library": None}):
+            value = deepcopy(self.spec)
+            value["shader"] = shader
+            for target, stack in (("single-file", "html"), ("app", "vite-react")):
+                value["target_format"] = target
+                value["binding"]["project"]["stack"] = stack
+                checked = design.validate_spec(value)
+                self.assertEqual(checked["design"]["shader"], shader)
+                self.assertEqual(checked["design"]["component_libraries"], [])
+                self.assertEqual(checked["design"]["motion"]["libraries"], [])
+            value["target_format"] = "single-file"
+            value["binding"]["project"]["stack"] = "html"
+            binding = value.pop("binding")
+            del value["source"]
+            pipeline = {
+                "version": "1.0", "schema_version": 1, "source": "pipeline",
+                "palette": {"text_dark": "#141413", "background": "#faf9f5"},
+                "fonts": {"heading": "Poppins", "body": "Lora"},
+                "per_format": {"web": {"sections": []}}, "web_design": value, "binding": binding,
+            }
+            checked = design.validate_spec(pipeline, "pipeline")
+            self.assertEqual(checked["design"]["shader"], shader)
+            self.assertEqual(checked["design"]["component_libraries"], [])
+        web = (SOURCE / "skills/generate-web/SKILL.md").read_text(encoding="utf-8")
+        self.assertTrue("if `shader != null`" not in web, "Web method still uses the unsafe non-null-only shader branch")
+        self.assertTrue('shader.visual_thesis != "none"' in web, "Web method must exclude the explicit none branch")
+        self.assertTrue("no GPU" in web, "Web method must retain the no-GPU result")
+        app = (SOURCE / "skills/generate-app/SKILL.md").read_text(encoding="utf-8")
+        self.assertIn("active non-`none` shader", app)
 
     def test_legacy_frontend_and_pipeline_are_readable_not_renderable(self):
         legacy = deepcopy(self.spec)
