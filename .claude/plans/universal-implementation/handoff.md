@@ -133,6 +133,14 @@ accepted core, transaction/schema/profile and Git behavior stay unchanged.
 The remaining complete SPEC and first whole QUALITY still await a new frozen
 candidate and the same reviewer.
 
+F02's exact guard-only seam is settled without changing the shared transaction:
+the lifecycle caller revalidates unchanged admission inputs immediately before
+delegation; the existing engine enforces the captured write-set expectations.
+No no-op user-file entry, extra transaction-key set or new guard API is permitted.
+Pre-admission marker drift must refuse; post-admission changes to an unmodified
+read dependency are explicitly outside the non-atomic contract, not claimed
+protected. Write-set races retain their full existing refusal requirement.
+
 ## Accepted local integrations
 
 P01: complete worker/final-review history merged as `a2ef318`. Source matches independently
