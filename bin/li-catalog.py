@@ -8,11 +8,12 @@
 
 import argparse
 from functools import lru_cache
+import hashlib
 import importlib.util
 import json
 import re
 import sys
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from types import ModuleType
 from typing import Any, Optional
 
@@ -288,6 +289,21 @@ def metadata(root: Path, *, kind: str = "skill", query: Optional[str] = None,
     for selected_kind in kinds:
         entry_aliases(root, entries, selected_kind)
     total = len(entries)
+    entries = filter_entries(entries, query=query, family=family, name=name,
+                             category=category, voice=voice, surface=surface)
+    return {
+        "schema_version": 1, "source_root": str(root), "evidence_level": "source-metadata",
+        "executed": False, "total": total, "matched": len(entries), "entries": entries,
+    }
+
+
+def filter_entries(entries: list[dict], *, query: Optional[str] = None,
+                   family: Optional[str] = None, name: Optional[str] = None,
+                   category: Optional[str] = None, voice: Optional[str] = None,
+                   surface: Optional[str] = None) -> list[dict]:
+    for value in (query, family, name, category, voice, surface):
+        if value is not None and (not isinstance(value, str) or not value.strip()):
+            raise ValueError("Discovery filters must be nonempty literal strings")
 
     def matches(entry: dict) -> bool:
         names = [entry["name"], *(alias["name"] for alias in entry["aliases"])]
@@ -302,11 +318,226 @@ def metadata(root: Path, *, kind: str = "skill", query: Optional[str] = None,
             and (surface is None or any(hint["surface"] == surface for hint in entry["cli_support"]))
         )
 
-    entries = sorted((entry for entry in entries if matches(entry)), key=lambda entry: entry["id"])
-    return {
-        "schema_version": 1, "source_root": str(root), "evidence_level": "source-metadata",
-        "executed": False, "total": total, "matched": len(entries), "entries": entries,
+    return sorted((entry for entry in entries if matches(entry)), key=lambda entry: entry["id"])
+
+
+def selection_path(root: Path, relative: str, *, directory: bool = False) -> Path:
+    if (not isinstance(relative, str) or not relative or "\\" in relative or ":" in relative
+            or any(ord(char) < 32 for char in relative)):
+        raise ValueError("Selection resources must be literal source-relative paths")
+    parts = relative.split("/")
+    if (PurePosixPath(relative).is_absolute() or any(part in ("", ".", "..") or part.startswith(".")
+                                                   for part in parts)):
+        raise ValueError(f"Unsafe selection resource path: {relative!r}")
+    path = source_path(root, relative)
+    parent = root
+    for part in parts:
+        if part not in {child.name for child in parent.iterdir()}:
+            raise ValueError(f"{relative}: selection resource spelling must match the source")
+        parent = parent / part
+    if not path.is_file() and not (directory and path.is_dir()):
+        raise ValueError(f"{relative}: selection resource is not a regular file")
+    return path
+
+
+def selection_keys(value: object, fields: set[str], label: str) -> None:
+    if not isinstance(value, dict) or set(value) != fields:
+        raise ValueError(f"{label}: missing or unsupported selection fields")
+
+
+def selection_strings(value: object, label: str, *, nonempty: bool = False) -> list[str]:
+    if (not isinstance(value, list) or (nonempty and not value)
+            or any(not isinstance(item, str) or not item.strip() for item in value)
+            or len(set(value)) != len(value)):
+        raise ValueError(f"{label}: expected unique nonempty strings")
+    return value
+
+
+def selection_id(value: object) -> str:
+    if not isinstance(value, str) or not re.fullmatch(r"[a-z][a-z0-9]*(?:-[a-z0-9]+)*", value):
+        raise ValueError("Selection IDs must be literal kebab-case names")
+    return value
+
+
+def selection_order(selections: dict) -> list[str]:
+    remaining, order = set(selections), []
+    while remaining:
+        ready = sorted(name for name in remaining if not (set(selections[name]["requires"]) - set(order)))
+        if not ready:
+            raise ValueError("Selection dependency cycle")
+        order.extend(ready)
+        remaining.difference_update(ready)
+    return order
+
+
+def selection_data(root: Path, entries: list[dict]) -> tuple[dict, dict, list[str]]:
+    path = selection_path(root, "lib/capability-selections.json")
+    data = load_text(path.read_text(encoding="utf-8-sig"))
+    selection_keys(data, {"schema_version", "shared", "selections", "source_stages"}, str(path))
+    if type(data["schema_version"]) is not int or data["schema_version"] != 1:
+        raise ValueError("Unsupported selection schema version")
+    selections, stages = data["selections"], data["source_stages"]
+    if not isinstance(selections, dict) or not selections or not isinstance(stages, dict):
+        raise ValueError("Missing or malformed selections/source_stages")
+    members = {entry["id"]: entry for entry in entries}
+    if selection_id(data["shared"]) not in selections:
+        raise ValueError("Shared core selection is missing")
+    fields = {"source", "members", "requires", "resources", "provenance",
+              "inputs", "outputs", "example", "limitations"}
+    for name, record in selections.items():
+        selection_id(name)
+        selection_keys(record, fields, name)
+        selection_path(root, record["source"])
+        for field in ("members", "requires", "resources", "provenance", "inputs", "outputs", "limitations"):
+            selection_strings(record[field], f"{name}.{field}",
+                              nonempty=field in ("members", "inputs", "outputs", "limitations"))
+        if any(member not in members for member in record["members"]):
+            raise ValueError(f"{name}: unknown canonical member ID (aliases are not member IDs)")
+        if any(dependency not in selections for dependency in record["requires"]):
+            raise ValueError(f"{name}: unknown selection dependency")
+        for relative in record["resources"]:
+            selection_path(root, relative)
+        selection_keys(record["example"], {"path", "heading"}, f"{name}.example")
+        selection_path(root, record["example"]["path"])
+        heading = text_field(record["example"], "heading", path)
+        if not re.fullmatch(r"#{1,6} [^\r\n]+", heading):
+            raise ValueError(f"{name}: example needs an exact Markdown heading reference")
+    order = selection_order(selections)
+    for member, stage in stages.items():
+        if member not in members:
+            raise ValueError("Unknown source-stage member")
+        selection_keys(stage, {"status", "evidence"}, member)
+        evidence = stage["evidence"]
+        if stage["status"] == "unknown" and evidence is None:
+            continue
+        if stage["status"] != "staged":
+            raise ValueError("Only unknown or source-evidenced staged status is supported")
+        selection_keys(evidence, {"path", "description_sha256", "quote"}, member)
+        description = members[member]["description"]
+        quote = text_field(evidence, "quote", path)
+        if (evidence["path"] != members[member]["path"] or quote not in description
+                or hashlib.sha256(description.encode("utf-8")).hexdigest() != evidence["description_sha256"]):
+            raise ValueError(f"{member}: missing or changed source-stage evidence")
+
+    registry_path = selection_path(root, "install/upstream-sources.yaml")
+    registry = load_text(registry_path.read_text(encoding="utf-8-sig"))
+    if not isinstance(registry, dict) or not isinstance(registry.get("bundled_materials"), dict):
+        raise ValueError("Missing bundled-material provenance registry")
+    materials = registry["bundled_materials"]
+    for name, material in materials.items():
+        selection_id(name)
+        if not isinstance(material, dict):
+            raise ValueError(f"{name}: malformed provenance record")
+        for field in ("source", "relationship", "license", "notice", "attribution", "modifications"):
+            text_field(material, field, registry_path)
+        if "import_commit" not in material or not (
+            material["import_commit"] is None or isinstance(material["import_commit"], str)
+            and re.fullmatch(r"[0-9a-f]{40}", material["import_commit"])
+        ):
+            raise ValueError(f"{name}: import revision must be recorded or explicitly unknown")
+        for relative in selection_strings(material.get("local_paths"), f"{name}.local_paths", nonempty=True):
+            selection_path(root, relative, directory=True)
+        for field in ("notice", "attribution"):
+            if selection_path(root, material[field]).stat().st_size == 0:
+                raise ValueError(f"{name}: empty {field}")
+    for name, record in selections.items():
+        if any(reference not in materials for reference in record["provenance"]):
+            raise ValueError(f"{name}: unknown provenance record")
+        selected_paths = record["resources"] + [record["source"], record["example"]["path"]] + [
+            members[member]["path"] for member in record["members"]
+        ]
+        for reference, material in materials.items():
+            if any(path == local or path.startswith(local + "/")
+                   for path in selected_paths for local in material["local_paths"]):
+                if reference not in record["provenance"]:
+                    raise ValueError(f"{name}: missing required provenance reference {reference}")
+    return data, materials, order
+
+
+def selection_metadata(root: Path, requested: Optional[list[str]] = None, *, kind: str = "all",
+                       query: Optional[str] = None, family: Optional[str] = None,
+                       name: Optional[str] = None, category: Optional[str] = None,
+                       voice: Optional[str] = None, cli: Optional[str] = None) -> dict:
+    if kind not in ("skill", "agent", "all"):
+        raise ValueError("kind must be skill, agent or all")
+    if requested is None and (kind != "all" or any(
+        value is not None for value in (query, family, name, category, voice, cli)
+    )):
+        raise ValueError("Selection listing cannot be filtered; select a projection first")
+    inventory = metadata(root, kind="all")
+    root = Path(inventory["source_root"])
+    entries = {entry["id"]: entry for entry in inventory["entries"]}
+    data, materials, order = selection_data(root, inventory["entries"])
+    definitions = data["selections"]
+    if requested is None:
+        return {
+            "schema_version": 1, "source_root": str(root), "evidence_level": "source-selection-metadata",
+            "executed": False, "shared": data["shared"],
+            "selections": [{"id": key, **definitions[key]} for key in sorted(definitions)],
+            "source_stages": [{"id": key, **data["source_stages"][key]} for key in sorted(data["source_stages"])],
+        }
+    selection_strings(requested, "requested selections", nonempty=True)
+    for selected in requested:
+        if selection_id(selected) not in definitions:
+            raise ValueError(f"Unknown selection: {selected}")
+    chosen = set(requested) | {data["shared"]}
+    pending = list(chosen)
+    while pending:
+        for dependency in definitions[pending.pop()]["requires"]:
+            if dependency not in chosen:
+                chosen.add(dependency)
+                pending.append(dependency)
+    reasons: dict[str, set[str]] = {key: set() for key in chosen}
+    for key in requested:
+        reasons[key].add("requested")
+    reasons[data["shared"]].add("shared")
+    member_reasons: dict[str, set[str]] = {}
+    resources: dict[str, set[str]] = {}
+    provenance: dict[str, set[str]] = {}
+
+    def resource(relative: str, reason: str) -> None:
+        selection_path(root, relative)
+        resources.setdefault(relative, set()).add(reason)
+
+    for key in sorted(chosen):
+        record = definitions[key]
+        for dependency in record["requires"]:
+            reasons[dependency].add(f"required-by:{key}")
+        resource(record["source"], f"source-of:{key}")
+        resource(record["example"]["path"], f"example-of:{key}")
+        for relative in record["resources"]:
+            resource(relative, f"resource-of:{key}")
+        for member in record["members"]:
+            member_reasons.setdefault(member, set()).add(f"member-of:{key}")
+            resource(entries[member]["path"], f"member:{member}")
+        for reference in record["provenance"]:
+            provenance.setdefault(reference, set()).add(f"provenance-of:{key}")
+            for field in ("notice", "attribution"):
+                resource(materials[reference][field], f"{field}:{reference}")
+    selected_entries = [entries[member] for member in member_reasons
+                        if kind == "all" or entries[member]["kind"] == kind]
+    surface = shared_reader("client_capabilities").surface_id(
+        load_registry(source_path(root, "lib/cli-tiers.yaml")), cli
+    ) if cli is not None else None
+    filtered = filter_entries(selected_entries, query=query, family=family, name=name,
+                              category=category, voice=voice, surface=surface)
+    inventory.update(total=len(selected_entries), matched=len(filtered), entries=filtered)
+    inventory["selection"] = {
+        "requested": sorted(requested), "order": [key for key in order if key in chosen],
+        "definitions": [{"id": key, **definitions[key]} for key in order if key in chosen],
+        "reasons": {key: sorted(reasons[key]) for key in sorted(reasons)},
+        "members": [{"id": key, "reasons": sorted(member_reasons[key])} for key in sorted(member_reasons)],
+        "resources": [{"path": key, "reasons": sorted(resources[key])} for key in sorted(resources)],
+        "provenance": [{
+            "id": key, "reasons": sorted(provenance[key]),
+            **{field: materials[key][field] for field in (
+                "source", "import_commit", "relationship", "license", "notice", "attribution", "modifications",
+            )},
+        } for key in sorted(provenance)],
+        "source_stages": [{"id": key, **data["source_stages"].get(key, {"status": "unknown", "evidence": None})}
+                          for key in sorted(member_reasons)],
     }
+    return inventory
 
 
 def main() -> int:
@@ -322,18 +553,27 @@ def main() -> int:
     parser.add_argument("--category", help="exact display category; not a capability package")
     parser.add_argument("--voice", help="exact declared voice")
     parser.add_argument("--cli", help="declared surface hint; registry aliases do not imply live support")
+    selection_mode = parser.add_mutually_exclusive_group()
+    selection_mode.add_argument("--selection", action="append", help="literal source selection ID; repeat for a union")
+    selection_mode.add_argument("--list-selections", action="store_true", help="list source selection definitions and stage evidence")
     args = parser.parse_args()
     filters = {field: getattr(args, field) for field in ("query", "family", "name", "category", "voice", "cli")}
-    selected = args.source_root is not None or args.kind is not None or any(
+    selected = (args.source_root is not None or args.kind is not None
+                or args.selection is not None or args.list_selections) or any(
         value is not None for value in filters.values()
     )
     if not args.json and selected:
         parser.error("metadata selectors require --json; generation/check cannot be filtered or redirected")
+    if args.list_selections and (args.kind is not None or any(value is not None for value in filters.values())):
+        parser.error("--list-selections cannot be filtered; use --selection for a filtered projection")
     root = SOURCE_ROOT
     try:
         if args.json:
-            result = metadata(args.source_root if args.source_root is not None else root,
-                              kind=args.kind or "skill", **filters)
+            source = args.source_root if args.source_root is not None else root
+            if args.selection is not None or args.list_selections:
+                result = selection_metadata(source, args.selection, kind=args.kind or "all", **filters)
+            else:
+                result = metadata(source, kind=args.kind or "skill", **filters)
             sys.stdout.reconfigure(newline="\n")
             print(json.dumps(result, ensure_ascii=True, separators=(",", ":"), allow_nan=False))
             return 0

@@ -1,0 +1,106 @@
+{
+  "schema_version": 1,
+  "shared": "core",
+  "selections": {
+    "core": {
+      "source": "scaffolding/01-foundation/SESSION-PROTOCOL.md",
+      "members": [
+        "skill:cycle",
+        "skill:sense",
+        "skill:scope",
+        "skill:define",
+        "skill:discover",
+        "skill:plan",
+        "skill:build",
+        "skill:review",
+        "skill:ship",
+        "skill:capture",
+        "skill:resume",
+        "skill:compliance-gate"
+      ],
+      "requires": [],
+      "resources": [
+        "SECURITY.md",
+        "shims/universal/ADAPTER.md",
+        "lib/cli-tiers.yaml",
+        "docs/concepts/pack-resolver.md",
+        "skills/review/references/evidence.md"
+      ],
+      "provenance": [],
+      "inputs": [
+        "Existing task authority, selected work map, actual host tools and permissions.",
+        "Company policy only through the explicitly selected P07 profile contract; never inferred from a role category."
+      ],
+      "outputs": [
+        "The unchanged nine-phase lifecycle, with resume as a utility.",
+        "References to the existing P05 review, P06 host and P07 profile contracts, not a new execution or policy interpretation."
+      ],
+      "example": {
+        "path": "skills/review/references/evidence.md",
+        "heading": "## Prepare the selected context"
+      },
+      "limitations": [
+        "Shared references do not mean every phase or prompt is loaded or executed for each task.",
+        "Selection cannot remove required controls, grant permission, switch profiles or establish independent review.",
+        "Source resource closure is not installed dependency closure or a live host acceptance result."
+      ]
+    },
+    "demo-script": {
+      "source": "agents/customer/DemoNarrativeArc.md",
+      "members": [
+        "agent:DemoNarrativeArc",
+        "agent:DemoNarratorJunior",
+        "agent:SlideNarrationCritic"
+      ],
+      "requires": ["core"],
+      "resources": [],
+      "provenance": [],
+      "inputs": [
+        "Approved brief, audience, duration, claims and supplied synthetic screens or fallback assets.",
+        "An existing arc/script for Critique mode; no script is required for DemoNarrativeArc Plan mode."
+      ],
+      "outputs": [
+        "DemoNarrativeArc Plan mode returns arc-DRAFT.md with scene goals, evidence, time and transitions.",
+        "DemoNarratorJunior consumes the approved arc and returns narration, pacing and honest recovery cues.",
+        "DemoNarrativeArc Critique mode and SlideNarrationCritic return findings without rewriting; a separately attributable context is required for independent critique.",
+        "The authorized caller persists draft artifacts; this source query does not create them."
+      ],
+      "example": {
+        "path": "agents/customer/DemoNarrativeArc.md",
+        "heading": "### Blank-brief worked decision (synthetic)"
+      },
+      "limitations": [
+        "Accepted role content is not native registration, an executed workflow, rehearsal or independent critique.",
+        "No PPT production, new format renderer, customer facts, sending or publication is included.",
+        "Slide content/visual production is a separate authorized handoff, not an automatic dependency of narration.",
+        "Unknown maturity remains unknown; absent delegation retains serial/manual guidance without claiming independence."
+      ]
+    }
+  },
+  "source_stages": {
+    "skill:generate-pdf": {
+      "status": "staged",
+      "evidence": {
+        "path": "skills/generate-pdf/SKILL.md",
+        "quote": "TEMPLATE ONLY",
+        "description_sha256": "a50d6d2420a5aff09b537e49419eb3b75c307b309693a739a9d3991077986195"
+      }
+    },
+    "skill:generate-visio": {
+      "status": "staged",
+      "evidence": {
+        "path": "skills/generate-visio/SKILL.md",
+        "quote": "TEMPLATE ONLY",
+        "description_sha256": "ebba5282558e2ccabf1eb5f7347468caeb4b2e2eebff35b9ad4a6cdcd29eaee9"
+      }
+    },
+    "skill:generate-xlsx": {
+      "status": "staged",
+      "evidence": {
+        "path": "skills/generate-xlsx/SKILL.md",
+        "quote": "TEMPLATE ONLY",
+        "description_sha256": "ddc93c749bfe099fed84468acdcd718cdb3eef1cd09aeb8cc57437784c9ab1b7"
+      }
+    }
+  }
+}

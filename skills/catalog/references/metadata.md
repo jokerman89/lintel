@@ -133,6 +133,10 @@ Without permitted helper execution, the existing trusted `skills/CATALOG.md` is 
 skills-only snapshot fallback. It does not supply agent metadata or live host evidence.
 Do not rebuild the inventory in model context by reading every canonical body.
 
+An explicit additive source-selection query is documented in [Source selections](selections.md).
+It reuses this inventory and parser; no selection leaves this JSON view and ordinary
+generation/check unchanged. Its descriptor is not required by the default operations.
+
 Optional installed selection, native wrapper/resource closure, provenance-notice
 distribution acceptance, welcome/status integration and final maturity/version decisions
 remain separate P13/coordinator gates. The source metadata tests do not establish those
