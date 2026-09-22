@@ -19,6 +19,9 @@ JOINED_RUNTIME_RESOURCES = (
     "bin/li-review-evidence.py", "bin/li-review-log", "bin/li-review-read",
     "bin/li-domain-result.py", "lib/domain_result.py", "lib/domain-result-schema.json",
     "lib/state.sh", "lib/cycle-modes.sh", "lib/cycle-footer.sh", "lib/workflow.sh",
+    "bin/li-catalog.py", "skills/catalog/references/metadata.md",
+    "skills/browse/scripts/chromium.mjs", "skills/scrape/scripts/extract.mjs",
+    "lib/url_policy.py", "config/aliases.yaml", "install/upstream-sources.yaml",
     ".claude-plugin/plugin.json",
 )
 spec = importlib.util.spec_from_file_location("li_copilot", ROOT / "bin/li-copilot.py")
@@ -75,6 +78,14 @@ class CopilotKit(unittest.TestCase):
         root = target or self.target
         return {p.relative_to(root).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
                 for p in root.rglob("*") if p.is_file() and not p.is_symlink()}
+
+    def test_browser_modules_use_portable_text_bytes(self):
+        module = self.target / "browser.mjs"
+        module.write_bytes(b"export const fixture = 'ok';\r\n")
+        self.assertEqual(adapter.source_bytes(module), b"export const fixture = 'ok';\n")
+        binary = self.target / "sample.png"
+        binary.write_bytes(b"\x89PNG\r\n\x1a\n")
+        self.assertEqual(adapter.source_bytes(binary), b"\x89PNG\r\n\x1a\n")
 
     def test_fresh_portable_clone_and_idempotence(self):
         self.run_cli()

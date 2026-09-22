@@ -368,11 +368,18 @@ Acceptance: actual artifacts and mandatory design checks, not only populated sch
 Acceptance: missing renderer remains unfinished; authored outputs preserve intended reasoning.
 
 ### A16 Real browser operations (P11; R03/R07)
-- [ ] A16.1 Share browse/cookies/scrape/preview/print operations and session ownership.
-- [ ] A16.2 Honor actual host browser capabilities and A01 URL boundaries.
-- [ ] A16.3 Exercise allowed reading, a UI interaction and local print output.
-- [ ] A16.4 Preserve login surface choice and distinguish profile files from installed engine.
+- [x] A16.1 Share browse/cookies/scrape/preview/print operations and session ownership.
+- [x] A16.2 Honor actual host browser capabilities and A01 URL boundaries.
+- [x] A16.3 Exercise allowed reading, a UI interaction and local print output.
+- [x] A16.4 Preserve login surface choice and distinguish profile files from installed engine.
 Acceptance: browser evidence identifies actual tool, session and resulting artifact.
+Evidence: [final independent browser review](reviews/P11-browser-final-d3b5569.md)
+accepts A16.1-.4 at `d3b5569`, report `3049811`, integrated with both histories
+in `7cb3812`. All eleven product files and the full report match reviewed blobs.
+Joined four shared and 30 Node checks pass. Original eight native headless cases,
+screenshots and two-page print evidence remain attributed to `3115790`; Q1/Q2
+parsing repairs have independent bounded verification, not a fabricated native
+rerun. Headed login, other hosts, PDF raster and full P11/A14 remain separate.
 
 ### A17 Portable, useful agent roles (P09; R06)
 - [ ] A17.1 Map all 69 inventoried roles to retained inputs, decisions, outputs and verification.

@@ -33,10 +33,11 @@ Current actionable checkpoints supersede the older chronological entries below:
   closes it but finds canonical stranded redirects falsely reported current.
   `b8f0cf7` releases the finite F04 class to the original owner and lets SAME
   reviewer `1578dfd8` finish the unrelated original 18 adapter/profile controls.
-- P11: numeric product `14b419c` / `68a6084` closes Q1 but independent `4cf84d0`
-  / `44ba13e` finds Q2 combinatorial whitespace matching. `b8f0cf7` releases a
-  deterministic parser/test correction. Original headless SPEC remains valid.
-  SAME reviewer `1f655ca9` owns recheck; A14 work proceeds separately.
+- P11: deterministic parser `d3b5569` / `336513e` passes complete A16 component
+  SPEC/QUALITY in `3049811`, integrated `7cb3812`. All eleven product/report
+  identities match; joined four shared and 30 Node checks pass. Original native
+  evidence stays attributed to `3115790`. Direct design source `f72f316` /
+  `c91e83d` is frozen; A14.5 needs its separately bounded native observations.
 - P12: defaults repair `32dac88` / `b270475` passes F01 recheck in `02e8028`
   / `984bb72`. SAME reviewer `31c39265-13e5-4057-9e78-49bf658749a5` also accepts
   actual six-slide visual observation. `69f2ef6` releases a distinct complete
@@ -120,6 +121,14 @@ recovery session's `files/verification/closure-red` and `closure-green`.
 
 No original parent checkbox has been closed merely by recovering these candidates.
 Final design/module/format/selection integration, P04 binding, P14 and delivery remain.
+
+The accepted A16 original leaves now close from independent review plus exact
+integration and joined checks, bringing original accepted items to 56/113.
+Coordinator source closure additionally includes the exact public alias and
+provenance data files, catalog/browser helpers and `.mjs` LF normalization.
+The new module-text test was RED before correction; it and the complete
+28-resource no-write source-refusal method pass. Actual installed/default
+consumer acceptance still waits for P10 and is not claimed from preflight.
 
 ## Durable state
 
