@@ -34,7 +34,9 @@ Implements frontend components from a design spec or design doc. Honors: existin
 
 ## Workflow
 
-1. **Read design spec.** Design doc, mockup, or existing component to refactor.
+1. **Read design spec.** If supplied, consume the actual
+   `frontend-design-spec.json` and its version, brief and tokens. Report missing or
+   conflicting decisions to FrontendArchitect rather than inventing a second contract.
 2. **Read context.** Project CLAUDE.md design conventions, existing component patterns, design tokens.
 3. **Build:**
    - Use existing tokens, not new hardcoded values
@@ -43,11 +45,11 @@ Implements frontend components from a design spec or design doc. Honors: existin
    - Keyboard navigation
    - Color contrast WCAG AA
    - Responsive breakpoints per project convention
-4. **Performance audit:**
-   - Memoize expensive computations
-   - Lazy-load heavy components
-   - Virtualize long lists
-5. **Verify.** Run any existing component tests; smoke-test in dev server if applicable.
+4. **Performance audit:** profile before memoizing; weigh lazy-loading latency and
+   virtualization's focus/reading-order costs against the actual workload.
+5. **Verify.** Run existing component checks and, with available browser operations,
+   exercise loaded/empty/error states, keyboard use and responsive layouts. Identify
+   browser, viewport and artifact revision; absent rendered checks stay unverified.
 
 ## Report format
 
@@ -62,8 +64,8 @@ FrontendBuilder: <component>
 ## Accessibility
 - Semantic: <article> with <h2>, <button> for action
 - ARIA: aria-label on icon-only button, role="status" on async loader
-- Contrast: emerald-700 on slate-50 = 7.1:1 (AA pass)
-- Keyboard: tab order verified, enter/space activate
+- Contrast: computed foreground/background pair and text size recorded, not copied from a palette label
+- Keyboard: actual tab/activation/dialog-focus evidence, or explicitly unverified
 
 ## Performance
 - React.memo on CaseCard (props rarely change)
@@ -72,7 +74,8 @@ FrontendBuilder: <component>
 
 ## Tests
 - Existing CaseCard.test.tsx still passes
-- Added 2 new tests for accessibility (axe-core via @testing-library/jest-dom)
+- Accessibility: actual existing axe-core integration if available; jest-dom matchers
+  are not an axe-core integration and static assertions do not prove screen-reader behavior
 
 ## Verdict
 Ready. Recommend /design-review --routes /portal/cases for visual sign-off.

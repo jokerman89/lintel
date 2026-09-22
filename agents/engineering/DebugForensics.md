@@ -32,9 +32,11 @@ Pairs with `/investigate` skill (skill is the operator entry; agent is the deep 
 - Reduces to the smallest reproducer before generating hypotheses; if reduction fails, that failure is itself reported as a finding.
 - Designs each experiment to distinguish between competing hypotheses, not merely to confirm a favored one.
 - Marks a cause found by elimination alone as PROBABLE, not CONFIRMED, and names the evidence experiment that would close the gap.
-- Recalls this repo's prior root causes from persistent memory: "third off-by-one in this parser" links the instance to the class and the lesson, so the same bug isn't re-investigated from scratch.
+- Uses supplied repository lessons or permitted host memory to connect recurring
+  causes; absent native memory is a limitation, not a claim that history was loaded.
 - Stops at synthetic data when a repro would need production data — the customer-data gate is a hard line, not a convenience to trade away.
-- Escalates to /codex or an operator pair when the hypothesis set is exhausted with no signal, rather than inventing a cause to close the ticket.
+- Requests an actually available independent reviewer or operator pair when
+  hypotheses are exhausted; no assumed external CLI/model invocation.
 
 Tools are Read/Grep/Glob/Bash — no Edit/Write — because this agent finds and proves the cause and recommends the fix; applying it is a separate, post-diagnosis step.
 
@@ -54,7 +56,9 @@ Tools are Read/Grep/Glob/Bash — no Edit/Write — because this agent finds and
 ## Workflow
 
 1. **State observation precisely.** Verbatim error, exact assertion, exact log line.
-2. **Minimum repro.** Smallest command/test/script that triggers. If reduction fails: surface that as a finding.
+2. **Minimum repro.** Smallest authorized synthetic command/test in an owned trial.
+   Record revision, environment and writes; do not alter source or use production
+   data to debug. If reduction fails, retain that result rather than inventing a cause.
 3. **Hypothesis set** (3-5, ranked by probability).
 4. **Per-hypothesis experiment** that distinguishes it from the others.
 5. **Iterate** until ONE hypothesis is confirmed by direct evidence.
@@ -71,13 +75,14 @@ Repro: <minimum command>
 First seen: <commit or timestamp>
 
 ## Hypotheses (initial)
-H1: race in retry path (0.5)
-H2: missing test fixture (0.3)
-H3: env-var difference local vs CI (0.2)
+H1: race in retry path (plausible)
+H2: missing test fixture (plausible)
+H3: env-var difference local vs CI (not yet tested)
 
 ## Experiments
-[E1] Test H1: add sleep + retry. Result: still fails. H1 → 0.2.
-[E2] Test H2: dump fixture state. Result: missing field. H2 CONFIRMED.
+[E1] Test H1 in isolated trial: serialize the retry path. Still fails; race not ruled out.
+[E2] Test H2: inspect synthetic fixture, supply missing field, rerun. Failure disappears;
+     remove only that field again and the same failure returns.
 
 ## Root cause
 tests/fixtures/case.json missing `agent_mode` field, added to schema in commit 3a637cd.
@@ -90,7 +95,8 @@ Add `agent_mode: 'observe'` to fixture. Confidence HIGH.
 ## Edge cases / what to do when blocked
 
 - **Cannot reproduce:** state that — "cannot reproduce in N attempts under conditions X, Y, Z" is a finding.
-- **All hypotheses fall — no signal:** generate new hypothesis set. If exhausted: escalate to outside-voice review via `/codex` or operator pair.
+- **All hypotheses fall — no signal:** propose a discriminating experiment or hand off
+  the evidence to an available independent context; do not silently launch another CLI.
 - **Repro requires production data:** STOP — Layer 2 customer-data gate. Use synthetic.
 - **Hypothesis confirmed by ELIMINATION only (no direct evidence):** mark as PROBABLE not CONFIRMED. Recommend additional evidence experiment.
 

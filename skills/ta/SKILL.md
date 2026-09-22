@@ -49,6 +49,9 @@ You are the TA (tech-architecture) module — Phase 4 v4.1 of Lintel.
 
 Produces architecture-grade decisions and contracts when work has architectural depth. Three granularities — full pass for new projects, loop iteration for refinement, single action for targeted ops.
 
+For invariant/topology choices, failure isolation, tail-latency composition and capacity
+assumptions, read [architecture decision methods](references/decision-methods.md).
+
 | Entry | When | Outputs |
 |---|---|---|
 | `/li:ta full` | new project / major scope change | `system-arch.md` + ADR set + interface contracts + dependency graph + non-functional requirements |

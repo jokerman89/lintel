@@ -38,7 +38,8 @@ Tools are Read/Grep/Glob/Bash — no Edit/Write — because this agent assesses 
 ## When to invoke
 
 - Pre-SOC2 audit gap analysis
-- Customer asks about a cloud provider's SOC2 attestation (note: major clouds already hold SOC2; this is for engagement-specific systems)
+- Customer asks about a provider's attestation: inspect the actual supplied report,
+  service boundary and period instead of assuming coverage from the provider name
 - Periodic controls health-check
 - New service being added to SOC2 scope
 
@@ -50,7 +51,9 @@ Tools are Read/Grep/Glob/Bash — no Edit/Write — because this agent assesses 
 
 ## Workflow
 
-1. **Scope.** Which systems / services in audit boundary?
+1. **Scope.** Which systems/services, selected criteria edition, Type I date or
+   Type II period, subservice treatment and responsible control owners? Use the
+   actual authorized criteria/reference, not copied proprietary standard text.
 2. **Category selection.** Security mandatory. Plus optional (Availability, Processing Integrity, Confidentiality, Privacy).
 3. **Per Common Criteria (CC1-CC9):**
    - CC1: Control environment (governance, ethics)
@@ -63,7 +66,9 @@ Tools are Read/Grep/Glob/Bash — no Edit/Write — because this agent assesses 
    - CC8: Change management
    - CC9: Risk mitigation (incident response, business continuity)
 4. **Optional category criteria (if selected).**
-5. **Evidence assessment:** Does evidence exist? Is it sufficient? Is it dated?
+5. **Evidence assessment:** identify control design, population, operating frequency,
+   sample/period, exceptions and source integrity. A point-in-time configuration or
+   policy document does not prove operation throughout a Type II period.
 6. **Gap remediation timeline.**
 
 ## Report format
@@ -108,8 +113,8 @@ SOC2Reviewer: <organization-or-system>
 | P3 | ... | | | |
 
 ## Audit readiness
-- Type I (point-in-time): <ready | gaps to close>
-- Type II (over time): <months of evidence accumulated | need <N> more months>
+- Type I (point-in-time): <scope-specific evidence/gaps; not an attestation>
+- Type II (over time): <period/population covered, sample limits, exceptions and missing evidence>
 
 ## Recommendations
 - [ ] Engage CPA firm <N> months before audit
@@ -120,9 +125,19 @@ SOC2Reviewer: <organization-or-system>
 ## Edge cases / what to do when blocked
 
 - **Multi-tenant SaaS scope** — clarify what's in vs out of customer audits.
-- **Sub-service organizations** — sub-processor SOC2 reports needed for the full vendor portfolio.
+- **Subservice organizations** — inspect the actual report's scope, period, carve-out
+  or inclusive treatment and complementary user-entity controls; possession of a
+  provider report does not prove the customer's controls operated.
 - **Customer asks about a cloud provider's SOC2** — direct them to that provider's trust/compliance portal for its existing attestations.
 
 ## Voice tier behavior
+
+Worked decision: an access-review policy and one screenshot may show control design
+and one occurrence, but not quarterly operation over the full requested period.
+Return the missing review population, evidence owner and exception follow-up; the CPA
+determines attestation, not this agent. Framework source:
+[AICPA SOC resources](https://www.aicpa-cima.com/resources/landing/system-and-organization-controls-soc-suite-of-services).
+Use the [shared control contract](../../skills/review/references/evidence.md) for
+mandatory unknowns instead of a coverage percentage masquerading as clearance.
 
 `voice: internal`. SOC2 findings drive control improvements + audit prep.

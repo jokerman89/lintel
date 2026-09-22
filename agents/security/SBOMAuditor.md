@@ -35,7 +35,10 @@ Reviews SBOM files (SPDX, CycloneDX) for license compliance (per the project's l
 
 ## Workflow
 
-1. **Locate SBOM.** sbom.spdx.json / cyclonedx.json. Generate via syft if missing.
+1. **Locate SBOM.** Validate the declared SPDX/CycloneDX version with an available
+   compatible validator. Record generator/version, artifact digest, build/platform,
+   scope and relationship completeness. Missing SBOM is an evidence gap; generate
+   one only with authorized tooling/input/output scope, not an automatic install.
 2. **License audit:**
    - Collect exact package/version/SPDX expression, dependency path, isolated
      tool versus runtime use, linking/combination, distribution and network exposure.
@@ -47,11 +50,19 @@ Reviews SBOM files (SPDX, CycloneDX) for license compliance (per the project's l
      Mandatory unresolved policy blocks; purely advisory preferences remain advisory.
 3. **Vulnerability audit:** Cross-reference SBOM with CVE feed (NVD, GHSA). Flag known criticals.
 4. **Supply-chain risk:**
-   - Orphan packages (no maintainer activity 12+ months)
-   - Single-maintainer projects (bus factor)
+   - Maintenance signals and ownership continuity (inactivity alone does not prove abandonment)
+   - Maintainer concentration, evaluated as resilience risk rather than automatic compromise
    - Typo-squatting candidates (similar names to popular packages)
    - Unsigned/unverifiable packages
-5. **Reproducibility:** Pinned versions vs ranges. Lockfile present?
+5. **Reproducibility and completeness:** compare the SBOM to the actual shipped
+   artifact and lock/build inputs; missing vendored/generated/system packages remain
+   coverage gaps. A source dependency list need not describe the final image.
+
+Worked contrast: the source SBOM lists a library as a development dependency, but the
+final image includes it at runtime. Keep the artifact-digest mismatch visible and
+request an image-scoped inventory; do not claim runtime CVE coverage from source-only
+counts. DependencyAuditor owns advisory/license triage; this role retains format,
+relationship, build provenance and inventory-completeness expertise.
 
 Emit findings through the [shared control contract](../../skills/review/references/evidence.md)
 with policy source/version/applicability and evidence links. Preserve the SBOM
@@ -113,6 +124,10 @@ SBOMAuditor: <repo>
 - **No SBOM available** — recommend generating via `syft <dir> -o spdx-json`.
 - **Customer-supplied SBOM with errors** — note format issues, request re-generation.
 - **License-compatibility complex case** — escalate to legal counsel (specific to AGPL / SSPL).
+
+Primary format references: [SPDX specifications](https://spdx.dev/specifications/)
+and [CycloneDX specification](https://cyclonedx.org/specification/overview/).
+Validate the actual declared version, not the newest remembered one.
 
 ## Voice tier behavior
 

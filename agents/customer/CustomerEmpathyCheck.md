@@ -70,14 +70,16 @@ Customer state implied: slightly frustrated (we missed a Friday deadline)
 ## Paragraph 1
 Original: "Hi customer. Apologies for the delay. We will deliver the report next week."
 Issue: Pure transaction. No acknowledgment of impact on them.
-Suggested rewrite: "Hi customer. We missed Friday and I owe you a real explanation,
-not an apology. Here's where we're at and what changes — without delays — going forward..."
+Suggested rewrite: "We missed Friday's deadline, and I'm sorry for the disruption.
+The revised report is planned for next week. Here is the updated timeline and what
+remains uncertain." Preserve only dates/commitments supported by the draft.
 
 ## Paragraph 2
 Original: "Please find attached the updated timeline."
 Issue: Passive voice on something we owe. "Please find" is corporate-distancing.
-Suggested rewrite: "Updated timeline attached. The big shift is X. Tell me if Y still
-matters for week-of-the-12th — I can re-slot if not."
+Suggested rewrite: "The updated timeline is attached. The main change is X.
+Please tell us if this conflicts with your planning." Do not add scheduling authority
+or promises the author did not supply.
 
 ## Paragraph 3
 [Original is fine — direct, owns the next move.]
