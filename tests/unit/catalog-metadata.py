@@ -441,6 +441,112 @@ class CatalogMetadata(unittest.TestCase):
         self.assertNotIn("Read all `skills/*/SKILL.md`", router)
         self.assertNotIn("~/.lintel/telemetry/", router)
 
+    def agent(self, folder, name, aliases=()):
+        return self.write(f"agents/{folder}/role.md", (
+            f"---\nname: {name}\ncategory: {folder}\ndescription: Synthetic {name} role\n"
+            "voice: internal\ncli_support: [codex]\n"
+            f"deprecated_aliases: {json.dumps(list(aliases))}\n---\nAGENT BODY MUST NOT ESCAPE\n"
+        ))
+
+    def assert_agent_collision_refuses(self, name):
+        for kind in ("agent", "all"):
+            for selector in ((), ("--name=" + name,), ("--query=no-such-metadata-value",)):
+                with self.subTest(kind=kind, selector=selector):
+                    result = self.assert_failed_without_writes("--json", "--kind=" + kind, *selector)
+                    self.assertIn(b"identity", result.stderr)
+
+    def test_agent_alias_name_collisions_refuse_before_filtering(self):
+        for alias in ("Beta", "bETA"):
+            self.agent("first", "Alpha", [alias])
+            self.agent("last", "Beta")
+            with self.subTest(alias=alias):
+                self.assert_agent_collision_refuses("Beta")
+        self.agent("first", "Alpha")
+        self.agent("last", "Beta", ["ALPHA"])
+        self.assert_agent_collision_refuses("Alpha")
+
+    def test_agent_alias_alias_collisions_refuse_before_filtering(self):
+        for alias in ("Shared", "shared"):
+            self.agent("first", "Alpha", ["Shared"])
+            self.agent("last", "Beta", [alias])
+            with self.subTest(alias=alias):
+                self.assert_agent_collision_refuses("shared")
+
+    def test_agent_self_alias_collisions_refuse_before_filtering(self):
+        for alias in ("Alpha", "aLPHA"):
+            self.agent("first", "Alpha", [alias])
+            with self.subTest(alias=alias):
+                self.assert_agent_collision_refuses("Alpha")
+
+    def test_agent_duplicate_canonical_names_remain_invalid(self):
+        for name in ("Alpha", "aLPHA"):
+            self.agent("first", "Alpha")
+            self.agent("last", name)
+            with self.subTest(name=name):
+                self.assert_agent_collision_refuses("Alpha")
+
+    def test_skill_and_agent_identity_namespaces_remain_distinct(self):
+        self.skill("alpha", extra="deprecated_aliases: [Shared, Analyst]\n")
+        self.agent("first", "Alpha", ["shared"])
+        before = files_snapshot(self.base)
+        for name in ("Alpha", "sHARED"):
+            result = self.run_cli("--json", "--kind=all", "--name=" + name)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            entries = json.loads(result.stdout)["entries"]
+            self.assertEqual([entry["id"] for entry in entries], ["agent:Alpha", "skill:alpha"])
+        alias = self.run_cli("--json", "--kind=agent", "--name=shared")
+        self.assertEqual(alias.returncode, 0, alias.stderr)
+        entry = json.loads(alias.stdout)["entries"][0]
+        self.assertEqual(entry["path"], "agents/first/role.md")
+        self.assertEqual(entry["aliases"], [
+            {"name": "shared", "source": "agents/first/role.md", "note": None},
+        ])
+        self.assertEqual(files_snapshot(self.base), before)
+
+    def test_generation_and_check_refuse_duplicate_canonical_skill_names(self):
+        tool = self.source / "bin" / "li-catalog.py"
+        tool.parent.mkdir()
+        shutil.copyfile(TOOL, tool)
+        result = self.run_cli(tool=tool, no_site=True, source=False)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        catalog = self.source / "skills" / "CATALOG.md"
+        good = catalog.read_bytes()
+        for name in ("alpha", "ALPHA"):
+            self.write("skills/duplicate/SKILL.md", (
+                f"---\nname: {name}\nlayer: another-layer\ndescription: Duplicate\n---\nBODY\n"
+            ))
+            for args in ((), ("--check",)):
+                catalog.write_bytes(good)
+                with self.subTest(name=name, args=args):
+                    refused = self.assert_failed_without_writes(
+                        *args, tool=tool, no_site=True, source=False,
+                    )
+                    self.assertIn(b"duplicate discovery identity", refused.stderr)
+                    self.assertEqual(catalog.read_bytes(), good)
+            with self.subTest(name=name, entry="generate"):
+                with self.assertRaisesRegex(ValueError, "duplicate discovery identity"):
+                    self.catalog.generate(self.source)
+
+    def test_check_refuses_previously_generated_ambiguous_catalog(self):
+        tool = self.source / "bin" / "li-catalog.py"
+        tool.parent.mkdir()
+        shutil.copyfile(TOOL, tool)
+        good = self.catalog.generate(self.source)
+        original = (self.source / "skills" / "alpha-tools" / "SKILL.md").read_text(encoding="utf-8")
+        for name in ("alpha", "ALPHA"):
+            self.write("skills/alpha-tools/SKILL.md", original.replace("name: alpha-tools", "name: " + name))
+            lines = good.splitlines()
+            row = next(line for line in lines if line.startswith("| [`/li:alpha-tools`]"))
+            lines.remove(row)
+            first_row = next(index for index, line in enumerate(lines) if line.startswith("| [`/li:alpha`]"))
+            lines.insert(first_row + (1 if name == "alpha" else 0), row.replace("/li:alpha-tools", "/li:" + name))
+            self.write("skills/CATALOG.md", "\n".join(lines) + "\n")
+            with self.subTest(name=name):
+                refused = self.assert_failed_without_writes(
+                    "--check", tool=tool, no_site=True, source=False,
+                )
+                self.assertIn(b"duplicate discovery identity", refused.stderr)
+
 
 if __name__ == "__main__":
     with isolated_environment():

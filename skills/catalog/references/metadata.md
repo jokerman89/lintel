@@ -58,6 +58,10 @@ strict loader rejects malformed metadata, duplicate keys, executable tags and YA
 anchors/aliases. The legacy Markdown renderer retains its three one-line scalar fields,
 ordering, Unicode, 120-character description truncation, pipe escaping and source links;
 empty, repeated or malformed required scalars fail before publication.
+Ordinary generation and `--check` also reject duplicate or case-equivalent canonical
+skill names across folders and layers, before opening or certifying a catalog. An
+already-generated ambiguous catalog cannot pass `--check`. This validation uses the same
+case-insensitive identity rule as metadata without adding a parser dependency.
 
 ## JSON contract
 
@@ -97,7 +101,12 @@ from agent frontmatter. Selection never moves or deletes canonical content.
 
 Central alias records take precedence over matching frontmatter aliases for the same
 target, retaining their migration note. Missing targets, collisions and ambiguous
-identities are errors. Recorded dates do not silently expire aliases. Notes may require
+identities are errors. Agent frontmatter aliases follow the same cross-record ownership
+rules: an alias may not match any canonical name (including its own) or another entry's
+alias, case-insensitively, anywhere in the agent inventory. Validation precedes every
+filter, including a query with no matches. Skill and agent namespaces remain distinct:
+the same spelling in those different kinds is allowed and retains separate IDs.
+Recorded dates do not silently expire aliases. Notes may require
 arguments or a sub-method: inspect the selected canonical body rather than inventing an
 executable rewrite from the alias spelling.
 

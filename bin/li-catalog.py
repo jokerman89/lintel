@@ -85,13 +85,22 @@ def scalar(frontmatter: str, field: str, path: Path) -> str:
     return value
 
 
+def register_identity(identities: set[str], kind: str, name: str, path: Path) -> None:
+    identity = f"{kind}:{name}".casefold()
+    if identity in identities:
+        raise ValueError(f"{path}: duplicate discovery identity")
+    identities.add(identity)
+
+
 def generate(root: Path) -> str:
     groups: dict[str, list[tuple[str, str, str]]] = {}
     root = root.resolve()
     files = source_files(root, "skill")
+    identities: set[str] = set()
     for path in files:
         fm = frontmatter(path)
         name = scalar(fm, "name", path)
+        register_identity(identities, "skill", name, path)
         layer = scalar(fm, "layer", path)
         description = scalar(fm, "description", path)
         if len(description) > 120:
@@ -182,43 +191,44 @@ def cli_hints(data: dict, registry: dict, path: Path) -> list[dict]:
     return result
 
 
-def skill_aliases(root: Path, entries: list[dict]) -> None:
-    skills = {entry["name"]: entry for entry in entries if entry["kind"] == "skill"}
-    skill_names = {name.casefold() for name in skills}
+def entry_aliases(root: Path, entries: list[dict], kind: str) -> None:
+    members = {entry["name"]: entry for entry in entries if entry["kind"] == kind}
+    canonical_names = {name.casefold() for name in members}
     owners = {}
 
     def add(name: str, target: str, source: str, note: Optional[str]) -> None:
         identifier(name, root / source)
-        if target not in skills or name.casefold() in skill_names:
-            raise ValueError(f"{source}: alias has a missing target or collides with a skill")
+        if target not in members or name.casefold() in canonical_names:
+            raise ValueError(f"{source}: alias has a missing target or collides with a {kind} identity")
         if name.casefold() in owners and owners[name.casefold()] != target:
-            raise ValueError(f"{source}: conflicting skill alias")
+            raise ValueError(f"{source}: conflicting {kind} alias identity")
         owners[name.casefold()] = target
-        aliases = skills[target]["aliases"]
+        aliases = members[target]["aliases"]
         aliases[:] = [alias for alias in aliases if alias["name"].casefold() != name.casefold()]
         aliases.append({"name": name, "source": source, "note": note})
 
-    for entry in skills.values():
+    for entry in members.values():
         declared = list(entry["aliases"])
         entry["aliases"] = []
         for alias in declared:
             add(alias, entry["name"], entry["path"], None)
-    path = source_path(root, "config/aliases.yaml")
-    data = load_text(path.read_text(encoding="utf-8-sig"))
-    if not isinstance(data, dict) or not isinstance(data.get("skill_aliases"), list):
-        raise ValueError(f"{path}: missing or invalid skill_aliases")
-    declared_names = set()
-    for alias in data["skill_aliases"]:
-        if not isinstance(alias, dict):
-            raise ValueError(f"{path}: invalid skill alias")
-        name = text_field(alias, "old", path)
-        target = text_field(alias, "new", path)
-        note = text_field(alias, "reason", path) if "reason" in alias else None
-        if name.casefold() in declared_names:
-            raise ValueError(f"{path}: duplicate skill alias")
-        declared_names.add(name.casefold())
-        add(name, target, "config/aliases.yaml", note)
-    for entry in skills.values():
+    if kind == "skill":
+        path = source_path(root, "config/aliases.yaml")
+        data = load_text(path.read_text(encoding="utf-8-sig"))
+        if not isinstance(data, dict) or not isinstance(data.get("skill_aliases"), list):
+            raise ValueError(f"{path}: missing or invalid skill_aliases")
+        declared_names = set()
+        for alias in data["skill_aliases"]:
+            if not isinstance(alias, dict):
+                raise ValueError(f"{path}: invalid skill alias")
+            name = text_field(alias, "old", path)
+            target = text_field(alias, "new", path)
+            note = text_field(alias, "reason", path) if "reason" in alias else None
+            if name.casefold() in declared_names:
+                raise ValueError(f"{path}: duplicate skill alias")
+            declared_names.add(name.casefold())
+            add(name, target, "config/aliases.yaml", note)
+    for entry in members.values():
         entry["aliases"].sort(key=lambda alias: alias["name"])
 
 
@@ -240,7 +250,8 @@ def metadata(root: Path, *, kind: str = "skill", query: Optional[str] = None,
     surface = shared_reader("client_capabilities").surface_id(registry, cli) if cli else None
     entries = []
     identities = set()
-    for selected_kind in (("skill", "agent") if kind == "all" else (kind,)):
+    kinds = ("skill", "agent") if kind == "all" else (kind,)
+    for selected_kind in kinds:
         for path in source_files(root, selected_kind):
             raw = frontmatter(path)
             try:
@@ -251,9 +262,7 @@ def metadata(root: Path, *, kind: str = "skill", query: Optional[str] = None,
                 raise ValueError(f"{path}: frontmatter must be a mapping")
             entry_name = identifier(text_field(data, "name", path), path)
             entry_id = selected_kind + ":" + entry_name
-            if entry_id.casefold() in identities:
-                raise ValueError(f"{path}: duplicate discovery identity")
-            identities.add(entry_id.casefold())
+            register_identity(identities, selected_kind, entry_name, path)
             aliases = data.get("deprecated_aliases", [])
             if (not isinstance(aliases, list) or any(not isinstance(alias, str) for alias in aliases)
                     or len(set(aliases)) != len(aliases)):
@@ -276,12 +285,8 @@ def metadata(root: Path, *, kind: str = "skill", query: Optional[str] = None,
                 "cli_support": cli_hints(data, registry, path),
                 "maturity": "unknown",
             })
-    if kind != "agent":
-        skill_aliases(root, entries)
-    for entry in entries:
-        if entry["kind"] == "agent":
-            entry["aliases"] = [{"name": alias, "source": entry["path"], "note": None}
-                                for alias in entry["aliases"]]
+    for selected_kind in kinds:
+        entry_aliases(root, entries, selected_kind)
     total = len(entries)
 
     def matches(entry: dict) -> bool:
