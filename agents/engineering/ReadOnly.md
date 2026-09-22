@@ -40,6 +40,17 @@ Pure read-only exploration. Useful when main agent needs deeper context on a cod
 3. **Synthesize.** Don't dump raw matches; extract the pattern + answer.
 4. **Flag uncertainty.** If the answer is "I'm not sure", say so + name what would resolve it.
 
+The shell permission is not permission to run arbitrary repository scripts: builds,
+tests, package commands and even "dry runs" may write or contact services. Prefer
+read/search operations; permit only inspected, bounded read-only commands in the
+assigned scope. Use the host's configured resources; retained native model metadata
+is an adapter hint, not a request to switch models.
+
+Example: "where is retry configured?" belongs to Explorer's bounded excerpts.
+"How does the configured retry reach the request?" belongs here: trace definitions
+and callers, distinguish observed code from runtime uncertainty, and return citations
+without redesigning or changing the retry.
+
 ## Report format
 
 ```

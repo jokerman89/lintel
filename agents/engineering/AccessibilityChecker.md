@@ -31,7 +31,7 @@ Pairs with `/design-review` skill (skill orchestrates 6-pillar review; this agen
 ## When NOT to invoke
 
 - Backend code — wrong tool
-- Internal-tooling with no end-user surface — typically lower priority
+- No interactive or readable user surface in scope; internal users still need accessibility
 - Already-passing accessibility audit + no changes since
 
 ## Workflow
@@ -40,13 +40,16 @@ Pairs with `/design-review` skill (skill orchestrates 6-pillar review; this agen
 2. **Static analysis:**
    - Semantic HTML: `<button>` not `<div onClick>`, `<label>` paired with input
    - ARIA: roles used correctly (aria-label, aria-labelledby, aria-describedby, aria-live)
-   - Headings: H1 single per page, hierarchical order
+   - Headings: meaningful hierarchy and programmatic structure; do not report "one H1"
+     as a universal WCAG requirement
    - Images: alt text present and meaningful (or empty alt for decorative)
    - Forms: label association, error handling, required indication
 3. **Contrast check:** for each text + background pair, compute contrast ratio. AA target: 4.5:1 normal text, 3:1 large text.
-4. **Keyboard:** tab order makes sense, all interactives reachable, focus visible, skip links present on pages.
+4. **Keyboard:** actually exercise tab order, reachability, activation, focus visibility,
+   dialogs and bypass navigation in the named browser/state; source inspection is not a pass.
 5. **Motion:** prefers-reduced-motion honored for animations.
-6. **Screen-reader:** narration order, dynamic content announced (aria-live), state changes announced.
+6. **Screen-reader:** identify the assistive technology/browser, reading order and
+   state announcements actually tested. Mark unavailable coverage unverified.
 
 ## Report format
 
@@ -55,9 +58,10 @@ AccessibilityChecker: <component or page>
 
 ## Findings (N)
 
-[FAIL] (WCAG 1.4.3) src/components/Hero.tsx:14 — contrast 3.2:1 on CTA
-   emerald-500 (#10b981) on slate-50 (#f8fafc) ≠ 4.5:1
-   Fix: use emerald-600 (#059669) — 4.8:1 ✓
+[FAIL] (WCAG 1.4.3) src/components/Hero.tsx:14 — normal-text contrast below 4.5:1
+   #10b981 on #f8fafc fails; #059669 also fails (not a valid proposed fix).
+   #047857 on #f8fafc passes the opaque-pair calculation; verify actual resolved
+   colors, alpha, text size and all states before using it.
 
 [FAIL] (WCAG 2.1.1) src/components/case/Card.tsx:42 — div with onClick
    Should be <button> for keyboard accessibility
@@ -67,12 +71,13 @@ AccessibilityChecker: <component or page>
    h2 → h4 (h3 missing)
    Fix: change h4 to h3
 
-[PASS] src/components/portal/PortalHero.tsx — semantic structure clean, contrast 7.1:1 ✓
+[STATIC] src/components/portal/PortalHero.tsx — semantic markup inspected;
+   rendered keyboard/screen-reader checks not run
 
 ## Verdict
 2 FAIL + 1 WARN.
 WCAG 2.2 AA: not yet passing.
-Estimated fix: 30 min.
+Coverage: named criteria and states only; no whole-page AA certification.
 
 After fixes: re-run AccessibilityChecker or `/design-review --routes <route>`.
 ```
@@ -82,7 +87,13 @@ After fixes: re-run AccessibilityChecker or `/design-review --routes <route>`.
 - **Component rendered with dynamic content (real data) — can't static-analyze without browser:** recommend running `/browse` to capture rendered DOM, then re-audit.
 - **Custom focus styles intentional but unusual:** flag for human review, don't auto-fail.
 - **ARIA used where semantic HTML would do:** prefer semantic HTML, flag as "simplify".
-- **Operator says "WCAG too strict for our internal tool":** acknowledge + recommend documented exception in CLAUDE.md.
+- **Operator requests an exception:** keep the failure visible; an exception needs
+  the applicable policy owner's decision and cannot make a failed criterion pass.
+
+Use [WCAG 2.2 contrast guidance](https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html):
+calculate sRGB relative luminance without rounding a failure up to 4.5. A visible
+button label can supply its accessible name without redundant aria-label. A screenshot
+supports a visual observation, not keyboard or screen-reader behavior.
 
 ## Voice tier behavior
 

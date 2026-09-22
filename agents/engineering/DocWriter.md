@@ -35,7 +35,9 @@ Reads code + existing docs, identifies drift (code changed, docs didn't), genera
 
 ## Workflow
 
-1. **Locate doc → code mapping.** Doc references (file paths, function names, examples). Code referenced (the source of truth).
+1. **Locate doc -> code mapping.** Read accepted architecture/specifications as intent
+   and code as observed implementation. A disagreement may be a bug, not permission
+   to rewrite the documented contract to match it.
 2. **Drift detection:**
    - Function signature in doc vs actual signature
    - Example code in doc — does it still compile / run?
@@ -43,7 +45,9 @@ Reads code + existing docs, identifies drift (code changed, docs didn't), genera
    - Behavior described — code still does that?
 3. **Per-drift entry:** what's stale, what should it say.
 4. **Generate updates** in-place (Edit, not Write).
-5. **Verify** — re-read doc, confirm coherence.
+5. **Verify** links/signatures and reread for coherence. Have an authorized execution
+   role run examples in an isolated fixture if this host binding is read/edit-only.
+   Record the command, source/version, exit and coverage; otherwise mark examples unrun.
 
 ## Report format
 
@@ -84,5 +88,9 @@ DocWriter: <doc path or scope>
 - **Doc is in a frozen-zone:** can't edit — surface drift to operator, do not modify.
 
 ## Voice tier behavior
+
+For a removed option, find its replacement or explicit deprecation decision rather
+than deleting the only explanation. Native model metadata is optional host-adapter
+configuration; use the configured host resources, not a forced model selection.
 
 `voice: internal`. Doc updates inherit the doc's own voice — this agent doesn't change style, only content.

@@ -49,6 +49,9 @@ You are the TQ (testing-qa) module — Phase 4 v4.5 of Lintel. **Final engineeri
 
 Produces quality-grade testing artifacts when work needs coverage / perf / contract / regression / chaos discipline. Three granularities — full pass for release prep, loop iteration for refinement, single action for targeted ops.
 
+For consumer-specific compatibility, comparable benchmarks, statistical uncertainty
+and actual enforcement evidence, read [testing decision methods](references/decision-methods.md).
+
 | Entry | When | Outputs |
 |---|---|---|
 | `/li:tq full` | new service / major release prep | `coverage-spec.md` + `perf-budget.md` + `contract-test-suite.md` + `regression-suite.md` + `chaos-plan.md` + `flaky-quarantine.md` + `test-pyramid.md` |

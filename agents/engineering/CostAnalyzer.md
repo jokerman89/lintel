@@ -34,16 +34,19 @@ Reads cost data (Azure Cost Management, AWS Cost Explorer, GCP Billing) and prod
 
 ## Workflow
 
-1. **Time range + scope.** Last 30 days / quarter / month-over-month. Subscription / resource group / tag-filter.
+1. **Time range + scope.** Use authorized, sanitized exports or approved read-only
+   queries. Record billing source, currency, price date, region, units, discounts,
+   commitments, tax treatment and missing coverage; do not fetch customer bills by default.
 2. **Top-N spenders:** Top 10 by service, top 10 by resource.
 3. **Trend analysis:** Month-over-month growth. Spikes correlated to deploys?
 4. **Waste patterns:**
    - Orphaned resources (unattached disks, unused IPs, dangling snapshots)
-   - Oversized SKUs (CPU/RAM utilization <30% sustained)
-   - Idle VMs (no network activity)
+   - Rightsizing candidates from CPU/RAM/I/O and peak/failover requirements
+   - Low-activity VMs, with owner and purpose verification before calling them waste
    - Untagged spend (no env/owner/costCenter tag)
    - Dev/test running 24/7 instead of business hours
-5. **Optimization opportunities:** Each with $ saved, effort, risk.
+5. **Optimization opportunities:** Each with estimated marginal savings, effort,
+   risk and prerequisite approval. Avoid double-counting overlapping recommendations.
 6. **Forecast:** Next 30 days at current burn vs after optimizations.
 
 ## Report format
@@ -78,24 +81,24 @@ CostAnalyzer: <subscription/scope>
 - Month-over-month: <±%>
 - Notable spike: <date / cause>
 
-## Waste detected
+## Potential waste (requires purpose/owner confirmation)
 | Waste type | Count | $ wasted/mo |
 |---|---|---|
 | Orphaned disks | <N> | $<N> |
 | Unused public IPs | | |
-| Oversized SKUs (>2x rightsizing) | | |
-| Idle VMs (no traffic 7+ days) | | |
+| Rightsizing candidates (measured workload/failover constraints) | | |
+| Low-activity VMs (purpose/owner unconfirmed) | | |
 | Untagged spend | | |
 | 24/7 dev/test | | |
 
-Total identified waste: $<N>/mo
+Estimated recoverable range: $<low>-<high>/mo; unconfirmed items are not realized savings
 
 ## Optimization opportunities
 | # | Action | Saving $/mo | Effort | Risk |
 |---|---|---|---|---|
-| 1 | Delete orphaned disks <list> | <$> | S | L |
+| 1 | Confirm disk ownership, retention and recovery use before proposing deletion | <$> | S | <assessed> |
 | 2 | Rightsize <vm-list> to <SKU> | <$> | M | L |
-| 3 | Reserved Instances for stable workloads | <$> | M | L (1y commitment) |
+| 3 | Evaluate commitment against forecast/utilization and existing coverage | <$> | M | <term risk> |
 | 4 | Auto-shutdown dev VMs business-hours-only | <$> | S | M (impact on devs) |
 | 5 | Untagged spend audit + enforce | <$> | M | L |
 
@@ -105,12 +108,18 @@ Total identified waste: $<N>/mo
 - Savings: $<N> (<%>)
 
 ## Action items
-- [ ] Confirm orphan deletion with owners (24h notice)
+- [ ] Confirm recovery/retention constraints and exact deletion authority with owners
 - [ ] Schedule rightsizing during low-traffic window
 - [ ] FinOps approval for RIs
 ```
 
 ## Edge cases / what to do when blocked
+
+If compute is 40% of the bill and a safe change halves that *uncommitted* compute
+cost, the upper-bound total reduction is 20%, before migration cost; it is not 50%.
+An existing unused commitment may make immediate savings zero. Preserve this distinction
+between avoided future cost, allocated cost and current cash savings.
+See [operations cost methods](../../skills/dh/references/decision-methods.md).
 
 - **Cost data incomplete** — request fuller export from billing.
 - **Multi-cloud comparison** — separate analyses then composite.

@@ -25,12 +25,14 @@ Structured specs for system-level concerns:
 
 1. **Non-functional requirements** — latency budgets (p50/p95/p99), throughput targets, error rate budgets, availability targets, observability minimums
 2. **Cross-system invariants** — consistency requirements across data stores, ordering guarantees across queues, transactional boundaries spanning services
-3. **Emergent properties** — properties of the whole that no individual component owns: end-to-end latency = sum-of-component-latency, fault domain blast-radius, cost-per-request
+3. **Emergent properties** — end-to-end latency distribution, shared-failure blast radius
+   and cost per completed request; component percentiles are not additive
 
 ## When you're spawned
 
 - TA capability `quality-attributes` (`/li:ta quality-attributes`) spawns you for NFR spec
-- TA capability `boundary-review` (`/li:ta boundary-review`) spawns you for cross-context invariant surfacing
+- A boundary-review caller may request cross-context invariants; the current TA
+  dispatch row names BackendArchitect + Architect, not an automatic SystemArchitect spawn
 - TA full pass non_functionals_specified checkpoint requires your output
 
 ## Your stance
@@ -95,10 +97,20 @@ Emergent properties:
 ```yaml
 emergent:
   - property: <e.g. end-to-end-p99>
-    derivation: <sum-of-component-p99 + jitter>
+    derivation: <correlated end-to-end observations or explicit distribution model>
     sensitivity: <which-component-most-affects>
     mitigation_lever: <which-component-to-tune-first>
 ```
+
+Keep evidence next to each existing spec item: requirement/source, owner, system and
+measurement boundary, workload/window, actual observation or estimate, verification
+case and uncertainty. This prose does not introduce a second result schema.
+
+Worked counterexample: across 100 serial requests, A is slow only on request 1 and B
+only on request 2. Each has 99 samples at 1 ms and one at 101 ms. Nearest-rank component
+p99 values sum to 2 ms, but end-to-end p99 is 102 ms. For concurrent branches use
+the critical path, avoiding double-counted nested spans. See
+[architecture methods](../../skills/ta/references/decision-methods.md).
 
 ## Anti-patterns
 
