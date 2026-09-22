@@ -49,9 +49,10 @@ Read the running **owned** browser's version API after safe launch instead.
    Do not attach to discovered personal tabs or silently reuse an old profile.
 3. Request a visible session through the actual provider. The delivered Chromium
    source API accepts `headed:true` with a **new** temporary user-data directory
-   and an isolated-context requirement. Its complete launch flow is currently
-   blocked in the recorded host fixture; headed use is not verified. It does not
-   reopen saved profiles or prove persistent authentication.
+   and an isolated-context requirement. Owned headless operations were observed,
+   but a subsequent startup failed reading its own endpoint file and native
+   execution stopped again. Headed use is not verified. It does not reopen saved
+   profiles or prove persistent authentication.
 4. Verify launch through the owned endpoint and actual page state. Keep the
    process attached and retain its handle. Do not detach by default.
 5. Report executable/API and version, owned context/PID, opened URL, available

@@ -59,13 +59,15 @@ It installs nothing. Use an already available suitable native host provider firs
 missing-tool restoration is task-local only after a real failure and provenance/
 license review. A failed TLS download is not permission to disable verification.
 
-**Current observation boundary (2026-09-22):** an isolated Chrome 153 blank-context
-probe succeeded, but the complete synthetic pipeline could not establish its
-owned CDP endpoint, including the one authorized hardened retry. Native execution
-was stopped. The adapter's page/read/action/screenshot/print flow is therefore
-**not live-verified** on that host. Its source, policy and extraction checks are
-not a substitute. Use an actually verified permitted host provider or keep the
-affected operation blocked/manual; do not start a configuration-variant search.
+**Current observation boundary (2026-09-22):** Chrome 153 completed eight owned
+headless synthetic scenarios: read/action/keyboard, extraction, screenshots,
+printing and URL/popup/auth refusals. Actual screenshot pixels and two printed
+pages' text/origins were inspected separately. This is not complete visual/PDF-raster
+review, headed/login validation or repeatable full-pipeline acceptance. A later
+run stopped at `EBUSY` reading its own `DevToolsActivePort`; native execution is
+stopped again at that boundary. Earlier startup failures and unverified background
+effects remain retained. Do not replace these observations with static checks,
+claim the remaining gates passed, or start a configuration-variant search.
 
 The module discovers the actual owned browser's `/json/protocol` and version.
 Unsupported isolation/interception blocks navigation. Missing print support blocks
@@ -77,8 +79,10 @@ For every start it creates a unique run and **new** user-data directory. A succe
 start must launch an
 attached browser on a loopback debugging port and creates its own incognito
 `browserContextId`. It never attaches to an existing browser or imports storage.
-The default browser page is not read. An owned main target is paused until request
-and response guards are installed.
+The default browser page is not read. The selected page must match the exact
+`Target.createTarget` handle and arrive paused. Other owned startup targets are
+closed while paused; request/response guards are installed before the selected
+page resumes. An earlier auxiliary attachment cannot become the selected page.
 
 The guard uses `Fetch.continueRequest(interceptResponse:true)`,
 `Fetch.requestPaused`, P03 admission, then `Fetch.continueResponse`. An invalid
@@ -139,6 +143,10 @@ start enables `consoleMessages()` for non-sensitive pages; it is off by default
 and must stay off during authentication. Artifacts use new simple filenames
 inside the owned run; overwrites and traversal are refused.
 
+A policy refusal remains the primary operation error if its blocked input also
+times out. The secondary provider error is retained separately; neither error is
+converted to a successful action.
+
 The browser data directory is unrelated to the P07 company-policy profile reference;
 neither one establishes the other's availability or identity.
 
@@ -184,5 +192,10 @@ loopback fixtures. The live scenario is designed to exercise read/action/screens
 redirects, refusals, keyboard/reduced motion and P05/P07/work-map links; only cases
 that actually run count as observations. Its deny-only loopback proxy is private
 fixture machinery, not a public browser proxy or proof of OS-wide egress isolation.
+PDF inspection defaults to an installed `pdftotext`. An explicit
+`--pdf-reader pypdf` selects an already installed Python reader instead; there is no
+installation or silent fallback. Its transformed text origins are not complete
+glyph bounds or PDF raster review. The recorded `pdftotext` crash and separately
+denied native raster-inspection attempt remain failures, not replaced observations.
 It is not an A14
 design-renderer test, real login, all-client validation or physical-printer test.

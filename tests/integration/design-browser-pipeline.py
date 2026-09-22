@@ -11,6 +11,7 @@ from dataclasses import replace
 import hashlib
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import importlib.util
+import importlib.metadata
 import json
 import os
 from pathlib import Path
@@ -32,6 +33,8 @@ PARSER.add_argument("--root", type=Path, required=True)
 PARSER.add_argument("--out", type=Path)
 PARSER.add_argument("--live", action="store_true")
 PARSER.add_argument("--browser", type=Path)
+PARSER.add_argument("--pdf-reader", choices=("pdftotext", "pypdf"), default="pdftotext",
+                    help="Explicit existing PDF inspector; never installs or silently falls back")
 OPTIONS = PARSER.parse_args()
 ROOT = OPTIONS.root.resolve()
 RUNTIME = ROOT / ".claude/runtime"
@@ -43,8 +46,10 @@ RUN = Path(tempfile.mkdtemp(prefix="a16-", dir=OUT))
 HOME = RUN / "home"
 TEMP = RUN / "tmp"
 LINTEL = HOME / "lintel"
+# The recorded Windows CURRENT lookup needs this fixture's USERPROFILE\AppData\Local.
 for directory in (HOME, TEMP, LINTEL / "packs", LINTEL / "audit",
-                  HOME / "appdata", HOME / "local", HOME / "config", HOME / "cache"):
+                  HOME / "appdata", HOME / "appdata" / "Local",
+                  HOME / "local", HOME / "config", HOME / "cache"):
     directory.mkdir(parents=True, exist_ok=True)
     if not directory.is_dir() or directory.is_symlink() or not directory.resolve().is_relative_to(RUN):
         raise SystemExit("Synthetic application directory failed ownership preflight")
@@ -383,6 +388,74 @@ def contrast_ratio(foreground: str, background: str) -> float:
     return (values[1] + 0.05) / (values[0] + 0.05)
 
 
+def inspect_print(pdf: str) -> dict:
+    text_path = RUN / "printed-text.txt"
+    if OPTIONS.pdf_reader == "pypdf":
+        from pypdf import PdfReader, Transformation
+
+        document = PdfReader(pdf)
+        pages = []
+        for page in document.pages:
+            box = [float(value) for value in page.mediabox]
+            origins = []
+
+            def observe_text(text, current_matrix, text_matrix, _font, size):
+                if text.strip():
+                    origin = Transformation(current_matrix).apply_on(
+                        Transformation(text_matrix).apply_on((0, 0)))
+                    if not (box[0] <= origin[0] < box[2] and box[1] <= origin[1] < box[3]):
+                        raise AssertionError("Printed text origin extends outside a page")
+                    origins.append({"text": text.strip(), "origin": origin, "font_size": size})
+
+            text = page.extract_text(visitor_text=observe_text)
+            pages.append({"media_box": box, "text": text, "text_origins": origins})
+        text = "\f".join(page["text"] for page in pages)
+        text_path.write_text(text, encoding="utf-8")
+        geometry_path = RUN / "printed-origins.json"
+        geometry_path.write_text(json.dumps(pages, indent=2), encoding="utf-8")
+        items = sum(len(page["text_origins"]) for page in pages)
+        reader = f"pypdf {importlib.metadata.version('pypdf')}"
+        geometry_kind = "transformed text origins; not complete glyph bounds or raster inspection"
+    else:
+        pdftotext = shutil.which("pdftotext")
+        if not pdftotext:
+            raise AssertionError("PDF text/layout observation unavailable: pdftotext missing")
+        geometry_path = RUN / "printed-bounds.html"
+        command([pdftotext, "-layout", "-enc", "UTF-8", pdf, str(text_path)], "print-text")
+        command([pdftotext, "-bbox", pdf, str(geometry_path)], "print-bounds")
+        text = text_path.read_text(encoding="utf-8")
+        tree = ET.parse(geometry_path)
+        pages = tree.findall(".//{http://www.w3.org/1999/xhtml}page")
+        items = 0
+        for page in pages:
+            width, height = float(page.attrib["width"]), float(page.attrib["height"])
+            for word in page.findall(".//{http://www.w3.org/1999/xhtml}word"):
+                items += 1
+                if not (0 <= float(word.attrib["xMin"]) < float(word.attrib["xMax"]) <= width
+                        and 0 <= float(word.attrib["yMin"]) < float(word.attrib["yMax"]) <= height):
+                    raise AssertionError("Printed text extends outside a page")
+        reader = pdftotext
+        geometry_kind = "word bounding boxes"
+    for expected in ("A16 Synthetic Preview", "Print summary: 2", "A16 second printed page",
+                     "Print-only continuation remains readable."):
+        if expected not in text:
+            raise AssertionError(f"Actual printed PDF lacks {expected!r}")
+    if "Unavailable credential input" in text or "Deliberately low-contrast" in text:
+        raise AssertionError("Print CSS failed to hide screen-only controls")
+    if len(pages) != 2:
+        raise AssertionError(f"Expected two actual printed pages, observed {len(pages)}")
+    if not items:
+        raise AssertionError("No actual printed words were observed")
+    if OPTIONS.pdf_reader == "pypdf" and (
+            "Print summary: 2" not in pages[0]["text"]
+            or "A16 second printed page" not in pages[1]["text"]):
+        raise AssertionError("Printed content is on the wrong page")
+    return {"reader": reader, "pages": len(pages), "geometry_kind": geometry_kind,
+            "text_items_within_page": items, "text": str(text_path),
+            "geometry": str(geometry_path), "pdf": pdf,
+            "pdf_raster_visual_inspection": "not_run; separate from print-media screenshot"}
+
+
 def live(node: str) -> None:
     if OPTIONS.browser is None or not OPTIONS.browser.is_absolute():
         raise AssertionError("--live needs an explicitly selected absolute --browser executable")
@@ -402,35 +475,7 @@ def live(node: str) -> None:
     if results["context"] != CONTEXT or results["outcome"] != "pass" or len(results["cases"]) != 8:
         raise AssertionError("Incomplete or changed live browser evidence")
     happy = results["cases"][0]["result"]
-    pdftotext = shutil.which("pdftotext")
-    if not pdftotext:
-        raise AssertionError("PDF text/layout observation unavailable: pdftotext missing")
-    pdf = happy["pdf"]
-    text_path = RUN / "printed-text.txt"
-    bbox_path = RUN / "printed-bounds.html"
-    command([pdftotext, "-layout", "-enc", "UTF-8", pdf, str(text_path)], "print-text")
-    command([pdftotext, "-bbox", pdf, str(bbox_path)], "print-bounds")
-    text = text_path.read_text(encoding="utf-8")
-    for expected in ("A16 Synthetic Preview", "Print summary: 2", "A16 second printed page",
-                     "Print-only continuation remains readable."):
-        if expected not in text:
-            raise AssertionError(f"Actual printed PDF lacks {expected!r}")
-    if "Unavailable credential input" in text or "Deliberately low-contrast" in text:
-        raise AssertionError("Print CSS failed to hide screen-only controls")
-    tree = ET.parse(bbox_path)
-    pages = tree.findall(".//{http://www.w3.org/1999/xhtml}page")
-    if len(pages) != 2:
-        raise AssertionError(f"Expected two actual printed pages, observed {len(pages)}")
-    words = 0
-    for page in pages:
-        width, height = float(page.attrib["width"]), float(page.attrib["height"])
-        for word in page.findall(".//{http://www.w3.org/1999/xhtml}word"):
-            words += 1
-            if not (0 <= float(word.attrib["xMin"]) < float(word.attrib["xMax"]) <= width
-                    and 0 <= float(word.attrib["yMin"]) < float(word.attrib["yMax"]) <= height):
-                raise AssertionError("Printed text extends outside a page")
-    if not words:
-        raise AssertionError("No actual printed words were observed")
+    printed = inspect_print(happy["pdf"])
     element = happy["contrast"]["elements"][0]
     ratio = contrast_ratio(element["color"], element["background"])
     evidence = (RUN / "live-results.json").relative_to(ROOT).as_posix()
@@ -450,9 +495,7 @@ def live(node: str) -> None:
     verify_profile_reference(REFERENCE, CONFIG)
     (RUN / "live-controls.json").write_text(json.dumps({
         "browser": browser_outcome, "deliberate_low_contrast_negative": negative,
-        "print": {"pages": len(pages), "words_within_page": words, "text": str(text_path),
-                  "bounds": str(bbox_path), "pdf": pdf, "print_media": happy["printMedia"],
-                  "pdf_raster_visual_inspection": "not_run; separate from print-media screenshot"},
+        "print": {**printed, "print_media": happy["printMedia"]},
         "visual_review": "pending; inspect screen.png and print-media.png separately",
         "profile_reference_preserved": REFERENCE,
     }, indent=2), encoding="utf-8")

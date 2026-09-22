@@ -78,9 +78,11 @@ cookie databases to repair that gap.
 ## Concrete local-provider boundary
 
 `skills/browse/scripts/chromium.mjs` requires a fresh isolated context and declares
-an optional headed launch. Its complete native launch/interaction acceptance is
-currently blocked on the recorded host; do not treat these source methods as
-verified login support. Its methods refuse password/file inputs and HTTP
+an optional headed launch. Headless operations and password/HTTP-auth refusals
+were observed on a synthetic fixture; headed mode and real login were not.
+A subsequent startup failed and native execution stopped again. Do not treat
+these source methods or the headless observations as verified login support.
+Its methods refuse password/file inputs and HTTP
 authentication challenges and never supply credentials. It implements no
 persistent profile reuse, SSO transfer, cookie export/import or global service registry.
 

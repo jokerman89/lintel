@@ -242,36 +242,57 @@ export class BrowserSession {
     this.evidence.version = await this.protocol.call('Browser.getVersion');
     const { browserContextId } = await this.protocol.call('Target.createBrowserContext', { disposeOnDetach: true });
     this.contextId = browserContextId;
+    this.evidence.lifecycle.push({ event: 'context-created', browserContextId });
     await this.protocol.call('Browser.setDownloadBehavior', { behavior: 'deny', browserContextId });
-    await this.protocol.call('Target.setAutoAttach', { autoAttach: true, waitForDebuggerOnStart: true, flatten: true, filter: [{}] });
-    const { targetId } = await this.protocol.call('Target.createTarget', { url: 'about:blank', browserContextId });
-    this.targetId = targetId;
-    for (let n = 0; n < 100 && !this.initialTarget; n++) await delay(50);
-    requireValue(this.initialTarget?.targetInfo.targetId === targetId, 'Could not identify the newly owned paused page');
-    this.sessionId = this.initialTarget.sessionId;
-    this.evidence.lifecycle.push({ event: 'created', browserContextId, targetId, sessionId: this.sessionId });
+    this.startupTargets = new Map();
+    await this.protocol.call('Target.setAutoAttach', { autoAttach: true, waitForDebuggerOnStart: true, flatten: true });
+    await this._createOwnedPage();
     for (const method of ['Page.enable', 'Runtime.enable', 'Network.enable']) await this._page(method);
     await this._page('Network.setCacheDisabled', { cacheDisabled: true });
     await this._page('Network.setBypassServiceWorker', { bypass: true });
     await this._page('Network.setBlockedURLs', { urls: ['ws://*', 'wss://*', 'file://*', 'ftp://*'] });
     await this._page('Fetch.enable', { patterns: [{ urlPattern: '*', requestStage: 'Request' }], handleAuthRequests: true });
-    await this._page('Target.setAutoAttach', { autoAttach: true, waitForDebuggerOnStart: true, flatten: true, filter: [{}] });
+    await this._page('Target.setAutoAttach', { autoAttach: true, waitForDebuggerOnStart: true, flatten: true });
     await this._page('Emulation.setDeviceMetricsOverride', { ...viewport, deviceScaleFactor: 1, mobile: false });
     this.viewport = viewport;
+    const startupTargets = this.startupTargets;
+    this.startupTargets = null;
+    for (const attached of startupTargets.values()) {
+      if (attached.targetInfo.targetId !== this.targetId) await this._refuseTarget(attached.targetInfo);
+    }
     await this._page('Runtime.runIfWaitingForDebugger');
     this.frameId = (await this._page('Page.getFrameTree')).frameTree.frame.id;
     this._healthy();
+  }
+
+  async _createOwnedPage() {
+    const { targetId } = await this.protocol.call('Target.createTarget', { url: 'about:blank', browserContextId: this.contextId });
+    this.targetId = targetId;
+    this.evidence.lifecycle.push({ event: 'target-created', targetId });
+    for (let n = 0; n < 100 && !this.startupTargets.has(targetId); n++) await delay(50);
+    const attached = this.startupTargets.get(targetId);
+    requireValue(attached?.targetInfo.type === 'page' && attached.waitingForDebugger === true,
+      'Could not identify the newly owned paused page');
+    this.sessionId = attached.sessionId;
+    this.evidence.lifecycle.push({ event: 'created', browserContextId: this.contextId, targetId, sessionId: this.sessionId });
+  }
+
+  async _refuseTarget(targetInfo) {
+    this.evidence.lifecycle.push({ event: 'refused-target', type: targetInfo.type, targetId: targetInfo.targetId });
+    const result = await this.protocol.call('Target.closeTarget', { targetId: targetInfo.targetId });
+    requireValue(result.success, 'Provider did not close an unselected target');
   }
 
   async _event({ method, params, sessionId }) {
     if (method === 'Target.attachedToTarget') {
       const ownedParent = this.sessionId && sessionId === this.sessionId;
       if (params.targetInfo.browserContextId !== this.contextId && !ownedParent) return;
-      if (!this.initialTarget) { this.initialTarget = params; return; }
-      if (params.targetInfo.targetId === this.initialTarget.targetInfo.targetId) return;
+      this.evidence.lifecycle.push({ event: 'target-attached', type: params.targetInfo.type,
+        targetId: params.targetInfo.targetId, waitingForDebugger: params.waitingForDebugger });
+      if (this.startupTargets) { this.startupTargets.set(params.targetInfo.targetId, params); return; }
+      if (params.targetInfo.targetId === this.targetId) return;
       this.fault ??= new Error('Additional pages, frames and workers are unsupported by this single-page provider');
-      this.evidence.lifecycle.push({ event: 'refused-target', type: params.targetInfo.type, targetId: params.targetInfo.targetId });
-      await this.protocol.call('Target.closeTarget', { targetId: params.targetInfo.targetId });
+      await this._refuseTarget(params.targetInfo);
     } else if (sessionId === this.sessionId && method === 'Fetch.requestPaused') {
       await this._request(params);
     } else if (sessionId === this.sessionId && method === 'Fetch.authRequired') {
@@ -355,7 +376,12 @@ export class BrowserSession {
       this._healthy();
       event.status = 'pass';
       return result;
-    } catch (error) { event.reason = error.message; throw error; }
+    } catch (error) {
+      const failure = this.fault ?? error;
+      if (failure !== error) event.provider_error = error.message;
+      event.reason = failure.message;
+      throw failure;
+    }
   }
 
   async open(url) {
@@ -415,7 +441,8 @@ export class BrowserSession {
       }
       if (action.kind === 'press') {
         const code = { Tab: 9, Enter: 13, Escape: 27, ArrowDown: 40, ArrowUp: 38 }[action.key];
-        await this._page('Input.dispatchKeyEvent', { type: 'keyDown', key: action.key, code: action.key, windowsVirtualKeyCode: code });
+        await this._page('Input.dispatchKeyEvent', { type: 'keyDown', key: action.key, code: action.key,
+          windowsVirtualKeyCode: code, ...(action.key === 'Enter' ? { text: '\r', unmodifiedText: '\r' } : {}) });
         await this._page('Input.dispatchKeyEvent', { type: 'keyUp', key: action.key, code: action.key, windowsVirtualKeyCode: code });
       } else {
         const target = await this._evaluate(`(() => {

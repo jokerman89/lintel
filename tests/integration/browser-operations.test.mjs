@@ -57,6 +57,98 @@ test('existing-profile and arbitrary launch options fail before any browser proc
   await assert.rejects(BrowserSession.start({ args: ['--no-sandbox'] }), /Unknown browser option/);
 });
 
+test('owned page attachment follows the created handle, not the first context event', async () => {
+  const browser = new BrowserSession();
+  browser.contextId = 'synthetic-owned-context';
+  browser.startupTargets = new Map();
+  browser.evidence = { lifecycle: [] };
+  browser.protocol = { call: async (method, params) => {
+    assert.equal(method, 'Target.createTarget');
+    assert.deepEqual(params, { url: 'about:blank', browserContextId: browser.contextId });
+    for (const [targetId, type, browserContextId] of [
+      ['unrelated-page', 'page', 'different-synthetic-context'],
+      ['auxiliary-target', 'browser_ui', browser.contextId],
+      ['selected-page', 'page', browser.contextId],
+    ]) {
+      await browser._event({ method: 'Target.attachedToTarget', params: {
+        targetInfo: { targetId, type, browserContextId }, waitingForDebugger: true,
+        sessionId: `${targetId}-session`,
+      } });
+    }
+    return { targetId: 'selected-page' };
+  } };
+  await browser._createOwnedPage();
+  assert.equal(browser.targetId, 'selected-page');
+  assert.equal(browser.sessionId, 'selected-page-session');
+  assert.deepEqual([...browser.startupTargets.keys()], ['auxiliary-target', 'selected-page']);
+  assert.equal(browser.fault, undefined);
+});
+
+test('an unpaused created page cannot establish the guarded session', async () => {
+  const browser = new BrowserSession();
+  browser.contextId = 'synthetic-owned-context';
+  browser.startupTargets = new Map([['selected-page', {
+    targetInfo: { targetId: 'selected-page', type: 'page' }, waitingForDebugger: false,
+  }]]);
+  browser.evidence = { lifecycle: [] };
+  browser.protocol = { call: async () => ({ targetId: 'selected-page' }) };
+  await assert.rejects(browser._createOwnedPage(), /owned paused page/);
+  assert.equal(browser.sessionId, undefined);
+});
+
+test('later owned targets are refused and an unsuccessful close remains an error', async () => {
+  const browser = new BrowserSession();
+  browser.contextId = 'synthetic-owned-context';
+  browser.targetId = 'selected-page';
+  browser.sessionId = 'selected-page-session';
+  browser.evidence = { lifecycle: [] };
+  browser.protocol = { call: async (method, params) => {
+    assert.equal(method, 'Target.closeTarget');
+    assert.deepEqual(params, { targetId: 'popup' });
+    return { success: false };
+  } };
+  await assert.rejects(browser._event({ method: 'Target.attachedToTarget', params: {
+    targetInfo: { targetId: 'popup', type: 'page', browserContextId: browser.contextId },
+    waitingForDebugger: true, sessionId: 'popup-session',
+  } }), /did not close/);
+  assert.match(browser.fault.message, /Additional pages/);
+  assert.equal(browser.evidence.lifecycle.at(-1).event, 'refused-target');
+});
+
+test('Enter carries its character event while navigation keys remain text-free', async () => {
+  const browser = new BrowserSession();
+  browser.evidence = { operations: [] };
+  browser.tasks = new Set();
+  const calls = [];
+  browser._page = async (method, params) => { calls.push({ method, params }); };
+  browser._ready = async () => {};
+  browser.read = async () => ({ activeElement: 'synthetic-button' });
+  await browser.act({ kind: 'press', key: 'Enter' });
+  await browser.act({ kind: 'press', key: 'Tab' });
+  assert(calls.every(call => call.method === 'Input.dispatchKeyEvent'));
+  assert.equal(calls[0].params.text, '\r');
+  assert.equal(calls[0].params.unmodifiedText, '\r');
+  assert.equal(calls[1].params.type, 'keyUp');
+  assert.equal(calls[1].params.text, undefined);
+  assert.equal(calls[2].params.key, 'Tab');
+  assert.equal(calls[2].params.text, undefined);
+});
+
+test('a policy refusal remains the operation error when its blocked input also times out', async () => {
+  const browser = new BrowserSession();
+  browser.evidence = { operations: [] };
+  browser.tasks = new Set();
+  const refusal = new Error('Additional pages are unsupported');
+  const transport = new Error('Input.dispatchMouseEvent timed out');
+  await assert.rejects(browser._operation('act', { kind: 'click' }, async () => {
+    browser.fault = refusal;
+    throw transport;
+  }), error => error === refusal);
+  assert.equal(browser.evidence.operations[0].status, 'error');
+  assert.equal(browser.evidence.operations[0].reason, refusal.message);
+  assert.equal(browser.evidence.operations[0].provider_error, transport.message);
+});
+
 test('unavailable printing stays an operation error rather than poisoning independent work', async () => {
   const browser = new BrowserSession();
   browser.evidence = { operations: [] };
