@@ -59,21 +59,30 @@ It installs nothing. Use an already available suitable native host provider firs
 missing-tool restoration is task-local only after a real failure and provenance/
 license review. A failed TLS download is not permission to disable verification.
 
-**Current observation boundary (2026-09-22):** Chrome 153 completed eight owned
+**Retained observation boundary (2026-09-22):** Chrome 153 completed eight owned
 headless synthetic scenarios: read/action/keyboard, extraction, screenshots,
 printing and URL/popup/auth refusals. Actual screenshot pixels and two printed
 pages' text/origins were inspected separately. This is not complete visual/PDF-raster
-review, headed/login validation or repeatable full-pipeline acceptance. A later
-run stopped at `EBUSY` reading its own `DevToolsActivePort`; native execution is
-stopped again at that boundary. Earlier startup failures and unverified background
-effects remain retained. Do not replace these observations with static checks,
-claim the remaining gates passed, or start a configuration-variant search.
+review or headed/login validation. A later run stopped at `EBUSY` reading its own
+`DevToolsActivePort`; that failed run and its unknown locking cause remain retained.
+See the source-bound [P11 report](../../../.claude/plans/universal-implementation/reports/P11.md)
+for the separately sealed readiness-correction run and independent-review status.
+Earlier startup failures and unverified background effects remain retained. Do not
+replace these observations with static checks, claim the remaining gates passed,
+or start a configuration-variant search.
 
 The module discovers the actual owned browser's `/json/protocol` and version.
 Unsupported isolation/interception blocks navigation. Missing print support blocks
 only print; independent permitted reading/actions remain available. The transport is
 Node's built-in WebSocket; no Playwright package or assumed MCP API is involved.
 The supplied executable's presence is checked separately from actual launch.
+
+Readiness reads only the new owned profile's `DevToolsActivePort`, retrying `ENOENT`
+and `EBUSY` within the existing 100-attempt, 100-ms polling boundary. Permissions
+and all other errors fail immediately; launch/child-exit checks and endpoint
+validation are unchanged. Injected transient-ready and exhausted-busy tests check
+that boundary without starting a browser or claiming to reproduce the actual lock.
+There is no generic I/O retry, lock stealing, file replacement or longer deadline.
 
 For every start it creates a unique run and **new** user-data directory. A successful
 start must launch an

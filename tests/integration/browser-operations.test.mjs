@@ -57,6 +57,105 @@ test('existing-profile and arbitrary launch options fail before any browser proc
   await assert.rejects(BrowserSession.start({ args: ['--no-sandbox'] }), /Unknown browser option/);
 });
 
+test('fault injection: transient owned endpoint EBUSY reaches readiness within the original poll budget', async () => {
+  const browser = new BrowserSession();
+  browser.profileDir = join(process.env.TEMP, 'synthetic-endpoint-profile');
+  const reads = [];
+  const waits = [];
+  const errors = ['ENOENT', 'EBUSY', 'EBUSY'];
+  const endpoint = await browser._waitForOwnedEndpoint({
+    readEndpoint: async (path, encoding) => {
+      reads.push({ path, encoding });
+      const code = errors.shift();
+      if (code) throw Object.assign(new Error(`Injected ${code}`), { code });
+      return '41000\r\n/devtools/browser/synthetic-owned-endpoint\r\n';
+    },
+    pause: async ms => { waits.push(ms); },
+  });
+  assert.deepEqual(endpoint, ['41000', '/devtools/browser/synthetic-owned-endpoint']);
+  assert.deepEqual(reads, Array(4).fill({
+    path: join(browser.profileDir, 'DevToolsActivePort'), encoding: 'utf8',
+  }));
+  assert.deepEqual(waits, [100, 100, 100]);
+  assert.equal(browser.child, undefined);
+});
+
+test('fault injection: exhausted owned endpoint EBUSY stops at exactly 100 reads and 100ms delays', async () => {
+  const browser = new BrowserSession();
+  browser.profileDir = join(process.env.TEMP, 'synthetic-endpoint-profile');
+  let reads = 0;
+  const waits = [];
+  await assert.rejects(browser._waitForOwnedEndpoint({
+    readEndpoint: async (path, encoding) => {
+      assert.equal(path, join(browser.profileDir, 'DevToolsActivePort'));
+      assert.equal(encoding, 'utf8');
+      reads++;
+      throw Object.assign(new Error('Injected EBUSY'), { code: 'EBUSY' });
+    },
+    pause: async ms => { waits.push(ms); },
+  }), /No verified owned browser endpoint/);
+  assert.equal(reads, 100);
+  assert.deepEqual(waits, Array(100).fill(100));
+  assert.equal(browser.child, undefined);
+});
+
+test('fault injection: permissions and other endpoint read errors are never retried', async () => {
+  for (const code of ['EACCES', 'EPERM', 'EIO']) {
+    const browser = new BrowserSession();
+    browser.profileDir = join(process.env.TEMP, 'synthetic-endpoint-profile');
+    const failure = Object.assign(new Error(`Injected ${code}`), { code });
+    let reads = 0;
+    let waits = 0;
+    await assert.rejects(browser._waitForOwnedEndpoint({
+      readEndpoint: async () => { reads++; throw failure; },
+      pause: async () => { waits++; },
+    }), error => error === failure);
+    assert.equal(reads, 1);
+    assert.equal(waits, 0);
+  }
+});
+
+test('fault injection: endpoint polling preserves launch and child-exit failures', async () => {
+  for (const state of ['launch-error', 'already-exited', 'exit-during-wait']) {
+    const browser = new BrowserSession();
+    browser.profileDir = join(process.env.TEMP, 'synthetic-endpoint-profile');
+    const failure = new Error('Injected launch failure');
+    if (state === 'launch-error') browser.launchError = failure;
+    if (state === 'already-exited') browser.exit = { code: 1, signal: null };
+    let reads = 0;
+    let waits = 0;
+    await assert.rejects(browser._waitForOwnedEndpoint({
+      readEndpoint: async () => {
+        reads++;
+        throw Object.assign(new Error('Injected ENOENT'), { code: 'ENOENT' });
+      },
+      pause: async ms => {
+        assert.equal(ms, 100);
+        waits++;
+        browser.exit = { code: 1, signal: null };
+      },
+    }), state === 'launch-error' ? error => error === failure : /Browser exited before its owned endpoint was ready/);
+    assert.equal(reads, state === 'exit-during-wait' ? 1 : 0);
+    assert.equal(waits, reads);
+  }
+});
+
+test('fault injection: invalid owned endpoint contents still fail without retry', async () => {
+  for (const contents of ['', 'not-a-port\n/devtools/browser/owned',
+    '41000\nws://outside.test/devtools/browser/owned', '41000\n/devtools/page/owned']) {
+    const browser = new BrowserSession();
+    browser.profileDir = join(process.env.TEMP, 'synthetic-endpoint-profile');
+    let reads = 0;
+    let waits = 0;
+    await assert.rejects(browser._waitForOwnedEndpoint({
+      readEndpoint: async () => { reads++; return contents; },
+      pause: async () => { waits++; },
+    }), /No verified owned browser endpoint/);
+    assert.equal(reads, 1);
+    assert.equal(waits, 0);
+  }
+});
+
 test('owned page attachment follows the created handle, not the first context event', async () => {
   const browser = new BrowserSession();
   browser.contextId = 'synthetic-owned-context';

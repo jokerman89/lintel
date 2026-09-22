@@ -183,6 +183,18 @@ export class BrowserSession {
     return this.protocol.call(method, params, this.sessionId);
   }
 
+  async _waitForOwnedEndpoint({ readEndpoint = readFile, pause = delay } = {}) {
+    let endpoint;
+    for (let n = 0; n < 100; n++) {
+      if (this.launchError) throw this.launchError;
+      requireValue(!this.exit, 'Browser exited before its owned endpoint was ready');
+      try { endpoint = (await readEndpoint(join(this.profileDir, 'DevToolsActivePort'), 'utf8')).trim().split(/\r?\n/); break; }
+      catch (error) { if (error.code !== 'ENOENT' && error.code !== 'EBUSY') throw error; await pause(100); }
+    }
+    requireValue(endpoint && /^\d+$/.test(endpoint[0]) && /^\/devtools\/browser\/[a-zA-Z0-9-]+$/.test(endpoint[1]), 'No verified owned browser endpoint');
+    return endpoint;
+  }
+
   async _launch(executable, headed, viewport) {
     const args = [
       ...(headed ? [] : ['--headless=new']), `--user-data-dir=${this.profileDir}`,
@@ -201,14 +213,7 @@ export class BrowserSession {
       this.child.once('exit', (code, signal) => { this.exit = { code, signal }; resolveExit(this.exit); });
     });
     this.evidence.pid = this.child.pid;
-    let endpoint;
-    for (let n = 0; n < 100; n++) {
-      if (this.launchError) throw this.launchError;
-      requireValue(!this.exit, 'Browser exited before its owned endpoint was ready');
-      try { endpoint = (await readFile(join(this.profileDir, 'DevToolsActivePort'), 'utf8')).trim().split(/\r?\n/); break; }
-      catch (error) { if (error.code !== 'ENOENT') throw error; await delay(100); }
-    }
-    requireValue(endpoint && /^\d+$/.test(endpoint[0]) && /^\/devtools\/browser\/[a-zA-Z0-9-]+$/.test(endpoint[1]), 'No verified owned browser endpoint');
+    const endpoint = await this._waitForOwnedEndpoint();
     const origin = `http://127.0.0.1:${endpoint[0]}`;
     const response = await fetch(`${origin}/json/protocol`, { redirect: 'error', signal: AbortSignal.timeout(timeout) });
     requireValue(response.ok, 'Owned browser protocol endpoint did not respond');
