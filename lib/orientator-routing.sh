@@ -4,7 +4,7 @@
 # implements: ADR-0028
 # intent: docs/concepts/orientator.md
 # constraints: none; recommendations do not execute workflows
-# last_intent_review: 2026-09-21
+# last_intent_review: 2026-09-22
 #
 # Sourced by skills/orientator/SKILL.md. Provides:
 #   classify_intent <prompt>        → intent enum
@@ -18,16 +18,10 @@
 
 # sourced library: no 'set -uo pipefail' here (shell opts leak into every caller — skills/hooks/tests); functions guard their own vars
 
-_orientator_clause_intent() {
+_orientator_request_head() {
   local question="$1"; shift
   local -a words=("$@")
-  local i=0 j token next intent="" explicit=0 negative=-1 symptom=0 embedded=0 request=0
-  for ((j=0; j<${#words[@]}; j++)); do
-    case "${words[$j]}" in
-      not|never|without|no|avoid|skip) [ "$negative" -ge 0 ] || negative="$j" ;;
-      bug|bugs|broken|error|errors|crash|crashes) symptom=1 ;;
-    esac
-  done
+  local i=0 token next intent="" explicit=0 embedded=0 request=0 nominal=0 width=1
   while :; do
     case "${words[$i]:-}" in
       please|kindly) explicit=1; i=$((i + 1)) ;;
@@ -37,13 +31,12 @@ _orientator_clause_intent() {
   done
   token="${words[$i]:-}"; next="${words[$((i + 1))]:-}"
   case "$token" in
-    not|never|without|no|avoid|skip) printf 'prohibited'; return ;;
+    not|never|without|no|avoid|skip) intent=prohibited ;;
     what)
       if [ "$next" = should ] && [ "${words[$((i + 2))]:-}" = i ] &&
           [ "${words[$((i + 3))]:-}" = do ] && [ "${#words[@]}" -eq "$((i + 4))" ]; then
-        printf 'ambiguous'; return
-      fi
-      intent=research ;;
+        intent=ambiguous
+      else intent=research; fi ;;
     how|why|where|when|who|which|whose|should|is|are|am|was|were|has|have|had|does|did)
       intent=research ;;
     do)
@@ -59,15 +52,15 @@ _orientator_clause_intent() {
       case "$next" in
         want|need) i=$((i + 2)) ;;
         would)
-          [ "${words[$((i + 2))]:-}" = like ] || { printf 'ambiguous'; return; }
+          [ "${words[$((i + 2))]:-}" = like ] || intent=ambiguous
           i=$((i + 3)) ;;
-        *) printf 'ambiguous'; return ;;
+        *) intent=ambiguous ;;
       esac
       if [ "${words[$i]:-}" = you ]; then i=$((i + 1)); fi
       case "${words[$i]:-}" in
         to) explicit=1; i=$((i + 1)) ;;
         advice|information) intent=research ;;
-        *) printf 'ambiguous'; return ;;
+        *) intent=ambiguous ;;
       esac ;;
   esac
   [ "$intent" != research ] || embedded=1
@@ -77,23 +70,65 @@ _orientator_clause_intent() {
   fi
   token="${words[$i]:-}"; next="${words[$((i + 1))]:-}"
   if [ -z "$intent" ]; then
+    # Nominal heads can also modify a shared object ("audit and review logging").
+    # Initial and boundary positions consume this same vocabulary and metadata.
     case "$token" in
-      review|audit|check|inspect|examine|analyze|analyse|assess|evaluate|granska) intent=review ;;
-      research|explore|understand|explain|describe|read|compare|summarize|summarise|show|list|know|utforska|förstå) intent=research ;;
-      plan|design|outline) intent=plan ;;
-      tell) [ "$next" != me ] || intent=research ;;
-      fix|fixa|felsök) intent=fix ;;
+      not|never|without|no|avoid|skip) intent=prohibited ;;
+      review|audit|check) intent=review; nominal=1 ;;
+      inspect|examine|analyze|analyse|assess|evaluate|granska) intent=review ;;
+      research) intent=research; nominal=1 ;;
+      explore|understand|explain|describe|read|compare|summarize|summarise|show|list|know|utforska|förstå) intent=research ;;
+      plan|design|outline) intent=plan; nominal=1 ;;
+      tell) if [ "$next" = me ]; then intent=research; width=2; fi ;;
+      fix) intent=fix; nominal=1 ;;
+      fixa|felsök) intent=fix ;;
       deploy|deploya|provision|driftsätt) intent=deploy ;;
-      ship|release|shippa|landa) intent=ship ;;
+      ship|release) intent=ship; nominal=1 ;;
+      shippa|landa) intent=ship ;;
       resume|continue|fortsätt) intent=resume ;;
       scaffold|starta) intent=scaffold ;;
-      build|add|implement|create|edit|change|modify|write|bygg) intent=build ;;
-      pick) [ "$next" != up ] || intent=resume ;;
+      build) intent=build; nominal=1 ;;
+      test) nominal=1 ;;
+      add|implement|create|edit|change|modify|write|bygg) intent=build ;;
+      pick) if [ "$next" = up ]; then intent=resume; width=2; fi ;;
       new) case "$next" in project|repo|repository) intent=scaffold ;; feature) intent=build ;; esac ;;
       nytt) [ "$next" != projekt ] || intent=scaffold ;;
-      lägg) [ "$next" != till ] || intent=build ;;
+      lägg) if [ "$next" = till ]; then intent=build; width=2; fi ;;
     esac
   fi
+  if [ "$token" = create ] && [ "$intent" = build ]; then
+    case "${words[$((i + 1))]:-} ${words[$((i + 2))]:-} ${words[$((i + 3))]:-}" in
+      "a new project"|"a new repo"|"a new repository"|"new project "*|"new repo "*|"new repository "*)
+        intent=scaffold ;;
+    esac
+  fi
+  printf '%s:%s:%s:%s:%s:%s:%s:%s' \
+    "$intent" "$i" "$explicit" "$embedded" "$request" "$nominal" "$width" "$question"
+}
+
+_orientator_object_marker() {
+  case "${1:-}" in
+    a|an|the|this|that|these|those|my|our|your|his|her|its|their|it|them|new|to|from|en|ett|den|det|v[0-9]*|[0-9]*)
+      return 0 ;;
+  esac
+  return 1
+}
+
+_orientator_clause_intent() {
+  local question="$1"; shift
+  local -a words=("$@")
+  local i j token next intent explicit embedded request nominal width negative=-1 symptom=0 objects=0
+  local head head_index head_explicit head_embedded head_request head_nominal head_width head_question
+  for ((j=0; j<${#words[@]}; j++)); do
+    case "${words[$j]}" in
+      not|never|without|no|avoid|skip) [ "$negative" -ge 0 ] || negative="$j" ;;
+      bug|bugs|broken|error|errors|crash|crashes) symptom=1 ;;
+    esac
+  done
+  IFS=: read -r intent i explicit embedded request nominal width question \
+    <<< "$(_orientator_request_head "$question" "${words[@]}")"
+  token="${words[$i]:-}"; next="${words[$((i + 1))]:-}"
+  case "$intent" in prohibited|ambiguous) printf '%s' "$intent"; return ;; esac
   if [ "$negative" -ge 0 ] && { [ -z "$intent" ] || [ "$negative" -le "$i" ]; }; then
     printf 'prohibited'; return
   fi
@@ -105,12 +140,33 @@ _orientator_clause_intent() {
     esac
     return
   fi
-  if [ "$token" = create ]; then
-    case "${words[$((i + 1))]:-} ${words[$((i + 2))]:-} ${words[$((i + 3))]:-}" in
-      "a new project"|"a new repo"|"a new repository"|"new project "*|"new repo "*|"new repository "*)
-        intent=scaffold ;;
+  for ((j=i+width; j<${#words[@]}; j++)); do
+    case "${words[$j]}" in
+      how|whether|why|what|which|if)
+        case "$intent" in research|review) embedded=1 ;; esac ;;
+      then)
+        [ "$embedded" -eq 1 ] || { printf 'ambiguous'; return; } ;;
+      and|or)
+        [ "$embedded" -eq 0 ] || continue
+        IFS=: read -r head head_index head_explicit head_embedded head_request head_nominal head_width head_question \
+          <<< "$(_orientator_request_head 0 "${words[@]:j+1}")"
+        case "$head" in ''|prohibited) continue ;; esac
+        if [ "$j" -eq "$((i + width + 1))" ] && [ "$head_index" -eq 0 ] &&
+            [ "$head_nominal" -eq 1 ] && [ -n "${words[$((j + 2))]:-}" ] &&
+            ! _orientator_object_marker "${words[$((i + width))]}" &&
+            ! _orientator_object_marker "${words[$((j + 2))]}"; then
+          IFS=: read -r head head_index head_explicit head_embedded head_request head_nominal head_width head_question \
+            <<< "$(_orientator_request_head 0 "${words[$((i + width))]}")"
+          if [ "$head_nominal" -eq 1 ]; then
+            # A write-head noun can already be the first operation's whole object.
+            case "$head:$intent" in
+              research:*|review:*|:*|*:research|*:review) objects=1; continue ;;
+            esac
+          fi
+        fi
+        printf 'ambiguous'; return ;;
     esac
-  fi
+  done
   case "$intent" in
     research|review) ;;
     *)
@@ -128,40 +184,41 @@ _orientator_clause_intent() {
       if [ "$explicit" -eq 0 ]; then
         case "$token" in
           build|release|ship)
-            case "$next" in
-              a|an|the|this|that|these|those|my|our|your|it|them|new|to|from|v[0-9]*|[0-9]*) ;;
-              *) printf 'context'; return ;;
-            esac ;;
+            if ! _orientator_object_marker "$next" &&
+                { [ "$token" != build ] || [ "$objects" -eq 0 ]; }; then
+              printf 'context'; return
+            fi ;;
         esac
       fi ;;
   esac
-  for ((j=i+1; j<${#words[@]}; j++)); do
-    case "${words[$j]}" in
-      how|whether|why|what|which|if)
-        case "$intent" in research|review) embedded=1 ;; esac ;;
-      then)
-        [ "$embedded" -eq 1 ] || { printf 'ambiguous'; return; } ;;
-      and|or)
-        [ "$embedded" -eq 0 ] || continue
-        case "${words[$((j + 1))]:-}" in
-          deploy|ship|release|build|fix|implement|create|modify|write|add|please|kindly|do)
-            printf 'ambiguous'; return ;;
-          review|audit|check|plan|design|assess|evaluate|research|explain)
-            case "${words[$((j + 2))]:-}" in
-              a|an|the|this|that|my|our|your|it|them) printf 'ambiguous'; return ;;
-            esac ;;
-        esac ;;
-    esac
-  done
   printf '%s' "$intent"
+}
+
+_orientator_line_boundary() {
+  local count="$1"; shift
+  local -a before=("${@:1:count}") after=("${@:count+1}")
+  local intent i explicit embedded request nominal width question
+  [ "$count" -gt 0 ] || return 1
+  case "${before[$((count - 1))]}" in
+    and|or|to|of|about|on|in|for|with|without|a|an|the|this|that|my|our|your|its|their|den|det|en|ett)
+      return 1 ;;
+  esac
+  IFS=: read -r intent i explicit embedded request nominal width question \
+    <<< "$(_orientator_request_head 0 "${before[@]}")"
+  # A wrapper or bare head still awaiting its operand is a line wrap.
+  [ "$count" -gt "$((i + width))" ] || return 1
+  IFS=: read -r intent i explicit embedded request nominal width question \
+    <<< "$(_orientator_request_head 0 "${after[@]}")"
+  case "$intent" in ''|prohibited) return 1 ;; esac
+  return 0
 }
 
 # ─── classify_intent ───────────────────────────────────────────────────────
 # Returns: build | fix | plan | review | research | ship | deploy | scaffold | resume | unclear
 classify_intent() {
-  local lp char following token="" quote="" heading=0 line_start=1 i result selected="" governing=""
+  local lp char following token="" quote="" heading=0 line_start=1 i j result selected="" governing=""
   local prohibited=0 context=0 ambiguous=0 symptom=0 question=0
-  local -a words=() clause=()
+  local -a words=() clause=() following_words=()
   lp=$(printf '%s' "${1:-}" | tr '[:upper:]' '[:lower:]')
   lp="${lp//’/\'}"; lp="${lp//n\'t/ not}"
   for ((i=0; i<${#lp}; i++)); do
@@ -185,7 +242,7 @@ classify_intent() {
       [[:space:]])
         [ -z "$token" ] || words+=("$token")
         token=""
-        [ "$char" != $'\n' ] || line_start=1
+        if [ "$char" = $'\n' ]; then line_start=1; words+=("$char"); fi
         continue ;;
       '.'|':')
         case "$following" in ''|[[:space:]]) ;; *) token+="$char"; line_start=0; continue ;; esac ;;
@@ -198,7 +255,21 @@ classify_intent() {
   [ -z "$quote" ] || { printf 'unclear'; return 0; }
   [ -z "$token" ] || words+=("$token")
   words+=(';')
-  for token in "${words[@]}"; do
+  for ((i=0; i<${#words[@]}; i++)); do
+    token="${words[$i]}"
+    if [ "$token" = $'\n' ]; then
+      [ -z "$governing" ] || continue
+      following_words=()
+      for ((j=i+1; j<${#words[@]}; j++)); do
+        case "${words[$j]}" in
+          ';'|'.'|'!'|'?'|':'|but|instead) break ;;
+          $'\n') ;;
+          *) following_words+=("${words[$j]}") ;;
+        esac
+      done
+      _orientator_line_boundary "${#clause[@]}" "${clause[@]}" "${following_words[@]}" || continue
+      token=';'
+    fi
     case "$token" in
       ':')
         if [ -z "$governing" ] && [ "${#clause[@]}" -gt 0 ]; then

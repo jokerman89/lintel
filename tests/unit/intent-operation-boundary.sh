@@ -3,7 +3,7 @@
 # implements: ADR-0028
 # intent: .claude/plans/universal-implementation/spec.md
 # constraints: recommendations only; fixtures never execute a selected workflow
-# last_intent_review: 2026-09-20
+# last_intent_review: 2026-09-22
 set -uo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 source "$ROOT/lib/orientator-routing.sh"
@@ -267,4 +267,202 @@ expect_route scaffold 'bin/li-scaffold init' high 'Nytt projekt.'
 expect_route resume '/li:resume' high 'Fortsätt med granskningen.'
 
 printf 'intent-operation-boundary: %s assertions, %s failures\n' "$checked" "$failed"
+
+# The independent review's 33 inputs and expectations, including literal LF.
+matrix_start="$checked"
+matrix_failures="$failed"
+expect_route research '/li:cycle --mode research-dive' high 'Do not change the release plan; explain it.'
+expect_route research '/li:cycle --mode research-dive' high 'Do not edit the deployment code; describe the release process.'
+expect_route research '/li:cycle --mode research-dive' high 'Is it safe to deploy this release?'
+expect_route unclear '/li:cycle' low 'Do not build the release.'
+expect_route review '/li:review' high 'Review the release plan.'
+expect_route deploy '/li:cycle --from SHIP' high 'Deploy the reviewed release.'
+expect_safe_route 'The release must not be deployed; explain the plan.'
+expect_safe_route 'Release notes: explain the deployment process.'
+expect_safe_route 'I want to know whether it is safe to deploy this release.'
+expect_safe_route 'I need advice on whether to deploy this release.'
+expect_safe_route 'Do not change the release plan, but explain the deployment process.'
+expect_safe_route "Don't change the build or release notes; review the plan."
+expect_safe_route 'Is the plan ready for release, or does it need review?'
+expect_safe_route 'Could you deploy the reviewed release?'
+expect_route unclear '/li:cycle' low 'Review the change then deploy it.'
+expect_route build '/li:cycle' high 'Implement release-note validation.'
+expect_route fix '/li:cycle --mode hotfix' high 'Fix review comments.'
+expect_route ship '/li:cycle --from SHIP' high 'Release v2.'
+expect_route deploy '/li:cycle --from SHIP' high 'Please deploy the reviewed release.'
+original_ifs="$IFS"
+IFS=:
+expect_safe_route 'Do not change the release plan; explain it.'
+ifs_probe=$(classify_intent 'Do not change the release plan; explain it.'; printf '|%s' "$IFS")
+[ "$ifs_probe" = 'research|:' ] || {
+  printf 'FAIL: independent row 20 changed caller IFS or intent\n' >&2
+  failed=$((failed + 1))
+}
+checked=$((checked + 1))
+expect_route deploy '/li:cycle --from SHIP' high 'Deploy the reviewed release.'
+ifs_probe=$(classify_intent 'Deploy the reviewed release.'; printf '|%s' "$IFS")
+[ "$ifs_probe" = 'deploy|:' ] || {
+  printf 'FAIL: independent row 21 changed caller IFS or intent\n' >&2
+  failed=$((failed + 1))
+}
+checked=$((checked + 1))
+IFS="$original_ifs"
+expect_route unclear '/li:cycle' low 'Build the service and edit its configuration.'
+expect_route unclear '/li:cycle' low 'Build the service; edit its configuration.'
+expect_route unclear '/li:cycle' low 'Deploy the release and change the deployment manifest.'
+expect_route unclear '/li:cycle' low 'Deploy the release; change the deployment manifest.'
+expect_route unclear '/li:cycle' low 'Build the service and provision the environment.'
+expect_route unclear '/li:cycle' low 'Build the service; provision the environment.'
+expect_route unclear '/li:cycle' low $'Deploy the release\nReview the release plan.'
+expect_route review '/li:review' high $'Please\nreview the fix\nwithout changing code'
+expect_route research '/li:cycle --mode research-dive' high 'Explain how to build and deploy the service.'
+expect_route build '/li:cycle' high 'Implement audit and review logging.'
+expect_safe_route 'Release commands are prohibited; explain the plan.'
+expect_route research '/li:cycle --mode research-dive' high 'I would like information about how to deploy the release.'
+printf 'independent 33-case matrix: %s assertions, %s failures\n' \
+  "$((checked - matrix_start))" "$((failed - matrix_failures))"
+
+# Explicit contract fixtures, not a vocabulary or expected result read from the router.
+head_count=0
+while IFS='|' read -r direct_intent direct_workflow head object; do
+  head_count=$((head_count + 1))
+  expect_route "$direct_intent" "$direct_workflow" high "$head $object."
+  for separator in ' and ' ' or ' '; ' $'\n' $'\r\n'; do
+    expect_route unclear '/li:cycle' low "Build the service${separator}${head} $object."
+    expect_route unclear '/li:cycle' low "Review the first report${separator}${head} $object."
+  done
+  expect_route "$direct_intent" "$direct_workflow" high "Please"$'\n'"$head"$'\n'"$object."
+  expect_route research '/li:cycle --mode research-dive' high \
+    "Explain how to"$'\n'"$head $object and $head $object."
+  expect_route review '/li:review' high "Assess whether to $head $object or $head $object."
+  expect_route unclear '/li:cycle' low "Do not $head $object or $head $object."
+  expect_route review '/li:review' high "Do not $head $object"$'\n'"review the plan."
+done <<'HEADS'
+review|/li:review|review|the report
+review|/li:review|audit|the change
+review|/li:review|check|the configuration
+review|/li:review|inspect|the patch
+review|/li:review|examine|the report
+review|/li:review|analyze|the change
+review|/li:review|analyse|the configuration
+review|/li:review|assess|the patch
+review|/li:review|evaluate|the report
+review|/li:review|granska|den trasiga releasen
+research|/li:cycle --mode research-dive|research|the options
+research|/li:cycle --mode research-dive|explore|the design
+research|/li:cycle --mode research-dive|understand|the process
+research|/li:cycle --mode research-dive|explain|the options
+research|/li:cycle --mode research-dive|describe|the design
+research|/li:cycle --mode research-dive|read|the report
+research|/li:cycle --mode research-dive|compare|the options
+research|/li:cycle --mode research-dive|summarize|the design
+research|/li:cycle --mode research-dive|summarise|the report
+research|/li:cycle --mode research-dive|show|the options
+research|/li:cycle --mode research-dive|list|the options
+research|/li:cycle --mode research-dive|know|the process
+research|/li:cycle --mode research-dive|utforska|alternativen
+research|/li:cycle --mode research-dive|förstå|processen
+research|/li:cycle --mode research-dive|tell me|about the process
+plan|/li:plan|plan|the release
+plan|/li:plan|design|the service
+plan|/li:plan|outline|the change
+fix|/li:cycle --mode hotfix|fix|the bug
+fix|/li:cycle --mode hotfix|fixa|felet
+fix|/li:cycle --mode hotfix|felsök|felet
+deploy|/li:cycle --from SHIP|deploy|the service
+deploy|/li:cycle --from SHIP|deploya|tjänsten
+deploy|/li:cycle --from SHIP|provision|the environment
+deploy|/li:cycle --from SHIP|driftsätt|till produktion
+ship|/li:cycle --from SHIP|ship|the release
+ship|/li:cycle --from SHIP|release|v2
+ship|/li:cycle --from SHIP|shippa|releasen
+ship|/li:cycle --from SHIP|landa|ändringen
+resume|/li:resume|resume|the work
+resume|/li:resume|continue|the work
+resume|/li:resume|fortsätt|med granskningen
+resume|/li:resume|pick up|the work
+scaffold|bin/li-scaffold init|scaffold|the repository
+scaffold|bin/li-scaffold init|starta|projektet
+scaffold|bin/li-scaffold init|new|project
+scaffold|bin/li-scaffold init|new|repo
+scaffold|bin/li-scaffold init|new|repository
+scaffold|bin/li-scaffold init|nytt|projekt
+scaffold|bin/li-scaffold init|create|a new project
+build|/li:cycle|build|the service
+build|/li:cycle|add|the option
+build|/li:cycle|implement|the change
+build|/li:cycle|create|the fixture
+build|/li:cycle|edit|its configuration
+build|/li:cycle|change|the manifest
+build|/li:cycle|modify|the setting
+build|/li:cycle|write|the adapter
+build|/li:cycle|bygg|en ny funktion
+build|/li:cycle|new|feature
+build|/li:cycle|lägg till|en funktion
+HEADS
+printf 'governing-head contract fixtures: %s\n' "$head_count"
+
+for request in \
+  'Implement audit and review logging.' \
+  'Implement review and audit logging.' \
+  'Build research and review tools.' \
+  'Build audit and check logging.' \
+  $'Implement audit and\nreview logging.' \
+  $'Implement audit\nand review logging.' \
+  'Build test and release fixtures.'; do
+  expect_route build '/li:cycle' high "$request"
+done
+for request in \
+  'Implement audit and explain logging.' \
+  'Implement audit and review the logs.' \
+  'Implement audit and please review logging.' \
+  'Implement audit and review logging and provision the environment.' \
+  $'Implement audit;\nreview logging.' \
+  'Deploy the service and review logs.' \
+  'Review the report and inspect config.' \
+  'Build the service and edit config.' \
+  'Implement audit and edit config.' \
+  'Implement audit and change state.'; do
+  expect_route unclear '/li:cycle' low "$request"
+done
+for first_request in 'Build service' 'Build release' 'Deploy release' 'Implement adapter' 'Implement release' 'Fix bug' 'Change config' 'Review report'; do
+  for separator in ' and ' ' or '; do
+    expect_route unclear '/li:cycle' low "${first_request}${separator}review config."
+  done
+done
+for request in \
+  $'Please\r\nreview the fix\r\nwithout changing code' \
+  $'Review the\nfix and deployment documentation.' \
+  $'Review "Deploy the release\nReview the plan" without executing it.' \
+  $'Review `Deploy the release\nReview the plan` without executing it.' \
+  'Review build and release scripts.'; do
+  expect_route review '/li:review' high "$request"
+done
+for request in \
+  $'Explain how to build and\ndeploy the service.' \
+  $'Explain how to build\nand deploy the service.' \
+  $'Explain this command:\ndeploy the release.' \
+  $'I want to\nknow whether to change and deploy the release.'; do
+  expect_route research '/li:cycle --mode research-dive' high "$request"
+done
+for separator in ' and ' '; ' $'\n' $'\r\n'; do
+  for wrapper in 'Please ' 'Kindly ' 'I need you to ' 'I want to ' 'I would like to ' 'Help me '; do
+    expect_route unclear '/li:cycle' low "Build the service${separator}${wrapper}edit its configuration."
+  done
+done
+original_ifs="$IFS"
+for caller_ifs in ':' '|' ''; do
+  IFS="$caller_ifs"
+  expect_route unclear '/li:cycle' low 'Build the service and edit its configuration.'
+  expect_route unclear '/li:cycle' low $'Deploy the release\nReview the release plan.'
+  expect_route review '/li:review' high $'Please\nreview the fix\nwithout changing code'
+  ifs_probe=$(classify_intent $'Deploy the release\nReview the release plan.'; printf '|%s' "$IFS")
+  [ "$ifs_probe" = "unclear|$caller_ifs" ] || {
+    printf 'FAIL: structural boundary changed caller IFS or intent\n' >&2
+    failed=$((failed + 1))
+  }
+  checked=$((checked + 1))
+done
+IFS="$original_ifs"
+printf 'intent-operation-boundary complete: %s assertions, %s failures\n' "$checked" "$failed"
 [ "$failed" -eq 0 ]
