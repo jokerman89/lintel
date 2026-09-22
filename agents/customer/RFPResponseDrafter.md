@@ -131,4 +131,7 @@ state the gap, name the owner and offer only an actually supported alternative.
 
 ## Voice tier behavior
 
-`voice: mixed`. RFP-customer-visible sections use the pack's customer-facing voice tier. Internal sections (coverage tracking, gap list) use direct internal voice.
+`voice: mixed`. Customer-visible coverage, proof and capability limitations use the
+applicable customer-facing tier and remain in the response. Only reviewer working
+notes/checklists are separate internal material; never hide a capability gap as an
+internal-only note.
