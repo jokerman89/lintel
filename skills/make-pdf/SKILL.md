@@ -60,7 +60,9 @@ No personal browser/profile, assumed daemon or Office export is required.
    media, call print, record output and verify exact process/profile/server cleanup.
    Missing API, timeout or partial output is failure, not a successful export.
 6. **Inspect actual PDF content.** Use an explicit existing reader for searchable
-   full text, page-specific material, paper/page boxes and its actual geometry.
+   full text, page-specific material and physical paper dimensions using its
+   finite positive UserUnit. Preserve raw boxes/origins and check the nonempty
+   MediaBox/CropBox intersection, not an oversized crop alone.
    File size/page count alone is not QA. Complete page rendering remains separate;
    unavailable/denied inspection stays unverified, not replaced with text origins
    or an HTML screenshot.

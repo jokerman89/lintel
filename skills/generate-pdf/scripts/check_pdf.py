@@ -46,10 +46,30 @@ def inspect_pdf(data: bytes, expected: dict[str, Any]) -> dict[str, Any]:
         raise ValueError("Encrypted PDF inspection needs separate authorization; no password attempted")
     pages, issues = [], []
     for index, page in enumerate(reader.pages, 1):
-        media, crop = [float(x) for x in page.mediabox], [float(x) for x in page.cropbox]
-        if not all(math.isfinite(x) for x in media + crop) or not (media[0] < media[2] and media[1] < media[3]) \
+        try:
+            media, crop = [float(x) for x in page.mediabox], [float(x) for x in page.cropbox]
+            unit = page.user_unit
+            if hasattr(unit, "get_object"):
+                unit = unit.get_object()
+            if isinstance(unit, bool) or not isinstance(unit, (int, float)):
+                raise ValueError("UserUnit must be numeric")
+            unit = float(unit)
+        except (AttributeError, AssertionError, KeyError, TypeError, ValueError, OverflowError) as error:
+            raise ValueError(f"Invalid or unavailable page metadata on page {index}: {error}") from error
+        if not math.isfinite(unit) or unit <= 0:
+            raise ValueError(f"UserUnit must be finite and positive on page {index}")
+        if len(media) != 4 or len(crop) != 4 or not all(math.isfinite(x) for x in media + crop) \
+                or not (media[0] < media[2] and media[1] < media[3]) \
                 or not (crop[0] < crop[2] and crop[1] < crop[3]):
             raise ValueError(f"Invalid page box on page {index}")
+        effective = [max(media[0], crop[0]), max(media[1], crop[1]),
+                     min(media[2], crop[2]), min(media[3], crop[3])]
+        if effective[0] >= effective[2] or effective[1] >= effective[3]:
+            raise ValueError(f"Empty effective MediaBox/CropBox intersection on page {index}")
+        physical_media = [(media[2] - media[0]) * unit, (media[3] - media[1]) * unit]
+        physical_effective = [(effective[2] - effective[0]) * unit, (effective[3] - effective[1]) * unit]
+        if any(not math.isfinite(value) or value <= 0 for value in physical_media + physical_effective):
+            raise ValueError(f"Invalid physical page dimensions on page {index}")
         if page.rotation:
             issues.append({"page": index, "check": "rotation", "status": "unverified",
                            "reason": "This text-origin checker does not establish rotated glyph bounds"})
@@ -61,17 +81,23 @@ def inspect_pdf(data: bytes, expected: dict[str, Any]) -> dict[str, Any]:
             point = Transformation(current).apply_on(Transformation(text_matrix).apply_on((0, 0)))
             if not all(math.isfinite(x) for x in point):
                 raise ValueError(f"Non-finite text origin on page {index}")
-            inside = crop[0] <= point[0] <= crop[2] and crop[1] <= point[1] <= crop[3]
-            origins.append({"text": text, "origin": list(point), "font_size": font_size, "within_crop_box": inside})
+            in_crop = crop[0] <= point[0] <= crop[2] and crop[1] <= point[1] <= crop[3]
+            in_media = media[0] <= point[0] <= media[2] and media[1] <= point[1] <= media[3]
+            inside = in_crop and in_media
+            origins.append({"text": text, "origin": list(point), "font_size": font_size,
+                            "within_crop_box": in_crop, "within_media_box": in_media, "within_effective_box": inside})
             if not inside:
-                issues.append({"page": index, "check": "text_origin", "status": "fail", "reason": "Text origin lies outside crop box"})
+                issues.append({"page": index, "check": "text_origin", "status": "fail",
+                               "reason": "Text origin lies outside the effective MediaBox/CropBox intersection"})
 
         text = page.extract_text(visitor_text=observe)
         if not text.strip() or not origins:
             issues.append({"page": index, "check": "searchable_text", "status": "fail", "reason": "No searchable text observed"})
-        if size and any(abs(actual - wanted) > 2 for actual, wanted in zip((media[2] - media[0], media[3] - media[1]), size)):
+        if size and any(abs(actual - wanted) > 2 for actual, wanted in zip(physical_media, size)):
             issues.append({"page": index, "check": "paper", "status": "fail", "reason": "Printed dimensions differ from requested paper"})
-        pages.append({"page": index, "media_box": media, "crop_box": crop, "text": text, "text_origins": origins})
+        pages.append({"page": index, "media_box": media, "crop_box": crop, "effective_box": effective,
+                      "user_unit": unit, "physical_media_points": physical_media,
+                      "physical_effective_points": physical_effective, "text": text, "text_origins": origins})
     normalized = " ".join("\n".join(page["text"] for page in pages).split())
     missing = [text for text in expected["required_text"] if " ".join(text.split()) not in normalized]
     if missing:
@@ -94,7 +120,7 @@ def inspect_pdf(data: bytes, expected: dict[str, Any]) -> dict[str, Any]:
         "page_status": observed_status({"page_count", "page_content", "paper"}),
         "text_origin_status": observed_status({"text_origin", "rotation"}),
         "text_matching": "Whitespace normalization only; not a visual comparison",
-        "geometry": "Actual page/crop boxes and transformed text origins; not full glyph bounds",
+        "geometry": "Raw user-space boxes/origins and their effective intersection; physical dimensions include UserUnit. Not full glyph bounds.",
         "complete_visual_inspection": "unverified", "release_clearance": False,
     }
 

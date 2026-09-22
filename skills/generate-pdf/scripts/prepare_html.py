@@ -10,7 +10,7 @@ from __future__ import annotations
 import argparse
 from datetime import date
 import hashlib
-from html import escape
+from html import escape, unescape
 from html.parser import HTMLParser
 import importlib.metadata
 import json
@@ -30,6 +30,8 @@ class PreparationError(ValueError):
 
 
 class DocumentHead(HTMLParser):
+    CDATA_CONTENT_ELEMENTS = HTMLParser.CDATA_CONTENT_ELEMENTS + ("title", "textarea")
+
     def __init__(self, text: str):
         super().__init__(convert_charrefs=True)
         self.text = text
@@ -57,7 +59,8 @@ class DocumentHead(HTMLParser):
 
     def handle_data(self, data: str) -> None:
         if self.in_title:
-            self.title.append(data)
+            # The parser protects RCDATA end tags; title references still decode once.
+            self.title.append(unescape(data))
 
 
 def _css_text(text: str) -> str:

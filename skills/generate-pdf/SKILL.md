@@ -74,7 +74,9 @@ through COM, another launcher, provider or export tool.
    available converter, or a supplied complete HTML document. The helper preserves
    supplied HTML and inserts print CSS into its actual head; Markdown mode needs
    the declared library. It writes a new owned HTML path using P03 expected-state
-   checks. Source, CSS and prepared HTML remain separate artifacts.
+   checks. Literal `</head>` text inside title/textarea is not a head boundary;
+   real duplicate closing heads still refuse. Source, CSS and prepared HTML
+   remain separate artifacts.
 4. Start an invocation-owned loopback server serving only the selected document
    and explicitly authorized local assets. Bind 127.0.0.1, observe a real health
    response, and retain the actual origin/server handle. The accepted provider
@@ -87,8 +89,9 @@ through COM, another launcher, provider or export tool.
    context/process/profile in `finally`. Stop the exact server and verify cleanup,
    including failures. Missing APIs or provider errors do not become success.
 6. Read the actual PDF with `scripts/check_pdf.py` and an explicit source oracle.
-   Check searchable complete content, page-specific material, paper dimensions,
-   page/crop boxes and transformed text origins. File size is not QA.
+   Check searchable complete content, page-specific material, physical paper
+   dimensions, page/crop boxes and transformed text origins against their
+   effective intersection. File size is not QA.
 7. Obtain complete rendered-page inspection through an actually permitted route:
    clipping, glyphs, table continuation, heading orphans, code, references, images
    and headers/footers. Text/origins or HTML print-media screenshots are not
@@ -125,18 +128,30 @@ refusal, incomplete cleanup or timeout is converted to successful completion.
 The provider's real DOM read bounds cause explicit refusal, never source truncation.
 
 Reader expectations use `required_text` (nonempty complete source segments),
-optional `min_pages`, `paper_points` (width/height), and `page_text` (page number
-to expected text). Matching normalizes whitespace only, not numbers, punctuation
-or facts. Results report actual text, page boxes, transformed text origins and
-missing material: **not full glyph bounds or complete visual inspection**.
-Blank/truncated/encrypted/malformed, missing-content or wrong-paper output cannot
-pass. Exit 0 means only requested reader checks; exit 3 means failed/unverified
-checks and exit 2 is an input/reader error. Release clearance is always false.
+optional `min_pages`, `paper_points` (physical width/height in 1/72-inch points),
+and `page_text` (page number to expected text). The existing reader's `user_unit`
+must be finite and positive; physical dimensions multiply raw box differences
+by that scale. Missing reader support or invalid scale is an error, not a
+unit-1 fallback. An omitted PDF UserUnit uses the reader's PDF-defined default.
+Results retain raw `media_box`, `crop_box`, `effective_box` and text origins
+separately from `physical_media_points` and `physical_effective_points`.
+
+Both boxes must have finite ordered coordinates and a nonempty intersection.
+An oversized crop cannot hide origins outside the media box; a narrower crop
+still restricts the effective region. Original crop membership remains reported
+alongside media/effective membership. No origin is clamped or discarded.
+Matching normalizes whitespace only, not numbers, punctuation or facts. These
+are **not full glyph bounds or complete visual inspection**. Blank/truncated/
+encrypted/malformed, missing-content or wrong-paper output cannot pass.
+Exit 0 means only requested reader checks; exit 3 means failed/unverified checks
+and exit 2 is an input/reader error. Release clearance is always false.
 
 Keep source-text, page-dimension and text-origin outcomes separate, without
 changing the aggregate failure. The four-page synthetic print retained complete
 source text and A4 page boxes, but pypdf 6.13.2 reported sixteen table-column text
-origins outside page 3. A single documented experimental-layout diagnostic failed
+origins outside page 3. All four pages have UserUnit 1; physical-unit and effective
+box checks do not explain or clear those observations. A single documented
+experimental-layout diagnostic failed
 inside that same reader before producing coordinates. Both observations remain
 non-clearing: neither a proven visual clipping defect nor permission to clamp
 coordinates, discard table cells or assert successful geometry. Full page visual

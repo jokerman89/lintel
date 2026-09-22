@@ -14,6 +14,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -23,6 +24,204 @@ ROOT = Path(__file__).resolve().parents[2]
 PREP = None
 CHECK = None
 OPTIONS = None
+RUN = None
+DEFAULT_UNIT = object()
+
+
+def readable_pdf(*, unit=DEFAULT_UNIT, media=None, crop=None, translation=None):
+    """Existing pypdf authors a tiny synthetic PDF 1.7, not a rendered artifact."""
+    from pypdf import PdfWriter, Transformation
+    from pypdf._page import PageObject
+    from pypdf.generic import (
+        BooleanObject, DecodedStreamObject, DictionaryObject, FloatObject,
+        NameObject, NullObject, NumberObject, RectangleObject, TextStringObject,
+    )
+    page = PageObject.create_blank_page(width=612, height=792)
+    font = DictionaryObject({
+        NameObject("/Type"): NameObject("/Font"), NameObject("/Subtype"): NameObject("/Type1"),
+        NameObject("/BaseFont"): NameObject("/Helvetica"),
+    })
+    page[NameObject("/Resources")] = DictionaryObject({NameObject("/Font"): DictionaryObject({NameObject("/F1"): font})})
+    stream = DecodedStreamObject()
+    stream.set_data(b"BT /F1 12 Tf 72 720 Td (Synthetic source and limitation.) Tj ET")
+    page[NameObject("/Contents")] = stream
+    if unit is not DEFAULT_UNIT:
+        if unit is None:
+            value = NullObject()
+        elif type(unit) is bool:
+            value = BooleanObject(unit)
+        elif isinstance(unit, str):
+            value = TextStringObject(unit)
+        elif type(unit) is int:
+            value = NumberObject(unit)
+        else:
+            value = FloatObject(unit)
+        page[NameObject("/UserUnit")] = value
+    if media is not None:
+        page.mediabox = RectangleObject(media)
+    if crop is not None:
+        page.cropbox = RectangleObject(crop)
+    if translation is not None:
+        page.add_transformation(Transformation().translate(*translation))
+    writer = PdfWriter()
+    writer.add_page(page)
+    writer.pdf_header = "%PDF-1.7"
+    output = BytesIO()
+    writer.write(output)
+    return output.getvalue()
+
+
+class PhysicalGeometry(unittest.TestCase):
+    def oracle(self, size=(612, 792)):
+        return {"required_text": ["Synthetic source and limitation."], "paper_points": list(size)}
+
+    def test_omitted_and_explicit_unit_one_are_equivalent(self):
+        for data in (readable_pdf(), readable_pdf(unit=1)):
+            with self.subTest(sha=hashlib.sha256(data).hexdigest()):
+                result = CHECK.inspect_pdf(data, self.oracle())
+                page = result["pages"][0]
+                self.assertEqual(result["status"], "pass")
+                self.assertEqual(page["user_unit"], 1)
+                self.assertEqual(page["physical_media_points"], [612, 792])
+                self.assertEqual(page["media_box"], [0, 0, 612, 792])
+                self.assertEqual(page["text_origins"][0]["origin"], [72, 720])
+                self.assertFalse(result["release_clearance"])
+
+    def test_unit_two_changes_physical_paper_not_raw_origins(self):
+        data = readable_pdf(unit=2)
+        raw = CHECK.inspect_pdf(data, self.oracle())
+        physical = CHECK.inspect_pdf(data, self.oracle((1224, 1584)))
+        self.assertEqual(raw["page_status"], "fail")
+        self.assertEqual(physical["status"], "pass")
+        self.assertEqual(physical["pages"][0]["physical_media_points"], [1224, 1584])
+        self.assertEqual(physical["pages"][0]["media_box"], [0, 0, 612, 792])
+        self.assertEqual(physical["pages"][0]["text_origins"][0]["origin"], [72, 720])
+        self.assertEqual(physical["complete_visual_inspection"], "unverified")
+
+    def test_fractional_unit_with_nonzero_media_origin(self):
+        result = CHECK.inspect_pdf(readable_pdf(unit=0.5, media=[10, 20, 622, 812]), self.oracle((306, 396)))
+        self.assertEqual(result["status"], "pass")
+        self.assertEqual(result["pages"][0]["user_unit"], 0.5)
+        self.assertEqual(result["pages"][0]["physical_media_points"], [306, 396])
+
+    def test_invalid_user_units_are_reader_errors_not_unit_one_fallback(self):
+        for unit in (0, -1, True, "2", "Infinity", None, 10 ** 309):
+            with self.subTest(unit=unit), self.assertRaises(ValueError):
+                CHECK.inspect_pdf(readable_pdf(unit=unit), self.oracle())
+
+    def test_larger_crop_cannot_hide_translated_out_of_media_origin(self):
+        translated = readable_pdf(translation=(0, 1000))
+        enlarged = readable_pdf(translation=(0, 1000), crop=[0, 0, 612, 1792])
+        ordinary = CHECK.inspect_pdf(translated, self.oracle())
+        masked = CHECK.inspect_pdf(enlarged, self.oracle())
+        self.assertEqual(ordinary["text_origin_status"], "fail")
+        self.assertEqual(masked["text_origin_status"], "fail")
+        self.assertEqual(masked["status"], "fail")
+        page = masked["pages"][0]
+        self.assertEqual(page["crop_box"], [0, 0, 612, 1792])
+        self.assertEqual(page["effective_box"], [0, 0, 612, 792])
+        origin = page["text_origins"][0]
+        self.assertEqual(origin["origin"], ordinary["pages"][0]["text_origins"][0]["origin"])
+        self.assertTrue(origin["within_crop_box"])
+        self.assertFalse(origin["within_media_box"])
+        self.assertFalse(origin["within_effective_box"])
+
+    def test_contained_and_oversized_crops_use_the_same_intersection_rule(self):
+        for crop, expected_box, status in (
+            ([0, 0, 612, 792], [0, 0, 612, 792], "pass"),
+            ([-10, -20, 700, 900], [0, 0, 612, 792], "pass"),
+            ([50, 700, 200, 750], [50, 700, 200, 750], "pass"),
+            ([0, 0, 20, 20], [0, 0, 20, 20], "fail"),
+        ):
+            with self.subTest(crop=crop):
+                result = CHECK.inspect_pdf(readable_pdf(crop=crop), self.oracle())
+                self.assertEqual(result["status"], status)
+                self.assertEqual(result["pages"][0]["effective_box"], expected_box)
+
+    def test_empty_inverted_and_disjoint_regions_are_rejected(self):
+        for box in ([0, 0, 0, 792], [10, 0, 0, 792], [700, 0, 800, 792], [612, 0, 700, 792]):
+            with self.subTest(crop=box), self.assertRaises(ValueError):
+                CHECK.inspect_pdf(readable_pdf(crop=box), self.oracle())
+        with self.assertRaises(ValueError):
+            CHECK.inspect_pdf(readable_pdf(media=[612, 0, 0, 792]), self.oracle())
+
+    def test_actual_cli_physical_dimensions_and_invalid_regions(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            data = root / "input.pdf"
+            oracle = root / "expectations.json"
+            for label, pdf, dimensions, expected_exit in (
+                ("default", readable_pdf(), [612, 792], 0),
+                ("scaled-wrong", readable_pdf(unit=2), [612, 792], 3),
+                ("scaled-physical", readable_pdf(unit=2), [1224, 1584], 0),
+                ("invalid-scale", readable_pdf(unit=0), [612, 792], 2),
+                ("disjoint", readable_pdf(crop=[700, 0, 800, 792]), [612, 792], 2),
+                ("masked-origin", readable_pdf(translation=(0, 1000), crop=[0, 0, 612, 1792]), [612, 792], 3),
+            ):
+                data.write_bytes(pdf)
+                oracle.write_text(json.dumps(self.oracle(dimensions)), encoding="utf-8")
+                command = [sys.executable, "-I", "-B", str(ROOT / "skills/generate-pdf/scripts/check_pdf.py"),
+                           "--root", str(root), "--input", data.name, "--expect", oracle.name]
+                prefix = RUN / f"cli-{label}"
+                prefix.with_suffix(".command.json").write_text(json.dumps(command), encoding="utf-8")
+                with prefix.with_suffix(".stdout.log").open("wb") as out, prefix.with_suffix(".stderr.log").open("wb") as err:
+                    result = subprocess.run(command, cwd=root, env=dict(os.environ), stdout=out, stderr=err)
+                prefix.with_suffix(".exit.json").write_text(json.dumps({"exit": result.returncode}), encoding="utf-8")
+                self.assertEqual(result.returncode, expected_exit, label)
+                self.assertEqual(data.read_bytes(), pdf)
+
+
+class TextContexts(unittest.TestCase):
+    def document(self, title="Source notation", body=""):
+        return ('<!doctype html><html><head><title>' + title + '</title></head><body>'
+                '<p>Complete source and limitation [S1].</p>' + body + '</body></html>')
+
+    def assert_only_insertion(self, original, result):
+        marker = '<style data-lintel-pdf="print">'
+        start = result.index("\n" + marker)
+        stop = result.index("</style>\n", start) + len("</style>\n")
+        self.assertEqual(result[:start] + result[stop:], original)
+        self.assertLess(result.index("</title>"), start)
+        self.assertLess(start, result.index("</head><body>"))
+
+    def test_raw_and_escaped_title_markers_are_literal_context(self):
+        titles = ("Source </head> notation", "Source &lt;/head&gt; notation",
+                  "Source &#60;/head&#62; notation", "Source </HEAD> notation")
+        for title in titles:
+            with self.subTest(title=title):
+                original = self.document(title)
+                result, metadata = PREP.prepare_document(original, input_format="html")
+                self.assert_only_insertion(original, result)
+                self.assertFalse(metadata["rendered"])
+
+    def test_raw_and_escaped_textarea_markers_preserve_complete_body(self):
+        for content in ("Example </head> token", "Example &lt;/head&gt; token",
+                        "<title>Not the document title</title> </head> &amp;"):
+            with self.subTest(content=content):
+                original = self.document(body="<textarea>" + content + "</textarea>")
+                result, _ = PREP.prepare_document(original, input_format="html", header_footer={"header": "{{title}}"})
+                self.assert_only_insertion(original, result)
+                self.assertIn('content:"Source notation"', result)
+
+    def test_title_entities_are_decoded_once_not_copied_as_raw_or_double_decoded(self):
+        for title, wanted in (("A &amp; B", "A & B"), ("A &amp;amp; B", "A &amp; B")):
+            with self.subTest(title=title):
+                original = self.document(title)
+                result, _ = PREP.prepare_document(original, input_format="html", header_footer={"header": "{{title}}"})
+                self.assert_only_insertion(original, result)
+                self.assertIn("content:" + PREP._css_text(wanted), result)
+                self.assertIn(title, result)
+
+    def test_existing_comment_script_style_and_lf_controls_are_retained(self):
+        for separator in ("\n", "\r\n", "\r", "\x0b", "\u2028"):
+            original = self.document("Title </head> &amp; text").replace(
+                "<head>", "<!-- </head> -->" + separator + "<head><style>/* </head> */</style>"
+                '<script type="text/plain">literal </head></script>')
+            result, _ = PREP.prepare_document(original, input_format="html")
+            self.assert_only_insertion(original, result)
+        invalid = self.document("Title </head> text").replace("</head><body>", "</head></head><body>")
+        with self.assertRaisesRegex(PREP.PreparationError, "multiple closing heads"):
+            PREP.prepare_document(invalid, input_format="html")
 
 
 class Preparation(unittest.TestCase):
@@ -186,13 +385,14 @@ def load(name, path):
 
 
 def main():
-    global OPTIONS, PREP, CHECK
+    global OPTIONS, PREP, CHECK, RUN
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--fixture-root", type=Path, default=Path(tempfile.gettempdir()))
     parser.add_argument("--native-root", type=Path)
     OPTIONS = parser.parse_args()
     OPTIONS.fixture_root.mkdir(parents=True, exist_ok=True)
     root = Path(tempfile.mkdtemp(prefix="pdf-tests-", dir=OPTIONS.fixture_root.resolve()))
+    RUN = root
     roots = {name: root / name for name in ("home", "app", "localapp", "temp", "lintel", "target")}
     for path in roots.values():
         path.mkdir()
@@ -225,7 +425,7 @@ def main():
     PREP = load("pdf_prepare", ROOT / "skills/generate-pdf/scripts/prepare_html.py")
     CHECK = load("pdf_check", ROOT / "skills/generate-pdf/scripts/check_pdf.py")
     suite = unittest.TestSuite()
-    for case in (Preparation, Reader) + ((NativePdf,) if OPTIONS.native_root else ()):
+    for case in (Preparation, Reader, PhysicalGeometry, TextContexts) + ((NativePdf,) if OPTIONS.native_root else ()):
         suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(case))
     result = unittest.TextTestRunner(verbosity=2).run(suite)
     (root / "result.json").write_text(json.dumps({
