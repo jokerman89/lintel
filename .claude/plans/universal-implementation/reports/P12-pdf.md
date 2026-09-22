@@ -28,7 +28,7 @@ SHA-256 is `cabe3a0e6319178ad7b01fd20301248f106faa1a31ab5e86d3e33976e3daaf10`,
 852 LF lines. The old report remains in preserved ancestry. Only the twenty
 accepted dependency paths entered the merge; no P12 file was taken over.
 
-PDF product `e5eca8fd2a4d1b742a43eb9905903942b5109499`, sole parent `51b6f301`.
+Initial PDF product `e5eca8fd2a4d1b742a43eb9905903942b5109499`, sole parent `51b6f301`.
 Exactly eight owned paths:
 
 - `skills/generate-pdf/SKILL.md`
@@ -40,8 +40,12 @@ Exactly eight owned paths:
 - `tests/integration/document-pdf.sh`
 - `tests/integration/document-pdf.test.mjs`
 
-This report is a separate report-only child. Exact report commit/hash is supplied
-in the handoff. Earlier Word/PPT/F01/workbook/presentation source and reports
+Final source is `5978def3a3ab0f310ece121d4649fa5798a0842b`, sole parent
+`22e8530c7ad9ec8f9b544aedbd66f7a6c4480806` (the initial report-only child of
+`e5eca8f`). That small source follow-up changes only HTML head-boundary handling
+and its focused tests, as described below. This final report is a separate
+report-only child. Exact report commit/hash is supplied in the handoff.
+Earlier Word/PPT/F01/workbook/presentation source and reports
 remain unchanged. Generated catalog/adapter/wiki/README and master ledgers were
 not edited; the two changed source descriptions need coordinator regeneration.
 
@@ -194,7 +198,8 @@ binding. Independent spec/quality stays required.
 | Existing-reader layout diagnostic | exit 1; retained library failure | `reader-layout-diagnostic.*` |
 | Final explicit reader | exit 3; source/page pass, origin fail | `reader-explicit-outcomes.*` |
 | Full focused tests | 17 Python + 6 Node pass, zero skips/errors, exit 0 | `pdf-full-tests.*` |
-| **Committed product `e5eca8f`** | **17 Python + 6 Node pass, zero skips/errors, exit 0** | `committed-product-tests.*` |
+| Initial committed product `e5eca8f` | 17 Python + 6 Node pass, zero skips/errors, exit 0 | `committed-product-tests.*` |
+| **Final committed source `5978def`** | **18 Python + 6 Node pass, zero skips/errors, exit 0** | `hardened-committed-tests.*` |
 | Actual bound QA | exit 3, two mandatory blockers | `bound-qa-observations.*` and `target\observations` |
 | Source/ancestry/preservation | eight paths sealed; four local links; 330 earlier artifact hashes unchanged | `final-preservation-seals-eol.*`, `final-seals.json` |
 | Staged whitespace and Node syntax | exit 0 | `staged-product-check.*`, `print-adapter-syntax.*` |
@@ -203,6 +208,23 @@ Tests explicitly preserve the aggregate geometry failure. Passing tests mean
 the fail-closed behavior and supported source/text paths work, not that the PDF
 or missing converter/raster gate passed. Blank/partial/missing-source/wrong-paper
 negative cases use the existing reader; no fake native output was produced.
+
+Final self-review corrected the directly coupled HTML head-offset routine:
+`HTMLParser` counts LF, whereas `str.splitlines()` also counts non-LF separators.
+The original routine could therefore place the insertion incorrectly for those
+inputs and repeatedly split the whole document for ambiguous closing heads.
+The final routine locates the single boundary with one LF-only scan and rejects
+the second closing head immediately. Tests cover CRLF, lone CR, vertical tab,
+Unicode line separator, comments and duplicate heads. It does not parse Markdown
+or change valid source content.
+
+`prepared-source-identity.*` and `hardened-input-identity.*` prove the final helper
+still produces the **byte-identical** HTML used for the actual print, SHA-256
+`417d084825b3465a06b55609803c6e5da2ab6d1b41c08f0783dc82810200f342`.
+No second print or artifact/QA rewrite occurred. The old blocked QA retains its
+actual 17+6 test evidence; the final 18+6 committed run is separately recorded,
+not retroactively substituted. Exact final follow-up source bytes are retained
+under `D\source-candidate-hardened`.
 
 An initial private sealing attempt compared LF reconstruction with the actual
 CRLF first-reader seal and failed. The corrected explicit LF/CRLF comparison
