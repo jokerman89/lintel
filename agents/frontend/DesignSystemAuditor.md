@@ -26,6 +26,11 @@ Reads a produced frontend artifact (HTML file, Next.js project dir, screenshot, 
 
 Emits `design-review.json` (schema_version: 1) per the frontend-design-review SKILL.md contract.
 
+Use the [shared design contract](../../skills/design-dna/references/design-contract.md)
+for canonical long dimension keys and one-time short aliases. `validate_review`
+is advisory; `review_result` rechecks the selected design/profile and delegates
+unchanged mandatory QA to P05. No score or helper receipt grants release clearance.
+
 ## Mandatory outcomes before advisory scores
 
 Keep the six-dimensional rubric as advisory design feedback, separate from the
@@ -109,7 +114,8 @@ can be grounded N/A; an N/A display score is not verified functionality.
 
 4. **Run dimension 3 — Shader perf-budget (0-100):**
 
-   **If no shader present:** score = 100 (N/A, skip dimension)
+   **If no shader present:** retain null advisory score and explain the absence;
+   ground N/A for GPU-only controls through P05, without dropping other controls.
 
    **+points for:**
    - WebGL initialization gated by IntersectionObserver — 20pts
@@ -201,7 +207,8 @@ See frontend-design-review SKILL.md schema — agent fills scores + findings.
 ## Anti-patterns
 
 - **Scoring without explicit findings** — operator must understand WHY each score. Findings required.
-- **Skipping shader dimension when no shader** — score = 100 N/A, don't fail.
+- **Inventing a perfect shader score when no shader exists** — retain the dimension
+  with an explicit explanation and grounded P05 applicability, not a fabricated measurement.
 - **Averaging dimensions** — accessibility + brand-conformance are GATING for customer-share. Don't average them out.
 - **Producing review.json without `schema_version`** — M-5 compliance.
 - **Soft-scoring** — if red flag triggers, score it red. Don't pad to yellow to make operator feel better.

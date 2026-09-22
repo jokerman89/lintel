@@ -42,6 +42,12 @@ Writes `~/.lintel/brand/design-patterns/<name>/` with 5 files:
 
 L-001-discipline: skill body is the contract. Agent at invocation does the actual extraction. Don't pre-bake what "patterns" look like.
 
+Reuse the [shared design contract](../design-dna/references/design-contract.md)
+when a pattern is selected for a new design. Extraction is source evidence, not
+automatic library/license/profile approval. Preserve unknown motion/shader behavior
+as unobserved; a screenshot cannot establish absence. Choose explicit owned output,
+not a personal-home search, and bind the source bytes on later consumption.
+
 ## When to use
 
 - "Customer just shared their site — extract their pattern for future runs"
@@ -101,10 +107,14 @@ Output: per-artifact `raw-extraction.json` in `$out_dir/_raw/` (gitignored runti
 
 If `--with-palette` flag:
 ```bash
-/li:generate-style-learn "${artifacts[@]}" --name "$name" --embed-target "$out_dir/typography.json"
+/li:generate-style-learn "${artifacts[@]}" --name "$name" --out-dir "$out_dir/palette"
 ```
 
-This produces the typography.json + palette block that pattern.json references.
+Read the returned `<name>.json` palette/font evidence. It does not directly emit
+`typography.json`; the old `--embed-target` argument was not supported. Adapt the
+observed font roles into the shared typography fragment explicitly, retain
+unresolved fallback/license data, and validate with `--kind typography` before
+synthesis. Do not silently label the palette JSON a frontend spec.
 
 ### Step 4 — Pattern synthesis
 
@@ -161,6 +171,9 @@ Agent (FrontendArchitect.md — yes the Phase A1 agent — reused for extraction
 # shader-snippets/<n>.glsl — raw GLSL where detected
 # component-imports.json — { "imports": [...], "fingerprint": "shadcn+aceternity" }
 ```
+Use the shared helper for typography/motion/shader fragments. No detected JS
+library is not automatically proof of no animation; select none/CSS/library only
+from supported observation or an explicit design decision.
 
 ### Step 6 — Validate emit
 

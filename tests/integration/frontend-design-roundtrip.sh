@@ -7,8 +7,8 @@
 # Step 5 schema specced in skills/frontend-design/SKILL.md) MUST be readable
 # + actionable by future generate-web --from-frontend-design mode (phase B).
 #
-# Phase A1 scope: this test verifies SCHEMA SHAPE, not actual rendering.
-# Phase B will extend this test to invoke generate-web and assert HTML output.
+# Retains the legacy fixture and exercises the delivered compatibility reader.
+# Real design binding is covered by design-contract.sh; neither test renders UI.
 #
 # tag: v3.7 phase-a1 m-6-resolution
 
@@ -232,12 +232,27 @@ else
   fail "generate-app SKILL.md missing (M-2 implementation required)"
 fi
 
+# The real shared reader must preserve this legacy input without claiming that
+# its missing profile/source binding is sufficient for a render.
+PYTHON="${LINTEL_PYTHON:-python}"
+if "$PYTHON" "$REPO_ROOT/skills/design-dna/scripts/design_contract.py" validate \
+  --repo "$TMP" --file frontend-design-spec.json --kind frontend > "$TMP/validated.json"; then
+  if "$PYTHON" -c 'import json,sys; x=json.load(open(sys.argv[1])); assert x["kind"]=="frontend" and not x["renderable"] and x["verification"]=="not_performed"' \
+    "$TMP/validated.json"; then
+    pass "real compatibility helper reads legacy input without fabricating render readiness"
+  else
+    fail "legacy compatibility result overclaimed its binding"
+  fi
+else
+  fail "shared compatibility helper rejected the retained legacy fixture"
+fi
+
 echo ""
 if [ "$FAILED" -eq 0 ]; then
   echo "All frontend-design-roundtrip tests PASSED"
   echo ""
-  echo "Phase B contract validated. Full HTML/JSX output assertion deferred to phase D"
-  echo "operator-dogfood — skills are scaffolding, agents produce content at invocation per L-001."
+  echo "Legacy compatibility and method wiring checked; no renderer or browser executed."
+  echo "Actual static-page/app artifacts remain the separately authorized A14.5 gate."
   exit 0
 else
   echo "Some frontend-design-roundtrip tests FAILED"

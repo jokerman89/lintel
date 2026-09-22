@@ -24,6 +24,10 @@ visual decision starts from a curated, searchable corpus (consumed from UI/UX Pr
 ink-and-paper system). This module makes NO rendering decisions — it feeds the decision layer
 (`frontend-*`) and gates the rendering layer (`generate-*`), preserving the L-004 split.
 
+The [direct design contract](references/design-contract.md) links retained brief,
+profile, corpus, renderer and review data through one schema/helper. Reuse it from
+every frontend/web consumer; source parsing or a populated spec is not rendering.
+
 ## When to use
 
 - Auto-invoked: `/li:frontend-design` Step 1.5 (required), `generate-web`/`generate-app` stack
@@ -50,8 +54,8 @@ All searches: python3, stdlib-only, exit 0 + markdown to stdout.
 | `stack` | `python3 "<base>/scripts/search.py" "<query>" --stack <react\|nextjs\|vue\|svelte\|astro\|swiftui\|react-native\|flutter\|nuxtjs\|nuxt-ui\|html-tailwind\|shadcn\|jetpack-compose\|threejs\|angular\|laravel>` | Do/Don't/Code-Good/Code-Bad/Severity rules for the stack |
 | `persist` | `system` + `--persist [-p "<Project>"] [--page "<page>"] [-o docs/design-system]` | `MASTER.md` + `pages/<page>.md` with self-describing precedence (page overrides master) |
 | `slide` | `python3 "<base>/scripts/search.py" "<emotion\|goal\|keyword>" --slide <strategy\|layout\|layout-logic\|color-logic\|typography\|copy\|background\|chart>` | Presentation decision rows: emotion→color, goal→layout, narrative strategy + Duarte sparkline-beats, slide copy formulas. Consumed by generate-ppt |
-| `tokens` | `python3 "<base>/scripts/emit_tokens.py" --profile "<base>/profiles/<id>.yaml" [--out design-tokens.css]` | Three-layer design-tokens.css (primitive → semantic → component) from the active profile |
-| `validate` | `python3 "<base>/scripts/validate_design.py" <file.html> [--profile "<base>/profiles/<id>.yaml"]` | Exit 1 on hard violations (zoom-disable, killed focus, emoji icons…); warnings (off-palette, token discipline) listed |
+| `tokens` | `python3 "<base>/scripts/emit_tokens.py" --profile "<verified-selected-profile-path>" [--out design-tokens.css]` | Three-layer design-tokens.css (primitive → semantic → component) from the selected pack/bundled asset |
+| `validate` | `python3 "<base>/scripts/validate_design.py" <file.html> [--profile "<verified-selected-profile-path>"]` | Exit 1 on hard violations (zoom-disable, killed focus, emoji icons…); warnings (off-palette, token discipline) listed |
 | `profile` | Read `<base>/profiles/<id>.yaml` (resolution below) + `references/token-architecture.md` for the layering doctrine | The active token set + doctrine |
 
 Domain auto-detects from the query when `--domain` is omitted. Multi-dimensional queries work
@@ -63,19 +67,16 @@ goals = `hook problem agitation solution proof social comparison traction cta te
 
 ## Profile resolution
 
-```bash
-source "${LINTEL_SOURCE_ROOT:-${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}}/lib/pack-resolver.sh" 2>/dev/null \
-  || source "$HOME/.lintel/lib/pack-resolver.sh" 2>/dev/null
-profile="$(resolve_pack_field design.profile 2>/dev/null)"
-[ -z "$profile" ] || [ "$profile" = "null" ] && profile="anthropic-default"
-```
-
-If the resolver cannot be sourced, SAY so before falling back to anthropic-default — a pack's
-declared `design.profile` must never be silently ignored.
+Use P07's already verified profile reference and explicit source/target/profile
+roots. `design_contract.profile_asset(record, config)` resolves the selected
+asset and records its bytes. Required-policy load/drift errors block; never source
+a personal-home helper or silently choose anthropic-default after an error.
 
 Packs override by declaring `design.profile` + shipping `profiles/<id>.yaml` in the pack dir
 (checked first), falling back to `<base>/profiles/`. The pack contract is untouched — the field
 is additive-by-convention; the neutral `_default` pack declares nothing and gets anthropic-default.
+The fallback is to the **same selected name**. An absent/invalid custom asset is
+not permission to switch brands. `load_design` verifies the pin and asset hash again.
 
 Profile precedence vs corpus: **brief > profile > corpus search hit.** The profile is the house
 default; a corpus palette/style hit replaces profile tokens only when the brief asks for something

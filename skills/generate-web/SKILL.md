@@ -27,6 +27,10 @@ Brand-compliant web artifact generation. Two variants:
 
 Uses native HTML / Next.js templates from `~/.lintel/brand/web-templates/` or in-repo defaults.
 
+The [shared design contract](../design-dna/references/design-contract.md) is the
+only input/argument/profile boundary. Template paths must be explicitly authorized;
+their historic home convention does not permit personal-directory discovery.
+
 ## When to use
 
 - Customer-demo landing page (single-file for quick iteration; Next.js for deployable demo)
@@ -47,6 +51,9 @@ Uses native HTML / Next.js templates from `~/.lintel/brand/web-templates/` or in
 - Optional `--use-defaults` — force in-repo default templates
 - Optional `--preview` — after generation, open in `/open-managed-browser`
 - Optional `--theme <name>` — apply a pack-provided theme palette (default: neutral)
+- Required explicit `--out <path>` for owned output; optional `--customer-share`
+  is propagated from the director. Reject conflicting input modes, unknown or
+  duplicate options; direct `--brief` remains an entry point into the same contract.
 
 ## From-pipeline mode (v3.5 Phase 2 — generate-pipeline integration)
 
@@ -55,6 +62,9 @@ If invoked with `--from-pipeline <run-dir>` instead of `--brief`:
 1. **Read shared pipeline-output:**
    - `<run-dir>/content.md` — hero + sections + body with HTML-comment annotations
    - `<run-dir>/design-spec.json` — read `per_format.web.sections` for layout-mappings
+   - Validate its existing envelope plus resolved `web_design`/`binding` through
+     `design_contract.load_design`. Preserve legacy readability, not fabricated
+     render readiness. Keep P12's document mappings intact.
 
 2. **Replace brief-parsing logic** with direct-read of content.md sections + design-spec web-block-types (hero / sections / features / FAQ).
 
@@ -75,21 +85,22 @@ If invoked with `--from-frontend-design <run-dir>` instead of `--brief` or `--fr
    - `<run-dir>/frontend-design-spec.json` — **distinct filename** from pipeline's `design-spec.json` (M-1 resolution per /plan-eng-review — avoids schema collision). Verify `"source": "frontend-design"` + `"schema_version": 1` before consuming.
    - Embedded blocks: `typography` (font-stacks + variable-axes + size-scale) + `motion` (libraries + scroll-trigger-config + key-animations + perf-budget) + `shader` (om present; nullable) + `component_libraries` (shadcn + Aceternity etc) + `layout_grammar` (max-width + grid + breakpoints) + `interaction_signature` (scroll-smoothing + hover-intent + page-transitions) + `visual_thesis` (one-paragraph)
 
-2. **Schema-version handshake:**
-   ```bash
-   spec="<run-dir>/frontend-design-spec.json"
-   sv=$(jq -r '.schema_version' "$spec")
-   source=$(jq -r '.source' "$spec")
-   [ "$sv" = "1" ] || { echo "Unsupported schema_version: $sv (this skill reads v1)"; exit 1; }
-   [ "$source" = "frontend-design" ] || { echo "Wrong source: $source (expected frontend-design)"; exit 1; }
-   ```
+2. **Shared handshake:** use `design_contract.load_design` with the external
+   prepared P05 context and explicit P07 configuration, then `renderer_args`.
+   Checking two JSON strings alone does not validate bindings, choices or policy.
 
 3. **Replace brief-parsing logic** with direct-read of spec:
    - Hero copy: synthesize from `visual_thesis` + brand-context
    - Typography: emit `<link>` tags from `typography.font_stacks[].loading_strategy` + apply via Tailwind config
-   - Motion: emit GSAP/Lenis import snippets from `motion.libraries[]` + scroll-trigger setup from `motion.scroll_trigger_config` + key-animations from `motion.key_animations[]`
-   - Shader: if `shader != null` → emit Paper Shaders component or OGL canvas-mount
-   - Component-libraries: emit shadcn-init command + Aceternity copy-paste-references in operator-instructions
+   - Motion: `none` emits no animation dependency; `css` emits only selected CSS;
+     `library` imports only the selected, sourced library and justified configuration.
+   - Shader: emit a selected GPU component only when
+     `shader != null && shader.visual_thesis != "none" && shader.library != null`.
+     Both null and the accepted non-null `visual_thesis: none, library: null`
+     representation emit no GPU canvas, import or dependency. Apply the same
+     predicate to pipeline `web_design.shader`; do not substitute an artificial score.
+   - Component libraries: preserve existing primitives; emit no setup/import when
+     the selected list is empty. New library advice requires source/version/license evidence.
    - Layout: apply `layout_grammar.max_width` + grid-config to root layout
    - Interaction: emit Lenis init if `interaction_signature.scroll_smoothing`
 
@@ -101,7 +112,8 @@ If invoked with `--from-frontend-design <run-dir>` instead of `--brief` or `--fr
 
 6. **prefers-reduced-motion handling** — always emit fallback per `motion.perf_budget.fallback_for_prefers_reduced_motion` field. Non-negotiable.
 
-7. **Mobile-strategy emission** — read `motion.perf_budget.mobile_strategy` + apply via `gsap.matchMedia()` conditional logic in generated code.
+7. **Mobile-strategy emission** — apply the selected strategy through the actual
+   CSS/library mechanism; do not introduce GSAP solely to handle a media query.
 
 8. **4-gate pipeline runs as usual** after generation.
 
@@ -115,6 +127,9 @@ If invoked with `--from-frontend-design <run-dir>` instead of `--brief` or `--fr
    - Hero (title + subtitle + CTA)
    - 2-4 substantive sections
    - Optional: features grid, FAQ, footer
+   Resolve direct brief input into the same frontend contract, pinning the existing
+   project/profile and retrieval evidence before rendering. No parallel private
+   schema for this entry point.
 
 3. **Invoke `WebExperienceCritic` agent** for layout review BEFORE generation:
    - Information hierarchy
@@ -142,7 +157,9 @@ If invoked with `--from-frontend-design <run-dir>` instead of `--brief` or `--fr
 
 6. **On pass:** move from draft → `--out`
 
-7. **Optional preview** via `/open-managed-browser file://...` (single-file) or instructions to `npm run dev` (Next.js)
+7. **Optional preview** through the shared browser operations on an authorized owned
+   local server. Verify health and actual session ownership first; provider availability
+   and URL admission are not established by this instruction.
 
 ## Report format
 
@@ -191,7 +208,8 @@ Preview: /open-managed-browser file://~/.lintel/draft/legal-assistant-demo.html
 
 ## Failure modes
 
-- **nextjs-scaffold template incomplete** — fall back to single-file variant + warn
+- **nextjs-scaffold template incomplete** — block that requested target with the
+  concrete missing resource; do not silently change the requested artifact.
 - **Voice gate fails on customer-facing content** — surface flagged paragraphs, allow regen
 - **Accessibility audit fails** (contrast issue, missing alt text) — surface findings; require fixes before gate-2 passes
 - **Customer-data in brief** — BLOCK

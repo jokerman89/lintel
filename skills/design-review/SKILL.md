@@ -14,6 +14,12 @@ The polish gate. Drives `/browse` to capture the current state of a frontend cha
 
 Distinct from `/plan-design-review`: that one reviews a design doc *plan*. This one reviews the *built result*.
 
+Retain the six-pillar human critique. For machine-readable frontend handoff use the
+[shared design contract](../design-dna/references/design-contract.md), its canonical
+dimension keys and P05 QA; do not create another score-based clearance format.
+Recheck the selected design/profile bytes. Required browser measurements that
+were not observed remain unverified, and source checks cannot substitute for them.
+
 Voice tier note: the critique itself is internal (builder-to-builder). When the copy pillar fires on a customer-facing surface, this skill references the active pack's voice corpus as the standard, but does NOT produce pack-voice copy. Use a pack-provided voice-rewrite skill for that.
 
 ## When to use
@@ -39,7 +45,9 @@ Voice tier note: the critique itself is internal (builder-to-builder). When the 
 
 ## Workflow
 
-1. **Preflight.** Verify URL is live (`curl -I`). Verify managed Chromium installed.
+1. **Preflight.** Apply the shared browser provider/session and P03 URL admission
+   boundary before any request. Then observe actual owned-server health. Installed
+   Chromium or a profile directory alone is not usable session evidence.
 2. **Capture phase.** For each route × each viewport: invoke `/browse` to load + screenshot + capture DOM + console log. Artifacts land in `~/.lintel/design-runs/<ts>/`.
 2b. **Mechanical validator (ADR-0015).** On captured DOM/HTML:
    `python3 "${LINTEL_SKILLS_DIR:-skills}/design-dna/scripts/validate_design.py" <captured.html> --profile <active-profile>` —
@@ -53,6 +61,9 @@ Voice tier note: the critique itself is internal (builder-to-builder). When the 
    - **Brand consistency:** colors from token set, typography from token set, signature elements present where expected (per project CLAUDE.md). No project token set → the active design profile (`skills/design-dna/profiles/`, default anthropic-default) is the reference.
 4. **Score findings.** Each pillar gets a 1-10 score + finding list. Findings get P1/P2/P3 severity.
 5. **Persist via the native `bin/li-review-log`** with `skill: design-review`.
+   Use its accepted P05 record protocol and actual independent actor evidence;
+   this procedure does not invent an audit/lifecycle implementation or clear a gate
+   from a pillar average.
 6. **Output** the structured report.
 
 ## Report format

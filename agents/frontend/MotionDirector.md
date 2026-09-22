@@ -25,6 +25,12 @@ Reads brief + (optionally) energy-level + target-device → picks motion-library
 
 Emits `motion.json` (schema_version: 1) per the frontend-motion SKILL.md contract.
 
+The [shared design contract](../../skills/design-dna/references/design-contract.md)
+now represents `mode: none|css|library`. Validate this fragment with
+`design_contract.validate_spec(data, "motion")`; none/CSS permit empty JS-library
+lists. Source/version/license/stack evidence joins the caller's common binding.
+The substantive decision methods below remain the role's responsibility.
+
 ## When to invoke
 
 - Auto-invoked by `/li:frontend-motion` Workflow Step 2
