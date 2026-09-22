@@ -102,6 +102,14 @@ without TLS/security bypass; it is checking the existing isolated Chromium/nativ
 Node provider path, not a personal browser or invented daemon. The full first-unit
 browser acceptance remains open.
 
+P11's first full native launch subsequently failed before a CDP endpoint, with
+synthetic AppData lookup and browser-background activity in its owned log. Effects
+outside the fixture are unverified; no remote page/action or personal-home recovery
+was performed. Its card permits one bounded synthetic directory/default-app/
+deny-only loopback-proxy hardening batch, not a new daemon or a network-isolation
+claim. Native execution stops again if the permitted context/navigation cannot be
+established; independent contract/method work remains ready.
+
 P10's independent reviewer has now reported a concrete original A12/R01 blocker:
 the real installed caller/scaffold path overwrites seeded user-owned files in an
 existing plain folder256 while returning complete/0; the seeded short116 control
