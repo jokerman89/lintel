@@ -22,11 +22,11 @@ Lintel source, not the target repository's working directory or a personal insta
 Use an available permitted shell and Python 3.9+ (`python` when that is the Python 3 command):
 
 ```bash
-python3 "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json
-python3 "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --query="$keyword"
-python3 "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --family=context
-python3 "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --kind=agent --query="$keyword"
-python3 "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --name=match
+python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json
+python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --query="$keyword"
+python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --family=context
+python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --kind=agent --query="$keyword"
+python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --name=match
 ```
 
 Only pass a query when the operator supplied a nonempty keyword. `--search` is an alias
@@ -46,6 +46,28 @@ inventing an empty inventory or parsing every prompt yourself. If execution is u
 the existing trusted `skills/CATALOG.md` is a skills-only fallback; disclose that it is a
 committed snapshot without agent metadata. An explicitly named canonical file can still
 be read through a permitted file tool. Neither fallback activates a workflow.
+
+## Select a capability without changing installation
+
+Choose one operation, rather than loading the entire selection and all of its bodies:
+
+```bash
+python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --list-selections
+python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --selection="$selection"
+python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --selection=demo-script --kind=agent
+```
+
+Set `selection` to the exact nonempty ID returned by the first operation. The
+[selection reference](references/selections.md) owns the operation and closure contract.
+The `demo-script` pilot returns the three demo roles plus the shared core metadata; read
+only the chosen Plan, draft or critique method at its returned path. A dependency/resource
+list is not an instruction to warm every file. Filters narrow displayed entries, not the
+required closure. Do not combine `--list-selections` with filters.
+
+No selection keeps ordinary discovery unchanged. Unknown, blank or malformed selections
+are errors, not a reason to regenerate, prune files, activate wrappers or invent another
+inventory. Preserve source-stage warnings, aliases and `maturity: unknown`. A selected
+role still needs an actual permitted host binding or explicit serial/manual handoff.
 
 ## Generate and check
 
@@ -70,3 +92,5 @@ personal telemetry or add a transient sort order to the committed catalog.
 In a consumer repo, read the catalog from the adapter's resource root. Regenerate only when
 the task actually changes that source. Do not write the tooling catalog into project state.
 Descriptions and source links are public output: keep them accurate and company-neutral.
+The [consumer checks](references/consumer-checks.md) distinguish executed helper examples
+from structural guidance, installed acceptance and unrun model/client behavior.

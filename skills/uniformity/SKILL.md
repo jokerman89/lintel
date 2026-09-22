@@ -55,7 +55,8 @@ All optional:
 ## Workflow
 
 ```bash
-REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+set -euo pipefail
+source_root="${LINTEL_SOURCE_ROOT:?select the trusted Lintel source}"
 mode="test"
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -65,40 +66,76 @@ while [ $# -gt 0 ]; do
   esac
 done
 
-MATRIX="$REPO_ROOT/.claude/engineering/audits/uniformity-matrix.md"
+MATRIX="$source_root/.claude/engineering/audits/uniformity-matrix.md"
+floor="$source_root/tests/shape/uniformity-coverage.sh"
+generator="$source_root/bin/li-uniformity"
 
-case "$mode" in
-  matrix)
-    if [ -f "$MATRIX" ]; then
-      # Print everything up to the first per-kind matrix section.
-      awk '/^## Matrix by kind/{exit} {print}' "$MATRIX"
-      echo "_Full matrix: .claude/engineering/audits/uniformity-matrix.md_"
+if [ "$mode" = matrix ]; then
+  [ -f "$MATRIX" ] && [ -r "$MATRIX" ] || {
+    printf 'UNAVAILABLE: readable source matrix missing: %s\n' "$MATRIX" >&2
+    exit 2
+  }
+  awk '/^## Matrix by kind/{exit} {print}' "$MATRIX"
+  printf '\nRecorded source matrix only; floor not run. Full matrix: %s\n' "$MATRIX"
+  exit 0
+fi
+
+[ -f "$floor" ] && [ -r "$floor" ] || {
+  printf 'UNAVAILABLE: source floor helper missing: %s\n' "$floor" >&2
+  exit 2
+}
+if bash "$floor"; then :
+else
+  result=$?
+  printf 'FAILED: floor helper exited %s; preserve its diagnostics above.\n' "$result" >&2
+  exit "$result"
+fi
+
+if [ "$mode" = check ]; then
+  [ -f "$MATRIX" ] && [ -r "$MATRIX" ] && [ -f "$generator" ] || {
+    printf 'UNAVAILABLE: source matrix or freshness helper is missing.\n' >&2
+    exit 2
+  }
+  printf '\n## Matrix freshness\n'
+  result=0
+  output=$(bash "$generator" --check) || result=$?
+  printf '%s\n' "$output"
+  if [ "$result" -ne 0 ]; then
+    stale='li-uniformity --check: DIFF (matrix is stale; run bin/li-uniformity)'
+    if [ "$result" -eq 1 ] && { [ "$output" = "$stale" ] || [[ "$output" == "$stale"$'\n'* ]]; }; then
+      printf 'STALE: source matrix differs; warning only, no regeneration performed.\n'
     else
-      echo "_No matrix yet._ Run: bin/li-uniformity"
+      printf 'ERROR: freshness helper exited %s; this is not a staleness verdict.\n' "$result" >&2
+      exit "$result"
     fi
-    ;;
-  check)
-    bash "$REPO_ROOT/tests/shape/uniformity-coverage.sh"
-    echo ""
-    echo "## Matrix freshness"
-    bash "$REPO_ROOT/bin/li-uniformity" --check || \
-      echo "_(matrix is stale — run: bin/li-uniformity)_"
-    ;;
-  *)
-    bash "$REPO_ROOT/tests/shape/uniformity-coverage.sh"
-    echo ""
-    echo "Living dashboard: .claude/engineering/audits/uniformity-matrix.md (regenerate: bin/li-uniformity)"
-    echo "Contract: docs/concepts/uniformity-contract.md"
-    ;;
-esac
+  fi
+fi
+printf '\nSource dashboard: %s\nContract: docs/concepts/uniformity-contract.md\n' "$MATRIX"
 ```
+
+Resolve `LINTEL_SOURCE_ROOT` from the loaded trusted adapter, never from the target cwd.
+These helpers inspect their own source component tree; they do not audit an arbitrary
+consumer project. A portable bundle may not contain the developer floor test or recorded
+matrix: report that boundary, not an invented passing gate or a target-executable fallback.
+For an explicitly requested current render,
+`bash "$LINTEL_SOURCE_ROOT/bin/li-uniformity" --stdout` is the existing nonwriting operation.
+Do not use default generation or `--output`
+in this read-only workflow.
 
 ## Status protocol
 
-- **DONE** — floor verdict + adoption summary printed
-- **NEEDS_ACTION** — the floor shape-test FAILED (a workflow_root skill or block-hook
-  lacks `necessity:`); the offending component(s) are named in the test output and
-  must be backfilled
+- **PASS** — the actual floor helper passed; adoption remains descriptive, not maturity.
+- **FAILED** — preserve the floor helper's nonzero exit and diagnostics. A floor violation
+  names the component; an execution error is not proof that the component violates policy.
+- **STALE** — only the documented diff result is warn-only; no matrix was written.
+- **UNAVAILABLE / ERROR** — a missing resource, unreadable matrix or helper failure leaves
+  its check unverified. Never relabel every nonzero exit as stale.
+- **RECORDED MATRIX** — `--matrix` displayed existing data; it did not run the floor.
+
+Examples: `--check` with a missing necessity field retains the floor failure even if the
+matrix is also stale. A valid floor and an actual matrix diff return a visible warning.
+A missing helper returns unavailable without searching the target or personal install.
+None of these outcomes proves that a host executed a declared skill or hook.
 
 ## Integration
 
