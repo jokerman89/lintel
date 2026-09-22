@@ -29,19 +29,32 @@ Distinct from `/qa --no-fix`: that one runs the suite and reports. This one zoom
 
 ## Inputs
 
-- A failure description, error message, log excerpt, or test name (passed inline or via the latest `/qa-only` report)
+- A failure description, redacted error/log or test name from the explicitly selected
+  QA result; a newer unrelated report is not the source
 - Optional `--scope <file>` — narrow code reading to a specific area
-- Optional `--with-codex` — invoke `/codex` mid-investigation for an outside opinion on the hypothesis set
+- Optional `--with-codex` retains the explicit outside-review request; inspect the
+  actual available authorized tool first. No installed CLI/model or permission is assumed.
 
 ## Workflow
 
-1. **State the observation precisely.** What's the failure? Exact error, exact assertion, exact log line. No paraphrasing.
-2. **Minimum repro.** Smallest possible command/test/script that triggers the failure. If you can't reduce it: surface that as a finding.
-3. **Hypothesis set.** Generate 3-5 candidate explanations. Rank by probability. Include "no idea yet" if honest.
+1. **State the observation precisely.** Exact assertion/error and relevant redacted
+   log evidence; mark redactions rather than reproducing secrets/customer data.
+2. **Minimum repro.** Use an inspected command in an owned synthetic target; preserve
+   source, staged/dirty/untracked inputs and exact environment. Read-only investigation
+   does not authorize live access or mutations just because a shell exists.
+3. **Hypothesis set.** Rank plausible explanations by evidence; do not invent
+   numerical probabilities without a calibration basis.
 4. **Variable isolation.** For each hypothesis, design ONE experiment that distinguishes it. Run it. Update the ranking.
 5. **Iterate.** Hypotheses survive or fall. New ones spawn from the experiments. Continue until one hypothesis is confirmed via direct evidence (not just elimination).
 6. **Root cause statement.** A single sentence: "X happens because Y, observable at Z." Cite file:line.
 7. **Fix recommendation.** NOT a fix. A recommendation — operator decides whether to fix here, escalate, or punt.
+
+For mapped/module work use [original-work admission and handoff](../full-engineering-pass/references/domain-handoff.md#module-caller-procedure):
+carry original IDs, source/attempt, pinned profile/policy and actual checks. Record
+unresolved hypotheses and next discriminating experiment for cold continuation;
+do not automatically rerun a side-effecting repro. For standalone unmapped inspection,
+use P05's existing snapshot/inspect route with no invented backlog or release clearance.
+An independent second opinion is a real separate context, not another heading.
 
 ## Report format
 
@@ -54,12 +67,12 @@ Repro: <minimum command>
 First seen: <commit or timestamp>
 
 ## Hypotheses (initial)
-H1: <hypothesis> — probability: 0.5
-H2: <hypothesis> — probability: 0.3
-H3: <hypothesis> — probability: 0.2
+H1: <hypothesis> — strongest current evidence: <source>
+H2: <hypothesis> — plausible, untested: <discriminating case>
+H3: <hypothesis> — unresolved: <missing observation>
 
 ## Experiments
-[E1] Test H1 by <action>. Result: <observation>. Updates: H1 → 0.1, H2 → 0.7
+[E1] Test H1 by <authorized experiment>. Result: <actual observation/exit>.
 [E2] Test H2 by <action>. Result: <observation>. CONFIRMED.
 
 ## Root cause
@@ -79,7 +92,8 @@ Recommend: fix here, add regression test.
 ## Failure modes
 
 - **Cannot reproduce:** name that as a finding. "Cannot reproduce in 50 attempts under conditions X, Y, Z" is data, not failure.
-- **No hypotheses survive after N experiments:** generate a new hypothesis set. If still stuck: write up what's been ruled out, escalate to operator with `/codex` for outside opinion.
+- **No hypotheses survive:** preserve evidence and request an available independent
+  reviewer/operator, not automatic external-CLI execution.
 - **Repro requires production access:** stop, escalate. Per Layer 2: production reads require explicit auth.
 
 ## Examples
@@ -89,10 +103,10 @@ Recommend: fix here, add regression test.
 > /investigate "refund returns 200 instead of 100"
 Observation: tests/billing/test_refund.py:42
 Repro: pytest tests/billing/test_refund.py::test_partial_refund -x
-H1: amount doubled in serialization (0.6)
-H2: refund handler called twice (0.3)
-H3: test fixture wrong (0.1)
-[E1] Add print at serialize: amount=100 going in, 200 coming out.
+H1: amount doubled in serialization (test directly)
+H2: refund handler called twice (check call evidence)
+H3: test fixture wrong (inspect isolated fixture)
+[E1] In an explicitly authorized disposable trial, observe amount=100 in and 200 out.
 ROOT CAUSE: src/lib/billing.ts:34 — `* 2` left over from a debug session.
 ```
 
@@ -106,6 +120,6 @@ Recommendation: enable CI artifact capture (har/trace) on next run, re-investiga
 ## See also
 
 - `/qa` — when fix is auto-applicable
-- `/codex` — for outside-voice hypothesis review
+- Actual available independent reviewer — `/codex` only when explicitly available/authorized
 - `/careful` — wrap investigation in extra rigor for prod-impact bugs
 - `DebugForensics` subagent — for parallel deeper trace analysis

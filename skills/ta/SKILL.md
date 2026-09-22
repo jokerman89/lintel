@@ -14,7 +14,7 @@ navigation:
   triggers:
     - new service / API design / dependency restructure / cross-system boundary
     - operator types /li:ta {full|loop|single --action <name>}
-    - BUILD phase detects architectural intent (Phase 4 wiring)
+    - active BUILD workflow requests architectural depth
   sibling_workflows:
     - /li:da — data-architecture module (v4.2)
     - /li:sc — security-compliance module (v4.3)
@@ -30,20 +30,20 @@ domain:
   checkpoints:
     - discovery_complete: all dependencies mapped and all consumers identified
     - decision_documented: ADR drafted with alternatives + trade-offs
-    - contract_locked: interface signed, versioned, consumers notified
-    - complexity_within_budget: cyclomatic + cognitive scores below pack/profile thresholds
+    - contract_locked: versioned interface and required consumer transition evidence
+    - complexity_within_budget: actual measurements meet applicable agreed budgets
     - non_functionals_specified: latency + throughput + error rate declared
   recovery:
-    - on_failure: revert to last-locked checkpoint, surface gap, AskUserQuestion (Re-loop | Accept-with-concern | Raise-help)
+    - on_failure: preserve the failed attempt, verify evidence, and reconcile the unmet checkpoint
   continuation:
-    - after_fix: resume at failed checkpoint, job state preserves loop position
+    - after_fix: verify saved evidence and select the unmet checkpoint
   raise_help:
     - new_dependency_tree_shake_reveals_unknown_service: operator confirms scope
-    - adr_alternatives_within_5_percent: operator picks
-    - contract_change_breaks_3_plus_consumers: operator decides migration path
+    - material_alternatives_unresolved: decision owner selects with grounded trade-offs
+    - active_consumer_break: agree the migration before changing its contract
 ---
 
-You are the TA (tech-architecture) module — Phase 4 v4.1 of Lintel.
+You are the TA (tech-architecture) module, invoked within the selected lifecycle phase.
 
 ## What this module does
 
@@ -62,7 +62,7 @@ assumptions, read [architecture decision methods](references/decision-methods.md
 
 - New service, API, dependency restructure, cross-system boundary
 - Operator wants explicit architectural decisions documented as ADRs
-- BUILD phase detected architectural intent (Phase 4 wiring auto-invokes)
+- The active workflow explicitly requests architectural depth; no automatic hook dispatch is implied
 - Work requires architecture-grade artifacts
 
 ## When NOT to use
@@ -73,20 +73,19 @@ assumptions, read [architecture decision methods](references/decision-methods.md
 
 ## Sub-capability dispatch
 
-Per ADR-0009 the seven capabilities live here as dispatch rows — there are no per-capability
-skill files. Invoke one directly as `/li:ta <capability>` (long form: `/li:ta single --action
-<capability>`). Per L-001 each capability is a workflow + dispatch contract: content comes from
-agents at invocation (spawned via `/li:brief-forge subagent_spawn`); each emits
-`.claude/runtime/state/ta/<capability>-<ts>.md` and appends the module audit line (Step 6).
+The seven capabilities remain direct entry points, not separate skills. Read the
+named role from the trusted source and use the actual host's delegation operation
+or an explicit serial handoff. The caller persists returned artifacts under the
+selected attempt. Follow the [shared module procedure](../full-engineering-pass/references/domain-handoff.md#module-caller-procedure).
 
 | Capability | Dispatches to (agents) | Produces | Raise-help / notes |
 |---|---|---|---|
 | `api-design` | APIDesigner | REST/GraphQL/gRPC interface spec with versioning + breaking-change analysis | prefs: `api_style`, `versioning`; validation checklist below |
 | `dependency-graph` | Explorer + Architect | module dependency map + `graph.dot`, circular-detection, layering audit | owns the shared language-detect heuristic (below) |
-| `boundary-review` | BackendArchitect + Architect (when leaks > 0) | bounded-context drift report — GREEN / YELLOW (>0 leaks) / RED (>5) | reuses `dependency-graph-*.md` <1 day old, else runs dependency-graph first |
-| `complexity-audit` | Architect (refactor recs when over budget) | per-component cyclomatic + cognitive scoring vs budgets | budgets via `--budget-cyclomatic`/`--budget-cognitive` (profile defaults 12/18); YELLOW = 1-5 components over, RED = >5; per-language tools below |
-| `scaling-plan` | CapacityPlanner + BackendArchitect | capacity model + top-3 bottlenecks + cost projection | default target `3x-12-months`; qualitative-only (DONE_WITH_CONCERNS) without `perf-baseline.md` |
-| `contract-collision` | APIDesigner + Architect (when breaking > 0) | change-impact analysis across consumers of an interface | RAISE_HELP at ≥3 breaking consumers (BLOCKED); requires `--interface` + `--change`; deprecation window from pack (default 90 days), prefer additive over in-place breaking |
+| `boundary-review` | BackendArchitect + Architect | bounded-context drift and failure-isolation report | reuse dependency evidence only when its relevant input identity is unchanged; request SystemArchitect explicitly for an invariant/NFR question |
+| `complexity-audit` | Architect | per-component cyclomatic + cognitive scoring and refactor options | obtain actual project budgets or label exploratory measurements advisory; report tool/version and excluded files |
+| `scaling-plan` | CapacityPlanner + BackendArchitect | capacity model, ranked bottlenecks and priced/qualitative projection | target and baseline come from the brief; missing measurements remain unknown, not default 3x growth |
+| `contract-collision` | APIDesigner + Architect | impact across actual consumer versions and migration options | requires named interface/change; even one mandatory consumer break needs a decision; no universal deprecation window |
 | `quality-attributes` | SystemArchitect + Architect | non-functional requirement spec + verification path per NFR | backs the `non_functionals_specified` checkpoint; dims: latency p50/p95/p99 per journey, throughput RPS, error-rate %, availability SLA, observability signals per component |
 
 ### api-design — validation checklist
@@ -110,133 +109,37 @@ node → `npx eslintcc --rule complexity` · other → `lizard`
 `pyproject.toml`/`requirements.txt` → python · `pom.xml`/`build.gradle` → jvm · `*.csproj`/`*.sln` → dotnet
 
 ## Workflow
+1. Select `full`, an explicitly saved `loop`, or one named capability/`single --action`.
+   Unknown capability or absent saved iteration is NEEDS_CONTEXT, not a new guessed run.
+2. Follow shared **Select original work and live policy**: actual `work_context`/
+   `workflow_inspect`, original package/leaves and verified P07 reference. Read
+   `engineering.tech_architecture.*` only from the verified pack or explicit advisory
+   invocation inputs. Preserve the existing API style/framework and accepted ADRs.
+3. Prepare immutable P05 obligations and a domain request with the checkpoint table
+   below. Record original output states before start. Supply actual role/mode/scope.
+4. Perform the method with real available tools; persist design, consumer evidence and
+   checks, then record the result. Explorer locates; Architect synthesizes/designs;
+   independent reviewers assess, not repair. Lack of a measurement is unverified.
+5. Freshly verify each required result, externally prepare the final P05 context and
+   obtain independent spec then quality/QA. Only the original task owner updates status.
+   Numeric rubrics are advice, never review or release clearance.
 
-### Step 1 — Parse invocation
+## Checkpoint ownership
 
-```bash
-granularity="${1:?usage: /li:ta {full|loop|<capability>|single --action <capability>}}"
-capabilities="api-design|dependency-graph|complexity-audit|boundary-review|scaling-plan|contract-collision|quality-attributes"
-case "$granularity" in
-  full|loop) action="" ;;
-  single)
-    [ "$2" = "--action" ] || { echo "ERROR: --action required for single"; exit 1; }
-    action="$3" ;;
-  *) action="$granularity"; granularity="single" ;;   # ADR-0009 shorthand: /li:ta <capability>
-esac
-if [ "$granularity" = "single" ]; then
-  echo "$action" | grep -qE "^(${capabilities})$" || { echo "ERROR: unknown capability '$action'"; exit 1; }
-fi
-```
+| Checkpoint | Method and receiver | Artifact and observable acceptance |
+|---|---|---|
+| `discovery_complete` | Explorer evidence lookup, then Architect dependency synthesis | dependency graph + consumer registry; distinguish observed edges, dynamic unknowns and intentional cycles |
+| `decision_documented` | Architect/BackendArchitect options; ADRDrafter proposed record | viable alternatives, invariant, decision owner and downside; proposed is not accepted |
+| `contract_locked` | APIDesigner contract, actual consumer-version verification | OpenAPI/SDL/protobuf + migration/notification evidence where required; additive is consumer-specific |
+| `complexity_within_budget` | Architect interprets actual analyzer output | measured scope/tool, applicable budget and bounded refactor recommendation; no metric-only rewrite |
+| `non_functionals_specified` | SystemArchitect constraints, Architect fit | NFR/invariant spec with source, workload, boundary and verification path; no sum of component p99s |
 
-### Step 2 — Read pack + profile preferences
+For `loop`, compare the selected prior ADRs/contracts and changed dependencies; retain
+old artifacts and revisit affected checkpoints with new input identity. Returning
+to a checkpoint never restores source files. For single API design, do not perform
+a capacity sweep unless its unresolved requirement truly depends on it.
 
-```bash
-source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/lib/pack-resolver.sh"
-voice=$(resolve_pack_field voice.default_tier)
-
-# Profile preferences (engineering.tech_architecture.*)
-PROFILE="$LINTEL_HOME/profile.yaml"
-api_style=$(grep -A20 '^engineering:' "$PROFILE" 2>/dev/null | grep -A8 'tech_architecture:' | grep 'api_style:' | head -1 | awk -F': *' '{print $2}' | tr -d '[:space:]')
-api_style="${api_style:-rest}"
-versioning=$(grep -A20 '^engineering:' "$PROFILE" 2>/dev/null | grep -A8 'tech_architecture:' | grep 'versioning:' | head -1 | awk -F': *' '{print $2}' | tr -d '[:space:]')
-versioning="${versioning:-semver-major-uri}"
-cyclomatic_budget=$(grep -A20 '^engineering:' "$PROFILE" 2>/dev/null | grep -A8 'tech_architecture:' | grep 'complexity_budget_cyclomatic:' | head -1 | awk -F': *' '{print $2}' | tr -d '[:space:]')
-cyclomatic_budget="${cyclomatic_budget:-12}"
-cognitive_budget=$(grep -A20 '^engineering:' "$PROFILE" 2>/dev/null | grep -A8 'tech_architecture:' | grep 'complexity_budget_cognitive:' | head -1 | awk -F': *' '{print $2}' | tr -d '[:space:]')
-cognitive_budget="${cognitive_budget:-18}"
-```
-
-### Step 3 — Dispatch by granularity
-
-#### `full` granularity
-
-```bash
-mkdir -p .claude/runtime/state/ta
-audit=".claude/runtime/audit/ta-decisions.jsonl"
-mkdir -p "$(dirname "$audit")"
-
-# Run checkpoint chain
-for checkpoint in discovery_complete decision_documented contract_locked complexity_within_budget non_functionals_specified; do
-  echo "─── Checkpoint: $checkpoint ───"
-  run_checkpoint "$checkpoint" || handle_checkpoint_failure "$checkpoint"
-  audit_checkpoint "$checkpoint" "$verdict"
-done
-
-# Apply 6-dim scoring rubric
-score=$(apply_scoring_rubric)
-if [ "$score" -lt 80 ]; then
-  echo "TA full pass score=$score (threshold 80) — surface concerns"
-  exit 1
-fi
-
-echo "TA full pass complete — score=$score, output .claude/runtime/state/ta/"
-```
-
-#### `loop` granularity
-
-```bash
-# Resume from prior state if present
-if [ ! -f ".claude/runtime/state/ta/00-state.md" ]; then
-  echo "ERROR: no prior TA state — use /li:ta full first"
-  exit 1
-fi
-
-prior_iteration=$(grep -E '^iteration:' .claude/runtime/state/ta/00-state.md | head -1 | awk '{print $2}')
-new_iteration=$((prior_iteration + 1))
-
-# Re-run discovery + decision + contract checkpoints
-run_checkpoint discovery_complete
-run_checkpoint decision_documented
-run_checkpoint contract_locked
-
-# Diff against prior iteration
-echo "Diff vs iteration $prior_iteration:" > .claude/runtime/state/ta/iteration-${new_iteration}-diff.md
-diff .claude/runtime/state/ta/iteration-${prior_iteration}-adrs.md .claude/runtime/state/ta/iteration-${new_iteration}-adrs.md \
-  >> .claude/runtime/state/ta/iteration-${new_iteration}-diff.md || true
-```
-
-#### `single` granularity
-
-```bash
-# ADR-0009: no sub-skill files — dispatch straight off the Sub-capability dispatch table.
-# Spawn the capability's agents via /li:brief-forge subagent_spawn, pass the prefs/budgets
-# listed in its row (api-design ← api_style + versioning; complexity-audit ← the two budgets),
-# emit .claude/runtime/state/ta/${action}-<ts>.md, append the audit line (Step 6).
-dispatch_capability "$action"   # no loop, no checkpoints
-```
-
-### Step 4 — Checkpoint failure handling (recovery + raise-help)
-
-```bash
-handle_checkpoint_failure() {
-  local checkpoint="$1"
-  echo "Checkpoint '$checkpoint' FAILED"
-
-  # Check raise_help triggers
-  case "$checkpoint" in
-    discovery_complete)
-      if [ "$unknown_service_count" -gt 0 ]; then
-        ask_user_question "Discovery surfaced $unknown_service_count unknown services. Re-loop / Accept-with-concern / Raise-help?"
-      fi
-      ;;
-    decision_documented)
-      if [ "$alternatives_within_5pct" -gt 0 ]; then
-        ask_user_question "ADR alternatives all score within 5%. Re-loop / Accept-with-concern / Raise-help (operator picks)?"
-      fi
-      ;;
-    contract_locked)
-      if [ "$breaking_consumer_count" -ge 3 ]; then
-        ask_user_question "Contract change breaks $breaking_consumer_count consumers. Re-loop / Accept-with-concern / Raise-help (operator decides migration)?"
-      fi
-      ;;
-  esac
-
-  # Default: revert to last-locked checkpoint, surface gap
-  revert_to_last_locked
-}
-```
-
-### Step 5 — 6-dimensional scoring rubric
+### Advisory six-dimensional rubric
 
 ```
 | Dimension | Score 0-100 |
@@ -248,45 +151,42 @@ handle_checkpoint_failure() {
 | Consumer impact analyzed | <D5> |
 | Alternatives considered | <D6> |
 
-Pass threshold per dimension: 80.
-Full-pass exit: every dimension ≥ 80 OR explicit operator override.
+Record each score's evidence and untested coverage. Any applicable mandatory
+failure/error/unverified control blocks regardless of scores or operator preference.
 ```
 
-Each dimension is scored by reading the artifact produced and counting positive signals against a checklist documented in `docs/concepts/ta-module.md`.
+Use the observable checkpoint criteria above, citing the actual artifact and missing
+evidence. A checklist count alone is not calibrated architectural quality.
 
-### Step 6 — Audit + emit ship report
+### Handoff and recovery
 
-One line via the unified writer (ts/operator/cycle_id come from the envelope):
-
-```bash
-source "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/bin/_audit.sh"
-audit_log ta-decisions ta_module_complete "granularity=$granularity" "score=$score" \
-  "checkpoints_passed=$passed_count"
-# → .claude/runtime/audit/ta-decisions.jsonl
-```
+Return named architecture artifacts, exact original work/profile/attempt references,
+control/evidence links, advisory scores, limitations and next owner. Use the shared
+start/result publication and cold-continuation table. Interrupted/failed output stays
+visible. An audit record is optional observation unless policy explicitly requires it;
+then verify real persistence without claiming it grants acceptance.
 
 ## Status protocol
 
-- **DONE** — granularity completed, score ≥ 80 (full) or target dimension improved (loop) or action complete (single)
-- **DONE_WITH_CONCERNS** — completed but score 60-79 OR raise-help triggered without operator resolution
-- **BLOCKED** — checkpoint failed, operator chose Raise-help, awaiting decision
+- **DONE** — selected results, required checks and independent acceptance complete
+- **DONE_WITH_CONCERNS** — required gates pass; remaining concerns are advisory only
+- **BLOCKED** — required checkpoint/evidence/policy/review failed or unavailable
 - **NEEDS_CONTEXT** — unknown capability for single, OR no prior state for loop
 
 ## Integration
 
 **Reads:**
-- `~/.lintel/profile.yaml` `engineering.tech_architecture.*` block
+- Original mapped artifacts and pinned pack fields; explicit advisory inputs, no automatic personal preference read
 - `lib/pack-resolver.sh` for pack policy
 - Existing arch agents: Architect, BackendArchitect, APIDesigner
 - New agents: SystemArchitect, CapacityPlanner
-- Existing ADRs (`.lintel/decisions/*.md` if present)
+- Existing ADRs in the repository's declared decision location
 
 **Writes:**
-- `.claude/runtime/state/ta/system-arch.md` (full)
-- `.claude/runtime/state/ta/iteration-N-adrs.md` (per iteration)
-- `.claude/runtime/state/ta/iteration-N-diff.md` (loop)
-- `.claude/runtime/audit/ta-decisions.jsonl`
-- Brief Forge envelopes through the standard gate
+- Selected `system-arch.md`, interface/ADR/NFR artifacts and iteration comparison;
+  runtime start/result files under `.claude/runtime/state/domains/<operation>/iNNNN/`.
+- Existing `state/ta/` artifacts remain usable only when explicitly selected and verified.
+- Brief Forge only when explicitly invoked/configured; no automatic hook activation
 
 **Triggered by:**
 - Operator: `/li:ta {full|loop|single --action <name>}`
@@ -303,6 +203,7 @@ audit_log ta-decisions ta_module_complete "granularity=$granularity" "score=$sco
 - **Skipping single granularity to "be safe"** — single is the operator's explicit choice; honor it
 - **Treating checkpoint failure as terminal** — checkpoints surface, recover, continue
 - **Inventing new agents when existing ones cover** — Architect/BackendArchitect/APIDesigner cover most TA work; new agents only for genuinely new capability
-- **Hardcoding api_style / versioning** — read from profile preferences
+- **Hardcoding api_style / versioning** — use actual verified pack fields or explicit advisory inputs
 - **Silent score-below-threshold** — surface to operator with dimension breakdown; never auto-pass
-- **Blocking on hook warnings** — TA hooks warn; blocking is operator's explicit decision
+- **Confusing a warn-hook with policy** — advisory warnings are not enforced controls;
+  applicable mandatory requirements still block independently of the warning mechanism
