@@ -1,7 +1,7 @@
 ---
 name: make-pdf
 layer: foundation
-description: Convert URL, markdown file, or HTML to PDF via managed Chromium.
+description: Convert an authorized URL, Markdown file or HTML through actual browser print, preserving source and separating text/page checks from complete visual inspection.
 color: yellow
 tools: Read, Bash, Glob
 voice: internal
@@ -10,7 +10,10 @@ cli_support: [claude-code]
 
 # /make-pdf
 
-PDF generation via the same managed Chromium that powers `/browse`. Accepts URLs, local HTML, or markdown (converted to HTML first via a deterministic toolchain). Use for deliverables: rendered design docs, customer-facing one-pagers (after the active pack's compliance gates), printable runbooks.
+PDF generation through the accepted [browser operations](../browse/references/browser-operations.md).
+Use the [standalone PDF procedure](../generate-pdf/SKILL.md) for explicit local
+HTML, Markdown through an available declared converter, or an authorized URL.
+No personal browser/profile, assumed daemon or Office export is required.
 
 ## When to use
 
@@ -37,27 +40,43 @@ PDF generation via the same managed Chromium that powers `/browse`. Accepts URLs
 
 ## Workflow
 
-1. **Resolve input.** URL → fetch via Playwright. Local file → check extension.
-2. **Markdown path.** If `.md`: convert to HTML using a deterministic pipeline (pandoc if available, else markdown-it). Apply default print CSS unless overridden.
-3. **Compliance gate.** If input is a URL matching Layer 2 prod-host list: BLOCK unless overridden.
-4. **Render.** Launch headless Chromium, navigate to file:// or http(s)://, wait for `networkidle`, render PDF with the requested format.
-5. **Verify.** PDF written + readable + non-zero bytes. If less than 5KB: warn (likely blank).
-6. **Report.** Path, file size, page count.
+1. **Resolve exact source and output.** Retain complete Markdown/HTML, tables,
+   code, citations, units and limitations. Refuse unapproved replacement.
+2. **Select converter explicitly.** Use available Pandoc/Markdown-it, not a new
+   parser/plain-text fallback. Missing conversion blocks Markdown mode. Explicit
+   HTML is independent. Only after a real missing-tool failure may an authorized,
+   manifest-declared task-local restore occur; no global install or TLS bypass.
+3. **Prepare existing print choices.** Preserve paper/orientation/CSS/header-footer/
+   background flags. The local helper uses print CSS and CSS page-margin content;
+   actual PDF inspection establishes their effect.
+4. **Verify policy and navigation.** Use P07's live reference and actual controls,
+   then P03 admission on an explicit authorized origin. Serve local HTML/assets
+   through an owned loopback server and verify health. The accepted provider
+   refuses file:// and checks requests/redirects before following them. Remote
+   inputs remain a guarded documented route, not exercised by the synthetic unit
+   and not authorization for production data or credential transfer.
+5. **Print through the actual provider.** Use the accepted BrowserSession or an
+   available permitted native print API. Create a fresh owned context, apply print
+   media, call print, record output and verify exact process/profile/server cleanup.
+   Missing API, timeout or partial output is failure, not a successful export.
+6. **Inspect actual PDF content.** Use an explicit existing reader for searchable
+   full text, page-specific material, paper/page boxes and its actual geometry.
+   File size/page count alone is not QA. Complete page rendering remains separate;
+   unavailable/denied inspection stays unverified, not replaced with text origins
+   or an HTML screenshot.
+7. **Report and bind evidence.** Retain exact source/config/tool/artifact identity,
+   failures and P05 outcomes. QA is not an independent decision or SHIP clearance.
 
 ## Report format
 
-```
-Make-PDF: design-doc-v2.md → design-doc-v2.pdf
-
-Input: 14KB markdown, 1 image embedded
-Render: 2.3s (chromium headless, A4 portrait)
-Output: 142KB PDF, 8 pages
-Path: ./design-doc-v2.pdf
-```
+Report exact source/output paths and hashes, converter/provider/reader and observed
+versions, actual print/read/cleanup actions, retained source, page observations
+and missing visual coverage. Do not fill the report with illustrative passing
+durations, page counts or invented renderer results.
 
 ## Compliance integration
 
-- Layer 2 customer-data gate on the input (markdown content scanned for customer-data patterns; URL hostname checked against prod list).
+- Resolve actual profile/data/navigation requirements, not an invented neutral prod-host list or count of passing controls.
 - Output PDFs land where operator specified — they are NOT auto-uploaded anywhere. Distribution is the operator's responsibility.
 - If customer-facing voice content detected in input markdown: surface reminder to run the active pack's compliance gates if not already done.
 
@@ -67,18 +86,18 @@ Path: ./design-doc-v2.pdf
 
 ## Failure modes
 
-- **Markdown converter not installed (no pandoc, no markdown-it):** report missing toolchain + bail. Do not silently degrade to a worse converter.
-- **Page render timeout (60s default):** capture whatever's there, warn about partial render.
-- **Output PDF < 5KB:** warn explicitly — almost certainly an empty or broken render.
-- **Print CSS reference broken:** fall back to default print stylesheet, log warning.
-- **Headless Chromium crash mid-render:** retry once. Second crash: report + bail.
+- **Selected converter missing:** retain source and report exact failure. Explicit HTML is not a claimed Markdown conversion.
+- **Print timeout/crash/partial output:** preserve failure evidence; no completion claim or blind launch-variant retry.
+- **Unreadable/blank/truncated output:** fail the actual reader/content check, not a file-size proxy.
+- **Explicit CSS/header-footer missing or malformed:** stop before print rather than silently replacing a requirement.
+- **Required page renderer unavailable/denied:** retain useful writer/text observations but leave visual inspection unverified; no workaround to a denied route.
 
 ## Examples
 
 **Markdown to PDF:**
 ```
 > /make-pdf --input design-doc.md
-✓ 142KB PDF, 8 pages → ./design-doc.pdf
+[Requires the selected converter; inspect actual output and report missing observations.]
 ```
 
 **URL to PDF with header/footer:**
@@ -87,13 +106,13 @@ Path: ./design-doc-v2.pdf
 hf.yaml:
   header: "Runbook — confidential — {{date}}"
   footer: "Page {{page}} of {{total}}"
-✓ 312KB PDF, 24 pages → ./runbook.pdf
+[Use an authorized guarded origin; no cookie or credential transfer.]
 ```
 
 **Letter landscape:**
 ```
 > /make-pdf --input report.html --format letter --orientation landscape
-✓ 87KB PDF, 4 pages → ./report.pdf
+[Verify printed dimensions and content; file size is not acceptance.]
 ```
 
 ## See also
