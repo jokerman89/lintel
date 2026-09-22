@@ -55,3 +55,11 @@ Use local Git base/head attribution where available. Only an explicitly mechanic
 record `mode: coordinator`; substantive work still needs a real independent actor. Distinct strings
 alone do not corroborate independence. Record the host/human evidence and retain the A22.7 shared
 corroboration gate rather than treating these local declarations as final delivery clearance.
+
+This Markdown record remains a local observation. The canonical shared decision is the lane's
+`shared_evidence.review` JSON, owned by its reviewer under `.claude/runtime/reviews/`.
+Use P05's actual v2 contract and writer; do not construct it by changing this record's version.
+The coordinator separately supplies expected context, QA and host/human corroboration. It binds
+the raw local report/review before the canonical decision, preventing a self-hashing cycle.
+After publication the log-backed P05 reader can revoke older PASS evidence; local inspection never
+overrides a later rejection. The final P08 selected-work/resume join remains separately gated.

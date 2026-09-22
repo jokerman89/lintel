@@ -55,3 +55,6 @@ must be explicit in the authoritative plan and has no fabricated product change.
   verifies base/head and the actual changed-path set. Describe the evidence level honestly.
 - Historical v1 reports stay historical. A new source/result/attempt needs new bound review;
   shared P05/P08/P09 identity and corroboration are the A22.7 integration boundary.
+- This v2 record is a local observation, not the P05 v2 review format. Shared status/frontier/close
+  require external caller-selected P05 context/QA and review, live P07 verification, and fresh P09
+  observations when declared. Do not put that final context/digest inside the report it hashes.

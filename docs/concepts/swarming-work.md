@@ -116,7 +116,7 @@ python3 "$LINTEL_SOURCE_ROOT/bin/li-swarm.py" wave \
 Do not execute scripts named by a work artifact or use the target repository as an implicit tool
 source. If the adapter cannot provide a trusted `LINTEL_SOURCE_ROOT`, stop with `NEEDS_CONTEXT`.
 
-`status` derives lane state from the declared report and review evidence in the repository tree.
+`status` derives lane state from the declared report/review and fresh shared evidence in the repository tree.
 The coordinator still uses committed integration history as completion truth. `wave` returns the earliest
 incomplete wave allowed by topology and evidence, bounded by `max_parallel`. That output is only a
 candidate frontier: known leaf/package prerequisites are filtered, and unresolved prerequisites
@@ -220,25 +220,79 @@ equality never permits following a target, and submodules (`160000`) retain thei
 File-only snapshots verify present content but cannot prove a base diff, host isolation or identity.
 Describe the level observed rather than converting a path string into an invented product change.
 
+These are the retained **local** snapshot semantics. `inspect` and `inspect --check-complete`
+expose local observations without shared acceptance; both return `release_clearance: false`.
+P05's selected raw base/HEAD/index/worktree snapshot is separate and remains authoritative for
+shared review. Never substitute a normalized local digest for its raw content identity.
+
+## Shared provider evidence
+
+Each lane may declare `shared_evidence` with `context`, `review`, `qa`, `corroboration`,
+`domain_request` and `review_skill`. All values except the skill are literal JSON-file pointers;
+corroboration and domain request may be null when genuinely inapplicable. Context, QA,
+corroboration and domain request are coordinator-owned; canonical shared review JSON is
+reviewer-owned under `.claude/runtime/reviews/`. No pointer can acquire mapped authority,
+another artifact, a reducer or an aliased physical file.
+All shared JSON slots use safe ordinary ancestors; an existing leaf must be a regular single-link
+file, while a missing planned leaf is allowed only through those safe ancestors. Symlink/reparse,
+hardlink, directory/special and uninspectable metadata paths fail before ownership is granted.
+The same guard checks the actual reviewer filename and consumption: an alternate name for the
+same file is not its assigned slot. Coordinator metadata references do not grant lane ownership
+of state/audit/jobs. Supported legacy product symlinks remain unaffected by this metadata rule.
+
+The caller creates actual provider artifacts, not Swarm lookalikes. Before observations it fixes
+P05 v2 work/QA obligations and the explicit P07 v1 reference. After reports/results exist it
+externally prepares the final P05 context, retaining original inputs/base and adding actual
+outputs/evidence. That context binds the complete coordination/charter/brief and all product scopes,
+plus the raw local report/review. The final context itself is outside the content it hashes.
+The canonical P05 decision then binds that context and complete per-leaf/control coverage.
+A P05 selection of an actual parent directory covers the whole descendant lane scope, including
+future files; the consumer does not force a redundant exact child selector. Missing/partial child
+coverage, siblings, misleading textual prefixes and file-as-parent claims remain invalid.
+A parent deleted by the reviewed change remains covered when P05 binds its former tracked
+descendants; the consumer does not require recreating the directory or replacing valid evidence.
+
+`status`, `wave`, `resume` and `verify` consume one common gate: current P07 reference and exact
+required policy, actual P05 review validation, the existing log-backed latest-review reader, and
+same-context QA. They require explicit `--profile-home`, `--profile-packs`, `--profile-pointer`
+and optional `--profile-context-file`; they never bootstrap/rebind missing pins. Local-only results
+become `awaiting_shared_evidence`, not a synthetic independently reviewed `complete`.
+
+When selected, P09's domain verifier re-reads every expected checkpoint/result/artifact. Its exact
+P05 QA is used, but its non-clearing/review-not-evaluated result is not promoted into independent
+review. No-domain packages use regular P05 QA. Verification-only packages need no imaginary edit;
+their selected product states must actually be unchanged. A later rejecting/malformed review,
+missing/changed obligation, profile drift, absent domain result or changed attempt blocks the same
+gate in every command. Synthetic actor names are never independent corroboration.
+
+Staging/committing selected data and Git fan-in can change a P05 context. Reprepare and obtain actual
+affected review rather than treating a prior lane decision as integration acceptance. The reader's
+latest-log precedence is not replaced by standalone artifact verification. Safe link and platform
+observations remain data; neither snapshot grants permission to dereference/execute a target.
+
 ## Close a swarm
 
 Run the deterministic evidence gate only after every lane report and review is present:
 
 ```bash
 python3 "$LINTEL_SOURCE_ROOT/bin/li-swarm.py" verify \
-  --repo "$repo" --coord "$coord"
+  --repo "$repo" --coord "$coord" \
+  --profile-home "${profile_home:?explicit approved home}" \
+  --profile-packs "${profile_packs:?explicit approved store}" \
+  --profile-pointer "${profile_pointer:?explicit approved pointer}"
 ```
 
-A passing `verify` result checks local declared evidence and observable content, not the identity
-of a person/model behind an actor reference. Distinct strings alone never establish independence. The
+A passing `verify` result checks local observations and the selected shared evidence. The P05
+corroboration verifier checks the consistency of separately supplied host/human evidence; the caller
+still owns its trust. Distinct strings alone never establish independence. The
 coordinator must still confirm that every passing lane was integrated into the declared integration
 branch, run focused integration checks, and hand the reconciled tree to ordinary REVIEW. REVIEW
 repeats specification, quality and active-pack compliance across the full diff. Lane reviews never
 replace that final integrated gate.
 
-Shared control/review corroboration (P05), effective-profile references (P07), work selection (P08)
-and domain results (P09) are the explicitly open A22.7 follow-up. The local identities are an
-integration seam, not a claim that final Universal evidence binding is already complete.
+P05/P07/P09 consumption uses accepted providers in this unit; newer P08 selected-work/resume
+binding is still the explicitly open A22.7 follow-up. No unaccepted lifecycle helper is imported.
+The current consumer is not a claim that final Universal integration/client acceptance is complete.
 
 Swarm completion does not authorize a push, deployment, production change or other external
 mutation. Those actions retain exactly the same approval and compliance requirements they would have

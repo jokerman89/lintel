@@ -19,7 +19,15 @@
       "write_scope": ["path/owned-by-p1"],
       "brief": ".claude/plans/replace-me/swarm/briefs/P1.md",
       "report": ".claude/plans/replace-me/swarm/reports/P1.md",
-      "review": ".claude/plans/replace-me/swarm/reviews/P1.md"
+      "review": ".claude/plans/replace-me/swarm/reviews/P1.md",
+      "shared_evidence": {
+        "context": ".claude/runtime/swarm/replace-me/P1/context.json",
+        "review": ".claude/runtime/reviews/replace-me-P1.json",
+        "qa": ".claude/runtime/swarm/replace-me/P1/qa.json",
+        "corroboration": ".claude/runtime/swarm/replace-me/P1/corroboration.json",
+        "domain_request": null,
+        "review_skill": "review"
+      }
     },
     {
       "task_id": "P2",
@@ -29,7 +37,15 @@
       "write_scope": ["path/owned-by-p2"],
       "brief": ".claude/plans/replace-me/swarm/briefs/P2.md",
       "report": ".claude/plans/replace-me/swarm/reports/P2.md",
-      "review": ".claude/plans/replace-me/swarm/reviews/P2.md"
+      "review": ".claude/plans/replace-me/swarm/reviews/P2.md",
+      "shared_evidence": {
+        "context": ".claude/runtime/swarm/replace-me/P2/context.json",
+        "review": ".claude/runtime/reviews/replace-me-P2.json",
+        "qa": ".claude/runtime/swarm/replace-me/P2/qa.json",
+        "corroboration": ".claude/runtime/swarm/replace-me/P2/corroboration.json",
+        "domain_request": null,
+        "review_skill": "review"
+      }
     }
   ]
 }

@@ -33,3 +33,8 @@ Write the lane's report from `agent-report.template.md`. List exact changed path
 findings, limitations, and downstream notes. Bind the current attempt/source/result using
 `li-swarm.py snapshot` and include acceptance evidence for every member leaf. Do not mark shared
 plan state complete, invent a changed file for verification-only work, or author your own review.
+
+Local v2 observations do not grant shared acceptance. The coordinator owns externally prepared
+P05 v2 context/QA, the P07 reference and any P09 request; do not write those pointers or synthesize
+independent corroboration. Preserve raw reports/results for final external preparation and actual
+review. No-domain work uses ordinary P05 QA. A domain result remains non-clearing observation data.

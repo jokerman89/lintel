@@ -98,5 +98,13 @@ assert wrapper.is_file(), "discovered integration wrapper is missing"
 wrapper_body = wrapper.read_text(encoding="utf-8")
 assert "tests/unit/swarm-contract.py" in wrapper_body
 assert "tests/integration/swarm-workflow.py" in wrapper_body
+consumer = (root / "lib/swarm_evidence.py").read_text(encoding="utf-8")
+for marker in ("verify_profile_reference", "required_policy", "verify_review", "verify_qa",
+               "bin/li-review-read", "domain_result.verify_result"):
+    assert marker in consumer, f"shared Swarm gate does not consume {marker}"
+assert "workflow.sh" not in consumer and "import work_context" not in consumer
+cli = (root / "bin/li-swarm.py").read_text(encoding="utf-8")
+assert '"inspect"' in cli and 'release_clearance=False' in cli
+assert (root / "tests/integration/swarm-shared-binding.sh").is_file()
 print("PASS: swarm workflow links, opt-in fallback, shared parser, and unique task authority are present")
 PY
