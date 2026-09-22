@@ -107,6 +107,24 @@ latest-log status. `qa --repo --expected --input` validates recorded checks, wit
 running/repairing code. `ship --repo --skill --expected --corroboration --qa` invokes
 the actual shared reader and same-context QA, never publication/deployment.
 
+## P09 data-core consumption
+
+The approved P09 data-only request/checkpoint/result unit reuses the P05 v2
+work/context/control/evidence/QA definitions and P07 v1 live reference/policy.
+Its single domain schema/helper and thin CLI never schedule, execute domain actions,
+complete original tasks/phases or grant release clearance. Raw recorded observations
+are not verified inputs; fresh composition rechecks actual artifacts, expected
+obligations, the caller-selected P05 context and current P07 policy.
+
+Accepted P05/P07 producers supply this unit's integration fixtures. P08's newer
+work-context reader and module procedure wiring are not replaced, copied or
+imported before their release. Final source/output preparation stays external to
+the handoff being hashed. Explicit advisory preferences remain distinct from
+required policy and from an uninspected personal `profile.yaml`.
+
+The concrete domain fields live only in P09's one schema/implementation, not this
+summary. Actual installed-resource/preflight closure remains coordinator/P10 work.
+
 ## P07 profile context
 
 `lib/profile_context.py` is the shared stdlib parser/resolver/validator/digester.

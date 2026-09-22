@@ -86,7 +86,12 @@ without authoring the still-gated domain/workflow result binding. P11 may implem
 only A16's browser-operation unit, whose P03/P05/P06/P07 prerequisites are accepted;
 A14 and frontend-agent edits still wait for P08/P09. These writers have disjoint
 scopes. This staging changes execution order, not leaf acceptance or the nine-phase
-cycle. P12/P13 and remaining cross-component gates retain their dependencies.
+cycle. P09's next data-only schema/helper unit can use accepted P03/P05/P07
+producers without importing P08; module wiring remains gated. P12's existing
+standalone brief/content/Word/PPT routes can now be implemented against accepted
+core/role contracts without forking the shared design schema. Its shared-pipeline
+binding, PDF/XLSX/Visio implementation, P13 and other cross-component gates retain
+their dependencies and specific later release.
 
 Each leaf below is a bounded change or scenario, intended for a short implementation
 step. If an actual leaf needs splitting, append stable sub-IDs before starting it and
@@ -327,7 +332,13 @@ Acceptance: actual artifacts and mandatory design checks, not only populated sch
 - [ ] A15.1 Separate shared facts/narrative from format-specific composition and QA.
 - [ ] A15.2 Remove universal 40-word truncation and test retained long reasoning.
 - [ ] A15.3 Verify supported document/slide rendering and promised editability.
+  - [ ] A15.3.word Verify real editable Word output, retained content and rendered/reopen evidence.
+  - [ ] A15.3.ppt Verify real editable slide output, notes/content retention and rendered/reopen evidence.
+  - [ ] A15.3.shared Bind the released shared design/profile/work contract to both format consumers.
 - [ ] A15.4 Give PDF/XLSX/Visio concrete adapters, recalculation/QA and honest staged boundaries.
+  - [ ] A15.4.pdf Verify a declared PDF writer/export route with page/text fidelity.
+  - [ ] A15.4.xlsx Verify a concrete workbook writer, recalculation and cached/formula integrity.
+  - [ ] A15.4.visio Verify a concrete diagram writer, connectors/labels and real reopen/editability.
 Acceptance: missing renderer remains unfinished; authored outputs preserve intended reasoning.
 
 ### A16 Real browser operations (P11; R03/R07)

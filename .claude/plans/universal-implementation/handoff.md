@@ -42,8 +42,8 @@ from the reviewed historical merge `40c2795`. Current implementation ownership:
 | P06 host adapters | `324863ff-e7cf-4abf-b449-04dd0f096170` | Component ACCEPTED/integrated `36593cd`; provider `7425960`, final review `1067da29`; idle |
 | P07 profile context | `b9352dfe-1c1e-4ea3-b7d9-0fd008d39b3d` | Long-path repair ACCEPTED by `a7450597`, integrated `c344133` with reports; joined checks pass, idle |
 | P08 work lifecycle | `f2c305ac-e8b0-4b02-b6cd-c7de598964cf` | `402fd804` SPEC FAIL preserved `26c80a0`; bounded F04/F05 class repair authorized; original semantic/host evidence remains open |
-| P09 specialist depth | `0fe8dc1e-8c6f-4d4a-af68-80696067be27` | Content accepted `19eb776`, integrated `4983af2`, joined checks pass; remaining binding design only, implementation waits for P08 |
-| P10 installer lifecycle | `5ea6c88c-68c1-4712-8f55-adecdfe0061f` | `c1a38a03` SPEC FAIL P1 F02 preserved `3649dc5`; original owner's bounded producer-expectation repair is authorized |
+| P09 specialist depth | `0fe8dc1e-8c6f-4d4a-af68-80696067be27` | Content accepted/integrated `4983af2`; proposal read; isolated data-core implementation released, P08/module wiring still gated |
+| P10 installer lifecycle | `5ea6c88c-68c1-4712-8f55-adecdfe0061f` | F02 `a797b2d` / report `7bf5a31` frozen; intake verified; same-reviewer complete SPEC then eligible whole QUALITY dispatched |
 | P11 browser operations | `f413bdcb-e081-45e0-9524-7274b4391665` | A16 `d389905` / `84f0d38` BLOCKED; only `307367f` computed-location/conditional owned-fixture scope, no unverified launch |
 
 All are `lintel-builder` sessions with explicit ownership, local commits, report paths
@@ -68,7 +68,7 @@ repair their own findings. All prior reports remain preserved in `reviews/` and 
 | P07 | Final `a7450597` accepts `4d001463`; integrated through `56de830`, earlier `a8de574`/`3d8e715` preserved | `a7d78944-c02c-4909-a060-2c4f2a754b00` |
 | P08 partial | `402fd804`: F04/F05 P2, joint F01/F02 class open; bounded mechanical F03 closed; selected SPEC FAIL/QUALITY NOT STARTED | `9dbf0a9b-750d-45c2-968c-41a5acb11c92` |
 | P09 content | `19eb776` staged CONTENT SPEC/QUALITY PASS at `4a9b946`; integrated; no runtime/parent clearance | `447d97f5-7919-4433-8f65-a64016c0dbdf` |
-| P10 | `c1a38a03` rejects exact `4c0519e3` / `a559c9f` for P1 F02; F01 closed; QUALITY NOT STARTED | `1578dfd8-f239-4eba-989b-3c4bde3e5792` |
+| P10 | Recheck exact `7bf5a31` / `a797b2d` after `c1a38a03` F02; F01 closed, full SPEC/QUALITY still open | `1578dfd8-f239-4eba-989b-3c4bde3e5792` |
 
 ## Current combined review checkpoints
 
@@ -158,6 +158,28 @@ and temp empty. Evidence is `.claude/runtime/p09-joined-zeskux4e`.
 P09 may now prepare only the remaining binding design; implementation and original
 parents still wait for the accepted P08 seam. Preserve the actual execution and
 planning modes of Migrator/ReleaseEngineer, not a blanket planning-only label.
+
+The complete P09 read-only proposal has been read. Its second unit is deliberately
+data-only: one schema/helper/thin CLI, real accepted P05/P07 producers, explicit
+owned record writes and fresh verification before composition. It does not consume
+or imitate unreleased P08 helpers, rewrite modules, create a scheduler or complete
+tasks. Advisory invocation preferences are not pinned pack policy. The concrete
+request/result protocol and remaining integration gates are in the P09 card.
+
+P12's new first-unit card releases actual content preservation and the existing
+standalone Word/PPT paths, not a shared-design or domain-envelope fork. The observed
+universal 40-word/slide-shaped source constraint and false count/score proxies are
+real in-scope defects. Shared pipeline binding and later formats remain separately
+gated; native tools must be discovered and artifacts actually inspected.
+
+F02 repair intake is verified at product `a797b2d8e357d319e549015f591bc85421535cf7`,
+report-only `7bf5a31526cc39951978945df86dea85796fd01b`, with four authorized product
+paths, report hash `2d074056...`, 1,050 lines and unchanged protected implementations.
+All 39 earlier Copilot and 53 lifecycle test methods remain exact ASTs. The report
+update was read. Builder final27/25/9/1 results are not independent acceptance;
+the same reviewer is checking F02 and the remaining original complete SPEC before
+eligible whole QUALITY in `reviews/P10-preservation-a797b2d.md`. Guard-only bounds,
+the unrepaired WinError5 observation and all historical failures remain explicit.
 
 P11 intake verified the 11 source paths, separate report-only parent/path/blob,
 and read the full 275-line report (Git SHA-256 `370b64a7...`). Live execution remains
