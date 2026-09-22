@@ -121,7 +121,8 @@ ADAPTER_RESOURCES = (
     "bin/li-review-evidence.py", "bin/li-review-log", "bin/li-review-read",
     "bin/li-domain-result.py", "lib/domain_result.py", "lib/domain-result-schema.json",
     "lib/state.sh", "lib/cycle-modes.sh", "lib/cycle-footer.sh", "lib/workflow.sh",
-    "bin/li-catalog.py", "skills/catalog/references/metadata.md",
+    "bin/li-catalog.py", "lib/capability-selections.json",
+    "skills/catalog/references/metadata.md", "skills/catalog/references/selections.md",
     "skills/browse/scripts/chromium.mjs", "skills/scrape/scripts/extract.mjs",
     "lib/url_policy.py",
 )
