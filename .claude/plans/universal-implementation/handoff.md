@@ -15,15 +15,20 @@ The existing P08/P09/P10/P11/P12/P13 owners have the new coordinator address.
 Use the app-surfaced session IDs, not differing IDs quoted inside worker messages.
 Current actionable checkpoints supersede the older chronological entries below:
 
+- P04: shared consumer product `f02e994a`, report-only `c2a9455`, is with SAME
+  reviewer `ed672f58`. Final P08/provider and module join remains separate.
 - P08: the same reviewer completed private native `main-review-02` planning SPEC
   and QUALITY. The recovery coordinator read it and approved the corrected Alpha
   design and conditional local T011/T027 implementation. The original controller
   now owns actual DEFINE/DISCOVER/PLAN progression, native BUILD and cold resume;
   it reports actual PLAN completion and the original map approved. SAME reviewer
-  `9dbf0a9b` is reviewing exact mechanical providers first, then the three pinned
-  side-case planning packets. No whole-P08 acceptance follows from those checkpoints.
+  `9dbf0a9b` accepted exact mechanical providers in `e98e7da8`, integrated
+  `e1edc0c`; 22 joined methods and 21-resource source preflight pass. The same
+  reviewer also completed the three side-case drafts; actual owner decisions
+  remain next. Whole P08 semantic acceptance does not follow.
 - P09: data core is independently accepted and integrated through `6144721`.
-  The original owner retains the pending module-binding design.
+  The accepted provider release now permits the original owner's module-binding
+  implementation under its appended card; installed execution remains a P10 join.
 - P10: `036e9033` / `50e654af` fixes F03; independent `131d3db` / `4b5f592`
   closes it but finds canonical stranded redirects falsely reported current.
   `b8f0cf7` releases the finite F04 class to the original owner and lets SAME
@@ -39,10 +44,11 @@ Current actionable checkpoints supersede the older chronological entries below:
   explicitly declined during recovery; no app launched. Page layout remains
   permission-blocked, with no retry, COM/export or alternate-launch workaround.
   The separate denied Copilot UI route stays closed. No full artifact QA follows.
-- P13: ambiguity repair `b1d4caf` / `204ea725` is with SAME independent reviewer
-  `4865e4f7-240b-4721-a64d-ce6df9a75a9c` for complete first-unit SPEC/QUALITY.
-  The original 198-line report and rejection `466a454b` remain unchanged.
-  Conditional additive selection/preservation starts only after actual PASS.
+- P13: ambiguity repair `b1d4caf` passes independent whole first-unit SPEC/QUALITY
+  in `09a3c6ec`, integrated with original history as `03df1db`; joined 31 metadata
+  methods pass and all eight product blobs match. The original owner is released
+  for the already approved additive selection/preservation unit. Installed closure
+  and final P13 parents remain open.
 
 Dependency-ready releases are committed, not new proposals awaiting an operator:
 `bdfd127` releases P04's accepted-provider shared-evidence consumer and conditionally

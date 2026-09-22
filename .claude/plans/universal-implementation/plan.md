@@ -265,12 +265,12 @@ full workflow/profile-value gates remain open.
   - [ ] A08.1.r1 Recognize governing request heads and complete clause context before recommending an operation.
   - [ ] A08.1.r2 Verify structural authority contrasts and retained affirmative/read routing without phrase exceptions.
 - [ ] A08.2 Start cycle identity before phases and prevent duplicate start phases.
-  - [ ] A08.2.a Implement cycle-start/phase-transition helpers and interrupted-state fixtures.
-  - [ ] A08.2.b Render footer state from actual STARTING/BLOCKED/DONE status, not next-phase metadata.
+  - [x] A08.2.a Implement cycle-start/phase-transition helpers and interrupted-state fixtures.
+  - [x] A08.2.b Render footer state from actual STARTING/BLOCKED/DONE status, not next-phase metadata.
   - [ ] A08.2.c Compose canonical phase entry without duplicate SENSE/SCOPE.
 - [ ] A08.3 Connect ANALYZE/CAPTURE/budget/resume to the same selected task source.
-  - [ ] A08.3.a Share the selected-map reader and bounded artifact manifest using accepted parsers/selectors.
-  - [ ] A08.3.b Persist selected-map/profile/required-policy resume identity without replacing original authority.
+  - [x] A08.3.a Share the selected-map reader and bounded artifact manifest using accepted parsers/selectors.
+  - [x] A08.3.b Persist selected-map/profile/required-policy resume identity without replacing original authority.
   - [ ] A08.3.c Wire ANALYZE/CAPTURE/BUILD/budget consumers to original paths and IDs.
     - [ ] A08.3.c.r1 Guard analysis-report selection through native identity before choosing output.
     - [ ] A08.3.c.r2 Verify actual PLAN present/absent/spelling and distinct-location refusal/preservation cases.
@@ -279,6 +279,14 @@ full workflow/profile-value gates remain open.
   - [ ] A08.5.j1 Join the exact reviewed native-path dependency and public-helper fixture consumer without altering the frozen root correction.
   - [ ] A08.5.j2 Verify original-dimension preservation and the final combined lifecycle candidate before the same reviewer's selected-subset SPEC/QUALITY.
 Acceptance: no write escalation of read intent, duplicate backlog or lost history.
+Mechanical-provider evidence: [independent checkpoint](reviews/P08-provider-7046929.md)
+at exact `70469296`, report `e98e7da8`, integrated `e1edc0c`. All three providers,
+the necessary footer and test module match reviewed Git blobs; accepted dependencies
+match. Joined 22 selected methods and 21-resource source preflight pass. These four
+refinements do not close A08 parents, actual semantic/intake/orchestration or A13.
+The broader lifecycle runner stays deferred until its remaining consumers join;
+the checked-in provider runner selects the actual accepted cases without deleting
+the other original test methods.
 
 ### A09 Concrete specialist modules (P09; R06)
 - [ ] A09.1 Define shared work/profile/revision/result handoff envelope.
