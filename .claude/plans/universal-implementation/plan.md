@@ -295,6 +295,8 @@ initiative-wide capacity/host acceptance from these component checkboxes.
 - [ ] A12.2 Preserve consumer customizations through install/update/conflict.
   - [ ] A12.2.a Verify fresh and repeated install in an independent consumer.
   - [ ] A12.2.b Refuse conflicting updates while retaining user prose, config and local extensions.
+    - [ ] A12.2.b.r1 Preserve native existing-file observations and original producer expectations through publication.
+    - [ ] A12.2.b.r2 Verify installed seeded preservation and late-change refusal at the original long plain target.
 - [ ] A12.3 Verify interrupted operations and owned rollback in a separate consumer repository.
   - [ ] A12.3.a Diagnose interrupted writes without success-shaped partial state.
   - [ ] A12.3.b Apply explicit recovery only to verified owned bytes.

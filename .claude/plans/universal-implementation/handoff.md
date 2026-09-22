@@ -43,7 +43,7 @@ from the reviewed historical merge `40c2795`. Current implementation ownership:
 | P07 profile context | `b9352dfe-1c1e-4ea3-b7d9-0fd008d39b3d` | Long-path repair ACCEPTED by `a7450597`, integrated `c344133` with reports; joined checks pass, idle |
 | P08 work lifecycle | `f2c305ac-e8b0-4b02-b6cd-c7de598964cf` | Combined `2f4cc38` / report `8eb00b87` frozen; intake verified; same-reviewer complete selected SPEC then eligible QUALITY dispatched |
 | P09 specialist depth | `0fe8dc1e-8c6f-4d4a-af68-80696067be27` | First knowledge/preservation unit active from `56df03d`; shared runtime/result binding still waits for P08 |
-| P10 installer lifecycle | `5ea6c88c-68c1-4712-8f55-adecdfe0061f` | `a559c9f` / `4c0519e3` frozen; `c1a38a03` SPEC FAIL P1 F02 scaffold preservation; original owner has design-only follow-up |
+| P10 installer lifecycle | `5ea6c88c-68c1-4712-8f55-adecdfe0061f` | `c1a38a03` SPEC FAIL P1 F02 preserved `3649dc5`; original owner's bounded producer-expectation repair is authorized |
 | P11 browser operations | `f413bdcb-e081-45e0-9524-7274b4391665` | A16-only unit active from `56df03d`; A14/shared design/frontend agents still gated |
 
 All are `lintel-builder` sessions with explicit ownership, local commits, report paths
@@ -122,6 +122,16 @@ whole scaffold/migration preservation-planning correction before the repair scop
 is committed. No product repair, recovery, cleanup or acceptance is
 authorized before its bounded repair card. All original successful and failed
 controls remain distinct; independent runtime9/9 and lifecycle53/53 do not clear F02.
+
+The coordinator read all 364 review lines and verified sole parent/path/hash,
+then preserved the report as `3649dc5` without importing product. The original
+owner's design-only response identified the complete producer class: native
+observations plus original expected-state maps in scaffold/migration and their
+existing publication callers. The appended P10 F02 card now authorizes that
+bounded repair and same-target late-change regressions. F01/parser/json-field,
+accepted core, transaction/schema/profile and Git behavior stay unchanged.
+The remaining complete SPEC and first whole QUALITY still await a new frozen
+candidate and the same reviewer.
 
 ## Accepted local integrations
 

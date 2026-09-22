@@ -93,8 +93,10 @@ completing full P10 SPEC before the first eligible whole QUALITY; no acceptance 
 That review now reports a real scaffold user-content overwrite at an existing
 long plain-folder target, distinct from the Git limitation. Immutable report
 `c1a38a03` is SPEC FAIL, P1 F02; testing stopped and QUALITY has not started.
-The original builder has design-only follow-up. No source repair or waiver
-precedes the bounded correction scope.
+Report-only rejection is preserved as `3649dc5`. The original builder's bounded
+native-observation/producer-expectation repair is now scoped in P10; no shared
+transaction/core/schema or Git compatibility redesign is allowed. Same-reviewer
+complete SPEC and first whole QUALITY remain required.
 The operator challenged the prolonged pathing focus on 2026-09-21. The target is
 useful, team-ready Universal skills, not a general Windows/Git compatibility layer.
 Close only the bounded active P08/P10 corrections and required review, then advance
