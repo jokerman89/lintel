@@ -41,7 +41,7 @@ from the reviewed historical merge `40c2795`. Current implementation ownership:
 | P05 review evidence | `2329e71f-cd9e-473b-94cf-41c579c29a88` | ACCEPTED by `33eac071`, integrated `c5c8f86`; current profile/review and focused gates pass, idle |
 | P06 host adapters | `324863ff-e7cf-4abf-b449-04dd0f096170` | Component ACCEPTED/integrated `36593cd`; provider `7425960`, final review `1067da29`; idle |
 | P07 profile context | `b9352dfe-1c1e-4ea3-b7d9-0fd008d39b3d` | Long-path repair ACCEPTED by `a7450597`, integrated `c344133` with reports; joined checks pass, idle |
-| P08 work lifecycle | `f2c305ac-e8b0-4b02-b6cd-c7de598964cf` | `402fd804` SPEC FAIL preserved `26c80a0`; bounded F04/F05 class repair authorized; original semantic/host evidence remains open |
+| P08 work lifecycle | `f2c305ac-e8b0-4b02-b6cd-c7de598964cf` | Routing `70469296` / `8318c308` frozen and intake verified; bounded native semantic fixture protocol released, no selected-SPEC clearance |
 | P09 specialist depth | `0fe8dc1e-8c6f-4d4a-af68-80696067be27` | Content accepted/integrated `4983af2`; proposal read; isolated data-core implementation released, P08/module wiring still gated |
 | P10 installer lifecycle | `5ea6c88c-68c1-4712-8f55-adecdfe0061f` | F02 `a797b2d` / report `7bf5a31` frozen; intake verified; same-reviewer complete SPEC then eligible whole QUALITY dispatched |
 | P11 browser operations | `f413bdcb-e081-45e0-9524-7274b4391665` | `f4cd1f3` / `a49e7b8` has real headless evidence; scoped existing-deadline owned-file readiness correction, acceptance still open |
@@ -198,6 +198,15 @@ normal-pipeline continuation. Outside/unresolved results stop; no actual-home,
 policy or startup-variant work is authorized.
 
 ## Accepted local integrations
+
+P08 correction intake is verified at `70469296f97e8292c6bcf7a0c2b324cc47fcfcf1`
+and report-only `8318c3086efc5eb938a2542780226eae3c227ea8`: three source files,
+unchanged modes, 328-line append with complete old prefix, LF hash `2651fb98...`.
+The new shared-head/newline implementation and 3,811 self-assertions are not
+independent closure. The complete proposed native proof protocol was read and
+is released only by the new P08 bounded-fixture section. The original owner
+controls isolated fixture actors; MasterSession supplies actual fixture decisions.
+No fabricated questions, semantic reports, accepted findings or phase completion.
 
 P11 continuation intake verified six source paths over `84f0d38`, the report-only
 child `a49e7b8`, and report SHA-256 `3b25c472...`; the full update was read.
