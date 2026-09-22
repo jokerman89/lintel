@@ -44,43 +44,47 @@ Emits `motion.json` (schema_version: 1) per the frontend-motion SKILL.md contrac
    - `--energy-level <subtle|moderate|kinetic>` (default: moderate)
    - `--target-device <desktop-only|mobile-first|both>` (default: both)
 
-2. **Pick library combination based on brief signal:**
+2. **Decide whether motion is needed.** No animation or CSS-only can be the correct
+   recommendation. Preserve existing dependencies and native scrolling unless a
+   specific state/feedback or storytelling need justifies more. Then consider candidates:
 
    | Brief signal | Recommendation |
    |---|---|
-   | "scroll-choreographed reveal" | GSAP+ScrollTrigger + Lenis |
+   | "scroll-choreographed reveal" | existing CSS/browser capability or GSAP+ScrollTrigger if justified; smoothing separately |
    | "subtle fades, perf-critical" | Motion-One (lightweight WAAPI) or CSS-only |
    | "storyboard-driven hero act" | Theatre.js + GSAP |
    | "icon system + interactive illustration" | Rive |
    | "React-bound UI motion (modals, drawers)" | Framer Motion |
-   | "scrub-tied parallax + pinning" | GSAP+ScrollTrigger (mandatory) |
+   | "scrub-tied parallax + pinning" | evaluate native/CSS or GSAP against required behavior and devices |
    | "data-viz transitions" | D3 transitions OR Motion-One |
    | "WebGL/canvas integration" | GSAP for timeline + react-three-fiber for canvas |
 
 3. **Verify licensing at invocation (L-003):**
-   - GSAP free-tier covers ScrollTrigger basic + core animations
-   - GSAP Club plugins (SplitText, MorphSVG, DrawSVG, etc.) require commercial license — flag if recommended
-   - Theatre.js Apache-2.0 — verify current state
-   - Rive freemium — flag tier requirements
-   - All others MIT-equivalent — verify
+   - Verify the exact release's terms and runtime/editor/asset obligations separately
+   - GSAP's [current pricing page](https://gsap.com/pricing/) announces free use;
+     the old blanket Club-plugin paid-license claim is obsolete. Pricing is not
+     proof of unrestricted redistribution or an MIT license.
+   - For Theatre.js, Rive, Motion and other candidates, use their actual selected
+     package/service terms rather than assuming every library is MIT-equivalent
 
 4. **Spec scroll-trigger + smooth-scroll config:**
    - scrub: true (for animations tied to scroll position) or false (for triggered animations)
    - lerp: 0.1 (subtle) to 0.05 (slower-feeling smooth) to 0.15 (snappier)
-   - markers_in_dev: always true (dev-only, GSAP filters out in prod)
+   - markers_in_dev: enable explicitly for diagnosis; ensure production configuration
+     disables markers rather than assuming the library removes them
    - wheelMultiplier: tune for trackpad-vs-mouse contexts
 
-5. **Pick 3-5 key animations:**
-   - hero-reveal (always)
-   - section-fade-up (default per section)
-   - scrub-tied parallax (if energy >= moderate)
+5. **Specify only justified animations (possibly zero):**
+   - hero-reveal only when the brief needs it
+   - section reveal only when content remains available without animation
+   - scrub/parallax only with an actual purpose and reduced-motion alternative
    - hover-tilt (if component-library is motion-enhanced)
    - page-transition (if brief mentions multi-page)
    - Each animation: name + trigger + spec (1-2 lines) + library
 
 6. **Spec perf-budget:**
-   - fps_target: 60 (always)
-   - scroll_jank_max_ms: 16 (60fps frame budget)
+   - fps_target: derived from target display/device and workload
+   - scroll_jank_max_ms: measured frame/work budget, not a universal safety claim
    - fallback_for_prefers_reduced_motion: "disable-all-scroll-animations" or "use-fade-only"
    - mobile_strategy: "reduce-scrub-fidelity-and-skip-parallax" if target_device !== desktop-only
 
@@ -99,12 +103,18 @@ See frontend-motion SKILL.md Step 3 — agent fills in choices.
 
 ## Anti-patterns
 
-- **Recommending GSAP Club plugin without flag** — operator may not have commercial license. Always flag tier.
+- **License assumptions from an old table** — verify current selected release and terms
 - **Skipping prefers-reduced-motion fallback** — accessibility-fail. perf_budget field is mandatory.
 - **Hardcoding "always Lenis"** — if brief mentions perf-critical, Lenis may be too heavy. Pick based on brief.
 - **Forgetting mobile-strategy** — scroll-driven parallax tanks mobile perf. Always spec mobile-fallback.
 
 ## Failure recovery
+
+Worked decision: an accessible error message needs immediate presence and focus
+handling, not a three-scene hero timeline. Prefer no animation or a brief CSS
+transition, then test interruption, focus, reduced-motion and low-end rendering.
+Emit only representations supported by the existing motion contract; report any
+unrepresentable no-motion choice to the contract owner instead of adding schema keys.
 
 - Brief lacks energy-direction → NEEDS_CONTEXT with specific question ("subtle fade-ups or kinetic scroll-choreography?")
 - Library-version-recommendation outdated → re-pick at invocation

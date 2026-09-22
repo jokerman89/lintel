@@ -51,7 +51,8 @@ writing a schema is not evidence that generated consumers compile or execute.
 
 - Internal function with no published inter-component contract — wrong tool
 - Renaming an internal helper — no API affected
-- Bug fix to existing endpoint — `/review` agent
+- Implementation bug in an existing endpoint — the approved implementer repairs;
+  a reviewer assesses the result independently
 
 ## Workflow
 

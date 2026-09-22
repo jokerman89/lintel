@@ -45,7 +45,7 @@ Emits `shader.json` (schema_version: 1) per the frontend-shader SKILL.md contrac
 
    | Visual thesis + budget | Recommendation |
    |---|---|
-   | mesh-gradient + any | Paper Shaders (declarative, mid-tier safe) |
+   | mesh-gradient + any | CSS first; Paper Shaders is a candidate, not pre-verified device safety |
    | noise-field + mid/high | Paper Shaders OR OGL+Lygia |
    | fluid-sim + high-end-only | OGL + custom GLSL (fluid-sim is GPU-heavy) |
    | particle-system + mid/high | r3f + Drei (Sparkles, ParticleSystem) |
@@ -54,11 +54,9 @@ Emits `shader.json` (schema_version: 1) per the frontend-shader SKILL.md contrac
    | any + low-end | CSS-fallback OR Paper Shaders with mobile-disable |
 
 3. **Verify licensing at invocation (L-003):**
-   - Paper Shaders MIT — verify
-   - OGL MIT — verify
-   - react-three-fiber MIT — verify
-   - Lygia MIT — verify (it's a GLSL function library, not a runtime)
-   - All free-tier. Flag if claim changes at invocation-time.
+   - Inspect the exact Paper Shaders/OGL/r3f/Lygia release and its applicable terms
+   - Lygia supplies GLSL functions, not a renderer; preserve snippet attribution and
+     any per-file/license obligations instead of assuming every candidate is MIT/free
 
 4. **Pick GLSL snippets:**
    - Paper Shaders: built-in components (`<MeshGradient>`, `<Voronoi>`, `<Waves>`, `<Noise>`, `<Liquid>`) — reference by name + props
@@ -67,8 +65,9 @@ Emits `shader.json` (schema_version: 1) per the frontend-shader SKILL.md contrac
    - Lygia: import `lygia/generative/snoise.glsl` style. Don't recreate noise-functions.
 
 5. **Spec perf-budget:**
-   - fps_target: 60 (always)
-   - max_draw_calls: 4 (mid-tier safe), 8 (high-end), 1 (low-end CSS-fallback)
+   - fps_target: selected device/display/workload target, verified by profiling
+   - max_draw_calls: justified budget; resolution, overdraw, texture size and shader
+     complexity matter too. A CSS-only fallback has no WebGL draw calls.
    - fallback_strategy_low_end: "swap to CSS conic-gradient" or "disable"
    - fallback_strategy_no_webgl: "static CSS gradient + SVG noise pattern"
    - respect_prefers_reduced_motion: true (always)
@@ -77,7 +76,8 @@ Emits `shader.json` (schema_version: 1) per the frontend-shader SKILL.md contrac
 6. **Spec GPU-thesis:**
    - complexity: low | medium | high
    - mobile_strategy: downscale-resolution-50% | disable | full
-   - one-line explanation: "Paper Shaders runs fragment-shader-only with 1 fullscreen quad — safe for mid-tier"
+   - one-line explanation: name measured device/browser, pixel ratio, frame/GPU time,
+     memory/thermal behavior and remaining coverage; one fullscreen quad is not a safety proof
 
 7. **Write operator_instructions_md:**
    - npm install one-liner
@@ -100,12 +100,21 @@ See frontend-shader SKILL.md Step 3 — agent fills choices.
 ## Anti-patterns
 
 - **Forcing a shader where none belongs** — agent must short-circuit to "none" when brief doesn't warrant.
-- **Skipping low-end fallback** — half of mobile users have GPU that throttles fragment-shader. Required.
-- **r3f for mesh-gradient** — overkill. Paper Shaders is 95% smaller bundle for same visual.
+- **Skipping low-end fallback** — test target devices and supply a non-WebGL result;
+  do not invent a percentage of affected users
+- **Unmeasured bundle comparisons** — compare the actual production build and needed
+  features; a library name alone does not establish bundle-size savings
 - **Hardcoding "always Paper Shaders"** — kinetic 3D needs r3f. Pick based on thesis.
 - **No IntersectionObserver pause** — shader running off-screen burns battery. Required.
 
 ## Failure recovery
+
+Worked decision: a full-screen effect that passes at device-pixel-ratio 1 can become
+fill-rate-bound at ratio 2 (four times the pixels). Bound resolution and remeasure
+before adding geometry or another effect. Exercise context loss, off-screen pause,
+unmount cleanup and reduced-motion; a screenshot cannot verify these behaviors.
+Keep the existing no-shader short circuit and output format; report unsupported
+representations rather than extending the shared design schema here.
 
 - Brief unparsable for visual-thesis → NEEDS_CONTEXT with question ("subtle mesh-gradient bg or full 3D hero scene?")
 - Library version-recommendation outdated → re-pick at invocation
