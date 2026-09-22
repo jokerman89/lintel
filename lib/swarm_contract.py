@@ -393,9 +393,11 @@ def _validate_lanes(
             if not isinstance(shared, dict) or set(shared) != set(definition.get("required", [])):
                 diagnostics.append(Diagnostic("error", "shared.shape", prefix, "Shared evidence needs exactly the declared external pointer fields"))
                 continue
-            skill = shared.get("review_skill")
-            if not isinstance(skill, str) or not IDENTIFIER.fullmatch(skill):
-                diagnostics.append(Diagnostic("error", "shared.skill", prefix, "Shared review_skill must be a stable identifier"))
+            try:
+                from review_contract import validate_shape
+                validate_shape(shared.get("review_skill"), "skill")
+            except (ImportError, OSError, ValueError) as error:
+                diagnostics.append(Diagnostic("error", "shared.skill", prefix, str(error)))
             for name in SHARED_POINTERS:
                 if name in ("corroboration", "domain_request") and shared[name] is None:
                     continue

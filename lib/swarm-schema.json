@@ -123,7 +123,7 @@
         "qa": {"$ref": "#/$defs/repositoryPath"},
         "corroboration": {"anyOf": [{"$ref": "#/$defs/repositoryPath"}, {"type": "null"}]},
         "domain_request": {"anyOf": [{"$ref": "#/$defs/repositoryPath"}, {"type": "null"}]},
-        "review_skill": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9._-]{0,63}$"}
+        "review_skill": {"$ref": "review-schema.json#/$defs/skill"}
       }
     }
   }

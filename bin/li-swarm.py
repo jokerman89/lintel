@@ -3,21 +3,30 @@
 # implements: ADR-0026, ADR-0027
 # intent: docs/concepts/swarming-work.md
 # constraints: read-only; standard library only; never executes artifact content
-# last_intent_review: 2026-09-20
+# last_intent_review: 2026-09-22
 """Read-only validation and evidence gates for a Lintel swarm."""
 
 from __future__ import annotations
 
 import argparse
+from dataclasses import replace
 import json
+import os
 from pathlib import Path
+import runpy
+import subprocess
 import sys
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from profile_context import ProfileConfig
 
 ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT / "lib") not in sys.path:
     sys.path.insert(0, str(ROOT / "lib"))
 
 from swarm_contract import (  # noqa: E402
+    Diagnostic,
     ValidationResult,
     brief_payload,
     check_lane_scope,
@@ -26,6 +35,7 @@ from swarm_contract import (  # noqa: E402
     inspect_local_frontier,
     local_lane_states,
     lane_states,
+    package_sources,
     ready_frontier,
     review_input,
     snapshot_lane,
@@ -62,6 +72,83 @@ def _changed_paths(args: argparse.Namespace) -> list[str]:
     return paths
 
 
+def _selected_work(args: argparse.Namespace, contract: dict[str, Any]) -> dict[str, Any]:
+    # The trusted reader calls Swarm validation; compose here, never in its library.
+    reader = runpy.run_path(str(ROOT / "bin/li-work-artifacts.py"))
+    root = args.repo.resolve()
+    selected = args.work_map if args.work_map is not None else Path(contract["work_map"])
+    work = reader["work_context"](root, selected)
+    mapped = reader["artifact_path"](root, contract["work_map"]).relative_to(root).as_posix()
+    if work["work_map"] != mapped:
+        raise ValueError("Selected work map differs from the explicit coordination backpointer")
+    packages = package_sources(root, contract)
+    for lane in contract["lanes"]:
+        task_id = lane["task_id"]
+        if work["packages"].get(task_id) != packages[task_id]:
+            raise ValueError(f"Selected original package/leaf identity differs for lane {task_id}")
+    return work
+
+
+_RESUME_SCRIPT = r'''
+set -euo pipefail
+audit_log() {
+  printf 'lintel-swarm resume diagnostic (not-persisted):' >&2
+  printf ' %q' "$@" >&2
+  printf '\n' >&2
+}
+source "$LINTEL_SOURCE_ROOT/lib/workflow.sh"
+workflow_resume "$1" "$2"
+'''
+
+
+def _resume_context(
+    args: argparse.Namespace, work: dict[str, Any], config: ProfileConfig,
+) -> tuple[dict[str, Any], ProfileConfig]:
+    from profile_context import required_policy, verify_profile_reference
+    from review_contract import load_json
+
+    if not args.cycle_id.strip():
+        raise ValueError("--cycle-id must select a nonempty original cycle")
+    environment = {key: value for key, value in os.environ.items() if not key.startswith("BASH_FUNC_")}
+    for key in (
+        "BASH_ENV", "ENV", "GSTACK_HOME", "PACK_CACHE_FILE", "LINTEL_CYCLE_ID", "LINTEL_WORK_MAP",
+        "LINTEL_PROFILE_CONTEXT", "LINTEL_PROFILE_CONTEXT_FILE", "LINTEL_PROFILE_REFERENCE",
+        "LINTEL_PROFILE_PACK", "LINTEL_REQUIRED_POLICY",
+    ):
+        environment.pop(key, None)
+    environment.update(
+        LINTEL_SOURCE_ROOT=ROOT.as_posix(), LINTEL_REPO_ROOT=config.repo.as_posix(),
+        LINTEL_PYTHON=Path(sys.executable).as_posix(),
+        _LINTEL_PROFILE_PYTHON=Path(sys.executable).as_posix(),
+        LINTEL_HOME=config.home.as_posix(), LINTEL_PACKS_DIR=config.packs.as_posix(),
+        LINTEL_ACTIVE_PACK_FILE=config.pointer.as_posix(), PYTHONDONTWRITEBYTECODE="1",
+    )
+    if config.context_file is not None:
+        environment["LINTEL_PROFILE_CONTEXT_FILE"] = config.context_file.as_posix()
+    if args.state_dir is not None:
+        environment["LINTEL_STATE_DIR"] = (config.repo / args.state_dir).as_posix()
+    observed = subprocess.run(
+        ["bash", "--noprofile", "--norc", "-s", "--", args.cycle_id, work["work_map"]],
+        input=_RESUME_SCRIPT, cwd=config.repo, env=environment,
+        capture_output=True, text=True, encoding="utf-8", check=False,
+    )
+    if observed.stderr:
+        sys.stderr.write(observed.stderr)
+    observed.check_returncode()
+    recovered = load_json(observed.stdout)
+    if (
+        recovered["cycle_id"] != args.cycle_id or recovered["work_map"] != work["work_map"]
+        or recovered["artifacts"] != work["artifacts"] or recovered["release_clearance"] is not False
+    ):
+        raise ValueError("Resumed cycle differs from the explicitly selected original work")
+    live = verify_profile_reference(recovered["profile"], config)
+    if required_policy(live) != recovered["required_policy"]:
+        raise ValueError("Resumed cycle required policy differs from the live selected profile")
+    bound = replace(config, context_id=recovered["profile"]["context_id"],
+                    expected_reference=recovered["profile"])
+    return {"mode": "persisted-cycle", **recovered}, bound
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -76,12 +163,17 @@ def main() -> int:
     resume_parser = subparsers.add_parser("resume", help="reconstruct candidate work and pending review from committed artifacts")
     _common(resume_parser)
     resume_parser.add_argument("--host-capability", choices=("native", "sequenced", "none"))
+    resume_parser.add_argument("--cycle-id", help="verify this original persisted cycle before shared consumption")
+    resume_parser.add_argument("--state-dir", type=Path, help="explicit existing state directory for --cycle-id")
 
     status_parser = subparsers.add_parser("status", help="show lane evidence states")
     _common(status_parser)
 
     verify_parser = subparsers.add_parser("verify", help="fail unless every lane has complete independent evidence")
     _common(verify_parser)
+    for accepting_parser in (wave_parser, resume_parser, status_parser, verify_parser):
+        accepting_parser.add_argument("--map", dest="work_map", type=Path,
+                                      help="explicit work map; must agree with --coord (defaults to its backpointer)")
     inspect_parser = subparsers.add_parser("inspect", help="retain local observation inspection without shared acceptance")
     _common(inspect_parser)
     inspect_parser.add_argument("--check-complete", action="store_true", help="require all local reports/reviews, still not shared clearance")
@@ -123,19 +215,47 @@ def main() -> int:
         if args.command == "validate":
             result = validate_coordination(args.repo, args.coord)
             return _emit(result)
+        metadata: dict[str, object] = {}
+        if args.command in ("status", "wave", "resume", "verify"):
+            result = validate_coordination(args.repo, args.coord)
+            if not result.ok or result.contract is None:
+                return _emit(result, release_clearance=False)
+            try:
+                work = _selected_work(args, result.contract)
+                metadata["work_context"] = work
+            except (ImportError, OSError, ValueError) as error:
+                result.diagnostics.append(Diagnostic("error", "work.selection", "work_map", str(error)))
+                return _emit(result, release_clearance=False)
+            if args.command == "resume":
+                metadata["recovery"] = {"mode": "artifact-only", "release_clearance": False}
+                try:
+                    if args.state_dir is not None and args.cycle_id is None:
+                        raise ValueError("--state-dir requires an explicit --cycle-id")
+                    if args.cycle_id is not None:
+                        if config is None:
+                            raise ValueError("Persisted-cycle resume requires the three explicit profile locations")
+                        metadata["recovery"], config = _resume_context(args, work, config)
+                except subprocess.CalledProcessError as error:
+                    result.diagnostics.append(Diagnostic(
+                        "error", "work.resume", "cycle_id", f"workflow_resume failed with exit {error.returncode}",
+                    ))
+                    _emit(result, release_clearance=False)
+                    return error.returncode
+                except (ImportError, OSError, ValueError) as error:
+                    result.diagnostics.append(Diagnostic("error", "work.resume", "cycle_id", str(error)))
+                    return _emit(result, release_clearance=False)
         if args.command in ("wave", "resume"):
             result, frontier = ready_frontier(args.repo, args.coord, host_capability=args.host_capability, profile_config=config)
-            return _emit(result, frontier=frontier, verification="shared_evidence", release_clearance=False)
+            return _emit(result, frontier=frontier, verification="shared_evidence", release_clearance=False, **metadata)
         if args.command == "status":
-            result = validate_coordination(args.repo, args.coord)
             states = []
             if result.ok and result.contract is not None:
                 states, evidence = lane_states(args.repo, result.contract, coordination_path=args.coord, profile_config=config)
                 result.diagnostics.extend(evidence)
-            return _emit(result, lanes=states, verification="shared_evidence", release_clearance=False)
+            return _emit(result, lanes=states, verification="shared_evidence", release_clearance=False, **metadata)
         if args.command == "verify":
             result, states = verify_close(args.repo, args.coord, profile_config=config)
-            return _emit(result, lanes=states, verification="shared_evidence", release_clearance=False)
+            return _emit(result, lanes=states, verification="shared_evidence", release_clearance=False, **metadata)
         if args.command == "inspect":
             if args.check_complete:
                 result, states = inspect_local(args.repo, args.coord)
