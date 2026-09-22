@@ -26,6 +26,10 @@ Reads `frontend-design-spec.json` (from `/li:frontend-design` orchestrator outpu
 
 L-001-discipline: skill body is the contract (what scaffolds get generated). Agent at invocation produces actual file-content. Don't pre-bake "the best React structure" — let agent decide based on stack + brief.
 
+Use the [shared direct design contract](../design-dna/references/design-contract.md)
+for validation and renderer arguments. Respect existing project technology; no
+library, framework migration, dependency installation or deployment is implicit.
+
 ## When to use
 
 - "Customer wants a full Next.js app POC, not just a landing page"
@@ -60,24 +64,25 @@ from_frontend_design="${FROM_FRONTEND_DESIGN:-}"
 stack="${STACK:-}"
 brief="${BRIEF:-}"
 routes="${ROUTES:-home,about,contact}"
-out_dir="${OUT:-$HOME/.lintel/generate-runs/$(date +%Y%m%d-%H%M%S)-${RANDOM}/app}"
+out_dir="${OUT:?select an owned repository-relative output directory}"
 
 [ -z "$from_frontend_design" ] && { echo "Required: --from-frontend-design <dir>"; exit 2; }
 [ -f "$from_frontend_design/frontend-design-spec.json" ] || { echo "frontend-design-spec.json not found"; exit 2; }
 [ -z "$stack" ] && { echo "Required: --stack <next-app|vite-react|svelte-kit>"; exit 2; }
 
-mkdir -p "$out_dir"
 ```
+Reject unknown, duplicate or conflicting options before output. Validate the
+selected design and project manifests before scaffolding; do not create directories
+merely because two required strings are nonempty.
 
 ### Step 2 — Schema-version handshake (M-1 + M-5)
 
-```bash
-spec="$from_frontend_design/frontend-design-spec.json"
-sv=$(jq -r '.schema_version' "$spec")
-source=$(jq -r '.source' "$spec")
-[ "$sv" = "1" ] || { echo "Unsupported schema_version: $sv"; exit 1; }
-[ "$source" = "frontend-design" ] || { echo "Wrong source: $source"; exit 1; }
-```
+Call `design_contract.load_design` using the external prepared P05 context and
+explicit P07 configuration. Consume `renderer_args` rather than reimplementing
+variant/stack mapping. Legacy readable inputs need explicit resolution; missing
+policy/assets and profile drift block, without rebinding.
+The shared reader enforces the existing `schema_version: 1` and
+`source: frontend-design` handshake as well as the complete bound design.
 
 ### Step 2b — Stack-guidance pass (ADR-0015 — retrieval before rendering)
 
@@ -86,7 +91,7 @@ case "$stack" in
   next-app)   dna_stack=nextjs ;;
   vite-react) dna_stack=react ;;
   svelte-kit) dna_stack=svelte ;;
-  *)          dna_stack=react; echo "unknown stack '$stack' — using react guidance" ;;
+  *)          echo "Unsupported stack '$stack'; preserve the project technology" >&2; exit 2 ;;
 esac
 python3 "${LINTEL_SKILLS_DIR:-skills}/design-dna/scripts/search.py" "<routes/features keywords>" --stack "$dna_stack"
 ```
@@ -99,6 +104,8 @@ Apply the returned Do/Don't/Severity rules while scaffolding. python3 absent →
 **For `--stack next-app`:**
 
 1. Use `create-next-app` template (or in-repo template at `~/.lintel/brand/web-templates/next-app/`)
+   Use an already available scaffold and explicit output scope. A missing dependency
+   is a reported boundary, not an automatic install or a reason to replace a project.
 2. Generate dir structure:
    ```
    app/
@@ -121,6 +128,10 @@ Apply the returned Do/Don't/Severity rules while scaffolding. python3 absent →
    tsconfig.json
    tailwind.config.ts   — fontFamily with stacks from typography.json
    ```
+   This is a library-enabled example, not a required dependency tree. For no-motion
+   or CSS-only output omit Lenis/GSAP providers, motion modules and dependencies;
+   for no-shader omit the canvas/GPU module. Use only libraries actually selected
+   with project-compatible source/version/license evidence.
 
 **For `--stack vite-react`:**
 
@@ -142,32 +153,22 @@ For each file generated, apply transforms from `frontend-design-spec.json`:
 - **layout.tsx / +layout.svelte:** inject `<link>` tags from `typography.font_stacks[].loading_strategy`, wrap children with LenisProvider if `interaction_signature.scroll_smoothing`, set up fontFamily classNames
 - **page.tsx / +page.svelte:** apply `visual_thesis` to hero copy + structure
 - **tailwind.config:** map `typography.size_scale.scale` + `typography.line_heights` + `layout_grammar.max_width` to Tailwind tokens
-- **components/motion/*.tsx:** GSAP setup with prefers-reduced-motion gating per `motion.perf_budget.fallback_for_prefers_reduced_motion`
-- **components/hero/HeroShader.tsx:** if `shader != null` → emit Paper Shaders component or OGL canvas-mount
+- **Motion:** none means no animation imports; CSS-only uses CSS, not a JS library
+  added for media queries. Library mode implements only selected effects with cleanup
+  and reduced-motion handling.
+- **Shader:** emit a GPU component only for an active non-`none` shader decision;
+  `shader: null` and `visual_thesis: none` produce no shader dependency.
 
 ### Step 5 — Generate `package.json`
 
-```json
-{
-  "name": "<inferred-from-brief>",
-  "version": "0.1.0",
-  "dependencies": {
-    "next": "^15.x" | "react": "^18.x" + "react-dom" | "svelte": "^4.x",
-    "gsap": "^3.12.x",
-    "@studio-freight/lenis": "^1.0.x",
-    "@paper-design/shaders-react": "^0.x"  // only if shader.present
-  },
-  "devDependencies": {
-    "typescript": "^5.x",
-    "tailwindcss": "^3.x"
-  },
-  "scripts": {
-    "dev": "next dev | vite | vite dev",
-    "build": "next build | vite build | vite build",
-    "start": "next start"
-  }
-}
-```
+Retain the project's manifest/lockfile and package manager. For a new authorized
+scaffold, select exact compatible framework/tool releases from their official
+sources; record version/license and rationale in the shared binding. Write only
+the dependencies the chosen design needs, plus the selected framework/build tools.
+No guessed `latest`, stale version ranges or universal GSAP/Lenis/Tailwind bundle.
+Use actual framework scripts and preserve the lockfile. Run installation only
+inside the separately authorized scope after a manifest change or missing-tool
+failure; never silently skip the failed build and claim smoke-test success.
 
 ### Step 6 — Operator-instructions emit
 
@@ -191,7 +192,7 @@ Next steps:
 
 Operator-licensed items (per frontend-design-spec.json):
   - Pangram font? See: $out_dir/public/README-fonts.md
-  - GSAP Club plugins? See: $out_dir/README.md "Motion notes"
+  - Any selected runtime/editor/asset terms? See the source-bound dependency notes.
 ```
 
 ### Step 7 — 4-gate quality pipeline
@@ -254,7 +255,8 @@ generate-app is the **rendering-engine** — produces files. frontend-design is 
 ## Anti-patterns
 
 - **Making design-decisions in generate-app** — wrong layer. Read them from frontend-design-spec.json.
-- **Bundling specific component-library versions** — let operator's npm install resolve. Skill body documents version-min, doesn't pin.
+- **Letting an unpinned install choose design dependencies** — retain project
+  versions/lockfile and record exact sourced choices before an authorized change.
 - **Generating without schema-version handshake** — M-1 + M-5 violation.
 - **Skipping prefers-reduced-motion handling** — accessibility-fail. Mandatory.
 - **Inventing routes not in `--routes` flag** — operator decides scope.
@@ -262,7 +264,8 @@ generate-app is the **rendering-engine** — produces files. frontend-design is 
 ## Failure recovery
 
 - Schema-version handshake fail: BLOCKED + diagnostic
-- npm install fails in smoke-test: surface error + offer `--skip-smoke-test` retry
+- Dependency/build failure: retain the exact diagnostic and unverified artifact
+  outcome; skipping a smoke test does not make the requested app runnable.
 - Stack-template missing or cli scaffold tool unavailable: BLOCKED with install-instruction
 
 ## Recommended next steps after invocation

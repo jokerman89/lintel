@@ -26,6 +26,10 @@ The skill OWNS design-decisions. It does NOT own HTML/Next.js-file-generation (t
 
 Reads operator brief → dispatches typography + motion sub-skills **in parallel** → synthesizes `frontend-design-spec.json` → calls rendering-engine.
 
+The [direct design contract](../design-dna/references/design-contract.md) and its
+single schema/helper govern all producers, renderer arguments and review. Use
+actual available delegation or serial execution; a role name is not an invocation.
+
 ## When to use
 
 - "A landing page for our legal-research assistant" — full end-to-end mode for production-ready design
@@ -48,6 +52,9 @@ Reads operator brief → dispatches typography + motion sub-skills **in parallel
 - Optional `--customer-share` — sets CUSTOMER_SHARE=1, triggers compliance-gate + voice-gate
 - Optional `--out <path>` — output path (default: `~/.lintel/frontend-runs/<run-id>/`)
 - Optional `--skip-shader` — Phase A1 default (frontend-shader skill ships in A2)
+- `--stack <next-app|vite-react|svelte-kit>` for `--target-format app`, selected
+  explicitly or confirmed from the existing project manifest; never infer React
+  for an unknown stack.
 
 ## Workflow
 
@@ -58,11 +65,14 @@ brief="${1:-}"
 pattern="${PATTERN:-}"
 target_format="${TARGET_FORMAT:-single-file}"
 customer_share="${CUSTOMER_SHARE:-}"
-out_dir="${OUT:-$HOME/.lintel/frontend-runs/$(date +%Y%m%d-%H%M%S)-${RANDOM}}"
+out_dir="${OUT:?select an owned repository-relative output directory}"
 
 [ -z "$brief" ] && { echo "Usage: /li:frontend-design <brief> [--pattern <name>] [--target-format <single-file|nextjs|app>]"; exit 2; }
-mkdir -p "$out_dir"
 ```
+
+Reject missing, unknown, duplicate or conflicting options before creating output.
+Preserve the brief as literal data. `--skip-shader` records a no-shader decision.
+The application stack and output path must reach the renderer unchanged.
 
 Voice-tier resolution: default `internal`. If `--customer-share` → run the active pack's voice gate (`resolve_pack_field compliance.hooks`; none by default) first. Per L-001-discipline: skill body preserves contract, agent at invocation produces actual content.
 
@@ -72,17 +82,15 @@ Retrieval before generation. Resolve the active design profile and search the co
 design decision:
 
 ```bash
-dna="${LINTEL_SKILLS_DIR:-skills}/design-dna"   # LINTEL_SKILLS_DIR = this skill's base-dir parent (plugin installs)
-source "${LINTEL_SOURCE_ROOT:-${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}}/lib/pack-resolver.sh" 2>/dev/null \
-  || source "$HOME/.lintel/lib/pack-resolver.sh" 2>/dev/null
-profile="$(resolve_pack_field design.profile 2>/dev/null)"
-[ -z "$profile" ] || [ "$profile" = "null" ] && profile="anthropic-default"
+dna="${LINTEL_SOURCE_ROOT:?trusted source required}/skills/design-dna"
 python3 "$dna/scripts/search.py" "<product> <industry> <tone keywords from brief>" \
   --design-system -f markdown -p "<project>" > "$out_dir/design-dna.md"
 ```
 
-Resolver unsourceable → surface it before defaulting (a pack's declared profile is never
-silently ignored).
+Use the already verified P07 reference and `design_contract.profile_asset` to select
+the pack-owned profile before the same named bundled asset. Retain its hash and
+retrieval output in `binding`. Missing required policy or a selected asset blocks;
+do not source a personal-home fallback or silently substitute a brand.
 
 Precedence: **brief > profile (`$dna/profiles/$profile.yaml`) > corpus hit** — the profile is the
 house default (anthropic-default: warm ink-and-paper); the corpus recommendation fills what the
@@ -93,7 +101,8 @@ Step 2-4 dispatch and Step 5 synthesis. No python3 → use the grep fallback doc
 
 ### Step 2-4 — Parallel sub-skill dispatch (M-4 resolution)
 
-**Run typography + motion sub-skills CONCURRENTLY** (single-batch Agent-tool dispatch). They are independent — both take the brief as input, neither depends on the other.
+Typography and motion are independent decision tasks. Run concurrently only when
+the actual host provides attributable disjoint output ownership; otherwise serialize.
 
 ```
 Concurrent dispatch:
@@ -107,7 +116,8 @@ Both sub-skills receive `$out_dir/design-dna.md` + the active profile as context
 outputs): typography starts from the profile's font roles + the corpus pairing hits; motion
 starts from the profile's duration/easing tokens. They deviate only where the brief demands it.
 
-Wallclock budget: ~60s concurrent (vs ~180s sequential). Wait for both to complete before Step 5.
+Wait for both actual results before synthesis. No timing or parallel-execution
+claim follows from this recipe. None/CSS motion is a complete result, not a stub.
 
 ### Step 5 — Synthesize `frontend-design-spec.json`
 
@@ -123,24 +133,20 @@ Read typography.json + motion.json (+ shader.json if A2). Synthesizes into `fron
   "typography": { /* embedded from typography.json */ },
   "motion": { /* embedded from motion.json */ },
   "shader": null,
-  "component_libraries": [
-    {"name": "shadcn", "kind": "primitive"},
-    {"name": "<aceternity|magic-ui|park-ui>", "kind": "motion-enhanced"}
-  ],
+  "component_libraries": [],
   "layout_grammar": {
     "max_width": "1200px",
     "section_spacing": "var(--space-section)",
     "grid": "12-col"
   },
   "interaction_signature": {
-    "scroll_smoothing": true,
+    "scroll_smoothing": false,
     "hover_intent": "subtle",
-    "page_transitions": "fade-or-slide"
+    "page_transitions": "none"
   },
   "palette": {
     "source_profile": "anthropic-default",
-    "tokens": { "<semantic-name>": "<hex>" },
-    "contrast_verified": true
+    "tokens": { "<semantic-name>": "<hex>" }
   },
   "style": {
     "name": "<chosen style from design-dna search>",
@@ -152,12 +158,17 @@ Read typography.json + motion.json (+ shader.json if A2). Synthesizes into `fron
     "search_ref": "design-dna.md"
   },
   "visual_thesis": "<one-paragraph synthesis>",
-  "voice_tier": "internal | customer-share"
+  "voice_tier": "internal | customer-share",
+  "binding": { /* exact profile, brief, project, retrieval and provenance per shared schema */ }
 }
 ```
 
 `palette`, `style` and `design_dna` are additive optional fields (ADR-0015) — `schema_version`
 stays 1; readers tolerate their absence (minor-additive per the schema-evolution policy below).
+Legacy input remains readable, not automatically renderable. New resolved output
+needs palette tokens, explicit motion mode and the shared binding. Libraries are
+chosen only when justified by the existing stack and brief, with exact sourced
+versions/licenses; empty lists are valid.
 
 **Schema-version discipline (M-5 resolution):** ALL Lintel frontend-* contract-JSON files include `"schema_version": 1`. generate-web/generate-app readers log+reject on unknown major version. Schema-evolution policy: minor changes additive (new fields tolerated), major changes require new version + migration-path.
 
@@ -165,34 +176,31 @@ stays 1; readers tolerate their absence (minor-additive per the schema-evolution
 
 ### Step 6 — Call rendering-engine
 
-```bash
-case "$target_format" in
-  single-file|nextjs)
-    /li:generate-web --from-frontend-design "$out_dir"
-    ;;
-  app)
-    /li:generate-app --from-frontend-design "$out_dir"   # Phase B skill
-    ;;
-esac
-```
+Prepare the external P05 input context, then call the shared helper's
+`renderer-args` operation with the explicit target/profile paths. It validates
+current bytes and returns a literal argument array:
 
-Phase A1 NOTE: `--from-frontend-design` mode in generate-web ships in the Phase B PR. Phase A1 stops at frontend-design-spec.json emission + the minimum-viable roundtrip test verifies the contract is consumable.
+- `single-file` -> `generate-web --from-frontend-design <run> --variant single-file --out <out>`
+- `nextjs` -> `generate-web --from-frontend-design <run> --variant nextjs-scaffold --out <out>`
+- `app` -> `generate-app --from-frontend-design <run> --stack <selected-stack> --out <out>`
+
+Propagate `--customer-share` when selected. Invoke through the actual host only
+within authorization; mapping itself reports `executed: false`. Missing stack,
+unresolved bindings or incompatible existing technology block before rendering.
 
 ### Step 7 — Quality gate (MANDATORY — ADR-0015)
 
 The gate is no longer optional. Two parts, in order:
 
-```bash
-# 1. Mechanical validator on every rendered HTML artifact (exit 1 blocks).
-#    Spec-only runs have no HTML yet — the guard defers validation to generate-*.
-if compgen -G "$out_dir/*.html" > /dev/null; then
-  python3 "$dna/scripts/validate_design.py" "$out_dir"/*.html \
-    --profile "$dna/profiles/$profile.yaml" || status=BLOCKED
-fi
-
-# 2. Six-dimension audit
-/li:frontend-design-review "$out_dir"
-```
+1. Run the existing mechanical validator on actual produced HTML/CSS. Use the
+   **resolved** palette, including explicit brief overrides, rather than rebuilding
+   a bundled `$dna/profiles/<name>` path that ignores a pack-owned asset.
+   The existing `validate_design.check(content, path, profile_hexes)` API accepts
+   the lowercase values of `loaded_design["design"]["palette"]["tokens"]`.
+   Preserve its returned errors/warnings separately; errors block. The standalone
+   validator CLI remains available when an explicit verified asset path is used.
+2. Invoke `/li:frontend-design-review` on the actual output and the same selected
+   design/context. That consumer rechecks P07 and the original P05 obligations.
 
 Validator errors → **BLOCKED** (fix and re-render; never ship over a red gate). No rendered HTML
 yet (spec-only run) → validator runs in generate-web/generate-app instead; the review still runs
@@ -263,13 +271,15 @@ frontend-design is the DESIGN-DIRECTOR-LAYER (decisions). generate-web/generate-
 ## Anti-patterns
 
 - **Generating HTML inside frontend-design** — that's generate-web's job (boundary-violation per L-002). Use `--from-frontend-design` chain.
-- **Sequential sub-skill dispatch** — Workflow Step 2-4 explicitly PARALLEL per M-4. Sequential breaks 10-min budget.
+- **Invented parallel dispatch** — serial/manual operation is valid when the host
+  cannot provide attributable parallel ownership.
 - **Pre-baking canonical patterns** — Phase A1 ships slot-bootstrapping only. Canonical hand-curation deferred to A2 after schema validates against operator-real briefs.
 - **Bundling commercial fonts/libraries** — Lintel ships scaffolding. Operator licenses Pangram + installs GSAP/OGL/Aceternity via npm.
 
 ## Failure recovery
 
-- Sub-skill timeout (>120s): mark sub-skill output as STUB + continue with partial synthesis; surface to operator with "partial-spec" warning
+- Sub-skill failure: retain partial artifacts and report the missing decision;
+  do not turn a stub into a resolved renderable spec.
 - Brief unparsable: BLOCKED, return to operator with prompt-improvement-suggestions
 - Schema-validation failure on frontend-design-spec.json: BLOCKED, log diff between produced + expected schema
 - Voice-gate fail (customer-share): BLOCKED, surface voice-check output verbatim

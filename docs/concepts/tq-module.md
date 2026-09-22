@@ -1,228 +1,61 @@
-# TQ module — testing-qa for engineering depth
+# TQ: testing and quality assurance
 
-**Last updated:** 2026-06-02 (v4.5)
-**Status:** Concept doc — referenced by `skills/tq/SKILL.md` + 7 Capabilities + 2 new agents + 3 hooks
+TQ verifies the requirements and promises from TA/DA/SC/DH through the
+[canonical skill](../../skills/tq/SKILL.md) and [testing methods](../../skills/tq/references/decision-methods.md).
+It follows the shared [engineering-module contract](engineering-modules.md), not
+a new runner/approval system.
 
-> **Final engineering-domain module of v4.x.** When work needs quality validation — critical-path coverage, perf budgets, contract tests, regression suite, chaos validation — running it through plain BUILD discards what the operator needs: explicit coverage targets, perf budgets with regression detection, consumer-driven contract tests, curated regression suite, chaos scenarios with recovery validation. TQ closes the loop on the 5-module engineering pass.
+## Retained capabilities
 
-## The problem
+| Capability | Receiver and output |
+|---|---|
+| coverage-audit | TestRunner measurements + Architect requirement/critical-path gaps |
+| perf-budget-spec | LatencyAnalyzer baseline + PerfBudgetEnforcer justified budget/gate design |
+| contract-test-design | APIDesigner interface + ContractTestArchitect consumer/version matrix |
+| regression-suite | RegressionDetective isolated cause/fix mapping + TestRunner actual checks |
+| chaos-plan | SecurityAuditor/SystemArchitect failure/recovery/abort plan |
+| flaky-quarantine | TestRunner/RegressionDetective repeated outcomes, owner and bounded remediation |
+| test-pyramid-review | TestRunner/Architect per-kind timing/flake/risk and rebalancing |
 
-Pre-v4.5, quality work happened through ad-hoc:
-- Coverage measured occasionally but no critical-path discipline
-- Perf budgets invented at customer-engagement time
-- Contract tests written only after a break
-- Regression suite accumulated without curation (every bug fix added a test, no pruning)
-- Chaos engineering practiced once and forgotten
+Full checkpoints: `coverage_targets_met`, `perf_budgets_locked`,
+`contract_tests_complete`, `regression_suite_curated`, `chaos_scenarios_documented`.
+Keep single capability and saved loop targeted; no test suite is run merely because
+the capability table names it. Inspect actual commands, hooks, data and effects.
 
-The user explicitly named the gap: "When the work needs quality validation — critical-path coverage, perf budgets, contract tests — invoke TQ."
+## Evidence methods
 
-The module fixes it with three granularities — `full`, `loop`, `single` — and 5 checkpoints with recovery.
+Line coverage cannot prove assertion quality. Map original requirements to behavior/
+failure cases and inspect surviving mutations with their limitations. Critical batch
+work can deserve tighter protection than an interactive endpoint; no global 80/100%
+or arbitrary journey labels determine policy.
 
-## The model
+New enum values may break generated consumers despite valid provider schemas.
+Test request/response direction, actual serializers and concurrent versions across
+HTTP, GraphQL, protobuf, events or IPC as applicable. One shared schema, real link
+verification; no duplicate oracle that agrees only with itself.
 
-```
-Operator invocation
-       │
-       ▼
-/li:tq {full|loop|single --action <name>}
-       │
-       │  Read pack policy + profile.engineering.testing_qa.*
-       ▼
-Granularity dispatch:
-       │
-       ├── full   → coverage_targets_met → perf_budgets_locked
-       │           → contract_tests_complete → regression_suite_curated
-       │           → chaos_scenarios_documented
-       │           → 6-dim scoring rubric → SHIP (score ≥80) or surface
-       │
-       ├── loop   → re-run coverage + perf + contracts → diff vs prior
-       │
-       └── single → direct Capability (no checkpoints, no orchestration)
-                   coverage-audit / perf-budget-spec / contract-test-design /
-                   regression-suite / chaos-plan /
-                   flaky-quarantine / test-pyramid-review
-                       │
-                       ▼
-                   Spawn agent via Brief Forge:
-                   TestRunner / RegressionDetective / LatencyAnalyzer /
-                   APIDesigner / SecurityAuditor / SystemArchitect / Architect /
-                   PerfBudgetEnforcer (NEW) / ContractTestArchitect (NEW)
-                       │
-                       ▼
-                   Output → .claude/runtime/state/tq/<action>-<ts>.md
-                   Audit → .claude/runtime/audit/tq-decisions.jsonl
-```
+Performance comparison records source/env/workload/build/runtime, warmup and offered
+load, repetitions and uncertainty. An unimplemented CI budget is a proposal, not
+enforcement. Tiny samples cannot establish precise tails. A failed/zero/skipped
+required case stays incomplete; do not drop it and report a green average.
 
-## The five checkpoints (full pass)
+Flakes retain the failed observation even after retry. Quarantine needs an owner,
+time bound and replacement critical coverage. Chaos plans name the invariant,
+failure injection, abort and recovery; disabled chaos is not a successful stub.
+Live fault injection requires exact separate authorization.
 
-### 1. `coverage_targets_met`
-Critical-path coverage at threshold + branch coverage adequate. Produced by `coverage-audit` + TestRunner + Architect.
-Pass criterion: overall ≥ profile.coverage_target; critical paths ≥ profile.critical_path_coverage. Raise-help on critical-path below threshold.
+## Continuation and acceptance
 
-### 2. `perf_budgets_locked`
-Per-critical-journey perf budget with regression detection. Produced by `perf-budget-spec` + LatencyAnalyzer + PerfBudgetEnforcer.
-Pass criterion: every critical journey has p50/p95/p99 budget; regression detection thresholds set; enforcement mode chosen per criticality. Raise-help on regression above budget.
+Persist actual named coverage/performance/contract/regression/chaos/quarantine/
+pyramid artifacts, raw evidence, exit/counts and source identities. TestRunner and
+other reviewers report; implementers fix. A separately attributable reviewer plus
+actual P05 QA/reader evidence is required, not a second role label.
 
-### 3. `contract_tests_complete`
-Consumer + provider contract tests passing. Produced by `contract-test-design` + APIDesigner + ContractTestArchitect.
-Pass criterion: every active consumer covered; version compatibility matrix verified. Raise-help on active-consumer break.
+The shared explicit attempt/iteration and cold state table prevent implicit replay
+of unknown side effects or reuse after changed inputs. Six advisory dimensions remain
+coverage, performance, contracts, regression, recovery and distribution. Missing
+mandatory evidence blocks regardless of scores. Historical feature-complete claims
+do not close current runtime/client/installed acceptance.
 
-### 4. `regression_suite_curated`
-Golden-path tests + recent-bug-fix tests. Produced by `regression-suite` + RegressionDetective + TestRunner.
-Pass criterion: every golden path has at least 1 happy + 1 edge-case test; every recent fix maps to a test or has documented "impossible-to-test" reason.
-
-### 5. `chaos_scenarios_documented`
-Failure injection scenarios + recovery validation. Produced by `chaos-plan` + SecurityAuditor + SystemArchitect.
-Pass criterion: scenarios per high-severity threat with recovery criteria + abort conditions. Skipped (stub) when `chaos_active: false`.
-
-## The 6-dimensional scoring rubric (full pass exit gate)
-
-| Dimension | Score 0-100 | Pass threshold | Source artifact |
-|---|---|---|---|
-| Critical-path coverage at target | _ | 80 | `.claude/runtime/state/tq/coverage-audit-<ts>.md` |
-| Perf budgets locked with regression detection | _ | 80 | `.claude/runtime/state/tq/perf-budget-<ts>.md` |
-| Contract tests complete | _ | 80 | `.claude/runtime/state/tq/contract-test-suite-<ts>.md` |
-| Regression suite curated | _ | 80 | `.claude/runtime/state/tq/regression-suite-<ts>.md` |
-| Chaos scenarios documented + recovery validated | _ | 80 | `.claude/runtime/state/tq/chaos-plan-<ts>.md` |
-| Test pyramid healthy | _ | 80 | `.claude/runtime/state/tq/test-pyramid-<ts>.md` |
-
-## Capability catalog
-
-| Capability | Primary agent | Other agents | Output |
-|---|---|---|---|
-| `coverage-audit` | TestRunner | Architect | per-component coverage + critical-path verdict |
-| `perf-budget-spec` | LatencyAnalyzer | PerfBudgetEnforcer (NEW) | per-journey budget + regression detection |
-| `contract-test-design` | APIDesigner | ContractTestArchitect (NEW) | consumer-driven tests + version matrix |
-| `regression-suite` | RegressionDetective | TestRunner | golden-path + bug-fix tests + execution health |
-| `chaos-plan` | SecurityAuditor | SystemArchitect | failure scenarios + recovery criteria |
-| `flaky-quarantine` | TestRunner | RegressionDetective | flake list + remediation plan |
-| `test-pyramid-review` | Architect | TestRunner | per-kind distribution + rebalancing |
-
-**L-002:** 5 of 7 Capabilities dispatch to existing agents (TestRunner, RegressionDetective, LatencyAnalyzer, APIDesigner, SecurityAuditor, SystemArchitect, Architect). Only 2 new agents.
-
-## Agent additions (v4.5)
-
-### `PerfBudgetEnforcer`
-- **Purpose:** turns perf baselines into enforceable budgets with regression detection
-- **Why new:** LatencyAnalyzer reports baseline; PerfBudgetEnforcer turns it into policy
-- **Spawned by:** `perf-budget-spec`
-
-### `ContractTestArchitect`
-- **Purpose:** consumer-driven contract test design + version compatibility matrix
-- **Why new:** APIDesigner specifies the contract; ContractTestArchitect specifies how it's verified
-- **Spawned by:** `contract-test-design`
-
-## Hook additions (v4.5)
-
-All three are warn-only. Each uses unified `audit_log` from `bin/_audit.sh`.
-
-### `tq-coverage-drop-warn`
-Pre-commit on coverage drops below profile threshold.
-
-### `tq-perf-regression-warn`
-Pre-commit on edits to perf-budget-bound paths.
-
-### `tq-contract-break-warn`
-Pre-commit on provider edits without paired contract-test update.
-
-## Profile preferences
-
-Under `engineering.testing_qa.*` in `~/.lintel/profile.yaml`:
-
-```yaml
-engineering:
-  testing_qa:
-    coverage_target: 80
-    critical_path_coverage: 100
-    perf_budget_p95_ms: 200
-    contract_test_framework: pact          # pact | consumer-driven-internal | none
-    chaos_active: true
-    flaky_quarantine_threshold: 3
-```
-
-Hooks + Capabilities read these. Defaults baked in when absent.
-
-## Pack overrides
-
-```yaml
-# packs/some-pack/pack.yaml
-testing_qa:
-  perf_path_glob: "src/api/**/*,pkg/critical/**/*"
-  provider_glob: "src/api/**/*,*.openapi.yaml"
-```
-
-## Audit trail
-
-```jsonl
-{"ts":"...","kind":"tq_module_complete","granularity":"full","score":85,"coverage_target":80}
-{"ts":"...","kind":"tq_coverage_audit","language":"go","target":80,"critical_below_threshold":0}
-{"ts":"...","kind":"tq_perf_budget_spec","default_p95_ms":200,"journeys":12}
-{"ts":"...","kind":"tq_contract_test_design","framework":"pact","contracts":24,"breaks_active":0}
-```
-
-## Composition — TQ as final stage in full engineering pass
-
-Per engineering-modules.md §"Composition":
-
-```
-TA
-  │
-  ├── DA  ┐
-  ├── SC  ┘
-  │
-  ▼
-DH
-  │
-  ▼
-TQ   ← reads everything: TA contracts, DA hot paths, SC threats, DH SLOs
-```
-
-TQ consumes outputs from all four prior modules. It validates that the architecture decisions, data design, security posture, and ops plan actually hold up under test + perf + contract + regression + chaos pressure. Without those inputs, TQ operates on operator-provided context.
-
-## Anti-patterns
-
-- **Single coverage number** — critical-path coverage is the discipline
-- **Perf budgets without regression detection** — declarative, not enforced
-- **Provider-only contract tests** — consumer-driven catches breaks the provider didn't expect
-- **Regression suite of every bug fix** — curate to actually-recurring + critical
-- **Chaos without recovery validation** — every scenario validates a specific resilience claim
-- **Quarantine without remediation plan** — quarantine is temporary
-- **Inverted test pyramid** — slow CI, brittle, hard to debug
-- **Inventing new agents when existing cover** — 5 of 7 Capabilities reuse
-- **Hardcoding profile values** — coverage / perf / framework / threshold all profile-driven
-
-## Integration points
-
-**Reads:**
-- `~/.lintel/profile.yaml` `engineering.testing_qa.*`
-- `lib/pack-resolver.sh` for pack policy
-- Existing agents (7) + 2 new agents
-- Prior modules: TA contracts/api-design, DA query-pattern-audit, SC threat-model + audit-path, DH SLI/SLO
-
-**Writes:**
-- `.claude/runtime/state/tq/*.{md,json}` (per-action artifacts)
-- `.claude/runtime/audit/tq-decisions.jsonl`
-- Brief Forge envelopes through the standard gate
-
-**Triggered by:**
-- Operator: `/li:tq {full|loop|single --action <name>}`
-- BUILD phase: invokes as sub-module when quality-validation intent detected
-- `/li:full-engineering-pass` (when composition skill ships): final stage after DH
-
-**Tested by:**
-- `tests/shape/tq-module-contract.sh`
-- `tests/unit/tq-routing.sh`
-
-## What this closes
-
-With TQ shipping as v4.5, **all 5 engineering-domain modules per design doc §3 are complete**. The harness now ships:
-- TA (v4.1) — tech-architecture
-- DA (v4.2) — data-architecture
-- SC (v4.3) — security-compliance
-- DH (v4.4) — devops-hosting
-- TQ (v4.5) — testing-qa
-
-Remaining v4.x work per design doc §5.2:
-- `/li:full-engineering-pass` composition skill — runs all 5 modules in DAG order (TA → DA‖SC → DH → TQ)
-
-After that ships, v4.x engineering depth is feature-complete.
+Opt-in `tq-coverage-drop-warn`, `tq-perf-regression-warn` and
+`tq-contract-break-warn` remain dormant absent actual compatible registration.

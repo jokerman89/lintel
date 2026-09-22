@@ -4,7 +4,7 @@
 # intent: .claude/plans/swarming-work/spec.md
 # constraints: hermetic fixture; no network, agent spawn, or artifact execution
 # last_intent_review: 2026-09-20
-"""Exercise work map -> safe wave -> evidence -> close across the shared contract."""
+"""Preserve local work/Git observations; they do not establish shared acceptance."""
 
 from __future__ import annotations
 
@@ -87,16 +87,20 @@ def evidence(
         write(root, review_path, f"# Review\n\n{swarm.EVIDENCE_START}\n{json.dumps(review)}\n{swarm.EVIDENCE_END}\n")
 
 
-def run_cli(repo: Path, command: str, coordination_path: str) -> dict[str, object]:
+def run_cli(repo: Path, command: str, coordination_path: str, *, check_complete: bool = False) -> dict[str, object]:
+    options = ["--check-complete"] if check_complete else []
     result = subprocess.run(
-        [sys.executable, str(ROOT / "bin/li-swarm.py"), command, "--repo", str(repo), "--coord", coordination_path],
+        [sys.executable, str(ROOT / "bin/li-swarm.py"), command, "--repo", str(repo), "--coord", coordination_path, *options],
         capture_output=True,
         text=True,
         check=False,
     )
     if result.returncode != 0:
         raise AssertionError(f"{command} failed ({result.returncode}): {result.stderr}{result.stdout}")
-    return json.loads(result.stdout)
+    value = json.loads(result.stdout)
+    if command == "inspect":
+        assert value["release_clearance"] is False
+    return value
 
 
 def git(repo: Path, *args: str, expected: int = 0) -> str:
@@ -160,7 +164,7 @@ def git_worktree_scenario() -> None:
         git(repo, "commit", "-qm", "test: seed synthetic swarm")
         base = git(repo, "rev-parse", "HEAD")
         for capability, expected in (("native", 2), ("sequenced", 1), ("none", 1)):
-            result, frontier = swarm.ready_frontier(repo, coord, host_capability=capability)
+            result, frontier = swarm.inspect_local_frontier(repo, coord, host_capability=capability)
             assert result.ok and len(frontier["dispatch_task_ids"]) == expected
         worker_heads = []
         for lane in lanes:
@@ -175,10 +179,10 @@ def git_worktree_scenario() -> None:
             git(worker, "commit", "-qm", f"test: isolated result {task_id}")
             product_head = git(worker, "rev-parse", "HEAD")
             evidence(worker, lane, initiative, base=base, head=product_head, with_review=False)
-            resumed = run_cli(worker, "resume", coord)
+            resumed = run_cli(worker, "inspect", coord)
             current = next(state for state in resumed["frontier"]["states"] if state["task_id"] == task_id)
             assert current["state"] == "awaiting_review", "runtime loss must not fabricate a reviewer"
-            closed, _ = swarm.verify_close(worker, coord)
+            closed, _ = swarm.inspect_local(worker, coord)
             assert not closed.ok
             git(worker, "add", "--", lane["report"])
             git(worker, "commit", "-qm", f"test: preserved report {task_id}")
@@ -218,14 +222,15 @@ def git_worktree_scenario() -> None:
         for head in worker_heads:
             git(repo, "merge", "--no-ff", "-qm", "test: deterministic isolated fan-in", head)
             git(repo, "merge-base", "--is-ancestor", head, "HEAD")
-        closed = run_cli(repo, "verify", coord)
+        closed = run_cli(repo, "inspect", coord, check_complete=True)
         assert all(state["state"] == "complete" for state in closed["lanes"])
+        assert not swarm.verify_close(repo, coord)[0].ok, "local synthetic actors are not shared acceptance"
         assert (repo / "src/bc1/change.txt").is_file() and (repo / "src/bc2/change.txt").is_file()
         write(repo, "src/bc1/unreviewed.txt", "new unreviewed scoped file\n")
-        invalidated, _ = swarm.verify_close(repo, coord)
+        invalidated, _ = swarm.inspect_local(repo, coord)
         assert not invalidated.ok, "an untracked scoped addition must invalidate the bound result"
         (repo / "src/bc1/unreviewed.txt").unlink()
-        assert swarm.verify_close(repo, coord)[0].ok
+        assert swarm.inspect_local(repo, coord)[0].ok
         conflict = parent / "conflict"
         git(repo, "worktree", "add", "-q", "-b", "conflicting-result", str(conflict), "HEAD")
         write(conflict, "src/bc1/change.txt", "isolated conflicting revision\n")
@@ -236,7 +241,7 @@ def git_worktree_scenario() -> None:
         git(repo, "commit", "-qm", "test: independent coordinator revision")
         git(repo, "merge", "--no-ff", "--no-commit", "conflicting-result", expected=1)
         assert git(repo, "diff", "--name-only", "--diff-filter=U") == "src/bc1/change.txt"
-        assert not swarm.verify_close(repo, coord)[0].ok
+        assert not swarm.inspect_local(repo, coord)[0].ok
         assert (conflict / "src/bc1/change.txt").read_text(encoding="utf-8") == "isolated conflicting revision\n"
         for lane, head in zip(lanes, worker_heads):
             assert git(parent / lane["task_id"], "rev-parse", "HEAD") == head
@@ -320,7 +325,7 @@ def main() -> None:
 
         loaded = work_artifacts.load_work_map(repo, Path(work_map_path))
         assert loaded["execution_mode"] == "swarm"
-        first = run_cli(repo, "wave", coordination_path)
+        first = run_cli(repo, "inspect", coordination_path)
         assert first["frontier"]["dispatch_task_ids"] == ["BC1"]
 
         allowed = swarm.check_lane_scope(repo, coordination_path, "BC1", ["src/bc1/change.txt", str(lanes[0]["report"])])
@@ -329,11 +334,11 @@ def main() -> None:
         assert not blocked.ok and any(item.code == "scope.outside" for item in blocked.diagnostics)
 
         evidence(repo, lanes[0], initiative)
-        second = run_cli(repo, "wave", coordination_path)
+        second = run_cli(repo, "inspect", coordination_path)
         assert second["frontier"]["dispatch_task_ids"] == ["BC2", "BC3"]
         evidence(repo, lanes[1], initiative)
         evidence(repo, lanes[2], initiative)
-        closed = run_cli(repo, "verify", coordination_path)
+        closed = run_cli(repo, "inspect", coordination_path, check_complete=True)
         assert closed["ok"] is True
         assert all(lane["state"] == "complete" for lane in closed["lanes"])
 
@@ -343,7 +348,7 @@ def main() -> None:
         write(repo, work_map_path, json.dumps(legacy, indent=2) + "\n")
         assert work_artifacts.load_work_map(repo, Path(work_map_path))["workflow"] == "lintel"
 
-    print("PASS: mapped swarm advances candidate waves, checks scope/evidence, closes, and preserves legacy maps")
+    print("PASS: retained local mapped observations, candidate frontier and legacy maps; no shared clearance claimed")
     git_worktree_scenario()
 
 

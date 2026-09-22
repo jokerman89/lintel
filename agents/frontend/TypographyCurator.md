@@ -26,6 +26,11 @@ Reads brief + (optionally) audience + mood → picks font-stack (3 roles: headin
 
 Emits `typography.json` (schema_version: 1) per the frontend-typography SKILL.md contract.
 
+Use the [shared design contract](../../skills/design-dna/references/design-contract.md)
+and `design_contract.validate_spec(data, "typography")`. Preserve the font-selection
+expertise below; carry actual source/version/license and brief overrides through
+the caller's bound design instead of creating a second profile interpretation.
+
 ## When to invoke
 
 - Auto-invoked by `/li:frontend-typography` Workflow Step 2

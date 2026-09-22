@@ -14,6 +14,12 @@ Parallel variant generation. Takes a seed HTML (typically from `/design-html`) a
 
 The shotgun pattern: when you don't know what you want yet, generate many possibilities cheaply and pick.
 
+Keep the [shared design contract](../design-dna/references/design-contract.md)
+for each selected variant: same pinned profile/project constraints, explicit
+brief-backed axis overrides and distinct output/evidence bytes. Static/no-shader
+is a complete variation choice. Parallelism requires real disjoint ownership;
+serial generation is valid when that host capability is unavailable.
+
 ## When to use
 
 - Seed mockup exists; want to explore the design space around it
@@ -101,7 +107,9 @@ Variant 3 (cool-accent). Reason: emerald accent maps to existing brand tokens; m
 
 ## Compliance integration
 
-- Variants inherit seed's compliance state. If seed had pack-voice copy: all variants do too, and the active pack's compliance gates apply to all of them.
+- Variants inherit the seed's applicable requirements, not its pass results.
+  Changed output needs its own P05-bound observations. If seed had pack-voice copy,
+  those requirements apply to every variant; no score averaging clears a failure.
 
 ## Failure modes
 

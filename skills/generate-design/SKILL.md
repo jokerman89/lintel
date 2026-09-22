@@ -23,6 +23,9 @@ Reads content.md (with HTML-comment annotations for type + voice + key_message) 
 
 This is the "shared design baseline." Format-builders (`generate-ppt`, `generate-web`, `generate-word`) read design-spec.json + apply their own format-specific design-pass (e.g., `PPTNarrativeArchitect` for PPT slide-narrative, `WebExperienceCritic` for web hero/flow, `WordTechnicalEditor` for word headings/style). The shared baseline gives them consistency; the per-format pass gives them format-fidelity.
 
+For web, use the [one direct design contract](../design-dna/references/design-contract.md).
+Keep document-format mappings intact; P12 owns their rendering methods.
+
 Used by `generate` orchestrator as Step 5, or solo when operator wants to re-design existing content for different formats or different brand-palette.
 
 ## When to use
@@ -42,8 +45,8 @@ Used by `generate` orchestrator as Step 5, or solo when operator wants to re-des
 
 - Required `--content <path>` — content.md from generate-write
 - Required `--target-formats <ppt,web,word,...>` — per-format spec generated for each
-- Optional `--palette <name>` — palette JSON name (default: `default`)
-- Optional `--brand-templates-dir <path>` — `~/.lintel/brand/` (default)
+- Optional `--palette <name>` — explicit brief-level palette selection with source evidence
+- Optional `--brand-templates-dir <path>` — explicitly authorized template root; no personal-home scan
 - Optional `--logo <path>` — explicit logo override
 - Optional `--out <path>` — output path (default: `${run_dir}/design-spec.json`)
 
@@ -52,6 +55,8 @@ Used by `generate` orchestrator as Step 5, or solo when operator wants to re-des
 ```json
 {
   "version": "1.0",
+  "schema_version": 1,
+  "source": "pipeline",
   "generated_at": "<iso-8601>",
   "source_content_hash": "<sha256 of content.md>",
   "palette": {
@@ -123,6 +128,11 @@ Used by `generate` orchestrator as Step 5, or solo when operator wants to re-des
 }
 ```
 
+The historical palette/font example above illustrates document projections, not a
+brand to impose. New web output also includes `web_design` and `binding` as defined
+by the shared schema. `web_design` uses the same common fields as the frontend v1
+envelope. Legacy pipeline files remain readable but unresolved for new rendering.
+
 Key contract points:
 - `palette` + `fonts` are shared across all target formats (consistency)
 - `per_format.<format>` is format-specific layout-mapping
@@ -137,9 +147,15 @@ Parse content.md frontmatter + per-section HTML-comment annotations (`<!-- type:
 
 ### Step 2 — Load palette + brand templates
 
-Resolve `--palette` to `~/.lintel/brand/palettes/<name>.json`. Read palette. If missing: fall back to `default` palette (in-repo).
+Load the verified P07 reference and selected design-profile asset through the shared
+helper. Retain actual retrieval and asset bytes. A supplied `--palette` must resolve
+to explicitly selected source evidence; a missing custom palette blocks instead of
+silently selecting `default`. Preserve brief > profile > corpus, subject to policy
+and existing project technology.
 
 For each format in `--target-formats`: locate template at `~/.lintel/brand/<format>-templates/<default>.<ext>`. Surface staleness warning if template > 90 days old. Fall back to blank if missing and `--use-defaults` set.
+Resolve that legacy template slot only within the explicitly authorized template
+root. A path convention is not permission to inspect a personal directory.
 
 ### Step 3 — Per-section layout-mapping
 
@@ -155,6 +171,10 @@ For each content.md section (§N):
 - No layout used > 3 times consecutively (rotation rule)
 - Font sizes within palette min/max
 - Logo placement consistent across all sections
+- For web, run `design_contract.validate_spec(..., "pipeline")` and then
+  `load_design` against the external P05 context before handing off to the renderer.
+  Contradictory palette/font projections, unsupported versions or unresolved
+  bindings block. No scalar `contrast_verified` flag replaces observed P05 controls.
 
 ### Step 5 — Write design-spec.json + return path
 
@@ -196,7 +216,8 @@ Write to `--out`. Surface summary (per-format layout count, palette used, font b
 
 ## Failure recovery
 
-- Palette resolution fails on `--palette <name>`: fall back to default, flag in design-spec frontmatter
+- Palette resolution fails on `--palette <name>`: BLOCKED with the exact missing
+  selection; do not substitute a different brand.
 - Template missing + no `--use-defaults`: exit BLOCKED with instruction to drop template in `~/.lintel/brand/<format>-templates/`
 - Validation rotation-rule violation: regenerate affected sections with varied layouts, flag if repeats
 

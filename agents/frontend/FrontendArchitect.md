@@ -32,6 +32,12 @@ plain semantic HTML may be enough; a design brief is not permission to replace t
 Does NOT write code or generate HTML. Returns the spec to the caller for the existing
 renderer/FrontendBuilder handoff; it does not claim that a renderer was invoked.
 
+Use the [shared design contract](../../skills/design-dna/references/design-contract.md)
+for the unchanged frontend v1 envelope plus its additive binding. The caller
+supplies the actual P07 reference, brief/retrieval/project inputs and library/font
+provenance; `design_contract` validates and maps renderer arguments. Empty component
+lists and explicit none/CSS motion are valid. Do not create another schema.
+
 ## Non-overlap with existing agents (m-1 resolution)
 
 - **vs `agents/engineering/FrontendBuilder.md`** — FrontendBuilder is **code-output** role: writes React/Vue/Svelte components given a design-spec. FrontendArchitect is **design-decision** role: produces the spec FrontendBuilder consumes. Use FrontendArchitect FIRST (design-director-layer), then FrontendBuilder (rendering-engine-layer).

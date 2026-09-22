@@ -5,9 +5,16 @@
 **Task source:** this file. **Work map:** [work.json](work.json).
 **Specification:** [spec.md](spec.md). **Execution handoff:** [prompt.md](prompt.md).
 **Acceptance source:** [A01-A26](../../engineering/audits/2026-09-20-universal-quality/action-plan.md).
-**Coordinator:** MasterSession.
+**Coordinator:** recovery session `88aecc43-40f9-41d4-8947-6c2fb0a55481`,
+continuing MasterSession's approved scope and original task source.
 
 ## Current state
+
+The operator explicitly transferred coordination from the broken MasterSession on
+2026-09-22. Its clean `5f3d885` checkpoint was fast-forwarded into
+`jokerman-microsoft-mastersession-recovery`; the original branch/worktree and all
+worker ownership are preserved. Current recovery routing is in [handoff.md](handoff.md).
+This is continuation of the same initiative, not a new audit or acceptance waiver.
 
 Audit and continuity: preserved in commit `74290e0`; original audit worktree untouched.
 All 25 source files were hash-verified before import. A separate local verified Git bundle
@@ -92,6 +99,15 @@ standalone brief/content/Word/PPT routes can now be implemented against accepted
 core/role contracts without forking the shared design schema. Its shared-pipeline
 binding, PDF/XLSX/Visio implementation, P13 and other cross-component gates retain
 their dependencies and specific later release.
+P13 may separately implement its compact metadata/catalog/helper first unit against
+existing accepted frontmatter/registry contracts; final optional installation,
+capability maturity/version mapping and generated reconciliation remain gated.
+Recovery staging: P04's shared-evidence consumer can use accepted P05/P07/P09
+without importing the pending P08 reader; its final work/resume join stays gated.
+After independent compact-discovery acceptance, P13 may implement the approved
+additive source-selection/preservation unit without waiting for unrelated format
+producers. Actual installed closure remains a separate accepted-P10 join. These
+are dependency-ready portions of existing outcomes, not extra initiatives.
 
 Each leaf below is a bounded change or scenario, intended for a short implementation
 step. If an actual leaf needs splitting, append stable sub-IDs before starting it and
@@ -249,12 +265,12 @@ full workflow/profile-value gates remain open.
   - [ ] A08.1.r1 Recognize governing request heads and complete clause context before recommending an operation.
   - [ ] A08.1.r2 Verify structural authority contrasts and retained affirmative/read routing without phrase exceptions.
 - [ ] A08.2 Start cycle identity before phases and prevent duplicate start phases.
-  - [ ] A08.2.a Implement cycle-start/phase-transition helpers and interrupted-state fixtures.
-  - [ ] A08.2.b Render footer state from actual STARTING/BLOCKED/DONE status, not next-phase metadata.
+  - [x] A08.2.a Implement cycle-start/phase-transition helpers and interrupted-state fixtures.
+  - [x] A08.2.b Render footer state from actual STARTING/BLOCKED/DONE status, not next-phase metadata.
   - [ ] A08.2.c Compose canonical phase entry without duplicate SENSE/SCOPE.
 - [ ] A08.3 Connect ANALYZE/CAPTURE/budget/resume to the same selected task source.
-  - [ ] A08.3.a Share the selected-map reader and bounded artifact manifest using accepted parsers/selectors.
-  - [ ] A08.3.b Persist selected-map/profile/required-policy resume identity without replacing original authority.
+  - [x] A08.3.a Share the selected-map reader and bounded artifact manifest using accepted parsers/selectors.
+  - [x] A08.3.b Persist selected-map/profile/required-policy resume identity without replacing original authority.
   - [ ] A08.3.c Wire ANALYZE/CAPTURE/BUILD/budget consumers to original paths and IDs.
     - [ ] A08.3.c.r1 Guard analysis-report selection through native identity before choosing output.
     - [ ] A08.3.c.r2 Verify actual PLAN present/absent/spelling and distinct-location refusal/preservation cases.
@@ -263,14 +279,36 @@ full workflow/profile-value gates remain open.
   - [ ] A08.5.j1 Join the exact reviewed native-path dependency and public-helper fixture consumer without altering the frozen root correction.
   - [ ] A08.5.j2 Verify original-dimension preservation and the final combined lifecycle candidate before the same reviewer's selected-subset SPEC/QUALITY.
 Acceptance: no write escalation of read intent, duplicate backlog or lost history.
+Mechanical-provider evidence: [independent checkpoint](reviews/P08-provider-7046929.md)
+at exact `70469296`, report `e98e7da8`, integrated `e1edc0c`. All three providers,
+the necessary footer and test module match reviewed Git blobs; accepted dependencies
+match. Joined 22 selected methods and 21-resource source preflight pass. These four
+refinements do not close A08 parents, actual semantic/intake/orchestration or A13.
+The broader lifecycle runner stays deferred until its remaining consumers join;
+the checked-in provider runner selects the actual accepted cases without deleting
+the other original test methods.
+The final Swarm CLI join reopened A08.3.a for an explicitly selected alphabetic
+legacy singleton omitted by the default reader. Its bounded correction is
+coordinator-owned in the recovery checkout; native fixture source `70469296`
+stays immutable. Prior tested provider controls remain their recorded evidence.
+Correction `aa5cf0e` now passes independent `78e3c09` SPEC/QUALITY (preserved as
+`14f97fa`) and the 25-method joined provider run. The refinement is reclosed;
+P04's final composed caller and original native workflow remain separate gates.
 
 ### A09 Concrete specialist modules (P09; R06)
-- [ ] A09.1 Define shared work/profile/revision/result handoff envelope.
-- [ ] A09.2 Replace ambiguous execution pseudocode with owned checkpoints and recovery.
-- [ ] A09.3 Add architecture/data failure mechanisms and worked decision examples.
-- [ ] A09.4 Add security/operations/testing mechanisms, criteria and false-positive examples.
+- [x] A09.1 Define shared work/profile/revision/result handoff envelope.
+- [x] A09.2 Replace ambiguous execution pseudocode with owned checkpoints and recovery.
+- [x] A09.3 Add architecture/data failure mechanisms and worked decision examples.
+- [x] A09.4 Add security/operations/testing mechanisms, criteria and false-positive examples.
 - [ ] A09.5 Test installed-source discovery, Windows filenames and interrupted domain handoff.
 Acceptance: every required domain result remains visible; no averaging away failure.
+Source/data and module-consumer evidence: accepted data core `ea92df8` / `6e2f7e4`
+and [module review](reviews/P09-modules-5c99612.md) `114ddfe3` at `5c99612`,
+integrated `2d789a4`. All 26 method/doc/test paths match; 13 joined consumer
+methods pass against current accepted providers. These closures concern the
+implemented methods and shared contracts, not database/model correctness.
+A09.5 remains open for installed closure. The archived native TA draft's separate
+N1 safety/liveness finding remains unresolved by this source acceptance.
 
 ### A10 Proportionate intake and composition (P08; R05)
 - [ ] A10.1 Ask only missing, task-relevant decisions and retain existing authorization.
@@ -308,6 +346,8 @@ initiative-wide capacity/host acceptance from these component checkboxes.
 - [ ] A12.4 Document real uninstall and historical migration boundaries.
   - [ ] A12.4.a Distinguish supported client operations and actual uninstall limits.
   - [ ] A12.4.b Preserve opt-in historical aliases and document recoverability evidence.
+    - [ ] A12.4.b.o1 Correct native marker/legacy/type/enumeration observations without changing the migration schema.
+    - [ ] A12.4.b.o2 Verify the real short153/plain256 diagnostic pair, preserved inputs and explicit inspection failures; obtain the same reviewer's acceptance.
 Acceptance: a success message corresponds to a verified change in the intended host/target.
 Operator decision: bare installation must remain usable without Python. The approved
 native/runtime transaction split and exact shared ownership release are in packages/P10.md;
@@ -321,11 +361,17 @@ no installer may turn a later operation's Python prerequisite into an install pr
 Acceptance: absent telemetry cannot imply healthy/dead or successful enforcement.
 
 ### A14 Working design contract (P11; R07)
-- [ ] A14.1 Preserve accepted design profile precedence in one brief/spec/render/review schema.
-- [ ] A14.2 Repair dimension keys and argument mapping.
-- [ ] A14.3 Support no-animation/CSS-only/no-shader without forced dependencies.
-- [ ] A14.4 Update source-grounded version advice while respecting project technology.
+- [x] A14.1 Preserve accepted design profile precedence in one brief/spec/render/review schema.
+- [x] A14.2 Repair dimension keys and argument mapping.
+- [x] A14.3 Support no-animation/CSS-only/no-shader without forced dependencies.
+- [x] A14.4 Update source-grounded version advice while respecting project technology.
 - [ ] A14.5 Exercise a static page and app through the same profile and review contract.
+
+A14.1-.4 source `a1b3a45` passes complete independent `edecfdf` SPEC then
+whole direct-unit QUALITY, with D1-D5 closed. Integration `e1cb9d2` preserves
+all 24 product blobs exactly; actual joined 18 contract methods and retained
+legacy roundtrip pass. Earlier native artifacts remain attributed to `f72f316`;
+these source closures do not clear A14.5's single-HTML, image or framework gates.
 Acceptance: actual artifacts and mandatory design checks, not only populated schema fields.
 
 ### A15 Verifiable document formats (P12; R07)
@@ -342,19 +388,32 @@ Acceptance: actual artifacts and mandatory design checks, not only populated sch
 Acceptance: missing renderer remains unfinished; authored outputs preserve intended reasoning.
 
 ### A16 Real browser operations (P11; R03/R07)
-- [ ] A16.1 Share browse/cookies/scrape/preview/print operations and session ownership.
-- [ ] A16.2 Honor actual host browser capabilities and A01 URL boundaries.
-- [ ] A16.3 Exercise allowed reading, a UI interaction and local print output.
-- [ ] A16.4 Preserve login surface choice and distinguish profile files from installed engine.
+- [x] A16.1 Share browse/cookies/scrape/preview/print operations and session ownership.
+- [x] A16.2 Honor actual host browser capabilities and A01 URL boundaries.
+- [x] A16.3 Exercise allowed reading, a UI interaction and local print output.
+- [x] A16.4 Preserve login surface choice and distinguish profile files from installed engine.
 Acceptance: browser evidence identifies actual tool, session and resulting artifact.
+Evidence: [final independent browser review](reviews/P11-browser-final-d3b5569.md)
+accepts A16.1-.4 at `d3b5569`, report `3049811`, integrated with both histories
+in `7cb3812`. All eleven product files and the full report match reviewed blobs.
+Joined four shared and 30 Node checks pass. Original eight native headless cases,
+screenshots and two-page print evidence remain attributed to `3115790`; Q1/Q2
+parsing repairs have independent bounded verification, not a fabricated native
+rerun. Headed login, other hosts, PDF raster and full P11/A14 remain separate.
 
 ### A17 Portable, useful agent roles (P09; R06)
-- [ ] A17.1 Map all 69 inventoried roles to retained inputs, decisions, outputs and verification.
-- [ ] A17.2 Neutralize forced model/tool assumptions and explicitly supersede relevant ADR0012 scope.
-- [ ] A17.3 Fix DemoNarratorJunior/DemoNarrativeArc circular prerequisites.
-- [ ] A17.4 Preserve distinct planner/executor responsibilities and specialist methods.
+- [x] A17.1 Map all 69 inventoried roles to retained inputs, decisions, outputs and verification.
+- [x] A17.2 Neutralize forced model/tool assumptions and explicitly supersede relevant ADR0012 scope.
+- [x] A17.3 Fix DemoNarratorJunior/DemoNarrativeArc circular prerequisites.
+- [x] A17.4 Preserve distinct planner/executor responsibilities and specialist methods.
 - [ ] A17.5 Verify dispatch/receiver contracts, independent reviews and cold-start examples.
 Acceptance: no unique role value disappears; no role depends on its own circular output.
+Evidence: [accepted role preservation](reviews/P09-content-4a9b946.md) `19eb776`,
+the 69-role map and ADR-0028, plus accepted consumer review `114ddfe3` and exact
+joined module checks. The accepted P13 demo-script selection retains Plan ->
+draft -> distinct critique and all three role sources. This is source/contract
+acceptance, not native registration or observed correctness of all 69 roles.
+Original A17.5 remains open for its actual mode/semantic/installed evidence.
 
 ### A18 Optional capabilities without loss (P13; R06)
 - [ ] A18.1 Define discoverable capability selections and their dependency/maturity metadata.

@@ -67,26 +67,37 @@ else
   fail "DAG missing depends_on declarations"
 fi
 
-# Scenario 4: Graceful degradation logic
+# Scenario 4: Missing mandatory work cannot become a successful partial pass.
 echo ""; echo "[4] Graceful degradation"
 if grep -qiE "missing[_-]modules|available[_-]modules|partial.rollout" "$FEP"; then
   pass "Composition handles missing modules"
 else
   fail "Composition MISSING graceful-degradation logic"
 fi
+if grep -q 'block dependent acceptance' "$FEP" &&
+   grep -q 'four other domains score 100' "$FEP"; then
+  pass "Missing mandatory work blocks despite advisory scores"
+else
+  fail "Missing mandatory work could be hidden by partial scoring"
+fi
 
 # Scenario 5: Skip-module operator override
 echo ""; echo "[5] Operator override"
 if grep -qE "\-\-skip-module|skip_modules" "$FEP"; then
-  pass "Composition supports --skip-module override"
+  pass "Composition documents --skip-module"
 else
   fail "Composition MISSING --skip-module support"
+fi
+if grep -q 'does not change required obligations' "$FEP"; then
+  pass "Skip cannot erase required obligations"
+else
+  fail "Skip boundary MISSING"
 fi
 
 # Scenario 6: Brief Forge handoff between stages
 echo ""; echo "[6] Brief Forge handoffs"
 if grep -qiE "(brief.forge|brief_forge|forge_envelope|phase_transition)" "$FEP"; then
-  pass "Composition uses Brief Forge for stage transitions"
+  pass "Composition documents explicit Brief Forge use (not execution proof)"
 else
   fail "Composition MISSING Brief Forge integration"
 fi
@@ -101,12 +112,17 @@ for verdict in GREEN YELLOW RED; do
   fi
 done
 
-# Scenario 8: Cap from pack policy
+# Scenario 8: Historic planning hints are not enforced policy.
 echo ""; echo "[8] Token cap"
 if grep -qE "cap_soft:.*500" "$FEP" && grep -qE "cap_hard:.*(750|1000)" "$FEP"; then
-  pass "Cap documented (500k soft / 750k+ hard)"
+  pass "Historic planning hints preserved (500k / 750k+)"
 else
   fail "Cap MISSING or incorrect"
+fi
+if grep -q 'uncalibrated advice' "$FEP" && grep -q 'Default to serial' "$FEP"; then
+  pass "Planning hints and concurrency retain actual-host boundaries"
+else
+  fail "Planning hints/concurrency authority boundary MISSING"
 fi
 
 # Scenario 9: All 5 modules referenced in sibling_workflows

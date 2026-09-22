@@ -1,6 +1,214 @@
 # Universal implementation handoff
 
-Updated 2026-09-22 by MasterSession.
+Updated 2026-09-22 by MasterSession's recovery coordinator.
+
+## Recovery checkpoint
+
+The operator transferred this initiative to session
+`88aecc43-40f9-41d4-8947-6c2fb0a55481` because MasterSession could no longer compact.
+Continue here, not in the broken original session. The clean original `5f3d885`
+history is preserved and fast-forwarded into `jokerman-microsoft-mastersession-recovery`.
+All original requirements, ownership, acceptance and current-batch delivery authority
+remain; original branches, reports, backups and unmerged work stay untouched.
+
+The existing P08/P09/P10/P11/P12/P13 owners have the new coordinator address.
+Use the app-surfaced session IDs, not differing IDs quoted inside worker messages.
+Current actionable checkpoints supersede the older chronological entries below:
+
+- P04: shared consumer `4f10837` passes `bb939e55` with F08/P3 advisory,
+  integrated `1f1b0d2`; eight joined shared/guard cases and source preflight pass.
+  Final join `08879e9` / report `7a453b0` now consumes accepted `aa5cf0e`,
+  passes all 47 composed and 25 provider cases plus six committed rechecks,
+  and is with SAME `ed672f58` for final join SPEC/QUALITY. It is not integrated
+  or accepted yet; original 76 destinations and historical artifacts remain.
+- P08: the same reviewer completed private native `main-review-02` planning SPEC
+  and QUALITY. The recovery coordinator read it and approved the corrected Alpha
+  design and conditional local T011/T027 implementation. The original controller
+  now owns actual DEFINE/DISCOVER/PLAN progression, native BUILD and cold resume;
+  it reports actual PLAN completion and the original map approved. SAME reviewer
+  `9dbf0a9b` accepted exact mechanical providers in `e98e7da8`, integrated
+  `e1edc0c`; 22 joined methods and 21-resource source preflight pass. The same
+  reviewer also accepts the named legacy-ID provider correction `aa5cf0e` in
+  separate exact-export report `78e3c09`, preserved `14f97fa`; A08.3.a is reclosed.
+  Native `70469296` and the original controller workspace are not re-pinned.
+  Main T011 is genuinely paused before T027. The original c5 builder is serially
+  consuming separate build/fix comparison evidence. Both fix T1 first records
+  passed, then correctly became raw-evidence stale after their actual checkbox
+  progress; new current-byte reviews preserve old records and real exit-3 history.
+  No provider patch or checkbox rollback is authorized by that behavior.
+- P09: module product `5c99612` passes `114ddfe3`, integrated `2d789a4`;
+  all 26 product paths match and 13 joined methods pass. `477d3fc` releases
+  the original owner's separate N1 safety-quantifier correction and two bounded
+  planning/execution mode probes. N1 and five actual mode packets are frozen
+  at `1b75264`, later report-only `4640ca9`. N1 passes SAME `447d97f5` review
+  `5c0cc0e`, preserved `fa287b0`. That reviewer explicitly adopted the exact
+  builder-transcribed N1 record before coordinator host corroboration; the
+  original owner now has its actual receipt for real P05 consumption. Mode
+  review remains separate; original TA FAIL/DA obligation and archive remain.
+- P10: `6e1b1e0` / `4be5e096` closes F01-F04 in `8c3afbbe` / `83c5458`.
+  Full SPEC remains B01 BLOCKED: repeated Windows journal access-denial prevents
+  the supported linked-init positive, with cause unknown. Final attempt exhausted,
+  no retry/platform investigation or speculative patch; QUALITY not started.
+  Other actual preservation/failure/recovery cases retain their passing evidence.
+- P11: deterministic parser `d3b5569` / `336513e` passes complete A16 component
+  SPEC/QUALITY in `3049811`, integrated `7cb3812`. All eleven product/report
+  identities match; joined four shared and 30 Node checks pass. Original native
+  evidence stays attributed to `3115790`. Direct design source `f72f316` /
+  `c91e83d` was repaired for D1-D3, then D4/D5. Current source `a1b3a45` /
+  `683db6a` passes complete direct A14.1-.4 SPEC/QUALITY in `edecfdf`.
+  Integration `e1cb9d2` preserves all 24 product blobs; joined 18 contract
+  methods and legacy roundtrip pass. `b1ca886` releases one bounded new
+  self-contained static artifact/responsive-image confirmation to the same
+  owner. Old artifacts stay on `f72f316`; framework TLS/build remains blocked.
+- P12: defaults repair `32dac88` / `b270475` passes F01 recheck in `02e8028`
+  / `984bb72`. SAME reviewer `31c39265-13e5-4057-9e78-49bf658749a5` also accepts
+  actual six-slide visual observation. `69f2ef6` releases a distinct complete
+  PPT-only attempt without dropping the original joint controls. Word access was
+  explicitly declined during recovery; no app launched. Page layout remains
+  permission-blocked, with no retry, COM/export or alternate-launch workaround.
+  The separate denied Copilot UI route stays closed. Selected native PPT passes
+  `5858268`, but complete common/Word source QUALITY was never accepted.
+  Workbook `839e6df` passes scoped source SPEC/QUALITY in `21e5228`, preserved
+  `699a997`; no product ancestry imported and native caches/layout still fail.
+  PDF D01-D03 repair `1ba9f9b` / `124780e` is with SAME reviewer. Full original
+  eleven-file common/Word/PPT source closure still needs a bounded source review;
+  shared pipeline serialization remains a further actual dependency gate.
+- P13: ambiguity repair `b1d4caf` passes independent whole first-unit SPEC/QUALITY
+  in `09a3c6ec`, integrated with original history as `03df1db`; joined 31 metadata
+  methods pass and all eight product blobs match. The original owner is released
+  for the additive selection/preservation unit, subsequently accepted below.
+  Remaining eight consumers/template `7884ddd` / `5df8e99` failed SPEC in
+  `5a3ab4c`, preserved `0c16373`, for one real existing-deep-draft guard defect.
+  `b1ca886` releases only that native-I/O observation/caller regression to the
+  original owner; SAME `4865e4f7` must recheck SPEC then first eligible QUALITY.
+
+Later P13 source checkpoint: A+B `72253ed` passes `7bf3f253`, integrated `895bb35`.
+All 19 joined source-selection methods pass. The new actual installed selection
+case passes init/check/repeat, alias/demo-role queries from unrelated cwd, exact
+alias/provenance/notices and a managed-files-only clone with empty synthetic home.
+Missing PyYAML visibly refuses; no source/home fallback or query write occurs.
+This is accepted-P06-engine evidence, not P10 linked/default transaction acceptance.
+The remaining eight discovery/authoring consumers and existing template are
+released to the original P13 owner with explicit status/welcome ownership.
+
+Current original acceptance count is 68/113 after accepted A16, domain methods,
+preserved role contracts and A14.1-.4. Native semantic/mode and installed observations
+remain distinct open leaves; counts are not elapsed time or release readiness.
+The user's percentage question was answered at the then-current 64/113 (57%).
+No push, PR, main merge or release has occurred.
+
+The accepted design helper/schema/reference are now in the coordinator's
+required-source closure. `design-resource-closure` passes missing-source/no-write
+cases but the separate long-name installed-inventory test fails during its init
+at the classic adapter's ordinary temporary-file write. This is the already
+recorded classic native-path consumer boundary, not P10's different journal
+WinError 5, and no source/target shortening or provider patch repairs it here.
+The unchanged existing selected-consumer pilot separately passes init/check/
+repeat, unrelated-cwd queries and managed-files-only clone in
+`design-kit-pilot-01`. That supported fixture does not supersede the failed
+deep-target case or establish P10/default/linked acceptance.
+
+P08 main native T011 passed its actual independent review and real P05 producer/
+latest-reader/typed-QA chain with coordinator host corroboration. Only T011
+progress was recorded, followed by a genuine pause before T027; main is revoked
+from builder `c5accb50` pending the third fresh resume context. Separate build-
+direct and alias T011 and T027 reviews remain their own scopes; real actual
+host receipts were created only after full record/context/typed-QA/evidence
+verification. Alias T027's new record is canonical `cf352e9e...`, with actual
+host file `files/p08-build-alias-t027-host-corroboration.json`. FIX-DIRECT
+post-progress review now returns canonical `92036327...`; its parent intake/
+host receipt remains next. FIX-ALIAS post-progress `03774177...` is separately
+with SAME `9db`. Old raw-plan refusals do not become successes by rehashing an
+old verdict. Controller `f2c305ac` uses interactive waiting when an actual event
+is its only dependency; new actionable deliveries resume autopilot.
+The third fresh main-resume context has not been created.
+
+Dependency-ready releases are committed, not new proposals awaiting an operator:
+`bdfd127` releases P04's accepted-provider shared-evidence consumer and conditionally
+releases P13 additive source selection/preservation after compact acceptance.
+`235d5bf` releases P11's direct A14.1-.4 design contract and P12's standalone
+native-workbook unit. P11 should prioritize its small browser finding first.
+P12 may use the native Excel canvas, not start an Office app or invent a recalc API.
+Final P08 binding, installed closure, A14.5, Word/PPT layout, PDF/Visio and final
+integrated acceptance remain separately tracked in their original cards.
+
+The original MasterSession briefly resumed and sent two duplicate continuation
+messages. It confirmed no new writes, decisions, executions or commits and is
+now explicitly parked; recovery `88aecc43` remains the sole coordinator.
+The original P08 owner confirmed its three frozen mechanical providers are
+separable from pending semantic controls; its card now permits the SAME reviewer
+to accept that provider checkpoint before dependent P09/P04 work.
+
+P10 F03 is frozen as `036e9033` / `50e654af` and dispatched to its SAME reviewer.
+Report intake's initial append-only assumption was corrected after inspecting
+the whole diff: status/seals were updated truthfully, old outcomes and Git history
+remain. P11 Q1 correction is released by `d3f94db`. P12 independent `dfb5cdd0`
+(`ee3ed5e` here) found a bounded standalone-default regression; its repair card
+preserves current content improvements and the two still-open inspection gates.
+
+Delivery permission boundary: the host rejected a recovery command that would
+retrieve the account-selected GitHub token. That command did not execute; no
+token or authenticated request was obtained. Do not retry token acquisition or
+substitute a different identity/tool to bypass that decision. Prior batch merge
+authority remains, but the current host credential permission is unresolved.
+Continue local implementation/review; remote delivery needs its permitted path.
+A subsequent `gh auth status` command returned only account metadata, not tokens,
+and reported an unauthorized injected account as active; `jokerman89` was stored
+but inactive. The CLI may validate accounts during that status operation, so do
+not call it proof of authorized-only remote access. No push, PR or merge occurred.
+No further GitHub/account operation is authorized by that observation.
+
+P12 source-default repair is frozen as `32dac88` / separate report `b270475`
+and with SAME reviewer `31c39265`. The coordinator rasterized all six exact
+native PPT SVGs with existing ImageMagick, then both coordinator and reviewer
+directly inspected the resulting pixels. The pinned PPTX is unchanged; this
+new native-rendition observation is separate from desktop/physical-print claims.
+It is available for a fresh QA/evidence decision, not a rewrite of old blockers.
+
+Native Excel actually recalculates formulas, but saves empty cached values.
+No fixture-specific cache publisher was authorized. Excel app access was also
+declined. A focused request for Word/Excel verification approval returned that
+the user is unavailable, not affirmative approval; neither app may be retried
+or reached through COM/shell/alternate-launch workarounds. Original native
+content/editability, cache-error and formula-error evidence remains useful but
+does not establish full workbook/page layout acceptance.
+
+Selected native PPT now passes actual SPEC and QUALITY in `5858268` for
+`32dac88` and the distinct `7c130a2` evidence packet. The reviewer's optional
+private decision-data command was denied before execution; no structured P05
+decision/corroboration exists. A focused permission request returned user
+unavailable, not approval. Do not retry or delegate that denied persistence.
+The existing source/artifact/QA/review evidence remains valid; strict publication,
+Word/joint and parent acceptance remain distinct.
+
+P10's same reviewer closed the native F03 pair, then found a producer-grounded
+F04: canonical redirects with missing destinations are called current even
+though actual migration dry-run refuses them. The original owner has proposed
+one finite redirect-class reader correction; no new path/Git initiative follows.
+Wait for the immutable report and exact repair release.
+
+Coordinator A23.4.g3 now requires nine already accepted P05/P09 context, review
+and domain helper/schema/CLI resources during adapter source preflight. All old
+test-method ASTs are unchanged. The actual missing-resource regression initially
+failed nine new subcases because generation reached publication instead of
+refusing the missing source; the publication then hit the already gated native
+path limitation. After the constant-only correction, the complete 17-resource
+no-write refusal method passes. The separate installed-check method still needs
+accepted P10 publication before it can reach its assertion at these same fixture
+paths. Neither the failed two-method run nor this one-method pass is a complete
+installed-consumer or g3 acceptance result. Raw exits/logs are retained in this
+recovery session's `files/verification/closure-red` and `closure-green`.
+
+No original parent checkbox has been closed merely by recovering these candidates.
+Final design/module/format/selection integration, P04 binding, P14 and delivery remain.
+
+The accepted A16 original leaves now close from independent review plus exact
+integration and joined checks, bringing original accepted items to 56/113.
+Coordinator source closure additionally includes the exact public alias and
+provenance data files, catalog/browser helpers and `.mjs` LF normalization.
+The new module-text test was RED before correction; it and the complete
+28-resource no-write source-refusal method pass. Actual installed/default
+consumer acceptance still waits for P10 and is not claimed from preflight.
 
 ## Durable state
 
@@ -41,10 +249,11 @@ from the reviewed historical merge `40c2795`. Current implementation ownership:
 | P05 review evidence | `2329e71f-cd9e-473b-94cf-41c579c29a88` | ACCEPTED by `33eac071`, integrated `c5c8f86`; current profile/review and focused gates pass, idle |
 | P06 host adapters | `324863ff-e7cf-4abf-b449-04dd0f096170` | Component ACCEPTED/integrated `36593cd`; provider `7425960`, final review `1067da29`; idle |
 | P07 profile context | `b9352dfe-1c1e-4ea3-b7d9-0fd008d39b3d` | Long-path repair ACCEPTED by `a7450597`, integrated `c344133` with reports; joined checks pass, idle |
-| P08 work lifecycle | `f2c305ac-e8b0-4b02-b6cd-c7de598964cf` | `402fd804` SPEC FAIL preserved `26c80a0`; bounded F04/F05 class repair authorized; original semantic/host evidence remains open |
-| P09 specialist depth | `0fe8dc1e-8c6f-4d4a-af68-80696067be27` | Content accepted/integrated `4983af2`; proposal read; isolated data-core implementation released, P08/module wiring still gated |
+| P08 work lifecycle | `f2c305ac-e8b0-4b02-b6cd-c7de598964cf` | Routing `70469296` / `8318c308` frozen and intake verified; bounded native semantic fixture protocol released, no selected-SPEC clearance |
+| P09 specialist depth | `0fe8dc1e-8c6f-4d4a-af68-80696067be27` | Content accepted/integrated `4983af2`; data-core `ea92df8` / `53145bd` frozen and intake verified, same-reviewer data SPEC/QUALITY dispatched |
 | P10 installer lifecycle | `5ea6c88c-68c1-4712-8f55-adecdfe0061f` | F02 `a797b2d` / report `7bf5a31` frozen; intake verified; same-reviewer complete SPEC then eligible whole QUALITY dispatched |
-| P11 browser operations | `f413bdcb-e081-45e0-9524-7274b4391665` | A16 `d389905` / `84f0d38` BLOCKED; only `307367f` computed-location/conditional owned-fixture scope, no unverified launch |
+| P11 browser operations | `f413bdcb-e081-45e0-9524-7274b4391665` | `f4cd1f3` / `a49e7b8` has real headless evidence; scoped existing-deadline owned-file readiness correction, acceptance still open |
+| P12 document formats | `0a75211f-455c-4318-864f-bc8023ce9142` | Standalone content/Word/PPT active from `3ee602f`; shared pipeline and later formats remain gated |
 
 All are `lintel-builder` sessions with explicit ownership, local commits, report paths
 and no remote authorization. P01/P02 and the owned P04-P07 components are accepted.
@@ -67,7 +276,7 @@ repair their own findings. All prior reports remain preserved in `reviews/` and 
 | P06 | Final `1067da29`; complete component SPEC/QUALITY PASS at `7425960`; integrated | `d2a89ac3-151a-4dc0-ab09-1f3a62465cab` |
 | P07 | Final `a7450597` accepts `4d001463`; integrated through `56de830`, earlier `a8de574`/`3d8e715` preserved | `a7d78944-c02c-4909-a060-2c4f2a754b00` |
 | P08 partial | `402fd804`: F04/F05 P2, joint F01/F02 class open; bounded mechanical F03 closed; selected SPEC FAIL/QUALITY NOT STARTED | `9dbf0a9b-750d-45c2-968c-41a5acb11c92` |
-| P09 content | `19eb776` staged CONTENT SPEC/QUALITY PASS at `4a9b946`; integrated; no runtime/parent clearance | `447d97f5-7919-4433-8f65-a64016c0dbdf` |
+| P09 | Content `19eb776` accepted/integrated; data-core review targets exact `53145bd` / `ea92df8`; module/parent gates remain | `447d97f5-7919-4433-8f65-a64016c0dbdf` |
 | P10 | Recheck exact `7bf5a31` / `a797b2d` after `c1a38a03` F02; F01 closed, full SPEC/QUALITY still open | `1578dfd8-f239-4eba-989b-3c4bde3e5792` |
 
 ## Current combined review checkpoints
@@ -197,6 +406,44 @@ normal-pipeline continuation. Outside/unresolved results stop; no actual-home,
 policy or startup-variant work is authorized.
 
 ## Accepted local integrations
+
+P09 data-core intake is verified at `ea92df855bc1e0dfea5c9deb913bdcdf2e5faa8c`
+and report-only `53145bd762410cceaadde213fdb3dc435639be8d`: exact seven product
+paths, protected earlier content, complete old report prefix and SHA-256
+`aa4b19a0...`; the full new append was read. The data schema/helper/CLI consume
+accepted P03/P05/P07 directly, without P08/module wiring. Builder 39/39 plus
+separate retained 12/12 are not independent acceptance. The existing reviewer
+now owns `reviews/P09-data-ea92df8.md`, data SPEC before eligible QUALITY.
+
+P08 correction intake is verified at `70469296f97e8292c6bcf7a0c2b324cc47fcfcf1`
+and report-only `8318c3086efc5eb938a2542780226eae3c227ea8`: three source files,
+unchanged modes, 328-line append with complete old prefix, LF hash `2651fb98...`.
+The new shared-head/newline implementation and 3,811 self-assertions are not
+independent closure. The complete proposed native proof protocol was read and
+is released only by the new P08 bounded-fixture section. The original owner
+controls isolated fixture actors; MasterSession supplies actual fixture decisions.
+No fabricated questions, semantic reports, accepted findings or phase completion.
+
+P11 continuation intake verified six source paths over `84f0d38`, the report-only
+child `a49e7b8`, and report SHA-256 `3b25c472...`; the full update was read.
+The computed in-owned native folder correction satisfied original CURRENT before
+real Chrome operations. Eight run-07 cases and retained PNG/PDF observations are
+separate from its failed outer inspector and run-08 EBUSY startup. The card now
+permits only an existing-deadline EBUSY readiness correction and final explicit
+reader run. Native raster-policy denial and unobserved broader layout/authentication
+remain limits, never bypassed or silently promoted.
+
+P12's native schemas expose editable Word/PowerPoint and PowerPoint SVG rendering,
+not a Word page-render action. The owner is producing real synthetic artifacts and
+retaining source-content checks. Native batch notes showed a content-preservation
+problem; its normal serialized API path is being checked without app/host changes.
+No rendered Word or complete format acceptance is claimed.
+
+P09's accepted content also passed a real fresh consumer init and actual installed
+adapter check from the joined source. All 69 role bodies and five decision-method
+references match the documented LF text representation; user prose/sentinel survived.
+Target length157 is a new content-distribution case, not a substitute for P10's
+original default/long cases. Records are in `.claude/runtime/p09-joined-zeskux4e`.
 
 Latest P08 independent report `402fd80417c2aa08193a460045168d8bb562793d` is
 preserved report-only as `26c80a0`. Its sole parent/path, 495 lines and LF SHA-256

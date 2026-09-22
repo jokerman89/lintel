@@ -8,7 +8,7 @@
 #
 # Fields:
 #   repo            — git URL (HTTPS) of the upstream repo
-#   install_path    — destination on the local machine (`~` expanded by the installer)
+#   install_path    — historical reference location; the installer does not create or expand it
 #   last_verified   — date we last manually confirmed this URL + license combination
 #   license         — SPDX identifier (or "NONE" if upstream has no LICENSE file)
 #   tier            — permissive | restricted | reference-only
@@ -18,8 +18,8 @@
 #                                    this label makes no blanket use or redistribution grant
 #                       reference-only = catalog/config repo, not a skill pack; install script SKIPS,
 #                                        docs point at it for reference
-#   install_type    — git-clone | git-clone-and-setup | reference-only
-#   post_install    — command to run inside install_path after clone (only if install_type=git-clone-and-setup)
+#   install_type    — historical recipe type: git-clone | git-clone-and-setup | reference-only
+#   post_install    — historical recipe metadata, never executed by this declaration-only listing
 #   description     — one-line summary
 #   docs            — URL of the upstream README or docs entry-point
 #   license_note    — present only when tier=restricted; explains the obligation

@@ -10,6 +10,20 @@ Cross-session working state (not durable rules — that's [[lessons.md]]; not pe
 
 ## Active - Universal implementation (2026-09-20)
 
+**Recovery, 2026-09-22:** the operator transferred the broken MasterSession to
+`88aecc43-40f9-41d4-8947-6c2fb0a55481`. Exact `5f3d885` is preserved on the recovery
+branch `jokerman-microsoft-mastersession-recovery`; the original worktree was not
+changed. Continue from the [recovery checkpoint](../plans/universal-implementation/handoff.md#recovery-checkpoint)
+and original work map. Existing owners are retained. Current original acceptance
+is **68/113**, not full release readiness: direct design A14.1-.4 is integrated
+as `e1cb9d2`, and the selected legacy-ID provider `aa5cf0e` is independently
+accepted. Final Swarm composition, native lifecycle comparisons/cold resume,
+specialist mode evidence and remaining consumer/format repairs are still active.
+P10's supported linked-init remains blocked by repeated journal WinError 5 with
+unknown cause; no further retry or speculative patch is released. Word/Excel,
+P12 structured-record and tool/CI permission boundaries remain unchanged.
+No push, PR, main merge or whole-initiative completion is claimed.
+
 **Status:** approved implementation, not complete. MasterSession secured the 25 uncommitted
 audit/continuity files with SHA-256 verification and committed them as `74290e0`, preserving the
 source worktree. A separate verified Git bundle retains the complete Swarming history.
@@ -110,16 +124,18 @@ infrastructure blocker with the original outcome before expanding scope (L-038).
 P09's content unit is independently accepted by `19eb776` and integrated in
 `4983af2`: 61 improved/eight retained roles, all 69 frontmatters and five domain
 references. Joined 12-method/catalog checks pass and reviewed source identity is
-exact. Original owner `0fe8dc1e` may now implement only the released data-core unit
-using accepted P03/P05/P07; P08/module procedure binding remains gated.
+exact. The data-core unit `ea92df8` / report `53145bd` is now frozen, its intake
+verified, and with the existing P09 reviewer. It uses accepted P03/P05/P07 only;
+P08/module procedure binding and original parents remain gated.
 P08 is repairing F04/F05 and planning the original semantic/host evidence; P10 is
 repairing F02 under the clarified consumer-admission/write-set contract.
 P11 owner `f413bdcb` has frozen blocked A16 source and only the bounded native
 location/conditional owned-fixture scope. P09 module-runtime binding and P11 A14/design/agent work
 retain their predecessor gates; no whole-package acceptance is implied.
 P10's frozen F02 product `a797b2d` / report `7bf5a31` is back with the same reviewer
-after verified intake; full SPEC/QUALITY remain open. P12's first standalone
-content/Word/PPT unit is released independently of the later shared-design wiring.
+after verified intake; full SPEC/QUALITY remain open. P12 owner `0a75211f` is
+implementing the standalone content/Word/PPT unit; shared-design wiring remains
+gated. Native artifacts are being exercised, not accepted from method prose alone.
 Continue P08-P14 in dependency order,
 not a new audit or partial delivery. Coordinator routing (`b72ab47` plus
 `1d40193`) and provenance (`9f49e26`) await their owning package reviews. All successor cards

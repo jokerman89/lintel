@@ -73,7 +73,7 @@ done
 # ─── Scenario 5: 3 raise-help triggers documented ───────────────────────
 echo ""
 echo "[5] Raise-help triggers documented"
-for trigger in new_dependency_tree_shake_reveals_unknown_service adr_alternatives_within_5_percent contract_change_breaks_3_plus_consumers; do
+for trigger in new_dependency_tree_shake_reveals_unknown_service material_alternatives_unresolved active_consumer_break; do
   if grep -q "$trigger" "$TA"; then
     pass "raise-help trigger: $trigger"
   else

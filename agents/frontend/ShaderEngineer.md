@@ -21,6 +21,11 @@ Reads brief + (optionally) visual-thesis + perf-budget → picks shader-library 
 
 Emits `shader.json` (schema_version: 1) per the frontend-shader SKILL.md contract.
 
+Validate with the [shared design contract](../../skills/design-dna/references/design-contract.md):
+`design_contract.validate_spec(data, "shader")` accepts the existing `none`/null
+branch before active-GPU requirements. The caller carries exact source/license
+and compatible-stack evidence in its binding; no renderer invocation is implied.
+
 ## When to invoke
 
 - Auto-invoked by `/li:frontend-shader` Workflow Step 2
