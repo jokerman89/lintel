@@ -25,6 +25,10 @@ Solo-invokable for component-mode ("just typography please") or auto-invoked by 
 
 L-001-discipline: skill body is the contract. Agent at invocation produces specific font choices and licensing-instructions. Don't pre-bake recommendations in the SKILL.md body.
 
+Use the typography definition in the [shared design contract](../design-dna/references/design-contract.md).
+Retain actual profile/brief precedence and source/version/license/rationale evidence
+for chosen fonts; licensed availability is not established by this example.
+
 ## When to use
 
 - Solo: "ai-app for legal professionals — give me a typography stack"
@@ -144,8 +148,8 @@ Agent fills in specific choices based on the brief. Don't pre-bake.
 ### Step 4 — Schema-validate + emit
 
 ```bash
-# Sanity: schema_version present, font_stacks non-empty
-jq -e '.schema_version == 1 and (.font_stacks | length > 0)' "$out" || { echo "Schema invalid"; exit 1; }
+python3 "${LINTEL_SOURCE_ROOT:?}/skills/design-dna/scripts/design_contract.py" \
+  validate --repo "${LINTEL_REPO_ROOT:?}" --file "$out" --kind typography
 
 # Customer-share mode: validate licensing claims
 if [ -n "${CUSTOMER_SHARE:-}" ]; then

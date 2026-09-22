@@ -14,6 +14,12 @@ Brief → single-file HTML mockup. Inline CSS, inline minimal JS if needed, no b
 
 The point: fast exploration before any framework commitment. Use for design conversations, customer demos of UI direction, or as the seed for `/design-shotgun` to spawn variants.
 
+For profile-aware handoff, use the [shared design contract](../design-dna/references/design-contract.md)
+without turning this mockup skill into a framework scaffold. Retain the brief,
+selected project/profile tokens and source evidence; none/CSS/no-shader needs no
+library. Explicitly selected missing tokens block, rather than silently changing
+the brand. These rules take precedence over illustrative default/home paths below.
+
 ## When to use
 
 - Want to sketch a UI direction in 5 minutes, not 50
@@ -40,7 +46,9 @@ The point: fast exploration before any framework commitment. Use for design conv
 
 1. **Read brief.** Extract: target surface, primary user task, layout hints, brand cues.
 2. **Read references.** If `--reference` is a URL: capture via `/browse` to extract palette + type. If file: read.
-3. **Read tokens.** If `--inherit-project`: load color/spacing/type tokens. Otherwise use sane defaults (system font, 8px scale, neutral palette).
+3. **Read tokens.** Retain selected project tokens and the verified design profile;
+   explicit brief choices override aesthetics, corpus fills unpinned choices.
+   Bind input bytes through the shared contract before claiming a resolved handoff.
 4. **Generate HTML.** Single file. Inline `<style>` (no external CSS). Minimal inline `<script>` only if needed for interactivity demo (toggle, accordion).
 5. **Copy population.** Per `--copy-tier`:
    - `internal`: lorem ipsum or `[TODO: real copy]` placeholders
@@ -81,7 +89,8 @@ To fork into variants: /design-shotgun --seed <this path> --count 3
 
 - **Brief too vague:** ask one targeted clarifying question before generating. Better one question than a wasted generation.
 - **Reference URL blocked by Layer 2:** generate without reference; note the gap in the report.
-- **Token file unreadable:** fall back to defaults; warn in report.
+- **Selected token file unreadable:** report the exact missing input; do not
+  replace an explicit selection with a neutral/default brand.
 - **Output dir unwriteable:** report exact path + permission issue; do not retry blindly.
 - **Operator asks for `pack-voice` but no pack voice corpus configured:** WARN — copy will be best-effort but UNVALIDATED until a voice pack is installed.
 

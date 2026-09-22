@@ -26,7 +26,13 @@ Solo-invokable for audit or chained from `/li:frontend-design` Workflow Step 7 (
 **Scoring rubric (resolves M-3 from /plan-eng-review):**
 - Per dimension: **≥80 = green**, **60-79 = yellow**, **<60 = red**
 - Overall verdict: ALL dimensions green → GREEN. Any red → RED. Otherwise YELLOW.
-- Customer-share runs: any yellow or red → BLOCKED until operator addresses
+- Scores are advisory; applicable mandatory P05 fail/error/unverified results
+  block regardless of score. A requested aesthetic threshold is an explicit
+  requirement, not a substitute for observed controls.
+
+Use the [shared design contract](../design-dna/references/design-contract.md) for
+the six canonical keys, aliases, profile verification and P05 review input. Do not
+copy its parser or use a separate score-only clearance path.
 
 L-001-discipline: skill body is the contract (the 6 dimensions). Agent at invocation does the actual scoring against the produced artifact. Don't pre-bake what "good" looks like.
 
@@ -88,8 +94,8 @@ python3 "$dna/scripts/validate_design.py" "$artifact" \
   --profile "$dna/profiles/<active-profile>.yaml"
 ```
 
-Exit 1 → the run is **RED** regardless of dimension scores (the violations are objective:
-zoom-disable, killed focus, emoji icons, off-palette drift). Surface the validator output as
+Exit 1 → the run is **RED** regardless of dimension scores (hard findings include
+zoom-disable, killed focus and emoji icons; off-palette/token checks are warnings). Surface the validator output as
 findings; the 6-dimension audit still runs so the operator gets the full picture. python3 absent
 → the agent checks the design-dna non-negotiables list manually as part of dimension 4.
 
@@ -146,39 +152,23 @@ Hand off to `agents/frontend/DesignSystemAuditor.md`. Agent loads artifact + (op
 
 ### Step 4 — Compute scores + verdict
 
-```bash
-# Per-dimension: agent emits {score: N, findings: [...]}
-# Skill computes verdict per dimension + overall
-
-for dim in typography motion shader accessibility brand responsive; do
-  score=$(jq -r ".dimensions.$dim.score" "$out")
-  if [ "$score" -ge 80 ]; then verdict="green"
-  elif [ "$score" -ge 60 ]; then verdict="yellow"
-  else verdict="red"; fi
-  jq --arg d "$dim" --arg v "$verdict" '.dimensions[$d].verdict = $v' "$out" > "$out.tmp" && mv "$out.tmp" "$out"
-done
-
-# Overall
-red_count=$(jq '[.dimensions[] | select(.verdict == "red")] | length' "$out")
-yellow_count=$(jq '[.dimensions[] | select(.verdict == "yellow")] | length' "$out")
-
-if [ "$red_count" -gt 0 ]; then overall="red"
-elif [ "$yellow_count" -gt 0 ]; then overall="yellow"
-else overall="green"; fi
-
-jq --arg v "$overall" '.overall_verdict = $v' "$out" > "$out.tmp" && mv "$out.tmp" "$out"
-```
+Call `design_contract.validate_review` for advisory feedback. The only emitted keys
+are `typography_hierarchy`, `motion_coherence`, `shader_perf_budget`,
+`accessibility_wcag`, `brand_conformance`, `responsive_fidelity`. Map short CLI
+aliases once through `normalize_dimensions`; reject unknown/duplicate keys and
+missing members of the selected subset. Never read different short keys from the
+JSON output. A null score retains unverified/unscored advice, not a synthetic 100.
 
 ### Step 5 — Customer-share strict gate
 
-```bash
-if [ -n "${CUSTOMER_SHARE:-}" ] && [ "$overall" != "green" ]; then
-  echo "BLOCKED: customer-share strict-mode requires GREEN. Current: $overall"
-  echo "Top concerns:"
-  jq -r '.dimensions[] | select(.verdict != "green") | "- " + .name + " (score: " + (.score|tostring) + "): " + (.findings[0] // "see report")' "$out"
-  exit 1
-fi
-```
+Run the shared helper's `review` operation with the selected design, external P05
+context/QA and the same explicit P07 configuration as rendering. It verifies
+current input bytes/profile and every original required observation. A dimension
+subset or none/CSS/no-shader choice cannot drop keyboard, contrast or other controls.
+Ground N/A applicability through P05; never award an artificial score to clear it.
+Actual browser absence remains unverified for keyboard/focus, responsive behavior,
+reduced-motion and performance measurements. Independent review still follows the
+existing P05 protocol; this advisory helper reports `release_clearance: false`.
 
 ### Step 6 — Output report
 
@@ -201,7 +191,7 @@ Top findings (yellow + red):
   • <dimension>: <finding>
 
 Recommendation:
-  GREEN  → ship as-is
+  GREEN  → advisory only; mandatory controls and independent review still apply
   YELLOW → address findings before customer-share
   RED    → BLOCKED for customer-share; must fix before re-review
 
@@ -239,14 +229,16 @@ Full report: $out
 
 ## Status protocol
 
-- **DONE** — review complete, design-review.json emitted, overall green
+- **DONE** — selected feedback and required observations are complete; report
+  their actual result separately from independent delivery acceptance
 - **DONE_WITH_CONCERNS** — review complete, overall yellow (non-customer-share)
 - **BLOCKED** — review red, OR customer-share strict-mode with yellow/red
 - **NEEDS_CONTEXT** — artifact unreadable, OR dimension-list invalid
 
 ## Pause-points
 
-- Customer-share + yellow/red: BLOCKED + surface top findings + ask "address now or override?"
+- Applicable mandatory failure/error/unverified: BLOCKED; a style-score override
+  cannot waive the underlying control.
 - Red dimension: hard-block for customer-share regardless of overall
 
 ## Integration
@@ -284,7 +276,7 @@ Full report: $out
 
 ## Recommended next steps after invocation
 
-- GREEN → ship
+- GREEN → inspect mandatory controls and obtain actual independent clearance
 - YELLOW → address findings + re-run review
 - RED → hard-block + investigate per-dimension findings
 - Use design-review.json as input to `/li:context-save` for session-handoff
