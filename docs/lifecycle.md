@@ -212,3 +212,9 @@ Layout observations use checked, same-location native I/O for the marker, legacy
 and nested directories. Missing paths are distinguished from inspection failures;
 malformed, unreadable or disappearing entries produce an explicit error instead.
 This reader does not migrate files, create a transaction or alter retained stubs.
+Canonical redirects count as retained stubs only when their mapped destination exists
+with the required type and, for files, can be read. A missing destination remains
+legacy work (`incomplete` with a current marker, otherwise `needs_migration`); wrong
+types, links and inspection failures are errors. The historical ADR README directory
+redirect takes precedence over its ordinary file redirect. Near-match prose is not a
+redirect, and no destination is parsed from arbitrary user text.

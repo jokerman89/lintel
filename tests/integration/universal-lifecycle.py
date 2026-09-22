@@ -737,8 +737,8 @@ class MigrationInventory(LifecycleFixture):
         self.assertIn("v5-claude-home-layout", {row["slug"] for row in rows})
         self.assertEqual(self.inventory("--today", "2026-09-21", "--all"), rows)
 
-    def _layout_targets(self):
-        prefix = "layout-observation-"
+    def _layout_targets(self, label="layout-observation"):
+        prefix = label + "-"
         padding = 147 - len(str(self.base)) - 1 - len(prefix)
         self.assertGreaterEqual(padding, 0, "Keep the declared fixture depth; do not shorten an existing root.")
         parent = self.base / (prefix + "x" * padding)
@@ -770,7 +770,7 @@ class MigrationInventory(LifecycleFixture):
             }
         return result
 
-    def _layout_inventory(self, target, *, error=False, locked=None):
+    def _layout_inventory(self, target, *, error=False, locked=None, migration=False):
         home = target / ".claude/runtime/lintel-home"
         jobs = target / ".claude/runtime/jobs"
         env = dict(self.env, LINTEL_REPO_ROOT=str(target), LINTEL_HOME=str(home),
@@ -812,15 +812,17 @@ class MigrationInventory(LifecycleFixture):
             handle = create(str(native_io_path(target / locked)), 0x80000000, 0, None, 3, 0x80, None)
             self.assertNotEqual(handle, wintypes.HANDLE(-1).value, ctypes.get_last_error())
         try:
+            block = ('bash "$LINTEL_SOURCE_ROOT/bin/li-migrate-claude-home" '
+                     '--dry-run --repo "$LINTEL_REPO_ROOT"\n') if migration else self.skill_block
             result = subprocess.run(
-                [OPTIONS.bash, "--noprofile", "--norc", "-c", "set -euo pipefail\n" + self.skill_block],
+                [OPTIONS.bash, "--noprofile", "--norc", "-c", "set -euo pipefail\n" + block],
                 cwd=self.caller, env=env, capture_output=True, text=True, encoding="utf-8", timeout=45)
         finally:
             if handle is not None:
                 self.assertTrue(kernel.CloseHandle(handle))
         after = self._layout_state()
         print(json.dumps({
-            "case": self._testMethodName, "target": str(target), "locked": locked,
+            "case": self._testMethodName, "target": str(target), "locked": locked, "migration": migration,
             "lengths": [len(str(target)), len(str(target / ".claude/lintel-layout.yaml")),
                         len(str(target / "tasks/lessons.md"))],
             "argv": result.args, "environment": env, "exit": result.returncode,
@@ -836,6 +838,11 @@ class MigrationInventory(LifecycleFixture):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertEqual(result.stderr, "")
         value = json.loads(result.stdout)
+        if migration:
+            self.assertEqual(value["state"], "preview")
+            self.assertEqual(Path(value["target"]), target)
+            self.assertIsNone(value["target_profile_reference"])
+            return value
         self.assertEqual(Path(value["target"]), target)
         self.assertEqual(Path(value["catalog"]), self.catalog)
         row, = [entry for entry in value["migrations"] if entry["slug"] == "v5-claude-home-layout"]
@@ -934,6 +941,133 @@ class MigrationInventory(LifecycleFixture):
                 self._layout_seed(target, ".claude/lintel-layout.yaml", b"layout_version: 5\n")
                 with self.subTest(length=len(str(target)), exclusive_read_lock=True):
                     self._layout_inventory(target, error=True, locked=".claude/lintel-layout.yaml")
+
+    def _redirect_sources(self):
+        relative = "bin/li-migrate-claude-home"
+        shutil.copyfile(ROOT / relative, self.source / relative)
+        self.assertEqual((self.source / relative).read_bytes(), (ROOT / relative).read_bytes())
+
+    def _canonical_redirects(self):
+        return (
+            ("tasks/lessons.md", ".claude/memory/lessons.md", "file"),
+            ("tasks/memory.md", ".claude/memory/working-state.md", "file"),
+            ("tasks/personas.md", ".claude/memory/personas.md", "file"),
+            ("tasks/todo.md", ".claude/plans/todo.md", "file"),
+            ("docs/adr/README.md", ".claude/decisions/", "directory"),
+            ("docs/adr/README.md", ".claude/decisions/README.md", "file"),
+            ("docs/adr/0042-example.md", ".claude/decisions/0042-example.md", "file"),
+            ("docs/adr/nested/.hidden.md", ".claude/decisions/nested/.hidden.md", "file"),
+        )
+
+    def _redirect_seed(self, target, old, new, *, marker=True):
+        if marker:
+            self._layout_seed(target, ".claude/lintel-layout.yaml", b"layout_version: 5\n")
+        redirect = (
+            f"> Moved to {new} (v5 .claude/ home layout, ADR-0005). Retained for explicit historical recovery.\n"
+        ).encode("utf-8")
+        self._layout_seed(target, old, redirect)
+        return redirect
+
+    def test_canonical_redirect_real_three_call_review_contrast(self):
+        self._redirect_sources()
+        valid = self._layout_targets("redirect-retained")[0]
+        stranded = self._layout_targets("redirect-stranded")[0]
+        for target in (valid, stranded):
+            redirect = self._redirect_seed(target, "tasks/lessons.md", ".claude/memory/lessons.md")
+            self.assertEqual((len(redirect), hashlib.sha256(redirect).hexdigest()),
+                             (117, "819912e23957536ae225c7d220728c2564cde1af9f50b0398309dfc1ad6b0332"))
+            marker = native_io_path(target / ".claude/lintel-layout.yaml").read_bytes()
+            self.assertEqual((len(marker), hashlib.sha256(marker).hexdigest()),
+                             (18, "a8e022980d1bc17474f4199f6a22fd6d8eba27f145375854a5e4b65cb19f92eb"))
+        self._layout_seed(valid, ".claude/memory/lessons.md", b"Retained migrated consumer lessons.\r\n")
+        self.assertFalse(native_io_path(stranded / ".claude/memory/lessons.md").exists())
+        good = self._layout_inventory(valid)
+        missing = self._layout_inventory(stranded)
+        refused = self._layout_inventory(stranded, migration=True, error=True)
+        self.assertIn("Stranded redirect without its destination: tasks/lessons.md", refused.stderr)
+        self.assertEqual(good, {"observation": "current", "layout_version": 5,
+                                "legacy": [], "stubs": ["tasks/lessons.md"]})
+        self.assertEqual(missing, {"observation": "incomplete", "layout_version": 5,
+                                   "legacy": ["tasks/lessons.md"], "stubs": []})
+
+    def test_canonical_redirect_matrix_agrees_with_owned_migration_preview(self):
+        self._redirect_sources()
+        for number, (old, new, kind) in enumerate(self._canonical_redirects()):
+            for condition in ("valid", "missing", "unmarked", "wrongkind"):
+                targets = self._layout_targets(f"redirect-{number}-{condition}")
+                for target in targets:
+                    with self.subTest(mapping=(old, new), kind=kind, condition=condition, length=len(str(target))):
+                        self._redirect_seed(target, old, new, marker=condition != "unmarked")
+                        destination = native_io_path(target / new.rstrip("/"))
+                        if condition == "valid":
+                            if kind == "directory":
+                                destination.mkdir(parents=True)
+                            else:
+                                self._layout_seed(target, new, b"Retained migrated bytes.\r\n")
+                        elif condition == "wrongkind":
+                            if kind == "directory":
+                                self._layout_seed(target, new.rstrip("/"), b"Not a directory.\n")
+                            else:
+                                destination.mkdir(parents=True)
+                        if condition == "wrongkind":
+                            self._layout_inventory(target, error=True)
+                            self._layout_inventory(target, migration=True, error=True)
+                            continue
+                        observed = self._layout_inventory(target)
+                        preview = self._layout_inventory(target, migration=True, error=condition != "valid")
+                        if condition == "valid":
+                            self.assertEqual(observed, {"observation": "current", "layout_version": 5,
+                                                        "legacy": [], "stubs": [old]})
+                            self.assertNotIn(old, preview["changes"])
+                            self.assertNotIn(new.rstrip("/"), preview["changes"])
+                        else:
+                            self.assertEqual(observed, {
+                                "observation": "needs_migration" if condition == "unmarked" else "incomplete",
+                                "layout_version": None if condition == "unmarked" else 5,
+                                "legacy": [old], "stubs": [],
+                            })
+                            self.assertIn("Stranded", preview.stderr)
+
+    def test_canonical_redirect_near_matches_remain_ordinary_legacy(self):
+        self._redirect_sources()
+        for number, (old, new, _) in enumerate(self._canonical_redirects()):
+            for target in self._layout_targets(f"redirect-decoy-{number}"):
+                with self.subTest(mapping=(old, new), length=len(str(target))):
+                    self._redirect_seed(target, old, new)
+                    self._layout_seed(target, old, f"> Moved to {new}-unrelated (consumer prose).\n".encode())
+                    observed = self._layout_inventory(target)
+                    preview = self._layout_inventory(target, migration=True)
+                    self.assertEqual(observed, {"observation": "incomplete", "layout_version": 5,
+                                                "legacy": [old], "stubs": []})
+                    self.assertEqual(preview["changes"][old], "replace")
+
+    def test_canonical_redirect_linked_and_unreadable_destinations_refuse(self):
+        self._redirect_sources()
+        outside = self.base / "redirect-destination-controls"
+        outside.mkdir()
+        (outside / "file.txt").write_bytes(b"Fixture-owned linked destination.\r\n")
+        (outside / "directory").mkdir()
+        for number, (old, new, kind) in enumerate(self._canonical_redirects()):
+            for target in self._layout_targets(f"redirect-link-{number}"):
+                with self.subTest(mapping=(old, new), length=len(str(target)), linked=True):
+                    self._redirect_seed(target, old, new)
+                    destination = native_io_path(target / new.rstrip("/"))
+                    destination.parent.mkdir(parents=True, exist_ok=True)
+                    linked = outside / ("directory" if kind == "directory" else "file.txt")
+                    os.symlink(str(linked), str(destination), target_is_directory=kind == "directory")
+                    self._layout_inventory(target, error=True)
+                    self._layout_inventory(target, migration=True, error=True)
+        if os.name == "nt":
+            for number, (old, new, kind) in enumerate(self._canonical_redirects()):
+                if kind == "directory":
+                    continue
+                for target in self._layout_targets(f"redirect-lock-{number}"):
+                    with self.subTest(mapping=(old, new), length=len(str(target)), locked=True):
+                        self._redirect_seed(target, old, new)
+                        self._layout_seed(target, new, b"Existing but unreadable migrated content.\n")
+                        for migration in (False, True):
+                            result = self._layout_inventory(target, locked=new, error=True, migration=migration)
+                            self.assertIn("Permission denied", result.stderr)
 
 
 class NativeInstallLifecycle(unittest.TestCase):

@@ -480,6 +480,20 @@ def layout_observation(repo: Path) -> dict:
         except FileNotFoundError:
             return path, None
 
+    def retained_redirect(data: bytes, destination: str) -> bool:
+        if not data.startswith(f"> Moved to {destination} (".encode("utf-8")):
+            return False
+        relative = destination.rstrip("/")
+        _, observed = observed_path(relative)
+        if observed is None:
+            return False
+        if destination.endswith("/"):
+            if not stat.S_ISDIR(observed.st_mode):
+                raise ValueError(f"Redirect destination is not a directory: {relative}")
+        else:
+            read_owned(repo, relative)
+        return True
+
     _, marker = observed_path(".claude/lintel-layout.yaml")
     version = None
     if marker is not None:
@@ -491,7 +505,9 @@ def layout_observation(repo: Path) -> dict:
         _, observed = observed_path(old)
         if observed is not None:
             data, _ = read_owned(repo, old, MAX_ROLE_BYTES)
-            if data.startswith(f"> Moved to {new} (".encode("utf-8")):
+            if new.endswith("/") and not data.startswith(f"> Moved to {new} (".encode("utf-8")):
+                new += Path(old).name
+            if retained_redirect(data, new):
                 stubs.append(old)
             else:
                 legacy.append(old)
@@ -516,11 +532,9 @@ def layout_observation(repo: Path) -> dict:
                     raise ValueError(f"Legacy entry is not a regular file: {relative}")
                 elif relative not in stubs and relative not in legacy:
                     destination_path = ".claude/decisions/" + entry.relative_to(path).as_posix()
-                    if folder == "docs/adr" and entry.suffix == ".md" and read_owned(repo, relative)[0].startswith(  # legacy-fallback-ok
-                        f"> Moved to {destination_path} (".encode("utf-8")
-                    ):
-                        _, destination = observed_path(destination_path)
-                        if destination is not None and stat.S_ISREG(destination.st_mode):
+                    if folder == "docs/adr" and entry.suffix == ".md":  # legacy-fallback-ok
+                        data, _ = read_owned(repo, relative)
+                        if retained_redirect(data, destination_path):
                             stubs.append(relative)
                             continue
                     legacy.append(relative)
