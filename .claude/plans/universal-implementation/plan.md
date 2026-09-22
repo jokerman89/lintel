@@ -463,16 +463,31 @@ No future automatic hook or dispatcher activation is implied.
   - [x] A22.4.b Map package membership to unchanged leaves and required acceptance evidence.
 - [x] A22.5 Bind attempt/result/report/review and acceptance identities; no fictitious product edits.
 - [x] A22.6 Exercise native isolated, sequential and manual-review recovery paths.
-- [ ] A22.7 Reconcile P05/P08/P09 contracts and verify joined enterprise/hybrid/swarm behavior.
+- [x] A22.7 Reconcile P05/P08/P09 contracts and verify joined enterprise/hybrid/swarm behavior.
 Acceptance: complete preservation map plus SW-01..06 regressions and actual Git fan-in fixture.
 Early acceptance evidence only: [P04 merge review](reviews/P04-merge.md) at `e74849d`,
 report commit `4bf5315`, integrated as `40c2795`; [76-path map](reports/P04-preservation.md).
 All 17 historical topology/brief/report/review artifacts are preserved byte-for-byte.
-Final A22 remains open pending the unchecked repairs and combined-contract verification.
+Those early checkpoints did not close final A22; the combined evidence is recorded below.
 Owned F01-F05 are closed by [P04 final component review](reviews/P04-final.md);
 current scoped content/type/mode and data-only link identity, unmapped prerequisites,
 actual isolated Git fan-in/recovery and retained artifacts are verified. Synthetic
-actors are not independently corroborated people; final A22.7 explicitly remains open.
+actors are not independently corroborated people; those earlier cases alone did not close A22.7.
+
+Final source join `08879e9` passes SAME-reviewer SPEC then QUALITY in
+[P04 final join](reviews/P04-final-08879e9.md), report `8a3a35c`, integrated
+`6e32d1f` with all nine product/report blobs exact and F08 closed. Recovery
+verification passes eight actual shared work/profile/domain/review/resume seams,
+all 57 retained local contract cases, and the original real-Git fan-in/conflict/
+interrupted-review/serial/manual fixture. The frozen `678ae22` source copy also
+passes the combined enterprise resolution, enterprise impact, actual hybrid
+workflow snippets, BUILD/Swarm shapes and original work-artifact wrapper.
+The first compatibility aggregate failed because the outer harness's pointer
+overrode the fixture's own selection. The corrected launcher leaves that pointer
+and state selection to the unchanged fixture; the subsequent full aggregate
+passes. No product or test assertion was patched. These are bounded synthetic
+contract and real-Git observations, not native people, live enterprise policy,
+all-client acceptance, the strict full suite or initiative release clearance.
 
 ### A23 Boundary regression evidence (all owners; P14; R11)
 - [ ] A23.1 Attach a discriminating negative and preserved-behavior case to every corrected mechanism.

@@ -15,12 +15,13 @@ The existing P08/P09/P10/P11/P12/P13 owners have the new coordinator address.
 Use the app-surfaced session IDs, not differing IDs quoted inside worker messages.
 Current actionable checkpoints supersede the older chronological entries below:
 
-- P04: shared consumer `4f10837` passes `bb939e55` with F08/P3 advisory,
-  integrated `1f1b0d2`; eight joined shared/guard cases and source preflight pass.
-  Final join `08879e9` / report `7a453b0` now consumes accepted `aa5cf0e`,
-  passes all 47 composed and 25 provider cases plus six committed rechecks,
-  and is with SAME `ed672f58` for final join SPEC/QUALITY. It is not integrated
-  or accepted yet; original 76 destinations and historical artifacts remain.
+- P04: final join `08879e9` passes SAME `ed672f58` SPEC then QUALITY in
+  `8a3a35c`, integrated `6e32d1f`; F08 is closed. All nine product/report blobs
+  match. Recovery passes eight joined shared seams, 57 retained cases, actual
+  Git fan-in/conflict/recovery and the complete retained enterprise/hybrid/
+  shape/work-artifact batch. A22.7 is now closed at its bounded contract level;
+  original 76 destinations and historical artifacts remain. This is not a
+  full-suite, live policy, native-person or initiative release verdict.
 - P08: the same reviewer completed private native `main-review-02` planning SPEC
   and QUALITY. The recovery coordinator read it and approved the corrected Alpha
   design and conditional local T011/T027 implementation. The original controller
@@ -43,8 +44,13 @@ Current actionable checkpoints supersede the older chronological entries below:
   at `1b75264`, later report-only `4640ca9`. N1 passes SAME `447d97f5` review
   `5c0cc0e`, preserved `fa287b0`. That reviewer explicitly adopted the exact
   builder-transcribed N1 record before coordinator host corroboration; the
-  original owner now has its actual receipt for real P05 consumption. Mode
-  review remains separate; original TA FAIL/DA obligation and archive remain.
+  original owner completed actual P05 consumption. All five finite mode
+  attempts pass separate `29ced18e`, preserved `cf19214`. The two current
+  execution records were authored by SAME447, actually returned and verified,
+  then separately host-corroborated by recovery. Original-owner producer/
+  latest-reader/QA chains pass in their own original roots. Final report
+  `9ec1c7c` is preserved through `b904ffd`; original TA FAIL/DA obligation,
+  historical stale contexts, archive and installed/parent gates remain.
 - P10: `6e1b1e0` / `4be5e096` closes F01-F04 in `8c3afbbe` / `83c5458`.
   Full SPEC remains B01 BLOCKED: repeated Windows journal access-denial prevents
   the supported linked-init positive, with cause unknown. Final attempt exhausted,
@@ -59,7 +65,11 @@ Current actionable checkpoints supersede the older chronological entries below:
   Integration `e1cb9d2` preserves all 24 product blobs; joined 18 contract
   methods and legacy roundtrip pass. `b1ca886` releases one bounded new
   self-contained static artifact/responsive-image confirmation to the same
-  owner. Old artifacts stay on `f72f316`; framework TLS/build remains blocked.
+  owner. New static report `d7139b5` and independent `a4caa1d` are preserved
+  in `6867acc`: seven data-backed controls pass, but the allowed image read
+  did not expose pixels to the reviewer. Required V1 is unverified and whole
+  static QUALITY was not eligible. Old artifacts stay on `f72f316`;
+  framework TLS/build remains blocked. No new native/image workaround is released.
 - P12: defaults repair `32dac88` / `b270475` passes F01 recheck in `02e8028`
   / `984bb72`. SAME reviewer `31c39265-13e5-4057-9e78-49bf658749a5` also accepts
   actual six-slide visual observation. `69f2ef6` releases a distinct complete
@@ -69,18 +79,28 @@ Current actionable checkpoints supersede the older chronological entries below:
   The separate denied Copilot UI route stays closed. Selected native PPT passes
   `5858268`, but complete common/Word source QUALITY was never accepted.
   Workbook `839e6df` passes scoped source SPEC/QUALITY in `21e5228`, preserved
-  `699a997`; no product ancestry imported and native caches/layout still fail.
-  PDF D01-D03 repair `1ba9f9b` / `124780e` is with SAME reviewer. Full original
-  eleven-file common/Word/PPT source closure still needs a bounded source review;
-  shared pipeline serialization remains a further actual dependency gate.
+  `699a997`; native caches/layout still fail. PDF source repair `1ba9f9b`
+  passes `ae793d39`; complete common source `32dac88` passes first whole
+  source SPEC/QUALITY in `f2c1d09`. These accepted sources are integrated in
+  `751af6c`/`81c5b01`; all 102 common/workbook/PDF source and retention methods
+  plus six pure Node print-request tests pass, without new native operations.
+  Exact `81c5b01` integration is thirteen format-source paths and six report
+  paths; its commit prose's seven-report count was an arithmetic error.
+  `98895a0` releases the read-only pipeline input join. New ten-path product
+  `d4e9188`, report `7c0ae29`, is frozen with SAME31 for SPEC then QUALITY.
+  Standalone defaults, all old native observations and denied record routes remain.
 - P13: ambiguity repair `b1d4caf` passes independent whole first-unit SPEC/QUALITY
   in `09a3c6ec`, integrated with original history as `03df1db`; joined 31 metadata
   methods pass and all eight product blobs match. The original owner is released
   for the additive selection/preservation unit, subsequently accepted below.
   Remaining eight consumers/template `7884ddd` / `5df8e99` failed SPEC in
   `5a3ab4c`, preserved `0c16373`, for one real existing-deep-draft guard defect.
-  `b1ca886` releases only that native-I/O observation/caller regression to the
-  original owner; SAME `4865e4f7` must recheck SPEC then first eligible QUALITY.
+  Correction `4922a6b` passes complete source-consumer SPEC and first whole
+  QUALITY in `9f58aa8`, integrated `991ca73`. Accepted document fan-in then
+  exposed stale template evidence; `678ae22` deliberately uses the existing
+  unknown/null representation for PDF/XLSX and retains Visio's staged proof.
+  Current 33 consumer, 20 selection and 31 metadata methods plus catalog check
+  pass. No reader/schema or maturity promotion was introduced.
 
 Later P13 source checkpoint: A+B `72253ed` passes `7bf3f253`, integrated `895bb35`.
 All 19 joined source-selection methods pass. The new actual installed selection
@@ -91,14 +111,20 @@ This is accepted-P06-engine evidence, not P10 linked/default transaction accepta
 The remaining eight discovery/authoring consumers and existing template are
 released to the original P13 owner with explicit status/welcome ownership.
 
-Current original acceptance count is 68/113 after accepted A16, domain methods,
-preserved role contracts and A14.1-.4. Native semantic/mode and installed observations
+Current original acceptance count is 69/113 after accepted A16, domain methods,
+preserved role contracts, A14.1-.4 and final A22.7. Native semantic and installed observations
 remain distinct open leaves; counts are not elapsed time or release readiness.
 The user's percentage question was answered at the then-current 64/113 (57%).
 No push, PR, main merge or release has occurred.
 
-The accepted design helper/schema/reference are now in the coordinator's
-required-source closure. `design-resource-closure` passes missing-source/no-write
+The accepted design and standalone document helpers/references are now in the
+coordinator's required-source closure (`59ca1b6`). Nine omitted document/discovery
+resources first reached the classic writer instead of explicit source refusal;
+the corrected 43-resource omission loop refuses with no writes. The supported
+installed pilot checks exact source bytes, real selection/alias queries, clone/
+empty-home behavior and three hidden-inventory document omissions. These new
+positive/negative observations do not replace the original failed deep-target test.
+`design-resource-closure` passes missing-source/no-write
 cases but the separate long-name installed-inventory test fails during its init
 at the classic adapter's ordinary temporary-file write. This is the already
 recorded classic native-path consumer boundary, not P10's different journal
@@ -116,12 +142,32 @@ direct and alias T011 and T027 reviews remain their own scopes; real actual
 host receipts were created only after full record/context/typed-QA/evidence
 verification. Alias T027's new record is canonical `cf352e9e...`, with actual
 host file `files/p08-build-alias-t027-host-corroboration.json`. FIX-DIRECT
-post-progress review now returns canonical `92036327...`; its parent intake/
-host receipt remains next. FIX-ALIAS post-progress `03774177...` is separately
-with SAME `9db`. Old raw-plan refusals do not become successes by rehashing an
-old verdict. Controller `f2c305ac` uses interactive waiting when an actual event
-is its only dependency; new actionable deliveries resume autopilot.
+post-progress `92036327...` and FIX-ALIAS `0b8a8267...` were actually consumed.
+Both original PLAN/BUILD comparisons are complete; their REVIEW-CAPTURE range
+was not run. Each fix then completed its own actual BUILD and prepared a distinct
+integrated REVIEW. Direct packet `b1385f6f...` passes ordered SPEC/QUALITY/local
+COMPLIANCE with original typed tests; record `23fb8ddf...` and recovery's actual
+host receipt were delivered for real consumption. Alias packet `fa1ac58e...`
+is sequentially with SAME9db. No integrated phase is done merely from that
+packet or private verdict. Old raw-plan refusals remain unchanged. Controller
+`f2c305ac` uses interactive waiting when an actual event is its only dependency;
+new actionable deliveries resume autopilot.
 The third fresh main-resume context has not been created.
+
+Latest recovery evidence lives in the session files under `verification/`:
+`p04-final-join-01`, `p04-retained-local-01`, `p04-git-fanin-01`,
+`a22-combined-compat-02`, `document-sources-joined-01`,
+`document-print-request-01`, `p13-consumers-fanin-03`,
+`p13-selection-fanin-01`, `p13-metadata-fanin-02`, `doc-resource-green-01`
+and `doc-kit-pilot-01`. Failed aggregates are retained: the first P13 pass
+overlapped common-source integration and is not stable-tree proof; the later
+stable run exposed real stale metadata. The old canonical metadata sample
+also expected PDF to be template-only; it now uses still-staged Visio without
+weakening its assertions. The first enterprise/hybrid run inherited the outer
+fixture pointer; corrected launchers let the unchanged test select its own
+pointer/state. The first finite-mode receipt check incorrectly compared the
+audit envelope to a raw decision; inspecting the actual `raw` field resolved
+that collector assumption without changing any producer or evidence.
 
 Dependency-ready releases are committed, not new proposals awaiting an operator:
 `bdfd127` releases P04's accepted-provider shared-evidence consumer and conditionally
