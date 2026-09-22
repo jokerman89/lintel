@@ -610,6 +610,108 @@ class PipelineBinding(unittest.TestCase):
             self.assertIn("--from-pipeline", text if name != "generate-qa" else
                           (SOURCE / "skills/generate-write/references/fidelity-and-evidence.md").read_text(encoding="utf-8"))
 
+    def test_content_anchor_api_and_cli_distinguish_literal_spans(self):
+        original = (self.repo / self.run_dir / "content.md").read_bytes()
+        cases = (
+            ("ordinary", "{#sec-1}", 0),
+            ("inline-only", "`{#sec-1}`", 2),
+            ("comment-only", "<!-- {#sec-1} -->", 2),
+            ("attribute-only", '<span data-example="{#sec-1}"></span>', 2),
+            ("escaped-only", r"\{#sec-1}", 2),
+            ("real-plus-inline", "{#sec-1} `{#sec-999}`", 0),
+            ("real-plus-comment", "{#sec-1} <!-- {#sec-999} -->", 0),
+            ("real-plus-attribute", '{#sec-1} <span data-example="{#sec-999}"></span>', 0),
+            ("real-mismatch", "{#sec-900}", 2),
+        )
+        for label, anchor, expected_exit in cases:
+            with self.subTest(case=label):
+                content = original.replace(b"{#sec-1}", anchor.encode("utf-8"), 1)
+                self.write(self.run_dir + "/content.md", content)
+                self.rehash()
+                self.design["source_content_hash"] = self.ref("content.md")["sha256"]
+                self.save_design()
+                expected = self.prepare()
+                self.write_json(".claude/runtime/anchor-expected.json", expected)
+                before = self.inventory()
+                try:
+                    value = self.inspect(expected)
+                except ValueError:
+                    accepted = False
+                else:
+                    accepted = True
+                    self.assertEqual(value["documents"]["content.md"]["text"].encode("utf-8"), content)
+                    self.assertFalse(value["executed"])
+                    self.assertFalse(value["release_clearance"])
+                result = self.command([
+                    sys.executable, "-I", "-B", SOURCE / "skills/generate/scripts/pipeline_inputs.py",
+                    "--repo", self.repo, "--from-pipeline", self.run_dir,
+                    "--expected", ".claude/runtime/anchor-expected.json", "--package", "P12",
+                    "--leaf", "A1.1", "--format", "word", "--format", "ppt",
+                    "--profile-home", self.config.home, "--profile-packs", self.config.packs,
+                    "--profile-pointer", self.config.pointer,
+                ])
+                self.assertEqual(before, self.inventory())
+                self.assertEqual(result.returncode, expected_exit, result.stderr)
+                self.assertEqual(accepted, expected_exit == 0)
+                if result.returncode:
+                    self.assertFalse(result.stdout.strip())
+                    self.assertEqual(json.loads(result.stderr)["status"], "error")
+
+    def test_optional_anchors_ignore_examples_but_reject_real_multiplicity(self):
+        valid = ("", "`{#sec-999}`", "<!-- {#sec-999} -->",
+                 '<span data-example="{#sec-999}"></span>', r"\{#sec-999}",
+                 "{#sec-1}", "{#sec-1} `{#sec-999}`")
+        invalid = ("{#sec-900}", "{#sec-1} {#sec-1}", "{#sec-1} {#sec-900}")
+        for anchor in (*valid, *invalid):
+            text = "## \u00a71 - Optional outline or notes " + anchor + "\n\nComplete source.\n"
+            source = PIPELINE.classify_markdown(text)
+            with self.subTest(anchor=anchor):
+                if anchor in invalid:
+                    with self.assertRaisesRegex(ValueError, "anchor"):
+                        PIPELINE._sections(source, 0)
+                else:
+                    self.assertEqual(PIPELINE._sections(source, 0), {"\u00a71": []})
+                self.assertEqual(source.original, text)
+        for name in ("outline.md", "speaker-notes.md"):
+            path = self.repo / self.run_dir / name
+            modified = re.sub(rb"(## \xc2\xa71[^\r\n]*)",
+                              rb"\1 <!-- {#sec-999} -->", path.read_bytes(), count=1)
+            path.write_bytes(modified)
+        self.rehash()
+        self.design["source_content_hash"] = self.ref("content.md")["sha256"]
+        self.save_design()
+        result = self.inspect()
+        for name in ("outline.md", "speaker-notes.md"):
+            self.assertEqual(result["documents"][name]["text"].encode("utf-8"),
+                             (self.repo / self.run_dir / name).read_bytes())
+
+    def test_anchor_offsets_use_original_unicode_crlf_and_real_duplicates(self):
+        cases = (
+            ("{#sec-1}", True),
+            ("{#sec-1} `{#sec-999}`", True),
+            (r"{#sec-1} \{#sec-999}", True),
+            ("`{#sec-1}`", False),
+            ("<!-- {#sec-1} -->", False),
+            ('<span title="{#sec-1}"></span>', False),
+            (r"\{#sec-1}", False),
+            ("{#sec-1} {#sec-1}", False),
+            ("{#sec-1} {#sec-2}", False),
+            ("{#sec-2}", False),
+        )
+        for newline in ("\n", "\r\n", "\r"):
+            for anchor, accepted in cases:
+                prefix = "Earlier \u00e9 and \U0001f642, not byte offsets." + newline * 2
+                text = prefix + "   ## \u00a71 - \u00e9 " + anchor + newline + "**Body:** full text" + newline
+                source = PIPELINE.classify_markdown(text)
+                with self.subTest(newline=repr(newline), anchor=anchor):
+                    if accepted:
+                        self.assertEqual(PIPELINE._sections(source, len(prefix), content=True),
+                                         {"\u00a71": ["Body"]})
+                    else:
+                        with self.assertRaisesRegex(ValueError, "anchor"):
+                            PIPELINE._sections(source, len(prefix), content=True)
+                    self.assertEqual(source.original, text)
+
     def upstream_fixture(self):
         """Existing-shape inert input records, not checkpoint or review publication."""
         upstream_config = PROFILE.ProfileConfig(

@@ -108,7 +108,14 @@ def _sections(source: MarkdownBoundaries, start: int, *, content: bool = False) 
             current = match[1]
             if current in sections:
                 raise ValueError(f"Duplicate source section: {current}")
-            anchors = re.findall(r"\{#sec-([^}]+)\}", body)
+            anchors = [
+                anchor[1] for anchor in re.finditer(r"\{#sec-([^}]+)\}", body)
+                if not any(
+                    region.span.start < line.content_start + anchor.end()
+                    and line.content_start + anchor.start() < region.span.end
+                    for region in source.regions
+                )
+            ]
             if (content or anchors) and anchors != [match[2]]:
                 raise ValueError(f"Source section anchor disagrees with {current}")
             sections[current] = []

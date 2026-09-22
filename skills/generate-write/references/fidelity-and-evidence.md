@@ -48,6 +48,10 @@ upstream_profile=None)`. It uses P03 rooted reads, P05 strict JSON/current
 context, P07 live reference/policy and the shared Markdown source classifier.
 It recognizes only the existing section/field markers in eligible source
 positions; fenced/quoted/raw/comment examples do not become section definitions.
+Anchor candidates also use their original classified spans: inline code, comments,
+HTML attributes and escaped markers cannot supply or duplicate an anchor. Content
+requires one eligible matching anchor; outline/notes anchors remain optional, but
+any eligible anchor must still be unique and match its section.
 Complete source, including those literal examples, remains in the returned inputs.
 Each read is bounded to 2 MiB with explicit failure, never truncation.
 
