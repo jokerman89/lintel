@@ -86,3 +86,24 @@ Keep exact action inputs, returned artifact versions, local file hashes and
 source copies. Use the accepted P05/P07 procedure for bound QA: native calculation
 and editability can pass while persisted-cache and required-renderer controls
 remain unverified. Independent review and shared pipeline release are separate.
+
+## Read-only package integrity is a separate layer
+
+The format checker validates required content types and all internal relationship
+targets before interpreting workbook/worksheet/shared-string parts. Renamed
+VBA/OLE/external-link declarations remain forbidden; a filename alone is not the
+mechanism's identity. It validates actual SST roots, declared cell types and
+unambiguous value/formula/inline payloads before decoding even an empty cell.
+Plain/rich/shared/inline text, native `phoneticPr` formatting metadata and literal
+`=1+1` remain distinct from formulas.
+
+For the XML parts it decodes, the existing parser rejects DTDs at its declaration
+hook, so UTF-16 encodings do not bypass an ASCII-byte search. Normal XML in those encodings remains
+supported. Only inert single-value declarations are used in regression tests;
+there is no external-entity or amplification probe.
+
+An explicit `t="normal"` on a formula is equivalent to its omitted default.
+Shared/array/data-table/unknown forms or uninterpreted attributes remain
+unverified. None of these structural corrections recalculates or publishes a
+cache, changes the frozen native workbook, authorizes an application or clears
+the existing persisted-cache/rendered-layout gates.

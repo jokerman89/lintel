@@ -29,6 +29,15 @@ from review_contract import ContractError, load_json  # noqa: E402
 S = "http://schemas.openxmlformats.org/spreadsheetml/2006/main"
 R = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
 P = "http://schemas.openxmlformats.org/package/2006/relationships"
+CT = "http://schemas.openxmlformats.org/package/2006/content-types"
+RELS_TYPE = "application/vnd.openxmlformats-package.relationships+xml"
+PART_TYPES = {
+    R + "/officeDocument": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml",
+    R + "/worksheet": "application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml",
+    R + "/sharedStrings": "application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml",
+    R + "/styles": "application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml",
+    R + "/theme": "application/vnd.openxmlformats-officedocument.theme+xml",
+}
 NS = {"s": S}
 MAX_INPUT = 64 * 1024 * 1024
 MAX_PART = 16 * 1024 * 1024
@@ -42,13 +51,15 @@ class WorkbookError(ValueError):
 def _part_name(name: str) -> str:
     path = PurePosixPath(name)
     if not name or path.is_absolute() or name != path.as_posix() or ".." in path.parts \
-            or "\\" in name or ":" in name:
+            or any(c in name for c in "\\:?#%") or any(ord(c) < 32 or ord(c) == 127 for c in name):
         raise WorkbookError(f"Invalid package part: {name!r}")
     return name
 
 
 def _target(base: str, target: str) -> str:
-    if not target or "\\" in target or ":" in target or "#" in target or "%" in target:
+    if not target or target.startswith("//") or target.endswith("/") or target.rsplit("/", 1)[-1] in (".", "..") \
+            or any(c in target for c in "\\:?#%") \
+            or any(ord(c) < 32 or ord(c) == 127 for c in target):
         raise WorkbookError(f"Unsupported relationship target: {target!r}")
     resolved = target.lstrip("/") if target.startswith("/") else posixpath.join(posixpath.dirname(base), target)
     return _part_name(posixpath.normpath(resolved))
@@ -67,12 +78,113 @@ def _cell_address(value: str) -> str:
 
 
 def _xml(data: bytes, name: str) -> ET.Element:
-    if b"<!DOCTYPE" in data.upper() or b"<!ENTITY" in data.upper():
-        raise WorkbookError(f"DTD/entities are unsupported: {name}")
+    class DeclarationFreeTree(ET.TreeBuilder):
+        def doctype(self, _name, _public_id, _system_id):
+            raise WorkbookError(f"DTD/entities are unsupported: {name}")
+
     try:
-        return ET.fromstring(data)
-    except ET.ParseError as error:
+        # The parser handles encoding before this hook; declarations never reach tree construction.
+        return ET.fromstring(data, parser=ET.XMLParser(target=DeclarationFreeTree()))
+    except WorkbookError:
+        raise
+    except (ET.ParseError, LookupError, ValueError) as error:
         raise WorkbookError(f"Malformed XML in {name}: {error}") from error
+
+
+def _content_types(parts: Mapping[str, bytes]) -> dict[str, str]:
+    name = "[Content_Types].xml"
+    if name not in parts:
+        raise WorkbookError("Required package content types are missing")
+    root = _xml(parts[name], name)
+    if root.tag != f"{{{CT}}}Types" or root.attrib or (root.text or "").strip():
+        raise WorkbookError("Invalid content-type root or namespace")
+    defaults, overrides = {}, {}
+    for item in root:
+        media = item.get("ContentType", "")
+        if not re.fullmatch(r"[A-Za-z0-9!#$&^_.+-]+/[A-Za-z0-9!#$&^_.+-]+", media):
+            raise WorkbookError("Invalid declared content type")
+        media = media.lower()
+        if any(token in media for token in (".macroenabled.", ".macrosheet", ".intlmacrosheet",
+                                            ".vbaproject", ".vbadata", ".oleobject", ".externallink")):
+            raise WorkbookError(f"Forbidden package content type: {media}")
+        if len(item) or (item.text or "").strip() or (item.tail or "").strip():
+            raise WorkbookError("Ambiguous content-type declaration")
+        if item.tag == f"{{{CT}}}Default" and set(item.attrib) == {"Extension", "ContentType"}:
+            extension = item.attrib["Extension"].lower()
+            if not re.fullmatch(r"[a-z0-9_-]+", extension) or extension in defaults:
+                raise WorkbookError("Invalid or duplicate content-type extension")
+            defaults[extension] = media
+        elif item.tag == f"{{{CT}}}Override" and set(item.attrib) == {"PartName", "ContentType"}:
+            value = item.attrib["PartName"]
+            if not value.startswith("/") or value.startswith("//"):
+                raise WorkbookError("Override needs one absolute package part name")
+            part = _part_name(value[1:])
+            if part not in parts or part == name or part in overrides:
+                raise WorkbookError(f"Missing or duplicate content-type override part: {part}")
+            overrides[part] = media
+        else:
+            raise WorkbookError("Unsupported content-type declaration")
+    result = {}
+    for part in parts:
+        if part == name:
+            continue
+        basename = posixpath.basename(part)
+        extension = basename.rpartition(".")[2].lower() if "." in basename else ""
+        media = overrides.get(part, defaults.get(extension))
+        if media is None:
+            raise WorkbookError(f"Package part has no content type: {part}")
+        result[part] = media
+    return result
+
+
+def _relationship_source(name: str, parts: Mapping[str, bytes]) -> str:
+    if name == "_rels/.rels":
+        return ""
+    path = PurePosixPath(name)
+    if path.parent.name != "_rels" or not path.name.endswith(".rels") or not path.name[:-5]:
+        raise WorkbookError(f"Invalid relationship part location: {name}")
+    owner = _part_name((path.parent.parent / path.name[:-5]).as_posix())
+    if owner not in parts or owner.endswith(".rels") or owner == "[Content_Types].xml":
+        raise WorkbookError(f"Relationship part has no valid owning part: {name}")
+    return owner
+
+
+def _relationships(parts: Mapping[str, bytes], content_types: Mapping[str, str]) -> dict[str, dict[str, dict[str, str]]]:
+    result = {}
+    for name, value in parts.items():
+        if not name.endswith(".rels") and content_types.get(name) != RELS_TYPE:
+            continue
+        if content_types.get(name) != RELS_TYPE:
+            raise WorkbookError(f"Relationship part has an inconsistent content type: {name}")
+        owner = _relationship_source(name, parts)
+        root = _xml(value, name)
+        if root.tag != f"{{{P}}}Relationships" or root.attrib or (root.text or "").strip():
+            raise WorkbookError(f"Unexpected relationship root/namespace: {name}")
+        by_id = {}
+        for relation in root:
+            identifier, kind = relation.get("Id"), relation.get("Type", "")
+            if relation.tag != f"{{{P}}}Relationship" \
+                    or set(relation.attrib) - {"Id", "Type", "Target", "TargetMode"} \
+                    or not {"Id", "Type", "Target"} <= set(relation.attrib) \
+                    or not identifier or identifier.strip() != identifier or identifier in by_id \
+                    or not re.fullmatch(r"[A-Za-z][A-Za-z0-9+.-]*:[^\s\x00-\x20]+", kind) \
+                    or len(relation) or (relation.text or "").strip() or (relation.tail or "").strip():
+                raise WorkbookError(f"Invalid or duplicate relationship: {name}")
+            if relation.get("TargetMode", "Internal") != "Internal":
+                raise WorkbookError(f"External relationship is not permitted: {name}")
+            semantic = kind.rsplit("/", 1)[-1].lower()
+            if semantic in {"oleobject", "package", "vbadata", "xlmacrosheet", "xlintlmacrosheet"} \
+                    or semantic.startswith(("vbaproject", "externallink")):
+                raise WorkbookError(f"Forbidden relationship mechanism: {kind}")
+            part = _target(owner, relation.attrib["Target"])
+            if part not in parts or part == "[Content_Types].xml" or content_types[part] == RELS_TYPE:
+                raise WorkbookError(f"Missing or invalid internal relationship target: {name} -> {part}")
+            declared_type = PART_TYPES.get(kind)
+            if declared_type and content_types[part] != declared_type.lower():
+                raise WorkbookError(f"Relationship/content-type mismatch: {kind} -> {part}")
+            by_id[identifier] = {**relation.attrib, "part": part}
+        result[name] = by_id
+    return result
 
 
 def _decimal(value: Any) -> Decimal:
@@ -90,7 +202,26 @@ def _decimal(value: Any) -> Decimal:
 def _text(element: ET.Element) -> str:
     if element.find(".//s:rPh", NS) is not None:
         raise WorkbookError("Phonetic string annotations need an explicit text reader")
-    return "".join(node.text or "" for node in element.findall(".//s:t", NS))
+    if (element.text or "").strip() or any((child.tail or "").strip() for child in element):
+        raise WorkbookError("Unexpected string-container text")
+    direct = element.findall("s:t", NS)
+    runs = element.findall("s:r", NS)
+    properties = element.findall("s:phoneticPr", NS)
+    if len(direct) > 1 or direct and runs or len(properties) > 1 \
+            or any(len(item) or (item.text or "").strip() for item in properties) \
+            or any(child.tag not in (f"{{{S}}}t", f"{{{S}}}r", f"{{{S}}}phoneticPr") for child in element):
+        raise WorkbookError("Ambiguous or unsupported string payload")
+    segments = list(direct)
+    for run in runs:
+        text = run.findall("s:t", NS)
+        if len(text) != 1 or len(run.findall("s:rPr", NS)) > 1 \
+                or any(child.tag not in (f"{{{S}}}rPr", f"{{{S}}}t") for child in run) \
+                or (run.text or "").strip() or any((child.tail or "").strip() for child in run):
+            raise WorkbookError("Invalid rich-text run")
+        segments.extend(text)
+    if any(len(segment) for segment in segments):
+        raise WorkbookError("Nested content inside a text value")
+    return "".join(segment.text or "" for segment in segments)
 
 
 def inspect_workbook(data: bytes) -> dict[str, Any]:
@@ -118,28 +249,13 @@ def inspect_workbook(data: bytes) -> dict[str, Any]:
                 parts[name] = archive.read(entry)
     except (BadZipFile, RuntimeError, NotImplementedError) as error:
         raise WorkbookError(f"Unreadable XLSX package: {error}") from error
-    relationships = {}
-    for name, value in parts.items():
-        if name.endswith(".rels"):
-            root = _xml(value, name)
-            if root.tag != f"{{{P}}}Relationships":
-                raise WorkbookError(f"Unexpected relationship namespace: {name}")
-            by_id = {}
-            for relation in root:
-                identifier = relation.get("Id")
-                if relation.tag != f"{{{P}}}Relationship" or not identifier or identifier in by_id:
-                    raise WorkbookError(f"Invalid or duplicate relationship: {name}")
-                if relation.get("TargetMode", "Internal") != "Internal":
-                    raise WorkbookError(f"External relationship is not permitted: {name}")
-                by_id[identifier] = relation.attrib
-            relationships[name] = by_id
+    content_types = _content_types(parts)
+    relationships = _relationships(parts, content_types)
     roots = [item for item in relationships.get("_rels/.rels", {}).values()
              if item.get("Type") == R + "/officeDocument"]
     if len(roots) != 1:
         raise WorkbookError("Exactly one workbook root relationship is required")
-    workbook_name = _target("", roots[0].get("Target", ""))
-    if workbook_name not in parts:
-        raise WorkbookError("Workbook part is missing")
+    workbook_name = roots[0]["part"]
     workbook = _xml(parts[workbook_name], workbook_name)
     if workbook.tag != f"{{{S}}}workbook":
         raise WorkbookError("Unsupported workbook namespace")
@@ -150,49 +266,64 @@ def inspect_workbook(data: bytes) -> dict[str, Any]:
         raise WorkbookError("Multiple shared-string parts")
     strings = []
     if string_links:
-        name = _target(workbook_name, string_links[0].get("Target", ""))
-        if name not in parts:
-            raise WorkbookError("Shared-string part is missing")
+        name = string_links[0]["part"]
         table = _xml(parts[name], name)
+        if table.tag != f"{{{S}}}sst" or any(child.tag != f"{{{S}}}si" for child in table) \
+                or (table.text or "").strip() or any((child.tail or "").strip() for child in table):
+            raise WorkbookError("Invalid shared-string root/namespace or entries")
         strings = [_text(item) for item in table.findall("s:si", NS)]
-    sheets, cells, seen_parts, seen_names = [], [], set(), set()
-    for sheet in workbook.findall("s:sheets/s:sheet", NS):
+    containers = workbook.findall("s:sheets", NS)
+    if len(containers) != 1 or any(child.tag != f"{{{S}}}sheet" for child in containers[0]):
+        raise WorkbookError("Workbook needs one unambiguous sheets container")
+    sheets, cells, seen_parts, seen_names, seen_ids = [], [], set(), set(), set()
+    for sheet in containers[0]:
         name, identifier = sheet.get("name"), sheet.get(f"{{{R}}}id")
-        if not name or name.casefold() in seen_names or identifier not in links:
+        sheet_id = sheet.get("sheetId", "")
+        if not name or name.casefold() in seen_names or identifier not in links \
+                or not re.fullmatch(r"[1-9][0-9]*", sheet_id) or sheet_id in seen_ids \
+                or sheet.get("state", "visible") not in ("visible", "hidden", "veryHidden"):
             raise WorkbookError("Missing, duplicate or unbound worksheet")
         relation = links[identifier]
         if relation.get("Type") != R + "/worksheet":
             raise WorkbookError(f"Unsupported sheet kind: {name}")
-        part = _target(workbook_name, relation.get("Target", ""))
+        part = relation["part"]
         if part not in parts or part in seen_parts:
             raise WorkbookError(f"Missing or aliased worksheet part: {name}")
         seen_parts.add(part)
         seen_names.add(name.casefold())
+        seen_ids.add(sheet_id)
         sheets.append({"name": name, "state": sheet.get("state", "visible"), "part": part})
         document = _xml(parts[part], part)
         if document.tag != f"{{{S}}}worksheet":
             raise WorkbookError(f"Unsupported worksheet namespace: {name}")
+        data_nodes = document.findall("s:sheetData", NS)
+        if len(data_nodes) != 1:
+            raise WorkbookError(f"Worksheet needs one sheetData container: {name}")
         addresses = set()
-        for cell in document.findall("s:sheetData/s:row/s:c", NS):
+        for cell in data_nodes[0].findall("s:row/s:c", NS):
             address = _cell_address(cell.get("r", ""))
             if address in addresses:
                 raise WorkbookError(f"Duplicate cell: {name}!{address}")
             addresses.add(address)
             formulas = cell.findall("s:f", NS)
             values = cell.findall("s:v", NS)
-            if len(formulas) > 1 or len(values) > 1:
-                raise WorkbookError(f"Ambiguous formula/value: {name}!{address}")
+            inline_values = cell.findall("s:is", NS)
+            kind = cell.get("t", "n")
+            if kind not in {"n", "b", "s", "str", "e", "inlineStr"}:
+                raise WorkbookError(f"Unsupported cell type {kind}: {name}!{address}")
+            if len(formulas) > 1 or len(values) > 1 or len(inline_values) > 1 \
+                    or kind == "inlineStr" and (len(inline_values) != 1 or formulas or values) \
+                    or kind != "inlineStr" and inline_values \
+                    or any(child.tag not in (f"{{{S}}}f", f"{{{S}}}v", f"{{{S}}}is") for child in cell) \
+                    or any(len(value) for value in formulas + values):
+                raise WorkbookError(f"Ambiguous formula/value/inline payload: {name}!{address}")
             formula = formulas[0] if formulas else None
             value = values[0].text if values else None
-            kind = cell.get("t", "n")
             cache_present = value is not None
             if formula is not None and not cache_present:
                 parsed, value_type = None, "empty"
             elif kind == "inlineStr":
-                inline = cell.find("s:is", NS)
-                if inline is None or formula is not None:
-                    raise WorkbookError(f"Invalid inline string: {name}!{address}")
-                parsed, value_type = _text(inline), "text"
+                parsed, value_type = _text(inline_values[0]), "text"
             elif kind == "s":
                 if value is None or not re.fullmatch(r"[0-9]+", value) or int(value) >= len(strings):
                     raise WorkbookError(f"Invalid shared-string index: {name}!{address}")
@@ -278,8 +409,9 @@ def check_workbook(data: bytes, expected: Mapping[str, Any]) -> dict[str, Any]:
         normalize = lambda text: text[1:] if isinstance(text, str) and text.startswith("=") else text
         if normalize(cell["formula"]) != normalize(item["formula"]):
             issue("formula_mismatch", "fail", location, "Formula text or literal/formula distinction changed")
-        if cell["formula_attributes"]:
-            issue("unsupported_formula", "unverified", location, "Shared/array/table formula semantics need another reader")
+        attributes = cell["formula_attributes"]
+        if attributes.get("t", "normal") != "normal" or set(attributes) - {"t"}:
+            issue("unsupported_formula", "unverified", location, "Shared/array/table or unknown formula attributes need another reader")
             continue
         if cell["formula"] is not None and not cell["cache_present"]:
             issue("cache_missing", "unverified", location, "No nonempty persisted formula cache; live calculation is separate")

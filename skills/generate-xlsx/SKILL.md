@@ -150,12 +150,41 @@ and `--expect` are relative to the explicit owned root. A minimal expectation:
 Include every formula and all relevant input/source cells, not just a favorable
 sample. The numbers above are expectation data, not executed results. Missing
 cache is `unverified`; stale values, changed formulas/types, unselected formulas
-and lost source text fail. Empty-string formula caches and shared/array/table
-formula forms need additional coverage and remain unverified rather than guessed.
-Macros, external relationships, embeddings, malformed/ambiguous parts and paths
-are refused. The bounded reader accepts transitional OOXML, not every spreadsheet
-extension; 64 MiB input/total-expanded and 16 MiB part bounds refuse oversized
-input without truncating it.
+and lost source text fail. Omitted formula type and explicit `t="normal"` are
+equivalent ordinary formulas. Shared/array/data-table types, unknown types or
+other uninterpreted formula attributes remain unverified. An empty-string
+formula cache is still ambiguous, not guessed to be a computed empty result.
+
+Before decoding cells, the checker requires a valid `[Content_Types].xml`,
+unambiguous declarations for every part, and matching declared kinds for the
+workbook, worksheets, shared strings and supported style/theme relationships.
+Every internal relationship is checked, including unconsumed ones: its owning
+part must exist, its target must resolve inside the package to a present part,
+and its declared kind must be consistent. Missing/malformed metadata, duplicate
+declarations and traversal/directory/query/fragment targets are refused. This is
+a bounded canonical package-URI reader; percent-escaped targets require another
+explicitly supported reader, not silent URI reinterpretation.
+
+Forbidden VBA/macro-enabled, OLE/embedded-package and external-link mechanisms
+are rejected by content-type/relationship declarations as well as the retained
+filename guards. Renaming an inert or executable payload cannot erase those
+declarations. This checks declared package integrity; it is not a general malware
+scanner, full OOXML schema validator or permission to open untrusted content.
+
+Shared strings need the actual `sst` namespace/root and valid string entries.
+Cell types and single formula/value/inline payload combinations are validated
+before any missing-value branch. Legitimate blank cells, shared/inline strings,
+rich-text runs and literal formula-looking text are retained. The native
+`phoneticPr` formatting metadata is accepted without inventing phonetic text;
+unsupported phonetic annotations remain explicit errors.
+
+DTD/entity declarations in the XML parts decoded by this reader are refused
+through the existing parser's declaration hook after encoding recognition,
+including UTF-8 and UTF-16LE/BE. Ordinary
+non-DTD UTF-16 and declaration-looking literal text remain readable. No external
+entity resolution, custom XML framework or calculation engine is introduced.
+The unchanged 64 MiB input/total-expanded, 16 MiB part and 10,000-entry bounds
+refuse oversized input without truncation.
 
 Exit 0 means only the declared persisted-integrity checks passed; exit 3 means
 failed/unverified integrity and exit 2 is invalid/unreadable/unsupported input.
