@@ -88,11 +88,12 @@ fi
 
 Before any agent judgment, run the cheap hard gate on HTML artifacts:
 
-```bash
-dna="${LINTEL_SKILLS_DIR:-skills}/design-dna"
-python3 "$dna/scripts/validate_design.py" "$artifact" \
-  --profile "$dna/profiles/<active-profile>.yaml"
-```
+First reload the selected design through `design_contract.load_design`. Feed its
+resolved palette (including explicit brief overrides) to the existing
+`validate_design.check(content, path, profile_hexes)` API, or use the standalone
+CLI with the explicit verified profile asset path. Do not reconstruct a bundled
+profile path by name when P07 selected a pack-owned asset. Static validation
+retains its actual error/warning scope and is not browser evidence.
 
 Exit 1 → the run is **RED** regardless of dimension scores (hard findings include
 zoom-disable, killed focus and emoji icons; off-palette/token checks are warnings). Surface the validator output as

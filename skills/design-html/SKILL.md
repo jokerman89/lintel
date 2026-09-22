@@ -10,7 +10,9 @@ cli_support: [claude-code, codex]
 
 # /design-html
 
-Brief → single-file HTML mockup. Inline CSS, inline minimal JS if needed, no build step, no framework. The output is a `.html` file the operator can open immediately via `/open-managed-browser --url file://...` or any browser.
+Brief → single-file HTML mockup. Inline CSS, inline minimal JS if needed, no build
+step, no framework. The output is a `.html` file; preview uses the actual selected
+browser surface and its admission/ownership rules, not an assumed file-URL API.
 
 The point: fast exploration before any framework commitment. Use for design conversations, customer demos of UI direction, or as the seed for `/design-shotgun` to spawn variants.
 
@@ -55,7 +57,10 @@ the brand. These rules take precedence over illustrative default/home paths belo
    - `placeholder`: descriptive placeholders that explain intent (`[Headline: 4-7 words, names the user benefit]`)
    - `pack-voice`: attempts real copy following the active pack's voice corpus — NEEDS the active pack's compliance gates before customer use
 6. **Save.** Write file + log path. Skill does NOT auto-open — operator runs `/open-managed-browser` next.
-7. **Optional preview.** If operator says "preview": chain to `/open-managed-browser --url file://...`.
+7. **Optional preview.** When authorized, serve the explicit owned artifact on
+   loopback, observe server health, then use the shared browser operation with that
+   admitted URL and an owned context. Stop only the owned server/process. If the
+   host offers only manual file viewing, keep that as a concrete manual fallback.
 
 ## Report format
 

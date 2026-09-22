@@ -54,8 +54,8 @@ All searches: python3, stdlib-only, exit 0 + markdown to stdout.
 | `stack` | `python3 "<base>/scripts/search.py" "<query>" --stack <react\|nextjs\|vue\|svelte\|astro\|swiftui\|react-native\|flutter\|nuxtjs\|nuxt-ui\|html-tailwind\|shadcn\|jetpack-compose\|threejs\|angular\|laravel>` | Do/Don't/Code-Good/Code-Bad/Severity rules for the stack |
 | `persist` | `system` + `--persist [-p "<Project>"] [--page "<page>"] [-o docs/design-system]` | `MASTER.md` + `pages/<page>.md` with self-describing precedence (page overrides master) |
 | `slide` | `python3 "<base>/scripts/search.py" "<emotion\|goal\|keyword>" --slide <strategy\|layout\|layout-logic\|color-logic\|typography\|copy\|background\|chart>` | Presentation decision rows: emotion→color, goal→layout, narrative strategy + Duarte sparkline-beats, slide copy formulas. Consumed by generate-ppt |
-| `tokens` | `python3 "<base>/scripts/emit_tokens.py" --profile "<base>/profiles/<id>.yaml" [--out design-tokens.css]` | Three-layer design-tokens.css (primitive → semantic → component) from the active profile |
-| `validate` | `python3 "<base>/scripts/validate_design.py" <file.html> [--profile "<base>/profiles/<id>.yaml"]` | Exit 1 on hard violations (zoom-disable, killed focus, emoji icons…); warnings (off-palette, token discipline) listed |
+| `tokens` | `python3 "<base>/scripts/emit_tokens.py" --profile "<verified-selected-profile-path>" [--out design-tokens.css]` | Three-layer design-tokens.css (primitive → semantic → component) from the selected pack/bundled asset |
+| `validate` | `python3 "<base>/scripts/validate_design.py" <file.html> [--profile "<verified-selected-profile-path>"]` | Exit 1 on hard violations (zoom-disable, killed focus, emoji icons…); warnings (off-palette, token discipline) listed |
 | `profile` | Read `<base>/profiles/<id>.yaml` (resolution below) + `references/token-architecture.md` for the layering doctrine | The active token set + doctrine |
 
 Domain auto-detects from the query when `--domain` is omitted. Multi-dimensional queries work

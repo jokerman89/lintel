@@ -192,17 +192,15 @@ unresolved bindings or incompatible existing technology block before rendering.
 
 The gate is no longer optional. Two parts, in order:
 
-```bash
-# 1. Mechanical validator on every rendered HTML artifact (exit 1 blocks).
-#    Spec-only runs have no HTML yet — the guard defers validation to generate-*.
-if compgen -G "$out_dir/*.html" > /dev/null; then
-  python3 "$dna/scripts/validate_design.py" "$out_dir"/*.html \
-    --profile "$dna/profiles/$profile.yaml" || status=BLOCKED
-fi
-
-# 2. Six-dimension audit
-/li:frontend-design-review "$out_dir"
-```
+1. Run the existing mechanical validator on actual produced HTML/CSS. Use the
+   **resolved** palette, including explicit brief overrides, rather than rebuilding
+   a bundled `$dna/profiles/<name>` path that ignores a pack-owned asset.
+   The existing `validate_design.check(content, path, profile_hexes)` API accepts
+   the lowercase values of `loaded_design["design"]["palette"]["tokens"]`.
+   Preserve its returned errors/warnings separately; errors block. The standalone
+   validator CLI remains available when an explicit verified asset path is used.
+2. Invoke `/li:frontend-design-review` on the actual output and the same selected
+   design/context. That consumer rechecks P07 and the original P05 obligations.
 
 Validator errors → **BLOCKED** (fix and re-render; never ship over a red gate). No rendered HTML
 yet (spec-only run) → validator runs in generate-web/generate-app instead; the review still runs
