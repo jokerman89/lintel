@@ -96,6 +96,7 @@ SWARM_RESOURCES = (
     "lib/copilot-env.sh",
     "lib/swarm-schema.json",
     "lib/swarm_contract.py",
+    "lib/swarm_evidence.py",
     "lib/swarm_snapshot.py",
     "lib/cli-tiers.yaml",
     "lib/brief-forge.sh",
