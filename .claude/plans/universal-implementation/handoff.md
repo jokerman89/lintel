@@ -44,7 +44,8 @@ from the reviewed historical merge `40c2795`. Current implementation ownership:
 | P08 work lifecycle | `f2c305ac-e8b0-4b02-b6cd-c7de598964cf` | `402fd804` SPEC FAIL preserved `26c80a0`; bounded F04/F05 class repair authorized; original semantic/host evidence remains open |
 | P09 specialist depth | `0fe8dc1e-8c6f-4d4a-af68-80696067be27` | Content accepted/integrated `4983af2`; proposal read; isolated data-core implementation released, P08/module wiring still gated |
 | P10 installer lifecycle | `5ea6c88c-68c1-4712-8f55-adecdfe0061f` | F02 `a797b2d` / report `7bf5a31` frozen; intake verified; same-reviewer complete SPEC then eligible whole QUALITY dispatched |
-| P11 browser operations | `f413bdcb-e081-45e0-9524-7274b4391665` | A16 `d389905` / `84f0d38` BLOCKED; only `307367f` computed-location/conditional owned-fixture scope, no unverified launch |
+| P11 browser operations | `f413bdcb-e081-45e0-9524-7274b4391665` | `f4cd1f3` / `a49e7b8` has real headless evidence; scoped existing-deadline owned-file readiness correction, acceptance still open |
+| P12 document formats | `0a75211f-455c-4318-864f-bc8023ce9142` | Standalone content/Word/PPT active from `3ee602f`; shared pipeline and later formats remain gated |
 
 All are `lintel-builder` sessions with explicit ownership, local commits, report paths
 and no remote authorization. P01/P02 and the owned P04-P07 components are accepted.
@@ -197,6 +198,27 @@ normal-pipeline continuation. Outside/unresolved results stop; no actual-home,
 policy or startup-variant work is authorized.
 
 ## Accepted local integrations
+
+P11 continuation intake verified six source paths over `84f0d38`, the report-only
+child `a49e7b8`, and report SHA-256 `3b25c472...`; the full update was read.
+The computed in-owned native folder correction satisfied original CURRENT before
+real Chrome operations. Eight run-07 cases and retained PNG/PDF observations are
+separate from its failed outer inspector and run-08 EBUSY startup. The card now
+permits only an existing-deadline EBUSY readiness correction and final explicit
+reader run. Native raster-policy denial and unobserved broader layout/authentication
+remain limits, never bypassed or silently promoted.
+
+P12's native schemas expose editable Word/PowerPoint and PowerPoint SVG rendering,
+not a Word page-render action. The owner is producing real synthetic artifacts and
+retaining source-content checks. Native batch notes showed a content-preservation
+problem; its normal serialized API path is being checked without app/host changes.
+No rendered Word or complete format acceptance is claimed.
+
+P09's accepted content also passed a real fresh consumer init and actual installed
+adapter check from the joined source. All 69 role bodies and five decision-method
+references match the documented LF text representation; user prose/sentinel survived.
+Target length157 is a new content-distribution case, not a substitute for P10's
+original default/long cases. Records are in `.claude/runtime/p09-joined-zeskux4e`.
 
 Latest P08 independent report `402fd80417c2aa08193a460045168d8bb562793d` is
 preserved report-only as `26c80a0`. Its sole parent/path, 495 lines and LF SHA-256
