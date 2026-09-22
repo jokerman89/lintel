@@ -117,8 +117,9 @@ parent directories. These files are data; installation never runs the historical
 upstream recipes. Compact catalog queries use the same trusted readers and
 aliases after copying. Their optional YAML parser remains an operation-specific
 dependency, not a new prerequisite for native bare installation. Required work,
-review, domain and browser helper files are checked before consumer writes;
-file presence does not prove a browser engine or live client is available.
+review, domain, browser and selected-design helper/schema files are checked
+before consumer writes; file presence does not prove a renderer, browser engine
+or live client is available.
 
 Some public guides also cite source-repository-only instructions, CI or internal engineering
 records. Their bundled copies explicitly label that boundary and link to the canonical

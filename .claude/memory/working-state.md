@@ -14,9 +14,15 @@ Cross-session working state (not durable rules — that's [[lessons.md]]; not pe
 `88aecc43-40f9-41d4-8947-6c2fb0a55481`. Exact `5f3d885` is preserved on the recovery
 branch `jokerman-microsoft-mastersession-recovery`; the original worktree was not
 changed. Continue from the [recovery checkpoint](../plans/universal-implementation/handoff.md#recovery-checkpoint)
-and original work map. Existing owners are retained; browser/discovery candidates
-await independent review and P10 has only its bounded F03 diagnostic correction
-released. No whole-initiative completion or main delivery is claimed.
+and original work map. Existing owners are retained. Current original acceptance
+is **68/113**, not full release readiness: direct design A14.1-.4 is integrated
+as `e1cb9d2`, and the selected legacy-ID provider `aa5cf0e` is independently
+accepted. Final Swarm composition, native lifecycle comparisons/cold resume,
+specialist mode evidence and remaining consumer/format repairs are still active.
+P10's supported linked-init remains blocked by repeated journal WinError 5 with
+unknown cause; no further retry or speculative patch is released. Word/Excel,
+P12 structured-record and tool/CI permission boundaries remain unchanged.
+No push, PR, main merge or whole-initiative completion is claimed.
 
 **Status:** approved implementation, not complete. MasterSession secured the 25 uncommitted
 audit/continuity files with SHA-256 verification and committed them as `74290e0`, preserving the

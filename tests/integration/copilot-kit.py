@@ -25,6 +25,9 @@ JOINED_RUNTIME_RESOURCES = (
     "skills/browse/scripts/chromium.mjs", "skills/scrape/scripts/extract.mjs",
     "lib/url_policy.py", "config/aliases.yaml", "install/upstream-sources.yaml",
     ".claude-plugin/plugin.json",
+    "skills/design-dna/scripts/design_contract.py",
+    "skills/design-dna/references/design-contract.schema.json",
+    "skills/design-dna/references/design-contract.md",
 )
 spec = importlib.util.spec_from_file_location("li_copilot", ROOT / "bin/li-copilot.py")
 adapter = importlib.util.module_from_spec(spec)

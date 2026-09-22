@@ -126,6 +126,9 @@ ADAPTER_RESOURCES = (
     "skills/catalog/references/metadata.md", "skills/catalog/references/selections.md",
     "skills/browse/scripts/chromium.mjs", "skills/scrape/scripts/extract.mjs",
     "lib/url_policy.py",
+    "skills/design-dna/scripts/design_contract.py",
+    "skills/design-dna/references/design-contract.schema.json",
+    "skills/design-dna/references/design-contract.md",
 )
 
 
