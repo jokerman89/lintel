@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:lintel:profile-context:1",
+  "title": "Content-bound profile context",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "context_id", "generation", "digest", "profile", "previous", "reason"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "context_id": {"type": ["string", "null"], "minLength": 1, "maxLength": 200},
+    "generation": {"type": "integer", "minimum": 0},
+    "digest": {"$ref": "#/$defs/digest"},
+    "profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["roots", "selection", "ancestry", "baseline", "values", "provenance", "inputs", "compatibility"],
+      "properties": {
+        "roots": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["source", "repo", "packs", "pointer"],
+          "properties": {
+            "source": {"type": "string", "minLength": 1},
+            "repo": {"type": "string", "minLength": 1},
+            "packs": {"type": "string", "minLength": 1},
+            "pointer": {"type": "string", "minLength": 1}
+          }
+        },
+        "selection": {
+          "type": "object",
+          "required": ["requested", "mode", "source", "status", "explicit_pack"],
+          "properties": {
+            "requested": {"type": "string"},
+            "mode": {"enum": ["required", "optional", "neutral"]},
+            "source": {"type": "string"},
+            "status": {"enum": ["loaded", "fallback"]},
+            "explicit_pack": {"type": ["string", "null"]},
+            "diagnostic": {"type": "object"}
+          },
+          "additionalProperties": false
+        },
+        "ancestry": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/manifest"}},
+        "baseline": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/manifest"}},
+        "values": {"type": "object"},
+        "provenance": {
+          "type": "object",
+          "additionalProperties": {
+            "allOf": [
+              {"$ref": "#/$defs/manifest"},
+              {"type": "object", "required": ["fallback"], "properties": {"fallback": {"type": "boolean"}}}
+            ]
+          }
+        },
+        "inputs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["path", "digest"],
+            "additionalProperties": false,
+            "properties": {
+              "path": {"type": "string"},
+              "digest": {"anyOf": [{"$ref": "#/$defs/digest"}, {"type": "null"}]}
+            }
+          }
+        },
+        "compatibility": {"type": "array", "items": {"type": "object"}}
+      }
+    },
+    "previous": {"anyOf": [{"$ref": "#/$defs/reference"}, {"type": "null"}]},
+    "reason": {"type": "string"}
+  },
+  "$defs": {
+    "digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "manifest": {
+      "type": "object",
+      "required": ["name", "version", "path", "digest"],
+      "properties": {
+        "name": {"type": "string", "pattern": "^[A-Za-z_][A-Za-z_0-9-]*$"},
+        "version": {"type": "string"},
+        "path": {"type": "string"},
+        "digest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "context_id", "generation", "digest", "name", "version"],
+      "properties": {
+        "schema_version": {"const": 1},
+        "context_id": {"type": "string", "minLength": 1, "maxLength": 200},
+        "generation": {"type": "integer", "minimum": 1},
+        "digest": {"$ref": "#/$defs/digest"},
+        "name": {"type": "string", "pattern": "^[A-Za-z_][A-Za-z_0-9-]*$"},
+        "version": {"type": "string"}
+      }
+    },
+    "requirements": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "required_pack"],
+      "properties": {
+        "schema_version": {"const": 1},
+        "required_pack": {"type": "string", "pattern": "^[A-Za-z_][A-Za-z_0-9-]*$"}
+      }
+    }
+  }
+}

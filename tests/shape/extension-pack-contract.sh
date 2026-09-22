@@ -141,7 +141,14 @@ if command -v jq >/dev/null 2>&1; then
   jq . "$PJ" >/dev/null 2>&1 && pass "plugin.json parses as valid JSON (jq)" || fail "plugin.json invalid JSON after hostile --description"
   [ "$(jq -b -r .name "$PJ" 2>/dev/null)" = "poison" ] && pass "jq .name == poison (not hijacked)" || fail "jq .name was hijacked"
 else
-  echo "  SKIP: jq not present — structural name-key checks only"
+  # Profile resolution already requires Python; preserve the same JSON assertion
+  # on hosts without jq rather than treating a skipped parse as a verified check.
+  if _profile_python && "$_LINTEL_PROFILE_PYTHON" -c \
+    'import json,sys; data=json.load(open(sys.argv[1], encoding="utf-8")); assert data["name"] == "poison"' "$PJ"; then
+    pass "plugin.json parses and its name is not hijacked (Python)"
+  else
+    fail "plugin.json parse/name check failed"
+  fi
 fi
 
 echo ""

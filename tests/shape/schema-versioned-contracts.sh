@@ -28,18 +28,21 @@ while IFS= read -r f; do
   fi
 done < <(find "$REPO_ROOT/seeds" -name "pattern.json" -o -name "typography.json" -o -name "motion.json" -o -name "component-imports.json" 2>/dev/null)
 
-# lib/ contracts (will populate in Phase 2-3)
+# Parse both JSON-compatible and block YAML contracts, rather than matching a header.
+source "$REPO_ROOT/lib/wiki-gen.sh" || exit 1
 LIB_CONTRACTS=("$REPO_ROOT/lib/envelope-schema.yaml" "$REPO_ROOT/lib/pack-schema.yaml")
 for f in "${LIB_CONTRACTS[@]}"; do
   if [ -f "$f" ]; then
-    if grep -qE '^schema_version:' "$f"; then
+    kind=envelope
+    [ "$(basename "$f")" != "pack-schema.yaml" ] || kind=pack-manifest
+    if wgen_schema_summary "$f" "$kind" >/dev/null; then
       pass "schema_version declared: lib/$(basename "$f")"
     else
-      fail "schema_version MISSING: lib/$(basename "$f")"
+      fail "schema contract invalid: lib/$(basename "$f")"
     fi
     checked=$((checked + 1))
   else
-    echo "  INFO: lib/$(basename "$f") not present yet (ships Phase 2-3)"
+    fail "required contract MISSING: lib/$(basename "$f")"
   fi
 done
 

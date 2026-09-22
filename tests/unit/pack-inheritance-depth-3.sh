@@ -161,13 +161,17 @@ EOF
   # Per shallow-merge semantics: derived's navigation: block REPLACES base's
   # wholesale. So orientator_budget_tokens is NOT inherited.
   v=$(resolve_pack_field navigation.orientator_budget_tokens)
-  if [ "$v" = "" ] || [ "$v" = "2000" ]; then
-    # Either empty (no field) or hardcoded fallback — both acceptable
+  if [ "$v" = "2000" ]; then
     echo "  PASS: shallow-merge: derived's navigation block replaced base's wholesale (orientator_budget = '$v')"
   else
-    echo "  FAIL: got '$v' — expected empty or 2000 hardcoded fallback per shallow-merge"
+    echo "  FAIL: got '$v' — expected 2000 from the validated neutral manifest"
     exit 1
   fi
+  provenance=$(profile_field_provenance navigation.orientator_budget_tokens)
+  case "$provenance" in
+    *'"fallback":true'*'"name":"_default"'*) echo "  PASS: field provenance identifies neutral fallback" ;;
+    *) echo "  FAIL: missing neutral provenance: $provenance"; exit 1 ;;
+  esac
 
   # voice.default_tier: derived's voice block replaced base's, so its tier wins.
   v=$(resolve_pack_field voice.default_tier)

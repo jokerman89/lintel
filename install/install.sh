@@ -11,9 +11,10 @@
 # - A6: cli_support frontmatter validated at install time
 # - C1: skill/agent frontmatter validated at install time
 #
-# Does NOT bundle upstream code. The upstream-sources.yaml step below is a STUB: it lists the
-# declared sources, it does NOT clone them. SHA-pinned cloning is not implemented in this
-# installer — Lintel currently ships only operator-authored content (see README "What you don't get").
+# Does not clone or execute the upstream reference projects. It copies Lintel's reviewed
+# tree, including explicitly attributed adaptations whose notices travel with the files.
+# The declaration-only source list and bundled-material provenance are distinguished in
+# upstream-sources.yaml and docs/provenance.md; automatic source resynchronization is absent.
 
 set -euo pipefail
 

@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 # ta-contract-collision-warn — Lintel warn-only hook
 # Surfaces when an Edit/Write hits a file with declared consumers.
+# component: ta-contract-collision-warn
+# implements: ADR-0008
+# intent: .claude/plans/universal-implementation/packages/P01.md
+# constraints: opt-in warning; target policy is data, not implementation code
+# last_intent_review: 2026-09-20
 
 set -euo pipefail
 LINTEL_REPO_ROOT="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}"  # guard: unset under set -u aborts the hook (fail-closed)
@@ -17,9 +22,12 @@ file_edited="$(hook_input file_path "${1:-}")"
 
 # Check pack policy for interface_glob
 interface_glob=""
-if [ -f "$LINTEL_REPO_ROOT/lib/pack-resolver.sh" ]; then
+_resolver="$(dirname "${BASH_SOURCE[0]}")/../../../lib/pack-resolver.sh"
+[ -f "$_resolver" ] || _resolver="$LINTEL_HOME/lib/pack-resolver.sh"
+if [ -f "$_resolver" ]; then
+  LINTEL_SOURCE_ROOT="$(cd "$(dirname "$_resolver")/.." && pwd)"
   # shellcheck disable=SC1091
-  source "$LINTEL_REPO_ROOT/lib/pack-resolver.sh" 2>/dev/null
+  source "$_resolver" 2>/dev/null
   interface_glob=$(resolve_pack_field tech_architecture.interface_glob 2>/dev/null || true)
 fi
 

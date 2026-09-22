@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # lib/orientator-routing.sh — mechanical routing helpers for skills/orientator
 # component: orientator-routing
-# implements: none; preserves the existing pack navigation contract
+# implements: ADR-0028
 # intent: docs/concepts/orientator.md
 # constraints: none; recommendations do not execute workflows
-# last_intent_review: 2026-09-08
+# last_intent_review: 2026-09-20
 #
 # Sourced by skills/orientator/SKILL.md. Provides:
 #   classify_intent <prompt>        → intent enum
@@ -24,22 +24,70 @@ classify_intent() {
   local p="${1:-}"
   [ -z "$p" ] && { printf 'unclear'; return 0; }
 
-  # Lowercase for matching
-  local lp
+  local lp normalized token next intent negated=0 saw_negation=0 i
+  local -a words
   lp=$(printf '%s' "$p" | tr '[:upper:]' '[:lower:]')
+  lp="${lp//don\'t/do not}"
+  normalized=$(printf '%s' "$lp" | tr '[:space:][:punct:]' ' ')
+  IFS=' ' read -r -a words <<< "$normalized"
 
-  # Order matters: first match wins
-  case "$lp" in
-    *bug*|*broken*|*error*|*crash*|*fix\ *|*fixa*|*felsök*)        printf 'fix'; return 0 ;;
-    *deploy*|*deploya*|*provision*|*driftsätt*)                     printf 'deploy'; return 0 ;;
-    *ship*|*release*|*shippa*|*landa*)                              printf 'ship'; return 0 ;;
-    *review\ *|*audit*|*check\ *|*granska*)                         printf 'review'; return 0 ;;
-    *research*|*explore*|*understand*|*utforska*|*förstå*)          printf 'research'; return 0 ;;
-    *scaffold*|*new\ project*|*new\ repo*|*nytt\ projekt*|*starta*) printf 'scaffold'; return 0 ;;
-    *resume*|*continue*|*pick\ up*|*fortsätt*)                      printf 'resume'; return 0 ;;
-    *build*|*add\ *|*implement*|*new\ feature*|*bygg*|*lägg\ till*) printf 'build'; return 0 ;;
+  case "${words[0]:-}" in
+    how|why) printf 'research'; return 0 ;;
+    what|where|when|who)
+      case "${words[1]:-}" in
+        is|are|does|do) printf 'research'; return 0 ;;
+      esac ;;
   esac
 
+  # An operation precedes its subject: "review the release" is not SHIP, but
+  # "fix review comments" remains FIX. Negated operations grant no write intent.
+  for ((i=0; i<${#words[@]}; i++)); do
+    token="${words[$i]}"
+    next="${words[$((i + 1))]:-}"
+    case "$token" in
+      not|never|without) negated=1; saw_negation=1; continue ;;
+    esac
+    intent=""
+    case "$token" in
+      review|audit|check|granska) intent=review ;;
+      research|explore|understand|explain|read|utforska|förstå) intent=research ;;
+      fix|fixa|felsök) intent=fix ;;
+      deploy|deploya|provision|driftsätt) intent=deploy ;;
+      ship|release|shippa|landa) intent=ship ;;
+      resume|continue|fortsätt) intent=resume ;;
+      scaffold|starta) intent=scaffold ;;
+      build|add|implement|create|edit|change|modify|write|bygg) intent=build ;;
+      pick) [ "$next" != up ] || intent=resume ;;
+      new)
+        case "$next" in project|repo|repository) intent=scaffold ;; feature) intent=build ;; esac ;;
+      nytt) [ "$next" != projekt ] || intent=scaffold ;;
+      lägg) [ "$next" != till ] || intent=build ;;
+    esac
+    [ -n "$intent" ] || continue
+    case "$token:$next" in
+      build:is|build:was|build:has|build:error|build:broken|build:crash)
+        continue ;;
+    esac
+    if [ "$negated" -eq 1 ]; then
+      negated=0
+      continue
+    fi
+    if [ "$token" = create ]; then
+      case "${words[$((i + 1))]:-} ${words[$((i + 2))]:-} ${words[$((i + 3))]:-}" in
+        "a new project"|"a new repo"|"a new repository"|"new project "*|"new repo "*|"new repository "*)
+          intent=scaffold ;;
+      esac
+    fi
+    printf '%s' "$intent"
+    return 0
+  done
+
+  # Preserve symptom-only triage without allowing a negated fix to reappear.
+  if [ "$saw_negation" -eq 0 ]; then
+    case "$lp" in
+      *bug*|*broken*|*error*|*crash*) printf 'fix'; return 0 ;;
+    esac
+  fi
   printf 'unclear'
 }
 

@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # component: li-vault-init
-# implements: ADR-0007
+# implements: ADR-0007, ADR-0008
 # intent: docs/concepts/obsidian-integration.md
 # constraints: NEVER reorganizes the operator's vault — adds three small files, idempotently
-# last_intent_review: 2026-06-12
+# last_intent_review: 2026-09-20
 #
 # Installs Lintel's Obsidian patterns into an existing vault:
 #   <vault>/<sessions-dir>/sessions.base   — Bases dashboard over session notes
@@ -32,20 +32,25 @@ while [ $# -gt 0 ]; do
   esac
 done
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)" || exit 1
 cd "${REPO:-.}" || { echo "ERROR: cannot cd to ${REPO:-.}" >&2; exit 1; }
 ROOT="$(git rev-parse --show-toplevel 2>/dev/null)" || { echo "ERROR: not a git repo" >&2; exit 1; }
 cd "$ROOT" || exit 1
 REPO_NAME="$(basename "$ROOT")"
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+LINTEL_REPO_ROOT="$ROOT"
 
 # Resolve the sessions dir from the pack when --vault not given
 if [ -z "$VAULT" ]; then
-  RESOLVER="$ROOT/lib/pack-resolver.sh"
+  # Executable code belongs to the installation; project pack files are data.
+  RESOLVER="$SCRIPT_DIR/../lib/pack-resolver.sh"
   [ -f "$RESOLVER" ] || RESOLVER="${LINTEL_HOME:-$HOME/.lintel}/lib/pack-resolver.sh"
   if [ -f "$RESOLVER" ]; then
+    LINTEL_SOURCE_ROOT="$(cd "$(dirname "$RESOLVER")/.." && pwd)" || exit 1
     # shellcheck disable=SC1090
-    source "$RESOLVER" 2>/dev/null || true
-    VAULT="$(resolve_pack_field capture.vault_sink_path 2>/dev/null || true)"
+    source "$RESOLVER" || { echo "ERROR: cannot load trusted resolver: $RESOLVER" >&2; exit 1; }
+    VAULT="$(resolve_pack_field capture.vault_sink_path)" || {
+      echo "ERROR: cannot resolve capture.vault_sink_path" >&2; exit 1;
+    }
   fi
 fi
 case "$VAULT" in ""|null)

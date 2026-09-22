@@ -1,18 +1,21 @@
 # Lintel
 
-**A shared session workflow for teams building with GitHub Copilot.** Turn an issue into a
+**A shared engineering workflow across coding agents.** Turn an issue into a
 reviewed plan, small build cards, verified changes and a handoff the next session can use.
 Your team's decisions, lessons and working agreements stay in the repository.
 
-Lintel combines repository instructions, native agent skills, specialist agents and reusable
-company packs. Start with Copilot in VS Code, Copilot CLI or a GitHub cloud agent; keep the
-same engineering workflow when teammates use Claude Code or Codex.
+Lintel combines repository instructions, canonical skills, specialist methods and reusable
+company packs. Start with the task, not a client: preserve its requirements, acceptance,
+review evidence and next action when work moves between CLI, desktop, IDE and cloud sessions.
+Native adapters expose documented discovery formats; explicit file handoff remains useful
+where native integration is unverified.
 
-> **Public beta: 0.9.0.** Interfaces may change before 1.0. Repository installation and structural
-> contracts are tested; an enterprise rollout still needs a pilot on your approved Copilot
-> client and policies. See the [adoption guide](docs/enterprise-adoption.md) for acceptance criteria.
+> **Public beta.** Interfaces may change before 1.0. Repository installation and structural
+> contracts are tested; an enterprise rollout still needs a pilot on each intended
+> client surface and policy configuration. See the [adoption guide](docs/enterprise-adoption.md).
 
-[Get started](docs/getting-started.md) · [GitHub Copilot guide](docs/copilot.md) ·
+[Get started](docs/getting-started.md) · [Client adapters](docs/client-adapters.md) ·
+[GitHub Copilot](docs/copilot.md) · [Claude Code](docs/claude-code.md) ·
 [Enterprise adoption](docs/enterprise-adoption.md) · [Swarming work](docs/concepts/swarming-work.md) ·
 [Use with Spec Kit](docs/spec-kit.md)
 
@@ -35,36 +38,46 @@ There is no hosted Lintel service or background daemon. Markdown defines the wor
 Bash and Python utilities handle installation and validation. Your agent client executes work
 under its existing permissions.
 
-## Start with GitHub Copilot
+## Start with one useful task
 
-Install the repository kit into a pilot repository. It is self-contained, reviewable in a pull
-request, and usable by teammates without a global Lintel installation.
+Choose a small fix, a review, an investigation or a bounded feature in a pilot repository.
+Define the expected result and its verification before implementation. Existing Spec Kit or
+other specifications remain authoritative; Lintel does not require a competing backlog.
+
+Use a reviewed Lintel checkout and select the [adapter](docs/client-adapters.md) for the
+exact surface your team uses. A repository-only manual route is available on every host:
 
 ```bash
 git clone https://github.com/jokerman89/lintel.git
 cd lintel
-bash bin/li-copilot init --target ../your-repo
-bash bin/li-copilot check --target ../your-repo
+python3 bin/li-adapter.py init --client other --target ../your-repo
+python3 bin/li-adapter.py check --target ../your-repo
 ```
 
-Use Bash, Git and Python 3.9+. On Windows, run the same commands in Git Bash. For an enterprise
+Replace `other` with an exact registered surface for native-format discovery files where
+documented. `other` installs a usable canonical-file handoff, not a native plugin.
+Use Python 3.9+ (`python` on Windows when that is your Python 3 command), Git and Bash for
+shell workflows. For an enterprise
 pilot, check out an approved tag or commit before installation and record it in the adoption PR.
 The target must be your intended project directory.
 
-Open the target repository in your Copilot client, enable its repository customizations, and run:
+Open the target repository in your approved client and inspect its actual discovery. If no
+skill is visible, ask it to read the manual entry:
 
 ```text
-/li-welcome
-/li-plan Add a health endpoint with a focused acceptance test.
+Read .github/lintel/START.md. Plan a health endpoint with a focused acceptance test.
+Inspect existing routes and conventions. Do not implement until the plan is authorized.
 ```
 
-Review the generated plan, then ask Copilot to execute its build cards. If the client does not
-list a skill, ask it to read `.github/skills/li-plan/SKILL.md` directly. The full
+Review the plan, then execute authorized build cards and obtain a separate review. Missing
+delegation does not mean lost functionality: use serial work and an external review handoff.
+Do not claim independent review by switching roles in the same conversation. The full
 [walkthrough](docs/getting-started.md) covers installation, the first build and resuming work.
 
-Already use the Copilot CLI plugin manager? The [Copilot guide](docs/copilot.md#copilot-cli-plugin)
-provides the plugin path. Claude Code's existing installation is in
-[multi-CLI support](docs/multi-cli.md#claude-code).
+Existing routes remain: the [Copilot repository kit and CLI plugin](docs/copilot.md),
+[Claude skills, agents and optional hooks](docs/claude-code.md), and the other
+[client-specific paths](docs/client-adapters.md). No personal installation is needed for
+the portable repository kit.
 
 ## One workflow, sized to the task
 
@@ -76,9 +89,9 @@ Understand the request, choose the scope, define success, inspect the code, plan
 build it, review the result, ship within the authorized scope, and capture what was learned.
 Small fixes can use a shorter route. A larger change can span multiple sessions and build cards.
 
-The portable Copilot kit exposes this workflow as `/li-cycle`, `/li-plan`, `/li-build`,
-`/li-review` and related skills. Its planner, builder and reviewer profiles help separate
-implementation from independent review. The full catalog contains architecture, data,
+Portable native wrappers expose `li-cycle`, `li-plan`, `li-build`, `li-review` and related
+skills; invocation follows the host, not a universal slash spelling. Copilot's native
+planner, builder and reviewer profiles remain available. The full catalog contains architecture, data,
 security, operations, testing, design and document workflows; load that depth when it helps.
 
 These are agent instructions backed by local helpers. Workflow approvals and review discipline
@@ -130,21 +143,53 @@ system or substitute for repository protection. [Security](SECURITY.md) and
 
 ## Multi-CLI support
 
-This table describes the Lintel integration shipped in this repository. Host capabilities can be
-broader; a declared integration is not proof of a live session on every client version.
-The table is generated from `lib/cli-tiers.yaml` and checked for drift.
+The canonical registry distinguishes vendor documentation, delivered discovery/binding and
+observed execution per operation and surface. A CLI record never proves desktop, IDE or cloud
+parity. The generated view below comes from `lib/cli-tiers.yaml`; use
+`python3 bin/li-client-capabilities.py show --client <surface>` for dated sources, conditions
+and observation details. Static compatibility tiers are conservative hints, not runtime grants.
 
 <!-- CLI-TIERS:START — generated from lib/cli-tiers.yaml via cli_tiers_markdown_table; do not hand-edit. -->
-| CLI | Tier | Skills | Subagents | Lintel hooks |
-|---|---|---|---|---|
-| Claude Code | full | native | native | yes |
-| Codex CLI / App | full | native | native | not ported |
-| Cursor | full | native | sequenced | not ported |
-| Gemini CLI | supported | manual | none | not ported |
-| OpenCode | supported | manual | none | not ported |
-| GitHub Copilot CLI | supported | native | native | not ported |
-| Factory Droid | supported | native | none | not ported |
-| Cline / Continue / Aider | best-effort | manual | none | not ported |
+| Surface | Delivered discovery route | Vendor delegation | Live Lintel evidence |
+|---|---|---|---|
+| Claude Code CLI | .claude/skills | documented | not_run |
+| Claude Desktop Code local | .claude/skills | unknown | not_run |
+| GitHub Copilot CLI | .github/skills | documented | not_run |
+| GitHub Copilot App | .github/skills | conditional | partial session observations |
+| GitHub Copilot VS Code | .github/skills | conditional | not_run |
+| GitHub Copilot cloud agent | .github/skills | unknown | not_run |
+| Codex CLI | .agents/skills | conditional | not_run |
+| Codex desktop | .agents/skills | unknown | not_run |
+| Codex IDE extension | .agents/skills | unknown | not_run |
+| Codex cloud | manual canonical-file handoff | unknown | not_run |
+| Cursor CLI | .cursor/skills | conditional | not_run |
+| Cursor editor | .cursor/skills | conditional | not_run |
+| Cursor cloud | .cursor/skills | conditional | not_run |
+| Gemini CLI | .gemini/skills | conditional | not_run |
+| OpenCode CLI/TUI | .opencode/skills | documented | not_run |
+| OpenCode desktop | manual canonical-file handoff | unknown | not_run |
+| OpenCode IDE | manual canonical-file handoff | unknown | not_run |
+| Factory Droid CLI | .factory/skills | conditional | not_run |
+| Factory desktop | manual canonical-file handoff | unknown | not_run |
+| Factory web/cloud | manual canonical-file handoff | unknown | not_run |
+| Antigravity CLI | .agents/skills | unknown | not_run |
+| Antigravity desktop | .agents/skills | unknown | not_run |
+| Antigravity IDE | .agents/skills | unknown | not_run |
+| Kiro CLI | .kiro/skills | conditional | not_run |
+| Kiro IDE | .kiro/skills | conditional | not_run |
+| Kiro web | .kiro/skills | unknown | not_run |
+| Devin Desktop Cascade / Windsurf | .windsurf/skills | unknown | not_run |
+| Devin CLI | .devin/skills | conditional | not_run |
+| Devin Local | manual canonical-file handoff | unknown | not_run |
+| Devin cloud | manual canonical-file handoff | unknown | not_run |
+| JetBrains Junie CLI | .junie/skills | unknown | not_run |
+| JetBrains Junie IDE | manual canonical-file handoff | unknown | not_run |
+| Cline editor | .cline/skills | conditional | not_run |
+| Cline CLI | manual canonical-file handoff | conditional | not_run |
+| Continue IDE | manual canonical-file handoff | unknown | not_run |
+| Continue CLI | manual canonical-file handoff | unknown | not_run |
+| Aider CLI | manual canonical-file handoff | unknown | not_run |
+| Unidentified host (explicit manual route) | manual canonical-file handoff | unknown | not_run |
 <!-- CLI-TIERS:END -->
 
 See [multi-CLI support](docs/multi-cli.md) for invocation differences and activation boundaries.
@@ -158,7 +203,7 @@ provided by their host.
 - [Skill catalog](skills/CATALOG.md) · [Pack resolution](docs/concepts/pack-resolver.md)
 - [Contributing](CONTRIBUTING.md) · [Code of conduct](CODE_OF_CONDUCT.md) · [Changelog](CHANGELOG.md)
 
-Bug reports from real Copilot sessions are especially useful: include the client version,
+Bug reports from real client sessions are especially useful: include the exact surface and version,
 installation route, task, expected behavior and a sanitized reproduction.
 
 MIT for Lintel's original code; see [LICENSE](LICENSE). Bundled design resources retain their

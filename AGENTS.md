@@ -41,10 +41,13 @@ Or for Codex App: sidebar → Plugins → `+`.
 
 ### Subagents in Codex
 
-Codex has native subagent support (`lib/cli-tiers.yaml`: `subagents: native`). Agents in `agents/<category>/<Name>.md` load through the plugin manifest and can be delegated to directly. For scripted one-shot runs, the `codex exec` subprocess pattern still works:
+Codex documents configured subagent support. Inspect the current surface's actual agent
+inventory and tools; a canonical `agents/<category>/<Name>.md` file is not proof of native
+registration or permission. CLI, desktop and IDE have distinct records in `lib/cli-tiers.yaml`.
+For an explicitly authorized outside-review subprocess, inspect the installed command first:
 
 ```bash
-codex exec --prompt "$(cat agents/security/SecurityAuditor.md). Audit branch X."
+codex exec --help
 ```
 
 ### Plan mode
@@ -57,15 +60,17 @@ Codex's tool-permission model is per-invocation. Auto-mode bounds in `AGENT-INST
 
 ### Skill discovery
 
-Skills live at `skills/<name>/SKILL.md` and surface natively as `/li:<skill>` once the plugin is
-installed (`/plugins`, search lintel, Install). Codex is a **full-tier** CLI: native skills and
-native subagents. The one thing it does not get is the hook enforcement layer, which is a Claude
-Code mechanism.
+Skills live at `skills/<name>/SKILL.md`. The preserved plugin is one distribution route.
+The repository adapter generates `.agents/skills/li-*/SKILL.md`; inspect `/skills` or the
+host's `$` references rather than assuming Claude's colon namespace. Native-format files,
+documented capabilities and observed execution are different facts. Lintel's Claude hook
+bundle is not a Codex adapter.
 
-For a scripted one-shot run outside an interactive session:
+For a portable explicit invocation without native discovery:
 
-```bash
-codex exec --prompt "$(cat skills/ship/SKILL.md). Execute on current branch."
+```text
+Read the Universal adapter and skills/ship/SKILL.md from the trusted Lintel source.
+Prepare delivery only within the current task's authorization.
 ```
 
 ### Compliance

@@ -12,8 +12,10 @@ Internal engineering artifacts — audits, gate records, superseded design docs 
 
 | Doc | What it gives you |
 |---|---|
-| [Getting started](getting-started.md) | Install the Copilot repository kit and finish one verified build card |
+| [Getting started](getting-started.md) | Start from a bounded task, finish an authorized card and resume its evidence |
+| [Client adapters](client-adapters.md) | Select the exact CLI/desktop/IDE/cloud surface or usable manual handoff |
 | [GitHub Copilot](copilot.md) | Native skills, custom agents, CLI plugin and cloud-agent boundaries |
+| [Claude Code](claude-code.md) | Preserved plugin, skills, agents and optional hooks; repository-only alternative |
 | [Enterprise adoption](enterprise-adoption.md) | Pilot criteria, ownership, policy boundaries, upgrades and rollback |
 | [Spec Kit](spec-kit.md) | Keep existing specifications and tasks authoritative while adding session continuity |
 | [Glossary](GLOSSARY.md) | One screen. Pack, spine, cycle, trio, depth schema — the terms you meet before they are defined |

@@ -19,23 +19,23 @@ Total skills: 127
 | [`/li:browse`](browse/SKILL.md) | Drive a headless Chromium to a URL — screenshot, extract DOM, click, fill forms, verify UI. |
 | [`/li:build`](build/SKILL.md) | Use to execute an approved plan in bounded work packages, preserving short task IDs and acceptance evidence while revie… |
 | [`/li:capture`](capture/SKILL.md) | Use after SHIP, at the end of a task, to make what was learned durable — updates lessons, drafts an ADR for any non-tri… |
-| [`/li:careful`](careful/SKILL.md) | Slow-down mode for high-stakes work — extra gates, double-confirm before mutations. |
+| [`/li:careful`](careful/SKILL.md) | Use for high-stakes work that needs explicit mutation boundaries, attributable recovery and verification before continu… |
 | [`/li:catalog`](catalog/SKILL.md) | Use to discover Lintel skills by name, purpose or family, or regenerate the committed skill catalog after frontmatter c… |
 | [`/li:clean`](clean/SKILL.md) | Manual self-maintenance trigger. Suggests /context-save + restart when session feels heavy. |
-| [`/li:cli-fingerprint`](cli-fingerprint/SKILL.md) | Detect which CLI is running Lintel — env-var → process → tool-probe → config fallback. |
+| [`/li:cli-fingerprint`](cli-fingerprint/SKILL.md) | Use to identify the current CLI, desktop, IDE or cloud surface and inspect its actual tools without inferring capabilit… |
 | [`/li:code-freeze`](code-freeze/SKILL.md) | Mark paths as DO-NOT-MODIFY for this session — other skills check + refuse to touch. |
 | [`/li:code-review`](code-review/SKILL.md) | Use before landing a change to review just the diff — focused on the changed code only, lighter than a full engineering… |
 | [`/li:code-unfreeze`](code-unfreeze/SKILL.md) | Remove a path from session freeze — other skills can write to it again. |
-| [`/li:codex`](codex/SKILL.md) | Outside-voice second opinion via Codex CLI. Independent review of diff, plan, or hypothesis. |
+| [`/li:codex`](codex/SKILL.md) | Use for an explicitly authorized Codex outside opinion on a diff, plan, code or hypothesis, retaining actual actor and … |
 | [`/li:compliance-gate`](compliance-gate/SKILL.md) | Compliance-gate aggregator — runs all gates the active pack declares (compliance.hooks) as ONE green/red verdict. Embar… |
-| [`/li:context-budget`](context-budget/SKILL.md) | Show current context utilization, recommend warm/cool, surface budget breakdown by source. `--watch` runs the threshold… |
-| [`/li:context-cool`](context-cool/SKILL.md) | Selectively drop context from session — free budget for further warming. Operator picks what to keep. |
+| [`/li:context-budget`](context-budget/SKILL.md) | Show observed context capacity and usage where available, clearly labeled input estimates otherwise; --watch compares a… |
+| [`/li:context-cool`](context-cool/SKILL.md) | Exclude explicitly selected files from future context reads without claiming to remove already-sent conversation conten… |
 | [`/li:context-restore`](context-restore/SKILL.md) | Use at the start of a fresh session that continues prior work to restore session state from a checkpoint file. Reach fo… |
 | [`/li:context-save`](context-save/SKILL.md) | Use before the context window fills up or before clearing the session to save the current state to a checkpoint file. R… |
-| [`/li:context-warm`](context-warm/SKILL.md) | Use to deliberately load specific files into context before working on them, reporting tokens added and budget impact. … |
+| [`/li:context-warm`](context-warm/SKILL.md) | Use to deliberately load a bounded set of literal files or globs, showing selected sources and estimated input size bef… |
 | [`/li:context-warm-adrs`](context-warm-adrs/SKILL.md) | Load topic-relevant ADRs into context — design constraints + prior decisions surfaced for current work. |
 | [`/li:context-warm-customer`](context-warm-customer/SKILL.md) | Load customer-engagement repo state into context — their infrastructure-as-code, their CLAUDE.md, their ADRs, recent co… |
-| [`/li:context-warm-from-url`](context-warm-from-url/SKILL.md) | Fetch URL + dump into context. Useful for loading documentation, blog posts, external references on-demand. |
+| [`/li:context-warm-from-url`](context-warm-from-url/SKILL.md) | Retrieve bounded external reference text only through explicit host policy and redirect checks, preserving source prove… |
 | [`/li:context-warm-related`](context-warm-related/SKILL.md) | Heuristic context warm — search codebase for files related to a topic, load top N most-relevant. |
 | [`/li:context-warm-sessions`](context-warm-sessions/SKILL.md) | Load last N session saves on current branch — cross-session continuity for resumed work. |
 | [`/li:cycle`](cycle/SKILL.md) | Use to run a real multi-step task through the full SENSE-to-CAPTURE pipeline, or a chosen subset of phases. Supports mo… |
@@ -77,7 +77,7 @@ Total skills: 127
 | [`/li:health`](health/SKILL.md) | Lintel install + upstream status check. Verifies layers, manifest, hooks, upstream pins, CLI shims. |
 | [`/li:help`](help/SKILL.md) | List the Lintel skills + agents + hooks available in this session. Filter by category, voice tier, or CLI support. |
 | [`/li:hooks-status`](hooks-status/SKILL.md) | Reader for hooks.jsonl — surface active-vs-dead hooks + override patterns + trigger counts. Closes the hooks-observatio… |
-| [`/li:instruction-parity-check`](instruction-parity-check/SKILL.md) | Verifies substance-parity across 6 instruction files (root CLAUDE/AGENTS/GEMINI + shims). The multi-CLI promise's weak … |
+| [`/li:instruction-parity-check`](instruction-parity-check/SKILL.md) | Use to verify shared session protocol equality and client-entry links without overwriting project prose or confusing si… |
 | [`/li:investigate`](investigate/SKILL.md) | Use when something is broken and you don't yet know why — drives a hypothesis-led investigation that builds a minimum r… |
 | [`/li:jobs`](jobs/SKILL.md) | Use to see and steer in-flight Lintel jobs — list what's open, continue, replan, abort, or branch a job. The single sou… |
 | [`/li:landing-report`](landing-report/SKILL.md) | Post-ship report — what landed in a window, in engineering or customer-voice format. |
@@ -95,8 +95,8 @@ Total skills: 127
 | [`/li:pack-list`](pack-list/SKILL.md) | Lists every pack discoverable in ~/.lintel/packs/ and repo packs/ — shows name, extends, voice tier, compliance mode, a… |
 | [`/li:pack-switch`](pack-switch/SKILL.md) | Use to change which pack is active — switching the identity that drives voice, compliance, persona, and roles. Validate… |
 | [`/li:pack-validate`](pack-validate/SKILL.md) | Validate a pack before activation or after editing its manifest. Checks effective required fields and inheritance with … |
-| [`/li:pair-agent`](pair-agent/SKILL.md) | Pair with a named subagent in the loop — explicit two-mind collaboration on a focused task. |
-| [`/li:perf-mode`](perf-mode/SKILL.md) | Activate the 1M context-budget mode for a session — the high-intensity preset for long, heavy phases. |
+| [`/li:pair-agent`](pair-agent/SKILL.md) | Use to pair with an available specialist context or a durable external handoff, retaining scoped turns and honest revie… |
+| [`/li:perf-mode`](perf-mode/SKILL.md) | Advise on bounded working sets, context observations and checkpoint strategy for heavy phases; never changes model capa… |
 | [`/li:perfbench`](perfbench/SKILL.md) | Measure performance — runtime, memory, cold-start — and detect regressions vs baseline. |
 | [`/li:personas-rotate`](personas-rotate/SKILL.md) | Load persona context from .claude/memory/personas.md for demo-prep, workshop-facilitation, or audience-aware writing. |
 | [`/li:plan`](plan/SKILL.md) | Use after DISCOVER, or standalone with an approved design, to produce the cold-executor trio (plan.md + spec.md + promp… |
@@ -117,7 +117,7 @@ Total skills: 127
 | [`/li:role`](role/SKILL.md) | Use to take on or change a working role — activate one for a lightweight lens, turn it off, swap mid-session, apply its… |
 | [`/li:role-new`](role-new/SKILL.md) | Scaffold a new role file from template via guided interview — IDENTITY, COLD KNOWLEDGE, DECISION CRITERIA, OUTCOME LENS… |
 | [`/li:roles-list`](roles-list/SKILL.md) | List all available roles (public + private, if accessible). Shows id, display name, scope, sensitivity, last-updated. |
-| [`/li:safe-install`](safe-install/SKILL.md) | Safe-install wrapper for Lintel — version-before-every-change + uninstall-with-restore + visible-announce backup. Opera… |
+| [`/li:safe-install`](safe-install/SKILL.md) | Protect explicitly owned installation files with verified snapshots and conflict-preserving restore; announce recovery … |
 | [`/li:sc`](sc/SKILL.md) | Use for security and compliance depth — threat models, auth flows, secret management, dependency-security audits, compl… |
 | [`/li:scaffold`](scaffold/SKILL.md) | Use when setting up a new or existing repo to work with Lintel to install the base templates interactively — the repo i… |
 | [`/li:scaffold-internal-tool`](scaffold-internal-tool/SKILL.md) | Initialize an internal-tooling repo — CI, README, pack compliance hooks, no customer surface. |
@@ -137,4 +137,4 @@ Total skills: 127
 | [`/li:uniformity`](uniformity/SKILL.md) | Read-only uniformity-contract dashboard — runs the Gate-M3 floor shape-test and points at the regenerable coverage matr… |
 | [`/li:usage-log`](usage-log/SKILL.md) | Append-only usage log for skill/agent invocations — manual writer (one audit_log line) plus reader reports. One log, no… |
 | [`/li:v4-migrate`](v4-migrate/SKILL.md) | Walks operator through v3.x → v4.0 migration — detects v3.x usage signals, recommends pack activation, optionally write… |
-| [`/li:welcome`](welcome/SKILL.md) | Use on first run, or when someone is new to Lintel, for guided onboarding — detects the CLI, shows its honest capabilit… |
+| [`/li:welcome`](welcome/SKILL.md) | Use on first run to choose a useful task, inspect the actual client surface and take a proportionate plan, build, revie… |

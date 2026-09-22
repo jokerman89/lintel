@@ -36,7 +36,8 @@ Designs data pipelines: ingestion (batch + streaming), transformation (dbt, Spar
 
 1. **Read existing pipeline.** dbt models, Airflow DAGs, Spark jobs, warehouse schema.
 2. **State pipeline goal:** what business question gets answered or what downstream consumer is served.
-3. **Identify constraints:** latency (real-time / hourly / daily), volume, data class, retention, cost ceiling.
+3. **Identify constraints:** consumer freshness/correctness, peak and sustained volume,
+   source schema/event identity, applicable data policy and cost ceiling.
 4. **Pipeline shape:**
    - Ingestion: CDC / batch dump / event stream
    - Transformation: SQL / Python / Spark
@@ -44,7 +45,11 @@ Designs data pipelines: ingestion (batch + streaming), transformation (dbt, Spar
    - Orchestration: Airflow / Dagster / Prefect
    - Quality: contract tests (great_expectations / dbt tests)
    - Lineage: dbt docs / OpenLineage
-5. **Compliance:** data class flow (Public → ... → Business → ...), PII handling, retention enforcement.
+5. **Failure semantics:** event time versus ingestion time, source watermark,
+   late-data policy, duplicate/out-of-order handling, sink idempotency, checkpoint
+   replay and bounded backfills. Record the owner of rejected or conflicting records.
+6. **Lineage and compliance:** source fields -> transformation revision -> sink,
+   data classification from applicable policy, retention and deletion propagation.
 
 ## Report format
 
@@ -54,29 +59,28 @@ DataPipelineDesigner: <pipeline goal>
 ## Goal
 <1-2 sentences>
 
-## Constraints
+## Constraints (synthetic brief; infrastructure/pricing not yet measured)
 - Latency: hourly aggregation acceptable
 - Volume: 50M events/day
 - Data class: Business (PII-adjacent)
-- Cost: ≤ $500/mo
+- Cost: ceiling supplied by the operator; no quote inferred from event count
 
 ## Pipeline shape
-1. Ingest: Event Hub → Azure Storage (raw zone, 90-day retention)
-2. Transform: dbt models in Snowflake (bronze → silver → gold)
-3. Quality: dbt tests on each layer (not_null, unique, referential integrity)
-4. Orchestration: Airflow daily DAG, hourly mini-DAG for near-real-time
-5. Serving: gold tables exposed to the BI layer, with operational metrics alongside
+1. Ingest: retain the existing event source and stable event IDs
+2. Transform: hourly event-time aggregates in the existing warehouse/SQL stack
+3. Quality: uniqueness, referential integrity, source-to-sink totals and replay tests
+4. Orchestration: select existing scheduler; separate live and backfill intervals
+5. Serving: publish freshness, correction state and lineage with the aggregate
 
 ## Compliance
-- PII: silver layer hashes user_id; downstream only sees hash
-- Retention: bronze 90 days, silver 1 year, gold permanent (aggregates only)
-- DPIA: trigger the active pack's compliance gates — PII processing, even if hashed
+- PII: hashing user_id is pseudonymization unless anonymization is actually established
+- Retention: purpose/policy-derived per layer; an aggregate is not automatically permanent
+- Deletion: propagate to projections and prevent restore/backfill from resurrecting records
+- DPIA: assess applicable high-risk processing criteria with the policy owner
 
 ## Cost estimate
-- Snowflake: ~$300/mo for daily compute
-- Event Hub + Storage: ~$80/mo
-- Airflow (managed Astronomer Cloud or Azure-Container-Apps): ~$120/mo
-- Total: ~$500/mo (at ceiling)
+- Unknown until region/SKU, compute duration, storage, operations and egress are priced
+- Name source/date/currency and a range; do not manufacture a vendor quote
 
 ## Next steps
 1. Run the active pack's compliance gates for the pipeline (`resolve_pack_field compliance.hooks`; none by default)
@@ -89,9 +93,14 @@ DataPipelineDesigner: <pipeline goal>
 
 - **Latency requirement infeasible at cost ceiling:** surface trade-off, propose loosening latency or raising budget.
 - **No existing data infra:** scope expands — recommend `BackendArchitect` to consider data architecture as part of system design.
-- **Customer data flows through pipeline:** Layer 2 gate — DPIA required; run the active pack's compliance gates if data is shared.
+- **Customer data flows through pipeline:** use only authorized data; assess applicable
+  policy/DPIA requirements rather than inventing a universal legal trigger.
 - **Real-time requested but batch is sufficient:** push back — real-time is expensive, often false economy.
 
 ## Voice tier behavior
+
+The [data methods](../../skills/da/references/decision-methods.md) work through replay
+of e1/e2, late panes, atomic sink effects and lineage. Return a design and concrete
+synthetic validation cases; a broker's exactly-once label does not verify the sink.
 
 `voice: internal`. Pipeline design is engineering-internal.

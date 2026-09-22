@@ -1,137 +1,27 @@
 #!/usr/bin/env bash
-# li-lessons-sync — sync repo-local lessons.md across operator's machines
-# (private to operator, opt-in — syncs via a personal git remote)
-#
-# Usage: li-lessons-sync [--push | --pull | --status]
-
+# component: lintel-lessons-sync
+# implements: ADR-0005, ADR-0010
+# intent: .claude/plans/universal-implementation/packages/P02.md
+# constraints: opt-in private sync; retain legacy records and canonical path resolution
+# last_intent_review: 2026-09-20
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
-LESSONS_REMOTE_FILE="$HOME/.lintel-lessons-remote.txt"
-LESSONS_LOCAL_DIR="$LINTEL_HOME/lessons"
+if command -v python3 >/dev/null 2>&1; then PYTHON=python3
+elif command -v python >/dev/null 2>&1; then PYTHON=python
+else echo "ERROR: li-lessons-sync requires Python 3.9+." >&2; exit 2
+fi
 
-# Repo-local lessons file resolved via lib/paths.sh (.claude/memory/lessons.md
-# on the v5 layout; un-migrated repos resolve to their legacy location).
-# shellcheck source=/dev/null
-source "$(dirname "${BASH_SOURCE[0]}")/../lib/paths.sh"
+context=(--)
+if [ "${1:---status}" = push ] || [ "${1:---status}" = --push ]; then
+  # shellcheck source=../lib/paths.sh
+  source "$SCRIPT_DIR/../lib/paths.sh"
+  root="$(lintel_repo_root)" || { echo "ERROR: No current repository for lessons sync." >&2; exit 3; }
+  lessons="$(lintel_lessons_file)" || { echo "ERROR: Cannot resolve repository lessons." >&2; exit 3; }
+  context=(--project-root "$root" --lessons-file "$lessons" --)
+fi
 
-CMD="${1:---status}"
-
-mkdir -p "$LESSONS_LOCAL_DIR"
-
-help() {
-  cat <<EOF
-li-lessons-sync — sync per-repo lessons across operator's machines
-
-This is OPT-IN. Lessons stay private to the operator (no team-wide push).
-The remote is a private git repo the operator configures.
-
-Usage:
-  li-lessons-sync setup <repo-url>   First-time setup with private repo URL
-  li-lessons-sync push               Push current repo's .claude/memory/lessons.md
-  li-lessons-sync pull               Pull all lessons from remote
-  li-lessons-sync status             Show status (default)
-  li-lessons-sync forget             Remove sync configuration
-
-Setup notes:
-  - <repo-url> should be a PRIVATE git repo (e.g. a personal lessons-vault)
-  - Lessons sync ONE-WAY per machine — operator can pull from any, push from current
-  - No team-wide sharing — use li-lessons-promote for that
-EOF
-}
-
-cmd_status() {
-  echo "Lintel lessons sync status"
-  echo ""
-  if [ -f "$LESSONS_REMOTE_FILE" ]; then
-    echo "Configured remote: $(cat "$LESSONS_REMOTE_FILE")"
-    echo "Local lessons dir: $LESSONS_LOCAL_DIR"
-    if [ -d "$LESSONS_LOCAL_DIR/.git" ]; then
-      cd "$LESSONS_LOCAL_DIR"
-      last_pull=$(git log -1 --format=%cd --date=short 2>/dev/null || echo "never")
-      file_count=$(find . -name "*.md" -not -path "./.git/*" | wc -l | tr -d ' ')
-      echo "Last pull: $last_pull"
-      echo "Files: $file_count"
-    else
-      echo "Lessons git repo not initialized — run 'li-lessons-sync setup <url>'"
-    fi
-  else
-    echo "Not configured. Run 'li-lessons-sync setup <repo-url>' to enable."
-  fi
-}
-
-cmd_setup() {
-  local url="${1:-}"
-  if [ -z "$url" ]; then
-    echo "Usage: li-lessons-sync setup <repo-url>" >&2
-    exit 2
-  fi
-  echo "$url" > "$LESSONS_REMOTE_FILE"
-  echo "Remote configured: $url"
-
-  if [ ! -d "$LESSONS_LOCAL_DIR/.git" ]; then
-    echo "Cloning into $LESSONS_LOCAL_DIR..."
-    if ! git clone "$url" "$LESSONS_LOCAL_DIR" 2>/dev/null; then
-      echo "Clone failed — initializing empty repo + setting remote"
-      cd "$LESSONS_LOCAL_DIR"
-      git init -q
-      git remote add origin "$url"
-      echo "# Lintel lessons vault" > README.md
-      git add README.md
-      git commit -q -m "init lessons vault"
-    fi
-  fi
-  echo "Setup complete. Run 'li-lessons-sync push' from any repo to sync."
-}
-
-cmd_push() {
-  local lessons_file
-  lessons_file="$(lintel_lessons_file)"
-  [ -f "$lessons_file" ] || { echo "No lessons file in current repo ($lessons_file)" >&2; exit 3; }
-  [ -d "$LESSONS_LOCAL_DIR/.git" ] || { echo "Setup not done — run 'li-lessons-sync setup <url>'" >&2; exit 4; }
-
-  local repo_name
-  repo_name=$(basename "$(git rev-parse --show-toplevel 2>/dev/null || pwd)")
-
-  cp "$lessons_file" "$LESSONS_LOCAL_DIR/${repo_name}.md"
-  cd "$LESSONS_LOCAL_DIR"
-  git add "${repo_name}.md"
-  if git diff --cached --quiet; then
-    echo "No changes to push (lessons.md identical to last push)."
-    exit 0
-  fi
-  git commit -q -m "sync lessons from $repo_name @ $(date +%Y-%m-%d)"
-  if git push origin HEAD 2>/dev/null; then
-    echo "✓ Pushed lessons from '$repo_name'"
-  else
-    echo "⚠ Local commit done, but push failed. Check remote credentials."
-  fi
-}
-
-cmd_pull() {
-  [ -d "$LESSONS_LOCAL_DIR/.git" ] || { echo "Setup not done" >&2; exit 4; }
-  cd "$LESSONS_LOCAL_DIR"
-  if git pull --ff-only 2>/dev/null; then
-    echo "✓ Pulled latest lessons"
-    file_count=$(find . -name "*.md" -not -path "./.git/*" | wc -l | tr -d ' ')
-    echo "  ${file_count} repo lesson file(s) available at $LESSONS_LOCAL_DIR"
-  else
-    echo "⚠ Pull failed"
-  fi
-}
-
-cmd_forget() {
-  rm -f "$LESSONS_REMOTE_FILE"
-  echo "Sync configuration removed."
-  echo "Local cache at $LESSONS_LOCAL_DIR preserved — delete manually if desired."
-}
-
-case "$CMD" in
-  setup) shift; cmd_setup "$@" ;;
-  push) cmd_push ;;
-  pull) cmd_pull ;;
-  status|--status) cmd_status ;;
-  forget) cmd_forget ;;
-  help|--help|-h) help ;;
-  *) help; exit 2 ;;
-esac
+exec "$PYTHON" "$SCRIPT_DIR/../lib/private_sync.py" \
+  --kind lessons --directory "$LINTEL_HOME/lessons" \
+  --binding "$HOME/.lintel-lessons-remote.txt" "${context[@]}" "$@"

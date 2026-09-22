@@ -1,11 +1,11 @@
 ---
 name: pair-agent
 layer: foundation
-description: Pair with a named subagent in the loop — explicit two-mind collaboration on a focused task.
+description: Use to pair with an available specialist context or a durable external handoff, retaining scoped turns and honest review attribution.
 color: green
 tools: Read, Bash, Grep, Glob
 voice: internal
-cli_support: [claude-code]
+cli_support: [claude-code, codex, copilot, cursor, gemini, opencode, droid]
 ---
 
 # /pair-agent
@@ -14,7 +14,10 @@ Pair-programming style with a named subagent. Operator describes a task; skill b
 
 Distinct from `/codex` (outside-voice review post-hoc) and from spawning a subagent for a one-shot question. Pair-mode means the subagent is in the loop alongside the main agent throughout.
 
-`cli_support: [claude-code]` only — subagent orchestration uses the Agent tool, which is Claude Code-native.
+Bind delegation and questions through the [Universal adapter](../../shims/universal/ADAPTER.md).
+Use the actual host tools and permissions. A specific tool name is not a portability boundary.
+When native delegation is missing, keep the same turn brief and report for an external actor;
+serial self-analysis is useful but must not be called two independent minds.
 
 ## When to use
 
@@ -38,12 +41,18 @@ Distinct from `/codex` (outside-voice review post-hoc) and from spawning a subag
 
 ## Workflow
 
-1. **Resolve subagent.** Look up `--agent` in the plugin's subagent fleet (run `/li:catalog` to list the available agents; a repo-local `.claude/agents/` override, if one exists, shadows the fleet by name). If not found: list available + exit.
+1. **Resolve subagent.** Apply operator pin, repository, active-pack and host discovery precedence.
+   Inspect the actual available agent inventory; a canonical role file is not automatically a
+   registered host agent. Retain a bounded external handoff when no suitable native context exists.
 2. **State the task.** Print the task description so operator sees what both minds will work on.
 3. **Turn loop.**
    - **Main turn:** main agent proposes a step (a diff, a decision, an investigation move). Output is shown.
-   - **Subagent turn:** subagent reviews the proposal from its specialty. Spawned via Agent tool with focused prompt + scope.
-   - **Operator gate:** AskUserQuestion — accept, modify, or skip this step.
+   - **Specialist turn:** delegate through the actual available tool, or pause for the separately
+     attributable external actor. Include the original work map/leaf IDs, profile reference,
+     exact proposal/revision, read scope and report requirements. The specialist does not repair
+     its own findings. Serialize writers unless isolated changes and disjoint ownership are proven.
+   - **Operator gate:** use the host question channel for a missing decision: accept, modify or
+     skip. Honor authorization already given for the scoped turn; do not repeat approval by habit.
 4. **Iterate** until `--turns` reached or task complete.
 5. **Synthesis.** Final summary: what was built, what subagent flagged, what was kept/skipped.
 
@@ -61,25 +70,27 @@ Operator: ACCEPTED.
 
 ## Turn 2
 Main: apply extraction. Diff shown.
-PerformanceAnalyzer: benchmark check — function call overhead negligible (<1µs). No regression.
+PerformanceAnalyzer: record the actual before/after command and measured result; unrun is unverified.
 Operator: ACCEPTED.
 
 ## Turn 3
 Main: add reset-controller on retry per /investigate finding.
-PerformanceAnalyzer: micro-benchmark — adds 50ns per retry, immaterial.
+PerformanceAnalyzer: inspect actual measurements; do not infer performance from code shape.
 Operator: ACCEPTED.
 
 ## Synthesis
-3 turns, 3 accepted. PerformanceAnalyzer raised 1 minor concern (resolved via benchmark). No perf regression detected.
-Final diff: src/lib/dlxClient.ts +18 -7.
+Record actual turns, accepted decisions, remaining findings and owned changed paths.
+Only claim no regression if the comparison ran against the relevant revisions.
 Recommendation: /qa-only before /ship.
 ```
 
 ## Compliance integration
 
-- Each main-agent Edit goes through the active pack's compliance gates + the secret/customer-data block hooks.
-- Subagent invocations logged to `.claude/runtime/audit/pair-agent.jsonl`.
-- Subagent inherits scope restriction from `--scope`; cannot read outside that set.
+- Apply required policy controls and record whether a compatible hook, accepted equivalent or
+  explicit review actually ran. Hook files or a pack label are not enforcement.
+- Persist non-sensitive turn evidence through the shared audit writer when configured.
+- `--scope` is an instruction boundary unless the host enforces it. Do not claim it prevents
+  reads outside the set. Worktrees attribute changes but are not security sandboxes.
 
 ## Failure modes
 
@@ -87,7 +98,10 @@ Recommendation: /qa-only before /ship.
 - **Subagent disagrees fundamentally with main agent's first proposal:** stop, report the disagreement, ask operator which path to take. Do not auto-resolve.
 - **Operator rejects 3 turns in a row:** suspect the wrong specialist was paired. Suggest different `--agent` and exit.
 - **Turn budget exhausted, task incomplete:** report partial state. Operator can re-run with higher `--turns`.
-- **`Agent` tool unavailable (running in Codex/Copilot):** STOP — this skill is claude-code only. Surface alternative (use `/codex` post-hoc instead).
+- **Delegation unavailable or prohibited:** keep the original scoped brief, status and next
+  action for manual/external execution. Do not silently call a paid external client.
+- **Independent review missing:** mark it outstanding; changing a role or model name is not
+  independent review. Follow the shared evidence contract before claiming clearance.
 
 ## Examples
 

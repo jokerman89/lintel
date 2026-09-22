@@ -9,7 +9,8 @@ The installer creates supported `.github/skills/li-*/SKILL.md`, `.github/agents/
 and instructions with correct repository-relative links. Do not copy this source-only
 shim into a consumer repository; its relative links describe the Lintel source tree.
 
-Copilot CLI, VS Code and the GitHub cloud agent have different tool capabilities.
-Use native delegation when available and accurately label a sequential fallback.
+Copilot CLI, App, VS Code and the GitHub cloud agent have distinct surface records and tools.
+Use actual native delegation when available, serialize without attributable isolated writes,
+and keep a durable manual handoff when unavailable. Missing independent review stays open.
 The kit does not pin models, install hooks or change enterprise permissions.
 See [the Copilot guide](../docs/copilot.md) for setup and limitations.

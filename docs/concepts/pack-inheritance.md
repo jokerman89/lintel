@@ -1,159 +1,86 @@
-# Pack inheritance — shallow merge with explicit precedence
+# Pack inheritance: whole-block replacement
 
-**Last updated:** 2026-09-08
-**Status:** Concept doc — referenced by `lib/pack-resolver.sh` (`_resolve_extends_chain`, `_merge_packs_into_cache`), `lib/pack-schema.yaml`, `tests/unit/pack-inheritance-depth-3.sh`
+**Last updated:** 2026-09-20
 
-> Pack ecosystems have variation: two packs from the same organisation share a set of defaults (compliance hooks, regulatory gates, audit paths) but differ on voice, persona, brand. Without inheritance, every new pack restates the shared defaults — drift becomes inevitable. With inheritance, the shared defaults live in a base pack (`acme-base`) and concrete packs (`acme-eng`, `acme-sales`) extend it. The mechanism is **shallow merge with explicit child-over-parent precedence**.
+A pack can declare one `extends:` parent. The resolver follows root to leaf,
+rejecting missing parents, cycles and more than ten parent links. Each manifest
+needs its own matching name and semantic version. Policy blocks can be inherited.
+Identity-only and extension packs use the same rule.
 
-## The problem
+## Precedence without hybrid blocks
 
-Three failure modes a flat pack ecosystem invites:
-
-1. **Drift across siblings.** `acme-eng` and `acme-sales` both want the same compliance hooks active. If both restate the hook list, they drift when one is updated without the other.
-2. **Restatement burden.** A new pack author wanting the organisation's shared defaults must copy every field from a sibling pack. Mistakes happen.
-3. **Hidden assumptions.** When `acme-eng` declares `compliance.mode: hard`, is that intentional or inherited from the organisation's base? Without an explicit `extends:` chain, the answer is invisible.
-
-Inheritance solves all three:
-- Drift: shared defaults change in one place.
-- Burden: new pack declares only what differs.
-- Visibility: `extends: acme-base` is the operator's explicit statement of inheritance intent.
-
-## The model
-
-```
-_default                  ← Lintel's neutral skeleton (resolver fallback)
-   ↑
-   │ (NOT extends — _default is the resolver's fallback layer,
-   │  not a parent in the extends chain)
-   │
-acme-base                 ← organisation-wide base
-   ↑
-   │ extends: acme-base
-   │
-acme-eng                  ← team-specific
-   ↑
-   │ extends: acme-eng
-   │
-foo-customer              ← (future) customer-specific
-```
-
-Two distinct mechanisms:
-- **`extends:` chain** — operator-declared inheritance from one pack to another. Walked by `_resolve_extends_chain` in the resolver.
-- **`_default` fallback** — resolver's last-resort layer for fields the active chain doesn't declare. Three-layer fallback per [pack-resolver.md](pack-resolver.md).
-
-These are NOT the same. A pack that extends nothing still gets `_default` as a fallback layer; a pack that extends `acme-base` gets the explicit `acme-base → child` merge PLUS `_default` as the last-resort fallback for anything still missing.
-
-## Shallow merge semantics
-
-When the resolver primes the cache for pack `acme-eng` (which extends `acme-base`), it walks the chain root → leaf and merges manifests into a single resolved cache file:
-
-1. Start with `acme-base/pack.yaml` content
-2. For each top-level key in `acme-eng/pack.yaml`, **replace the corresponding block from the cache wholesale**
-3. Write the merged result to `${LINTEL_HOME}/sessions/<session>-pack-cache.yaml`
-
-Top-level keys in pack manifests include: `voice`, `compliance`, `navigation`, `persona`, `roles`, `brand`, `knowhow`, `lessons`, `opinions`, `brief_forge_handoffs`.
-
-**Shallow means:** if `acme-eng` declares `voice:` at all, it REPLACES `acme-base`'s entire voice block. It does not deep-merge sub-fields.
-
-### Why shallow, not deep
-
-Deep-merge produces surprising hybrid states. Consider:
+Each child top-level key replaces the parent's **entire** value:
 
 ```yaml
-# acme-base
-voice:
-  default_tier: mixed
-  gates_active: [voice_critic]
-
-# acme-eng
-voice:
-  default_tier: internal
+# example-base/pack.yaml
+name: example-base
+version: 1.0.0
+voice: {default_tier: mixed, gates_active: [voice-check]}
+compliance: {mode: hard, hooks: [evidence-check]}
+navigation: {default_workflow: controlled}
 ```
 
-**Deep merge** would produce `{default_tier: internal, gates_active: [voice_critic]}` — but `voice_critic` was the base pack's choice, and the operator authoring `acme-eng` may not have considered it. They get a hybrid they didn't write.
-
-**Shallow merge** produces `{default_tier: internal}` — and if `acme-eng` wants `voice_critic` too, they list it explicitly. The operator's pack manifest is what runs; no hidden inherited residue.
-
-The cost: every block-level field in a child pack must restate what the operator wants from the parent. The benefit: the child manifest is self-documenting. You read `acme-eng/pack.yaml` and see exactly what is active.
-
-### Evaluator lists follow the same rule
-
-Declaring `brief_forge_handoffs` replaces that entire parent block, including its
-evaluator lists. Lists are not concatenated or deduplicated. A child adding an
-evaluator must declare every hand-off setting and evaluator it intends to retain.
-Omitting the whole block inherits it unchanged. This is the same whole-block rule
-described in [the architecture](../architecture.md#resolution-and-inheritance).
-
-## Chain depth + cycle detection
-
-Maximum ancestry: ten parent links. The resolver rejects a chain needing an
-eleventh link instead of loading a truncated policy.
-
-Cycle detection: if pack A declares `extends: B` and pack B declares `extends: A` (or any longer cycle through the chain), `validate_pack` refuses activation and falls back to `_default`. Audited.
-
-Cycle test: `tests/unit/pack-resolver-fallbacks.sh` scenario 4.
-
-## Three-level chain example
-
-`foo-customer extends acme-eng extends acme-base`:
-
-1. `_resolve_extends_chain foo-customer` returns: `acme-base acme-eng foo-customer`
-2. Cache merge order: acme-base contents → overlay acme-eng → overlay foo-customer
-3. Each later overlay wholesale-replaces matching top-level blocks
-
-If `foo-customer` declares no `voice:` block, the cache retains `acme-eng`'s voice. If `foo-customer` declares `voice: {default_tier: custom}`, the cache shows only `{default_tier: custom}` (acme-base AND acme-eng voice blocks both gone).
-
-Tested by `tests/unit/pack-inheritance-depth-3.sh`.
-
-## Missing parent + missing fields
-
-Two distinct failures:
-
-**Missing parent:** `acme-eng extends acme-base` but `acme-base/pack.yaml` doesn't exist. `validate_pack acme-eng` fails (audited), resolver falls back to `_default`.
-
-**Missing field in chain:** the resolver uses that field's neutral `_default`
-value; `voice.corpus`, for example, resolves to `null`. Explicit `null`, `false`
-and `[]` remain explicit. A field absent from both the effective pack and the
-neutral pack returns empty. Required policy fields must exist in the effective
-ancestry before activation; fallback does not make an incomplete policy valid.
-
-## Audit trail
-
-Cache priming with an inheritance chain logs the chain to `${LINTEL_HOME}/audit/pack-resolver.jsonl`:
-
-```jsonl
-{"ts":"2026-05-29T15:00:00Z","kind":"pack_resolver_cache_primed","msg":"pack=acme-eng chain=acme-base acme-eng session=42071"}
+```yaml
+# example-team/pack.yaml
+name: example-team
+version: 1.0.0
+extends: example-base
+voice: {default_tier: internal}
 ```
 
-The chain is recorded by the shared audit writer and can be inspected in the pack
-resolver audit log. `LINTEL_AUDIT_DIR` can select a different audit destination.
+The team inherits the base compliance and navigation blocks. Its voice block does
+**not** retain `voice-check`. The omitted `voice.gates_active` instead uses the
+neutral `[]` field default, identified as neutral fallback in provenance.
+Required fields validate in the effective ancestry before those neutral defaults
+are considered; an explicit `compliance: {hooks: []}` is invalid, not repaired by
+adding a neutral `compliance.mode`.
 
-## When inheritance is the wrong tool
+The same applies to `brief_forge_handoffs`. Declaring that block replaces every
+parent handoff setting. Lists are not concatenated or deduplicated. A child adding
+an evaluator must restate all settings/evaluators it intends to retain.
 
-Inheritance is for shared baseline values across packs that have a common ancestor concept (an organisation's shared defaults, customer-engagement work). It is NOT for:
+Explicit `null`, `false`, `""`, `[]` and quoted scalar types survive. An explicit
+null block stays null rather than being recursively repopulated from defaults.
+A missing field absent from both effective and neutral data returns empty through
+the legacy shell accessor. Typed accessors distinguish missing from explicit null.
 
-- **Per-workflow overrides** — use the supported `--mode` or phase-range flags on `/li:cycle`
-- **One-off field tweaks** — edit the pack manifest directly
-- **Pack composition** — Lintel v4.0 does not support multi-parent inheritance. A pack has 0 or 1 parents. Multi-parent (diamond inheritance) is rejected by `validate_pack` if attempted via two `extends:` declarations.
+## Ancestry is not neutral fallback
 
-## Integration points
+`_default` is not an implicit parent. A pack can explicitly extend it, but ordinary
+neutral missing-field fallback is separate from declared ancestry. For a three-level
+chain, `_resolve_extends_chain example-team` returns its actual root-to-leaf names.
+`profile_field_provenance compliance.mode` identifies the exact owning manifest,
+version, SHA-256 and whether the field came from neutral fallback.
 
-**Reads:**
-- `packs/<name>/pack.yaml` (one or more, depending on chain depth)
+One structured representation handles merge, values, provenance, compatibility and
+context identity. The shell API is an adapter; consumers must not merge text or parse
+`PACK_CACHE_FILE`. See [pack resolution](pack-resolver.md) for the stable reference.
 
-**Writes:**
-- `${LINTEL_HOME}/sessions/<session>-pack-cache.yaml` (merged manifest)
-- `${LINTEL_HOME}/audit/pack-resolver.jsonl` (chain audit)
+## Invalid or changed parents
 
-**Public functions in lib/pack-resolver.sh:**
-- `_resolve_extends_chain <name>` — returns space-separated chain (root → leaf)
-- `_merge_packs_into_cache <chain>` — writes merged manifest to cache
-- (Both are private-by-convention but useful from inheritance tests.)
+`validate_pack <name>` rejects an invalid chain without activating anything.
+A failed required selection never becomes neutral/advisory success. Only an
+initial **optional legacy preference** may use diagnostic neutral fallback.
+Neutral first use without a requested profile remains valid.
 
-## Anti-patterns
+Every bound read verifies each ancestor's content, independent of timestamps.
+A deleted parent, a same-mtime edit, or a source/selection change blocks with
+`PROFILE_DRIFT`. Explicit rebind validates a new generation and retains the old
+one for evidence; dependent work must be replanned/reviewed. This replaces the
+historical cache deletion/pointer-ignore behavior under ADR-0029.
 
-- **Deep-merge expectation** — chain inheritance is shallow; child block replaces parent block
-- **Diamond inheritance** — `extends:` is a single string, not a list
-- **Inheritance for one-off overrides** — use mode/flag instead
-- **Skipping the explicit `extends:`** — implicit inheritance through naming convention is brittle
-- **Editing parent to fix child** — if `acme-eng` needs `voice.gates_active: [brand_alignment]`, declare it in `acme-eng/pack.yaml`, not by sneaking it into `acme-base`
+Compatibility also belongs to each manifest: a child cannot overwrite an
+incompatible parent's product or capability requirement. Pack release versions,
+schema versions and installed product versions are different axes.
+
+## Verification and limits
+
+`tests/unit/pack-inheritance-depth-3.sh` covers depth, whole-block replacement,
+neutral provenance and cycles. `tests/unit/enterprise-pack-resolution.sh` adds
+quoted/null/list semantics and malformed input. The Universal profile integration
+test covers deleted and same-mtime-edited parents across fresh processes.
+
+Inheritance is for shared identity/policy blocks, not an implicit per-task override
+or multi-parent composition. Workflow flags select workflows; they do not rewrite
+the bound corporate policy. To change one team, change its declared block rather
+than silently changing a shared parent's meaning for every sibling.

@@ -1,8 +1,9 @@
 # Lintel pack schema v1 — declarative contract for what a pack manifest may declare.
 #
 # Authoring reference, read by the wiki generator and pack-validation skill.
-# Runtime checks are implemented in lib/pack-resolver.sh; it does not interpret
-# this file as an executable YAML schema. See validation behavior below.
+# Runtime checks are implemented once in lib/profile_context.py, with shell
+# adapters in lib/pack-resolver.sh. Only runtime_compatibility below is consumed
+# as data; the remaining field descriptions are an authoring reference.
 #
 # Versioning: schema_version is a string. Major bumps are breaking. Minor bumps
 # are additive. Phase 2 ships v1.
@@ -11,18 +12,25 @@
 
 schema_version: "1"
 schema_kind: pack-manifest
-as_of: 2026-09-08
+as_of: 2026-09-20
+
+# Feature contracts are not host capability claims or public product versions.
+runtime_compatibility:
+  schema_versions: ["1"]
+  capabilities:
+    pack-inheritance: "1.0.0"
+    profile-context: "1.0.0"
+    extension-pack: "1.0.0"
 
 # Authoring contract for a complete pack. A derived pack may inherit policy
 # blocks; runtime requires name/version per manifest and effective required
-# policy fields. Legacy manifests may omit requires_lintel/schema_version.
+# policy fields. Legacy manifests may omit schema_version.
 required_fields:
   - name              # string: unique identifier (filesystem-safe, kebab-case)
   - version           # string: semver, e.g. "1.0.0"
   - voice             # block (see voice schema)
   - compliance        # block (see compliance schema)
   - navigation        # block (see navigation schema)
-  - requires_lintel   # string: semver range, e.g. ">=4.0.0"
 
 # Optional top-level fields a pack may declare.
 optional_fields:
@@ -38,6 +46,10 @@ optional_fields:
   - description       # string: one-line operator-facing summary
   - maintainers       # list[string]: GitHub handles or contact pointers
   - extension         # optional executable-surface declaration (ADR-0018)
+  - schema_version    # string: supported manifest schema; absent means legacy "1"
+  - requires_lintel   # legacy: exact ">=4.0.0" is the historical pack-v1 marker
+  - requires_lintel_product  # string: actual public product semver constraint
+  - requires_capabilities    # mapping: feature ID -> feature-contract semver constraint
 
 # ─── Nested block schemas ──────────────────────────────────────────────────
 
@@ -147,19 +159,28 @@ extension:
 #
 # Pack-resolver invokes validate_pack() at SENSE Step 1:
 #   1. Manifest file exists
-#   2. Nonempty scalar name/version in each manifest
+#   2. Matching directory/name and semantic pack version in each manifest
 #   3. Required effective fields present after whole-block inheritance:
 #      voice.default_tier, compliance.mode, navigation.default_workflow
 #   4. Every parent exists, no cycle, at most ten parent links
 #   5. compliance.mode is hard/advisory/off; enabled extensions have namespace/workflow
 # Supported parsing syntax and limits: skills/pack-validate/SKILL.md.
-# Optional field types and schema/semver compatibility are not fully validated.
+#   6. Known control lists are scalar string lists; custom fields retain typed data
+#   7. Independent schema/product/feature compatibility for every manifest
+# This is not a general-purpose YAML schema engine.
 #
-# On failure: warn + audit + fall back to _default.
-# On success: cache merged manifest for session lifetime.
+# Required selection failure: error, no neutral fallback (ADR-0029).
+# Optional legacy pointer failure: diagnostic validated neutral fallback.
+# Invalid neutral baseline: error. No hardcoded emergency values.
+# Bound contexts verify content hashes on every read, including pointer/parents.
 
 # ─── Version compatibility ─────────────────────────────────────────────────
 #
-# Pack may declare `requires_lintel: ">=4.0.0"`. Runtime does not evaluate the
-# range. pack-validate reports compatibility as NOT VERIFIED until reviewed
-# against the installed version; it must not report an unexecuted check as PASS.
+# schema_version describes syntax, version identifies the pack release, and
+# requires_lintel_product compares against the source .claude-plugin/plugin.json.
+# Unknown product metadata cannot satisfy a declared product constraint.
+# requires_capabilities uses runtime_compatibility above, not host permissions.
+# Constraint grammar: full semver with =, ==, <, <=, >, >=; space/comma-separated
+# conjunctions. Unsupported ranges are errors, not approximately evaluated.
+# Historical requires_lintel: ">=4.0.0" means legacy pack-v1, NOT public v4+.
+# Other requires_lintel values require explicit migration to the new fields.

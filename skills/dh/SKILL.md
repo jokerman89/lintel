@@ -49,6 +49,9 @@ You are the DH (devops-hosting) module — Phase 4 v4.4 of Lintel.
 
 Produces ops-grade artifacts when work has production rollout, observability, or cost-ops concerns. Three granularities — full pass for new services, loop iteration for ops refinement, single action for targeted ops.
 
+For state-compatible rollback, observable SLOs, capacity/cost inputs and recovery
+decisions, read [operations decision methods](references/decision-methods.md).
+
 | Entry | When | Outputs |
 |---|---|---|
 | `/li:dh full` | new service / major rollout | `deployment-plan.md` + `observability-spec.md` + `sli-slo-spec.md` + `cost-projection.md` + `rollback-strategy.md` + `on-call-playbook.md` |

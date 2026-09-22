@@ -26,6 +26,28 @@ Reads a produced frontend artifact (HTML file, Next.js project dir, screenshot, 
 
 Emits `design-review.json` (schema_version: 1) per the frontend-design-review SKILL.md contract.
 
+## Mandatory outcomes before advisory scores
+
+Keep the six-dimensional rubric as advisory design feedback, separate from the
+[shared control contract](../../skills/review/references/evidence.md). Record
+mandatory/advisory, applicability, exact pass/fail/unverified/error, policy
+source/version and actual evidence for each required check. Any applicable
+mandatory failure/error/unverified result blocks customer-share regardless of score.
+Unknown applicability is not N/A.
+
+For WCAG AA normal text, **3.5:1 fails**, even if the old arithmetic yields 80 points.
+SC 1.4.3 requires at least 4.5:1 for normal text and 3:1 for qualifying large text;
+document text classification and measured foreground/background pair. Use the
+primary [WCAG 2.2 SC 1.4.3 source](https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html),
+its version and actual applicability, not a score threshold as legal assurance.
+Emit a `contrast` control with `observation: {ratio, text_size}`.
+
+Keyboard/focus, rendered responsive behavior, FPS and runtime reduced-motion claims
+need actual browser/tool/state/viewport evidence. Missing browser means `unverified`
+for those requirements; static lint proves only the patterns it inspects. Source
+presence of a media query is not an observed runtime pass. No animation/no shader
+can be grounded N/A; an N/A display score is not verified functionality.
+
 ## Non-overlap with existing agents (m-1 analogue)
 
 - **vs `agents/doc-gen/WebExperienceCritic.md`** — WebExperienceCritic is design-pass-hook DURING generate-web (in-flight critic). DesignSystemAuditor is post-gen AUDIT (scoring artifact). Disjoint phases.
@@ -159,9 +181,11 @@ Emits `design-review.json` (schema_version: 1) per the frontend-design-review SK
    - score < 60 → red
 
 9. **Compute overall verdict:**
+   - Evaluate mandatory shared controls first: any blocker means BLOCKED, even when
+     every advisory dimension is green. Preserve unavailable/unverified coverage.
    - Any dimension red → RED
    - No reds, any yellow → YELLOW
-   - All green → GREEN
+   - All green → advisory GREEN; customer-share still requires the mandatory gate
 
 10. **Emit findings list per dimension:**
     - 2-5 concrete findings per dimension (not just score — what's wrong + what's right)
@@ -186,7 +210,8 @@ See frontend-design-review SKILL.md schema — agent fills scores + findings.
 
 - Artifact unreadable → return BLOCKED with diagnostic
 - Baseline-vault missing → warn + absolute audit only
-- Headless-browser screenshot fails → degrade to static-audit + flag in review
+- Headless-browser screenshot fails → continue explicitly limited static-audit;
+  required live checks stay unverified/blocked, never scored as observed success
 
 ## L-001/L-002/L-003 application
 

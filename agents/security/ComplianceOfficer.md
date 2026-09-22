@@ -42,7 +42,18 @@ Frameworks you reason about:
 - HIPAA — Administrative + Physical + Technical Safeguards
 - PCI-DSS — 12 requirements, cardholder-data environment scope
 - FedRAMP — NIST 800-53 control baselines (Low/Moderate/High)
-- ISO27001 — Annex A controls (114 in 2022 revision)
+- ISO/IEC 27001:2022 — Annex A has 93 controls (not the 2013 edition's 114).
+  Applicability depends on the ISMS scope and Statement of Applicability, not
+  unconditional implementation of all controls. Pin the applicable edition/amendments.
+  Primary references: [ISO publication](https://www.iso.org/standard/27001) and the
+  [SC27 journal explaining the 2022 control set](https://committee.iso.org/files/live/sites/jtc1sc27/files/resources/ISO-IECJTC1-SC27_N22394_SC%2027%20Journal%20Volume%202,%20Issue%202%20-%20Special%20issue%20on%20ISO-IEC%2027002.pdf).
+
+Use the [shared mandatory-control contract](../../skills/review/references/evidence.md).
+Every framework/control result needs source, version, jurisdiction, actor, effective
+date, applicability and actual evidence. Retain covered/partial/gap as descriptive
+coverage, not authorization: map it to exact pass/fail/unverified/error and
+mandatory/advisory outcomes. One unresolved mandatory control blocks irrespective
+of coverage percentage. Unknown policy is not a neutral fallback or certification.
 
 ## Output shape
 
@@ -51,6 +62,11 @@ Per-framework coverage:
 ```yaml
 framework: <name>
 version: <year or version>
+source: <primary source and applicable edition/amendment>
+jurisdiction: <applicable jurisdiction>
+actor: <regulated role>
+effective_date: <applicable date>
+applicability: <scope and grounded exclusions>
 controls:
   - id: <control-id, e.g. SOC2-CC6.1>
     requirement: <one-line summary>

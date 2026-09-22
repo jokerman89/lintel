@@ -1,7 +1,7 @@
 ---
 name: perf-mode
 layer: foundation
-description: Activate the 1M context-budget mode for a session — the high-intensity preset for long, heavy phases.
+description: Advise on bounded working sets, context observations and checkpoint strategy for heavy phases; never changes model capacity.
 color: orange
 tools: Read, Write, Bash
 voice: internal
@@ -15,114 +15,61 @@ cli_support:
         strategy: auto-pick-recommended
 ---
 
-# /perf-mode
+# Perf mode
 
-Activates Performance Mode for the current session. Raises context budget ceiling from default (200k) to perf-mode level (800k default; configurable to 1M ceiling). Use for hard phases that genuinely need 800k+ tokens of loaded context.
+Keep `/perf-mode` as the resource-advice entry point for long integrations, multi-session
+consolidation and heavy deliverables. It does **not** activate a larger model window,
+install a context engine, change a host setting or promise a fixed dollar cost.
+Routine small edits do not need this additional planning.
 
-Outcome-based, not token-saving. Spend tokens where outcome density justifies it.
+## Inputs retained
 
-## When to use
+| Input | Actual effect |
+|---|---|
+| `--budget <N>` | Desired local working-set size for planning, not capacity |
+| `--ceiling <N>` | Local advisory upper bound; cannot override the host |
+| `--decay-policy <prompt-operator|aggressive|conservative|retain-all>` | Advice on future retrieval/checkpointing, not deletion of conversation |
+| `--cost-estimate` | Reports unknown without actual pricing and billable-usage inputs |
+| `--off` | Ends this advisory preference; active conversation is unchanged |
 
-- Multi-week project consolidation — load all prior session checkpoints + design docs
-- Parallel decomposed task — multiple sub-tasks need shared deep context
-- Warmup-heavy integration moment — preload entire project state before authoring
-- Critical deliverable prep — context window must hold the full source set
+Ask through the actual host question mechanism only when a needed decision is missing.
+Lack of a specifically named question tool is not permission to choose a costly setting.
 
-## When NOT to use
+## Shared observation and advice
 
-- Routine work — default 200k is more than enough
-- Cost-sensitive sessions — perf-mode token spend is ~5x default ($15-30/session)
-- Light edits, single-file changes — perf-mode is overkill
-- Tests + CI runs — predictable budget needed
-
-## Inputs
-
-- `--budget <N>` — explicit budget override (default: from config `perf_mode_budget`)
-- `--ceiling <N>` — raise/lower the max ceiling for this session (default: from `max_budget`)
-- `--decay-policy <prompt-operator|aggressive|conservative|retain-all>` — set default decay for this session
-- `--cost-estimate` — show projected token spend + USD estimate without activating
-- `--off` — deactivate perf-mode, return to default budget
-
-## Workflow
-
-1. **Preflight check.** Verify context engine is enabled (`context.enabled: true` in config). If not: warn + offer to enable.
-2. **Cost estimate (if `--cost-estimate`).** Compute projected spend based on budget + average session token-velocity history. Show estimate + skip activation.
-3. **Activate.** Write to `.claude/runtime/sessions/$SESSION_ID/perf-mode-active`:
-   ```yaml
-   active: true
-   activated_at: 2026-05-27T21:30:00Z
-   budget: 800000
-   ceiling: 1000000
-   decay_policy: prompt-operator
-   activated_by: operator-explicit
-   ```
-4. **Surface to operator.** Print activation banner. Subsequent watcher warnings use perf-mode thresholds.
-5. **Subsequent skill invocations** check perf-mode-active file and apply perf-mode budget if no explicit `context_phases` declared.
-6. **Cost tracking.** Audit log entry recording activation. Monthly cost summary report picks this up.
-
-## Report format
-
-```
-⚡ Perf-mode ACTIVE for session 47821-1716926400
-
-Budget:        800,000 tokens (vs default 200,000)
-Ceiling:       1,000,000 tokens (max)
-Decay policy:  prompt-operator
-Estimated spend:
-  At average velocity (50k tokens/hour): ~16 hours runway
-  USD estimate (Claude Sonnet pricing):  ~$24-48 for full perf-mode session
-
-Active phases will use perf-mode budget unless explicitly declared otherwise.
-
-Deactivate: /perf-mode --off
-View state: /context-budget
-Monitor:    /context-budget --watch
+```bash
+source_root="${LINTEL_SOURCE_ROOT:?Set the trusted Lintel source root}"
+source "$source_root/bin/_context.sh"
+context_perf "$@"
 ```
 
-## Compliance integration
+Pass `--bytes` from the bounded source manifest. Host capacity/usage arguments have the
+same semantics as `/li:context-budget`: `--capacity --capacity-source` must be actually
+reported for this session; `--used --usage-source` needs an observation or a labeled
+`--usage-kind estimated` heuristic. Do not infer a capacity from the chosen model's name
+or a saved preference.
 
-- Activation logged: `.claude/runtime/audit/perf-mode-activations.jsonl`
-- Cost tracking aggregates perf-mode sessions to monthly summary
-- No production-mutation gate — perf-mode is local resource allocation
+The helper returns resource advice without writing any host configuration or activation
+marker. There is no automatic reader of historical `perf-mode-active` files: leave them
+as historical preferences, never evidence of activation. No watcher, billing aggregator,
+phase engine or decay control is implicitly enabled.
 
-## Failure modes
+## Make the advice useful
 
-- **Context engine disabled in config** — warn + offer to enable, then retry
-- **Already active in this session** — show current state, no-op
-- **Budget request exceeds max_budget ceiling** — refuse + show ceiling. Operator edits config to permanently raise ceiling.
-- **`--off` when not active** — no-op + confirmation
+1. Name the deliverable and the smallest source set required for its next phase.
+2. Preview literal paths or declared globs with `/li:context-warm`, including source sizes.
+   Do not recommend `--pattern all` as a whole-repository load.
+3. Show known active usage and capacity separately from planned inputs and cumulative
+   billable tokens. Unknown capacity stays unknown even with `--budget 800000`.
+4. Break oversized work into evidence-preserving checkpoints. Retain failure context
+   for debugging, decisions for integration, and exact source identities for review.
+5. If cost matters, obtain current provider/model pricing and actually billable input,
+   output/cache observations before calculating an explicitly labeled estimate. Do not
+   derive dollars or hours of runway from a requested context budget.
+6. Suggest model/host configuration changes only through a real available control and
+   within current authorization. Describe unavailable controls as unavailable.
 
-## Examples
-
-**Standard activation:**
-```
-> /perf-mode
-⚡ Perf-mode active. 800k budget, ~16 hour runway.
-```
-
-**Cost estimate before committing:**
-```
-> /perf-mode --cost-estimate
-At average velocity: 16 hours runway. Estimated $24-48 cost.
-[Skill exits without activating]
-```
-
-**Custom budget:**
-```
-> /perf-mode --budget 600000 --decay-policy aggressive
-⚡ Perf-mode active. 600k budget, aggressive decay default.
-```
-
-**Deactivate:**
-```
-> /perf-mode --off
-✓ Perf-mode deactivated. Returning to default 200k budget for remaining session.
-```
-
-## See also
-
-- `CONTEXT-ENGINE.md` — engine semantics
-- `/context-budget` — view + modify state
-- `/context-warm --pattern` — explicit declared-pattern preload
-- `/context-budget --watch` — passive monitoring
-- `ContextBudgetAdvisor` — Layer 4 agent suggests perf-mode for unstructured tasks
+Report the selected sources, local advisory preferences, observation provenance, unknowns
+and checkpoint recommendation. `host_settings_changed` is false; `--off` cannot restore
+a fictional "default 200k" limit. `/li:context-cool` affects future reads only, while
+`/li:context-save` and selective restore retain useful continuity.

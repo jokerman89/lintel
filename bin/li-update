@@ -2,6 +2,11 @@
 # li-update — update Lintel plugin across all detected CLIs
 #
 # Usage: li-update [--dry-run]
+# component: li-update
+# implements: ADR-0008
+# intent: .claude/plans/universal-implementation/packages/P01.md
+# constraints: preserve subprocess failure while continuing independent hosts
+# last_intent_review: 2026-09-20
 
 set -euo pipefail
 
@@ -31,6 +36,8 @@ Per-CLI update commands run:
 
 Note: Claude Code, Codex, and Cursor update via in-CLI commands —
       this script just lists them for you to run.
+      Copilot falls back to a forced install only when its update fails.
+      An unrecovered source update, host update or discovery failure exits nonzero.
 EOF
       exit 0 ;;
     *) echo "Unknown arg: $1" >&2; exit 2 ;;
@@ -38,13 +45,37 @@ EOF
 done
 
 LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
+UPDATE_STATUS=0
+
+record_failure() {
+  if [ "$UPDATE_STATUS" -eq 0 ]; then UPDATE_STATUS="$1"; fi
+}
 
 run() {
   if [ "$DRY_RUN" = "1" ]; then
     echo "  [dry-run] $*"
   else
     echo "  → $*"
-    "$@" || echo "    ⚠ failed (continuing)"
+    local status
+    if "$@"; then
+      return 0
+    else
+      status=$?
+      printf '    WARN: failed (exit %s): %s\n' "$status" "$*" >&2
+      return "$status"
+    fi
+  fi
+}
+
+plugin_installed() {
+  local plugins status
+  if plugins=$("$@" 2>&1); then
+    printf '%s\n' "$plugins" | grep -qi "li"
+  else
+    status=$?
+    printf '  WARN: discovery failed (exit %s): %s\n%s\n' "$status" "$*" "$plugins" >&2
+    record_failure "$status"
+    return 1
   fi
 }
 
@@ -57,9 +88,12 @@ if [ -d "$LINTEL_HOME/.git" ]; then
   if [ "$DRY_RUN" = "1" ]; then
     echo "  [dry-run] cd $LINTEL_HOME && git fetch && git pull --ff-only"
   else
-    cd "$LINTEL_HOME"
-    git fetch -q origin 2>/dev/null || echo "  ⚠ fetch failed"
-    git pull --ff-only -q 2>/dev/null && echo "  ✓ updated" || echo "  ⚠ pull failed (manual intervention may be needed)"
+    if (cd "$LINTEL_HOME" && run git fetch -q origin && run git pull --ff-only -q); then
+      echo "  ✓ updated"
+    else
+      record_failure "$?"
+      echo "  WARN: scaffolding update failed (manual intervention may be needed)" >&2
+    fi
   fi
 else
   echo "  ⚠ $LINTEL_HOME not a git repo — skipping scaffolding update"
@@ -72,26 +106,26 @@ echo "## Per-CLI plugin updates"
 
 # Gemini (scriptable)
 if command -v gemini >/dev/null 2>&1; then
-  if gemini extensions list 2>/dev/null | grep -qi "li"; then
+  if plugin_installed gemini extensions list; then
     echo "gemini:"
-    run gemini extensions update li
+    run gemini extensions update li || record_failure "$?"
   fi
 fi
 
 # Copilot CLI (scriptable)
 if command -v copilot >/dev/null 2>&1; then
-  if copilot plugin list 2>/dev/null | grep -qi "li"; then
+  if plugin_installed copilot plugin list; then
     echo "copilot cli:"
-    run copilot plugin update li@jokerman-lintel 2>/dev/null || \
-      run copilot plugin install li@jokerman-lintel --force
+    run copilot plugin update li@jokerman-lintel || \
+      run copilot plugin install li@jokerman-lintel --force || record_failure "$?"
   fi
 fi
 
 # Droid (scriptable)
 if command -v droid >/dev/null 2>&1; then
-  if droid plugin list 2>/dev/null | grep -qi "li"; then
+  if plugin_installed droid plugin list; then
     echo "droid:"
-    run droid plugin update li 2>/dev/null || true
+    run droid plugin update li || record_failure "$?"
   fi
 fi
 
@@ -109,4 +143,8 @@ if command -v cursor >/dev/null 2>&1; then
 fi
 
 echo ""
+if [ "$UPDATE_STATUS" -ne 0 ]; then
+  echo "ERROR: one or more updates or discovery commands failed (exit $UPDATE_STATUS)." >&2
+fi
 echo "Run 'li-doctor' afterward to verify all CLIs on latest version."
+exit "$UPDATE_STATUS"

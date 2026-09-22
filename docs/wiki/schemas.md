@@ -7,7 +7,7 @@ Source: `lib/pack-schema.yaml`
 
 schema_version: 1
 
-Required top-level fields: name, version, voice, compliance, navigation, requires_lintel
+Required top-level fields: name, version, voice, compliance, navigation
 
 See [pack-defaults.md](../concepts/pack-defaults.md) and [pack-inheritance.md](../concepts/pack-inheritance.md).
 
@@ -16,6 +16,6 @@ Source: `lib/envelope-schema.yaml`
 
 schema_version: 1
 
-Structure: HEAD (6 required) + BODY (content_type discriminator) + TAIL (4 required)
+Structure: HEAD (6 required) + BODY (content_type discriminator; 2 required) + TAIL (4 required)
 
 See [envelope.md](../concepts/envelope.md).

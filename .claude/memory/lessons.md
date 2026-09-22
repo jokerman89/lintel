@@ -684,3 +684,134 @@ every host has identical tools or that a manifest proves runtime support.
 - Context: operator explicitly requires all Swarming branch work to be preserved as far as feasible; swarming or practical facilitation is a desired capability.
 - Risk to prevent: treating review findings, hybrid integration or missing host concurrency as a reason to discard the initiative or defer it indefinitely. No branch work was changed or removed.
 - Rule: preserve implementation, knowledge, tests, reports, history and useful entry points; trace every valuable delta into the reconciled result. Adapt execution to native isolated, sequential or explicit external/manual handoff modes. Keep true independent review requirements visible. Escalate an actual unavoidable loss with concrete alternatives before dropping value.
+
+## L-033 - Preserve declared runtime and dependency contracts
+
+**Date:** 2026-09-20
+
+**Context:** The Universal implementation introduced shared review/profile/envelope helpers.
+One candidate unnecessarily raised the documented Python 3.9 floor to 3.10; another initially
+relied on a YAML library available on the development machine without establishing consumer
+availability. Both assumptions were corrected before integrated acceptance.
+
+**Rule:** A shared helper must preserve the published runtime floor unless an explicit
+compatibility decision changes it. Developer-installed packages are not proof of clean-client
+dependencies. Keep default paths dependency-light, declare optional dependencies and their
+failure boundary, and test missing-dependency cases before output or side effects.
+
+**Verification:** Grammar checks are not a real minimum-runtime execution. Record those levels
+separately, propagate loader/parser failures, and run producer/consumer tests against the same
+canonical schema instead of independently interpreting message examples.
+
+## L-034 - Test oracles must follow the producer contract
+
+**Date:** 2026-09-20
+
+**Context:** Universal P01's metadata repair and an initial reviewer oracle treated fractional
+p95 budgets as invalid, although the unchanged producer declared `<number>`. Passing that
+oracle narrowed useful input instead of fixing the defective original regex.
+
+**Rule:** Trace accepted values and ownership to the authoritative producer/requirement before
+changing a consumer or an assertion. Green tests cannot justify narrowing the contract through
+new documentation. Correct an overrestrictive oracle openly, retain the historical report,
+and add source-grounded positive, malformed and decoy cases. Verify real consumers and retained
+user value, not agreement between two copies of the same mistaken assumption.
+
+## L-035 - Preserve the install-time dependency floor
+
+**Date:** 2026-09-20
+
+**Context:** P10 proposed sharing Python transaction helpers across existing native bare
+installers and the Python-based repository adapter. The operator explicitly chose
+"keep installation without Python"; no installer prerequisite had been changed.
+
+**Rule:** A runtime helper's prerequisite does not authorize adding that dependency to
+installation. Keep bare Bash/PowerShell installation usable without Python, document
+later operation-specific prerequisites, and test the no-Python path. Share the ownership
+contract and behavioral cases across necessary native implementations rather than
+silently raising the installation floor or automatically installing an interpreter.
+
+## L-036 - Scope fixture Git isolation to fixture checks
+
+**Date:** 2026-09-20
+
+**Context:** Joined P05 tests passed with global/system Git configuration disabled
+for synthetic repositories. A later source diff check inherited that environment
+and treated the real Windows checkout's CRLF files as changed, returning a failed
+aggregate despite the passing test commands.
+
+**Rule:** Separate fixture isolation from source-checkout verification. Use the real
+checkout configuration or immutable Git-byte/EOL comparisons for source checks.
+Record each command and aggregate exit accurately; never normalize source files or
+weaken assertions merely to turn an environment-induced diagnostic green.
+
+## L-037 - Verify hook-test home isolation before execution
+
+**Date:** 2026-09-21
+
+**Context:** P08 ran cycle-continuity.sh without an outer synthetic home. Its direct
+session-digest calls could use Git Bash's USERPROFILE-derived home and inspect or
+initialize user-global profile, jobs and audit state. Actual effects were not verified;
+the worker stopped and the run was excluded from authorized evidence.
+
+**Rule:** Before tests that invoke hooks or global-path helpers, construct and verify
+per-process HOME, USERPROFILE, LINTEL_HOME and all derived pack, audit, profile and
+registry paths inside the explicit fixture; clear inherited redirects. Unset values
+are not isolation. After a boundary incident, stop and escalate before continuing.
+
+**Recovery authority:** the operator approved synthetic-only continuation and rerunning
+affected checks, with no real-home access or rollback. That approval does not establish
+what the invalid run did, authorize inspection/recovery, or make its results valid.
+
+**Reviewer follow-up, 2026-09-22:** a P08 direct `bind_work` comparison ran in the
+outer reviewer Python process rather than its verified child. q02's apparent 47/47
+was excluded; effects remain unknown. The isolation boundary must cover EVERY
+product call, including inline comparisons and diagnostic imports, not just shell
+children. Keep parent collection code data-only or give it the same explicit
+verified synthetic environment before any product execution.
+
+## L-038 - Reconcile external-tool limits before extending an acceptance oracle
+
+**Date:** 2026-09-21
+
+**Context:** Additional P10 long-root diagnostics required Git itself to initialize
+repositories beyond its observed setup boundaries, although the original installer/
+recovery cases were already passing builder checks. Repeated bounded flag, spelling
+and fixture changes failed before the intended Git verification could run.
+
+**Correction:** The operator chose documented pre-write refusal for the observed
+Git limitation and continuation of the remaining fixes, not expanded Git support.
+Primary Git release source confirmed distinct setup and pre-configuration boundaries.
+
+**Rule:** Separate the adapter's owned I/O obligation from an external executable's
+capability. Check the producer contract/source before repeatedly enlarging a new
+oracle or trying configuration variants. Preserve original required dimensions and
+all failed evidence; never silently skip verification or label an unavailable host
+operation successful. A changed support boundary needs explicit authority, accurate
+diagnostics, negative preservation evidence and independent review.
+
+**Product-focus correction, 2026-09-21:** the operator challenged why path handling
+had become the apparent deliverable instead of useful team-ready skills. The initial
+default-installation failures needed repair; the subsequent compatibility and fixture
+work consumed disproportionate coordination. Tie each new blocker to an original
+user outcome before opening another repair card. Finish the already bounded safe
+installation/workflow corrections, then advance dependency-ready skill content and
+client experience. Infrastructure verification supports that outcome; it must not
+become a separate, expanding product. This does not waive existing safety or review gates.
+
+## L-039 - Name the actual nine-phase lifecycle
+
+**Date:** 2026-09-21
+
+**Context:** The operator challenged my "plan -> build -> resume" shorthand because
+it sounded like replacing Lintel's established workflow.
+
+**Correction:** The canonical cycle is SENSE -> SCOPE -> DEFINE -> DISCOVER -> PLAN
+-> BUILD -> REVIEW -> SHIP -> CAPTURE. Resume returns to the appropriate saved phase;
+it is not a phase or an alternative three-step architecture. The current source
+and frozen workflow candidate both retain that declaration.
+
+**Rule:** Distinguish the narrow surfaces being repaired from the product lifecycle.
+Use the complete canonical names when describing the cycle, preserve documented
+presets/entry points, and do not imply an architectural change through shorthand.
+Implementation or delivery authorization does not authorize replacing the lifecycle.

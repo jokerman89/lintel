@@ -1,182 +1,85 @@
 ---
 name: cli-fingerprint
 layer: foundation
-description: Detect which CLI is running Lintel — env-var → process → tool-probe → config fallback.
+description: Use to identify the current CLI, desktop, IDE or cloud surface and inspect its actual tools without inferring capability from a vendor name.
 color: blue
 tools: Read, Bash
 voice: internal
-cli_support:
-  - cli: claude-code
-    level: full
-  - cli: codex
-    level: full
-  - cli: copilot-cli
-    level: full
-  - cli: copilot-app
-    level: full
+cli_support: [claude-code, codex, copilot, cursor, gemini, opencode, droid]
 ---
 
-# /li:cli-fingerprint
+# Client fingerprint
 
-CLI detection runtime that feeds the portability shim. **Foundational** — every other skill's degradation decision depends on knowing which CLI is currently running.
+Identify a surface and bind operations, not a vendor-wide support tier. Use the shared
+reader in `lib/client_capabilities.py`; this skill is instruction-driven, not an automatic
+process detector or hidden global cache.
 
-P1 fix T2 (eng-review): Phase B sub-step 0. Without reliable detection the shim layer is guessed.
+## Inputs and authority
 
-Detected IDs (the enum): `claude-code`, `codex`, `copilot`, `copilot-cli`, `copilot-app`, `copilot-vscode`, `copilot-cloud`, `copilot-coding-agent`, `cursor`, `gemini`, `opencode`, `droid`. For capability-tier lookups the ID is normalized onto the 8 rows of `lib/cli-tiers.yaml` via `cli_tier_normalize` (`lib/cli-tiers.sh`): `copilot-cli`/`copilot-app` → `copilot`; anything unrecognized → `other`. That mapping is what lets `/li:welcome`'s honest-tier banner reach every row.
+An explicit current-host declaration or host-provided session metadata is strongest.
+`LINTEL_CLI` may be an operator hint, but cannot grant a tool or permission. `--declare`
+means select the surface for this session; it does not write a personal configuration file.
+`--force-redetect` means discard the prior declaration and inspect current evidence again.
 
-## When to use
+Use exact IDs from:
 
-- Session start (auto-run by `/help` and other entry skills)
-- Operator unsure which CLI Claude / agent is actually running in
-- Debugging shim behavior ("why did this skill use degraded path?")
-- After CLI install/update — verify detection still picks the right one
+```bash
+python3 "$LINTEL_SOURCE_ROOT/bin/li-client-capabilities.py" list
+python3 "$LINTEL_SOURCE_ROOT/bin/li-client-capabilities.py" show --client "$surface"
+```
 
-## When NOT to use
+Set the source to the trusted checkout/bundle, not whichever repository happens to contain
+a helper with the same name. Registry aliases such as `codex` and `copilot` select CLI only;
+`copilot-app`, `copilot-vscode` and `copilot-cloud` never collapse to that CLI. `other` is an
+explicit unidentified/manual route. A misspelled requested surface is an error.
 
-- Inside a skill that already received its CLI ID from session cache
-- Test fixtures with mock CLI ID (use `LINTEL_CLI=test` instead)
+## Procedure
 
-## Inputs
+1. Read the current host's supplied surface/session metadata and any explicit operator
+   declaration. Retain both the actual session ID and separately selected work map.
+   Resolve contradictory evidence before relying on a client-specific API.
+2. Treat process names and installed-client folders only as weak hints. A desktop app can
+   host a CLI engine. Do not inspect tokens, credential environment variables or private
+   account settings. Having a binary installed does not mean it runs this session.
+3. Inspect the actual tool inventory, including deferred-tool discovery where required.
+   Identify question, plan, file/shell/browser, delegation, isolation, memory/resume, hooks
+   and control operations by their schemas, not mandatory names such as `AskUserQuestion`.
+4. Read the registry's source, delivered and observed fields separately. Missing vendor
+   evidence is `unknown`; missing execution evidence is `not_run`. A documented feature
+   can still be unavailable or forbidden in this session.
+5. If needed, record a local session binding using the exact shape in
+   [the Universal adapter](../../shims/universal/ADAPTER.md). Run the real selector:
 
-- Optional `--force-redetect` — ignore session cache, re-run all detection steps
-- Optional `--declare <cli-id>` — operator-side manual declaration (writes to `~/.lintel/cli-id.txt`)
-- Optional `--verbose` — print the cascade evaluation step-by-step
-
-## Workflow
-
-1. **Check explicit env var first.**
    ```bash
-   if [ -n "${LINTEL_CLI:-}" ]; then
-     return "$LINTEL_CLI"
-   fi
+   python3 "$LINTEL_SOURCE_ROOT/bin/li-client-capabilities.py" resolve --session "$binding_file"
    ```
-   This is the highest-priority signal — operator pinned via shell init or per-invocation `LINTEL_CLI=codex command`.
 
-2. **Process inspection.**
-   - Check `$0` / `process.argv0` for known binary patterns:
-     - `claude-code`, `claude` → `claude-code`
-     - `codex`, `codex exec` → `codex`
-     - `copilot` → `copilot-cli`; the retired `gh copilot` extension is not evidence of the current agent CLI
-     - GitHub Copilot App native bundle paths → `copilot-app`
-     - `cursor`, `cursor-agent` → `cursor`
-     - `gemini` → `gemini`
-     - `opencode` → `opencode`
-     - `droid` → `droid`
-   - Check parent process tree (1 level up) for the same patterns. Some CLIs spawn shells that obscure $0.
+   The result is `declared-session-bindings`, with `executed: false`. It selects a route;
+   it does not prove tool execution, authority or independent review.
+6. Report the surface, actual version if available (otherwise unknown), identity source,
+   available and missing operations, permission restrictions and selected fallback.
+   Persist only non-sensitive evidence when continuity needs it, under project runtime
+   storage, never an invented global `cli-id.txt` runtime.
 
-3. **Tool-availability probe.**
-   - Check for CLI-specific env vars:
-     - `CLAUDE_CODE_VERSION` (or `ANTHROPIC_*`) → `claude-code`
-     - `CODEX_*` → `codex`
-     - `COPILOT_CLI` or an active Copilot process → `copilot-cli`; `GH_TOKEN` alone is not host evidence and must never be read or printed
-     - `CURSOR_TRACE_ID` (or other `CURSOR_*`) → `cursor`
-     - `GEMINI_CLI` / `GEMINI_*` → `gemini`
-     - `OPENCODE_*` → `opencode`
-     - `FACTORY_*` → `droid`
-   - Check for CLI-specific filesystem markers (all weak signals — could be stale installs):
-     - `~/.claude/config.json` exists → suggests `claude-code`
-     - `~/.codex/config.toml` exists → suggests `codex`
-     - `~/.cursor/` exists → suggests `cursor`
-     - `~/.gemini/settings.json` exists → suggests `gemini`
-     - `~/.config/opencode/` exists → suggests `opencode`
-     - `~/.factory/` exists → suggests `droid`
+## Degradation is useful
 
-4. **Operator-declared fallback.**
-   - Read `~/.lintel/cli-id.txt` if exists
-   - This is operator-set via `/li:cli-fingerprint --declare <cli-id>`
+An unknown host can still read the same plan, execute permitted work serially, export a
+package brief and resume from committed evidence. Missing a particular question-tool name
+does not block questions; use the available channel. A denied tool is not an invitation to
+bypass permission through shell or conversation.
 
-5. **Refuse + ask.**
-   - If all detection steps fail: print:
-     ```
-     Could not detect CLI. Lintel needs to know which CLI it's running in
-     to apply the correct shim behavior.
+Native delegation without attributable isolated writes selects serial work. Missing
+delegation selects durable manual handoff. Independent review remains outstanding until
+there is a separately attributable reviewer, not a second role played by the implementer.
 
-     Set LINTEL_CLI env var:
-       export LINTEL_CLI=claude-code
-       # or: codex / copilot-cli / copilot-app / cursor / gemini / opencode / droid
+## Recovery and compatibility
 
-     Or declare via skill:
-       /li:cli-fingerprint --declare <cli-id>
-     ```
-   - Exit 1.
+Malformed registry or bindings fail explicitly; repair the inputs rather than reporting
+success with empty capability data. A new host needs a distinct surface record, official
+sources for native outputs and consumer tests. No `.disabled` marker, model setting or
+plugin command is assumed.
 
-6. **Cache result.**
-   - Write detected CLI to `~/.lintel/sessions/$SESSION_ID/cli-id.txt`
-   - Subsequent skill invocations read cache instead of re-running detection.
-
-7. **Report.**
-
-## Report format
-
-```
-CLI fingerprint: claude-code
-
-Detection cascade:
-  Step 1 (env var LINTEL_CLI):     not set
-  Step 2 (process inspection):     match — process.argv0 contains "claude-code"
-  Step 3 (tool probe):             skipped (matched at step 2)
-  Step 4 (declared fallback):      skipped
-  Step 5 (refuse):                 skipped
-
-Cached to: ~/.lintel/sessions/47821-1716926400/cli-id.txt
-TTL: session
-Override: LINTEL_CLI=<other> in env, or /li:cli-fingerprint --declare <other>
-
-Shim behavior for this CLI:
-  AskUserQuestion: native
-  Agent tool:       native (Task tool)
-  Browser tool:     full
-  MCP:              full
-```
-
-## Compliance integration
-
-- CLI ID is not sensitive — Layer 2 rules don't apply.
-- Audit log entry per detection event: `.claude/runtime/audit/cli-detect.jsonl`. Helps debug "why is this skill using degraded path?".
-- Operator-declared override is logged with operator reason if provided.
-
-## Failure modes
-
-- **Detection cascade falls through to step 5:** refuse + clear instructions. Don't guess.
-- **Env var contains invalid CLI ID:** validate against the enum (`claude-code`, `codex`, `copilot`, `copilot-cli`, `copilot-app`, `copilot-vscode`, `copilot-cloud`, `copilot-coding-agent`, `cursor`, `gemini`, `opencode`, `droid`); reject unknown values with error.
-- **Cache file unreadable / corrupted:** delete cache + re-run detection. Should be transparent to operator.
-- **Process inspection finds multiple matches (claude-code + codex both in process tree):** prefer the one with shorter PID distance to current process. If tied, treat detection as uncertain and ask for or use the explicit host declaration; never prefer a vendor by popularity.
-- **Conflicting signals (env var says codex, process says claude-code):** env var wins. Log conflict to audit.
-
-## Examples
-
-**Standard session-start:**
-```
-> /li:cli-fingerprint
-✓ Detected: claude-code (via process inspection)
-Cached to session.
-```
-
-**Force redetect after CLI upgrade:**
-```
-> /li:cli-fingerprint --force-redetect --verbose
-[Step-by-step cascade printed]
-✓ Detected: codex (env var LINTEL_CLI=codex)
-```
-
-**Operator declares manually:**
-```
-> /li:cli-fingerprint --declare copilot-app
-Wrote ~/.lintel/cli-id.txt = copilot-app
-Subsequent detections will use this declared value (step 4) if no env var or process match.
-```
-
-**Refusal:**
-```
-> /li:cli-fingerprint
-✗ Could not detect CLI.
-[Instructions printed]
-```
-
-## See also
-
-- `lib/cli-tiers.sh` — `cli_tier_normalize` maps these IDs onto the 8 `lib/cli-tiers.yaml` rows for the honest-tier lookup (`/li:welcome`)
-- `CLI-SUPPORT-V2-SCHEMA.md` — schema this skill's output feeds
-- `~/.lintel/config.yaml` — operator overrides per-skill cli_support
-- `verify.sh --portability` — schema validation
-- Phase B design — full shim runtime that consumes detection
+The old `cli_tier_normalize`, `cli_tier_field`, `cli_tier_list` and table functions remain
+in `lib/cli-tiers.sh`. They use the same registry; static hints never authorize concurrency.
+Unknown legacy IDs produce a warned manual default, while the installer and explicit
+surface selector reject unknown IDs.

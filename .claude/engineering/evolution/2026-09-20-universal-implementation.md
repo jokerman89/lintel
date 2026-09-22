@@ -17,6 +17,19 @@ package execution. Reserve ADR-0027 for reconciled Swarming, ADR-0028 for Univer
 and evidence boundaries, and ADR-0029 for explicit required-profile behavior. Legacy entry
 points remain available unless a verified equivalent and migration are established.
 
+ADR-0030 records the operator's explicit no-Python installation boundary. P10 keeps
+native bare installation, shares a receipt contract and behavioral cases across host
+performers, and reuses owned-snapshot primitives only in already Python-based operations.
+The adapter retains its existing inventory and protected-file semantics. This is approved
+direction, not completed implementation or an independent acceptance claim.
+
+ADR-0031 separates pure filesystem spelling from caller-owned authority. The first
+repair unit reuses P07's representation logic for P03 without changing identities,
+formats or global settings; Git handling and fixture cleanup remain distinct. P10
+direct consumers follow an independently reviewed dependency under their original
+owner, avoiding concurrent edits to the installer engine. Failed joined evidence
+reopens the affected leaves and is not relabeled as historical success.
+
 ## Verification
 
 Per-package negative and preservation tests; independent package review; exact-result review

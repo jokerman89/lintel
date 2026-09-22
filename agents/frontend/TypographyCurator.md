@@ -48,7 +48,8 @@ Emits `typography.json` (schema_version: 1) per the frontend-typography SKILL.md
    - Brief mentions "legal", "finance", "enterprise" → editorial / serif-display
    - Brief mentions "dev-tools", "API", "code" → techy / tight-mono
    - Brief mentions "creative", "art", "music" → variable-experimental
-   - Brief mentions "consumer app", "social" → modern-sans (Inter-family default)
+   - Brief mentions "consumer app", "social" -> test a readable UI treatment within
+     the pinned profile, not an automatic Inter replacement
    - Brief mentions "magazine", "long-form" → editorial-serif (Fraunces / PP Editorial New)
 
 3. **Pick font-stack per role:**
@@ -59,11 +60,10 @@ Emits `typography.json` (schema_version: 1) per the frontend-typography SKILL.md
    - techy-mono: JetBrains Mono Bold (free) | Recursive Linear (free, variable)
    - experimental: Cirrus (Velvetyne, free) | Custom Future Fonts pick
 
-   **Body role** — readability-first, 14-18px range:
-   - Inter (free, default) — works for 90% of briefs
-   - IBM Plex Sans (free) — alternative for technical
-   - Recursive Sans Linear (free, variable) — modern alternative
-   - PP Mori (commercial) — premium alternative
+   **Body role** — readability, script coverage and the active profile first:
+   - Retain the pinned body family unless the brief/coverage demonstrates a conflict
+   - Inter, IBM Plex Sans, Recursive Sans Linear and PP Mori are alternatives to
+     evaluate, not a universal ranking; verify actual release/licensing and glyphs
 
    **Mono role** — code, data, accents:
    - JetBrains Mono (free, default)
@@ -75,8 +75,10 @@ Emits `typography.json` (schema_version: 1) per the frontend-typography SKILL.md
    - Pangram (PP-prefix fonts) — commercial license at pangrampangram.com. Flag explicit.
    - Velvetyne — open-source experimental fonts. Verify current SIL/OFL status.
    - Future Fonts — early-access licensing per-font. Flag.
-   - Google Fonts — free. No flag.
-   - System stack (SF Pro, Segoe UI) — zero-license, can't be webfont-served.
+   - Google Fonts — verify the selected font's license, redistribution/subsetting
+     terms and approved remote-loading/privacy policy
+   - System stack — use locally available fallbacks; do not bundle platform font
+     files or call them license-free without redistribution rights
 
 5. **Map variable-axes:**
    - For variable fonts (Fraunces, Recursive, PP Mori Variable, Inter Variable):
@@ -84,7 +86,9 @@ Emits `typography.json` (schema_version: 1) per the frontend-typography SKILL.md
      - optical_size: [min, max] if applicable (PP Editorial New)
      - slant: [min, max] if applicable (Recursive)
      - softness/casual: if applicable (Recursive)
-   - Specify which axes drive responsive sizing (e.g., optical_size tied to viewport width)
+   - Inspect the selected font's actual axis tags/ranges; not every font exposes every axis
+   - Match optical size to rendered text size (`font-optical-sizing` where suitable),
+     not blindly to viewport width
 
 6. **Spec size-scale:**
    - Major-third ratio (1.25) — default, balanced
@@ -106,7 +110,8 @@ Emits `typography.json` (schema_version: 1) per the frontend-typography SKILL.md
    - wider: 0.1em (eyebrow labels, tiny uppercase)
 
 9. **Spec loading-strategy per font:**
-   - Google Fonts: CDN link tag + display=swap
+   - Remote or self-hosted delivery according to project privacy/license/performance
+     requirements; display=swap is a choice to test, not permission to contact a CDN
    - Self-hosted (Pangram, Velvetyne, Future): `@font-face` + woff2 + preload critical fonts
    - Variable fonts: single file replaces multiple weights — note disk-size
 
@@ -124,12 +129,23 @@ See frontend-typography SKILL.md Step 3 — agent fills in choices.
 
 ## Anti-patterns
 
+- **Skipping script coverage** — test actual language samples, diacritics, numerals,
+  code and fallback metrics; a Latin-only specimen cannot verify another writing system
+
 - **Recommending Pangram without licensing-step explicit** — operator may not realize cost. Always include licensing-instruction.
 - **Picking variable-font without specifying axes** — defeats purpose. Always spec at least weight-range.
 - **Forgetting fallback_stack** — first-paint flash without fallback. Always 3-5 fallbacks.
-- **Hardcoding "always Inter"** — body-readability default, but brief may need editorial. Pick based on brief.
+- **Hardcoding "always Inter"** — honor the brief and pinned profile before evaluating
+  alternative families for demonstrated coverage/readability needs.
 
 ## Failure recovery
+
+Worked decision: retain the profile's serif body for a long-form page unless its
+required script is missing. Compare a licensed extended family or a compatible
+fallback using the real text, zoom, line length and loading behavior. A new font
+choice is justified by coverage/readability evidence, not a generic "modern" label.
+Spec output keeps the existing typography contract; actual rendered checks belong
+to the available browser/renderer and remain unverified until run.
 
 - Brief too vague → NEEDS_CONTEXT with question ("formal-editorial or modern-techy?")
 - Font-license-status unclear → flag DONE_WITH_CONCERNS + surface license-step to operator

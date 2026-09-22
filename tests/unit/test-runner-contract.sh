@@ -35,4 +35,17 @@ printf 'echo "Ran 1 test in 0.001s"\necho "OK (skipped=1)"\n' > "$TMP/tests/unit
 expect_rc 1
 printf 'exit 7\n' > "$TMP/tests/unit/fixture.sh"
 expect_rc 1
+cat > "$TMP/tests/unit/fixture.sh" <<'EOF'
+printf '%s\n' 'C:\new\target\profile.json' 'literal \c must not truncate' 'last failure line'
+exit 7
+EOF
+expected_output=$(bash "$TMP/tests/unit/fixture.sh" 2>&1) || test "$?" -eq 7
+rc=0
+actual_output=$(bash "$RUNNER" 2>&1) || rc=$?
+[ "$rc" -eq 1 ] || { printf 'FAIL: diagnostic fixture returned %s\n' "$rc"; exit 1; }
+[[ "$actual_output" == *"$expected_output"* ]] || {
+  printf 'FAIL: runner changed literal failure output\n%s\n' "$actual_output"
+  exit 1
+}
 echo 'PASS: runner rejects invalid input, empty suites, exact tag misses, shell/framework skips, and failed tests'
+echo 'PASS: runner preserves literal Windows paths and backslash diagnostics'

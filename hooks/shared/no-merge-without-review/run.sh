@@ -1,44 +1,32 @@
 #!/usr/bin/env bash
-# no-merge-without-review — Lintel warn-only hook
-set -euo pipefail
-
-source "$(dirname "${BASH_SOURCE[0]}")/../_input.sh"
+# component: no-merge-without-review
+# implements: ADR-0028
+# intent: skills/review/references/evidence.md
+# constraints: advisory and opt-in; does not authorize or block a merge
+# last_intent_review: 2026-09-20
+set -uo pipefail
+SOURCE_ROOT="${LINTEL_SOURCE_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)}"
+source "$SOURCE_ROOT/hooks/shared/_input.sh"
 CMD="$(hook_input command "${1:-}")"
 [ -z "$CMD" ] && exit 0
-
-LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
-mkdir -p "$LINTEL_HOME/audit"
-
-# Unified audit writer (hooks/shared/<name>/ → repo-root → bin/). Idempotent source.
-command -v audit_log >/dev/null 2>&1 || source "$(dirname "${BASH_SOURCE[0]}")/../../../bin/_audit.sh"
-
-# Detect merge-to-main patterns
-if echo "$CMD" | grep -qE '(gh\s+pr\s+merge|git\s+merge.*main|git\s+merge.*master)'; then
-  # The review log is written by bin/li-review-log via the unified audit helper to the
-  # repo's .claude/runtime/audit/reviews.jsonl (un-migrated repos still write the global
-  # file — see fallback below; NOT the old ~/.lintel/review-log/entries.jsonl path, which
-  # nothing writes). And li-review-log resolves commits to the SHORT HEAD, so we
-  # match on the short commit (a prefix that substring-matches whether the record stored
-  # the short or full sha). Both were silent mismatches that left this gate effectively dead.
-  repo_root=$(git rev-parse --show-toplevel 2>/dev/null || echo "")
-  REVIEW_LOG="$repo_root/.claude/runtime/audit/reviews.jsonl"
-  [ -f "$REVIEW_LOG" ] || REVIEW_LOG="$LINTEL_HOME/audit/reviews.jsonl" # legacy-fallback-ok
-  recent_review=0
-  if [ -f "$REVIEW_LOG" ]; then
-    head_commit=$(git rev-parse --short HEAD 2>/dev/null || echo "")
-    seven_days_ago=$(date -u -d '7 days ago' +"%Y-%m-%d" 2>/dev/null || date -u -v-7d +"%Y-%m-%d" 2>/dev/null || echo "")
-    if [ -n "$head_commit" ] && [ -n "$seven_days_ago" ]; then
-      if grep "$head_commit" "$REVIEW_LOG" 2>/dev/null | grep -qE "\"status\":\"CLEARED\""; then
-        recent_review=1
-      fi
-    fi
-  fi
-
-  if [ "$recent_review" = "0" ]; then
-    audit_log "hooks" "no_merge_without_review" "hook=no-merge-without-review" "tier=warn" "cmd_preview=$(echo "$CMD" | head -c 120)"
-    echo "WARN [Lintel hook]: merge to main detected without recent /review or /plan-eng-review CLEARED for HEAD"
-    echo "WARN: Run /review or /plan-eng-review first, or confirm intentional bypass."
-  fi
+if ! printf '%s\n' "$CMD" | grep -qE '(gh[[:space:]]+pr[[:space:]]+merge|git[[:space:]]+merge.*(main|master))'; then
+  exit 0
 fi
 
+options=(--skill "${LINTEL_REVIEW_SKILL:-review}" --gate-json)
+if [ -n "${LINTEL_REVIEW_CONTEXT:-}" ]; then
+  options+=(--expected "$LINTEL_REVIEW_CONTEXT")
+fi
+if [ -n "${LINTEL_REVIEW_CORROBORATION:-}" ]; then
+  options+=(--corroboration "$LINTEL_REVIEW_CORROBORATION")
+fi
+if bash "$SOURCE_ROOT/bin/li-review-read" "${options[@]}" >/dev/null 2>&1; then
+  exit 0
+fi
+source "$SOURCE_ROOT/bin/_audit.sh"
+audit_log hooks no_merge_without_review "hook=no-merge-without-review" "tier=warn" \
+  "reason=missing-or-invalid-content-bound-review"
+echo 'WARN [Lintel hook]: merge detected without a current content-bound review decision.'
+echo 'WARN: Supply the selected review context and actual corroboration; inspect li-review-read diagnostics.'
+echo 'WARN: This opt-in hook is advisory, not merge authorization or enforcement.'
 exit 0

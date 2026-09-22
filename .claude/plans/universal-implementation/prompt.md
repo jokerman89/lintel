@@ -4,9 +4,14 @@ Read [spec.md](spec.md), [plan.md](plan.md) and [handoff.md](handoff.md).
 Select [work.json](work.json); plan.md alone owns implementation checkbox state.
 The 2026-09-20 operator authorized execution of all audited A01-A26 outcomes, not just
 another audit. Preserve all useful methods, entry points and Swarming history.
+The 2026-09-21 continuation authorizes final reviewed PR delivery/merge to main and
+scoped cleanup for this initiative, not unrelated work or relaxed acceptance gates.
+The full cycle remains SENSE -> SCOPE -> DEFINE -> DISCOVER -> PLAN -> BUILD ->
+REVIEW -> SHIP -> CAPTURE. Resume is a utility that returns to that cycle, not a
+phase or a replacement lifecycle. Preserve documented presets and entry points.
 
 Follow AGENTS.md, AGENT-INSTRUCTIONS.md, the Copilot adapter when on Copilot,
-accepted ADRs, and memory lessons L-030 through L-032. Original audit evidence is
+accepted ADRs, and relevant recent memory lessons through L-039. Original audit evidence is
 committed under `.claude/engineering/audits/2026-09-20-universal-quality/`.
 The original source audit and Swarming worktrees must not be overwritten or reset.
 
@@ -32,10 +37,14 @@ audited acceptance and evidence of retained value. A24 is actual scenario eviden
 manufactured productivity metrics. No client lacking a real run becomes "verified".
 
 Use only the explicitly authorized `jokerman89` GitHub account. The injected credentials
-were rejected earlier; do not use them for reads, pushes or PR tools. Authentication was
-still unavailable at bootstrap. Continue local work and preserve a ready feature branch;
-surface this exact external blocker without bypass. No main merge, release, production
-mutation, private synchronization or dormant hook activation is authorized.
+were rejected earlier; do not use them for reads, pushes or PR tools. The operator's
+new login was verified through an explicitly account-selected CLI credential and
+`/user` during the 2026-09-22 continuation. Verify the actor for the actual publishing path, then deliver
+through the feature PR with review/CI and preserved ancestry. Merge authorization is
+only for this accepted initiative batch. Clean only verified completed owned artifacts/
+workspaces after preserving commits, reports and history; retain unrelated/unmerged work.
+No release/tag, production/deployment mutation, private synchronization or dormant
+hook activation is authorized. A morning target is not evidence of completion.
 
 Before yielding, update the handoff, plan review section and durable working state with
 exact commits, active child IDs, verification status and the next dependency-ready package.

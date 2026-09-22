@@ -34,7 +34,14 @@ You assume the operator runs systems with some existing telemetry. Your job is t
 You distinguish:
 - **Signals you emit** — metrics, traces, logs (the data)
 - **Signals you derive** — SLIs, dashboards, alerts (the interpretation)
-- **Stack-specific conventions** — App Insights uses `operationId`; Datadog uses `trace_id`; OpenTelemetry uses `traceparent`. Conform to the stack's idioms, don't fight them.
+- **Propagation versus stored fields** — W3C `traceparent` is a wire header, not a
+  universal log field. Verify the selected SDK/exporter's mapping to stored trace/span IDs.
+
+Read actual journey/SLO requirements, instrumentation/config versions, signal queries,
+sampling and approved retention/access policy. Define eligible/good events and no-data
+behavior before an SLI; missing telemetry must not become 100% success. Bound metric
+label cardinality and exclude secrets/personal fields from logs and span attributes.
+Trace IDs are useful correlation fields, not authorization credentials.
 
 ## Output shape
 
@@ -65,10 +72,10 @@ traces:
       events: [<list>]    # for slow-path debugging
   propagation: traceparent | b3 | xray | custom
   sample_rate:
-    default: 0.01
+    default: <chosen from diagnostic need, cost and privacy constraints>
     critical_paths:
       - path: <name>
-        rate: 1.0
+        rate: <justified rate; record head/tail sampling effects>
 ```
 
 Log spec:
@@ -83,10 +90,10 @@ logs:
     - event
     - <stack-specific>
   retention:
-    debug: 7d
-    info: 30d
-    warn_error: 90d
-    audit: 2555d  # 7 years
+    debug: <purpose/policy-derived duration>
+    info: <purpose/policy-derived duration>
+    warn_error: <purpose/policy-derived duration>
+    audit: <applicable obligation and approved duration, not a universal seven years>
 ```
 
 SLI definitions:
@@ -105,13 +112,20 @@ slis:
 ## Anti-patterns
 
 - **RED on resources, USE on endpoints** — they're swapped; RED is for request-shaped work, USE for resource consumption
-- **Single trace sample rate** — critical paths should have higher (or 100%) sampling; non-critical paths lower
+- **Sampling without a decision** — targeted tail sampling can aid diagnosis but biases
+  naive error/latency population estimates; justify rate and estimator
 - **Logs without correlation_id** — incidents become un-threadable
 - **SLI without queryable data source** — every SLI must point to a specific query against a specific signal
 - **Stack-agnostic specs** — observability stacks have strong conventions; conform to the stack the operator picked
-- **Single retention for all log levels** — debug doesn't need 90 days; audit does
+- **Retention from a role template** — signal purpose, legal holds and applicable
+  policy decide duration, not severity labels alone
 
 ## Voice tier behavior
+
+Example: a canary reports zero errors but also zero eligible requests. Return unknown
+coverage, not a healthy SLI. Reconcile the load balancer's requests with application
+counters, then test one good, one bad and one missing-signal interval. See
+[SLO and signal methods](../../skills/dh/references/decision-methods.md).
 
 Internal. You produce operator-facing observability specs. No customer-facing voice.
 

@@ -12,7 +12,9 @@ cli_support: [claude-code, codex]
 
 Reviews the current branch's diff before landing. Lighter than `/plan-eng-review` (which reviews a plan/design doc). Use when there's no plan but you want a code review pass before `/ship`.
 
-Auto-scales: small diffs get fast review; large diffs (200+ lines) additionally get Codex structured review with P1 gate.
+Auto-scales by aggregate risk: mechanical diffs may use explicitly labeled inline
+review; substantive changes need a separately attributable reviewer. An optional
+outside-review tool does not substitute for missing independence.
 
 ## When to use
 
@@ -24,7 +26,7 @@ Auto-scales: small diffs get fast review; large diffs (200+ lines) additionally 
 ## When NOT to use
 
 - Plan exists — use `/plan-eng-review` against the plan instead
-- Diff too small to be reviewable (<5 lines, trivial fix) — skip review
+- Trivial mechanical diff — inline review is proportionate; record the actual mode
 - Tests fail — fix first, review after
 
 ## Inputs
@@ -35,17 +37,29 @@ Auto-scales: small diffs get fast review; large diffs (200+ lines) additionally 
 
 ## Workflow
 
-1. **Diff stats** — `git diff <base>...HEAD --stat`. Auto-classify:
-   - <50 lines changed: SMALL (Claude-only review)
-   - 50-200: MEDIUM (Claude + optional Codex)
-   - 200+: LARGE (Claude + mandatory Codex with P1 gate, unless --no-codex)
-2. **Read diff content** — `git diff <base>...HEAD`. Identify changed files + functions + tests.
+For ad-hoc work with no initiative map, keep this lightweight: capture an explicit
+snapshot, review it and return useful read-only findings. Do not create a duplicate
+plan/backlog merely to get review feedback. The shared `snapshot` + `inspect`
+commands can bind observations without a map; they explicitly report
+`release_clearance: false`. Mapped authority and full evidence are needed only to
+enter the strict SHIP path. See [inspection mode](../review/references/evidence.md#unmapped-inspection).
+
+1. **Bind scope** — follow [the shared evidence procedure](../review/references/evidence.md).
+   Include explicitly selected tracked, staged, unstaged, new and deleted files,
+   documentation/config inputs and the selected package/leaf acceptance. Use the
+   snapshot manifest for scope; `git diff <base>...HEAD --stat` covers only committed
+   changes. Preserve useful SMALL/MEDIUM/LARGE reporting without using line count
+   to downgrade substantive risk.
+2. **Read selected content** — inspect every selected changed state and relevant
+   surrounding functions/tests. A commit-only diff cannot clear dirty/new files.
 3. **4-dimension review** (lighter than `/plan-eng-review`'s 4 sections — no per-issue AskUserQuestion overhead):
    - Architecture impact (does the diff respect existing boundaries?)
    - Code quality (DRY violations, error handling, edge cases)
    - Test coverage (does the diff add tests for new code paths? regression risk?)
    - Performance (N+1, memory, slow paths introduced)
-4. **Codex pass (if LARGE diff or --codex)** — invoke Codex with structured review prompt. P1 findings BLOCK ship.
+4. **Independent pass** — use an actual available independent reviewer for substantive
+   scope. `--codex` requests an outside review when available; `--no-codex` does not
+   waive required independence. Keep findings read-only and route fixes to the builder.
 5. **Persist via `bin/li-review-log`** with `skill: code-review` (distinct from Phase-6 `/review` and `plan-eng-review`).
 6. **Output: findings list + severity + suggested fixes.**
 
@@ -77,10 +91,12 @@ Codex pass: optional, skipped this run
 Run /ship when P2+ resolved.
 ```
 
-Persist via `bin/li-review-log`:
-```bash
-bin/li-review-log '{"skill":"code-review","timestamp":"...","status":"...","findings":N,"findings_fixed":N,"gate":"P1_clean","commit":"..."}'
-```
+Persist the full version-2 decision with `skill: code-review` through the shared
+writer, then consume the shared reader with the same expected context and actual
+host/human corroboration. The [procedure](../review/references/evidence.md) defines
+the executable commands. Missing/unverified mandatory controls block independently
+of advisory findings. Empty or placeholder commits and loose clearance strings
+are not valid evidence.
 
 ## Compliance integration
 
@@ -98,10 +114,12 @@ Every finding gets a 1-10 confidence:
 
 ## Failure modes
 
-- **Diff empty:** no changes to review. Report + exit.
+- **Diff empty:** implementation clearance is blocked. An approved verification-only
+  task may use its actual acceptance evidence without inventing changes.
 - **Diff too large to fully analyze:** spot-check + warn operator that some files weren't deeply reviewed.
-- **Codex unavailable:** fall back to Claude adversarial subagent. Note in report.
-- **`bin/li-review-log` unavailable:** still print findings, but no dashboard update.
+- **Outside reviewer unavailable:** use an available separate reviewer or manual
+  handoff. A main-agent self-review remains declared, not independently corroborated.
+- **`bin/li-review-log` unavailable:** print findings; strict clearance remains blocked.
 
 ## Examples
 
@@ -109,7 +127,7 @@ Every finding gets a 1-10 confidence:
 ```
 > /code-review
 Diff scope: 23 lines, 2 files (SMALL)
-✓ No findings. Clean to /ship.
+No findings. Ready for the shared evidence gate, not clearance from this sentence.
 ```
 
 **Medium diff with findings:**
@@ -132,4 +150,4 @@ Codex pass: P1 found — race condition in payment-handler.ts:108
 
 - `/plan-eng-review` — heavier plan-stage review (use when design doc exists)
 - `/investigate` — debugging when /code-review finds something broken
-- `/ship` — reads /code-review's dashboard entry as ship-gate signal (within 7 days, current commit)
+- `/ship` — consumes the latest applicable content-bound decision and same-context read-only QA

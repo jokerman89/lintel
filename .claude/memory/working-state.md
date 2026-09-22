@@ -10,6 +10,14 @@ Cross-session working state (not durable rules — that's [[lessons.md]]; not pe
 
 ## Active - Universal implementation (2026-09-20)
 
+**Recovery, 2026-09-22:** the operator transferred the broken MasterSession to
+`88aecc43-40f9-41d4-8947-6c2fb0a55481`. Exact `5f3d885` is preserved on the recovery
+branch `jokerman-microsoft-mastersession-recovery`; the original worktree was not
+changed. Continue from the [recovery checkpoint](../plans/universal-implementation/handoff.md#recovery-checkpoint)
+and original work map. Existing owners are retained; browser/discovery candidates
+await independent review and P10 has only its bounded F03 diagnostic correction
+released. No whole-initiative completion or main delivery is claimed.
+
 **Status:** approved implementation, not complete. MasterSession secured the 25 uncommitted
 audit/continuity files with SHA-256 verification and committed them as `74290e0`, preserving the
 source worktree. A separate verified Git bundle retains the complete Swarming history.
@@ -19,10 +27,124 @@ stable profile/work/review contracts, short leaves with package execution, indep
 The [work map](../plans/universal-implementation/work.json) selects the sole task source.
 See [handoff](../plans/universal-implementation/handoff.md) for current worker and integration state.
 
-**What's pending:** first-wave P01-P04 implementation and all downstream acceptance. Original
-Swarming worktree remains at `275a354`; local main baseline is `28061e4`. Remote refresh/PR/CI
-await verified `jokerman89` credentials. Rejected credentials must not be used. No main merge,
-release, production change, private sync or dormant-hook activation is authorized.
+**Verified checkpoint:** independent spec and quality review accepted the historical Swarming
+merge at `e74849d`; report `4bf5315` and both ancestries are integrated in `40c2795`. All 76
+delta destinations are preserved and 17 historical topology/brief/report/review artifacts
+are unchanged. This closes only A22.1/A22.2, not the SW fixes or final A22 integration.
+
+**Accepted products:** after scoped repairs and independent spec then quality review,
+P01 trusted helpers, P02 private sync and P03 context/recovery are integrated at `a2ef318`,
+`39561c0` and `9a1cf17`. Exact reviewed blobs and selected joined consumers passed; source
+catalog was regenerated and checked. Earlier rejected reports remain history, not current
+verdicts. P07 combination, remaining role/browser consumers and final platform checks are open.
+
+**Further accepted components:** P04 final `279dfc9` accepts `aa73651`, integrated in
+`490a0f4` with report history `8964267`; P07 final `3d8e715` accepts `a8de574`, its owned
+commit sequence integrated through `62ca389` without replaying P04's dependency. Exact
+source comparisons and selected joined consumers pass. P01's copied fixture needed real
+profile dependencies after that join; `d7eb92f` corrects the fixture only and six tests pass.
+
+P06 provider/adapters are also independently accepted: exact product `7425960`, report
+`1067da29`, integrated `36593cd`. C01-C07 are closed. Joined regeneration exposed and
+repaired a wiki schema-reader mismatch (JSON envelope, optional legacy pack field);
+actual source-derived metadata, error refusal, idempotency and local adapter checks pass.
+
+**What's pending:** P04 final A22.7 remains open. P05's `9c8ef727` consumer was rejected
+by report `0cdbf596` for lost excerpt-classification identity. Its repair `b023e8c`
+now passes complete owned spec and first whole quality in `33eac071`, integrated
+with history in `c5c8f86`. All 29 product/provider blobs match; focused Q01, current
+P07 bridge, mandatory-control, hook/source-target and generated/shape checks pass.
+The reviewer's cleanup ERROR remains historical; its exact two empty directories were
+later inspected and removed nonrecursively by the coordinator. The provider remains
+unchanged and accepted. P07's native long-path repair `4d001463` passed independent spec/quality in
+`a7450597` and is integrated as `c344133` with reports through `56de830`; eight joined
+adapter methods and 19 path methods pass. P10 is implementing in session `5ea6c88c`;
+the operator requires installation without Python (ADR-0030) and explicitly approved
+existing PowerShell 7.6.6 for local verification with its existing RemoteSigned policy.
+Windows PowerShell 5.1 remains denied/unverified; no policy changed. P08's root
+routing/PLAN product `171daa8` / report `723b067f` is frozen after the second
+independent SPEC FAIL. Intake is verified, not acceptance; an exact reviewed-core
+join and two fixture consumer migrations precede combined review.
+Joined product `2f4cc38` preserves the frozen root/core blobs. Its verification
+stopped on synthetic Git-ancestor discovery and two unrepresentable exact-size
+fixtures; only the private harness correction in the P08 card is released.
+The interrupted aggregate and uninspected host output capture are not acceptance.
+Final report-only `8eb00b87` now records the corrected 22-command joined run on
+unchanged `2f4cc38`, with complete explicit 26+2 fixture coverage. Intake is verified
+and the original reviewer is completing selected-subset SPEC before eligible QUALITY.
+That review is now frozen as `402fd804`, preserved `26c80a0`: two P2 compound-head/
+newline findings, selected SPEC FAIL and QUALITY NOT STARTED. Mechanical F03 is
+closed from valid c20; q02 is INVALID and home effects UNKNOWN. The original P08
+owner has the bounded class repair and must plan actual semantic/host evidence,
+not substitute another mechanical-only pass for the remaining original controls.
+P10's migration F01 is independently closed
+by `00a0bef`; default-store/cleanup and whole-package acceptance remain blocked.
+A13 remains gated.
+
+Joined investigation `990b0daa` reopens A01.2/A01.4/A11.1: ordinary Python long-path
+I/O, Git ref handling and fixture cleanup are distinct boundaries. ADR-0031 and the
+P03 card authorize a first shared-path core/extraction unit, followed by separately
+owned P10 consumer work after independent acceptance. No global settings, shortened
+defaults, identity/schema migration or real-home inspection/rollback is authorized.
+The reviewed core `ce7415f` + fixture `5fc657f` now passes independent spec/quality
+in `062d0f20` and is integrated as `1d44d2a`, with all 16 product paths exact.
+Core checkpoint/snapshot/bisect leaves are reclosed, restoring 52/113 original items.
+The classic adapter's 256->263 publication and full P10 default init/check/recovery
+remain blocked under their separate consumer gate. P10's original owner has a bounded
+exact-dependency/direct-I/O follow-up; no inventory/schema/store-policy redesign or
+A13 release. Its four additional adapter metadata/read sites are explicitly scoped
+in the P10 card; both active streams still require immutable product/review checkpoints.
+Earlier failed and diagnostic-only evidence is preserved.
+P10 consumer `a31c5eb` / report `f7d2151` is frozen with new builder passes, not
+independent acceptance. After failed bounded Git-root/setup variants, the operator
+selected documented pre-write refusal for unverifiable Git operations, not expanded
+compatibility work. The P10 card now scopes that final error/preflight/doc follow-up;
+original default/classic/canonical dimensions and independent gates stay unchanged.
+The later refusal product `a559c9f` / report `4c0519e3` is now frozen and its scope,
+protected runtime/test identities and report are verified. The original reviewer is
+completing full P10 SPEC before the first eligible whole QUALITY; no acceptance yet.
+That review now reports a real scaffold user-content overwrite at an existing
+long plain-folder target, distinct from the Git limitation. Immutable report
+`c1a38a03` is SPEC FAIL, P1 F02; testing stopped and QUALITY has not started.
+Report-only rejection is preserved as `3649dc5`. The original builder's bounded
+native-observation/producer-expectation repair is now scoped in P10; no shared
+transaction/core/schema or Git compatibility redesign is allowed. Same-reviewer
+complete SPEC and first whole QUALITY remain required.
+The operator challenged the prolonged pathing focus on 2026-09-21. The target is
+useful, team-ready Universal skills, not a general Windows/Git compatibility layer.
+Close only the bounded active P08/P10 corrections and required review, then advance
+dependency-ready skill depth and client experience. Reconcile any newly proposed
+infrastructure blocker with the original outcome before expanding scope (L-038).
+P09's content unit is independently accepted by `19eb776` and integrated in
+`4983af2`: 61 improved/eight retained roles, all 69 frontmatters and five domain
+references. Joined 12-method/catalog checks pass and reviewed source identity is
+exact. The data-core unit `ea92df8` / report `53145bd` is now frozen, its intake
+verified, and with the existing P09 reviewer. It uses accepted P03/P05/P07 only;
+P08/module procedure binding and original parents remain gated.
+P08 is repairing F04/F05 and planning the original semantic/host evidence; P10 is
+repairing F02 under the clarified consumer-admission/write-set contract.
+P11 owner `f413bdcb` has frozen blocked A16 source and only the bounded native
+location/conditional owned-fixture scope. P09 module-runtime binding and P11 A14/design/agent work
+retain their predecessor gates; no whole-package acceptance is implied.
+P10's frozen F02 product `a797b2d` / report `7bf5a31` is back with the same reviewer
+after verified intake; full SPEC/QUALITY remain open. P12 owner `0a75211f` is
+implementing the standalone content/Word/PPT unit; shared-design wiring remains
+gated. Native artifacts are being exercised, not accepted from method prose alone.
+Continue P08-P14 in dependency order,
+not a new audit or partial delivery. Coordinator routing (`b72ab47` plus
+`1d40193`) and provenance (`9f49e26`) await their owning package reviews. All successor cards
+and interface agreements are committed; use the handoff's exact IDs, do not duplicate workers.
+
+Original Swarming worktree remains at `275a354`. On 2026-09-21 the operator authorized
+final accepted PR/CI/main merge and scoped cleanup for this initiative. The new
+account-selected CLI credential was verified as `jokerman89` during the 2026-09-22
+continuation; authenticated reads
+confirm main is still `28061e4`, push permission and merge-commit support. Verify
+each publishing path's actor; rejected injected credentials remain forbidden.
+No release/tag, production/deployment, private sync or dormant-hook activation follows.
+Preserve original histories/reports/backups and unrelated or unmerged work during cleanup.
+The canonical nine phases remain unchanged; resume is a utility, not a replacement
+phase or shortened lifecycle (L-039). The morning target does not waive acceptance.
 
 ## Completed — Universal whole-system quality audit (2026-09-20)
 

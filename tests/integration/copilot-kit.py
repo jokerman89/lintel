@@ -11,6 +11,15 @@ import tempfile
 import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
+JOINED_RUNTIME_RESOURCES = (
+    "lib/swarm_snapshot.py", "lib/envelope_contract.py", "lib/envelope-requirements.txt",
+    "lib/profile_context.py", "lib/profile-context-schema.json", "lib/pack-schema.yaml",
+    "lib/native_paths.py",
+    "lib/context_safety.py", "lib/review_contract.py", "lib/review-schema.json",
+    "bin/li-review-evidence.py", "bin/li-review-log", "bin/li-review-read",
+    "bin/li-domain-result.py", "lib/domain_result.py", "lib/domain-result-schema.json",
+    ".claude-plugin/plugin.json",
+)
 spec = importlib.util.spec_from_file_location("li_copilot", ROOT / "bin/li-copilot.py")
 adapter = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(adapter)
@@ -27,7 +36,8 @@ class CopilotKit(unittest.TestCase):
         # introduce unrelated source drift between init and check.
         for name in adapter.COMPONENTS:
             shutil.copytree(ROOT / name, cls.source / name, ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
-        for name in adapter.DOCS + ("LICENSE", "shims/copilot/COPILOT.md"):
+        shutil.copytree(ROOT / "docs", cls.source / "docs")
+        for name in adapter.DOCS + adapter.SOURCE_METADATA + ("LICENSE", "shims/copilot/COPILOT.md", "shims/universal/ADAPTER.md"):
             if (ROOT / name).is_file():
                 (cls.source / name).parent.mkdir(parents=True, exist_ok=True)
                 shutil.copyfile(ROOT / name, cls.source / name)
@@ -36,6 +46,13 @@ class CopilotKit(unittest.TestCase):
     def tearDownClass(cls):
         # TemporaryDirectory owns this exact sandbox; no user path is deleted.
         assert cls.base.name.startswith("lintel-copilot-tests-")
+        assert Path(cls.sandbox.name).resolve() == cls.base
+        if os.name == "nt":
+            # Retain TemporaryDirectory's readonly handling for long native paths.
+            directory = str(cls.base)
+            if not directory.startswith("\\\\?\\"):
+                directory = "\\\\?\\UNC\\" + directory[2:] if directory.startswith("\\\\") else "\\\\?\\" + directory
+            cls.sandbox.name = directory
         cls.sandbox.cleanup()
 
     def setUp(self):
@@ -53,9 +70,10 @@ class CopilotKit(unittest.TestCase):
             self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
         return result
 
-    def snapshot(self):
-        return {p.relative_to(self.target).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
-                for p in self.target.rglob("*") if p.is_file() and not p.is_symlink()}
+    def snapshot(self, target=None):
+        root = target or self.target
+        return {p.relative_to(root).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
+                for p in root.rglob("*") if p.is_file() and not p.is_symlink()}
 
     def test_fresh_portable_clone_and_idempotence(self):
         self.run_cli()
@@ -82,7 +100,7 @@ class CopilotKit(unittest.TestCase):
         self.assertTrue(wrapper.is_file())
         self.assertIn("../../lintel/skills/swarm/SKILL.md", wrapper.read_text(encoding="utf-8"))
         inventory = json.loads((self.target / adapter.INVENTORY).read_text(encoding="utf-8"))["files"]
-        for relative in adapter.SWARM_RESOURCES:
+        for relative in adapter.SWARM_RESOURCES + adapter.ADAPTER_RESOURCES + adapter.SOURCE_METADATA:
             installed = f"{adapter.BUNDLE}/{relative}"
             self.assertIn(installed, inventory)
             self.assertTrue((self.target / installed).is_file(), installed)
@@ -91,17 +109,164 @@ class CopilotKit(unittest.TestCase):
         broken = self.base / "missing-swarm-dependency-source"
         shutil.copytree(self.source, broken)
         before = self.snapshot()
-        for relative in adapter.SWARM_RESOURCES:
+        for relative in adapter.SWARM_RESOURCES + adapter.ADAPTER_RESOURCES + adapter.SOURCE_METADATA:
             with self.subTest(relative=relative):
                 path = broken / relative
                 content = path.read_bytes()
                 path.unlink()
                 try:
                     result = self.run_cli(success=False, source=broken)
+                    if relative == "lib/cli-tiers.yaml":
+                        self.assertIn("ERROR:", result.stderr)
+                        self.assertIn("cli-tiers.yaml", result.stderr)
+                    else:
+                        self.assertIn(f"Required source file is missing: {path}", result.stderr)
+                    self.assertEqual(before, self.snapshot())
+                finally:
+                    path.write_bytes(content)
+
+    def test_joined_runtime_dependencies_refuse_incomplete_source_before_writes(self):
+        broken = self.base / "missing-joined-dependency-source"
+        shutil.copytree(self.source, broken)
+        for index, relative in enumerate(JOINED_RUNTIME_RESOURCES):
+            with self.subTest(relative=relative):
+                target = self.target / str(index)
+                target.mkdir()
+                (target / "consumer-owned.txt").write_bytes(b"retain exact consumer bytes\r\n")
+                before = self.snapshot(target)
+                path = broken / relative
+                content = path.read_bytes()
+                path.unlink()
+                try:
+                    result = self.run_cli(source=broken, target=target, success=False)
+                    self.assertIn(f"Required source file is missing: {path}", result.stderr)
+                    self.assertEqual(before, self.snapshot(target))
+                finally:
+                    path.write_bytes(content)
+
+    def test_joined_installed_dependencies_cannot_be_hidden_by_inventory_removal(self):
+        self.run_cli()
+        bundle = self.target / adapter.BUNDLE
+        manifest_path = self.target / adapter.INVENTORY
+        original = manifest_path.read_bytes()
+        for relative in JOINED_RUNTIME_RESOURCES:
+            with self.subTest(relative=relative):
+                path = bundle / relative
+                content = path.read_bytes()
+                inventory = json.loads(original)
+                self.assertIn(f"{adapter.BUNDLE}/{relative}", inventory["files"])
+                del inventory["files"][f"{adapter.BUNDLE}/{relative}"]
+                manifest_path.write_text(json.dumps(inventory), encoding="utf-8")
+                path.unlink()
+                before = self.snapshot()
+                try:
+                    result = self.run_cli("check", source=bundle,
+                                          script=bundle / "bin/li-copilot.py", success=False)
                     self.assertIn(f"Required source file is missing: {path}", result.stderr)
                     self.assertEqual(before, self.snapshot())
                 finally:
                     path.write_bytes(content)
+                    manifest_path.write_bytes(original)
+        self.run_cli("check", source=bundle, script=bundle / "bin/li-copilot.py")
+
+    def test_joined_installed_profile_is_pinned_across_fresh_shells_and_detects_drift(self):
+        # Keep the fixture's nested runtime paths inside native Windows path limits.
+        target = self.base / "profile-consumer"
+        target.mkdir()
+        self.run_cli(target=target)
+        (target / ".claude/profile-requirements.json").write_text(
+            json.dumps({"schema_version": 1, "required_pack": "_default"}), encoding="utf-8")
+        home = self.base / "joined-profile-unused-home"
+        home.mkdir()
+        env = {key: value for key, value in os.environ.items()
+               if not key.startswith("LINTEL_") and key != "CLAUDE_SESSION_ID"}
+        env.update(HOME=str(home), USERPROFILE=str(home), PYTHONDONTWRITEBYTECODE="1")
+        bash = os.environ.get("LINTEL_TEST_BASH") or shutil.which("bash")
+        self.assertTrue(bash)
+        script = '''set -e
+source .github/lintel/lib/copilot-env.sh
+lintel_copilot_env "$PWD"
+printf '%s\\n' "$LINTEL_PROFILE_REFERENCE"
+'''
+
+        def bootstrap():
+            return subprocess.run([bash, "-c", script], cwd=target, env=env,
+                                  capture_output=True, text=True, encoding="utf-8")
+
+        first = bootstrap()
+        self.assertEqual(first.returncode, 0, first.stdout + first.stderr)
+        reference = json.loads(first.stdout)
+        self.assertEqual(reference["name"], "_default")
+        repeated = bootstrap()
+        self.assertEqual(repeated.returncode, 0, repeated.stdout + repeated.stderr)
+        self.assertEqual(json.loads(repeated.stdout), reference)
+        selected = target / ".claude/runtime/profiles/selected.json"
+        pin = selected.read_bytes()
+        manifest = target / adapter.BUNDLE / "packs/_default/pack.yaml"
+        content, times = manifest.read_bytes(), manifest.stat()
+        manifest.write_bytes(content + b"\n# Same-mtime input drift\n")
+        os.utime(manifest, ns=(times.st_atime_ns, times.st_mtime_ns))
+        try:
+            refused = bootstrap()
+            self.assertNotEqual(refused.returncode, 0, refused.stdout + refused.stderr)
+            self.assertIn("PROFILE_", refused.stderr)
+            self.assertEqual(refused.stdout, "")
+            self.assertEqual(selected.read_bytes(), pin)
+        finally:
+            manifest.write_bytes(content)
+            os.utime(manifest, ns=(times.st_atime_ns, times.st_mtime_ns))
+        restored = bootstrap()
+        self.assertEqual(restored.returncode, 0, restored.stdout + restored.stderr)
+        self.assertEqual(json.loads(restored.stdout), reference)
+        self.assertEqual(list(home.iterdir()), [])
+
+    def test_joined_installed_swarm_and_json_envelope_use_stdlib_dependencies(self):
+        self.run_cli()
+        bundle = self.target / adapter.BUNDLE
+        product = self.target / "product.txt"
+        product.write_text("original synthetic product\n", encoding="utf-8")
+        script = '''import json, sys
+from pathlib import Path
+sys.path.insert(0, str(Path(sys.argv[1]) / "lib"))
+from swarm_contract import capture_result, verify_result
+root = Path(sys.argv[2])
+result = capture_result(root, ["product.txt"])
+verify_result(root, ["product.txt"], result)
+(root / "product.txt").write_text("changed synthetic product\\n", encoding="utf-8")
+try:
+    verify_result(root, ["product.txt"], result)
+except ValueError:
+    print(json.dumps(result))
+else:
+    raise AssertionError("installed snapshot accepted changed product bytes")
+'''
+        result = subprocess.run([sys.executable, "-I", "-B", "-S", "-c", script,
+                                 str(bundle), str(self.target)], capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        snapshot = json.loads(result.stdout)
+        self.assertEqual(snapshot["kind"], "files")
+        self.assertIn("product.txt", snapshot["files"])
+        envelope = {
+            "head": {"envelope_id": "synthetic-installed", "envelope_schema_version": "1",
+                     "kind": "subagent_spawn", "from": "plan", "to": "fixture",
+                     "issued_at": "2026-09-20T00:00:00Z"},
+            "body": {"content_type": "brief", "content": {
+                "task": "Inspect synthetic product", "constraints": ["No publication"],
+                "acceptance": ["Report observed bytes"]}},
+            "tail": {"completeness_score": 100, "evaluators_run": [], "escape_hatches": [],
+                     "audit_pointer": ".claude/runtime/audit/synthetic.jsonl"},
+        }
+        path = self.target / "synthetic-envelope.json"
+        command = [sys.executable, "-I", "-B", "-S", str(bundle / "lib/envelope_contract.py"),
+                   "validate", str(path)]
+        path.write_text(json.dumps(envelope), encoding="utf-8")
+        valid = subprocess.run(command, capture_output=True, text=True)
+        self.assertEqual(valid.returncode, 0, valid.stdout + valid.stderr)
+        envelope["head"]["kind"] = "invented-kind"
+        path.write_text(json.dumps(envelope), encoding="utf-8")
+        invalid = subprocess.run(command, capture_output=True, text=True)
+        self.assertNotEqual(invalid.returncode, 0, invalid.stdout + invalid.stderr)
+        self.assertFalse((self.target / ".claude/runtime/audit").exists())
 
     def test_preserves_existing_project_instructions_and_memory(self):
         (self.target / ".github").mkdir()
