@@ -72,6 +72,27 @@ substitute a different identity/tool to bypass that decision. Prior batch merge
 authority remains, but the current host credential permission is unresolved.
 Continue local implementation/review; remote delivery needs its permitted path.
 
+P12 source-default repair is frozen as `32dac88` / separate report `b270475`
+and with SAME reviewer `31c39265`. The coordinator rasterized all six exact
+native PPT SVGs with existing ImageMagick, then both coordinator and reviewer
+directly inspected the resulting pixels. The pinned PPTX is unchanged; this
+new native-rendition observation is separate from desktop/physical-print claims.
+It is available for a fresh QA/evidence decision, not a rewrite of old blockers.
+
+Native Excel actually recalculates formulas, but saves empty cached values.
+No fixture-specific cache publisher was authorized. Excel app access was also
+declined. A focused request for Word/Excel verification approval returned that
+the user is unavailable, not affirmative approval; neither app may be retried
+or reached through COM/shell/alternate-launch workarounds. Original native
+content/editability, cache-error and formula-error evidence remains useful but
+does not establish full workbook/page layout acceptance.
+
+P10's same reviewer closed the native F03 pair, then found a producer-grounded
+F04: canonical redirects with missing destinations are called current even
+though actual migration dry-run refuses them. The original owner has proposed
+one finite redirect-class reader correction; no new path/Git initiative follows.
+Wait for the immutable report and exact repair release.
+
 Coordinator A23.4.g3 now requires nine already accepted P05/P09 context, review
 and domain helper/schema/CLI resources during adapter source preflight. All old
 test-method ASTs are unchanged. The actual missing-resource regression initially
