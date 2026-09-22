@@ -94,9 +94,10 @@ import sys
 from pathlib import Path
 sys.path.insert(0, sys.argv[1])
 from context_safety import checked_root, safe_path
+from native_paths import native_io_path
 try:
     draft = safe_path(checked_root(Path(sys.argv[2])), sys.argv[3])
-    if draft.name != "SKILL.md" or draft.exists():
+    if draft.name != "SKILL.md" or native_io_path(draft).exists():
         raise ValueError("target must be a new owned SKILL.md; refusing overwrite")
 except (OSError, ValueError) as error:
     print(f"INVALID destination: {error}", file=sys.stderr)
@@ -106,6 +107,7 @@ PY
 ```
 
 This uses the accepted source identity/alias and path contracts, not a new parser.
+Existence uses the accepted native I/O spelling of that same path; output stays logical.
 It does not grant ownership or make a later edit atomic; the host must still honor
 permissions and refuse a destination that appeared or changed before writing.
 

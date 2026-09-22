@@ -5,6 +5,7 @@
 # constraints: synthetic roots; executed caller blocks, not model/client acceptance
 # last_intent_review: 2026-09-22
 """Exercise the shipped consumer examples without a second production inventory."""
+import hashlib
 import importlib.util
 import json
 import os
@@ -518,6 +519,46 @@ state_append BUILD BLOCKED next=REVIEW cycle_id=one
         self.unchanged("skillify", "### Check name and destination", expected=2)
         self.env.update(skill_name="li-regen-mocks", draft_relative="drafts/unused/SKILL.md")
         self.unchanged("skillify", "### Check name and destination", expected=2)
+
+    def deep_draft(self):
+        folder = self.repo / "drafts" / ("bounded-" + "a" * 72)
+        suffix = max(55, 297 - len(str(folder / "existing-" / "SKILL.md")))
+        draft = folder / ("existing-" + "b" * suffix) / "SKILL.md"
+        self.assertGreaterEqual(len(str(draft)), 297)
+        self.env.update(
+            skill_name="private-repeatable-task",
+            draft_relative=draft.relative_to(self.repo).as_posix(),
+        )
+        return draft
+
+    def test_skillify_new_deep_draft_keeps_logical_path_and_does_not_write(self):
+        draft = self.deep_draft()
+        self.assertFalse(native_io_path(draft).exists())
+        result = self.unchanged("skillify", "### Check name and destination")
+        self.assertEqual(result.stdout.strip(), str(draft))
+        self.assertEqual(result.stderr, "")
+
+    def test_skillify_existing_deep_draft_refuses_without_overwrite(self):
+        draft = self.deep_draft()
+        physical = native_io_path(draft)
+        physical.parent.mkdir(parents=True)
+        content = b"EXISTING OWNED DEEP DRAFT\n"
+        physical.write_bytes(content)
+        self.assertTrue(physical.is_file())
+        self.assertEqual(
+            hashlib.sha256(physical.read_bytes()).hexdigest(),
+            "bf6ce5e717df278e50d11785693086c68ebb6e34cd6ec2db1a6daa46a7b36d72",
+        )
+        before = tree_snapshot(self.base)
+        result = self.shell(block("skillify", "### Check name and destination"))
+        self.assertEqual(tree_snapshot(self.base), before)
+        self.assertEqual(physical.read_bytes(), content)
+        self.assertEqual(result.returncode, 2, (
+            f"logical length={len(str(draft))}; native file exists; "
+            f"stdout={result.stdout!r}; stderr={result.stderr!r}"
+        ))
+        self.assertEqual(result.stdout, "")
+        self.assertIn("refusing overwrite", result.stderr)
 
     def test_skillify_refuses_outside_destination(self):
         self.env.update(skill_name="regen-mocks", draft_relative="../outside/SKILL.md")

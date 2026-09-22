@@ -46,6 +46,9 @@ the logical roots. Missing prerequisites are errors, not skipped passing cases.
   That validator checks field presence/boundaries, not YAML semantics, actual skill
   quality or host registration. Draft instantiation is fixture setup, not a measured
   model-authoring run. No activation or symlink is performed.
+  A real existing deep draft is observed through the accepted native I/O spelling
+  after the shared safe-path check; refusal preserves its complete bytes and tree.
+  A new deep destination still returns the same logical path without writing it.
 - Uniformity invokes real floor/generator code on a synthetic source; missing
   resources, a real floor violation, a real diff and actual helper errors are
   distinguished. Additional injected exit failures test caller propagation and
