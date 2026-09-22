@@ -9,12 +9,15 @@
 from __future__ import annotations
 
 from copy import deepcopy
+from dataclasses import replace
 from datetime import datetime, timezone
 import importlib.util
 import json
 import os
 from pathlib import Path
+import runpy
 import shlex
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -70,6 +73,8 @@ class SharedBinding(unittest.TestCase):
             "PYTHONNOUSERSITE": "1", "PYTHONIOENCODING": "utf-8",
             "GIT_CONFIG_GLOBAL": os.devnull, "GIT_CONFIG_SYSTEM": os.devnull,
             "GIT_CONFIG_NOSYSTEM": "1", "GIT_TERMINAL_PROMPT": "0", "GCM_INTERACTIVE": "Never",
+            "HOMEDRIVE": self.home.drive, "HOMEPATH": str(self.home)[len(self.home.drive):],
+            "GIT_CEILING_DIRECTORIES": self.root.as_posix(), "GIT_ALLOW_PROTOCOL": "",
         })
         self.fixture = SwarmFixture(self.repo)
         self.fixture.coordination["lanes"] = [self.fixture.coordination["lanes"][0]]
@@ -117,6 +122,7 @@ class SharedBinding(unittest.TestCase):
             "GSTACK_HOME", "GH_TOKEN", "GITHUB_TOKEN", "PACK_CACHE_FILE", "BASH_ENV",
             "PYTHONPATH", "LINTEL_PROFILE_REFERENCE", "GIT_CONFIG_COUNT",
         )))
+        self.assertEqual(Path(self.env["HOMEDRIVE"] + self.env["HOMEPATH"]).resolve(), self.home)
 
     def run_process(self, arguments, *, expected=0):
         self.assert_isolation()
@@ -149,13 +155,72 @@ class SharedBinding(unittest.TestCase):
                                 command, "--repo", self.repo, *args], expected=expected)
         return json.loads(run.stdout) if run.stdout.strip() else None
 
-    def consume(self, command="verify", *, expected=0, profile_args=True):
+    def consume(self, command="verify", *options, expected=0, profile_args=True):
         arguments = [sys.executable, "-B", SOURCE / "bin/li-swarm.py", command,
-                     "--repo", self.repo, "--coord", self.fixture.coordination_path]
+                     "--repo", self.repo, "--coord", self.fixture.coordination_path, *options]
         if profile_args:
             arguments += ["--profile-home", self.config.home, "--profile-packs", self.config.packs,
                           "--profile-pointer", self.config.pointer]
-        return json.loads(self.run_process(arguments, expected=expected).stdout)
+            if self.config.context_file is not None:
+                arguments += ["--profile-context-file", self.config.context_file]
+        result = self.run_process(arguments, expected=expected)
+        self.last_stderr = result.stderr
+        return json.loads(result.stdout or result.stderr)
+
+    def provider_context(self, selected=None, **options):
+        self.assert_isolation()
+        reader = runpy.run_path(str(SOURCE / "bin/li-work-artifacts.py"))
+        return reader["work_context"](self.repo, Path(selected or self.fixture.work_map_path), **options)
+
+    def grouped_map(self, workflow="lintel"):
+        self.fixture.work_map["workflow"] = workflow
+        self.fixture.work_map["tasks"] = "tasks.md" if workflow == "spec-kit" else "plan.md"
+        leaf_ids = ["T011", "T027"] if workflow == "spec-kit" else ["1.1.a", "1.1.b"]
+        tasks = (f"- [x] {leaf_ids[0]} Establish baseline\n"
+                 f"- [ ] {leaf_ids[1]} Preserve result (depends {leaf_ids[0]})\n")
+        plan = ("# Plan\n| Package ID | Leaf IDs | Owner / edit boundary |\n"
+                "|---|---|---|\n| BC1 | " + ", ".join(leaf_ids) + " | builder; src/core |\n\n")
+        self.write("plan.md", plan + (tasks if workflow == "lintel" else ""))
+        if workflow == "spec-kit":
+            self.write("tasks.md", tasks)
+        self.fixture.save()
+        return leaf_ids
+
+    def decoy_map(self):
+        selected = ".claude/plans/decoy/work.json"
+        mapping = {key: value for key, value in self.fixture.work_map.items()
+                   if key not in ("execution_mode", "coordination")}
+        for key in ("spec", "plan", "tasks", "prompt"):
+            mapping[key] = ".claude/plans/decoy/" + key + ".md"
+            self.write(mapping[key], (self.repo / self.fixture.work_map[key]).read_text(encoding="utf-8"))
+        self.write_json(selected, mapping)
+        return selected
+
+    def filesystem_state(self):
+        self.assert_isolation()
+        root = native_io_path(self.root)
+        return {path.relative_to(root).as_posix():
+                ("directory" if path.is_dir() else "file", path.lstat().st_mode,
+                 path.lstat().st_mtime_ns, None if path.is_dir() else path.read_bytes())
+                for path in root.rglob("*")}
+
+    def workflow(self, body, *arguments, expected=0):
+        script = ('set -euo pipefail\nexport _LINTEL_PROFILE_PYTHON="$LINTEL_PYTHON"\n'
+                  'source "$LINTEL_SOURCE_ROOT/lib/workflow.sh"\n' + body)
+        return self.run_process(["bash", "--noprofile", "--norc", "-c", script, "swarm-cycle-fixture",
+                                 *arguments], expected=expected)
+
+    def begin_cycle(self, cycle="original", selected=None, *, phase="BUILD", config=None):
+        config = config or self.config
+        self.assert_isolation()
+        reference = profile.profile_reference(profile.load_profile_context(config))
+        return self.workflow(
+            'export LINTEL_PROFILE_REFERENCE="$3" LINTEL_PROFILE_CONTEXT_FILE="$4"\n'
+            'workflow_begin "$1" full "$2" operation=build\n'
+            'state_phase_begin "$5" next=REVIEW\n',
+            cycle, selected or self.fixture.work_map_path, encoded(reference),
+            profile.context_path(config).as_posix(), phase,
+        )
 
     def scope_command(self, path, *, actor="reviewer", expected=0):
         return self.run_process([
@@ -188,7 +253,7 @@ class SharedBinding(unittest.TestCase):
         if domain:
             self.paths["domain_request"] = ".claude/runtime/swarm/BC1/domain-request.json"
             self.fixture.save()
-        leaves = ["T1"] if mechanical else ["BC1"]
+        leaves = swarm.package_sources(self.repo, self.fixture.coordination)["BC1"]["leaf_ids"]
         self.requirement = {
             "id": "tests", "kind": "tests", "requirement": "mandatory", "applicability": "applicable",
             "policy": {"source": "spec.md", "version": "synthetic-1", "applicability": "Synthetic acceptance",
@@ -279,7 +344,7 @@ class SharedBinding(unittest.TestCase):
             item.update(id=name, kind="check", observation={})
             controls.append(item)
         self.decision = {
-            "schema_version": review.CONTRACT_VERSION, "skill": "review", "status": "pass",
+            "schema_version": review.CONTRACT_VERSION, "skill": self.paths["review_skill"], "status": "pass",
             "timestamp": datetime.now(timezone.utc).isoformat(), "reason": "Synthetic provider fixture only.",
             "context": self.context, "reviewer": {"id": "reviewer-BC1", "context": "synthetic:reviewer-BC1"},
             "provenance": "declared", "controls": controls,
@@ -820,6 +885,361 @@ class SharedBinding(unittest.TestCase):
         finally:
             safety.safe_path = original
         self.assertTrue(self.consume("validate", profile_args=False)["ok"])
+
+    def test_review_skill_preflight_consumes_the_actual_p05_grammar(self):
+        schema = json.loads((SOURCE / "lib/swarm-schema.json").read_text(encoding="utf-8"))
+        self.assertEqual(schema["$defs"]["sharedEvidence"]["properties"]["review_skill"],
+                         {"$ref": "review-schema.json#/$defs/skill"})
+        for value in ("1-review", "Review", "review_skill", "review.skill", "review skill", "", None, 4):
+            with self.subTest(value=value):
+                with self.assertRaises(review.ContractError):
+                    review.validate_shape(value, "skill")
+                self.paths["review_skill"] = value
+                self.fixture.save()
+                rejected = self.consume("validate", profile_args=False, expected=1)
+                self.assertIn("shared.skill", {item["code"] for item in rejected["diagnostics"]})
+        for value in ("review", "plan-eng-review", "review-" + "a" * 96):
+            with self.subTest(value=value):
+                review.validate_shape(value, "skill")
+                self.paths["review_skill"] = value
+                self.fixture.save()
+                self.assertTrue(self.consume("validate", profile_args=False)["ok"])
+
+    def test_long_p05_skill_name_reaches_actual_log_and_all_shared_consumers(self):
+        self.paths["review_skill"] = "review-" + "a" * 96
+        self.fixture.save()
+        self.prepare()
+        for command in ("status", "wave", "resume", "verify"):
+            with self.subTest(command=command):
+                self.assertTrue(self.consume(command)["ok"])
+
+    def test_selected_work_is_the_actual_provider_view_with_original_alias_and_no_writes(self):
+        self.prepare()
+        selected = self.provider_context()
+        before = {path: path.read_bytes() for path in self.repo.rglob("*")
+                  if path.is_file() and ".git" not in path.relative_to(self.repo).parts}
+        for command in ("status", "wave", "resume", "verify"):
+            with self.subTest(command=command):
+                result = self.consume(command, "--map", self.fixture.work_map_path)
+                self.assertEqual(result["work_context"], selected)
+                self.assertEqual(result["work_context"]["artifacts"]["plan"],
+                                 result["work_context"]["artifacts"]["tasks"])
+                self.assertFalse(result["work_context"]["release_clearance"])
+                self.assertIsNone(result["work_context"]["binding"])
+        self.assertEqual(before, {path: path.read_bytes() for path in before})
+
+    def test_grouped_tree_and_spec_kit_leaves_match_the_actual_work_provider(self):
+        for workflow in ("lintel", "spec-kit"):
+            with self.subTest(workflow=workflow):
+                leaf_ids = self.grouped_map(workflow)
+                self.prepare()
+                selected = self.provider_context()
+                self.assertEqual(selected["packages"]["BC1"]["leaf_ids"], leaf_ids)
+                for command in ("status", "wave", "resume", "verify"):
+                    result = self.consume(command, "--map", self.fixture.work_map_path)
+                    self.assertEqual(result["work_context"], selected)
+                    self.assertEqual(result["work_context"]["packages"]["BC1"]["leaf_ids"], leaf_ids)
+
+    def test_explicit_other_map_and_backpointer_mismatch_block_every_consumer(self):
+        self.grouped_map("spec-kit")
+        self.prepare()
+        decoy = self.decoy_map()
+        for command in ("status", "wave", "resume", "verify"):
+            with self.subTest(command=command):
+                rejected = self.consume(command, "--map", decoy, expected=1)
+                self.assertIn("work.selection", {item["code"] for item in rejected["diagnostics"]})
+                self.assertTrue(self.consume(command, "--map", self.fixture.work_map_path)["ok"])
+        original = self.fixture.work_map["coordination"]
+        self.fixture.work_map["coordination"] = ".claude/plans/decoy/coordination.json"
+        self.fixture.save()
+        try:
+            for command in ("status", "wave", "resume", "verify"):
+                self.assertFalse(self.consume(command, expected=1)["ok"])
+        finally:
+            self.fixture.work_map["coordination"] = original
+            self.fixture.save()
+
+    def test_missing_empty_or_oversized_selected_input_fails_before_shared_gate(self):
+        self.prepare()
+        prompt = self.repo / self.fixture.work_map["prompt"]
+        retained = prompt.read_bytes()
+        decoy = self.decoy_map()
+        self.env["LINTEL_WORK_MAP"] = decoy
+        for value in (None, b" \n", b"x" * 262145):
+            with self.subTest(value="missing" if value is None else len(value)):
+                if value is None:
+                    prompt.unlink()
+                else:
+                    prompt.write_bytes(value)
+                try:
+                    with self.assertRaises(ValueError):
+                        self.provider_context()
+                    for command in ("status", "wave", "resume", "verify"):
+                        rejected = self.consume(command, expected=1)
+                        self.assertIn("work.selection", {item["code"] for item in rejected["diagnostics"]})
+                finally:
+                    prompt.write_bytes(retained)
+        self.assertTrue(self.consume()["ok"])
+
+    def test_target_reader_and_workflow_decoys_are_data_not_source(self):
+        self.prepare()
+        self.begin_cycle()
+        self.write("bin/li-work-artifacts.py", "raise RuntimeError('TARGET READER MUST NOT EXECUTE')\n")
+        self.write("lib/workflow.sh", "echo target-workflow-ran > TARGET-EXECUTED\nexit 97\n")
+        previous = self.env["LINTEL_SOURCE_ROOT"]
+        self.env["LINTEL_SOURCE_ROOT"] = self.repo.as_posix()
+        try:
+            for command in ("status", "wave", "resume", "verify"):
+                result = self.consume(command)
+                self.assertEqual(result["work_context"]["work_map"], self.fixture.work_map_path)
+                self.assertFalse((self.repo / "TARGET-EXECUTED").exists())
+            before = self.filesystem_state()
+            resumed = self.consume("resume", "--cycle-id", "original")
+            self.assertEqual(resumed["recovery"]["mode"], "persisted-cycle")
+            self.assertEqual(self.filesystem_state(), before)
+            self.assertFalse((self.repo / "TARGET-EXECUTED").exists())
+        finally:
+            self.env["LINTEL_SOURCE_ROOT"] = previous
+
+    def test_original_task_progress_is_not_clearance_or_a_new_acceptance_hash(self):
+        leaf_ids = self.grouped_map("spec-kit")
+        self.prepare()
+        binding = self.context["work"]
+        task_file = self.repo / self.fixture.work_map["tasks"]
+        task_file.write_text(task_file.read_text(encoding="utf-8").replace("[ ] " + leaf_ids[1],
+                                                                         "[x] " + leaf_ids[1]), encoding="utf-8")
+        selected = self.provider_context(package_id="BC1", leaf_ids=leaf_ids,
+                                         acceptance_paths=binding["acceptance_paths"])
+        self.assertEqual(selected["binding"], binding)
+        self.assertEqual(selected["incomplete_ids"], [])
+        self.assertFalse(selected["release_clearance"])
+        self.assertTrue(self.consume()["ok"])
+        (self.repo / self.paths["corroboration"]).unlink()
+        self.assertFalse(self.consume(expected=1)["ok"])
+        self.finalize()
+        task_file.write_text(task_file.read_text(encoding="utf-8").replace("Preserve result", "Change acceptance"),
+                             encoding="utf-8")
+        self.assertNotEqual(self.provider_context(package_id="BC1", leaf_ids=leaf_ids,
+                                                 acceptance_paths=binding["acceptance_paths"])["binding"], binding)
+        for command in ("status", "wave", "resume", "verify"):
+            self.assertFalse(self.consume(command, expected=1)["ok"])
+
+    def test_artifact_only_resume_keeps_host_modes_without_reading_runtime(self):
+        self.prepare(verification_only=True)
+        state = self.repo / ".claude/runtime/state/00-state.md"
+        state.write_text("not a selected cycle\n", encoding="utf-8")
+        retained = state.read_bytes()
+        self.env["LINTEL_CYCLE_ID"] = "ambient-decoy"
+        for mode in ("native", "sequenced", "none"):
+            result = self.consume("resume", "--host-capability", mode)
+            self.assertEqual(result["recovery"], {"mode": "artifact-only", "release_clearance": False})
+            self.assertEqual(result["frontier"]["states"][0]["state"], "complete")
+            self.assertFalse(result["release_clearance"])
+        (self.repo / self.lane["report"]).unlink()
+        (self.repo / self.lane["review"]).unlink()
+        for mode in ("native", "sequenced", "none"):
+            result = self.consume("resume", "--host-capability", mode)
+            self.assertEqual(result["frontier"]["host_capability"], mode)
+            self.assertEqual(result["frontier"]["dispatch_task_ids"], ["BC1"])
+            self.assertEqual(result["frontier"]["states"][0]["state"], "not_started")
+        self.assertEqual(state.read_bytes(), retained)
+
+    def test_cold_cycle_resume_uses_actual_provider_and_original_not_newer_initiative(self):
+        self.grouped_map("spec-kit")
+        self.prepare()
+        decoy = self.decoy_map()
+        self.begin_cycle()
+        self.begin_cycle("newer-decoy", decoy, phase="SENSE")
+        direct = json.loads(self.workflow('workflow_resume "$1" "$2"\n',
+                                         "original", self.fixture.work_map_path).stdout)
+        before = self.filesystem_state()
+        result = self.consume("resume", "--cycle-id", "original", "--map", self.fixture.work_map_path)
+        self.assertEqual(result["recovery"], {"mode": "persisted-cycle", **direct})
+        self.assertEqual(result["recovery"]["phase"], "BUILD")
+        self.assertEqual(result["recovery"]["operation"], "build")
+        self.assertEqual(result["recovery"]["profile"], self.reference)
+        self.assertEqual(result["recovery"]["required_policy"], self.policy)
+        self.assertFalse(result["recovery"]["release_clearance"])
+        self.assertEqual(result["work_context"]["packages"]["BC1"]["leaf_ids"], ["T011", "T027"])
+        self.assertEqual(result["frontier"]["states"][0]["state"], "complete")
+        self.assertEqual(self.filesystem_state(), before)
+
+    def test_requested_absent_or_other_cycle_never_falls_back_or_executes_identifiers(self):
+        self.prepare()
+        decoy = self.decoy_map()
+        self.begin_cycle()
+        self.begin_cycle("other", decoy, phase="SENSE")
+        before = self.filesystem_state()
+        for cycle in ("missing", "other", "original; touch CYCLE-INJECTION"):
+            with self.subTest(cycle=cycle):
+                rejected = self.consume("resume", "--cycle-id", cycle, expected=2)
+                self.assertFalse(rejected["ok"])
+                self.assertIn("work.resume", {item["code"] for item in rejected["diagnostics"]})
+                self.assertNotIn("recovery", rejected)
+                self.assertEqual(self.filesystem_state(), before)
+        rejected = self.consume("resume", "--cycle-id", "", expected=1)
+        self.assertFalse(rejected["ok"])
+        self.assertEqual(self.filesystem_state(), before)
+
+    def test_missing_or_drifted_resume_pin_emits_diagnostics_without_any_filesystem_write(self):
+        self.begin_cycle()
+        audit = self.repo / ".claude/runtime/audit"
+        self.assertEqual(list(audit.iterdir()), [])
+        audit.rmdir()
+        global_audit = self.config.home / "audit"
+        self.assertFalse(global_audit.exists())
+        pin = native_io_path(profile.context_path(self.config))
+        retained = pin.read_bytes()
+        declaration = self.repo / ".claude/profile-requirements.json"
+        for condition in ("missing", "drift"):
+            with self.subTest(condition=condition):
+                if condition == "missing":
+                    pin.unlink()
+                else:
+                    self.write_json(".claude/profile-requirements.json",
+                                    {"schema_version": 1, "required_pack": "unavailable-synthetic-profile"})
+                try:
+                    before = self.filesystem_state()
+                    rejected = self.consume("resume", "--cycle-id", "original", expected=2)
+                    self.assertFalse(rejected["ok"])
+                    self.assertIn("not-persisted", self.last_stderr)
+                    event = next(line for line in self.last_stderr.splitlines()
+                                 if line.startswith("lintel-swarm resume diagnostic (not-persisted):"))
+                    self.assertEqual(shlex.split(event.split(":", 1)[1]), [
+                        "pack-resolver", "pack_resolver_fail", "msg=operation=verify profile-context-unresolved",
+                    ])
+                    self.assertEqual(self.filesystem_state(), before)
+                    self.assertFalse(audit.exists())
+                    self.assertFalse(global_audit.exists())
+                    if condition == "missing":
+                        self.assertFalse(pin.exists())
+                finally:
+                    if condition == "missing":
+                        pin.write_bytes(retained)
+                    else:
+                        declaration.unlink()
+
+    def test_saved_profile_generation_and_policy_mismatches_preserve_resume_state(self):
+        self.begin_cycle()
+        ledger = self.repo / ".claude/runtime/state/00-state.md"
+        original = ledger.read_text(encoding="utf-8")
+        reference = deepcopy(self.reference)
+        reference["generation"] += 1
+        policy = deepcopy(self.policy)
+        policy["version"] = "different-synthetic-policy"
+        for field, replacement in (("profile_reference", reference), ("required_policy", policy)):
+            with self.subTest(field=field):
+                lines = [field + ": " + review.canonical_json(replacement) if line.startswith(field + ":")
+                         else line for line in original.splitlines()]
+                ledger.write_text("\n".join(lines) + "\n", encoding="utf-8")
+                before = self.filesystem_state()
+                self.assertFalse(self.consume("resume", "--cycle-id", "original", expected=2)["ok"])
+                self.assertEqual(self.filesystem_state(), before)
+        ledger.write_text(original, encoding="utf-8")
+
+    def test_truncated_transition_preserves_interrupted_phase_despite_complete_lane(self):
+        self.prepare()
+        self.begin_cycle()
+        self.workflow('state_append BUILD DONE cycle_id=original next=REVIEW\n')
+        ledger = self.repo / ".claude/runtime/state/00-state.md"
+        ledger.write_bytes(b"\n".join(ledger.read_bytes().splitlines()[:-1]) + b"\n")
+        before = self.filesystem_state()
+        result = self.consume("resume", "--cycle-id", "original")
+        self.assertEqual(result["recovery"]["phase"], "BUILD")
+        self.assertFalse(result["recovery"]["release_clearance"])
+        self.assertEqual(result["frontier"]["states"][0]["state"], "complete")
+        self.assertEqual(self.filesystem_state(), before)
+
+    def test_cycle_profile_cannot_be_replaced_by_another_valid_shared_context(self):
+        self.prepare()
+        other = replace(self.config, context_id="second-valid-context")
+        self.assert_isolation()
+        other_reference = profile.profile_reference(profile.load_profile_context(other, create=True))
+        self.begin_cycle(config=other)
+        before = self.filesystem_state()
+        rejected = self.consume("resume", "--cycle-id", "original", expected=1)
+        self.assertEqual(rejected["recovery"]["profile"], other_reference)
+        self.assertEqual(rejected["frontier"]["states"][0]["state"], "awaiting_shared_evidence")
+        self.assertEqual(self.filesystem_state(), before)
+        self.config, self.reference = other, other_reference
+        self.prepare()
+        self.assertTrue(self.consume("resume", "--cycle-id", "original")["ok"])
+
+    def test_explicit_state_and_profile_file_are_used_without_ambient_reselection(self):
+        state = self.repo / ".claude/runtime/state explicit"
+        state.mkdir()
+        self.env["LINTEL_STATE_DIR"] = state.as_posix()
+        self.config = replace(self.config, context_file=profile.context_path(self.config))
+        self.assert_isolation()
+        self.reference = profile.profile_reference(profile.load_profile_context(self.config))
+        self.prepare(verification_only=True)
+        self.begin_cycle()
+        self.env["LINTEL_STATE_DIR"] = (self.repo / ".claude/runtime/unrelated-state").as_posix()
+        before = self.filesystem_state()
+        result = self.consume("resume", "--cycle-id", "original", "--state-dir", state)
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["recovery"]["profile"], self.reference)
+        self.assertEqual(result["recovery"]["phase"], "BUILD")
+        self.assertEqual(self.filesystem_state(), before)
+        self.assertFalse(self.consume("resume", "--cycle-id", "original", expected=2)["ok"])
+        self.assertFalse(self.consume("resume", "--state-dir", state, expected=1)["ok"])
+        self.assertEqual(self.filesystem_state(), before)
+
+    def test_cycle_resume_in_another_target_cannot_transfer_the_profile_pin(self):
+        self.prepare()
+        self.begin_cycle()
+        other = self.root / "other-target"
+        shutil.copytree(self.repo, other, ignore=shutil.ignore_patterns(".git"))
+        before = self.filesystem_state()
+        observed = self.run_process([
+            sys.executable, "-B", SOURCE / "bin/li-swarm.py", "resume", "--repo", other,
+            "--coord", self.fixture.coordination_path, "--cycle-id", "original",
+            "--state-dir", other / ".claude/runtime/state",
+            "--profile-home", self.config.home, "--profile-packs", self.config.packs,
+            "--profile-pointer", self.config.pointer,
+        ], expected=2)
+        self.assertFalse(json.loads(observed.stdout)["ok"])
+        self.assertEqual(self.filesystem_state(), before)
+
+    def test_cycle_aware_domain_data_and_later_rejection_keep_the_original_shared_gate(self):
+        self.prepare(domain=True)
+        self.begin_cycle()
+        before = self.filesystem_state()
+        result = self.consume("resume", "--cycle-id", "original")
+        domain = result["frontier"]["states"][0]["shared_evidence"]["domain"]
+        self.assertTrue(domain["ok"])
+        self.assertFalse(domain["release_clearance"])
+        self.assertEqual(domain["review"], "not_evaluated")
+        self.assertEqual(self.filesystem_state(), before)
+        path = self.repo / self.domain_result_path
+        retained = path.read_bytes()
+        path.unlink()
+        self.finalize()
+        self.assertFalse(self.consume("resume", "--cycle-id", "original", expected=1)["ok"])
+        path.write_bytes(retained)
+        self.finalize()
+        original = deepcopy(self.decision)
+        self.decision["status"] = "fail"
+        self.log()
+        self.write_json(self.paths["review"], original)
+        rejected = self.consume("resume", "--cycle-id", "original", expected=1)
+        self.assertEqual(rejected["frontier"]["states"][0]["state"], "awaiting_shared_evidence")
+        self.decision = original
+        self.log()
+        self.assertTrue(self.consume("resume", "--cycle-id", "original")["ok"])
+
+    def test_named_legacy_singleton_keeps_the_original_swarm_parser_contract(self):
+        self.lane["task_id"] = "core"
+        self.write("plan.md", "# Plan\n### core Core implementation\n")
+        self.fixture.save()
+        self.assertTrue(swarm.validate_coordination(self.repo, self.fixture.coordination_path).ok)
+        original = swarm.package_sources(self.repo, self.fixture.coordination)["core"]
+        self.assertEqual(original["leaf_ids"], ["core"])
+        for command in ("status", "wave", "resume"):
+            with self.subTest(command=command):
+                result = self.consume(command)
+                self.assertEqual(result["work_context"]["packages"]["core"], original)
+                self.assertFalse(result["work_context"]["release_clearance"])
 
 
 if __name__ == "__main__":

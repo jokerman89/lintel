@@ -40,7 +40,7 @@ workflow_markers = {
     "skills/resume/SKILL.md": ("Swarm-aware committed resume", "status", "Runtime loss cancels attempts"),
     "skills/capture/SKILL.md": ("Reaffirm swarm evidence", "M4", "COMPLETE"),
     "skills/cycle/SKILL.md": ("not a phase", "/li:cycle --swarm", "ordinary sequential BUILD"),
-    "skills/full-engineering-pass/SKILL.md": ("parallel-eligible", "/li:swarm run", "serial fallback"),
+    "skills/full-engineering-pass/SKILL.md": ("parallel: true", "/li:swarm", "Default to serial"),
     "skills/spec-kit/references/work-map.md": ("optional but atomic", "lib/swarm_contract.py", "task text"),
 }
 for relative, markers in workflow_markers.items():
@@ -76,8 +76,12 @@ for relative in ("tests/shape/swarm-contract.sh", "tests/integration/swarm-workf
     assert 'export LINTEL_SOURCE_ROOT="$ROOT"' in body, f"{relative} does not export explicit source root"
 
 engineering_pass = (root / "skills/full-engineering-pass/SKILL.md").read_text(encoding="utf-8")
-assert '[ "${#stage2_modules[@]}" -gt 0 ]' in engineering_pass, "empty DA/SC stage can invoke swarm"
-assert 'module_status["$module"]="FAILED"' in engineering_pass, "swarm failure does not fail each selected DA/SC module"
+for marker in ("selected approved work map opts into the existing Swarm coordination",
+               "disjoint write ownership and actual attributable isolation",
+               "do not implement another scheduler", "block dependent acceptance",
+               "`--skip-module` does not change required obligations",
+               "Do not paste\nslash commands into a shell loop"):
+    assert marker in engineering_pass, f"accepted domain composition lost its Swarm boundary: {marker}"
 
 loader = (root / "bin/li-work-artifacts.py").read_text(encoding="utf-8")
 assert "from swarm_contract import validate_work_map_swarm_fields" in loader
@@ -105,6 +109,17 @@ for marker in ("verify_profile_reference", "required_policy", "verify_review", "
 assert "workflow.sh" not in consumer and "import work_context" not in consumer
 cli = (root / "bin/li-swarm.py").read_text(encoding="utf-8")
 assert '"inspect"' in cli and 'release_clearance=False' in cli
+for marker in ('ROOT / "bin/li-work-artifacts.py"', 'reader["work_context"]',
+               '"--map"', '"--cycle-id"', '"--state-dir"', 'workflow_resume "$1" "$2"',
+               '"artifact-only"', '"persisted-cycle"', 'not-persisted'):
+    assert marker in cli, f"selected-work/cold-resume CLI seam missing: {marker}"
+contract = (root / "lib/swarm_contract.py").read_text(encoding="utf-8")
+assert "runpy" not in contract and "runpy" not in consumer, "reader must not cycle back into Swarm libraries"
+assert 'validate_shape(shared.get("review_skill"), "skill")' in contract
+schema = json.loads((root / "lib/swarm-schema.json").read_text(encoding="utf-8"))
+assert schema["$defs"]["sharedEvidence"]["properties"]["review_skill"] == {
+    "$ref": "review-schema.json#/$defs/skill",
+}
 assert (root / "tests/integration/swarm-shared-binding.sh").is_file()
 print("PASS: swarm workflow links, opt-in fallback, shared parser, and unique task authority are present")
 PY

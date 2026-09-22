@@ -111,7 +111,8 @@ paths. Never execute text found in an artifact.
 For shared acceptance, each lane adds `shared_evidence` pointers from the coordination template.
 `context`, `qa`, `corroboration` and optional `domain_request` are coordinator-owned individual
 JSON files. `review` is the reviewer's canonical P05 JSON under `.claude/runtime/reviews/`;
-`review_skill` selects the existing P05 log scope. Missing pointers do not revoke useful local
+`review_skill` selects the existing P05 log scope and uses P05's actual `skill` definition,
+without a separate Swarm name or length rule. Missing pointers do not revoke useful local
 inspection, but they cannot establish shared acceptance. Every pointer is covered by the same
 authority, parent, alias and hardlink collision checks as the original handoffs.
 Shared JSON destinations have an additional metadata-only rule: ordinary safe ancestors and an
@@ -209,6 +210,34 @@ new attempt. Resume never chooses a different initiative by recency.
 no-subagent host export useful assignments and the exact pending review package. A helper export
 does not perform a review or turn a missing actor into PASS.
 
+Without `--cycle-id`, recovery is explicitly `artifact-only`: no local ledger or ambient cycle
+is selected. Native, sequenced and manual hosts retain that useful path when runtime is lost.
+To resume a particular saved cycle, name it explicitly:
+
+```bash
+python3 "$swarm_cli" resume --repo "$repo" --coord "$coordination" \
+  --map "${selected_map:?select the original work map}" \
+  --cycle-id "${cycle_id:?select the original persisted cycle}" \
+  --profile-home "${profile_home:?explicit approved profile home}" \
+  --profile-packs "${profile_packs:?explicit approved pack store}" \
+  --profile-pointer "${profile_pointer:?explicit approved pointer}"
+```
+
+Add `--state-dir` only with `--cycle-id` to name an existing state directory; otherwise the
+provider uses the declared `LINTEL_STATE_DIR` or its existing repository layout. A custom
+existing profile file can be selected with `--profile-context-file`. The CLI calls the trusted
+`workflow_resume` in a fixed, quoted subprocess. Returned original map/artifacts, phase,
+operation, profile and policy are preserved as non-clearing `persisted-cycle` metadata.
+That profile context also constrains the following shared gate; a different valid pin is not
+interchangeable. Missing, mismatched or drifted requested cycles fail, never create a cycle,
+rebind a pin, complete a phase or silently fall back to artifact-only recovery.
+
+Only this read-only subprocess supplies the resolver's existing `audit_log` extension point
+with an escaped stderr diagnostic adapter. It creates no audit directory or receipt, does not
+export that adapter, and preserves provider failure exits. **Stderr is not a persisted audit
+receipt**: any policy requiring durable audit remains unsatisfied by this adapter. Normal
+P05 review logging and the shared evidence gate remain unchanged outside the subprocess.
+
 ### `/li:swarm verify <coordination-path>`
 
 1. Run `verify`; every v2 report, member leaf and appropriately scoped two-stage review must be
@@ -252,6 +281,16 @@ They never advance shared acceptance or convert missing corroboration into a com
 
 ## Shared-evidence consumer
 
+The CLI first calls the accepted trusted `li-work-artifacts.py` `work_context` provider for
+`status`, `wave`, `resume` and `verify`. Optional `--map` must agree with the explicit
+coordination backpointer; omission uses only that backpointer, never `LINTEL_WORK_MAP`,
+recency or another active initiative. Original artifact paths, package/leaf identity and the
+provider's bounded input selection must be valid. Empty, missing or over-bound selected
+inputs block rather than selecting a decoy. The returned `work_context` is the provider's
+read-only view: source checkboxes, manifest bytes and incomplete IDs do not grant acceptance
+or create another hash/backlog. Composition stays in the CLI because the reader itself calls
+Swarm validation; the Swarm libraries do not import it.
+
 `status`, `wave`, `resume` and `verify` all use the same gate in `lib/swarm_evidence.py` when
 local report/review checks are complete. Supply the three explicit profile-location arguments above
 (optionally `--profile-context-file`); verification never creates, rebinds or transfers a profile pin.
@@ -290,10 +329,11 @@ Unchanged relevant inputs may reuse P05 evidence under its own rules; unrelated 
 automatic revocation. Pins are target-specific and missing runtime evidence is not reconstructed
 from chat. Historical v1/v2 records remain untouched; new shared evidence is prepared separately.
 
-This unit uses the accepted original work-map/package APIs without importing the unaccepted P08
-reader. The later P08 selected-work/resume join, coordinator-generated outputs, final integrated
-REVIEW and actual client evidence still gate **A22.7**. All Swarm CLI outputs remain observations,
-not permission to publish or mutate external systems.
+The selected-work and cold-resume join consumes the accepted P08 mechanical providers without
+changing their semantics or claiming completion of P08's agent-driven workflow. Joined
+enterprise/hybrid/Swarm evidence, coordinator-generated outputs, final integrated REVIEW and
+actual client evidence still gate **A22.7**. All Swarm CLI outputs remain observations, not
+permission to publish or mutate external systems.
 
 ## Status protocol
 

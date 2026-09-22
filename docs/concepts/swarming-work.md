@@ -186,9 +186,26 @@ process labels are not.
 Independent lanes may continue while a blocked lane's ownership domain is isolated and no dependency
 requires it.
 
-`resume` reconstructs status and the candidate frontier without private runtime state or another
-initiative's timestamps. Historical v1 reports remain untouched history; they never automatically
-become current content-bound clearance.
+Without an explicit cycle ID, `resume` reconstructs status and the candidate frontier as
+`artifact-only` recovery, without private runtime state, an ambient cycle or another initiative's
+timestamps. Historical v1 reports remain untouched history; they never automatically become
+current content-bound clearance.
+
+`resume --cycle-id <original-id>` additionally invokes the actual accepted `workflow_resume`
+provider before the shared gate. Its `persisted-cycle` metadata retains the original phase,
+operation, map/artifact paths, live profile and required policy; none is permission or phase
+completion. `--state-dir <existing-directory>` selects an explicit state location with that
+cycle; omission preserves the provider's declared state/layout resolution. Use
+`--profile-context-file` for an explicitly selected existing profile file. Wrong or absent cycles,
+changed paths, missing/drifted pins and mismatched policy fail without beginning a new cycle or
+rebinding a profile. The saved profile also constrains the subsequent lane evidence, so a
+different valid profile context cannot replace it.
+
+The fixed, quoted resume subprocess uses the resolver's existing diagnostic callback to send
+escaped events to stderr, not the file writer. It never exports that adapter or creates an
+audit directory, and returns the provider's actual failure exit. This diagnostic is **not a
+persisted audit receipt** and cannot satisfy a durable-audit policy. P05's normal log writer,
+latest-review reader and all mandatory evidence checks remain unchanged outside that subprocess.
 
 ## Result identity
 
@@ -228,8 +245,9 @@ shared review. Never substitute a normalized local digest for its raw content id
 ## Shared provider evidence
 
 Each lane may declare `shared_evidence` with `context`, `review`, `qa`, `corroboration`,
-`domain_request` and `review_skill`. All values except the skill are literal JSON-file pointers;
-corroboration and domain request may be null when genuinely inapplicable. Context, QA,
+`domain_request` and `review_skill`. The skill consumes P05's canonical definition and validator
+without a second name/length rule. Other values are literal JSON-file pointers; corroboration
+and domain request may be null when genuinely inapplicable. Context, QA,
 corroboration and domain request are coordinator-owned; canonical shared review JSON is
 reviewer-owned under `.claude/runtime/reviews/`. No pointer can acquire mapped authority,
 another artifact, a reducer or an aliased physical file.
@@ -252,7 +270,15 @@ coverage, siblings, misleading textual prefixes and file-as-parent claims remain
 A parent deleted by the reviewed change remains covered when P05 binds its former tracked
 descendants; the consumer does not require recreating the directory or replacing valid evidence.
 
-`status`, `wave`, `resume` and `verify` consume one common gate: current P07 reference and exact
+All four accepting CLI commands first consume the actual trusted P08 `work_context` view.
+Optional `--map` must agree with the explicit coordination backpointer; without it that
+backpointer alone selects the work. Empty/missing inputs, incomplete package membership or the
+provider's file/byte bound are not repaired by choosing another initiative. Original paths and
+IDs remain authoritative; the returned manifest and source-status checkboxes are non-clearing
+data, not an additional review hash or backlog. The CLI composes this reader, avoiding a
+circular import back into the Swarm library that the reader already uses.
+
+`status`, `wave`, `resume` and `verify` then consume one common gate: current P07 reference and exact
 required policy, actual P05 review validation, the existing log-backed latest-review reader, and
 same-context QA. They require explicit `--profile-home`, `--profile-packs`, `--profile-pointer`
 and optional `--profile-context-file`; they never bootstrap/rebind missing pins. Local-only results
@@ -290,9 +316,10 @@ branch, run focused integration checks, and hand the reconciled tree to ordinary
 repeats specification, quality and active-pack compliance across the full diff. Lane reviews never
 replace that final integrated gate.
 
-P05/P07/P09 consumption uses accepted providers in this unit; newer P08 selected-work/resume
-binding is still the explicitly open A22.7 follow-up. No unaccepted lifecycle helper is imported.
-The current consumer is not a claim that final Universal integration/client acceptance is complete.
+P05/P07/P08/P09 consumption uses accepted providers. The P08 link covers mechanical selection and
+explicit cold-resume identity, not its separate agent-driven workflow acceptance. Domain results
+still do not prove a live database or specialist action. Final A22.7 requires joined evidence
+and independent integrated review; this consumer is not Universal or client acceptance.
 
 Swarm completion does not authorize a push, deployment, production change or other external
 mutation. Those actions retain exactly the same approval and compliance requirements they would have
