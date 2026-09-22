@@ -305,6 +305,71 @@ test('extraction preserves trim, numeric and multiple values without guessing lo
   assert.equal(result.errors.length, 2);
 });
 
+for (const [text, expected] of [['$.50', 0.5], ['-.50', -0.5], ['-$9.50', -9.5]]) {
+  test(`numeric extraction preserves the whole signed amount: ${text}`, async () => {
+    const result = await extractPage({ read: async () => ({
+      url: 'https://app.example.test/', elements: [{ text }],
+    }) }, { fields: [{ name: 'amount', selector: '.amount', transform: 'number_extract' }] });
+    assert.deepEqual(result, {
+      url: 'https://app.example.test/', fields: { amount: expected }, errors: [], ok: true,
+    });
+  });
+}
+
+test('numeric extraction accepts complete ordinary and fractional amounts', async () => {
+  for (const [text, expected] of [
+    ['$99.50', 99.5], ['-9.50', -9.5], ['+9.50', 9.5], ['0.50 USD', 0.5],
+    ['-0.50', -0.5], ['+.50', 0.5], ['$-.50', -0.5], ['-$.50', -0.5],
+    ['+$9.50', 9.5], [' $ -0.50 ', -0.5], ['9.5 kg', 9.5], ['0', 0],
+  ]) {
+    const result = await extractPage({ read: async () => ({
+      url: 'https://app.example.test/', elements: [{ text }],
+    }) }, { fields: [{ name: 'amount', selector: '.amount', transform: 'number_extract' }] });
+    assert.deepEqual(result.fields, { amount: expected }, text);
+    assert.equal(result.ok, true, text);
+    assert.deepEqual(result.errors, [], text);
+  }
+});
+
+test('numeric extraction rejects incomplete, ambiguous and unsupported forms without partial values', async () => {
+  for (const text of [
+    '', 'NaN', 'Infinity', '1e3', '1e', '1,234.50 EUR', '1 234.50', '1\u00a0234.50',
+    '1,50', '1.2.3', '9.50 10.50', '1-2', '--9.50', '-$-9.50', '++9', '+-9',
+    '.$9.50', '9.', '0x10', '0b10', '1_000', '(9.50)', '\u22129.50', '$.', '-.',
+    '--.50', '9/10', '9'.repeat(400),
+  ]) {
+    const result = await extractPage({ read: async () => ({
+      url: 'https://app.example.test/', elements: [{ text }],
+    }) }, { fields: [{ name: 'amount', selector: '.amount', transform: 'number_extract' }] });
+    assert.equal(result.ok, false, text);
+    assert.deepEqual(result.fields, { amount: null }, text);
+    assert.equal(result.errors.length, 1, text);
+    assert.equal(result.errors[0].field, 'amount', text);
+    assert.match(result.errors[0].reason, /numeric|Numeric/, text);
+  }
+});
+
+test('numeric errors preserve multi, text, trim and prototype-like field names', async () => {
+  const result = await extractPage({ read: async selector => ({
+    url: 'https://app.example.test/',
+    elements: (selector === 'amounts' ? ['$.50', '-$9.50'] :
+      selector === 'invalid' ? ['$.50', '--9.50'] : ['  unchanged text  '])
+      .map(text => ({ text })),
+  }) }, { fields: [
+    { name: '__proto__', selector: 'amounts', transform: 'number_extract', multi: true },
+    { name: 'constructor', selector: 'invalid', transform: 'number_extract', multi: true },
+    { name: 'trimmed', selector: 'text', transform: 'trim' },
+    { name: 'text', selector: 'text', transform: 'text' },
+  ] });
+  assert.equal(Object.getPrototypeOf(result.fields), Object.prototype);
+  assert.deepEqual(result.fields.__proto__, [0.5, -9.5]);
+  assert.deepEqual(result.fields.constructor, []);
+  assert.equal(result.fields.trimmed, 'unchanged text');
+  assert.equal(result.fields.text, '  unchanged text  ');
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.errors.map(error => error.field), ['constructor']);
+});
+
 test('prior-run diff includes failures and is not confused by JSON property order', () => {
   assert.deepEqual(diffRecords([{ url: 'a', fields: { title: 'A' }, ok: true }],
     [{ ok: true, fields: { title: 'A' }, url: 'a' }]), { added: [], removed: [], changed: [] });

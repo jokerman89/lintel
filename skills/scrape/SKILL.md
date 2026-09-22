@@ -50,6 +50,12 @@ known transform. The delivered `scripts/extract.mjs` consumes this **parsed** sc
 uses the same browser's `read` operation, and implements trim, text and
 number_extract without evaluating supplied code. Ambiguous numeric strings produce
 an explicit field error; do not guess locale/currency or silently emit NaN.
+`number_extract` accepts one complete decimal amount, including `.50`, with at most
+one ASCII sign before or after an optional currency symbol and an optional
+whitespace-separated alphabetic unit/currency label. It preserves the sign; it does
+not convert currencies. Grouping/locale separators, exponent notation, accounting
+parentheses, multiple amounts and unsupported decoration are explicit field errors,
+never partially parsed digit substrings.
 
 ## Workflow
 

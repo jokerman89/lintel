@@ -26,9 +26,11 @@ export function validateSchema(schema) {
 function transform(text, kind) {
   if (kind === 'text') return text;
   if (kind === 'trim') return text.trim();
-  const numbers = text.match(/[+-]?\d+(?:\.\d+)?/g);
-  if (numbers?.length !== 1 || /\d[,\s]\d/.test(text)) throw new Error('Ambiguous numeric field; specify a locale-aware method instead');
-  const value = Number(numbers[0]);
+  const amount = text.match(/^\s*([+-]?)\s*(?:\p{Sc}\s*)?([+-]?)\s*(\d+(?:\.\d+)?|\.\d+)(?:\s+[A-Za-z]+)?\s*$/u);
+  if (!amount || (amount[1] && amount[2])) {
+    throw new Error('Unsupported or ambiguous numeric field; specify a locale-aware method instead');
+  }
+  const value = Number(`${amount[1] || amount[2]}${amount[3]}`);
   if (!Number.isFinite(value)) throw new Error('Numeric field is not finite');
   return value;
 }
