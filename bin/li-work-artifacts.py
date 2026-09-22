@@ -69,7 +69,7 @@ def work_context(
 ) -> dict:
     """Derive a read-only view of original artifacts, not another work/status authority."""
     from context_safety import checked_root, read_owned, select_files
-    from swarm_contract import _task_sources, package_sources
+    from swarm_contract import _task_sources, load_swarm_contract, package_sources
 
     root = checked_root(root)
     mapping = load_work_map(root, map_path)
@@ -77,15 +77,16 @@ def work_context(
     artifacts = {key: mapping[key] for key in REQUIRED_ARTIFACTS}
     if mapping.get("constitution"):
         artifacts["constitution"] = mapping["constitution"]
-    if any(any(char in path for char in "\r\n\t") for path in [selected, *artifacts.values()]):
+    coordination = mapping.get("coordination")
+    context_paths = [selected, *artifacts.values(), *([coordination] if coordination else [])]
+    if any(any(char in path for char in "\r\n\t") for path in context_paths):
         raise ValueError("Selected paths contain control characters and cannot be carried in the ledger")
-    manifest = select_files(root, paths=[selected, *artifacts.values(), *warm_paths],
+    manifest = select_files(root, paths=[*context_paths, *warm_paths],
                             max_files=max_files, max_bytes=max_bytes)
     if manifest["status"] != "selected":
         raise ValueError(f"Selected work input is incomplete: {manifest['unmatched']}")
     present = {item["path"] for item in manifest["files"]}
-    required = {selected, *(artifact_path(root, path).relative_to(root).as_posix()
-                            for path in artifacts.values())}
+    required = {artifact_path(root, path).relative_to(root).as_posix() for path in context_paths}
     if not required <= present:
         raise ValueError("A required work artifact was excluded by the bounded selector")
     texts = {}
@@ -98,9 +99,14 @@ def work_context(
     # Match package_sources' universal-newline read, without changing source
     # bytes or P03/P05 hashes.
     task_text = texts["tasks"].replace("\r\n", "\n").replace("\r", "\n")
-    tasks = _task_sources(task_text, set(leaf_ids))
+    contract = (load_swarm_contract(root, coordination) if coordination
+                else {"work_map": selected, "lanes": []})
+    if artifact_path(root, contract["work_map"]) != artifact_path(root, selected):
+        raise ValueError("Selected coordination points to a different work map")
+    packages = package_sources(root, contract)
+    recognized = {leaf for package in packages.values() for leaf in package["leaf_ids"]}
+    tasks = _task_sources(task_text, set(leaf_ids) | recognized)
     leaves = [key for key in tasks if not any(other.startswith(key + ".") for other in tasks)]
-    packages = package_sources(root, {"work_map": selected, "lanes": []})
     if not packages:
         packages = package_sources(root, {"work_map": selected,
                                           "lanes": [{"task_id": key} for key in leaves]})

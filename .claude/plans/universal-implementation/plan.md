@@ -269,7 +269,7 @@ full workflow/profile-value gates remain open.
   - [x] A08.2.b Render footer state from actual STARTING/BLOCKED/DONE status, not next-phase metadata.
   - [ ] A08.2.c Compose canonical phase entry without duplicate SENSE/SCOPE.
 - [ ] A08.3 Connect ANALYZE/CAPTURE/budget/resume to the same selected task source.
-  - [x] A08.3.a Share the selected-map reader and bounded artifact manifest using accepted parsers/selectors.
+  - [ ] A08.3.a Share the selected-map reader and bounded artifact manifest using accepted parsers/selectors.
   - [x] A08.3.b Persist selected-map/profile/required-policy resume identity without replacing original authority.
   - [ ] A08.3.c Wire ANALYZE/CAPTURE/BUILD/budget consumers to original paths and IDs.
     - [ ] A08.3.c.r1 Guard analysis-report selection through native identity before choosing output.
@@ -287,6 +287,10 @@ refinements do not close A08 parents, actual semantic/intake/orchestration or A1
 The broader lifecycle runner stays deferred until its remaining consumers join;
 the checked-in provider runner selects the actual accepted cases without deleting
 the other original test methods.
+The final Swarm CLI join reopens A08.3.a for an explicitly selected alphabetic
+legacy singleton omitted by the default reader. Its bounded correction is
+coordinator-owned in the recovery checkout; native fixture source `70469296`
+stays immutable. Prior tested provider controls remain their recorded evidence.
 
 ### A09 Concrete specialist modules (P09; R06)
 - [x] A09.1 Define shared work/profile/revision/result handoff envelope.
