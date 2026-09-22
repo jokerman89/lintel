@@ -6,6 +6,7 @@
 import assert from 'node:assert/strict';
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
+import { Worker } from 'node:worker_threads';
 import test from 'node:test';
 import {
   Admission, artifactName, BrowserSession, checkProvider, validateAction,
@@ -368,6 +369,58 @@ test('numeric errors preserve multi, text, trim and prototype-like field names',
   assert.equal(result.fields.text, '  unchanged text  ');
   assert.equal(result.ok, false);
   assert.deepEqual(result.errors.map(error => error.field), ['constructor']);
+});
+
+test('numeric extraction consumes whitespace and decorated inputs within the existing read bound', async t => {
+  const worker = new Worker(`
+    const { parentPort, workerData } = require('node:worker_threads');
+    (async () => {
+      const { extractPage } = await import(workerData.moduleUrl);
+      const results = [];
+      for (const size of [1024, 4096, 65536]) {
+        const cases = [
+          ['whitespace', ' '.repeat(size), null],
+          ['currency-whitespace', '$' + ' '.repeat(size - 1), null],
+          ['invalid-dot', '$' + ' '.repeat(size - 3) + '..', null],
+          ['duplicate-sign', '-' + ' '.repeat(size - 7) + '$-9.50', null],
+          ['leading-whitespace', ' '.repeat(size - 4) + '-.50', -0.5],
+          ['signed-currency', '-' + ' '.repeat(size - 6) + '$9.50', -9.5],
+          ['fraction', '$' + ' '.repeat(size - 4) + '.50', 0.5],
+          ['long-unit', '9.5 ' + 'a'.repeat(size - 4), 9.5],
+        ];
+        for (const [name, text, expected] of cases) {
+          const started = performance.now();
+          const result = await extractPage({ read: async () => ({
+            url: 'https://app.example.test/', elements: [{ text }],
+          }) }, { fields: [{ name: 'amount', selector: '.amount', transform: 'number_extract' }] });
+          results.push({ name, size, elapsedMs: performance.now() - started, expected, result });
+        }
+      }
+      parentPort.postMessage(results);
+    })();
+  `, { eval: true, workerData: {
+    moduleUrl: new URL('../../skills/scrape/scripts/extract.mjs', import.meta.url).href,
+  } });
+  let timer;
+  try {
+    const results = await new Promise((resolve, reject) => {
+      timer = setTimeout(() => reject(new Error('Numeric probe exceeded the observed 5000 ms cutoff')), 5000);
+      worker.once('message', resolve);
+      worker.once('error', reject);
+      worker.once('exit', code => {
+        if (code !== 0) reject(new Error(`Owned numeric worker exited ${code}`));
+      });
+    });
+    for (const { name, size, expected, result } of results) {
+      assert.equal(result.fields.amount, expected, `${name}/${size}`);
+      assert.equal(result.ok, expected !== null, `${name}/${size}`);
+      assert.equal(result.errors.length, expected === null ? 1 : 0, `${name}/${size}`);
+    }
+    t.diagnostic(JSON.stringify(results.map(({ name, size, elapsedMs }) => ({ name, size, elapsedMs }))));
+  } finally {
+    clearTimeout(timer);
+    await worker.terminate();
+  }
 });
 
 test('prior-run diff includes failures and is not confused by JSON property order', () => {

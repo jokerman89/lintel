@@ -56,6 +56,9 @@ whitespace-separated alphabetic unit/currency label. It preserves the sign; it d
 not convert currencies. Grouping/locale separators, exponent notation, accounting
 parentheses, multiple amounts and unsupported decoration are explicit field errors,
 never partially parsed digit substrings.
+Whitespace, signs, the optional currency symbol, digits and trailing label are
+consumed by one forward cursor. Invalid whitespace/decorated fields within the
+browser's existing read bound do not enter a backtracking regular expression.
 
 ## Workflow
 

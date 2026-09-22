@@ -26,11 +26,54 @@ export function validateSchema(schema) {
 function transform(text, kind) {
   if (kind === 'text') return text;
   if (kind === 'trim') return text.trim();
-  const amount = text.match(/^\s*([+-]?)\s*(?:\p{Sc}\s*)?([+-]?)\s*(\d+(?:\.\d+)?|\.\d+)(?:\s+[A-Za-z]+)?\s*$/u);
-  if (!amount || (amount[1] && amount[2])) {
+  const invalid = () => {
     throw new Error('Unsupported or ambiguous numeric field; specify a locale-aware method instead');
+  };
+  if (typeof text !== 'string') invalid();
+  let cursor = 0;
+  let sign = '';
+  const whitespace = () => {
+    while (cursor < text.length && /\s/u.test(text[cursor])) cursor++;
+  };
+  const takeSign = () => {
+    if (text[cursor] === '+' || text[cursor] === '-') {
+      if (sign) invalid();
+      sign = text[cursor++];
+      whitespace();
+    }
+  };
+  const digits = () => {
+    const start = cursor;
+    while (cursor < text.length && text.charCodeAt(cursor) >= 48 && text.charCodeAt(cursor) <= 57) cursor++;
+    return cursor - start;
+  };
+  whitespace();
+  takeSign();
+  if (cursor < text.length) {
+    const symbol = String.fromCodePoint(text.codePointAt(cursor));
+    if (/^\p{Sc}$/u.test(symbol)) {
+      cursor += symbol.length;
+      whitespace();
+    }
   }
-  const value = Number(`${amount[1] || amount[2]}${amount[3]}`);
+  takeSign();
+  const start = cursor;
+  const wholeDigits = digits();
+  if (text[cursor] === '.') {
+    cursor++;
+    if (!digits()) invalid();
+  } else if (!wholeDigits) invalid();
+  const end = cursor;
+  whitespace();
+  if (cursor < text.length) {
+    if (cursor === end) invalid();
+    const labelStart = cursor;
+    while (cursor < text.length && /[A-Za-z]/.test(text[cursor])) cursor++;
+    if (cursor === labelStart) invalid();
+    whitespace();
+  }
+  if (cursor !== text.length) invalid();
+  const value = Number(`${sign}${text.slice(start, end)}`);
   if (!Number.isFinite(value)) throw new Error('Numeric field is not finite');
   return value;
 }
