@@ -737,6 +737,204 @@ class MigrationInventory(LifecycleFixture):
         self.assertIn("v5-claude-home-layout", {row["slug"] for row in rows})
         self.assertEqual(self.inventory("--today", "2026-09-21", "--all"), rows)
 
+    def _layout_targets(self):
+        prefix = "layout-observation-"
+        padding = 147 - len(str(self.base)) - 1 - len(prefix)
+        self.assertGreaterEqual(padding, 0, "Keep the declared fixture depth; do not shorten an existing root.")
+        parent = self.base / (prefix + "x" * padding)
+        parent.mkdir()
+        targets = (parent / "short", parent / ("long-" + "x" * 103))
+        for target, length in zip(targets, (153, 256)):
+            native_io_path(target).mkdir()
+            self.assertEqual(len(str(target)), length)
+            self.assertFalse(native_io_path(target / ".git").exists())
+        return targets
+
+    def _layout_seed(self, target, relative, data):
+        path = native_io_path(target / relative)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(data)
+
+    def _layout_state(self):
+        import stat
+
+        base = native_io_path(self.base)
+        result = {}
+        for path in (base, *base.rglob("*")):
+            info = path.lstat()
+            result[path.relative_to(base).as_posix()] = {
+                "mode": info.st_mode, "attributes": getattr(info, "st_file_attributes", 0),
+                "size": info.st_size if stat.S_ISREG(info.st_mode) else None,
+                "sha256": hashlib.sha256(path.read_bytes()).hexdigest() if stat.S_ISREG(info.st_mode) else None,
+                "link": os.readlink(path) if path.is_symlink() else None,
+            }
+        return result
+
+    def _layout_inventory(self, target, *, error=False, locked=None):
+        home = target / ".claude/runtime/lintel-home"
+        jobs = target / ".claude/runtime/jobs"
+        env = dict(self.env, LINTEL_REPO_ROOT=str(target), LINTEL_HOME=str(home),
+                   LINTEL_PACKS_DIR=str(home / "packs"), LINTEL_ACTIVE_PACK_FILE=str(home / "packs/active-pack"),
+                   LINTEL_AUDIT_DIR=str(target / ".claude/runtime/audit"),
+                   LINTEL_JOBS_DIR=str(jobs), LINTEL_JOBS_ACTIVE=str(jobs / "_active.md"),
+                   LINTEL_JOBS_ARCHIVE=str(jobs / "_archive"),
+                   LINTEL_JOBS_REGISTRY=str(home / "jobs/_active.md"),
+                   LINTEL_PRIVATE_ROLES_DIR=str(home / "private/roles"),
+                   CLAUDE_CONFIG_DIR=str(Path(self.env["HOME"]) / ".claude"),
+                   COPILOT_HOME=str(Path(self.env["HOME"]) / ".copilot"),
+                   GSTACK_STATE_DIR=str(Path(self.env["HOME"]) / ".gstack"),
+                   PACK_CACHE_FILE=str(home / "profile-cache.json"), LINTEL_JOBS_NO_INIT="1")
+        env.pop("LINTEL_RECOVERY_STORE", None)
+        for key, value in env.items():
+            if ((key.startswith(("LINTEL_", "XDG_")) and key != "LINTEL_JOBS_NO_INIT") or key in
+                    ("HOME", "USERPROFILE", "APPDATA", "LOCALAPPDATA", "TEMP", "TMP", "TMPDIR",
+                     "CLAUDE_CONFIG_DIR", "COPILOT_HOME", "GSTACK_STATE_DIR",
+                     "PACK_CACHE_FILE", "GIT_CONFIG_GLOBAL")):
+                self.assertTrue(Path(value).is_relative_to(self.base), (key, value))
+        for path in (home / "profile.yaml", home / "sessions/profiles", home / "audit",
+                     target / ".claude/runtime", target / ".claude/runtime/profiles", self.caller):
+            self.assertTrue(path.is_relative_to(self.base), path)
+        self.assertEqual(env["HOME"], env["USERPROFILE"])
+        self.assertFalse(native_io_path(target / ".git").exists())
+        before = self._layout_state()
+        handle = None
+        if locked:
+            import ctypes
+            from ctypes import wintypes
+
+            kernel = ctypes.WinDLL("kernel32", use_last_error=True)
+            create = kernel.CreateFileW
+            create.argtypes = [wintypes.LPCWSTR, wintypes.DWORD, wintypes.DWORD, wintypes.LPVOID,
+                               wintypes.DWORD, wintypes.DWORD, wintypes.HANDLE]
+            create.restype = wintypes.HANDLE
+            kernel.CloseHandle.argtypes = [wintypes.HANDLE]
+            kernel.CloseHandle.restype = wintypes.BOOL
+            handle = create(str(native_io_path(target / locked)), 0x80000000, 0, None, 3, 0x80, None)
+            self.assertNotEqual(handle, wintypes.HANDLE(-1).value, ctypes.get_last_error())
+        try:
+            result = subprocess.run(
+                [OPTIONS.bash, "--noprofile", "--norc", "-c", "set -euo pipefail\n" + self.skill_block],
+                cwd=self.caller, env=env, capture_output=True, text=True, encoding="utf-8", timeout=45)
+        finally:
+            if handle is not None:
+                self.assertTrue(kernel.CloseHandle(handle))
+        after = self._layout_state()
+        print(json.dumps({
+            "case": self._testMethodName, "target": str(target), "locked": locked,
+            "lengths": [len(str(target)), len(str(target / ".claude/lintel-layout.yaml")),
+                        len(str(target / "tasks/lessons.md"))],
+            "argv": result.args, "environment": env, "exit": result.returncode,
+            "stdout": result.stdout, "stderr": result.stderr, "before": before, "after": after,
+        }, sort_keys=True))
+        self.assertEqual(after, before, "Migration observation must not mutate source, caller, home or target.")
+        self.assertNotIn("Traceback", result.stderr)
+        if error:
+            self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+            self.assertEqual(result.stdout, "")
+            self.assertIn("li-lifecycle:", result.stderr)
+            return result
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(result.stderr, "")
+        value = json.loads(result.stdout)
+        self.assertEqual(Path(value["target"]), target)
+        self.assertEqual(Path(value["catalog"]), self.catalog)
+        row, = [entry for entry in value["migrations"] if entry["slug"] == "v5-claude-home-layout"]
+        self.assertEqual(row["schedule"], "overdue")
+        self.assertTrue(all(entry["observation"] == "unknown" for entry in value["migrations"]
+                            if entry["slug"] != row["slug"]))
+        self.assertEqual(set(row), {"slug", "started", "grace_until", "schedule", "observation",
+                                   "description", "layout_version", "legacy", "stubs"})
+        return {key: row[key] for key in ("observation", "layout_version", "legacy", "stubs")}
+
+    def test_layout_observation_real_skill_matches_short_and_long_review_fixture(self):
+        seeds = {
+            ".claude/lintel-layout.yaml": (
+                b"# Consumer marker; legacy content still exists.\nlayout_version: 5\n", 66,
+                "b6ff0ad8776fa67e263c5c694a9f44c3f41f1a62399863862fa20c4c117e99ee"),
+            "tasks/lessons.md": (
+                b"# Consumer lessons\r\nUnmigrated knowledge must remain visible.\r\n", 63,
+                "34c67a8e8ed5b15d967750f15c1b5a628bd0f714501a1ce85b1f1144f0dad7c3"),
+        }
+        for target in self._layout_targets():
+            for relative, (data, size, digest) in seeds.items():
+                self.assertEqual((len(data), hashlib.sha256(data).hexdigest()), (size, digest))
+                self._layout_seed(target, relative, data)
+            with self.subTest(length=len(str(target))):
+                self.assertEqual(self._layout_inventory(target), {
+                    "observation": "incomplete", "layout_version": 5,
+                    "legacy": ["tasks/lessons.md"], "stubs": [],
+                })
+
+    def test_layout_observation_distinguishes_absent_current_and_unmigrated_targets(self):
+        for target in self._layout_targets():
+            stages = (
+                (None, None, "not_applicable", None, []),
+                (None, b"Legacy consumer lessons.\r\n", "needs_migration", None, ["tasks/lessons.md"]),
+                (b"layout_version: 4\n", b"Legacy consumer lessons.\r\n", "needs_migration", 4, ["tasks/lessons.md"]),
+                (b"layout_version: 5\n", b"Legacy consumer lessons.\r\n", "incomplete", 5, ["tasks/lessons.md"]),
+                (b"layout_version: 5\n# Consumer comment.\n", None, "current", 5, []),
+                (b"layout_version: 6\n", None, "current", 6, []),
+                (None, None, "not_applicable", None, []),
+            )
+            for marker, lessons, observation, version, legacy in stages:
+                for relative, data in ((".claude/lintel-layout.yaml", marker), ("tasks/lessons.md", lessons)):
+                    path = native_io_path(target / relative)
+                    if data is not None:
+                        self._layout_seed(target, relative, data)
+                    elif path.exists():
+                        path.unlink()
+                with self.subTest(length=len(str(target)), observation=observation, version=version):
+                    self.assertEqual(self._layout_inventory(target), {
+                        "observation": observation, "layout_version": version, "legacy": legacy, "stubs": [],
+                    })
+
+    def test_layout_observation_retains_nested_hidden_legacy_and_redirects(self):
+        for target in self._layout_targets():
+            seeds = {
+                ".claude/lintel-layout.yaml": b"layout_version: 5\n",
+                "tasks/lessons.md": b"> Moved to .claude/memory/lessons.md (retained history).\n",
+                ".claude/memory/lessons.md": b"Retained migrated lessons.\n",
+                "docs/adr/README.md": b"> Moved to .claude/decisions/ (retained history).\n",
+                "docs/adr/nested/kept.md": b"> Moved to .claude/decisions/nested/kept.md (retained history).\n",
+                ".claude/decisions/nested/kept.md": b"# Retained migrated decision\n",
+                "docs/adr/nested/unresolved.md": b"> Moved to .claude/decisions/nested/unresolved.md (missing).\n",
+                "docs/adr/nested/.hidden.md": b"# Hidden unmigrated decision\r\n",
+                ".lintel/state/nested/.hidden.json": b'{"unmigrated":true}\r\n',
+                ".lintel/state/visible.txt": b"Legacy state.\n",
+            }
+            for relative, data in seeds.items():
+                self._layout_seed(target, relative, data)
+            with self.subTest(length=len(str(target))):
+                row = self._layout_inventory(target)
+                self.assertEqual((row["observation"], row["layout_version"]), ("incomplete", 5))
+                self.assertEqual(row["legacy"], [".lintel/state/nested/.hidden.json", ".lintel/state/visible.txt",
+                                                 "docs/adr/nested/.hidden.md", "docs/adr/nested/unresolved.md"])
+                self.assertEqual(sorted(row["stubs"]), ["docs/adr/README.md", "docs/adr/nested/kept.md",
+                                                       "tasks/lessons.md"])
+
+    def test_layout_observation_refuses_malformed_nonfile_and_unreadable_inputs(self):
+        for target in self._layout_targets():
+            for malformed in (b"layout_version: invalid\n", b"layout_version: 5\nlayout_version: 5\n", b"\xff"):
+                self._layout_seed(target, ".claude/lintel-layout.yaml", malformed)
+                with self.subTest(length=len(str(target)), marker=malformed):
+                    self._layout_inventory(target, error=True)
+            marker = native_io_path(target / ".claude/lintel-layout.yaml")
+            marker.unlink()
+            for relative in (".claude/lintel-layout.yaml", "tasks/lessons.md"):
+                path = native_io_path(target / relative)
+                path.mkdir(parents=True)
+                with self.subTest(length=len(str(target)), directory=relative):
+                    self._layout_inventory(target, error=True)
+                path.rmdir()
+            self._layout_seed(target, "docs/adr", b"A file cannot stand in for the legacy decision directory.\n")
+            with self.subTest(length=len(str(target)), invalid_directory="docs/adr"):
+                self._layout_inventory(target, error=True)
+            native_io_path(target / "docs/adr").unlink()
+            if os.name == "nt":
+                self._layout_seed(target, ".claude/lintel-layout.yaml", b"layout_version: 5\n")
+                with self.subTest(length=len(str(target)), exclusive_read_lock=True):
+                    self._layout_inventory(target, error=True, locked=".claude/lintel-layout.yaml")
+
 
 class NativeInstallLifecycle(unittest.TestCase):
     def setUp(self):

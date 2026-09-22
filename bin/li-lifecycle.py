@@ -471,35 +471,59 @@ def persona_sources(config: ProfileConfig) -> dict:
 
 
 def layout_observation(repo: Path) -> dict:
-    marker = safe_path(repo, ".claude/lintel-layout.yaml")
+    import stat
+
+    def observed_path(relative: str) -> tuple[Path, os.stat_result | None]:
+        path = safe_path(repo, relative)
+        try:
+            return path, native_io_path(path).lstat()
+        except FileNotFoundError:
+            return path, None
+
+    _, marker = observed_path(".claude/lintel-layout.yaml")
     version = None
-    if marker.exists():
+    if marker is not None:
         version = parse_manifest(read_owned(repo, ".claude/lintel-layout.yaml")[0].decode("utf-8")).get("layout_version")
         if type(version) is not int or version < 1:
             raise ValueError("Invalid layout_version; preserve the layout marker and inspect it.")
     legacy, stubs = [], []
     for old, new in KNOWLEDGE_MOVES + (("docs/adr/README.md", ".claude/decisions/"),):  # legacy-fallback-ok
-        path = safe_path(repo, old)
-        if path.exists():
+        _, observed = observed_path(old)
+        if observed is not None:
             data, _ = read_owned(repo, old, MAX_ROLE_BYTES)
             if data.startswith(f"> Moved to {new} (".encode("utf-8")):
                 stubs.append(old)
             else:
                 legacy.append(old)
     for folder in ("docs/adr", ".lintel/state"):
-        path = safe_path(repo, folder)
-        if path.is_dir():
-            for entry in path.rglob("*"):
+        path, observed = observed_path(folder)
+        if observed is None:
+            continue
+        if not stat.S_ISDIR(observed.st_mode):
+            raise ValueError(f"Legacy location is not a directory: {folder}")
+        pending = [path]
+        while pending:
+            directory = pending.pop()
+            for native_entry in native_io_path(directory).iterdir():
+                entry = directory / native_entry.name
                 relative = entry.relative_to(repo).as_posix()
-                safe_path(repo, relative)
-                if entry.is_file() and relative not in stubs and relative not in legacy:
+                _, observed = observed_path(relative)
+                if observed is None:
+                    raise ValueError(f"Layout entry disappeared during inspection: {relative}")
+                if stat.S_ISDIR(observed.st_mode):
+                    pending.append(entry)
+                elif not stat.S_ISREG(observed.st_mode):
+                    raise ValueError(f"Legacy entry is not a regular file: {relative}")
+                elif relative not in stubs and relative not in legacy:
                     destination_path = ".claude/decisions/" + entry.relative_to(path).as_posix()
                     if folder == "docs/adr" and entry.suffix == ".md" and read_owned(repo, relative)[0].startswith(  # legacy-fallback-ok
                         f"> Moved to {destination_path} (".encode("utf-8")
-                    ) and safe_path(repo, destination_path).is_file():
-                        stubs.append(relative)
-                    else:
-                        legacy.append(relative)
+                    ):
+                        _, destination = observed_path(destination_path)
+                        if destination is not None and stat.S_ISREG(destination.st_mode):
+                            stubs.append(relative)
+                            continue
+                    legacy.append(relative)
     status = ("incomplete" if version and version >= 5 else "needs_migration") if legacy else (
         "current" if version and version >= 5 else "not_applicable")
     return {"observation": status, "layout_version": version, "legacy": sorted(legacy), "stubs": stubs}

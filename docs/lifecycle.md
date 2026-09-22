@@ -207,3 +207,8 @@ same result; source structure checks are separate from installation and live-hos
 archived schedules are distinct from actual target observations. Missing catalogs and
 malformed metadata are errors; absent detectors are unknown. `v4-migrate` remains an
 opt-in historical inspection and explicit pack-switch route, not a neutral fallback.
+
+Layout observations use checked, same-location native I/O for the marker, legacy files
+and nested directories. Missing paths are distinguished from inspection failures;
+malformed, unreadable or disappearing entries produce an explicit error instead.
+This reader does not migrate files, create a transaction or alter retained stubs.
