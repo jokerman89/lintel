@@ -42,9 +42,9 @@ from the reviewed historical merge `40c2795`. Current implementation ownership:
 | P06 host adapters | `324863ff-e7cf-4abf-b449-04dd0f096170` | Component ACCEPTED/integrated `36593cd`; provider `7425960`, final review `1067da29`; idle |
 | P07 profile context | `b9352dfe-1c1e-4ea3-b7d9-0fd008d39b3d` | Long-path repair ACCEPTED by `a7450597`, integrated `c344133` with reports; joined checks pass, idle |
 | P08 work lifecycle | `f2c305ac-e8b0-4b02-b6cd-c7de598964cf` | Combined `2f4cc38` / report `8eb00b87` frozen; intake verified; same-reviewer complete selected SPEC then eligible QUALITY dispatched |
-| P09 specialist depth | `0fe8dc1e-8c6f-4d4a-af68-80696067be27` | First knowledge/preservation unit active from `56df03d`; shared runtime/result binding still waits for P08 |
+| P09 specialist depth | `0fe8dc1e-8c6f-4d4a-af68-80696067be27` | Knowledge product `4a9b946` / report `6581339` frozen; staged-content review dispatched; runtime binding still waits for P08 |
 | P10 installer lifecycle | `5ea6c88c-68c1-4712-8f55-adecdfe0061f` | `c1a38a03` SPEC FAIL P1 F02 preserved `3649dc5`; original owner's bounded producer-expectation repair is authorized |
-| P11 browser operations | `f413bdcb-e081-45e0-9524-7274b4391665` | A16-only unit active from `56df03d`; A14/shared design/frontend agents still gated |
+| P11 browser operations | `f413bdcb-e081-45e0-9524-7274b4391665` | A16 `d389905` / report `84f0d38` frozen BLOCKED; no native launch; bounded location-metadata observation only |
 
 All are `lintel-builder` sessions with explicit ownership, local commits, report paths
 and no remote authorization. P01/P02 and the owned P04-P07 components are accepted.
@@ -67,6 +67,7 @@ repair their own findings. All prior reports remain preserved in `reviews/` and 
 | P06 | Final `1067da29`; complete component SPEC/QUALITY PASS at `7425960`; integrated | `d2a89ac3-151a-4dc0-ab09-1f3a62465cab` |
 | P07 | Final `a7450597` accepts `4d001463`; integrated through `56de830`, earlier `a8de574`/`3d8e715` preserved | `a7d78944-c02c-4909-a060-2c4f2a754b00` |
 | P08 partial | Review exact `8eb00b87` / product `2f4cc38`; F01/F02/F03 and complete selected-subset gates remain open | `9dbf0a9b-750d-45c2-968c-41a5acb11c92` |
+| P09 content | Review exact `6581339` / `4a9b946`, knowledge-only SPEC then eligible QUALITY; no runtime/parent clearance | `447d97f5-7919-4433-8f65-a64016c0dbdf` |
 | P10 | `c1a38a03` rejects exact `4c0519e3` / `a559c9f` for P1 F02; F01 closed; QUALITY NOT STARTED | `1578dfd8-f239-4eba-989b-3c4bde3e5792` |
 
 ## Current combined review checkpoints
@@ -140,6 +141,19 @@ No no-op user-file entry, extra transaction-key set or new guard API is permitte
 Pre-admission marker drift must refuse; post-admission changes to an unmodified
 read dependency are explicitly outside the non-atomic contract, not claimed
 protected. Write-set races retain their full existing refusal requirement.
+
+P09 intake verified all 75 permitted paths, both report hashes, all 69 unchanged
+frontmatters and the 61 changed/eight exact-retained bodies. The 319-line report
+was read in full. An initial coordinator scope assertion wrongly excluded the
+authorized report draft already in the product; the corrected check passed with
+no source change. The distinct reviewer is active for staged content only.
+
+P11 intake verified the 11 source paths, separate report-only parent/path/blob,
+and read the full 275-line report (Git SHA-256 `370b64a7...`). Live execution remains
+blocked, not accepted from the 4+13 static checks. Offline comparison ruled out
+an evidenced argument-quoting/splitting defect and identified the unobserved native
+Windows default-folder dependency. Only the card's bounded native location-metadata
+observation is now allowed; no new browser launch or personal-folder inspection.
 
 ## Accepted local integrations
 
