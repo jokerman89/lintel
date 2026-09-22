@@ -102,6 +102,12 @@ their dependencies and specific later release.
 P13 may separately implement its compact metadata/catalog/helper first unit against
 existing accepted frontmatter/registry contracts; final optional installation,
 capability maturity/version mapping and generated reconciliation remain gated.
+Recovery staging: P04's shared-evidence consumer can use accepted P05/P07/P09
+without importing the pending P08 reader; its final work/resume join stays gated.
+After independent compact-discovery acceptance, P13 may implement the approved
+additive source-selection/preservation unit without waiting for unrelated format
+producers. Actual installed closure remains a separate accepted-P10 join. These
+are dependency-ready portions of existing outcomes, not extra initiatives.
 
 Each leaf below is a bounded change or scenario, intended for a short implementation
 step. If an actual leaf needs splitting, append stable sub-IDs before starting it and
