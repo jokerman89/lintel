@@ -791,3 +791,20 @@ user outcome before opening another repair card. Finish the already bounded safe
 installation/workflow corrections, then advance dependency-ready skill content and
 client experience. Infrastructure verification supports that outcome; it must not
 become a separate, expanding product. This does not waive existing safety or review gates.
+
+## L-039 - Name the actual nine-phase lifecycle
+
+**Date:** 2026-09-21
+
+**Context:** The operator challenged my "plan -> build -> resume" shorthand because
+it sounded like replacing Lintel's established workflow.
+
+**Correction:** The canonical cycle is SENSE -> SCOPE -> DEFINE -> DISCOVER -> PLAN
+-> BUILD -> REVIEW -> SHIP -> CAPTURE. Resume returns to the appropriate saved phase;
+it is not a phase or an alternative three-step architecture. The current source
+and frozen workflow candidate both retain that declaration.
+
+**Rule:** Distinguish the narrow surfaces being repaired from the product lifecycle.
+Use the complete canonical names when describing the cycle, preserve documented
+presets/entry points, and do not imply an architectural change through shorthand.
+Implementation or delivery authorization does not authorize replacing the lifecycle.

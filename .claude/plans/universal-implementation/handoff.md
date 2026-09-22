@@ -16,6 +16,10 @@ Updated 2026-09-20 by MasterSession.
   original main checkout and four older Swarming worker worktrees remain untouched.
 - Integration branch: `jokerman-microsoft-lintel-harness-preview`. Its historical branch
   label is not account authorization.
+- On 2026-09-21 the operator explicitly authorized finishing this initiative through
+  reviewed PR/CI/main merge and scoped cleanup. Preserve the nine-phase cycle,
+  useful content, original histories/reports and unrelated/unmerged work; no release,
+  deployment or broad personal/workspace deletion follows.
 
 ## Active work
 
@@ -37,8 +41,8 @@ from the reviewed historical merge `40c2795`. Current implementation ownership:
 | P05 review evidence | `2329e71f-cd9e-473b-94cf-41c579c29a88` | ACCEPTED by `33eac071`, integrated `c5c8f86`; current profile/review and focused gates pass, idle |
 | P06 host adapters | `324863ff-e7cf-4abf-b449-04dd0f096170` | Component ACCEPTED/integrated `36593cd`; provider `7425960`, final review `1067da29`; idle |
 | P07 profile context | `b9352dfe-1c1e-4ea3-b7d9-0fd008d39b3d` | Long-path repair ACCEPTED by `a7450597`, integrated `c344133` with reports; joined checks pass, idle |
-| P08 work lifecycle | `f2c305ac-e8b0-4b02-b6cd-c7de598964cf` | Root `171daa8` / report `723b067f` frozen, intake verified; bounded reviewed-core join authorized before combined review |
-| P10 installer lifecycle | `5ea6c88c-68c1-4712-8f55-adecdfe0061f` | Accepted-core consumer follow-up authorized `2180b55`, acknowledged; F01 closed, D01/D03/whole quality still open |
+| P08 work lifecycle | `f2c305ac-e8b0-4b02-b6cd-c7de598964cf` | Combined `2f4cc38` / report `8eb00b87` frozen; intake verified; same-reviewer complete selected SPEC then eligible QUALITY dispatched |
+| P10 installer lifecycle | `5ea6c88c-68c1-4712-8f55-adecdfe0061f` | Refusal product `a559c9f` / report `4c0519e3` frozen; intake verified; same-reviewer complete SPEC then first eligible whole QUALITY dispatched |
 
 All are `lintel-builder` sessions with explicit ownership, local commits, report paths
 and no remote authorization. P01/P02 and the owned P04-P07 components are accepted.
@@ -60,8 +64,33 @@ repair their own findings. All prior reports remain preserved in `reviews/` and 
 | P05 | Final `33eac071` accepts `b023e8c`; integrated `c5c8f86`; earlier rejections retained | `6ed9c7df-4845-4d70-88c7-f0746ab28059` |
 | P06 | Final `1067da29`; complete component SPEC/QUALITY PASS at `7425960`; integrated | `d2a89ac3-151a-4dc0-ab09-1f3a62465cab` |
 | P07 | Final `a7450597` accepts `4d001463`; integrated through `56de830`, earlier `a8de574`/`3d8e715` preserved | `a7d78944-c02c-4909-a060-2c4f2a754b00` |
-| P08 partial | `af5c939` SPEC FAIL preserved `92502e6`; same three findings open, quality NOT STARTED | `9dbf0a9b-750d-45c2-968c-41a5acb11c92` |
-| P10 | `00a0bef` closes F01 only, preserved `ab91c36`; complete spec/default preservation blocked, quality NOT STARTED | `1578dfd8-f239-4eba-989b-3c4bde3e5792` |
+| P08 partial | Review exact `8eb00b87` / product `2f4cc38`; F01/F02/F03 and complete selected-subset gates remain open | `9dbf0a9b-750d-45c2-968c-41a5acb11c92` |
+| P10 | Review exact `4c0519e3` / product `a559c9f`; F01 closed, remaining complete SPEC/whole QUALITY open | `1578dfd8-f239-4eba-989b-3c4bde3e5792` |
+
+## Current combined review checkpoints
+
+P08 report-only `8eb00b87a9a14da7eaf949d11f1d1b444e9ecd8d` is directly on
+`2f4cc38`. Intake verified the report-only path, full 1,088-line prefix, 368-line
+append, Git-LF hash `470eba9b...` and disclosed CRLF projection. The complete append
+was read. Final p8k4 is 22 passing commands including the explicit unchanged 26+2
+fixture split, not a green old c6 wrapper/full repository suite. All prior failures,
+host limits and A13 gates remain. The same reviewer owns
+`reviews/P08-combined-2f4cc38.md`, SPEC before eligible selected-subset QUALITY.
+
+P10 product `a559c9f5aefc62b3a2e6094e8c899d5f3ed55f70` is directly on
+`f7d2151`; report-only `4c0519e3ba3ba610d4db3f7f19e18a85531546d9` is its child.
+Intake verified the three authorized paths, report hash `9c2aec3e...`, four core
+blobs, all 29 original test ASTs and unchanged logical-C Git invocation. The entire
+report update was read. Builder final 2/2 refusal and 22/22 preservation are
+not independent acceptance. The same reviewer owns `reviews/P10-combined-a559c9f.md`,
+complete SPEC before the first eligible whole QUALITY. Git compatibility remains
+stopped; the operator-approved explicit refusal is the contract under review.
+
+The operator reinforced the nine-phase architecture. A read-only source check of
+both current HEAD and frozen `2f4cc38` confirms the full nine-step declaration and
+resume's utility status. An initial console print failed on Unicode output, not
+on product behavior; the ASCII-safe comparison passed without source changes.
+This is source evidence, not a waiver of lifecycle behavior review.
 
 ## Accepted local integrations
 
@@ -252,16 +281,19 @@ to continue P08-P14 and final P04 binding; do not stop the initiative at the fir
 
 ## Blockers and boundaries
 
-Only `jokerman89` may be used for authenticated GitHub operations. Local GitHub CLI and
-Git Credential Manager lookup found no stored credentials for that account. A separate
-anonymous public API read (curl defaults disabled, no credentials supplied) verified
-current main is still `28061e434be455ca02f135b73244eaf4f73f3a69` on 2026-09-20.
-Push, PR and authenticated CI operations still require the authorized identity. Do not reuse the rejected injected
-credentials or revive the abandoned lintel-harness repository operation.
-An additional anonymous lookup did not establish the old local `azureflipper` label as
-the authorized account (404); no credential was retrieved or used on that basis.
+Only `jokerman89` may be used for authenticated GitHub operations. Earlier CLI/GCM
+lookups were unavailable; the operator explicitly completed the new personal login
+on 2026-09-21. With rejected injected tokens cleared and the credential selected by
+hostname/user, `/user` returned `jokerman89`. Authenticated repository reads confirm
+push/admin permission, merge-commit support and current main still
+`28061e434be455ca02f135b73244eaf4f73f3a69`. No repository mutation occurred in that
+check. Verify the actual publishing path's actor; never reuse injected credentials
+or infer account authority from a branch/author label. The abandoned new-repository
+operation remains out of scope.
 
-No new authorization for main merge, releases, production, hook activation or private sync.
+Main merge and scoped post-delivery cleanup are now explicitly authorized for this
+accepted A01-A26 batch only, through the planned PR/review/CI path with ancestry
+preserved. No new release/tag, production/deployment, hook or private-sync authority.
 
 ## Next action
 

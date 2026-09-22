@@ -12,8 +12,10 @@
 Audit and continuity: preserved in commit `74290e0`; original audit worktree untouched.
 All 25 source files were hash-verified before import. A separate local verified Git bundle
 preserves Swarming and its four worker branches with complete ancestry.
-No whole-initiative acceptance is claimed. Anonymous public API verification confirmed
-current main remains `28061e4`; authenticated delivery still requires `jokerman89`.
+No whole-initiative acceptance is claimed. On 2026-09-21 the explicitly selected
+`jokerman89` CLI identity was verified; authenticated reads confirm main remains
+`28061e4`, push permission and merge-commit support. Final accepted PR delivery/merge
+and scoped cleanup now have explicit operator authority, as bounded in spec.md.
 The independently reviewed Swarming historical checkpoint is integrated in `40c2795`,
 preserving both ancestries. P01-P03 and owned P04-P07 components are accepted and
 integrated, including P05's reviewed evidence consumer and P07's joined long-path repair.
@@ -77,6 +79,14 @@ dependency-ready lifecycle/intake leaves; installer-observation work waits for t
 P10 producer seam and its real fixture evidence. Run overlapping lifecycle,
 specialist, installer and vertical packages sequentially, allowing only truly disjoint
 independent work. P04 stays active for final evidence/work-map reconciliation.
+
+Ready depth units, while the exact P08/P10 combined candidates undergo their existing
+independent reviews: P09 may start the knowledge/preservation-only unit in its card,
+without authoring the still-gated domain/workflow result binding. P11 may implement
+only A16's browser-operation unit, whose P03/P05/P06/P07 prerequisites are accepted;
+A14 and frontend-agent edits still wait for P08/P09. These writers have disjoint
+scopes. This staging changes execution order, not leaf acceptance or the nine-phase
+cycle. P12/P13 and remaining cross-component gates retain their dependencies.
 
 Each leaf below is a bounded change or scenario, intended for a short implementation
 step. If an actual leaf needs splitting, append stable sub-IDs before starting it and
@@ -467,8 +477,9 @@ explicit downstream, profile-value and live-platform boundaries.
 Pending: remaining independent package reviews, assigned cross-surface migrations
 and final integrated acceptance. Accepted packages must not be reimplemented.
 Keep each action open until all its leaves and preservation evidence are linked. P04's
-early merge is not A22 completion. P15 remains blocked for remote refresh/PR/CI until the
-authorized identity is available. No main merge or production authorization is implied.
+early merge is not A22 completion. The authorized CLI identity is now verified, but
+P15 still requires all applicable acceptance, final integrated review and CI before
+the explicitly authorized main merge. No production/release permission is implied.
 
 Plan review: native independent `lintel-reviewer` instance `universal-plan-review`
 returned no P1 findings and one P2 dispatch-binding condition, addressed by packages/P01-P04.

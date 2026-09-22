@@ -61,6 +61,9 @@ Joined product `2f4cc38` preserves the frozen root/core blobs. Its verification
 stopped on synthetic Git-ancestor discovery and two unrepresentable exact-size
 fixtures; only the private harness correction in the P08 card is released.
 The interrupted aggregate and uninspected host output capture are not acceptance.
+Final report-only `8eb00b87` now records the corrected 22-command joined run on
+unchanged `2f4cc38`, with complete explicit 26+2 fixture coverage. Intake is verified
+and the original reviewer is completing selected-subset SPEC before eligible QUALITY.
 P10's migration F01 is independently closed
 by `00a0bef`; default-store/cleanup and whole-package acceptance remain blocked.
 A13 remains gated.
@@ -84,6 +87,9 @@ independent acceptance. After failed bounded Git-root/setup variants, the operat
 selected documented pre-write refusal for unverifiable Git operations, not expanded
 compatibility work. The P10 card now scopes that final error/preflight/doc follow-up;
 original default/classic/canonical dimensions and independent gates stay unchanged.
+The later refusal product `a559c9f` / report `4c0519e3` is now frozen and its scope,
+protected runtime/test identities and report are verified. The original reviewer is
+completing full P10 SPEC before the first eligible whole QUALITY; no acceptance yet.
 The operator challenged the prolonged pathing focus on 2026-09-21. The target is
 useful, team-ready Universal skills, not a general Windows/Git compatibility layer.
 Close only the bounded active P08/P10 corrections and required review, then advance
@@ -94,10 +100,15 @@ not a new audit or partial delivery. Coordinator routing (`b72ab47` plus
 `1d40193`) and provenance (`9f49e26`) await their owning package reviews. All successor cards
 and interface agreements are committed; use the handoff's exact IDs, do not duplicate workers.
 
-Original Swarming worktree remains at `275a354`. Anonymous public API access with no credentials
-confirmed main is still `28061e4`; authenticated PR/push/CI awaits verified `jokerman89` credentials.
-Rejected credentials must not be used. No main merge, release, production change, private sync
-or dormant-hook activation is authorized.
+Original Swarming worktree remains at `275a354`. On 2026-09-21 the operator authorized
+final accepted PR/CI/main merge and scoped cleanup for this initiative. The new
+account-selected CLI credential was verified as `jokerman89`; authenticated reads
+confirm main is still `28061e4`, push permission and merge-commit support. Verify
+each publishing path's actor; rejected injected credentials remain forbidden.
+No release/tag, production/deployment, private sync or dormant-hook activation follows.
+Preserve original histories/reports/backups and unrelated or unmerged work during cleanup.
+The canonical nine phases remain unchanged; resume is a utility, not a replacement
+phase or shortened lifecycle (L-039). The morning target does not waive acceptance.
 
 ## Completed — Universal whole-system quality audit (2026-09-20)
 

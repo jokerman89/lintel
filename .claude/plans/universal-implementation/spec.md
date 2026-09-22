@@ -90,10 +90,21 @@ Only the `jokerman89` GitHub identity is authorized. Previously rejected credent
 not be used even for read-only GitHub calls, cleanup or PR creation. The earlier abandoned
 private-repository operation is not part of this initiative.
 
-No main push, merge, release/tag, publication, production action, private synchronization,
-hook activation, credential change or paid external benchmark follows implicitly.
-Current remote refresh/PR/CI access is blocked until authorized authentication is verified.
-Continue independent local work; record the exact unverified remote boundary.
+On 2026-09-21 the operator explicitly authorized completing this initiative through
+a reviewed feature PR and merge to `main`, then cleaning up its completed owned work.
+This applies to the approved A01-A26 delivery batch only, after required verification,
+independent review and CI; it is not standing default-branch authority or permission
+to bypass branch rules. Preserve Swarming ancestry, historical reports, verified
+backups and any unmerged work during scoped cleanup. No broad deletion or personal
+profile cleanup is authorized.
+
+The operator separately authorized GitHub login as `jokerman89`; the CLI credential
+selected specifically for that account was verified through `/user` on 2026-09-21.
+Authenticated repository reads confirm `main` is still `28061e4`, push permission
+and merge-commit support. Clear rejected injected tokens and select the verified
+identity explicitly for authenticated operations; never assume another tool's actor.
+No release/tag, new repository, production/deployment action, private synchronization,
+hook activation, other credential/policy change or paid benchmark follows implicitly.
 
 ## Decisions
 
