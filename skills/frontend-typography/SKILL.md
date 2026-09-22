@@ -56,7 +56,7 @@ for chosen fonts; licensed availability is not established by this example.
 brief="${BRIEF:-${1:-}}"
 audience="${TARGET_AUDIENCE:-}"
 mood="${MOOD:-auto}"
-out="${OUT:-/dev/stdout}"
+out="${OUT:-}"  # absent --out means stdout, not a path to validate
 [ -z "$brief$audience" ] && { echo "Need --brief OR --target-audience"; exit 2; }
 ```
 
@@ -147,15 +147,46 @@ Agent fills in specific choices based on the brief. Don't pre-bake.
 
 ### Step 4 — Schema-validate + emit
 
-```bash
-python3 "${LINTEL_SOURCE_ROOT:?}/skills/design-dna/scripts/design_contract.py" \
-  validate --repo "${LINTEL_REPO_ROOT:?}" --file "$out" --kind typography
+Keep Step 3's actual parsed JSON object as `fragment` until validation and any
+required licensing checks finish. In the trusted source Python scope, `repo` is
+the explicit target root and `out` is `None` when `--out` was omitted, otherwise
+the literal repository-relative output path. For named output, the authorized
+caller captures `original_output_state` through P03 before generation (`None`
+means originally absent, not overwrite permission). Then execute:
 
-# Customer-share mode: validate licensing claims
-if [ -n "${CUSTOMER_SHARE:-}" ]; then
-  /li:compliance-gate --check font-licensing "$out"
-fi
+```python
+import sys
+import context_safety as safety
+from design_contract import validate_spec
+from review_contract import canonical_json
+
+try:
+    checked = validate_spec(fragment, "typography")
+    payload = (canonical_json(checked["fragment"]) + "\n").encode("utf-8")
+    if out is None:
+        sys.stdout.buffer.write(payload)
+    else:
+        root = safety.checked_root(repo)
+        relative = safety.selector_path(out)
+        safety.atomic_write(
+            root, relative, payload,
+            mode=original_output_state["mode"] if original_output_state is not None else 0o600,
+            expected=original_output_state, check_expected=True,
+        )
+        if safety.read_owned(root, relative, len(payload))[0] != payload:
+            raise ValueError("Fragment output failed readback")
+except (ValueError, OSError, UnicodeError) as error:
+    print(f"ERROR [lintel/design]: {error}", file=sys.stderr)
+    raise SystemExit(2)
 ```
+
+This emits only the validated fragment, not a success-shaped validation receipt.
+Invalid data emits no stdout or named file; publication errors have a nonzero exit.
+Never pass stdout/special/absolute paths to the rooted-file reader. Its existing
+CLI remains valid for an already written, explicitly owned relative file.
+For `--customer-share`, apply `/li:compliance-gate --check font-licensing` to the
+same data or an owned relative staging file before release; absence of a named
+output does not remove the required check.
 
 ## Status protocol
 

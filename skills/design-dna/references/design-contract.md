@@ -24,7 +24,7 @@ Both envelopes carry the same additive `binding`:
 |---|---|
 | `profile_ref` | Unchanged P07 reference, including context, generation and digest |
 | `profile_asset` | Selected design asset `{name, origin: pack\|source, sha256}` from `profile_asset` |
-| `brief` | P05 `{path, sha256}` for the actual brief/content input |
+| `brief` | P05 `{path, sha256}` for the actual input: frontend's selected brief, or pipeline's exact sibling `content.md` |
 | `retrieval` | P05 file references for retained design-DNA search results |
 | `project` | `{existing, stack, manifests}`; manifest/lockfile references are selected input bytes |
 | `customer_share` | Explicit boolean propagated to the renderer |
@@ -124,6 +124,13 @@ Directory-based handoff requires the exact canonical filename for its envelope:
 `frontend-design-spec.json` or `design-spec.json`. An alternate filename can be
 read/validated, but mapping rejects it rather than discarding its basename and
 making the renderer consume a different sibling. No new exact-file flag is invented.
+For a pipeline, the implicit consumed set also includes that directory's
+`content.md`. Its exact repository-relative path must be `binding.brief.path`,
+its current bytes must match `binding.brief.sha256`, and it must be selected in
+the external P05 context together with the design spec. A `source_content_hash`
+of a different brief, even one with identical bytes, cannot stand in for the file
+the renderer opens. Missing, changed or unselected sibling content blocks; a
+frontend's explicitly bound brief remains unrestricted by this pipeline convention.
 The brief is the bound input carried through the envelope, not a second conflicting
 `--brief` input alongside `--from-*`. Direct `generate-web --brief` remains useful;
 resolve that brief into the same contract before rendering. `--customer-share`
@@ -132,6 +139,19 @@ propagates when selected. Argument mapping reports `executed: false`.
 Exit 0 means the requested data operation succeeded, not artifact acceptance.
 Exit 2 reports invalid/missing/drifted input; exit 3 reports mandatory QA blockers.
 The helper does not publish a result or change the task state.
+
+### Fragment emission
+
+Typography, motion and shader keep solo stdout as their default. Their Step 4
+recipes call the existing `validate_spec(fragment, kind)` on the actual parsed
+value **before** emission, then serialize only the validated fragment. Absence
+of `--out` is an output-stream choice, never `/dev/stdout` as an input path.
+Named output uses the same validation first, followed by existing P03 rooted
+atomic publication against the authorized original preimage and readback.
+Unknown versions/invalid choices emit neither a fragment nor a pass receipt;
+errors go to stderr with nonzero exit. Existing named-file CLI validation remains.
+No special-file/absolute exception, new flag or helper API is introduced.
+Required licensing or other policy checks still apply to either output mode.
 
 ## Review and domain handoff
 

@@ -7,12 +7,14 @@
 from __future__ import annotations
 
 import argparse
+from contextlib import nullcontext
 from copy import deepcopy
 import hashlib
 import importlib.util
 import json
 import os
 from pathlib import Path
+import re
 import subprocess
 import sys
 import tempfile
@@ -44,6 +46,8 @@ SEAL_PATHS = [
     "lib/markdown_source.py", "bin/li-review-evidence.py", "tests/integration/design-contract.py",
     "skills/generate-web/SKILL.md", "skills/generate-app/SKILL.md",
     "skills/design-dna/references/design-contract.md",
+    "skills/frontend-typography/SKILL.md", "skills/frontend-motion/SKILL.md",
+    "skills/frontend-shader/SKILL.md",
 ]
 
 
@@ -167,18 +171,21 @@ class DesignContract(unittest.TestCase):
             "qa_requirements": [self.requirement],
         }
 
-    def run_process(self, argv):
+    def run_process(self, argv, *, separate_stderr=False):
         self.command_count += 1
         stem = self.base / f"command-{self.command_count}"
-        with safety.native_io_path(stem.with_suffix(".log")).open("wb") as out:
+        error_path = safety.native_io_path(stem.with_suffix(".stderr.log"))
+        with safety.native_io_path(stem.with_suffix(".log")).open("wb") as out, \
+                (error_path.open("wb") if separate_stderr else nullcontext(subprocess.STDOUT)) as err:
             result = subprocess.run([str(x) for x in argv], cwd=self.repo, env=self.env,
-                                    stdout=out, stderr=subprocess.STDOUT, timeout=60, check=False)
+                                    stdout=out, stderr=err, timeout=60, check=False)
         stdout = safety.native_io_path(stem.with_suffix(".log")).read_text(encoding="utf-8")
         safety.native_io_path(stem.with_suffix(".json")).write_bytes(encoded({
             "argv": [str(x) for x in argv], "exit": result.returncode,
             "environment": self.env, "cwd": str(self.repo),
         }))
-        return subprocess.CompletedProcess(argv, result.returncode, stdout)
+        stderr = error_path.read_text(encoding="utf-8") if separate_stderr else ""
+        return subprocess.CompletedProcess(argv, result.returncode, stdout, stderr)
 
     def git(self, *argv):
         result = self.run_process([
@@ -270,6 +277,8 @@ class DesignContract(unittest.TestCase):
                 web = deepcopy(self.spec)
                 binding = web.pop("binding")
                 del web["source"]
+                self.write(f"{directory}/content.md", b"Selected pipeline content.\n")
+                binding["brief"] = self.ref(f"{directory}/content.md")
                 canonical = {
                     "version": "1.0", "schema_version": 1, "source": "pipeline",
                     "palette": {"text_dark": "#141413", "background": "#faf9f5"},
@@ -380,6 +389,8 @@ class DesignContract(unittest.TestCase):
         web = deepcopy(self.spec)
         binding = web.pop("binding")
         del web["source"]
+        self.write("run with spaces/content.md", b"Selected pipeline content.\n")
+        binding["brief"] = self.ref("run with spaces/content.md")
         pipeline = {"version": "1.0", "schema_version": 1, "source": "pipeline",
                     "palette": {"text_dark": "#141413", "background": "#faf9f5"},
                     "fonts": {"heading": "Poppins", "body": "Lora"},
@@ -392,6 +403,156 @@ class DesignContract(unittest.TestCase):
         pipeline["fonts"]["body"] = "Unrelated font"
         with self.assertRaises(ValueError):
             design.validate_spec(pipeline, "pipeline")
+
+    def test_pipeline_binds_the_actual_consumed_content_path_and_bytes(self):
+        for case in ("canonical", "different-brief", "same-bytes-other-path",
+                     "stale-content-hash", "unselected-content", "missing-content"):
+            with self.subTest(case=case):
+                directory = f"pipeline {case} with spaces"
+                content_path = f"{directory}/content.md"
+                spec_path = f"{directory}/design-spec.json"
+                actual = b"# Actual sibling content, consumed by the renderer.\n"
+                if case == "same-bytes-other-path":
+                    actual = safety.read_owned(self.repo, "brief with spaces.md")[0]
+                if case != "missing-content":
+                    self.write(content_path, actual)
+                binding = deepcopy(self.spec["binding"])
+                binding["brief"] = {"path": content_path, "sha256": hashlib.sha256(actual).hexdigest()}
+                if case in ("different-brief", "same-bytes-other-path"):
+                    binding["brief"] = self.ref("brief with spaces.md")
+                if case == "stale-content-hash":
+                    self.write(content_path, b"# Changed current sibling content.\n")
+                web = deepcopy(self.spec)
+                del web["binding"], web["source"]
+                pipeline = {
+                    "version": "1.0", "schema_version": 1, "source": "pipeline",
+                    "source_content_hash": binding["brief"]["sha256"],
+                    "palette": {"text_dark": "#141413", "background": "#faf9f5"},
+                    "fonts": {"heading": "Poppins", "body": "Lora"},
+                    "per_format": {"web": {"sections": []}}, "web_design": web, "binding": binding,
+                }
+                self.write_json(spec_path, pipeline)
+                expected = self.prepare([spec_path if case == "unselected-content" else directory])
+                if case == "canonical":
+                    loaded = design.load_design(self.repo, spec_path, expected=expected,
+                                                profile_config=self.config)
+                    self.assertEqual(loaded["binding"]["brief"], self.ref(content_path))
+                    self.assertEqual(design.renderer_args(loaded, out="output with spaces")["args"], [
+                        "--from-pipeline", directory, "--variant", "single-file", "--out", "output with spaces",
+                    ])
+                else:
+                    with self.assertRaises((ValueError, OSError)):
+                        design.load_design(self.repo, spec_path, expected=expected, profile_config=self.config)
+        self.assertEqual(self.load()["binding"]["brief"], self.ref("brief with spaces.md"))
+
+    def _fragment_emission(self, kind):
+        method = (SOURCE / f"skills/frontend-{kind}/SKILL.md").read_text(encoding="utf-8")
+        section = method.split("### Step 4", 1)[1]
+        recipe = re.search(r"```python\n(.*?)\n```", section, re.S)
+        self.assertIsNotNone(recipe, f"{kind}: validate the parsed value before stdout/file emission")
+        if kind == "shader":
+            fragment = {"schema_version": 1, "visual_thesis": "none", "library": None}
+        else:
+            fragment = deepcopy(self.spec[kind])
+        driver = """
+import os, sys
+from pathlib import Path
+sys.path[:0] = [str(Path(os.environ["LINTEL_SOURCE_ROOT"]) / "lib"),
+               str(Path(os.environ["LINTEL_SOURCE_ROOT"]) / "skills/design-dna/scripts")]
+from review_contract import load_json
+import context_safety as safety
+repo = safety.checked_root(Path(os.environ["LINTEL_REPO_ROOT"]))
+inputs = load_json(safety.read_owned(repo, sys.argv[1], 2097152)[0].decode("utf-8"))
+fragment = inputs["fragment"]
+out = inputs["out"]
+original_output_state = inputs["original_output_state"]
+""" + recipe.group(1)
+
+        def emit(value, out=None, state=None):
+            self.write_json("fragment-input.json", {
+                "fragment": value, "out": out, "original_output_state": state,
+            })
+            return self.run_process([sys.executable, "-B", "-c", driver, "fragment-input.json"],
+                                    separate_stderr=True)
+
+        stdout = emit(fragment)
+        self.assertEqual(stdout.returncode, 0, stdout.stderr)
+        self.assertEqual(json.loads(stdout.stdout), fragment)
+        self.assertEqual(stdout.stderr, "")
+        output = f"fragment output/{kind}.json"
+        named = emit(fragment, output)
+        self.assertEqual(named.returncode, 0, named.stderr)
+        self.assertEqual(named.stdout, "")
+        self.assertEqual(named.stderr, "")
+        self.assertEqual(json.loads(safety.read_owned(self.repo, output)[0]), fragment)
+        named_validation = self.run_process([
+            sys.executable, "-B", SOURCE / "skills/design-dna/scripts/design_contract.py",
+            "validate", "--repo", self.repo, "--file", output, "--kind", kind,
+        ])
+        self.assertEqual(named_validation.returncode, 0, named_validation.stdout)
+        alternate = deepcopy(fragment)
+        invalid_branch = deepcopy(fragment)
+        if kind == "motion":
+            alternate.update(mode="css", key_animations=[{"name": "focus-color", "library": "css"}])
+            invalid_branch.update(mode="css", libraries=[{"name": "unrequested-js"}])
+        elif kind == "shader":
+            alternate.update(
+                visual_thesis="noise-field", library={"name": "synthetic-gpu"},
+                perf_budget={"fallback_strategy_low_end": "static",
+                             "fallback_strategy_no_webgl": "static",
+                             "respect_prefers_reduced_motion": True},
+            )
+            invalid_branch.update(library={"name": "contradicts-none"})
+        else:
+            alternate["font_stacks"][0]["family"] = "Synthetic alternative family"
+            invalid_branch["font_stacks"] = []
+        for out in (None, f"alternate output/{kind}.json"):
+            valid = emit(alternate, out)
+            self.assertEqual(valid.returncode, 0, valid.stderr)
+            emitted = valid.stdout if out is None else safety.read_owned(self.repo, out)[0]
+            self.assertEqual(json.loads(emitted), alternate)
+            refused = emit(invalid_branch, out)
+            self.assertEqual(refused.returncode, 2, refused.stderr)
+            self.assertEqual(refused.stdout, "")
+            self.assertIn("ERROR", refused.stderr)
+            if out is not None:
+                self.assertEqual(json.loads(safety.read_owned(self.repo, out)[0]), alternate)
+        original = safety.read_owned(self.repo, output)
+        for out in (None, f"invalid output/{kind}.json", output):
+            invalid = deepcopy(fragment)
+            invalid["schema_version"] = 2
+            refused = emit(invalid, out)
+            self.assertEqual(refused.returncode, 2, refused.stderr)
+            self.assertEqual(refused.stdout, "")
+            self.assertIn("ERROR", refused.stderr)
+        self.assertFalse(safety.native_io_path(self.repo / f"invalid output/{kind}.json").exists())
+        self.assertEqual(safety.read_owned(self.repo, output)[0], original[0])
+        collision = emit(fragment, output)
+        self.assertEqual(collision.returncode, 2)
+        self.assertEqual(collision.stdout, "")
+        self.assertEqual(safety.read_owned(self.repo, output)[0], original[0])
+        changed = {**fragment, "brief_summary": "Authorized replacement of the exact owned output"}
+        replaced = emit(changed, output, original[1])
+        self.assertEqual(replaced.returncode, 0, replaced.stderr)
+        self.assertEqual(replaced.stdout, "")
+        self.assertEqual(json.loads(safety.read_owned(self.repo, output)[0]), changed)
+        stale = emit(fragment, output, original[1])
+        self.assertEqual(stale.returncode, 2)
+        self.assertEqual(stale.stdout, "")
+        for unsafe in ("/dev/stdout", "../escape.json", str(self.base / "absolute.json")):
+            refused = emit(fragment, unsafe)
+            self.assertEqual(refused.returncode, 2, refused.stderr)
+            self.assertEqual(refused.stdout, "")
+            self.assertIn("ERROR", refused.stderr)
+
+    def test_typography_solo_stdout_and_named_output(self):
+        self._fragment_emission("typography")
+
+    def test_motion_solo_stdout_and_named_output(self):
+        self._fragment_emission("motion")
+
+    def test_shader_solo_stdout_and_named_output(self):
+        self._fragment_emission("shader")
 
     def test_none_css_and_shader_short_circuits_reject_contradictions(self):
         self.assertTrue(design.validate_spec(self.spec)["renderable"])

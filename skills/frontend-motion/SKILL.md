@@ -58,7 +58,7 @@ No animation and CSS-only are first-class successful decisions, not missing work
 brief="${BRIEF:-${1:-}}"
 energy="${ENERGY_LEVEL:-moderate}"
 target_device="${TARGET_DEVICE:-both}"
-out="${OUT:-/dev/stdout}"
+out="${OUT:-}"  # absent --out means stdout, not a path to validate
 [ -z "$brief" ] && { echo "Need --brief"; exit 2; }
 ```
 
@@ -168,14 +168,45 @@ for every actual selected library is carried in the common binding at synthesis.
 
 ### Step 4 — Schema-validate + emit
 
-```bash
-python3 "${LINTEL_SOURCE_ROOT:?}/skills/design-dna/scripts/design_contract.py" \
-  validate --repo "${LINTEL_REPO_ROOT:?}" --file "$out" --kind motion
+Keep Step 3's actual parsed JSON object as `fragment` until validation and any
+required licensing checks finish. In the trusted source Python scope, `repo` is
+the explicit target root and `out` is `None` when `--out` was omitted, otherwise
+the literal repository-relative output path. For named output, the authorized
+caller captures `original_output_state` through P03 before generation (`None`
+means originally absent, not overwrite permission). Then execute:
 
-if [ -n "${CUSTOMER_SHARE:-}" ]; then
-  /li:compliance-gate --check motion-licensing "$out"
-fi
+```python
+import sys
+import context_safety as safety
+from design_contract import validate_spec
+from review_contract import canonical_json
+
+try:
+    checked = validate_spec(fragment, "motion")
+    payload = (canonical_json(checked["fragment"]) + "\n").encode("utf-8")
+    if out is None:
+        sys.stdout.buffer.write(payload)
+    else:
+        root = safety.checked_root(repo)
+        relative = safety.selector_path(out)
+        safety.atomic_write(
+            root, relative, payload,
+            mode=original_output_state["mode"] if original_output_state is not None else 0o600,
+            expected=original_output_state, check_expected=True,
+        )
+        if safety.read_owned(root, relative, len(payload))[0] != payload:
+            raise ValueError("Fragment output failed readback")
+except (ValueError, OSError, UnicodeError) as error:
+    print(f"ERROR [lintel/design]: {error}", file=sys.stderr)
+    raise SystemExit(2)
 ```
+
+This emits only the validated fragment, including none/CSS choices, not a
+success-shaped receipt. Invalid data emits no stdout or named file; publication
+errors have a nonzero exit. Never pass stdout/special/absolute paths to the rooted
+reader. For `--customer-share`, apply `/li:compliance-gate --check motion-licensing`
+to the same data or an owned relative staging file before release; stdout does
+not exempt the required check.
 
 ## Status protocol
 

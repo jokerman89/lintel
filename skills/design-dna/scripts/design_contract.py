@@ -340,6 +340,10 @@ def load_design(repo: Path, path: str, *, expected: dict, profile_config: Profil
     for label in (design["palette"].get("source_profile"), design.get("design_dna", {}).get("profile")):
         if label is not None and label != asset["name"]:
             raise DesignError("Design profile label contradicts the verified selected asset")
+    if result["kind"] == "pipeline" and binding["brief"]["path"] != (
+        Path(reference["path"]).parent / "content.md"
+    ).as_posix():
+        raise DesignError("Pipeline binding must name the actual sibling content.md consumed by the renderer")
     _bound(root, binding["brief"], expected)
     for reference_input in binding["retrieval"]:
         _bound(root, reference_input, expected)
