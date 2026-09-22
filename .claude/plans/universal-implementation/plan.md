@@ -269,7 +269,7 @@ full workflow/profile-value gates remain open.
   - [x] A08.2.b Render footer state from actual STARTING/BLOCKED/DONE status, not next-phase metadata.
   - [ ] A08.2.c Compose canonical phase entry without duplicate SENSE/SCOPE.
 - [ ] A08.3 Connect ANALYZE/CAPTURE/budget/resume to the same selected task source.
-  - [ ] A08.3.a Share the selected-map reader and bounded artifact manifest using accepted parsers/selectors.
+  - [x] A08.3.a Share the selected-map reader and bounded artifact manifest using accepted parsers/selectors.
   - [x] A08.3.b Persist selected-map/profile/required-policy resume identity without replacing original authority.
   - [ ] A08.3.c Wire ANALYZE/CAPTURE/BUILD/budget consumers to original paths and IDs.
     - [ ] A08.3.c.r1 Guard analysis-report selection through native identity before choosing output.
@@ -287,10 +287,13 @@ refinements do not close A08 parents, actual semantic/intake/orchestration or A1
 The broader lifecycle runner stays deferred until its remaining consumers join;
 the checked-in provider runner selects the actual accepted cases without deleting
 the other original test methods.
-The final Swarm CLI join reopens A08.3.a for an explicitly selected alphabetic
+The final Swarm CLI join reopened A08.3.a for an explicitly selected alphabetic
 legacy singleton omitted by the default reader. Its bounded correction is
 coordinator-owned in the recovery checkout; native fixture source `70469296`
 stays immutable. Prior tested provider controls remain their recorded evidence.
+Correction `aa5cf0e` now passes independent `78e3c09` SPEC/QUALITY (preserved as
+`14f97fa`) and the 25-method joined provider run. The refinement is reclosed;
+P04's final composed caller and original native workflow remain separate gates.
 
 ### A09 Concrete specialist modules (P09; R06)
 - [x] A09.1 Define shared work/profile/revision/result handoff envelope.
@@ -358,11 +361,17 @@ no installer may turn a later operation's Python prerequisite into an install pr
 Acceptance: absent telemetry cannot imply healthy/dead or successful enforcement.
 
 ### A14 Working design contract (P11; R07)
-- [ ] A14.1 Preserve accepted design profile precedence in one brief/spec/render/review schema.
-- [ ] A14.2 Repair dimension keys and argument mapping.
-- [ ] A14.3 Support no-animation/CSS-only/no-shader without forced dependencies.
-- [ ] A14.4 Update source-grounded version advice while respecting project technology.
+- [x] A14.1 Preserve accepted design profile precedence in one brief/spec/render/review schema.
+- [x] A14.2 Repair dimension keys and argument mapping.
+- [x] A14.3 Support no-animation/CSS-only/no-shader without forced dependencies.
+- [x] A14.4 Update source-grounded version advice while respecting project technology.
 - [ ] A14.5 Exercise a static page and app through the same profile and review contract.
+
+A14.1-.4 source `a1b3a45` passes complete independent `edecfdf` SPEC then
+whole direct-unit QUALITY, with D1-D5 closed. Integration `e1cb9d2` preserves
+all 24 product blobs exactly; actual joined 18 contract methods and retained
+legacy roundtrip pass. Earlier native artifacts remain attributed to `f72f316`;
+these source closures do not clear A14.5's single-HTML, image or framework gates.
 Acceptance: actual artifacts and mandatory design checks, not only populated schema fields.
 
 ### A15 Verifiable document formats (P12; R07)
