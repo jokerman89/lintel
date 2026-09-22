@@ -16,8 +16,10 @@ Use the app-surfaced session IDs, not differing IDs quoted inside worker message
 Current actionable checkpoints supersede the older chronological entries below:
 
 - P08: the same reviewer completed private native `main-review-02` planning SPEC
-  and QUALITY. This is draft-fixture review, not P08 acceptance or executed PLAN;
-  the actual fixture decision/controller transition remains next.
+  and QUALITY. The recovery coordinator read it and approved the corrected Alpha
+  design and conditional local T011/T027 implementation. The original controller
+  now owns actual DEFINE/DISCOVER/PLAN progression, native BUILD and cold resume;
+  no phase completion or P08 acceptance follows merely from that approval.
 - P09: data core is independently accepted and integrated through `6144721`.
   The original owner retains the pending module-binding design.
 - P10: independent `c1f6bad1` / preserved `5f3d885` closes F02 but reports P2 F03,
@@ -25,7 +27,9 @@ Current actionable checkpoints supersede the older chronological entries below:
   correction and focused original-dimension verification to its original owner.
 - P11: browser-only product `3115790`, report-only `043019a`, is frozen for its
   first independent SPEC/QUALITY in `1f655ca9-eb2b-4325-9996-72ed8539c13b`;
-  original full source history must accompany it.
+  original full source history must accompany it. The reviewer reports SPEC PASS
+  followed by QUALITY P2: partial numeric extraction loses a decimal/sign.
+  Await its immutable report before the original owner's bounded correction.
 - P12: standalone product `cdb4ea6`, final report `30bd4e3`, is with independent
   reviewer `31c39265-13e5-4057-9e78-49bf658749a5`. Word application access was
   explicitly declined during recovery; no app launched. Page layout remains
@@ -34,7 +38,18 @@ Current actionable checkpoints supersede the older chronological entries below:
   remain unverified. These are not source defects or passing artifact QA.
 - P13: compact-discovery product `2a4ba25`, report-only `e20588d`, is frozen for
   first-unit independent SPEC/QUALITY in `4865e4f7-240b-4721-a64d-ce6df9a75a9c`,
-  not final optional-distribution acceptance.
+  not final optional-distribution acceptance. Preliminary SPEC findings concern
+  agent-alias collisions and ordinary generation with duplicate skill names;
+  await the immutable report and repair through the original owner.
+
+Dependency-ready releases are committed, not new proposals awaiting an operator:
+`bdfd127` releases P04's accepted-provider shared-evidence consumer and conditionally
+releases P13 additive source selection/preservation after compact acceptance.
+`235d5bf` releases P11's direct A14.1-.4 design contract and P12's standalone
+native-workbook unit. P11 should prioritize its small browser finding first.
+P12 may use the native Excel canvas, not start an Office app or invent a recalc API.
+Final P08 binding, installed closure, A14.5, Word/PPT layout, PDF/Visio and final
+integrated acceptance remain separately tracked in their original cards.
 
 Coordinator A23.4.g3 now requires nine already accepted P05/P09 context, review
 and domain helper/schema/CLI resources during adapter source preflight. All old
