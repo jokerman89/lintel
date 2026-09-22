@@ -1,0 +1,7 @@
+{"event_id":"evt-01","sku":"BOLT","delta":8}
+{"event_id":"evt-02","sku":"NUT","delta":-2}
+{"event_id":"evt-03","sku":"BOLT","delta":-3}
+{"event_id":"evt-04","sku":"WASHER","delta":0}
+{"event_id":"evt-01","sku":"BOLT","delta":8}
+{"event_id":"evt-05","sku":"NUT","delta":3}
+{"event_id":"evt-06","sku":"NUT","delta":-3}
