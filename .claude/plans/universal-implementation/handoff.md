@@ -15,26 +15,114 @@ The existing P08/P09/P10/P11/P12/P13 owners have the new coordinator address.
 Use the app-surfaced session IDs, not differing IDs quoted inside worker messages.
 Current actionable checkpoints supersede the older chronological entries below:
 
+- P04: shared consumer product `f02e994a`, report-only `c2a9455`, is with SAME
+  reviewer `ed672f58`. Final P08/provider and module join remains separate.
 - P08: the same reviewer completed private native `main-review-02` planning SPEC
-  and QUALITY. This is draft-fixture review, not P08 acceptance or executed PLAN;
-  the actual fixture decision/controller transition remains next.
+  and QUALITY. The recovery coordinator read it and approved the corrected Alpha
+  design and conditional local T011/T027 implementation. The original controller
+  now owns actual DEFINE/DISCOVER/PLAN progression, native BUILD and cold resume;
+  it reports actual PLAN completion and the original map approved. SAME reviewer
+  `9dbf0a9b` accepted exact mechanical providers in `e98e7da8`, integrated
+  `e1edc0c`; 22 joined methods and 21-resource source preflight pass. The same
+  reviewer also completed the three side-case drafts; actual owner decisions
+  remain next. Whole P08 semantic acceptance does not follow.
 - P09: data core is independently accepted and integrated through `6144721`.
-  The original owner retains the pending module-binding design.
-- P10: independent `c1f6bad1` / preserved `5f3d885` closes F02 but reports P2 F03,
-  false layout non-applicability. The appended P10 card releases only that reader
-  correction and focused original-dimension verification to its original owner.
-- P11: browser-only product `3115790`, report-only `043019a`, is frozen for its
-  first independent SPEC/QUALITY in `1f655ca9-eb2b-4325-9996-72ed8539c13b`;
-  original full source history must accompany it.
-- P12: standalone product `cdb4ea6`, final report `30bd4e3`, is with independent
-  reviewer `31c39265-13e5-4057-9e78-49bf658749a5`. Word application access was
+  The accepted provider release now permits the original owner's module-binding
+  implementation under its appended card; installed execution remains a P10 join.
+- P10: `036e9033` / `50e654af` fixes F03; independent `131d3db` / `4b5f592`
+  closes it but finds canonical stranded redirects falsely reported current.
+  `b8f0cf7` releases the finite F04 class to the original owner and lets SAME
+  reviewer `1578dfd8` finish the unrelated original 18 adapter/profile controls.
+- P11: deterministic parser `d3b5569` / `336513e` passes complete A16 component
+  SPEC/QUALITY in `3049811`, integrated `7cb3812`. All eleven product/report
+  identities match; joined four shared and 30 Node checks pass. Original native
+  evidence stays attributed to `3115790`. Direct design source `f72f316` /
+  `c91e83d` is frozen; A14.5 needs its separately bounded native observations.
+- P12: defaults repair `32dac88` / `b270475` passes F01 recheck in `02e8028`
+  / `984bb72`. SAME reviewer `31c39265-13e5-4057-9e78-49bf658749a5` also accepts
+  actual six-slide visual observation. `69f2ef6` releases a distinct complete
+  PPT-only attempt without dropping the original joint controls. Word access was
   explicitly declined during recovery; no app launched. Page layout remains
   permission-blocked, with no retry, COM/export or alternate-launch workaround.
-  The separate denied Copilot UI route and incomplete PPT visual observation also
-  remain unverified. These are not source defects or passing artifact QA.
-- P13: compact-discovery product `2a4ba25`, report-only `e20588d`, is frozen for
-  first-unit independent SPEC/QUALITY in `4865e4f7-240b-4721-a64d-ce6df9a75a9c`,
-  not final optional-distribution acceptance.
+  The separate denied Copilot UI route stays closed. No full artifact QA follows.
+- P13: ambiguity repair `b1d4caf` passes independent whole first-unit SPEC/QUALITY
+  in `09a3c6ec`, integrated with original history as `03df1db`; joined 31 metadata
+  methods pass and all eight product blobs match. The original owner is released
+  for the already approved additive selection/preservation unit. Installed closure
+  and final P13 parents remain open.
+
+Later P13 source checkpoint: A+B `72253ed` passes `7bf3f253`, integrated `895bb35`.
+All 19 joined source-selection methods pass. The new actual installed selection
+case passes init/check/repeat, alias/demo-role queries from unrelated cwd, exact
+alias/provenance/notices and a managed-files-only clone with empty synthetic home.
+Missing PyYAML visibly refuses; no source/home fallback or query write occurs.
+This is accepted-P06-engine evidence, not P10 linked/default transaction acceptance.
+The remaining eight discovery/authoring consumers and existing template are
+released to the original P13 owner with explicit status/welcome ownership.
+
+Dependency-ready releases are committed, not new proposals awaiting an operator:
+`bdfd127` releases P04's accepted-provider shared-evidence consumer and conditionally
+releases P13 additive source selection/preservation after compact acceptance.
+`235d5bf` releases P11's direct A14.1-.4 design contract and P12's standalone
+native-workbook unit. P11 should prioritize its small browser finding first.
+P12 may use the native Excel canvas, not start an Office app or invent a recalc API.
+Final P08 binding, installed closure, A14.5, Word/PPT layout, PDF/Visio and final
+integrated acceptance remain separately tracked in their original cards.
+
+The original MasterSession briefly resumed and sent two duplicate continuation
+messages. It confirmed no new writes, decisions, executions or commits and is
+now explicitly parked; recovery `88aecc43` remains the sole coordinator.
+The original P08 owner confirmed its three frozen mechanical providers are
+separable from pending semantic controls; its card now permits the SAME reviewer
+to accept that provider checkpoint before dependent P09/P04 work.
+
+P10 F03 is frozen as `036e9033` / `50e654af` and dispatched to its SAME reviewer.
+Report intake's initial append-only assumption was corrected after inspecting
+the whole diff: status/seals were updated truthfully, old outcomes and Git history
+remain. P11 Q1 correction is released by `d3f94db`. P12 independent `dfb5cdd0`
+(`ee3ed5e` here) found a bounded standalone-default regression; its repair card
+preserves current content improvements and the two still-open inspection gates.
+
+Delivery permission boundary: the host rejected a recovery command that would
+retrieve the account-selected GitHub token. That command did not execute; no
+token or authenticated request was obtained. Do not retry token acquisition or
+substitute a different identity/tool to bypass that decision. Prior batch merge
+authority remains, but the current host credential permission is unresolved.
+Continue local implementation/review; remote delivery needs its permitted path.
+A subsequent `gh auth status` command returned only account metadata, not tokens,
+and reported an unauthorized injected account as active; `jokerman89` was stored
+but inactive. The CLI may validate accounts during that status operation, so do
+not call it proof of authorized-only remote access. No push, PR or merge occurred.
+No further GitHub/account operation is authorized by that observation.
+
+P12 source-default repair is frozen as `32dac88` / separate report `b270475`
+and with SAME reviewer `31c39265`. The coordinator rasterized all six exact
+native PPT SVGs with existing ImageMagick, then both coordinator and reviewer
+directly inspected the resulting pixels. The pinned PPTX is unchanged; this
+new native-rendition observation is separate from desktop/physical-print claims.
+It is available for a fresh QA/evidence decision, not a rewrite of old blockers.
+
+Native Excel actually recalculates formulas, but saves empty cached values.
+No fixture-specific cache publisher was authorized. Excel app access was also
+declined. A focused request for Word/Excel verification approval returned that
+the user is unavailable, not affirmative approval; neither app may be retried
+or reached through COM/shell/alternate-launch workarounds. Original native
+content/editability, cache-error and formula-error evidence remains useful but
+does not establish full workbook/page layout acceptance.
+
+Selected native PPT now passes actual SPEC and QUALITY in `5858268` for
+`32dac88` and the distinct `7c130a2` evidence packet. The reviewer's optional
+private decision-data command was denied before execution; no structured P05
+decision/corroboration exists. A focused permission request returned user
+unavailable, not approval. Do not retry or delegate that denied persistence.
+The existing source/artifact/QA/review evidence remains valid; strict publication,
+Word/joint and parent acceptance remain distinct.
+
+P10's same reviewer closed the native F03 pair, then found a producer-grounded
+F04: canonical redirects with missing destinations are called current even
+though actual migration dry-run refuses them. The original owner has proposed
+one finite redirect-class reader correction; no new path/Git initiative follows.
+Wait for the immutable report and exact repair release.
 
 Coordinator A23.4.g3 now requires nine already accepted P05/P09 context, review
 and domain helper/schema/CLI resources during adapter source preflight. All old
@@ -50,6 +138,14 @@ recovery session's `files/verification/closure-red` and `closure-green`.
 
 No original parent checkbox has been closed merely by recovering these candidates.
 Final design/module/format/selection integration, P04 binding, P14 and delivery remain.
+
+The accepted A16 original leaves now close from independent review plus exact
+integration and joined checks, bringing original accepted items to 56/113.
+Coordinator source closure additionally includes the exact public alias and
+provenance data files, catalog/browser helpers and `.mjs` LF normalization.
+The new module-text test was RED before correction; it and the complete
+28-resource no-write source-refusal method pass. Actual installed/default
+consumer acceptance still waits for P10 and is not claimed from preflight.
 
 ## Durable state
 

@@ -8,19 +8,19 @@ tools: Read, Write, Edit, Bash, Grep, Glob
 voice: internal
 cli_support: [claude-code, codex]
 necessity: STRONGLY_RECOMMENDED
-gap_if_skipped: "Production-bound work ships with no deployment pattern, no rollback path, no observability instrumentation, no SLI/SLO definitions, no cost projection, no on-call playbook; incidents accumulate undetected and unrecoverable."
+gap_if_skipped: "Production-bound work lacks state-compatible recovery, observable service objectives, capacity/cost assumptions and actionable on-call evidence."
 navigation:
-  primary_intent: produce ops-grade artifacts when work has production rollout, observability, or cost-ops concerns
+  primary_intent: produce ops-grade decisions for rollout, observability and cost
   triggers:
     - new service / major rollout / observability gap / cost anomaly
     - operator types /li:dh {full|loop|single --action <name>}
-    - BUILD phase detects deployment intent (Phase 4 wiring)
+    - active workflow requests operational depth
   sibling_workflows:
-    - /li:ta — tech-architecture module (v4.1)
-    - /li:da — data-architecture module (v4.2)
-    - /li:sc — security-compliance module (v4.3)
-    - /li:tq — testing-qa module (v4.5)
-    - /li:full-engineering-pass — composes all 5 modules in DAG order
+    - /li:ta — technical architecture
+    - /li:da — data architecture
+    - /li:sc — security and compliance
+    - /li:tq — testing and QA
+    - /li:full-engineering-pass — dependency-ordered composition
   risk_level: high
   auto_mode_eligible: false
   estimated_tokens: 80000
@@ -28,265 +28,108 @@ domain:
   preferences_root: engineering.devops_hosting.*
   granularities: [full, loop, single]
   checkpoints:
-    - deployment_plan_locked: deployment pattern declared with rollback path and feature-flag strategy
-    - observability_specified: metrics plus traces plus logs per component and dashboards defined
-    - slos_defined: SLI definitions plus SLO budgets plus error budget policy
-    - cost_projected: per-component cost projection within budget threshold
-    - on_call_ready: per-failure-mode playbook plus escalation matrix
+    - deployment_plan_locked: traffic, compatibility and abort conditions agreed
+    - observability_specified: required signals and query coverage evidenced
+    - slos_defined: user journeys, objectives and budget policy grounded
+    - cost_projected: sourced cost ranges and workload assumptions explicit
+    - on_call_ready: detection, recovery and escalation responsibilities verified
   recovery:
-    - on_failure: revert to last-locked checkpoint, surface gap, AskUserQuestion (Re-loop | Accept-with-concern | Raise-help)
+    - on_failure: preserve actual state and reconcile the affected checkpoint
   continuation:
-    - after_fix: resume at failed checkpoint, job state preserves loop position
+    - after_fix: verify unchanged inputs or begin an explicitly revised iteration
   raise_help:
-    - cost_projection_exceeds_budget_threshold: operator decides accept-cost or refine
-    - slo_budget_below_30_day_minimum: operator decides re-architect or accept
-    - rollback_path_irreversible: operator decides accept-toxic or refine
+    - cost_exceeds_approved_budget: refer the supported trade-off to its owner
+    - slo_requirement_unmet: surface measured gap and alternatives
+    - recovery_uncertain: stop before unsafe reversal or replay
 ---
 
-You are the DH (devops-hosting) module — Phase 4 v4.4 of Lintel.
+# Hosting and operations
 
-## What this module does
-
-Produces ops-grade artifacts when work has production rollout, observability, or cost-ops concerns. Three granularities — full pass for new services, loop iteration for ops refinement, single action for targeted ops.
-
-For state-compatible rollback, observable SLOs, capacity/cost inputs and recovery
-decisions, read [operations decision methods](references/decision-methods.md).
-
-| Entry | When | Outputs |
-|---|---|---|
-| `/li:dh full` | new service / major rollout | `deployment-plan.md` + `observability-spec.md` + `sli-slo-spec.md` + `cost-projection.md` + `rollback-strategy.md` + `on-call-playbook.md` |
-| `/li:dh loop` | mid-cycle ops refinement | revised plan + diff against prior + new mitigations |
-| `/li:dh <capability>` · `/li:dh single --action <capability>` | targeted operation (see Sub-capability dispatch) | one artifact per the dispatch table below |
-
-## When to use
-
-- New service deployment to production
-- Major version rollout requiring traffic-cutover plan
-- Observability gap discovered (incident root-caused to missing signal)
-- Cost anomaly investigation or budget threshold approaching
-- SLO definition for a service or release
-- BUILD phase detected deployment intent (Phase 4 wiring auto-invokes)
-
-## When NOT to use
-
-- Pure code refactor with no deployment shape change
-- Single SLI tuning (operator adjusts dashboard directly)
-- One-off deployment (use existing release pipeline)
-- Cost report generation (use cloud-vendor tools)
+Read [operations decision methods](references/decision-methods.md) for state-compatible
+rollback, actual SLO/capacity/cost sources and uncertainty. Design artifacts do not
+deploy services. `/li:dh full`, saved `/li:dh loop` and `/li:dh <capability>` or
+`/li:dh single --action <capability>` preserve their distinct scope; a routine
+already-approved deployment uses its existing runbook.
 
 ## Sub-capability dispatch
 
-Per ADR-0009 the seven capabilities live here as dispatch rows — there are no per-capability
-skill files. Invoke one directly as `/li:dh <capability>` (long form: `/li:dh single --action
-<capability>`). Per L-001 each capability is a workflow + dispatch contract: content comes from
-agents at invocation (spawned via `/li:brief-forge subagent_spawn`); each emits
-`.claude/runtime/state/dh/<capability>-<ts>.md` and appends the module audit line (Step 6).
-
-| Capability | Dispatches to (agents) | Produces | Raise-help / notes |
+| Capability | Dispatches to (agents) | Produces | Decisions and checks |
 |---|---|---|---|
-| `deployment-plan` | ReleaseEngineer + DeploymentEngineer | deployment pattern + traffic-cutover stages + feature-flag strategy + rollback triggers | pref: `deployment_pattern` (default blue-green); cutover stages with percent, duration, success criteria, abort triggers; flag rollout cadence + deprecation; artifact provenance (signed builds, SBOM attestation) |
-| `observability-spec` | ObservabilityArchitect + Architect | metrics + traces + logs + dashboards + alert routing per component | pref: `stack` (default otel); signals spec below; reads TA dependency-graph <7 days old |
-| `sli-slo-spec` | ObservabilityArchitect + SystemArchitect | SLI definitions + SLO budgets + error budget policy + burn-rate alerts | RAISE_HELP when any SLO budget < 99% over the window — the 30-day minimum (BLOCKED); pref: `error_budget_window` (default 30 days); burn-rate alerts at 1h/6h/24h windows; explicit budget-exhaustion policy (freeze deploys, page leadership, …); reads TA quality-attributes <30 days old |
-| `cost-projection` | CostAnalyzer + CapacityPlanner | per-component monthly $ projection + anomaly-detection thresholds | RAISE_HELP when projected monthly cost > `threshold` (profile `cost_budget_monthly_usd_threshold`, default $10,000) (BLOCKED); prefs: `cloud`, `threshold`; per-SKU line items with confidence high/medium/low; bounded-by-capacity vs unbounded items; NEEDS_CONTEXT without a TA scaling plan <30 days old |
-| `rollback-strategy` | ReleaseEngineer + SecurityAuditor | per-failure-mode rollback path + blast-radius + revoke paths | RAISE_HELP when any failure mode's rollback path is none/irreversible (BLOCKED); per mode: revert \| rollback \| hot-swap \| feature-flag-off + time-to-rollback + data implications (schema, in-flight transactions); revoke path per security-sensitive change; blast-radius: users, data, downtime if rollback fails; pairs with `dh-deploy-without-rollback-warn` hook (opt-in, not auto-registered — ADR-0008) |
-| `capacity-headroom` | CapacityPlanner + LatencyAnalyzer | per-component headroom margins + alert thresholds + scaling triggers | vertical (per-instance) vs horizontal (instance-count) headroom; alert threshold at the utilization level BEFORE p99 degradation; scaling trigger = signal + duration; factor known peak patterns; reads TA scaling-plan <30 days + observability spec <7 days old |
-| `on-call-playbook` | ReleaseEngineer + SecurityAuditor | per-failure-mode runbook + escalation matrix + security cross-reference | BLOCKED without an observability spec; per failure mode: detection signal (alert/SLI burn), first-5-minute actions, decision tree; escalation matrix severity → who pages → when to escalate; merges overlapping paths with `/li:sc incident-runbook` (security vs operational on-call) |
+| `deployment-plan` | ReleaseEngineer planning-only + DeploymentEngineer | pattern, traffic stages, feature flags and abort signals | old/new state and consumer compatibility, capacity, artifact provenance; no universal blue-green choice |
+| `observability-spec` | ObservabilityArchitect + Architect | RED/USE metrics, traces, logs, dashboards and routing | real stack/SDK conventions; privacy/cardinality/sampling budgets, applicable retention |
+| `sli-slo-spec` | ObservabilityArchitect + SystemArchitect | good/eligible-event queries, objectives and burn-rate/budget policy | derive target/window from user need; no universal 99%/30-day minimum; no-data is unknown |
+| `cost-projection` | CostAnalyzer + CapacityPlanner | per-component/SKU range and anomaly thresholds | price source/date/region/currency/commitments, measured workload and egress; no invented dollar ceiling |
+| `rollback-strategy` | ReleaseEngineer planning-only + SecurityAuditor | per-failure-mode recovery, blast radius and revoke paths | binary/schema/event compatibility, in-flight effects, actual rehearsal or unverified recovery |
+| `capacity-headroom` | CapacityPlanner + LatencyAnalyzer | per-resource/failure-domain headroom and scaling triggers | current load mix, queueing, saturation and peak/failover; trigger before observed degradation |
+| `on-call-playbook` | ReleaseEngineer planning-only + SecurityAuditor | signal-to-action decision tree and escalation matrix | named owners, permitted first diagnostics, live-action approvals and failed-recovery path |
 
-L-002 result: 5 of 7 capabilities dispatch to existing agents (ReleaseEngineer, CostAnalyzer, LatencyAnalyzer, CapacityPlanner, SystemArchitect, SecurityAuditor, Architect). Only 2 new agents (DeploymentEngineer, ObservabilityArchitect) for genuinely new capability.
-
-### observability-spec — signals
-
-- metrics: RED (rate/errors/duration) per endpoint, USE (utilization/saturation/errors) per resource
-- traces: span structure, propagation header, sample rate per criticality
-- logs: structured fields (timestamp/level/correlation_id/component/event), retention per environment
-- per stack: native conventions (App Insights → operationId; Datadog → trace_id; OTel → traceparent)
+ReleaseEngineer retains **authorized-execution** for separately approved release work;
+this module's planning handoff is not blanket prohibition. No deployment, registry
+push, IAM change, live database action or external notification is granted by a role name.
+DevOpsToolchain implements scoped repository configuration when requested, separately
+from reviewer assessment.
 
 ## Workflow
 
-### Step 1 — Parse invocation
+1. Execute [shared admission and live-policy verification](../full-engineering-pass/references/domain-handoff.md#module-caller-procedure)
+   against the original map/package/leaves. Reuse accepted `work_context`,
+   `workflow_inspect`/`workflow_resume`; never take a newer unrelated SLO report.
+2. Read TA architecture/scaling, DA migration and SC threat/audit evidence relevant
+   to this request. Required missing upstream evidence blocks dependent work. Inspect
+   the actual environment/version; use explicit advice and typed verified pack values.
+3. Prepare P05 obligations and expected domain checkpoints before observations.
+   Assign receiver mode/scope and exact original publication state. No personal-file parser.
+4. Record start, perform the scoped method, persist results and actual checks.
+   Suggested commands are not executed operations; local `act` or a deploy dry-run
+   may still have effects and requires command inspection/target authority.
+5. Externally prepare final P05 context, fresh domain verification, real QA and
+   independent spec then quality. Reviews report findings; the implementer repairs.
 
-```bash
-granularity="${1:?usage: /li:dh {full|loop|<capability>|single --action <capability>}}"
-capabilities="deployment-plan|observability-spec|sli-slo-spec|cost-projection|rollback-strategy|capacity-headroom|on-call-playbook"
-case "$granularity" in
-  full|loop) action="" ;;
-  single)
-    [ "$2" = "--action" ] || { echo "ERROR: --action required for single"; exit 1; }
-    action="$3" ;;
-  *) action="$granularity"; granularity="single" ;;   # ADR-0009 shorthand: /li:dh <capability>
-esac
-if [ "$granularity" = "single" ]; then
-  echo "$action" | grep -qE "^(${capabilities})$" || { echo "ERROR: unknown capability '$action'"; exit 1; }
-fi
-```
+## Checkpoint ownership
 
-### Step 2 — Read pack + profile preferences
+| Checkpoint | Owner/method | Observable acceptance |
+|---|---|---|
+| `deployment_plan_locked` | DeploymentEngineer + ReleaseEngineer | selected pattern, state compatibility, stage criteria/abort and actual rehearsal limits |
+| `observability_specified` | ObservabilityArchitect | emitted/derived signal queries, cardinality/privacy/retention and missing-series handling |
+| `slos_defined` | SystemArchitect + ObservabilityArchitect | agreed journey/window/objective, source query and error-budget action |
+| `cost_projected` | CostAnalyzer + CapacityPlanner | per-component priced units, normal/peak/failure assumptions, uncertainty and applicable budget |
+| `on_call_ready` | ReleaseEngineer + SecurityAuditor | per-failure trigger, read-only diagnostics, recovery/escalation owners and approval boundaries |
 
-```bash
-source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/lib/pack-resolver.sh"
+Keep rollback and capacity-headroom artifacts in deployment/cost/on-call checks, not
+lost between checkpoint names. RED measures request work, USE resource consumption.
+Wire propagation headers and stored trace IDs are distinct; test the selected SDK's
+mapping. Log-level names do not establish retention law or required sampling rates.
 
-# Profile preferences (engineering.devops_hosting.*)
-PROFILE="$LINTEL_HOME/profile.yaml"
-cloud=$(grep -A30 '^engineering:' "$PROFILE" 2>/dev/null | grep -A10 'devops_hosting:' | grep 'cloud:' | head -1 | awk -F': *' '{print $2}' | tr -d '[:space:]')
-cloud="${cloud:-unspecified}"
-deployment_pattern=$(grep -A30 '^engineering:' "$PROFILE" 2>/dev/null | grep -A10 'devops_hosting:' | grep 'deployment_pattern:' | head -1 | awk -F': *' '{print $2}' | tr -d '[:space:]')
-deployment_pattern="${deployment_pattern:-blue-green}"
-observability_stack=$(grep -A30 '^engineering:' "$PROFILE" 2>/dev/null | grep -A10 'devops_hosting:' | grep 'observability_stack:' | head -1 | awk -F': *' '{print $2}' | tr -d '[:space:]')
-observability_stack="${observability_stack:-otel}"
-error_budget_window=$(grep -A30 '^engineering:' "$PROFILE" 2>/dev/null | grep -A10 'devops_hosting:' | grep 'error_budget_window_days:' | head -1 | awk -F': *' '{print $2}' | tr -d '[:space:]')
-error_budget_window="${error_budget_window:-30}"
-cost_threshold=$(grep -A30 '^engineering:' "$PROFILE" 2>/dev/null | grep -A10 'devops_hosting:' | grep 'cost_budget_monthly_usd_threshold:' | head -1 | awk -F': *' '{print $2}' | tr -d '[:space:]')
-cost_threshold="${cost_threshold:-10000}"
-```
+Worked choice: a canary writing an enum old readers cannot parse cannot safely
+reverse traffic just because the load balancer can switch quickly. Design reader-first
+compatibility or verified forward repair. A 99.9% objective over five million
+requests permits 5,000 bad events, while zero eligible events proves no availability.
 
-### Step 3 — Dispatch by granularity
+## Handoff and recovery
 
-#### `full` granularity
+Preserve deployment/cutover/flags, observability, SLI/SLO, cost, capacity, rollback and
+on-call artifacts with their actual sources. Request/result files use safe explicit
+operation/iteration paths; selected legacy `state/dh/` artifacts are retained as
+history, not automatically current. Carry the next owner and unverified checks.
 
-```bash
-mkdir -p .claude/runtime/state/dh
-audit=".claude/runtime/audit/dh-decisions.jsonl"
-mkdir -p "$(dirname "$audit")"
+Cold resume uses the shared table: started-without-result is interrupted. Reconcile
+unknown effects before repeating or undoing any operation. Loops retain prior
+artifact references and validate changed dependencies; no automatic rollback command.
 
-for checkpoint in deployment_plan_locked observability_specified slos_defined cost_projected on_call_ready; do
-  echo "─── Checkpoint: $checkpoint ───"
-  run_checkpoint "$checkpoint" || handle_checkpoint_failure "$checkpoint"
-  audit_checkpoint "$checkpoint" "$verdict"
-done
+Advisory dimensions remain Deployment pattern (including recovery),
+Observability instrumentation, SLI/SLO definitions, Cost projection, Capacity headroom and On-call playbook,
+measured against the observable checkpoint criteria. Scores cannot erase one missing mandatory domain. DONE means
+selected required evidence and independent acceptance; DONE_WITH_CONCERNS is only
+advisory residue. Unresolved evidence/authority is BLOCKED/NEEDS_CONTEXT.
 
-score=$(apply_scoring_rubric)
-if [ "$score" -lt 80 ]; then
-  echo "DH full pass score=$score (threshold 80) — surface concerns"
-  exit 1
-fi
-```
+## Integration and dormant hooks
 
-#### `loop` granularity
+DA/SC can feed DH only through verified selected artifacts; TQ exercises its promises.
+Optional audit/Brief Forge use must be an observed configured invocation, not a
+fabricated enforcement claim. Preserve these dormant ADR-0008 hook resources:
 
-```bash
-if [ ! -f ".claude/runtime/state/dh/00-state.md" ]; then
-  echo "ERROR: no prior DH state — use /li:dh full first"
-  exit 1
-fi
+- `hooks/shared/dh-deploy-without-rollback-warn/`
+- `hooks/shared/dh-observability-gap-warn/`
+- `hooks/shared/dh-cost-budget-warn/`
 
-prior_iteration=$(grep -E '^iteration:' .claude/runtime/state/dh/00-state.md | head -1 | awk '{print $2}')
-new_iteration=$((prior_iteration + 1))
-
-run_checkpoint deployment_plan_locked
-run_checkpoint observability_specified
-run_checkpoint cost_projected
-```
-
-#### `single` granularity
-
-```bash
-# ADR-0009: no sub-skill files — dispatch straight off the Sub-capability dispatch table.
-# Spawn the capability's agents via /li:brief-forge subagent_spawn, pass the prefs listed
-# in its row (deployment-plan + rollback-strategy ← deployment_pattern; observability-spec
-# ← stack; sli-slo-spec ← error_budget_window; cost-projection ← cloud + threshold),
-# emit .claude/runtime/state/dh/${action}-<ts>.md, append the audit line (Step 6).
-dispatch_capability "$action"   # no loop, no checkpoints
-```
-
-### Step 4 — Checkpoint failure handling (recovery + raise-help)
-
-```bash
-handle_checkpoint_failure() {
-  local checkpoint="$1"
-  echo "Checkpoint '$checkpoint' FAILED"
-
-  case "$checkpoint" in
-    cost_projected)
-      if [ "$projected_monthly_cost" -gt "$cost_threshold" ]; then
-        ask_user_question "Projected monthly cost \$$projected_monthly_cost exceeds budget \$$cost_threshold. Re-loop / Accept-cost / Raise-help (refine)?"
-      fi
-      ;;
-    slos_defined)
-      if [ "$slo_below_minimum" = "true" ]; then
-        ask_user_question "SLO budget below 30-day minimum. Re-loop / Accept-with-concern / Raise-help (re-architect)?"
-      fi
-      ;;
-    deployment_plan_locked)
-      if [ "$rollback_irreversible" = "true" ]; then
-        ask_user_question "Rollback path is irreversible. Re-loop / Accept-toxic / Raise-help (refine)?"
-      fi
-      ;;
-  esac
-
-  revert_to_last_locked
-}
-```
-
-### Step 5 — 6-dimensional scoring rubric
-
-```
-| Dimension | Score 0-100 |
-|---|---|
-| Deployment pattern + rollback path locked | <D1> |
-| Observability instrumentation coverage | <D2> |
-| SLI/SLO definitions complete | <D3> |
-| Cost projection per component | <D4> |
-| Capacity headroom documented | <D5> |
-| On-call playbook (per failure mode) | <D6> |
-
-Pass threshold per dimension: 80.
-Full-pass exit: every dimension ≥ 80 OR explicit operator override.
-```
-
-### Step 6 — Audit + emit ship report
-
-One line via the unified writer (ts/operator/cycle_id come from the envelope):
-
-```bash
-source "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/bin/_audit.sh"
-audit_log dh-decisions dh_module_complete "granularity=$granularity" "score=$score" \
-  "checkpoints_passed=$passed_count" "cloud=$cloud" "deployment_pattern=$deployment_pattern"
-# → .claude/runtime/audit/dh-decisions.jsonl
-```
-
-## Status protocol
-
-- **DONE** — granularity completed, score ≥ 80, cost within threshold, SLOs above minimum
-- **DONE_WITH_CONCERNS** — completed but 1-2 dimensions below 80 with operator accept-with-concern
-- **BLOCKED** — checkpoint failed, raise-help triggered
-- **NEEDS_CONTEXT** — unknown capability for single, OR no prior state for loop
-
-## Integration
-
-**Reads:**
-- `~/.lintel/profile.yaml` `engineering.devops_hosting.*` block
-- `lib/pack-resolver.sh` for pack policy (deployment_pattern overrides, cost guardrails)
-- Existing agents: ReleaseEngineer, CostAnalyzer, LatencyAnalyzer, CapacityPlanner (TA), SystemArchitect (TA), SecurityAuditor, Architect
-- New agents: DeploymentEngineer, ObservabilityArchitect
-- Prior TA scaling-plan + SC threat-model (if present, for cross-module input)
-
-**Writes:**
-- `.claude/runtime/state/dh/deployment-plan.md`
-- `.claude/runtime/state/dh/observability-spec.md`
-- `.claude/runtime/state/dh/sli-slo-spec.md`
-- `.claude/runtime/state/dh/cost-projection.md`
-- `.claude/runtime/state/dh/rollback-strategy.md`
-- `.claude/runtime/state/dh/on-call-playbook.md`
-- `.claude/runtime/audit/dh-decisions.jsonl`
-- Brief Forge envelopes through the standard gate
-
-**Triggered by:**
-- Operator: `/li:dh {full|loop|single --action <name>}`
-- BUILD phase: invokes as sub-module when deployment intent detected
-- `/li:full-engineering-pass`: third stage in composition DAG (after TA + DA + SC)
-
-**Hooks** (dormant by decision, ADR-0008 — ship in `hooks/shared/` but are opt-in, not auto-registered):
-- `hooks/shared/dh-deploy-without-rollback-warn/` (pre-commit on deploy/IaC w/o rollback)
-- `hooks/shared/dh-observability-gap-warn/` (pre-edit on new service paths w/o instrumentation)
-- `hooks/shared/dh-cost-budget-warn/` (pre-commit on IaC changes exceeding cost threshold)
-
-## Anti-patterns
-
-- **Treating deployment as IaC-only** — pattern + cutover + flag strategy matter as much as YAML
-- **Single SLO for entire service** — per-critical-journey SLO; aggregate hides hot paths
-- **Cost projection without per-component breakdown** — total $ without per-component is unactionable
-- **On-call playbook without detection signals** — runbook needs the trigger pattern, not just response
-- **Inventing new agents when existing cover** — 5 of 7 capabilities reuse existing
-- **Hardcoding deployment_pattern** — read from profile
-- **Skipping rollback for "obviously safe" deploys** — every deploy has a rollback path documented
-- **Blocking on hook warnings** — DH hooks warn; blocking is operator's explicit decision
+This module does not enable them, publish anything or complete the enclosing phase.

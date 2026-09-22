@@ -815,3 +815,31 @@ and frozen workflow candidate both retain that declaration.
 Use the complete canonical names when describing the cycle, preserve documented
 presets/entry points, and do not imply an architectural change through shorthand.
 Implementation or delivery authorization does not authorize replacing the lifecycle.
+
+## L-040 - Recovery has one coordinator and current host permissions
+
+**Date:** 2026-09-22
+
+**Context:** The operator transferred a broken MasterSession to a recovery session.
+The old session later resumed and sent duplicate continuation messages; workers
+retained the recovery owner and no duplicate execution occurred.
+
+**Rule:** Record one active coordinator in the committed handoff, explicitly park
+the replaced session and preserve its history. Keep past decisions attributed to
+their actual actor; a new coordinator records only its own later decisions.
+Previously authorized delivery does not bypass a current host credential or app
+permission decision. A declined operation did not run, and an unavailable user
+is not approval to retry it through another tool.
+
+## L-041 - Removing broad limits must preserve useful format defaults
+
+**Date:** 2026-09-22
+
+**Context:** P12 removed universal slide-shaped content caps but also removed the
+omitted Word template selection and useful PPT-specific advisory planning hints.
+Independent review found the gap despite passing flag-presence tests.
+
+**Rule:** Preserve omitted-argument behavior, explicit-selection precedence and
+each existing variant while removing inappropriate universal constraints. Test
+those distinctions, not just flag names. Format-specific advisory hints must not
+truncate source content or override mandatory policy.

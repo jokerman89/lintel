@@ -265,12 +265,12 @@ full workflow/profile-value gates remain open.
   - [ ] A08.1.r1 Recognize governing request heads and complete clause context before recommending an operation.
   - [ ] A08.1.r2 Verify structural authority contrasts and retained affirmative/read routing without phrase exceptions.
 - [ ] A08.2 Start cycle identity before phases and prevent duplicate start phases.
-  - [ ] A08.2.a Implement cycle-start/phase-transition helpers and interrupted-state fixtures.
-  - [ ] A08.2.b Render footer state from actual STARTING/BLOCKED/DONE status, not next-phase metadata.
+  - [x] A08.2.a Implement cycle-start/phase-transition helpers and interrupted-state fixtures.
+  - [x] A08.2.b Render footer state from actual STARTING/BLOCKED/DONE status, not next-phase metadata.
   - [ ] A08.2.c Compose canonical phase entry without duplicate SENSE/SCOPE.
 - [ ] A08.3 Connect ANALYZE/CAPTURE/budget/resume to the same selected task source.
-  - [ ] A08.3.a Share the selected-map reader and bounded artifact manifest using accepted parsers/selectors.
-  - [ ] A08.3.b Persist selected-map/profile/required-policy resume identity without replacing original authority.
+  - [x] A08.3.a Share the selected-map reader and bounded artifact manifest using accepted parsers/selectors.
+  - [x] A08.3.b Persist selected-map/profile/required-policy resume identity without replacing original authority.
   - [ ] A08.3.c Wire ANALYZE/CAPTURE/BUILD/budget consumers to original paths and IDs.
     - [ ] A08.3.c.r1 Guard analysis-report selection through native identity before choosing output.
     - [ ] A08.3.c.r2 Verify actual PLAN present/absent/spelling and distinct-location refusal/preservation cases.
@@ -279,6 +279,14 @@ full workflow/profile-value gates remain open.
   - [ ] A08.5.j1 Join the exact reviewed native-path dependency and public-helper fixture consumer without altering the frozen root correction.
   - [ ] A08.5.j2 Verify original-dimension preservation and the final combined lifecycle candidate before the same reviewer's selected-subset SPEC/QUALITY.
 Acceptance: no write escalation of read intent, duplicate backlog or lost history.
+Mechanical-provider evidence: [independent checkpoint](reviews/P08-provider-7046929.md)
+at exact `70469296`, report `e98e7da8`, integrated `e1edc0c`. All three providers,
+the necessary footer and test module match reviewed Git blobs; accepted dependencies
+match. Joined 22 selected methods and 21-resource source preflight pass. These four
+refinements do not close A08 parents, actual semantic/intake/orchestration or A13.
+The broader lifecycle runner stays deferred until its remaining consumers join;
+the checked-in provider runner selects the actual accepted cases without deleting
+the other original test methods.
 
 ### A09 Concrete specialist modules (P09; R06)
 - [ ] A09.1 Define shared work/profile/revision/result handoff envelope.
@@ -360,11 +368,18 @@ Acceptance: actual artifacts and mandatory design checks, not only populated sch
 Acceptance: missing renderer remains unfinished; authored outputs preserve intended reasoning.
 
 ### A16 Real browser operations (P11; R03/R07)
-- [ ] A16.1 Share browse/cookies/scrape/preview/print operations and session ownership.
-- [ ] A16.2 Honor actual host browser capabilities and A01 URL boundaries.
-- [ ] A16.3 Exercise allowed reading, a UI interaction and local print output.
-- [ ] A16.4 Preserve login surface choice and distinguish profile files from installed engine.
+- [x] A16.1 Share browse/cookies/scrape/preview/print operations and session ownership.
+- [x] A16.2 Honor actual host browser capabilities and A01 URL boundaries.
+- [x] A16.3 Exercise allowed reading, a UI interaction and local print output.
+- [x] A16.4 Preserve login surface choice and distinguish profile files from installed engine.
 Acceptance: browser evidence identifies actual tool, session and resulting artifact.
+Evidence: [final independent browser review](reviews/P11-browser-final-d3b5569.md)
+accepts A16.1-.4 at `d3b5569`, report `3049811`, integrated with both histories
+in `7cb3812`. All eleven product files and the full report match reviewed blobs.
+Joined four shared and 30 Node checks pass. Original eight native headless cases,
+screenshots and two-page print evidence remain attributed to `3115790`; Q1/Q2
+parsing repairs have independent bounded verification, not a fabricated native
+rerun. Headed login, other hosts, PDF raster and full P11/A14 remain separate.
 
 ### A17 Portable, useful agent roles (P09; R06)
 - [ ] A17.1 Map all 69 inventoried roles to retained inputs, decisions, outputs and verification.

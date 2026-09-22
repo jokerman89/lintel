@@ -54,9 +54,9 @@ PUBLIC_SOURCE_NOTE = (
     "by the installer. Private packs, personal settings and `.claude/` "
     "knowledge/runtime content are not copied.\n\n"
 )
-SOURCE_METADATA = (".claude-plugin/plugin.json",)
+SOURCE_METADATA = (".claude-plugin/plugin.json", "config/aliases.yaml", "install/upstream-sources.yaml")
 TEXT_SUFFIXES = {".md", ".sh", ".bash", ".py", ".json", ".yaml", ".yml", ".csv", ".tsv", ".txt",
-                 ".template", ".base", ".html", ".htm", ".css", ".js", ".svg"}
+                 ".template", ".base", ".html", ".htm", ".css", ".js", ".mjs", ".svg"}
 ATTRIBUTES = (
     ".github/lintel/** text=auto eol=lf",
     ".github/skills/li-*/** text=auto eol=lf",
@@ -96,6 +96,7 @@ SWARM_RESOURCES = (
     "lib/copilot-env.sh",
     "lib/swarm-schema.json",
     "lib/swarm_contract.py",
+    "lib/swarm_evidence.py",
     "lib/swarm_snapshot.py",
     "lib/cli-tiers.yaml",
     "lib/brief-forge.sh",
@@ -120,6 +121,11 @@ ADAPTER_RESOURCES = (
     "lib/context_safety.py", "lib/review_contract.py", "lib/review-schema.json",
     "bin/li-review-evidence.py", "bin/li-review-log", "bin/li-review-read",
     "bin/li-domain-result.py", "lib/domain_result.py", "lib/domain-result-schema.json",
+    "lib/state.sh", "lib/cycle-modes.sh", "lib/cycle-footer.sh", "lib/workflow.sh",
+    "bin/li-catalog.py", "lib/capability-selections.json",
+    "skills/catalog/references/metadata.md", "skills/catalog/references/selections.md",
+    "skills/browse/scripts/chromium.mjs", "skills/scrape/scripts/extract.mjs",
+    "lib/url_policy.py",
 )
 
 

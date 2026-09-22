@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # component: cycle-footer
 # implements: ADR-0003
-# intent: docs/adr/0003-cycle-position-footer.md
-# last_intent_review: 2026-06-09
+# intent: .claude/decisions/0003-cycle-position-footer.md
+# last_intent_review: 2026-09-20
 #
 # lib/cycle-footer.sh — render the position footer that closes every official Lintel
 # report, so an operator entering the cycle at any point always knows where they are
@@ -70,9 +70,10 @@ _cf_phase_history() {
 render_cycle_footer() {
   # v5 layout (ADR-0005): state lives in .claude/runtime/state/; the .lintel/
   # path is the pre-migration fallback (grace window to 2026-09-12).
-  local _default_state=".claude/runtime/state/00-state.md"
-  [ -f "$_default_state" ] || { [ -f ".lintel/state/00-state.md" ] && _default_state=".lintel/state/00-state.md"; }
+  local _default_state
+  _default_state="$(state_file 2>/dev/null)" || _default_state=""
   local tier="auto" ascii="${LINTEL_ASCII:-0}" awaiting="" mode="" here="" next="" state="$_default_state"
+  local cycle_id="${LINTEL_CYCLE_ID:-}" status="" explicit_here=no explicit_next=no selected=""
   while [ $# -gt 0 ]; do
     case "$1" in
       --compact) tier="compact"; shift ;;
@@ -83,9 +84,10 @@ render_cycle_footer() {
       # no value must NOT `shift 2` (that fails without consuming → infinite loop).
       --awaiting) awaiting="${2:-}"; shift; [ $# -gt 0 ] && shift ;;
       --mode)    mode="${2:-}"; shift; [ $# -gt 0 ] && shift ;;
-      --here)    here="${2:-}"; shift; [ $# -gt 0 ] && shift ;;
-      --next)    next="${2:-}"; shift; [ $# -gt 0 ] && shift ;;
+      --here)    here="${2:-}"; explicit_here=yes; shift; [ $# -gt 0 ] && shift ;;
+      --next)    next="${2:-}"; explicit_next=yes; shift; [ $# -gt 0 ] && shift ;;
       --state)   state="${2:-}"; shift; [ $# -gt 0 ] && shift ;;
+      --cycle)   cycle_id="${2:-}"; shift; [ $# -gt 0 ] && shift ;;
       *) shift ;;
     esac
   done
@@ -109,7 +111,10 @@ render_cycle_footer() {
   local seg=""
   if [ -f "$state" ]; then
     if command -v state_cycle_segment >/dev/null 2>&1; then
-      seg="$(state_cycle_segment "$state")"
+      seg="$(state_cycle_segment "$state" "$cycle_id")" || {
+        printf '> `li` · selected cycle not found — reconcile the work selection before resuming\n'
+        return 0
+      }
     else
       seg="$(cat "$state" 2>/dev/null)"
     fi
@@ -142,6 +147,14 @@ EOF_HIST
   # cycle_phase_known, since state or operator input may be lowercase or multi-word.
   here="$(printf '%s' "$here" | awk '{print toupper($1)}')"
   next="$(printf '%s' "$next" | awk '{print toupper($1)}')"
+  if [ -n "$here" ] && [ -n "$seg" ]; then
+    status="$(state_phase_record "$here" "$state" "$cycle_id" | state_field status)"
+    status="$(printf '%s' "$status" | tr '[:lower:]' '[:upper:]')"
+    selected="$(printf '%s\n' "$seg" | state_field phases_selected)"
+    if [ -n "$selected" ] && [ "$explicit_next" = no ]; then
+      case "$status" in DONE|DONE_WITH_CONCERNS) next="$(state_resume_phase "$state" "$cycle_id")" ;; esac
+    fi
+  fi
 
   # an explicitly-set-but-unknown `here` (typo) degrades VISIBLY, never to a silent
   # all-pending, here-less footer.
@@ -151,6 +164,9 @@ EOF_HIST
   fi
 
   local skips; skips="$(cycle_mode_skips "$mode")"
+  if [ -n "$selected" ]; then
+    for p in $(cycle_phases); do _cf_in_list "$p" "$selected" || skips="$skips $p"; done
+  fi
 
   # derive `next` from canonical order when not supplied and `here` is mid-pipeline, so a
   # known-but-non-terminal position never mislabels itself "cycle complete".
@@ -160,7 +176,10 @@ EOF_HIST
   # phase (SENSE in every shipping mode) so the stepper shows the here-glyph, not all-pending.
   local _mark="$here"
   if [ "$started" = "1" ] && [ -z "$here" ]; then
-    for p in $(cycle_phases); do _cf_in_list "$p" "$skips" || { _mark="$p"; break; }; done
+    _mark="$(printf '%s\n' "$seg" | state_field first_phase)"
+    if [ -z "$_mark" ]; then
+      for p in $(cycle_phases); do _cf_in_list "$p" "$skips" || { _mark="$p"; break; }; done
+    fi
   fi
 
   # auto tier → thin only when there is genuinely no active cycle. A freshly STARTED
@@ -174,7 +193,11 @@ EOF_HIST
   # ── thin ambient footer (outside the cycle) ──
   if [ "$tier" = "thin" ]; then
     local pack=""
-    [ -f "$HOME/.lintel/packs/active-pack" ] && pack="$(tr -d ' \r\n' < "$HOME/.lintel/packs/active-pack" 2>/dev/null)"
+    if command -v verify_profile_context >/dev/null 2>&1 &&
+        [ -n "${LINTEL_PROFILE_REFERENCE:-}" ]; then
+      if verify_profile_context >/dev/null; then pack="$(get_loaded_pack)" || pack="unverified"
+      else pack="unverified"; fi
+    fi
     if [ -n "$pack" ]; then
       printf '> `li` · pack `%s` · no active cycle — `/li:cycle` for structured work · `/li:catalog` to browse\n' "$pack"
     else
@@ -190,17 +213,30 @@ EOF_HIST
   # before `here` — e.g. SCOPE in research-dive — renders ⊘, not ✅).
   local here_idx=0 idx=0 p
   for p in $(cycle_phases); do idx=$((idx+1)); [ "$p" = "$_mark" ] && here_idx=$idx; done
-  local stepper="" first=1 g; idx=0
+  local stepper="" first=1 g done_phases
+  done_phases="$(printf '%s\n' "$seg" | state_completed_phases)"
+  idx=0
   for p in $(cycle_phases); do
     idx=$((idx+1))
     if   [ "$p" = "$_mark" ]; then g="$g_here"
     elif _cf_in_list "$p" "$skips"; then g="$g_skip"
-    elif [ "$here_idx" -gt 0 ] && [ "$idx" -lt "$here_idx" ]; then g="$g_done"
+    elif _cf_in_list "$p" "$done_phases"; then g="$g_done"
+    elif [ -z "$seg" ] && [ "$explicit_here" = yes ] && [ "$here_idx" -gt 0 ] && [ "$idx" -lt "$here_idx" ]; then g="$g_done"
     else g="$g_pend"; fi
     if [ "$first" = 1 ]; then stepper="${p} ${g}"; first=0; else stepper="${stepper}${arrow}${p} ${g}"; fi
   done
 
   local nl; nl="$(printf '%s' "$next" | tr '[:upper:]' '[:lower:]')"
+  local label
+  case "$status" in
+    DONE) label="done" ;;
+    DONE_WITH_CONCERNS) label="done with concerns" ;;
+    STARTING|IN_PROGRESS) label="in progress" ;;
+    BLOCKED) label="blocked" ;;
+    NEEDS_CONTEXT) label="needs context" ;;
+    PAUSED|ABORTED) label="$(printf '%s' "$status" | tr '[:upper:]' '[:lower:]')" ;;
+    *) label="status unknown" ;;
+  esac
 
   # ── compact one-liner (in a cycle, short replies) ──
   if [ "$tier" = "compact" ]; then
@@ -208,11 +244,15 @@ EOF_HIST
       printf '> %s `%s` · **%s awaiting your answer:** %s\n' "$g_here" "${here:-?}" "$nextmark" "$awaiting"
     elif [ -z "$here" ] && [ "$complete" != "true" ]; then
       # cycle started (CYCLE STARTING ledger entry) but no phase has closed yet
-      printf '> %s cycle starting%s → first phase **`SENSE`**.\n' "$g_here" "${mode:+ (mode \`$mode\`)}"
+      printf '> %s cycle starting%s → first phase **`%s`**.\n' "$g_here" "${mode:+ (mode \`$mode\`)}" "$_mark"
+    elif [ -n "$status" ] && [ "$status" != DONE ] && [ "$status" != DONE_WITH_CONCERNS ]; then
+      printf '> %s `%s` %s — reconcile/resume this phase with `/li:resume`; later-phase metadata is not completion.\n' "$g_here" "$here" "$label"
     elif [ -n "$next" ]; then
-      printf '> %s `%s` done → next **`%s`**. Say `go` or `/li:%s`, or `pause`.\n' "$g_here" "${here:-?}" "$next" "$nl"
+      printf '> %s `%s` %s → next **`%s`**. Say `go` or `/li:%s`, or `pause`.\n' "$g_here" "${here:-?}" "$label" "$next" "$nl"
+    elif [ "$complete" = true ]; then
+      printf '> %s `%s` %s — cycle complete.\n' "$g_here" "${here:-?}" "$label"
     else
-      printf '> %s `%s` — cycle complete. `/li:capture` to bank lessons + an ADR.\n' "$g_here" "${here:-?}"
+      printf '> %s `%s` %s — next action unresolved; `/li:resume` to reconcile.\n' "$g_here" "${here:-?}" "$label"
     fi
     return 0
   fi
@@ -234,13 +274,19 @@ EOF_HIST
     printf '> **%s Next:** run `%s` — say `go` or `/li:%s`.\n' "$nextmark" "$_mark" "$_ml"
     return 0
   fi
-  printf '> **%s You are here:** `%s`\n' "$g_here" "${here:-?}"
+  printf '> **%s You are here:** `%s` (%s)\n' "$g_here" "${here:-?}" "$label"
+  if [ -n "$status" ] && [ "$status" != DONE ] && [ "$status" != DONE_WITH_CONCERNS ]; then
+    printf '> **%s Next:** reconcile/resume `%s` via `/li:resume`; do not advance from an incomplete phase.\n' "$nextmark" "$here"
+    return 0
+  fi
   if [ -n "$next" ]; then
     printf '> **%s Next:** `%s`\n>\n' "$nextmark" "$next"
     printf '> | To do this | Say / type |\n> |---|---|\n'
     printf '> | Continue to %s | `go` or `/li:%s` |\n' "$next" "$nl"
     printf '> | Pause here | `pause` |\n'
+  elif [ "$complete" = true ]; then
+    printf '> **%s Next:** cycle complete.\n' "$nextmark"
   else
-    printf '> **%s Next:** cycle complete — `/li:capture` to bank lessons + an ADR.\n' "$nextmark"
+    printf '> **%s Next:** unresolved — `/li:resume` to reconcile completion and the next action.\n' "$nextmark"
   fi
 }

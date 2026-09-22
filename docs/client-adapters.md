@@ -111,6 +111,15 @@ against the managed bundle as well as checking file hashes. A stray project file
 stand in for a missing bundled guide. The installed source can reproduce the same navigation
 in another checkout without reading the original workstation.
 
+The bundle also carries the exact public alias registry (`config/aliases.yaml`)
+and provenance declarations (`install/upstream-sources.yaml`), not their entire
+parent directories. These files are data; installation never runs the historical
+upstream recipes. Compact catalog queries use the same trusted readers and
+aliases after copying. Their optional YAML parser remains an operation-specific
+dependency, not a new prerequisite for native bare installation. Required work,
+review, domain and browser helper files are checked before consumer writes;
+file presence does not prove a browser engine or live client is available.
+
 Some public guides also cite source-repository-only instructions, CI or internal engineering
 records. Their bundled copies explicitly label that boundary and link to the canonical
 repository's public `main` branch instead of copying those records into your project.

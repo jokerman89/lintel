@@ -56,7 +56,7 @@ done
 
 # Scenario 5: 3 raise-help triggers
 echo ""; echo "[5] Raise-help triggers"
-for trigger in cost_projection_exceeds_budget_threshold slo_budget_below_30_day_minimum rollback_path_irreversible; do
+for trigger in cost_exceeds_approved_budget slo_requirement_unmet recovery_uncertain; do
   if grep -q "$trigger" "$DH"; then pass "raise-help: $trigger"
   else fail "raise-help MISSING: $trigger"; fi
 done

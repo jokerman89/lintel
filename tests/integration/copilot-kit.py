@@ -12,12 +12,18 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
 JOINED_RUNTIME_RESOURCES = (
-    "lib/swarm_snapshot.py", "lib/envelope_contract.py", "lib/envelope-requirements.txt",
+    "lib/swarm_snapshot.py", "lib/swarm_evidence.py",
+    "lib/envelope_contract.py", "lib/envelope-requirements.txt",
     "lib/profile_context.py", "lib/profile-context-schema.json", "lib/pack-schema.yaml",
     "lib/native_paths.py",
     "lib/context_safety.py", "lib/review_contract.py", "lib/review-schema.json",
     "bin/li-review-evidence.py", "bin/li-review-log", "bin/li-review-read",
     "bin/li-domain-result.py", "lib/domain_result.py", "lib/domain-result-schema.json",
+    "lib/state.sh", "lib/cycle-modes.sh", "lib/cycle-footer.sh", "lib/workflow.sh",
+    "bin/li-catalog.py", "lib/capability-selections.json",
+    "skills/catalog/references/metadata.md", "skills/catalog/references/selections.md",
+    "skills/browse/scripts/chromium.mjs", "skills/scrape/scripts/extract.mjs",
+    "lib/url_policy.py", "config/aliases.yaml", "install/upstream-sources.yaml",
     ".claude-plugin/plugin.json",
 )
 spec = importlib.util.spec_from_file_location("li_copilot", ROOT / "bin/li-copilot.py")
@@ -74,6 +80,88 @@ class CopilotKit(unittest.TestCase):
         root = target or self.target
         return {p.relative_to(root).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
                 for p in root.rglob("*") if p.is_file() and not p.is_symlink()}
+
+    def test_browser_modules_use_portable_text_bytes(self):
+        module = self.target / "browser.mjs"
+        module.write_bytes(b"export const fixture = 'ok';\r\n")
+        self.assertEqual(adapter.source_bytes(module), b"export const fixture = 'ok';\n")
+        binary = self.target / "sample.png"
+        binary.write_bytes(b"\x89PNG\r\n\x1a\n")
+        self.assertEqual(adapter.source_bytes(binary), b"\x89PNG\r\n\x1a\n")
+
+    def test_selected_catalog_runs_from_portable_bundle_without_source_fallback(self):
+        target = self.base / "selection"
+        target.mkdir()
+        (target / "consumer-owned.txt").write_bytes(b"preserve consumer selection state\r\n")
+        self.run_cli(target=target)
+        self.run_cli("check", target=target)
+        before = self.snapshot(target)
+        self.run_cli(target=target)
+        self.assertEqual(before, self.snapshot(target))
+        bundle = target / adapter.BUNDLE
+        for relative in adapter.SOURCE_METADATA:
+            self.assertEqual((bundle / relative).read_bytes(),
+                             adapter.source_bytes(self.source / relative))
+        for relative in (
+            "skills/design-dna/ATTRIBUTION.md",
+            "skills/design-dna/LICENSES/MIT-next-level-builder.txt",
+            "skills/design-dna/LICENSES/Apache-2.0-anthropic.txt",
+        ):
+            self.assertEqual((bundle / relative).read_bytes(),
+                             adapter.source_bytes(self.source / relative))
+        unrelated = self.base / "unrelated-cwd"
+        unrelated.mkdir()
+        for arguments in (("--json", "--name=match"),
+                          ("--json", "--selection=demo-script", "--kind=agent")):
+            result = subprocess.run(
+                [sys.executable, "-I", "-B", str(bundle / "bin/li-catalog.py"), *arguments],
+                cwd=unrelated, capture_output=True, text=True, encoding="utf-8")
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            value = json.loads(result.stdout)
+            self.assertFalse(value["executed"])
+            self.assertNotIn("## Behavioral traits", result.stdout)
+            if "--name=match" in arguments:
+                self.assertEqual([item["id"] for item in value["entries"]], ["skill:skill-router"])
+            else:
+                self.assertEqual({item["id"] for item in value["entries"]}, {
+                    "agent:DemoNarrativeArc", "agent:DemoNarratorJunior",
+                    "agent:SlideNarrationCritic",
+                })
+                self.assertEqual(value["selection"]["order"], ["core", "demo-script"])
+                for resource in value["selection"]["resources"]:
+                    self.assertTrue((bundle / resource["path"]).is_file(), resource["path"])
+        self.assertEqual(before, self.snapshot(target))
+        self.assertEqual(list(unrelated.iterdir()), [])
+        clone = self.base / "sc"
+        shutil.copytree(target, clone)
+        clone_bundle = clone / adapter.BUNDLE
+        self.run_cli("check", target=clone, source=clone_bundle,
+                     script=clone_bundle / "bin/li-copilot.py")
+        empty_home = self.base / "selection-empty-home"
+        empty_home.mkdir()
+        env = {key: value for key, value in os.environ.items()
+               if not key.startswith(("LINTEL_", "CLAUDE_"))}
+        env.update(HOME=str(empty_home), USERPROFILE=str(empty_home),
+                   PYTHONDONTWRITEBYTECODE="1")
+        clone_before = self.snapshot(clone)
+        result = subprocess.run(
+            [sys.executable, "-I", "-B", str(clone_bundle / "bin/li-catalog.py"),
+             "--json", "--selection=demo-script", "--kind=agent"],
+            cwd=unrelated, env=env, capture_output=True, text=True, encoding="utf-8")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual({item["id"] for item in json.loads(result.stdout)["entries"]}, {
+            "agent:DemoNarrativeArc", "agent:DemoNarratorJunior", "agent:SlideNarrationCritic",
+        })
+        missing_parser = subprocess.run(
+            [sys.executable, "-I", "-S", "-B", str(clone_bundle / "bin/li-catalog.py"),
+             "--json", "--selection=demo-script"],
+            cwd=unrelated, env=env, capture_output=True, text=True, encoding="utf-8")
+        self.assertNotEqual(missing_parser.returncode, 0)
+        self.assertEqual(missing_parser.stdout, "")
+        self.assertIn("PyYAML", missing_parser.stderr)
+        self.assertEqual(clone_before, self.snapshot(clone))
+        self.assertEqual(list(empty_home.iterdir()), [])
+        self.assertEqual(list(unrelated.iterdir()), [])
 
     def test_fresh_portable_clone_and_idempotence(self):
         self.run_cli()
