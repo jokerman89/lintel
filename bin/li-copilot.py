@@ -129,6 +129,15 @@ ADAPTER_RESOURCES = (
     "skills/design-dna/scripts/design_contract.py",
     "skills/design-dna/references/design-contract.schema.json",
     "skills/design-dna/references/design-contract.md",
+    "skills/catalog/references/consumer-checks.md",
+    "skills/generate-write/references/fidelity-and-evidence.md",
+    "skills/generate-word/references/native-word.md",
+    "skills/generate-ppt/references/native-powerpoint.md",
+    "skills/generate-xlsx/references/native-xlsx.md",
+    "skills/generate-xlsx/scripts/check_xlsx.py",
+    "skills/generate-pdf/scripts/prepare_html.py",
+    "skills/generate-pdf/scripts/check_pdf.py",
+    "skills/generate-pdf/scripts/print_pdf.mjs",
 )
 
 

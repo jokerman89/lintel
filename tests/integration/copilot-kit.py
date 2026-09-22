@@ -28,6 +28,15 @@ JOINED_RUNTIME_RESOURCES = (
     "skills/design-dna/scripts/design_contract.py",
     "skills/design-dna/references/design-contract.schema.json",
     "skills/design-dna/references/design-contract.md",
+    "skills/catalog/references/consumer-checks.md",
+    "skills/generate-write/references/fidelity-and-evidence.md",
+    "skills/generate-word/references/native-word.md",
+    "skills/generate-ppt/references/native-powerpoint.md",
+    "skills/generate-xlsx/references/native-xlsx.md",
+    "skills/generate-xlsx/scripts/check_xlsx.py",
+    "skills/generate-pdf/scripts/prepare_html.py",
+    "skills/generate-pdf/scripts/check_pdf.py",
+    "skills/generate-pdf/scripts/print_pdf.mjs",
 )
 spec = importlib.util.spec_from_file_location("li_copilot", ROOT / "bin/li-copilot.py")
 adapter = importlib.util.module_from_spec(spec)
@@ -102,7 +111,7 @@ class CopilotKit(unittest.TestCase):
         self.run_cli(target=target)
         self.assertEqual(before, self.snapshot(target))
         bundle = target / adapter.BUNDLE
-        for relative in adapter.SOURCE_METADATA:
+        for relative in adapter.SOURCE_METADATA + JOINED_RUNTIME_RESOURCES:
             self.assertEqual((bundle / relative).read_bytes(),
                              adapter.source_bytes(self.source / relative))
         for relative in (
@@ -162,6 +171,30 @@ class CopilotKit(unittest.TestCase):
         self.assertNotEqual(missing_parser.returncode, 0)
         self.assertEqual(missing_parser.stdout, "")
         self.assertIn("PyYAML", missing_parser.stderr)
+        manifest_path = clone / adapter.INVENTORY
+        original_manifest = manifest_path.read_bytes()
+        for relative in (
+            "skills/generate-write/references/fidelity-and-evidence.md",
+            "skills/generate-xlsx/scripts/check_xlsx.py",
+            "skills/generate-pdf/scripts/check_pdf.py",
+        ):
+            path = clone_bundle / relative
+            original_resource = path.read_bytes()
+            inventory = json.loads(original_manifest)
+            del inventory["files"][f"{adapter.BUNDLE}/{relative}"]
+            manifest_path.write_text(json.dumps(inventory), encoding="utf-8")
+            path.unlink()
+            missing_before = self.snapshot(clone)
+            try:
+                result = self.run_cli(
+                    "check", target=clone, source=clone_bundle,
+                    script=clone_bundle / "bin/li-copilot.py", success=False,
+                )
+                self.assertIn(f"Required source file is missing: {path}", result.stderr)
+                self.assertEqual(missing_before, self.snapshot(clone))
+            finally:
+                path.write_bytes(original_resource)
+                manifest_path.write_bytes(original_manifest)
         self.assertEqual(clone_before, self.snapshot(clone))
         self.assertEqual(list(empty_home.iterdir()), [])
         self.assertEqual(list(unrelated.iterdir()), [])
