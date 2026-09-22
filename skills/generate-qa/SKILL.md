@@ -20,6 +20,10 @@ You are the `generate-qa` skill — final stage of the v3.5 shared content pipel
 ## What this skill does
 
 Reads one or more artifacts (PPTX, DOCX, HTML, PDF, XLSX, Visio — or whatever was produced) + their generating design-spec.json + voice-blocklist → runs format-appropriate checks, applies auto-fixes where safe, produces qa-report.json with severity-tagged issues + a summary.
+For standalone Word/PPT, a design-spec is optional: inspect the exact original
+brief/content and saved artifact. Follow the
+[source-fidelity and P05/P07 evidence procedure](../generate-write/references/fidelity-and-evidence.md).
+Do not invent a shared design input or treat package extraction as rendered inspection.
 
 Crucially: **invocable solo on any artifact**, including those not produced by the `generate` pipeline. Operator can run QA on a deck a teammate sent them, on an existing .docx from a prior engagement, on a web page exported from another tool.
 
@@ -42,6 +46,7 @@ Used by `generate` orchestrator as Step 8 (aggregate QA on all produced formats)
 
 - Required `--artifacts <path|paths>` — single artifact or list (glob: `${run_dir}/*/*` works)
 - Optional `--design-spec <path>` — generating design-spec.json for cross-reference checks (if available)
+- Optional `--source <path>` — exact source brief or content.md for standalone retention checks
 - Optional `--palette <name>` — palette for brand-color validation (default: inferred from design-spec or the active pack's default palette)
 - Optional `--vocabulary-blocklist <path>` — voice blocklist for content-text checks
 - Optional `--auto-fix <safe|aggressive|none>` — auto-fix mode (default: safe)
@@ -49,35 +54,52 @@ Used by `generate` orchestrator as Step 8 (aggregate QA on all produced formats)
 
 ## Check categories
 
+Determine applicability and mandatory/advisory status from the brief, selected
+acceptance and verified profile **before** observing results. For mapped evidence,
+use P05's immutable `qa_requirements`; standalone inspection uses its existing
+snapshot/inspect path. The tables below describe checks, not invented neutral hard
+gates. Required errors, missing tools, unknown applicability and unperformed
+inspections stay unresolved regardless of an advisory score.
+
+### Source fidelity and actual inspection
+
+Trace all material claims, reasoning paragraphs, table cells/units, citations and
+limitations from the full source to output locations. A long Word section is not
+a malformed slide. For PPT, inspect visible claims plus actual saved notes/appendix
+and delivered linked long-form content. Missing detail in a sidecar that never
+reaches the delivered package is a fidelity finding.
+
+Reopen and edit/read back through an actual application/API where editability is
+promised. Render every required page/slide and inspect wrapping, clipping, overlap,
+legibility, table continuation and assets at that renderer's layer. Word model/ZIP
+checks cannot prove pagination; a PowerPoint SVG render does not establish every
+Office application's behavior. Record the tool, instance, actions, paths/hashes,
+coverage and unsupported features. Missing rendering is unverified, not N/A or PASS.
+
 ### Brand (palette/font/logo)
 
 | Check | Rule | Severity |
 |-------|------|----------|
-| Colors | All text/shape colors within palette | warning |
-| Fonts | All fonts match palette heading/body | warning |
-| Logo | Present on expected slides/pages | error |
-| Logo placement | Consistent across artifact | warning |
+| Colors/fonts | Match explicit or configured requirements | severity from applicable requirement |
+| Logo | Required only by actual brief/profile, with an authorized asset | severity from applicable requirement |
+| Logo placement | Inspect only where a logo is required/present | warning unless required |
 
 ### Readability
 
 | Check | Rule | Severity |
 |-------|------|----------|
-| Title length | Max 8 words | warning |
-| Bullet count | Max 6 per slide/section | error |
-| Bullet length | Max 12 words per bullet | warning |
-| Font size | Body >= 14pt, Title >= 20pt (PPT); proportional for other formats | error |
-| Contrast | Text/background ratio >= 4.5:1 (WCAG AA) | warning |
-| Slide/section count | 5-30 (PPT); proportional for other formats | info |
+| Titles/bullets | Concise visible slides, complete source detail elsewhere; no universal section cap | advisory unless explicitly required |
+| Font size | Legible in the actual format and viewing context; inspect rendering after resizing | severity from applicable requirement |
+| Contrast | When WCAG AA applies, measured normal text >= 4.5:1 and large text >= 3:1 | mandatory when required, otherwise advice |
+| Slide/page count | Serves material and duration; count targets cannot authorize content loss | info unless an explicit delivery constraint |
 
 ### Voice
 
 | Check | Rule | Severity |
 |-------|------|----------|
-| Blocklist Tier 1 | Zero matches from hard-block list | error |
-| Blocklist Tier 2 | Zero matches from replace-words list | warning |
-| Blocklist Tier 3 | Zero matches from phrase-patterns list | warning |
+| Blocklist | Actual configured tiers, scope and exceptions; no neutral stock blocklist | mandatory/advisory as configured |
 | Passive voice | Flag excessive passive constructions | info |
-| Sentence length | No sentence > 25 words | warning |
+| Sentence length | Readability advice appropriate to language and technical precision | info |
 
 ### Structure
 
@@ -85,22 +107,22 @@ Used by `generate` orchestrator as Step 8 (aggregate QA on all produced formats)
 |-------|------|----------|
 | Empty content | No slide/section without content | error |
 | Duplicate titles | No two slides/sections same title | warning |
-| Speaker notes | Every slide has notes (PPT only, only if content.md exists) | info |
+| Speaker notes | Supporting source detail required by the presentation view survives in actual notes/appendix or linked deliverable | error when required detail is missing |
 | Heading hierarchy | No skipped levels (H1 → H3 with no H2) | warning |
 
 ## Auto-fix modes
 
 **`safe` (default):**
-- Replace Tier 2 blocklist words via substitution table
-- Resize fonts below minimum to minimum
-- Strip empty placeholders
-- Normalize bullet-marker style to template default
+- Normalize decorative formatting only when semantics and source coverage are unchanged
+- Remove a genuinely empty unused placeholder, not a source slot awaiting content
+- Preserve the original owned artifact/version and record every edit
+- Reopen and repeat affected retention/render checks after any edit; font resizing or wording changes are not automatically safe
 
 **`aggressive`:**
 - All `safe` actions
-- Truncate bullets exceeding word limit (flag in report)
-- Reorder slides/sections if duplicate titles detected (flag in report)
-- Apply contrast adjustments to text colors (flag in report)
+- With explicit approval, reflow/split slides, add continuation pages, or move detail to actual notes/appendix while preserving every fact and citation
+- Propose order, wording or contrast changes with a source-preserving diff
+- Never truncate bullets or delete qualifiers to meet a count or font target
 
 **`none`:**
 - Report-only mode. No artifact modification.
@@ -147,23 +169,38 @@ Parse `--artifacts` (single path or glob). Validate each exists + is in supporte
 - `--design-spec <path>` if provided (for cross-reference checks: does artifact match what was specified?)
 - `--palette <name>` (or infer from design-spec, or default to the active pack's default palette)
 - `--vocabulary-blocklist <path>` (or default from the active pack's voice corpus; none by default)
+- Full source and claim ledger; verify hashes rather than checking a generated summary against itself
+- Current P07 profile reference/required-policy bridge and P05 accepted check inventory
 
 ### Step 3 — Per-artifact checks
 
-For each artifact, run all 4 check categories. Format-specific extraction:
-- PPTX: open via python-pptx (or pptx-genjs equivalent), iterate slides
-- DOCX: open via python-docx, iterate sections
-- HTML: parse via BeautifulSoup or similar
-- PDF: extract text via pdfplumber or pdftotext
-- XLSX/Visio: format-specific tooling, may have reduced check coverage
+Discover actual available inspection tools and schemas first; prefer native
+operations or already declared libraries. Word/PPT canvas model operations,
+python-docx/python-pptx and ZIP/XML extraction provide different coverage from a
+page/slide renderer. Name the layer and do not count an extractor as rendering.
+Check all selected applicable categories and retain missing observations.
+
+PDF needs a real page renderer and text/page-fidelity check. XLSX needs actual
+recalculation plus formula/cache/reopen checks. Visio needs connector/label and
+rendered editable-reopen checks. Their planned adapters and the shared design
+binding retain their own release gates; this unit does not claim those formats
+verified. Do not install libraries automatically to make a missing tool disappear.
 
 ### Step 4 — Apply auto-fixes per `--auto-fix` mode
 
-For each fixable issue: apply fix in-place to artifact. Record fix in issue's `auto_fixed: true` + `fix_applied: "<description>"`.
+For each authorized fix, preserve the original version and record `auto_fixed`
+and `fix_applied`. Re-read the changed artifact, compare it to the full source and
+rerun affected checks. Reprepare stale P05 evidence; an auto-fix cannot retain a
+pre-edit PASS. `none` remains strictly read-only.
 
 ### Step 5 — Compose qa-report.json
 
-Aggregate all issues, compute summary stats, set `qa_pass: (errors == 0)`. Write to `--out`.
+Keep the existing report fields. Counts describe actual checks, not assumed passes.
+Set `summary.qa_pass` true only when the applicable required validation was actually
+performed and P05's evaluation has no mandatory blocker, with requested format
+coverage complete. Otherwise set false and record the missing/failed requirement
+in `issues`, referring to its P05 evidence. No applicable checks is not a verified
+QA pass. Persist the bound P05 receipt separately; qa-report.json is not clearance.
 
 ### Step 6 — Surface summary to operator
 
@@ -171,9 +208,9 @@ Print: total checks, pass/warn/err counts, qa_pass status, auto-fix count, top 3
 
 ## Status protocol
 
-- **DONE** — qa-report written, qa_pass=true (zero errors)
-- **DONE_WITH_CONCERNS** — qa-report written, qa_pass=false (errors present), or auto-fixes applied but some errors remain
-- **BLOCKED** — artifacts missing/unreadable, format unsupported, no extraction tool available
+- **DONE** — report written, required inspection complete and qa_pass=true
+- **DONE_WITH_CONCERNS** — required checks satisfied with advisory concerns explicitly retained
+- **BLOCKED** — required inspection/control failed or remains unverified, including missing/unreadable artifacts or unavailable extraction/rendering; report useful partial observations
 - **NEEDS_CONTEXT** — `--artifacts` empty or glob matched nothing
 
 ## Pause-points
@@ -186,7 +223,7 @@ Print: total checks, pass/warn/err counts, qa_pass status, auto-fix count, top 3
 **Reads:**
 - Artifact files (PPTX, DOCX, HTML, PDF, XLSX, Visio)
 - `design-spec.json` (optional, for cross-reference)
-- `~/.lintel/brand/palettes/<palette>.json`
+- Explicit palette/source paths selected through the verified profile; no personal-directory scan
 - The active pack's vocabulary blocklist (`resolve_pack_field voice.corpus`; none by default)
 
 **Writes:**
@@ -199,20 +236,20 @@ Print: total checks, pass/warn/err counts, qa_pass status, auto-fix count, top 3
 
 ## Anti-patterns
 
-- **Auto-fix `aggressive` without operator confirmation** — bullet truncation + slide reorder can lose intent. Default to `safe`.
-- **Block customer-share solely on QA-pass** — voice-gate is the authoritative customer-share check. QA is broader but advisory for voice-tier decisions.
+- **Auto-fix `aggressive` without operator confirmation** — reflow/reorder can change intent. No mode permits silent content loss.
+- **Treat QA-pass as sharing permission** — applicable policy, independent review and delivery authority still govern; neutral voice advice is not an invented hard gate.
 - **Modify artifact when `--auto-fix none`** — none means report-only. Hard rule.
 - **Skip cross-reference check when design-spec available** — if operator provided design-spec, validate artifact matches spec (catches drift).
 
 ## Failure recovery
 
-- Format-specific extraction tool missing (e.g., no python-pptx for PPTX): degrade to text-only checks, flag in report
+- Tool missing: use another actually available authorized operation, or record incomplete text/render/edit coverage; never convert missing required coverage to pass
 - Artifact corrupted: report unreadable + skip, continue with other artifacts in batch
-- Palette resolution fails: fall back to the active pack's default palette, flag inferred-palette in report
+- Required palette/profile resolution fails: block the affected action; optional neutral defaults remain explicitly advisory
 
 ## Recommended next steps after invocation
 
-- If `qa_pass=true`: artifact is ready for next step (delivery, voice-gate for customer-share, archive)
+- If `qa_pass=true`: the reported required inspection is satisfied for the bound artifact; obtain any outstanding independent review and delivery authorization
 - If `qa_pass=false` with errors: operator addresses errors manually, re-runs QA
 - If many warnings: consider re-invoking `/li:generate-design` with different palette or template
 - For customer-share: chain the active pack's compliance gates after QA-pass

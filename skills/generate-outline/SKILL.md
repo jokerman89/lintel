@@ -45,7 +45,7 @@ Replaces brief-parsing logic previously inline in `generate-ppt` / `generate-web
 - Optional `--audience <text>` — primary audience (default: "general business")
 - Optional `--arc <name>` — narrative arc (see Arcs section)
 - Optional `--slide-count <N>` — target slide count (default: agent decides based on material volume)
-- Optional `--language <sv|en>` — output language (default: match brief)
+- Optional `--language <language-tag|name>` — output language, including regional or multilingual requirements (default: match brief; respect applicable configured policy)
 - Optional `--out <path>` — output path (default: `${run_dir}/outline.md` or `./outline.md`)
 
 ## Narrative arcs
@@ -64,10 +64,10 @@ If no arc specified, agent picks based on audience + brief signal.
 
 ```markdown
 ---
-title: <string, max 12 words>
+title: <descriptive title, preserving the brief's meaning>
 audience: <string>
 arc: <name from arcs table>
-language: <sv|en>
+language: <selected language, for example en-GB, sv, or ja>
 target_formats: [ppt, web, word]
 slide_count_target: <int>
 generated_at: <iso-8601>
@@ -76,28 +76,39 @@ source_brief_hash: <sha256 of brief>
 
 # <title>
 
-## §1 — <Slide/Section title, max 8 words>
+## §1 — <Section title>
 - **type:** title | agenda | section-header | content | content-image | two-column | comparison | data-viz | quote | timeline | demo | thank-you
 - **key_message:** <one sentence — the one thing this section communicates>
-- **source_material:** <brief paragraph or "agent synthesis">
-- **voice_technique:** <REVEAL/Understatement | INSPIRE/Marvel | PROVOKE/Skewer | ...>
-- **notes_for_writer:** <guidance for the write step>
+- **source_material:** <explicit source path and paragraph/heading/table/claim references, or labelled "agent synthesis">
+- **voice_technique:** <configured technique or null>
+- **notes_for_writer:** <reasoning, citations, tables, qualifications and material limitations to retain>
 
 ## §2 — <next section title>
 ...
 ```
 
 Sections are numbered §1, §2, ... — a consistent §-pattern across content artifacts.
+Keep these IDs stable during writing and format composition. A section is a unit of
+reasoning, not necessarily one slide or one page. `slide_count_target` remains an
+integer planning hint for compatibility; it is not a content budget or a truncation rule.
 
 ## Workflow
 
 ### Step 1 — Parse brief
 
-Read brief content. If brief is a path: load file. If inline: use text directly. Compute sha256 hash for traceability.
+Read the complete brief and its explicitly supplied sources. If inline, retain the
+exact supplied text in the owned run directory before computing its SHA-256.
+Keep a source inventory of claims, evidence, tables, citations and material limitations.
+Do not reconstruct the brief from its key messages later. Follow the
+[content fidelity and evidence procedure](../generate-write/references/fidelity-and-evidence.md).
 
 ### Step 2 — Detect language + audience signal
 
-Default language matches brief language. Audience cues from brief (mention of "CTO", "engineers", "customer", etc.) inform default arc if `--arc` not specified.
+An explicit language choice overrides an inferred preference, subject to applicable
+configured policy; otherwise preserve the brief's language. Keep original quotations,
+identifiers and citations even in a translated document, marking translations where
+needed. There is no fixed language pair or required first-person pronoun. Audience
+cues inform the default arc if `--arc` is not specified.
 
 ### Step 3 — Pick arc
 
@@ -110,27 +121,29 @@ If `--arc` provided: use it. Otherwise:
 
 ### Step 4 — Choose slide_count_target
 
-If `--slide-count` provided: use it. Otherwise:
-- `ppt` in target_formats: 8-15 slides (default 12) based on material volume
-- `word` only: section_count 5-8
-- `web` only: 3-5 hero/sections
+If `--slide-count` is provided, use it as the presentation-view target. Otherwise
+estimate from material, audience and duration. For Word/web, record the planned
+section count in the existing field rather than forcing a slide-sized structure.
+Split at reasoning boundaries. If the presentation target is tight, plan notes,
+appendices or linked long-form content; do not delete evidence to fit the target.
 
 ### Step 5 — Generate section/slide list
 
 For each section/slide:
 - Pick type from available list
-- Write title (max 8 words, no period)
+- Write an informative title; brief slide headlines can be composed later
 - Write key_message (one sentence, distinct from every other key_message)
-- Map source_material reference (which part of brief, or "agent synthesis")
-- Pick voice_technique appropriate for type + arc position
-- Write notes_for_writer (guidance)
+- Map every source claim, supporting argument, table, citation and limitation to a section
+- Pick voice_technique from the configured corpus, or null when none applies
+- Write notes_for_writer, including content that needs a continuation or appendix
 
 ### Step 6 — Validate
 
 - All key_messages distinct
 - Arc internally consistent (matches first → middle → last structure for chosen arc)
-- Slide types vary (no 5 content slides in a row)
-- Total within ±2 of slide_count_target
+- Source inventory is covered without dropping qualifications or unsupported synthesis
+- For slides, review pacing and variety as presentation advice, not universal hard gates
+- Explain count drift and any continuation/appendix plan; never resolve drift by content loss
 
 ### Step 7 — Write outline.md + return path
 
@@ -139,20 +152,20 @@ Write to `--out` path. Surface summary (slide_count, section types, language, ar
 ## Status protocol
 
 - **DONE** — outline.md written, validation passed
-- **DONE_WITH_CONCERNS** — outline.md written but slide-count drift > ±2 from target, or arc consistency questionable
+- **DONE_WITH_CONCERNS** — outline written with pacing/count advice or an uncertain arc explicitly recorded
 - **BLOCKED** — brief is unparseable, missing, or too vague to outline
 - **NEEDS_CONTEXT** — `--target-formats` not specified (ambiguous slide-count target)
 
 ## Pause-points
 
-- Brief is too vague to outline (less than 50 words): surface back + offer to gather more context
+- Brief lacks the purpose, audience or evidence necessary for the requested output: ask for the missing input, not an arbitrary word quota
 - Multiple plausible arcs detected: surface options + recommendation
 
 ## Integration
 
 **Reads:**
 - Brief (path or inline)
-- `~/.lintel/voice/arc-defaults.yaml` (optional — operator's arc-preference overrides)
+- Explicitly supplied or verified profile arc preferences, when present; no personal-directory scan
 
 **Writes:**
 - `outline.md` to `--out` path
@@ -165,15 +178,15 @@ Write to `--out` path. Surface summary (slide_count, section types, language, ar
 ## Anti-patterns
 
 - **Generating content INSIDE outline.md** — outline holds structure + key_messages only. Content (bodies, bullets) belongs in content.md (generate-write).
-- **Duplicate key_messages across sections** — every key_message must be distinct. If two sections have the same message, collapse them.
+- **Duplicate key_messages across sections** — clarify the different purpose; consolidate only when all source detail and references remain covered.
 - **Inferring `--target-formats`** — slide_count_target depends on this. Block on missing instead of guessing.
-- **Hard-coded English when brief is in Swedish** — language must match brief unless `--language` overrides.
+- **Hard-coded language or voice** — use the brief, explicit choice and applicable configured policy.
 
 ## Failure recovery
 
-- Brief too short: surface back with prompt for at least 100 words of substantive content
+- Missing source material: identify the exact gap; do not invent facts to fill a section
 - All arcs deadlock (each scores equal): pick `problem-solution` (most-versatile default), flag in notes
-- Slide_count drift > ±2: regenerate with explicit constraint, flag if drift persists
+- Count drift: adjust the presentation plan or retain an explicit concern; preserve the source
 
 ## Recommended next steps after invocation
 
