@@ -11,7 +11,7 @@ REVIEW -> SHIP -> CAPTURE. Resume is a utility that returns to that cycle, not a
 phase or a replacement lifecycle. Preserve documented presets and entry points.
 
 Follow AGENTS.md, AGENT-INSTRUCTIONS.md, the Copilot adapter when on Copilot,
-accepted ADRs, and memory lessons L-030 through L-032. Original audit evidence is
+accepted ADRs, and relevant recent memory lessons through L-039. Original audit evidence is
 committed under `.claude/engineering/audits/2026-09-20-universal-quality/`.
 The original source audit and Swarming worktrees must not be overwritten or reset.
 
@@ -39,7 +39,7 @@ manufactured productivity metrics. No client lacking a real run becomes "verifie
 Use only the explicitly authorized `jokerman89` GitHub account. The injected credentials
 were rejected earlier; do not use them for reads, pushes or PR tools. The operator's
 new login was verified through an explicitly account-selected CLI credential and
-`/user` on 2026-09-21. Verify the actor for the actual publishing path, then deliver
+`/user` during the 2026-09-22 continuation. Verify the actor for the actual publishing path, then deliver
 through the feature PR with review/CI and preserved ancestry. Merge authorization is
 only for this accepted initiative batch. Clean only verified completed owned artifacts/
 workspaces after preserving commits, reports and history; retain unrelated/unmerged work.

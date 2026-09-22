@@ -99,7 +99,8 @@ backups and any unmerged work during scoped cleanup. No broad deletion or person
 profile cleanup is authorized.
 
 The operator separately authorized GitHub login as `jokerman89`; the CLI credential
-selected specifically for that account was verified through `/user` on 2026-09-21.
+selected specifically for that account was verified through `/user` during the
+2026-09-22 continuation.
 Authenticated repository reads confirm `main` is still `28061e4`, push permission
 and merge-commit support. Clear rejected injected tokens and select the verified
 identity explicitly for authenticated operations; never assume another tool's actor.

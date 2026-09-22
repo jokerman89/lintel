@@ -12,7 +12,7 @@
 Audit and continuity: preserved in commit `74290e0`; original audit worktree untouched.
 All 25 source files were hash-verified before import. A separate local verified Git bundle
 preserves Swarming and its four worker branches with complete ancestry.
-No whole-initiative acceptance is claimed. On 2026-09-21 the explicitly selected
+No whole-initiative acceptance is claimed. During the 2026-09-22 continuation the explicitly selected
 `jokerman89` CLI identity was verified; authenticated reads confirm main remains
 `28061e4`, push permission and merge-commit support. Final accepted PR delivery/merge
 and scoped cleanup now have explicit operator authority, as bounded in spec.md.

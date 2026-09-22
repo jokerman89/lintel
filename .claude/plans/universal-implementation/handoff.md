@@ -1,6 +1,6 @@
 # Universal implementation handoff
 
-Updated 2026-09-20 by MasterSession.
+Updated 2026-09-22 by MasterSession.
 
 ## Durable state
 
@@ -42,7 +42,9 @@ from the reviewed historical merge `40c2795`. Current implementation ownership:
 | P06 host adapters | `324863ff-e7cf-4abf-b449-04dd0f096170` | Component ACCEPTED/integrated `36593cd`; provider `7425960`, final review `1067da29`; idle |
 | P07 profile context | `b9352dfe-1c1e-4ea3-b7d9-0fd008d39b3d` | Long-path repair ACCEPTED by `a7450597`, integrated `c344133` with reports; joined checks pass, idle |
 | P08 work lifecycle | `f2c305ac-e8b0-4b02-b6cd-c7de598964cf` | Combined `2f4cc38` / report `8eb00b87` frozen; intake verified; same-reviewer complete selected SPEC then eligible QUALITY dispatched |
-| P10 installer lifecycle | `5ea6c88c-68c1-4712-8f55-adecdfe0061f` | Refusal product `a559c9f` / report `4c0519e3` frozen; intake verified; same-reviewer complete SPEC then first eligible whole QUALITY dispatched |
+| P09 specialist depth | `0fe8dc1e-8c6f-4d4a-af68-80696067be27` | First knowledge/preservation unit active from `56df03d`; shared runtime/result binding still waits for P08 |
+| P10 installer lifecycle | `5ea6c88c-68c1-4712-8f55-adecdfe0061f` | `a559c9f` / `4c0519e3` frozen; `c1a38a03` SPEC FAIL P1 F02 scaffold preservation; original owner has design-only follow-up |
+| P11 browser operations | `f413bdcb-e081-45e0-9524-7274b4391665` | A16-only unit active from `56df03d`; A14/shared design/frontend agents still gated |
 
 All are `lintel-builder` sessions with explicit ownership, local commits, report paths
 and no remote authorization. P01/P02 and the owned P04-P07 components are accepted.
@@ -65,7 +67,7 @@ repair their own findings. All prior reports remain preserved in `reviews/` and 
 | P06 | Final `1067da29`; complete component SPEC/QUALITY PASS at `7425960`; integrated | `d2a89ac3-151a-4dc0-ab09-1f3a62465cab` |
 | P07 | Final `a7450597` accepts `4d001463`; integrated through `56de830`, earlier `a8de574`/`3d8e715` preserved | `a7d78944-c02c-4909-a060-2c4f2a754b00` |
 | P08 partial | Review exact `8eb00b87` / product `2f4cc38`; F01/F02/F03 and complete selected-subset gates remain open | `9dbf0a9b-750d-45c2-968c-41a5acb11c92` |
-| P10 | Review exact `4c0519e3` / product `a559c9f`; F01 closed, remaining complete SPEC/whole QUALITY open | `1578dfd8-f239-4eba-989b-3c4bde3e5792` |
+| P10 | `c1a38a03` rejects exact `4c0519e3` / `a559c9f` for P1 F02; F01 closed; QUALITY NOT STARTED | `1578dfd8-f239-4eba-989b-3c4bde3e5792` |
 
 ## Current combined review checkpoints
 
@@ -91,6 +93,27 @@ both current HEAD and frozen `2f4cc38` confirms the full nine-step declaration a
 resume's utility status. An initial console print failed on Unicode output, not
 on product behavior; the ASCII-safe comparison passed without source changes.
 This is source evidence, not a waiver of lifecycle behavior review.
+
+Both new writers were observed busy in their separate app worktrees. P09 owns
+agent/domain knowledge; P11 owns only browser operations in this stage, so their
+active file scopes do not overlap. Do not create replacement workers. The P11
+owner observed missing Python/Node Playwright and a failed task-local restore,
+without TLS/security bypass; it is checking the existing isolated Chromium/native
+Node provider path, not a personal browser or invented daemon. The full first-unit
+browser acceptance remains open.
+
+P10's independent reviewer has now reported a concrete original A12/R01 blocker:
+the real installed caller/scaffold path overwrites seeded user-owned files in an
+existing plain folder256 while returning complete/0; the seeded short116 control
+preserves them. This is not the approved external-Git limit (there is no Git
+metadata). The immutable verdict is `c1a38a03e0efb54454e14bddee7cd07b4af6e1e3`, sole parent
+`4c0519e3`, one 364-line report with verified hash `fee7f46c...`; SPEC FAIL,
+P1 F02, including the settings custom-key loss. Testing stopped and QUALITY has
+not started. The original builder may only inspect/design the
+whole scaffold/migration preservation-planning correction before the repair scope
+is committed. No product repair, recovery, cleanup or acceptance is
+authorized before its bounded repair card. All original successful and failed
+controls remain distinct; independent runtime9/9 and lifecycle53/53 do not clear F02.
 
 ## Accepted local integrations
 
@@ -282,8 +305,9 @@ to continue P08-P14 and final P04 binding; do not stop the initiative at the fir
 ## Blockers and boundaries
 
 Only `jokerman89` may be used for authenticated GitHub operations. Earlier CLI/GCM
-lookups were unavailable; the operator explicitly completed the new personal login
-on 2026-09-21. With rejected injected tokens cleared and the credential selected by
+lookups were unavailable; the operator authorized the new personal login on
+2026-09-21. Completion and authenticated identity were observed during the
+2026-09-22 continuation. With rejected injected tokens cleared and the credential selected by
 hostname/user, `/user` returned `jokerman89`. Authenticated repository reads confirm
 push/admin permission, merge-commit support and current main still
 `28061e434be455ca02f135b73244eaf4f73f3a69`. No repository mutation occurred in that
@@ -294,6 +318,13 @@ operation remains out of scope.
 Main merge and scoped post-delivery cleanup are now explicitly authorized for this
 accepted A01-A26 batch only, through the planned PR/review/CI path with ancestry
 preserved. No new release/tag, production/deployment, hook or private-sync authority.
+
+Read-only delivery preflight on 2026-09-22: GitHub reports main "Branch not protected"
+(404) and no repository/parent rulesets. This does not waive our PR/review/CI gates.
+The two current workflows, CI and Catalog, run read-only checks on PR/main; no
+deployment/publication job is present. No workflow, policy or repository mutation
+was made during these checks. The morning target is not met merely by having
+credentials or active workers; the initiative is still in BUILD/REVIEW.
 
 ## Next action
 

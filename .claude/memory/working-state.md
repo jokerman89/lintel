@@ -90,11 +90,20 @@ original default/classic/canonical dimensions and independent gates stay unchang
 The later refusal product `a559c9f` / report `4c0519e3` is now frozen and its scope,
 protected runtime/test identities and report are verified. The original reviewer is
 completing full P10 SPEC before the first eligible whole QUALITY; no acceptance yet.
+That review now reports a real scaffold user-content overwrite at an existing
+long plain-folder target, distinct from the Git limitation. Immutable report
+`c1a38a03` is SPEC FAIL, P1 F02; testing stopped and QUALITY has not started.
+The original builder has design-only follow-up. No source repair or waiver
+precedes the bounded correction scope.
 The operator challenged the prolonged pathing focus on 2026-09-21. The target is
 useful, team-ready Universal skills, not a general Windows/Git compatibility layer.
 Close only the bounded active P08/P10 corrections and required review, then advance
 dependency-ready skill depth and client experience. Reconcile any newly proposed
 infrastructure blocker with the original outcome before expanding scope (L-038).
+P09 knowledge/preservation is now active in `0fe8dc1e`; P11's disjoint A16 browser
+unit is active in `f413bdcb`, both from `56df03d`. P08 and P10 are with their original
+independent reviewers. P09 runtime binding and P11 A14/design/agent work retain
+their predecessor gates; no new whole-package acceptance is implied.
 Continue P08-P14 in dependency order,
 not a new audit or partial delivery. Coordinator routing (`b72ab47` plus
 `1d40193`) and provenance (`9f49e26`) await their owning package reviews. All successor cards
@@ -102,7 +111,8 @@ and interface agreements are committed; use the handoff's exact IDs, do not dupl
 
 Original Swarming worktree remains at `275a354`. On 2026-09-21 the operator authorized
 final accepted PR/CI/main merge and scoped cleanup for this initiative. The new
-account-selected CLI credential was verified as `jokerman89`; authenticated reads
+account-selected CLI credential was verified as `jokerman89` during the 2026-09-22
+continuation; authenticated reads
 confirm main is still `28061e4`, push permission and merge-commit support. Verify
 each publishing path's actor; rejected injected credentials remain forbidden.
 No release/tag, production/deployment, private sync or dormant-hook activation follows.
