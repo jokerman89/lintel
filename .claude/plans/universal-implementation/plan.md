@@ -269,7 +269,7 @@ full workflow/profile-value gates remain open.
   - [x] A08.2.b Render footer state from actual STARTING/BLOCKED/DONE status, not next-phase metadata.
   - [ ] A08.2.c Compose canonical phase entry without duplicate SENSE/SCOPE.
 - [ ] A08.3 Connect ANALYZE/CAPTURE/budget/resume to the same selected task source.
-  - [x] A08.3.a Share the selected-map reader and bounded artifact manifest using accepted parsers/selectors.
+  - [ ] A08.3.a Share the selected-map reader and bounded artifact manifest using accepted parsers/selectors.
   - [x] A08.3.b Persist selected-map/profile/required-policy resume identity without replacing original authority.
   - [ ] A08.3.c Wire ANALYZE/CAPTURE/BUILD/budget consumers to original paths and IDs.
     - [ ] A08.3.c.r1 Guard analysis-report selection through native identity before choosing output.
@@ -287,14 +287,25 @@ refinements do not close A08 parents, actual semantic/intake/orchestration or A1
 The broader lifecycle runner stays deferred until its remaining consumers join;
 the checked-in provider runner selects the actual accepted cases without deleting
 the other original test methods.
+The final Swarm CLI join reopens A08.3.a for an explicitly selected alphabetic
+legacy singleton omitted by the default reader. Its bounded correction is
+coordinator-owned in the recovery checkout; native fixture source `70469296`
+stays immutable. Prior tested provider controls remain their recorded evidence.
 
 ### A09 Concrete specialist modules (P09; R06)
-- [ ] A09.1 Define shared work/profile/revision/result handoff envelope.
-- [ ] A09.2 Replace ambiguous execution pseudocode with owned checkpoints and recovery.
-- [ ] A09.3 Add architecture/data failure mechanisms and worked decision examples.
-- [ ] A09.4 Add security/operations/testing mechanisms, criteria and false-positive examples.
+- [x] A09.1 Define shared work/profile/revision/result handoff envelope.
+- [x] A09.2 Replace ambiguous execution pseudocode with owned checkpoints and recovery.
+- [x] A09.3 Add architecture/data failure mechanisms and worked decision examples.
+- [x] A09.4 Add security/operations/testing mechanisms, criteria and false-positive examples.
 - [ ] A09.5 Test installed-source discovery, Windows filenames and interrupted domain handoff.
 Acceptance: every required domain result remains visible; no averaging away failure.
+Source/data and module-consumer evidence: accepted data core `ea92df8` / `6e2f7e4`
+and [module review](reviews/P09-modules-5c99612.md) `114ddfe3` at `5c99612`,
+integrated `2d789a4`. All 26 method/doc/test paths match; 13 joined consumer
+methods pass against current accepted providers. These closures concern the
+implemented methods and shared contracts, not database/model correctness.
+A09.5 remains open for installed closure. The archived native TA draft's separate
+N1 safety/liveness finding remains unresolved by this source acceptance.
 
 ### A10 Proportionate intake and composition (P08; R05)
 - [ ] A10.1 Ask only missing, task-relevant decisions and retain existing authorization.
@@ -382,12 +393,18 @@ parsing repairs have independent bounded verification, not a fabricated native
 rerun. Headed login, other hosts, PDF raster and full P11/A14 remain separate.
 
 ### A17 Portable, useful agent roles (P09; R06)
-- [ ] A17.1 Map all 69 inventoried roles to retained inputs, decisions, outputs and verification.
-- [ ] A17.2 Neutralize forced model/tool assumptions and explicitly supersede relevant ADR0012 scope.
-- [ ] A17.3 Fix DemoNarratorJunior/DemoNarrativeArc circular prerequisites.
-- [ ] A17.4 Preserve distinct planner/executor responsibilities and specialist methods.
+- [x] A17.1 Map all 69 inventoried roles to retained inputs, decisions, outputs and verification.
+- [x] A17.2 Neutralize forced model/tool assumptions and explicitly supersede relevant ADR0012 scope.
+- [x] A17.3 Fix DemoNarratorJunior/DemoNarrativeArc circular prerequisites.
+- [x] A17.4 Preserve distinct planner/executor responsibilities and specialist methods.
 - [ ] A17.5 Verify dispatch/receiver contracts, independent reviews and cold-start examples.
 Acceptance: no unique role value disappears; no role depends on its own circular output.
+Evidence: [accepted role preservation](reviews/P09-content-4a9b946.md) `19eb776`,
+the 69-role map and ADR-0028, plus accepted consumer review `114ddfe3` and exact
+joined module checks. The accepted P13 demo-script selection retains Plan ->
+draft -> distinct critique and all three role sources. This is source/contract
+acceptance, not native registration or observed correctness of all 69 roles.
+Original A17.5 remains open for its actual mode/semantic/installed evidence.
 
 ### A18 Optional capabilities without loss (P13; R06)
 - [ ] A18.1 Define discoverable capability selections and their dependency/maturity metadata.

@@ -131,6 +131,69 @@ test "$(grep -c '^phase: SENSE$' "$(state_file)")" = 2
 
 
 class WorkSelectionTests(FixtureCase):
+    def named_swarm(self):
+        fixture_class = runpy.run_path(str(ROOT / "tests/unit/swarm-contract.py"))["SwarmFixture"]
+        fixture = fixture_class(self.repo)
+        fixture._write("plan.md", "# Plan\n\n### core - Named work\n\n- [ ] Finish the named work.\n"
+                       "\n### Overview\nThis is prose, not another task.\n")
+        fixture._write(".claude/plans/example/swarm/briefs/core.md", "# Core brief\n")
+        fixture.coordination["lanes"] = [fixture._lane("core", 1, "src/core")]
+        fixture.coordination["max_parallel"] = 1
+        fixture.save()
+        self.assertTrue(fixture.validate().ok)
+        return fixture
+
+    def test_named_swarm_singleton_uses_selected_coordination_without_acceptance(self):
+        fixture = self.named_swarm()
+        fixture.work_map["status"] = "DRAFT"
+        fixture.save()
+        before = {p: p.read_bytes() for p in self.repo.rglob("*") if p.is_file()}
+        result = WORK["work_context"](self.repo, Path(fixture.work_map_path))
+        self.assertEqual(set(result["tasks"]), {"core"})
+        self.assertEqual(result["packages"]["core"]["leaf_ids"], ["core"])
+        self.assertEqual(result["packages"]["core"]["leaves"]["core"], result["tasks"]["core"])
+        self.assertEqual(result["incomplete_ids"], ["core"])
+        self.assertEqual(result["status"], "DRAFT")
+        self.assertEqual(result["task_evidence"], "source-status-only")
+        self.assertIsNone(result["binding"])
+        self.assertFalse(result["release_clearance"])
+        self.assertEqual(before, {p: p.read_bytes() for p in self.repo.rglob("*") if p.is_file()})
+
+    def test_selected_coordination_is_counted_once_and_cannot_switch_initiatives(self):
+        fixture = self.named_swarm()
+        result = WORK["work_context"](self.repo, Path(fixture.work_map_path),
+                                      warm_paths=[fixture.coordination_path])
+        paths = {fixture.work_map_path, "spec.md", "plan.md", "prompt.md",
+                 fixture.coordination_path}
+        self.assertEqual({item["path"] for item in result["manifest"]["files"]}, paths)
+        expected_bytes = sum(len((self.repo / path).read_bytes()) for path in paths)
+        self.assertEqual(result["manifest"]["bytes"], expected_bytes)
+        exact = WORK["work_context"](self.repo, Path(fixture.work_map_path),
+                                     max_files=5, max_bytes=expected_bytes)
+        self.assertEqual(exact["manifest"]["bytes"], expected_bytes)
+        with self.assertRaises(ValueError):
+            WORK["work_context"](self.repo, Path(fixture.work_map_path), max_bytes=expected_bytes - 1)
+        with self.assertRaises(ValueError):
+            WORK["work_context"](self.repo, Path(fixture.work_map_path), max_files=4)
+        fixture.coordination["work_map"] = "different-work.json"
+        fixture.save()
+        before = {p: p.read_bytes() for p in self.repo.rglob("*") if p.is_file()}
+        with self.assertRaises(ValueError):
+            WORK["work_context"](self.repo, Path(fixture.work_map_path))
+        self.assertEqual(before, {p: p.read_bytes() for p in self.repo.rglob("*") if p.is_file()})
+
+    def test_ordinary_heading_does_not_become_a_task_without_explicit_selection(self):
+        fixture = self.named_swarm()
+        del fixture.work_map["execution_mode"]
+        del fixture.work_map["coordination"]
+        fixture.save()
+        result = WORK["work_context"](self.repo, Path(fixture.work_map_path))
+        self.assertEqual(result["tasks"], {})
+        self.assertEqual(result["packages"], {})
+        self.assertEqual(result["incomplete_ids"], [])
+        self.assertEqual(result["task_evidence"], "unrecognized")
+        self.assertIsNone(result["binding"])
+
     def make_map(self, name, workflow="spec-kit"):
         folder = self.repo / "specs" / name
         folder.mkdir(parents=True)

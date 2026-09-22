@@ -9,6 +9,9 @@ set -euo pipefail
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 python="${LINTEL_PYTHON:-python3}"
 PYTHONDONTWRITEBYTECODE=1 "$python" "$root/tests/integration/universal-work-lifecycle.py" --root "$root" \
+  WorkSelectionTests.test_named_swarm_singleton_uses_selected_coordination_without_acceptance \
+  WorkSelectionTests.test_selected_coordination_is_counted_once_and_cannot_switch_initiatives \
+  WorkSelectionTests.test_ordinary_heading_does_not_become_a_task_without_explicit_selection \
   WorkSelectionTests.test_explicit_map_original_ids_and_no_writes \
   WorkSelectionTests.test_manifest_measures_selected_and_warming_bytes_once \
   WorkSelectionTests.test_budget_matches_reported_capacity_boundary_without_a_default_cap \

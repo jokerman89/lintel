@@ -15,8 +15,10 @@ The existing P08/P09/P10/P11/P12/P13 owners have the new coordinator address.
 Use the app-surfaced session IDs, not differing IDs quoted inside worker messages.
 Current actionable checkpoints supersede the older chronological entries below:
 
-- P04: shared consumer product `f02e994a`, report-only `c2a9455`, is with SAME
-  reviewer `ed672f58`. Final P08/provider and module join remains separate.
+- P04: shared consumer `4f10837` passes `bb939e55` with F08/P3 advisory,
+  integrated `1f1b0d2`; eight joined shared/guard cases and source preflight pass.
+  `7430838` releases the original owner's final actual P08 work/cold-resume join
+  and F08 canonical-grammar correction; SAME reviewer `ed672f58` follows.
 - P08: the same reviewer completed private native `main-review-02` planning SPEC
   and QUALITY. The recovery coordinator read it and approved the corrected Alpha
   design and conditional local T011/T027 implementation. The original controller
@@ -26,18 +28,22 @@ Current actionable checkpoints supersede the older chronological entries below:
   `e1edc0c`; 22 joined methods and 21-resource source preflight pass. The same
   reviewer also completed the three side-case drafts; actual owner decisions
   remain next. Whole P08 semantic acceptance does not follow.
-- P09: data core is independently accepted and integrated through `6144721`.
-  The accepted provider release now permits the original owner's module-binding
-  implementation under its appended card; installed execution remains a P10 join.
-- P10: `036e9033` / `50e654af` fixes F03; independent `131d3db` / `4b5f592`
-  closes it but finds canonical stranded redirects falsely reported current.
-  `b8f0cf7` releases the finite F04 class to the original owner and lets SAME
-  reviewer `1578dfd8` finish the unrelated original 18 adapter/profile controls.
+- P09: module product `5c99612` passes `114ddfe3`, integrated `2d789a4`;
+  all 26 product paths match and 13 joined methods pass. `477d3fc` releases
+  the original owner's separate N1 safety-quantifier correction and two bounded
+  planning/execution mode probes; SAME `447d97f5` reviews their actual artifacts.
+- P10: `6e1b1e0` / `4be5e096` closes F01-F04 in `8c3afbbe` / `83c5458`.
+  Full SPEC remains B01 BLOCKED: repeated Windows journal access-denial prevents
+  the supported linked-init positive, with cause unknown. Final attempt exhausted,
+  no retry/platform investigation or speculative patch; QUALITY not started.
+  Other actual preservation/failure/recovery cases retain their passing evidence.
 - P11: deterministic parser `d3b5569` / `336513e` passes complete A16 component
   SPEC/QUALITY in `3049811`, integrated `7cb3812`. All eleven product/report
   identities match; joined four shared and 30 Node checks pass. Original native
   evidence stays attributed to `3115790`. Direct design source `f72f316` /
-  `c91e83d` is frozen; A14.5 needs its separately bounded native observations.
+  `c91e83d` was repaired for D1-D3, then D4/D5. Current source `a1b3a45` /
+  `683db6a` awaits affected re-review. Static artifact observations stay on
+  `f72f316`; framework build remains blocked by official-registry TLS failure.
 - P12: defaults repair `32dac88` / `b270475` passes F01 recheck in `02e8028`
   / `984bb72`. SAME reviewer `31c39265-13e5-4057-9e78-49bf658749a5` also accepts
   actual six-slide visual observation. `69f2ef6` releases a distinct complete
@@ -59,6 +65,22 @@ Missing PyYAML visibly refuses; no source/home fallback or query write occurs.
 This is accepted-P06-engine evidence, not P10 linked/default transaction acceptance.
 The remaining eight discovery/authoring consumers and existing template are
 released to the original P13 owner with explicit status/welcome ownership.
+
+Current original acceptance count is 64/113 after accepted A16, domain methods
+and preserved role contracts. Native semantic/mode and installed observations
+remain distinct open leaves; counts are not elapsed time or release readiness.
+P13's remaining eight source consumers/template are active under `a5d77f9`.
+P12 workbook W01-W04 is in repair under `764cf53`; PDF writer `5978def` /
+`9b4a8a1` is frozen with actual four-page/text success but geometry/visual gaps.
+
+P08 main native T011 passed its actual independent review and real P05 producer/
+latest-reader/typed-QA chain with coordinator host corroboration. Only T011
+progress was recorded, followed by a genuine pause before T027; main is revoked
+from builder `c5accb50` pending the third fresh resume context. Separate build-
+direct T011 review/corroboration was supplied and its T027 candidate is ready.
+Build-alias/fix-direct/fix-alias packets remain their own scopes, with SAME `9db`
+reviews queued; no main clearance is transferred. Controller `f2c305ac` uses
+interactive waiting when an actual child/review event is its only dependency.
 
 Dependency-ready releases are committed, not new proposals awaiting an operator:
 `bdfd127` releases P04's accepted-provider shared-evidence consumer and conditionally
