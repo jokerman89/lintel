@@ -709,6 +709,276 @@ lintel_copilot_env "$PWD"
             os.utime(manifest, ns=(times.st_atime_ns, times.st_mtime_ns))
         run_child("retained caller")
 
+    def _scaffold_state(self, root):
+        native = adapter.native_io_path(root)
+        if not native.exists():
+            return None
+        return {path.relative_to(native).as_posix(): [
+            path.lstat().st_mode, getattr(path.lstat(), "st_file_attributes", 0),
+            hashlib.sha256(path.read_bytes()).hexdigest() if path.is_file() else None,
+        ] for path in (native, *native.rglob("*"))}
+
+    def _scaffold_fixture(self):
+        base, source, caller, env = self.default_consumer()
+        self.default_cli(source, caller, env)
+        bundle = caller / adapter.BUNDLE
+        for relative in ("bin/li-scaffold", "bin/li-lifecycle", "bin/li-lifecycle.py",
+                         "lib/context_safety.py", "lib/managed_transaction.py", "lib/profile_context.py"):
+            self.assertEqual((bundle / relative).read_bytes(), adapter.source_bytes(source / relative))
+        bash = shutil.which("bash")
+        self.assertTrue(bash)
+        bootstrap = ('set -euo pipefail\nsource .github/lintel/lib/copilot-env.sh\n'
+                     'lintel_copilot_env "$PWD"\n')
+        result = subprocess.run([bash, "--noprofile", "--norc", "-c",
+                                 bootstrap + "printf '%s\\n' \"$LINTEL_PROFILE_REFERENCE\"\n"],
+                                cwd=caller, env=env, text=True, encoding="utf-8", capture_output=True, timeout=90)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        reference = json.loads(result.stdout)
+        self.assertEqual(reference["generation"], 1)
+        home = caller / ".claude/runtime/lintel-home"
+        history = [path for path in adapter.native_io_path(home).rglob("*.json")
+                   if path.parent.name == "history"]
+        self.assertEqual(max(len(str(Path(*adapter.path_identity(path)))) for path in history), 304)
+        return base, source, caller, env, bash, bootstrap, reference
+
+    def _scaffold_seed(self, child):
+        seeds = {
+            "AGENTS.md": b"Consumer-owned AGENTS prose.\r\n",
+            "CLAUDE.md": b"Consumer-owned CLAUDE prose.\r\n",
+            ".claude/memory/lessons.md": b"Consumer-owned durable lessons.\r\n",
+            ".claude/memory/MEMORY.md": b"Consumer-owned memory index.\r\n",
+            ".claude/rules/README.md": b"Consumer-owned rules.\r\n",
+            ".claude/settings.local.json":
+                b'{"custom":"consumer-owned","autoMemoryDirectory":"preserve-or-update-only-this"}\r\n',
+            ".claude/lintel-layout.yaml": b"layout_version: 5\n# Preserve this consumer comment.\n",
+            ".gitignore": b"# Consumer ignore policy\r\n.claude/runtime/\r\n.claude/settings.local.json\r\n",
+            "unrelated.txt": b"Unrelated consumer file.\r\n",
+        }
+        for relative, data in seeds.items():
+            path = adapter.native_io_path(child / relative)
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(data)
+        return seeds
+
+    def _scaffold_call(self, fixture, child, *arguments, success=True, intercept=None):
+        base, source, caller, env, bash, bootstrap, reference = fixture
+        self.assertNotIn("LINTEL_RECOVERY_STORE", env)
+        self.assertNotIn("LINTEL_HOME", env)
+        self.assertFalse(adapter.native_io_path(child / ".git").exists())
+        protected = (source, caller, Path(env["USERPROFILE"]))
+        before = [self._scaffold_state(path) for path in protected]
+        if intercept is None:
+            command = bootstrap + 'bash "$LINTEL_SOURCE_ROOT/bin/li-scaffold" "$@"\n'
+            argv = [bash, "--noprofile", "--norc", "-c", command, "installed-scaffold", *arguments,
+                    "--target", str(child)]
+        else:
+            command = bootstrap + r'''
+python="$1"; observer="$2"; child="$3"; relative="$4"; operation="$5"; phase="$6"; shift 6
+"$python" -I -B -c "$observer" "$LINTEL_SOURCE_ROOT" "$relative" "$operation" "$phase" \
+  --source "$LINTEL_SOURCE_ROOT" --repo "$LINTEL_REPO_ROOT" --home "$LINTEL_HOME" \
+  --packs "$LINTEL_PACKS_DIR" --pointer "${LINTEL_ACTIVE_PACK_FILE:-$LINTEL_PACKS_DIR/active-pack}" \
+  --context "${LINTEL_PROFILE_CONTEXT:-}" --context-file "${LINTEL_PROFILE_CONTEXT_FILE:-}" \
+  --reference "$LINTEL_PROFILE_REFERENCE" --profile-pack "${LINTEL_PROFILE_PACK:-}" \
+  scaffold "$@" --target "$child"
+'''
+            relative, operation, *phases = intercept
+            phase = phases[0] if phases else "producer"
+            observer = r'''
+import hashlib, importlib.util, json, sys
+from pathlib import Path
+source, relative, operation, phase = Path(sys.argv[1]), sys.argv[2], sys.argv[3], sys.argv[4]
+sys.path.insert(0, str(source / "lib"))
+from context_safety import native_io_path, safe_path
+spec = importlib.util.spec_from_file_location("observed_lifecycle", source / "bin/li-lifecycle.py")
+module = importlib.util.module_from_spec(spec); spec.loader.exec_module(module)
+def mutate(target):
+    path = native_io_path(safe_path(target, relative))
+    if operation == "delete":
+        path.unlink()
+    else:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(b"layout_version: 4\n# Intervening marker.\n" if operation == "marker"
+                         else b"Intervening consumer-owned bytes.\r\n")
+    root = native_io_path(target)
+    state = {entry.relative_to(root).as_posix(): [
+        entry.lstat().st_mode, getattr(entry.lstat(), "st_file_attributes", 0),
+        hashlib.sha256(entry.read_bytes()).hexdigest() if entry.is_file() else None,
+    ] for entry in (root, *root.rglob("*"))}
+    print("F02_INTERVENING_STATE=" + json.dumps(state, sort_keys=True), file=sys.stderr)
+if phase == "producer":
+    publication = module.runtime_publication
+    def intervene(config, args, *positional, **keywords):
+        mutate(config.repo)
+        return publication(config, args, *positional, **keywords)
+    module.runtime_publication = intervene
+else:
+    import managed_transaction
+    publication = managed_transaction.apply_files
+    def intervene(root, *positional, **keywords):
+        mutate(root)
+        return publication(root, *positional, **keywords)
+    managed_transaction.apply_files = intervene
+sys.argv = ["li-lifecycle", *sys.argv[5:]]
+raise SystemExit(module.main())
+'''
+            argv = [bash, "--noprofile", "--norc", "-c", command, "observed-scaffold",
+                    sys.executable, observer, str(child), relative, operation, phase, *arguments]
+        result = subprocess.run(argv, cwd=caller, env=env, text=True, encoding="utf-8",
+                                capture_output=True, timeout=180)
+        self.assertEqual([self._scaffold_state(path) for path in protected], before,
+                         "The installed caller, pin/history, source and synthetic personal home must be unchanged.")
+        for relative in (".claude/runtime/profiles", ".claude/runtime/lintel-home",
+                         ".claude/profile-requirements.json", "packs"):
+            self.assertFalse(adapter.native_io_path(child / relative).exists(), relative)
+        print(json.dumps({"case": self._testMethodName, "child": str(child), "length": len(str(child)),
+                          "arguments": list(arguments), "interception": intercept,
+                          "exit": result.returncode, "stdout": result.stdout, "stderr": result.stderr}))
+        if success:
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            value = json.loads(result.stdout)
+            self.assertEqual(value["operation_profile_reference"], reference)
+            self.assertIsNone(value["target_profile_reference"])
+        else:
+            self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+            self.assertEqual(result.stdout, "")
+        return result
+
+    def test_installed_scaffold_preserves_seeded_short_and_long_plain_targets(self):
+        from managed_transaction import default_store
+
+        fixture = self._scaffold_fixture()
+        base = fixture[0]
+        for name, length, seeded in (("short seeded consumer", 116, True),
+                                     ("long-seeded-", 256, True), ("long-absent-", 256, False)):
+            child = base / (name + "x" * (length - len(str(base)) - 1 - len(name)))
+            adapter.native_io_path(child).mkdir()
+            self.assertEqual(len(str(child)), length)
+            seeds = self._scaffold_seed(child) if seeded else {}
+            before = self._scaffold_state(child)
+            store = default_store(child)
+            self.assertFalse(adapter.native_io_path(store).exists())
+            for arguments in (("check",), ("init", "--dry-run")):
+                preview = json.loads(self._scaffold_call(fixture, child, *arguments).stdout)
+                self.assertEqual(preview["state"], "preview")
+                self.assertEqual(self._scaffold_state(child), before)
+                self.assertFalse(adapter.native_io_path(store).exists())
+                for relative in seeds.keys() - {".claude/settings.local.json"}:
+                    with self.subTest(length=length, arguments=arguments, relative=relative):
+                        self.assertNotIn(relative, preview["changes"])
+            self._scaffold_call(fixture, child, "init")
+            published = self._scaffold_state(child)
+            print(json.dumps({"case": "seeded-foundation-bytes", "length": length, "target": str(child),
+                              "before": before, "after": published}))
+            for relative, data in seeds.items():
+                actual = adapter.native_io_path(child / relative).read_bytes()
+                if relative == ".claude/settings.local.json":
+                    data = data.replace(b'"preserve-or-update-only-this"',
+                                        json.dumps(str(child / ".claude/memory")).encode("utf-8"))
+                with self.subTest(length=length, relative=relative, seeded=seeded):
+                    self.assertEqual(actual, data, relative)
+                    self.assertEqual(published[relative][:2], before[relative][:2], relative)
+            for relative in ("AGENTS.md", "CLAUDE.md", ".claude/memory/MEMORY.md",
+                             ".claude/memory/lessons.md", ".claude/rules/README.md"):
+                self.assertTrue(adapter.native_io_path(child / relative).is_file(), relative)
+            stable, store_before = self._scaffold_state(child), self._scaffold_state(store)
+            repeated = json.loads(self._scaffold_call(fixture, child, "init").stdout)
+            self.assertEqual(repeated["state"], "unchanged")
+            self.assertEqual(self._scaffold_state(child), stable)
+            self.assertEqual(self._scaffold_state(store), store_before)
+            if length == 256 and seeded:
+                missing = child / "CLAUDE.md"
+                adapter.native_io_path(missing).unlink()
+                settings = child / ".claude/settings.local.json"
+                adapter.native_io_path(settings).write_bytes(seeds[".claude/settings.local.json"])
+                self._scaffold_call(fixture, child, "init", "--no-memory-pointer")
+                self.assertTrue(adapter.native_io_path(missing).is_file())
+                self.assertEqual(adapter.native_io_path(settings).read_bytes(), seeds[".claude/settings.local.json"])
+                for relative in seeds.keys() - {"CLAUDE.md", ".claude/settings.local.json"}:
+                    with self.subTest(mixed=relative):
+                        self.assertEqual(adapter.native_io_path(child / relative).read_bytes(), seeds[relative], relative)
+
+    def test_installed_scaffold_refuses_late_long_target_changes(self):
+        from managed_transaction import default_store
+
+        fixture = self._scaffold_fixture()
+        base = fixture[0]
+        planned_cases = (
+            ("absent-seed", "AGENTS.md", "create"),
+            ("absent-destination", ".claude/memory/lessons.md", "create"),
+            ("ignore-edit", ".gitignore", "edit"), ("ignore-delete", ".gitignore", "delete"),
+            ("settings-edit", ".claude/settings.local.json", "edit"),
+            ("settings-delete", ".claude/settings.local.json", "delete"),
+            ("legacy-edit", "tasks/lessons.md", "edit"), ("legacy-delete", "tasks/lessons.md", "delete"),
+            ("existing-marker", ".claude/lintel-layout.yaml", "marker"),
+            ("absent-marker", ".claude/lintel-layout.yaml", "marker"),
+            ("migrating-marker", ".claude/lintel-layout.yaml", "marker"),
+        )
+        cases = [(name, relative, operation, "producer") for name, relative, operation in planned_cases]
+        cases += [(name, relative, operation, "writer") for name, relative, operation in planned_cases
+                  if name != "existing-marker"]
+        for name, relative, operation, phase in cases:
+            with self.subTest(case=name, phase=phase):
+                prefix = "late-" + phase + "-" + name + "-"
+                child = base / (prefix + "x" * (256 - len(str(base)) - 1 - len(prefix)))
+                adapter.native_io_path(child).mkdir()
+                self.assertEqual(len(str(child)), 256)
+                self._scaffold_seed(child)
+                if name == "absent-seed":
+                    adapter.native_io_path(child / relative).unlink()
+                if name.startswith("legacy-") or name == "absent-destination":
+                    adapter.native_io_path(child / ".claude/memory/lessons.md").unlink()
+                    legacy = adapter.native_io_path(child / "tasks/lessons.md")
+                    legacy.parent.mkdir()
+                    legacy.write_bytes(b"Original legacy knowledge.\r\n")
+                if name.startswith("ignore-"):
+                    adapter.native_io_path(child / ".gitignore").write_bytes(b"# Retain this merge input.\r\n")
+                if name == "absent-marker":
+                    adapter.native_io_path(child / relative).unlink()
+                if name == "migrating-marker":
+                    adapter.native_io_path(child / relative).write_bytes(b"layout_version: 4\n")
+                store = default_store(child)
+                self.assertFalse(adapter.native_io_path(store).exists())
+                result = self._scaffold_call(fixture, child, "init", success=False,
+                                             intercept=(relative, operation, phase))
+                observed = next(line.removeprefix("F02_INTERVENING_STATE=")
+                                for line in result.stderr.splitlines() if line.startswith("F02_INTERVENING_STATE="))
+                self.assertEqual(self._scaffold_state(child), json.loads(observed))
+                self.assertFalse(adapter.native_io_path(store).exists())
+                self.assertRegex(result.stderr.lower(), r"changed|expected state")
+                self.assertNotIn("Traceback", result.stderr)
+
+    def test_post_admission_guard_change_is_preserved_without_atomicity_claim(self):
+        fixture = self._scaffold_fixture()
+        base = fixture[0]
+        name = "unguarded-after-admission-"
+        child = base / (name + "x" * (256 - len(str(base)) - 1 - len(name)))
+        adapter.native_io_path(child).mkdir()
+        self.assertEqual(len(str(child)), 256)
+        seeds = self._scaffold_seed(child)
+        result = self._scaffold_call(fixture, child, "init",
+                                     intercept=(".claude/lintel-layout.yaml", "marker", "writer"))
+        value = json.loads(result.stdout)
+        self.assertEqual(value["state"], "complete")
+        marker = adapter.native_io_path(child / ".claude/lintel-layout.yaml").read_bytes()
+        self.assertEqual(marker, b"layout_version: 4\n# Intervening marker.\n")
+        self.assertNotIn(".claude/lintel-layout.yaml", value["changed"])
+        plan = json.loads(adapter.native_io_path(
+            Path(value["store"]) / "transactions" / value["id"] / "plan.json").read_bytes())
+        self.assertNotIn(".claude/lintel-layout.yaml", plan["files"])
+        for relative, data in seeds.items():
+            if relative == ".claude/lintel-layout.yaml":
+                continue
+            if relative == ".claude/settings.local.json":
+                data = data.replace(b'"preserve-or-update-only-this"',
+                                    json.dumps(str(child / ".claude/memory")).encode("utf-8"))
+            else:
+                self.assertNotIn(relative, plan["files"], relative)
+            self.assertEqual(adapter.native_io_path(child / relative).read_bytes(), data, relative)
+        print(json.dumps({"boundary": "POST_ADMISSION_GUARD_NOT_PROTECTED", "target": str(child),
+                          "actual_exit": result.returncode, "state": value["state"],
+                          "intervening_marker_preserved": True, "guard_absent_from_write_plan": True,
+                          "limitation": "An unchanged input can change after final admission; no atomicity claimed."}))
+
     def test_interrupted_adapter_publication_requires_explicit_owned_recovery(self):
         (self.target / "AGENTS.md").write_bytes(b"Consumer-owned prose.\r\n")
         (self.target / "custom.json").write_bytes(b'{"owned":"consumer"}\n')

@@ -57,6 +57,20 @@ Existing foundation files remain user-owned. Legacy knowledge and hidden/nested 
 files move only after a complete collision/path preflight. Redirect stubs remain available;
 the layout marker publishes last. Git staging/index is not changed by the helper.
 
+The lifecycle producer observes checked paths through the accepted native I/O boundary.
+Missing-only outputs retain an explicit absent-state expectation; merges, redirects and
+deletions retain the state captured with their original bytes. Publication must not
+replace those expectations with a later snapshot of whatever is currently present.
+A recoverable before-image is evidence for recovery, not permission to overwrite
+consumer-owned content.
+
+Unchanged planning inputs, such as an existing v5 layout marker, are separate admission
+guards, not no-op writes. The consumer checks them immediately before handing the
+original write-set expectations to the transaction. A guard change before that check
+refuses without publication; a write-set change is also checked by the transaction.
+An unchanged guard can still change after admission. It is not rewritten or locked by
+the transaction, and no cross-file atomicity or post-admission guard protection is claimed.
+
 `li-migrate-claude-home --dry-run --repo <target>` previews that same migration.
 `--repair-pointer` changes only the local Claude memory pointer on an already migrated
 v5 target, preserving other JSON fields/prose. `--no-memory-pointer` leaves this optional

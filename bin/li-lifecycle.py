@@ -22,8 +22,8 @@ from typing import Sequence
 
 sys.dont_write_bytecode = True
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lib"))
-from context_safety import (atomic_write, checked_root, file_state, is_link, json_bytes, read_owned,
-                            safe_path)
+from context_safety import (atomic_write, checked_root, file_state, is_link, json_bytes, native_io_path,
+                            read_owned, safe_path)
 from profile_context import (
     MISSING, ManifestParser, ProfileConfig, ProfileError, bootstrap_profile_context, context_path, field_value,
     digest as profile_digest, load_profile_context, pack_directory, parse_manifest, profile_reference, read_json,
@@ -66,7 +66,7 @@ def destination(value: Path) -> Path:
     for parent in (path, *path.parents):
         if is_link(parent):
             raise ValueError(f"Linked lifecycle path refused: {parent}")
-        if parent != path and parent.exists() and not parent.is_dir():
+        if parent != path and native_io_path(parent).exists() and not native_io_path(parent).is_dir():
             raise ValueError(f"Lifecycle parent is not a directory: {parent}")
     return path
 
@@ -726,32 +726,45 @@ def json_field(data: bytes, key: str, value: str) -> bytes:
     return (b"\xef\xbb\xbf" if data.startswith(b"\xef\xbb\xbf") else b"") + replacement.encode("utf-8")
 
 
-def migration_changes(repo: Path, *, pointer_only: bool = False, memory_pointer: bool = True) -> dict:
-    changes = {}
-    marker = safe_path(repo, ".claude/lintel-layout.yaml")
+def migration_changes(repo: Path, *, pointer_only: bool = False,
+                      memory_pointer: bool = True) -> tuple[dict, dict, dict]:
+    changes, observed, originals = {}, {}, {}
+
+    def observe(relative: str) -> bytes | None:
+        if relative not in observed:
+            path = native_io_path(safe_path(repo, relative))
+            try:
+                path.lstat()
+            except FileNotFoundError:
+                originals[relative], observed[relative] = None, None
+            else:
+                originals[relative], observed[relative] = read_owned(repo, relative)
+        return originals[relative]
+
+    marker = observe(".claude/lintel-layout.yaml")
     version = None
-    if marker.exists():
-        version = parse_manifest(read_owned(repo, ".claude/lintel-layout.yaml")[0].decode("utf-8")).get("layout_version")
+    if marker is not None:
+        version = parse_manifest(marker.decode("utf-8")).get("layout_version")
         if type(version) is not int or version not in (1, 2, 3, 4, 5):
             raise ValueError("Unsupported layout marker; preserve it and use an explicit migration plan.")
     if pointer_only and version != 5:
         raise ValueError("Pointer-only repair requires an already migrated v5 target.")
 
     def move(old: str, new: str, *, redirect: bool) -> None:
-        source = safe_path(repo, old)
-        target = safe_path(repo, new)
-        if not source.exists():
+        safe_path(repo, new)
+        data = observe(old)
+        if data is None:
             return
-        data, _ = read_owned(repo, old)
         if old == "docs/adr/README.md" and data.startswith(b"> Moved to .claude/decisions/ ("):  # legacy-fallback-ok
-            if not safe_path(repo, ".claude/decisions").is_dir():
+            if not native_io_path(safe_path(repo, ".claude/decisions")).is_dir():
                 raise ValueError("Stranded historical decisions redirect.")
             return
+        target = observe(new)
         if data.startswith(f"> Moved to {new} (".encode("utf-8")):
-            if not target.is_file():
+            if target is None:
                 raise ValueError(f"Stranded redirect without its destination: {old}")
             return
-        if target.exists():
+        if target is not None:
             raise ValueError(f"Migration collision (both preserved): {old} and {new}")
         changes[new] = data
         changes[old] = (
@@ -767,21 +780,28 @@ def migration_changes(repo: Path, *, pointer_only: bool = False, memory_pointer:
             (".lintel/state", ".claude/runtime/state", False),
         ):
             folder = safe_path(repo, old_root)
-            if folder.exists():
-                if not folder.is_dir():
+            if native_io_path(folder).exists():
+                if not native_io_path(folder).is_dir():
                     raise ValueError(f"Legacy location is not a directory: {old_root}")
-                for path in sorted(folder.rglob("*")):
-                    relative = path.relative_to(repo).as_posix()
-                    safe_path(repo, relative)
-                    if path.is_file():
-                        move(relative, new_root + "/" + path.relative_to(folder).as_posix(),
-                             redirect=redirects and path.suffix == ".md")
-        if not safe_path(repo, ".claude/memory/MEMORY.md").exists():
+                pending = [folder]
+                while pending:
+                    directory = pending.pop()
+                    for entry in sorted(native_io_path(directory).iterdir()):
+                        path = directory / entry.name
+                        relative = path.relative_to(repo).as_posix()
+                        safe_path(repo, relative)
+                        if native_io_path(path).is_dir():
+                            pending.append(path)
+                        else:
+                            move(relative, new_root + "/" + path.relative_to(folder).as_posix(),
+                                 redirect=redirects and path.suffix == ".md")
+        if observe(".claude/memory/MEMORY.md") is None:
             changes[".claude/memory/MEMORY.md"] = MEMORY_INDEX
         if version != 5:
             changes[".claude/lintel-layout.yaml"] = b"layout_version: 5\n"
-        ignore = safe_path(repo, ".gitignore")
-        original = read_owned(repo, ".gitignore")[0] if ignore.exists() else b""
+        original = observe(".gitignore")
+        if original is None:
+            original = b""
         text = original.decode("utf-8")
         if ".claude/runtime/" in text.splitlines() and (repo / ".git").exists():
             result = subprocess.run(["git", "-c", "core.fsmonitor=false", "-C", str(repo),
@@ -794,22 +814,29 @@ def migration_changes(repo: Path, *, pointer_only: bool = False, memory_pointer:
             separator = "" if not text or text.endswith("\n") else "\n"
             changes[".gitignore"] = (text + separator + "# Lintel local state\n" + "\n".join(missing) + "\n").encode("utf-8")
     if memory_pointer:
-        settings = safe_path(repo, ".claude/settings.local.json")
-        data = read_owned(repo, ".claude/settings.local.json")[0] if settings.exists() else b"{}\n"
+        data = observe(".claude/settings.local.json")
+        if data is None:
+            data = b"{}\n"
         updated = json_field(data, "autoMemoryDirectory", str(repo / ".claude/memory"))
         if updated != data:
             changes[".claude/settings.local.json"] = updated
-    return changes
+    return (changes, {name: observed[name] for name in changes},
+            {name: before for name, before in observed.items() if name not in changes})
 
 
 def runtime_publication(config: ProfileConfig, args: argparse.Namespace, changes: dict,
-                        label: str, *, final_paths: Sequence[str] = ()) -> dict:
+                        expected: dict, label: str, *, guards: dict,
+                        final_paths: Sequence[str] = ()) -> dict:
     from managed_transaction import apply_files, assert_ready, default_store
     store = destination(args.store or os.environ.get("LINTEL_RECOVERY_STORE") or default_store(config.repo))
     assert_ready(config.repo, store)
-    expected = {name: file_state(config.repo, name) for name in changes}
+    if set(changes) != set(expected) or set(guards) & set(changes):
+        raise ValueError("Lifecycle changes require their original expected states.")
     modes = {name: None if data is None else expected[name]["mode"] if expected[name] else 0o600
              for name, data in changes.items()}
+    for name, before in {**expected, **guards}.items():
+        if file_state(config.repo, name) != before:
+            raise ValueError(f"Lifecycle input changed after planning: {name}")
     if args.dry_run:
         return {"state": "preview", "target": str(config.repo), "store": str(store),
                 "changes": {name: "delete" if data is None else "replace" if expected[name] else "create"
@@ -897,7 +924,7 @@ def scaffold(config: ProfileConfig, args: argparse.Namespace) -> dict:
                  "VOICE_TIER": args.voice or field_value(target_profile["values"], "voice.default_tier")}
     if any(not isinstance(value, str) or any(ord(char) < 32 for char in value) for value in variables.values()):
         raise ValueError("Scaffold preferences must be single-line literal values.")
-    changes = migration_changes(config.repo, memory_pointer=not args.no_memory_pointer)
+    changes, expected, guards = migration_changes(config.repo, memory_pointer=not args.no_memory_pointer)
     preserved = []
     for relative, data in templates.items():
         if relative.endswith(".md.template"):
@@ -908,23 +935,27 @@ def scaffold(config: ProfileConfig, args: argparse.Namespace) -> dict:
             data = text.encode("utf-8")
         elif relative.startswith("templates/swarm/"):
             relative = ".claude/" + relative
-        path = safe_path(config.repo, relative)
-        if path.exists():
-            if not path.is_file():
-                raise ValueError(f"Scaffold collision: {relative}")
+        if relative in changes:
+            continue
+        if relative not in guards:
+            guards[relative] = file_state(config.repo, relative)
+        if guards[relative] is not None:
             preserved.append(relative)
-        elif relative not in changes:
+        else:
             changes[relative] = data
+            expected[relative] = guards.pop(relative)
     rules = ".claude/rules/README.md"
-    if not safe_path(config.repo, rules).exists():
+    guards[rules] = file_state(config.repo, rules)
+    if guards[rules] is None:
+        expected[rules] = guards.pop(rules)
         changes[rules] = (
             "# Path-scoped rules\n\nKeep one reviewed rule per file. Use quoted `paths:` globs where the host supports them.\n"
             "Native discovery and hook activation depend on the actual client; other clients read rules explicitly.\n"
         ).encode("utf-8")
     if args.action == "check":
         args.dry_run = True
-    result = runtime_publication(config, args, changes, "foundation scaffold",
-                                 final_paths=[".claude/lintel-layout.yaml"])
+    result = runtime_publication(config, args, changes, expected, "foundation scaffold",
+                                 guards=guards, final_paths=[".claude/lintel-layout.yaml"])
     return {**result, **profiles, "preserved": preserved, "preferences": variables,
             "host_activation": "not performed", "git_index": "unchanged"}
 
@@ -948,13 +979,13 @@ def extension_pack(config: ProfileConfig, args: argparse.Namespace) -> dict:
     parent = destination(args.target or config.repo)
     target = parent if args.in_place else safe_path(parent, name)
     for filename in ("pack.yaml", ".claude-plugin/plugin.json", "README.md", "CLAUDE.md"):
-        if safe_path(target, filename).exists():
+        if file_state(target, filename) is not None:
             raise ValueError(f"Extension scaffold collision (preserved): {filename}")
     directories = ("skills", "agents", "hooks/shared", "knowhow", "lib", "tests/shape", "tests/unit",
                    ".claude-plugin", ".claude/decisions", ".claude/memory", ".claude/plans", "source")
     for name_in_tree in directories:
         path = destination(target / name_in_tree)
-        if path.exists() and not path.is_dir():
+        if native_io_path(path).exists() and not native_io_path(path).is_dir():
             raise ValueError(f"Extension scaffold directory collision: {name_in_tree}")
     args.target = target
     target_config, _, profiles = operation_profiles(config, args, allow_missing=True)
@@ -993,11 +1024,12 @@ def extension_pack(config: ProfileConfig, args: argparse.Namespace) -> dict:
     if args.dry_run:
         return {"state": "preview", **profiles, "path": str(target), "changes": sorted(changes),
                 "activated": False, "implementation": "skeleton"}
-    target.mkdir(parents=True, exist_ok=True)
-    result = runtime_publication(target_config, args, changes, "extension pack scaffold", final_paths=["pack.yaml"])
+    native_io_path(target).mkdir(parents=True, exist_ok=True)
+    result = runtime_publication(target_config, args, changes, {name: None for name in changes},
+                                 "extension pack scaffold", guards={}, final_paths=["pack.yaml"])
     if not args.dry_run:
         for relative in directories:
-            destination(target / relative).mkdir(parents=True, exist_ok=True)
+            native_io_path(destination(target / relative)).mkdir(parents=True, exist_ok=True)
     return {**result, **profiles, "path": str(target), "namespace": args.namespace,
             "workflow": args.workflow, "activated": False, "implementation": "skeleton"}
 
@@ -1141,10 +1173,10 @@ def main() -> int:
             result = scaffold(config, args)
         elif args.command == "migrate":
             config, _, profiles = operation_profiles(config, args)
-            changes = migration_changes(config.repo, pointer_only=args.repair_pointer,
-                                        memory_pointer=not args.no_memory_pointer)
-            result = runtime_publication(config, args, changes, "v5 layout migration",
-                                         final_paths=[".claude/lintel-layout.yaml"])
+            changes, expected, guards = migration_changes(config.repo, pointer_only=args.repair_pointer,
+                                                          memory_pointer=not args.no_memory_pointer)
+            result = runtime_publication(config, args, changes, expected, "v5 layout migration",
+                                         guards=guards, final_paths=[".claude/lintel-layout.yaml"])
             result.update(profiles)
         elif args.command == "extension-pack":
             result = extension_pack(config, args)

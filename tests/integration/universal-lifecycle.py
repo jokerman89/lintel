@@ -23,6 +23,8 @@ PARSER.add_argument("--native-small", action="store_true")
 PARSER.add_argument("--native-performer", choices=("auto", "bash"), default="auto")
 OPTIONS, TEST_ARGS = PARSER.parse_known_args()
 ROOT = OPTIONS.root.resolve()
+sys.path.insert(0, str(ROOT / "lib"))
+from native_paths import native_io_path
 
 
 def hashes(root):
@@ -1161,6 +1163,192 @@ raise SystemExit(module.main())
         before = hashes(self.target)
         self.shell_helper("li-migrate-claude-home", "--repo", str(self.target), success=False)
         self.assertEqual(hashes(self.target), before)
+
+    def _long_plain_consumer(self, name):
+        prefix = name + "-"
+        padding = 256 - len(str(self.base)) - 1 - len(prefix)
+        self.assertGreater(padding, 0, "Keep the verified fixture depth; do not relocate a target.")
+        target = self.base / (prefix + "x" * padding)
+        native_io_path(target).mkdir()
+        self.assertEqual(len(str(target)), 256)
+        self.env.pop("LINTEL_RECOVERY_STORE", None)
+        self.assertFalse(native_io_path(target / ".git").exists())
+        return target
+
+    def _native_lifecycle_state(self, root):
+        native = native_io_path(root)
+        if not native.exists():
+            return None
+        return {path.relative_to(native).as_posix(): [
+            path.lstat().st_mode, getattr(path.lstat(), "st_file_attributes", 0),
+            hashlib.sha256(path.read_bytes()).hexdigest() if path.is_file() else None,
+        ] for path in (native, *native.rglob("*"))}
+
+    def _long_seed(self, target, files):
+        for relative, data in files.items():
+            path = native_io_path(target / relative)
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(data)
+
+    def test_long_plain_migration_keeps_hidden_files_stubs_and_user_bytes(self):
+        from managed_transaction import default_store
+
+        target = self._long_plain_consumer("legacy")
+        seeds = {
+            "tasks/lessons.md": b"Legacy lessons.\r\n",
+            "docs/adr/nested/.hidden.md": b"# Original hidden decision\r\n",
+            ".lintel/state/nested/.hidden.json": b'{"legacy":"retain"}\r\n',
+            ".claude/memory/MEMORY.md": b"User-owned memory index.\r\n",
+            ".claude/lintel-layout.yaml": b"layout_version: 5\r\n# Keep marker comments.\r\n",
+            ".gitignore": b"# Keep ignore prose.\r\n",
+            ".claude/settings.local.json": b'\xef\xbb\xbf{\r\n  "custom": [1, 2], "autoMemoryDirectory": "old"\r\n}\r\n',
+            "unrelated.txt": b"Unrelated consumer bytes.\r\n",
+        }
+        self._long_seed(target, seeds)
+        protected = [self._native_lifecycle_state(root) for root in (self.source, self.home, self.target)]
+        original = self._native_lifecycle_state(target)
+        preview = json.loads(self.shell_helper("li-migrate-claude-home", "--repo", str(target), "--dry-run").stdout)
+        self.assertEqual(preview["state"], "preview")
+        self.assertEqual(self._native_lifecycle_state(target), original)
+        self.assertFalse(native_io_path(default_store(target)).exists())
+        result = json.loads(self.shell_helper("li-migrate-claude-home", "--repo", str(target)).stdout)
+        self.assertEqual(result["state"], "complete")
+        moves = {
+            "tasks/lessons.md": ".claude/memory/lessons.md",
+            "docs/adr/nested/.hidden.md": ".claude/decisions/nested/.hidden.md",
+            ".lintel/state/nested/.hidden.json": ".claude/runtime/state/nested/.hidden.json",
+        }
+        for old, new in moves.items():
+            self.assertEqual(native_io_path(target / new).read_bytes(), seeds[old])
+            if old.startswith(".lintel/"):
+                self.assertFalse(native_io_path(target / old).exists())
+            else:
+                self.assertTrue(native_io_path(target / old).read_bytes().startswith(f"> Moved to {new} (".encode()))
+        for relative in (".claude/memory/MEMORY.md", ".claude/lintel-layout.yaml", "unrelated.txt"):
+            self.assertEqual(native_io_path(target / relative).read_bytes(), seeds[relative], relative)
+        self.assertEqual(native_io_path(target / ".gitignore").read_bytes(),
+                         seeds[".gitignore"] + b"# Lintel local state\n.claude/runtime/\n.claude/settings.local.json\n")
+        self.assertEqual(native_io_path(target / ".claude/settings.local.json").read_bytes(),
+                         seeds[".claude/settings.local.json"].replace(
+                             b'"old"', json.dumps(str(target / ".claude/memory")).encode()))
+        stable = self._native_lifecycle_state(target)
+        repeated = json.loads(self.shell_helper("li-migrate-claude-home", "--repo", str(target)).stdout)
+        self.assertEqual(repeated["state"], "unchanged")
+        self.assertEqual(self._native_lifecycle_state(target), stable)
+        self.assertEqual([self._native_lifecycle_state(root) for root in (self.source, self.home, self.target)], protected)
+        print(json.dumps({"case": "long-legacy-moves", "target": str(target), "result": result,
+                          "before": original, "after": stable}))
+
+    def test_long_plain_migration_collisions_and_invalid_inputs_refuse_before_writes(self):
+        from managed_transaction import default_store
+
+        cases = {
+            "knowledge-collision": {"tasks/lessons.md": b"old", ".claude/memory/lessons.md": b"new"},
+            "hidden-collision": {".lintel/state/nested/.hidden": b"old",
+                                 ".claude/runtime/state/nested/.hidden": b"new"},
+            "stranded-redirect": {"tasks/lessons.md": b"> Moved to .claude/memory/lessons.md (v5).\n"},
+            "malformed-settings": {".claude/settings.local.json": b'{"custom":1,"custom":2}'},
+            "invalid-marker": {".claude/lintel-layout.yaml": b"layout_version: invalid\n"},
+        }
+        for name, values in cases.items():
+            with self.subTest(case=name):
+                target = self._long_plain_consumer(name)
+                self._long_seed(target, {".gitignore": b"# Unrelated policy\r\n", **values})
+                before = self._native_lifecycle_state(self.base)
+                result = self.shell_helper("li-migrate-claude-home", "--repo", str(target), success=False)
+                self.assertEqual(result.stdout, "")
+                self.assertNotIn("Traceback", result.stderr)
+                self.assertEqual(self._native_lifecycle_state(self.base), before)
+                self.assertFalse(native_io_path(default_store(target)).exists())
+                print(json.dumps({"case": name, "target": str(target), "exit": result.returncode,
+                                  "stderr": result.stderr, "state_preserved": True}))
+        for relative in ("tasks/lessons.md", ".claude/memory/MEMORY.md", ".claude/settings.local.json"):
+            with self.subTest(nonfile=relative):
+                target = self._long_plain_consumer("nonfile-" + relative.replace("/", "-").replace(".", ""))
+                native_io_path(target / relative).mkdir(parents=True)
+                before = self._native_lifecycle_state(self.base)
+                result = self.shell_helper("li-migrate-claude-home", "--repo", str(target), success=False)
+                self.assertEqual(result.stdout, "")
+                self.assertEqual(self._native_lifecycle_state(self.base), before)
+                self.assertFalse(native_io_path(default_store(target)).exists())
+
+    def test_long_plain_pointer_repair_preserves_surroundings_and_no_pointer_opt_out(self):
+        target = self._long_plain_consumer("pointer")
+        settings = b'{\r\n "custom" : [1, 2], "autoMemoryDirectory" : "old"\r\n}\r\n'
+        seeds = {".claude/settings.local.json": settings,
+                 ".claude/lintel-layout.yaml": b"layout_version: 5\n# Retained marker.\n",
+                 ".gitignore": b"# Consumer ignore prose\r\n",
+                 ".claude/memory/MEMORY.md": b"User-owned memory index\r\n"}
+        self._long_seed(target, seeds)
+        result = json.loads(self.shell_helper("li-migrate-claude-home", "--repo", str(target),
+                                             "--repair-pointer").stdout)
+        self.assertEqual(result["changed"], [".claude/settings.local.json"])
+        self.assertEqual(native_io_path(target / ".claude/settings.local.json").read_bytes(),
+                         settings.replace(b'"old"', json.dumps(str(target / ".claude/memory")).encode()))
+        for relative in seeds.keys() - {".claude/settings.local.json"}:
+            self.assertEqual(native_io_path(target / relative).read_bytes(), seeds[relative], relative)
+        native_io_path(target / ".claude/settings.local.json").write_bytes(b"malformed but opted out\r\n")
+        self.shell_helper("li-migrate-claude-home", "--repo", str(target), "--no-memory-pointer")
+        self.assertEqual(native_io_path(target / ".claude/settings.local.json").read_bytes(),
+                         b"malformed but opted out\r\n")
+        print(json.dumps({"case": "long-pointer-modes", "target": str(target), "pointer_result": result}))
+
+    def test_long_extension_outputs_keep_create_only_expectations(self):
+        from managed_transaction import default_store
+
+        observer = r'''
+import importlib.util, sys
+from pathlib import Path
+source, target, relative = Path(sys.argv[1]), Path(sys.argv[2]), sys.argv[3]
+sys.path.insert(0, str(source / "lib"))
+from context_safety import native_io_path
+spec = importlib.util.spec_from_file_location("observed_lifecycle", source / "bin/li-lifecycle.py")
+module = importlib.util.module_from_spec(spec); spec.loader.exec_module(module)
+publication = module.runtime_publication
+def intervene(config, args, *positional, **keywords):
+    path = native_io_path(target / relative)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(b"Late consumer-owned extension content.\r\n")
+    print("F02_EXTENSION_INTERVENED", file=sys.stderr)
+    return publication(config, args, *positional, **keywords)
+module.runtime_publication = intervene
+sys.argv = ["li-lifecycle", "extension-pack", "example", "--namespace", "example",
+            "--workflow", "example-flow", "--target", str(target), "--in-place"]
+raise SystemExit(module.main())
+'''
+        for relative in ("pack.yaml", ".claude-plugin/plugin.json", "README.md", "CLAUDE.md"):
+            for late in (False, True):
+                with self.subTest(output=relative, late=late):
+                    target = self._long_plain_consumer(
+                        ("late-" if late else "existing-") + relative.replace("/", "-").replace(".", ""))
+                    self._long_seed(target, {"unrelated.txt": b"Keep this extension neighbor.\r\n"})
+                    if not late:
+                        self._long_seed(target, {relative: b"Late consumer-owned extension content.\r\n"})
+                    before = self._native_lifecycle_state(target)
+                    source_before = self._native_lifecycle_state(self.source)
+                    if late:
+                        result = subprocess.run([sys.executable, "-I", "-B", "-c", observer,
+                                                 str(self.source), str(target), relative],
+                                                cwd=self.target, env=self.env, text=True, encoding="utf-8",
+                                                capture_output=True, timeout=120)
+                        self.assertIn("F02_EXTENSION_INTERVENED", result.stderr)
+                    else:
+                        result = self.shell_helper("li-pack-scaffold", "example", "--namespace", "example",
+                                                   "--workflow", "example-flow", "--target", str(target),
+                                                   "--in-place", success=False)
+                    print(json.dumps({"case": "extension-create-only", "target": str(target),
+                                      "relative": relative, "late": late, "exit": result.returncode,
+                                      "stdout": result.stdout, "stderr": result.stderr}))
+                    self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+                    self.assertEqual(result.stdout, "")
+                    self.assertFalse(native_io_path(default_store(target)).exists())
+                    self.assertEqual(native_io_path(target / relative).read_bytes(),
+                                     b"Late consumer-owned extension content.\r\n")
+                    after = self._native_lifecycle_state(target)
+                    for name, state in before.items():
+                        self.assertEqual(after[name], state, name)
+                    self.assertLessEqual(after.keys() - before.keys(), {relative, ".claude-plugin"})
+                    self.assertEqual(self._native_lifecycle_state(self.source), source_before)
 
     def child(self, name="child consumer"):
         target = self.base / name
