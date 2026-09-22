@@ -110,16 +110,18 @@ infrastructure blocker with the original outcome before expanding scope (L-038).
 P09's content unit is independently accepted by `19eb776` and integrated in
 `4983af2`: 61 improved/eight retained roles, all 69 frontmatters and five domain
 references. Joined 12-method/catalog checks pass and reviewed source identity is
-exact. Original owner `0fe8dc1e` may now implement only the released data-core unit
-using accepted P03/P05/P07; P08/module procedure binding remains gated.
+exact. The data-core unit `ea92df8` / report `53145bd` is now frozen, its intake
+verified, and with the existing P09 reviewer. It uses accepted P03/P05/P07 only;
+P08/module procedure binding and original parents remain gated.
 P08 is repairing F04/F05 and planning the original semantic/host evidence; P10 is
 repairing F02 under the clarified consumer-admission/write-set contract.
 P11 owner `f413bdcb` has frozen blocked A16 source and only the bounded native
 location/conditional owned-fixture scope. P09 module-runtime binding and P11 A14/design/agent work
 retain their predecessor gates; no whole-package acceptance is implied.
 P10's frozen F02 product `a797b2d` / report `7bf5a31` is back with the same reviewer
-after verified intake; full SPEC/QUALITY remain open. P12's first standalone
-content/Word/PPT unit is released independently of the later shared-design wiring.
+after verified intake; full SPEC/QUALITY remain open. P12 owner `0a75211f` is
+implementing the standalone content/Word/PPT unit; shared-design wiring remains
+gated. Native artifacts are being exercised, not accepted from method prose alone.
 Continue P08-P14 in dependency order,
 not a new audit or partial delivery. Coordinator routing (`b72ab47` plus
 `1d40193`) and provenance (`9f49e26`) await their owning package reviews. All successor cards
