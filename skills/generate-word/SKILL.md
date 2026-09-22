@@ -1,7 +1,7 @@
 ---
 name: generate-word
 layer: foundation
-description: Produce brand-compliant Word doc via docxtemplater — technical / customer-summary / transparency-note variants.
+description: Produce an editable Word document through available native tools or a declared library, preserving source detail and reporting actual inspection evidence.
 color: orange
 tools: Read, Write, Bash, Glob
 voice: mixed
@@ -18,22 +18,34 @@ license_note: produces customer-bound output; honors the active pack's complianc
 
 # /generate-word
 
-Brand-compliant Word document generation. Three target variants:
+Editable Word document generation with source fidelity and applicable configured
+policy. Three target variants:
 
 - **`technical`** — engineering-internal deliverable (technical spec, runbook, ADR-style doc) — voice: internal
 - **`customer-summary`** — customer-bound engagement summary — voice: pack-resolved (customer-facing tier), gated
 - **`transparency-note`** — AI-feature transparency note — voice: pack-resolved (customer-facing tier), gated, includes honest-limitations check
 
-Renders `.docx` via a Node library under the hood.
+`--brief` is a standalone route: it does not require generate-design, a domain
+envelope or an invented shared design input. Preserve the complete brief and its
+evidence, not just an outline or slide summary.
 
 ## Prerequisites
 
-This skill produces `.docx` via a Node library — [`docxtemplater`](https://www.npmjs.com/package/docxtemplater)
-for filling brand `.docx` templates, or [`docx`](https://www.npmjs.com/package/docx) for programmatic
-generation. If neither is installed, set one up first (e.g. `npm i docxtemplater pizzip`).
-**Graceful degradation if it cannot be installed** (no Node toolchain / offline): fall back to
-`/li:make-pdf` from a markdown draft, or emit the document as markdown. Do not silently produce
-nothing — state which path you took.
+Discover the host's actual create/read/edit/render operations and their schemas.
+Prefer a native Word artifact API when available. On the Copilot canvas surface,
+call `list_canvas_capabilities` for `word`, then `open_canvas` on an explicit owned
+path; use the discovered `get_model` and `batch` actions. The
+[native Word procedure](references/native-word.md) documents that observed route
+and its page-render boundary. Never guess an action or claim a tool ran from its
+presence in a manifest.
+
+Retain the existing declared library alternatives: `docxtemplater` plus `pizzip`
+for a compatible `.docx` template, or `docx` for programmatic generation. Check the
+selected task-local environment before use. Only after an actual missing-tool
+failure may an authorized task-local restore be considered; do not install
+automatically/globally or assume every library can consume every template.
+If no writer exists, retain the Markdown source and mark DOCX generation blocked.
+An explicitly chosen Markdown/PDF alternative is not an editable DOCX substitute.
 
 ## When to use
 
@@ -51,15 +63,41 @@ nothing — state which path you took.
 
 - Required `--brief <path|inline>` — content brief or source markdown **OR** `--from-pipeline <dir>` (shared pipeline mode)
 - Required `--target <technical|customer-summary|transparency-note>` — variant
-- Optional `--template <name>` — explicit template (default: `<target>.docx` from brand)
+- Optional `--template <name|path>` — explicit selection overrides the omitted-flag default `<target>.docx` in the verified configured brand directory
 - Optional `--audience <text>` — primary audience
 - Optional `--voice` — voice tier override (default per target)
-- Optional `--use-defaults` — force in-repo default templates
-- Optional `--ignore-stale-brand <reason>` — bypass staleness-warn
+- Optional `--use-defaults` — use an available neutral template or an explicitly blank native document; never invent a missing bundled template
+- Optional `--ignore-stale-brand <reason>` — record an advisory staleness exception; cannot waive mandatory policy
+- Optional `--out <path>` — explicit new `.docx` output (default: `<brief-stem>.docx` in the working directory)
+
+### Standalone template selection
+
+Without `--template` and without `--use-defaults`, select `<target>.docx` from
+the already verified configured brand directory:
+
+| Target | Default template filename |
+|---|---|
+| `technical` | `technical.docx` |
+| `customer-summary` | `customer-summary.docx` |
+| `transparency-note` | `transparency-note.docx` |
+
+Explicit `--template` takes precedence over `<target>.docx` on this brand route:
+use its explicit path, or resolve its name inside that same verified directory.
+`--use-defaults` selects the explicit neutral/default route described above
+instead of the implicit brand-template lookup; required policy still applies.
+Omitting `--template` does not imply `--use-defaults`.
+No personal-directory scan is permitted. If the selected template/directory is
+unavailable, report that gap; do not silently choose another variant or claim a
+blank document satisfies required brand policy.
 
 ## From-pipeline mode (v3.5 Phase 2 — generate-pipeline integration)
 
 If invoked with `--from-pipeline <run-dir>` instead of `--brief`:
+
+Keep this existing entry path and field names. The full shared design/profile/work
+binding is still the A15.3.shared integration gate; standalone evidence does not
+establish that binding. Validate the supplied artifacts against their released
+contracts before consuming them. Do not fabricate design-spec.json to unblock it.
 
 1. **Read shared pipeline-output:**
    - `<run-dir>/content.md` — sections with H1/H2/H3 hierarchy + bodies + voice-annotations
@@ -77,108 +115,118 @@ If invoked with `--from-pipeline <run-dir>` instead of `--brief`:
 
 4. **CLI stays backward-compat:** existing `--brief`-flag invocations work unchanged. `--from-pipeline` is additive.
 
-5. **4-gate pipeline runs as usual** (voice + brand + honest-limitations if transparency-note + provenance).
+5. **Apply the same fidelity/inspection and configured controls as standalone mode.**
+   Shared content must survive in full; heading/slot mappings cannot discard
+   unmapped paragraphs, tables, citations or qualifications.
 
 ## Workflow
 
-1. **Preflight gates** (same as /generate-ppt) — brand template present, staleness check, the active pack's compliance gates for customer-facing variants
+1. **Preflight and policy.** Follow the
+   [P05/P07 fidelity and evidence procedure](../generate-write/references/fidelity-and-evidence.md).
+   Resolve source/output paths and the standalone template selection above;
+   refuse unapproved replacement.
+   Verify the pinned profile and requested controls. Use only configured brand/voice
+   rules and their actual applicability. A required template, policy or inspection
+   that is unavailable remains blocked. Neutral mode needs no personal brand scan.
 
-2. **Read brief + parse into target-shape:**
-   - **technical:** headings + paragraphs + code blocks + tables → matched to technical template
-   - **customer-summary:** narrative paragraphs + key findings + next steps → matched to customer template
-   - **transparency-note:** capabilities + limitations + data + decisions + appeals → matched to transparency template
+2. **Read the complete brief and compose the target.**
+   - **technical:** meaningful heading styles, multi-paragraph reasoning, code,
+     editable tables with headers/units, references and material limitations.
+   - **customer-summary:** audience-appropriate narrative, supported findings and
+     next steps; retain qualifications rather than enforcing a fixed page count.
+   - **transparency-note:** capabilities, material limitations and failure
+     conditions, data, decision impact, appeals and disclosure as required by the
+     brief/policy. Map each material claim to its evidence and relevant boundary.
+   Preserve the claim/evidence ledger and citation targets. Label missing evidence;
+   do not invent a legal basis, retention period, contact or measured result.
 
-3. **Invoke target-specific agent:**
-   - technical → `WordTechnicalEditor` agent for structure + accuracy review
-   - customer-summary → `WordTechnicalEditor` for structure; voice gate Gate 1 handles voice
-   - transparency-note → both `WordTechnicalEditor` and explicit honest-limitations check
+3. **Use WordTechnicalEditor as the format-specific review method.**
+   Read its accepted source; delegate only through a real available host operation,
+   with read-only source/artifact inputs. It checks structure and claim accuracy;
+   pack voice scoring remains separate. Source-only advice is pre-generation
+   review, not DOCX inspection. A builder's own pass is self-review, not independent.
 
-4. **Generate via docxtemplater:**
-   - Load template
-   - Substitute placeholders with brief-derived content
-   - Insert formatted blocks (tables, code, lists)
-   - Embed asset references where appropriate
+4. **Create editable content through the selected writer.**
+   With native operations, inspect available styles, insert complete paragraphs,
+   apply real heading styles, and create/edit table cells. With a declared library,
+   fill only a compatible explicit template or create the same document structure.
+   Keep code and list semantics, cross-references, table headers and cited evidence.
+   If an unsupported field, footnote, image or layout is required, report that
+   specific gap instead of silently flattening it or claiming fidelity.
 
-5. **4-gate quality pipeline** (per /generate-ppt):
-   - Gate 1: voice gate (per voice-tier)
-   - Gate 2: brand-conformance
-   - Gate 3: honest-limitations (active only for transparency-note variant)
-   - Gate 4: provenance record
+5. **Reopen, edit/read back, and inspect the actual artifact.**
+   Open the saved `.docx` through the available application/API. Read body, tables,
+   styles, headers/footers and relevant notes/fields. Make a small authorized edit,
+   read it back and restore it if it is only a verification marker. Compare the
+   full source ledger to the saved content. Render every page where supported;
+   inspect pagination, heading orphans, table continuation, margins, references,
+   clipping and legibility. A ZIP parse or `get_model` is not rendered page evidence.
 
-6. **On all 4 PASS:** move from `~/.lintel/draft/` → `--out` path.
+6. **Record actual outcomes, not a four-score shortcut.**
+   Retain the familiar voice, brand, honest-limitations and provenance categories
+   with grounded applicability, plus source retention, editability and rendered
+   inspection. Mandatory failure/error/unverified blocks the affected completion
+   or distribution regardless of other scores. An absent optional brand/voice
+   requirement is not failed compliance or verified enterprise enforcement.
+   Persist P05 evidence bound to the final artifact and current P07 reference.
+   Keep incomplete output at its explicit owned path, clearly marked unverified;
+   do not move it through an implicit personal draft directory.
 
 ## Report format
 
-```
-Generate Word: case-analysis-ai-transparency-note
-
-Target: transparency-note
-Template: transparency-note.docx (~/.lintel/brand/word-templates/, brand version 2026-Q2)
-Voice tier: internal (pack-resolved)
-
-## Structure (from brief)
-- Overview: 1 paragraph
-- Capabilities: 6 items
-- Limitations: 7 items (ratio 7/6 — honest ✓)
-- Data inventory: 4 categories
-- Decision impact: medium (informational with human-in-loop)
-- Appeals + feedback: documented
-
-## Generation (docxtemplater)
-  Produced ~/.lintel/draft/case-analysis-ai-transparency-note.docx (47 KB)
-
-## 4-Gate pipeline
-  Gate 1 (voice):   ✓ PASS — score 88/100
-  Gate 2 (brand):   ✓ PASS — template + heading styles + footer per brand 2026-Q2
-  Gate 3 (honest):  ✓ PASS — limitations ratio 7/6 ≥ capabilities−2
-  Gate 4 (proven):  ✓ PASS — PROV-8b2c4 recorded
-
-## Status
-ALL GATES PASS. Moving from draft → ./case-analysis-ai-transparency-note.docx.
-
-For customer distribution: confirm the recorded provenance reference PROV-8b2c4.
-```
+Report the exact source/output paths and hashes; target; actual template or blank
+choice; verified profile reference; writer/tool/provider/instance/actions; retained
+claims, paragraphs, tables, citations and limitations; reopen/edit result; rendered
+pages inspected or precise missing renderer; each configured control's observed
+status and evidence; and the remaining acceptance/review gates. Do not fill this
+report with illustrative PASS scores, invented provenance IDs or guessed page counts.
 
 ## Compliance integration
 
-- 4-gate pipeline is the customer-bound enforcement path; the specific gates are pack-configurable (`resolve_pack_field compliance.hooks`; none by default)
-- transparency-note variant invokes the honest-limitations gate (mandatory)
-- Customer-data in brief → BLOCK
-- Distribution gated by the active pack's deploy/release gate (if any) reading provenance + voice status
+- Honor applicable configured controls and the brief's disclosure requirements.
+  A transparency note needs claim-to-evidence/limitation coverage, not a count ratio.
+- No customer data, secrets, macro execution or external upload in synthetic validation.
+- Generation is not authorization to distribute. Required independent review and
+  delivery controls stay open until their actual evidence exists.
 
 ## Failure modes
 
-- **docxtemplater placeholder mismatch** (template + brief don't align) — surface diff, allow operator to align brief or pick different template
-- **Honest-limitations fails** (limitations < capabilities − 2) — REJECT for transparency-note; force operator to expand limitations
-- **Voice gate fails after regen** — same as /generate-ppt
-- **Brand template absent** — fall back to default-word-template.json OR refuse if `--use-defaults` not set
+- **Template/placeholder mismatch:** preserve the source and identify the missing slot; do not drop content.
+- **Material limitation/evidence missing:** name the uncovered claim and keep the relevant control unresolved.
+- **Required voice/template unavailable:** block that action; `--use-defaults` cannot override required policy.
+- **Page renderer absent:** retain editable DOCX and model evidence, with rendered layout unverified.
+- **Only Markdown/PDF available:** disclose the alternative and keep promised DOCX editability open.
 
 ## Examples
 
 **Technical spec:**
 ```
 > /generate-word --brief docs/spec/auth-rewrite.md --target technical
-[Uses technical voice tier; no voice gate; brand gate active]
-✓ ./auth-rewrite.docx
+[Resolve applicable controls, select an available writer, then inspect actual output.]
 ```
 
 **Customer summary:**
 ```
-> /generate-word --brief engagement-notes.md --target customer-summary --audience "Customer A finserv CISO"
-[Customer-facing voice tier; full 4-gate]
-✓ ./engagement-summary.docx — PROV-9a3.
+> /generate-word --brief summary-brief.md --target customer-summary --audience "Technical decision makers" --out summary.docx
+[Preserve sources and qualifications; run the configured customer-facing controls.]
 ```
 
 **Transparency note:**
 ```
 > /generate-word --brief case-analysis-design.md --target transparency-note
-[Honest-limitations gate active; cross-references the active pack's impact-assessment gates if present]
-✓ ./case-analysis-ai-transparency-note.docx — PROV-8b2c4.
+[Check material claim boundaries and required disclosures; no limitation-count proxy.]
+```
+
+**Neutral standalone:**
+```
+> /generate-word --brief synthetic-brief.md --target technical --use-defaults --out synthetic.docx
+[Use an explicitly blank native document when available; no personal template lookup.]
 ```
 
 ## See also
 
-- `BRAND-INTEGRATION.md`
+- [Native Word procedure](references/native-word.md)
+- [Content fidelity and evidence](../generate-write/references/fidelity-and-evidence.md)
 - `WordTechnicalEditor` agent
 - The active pack's compliance gates (`resolve_pack_field compliance.hooks`; none by default)
 - `/generate-ppt`, `/generate-web`
