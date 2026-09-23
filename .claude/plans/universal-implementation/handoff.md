@@ -386,6 +386,15 @@ never inferred from this directive; a model switch does not change context ident
   nothing has run on Linux or macOS (no WSL/container here). The final PR
   therefore needs a timing decision before CI can pass.
   Per L-045 nothing is pushed or dispatched before the accepted batch.
+  Cheap CI steps pass locally on Windows at `b7e3b0ec`: `bash -n` on 223
+  scripts, `compileall`, catalog, instructions, adapter check, wiki and
+  `install/verify.sh --all`. On the P10 trial merge, `check-install.ps1` with
+  PowerShell 7 passes in 59 s (one bounded 1175 sharing-conflict retry).
+  `copilot-kit.py` has no platform guards, and all P10 evidence is Windows-only,
+  so the PR's CI is the first Linux/macOS run of P10's 16 new kit tests.
+  A static scan of P10's `install.sh`/`native.sh` for stock-Bash-3.2 blockers
+  found none; `LINTEL_HOME=/` would refuse through an unbound empty array
+  rather than the documented message, still before any write.
 - P11: deterministic parser `d3b5569` / `336513e` passes complete A16 component
   SPEC/QUALITY in `3049811`, integrated `7cb3812`. All eleven product/report
   identities match; joined four shared and 30 Node checks pass. Original native
