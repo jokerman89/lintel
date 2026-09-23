@@ -20,16 +20,20 @@ echo "tests/unit/plugin-manifests-valid.sh"
 echo "===================================="
 
 # JSON validator (python3 or jq)
+JSON_VALIDATOR=""
+if command -v python3 >/dev/null 2>&1; then
+  JSON_VALIDATOR=python3
+elif command -v jq >/dev/null 2>&1; then
+  JSON_VALIDATOR=jq
+fi
+
 validate_json() {
   local file="$1"
-  if command -v python3 >/dev/null 2>&1; then
-    python3 -c "import json,sys;json.load(open(sys.argv[1]))" "$file" 2>/dev/null
-  elif command -v jq >/dev/null 2>&1; then
-    jq empty "$file" 2>/dev/null
-  else
-    echo "  WARN: no python3/jq available — skipping JSON validation"
-    return 0
-  fi
+  case "$JSON_VALIDATOR" in
+    python3) python3 -c "import json,sys;json.load(open(sys.argv[1]))" "$file" 2>/dev/null ;;
+    jq) jq empty "$file" 2>/dev/null ;;
+    *) echo "ERROR: JSON validation requested without a parser" >&2; return 1 ;;
+  esac
 }
 
 # Required manifests
@@ -46,8 +50,11 @@ MANIFESTS=(
 for m in "${MANIFESTS[@]}"; do
   if [ ! -f "$m" ]; then
     fail "missing: $m"
+    continue
   fi
-  if validate_json "$m"; then
+  if [ -z "$JSON_VALIDATOR" ]; then
+    echo "  SKIP: no python3/jq available — JSON validation not run: $m"
+  elif validate_json "$m"; then
     pass "valid JSON: $(basename "$(dirname "$m")")/$(basename "$m")"
   else
     fail "INVALID JSON: $m"
@@ -116,11 +123,13 @@ sys.exit(0 if m.get('contextFileName') == 'GEMINI.md' else 1)
   else
     fail "gemini-extension contextFileName missing or wrong"
   fi
+else
+  echo "  SKIP: python3 absent — manifest field assertions not run"
 fi
 
 echo ""
 if [ "$FAILED" -eq 0 ]; then
-  echo "All plugin manifest tests PASSED"
+  echo "Executed plugin manifest checks PASSED"
   exit 0
 else
   echo "Some plugin manifest tests FAILED"

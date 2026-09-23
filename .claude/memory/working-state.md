@@ -106,7 +106,12 @@ refusal without executing or replacing jq. Earlier reported counts remain
 history, not full strict coverage. The corrected complete shape scope on frozen
 `c6ebaec` now records 39 passes, zero failures, one partial suite and exit 1,
 honestly refusing missing parity. The current full strict runner, required
-installed P10 case and original artifact gates remain. The ten additional
+installed P10 case and original artifact gates remain. The same focused scan
+found two more hidden-skip producers in hook-input and plugin-manifest tests;
+real-entry RED/GREEN now verifies missing-tool partial reporting, no false
+valid-JSON output, real valid/malformed Python parsing and parser-error failure.
+Production hooks/manifests and denied jq/CI routes are unchanged.
+The ten additional
 optional families pass independent `8f0f7dc` and are
 integrated in `c62606b`. Actual committed clone coverage `2b672bb` passes for
 all twelve selections, resources/notices and refusal paths. This closes the

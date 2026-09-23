@@ -47,7 +47,7 @@ if command -v jq >/dev/null 2>&1; then
   r=$( printf '%s' '{"tool_input":{}}' | ( source "$ADAPTER"; hook_input command "FALLBACK" ) )
   [ "$r" = "FALLBACK" ] && pass "stdin JSON with field absent → falls back to \$1" || fail "absent-field got '$r'"
 else
-  echo "  NOTE: jq absent — JSON-extraction asserts skipped (enforced in CI); fallback asserts above still ran"
+  echo "  SKIP: jq absent — JSON-extraction assertions not run; fallback assertions still run"
 fi
 
 # ── jq-free extraction (v4.10 fix): _json_str_field never uses jq, so the
@@ -59,4 +59,4 @@ r=$( source "$ADAPTER"; _json_str_field file_path '{"tool_input":{"file_path":"s
 [ "$r" = "src/auth.ts" ] && pass "jq-free: _json_str_field extracts file_path (no jq needed)" || fail "jq-free file_path got '$r'"
 
 echo ""
-[ "$FAILED" -eq 0 ] && { echo "hook-input-adapter: ALL PASS"; exit 0; } || { echo "hook-input-adapter: FAILURES"; exit 1; }
+[ "$FAILED" -eq 0 ] && { echo "hook-input-adapter: executed checks PASSED"; exit 0; } || { echo "hook-input-adapter: FAILURES"; exit 1; }

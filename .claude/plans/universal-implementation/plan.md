@@ -553,6 +553,8 @@ all-client acceptance, the strict full suite or initiative release clearance.
   - [x] A23.3.s1 Reproduce the actual manifest shape check hiding unavailable JSON parity checks from the strict runner.
   - [x] A23.3.s2 Report that missing coverage through the existing skip protocol and verify strict refusal without executing or replacing jq.
   - [ ] A23.3.s3 Reconcile remaining original package and caller evidence against this refusal contract before whole-parent acceptance.
+  - [x] A23.3.s4 Reproduce the same hidden-skip behavior in the actual hook-input and plugin-manifest guards.
+  - [x] A23.3.s5 Report unavailable extraction/parsing/field coverage explicitly, retain available checks and reject false valid-JSON claims.
 - [ ] A23.4 Run stable-tree generated checks, strict suite and separate consumer installation.
   - [x] A23.4.g1 Render schema references from actual pack/envelope contracts; reject invalid source rather than emitting empty or stale metadata.
   - [x] A23.4.g2 Regenerate and check the joined catalog, wiki, README and repository adapter without hand-editing their output.
@@ -585,6 +587,24 @@ This is verified fail-closed behavior, not a full strict-suite PASS.
 The original A23.3 remainder stays explicit as s3: the real work-map reader
 returns executable leaves, so two completed refinements must not make an
 unchecked original parent disappear from the remaining-work view.
+The same coordinator-owned reporting correction also covers the two actual
+test producers found by the focused skip scan: hook-input's NOTE and the plugin
+manifest validator's missing-parser success/default plus silent field-check skip.
+Use real copied entrypoints and their minimal fixture inputs to reproduce the
+strict false passes. Preserve valid/invalid parser behavior, non-strict partial
+results and hook fallbacks; do not execute/replace jq, install a parser, change
+the production hook/manifest contracts or redesign the shared runner.
+`remaining-skip-red-01/02` reproduce both actual-entry strict false passes;
+the second also records seven false `valid JSON` claims with no parser.
+The correction emits standard SKIP messages for absent extraction, parsing and
+field coverage and never invokes a validator through an absence success.
+Available-parser failure remains failure. `remaining-skip-green-03` passes the
+retained runner suite, actual copied guard strict/non-strict behavior, real
+Python valid/malformed manifest discrimination, injected parser-error refusal,
+Bash syntax and current-source manifest checks. Coordinator mechanical
+SPEC/QUALITY review covered the complete bounded diff. No jq, replacement
+parser, installation, production hook or CI change occurred; the real jq
+extraction branch and whole-parent A23.3 acceptance remain unverified.
 Coordinator integration refinement: g1/g2 repair the observed JSON-envelope/YAML-only
 wiki mismatch and optional pack-field drift after P04/P07/P06 fan-in. Reuse the accepted
 data parsers, preserve schema versions, and run generator idempotency, malformed-source

@@ -24,6 +24,9 @@ Unavailable assertions must emit a `SKIP:` line, not an informational `NOTE:`.
 For example, missing jq leaves manifest version-parity coverage unrun even when
 the other identity checks pass. The runner reports that suite as partial and
 `--require-all` refuses full acceptance; a non-strict run may retain the partial result.
+The same rule applies to hook JSON-extraction checks and manifest parsing/field
+checks. Missing parsers must not print `valid JSON`; an available parser that
+fails remains a failed check, not a dependency skip.
 
 ## The tiers
 
