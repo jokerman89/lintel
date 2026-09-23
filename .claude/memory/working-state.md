@@ -183,6 +183,12 @@ all twelve selections, resources/notices and refusal paths. This closes the
 source metadata/core, one-catalog/honest-routing and provenance-retirement leaves,
 not native utility or P10. `6885d9e` reconciles accepted pipeline preflight and
 explicit document-content unions without forcing them onto standalone formats.
+Release `8c9ab714` advances the still-open native-utility portion with one
+declared demo-script example on read-only accepted source `9c15d690`.
+The original P13 owner (bef/projectc4) retains control; one fresh drafter is the
+maximum, with actual arc approval before narration and original486's separate
+critique after the frozen return through88. This is not P10, native rendering,
+source maturity or full A18.3/A19.4 acceptance. Original79/113 is unchanged.
 
 ### Historical integration chronology
 

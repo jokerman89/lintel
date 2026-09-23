@@ -294,6 +294,15 @@ Current actionable checkpoints supersede the older chronological entries below:
   unions and missing-resource refusal; committed run passes. Earlier missing-
   family RED and two test-oracle mistakes are retained, not product failures.
   No source-body/schema/default access change or P10/native utility claim follows.
+  Concrete `8c9ab714` now releases one original A18.3/A19.4 native utility
+  example to the original owner (`bef15fa8` resolves to projectc4), using exact
+  read-only source `9c15d690`. The card permits accepted-P06 synthetic consumer
+  preparation, metadata-first selected demo methods and at most one fresh
+  continuation-capable drafting context. The controller records actual local
+  arc approval; the frozen draft/selection/host chain returns through88 for
+  original486's independent critique and SPEC/QUALITY. No new product/source,
+  version, generated map, maturity, renderer, P10 route or parent clearance.
+  This P13 case is separate from P08's original seventeen targets/actor limit.
 - P14: the original core-profile experiment is owned by
   `8fa44739-f562-4213-a6c4-fb7719fc8c9e`, branch
   `jokerman-microsoft-universal-profile-scenarios`, from `9f8885b`.
