@@ -138,6 +138,9 @@ native pin execution and candidate review remain gated.
 SAME9db passed that package; actual pin02 then stopped on eight CR bytes in the
 actor-copied request. One transport-only pin03 (byte-exact copy with SHA assertion)
 is released; candidate SPEC follows only after its actual packet and post-exit result.
+Pin03 succeeded; candidate-03 `2890b808` passed coordinator intake (37/37) and is
+under SAME9db candidate SPEC. f2 prepares, but does not execute, the remaining
+direct-consumption and alias packages for one queued preparation review.
 No forced verdict, waiver, new actor, source repin or remote operation follows.
 A13.1/.2/.4 and installer gates remain separate. All native leases are revoked;
 no target changes are released merely by the proposed evidence design.

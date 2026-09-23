@@ -268,6 +268,13 @@ never inferred from this directive; a model switch does not change context ident
   derivation with byte-substitution proof, byte-exact copy with SHA assertion
   before invocation, grant `f06-direct-pin-release-02`, the same post-exit
   contract. On success, the candidate goes to SAME9db and coordinator88 in parallel.
+  Actual pin03 succeeded (child/outer 0/0): candidate-03 `2890b808`, handoff
+  `50022870`, chronological post-exit `d5575855`, revocation `ee84c45c`, empty
+  ownership `a5b085fc`. Coordinator intake passed 37/37 data-only checks, including
+  an independent recomputation of the derivation. SAME9db's candidate SPEC is
+  running. The card releases f2 to prepare only the direct-consumption,
+  alias-candidate and alias-consumption packages, for one queued SAME9db
+  preparation review; every execution still needs its own grant.
   A13.1/.2/.4, P10 and invalid shell27/q02 boundaries remain separate. No
   unaccepted owner source is integrated merely to preserve report ancestry.
   Reviewer-private failures remain honest post-hoc transcript artifacts,
