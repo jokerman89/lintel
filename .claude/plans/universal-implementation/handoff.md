@@ -139,13 +139,35 @@ Current actionable checkpoints supersede the older chronological entries below:
   decisions are `8b794af67afa98fe1fe0a2c3d0092ef9cbc48d855b630d4388236ea8df534d03`
   and `5689f02c71c8a05cbb379e64efc716e5f37533f9bda1e343d12b21a28039a9de`.
   Actual new88 host receipts `cb55ea29`/`a8c5046a` bind those distinct attempts;
-  originalf2/c2 have only alias exact-byte publication/current consumers and
-  the original no-publication continuation. No copied direct/MAIN clearance.
+  originalf2/c2 completed alias exact-byte publication/current consumers and
+  the original no-publication continuation, without copied direct/MAIN clearance.
   Input comparison `98339fd3` independently confirms same9 original snapshot
-  bytes, literal typed obligations/local policy and13 case IDs; final paired
-  outcome remains future. After verified alias quiescence/revocation, the owner
-  must freeze original finite comparison and full selected-subset P08 report
-  with all actual gaps/history for SAME9db SPEC then eligible whole QUALITY.
+  bytes, literal typed obligations/local policy and13 case IDs. Final alias
+  packet `32ec612f`, verification `70b41146` and quiescence `18a766f4` now
+  record the same subsequent local publication-authority refusal as direct:
+  REVIEW DONE, SHIP BLOCKED, CYCLE PAUSED/resume SHIP, CAPTURE unreached.
+  Parent final-pair intake02 verifies1,161 alias/419 prior snapshots,269
+  paired snapshots,46 alias files,42 actual inner commands,12 reader/QA
+  boundaries,2 local readiness checks,6 complete ledger appends and existing
+  audit prefixes. Alias native53/40dirs is all53 selected/zero boundary-only;
+  direct native53 is47selected+6boundary-only. No external command or actual
+  rejecting review occurred. A parent read-only observer's wrong alias key
+  caused intake01 failure; its driver/log remain and exact-key02 passes.
+  The original paired comparison `2e495335` is frozen, not a new task authority.
+  Owner report-only `229656cf602f7f651801dfd0b14862415a930158`, sole parent
+  `8318c3086efc5eb938a2542780226eae3c227ea8`, changes only reports/P08.md:
+  244,464 Git bytes/3,609 LF lines, SHA256
+  `53c921c6fbe98dbfad2f6ef576b76a0c2d8809b1a443e2a6c71c25f14d0356c7`;
+  full old124,699Git-byte/1,784line prefix intact. Raw Windows representation
+  is248,073 bytes/SHA `b613452e`; handoff `fc638af9` binds both and16 actual
+  source-Git operations. Post-report source960 is distinct from959 unchanged
+  unrelated owner-workspace files plus the authorized report.
+  SAME9db is now commissioned for COMPLETE original selected-subset source/
+  method/native SPEC, then first eligible whole QUALITY, not another fixture-
+  only verdict. It must assess original A08/A10/advisoryA13.3 and all genuine
+  gaps, including the still UNOBSERVED/OPEN rejecting-review condition.
+  A13.1/.2/.4, P10 and invalid shell27/q02 boundaries remain separate. No
+  unaccepted owner source is integrated merely to preserve report ancestry.
   Reviewer-private failures remain honest post-hoc transcript artifacts,
   not claimed original redirected streams.
   Additive reporting correction: the earlier controller summary, recovery relay
@@ -161,7 +183,8 @@ Current actionable checkpoints supersede the older chronological entries below:
   actual exit3 refusals already retained in both decisions' history assessment;
   quiescence, not universal exit0, supported the boundary. No released-MAIN
   reread or new clearance occurred. Old report/decisions/handoff remain exact;
-  current consumer passes and grant801/handoff27 remain.
+  current consumer evidence remains valid; MAIN grant801/handoff27 is complete
+  and revoked, not permission to reopen that target.
 - P09: module product `5c99612` passes `114ddfe3`, integrated `2d789a4`;
   all 26 product paths match and 13 joined methods pass. `477d3fc` releases
   the original owner's separate N1 safety-quantifier correction and two bounded

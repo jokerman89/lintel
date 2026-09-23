@@ -76,8 +76,8 @@ twelve reader/QA observations, two readiness checks, six complete ledger
 appends and preserved audit prefixes. No external command or rejecting review
 was observed. Direct is quiescent/revoked. Handoff30 `8e2fdd37` ran the actual
 ship-alias composition with the same nine inherited input snapshots and its
-own seed `3459e693`, profile `b67e4a2a` and one local 13-case suite. It now
-stops at missing own REVIEW, with lease revoked and packet `ad9e0a1c` frozen.
+own seed `3459e693`, profile `b67e4a2a` and one local 13-case suite. Its initial
+missing-REVIEW stop remains frozen in packet `ad9e0a1c`.
 Recovery verifies 419 snapshots, 40 current alias files, all 47 native files
 represented with zero boundary-only files, exact typed QA and original
 contexts `e8359100` / `07bff3be`. The controller corrected a message-only
@@ -87,12 +87,22 @@ SAME9db now passes alias-specific SPEC, subsequent QUALITY and mandatory local
 compliance/FR-DOC, report `bd645854`, handoff `1901152f`. Recovery verifies
 36 returned artifacts, 913 unchanged before/after records, current snapshots/
 contexts and verbatim typed QA. Exact decisions `8b794af6`/`5689f02c` have
-separate actual host receipts `cb55ea29`/`a8c5046a`, returned for SAMEc2's
-original alias-only consumers and local authority boundary. The input-only
-pair comparison `98339fd3` is independently verified; it does not preclear
-the remaining alias outcome. Final paired evidence and the original P08
-selected-subset report/review remain required. Publication stays unauthorized,
-with no direct/MAIN verdict transfer, forced rejection or extra actor.
+separate actual host receipts `cb55ea29`/`a8c5046a`. Actual alias consumption
+then passed both current review/QA/readiness chains and refused publication
+authority in SHIP, preserving CYCLE PAUSED/resume SHIP and unreached CAPTURE.
+Final alias `32ec612f` and pair `2e495335` pass parent data intake02: 1,161
+alias snapshots, 419 prior, 269 paired support snapshots, all46 alias files,
+42 actual inner command records, twelve reader/QA boundaries, two readiness
+checks, six complete appends and unchanged nine inherited inputs. This is
+finite observed parity, not arbitrary-input or whole-P08 acceptance.
+Original owner report-only `229656cf` (sole parent `8318c308`, Git-byte SHA
+`53c921c6`, full original prefix retained) is frozen with handoff `fc638af9`.
+SAME9db now has the COMPLETE original A08/A10/advisory A13.3 selected-subset
+SPEC and first eligible whole QUALITY review, including source and retained
+native/preservation evidence. A genuinely rejecting native independent review
+is still UNOBSERVED/OPEN; no manufactured rejection or waiver. A13.1/.2/.4
+and installer gates remain separate. All native leases are revoked and both
+owners parked; no extra actor, source repin or remote action is authorized.
 Source `70469296` and bound inputs stay frozen; no fourth actor.
 P14 preparation passes complete SPEC then QUALITY in `f690eae`, integrated
 `c544fd0`. Native release `acc18df` permits the original controller's sequential

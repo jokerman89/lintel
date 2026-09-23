@@ -346,9 +346,14 @@ review, current consumption and CAPTURE (`6d1edc70`). The finite direct-delivery
 case subsequently passes its own target-specific review/current QA, then
 actually refuses unauthorized publication in SHIP (`91ac416c`), preserving
 CYCLE PAUSED/resume SHIP and unreached CAPTURE. That local authority refusal
-is not a network failure, host denial or rejecting review. The separate
-ship-alias case is now executing under the original one-target grant; paired
-comparison and complete selected-subset review still precede A10 closure.
+is not a network failure, host denial or rejecting review. The separate ship-alias case subsequently reached the same local authority
+stop after its own independently reviewed/current consumer chain (`32ec612f`).
+The final finite-pair comparison `2e495335` preserves equal original inputs,
+distinct profile/context/QA/decision identities and incomplete SHIP cycles,
+with CAPTURE unreached. It does not supply a genuinely rejecting review:
+that requested native condition remains UNOBSERVED/OPEN. Full owner report
+`229656cf` is now frozen for SAME9db's complete original selected-subset SPEC,
+then first eligible whole QUALITY. No A10 parent closes from data parity alone.
 
 ### A11 Honest context capacity (P03; R05)
 - [x] A11.1 Share context selection/save/restore readers and show bounded sources.
