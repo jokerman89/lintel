@@ -6,7 +6,9 @@
 """Exercise real producer, audit reader and SHIP with isolated Git fixtures."""
 from copy import deepcopy
 from datetime import datetime, timezone
+import errno
 import hashlib
+import importlib.util
 import json
 import os
 from pathlib import Path
@@ -16,10 +18,12 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 SOURCE = Path(__file__).resolve().parents[2]
 CLI = SOURCE / "bin" / "li-review-evidence.py"
 sys.path.insert(0, str(SOURCE / "lib"))
+from native_paths import native_io_path, path_identity
 from review_contract import CONTRACT_VERSION
 
 
@@ -66,24 +70,48 @@ def observed_tests():
 
 
 class Fixture(unittest.TestCase):
+    native_root_length = None
+
     def setUp(self):
         self.temporary = tempfile.TemporaryDirectory(prefix="lintel-review-")
-        self.addCleanup(self.temporary.cleanup)
+        self.addCleanup(self.cleanup)
         self.root = Path(self.temporary.name)
         self.repo = self.root / "target with spaces"
-        self.repo.mkdir()
+        if self.native_root_length is not None:
+            padding = self.native_root_length - len(str(self.root / "cases" / "target-"))
+            self.assertGreater(padding, 0, "Fixture parent cannot retain the declared root length")
+            self.repo = self.root / "cases" / ("target-" + "x" * padding)
+            self.assertEqual(len(str(self.repo)), self.native_root_length)
+        native_io_path(self.repo).mkdir(parents=True)
         self.env = dict(os.environ)
-        for key in ("LINTEL_AUDIT_DIR", "LINTEL_WORK_MAP", "CLAUDE_PLUGIN_ROOT"):
-            self.env.pop(key, None)
+        for key in list(self.env):
+            if key.startswith(("LINTEL_", "CLAUDE_", "GSTACK_")):
+                self.env.pop(key)
+        directories = {
+            "HOME": "home", "USERPROFILE": "home", "APPDATA": "appdata",
+            "LOCALAPPDATA": "localappdata", "TEMP": "temp", "TMP": "temp", "TMPDIR": "temp",
+            "XDG_CONFIG_HOME": "xdg-config", "XDG_DATA_HOME": "xdg-data",
+            "XDG_CACHE_HOME": "xdg-cache", "XDG_STATE_HOME": "xdg-state",
+            "XDG_RUNTIME_DIR": "xdg-runtime", "LINTEL_HOME": "home/.lintel",
+            "GSTACK_HOME": "legacy",
+        }
+        for key, name in directories.items():
+            path = self.root / name
+            native_io_path(path).mkdir(parents=True, exist_ok=True)
+            self.assertFalse(native_io_path(path).is_symlink())
+            self.env[key] = path.as_posix()
         self.env.update({
-            "HOME": (self.root / "home").as_posix(), "USERPROFILE": str(self.root / "home"),
-            "LINTEL_HOME": (self.root / "home" / ".lintel").as_posix(),
-            "GSTACK_HOME": (self.root / "legacy").as_posix(),
             "LINTEL_REPO_ROOT": self.repo.as_posix(), "LINTEL_SOURCE_ROOT": SOURCE.as_posix(),
             "LINTEL_PYTHON": Path(sys.executable).as_posix(), "GIT_CONFIG_NOSYSTEM": "1",
             "GIT_CONFIG_GLOBAL": os.devnull, "PYTHONDONTWRITEBYTECODE": "1",
+            "GIT_CEILING_DIRECTORIES": self.root.as_posix(),
         })
-        (self.root / "home").mkdir()
+        if self.native_root_length is not None and os.name == "nt":
+            self.assertFalse(any(
+                key == "GIT_CONFIG_COUNT" or key.startswith(("GIT_CONFIG_KEY_", "GIT_CONFIG_VALUE_"))
+                for key in self.env
+            ), "Native fixtures do not inherit arbitrary Git command configuration")
+            self.env.update(GIT_CONFIG_COUNT="1", GIT_CONFIG_KEY_0="core.longpaths", GIT_CONFIG_VALUE_0="true")
         self.git("init", "-q")
         self.git("symbolic-ref", "HEAD", "refs/heads/fixture")
         self.git("config", "user.name", "Fixture")
@@ -127,7 +155,23 @@ class Fixture(unittest.TestCase):
         self.qa_file = self.root / "qa.json"
         self.record_file = self.repo / self.request["record_path"]
 
+    def cleanup(self):
+        root = Path(self.temporary.name).absolute()
+        self.assertEqual(root, self.root)
+        self.assertTrue(root.name.startswith("lintel-review-"))
+        self.temporary.name = str(native_io_path(root))
+        self.temporary.cleanup()
+
     def run_command(self, args, *, ok=None, input=None):
+        if self.native_root_length is not None and os.name == "nt":
+            self.assertTrue(self.repo.is_relative_to(self.root / "cases"))
+            configuration = {
+                key: value for key, value in self.env.items()
+                if key == "GIT_CONFIG_COUNT" or key.startswith(("GIT_CONFIG_KEY_", "GIT_CONFIG_VALUE_"))
+            }
+            self.assertEqual(configuration, {
+                "GIT_CONFIG_COUNT": "1", "GIT_CONFIG_KEY_0": "core.longpaths", "GIT_CONFIG_VALUE_0": "true",
+            })
         if args[0] == "bash":
             # Avoid Windows CRT/MSYS double-quoting of literal JSON argv.
             self.assertIsNone(input)
@@ -151,19 +195,20 @@ class Fixture(unittest.TestCase):
 
     def write(self, name, content):
         path = self.repo / name
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(content, encoding="utf-8")
+        native_io_path(path.parent).mkdir(parents=True, exist_ok=True)
+        native_io_path(path).write_text(content, encoding="utf-8")
         return path
 
     def write_json(self, name, value):
         return self.write(name, encoded(value) + "\n")
 
     def prepare(self):
-        request_file = self.root / "request.json"
-        request_file.write_text(encoded(self.request), encoding="utf-8")
+        request_file = getattr(self, "request_file", self.root / "request.json")
+        native_io_path(request_file.parent).mkdir(parents=True, exist_ok=True)
+        native_io_path(request_file).write_text(encoded(self.request), encoding="utf-8")
         result = self.cli("prepare", "--repo", self.repo, "--request", request_file)
         self.expected = json.loads(result.stdout)
-        self.expected_file.write_text(encoded(self.expected), encoding="utf-8")
+        native_io_path(self.expected_file).write_text(encoded(self.expected), encoding="utf-8")
         return self.expected
 
     def record(self, *, status="pass", controls=None):
@@ -196,14 +241,14 @@ class Fixture(unittest.TestCase):
     def bind_evidence(self, record):
         paths = sorted({p for item in record["controls"] for p in item["evidence"]})
         record["evidence"] = [
-            {"path": path, "sha256": hashlib.sha256((self.repo / path).read_bytes()).hexdigest()}
+            {"path": path, "sha256": hashlib.sha256(native_io_path(self.repo / path).read_bytes()).hexdigest()}
             for path in paths
         ]
 
     def log(self, record=None, *, ok=0):
         record = self.review if record is None else record
-        self.record_file.parent.mkdir(parents=True, exist_ok=True)
-        self.record_file.write_text(encoded(record), encoding="utf-8")
+        native_io_path(self.record_file.parent).mkdir(parents=True, exist_ok=True)
+        native_io_path(self.record_file).write_text(encoded(record), encoding="utf-8")
         return self.run_command(
             ["bash", SOURCE / "bin" / "li-review-log", "--file", self.record_file], ok=ok,
         )
@@ -216,7 +261,7 @@ class Fixture(unittest.TestCase):
             "record_digest": digest(record), "attempt_id": record["context"]["attempt_id"],
             "builder": record["context"]["builder"], "reviewer": record["reviewer"],
         }
-        self.observed_file.write_text(encoded(data), encoding="utf-8")
+        native_io_path(self.observed_file).write_text(encoded(data), encoding="utf-8")
         return data
 
     def read(self, *, ok=0, corroboration=True, skill="review"):
@@ -237,12 +282,12 @@ class Fixture(unittest.TestCase):
             }
             controls = [tests]
         inputs = self.root / "qa-input.json"
-        inputs.write_text(encoded({"controls": controls}), encoding="utf-8")
+        native_io_path(inputs).write_text(encoded({"controls": controls}), encoding="utf-8")
         result = self.cli(
             "qa", "--repo", self.repo, "--expected", self.expected_file,
             "--input", inputs, ok=None,
         )
-        self.qa_file.write_text(result.stdout, encoding="utf-8")
+        native_io_path(self.qa_file).write_text(result.stdout, encoding="utf-8")
         return result
 
     def ship(self, *, ok=0):
@@ -482,13 +527,14 @@ class ReviewEvidence(Fixture):
         for name in (
             "bin/li-review-log", "bin/li-review-read", "bin/li-review-evidence.py",
             "bin/_audit.sh", "lib/paths.sh", "lib/review_contract.py", "lib/review-schema.json",
-            "lib/markdown_source.py",
+            "lib/markdown_source.py", "lib/native_paths.py",
         ):
             target = installed / name
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(SOURCE / name, target)
         self.write("lib/review_contract.py", "raise RuntimeError('target code executed')\n")
         self.write("lib/markdown_source.py", "raise RuntimeError('target classifier executed')\n")
+        self.write("lib/native_paths.py", "raise RuntimeError('target native helper executed')\n")
         env = dict(self.env)
         env.pop("LINTEL_SOURCE_ROOT")
         command = "exec " + shlex.join([
@@ -503,6 +549,15 @@ class ReviewEvidence(Fixture):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertTrue(json.loads(result.stdout)["ok"])
         self.assertFalse((installed / ".claude").exists())
+        (installed / "lib" / "native_paths.py").unlink()
+        env["PYTHONPATH"] = (self.repo / "lib").as_posix()
+        missing = subprocess.run(
+            ["bash"], input=command, cwd=self.root, env=env, text=True, encoding="utf-8",
+            capture_output=True, check=False,
+        )
+        self.assertNotEqual(missing.returncode, 0)
+        self.assertIn("Required trusted source helper is unavailable", missing.stderr)
+        self.assertNotIn("target native helper executed", missing.stderr)
 
     def test_staged_content_and_symlink_type_are_bound(self):
         self.good()
@@ -1448,6 +1503,348 @@ class MarkdownBoundaryEvidence(Fixture):
         self.consume_changed(original.replace("[ ] A1", "[x] A1"), literal=True)
 
 
+class NativePathEvidence(Fixture):
+    native_root_length = 216
+
+    def setUp(self):
+        super().setUp()
+        self.configuration = native_io_path(self.repo / ".git" / "config").read_bytes()
+        self.addCleanup(self.assert_fixture_configuration)
+        environment = patch.dict(os.environ, self.env, clear=True)
+        environment.start()
+        self.addCleanup(environment.stop)
+        if os.name == "nt":
+            observed = self.git("config", "--show-scope", "--get", "core.longpaths")
+            self.assertEqual(observed.stdout.strip().split(), ["command", "true"])
+            local = self.run_command(["git", "config", "--local", "--get", "core.longpaths"])
+            self.assertEqual(local.returncode, 1)
+
+    def write(self, name, content):
+        path = self.repo / name
+        native_io_path(path.parent).mkdir(parents=True, exist_ok=True)
+        native_io_path(path).write_bytes(content.encode("utf-8"))
+        return path
+
+    def assert_fixture_configuration(self):
+        self.assertEqual(native_io_path(self.repo / ".git" / "config").read_bytes(), self.configuration)
+
+    def good(self, *, controls=None, qa_controls=None):
+        self.record(controls=controls)
+        self.log()
+        self.corroborate()
+        self.assertEqual(self.qa(controls=qa_controls).returncode, 0)
+        self.read()
+        self.ship()
+
+    def current(self, *, valid, qa_controls=None, qa_code=None):
+        old_qa = native_io_path(self.qa_file).read_bytes()
+        reader = self.read(ok=None)
+        qa = self.qa(controls=qa_controls)
+        native_io_path(self.qa_file).write_bytes(old_qa)
+        ship = self.ship(ok=None)
+        for role, result, code in (
+            ("reader", reader, 0 if valid else 3),
+            ("qa", qa, (0 if valid else 1) if qa_code is None else qa_code),
+            ("ship", ship, 0 if valid else 3),
+        ):
+            with self.subTest(consumer=role):
+                self.assertEqual(result.returncode, code, result.stdout + result.stderr)
+                if role != "qa":
+                    self.assertEqual(json.loads(result.stdout)["ok"], valid)
+
+    def test_native_policy_262_bytes_current_and_missing_are_observed(self):
+        policy = "packs/rapid-development/policies/inventory.md"
+        data = b"Synthetic owner-created policy.\n".ljust(848, b"p")
+        self.assertEqual(len(data), 848)
+        path = self.write(policy, data.decode("utf-8"))
+        native_io_path(path).write_bytes(data)
+        self.assertEqual(len(str(path)), 262)
+        self.request["acceptance_paths"].append(policy)
+        tests = observed_tests()
+        tests["policy"]["source"] = policy
+        self.request["qa_requirements"] = [qa_requirement(tests)]
+        controls = [control(), control("quality"), tests]
+        self.good(controls=controls, qa_controls=[tests])
+        entry = next(item for item in self.expected["work"]["acceptance_manifest"] if item["path"] == policy)
+        self.assertEqual(entry["sha256"], hashlib.sha256(data).hexdigest())
+        native_io_path(path).write_bytes(data + b"changed\n")
+        self.current(valid=False, qa_controls=[tests])
+        native_io_path(path).unlink()
+        self.current(valid=False, qa_controls=[tests])
+        native_io_path(path).write_bytes(data)
+        self.current(valid=True, qa_controls=[tests])
+
+    def test_native_long_authority_evidence_and_current_record_reads(self):
+        directory = "authority/" + "a" * 58
+        files = {role: f"{directory}/{role}.md" for role in ("spec", "plan", "prompt")}
+        for role, name in files.items():
+            data = native_io_path(self.repo / f"{role}.md").read_bytes()
+            native_io_path(self.write(name, "")).write_bytes(data)
+        mapping = f"{directory}/work.json"
+        self.write_json(mapping, {
+            "schema_version": 1, "workflow": "lintel", "status": "APPROVED",
+            **files, "tasks": files["plan"],
+        })
+        self.request.update(work_map=mapping, acceptance_paths=list(files.values()))
+        evidence = "observations/" + "e" * 63 + "/checks.txt"
+        self.write(evidence, "Synthetic executed-test observation.\n")
+        controls = [control(), control("quality"), observed_tests()]
+        for item in controls:
+            item["evidence"] = [evidence]
+        metadata = self.repo / "metadata" / ("m" * 59)
+        native_io_path(metadata).mkdir(parents=True)
+        self.request_file = metadata / "request.json"
+        self.expected_file = metadata / "expected.json"
+        self.observed_file = metadata / "corroboration.json"
+        self.qa_file = metadata / "qa.json"
+        self.request["record_path"] = ".claude/runtime/reviews/native-" + "r" * 60 + ".json"
+        self.record_file = self.repo / self.request["record_path"]
+        self.good(controls=controls, qa_controls=[controls[-1]])
+        before = deepcopy(self.expected)
+        self.prepare()
+        self.assertEqual(before, self.expected)
+        self.assertNotIn("//?/", encoded(self.expected))
+        self.current(valid=True, qa_controls=[controls[-1]])
+        old_record = native_io_path(self.record_file).read_bytes()
+        native_io_path(self.record_file).write_text('{"not":"a review"}', encoding="utf-8")
+        self.current(valid=False, qa_controls=[controls[-1]])
+        native_io_path(self.record_file).write_bytes(old_record)
+        native_io_path(self.repo / evidence).write_bytes(b"late evidence change\n")
+        from review_contract import ContractError, verify_qa
+        stale_qa = json.loads(native_io_path(self.qa_file).read_text(encoding="utf-8"))
+        with self.assertRaisesRegex(ContractError, "QA evidence files changed"):
+            verify_qa(self.repo, stale_qa, expected=self.expected)
+        # Fresh QA can observe new evidence; the stale review and restored old QA still cannot ship.
+        self.current(valid=False, qa_controls=[controls[-1]], qa_code=0)
+
+    def test_native_selected_directory_keeps_dirty_new_tracked_and_deleted(self):
+        selected = "selected/" + "d" * 58
+        tracked, deleted, added = (f"{selected}/{name}.txt" for name in ("tracked", "deleted", "new"))
+        self.write(tracked, "original tracked\n")
+        self.write(deleted, "original deleted\n")
+        self.git("add", selected)
+        self.git("commit", "-qm", "native selected baseline")
+        self.base = self.git("rev-parse", "HEAD").stdout.strip()
+        self.request.update(base=self.base, selection=[selected])
+        self.write(tracked, "dirty tracked\n")
+        native_io_path(self.repo / deleted).unlink()
+        self.write(added, "new selected\n")
+        self.good()
+        entries = {item["path"]: item for item in self.expected["snapshot"]["entries"]}
+        self.assertEqual(set(entries), {tracked, deleted, added})
+        self.assertEqual(entries[deleted]["worktree"], {"kind": "absent", "mode": "000000", "sha256": None})
+        self.assertEqual(entries[added]["base"]["kind"], "absent")
+        self.assertEqual(entries[tracked]["base"]["sha256"], hashlib.sha256(b"original tracked\n").hexdigest())
+        self.assertEqual(entries[tracked]["worktree"]["sha256"], hashlib.sha256(b"dirty tracked\n").hexdigest())
+        extra = self.write(f"{selected}/later-new.txt", "later selected content\n")
+        self.current(valid=False)
+        native_io_path(extra).unlink()
+        self.current(valid=True)
+        self.git("add", tracked)
+        self.current(valid=False)
+        self.git("restore", "--staged", tracked)
+        self.current(valid=True)
+
+    def test_native_audit_and_long_cli_inputs_preserve_latest_decision(self):
+        audit_dir = self.repo / "audit" / ("j" * 63)
+        self.env["LINTEL_AUDIT_DIR"] = audit_dir.as_posix()
+        self.good()
+        decision = deepcopy(self.review)
+        decision["status"] = "fail"
+        self.log(decision)
+        self.read(ok=3)
+        self.ship(ok=3)
+        self.log()
+        self.read()
+        self.ship()
+        audit = audit_dir / "reviews.jsonl"
+        with native_io_path(audit).open("ab") as stream:
+            stream.write(b'{"schema_version":2,"status":"fail"}\n')
+        self.read(ok=3)
+        self.ship(ok=3)
+        history = self.run_command(["bash", SOURCE / "bin/li-review-read", "--json"], ok=0)
+        self.assertIn('"status":"fail"', history.stdout)
+
+    def test_native_explicit_ignored_domain_record_is_bound_not_omitted(self):
+        relative = ".claude/runtime/state/domains/pipeline-fixture/i0001/ta/01-result.json"
+        payload = {"fixture_only": "fresh P05-owned opaque input, not a P12 decision", "value": 1}
+        path = self.write_json(relative, payload)
+        original = native_io_path(path).read_bytes()
+        self.assertGreater(len(str(path)), 263)
+        self.assertEqual(self.git("check-ignore", relative).stdout.strip(), relative)
+        self.request["selection"] = [relative]
+        self.good()
+        entries = self.expected["snapshot"]["entries"]
+        self.assertEqual(len(entries), 1)
+        self.assertEqual(entries[0]["path"], relative)
+        self.assertEqual(entries[0]["base"], {"kind": "absent", "mode": "000000", "sha256": None})
+        self.assertEqual(entries[0]["worktree"]["sha256"], hashlib.sha256(original).hexdigest())
+        self.write_json(relative, {**payload, "value": 2})
+        self.current(valid=False)
+        native_io_path(path).unlink()
+        self.current(valid=False)
+        native_io_path(path).write_bytes(original)
+        self.current(valid=True)
+
+    def test_native_metadata_errors_are_not_missing_snapshots(self):
+        import review_contract as contract
+        selected = self.write("selected/" + "e" * 58 + "/present.txt", "bound content\n")
+        original = Path.lstat
+
+        def failing(path, *args, **kwargs):
+            if path_identity(path) == path_identity(selected):
+                raise OSError(errno.EINVAL, "injected metadata observation failure")
+            return original(path, *args, **kwargs)
+
+        with patch.object(Path, "lstat", failing), self.assertRaises(OSError):
+            contract.snapshot(self.repo, base=self.base, selection=[selected.relative_to(self.repo).as_posix()])
+
+    def test_native_audit_observation_errors_are_not_empty_history(self):
+        spec = importlib.util.spec_from_file_location("native_review_cli_test", CLI)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        audit = self.write("audit/" + "e" * 63 + "/reviews.jsonl", "{}\n")
+        with patch.object(Path, "read_bytes", side_effect=PermissionError("injected audit read refusal")):
+            with self.assertRaises(PermissionError):
+                module.audit_records(audit)
+        native_io_path(audit).unlink()
+        self.assertEqual(module.audit_records(audit), [])
+
+    def test_native_representation_and_regular_file_rules_keep_logical_names(self):
+        from review_contract import ContractError, bind_work, evidence_manifest
+        evidence = "evidence/" + "n" * 60 + "/evidence.txt"
+        self.write(evidence, "unchanged synthetic observation\n")
+        controls = [control()]
+        controls[0]["evidence"] = [evidence]
+        ordinary = evidence_manifest(self.repo, controls)
+        self.assertEqual(ordinary[0]["path"], evidence)
+        self.assertEqual(evidence_manifest(native_io_path(self.repo), controls), ordinary)
+        work = dict(work_map="work.json", package_id="P1", leaf_ids=["A1", "A2"],
+                    acceptance_paths=["spec.md", "plan.md"])
+        self.assertEqual(bind_work(self.repo, **work), bind_work(native_io_path(self.repo), **work))
+        for invalid in ("../outside.txt", ".git/config", "input:stream"):
+            controls[0]["evidence"] = [invalid]
+            with self.subTest(path=invalid), self.assertRaises(ContractError):
+                evidence_manifest(self.repo, controls)
+        controls[0]["evidence"] = [evidence.rsplit("/", 1)[0]]
+        with self.assertRaises(ContractError):
+            evidence_manifest(self.repo, controls)
+
+    def test_native_deep_authority_root_includes_required_declaration(self):
+        from review_contract import bind_work, evidence_manifest
+        root = self.repo / ("deep-root-" + "x" * 75)
+        native_io_path(root).mkdir()
+        for name, text in (
+            ("spec.md", "A1: synthetic bound acceptance\n"),
+            ("plan.md", "- [ ] A1 Synthetic task\n"),
+            ("prompt.md", "Implement the owned synthetic task.\n"),
+            ("work.json", encoded({
+                "schema_version": 1, "workflow": "lintel", "status": "APPROVED",
+                "spec": "spec.md", "plan": "plan.md", "tasks": "plan.md", "prompt": "prompt.md",
+            })),
+            (".claude/profile-requirements.json", '{"schema_version":1,"required_pack":"synthetic-required"}'),
+        ):
+            path = root / name
+            native_io_path(path.parent).mkdir(parents=True, exist_ok=True)
+            native_io_path(path).write_bytes(text.encode("utf-8"))
+        arguments = dict(work_map="work.json", package_id="P1", leaf_ids=["A1"],
+                         acceptance_paths=["spec.md", "plan.md"])
+        expected = bind_work(root, **arguments)
+        self.assertIn(".claude/profile-requirements.json", expected["acceptance_paths"])
+        self.assertEqual(bind_work(native_io_path(root), **arguments), expected)
+        checks = [control()]
+        checks[0]["evidence"] = ["spec.md"]
+        self.assertEqual(evidence_manifest(root, checks), [{
+            "path": "spec.md", "sha256": hashlib.sha256(b"A1: synthetic bound acceptance\n").hexdigest(),
+        }])
+
+    def test_native_domain_context_and_swarm_latest_source_calls(self):
+        import domain_result
+        import swarm_evidence
+        from profile_context import ProfileConfig, load_profile_context, profile_reference, required_policy
+        from review_contract import ContractError
+        home = self.root / "profile-home"
+        config = ProfileConfig(
+            source=SOURCE, repo=self.repo, home=home, packs=home / "packs",
+            pointer=home / "packs" / "active-pack", context_id="p05-native-owned",
+        )
+        profile = load_profile_context(config, create=True)
+        self.request.update(profile=profile_reference(profile), required_policy=required_policy(profile))
+        policy = "packs/rapid-development/policies/inventory.md"
+        self.write(policy, "Fresh owner-created acceptance; no P14 input or pin.\n")
+        self.request["acceptance_paths"].append(policy)
+        metadata = self.repo / "metadata" / ("q" * 63)
+        native_io_path(metadata).mkdir(parents=True)
+        self.expected_file = metadata / "expected.json"
+        self.observed_file = metadata / "corroboration.json"
+        self.good()
+        request = {"input_context": deepcopy(self.expected)}
+        pointers = {
+            "context": self.expected_file.relative_to(self.repo).as_posix(),
+            "corroboration": self.observed_file.relative_to(self.repo).as_posix(),
+            "review_skill": "review",
+        }
+        domain_result._current_context(self.repo, request, self.expected, config)
+        self.assertTrue(swarm_evidence._latest_review(self.repo, pointers, config)["ok"])
+        original = native_io_path(self.repo / policy).read_bytes()
+        native_io_path(self.repo / policy).write_bytes(b"changed selected acceptance\n")
+        with self.assertRaisesRegex(ContractError, "Selected work/acceptance sources changed"):
+            domain_result._current_context(self.repo, request, self.expected, config)
+        with self.assertRaisesRegex(ContractError, "Latest applicable shared review blocks"):
+            swarm_evidence._latest_review(self.repo, pointers, config)
+        native_io_path(self.repo / policy).write_bytes(original)
+        rejected = deepcopy(self.review)
+        rejected["status"] = "fail"
+        self.log(rejected)
+        with self.assertRaisesRegex(ContractError, "Latest applicable shared review blocks"):
+            swarm_evidence._latest_review(self.repo, pointers, config)
+
+    @unittest.skipUnless(os.name == "nt", "actual native Windows junction policy")
+    def test_native_junction_and_symlink_rules_are_not_replaced_by_provider_policy(self):
+        import _winapi
+        from review_contract import ContractError, _path, evidence_manifest, snapshot
+        real = self.repo / "owned"
+        filename = "checks-" + "d" * 63 + ".txt"
+        native_io_path(real).mkdir()
+        native_io_path(real / filename).write_bytes(b"in-root evidence\n")
+        inside = self.repo / "inside-junction"
+        # The target is stored as data; only the junction creation path is an I/O operand.
+        _winapi.CreateJunction(str(real), str(native_io_path(inside)))
+        self.assertEqual(path_identity(Path(os.readlink(native_io_path(inside)))), path_identity(real))
+        selected = "inside-junction/" + filename
+        self.assertEqual(len(str(self.repo)), 216)
+        self.assertGreater(len(str(self.repo / selected)), 262)
+        self.assertEqual(_path(self.repo, selected, regular=True), self.repo / selected)
+        item = control()
+        item["evidence"] = [selected]
+        self.assertEqual(evidence_manifest(self.repo, [item]), [{
+            "path": selected, "sha256": hashlib.sha256(b"in-root evidence\n").hexdigest(),
+        }])
+        with self.assertRaisesRegex(ContractError, "junction/alias"):
+            snapshot(self.repo, base=self.base, selection=["inside-junction"])
+        outside = self.root / "outside"
+        native_io_path(outside).mkdir()
+        native_io_path(outside / "checks.txt").write_bytes(b"outside sentinel\n")
+        escape = self.repo / "outside-junction"
+        _winapi.CreateJunction(str(outside), str(native_io_path(escape)))
+        with self.assertRaisesRegex(ContractError, "escapes repository"):
+            _path(self.repo, "outside-junction/checks.txt", regular=True)
+        link_name = "selected-link-" + "s" * 60
+        link = self.repo / link_name
+        native_io_path(link).symlink_to("source.txt")
+        observed = snapshot(self.repo, base=self.base, selection=[link_name])
+        self.assertEqual(observed["entries"][0]["worktree"], {
+            "kind": "symlink", "mode": "120000", "sha256": hashlib.sha256(b"source.txt").hexdigest(),
+        })
+        with self.assertRaisesRegex(ContractError, "regular local file"):
+            _path(self.repo, link_name, regular=True)
+        directory_link = self.repo / "directory-link"
+        native_io_path(directory_link).symlink_to(real, target_is_directory=True)
+        with self.assertRaisesRegex(ContractError, "symlink or non-directory"):
+            _path(self.repo, "directory-link/checks.txt", regular=True)
+        self.assertEqual(native_io_path(outside / "checks.txt").read_bytes(), b"outside sentinel\n")
+
+
 class MandatoryControls(Fixture):
     def evaluate(self, controls, policy=None):
         from review_contract import evaluate_controls
@@ -1641,8 +2038,9 @@ if __name__ == "__main__":
     suite_name = sys.argv.pop(1) if len(sys.argv) > 1 else "evidence"
     classes = {
         "legacy": (LegacyRegressions,),
-        "evidence": (LegacyRegressions, ReviewEvidence, MarkdownBoundaryEvidence),
+        "evidence": (LegacyRegressions, ReviewEvidence, MarkdownBoundaryEvidence, NativePathEvidence),
         "boundaries": (MarkdownBoundaryEvidence,),
+        "native": (NativePathEvidence,),
         "controls": (MandatoryControls,), "hook": (HookEvidence,),
     }[suite_name]
     suite = unittest.TestSuite(unittest.defaultTestLoader.loadTestsFromTestCase(cls) for cls in classes)
