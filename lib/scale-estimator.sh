@@ -3,7 +3,7 @@
 # implements: ADR-0008
 # intent: .claude/engineering/design-archive/lintel-scope-and-scaled-planning-design.md
 # constraints: preserve leaf granularity and dormant calibration writes; estimate whole cycles
-# last_intent_review: 2026-09-08
+# last_intent_review: 2026-09-23
 # lib/scale-estimator.sh — mechanical scale estimation for SENSE (Slice 1)
 #
 # Sourced by skills/sense/SKILL.md (step 0b + step 0e). Provides the SIZE axis
@@ -41,6 +41,7 @@
 # on their own.
 
 # sourced library: no 'set -uo pipefail' here (shell opts leak into every caller — skills/hooks/tests); functions guard their own vars
+_SCALE_LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # ─── Domain lexicon ──────────────────────────────────────────────────────────
 # Bimodal-prone nouns: present without a size qualifier ⇒ the request could be
@@ -195,8 +196,10 @@ size_default_prior() {
 #   scale_token_estimate <size> → tokens calibrated|uncalibrated sample_count
 # These are whole-cycle actuals, not per-task costs. Never multiply by leaf count.
 #
-# Reads CAPTURE's append-only log at .claude/runtime/audit/granularity.jsonl
-# (written via `audit_log granularity ...`, scope-routed by bin/_audit.sh). For every record whose `size`
+# Reads CAPTURE's append-only granularity log (written via `audit_log
+# granularity ...`) through bin/_audit.sh `audit_read_files`: the first existing
+# listed file is read and a later existing one is named on stderr, so this
+# estimator keeps no routing of its own. For every record whose `size`
 # field matches <size> and that carries a numeric `actual_tokens`, it takes the
 # MEDIAN of those actuals as the corrected prior — median, not mean, so a single
 # runaway cycle cannot skew the band.
@@ -207,15 +210,20 @@ size_default_prior() {
 # function is purely additive: callers that never had history simply get the
 # old number.
 scale_token_estimate() {
-  local size="${1:-S}"
-  local lintel_home="${LINTEL_HOME:-$HOME/.lintel}"
-  local root
-  root="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}"
-  local log="$root/.claude/runtime/audit/granularity.jsonl"
-  [ -r "$log" ] || log="${LINTEL_AUDIT_DIR:-$lintel_home/audit}/granularity.jsonl" # legacy-fallback-ok
+  local size="${1:-S}" log="" candidate
+  command -v audit_read_files >/dev/null 2>&1 || source "$_SCALE_LIB_DIR/../bin/_audit.sh" 2>/dev/null || true
+  if command -v audit_read_files >/dev/null 2>&1; then
+    while IFS= read -r candidate; do
+      if [ -z "$log" ]; then
+        [ -r "$candidate" ] && log="$candidate"
+      elif [ -e "$candidate" ]; then
+        printf 'scale_token_estimate: read %s; also present but not read: %s\n' "$log" "$candidate" >&2
+      fi
+    done < <(audit_read_files granularity)
+  fi
 
   # No history → mechanical default (the Slice-1 guess).
-  [ -r "$log" ] || { printf '%s uncalibrated 0' "$(size_default_prior "$size")"; return 0; }
+  [ -n "$log" ] || { printf '%s uncalibrated 0' "$(size_default_prior "$size")"; return 0; }
 
   # Collect actual_tokens for records matching this size. Pure awk: match the
   # size field exactly, pull the numeric actual_tokens, sort, take the median.
