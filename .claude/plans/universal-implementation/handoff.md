@@ -381,9 +381,10 @@ never inferred from this directive; a model switch does not change context ident
 - P15 delivery risk (coordinator finding, local only): `ci.yml` runs the whole
   `run-all.sh --require-all` on ubuntu, macOS and Windows with
   `timeout-minutes: 30`. The last main run (`28061e43`) took 0.8/2.5/11.1 min.
-  This branch adds suites that take far longer locally on Windows (copilot-kit
-  about 2.1 h, review-evidence about 25 min), and nothing has run on Linux or
-  macOS. The final PR therefore needs a timing decision before CI can pass.
+  Locally on Windows the integrated aggregate at `b2909947` took 6,858 s, before
+  P10's slow long-path/native kit tests (P10's complete kit: 7,706 s), and
+  nothing has run on Linux or macOS (no WSL/container here). The final PR
+  therefore needs a timing decision before CI can pass.
   Per L-045 nothing is pushed or dispatched before the accepted batch.
 - P11: deterministic parser `d3b5569` / `336513e` passes complete A16 component
   SPEC/QUALITY in `3049811`, integrated `7cb3812`. All eleven product/report
