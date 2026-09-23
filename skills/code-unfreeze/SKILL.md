@@ -40,8 +40,9 @@ No filesystem lock or universal skill refusal was installed.
 3. **Match.** Exact-match required (no glob expansion at unfreeze time — too easy to over-unfreeze by accident).
 4. **Remove matched entries.** Preserve all unmatched entries and verify the exact
    selected file's new contents before reporting success.
-5. **Audit observation.** Use the existing `audit_log code-freeze unfreeze` writer;
-   the event is not verification of host permission or project-policy override.
+5. **Audit observation.** Use the existing writer once per removed path:
+   `audit_log code-freeze unfreeze "path=<path>" "reason=<reason>"`; the event is not
+   verification of host permission or project-policy override.
 6. **Report remaining freeze state.**
 
 ## Report format
@@ -93,5 +94,5 @@ Currently frozen this session:
 ## See also
 
 - `/code-freeze` — add to session freeze
-- `/help` — shows current freeze state
+- `/code-freeze --list` — shows the recorded advisory freeze state
 - Project CLAUDE.md frozen-zones — permanent rules, distinct from session freeze

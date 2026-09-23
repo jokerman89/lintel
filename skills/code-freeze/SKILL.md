@@ -61,8 +61,9 @@ Use to prevent drift: "we're working on portal/, do not touch landing/ this sess
    ```
 4. **Carry the pointer.** Link this scope reminder from the selected work/handoff.
    Report that enforcement is cooperative. Do not claim every write skill consumes it.
-5. **Audit observation.** Use the existing `audit_log code-freeze freeze` writer
-   with selected path/reason references. An observation is not evidence of enforcement.
+5. **Audit observation.** Use the existing writer once per recorded path:
+   `audit_log code-freeze freeze "path=<path>" "reason=<reason>"`. The record is an observation,
+   not evidence of enforcement.
 6. **Report current freeze state.**
 
 ## Report format
@@ -104,7 +105,8 @@ Do not silently copy records there, activate the hook or call it enforcement.
 - **Path conflicts with existing freeze:** consolidate, do not duplicate. Update reason if operator supplies a new one.
 - **Session file corrupted:** preserve it and report unknown scope. Do not reset
   to an empty, apparently unrestricted state.
-- **Operator passes `--ignore-freeze` without reason:** WARN — require a reason, do not allow silent override.
+- **Operator asks for an exception:** there is no override flag to pass. Require explicit
+  scoped authorization and a recorded reason, or remove the entry with `/code-unfreeze`.
 
 ## Examples
 
@@ -132,6 +134,7 @@ Do not silently copy records there, activate the hook or call it enforcement.
 ## See also
 
 - `/code-unfreeze` — remove a path from session freeze
-- `/help` — shows currently frozen paths at session start
+- `/code-freeze --list` — shows the recorded advisory freeze state; no session-start display
+  is installed
 - `/context-restore` — restores owned checkpoints; no automatic freeze enforcement implied
 - Project CLAUDE.md "frozen zones" section — permanent freezes, not session-scoped

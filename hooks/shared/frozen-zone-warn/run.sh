@@ -70,7 +70,7 @@ if [ -n "$session_match" ] || [ -n "$project_match" ]; then
   fi
   audit_log "hooks" "frozen_zone_warn" "hook=frozen-zone-warn" "tier=warn" "frozen_path=$matched" "edit_target=$TARGET_PATH" "source=$source"
   echo "WARN [Lintel hook]: editing $TARGET_PATH which is in frozen zone ($matched, source: $source)"
-  echo "WARN: Use /unfreeze if intentional, or consider whether this edit is correct. (warn-only.)"
+  echo "WARN: Use /li:code-unfreeze if intentional, or consider whether this edit is correct. (warn-only.)"
 fi
 
 exit 0
