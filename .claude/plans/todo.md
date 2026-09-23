@@ -1,7 +1,9 @@
 # Work index — current initiative and historical plans
 
 Current initiative: [Universal implementation](universal-implementation/work.json), coordinated by
-MasterSession. Its plan and memory remain active; the entries below are preserved history.
+MasterSession's recovery session `88aecc43-40f9-41d4-8947-6c2fb0a55481`.
+Follow its [current handoff](universal-implementation/handoff.md); the original plan remains
+the sole task ledger. The entries below are preserved history.
 
 ## Historical: first-class swarming work — 2026-09-08
 

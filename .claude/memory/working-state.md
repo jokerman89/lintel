@@ -42,9 +42,15 @@ final BUILD, ANALYZE, integrated REVIEW and CAPTURE remain pending. Source `7046
 and bound task/prompt bytes remain frozen; no fourth actor is authorized.
 P14 preparation passes complete SPEC then QUALITY in `f690eae`, integrated
 `c544fd0`. Native release `acc18df` permits the original controller's sequential
-neutral/rapid/strict/fresh-strict experiment. Setup is active; no actual native
-result is yet accepted. Source Git/raw archive identities remain distinct and
-the fixed business inputs must retain their exact raw hashes.
+neutral/rapid/strict/fresh-strict experiment. Neutral actor `7742184c` completed
+actual T001, then the runtime rejected its follow-up BUILD because it was a
+synchronous task. The P14 card now permits exactly one new background neutral
+continuation, at most five total implementer contexts including the plan-only
+actor. Preserve the original plan, refusal and genuine fresh strict recovery;
+the extra neutral handoff is an observed intervention, not same-context reuse.
+No native implementation is yet accepted. Source Git/raw archive identities
+remain distinct; all18 frozen fixture raw hashes were checked against accepted
+run07 before BUILD, without rewriting data or the `c544fd0` source baseline.
 The pinned accepted tree previously passed all 39 strict **shape-only** suites;
 the current full strict runner, required installed P10 case and original artifact
 gates remain. The ten additional optional families pass independent `8f0f7dc` and are

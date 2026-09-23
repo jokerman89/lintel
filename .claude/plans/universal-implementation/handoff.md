@@ -156,14 +156,22 @@ Current actionable checkpoints supersede the older chronological entries below:
   all15 methods at unchanged root216/policy262. Recovery verifies actual
   command records, current/old locks and three profile effects, then passes
   complete preparation SPEC and QUALITY in `f690eae`. Exact preparation is
-  integrated as `c544fd0`. Native release `acc18df` names up to four sequential
+  integrated as `c544fd0`. Native release `acc18df` initially names four sequential
   real implementers: neutral, rapid, strict PLAN, genuinely fresh strict resume.
-  Existing recovery88 is final independent reviewer; no fifth reviewer/factory.
+  Existing recovery88 is final independent reviewer; no additional reviewer/factory.
   Setup exports the full frozen `c544fd0` closure once to `p14-native-01`.
   The latest setup guard distinguishes raw archive/checkout bytes from Git LF
   identities; it may record both but not rewrite source/pins or relax exact raw
-  business-input/oracle/policy hashes. Actual actor handles/results are not yet
-  reported. Native A24 outcomes, fresh resume and independent review remain open.
+  business-input/oracle/policy hashes. Neutral native task `7742184c` completed
+  actual T001, but its synchronous transport rejected the later BUILD message.
+  No code was implemented. The P14 card's explicit transport correction permits
+  one background neutral continuation and at most five total implementer contexts,
+  preserving the plan-only actor, refusal and actual intervention. The remaining
+  rapid/strict/fresh-strict actors must also support real follow-up. Original
+  roots/source/pins stay fixed; all18 raw fixture identities were checked against
+  run07 before BUILD. Controller-local task receipts remain required: parent
+  session/agent inspection did not expose that task. Native A24 outcomes, fresh
+  resume and independent review remain open.
   Local SHIP is explicitly skipped; no remote publication or other-scope release.
 
 Later P13 source checkpoint: A+B `72253ed` passes `7bf3f253`, integrated `895bb35`.

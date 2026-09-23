@@ -857,3 +857,19 @@ controls intact.
 test boundary. Do not carry them into real source-checkout commits, even when
 the task forbids activating new hooks. Existing controls remain in force.
 A rejected command is not evidence it ran and does not authorize a bypass.
+
+## L-043 - Match reusable actors to the host's actual continuation transport
+
+**Date:** 2026-09-23
+
+**Context:** P14's neutral actor completed a real planning turn through a
+synchronous task. The controller then tried to send BUILD to the same actor;
+the runtime refused because that host's follow-up API supports background
+agents only. The implementation stub was unchanged.
+
+**Rule:** When a workflow requires later approval, rework or resumption in the
+same context, select a transport that actually supports follow-up before its
+first dispatch. Preserve real task IDs, completed work and failed delivery;
+never relabel a new actor as reuse. A necessary replacement requires an explicit
+bounded plan correction, truthful actor/intervention counts and preserved
+independence. Keep transport capability separate from task authority.
