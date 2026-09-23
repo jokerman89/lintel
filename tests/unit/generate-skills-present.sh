@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # tests/unit/generate-skills-present.sh
 #
-# Verifies v3.5 doc-generation pipeline skills are present + valid frontmatter.
-# Per lintel-v3.5-doc-generation-plan.md: 1 orchestrator + 4 shared sub-skills
-# + 3 ⚠ template only-slots = 8 skills. (3 existing format-builders
-# generate-ppt/web/word are checked separately as part of legacy skill set.)
+# Verifies generation skill presence/frontmatter: 1 orchestrator, 4 shared
+# sub-skills, concrete PDF/XLSX methods and the remaining Visio template slot.
+# Existing PPT/web/Word builders are checked separately. Source presence does
+# not establish native/runtime verification.
 #
 # tag: v3.5 doc-generation-pipeline
 
@@ -51,7 +51,7 @@ for skill in "${SHARED_SUBSKILLS[@]}"; do
   fi
 done
 
-# 3. ⚠ Template only-slots (3)
+# 3. Format source state: concrete PDF/XLSX methods and the Visio template slot
 SLOT_SKILLS=(generate-pdf generate-xlsx generate-visio)
 for skill in "${SLOT_SKILLS[@]}"; do
   f="$REPO_ROOT/skills/$skill/SKILL.md"
@@ -66,14 +66,40 @@ for skill in "${SLOT_SKILLS[@]}"; do
       fail "slot frontmatter: $skill (name=$name, layer=$layer)"
     fi
 
-    # Verify slot marker present (signals AI to generate content at invocation per L-001)
-    if grep -q "TEMPLATE ONLY" "$f"; then
-      pass "slot: $skill has TEMPLATE ONLY marker (L-001 compliance)"
+    if [ "$skill" = "generate-visio" ]; then
+      # Verify the remaining slot marker per L-001.
+      if grep -q "TEMPLATE ONLY" "$f"; then
+        pass "slot: $skill has TEMPLATE ONLY marker (L-001 compliance)"
+      else
+        fail "slot: $skill missing TEMPLATE ONLY marker — pre-baking content violates L-001"
+      fi
+    elif grep -qi "TEMPLATE ONLY" "$f"; then
+      fail "concrete method: $skill must not declare TEMPLATE ONLY"
     else
-      fail "slot: $skill missing TEMPLATE ONLY marker — pre-baking content violates L-001"
+      pass "concrete method: $skill does not declare TEMPLATE ONLY"
     fi
   else
     fail "slot SKILL.md missing: $f"
+  fi
+done
+
+# Concrete methods must retain their helpers and existing integration entry points.
+CONCRETE_SUPPORT=(
+  skills/generate-pdf/scripts/prepare_html.py
+  skills/generate-pdf/scripts/print_pdf.mjs
+  skills/generate-pdf/scripts/check_pdf.py
+  skills/generate-xlsx/scripts/check_xlsx.py
+  tests/integration/document-pdf.py
+  tests/integration/document-pdf.sh
+  tests/integration/document-pdf.test.mjs
+  tests/integration/document-workbook.py
+  tests/integration/document-workbook.sh
+)
+for support in "${CONCRETE_SUPPORT[@]}"; do
+  if [ -f "$REPO_ROOT/$support" ]; then
+    pass "concrete method support: $support"
+  else
+    fail "concrete method support missing: $support"
   fi
 done
 
