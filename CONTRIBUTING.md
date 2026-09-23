@@ -199,9 +199,14 @@ Hooks run with the operator's privileges. Keep them minimal. Warning hooks may f
 
 When a pull request teaches something a future contributor should know, record it in
 [.claude/memory/lessons.md](.claude/memory/lessons.md) as a rule that prevents the mistake
-recurring. `bin/li-lessons-promote` lifts a repo-local lesson into the scaffolding baseline, so
-every future scaffolded repo inherits it. (`bin/li-lessons-sync` is a different tool — it syncs one
-operator's lessons across their own machines, and is not part of this workflow.)
+recurring (`/li:learn` allocates the next `L-NNN`). `bin/li-lessons-promote` promotes one such
+lesson into the scaffolding baseline of a Lintel work tree named with `--lintel-dir`, so every
+future scaffolded repo inherits it. It writes only
+`scaffolding/01-foundation/.claude/memory/lessons.md` with a provenance comment and an explicit
+source label, prints the diff, and commits only with `--commit --expect-branch <branch>`; review
+and commit that change on your feature branch like any other. (`bin/li-lessons-sync` is a
+different tool — it syncs one operator's lessons across their own machines, and is not part of
+this workflow.)
 
 ## Questions
 

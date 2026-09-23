@@ -253,7 +253,7 @@ is wrong or it is not surfacing early enough.
 
 **Two lessons tools that are not interchangeable:**
 
-- `bin/li-lessons-promote` lifts a repo-local lesson into the scaffolding baseline, so every repo scaffolded afterwards inherits it. Use it when the lesson is about how software gets built, not about this codebase.
+- `bin/li-lessons-promote` promotes one ID-managed lesson into the scaffolding baseline of a Lintel work tree you name with `--lintel-dir` (or `LINTEL_DIR`), so every repo scaffolded afterwards inherits it. You supply the generalized text and an explicit `--source-label`; the tool appends a provenance comment, writes only the baseline file and prints the diff. It commits only with `--commit --expect-branch <branch>` and never switches branches or pushes. Use it when the lesson is about how software gets built, not about this codebase.
 - `bin/li-lessons-sync` syncs **your own** lessons across your machines through a personal remote. Opt-in and private to you.
 
 Promoting a lesson that only applies to one repo pollutes every future repo. Syncing one that should
