@@ -34,7 +34,8 @@ preserved in `b9264b2`.
 Native lifecycle comparisons/cold resume remain active; the N1 and two finite
 specialist execution review-consumption chains are complete, not whole P09.
 P10's supported linked-init remains blocked by repeated journal WinError 5 with
-unknown cause; no further retry or speculative patch is released. Word/Excel,
+unknown cause. Recovery released one bounded owned journal-replacement retry on
+the P03 `aa7fad4` precedent; review by `1578dfd8` follows. Word/Excel,
 P12 structured-record and tool/CI permission boundaries remain unchanged.
 No push, PR, main merge or whole-initiative completion is claimed.
 

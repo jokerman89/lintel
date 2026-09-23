@@ -303,9 +303,11 @@ never inferred from this directive; a model switch does not change context ident
   historical stale contexts, archive and installed/parent gates remain.
 - P10: `6e1b1e0` / `4be5e096` closes F01-F04 in `8c3afbbe` / `83c5458`.
   Full SPEC remains B01 BLOCKED: repeated Windows journal access-denial prevents
-  the supported linked-init positive, with cause unknown. Final attempt exhausted,
-  no retry/platform investigation or speculative patch; QUALITY not started.
+  the supported linked-init positive, with cause unknown. QUALITY not started.
   Other actual preservation/failure/recovery cases retain their passing evidence.
+  Recovery now releases the bounded owned journal-replacement retry (P10 card
+  "B01 bounded transaction-journal replacement retry", P03 `aa7fad4` precedent)
+  to the original owner, then SAME `1578dfd8` B01/SPEC/first whole QUALITY.
 - P11: deterministic parser `d3b5569` / `336513e` passes complete A16 component
   SPEC/QUALITY in `3049811`, integrated `7cb3812`. All eleven product/report
   identities match; joined four shared and 30 Node checks pass. Original native
