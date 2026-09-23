@@ -77,7 +77,7 @@ Current actionable checkpoints supersede the older chronological entries below:
   explicitly declined during recovery; no app launched. Page layout remains
   permission-blocked, with no retry, COM/export or alternate-launch workaround.
   The separate denied Copilot UI route stays closed. Selected native PPT passes
-  `5858268`, but complete common/Word source QUALITY was never accepted.
+  `5858268`; that selected-PPT verdict alone did not accept common/Word source.
   Workbook `839e6df` passes scoped source SPEC/QUALITY in `21e5228`, preserved
   `699a997`; native caches/layout still fail. PDF source repair `1ba9f9b`
   passes `ae793d39`; complete common source `32dac88` passes first whole
@@ -89,10 +89,10 @@ Current actionable checkpoints supersede the older chronological entries below:
   `98895a0` releases the read-only pipeline input join. Ten-path product
   `d4e9188` / report `7c0ae29` fails complete source SPEC in `e85f70a`,
   preserved `42abfcb`: P2 B01 admits literal anchors and rejects real anchors
-  beside examples. Whole QUALITY has not started. The original owner is
-  repairing only candidate-anchor eligibility through the existing classifier
-  under `12a40cc`; standalone defaults, all old native observations and denied
-  record routes remain.
+  beside examples. Correction `fa5139c` / report `e309b17` is now frozen with
+  SAME31 for complete SPEC and first whole QUALITY under `12a40cc`. All nine
+  original API/CLI cases and 33 builder methods pass; this is not independent
+  acceptance. Standalone defaults, old native observations and denied routes remain.
 - P13: ambiguity repair `b1d4caf` passes independent whole first-unit SPEC/QUALITY
   in `09a3c6ec`, integrated with original history as `03df1db`; joined 31 metadata
   methods pass and all eight product blobs match. The original owner is released
@@ -107,7 +107,10 @@ Current actionable checkpoints supersede the older chronological entries below:
   pass. No reader/schema or maturity promotion was introduced. `a426242` now
   releases the remaining ten source-family records and exact preservation-map
   refresh to SAMEc4, using accepted `42abfcb` without the rejected pipeline.
-  Descriptor/reference/tests/map only; SAME486 review remains required.
+  Four-path product `20493b7` / report `e797bd4` is frozen with SAME486 for
+  complete SPEC then QUALITY. The exact report's old 867-line prefix and all
+  four product hashes are verified; 109 builder methods pass, not reviewer
+  acceptance. Descriptor/reference/tests/map only; no source-body or schema change.
 - P14: original core-profile experiment preparation is owned by
   `8fa44739-f562-4213-a6c4-fb7719fc8c9e`, branch
   `jokerman-microsoft-universal-profile-scenarios`, from `9f8885b`.
@@ -115,8 +118,11 @@ Current actionable checkpoints supersede the older chronological entries below:
   rapid and strict profiles. No native scenario actor is released yet.
   The owner reports 14 preparation methods passing at its explicit owned root,
   but the separate no-argument shell entry fails one Git-object write at its
-  deeper generated root. Await its exact frozen source/report before any
-  bounded correction or native release; do not substitute the passing root.
+  deeper generated root. Product `56ce767` / report `f106f00` fails coordinator
+  preparation SPEC: retained E01 plus P2 R01, whose fixed-incomplete-task check
+  rejects legitimate A24 progress. Whole QUALITY has not started. `2c4fc3d`
+  releases only bounded fixture-Git and progress-preservation corrections.
+  Do not substitute the passing root or release native actors yet.
 
 Later P13 source checkpoint: A+B `72253ed` passes `7bf3f253`, integrated `895bb35`.
 All 19 joined source-selection methods pass. The new actual installed selection
@@ -153,7 +159,7 @@ deep-target case or establish P10/default/linked acceptance.
 P08 main native T011 passed its actual independent review and real P05 producer/
 latest-reader/typed-QA chain with coordinator host corroboration. Only T011
 progress was recorded, followed by a genuine pause before T027; main is revoked
-from builder `c5accb50` pending the third fresh resume context. Separate build-
+from builder `c5accb50`. Separate build-
 direct and alias T011 and T027 reviews remain their own scopes; real actual
 host receipts were created only after full record/context/typed-QA/evidence
 verification. Alias T027's new record is canonical `cf352e9e...`, with actual
@@ -164,11 +170,22 @@ was not run. Each fix then completed its own actual BUILD and prepared a distinc
 integrated REVIEW. Direct packet `b1385f6f...` passes ordered SPEC/QUALITY/local
 COMPLIANCE with original typed tests; record `23fb8ddf...` and recovery's actual
 host receipt were delivered for real consumption. Alias packet `fa1ac58e...`
-is sequentially with SAME9db. No integrated phase is done merely from that
-packet or private verdict. Old raw-plan refusals remain unchanged. Controller
+also passes its separate ordered review as record `ebc542c7...`, with actual
+host observation delivered. The original controller now reports both fix ranges
+completed through their real consumers and all four build/fix ranges frozen.
+Its final packet `4217d437...` preserves 3,301 snapshots, 67 prior receipts and
+eleven nonzero outcomes. Those are controller-attributed observations, not a
+parent claim of completed P08. Old raw-plan refusals remain unchanged. Controller
 `f2c305ac` uses interactive waiting when an actual event is its only dependency;
 new actionable deliveries resume autopilot.
-The third fresh main-resume context has not been created.
+The third and final fresh MAIN context is now actually created:
+`c2d5b8df-d84b-4e36-893a-cd7e28b63e1b`, same original synthetic project/checkout,
+default agent/model without overrides. The controller verified its path/type/
+branch and transferred MAIN-only ownership in handoff22 after revoking c5.
+The child receives original literal map/cycle and durable artifact locations,
+not prior chat, semantic answers or another target's implementation. Other
+sixteen targets stay read-only; side SHIP targets are not granted. Creation
+and transfer do not prove successful cold recovery; await the actual callback.
 
 Latest recovery evidence lives in the session files under `verification/`:
 `p04-final-join-01`, `p04-retained-local-01`, `p04-git-fanin-01`,
