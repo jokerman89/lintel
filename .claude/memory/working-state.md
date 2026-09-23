@@ -15,7 +15,9 @@ Cross-session working state (not durable rules — that's [[lessons.md]]; not pe
 branch `jokerman-microsoft-mastersession-recovery`; the original worktree was not
 changed. Continue from the [recovery checkpoint](../plans/universal-implementation/handoff.md#recovery-checkpoint)
 and original work map. Existing owners are retained. Current original acceptance
-is **75/113**, not full release readiness. A03.2 is reclosed after independently
+is **79/113**, not full release readiness. A24.1-.4 now close from the completed
+original three-profile experiment and final cross-profile verification.
+A03.2 is reclosed after independently
 accepted P05 native observations (`06a41fe2`, integrated `b22443f`) and both
 original caller joins: P14 15/15 and P12 default/explicit 33/33 each. Old
 failures and the separate reviewer cleanup ERROR remain. Final Swarm A22.7 is accepted and
@@ -69,20 +71,20 @@ Recovery88 independently passes complete neutral SPEC then QUALITY in
 eight additional reviewer probes pass. Exact decision `cfa1c812` and handoff
 `1598c17c` were returned to the distinct controller. It now reports actual
 producer/latest-reader/QA0/0/0, SAME7169's T003 checkbox-only progress and
-postprogress reader/QA0/0, local CAPTURE and quiescence. Exact receipt intake
-awaits its next report. Actual rapid actor3 `f1030ad2` now separately passes
+postprogress reader/QA0/0, local CAPTURE and quiescence. Final cross-profile
+intake below now verifies those receipts. Actual rapid actor3 `f1030ad2` separately passes
 recovery88 SPEC then QUALITY in `b14d927`, not by transferring neutral acceptance.
 Required profile loading is independently verified; its advice stays advisory.
 Exact packet `50394141`, context `e25ced5c`, decision `f1b11842` and handoff
 `847ce8d0` were returned for actual rapid host/producer/latest-reader/QA,
 original T003/local CAPTURE and quiescence; the controller reports those
-completed and will freeze exact receipts in its final comparison.
+completed, with exact receipts frozen in final report `13c18a0`.
 Strict PLAN context4 `6cc62d16` completed a bounded T001 formatting rework: its
 explanatory QA table's generic `ID` header made the real reader find three
 unassigned pseudo-tasks. Command47 failed before phase progression. SAME4
 renamed only that header to `QA control`; exact replacement and the real reader
-now pass with only the original three tasks. Plan `d09c16db` is paused before
-BUILD, with the stub intact and context4 revoked. Final genuinely fresh context5
+then passed with only the original three tasks. Plan `d09c16db` preserves the
+actual pre-BUILD pause with the original stub and context4 revocation. Final genuinely fresh context5
 `5c6b5c3f-9e99-47a3-8e1d-020c1da1c760` actually recovered from literal original
 paths/durable handoff, verified the same live pin and then implemented strict
 after real pre-BUILD SC2. The same actor performed substantive finite TQ;
@@ -90,11 +92,19 @@ original P09 request/start/result and all three typed obligations are retained.
 Separate recovery88 strict SPEC then QUALITY passes in `ed45a73`: independent
 business11/atomic2/eight probes/two fresh non-clearing domain consumers pass,
 with all53 candidate/cold and nine recovery-store files unchanged. Decision
-`7ab7f5dc`/handoff `39717efc` now goes to the distinct controller for real
-host/producer/latest-reader/QA/P09 consumption, only then original progress/
+`7ab7f5dc`/handoff `39717efc` returned to the distinct controller and cleared real
+host/producer/latest-reader/QA/P09 consumption, then original progress/
 local CAPTURE and final three-profile synthesis. No provider fix, sixth actor
 or waiver; the original plan remains substantive-byte unchanged.
-No whole A24 acceptance.
+Final whole A24 acceptance now passes in
+`reviews/P14-cross-profile-final.md` on report-only `13c18a0` and immutable
+packet `c9a5a3ce`. All three separate decisions were actually consumed, original
+progress rechecked and local capture completed. Recovery verifies all 253 final
+artifacts, 565 source files, 18 raw fixtures, 70 controller events, seven old
+preparation histories and 13 fresh current read-only consumer calls. Five actual
+contexts, source/target identities, earlier failures and unknown model/usage/cost
+remain; SHIP is skipped. This closes A24's finite local experiment only, not
+A23/full P14 or the remaining installer/format/CI/remote gates.
 Preserve the original plan, refusal and genuine fresh strict recovery; the
 extra neutral handoff is an intervention, not same-context reuse. Source raw
 archive/Git identities remain distinct; all565 source and18 raw fixture pins

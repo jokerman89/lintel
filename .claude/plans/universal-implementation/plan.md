@@ -629,10 +629,10 @@ without running that path suite; it was corrected, not counted as a product fail
 or a passing aggregate. P05/P10 dependency additions still keep g3 open.
 
 ### A24 Observable enterprise profile value (P14; R04/R11)
-- [ ] A24.1 Define identical synthetic task under neutral, rapid-development and strict-change profiles.
-- [ ] A24.2 Observe different requirements, decisions, packages, controls and artifacts end-to-end.
-- [ ] A24.3 Record actual interventions/rework/elapsed/usage where measurable, unknown otherwise.
-- [ ] A24.4 Exercise available native host scenario and label all other host evidence precisely.
+- [x] A24.1 Define identical synthetic task under neutral, rapid-development and strict-change profiles.
+- [x] A24.2 Observe different requirements, decisions, packages, controls and artifacts end-to-end.
+- [x] A24.3 Record actual interventions/rework/elapsed/usage where measurable, unknown otherwise.
+- [x] A24.4 Exercise available native host scenario and label all other host evidence precisely.
 Acceptance: proportional process and traceable profile effects; no fictional ROI or unrun client claim.
 Preparation passes independent coordinator SPEC/QUALITY after original run07,
 integrated `c544fd0`. Actual neutral T001 belongs to plan-only actor `7742184c`;
@@ -653,9 +653,17 @@ Strict and genuine fresh strict recovery now pass their separate
 SC1-SC3 and actual finite own-context TQ. Independent business11/atomic2,
 eight direct probes and two fresh non-clearing P09 consumers pass. The original
 SC2 seven API observations are not seven tests or a reviewer recovery replay.
-Strict decision `7ab7f5dc` awaits distinct actual host corroboration and real
-consumption/progress/CAPTURE. Final whole-experiment comparison and all-case
-consumer receipts remain required; all four A24 leaves stay open.
+Strict decision `7ab7f5dc` subsequently cleared actual distinct host
+corroboration, real consumption, original progress and local CAPTURE.
+Final report-only `13c18a0` and packet `c9a5a3ce` now pass
+[complete cross-profile acceptance](reviews/P14-cross-profile-final.md).
+Recovery verifies all 253 final artifacts, 565 source files, 18 raw fixtures,
+70 controller events and seven historical preparations, plus 13 fresh read-only
+profile/latest-review/QA/work/domain calls. All three local cycles and original
+tasks are complete with SHIP skipped. Policy effects and limits, five actual
+contexts, one/one/two checkbox-only changes, prior failures and unknown model/
+usage/cost remain explicit. Original A24.1-.4 close; A23, whole P14, remaining
+client/installer/format and delivery gates do not inherit this finite acceptance.
 
 ### A25 Trusted implementation source (P01; R01)
 - [x] A25.1 Enumerate optional-hook/vault executable resolver lookup and use trusted source only.

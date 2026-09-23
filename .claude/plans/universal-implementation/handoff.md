@@ -256,8 +256,19 @@ Current actionable checkpoints supersede the older chronological entries below:
   consumer/capture receipts before whole A24 acceptance.
   No provider/parser change, sixth actor, root relocation or source repin.
   Controller-local task receipts remain attributed to that observer; parent
-  inspection APIs did not expose those tasks. Whole native A24 remains open.
-  Local SHIP is explicitly skipped; no remote publication or other-scope release.
+  inspection APIs did not expose those tasks. Final report-only `13c18a0`
+  (Git SHA256 `c2a86256`) and whole packet `c9a5a3ce` now pass recovery's
+  complete cross-profile SPEC/quality assessment in
+  `reviews/P14-cross-profile-final.md`. All three cases have real current
+  host-bound review/QA, original progress and local capture. Recovery checks
+  253 final artifacts, 565 source files, 18 approved raw fixtures, 70 actual
+  command events/streams and seven historical preparation locks, then 13
+  fresh read-only profile/latest/QA/work/domain consumers. Two parent intake
+  mistakes are retained: later55+5 history count and object-only parsing of
+  a selected list; neither changes source or product outcomes.
+  Original A24.1-.4 are now closed. Whole P14/A23, installer/format/client/CI
+  and remote-delivery gates remain separate. All five native grants are
+  revoked. Local SHIP is explicitly skipped; no new execution is requested.
 
 Later P13 source checkpoint: A+B `72253ed` passes `7bf3f253`, integrated `895bb35`.
 All 19 joined source-selection methods pass. The new actual installed selection
@@ -268,7 +279,8 @@ This is accepted-P06-engine evidence, not P10 linked/default transaction accepta
 The remaining eight discovery/authoring consumers and existing template are
 released to the original P13 owner with explicit status/welcome ownership.
 
-Current original acceptance count is 75/113: A03.2 is reclosed after the accepted
+Current original acceptance count is 79/113: A24.1-.4 now close on the original
+verified three-profile experiment, and A03.2 is reclosed after the accepted
 P05 fix and actual original P14/P12 callers, while six source metadata/core/routing/
 provenance leaves close from accepted P13 and real clone evidence. Accepted A16, domain methods,
 preserved role contracts, A14.1-.4 and final A22.7 remain. Native semantic and installed observations
