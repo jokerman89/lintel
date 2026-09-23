@@ -36,21 +36,31 @@ No push, PR, main merge or whole-initiative completion is claimed.
 
 Latest continuation: P08's original fresh context c2 consumed the exact new
 T027 current-byte record `45b6964b` through the real producer/latest-reader/QA
-chain. Final BUILD then stopped before tests on a caller-only Windows/Bash path
-spelling assertion. Handoff25 releases only that correction to the same context;
-final BUILD, ANALYZE, integrated REVIEW and CAPTURE remain pending. Source `70469296`
-and bound task/prompt bytes remain frozen; no fourth actor is authorized.
+chain. The caller-only Windows/Bash path assertion failed before tests and remains
+history. Its handoff25 correction then completed the actual fresh 13-case final
+suite, mandatory author documentation and self-ANALYZE. Exact integrated packet
+`55c829c6` is quiescent and with SAME9db for whole-result SPEC, QUALITY, mandatory
+local compliance and cross-artifact review. T011/T027 retain separate contexts
+and decisions; package PASS is not integrated clearance. Actual consumption and
+CAPTURE remain pending. Source `70469296` and bound inputs stay frozen; no fourth actor.
 P14 preparation passes complete SPEC then QUALITY in `f690eae`, integrated
 `c544fd0`. Native release `acc18df` permits the original controller's sequential
 neutral/rapid/strict/fresh-strict experiment. Neutral actor `7742184c` completed
 actual T001, then the runtime rejected its follow-up BUILD because it was a
 synchronous task. The P14 card now permits exactly one new background neutral
 continuation, at most five total implementer contexts including the plan-only
-actor. Preserve the original plan, refusal and genuine fresh strict recovery;
-the extra neutral handoff is an observed intervention, not same-context reuse.
-No native implementation is yet accepted. Source Git/raw archive identities
-remain distinct; all18 frozen fixture raw hashes were checked against accepted
-run07 before BUILD, without rewriting data or the `c544fd0` source baseline.
+actor. Actual background continuation `7169bb1a` implemented neutral T002.
+Recovery88 independently passes complete neutral SPEC then QUALITY in
+`reviews/P14-neutral-native-01.md`, preserved with the native milestone in
+`e0a18a9`. Controller11 and reviewer11 business methods are separate runs;
+eight additional reviewer probes pass. Exact decision `cfa1c812` and handoff
+`1598c17c` are returned for the distinct controller's actual host observation
+and real producer/latest-reader/QA. Only then may original T003/local CAPTURE
+and the already released rapid/strict sequence continue. No whole A24 acceptance.
+Preserve the original plan, refusal and genuine fresh strict recovery; the
+extra neutral handoff is an intervention, not same-context reuse. Source raw
+archive/Git identities remain distinct; all565 source and18 raw fixture pins
+were independently verified without rewriting the `c544fd0` baseline.
 The shape runner previously reported 39 passes, including on exact `924a40c`,
 but inspection found the manifest guard hid unavailable jq parity as a NOTE.
 A real-script RED/GREEN regression now verifies SKIP/partial reporting and strict

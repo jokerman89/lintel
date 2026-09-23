@@ -555,6 +555,7 @@ first fails (`manifest-skip-red-01`): strict mode incorrectly reports one pass
 and no partial coverage. Reporting SKIP through the existing protocol fixes it;
 `manifest-skip-green-01` passes syntax, all retained runner controls, the real
 manifest strict-refusal/partial-output case and non-strict preservation.
+The committed rerun `manifest-skip-committed-01` also passes at `2d83a0c`.
 Coordinator mechanical SPEC/QUALITY assessment found no remaining scoped issue;
 this is not a new independent package review. No jq execution/install,
 substitute parser, CI edit or wider runner redesign occurred.
@@ -593,6 +594,16 @@ or a passing aggregate. P05/P10 dependency additions still keep g3 open.
 - [ ] A24.3 Record actual interventions/rework/elapsed/usage where measurable, unknown otherwise.
 - [ ] A24.4 Exercise available native host scenario and label all other host evidence precisely.
 Acceptance: proportional process and traceable profile effects; no fictional ROI or unrun client claim.
+Preparation passes independent coordinator SPEC/QUALITY after original run07,
+integrated `c544fd0`. Actual neutral T001 belongs to plan-only actor `7742184c`;
+explicit transport correction `924a40c` permits background continuation `7169bb1a`
+without hiding the failed delivery or extra context. Its native implementation
+passes [neutral independent review](reviews/P14-neutral-native-01.md), preserved
+with candidate `3c5fe35` in `e0a18a9`: controller11 and reviewer11 are separate
+business runs, with eight further reviewer probes. Exact declared review
+`cfa1c812` awaits the distinct controller's actual host observation and real
+producer/latest-reader/QA before neutral completion. Rapid, strict and genuine
+fresh strict recovery remain required; all four A24 leaves stay open.
 
 ### A25 Trusted implementation source (P01; R01)
 - [x] A25.1 Enumerate optional-hook/vault executable resolver lookup and use trusted source only.

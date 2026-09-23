@@ -55,10 +55,17 @@ Current actionable checkpoints supersede the older chronological entries below:
   assertion. Its failed request captured no original effective value; the
   later alias observation is a reproduction, not retroactive evidence.
   Handoff25 `1173d1eb95ea06c1a4fc9a4733bb5b8d57bfbdc3809901bf8adb020c5325c0a5`
-  releases only that assertion correction to the same c2, followed by original
-  final BUILD/ANALYZE and eligible integrated-review preparation. Bound tasks/
-  prompt remain unchanged; no fourth context, provider import, repin or other
-  target write. SAME9db integrated REVIEW and actual CAPTURE remain future.
+  corrected only that assertion. The same c2 then completed the actual fresh
+  13-case final suite, mandatory author documentation, final BUILD and self-
+  ANALYZE. Exact integrated packet `55c829c659c251686647a44155a3f07e34b4d490b59aad8f1abed26c02948832`
+  is quiescent, grant revoked, and commissioned to SAME9db for complete
+  whole-result SPEC then QUALITY then mandatory local compliance/cross-artifact
+  analysis. Original T011/T027 require two separate decisions; their contexts
+  are `a3451e2f` and `e5fc545e`, never a fabricated combined package. Both new
+  readers correctly refuse package verdicts while current QA passes. Bound
+  task/prompt, completed build log and analysis stay frozen. Host receipts,
+  actual integrated consumption and CAPTURE remain future; no fourth context,
+  provider import, repin or other target write.
 - P09: module product `5c99612` passes `114ddfe3`, integrated `2d789a4`;
   all 26 product paths match and 13 joined methods pass. `477d3fc` releases
   the original owner's separate N1 safety-quantifier correction and two bounded
@@ -164,14 +171,25 @@ Current actionable checkpoints supersede the older chronological entries below:
   identities; it may record both but not rewrite source/pins or relax exact raw
   business-input/oracle/policy hashes. Neutral native task `7742184c` completed
   actual T001, but its synchronous transport rejected the later BUILD message.
-  No code was implemented. The P14 card's explicit transport correction permits
+  That actor implemented no code. The P14 card's explicit transport correction permits
   one background neutral continuation and at most five total implementer contexts,
   preserving the plan-only actor, refusal and actual intervention. The remaining
   rapid/strict/fresh-strict actors must also support real follow-up. Original
   roots/source/pins stay fixed; all18 raw fixture identities were checked against
-  run07 before BUILD. Controller-local task receipts remain required: parent
-  session/agent inspection did not expose that task. Native A24 outcomes, fresh
-  resume and independent review remain open.
+  run07 before BUILD. Actual background continuation `7169bb1a` implemented
+  neutral T002 and received a real same-context follow-up. Candidate report
+  `3c5fe35` and recovery88's actual SPEC then QUALITY report are preserved in
+  `e0a18a9`. Reviewer independently verified all565 archive/source identities,
+  all18 fixture pins,24 candidate/transport inputs, an11-method business rerun
+  and eight direct boundary probes; no target/source edit. Typed controller
+  business11 is preserved, not combined into22 distinct methods.
+  Actual neutral decision canonical `cfa1c812c1d171eb899edf863cdf57fc6e11b70d0863ee15ff6aa396cdf8583f`
+  is returned with private handoff `1598c17c1455307904591cbabbc2fa825ef137a5bbc33ed590de6084f3c255d3`.
+  Original8fa must independently bind its actual observation of that return,
+  publish/consume exact review+QA, then complete normalized T003/local CAPTURE
+  before quiescence and the released rapid actor3/strict PLAN4/fresh resume5.
+  Controller-local task receipts remain attributed to that observer; parent
+  inspection APIs did not expose those tasks. Whole native A24 remains open.
   Local SHIP is explicitly skipped; no remote publication or other-scope release.
 
 Later P13 source checkpoint: A+B `72253ed` passes `7bf3f253`, integrated `895bb35`.
@@ -190,6 +208,16 @@ preserved role contracts, A14.1-.4 and final A22.7 remain. Native semantic and i
 remain distinct open leaves; counts are not elapsed time or release readiness.
 The user's percentage question was answered at the then-current 64/113 (57%).
 No push, PR, main merge or release has occurred.
+
+Current structural verification found a real A23.3 reporting gap: exact `924a40c`
+reported39 shape passes while the manifest guard's missing-jq parity was a NOTE,
+not runner-visible skipped coverage. A real-script RED reproduced the false
+strict pass. `2d83a0c` reports SKIP through the unchanged runner; the full retained
+runner contract, actual manifest partial/strict refusal and committed rerun pass.
+Old shape counts remain historical, not complete strict coverage. The original
+`current-shape-01` wrapper failure (missing Python alias and overridden fixture
+selectors) is also retained; restoring the established invocation fixes that
+separate issue without changing source. No jq execution/replacement or CI edit.
 
 The accepted design and standalone document helpers/references are now in the
 coordinator's required-source closure (`59ca1b6`). Nine omitted document/discovery
