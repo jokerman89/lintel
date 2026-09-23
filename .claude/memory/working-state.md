@@ -14,7 +14,9 @@ Cross-session working state (not durable rules — that's [[lessons.md]]; not pe
 `88aecc43-40f9-41d4-8947-6c2fb0a55481`. Exact `5f3d885` is preserved on the recovery
 branch `jokerman-microsoft-mastersession-recovery`; the original worktree was not
 changed. Continue from the [recovery checkpoint](../plans/universal-implementation/handoff.md#recovery-checkpoint)
-and original work map. Existing owners are retained. Current original acceptance
+and original work map. Existing owners are retained. Operator directive: every
+session and new actor uses `claude-opus-5.5`/max/`long_context`; see the handoff
+rule. Current original acceptance
 is **79/113**, not full release readiness. A24.1-.4 now close from the completed
 original three-profile experiment and final cross-profile verification.
 A03.2 is reclosed after independently

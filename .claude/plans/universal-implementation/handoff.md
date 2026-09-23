@@ -20,6 +20,17 @@ verified frozen evidence and check changed/current boundaries once. Batch cohere
 actions and milestone bookkeeping; no ACK/status loops or duplicate proof packaging.
 Keep original ownership, independent review and all acceptance/permission gates.
 
+Operator model directive (2026-09-23): every session, subagent and new actor uses
+`claude-opus-5.5`, reasoning `max`, context `long_context` (1M). Pass all three
+explicitly on every `task`, `create_session` kickoff and workflow; relay the rule in
+the next real dispatch to each owner instead of waking idle sessions. The app exposes
+no tool to switch an existing session, so the operator switches existing sessions in
+the model picker; never replace an owner or native context for this. Host events at
+this checkpoint show recovery on Opus 5.5/max but context `default` (switched 15:40Z);
+the other 32 Lintel sessions, including deferred MMARS, remain `gpt-6-astra`/max/1M.
+Record each actor's actual host model as an observed fact,
+never inferred from this directive; a model switch does not change context identity.
+
 - P05: the original 262-character policy-file failure and selected-new-file
   omission are repaired by `78e4381` / test-only `a75ec0e`. SAME reviewer
   `6ed9c7df-4845-4d70-88c7-f0746ab28059` passes complete scoped SPEC then
