@@ -188,6 +188,16 @@ Current actionable checkpoints supersede the older chronological entries below:
   identical in-memory-only946-byte sorting regression; nothing was executed or
   changed in either target. Its failed CRLF-observer01/driver remain retained.
   Actual review status is never dictated. Prior positive packets remain exact.
+  M01 private implementation is now frozen in controller packet `c5d00ee8`;
+  derived launcher `0ada32c2` changes only `frozen_seals` and retains every
+  other original byte. The author executed17 private guard checks with no
+  failures/errors/skips;2,640 protected records remained identical. These
+  are not native fixture tests. Parent binding01 verifies all42 packet artifacts,
+  old/new launchers, actual streams/exit,18 proposed fresh runtime paths and
+  unchanged938-byte implementations in both targets. The exact244-line direct
+  brief `d23421d0` and parked request `8a7794ab` remain preparation, not grants.
+  SAME9db now has the concrete M01/plan-quality recheck. All target leases stay
+  revoked; no negative context, test, review or result has been fabricated.
   A13.1/.2/.4, P10 and invalid shell27/q02 boundaries remain separate. No
   unaccepted owner source is integrated merely to preserve report ancestry.
   Reviewer-private failures remain honest post-hoc transcript artifacts,

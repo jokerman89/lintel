@@ -109,6 +109,11 @@ Its independent method check c08335a2 passes evidentiary SPEC fit but identifies
 M01: the old launcher guards the pre229 report. Only the additive, exactly
 pinned private guard correction is released to controllerf2; its independent
 recheck must pass before a concrete target release. No native write is granted.
+The correction is now frozen as packet `c5d00ee8`/launcher `0ada32c2`, with
+17 actual private guard checks and2,640 unchanged protected records. Parent
+binding01 verifies all42 artifacts and the still-unchanged target implementations.
+SAME9db is commissioned for the bounded M01 recheck; the parked direct request
+and18 proposed fresh files are not a native grant or executed negative case.
 No forced verdict, waiver, new actor, source repin or remote operation follows.
 A13.1/.2/.4 and installer gates remain separate. All native leases are revoked;
 no target changes are released merely by the proposed evidence design.
