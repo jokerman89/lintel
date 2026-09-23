@@ -15,6 +15,11 @@ The existing P08/P09/P10/P11/P12/P13 owners have the new coordinator address.
 Use the app-surfaced session IDs, not differing IDs quoted inside worker messages.
 Current actionable checkpoints supersede the older chronological entries below:
 
+Operator efficiency correction (2026-09-23): prioritize the critical path, reuse
+verified frozen evidence and check changed/current boundaries once. Batch coherent
+actions and milestone bookkeeping; no ACK/status loops or duplicate proof packaging.
+Keep original ownership, independent review and all acceptance/permission gates.
+
 - P05: the original 262-character policy-file failure and selected-new-file
   omission are repaired by `78e4381` / test-only `a75ec0e`. SAME reviewer
   `6ed9c7df-4845-4d70-88c7-f0746ab28059` passes complete scoped SPEC then
@@ -380,6 +385,11 @@ Current actionable checkpoints supersede the older chronological entries below:
   from unperformed rehearsal. No all-context negative or maturity promotion.
   Original ownerc4 may now make only the append-only P13 report capture from
   e797bd48; source/map/version/generated outputs and original79/113 stay unchanged.
+  Report-only capture `ec5dfef2` is now integrated as `dde0d0c8`: exact Git
+  blob07f63aa1,143 appended lines and the full1,053-line old prefix retained.
+  Parent capture-intake01 verifies218 capture records and1,066 unchanged other
+  owner files. The native utility tranche is complete; original owner/reviewer
+  are parked. Remaining final producer/installer/preservation gates are not waived.
 - P14: the original core-profile experiment is owned by
   `8fa44739-f562-4213-a6c4-fb7719fc8c9e`, branch
   `jokerman-microsoft-universal-profile-scenarios`, from `9f8885b`.

@@ -223,8 +223,9 @@ Actual original486 critique is now complete: bounded SPEC PASS then QUALITY
 PASS_WITH_ADVISORY_P3, handoff `2180ffb4`. Parent intake01 binds52 reviewer
 evidence files/11 artifacts and unchanged1,055 case inputs. N01 is optional
 wording repetition, not a required defect; no new draft is commissioned.
-This one native selected-method utility proof is accepted. Only original
-owner report capture is released; full A18.3/A19.4/P10/final-map gates remain.
+This one native selected-method utility proof is accepted and captured:
+report-onlyec5dfef2 is integrated asdde0d0c8 with the exact full old prefix.
+The original owner/reviewer are parked; full A18.3/A19.4/P10/final-map gates remain.
 
 ### Historical integration chronology
 

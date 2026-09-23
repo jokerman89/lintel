@@ -617,6 +617,12 @@ or mark an open package complete. Record the actual next repair action for a col
 **How to apply:** Use the canonical package table and singleton fallback for legacy plans.
 The operator's hybrid decision supersedes per-leaf dispatch, not acceptance or authorization.
 
+**Further correction (2026-09-23):** the operator flagged slow progress after repeated
+hash sweeps, long handoffs and status-only turns. Reuse attributable frozen evidence;
+verify changed boundaries and current applicability without rebuilding every proof at
+each handoff. Batch milestone bookkeeping and compatible actions, keep completed owners
+parked, and report meaningful outcomes or blockers rather than polling. Preserve required
+independent reviews, real execution evidence and permission boundaries.
 
 ## L-027 — Repeat the complete session protocol where a fresh host starts
 
