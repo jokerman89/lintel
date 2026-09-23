@@ -24,9 +24,13 @@ are different evidence layers.
 
 - `--brief <path|inline>`: complete source, including assumptions and evidence;
   retain inline text before hashing.
-- `--from-pipeline <run-dir>`: existing entry retained. Consume only released
-  content/design/profile/work contracts; A15.3.shared is separate from this
-  standalone method. Do not synthesize design-spec.json to unblock it.
+- `--from-pipeline <run-dir>`: use
+  [existing input admission](../generate-write/references/fidelity-and-evidence.md#existing-pipeline-input-admission)
+  with `--format xlsx`, external input context, original package/leaves and live
+  profile. Feed the full admitted content into the existing workbook procedure,
+  preserving Inputs/Calculation/Summary/Sources and formula/cache requirements.
+  Do not invent a `per_format.xlsx` layout or call source admission recalculation.
+  Shared artifact acceptance remains distinct from this input-only join.
 - `--out <path>`: explicit new owned `.xlsx` path, default `<brief-stem>.xlsx`
   in the selected working directory. Refuse unapproved replacement.
 - `--update-data <source>`: retain the existing workbook/source identity, apply

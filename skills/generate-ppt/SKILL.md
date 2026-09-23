@@ -70,10 +70,13 @@ editable PowerPoint or rendered PPTX evidence.
 
 If invoked with `--from-pipeline <run-dir>` instead of `--brief`:
 
-Preserve this entry point and its existing fields. Shared theme/profile/work
-serialization remains the A15.3.shared gate; standalone artifacts do not clear it.
-Validate an actual released design-spec rather than fabricating one. Standalone
-`--brief` needs no generate-design output or new domain envelope.
+Preserve this entry point and its existing fields. First follow
+[existing pipeline input admission](../generate-write/references/fidelity-and-evidence.md#existing-pipeline-input-admission)
+with `--format ppt`, external input context, original package/leaves and current
+profile. It verifies canonical content/notes/hash identity and the existing PPT
+projection without rendering. Shared theme/artifact acceptance remains the
+A15.3.shared gate. Standalone `--brief` still needs no generate-design output or
+new domain envelope.
 
 1. **Read shared pipeline-output:**
    - `<run-dir>/content.md` — written content (with HTML-comment annotations for voice/type/key_message per section)
@@ -93,6 +96,11 @@ Validate an actual released design-spec rather than fabricating one. Standalone
 
 5. **Use the same source-retention, native inspection and configured controls as
    standalone mode.** Layout mappings must not discard unmapped source detail.
+   Keep complete returned content and notes, including facts not shown in a
+   visible placeholder. Continuation layouts keep the original section ID.
+   Select template/config overrides before admission and refresh final P05
+   evidence after the deck is created or edited; input checks do not establish
+   notes serialization, editability or rendered layout.
 
 Existing skill arguments and data field names are retained; this is not a claim
 that every host or shared-pipeline script has been executed.
