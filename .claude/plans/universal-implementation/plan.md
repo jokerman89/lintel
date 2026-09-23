@@ -488,8 +488,13 @@ One bounded native demo-script utility case is now frozen under release8c9ab714:
 actual metadata-first Plan/owner-approval/same-context narration, with exact
 source/consumer/host evidence in manifest2817e492. Parent intake verifies its
 immutable files and actual source identities without rerunning the case.
-Original reviewer486's actual critique and bounded SPEC/QUALITY remain pending;
-this does not yet close A18.3, A19.4, P10 or whole-family utility.
+Original reviewer486's actual NarrativeArc Critique and SlideNarrationCritic
+now yield bounded SPEC PASS then QUALITY PASS_WITH_ADVISORY_P3, handoff2180ffb4.
+N01 is optional middle-section wording consolidation, not a required repair.
+Parent intake verifies the exact reviews/stage order and unchanged case; this
+one native utility proof is accepted without a rerun. The original report-only
+capture is released separately. A18.3, A19.4, P10 and final preservation/
+whole-family acceptance remain open at their broader original boundaries.
 
 ### A19 Coherent discovery and richer skills (P13; R03/R06)
 - [x] A19.1 Reuse one catalog generator for help/router/status/welcome metadata.

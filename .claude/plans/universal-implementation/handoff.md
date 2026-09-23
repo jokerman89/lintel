@@ -360,6 +360,17 @@ Current actionable checkpoints supersede the older chronological entries below:
   NarrativeArc Critique/SlideNarrationCritic and bounded SPEC then eligible
   QUALITY. No native utility, original-parent or maturity acceptance is claimed
   before that result; P10/native-format/global-P05 gates remain separate.
+  SAME486 has now completed actual NarrativeArc Critique and SlideNarrationCritic,
+  one independent reviewer/two methods. Handoff `2180ffb4`, bounded report
+  `0894c9ba`, critiques `4d24b622`/`6e8851ee`, SPEC `fb68ae9a` and subsequent
+  QUALITY `639ad657` establish this finite utility acceptance. P1/P2/P3=0/0/1:
+  N01 is advisory repetition in the middle, retained without another draft.
+  Parent native-review-intake01 verifies52 reviewer evidence files,11 artifacts,
+  all1,055 unchanged owner inputs and three separate sealing receipts. Actual
+  wording is useful;670 counted words and timing sensitivity remain distinct
+  from unperformed rehearsal. No all-context negative or maturity promotion.
+  Original ownerc4 may now make only the append-only P13 report capture from
+  e797bd48; source/map/version/generated outputs and original79/113 stay unchanged.
 - P14: the original core-profile experiment is owned by
   `8fa44739-f562-4213-a6c4-fb7719fc8c9e`, branch
   `jokerman-microsoft-universal-profile-scenarios`, from `9f8885b`.
