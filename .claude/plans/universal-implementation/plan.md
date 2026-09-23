@@ -424,27 +424,52 @@ acceptance, not native registration or observed correctness of all 69 roles.
 Original A17.5 remains open for its actual mode/semantic/installed evidence.
 
 ### A18 Optional capabilities without loss (P13; R06)
-- [ ] A18.1 Define discoverable capability selections and their dependency/maturity metadata.
-- [ ] A18.2 Keep common lifecycle/security core and identity overlay distinct.
+- [x] A18.1 Define discoverable capability selections and their dependency/maturity metadata.
+- [x] A18.2 Keep common lifecycle/security core and identity overlay distinct.
 - [ ] A18.3 Verify a selected consumer gets needed methods without unrelated prompt loading.
 - [ ] A18.4 Trace every moved/consolidated use case and preserve useful aliases.
 Acceptance: no deletion for file-count reduction; optional capability remains usable.
+Source declarations and shared-core separation are accepted in
+[P13 family review](reviews/P13-families-20493b7.md), `8f0f7dc`, product
+`20493b7`, integrated `c62606b` with all six source/report blobs exact.
+All 29 joined selection methods pass. The committed `2b672bb` portable-clone
+case exercises all twelve selections, full default access, minimal standalone
+dependencies, deterministic unions, resource/notice bytes and missing-resource
+refusal under an empty synthetic home. This is actual accepted-P06-engine
+distribution, not new-P10 acceptance or proof of model body-selection behavior;
+A18.3/.4 and their remaining utility/preservation joins stay open.
 
 ### A19 Coherent discovery and richer skills (P13; R03/R06)
-- [ ] A19.1 Reuse one catalog generator for help/router/status/welcome metadata.
-- [ ] A19.2 Route compact metadata to selected skills without advertising drafts as finished.
+- [x] A19.1 Reuse one catalog generator for help/router/status/welcome metadata.
+- [x] A19.2 Route compact metadata to selected skills without advertising drafts as finished.
 - [ ] A19.3 Map all 126 skill inventory recommendations to retained value and owning package.
 - [ ] A19.4 Verify worked examples, negative cases and migration/alias coverage.
 Acceptance: every source skill has a documented disposition and discoverable retained value.
+The accepted first-unit, source-consumer `9f58aa8` and family `8f0f7dc` reviews
+cover the one-generator and compact/honest routing contracts. Joined metadata,
+consumer and selection checks and the actual clone query preserve unknown
+maturity, PDF/XLSX unknown stage and Visio's explicit staged declaration.
+No metadata query is called native execution. The final preservation/example
+fan-in remains A19.3/.4; current and historical maps are not a second task source.
 
 ### A20 Provenance and versions (P07/P13; R04)
-- [ ] A20.1 Preserve sources/revisions/licenses/local adaptations and correct original-only claims.
-- [ ] A20.2 Explicitly retire synonym/similarity rewriting as a quality or rights method.
+- [x] A20.1 Preserve sources/revisions/licenses/local adaptations and correct original-only claims.
+- [x] A20.2 Explicitly retire synonym/similarity rewriting as a quality or rights method.
 - [x] A20.3 Separate pack schema, capability and product versions with migration checks.
 - [ ] A20.4 Verify external contribution and synthetic pack compatibility from recorded sources.
 Acceptance: no attribution loss, no ungrounded legal or quality guarantee.
 P07's synthetic pack compatibility is independently accepted; A20.4 remains open for
 P13's full external-contribution/provenance and selected-distribution verification.
+The source corrections in [A20 provenance](reports/A20-provenance.md) now have
+independent P13 source acceptance and real twelve-selection clone distribution:
+both adapted-component records, exact notices/attribution, declared release,
+local modifications and explicitly unknown historical imports are preserved.
+Removing either notice makes the actual selected query refuse without writes.
+Public documentation uses the already accepted navigation rendering rather
+than pretending transformed guide bytes equal their source bytes. The original
+similarity proposal remains historical with its explicit superseded banner;
+no lexical-rewriting, legal-clearance or originality guarantee is claimed.
+A20.4 retains its final external-contribution/profile/consumer boundary.
 
 ### A21 Safe dormant handoff (P04; R08)
 - [x] A21.1 Keep automatic envelope construction dormant under ADR0008.

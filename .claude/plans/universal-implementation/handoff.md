@@ -98,9 +98,12 @@ Current actionable checkpoints supersede the older chronological entries below:
   `d4e9188` / report `7c0ae29` fails complete source SPEC in `e85f70a`,
   preserved `42abfcb`: P2 B01 admits literal anchors and rejects real anchors
   beside examples. Correction `fa5139c` / report `e309b17` is now frozen with
-  SAME31 for complete SPEC and first whole QUALITY under `12a40cc`. All nine
-  original API/CLI cases and 33 builder methods pass; this is not independent
-  acceptance. Standalone defaults, old native observations and denied routes remain.
+  SAME31 and passes complete source SPEC and first whole QUALITY in `c75eabc`.
+  All 33 joined explicit-argument cases pass. Integration is held for the
+  actual normal test-entry gap: zero-argument `.sh` exits 2 before any test.
+  `5e1d21a` releases only its isolated test bootstrap to the original owner.
+  The uncommitted pipeline merge was safely aborted; no accepted history or
+  pending family regression was lost. Native/shared-runtime gates remain.
 - P13: ambiguity repair `b1d4caf` passes independent whole first-unit SPEC/QUALITY
   in `09a3c6ec`, integrated with original history as `03df1db`; joined 31 metadata
   methods pass and all eight product blobs match. The original owner is released
@@ -115,10 +118,14 @@ Current actionable checkpoints supersede the older chronological entries below:
   pass. No reader/schema or maturity promotion was introduced. `a426242` now
   releases the remaining ten source-family records and exact preservation-map
   refresh to SAMEc4, using accepted `42abfcb` without the rejected pipeline.
-  Four-path product `20493b7` / report `e797bd4` is frozen with SAME486 for
-  complete SPEC then QUALITY. The exact report's old 867-line prefix and all
-  four product hashes are verified; 109 builder methods pass, not reviewer
-  acceptance. Descriptor/reference/tests/map only; no source-body or schema change.
+  Four-path product `20493b7` passes SAME486 complete SPEC then QUALITY in
+  `8f0f7dc`, integrated `c62606b`. The reviewer independently ran 109 methods;
+  all six product/report blobs match and 29 joined selection methods pass.
+  `2b672bb` adds actual portable-clone coverage of all twelve selections,
+  canonical source/notices, generated public-guide bytes, minimal dependencies,
+  unions and missing-resource refusal; committed run passes. Earlier missing-
+  family RED and two test-oracle mistakes are retained, not product failures.
+  No source-body/schema/default access change or P10/native utility claim follows.
 - P14: original core-profile experiment preparation is owned by
   `8fa44739-f562-4213-a6c4-fb7719fc8c9e`, branch
   `jokerman-microsoft-universal-profile-scenarios`, from `9f8885b`.
@@ -144,9 +151,10 @@ This is accepted-P06-engine evidence, not P10 linked/default transaction accepta
 The remaining eight discovery/authoring consumers and existing template are
 released to the original P13 owner with explicit status/welcome ownership.
 
-Current original acceptance count is 68/113 after reopening A03.2 for the actual
-P14/P05 observation gap. Accepted A16, domain methods, preserved role contracts,
-A14.1-.4 and final A22.7 remain. Native semantic and installed observations
+Current original acceptance count is 74/113: A03.2 remains reopened for the actual
+P14/P05 observation gap, while six source metadata/core/routing/provenance leaves
+now close from accepted P13 and real clone evidence. Accepted A16, domain methods,
+preserved role contracts, A14.1-.4 and final A22.7 remain. Native semantic and installed observations
 remain distinct open leaves; counts are not elapsed time or release readiness.
 The user's percentage question was answered at the then-current 64/113 (57%).
 No push, PR, main merge or release has occurred.
