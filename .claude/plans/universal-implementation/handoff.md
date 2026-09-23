@@ -243,6 +243,12 @@ Keep original ownership, independent review and all acceptance/permission gates.
   pin, product helper or target write ran. SAME9db now reviews the complete
   bounded correction SPEC then QUALITY before any one-pin release. The parked
   request is not a grant and no candidate review has been commissioned.
+  SAME9db subsequently passes bounded SPEC/QUALITY in `f96d6b85`, handoff
+  `6a65e6a7`. The original card now releases exactly one SAMEc2/direct pin02
+  through controllerf2 on immutable packetbdb85a5a, with target writes forbidden.
+  Actual pin-time-preserving `postexit.inspect_postexit`, quiescence and lease
+  revocation precede candidate SPEC. Tests/QA/state are not regenerated; no
+  alias or later review-publication/consumer gate is released.
   A13.1/.2/.4, P10 and invalid shell27/q02 boundaries remain separate. No
   unaccepted owner source is integrated merely to preserve report ancestry.
   Reviewer-private failures remain honest post-hoc transcript artifacts,
