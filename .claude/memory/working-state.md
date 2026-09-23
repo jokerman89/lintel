@@ -147,6 +147,12 @@ recheck. Each step has its own grant and stops on any failure.
 No forced verdict, waiver, new actor, source repin or remote operation follows.
 A13 contract `92d677c8` releases A13.1.a/.2/.3/.4.a to f2 on a new branch stacked
 on `229656cf`; A13.1.b/.4.b stay gated on P10. Installer gates remain separate.
+Clean integrated-suite triage leaves two genuine test seams: P12 skill presence
+(`49ba9eb5` / `61c3afdb`, SAME31 PASS `635c76cc`, integrated `66090974`) and the
+e2e footer (reconciled in `ebfbcd0d`). P10 B01 is independently closed in scope, but
+the first whole QUALITY (`2685bd57`) found P1 F05 (adapter late-edit overwrite) and
+P2 F06 (Bash accepts header-shaped native inventory rows). Both, plus the A23.4.p2
+`config/aliases.yaml` native payload item, are released to the original P10 owner.
 All native leases are revoked;
 no target changes are released merely by the proposed evidence design.
 Source `70469296` and bound inputs stay frozen; no fourth actor.

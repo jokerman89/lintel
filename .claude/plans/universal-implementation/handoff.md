@@ -329,6 +329,41 @@ never inferred from this directive; a model switch does not change context ident
   Recovery now releases the bounded owned journal-replacement retry (P10 card
   "B01 bounded transaction-journal replacement retry", P03 `aa7fad4` precedent)
   to the original owner, then SAME `1578dfd8` B01/SPEC/first whole QUALITY.
+  B01 arrived as `dea408ef` (parent `4be5e096`) / report-only `72cf78a5`, three
+  paths; coordinator data-only intake passes 23/23. SAME's independent B01 recheck
+  passes (15 transaction tests, real pair 2/2, zero real retries: a
+  non-reproduction) and closes B01 in scope. The first whole QUALITY
+  (report-only `2685bd57`, `reviews/P10-final-dea408ef.md`, SHA `46dc734e…`)
+  reopens SPEC FAIL / QUALITY FAIL with P1 F05 (`bin/li-copilot.py:1048`
+  rebuilds expected state after planning; a controlled late AGENTS.md edit was
+  overwritten with exit 0) and P2 F06 (Bash skips header-shaped inventory rows
+  that PowerShell rejects). The P10 card section "F05/F06 adapter expectations,
+  strict native inventory and metadata payload" releases both to the original
+  owner. It also releases the A23.4.p2 `config/aliases.yaml` native payload item
+  and the coordinator-found unterminated-final-record case. SAME `1578dfd8` then
+  rechecks and runs the first eligible whole QUALITY.
+- Integrated suite triage (2026-09-23): the py3 aggregate at `b2909947`
+  (product-identical to `84e63a4e`) ran 141 files: 118 pass, 23 fail, 2 partial
+  (jq absent, strict refusal holds). Its launcher exported `LINTEL_*` selectors
+  and used a deep root. A clean CI-like rerun of the 22 non-kit failures (no
+  `LINTEL_*` exports, short synthetic roots, Windows PowerShell on PATH) leaves
+  two genuine integration seams.
+  1. `generate-skills-present.sh` still required TEMPLATE ONLY for the accepted
+     concrete PDF/XLSX methods. Released to P12: `49ba9eb5` / report `61c3afdb`,
+     coordinator intake 35/35; SAME31 SPEC then QUALITY PASS 0/0/0 in
+     `635c76cc`, integrated `66090974` with all three blobs exact.
+  2. `harness-critical-path.sh` expected `/li:review` for an unfinished BUILD,
+     against accepted A08.2.b. Coordinator test reconciliation `ebfbcd0d`: the
+     pre-provider footer fails the new negative case. Its installed Copilot
+     init/check still fails: `install.sh` installs none of `SOURCE_METADATA`
+     (`7b0a30cf`). P10's native payload adds `plugin.json` and `install/*` but not
+     `config/aliases.yaml`; that A23.4.p2 item is now in the P10 F05/F06 release.
+  Three first-pass failures were launcher artifacts: `snapshot-ownership` and
+  `profile-path-identity` pass once Windows PowerShell is on PATH; the 11 failing
+  `review-evidence` native tests assert that fixtures refuse inherited
+  `GIT_CONFIG_COUNT/KEY/VALUE`, which only the launcher set (clean rerun pending).
+  Copilot-kit was not rerun here (P10 ran 42/42 at `dea408ef`); the final strict
+  suite stays A23.4. Evidence: recovery `files/verification/rerun-*-clean`.
 - P11: deterministic parser `d3b5569` / `336513e` passes complete A16 component
   SPEC/QUALITY in `3049811`, integrated `7cb3812`. All eleven product/report
   identities match; joined four shared and 30 Node checks pass. Original native
@@ -757,7 +792,7 @@ from the reviewed historical merge `40c2795`. Current implementation ownership:
 | P07 profile context | `b9352dfe-1c1e-4ea3-b7d9-0fd008d39b3d` | Long-path repair ACCEPTED by `a7450597`, integrated `c344133` with reports; joined checks pass, idle |
 | P08 work lifecycle | `f2c305ac-e8b0-4b02-b6cd-c7de598964cf` | Routing `70469296` / `8318c308` frozen and intake verified; bounded native semantic fixture protocol released, no selected-SPEC clearance |
 | P09 specialist depth | `0fe8dc1e-8c6f-4d4a-af68-80696067be27` | Content accepted/integrated `4983af2`; data-core `ea92df8` / `53145bd` frozen and intake verified, same-reviewer data SPEC/QUALITY dispatched |
-| P10 installer lifecycle | `5ea6c88c-68c1-4712-8f55-adecdfe0061f` | F02 `a797b2d` / report `7bf5a31` frozen; intake verified; same-reviewer complete SPEC then eligible whole QUALITY dispatched |
+| P10 installer lifecycle | `5ea6c88c-68c1-4712-8f55-adecdfe0061f` | B01 `dea408ef` / `72cf78a5` closed in `2685bd57`; F05/F06 plus `config/aliases.yaml` payload released (P10 card) |
 | P11 browser operations | `f413bdcb-e081-45e0-9524-7274b4391665` | `f4cd1f3` / `a49e7b8` has real headless evidence; scoped existing-deadline owned-file readiness correction, acceptance still open |
 | P12 document formats | `0a75211f-455c-4318-864f-bc8023ce9142` | Standalone content/Word/PPT active from `3ee602f`; shared pipeline and later formats remain gated |
 
@@ -783,7 +818,7 @@ repair their own findings. All prior reports remain preserved in `reviews/` and 
 | P07 | Final `a7450597` accepts `4d001463`; integrated through `56de830`, earlier `a8de574`/`3d8e715` preserved | `a7d78944-c02c-4909-a060-2c4f2a754b00` |
 | P08 partial | `402fd804`: F04/F05 P2, joint F01/F02 class open; bounded mechanical F03 closed; selected SPEC FAIL/QUALITY NOT STARTED | `9dbf0a9b-750d-45c2-968c-41a5acb11c92` |
 | P09 | Content `19eb776` accepted/integrated; data-core review targets exact `53145bd` / `ea92df8`; module/parent gates remain | `447d97f5-7919-4433-8f65-a64016c0dbdf` |
-| P10 | Recheck exact `7bf5a31` / `a797b2d` after `c1a38a03` F02; F01 closed, full SPEC/QUALITY still open | `1578dfd8-f239-4eba-989b-3c4bde3e5792` |
+| P10 | `2685bd57`: B01 closed, F01-F04 retained; SPEC FAIL, first whole QUALITY FAIL (P1 F05, P2 F06); awaits frozen fix | `1578dfd8-f239-4eba-989b-3c4bde3e5792` |
 
 ## Current combined review checkpoints
 
