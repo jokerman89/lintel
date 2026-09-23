@@ -72,11 +72,16 @@ Exact packet `50394141`, context `e25ced5c`, decision `f1b11842` and handoff
 `847ce8d0` are returned for actual rapid host/producer/latest-reader/QA,
 original T003/local CAPTURE and quiescence. Strict PLAN4/fresh resume5 remain
 required, including SC1-SC3, pre-BUILD P03 rehearsal and finite own-context TQ.
-Strict PLAN context4 `6cc62d16` has a bounded T001 formatting rework: its
+Strict PLAN context4 `6cc62d16` completed a bounded T001 formatting rework: its
 explanatory QA table's generic `ID` header made the real reader find three
 unassigned pseudo-tasks. Command47 failed before phase progression. SAME4
-may rename only that header to `QA control`, preserving every obligation,
-then revalidate before context5/SC2/BUILD. No provider fix, new actor or waiver.
+renamed only that header to `QA control`; exact replacement and the real reader
+now pass with only the original three tasks. Plan `d09c16db` is paused before
+BUILD, with the stub intact and context4 revoked. Final genuinely fresh context5
+`5c6b5c3f-9e99-47a3-8e1d-020c1da1c760` is launched for read-only recovery from
+literal original paths/durable handoff, without a supplied next-task answer.
+SC2, BUILD, finite TQ and final review still need actual evidence. No provider
+fix, sixth actor or waiver.
 No whole A24 acceptance.
 Preserve the original plan, refusal and genuine fresh strict recovery; the
 extra neutral handoff is an intervention, not same-context reuse. Source raw

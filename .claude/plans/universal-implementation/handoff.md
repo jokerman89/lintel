@@ -85,8 +85,13 @@ Current actionable checkpoints supersede the older chronological entries below:
   reader refusal,142 the pin. Later handoff26's143/144 both0 is separate.
   Controller erratum `b0cd9eb4` preserves originals. The wrong range is absent
   from the three stage files, both decisions and the new host receipts.
-  SAME9db is asked only for an additive historical report/impact clarification,
-  with no released-MAIN reread; current consumer passes and grant801 remain.
+  SAME9db's actual additive clarification `856f8d0d` now confirms this is a
+  report-sentence correction, not changed SPEC/QUALITY/local-compliance
+  conclusions or replacement decisions. Its substantive comparison found the
+  actual exit3 refusals already retained in both decisions' history assessment;
+  quiescence, not universal exit0, supported the boundary. No released-MAIN
+  reread or new clearance occurred. Old report/decisions/handoff remain exact;
+  current consumer passes and grant801/handoff27 remain.
 - P09: module product `5c99612` passes `114ddfe3`, integrated `2d789a4`;
   all 26 product paths match and 13 joined methods pass. `477d3fc` releases
   the original owner's separate N1 safety-quantifier correction and two bounded
@@ -224,9 +229,15 @@ Current actionable checkpoints supersede the older chronological entries below:
   pre-BUILD owned recovery and own-context finite TQ are not waived.
   Strict PLAN context4 `6cc62d16` returned T001 but command47's actual reader
   refused the explanatory QA table's generic `ID` heading as unassigned tasks.
-  Controller reuses SAME4 for the sole `QA control` header correction; rows,
-  original tasks and three typed obligations remain intact. Context5/SC2/BUILD
-  stay unlaunched until real revalidation; no provider or parser change.
+  SAME4 made only the `QA control` header correction, preserving every row,
+  original task and typed obligation. Actual reader now0; plan `d09c16db`
+  records PLAN DONE/pre-BUILD pause with the original stub unchanged. Context4
+  is idle/revoked. Genuinely fresh final context5
+  `5c6b5c3f-9e99-47a3-8e1d-020c1da1c760` is launched for original-file/pin
+  recovery only, without earlier chat, other-profile output or a next-task
+  answer. Controller prepares existing-API scripts independently; SC2 must
+  actually precede BUILD and all three obligations/TQ/final review remain.
+  No provider/parser change, sixth actor, root relocation or source repin.
   Controller-local task receipts remain attributed to that observer; parent
   inspection APIs did not expose those tasks. Whole native A24 remains open.
   Local SHIP is explicitly skipped; no remote publication or other-scope release.
