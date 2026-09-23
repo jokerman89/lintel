@@ -84,13 +84,13 @@ Current actionable checkpoints supersede the older chronological entries below:
   no-publication pair to SAMEc2, serialized with attributable equivalent inputs
   and independent target profile/review/QA gates. No fourth context, provider
   import, source repin or publication authority is added.
-  The actual ship-direct canonical entry now stops at its own missing REVIEW:
+  The actual ship-direct canonical entry first stopped at its own missing REVIEW:
   packet `f88fa37c` / full brief `8a1539e1`, own seed base `dfeba1d3`, own
   generation1 profile `5b911814`, nine attributable inherited files and one
   genuinely local 13-case suite. Both original-context QA records pass and
   both latest readers return3/unverified/No applicable review decision.
   Publication-stage refusal, actual rejecting review and paired equivalence
-  remain unobserved. Recovery's data-only intake verifies330 snapshots,40
+  were unobserved at that earlier boundary. Recovery's data-only intake verifies330 snapshots,40
   current files, inheritance and nine distinct raw QA files. SAME9db completed
   unbiased target-specific SPEC then QUALITY then local compliance/FR-DOC PASS,
   with zero current P1/P2/P3, report `93b12243` and handoff `65fd7a87`.
@@ -101,14 +101,23 @@ Current actionable checkpoints supersede the older chronological entries below:
   returned artifacts, ordered stages, 751 identical before/after records, both
   exact decisions `28df28a3`/`61bb7c2b`, full typed QA and 26 current raw controls
   per decision. The two actual host receipts are `1180271d` and `cd99efb2`.
-  Original f2/c2 have the concrete exact-byte publication/current consumer
-  continuation, then only the original39 local readiness/authority stop. No
-  publication, forced negative verdict, other-root clearance or successful
-  CAPTURE after blocked SHIP follows. Following direct preservation/quiescence/
-  revocation, the already released ship-alias case may proceed in its own
-  target with equivalent substantive inputs and separate pin/review/QA; no
-  extra generic approval is needed. Reviewer-private failures remain honest
-  post-hoc transcript artifacts, not claimed original redirected streams.
+  Original f2/c2 completed exact-byte local review publication and both real
+  current consumer chains, then reached the original39 local SHIP authority
+  stop. Final packet `91ac416c`, outcome `fd2e4dcd` and quiescence `bfd30dc6`
+  distinguish successful readiness from absent publication permission:
+  REVIEW DONE, SHIP BLOCKED, CYCLE PAUSED/resume SHIP, CAPTURE unreached.
+  No external command, host-tool denial or genuinely rejecting review occurred.
+  Recovery's final data intake verifies999 immutable snapshots/330 prior,
+  46 current target files,42 inner command records,12 current reader/QA
+  observations,2 readiness passes,6 complete ledger appends,2 actual review
+  envelopes and1 SHIP failure event with the3751/409 old prefixes preserved.
+  Actual owned final exits are0/3/0, all quiescent. Only then controller
+  handoff30 `8e2fdd3707a513e3120b8a6d6ca7d1a432ba8c47e54235db4c741cde9bcbb29f`
+  grants SAMEc2 only ship-alias from the same nine immutable inputs and its own
+  original seed/profile/cycle/QA; direct and MAIN remain frozen. No new
+  approval or actor is needed, no readiness clearance is transferred.
+  Reviewer-private failures remain honest post-hoc transcript artifacts,
+  not claimed original redirected streams.
   Additive reporting correction: the earlier controller summary, recovery relay
   and independent report line46 misstated handoff25 as shells142-145/all0.
   Immutable original quiescence `65c7eedd` actually records137-142 with

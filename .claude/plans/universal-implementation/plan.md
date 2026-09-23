@@ -341,6 +341,14 @@ separate DA obligation remain history, not reversed by this correction.
 - [ ] A10.3 Route alternate plan/build/review entry points through the same work contract.
 - [ ] A10.4 Keep plan-tune settings dormant until an actual reader exists.
 Acceptance: equivalent entry points preserve artifacts/status without repeated interview.
+The original native MAIN local objective is verified through actual independent
+review, current consumption and CAPTURE (`6d1edc70`). The finite direct-delivery
+case subsequently passes its own target-specific review/current QA, then
+actually refuses unauthorized publication in SHIP (`91ac416c`), preserving
+CYCLE PAUSED/resume SHIP and unreached CAPTURE. That local authority refusal
+is not a network failure, host denial or rejecting review. The separate
+ship-alias case is now executing under the original one-target grant; paired
+comparison and complete selected-subset review still precede A10 closure.
 
 ### A11 Honest context capacity (P03; R05)
 - [x] A11.1 Share context selection/save/restore readers and show bounded sources.

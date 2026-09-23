@@ -56,7 +56,7 @@ the map remains APPROVED, T042 deferred and SHIP skipped. Actual handoff budget
 is a byte-derived 56,292-token estimate with unknown capacity/usage, not a fit.
 Grant `39f8107` now releases only the original ship-direct/ship-alias refusal
 comparison to SAMEc2, one target at a time, without publication or borrowed
-profile/review/QA clearance. Actual ship-direct now reaches target-specific
+profile/review/QA clearance. Actual ship-direct first reached target-specific
 REVIEW, not a publication refusal: its own seed base `dfeba1d3`, nine exact
 inherited inputs, profile `5b911814`, local 13-case suite and typed QA are
 recorded in packet `f88fa37c`. Both readers correctly return 3 for no applicable
@@ -66,12 +66,17 @@ replayed. SAME9db now passes target-specific SPEC, subsequent QUALITY and
 mandatory local compliance/full FR-DOC, report `93b12243`, handoff `65fd7a87`.
 Recovery validates both exact decisions `28df28a3`/`61bb7c2b`, all 21 returned
 artifacts, 751 identical before/after records, unchanged typed QA and 26 current
-raw control files per decision. Actual new host receipts `1180271d`/`cd99efb2`
-are returned for SAMEc2's target-only publication/current consumers, then the
-original local no-publication next gate. Ship-alias is still untouched; only
-after verified direct quiescence may its already released own-root comparison
-proceed. Publication remains unauthorized, no rejecting review is invented,
-and whole P08/A13/selected-subset acceptance remain open.
+raw control files per decision. Actual host receipts `1180271d`/`cd99efb2`
+then cleared SAMEc2's own-target consumer gates. Final direct packet `91ac416c`
+now proves the separate next boundary: current REVIEW/QA and local evidence
+readiness pass, but SHIP refuses absent publication authority. CYCLE remains
+PAUSED/resume SHIP; CAPTURE is unreached. Recovery data intake verifies 999
+final and 330 old snapshots, 46 current files, 42 inner command records,
+twelve reader/QA observations, two readiness checks, six complete ledger
+appends and preserved audit prefixes. No external command or rejecting review
+was observed. Direct is quiescent/revoked; handoff30 `8e2fdd37` now grants only
+SAMEc2 ship-alias, using equivalent original inputs and its own identities.
+Publication remains unauthorized and P08/A13/selected-subset acceptance open.
 Source `70469296` and bound inputs stay frozen; no fourth actor.
 P14 preparation passes complete SPEC then QUALITY in `f690eae`, integrated
 `c544fd0`. Native release `acc18df` permits the original controller's sequential
