@@ -4,12 +4,17 @@
 # constraints: isolated file roots and accepted P03 recovery; no host operations
 # last_intent_review: 2026-09-20
 import argparse
+from contextlib import redirect_stderr
+import errno
 import importlib
+import io
 import json
 import os
 from pathlib import Path
 import sys
 import tempfile
+import time
+from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 
@@ -262,6 +267,266 @@ class ManagedTransaction(unittest.TestCase):
                                     self.modes, label="not authorized by existence")
         self.assertEqual(list(native_io_path(unowned).iterdir()), [])
         self.assertEqual(self.native_files(), before)
+
+    def retry_trial(self, name):
+        directory = self.base / name
+        directory.mkdir()
+        self.root, self.store = directory / "consumer", directory / "store"
+        self.root.mkdir()
+        for relative, data in (("a.txt", b"before a"), ("b.txt", b"before b"),
+                               ("custom.txt", b"never owned")):
+            (self.root / relative).write_bytes(data)
+        self.expected = {name: file_state(self.root, name) for name in self.changes}
+        self.modes = {name: self.expected["a.txt"]["mode"] for name in self.changes}
+
+    def replacement_error(self, source, target, code):
+        error = OSError(errno.EACCES, "injected owned replacement denial")
+        if code is not None:
+            error.winerror = code
+        error.filename, error.filename2 = str(source), str(target)
+        return error
+
+    def journal_fixture(self, *, existing):
+        folder = self.store / "transactions" / ("transaction-" + "b" * 32)
+        native_io_path(folder).mkdir(parents=True)
+        previous = {"schema_version": 1, "id": folder.name, "state": "prepared",
+                    "plan_digest": "a" * 64, "files": {"a.txt": "pending"}}
+        if existing:
+            self.module._save_journal(folder, previous)
+        planned = {**previous, "state": "applying", "files": {"a.txt": "applying"}}
+        return folder, planned
+
+    def test_journal_replace_transients_have_bounded_notices_and_backoff(self):
+        original_replace = os.replace
+        windows = SimpleNamespace(name="nt", path=os.path)
+        for code in (5, 32, 33):
+            for failures in range(1, 5):
+                for existing in (False, True):
+                    with self.subTest(winerror=code, failures=failures, existing=existing):
+                        self.retry_trial(f"transient-{code}-{failures}-{existing}")
+                        with self.module._lock(self.root, self.store):
+                            folder, planned = self.journal_fixture(existing=existing)
+                            before = file_state(folder, "journal.json")
+                            attempts = []
+
+                            def replace(source, target):
+                                if Path(target) == native_io_path(folder / "journal.json"):
+                                    self.assertTrue(native_io_path(self.store / ".operation-lock").is_dir())
+                                    self.assertEqual(file_state(folder, "journal.json"), before)
+                                    attempts.append((str(source), str(target)))
+                                    if len(attempts) <= failures:
+                                        raise self.replacement_error(source, target, code)
+                                return original_replace(source, target)
+
+                            notices = io.StringIO()
+                            with patch.object(self.module, "os", windows), patch("os.replace", side_effect=replace), \
+                                    patch("time.sleep", wraps=time.sleep) as delays, redirect_stderr(notices):
+                                self.module._save_journal(folder, planned)
+                            self.assertEqual(len(attempts), failures + 1)
+                            self.assertEqual([call.args[0] for call in delays.call_args_list],
+                                             [0.05 * 2 ** attempt for attempt in range(failures)])
+                            lines = notices.getvalue().splitlines()
+                            self.assertEqual(len(lines), failures)
+                            for attempt, line in enumerate(lines, 1):
+                                self.assertIn("journal", line)
+                                self.assertIn(f"retry {attempt}/4", line)
+                                self.assertIn(f"winerror {code}", line)
+                            self.assertEqual(native_io_path(folder / "journal.json").read_bytes(),
+                                             self.module.json_bytes(planned))
+                            self.assertEqual(sorted(path.name for path in native_io_path(folder).iterdir()),
+                                             ["journal.json"])
+                            print(json.dumps({"B01": "injected-transient", "winerror": code,
+                                              "failures": failures, "existing": existing,
+                                              "attempts": len(attempts), "notices": lines,
+                                              "delays": [call.args[0] for call in delays.call_args_list]}))
+                        self.assertEqual(self.files(), {"a.txt": b"before a", "b.txt": b"before b",
+                                                       "custom.txt": b"never owned"})
+
+    def test_journal_replace_persistent_failure_retains_explicit_recovery(self):
+        original_replace = os.replace
+        windows = SimpleNamespace(name="nt", path=os.path)
+        for code in (5, 32, 33):
+            with self.subTest(winerror=code):
+                self.retry_trial(f"persistent-{code}")
+                before, errors = self.files(), []
+
+                def replace(source, target):
+                    if Path(target).name == "journal.json":
+                        staged = json.loads(native_io_path(Path(source)).read_bytes())
+                        if staged["files"]["a.txt"] == "applied":
+                            self.assertTrue(native_io_path(self.store / ".operation-lock").is_dir())
+                            error = self.replacement_error(source, target, code)
+                            errors.append(error)
+                            raise error
+                    return original_replace(source, target)
+
+                notices = io.StringIO()
+                with patch.object(self.module, "os", windows), patch("os.replace", side_effect=replace), \
+                        patch("time.sleep", wraps=time.sleep) as delays, redirect_stderr(notices):
+                    with self.assertRaises(OSError) as failure:
+                        self.apply()
+                self.assertIs(failure.exception, errors[-1])
+                self.assertEqual(len(errors), 5)
+                self.assertEqual([call.args[0] for call in delays.call_args_list], [0.05, 0.1, 0.2, 0.4])
+                self.assertEqual(len(notices.getvalue().splitlines()), 4)
+                identifier, = [path.name for path in native_io_path(self.store / "transactions").iterdir()]
+                state = self.module.inspect_transaction(self.root, self.store, identifier)
+                self.assertEqual(state["state"], "applying")
+                self.assertEqual(state["files"]["a.txt"], "applying")
+                self.assertEqual(self.files(), {**before, "a.txt": b"after a"})
+                with self.assertRaisesRegex(ValueError, "incomplete"):
+                    self.apply()
+                recovered = self.module.recover_transaction(self.root, self.store, identifier)
+                self.assertEqual(recovered["state"], "recovered")
+                self.assertEqual(self.files(), before)
+                print(json.dumps({"B01": "injected-persistent", "winerror": code, "attempts": len(errors),
+                                  "notices": notices.getvalue().splitlines(), "state": state,
+                                  "recovery": recovered["state"], "original_bytes_restored": True}))
+
+    def test_journal_replace_nonretryable_and_nonwindows_errors_propagate(self):
+        original_replace = os.replace
+        for platform, code, replacement in (
+                ("nt", 2, True), ("nt", 80, True), ("nt", 1117, True), ("nt", None, True),
+                ("posix", 5, True), ("posix", 32, True), ("posix", 33, True),
+                ("nt", 5, False)):
+            with self.subTest(platform=platform, winerror=code, replacement=replacement):
+                self.retry_trial(f"nonretryable-{platform}-{code}-{replacement}")
+                with self.module._lock(self.root, self.store):
+                    folder, planned = self.journal_fixture(existing=True)
+                    before = file_state(folder, "journal.json")
+                    errors = []
+
+                    def replace(source, target):
+                        if Path(target) == native_io_path(folder / "journal.json"):
+                            error = self.replacement_error(source, target, code)
+                            if not replacement:
+                                error.filename2 = None
+                            errors.append(error)
+                            raise error
+                        return original_replace(source, target)
+
+                    notices = io.StringIO()
+                    with patch.object(self.module, "os", SimpleNamespace(name=platform, path=os.path)), \
+                            patch("os.replace", side_effect=replace), patch("time.sleep") as delays, \
+                            redirect_stderr(notices):
+                        with self.assertRaises(OSError) as failure:
+                            self.module._save_journal(folder, planned)
+                    self.assertEqual(len(errors), 1)
+                    self.assertIs(failure.exception, errors[0])
+                    delays.assert_not_called()
+                    self.assertEqual(notices.getvalue(), "")
+                    self.assertEqual(file_state(folder, "journal.json"), before)
+                    print(json.dumps({"B01": "injected-nonretryable", "simulated_platform": platform,
+                                      "winerror": code, "replacement": replacement, "attempts": 1,
+                                      "same_exception": True, "notices": []}))
+
+    def test_journal_replace_refuses_changed_saved_state(self):
+        original_replace = os.replace
+        windows = SimpleNamespace(name="nt", path=os.path)
+        for scenario in ("absent-created", "existing-edited", "existing-deleted", "changed-during-backoff"):
+            with self.subTest(scenario=scenario):
+                self.retry_trial(scenario)
+                with self.module._lock(self.root, self.store):
+                    folder, planned = self.journal_fixture(existing=scenario != "absent-created")
+                    target = native_io_path(folder / "journal.json")
+                    attempts, observed, delays = [], [], []
+
+                    def change():
+                        if scenario == "existing-deleted":
+                            target.unlink()
+                        else:
+                            target.write_bytes(b'{"consumer":"intervening journal edit"}\n')
+                        observed.append(file_state(folder, "journal.json"))
+
+                    def replace(source, destination):
+                        if Path(destination) == target:
+                            attempts.append(str(source))
+                            if scenario != "changed-during-backoff":
+                                change()
+                            raise self.replacement_error(source, destination, 5)
+                        return original_replace(source, destination)
+
+                    def wait(seconds):
+                        delays.append(seconds)
+                        change()
+
+                    notices = io.StringIO()
+                    with patch.object(self.module, "os", windows), patch("os.replace", side_effect=replace), \
+                            patch("time.sleep", side_effect=wait), redirect_stderr(notices):
+                        with self.assertRaisesRegex(ValueError, "journal.*changed|changed.*journal"):
+                            self.module._save_journal(folder, planned)
+                    self.assertEqual(len(attempts), 1)
+                    self.assertEqual(len(observed), 1)
+                    self.assertEqual(file_state(folder, "journal.json"), observed[0])
+                    self.assertEqual(delays, [0.05] if scenario == "changed-during-backoff" else [])
+                    self.assertEqual(len(notices.getvalue().splitlines()), len(delays))
+                    print(json.dumps({"B01": "changed-journal-refusal", "scenario": scenario,
+                                      "attempts": len(attempts), "notices": notices.getvalue().splitlines(),
+                                      "intervening_state_preserved": True}))
+
+    def test_journal_replace_requires_held_operation_lock(self):
+        self.retry_trial("missing-lock")
+        folder = self.store / "transactions" / ("transaction-" + "b" * 32)
+        native_io_path(folder).mkdir(parents=True)
+        with patch("os.replace", wraps=os.replace) as replacement:
+            with self.assertRaisesRegex(ValueError, "lock"):
+                self.module._save_journal(folder, {"state": "prepared"})
+        replacement.assert_not_called()
+        self.assertFalse(native_io_path(folder / "journal.json").exists())
+
+    def test_journal_retry_does_not_retry_other_publications(self):
+        original_replace = os.replace
+        for phase in ("staged", "plan", "target", "snapshot", "result", "binding", "restore"):
+            with self.subTest(phase=phase):
+                self.retry_trial("other-" + phase)
+                identifier = None
+                if phase in ("binding", "restore"):
+                    if phase == "binding":
+                        original_write = self.module._write_change
+
+                        def interrupt(*args):
+                            original_write(*args)
+                            raise OSError("injected target interruption for explicit recovery")
+
+                        with patch.object(self.module, "_write_change", side_effect=interrupt):
+                            with self.assertRaises(OSError):
+                                self.apply()
+                        identifier, = [path.name for path in native_io_path(self.store / "transactions").iterdir()]
+                    else:
+                        identifier = self.apply()["id"]
+                errors = []
+
+                def replace(source, target):
+                    target = Path(target)
+                    selected = (
+                        phase == "staged" and target.parent.name == "staged"
+                        or phase == "plan" and target.name == "plan.json"
+                        or phase == "target" and target == native_io_path(self.root / "a.txt")
+                        or phase == "snapshot" and target.name == "manifest.json"
+                        or phase == "result" and target.name == "result.json"
+                        or phase == "binding" and target.name == "recovery-binding.json"
+                        or phase == "restore" and target.name == "restore.json"
+                    )
+                    if selected:
+                        error = self.replacement_error(source, target, 5)
+                        errors.append(error)
+                        raise error
+                    return original_replace(source, target)
+
+                notices = io.StringIO()
+                with patch("os.replace", side_effect=replace), patch("time.sleep") as delays, redirect_stderr(notices):
+                    with self.assertRaises(OSError) as failure:
+                        if identifier:
+                            self.module.recover_transaction(self.root, self.store, identifier)
+                        else:
+                            self.apply()
+                self.assertEqual(len(errors), 1)
+                self.assertIs(failure.exception, errors[0])
+                delays.assert_not_called()
+                self.assertEqual(notices.getvalue(), "")
+                self.assertFalse(native_io_path(self.store / ".operation-lock").exists())
+                print(json.dumps({"B01": "other-publication-not-retried", "phase": phase,
+                                  "attempts": len(errors), "same_exception": True, "notices": []}))
 
 
 if __name__ == "__main__":

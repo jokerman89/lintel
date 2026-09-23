@@ -114,6 +114,14 @@ bytes verify. Failure leaves an incomplete transaction; another init cannot adop
 Recovery is explicit, preflights the entire owned set and refuses later edits or replay of
 already consumed restoration permission.
 
+While holding the operation lock, the runtime may retry only replacement of its owned
+transaction journal on Windows errors 5, 32 or 33. At most four retries are reported on
+stderr, delayed by 0.05, 0.1, 0.2 and 0.4 seconds. The journal must still match its saved
+before-state (including absence for its first save); a changed journal is refused.
+Other writes are not retried by this rule. Persistent or other errors remain failures,
+retain incomplete evidence and require explicit recovery. This bounded handling does
+not identify the cause of earlier access-denied failures or guarantee completion.
+
 `--store`/`LINTEL_RECOVERY_STORE` is honored exactly. Runtime defaults use a reported
 `.lintel-recovery-<full-root-digest>` sibling to avoid repeating a long target basename in
 every snapshot path. The full resolved target remains bound in the store/receipt; same
