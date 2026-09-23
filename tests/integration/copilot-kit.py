@@ -37,6 +37,7 @@ JOINED_RUNTIME_RESOURCES = (
     "skills/generate-pdf/scripts/prepare_html.py",
     "skills/generate-pdf/scripts/check_pdf.py",
     "skills/generate-pdf/scripts/print_pdf.mjs",
+    "skills/generate/scripts/pipeline_inputs.py",
 )
 spec = importlib.util.spec_from_file_location("li_copilot", ROOT / "bin/li-copilot.py")
 adapter = importlib.util.module_from_spec(spec)

@@ -261,7 +261,7 @@ run path. Name the requested formats rather than generating every format.
 
 **Method and output.** The existing outline/write methods preserve source IDs and full
 reasoning in `outline.md`/`content.md`, with actual speaker-note content for slides.
-Use an explicit union with the desired format for standalone production. For a
+Use an explicit union with the desired format for shared-input production. For a
 repository-reference task, select document-generate and ground its signatures,
 examples and caveats in the supplied code/tests instead of a slide outline.
 
@@ -269,9 +269,11 @@ examples and caveats in the supplied code/tests instead of a slide outline.
 words to fit a layout. Missing or unaccepted shared design/input binding cannot be
 filled with a fabricated `design-spec.json` or claimed as serialized-pipeline success.
 
-**Evidence limit.** P12 candidate `d4e9188` failed SPEC for B01 anchor eligibility;
-its product is not integrated and QUALITY has not started. Accepted standalone
-content/format source remains useful without claiming that rejected join works.
+**Evidence limit.** The repaired input-only admission source is accepted and
+retains complete source, work and profile identity. It does not render, publish
+an artifact, certify a native format or clear the remaining shared-runtime gates.
+The earlier B01 rejection remains historical evidence, not the current source.
+`document-content` includes the helper and its declared trusted preflight resources.
 
 ## Word example
 
@@ -293,8 +295,9 @@ is an unresolved input, not an implicit blank document. Missing page rendering i
 unverified, not rescued by a successful content/model readback.
 
 **Evidence limit.** Source acceptance does not clear the denied Word page-layout
-route. This projection deliberately excludes common pipeline and other format methods;
-selection itself creates no document and grants no native permission.
+route. This standalone projection excludes common pipeline and other format methods;
+explicitly union `document-content` when requesting `--from-pipeline`. Selection
+itself creates no document and grants no native permission.
 
 ## PowerPoint example
 
@@ -316,8 +319,9 @@ a talk-track Markdown file is not automatically saved PPT notes. No fictitious
 native actor, slide render or independent critique follows from a role name.
 
 **Evidence limit.** Prior selected native PPT acceptance remains scoped to its actual
-artifact. This query does not repeat it or accept the rejected shared P12 pipeline.
-It includes design knowledge, not the entire frontend-role family.
+artifact. This query does not repeat it or certify a shared rendered pipeline.
+Explicitly union `document-content` for `--from-pipeline` input admission. The
+standalone projection includes design knowledge, not the entire frontend-role family.
 
 ## PDF example
 

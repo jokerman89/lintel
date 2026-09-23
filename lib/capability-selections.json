@@ -231,7 +231,14 @@
       "resources": [
         "skills/generate/agent-mapping.yaml",
         "skills/generate-write/references/fidelity-and-evidence.md",
-        "bin/li-review-evidence.py"
+        "skills/generate/scripts/pipeline_inputs.py",
+        "bin/li-review-evidence.py",
+        "bin/li-work-artifacts.py",
+        "lib/swarm_contract.py",
+        "lib/swarm_snapshot.py",
+        "lib/swarm-schema.json",
+        "lib/domain_result.py",
+        "lib/domain-result-schema.json"
       ],
       "provenance": [],
       "inputs": [
@@ -249,7 +256,7 @@
       },
       "limitations": [
         "Retain long reasoning, tables, citations and qualifications; presentation brevity cannot truncate canonical content.",
-        "P12 pipeline candidate d4e9188 is SPEC FAIL for B01 and not integrated; no shared serialized-pipeline PASS is claimed.",
+        "The accepted input-only admission helper binds existing source/work/profile inputs; this is not native artifact creation or full shared-pipeline acceptance.",
         "Agent-mapping entries are hints, not observed dispatch or permission; incidental links do not form a new dependency engine.",
         "Standalone format selections remain independently usable with their explicit brief inputs and required controls."
       ]
@@ -286,7 +293,7 @@
       "limitations": [
         "Standalone --brief does not require common pipeline or design knowledge; a missing required template cannot become an implicit blank document.",
         "Word rendered page layout remains permission-blocked; source acceptance or a model readback is not page-render evidence.",
-        "The rejected P12 shared pipeline is not a verified alternate route; no installation, native action or distribution is performed by selection."
+        "For --from-pipeline, explicitly union document-content for input admission; selection itself performs no installation, native action or artifact validation."
       ]
     },
     "document-ppt": {
@@ -361,7 +368,7 @@
       },
       "limitations": [
         "The accepted PDF source method is implemented, not TEMPLATE ONLY; unknown maturity is not a missing-method claim.",
-        "Standalone production does not require the common pipeline; the rejected shared input binding is not imported.",
+        "Standalone production does not require the common pipeline; explicitly union document-content when using --from-pipeline input admission.",
         "Missing converters/readers, wrong physical page bounds or unverified required visual inspection remain explicit gates.",
         "Browser sources are not an installed engine, network permission or a native print action."
       ]

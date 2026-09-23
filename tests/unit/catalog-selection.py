@@ -563,7 +563,7 @@ class CatalogSelection(unittest.TestCase):
                 ):
                     self.assertIn(path, resources)
 
-    def test_format_source_resources_do_not_claim_the_rejected_pipeline(self):
+    def test_format_sources_keep_standalone_and_pipeline_admission_distinct(self):
         expected = {
             "document-word": {
                 "skills/generate-word/references/native-word.md",
@@ -605,8 +605,24 @@ class CatalogSelection(unittest.TestCase):
                     self.assertEqual(stage, {"id": member, "status": "unknown", "evidence": None})
         content = self.catalog.selection_metadata(ROOT, ["document-content"])
         record = next(row for row in content["selection"]["definitions"] if row["id"] == "document-content")
-        self.assertIn("SPEC FAIL", " ".join(record["limitations"]))
-        self.assertIn("B01", " ".join(record["limitations"]))
+        required = {
+            "skills/generate/scripts/pipeline_inputs.py", "bin/li-work-artifacts.py",
+            "lib/swarm_contract.py", "lib/swarm_snapshot.py", "lib/swarm-schema.json",
+            "lib/domain_result.py", "lib/domain-result-schema.json",
+            "lib/context_safety.py", "lib/native_paths.py", "lib/markdown_source.py",
+            "lib/review_contract.py", "lib/review-schema.json",
+            "lib/profile_context.py", "lib/profile-context-schema.json",
+            "skills/design-dna/scripts/design_contract.py",
+            "skills/design-dna/scripts/emit_tokens.py",
+            "skills/design-dna/references/design-contract.schema.json",
+        }
+        self.assertTrue(required <= {row["path"] for row in content["selection"]["resources"]})
+        self.assertIn("input-only", " ".join(record["limitations"]))
+        self.assertIn("not native", " ".join(record["limitations"]))
+        for name in ("document-word", "document-ppt", "document-pdf", "document-xlsx"):
+            union = self.catalog.selection_metadata(ROOT, ["document-content", name])
+            self.assertTrue(required <= {row["path"] for row in union["selection"]["resources"]})
+            self.assertFalse(union["executed"])
 
     def test_each_new_family_example_has_exact_heading_inputs_outputs_negative_and_limits(self):
         records = {item["id"]: item for item in self.catalog.selection_metadata(ROOT)["selections"]}

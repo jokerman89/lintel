@@ -120,8 +120,11 @@ dependency, not a new prerequisite for native bare installation. Required work,
 review, domain, browser, selected-design and document helper/schema/reference
 files are checked before consumer writes. This includes the source-fidelity and
 native-format guides, workbook integrity reader and PDF preparation/inspection/
-print adapters. File presence does not prove a renderer, recalculation engine,
-browser or live client is available; missing native observations remain open.
+print adapters, plus the shared document input-admission helper. An explicit
+`document-content` selection union supplies that helper's declared preflight
+resources without forcing pipeline dependencies onto standalone format choices.
+File presence does not prove a renderer, recalculation engine, browser or live
+client is available; missing native observations remain open.
 
 Some public guides also cite source-repository-only instructions, CI or internal engineering
 records. Their bundled copies explicitly label that boundary and link to the canonical
