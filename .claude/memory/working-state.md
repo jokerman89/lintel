@@ -199,6 +199,13 @@ The original P13 owner (bef/projectc4) retains control; one fresh drafter is the
 maximum, with actual arc approval before narration and original486's separate
 critique after the frozen return through88. This is not P10, native rendering,
 source maturity or full A18.3/A19.4 acceptance. Original79/113 is unchanged.
+The native case is now frozen at manifest `2817e492` / case `7964b27b`.
+One actualb9fd8733 context completed Plan, controller approval and same-context
+Junior narration. Parent intake01 binds all1,055 files and exact two new drafts;
+all434 exported source blobs match accepted9c15. SAME486 now performs the
+actual independent critique and bounded SPEC/QUALITY. Unknown injected-context
+visibility, initial ZIP/CRLF RED, unchanged owner/source and all broader
+installer/format/maturity gates remain explicit. No acceptance count changed.
 
 ### Historical integration chronology
 

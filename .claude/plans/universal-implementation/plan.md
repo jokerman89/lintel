@@ -484,6 +484,12 @@ dependencies, deterministic unions, resource/notice bytes and missing-resource
 refusal under an empty synthetic home. This is actual accepted-P06-engine
 distribution, not new-P10 acceptance or proof of model body-selection behavior;
 A18.3/.4 and their remaining utility/preservation joins stay open.
+One bounded native demo-script utility case is now frozen under release8c9ab714:
+actual metadata-first Plan/owner-approval/same-context narration, with exact
+source/consumer/host evidence in manifest2817e492. Parent intake verifies its
+immutable files and actual source identities without rerunning the case.
+Original reviewer486's actual critique and bounded SPEC/QUALITY remain pending;
+this does not yet close A18.3, A19.4, P10 or whole-family utility.
 
 ### A19 Coherent discovery and richer skills (P13; R03/R06)
 - [x] A19.1 Reuse one catalog generator for help/router/status/welcome metadata.

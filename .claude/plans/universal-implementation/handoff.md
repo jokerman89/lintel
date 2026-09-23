@@ -330,6 +330,22 @@ Current actionable checkpoints supersede the older chronological entries below:
   original486's independent critique and SPEC/QUALITY. No new product/source,
   version, generated map, maturity, renderer, P10 route or parent clearance.
   This P13 case is separate from P08's original seventeen targets/actor limit.
+  The one native case is now frozen: manifest `2817e492` binds1,055 files,
+  handoff `376f188c` and case record `7964b27b`. One actual fresh context
+  `b9fd8733` returned the arc, then the same context returned narration after
+  controllerc4's real approval. Exact drafts are9,460/14,145 UTF-8 bytes
+  (`d684ffda`/`e076db4f`); approval is `12ab1ceb`. Metadata-before-selected-body
+  reads and actual continuation are exposed in the scoped host trace; automatic
+  injected context remains unknown. Parent intake01 verifies all1,055 file
+  hashes,434 source blob identities,374 canonical consumer files,467 unchanged
+  prepared consumer files and exactly two additions, plus18 command returns.
+  A separate normal-Git read matches all434 exports to exact accepted9c15.
+  The original owner HEAD remains e797bd48; no source or report changed.
+  Initial ZIP/CRLF export RED remains, followed by verified exact-blob extraction;
+  no rerun or new native actor was needed. SAME486 now owns actual independent
+  NarrativeArc Critique/SlideNarrationCritic and bounded SPEC then eligible
+  QUALITY. No native utility, original-parent or maturity acceptance is claimed
+  before that result; P10/native-format/global-P05 gates remain separate.
 - P14: the original core-profile experiment is owned by
   `8fa44739-f562-4213-a6c4-fb7719fc8c9e`, branch
   `jokerman-microsoft-universal-profile-scenarios`, from `9f8885b`.
