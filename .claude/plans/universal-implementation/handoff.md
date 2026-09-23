@@ -215,6 +215,20 @@ Current actionable checkpoints supersede the older chronological entries below:
   unchanged suite, fresh original-singleton contexts/failed QA, freeze and
   revoke. Alias and record publication remain ungranted. F06 and whole selected
   acceptance remain open until genuine review and actual negative consumers.
+  The direct tranche now returned partially: actual exits0/0/1/3/1, one13-case
+  suite with4 order failures/0errors/0skips, valid new contexts and blocked
+  QA. The fifth pin failed the stronger grant-time MAIN preservation assertion;
+  no candidate packet exists and the lease is revoked. Diagnosis `5c8cd35c`
+  plus parent intake01 bind37 snapshots/290 stopped artifacts: all566 old
+  MAIN file states survive, with only six same-c2 checkpoint refs/six commit
+  objects and seven directories added. All objects reference the exact old
+  tree/parent; metadata is not authenticated writer provenance. Other15
+  siblings are exact; direct's declared candidate delta remains unchanged.
+  The original card now permits only private observer/pin-preparation work
+  by controllerf2, retaining both baselines and strictly classifying additive
+  checkpoint metadata. SAME9db must review that correction before a separate
+  one-attempt pin-only release. No mutation/test/QA replay or candidate review
+  is authorized now. Original unexpected pin failure remains distinct.
   A13.1/.2/.4, P10 and invalid shell27/q02 boundaries remain separate. No
   unaccepted owner source is integrated merely to preserve report ancestry.
   Reviewer-private failures remain honest post-hoc transcript artifacts,

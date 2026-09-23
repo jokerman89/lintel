@@ -119,6 +119,14 @@ The original card now concretely releases only SAMEc2/ship-direct candidate
 execution through originalf2, with exact packet/path identities and one real
 unchanged test run. Freeze and revoke before independent candidate review;
 alias, review-record publication and F06/whole-package acceptance remain gated.
+The direct execution stopped after its fifth pin: exits0/0/1/3/1 retain the
+single13-case/four-failure negative run and blocked QA, but no final packet.
+Read-only diagnosis `5c8cd35c` identifies12 additive MAIN checkpoint files,
+not changed old product/HEAD/index/branch bytes. Parent intake binds all37
+snapshots/290 stopped artifacts;15 other siblings are exact. The exhausted
+lease is revoked. Only a narrow private preservation-observer/pin-preparation
+correction is released to originalf2, for SAME9db review before any pin retry;
+no source/test/context/QA or target write replay is allowed.
 No forced verdict, waiver, new actor, source repin or remote operation follows.
 A13.1/.2/.4 and installer gates remain separate. All native leases are revoked;
 no target changes are released merely by the proposed evidence design.

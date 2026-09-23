@@ -10,6 +10,9 @@ SPEC `624b554f` is BLOCKED on F06/A10.3; whole QUALITY has not started.
 The negative-control method and private M01 correction pass their bounded
 reviews. The first exact candidate-only release is SAMEc2/ship-direct;
 its actual negative execution, independent verdict and consumer gates remain.
+Direct's single negative suite ran, but final pin stopped on additive MAIN
+checkpoint metadata. Private preservation accounting is being corrected;
+candidate review waits for a verified pin, without any test/QA replay.
 
 ## Historical: first-class swarming work — 2026-09-08
 
