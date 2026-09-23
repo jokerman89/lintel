@@ -62,10 +62,16 @@ inherited inputs, profile `5b911814`, local 13-case suite and typed QA are
 recorded in packet `f88fa37c`. Both readers correctly return 3 for no applicable
 decision. Recovery verifies 330 snapshots, all 40 current target files, exact
 inheritance and original contexts `3f76896f`/`e7ef37fb`; no fixture action is
-replayed. SAME9db is commissioned for separate SPEC, eligible QUALITY and
-mandatory local compliance with full FR-DOC. Current lease is revoked;
-ship-alias stays untouched. Publication remains unauthorized. Whole P08/A13
-and selected-subset review remain.
+replayed. SAME9db now passes target-specific SPEC, subsequent QUALITY and
+mandatory local compliance/full FR-DOC, report `93b12243`, handoff `65fd7a87`.
+Recovery validates both exact decisions `28df28a3`/`61bb7c2b`, all 21 returned
+artifacts, 751 identical before/after records, unchanged typed QA and 26 current
+raw control files per decision. Actual new host receipts `1180271d`/`cd99efb2`
+are returned for SAMEc2's target-only publication/current consumers, then the
+original local no-publication next gate. Ship-alias is still untouched; only
+after verified direct quiescence may its already released own-root comparison
+proceed. Publication remains unauthorized, no rejecting review is invented,
+and whole P08/A13/selected-subset acceptance remain open.
 Source `70469296` and bound inputs stay frozen; no fourth actor.
 P14 preparation passes complete SPEC then QUALITY in `f690eae`, integrated
 `c544fd0`. Native release `acc18df` permits the original controller's sequential

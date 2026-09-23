@@ -91,13 +91,24 @@ Current actionable checkpoints supersede the older chronological entries below:
   both latest readers return3/unverified/No applicable review decision.
   Publication-stage refusal, actual rejecting review and paired equivalence
   remain unobserved. Recovery's data-only intake verifies330 snapshots,40
-  current files, inheritance and nine distinct raw QA files; SAME9db now owns
-  unbiased target-specific SPEC then QUALITY then local compliance/FR-DOC.
+  current files, inheritance and nine distinct raw QA files. SAME9db completed
+  unbiased target-specific SPEC then QUALITY then local compliance/FR-DOC PASS,
+  with zero current P1/P2/P3, report `93b12243` and handoff `65fd7a87`.
   Prepared contexts are `3f76896f` (T011) and `e7ef37fb` (T027), never a
   combined package or borrowed MAIN clearance. Actual host shells149-154
   completed with exits0/0/0/0/3/0, no running owned command; lease revoked,
-  ship-alias ungranted. Await the actual reviewer report/two decisions before
-  new event-bound host receipts and original-writer consumption.
+  ship-alias ungranted at that boundary. Recovery subsequently verifies all 21
+  returned artifacts, ordered stages, 751 identical before/after records, both
+  exact decisions `28df28a3`/`61bb7c2b`, full typed QA and 26 current raw controls
+  per decision. The two actual host receipts are `1180271d` and `cd99efb2`.
+  Original f2/c2 have the concrete exact-byte publication/current consumer
+  continuation, then only the original39 local readiness/authority stop. No
+  publication, forced negative verdict, other-root clearance or successful
+  CAPTURE after blocked SHIP follows. Following direct preservation/quiescence/
+  revocation, the already released ship-alias case may proceed in its own
+  target with equivalent substantive inputs and separate pin/review/QA; no
+  extra generic approval is needed. Reviewer-private failures remain honest
+  post-hoc transcript artifacts, not claimed original redirected streams.
   Additive reporting correction: the earlier controller summary, recovery relay
   and independent report line46 misstated handoff25 as shells142-145/all0.
   Immutable original quiescence `65c7eedd` actually records137-142 with
