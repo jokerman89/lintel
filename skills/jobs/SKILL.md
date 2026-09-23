@@ -116,10 +116,15 @@ stale_jobs 24
 
 ### Step 4 — Audit
 
-Every operation logs to `.claude/runtime/audit/jobs.jsonl`:
+The helpers in `bin/_jobs.sh` record their own operations in the `jobs` category
+(`.claude/runtime/audit/jobs.jsonl` on the v5 layout): `job_begin` (`job_create`),
+`job_set_steps`, `job_update` and `job_end` (`job_archive`). `job_stale_warn` is recorded by the
+dormant `job-stale-warn` hook, not by `bin/_jobs.sh`. This skill emits no separate `job_action`
+record; `continue`, `replan` and `branch` leave only the helper records they cause. These audit
+lines are advisory, while a failed `job.yaml` write makes the helper return non-zero:
 
 ```json
-{"ts":"...","kind":"job_action","job_id":"...","action":"continue|replan|abort|branch"}
+{"ts":"...","kind":"job_update","operator":"...","cycle_id":"...","job_id":"...","step":"PLAN","status":"IN_PROGRESS"}
 ```
 
 ## Voice tier behavior

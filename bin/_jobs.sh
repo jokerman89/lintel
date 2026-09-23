@@ -4,7 +4,7 @@
 # implements: ADR-0005
 # intent: docs/concepts/jobs-system.md
 # constraints: registry is a derived cross-repository view; job files remain authoritative
-# last_intent_review: 2026-09-20
+# last_intent_review: 2026-09-23
 #
 # Lifecycle:
 #   job_create <workflow> <mode>     → creates ~/.lintel/jobs/<id>/{job.yaml,outputs,inputs} + regenerates _active.md
@@ -54,14 +54,46 @@ _jobs_audit() {
 }
 
 # LINTEL_JOBS_NO_INIT=1 -> read-only source (the session digest sources this
-# just to call job_ready; a digest must not create directories as a side effect)
+# just to call job_ready; a digest must not create directories as a side effect).
+# audit_log creates its own directory when it writes, so none is made here.
 if [ -z "${LINTEL_JOBS_NO_INIT:-}" ]; then
   command -v audit_log >/dev/null 2>&1 || source "$_JOBS_BIN_DIR/_audit.sh"
-  mkdir -p "$LINTEL_JOBS_DIR" "$LINTEL_JOBS_ARCHIVE" "$LINTEL_AUDIT_DIR" 2>/dev/null || true
+  mkdir -p "$LINTEL_JOBS_DIR" "$LINTEL_JOBS_ARCHIVE" 2>/dev/null || true
 fi
 
 _jobs_iso_now() { date -u +"%Y-%m-%dT%H:%M:%SZ"; }
 _jobs_epoch_now() { date +%s; }
+
+# job.yaml is the authoritative job record, so its writes are mandatory: a
+# failed write, or a staged rewrite with fewer or more lines than the rewrite
+# must produce (a short write), returns non-zero with an explicit message and
+# never replaces the previous record. (The jobs.jsonl audit line stays advisory.)
+_jobs_lines() { awk 'END { print NR }' "$1" 2>/dev/null; }
+
+# Args: <job.yaml> <staged file> <producer exit status> <expected line count>
+_jobs_replace() {
+  local target="$1" staged="$2" status="$3" expected="$4" lines
+  lines="$(_jobs_lines "$staged")"
+  if [ "$status" = 0 ] && [ -n "$lines" ] && [ "$lines" = "$expected" ] &&
+      mv -f "$staged" "$target" 2>/dev/null; then
+    return 0
+  fi
+  rm -f "$staged" 2>/dev/null
+  echo "ERROR [lintel/jobs]: could not write job record $target; it was not changed" >&2
+  return 1
+}
+
+# Write a new job.yaml and verify every byte before it is published.
+_jobs_write_new() { # <job.yaml> <content>
+  local target="$1" staged="$1.tmp.$$"
+  if printf '%s' "$2" 2>/dev/null > "$staged" && printf '%s' "$2" | cmp -s - "$staged" &&
+      mv -f "$staged" "$target" 2>/dev/null; then
+    return 0
+  fi
+  rm -f "$staged" 2>/dev/null
+  echo "ERROR [lintel/jobs]: failed or short write of job record $target; no job record was written" >&2
+  return 1
+}
 
 # Generate a job-id: <workflow>-<YYYYMMDD-HHMM>-<short-hash>
 job_id() {
@@ -88,12 +120,14 @@ job_create() {
   local id
   id=$(job_id "$workflow")
   local dir="$LINTEL_JOBS_DIR/$id"
-  mkdir -p "$dir/outputs" "$dir/inputs" 2>/dev/null || true
+  if ! mkdir -p "$dir/outputs" "$dir/inputs" 2>/dev/null; then
+    echo "ERROR [lintel/jobs]: could not create job record directory $dir; no job record was written" >&2
+    return 1
+  fi
 
-  local ts
+  local ts record
   ts=$(_jobs_iso_now)
-  cat > "$dir/job.yaml" <<EOF
-workflow: $workflow
+  record="workflow: $workflow
 job_id: $id
 called_by: ${CALLED_BY:-operator}
 mode: $mode
@@ -105,17 +139,21 @@ cleanup_policy:
   keep: [adr, lessons, plan.md, spec.md, prompt.md]
   discard: [scratch/*]
 steps: []
-EOF
+"
+  _jobs_write_new "$dir/job.yaml" "$record" || return 1
 
   # Touch a placeholder 00-state.md inside the job
-  : > "$dir/00-state.md"
+  if ! : 2>/dev/null > "$dir/00-state.md"; then
+    echo "ERROR [lintel/jobs]: could not create $dir/00-state.md; the job record is incomplete" >&2
+    return 1
+  fi
 
   # Audit (unified writer → ~/.lintel/audit/jobs.jsonl)
   _jobs_audit "jobs" "job_begin" "job_id=$id" "workflow=$workflow" "mode=$mode"
 
   # Optional inline step contracts (design §3.4 — per-step consumes/produces).
   if [ "$#" -gt 0 ]; then
-    job_set_steps "$id" "$@"
+    job_set_steps "$id" "$@" || return 1
   fi
 
   regenerate_active
@@ -217,19 +255,26 @@ job_set_steps() {
   # Reprint job.yaml up to (not including) the `steps:` line, then re-emit steps.
   # The steps block is always the trailing block (job_create writes it last),
   # so dropping from `^steps:` to EOF and re-appending is safe and idempotent.
-  awk '
-    /^steps:/ { found=1 }
-    !found { print }
-  ' "$dir/job.yaml" > "$dir/job.yaml.tmp"
-
+  local rc=0 expected
+  expected="$(awk '/^steps:/ { exit } { n++ } END { print n + 0 }' "$dir/job.yaml" 2>/dev/null)"
   if [ -z "$body" ]; then
-    printf 'steps: []\n' >> "$dir/job.yaml.tmp"
+    expected=$((expected + 1))
   else
-    printf 'steps:\n' >> "$dir/job.yaml.tmp"
-    printf '%s\n' "$body" >> "$dir/job.yaml.tmp"
+    expected=$((expected + 1 + $(printf '%s\n' "$body" | awk 'END { print NR }')))
   fi
-
-  mv "$dir/job.yaml.tmp" "$dir/job.yaml"
+  {
+    awk '
+      /^steps:/ { found=1 }
+      !found { print }
+    ' "$dir/job.yaml" || rc=$?
+    if [ -z "$body" ]; then
+      printf 'steps: []\n'
+    else
+      printf 'steps:\n'
+      printf '%s\n' "$body"
+    fi
+  } 2>/dev/null > "$dir/job.yaml.tmp" || rc=$?
+  _jobs_replace "$dir/job.yaml" "$dir/job.yaml.tmp" "$rc" "$expected" || return 1
 
   _jobs_audit "jobs" "job_set_steps" "job_id=$id" "count=$#"
 }
@@ -280,6 +325,7 @@ job_update() {
   # the ^status: matcher. `cur` tracks which step block we are inside so the
   # right nested status line is rewritten. The top-level `status:` is only
   # rewritten when the step is NOT a populated steps[] entry (see above).
+  local rc=0
   awk -v ts="$ts" -v step="$step" -v status="$status" -v step_exists="$step_exists" '
     BEGIN { updated_lt=0; updated_cs=0; updated_st=0; cur="" }
     /^last_touched:/ && !updated_lt { print "last_touched: " ts; updated_lt=1; next }
@@ -288,7 +334,8 @@ job_update() {
     /^  - name:/ { cur=$3; print; next }
     /^    status:/ && cur==step { print "    status: " status; next }
     { print }
-  ' "$dir/job.yaml" > "$dir/job.yaml.tmp" && mv "$dir/job.yaml.tmp" "$dir/job.yaml"
+  ' "$dir/job.yaml" 2>/dev/null > "$dir/job.yaml.tmp" || rc=$?
+  _jobs_replace "$dir/job.yaml" "$dir/job.yaml.tmp" "$rc" "$(_jobs_lines "$dir/job.yaml")" || return 1
 
   _jobs_audit "jobs" "job_update" "job_id=$id" "step=$step" "status=$status"
 
@@ -314,7 +361,7 @@ job_archive() {
   fi
 
   # Mark final status + ts in job.yaml
-  local ts
+  local ts rc=0
   ts=$(_jobs_iso_now)
   awk -v ts="$ts" -v result="$result" '
     BEGIN { updated_lt=0; updated_st=0; appended_arc=0 }
@@ -322,7 +369,8 @@ job_archive() {
     /^status:/ && !updated_st { print "status: " result; updated_st=1; next }
     { print }
     END { print "archived_at: " ts }
-  ' "$dir/job.yaml" > "$dir/job.yaml.tmp" && mv "$dir/job.yaml.tmp" "$dir/job.yaml"
+  ' "$dir/job.yaml" 2>/dev/null > "$dir/job.yaml.tmp" || rc=$?
+  _jobs_replace "$dir/job.yaml" "$dir/job.yaml.tmp" "$rc" "$(( $(_jobs_lines "$dir/job.yaml") + 1 ))" || return 1
 
   # Move to archive (mv across paths)
   mv "$dir" "$archive_dir/" 2>/dev/null || true
