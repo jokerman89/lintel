@@ -271,10 +271,17 @@ never inferred from this directive; a model switch does not change context ident
   Actual pin03 succeeded (child/outer 0/0): candidate-03 `2890b808`, handoff
   `50022870`, chronological post-exit `d5575855`, revocation `ee84c45c`, empty
   ownership `a5b085fc`. Coordinator intake passed 37/37 data-only checks, including
-  an independent recomputation of the derivation. SAME9db's candidate SPEC is
-  running. The card releases f2 to prepare only the direct-consumption,
-  alias-candidate and alias-consumption packages, for one queued SAME9db
-  preparation review; every execution still needs its own grant.
+  an independent recomputation of the derivation. The card releases f2 to prepare
+  only the direct-consumption, alias-candidate and alias-consumption packages, for
+  one queued SAME9db preparation review.
+  SAME9db then returned candidate-03 SPEC FAIL for T011 and T027 (F06-D01 P1 at
+  `labels.py:14`, F06-D02 P2 at `README.md:12-13`; QUALITY/compliance not run),
+  manifest `744167d6`, decisions `83921d88`/`900f49fc`. Coordinator intake passed
+  27/27. The card now releases one ordered chain, each step conditional on the
+  previous one and on the preparation review passing: direct consumption, alias
+  candidate plus review, alias consumption, then a report-only appendix and SAME9db
+  recheck. Every invocation needs its own grant, post-exit, quiescence and
+  revocation; any stop returns to coordinator88 without retry.
   A13.1/.2/.4, P10 and invalid shell27/q02 boundaries remain separate. No
   unaccepted owner source is integrated merely to preserve report ancestry.
   Reviewer-private failures remain honest post-hoc transcript artifacts,
