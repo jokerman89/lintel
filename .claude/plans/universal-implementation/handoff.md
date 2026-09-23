@@ -176,9 +176,18 @@ Current actionable checkpoints supersede the older chronological entries below:
   The P08 card now proposes three original A10.3.n1-n3 refinements: a declared
   one-line original sorting-regression input in each existing delivery target,
   unbiased independent review, then actual negative native consumers. Existing
-  SAME9db must first check the method against F06 read-only. No target grant
-  or execution is authorized before that result and the coordinator's release;
-  actual review status is never dictated. Prior positive packets remain exact.
+  SAME9db's actual method check c08335a2 passes evidentiary SPEC fit; bounded
+  plan QUALITY needs M01. The unchanged original launcher expects the old831
+  report and would stop before payload on authorized229's report-only change.
+  Controllerf2 is now authorized only for an additive pinned private
+  `launch-f06.py`: exact229 report exception, all960 frozen source files and959
+  other original files still checked, old launcher/manifests unchanged.
+  Private read-only guard checks and literal next-request preparation precede
+  the independent M01 recheck. No target grant or native execution is released.
+  Parent input-proof02 verifies both938-byte original implementations and an
+  identical in-memory-only946-byte sorting regression; nothing was executed or
+  changed in either target. Its failed CRLF-observer01/driver remain retained.
+  Actual review status is never dictated. Prior positive packets remain exact.
   A13.1/.2/.4, P10 and invalid shell27/q02 boundaries remain separate. No
   unaccepted owner source is integrated merely to preserve report ancestry.
   Reviewer-private failures remain honest post-hoc transcript artifacts,
