@@ -3,7 +3,7 @@
 # implements: ADR-0028
 # intent: skills/catalog/references/selections.md
 # constraints: source-only selection; synthetic homes; no installed or live-host acceptance
-# last_intent_review: 2026-09-22
+# last_intent_review: 2026-09-23
 """Selection closure, evidence and preservation over the existing catalog inventory."""
 import copy
 import hashlib
@@ -23,6 +23,58 @@ TOOL = ROOT / "bin" / "li-catalog.py"
 spec = importlib.util.spec_from_file_location("catalog_metadata_tests", ROOT / "tests/unit/catalog-metadata.py")
 support = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(support)
+
+FAMILIES = {
+    "design-knowledge": {
+        "requires": ["core"],
+        "skills": "design-dna design-consultation",
+        "agents": "",
+    },
+    "frontend-design": {
+        "requires": ["design-knowledge"],
+        "skills": (
+            "frontend-design frontend-typography frontend-motion frontend-shader "
+            "frontend-design-review frontend-style-extract design-html design-review "
+            "design-shotgun plan-design-review generate-style-learn generate-web "
+            "generate-app browse open-managed-browser"
+        ),
+        "agents": (
+            "FrontendArchitect TypographyCurator MotionDirector ShaderEngineer "
+            "DesignSystemAuditor WebExperienceCritic AccessibilityChecker"
+        ),
+    },
+    "document-content": {
+        "requires": ["design-knowledge"],
+        "skills": "generate generate-outline generate-write generate-design generate-qa document-generate",
+        "agents": "SystemArchitect WordTechnicalEditor DesignSystemAuditor",
+    },
+    "document-word": {
+        "requires": ["core"], "skills": "generate-word", "agents": "WordTechnicalEditor",
+    },
+    "document-ppt": {
+        "requires": ["design-knowledge"], "skills": "generate-ppt",
+        "agents": "PPTNarrativeArchitect SlideNarrationCritic",
+    },
+    "document-pdf": {
+        "requires": ["core"], "skills": "generate-pdf make-pdf browse", "agents": "WordTechnicalEditor",
+    },
+    "document-xlsx": {
+        "requires": ["core"], "skills": "generate-xlsx", "agents": "CostAnalyzer CapacityPlanner",
+    },
+    "document-visio": {
+        "requires": ["core"], "skills": "generate-visio", "agents": "SystemArchitect",
+    },
+    "customer-communication": {
+        "requires": ["core"], "skills": "eval",
+        "agents": (
+            "EmailCustomerDrafter BlogPostDrafter LinkedInPostDrafter CustomerEmpathyCheck "
+            "ExecutiveBriefingDrafter PostDemoFollowup ProposalDrafter RFPResponseDrafter"
+        ),
+    },
+    "regulatory-review": {
+        "requires": ["core"], "skills": "", "agents": "EUAIActReviewer GDPRReviewer SOC2Reviewer",
+    },
+}
 
 
 class CatalogSelection(unittest.TestCase):
@@ -122,7 +174,10 @@ class CatalogSelection(unittest.TestCase):
         result = self.cli("--json", "--list-selections", source=ROOT)
         self.assertEqual(result.returncode, 0, result.stderr)
         value = json.loads(result.stdout)
-        self.assertEqual([item["id"] for item in value["selections"]], ["core", "demo-script"])
+        self.assertEqual(
+            [item["id"] for item in value["selections"]],
+            sorted({"core", "demo-script", *FAMILIES}),
+        )
         stages = {item["id"]: item for item in value["source_stages"]}
         self.assertEqual(set(stages), {"skill:generate-pdf", "skill:generate-visio", "skill:generate-xlsx"})
         self.assertEqual(stages["skill:generate-visio"]["status"], "staged")
@@ -409,6 +464,237 @@ class CatalogSelection(unittest.TestCase):
         self.descriptor["shared"] = "missing"
         self.save()
         self.refused()
+
+    def test_actual_optional_families_use_exact_existing_members_and_dependencies(self):
+        value = self.catalog.selection_metadata(ROOT)
+        records = {record["id"]: record for record in value["selections"]}
+        self.assertEqual(set(records), {"core", "demo-script", *FAMILIES})
+        for name, expected in FAMILIES.items():
+            with self.subTest(selection=name):
+                record = records[name]
+                members = {f"skill:{skill}" for skill in expected["skills"].split()}
+                members.update(f"agent:{agent}" for agent in expected["agents"].split())
+                self.assertEqual(set(record["members"]), members)
+                self.assertEqual(record["requires"], expected["requires"])
+                self.assertEqual(len(record["members"]), len(members))
+                selected = self.catalog.selection_metadata(ROOT, [name])
+                self.assertIn("core", selected["selection"]["order"])
+                self.assertTrue(members <= {entry["id"] for entry in selected["entries"]})
+                self.assertFalse(selected["executed"])
+                self.assertTrue(all(entry["maturity"] == "unknown" for entry in selected["entries"]))
+                self.assertNotIn("profile", selected)
+                self.assertNotIn("required_policy", selected)
+
+    def test_standalone_formats_do_not_require_pipeline_or_other_format_bodies(self):
+        for name, format_skill in (
+            ("document-word", "generate-word"), ("document-pdf", "generate-pdf"),
+            ("document-xlsx", "generate-xlsx"),
+        ):
+            with self.subTest(selection=name):
+                value = self.catalog.selection_metadata(ROOT, [name])
+                self.assertEqual(value["selection"]["order"], ["core", name])
+                skills = {entry["name"] for entry in value["entries"] if entry["kind"] == "skill"}
+                self.assertIn(format_skill, skills)
+                self.assertTrue({"generate", "generate-design", "frontend-design", "generate-visio"}.isdisjoint(skills))
+                self.assertEqual(
+                    skills & {"generate-word", "generate-ppt", "generate-pdf", "generate-xlsx"},
+                    {format_skill},
+                )
+        customer = self.catalog.selection_metadata(ROOT, ["customer-communication"])
+        self.assertNotIn("demo-script", customer["selection"]["order"])
+        self.assertTrue({"agent:DemoNarrativeArc", "agent:DemoNarratorJunior"}.isdisjoint(
+            entry["id"] for entry in customer["entries"]
+        ))
+        visio = self.catalog.selection_metadata(ROOT, ["document-visio"])
+        stages = {record["id"]: record for record in visio["selection"]["source_stages"]}
+        self.assertEqual(stages["skill:generate-visio"]["status"], "staged")
+        self.assertNotIn("agent:NetworkArchitect", {entry["id"] for entry in visio["entries"]})
+
+    def test_actual_family_unions_are_deterministic_and_preserve_every_reason(self):
+        requested = ["frontend-design", "document-ppt", "customer-communication", "demo-script"]
+        before = support.files_snapshot(self.base)
+        first = self.cli("--json", *("--selection=" + name for name in requested), source=ROOT)
+        second = self.cli("--json", *("--selection=" + name for name in reversed(requested)), source=ROOT)
+        self.assertEqual(first.returncode, 0, first.stderr)
+        self.assertEqual(second.returncode, 0, second.stderr)
+        self.assertEqual(first.stdout, second.stdout)
+        value = json.loads(first.stdout)
+        order = value["selection"]["order"]
+        self.assertEqual(order.count("core"), 1)
+        self.assertEqual(order.count("design-knowledge"), 1)
+        self.assertLess(order.index("design-knowledge"), order.index("frontend-design"))
+        reasons = {record["id"]: record["reasons"] for record in value["selection"]["members"]}
+        self.assertEqual(
+            reasons["agent:SlideNarrationCritic"], ["member-of:demo-script", "member-of:document-ppt"],
+        )
+        paths = [record["path"] for record in value["selection"]["resources"]]
+        self.assertEqual(len(paths), len(set(paths)))
+        self.assertEqual(support.files_snapshot(self.base), before)
+
+    def test_actual_design_source_resources_and_both_notices_are_retained(self):
+        for name in ("design-knowledge", "frontend-design", "document-content", "document-ppt"):
+            with self.subTest(selection=name):
+                value = self.catalog.selection_metadata(ROOT, [name])
+                resources = {record["path"] for record in value["selection"]["resources"]}
+                provenance = {record["id"]: record for record in value["selection"]["provenance"]}
+                self.assertEqual(set(provenance), {"design-dna-corpus", "design-dna-example-profile"})
+                self.assertEqual(provenance["design-dna-corpus"]["license"], "MIT")
+                self.assertEqual(provenance["design-dna-example-profile"]["license"], "Apache-2.0")
+                for record in provenance.values():
+                    self.assertIsNone(record["import_commit"])
+                    self.assertIn(record["notice"], resources)
+                    self.assertIn(record["attribution"], resources)
+                    self.assertTrue(record["modifications"])
+                csv_paths = {
+                    path.relative_to(ROOT).as_posix()
+                    for path in (ROOT / "skills/design-dna/data").rglob("*.csv")
+                }
+                self.assertTrue(csv_paths <= resources)
+                for path in (
+                    "skills/design-dna/scripts/design_contract.py",
+                    "skills/design-dna/references/design-contract.schema.json",
+                    "skills/design-dna/scripts/search.py", "skills/design-dna/scripts/core.py",
+                    "skills/design-dna/scripts/design_system.py",
+                    "skills/design-dna/scripts/emit_tokens.py",
+                    "skills/design-dna/scripts/validate_design.py",
+                    "skills/design-dna/profiles/anthropic-default.yaml",
+                    "lib/context_safety.py", "lib/native_paths.py", "lib/profile_context.py",
+                    "lib/review_contract.py", "lib/markdown_source.py",
+                ):
+                    self.assertIn(path, resources)
+
+    def test_format_source_resources_do_not_claim_the_rejected_pipeline(self):
+        expected = {
+            "document-word": {
+                "skills/generate-word/references/native-word.md",
+                "skills/generate-write/references/fidelity-and-evidence.md",
+            },
+            "document-ppt": {
+                "skills/generate-ppt/references/native-powerpoint.md",
+                "skills/design-dna/scripts/search.py",
+                "skills/design-dna/data/slides/slide-strategies.csv",
+            },
+            "document-pdf": {
+                "skills/generate-pdf/scripts/prepare_html.py",
+                "skills/generate-pdf/scripts/print_pdf.mjs",
+                "skills/generate-pdf/scripts/check_pdf.py",
+                "skills/browse/scripts/chromium.mjs",
+                "skills/browse/references/browser-operations.md",
+            },
+            "document-xlsx": {
+                "skills/generate-xlsx/references/native-xlsx.md",
+                "skills/generate-xlsx/scripts/check_xlsx.py",
+                "skills/dh/references/decision-methods.md",
+                "agents/engineering/CapacityPlanner.md",
+            },
+            "document-visio": {"skills/generate/agent-mapping.yaml"},
+        }
+        for name, paths in expected.items():
+            with self.subTest(selection=name):
+                value = self.catalog.selection_metadata(ROOT, [name])
+                resources = {record["path"] for record in value["selection"]["resources"]}
+                self.assertTrue(paths <= resources)
+                self.assertNotIn("skills/generate/scripts/pipeline_inputs.py", resources)
+                for relative in resources:
+                    self.assertTrue((ROOT / relative).is_file())
+                    self.assertNotIn("\\", relative)
+                    self.assertFalse(any(part.startswith(".") for part in relative.split("/")))
+                if name in ("document-pdf", "document-xlsx"):
+                    member = "skill:generate-" + name.removeprefix("document-")
+                    stage = next(row for row in value["selection"]["source_stages"] if row["id"] == member)
+                    self.assertEqual(stage, {"id": member, "status": "unknown", "evidence": None})
+        content = self.catalog.selection_metadata(ROOT, ["document-content"])
+        record = next(row for row in content["selection"]["definitions"] if row["id"] == "document-content")
+        self.assertIn("SPEC FAIL", " ".join(record["limitations"]))
+        self.assertIn("B01", " ".join(record["limitations"]))
+
+    def test_each_new_family_example_has_exact_heading_inputs_outputs_negative_and_limits(self):
+        records = {item["id"]: item for item in self.catalog.selection_metadata(ROOT)["selections"]}
+        for name in FAMILIES:
+            with self.subTest(selection=name):
+                example = records[name]["example"]
+                self.assertEqual(example["path"], "skills/catalog/references/selections.md")
+                text = (ROOT / example["path"]).read_text(encoding="utf-8")
+                self.assertIn(example["heading"], text.splitlines())
+                section = text.split(example["heading"] + "\n", 1)[1].split("\n## ", 1)[0]
+                for label in ("**Inputs.**", "**Method and output.**", "**Negative.**", "**Evidence limit.**"):
+                    self.assertIn(label, section)
+                self.assertIn("--selection=" + name, section)
+
+    def test_actual_family_queries_keep_literal_alias_and_body_boundaries(self):
+        original = Path.read_text
+        def metadata_only(path, *args, **kwargs):
+            if path.name == "SKILL.md" or path.parent.parent.name == "agents":
+                raise AssertionError("whole prompt read during family selection")
+            return original(path, *args, **kwargs)
+        with mock.patch.object(Path, "read_text", metadata_only):
+            selected = self.catalog.selection_metadata(
+                ROOT, ["frontend-design", "document-word"], query="$(touch family-marker)",
+            )
+        self.assertEqual(selected["matched"], 0)
+        self.assertTrue(selected["selection"]["resources"])
+        before = support.files_snapshot(self.base)
+        match = self.cli("--json", "--selection=frontend-design", "--name=match", source=ROOT)
+        self.assertEqual(match.returncode, 0, match.stderr)
+        self.assertEqual(json.loads(match.stdout)["matched"], 0)
+        ordinary = self.cli("--json", "--name=match", source=ROOT)
+        self.assertEqual(ordinary.returncode, 0, ordinary.stderr)
+        self.assertEqual(json.loads(ordinary.stdout)["entries"][0]["id"], "skill:skill-router")
+        self.assertNotIn("## Behavioral traits", json.dumps(selected))
+        self.assertNotIn("## What this skill does", json.dumps(selected))
+        self.assertEqual(support.files_snapshot(self.base), before)
+        self.assertFalse((self.target / "family-marker").exists())
+
+    def test_new_family_descriptor_faults_refuse_before_unmatched_filter_without_writes(self):
+        path = ROOT / "lib/capability-selections.json"
+        descriptor = self.catalog.load_text(path.read_text(encoding="utf-8"))
+        original_read = Path.read_text
+        for name in FAMILIES:
+            for field, invalid in (
+                ("members", ["agent:NetworkArchitect"]),
+                ("resources", ["skills/catalog/references/absent-family-resource.md"]),
+                ("requires", ["no-such-selection"]),
+            ):
+                with self.subTest(selection=name, field=field):
+                    candidate = copy.deepcopy(descriptor)
+                    candidate["selections"][name][field] = invalid
+                    def changed(selected, *args, **kwargs):
+                        return json.dumps(candidate) if selected == path else original_read(selected, *args, **kwargs)
+                    before = support.files_snapshot(self.base)
+                    expected_error = FileNotFoundError if field == "resources" else ValueError
+                    with mock.patch.object(Path, "read_text", changed), self.assertRaises(expected_error):
+                        self.catalog.selection_metadata(ROOT, [name], query="unmatched-literal")
+                    self.assertEqual(support.files_snapshot(self.base), before)
+        for name in ("design-knowledge", "frontend-design"):
+            candidate = copy.deepcopy(descriptor)
+            candidate["selections"][name]["provenance"] = []
+            def omitted(selected, *args, **kwargs):
+                return json.dumps(candidate) if selected == path else original_read(selected, *args, **kwargs)
+            with mock.patch.object(Path, "read_text", omitted), self.assertRaisesRegex(ValueError, "provenance"):
+                self.catalog.selection_metadata(ROOT, [name], query="unmatched-literal")
+
+    def test_current_preservation_refresh_retains_recommendations_and_exact_delta(self):
+        path = ROOT / ".claude/plans/universal-implementation/reports/P13-skills-preservation.md"
+        text = path.read_text(encoding="utf-8")
+        self.assertIn("42abfcba39ac80a271ff57e838ffccb1d7f6ed7c", text)
+        self.assertIn("204ea7253b18fb1849fa6de94e1b283b098039b5", text)
+        self.assertIn("73", text)
+        self.assertIn("53", text)
+        delta = text.split("## Accepted-source delta", 1)[1].split("## ", 1)[0]
+        names = set(re.findall(r"^\| `([a-z0-9-]+)` \|", delta, re.M))
+        self.assertEqual(len(names), 44)
+        self.assertIn("swarm", names)
+        for path in (
+            "P04-final-08879e9.md", "P09-modules-5c99612.md",
+            "P11-a14-a1b3a45.md", "P12-common-source-32dac88.md",
+            "P13-consumers-4922a6b.md", "P12-pipeline-binding-d4e9188.md",
+        ):
+            self.assertIn(path, text)
+        for role in (
+            "DesignSystemAuditor", "FrontendArchitect", "MotionDirector",
+            "ShaderEngineer", "TypographyCurator",
+        ):
+            self.assertIn(f"agents/frontend/{role}.md", text)
 
     def test_preservation_map_covers_exact_originals_and_swarm_with_grounded_columns(self):
         audit = ROOT / ".claude/engineering/audits/2026-09-20-universal-quality"
