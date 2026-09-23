@@ -34,7 +34,7 @@ Closes operator-request 5.3 + integrates with L-002 (grep-first-pattern adapted 
 - "My Lintel feels sluggish" → `/li:maintenance --force-compact`
 - "Is everything in place?" → `/li:maintenance --monitor-paths`
 - "What would X cost?" → `/li:maintenance --simulate-tokens customer-engagement`
-- "What's rusting?" → `/li:maintenance --rust-report` (skills with <2 invocations past 30 days, via usage-log)
+- "What has low observed usage?" → `/li:maintenance --rust-report` (retained flag name: skills with <2 recorded invocations past 30 days, via usage-log)
 
 ## When NOT to use
 
@@ -106,7 +106,7 @@ research-dive:    ~10-20k tokens
 ```
 
 Cross-reference with usage records, if any exist (the usage-log writer is manual, operator-invoked):
-- Read `~/.lintel/audit/usage-*.jsonl` past 30 days
+- Read `usage-*.jsonl` in `$(audit_dir usage-skill)` past 30 days, through `bin/li-events.py`
 - Filter by skill-list for the chosen workflow
 - Compute median + p95 tokens-est
 - Surface the source, sample count, missing/estimated fields and selection bias.
@@ -119,9 +119,9 @@ estimate without actual provider/billing inputs.
 
 ### `--rust-report`
 
-Read usage records past 30 days, if any exist (writer is manual — without records, report "no usage data" instead of a rust table):
+Read usage records past 30 days, if any exist (writer is manual — without records, report "no usage records observed" instead of a low-usage table):
 - Count only **recorded** invocations in the selected source/log scope
-- Low recorded activity may prompt a review, not deletion or a dead-skill verdict
+- Low recorded activity may prompt a review, never deletion or an unused-skill verdict
 - Group observed samples separately from **unobserved/coverage unknown**
 - Surface a table for operator review
 
@@ -136,7 +136,7 @@ Pairs naturally with `/li:catalog --trends` (Cohort 2 1.6 output).
 ## Integration
 
 **Reads:**
-- `~/.lintel/audit/usage-*.jsonl` (Cohort 2 1.1 output)
+- `usage-*.jsonl` in `$(audit_dir usage-skill)` (Cohort 2 1.1 output; operator-global)
 - `.claude/runtime/state/` (snapshot dir)
 - `~/.lintel/draft/` (clean targets)
 - `skills/cycle/SKILL.md` mode_envelopes
@@ -144,8 +144,7 @@ Pairs naturally with `/li:catalog --trends` (Cohort 2 1.6 output).
 
 **Writes:**
 - Explicitly authorized owned storage artifacts only; no default global archive
-- `.claude/runtime/audit/maintenance-runs.jsonl` (audit-trail)
-- stdout (report)
+- stdout (report); no audit record is written by this skill
 
 **Consumed by:**
 - Operator (manual periodic runs)
@@ -156,7 +155,7 @@ Pairs naturally with `/li:catalog --trends` (Cohort 2 1.6 output).
 - **Aggressive force-compact mid-engagement** — keep recent state for 30 days minimum. Operators need to resume from context that isn't just-shipped.
 - **Path-monitoring without write-safety** — this skill READS paths. Modifications go through separate ops.
 - **Token-simulation without compatible measured data** — label uncalibrated/unknown.
-- **Calling absent partial telemetry healthy, dead or complete** — preserve the gap.
+- **Turning absent or partial telemetry into a health, disuse or completion verdict** — preserve the gap.
 
 ## Failure recovery
 

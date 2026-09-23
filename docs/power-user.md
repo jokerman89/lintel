@@ -209,9 +209,12 @@ pack resolution, migrations, usage — stay in `~/.lintel/audit/`.
 /li:audit --kind brief_forge_bypassed --since 7
 ```
 
-`/li:hooks-status` reads `hooks.jsonl` specifically, and answers a question the raw log does not:
-which hooks are actually firing, which are dead, and what overrides have been used. Every block you
-override is recorded with the reason you gave.
+`/li:hooks-status` reads the `hooks` category specifically, through the structured reader
+`bin/li-events.py`, and answers a question the raw log does not: which hooks left records in a
+window, which have no observed record, and what overrides have been used. Hooks record only
+findings, blocks, overrides and failures, so a hook with no observed record may simply have had
+nothing to report — absence is never read as "did not run", and a block record is not proof that
+the host enforced the block. Every block you override is recorded with the reason you gave.
 
 Two caveats. First, `.claude/runtime/` is gitignored — the trail is local to your machine, and it is
 not a shared or tamper-evident compliance record. Treat it as a debugging and reconstruction aid.

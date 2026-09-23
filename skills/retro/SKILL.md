@@ -39,12 +39,20 @@ Optional `/learn` emission: skill can offer to write 1-3 lesson entries on the o
 1. **Determine window.** Resolve `--since` to a concrete timestamp.
 2. **Gather signals:**
    - Git log since window start (commits + messages)
-   - Audit log entries (`.claude/runtime/audit/*.jsonl`) within window
+   - Audit records within window, read through `bin/li-events.py` (`--since`) from the files
+     `audit_read_files <category>` names; list reader diagnostics instead of skipping them
    - Todo state changes (if tracked)
-   - Skill invocations within window (from `.claude/runtime/audit/skill-usage.jsonl`)
+   - Recorded skill invocations within window (`usage-*.jsonl` in `$(audit_dir usage-skill)`;
+     the writer is manual, so absence is unobserved, not disuse)
+   - Ledger phase status from `lib/state.sh` (`state_cycle_segment`)
 3. **Structured analysis:**
    - **Shipped:** what landed (commits + PRs + deploys)
-   - **Stuck:** unresolved items (audit log entries marked BLOCKED, failing CI runs, abandoned skills)
+   - **Stuck:** unresolved items — ledger phases whose status is `BLOCKED`, `INCOMPLETE` or
+     `UNTRUSTED`, failing CI runs, abandoned skills
+   - **Block decisions (separate from the ledger):** hook records with `tier=BLOCK`,
+     `blocked="true"` and their `check` (`performed` or `not_performed`, such as a scanner that
+     was unavailable). A block record shows a hook decided to block; it is not proof that the
+     host enforced it, and it is never merged with a ledger `BLOCKED` status
    - **Surprises:** unexpected events (auto-rollbacks, compliance blocks, repeated retries)
    - **Patterns worth recording:** recurring corrections, new workflows that emerged, quirks discovered
 4. **Optional lesson proposals.** If `--emit-lessons`: for each pattern-worth-recording, draft a `/learn` entry. Operator confirms each before write.
@@ -118,7 +126,9 @@ Retro written to docs/retros/2026-W22.md. 14 commits, 4 stuck, 6 patterns.
 
 ## See also
 
-- `/learn` — what /retro --emit-lessons drives
+- `/learn` — what /retro --emit-lessons drives (project lessons through `bin/li-lessons.py`)
 - `/context-save` — for actual session-end persistence
-- `.claude/memory/lessons.md` (project) / `~/.lintel/lessons.jsonl` (global) — where lessons land
+- The project lessons store resolved by `lintel_lessons_file` (`.claude/memory/lessons.md` on the v5
+  layout). No operator-global lessons sink is activated; `~/.lintel/lessons.jsonl` is a read-only
+  legacy view that is not ID-managed
 - Project CLAUDE.md "Self-improvement loop" — the discipline /retro enables
