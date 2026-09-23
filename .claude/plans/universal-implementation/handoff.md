@@ -342,6 +342,19 @@ never inferred from this directive; a model switch does not change context ident
   owner. It also releases the A23.4.p2 `config/aliases.yaml` native payload item
   and the coordinator-found unterminated-final-record case. SAME `1578dfd8` then
   rechecks and runs the first eligible whole QUALITY.
+  Coordinator trial merge (prep only, uncommitted) of `72cf78a5` onto `66090974`:
+  12 conflicts. The seven shared-state files come from `7c0fedc2`, which is
+  patch-identical to `0ecdb520`, so they resolve to ours. The five product/test
+  files resolve by union (adapter resources, runtime-resource lists, kit tests).
+  `skills/CATALOG.md` must be regenerated for P10's ten changed descriptions.
+  Clean-env checks on that tree: eight light tests pass directly. The two native
+  installer behavior tests pass with the approved PowerShell 7 (Windows
+  PowerShell 5.1 refuses scripts under its policy; no bypass). `harness-critical-
+  path` then fails only installed Copilot init/check on missing
+  `config/aliases.yaml`, the item already released. A copilot-kit subset (three
+  HEAD-only tests plus five count- and closure-sensitive P10 tests) passes 8/8.
+  The real merge follows P10 acceptance and gets its own complete kit run and
+  independent review.
 - Integrated suite triage (2026-09-23): the py3 aggregate at `b2909947`
   (product-identical to `84e63a4e`) ran 141 files: 118 pass, 23 fail, 2 partial
   (jq absent, strict refusal holds). Its launcher exported `LINTEL_*` selectors
@@ -361,7 +374,8 @@ never inferred from this directive; a model switch does not change context ident
   Three first-pass failures were launcher artifacts: `snapshot-ownership` and
   `profile-path-identity` pass once Windows PowerShell is on PATH; the 11 failing
   `review-evidence` native tests assert that fixtures refuse inherited
-  `GIT_CONFIG_COUNT/KEY/VALUE`, which only the launcher set (clean rerun pending).
+  `GIT_CONFIG_COUNT/KEY/VALUE`, which only the launcher set; without them the clean
+  rerun passes (exit 0, 1,494 s).
   Copilot-kit was not rerun here (P10 ran 42/42 at `dea408ef`); the final strict
   suite stays A23.4. Evidence: recovery `files/verification/rerun-*-clean`.
 - P11: deterministic parser `d3b5569` / `336513e` passes complete A16 component
