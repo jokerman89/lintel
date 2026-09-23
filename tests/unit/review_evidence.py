@@ -1665,6 +1665,27 @@ class NativePathEvidence(Fixture):
         history = self.run_command(["bash", SOURCE / "bin/li-review-read", "--json"], ok=0)
         self.assertIn('"status":"fail"', history.stdout)
 
+    def test_native_explicit_ignored_domain_record_is_bound_not_omitted(self):
+        relative = ".claude/runtime/state/domains/pipeline-fixture/i0001/ta/01-result.json"
+        payload = {"fixture_only": "fresh P05-owned opaque input, not a P12 decision", "value": 1}
+        path = self.write_json(relative, payload)
+        original = native_io_path(path).read_bytes()
+        self.assertGreater(len(str(path)), 263)
+        self.assertEqual(self.git("check-ignore", relative).stdout.strip(), relative)
+        self.request["selection"] = [relative]
+        self.good()
+        entries = self.expected["snapshot"]["entries"]
+        self.assertEqual(len(entries), 1)
+        self.assertEqual(entries[0]["path"], relative)
+        self.assertEqual(entries[0]["base"], {"kind": "absent", "mode": "000000", "sha256": None})
+        self.assertEqual(entries[0]["worktree"]["sha256"], hashlib.sha256(original).hexdigest())
+        self.write_json(relative, {**payload, "value": 2})
+        self.current(valid=False)
+        native_io_path(path).unlink()
+        self.current(valid=False)
+        native_io_path(path).write_bytes(original)
+        self.current(valid=True)
+
     def test_native_metadata_errors_are_not_missing_snapshots(self):
         import review_contract as contract
         selected = self.write("selected/" + "e" * 58 + "/present.txt", "bound content\n")
