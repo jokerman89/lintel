@@ -30,7 +30,7 @@ The output is NOT a deployed skill yet — operator iterates on the draft, then 
 ## Inputs
 
 - Required: name (kebab-case) + one-line description
-- Optional `--from-lesson <id>` — read a `/learn` entry by id, use it as seed
+- Optional `--from-lesson <L-NNN>` — read a `/learn` entry by ID, use it as seed
 - Optional `--dir <subdir>` — scaffolding subdirectory under `scaffolding/01-foundation/skills/` (default: the skill's own name)
 - Optional `--voice <internal|customer|mixed>` — voice tier (default: internal)
 - Optional `--cli <list>` — CLIs supported (default: `claude-code,codex`)
@@ -40,7 +40,9 @@ The output is NOT a deployed skill yet — operator iterates on the draft, then 
 
 1. **Name validation.** Check name doesn't conflict with existing skill (search scaffolding tree + `~/.claude/skills/`). Must start with `li-`. Kebab-case.
 2. **Read template.** Load `scaffolding/01-foundation/TEMPLATE-skill.md`.
-3. **Read seed (if `--from-lesson`).** Pull lesson body, source, type to use as seed material.
+3. **Read seed (if `--from-lesson`).** Print the exact block by ID with
+   `python3 "$LINTEL_SOURCE_ROOT/bin/li-lessons.py" get --id L-NNN` (exit 1 absent, 2 duplicated
+   or malformed) and use its body, source and type as seed material.
 4. **Generate frontmatter.** Fill required fields per inputs + sensible defaults.
 5. **Generate body.** Scaffold sections:
    - What this skill does — derived from description + seed
@@ -92,13 +94,13 @@ Tools: Read, Bash, Edit, Glob
 - **Name collides:** report existing skill path, exit. Do not auto-rename.
 - **Template missing or corrupted:** report + exit. Do not silently generate without template.
 - **Frontmatter validation fails:** write file anyway BUT mark it INVALID in report. Operator must fix before activation.
-- **Lesson id (`--from-lesson`) not found:** report + ask operator to supply lesson body inline.
+- **Lesson id (`--from-lesson`) not found:** `li-lessons.py get` exits 1 (absent) or 2 (duplicated or malformed); report it + ask operator to supply lesson body inline.
 
 ## Examples
 
 **From a lesson:**
 ```
-> /skillify --name regen-mocks --from-lesson LESSON-042
+> /skillify --name regen-mocks --from-lesson L-042
 [Reads lesson body, scaffolds SKILL.md]
 ✓ Skill draft at scaffolding/01-foundation/skills/regen-mocks/SKILL.md
   Next: fill workflow + examples, then /health

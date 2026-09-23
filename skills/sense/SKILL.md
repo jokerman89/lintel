@@ -48,7 +48,7 @@ explicitly. Required-policy load/drift errors remain errors, not neutral default
 
 ### Step 0a — Surface relevant lessons (v3.6 cohort 2 item 1.3)
 
-Before reading configuration, invoke `/li:lessons-surface` so future session work starts with relevant lessons from `.claude/memory/lessons.md`. Closes the L-001/L-002 loop (lessons are written but never read without this step).
+Before reading configuration, invoke `/li:lessons-surface` so future session work starts with relevant lessons from the project lessons store (`lintel_lessons_file`). Closes the L-001/L-002 loop (lessons are written but never read without this step).
 
 Invocation: `/li:lessons-surface --auto-from-sense` — keyword derived from the branch name + recent commit subjects. (A skill call, portable across every CLI; the old `~/.claude/skills/...` path was Claude-Code-only and non-executable.)
 
@@ -282,8 +282,11 @@ Those load on-demand via `/li:role --deep-dive <role-id>`.
 ### Step 5 — Read lessons + memory (light scan)
 
 ```bash
-[ -f ".claude/memory/lessons.md" ] && lessons_count=$(grep -c '^## ' .claude/memory/lessons.md)
-[ -f ".claude/memory/working-state.md" ] && memory_count=$(grep -c '^## ' .claude/memory/working-state.md)
+# Counts come from the one awk entry point; it resolves the store through lintel_lessons_file.
+source "${LINTEL_SOURCE_ROOT:?select trusted source}/lib/memory.sh"
+lessons_count=$(lessons_count)
+memory_file="$(lintel_working_state_file 2>/dev/null)"
+[ -f "$memory_file" ] && memory_count=$(grep -c '^## ' "$memory_file")
 ```
 
 Surface: "X lessons / Y memory entries available — invoke `/li:lessons` to filter for current intent."
@@ -369,7 +372,7 @@ If operator explicitly asks for the SENSE report mid-session, re-run is allowed 
 - `.claude/runtime/state/00-state.md` in cwd (if present)
 - `.claude-plugin/plugin.json` + `lib/pack-resolver.sh` + `packs/_default/` (Lintel-repo marker for meta-infra gating, Step 0c)
 - recent `git log --oneline -10` (cheap)
-- `.claude/memory/lessons.md` (line count only)
+- The project lessons store via `lessons_count` (count only; `lintel_lessons_file` resolution)
 - `.claude/memory/working-state.md` (line count only)
 - role file IDENTITY section (if role active)
 - `~/.lintel/scaffolding/` presence

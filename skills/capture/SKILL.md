@@ -17,7 +17,7 @@ You are the CAPTURE skill — Phase 8 (final) of the Lintel cycle.
 Closes the cycle by capturing what's durable. The work is shipped; CAPTURE makes sure the NEXT operator (could be you in 6 months, or a teammate, or a fresh cold session) can pick up where this ended without re-deriving everything.
 
 Five artifact categories:
-1. **Lessons** — corrections from BUILD/REVIEW → `.claude/memory/lessons.md` (filtered, durable patterns only)
+1. **Lessons** — corrections from BUILD/REVIEW → the project lessons store resolved by `lintel_lessons_file` (`.claude/memory/lessons.md` on the v5 layout; filtered, durable patterns only)
 2. **ADR** — non-trivial decisions → `.claude/decisions/NNNN-<slug>.md`
 3. **EVOLUTION-LOG** — CLAUDE.md changes → log entry
 4. **Cold-executor handoff trio** — reaffirm `spec.md` + `plan.md` + `prompt.md` against build evidence (trio BORN in PLAN per v3.8 Feature 2.2; CAPTURE only annotates with actual-build outcomes)
@@ -87,7 +87,7 @@ audit_log granularity actual_vs_estimated \
 # → appends one JSONL line to .claude/runtime/audit/granularity.jsonl
 ```
 
-When active: if any field is unavailable (e.g. SCOPE was silent on an XS request, or tokens weren't tracked), pass what you have and omit the rest — `audit_log` records whatever k=v pairs it's given; a partial record is still useful history. Never block the cycle on this; a failed write is silent by design (`_audit.sh` swallows write errors).
+When active: if any field is unavailable (e.g. SCOPE was silent on an XS request, or tokens weren't tracked), pass what you have and omit the rest — `audit_log` records whatever k=v pairs it's given; a partial record is still useful history. Never block the cycle on this: a failed write is advisory — `audit_log` warns on stderr and returns 0 (some hooks discard that stderr), so a missing record stays unobserved.
 
 The estimator's `scale_calibrated_prior <size>` reads exactly this log: it takes the median `actual_tokens` for a size as the corrected prior, falling back to the mechanical default when no history exists (the UNCALIBRATED label is honest while this stays dormant).
 
@@ -97,7 +97,7 @@ Invoke `/li:learn` (or inline):
 
 For each correction operator made during the cycle:
 - Was this correction GENERAL (would apply to future work) or SPECIFIC (one-time)?
-- If GENERAL: candidate for `.claude/memory/lessons.md`
+- If GENERAL: candidate for the project lessons store (`lintel_lessons_file`; `.claude/memory/lessons.md` on the v5 layout)
 - If SPECIFIC: keep in this cycle's notes only
 
 Examples of LESSON-worthy:
@@ -117,29 +117,32 @@ lessons_find_related <candidate keywords>    # all related active lessons, ranke
 ```
 
 Classify against the hits:
-- **add** — nothing related exists → new `## L-NNN — <title>` entry
-- **update** — an existing lesson covers it but the candidate sharpens it → extend THAT lesson's
-  How-to-apply (note the cycle id), no new entry
-- **supersede** — the candidate CONTRADICTS an existing lesson → write the new entry, then add
-  `superseded_by: L-<new> (<date>)` as the first body line of the old one. Never delete or edit
-  the old lesson away — git holds ingestion history, the marker holds validity
-  (supersede-don't-delete).
+- **add** — nothing related exists → new lesson; `bin/li-lessons.py add` allocates the next `L-NNN`
+- **update** — an existing lesson covers it but the candidate sharpens it → `bin/li-lessons.py
+  update --id L-NNN` rewrites THAT lesson's body (note the cycle id) and keeps its ID
+- **supersede** — the candidate CONTRADICTS an existing lesson → `bin/li-lessons.py supersede
+  --id L-OLD` adds the new lesson with `supersedes: L-OLD` and stamps the old one with
+  `superseded_by: L-<new> (<date>)` in one conditional write. Never delete or edit the old
+  lesson away — git holds ingestion history, the marker holds validity (supersede-don't-delete).
 - **no-op** — an existing lesson already says this → skip, mention the existing id
 
 AskUserQuestion per candidate lesson: "Capture as <classification>? (yes / no / edit-first)"
 
-If add: append to `.claude/memory/lessons.md`:
-```markdown
-## L-NNN — <lesson title>
-<lesson body: Rule / Why / How to apply>
-<-- Captured from cycle <cycle-id> by <operator>. -->
+Write through the helper so allocation, the lock and the conditional write stay mechanical
+(without Python 3.9+ the shim refuses visibly and nothing is written):
+```bash
+source "${LINTEL_SOURCE_ROOT:?select trusted source}/lib/memory.sh"
+lessons_helper add --title "<lesson title>" --body-file "$body_file"   # prints the new L-NNN
 ```
+The body carries Rule / Why / How to apply and a `Captured from cycle <cycle-id>` note. The
+helper appends at the end, creates a missing store from the scaffolding template inside a
+repository, and records an advisory `lessons` audit line after the write.
 
 ### Step 3 — Promote lesson check (NEW)
 
-For each NEW lesson captured, AskUserQuestion: "Promote to Lintel global lessons (scaffolding/01-foundation/.claude/memory/lessons.md)? — applies to ALL future scaffolded repos."
+For each NEW lesson captured, AskUserQuestion: "Promote to the Lintel scaffolding baseline (scaffolding/01-foundation/.claude/memory/lessons.md in an explicitly named Lintel work tree)? — applies to future scaffolded repos."
 
-If yes: invoke `/li:lessons-promote`.
+If yes: invoke `/li:lessons-promote` (which runs `bin/li-lessons-promote` with an explicit destination and source label).
 
 This is how operator-discovered patterns become team-wide knowledge.
 
@@ -450,7 +453,7 @@ YES — standalone post-implementation reflection. Useful if operator forgot CAP
 - role file (if active)
 
 **Writes:**
-- `.claude/memory/lessons.md` (append per captured lesson)
+- The project lessons store from `lintel_lessons_file` (conditional append/update/supersede per captured lesson through `bin/li-lessons.py`)
 - `.claude/decisions/NNNN-<slug>.md` (new ADR if drafted)
 - `EVOLUTION-LOG.md` (if CLAUDE.md changed)
 - Mapped `spec`/`plan` (reconciled only within original authority)
@@ -490,7 +493,7 @@ YES — standalone post-implementation reflection. Useful if operator forgot CAP
 
 ## Failure recovery
 
-- **lessons.md missing**: create via `bin/li-scaffold` template, then proceed
+- **lessons store missing**: `bin/li-lessons.py add` creates it from the scaffolding template with the same conditional write (inside a repository only), then proceeds
 - **.claude/decisions/TEMPLATE.md missing**: prompt operator to run `bin/li-scaffold init` first
 - **operator can't decide on lesson capture**: capture as PROVISIONAL (low confidence flag), they can promote/remove later
 - **CLAUDE.md changed but operator says "not significant"**: skip EVOLUTION-LOG, but log audit-trail note

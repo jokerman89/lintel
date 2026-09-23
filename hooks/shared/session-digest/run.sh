@@ -58,17 +58,29 @@ add "Pack: ${pack} · mode: ${mode} · role: ${role}${compliance}"
 # v5 layout (ADR-0005): knowledge lives in .claude/; legacy paths are the
 # pre-migration fallback (grace window to 2026-09-12).
 _first_existing() { for p in "$@"; do [ -e "$p" ] && { printf '%s' "$p"; return; }; done; }
-LESSONS_FILE=""; MEMORY_FILE=""; DECISIONS_DIR=""
+MEMORY_FILE=""; DECISIONS_DIR=""
 if [ -n "$REPO_ROOT" ]; then
-  LESSONS_FILE="$(_first_existing "$REPO_ROOT/.claude/memory/lessons.md" "$REPO_ROOT/tasks/lessons.md")"
   MEMORY_FILE="$(_first_existing "$REPO_ROOT/.claude/memory/working-state.md" "$REPO_ROOT/tasks/memory.md")"
   DECISIONS_DIR="$(_first_existing "$REPO_ROOT/.claude/decisions" "$REPO_ROOT/docs/adr")"
 fi
 
-# Recent lessons (last 3 ## L-NNN headers)
-if [ -n "$LESSONS_FILE" ]; then
-  les="$(grep -E '^## L-[0-9]' "$LESSONS_FILE" 2>/dev/null | tail -3 \
-        | sed -E 's/^## //; s/ — / /' | paste -sd '|' - | sed 's/|/ · /g')"
+# Recent lessons: the three active lessons with the highest numeric IDs, read
+# through the one awk grammar in lib/memory.sh from the resolved project store
+# (own tree first, ADR-0008). Its stderr diagnostics are not part of the envelope.
+_memory_lib="$(dirname "${BASH_SOURCE[0]}")/../../../lib/memory.sh"
+[ -f "$_memory_lib" ] || _memory_lib="$LINTEL_HOME/lib/memory.sh"
+LESSONS_REL=""
+if [ -n "$REPO_ROOT" ] && [ -f "$_memory_lib" ]; then
+  lesson_view="$( (
+    cd "$REPO_ROOT" 2>/dev/null || exit 0
+    # shellcheck disable=SC1090
+    source "$_memory_lib" || exit 0
+    root="$(lintel_repo_root)"; file="$(lintel_lessons_file)" || exit 0
+    printf '%s\n' "${file#"$root"/}"
+    lessons_recent 3
+  ) 2>/dev/null )"
+  LESSONS_REL="$(printf '%s\n' "$lesson_view" | head -1)"
+  les="$(printf '%s\n' "$lesson_view" | sed '1d' | sed -E 's/ (—|-) / /' | paste -sd '|' - | sed 's/|/ · /g')"
   [ -n "$les" ] && add "Recent lessons: $les"
 fi
 
@@ -151,7 +163,7 @@ fi
 
 # Repo-relative paths in the header (readability)
 _rel() { printf '%s' "${1#"$REPO_ROOT"/}"; }
-digest="LINTEL SESSION DIGEST (auto-loaded · $(_rel "${LESSONS_FILE:-.claude/memory/lessons.md}"), $(_rel "${MEMORY_FILE:-.claude/memory/working-state.md}"), $(_rel "${DECISIONS_DIR:-.claude/decisions}") for detail)
+digest="LINTEL SESSION DIGEST (auto-loaded · ${LESSONS_REL:-.claude/memory/lessons.md}, $(_rel "${MEMORY_FILE:-.claude/memory/working-state.md}"), $(_rel "${DECISIONS_DIR:-.claude/decisions}") for detail)
 ${lines}"
 
 # ── audit (best-effort, via the unified writer — keeps stdout clean for the envelope) ──

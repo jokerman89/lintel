@@ -79,9 +79,11 @@ For relevant ADRs:
 ### Step 3 — Lessons scan (filtered by relevance)
 
 Invoke `/li:lessons` skill OR inline:
-- Read `.claude/memory/lessons.md`
+- Read the project lessons store through `lib/memory.sh` (`lessons_find_related <wedge keywords>`;
+  the store is `lintel_lessons_file`, and a second ignored store is named, never hidden)
 - Filter by keyword match + topic similarity to wedge
-- Surface top 3-5 lessons with "Why this might apply now: <one-line>"
+- Surface top 3-5 lessons with "Why this might apply now: <one-line>"; print a full block with
+  `bin/li-lessons.py get --id L-NNN`
 
 ### Step 4 — Dependency audit (if wedge touches third-party)
 
@@ -260,7 +262,7 @@ Skip-conditions: intent=hotfix, intent=ship-existing-branch, known territory ope
 **Reads:**
 - cwd codebase (Grep/Glob, capped at top-20 files)
 - `.claude/decisions/*.md`
-- `.claude/memory/lessons.md`
+- The project lessons store (`lintel_lessons_file`), through `lib/memory.sh`
 - `package.json` / `requirements.txt` / `Cargo.toml` / etc
 - `skills/*/SKILL.md` (description field only)
 - `agents/<category>/*.md` (description field only)

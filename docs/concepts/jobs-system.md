@@ -77,7 +77,8 @@ cleanup_policy:
 
 - Historical intended **keep** destinations:
   - ADRs → `.claude/decisions/`
-  - Lessons → `.claude/memory/lessons.md` (via existing `lessons-promote` skill)
+  - Lessons → never appended. The hook only suggests `/li:learn` review and
+    `/li:lessons-promote` for general lessons; candidates stay in the archived job outputs.
   - Plan/spec/prompt → `.claude/plans/<slug>/`
 - Explicit archive operations use `job_archive`; they are separate from approval
   or promotion of durable artifacts. Preserve failed candidates for diagnosis.
