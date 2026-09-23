@@ -83,9 +83,16 @@ represented with zero boundary-only files, exact typed QA and original
 contexts `e8359100` / `07bff3be`. The controller corrected a message-only
 T027 hash triplet; unchanged packet, full brief and current files agree on
 `07bff3be`, raw `800f8fe7`, QA `269bc045`. No context was rewritten.
-SAME9db is commissioned for alias-specific SPEC, eligible QUALITY and
-mandatory local compliance/FR-DOC; no direct or MAIN verdict transfers.
-Publication remains unauthorized and P08/A13/selected-subset acceptance open.
+SAME9db now passes alias-specific SPEC, subsequent QUALITY and mandatory local
+compliance/FR-DOC, report `bd645854`, handoff `1901152f`. Recovery verifies
+36 returned artifacts, 913 unchanged before/after records, current snapshots/
+contexts and verbatim typed QA. Exact decisions `8b794af6`/`5689f02c` have
+separate actual host receipts `cb55ea29`/`a8c5046a`, returned for SAMEc2's
+original alias-only consumers and local authority boundary. The input-only
+pair comparison `98339fd3` is independently verified; it does not preclear
+the remaining alias outcome. Final paired evidence and the original P08
+selected-subset report/review remain required. Publication stays unauthorized,
+with no direct/MAIN verdict transfer, forced rejection or extra actor.
 Source `70469296` and bound inputs stay frozen; no fourth actor.
 P14 preparation passes complete SPEC then QUALITY in `f690eae`, integrated
 `c544fd0`. Native release `acc18df` permits the original controller's sequential

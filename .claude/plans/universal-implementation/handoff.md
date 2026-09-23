@@ -131,9 +131,21 @@ Current actionable checkpoints supersede the older chronological entries below:
   `e8359100`; T027 context `07bff3bea1b7706f8ddec3426d86fcba2f9347178f306fa721059acade5aeb24`,
   raw `800f8fe76f6fa02da8b1e0ca2ed8e74d1da9bec35b269141c2d6ed14100a2bdd`,
   QA `269bc0458f6f7be9f50f09bdae29d8ff8c46b5a209eeb2fcaedf754064cce4d1`.
-  No reprepare/rebind or evidence edit follows that correction. All leases
-  are revoked and SAME9db now owns actual target-specific ordered review,
-  with full mandatory documentation and no copied direct/MAIN clearance.
+  No reprepare/rebind or evidence edit follows that correction. SAME9db has
+  completed target-specific SPEC then QUALITY then mandatory local compliance/
+  FR-DOC PASS, report `bd645854` / handoff `1901152f`. Recovery verifies all36
+  returned artifacts,913 identical before/after records/environment, current
+  419 snapshots/40 alias files, exact contexts and full typed QA. The complete
+  decisions are `8b794af67afa98fe1fe0a2c3d0092ef9cbc48d855b630d4388236ea8df534d03`
+  and `5689f02c71c8a05cbb379e64efc716e5f37533f9bda1e343d12b21a28039a9de`.
+  Actual new88 host receipts `cb55ea29`/`a8c5046a` bind those distinct attempts;
+  originalf2/c2 have only alias exact-byte publication/current consumers and
+  the original no-publication continuation. No copied direct/MAIN clearance.
+  Input comparison `98339fd3` independently confirms same9 original snapshot
+  bytes, literal typed obligations/local policy and13 case IDs; final paired
+  outcome remains future. After verified alias quiescence/revocation, the owner
+  must freeze original finite comparison and full selected-subset P08 report
+  with all actual gaps/history for SAME9db SPEC then eligible whole QUALITY.
   Reviewer-private failures remain honest post-hoc transcript artifacts,
   not claimed original redirected streams.
   Additive reporting correction: the earlier controller summary, recovery relay
