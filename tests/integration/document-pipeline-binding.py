@@ -15,6 +15,8 @@ import json
 import os
 from pathlib import Path
 import re
+import shutil
+import stat
 import subprocess
 import sys
 import tempfile
@@ -73,7 +75,8 @@ class PipelineBinding(unittest.TestCase):
             "LINTEL_PYTHON": sys.executable, "LINTEL_PROFILE_CONTEXT": "synthetic-pipeline",
             "GIT_CONFIG_NOSYSTEM": "1", "GIT_CONFIG_GLOBAL": str(self.base / "empty.gitconfig"),
             "GIT_CONFIG_SYSTEM": str(self.base / "empty.gitconfig"),
-            "GIT_CEILING_DIRECTORIES": str(self.base), "GIT_TERMINAL_PROMPT": "0",
+            # Git does not stop discovery at a ceiling equal to its starting directory.
+            "GIT_CEILING_DIRECTORIES": str(self.base.parent), "GIT_TERMINAL_PROMPT": "0",
             "GIT_PAGER": "cat", "PAGER": "cat", "GCM_INTERACTIVE": "Never",
             "PYTHONNOUSERSITE": "1", "PYTHONDONTWRITEBYTECODE": "1", "PYTHONUTF8": "1",
         })
@@ -811,22 +814,93 @@ class PipelineBinding(unittest.TestCase):
                          upstream_expected=changed, upstream_profile=upstream_profile)
 
 
+def bootstrap(options):
+    """Isolate the ordinary no-argument entry before product imports or environment logs."""
+    if sys.version_info < (3, 9):
+        raise ValueError("Python 3.9+ is required; no install attempted")
+    selected_git = "git" if options.git is None else options.git
+    git = shutil.which(selected_git)
+    if git is None:
+        raise ValueError("Selected Git executable is unavailable; no install or skip attempted")
+    options.git = str(Path(git).resolve())
+    system = {}
+    tool_dirs = [str(Path(options.git).parent), str(Path(sys.executable).resolve().parent)]
+    if os.name == "nt":
+        system_root = os.environ.get("SystemRoot")
+        if not system_root or not Path(system_root).is_absolute() or not Path(system_root).is_dir():
+            raise ValueError("An existing absolute Windows SystemRoot is required")
+        windows = Path(system_root)
+        system = {"SystemRoot": str(windows), "WINDIR": str(windows),
+                  "ComSpec": str(windows / "System32" / "cmd.exe")}
+        tool_dirs.extend((str(windows / "System32"), str(windows)))
+    else:
+        tool_dirs.extend(path for path in os.defpath.split(os.pathsep) if Path(path).is_absolute())
+
+    def directory(value):
+        path = Path(os.path.abspath(value))
+        if path == Path(path.anchor):
+            raise ValueError("Filesystem roots are not owned test fixture directories")
+        for part in (path, *path.parents):
+            try:
+                info = part.lstat()
+            except FileNotFoundError:
+                continue
+            if stat.S_ISLNK(info.st_mode) or getattr(info, "st_file_attributes", 0) & 0x400:
+                raise ValueError(f"Linked test directory refused: {path}")
+        path.mkdir(parents=True, exist_ok=True)
+        return path
+
+    parent = directory(options.fixture_root if options.fixture_root is not None else
+                       SOURCE / ".claude" / "runtime" / "p12-pipeline-binding")
+    options.fixture_root = parent
+    run = directory(tempfile.mkdtemp(prefix="pipeline-tests-", dir=parent))
+    roots = {name: directory(run / name) for name in (
+        "home", "app", "local", "temp", "lintel", "target", "config", "cache", "data", "empty-hooks",
+    )}
+    for name in ("packs", "audit"):
+        directory(roots["lintel"] / name)
+    environment = {
+        **system, "PATH": os.pathsep.join(dict.fromkeys(tool_dirs)), "PATHEXT": ".COM;.EXE;.BAT;.CMD",
+        "HOME": str(roots["home"]), "USERPROFILE": str(roots["home"]),
+        "APPDATA": str(roots["app"]), "LOCALAPPDATA": str(roots["local"]),
+        "TEMP": str(roots["temp"]), "TMP": str(roots["temp"]), "TMPDIR": str(roots["temp"]),
+        "XDG_CONFIG_HOME": str(roots["config"]), "XDG_CACHE_HOME": str(roots["cache"]),
+        "XDG_DATA_HOME": str(roots["data"]), "LINTEL_HOME": str(roots["lintel"]),
+        "LINTEL_PACKS_DIR": str(roots["lintel"] / "packs"),
+        "LINTEL_ACTIVE_PACK_FILE": str(roots["lintel"] / "packs" / "active-pack"),
+        "LINTEL_AUDIT_DIR": str(roots["lintel"] / "audit"),
+        "LINTEL_SOURCE_ROOT": str(SOURCE), "LINTEL_REPO_ROOT": str(roots["target"]),
+        "LINTEL_PYTHON": sys.executable, "LINTEL_PROFILE_CONTEXT": "synthetic-pipeline-bootstrap",
+        "GIT_CONFIG_NOSYSTEM": "1", "GIT_CONFIG_GLOBAL": str(run / "empty.gitconfig"),
+        "GIT_CONFIG_SYSTEM": str(run / "empty.gitconfig"), "GIT_CEILING_DIRECTORIES": str(parent),
+        "GIT_TERMINAL_PROMPT": "0", "GCM_INTERACTIVE": "Never", "GIT_PAGER": "cat", "PAGER": "cat",
+        "PYTHONNOUSERSITE": "1", "PYTHONDONTWRITEBYTECODE": "1", "PYTHONUTF8": "1",
+        "PYTHONIOENCODING": "utf-8",
+    }
+    if os.name == "nt":
+        environment.update(HOMEDRIVE=roots["home"].drive, HOMEPATH=str(roots["home"])[2:])
+    os.environ.clear()
+    os.environ.update(environment)
+    tempfile.tempdir = str(roots["temp"])
+    sys.dont_write_bytecode = True
+    (run / "empty.gitconfig").write_bytes(b"")
+    return run
+
+
 def main():
     global RUN, OPTIONS, PIPELINE, FIXTURE, SAFETY, PROFILE, REVIEW, DESIGN
     parser = argparse.ArgumentParser(allow_abbrev=False)
-    parser.add_argument("--fixture-root", type=Path, required=True)
-    parser.add_argument("--git", required=True)
+    parser.add_argument("--fixture-root", type=Path,
+                        help="Owned parent for a fresh run; defaults to repo-local .claude/runtime/p12-pipeline-binding")
+    parser.add_argument("--git", help="Existing Git executable; defaults to Git discovered on PATH")
     parser.add_argument("--test", action="append",
                         choices=sorted(name for name in PipelineBinding.__dict__ if name.startswith("test_")))
     OPTIONS = parser.parse_args()
-    OPTIONS.fixture_root.mkdir(parents=True, exist_ok=True)
-    RUN = Path(tempfile.mkdtemp(prefix="pipeline-tests-", dir=OPTIONS.fixture_root.resolve()))
-    sys.path.insert(0, str(SOURCE / "lib"))
-    import context_safety
-    import profile_context
-    import review_contract
-    SAFETY, PROFILE, REVIEW = context_safety, profile_context, review_contract
-    SAFETY.checked_root(RUN)
+    try:
+        RUN = bootstrap(OPTIONS)
+    except (OSError, ValueError) as error:
+        print(f"Test bootstrap failed: {error}", file=sys.stderr)
+        return 2
     paths = (
         "skills/generate/scripts/pipeline_inputs.py", "bin/li-work-artifacts.py",
         "lib/swarm_contract.py", "lib/swarm_snapshot.py", "lib/swarm-schema.json", "lib/markdown_source.py",
@@ -838,14 +912,24 @@ def main():
         "lib/pack-schema.yaml", "packs/_default/pack.yaml", ".claude-plugin/plugin.json",
         "skills/design-dna/profiles/anthropic-default.yaml",
         "tests/integration/document-format-pipeline.py", "tests/integration/document-pipeline-binding.py",
+        "tests/integration/document-pipeline-binding.sh",
     )
     seals = {name: hashlib.sha256((SOURCE / name).read_bytes()).hexdigest()
              if (SOURCE / name).is_file() else None for name in paths}
     (RUN / "preflight.json").write_bytes(encoded({
         "source": str(SOURCE), "source_sha256": seals, "environment": dict(os.environ),
         "fixture_root": str(RUN), "native_execution": False,
+        "bootstrap": {"git": OPTIONS.git, "python": sys.executable,
+                      "fixture_parent": str(OPTIONS.fixture_root),
+                      "environment_isolated_before_product_imports": True},
     }))
     print(f"preflight: {RUN / 'preflight.json'}", flush=True)
+    sys.path.insert(0, str(SOURCE / "lib"))
+    import context_safety
+    import profile_context
+    import review_contract
+    SAFETY, PROFILE, REVIEW = context_safety, profile_context, review_contract
+    SAFETY.checked_root(RUN)
     FIXTURE = load("pipeline_long_source_fixture", SOURCE / "tests/integration/document-format-pipeline.py")
     PIPELINE = load("pipeline_inputs", SOURCE / "skills/generate/scripts/pipeline_inputs.py")
     DESIGN = PIPELINE.design_contract
