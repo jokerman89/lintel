@@ -46,10 +46,15 @@ records/current evidence and supplied distinct actual host receipts `af0d9fe3`
 and `60a53f12`. Actual original f2/c2 consumption now passes both chains,
 including after-both and final-pin currentness. Packet `913d6864` is quiescent;
 recovery verifies 1,078 snapshots, 95 current MAIN files and both audit additions.
-Concrete grant `801459b` now releases only the original MAIN three-path local
-CAPTURE continuation, with no-edit mapped-artifact reaffirmation, actual budget
-observation, append/readback and final paired QA gates. No CAPTURE completion
-is preclaimed and the map remains APPROVED with T042 deferred.
+Concrete grant `801459b` completed the exact original three-path CAPTURE.
+Final packet `6d1edc70` is independently verified: 1,310 snapshots, 97 current
+MAIN pairs, five complete ledger entries with the old prefix, actual cycle-audit
+readback and twelve paired reader/QA passes. Local T011/T027 outcome is DONE;
+the map remains APPROVED, T042 deferred and SHIP skipped. Actual handoff budget
+is a byte-derived 56,292-token estimate with unknown capacity/usage, not a fit.
+Grant `39f8107` now releases only the original ship-direct/ship-alias refusal
+comparison to SAMEc2, one target at a time, without publication or borrowed
+profile/review/QA clearance. Whole P08/A13 and selected-subset review remain.
 Source `70469296` and bound inputs stay frozen; no fourth actor.
 P14 preparation passes complete SPEC then QUALITY in `f690eae`, integrated
 `c544fd0`. Native release `acc18df` permits the original controller's sequential
@@ -69,19 +74,26 @@ awaits its next report. Actual rapid actor3 `f1030ad2` now separately passes
 recovery88 SPEC then QUALITY in `b14d927`, not by transferring neutral acceptance.
 Required profile loading is independently verified; its advice stays advisory.
 Exact packet `50394141`, context `e25ced5c`, decision `f1b11842` and handoff
-`847ce8d0` are returned for actual rapid host/producer/latest-reader/QA,
-original T003/local CAPTURE and quiescence. Strict PLAN4/fresh resume5 remain
-required, including SC1-SC3, pre-BUILD P03 rehearsal and finite own-context TQ.
+`847ce8d0` were returned for actual rapid host/producer/latest-reader/QA,
+original T003/local CAPTURE and quiescence; the controller reports those
+completed and will freeze exact receipts in its final comparison.
 Strict PLAN context4 `6cc62d16` completed a bounded T001 formatting rework: its
 explanatory QA table's generic `ID` header made the real reader find three
 unassigned pseudo-tasks. Command47 failed before phase progression. SAME4
 renamed only that header to `QA control`; exact replacement and the real reader
 now pass with only the original three tasks. Plan `d09c16db` is paused before
 BUILD, with the stub intact and context4 revoked. Final genuinely fresh context5
-`5c6b5c3f-9e99-47a3-8e1d-020c1da1c760` is launched for read-only recovery from
-literal original paths/durable handoff, without a supplied next-task answer.
-SC2, BUILD, finite TQ and final review still need actual evidence. No provider
-fix, sixth actor or waiver.
+`5c6b5c3f-9e99-47a3-8e1d-020c1da1c760` actually recovered from literal original
+paths/durable handoff, verified the same live pin and then implemented strict
+after real pre-BUILD SC2. The same actor performed substantive finite TQ;
+original P09 request/start/result and all three typed obligations are retained.
+Separate recovery88 strict SPEC then QUALITY passes in `ed45a73`: independent
+business11/atomic2/eight probes/two fresh non-clearing domain consumers pass,
+with all53 candidate/cold and nine recovery-store files unchanged. Decision
+`7ab7f5dc`/handoff `39717efc` now goes to the distinct controller for real
+host/producer/latest-reader/QA/P09 consumption, only then original progress/
+local CAPTURE and final three-profile synthesis. No provider fix, sixth actor
+or waiver; the original plan remains substantive-byte unchanged.
 No whole A24 acceptance.
 Preserve the original plan, refusal and genuine fresh strict recovery; the
 extra neutral handoff is an intervention, not same-context reuse. Source raw

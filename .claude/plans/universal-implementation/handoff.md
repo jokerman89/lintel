@@ -74,10 +74,16 @@ Current actionable checkpoints supersede the older chronological entries below:
   Concrete original-card grant `801459b` accepts proposal `56155ed6`: only the
   existing state ledger, original-cycle capture artifact and target-local cycle
   audit may be written by SAMEc2. No-edit reaffirmation preserves raw originals;
-  actual audit/ledger readback and paired post-write consumers are required.
-  No CAPTURE/cycle completion is preclaimed. Bound task/prompt, completed
-  build log and analysis stay frozen; no fourth context,
-  provider import, repin or other target write.
+  actual audit/ledger readback and paired post-write consumers were completed.
+  Final packet `6d1edc70` now establishes the actual LOCAL T011/T027 cycle DONE:
+  recovery verifies1,310 snapshots/97 MAIN pairs, five complete ledger appends,
+  actual520-byte cycle record and twelve reader/QA boundary passes. The real
+  budget returns225,166 selected bytes/56,292 estimated tokens, capacity/usage
+  unknown. Map APPROVED/T042deferred/SHIPskipped remain. MAIN is quiescent and
+  frozen; grant `39f8107` releases only its original ship-direct/ship-alias
+  no-publication pair to SAMEc2, serialized with attributable equivalent inputs
+  and independent target profile/review/QA gates. No fourth context, provider
+  import, source repin or publication authority is added.
   Additive reporting correction: the earlier controller summary, recovery relay
   and independent report line46 misstated handoff25 as shells142-145/all0.
   Immutable original quiescence `65c7eedd` actually records137-142 with
@@ -233,10 +239,21 @@ Current actionable checkpoints supersede the older chronological entries below:
   original task and typed obligation. Actual reader now0; plan `d09c16db`
   records PLAN DONE/pre-BUILD pause with the original stub unchanged. Context4
   is idle/revoked. Genuinely fresh final context5
-  `5c6b5c3f-9e99-47a3-8e1d-020c1da1c760` is launched for original-file/pin
-  recovery only, without earlier chat, other-profile output or a next-task
-  answer. Controller prepares existing-API scripts independently; SC2 must
-  actually precede BUILD and all three obligations/TQ/final review remain.
+  `5c6b5c3f-9e99-47a3-8e1d-020c1da1c760` actually recovered from original files,
+  verified the same live pin, and derived original T002/SC2 without earlier
+  chat, other-profile output or a supplied answer. Real initial P05/P09 start
+  precedes SC2; actual SC2 precedes BUILD. Its strict program, finite native TQ
+  report and original request/start/result pass separate recovery88 SPEC then
+  QUALITY in `ed45a73`. Actual independent business11/atomic2/eight direct
+  probes and two fresh P09 consumers pass without release clearance; all53
+  selected/cold files and nine recovery files remain unchanged.
+  Strict decision `7ab7f5dc14f18ff84fa5498aa24b041d2f38a50e92c39a6822261fe9e895c567`
+  and private handoff `39717efcf203ed1e7ca61f6866228d4cbbca500cd30b95fc8d39edd180babe83`
+  are returned to original8fa for distinct actual host observation and real
+  producer/latest-reader/QA/P09 gates. Only afterward may SAME5c6b change the
+  original T002/T003 checkboxes, recheck currentness and complete local CAPTURE.
+  The controller must return final three-profile comparison and exact all-case
+  consumer/capture receipts before whole A24 acceptance.
   No provider/parser change, sixth actor, root relocation or source repin.
   Controller-local task receipts remain attributed to that observer; parent
   inspection APIs did not expose those tasks. Whole native A24 remains open.

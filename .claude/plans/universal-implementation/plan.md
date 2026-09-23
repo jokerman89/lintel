@@ -628,8 +628,14 @@ exact final receipt intake remains separate. Rapid actor `f1030ad2` also passes
 its distinct [independent review](reviews/P14-rapid-native-01.md), `b14d927`,
 with required-profile verification, separate 11-method oracle and eight direct
 probes. Actual rapid decision `f1b11842` awaits its original consumer gate.
-Strict and genuine fresh strict recovery remain required, including SC1-SC3
-and finite TQ; all four A24 leaves stay open.
+Strict and genuine fresh strict recovery now pass their separate
+[independent review](reviews/P14-strict-native-01.md), `ed45a73`, including
+SC1-SC3 and actual finite own-context TQ. Independent business11/atomic2,
+eight direct probes and two fresh non-clearing P09 consumers pass. The original
+SC2 seven API observations are not seven tests or a reviewer recovery replay.
+Strict decision `7ab7f5dc` awaits distinct actual host corroboration and real
+consumption/progress/CAPTURE. Final whole-experiment comparison and all-case
+consumer receipts remain required; all four A24 leaves stay open.
 
 ### A25 Trusted implementation source (P01; R01)
 - [x] A25.1 Enumerate optional-hook/vault executable resolver lookup and use trusted source only.
