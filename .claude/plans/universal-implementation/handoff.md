@@ -282,7 +282,14 @@ never inferred from this directive; a model switch does not change context ident
   candidate plus review, alias consumption, then a report-only appendix and SAME9db
   recheck. Every invocation needs its own grant, post-exit, quiescence and
   revocation; any stop returns to coordinator88 without retry.
-  A13.1/.2/.4, P10 and invalid shell27/q02 boundaries remain separate. No
+  A13 is now released by contract `a13-contract.md` (Git-LF `92d677c8`): A13.1.a,
+  A13.2, A13.3 corrections and A13.4.a, on a new f2 branch stacked on `229656cf`,
+  evidence in `reports/P08-A13.md`, review by SAME9db after its F06 work with a
+  parallel coordinator88 intake. A13.1.b/.4.b stay gated on P10 integration.
+  Coordinator finding F-HOOK-MKDIR (unrouted): 21 warn-only hooks run an unguarded
+  `mkdir -p "$LINTEL_HOME/audit"` under `set -euo pipefail` and exit 1 before
+  warning when that path is not a directory; predates A13 and is not released.
+  P10 and invalid shell27/q02 boundaries remain separate. No
   unaccepted owner source is integrated merely to preserve report ancestry.
   Reviewer-private failures remain honest post-hoc transcript artifacts,
   not claimed original redirected streams.

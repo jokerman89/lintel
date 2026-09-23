@@ -230,6 +230,16 @@ A narrow P07 fixture follow-up is pending under the P10 card. A13.1/.2/.4 stay p
 until the resulting exact contract/fixtures are reviewed and the coordinator explicitly
 releases the shared interface; no WIP import or second interpretation is authorized.
 
+The coordinator's `a13-contract.md` is that exact contract for everything except the
+installer seam. It releases A13.1.a, A13.2, the A13.3 corrections and A13.4.a. Those
+leaves do not depend on P10: its native installers write no audit records, and the one
+producer its runtime replaces (the Claude-home migration event) is reconciled in the
+catalog at fan-in. A13.1.b and A13.4.b stay paused on the P10 seam above, and the parent
+items A13.1 and A13.4 stay open until they pass. After P10 acceptance and integration,
+they read installer evidence only through P10's accepted receipt check, `li-lifecycle`
+and `li-managed-transaction` surfaces. They add no second parser of P10's receipt or
+journal files, and no audit writer or Python prerequisite to the native installers.
+
 ## Coordinated native-path representation
 
 ADR-0031 and the appended P03 repair card authorize one staged implementation:

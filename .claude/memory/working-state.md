@@ -145,7 +145,9 @@ packages for one preparation review, then runs the released chain: direct
 consumption, alias candidate and review, alias consumption, report appendix,
 recheck. Each step has its own grant and stops on any failure.
 No forced verdict, waiver, new actor, source repin or remote operation follows.
-A13.1/.2/.4 and installer gates remain separate. All native leases are revoked;
+A13 contract `92d677c8` releases A13.1.a/.2/.3/.4.a to f2 on a new branch stacked
+on `229656cf`; A13.1.b/.4.b stay gated on P10. Installer gates remain separate.
+All native leases are revoked;
 no target changes are released merely by the proposed evidence design.
 Source `70469296` and bound inputs stay frozen; no fourth actor.
 P14 preparation passes complete SPEC then QUALITY in `f690eae`, integrated

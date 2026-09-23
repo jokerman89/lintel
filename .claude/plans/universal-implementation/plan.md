@@ -402,9 +402,13 @@ no installer may turn a later operation's Python prerequisite into an install pr
 
 ### A13 Observable learning and status (P08; R05)
 - [ ] A13.1 Unify event producer/consumer fields and distinguish observation from verification.
+    - [ ] A13.1.a Add the common event catalog and structured reader, migrate consumers, propagate mandatory-writer failures and diagnose incomplete ledgers.
+    - [ ] A13.1.b Map P10 installer observations through P10's accepted readers after P10 integration, with an integrated doctor that derives no firing verdict from logs.
 - [ ] A13.2 Make learn/surface/promote preserve retrievable L-NNN IDs and configured sinks.
 - [ ] A13.3 Wire freeze to promised write paths or explicitly keep it advisory.
 - [ ] A13.4 Test round-trip events, promoted lesson retrieval and incomplete-log diagnoses.
+    - [ ] A13.4.a Test the non-installer event, lesson, promotion, incomplete-log and freeze scenarios.
+    - [ ] A13.4.b Round-trip complete, interrupted and absent-store installer transactions through P10's accepted reader, and test the doctor's no-verdict rule.
 Acceptance: absent telemetry cannot imply healthy/dead or successful enforcement.
 
 ### A14 Working design contract (P11; R07)
