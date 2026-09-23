@@ -552,6 +552,7 @@ all-client acceptance, the strict full suite or initiative release clearance.
 - [ ] A23.3 Refuse zero-run/skipped/unverified results as full acceptance.
   - [x] A23.3.s1 Reproduce the actual manifest shape check hiding unavailable JSON parity checks from the strict runner.
   - [x] A23.3.s2 Report that missing coverage through the existing skip protocol and verify strict refusal without executing or replacing jq.
+  - [ ] A23.3.s3 Reconcile remaining original package and caller evidence against this refusal contract before whole-parent acceptance.
 - [ ] A23.4 Run stable-tree generated checks, strict suite and separate consumer installation.
   - [x] A23.4.g1 Render schema references from actual pack/envelope contracts; reject invalid source rather than emitting empty or stale metadata.
   - [x] A23.4.g2 Regenerate and check the joined catalog, wiki, README and repository adapter without hand-editing their output.
@@ -581,6 +582,9 @@ The complete corrected shape scope on frozen `c6ebaec` (`current-shape-04`)
 reports 39 passes, zero failures, one partial suite and actual exit 1:
 missing manifest parity is now visible and strict mode correctly refuses it.
 This is verified fail-closed behavior, not a full strict-suite PASS.
+The original A23.3 remainder stays explicit as s3: the real work-map reader
+returns executable leaves, so two completed refinements must not make an
+unchecked original parent disappear from the remaining-work view.
 Coordinator integration refinement: g1/g2 repair the observed JSON-envelope/YAML-only
 wiki mismatch and optional pack-field drift after P04/P07/P06 fan-in. Reuse the accepted
 data parsers, preserve schema versions, and run generator idempotency, malformed-source
