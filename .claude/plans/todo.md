@@ -7,8 +7,9 @@ the sole task ledger. The entries below are preserved history.
 
 Current review checkpoint: 79/113 original acceptances. Complete P08 selected
 SPEC `624b554f` is BLOCKED on F06/A10.3; whole QUALITY has not started.
-The negative-control method passes evidentiary SPEC fit. Its private M01
-launcher guard correction and recheck precede any existing-target release.
+The negative-control method and private M01 correction pass their bounded
+reviews. The first exact candidate-only release is SAMEc2/ship-direct;
+its actual negative execution, independent verdict and consumer gates remain.
 
 ## Historical: first-class swarming work — 2026-09-08
 

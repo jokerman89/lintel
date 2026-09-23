@@ -114,6 +114,11 @@ The correction is now frozen as packet `c5d00ee8`/launcher `0ada32c2`, with
 binding01 verifies all42 artifacts and the still-unchanged target implementations.
 SAME9db is commissioned for the bounded M01 recheck; the parked direct request
 and18 proposed fresh files are not a native grant or executed negative case.
+Subsequent actual recheck `d116b057` closes M01 and passes bounded plan QUALITY.
+The original card now concretely releases only SAMEc2/ship-direct candidate
+execution through originalf2, with exact packet/path identities and one real
+unchanged test run. Freeze and revoke before independent candidate review;
+alias, review-record publication and F06/whole-package acceptance remain gated.
 No forced verdict, waiver, new actor, source repin or remote operation follows.
 A13.1/.2/.4 and installer gates remain separate. All native leases are revoked;
 no target changes are released merely by the proposed evidence design.

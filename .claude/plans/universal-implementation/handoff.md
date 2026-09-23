@@ -198,6 +198,23 @@ Current actionable checkpoints supersede the older chronological entries below:
   brief `d23421d0` and parked request `8a7794ab` remain preparation, not grants.
   SAME9db now has the concrete M01/plan-quality recheck. All target leases stay
   revoked; no negative context, test, review or result has been fabricated.
+  Read-only integration preflight at recovery `c56c09a` compares all47 authored
+  P08 paths against frozen704:40 candidate-only deltas,3 already identical,
+  4 requiring reconciliation. Preserve current accepted named-legacy work reader,
+  its three additional lifecycle regressions and P13's reassigned status body.
+  The fourth seam is `tests/unit/review-source-target.sh`: future integration
+  needs704's legacy-history/new-v2-caller separation plus current P05's
+  `native_paths.py` fixture dependency. Private comparison SHA `d0c5fac2` and
+  its separate disposition record preserve exact refs. No source was imported,
+  merged or tested by this preflight; full selected acceptance still gates it.
+  Actual SAME9db M01 recheck `d116b057` now closes M01 and passes the bounded
+  preparation/parked-direct plan QUALITY. Its68 inspected records remain exact;
+  no guard or native test was rerun by the reviewer. The original card now
+  releases controllerf2 to grant only ship-direct to SAMEc2 for the exact
+  candidate-only packet/path set: one declared sorting mutation, one real
+  unchanged suite, fresh original-singleton contexts/failed QA, freeze and
+  revoke. Alias and record publication remain ungranted. F06 and whole selected
+  acceptance remain open until genuine review and actual negative consumers.
   A13.1/.2/.4, P10 and invalid shell27/q02 boundaries remain separate. No
   unaccepted owner source is integrated merely to preserve report ancestry.
   Reviewer-private failures remain honest post-hoc transcript artifacts,
