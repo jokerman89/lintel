@@ -229,6 +229,15 @@ Current actionable checkpoints supersede the older chronological entries below:
   checkpoint metadata. SAME9db must review that correction before a separate
   one-attempt pin-only release. No mutation/test/QA replay or candidate review
   is authorized now. Original unexpected pin failure remains distinct.
+  The private correction is now frozen in packet `bdb85a5a`, with observer
+  `ba4e0df9`, post-exit observer `cbe2804b` and dormant pin-only caller `5af8fdd1`.
+  Parent intake01 verifies375 artifacts,336 copies against originals, nine
+  retained helper ASTs and actual author55+12 private checks/streams. All290
+  stopped actor records and both original/diagnosed baselines remain exact;
+  the author observed no further checkpoint during preparation. No corrected
+  pin, product helper or target write ran. SAME9db now reviews the complete
+  bounded correction SPEC then QUALITY before any one-pin release. The parked
+  request is not a grant and no candidate review has been commissioned.
   A13.1/.2/.4, P10 and invalid shell27/q02 boundaries remain separate. No
   unaccepted owner source is integrated merely to preserve report ancestry.
   Reviewer-private failures remain honest post-hoc transcript artifacts,

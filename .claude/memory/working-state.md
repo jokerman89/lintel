@@ -127,6 +127,11 @@ snapshots/290 stopped artifacts;15 other siblings are exact. The exhausted
 lease is revoked. Only a narrow private preservation-observer/pin-preparation
 correction is released to originalf2, for SAME9db review before any pin retry;
 no source/test/context/QA or target write replay is allowed.
+The private preservation package is frozen as `bdb85a5a`. Parent intake01
+binds375 artifacts/336 original-preserving copies and author55+12 private
+checks, with no package execution or target writes. SAME9db is now reviewing
+the observer, post-exit accounting and dormant pin-only caller; corrected
+native pin execution and candidate review remain gated.
 No forced verdict, waiver, new actor, source repin or remote operation follows.
 A13.1/.2/.4 and installer gates remain separate. All native leases are revoked;
 no target changes are released merely by the proposed evidence design.
