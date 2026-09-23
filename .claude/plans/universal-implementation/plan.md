@@ -538,6 +538,8 @@ all-client acceptance, the strict full suite or initiative release clearance.
 - [ ] A23.1 Attach a discriminating negative and preserved-behavior case to every corrected mechanism.
 - [ ] A23.2 Exercise profile/work/result/review/resume producer-consumer links together.
 - [ ] A23.3 Refuse zero-run/skipped/unverified results as full acceptance.
+  - [x] A23.3.s1 Reproduce the actual manifest shape check hiding unavailable JSON parity checks from the strict runner.
+  - [x] A23.3.s2 Report that missing coverage through the existing skip protocol and verify strict refusal without executing or replacing jq.
 - [ ] A23.4 Run stable-tree generated checks, strict suite and separate consumer installation.
   - [x] A23.4.g1 Render schema references from actual pack/envelope contracts; reject invalid source rather than emitting empty or stale metadata.
   - [x] A23.4.g2 Regenerate and check the joined catalog, wiki, README and repository adapter without hand-editing their output.
@@ -546,6 +548,22 @@ all-client acceptance, the strict full suite or initiative release clearance.
   - [ ] A23.4.p2 Verify accepted P10 direct consumers and full default installed init/check/recovery at original paths.
 - [ ] A23.5 Obtain independent final spec/quality review of exact integrated content.
 Acceptance: evidence category and limitations are explicit; existing useful tests remain.
+Coordinator-owned A23.3 refinement: the prior structural runner could report
+39 passes while `manifest-identity.sh` labels unavailable jq version-parity
+coverage as a NOTE. The actual-script regression in `test-runner-contract.sh`
+first fails (`manifest-skip-red-01`): strict mode incorrectly reports one pass
+and no partial coverage. Reporting SKIP through the existing protocol fixes it;
+`manifest-skip-green-01` passes syntax, all retained runner controls, the real
+manifest strict-refusal/partial-output case and non-strict preservation.
+Coordinator mechanical SPEC/QUALITY assessment found no remaining scoped issue;
+this is not a new independent package review. No jq execution/install,
+substitute parser, CI edit or wider runner redesign occurred.
+The earlier `current-shape-03` run on exact `924a40c` reported 39/0/0/0 and exit 0,
+but its unavailable manifest parity remains unrun, not full strict acceptance.
+The first `current-shape-01` failure also remains: the outer invocation omitted
+the established Python alias and overrode the pack fixture's own selectors.
+The unchanged source passes after restoring that existing invocation. Neither
+fix supplies the still-denied jq tool or closes A23.3/.4 as a whole.
 Coordinator integration refinement: g1/g2 repair the observed JSON-envelope/YAML-only
 wiki mismatch and optional pack-field drift after P04/P07/P06 fan-in. Reuse the accepted
 data parsers, preserve schema versions, and run generator idempotency, malformed-source

@@ -62,7 +62,7 @@ if command -v jq >/dev/null 2>&1; then
     fi
   done
 else
-  echo "  NOTE: jq absent — version-parity checks skipped (enforced in CI); drift tripwires below still run"
+  echo "  SKIP: jq absent — version-parity checks not run; drift tripwires below still run"
 fi
 
 # Drift tripwires: no stale identity anywhere on the shipped surface (jq-free).

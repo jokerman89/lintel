@@ -20,6 +20,11 @@ standard-library unittest suites. The runner discovers current tests instead of 
 fixed test count. It prints each test as it starts, aggregates failures, reports skipped coverage,
 and rejects an empty run. Use `--require-all` for release evidence.
 
+Unavailable assertions must emit a `SKIP:` line, not an informational `NOTE:`.
+For example, missing jq leaves manifest version-parity coverage unrun even when
+the other identity checks pass. The runner reports that suite as partial and
+`--require-all` refuses full acceptance; a non-strict run may retain the partial result.
+
 ## The tiers
 
 | Tier | What it verifies |

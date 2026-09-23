@@ -51,9 +51,13 @@ the extra neutral handoff is an observed intervention, not same-context reuse.
 No native implementation is yet accepted. Source Git/raw archive identities
 remain distinct; all18 frozen fixture raw hashes were checked against accepted
 run07 before BUILD, without rewriting data or the `c544fd0` source baseline.
-The pinned accepted tree previously passed all 39 strict **shape-only** suites;
-the current full strict runner, required installed P10 case and original artifact
-gates remain. The ten additional optional families pass independent `8f0f7dc` and are
+The shape runner previously reported 39 passes, including on exact `924a40c`,
+but inspection found the manifest guard hid unavailable jq parity as a NOTE.
+A real-script RED/GREEN regression now verifies SKIP/partial reporting and strict
+refusal without executing or replacing jq. Earlier reported counts remain
+history, not full strict coverage. The current full strict runner, required
+installed P10 case and original artifact gates remain. The ten additional
+optional families pass independent `8f0f7dc` and are
 integrated in `c62606b`. Actual committed clone coverage `2b672bb` passes for
 all twelve selections, resources/notices and refusal paths. This closes the
 source metadata/core, one-catalog/honest-routing and provenance-retirement leaves,

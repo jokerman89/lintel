@@ -47,5 +47,29 @@ actual_output=$(bash "$RUNNER" 2>&1) || rc=$?
   printf 'FAIL: runner changed literal failure output\n%s\n' "$actual_output"
   exit 1
 }
+
+mkdir -p "$TMP/tests/shape"
+cp "$ROOT/tests/shape/manifest-identity.sh" "$TMP/tests/shape/manifest-identity.sh"
+(
+  command() {
+    if [ "$#" -eq 2 ] && [ "$1" = "-v" ] && [ "$2" = "jq" ]; then
+      return 1
+    fi
+    builtin command "$@"
+  }
+  export -f command
+  manifest_rc=0
+  manifest_output=$(bash "$RUNNER" --scope shape --require-all 2>&1) || manifest_rc=$?
+  [ "$manifest_rc" -eq 1 ] || {
+    printf 'FAIL: strict runner accepted unavailable manifest parity checks\n%s\n' "$manifest_output"
+    exit 1
+  }
+  [[ "$manifest_output" == *"SKIP: jq absent"* && "$manifest_output" == *"Partial: 1 "* ]] || {
+    printf 'FAIL: manifest parity was not reported as skipped coverage\n%s\n' "$manifest_output"
+    exit 1
+  }
+  expect_rc 0 --scope shape
+)
 echo 'PASS: runner rejects invalid input, empty suites, exact tag misses, shell/framework skips, and failed tests'
 echo 'PASS: runner preserves literal Windows paths and backslash diagnostics'
+echo 'PASS: actual manifest parity reports unavailable jq and blocks strict acceptance'
