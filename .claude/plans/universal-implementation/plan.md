@@ -327,8 +327,13 @@ and [module review](reviews/P09-modules-5c99612.md) `114ddfe3` at `5c99612`,
 integrated `2d789a4`. All 26 method/doc/test paths match; 13 joined consumer
 methods pass against current accepted providers. These closures concern the
 implemented methods and shared contracts, not database/model correctness.
-A09.5 remains open for installed closure. The archived native TA draft's separate
-N1 safety/liveness finding remains unresolved by this source acceptance.
+A09.5 remains open for installed closure. This source acceptance did not itself
+resolve the archived TA draft's separate N1 finding. Its later bounded correction
+passes [independent N1 review](reviews/P09-n1-correction-031d408.md), `5c0cc0e`,
+and actual same-context P05 publication/latest-reader/QA consumption is recorded
+in [P09's report](reports/P09.md#n1-actual-p05-publication-and-consumption).
+Final report `9ec1c7c` is preserved in `b904ffd`; the original TA failure and
+separate DA obligation remain history, not reversed by this correction.
 
 ### A10 Proportionate intake and composition (P08; R05)
 - [ ] A10.1 Ask only missing, task-relevant decisions and retain existing authorization.
@@ -433,7 +438,14 @@ the 69-role map and ADR-0028, plus accepted consumer review `114ddfe3` and exact
 joined module checks. The accepted P13 demo-script selection retains Plan ->
 draft -> distinct critique and all three role sources. This is source/contract
 acceptance, not native registration or observed correctness of all 69 roles.
-Original A17.5 remains open for its actual mode/semantic/installed evidence.
+The five finite Migrator/ReleaseEngineer attempts pass
+[independent mode review](reviews/P09-modes-1b75264.md), `29ced18e`.
+Both current execution decisions were actually authored by SAME447, separately
+host-corroborated and consumed through their original producer/latest-reader/QA
+chains (`9ec1c7c`, preserved `b904ffd`). Planning, conflict and later execution
+retain distinct effects and freshness; no replay or current no-effect claim
+replaces history. Original A17.5 remains open for its remaining installed and
+final receiver coverage, not another run of these completed finite attempts.
 
 ### A18 Optional capabilities without loss (P13; R06)
 - [x] A18.1 Define discoverable capability selections and their dependency/maturity metadata.
