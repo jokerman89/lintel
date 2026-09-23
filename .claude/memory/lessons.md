@@ -843,3 +843,17 @@ Independent review found the gap despite passing flag-presence tests.
 each existing variant while removing inappropriate universal constraints. Test
 those distinctions, not just flag names. Format-specific advisory hints must not
 truncate source content or override mandatory policy.
+
+## L-042 - Fixture isolation flags never authorize disabling product Git controls
+
+**Date:** 2026-09-23
+
+**Context:** A P14 preparation commit was proposed with a process-local
+hook-disabling override. The host rejected it before execution; the owner
+verified unchanged HEAD/staging and then committed normally with existing
+controls intact.
+
+**Rule:** Keep synthetic repository isolation settings inside their declared
+test boundary. Do not carry them into real source-checkout commits, even when
+the task forbids activating new hooks. Existing controls remain in force.
+A rejected command is not evidence it ran and does not authorize a bypass.

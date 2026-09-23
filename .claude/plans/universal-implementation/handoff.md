@@ -15,6 +15,14 @@ The existing P08/P09/P10/P11/P12/P13 owners have the new coordinator address.
 Use the app-surfaced session IDs, not differing IDs quoted inside worker messages.
 Current actionable checkpoints supersede the older chronological entries below:
 
+- P05: P14's same-dimension run06 reaches an unmodified provider failure:
+  ordinary regular-file observation rejects a real 262-character policy path
+  that accepted P03 reads successfully. Recovery reproduced the exact 848-byte
+  file read-only under `p05-p14-policy-path-repro-01`. A03.2 is reopened;
+  the original P05 owner `2329e71f-cd9e-473b-94cf-41c579c29a88` and reviewer
+  `6ed9c7df-4845-4d70-88c7-f0746ab28059` retain this bounded Python observation
+  seam. No P10/Git strategy, root shortening, schema or actor/policy change
+  follows. Earlier accepted cases and native snapshots remain their own evidence.
 - P04: final join `08879e9` passes SAME `ed672f58` SPEC then QUALITY in
   `8a3a35c`, integrated `6e32d1f`; F08 is closed. All nine product/report blobs
   match. Recovery passes eight joined shared seams, 57 retained cases, actual
@@ -77,7 +85,7 @@ Current actionable checkpoints supersede the older chronological entries below:
   explicitly declined during recovery; no app launched. Page layout remains
   permission-blocked, with no retry, COM/export or alternate-launch workaround.
   The separate denied Copilot UI route stays closed. Selected native PPT passes
-  `5858268`, but complete common/Word source QUALITY was never accepted.
+  `5858268`; that selected-PPT verdict alone did not accept common/Word source.
   Workbook `839e6df` passes scoped source SPEC/QUALITY in `21e5228`, preserved
   `699a997`; native caches/layout still fail. PDF source repair `1ba9f9b`
   passes `ae793d39`; complete common source `32dac88` passes first whole
@@ -86,9 +94,16 @@ Current actionable checkpoints supersede the older chronological entries below:
   plus six pure Node print-request tests pass, without new native operations.
   Exact `81c5b01` integration is thirteen format-source paths and six report
   paths; its commit prose's seven-report count was an arithmetic error.
-  `98895a0` releases the read-only pipeline input join. New ten-path product
-  `d4e9188`, report `7c0ae29`, is frozen with SAME31 for SPEC then QUALITY.
-  Standalone defaults, all old native observations and denied record routes remain.
+  `98895a0` releases the read-only pipeline input join. Ten-path product
+  `d4e9188` / report `7c0ae29` fails complete source SPEC in `e85f70a`,
+  preserved `42abfcb`: P2 B01 admits literal anchors and rejects real anchors
+  beside examples. Correction `fa5139c` / report `e309b17` is now frozen with
+  SAME31 and passes complete source SPEC and first whole QUALITY in `c75eabc`.
+  All 33 joined explicit-argument cases pass. Integration is held for the
+  actual normal test-entry gap: zero-argument `.sh` exits 2 before any test.
+  `5e1d21a` releases only its isolated test bootstrap to the original owner.
+  The uncommitted pipeline merge was safely aborted; no accepted history or
+  pending family regression was lost. Native/shared-runtime gates remain.
 - P13: ambiguity repair `b1d4caf` passes independent whole first-unit SPEC/QUALITY
   in `09a3c6ec`, integrated with original history as `03df1db`; joined 31 metadata
   methods pass and all eight product blobs match. The original owner is released
@@ -100,7 +115,32 @@ Current actionable checkpoints supersede the older chronological entries below:
   exposed stale template evidence; `678ae22` deliberately uses the existing
   unknown/null representation for PDF/XLSX and retains Visio's staged proof.
   Current 33 consumer, 20 selection and 31 metadata methods plus catalog check
-  pass. No reader/schema or maturity promotion was introduced.
+  pass. No reader/schema or maturity promotion was introduced. `a426242` now
+  releases the remaining ten source-family records and exact preservation-map
+  refresh to SAMEc4, using accepted `42abfcb` without the rejected pipeline.
+  Four-path product `20493b7` passes SAME486 complete SPEC then QUALITY in
+  `8f0f7dc`, integrated `c62606b`. The reviewer independently ran 109 methods;
+  all six product/report blobs match and 29 joined selection methods pass.
+  `2b672bb` adds actual portable-clone coverage of all twelve selections,
+  canonical source/notices, generated public-guide bytes, minimal dependencies,
+  unions and missing-resource refusal; committed run passes. Earlier missing-
+  family RED and two test-oracle mistakes are retained, not product failures.
+  No source-body/schema/default access change or P10/native utility claim follows.
+- P14: original core-profile experiment preparation is owned by
+  `8fa44739-f562-4213-a6c4-fb7719fc8c9e`, branch
+  `jokerman-microsoft-universal-profile-scenarios`, from `9f8885b`.
+  It prepares one identical offline inventory-reconciliation task under neutral,
+  rapid and strict profiles. No native scenario actor is released yet.
+  The owner reports 14 preparation methods passing at its explicit owned root,
+  but the separate no-argument shell entry fails one Git-object write at its
+  deeper generated root. Product `56ce767` / report `f106f00` fails coordinator
+  preparation SPEC: retained E01 plus P2 R01, whose fixed-incomplete-task check
+  rejects legitimate A24 progress. Whole QUALITY has not started. `2c4fc3d`
+  releases only bounded fixture-Git and progress-preservation corrections.
+  Correction `175a03d` / report `9120bb2` is frozen: R01 tests pass and original
+  E01 Git/copy substeps are corrected at the same dimensions, but full default
+  entry remains 14/15 with E02 in P05's policy-file observation. P14 is stopped
+  at that provider boundary; no native actor, alternate path or retry is released.
 
 Later P13 source checkpoint: A+B `72253ed` passes `7bf3f253`, integrated `895bb35`.
 All 19 joined source-selection methods pass. The new actual installed selection
@@ -111,8 +151,10 @@ This is accepted-P06-engine evidence, not P10 linked/default transaction accepta
 The remaining eight discovery/authoring consumers and existing template are
 released to the original P13 owner with explicit status/welcome ownership.
 
-Current original acceptance count is 69/113 after accepted A16, domain methods,
-preserved role contracts, A14.1-.4 and final A22.7. Native semantic and installed observations
+Current original acceptance count is 74/113: A03.2 remains reopened for the actual
+P14/P05 observation gap, while six source metadata/core/routing/provenance leaves
+now close from accepted P13 and real clone evidence. Accepted A16, domain methods,
+preserved role contracts, A14.1-.4 and final A22.7 remain. Native semantic and installed observations
 remain distinct open leaves; counts are not elapsed time or release readiness.
 The user's percentage question was answered at the then-current 64/113 (57%).
 No push, PR, main merge or release has occurred.
@@ -137,7 +179,7 @@ deep-target case or establish P10/default/linked acceptance.
 P08 main native T011 passed its actual independent review and real P05 producer/
 latest-reader/typed-QA chain with coordinator host corroboration. Only T011
 progress was recorded, followed by a genuine pause before T027; main is revoked
-from builder `c5accb50` pending the third fresh resume context. Separate build-
+from builder `c5accb50`. Separate build-
 direct and alias T011 and T027 reviews remain their own scopes; real actual
 host receipts were created only after full record/context/typed-QA/evidence
 verification. Alias T027's new record is canonical `cf352e9e...`, with actual
@@ -148,11 +190,22 @@ was not run. Each fix then completed its own actual BUILD and prepared a distinc
 integrated REVIEW. Direct packet `b1385f6f...` passes ordered SPEC/QUALITY/local
 COMPLIANCE with original typed tests; record `23fb8ddf...` and recovery's actual
 host receipt were delivered for real consumption. Alias packet `fa1ac58e...`
-is sequentially with SAME9db. No integrated phase is done merely from that
-packet or private verdict. Old raw-plan refusals remain unchanged. Controller
+also passes its separate ordered review as record `ebc542c7...`, with actual
+host observation delivered. The original controller now reports both fix ranges
+completed through their real consumers and all four build/fix ranges frozen.
+Its final packet `4217d437...` preserves 3,301 snapshots, 67 prior receipts and
+eleven nonzero outcomes. Those are controller-attributed observations, not a
+parent claim of completed P08. Old raw-plan refusals remain unchanged. Controller
 `f2c305ac` uses interactive waiting when an actual event is its only dependency;
 new actionable deliveries resume autopilot.
-The third fresh main-resume context has not been created.
+The third and final fresh MAIN context is now actually created:
+`c2d5b8df-d84b-4e36-893a-cd7e28b63e1b`, same original synthetic project/checkout,
+default agent/model without overrides. The controller verified its path/type/
+branch and transferred MAIN-only ownership in handoff22 after revoking c5.
+The child receives original literal map/cycle and durable artifact locations,
+not prior chat, semantic answers or another target's implementation. Other
+sixteen targets stay read-only; side SHIP targets are not granted. Creation
+and transfer do not prove successful cold recovery; await the actual callback.
 
 Latest recovery evidence lives in the session files under `verification/`:
 `p04-final-join-01`, `p04-retained-local-01`, `p04-git-fanin-01`,
@@ -168,6 +221,18 @@ fixture pointer; corrected launchers let the unchanged test select its own
 pointer/state. The first finite-mode receipt check incorrectly compared the
 audit envelope to a raw decision; inspecting the actual `raw` field resolved
 that collector assumption without changing any producer or evidence.
+
+On exact accepted `42abfcb`, the complete **shape-only** runner now passes
+`--scope shape --require-all`: 39 pass, zero failures/skips/partial suites,
+348.813 seconds, under `accepted-shape-contracts-02`. This is not the full
+unit/behavior/integration/e2e suite. The first aggregate was 38/39 because the
+outer launcher still exported a packs directory while the original fallback
+fixture selected a new home. The unchanged test passes once its own derived
+packs/pointer/state selectors are honored; no product, assertion, path length
+or policy was changed. The original failure is retained. The private launcher's
+failure-tail printing also hit the Windows console code page; raw logs/result
+were already safely saved, and only the private stdout/stderr encoding was
+corrected. The isolated test-source worktree stayed clean and is disposable.
 
 Dependency-ready releases are committed, not new proposals awaiting an operator:
 `bdfd127` releases P04's accepted-provider shared-evidence consumer and conditionally

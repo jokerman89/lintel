@@ -2,8 +2,8 @@
 
 ## Boundaries and evidence key
 
-This source map implements the released P13 A+B preservation work, not a second task
-ledger. **No original leaf is completed** by a row, a count, an unchanged file or a
+This source map retains the released P13 A+B preservation work and its accepted-current
+delta, not a second task ledger. **No original leaf is completed** by a row, a count, an unchanged file or a
 source-selection test. Current package status remains in the coordinator's selected
 [work map](../work.json), [plan](../plan.md) and [handoff](../handoff.md).
 
@@ -17,17 +17,25 @@ at `28061e434be455ca02f135b73244eaf4f73f3a69`. Its
 [human-readable recommendations](../../../engineering/audits/2026-09-20-universal-quality/skills-inventory.md)
 are proposals, not deletion authority or current readiness labels.
 
-The current-source comparison is pinned to accepted first-unit checkpoint
+The historical A+B source comparison below remains pinned to accepted first-unit checkpoint
 `204ea7253b18fb1849fa6de94e1b283b098039b5`, product `b1d4caf`. All 126 original
 canonical paths/names remain. Swarm is the one separate addition, for 127 current skills.
 Every source link below is the current canonical path; no entry is moved or replaced
-by this unit. The A+B descriptor does not change any canonical skill or role body.
+by this unit. The descriptor does not change any canonical skill or role body.
 
-Evidence labels used in the table:
+The **accepted-current comparison** is
+`42abfcba39ac80a271ff57e838ffccb1d7f6ed7c`. Since the historical pin, 43 original
+skill bodies plus Swarm changed. Compared with the original `28061e4` inventory,
+**73 original skills are changed and 53 remain byte-identical**: 33 old U rows
+became C, ten old C rows changed again, and Swarm remains a separate addition.
+The [accepted-source delta](#accepted-source-delta) supersedes historical pending
+statements for those rows at its stated evidence layer. It is not a new corpus audit.
 
-- **U**: original/current Git blob bytes are identical (86 skills). The original audit's
+Historical evidence labels used in the retained 126-row table:
+
+- **U**: original/204ea725 Git blob bytes are identical (86 skills at that checkpoint). The original audit's
   full-reading method assessment is retained, not relabeled as a new full-body review.
-- **C**: source changed before A+B (40 skills). The row identifies its retained method
+- **C**: source changed before A+B (40 skills at that checkpoint). The row identifies its retained method
   and relevant accepted component evidence; integration boundaries are still explicit.
 - **D**: exact per-path original/current bytes, headings and inventory comparison recorded
   in builder `ab-preservation-baseline.*`; see [P13 evidence](P13.md). This proves source
@@ -38,20 +46,22 @@ Evidence labels used in the table:
 - **C01**: [P01 final review](../reviews/P01-final.md), helper acceptance only.
 - **C03**: [P03 final review](../reviews/P03-final.md) and
   [joined-path final](../reviews/P03-joined-path-final.md), owned context/recovery only.
-- **C04**: [P04 component final](../reviews/P04-final.md) and
-  [preservation map](P04-preservation.md); final A22.7 remains separate.
+- **C04**: historical [P04 component final](../reviews/P04-final.md) and
+  [preservation map](P04-preservation.md); current A22.7 evidence is J04 below.
 - **C05**: [P05 excerpt/context final](../reviews/P05-excerpt-context-final.md), content-bound
   control/review consumers, not all downstream invocation paths.
 - **C06**: [P06 provider/component final](../reviews/P06-provider-repair-final.md), source
   adapters and recorded host boundaries, not blanket live-client parity.
 - **C07**: [P07 long-path final](../reviews/P07-long-path-final.md), profile contract and
   resolver evidence, not every lifecycle wrapper.
-- **C09**: [P09 content review](../reviews/P09-content-4a9b946.md) and the existing
-  [69-role preservation map](P09-agent-preservation.md), knowledge only.
+- **C09**: historical [P09 content review](../reviews/P09-content-4a9b946.md) and the existing
+  [69-role preservation map](P09-agent-preservation.md), knowledge-layer evidence;
+  later source/module/mode evidence is J09 below.
 - **C13**: exact independent first-unit SPEC then QUALITY PASS at
   `09a3c6ec3c3fa2c3232e921f52accc9262088e8b`, SHA-256
   `695e934d0b393e1c8c3a34644db0bb67964344d62830527de40f7c071fb3de58`;
-  this is source discovery, not A+B acceptance. See [P13 evidence](P13.md).
+  this is first-unit source discovery, not later selection/consumer acceptance.
+  Current evidence is J13 below. See [P13 evidence](P13.md).
 
 Examples below are source-grounded **worked/recheck scenarios**, not fresh execution
 claims. C-labels reuse only the narrower accepted evidence they actually name. U rows
@@ -62,12 +72,17 @@ explicit where an entrypoint crosses package ownership.
 
 Historical `merge`, `retire`, `pack` and `staged` recommendations remain visible.
 No physical pruning, relocation or automatic alias retirement is performed. General
-maturity remains unknown. Only the current explicit PDF/Visio/XLSX `TEMPLATE ONLY`
-descriptions support the separately digest-bound stage declarations in
-[source selections](../../../../lib/capability-selections.json); old audit labels do not
-upgrade or demote changed producers automatically.
+maturity remains unknown. Only Visio retains current explicit `TEMPLATE ONLY`
+evidence. Accepted PDF/XLSX source methods use unknown/null stage records after
+coordinator reconciliation `678ae22`; this does not make those methods absent.
+See [source selections](../../../../lib/capability-selections.json). Old audit labels
+do not upgrade or demote changed producers automatically.
 
-## All 126 original skills
+## All 126 original skills (historical source comparison)
+
+The recommendations, retained method/argument value and historical evidence below
+are preserved. U/C and pending wording in this table describe `204ea725`, not an
+assertion that subsequent accepted work is missing. The current delta follows it.
 
 | Original and current source | Original recommendation; source state | Responsible package and acceptance | Retained method and output | Change or grounded retention rationale | Worked example and evidence | Remaining boundary |
 |---|---|---|---|---|---|---|
@@ -198,12 +213,110 @@ upgrade or demote changed producers automatically.
 | [v4-migrate](../../../../skills/v4-migrate/SKILL.md) | retire; U, same path | P10 A12 | Historical version-specific migration/recovery entry. | Keep recoverability until verified replacement and explicit archival. | An overdue migration remains actionable, not erased by date; D. | No old recipe is endorsed as current universal installation. |
 | [welcome](../../../../skills/welcome/SKILL.md) | refine; C, same path | P06 A05/A06; later P13 view | Task-first onboarding with actual tools and honest fallback. | Retain concise entry and accepted surface distinction. | A native-format wrapper still needs live discovery evidence; D, C06. | No status/welcome change or live onboarding claim follows from A+B. |
 
+## Accepted-source delta
+
+This is the exact 43-original-plus-Swarm changed-path set from `204ea725` to
+`42abfcba39ac80a271ff57e838ffccb1d7f6ed7c`. The historical recommendations above
+are not changed by this table. Current C means changed original bytes; it is not
+semantic acceptance. The 83 originals outside this delta keep their historical
+U/C identity (53 U and 30 C). New descriptor rows still need this unit's independent
+review; these evidence keys cover only already accepted predecessors.
+
+- **J04**: [final joined Swarm review](../reviews/P04-final-08879e9.md), product
+  `08879e9`, review `8a3a35c`, integration `6e32d1f`. Bounded A22.7 closes at its
+  contract/fixture level, not live-person, policy or whole-initiative acceptance.
+- **J09**: [module source review](../reviews/P09-modules-5c99612.md), product
+  `5c99612` / review `114ddfe3`, integration `2d789a4`; later
+  [N1 correction](../reviews/P09-n1-correction-031d408.md) and
+  [finite mode evidence](../reviews/P09-modes-1b75264.md) stay separately attributed.
+  This does not establish every role's native registration or all domain executions.
+- **J11**: [direct design source](../reviews/P11-a14-a1b3a45.md), `a1b3a45` /
+  `edecfdf`, integration `e1cb9d2`; [browser source/observations](../reviews/P11-browser-final-d3b5569.md),
+  `d3b5569` / `3049811`, integration `7cb3812`. Current
+  [static artifact review](../reviews/P11-static-single-03.md) retains unverified V1;
+  framework TLS/build and A14.5 remain open.
+- **J12**: [common/Word/PPT source](../reviews/P12-common-source-32dac88.md),
+  `32dac88` / `f2c1d09`; [PDF source](../reviews/P12-pdf-1ba9f9b.md),
+  `1ba9f9b` / `ae793d39`; [workbook source](../reviews/P12-workbook-839e6df.md),
+  `839e6df` / `21e5228`, integrated through `751af6c`/`81c5b01`.
+  The [P12 pipeline candidate](../reviews/P12-pipeline-binding-d4e9188.md) is
+  SPEC FAIL, P2 B01, QUALITY not started; rejected source was not integrated.
+- **J13**: [A+B selection review](../reviews/P13-selection-72253ed.md),
+  `72253ed` / `7bf3f253`, integration `895bb35`; [consumer review](../reviews/P13-consumers-4922a6b.md),
+  `4922a6b` / `9f58aa8`, integration `991ca73`; current format stage reconciliation
+  `678ae22`. The accepted-P06-engine pilot at `ad605de`/`a5d77f9` covers its actual
+  alias/resource/notice cases, not new-family or new-P10 acceptance.
+
+| Skill | Current identity | Owner/evidence and retained current method | Remaining boundary |
+|---|---|---|---|
+| `browse` | C; was U | P11 A16, J11: actual provider operations and evidence, not a fictional daemon. | Exact prior native observations are not a fresh browser/client run. |
+| `catalog` | C; was C | P13 A19, J13: one deterministic generator and metadata/selection-first discovery. | New family descriptions and closure are not installed/native acceptance. |
+| `da` | C; was C | P09 A09, J09: seven data methods with accepted checkpoint/result consumption. | Recorded planning/execution cases are not every migration or database outcome. |
+| `design-dna` | C; was U | P11 A14/P13 A20, J11: retrieval, profile/asset binding, tokens and shared contract. | Notice/source identity and unknown maturity do not certify rendering or licenses. |
+| `design-html` | C; was U | P11 A14, J11: owned static preview and explicit selected-token errors. | A14.5 V1 visual gap remains; legacy example paths are not fresh authority. |
+| `design-review` | C; was U | P11 A14/P05, J11: shared dimensions and mandatory evidence before advisory scores. | Missing keyboard/visual observation stays unverified. |
+| `design-shotgun` | C; was U | P11 A14, J11: literal variant input and attributable or serial exploration. | Parallel instructions are not actual independent actors or rendered acceptance. |
+| `devex-review` | C; was U | P09 A09, J09: retained developer-journey method and N1 safety quantifier correction. | No blanket fresh-clone/CI or external-operation permission follows. |
+| `dh` | C; was C | P09 A09, J09: seven operations methods with current evidence-bound results. | A deployment/rollback plan is not production execution. |
+| `eval` | C; was U | P13 A19, J13: per-cell good/bad comparison, explicit inputs and partial/unrun outcomes. | No model evaluator, audit writer or automatic ship clearance is invented. |
+| `frontend-design-review` | C; was U | P11 A14, J11: canonical dimensions and exact design/profile/P05 obligations. | Mandatory visual gaps cannot become PASS from a populated JSON result. |
+| `frontend-design` | C; was U | P11 A14, J11: accepted director/renderer mapping and bound source inputs. | Static V1/framework/native gates remain; source decisions are not a rendered page. |
+| `frontend-motion` | C; was U | P11 A14, J11: validated none/CSS/library fragments and explicit output mode. | Named libraries need actual sourced suitability and permission. |
+| `frontend-shader` | C; was U | P11 A14, J11: validated no-shader or active-shader/fallback choices. | No GPU dependency or measured performance is implied by metadata. |
+| `frontend-style-extract` | C; was U | P11 A14, J11: retained pattern extraction with actual palette argument mapping. | Existing artifact/private-vault reads still require explicit authority. |
+| `frontend-typography` | C; was U | P11 A14, J11: validated type decisions with brief/profile/source evidence. | Font source/license fields are not measured readability or blanket usage rights. |
+| `full-engineering-pass` | C; was C | P09 A09, J09: original domain methods and accepted composed result boundaries. | Finite mode evidence is not universal domain or host execution. |
+| `generate-app` | C; was U | P11 A14, J11: literal supported-stack mapping preserving existing manifests. | Framework TLS/build remains blocked; no replacement stack is inferred. |
+| `generate-design` | C; was U | P11 A14/P12 A15, J11: shared design vocabulary and exact sibling-content binding. | Rejected P12 serialized input join is not accepted by this source. |
+| `generate-outline` | C; was U | P12 A15, J12: original source inventory, sections, language and advisory slide pacing. | Source preparation is not native artifact or pipeline acceptance. |
+| `generate-pdf` | C; was U | P12 A15.4, J12: implemented preparation/print/reader and physical-page checks. | Unknown/null stage is not absent method; required visual/full-format gates remain. |
+| `generate-ppt` | C; was U | P12 A15.3, J12: editable slide method, full notes and format-specific inspection. | Selected native PPT verdict is scoped; shared serialization remains blocked. |
+| `generate-qa` | C; was U | P12 A15, J12: actual fidelity/format obligations and evidence invalidation after edits. | Scores cannot clear missing render or required policy evidence. |
+| `generate-web` | C; was U | P11 A14, J11: exact frontend/pipeline argument mapping and source constraints. | Renderer source acceptance does not resolve A14.5 visual/framework gates. |
+| `generate-word` | C; was U | P12 A15.3, J12: standalone three-variant/template/default and editable-content method. | Word page-layout permission remains blocked; no shared-pipeline PASS. |
+| `generate-write` | C; was U | P12 A15, J12: full Body/Bullets/tables/citations and actual speaker-note content. | Word/PPT presentation choices cannot truncate the canonical source. |
+| `generate-xlsx` | C; was U | P12 A15.4, J12: implemented workbook composition and typed saved-integrity checker. | Live calculation does not clear failed/missing persisted caches or layout. |
+| `generate` | C; was U | P12 A15, J12: retained common preparation and standalone choices with explicit gates. | P12 B01 shared join rejected; do not advertise serialized completion. |
+| `help` | C; was C | P13 A19, J13: shared literal catalog/selection metadata before selected bodies. | Source declarations are not tools registered or permitted by the host. |
+| `investigate` | C; was U | P09 A09, J09: hypothesis-led bounded diagnosis and N1 safety clarification. | A plausible diagnosis is not tested remediation or wider authority. |
+| `make-pdf` | C; was U | P12 A15.4, J12: retained conversion entry over actual PDF/browser methods. | A nonempty PDF or page count is not complete rendered/fidelity acceptance. |
+| `open-managed-browser` | C; was U | P11 A16, J11: explicitly owned real session launch/check. | No personal browser, cookie or login authority follows from discovery. |
+| `perfbench` | C; was U | P09 A09, J09: comparable workload/evidence method and N1 boundary. | No paid benchmark or unmeasured improvement is claimed by this row. |
+| `sc` | C; was C | P09 A09/P05, J09: threat/auth/secrets/compliance methods with shared controls. | Optional framework selection cannot remove generic security/required policy. |
+| `scrape` | C; was U | P11 A16, J11: actual structured extraction and explicit partial/error outcomes. | No remote source or new network authorization is implied. |
+| `setup-browser-cookies` | C; was U | P11 A16, J11: chosen login surface and no-cookie-copy boundary. | Source capability does not establish signed-in state or authorize credentials. |
+| `skill-router` | C; was C | P13 A19, J13: literal metadata and at-most-three selected skill bodies; match retained. | Structural guidance is not measured model context or routing behavior. |
+| `skillify` | C; was U | P13 A19, J13: literal name/alias checks, owned draft and native existing-path refusal. | A header check is not semantic method validation or activation. |
+| `status` | C; was U | P13/P08 read-only seam, J13: original map/cycle/profile observations before optional jobs. | Missing logs are not idle/completed work; providers/native704 remain separate. |
+| `swarm` | Separate addition; changed | P04 A22, J04: final joined evidence, original leaves, attributable fan-in and recovery. | Preserve 76 destinations/17 artifacts; no whole-initiative or live-person clearance. |
+| `ta` | C; was C | P09 A09, J09: seven architecture methods and actual accepted result contracts. | No universal capacity or deployment result follows from source methods. |
+| `tq` | C; was C | P09 A09, J09: seven testing methods with bound evidence and retained failures. | Model/host/product outcomes remain their actual selected scenarios. |
+| `uniformity` | C; was U | P13 A19, J13: trusted-source floor and distinct missing/error/stale observations. | Consistency/adoption is not skill usefulness or runtime maturity. |
+| `welcome` | C; was C | P06/P13, J13: task-first metadata and actual surface facts without state creation. | A native-format wrapper or source tour is not live onboarding acceptance. |
+
+## Frontend role evidence alongside the preserved role map
+
+The [69-role map](P09-agent-preservation.md) remains intact. These five role blobs
+changed after the historical `204ea725` pin and now point to J11's accepted
+`a1b3a45` direct-design source. This updates attribution, not the role count,
+names, registration or an independent actor claim.
+
+| Existing role | Retained method and current evidence |
+|---|---|
+| [DesignSystemAuditor](../../../../agents/frontend/DesignSystemAuditor.md) | Canonical dimensions, validator-first and actual mandatory outcomes; J11. |
+| [FrontendArchitect](../../../../agents/frontend/FrontendArchitect.md) | Bound design synthesis with director/render separation and retained Apache notice; J11. |
+| [MotionDirector](../../../../agents/frontend/MotionDirector.md) | None/CSS/library motion choice and reduced-motion limits; J11. |
+| [ShaderEngineer](../../../../agents/frontend/ShaderEngineer.md) | No-shader or evidenced GPU/fallback decision; J11. |
+| [TypographyCurator](../../../../agents/frontend/TypographyCurator.md) | Type/profile/source decisions through the shared contract; J11. |
+
 ## Separately attributed Swarm addition
 
 | Original and current source | Original recommendation; source state | Responsible package and acceptance | Retained method and output | Change or grounded retention rationale | Worked example and evidence | Remaining boundary |
 |---|---|---|---|---|---|---|
 | [swarm](../../../../skills/swarm/SKILL.md) | addition; separate from original126 | P04 A22/A21 | Explicit mapped coordination, briefs, scope checks, evidence and serial/manual fallback. | Preserve `275a35447c4ad271e05816ade43ac48f1acec24f` history and reconciled component, not a tenth phase. | Same briefs survive loss of parallel isolation; D, C04. | Component acceptance is not final A22.7/domain/workflow integration. |
 
+The row above retains its historical A+B wording; J04 and the current delta now
+record bounded A22.7 acceptance without rewriting the old component verdict.
 The [original 76-path record](../../../engineering/audits/2026-09-20-universal-quality/swarm-preservation.md)
 and [P04 preservation map](P04-preservation.md) retain the full history, plans, tests,
 briefs and review evidence. This +1 row supplements them; it does not reduce that
@@ -233,7 +346,8 @@ rewrite rules. The following mappings are read from actual current target method
 
 ## Selection and provenance disposition
 
-The additive [demo-script selection](../../../../lib/capability-selections.json) keeps the
+The additive [source selections](../../../../lib/capability-selections.json) keep the
+existing core and demo-script definitions unchanged. The demo-script selection keeps the
 three accepted role methods, all receiver modes and plan/draft/separate-critique sequence.
 The existing [69-role map](P09-agent-preservation.md) remains authoritative content
 preservation evidence; no role is relocated, reauthored or newly registered by P13.
@@ -250,7 +364,37 @@ Selection resource checks preserve those recorded obligations, not legal suffici
 or selected-package delivery. No similarity threshold, synonym rewrite, license rewrite,
 private export or new upstream content is used.
 
-Actual installed alias/config/selection/provenance/notice closure is the coordinator/P10
-join. The known missing `config/aliases.yaml` bundle declaration is not repaired by this
-source-only unit. Future accepted producer changes require an explicit map/evidence
-refresh; they are not anticipated from current frontmatter hints.
+The earlier missing `config/aliases.yaml` bundle seam was corrected and actually
+exercised by the accepted-P06-engine pilot at `ad605de`/`a5d77f9`. That evidence is
+not acceptance of the new P10 engine or installed closure for every new family.
+The new-P10 B01 linked-init positive remains blocked, with QUALITY not started.
+Native Word/Excel/PDF, static V1/TLS, jq/CI and denied record routes remain their
+separate gates. Future accepted producer changes require another explicit
+map/evidence delta; no WIP or frontmatter hint anticipates their acceptance.
+
+## Optional family disposition
+
+These are additive views, not relocations or changes to original recommendations.
+No selection changes on-disk access or the nine phases; resume stays a utility.
+Canonical member IDs and exact resource/provenance closure live only in the existing
+descriptor. The [worked examples](../../../../skills/catalog/references/selections.md#optional-family-projections)
+name source inputs, useful output, negative behavior and execution limits.
+
+| Selection | Retained method / source owner | Current source boundary |
+|---|---|---|
+| `design-knowledge` | P11 retrieval/tokens/consultation; P13 accurate provenance | Unknown maturity; both actual notices and null historical imports retained. |
+| `frontend-design` | P11 design decisions/render/review, existing real browser method | J11 source available; A14.5 V1/TLS/native gates unchanged. |
+| `document-content` | P12 outline/full content/QA and repository documentation; P11 design seam | Accepted standalone source; rejected P12 B01 serialization not included. |
+| `document-word` | P12 standalone editable Word and WordTechnicalEditor | Core only; required page observation still blocked. |
+| `document-ppt` | P12 editable slides/full notes; actual Design DNA retrieval | Depends on design knowledge, not all frontend roles; prior native verdict stays scoped. |
+| `document-pdf` | P12 prepare/print/check plus accepted browser source | Core only; implemented method/unknown maturity, remaining visual evidence explicit. |
+| `document-xlsx` | P12 workbook/integrity with real P09 cost/capacity methods | Core only; live values cannot clear saved-cache/layout failures. |
+| `document-visio` | P12 retained topology/diagram slot | Exact staged proof; no writer or fictitious NetworkArchitect. |
+| `customer-communication` | P09 distinct draft/empathy methods; P13 explicit voice eval | No sending/private policy; demo-script is an explicit optional union. |
+| `regulatory-review` | P05/P09 scoped legal/framework evidence methods | Optional expertise never makes generic security or required policy optional. |
+
+Source-ready A18 metadata, A19 discovery/examples and A20 provenance work do not
+require a fictional native PASS. Conversely, records and identity counts cannot
+close original consumer/distribution/model/parent acceptance. Coordinator alone
+reconciles the authoritative plan; the new family unit remains subject to SAME486
+SPEC then QUALITY.

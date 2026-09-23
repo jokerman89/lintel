@@ -1,8 +1,8 @@
 # component: review-contract
-# implements: ADR-0028
+# implements: ADR-0028, ADR-0031
 # intent: .claude/plans/universal-implementation/packages/P05.md
 # constraints: read-only Git/filesystem; declared identity is not authentication
-# last_intent_review: 2026-09-20
+# last_intent_review: 2026-09-23
 """Shared result validation and explicit content identity. No dispatch or audit writes."""
 from __future__ import annotations
 
@@ -11,6 +11,7 @@ from copy import deepcopy
 from datetime import datetime
 from functools import lru_cache
 import hashlib
+import importlib.util
 import json
 import math
 import os
@@ -21,6 +22,21 @@ import subprocess
 from typing import Any, Optional, Union
 
 from markdown_source import MarkdownBoundaries, Span, classify_markdown
+
+_NATIVE_PATHS = Path(__file__).absolute().with_name("native_paths.py")
+try:
+    _native_info = _NATIVE_PATHS.lstat()
+except OSError as error:
+    raise ImportError(f"Required trusted source helper is unavailable: {_NATIVE_PATHS}") from error
+if not stat.S_ISREG(_native_info.st_mode) or getattr(_native_info, "st_file_attributes", 0) & 0x400:
+    raise ImportError(f"Linked or non-file trusted source helper refused: {_NATIVE_PATHS}")
+_native_spec = importlib.util.spec_from_file_location("lintel_review_native_paths", _NATIVE_PATHS)
+if _native_spec is None or _native_spec.loader is None:
+    raise ImportError(f"Cannot load required trusted source helper: {_NATIVE_PATHS}")
+_native_paths = importlib.util.module_from_spec(_native_spec)
+_native_spec.loader.exec_module(_native_paths)
+native_io_path = _native_paths.native_io_path
+path_identity = _native_paths.path_identity
 
 Json = dict[str, Any]
 CONTRACT_VERSION = 2
@@ -73,7 +89,7 @@ def content_digest(value: Any) -> str:
 
 @lru_cache(maxsize=1)
 def _schema() -> Json:
-    return load_json(Path(__file__).with_name("review-schema.json").read_text(encoding="utf-8"))
+    return load_json(native_io_path(Path(__file__).absolute().with_name("review-schema.json")).read_text(encoding="utf-8"))
 
 
 def _validate(value: Any, schema: Json, location: str) -> None:
@@ -265,20 +281,48 @@ def relative_path(value: str, *, allow_root: bool = False) -> str:
     return path.as_posix()
 
 
+def _metadata(path: Path) -> Optional[os.stat_result]:
+    try:
+        return native_io_path(path).lstat()
+    except FileNotFoundError:
+        return None
+    except ValueError as error:
+        raise ContractError(f"Invalid local filesystem path: {path}: {error}") from error
+
+
+def _resolved_path(path: Path) -> Path:
+    absolute = Path(os.path.abspath(path))
+    try:
+        resolved = native_io_path(absolute).resolve()
+        if os.name == "nt" and absolute.anchor != path_identity(absolute)[0]:
+            return resolved
+        return Path(*path_identity(resolved))
+    except ValueError as error:
+        raise ContractError(f"Invalid local filesystem path: {path}: {error}") from error
+
+
+def _within(path: Path, repo: Path) -> bool:
+    root = path_identity(repo)
+    return path_identity(path)[:len(root)] == root
+
+
 def _path(repo: Path, value: str, *, regular: bool = False) -> Path:
     name = relative_path(value)
     path = repo / name
     current = repo
     for part in PurePosixPath(name).parts[:-1]:
         current = current / part
-        if current.is_symlink() or (current.exists() and not current.is_dir()):
+        info = _metadata(current)
+        if info is not None and not stat.S_ISDIR(info.st_mode):
             raise ContractError(f"Input traverses a symlink or non-directory: {name}")
-        if not current.resolve().is_relative_to(repo):
+        if not _within(_resolved_path(current), repo):
             raise ContractError(f"Input escapes repository: {name}")
-    if regular and (path.is_symlink() or not path.is_file()):
-        raise ContractError(f"Evidence/authority must be a regular local file: {name}")
-    if regular and not path.resolve().is_relative_to(repo):
-        raise ContractError(f"Evidence/authority escapes repository: {name}")
+    if regular:
+        info = _metadata(path)
+        if info is None or not stat.S_ISREG(info.st_mode):
+            raise ContractError(f"Evidence/authority must be a regular local file: {name}")
+        if not _within(_resolved_path(path), repo):
+            raise ContractError(f"Evidence/authority escapes repository: {name}")
     return path
 
 
@@ -294,9 +338,9 @@ def _git(repo: Path, *args: str) -> bytes:
 
 
 def _root(repo: Path) -> Path:
-    root = Path(repo).resolve()
-    reported = Path(os.fsdecode(_git(root, "rev-parse", "--show-toplevel")).strip()).resolve()
-    if root != reported:
+    root = _resolved_path(repo)
+    reported = _resolved_path(Path(os.fsdecode(_git(root, "rev-parse", "--show-toplevel")).strip()))
+    if path_identity(root) != path_identity(reported):
         raise ContractError("--repo must name the repository root")
     return root
 
@@ -330,10 +374,11 @@ def _record_path(repo: Path, value: Optional[str]) -> Optional[str]:
     if re.fullmatch(r"\.claude/runtime/reviews/[A-Za-z0-9._-]+\.json", value) is None:
         raise ContractError("Self-exclusion is only for one review JSON under .claude/runtime/reviews/")
     path = _path(repo, value)
-    if path.is_symlink():
+    info = _metadata(path)
+    if info is not None and stat.S_ISLNK(info.st_mode):
         raise ContractError("A review record cannot be a symlink")
-    if path.exists():
-        _validate_versioned_review(load_json(path.read_text(encoding="utf-8")))
+    if info is not None:
+        _validate_versioned_review(load_json(native_io_path(path).read_text(encoding="utf-8")))
     return value
 
 
@@ -372,14 +417,18 @@ def snapshot(
         relative = path.relative_to(repo).as_posix()
         if relative in excluded:
             return
-        if path.is_symlink() or (path.exists() and not path.is_dir()):
+        info = _metadata(path)
+        if info is None:
+            return
+        if not stat.S_ISDIR(info.st_mode):
             names.add(relative)
-        elif path.is_dir():
-            if path.resolve() != path or not path.resolve().is_relative_to(repo):
+        else:
+            resolved = _resolved_path(path)
+            if path_identity(resolved) != path_identity(path) or not _within(resolved, repo):
                 raise ContractError(f"Selected directory is a junction/alias: {relative}")
-            for child in sorted(path.iterdir()):
+            for child in sorted(native_io_path(path).iterdir()):
                 if child.name.casefold() != ".git":
-                    walk(child)
+                    walk(path / child.name)
 
     for item in selection:
         walk(repo if item == "." else _path(repo, item))
@@ -402,15 +451,16 @@ def snapshot(
         relative_path(name)
         path = _path(repo, name)
         states = {label: git_state(table.get(name)) for label, table in tables.items()}
-        if path.is_symlink():
-            working = {"kind": "symlink", "mode": "120000", "sha256": hashlib.sha256(os.fsencode(os.readlink(path))).hexdigest()}
-        elif not path.exists():
+        info = _metadata(path)
+        if info is None:
             working = _absent()
-        elif path.is_file():
-            mode = "100755" if path.stat().st_mode & stat.S_IXUSR else "100644"
+        elif stat.S_ISLNK(info.st_mode):
+            working = {"kind": "symlink", "mode": "120000", "sha256": hashlib.sha256(os.fsencode(os.readlink(native_io_path(path)))).hexdigest()}
+        elif stat.S_ISREG(info.st_mode):
+            mode = "100755" if info.st_mode & stat.S_IXUSR else "100644"
             if os.name == "nt":
                 mode = next((states[k]["mode"] for k in ("index", "head", "base") if states[k]["kind"] == "file"), "100644")
-            working = {"kind": "file", "mode": mode, "sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
+            working = {"kind": "file", "mode": mode, "sha256": hashlib.sha256(native_io_path(path).read_bytes()).hexdigest()}
         else:
             raise ContractError(f"Unsupported selected file type: {name}")
         entries.append({"path": name, **states, "worktree": working})
@@ -448,21 +498,21 @@ def bind_work(
     acceptance_paths: Sequence[Union[str, Json]],
 ) -> Json:
     """Bind acceptance, excluding only selected task checkbox progress in the mapped tasks."""
-    repo = Path(repo).resolve()
+    repo = _resolved_path(repo)
     refs = deepcopy(list(acceptance_paths))
     if not refs:
         raise ContractError("Explicit acceptance source selection is required")
     for ref in refs:
         validate_shape(ref, "acceptanceRef")
     required_declaration = ".claude/profile-requirements.json"
-    if (repo / required_declaration).exists() or (repo / required_declaration).is_symlink():
+    if _metadata(repo / required_declaration) is not None:
         if required_declaration not in refs:
             refs.append(required_declaration)
     map_digest = None
     task_path = None
     if work_map is not None:
         work_map = relative_path(work_map)
-        data = _path(repo, work_map, regular=True).read_bytes()
+        data = native_io_path(_path(repo, work_map, regular=True)).read_bytes()
         mapping = load_json(data.decode("utf-8-sig"))
         if type(mapping.get("schema_version")) is not int or mapping["schema_version"] != 1 or mapping.get("workflow") not in ("lintel", "spec-kit"):
             raise ContractError("Unsupported selected work-map identity")
@@ -484,7 +534,7 @@ def bind_work(
         name = relative_path(ref if isinstance(ref, str) else ref["path"])
         if name == AUDIT_RECORD or name.startswith(".claude/runtime/reviews/"):
             raise ContractError("Review storage is not an acceptance source")
-        data = _path(repo, name, regular=True).read_bytes()
+        data = native_io_path(_path(repo, name, regular=True)).read_bytes()
         start, end = (None, None) if isinstance(ref, str) else (ref["start"], ref["end"])
         if name == task_path or start is not None:
             source = classify_markdown(data.decode("utf-8"))
@@ -677,10 +727,10 @@ def validate_decision(record: Mapping[str, Any], *, history: bool = False) -> Js
 
 
 def evidence_manifest(repo: Path, controls: Sequence[Mapping[str, Any]]) -> list[Json]:
-    repo = Path(repo).resolve()
+    repo = _resolved_path(repo)
     names = sorted({path for control in controls for path in control["evidence"]})
     return [
-        {"path": name, "sha256": hashlib.sha256(_path(repo, name, regular=True).read_bytes()).hexdigest()}
+        {"path": name, "sha256": hashlib.sha256(native_io_path(_path(repo, name, regular=True)).read_bytes()).hexdigest()}
         for name in names
     ]
 
@@ -697,9 +747,9 @@ def verify_context(repo: Path, context: Json) -> None:
     current = snapshot(repo, base=snap["base"], selection=snap["selection"], record_path=snap["record_path"])
     if current["result_digest"] != snap["result_digest"]:
         raise ContractError("Selected base/head/index/working content changed")
-    declaration = Path(repo) / ".claude" / "profile-requirements.json"
-    if declaration.exists() or declaration.is_symlink():
-        required = load_json(_path(Path(repo).resolve(), ".claude/profile-requirements.json", regular=True).read_text(encoding="utf-8"))
+    root = _resolved_path(repo)
+    if _metadata(root / ".claude" / "profile-requirements.json") is not None:
+        required = load_json(native_io_path(_path(root, ".claude/profile-requirements.json", regular=True)).read_text(encoding="utf-8"))
         name = required.get("required_pack")
         if type(required.get("schema_version")) is not int or required["schema_version"] != 1 or not isinstance(name, str) or not name.strip():
             raise ContractError("PROFILE_REQUIRED: invalid required-policy declaration")

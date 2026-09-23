@@ -199,6 +199,94 @@ class CopilotKit(unittest.TestCase):
         self.assertEqual(list(empty_home.iterdir()), [])
         self.assertEqual(list(unrelated.iterdir()), [])
 
+    def test_optional_family_closures_survive_portable_clone(self):
+        target = self.base / "families"
+        target.mkdir()
+        self.run_cli(target=target)
+        clone = self.base / "fc"
+        shutil.copytree(target, clone)
+        bundle = clone / adapter.BUNDLE
+        self.run_cli("check", target=clone, source=bundle, script=bundle / "bin/li-copilot.py")
+        unrelated = self.base / "family-cwd"
+        unrelated.mkdir()
+        empty_home = self.base / "family-home"
+        empty_home.mkdir()
+        env = {key: value for key, value in os.environ.items()
+               if not key.startswith(("LINTEL_", "CLAUDE_"))}
+        env.update(HOME=str(empty_home), USERPROFILE=str(empty_home),
+                   PYTHONDONTWRITEBYTECODE="1")
+
+        def query(*arguments, success=True):
+            result = subprocess.run(
+                [sys.executable, "-I", "-B", str(bundle / "bin/li-catalog.py"),
+                 "--json", *arguments],
+                cwd=unrelated, env=env, capture_output=True, text=True, encoding="utf-8")
+            if success:
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            else:
+                self.assertNotEqual(result.returncode, 0)
+                self.assertEqual(result.stdout, "")
+            return result
+
+        expected = {
+            "core", "demo-script", "design-knowledge", "frontend-design",
+            "document-content", "document-word", "document-ppt", "document-pdf",
+            "document-xlsx", "document-visio", "customer-communication", "regulatory-review",
+        }
+        expected_bundle, _, _ = adapter.generate(self.source, target)
+        before = self.snapshot(clone)
+        index = json.loads(query("--list-selections").stdout)
+        self.assertEqual({item["id"] for item in index["selections"]}, expected)
+        self.assertFalse(index["executed"])
+        full = json.loads(query("--kind=all").stdout)
+        self.assertEqual(full["total"], 196)
+        for name in sorted(expected):
+            with self.subTest(selection=name):
+                result = query(f"--selection={name}")
+                selected = json.loads(result.stdout)
+                self.assertFalse(selected["executed"])
+                self.assertTrue(all(entry["maturity"] == "unknown" for entry in selected["entries"]))
+                self.assertNotIn("## Behavioral traits", result.stdout)
+                self.assertIn("core", selected["selection"]["order"])
+                for resource in selected["selection"]["resources"]:
+                    relative = resource["path"]
+                    key = f"{adapter.BUNDLE}/{relative}"
+                    public_document = relative.startswith("docs/") or relative in adapter.PUBLIC_ROOT_DOCS
+                    expected_bytes = expected_bundle[key] if public_document else \
+                        adapter.source_bytes(self.source / relative)
+                    self.assertEqual((bundle / relative).read_bytes(), expected_bytes, relative)
+                for material in selected["selection"]["provenance"]:
+                    self.assertIsNone(material["import_commit"])
+                    for field in ("notice", "attribution"):
+                        self.assertTrue((bundle / material[field]).read_bytes())
+                if name in ("document-word", "document-pdf", "document-xlsx"):
+                    self.assertEqual(selected["selection"]["order"], ["core", name])
+                if name == "document-visio":
+                    stages = {item["id"]: item for item in selected["selection"]["source_stages"]}
+                    self.assertEqual(stages["skill:generate-visio"]["status"], "staged")
+        first = query("--selection=document-word", "--selection=document-content")
+        second = query("--selection=document-content", "--selection=document-word")
+        self.assertEqual(first.stdout, second.stdout)
+        self.assertEqual(before, self.snapshot(clone))
+        for relative in (
+            "skills/design-dna/LICENSES/MIT-next-level-builder.txt",
+            "skills/design-dna/LICENSES/Apache-2.0-anthropic.txt",
+            "skills/design-dna/data/typography.csv",
+        ):
+            path = bundle / relative
+            original = path.read_bytes()
+            path.unlink()
+            missing_before = self.snapshot(clone)
+            try:
+                refused = query("--selection=frontend-design", success=False)
+                self.assertIn(path.name, refused.stderr)
+                self.assertEqual(missing_before, self.snapshot(clone))
+            finally:
+                path.write_bytes(original)
+        self.assertEqual(before, self.snapshot(clone))
+        self.assertEqual(list(empty_home.iterdir()), [])
+        self.assertEqual(list(unrelated.iterdir()), [])
+
     def test_fresh_portable_clone_and_idempotence(self):
         self.run_cli()
         before = self.snapshot()

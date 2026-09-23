@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # component: review-evidence-cli
-# implements: ADR-0005, ADR-0024, ADR-0028
+# implements: ADR-0005, ADR-0024, ADR-0028, ADR-0031
 # intent: .claude/plans/universal-implementation/packages/P05.md
 # constraints: trusted source helpers; selected target data; no execution of evidence content
-# last_intent_review: 2026-09-20
+# last_intent_review: 2026-09-23
 """Prepare, validate and consume review evidence; shell adapters own audit routing/writes."""
 from __future__ import annotations
 
@@ -23,11 +23,12 @@ from review_contract import (  # noqa: E402
     CONTRACT_VERSION, ContractError, bind_work, canonical_json, content_digest, evaluate_controls,
     evidence_manifest, load_json, resolve_commit, select_latest, snapshot,
     validate_context, validate_decision, validate_review, validate_shape, verify_context, verify_qa, verify_review,
+    native_io_path, _resolved_path,
 )
 
 
 def read_object(path: Path) -> dict[str, Any]:
-    return load_json(path.read_text(encoding="utf-8-sig"))
+    return load_json(native_io_path(Path(os.path.abspath(path))).read_text(encoding="utf-8-sig"))
 
 
 def emit(value: Any) -> None:
@@ -58,10 +59,12 @@ def prepare(repo: Path, request: dict[str, Any]) -> dict[str, Any]:
 
 
 def audit_records(path: Path) -> list[Union[dict[str, Any], ContractError]]:
-    if not path.exists():
+    try:
+        data = native_io_path(Path(os.path.abspath(path))).read_bytes()
+    except FileNotFoundError:
         return []
     records = []
-    for index, line in enumerate(path.read_bytes().split(b"\n"), 1):
+    for index, line in enumerate(data.split(b"\n"), 1):
         if not line.strip():
             continue
         try:
@@ -123,7 +126,7 @@ def ship(args: argparse.Namespace) -> dict[str, Any]:
         command += ["--corroboration", args.corroboration.as_posix()]
     environment = {
         **os.environ, "LINTEL_SOURCE_ROOT": SOURCE_ROOT.as_posix(),
-        "LINTEL_REPO_ROOT": args.repo.resolve().as_posix(),
+        "LINTEL_REPO_ROOT": _resolved_path(args.repo).as_posix(),
         "LINTEL_PYTHON": Path(sys.executable).as_posix(),
     }
     read = subprocess.run(command, cwd=args.repo, env=environment, text=True, encoding="utf-8", capture_output=True, check=False)
@@ -270,7 +273,11 @@ def main() -> int:
                 emit(result)
             else:
                 print(f"## Review records (native: {args.log})")
-                print(args.log.read_text(encoding="utf-8") if args.log.is_file() else "NO_REVIEWS")
+                try:
+                    history = native_io_path(Path(os.path.abspath(args.log))).read_text(encoding="utf-8")
+                except FileNotFoundError:
+                    history = "NO_REVIEWS"
+                print(history)
                 print("---VERDICT---")
                 print(f"gate_skill: {args.skill}")
                 print(f"current_head: {resolve_commit(args.repo, 'HEAD')[:7]}")
@@ -282,14 +289,14 @@ def main() -> int:
             log_input(args)
         elif args.command == "audit-check":
             expected_raw = canonical_json(load_json(sys.stdin.read()))
-            with args.log.open("rb") as file:
+            with native_io_path(Path(os.path.abspath(args.log))).open("rb") as file:
                 file.seek(args.offset)
                 lines = file.read().decode("utf-8").splitlines()
             if not any(load_json(line).get("raw") == expected_raw for line in lines if line.strip()):
                 raise ContractError("Audit writer did not persist this review; no successful receipt")
         elif args.command == "import-lines":
             lines = [
-                load_json(line) for line in args.file.read_text(encoding="utf-8-sig").splitlines() if line.strip()
+                load_json(line) for line in native_io_path(Path(os.path.abspath(args.file))).read_text(encoding="utf-8-sig").splitlines() if line.strip()
             ]
             for line in lines:
                 emit(line)

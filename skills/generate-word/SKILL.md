@@ -94,10 +94,12 @@ blank document satisfies required brand policy.
 
 If invoked with `--from-pipeline <run-dir>` instead of `--brief`:
 
-Keep this existing entry path and field names. The full shared design/profile/work
-binding is still the A15.3.shared integration gate; standalone evidence does not
-establish that binding. Validate the supplied artifacts against their released
-contracts before consuming them. Do not fabricate design-spec.json to unblock it.
+Keep this existing entry path and field names. First follow
+[existing pipeline input admission](../generate-write/references/fidelity-and-evidence.md#existing-pipeline-input-admission)
+with `--format word`, the external input context, original package/leaves and
+current profile. It verifies canonical sibling paths/hashes and the existing
+Word projection, not a web renderer or completed artifact. A15.3.shared/native
+acceptance stays separate; never fabricate design-spec.json to unblock it.
 
 1. **Read shared pipeline-output:**
    - `<run-dir>/content.md` — sections with H1/H2/H3 hierarchy + bodies + voice-annotations
@@ -118,6 +120,11 @@ contracts before consuming them. Do not fabricate design-spec.json to unblock it
 5. **Apply the same fidelity/inspection and configured controls as standalone mode.**
    Shared content must survive in full; heading/slot mappings cannot discard
    unmapped paragraphs, tables, citations or qualifications.
+   Retain all three standalone target/template/default choices. Select any
+   explicit override as an input before admission and revalidate the actual
+   template mapping; an omitted projection template is not `--use-defaults`.
+   Final changed DOCX and its actual observations need a fresh external P05
+   binding. Missing Word page rendering remains unverified.
 
 ## Workflow
 

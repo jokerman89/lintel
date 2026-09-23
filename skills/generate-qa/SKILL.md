@@ -172,6 +172,14 @@ Parse `--artifacts` (single path or glob). Validate each exists + is in supporte
 - Full source and claim ledger; verify hashes rather than checking a generated summary against itself
 - Current P07 profile reference/required-policy bridge and P05 accepted check inventory
 
+For a pipeline-produced document, repeat the
+[existing input admission](../generate-write/references/fidelity-and-evidence.md#existing-pipeline-input-admission)
+against its current external context before comparing source/design with the
+artifact. Use original package/leaves and selected templates/config; never
+substitute a same-bytes sibling path or a cached admission result. This is
+read-only source verification, not QA of an uncreated artifact. Retain the
+standalone `--source` route without requiring pipeline files.
+
 ### Step 3 — Per-artifact checks
 
 Discover actual available inspection tools and schemas first; prefer native
@@ -201,6 +209,9 @@ performed and P05's evaluation has no mandatory blocker, with requested format
 coverage complete. Otherwise set false and record the missing/failed requirement
 in `issues`, referring to its P05 evidence. No applicable checks is not a verified
 QA pass. Persist the bound P05 receipt separately; qa-report.json is not clearance.
+Input admission does not supply missing artifact observations. Keep the original
+mandatory inventory, reprepare the final context after source/artifact edits,
+and respect any explicit decision/corroboration persistence denial.
 
 ### Step 6 — Surface summary to operator
 

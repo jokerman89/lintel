@@ -158,7 +158,7 @@ Acceptance: no mandatory failure or absent evidence becomes verified green.
 
 ### A03 Content-bound independent review (P05; R02)
 - [x] A03.1 Select latest applicable review before evaluating an exact status.
-- [x] A03.2 Bind review to base/result, selected dirty/new files, work and leaf/package identity.
+- [ ] A03.2 Bind review to base/result, selected dirty/new files, work and leaf/package identity.
   - [x] A03.2.s1 Consume the approved shared source-boundary helper instead of a second block parser.
   - [x] A03.2.s2 Normalize only selected real task-progress character spans, also for excerpts.
   - [x] A03.2.s3 Verify literal/criteria/approval/product mutations and legitimate nested progress through real gates.
@@ -166,6 +166,9 @@ Acceptance: no mandatory failure or absent evidence becomes verified green.
   - [x] A03.2.e1 Reproduce excerpt context transitions with unchanged or colliding checkbox bytes through actual gates.
   - [x] A03.2.e2 Bind relevant source interpretation into selected acceptance identity.
   - [x] A03.2.e3 Preserve structural progress and unrelated outside-selection edits while blocking literal-context transitions.
+  - [ ] A03.2.n1 Reproduce native regular-file refusal at the original P14 policy path without changing its input.
+  - [ ] A03.2.n2 Apply accepted same-location I/O spelling across the scoped P05 observation and snapshot boundary, preserving logical identities.
+  - [ ] A03.2.n3 Obtain independent provider SPEC/QUALITY and verify the original joined P14 caller plus retained evidence consumers.
 - [x] A03.3 Require SHIP/QA to consume the same snapshot and real independent actor.
 - [x] A03.4 Test stale acceptance/config/new-file changes and later rejection revocation.
 - [x] A03.5 Verify unchanged relevant inputs reuse valid evidence without relying on age alone.
@@ -182,6 +185,11 @@ a separate CRLF-only workspace diff diagnostic; normal checkout and read-only EO
 comparison are clean, with no source normalization. No failing aggregate was relabeled.
 Caller-trusted corroboration is not cryptographic authentication, and these component
 results do not close downstream migration, installed preflight or final live/CI gates.
+The P14 default entry now reopens A03.2 for a concrete 262-character policy input:
+P03 reads the real file, while P05's ordinary regular-file observation rejects it.
+The bounded P05 native-observation card retains earlier source/record/schema
+acceptance and requires same-reviewer plus actual joined-caller evidence; it does
+not authorize another P10 or platform investigation.
 
 ### A04 Helper failure semantics (P01; R01)
 - [x] A04.1 Repair ADR title/status argument handling.
@@ -416,27 +424,52 @@ acceptance, not native registration or observed correctness of all 69 roles.
 Original A17.5 remains open for its actual mode/semantic/installed evidence.
 
 ### A18 Optional capabilities without loss (P13; R06)
-- [ ] A18.1 Define discoverable capability selections and their dependency/maturity metadata.
-- [ ] A18.2 Keep common lifecycle/security core and identity overlay distinct.
+- [x] A18.1 Define discoverable capability selections and their dependency/maturity metadata.
+- [x] A18.2 Keep common lifecycle/security core and identity overlay distinct.
 - [ ] A18.3 Verify a selected consumer gets needed methods without unrelated prompt loading.
 - [ ] A18.4 Trace every moved/consolidated use case and preserve useful aliases.
 Acceptance: no deletion for file-count reduction; optional capability remains usable.
+Source declarations and shared-core separation are accepted in
+[P13 family review](reviews/P13-families-20493b7.md), `8f0f7dc`, product
+`20493b7`, integrated `c62606b` with all six source/report blobs exact.
+All 29 joined selection methods pass. The committed `2b672bb` portable-clone
+case exercises all twelve selections, full default access, minimal standalone
+dependencies, deterministic unions, resource/notice bytes and missing-resource
+refusal under an empty synthetic home. This is actual accepted-P06-engine
+distribution, not new-P10 acceptance or proof of model body-selection behavior;
+A18.3/.4 and their remaining utility/preservation joins stay open.
 
 ### A19 Coherent discovery and richer skills (P13; R03/R06)
-- [ ] A19.1 Reuse one catalog generator for help/router/status/welcome metadata.
-- [ ] A19.2 Route compact metadata to selected skills without advertising drafts as finished.
+- [x] A19.1 Reuse one catalog generator for help/router/status/welcome metadata.
+- [x] A19.2 Route compact metadata to selected skills without advertising drafts as finished.
 - [ ] A19.3 Map all 126 skill inventory recommendations to retained value and owning package.
 - [ ] A19.4 Verify worked examples, negative cases and migration/alias coverage.
 Acceptance: every source skill has a documented disposition and discoverable retained value.
+The accepted first-unit, source-consumer `9f58aa8` and family `8f0f7dc` reviews
+cover the one-generator and compact/honest routing contracts. Joined metadata,
+consumer and selection checks and the actual clone query preserve unknown
+maturity, PDF/XLSX unknown stage and Visio's explicit staged declaration.
+No metadata query is called native execution. The final preservation/example
+fan-in remains A19.3/.4; current and historical maps are not a second task source.
 
 ### A20 Provenance and versions (P07/P13; R04)
-- [ ] A20.1 Preserve sources/revisions/licenses/local adaptations and correct original-only claims.
-- [ ] A20.2 Explicitly retire synonym/similarity rewriting as a quality or rights method.
+- [x] A20.1 Preserve sources/revisions/licenses/local adaptations and correct original-only claims.
+- [x] A20.2 Explicitly retire synonym/similarity rewriting as a quality or rights method.
 - [x] A20.3 Separate pack schema, capability and product versions with migration checks.
 - [ ] A20.4 Verify external contribution and synthetic pack compatibility from recorded sources.
 Acceptance: no attribution loss, no ungrounded legal or quality guarantee.
 P07's synthetic pack compatibility is independently accepted; A20.4 remains open for
 P13's full external-contribution/provenance and selected-distribution verification.
+The source corrections in [A20 provenance](reports/A20-provenance.md) now have
+independent P13 source acceptance and real twelve-selection clone distribution:
+both adapted-component records, exact notices/attribution, declared release,
+local modifications and explicitly unknown historical imports are preserved.
+Removing either notice makes the actual selected query refuse without writes.
+Public documentation uses the already accepted navigation rendering rather
+than pretending transformed guide bytes equal their source bytes. The original
+similarity proposal remains historical with its explicit superseded banner;
+no lexical-rewriting, legal-clearance or originality guarantee is claimed.
+A20.4 retains its final external-contribution/profile/consumer boundary.
 
 ### A21 Safe dormant handoff (P04; R08)
 - [x] A21.1 Keep automatic envelope construction dormant under ADR0008.

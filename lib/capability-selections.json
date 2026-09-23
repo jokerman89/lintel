@@ -75,6 +75,423 @@
         "Slide content/visual production is a separate authorized handoff, not an automatic dependency of narration.",
         "Unknown maturity remains unknown; absent delegation retains serial/manual guidance without claiming independence."
       ]
+    },
+    "design-knowledge": {
+      "source": "skills/design-dna/SKILL.md",
+      "members": [
+        "skill:design-dna",
+        "skill:design-consultation"
+      ],
+      "requires": ["core"],
+      "resources": [
+        "skills/design-dna/scripts/core.py",
+        "skills/design-dna/scripts/search.py",
+        "skills/design-dna/scripts/design_system.py",
+        "skills/design-dna/scripts/emit_tokens.py",
+        "skills/design-dna/scripts/validate_design.py",
+        "skills/design-dna/scripts/design_contract.py",
+        "skills/design-dna/references/design-contract.md",
+        "skills/design-dna/references/design-contract.schema.json",
+        "skills/design-dna/references/token-architecture.md",
+        "skills/design-dna/references/primitive-tokens.md",
+        "skills/design-dna/references/semantic-tokens.md",
+        "skills/design-dna/references/component-tokens.md",
+        "skills/design-dna/profiles/anthropic-default.yaml",
+        "skills/design-dna/data/app-interface.csv",
+        "skills/design-dna/data/charts.csv",
+        "skills/design-dna/data/colors.csv",
+        "skills/design-dna/data/icons.csv",
+        "skills/design-dna/data/landing.csv",
+        "skills/design-dna/data/products.csv",
+        "skills/design-dna/data/react-performance.csv",
+        "skills/design-dna/data/styles.csv",
+        "skills/design-dna/data/typography.csv",
+        "skills/design-dna/data/ui-reasoning.csv",
+        "skills/design-dna/data/ux-guidelines.csv",
+        "skills/design-dna/data/stacks/angular.csv",
+        "skills/design-dna/data/stacks/astro.csv",
+        "skills/design-dna/data/stacks/flutter.csv",
+        "skills/design-dna/data/stacks/html-tailwind.csv",
+        "skills/design-dna/data/stacks/jetpack-compose.csv",
+        "skills/design-dna/data/stacks/laravel.csv",
+        "skills/design-dna/data/stacks/nextjs.csv",
+        "skills/design-dna/data/stacks/nuxt-ui.csv",
+        "skills/design-dna/data/stacks/nuxtjs.csv",
+        "skills/design-dna/data/stacks/react-native.csv",
+        "skills/design-dna/data/stacks/react.csv",
+        "skills/design-dna/data/stacks/shadcn.csv",
+        "skills/design-dna/data/stacks/svelte.csv",
+        "skills/design-dna/data/stacks/swiftui.csv",
+        "skills/design-dna/data/stacks/threejs.csv",
+        "skills/design-dna/data/stacks/vue.csv",
+        "skills/design-dna/data/slides/slide-backgrounds.csv",
+        "skills/design-dna/data/slides/slide-charts.csv",
+        "skills/design-dna/data/slides/slide-color-logic.csv",
+        "skills/design-dna/data/slides/slide-copy.csv",
+        "skills/design-dna/data/slides/slide-layout-logic.csv",
+        "skills/design-dna/data/slides/slide-layouts.csv",
+        "skills/design-dna/data/slides/slide-strategies.csv",
+        "skills/design-dna/data/slides/slide-typography.csv",
+        "lib/context_safety.py",
+        "lib/native_paths.py",
+        "lib/profile_context.py",
+        "lib/profile-context-schema.json",
+        "lib/review_contract.py",
+        "lib/review-schema.json",
+        "lib/markdown_source.py"
+      ],
+      "provenance": ["design-dna-corpus", "design-dna-example-profile"],
+      "inputs": [
+        "Explicit design brief or question, current project conventions and a bounded retrieval query.",
+        "Existing verified P07 profile and selected asset when profile-bound decisions are requested."
+      ],
+      "outputs": [
+        "Source-grounded corpus recommendations, token guidance and design alternatives with trade-offs.",
+        "Paths to the existing retrieval, token and direct-design contract methods; no rendering or profile activation by selection."
+      ],
+      "example": {
+        "path": "skills/catalog/references/selections.md",
+        "heading": "## Design knowledge example"
+      },
+      "limitations": [
+        "Brief, verified profile and corpus precedence remains with the existing design contract; required-policy failures cannot choose another brand.",
+        "Bundled anthropic-default is an existing fallback asset, not an inferred company identity or forced design choice.",
+        "Both recorded adaptation notices and unknown historical import revisions remain in closure; source validity is not license sufficiency or installed delivery.",
+        "Unknown maturity and source methods do not establish rendered accessibility, native execution or independent review."
+      ]
+    },
+    "frontend-design": {
+      "source": "skills/frontend-design/SKILL.md",
+      "members": [
+        "skill:frontend-design",
+        "skill:frontend-typography",
+        "skill:frontend-motion",
+        "skill:frontend-shader",
+        "skill:frontend-design-review",
+        "skill:frontend-style-extract",
+        "skill:design-html",
+        "skill:design-review",
+        "skill:design-shotgun",
+        "skill:plan-design-review",
+        "skill:generate-style-learn",
+        "skill:generate-web",
+        "skill:generate-app",
+        "skill:browse",
+        "skill:open-managed-browser",
+        "agent:FrontendArchitect",
+        "agent:TypographyCurator",
+        "agent:MotionDirector",
+        "agent:ShaderEngineer",
+        "agent:DesignSystemAuditor",
+        "agent:WebExperienceCritic",
+        "agent:AccessibilityChecker"
+      ],
+      "requires": ["design-knowledge"],
+      "resources": [
+        "skills/browse/references/browser-operations.md",
+        "skills/browse/scripts/chromium.mjs",
+        "skills/full-engineering-pass/references/domain-handoff.md",
+        "lib/domain_result.py",
+        "lib/domain-result-schema.json"
+      ],
+      "provenance": ["design-dna-example-profile"],
+      "inputs": [
+        "Authorized brief, existing project manifests, verified profile/design asset and explicit owned output.",
+        "Requested design/render/review operation and actual available host tools, permissions and evidence."
+      ],
+      "outputs": [
+        "Retained typography, motion and shader decisions, bound frontend design spec and literal renderer argument mapping.",
+        "Actual selected render/review artifacts only when their separate operations and required observations succeed."
+      ],
+      "example": {
+        "path": "skills/catalog/references/selections.md",
+        "heading": "## Frontend design example"
+      },
+      "limitations": [
+        "Static, CSS-only, no-motion and no-shader decisions remain valid; selecting this family installs no libraries.",
+        "Metadata lists available source methods; read only the selected bodies, not every role or resource in closure.",
+        "Accepted direct-design source is not A14.5 acceptance: static visual V1 remains unverified and framework TLS/build remains blocked.",
+        "A role file, browser source or model name is not live availability, permission or an independent actor."
+      ]
+    },
+    "document-content": {
+      "source": "skills/generate/SKILL.md",
+      "members": [
+        "skill:generate",
+        "skill:generate-outline",
+        "skill:generate-write",
+        "skill:generate-design",
+        "skill:generate-qa",
+        "skill:document-generate",
+        "agent:SystemArchitect",
+        "agent:WordTechnicalEditor",
+        "agent:DesignSystemAuditor"
+      ],
+      "requires": ["design-knowledge"],
+      "resources": [
+        "skills/generate/agent-mapping.yaml",
+        "skills/generate-write/references/fidelity-and-evidence.md",
+        "bin/li-review-evidence.py"
+      ],
+      "provenance": [],
+      "inputs": [
+        "Complete cited brief or selected source code, audience, language, requested formats and explicit output authority.",
+        "Existing profile/review context and actual released input contracts; no invented design spec or upstream result."
+      ],
+      "outputs": [
+        "Outline, complete written content, real speaker-note content where requested, and format-specific QA obligations.",
+        "Source-grounded repository reference, customer-guide or tutorial drafts through the distinct document-generate method.",
+        "Choose a format with an explicit selection union; common preparation is not a finished native artifact."
+      ],
+      "example": {
+        "path": "skills/catalog/references/selections.md",
+        "heading": "## Document content example"
+      },
+      "limitations": [
+        "Retain long reasoning, tables, citations and qualifications; presentation brevity cannot truncate canonical content.",
+        "P12 pipeline candidate d4e9188 is SPEC FAIL for B01 and not integrated; no shared serialized-pipeline PASS is claimed.",
+        "Agent-mapping entries are hints, not observed dispatch or permission; incidental links do not form a new dependency engine.",
+        "Standalone format selections remain independently usable with their explicit brief inputs and required controls."
+      ]
+    },
+    "document-word": {
+      "source": "skills/generate-word/SKILL.md",
+      "members": ["skill:generate-word", "agent:WordTechnicalEditor"],
+      "requires": ["core"],
+      "resources": [
+        "skills/generate-word/references/native-word.md",
+        "skills/generate-write/references/fidelity-and-evidence.md",
+        "lib/context_safety.py",
+        "lib/native_paths.py",
+        "lib/review_contract.py",
+        "lib/review-schema.json",
+        "lib/markdown_source.py",
+        "lib/profile_context.py",
+        "lib/profile-context-schema.json",
+        "bin/li-review-evidence.py"
+      ],
+      "provenance": [],
+      "inputs": [
+        "Explicit complete brief, target variant, verified template or explicit neutral/default choice and owned DOCX output.",
+        "Actual permitted writer, editable reopen/readback and page-inspection operations plus applicable profile controls."
+      ],
+      "outputs": [
+        "Editable technical, customer-summary or transparency-note document with retained source detail.",
+        "Content, edit/reopen and page-inspection evidence at the layers actually observed, with unresolved gates explicit."
+      ],
+      "example": {
+        "path": "skills/catalog/references/selections.md",
+        "heading": "## Word example"
+      },
+      "limitations": [
+        "Standalone --brief does not require common pipeline or design knowledge; a missing required template cannot become an implicit blank document.",
+        "Word rendered page layout remains permission-blocked; source acceptance or a model readback is not page-render evidence.",
+        "The rejected P12 shared pipeline is not a verified alternate route; no installation, native action or distribution is performed by selection."
+      ]
+    },
+    "document-ppt": {
+      "source": "skills/generate-ppt/SKILL.md",
+      "members": [
+        "skill:generate-ppt",
+        "agent:PPTNarrativeArchitect",
+        "agent:SlideNarrationCritic"
+      ],
+      "requires": ["design-knowledge"],
+      "resources": [
+        "skills/generate-ppt/references/native-powerpoint.md",
+        "skills/generate-write/references/fidelity-and-evidence.md",
+        "bin/li-review-evidence.py"
+      ],
+      "provenance": [],
+      "inputs": [
+        "Complete source brief and claims, audience, slide goals, template/default choice and owned PPTX output.",
+        "Actual permitted slide writer, serialized notes/table support and selected rendered/reopen evidence."
+      ],
+      "outputs": [
+        "Editable slides with full source detail retained in actual notes, appendices or explicitly delivered long-form content.",
+        "Narrative/slide critique and actual artifact evidence, with independent review separate from drafting."
+      ],
+      "example": {
+        "path": "skills/catalog/references/selections.md",
+        "heading": "## PowerPoint example"
+      },
+      "limitations": [
+        "Design knowledge supplies the existing required slide-retrieval assets, not all frontend roles or a forced library.",
+        "Prior selected native PPT acceptance is scoped evidence, not this query running PowerPoint or accepting every host.",
+        "Missing writer, notes retention or required render observation remains blocked; no shared P12 serialization PASS is inferred."
+      ]
+    },
+    "document-pdf": {
+      "source": "skills/generate-pdf/SKILL.md",
+      "members": [
+        "skill:generate-pdf",
+        "skill:make-pdf",
+        "skill:browse",
+        "agent:WordTechnicalEditor"
+      ],
+      "requires": ["core"],
+      "resources": [
+        "skills/generate-write/references/fidelity-and-evidence.md",
+        "skills/generate-pdf/scripts/prepare_html.py",
+        "skills/generate-pdf/scripts/print_pdf.mjs",
+        "skills/generate-pdf/scripts/check_pdf.py",
+        "skills/browse/references/browser-operations.md",
+        "skills/browse/scripts/chromium.mjs",
+        "lib/context_safety.py",
+        "lib/native_paths.py",
+        "lib/review_contract.py",
+        "lib/review-schema.json",
+        "lib/markdown_source.py",
+        "lib/profile_context.py",
+        "lib/profile-context-schema.json",
+        "bin/li-review-evidence.py"
+      ],
+      "provenance": [],
+      "inputs": [
+        "Authorized Markdown, HTML or URL source, explicit PDF output and an exact source/page oracle.",
+        "Actual permitted converter, browser print and PDF reader with applicable policy and declared dependencies."
+      ],
+      "outputs": [
+        "PDF from the existing preparation/print route when available, preserving the original editable source.",
+        "Actual text, physical page-bound and source-retention diagnostics, separately from required visual observations."
+      ],
+      "example": {
+        "path": "skills/catalog/references/selections.md",
+        "heading": "## PDF example"
+      },
+      "limitations": [
+        "The accepted PDF source method is implemented, not TEMPLATE ONLY; unknown maturity is not a missing-method claim.",
+        "Standalone production does not require the common pipeline; the rejected shared input binding is not imported.",
+        "Missing converters/readers, wrong physical page bounds or unverified required visual inspection remain explicit gates.",
+        "Browser sources are not an installed engine, network permission or a native print action."
+      ]
+    },
+    "document-xlsx": {
+      "source": "skills/generate-xlsx/SKILL.md",
+      "members": [
+        "skill:generate-xlsx",
+        "agent:CostAnalyzer",
+        "agent:CapacityPlanner"
+      ],
+      "requires": ["core"],
+      "resources": [
+        "skills/generate-xlsx/references/native-xlsx.md",
+        "skills/generate-xlsx/scripts/check_xlsx.py",
+        "skills/generate-write/references/fidelity-and-evidence.md",
+        "skills/dh/references/decision-methods.md",
+        "lib/context_safety.py",
+        "lib/native_paths.py",
+        "lib/review_contract.py",
+        "lib/review-schema.json",
+        "lib/markdown_source.py",
+        "lib/profile_context.py",
+        "lib/profile-context-schema.json",
+        "bin/li-review-evidence.py"
+      ],
+      "provenance": [],
+      "inputs": [
+        "Typed source data, formulas, units, explicit workbook output and expected-cell/source oracle.",
+        "Actual permitted writer/calculation/reopen/inspection operations; select cost or capacity expertise only when the brief needs it."
+      ],
+      "outputs": [
+        "Editable workbook with retained source data, formulas and documented assumptions.",
+        "Separate actual live calculation, persisted-cache integrity, editable reopen and rendered-inspection evidence."
+      ],
+      "example": {
+        "path": "skills/catalog/references/selections.md",
+        "heading": "## Workbook example"
+      },
+      "limitations": [
+        "The accepted workbook source method is implemented but maturity remains unknown; native saved-cache/layout gates have not passed.",
+        "A live calculated value cannot certify a missing or stale saved cache; metadata selection performs no calculation.",
+        "Standalone --brief requires neither common pipeline nor every other format; no shared P12 serialization PASS is claimed."
+      ]
+    },
+    "document-visio": {
+      "source": "skills/generate-visio/SKILL.md",
+      "members": ["skill:generate-visio", "agent:SystemArchitect"],
+      "requires": ["core"],
+      "resources": ["skills/generate/agent-mapping.yaml"],
+      "provenance": [],
+      "inputs": [
+        "An explicitly supplied diagram/topology request and intended editable/output format, for source-slot discovery only."
+      ],
+      "outputs": [
+        "The retained staged-slot description and named missing writer, connector, label and editable-render requirements.",
+        "No Visio, SVG, PNG or drawio artifact is promised or produced by this selection."
+      ],
+      "example": {
+        "path": "skills/catalog/references/selections.md",
+        "heading": "## Staged Visio example"
+      },
+      "limitations": [
+        "The exact TEMPLATE ONLY description remains digest-bound; no implemented writer or format acceptance exists.",
+        "A frontmatter full hint or agent-mapping entry cannot supply a renderer; the absent NetworkArchitect is not a canonical member.",
+        "Do not execute speculative slot recipes or infer private stencil/template access from discovery."
+      ]
+    },
+    "customer-communication": {
+      "source": "agents/communication/EmailCustomerDrafter.md",
+      "members": [
+        "agent:EmailCustomerDrafter",
+        "agent:BlogPostDrafter",
+        "agent:LinkedInPostDrafter",
+        "agent:CustomerEmpathyCheck",
+        "agent:ExecutiveBriefingDrafter",
+        "agent:PostDemoFollowup",
+        "agent:ProposalDrafter",
+        "agent:RFPResponseDrafter",
+        "skill:eval"
+      ],
+      "requires": ["core"],
+      "resources": ["lib/envelope_contract.py"],
+      "provenance": [],
+      "inputs": [
+        "Sanitized supplied facts, audience, requested medium, consent boundaries and applicable verified profile voice requirements.",
+        "Only for an explicitly requested voice evaluation: selected corpus, rubric, actual permitted or recorded verdict evidence and owned output."
+      ],
+      "outputs": [
+        "Medium-specific drafts, empathy/claim questions and separate internal review or follow-up checklists.",
+        "Scoped known-good/known-bad voice comparisons where actual evidence exists; no invented full-corpus calibration."
+      ],
+      "example": {
+        "path": "skills/catalog/references/selections.md",
+        "heading": "## Customer communication example"
+      },
+      "limitations": [
+        "Drafting does not send, publish, schedule, price or commit on another person's behalf.",
+        "No private corpus, customer repository, persona store or policy is loaded by selection; company identity remains a separate P07 overlay.",
+        "Demo narration is an explicit union with demo-script, not a prerequisite for every email or proposal.",
+        "Missing evaluator/corpus evidence remains NOT_EVALUATED; role declarations are not native actors or independent review."
+      ]
+    },
+    "regulatory-review": {
+      "source": "agents/compliance/EUAIActReviewer.md",
+      "members": [
+        "agent:EUAIActReviewer",
+        "agent:GDPRReviewer",
+        "agent:SOC2Reviewer"
+      ],
+      "requires": ["core"],
+      "resources": [],
+      "provenance": [],
+      "inputs": [
+        "Intended use, jurisdiction, actor roles, effective dates, data flows and actual selected control evidence.",
+        "Applicable primary-source versions and verified company requirements, with unresolved interpretation identified."
+      ],
+      "outputs": [
+        "Scoped applicability, obligations, control gaps and evidence requirements for qualified legal/control owners.",
+        "Explicit unknown or unverified outcomes where required law, policy, dates or observations are unavailable."
+      ],
+      "example": {
+        "path": "skills/catalog/references/selections.md",
+        "heading": "## Regulatory review example"
+      },
+      "limitations": [
+        "Optional framework expertise does not make generic security, selected company policy or applicable mandatory controls optional.",
+        "A source checklist is not legal certification, permission, universal SOC2 applicability or an executed compliance gate.",
+        "No legal text is imported, no network lookup occurs and unknown maturity is not promoted by a source review."
+      ]
     }
   },
   "source_stages": {
