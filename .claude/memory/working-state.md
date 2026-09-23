@@ -15,7 +15,8 @@ Cross-session working state (not durable rules — that's [[lessons.md]]; not pe
 branch `jokerman-microsoft-mastersession-recovery`; the original worktree was not
 changed. Continue from the [recovery checkpoint](../plans/universal-implementation/handoff.md#recovery-checkpoint)
 and original work map. Existing owners are retained. Current original acceptance
-is **69/113**, not full release readiness. Final Swarm A22.7 is accepted and
+is **68/113**, not full release readiness. A03.2 is reopened for the observed
+P14-to-P05 native policy-file observation gap. Final Swarm A22.7 is accepted and
 integrated in `6e32d1f`, with joined shared, retained, real-Git and enterprise/
 hybrid checks. Discovery consumers are joined in `991ca73`; stale PDF/XLSX
 template metadata is reconciled without maturity promotion in `678ae22`.

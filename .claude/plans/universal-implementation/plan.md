@@ -158,7 +158,7 @@ Acceptance: no mandatory failure or absent evidence becomes verified green.
 
 ### A03 Content-bound independent review (P05; R02)
 - [x] A03.1 Select latest applicable review before evaluating an exact status.
-- [x] A03.2 Bind review to base/result, selected dirty/new files, work and leaf/package identity.
+- [ ] A03.2 Bind review to base/result, selected dirty/new files, work and leaf/package identity.
   - [x] A03.2.s1 Consume the approved shared source-boundary helper instead of a second block parser.
   - [x] A03.2.s2 Normalize only selected real task-progress character spans, also for excerpts.
   - [x] A03.2.s3 Verify literal/criteria/approval/product mutations and legitimate nested progress through real gates.
@@ -166,6 +166,9 @@ Acceptance: no mandatory failure or absent evidence becomes verified green.
   - [x] A03.2.e1 Reproduce excerpt context transitions with unchanged or colliding checkbox bytes through actual gates.
   - [x] A03.2.e2 Bind relevant source interpretation into selected acceptance identity.
   - [x] A03.2.e3 Preserve structural progress and unrelated outside-selection edits while blocking literal-context transitions.
+  - [ ] A03.2.n1 Reproduce native regular-file refusal at the original P14 policy path without changing its input.
+  - [ ] A03.2.n2 Apply accepted same-location I/O spelling across the scoped P05 observation and snapshot boundary, preserving logical identities.
+  - [ ] A03.2.n3 Obtain independent provider SPEC/QUALITY and verify the original joined P14 caller plus retained evidence consumers.
 - [x] A03.3 Require SHIP/QA to consume the same snapshot and real independent actor.
 - [x] A03.4 Test stale acceptance/config/new-file changes and later rejection revocation.
 - [x] A03.5 Verify unchanged relevant inputs reuse valid evidence without relying on age alone.
@@ -182,6 +185,11 @@ a separate CRLF-only workspace diff diagnostic; normal checkout and read-only EO
 comparison are clean, with no source normalization. No failing aggregate was relabeled.
 Caller-trusted corroboration is not cryptographic authentication, and these component
 results do not close downstream migration, installed preflight or final live/CI gates.
+The P14 default entry now reopens A03.2 for a concrete 262-character policy input:
+P03 reads the real file, while P05's ordinary regular-file observation rejects it.
+The bounded P05 native-observation card retains earlier source/record/schema
+acceptance and requires same-reviewer plus actual joined-caller evidence; it does
+not authorize another P10 or platform investigation.
 
 ### A04 Helper failure semantics (P01; R01)
 - [x] A04.1 Repair ADR title/status argument handling.

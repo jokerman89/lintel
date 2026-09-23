@@ -15,6 +15,14 @@ The existing P08/P09/P10/P11/P12/P13 owners have the new coordinator address.
 Use the app-surfaced session IDs, not differing IDs quoted inside worker messages.
 Current actionable checkpoints supersede the older chronological entries below:
 
+- P05: P14's same-dimension run06 reaches an unmodified provider failure:
+  ordinary regular-file observation rejects a real 262-character policy path
+  that accepted P03 reads successfully. Recovery reproduced the exact 848-byte
+  file read-only under `p05-p14-policy-path-repro-01`. A03.2 is reopened;
+  the original P05 owner `2329e71f-cd9e-473b-94cf-41c579c29a88` and reviewer
+  `6ed9c7df-4845-4d70-88c7-f0746ab28059` retain this bounded Python observation
+  seam. No P10/Git strategy, root shortening, schema or actor/policy change
+  follows. Earlier accepted cases and native snapshots remain their own evidence.
 - P04: final join `08879e9` passes SAME `ed672f58` SPEC then QUALITY in
   `8a3a35c`, integrated `6e32d1f`; F08 is closed. All nine product/report blobs
   match. Recovery passes eight joined shared seams, 57 retained cases, actual
@@ -122,7 +130,10 @@ Current actionable checkpoints supersede the older chronological entries below:
   preparation SPEC: retained E01 plus P2 R01, whose fixed-incomplete-task check
   rejects legitimate A24 progress. Whole QUALITY has not started. `2c4fc3d`
   releases only bounded fixture-Git and progress-preservation corrections.
-  Do not substitute the passing root or release native actors yet.
+  Correction `175a03d` / report `9120bb2` is frozen: R01 tests pass and original
+  E01 Git/copy substeps are corrected at the same dimensions, but full default
+  entry remains 14/15 with E02 in P05's policy-file observation. P14 is stopped
+  at that provider boundary; no native actor, alternate path or retry is released.
 
 Later P13 source checkpoint: A+B `72253ed` passes `7bf3f253`, integrated `895bb35`.
 All 19 joined source-selection methods pass. The new actual installed selection
@@ -133,8 +144,9 @@ This is accepted-P06-engine evidence, not P10 linked/default transaction accepta
 The remaining eight discovery/authoring consumers and existing template are
 released to the original P13 owner with explicit status/welcome ownership.
 
-Current original acceptance count is 69/113 after accepted A16, domain methods,
-preserved role contracts, A14.1-.4 and final A22.7. Native semantic and installed observations
+Current original acceptance count is 68/113 after reopening A03.2 for the actual
+P14/P05 observation gap. Accepted A16, domain methods, preserved role contracts,
+A14.1-.4 and final A22.7 remain. Native semantic and installed observations
 remain distinct open leaves; counts are not elapsed time or release readiness.
 The user's percentage question was answered at the then-current 64/113 (57%).
 No push, PR, main merge or release has occurred.
