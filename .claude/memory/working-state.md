@@ -97,12 +97,18 @@ checks, six complete appends and unchanged nine inherited inputs. This is
 finite observed parity, not arbitrary-input or whole-P08 acceptance.
 Original owner report-only `229656cf` (sole parent `8318c308`, Git-byte SHA
 `53c921c6`, full original prefix retained) is frozen with handoff `fc638af9`.
-SAME9db now has the COMPLETE original A08/A10/advisory A13.3 selected-subset
-SPEC and first eligible whole QUALITY review, including source and retained
-native/preservation evidence. A genuinely rejecting native independent review
-is still UNOBSERVED/OPEN; no manufactured rejection or waiver. A13.1/.2/.4
-and installer gates remain separate. All native leases are revoked and both
-owners parked; no extra actor, source repin or remote action is authorized.
+SAME9db completed that COMPLETE original A08/A10/advisory A13.3 review in
+`624b554f`, preserved report-only as `d1e821a` without importing blocked source.
+Selected SPEC is UNVERIFIED/BLOCKED and first whole QUALITY NOT STARTED.
+One P2 gap F06/A10.3 remains: a genuine later-rejecting native review is absent;
+no new product defect was reproduced. Exact full report/handoff and unchanged
+13,831 before/after records/344 supplements pass parent intake01.
+The original card now records a bounded declared negative-test re-plan using
+the original sorting defect, existing direct/alias targets and original actors.
+Its read-only independent method check precedes any concrete target release.
+No forced verdict, waiver, new actor, source repin or remote operation follows.
+A13.1/.2/.4 and installer gates remain separate. All native leases are revoked;
+no target changes are released merely by the proposed evidence design.
 Source `70469296` and bound inputs stay frozen; no fourth actor.
 P14 preparation passes complete SPEC then QUALITY in `f690eae`, integrated
 `c544fd0`. Native release `acc18df` permits the original controller's sequential

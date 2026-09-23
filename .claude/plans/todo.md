@@ -5,6 +5,11 @@ MasterSession's recovery session `88aecc43-40f9-41d4-8947-6c2fb0a55481`.
 Follow its [current handoff](universal-implementation/handoff.md); the original plan remains
 the sole task ledger. The entries below are preserved history.
 
+Current review checkpoint: 79/113 original acceptances. Complete P08 selected
+SPEC `624b554f` is BLOCKED on F06/A10.3; whole QUALITY has not started.
+The original card's explicitly declared negative-control design needs its
+independent read-only method check before any existing target is released.
+
 ## Historical: first-class swarming work — 2026-09-08
 
 Historical initiative: [work map](swarming-work/work.json), [plan](swarming-work/plan.md),

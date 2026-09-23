@@ -162,10 +162,23 @@ Current actionable checkpoints supersede the older chronological entries below:
   is248,073 bytes/SHA `b613452e`; handoff `fc638af9` binds both and16 actual
   source-Git operations. Post-report source960 is distinct from959 unchanged
   unrelated owner-workspace files plus the authorized report.
-  SAME9db is now commissioned for COMPLETE original selected-subset source/
-  method/native SPEC, then first eligible whole QUALITY, not another fixture-
-  only verdict. It must assess original A08/A10/advisoryA13.3 and all genuine
-  gaps, including the still UNOBSERVED/OPEN rejecting-review condition.
+  SAME9db completed that substantive original selected-subset review in
+  `624b554f356bd41b570ad4c6da8b809dbd2517d3`, sole parent229. Its exact546-line/
+  40,354-Git-byte report (SHA `ce61df9a`) is preserved alone in `d1e821a`,
+  without importing the unaccepted product ancestry. Selected SPEC is
+  UNVERIFIED/BLOCKED; first whole QUALITY is NOT STARTED. Current P1/P2/P3
+  gaps are0/1/0: F06 is the original A10.3 later-rejecting native condition.
+  No new product defect was reproduced. Other scoped SPEC dispositions and
+  accepted component-quality boundaries remain distinct, including704 versus
+  aa5 named-legacy correction. Parent data intake `p08-selected-final-binding-01`
+  verifies17 returned artifacts, the exact report/handoff4104081b,13,831
+  unchanged before/after records and344 supplemental records; no native replay.
+  The P08 card now proposes three original A10.3.n1-n3 refinements: a declared
+  one-line original sorting-regression input in each existing delivery target,
+  unbiased independent review, then actual negative native consumers. Existing
+  SAME9db must first check the method against F06 read-only. No target grant
+  or execution is authorized before that result and the coordinator's release;
+  actual review status is never dictated. Prior positive packets remain exact.
   A13.1/.2/.4, P10 and invalid shell27/q02 boundaries remain separate. No
   unaccepted owner source is integrated merely to preserve report ancestry.
   Reviewer-private failures remain honest post-hoc transcript artifacts,

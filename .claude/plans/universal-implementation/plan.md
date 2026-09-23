@@ -339,6 +339,9 @@ separate DA obligation remain history, not reversed by this correction.
 - [ ] A10.1 Ask only missing, task-relevant decisions and retain existing authorization.
 - [ ] A10.2 Keep venture framing optional for maintenance/migration/research.
 - [ ] A10.3 Route alternate plan/build/review entry points through the same work contract.
+  - [ ] A10.3.n1 Validate the F06 evidence design, then freeze equivalent explicitly regressed original sorting candidates in the two existing disposable delivery targets.
+  - [ ] A10.3.n2 Obtain actual unbiased target-specific independent review results with unchanged requirements and honest typed QA; preserve prior positive histories.
+  - [ ] A10.3.n3 Verify both native latest/readiness consumers refuse genuine later rejection, then obtain complete selected-subset SPEC and eligible whole QUALITY.
 - [ ] A10.4 Keep plan-tune settings dormant until an actual reader exists.
 Acceptance: equivalent entry points preserve artifacts/status without repeated interview.
 The original native MAIN local objective is verified through actual independent
@@ -354,6 +357,12 @@ with CAPTURE unreached. It does not supply a genuinely rejecting review:
 that requested native condition remains UNOBSERVED/OPEN. Full owner report
 `229656cf` is now frozen for SAME9db's complete original selected-subset SPEC,
 then first eligible whole QUALITY. No A10 parent closes from data parity alone.
+Complete independent `624b554f` on `229656cf` now leaves SPEC UNVERIFIED,
+whole QUALITY NOT STARTED and F06/A10.3 open: all real delivery reviews passed.
+The exact report is preserved without importing unaccepted product ancestry.
+The original P08 card records a bounded negative-control re-plan and mandatory
+pre-execution method check; it does not waive the gap or direct a fabricated
+review verdict. Other per-leaf SPEC positives remain evidence, not whole QUALITY.
 
 ### A11 Honest context capacity (P03; R05)
 - [x] A11.1 Share context selection/save/restore readers and show bounded sources.
