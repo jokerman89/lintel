@@ -67,10 +67,26 @@ Current actionable checkpoints supersede the older chronological entries below:
   32 current evidence files per record and 2,711 unchanged reviewer input records.
   Distinct actual host receipts `af0d9fe3`/`60a53f12` now bind those decisions;
   original f2/c2 have only the exact-byte consumer gate and subsequent permitted
-  runtime REVIEW outcome after both chains pass. Bound task/prompt, completed
-  build log and analysis stay frozen. Actual consumption and the separate
-  CAPTURE continuation remain future; no fourth context,
+  runtime REVIEW outcome after both chains pass. Actual consumption now passes
+  for both originals, including after-both and final-pin currentness. Exact
+  packet `913d6864` is quiescent; recovery verifies 1,078 snapshots, 95 current
+  MAIN files, eight recorded native commands and two real audit appends.
+  Concrete original-card grant `801459b` accepts proposal `56155ed6`: only the
+  existing state ledger, original-cycle capture artifact and target-local cycle
+  audit may be written by SAMEc2. No-edit reaffirmation preserves raw originals;
+  actual audit/ledger readback and paired post-write consumers are required.
+  No CAPTURE/cycle completion is preclaimed. Bound task/prompt, completed
+  build log and analysis stay frozen; no fourth context,
   provider import, repin or other target write.
+  Additive reporting correction: the earlier controller summary, recovery relay
+  and independent report line46 misstated handoff25 as shells142-145/all0.
+  Immutable original quiescence `65c7eedd` actually records137-142 with
+  exits0/0/0/0/3/0 and no running owned command;141 is the expected integrated
+  reader refusal,142 the pin. Later handoff26's143/144 both0 is separate.
+  Controller erratum `b0cd9eb4` preserves originals. The wrong range is absent
+  from the three stage files, both decisions and the new host receipts.
+  SAME9db is asked only for an additive historical report/impact clarification,
+  with no released-MAIN reread; current consumer passes and grant801 remain.
 - P09: module product `5c99612` passes `114ddfe3`, integrated `2d789a4`;
   all 26 product paths match and 13 joined methods pass. `477d3fc` releases
   the original owner's separate N1 safety-quantifier correction and two bounded
@@ -206,6 +222,11 @@ Current actionable checkpoints supersede the older chronological entries below:
   Only after that quiescence may released strict PLAN4/fresh resume5 proceed,
   without other-profile outputs or a supplied next-task answer. SC1-SC3,
   pre-BUILD owned recovery and own-context finite TQ are not waived.
+  Strict PLAN context4 `6cc62d16` returned T001 but command47's actual reader
+  refused the explanatory QA table's generic `ID` heading as unassigned tasks.
+  Controller reuses SAME4 for the sole `QA control` header correction; rows,
+  original tasks and three typed obligations remain intact. Context5/SC2/BUILD
+  stay unlaunched until real revalidation; no provider or parser change.
   Controller-local task receipts remain attributed to that observer; parent
   inspection APIs did not expose those tasks. Whole native A24 remains open.
   Local SHIP is explicitly skipped; no remote publication or other-scope release.

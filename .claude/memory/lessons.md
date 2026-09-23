@@ -873,3 +873,19 @@ first dispatch. Preserve real task IDs, completed work and failed delivery;
 never relabel a new actor as reuse. A necessary replacement requires an explicit
 bounded plan correction, truthful actor/intervention counts and preserved
 independence. Keep transport capability separate from task authority.
+
+## L-044 - Quiescence and successful exits are different observations
+
+**Date:** 2026-09-23
+
+**Context:** A P08 controller summary misstated a completed shell range and
+called every exit zero. The coordinator relayed it, and independent report
+prose repeated it. The original receipts and verification data correctly
+retained the expected pre-review reader refusal and no running owned command.
+
+**Rule:** Derive shell IDs, exits and timestamps directly from the named
+structured receipt when summarizing them. Completed or quiescent does not mean
+successful, and an expected refusal must not disappear into an all-zero
+paraphrase. Correct published summaries additively, preserve the original
+records and obtain the report author's impact clarification where needed;
+do not rewrite evidence or rerun effects to conceal a reporting mistake.

@@ -43,8 +43,13 @@ suite, mandatory author documentation and self-ANALYZE. Exact integrated packet
 and cross-artifact review. T011/T027 retain separate decisions `b369afc6` and
 `6ceab2a4`; package PASS was not transferred. Recovery verified the returned
 records/current evidence and supplied distinct actual host receipts `af0d9fe3`
-and `60a53f12`. Original f2/c2 now own real integrated consumption; only both
-passing chains may advance REVIEW. CAPTURE remains a separate next boundary.
+and `60a53f12`. Actual original f2/c2 consumption now passes both chains,
+including after-both and final-pin currentness. Packet `913d6864` is quiescent;
+recovery verifies 1,078 snapshots, 95 current MAIN files and both audit additions.
+Concrete grant `801459b` now releases only the original MAIN three-path local
+CAPTURE continuation, with no-edit mapped-artifact reaffirmation, actual budget
+observation, append/readback and final paired QA gates. No CAPTURE completion
+is preclaimed and the map remains APPROVED with T042 deferred.
 Source `70469296` and bound inputs stay frozen; no fourth actor.
 P14 preparation passes complete SPEC then QUALITY in `f690eae`, integrated
 `c544fd0`. Native release `acc18df` permits the original controller's sequential
@@ -67,6 +72,11 @@ Exact packet `50394141`, context `e25ced5c`, decision `f1b11842` and handoff
 `847ce8d0` are returned for actual rapid host/producer/latest-reader/QA,
 original T003/local CAPTURE and quiescence. Strict PLAN4/fresh resume5 remain
 required, including SC1-SC3, pre-BUILD P03 rehearsal and finite own-context TQ.
+Strict PLAN context4 `6cc62d16` has a bounded T001 formatting rework: its
+explanatory QA table's generic `ID` header made the real reader find three
+unassigned pseudo-tasks. Command47 failed before phase progression. SAME4
+may rename only that header to `QA control`, preserving every obligation,
+then revalidate before context5/SC2/BUILD. No provider fix, new actor or waiver.
 No whole A24 acceptance.
 Preserve the original plan, refusal and genuine fresh strict recovery; the
 extra neutral handoff is an intervention, not same-context reuse. Source raw
