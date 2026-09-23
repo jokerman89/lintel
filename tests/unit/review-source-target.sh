@@ -16,7 +16,8 @@ mkdir -p "$installed/bin" "$installed/lib"
 cp "$review_source/bin/li-review-log" "$review_source/bin/li-review-read" \
   "$review_source/bin/li-review-evidence.py" "$review_source/bin/_audit.sh" "$installed/bin/"
 cp "$review_source/lib/paths.sh" "$review_source/lib/review_contract.py" \
-  "$review_source/lib/review-schema.json" "$review_source/lib/markdown_source.py" "$installed/lib/"
+  "$review_source/lib/review-schema.json" "$review_source/lib/markdown_source.py" \
+  "$review_source/lib/native_paths.py" "$installed/lib/"
 for name in target cwd; do
   repo="$review_tmp/$name"
   mkdir -p "$repo/.claude"
