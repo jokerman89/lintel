@@ -6,9 +6,9 @@ scenario, installed-consumer success, independent verdict or release clearance.
 
 | ID | Positive oracle | Negative / preservation oracle |
 |---|---|---|
-| C01 | Frozen source bytes match accepted base and retain hashes | A changed frozen byte is rejected before product calls |
-| C02 | Every process/root is explicitly synthetic; trusted source differs from target | Escaping home/state/pointer, ambient selector or credential variable refuses before execution |
-| C03 | One base request, seed, oracle and original T001-T003 for all variants | No Universal A-ID is copied into synthetic tasks; original A24 and A23.4/.5 stay open |
+| C01 | Frozen executable bytes match the declared current source revision; historical base provenance remains separate | Changed frozen/current selected bytes are rejected; no historical-helper substitution or automatic repin |
+| C02 | Every process/root is explicitly synthetic; Windows fixture Git uses command-scoped longpaths without persisted configuration | Escaping home/state/pointer, ambient selectors, credentials or fixture Git options on source commands refuse |
+| C03 | One base request/seed/oracle and T001-T003 for all variants; current original authority is preserved before/after reads; legitimate A24.1 checkbox progress passes real P05/P08 consumers | No Universal A-ID enters the inventory task map; substantive requirement drift and withdrawn approval fail; current status is not forced incomplete |
 | C04 | Actual P07 bootstrap, field/provenance reads and policy source consumption | Required missing pack, conflict and same-mtime manifest drift refuse without neutral clearance |
 | C05 | Unchanged P07 reference verifies in a fresh process | Missing pin is not recreated on recovery; changed policy-source bytes invalidate P05 acceptance |
 | C06 | P08 map/package/leaf readers retain P1 and T001-T003 | Unknown/parent leaf and changed acceptance are rejected, not renamed |
@@ -58,3 +58,19 @@ estimates as measured tokens, or compute ROI from a single task.
 Compare accepted R1-R6 plus applicable SC1-SC3, decisions and required controls.
 An identical valid design/package is acceptable. Do not score file count, prompt
 length, populated fields or narrative volume. Neutral/rapid have no SC1-SC3 gate.
+
+## Released preparation correction
+
+Coordinator release `2c4fc3d` preserves the historical experiment and adds the
+paired progress/requirement/approval controls above. Any copied Universal map/
+plan/spec/prompt is explicitly read-only-source test data in an owned synthetic
+case, not a second initiative. The existing P05 Markdown boundary/progress
+semantics and P08 reader remain authoritative; no second parser is introduced.
+The harness does not change original task checkboxes in its source checkout.
+
+The ordinary shell entry retains its original root dimensions and executable
+selection. Windows-only `core.longpaths=true` uses Git's command environment
+scope only for inspected fixture targets, including unchanged provider children.
+No persistent/local/global Git setting, hook bypass, shortened target, other
+Git installation or P10 investigation is authorized. Old E01/R01 and failed
+run locks remain historical evidence, not silently repinned observations.

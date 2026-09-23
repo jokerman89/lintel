@@ -25,6 +25,12 @@ import unittest
 FIXTURE_PATH = "tests/fixtures/universal-profile-scenarios"
 MAP = ".claude/plans/universal-implementation/work.json"
 ORIGINAL = ("A24.1", "A24.2", "A24.3", "A24.4")
+AUTHORITY_PATHS = (
+    MAP, ".claude/plans/universal-implementation/spec.md",
+    ".claude/plans/universal-implementation/plan.md",
+    ".claude/plans/universal-implementation/prompt.md",
+    ".claude/plans/universal-implementation/packages/P14.md",
+)
 LEAVES = ["T001", "T002", "T003"]
 OWNER = {"id": "00181e45-3979-4f33-bd31-562e63dc48f0",
          "context": "8fa44739-f562-4213-a6c4-fb7719fc8c9e"}
@@ -36,8 +42,12 @@ DIRECTORIES = (
 FORBIDDEN = (
     "GH_TOKEN", "GITHUB_TOKEN", "BASH_ENV", "ENV", "PYTHONPATH", "PYTHONHOME",
     "PACK_CACHE_FILE", "CLAUDE_PLUGIN_ROOT", "CLAUDE_SESSION_ID", "GIT_DIR",
-    "GIT_WORK_TREE", "GIT_CONFIG_COUNT", "GIT_CONFIG_PARAMETERS",
+    "GIT_WORK_TREE", "GIT_CONFIG_PARAMETERS",
 )
+WINDOWS_FIXTURE_GIT = {
+    "GIT_CONFIG_COUNT": "1", "GIT_CONFIG_KEY_0": "core.longpaths",
+    "GIT_CONFIG_VALUE_0": "true",
+}
 OPTIONS = None
 SOURCE = FIXTURES = RUN = None
 LOCK = {}
@@ -78,6 +88,11 @@ def inspect_environment(env: dict, root: Path, source: Path, target: Path) -> No
     for key in FORBIDDEN:
         if key in env:
             raise ValueError(f"Ambient variable refused: {key}")
+    git_config = {key: value for key, value in env.items()
+                  if key == "GIT_CONFIG_COUNT" or key.startswith(("GIT_CONFIG_KEY_", "GIT_CONFIG_VALUE_"))}
+    if git_config and (os.name != "nt" or not target.is_relative_to(root / "cases")
+                       or git_config != WINDOWS_FIXTURE_GIT):
+        raise ValueError("Only command-scoped longpaths in owned Windows fixture repos are allowed")
     if any(key.startswith(("CLAUDE_", "COPILOT_", "AZURE_", "AWS_", "SSH_")) for key in env):
         raise ValueError("Ambient host/credential selector refused")
     if Path(env["P14_ISOLATION_ROOT"]) != root:
@@ -142,18 +157,25 @@ def environment(base: Path, target: Path) -> dict:
         path = inspected(Path(env[key]), RUN, exists=False)
         path.mkdir(parents=True, exist_ok=True)
     (base / "empty-git-config").write_bytes(b"")
+    if os.name == "nt" and target.is_relative_to(RUN / "cases"):
+        # Git's command scope reaches unmodified provider subprocesses, without
+        # persisting config or applying fixture options to source-checkout Git.
+        env.update(WINDOWS_FIXTURE_GIT)
     inspect_environment(env, RUN, SOURCE, target)
     return env
 
 
 def command(argv, *, env, cwd, expected=0):
     inspect_environment(env, RUN, Path(env["LINTEL_SOURCE_ROOT"]), Path(env["LINTEL_REPO_ROOT"]))
+    if Path(cwd) == OPTIONS.root and any(key in env for key in WINDOWS_FIXTURE_GIT):
+        raise ValueError("Fixture Git options may not reach source-checkout commands")
     number = len(COMMANDS) + 1
     stem = RUN / "logs" / f"{number:04d}"
     argv = [str(item) for item in argv]
     record = {"number": number, "argv": argv, "cwd": str(cwd),
               "home": env["HOME"], "target": env["LINTEL_REPO_ROOT"],
               "ceiling": env["GIT_CEILING_DIRECTORIES"],
+              "git_command_configuration": {key: env[key] for key in WINDOWS_FIXTURE_GIT if key in env},
               "started_at": datetime.now(timezone.utc).isoformat(),
               "expected_exit": expected, "exit": None, "elapsed_seconds": None}
     COMMANDS.append(record)
@@ -180,9 +202,15 @@ def command(argv, *, env, cwd, expected=0):
 
 
 def git(repo, env, *args, expected=0):
+    options = []
+    if Path(repo).is_relative_to(RUN):
+        inspected(Path(repo), RUN)
+        if Path(repo) != Path(env["LINTEL_REPO_ROOT"]):
+            raise ValueError("Git fixture target differs from the declared owned target")
+        options = ["-c", "core.autocrlf=false", "-c", "core.fsmonitor=false",
+                   "-c", f"core.hooksPath={RUN / 'empty-hooks'}"]
     return command([
-        OPTIONS.git, "--no-pager", "-c", "core.autocrlf=false", "-c", "core.fsmonitor=false",
-        "-c", f"core.hooksPath={RUN / 'empty-hooks'}", "-C", repo, *args,
+        OPTIONS.git, "--no-pager", *options, "-C", repo, *args,
     ], env=env, cwd=repo, expected=expected)
 
 
@@ -195,6 +223,13 @@ def verify_files(root: Path, files: list) -> None:
 
 def assert_lock() -> None:
     verify_files(RUN, LOCK["files"])
+    for item in LOCK["files"]:
+        if sha((OPTIONS.root / item["origin"]).read_bytes()) != item["sha256"]:
+            raise ValueError(f"Declared current source/fixture drift: {item['origin']}")
+    for item in LOCK["original_authorities"]:
+        if sha((OPTIONS.root / item["path"]).read_bytes()) != item["sha256"]:
+            raise ValueError(f"Current authority changed during observation: {item['path']}")
+    verify_files(RUN, LOCK["original_authorities"])
 
 
 def freeze() -> None:
@@ -204,21 +239,19 @@ def freeze() -> None:
     env = dict(os.environ)
     (RUN / "logs").mkdir()
     (RUN / "empty-hooks").mkdir()
-    if git(OPTIONS.root, env, "rev-parse", base).stdout.decode().strip() != base:
-        raise ValueError("The accepted base object is unavailable")
-    git(OPTIONS.root, env, "merge-base", "--is-ancestor", base, "HEAD")
+    subject = git(OPTIONS.root, env, "rev-parse", "HEAD").stdout.decode().strip()
     paths = (original_fixtures / "source-paths.txt").read_text(encoding="utf-8").splitlines()
     files = []
     for relative in paths:
         data = (OPTIONS.root / relative).read_bytes()
-        committed = git(OPTIONS.root, env, "show", f"{base}:{relative}").stdout
+        committed = git(OPTIONS.root, env, "show", f"{subject}:{relative}").stdout
         if data.replace(b"\r\n", b"\n") != committed.replace(b"\r\n", b"\n"):
-            raise ValueError(f"Selected production source differs from accepted base: {relative}")
+            raise ValueError(f"Selected production source differs from declared current revision: {relative}")
         target = SOURCE / relative
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_bytes(data)
         files.append({"origin": relative, "frozen": target.relative_to(RUN).as_posix(),
-                      "sha256": sha(data), "base_blob_sha256": sha(committed)})
+                      "sha256": sha(data), "subject_blob_sha256": sha(committed)})
     for path in sorted(original_fixtures.rglob("*")):
         if path.is_file():
             relative = path.relative_to(original_fixtures)
@@ -235,15 +268,17 @@ def freeze() -> None:
         (RUN / name).write_bytes(harness)
         files.append({"origin": relative, "frozen": name, "sha256": sha(harness)})
     authorities = []
-    for relative in (MAP, ".claude/plans/universal-implementation/spec.md",
-                     ".claude/plans/universal-implementation/plan.md",
-                     ".claude/plans/universal-implementation/packages/P14.md"):
+    for relative in AUTHORITY_PATHS:
         data = (OPTIONS.root / relative).read_bytes()
-        original = git(OPTIONS.root, env, "show", f"{base}:{relative}").stdout
-        if data.replace(b"\r\n", b"\n") != original.replace(b"\r\n", b"\n"):
-            raise ValueError(f"Original task authority changed: {relative}")
-        authorities.append({"path": relative, "sha256": sha(data), "base_blob_sha256": sha(original)})
+        committed = git(OPTIONS.root, env, "show", f"{subject}:{relative}").stdout
+        target = RUN / "authority-inputs" / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(data)
+        authorities.append({"path": relative, "frozen": target.relative_to(RUN).as_posix(),
+                            "sha256": sha(data), "subject_blob_sha256": sha(committed)})
     LOCK = {"category": "pre-observation-fixture-lock", "base": base,
+            "base_role": "historical-experiment-provenance",
+            "subject_revision": subject,
             "created_at": datetime.now(timezone.utc).isoformat(),
             "files": files, "original_authorities": authorities,
             "original_ids": list(ORIGINAL), "fixture_ids": LEAVES,
@@ -291,8 +326,8 @@ class Preparation(unittest.TestCase):
         os.environ.update(self.saved_environment)
         assert_lock()
 
-    def git(self, *args):
-        return git(self.target, self.env, *args)
+    def git(self, *args, expected=0):
+        return git(self.target, self.env, *args, expected=expected)
 
     def shell(self, script, *, expected=0, env=None):
         return command([OPTIONS.bash, "--noprofile", "--norc", "-c", SHELL_PREFIX + script],
@@ -300,7 +335,9 @@ class Preparation(unittest.TestCase):
 
     def select(self, name=None):
         if name:
-            shutil.copytree(FIXTURES / "packs" / name, self.target / "packs" / name)
+            source = SAFETY.safe_path(SAFETY.checked_root(FIXTURES), "packs/" + name)
+            destination = SAFETY.safe_path(SAFETY.checked_root(self.target), "packs/" + name)
+            shutil.copytree(SAFETY.native_io_path(source), SAFETY.native_io_path(destination))
             self.write(".claude/profile-requirements.json",
                        encoded({"schema_version": 1, "required_pack": name}))
         result = self.shell(
@@ -336,8 +373,9 @@ class Preparation(unittest.TestCase):
                             "consumed_text": data.decode("utf-8")})
         return sources
 
-    def context(self):
+    def context(self, *, work_map="work.json", package_id="P1", leaf_ids=LEAVES):
         sources = self.profile_sources()
+        mapping = WORK["load_work_map"](self.target, Path(work_map))
         hooks = PROFILE.field_value(self.profile["profile"]["values"], "compliance.hooks")
         permitted = {"inventory-atomic-publication", "inventory-owned-recovery"}
         self.assertTrue(set(hooks) <= permitted, "unrecognized policy control must be reconciled")
@@ -354,8 +392,8 @@ class Preparation(unittest.TestCase):
                        "jurisdiction": None, "actor": None, "effective_date": None},
         } for name, kind, source in obligations]
         request = {
-            "work_map": "work.json", "package_id": "P1", "leaf_ids": LEAVES,
-            "acceptance_paths": ["spec.md", "plan.md", *[item["path"] for item in sources]],
+            "work_map": work_map, "package_id": package_id, "leaf_ids": list(leaf_ids),
+            "acceptance_paths": [mapping["spec"], mapping["plan"], *[item["path"] for item in sources]],
             "base": self.base_ref, "selection": ["inventory.py", "plan.md", "data"],
             "record_path": ".claude/runtime/reviews/p14-future.json",
             "attempt_id": "p14-preparation-only", "builder": OWNER,
@@ -370,6 +408,8 @@ class Preparation(unittest.TestCase):
 
     def test_c01_source_and_fixture_lock(self):
         self.assertEqual(LOCK["base"], "9f8885be132b5af0f579dd64019d32aef5501d45")
+        self.assertEqual(WORK["SOURCE_ROOT"], SOURCE)
+        self.assertEqual(Path(PROFILE.__file__).parent, SOURCE / "lib")
         isolated_copy = self.base / "tampered-copy"
         isolated_copy.mkdir()
         original = (RUN / LOCK["files"][0]["frozen"]).read_bytes()
@@ -392,13 +432,27 @@ class Preparation(unittest.TestCase):
                          env=self.env, cwd=self.target)
         self.assertEqual(result.stdout.decode().splitlines(), [self.env["HOME"]] * 2)
         self.assertNotIn("LINTEL_PROFILE_REFERENCE", self.env)
+        config_before = (self.target / ".git" / "config").read_bytes()
+        self.git("config", "--local", "--get", "core.longpaths", expected=1)
+        if os.name == "nt":
+            scope = self.git("config", "--show-scope", "--get", "core.longpaths").stdout
+            self.assertEqual(scope.decode().split(), ["command", "true"])
+            with self.assertRaises(ValueError):
+                inspect_environment({**self.env, "GIT_CONFIG_KEY_0": "core.hooksPath"},
+                                    RUN, SOURCE, self.target)
+            with self.assertRaises(ValueError):
+                command([OPTIONS.git, "--version"], env=self.env, cwd=OPTIONS.root)
+        self.assertEqual((self.target / ".git" / "config").read_bytes(), config_before)
 
     def test_c03_original_authority_and_identical_seed(self):
         original = WORK["work_context"](OPTIONS.root, Path(MAP))
         self.assertEqual(original["artifacts"]["tasks"], ".claude/plans/universal-implementation/plan.md")
-        self.assertTrue(set(ORIGINAL) <= set(original["incomplete_ids"]))
-        self.assertFalse(original["tasks"]["A23.4"]["complete"])
-        self.assertFalse(original["tasks"]["A23.5"]["complete"])
+        self.assertTrue(set((*ORIGINAL, "A23.4", "A23.5")) <= set(original["tasks"]))
+        REVIEW.bind_work(
+            OPTIONS.root, work_map=MAP, package_id="P14", leaf_ids=ORIGINAL,
+            acceptance_paths=[original["artifacts"]["spec"], original["artifacts"]["plan"]])
+        self.assertEqual(original, WORK["work_context"](OPTIONS.root, Path(MAP)))
+        assert_lock()
         for name in ("neutral", "rapid-development", "strict-change"):
             destination = self.base / name
             shutil.copytree(FIXTURES / "seed", destination)
@@ -410,6 +464,44 @@ class Preparation(unittest.TestCase):
             self.assertEqual(work["packages"]["P1"]["leaf_ids"], LEAVES)
             self.assertFalse(work["release_clearance"])
             self.assertFalse(set(ORIGINAL) & set(work["tasks"]))
+
+    def test_c03_legitimate_progress_requirement_and_approval_controls(self):
+        for item in LOCK["original_authorities"]:
+            self.write(item["path"], (RUN / item["frozen"]).read_bytes())
+        self.select()
+        plan_path = ".claude/plans/universal-implementation/plan.md"
+        original = (self.target / plan_path).read_bytes().decode("utf-8")
+        classified = REVIEW.classify_markdown(original)
+        spans = REVIEW._task_progress_spans(classified, ["A24.1"])
+        self.assertEqual(len(spans), 1)
+        span = next(iter(spans.values()))
+        incomplete = original[:span.start] + " " + original[span.end:]
+        self.write(plan_path, incomplete.encode("utf-8"))
+        context = self.context(work_map=MAP, package_id="P14", leaf_ids=ORIGINAL)
+        before = WORK["work_context"](self.target, Path(MAP))
+        self.assertFalse(before["tasks"]["A24.1"]["complete"])
+        completed = incomplete[:span.start] + "x" + incomplete[span.end:]
+        self.write(plan_path, completed.encode("utf-8"))
+        after = WORK["work_context"](self.target, Path(MAP))
+        self.assertEqual(before["tasks"].keys(), after["tasks"].keys())
+        self.assertTrue(after["tasks"]["A24.1"]["complete"])
+        REVIEW.verify_context(self.target, context)
+        self.assertEqual((self.target / plan_path).read_bytes(), completed.encode("utf-8"))
+        line_end = completed.find("\n", span.end)
+        self.assertGreater(line_end, span.end)
+        if completed[line_end - 1] == "\r":
+            line_end -= 1
+        changed = completed[:line_end] + " Synthetic requirement change." + completed[line_end:]
+        self.write(plan_path, changed.encode("utf-8"))
+        with self.assertRaisesRegex(REVIEW.ContractError, "acceptance sources changed"):
+            REVIEW.verify_context(self.target, context)
+        self.write(plan_path, completed.encode("utf-8"))
+        mapping = REVIEW.load_json((self.target / MAP).read_text(encoding="utf-8"))
+        mapping["status"] = "DRAFT"
+        self.write(MAP, encoded(mapping))
+        with self.assertRaisesRegex(REVIEW.ContractError, "not approved"):
+            REVIEW.verify_context(self.target, context)
+        assert_lock()
 
     def test_c04_resolved_fields_and_consumed_policy_sources(self):
         observations = []
