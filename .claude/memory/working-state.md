@@ -10,19 +10,23 @@ Cross-session working state (not durable rules — that's [[lessons.md]]; not pe
 
 ## Active - Universal implementation (2026-09-20)
 
-**Recovery, 2026-09-22:** the operator transferred the broken MasterSession to
+**Recovery, updated 2026-09-23:** the operator transferred the broken MasterSession to
 `88aecc43-40f9-41d4-8947-6c2fb0a55481`. Exact `5f3d885` is preserved on the recovery
 branch `jokerman-microsoft-mastersession-recovery`; the original worktree was not
 changed. Continue from the [recovery checkpoint](../plans/universal-implementation/handoff.md#recovery-checkpoint)
 and original work map. Existing owners are retained. Current original acceptance
-is **74/113**, not full release readiness. A03.2 is reopened for the observed
-P14-to-P05 native policy-file observation gap. Final Swarm A22.7 is accepted and
+is **75/113**, not full release readiness. A03.2 is reclosed after independently
+accepted P05 native observations (`06a41fe2`, integrated `b22443f`) and both
+original caller joins: P14 15/15 and P12 default/explicit 33/33 each. Old
+failures and the separate reviewer cleanup ERROR remain. Final Swarm A22.7 is accepted and
 integrated in `6e32d1f`, with joined shared, retained, real-Git and enterprise/
 hybrid checks. Discovery consumers are joined in `991ca73`; stale PDF/XLSX
 template metadata is reconciled without maturity promotion in `678ae22`.
 Standalone common/Word/PPT, workbook and PDF source scopes are joined in
 `751af6c`/`81c5b01`; 102 source/retention and six pure print-request checks pass.
-The ten-path document pipeline join is under bounded rework after independent review.
+The ten-path document pipeline join and its ordinary test entry are independently
+accepted and integrated in `095c435`; original caller report `4a8c744` is
+preserved in `b9264b2`.
 Native lifecycle comparisons/cold resume remain active; the N1 and two finite
 specialist execution review-consumption chains are complete, not whole P09.
 P10's supported linked-init remains blocked by repeated journal WinError 5 with
@@ -30,19 +34,30 @@ unknown cause; no further retry or speculative patch is released. Word/Excel,
 P12 structured-record and tool/CI permission boundaries remain unchanged.
 No push, PR, main merge or whole-initiative completion is claimed.
 
-Latest continuation: the pipeline's complete source review found P2 B01 in
-literal anchor admission (`e85f70a` / `42abfcb`); the original owner is repairing
-it under `12a40cc`, with whole QUALITY still ineligible. P13's ten remaining
-source-family records/current preservation refresh are released under `a426242`.
-P14 core-profile fixture preparation is active, not native outcome acceptance.
-The pinned accepted tree passes all 39 strict **shape-only** suites; the full
-strict runner, required installed P10 case and original artifact gates remain.
-The ten additional optional families now pass independent `8f0f7dc` and are
+Latest continuation: P08's original fresh context c2 consumed the exact new
+T027 current-byte record `45b6964b` through the real producer/latest-reader/QA
+chain. Final BUILD then stopped before tests on a caller-only Windows/Bash path
+spelling assertion. Handoff25 releases only that correction to the same context;
+final BUILD, ANALYZE, integrated REVIEW and CAPTURE remain pending. Source `70469296`
+and bound task/prompt bytes remain frozen; no fourth actor is authorized.
+P14 preparation passes complete SPEC then QUALITY in `f690eae`, integrated
+`c544fd0`. Native release `acc18df` permits the original controller's sequential
+neutral/rapid/strict/fresh-strict experiment. Setup is active; no actual native
+result is yet accepted. Source Git/raw archive identities remain distinct and
+the fixed business inputs must retain their exact raw hashes.
+The pinned accepted tree previously passed all 39 strict **shape-only** suites;
+the current full strict runner, required installed P10 case and original artifact
+gates remain. The ten additional optional families pass independent `8f0f7dc` and are
 integrated in `c62606b`. Actual committed clone coverage `2b672bb` passes for
 all twelve selections, resources/notices and refusal paths. This closes the
 source metadata/core, one-catalog/honest-routing and provenance-retirement leaves,
-not native utility or P10. Accepted P12 pipeline source is held for its discovered
-zero-argument test-runner entry repair (`5e1d21a`); its 33 explicit joined cases pass.
+not native utility or P10. `6885d9e` reconciles accepted pipeline preflight and
+explicit document-content unions without forcing them onto standalone formats.
+
+### Historical integration chronology
+
+The records below preserve prior checkpoints and failures. The current recovery
+summary above and the linked handoff supersede their then-current pending states.
 
 **Status:** approved implementation, not complete. MasterSession secured the 25 uncommitted
 audit/continuity files with SHA-256 verification and committed them as `74290e0`, preserving the

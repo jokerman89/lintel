@@ -1,6 +1,6 @@
 # Universal implementation handoff
 
-Updated 2026-09-22 by MasterSession's recovery coordinator.
+Updated 2026-09-23 by MasterSession's recovery coordinator.
 
 ## Recovery checkpoint
 
@@ -15,14 +15,18 @@ The existing P08/P09/P10/P11/P12/P13 owners have the new coordinator address.
 Use the app-surfaced session IDs, not differing IDs quoted inside worker messages.
 Current actionable checkpoints supersede the older chronological entries below:
 
-- P05: P14's same-dimension run06 reaches an unmodified provider failure:
-  ordinary regular-file observation rejects a real 262-character policy path
-  that accepted P03 reads successfully. Recovery reproduced the exact 848-byte
-  file read-only under `p05-p14-policy-path-repro-01`. A03.2 is reopened;
-  the original P05 owner `2329e71f-cd9e-473b-94cf-41c579c29a88` and reviewer
-  `6ed9c7df-4845-4d70-88c7-f0746ab28059` retain this bounded Python observation
-  seam. No P10/Git strategy, root shortening, schema or actor/policy change
-  follows. Earlier accepted cases and native snapshots remain their own evidence.
+- P05: the original 262-character policy-file failure and selected-new-file
+  omission are repaired by `78e4381` / test-only `a75ec0e`. SAME reviewer
+  `6ed9c7df-4845-4d70-88c7-f0746ab28059` passes complete scoped SPEC then
+  QUALITY in `06a41fe2`; exact six blobs are integrated as `b22443f`.
+  The reviewer ran a real 102-method aggregate and nine independent probes;
+  recovery passes seven joined cases and the unchanged original policy guard.
+  Original P14 run07 passes 15/15 at root216/policy262; original P12 default
+  and explicit runs pass 33/33 each at their unchanged 263/260 dimensions.
+  Their actual evidence was independently inspected. A03.2 and n1-n3 are
+  reclosed. Old failures and the separate cleanup ERROR remain: ten inspected
+  empty reviewer directories are locked, with no further cleanup/process/ACL
+  action authorized. No P10, native-format, final-CI or wider client clearance.
 - P04: final join `08879e9` passes SAME `ed672f58` SPEC then QUALITY in
   `8a3a35c`, integrated `6e32d1f`; F08 is closed. All nine product/report blobs
   match. Recovery passes eight joined shared seams, 57 retained cases, actual
@@ -40,11 +44,21 @@ Current actionable checkpoints supersede the older chronological entries below:
   reviewer also accepts the named legacy-ID provider correction `aa5cf0e` in
   separate exact-export report `78e3c09`, preserved `14f97fa`; A08.3.a is reclosed.
   Native `70469296` and the original controller workspace are not re-pinned.
-  Main T011 is genuinely paused before T027. The original c5 builder is serially
-  consuming separate build/fix comparison evidence. Both fix T1 first records
-  passed, then correctly became raw-evidence stale after their actual checkbox
-  progress; new current-byte reviews preserve old records and real exit-3 history.
-  No provider patch or checkbox rollback is authorized by that behavior.
+  Build/fix comparisons and their separate current-byte review consumption are
+  complete. The third/final fresh context `c2d5b8df-d84b-4e36-893a-cd7e28b63e1b`
+  recovered MAIN from files, resumed and completed actual T027. T011/T027 are
+  checked, T042 deferred. First review `61955260` genuinely passed consumption
+  before task/prompt progress correctly made its raw evidence stale. SAME9db
+  then reviewed current bytes, producing `45b6964b`; recovery authored a new
+  actual host receipt (raw `66764ed1`), and c2's producer/latest-reader/QA pass.
+  Handoff24 stopped before final tests on a caller-only native/Bash path-string
+  assertion. Its failed request captured no original effective value; the
+  later alias observation is a reproduction, not retroactive evidence.
+  Handoff25 `1173d1eb95ea06c1a4fc9a4733bb5b8d57bfbdc3809901bf8adb020c5325c0a5`
+  releases only that assertion correction to the same c2, followed by original
+  final BUILD/ANALYZE and eligible integrated-review preparation. Bound tasks/
+  prompt remain unchanged; no fourth context, provider import, repin or other
+  target write. SAME9db integrated REVIEW and actual CAPTURE remain future.
 - P09: module product `5c99612` passes `114ddfe3`, integrated `2d789a4`;
   all 26 product paths match and 13 joined methods pass. `477d3fc` releases
   the original owner's separate N1 safety-quantifier correction and two bounded
@@ -99,11 +113,17 @@ Current actionable checkpoints supersede the older chronological entries below:
   preserved `42abfcb`: P2 B01 admits literal anchors and rejects real anchors
   beside examples. Correction `fa5139c` / report `e309b17` is now frozen with
   SAME31 and passes complete source SPEC and first whole QUALITY in `c75eabc`.
-  All 33 joined explicit-argument cases pass. Integration is held for the
-  actual normal test-entry gap: zero-argument `.sh` exits 2 before any test.
-  `5e1d21a` releases only its isolated test bootstrap to the original owner.
-  The uncommitted pipeline merge was safely aborted; no accepted history or
-  pending family regression was lost. Native/shared-runtime gates remain.
+  All 33 joined explicit-argument cases pass. The discovered zero-argument
+  entry failure was repaired separately in `e7e97d4`, accepted by SAME31 in
+  `d2a2cfe`, and integrated with the pipeline source as `095c435`. After the
+  exact accepted P05 dependency `b22443f`, both original default/explicit
+  callers pass 33/33 at the original dimensions and Git choices. Report-only
+  `4a8c744` is preserved in `b9264b2`; recovery verified real results, six
+  ignored-file snapshots and fourteen successful preparations. Old 30/3
+  failures, old roots and all397 artifact/QA entries remain unchanged.
+  `6885d9e` joins the pipeline helper/preflight resource closure and explicit
+  content unions, with actual clone and omission tests. No new native,
+  structured-record, Office, raster, network or other denied operation.
 - P13: ambiguity repair `b1d4caf` passes independent whole first-unit SPEC/QUALITY
   in `09a3c6ec`, integrated with original history as `03df1db`; joined 31 metadata
   methods pass and all eight product blobs match. The original owner is released
@@ -126,21 +146,25 @@ Current actionable checkpoints supersede the older chronological entries below:
   unions and missing-resource refusal; committed run passes. Earlier missing-
   family RED and two test-oracle mistakes are retained, not product failures.
   No source-body/schema/default access change or P10/native utility claim follows.
-- P14: original core-profile experiment preparation is owned by
+- P14: the original core-profile experiment is owned by
   `8fa44739-f562-4213-a6c4-fb7719fc8c9e`, branch
   `jokerman-microsoft-universal-profile-scenarios`, from `9f8885b`.
-  It prepares one identical offline inventory-reconciliation task under neutral,
-  rapid and strict profiles. No native scenario actor is released yet.
-  The owner reports 14 preparation methods passing at its explicit owned root,
-  but the separate no-argument shell entry fails one Git-object write at its
-  deeper generated root. Product `56ce767` / report `f106f00` fails coordinator
-  preparation SPEC: retained E01 plus P2 R01, whose fixed-incomplete-task check
-  rejects legitimate A24 progress. Whole QUALITY has not started. `2c4fc3d`
-  releases only bounded fixture-Git and progress-preservation corrections.
-  Correction `175a03d` / report `9120bb2` is frozen: R01 tests pass and original
-  E01 Git/copy substeps are corrected at the same dimensions, but full default
-  entry remains 14/15 with E02 in P05's policy-file observation. P14 is stopped
-  at that provider boundary; no native actor, alternate path or retry is released.
+  One identical offline inventory-reconciliation task runs under neutral,
+  rapid and strict profiles. Original E01, R01 and E02 failures remain.
+  Correction `175a03d` / report `9120bb2` plus accepted provider `b22443f`
+  produce joined `9092a721`, report `5003ab44`: original default run07 passes
+  all15 methods at unchanged root216/policy262. Recovery verifies actual
+  command records, current/old locks and three profile effects, then passes
+  complete preparation SPEC and QUALITY in `f690eae`. Exact preparation is
+  integrated as `c544fd0`. Native release `acc18df` names up to four sequential
+  real implementers: neutral, rapid, strict PLAN, genuinely fresh strict resume.
+  Existing recovery88 is final independent reviewer; no fifth reviewer/factory.
+  Setup exports the full frozen `c544fd0` closure once to `p14-native-01`.
+  The latest setup guard distinguishes raw archive/checkout bytes from Git LF
+  identities; it may record both but not rewrite source/pins or relax exact raw
+  business-input/oracle/policy hashes. Actual actor handles/results are not yet
+  reported. Native A24 outcomes, fresh resume and independent review remain open.
+  Local SHIP is explicitly skipped; no remote publication or other-scope release.
 
 Later P13 source checkpoint: A+B `72253ed` passes `7bf3f253`, integrated `895bb35`.
 All 19 joined source-selection methods pass. The new actual installed selection
@@ -151,9 +175,9 @@ This is accepted-P06-engine evidence, not P10 linked/default transaction accepta
 The remaining eight discovery/authoring consumers and existing template are
 released to the original P13 owner with explicit status/welcome ownership.
 
-Current original acceptance count is 74/113: A03.2 remains reopened for the actual
-P14/P05 observation gap, while six source metadata/core/routing/provenance leaves
-now close from accepted P13 and real clone evidence. Accepted A16, domain methods,
+Current original acceptance count is 75/113: A03.2 is reclosed after the accepted
+P05 fix and actual original P14/P12 callers, while six source metadata/core/routing/
+provenance leaves close from accepted P13 and real clone evidence. Accepted A16, domain methods,
 preserved role contracts, A14.1-.4 and final A22.7 remain. Native semantic and installed observations
 remain distinct open leaves; counts are not elapsed time or release readiness.
 The user's percentage question was answered at the then-current 64/113 (57%).
