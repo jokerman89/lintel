@@ -60,8 +60,14 @@ eight additional reviewer probes pass. Exact decision `cfa1c812` and handoff
 `1598c17c` were returned to the distinct controller. It now reports actual
 producer/latest-reader/QA0/0/0, SAME7169's T003 checkbox-only progress and
 postprogress reader/QA0/0, local CAPTURE and quiescence. Exact receipt intake
-awaits its next report; the already released rapid actor3 proceeds, with strict
-PLAN4/fresh resume5 still required. No whole A24 acceptance.
+awaits its next report. Actual rapid actor3 `f1030ad2` now separately passes
+recovery88 SPEC then QUALITY in `b14d927`, not by transferring neutral acceptance.
+Required profile loading is independently verified; its advice stays advisory.
+Exact packet `50394141`, context `e25ced5c`, decision `f1b11842` and handoff
+`847ce8d0` are returned for actual rapid host/producer/latest-reader/QA,
+original T003/local CAPTURE and quiescence. Strict PLAN4/fresh resume5 remain
+required, including SC1-SC3, pre-BUILD P03 rehearsal and finite own-context TQ.
+No whole A24 acceptance.
 Preserve the original plan, refusal and genuine fresh strict recovery; the
 extra neutral handoff is an intervention, not same-context reuse. Source raw
 archive/Git identities remain distinct; all565 source and18 raw fixture pins

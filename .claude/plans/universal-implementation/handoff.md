@@ -194,8 +194,18 @@ Current actionable checkpoints supersede the older chronological entries below:
   by SAME7169's one-character T003 progress and postprogress reader/QA0/0.
   Original context/QA stay untouched; local CAPTURE is complete and SHIP skipped.
   Parent intake of the next report's exact consumer/capture receipts remains.
-  The controller proceeds after actual quiescence to the already released
-  rapid actor3/strict PLAN4/fresh resume5, without sharing neutral output.
+  Rapid actor3 `f1030ad2` subsequently completed three real background turns.
+  Its separate exact packet `50394141` passes recovery88 SPEC then QUALITY in
+  `b14d927`, including actual mandatory P07 profile verification, an independent
+  11-method business run and eight boundary probes. All27 rapid candidate/
+  policy files stay unchanged; advice is not converted into strict obligations.
+  Actual rapid decision `f1b11842e5d1950166634af38f9e66f6d92ac304da883e57ea8c0dbe2e4cc00d`
+  and handoff `847ce8d01505a6b5ab0fa6b359c6d131497ac62918df27c5890cd30588805375`
+  are returned to original8fa for its distinct actual host observation and
+  producer/latest-reader/QA, then same-actor T003/local CAPTURE/currentness.
+  Only after that quiescence may released strict PLAN4/fresh resume5 proceed,
+  without other-profile outputs or a supplied next-task answer. SC1-SC3,
+  pre-BUILD owned recovery and own-context finite TQ are not waived.
   Controller-local task receipts remain attributed to that observer; parent
   inspection APIs did not expose those tasks. Whole native A24 remains open.
   Local SHIP is explicitly skipped; no remote publication or other-scope release.

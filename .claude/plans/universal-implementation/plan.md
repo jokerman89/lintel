@@ -618,8 +618,14 @@ passes [neutral independent review](reviews/P14-neutral-native-01.md), preserved
 with candidate `3c5fe35` in `e0a18a9`: controller11 and reviewer11 are separate
 business runs, with eight further reviewer probes. Exact declared review
 `cfa1c812` awaits the distinct controller's actual host observation and real
-producer/latest-reader/QA before neutral completion. Rapid, strict and genuine
-fresh strict recovery remain required; all four A24 leaves stay open.
+producer/latest-reader/QA before neutral completion. The controller subsequently
+reports those real gates and checkbox-only T003/postprogress checks passing;
+exact final receipt intake remains separate. Rapid actor `f1030ad2` also passes
+its distinct [independent review](reviews/P14-rapid-native-01.md), `b14d927`,
+with required-profile verification, separate 11-method oracle and eight direct
+probes. Actual rapid decision `f1b11842` awaits its original consumer gate.
+Strict and genuine fresh strict recovery remain required, including SC1-SC3
+and finite TQ; all four A24 leaves stay open.
 
 ### A25 Trusted implementation source (P01; R01)
 - [x] A25.1 Enumerate optional-hook/vault executable resolver lookup and use trusted source only.
