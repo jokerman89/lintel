@@ -565,6 +565,10 @@ The first `current-shape-01` failure also remains: the outer invocation omitted
 the established Python alias and overrode the pack fixture's own selectors.
 The unchanged source passes after restoring that existing invocation. Neither
 fix supplies the still-denied jq tool or closes A23.3/.4 as a whole.
+The complete corrected shape scope on frozen `c6ebaec` (`current-shape-04`)
+reports 39 passes, zero failures, one partial suite and actual exit 1:
+missing manifest parity is now visible and strict mode correctly refuses it.
+This is verified fail-closed behavior, not a full strict-suite PASS.
 Coordinator integration refinement: g1/g2 repair the observed JSON-envelope/YAML-only
 wiki mismatch and optional pack-field drift after P04/P07/P06 fan-in. Reuse the accepted
 data parsers, preserve schema versions, and run generator idempotency, malformed-source

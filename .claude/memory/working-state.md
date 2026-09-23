@@ -39,10 +39,13 @@ T027 current-byte record `45b6964b` through the real producer/latest-reader/QA
 chain. The caller-only Windows/Bash path assertion failed before tests and remains
 history. Its handoff25 correction then completed the actual fresh 13-case final
 suite, mandatory author documentation and self-ANALYZE. Exact integrated packet
-`55c829c6` is quiescent and with SAME9db for whole-result SPEC, QUALITY, mandatory
-local compliance and cross-artifact review. T011/T027 retain separate contexts
-and decisions; package PASS is not integrated clearance. Actual consumption and
-CAPTURE remain pending. Source `70469296` and bound inputs stay frozen; no fourth actor.
+`55c829c6` passes SAME9db whole-result SPEC, QUALITY, mandatory local compliance
+and cross-artifact review. T011/T027 retain separate decisions `b369afc6` and
+`6ceab2a4`; package PASS was not transferred. Recovery verified the returned
+records/current evidence and supplied distinct actual host receipts `af0d9fe3`
+and `60a53f12`. Original f2/c2 now own real integrated consumption; only both
+passing chains may advance REVIEW. CAPTURE remains a separate next boundary.
+Source `70469296` and bound inputs stay frozen; no fourth actor.
 P14 preparation passes complete SPEC then QUALITY in `f690eae`, integrated
 `c544fd0`. Native release `acc18df` permits the original controller's sequential
 neutral/rapid/strict/fresh-strict experiment. Neutral actor `7742184c` completed
@@ -54,9 +57,11 @@ Recovery88 independently passes complete neutral SPEC then QUALITY in
 `reviews/P14-neutral-native-01.md`, preserved with the native milestone in
 `e0a18a9`. Controller11 and reviewer11 business methods are separate runs;
 eight additional reviewer probes pass. Exact decision `cfa1c812` and handoff
-`1598c17c` are returned for the distinct controller's actual host observation
-and real producer/latest-reader/QA. Only then may original T003/local CAPTURE
-and the already released rapid/strict sequence continue. No whole A24 acceptance.
+`1598c17c` were returned to the distinct controller. It now reports actual
+producer/latest-reader/QA0/0/0, SAME7169's T003 checkbox-only progress and
+postprogress reader/QA0/0, local CAPTURE and quiescence. Exact receipt intake
+awaits its next report; the already released rapid actor3 proceeds, with strict
+PLAN4/fresh resume5 still required. No whole A24 acceptance.
 Preserve the original plan, refusal and genuine fresh strict recovery; the
 extra neutral handoff is an intervention, not same-context reuse. Source raw
 archive/Git identities remain distinct; all565 source and18 raw fixture pins
@@ -65,7 +70,9 @@ The shape runner previously reported 39 passes, including on exact `924a40c`,
 but inspection found the manifest guard hid unavailable jq parity as a NOTE.
 A real-script RED/GREEN regression now verifies SKIP/partial reporting and strict
 refusal without executing or replacing jq. Earlier reported counts remain
-history, not full strict coverage. The current full strict runner, required
+history, not full strict coverage. The corrected complete shape scope on frozen
+`c6ebaec` now records 39 passes, zero failures, one partial suite and exit 1,
+honestly refusing missing parity. The current full strict runner, required
 installed P10 case and original artifact gates remain. The ten additional
 optional families pass independent `8f0f7dc` and are
 integrated in `c62606b`. Actual committed clone coverage `2b672bb` passes for

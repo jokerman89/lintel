@@ -58,13 +58,18 @@ Current actionable checkpoints supersede the older chronological entries below:
   corrected only that assertion. The same c2 then completed the actual fresh
   13-case final suite, mandatory author documentation, final BUILD and self-
   ANALYZE. Exact integrated packet `55c829c659c251686647a44155a3f07e34b4d490b59aad8f1abed26c02948832`
-  is quiescent, grant revoked, and commissioned to SAME9db for complete
-  whole-result SPEC then QUALITY then mandatory local compliance/cross-artifact
-  analysis. Original T011/T027 require two separate decisions; their contexts
+  was quiescent for SAME9db's actual complete whole-result SPEC then QUALITY
+  then mandatory local compliance/cross-artifact PASS. Original T011/T027 have
+  separate decisions `b369afc6` and `6ceab2a4`; their contexts
   are `a3451e2f` and `e5fc545e`, never a fabricated combined package. Both new
-  readers correctly refuse package verdicts while current QA passes. Bound
-  task/prompt, completed build log and analysis stay frozen. Host receipts,
-  actual integrated consumption and CAPTURE remain future; no fourth context,
+  readers correctly refused package verdicts while current QA passed. Recovery
+  read the full actual report, verified both complete records, verbatim QA,
+  32 current evidence files per record and 2,711 unchanged reviewer input records.
+  Distinct actual host receipts `af0d9fe3`/`60a53f12` now bind those decisions;
+  original f2/c2 have only the exact-byte consumer gate and subsequent permitted
+  runtime REVIEW outcome after both chains pass. Bound task/prompt, completed
+  build log and analysis stay frozen. Actual consumption and the separate
+  CAPTURE continuation remain future; no fourth context,
   provider import, repin or other target write.
 - P09: module product `5c99612` passes `114ddfe3`, integrated `2d789a4`;
   all 26 product paths match and 13 joined methods pass. `477d3fc` releases
@@ -185,9 +190,12 @@ Current actionable checkpoints supersede the older chronological entries below:
   business11 is preserved, not combined into22 distinct methods.
   Actual neutral decision canonical `cfa1c812c1d171eb899edf863cdf57fc6e11b70d0863ee15ff6aa396cdf8583f`
   is returned with private handoff `1598c17c1455307904591cbabbc2fa825ef137a5bbc33ed590de6084f3c255d3`.
-  Original8fa must independently bind its actual observation of that return,
-  publish/consume exact review+QA, then complete normalized T003/local CAPTURE
-  before quiescence and the released rapid actor3/strict PLAN4/fresh resume5.
+  Original8fa reports exact publication and producer/latest/QA0/0/0, followed
+  by SAME7169's one-character T003 progress and postprogress reader/QA0/0.
+  Original context/QA stay untouched; local CAPTURE is complete and SHIP skipped.
+  Parent intake of the next report's exact consumer/capture receipts remains.
+  The controller proceeds after actual quiescence to the already released
+  rapid actor3/strict PLAN4/fresh resume5, without sharing neutral output.
   Controller-local task receipts remain attributed to that observer; parent
   inspection APIs did not expose those tasks. Whole native A24 remains open.
   Local SHIP is explicitly skipped; no remote publication or other-scope release.
@@ -218,6 +226,9 @@ Old shape counts remain historical, not complete strict coverage. The original
 `current-shape-01` wrapper failure (missing Python alias and overridden fixture
 selectors) is also retained; restoring the established invocation fixes that
 separate issue without changing source. No jq execution/replacement or CI edit.
+The corrected full shape run at `c6ebaec`, `current-shape-04`, actually reports
+39 passes/zero failures/one partial and exit1. It now refuses the missing jq
+parity coverage instead of certifying an incomplete strict run.
 
 The accepted design and standalone document helpers/references are now in the
 coordinator's required-source closure (`59ca1b6`). Nine omitted document/discovery
