@@ -134,6 +134,9 @@ binds375 artifacts/336 original-preserving copies and author55+12 private
 checks, with no package execution or target writes. SAME9db is now reviewing
 the observer, post-exit accounting and dormant pin-only caller; corrected
 native pin execution and candidate review remain gated.
+SAME9db passed that package; actual pin02 then stopped on eight CR bytes in the
+actor-copied request. One transport-only pin03 (byte-exact copy with SHA assertion)
+is released; candidate SPEC follows only after its actual packet and post-exit result.
 No forced verdict, waiver, new actor, source repin or remote operation follows.
 A13.1/.2/.4 and installer gates remain separate. All native leases are revoked;
 no target changes are released merely by the proposed evidence design.

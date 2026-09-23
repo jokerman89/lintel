@@ -260,6 +260,14 @@ never inferred from this directive; a model switch does not change context ident
   Actual pin-time-preserving `postexit.inspect_postexit`, quiescence and lease
   revocation precede candidate SPEC. Tests/QA/state are not regenerated; no
   alias or later review-publication/consumer gate is released.
+  Actual pin02 then stopped at caller line126 (exits1/1): SAMEc2's copied request
+  gained eight CR bytes (1,625 `95d4ad54` versus reviewed 1,617 `c1d47cd4`). No
+  candidate packet or post-exit result exists; bundle
+  `f06-direct-pin-intake-01`/`37a307a8` is verified and the lease revoked
+  (`624e6b4c`). The card now releases one transport-only pin03: literal fresh-name
+  derivation with byte-substitution proof, byte-exact copy with SHA assertion
+  before invocation, grant `f06-direct-pin-release-02`, the same post-exit
+  contract. On success, the candidate goes to SAME9db and coordinator88 in parallel.
   A13.1/.2/.4, P10 and invalid shell27/q02 boundaries remain separate. No
   unaccepted owner source is integrated merely to preserve report ancestry.
   Reviewer-private failures remain honest post-hoc transcript artifacts,
