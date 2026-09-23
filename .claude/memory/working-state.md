@@ -56,7 +56,16 @@ the map remains APPROVED, T042 deferred and SHIP skipped. Actual handoff budget
 is a byte-derived 56,292-token estimate with unknown capacity/usage, not a fit.
 Grant `39f8107` now releases only the original ship-direct/ship-alias refusal
 comparison to SAMEc2, one target at a time, without publication or borrowed
-profile/review/QA clearance. Whole P08/A13 and selected-subset review remain.
+profile/review/QA clearance. Actual ship-direct now reaches target-specific
+REVIEW, not a publication refusal: its own seed base `dfeba1d3`, nine exact
+inherited inputs, profile `5b911814`, local 13-case suite and typed QA are
+recorded in packet `f88fa37c`. Both readers correctly return 3 for no applicable
+decision. Recovery verifies 330 snapshots, all 40 current target files, exact
+inheritance and original contexts `3f76896f`/`e7ef37fb`; no fixture action is
+replayed. SAME9db is commissioned for separate SPEC, eligible QUALITY and
+mandatory local compliance with full FR-DOC. Current lease is revoked;
+ship-alias stays untouched. Publication remains unauthorized. Whole P08/A13
+and selected-subset review remain.
 Source `70469296` and bound inputs stay frozen; no fourth actor.
 P14 preparation passes complete SPEC then QUALITY in `f690eae`, integrated
 `c544fd0`. Native release `acc18df` permits the original controller's sequential

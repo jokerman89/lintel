@@ -84,6 +84,20 @@ Current actionable checkpoints supersede the older chronological entries below:
   no-publication pair to SAMEc2, serialized with attributable equivalent inputs
   and independent target profile/review/QA gates. No fourth context, provider
   import, source repin or publication authority is added.
+  The actual ship-direct canonical entry now stops at its own missing REVIEW:
+  packet `f88fa37c` / full brief `8a1539e1`, own seed base `dfeba1d3`, own
+  generation1 profile `5b911814`, nine attributable inherited files and one
+  genuinely local 13-case suite. Both original-context QA records pass and
+  both latest readers return3/unverified/No applicable review decision.
+  Publication-stage refusal, actual rejecting review and paired equivalence
+  remain unobserved. Recovery's data-only intake verifies330 snapshots,40
+  current files, inheritance and nine distinct raw QA files; SAME9db now owns
+  unbiased target-specific SPEC then QUALITY then local compliance/FR-DOC.
+  Prepared contexts are `3f76896f` (T011) and `e7ef37fb` (T027), never a
+  combined package or borrowed MAIN clearance. Actual host shells149-154
+  completed with exits0/0/0/0/3/0, no running owned command; lease revoked,
+  ship-alias ungranted. Await the actual reviewer report/two decisions before
+  new event-bound host receipts and original-writer consumption.
   Additive reporting correction: the earlier controller summary, recovery relay
   and independent report line46 misstated handoff25 as shells142-145/all0.
   Immutable original quiescence `65c7eedd` actually records137-142 with
