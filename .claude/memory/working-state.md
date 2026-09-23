@@ -74,8 +74,17 @@ PAUSED/resume SHIP; CAPTURE is unreached. Recovery data intake verifies 999
 final and 330 old snapshots, 46 current files, 42 inner command records,
 twelve reader/QA observations, two readiness checks, six complete ledger
 appends and preserved audit prefixes. No external command or rejecting review
-was observed. Direct is quiescent/revoked; handoff30 `8e2fdd37` now grants only
-SAMEc2 ship-alias, using equivalent original inputs and its own identities.
+was observed. Direct is quiescent/revoked. Handoff30 `8e2fdd37` ran the actual
+ship-alias composition with the same nine inherited input snapshots and its
+own seed `3459e693`, profile `b67e4a2a` and one local 13-case suite. It now
+stops at missing own REVIEW, with lease revoked and packet `ad9e0a1c` frozen.
+Recovery verifies 419 snapshots, 40 current alias files, all 47 native files
+represented with zero boundary-only files, exact typed QA and original
+contexts `e8359100` / `07bff3be`. The controller corrected a message-only
+T027 hash triplet; unchanged packet, full brief and current files agree on
+`07bff3be`, raw `800f8fe7`, QA `269bc045`. No context was rewritten.
+SAME9db is commissioned for alias-specific SPEC, eligible QUALITY and
+mandatory local compliance/FR-DOC; no direct or MAIN verdict transfers.
 Publication remains unauthorized and P08/A13/selected-subset acceptance open.
 Source `70469296` and bound inputs stay frozen; no fourth actor.
 P14 preparation passes complete SPEC then QUALITY in `f690eae`, integrated

@@ -116,6 +116,24 @@ Current actionable checkpoints supersede the older chronological entries below:
   grants SAMEc2 only ship-alias from the same nine immutable inputs and its own
   original seed/profile/cycle/QA; direct and MAIN remain frozen. No new
   approval or actor is needed, no readiness clearance is transferred.
+  Actual alias Step1 preflight and Step2 delegation to canonical REVIEW-to-
+  CAPTURE now stop at the own independent REVIEW prerequisite. Packet
+  `ad9e0a1c`, complete brief `761b629a`, quiescence `61020991` and controller
+  intake `a7367aca` are verified. Parent data-only intake also checks 419
+  snapshots, 40 alias files, the exact same nine inherited snapshots, own
+  seed `3459e693` / profile `b67e4a2a`, one local 13-case suite and typed QA.
+  Alias native boundary is 47 files/40 directories, all47 represented and
+  zero boundary-only; do not transplant counts from a direct-stage packet.
+  Both readers return3/No applicable review decision, with QA pass;
+  SHIP/CAPTURE and publication/rejection outcomes are not reached in alias.
+  Controller's initial T027 messaging triplet was corrected before commission.
+  The authoritative unchanged packet/brief/current bytes agree: T011 context
+  `e8359100`; T027 context `07bff3bea1b7706f8ddec3426d86fcba2f9347178f306fa721059acade5aeb24`,
+  raw `800f8fe76f6fa02da8b1e0ca2ed8e74d1da9bec35b269141c2d6ed14100a2bdd`,
+  QA `269bc0458f6f7be9f50f09bdae29d8ff8c46b5a209eeb2fcaedf754064cce4d1`.
+  No reprepare/rebind or evidence edit follows that correction. All leases
+  are revoked and SAME9db now owns actual target-specific ordered review,
+  with full mandatory documentation and no copied direct/MAIN clearance.
   Reviewer-private failures remain honest post-hoc transcript artifacts,
   not claimed original redirected streams.
   Additive reporting correction: the earlier controller summary, recovery relay
