@@ -895,3 +895,17 @@ successful, and an expected refusal must not disappear into an all-zero
 paraphrase. Correct published summaries additively, preserve the original
 records and obtain the report author's impact clarification where needed;
 do not rewrite evidence or rerun effects to conceal a reporting mistake.
+
+## L-045 - Delivery authority does not authorize early publication
+
+**Date:** 2026-09-24
+
+**Context:** To learn Linux/macOS behavior and CI's 30-minute suite timeout
+early, the coordinator tried to push the unaccepted recovery branch to the
+public remote and dispatch CI. The operator rejected the push: the request was
+to continue the work, not to publish.
+
+**Rule:** The PR/review/CI delivery authority covers the final accepted batch
+only. Do not push, dispatch remote CI or open a draft PR for intermediate
+state, even on a feature branch. Estimate remote risks locally, record them
+as final-delivery findings and publish only at the authorized delivery step.
