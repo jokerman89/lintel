@@ -386,6 +386,12 @@ never inferred from this directive; a model switch does not change context ident
   nothing has run on Linux or macOS (no WSL/container here). The final PR
   therefore needs a timing decision before CI can pass.
   Per L-045 nothing is pushed or dispatched before the accepted batch.
+  Recovery denies local jq (L-046), so strict `--require-all` refuses locally.
+  CI checks `jq --version` before the suite, which makes the final PR's CI the
+  first strict full-suite run: A23.4's strict evidence comes from it.
+  `run-all.sh --scope` already exists, so per-directory sharding needs only a
+  workflow change. A Windows integration shard carrying the kit (about 128 min
+  locally) would still need a longer timeout than 30 minutes.
   Cheap CI steps pass locally on Windows at `b7e3b0ec`: `bash -n` on 223
   scripts, `compileall`, catalog, instructions, adapter check, wiki and
   `install/verify.sh --all`. On the P10 trial merge, `check-install.ps1` with
@@ -1543,6 +1549,12 @@ acceptance of the broader Swarming/envelope WIP.
 Required jq was absent (exit 127). A checksum-verified official jq 1.8.2 executable was
 restored only under master `.claude/runtime/tools/jq-1.8.2/`; see reports/toolchain.md.
 Use a per-process PATH prefix for required tests; no global setting or account changed.
+Recovery update: the recovery session's reuse of this binary (copy or execution) was
+denied and stays closed, with no alternative route. The approval above belonged to
+MasterSession and its reviewers and does not transfer. Locally, jq-dependent coverage
+stays partial and strict runs refuse it. On 2026-09-24 the coordinator ran one
+`--version` probe on the binary by mistake. It wrote nothing and no test used jq
+(L-046).
 
 P05 restored the existing Python 3.9 floor. Real Python 3.9/other-platform execution is
 not established by grammar checks. The one required_policy schema, host transport and

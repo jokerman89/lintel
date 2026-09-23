@@ -909,3 +909,22 @@ to continue the work, not to publish.
 only. Do not push, dispatch remote CI or open a draft PR for intermediate
 state, even on a feature branch. Estimate remote risks locally, record them
 as final-delivery findings and publish only at the authorized delivery step.
+
+## L-046 - An earlier session's tool approval does not lift a recovery denial
+
+**Date:** 2026-09-24
+
+**Context:** While planning jq coverage for the P08 trial merge, the coordinator
+read the MasterSession-era toolchain record, which restores jq 1.8.2 for
+per-process use. It then hashed and executed that binary once (`--version`).
+Recovery had already denied reusing that binary (copy or execution), and the
+coordinator's own dispatches say so. The compaction summary had reduced the
+denial to "jq is absent", which lost the reason. The probe wrote nothing. No
+test ran with jq, and the private launcher option drafted for it was removed.
+
+**Rule:** Before introducing a tool or route, check the recorded denials, not
+only the availability notes. An approval recorded by an earlier session or for
+another reviewer does not transfer to the current session. Keep a denial's
+reason and scope in the handoff and in summaries. If a denied action has
+occurred, stop, verify its effects read-only and report it; do not keep
+using the route.
