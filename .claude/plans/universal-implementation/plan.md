@@ -536,9 +536,12 @@ whole-family acceptance remain open at their broader original boundaries.
 ### A19 Coherent discovery and richer skills (P13; R03/R06)
 - [x] A19.1 Reuse one catalog generator for help/router/status/welcome metadata.
 - [x] A19.2 Route compact metadata to selected skills without advertising drafts as finished.
-- [ ] A19.3 Map all 126 skill inventory recommendations to retained value and owning package.
-- [ ] A19.4 Verify worked examples, negative cases and migration/alias coverage.
+- [x] A19.3 Map all 126 skill inventory recommendations to retained value and owning package.
+- [x] A19.4 Verify worked examples, negative cases and migration/alias coverage.
 Acceptance: every source skill has a documented disposition and discoverable retained value.
+Fan-in closure (2026-09-24): reviewer `30146eab` passes the 126-row map, examples and
+negatives, the status union and N2 (SPEC, then QUALITY with P3 advisories), preserved as
+`reviews/P13-fanin-f581b07.md` and integrated in `cd877232`.
 The accepted first-unit, source-consumer `9f58aa8` and family `8f0f7dc` reviews
 cover the one-generator and compact/honest routing contracts. Joined metadata,
 consumer and selection checks and the actual clone query preserve unknown
@@ -550,8 +553,10 @@ fan-in remains A19.3/.4; current and historical maps are not a second task sourc
 - [x] A20.1 Preserve sources/revisions/licenses/local adaptations and correct original-only claims.
 - [x] A20.2 Explicitly retire synonym/similarity rewriting as a quality or rights method.
 - [x] A20.3 Separate pack schema, capability and product versions with migration checks.
-- [ ] A20.4 Verify external contribution and synthetic pack compatibility from recorded sources.
+- [x] A20.4 Verify external contribution and synthetic pack compatibility from recorded sources.
 Acceptance: no attribution loss, no ungrounded legal or quality guarantee.
+External-contribution closure (2026-09-24): the same review passes P13's provenance part,
+complementing P07's accepted synthetic-pack compatibility.
 P07's synthetic pack compatibility is independently accepted; A20.4 remains open for
 P13's full external-contribution/provenance and selected-distribution verification.
 The source corrections in [A20 provenance](reports/A20-provenance.md) now have
