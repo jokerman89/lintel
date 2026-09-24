@@ -412,6 +412,81 @@ state_append BUILD BLOCKED next=REVIEW cycle_id=one
         self.assertIn("REPO JOB OBSERVATION", result.stdout)
         self.assertIn('"T014"', result.stdout)
 
+    def test_status_reads_local_jobs_without_layout_or_inherited_global_selectors(self):
+        selected, _ = self.make_map("chosen")
+        self.env["LINTEL_WORK_MAP"] = selected
+        (self.repo / ".claude/lintel-layout.yaml").unlink()
+        jobs = self.repo / ".claude/runtime/jobs"
+        self.write(jobs / "blocked/job.yaml", (
+            "job_id: local-blocked\nstatus: BLOCKED\ncurrent_step: BUILD\n"
+            "last_touched: 2000-01-01T00:00:00Z\n"
+        ))
+        foreign = self.base / "lintel/foreign-jobs"
+        self.write(foreign / "private/job.yaml", (
+            "job_id: PERSONAL JOBS MUST NOT BE READ\nstatus: DONE\ncurrent_step: SHIP\n"
+            "last_touched: 2000-01-01T00:00:00Z\n"
+        ))
+        self.write(foreign / "_active.md", "PERSONAL JOBS MUST NOT BE READ\n")
+        self.env.update(LINTEL_JOBS_DIR=foreign.as_posix(),
+                        LINTEL_JOBS_ACTIVE=(foreign / "_active.md").as_posix(),
+                        LINTEL_JOBS_ARCHIVE=(foreign / "private").as_posix())
+        result = self.unchanged("status", "## Workflow")
+        self.assertIn("local-blocked", result.stdout)
+        self.assertIn("BLOCKED", result.stdout)
+        self.assertIn("unobserved", result.stdout)
+        self.assertRegex(result.stdout, r"local-blocked\s+\d+h")
+        self.assertLess(result.stdout.index("## Original work"),
+                        result.stdout.index("## Supplementary repo-local jobs"))
+        self.assertIn('"T014"', result.stdout)
+
+    def test_status_preserves_unknown_records_and_stale_age_after_partial_job_read(self):
+        selected, _ = self.make_map("chosen")
+        self.env["LINTEL_WORK_MAP"] = selected
+        jobs = self.repo / ".claude/runtime/jobs"
+        self.write(jobs / "old/job.yaml", (
+            "job_id: old-blocked\nstatus: BLOCKED\ncurrent_step: BUILD\n"
+            "last_touched: 2000-01-01T00:00:00Z\n"
+        ))
+        self.write(jobs / "no-state/job.yaml", "job_id: unknown-state\nlast_touched: not-a-time\n")
+        self.write(jobs / "no-time/job.yaml", "job_id: unknown-age\nstatus: PAUSED\ncurrent_step: REVIEW\n")
+        (jobs / "no-record").mkdir()
+        result = self.unchanged("status", "## Workflow", expected=1)
+        self.assertIn("old-blocked", result.stdout)
+        self.assertIn("UNKNOWN", result.stdout)
+        self.assertIn("metadata missing; state unknown", result.stdout)
+        self.assertIn("age-unknown (unparsed timestamp)", result.stdout)
+        self.assertIn("age-unknown (missing timestamp)", result.stdout)
+        self.assertIn("incomplete metadata", result.stderr)
+        self.assertIn("UNVERIFIED: supplementary job observations", result.stderr)
+        self.assertIn('"T014"', result.stdout)
+
+    def test_status_calls_trusted_job_readers_without_initializing_a_missing_registry(self):
+        selected, _ = self.make_map("chosen")
+        self.env["LINTEL_WORK_MAP"] = selected
+        self.write(self.repo / "bin/_jobs.sh", "printf 'TARGET JOB HELPER EXECUTED\\n'; exit 19\n")
+        result = self.unchanged("status", "## Workflow")
+        self.assertIn("registry is unobserved", result.stdout)
+        self.assertIn("No job records observed", result.stdout)
+        self.assertNotIn("TARGET JOB HELPER EXECUTED", result.stdout)
+        self.assertFalse((self.repo / ".claude/runtime").exists())
+
+    def test_status_job_reader_error_keeps_other_observations_and_real_exit(self):
+        selected, _ = self.make_map("chosen")
+        self.env["LINTEL_WORK_MAP"] = selected
+        script = block("status", "## Workflow")
+        anchor = 'source "$source_root/bin/_jobs.sh"\n'
+        self.assertEqual(script.count(anchor), 1)
+        script = script.replace(
+            anchor, anchor + "stale_jobs() { printf 'injected stale reader error\\n' >&2; return 7; }\n",
+        )
+        before = tree_snapshot(self.base)
+        result = self.shell(script)
+        self.assertEqual(result.returncode, 7, result.stdout + result.stderr)
+        self.assertIn("injected stale reader error", result.stderr)
+        self.assertIn("No job records observed", result.stdout)
+        self.assertIn('"T014"', result.stdout)
+        self.assertEqual(tree_snapshot(self.base), before)
+
     def test_status_archive_listing_is_opt_in_and_repo_local(self):
         selected, _ = self.make_map("chosen")
         self.env["LINTEL_WORK_MAP"] = selected
