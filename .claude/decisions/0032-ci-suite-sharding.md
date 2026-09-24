@@ -51,6 +51,10 @@ Every discovered test must still run under `--require-all` on every system.
 - **Windows** jobs select the approved PowerShell 7 with
   `LINTEL_POWERSHELL=<path of pwsh.exe>`. `tests/integration/universal-a23.py` requires it,
   and every local Windows result used it.
+- **Windows** jobs also set `TEMP` and `TMP` to `RUNNER_TEMP` (`D:\a\_temp`). The installed-consumer
+  tests refuse fixtures whose paths reach 235 characters. `domain-installed-consumers` needs
+  about 201 characters below its temp root, so the default `C:\Users\runneradmin\AppData\Local\Temp`
+  would give about 253. Locally it passes with a short work directory (`fin2-dic-short`).
 
 ## Alternatives considered
 

@@ -54,10 +54,15 @@ jobs:
           printf '#!/usr/bin/env bash\nexec python "$@"\n' > "$RUNNER_TEMP/lintel-ci-bin/python3"
           chmod +x "$RUNNER_TEMP/lintel-ci-bin/python3"
           echo "$RUNNER_TEMP/lintel-ci-bin" >> "$GITHUB_PATH"
-      - name: Select the approved PowerShell 7 for Windows tests
+      - name: Select the approved PowerShell 7 and a short temp root for Windows tests
         if: runner.os == 'Windows'
         shell: pwsh
-        run: '"LINTEL_POWERSHELL=$((Get-Command pwsh).Source)" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8'
+        # Installed-consumer tests refuse fixture paths of 235 characters or more; the default
+        # C:\Users\runneradmin\AppData\Local\Temp root would exceed that, RUNNER_TEMP (D:\a\_temp) does not.
+        run: |
+          "LINTEL_POWERSHELL=$((Get-Command pwsh).Source)" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          "TEMP=$env:RUNNER_TEMP" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          "TMP=$env:RUNNER_TEMP" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
       - name: Check verification dependencies
         run: |
           git --version
