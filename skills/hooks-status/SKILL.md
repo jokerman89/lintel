@@ -38,8 +38,11 @@ records, a failed write only warns, and some hooks discard that warning. This sk
 ## When NOT to use
 
 - Real-time hook-execution detection — this is retroactive and reads records after the fact
-- Hook design or install — `bin/li-doctor` has a hook-install-state check. Registration,
-  symlinks and settings are activation observations, not evidence that a hook ran
+- Hook installation state — the integrated doctor (`bin/li-doctor --json`, which runs
+  `li-lifecycle doctor`) compares installed hook bytes and reports only whether the hooks log
+  exists. Read its JSON through `bin/li-events.py installer --file <doctor.json>`, which keeps
+  registration, hook execution and host activation `unverified`. Registration, symlinks and
+  settings are activation observations, not evidence that a hook ran
 
 ## Workflow
 
@@ -131,6 +134,8 @@ that absence is unobserved. Operator pipes to less or redirects to a file.
 - The `hooks` category through `audit_read_files hooks` (repo-scoped on the v5 layout)
 - `lib/event-catalog.json` (`records_when`, classes and `non_recording_hooks`)
 - `hooks/shared/` directory scan (which hooks exist; not whether they ran)
+- Optional: the integrated doctor's JSON through `bin/li-events.py installer` (installed hook
+  bytes and P10 installer state; host activation, registration and execution `unverified`)
 - Optional: `usage-*.jsonl` via `/li:usage-log` — correlate only by `cycle_id` and time window,
   as a hint, never as causation
 
@@ -158,5 +163,6 @@ that absence is unobserved. Operator pipes to less or redirects to a file.
 
 - For the full picture: pair with `/li:usage-log --report` (sibling skill)
 - On an override spike: surface to operator decision on whether hook-tuning is needed
-- On a hook with no observed record: `/li:doctor --hooks` shows installed state; activation and
-  execution still need their own evidence before any cleanup decision
+- On a hook with no observed record: `bin/li-doctor --target <repo> --json` shows installed hook
+  bytes; read it through `bin/li-events.py installer`. Registration, activation and execution stay
+  `unverified` and need their own evidence before any cleanup decision

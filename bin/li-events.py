@@ -10,6 +10,11 @@ Exit codes, in order of precedence: 2 unreadable file, catalog failure or usage 
 4 at least one line and at least one diagnostic (regardless of filters); 3 absent or
 empty file, or nothing left after filtering; 0 at least one selected valid record.
 Exits 3 and 4 are data outcomes: callers branch on them instead of running under set -e.
+
+`installer --file PATH` maps one JSON document printed by a P10 reader
+(`li-managed-transaction inspect|recover`, a lifecycle operation result or
+`li-lifecycle doctor --json`) to A13 evidence: 2 unreadable or unrecognized input,
+4 a P10 error or unmapped state, 3 unobserved, 0 observed.
 """
 from __future__ import annotations
 
@@ -354,6 +359,110 @@ def summarize_kinds(by_kind):
     return result
 
 
+# A13.1.b: installer evidence comes only from the JSON that P10's accepted readers print.
+# The contract table maps P10's own states; the reader never opens P10's recovery store or
+# receipts, and host activation, hook execution and registration always stay unverified.
+INCOMPLETE_STATES = ("prepared", "applying", "recovering")
+TERMINAL_STATES = ("complete", "recovered")
+NATIVE_STATUS = {"verified": ("verified_file_state", "p10_native_receipt_check_verified"),
+                 "not_detected": ("unobserved", "no_native_installation_reported"),
+                 "unverified": ("unverified", "p10_native_check_not_run")}
+PROFILE_FIELDS = ("operation_profile_reference", "required_caller_policy", "target_profile_reference",
+                  "target_selection", "policy_enforcement")
+UNVERIFIED = {"host_activation": "unverified", "hook_execution": "unverified", "registration": "unverified"}
+RECORDED_INPUT = {"evidence": "recorded_input", "enforcement": "not_established"}
+
+
+def installer_observation(value) -> tuple[str, dict]:
+    """Map one P10 reader output to A13 evidence without re-deriving P10's result."""
+    diagnostics = []
+
+    def diagnose(subject, code, detail):
+        diagnostics.append({"subject": subject, "code": code, "detail": detail})
+        return "diagnostic"
+
+    def text(container, key, where):
+        if not isinstance(container, dict) or not isinstance(container.get(key), str):
+            raise ReaderError(f"P10 {where} has no string {key!r}")
+        return container[key]
+
+    if not isinstance(value, dict):
+        raise ReaderError("installer evidence must be one JSON object printed by a P10 reader")
+    report = {}
+    if isinstance(value.get("transaction"), dict) and "native_install" in value and "hook_execution" in value:
+        surface = "doctor"
+        p10 = text(value["transaction"], "status", "doctor transaction")
+        if p10 == "no_incomplete_operation":
+            status, evidence = "unobserved", "no_transaction_reported"
+        elif p10 == "error":
+            status = diagnose("transaction", "p10_transaction_error",
+                              "P10 reports unresolved transaction or recovery evidence; inspect that "
+                              "transaction with li-managed-transaction")
+            evidence = "p10_reported_error"
+        else:
+            status = diagnose("transaction", "unmapped_p10_state",
+                              f"doctor transaction status {p10!r} has no A13 mapping")
+            evidence = "unmapped"
+        report["transaction"] = {"p10_status": p10, "status": status, "evidence": evidence}
+        native = text(value["native_install"], "status", "doctor native_install")
+        if native in NATIVE_STATUS:
+            native_status, native_evidence = NATIVE_STATUS[native]
+        elif native == "error":
+            native_status = diagnose("native_install", "p10_native_install_error",
+                                     "the native receipt check did not verify the installed files")
+            native_evidence = "p10_reported_error"
+        else:
+            native_status = diagnose("native_install", "unmapped_p10_state",
+                                     f"native install status {native!r} has no A13 mapping")
+            native_evidence = "unmapped"
+        report["native_install"] = {"p10_status": native, "status": native_status, "evidence": native_evidence}
+        present = value.get("audit_log_present")
+        if not isinstance(present, bool):
+            raise ReaderError("P10 doctor audit_log_present must be a boolean")
+        report["logs"] = {"audit_log_present": present, "evidence": "file_presence_only"}
+        if "profile" in value:
+            report["profile"] = dict(RECORDED_INPUT)
+    elif isinstance(value.get("state"), str) and "store" in value and "id" in value:
+        surface = "transaction"
+        identifier, p10 = value["id"], value["state"]
+        if identifier is not None and not isinstance(identifier, str):
+            raise ReaderError("P10 transaction id must be a string")
+        if p10 in INCOMPLETE_STATES:
+            status, evidence = "incomplete", "incomplete_observation"
+        elif p10 in TERMINAL_STATES:
+            status, evidence = "verified_file_state", "p10_verified_terminal_file_state"
+        else:
+            status = diagnose("transaction", "unmapped_p10_state", f"transaction state {p10!r} has no A13 mapping")
+            evidence = "unmapped"
+        report["transaction"] = {"id": identifier, "p10_state": p10, "status": status, "evidence": evidence}
+        if any(key in value for key in PROFILE_FIELDS):
+            report["operation_profile"] = dict(RECORDED_INPUT)
+    else:
+        raise ReaderError("not the output of a P10 transaction reader or li-lifecycle doctor --json")
+    report.update(status=report["transaction"]["status"], **UNVERIFIED, diagnostics=diagnostics,
+                  evidence="p10_reported_state_only", verification="not_performed",
+                  enforcement="not_established")
+    return surface, report
+
+
+def installer_main(path: Path) -> int:
+    try:
+        native_io = _load_native_io()
+        state, data = read_source(native_io, path)
+        if state != "present":
+            raise ReaderError(f"cannot read {path.as_posix()}: {data if state == 'unreadable' else 'absent'}")
+        value = json.loads(data.decode("utf-8"), object_pairs_hook=_pairs, parse_constant=_reject_constant)
+        surface, report = installer_observation(value)
+    except (ReaderError, ValueError, UnicodeError, RecursionError) as error:
+        print(f"li-events: installer evidence unavailable: {error}", file=sys.stderr)
+        return 2
+    emit(json.dumps({"schema_version": SCHEMA_VERSION, "source": {"path": path.as_posix(), "surface": surface},
+                     **report}, ensure_ascii=False) + "\n")
+    if report["diagnostics"]:
+        return 4
+    return 3 if report["status"] == "unobserved" else 0
+
+
 def emit(text: str) -> None:
     sys.stdout.buffer.write(text.encode("utf-8"))
     sys.stdout.buffer.flush()
@@ -368,12 +477,16 @@ def build_parser():
         command.add_argument("--category")
         command.add_argument("--kind")
         command.add_argument("--since")
+    installer = sub.add_parser("installer")
+    installer.add_argument("--file", required=True, type=Path)
     return parser
 
 
 def main(argv=None) -> int:
     args = build_parser().parse_args(argv)
     path = Path(os.path.abspath(args.file))
+    if args.command == "installer":
+        return installer_main(path)
     category = args.category or (path.name[:-len(".jsonl")] if path.name.endswith(".jsonl") else path.stem)
     summary = {"schema_version": SCHEMA_VERSION, "catalog_version": None,
                "source": {"path": path.as_posix(), "state": "absent"}, "status": "error",
