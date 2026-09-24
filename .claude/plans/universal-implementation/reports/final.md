@@ -6,15 +6,16 @@ with the exact head, the joined-run results and the CI results. Nothing has been
 
 ## Delivery identity
 
-- Delivery branch `jokerman-microsoft-mastersession-recovery`. `main` at `e9401f52` (PRs #86 and
-  #87) is merged in `fe9e6284`, so the branch is conflict-free against the current `main`.
+- Delivery branch `jokerman-microsoft-mastersession-recovery`. `main` is merged twice: at
+  `e9401f52` (PRs #86 and #87) in `fe9e6284`, and at `9575aaac` (PRs #88–#92, presentation-only)
+  in `d6d4d6a8`. The branch is conflict-free against that `main`.
 - The product version is `0.11.0`, on all nine manifest fields (`99443cf8`), with a
   `CHANGELOG.md` entry. No tag or release is made.
 - The exact head, and the exact diff against `main`, are recorded here at the final freeze.
 
 ## Acceptance by area
 
-The count is 90/113 original top-level items. Each area links to its plan section,
+The count is 107/113 original top-level items. Each area links to its plan section,
 where the leaf evidence and the review files are cited.
 
 | Area | Closed | Status |
@@ -26,14 +27,14 @@ where the leaf evidence and the review files are cited.
 | [A05 Universal product identity](../plan.md#a05-universal-product-identity-p06-r03) | 4/4 | Accepted |
 | [A06 Honest host capabilities](../plan.md#a06-honest-host-capabilities-p06-r03) | 4/4 | Accepted |
 | [A07 Stable effective profile](../plan.md#a07-stable-effective-profile-p07-r04) | 5/5 | Accepted |
-| [A08 One lifecycle work map](../plan.md#a08-one-lifecycle-work-map-p08-r05) | 0/5 | Pending SAME9db's whole-P08 integration review and the joined run |
+| [A08 One lifecycle work map](../plan.md#a08-one-lifecycle-work-map-p08-r05) | 5/5 | Accepted |
 | [A09 Concrete specialist modules](../plan.md#a09-concrete-specialist-modules-p09-r06) | 5/5 | Accepted |
-| [A10 Proportionate intake and composition](../plan.md#a10-proportionate-intake-and-composition-p08-r05) | 0/4 | Pending SAME9db's whole-P08 integration review and the joined run |
+| [A10 Proportionate intake and composition](../plan.md#a10-proportionate-intake-and-composition-p08-r05) | 4/4 | Accepted |
 | [A11 Honest context capacity](../plan.md#a11-honest-context-capacity-p03-r05) | 4/4 | Accepted |
 | [A12 Owned installer lifecycle](../plan.md#a12-owned-installer-lifecycle-p10-r01) | 4/4 | Accepted |
-| [A13 Observable learning and status](../plan.md#a13-observable-learning-and-status-p08-r05) | 0/4 | Pending SAME9db's whole-P08 integration review and the joined run |
-| [A14 Working design contract](../plan.md#a14-working-design-contract-p11-r07) | 4/5 | A14.1–.4 accepted; A14.5 blocked: the static page's direct image observation (V1) is unverified, and the framework half needs a dependency restore that failed on TLS; no workaround is authorized |
-| [A15 Verifiable document formats](../plan.md#a15-verifiable-document-formats-p12-r07) | 0/4 | A15.1–.4 blocked: denied Word, Excel and PDF-raster application routes, denied P12 record persistence, and no Visio writer (a template-only staged slot) |
+| [A13 Observable learning and status](../plan.md#a13-observable-learning-and-status-p08-r05) | 4/4 | Accepted |
+| [A14 Working design contract](../plan.md#a14-working-design-contract-p11-r07) | 5/5 | Accepted |
+| [A15 Verifiable document formats](../plan.md#a15-verifiable-document-formats-p12-r07) | 0/4 | Blocked: denied Word, Excel and PDF-raster application routes, denied P12 record persistence, and no Visio writer (a template-only staged slot) |
 | [A16 Real browser operations](../plan.md#a16-real-browser-operations-p11-r03r07) | 4/4 | Accepted |
 | [A17 Portable, useful agent roles](../plan.md#a17-portable-useful-agent-roles-p09-r06) | 5/5 | Accepted |
 | [A18 Optional capabilities without loss](../plan.md#a18-optional-capabilities-without-loss-p13-r06) | 4/4 | Accepted |
@@ -41,7 +42,7 @@ where the leaf evidence and the review files are cited.
 | [A20 Provenance and versions](../plan.md#a20-provenance-and-versions-p07p13-r04) | 4/4 | Accepted |
 | [A21 Safe dormant handoff](../plan.md#a21-safe-dormant-handoff-p04-r08) | 4/4 | Accepted |
 | [A22 Preserved Swarming integration](../plan.md#a22-preserved-swarming-integration-p04-r09) | 7/7 | Accepted |
-| [A23 Boundary regression evidence](../plan.md#a23-boundary-regression-evidence-all-owners-p14-r11) | 0/5 | Pending. A23.1 and A23.2 close with the A23 unit review; A23.3 with the A23.3.s3 reconciliation; A23.4 with its g3 and p2 leaves and the strict CI suite; A23.5 with this final review |
+| [A23 Boundary regression evidence](../plan.md#a23-boundary-regression-evidence-all-owners-p14-r11) | 3/5 | Pending: A23.1–.3 and A23.4.g3/p2 are closed; A23.4 closes with the PR's strict CI suite and A23.5 with this final review |
 | [A24 Observable enterprise profile value](../plan.md#a24-observable-enterprise-profile-value-p14-r04r11) | 4/4 | Accepted |
 | [A25 Trusted implementation source](../plan.md#a25-trusted-implementation-source-p01-r01) | 3/3 | Accepted |
 | [A26 Explicit private-sync destination](../plan.md#a26-explicit-private-sync-destination-p02-r10) | 4/4 | Accepted |
@@ -54,11 +55,11 @@ says so.
 
 ## Blocked items that need an operator decision
 
-- **A14.5, the static page and app exercise.** The static page ran, and its review passes seven
-  data-backed controls. The required direct image observation (V1) stays unverified, so static
-  SPEC is blocked (`reviews/P11-static-single-03.md`). The app half needs a framework build,
-  whose dependency restore failed on TLS. No TLS workaround, offline cache or alternative
-  registry is authorized.
+A14.5 is now accepted. On the operator's instruction, the framework app's dependencies were
+restored task-locally through the Microsoft npm feed proxy, and the image-capable reviewer
+`aba328fd` passed both halves, with V1 observed directly (`reviews/P11-a145-static-v1.md` and
+`reviews/P11-a145-app.md`). One area stays blocked:
+
 - **A15.1–A15.4, verifiable document formats.** The Word, PowerPoint, workbook and PDF source
   helpers are integrated. Their acceptance needs rendering and editability evidence through
   application routes that the operator denied (Word, Excel, PDF raster). It also needs P12
@@ -66,7 +67,8 @@ says so.
   no implemented writer or editor (`packages/P12.md`); Visio stays a template-only staged slot,
   which no permission would resolve.
 
-None of these is counted as accepted, and none is waived.
+Its four items are not counted as accepted, and none is waived. The operator's question about lifting the
+Word, Excel and record-persistence denials went unanswered, so no authorization is assumed.
 
 ## Preserved Swarming integration
 
@@ -131,6 +133,16 @@ These are reviewed at A23.5, not by a package review:
   their effects on the actual home are UNKNOWN.
 - **Unknown causes.** The cause of the intermittent WinError 5 on journal replacement is not
   established.
+- **Later review advisories, all P3.**
+  - SAME9db's integration QI-1: `li-lessons.py:380-381` reads the lessons template without
+    `OSError` handling, so a missing template gives a traceback instead of a typed refusal.
+  - QI-2: the gated `_audit.sh:53` still names `pack-lifecycle`.
+  - QI-3: the node-absent fallback of `hooks-registration-safe.sh:41` misreads escaped quotes.
+  - The A23 unit's Q1: `universal-a23.py` runs a whole P09 test module through `runpy`.
+  - P13's N1: the installed-consumer entries are a large share of a Windows CI shard.
+- **A14.5 restore.** 24 lock entries carry SHA-1 integrity only, because the feed supplies only a
+  shasum. The tarballs arrive through Azure DevOps' first-party CDN redirects, and the signed
+  delivery URLs are never copied into reports.
 
 ## Evidence at the final freeze
 

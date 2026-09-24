@@ -34,7 +34,8 @@ content-bound review evidence and explicit limits on what each check proves.
   126-row preservation map of the original skill inventory.
 - Guarded browser operations (`lib/url_policy.py`), a design contract with profile precedence
   (`skills/design-dna/scripts/design_contract.py`), and format helpers for Word, PowerPoint,
-  workbook and PDF sources with explicit staged boundaries.
+  workbook and PDF sources with explicit staged boundaries. A static page and a React/Vite app
+  are built from the same design contract and checked in a real browser.
 - A deterministic `--shard K/N` option for `tests/runner/run-all.sh`. CI runs the strict suite in
   shards on every system (ADR-0032).
 
@@ -53,8 +54,6 @@ content-bound review evidence and explicit limits on what each check proves.
   Python 3.12. Windows PowerShell 5.1, which the native performer supports, and a Python 3.9 runtime
   are not verified.
 - Still open:
-  - the design contract's app exercise, which needs a framework dependency restore;
-  - the direct image observation of its static page;
   - complete document rendering and editability for Word, PowerPoint, PDF and workbooks;
   - a Visio writer, which stays a template-only staged slot.
 - Required-policy enforcement is not verified without a resolved company policy source.
