@@ -178,17 +178,21 @@ them into the preset list at invocation. Nothing about audience or compliance is
 
 ## Code freeze
 
-`/li:code-freeze <paths> --reason "<why>" --until <session|eod|1h|timestamp>` marks paths
-do-not-modify for the session. Other skills read
-`.claude/runtime/state/code-freeze/<session-id>.yaml` before any Edit or Write and refuse a match.
-`/li:code-unfreeze` reverses it. Both actions are audit-logged.
+`/li:code-freeze <paths> --reason "<why>" --until <session|eod|1h|timestamp>` records advisory
+do-not-modify metadata in `.claude/runtime/state/code-freeze/<session-id>.yaml`, and
+`/li:code-unfreeze` removes entries from it. Both actions record an audit observation.
 
-The honest description: this is **cooperative metadata, not a filesystem lock**. It works because the
-skills check it, so a raw editor or a direct tool call outside the harness is unaffected. It blocks
-writes only — reads are always allowed. It is session-scoped and expires; permanent policy belongs in
-a frozen-zones section of the repo instruction file instead. A `frozen-zone-warn` hook exists that
-surfaces the freeze at Edit time from both sources, but it is warn-only and not auto-registered — opt
-in by symlinking it.
+The honest description: this is **cooperative metadata, not a filesystem lock**. Nothing refuses a
+matching write on its own and nothing enforces the freeze: BUILD and review are expected to honor
+the recorded scope through their normal authorization checks. `--until` records requested expiry
+intent; no timer or cleanup removes an entry. Permanent policy belongs in a frozen-zones section of
+the repo instruction file instead.
+
+A separate `frozen-zone-warn` hook exists but is warn-only, opt-in and not auto-registered. It does
+not read the metadata above. It reads two sources of its own: prefix matches from the legacy
+session file `$LINTEL_HOME/freeze/${LINTEL_SESSION_ID:-default}.yaml`, and substring matches from
+the current directory's `CLAUDE.md` "Frozen zones" section. A match prints a warning that names
+`/li:code-unfreeze`; the edit proceeds.
 
 Worth it when a refactor has surgical scope, or when the agent has already wandered once.
 
@@ -209,9 +213,12 @@ pack resolution, migrations, usage — stay in `~/.lintel/audit/`.
 /li:audit --kind brief_forge_bypassed --since 7
 ```
 
-`/li:hooks-status` reads `hooks.jsonl` specifically, and answers a question the raw log does not:
-which hooks are actually firing, which are dead, and what overrides have been used. Every block you
-override is recorded with the reason you gave.
+`/li:hooks-status` reads the `hooks` category specifically, through the structured reader
+`bin/li-events.py`, and answers a question the raw log does not: which hooks left records in a
+window, which have no observed record, and what overrides have been used. Hooks record only
+findings, blocks, overrides and failures, so a hook with no observed record may simply have had
+nothing to report — absence is never read as "did not run", and a block record is not proof that
+the host enforced the block. Every block you override is recorded with the reason you gave.
 
 Two caveats. First, `.claude/runtime/` is gitignored — the trail is local to your machine, and it is
 not a shared or tamper-evident compliance record. Treat it as a debugging and reconstruction aid.
@@ -250,7 +257,7 @@ is wrong or it is not surfacing early enough.
 
 **Two lessons tools that are not interchangeable:**
 
-- `bin/li-lessons-promote` lifts a repo-local lesson into the scaffolding baseline, so every repo scaffolded afterwards inherits it. Use it when the lesson is about how software gets built, not about this codebase.
+- `bin/li-lessons-promote` promotes one ID-managed lesson into the scaffolding baseline of a Lintel work tree you name with `--lintel-dir` (or `LINTEL_DIR`), so every repo scaffolded afterwards inherits it. You supply the generalized text and an explicit `--source-label`; the tool appends a provenance comment, writes only the baseline file and prints the diff. It commits only with `--commit --expect-branch <branch>` and never switches branches or pushes. Use it when the lesson is about how software gets built, not about this codebase.
 - `bin/li-lessons-sync` syncs **your own** lessons across your machines through a personal remote. Opt-in and private to you.
 
 Promoting a lesson that only applies to one repo pollutes every future repo. Syncing one that should
@@ -267,7 +274,7 @@ Naming these is cheaper than you discovering them:
 - **Context budget numbers are estimates**, summed from an event log rather than read from the CLI.
 - **Cooling cannot actually shrink the window.** Only a save, restart and restore round trip does.
 - **`/li:usage-log` has no automatic trigger.** What it reports is what you logged by hand.
-- **`/li:code-freeze` is cooperative**, enforced by the skills that check it, not by the filesystem.
+- **`/li:code-freeze` is advisory metadata.** Nothing enforces it: no skill refuses a matching write on its own, and the filesystem does not block one. Honoring it is cooperative.
 - **The default pack ships no roles.** The role machinery works; the content is yours to write.
 - **The audit trail is local and gitignored.** It is not a shared compliance artifact.
 - **Lintel does not install, vendor, or update third-party tools.** The installer copies Lintel's own files and nothing else. There is no uninstall script; removal means deleting `~/.lintel/` and the plugin.

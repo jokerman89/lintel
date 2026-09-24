@@ -3,7 +3,7 @@
 # implements: ADR-0008, ADR-0022, ADR-0028
 # intent: .claude/engineering/audits/2026-06-12-fable5-fit-audit.md (behavior-over-prose track)
 # constraints: one command per phase — if the ledger costs more than one line, it gets skipped
-# last_intent_review: 2026-09-20
+# last_intent_review: 2026-09-23
 #
 # lib/state.sh — the cycle state ledger, mechanical.
 # The fit audit found ZERO 00-state.md files on the whole machine after weeks of
@@ -126,6 +126,10 @@ state_last() {
 # state_cycle_segment [file] [cycle_id] — select a cycle's original start and
 # correlated entries, including a later resume after another initiative. CYCLE
 # DONE is not a new segment. Legacy untagged entries inherit their start marker.
+# Entry diagnoses are appended to each block: a truncated v1 entry reads as
+# INCOMPLETE, an unknown entry_format as UNTRUSTED (never a trusted DONE), and a
+# legacy block without entry_format keeps its status with
+# `completeness: unknown (legacy entry)`.
 # Multi-cycle ledgers are the
 # normal state of a working repo, and resolving position / mode / completeness
 # across cycle boundaries poisons every consumer — a prior cycle's
@@ -139,9 +143,15 @@ state_cycle_segment() {
   awk -v wanted="$wanted" '
     function flush() {
       if (block=="") return
-      if (format=="1" && complete!="true") {
+      if (format!="" && format!="1") {
+        # An entry format this reader does not know is never a trusted status.
+        status="UNTRUSTED"
+        block=block "status: UNTRUSTED\ncycle_complete: false\nstate_diagnostic: unsupported entry format\n"
+      } else if (format=="1" && complete!="true") {
         status="INCOMPLETE"
         block=block "status: INCOMPLETE\ncycle_complete: false\nstate_diagnostic: incomplete entry\n"
+      } else if (format=="") {
+        block=block "completeness: unknown (legacy entry)\n"
       }
       if (phase=="CYCLE" && (status=="STARTING" || status=="")) {
         generation++

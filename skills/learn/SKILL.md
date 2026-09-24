@@ -10,7 +10,7 @@ cli_support: [claude-code, codex]
 
 # /learn
 
-Captures something worth remembering across sessions: a correction from the operator, a discovered pattern, a workaround for a specific quirk. Lands as a structured entry in `.claude/memory/lessons.md` (project-level) or `~/.lintel/lessons.jsonl` (operator-level).
+Captures something worth remembering across sessions: a correction from the operator, a discovered pattern, a workaround for a specific quirk. Lands as an ID-managed `L-NNN` entry in the project lessons store (`lintel_lessons_file`; `.claude/memory/lessons.md` on the v5 layout). No operator-global lessons sink is activated.
 
 The only mechanism in Lintel that compounds learning across fresh sessions. Without it, the same correction gets made repeatedly.
 
@@ -31,40 +31,44 @@ The only mechanism in Lintel that compounds learning across fresh sessions. With
 ## Inputs
 
 - Required: the lesson body (inline prose)
-- Optional `--scope <project|global>` — `project` writes to `.claude/memory/lessons.md` in the current repo; `global` writes to `~/.lintel/lessons.jsonl` (default: project)
+- Optional `--scope <project|global>` — `project` writes to the resolved project store (default). `global` refuses with "operator lessons sink not activated": no operator-global destination is active, and activating one is a separate operator decision
 - Optional `--type <correction|pattern|quirk|skillify-candidate>` — categorization (default: pattern)
 - Optional `--source <text>` — what triggered this (e.g. "operator correction at 16:42", "debug session for refund flow")
 
 ## Workflow
 
-1. **Validate scope.** If `--scope project` and no `.claude/memory/lessons.md` exists: create it with a frontmatter header. If `--scope global` and no `~/.lintel/lessons.jsonl` exists: create empty.
+1. **Validate scope.** `project` only. The helper resolves the store with `lintel_lessons_file`, names any second store it ignores, and creates a missing store from the scaffolding template (inside a repository only). `--scope global` refuses; nothing is written to `~/.lintel/lessons.jsonl`, which stays a read-only legacy view.
 2. **Compliance scan.** Run Layer 2 patterns over the lesson body. If a secret/customer-data pattern hits: BLOCK + ask operator to rewrite without the sensitive bit.
-2b. **Update-phase (ADR-0006).** Before appending, check what already exists:
+2b. **Update-phase (ADR-0006).** Before writing, check what already exists:
    `source lib/memory.sh; lessons_find_related <keywords>` — classify the candidate
-   add / update / supersede / no-op exactly as CAPTURE Step 2 does. Only `add` creates
-   a new entry; `supersede` also stamps the old lesson with `superseded_by: L-NNN (date)`.
-3. **Format entry.** Project lessons use the L-NNN grammar — the mechanical layer
-   (`lessons_surface`, the digest, the budget check) keys on `^## L-NNN`; a dated heading
-   would be invisible to all of it. Next number = highest existing + 1:
+   add / update / supersede / no-op exactly as CAPTURE Step 2 does.
+3. **Format the body.** The helper writes the `## L-NNN — <one-line summary>` heading itself;
+   supply the body:
    ```markdown
-   ## L-NNN — <one-line summary>
    **Rule:** <the durable rule>
    **Why:** <source / what triggered it, with date>
    **How to apply:** <bullets>
    ```
-   Global lessons:
-   ```jsonl
-   {"date": "YYYY-MM-DD", "type": "...", "source": "...", "body": "...", "repo": "..."}
+4. **Write through the helper.** It allocates the next ID (one more than the highest existing ID,
+   superseded and duplicated IDs included), takes the store lock and replaces the file only if it
+   is unchanged since it was read:
+   ```bash
+   source "${LINTEL_SOURCE_ROOT:?select trusted source}/lib/memory.sh"
+   lessons_helper add --title "<one-line summary>" --body-file "$body_file"          # add
+   lessons_helper update --id L-NNN --body-file "$body_file"                         # update
+   lessons_helper supersede --id L-OLD --title "<summary>" --body-file "$body_file"  # supersede
    ```
-4. **Append.** Atomic write (read existing, append entry, write back).
-5. **Audit log.** One line via the unified writer:
-   `source "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/bin/_audit.sh"; audit_log lessons lesson_recorded scope=<project|global> id=<L-NNN> classification=<add|update|supersede>` → `.claude/runtime/audit/lessons.jsonl`.
+   A held lock or a store that changed meanwhile refuses with exit 9 and replaces nothing — retry.
+   Without Python 3.9+ the shim refuses visibly; surfacing and counts keep working.
+5. **Audit.** After a successful write the helper records one advisory line itself:
+   `lessons lesson_recorded|lesson_updated|lesson_superseded` with `scope`, `id` and
+   `classification`. Do not add a second manual `audit_log` call.
 6. **Report.**
 
 ## Report format
 
 ```
-Lesson recorded
+Lesson recorded: L-042
 
 Scope: project (.claude/memory/lessons.md)
 Type: pattern
@@ -74,45 +78,47 @@ Body:
 > CTA copy on landing pages should use "Start free case" (canonical primary CTA).
 > Never use "Get started", "Start your analysis", or other variants. Refactor when seen.
 
-Future sessions reading .claude/memory/lessons.md will surface this at session start (per repo CLAUDE.md "Review at session start" rule).
+Future sessions reading the project lessons store will surface this at session start (per repo CLAUDE.md "Review at session start" rule).
 ```
 
 ## Compliance integration
 
 - Layer 2 secret/customer-data scan on lesson body — BLOCKS if pattern hits.
-- Project lessons file (`.claude/memory/lessons.md`) is committed to repo — anything in it is visible to all collaborators. Sanity-scan applies.
-- Global lessons file (`~/.lintel/lessons.jsonl`) is local-only. Looser scanning, but still no customer-data.
+- The project lessons store is committed to the repo — anything in it is visible to all collaborators. Sanity-scan applies.
+- No operator-global lessons sink is active, so nothing is written outside the project store.
 
 ## Failure modes
 
 - **Lesson body too vague to be useful:** WARN + ask whether to proceed. A vague lesson signals nothing actionable to future sessions.
 - **Duplicate lesson (same body within 30 days):** report + ask whether to skip or merge.
 - **Compliance scan hits:** BLOCK, surface what hit, refuse to write. Operator rewrites + retries.
-- **Project lessons file conflicts with `/code-freeze`:** if frozen, refuse + ask operator to `/code-unfreeze` first.
+- **Store locked or changed during the write (exit 9):** nothing was replaced; inspect and retry.
+- **Update or supersede of an absent (exit 1) or duplicated (exit 2) ID:** refused; resolve the ID first.
+- **Project lessons file conflicts with `/code-freeze`:** the freeze is advisory; honor the operator's recorded scope and ask before writing.
 
 ## Examples
 
 **Operator correction:**
 ```
 > /learn "CTA copy must be 'Start free case' on landing, never 'Get started' — canonical primary CTA per project memory" --type correction
-✓ Lesson appended to .claude/memory/lessons.md. Visible to future sessions.
+✓ L-042 appended to .claude/memory/lessons.md. Visible to future sessions.
 ```
 
 **Skillify candidate:**
 ```
 > /learn "Recurring task: regenerate /portal/cases mock data after schema change. Could be a /regen-mocks skill." --type skillify-candidate
-✓ Lesson recorded. Run /skillify when ready to formalize.
+✓ Lesson recorded. Run /skillify --from-lesson L-043 when ready to formalize.
 ```
 
-**Global quirk:**
+**Global scope (refused):**
 ```
-> /learn "On Windows, gh CLI returns case-normalized URLs (jokerman89 instead of jokerman89). Push works but display may surprise." --scope global --type quirk
-✓ Lesson appended to ~/.lintel/lessons.jsonl. Visible in any repo.
+> /learn "On Windows, gh CLI returns case-normalized URLs. Push works but display may surprise." --scope global --type quirk
+✗ operator lessons sink not activated; nothing was written. Record it in the project store instead.
 ```
 
 ## See also
 
-- `/skillify` — turn a `skillify-candidate` lesson into a real skill
-- `.claude/memory/lessons.md` (project) / `~/.lintel/lessons.jsonl` (global) — where lessons live
+- `/skillify` — turn a `skillify-candidate` lesson into a real skill (`--from-lesson L-NNN`)
+- The project lessons store (`lintel_lessons_file`) — where lessons live; `bin/li-lessons.py get --id L-NNN` prints one exactly. `~/.lintel/lessons.jsonl` is a read-only legacy view (`lessons_legacy_operator`), not ID-managed
 - Project CLAUDE.md "Self-improvement loop" — the discipline this skill enables
 - `/retro` — session-end reflection that may emit several /learn calls

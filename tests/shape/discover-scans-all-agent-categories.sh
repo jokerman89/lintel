@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 # tests/shape/discover-scans-all-agent-categories.sh
-# Asserts: DISCOVER's Step 6 agent scan is directory-derived (iterates agents/*/)
+# Asserts: DISCOVER's Step 6 scan is directory-derived from the trusted source.
+# Source authority: accepted P03 500adb3 context selectors/source-root contract,
+# skills/context-warm/SKILL.md and lib/context_safety.py::select_files;
+# shims/universal/ADAPTER.md supplies the shared installed-source boundary.
+# Actual future-category/source-vs-target behavior is covered by P08 integration.
 #          and does NOT hardcode a category list, so it can never drift from the
 #          actual agent categories (e.g. silently omitting `frontend`).
 # tag: shape v4.0
@@ -23,10 +27,10 @@ if [ ! -f "$SKILL" ]; then
 fi
 
 # 1. The scan must be directory-derived.
-if grep -q 'for cat_dir in agents/\*/' "$SKILL"; then
-  pass "Agent scan iterates agents/*/ (directory-derived)"
+if grep -Fq 'for cat_dir in "${LINTEL_SOURCE_ROOT:?select trusted source}"/agents/*/;' "$SKILL"; then
+  pass "Agent scan derives all category directories from the trusted source"
 else
-  fail "Agent scan is not directory-derived (expected 'for cat_dir in agents/*/')"
+  fail "Agent scan lost source-root-scoped directory discovery"
 fi
 
 # 2. The scan must NOT hardcode a space-separated category list.

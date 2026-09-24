@@ -1,0 +1,805 @@
+{
+  "schema_version": 1,
+  "catalog_version": 1,
+  "description": "Versioned producer catalog for audit_log records. The envelope is ts, kind, operator, cycle_id; every listed field is a string. bin/li-events.py is the structured reader. A record is an observation of what a producer wrote, never proof of host enforcement; an absent record is unobserved, not evidence that nothing ran.",
+  "envelope": ["ts", "kind", "operator", "cycle_id"],
+  "vocabulary": {
+    "records_when": ["always", "start", "end", "finding", "block", "override", "unavailable", "failure"],
+    "class": ["observation", "finding", "block_decision", "override", "receipt", "diagnostic"],
+    "check": ["performed", "not_performed", "unknown"]
+  },
+  "wrappers": [
+    {
+      "name": "_jobs_audit",
+      "path": "bin/_jobs.sh",
+      "call_form": "_jobs_audit <category> <kind> [key=value ...]"
+    }
+  ],
+  "categories": {
+    "alias-resolution": {
+      "kinds": {
+        "env_var": {
+          "producers": ["bin/_aliases.sh:resolve_env_var"],
+          "records_when": ["always"],
+          "fields": ["old", "new", "context"],
+          "aliases": {},
+          "rules": [
+            {"when": {}, "class": "diagnostic", "check": "performed"}
+          ]
+        }
+      }
+    },
+    "brief-forge": {
+      "kinds": {
+        "brief_forge_blocked": {
+          "producers": ["lib/brief-forge.sh:_brief_forge_audit"],
+          "records_when": ["block", "failure"],
+          "fields": ["reason", "audit_receipt", "evaluator"],
+          "aliases": {},
+          "rules": [
+            {
+              "when": {"reason": ["invalid_policy", "unknown_evaluator", "invalid_content", "evaluation_failed"]},
+              "class": "receipt",
+              "check": "not_performed"
+            },
+            {"when": {"reason": "release_failed"}, "class": "receipt", "check": "performed"},
+            {"when": {}, "class": "receipt", "check": "unknown"}
+          ]
+        },
+        "brief_forge_bypassed": {
+          "producers": ["lib/brief-forge.sh:_brief_forge_audit"],
+          "records_when": ["override"],
+          "fields": ["reason", "audit_receipt"],
+          "aliases": {},
+          "rules": [
+            {"when": {}, "class": "receipt", "check": "not_performed"}
+          ]
+        },
+        "brief_forge_emitted": {
+          "producers": ["lib/brief-forge.sh:forge_handoff"],
+          "records_when": ["end"],
+          "fields": ["decision", "envelope_id", "envelope_digest", "content_type", "score", "evaluators_run"],
+          "aliases": {},
+          "rules": [
+            {"when": {}, "class": "receipt", "check": "performed"}
+          ]
+        }
+      }
+    },
+    "capture": {
+      "kinds": {
+        "vault_init": {
+          "producers": ["bin/li-vault-init"],
+          "records_when": ["end"],
+          "fields": ["vault", "repo"],
+          "aliases": {},
+          "rules": [
+            {"when": {}, "class": "observation", "check": "performed"}
+          ]
+        },
+        "vault_sink_skipped": {
+          "producers": ["instruction-only:skills/capture/SKILL.md"],
+          "records_when": ["unavailable"],
+          "fields": ["reason", "path", "secrets", "pii"],
+          "aliases": {},
+          "rules": [
+            {"when": {}, "class": "observation", "check": "not_performed"}
+          ]
+        },
+        "vault_sink_written": {
+          "producers": ["instruction-only:skills/capture/SKILL.md"],
+          "records_when": ["end"],
+          "fields": ["file"],
+          "aliases": {},
+          "rules": [
+            {"when": {}, "class": "observation", "check": "performed"}
+          ]
+        }
+      }
+    },
+    "code-freeze": {
+      "kinds": {
+        "freeze": {
+          "producers": ["instruction-only:skills/code-freeze/SKILL.md"],
+          "records_when": ["always"],
+          "fields": ["path", "reason"],
+          "aliases": {"target_path": ["path"]},
+          "rules": [
+            {"when": {}, "class": "observation", "check": "performed"}
+          ]
+        },
+        "unfreeze": {
+          "producers": ["instruction-only:skills/code-unfreeze/SKILL.md"],
+          "records_when": ["always"],
+          "fields": ["path", "reason"],
+          "aliases": {"target_path": ["path"]},
+          "rules": [
+            {"when": {}, "class": "observation", "check": "performed"}
+          ]
+        }
+      }
+    },
+    "compliance-gates": {
+      "kinds": {
+        "verdict": {
+          "producers": ["instruction-only:skills/compliance-gate/SKILL.md"],
+          "records_when": ["end"],
+          "fields": ["status", "blocked", "evidence"],
+          "aliases": {},
+          "rules": [
+            {"when": {}, "class": "observation", "check": "performed"}
+          ]
+        }
+      }
+    },
+    "compliance-stops": {
+      "kinds": {
+        "gate_violation": {
+          "producers": ["instruction-only:skills/ship/SKILL.md"],
+          "records_when": ["finding"],
+          "fields": ["gate", "file", "resolution"],
+          "aliases": {"target_path": ["file"]},
+          "rules": [
+            {"when": {}, "class": "finding", "check": "performed"}
+          ]
+        }
+      }
+    },
+    "customer-repo-access": {
+      "kinds": {
+        "context_warm": {
+          "producers": ["instruction-only:skills/context-warm-customer/SKILL.md"],
+          "records_when": ["always"],
+          "fields": ["source_id", "files_loaded", "sensitivity_check"],
+          "aliases": {},
+          "rules": [
+            {"when": {}, "class": "observation", "check": "performed"}
+          ]
+        }
+      }
+    },
+    "cycle": {
+      "kinds": {
+        "cycle_complete": {
+          "producers": ["instruction-only:skills/cycle/SKILL.md"],
+          "records_when": ["end"],
+          "fields": ["mode", "phases", "outcome"],
+          "aliases": {},
+          "rules": [
+            {"when": {}, "class": "observation", "check": "performed"}
+          ]
+        },
+        "cycle_failure": {
+          "producers": ["instruction-only:skills/cycle/SKILL.md"],
+          "records_when": ["failure"],
+          "fields": ["phase", "action"],
+          "aliases": {},
+          "rules": [
+            {"when": {}, "class": "observation", "check": "performed"}
+          ]
+        }
+      }
+    },
+    "envelope-replay": {
+      "kinds": {
+        "envelope_replay_requested": {
+          "producers": ["bin/li-envelope-replay"],
+          "records_when": ["start"],
+          "fields": ["envelope_id", "audit_receipt", "forced"],
+          "aliases": {},
+          "rules": [
+            {"when": {}, "class": "receipt", "check": "performed"}
+          ]
+        }
+      }
+    },
+    "frontend-style-extract-runs": {
+      "kinds": {
+        "pattern_extracted": {
+          "producers": ["instruction-only:skills/frontend-style-extract/SKILL.md"],
+          "records_when": ["end"],
+          "fields": ["name", "artifacts"],
+          "aliases": {},
+          "rules": [
+            {"when": {}, "class": "observation", "check": "performed"}
+          ]
+        }
+      }
+    },
+    "granularity": {
+      "kinds": {
+        "actual_vs_estimated": {
+          "producers": ["instruction-only:skills/capture/SKILL.md"],
+          "records_when": ["end"],
+          "fields": ["size", "est_tokens", "actual_tokens", "task_count", "depth_schema"],
+          "aliases": {},
+          "rules": [
+            {"when": {}, "class": "observation", "check": "performed"}
+          ]
+        }
+      }
+    },
+    "handoff-size-checks": {
+      "kinds": {
+        "size_check": {
+          "producers": ["instruction-only:skills/handoff-size-check/SKILL.md"],
+          "records_when": ["always"],
+          "fields": ["work_map", "basis", "admission"],
+          "aliases": {},
+          "rules": [
+            {"when": {}, "class": "observation", "check": "performed"}
+          ]
+        }
+      }
+    },
+    "hooks": {
+      "kinds": {
+        "customer_data_block": {
+          "producers": ["hook:customer-data-block"],
+          "records_when": ["block", "override", "unavailable"],
+          "fields": ["hook", "tier", "override", "reason", "blocked", "patterns_matched"],
+          "aliases": {"patterns": ["patterns_matched"]},
+          "rules": [
+            {"when": {"tier": "OVERRIDDEN"}, "class": "override", "check": "not_performed"},
+            {
+              "when": {"reason": ["scanner-unavailable", "collection-unavailable", "scan-unavailable"]},
+              "class": "block_decision",
+              "check": "not_performed"
+            },
+            {"when": {"blocked": "true"}, "class": "block_decision", "check": "performed"},
+            {"when": {}, "class": "block_decision", "check": "unknown"}
+          ]
+        },
+        "cycle_incomplete_warn": {
+          "producers": ["hook:cycle-incomplete-warn"],
+          "records_when": ["finding"],
+          "fields": ["hook", "tier", "phase"],
+          "aliases": {},
+          "rules": [
+            {"when": {}, "class": "finding", "check": "performed"}
+          ]
+        },
+        "cycle_position_inject": {
+          "producers": ["hook:cycle-position-inject"],
+          "records_when": ["finding"],
+          "fields": ["hook", "tier"],
+          "aliases": {},
+          "rules": [
+            {"when": {}, "class": "observation", "check": "performed"}
+          ]
+        },
+        "da_migration_irreversible_warn": {
+          "producers": ["hook:da-migration-irreversible-warn"],
+          "records_when": ["finding"],
+          "fields": ["hook", "tier", "file", "destructive_ops", "has_rollback"],
+          "aliases": {"target_path": ["file"]},
+          "rules": [
+            {"when": {}, "class": "finding", "check": "performed"}
+          ]
+        },
+        "da_retention_violation_warn": {
+          "producers": ["hook:da-retention-violation-warn"],
+          "records_when": ["finding"],
+          "fields": ["hook", "tier", "file_edited", "violations"],
+          "aliases": {"target_path": ["file_edited"]},
+          "rules": [
+            {"when": {}, "class": "finding", "check": "performed"}
+          ]
+        },
+        "da_schema_drift_warn": {
+          "producers": ["hook:da-schema-drift-warn"],
+          "records_when": ["finding"],
+          "fields": ["hook", "tier", "file_edited", "adr_id", "adr_decision"],
+          "aliases": {"target_path": ["file_edited"]},
+          "rules": [
+            {"when": {}, "class": "finding", "check": "performed"}
+          ]
+        },
+        "dh_cost_budget_warn": {
+          "producers": ["hook:dh-cost-budget-warn"],
+          "records_when": ["finding"],
+          "fields": ["hook", "tier", "file_edited", "patterns"],
+          "aliases": {"target_path": ["file_edited"], "patterns": ["patterns"]},
+          "rules": [
+            {"when": {}, "class": "finding", "check": "performed"}
+          ]
+        },
+        "dh_deploy_without_rollback_warn": {
+          "producers": ["hook:dh-deploy-without-rollback-warn"],
+          "records_when": ["finding"],
+          "fields": ["hook", "tier", "file_edited", "rollback_age_days"],
+          "aliases": {"target_path": ["file_edited"]},
+          "rules": [
+            {"when": {}, "class": "finding", "check": "performed"}
+          ]
+        },
+        "dh_observability_gap_warn": {
+          "producers": ["hook:dh-observability-gap-warn"],
+          "records_when": ["finding"],
+          "fields": ["hook", "tier", "file_edited", "markers_found"],
+          "aliases": {"target_path": ["file_edited"]},
+          "rules": [
+            {"when": {}, "class": "finding", "check": "performed"}
+          ]
+        },
+        "frontend_design_surface": {
+          "producers": ["hook:frontend-design-surface"],
+          "records_when": ["finding"],
+          "fields": ["hook", "tier", "file", "patterns", "vault_size"],
+          "aliases": {"target_path": ["file"], "patterns": ["patterns"]},
+          "rules": [
+            {"when": {}, "class": "finding", "check": "performed"}
+          ]
+        },
+        "frozen_zone_warn": {
+          "producers": ["hook:frozen-zone-warn"],
+          "records_when": ["finding"],
+          "fields": ["hook", "tier", "frozen_path", "edit_target", "source"],
+          "aliases": {"target_path": ["edit_target"]},
+          "rules": [
+            {"when": {}, "class": "finding", "check": "performed"}
+          ]
+        },
+        "memory_budget_warn": {
+          "producers": ["hook:memory-budget-warn"],
+          "records_when": ["finding"],
+          "fields": ["hook", "tier"],
+          "aliases": {},
+          "rules": [
+            {"when": {}, "class": "finding", "check": "performed"}
+          ]
+        },
+        "no_customer_data_in_message": {
+          "producers": ["hook:no-customer-data-in-message"],
+          "records_when": ["finding", "unavailable"],
+          "fields": ["hook", "tier", "reason", "patterns_matched"],
+          "aliases": {"patterns": ["patterns_matched"]},
+          "rules": [
+            {"when": {"reason": "scan-unavailable"}, "class": "observation", "check": "not_performed"},
+            {"when": {}, "class": "finding", "check": "performed"}
+          ]
+        },
+        "no_customer_data_in_screenshot": {
+          "producers": ["hook:no-customer-data-in-screenshot"],
+          "records_when": ["finding", "unavailable"],
+          "fields": ["hook", "tier", "reason", "artifact_dir", "patterns_matched"],
+          "aliases": {"target_path": ["artifact_dir"], "patterns": ["patterns_matched"]},
+          "rules": [
+            {"when": {"reason": "scan-unavailable"}, "class": "observation", "check": "not_performed"},
+            {"when": {}, "class": "finding", "check": "performed"}
+          ]
+        },
+        "no_direct_main_push": {
+          "producers": ["hook:no-direct-main-push"],
+          "records_when": ["finding"],
+          "fields": ["hook", "tier", "pattern", "cmd_preview"],
+          "aliases": {},
+          "rules": [
+            {"when": {}, "class": "finding", "check": "performed"}
+          ]
+        },
+        "no_merge_without_review": {
+          "producers": ["hook:no-merge-without-review"],
+          "records_when": ["finding"],
+          "fields": ["hook", "tier", "reason"],
+          "aliases": {},
+          "rules": [
+            {"when": {}, "class": "finding", "check": "performed"}
+          ]
+        },
+        "no_production_mutation_without_auth": {
+          "producers": ["hook:no-production-mutation-without-auth"],
+          "records_when": ["finding"],
+          "fields": ["hook", "tier", "pattern", "cmd_preview"],
+          "aliases": {},
+          "rules": [
+            {"when": {}, "class": "finding", "check": "performed"}
+          ]
+        },
+        "no_secrets_in_edit": {
+          "producers": ["hook:no-secrets-in-edit"],
+          "records_when": ["finding", "unavailable"],
+          "fields": ["hook", "tier", "reason", "patterns_matched"],
+          "aliases": {"patterns": ["patterns_matched"]},
+          "rules": [
+            {"when": {"reason": "scan-unavailable"}, "class": "observation", "check": "not_performed"},
+            {"when": {}, "class": "finding", "check": "performed"}
+          ]
+        },
+        "sc_auth_bypass_warn": {
+          "producers": ["hook:sc-auth-bypass-warn"],
+          "records_when": ["finding"],
+          "fields": ["hook", "tier", "file_edited", "patterns", "total"],
+          "aliases": {"target_path": ["file_edited"], "patterns": ["patterns"]},
+          "rules": [
+            {"when": {}, "class": "finding", "check": "performed"}
+          ]
+        },
+        "sc_compliance_gap_warn": {
+          "producers": ["hook:sc-compliance-gap-warn"],
+          "records_when": ["finding"],
+          "fields": ["hook", "tier", "file_edited", "required_frameworks", "evidence_age_days", "gap_count"],
+          "aliases": {"target_path": ["file_edited"]},
+          "rules": [
+            {"when": {}, "class": "finding", "check": "performed"}
+          ]
+        },
+        "sc_threat_coverage_warn": {
+          "producers": ["hook:sc-threat-coverage-warn"],
+          "records_when": ["finding"],
+          "fields": ["hook", "tier", "file_edited", "threat_model_age_days", "file_in_model"],
+          "aliases": {"target_path": ["file_edited"]},
+          "rules": [
+            {"when": {}, "class": "finding", "check": "performed"}
+          ]
+        },
+        "secret_scan_block": {
+          "producers": ["hook:secret-scan-block"],
+          "records_when": ["block", "override", "unavailable"],
+          "fields": ["hook", "tier", "override", "reason", "blocked", "patterns_matched"],
+          "aliases": {"patterns": ["patterns_matched"]},
+          "rules": [
+            {"when": {"tier": "OVERRIDDEN"}, "class": "override", "check": "not_performed"},
+            {
+              "when": {"reason": ["scanner-unavailable", "collection-unavailable", "scan-unavailable"]},
+              "class": "block_decision",
+              "check": "not_performed"
+            },
+            {"when": {"blocked": "true"}, "class": "block_decision", "check": "performed"},
+            {"when": {}, "class": "block_decision", "check": "unknown"}
+          ]
+        },
+        "session_digest": {
+          "producers": ["hook:session-digest"],
+          "records_when": ["always"],
+          "fields": ["hook", "pack", "mode"],
+          "aliases": {},
+          "rules": [
+            {"when": {}, "class": "observation", "check": "performed"}
+          ]
+        },
+        "ta_arch_drift_warn": {
+          "producers": ["hook:ta-arch-drift-warn"],
+          "records_when": ["finding"],
+          "fields": ["hook", "tier", "file_edited", "adr_id", "adr_decision"],
+          "aliases": {"target_path": ["file_edited"]},
+          "rules": [
+            {"when": {}, "class": "finding", "check": "performed"}
+          ]
+        },
+        "ta_complexity_budget_warn": {
+          "producers": ["hook:ta-complexity-budget-warn"],
+          "records_when": ["finding"],
+          "fields": ["hook", "tier", "file_edited", "cyclomatic", "cognitive", "budget_cyclomatic", "budget_cognitive"],
+          "aliases": {"target_path": ["file_edited"]},
+          "rules": [
+            {"when": {}, "class": "finding", "check": "performed"}
+          ]
+        },
+        "ta_contract_collision_warn": {
+          "producers": ["hook:ta-contract-collision-warn"],
+          "records_when": ["finding"],
+          "fields": ["hook", "tier", "file_edited", "consumer_count"],
+          "aliases": {"target_path": ["file_edited"]},
+          "rules": [
+            {"when": {}, "class": "finding", "check": "performed"}
+          ]
+        },
+        "tq_contract_break_warn": {
+          "producers": ["hook:tq-contract-break-warn"],
+          "records_when": ["finding"],
+          "fields": ["hook", "tier", "file_edited", "contract_test_updated"],
+          "aliases": {"target_path": ["file_edited"]},
+          "rules": [
+            {"when": {}, "class": "finding", "check": "performed"}
+          ]
+        },
+        "tq_coverage_drop_warn": {
+          "producers": ["hook:tq-coverage-drop-warn"],
+          "records_when": ["finding"],
+          "fields": ["hook", "tier", "coverage_pct", "target_pct", "critical_below"],
+          "aliases": {},
+          "rules": [
+            {"when": {}, "class": "finding", "check": "performed"}
+          ]
+        },
+        "tq_perf_regression_warn": {
+          "producers": ["hook:tq-perf-regression-warn"],
+          "records_when": ["finding"],
+          "fields": ["hook", "tier", "file_edited", "journey", "budget_p95_ms"],
+          "aliases": {"target_path": ["file_edited"]},
+          "rules": [
+            {"when": {}, "class": "finding", "check": "performed"}
+          ]
+        }
+      }
+    },
+    "jobs": {
+      "kinds": {
+        "job_begin": {
+          "producers": ["bin/_jobs.sh:job_create", "hook:job-begin"],
+          "records_when": ["start"],
+          "fields": ["job_id", "workflow", "mode"],
+          "aliases": {},
+          "rules": [
+            {"when": {}, "class": "observation", "check": "performed"}
+          ]
+        },
+        "job_end": {
+          "producers": ["bin/_jobs.sh:job_archive", "hook:job-end"],
+          "records_when": ["end"],
+          "fields": ["job_id", "result"],
+          "aliases": {},
+          "rules": [
+            {"when": {}, "class": "observation", "check": "performed"}
+          ]
+        },
+        "job_set_steps": {
+          "producers": ["bin/_jobs.sh:job_set_steps"],
+          "records_when": ["always"],
+          "fields": ["job_id", "count"],
+          "aliases": {},
+          "rules": [
+            {"when": {}, "class": "observation", "check": "performed"}
+          ]
+        },
+        "job_stale_warn": {
+          "producers": ["hook:job-stale-warn"],
+          "records_when": ["finding"],
+          "fields": ["job_id", "age_hours_str", "threshold_hours"],
+          "aliases": {},
+          "rules": [
+            {"when": {}, "class": "finding", "check": "performed"}
+          ]
+        },
+        "job_update": {
+          "producers": ["bin/_jobs.sh:job_update"],
+          "records_when": ["always"],
+          "fields": ["job_id", "step", "status"],
+          "aliases": {},
+          "rules": [
+            {"when": {}, "class": "observation", "check": "performed"}
+          ]
+        }
+      }
+    },
+    "lessons": {
+      "kinds": {
+        "lesson_recorded": {
+          "producers": ["bin/li-lessons.py:emit_audit"],
+          "records_when": ["end"],
+          "fields": ["scope", "id", "classification"],
+          "aliases": {},
+          "rules": [
+            {"when": {}, "class": "observation", "check": "performed"}
+          ]
+        },
+        "lesson_superseded": {
+          "producers": ["bin/li-lessons.py:emit_audit"],
+          "records_when": ["end"],
+          "fields": ["scope", "id", "classification"],
+          "aliases": {},
+          "rules": [
+            {"when": {}, "class": "observation", "check": "performed"}
+          ]
+        },
+        "lesson_updated": {
+          "producers": ["bin/li-lessons.py:emit_audit"],
+          "records_when": ["end"],
+          "fields": ["scope", "id", "classification"],
+          "aliases": {},
+          "rules": [
+            {"when": {}, "class": "observation", "check": "performed"}
+          ]
+        }
+      }
+    },
+    "migration": {
+      "kinds": {
+        "claude_home_migrated": {
+          "producers": ["bin/li-migrate-claude-home"],
+          "records_when": ["end"],
+          "fields": ["repo"],
+          "aliases": {},
+          "rules": [
+            {"when": {}, "class": "observation", "check": "performed"}
+          ],
+          "note": "P10 replaces this producer with li-lifecycle migrate; the coordinator reconciles this entry at fan-in."
+        },
+        "surfaced": {
+          "producers": ["instruction-only:skills/migrations/SKILL.md"],
+          "records_when": ["always"],
+          "fields": ["active_count"],
+          "aliases": {},
+          "rules": [
+            {"when": {}, "class": "observation", "check": "performed"}
+          ]
+        }
+      }
+    },
+    "orientator-decisions": {
+      "kinds": {
+        "orientator_decision": {
+          "producers": ["instruction-only:skills/orientator/SKILL.md", "instruction-only:skills/sense/SKILL.md"],
+          "records_when": ["always"],
+          "fields": ["intent", "workflow", "risk", "confidence", "decision", "budget_used", "escalated"],
+          "aliases": {},
+          "rules": [
+            {"when": {}, "class": "observation", "check": "performed"}
+          ]
+        }
+      }
+    },
+    "pack-lifecycle": {
+      "kinds": {
+        "pack_created": {
+          "producers": ["instruction-only:skills/pack-create/SKILL.md"],
+          "records_when": ["end"],
+          "fields": ["name", "extends", "scope"],
+          "aliases": {},
+          "rules": [
+            {"when": {}, "class": "observation", "check": "performed"}
+          ]
+        },
+        "pack_validated": {
+          "producers": ["instruction-only:skills/pack-validate/SKILL.md"],
+          "records_when": ["end"],
+          "fields": ["name", "verdict"],
+          "aliases": {},
+          "rules": [
+            {"when": {}, "class": "observation", "check": "performed"}
+          ]
+        }
+      }
+    },
+    "pack-resolver": {
+      "kinds": {
+        "pack_resolver_context_bound": {
+          "producers": ["lib/pack-resolver.sh:_resolver_audit"],
+          "records_when": ["always"],
+          "fields": ["msg"],
+          "aliases": {},
+          "rules": [
+            {"when": {}, "class": "observation", "check": "performed"}
+          ]
+        },
+        "pack_resolver_context_rebound": {
+          "producers": ["lib/pack-resolver.sh:_resolver_audit"],
+          "records_when": ["always"],
+          "fields": ["msg"],
+          "aliases": {},
+          "rules": [
+            {"when": {}, "class": "observation", "check": "performed"}
+          ]
+        },
+        "pack_resolver_fail": {
+          "producers": ["lib/pack-resolver.sh:_resolver_audit"],
+          "records_when": ["failure"],
+          "fields": ["msg"],
+          "aliases": {},
+          "rules": [
+            {"when": {}, "class": "diagnostic", "check": "not_performed"}
+          ]
+        },
+        "pack_resolver_info": {
+          "producers": ["lib/pack-resolver.sh:_resolver_audit"],
+          "records_when": ["always"],
+          "fields": ["msg"],
+          "aliases": {},
+          "rules": [
+            {"when": {}, "class": "diagnostic", "check": "unknown"}
+          ]
+        },
+        "pack_resolver_warn": {
+          "producers": ["lib/pack-resolver.sh:_resolver_audit"],
+          "records_when": ["failure"],
+          "fields": ["msg"],
+          "aliases": {},
+          "rules": [
+            {"when": {}, "class": "diagnostic", "check": "performed"}
+          ]
+        }
+      }
+    },
+    "provenance-log": {
+      "kinds": {
+        "shipped": {
+          "producers": ["instruction-only:skills/ship/SKILL.md"],
+          "records_when": ["end"],
+          "fields": ["branch", "commit_range", "ai_assistance", "phases", "audience", "voice_tier", "gates_passed"],
+          "aliases": {},
+          "rules": [
+            {"when": {}, "class": "observation", "check": "performed"}
+          ]
+        }
+      }
+    },
+    "qa-fixes": {
+      "kinds": {
+        "auto_fix": {
+          "producers": ["instruction-only:skills/qa/SKILL.md"],
+          "records_when": ["always"],
+          "fields": ["file", "fix_kind"],
+          "aliases": {"target_path": ["file"]},
+          "rules": [
+            {"when": {}, "class": "observation", "check": "performed"}
+          ]
+        }
+      }
+    },
+    "reviews": {
+      "delegated": "li-review-read",
+      "producers": ["bin/li-review-log"],
+      "fields": ["status", "commit", "format", "raw"],
+      "note": "Kinds are reviewed skill names. The generic reader counts lines and never classifies verdicts or parses review content.",
+      "kinds": {}
+    },
+    "self-test": {
+      "kinds": {
+        "smoke": {
+          "producers": ["bin/_audit.sh"],
+          "records_when": ["always"],
+          "fields": ["key1", "key2"],
+          "aliases": {},
+          "rules": [
+            {"when": {}, "class": "observation", "check": "performed"}
+          ]
+        }
+      }
+    },
+    "usage-skill": {
+      "kinds": {
+        "invocation": {
+          "producers": ["instruction-only:skills/usage-log/SKILL.md"],
+          "records_when": ["always"],
+          "fields": ["skill", "mode", "tokens_est", "cli"],
+          "aliases": {},
+          "rules": [
+            {"when": {}, "class": "observation", "check": "performed"}
+          ]
+        }
+      }
+    }
+  },
+  "dynamic": [
+    {
+      "call_site": "lib/brief-forge.sh:_brief_forge_audit",
+      "category": "brief-forge",
+      "kind_pattern": "^brief_forge_(blocked|bypassed)$",
+      "kinds": ["brief_forge_blocked", "brief_forge_bypassed"],
+      "fields_dynamic": true,
+      "fields": ["reason", "audit_receipt", "evaluator"],
+      "note": "audit_log brief-forge \"brief_forge_$decision\" \"${fields[@]}\""
+    },
+    {
+      "call_site": "lib/pack-resolver.sh:_resolver_audit",
+      "category": "pack-resolver",
+      "kind_pattern": "^pack_resolver_(info|warn|fail|context_bound|context_rebound)$",
+      "kinds": ["pack_resolver_context_bound", "pack_resolver_context_rebound", "pack_resolver_fail", "pack_resolver_info", "pack_resolver_warn"],
+      "fields": ["msg"],
+      "note": "audit_log \"pack-resolver\" \"pack_resolver_${level}\" \"msg=...\""
+    },
+    {
+      "call_site": "bin/_jobs.sh:_jobs_audit",
+      "wrapper": "_jobs_audit",
+      "category_pattern": "^jobs$",
+      "kind_pattern": "^job_[a-z_]+$",
+      "fields_dynamic": true,
+      "note": "forwards \"$@\"; each literal _jobs_audit call is catalogued as its caller's producer"
+    },
+    {
+      "call_site": "bin/li-review-log",
+      "category": "reviews",
+      "kind_pattern": "^[a-z][a-z0-9-]*$",
+      "delegated_kinds": true,
+      "fields": ["status", "commit", "format", "raw"],
+      "note": "the kind is the reviewed skill name; li-review-read owns review interpretation"
+    }
+  ],
+  "non_recording_hooks": [
+    {
+      "hook": "context-bloat-warn",
+      "reason": "prints threshold warnings only; it never calls audit_log, so no record is expected"
+    }
+  ]
+}

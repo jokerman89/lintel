@@ -16,19 +16,19 @@ You are the `audit` skill — read-only window onto the unified Lintel audit tra
 
 ## What this skill does
 
-Every Lintel audit record lands in `<category>.jsonl` via the unified `audit_log` writer in `bin/_audit.sh`. Since v5 the trail is split in two: repo events (cycle runs, jobs, brief-forge, granularity, …) land in `<repo>/.claude/runtime/audit/<category>.jsonl`; operator events (pack lifecycle, pack-resolver, migrations, `usage-*`) stay in `~/.lintel/audit/<category>.jsonl`. This reader checks the repo dir first, then global. Each record is a single JSON line with the shape:
+Every Lintel audit record lands in `<category>.jsonl` via the unified `audit_log` writer in `bin/_audit.sh`. Since v5 the trail is split in two: repo events (cycle runs, jobs, brief-forge, granularity, …) land in `<repo>/.claude/runtime/audit/<category>.jsonl`; operator events (pack lifecycle, pack-resolver, migrations, `usage-*`) stay in `~/.lintel/audit/<category>.jsonl`. The writer's own router decides which: this reader asks `audit_read_files <category>` for the write file and, when it differs, the legacy global file, reads the first that exists and names any later one it did not read. Each record is a single JSON line with the shape:
 
 ```json
 {"ts":"...","kind":"...","operator":"...","cycle_id":"...", ...extra k=v fields...}
 ```
 
-This skill cats/greps those logs so an operator can answer "what happened, and when?" without hand-parsing JSONL. It never writes — pure read.
+This skill reads those logs through the structured reader `bin/li-events.py`, so counts, classes and malformed-line diagnostics come from one parser instead of hand-grepped JSONL. It never writes — pure read. A missing record is unobserved, not proof that nothing happened.
 
 ## When to use
 
 - "What's in the audit trail?" — no args, lists every category + record count
 - "Show me the jobs audit" — `--category jobs`
-- "Did any brief-forge bypass fire this week?" — `--kind brief_forge_bypassed --since 7`
+- "Is there a brief-forge bypass record this week?" — `--kind brief_forge_bypassed --since 7`
 - After a meta-infra change — confirm the expected override/pack-resolver events landed
 
 ## When NOT to use
@@ -49,18 +49,8 @@ All optional:
 ## Workflow
 
 ```bash
-LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
-REPO_ROOT="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}"
-# v5 split: repo events in <repo>/.claude/runtime/audit/, operator events
-# (pack-lifecycle, pack-resolver, migrations, usage-*) in ~/.lintel/audit/.
-# Repo dir is checked first, then global. LINTEL_AUDIT_DIR overrides both.
-if [ -n "${LINTEL_AUDIT_DIR:-}" ]; then
-  audit_dirs=("$LINTEL_AUDIT_DIR")
-else
-  audit_dirs=()
-  [ -n "$REPO_ROOT" ] && [ -d "$REPO_ROOT/.claude/runtime/audit" ] && audit_dirs+=("$REPO_ROOT/.claude/runtime/audit")
-  [ -d "$LINTEL_HOME/audit" ] && audit_dirs+=("$LINTEL_HOME/audit")
-fi
+source "${LINTEL_SOURCE_ROOT:?select trusted source}/bin/_audit.sh"
+reader() { python3 "$LINTEL_SOURCE_ROOT/bin/li-events.py" "$@"; }
 
 category=""
 kind=""
@@ -76,84 +66,81 @@ while [ $# -gt 0 ]; do
   esac
 done
 
-if [ "${#audit_dirs[@]}" -eq 0 ]; then
-  echo "_No audit trail yet._ (Nothing has been audit-logged in this repo or on this machine.)"
-  exit 0
-fi
-
-# No filters → summary table of categories + counts (repo dir first, then global)
-if [ -z "$category" ] && [ -z "$kind" ] && [ -z "$since" ]; then
-  echo "## Lintel audit categories"
-  found=0
-  for d in "${audit_dirs[@]}"; do
-    echo ""
-    echo "### $d"
-    for f in "$d"/*.jsonl; do
-      [ -f "$f" ] || continue
-      found=1
-      n=$(wc -l < "$f" | tr -d ' ')
-      printf -- '- %s: %s records\n' "$(basename "$f" .jsonl)" "$n"
-    done
-  done
-  [ "$found" -eq 0 ] && echo "_No audit records yet._"
-  echo ""
-  echo "Run with --category <name> to view records."
-  exit 0
-fi
-
-# Build the cut-off ISO timestamp for --since
+# A window that cannot be computed is reported; the filter is never silently dropped.
 since_iso=""
 if [ -n "$since" ]; then
-  since_iso=$(date -u -d "$since days ago" +"%Y-%m-%dT%H:%M:%SZ" 2>/dev/null || \
-              date -u -v "-${since}d" +"%Y-%m-%dT%H:%M:%SZ" 2>/dev/null || echo "")
+  since_iso="$(audit_days_ago "$since")" || {
+    echo "Cannot compute the date $since days ago; no records are shown instead of unfiltered history."
+    exit 2
+  }
 fi
 
-# Resolve which files to scan (repo dir first, then global)
-files=()
-for d in "${audit_dirs[@]}"; do
-  if [ -n "$category" ]; then
-    [ -f "$d/$category.jsonl" ] && files+=("$d/$category.jsonl")
-  else
-    for f in "$d"/*.jsonl; do [ -f "$f" ] && files+=("$f"); done
+# Categories: the requested one, or every <category>.jsonl in the writer's repo and
+# operator directories (the router's answer, not a second routing copy).
+if [ -n "$category" ]; then
+  categories=("$category")
+else
+  mapfile -t categories < <(for d in "$(audit_dir hooks)" "$(audit_dir pack-resolver)"; do
+    for f in "$d"/*.jsonl; do [ -f "$f" ] && basename "$f" .jsonl; done
+  done | sort -u)
+fi
+if [ "${#categories[@]}" -eq 0 ]; then
+  echo "No records observed in $(audit_dir hooks) or $(audit_dir pack-resolver); absence is not evidence that nothing ran."
+  exit 0
+fi
+
+filters=()
+[ -n "$kind" ] && filters+=(--kind "$kind")
+[ -n "$since_iso" ] && filters+=(--since "$since_iso")
+for c in "${categories[@]}"; do
+  log=""
+  while IFS= read -r candidate; do
+    if [ -z "$log" ]; then [ -f "$candidate" ] && log="$candidate"
+    elif [ -e "$candidate" ]; then echo "- $c: also present, not read: $candidate"; fi
+  done < <(audit_read_files "$c")
+  if [ -z "$log" ]; then
+    echo "- $c: no records observed in $(audit_read_files "$c" | paste -sd ' ' -); absence is not evidence that nothing ran"
+    continue
+  fi
+  rc=0
+  summary="$(reader summary --file "$log" --category "$c" "${filters[@]}")" || rc=$?
+  case "$rc" in
+    0|3|4) ;;   # data outcomes; 4 means records and diagnostics both exist
+    *) echo "- $c: the reader could not read $log (exit $rc)"; continue ;;
+  esac
+  # Counts come from the reader; malformed and other diagnostic lines are listed separately.
+  python3 - "$c" "$summary" <<'PY'
+import json, sys
+name, summary = sys.argv[1], json.loads(sys.argv[2])
+counts = summary["records"]
+print("- {}: {} selected of {} valid records, {} malformed, in {} ({})".format(
+    name, counts["selected"], counts["valid"], counts["malformed"], summary["source"]["path"],
+    summary["status"]))
+for item in summary["diagnostics"]:
+    print("  - line {}: {} ({})".format(item["line"], item["code"], item["detail"]))
+PY
+  if [ -n "$category" ] || [ -n "$kind" ] || [ -n "$since" ]; then
+    reader records --file "$log" --category "$c" "${filters[@]}" | grep -v '"diagnostic"' | head -n "$limit"
   fi
 done
-
-shown=0
-for f in "${files[@]}"; do
-  [ -f "$f" ] || continue
-  while IFS= read -r line; do
-    [ -z "$line" ] && continue
-    # kind filter (field-based; tolerates extra fields)
-    if [ -n "$kind" ] && ! printf '%s' "$line" | grep -q "\"kind\":\"${kind}\""; then
-      continue
-    fi
-    # since filter (ISO-8601 lexicographic compare on ts)
-    if [ -n "$since_iso" ]; then
-      ts=$(printf '%s' "$line" | grep -oE '"ts":"[^"]+"' | head -1 | sed 's/.*"ts":"//; s/"$//')
-      [ -n "$ts" ] && [ "$ts" \< "$since_iso" ] && continue
-    fi
-    printf '%s\t%s\n' "$(basename "$f" .jsonl)" "$line"
-    shown=$((shown + 1))
-    [ "$shown" -ge "$limit" ] && break 2
-  done < "$f"
-done
-
-[ "$shown" -eq 0 ] && echo "_No matching audit records._"
 ```
 
-The skill leans on `audit_count` / `audit_days_ago` semantics already defined in `bin/_audit.sh`; it can also source that helper if richer counting is needed (`source bin/_audit.sh; audit_count jobs job_begin`).
+`audit_count` in `bin/_audit.sh` stays an approximate bash line counter for quick shell checks
+(it returns 3 with `unobserved:` on stderr when no listed log exists); the counts above come from
+the structured reader.
 
 ## Integration
 
 **Reads:**
-- `.claude/runtime/audit/<category>.jsonl` (repo events — checked first)
-- `~/.lintel/audit/<category>.jsonl` (operator events: pack lifecycle, pack-resolver, migrations, `usage-*`)
+- `<category>.jsonl` from `audit_read_files <category>`: the write file (repo events on the v5
+  layout) and, when it differs, the legacy global `~/.lintel/audit/<category>.jsonl`
 
 **Writes:**
 - nothing (pure read)
 
 **Calls into:**
-- `bin/_audit.sh` helpers `audit_count` / `audit_days_ago` (optional, for counting)
+- `bin/_audit.sh` router (`audit_dir`, `audit_read_files`) and `audit_days_ago`
+- `bin/li-events.py` (counts, classes and diagnostics; exits 3 and 4 are data outcomes)
 
 ## Anti-patterns
 

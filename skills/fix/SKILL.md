@@ -33,8 +33,18 @@ You are the FIX composite shortcut — hotfix mode pre-baked. Not nestable — /
 ### Step 1 — Pre-flight
 
 Confirm hotfix mode is appropriate:
-- AskUserQuestion (brief): "Hotfix mode skips DEFINE+DISCOVER+PLAN+CAPTURE. Sure root cause is clear and fix path is known? (Y/n)"
-- If operator hesitates: suggest `/li:investigate` or `/li:cycle` instead
+- Reuse the supplied diagnosis and authority. Ask through the actual host channel
+  only if the root cause, intended behavior or mutation scope is unresolved.
+- If the diagnosis is missing, use `/li:investigate`; do not improvise a fix from
+  a review/research request.
+
+Keep BUILD's work contract even though the full PLAN ceremony is skipped. Use the
+[selected work map](../spec-kit/references/work-map.md) and `bin/li-work-artifacts.py`.
+An existing defect task keeps its original ID. For a new bounded authorized fix,
+record a minimal native spec/plan/prompt/work.json with the reproduction, intended
+behavior, owned files, one stable leaf, regression check and existing scope approval.
+The map's tasks points to that plan; no extra backlog or unrelated interview.
+If required planning/review is missing, the alias remains incomplete.
 
 ### Step 2 — Delegate to /li:cycle
 
@@ -46,6 +56,7 @@ Mode preset handles:
 - audience=solo
 - voice_tier=internal
 - compliance=minimal (HARD-RULES still enforced per the pack's compliance mode; default advisory)
+- Same verified P07 profile/required-policy reference and original task selection
 - Cost expectation pre-set low
 
 ### Step 3 — Post-fix
@@ -57,7 +68,7 @@ HOTFIX SHIPPED — <commit/PR>
 Skipped phases:
   - DEFINE (no design needed for known fix)
   - DISCOVER (no codebase mapping needed)
-  - PLAN (single-task work, no breakdown needed)
+  - Full PLAN ceremony (minimal approved mapped work and acceptance were retained)
   - CAPTURE (no durable artifacts to capture)
 
 If this fix reveals a pattern worth capturing (lesson for /li:lessons-promote),

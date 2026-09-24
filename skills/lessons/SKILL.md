@@ -18,12 +18,18 @@ You are the lessons skill.
 
 ## When NOT to use
 
-- No lessons.md yet — recommend `li-scaffold init` first
+- No project lessons store yet — report "no project lessons store (unobserved)" outside a repository; inside one, `/li:learn` creates the store from the scaffolding template on first write
 - Tiny task (single-line edit) — overkill
 
 ## Workflow
 
-1. **Read .claude/memory/lessons.md.** Parse into lessons (each header = one lesson).
+1. **Resolve and read the project store.** Use the awk entry point in `lib/memory.sh`
+   (`lessons_find_related <keywords>` for relevance, `lessons_index` for every heading). The store
+   is always `lintel_lessons_file`; outside a repository the result is "no project lessons store
+   (unobserved)", which is different from an existing empty store. When an unmigrated repository
+   has both `tasks/lessons.md` and `.claude/memory/lessons.md`, name the store read and the one
+   ignored — never hide the ignored store's lessons. Print a full block with
+   `bin/li-lessons.py get --id L-NNN`.
 
 2. **Identify current task context.** From last operator message, current open files, recent git log.
 
@@ -34,7 +40,10 @@ You are the lessons skill.
 
 4. **Top 3-5 relevant lessons.** Surface with original text + 1-line "why this might apply now".
 
-5. **Plus operator-global lessons (optional).** Surface operator-level lessons written by `/li:learn --scope global` from `~/.lintel/lessons.jsonl` (the file `/li:learn` writes). If the operator also opted in to `li-lessons-sync`, additionally surface the synced per-repo files under `~/.lintel/lessons/*.md`.
+5. **Plus legacy operator lessons (optional, read-only).** `lessons_legacy_operator` shows
+   `~/.lintel/lessons.jsonl` labelled "legacy operator lessons, not ID-managed". Nothing imports or
+   writes it, and no operator-global lessons sink is activated. If the operator also opted in to
+   `li-lessons-sync`, additionally surface the synced per-repo files under `~/.lintel/lessons/*.md`.
 
 ## Output format
 
@@ -57,8 +66,9 @@ LESSONS: review for current task
 
 ## Action
 - Read above. If still applicable, follow the rule.
-- If outdated, consider removing from lessons.md or marking superseded.
-- If new lesson emerges from this task, /lessons-promote after task completes.
+- If outdated, supersede it — `/li:learn` with the `supersede` classification adds the replacement
+  and stamps the old lesson `superseded_by:`. Never delete a lesson.
+- If new lesson emerges from this task, record it with /li:learn, then /lessons-promote if it generalizes.
 ```
 
 ## Edge cases
@@ -69,6 +79,6 @@ LESSONS: review for current task
 
 ## Session-harness role
 
-`.claude/memory/lessons.md` is durable knowledge that compounds over time. This skill is the surfacing mechanism — without it, lessons accumulate but rarely get applied at the right moment.
+The project lessons store (`.claude/memory/lessons.md` on the v5 layout) is durable knowledge that compounds over time. This skill is the surfacing mechanism — without it, lessons accumulate but rarely get applied at the right moment.
 
 Pair with `/lessons-promote` (global) for cross-repo learning.

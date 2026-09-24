@@ -13,6 +13,7 @@ import runpy
 import re
 import shutil
 import subprocess
+import sys
 import tempfile
 import unittest
 
@@ -43,6 +44,8 @@ class FixtureCase(unittest.TestCase):
                     "LINTEL_REPO_ROOT": self.repo.as_posix(),
                     "LINTEL_SOURCE_ROOT": ROOT.as_posix(), "LINTEL_ASCII": "1",
                     "GIT_CONFIG_NOSYSTEM": "1", "GIT_CONFIG_GLOBAL": os.devnull}
+        # Plan-analysis fixtures run the selected interpreter; keep an explicit caller choice.
+        self.env.setdefault("LINTEL_PYTHON", Path(sys.executable).as_posix())
         for name in ("LINTEL_CYCLE_ID", "LINTEL_WORK_MAP", "LINTEL_PROFILE_REFERENCE",
                      "LINTEL_PROFILE_CONTEXT", "LINTEL_PROFILE_CONTEXT_FILE",
                      "LINTEL_SESSION_ID", "CLAUDE_SESSION_ID", "LINTEL_PROFILE_PACK",
