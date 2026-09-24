@@ -375,7 +375,10 @@ never inferred from this directive; a model switch does not change context ident
   bounded repair and recheck of packages 2 and 3; see the P08 card, "Preparation review
   and step-1 re-release".
 - P09: module product `5c99612` passes `114ddfe3`, integrated `2d789a4`;
-  all 26 product paths match and 13 joined methods pass. `477d3fc` releases
+  all 26 product paths match and 13 joined methods pass. After P10's integration, the
+  installed-source closure for A09.5/A17.5 is released to the original owner, with
+  review by SAME `447d97f5` (P09 card, "Installed-source closure after P10
+  integration"). `477d3fc` releases
   the original owner's separate N1 safety-quantifier correction and two bounded
   planning/execution mode probes. N1 and five actual mode packets are frozen
   at `1b75264`, later report-only `4640ca9`. N1 passes SAME `447d97f5` review
@@ -524,7 +527,10 @@ never inferred from this directive; a model switch does not change context ident
 - P13: ambiguity repair `b1d4caf` passes independent whole first-unit SPEC/QUALITY
   in `09a3c6ec`, integrated with original history as `03df1db`; joined 31 metadata
   methods pass and all eight product blobs match. The original owner is released
-  for the additive selection/preservation unit, subsequently accepted below.
+  for the additive selection/preservation unit, subsequently accepted below. After
+  P10's integration, the installed consumer closure for A18.3/A18.4/A19.4 is released
+  to the original owner, with review by SAME `4865e4f7` (P13 card, "Installed
+  consumer closure after P10 integration").
   Remaining eight consumers/template `7884ddd` / `5df8e99` failed SPEC in
   `5a3ab4c`, preserved `0c16373`, for one real existing-deep-draft guard defect.
   Correction `4922a6b` passes complete source-consumer SPEC and first whole
