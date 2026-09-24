@@ -188,6 +188,10 @@ N5 are an optional owner follow-up for a recheck by `30146eab`.
 P14: the A23 unit (product `96bd5bab`, report `0a091f34`, on `ad1045b8`; final run 8/8 in
 963 s; an 81-row matrix) is frozen and under review by `6310f7ad` (Opus 5.5).
 P10 F-INT-5: the test-only repair `b7555ca3` / `b7cf10ef` is with SAME `1578dfd8`.
+Operator question (2026-09-24 17:58): why is nothing pushed? Answer: everything is committed
+locally (682 commits); L-045 holds publication until the final accepted batch. The offer to
+push a draft PR early got no answer (the operator is away), so L-045 stands. Push and PR
+follow directly after the last gates: P08 integration review, A23, F-INT-6 and A23.5.
 P15 (coordinator): the Windows CI job cannot fit 30 minutes. The sharding and timeout
 decision follows from the joined run's per-entry durations.
 Host note (2026-09-24, 14:00 UTC): host commit-memory exhaustion killed the coordinator's
