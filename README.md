@@ -1,5 +1,7 @@
 # Lintel
 
+[Presentation, demos & technical reference](https://jokerman89.github.io/lintel/) · [Presentation source](presentations/tech-shots-2026-09-25/README.md)
+
 **A shared session workflow for teams building with GitHub Copilot.** Turn an issue into a
 reviewed plan, small build cards, verified changes and a handoff the next session can use.
 Your team's decisions, lessons and working agreements stay in the repository.

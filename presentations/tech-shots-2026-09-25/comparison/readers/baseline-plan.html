@@ -1,0 +1,25 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>baseline-plan · actual artifact</title><style>:root{color-scheme:dark}*{box-sizing:border-box}body{background:#100d16;color:#f2eaf8;font:18px/1.65 Arial,sans-serif;margin:0}main{max-width:1150px;margin:0 auto;padding:40px 45px 80px}h1{font-size:42px;line-height:1.1;letter-spacing:-.03em}h2{color:#d9a1fa;font-size:28px;margin-top:38px}h3{font-size:22px}a{color:#a6ff00}table{width:100%;border-collapse:collapse;font-size:15px}th,td{border-bottom:1px solid #46364f;padding:12px;text-align:left;vertical-align:top}pre{background:#211927;padding:22px;white-space:pre-wrap;overflow-wrap:anywhere;font:15px/1.6 Consolas,monospace}code{color:#d9bae9}blockquote{border-left:3px solid #a6ff00;padding-left:20px;margin-left:0;color:#cdbcd8}.label{font:13px Consolas,monospace;letter-spacing:.12em;color:#a6ff00;margin-bottom:27px}nav{display:flex;gap:25px;border-bottom:1px solid #483450;padding:18px 35px;font-size:15px}@media(max-width:650px){main{padding:25px 20px}h1{font-size:31px}table{font-size:12px}td,th{padding:7px}}</style><link rel="stylesheet" href="../../site/theme.css"><script src="../../site/theme.js"></script><link rel="icon" href="../../site/favicon.ico?v=folded-l" sizes="16x16 32x32 48x48"><link rel="icon" href="../../site/favicon-32.png?v=folded-l" type="image/png" sizes="32x32"><link rel="icon" href="../../site/mark.svg?v=folded-l" type="image/svg+xml"><link rel="apple-touch-icon" href="../../site/apple-touch-icon.png?v=folded-l" sizes="180x180"></head><body><nav><a href="../../show/index.html">Presentation</a><a href="../index.html">Comparison desk</a><a href="../without-lintel/plan.md">Raw artifact</a></nav><main><div class="label">ACTUAL SAVED ARTIFACT / without-lintel/plan.md</div><h1>Implementation plan</h1>
+<h2>Acceptance criteria</h2>
+<ul>
+<li>Open index.html offline with no dependencies or browser errors.</li>
+<li>Default to Northwind; one selected customer, intersecting status, severity, case-insensitive ID/subject search and inclusive UTC creation dates.</li>
+<li>Derive counts, actual-day trend, status breakdown, ticket rows and CSV from one filtered set. Active = New + Investigating.</li>
+<li>Render fixture text literally; quote CSV values and neutralize spreadsheet formula prefixes.</li>
+<li>Provide labelled native controls, visible focus, meaningful empty/error states and usable 390px/1440px layouts.</li>
+<li>State the local synthetic pilot boundary in the UI and handoff.</li>
+</ul>
+<h2>Build cards</h2>
+<ul>
+<li><input checked="" disabled="" type="checkbox"> Read authoritative brief, stakeholder answers, fixture and shared tests.</li>
+<li><input checked="" disabled="" type="checkbox"> Record resolved questions and implementation decisions.</li>
+<li><input checked="" disabled="" type="checkbox"> Build accessible responsive dashboard shell and styling.</li>
+<li><input checked="" disabled="" type="checkbox"> Implement validation, shared filtering/rendering and CSV download.</li>
+<li><input checked="" disabled="" type="checkbox"> Run supplied browser checks unchanged; inspect desktop/mobile screenshots.</li>
+<li><input checked="" disabled="" type="checkbox"> Run additional checks for invalid ranges, empty export and filtered reconciliation.</li>
+<li><input checked="" disabled="" type="checkbox"> Finish handoff with actual evidence, limitations and next steps.</li>
+</ul>
+<h2>Verification</h2>
+<p>Run the supplied verify.mjs with the installed Node/Playwright runtime, retain its report and screenshots, and inspect any failures. Add bounded checks for behaviors not covered by the supplied suite. Preserve original starter files. No git, remote CI, installation, network or deployment.</p>
+<h2>Review</h2>
+<p>Completed: all 14 unchanged shared browser checks and all 6 additional check groups passed in local Chromium with no browser errors. Additional coverage includes 32 filter combinations, date-error recovery, header-only downloads, single date bounds, keyboard focus, immutable fixtures and malformed-source handling. Desktop and mobile screenshots were visually inspected. Starter hashes match their initial values. Status percentages were refined to one decimal place after visual review; both suites passed afterward. No browser-test failures occurred. Remote CI, other browsers, screen readers and opening CSV in spreadsheet applications remain unverified. This is one implementer&#39;s work; no independent review is claimed.</p>
+</main></body></html>

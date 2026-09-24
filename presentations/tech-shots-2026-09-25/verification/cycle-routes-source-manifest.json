@@ -1,0 +1,154 @@
+{
+  "purpose": "Sources for the reworked cycle screen and the short-routes screen (follow-up 1 of the story revision)",
+  "read_on": "2026-09-20",
+  "repository_revision": "275a35447c4ad271e05816ade43ac48f1acec24f",
+  "working_tree_clean": true,
+  "method": "five parallel readers returned cited facts; one adversarial verifier per fact sheet re-opened every citation; docs/the-cycle.md then read in full by the coordinator. Fact sheets: .build/story-revision/followup-1/facts.json (not part of the ZIP).",
+  "files": [
+    {
+      "path": "docs/the-cycle.md",
+      "sha256": "b9765815b9c8b9d2a6276a871720f242f96340439feb6ebbac6773df2bd1f6c9",
+      "bytes": 16141
+    },
+    {
+      "path": "skills/cycle/SKILL.md",
+      "sha256": "e4f3648dca62da175c30a6a468983d1f6ce3f993078ec0356fbad017d5e03bce",
+      "bytes": 23724
+    },
+    {
+      "path": "skills/sense/SKILL.md",
+      "sha256": "74daa068dcc38b605e6faec993872694ab4bb8e798b041c10af9e4bc1bfb8246",
+      "bytes": 20181
+    },
+    {
+      "path": "skills/orientator/SKILL.md",
+      "sha256": "a8903b40488f0bcee63bc64d682c0a7d85b5fed9aae87eb5faf4074304429854",
+      "bytes": 7253
+    },
+    {
+      "path": "skills/scope/SKILL.md",
+      "sha256": "59bd487b6f13f6d147696d22f8730c5de7214ab44eb1bb8a04fa77476eec4795",
+      "bytes": 14193
+    },
+    {
+      "path": "skills/fix/SKILL.md",
+      "sha256": "aab7cc255aeeec92bcb483193286c14c40edcb5616f74f2fd7a7d894e183c64d",
+      "bytes": 2781
+    },
+    {
+      "path": "lib/scale-estimator.sh",
+      "sha256": "5042f94bddb644eff1438c7570131aae5efe1436f8d9aa08fa334f304a0a6f3d",
+      "bytes": 15370
+    },
+    {
+      "path": "lib/cycle-footer.sh",
+      "sha256": "79333bab5957b81288d9836e28871952a5e2636375d7346d96fd207392e5ed2c",
+      "bytes": 11790
+    },
+    {
+      "path": "lib/auto-decide.sh",
+      "sha256": "89059c6b4dbf76a2db4d540ecf5a82260c862646d34a30ad5461303673fdee2e",
+      "bytes": 1929
+    },
+    {
+      "path": ".github/skills/li-cycle/SKILL.md",
+      "sha256": "cc6c8fe33ecaac7fdbf7c15275646d43a12bb85fbd1b190506047ed34e12314b",
+      "bytes": 518
+    },
+    {
+      "path": "docs/copilot.md",
+      "sha256": "1c436cb0af333b1c9d40ee5a77bca88f4ecf09f1966be2b3d4b6249f19e7bd85",
+      "bytes": 9311
+    },
+    {
+      "path": "README.md",
+      "sha256": "07eff9a56086615680d2894121c4186df13719d3fc37ba750f0d5132f787ee07",
+      "bytes": 9419
+    },
+    {
+      "path": "lib/orientator-routing.sh",
+      "sha256": "d865fce31adb8c2f607ea9794e7ba92db1fc321c1b9a3e042fe9d37412e6d7f3",
+      "bytes": 6529
+    }
+  ],
+  "verified_requests": {
+    "method": "each string passed to classify_intent, match_workflow, score_confidence (lib/orientator-routing.sh) and classify_size, scale_ambiguous, size_to_depth_schema (lib/scale-estimator.sh), sourced read-only at the revision above; pure functions, nothing written",
+    "on_screen": [
+      {
+        "request": "Fix the typo on the export button.",
+        "intent": "fix",
+        "workflow": "/li:cycle --mode hotfix",
+        "confidence": "high",
+        "size": "XS",
+        "ambiguous": "no",
+        "depth_schema": "flat"
+      },
+      {
+        "request": "Explore how tenant isolation works.",
+        "intent": "research",
+        "workflow": "/li:cycle --mode research-dive",
+        "confidence": "high",
+        "size": "M",
+        "ambiguous": "no",
+        "depth_schema": "phased"
+      },
+      {
+        "request": "Add a date-range filter to the dashboard.",
+        "intent": "build",
+        "workflow": "/li:cycle",
+        "confidence": "high",
+        "size": "S",
+        "ambiguous": "no",
+        "depth_schema": "flat"
+      },
+      {
+        "request": "Deploy the support dashboard to Azure.",
+        "intent": "deploy",
+        "workflow": "/li:cycle --from SHIP",
+        "confidence": "high",
+        "size": "XL",
+        "ambiguous": "yes",
+        "depth_schema": "tree"
+      }
+    ],
+    "traps_and_neighbours": [
+      {
+        "request": "Correct the typo on the export button.",
+        "intent": "unclear",
+        "workflow": "/li:cycle",
+        "confidence": "low",
+        "size": "XS",
+        "ambiguous": "no",
+        "depth_schema": "flat"
+      },
+      {
+        "request": "Add error handling to the export.",
+        "intent": "fix",
+        "workflow": "/li:cycle --mode hotfix",
+        "confidence": "high",
+        "size": "S",
+        "ambiguous": "no",
+        "depth_schema": "flat"
+      },
+      {
+        "request": "Add a health endpoint with a focused acceptance test.",
+        "intent": "build",
+        "workflow": "/li:cycle",
+        "confidence": "high",
+        "size": "M",
+        "ambiguous": "no",
+        "depth_schema": "phased"
+      },
+      {
+        "request": "Fix the bug: the CSV export ignores the filter.",
+        "intent": "fix",
+        "workflow": "/li:cycle --mode hotfix",
+        "confidence": "high",
+        "size": "S",
+        "ambiguous": "no",
+        "depth_schema": "flat"
+      }
+    ]
+  },
+  "known_source_discrepancy": "lib/orientator-routing.sh returns a ninth intent, \"deploy\" (mapped to the same workflow as ship: /li:cycle --from SHIP), while skills/orientator/SKILL.md lists eight intents and skills/sense/SKILL.md speaks of intent ship. The screen avoids the enum (“deploy” → ready to ship). Not fixed here: the Lintel repository is read-only for this package."
+}

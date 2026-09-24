@@ -1,0 +1,63 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>lintel-plan · actual artifact</title><style>:root{color-scheme:dark}*{box-sizing:border-box}body{background:#100d16;color:#f2eaf8;font:18px/1.65 Arial,sans-serif;margin:0}main{max-width:1150px;margin:0 auto;padding:40px 45px 80px}h1{font-size:42px;line-height:1.1;letter-spacing:-.03em}h2{color:#d9a1fa;font-size:28px;margin-top:38px}h3{font-size:22px}a{color:#a6ff00}table{width:100%;border-collapse:collapse;font-size:15px}th,td{border-bottom:1px solid #46364f;padding:12px;text-align:left;vertical-align:top}pre{background:#211927;padding:22px;white-space:pre-wrap;overflow-wrap:anywhere;font:15px/1.6 Consolas,monospace}code{color:#d9bae9}blockquote{border-left:3px solid #a6ff00;padding-left:20px;margin-left:0;color:#cdbcd8}.label{font:13px Consolas,monospace;letter-spacing:.12em;color:#a6ff00;margin-bottom:27px}nav{display:flex;gap:25px;border-bottom:1px solid #483450;padding:18px 35px;font-size:15px}@media(max-width:650px){main{padding:25px 20px}h1{font-size:31px}table{font-size:12px}td,th{padding:7px}}</style><link rel="stylesheet" href="../../site/theme.css"><script src="../../site/theme.js"></script><link rel="icon" href="../../site/favicon.ico?v=folded-l" sizes="16x16 32x32 48x48"><link rel="icon" href="../../site/favicon-32.png?v=folded-l" type="image/png" sizes="32x32"><link rel="icon" href="../../site/mark.svg?v=folded-l" type="image/svg+xml"><link rel="apple-touch-icon" href="../../site/apple-touch-icon.png?v=folded-l" sizes="180x180"></head><body><nav><a href="../../show/index.html">Presentation</a><a href="../index.html">Comparison desk</a><a href="../with-lintel/plan.md">Raw artifact</a></nav><main><div class="label">ACTUAL SAVED ARTIFACT / with-lintel/plan.md</div><h1>Implementation plan</h1>
+<p>Authority: implementation-prompt.md authorizes this local build; stakeholder-answers.md defines behavior. Starter files are preserved. No customer data, credentials or production mutations are involved.</p>
+<h2>Acceptance contract</h2>
+<p>See spec.md. Run the supplied verify.mjs unchanged, then focused edge-case checks and visual inspection of desktop/mobile captures. Document observed results and limitations; do not claim independent review.</p>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Task and files</th>
+<th>Depends</th>
+<th>Acceptance</th>
+<th>Heuristic effort</th>
+<th>Complexity / role</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>T1</td>
+<td>Resolve scope and record spec, questions, decisions and handoff prompt in scope.md, spec.md, questions.md, decision-log.md, prompt.md</td>
+<td>—</td>
+<td>All stakeholder requirements mapped; assumptions explicit</td>
+<td>2 min</td>
+<td>Mechanical; local implementer</td>
+<td>DONE</td>
+</tr>
+<tr>
+<td>T2</td>
+<td>Build accessible responsive shell in index.html and styles.css</td>
+<td>T1</td>
+<td>Native labels, focus, 390/1440 layout, clear production boundary</td>
+<td>2–3 min</td>
+<td>Multi-file; local implementer</td>
+<td>DONE</td>
+</tr>
+<tr>
+<td>T3</td>
+<td>Implement coherent filtering, charts, table, validation and safe export in app.js</td>
+<td>T2</td>
+<td>UTC/intersection behavior, plain text, formula-safe CSV, empty/error states</td>
+<td>2–3 min</td>
+<td>Multi-file; local implementer</td>
+<td>DONE</td>
+</tr>
+<tr>
+<td>T4</td>
+<td>Run shared/extra checks, inspect captures, self-review and write handoff.md / review.md</td>
+<td>T3</td>
+<td>Passing checks, actual evidence, fresh-session instructions and remaining limits</td>
+<td>2–3 min</td>
+<td>Review; same implementer</td>
+<td>DONE</td>
+</tr>
+</tbody></table>
+<p>These are unmeasured planning heuristics.</p>
+<h2>Inline plan review</h2>
+<p>Spec self-review: PASS. Customer scope, active definition, status/severity/search/date intersection, UTC aggregation, safe export, text rendering, empty states and responsive accessibility are covered.
+Quality self-review: PASS. One derived set removes drift across outputs. Dependencies are local scripts only. Date-range and malformed-data failures need visible feedback. Chart count text is available without graphics. Keep the scope bounded.
+Design self-review: readable light workspace, clear hierarchy, restrained violet accent, labelled charts, visible focus, mobile ticket cards.
+Developer experience self-review: opening index.html must work; document definitions and commands, preserve tests, no telemetry needed for this offline synthetic pilot.
+Adversarial review unavailable — plan unreviewed by an independent identity. The inline checks above are self-reviews only, as required by the local workflow adaptation.</p>
+<h2>Final review</h2>
+<p>Complete. Shared browser suite: 14/14 PASS; supplemental suite: 7/7 PASS. Both viewport captures visually inspected. See common-verification.json, additional-verification.json, review.md and handoff.md. No open implementation blocker. Remote CI, cross-browser and full assistive-technology verification remain outside observed evidence.</p>
+</main></body></html>

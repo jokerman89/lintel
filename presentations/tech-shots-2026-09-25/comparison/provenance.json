@@ -1,0 +1,148 @@
+{
+  "protocol_frozen_at": "2026-09-20T13:04:10.615579+00:00",
+  "source_revision": "275a35447c4ad271e05816ade43ac48f1acec24f",
+  "sources": [
+    {
+      "path": "skills/scope/SKILL.md",
+      "sha256": "59bd487b6f13f6d147696d22f8730c5de7214ab44eb1bb8a04fa77476eec4795",
+      "line_ranges": [
+        [
+          15,
+          19
+        ],
+        [
+          83,
+          86
+        ]
+      ]
+    },
+    {
+      "path": "skills/plan/SKILL.md",
+      "sha256": "8795528b713beffdaf190b8aebdfcfc88678814762dbac22786762bb64f6e3c3",
+      "line_ranges": [
+        [
+          70,
+          73
+        ],
+        [
+          94,
+          128
+        ],
+        [
+          224,
+          240
+        ],
+        [
+          285,
+          287
+        ],
+        [
+          354,
+          358
+        ]
+      ]
+    },
+    {
+      "path": "skills/review/SKILL.md",
+      "sha256": "54304ad0a2ecce2013d9a9de730d1dcb9ef1f788c4d75cef3b4188d068300f53",
+      "line_ranges": [
+        [
+          103,
+          134
+        ]
+      ]
+    },
+    {
+      "path": "skills/capture/SKILL.md",
+      "sha256": "0ff53e8af737abc1966d12145ff071a14395647d2765c7b4c2d38220b2976a81",
+      "line_ranges": [
+        [
+          89,
+          103
+        ],
+        [
+          140,
+          155
+        ],
+        [
+          183,
+          197
+        ],
+        [
+          233,
+          234
+        ]
+      ]
+    }
+  ],
+  "common_inputs": {
+    "implementation-prompt.md": "8aa85626ec13e3613957ad4d3ba5c7c1aa0dd00da505a46a67daeb02f1651291",
+    "stakeholder-answers.md": "b258a31ccbd9d6e4ca86a1ed027f81c33d3053fe99e92f03a8d4d6c7ebf830d4",
+    "tickets.js": "1c8f1441ff0e1c47710c6e6b02fb4ec19a7816035f2f25ae2c1131c474e9d58e",
+    "AGENTS.md": "6c3a6808b0d191abedc6d67b1aabe77a8aca43d9167f463eb9cb691e3f7f9547",
+    "verify.mjs": "50ad7f9f377cdd58411cc8bdec83064e1280ec14eeb57545b230fc1e9a6d3635",
+    ".github/workflows/verify.yml": "4762eadc240ca0093a2c53ee7b65b98ae92b7ce0667e1e6d2ab4c81d87502bf4"
+  },
+  "workflow_context_sha256": "20b11d2e6b4207d3c3528ba35eae8658677528c68c5c67b731c056ee113678b3",
+  "protocol_sha256": "03eac51713fcd37ba8c170556070a8423254fa43b7be9b41180d355235e719d2",
+  "attempt": 2,
+  "workflow_context_bytes": 10258,
+  "model": "Same inherited default model and reasoning configuration; exact runtime model identity not exposed by spawn result.",
+  "ci": "Identical CI configuration present; remote CI not run. Common browser checks run locally.",
+  "final_artifacts_sha256": {
+    "without-lintel": {
+      ".github/workflows/verify.yml": "4762eadc240ca0093a2c53ee7b65b98ae92b7ce0667e1e6d2ab4c81d87502bf4",
+      "AGENTS.md": "6c3a6808b0d191abedc6d67b1aabe77a8aca43d9167f463eb9cb691e3f7f9547",
+      "app.js": "da0191d0c411d960b9109396486f24ee336faf171f99135834032b30b5a4af13",
+      "common-1440.png": "81e01c4bc5d321049be5283c46f2faa2232b69cd08f468c69ff7f098f11d9760",
+      "common-390.png": "d48a31fbefd7806da0221db35169386a3d7f5f2a3fe8f300b68d6ae04238cd4c",
+      "common-verification.json": "de1955a848cc236ce6d45797537b1cca225d7d7f63976fb01feb7476c16e9e67",
+      "decision-log.md": "8a1b6ccf1d0f294967bd9cec16cf43c1f5e42907161cd62744cfa6cc92cb55d5",
+      "extra-verification.json": "033f0c6b55c3f146404e7ee5057191458a2392292bac94854eb1808b69c32348",
+      "handoff.md": "722a8053b4d5ffd7dc67f1eaf4604d004bc786816398d238680b491796862a03",
+      "implementation-prompt.md": "8aa85626ec13e3613957ad4d3ba5c7c1aa0dd00da505a46a67daeb02f1651291",
+      "index.html": "aa6c6682ef3a08e663bf057fa353de4e961ffa601049289bb51c66a658bb2d2f",
+      "plan.md": "e41476985ac45f13eebd124ec1ebc0c3fbe981d33c8de638a7f9f4751572de6d",
+      "questions.md": "aab2db3e7416a8bbcbe51479eb467dd005a3f94ae0ccf893934924a39b80779b",
+      "stakeholder-answers.md": "b258a31ccbd9d6e4ca86a1ed027f81c33d3053fe99e92f03a8d4d6c7ebf830d4",
+      "starter-hashes.json": "adeba11d34702494f21be271c84c5a93c2489372f34be624647c46f58178b49a",
+      "starter-integrity.json": "e8ce2e5b0ceac762416f78816ee70815c39881e48248719e41d34b4954c304ac",
+      "styles.css": "247ffd9d343049f68608e6857873ba59414201498df7ce3535b98866845fe35e",
+      "tickets.js": "1c8f1441ff0e1c47710c6e6b02fb4ec19a7816035f2f25ae2c1131c474e9d58e",
+      "verify-extra.mjs": "e0b051ca398f85ef6d717d8a6290b36a0dfb89562d3fd0d354f568fe3b69b1fe",
+      "verify.mjs": "50ad7f9f377cdd58411cc8bdec83064e1280ec14eeb57545b230fc1e9a6d3635"
+    },
+    "with-lintel": {
+      ".github/workflows/verify.yml": "4762eadc240ca0093a2c53ee7b65b98ae92b7ce0667e1e6d2ab4c81d87502bf4",
+      "additional-verification.json": "3ee82f10c5fd24c329d31e7917902196ddd4a5b0a3e25ae2588f1dcf9e8d9f49",
+      "AGENTS.md": "6c3a6808b0d191abedc6d67b1aabe77a8aca43d9167f463eb9cb691e3f7f9547",
+      "app.js": "33b9a50bf2b17e75cfd0481b5b9d7d860294d591127a4e3afcd0579fb7fb9373",
+      "common-1440.png": "c6f17718c5dbe1a905383cd2ebe2666eb799e17bb1070cc2b21c02dd4c5af3d6",
+      "common-390.png": "17789fad9ca26b1389bc7d00c6f94ea9663d42c75e2940eb3385d71ce951358d",
+      "common-verification.json": "ef32f2fcd364d1bef73fe4af6c9829a5b778e4c525c1535db67acfe47ddbc188",
+      "decision-log.md": "19d5db3c3208d36d2dc30c84c3c34f63cd5a365f14ddc7dceedbfedb5d4c1916",
+      "handoff.md": "8d7c37181f572932385415911187c5a1e2dc765d6b99f86e60a3033f34bcf7e6",
+      "implementation-prompt.md": "8aa85626ec13e3613957ad4d3ba5c7c1aa0dd00da505a46a67daeb02f1651291",
+      "index.html": "44a890dfa1e1513bbec227fc878103d443766e4ad943c5cb2a8bb4906860187b",
+      "plan.md": "0b0f71960d1a477fc6136d4c8f475b7b4f73cb24792e724f239f7cf7b5fc79f2",
+      "prompt.md": "9507d623d03ece785542bd315fd5098507cef3ee902b812440d12ddf22149e12",
+      "questions.md": "c9bf7b2eee3002b4cc124a8eab78532229b1cf13befb99488dd547be73a89d08",
+      "review.md": "173e26b3d933f47e097ff49cae1c76546110e8dc8572a093da0c2462d7e0132e",
+      "scope.md": "1293c374c3197b72e3ad322379dd2cb5111313a7de8daa16db475e34c9766b32",
+      "spec.md": "d1852adf0986fd056b8f69d1aa0842c41f83e9853110f918638522bdf06c73ef",
+      "stakeholder-answers.md": "b258a31ccbd9d6e4ca86a1ed027f81c33d3053fe99e92f03a8d4d6c7ebf830d4",
+      "styles.css": "2a3e2bfb6e95ee615e7e59fbc47835e24592234d184318f16e4641afbc0d78dd",
+      "tickets.js": "1c8f1441ff0e1c47710c6e6b02fb4ec19a7816035f2f25ae2c1131c474e9d58e",
+      "verify-extra.mjs": "a8b61d9f69fee5fa8bae13f46acfc889ee4e05a9ab1f9be4f9261250d40915f0",
+      "verify.mjs": "50ad7f9f377cdd58411cc8bdec83064e1280ec14eeb57545b230fc1e9a6d3635",
+      "workflow-context.md": "20b11d2e6b4207d3c3528ba35eae8658677528c68c5c67b731c056ee113678b3"
+    }
+  },
+  "outputs_frozen_at": "2026-09-20T13:16:07.525889+00:00",
+  "protocol_frozen_sha256": "9b63d99bae659127f5563c635da582fd388d415b57faf0b9b6c673a47e55341d",
+  "protocol_typography_correction": {
+    "date": "2026-09-20T13:22:33.131070+00:00",
+    "change": "Line 1 encoding corrected and attempt-2 heading made explicit; rubric and controls unchanged.",
+    "original": "protocol-frozen-attempt-02.md"
+  }
+}

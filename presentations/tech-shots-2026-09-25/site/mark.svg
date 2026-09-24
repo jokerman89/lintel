@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title"><title id="title">Lintel — Folded L</title><defs>
+ <linearGradient id="violet" x1="18%" y1="0%" x2="82%" y2="100%"><stop offset="0" stop-color="#ad74f4"/><stop offset=".45" stop-color="#8e43e7"/><stop offset="1" stop-color="#7233ca"/></linearGradient>
+ <linearGradient id="lime" x1="18%" y1="0%" x2="82%" y2="100%"><stop offset="0" stop-color="#c4ff62"/><stop offset=".46" stop-color="#a6ed31"/><stop offset="1" stop-color="#86cb25"/></linearGradient>
+ <linearGradient id="joint" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#361957" stop-opacity=".18"/><stop offset="1" stop-color="#361957" stop-opacity="0"/></linearGradient>
+</defs><path fill="url(#violet)" d="M20 27L37 17L51 35V92H103L111 109H20Z"/><path fill="url(#lime)" d="M37 17L108 36V70L90 80V50L37 36Z"/><path fill="url(#joint)" d="M37 36L51 39.8V45L37 41.2Z"/><path d="M37.6 17.6L107.4 36.3" fill="none" stroke="#fff" stroke-opacity=".4" stroke-width=".75"/><path d="M51.3 92.5H102.6" fill="none" stroke="#fff" stroke-opacity=".2" stroke-width=".65"/></svg>
