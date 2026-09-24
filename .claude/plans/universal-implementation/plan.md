@@ -663,19 +663,19 @@ and 216 record paths. Every product byte traces to a reviewed unit or to a coord
 reviewed, and nothing is lost relative to `main`. A23.4 closes with PR #93's strict CI.
 A23.4.g3 and A23.4.p2 closure (2026-09-24): the complete kit passes 50/50 on the integrated tree
 (`fin2-kit`, `3d7f1284`).
-- g3: its data-driven missing-resource refusals cover every declared resource, reconciliations 6
+- For g3, its data-driven missing-resource refusals cover every declared resource, reconciliations 6
   and 7 included, as SAME9db's integration review confirms.
-- p2: its default 113/128-path init, check and owned-recovery method passes at the original
+- For p2, its default 113/128-path init, check and owned-recovery method passes at the original
   paths.
 A23.4 itself closes with the PR's strict CI suite.
 A23.1 and A23.2 closure (2026-09-24): the P14 A23 unit (`96bd5bab`, repair `88c92377`, report
 `d13455de`) passes `6310f7ad`'s complete SPEC and first whole QUALITY after the F1/F2 repair
 (`reviews/P14-a23-recheck-88c9237.md`), and is integrated in `8f418e68`.
-- A23.1 rests on its 83-row matrix: every corrected mechanism, coordinator reconciliations
+- The A23.1 evidence is its 83-row matrix: every corrected mechanism, coordinator reconciliations
   included, has its current discriminating negative and its preserved-behavior evidence. Where
   historical RED provenance is missing, the gap stays explicit; a new passing regression does not
   replace it.
-- A23.2 rests on the installed caller-to-child bridge and one installed chain across the real P07,
+- The A23.2 evidence is the installed caller-to-child bridge and one installed chain across the real P07,
   P08, P09, P05 and resume links, with a typed refusal per link. Review-to-resume is labelled
   caller orchestration.
 
