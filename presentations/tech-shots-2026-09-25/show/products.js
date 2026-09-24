@@ -5,7 +5,7 @@ const PRODUCT_ART=[
  {key:'core',id:'product-core',name:'Core',tagline:'Build for your case',status:'Planned',alt:'An open frame with one floating insert: a focused Lintel Core workflow.'},
  {key:'benchmark',id:'product-benchmark',name:'Benchmark',tagline:'Test the value',status:'Planned',alt:'A precision calibration reticle: measure whether Lintel earns its place.'}
 ];
-const productImagePath=key=>'../assets/products/'+key+'-'+(document.documentElement.dataset.theme==='paper'?'paper':'neon')+'.png';
+const productImagePath=key=>{const theme=document.documentElement.dataset.theme;return '../assets/products/'+key+'-'+(theme==='fluent'?'fluent.svg':theme==='paper'?'paper.png':'neon.png');};
 // A theme change swaps the original artwork, not a filter over the Neon image.
 new MutationObserver(()=>document.querySelectorAll('.product-art[data-art-id]').forEach(a=>{
  const src=productImagePath(a.dataset.artId);a.setAttribute('href',src);a.querySelector('img').setAttribute('src',src);

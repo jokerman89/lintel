@@ -1,0 +1,5 @@
+/* component: presenter-popup-status
+ * intent: ../README.md
+ * constraints: never expose speaker notes on the audience slide */
+:root[data-theme] #notesStatus{position:fixed;bottom:40px;right:20px;z-index:50;max-width:calc(100vw - 40px);padding:14px 20px;background:#fff;color:#242424;border:1px solid #767676;border-radius:8px;box-shadow:0 6px 20px #0003;font:16px/1.5 'Segoe UI',Arial,sans-serif}
+:root[data-theme] #notesStatus[hidden]{display:none}

@@ -1,16 +1,28 @@
 window.DECK_SLIDES = [
   {
+    "id": "welcome",
+    "chapter": "Welcome",
+    "type": "holding",
+    "holding": true,
+    "title": "The portal is open.",
+    "subtitle": "We begin shortly.",
+    "minutes": 0,
+    "notes": "Leave this screen on while people join. The supplied portal animation loops silently. Pause motion if preferred; reduced-motion settings show the still image by default. This holding screen is outside the 50-minute talk. When everyone is ready, choose Begin or press the right arrow: the original opening starts on slide 2. The illustration sets the atmosphere; it is not evidence of product behavior.",
+    "stageAction": "Let the room settle. Use fullscreen if presenting. Choose Begin when you are ready.",
+    "bridge": "We had a plan. The AI had other plans."
+  },
+  {
     "id": "three-hours",
     "chapter": "Meet Lintel",
     "type": "systemcover",
     "title": "We had a plan.\nThe AI had\nother plans.",
     "subtitle": "Ever had to explain the same plan twice?",
     "minutes": 1,
-    "notes": "I am Johannes, a Solution Engineer. This is my personal engineering project and the journey behind it. You write a detailed plan. Hours later the agent is doing something impressive, but it is no longer the thing you asked for. Or it stops and you have to reconstruct what was happening. Today I want to show the system I built around that frustration, then test where it adds value. The exchange on screen is an illustration, not a recorded benchmark. Lintel is a personal open-source project, not a Microsoft product.",
+    "notes": "I am Johannes, the creator of Lintel. This is my personal engineering project and the journey behind it. A lintel is a horizontal support beam placed across the top of an opening—such as a door, window, or fireplace—that carries the weight of the structure above it. The name is the metaphor: useful structure supports the work. You write a detailed plan. Hours later the agent is doing something impressive, but it is no longer the thing you asked for. Or it stops and you have to reconstruct what was happening. Today I want to show the system I built around that frustration, then test where it adds value. The exchange on screen is an illustration, not a recorded benchmark. Lintel is a personal open-source project, not a Microsoft product.",
     "showSubtitle": true,
     "evidenceLabel": "Illustrative conversation",
     "cue": "Who has corrected an AI on something you agreed three hours ago?",
-    "stageAction": "Pause for hands, including Teams. Let the dashboard-to-platform joke land. Introduce yourself in one sentence.",
+    "stageAction": "Pause for hands, including remote participants. Let the dashboard-to-platform joke land. Introduce yourself in one sentence.",
     "bridge": "Let me show you the whole system before we open any of its parts.",
     "eyebrow": "Lintel · Taming the wild beast"
   },
@@ -26,7 +38,26 @@ window.DECK_SLIDES = [
     "evidenceLabel": "Hook coverage depends on the client and verified activation.",
     "cue": "Your agent does the work. Lintel gives it a method and a useful trail to leave behind.",
     "stageAction": "Read the map top to bottom. Point to the team pack, then follow the return line from project records into the next task.",
-    "bridge": "Six names appear in that map. Here is what each one means."
+    "bridge": "Before we open those parts, here is the moment this changed how I worked."
+  },
+  {
+    "id": "swarming-moment",
+    "chapter": "Meet Lintel",
+    "type": "swarmreveal",
+    "title": "I stopped being the queue.",
+    "subtitle": "My GitHub activity, before and after adopting Lintel swarming.",
+    "showSubtitle": false,
+    "minutes": 1,
+    "eyebrow": "MY JOURNEY / THE SWARMING MOMENT",
+    "evidenceLabel": "Two selected days from my GitHub history. Contributions measure activity — not quality or bugs fixed.",
+    "cue": "Here is a day from before I had swarming in Lintel. Fifty-five contributions. Then I changed how I organised the work.",
+    "stageAction": "Point to 55. Click “Then I turned on swarming.” Let 711 land in silence for two beats. Point to the original screenshots, then trace the report-to-fix flow. Use “Replay reveal” if rehearsing.",
+    "bridge": "The number gets your attention. The structure is what I want you to take away. Here are the six parts that make it possible.",
+    "notes": "Here is a day from before swarming in Lintel: fifty-five contributions. Then I changed how I organised the work. [Click. Pause for two beats.] Seven hundred and eleven. Same me. A different way to work.\n\nThese are two selected days from my GitHub history. Contributions are activity, not a quality score or a count of bugs fixed. This is a personal observation, not a controlled benchmark.\n\nNow think about a bug list, or a report from MDASH or MARS. Triage it. Agree the fixes. Give independent work to isolated lanes, with one coordinator keeping the plan. Review each lane independently, then integrate and test the combined result. No safe isolation? Run the briefs sequentially.\n\nThat is the useful shift: an overwhelming report becomes reviewable work. The chart gets your attention. The structure is what I want you to take away.",
+    "sources": [
+      "../presenter/sources.html#swarming-activity",
+      "../reference-source/docs-concepts-swarming-work-md.html#L4"
+    ]
   },
   {
     "id": "inside-the-kit",
@@ -152,7 +183,7 @@ window.DECK_SLIDES = [
     "title": "No single harness.\nNo magic ring.",
     "subtitle": "Different tools. Different jobs. Plenty of room at the table.",
     "minutes": 0.5,
-    "notes": "Now you know what kind of thing Lintel is. A harness, by the way, is just the scaffolding around a model: the instructions, tools and checks it works inside. Before we go deeper: MDASH is awesome, AGT is cool, and this is not a replacement pitch. We have seen other useful approaches in Tech SHOTs. Different problems deserve different tools. Today we are examining the working method around development. One harness to rule them all would probably need a migration plan and three steering committees.",
+    "notes": "Now you know what kind of thing Lintel is. A harness, by the way, is just the scaffolding around a model: the instructions, tools and checks it works inside. Before we go deeper: MDASH is awesome, AGT is cool, and this is not a replacement pitch. Other useful approaches solve different parts of the problem. Different problems deserve different tools. Today we are examining the working method around development. One harness to rule them all would probably need a migration plan and three steering committees.",
     "showSubtitle": false,
     "evidenceLabel": "Positioning, not a feature comparison",
     "cue": "MDASH is awesome. AGT is cool. Different problems deserve different tools.",
@@ -352,7 +383,7 @@ window.DECK_SLIDES = [
     "title": "A lesson that never returns\nis just a diary entry.",
     "subtitle": "Capture → retrieve → verify → reinforce.",
     "minutes": 3,
-    "notes": "Show Before: lookup by document ID allows another tenant's document. Switch to Fixed: the same three tests now include the tenant condition. Then select Reintroduce bug: deliberately run the vulnerable version again and watch the cross-tenant check fail. That is the important negative control. The prepared lesson is retrieved through the real keyword-scoped memory helper; an obsolete lesson and an unrelated lesson are excluded. This is not model training and not proof of production authentication. It is an example of turning a specific correction into both reusable context and executable protection. Read the red result aloud for Teams.",
+    "notes": "Show Before: lookup by document ID allows another tenant's document. Switch to Fixed: the same three tests now include the tenant condition. Then select Reintroduce bug: deliberately run the vulnerable version again and watch the cross-tenant check fail. That is the important negative control. The prepared lesson is retrieved through the real keyword-scoped memory helper; an obsolete lesson and an unrelated lesson are excluded. This is not model training and not proof of production authentication. It is an example of turning a specific correction into both reusable context and executable protection. Read the red result aloud for remote participants.",
     "showSubtitle": false,
     "evidenceLabel": "Actual saved tests · prepared variants · trusted test identity",
     "cue": "Put the bug back. Does the test notice?",
@@ -380,7 +411,7 @@ window.DECK_SLIDES = [
     "title": "Markdown can tell you to lock it.\nIt cannot be the lock.",
     "subtitle": "Guidance, checks and authority have different jobs.",
     "minutes": 1,
-    "notes": "This matters when we talk to customers. The harness can structure the work, ask for evidence and invoke supported checks. Actual permissions, identity, network isolation, CI and deployment approvals must be configured and verified in the platform. A skill saying use least privilege does not grant or enforce least privilege. Likewise, universal method does not mean every host supports the same hooks or parallel agents. Keep this distinction crisp. It makes the rest of the story more credible and gives CSAs a clear architectural boundary.",
+    "notes": "This matters when we talk to customers. The harness can structure the work, ask for evidence and invoke supported checks. Actual permissions, identity, network isolation, CI and deployment approvals must be configured and verified in the platform. A skill saying use least privilege does not grant or enforce least privilege. Likewise, universal method does not mean every host supports the same hooks or parallel agents. Keep this distinction crisp. It makes the rest of the story more credible and gives architects a clear boundary.",
     "showSubtitle": false,
     "evidenceLabel": "Platform controls must be configured and verified.",
     "cue": "The instruction describes the lock. The platform has to provide it.",
@@ -436,11 +467,11 @@ window.DECK_SLIDES = [
     "title": "Different roles.\nShared context.",
     "subtitle": "One shared contract. Three different jobs.",
     "minutes": 1,
-    "notes": "For SEs, the opportunity is more reproducible demos, a clear story about trade-offs and less time reconstructing context before a customer meeting. For CSAs, it is explicit constraints, traceable decisions and a cleaner architecture handoff. For customer developers, especially newcomers, it is a practical way to turn an intent into a verifiable slice without having to invent the review discipline each time. These are proposed benefits to test in a bounded pilot. We are not claiming a measured customer outcome from this internal presentation.",
+    "notes": "For demo builders, the opportunity is more reproducible demos, a clear story about trade-offs and less time reconstructing context before a customer meeting. For architects, it is explicit constraints, traceable decisions and a cleaner architecture handoff. For customer developers, especially newcomers, it is a practical way to turn an intent into a verifiable slice without having to invent the review discipline each time. These are proposed benefits to test in a bounded pilot. We are not claiming a measured customer outcome from this presentation.",
     "showSubtitle": false,
     "evidenceLabel": "Proposed benefits · validate in a pilot",
     "cue": "The same context helps us in different parts of the customer journey.",
-    "stageAction": "Give one concrete benefit each for SE, CSA and developer.",
+    "stageAction": "Give one concrete benefit each for demo builder, architect and developer.",
     "bridge": "None of that is proven yet. So do not adopt it — test it."
   },
   {
@@ -463,12 +494,12 @@ window.DECK_SLIDES = [
     "type": "discussion",
     "title": "What are you tired\nof explaining twice?",
     "subtitle": "Pick one recurring task. Name the mistake. Decide what should remember it.",
-    "minutes": 5,
-    "notes": "Give the room a few seconds to think, then take one answer from Teams first. Ask for a specific recurring task rather than general enthusiasm about agents. Which part should be a skill? Which decision belongs in an ADR? Which mistake deserves a regression test? What would make this too heavy? The goal is not to collect a huge roadmap in five minutes. Choose one candidate workflow and an observable failure that a pilot could try to prevent. If there is disagreement, use it: different contexts may need different harnesses.",
+    "minutes": 4,
+    "notes": "Give the room a few seconds to think, then take one answer from a remote participant first. Ask for a specific recurring task rather than general enthusiasm about agents. Which part should be a skill? Which decision belongs in an ADR? Which mistake deserves a regression test? What would make this too heavy? The goal is not to collect a huge roadmap in four minutes. Choose one candidate workflow and an observable failure that a pilot could try to prevent. If there is disagreement, use it: different contexts may need different harnesses.",
     "showSubtitle": false,
-    "evidenceLabel": "5 minutes · choose one pilot candidate",
+    "evidenceLabel": "4 minutes · choose one pilot candidate",
     "cue": "What are you tired of explaining twice?",
-    "stageAction": "Take Teams first. Choose one task, one recurring failure and what should remember it.",
+    "stageAction": "Take a remote participant first. Choose one task, one recurring failure and what should remember it.",
     "bridge": "Let me close with the short version."
   },
   {
@@ -627,7 +658,7 @@ window.DECK_SLIDES = [
     "cue": "The CAIP Pack brings team context to the universal method.",
     "stageAction": "Read the workshop request, then trace the added context to a more relevant brief. Describe this as the pack’s intended use.",
     "bridge": "What if a customer only needs one focused workflow?",
-    "notes": "Imagine the request: prepare a customer technical workshop. Without the relevant team context, the agent has to rediscover the audience, expected evidence and our way of working.\n\nThe purpose of Lintel CAIP Pack, Pack number one, is to carry the MS employee in CAIP role and the approved team knowledge and standards that belong with it. The universal method stays in Lintel. The team-specific content stays in the pack. The example on this slide shows the intended value, not a live execution of a released pack.\n\nFor an SE or CSA, this could mean a workshop brief that starts with the right audience, a useful technical agenda and explicit questions still to resolve. The operator remains responsible for the customer context and approved inputs.\n\nThe pack’s distribution link will follow. This public presentation contains no private employee pack.",
+    "notes": "Imagine the request: prepare a customer technical workshop. Without the relevant team context, the agent has to rediscover the audience, expected evidence and our way of working.\n\nThe purpose of Lintel CAIP Pack, Pack number one, is to carry the MS employee in CAIP role and the approved team knowledge and standards that belong with it. The universal method stays in Lintel. The team-specific content stays in the pack. The example on this slide shows the intended value, not a live execution of a released pack.\n\nFor a solution engineer or architect, this could mean a workshop brief that starts with the right audience, a useful technical agenda and explicit questions still to resolve. The operator remains responsible for the customer context and approved inputs.\n\nThe pack’s distribution link will follow. This public presentation contains no private employee pack.",
     "evidenceLabel": "Lintel CAIP Pack · MS Employee in CAIP · Distribution link to follow",
     "eyebrow": "02 / LINTEL CAIP PACK"
   },

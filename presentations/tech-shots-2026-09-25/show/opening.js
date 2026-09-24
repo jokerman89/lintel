@@ -2,9 +2,10 @@
 window.LINTEL_OPENING = ({shell,icon,state}) => ({
   systemcover:s=>shell(s,
     '<div class="cover-art" role="img" aria-label="Lintel portal surrounded by the beasts of context rot and AI slop"></div>'+
-    '<div class="cover-intro"><span>JOHANNES ÅKERMAN</span><span>CAIP SE + CSA</span></div>'+
+    '<div class="cover-intro"><span>JOHANNES ÅKERMAN</span><span>AN INDEPENDENT OPEN-SOURCE PROJECT</span></div>'+
     '<div class="cover-exchange"><div><span>09:12 · YOU</span><p>One dashboard, please.</p></div><i aria-hidden="true">→</i><div><span>12:12 · AGENT</span><p>I built you <strong>a platform.</strong></p></div></div>'+
-    '<div class="cover-prompt">A quick show of hands. Teams, you too.</div>', 'system-cover'),
+    '<div class="cover-prompt">A quick show of hands. Remote participants, you too.</div>'+
+    '<aside class="lintel-definition" aria-label="Meaning of lintel"><h2>lintel <span>noun · architecture</span></h2><p>A lintel is a horizontal support beam placed across the top of an opening—such as a door, window, or fireplace—that carries the weight of the structure above it.</p></aside>', 'system-cover'),
   systemmap:s=>shell(s,
     '<div class="system-map" aria-label="Lintel architecture: client runs the method, skills and roles; event hooks check selected actions; project records feed future tasks">'+
     '<div class="map-client">'+icon('terminal')+'<strong>Your coding client</strong><span>CLI / editor / desktop</span><b>You set the outcome.</b></div>'+
@@ -17,6 +18,16 @@ window.LINTEL_OPENING = ({shell,icon,state}) => ({
     '<div class="map-storage"><span>Reviewed records travel with Git</span><span>Runtime state stays Git-ignored</span></div></div>'+
     '<div class="map-return"><span class="return-line" aria-hidden="true"></span>'+icon('git')+'<span class="map-kicker">COMPOUNDING</span><h2>The next task<br>starts wiser.</h2><p>Retrieve relevant<br>decisions and lessons.</p></div>'+
     '<div class="map-platform">'+icon('lock')+'<strong>Platform controls</strong><span>Permissions · sandbox · CI · deployment gates</span></div></div>', 'system-map-slide'),
+  swarmreveal:s=>{
+    const revealed=!!state.swarmReveal;
+    return shell(s,
+      '<div class="swarm-comparison'+(revealed?' is-revealed':'')+'">'+
+      '<article class="swarm-before"><span class="swarm-label">BEFORE SWARMING</span><div class="swarm-count">55<span>contributions / June 12</span></div><a class="swarm-evidence" href="../assets/swarming/contributions-before.png" target="_blank" rel="noopener" aria-label="Open original GitHub screenshot: 55 contributions on June 12"><img src="../assets/swarming/contributions-before.png" width="261" height="147" alt="GitHub contribution graph showing 55 contributions on June 12"></a></article>'+
+      '<article class="swarm-after"><span class="swarm-label">AFTER / LINTEL SWARMING</span>'+
+      (revealed?'<div class="swarm-result" aria-live="polite"><div class="swarm-count">711<span>contributions / September 4</span></div><a class="swarm-evidence" href="../assets/swarming/contributions-after.png" target="_blank" rel="noopener" aria-label="Open original GitHub screenshot: 711 contributions on September 4"><img src="../assets/swarming/contributions-after.png" width="296" height="197" alt="GitHub contribution graph showing 711 contributions on September 4"></a></div><div class="swarm-payoff">One coordinator. Many focused workers.</div><button class="swarm-replay" data-action="swarm-reveal">Replay reveal ↺</button>':
+      '<div class="swarm-anticipation"><div class="swarm-fan" aria-hidden="true"><i></i><i></i><i></i><i></i></div><p>Same me.<br>A different way to work.</p><button class="swarm-trigger" data-action="swarm-reveal">Then I turned on swarming. <span aria-hidden="true">→</span></button></div>')+'</article></div>'+
+      '<div class="swarm-remediation"><div class="swarm-report"><b>FROM REPORT TO FIX</b><span>Bug lists · MDASH / MARS</span></div><ol aria-label="Report remediation workflow"><li>Triage + approve</li><li>Isolated work lanes</li><li>Independent review</li><li>Integrate + test</li></ol></div>', 'swarming-moment');
+  },
   buildingblocks:s=>shell(s,
     '<div class="blocks-grid">'+[
       ['folder','Scaffolding','Where the project remembers.','Plans, decisions, lessons, handoffs.'],

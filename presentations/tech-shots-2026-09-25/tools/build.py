@@ -97,5 +97,5 @@ def main():
     with zipfile.ZipFile(archive) as z:
         if z.testzip():raise SystemExit('Offline archive failed integrity check')
         if set(z.namelist())!=set(files):raise SystemExit('Offline archive differs from public allowlist')
-    print(json.dumps({'public_files':len(files),'local_links_checked':count,'cited_ranges_checked':ranges_checked,'slides':len(slides),'themes':['neon','paper'],'core_minutes':50,'technical_minutes':18,'product_minutes':6,'archive_bytes':archive.stat().st_size,'result':'PASS'}))
+    print(json.dumps({'public_files':len(files),'local_links_checked':count,'cited_ranges_checked':ranges_checked,'slides':len(slides),'themes':['neon','paper','fluent'],'core_minutes':50,'technical_minutes':18,'product_minutes':6,'archive_bytes':archive.stat().st_size,'result':'PASS'}))
 if __name__=='__main__':main()

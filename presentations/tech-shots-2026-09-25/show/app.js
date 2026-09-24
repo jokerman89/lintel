@@ -9,7 +9,7 @@ const demo = id => evidence.demos.find(x=>x.id===id);
 const compare = () => window.COMPARISON_DATA || {};
 const B = '../comparison/';
 const state = {index:0, packed:false, curated:false, later:false, profile:'lab', regression:'before'};
-const acts=[];slides.forEach((s,i)=>{if(s.optional)return;const a=acts[acts.length-1];if(a&&a.name===s.chapter){a.last=i;a.minutes+=s.minutes;}else acts.push({name:s.chapter,first:i,last:i,minutes:s.minutes});});
+const acts=[];slides.forEach((s,i)=>{if(s.optional||s.holding)return;const a=acts[acts.length-1];if(a&&a.name===s.chapter){a.last=i;a.minutes+=s.minutes;}else acts.push({name:s.chapter,first:i,last:i,minutes:s.minutes});});
 const firstBackup=slides.findIndex(s=>s.optional&&!s.track);
 const firstTechnical=slides.findIndex(s=>s.track==="technical");
 const firstProducts=slides.findIndex(s=>s.track==="products");
@@ -84,9 +84,9 @@ const chip=(c,i)=>'<div class="rt-chip c'+i+(i===1&&R.ask!==undefined?' is-ask':
 return shell(s,'<div class="rt-count" aria-hidden="true"><div><b>'+ROUTES[0].run.length+'</b><span> of 9</span></div><p>SENSE read one word: “<em>fix</em>”</p></div>'+names+'<div class="rt-rows">'+ROUTES.map(row).join('')+'</div><div class="rt-band" aria-live="polite">'+chip(R.chips[0],0)+'<i class="rt-arrow">→</i>'+chip(R.chips[1],1)+'<i class="rt-arrow">→</i>'+chip(R.chips[2],2)+'</div>','routes-slide');
 },
 firstsession:s=>shell(s,'<div class="endpoint-example"><div class="endpoint-request"><span class="tiny">ONE REQUEST · NEW BEHAVIOUR, SO IT STARTS WITH A PLAN</span><blockquote>“Add a health endpoint<br>and a focused test.”</blockquote></div><div class="endpoint-result"><div class="endpoint-status"><span>GET /health</span><strong>200 OK</strong></div><pre>{ "status": "ok" }</pre><div class="endpoint-test">'+icon('check')+' Acceptance check passes</div></div></div><div class="receipt-path"><span>Agreed plan</span><b>→</b><span>Code + test</span><b>→</b><span>Useful handoff</span></div>','firstsession'),
-hook:s=>shell(s,'<div class="ghost-time">03:00:00 later</div><div class="poll">Quick show of hands. You too, Teams.</div><div class="chat-stack"><div class="chat"><div class="who"><span>YOU</span><span>09:12</span></div>We agreed: one dashboard.<br>No platform rewrite.</div><div class="chat"><div class="who"><span>AGENT</span><span>12:12</span></div>Great news. I’ve designed<br><span class="new">a new platform.</span></div></div>','hook','Illustrative conversation. Painfully familiar energy.'),
+hook:s=>shell(s,'<div class="ghost-time">03:00:00 later</div><div class="poll">Quick show of hands. Remote participants, you too.</div><div class="chat-stack"><div class="chat"><div class="who"><span>YOU</span><span>09:12</span></div>We agreed: one dashboard.<br>No platform rewrite.</div><div class="chat"><div class="who"><span>AGENT</span><span>12:12</span></div>Great news. I’ve designed<br><span class="new">a new platform.</span></div></div>','hook','Illustrative conversation. Painfully familiar energy.'),
 guild:s=>shell(s,'<div class="ring" aria-hidden="true"></div><div class="guild-lineup"><div class="guild-item"><div class="name">MDASH</div></div><div class="guild-item"><div class="name">AGT</div></div><div class="guild-item"><div class="name accent">Lintel</div></div></div><div class="smallprint">Different tools. Different jobs.</div>','guild'),
-title:s=>shell(s,'<ol class="promise">'+['Why agents lose the plot','A kit called Lintel — and the method underneath','An honest A/B test','What is worth adopting'].map((t,i)=>'<li><b>0'+(i+1)+'</b>'+t+'</li>').join('')+'</ol><div class="speaker"><strong>Johannes Åkerman</strong><br><span>TECH SHOTS · 25 SEPTEMBER 2026<br>CAIP SOLUTION ENGINEERS + CSAs · LEVEL 200–300</span></div>','title-slide','A personal engineering journey. A set of ideas to test.'),
+title:s=>shell(s,'<ol class="promise">'+['Why agents lose the plot','A kit called Lintel — and the method underneath','An honest A/B test','What is worth adopting'].map((t,i)=>'<li><b>0'+(i+1)+'</b>'+t+'</li>').join('')+'</ol><div class="speaker"><strong>Johannes Åkerman</strong><br><span>THE LINTEL FIELD GUIDE<br>DEVELOPERS + ARCHITECTS · LEVEL 200–300</span></div>','title-slide','A personal engineering journey. A set of ideas to test.'),
 drift:s=>shell(s,'<div class="drift-labels"><span>Context loses signal</span><span>The goal drifts</span><span>The handoff breaks</span></div>','drift','A stopped agent may also be hitting a tool, permission or budget boundary. Diagnose before prescribing.'),
 journey:s=>shell(s,'<div class="journey-path">'+[['01','Better prompts','bubble','My head'],['02','Reusable habits','route','My clipboard'],['03','A durable method','book','The repo']].map(([n,h,i,w])=>'<article class="journey-step">'+icon(i)+'<div class="n">'+n+'</div><h2>'+h+'</h2><p class="lives"><span>LIVES IN</span>'+w+'</p></article>').join('')+'</div>','journey'),
 triad:s=>shell(s,'<div class="triad-grid"><article>'+icon('compass')+'<div class="big violet">WHAT</div><p>Outcome + boundaries</p></article><article>'+icon('route')+'<div class="big accent">HOW</div><p>Work + verification</p></article><article>'+icon('bulb')+'<div class="big violet">WHY</div><p>Decisions + rationale</p></article></div><div class="compound-bar"><b>↻</b><span>Keep what the next task needs.</span></div>','triad'),
@@ -124,9 +124,9 @@ enforcement:s=>shell(s,'<div class="lock-comparison"><article><div class="paper-
 knowledge:s=>shell(s,'<div class="decision-scene"><div class="meeting-chairs" aria-hidden="true">'+icon('person')+icon('person')+icon('person')+'</div><div class="decision-card"><span>ARCHITECTURE DECISION RECORD</span><h2>We rejected option B.</h2><p>Reason: the agreed data boundary.</p><div>Now the next session can know why.</div></div></div>','knowledge'),
 smallcore:s=>shell(s,'<div class="rent-scene"><div class="rent-receipt"><span>THE SMALL DEFAULT</span><div>Intent</div><div>Relevant context</div><div>Next action</div><div>Evidence</div><strong>Less ceremony. Clearer work.</strong></div><div class="rent-choice">'+icon('scales')+'<p>Depth follows risk.</p><span>A button label ≠ a tenant boundary.</span></div></div>','smallcore'),
 vibe:s=>shell(s,'<div class="route"><span>'+icon('bubble')+'Describe it</span><b>→</b><span>'+icon('compass')+'Resolve it</span><b>→</b><span>'+icon('terminal')+'Build a slice</span><b>→</b><span>'+icon('check')+'Verify it</span></div><div class="return-address">'+icon('handoff')+'Return to: the agreed intent</div>','vibe'),
-team:s=>shell(s,'<div class="roles">'+[['terminal','SE','A repeatable demo.','“Can I show why it works?”'],['compass','CSA','A defensible design.','“Why this trade-off?”'],['check','CUSTOMER DEVELOPER','A verifiable first slice.','“What does done look like?”']].map(([i,r,h,q])=>'<article class="role">'+icon(i)+'<div class="role-name">'+r+'</div><h2>'+h+'</h2><div class="question">'+q+'</div></article>').join('')+'</div>','team'),
+team:s=>shell(s,'<div class="roles">'+[['terminal','DEMO BUILDER','A repeatable demo.','“Can I show why it works?”'],['compass','ARCHITECT','A defensible design.','“Why this trade-off?”'],['check','CUSTOMER DEVELOPER','A verifiable first slice.','“What does done look like?”']].map(([i,r,h,q])=>'<article class="role">'+icon(i)+'<div class="role-name">'+r+'</div><h2>'+h+'</h2><div class="question">'+q+'</div></article>').join('')+'</div>','team'),
 pilot:s=>shell(s,'<div class="pilot-experiment"><div class="pilot-size"><span>START WITH</span><strong>1</strong><p>recurring workflow</p></div><div class="pilot-measure"><div>'+icon('clock')+'Time to accepted change</div><div>'+icon('bubble')+'Human interventions</div><div>'+icon('check')+'Defects + recovery</div><div>'+icon('scales')+'Total cost + overhead</div></div></div><div class="pilot-decision"><span>Keep</span><span>Change</span><span>Stop</span><b>Let the evidence decide.</b></div>','pilot'),
-discussion:s=>shell(s,'<div class="discussion-cards"><span>One task.</span><span>One recurring mistake.</span><span>What should remember it?</span></div><div class="teams">'+icon('bubble')+' Teams first.</div>','discussion'),
+discussion:s=>shell(s,'<div class="discussion-cards"><span>One task.</span><span>One recurring mistake.</span><span>What should remember it?</span></div><div class="teams">'+icon('bubble')+' Remote participants first.</div>','discussion'),
 close:s=>shell(s,'<div class="recap">'+[['The same explanation','Plan + handoff'],['The same decision','Decision record'],['The same mistake','Lesson + test']].map(([a,b])=>'<div><span>'+a+'</span><b>→</b><strong>'+b+'</strong></div>').join('')+'</div><div class="loop">Make the useful part reusable.</div><div class="signature">JOHANNES ÅKERMAN · <span class="repo">github.com/jokerman89/lintel</span></div>','close'),
 swarm:s=>shell(s,'<div class="swarm-map"><div class="swarm-node accent">Coordinator<small>One authoritative task map<br>Dependencies + ownership</small></div><div class="worker-stack"><div class="swarm-node">UI lane<small>Isolated scope + attributable changes</small></div><div class="swarm-node">API lane<small>Isolated scope + attributable changes</small></div><div class="swarm-node">Evidence lane<small>Independent verification</small></div></div><div class="swarm-node accent">Integration review<small>Reconciled result<br>Evidence before completion</small></div></div><div class="owner">No safe isolation? Replay the same briefs serially.</div>','swarm','Optional topology illustration. This screen does not execute a swarm.'),
 resources:s=>shell(s,'<div class="resource-links">'+comparisonButton('Prepared A/B comparison')+viewButton('Helper proof explorer','../web/index.html','Profiles, cold handoff and learning')+viewButton('English speaker script','../presenter/speaker-script.html','Full English script')+viewButton('Timed run of show','../presenter/run-of-show.html','50-minute run of show')+viewButton('Source notes','../presenter/sources.html','Evidence and sources')+viewButton('Demo protocol',B+'readers/protocol.html','Comparison protocol')+'</div><div class="source-links"><a href="../downloads/lintel-techshots-offline.zip">Download the web presentation</a><a href="../START-HERE.html">Package home</a></div>','resources','Controls: ← / → navigate · N notes · O overview · F fullscreen · Escape closes overlays.')
@@ -134,36 +134,47 @@ resources:s=>shell(s,'<div class="resource-links">'+comparisonButton('Prepared A
 Object.assign(templates, window.LINTEL_OPENING({shell, icon, state}));
 Object.assign(templates, window.LINTEL_TECHNICAL({shell,icon,state,viewButton}));
 Object.assign(templates, window.LINTEL_PRODUCTS({shell,icon,state,viewButton}));
-let lastRendered=-1;
+templates.holding=window.LINTEL_INTRO.render;
+let lastRendered=-1, notesHtml="", notesWindow=null;
+const notesWindowName="lintel-notes-"+Math.random().toString(36).slice(2);
 function render(){
-const s=slides[state.index];$('#stage').innerHTML=(templates[s.type]||templates.triad)(s);
+const s=slides[state.index];window.LINTEL_INTRO.unmount();$('#stage').innerHTML=(templates[s.type]||templates.triad)(s);
 // A click re-renders the same screen: do not replay the entrance animation over a dense diagram.
 if(lastRendered===state.index)$('#stage .slide').classList.add('no-anim');lastRendered=state.index;
 $('#chapter').textContent=s.chapter;$('#counter').textContent=String(state.index+1).padStart(2,'0')+' / '+slides.length;
-document.querySelectorAll('#acts button').forEach(b=>{const first=Number(b.dataset.act),group=b.dataset.group;const a=acts.find(x=>x.first===first);const here=group==='products'?s.track==='products':group==='technical'?s.track==='technical':group==='backup'?!!s.optional&&!s.track:!!a&&state.index>=a.first&&state.index<=a.last;const last=group?slides.reduce((end,x,i)=>(group==='backup'?x.optional&&!x.track:x.track===group)?i:end,-1):a.last;const fill=here?(group?100:Math.round((state.index-first+1)/(last-first+1)*100)):state.index>last?100:0;b.style.setProperty('--fill',fill+'%');b.classList.toggle('current',here);b.classList.toggle('done',fill===100&&!here);if(here)b.setAttribute('aria-current','step');else b.removeAttribute('aria-current');});
+document.querySelectorAll('#acts button').forEach(b=>{const first=Number(b.dataset.act),group=b.dataset.group;const a=acts.find(x=>x.first===first);const here=group==='products'?s.track==='products':group==='technical'?s.track==='technical':group==='backup'?!!s.optional&&!s.track:!!a&&state.index>=a.first&&state.index<=a.last;const last=group?slides.reduce((end,x,i)=>(group==='backup'?x.optional&&!x.track:x.track===group)?i:end,-1):a.last;const fill=here?Math.round((state.index-first+1)/(last-first+1)*100):state.index>last?100:0;b.style.setProperty('--fill',fill+'%');b.setAttribute('aria-label',(a?.name||group||'Section')+': '+fill+'%'+(here?', current section':fill===100?', completed':', upcoming'));b.classList.toggle('current',here);b.classList.toggle('done',fill===100&&!here);if(here)b.setAttribute('aria-current','step');else b.removeAttribute('aria-current');});
+window.LINTEL_INTRO.mount();
+$('#next span').textContent=s.holding?'Begin':'Next';
 $('#prev').disabled=state.index===0;$('#next').disabled=state.index===slides.length-1;
 const elapsed=slides.slice(0,state.index).filter(x=>!x.optional).reduce((a,x)=>a+x.minutes,0);
 const moduleElapsed=slides.slice(0,state.index).filter(x=>x.track===s.track).reduce((a,x)=>a+x.minutes,0);
 const timing=(start,end)=>[start,end].map(m=>String(Math.floor(m)).padStart(2,'0')+':'+String(Math.round((m%1)*60)).padStart(2,'0')).join('–');
-$('#clock').textContent=s.track==='products'?timing(moduleElapsed,moduleElapsed+s.minutes)+' / '+productMinutes+' MIN · PRODUCTS':s.track==='technical'?timing(moduleElapsed,moduleElapsed+s.minutes)+' / '+technicalMinutes+' MIN · TECHNICAL':s.optional?'OPTIONAL / REFERENCE':timing(elapsed,elapsed+s.minutes)+' / 50 MIN';
-$('#noteContent').innerHTML='<p class="note-time">'+esc(s.chapter)+' · '+s.minutes+' MIN · SLIDE '+(state.index+1)+'</p><h2>'+esc(s.title).replace(/\n/g,' ')+'</h2>'+(s.cue?'<div class="oral-cue"><b>SAY</b><p>'+esc(s.cue)+'</p></div>':'')+(s.stageAction?'<div class="oral-action"><b>DO / ASK</b><p>'+esc(s.stageAction)+'</p></div>':'')+(s.bridge?'<div class="oral-bridge"><b>THEN →</b><p>'+esc(s.bridge)+'</p></div>':'')+esc(s.notes).split('\n\n').map(x=>'<p>'+x+'</p>').join('')+(s.sources?'<p>'+s.sources.map(u=>'<a href="'+esc(u)+'" target="_blank" rel="noopener">'+esc(u)+'</a>').join('<br>')+'</p>':'');
+$('#clock').textContent=s.holding?'BEFORE WE BEGIN · UNTIMED':s.track==='products'?timing(moduleElapsed,moduleElapsed+s.minutes)+' / '+productMinutes+' MIN · PRODUCTS':s.track==='technical'?timing(moduleElapsed,moduleElapsed+s.minutes)+' / '+technicalMinutes+' MIN · TECHNICAL':s.optional?'OPTIONAL / REFERENCE':timing(elapsed,elapsed+s.minutes)+' / 50 MIN';
+notesHtml='<p class="note-time">'+esc(s.chapter)+' · '+(s.holding?'BEFORE START':s.minutes+' MIN')+' · SLIDE '+(state.index+1)+'</p><h2>'+esc(s.title).replace(/\n/g,' ')+'</h2>'+(s.cue?'<div class="oral-cue"><b>SAY</b><p>'+esc(s.cue)+'</p></div>':'')+(s.stageAction?'<div class="oral-action"><b>DO / ASK</b><p>'+esc(s.stageAction)+'</p></div>':'')+(s.bridge?'<div class="oral-bridge"><b>THEN →</b><p>'+esc(s.bridge)+'</p></div>':'')+esc(s.notes).split('\n\n').map(x=>'<p>'+x+'</p>').join('')+(s.sources?'<p>'+s.sources.map(u=>'<a href="'+esc(u)+'" target="_blank" rel="noopener">'+esc(u)+'</a>').join('<br>')+'</p>':'');
 document.title=(state.index+1)+' · '+s.title.replace(/\n/g,' ')+' · Lintel';
 $('#stage').setAttribute('aria-label','Slide '+(state.index+1)+': '+s.title.replace(/\n/g,' '));
 document.querySelectorAll('#overviewGrid button').forEach((b,i)=>b.classList.toggle('active',i===state.index));
 fit();
 }
-function go(i){const leaving=slides[state.index].type;if(leaving==='stateflow')state.trail=0;if(leaving==='primer')state.later=false;if(leaving==='cyclemap')state.cyclePhase=undefined;if(leaving==='routes')state.route=0;state.index=Math.max(0,Math.min(slides.length-1,i));history.replaceState(null,'','#'+slides[state.index].id);render();window.scrollTo(0,0);}
+function go(i){const leaving=slides[state.index].type;if(leaving==='swarmreveal')state.swarmReveal=false;if(leaving==='stateflow')state.trail=0;if(leaving==='primer')state.later=false;if(leaving==='cyclemap')state.cyclePhase=undefined;if(leaving==='routes')state.route=0;state.index=Math.max(0,Math.min(slides.length-1,i));history.replaceState(null,'','#'+slides[state.index].id);render();window.scrollTo(0,0);}
 function fit(){if(innerWidth<=650)return;const box=$('#viewport').getBoundingClientRect();const scale=Math.min((box.width-34)/1440,(box.height-22)/810);$('#stage').style.transform='scale('+scale+')';}
-function showViewer(url,title){$('#viewerTitle').textContent=title;$('#viewerSource').href=url;$('#viewerFrame').src=url;$('#viewer').showModal();}
+function showViewer(url,title){const target=new URL(url,location.href);if(target.origin===location.origin)target.searchParams.set('theme',document.documentElement.dataset.theme||'neon');$('#viewerTitle').textContent=title;$('#viewerSource').href=target.href;$('#viewerFrame').src=target.href;$('#viewer').showModal();}
 function closeViewer(){$('#viewer').close();$('#viewerFrame').src='about:blank';}
-function toggleNotes(){$('#notePanel').hidden=!$('#notePanel').hidden;$('#notes').setAttribute('aria-expanded',String(!$('#notePanel').hidden));}
+// Keep speaker notes in their own window, never over the audience slide.
+function openNotes(){
+const status=$('#notesStatus');status.hidden=true;
+if(notesWindow&&!notesWindow.closed){notesWindow.focus();return;}
+notesWindow=window.open('notes.html',notesWindowName,'popup=yes,width=900,height=820,resizable=yes,scrollbars=yes');
+if(!notesWindow){status.textContent='Allow pop-ups for this site, then choose Notes again.';status.hidden=false;return;}
+notesWindow.focus();
+}
 const mmss=m=>String(Math.floor(m)).padStart(2,'0')+':'+String(Math.round((m%1)*60)).padStart(2,'0');
-$('#overviewGrid').innerHTML=slides.map((s,i)=>{const n=acts.findIndex(a=>a.first===i);const start=n>=0?acts.slice(0,n).reduce((t,a)=>t+a.minutes,0):0;const head=n>=0?'<h3 class="o-act"><b>'+(n+1)+'</b>'+esc(acts[n].name)+'<span>'+mmss(start)+' · '+acts[n].minutes+' min</span></h3>':i===firstProducts?'<h3 class="o-act"><b>P</b>Product launch<span>separate · '+productMinutes+' min</span></h3>':i===firstTechnical?'<h3 class="o-act"><b>T</b>Technical deep dive<span>separate · '+technicalMinutes+' min</span></h3>':i===firstBackup?'<h3 class="o-act"><b>+</b>Backup<span>optional · reference</span></h3>':'';return head+'<button data-slide="'+i+'"><span class="o-num">'+String(i+1).padStart(2,'0')+(s.optional?' / '+esc(s.chapter):' · '+s.minutes+' min')+'</span>'+esc(s.title).replace(/\n/g,' ')+'</button>';}).join('');
+$('#overviewGrid').innerHTML=slides.map((s,i)=>{const n=acts.findIndex(a=>a.first===i);const start=n>=0?acts.slice(0,n).reduce((t,a)=>t+a.minutes,0):0;const head=n>=0?'<h3 class="o-act"><b>'+(n+1)+'</b>'+esc(acts[n].name)+'<span>'+mmss(start)+' · '+acts[n].minutes+' min</span></h3>':i===firstProducts?'<h3 class="o-act"><b>P</b>Product launch<span>separate · '+productMinutes+' min</span></h3>':i===firstTechnical?'<h3 class="o-act"><b>T</b>Technical deep dive<span>separate · '+technicalMinutes+' min</span></h3>':i===firstBackup?'<h3 class="o-act"><b>+</b>Backup<span>optional · reference</span></h3>':'';return head+'<button data-slide="'+i+'"><span class="o-num">'+String(i+1).padStart(2,'0')+(s.holding?' · before start':s.optional?' / '+esc(s.chapter):' · '+s.minutes+' min')+'</span>'+esc(s.title).replace(/\n/g,' ')+'</button>';}).join('');
 $('#acts').innerHTML=acts.map((a,n)=>'<button data-act="'+a.first+'" style="flex-grow:'+(a.minutes+3)+'" title="'+esc(a.name)+' · '+a.minutes+' min" aria-label="Act '+(n+1)+': '+esc(a.name)+', '+a.minutes+' minutes"><b>'+(n+1)+'</b><span>'+esc(String(a.name||'').replace(/^The /,''))+'</span></button>').join('')+(firstBackup>=0?'<button data-act="'+firstBackup+'" data-group="backup" class="backup" style="flex-grow:5" title="Optional and reference screens" aria-label="Backup: optional and reference screens"><b>+</b><span>Backup</span></button>':'');
 if(firstProducts>=0)$('#acts').insertAdjacentHTML('beforeend','<button data-act="'+firstProducts+'" data-group="products" style="flex-grow:7" title="Product launch · '+productMinutes+' minutes" aria-label="Products: '+productMinutes+' minute launch section"><b>P</b><span>Products</span></button>');
 if(firstTechnical>=0)$('#acts').insertAdjacentHTML('beforeend','<button data-act="'+firstTechnical+'" data-group="technical" style="flex-grow:8" title="Separate technical section · '+technicalMinutes+' minutes" aria-label="Technical: separate '+technicalMinutes+' minute section"><b>T</b><span>Technical</span></button>');
 $('#prev').onclick=()=>go(state.index-1);$('#next').onclick=()=>go(state.index+1);
-$('#overview').onclick=()=>$('#overviewDialog').showModal();$('#notes').onclick=toggleNotes;$('#closeNotes').onclick=toggleNotes;
+$('#overview').onclick=()=>$('#overviewDialog').showModal();$('#notes').onclick=openNotes;
 $('#full').onclick=async()=>{try{if(!document.fullscreenElement)await document.documentElement.requestFullscreen();else await document.exitFullscreen();}catch{ $('#full').title='Use the browser fullscreen shortcut';}};
 document.addEventListener('click',event=>{
 const b=event.target.closest('button');if(!b)return;
@@ -174,6 +185,7 @@ if(b.dataset.product!==undefined){go(slides.findIndex(x=>x.id===b.dataset.produc
 if(b.dataset.slide!==undefined){$('#overviewDialog').close();go(Number(b.dataset.slide));}
 if(b.dataset.close){b.dataset.close==='viewer'?closeViewer():$('#'+b.dataset.close).close();}
 if(b.dataset.view)showViewer(b.dataset.view,b.dataset.title||'Artifact');
+if(b.dataset.action==='swarm-reveal'){state.swarmReveal=!state.swarmReveal;render();keep('#stage [data-action="swarm-reveal"]');}
 if(b.dataset.action==='reuse'){state.packed=!state.packed;render();keep('#stage [data-action="reuse"]');}
 if(b.dataset.action==='context'){state.curated=!state.curated;render();keep('#stage [data-action="context"]');}
 if(b.dataset.action==='later'){state.later=!state.later;render();keep('#stage [data-action="later"]');}
@@ -187,15 +199,21 @@ if(b.dataset.regression){state.regression=b.dataset.regression;render();keep('#s
 document.addEventListener('keydown',e=>{
 if(e.target.closest('input,textarea,select')||e.ctrlKey||e.altKey||e.metaKey)return;
 if($('#viewer').open||$('#overviewDialog').open)return;
-if(e.key==='Escape'){$('#notePanel').hidden=true;return;}
+if(e.key==='Escape'){$('#notesStatus').hidden=true;return;}
 if(e.key==='ArrowRight'||e.key==='PageDown'||(e.key===' '&&e.target===document.body)){e.preventDefault();go(state.index+1);}
 if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(state.index-1);}
 if(e.key==='Home'){e.preventDefault();go(0);}if(e.key==='End'){e.preventDefault();go(slides.length-1);}
-if(e.key.toLowerCase()==='n')toggleNotes();if(e.key.toLowerCase()==='o')$('#overviewDialog').showModal();if(e.key.toLowerCase()==='f')$('#full').click();
+if(e.key.toLowerCase()==='n')openNotes();if(e.key.toLowerCase()==='o')$('#overviewDialog').showModal();if(e.key.toLowerCase()==='f')$('#full').click();
 });
 $('#viewer').addEventListener('close',()=>{$('#viewerFrame').src='about:blank';});
 addEventListener('resize',fit);addEventListener('hashchange',()=>{const i=slides.findIndex(s=>s.id===location.hash.slice(1));if(i>=0&&i!==state.index)go(i);});
 $('#stage').style.setProperty('--cl',CL.map(w=>w+'px').join(' '));
 const initial=slides.findIndex(s=>s.id===location.hash.slice(1));state.index=initial>=0?initial:0;render();
-window.DECK_API={go,state,slides};
+// Presenter API: one same-origin snapshot contract, consumed by notes.js.
+// Reading on a short interval also reconnects a notes window after this page reloads.
+window.DECK_API={go,state,slides,registerPresenter:popup=>{if(popup.opener===window&&popup.location.href===new URL('notes.html',location.href).href)notesWindow=popup;},getPresenterNotes:()=>({
+ index:state.index,total:slides.length,id:slides[state.index].id,
+ title:slides[state.index].title,html:notesHtml,timing:$('#clock').textContent,
+ nextTitle:slides[state.index+1]?.title||'End of presentation'
+})};
 })();
