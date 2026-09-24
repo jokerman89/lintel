@@ -171,23 +171,22 @@ performer exceeds the tests' timeout on Windows) are repaired by the P10 owner
 (`0caba6fe` / `d4b90259`), accepted in SAME `1578dfd8`'s integration review `9ca6402a`
 and integrated in `b0598b0b` / `f740141e`. The joined checks pass, and A12.1–A12.4 are
 closed.
-A13.a and A13.1.b/.4.b are accepted (`0e1746a8`, `5a058dd5`). P08's selected SPEC waits
-for F06, so recovery does not take P08 yet. The local branch
-`jokerman-microsoft-p08-integration` (worktree `%LOCALAPPDATA%\Temp\p08int`, head
-`ad1045b8`) carries P08 and A13 on recovery `371343eb`, the `624b554f` review ancestry and
-reconciliation 6. Recovery merges that branch after P08's selected SPEC and QUALITY.
-The joined checks run on `ad1045b8`: the kit (`p08int-kit`) and the other 148 entries
-(`p08int-rest`). A23.4.g3 and p2 close with the P08 integration.
+A13.a and A13.1.b/.4.b are accepted (`0e1746a8`, `5a058dd5`). **F06 is accepted** on
+SAME9db's recheck of `624` (selected SPEC PASS, whole QUALITY PASS with five P3s;
+`a337161c`), and **recovery has integrated P08** (`b38b4b3e`, then the F06 appendix in
+`9f351a00`). Recovery's product tree equals the tested integration branch `ad1045b8`.
+SAME9db now runs the whole-P08 integration review (conflict resolutions and
+reconciliations 1–6). The A08, A10 and A13 parents close after that review and the joined
+checks: the kit (`p08int-kit`) and the other 148 entries (`p08int-rest`, three failures
+so far).
 P09's installed closure is integrated (`da5a599b`), and A09.5/A17.5 are closed.
-F06: step 1 completed. In step 2 the candidate grant closed with a post-exit rerun under
-the accepted rotation contract (`946d362d`). SAME9db's paired preparation review found
-P2 R08, a stale candidate-01 name in the package 3 parameter schema. f2 refreezes package
-3 as -04 (`ed1048a0`), and the pin-02 release follows on PASS.
 P13: the installed-consumer closure is accepted and integrated (`1e41deb0`), and A18.3 and
-A18.4 are closed. The fan-in rebases onto `ad1045b8` for reviewer `30146eab` (Opus 5.5),
-who also reviews A19.3, A19.4, A20.4's P13 part and reconciliation 6's descriptor change.
-P14: the remaining preparable A23 evidence (the installed caller-to-child bridge, A23.2's
-joined chain and A23.1's matrix) is released on `ad1045b8` (`2557676e`).
+A18.4 are closed. The rebased fan-in (`e922515c`, `f581b072`, report `d12bbf6d`, on
+`ad1045b8`) is frozen and under review by `30146eab` (Opus 5.5): A19.3, A19.4, A20.4's
+P13 part, N2 and reconciliation 6's descriptor change.
+P14: the A23 unit (product `96bd5bab`, report `0a091f34`, on `ad1045b8`; final run 8/8 in
+963 s; an 81-row matrix) is frozen and under review by `6310f7ad` (Opus 5.5).
+P10 F-INT-5: the test-only repair `b7555ca3` / `b7cf10ef` is with SAME `1578dfd8`.
 P15 (coordinator): the Windows CI job cannot fit 30 minutes. The sharding and timeout
 decision follows from the joined run's per-entry durations.
 Host note (L-049): the host-wide MSYS `/tmp` mount moved at about 07:30 to
