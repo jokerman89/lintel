@@ -3,7 +3,7 @@
 # implements: ADR-0028
 # intent: skills/catalog/references/metadata.md
 # constraints: synthetic sources and homes; metadata evidence, not live client acceptance
-# last_intent_review: 2026-09-22
+# last_intent_review: 2026-09-24
 """Exercise the catalog's read-only discovery contract and retained Markdown output."""
 import contextlib
 import hashlib
@@ -73,6 +73,31 @@ def load_catalog():
 def files_snapshot(root):
     return {path.relative_to(root).as_posix(): hashlib.sha256(path.read_bytes()).hexdigest()
             for path in root.rglob("*") if path.is_file()}
+
+
+@contextlib.contextmanager
+def observe_prompt_bodies(allowed=None):
+    """Test-only observation of whole-prompt reads, not a shipped access-control API."""
+    allowed = set() if allowed is None else allowed
+    observed = []
+    original_text, original_bytes = Path.read_text, Path.read_bytes
+
+    def read(path, original, operation, *args, **kwargs):
+        if path.name == "SKILL.md" or path.parent.parent.name == "agents":
+            permitted = path.resolve() in allowed
+            observed.append({"path": str(path), "operation": operation, "allowed": permitted})
+            if not permitted:
+                raise AssertionError(f"UNRELATED_BODY_EXPOSURE: {path}")
+        return original(path, *args, **kwargs)
+
+    def read_text(path, *args, **kwargs):
+        return read(path, original_text, "read_text", *args, **kwargs)
+
+    def read_bytes(path, *args, **kwargs):
+        return read(path, original_bytes, "read_bytes", *args, **kwargs)
+
+    with mock.patch.object(Path, "read_text", read_text), mock.patch.object(Path, "read_bytes", read_bytes):
+        yield observed
 
 
 class CatalogMetadata(unittest.TestCase):
