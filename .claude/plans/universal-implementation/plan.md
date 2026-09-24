@@ -668,6 +668,13 @@ A23.4.g3 and A23.4.p2 closure (2026-09-24): the complete kit passes 50/50 on the
 - For p2, its default 113/128-path init, check and owned-recovery method passes at the original
   paths.
 A23.4 itself closes with the PR's strict CI suite.
+A23.4 CI status (2026-09-25): the first hosted strict run (`36054668106` on `2ab1f25d`) failed on all
+three systems. The failures were portability defects that the local Windows evidence could not show.
+The coordinator's repair is recorded in ADR-0032 ("First hosted run") and in `reports/final.md`
+("Delivery CI"). On `ed91ef4f`, run `36065850657` passes 149 of 150 entries on each system, with no
+skipped or partial result. The one failing entry is `document-pdf`: it needs an existing `pypdf`,
+which the repository does not declare and the operator refused to add (L-054). A23.4 stays open
+until the operator decides on that dependency.
 A23.1 and A23.2 closure (2026-09-24): the P14 A23 unit (`96bd5bab`, repair `88c92377`, report
 `d13455de`) passes `6310f7ad`'s complete SPEC and first whole QUALITY after the F1/F2 repair
 (`reviews/P14-a23-recheck-88c9237.md`), and is integrated in `8f418e68`.
@@ -686,7 +693,8 @@ of four groups, and none counts as executed evidence for a closed item:
   recheck of `624` (`a337161c`). C-3 (reconciliation 6) and C-10 (A23.4.g3 installed failure
   paths): reconciliation 7 (`ac216479`) and the kit's data-driven missing-resource refusals.
 - **Carried to the PR's strict CI.** X2, C-5 and C-7 (the jq-dependent assertions), and X3 (Linux,
-  macOS, stock Bash 3.2 and hosted CI). A23.4 stays open until then.
+  macOS, stock Bash 3.2 and hosted CI). Run `36065850657` on `ed91ef4f` executes them strictly on all
+  three systems; A23.4 remains open only for the `document-pdf` dependency decision.
 - **Explicit limits on closed items,** stated in `reports/final.md`: X1 (Python 3.9 runtime), X4
   (Windows PowerShell 5.1), X5 (live host and native role registration), P07-3 (live UNC I/O),
   P08-5 (case-sensitive positive), P08-12 (host activation and hooks), P09-5 (path budget at a

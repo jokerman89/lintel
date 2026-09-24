@@ -17,8 +17,13 @@ changed. Continue from the [recovery checkpoint](../plans/universal-implementati
 and original work map. Existing owners are retained. Operator directive: every
 session and new actor uses `claude-opus-5.5`/max/`long_context`; see the handoff
 rule. Current original acceptance
-is **107/113**, not full release readiness. Open: A15.1–.4 (denied routes), A23.4 (strict CI)
-and A23.5 (final review). A08, A10, A13, A14.5 and A23.1–.3 closed on 2026-09-24. A19.3, A19.4 and A20.4 close from P13's accepted
+is **108/113**, not full release readiness. Open: A15.1–.4 (denied routes) and A23.4 (strict CI,
+blocked only on the `document-pdf` pypdf decision, L-054). A23.5 closed on 2026-09-24.
+**Delivery, 2026-09-25:** PR #93 (draft, `jokerman89`) head `ed91ef4f`; CI run `36065850657`
+passes 149/150 entries per system, and only `document-pdf` fails (undeclared `pypdf`). The A23.5
+Phase 3 addendum for the CI-repair delta is requested from `8df81ac8`. The session
+"Removing legacy skills and agents" (`f4584b03`) waits for an explicit CI-ready handoff after
+the merge. A08, A10, A13, A14.5 and A23.1–.3 closed on 2026-09-24. A19.3, A19.4 and A20.4 close from P13's accepted
 fan-in (`cd877232`). A18.3 and A18.4 close from P13's accepted
 installed-consumer closure (`d0eb793e`, integrated `1e41deb0`). A12.1–A12.4 close from P10's accepted
 integration repair and the joined checks (kit 50/50, light 8/8). A09.5 and A17.5 close from P09's accepted

@@ -1,7 +1,10 @@
 # Universal initiative final report (P15)
 
 **Status:** A23.5 passes on the frozen head `ad529ebc` (`reviews/A23.5-final-ad529eb.md`). The branch is
-published as draft PR #93 by `jokerman89`. The CI results are added after its run.
+published as draft PR #93 by `jokerman89`. Its first hosted strict runs found portability defects,
+which the coordinator repaired (see "Delivery CI"). On the repaired head, every CI job passes except
+the three that run `document-pdf`. That entry needs a `pypdf` the repository does not declare, and
+adding it is an open operator decision.
 
 ## Delivery identity
 
@@ -41,7 +44,7 @@ where the leaf evidence and the review files are cited.
 | [A20 Provenance and versions](../plan.md#a20-provenance-and-versions-p07p13-r04) | 4/4 | Accepted |
 | [A21 Safe dormant handoff](../plan.md#a21-safe-dormant-handoff-p04-r08) | 4/4 | Accepted |
 | [A22 Preserved Swarming integration](../plan.md#a22-preserved-swarming-integration-p04-r09) | 7/7 | Accepted |
-| [A23 Boundary regression evidence](../plan.md#a23-boundary-regression-evidence-all-owners-p14-r11) | 4/5 | Pending: A23.4 closes with PR #93's strict CI suite; A23.1–.3 and A23.5 are closed |
+| [A23 Boundary regression evidence](../plan.md#a23-boundary-regression-evidence-all-owners-p14-r11) | 4/5 | Blocked: A23.4's strict CI passes on every job except `document-pdf`'s, which needs the undeclared `pypdf` (operator decision); A23.1–.3 and A23.5 are closed |
 | [A24 Observable enterprise profile value](../plan.md#a24-observable-enterprise-profile-value-p14-r04r11) | 4/4 | Accepted |
 | [A25 Trusted implementation source](../plan.md#a25-trusted-implementation-source-p01-r01) | 3/3 | Accepted |
 | [A26 Explicit private-sync destination](../plan.md#a26-explicit-private-sync-destination-p02-r10) | 4/4 | Accepted |
@@ -57,17 +60,24 @@ says so.
 A14.5 is now accepted. On the operator's instruction, the framework app's dependencies were
 restored task-locally through the Microsoft npm feed proxy, and the image-capable reviewer
 `aba328fd` passed both halves, with V1 observed directly (`reviews/P11-a145-static-v1.md` and
-`reviews/P11-a145-app.md`). One area stays blocked:
+`reviews/P11-a145-app.md`). Two items stay blocked:
 
 - **A15.1–A15.4, verifiable document formats.** The Word, PowerPoint, workbook and PDF source
   helpers are integrated. Their acceptance needs rendering and editability evidence through
   application routes that the operator denied (Word, Excel, PDF raster). It also needs P12
   structured-record persistence, which was denied as well. In addition, A15.4's Visio part has
   no implemented writer or editor (`packages/P12.md`); Visio stays a template-only staged slot,
-  which no permission would resolve.
+  which no permission would resolve. The operator's question about lifting the Word, Excel and
+  record-persistence denials went unanswered, so no authorization is assumed.
+- **A23.4, the strict CI suite, blocked only on `document-pdf`.** P12's PDF checks read PDFs
+  through an existing `pypdf` installation (`skills/generate-pdf/SKILL.md`), and the local runs had
+  pypdf 6.13.2. The repository does not declare pypdf, and the operator refused to have it added as
+  a CI dependency (L-054). `tests/integration/document-pdf.sh` therefore errors with
+  `ModuleNotFoundError: No module named 'pypdf'` in integration shard 3 on every system, and those
+  three jobs fail. The entry is neither excluded nor weakened. A23.4 closes once the operator
+  authorizes pypdf for CI or chooses another course.
 
-Its four items are not counted as accepted, and none is waived. The operator's question about lifting the
-Word, Excel and record-persistence denials went unanswered, so no authorization is assumed.
+None of these five items counts as accepted, and none is waived.
 
 ## Preserved Swarming integration
 
@@ -90,6 +100,16 @@ These are reviewed at A23.5, not by a package review:
     Windows (`b3620e5c`), and separate tier steps (`6d12fd91`).
   - The runner's `N/A` category for `platform: windows-only` skips off Windows (`917d7125`), and
     the 22 canonical skip reasons (`89131723`, only reason strings change).
+  - The repair after the first hosted run (ADR-0032, "First hosted run"):
+    - plan bullets that parsed as task definitions (`261efeae`);
+    - the CI environment (`d739d479`): the declared YAML parser, plus a synthetic home and a
+      physical temporary root on every system;
+    - product portability: the PATH Bash in the review and swarm readers, and no bytecode written
+      into installed kits (`d677efaa`); resolved lifecycle staging roots (`3dc8a01b`); and raw
+      script and style regions that close on newer `HTMLParser` releases (`8c9893f9`);
+    - fixture portability (`497863de`, `9d23accc`, `53383406`);
+    - lessons L-054 and L-055 (`c5667a7e`, `ed91ef4f`).
+    A23.5's Phase 3 addendum reviews this delta.
 - **The `main` merges** (`fe9e6284`, and at the freeze any later presentation-only PRs), which
   resolve the README conflict.
 - **Version `0.11.0` and its CHANGELOG entry** (`99443cf8`, `3ea42d70`).
@@ -110,15 +130,15 @@ These are reviewed at A23.5, not by a package review:
 
 ## Known limits
 
-- **Platforms.** The evidence is from native Windows with Python 3.11 and PowerShell 7. Linux and
-  macOS results come from the delivery PR's CI. Windows PowerShell 5.1 and a Python 3.9 runtime
-  are not verified.
+- **Platforms.** The local evidence is from native Windows with Python 3.11 and PowerShell 7. The
+  PR's CI adds Linux (Python 3.12.14), macOS (Python 3.12.10, Homebrew Bash) and hosted Windows
+  (Python 3.12.10, PowerShell 7). Windows PowerShell 5.1 and a Python 3.9 runtime are not verified.
 - **Compliance.** Required-policy enforcement stays UNVERIFIED, because no required-policy
   source is resolved.
 - **Host.** An outside actor restores journal timestamps about every 300 s (IC-F01); its identity
   is unknown. P10's bounded retry handles it, and F-INT-5 shields the tests' retry accounting.
-- **Strict suite.** jq is denied locally (L-046), so the first strict full run is the PR's CI,
-  which uses Python 3.12 against the local 3.11 evidence.
+- **Strict suite.** jq is denied locally (L-046), so the strict full runs are the PR's CI runs,
+  on Python 3.12 against the local 3.11 evidence.
 - **P08 advisories.** SAME9db's recheck of `624` routes five P3 advisories here:
   - `state.sh:32` handles drive-relative and UNC paths incompletely;
   - `workflow.sh:114-122` re-exports an unset profile reference as empty;
@@ -205,3 +225,22 @@ exercises it, and it was validated statically and in the A23.5 review. The entri
 **Not run locally:** the strict `--require-all` suite, because jq is denied (L-046); Linux and macOS;
 Python 3.9 and 3.12; and Windows PowerShell 5.1. The delivery PR's CI supplies the strict suite on
 all three systems, and A23.4 closes on it.
+
+## Delivery CI
+
+PR #93's CI runs the strict suite in 21 shard jobs plus a syntax job (ADR-0032). The per-job logs
+and summaries are under the coordinator's session files, `ci93/`.
+
+| Run | Head | Outcome |
+|---|---|---|
+| `36054668106` | `2ab1f25d` | The first hosted strict run. It failed on all three systems; ADR-0032's "First hosted run" section records the causes. |
+| `36063322462` | `c5667a7e` | The repair batch. It confirmed most of the repair and exposed two further classes: macOS `mktemp` ignores `TMPDIR`, and a quiet skip was counted as partial. It was superseded when those fixes were pushed. |
+| `36065850657` | `ed91ef4f` | 20 of 23 jobs pass, and each system passes 149 of its 150 entries. The only failing entry is `document-pdf`, in integration shard 3 on each system (27 errors, `No module named 'pypdf'`). |
+
+On `ed91ef4f`, every other entry passes with no skipped or partial result. That includes
+`copilot-kit`, `universal-a23` and every `platform: windows-only` method on hosted Windows. Off
+Windows, those methods are reported as N/A: 23 on Linux and 23 on macOS. The once-per-system checks
+all pass: repository verification, stock Bash 3.2 installation on macOS, `check-install.ps1` on
+Windows, and the catalog, instructions, adapter and wiki checks. The jq-dependent assertions X2,
+C-5 and C-7 and the platform row X3 therefore now run strictly. A23.4 stays open only for the
+`pypdf` decision above.

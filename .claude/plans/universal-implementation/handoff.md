@@ -713,6 +713,20 @@ When the operator returns, the publishing step is:
    A23.4 and A23.5 and mark the PR ready.
 
 Any A23.5 verdict file is preserved before the push, so the push is made once, with no CI restart.
+
+**Delivery status (2026-09-25, 02:00).** The operator authorized publishing as `jokerman89`. PR #93
+is a draft whose head is `ed91ef4f`. The first hosted strict run (`36054668106`) failed on
+portability defects; the coordinator repaired them (ADR-0032, "First hosted run"; commits
+`261efeae`..`ed91ef4f`). Run `36065850657` passes 149 of 150 entries on each system. Only
+`document-pdf` fails, because it needs an existing `pypdf` that the repository does not declare,
+and the operator refused to add it (L-054). Next:
+
+1. Preserve A23.5's Phase 3 addendum from `8df81ac8`, byte-exact, together with the records-only
+   commit, and push both once.
+2. Close A23.4 only after the operator decides on `pypdf` and a CI run is green. Do not exclude or
+   weaken `document-pdf`.
+3. After the merge, send "Removing legacy skills and agents" (`f4584b03`) the explicit CI-ready
+   handoff: the main SHA, the run and job evidence, and the ownership boundaries.
 Current original acceptance count is 107/113. A08, A10 and A13 close on SAME9db's whole-P08
 integration review (`f724834c`). A14.5 closes on the operator-authorized Microsoft npm feed
 restore and the image-capable review (`562f0386`, `9d23f2ff`). A23.1–.3 close on the A23 unit
@@ -1369,6 +1383,9 @@ was made during these checks. The morning target is not met merely by having
 credentials or active workers; the initiative is still in BUILD/REVIEW.
 
 ## Next action
+
+**Current (2026-09-25):** see "Delivery status" above. The paragraphs below are the historical
+record of the earlier dispatch order.
 
 P05/P06/P07 are accepted and integrated. P08 is dispatched in session `f2c305ac`
 from exact `5c3e7533335eeae15556aeabba422bfdbbe07f46` and has acknowledged its scope.
