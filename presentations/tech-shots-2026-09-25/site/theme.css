@@ -1,6 +1,6 @@
 /* Two deliberate visual systems, one set of content and controls. */
 .theme-picker{display:inline-flex;gap:0!important;flex-shrink:0;align-items:center;margin-left:9px;border:1px solid #57515f;border-radius:5px;overflow:hidden}.theme-picker button{font:12px/1.3 Consolas,monospace!important;letter-spacing:0!important;padding:8px 10px!important;border:0!important;border-radius:0!important;min-height:32px;background:#15151c;color:#c8c4d0;white-space:nowrap}.theme-picker button[aria-pressed="true"]{background:#a6ff00;color:#14170c}.theme-picker button:focus-visible{outline:2px solid currentColor!important;outline-offset:-4px!important}
-:root[data-theme="paper"]{--ink:#f6f4ef;--paper:#232320;--lime:#415f25;--purple:#67477b;--muted:#646158;--line:#bcb6ab;--red:#9b303b;color-scheme:light}
+:root[data-theme="paper"]{--ink:#f6f4ef;--paper:#232320;--lime:#415f25;--purple:#67477b;--muted:#646158;--line:#bcb6ab;--red:#9b303b;--bg:#f6f4ef;--surface:#e9e5dc;--panel:#e9e5dc;--fg:#232320;--dim:#57534b;color-scheme:light}
 :root[data-theme="paper"] body{background:#f6f4ef;color:#232320}
 :root[data-theme="paper"] :is(h1,h2,.display,.big,.guild-item .name){font-family:Georgia,'Times New Roman',serif!important;font-weight:400!important;letter-spacing:-.045em}
 :root[data-theme="paper"] .slide h1{font-size:64px;line-height:1.06;letter-spacing:-.04em}
@@ -12,7 +12,7 @@
 :root[data-theme="paper"] .cover-intro{color:#35332f;text-shadow:none}
 :root[data-theme="paper"] .slide:not(.system-cover):is(.drift,.title-slide){background:#f4f2ed}
 :root[data-theme="paper"] .slide:not(.system-cover):is(.drift,.title-slide):before{content:'';position:absolute;inset:0;z-index:-1;background:url('../assets/context-monsters.png') 60% center/cover;filter:grayscale(1);opacity:.12}
-:root[data-theme="paper"] .slide img{filter:grayscale(1);opacity:.88}
+:root[data-theme="paper"] .slide img{filter:grayscale(1);opacity:1}
 :root[data-theme="paper"] :is(.toolbar,.statusbar,#acts){background:#f6f4ef;border-color:#bcb6ab}
 :root[data-theme="paper"] :is(button,.action){border-radius:2px;box-shadow:inset 0 1px #fff;background:linear-gradient(#fff,#e3e0d9);color:#25241f;border-color:#949086}
 :root[data-theme="paper"] :is(button.primary,.primary,button.selected,button.active,button.is-on,button[aria-pressed="true"]){background:#292923;color:#fff;border-color:#292923}
@@ -47,3 +47,37 @@
 @media(max-width:1150px){.toolbar .edition{display:none}.toolbar{gap:12px}.toolbar .location{max-width:200px}.toolbar .theme-picker{margin-left:2px}.toolbar .theme-picker button{font-size:11px!important;padding:7px!important}}
 @media(max-width:650px){.toolbar .theme-picker{position:fixed;right:12px;bottom:8px;z-index:5;box-shadow:0 2px 12px #0003}.toolbar .theme-picker button{min-height:34px}.statusbar{padding-right:135px}:root[data-theme="paper"] #stage .slide h1{font-size:43px!important}:root[data-theme="paper"] #stage .system-cover h1{font-size:53px!important}.theme-picker{margin-left:0}.ref-tools{z-index:3}}
 @media print{.theme-picker{display:none}}
+
+/* Paper emphasis and selection stay distinct from the neutral reading surface. */
+:root[data-theme="paper"] .prompt-text mark{background:#d6e7ac;color:#29430f;border-bottom:2px solid #70864c;font-weight:600}
+:root[data-theme="paper"] .brief .prompt-window{background:#fffdf8;border-color:#80766f}
+:root[data-theme="paper"] .brief .prompt-window .window-bar{background:#e8e2d8;color:#484136}
+:root[data-theme="paper"] #stage button:is([aria-pressed="true"],.selected,.active,.is-on),
+:root[data-theme="paper"] #overviewGrid button.active{background:#292923;color:#fff;border-color:#292923;box-shadow:none}
+:root[data-theme="paper"] #stage button:is([aria-pressed="true"],.selected,.active,.is-on) :is(b,strong,span,small,code),
+:root[data-theme="paper"] #overviewGrid button.active :is(b,strong,span,small){color:#fff}
+:root[data-theme="paper"] .rt-block.is-on{background:#51473b!important;color:#fff}
+:root[data-theme="paper"] .rt-block.is-on :is(b,strong,span,small){color:inherit}
+
+/* Graphical marks use ink, not the pale panel palette. */
+:root[data-theme="paper"] .mini-dash i{background:#693781}
+:root[data-theme="paper"] .repo-card:nth-child(2) .mini-dash i{background:#345119}
+:root[data-theme="paper"] .repo-card:nth-child(3) .mini-dash i{background:#234f68}
+:root[data-theme="paper"] .fbars i{background:#526d35}
+:root[data-theme="paper"] .context.curated .context-item.drop{opacity:1;color:#625c53;background:#e8e5df;border-color:#8d877c}
+:root[data-theme="paper"] .context.curated .context-item.drop :is(span,.scene-icon){color:inherit}
+:root[data-theme="paper"] #stage button:is([aria-pressed="true"],.selected,.active,.is-on) .cl-art{background:#4a493f;border-color:#969184;color:#fff}
+
+:root[data-theme="paper"] #stage .rt-row.is-on .rt-m,
+:root[data-theme="paper"] #stage .rt-row.is-on .rt-tag b{color:#d6e8aa}
+:root[data-theme="paper"] #stage .rt-row.is-on.is-warn .rt-m,
+:root[data-theme="paper"] #stage .rt-row.is-on .rt-tag s{color:#ffc2c6}
+:root[data-theme="paper"] #stage .rt-row.is-on .rt-tag u{color:#e4c5fa}
+:root[data-theme="paper"] #stage .rt-row.is-on .rt-tag em{color:#ede8dd}
+:root[data-theme="paper"] #stage .rt-row.is-on .rt-tag i{color:#d2cbbc}
+:root[data-theme="paper"] .primer-bar u{background:#4b6b2f}
+:root[data-theme="paper"] .primer-window.full .primer-bar u{background:#9b303b}
+
+/* Saved proof viewers use the same palette aliases as the slide player. */
+:root[data-theme="paper"] .flow .phase{opacity:1;color:#625c53;background:#e8e5df;border-color:#8d877c}
+:root[data-theme="paper"] .flow .phase.on{color:#232320;background:#dce8c5;border-color:#415f25}
