@@ -281,24 +281,29 @@ as do all 19 path methods and the local adapter check. Other platform/runtime an
 full workflow/profile-value gates remain open.
 
 ### A08 One lifecycle work map (P08; R05)
-- [ ] A08.1 Preserve requested operation separately from topic during routing.
+- [x] A08.1 Preserve requested operation separately from topic during routing.
   - [x] A08.1.r1 Recognize governing request heads and complete clause context before recommending an operation.
   - [x] A08.1.r2 Verify structural authority contrasts and retained affirmative/read routing without phrase exceptions.
-- [ ] A08.2 Start cycle identity before phases and prevent duplicate start phases.
+- [x] A08.2 Start cycle identity before phases and prevent duplicate start phases.
   - [x] A08.2.a Implement cycle-start/phase-transition helpers and interrupted-state fixtures.
   - [x] A08.2.b Render footer state from actual STARTING/BLOCKED/DONE status, not next-phase metadata.
   - [x] A08.2.c Compose canonical phase entry without duplicate SENSE/SCOPE.
-- [ ] A08.3 Connect ANALYZE/CAPTURE/budget/resume to the same selected task source.
+- [x] A08.3 Connect ANALYZE/CAPTURE/budget/resume to the same selected task source.
   - [x] A08.3.a Share the selected-map reader and bounded artifact manifest using accepted parsers/selectors.
   - [x] A08.3.b Persist selected-map/profile/required-policy resume identity without replacing original authority.
   - [x] A08.3.c Wire ANALYZE/CAPTURE/BUILD/budget consumers to original paths and IDs.
     - [x] A08.3.c.r1 Guard analysis-report selection through native identity before choosing output.
     - [x] A08.3.c.r2 Verify actual PLAN present/absent/spelling and distinct-location refusal/preservation cases.
-- [ ] A08.4 Parse actual ADR conventions and retain overdue/blocked work.
-- [ ] A08.5 Test two initiatives, Spec Kit IDs and interrupted-cycle recovery.
+- [x] A08.4 Parse actual ADR conventions and retain overdue/blocked work.
+- [x] A08.5 Test two initiatives, Spec Kit IDs and interrupted-cycle recovery.
   - [x] A08.5.j1 Join the exact reviewed native-path dependency and public-helper fixture consumer without altering the frozen root correction.
   - [x] A08.5.j2 Verify original-dimension preservation and the final combined lifecycle candidate before the same reviewer's selected-subset SPEC/QUALITY.
 Acceptance: no write escalation of read intent, duplicate backlog or lost history.
+Integration closure (2026-09-24): SAME9db's whole-P08 integration review (`reviews/P08-integration-3ff5998.md`,
+`f724834c`) passes SPEC, with carried limits, and QUALITY, with advisories (P1 0, P2 0, 3 new P3s), on
+recovery `6a6d95d0` for P08's scope: the preview's conflict resolutions, reconciliations 1–7 and the status
+union. It follows the selected-subset recheck of `624` and the joined run on the integrated tree: kit
+50/50, and 146 of 148 other entries, with both failures outside P08 and resolved.
 Mechanical-provider evidence: [independent checkpoint](reviews/P08-provider-7046929.md)
 at exact `70469296`, report `e98e7da8`, integrated `e1edc0c`. All three providers,
 the necessary footer and test module match reviewed Git blobs; accepted dependencies
@@ -344,14 +349,15 @@ Final report `9ec1c7c` is preserved in `b904ffd`; the original TA failure and
 separate DA obligation remain history, not reversed by this correction.
 
 ### A10 Proportionate intake and composition (P08; R05)
-- [ ] A10.1 Ask only missing, task-relevant decisions and retain existing authorization.
-- [ ] A10.2 Keep venture framing optional for maintenance/migration/research.
-- [ ] A10.3 Route alternate plan/build/review entry points through the same work contract.
+- [x] A10.1 Ask only missing, task-relevant decisions and retain existing authorization.
+- [x] A10.2 Keep venture framing optional for maintenance/migration/research.
+- [x] A10.3 Route alternate plan/build/review entry points through the same work contract.
   - [x] A10.3.n1 Validate the F06 evidence design, then freeze equivalent explicitly regressed original sorting candidates in the two existing disposable delivery targets.
   - [x] A10.3.n2 Obtain actual unbiased target-specific independent review results with unchanged requirements and honest typed QA; preserve prior positive histories.
   - [x] A10.3.n3 Verify both native latest/readiness consumers refuse genuine later rejection, then obtain complete selected-subset SPEC and eligible whole QUALITY.
-- [ ] A10.4 Keep plan-tune settings dormant until an actual reader exists.
+- [x] A10.4 Keep plan-tune settings dormant until an actual reader exists.
 Acceptance: equivalent entry points preserve artifacts/status without repeated interview.
+Integration closure (2026-09-24): as A08, on SAME9db's whole-P08 integration review (`f724834c`).
 The original native MAIN local objective is verified through actual independent
 review, current consumption and CAPTURE (`6d1edc70`). The finite direct-delivery
 case subsequently passes its own target-specific review/current QA, then
@@ -421,15 +427,18 @@ Compliance stays UNVERIFIED without a resolved policy source. The timestamp acto
 cause of WinError 5, Windows PowerShell 5.1 and full hosted CI remain unverified.
 
 ### A13 Observable learning and status (P08; R05)
-- [ ] A13.1 Unify event producer/consumer fields and distinguish observation from verification.
-    - [ ] A13.1.a Add the common event catalog and structured reader, migrate consumers, propagate mandatory-writer failures and diagnose incomplete ledgers.
-    - [ ] A13.1.b Map P10 installer observations through P10's accepted readers after P10 integration, with an integrated doctor that derives no firing verdict from logs.
-- [ ] A13.2 Make learn/surface/promote preserve retrievable L-NNN IDs and configured sinks.
-- [ ] A13.3 Wire freeze to promised write paths or explicitly keep it advisory.
-- [ ] A13.4 Test round-trip events, promoted lesson retrieval and incomplete-log diagnoses.
-    - [ ] A13.4.a Test the non-installer event, lesson, promotion, incomplete-log and freeze scenarios.
-    - [ ] A13.4.b Round-trip complete, interrupted and absent-store installer transactions through P10's accepted reader, and test the doctor's no-verdict rule.
+- [x] A13.1 Unify event producer/consumer fields and distinguish observation from verification.
+    - [x] A13.1.a Add the common event catalog and structured reader, migrate consumers, propagate mandatory-writer failures and diagnose incomplete ledgers.
+    - [x] A13.1.b Map P10 installer observations through P10's accepted readers after P10 integration, with an integrated doctor that derives no firing verdict from logs.
+- [x] A13.2 Make learn/surface/promote preserve retrievable L-NNN IDs and configured sinks.
+- [x] A13.3 Wire freeze to promised write paths or explicitly keep it advisory.
+- [x] A13.4 Test round-trip events, promoted lesson retrieval and incomplete-log diagnoses.
+    - [x] A13.4.a Test the non-installer event, lesson, promotion, incomplete-log and freeze scenarios.
+    - [x] A13.4.b Round-trip complete, interrupted and absent-store installer transactions through P10's accepted reader, and test the doctor's no-verdict rule.
 Acceptance: absent telemetry cannot imply healthy/dead or successful enforcement.
+Integration closure (2026-09-24): the accepted A13.a (`0e1746a8`) and A13.1.b/.4.b (`5a058dd5`) units are
+preserved byte-identically on the integrated tree, as SAME9db's whole-P08 integration review confirms
+(`f724834c`). A13.3 keeps freeze explicitly advisory.
 
 ### A14 Working design contract (P11; R07)
 - [x] A14.1 Preserve accepted design profile precedence in one brief/spec/render/review schema.
@@ -642,11 +651,18 @@ all-client acceptance, the strict full suite or initiative release clearance.
 - [ ] A23.4 Run stable-tree generated checks, strict suite and separate consumer installation.
   - [x] A23.4.g1 Render schema references from actual pack/envelope contracts; reject invalid source rather than emitting empty or stale metadata.
   - [x] A23.4.g2 Regenerate and check the joined catalog, wiki, README and repository adapter without hand-editing their output.
-  - [ ] A23.4.g3 Preflight accepted shared helper dependencies before consumer writes and exercise installed-source failures.
+  - [x] A23.4.g3 Preflight accepted shared helper dependencies before consumer writes and exercise installed-source failures.
   - [x] A23.4.p1 Independently accept the shared native-path core/extraction and its source closure.
-  - [ ] A23.4.p2 Verify accepted P10 direct consumers and full default installed init/check/recovery at original paths.
+  - [x] A23.4.p2 Verify accepted P10 direct consumers and full default installed init/check/recovery at original paths.
 - [ ] A23.5 Obtain independent final spec/quality review of exact integrated content.
 Acceptance: evidence category and limitations are explicit; existing useful tests remain.
+A23.4.g3 and A23.4.p2 closure (2026-09-24): the complete kit passes 50/50 on the integrated tree
+(`fin2-kit`, `3d7f1284`).
+- g3: its data-driven missing-resource refusals cover every declared resource, reconciliations 6
+  and 7 included, as SAME9db's integration review confirms.
+- p2: its default 113/128-path init, check and owned-recovery method passes at the original
+  paths.
+A23.4 itself closes with the PR's strict CI suite.
 A23.1 and A23.2 closure (2026-09-24): the P14 A23 unit (`96bd5bab`, repair `88c92377`, report
 `d13455de`) passes `6310f7ad`'s complete SPEC and first whole QUALITY after the F1/F2 repair
 (`reviews/P14-a23-recheck-88c9237.md`), and is integrated in `8f418e68`.
