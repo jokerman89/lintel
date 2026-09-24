@@ -11,6 +11,7 @@ import argparse
 import json
 from pathlib import Path, PurePosixPath
 import sys
+sys.dont_write_bytecode = True
 from typing import Sequence, Union
 
 SOURCE_ROOT = Path(__file__).resolve().parent.parent

@@ -8,6 +8,7 @@
 import importlib.util
 from pathlib import Path
 import sys
+sys.dont_write_bytecode = True
 
 
 def main() -> None:

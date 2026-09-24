@@ -15,6 +15,7 @@ import json
 from pathlib import Path
 import re
 import sys
+sys.dont_write_bytecode = True
 import time
 from typing import Sequence
 import uuid

@@ -11,6 +11,7 @@ from __future__ import annotations
 import os
 from pathlib import Path, PurePosixPath
 import re
+import shutil
 import stat
 import subprocess
 import sys
@@ -102,7 +103,7 @@ def _latest_review(
     if pointers["corroboration"] is not None:
         shared_metadata_path(repo, "corroboration", pointers["corroboration"])
     command = [
-        "bash", (SOURCE / "bin/li-review-read").as_posix(), "--skill", pointers["review_skill"],
+        shutil.which("bash") or "bash", (SOURCE / "bin/li-review-read").as_posix(), "--skill", pointers["review_skill"],
         "--expected", (repo / pointers["context"]).as_posix(), "--gate-json",
     ]
     if pointers["corroboration"] is not None:

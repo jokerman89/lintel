@@ -14,8 +14,10 @@ import json
 import os
 from pathlib import Path
 import runpy
+import shutil
 import subprocess
 import sys
+sys.dont_write_bytecode = True
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
@@ -128,7 +130,7 @@ def _resume_context(
     if args.state_dir is not None:
         environment["LINTEL_STATE_DIR"] = (config.repo / args.state_dir).as_posix()
     observed = subprocess.run(
-        ["bash", "--noprofile", "--norc", "-s", "--", args.cycle_id, work["work_map"]],
+        [shutil.which("bash") or "bash", "--noprofile", "--norc", "-s", "--", args.cycle_id, work["work_map"]],
         input=_RESUME_SCRIPT, cwd=config.repo, env=environment,
         capture_output=True, text=True, encoding="utf-8", check=False,
     )

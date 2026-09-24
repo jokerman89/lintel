@@ -13,8 +13,10 @@ import json
 import os
 from pathlib import Path
 import re
+import shutil
 import subprocess
 import sys
+sys.dont_write_bytecode = True
 from typing import Any, Union
 
 SOURCE_ROOT = Path(__file__).resolve().parent.parent
@@ -118,8 +120,9 @@ def read_gate(args: argparse.Namespace) -> dict[str, Any]:
 
 def ship(args: argparse.Namespace) -> dict[str, Any]:
     # Consume the real shell reader so source/target audit routing has one owner.
+    # PATH lookup keeps Windows from preferring System32's WSL launcher over the selected Bash.
     command = [
-        "bash", (SOURCE_ROOT / "bin" / "li-review-read").as_posix(),
+        shutil.which("bash") or "bash", (SOURCE_ROOT / "bin" / "li-review-read").as_posix(),
         "--skill", args.skill, "--expected", args.expected.as_posix(), "--gate-json",
     ]
     if args.corroboration:
