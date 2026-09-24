@@ -685,7 +685,9 @@ This is accepted-P06-engine evidence, not P10 linked/default transaction accepta
 The remaining eight discovery/authoring consumers and existing template are
 released to the original P13 owner with explicit status/welcome ownership.
 
-Current original acceptance count is 79/113: A24.1-.4 now close on the original
+Current original acceptance count is 81/113. A09.5 and A17.5 close from P09's accepted
+installed closure, revalidated on recovery `1a116d8c` after P10's integration repair.
+A24.1-.4 now close on the original
 verified three-profile experiment, and A03.2 is reclosed after the accepted
 P05 fix and actual original P14/P12 callers, while six source metadata/core/routing/
 provenance leaves close from accepted P13 and real clone evidence. Accepted A16, domain methods,

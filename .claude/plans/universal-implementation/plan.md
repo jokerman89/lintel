@@ -320,8 +320,16 @@ P04's final composed caller and original native workflow remain separate gates.
 - [x] A09.2 Replace ambiguous execution pseudocode with owned checkpoints and recovery.
 - [x] A09.3 Add architecture/data failure mechanisms and worked decision examples.
 - [x] A09.4 Add security/operations/testing mechanisms, criteria and false-positive examples.
-- [ ] A09.5 Test installed-source discovery, Windows filenames and interrupted domain handoff.
+- [x] A09.5 Test installed-source discovery, Windows filenames and interrupted domain handoff.
 Acceptance: every required domain result remains visible; no averaging away failure.
+Installed closure (2026-09-24): the original owner's installed-source unit `e6a84ce6` /
+`0247a867` passes SAME447's scoped SPEC and QUALITY (`2e71a94b`, 0/0/0/0) and is
+integrated in `da5a599b`. After P10's integration repair (`b0598b0b` / `f740141e`), the
+owner reran the committed installed routes on recovery `1a116d8c`: the native P10
+install with PowerShell 7 and the `li-lifecycle` route each give 8/8 domain methods with
+no skips (receipts `94fb0ca1…` and `814653ca…`). Installed paths stay at or below 117
+characters. The evidence covers native Windows with Python 3.11.9 and PowerShell 7.6.6,
+not other platforms or model correctness.
 Source/data and module-consumer evidence: accepted data core `ea92df8` / `6e2f7e4`
 and [module review](reviews/P09-modules-5c99612.md) `114ddfe3` at `5c99612`,
 integrated `2d789a4`. All 26 method/doc/test paths match; 13 joined consumer
@@ -457,8 +465,14 @@ rerun. Headed login, other hosts, PDF raster and full P11/A14 remain separate.
 - [x] A17.2 Neutralize forced model/tool assumptions and explicitly supersede relevant ADR0012 scope.
 - [x] A17.3 Fix DemoNarratorJunior/DemoNarrativeArc circular prerequisites.
 - [x] A17.4 Preserve distinct planner/executor responsibilities and specialist methods.
-- [ ] A17.5 Verify dispatch/receiver contracts, independent reviews and cold-start examples.
+- [x] A17.5 Verify dispatch/receiver contracts, independent reviews and cold-start examples.
 Acceptance: no unique role value disappears; no role depends on its own circular output.
+Installed closure (2026-09-24): the same accepted and integrated installed unit
+(`2e71a94b`, `da5a599b`) exercises the dispatch/receiver contracts against the installed
+roles, with discriminating refusals, and one read-only cold-start context against the
+installed kit bodies. Both installed routes revalidate 8/8 on recovery `1a116d8c` after
+P10's repair. This is installed and receiver coverage, not native registration or
+observed correctness of all 69 roles.
 Evidence: [accepted role preservation](reviews/P09-content-4a9b946.md) `19eb776`,
 the 69-role map and ADR-0028, plus accepted consumer review `114ddfe3` and exact
 joined module checks. The accepted P13 demo-script selection retains Plan ->

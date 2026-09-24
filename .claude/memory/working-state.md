@@ -17,7 +17,8 @@ changed. Continue from the [recovery checkpoint](../plans/universal-implementati
 and original work map. Existing owners are retained. Operator directive: every
 session and new actor uses `claude-opus-5.5`/max/`long_context`; see the handoff
 rule. Current original acceptance
-is **79/113**, not full release readiness. A24.1-.4 now close from the completed
+is **81/113**, not full release readiness. A09.5 and A17.5 close from P09's accepted
+installed closure, revalidated after P10's integration repair. A24.1-.4 now close from the completed
 original three-profile experiment and final cross-profile verification.
 A03.2 is reclosed after independently
 accepted P05 native observations (`06a41fe2`, integrated `b22443f`) and both
