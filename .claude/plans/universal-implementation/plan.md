@@ -654,8 +654,13 @@ all-client acceptance, the strict full suite or initiative release clearance.
   - [x] A23.4.g3 Preflight accepted shared helper dependencies before consumer writes and exercise installed-source failures.
   - [x] A23.4.p1 Independently accept the shared native-path core/extraction and its source closure.
   - [x] A23.4.p2 Verify accepted P10 direct consumers and full default installed init/check/recovery at original paths.
-- [ ] A23.5 Obtain independent final spec/quality review of exact integrated content.
+- [x] A23.5 Obtain independent final spec/quality review of exact integrated content.
 Acceptance: evidence category and limitations are explicit; existing useful tests remain.
+A23.5 closure (2026-09-24): the independent final reviewer `8df81ac8` (claude-opus-5.5) returns SPEC PASS,
+then whole QUALITY PASS with six records-only P3s, on the exact frozen head `ad529ebc`, based on
+`main` `9575aaac` (`reviews/A23.5-final-ad529eb.md`). The merged content is 755 files: 539 product
+and 216 record paths. Every product byte traces to a reviewed unit or to a coordinator change it
+reviewed, and nothing is lost relative to `main`. A23.4 closes with PR #93's strict CI.
 A23.4.g3 and A23.4.p2 closure (2026-09-24): the complete kit passes 50/50 on the integrated tree
 (`fin2-kit`, `3d7f1284`).
 - g3: its data-driven missing-resource refusals cover every declared resource, reconciliations 6
@@ -687,8 +692,8 @@ of four groups, and none counts as executed evidence for a closed item:
   P08-5 (case-sensitive positive), P08-12 (host activation and hooks), P09-5 (path budget at a
   long root), P10-4 (long linked-worktree positive), P10-9 (WinError 5 cause) and P13-6 (the
   `verify.sh` upstream listing without yq).
-- **Open or blocked items.** P11-4 and P11-5 (A14.5, under its review) and P12-2 (A15, denied
-  routes).
+- **Blocked items.** P12-2 (A15, denied routes). The A14.5 rows are resolved: P11-4 was executed, and P11-5's
+  framework build closed through the operator-authorized Microsoft npm feed restore and its reviews.
 
 The runner reports only canonical `platform: windows-only` skips as N/A, and only off Windows
 (`917d7125`); every other skip still refuses strict acceptance.

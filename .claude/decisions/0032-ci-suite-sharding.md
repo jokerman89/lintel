@@ -67,7 +67,9 @@ Every discovered test must still run under `--require-all` on every system.
   entries.** Rejected for now. Durations would need a maintained data file and would
   drift. Splitting the kit changes a test that P10 owns and SAME reviewed, late in
   delivery. Index-modulo sharding already caps the largest local shard at about 2.9
-  hours, the shard holding the kit.
+  hours, the shard holding the kit. The A23.5 review supersedes that estimate: on the frozen head,
+  the kit's shard 3/4 measures about 3.77 hours locally, which is inside the 300-minute timeout,
+  but with a smaller margin.
 
 ## Consequences
 

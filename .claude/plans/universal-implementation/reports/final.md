@@ -1,7 +1,7 @@
 # Universal initiative final report (P15)
 
-**Status:** frozen for the A23.5 independent final review. The CI results are added after the
-delivery PR's run. Nothing has been pushed before the review (L-045).
+**Status:** A23.5 passes on the frozen head `ad529ebc` (`reviews/A23.5-final-ad529eb.md`). The branch is
+published as draft PR #93 by `jokerman89`. The CI results are added after its run.
 
 ## Delivery identity
 
@@ -14,7 +14,7 @@ delivery PR's run. Nothing has been pushed before the review (L-045).
 
 ## Acceptance by area
 
-The count is 107/113 original top-level items. Each area links to its plan section,
+The count is 108/113 original top-level items. Each area links to its plan section,
 where the leaf evidence and the review files are cited.
 
 | Area | Closed | Status |
@@ -41,7 +41,7 @@ where the leaf evidence and the review files are cited.
 | [A20 Provenance and versions](../plan.md#a20-provenance-and-versions-p07p13-r04) | 4/4 | Accepted |
 | [A21 Safe dormant handoff](../plan.md#a21-safe-dormant-handoff-p04-r08) | 4/4 | Accepted |
 | [A22 Preserved Swarming integration](../plan.md#a22-preserved-swarming-integration-p04-r09) | 7/7 | Accepted |
-| [A23 Boundary regression evidence](../plan.md#a23-boundary-regression-evidence-all-owners-p14-r11) | 3/5 | Pending: A23.1–.3 and A23.4.g3/p2 are closed; A23.4 closes with the PR's strict CI suite and A23.5 with this final review |
+| [A23 Boundary regression evidence](../plan.md#a23-boundary-regression-evidence-all-owners-p14-r11) | 4/5 | Pending: A23.4 closes with PR #93's strict CI suite; A23.1–.3 and A23.5 are closed |
 | [A24 Observable enterprise profile value](../plan.md#a24-observable-enterprise-profile-value-p14-r04r11) | 4/4 | Accepted |
 | [A25 Trusted implementation source](../plan.md#a25-trusted-implementation-source-p01-r01) | 3/3 | Accepted |
 | [A26 Explicit private-sync destination](../plan.md#a26-explicit-private-sync-destination-p02-r10) | 4/4 | Accepted |
@@ -130,6 +130,20 @@ These are reviewed at A23.5, not by a package review:
   It is outside every released package scope.
 - **Invalid historical evidence.** The `shell27` and `q02` isolation incidents stay invalid, and
   their effects on the actual home are UNKNOWN.
+- **Standing limits on closed items** (the A23.3.s3 reconciliation):
+  - P07-3: live UNC I/O;
+  - P08-5: the case-sensitive positive;
+  - P09-5: the installed test's path budget at a long root;
+  - P10-4: the long linked-worktree positive;
+  - P13-6: the `verify.sh` upstream listing without yq.
+  X1, Python 3.9; X4, Windows PowerShell 5.1; and X5, live host and native role registration,
+  appear under Platforms.
+- **SAME9db's carried P08 limits:**
+  - the 704/aa5 seam is qualified by revision;
+  - the inherited P03/P07 14/18 and 22/23 groups are not exercised at their failing depth,
+    because the joined runs use short roots;
+  - the cycle authority sentences are reviewed as instruction text only;
+  - host activation, native roles and paid models are not verified.
 - **Unknown causes.** The cause of the intermittent WinError 5 on journal replacement is not
   established.
 - **Later review advisories, all P3.**
@@ -160,7 +174,8 @@ runs used launcher `d288e74b` with PowerShell 7 only, synthetic roots and no oth
 | `fin2-rest-b` | 74/75; `catalog-installed` is F-INT-6, now fixed, reviewed and integrated | `4496f946…679654a8` |
 
 **Targeted run on `14ab496e`** (`fin3-targeted`, 16/16 exit 0, `results.json` `cfdfdb09…cb84947f`),
-covering everything that changed since `3d7f1284`:
+covering every executable change since `3d7f1284`. The one exception is `ci.yml`: only CI itself
+exercises it, and it was validated statically and in the A23.5 review. The entries are:
 - the runner contract, with the platform N/A and shard cases;
 - `context-safety`, `profile-path-identity` and `snapshot-ownership`, whose skip reasons changed;
 - `catalog-metadata`;
@@ -170,7 +185,7 @@ covering everything that changed since `3d7f1284`:
 - `domain-installed-consumers` from a short work directory;
 - `catalog-installed` (1,254 s) and `review-evidence` (1,000 s).
 
-**Independent verdicts integrated in this delivery:**
+**Independent verdicts added in this delivery's final phase.** Earlier verdicts are preserved under `reviews/`:
 - P10: `f460eb9f`, `9ca6402a` and F-INT-5 (`70bdcd69`).
 - P09's installed closure: `2e71a94b`.
 - P13:
@@ -183,7 +198,9 @@ covering everything that changed since `3d7f1284`:
   - the whole integration review (`f724834c`).
 - The P14 A23 unit: `8a74d548`.
 - A14.5: the static page (`562f0386`) and the app (`9d23f2ff`).
-- The A23.5 Phase 1 notes: `9c6f65a4` and `edd2f556`.
+- The P14 A23 unit's first review (`fb17f69f`, SPEC FAIL, repaired) and its recheck.
+- A23.5: the Phase 1 notes (`9c6f65a4`), the Phase 1b notes (`edd2f556`) and the Phase 2 final
+  review (`reviews/A23.5-final-ad529eb.md`).
 
 **Not run locally:** the strict `--require-all` suite, because jq is denied (L-046); Linux and macOS;
 Python 3.9 and 3.12; and Windows PowerShell 5.1. The delivery PR's CI supplies the strict suite on
