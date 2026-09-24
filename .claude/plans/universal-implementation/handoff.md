@@ -362,6 +362,10 @@ never inferred from this directive; a model switch does not change context ident
   one bounded repair; see the P08 card, "SAME9db review and repair release". The frozen
   repair (product `5f58da04`, report `af24721a`) passes coordinator intake and is with
   SAME9db for the recheck.
+  F06: f2 froze the three remaining preparation packages for SAME9db. The coordinator
+  supplied the step-1 host corroboration receipts for both rejecting candidate-03
+  records (T011 `29b575c0…`, T027 `7f96932d…`); see the P08 card, "Preparation
+  handoff and step-1 host receipts".
 - P09: module product `5c99612` passes `114ddfe3`, integrated `2d789a4`;
   all 26 product paths match and 13 joined methods pass. `477d3fc` releases
   the original owner's separate N1 safety-quantifier correction and two bounded
