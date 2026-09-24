@@ -38,3 +38,10 @@
  .blocks-grid{grid-template-columns:1fr;gap:28px;margin-top:32px}.blocks-grid h2{font-size:29px;margin:11px 0}.blocks-grid p{font-size:21px}.blocks-grid small{font-size:16px}
  .trail-path{grid-template-columns:1fr;gap:9px}.trail-path>i{transform:rotate(90deg);padding:0;font-size:20px;line-height:20px}.trail-path>div{padding-top:13px}.trail-path b{font-size:22px}.trail-example{grid-template-columns:1fr;gap:24px;margin-top:29px;min-height:0}.trail-narrative nav{gap:6px}.trail-narrative nav button{font-size:11px;padding:9px 8px}.trail-narrative h2{font-size:29px}.trail-narrative p{font-size:19px}.trail-kicker{font-size:10px}.trail-record pre{font-size:16px;padding:20px 15px}.record-top{font-size:9px;padding:13px 11px;gap:8px}.record-top b{font-size:8px}.record-outcome{font-size:15px;padding:15px}.trail-hooks{flex-wrap:wrap;gap:12px;font-size:16px}.trail-hooks b{font-size:19px}.trail-hooks small{width:100%;margin:0;padding:12px 0 0;border-left:0;border-top:1px solid #54405f}.state-flow .stamp,.system-map-slide .stamp{max-width:calc(100% - 50px);font-size:10px}
 }
+
+/* The name explains the metaphor without adding another presentation step. */
+.lintel-definition{position:absolute;right:66px;bottom:105px;width:400px;padding:18px 21px;border-left:2px solid var(--purple);background:#101016eb;color:#e6dff0}
+.lintel-definition h2{font:600 24px/1.2 Georgia,serif;margin:0 0 11px;letter-spacing:-.02em}
+.lintel-definition h2 span{font:10px/1.5 Consolas,monospace;letter-spacing:.07em;margin-left:12px;color:#cbb6dc}
+.lintel-definition p{font:16px/1.5 Arial,Helvetica,sans-serif;margin:0}
+@media(max-width:650px){.lintel-definition{position:static;width:100%;margin:25px 0 0;padding:16px 18px}.lintel-definition p{font-size:15px}}

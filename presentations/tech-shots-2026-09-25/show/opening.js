@@ -2,9 +2,10 @@
 window.LINTEL_OPENING = ({shell,icon,state}) => ({
   systemcover:s=>shell(s,
     '<div class="cover-art" role="img" aria-label="Lintel portal surrounded by the beasts of context rot and AI slop"></div>'+
-    '<div class="cover-intro"><span>JOHANNES ÅKERMAN</span><span>CAIP SE + CSA</span></div>'+
+    '<div class="cover-intro"><span>JOHANNES ÅKERMAN</span><span>AN INDEPENDENT OPEN-SOURCE PROJECT</span></div>'+
     '<div class="cover-exchange"><div><span>09:12 · YOU</span><p>One dashboard, please.</p></div><i aria-hidden="true">→</i><div><span>12:12 · AGENT</span><p>I built you <strong>a platform.</strong></p></div></div>'+
-    '<div class="cover-prompt">A quick show of hands. Teams, you too.</div>', 'system-cover'),
+    '<div class="cover-prompt">A quick show of hands. Remote participants, you too.</div>'+
+    '<aside class="lintel-definition" aria-label="Meaning of lintel"><h2>lintel <span>noun · architecture</span></h2><p>A lintel is a horizontal support beam placed across the top of an opening—such as a door, window, or fireplace—that carries the weight of the structure above it.</p></aside>', 'system-cover'),
   systemmap:s=>shell(s,
     '<div class="system-map" aria-label="Lintel architecture: client runs the method, skills and roles; event hooks check selected actions; project records feed future tasks">'+
     '<div class="map-client">'+icon('terminal')+'<strong>Your coding client</strong><span>CLI / editor / desktop</span><b>You set the outcome.</b></div>'+
