@@ -282,22 +282,22 @@ full workflow/profile-value gates remain open.
 
 ### A08 One lifecycle work map (P08; R05)
 - [ ] A08.1 Preserve requested operation separately from topic during routing.
-  - [ ] A08.1.r1 Recognize governing request heads and complete clause context before recommending an operation.
-  - [ ] A08.1.r2 Verify structural authority contrasts and retained affirmative/read routing without phrase exceptions.
+  - [x] A08.1.r1 Recognize governing request heads and complete clause context before recommending an operation.
+  - [x] A08.1.r2 Verify structural authority contrasts and retained affirmative/read routing without phrase exceptions.
 - [ ] A08.2 Start cycle identity before phases and prevent duplicate start phases.
   - [x] A08.2.a Implement cycle-start/phase-transition helpers and interrupted-state fixtures.
   - [x] A08.2.b Render footer state from actual STARTING/BLOCKED/DONE status, not next-phase metadata.
-  - [ ] A08.2.c Compose canonical phase entry without duplicate SENSE/SCOPE.
+  - [x] A08.2.c Compose canonical phase entry without duplicate SENSE/SCOPE.
 - [ ] A08.3 Connect ANALYZE/CAPTURE/budget/resume to the same selected task source.
   - [x] A08.3.a Share the selected-map reader and bounded artifact manifest using accepted parsers/selectors.
   - [x] A08.3.b Persist selected-map/profile/required-policy resume identity without replacing original authority.
-  - [ ] A08.3.c Wire ANALYZE/CAPTURE/BUILD/budget consumers to original paths and IDs.
-    - [ ] A08.3.c.r1 Guard analysis-report selection through native identity before choosing output.
-    - [ ] A08.3.c.r2 Verify actual PLAN present/absent/spelling and distinct-location refusal/preservation cases.
+  - [x] A08.3.c Wire ANALYZE/CAPTURE/BUILD/budget consumers to original paths and IDs.
+    - [x] A08.3.c.r1 Guard analysis-report selection through native identity before choosing output.
+    - [x] A08.3.c.r2 Verify actual PLAN present/absent/spelling and distinct-location refusal/preservation cases.
 - [ ] A08.4 Parse actual ADR conventions and retain overdue/blocked work.
 - [ ] A08.5 Test two initiatives, Spec Kit IDs and interrupted-cycle recovery.
-  - [ ] A08.5.j1 Join the exact reviewed native-path dependency and public-helper fixture consumer without altering the frozen root correction.
-  - [ ] A08.5.j2 Verify original-dimension preservation and the final combined lifecycle candidate before the same reviewer's selected-subset SPEC/QUALITY.
+  - [x] A08.5.j1 Join the exact reviewed native-path dependency and public-helper fixture consumer without altering the frozen root correction.
+  - [x] A08.5.j2 Verify original-dimension preservation and the final combined lifecycle candidate before the same reviewer's selected-subset SPEC/QUALITY.
 Acceptance: no write escalation of read intent, duplicate backlog or lost history.
 Mechanical-provider evidence: [independent checkpoint](reviews/P08-provider-7046929.md)
 at exact `70469296`, report `e98e7da8`, integrated `e1edc0c`. All three providers,
@@ -347,9 +347,9 @@ separate DA obligation remain history, not reversed by this correction.
 - [ ] A10.1 Ask only missing, task-relevant decisions and retain existing authorization.
 - [ ] A10.2 Keep venture framing optional for maintenance/migration/research.
 - [ ] A10.3 Route alternate plan/build/review entry points through the same work contract.
-  - [ ] A10.3.n1 Validate the F06 evidence design, then freeze equivalent explicitly regressed original sorting candidates in the two existing disposable delivery targets.
-  - [ ] A10.3.n2 Obtain actual unbiased target-specific independent review results with unchanged requirements and honest typed QA; preserve prior positive histories.
-  - [ ] A10.3.n3 Verify both native latest/readiness consumers refuse genuine later rejection, then obtain complete selected-subset SPEC and eligible whole QUALITY.
+  - [x] A10.3.n1 Validate the F06 evidence design, then freeze equivalent explicitly regressed original sorting candidates in the two existing disposable delivery targets.
+  - [x] A10.3.n2 Obtain actual unbiased target-specific independent review results with unchanged requirements and honest typed QA; preserve prior positive histories.
+  - [x] A10.3.n3 Verify both native latest/readiness consumers refuse genuine later rejection, then obtain complete selected-subset SPEC and eligible whole QUALITY.
 - [ ] A10.4 Keep plan-tune settings dormant until an actual reader exists.
 Acceptance: equivalent entry points preserve artifacts/status without repeated interview.
 The original native MAIN local objective is verified through actual independent
@@ -367,6 +367,11 @@ that requested native condition remains UNOBSERVED/OPEN. Full owner report
 then first eligible whole QUALITY. No A10 parent closes from data parity alone.
 Complete independent `624b554f` on `229656cf` now leaves SPEC UNVERIFIED,
 whole QUALITY NOT STARTED and F06/A10.3 open: all real delivery reviews passed.
+F06 acceptance (2026-09-24): after the native negative-control chain, SAME9db's recheck
+of `624` (`ae844989…7afbf064`) passes the selected-subset SPEC and scoped whole QUALITY
+(P1 0, P2 0, P3 5): both native readers and readiness consumers refuse the genuine later
+rejection. The leaves close; the A08 and A10 parents close after recovery integration,
+joined checks and the whole-P08 integration review.
 The exact report is preserved without importing unaccepted product ancestry.
 The original P08 card records a bounded negative-control re-plan and mandatory
 pre-execution method check; it does not waive the gap or direct a fabricated
