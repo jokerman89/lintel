@@ -960,3 +960,22 @@ same session caught every similar slip because they ran before the commit.
 after reading a clean result, or make the commit conditional on the check's
 exit status. Recompute abbreviations from the full value rather than typing
 them.
+
+## L-049 - A synthetic TEMP can pin the host-wide MSYS /tmp
+
+**Date:** 2026-09-24
+
+**Context:** Git for Windows mounts `/tmp` as `usertemp`, which MSYS evaluates once
+and keeps in per-user shared memory while any MSYS process is alive. An entry in
+the coordinator's targeted test run started an MSYS process with a synthetic
+`TEMP`, so `/tmp` for every later Git Bash process on the machine pointed into
+that entry's root. After the entry's directory was removed, every session's Bash
+printed "could not find /tmp", `mktemp -d` returned empty, and F06 step 1 stopped
+fail-closed on a strict producer-stderr assertion.
+
+**Rule:** After starting or stopping any run that gives Bash a synthetic `TEMP`,
+check the `/tmp` line of `mount`. Keep any synthetic directory that backs it until
+no MSYS process uses the old mount; if it has gone, recreate it empty rather than
+killing other sessions' processes. Probe Bash stderr before granting a native
+invocation, and treat host warnings as shared-state defects to diagnose, not as
+noise to tolerate.
