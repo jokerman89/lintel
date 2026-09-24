@@ -622,12 +622,12 @@ contract and real-Git observations, not native people, live enterprise policy,
 all-client acceptance, the strict full suite or initiative release clearance.
 
 ### A23 Boundary regression evidence (all owners; P14; R11)
-- [ ] A23.1 Attach a discriminating negative and preserved-behavior case to every corrected mechanism.
-- [ ] A23.2 Exercise profile/work/result/review/resume producer-consumer links together.
-- [ ] A23.3 Refuse zero-run/skipped/unverified results as full acceptance.
+- [x] A23.1 Attach a discriminating negative and preserved-behavior case to every corrected mechanism.
+- [x] A23.2 Exercise profile/work/result/review/resume producer-consumer links together.
+- [x] A23.3 Refuse zero-run/skipped/unverified results as full acceptance.
   - [x] A23.3.s1 Reproduce the actual manifest shape check hiding unavailable JSON parity checks from the strict runner.
   - [x] A23.3.s2 Report that missing coverage through the existing skip protocol and verify strict refusal without executing or replacing jq.
-  - [ ] A23.3.s3 Reconcile remaining original package and caller evidence against this refusal contract before whole-parent acceptance.
+  - [x] A23.3.s3 Reconcile remaining original package and caller evidence against this refusal contract before whole-parent acceptance.
   - [x] A23.3.s4 Reproduce the same hidden-skip behavior in the actual hook-input and plugin-manifest guards.
   - [x] A23.3.s5 Report unavailable extraction/parsing/field coverage explicitly, retain available checks and reject false valid-JSON claims.
 - [ ] A23.4 Run stable-tree generated checks, strict suite and separate consumer installation.
@@ -638,6 +638,35 @@ all-client acceptance, the strict full suite or initiative release clearance.
   - [ ] A23.4.p2 Verify accepted P10 direct consumers and full default installed init/check/recovery at original paths.
 - [ ] A23.5 Obtain independent final spec/quality review of exact integrated content.
 Acceptance: evidence category and limitations are explicit; existing useful tests remain.
+A23.1 and A23.2 closure (2026-09-24): the P14 A23 unit (`96bd5bab`, repair `88c92377`, report
+`d13455de`) passes `6310f7ad`'s complete SPEC and first whole QUALITY after the F1/F2 repair
+(`reviews/P14-a23-recheck-88c9237.md`), and is integrated in `8f418e68`.
+- A23.1 rests on its 83-row matrix: every corrected mechanism, coordinator reconciliations
+  included, has its current discriminating negative and its preserved-behavior evidence. Where
+  historical RED provenance is missing, the gap stays explicit; a new passing regression does not
+  replace it.
+- A23.2 rests on the installed caller-to-child bridge and one installed chain across the real P07,
+  P08, P09, P05 and resume links, with a typed refusal per link. Review-to-resume is labelled
+  caller orchestration.
+
+A23.3.s3 reconciliation (2026-09-24, coordinator). The accepted matrix has 63 executed, 4
+skipped, 9 unverified and 7 host-unavailable rows. Each row that is not executed falls into one
+of four groups, and none counts as executed evidence for a closed item:
+- **Resolved since the matrix base `ad1045b8`.** P08-3 (A08.1 routing) and P08-9 (F06): SAME9db's
+  recheck of `624` (`a337161c`). C-3 (reconciliation 6) and C-10 (A23.4.g3 installed failure
+  paths): reconciliation 7 (`ac216479`) and the kit's data-driven missing-resource refusals.
+- **Carried to the PR's strict CI.** X2, C-5 and C-7 (the jq-dependent assertions), and X3 (Linux,
+  macOS, stock Bash 3.2 and hosted CI). A23.4 stays open until then.
+- **Explicit limits on closed items,** stated in `reports/final.md`: X1 (Python 3.9 runtime), X4
+  (Windows PowerShell 5.1), X5 (live host and native role registration), P07-3 (live UNC I/O),
+  P08-5 (case-sensitive positive), P08-12 (host activation and hooks), P09-5 (path budget at a
+  long root), P10-4 (long linked-worktree positive), P10-9 (WinError 5 cause) and P13-6 (the
+  `verify.sh` upstream listing without yq).
+- **Open or blocked items.** P11-4 and P11-5 (A14.5, under its review) and P12-2 (A15, denied
+  routes).
+
+The runner reports only canonical `platform: windows-only` skips as N/A, and only off Windows
+(`917d7125`); every other skip still refuses strict acceptance.
 Coordinator-owned A23.3 refinement: the prior structural runner could report
 39 passes while `manifest-identity.sh` labels unavailable jq version-parity
 coverage as a NOTE. The actual-script regression in `test-runner-contract.sh`
