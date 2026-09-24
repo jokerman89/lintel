@@ -7,7 +7,8 @@
   "technical_minutes": 18,
   "themes": [
     "neon",
-    "paper"
+    "paper",
+    "fluent"
   ],
   "demo_mode": "prepared synthetic browser implementations and saved helper executions",
   "planned_links": [
@@ -17,6 +18,6 @@
   ],
   "source_status": "unreleased development snapshot; public equivalent files plus cited excerpts",
   "product_minutes": 6,
-  "product_artwork": "four standalone motifs, each in Neon and Paper",
+  "product_artwork": "four standalone motifs: Neon and Paper rasters plus Fluent SVG sculptures",
   "primary_logo": "Folded L \u2014 shaded"
 }

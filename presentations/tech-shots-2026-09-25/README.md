@@ -2,7 +2,7 @@
 
 [Open the website](https://jokerman89.github.io/lintel/) · [Presentation](https://jokerman89.github.io/lintel/show/index.html) · [Technical reference](https://jokerman89.github.io/lintel/show/technical-reference.html)
 
-A 50-minute level-200 presentation for developers and architects, with a separate six-minute product launch and 18-minute technical module. English slides and speaker notes, two themes, 58 screens including optional material, and prepared browser demos.
+A 50-minute level-200 presentation for developers and architects, with a separate six-minute product launch and 18-minute technical module. English slides and speaker notes, three themes (Neon, Paper and Fluent), 58 screens including optional material, and prepared browser demos.
 
 ## Use it
 
@@ -45,3 +45,7 @@ Revision 275a354 is an unreleased local development snapshot, not a publicly ins
 ## Brand
 
 Folded L is the selected primary logo, with restrained lime/violet surface shading. `site/mark.svg` is the website master and shared favicon. The same colors are retained in both themes. [Download the selected brand kit](downloads/lintel-brand-kit.zip) for SVG, transparent PNG and browser/app icon sizes.
+
+## Visual themes
+
+The Fluent theme takes inspiration from Microsoft Fluent 2 while retaining Lintel branding. [Theme design and maintenance](site/THEMES.md) describes the tokens, original artwork and checks. Select a theme in the header or share `show/index.html?theme=fluent`. Preferences stay in browser-local storage; no telemetry or remote font is added.

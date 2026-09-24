@@ -1,4 +1,5 @@
-/* Two deliberate visual systems, one set of content and controls. */
+@import url("fluent.css");
+/* Three deliberate visual systems, one set of content and controls. */
 .theme-picker{display:inline-flex;gap:0!important;flex-shrink:0;align-items:center;margin-left:9px;border:1px solid #57515f;border-radius:5px;overflow:hidden}.theme-picker button{font:12px/1.3 Consolas,monospace!important;letter-spacing:0!important;padding:8px 10px!important;border:0!important;border-radius:0!important;min-height:32px;background:#15151c;color:#c8c4d0;white-space:nowrap}.theme-picker button[aria-pressed="true"]{background:#a6ff00;color:#14170c}.theme-picker button:focus-visible{outline:2px solid currentColor!important;outline-offset:-4px!important}
 :root[data-theme="paper"]{--ink:#f6f4ef;--paper:#232320;--lime:#415f25;--purple:#67477b;--muted:#646158;--line:#bcb6ab;--red:#9b303b;--bg:#f6f4ef;--surface:#e9e5dc;--panel:#e9e5dc;--fg:#232320;--dim:#57534b;color-scheme:light}
 :root[data-theme="paper"] body{background:#f6f4ef;color:#232320}
@@ -89,3 +90,23 @@
 :root[data-theme="paper"] .swarm-trigger{color:#fff;background:#344d20;border-color:#344d20}
 :root[data-theme="paper"] .swarm-replay{color:#464c3e;border-color:#7f8875}
 :root[data-theme="paper"] .swarm-evidence{background:#0d1117}
+
+/* Progress is a fill inside every section, with independent foreground contrast. */
+:root[data-theme="paper"] #acts button:before,
+:root[data-theme="fluent"] #acts button:before{display:block;pointer-events:none}
+:root[data-theme="paper"] #acts button.current{background:#706b60;color:#fff;box-shadow:inset 0 -2px #292923}
+:root[data-theme="paper"] #acts button.current:hover{background:#625d53;color:#fff}
+:root[data-theme="paper"] #acts button.current:before{background:#292923;border-right:2px solid #d6d0c4;box-sizing:border-box}
+:root[data-theme="paper"] #acts button.done{background:#ccc9c2;color:#45433e}
+:root[data-theme="paper"] #acts button.done:before{background:#ccc9c2}
+:root[data-theme="paper"] #acts button.done:hover:before{background:#bab7b0}
+:root[data-theme="fluent"] #acts button.current{background:#f3efff;color:#3c276c;box-shadow:inset 0 -2px #5b4fc4}
+:root[data-theme="fluent"] #acts button.current:hover{background:#eae3fc}
+:root[data-theme="fluent"] #acts button.current:before{background:#cfc2f0;border-right:2px solid #5b4fc4;box-sizing:border-box}
+:root[data-theme="fluent"] #acts button.done:before{background:#e4e4e4}
+:root[data-theme="neon"] #acts button.current:before{border-right:1px solid #a6ff00;box-sizing:border-box}
+
+:root[data-theme="paper"] #acts button.current b,
+:root[data-theme="paper"] #acts button.done b,
+:root[data-theme="fluent"] #acts button.current b,
+:root[data-theme="fluent"] #acts button.done b{color:inherit}
