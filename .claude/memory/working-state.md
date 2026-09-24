@@ -17,7 +17,8 @@ changed. Continue from the [recovery checkpoint](../plans/universal-implementati
 and original work map. Existing owners are retained. Operator directive: every
 session and new actor uses `claude-opus-5.5`/max/`long_context`; see the handoff
 rule. Current original acceptance
-is **87/113**, not full release readiness. A18.3 and A18.4 close from P13's accepted
+is **90/113**, not full release readiness. A19.3, A19.4 and A20.4 close from P13's accepted
+fan-in (`cd877232`). A18.3 and A18.4 close from P13's accepted
 installed-consumer closure (`d0eb793e`, integrated `1e41deb0`). A12.1–A12.4 close from P10's accepted
 integration repair and the joined checks (kit 50/50, light 8/8). A09.5 and A17.5 close from P09's accepted
 installed closure, revalidated after P10's integration repair. A24.1-.4 now close from the completed
@@ -181,9 +182,9 @@ checks: the kit (`p08int-kit`) and the other 148 entries (`p08int-rest`, three f
 so far).
 P09's installed closure is integrated (`da5a599b`), and A09.5/A17.5 are closed.
 P13: the installed-consumer closure is accepted and integrated (`1e41deb0`), and A18.3 and
-A18.4 are closed. The rebased fan-in (`e922515c`, `f581b072`, report `d12bbf6d`, on
-`ad1045b8`) is frozen and under review by `30146eab` (Opus 5.5): A19.3, A19.4, A20.4's
-P13 part, N2 and reconciliation 6's descriptor change.
+A18.4 are closed. The fan-in is accepted and integrated (`cd877232`, review preserved in
+`2172dd31`), and A19.3, A19.4 and A20.4 are closed. Its N4 becomes reconciliation 7; N3 and
+N5 are an optional owner follow-up for a recheck by `30146eab`.
 P14: the A23 unit (product `96bd5bab`, report `0a091f34`, on `ad1045b8`; final run 8/8 in
 963 s; an 81-row matrix) is frozen and under review by `6310f7ad` (Opus 5.5).
 P10 F-INT-5: the test-only repair `b7555ca3` / `b7cf10ef` is with SAME `1578dfd8`.
