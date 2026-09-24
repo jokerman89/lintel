@@ -5,6 +5,10 @@ native utilities on POSIX; on Windows it invokes the same native performer as
 `install/install.ps1`. That performer uses PowerShell 5.1+ and .NET. Git is required.
 The POSIX path needs an existing SHA-256 provider: `sha256sum`, `shasum` or OpenSSL.
 Missing tools fail before mutation; nothing installs a dependency automatically.
+The Bash performer starts several processes per file. On Windows that makes a
+full-source install far slower than the PowerShell performer, which `install.sh` selects
+there. The repository's Windows tests therefore exercise the Bash performer on a small,
+labelled fixture and the full source through PowerShell.
 
 Installation copies files, not live host capabilities. Later profile, repository-adapter,
 scaffold and snapshot operations have their separately documented Python prerequisites.

@@ -528,6 +528,212 @@ class ManagedTransaction(unittest.TestCase):
                 print(json.dumps({"B01": "other-publication-not-retried", "phase": phase,
                                   "attempts": len(errors), "same_exception": True, "notices": []}))
 
+    def disturbed_journal_reads(self, selected):
+        """Reset the owned journal's timestamps inside chosen reads, as IC-F01 observed."""
+        original_open, original_fstat = os.open, os.fstat
+        journals, reads, disturbed = {}, [], []
+
+        def opened(path, flags, *args, **kwargs):
+            descriptor = original_open(path, flags, *args, **kwargs)
+            if Path(path).name == "journal.json":
+                journals[descriptor] = Path(path)
+            return descriptor
+
+        def status(descriptor):
+            path = journals.pop(descriptor, None)
+            if path is not None:
+                reads.append(str(path))
+                if selected(len(reads)):
+                    current = os.lstat(path)
+                    os.utime(path, ns=(current.st_atime_ns, current.st_mtime_ns - 340_000_000))
+                    disturbed.append(len(reads))
+            return original_fstat(descriptor)
+
+        return reads, disturbed, (patch("os.open", side_effect=opened), patch("os.fstat", side_effect=status))
+
+    def test_journal_identity_disturbance_rereads_only_a_stable_owned_journal(self):
+        for site in ("entry", "staging-check"):
+            for disturbances in range(1, 5):
+                with self.subTest(site=site, disturbances=disturbances):
+                    self.retry_trial(f"disturbed-{site}-{disturbances}")
+                    with self.module._lock(self.root, self.store):
+                        folder, planned = self.journal_fixture(existing=True)
+                        previous = native_io_path(folder / "journal.json").read_bytes()
+                        # Each attempt reads the journal twice: its verification, then the staging check.
+                        chosen = (set(range(1, disturbances + 1)) if site == "entry"
+                                  else {2 * attempt for attempt in range(1, disturbances + 1)})
+                        reads, disturbed, patches = self.disturbed_journal_reads(lambda number: number in chosen)
+                        notices = io.StringIO()
+                        with patches[0], patches[1], patch("time.sleep") as delays, redirect_stderr(notices):
+                            self.module._save_journal(folder, planned)
+                        self.assertEqual(disturbed, sorted(chosen))
+                        self.assertEqual(native_io_path(folder / "journal.json").read_bytes(),
+                                         self.module.json_bytes(planned))
+                        self.assertNotEqual(previous, self.module.json_bytes(planned))
+                        self.assertEqual(sorted(path.name for path in native_io_path(folder).iterdir()),
+                                         ["journal.json"])
+                        self.assertEqual([call.args[0] for call in delays.call_args_list],
+                                         [0.05 * 2 ** attempt for attempt in range(disturbances)])
+                        lines = notices.getvalue().splitlines()
+                        self.assertEqual(lines, [f"li-transaction: owned journal changed during a verification read; "
+                                                 f"retry {attempt}/4." for attempt in range(1, disturbances + 1)])
+                        print(json.dumps({"IC-F01": "injected-transient", "site": site,
+                                          "disturbed_reads": disturbed, "journal_reads": len(reads),
+                                          "notices": lines, "published": True}))
+
+    def test_journal_identity_disturbance_is_bounded_and_content_changes_still_refuse(self):
+        self.retry_trial("disturbed-persistent")
+        with self.module._lock(self.root, self.store):
+            folder, planned = self.journal_fixture(existing=True)
+            previous = native_io_path(folder / "journal.json").read_bytes()
+            reads, disturbed, patches = self.disturbed_journal_reads(lambda number: True)
+            notices = io.StringIO()
+            with patches[0], patches[1], patch("time.sleep") as delays, redirect_stderr(notices):
+                with self.assertRaises(ValueError) as failure:
+                    self.module._save_journal(folder, planned)
+            self.assertEqual(str(failure.exception), "File changed while reading: journal.json")
+            self.assertEqual(disturbed, [1, 2, 3, 4, 5])
+            self.assertEqual([call.args[0] for call in delays.call_args_list], [0.05, 0.1, 0.2, 0.4])
+            self.assertEqual(len(notices.getvalue().splitlines()), 4)
+            self.assertEqual(native_io_path(folder / "journal.json").read_bytes(), previous)
+            self.assertEqual(sorted(path.name for path in native_io_path(folder).iterdir()), ["journal.json"])
+            print(json.dumps({"IC-F01": "injected-persistent", "attempts": 5, "notices": 4,
+                              "same_message": True, "journal_preserved": True}))
+        self.retry_trial("disturbed-content-change")
+        with self.module._lock(self.root, self.store):
+            folder, planned = self.journal_fixture(existing=True)
+            target = native_io_path(folder / "journal.json")
+            intervening = b'{"consumer":"intervening journal edit during its staging check"}\n'
+            original_open, original_fstat = os.open, os.fstat
+            journals, reads = {}, []
+
+            def opened(path, flags, *args, **kwargs):
+                descriptor = original_open(path, flags, *args, **kwargs)
+                if Path(path).name == "journal.json":
+                    journals[descriptor] = Path(path)
+                return descriptor
+
+            def status(descriptor):
+                if journals.pop(descriptor, None) is not None:
+                    reads.append(descriptor)
+                    if len(reads) == 2:
+                        with open(target, "wb") as stream:
+                            stream.write(intervening)
+                return original_fstat(descriptor)
+
+            notices = io.StringIO()
+            with patch("os.open", side_effect=opened), patch("os.fstat", side_effect=status), \
+                    patch("time.sleep") as delays, redirect_stderr(notices):
+                with self.assertRaisesRegex(ValueError, "changed before replacement retry; preserve it"):
+                    self.module._save_journal(folder, planned)
+            self.assertEqual(target.read_bytes(), intervening)
+            self.assertEqual(len(reads), 3)
+            self.assertEqual([call.args[0] for call in delays.call_args_list], [0.05])
+            self.assertEqual(len(notices.getvalue().splitlines()), 1)
+            print(json.dumps({"IC-F01": "content-change-refused", "journal_reads": len(reads),
+                              "notices": notices.getvalue().splitlines(), "intervening_bytes_preserved": True}))
+
+    def test_journal_identity_disturbance_after_replacement_denial_keeps_b01_rule(self):
+        original_replace = os.replace
+        windows = SimpleNamespace(name="nt", path=os.path)
+        for scenario in ("unchanged", "edited-during-denial"):
+            with self.subTest(scenario=scenario):
+                self.retry_trial("denied-disturbed-" + scenario)
+                with self.module._lock(self.root, self.store):
+                    folder, planned = self.journal_fixture(existing=True)
+                    target = native_io_path(folder / "journal.json")
+                    intervening = b'{"consumer":"intervening journal edit during denial"}\n'
+                    # Read 1 establishes the before-state, read 2 is the staging check and
+                    # read 3 verifies the journal after the injected replacement denial.
+                    reads, disturbed, patches = self.disturbed_journal_reads(lambda number: number == 3)
+                    attempts = []
+
+                    def replace(source, destination):
+                        if Path(destination) == target:
+                            attempts.append(str(source))
+                            if len(attempts) == 1:
+                                if scenario == "edited-during-denial":
+                                    target.write_bytes(intervening)
+                                raise self.replacement_error(source, destination, 5)
+                        return original_replace(source, destination)
+
+                    notices = io.StringIO()
+                    with patches[0], patches[1], patch.object(self.module, "os", windows), \
+                            patch("os.replace", side_effect=replace), patch("time.sleep") as delays, \
+                            redirect_stderr(notices):
+                        if scenario == "unchanged":
+                            self.module._save_journal(folder, planned)
+                        else:
+                            with self.assertRaisesRegex(ValueError, "changed before replacement retry; preserve it"):
+                                self.module._save_journal(folder, planned)
+                    self.assertEqual(disturbed, [3])
+                    self.assertEqual([call.args[0] for call in delays.call_args_list], [0.05])
+                    self.assertEqual(notices.getvalue().splitlines(),
+                                     ["li-transaction: Windows blocked owned journal replacement; retry 1/4 (winerror 5)."])
+                    self.assertEqual(target.read_bytes(),
+                                     self.module.json_bytes(planned) if scenario == "unchanged" else intervening)
+                    self.assertEqual(len(attempts), 2 if scenario == "unchanged" else 1)
+                    print(json.dumps({"IC-F01": "denial-then-disturbed-verification", "scenario": scenario,
+                                      "replacement_attempts": len(attempts), "journal_reads": len(reads),
+                                      "notices": notices.getvalue().splitlines()}))
+
+    def test_journal_identity_disturbance_during_apply_publishes_or_stays_recoverable(self):
+        self.retry_trial("disturbed-apply-transient")
+        armed = {"reads": 0}
+        reads, disturbed, patches = self.disturbed_journal_reads(lambda number: number == armed["reads"])
+        original_write = self.module._write_change
+
+        def published(root, relative, *args):
+            original_write(root, relative, *args)
+            if relative == "a.txt":
+                armed["reads"] = len(reads) + 1
+
+        notices = io.StringIO()
+        with patches[0], patches[1], patch.object(self.module, "_write_change", side_effect=published), \
+                redirect_stderr(notices):
+            result = self.apply()
+        self.assertEqual(result["state"], "complete")
+        self.assertEqual(len(disturbed), 1)
+        self.assertEqual(self.module.inspect_transaction(self.root, self.store, result["id"])["state"], "complete")
+        self.assertEqual(self.files(), {"a.txt": b"after a", "b.txt": b"after b", "custom.txt": b"never owned",
+                                        "new.txt": b"created"})
+        self.assertEqual(notices.getvalue().splitlines(),
+                         ["li-transaction: owned journal changed during a verification read; retry 1/4."])
+        print(json.dumps({"IC-F01": "apply-transient", "state": result["state"],
+                          "notices": notices.getvalue().splitlines()}))
+
+        self.retry_trial("disturbed-apply-persistent")
+        before = self.files()
+        armed = {"reads": None}
+        reads, disturbed, patches = self.disturbed_journal_reads(
+            lambda number: armed["reads"] is not None and number >= armed["reads"])
+
+        def published_then_persistent(root, relative, *args):
+            original_write(root, relative, *args)
+            if relative == "a.txt":
+                armed["reads"] = len(reads) + 1
+
+        notices = io.StringIO()
+        with patches[0], patches[1], patch.object(self.module, "_write_change", side_effect=published_then_persistent), \
+                patch("time.sleep") as delays, redirect_stderr(notices):
+            with self.assertRaisesRegex(ValueError, "^File changed while reading: journal.json$"):
+                self.apply()
+        self.assertEqual(len(disturbed), 5)
+        self.assertEqual([call.args[0] for call in delays.call_args_list], [0.05, 0.1, 0.2, 0.4])
+        self.assertFalse(native_io_path(self.store / ".operation-lock").exists())
+        identifier, = [path.name for path in native_io_path(self.store / "transactions").iterdir()]
+        state = self.module.inspect_transaction(self.root, self.store, identifier)
+        self.assertEqual(state["state"], "applying")
+        self.assertEqual(state["files"]["a.txt"], "applying")
+        self.assertEqual(self.files(), {**before, "a.txt": b"after a"})
+        with self.assertRaisesRegex(ValueError, "incomplete"):
+            self.apply()
+        recovered = self.module.recover_transaction(self.root, self.store, identifier)
+        self.assertEqual(recovered["state"], "recovered")
+        self.assertEqual(self.files(), before)
+        print(json.dumps({"IC-F01": "apply-persistent", "state": state, "notices": len(notices.getvalue().splitlines()),
+                          "recovery": recovered["state"], "original_bytes_restored": True}))
+
 
 if __name__ == "__main__":
     unittest.main(argv=[sys.argv[0], *remaining])

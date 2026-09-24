@@ -1548,6 +1548,33 @@ except (ValueError,OSError) as error:
                     manifest_path.write_bytes(original)
         self.run_cli("check", source=bundle, script=bundle / "bin/li-copilot.py")
 
+    def test_installed_observation_helper_missing_refuses_before_target_reads(self):
+        # F-INT-2: planning reads the target through context_safety; a missing
+        # installed helper must be the clean source refusal, not an import crash.
+        self.run_cli()
+        bundle = self.target / adapter.BUNDLE
+        helper = bundle / "lib/context_safety.py"
+        content = helper.read_bytes()
+        helper.unlink()
+        before = self.snapshot()
+        siblings = sorted(path.name for path in self.base.iterdir())
+        try:
+            for entry, arguments in (("li-copilot.py", ("check",)), ("li-copilot.py", ("init",)),
+                                     ("li-adapter.py", ("init", "--client", "copilot-cli"))):
+                with self.subTest(entry=entry, arguments=arguments):
+                    result = subprocess.run(
+                        [sys.executable, str(bundle / "bin" / entry), *arguments,
+                         "--target", str(self.target), "--source", str(bundle)],
+                        capture_output=True, text=True, encoding="utf-8")
+                    self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+                    self.assertEqual(result.stdout, "")
+                    self.assertEqual(result.stderr, f"ERROR: Required source file is missing: {helper}\n")
+                    self.assertEqual(before, self.snapshot())
+                    self.assertEqual(siblings, sorted(path.name for path in self.base.iterdir()))
+        finally:
+            helper.write_bytes(content)
+        self.run_cli("check", source=bundle, script=bundle / "bin/li-copilot.py")
+
     def test_joined_installed_profile_is_pinned_across_fresh_shells_and_detects_drift(self):
         # Keep the fixture's nested runtime paths inside native Windows path limits.
         target = self.base / "profile-consumer"
