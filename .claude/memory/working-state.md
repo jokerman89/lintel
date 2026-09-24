@@ -173,6 +173,9 @@ preparation packages are with SAME9db, and the step-1 host receipts are supplied
 original owner (reviewer `447d97f5`) and P13 A18.3/A18.4/A19.4 to the original owner
 (reviewer `4865e4f7`). A13.1.b/.4.b follow after A13.a passes and P10's joined checks
 are green, on a P08 integration preview.
+Host note (L-049): `%LOCALAPPDATA%\Temp\a13t1\r10\temp` currently backs the host-wide
+MSYS `/tmp` mount. Do not delete `a13t1` until `mount` shows `/tmp` elsewhere. F06 step
+1 stopped on that host warning; recovery is `consume-02` under `dcdaa44e`/`b8803e29`.
 All native leases are revoked;
 no target changes are released merely by the proposed evidence design.
 Source `70469296` and bound inputs stay frozen; no fourth actor.
