@@ -463,6 +463,12 @@ never inferred from this directive; a model switch does not change context ident
   P10's slow long-path/native kit tests (P10's complete kit: 7,706 s), and
   nothing has run on Linux or macOS (no WSL/container here). The final PR
   therefore needs a timing decision before CI can pass.
+  Decision (2026-09-24, ADR-0032): `run-all.sh --shard K/N` (`8651f392`) and a CI matrix of
+  each system by seven parts (`736cb82f`): unit in 2 shards, integration in 4 shards, and one
+  part for behavior, e2e, shape and the once-per-system checks, all with `--require-all`. The
+  timeouts are 180, 300 and 60 minutes. Windows selects PowerShell 7 via `LINTEL_POWERSHELL`.
+  The runner contract and a real-tree check prove the shards are disjoint and complete. The
+  first hosted run is the final PR's.
   Per L-045 nothing is pushed or dispatched before the accepted batch.
   Recovery denies local jq (L-046), so strict `--require-all` refuses locally.
   CI checks `jq --version` before the suite, which makes the final PR's CI the
