@@ -10,5 +10,5 @@
 .site-header .repo-link:hover{color:var(--lime);border-color:currentColor;background:color-mix(in srgb,var(--paper) 5%,transparent)}
 .repo-link svg{width:24px;height:24px}
 .credit-heart{color:var(--purple)}
-@media(max-width:760px){.site-header{column-gap:12px}}
+@media(max-width:760px){.site-header{column-gap:12px}.site-footer .footer-credit{grid-column:1/-1}}
 @media(max-width:450px){.site-header{display:grid;grid-template-columns:1fr auto}.site-header>.brand{grid-column:1;grid-row:1}.site-header>.repo-link{grid-column:2;grid-row:1;justify-self:end}.site-header>[data-theme-mount]{grid-column:1/-1;grid-row:2;justify-content:flex-end;margin-left:0}.site-header>nav{grid-column:1/-1;grid-row:3;gap:10px}}
