@@ -147,6 +147,11 @@ recheck. Each step has its own grant and stops on any failure.
 No forced verdict, waiver, new actor, source repin or remote operation follows.
 A13 contract `92d677c8` releases A13.1.a/.2/.3/.4.a to f2 on a new branch stacked
 on `229656cf`; A13.1.b/.4.b stay gated on P10. Installer gates remain separate.
+`855a5c27` resolves f2's A13 contract defect with one write-site mkdir in the P05
+`li-review-read` marker append, reviewed as a cross-package change. The coordinator's
+P08 trial merge (`d59072a8`) finds three test-contract reconciliations with a verified
+draft patch, a P13 status union and catalog/wiki regeneration, and no other P08 finding.
+Recovery jq execution and copying stay denied (L-046).
 Clean integrated-suite triage leaves two genuine test seams: P12 skill presence
 (`49ba9eb5` / `61c3afdb`, SAME31 PASS `635c76cc`, integrated `66090974`) and the
 e2e footer (reconciled in `ebfbcd0d`). P10 B01 is independently closed in scope, but
