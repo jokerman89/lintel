@@ -21,7 +21,8 @@ A unittest skip whose reason begins `platform: windows-only` marks a Windows-nat
 Off Windows, the runner reports such skips as `N/A`, not as partial coverage, but only when every
 skip in the entry carries that reason and at least one test in it ran. On Windows the same skips
 count as partial, so strict mode refuses them. Any other skip reason keeps refusing strict
-acceptance.
+acceptance. Keep the reason free of apostrophes: unittest then prints it in double quotes, which
+the runner does not recognize, so the skip refuses fail-closed.
 
 The full developer suite needs Bash 4+ because several existing routing tests and developer
 utilities use associative arrays. On macOS, install modern Bash for the suite. CI separately

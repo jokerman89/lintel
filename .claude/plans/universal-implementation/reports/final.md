@@ -32,8 +32,8 @@ where the leaf evidence and the review files are cited.
 | [A11 Honest context capacity](../plan.md#a11-honest-context-capacity-p03-r05) | 4/4 | Accepted |
 | [A12 Owned installer lifecycle](../plan.md#a12-owned-installer-lifecycle-p10-r01) | 4/4 | Accepted |
 | [A13 Observable learning and status](../plan.md#a13-observable-learning-and-status-p08-r05) | 0/4 | Pending SAME9db's whole-P08 integration review and the joined run |
-| [A14 Working design contract](../plan.md#a14-working-design-contract-p11-r07) | 4/5 | A14.1–.4 accepted; A14.5 blocked: the framework half needs a dependency restore that failed on TLS; no workaround is authorized |
-| [A15 Verifiable document formats](../plan.md#a15-verifiable-document-formats-p12-r07) | 0/4 | A15.1–.4 blocked: denied Word, Excel and PDF-raster application routes, and denied P12 record persistence |
+| [A14 Working design contract](../plan.md#a14-working-design-contract-p11-r07) | 4/5 | A14.1–.4 accepted; A14.5 blocked: the static page's direct image observation (V1) is unverified, and the framework half needs a dependency restore that failed on TLS; no workaround is authorized |
+| [A15 Verifiable document formats](../plan.md#a15-verifiable-document-formats-p12-r07) | 0/4 | A15.1–.4 blocked: denied Word, Excel and PDF-raster application routes, denied P12 record persistence, and no Visio writer (a template-only staged slot) |
 | [A16 Real browser operations](../plan.md#a16-real-browser-operations-p11-r03r07) | 4/4 | Accepted |
 | [A17 Portable, useful agent roles](../plan.md#a17-portable-useful-agent-roles-p09-r06) | 5/5 | Accepted |
 | [A18 Optional capabilities without loss](../plan.md#a18-optional-capabilities-without-loss-p13-r06) | 4/4 | Accepted |
@@ -93,7 +93,7 @@ These are reviewed at A23.5, not by a package review:
   resolve the README conflict.
 - **Version `0.11.0` and its CHANGELOG entry** (`99443cf8`, `3ea42d70`).
 - **Earlier coordinator product commits.** They carry surviving product lines that no package
-  review names. The A23.5 Phase 1 review statically passes all of them:
+  review covers as its own content. The A23.5 Phase 1 review statically passes all of them:
   - `80f36fb0`: schema references and refusal before writes (A23.4.g1/g2);
   - `2d83a0c8` and `4d6e9929`: unavailable jq and parser coverage reported as SKIP (A23.3);
   - `ebfbcd0d`: the e2e footer aligned with status-grounded resume;

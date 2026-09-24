@@ -75,7 +75,7 @@ jobs:
         if: matrix.part != 'other'
         run: bash tests/runner/run-all.sh --scope "${{ matrix.scope }}" --shard "${{ matrix.shard }}" --require-all
       - name: Run the behavior tier, including security behavior
-        if: matrix.part == 'other'
+        if: ${{ !cancelled() && matrix.part == 'other' }}
         run: bash tests/runner/run-all.sh --scope behavior --require-all
       # Later checks keep running after an earlier failure so every signal is reported; the job still fails.
       - name: Run the e2e tier
