@@ -110,7 +110,9 @@ coordinator session, repository/commit, subject, brief hash, model, effort and c
 
 Copilot App: `task` (subagent, `model`, `reasoning_effort`, `context_tier`) or
 `create_session` (`kickoff.model`, `kickoff.reasoning_effort`, `kickoff.context_tier`,
-`kickoff.mode: autopilot`, `coordinate_with_creator: false`, `notify_on_idle`).
+`kickoff.mode: autopilot`, `coordinate_with_creator: false`, `notify_on_idle: once`).
+`always` keeps emitting idle notices even after the session is archived; for the challenge
+round, read the round-2 report from the session store instead of waiting for a notice.
 Other hosts: their native per-child model API.
 
 ### 5. Collect and verify identity
