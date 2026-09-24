@@ -3,7 +3,7 @@
 # implements: ADR-0005, ADR-0008, ADR-0028
 # intent: .claude/plans/universal-implementation/packages/P08.md
 # constraints: stdlib only; reads explicit files and never writes; absence is unobserved, never a verdict
-# last_intent_review: 2026-09-23
+# last_intent_review: 2026-09-24
 """Structured reader for Lintel audit JSONL, classified through lib/event-catalog.json.
 
 Exit codes, in order of precedence: 2 unreadable file, catalog failure or usage error;
@@ -75,26 +75,82 @@ def _strings(value) -> bool:
     return isinstance(value, list) and all(isinstance(item, str) for item in value)
 
 
+def _integer(value) -> bool:
+    return type(value) is int
+
+
+def _text(value) -> bool:
+    return isinstance(value, str)
+
+
+def _name(value) -> bool:
+    return isinstance(value, str) and bool(value)
+
+
+def _flag(value) -> bool:
+    return isinstance(value, bool)
+
+
 def validate_catalog(catalog) -> None:
+    """Check every catalog container and element type before any of it is dereferenced.
+
+    A syntactically valid but structurally invalid catalog raises ReaderError (exit 2)
+    instead of failing later on an unexpected type.
+    """
     def need(condition, message):
         if not condition:
             raise ReaderError(f"event catalog invalid: {message}")
 
+    def typed(container, key, check, message):
+        if key in container:
+            need(check(container[key]), message)
+
+    def objects(value, where):
+        need(isinstance(value, list) and all(isinstance(item, dict) for item in value),
+             f"{where} must be a list of objects")
+        return value
+
     need(isinstance(catalog, dict), "top level is not an object")
-    need(catalog.get("schema_version") == SCHEMA_VERSION, "unsupported schema_version")
-    need(isinstance(catalog.get("catalog_version"), int), "catalog_version must be an integer")
-    vocabulary = catalog.get("vocabulary", {})
+    need(_integer(catalog.get("schema_version")) and catalog["schema_version"] == SCHEMA_VERSION,
+         "unsupported schema_version")
+    need(_integer(catalog.get("catalog_version")), "catalog_version must be an integer")
+    typed(catalog, "description", _text, "description must be a string")
+    typed(catalog, "envelope", _strings, "envelope must list strings")
+    vocabulary = catalog.get("vocabulary")
+    need(isinstance(vocabulary, dict), "vocabulary must be an object")
     for name in ("records_when", "class", "check"):
         need(_strings(vocabulary.get(name)), f"vocabulary.{name} must list strings")
     for value in vocabulary["class"] + vocabulary["check"]:
         need(not FORBIDDEN.search(value), f"verdict token in vocabulary value {value!r}")
+    for index, item in enumerate(objects(catalog.get("wrappers", []), "wrappers")):
+        need(_name(item.get("name")) and _name(item.get("path")), f"wrappers[{index}]: name and path required")
+        typed(item, "call_form", _text, f"wrappers[{index}]: call_form must be a string")
+    for index, item in enumerate(objects(catalog.get("dynamic", []), "dynamic")):
+        where = f"dynamic[{index}]"
+        need(_name(item.get("call_site")) and _name(item.get("kind_pattern")),
+             f"{where}: call_site and kind_pattern required")
+        need(_name(item.get("category")) or _name(item.get("category_pattern")),
+             f"{where}: category or category_pattern required")
+        for key in ("category", "category_pattern", "wrapper"):
+            typed(item, key, _name, f"{where}: {key} must be a non-empty string")
+        for key in ("kinds", "fields"):
+            typed(item, key, _strings, f"{where}: {key} must list strings")
+        for key in ("fields_dynamic", "delegated_kinds"):
+            typed(item, key, _flag, f"{where}: {key} must be a boolean")
+        typed(item, "note", _text, f"{where}: note must be a string")
+    for index, item in enumerate(objects(catalog.get("non_recording_hooks", []), "non_recording_hooks")):
+        need(_name(item.get("hook")) and _name(item.get("reason")),
+             f"non_recording_hooks[{index}]: hook and reason required")
     categories = catalog.get("categories")
     need(isinstance(categories, dict) and categories, "categories must be a non-empty object")
     for category, meta in categories.items():
         need(isinstance(meta, dict) and isinstance(meta.get("kinds"), dict), f"{category}: kinds must be an object")
-        if meta.get("delegated") is not None:
-            need(isinstance(meta["delegated"], str) and not meta["kinds"],
-                 f"{category}: a delegated category lists no classified kinds")
+        for key in ("producers", "fields"):
+            typed(meta, key, _strings, f"{category}: {key} must list strings")
+        typed(meta, "note", _text, f"{category}: note must be a string")
+        if "delegated" in meta:
+            need(_name(meta["delegated"]) and not meta["kinds"],
+                 f"{category}: a delegated category names its reader and lists no classified kinds")
             continue
         for kind, entry in meta["kinds"].items():
             where = f"{category}/{kind}"
@@ -106,9 +162,9 @@ def validate_catalog(catalog) -> None:
             aliases = entry.get("aliases")
             need(isinstance(aliases, dict) and all(_strings(v) and v and set(v) <= set(entry["fields"])
                                                    for v in aliases.values()), f"{where}: aliases")
+            typed(entry, "note", _text, f"{where}: note must be a string")
             rules = entry.get("rules")
-            need(isinstance(rules, list) and rules and rules[-1].get("when") == {},
-                 f"{where}: rules must end with a default")
+            need(isinstance(rules, list) and rules, f"{where}: rules must be a non-empty list")
             for rule in rules:
                 need(isinstance(rule, dict) and isinstance(rule.get("when"), dict), f"{where}: rule shape")
                 need(rule.get("class") in vocabulary["class"] and rule.get("check") in vocabulary["check"],
@@ -116,13 +172,14 @@ def validate_catalog(catalog) -> None:
                 for field, wanted in rule["when"].items():
                     need(field in entry["fields"], f"{where}: rule field {field} is not catalogued")
                     need(isinstance(wanted, str) or (_strings(wanted) and wanted), f"{where}: rule value")
+            need(rules[-1]["when"] == {}, f"{where}: rules must end with a default")
 
 
 def load_catalog(native_io, path: Path = CATALOG) -> dict:
     try:
         catalog = json.loads(native_io(path).read_bytes().decode("utf-8"), object_pairs_hook=_pairs,
                              parse_constant=_reject_constant)
-    except (OSError, UnicodeError, ValueError) as error:
+    except (OSError, UnicodeError, ValueError, RecursionError) as error:
         raise ReaderError(f"event catalog unavailable: {path}: {error}") from error
     validate_catalog(catalog)
     return catalog
@@ -204,14 +261,14 @@ def examine(number, raw, tail, category, meta, kind_filter, since):
     stamp = value.get("ts")
     when = parse_time(stamp) if stamp else None
     info = {"undated": when is None, "kind": kind, "when": when}
+    if since is not None and when is None:
+        # Before kind selection: no filter may hide an undated record from the since window.
+        return "undated", {"line": number, "code": "undated",
+                           "detail": "no usable ts; excluded from the since window and reported"} | info
     if kind_filter is not None and kind != kind_filter:
         return "filtered", info
-    if since is not None:
-        if when is None:
-            return "undated", {"line": number, "code": "undated",
-                               "detail": "no usable ts; excluded from the since window and reported"} | info
-        if when < since:
-            return "filtered", info
+    if since is not None and when < since:
+        return "filtered", info
     fields = {key: item for key, item in value.items() if key not in ("ts", "kind", "operator", "cycle_id")}
     if delegated:
         row = {"line": number, "category": category, "kind": kind, "ts": stamp, "class": None, "check": None,
