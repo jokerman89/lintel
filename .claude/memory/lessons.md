@@ -967,6 +967,11 @@ release) carried a wrong tail, `4f9a97f` for `cf9a97f`. It was caught before any
 it and amended. Begin such chains with `$ErrorActionPreference = "Stop"`, and throw on
 `$LASTEXITCODE -ne 0` after each check, before any commit.
 
+**Second recurrence (2026-09-24):** a `ci.yml` edit and its YAML check were issued in the same
+parallel tool batch. The check read the file before the edit landed and refused correctly, so
+nothing wrong was committed. Run a check only after the edit it verifies has returned. Never
+batch an edit together with its own verification.
+
 ## L-049 - A synthetic TEMP can pin the host-wide MSYS /tmp
 
 **Date:** 2026-09-24
