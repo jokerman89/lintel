@@ -223,16 +223,28 @@ def _save_journal(folder: Path, journal: dict) -> None:
 
     lock = safe_path(folder.parent.parent, ".operation-lock")
     target = native_io_path(safe_path(folder, "journal.json"))
-    before = file_state(folder, "journal.json")
+    # IC-F01: an outside actor was observed resetting the just-published journal's
+    # timestamps between one read's identity samples. Only that exact unstable read
+    # of this owned journal is repeated; every accepted read is still a stable one.
+    unstable = "File changed while reading: journal.json"
     data = json_bytes(journal)
+    before, observed = None, False
     for attempt in range(5):
         if not native_io_path(lock).is_dir():
             raise ValueError("Transaction journal operation lock is not held.")
-        if attempt and not _same(file_state(folder, "journal.json"), before):
-            raise ValueError("Transaction journal changed before replacement retry; preserve it.")
         try:
+            current = file_state(folder, "journal.json")
+            if not observed:
+                before, observed = current, True
+            elif not _same(current, before):
+                raise ValueError("Transaction journal changed before replacement retry; preserve it.")
             atomic_write(folder, "journal.json", data, expected=before, check_expected=True)
             return
+        except ValueError as error:
+            if str(error) != unstable or attempt == 4:
+                raise
+            print("li-transaction: owned journal changed during a verification read; "
+                  f"retry {attempt + 1}/4.", file=sys.stderr)
         except OSError as error:
             if (os.name != "nt" or getattr(error, "winerror", None) not in (5, 32, 33)
                     or attempt == 4 or error.filename2 != str(target)
@@ -240,11 +252,17 @@ def _save_journal(folder: Path, journal: dict) -> None:
                     or Path(error.filename).parent != target.parent
                     or not Path(error.filename).name.startswith(".lintel-write-")):
                 raise
-            if not _same(file_state(folder, "journal.json"), before):
+            try:
+                changed = not _same(file_state(folder, "journal.json"), before)
+            except ValueError as disturbed:
+                if str(disturbed) != unstable:
+                    raise
+                changed = False  # The next attempt compares a stable read before replacing.
+            if changed:
                 raise ValueError("Transaction journal changed after failed replacement; preserve it.") from error
             print("li-transaction: Windows blocked owned journal replacement; "
                   f"retry {attempt + 1}/4 (winerror {error.winerror}).", file=sys.stderr)
-            time.sleep(0.05 * (2 ** attempt))
+        time.sleep(0.05 * (2 ** attempt))
 
 
 def apply_files(root: Path, store: Path, changes: Mapping[str, Optional[bytes]], expected: Mapping[str, object],

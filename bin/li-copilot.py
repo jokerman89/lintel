@@ -996,11 +996,13 @@ def main(universal: bool = False) -> None:
     if target in (Path(target.anchor), Path.home().resolve()):
         raise ValueError("Target must be a project directory, not a filesystem or user-home root")
     store = args.store or (Path(os.environ["LINTEL_RECOVERY_STORE"]) if os.environ.get("LINTEL_RECOVERY_STORE") else None)
+    if args.command in ("inspect", "recover") and not args.transaction:
+        parser.error("--transaction is required for inspect/recover")
+    # Target observations import these joined helpers lazily; an incomplete
+    # source must refuse cleanly before the first target read, never crash.
+    for relative in ADAPTER_RESOURCES:
+        read_file(source, relative)
     if args.command in ("inspect", "recover"):
-        if not args.transaction:
-            parser.error("--transaction is required for inspect/recover")
-        for relative in ADAPTER_RESOURCES:
-            read_file(source, relative)
         from managed_transaction import default_store, inspect_transaction, recover_transaction
         store = store or default_store(target)
         operation = inspect_transaction if args.command == "inspect" else recover_transaction

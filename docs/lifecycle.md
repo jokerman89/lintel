@@ -118,6 +118,12 @@ While holding the operation lock, the runtime may retry only replacement of its 
 transaction journal on Windows errors 5, 32 or 33. At most four retries are reported on
 stderr, delayed by 0.05, 0.1, 0.2 and 0.4 seconds. The journal must still match its saved
 before-state (including absence for its first save); a changed journal is refused.
+Within the same four-retry bound, a verification read of that owned journal whose own
+identity samples disagree ("File changed while reading: journal.json") is repeated and
+reported as `owned journal changed during a verification read`. This was observed when an
+actor outside Lintel reset the just-replaced journal's timestamps to an earlier version's
+values. Every accepted read is still internally stable, and a changed journal state is
+still refused.
 Other writes are not retried by this rule. Persistent or other errors remain failures,
 retain incomplete evidence and require explicit recovery. This bounded handling does
 not identify the cause of earlier access-denied failures or guarantee completion.
