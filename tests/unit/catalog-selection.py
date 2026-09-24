@@ -3,7 +3,7 @@
 # implements: ADR-0028
 # intent: skills/catalog/references/selections.md
 # constraints: source-only selection; synthetic homes; no installed or live-host acceptance
-# last_intent_review: 2026-09-23
+# last_intent_review: 2026-09-24
 """Selection closure, evidence and preservation over the existing catalog inventory."""
 import copy
 import hashlib
@@ -638,15 +638,11 @@ class CatalogSelection(unittest.TestCase):
                 self.assertIn("--selection=" + name, section)
 
     def test_actual_family_queries_keep_literal_alias_and_body_boundaries(self):
-        original = Path.read_text
-        def metadata_only(path, *args, **kwargs):
-            if path.name == "SKILL.md" or path.parent.parent.name == "agents":
-                raise AssertionError("whole prompt read during family selection")
-            return original(path, *args, **kwargs)
-        with mock.patch.object(Path, "read_text", metadata_only):
+        with support.observe_prompt_bodies() as body_reads:
             selected = self.catalog.selection_metadata(
                 ROOT, ["frontend-design", "document-word"], query="$(touch family-marker)",
             )
+        self.assertEqual(body_reads, [])
         self.assertEqual(selected["matched"], 0)
         self.assertTrue(selected["selection"]["resources"])
         before = support.files_snapshot(self.base)

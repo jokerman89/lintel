@@ -161,6 +161,12 @@ class CopilotKit(unittest.TestCase):
             self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
         return result
 
+    def catalog_query(self, bundle, *arguments, cwd, env=None, no_site=False):
+        command = [sys.executable, "-I", *(["-S"] if no_site else []),
+                   "-B", str(bundle / "bin/li-catalog.py"), *arguments]
+        return subprocess.run(command, cwd=cwd, env=env, capture_output=True,
+                              text=True, encoding="utf-8")
+
     def snapshot(self, target=None):
         root = target or self.target
         return {p.relative_to(root).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
@@ -198,9 +204,7 @@ class CopilotKit(unittest.TestCase):
         unrelated.mkdir()
         for arguments in (("--json", "--name=match"),
                           ("--json", "--selection=demo-script", "--kind=agent")):
-            result = subprocess.run(
-                [sys.executable, "-I", "-B", str(bundle / "bin/li-catalog.py"), *arguments],
-                cwd=unrelated, capture_output=True, text=True, encoding="utf-8")
+            result = self.catalog_query(bundle, *arguments, cwd=unrelated)
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             value = json.loads(result.stdout)
             self.assertFalse(value["executed"])
@@ -229,18 +233,14 @@ class CopilotKit(unittest.TestCase):
         env.update(HOME=str(empty_home), USERPROFILE=str(empty_home),
                    PYTHONDONTWRITEBYTECODE="1")
         clone_before = self.snapshot(clone)
-        result = subprocess.run(
-            [sys.executable, "-I", "-B", str(clone_bundle / "bin/li-catalog.py"),
-             "--json", "--selection=demo-script", "--kind=agent"],
-            cwd=unrelated, env=env, capture_output=True, text=True, encoding="utf-8")
+        result = self.catalog_query(clone_bundle, "--json", "--selection=demo-script",
+                                    "--kind=agent", cwd=unrelated, env=env)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertEqual({item["id"] for item in json.loads(result.stdout)["entries"]}, {
             "agent:DemoNarrativeArc", "agent:DemoNarratorJunior", "agent:SlideNarrationCritic",
         })
-        missing_parser = subprocess.run(
-            [sys.executable, "-I", "-S", "-B", str(clone_bundle / "bin/li-catalog.py"),
-             "--json", "--selection=demo-script"],
-            cwd=unrelated, env=env, capture_output=True, text=True, encoding="utf-8")
+        missing_parser = self.catalog_query(clone_bundle, "--json", "--selection=demo-script",
+                                            cwd=unrelated, env=env, no_site=True)
         self.assertNotEqual(missing_parser.returncode, 0)
         self.assertEqual(missing_parser.stdout, "")
         self.assertIn("PyYAML", missing_parser.stderr)
@@ -290,10 +290,7 @@ class CopilotKit(unittest.TestCase):
                    PYTHONDONTWRITEBYTECODE="1")
 
         def query(*arguments, success=True):
-            result = subprocess.run(
-                [sys.executable, "-I", "-B", str(bundle / "bin/li-catalog.py"),
-                 "--json", *arguments],
-                cwd=unrelated, env=env, capture_output=True, text=True, encoding="utf-8")
+            result = self.catalog_query(bundle, "--json", *arguments, cwd=unrelated, env=env)
             if success:
                 self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             else:
