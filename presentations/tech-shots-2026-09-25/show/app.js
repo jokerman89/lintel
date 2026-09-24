@@ -152,7 +152,7 @@ $('#stage').setAttribute('aria-label','Slide '+(state.index+1)+': '+s.title.repl
 document.querySelectorAll('#overviewGrid button').forEach((b,i)=>b.classList.toggle('active',i===state.index));
 fit();
 }
-function go(i){const leaving=slides[state.index].type;if(leaving==='stateflow')state.trail=0;if(leaving==='primer')state.later=false;if(leaving==='cyclemap')state.cyclePhase=undefined;if(leaving==='routes')state.route=0;state.index=Math.max(0,Math.min(slides.length-1,i));history.replaceState(null,'','#'+slides[state.index].id);render();window.scrollTo(0,0);}
+function go(i){const leaving=slides[state.index].type;if(leaving==='swarmreveal')state.swarmReveal=false;if(leaving==='stateflow')state.trail=0;if(leaving==='primer')state.later=false;if(leaving==='cyclemap')state.cyclePhase=undefined;if(leaving==='routes')state.route=0;state.index=Math.max(0,Math.min(slides.length-1,i));history.replaceState(null,'','#'+slides[state.index].id);render();window.scrollTo(0,0);}
 function fit(){if(innerWidth<=650)return;const box=$('#viewport').getBoundingClientRect();const scale=Math.min((box.width-34)/1440,(box.height-22)/810);$('#stage').style.transform='scale('+scale+')';}
 function showViewer(url,title){$('#viewerTitle').textContent=title;$('#viewerSource').href=url;$('#viewerFrame').src=url;$('#viewer').showModal();}
 function closeViewer(){$('#viewer').close();$('#viewerFrame').src='about:blank';}
@@ -174,6 +174,7 @@ if(b.dataset.product!==undefined){go(slides.findIndex(x=>x.id===b.dataset.produc
 if(b.dataset.slide!==undefined){$('#overviewDialog').close();go(Number(b.dataset.slide));}
 if(b.dataset.close){b.dataset.close==='viewer'?closeViewer():$('#'+b.dataset.close).close();}
 if(b.dataset.view)showViewer(b.dataset.view,b.dataset.title||'Artifact');
+if(b.dataset.action==='swarm-reveal'){state.swarmReveal=!state.swarmReveal;render();keep('#stage [data-action="swarm-reveal"]');}
 if(b.dataset.action==='reuse'){state.packed=!state.packed;render();keep('#stage [data-action="reuse"]');}
 if(b.dataset.action==='context'){state.curated=!state.curated;render();keep('#stage [data-action="context"]');}
 if(b.dataset.action==='later'){state.later=!state.later;render();keep('#stage [data-action="later"]');}

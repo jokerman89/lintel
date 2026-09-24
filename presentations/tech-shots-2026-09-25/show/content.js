@@ -26,7 +26,26 @@ window.DECK_SLIDES = [
     "evidenceLabel": "Hook coverage depends on the client and verified activation.",
     "cue": "Your agent does the work. Lintel gives it a method and a useful trail to leave behind.",
     "stageAction": "Read the map top to bottom. Point to the team pack, then follow the return line from project records into the next task.",
-    "bridge": "Six names appear in that map. Here is what each one means."
+    "bridge": "Before we open those parts, here is the moment this changed how I worked."
+  },
+  {
+    "id": "swarming-moment",
+    "chapter": "Meet Lintel",
+    "type": "swarmreveal",
+    "title": "I stopped being the queue.",
+    "subtitle": "My GitHub activity, before and after adopting Lintel swarming.",
+    "showSubtitle": false,
+    "minutes": 1,
+    "eyebrow": "MY JOURNEY / THE SWARMING MOMENT",
+    "evidenceLabel": "Two selected days from my GitHub history. Contributions measure activity — not quality or bugs fixed.",
+    "cue": "Here is a day from before I had swarming in Lintel. Fifty-five contributions. Then I changed how I organised the work.",
+    "stageAction": "Point to 55. Click “Then I turned on swarming.” Let 711 land in silence for two beats. Point to the original screenshots, then trace the report-to-fix flow. Use “Replay reveal” if rehearsing.",
+    "bridge": "The number gets your attention. The structure is what I want you to take away. Here are the six parts that make it possible.",
+    "notes": "Here is a day from before swarming in Lintel: fifty-five contributions. Then I changed how I organised the work. [Click. Pause for two beats.] Seven hundred and eleven. Same me. A different way to work.\n\nThese are two selected days from my GitHub history. Contributions are activity, not a quality score or a count of bugs fixed. This is a personal observation, not a controlled benchmark.\n\nNow think about a bug list, or a report from MDASH or MARS. Triage it. Agree the fixes. Give independent work to isolated lanes, with one coordinator keeping the plan. Review each lane independently, then integrate and test the combined result. No safe isolation? Run the briefs sequentially.\n\nThat is the useful shift: an overwhelming report becomes reviewable work. The chart gets your attention. The structure is what I want you to take away.",
+    "sources": [
+      "../presenter/sources.html#swarming-activity",
+      "../reference-source/docs-concepts-swarming-work-md.html#L4"
+    ]
   },
   {
     "id": "inside-the-kit",
@@ -463,10 +482,10 @@ window.DECK_SLIDES = [
     "type": "discussion",
     "title": "What are you tired\nof explaining twice?",
     "subtitle": "Pick one recurring task. Name the mistake. Decide what should remember it.",
-    "minutes": 5,
-    "notes": "Give the room a few seconds to think, then take one answer from a remote participant first. Ask for a specific recurring task rather than general enthusiasm about agents. Which part should be a skill? Which decision belongs in an ADR? Which mistake deserves a regression test? What would make this too heavy? The goal is not to collect a huge roadmap in five minutes. Choose one candidate workflow and an observable failure that a pilot could try to prevent. If there is disagreement, use it: different contexts may need different harnesses.",
+    "minutes": 4,
+    "notes": "Give the room a few seconds to think, then take one answer from a remote participant first. Ask for a specific recurring task rather than general enthusiasm about agents. Which part should be a skill? Which decision belongs in an ADR? Which mistake deserves a regression test? What would make this too heavy? The goal is not to collect a huge roadmap in four minutes. Choose one candidate workflow and an observable failure that a pilot could try to prevent. If there is disagreement, use it: different contexts may need different harnesses.",
     "showSubtitle": false,
-    "evidenceLabel": "5 minutes · choose one pilot candidate",
+    "evidenceLabel": "4 minutes · choose one pilot candidate",
     "cue": "What are you tired of explaining twice?",
     "stageAction": "Take a remote participant first. Choose one task, one recurring failure and what should remember it.",
     "bridge": "Let me close with the short version."

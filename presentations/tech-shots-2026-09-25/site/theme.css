@@ -81,3 +81,11 @@
 /* Saved proof viewers use the same palette aliases as the slide player. */
 :root[data-theme="paper"] .flow .phase{opacity:1;color:#625c53;background:#e8e5df;border-color:#8d877c}
 :root[data-theme="paper"] .flow .phase.on{color:#232320;background:#dce8c5;border-color:#415f25}
+
+/* Preserve original evidence pixels in both themes; activity graphs are not decorative art. */
+:root[data-theme="paper"] .swarming-moment .swarm-evidence img{filter:none;opacity:1}
+:root[data-theme="paper"] .swarm-comparison article{background:#eeebe3;border-color:#8a7b90}
+:root[data-theme="paper"] .swarm-comparison .swarm-after{background:#e6eadf;border-color:#415f25}
+:root[data-theme="paper"] .swarm-trigger{color:#fff;background:#344d20;border-color:#344d20}
+:root[data-theme="paper"] .swarm-replay{color:#464c3e;border-color:#7f8875}
+:root[data-theme="paper"] .swarm-evidence{background:#0d1117}

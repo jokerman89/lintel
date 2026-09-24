@@ -18,6 +18,16 @@ window.LINTEL_OPENING = ({shell,icon,state}) => ({
     '<div class="map-storage"><span>Reviewed records travel with Git</span><span>Runtime state stays Git-ignored</span></div></div>'+
     '<div class="map-return"><span class="return-line" aria-hidden="true"></span>'+icon('git')+'<span class="map-kicker">COMPOUNDING</span><h2>The next task<br>starts wiser.</h2><p>Retrieve relevant<br>decisions and lessons.</p></div>'+
     '<div class="map-platform">'+icon('lock')+'<strong>Platform controls</strong><span>Permissions · sandbox · CI · deployment gates</span></div></div>', 'system-map-slide'),
+  swarmreveal:s=>{
+    const revealed=!!state.swarmReveal;
+    return shell(s,
+      '<div class="swarm-comparison'+(revealed?' is-revealed':'')+'">'+
+      '<article class="swarm-before"><span class="swarm-label">BEFORE SWARMING</span><div class="swarm-count">55<span>contributions / June 12</span></div><a class="swarm-evidence" href="../assets/swarming/contributions-before.png" target="_blank" rel="noopener" aria-label="Open original GitHub screenshot: 55 contributions on June 12"><img src="../assets/swarming/contributions-before.png" width="261" height="147" alt="GitHub contribution graph showing 55 contributions on June 12"></a></article>'+
+      '<article class="swarm-after"><span class="swarm-label">AFTER / LINTEL SWARMING</span>'+
+      (revealed?'<div class="swarm-result" aria-live="polite"><div class="swarm-count">711<span>contributions / September 4</span></div><a class="swarm-evidence" href="../assets/swarming/contributions-after.png" target="_blank" rel="noopener" aria-label="Open original GitHub screenshot: 711 contributions on September 4"><img src="../assets/swarming/contributions-after.png" width="296" height="197" alt="GitHub contribution graph showing 711 contributions on September 4"></a></div><div class="swarm-payoff">One coordinator. Many focused workers.</div><button class="swarm-replay" data-action="swarm-reveal">Replay reveal ↺</button>':
+      '<div class="swarm-anticipation"><div class="swarm-fan" aria-hidden="true"><i></i><i></i><i></i><i></i></div><p>Same me.<br>A different way to work.</p><button class="swarm-trigger" data-action="swarm-reveal">Then I turned on swarming. <span aria-hidden="true">→</span></button></div>')+'</article></div>'+
+      '<div class="swarm-remediation"><div class="swarm-report"><b>FROM REPORT TO FIX</b><span>Bug lists · MDASH / MARS</span></div><ol aria-label="Report remediation workflow"><li>Triage + approve</li><li>Isolated work lanes</li><li>Independent review</li><li>Integrate + test</li></ol></div>', 'swarming-moment');
+  },
   buildingblocks:s=>shell(s,
     '<div class="blocks-grid">'+[
       ['folder','Scaffolding','Where the project remembers.','Plans, decisions, lessons, handoffs.'],

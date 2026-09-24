@@ -37,3 +37,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+## Supplied GitHub activity screenshots
+
+`assets/swarming/contributions-before.png` and `contributions-after.png` are original crops supplied by Johannes for publication in this presentation. They show GitHub contribution graphs (55 on June 12 and 711 on September 4) and are included unchanged. GitHub interface elements belong to their respective owner; no affiliation or endorsement is implied. Unlike the conceptual illustrations, these are activity screenshots, not a controlled benchmark.
