@@ -697,6 +697,22 @@ The remaining eight discovery/authoring consumers and existing template are
 released to the original P13 owner with explicit status/welcome ownership.
 
 The final report is [reports/final.md](reports/final.md): a draft for A23.5, completed at the final freeze.
+**Publishing (2026-09-24, 22:15).** The delivery branch is frozen at `ad529ebc` (base `main`
+`9575aaac`, which it contains). Publishing is blocked on identity, not on content:
+
+- `git push` ran as the session's injected identity `jokerman_microsoft` and was refused (403).
+- The app's PR tool runs as the same Enterprise Managed User and cannot access the repository.
+- Only `jokerman89` is authorized (L-053), and the coordinator does not touch credentials.
+
+When the operator returns, the publishing step is:
+
+1. As `jokerman89`, run `git push -u origin jokerman-microsoft-mastersession-recovery`.
+2. Open the PR: `gh pr create --draft --base main --head jokerman-microsoft-mastersession-recovery --title "Universal initiative: integrated delivery (0.11.0)" --body-file <session files>/pr-body.md`
+   (`pr-body.md` SHA-256 prefix `04b0824e`).
+3. When CI finishes, run A23.5 Phase 3: check that CI tested exactly the reviewed head, then close
+   A23.4 and A23.5 and mark the PR ready.
+
+Any A23.5 verdict file is preserved before the push, so the push is made once, with no CI restart.
 Current original acceptance count is 107/113. A08, A10 and A13 close on SAME9db's whole-P08
 integration review (`f724834c`). A14.5 closes on the operator-authorized Microsoft npm feed
 restore and the image-capable review (`562f0386`, `9d23f2ff`). A23.1–.3 close on the A23 unit

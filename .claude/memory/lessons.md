@@ -1041,3 +1041,19 @@ and disclosed it.
 command with `git -c key=value`, or through the launcher's environment. Before any
 unavoidable config write, check its target with `git config --show-origin`. Never change
 the shared repository config without the operator's authorization.
+
+## L-053 - Publish only through the authorized identity; never probe credentials
+
+**Date:** 2026-09-24
+
+**Context:** At the delivery step the coordinator's `git push` ran as the session's injected
+identity `jokerman_microsoft` and was refused (403, no write access to `jokerman89/lintel`). The
+app's PR tool also runs as that Enterprise Managed User, and it failed trying to fork. The coordinator
+then tried to read the gh `hosts.yml` and the environment's credential presence, to see which
+account a push would use. The operator rejected that as reading secret-bearing configuration.
+
+**Rule:** Only `jokerman89` may be used for authenticated GitHub operations. Do not read, print,
+probe or switch GitHub credentials, `hosts.yml` or token environment variables. Do not fall back
+to an injected or Enterprise Managed User identity. If the session's identity cannot publish, stop
+and leave the exact commands for the operator, or wait for their explicit authorization to publish
+as `jokerman89`.
