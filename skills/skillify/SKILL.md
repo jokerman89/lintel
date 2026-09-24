@@ -35,7 +35,7 @@ spelling `/li:regen-mocks`; do not silently strip or add a prefix.
 ## Inputs
 
 - Required: bare canonical name (kebab-case), one-line description and authorized target directory
-- Optional `--from-lesson <id>` — read a `/learn` entry by id, use it as seed
+- Optional `--from-lesson <L-NNN>` — read a `/learn` entry by ID, use it as seed
 - `--dir <subdir>` — explicit repository-relative draft directory; no implicit personal destination
 - Optional `--voice <tier>` — declared voice tier (default: internal; project/pack constraints still apply)
 - Optional `--cli <list>` — source declarations using the accepted registry; default empty/unknown, not claimed host support
@@ -48,7 +48,10 @@ spelling `/li:regen-mocks`; do not silently strip or add a prefix.
    Inspect only explicitly selected project-local draft/registration paths for additional
    collisions. A catalog miss covers that source namespace, not every installed plugin.
 2. **Read the existing template** and, only if requested, the exact `L-NNN` lesson from the
-   target's documented memory file. A missing seed is an unresolved input, not invented history.
+   target's documented memory file. Print that block by ID with
+   `python3 "$LINTEL_SOURCE_ROOT/bin/li-lessons.py" get --id L-NNN` (exit 1 absent, 2 duplicated
+   or malformed) and use its body, source and type as seed material. A missing seed is an
+   unresolved input, not invented history.
 3. **Instantiate a valid opening header.** Fill name, layer, description, color, tools,
    voice and cli_support. Keep declarations distinct from host observation and permissions.
    Use proper YAML quoting for supplied text; do not interpolate it into executable code.
@@ -166,7 +169,8 @@ Adoption/discovery is a separately authorized adapter action, not performed here
 - **Destination exists, escapes the target or is not owned:** refuse without changing it.
 - **Frontmatter validation fails after drafting:** retain the owned draft as INVALID, with
   actual diagnostics; do not delete it, overwrite other work or advertise activation.
-- **Lesson id not found:** report the missing input; use the real question channel if needed.
+- **Lesson id not found:** `li-lessons.py get` exits 1 (absent) or 2 (duplicated or malformed);
+  report the missing input and use the real question channel if needed.
 
 ## Examples
 

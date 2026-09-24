@@ -12,7 +12,7 @@ cli_support:
     level: degraded
 ---
 
-You are the `usage-log` skill — the observation foundation under maintenance, token budgeting, hook audit, and "what rusts."
+You are the `usage-log` skill — the observation foundation under maintenance, token budgeting, hook audit, and low-observed-usage review.
 
 ## What this skill does
 
@@ -25,9 +25,9 @@ source "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/bin/_audit.sh"
 audit_log usage-skill invocation skill=<name>     # optional: mode=<mode> tokens_est=<n> cli=<cli>
 ```
 
-→ appends to `~/.lintel/audit/usage-skill.jsonl` (`usage-*` categories always route operator-global — see `bin/_audit.sh`).
+→ appends to `$(audit_file usage-skill)`, the operator-global `usage-skill.jsonl` (`usage-*` categories always route operator-global — see `bin/_audit.sh`).
 
-**Reader mode (solo-invokable for reports):** reads existing usage records, surfaces top-skills + frequency + estimated token spend per skill family. Pairs with `/li:hooks-status` (siblings in the observation spine).
+**Reader mode (solo-invokable for reports):** reads existing usage records, surfaces top-skills + frequency + estimated token spend per skill family. Pairs with `/li:hooks-status` (siblings in the observation spine). Absent or low recorded usage is reported as unobserved or low observed usage — never as a verdict that a skill is unused.
 
 The foundation that `/li:maintenance` (5.3) and `/li:catalog` (1.6 trends) build on — both degrade gracefully when no records exist.
 
@@ -35,7 +35,7 @@ The foundation that `/li:maintenance` (5.3) and `/li:catalog` (1.6 trends) build
 
 - **Writer mode:** the operator (or a skill the operator instructs) wants an invocation counted — run the one-liner above.
 - **Reader mode:** "what have I used most over the past week?" → `/li:usage-log --report --days 7`
-- Maintenance pre-flight: `/li:usage-log --report --topn 10` sees what's rusting (skills used <2× per month)
+- Maintenance pre-flight: `/li:usage-log --report --topn 10` shows low observed usage (skills with <2 recorded invocations per month)
 - Token-budget debugging: `/li:usage-log --tokens-by-skill` aggregates token-est per skill
 
 ## When NOT to use
@@ -82,28 +82,36 @@ audit_log usage-skill invocation skill=research mode=full tokens_est=3500 cli=cl
 ### Step 2 — Reader mode (solo-invokable)
 
 ```bash
-~/.lintel/audit/usage-*.jsonl
+source "${LINTEL_SOURCE_ROOT:?select trusted source}/bin/_audit.sh"
+usage_dir="$(audit_dir usage-skill)"   # the router's operator-global directory
+for log in "$usage_dir"/usage-*.jsonl; do
+  [ -f "$log" ] || continue
+  rc=0
+  python3 "$LINTEL_SOURCE_ROOT/bin/li-events.py" records --file "$log" --category usage-skill \
+    ${since:+--since "$since"} || rc=$?
+  case "$rc" in 0|3|4) ;; *) echo "Could not read $log (exit $rc)"; exit "$rc" ;; esac
+done
 ```
 
-Glob across files (the writer appends to `usage-skill.jsonl`; older `usage-<YYYYMMDD>.jsonl` files, if any exist, still match). Surface:
+Glob across files (the writer appends to `usage-skill.jsonl`; older `usage-<YYYYMMDD>.jsonl` files, if any exist, still match and are read with the same `usage-skill` catalog entry; anything else surfaces as a reader diagnostic rather than disappearing). Surface:
 - **Top N skills by frequency** (`--topn 10 --days 7`)
 - **Token spend by skill family** (`--tokens-by-skill`)
-- **Rust detection** (skills used < 2× past 30 days — flag candidates for archive)
+- **Low observed usage** (fewer than 2 recorded invocations in 30 days — review candidates only; unrecorded use is unobserved, not disuse)
 - **Override-pattern correlation** (cross-reference with hooks.jsonl override-counts)
 
-If no records exist: surface "No usage data yet — the writer is manual (see writer mode)" and stop. Never invent counts.
+If no records exist: surface "No usage records observed in `<usage dir>` — the writer is manual (see writer mode)" and stop. Never invent counts.
 
 ## Integration
 
 **Writes (writer mode):**
-- `~/.lintel/audit/usage-skill.jsonl` (append, one line per recorded invocation, via `audit_log`)
+- `$(audit_file usage-skill)` — operator-global `usage-skill.jsonl` (append, one line per recorded invocation, via `audit_log`)
 
 **Reads (reader mode):**
-- `~/.lintel/audit/usage-*.jsonl` (glob)
+- `usage-*.jsonl` in `$(audit_dir usage-skill)` (glob), through `bin/li-events.py`
 - `.claude/runtime/audit/hooks.jsonl` (cross-reference for override-pattern correlation, if requested)
 
 **Consumed by:**
-- `/li:maintenance` (5.3 — token-cost simulation, rust detection; falls back to defaults when no records exist)
+- `/li:maintenance` (5.3 — token-cost simulation, low-observed-usage review; falls back to defaults when no records exist)
 - `/li:catalog` (1.6 — usage-trend coloring for top-N skills)
 - `/li:hooks-status` (1.2 + 1.7 — sibling observation skill)
 - Operator (solo-report invocation)
@@ -117,8 +125,8 @@ If no records exist: surface "No usage data yet — the writer is manual (see wr
 
 ## Failure recovery
 
-- Append fails (permission, disk-full): `audit_log` warns on stderr and continues — observation never blocks work.
-- Reader-report empty (no records yet): surface "No usage data yet. The writer is manual — `audit_log usage-skill invocation skill=<name>`."
+- Append fails (permission, disk-full, a path that is not a directory): `audit_log` warns on stderr and returns 0 — observation never blocks work. Some hooks discard that stderr, so a missing record stays unobserved rather than meaning the invocation did not happen.
+- Reader-report empty (no records yet): surface "No usage records observed. The writer is manual — `audit_log usage-skill invocation skill=<name>`."
 
 ## Recommended next steps after invocation
 

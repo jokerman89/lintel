@@ -108,5 +108,25 @@ intent=$(classify_intent "driftsätt till produktion")
 [ "$intent" = "deploy" ] && pass "Swedish 'driftsätt' → deploy (bilingual input preserved)" || fail "intent=$intent (expected deploy)"
 
 echo ""
+echo "[boundary consumers] compound requests clarify; recommendations are never executed"
+for request in \
+  'Build the service and provision the environment.' \
+  'Deploy the release and change the deployment manifest.' \
+  $'Deploy the release\nReview the release plan.'; do
+  intent=$(classify_intent "$request")
+  workflow=$(match_workflow "$intent" delivery team)
+  confidence=$(score_confidence "$intent" "$workflow")
+  should=$(check_escalation_threshold "$confidence" medium)
+  [ "$intent|$workflow|$confidence|$should" = 'unclear|/team:delivery|low|yes' ] &&
+    pass "compound operation uses low-confidence pack default and clarification" ||
+    fail "compound result=$intent|$workflow|$confidence|$should"
+done
+intent=$(classify_intent $'Please\nreview the fix\nwithout changing code')
+workflow=$(match_workflow "$intent" delivery team)
+[ "$intent|$workflow" = 'review|/li:review' ] &&
+  pass "wrapped read remains review rather than the pack build default" ||
+  fail "wrapped read=$intent|$workflow"
+
+echo ""
 if [ "$FAILED" -eq 0 ]; then echo "All orientator-mechanical-routing scenarios PASSED"; exit 0
 else echo "Some orientator-mechanical-routing scenarios FAILED"; exit 1; fi

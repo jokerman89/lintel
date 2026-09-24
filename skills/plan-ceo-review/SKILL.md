@@ -11,7 +11,11 @@ hop_in: no
 
 # /plan-ceo-review
 
-Strategy-level review of a plan or design doc. Asks the hard product/business questions BEFORE `/plan-eng-review` locks architecture. Optional but recommended for any plan that changes user-facing behavior, expands scope, or introduces a new market position.
+Optional strategy/venture review of the selected plan/design. Invoke it for an
+explicit strategy request, `--lens venture`, or an applicable operator-selected
+pack lens. A large migration, maintenance task, research request or ordinary
+user-facing feature does not automatically need a founder interview.
+Follow [task-relevant intake](../define/references/intake.md).
 
 Operator-to-operator strategic challenge before architecture locks: demand reality, wedge specificity, 3-year fit. Voice stays internal (this is a builder-to-builder challenge, not customer-facing).
 
@@ -30,19 +34,23 @@ Operator-to-operator strategic challenge before architecture locks: demand reali
 
 ## Inputs
 
-- Optional path to a design doc (auto-discovers latest from `~/.lintel/projects/<slug>/*-design-*.md`).
-- No-args: reviews the currently active design context (operator pastes plan or skill reads recent design from `~/.lintel/projects/`).
+- Explicit design path or the selected [work map](../spec-kit/references/work-map.md),
+  validated with `bin/li-work-artifacts.py`; no timestamp/global-store selection.
+- Verify the P07 reference and required-policy bridge before using pack criteria.
 
 ## Workflow
 
-1. **Read design context.** Authoritative source is whichever design doc is freshest in `~/.lintel/projects/<slug>/`.
+1. **Read design context.** Use the original mapped design/spec/task IDs and
+   explicitly linked evidence. Prior answers and approval remain valid within scope.
 2. **Three forcing questions** — one AskUserQuestion per question. Skip if answer is already in the design doc.
    - **Q1 Demand reality:** strongest evidence someone actually wants this — not interest, not signups, behavior + money + panic-when-it-breaks?
    - **Q2 Wedge specificity:** smallest version someone would pay real money for this week, not after the platform ships?
    - **Q3 3-year fit:** if the world looks meaningfully different in 3 years (and it will), does this become MORE essential or less?
 3. **Premise challenge** — list 3-5 load-bearing premises the design assumes. Ask operator to confirm each. If any rejected → revise design before continuing.
 4. **Scope deltas** — propose 1-2 scope EXPANSIONS (10-star versions) and 1-2 scope REDUCTIONS (minimum viable wedge). Operator picks.
-5. **Founder signal synthesis** — observe what the operator said + how they said it. Surface what their answers reveal about conviction, taste, agency.
+5. **Decision-evidence synthesis** — record relevant stated priorities, observed
+   user behavior and remaining uncertainty. Do not infer personality or founder
+   traits from phrasing; optional pack framing does not replace factual evidence.
 
 ## Report format
 
@@ -62,23 +70,28 @@ Operator-to-operator strategic challenge before architecture locks: demand reali
 - Expansion B: <one-line> — operator: <decision>
 - Reduction C: <one-line> — operator: <decision>
 
-**Founder signals observed:**
-- <signal 1>
-- <signal 2>
+**Decision evidence and uncertainty:**
+- <source-grounded priority or observation>
+- <unverified premise and next evidence needed>
 
 **Verdict:** SCOPE LOCKED — proceed to /plan-eng-review
         OR  REVISE — design doc needs <specific change> before eng review
 ```
 
-Persist via first-party `bin/li-review-log`:
-```bash
-bin/li-review-log '{"skill":"plan-ceo-review","timestamp":"...","status":"...","scope_proposed":N,"scope_accepted":N,"scope_deferred":N,"mode":"...","commit":"..."}'
-```
+Preserve the strategy report, scope deltas and original IDs. Use
+[P05 evidence](../review/references/evidence.md) for a bound result:
+prepare -> actual review -> `bash "$LINTEL_SOURCE_ROOT/bin/li-review-log" --file
+"$review_record"` -> latest reader with expected context/corroboration.
+Immutable QA obligations and required policy are not inferred from this lens's
+score. For an unmapped/draft inspection use shared `snapshot`/`inspect`; it
+declares `release_clearance:false`. A strategy heading or old SCOPE LOCKED/CLEAR
+string never grants implementation or SHIP clearance.
 
 ## Failure modes
 
 - **No design doc found:** suggest `/office-hours` first to produce one.
-- **Operator unwilling to engage with hard questions:** offer escape hatch ("ask 2 more, then proceed"). Don't gatekeep beyond that.
+- **Operator declines optional questions:** stop that interview; retain genuinely
+  unresolved material decisions without forcing two more questions.
 - **Premise rejected mid-review:** loop back. Don't proceed with a known-false premise.
 
 ## Examples
@@ -105,4 +118,4 @@ bin/li-review-log '{"skill":"plan-ceo-review","timestamp":"...","status":"...","
 - `/office-hours` — design doc generator (run before this skill if no doc exists)
 - `/plan-eng-review` — runs after this (architecture & tests)
 - `/autoplan` — chains office-hours → ceo-review → eng-review → design-review
-- `/plan-tune` — auto-decide question preferences over time
+- `/plan-tune` — dormant preference history; no runtime auto-decision consumer

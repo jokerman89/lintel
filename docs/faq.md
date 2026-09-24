@@ -155,6 +155,8 @@ a private pack. Propose reusable fixes upstream through a pull request. Generate
 managed adapter files should be changed through their sources, not patched as final output.
 [CONTRIBUTING.md](../CONTRIBUTING.md) covers contracts and verification.
 
-Two lesson utilities have different purposes: `li-lessons-promote` promotes a lesson into the
-scaffolding baseline; `li-lessons-sync` synchronizes an operator's lessons through a configured
-private Git repository. Review the destinations before using either.
+Two lesson utilities have different purposes: `li-lessons-promote` promotes one ID-managed lesson
+into the scaffolding baseline of a Lintel work tree you name explicitly (it writes only that file,
+records provenance with an explicit source label and commits only on request);
+`li-lessons-sync` synchronizes an operator's lessons through a configured private Git repository.
+Review the destinations before using either.

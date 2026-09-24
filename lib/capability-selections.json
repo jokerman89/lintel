@@ -24,7 +24,8 @@
         "shims/universal/ADAPTER.md",
         "lib/cli-tiers.yaml",
         "docs/concepts/pack-resolver.md",
-        "skills/review/references/evidence.md"
+        "skills/review/references/evidence.md",
+        "bin/li-lessons.py"
       ],
       "provenance": [],
       "inputs": [

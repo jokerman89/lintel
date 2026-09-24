@@ -30,12 +30,12 @@ _context_run() {
   local python
   for python in python3 python; do
     if command -v "$python" >/dev/null 2>&1 && \
-        "$python" -c 'import sys; assert sys.version_info >= (3, 10)' >/dev/null 2>&1; then
+        "$python" -c 'import sys; assert sys.version_info >= (3, 9)' >/dev/null 2>&1; then
       PYTHONDONTWRITEBYTECODE=1 "$python" "$_CONTEXT_BIN_DIR/../lib/context_safety.py" "$@"
       return $?
     fi
   done
-  echo 'Context helpers require Python 3.10+; no operation performed.' >&2
+  echo 'Context helpers require Python 3.9+; no operation performed.' >&2
   return 1
 }
 

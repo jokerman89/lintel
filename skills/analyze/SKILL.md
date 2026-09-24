@@ -15,7 +15,9 @@ gap_if_skipped: "Plan revisions and BUILD deviations go unreconciled against the
 Cross-artifact consistency check across the cycle's contract chain: the APPROVED design doc
 (DEFINE) ↔ the cold-executor trio (PLAN) ↔ the build-log + tree (BUILD), plus alignment with
 authority docs (ADRs, CLAUDE.md constraints). Read-only on the repo; writes exactly one
-artifact: `.claude/runtime/state/analyze-report.md`.
+report at the selected cycle's explicit runtime path (for example
+`.claude/runtime/state/<cycle-id>-analyze-report.md`). Retain prior-cycle reports;
+the old `analyze-report.md` path is readable history, not automatic current evidence.
 
 ## When to use
 
@@ -32,48 +34,72 @@ artifact: `.claude/runtime/state/analyze-report.md`.
 
 ## Inputs (read-only)
 
-Resolve each; if one is absent, mark its legs SKIPPED in the report (never fail on a missing
-artifact — report honestly what could not be checked):
+Use the [shared work-map contract](../spec-kit/references/work-map.md) and
+`bin/li-work-artifacts.py --repo <target> --map <selected> --view context`.
+Verify the saved profile through `workflow_resume` before consuming its requirements.
+ANALYZE uses the same explicit selection as PLAN/BUILD/CAPTURE; it never selects
+the newest design, report or sibling file.
+
+If a required artifact/evidence source is missing, mark the affected leg INCOMPLETE
+with its path and reason. Do not convert a skipped/missing leg into GREEN. A leg can
+be not-applicable only with a grounded phase/scope reason (e.g. BUILD has not started
+at plan-time). This does not stop independent read-only analysis of available inputs.
 
 | Artifact | Source |
 |---|---|
-| Design doc | newest `.claude/engineering/design-archive/*-design-*.md` or the doc named in `00-state.md` DEFINE entry |
-| Cold-executor trio | `plan.md` + `spec.md` (paths from the `00-state.md` PLAN entry) + `prompt.md` (sibling in the same `.claude/plans/<slug>/` dir — the PLAN entry records only plan/spec paths) |
-| Discover report | newest `.claude/runtime/state/discover-report-*.md`, or the `report_path:` recorded in the `00-state.md` DISCOVER entry (ADR constraints list) |
-| Build evidence | build-log entries + `00-state.md` BUILD entry + `git log`/`git diff` over the cycle's commits |
-| Authority docs | `.claude/decisions/*.md` (Accepted), CLAUDE.md frozen zones |
+| Requirements/design | Mapped `spec`/`plan` and explicitly linked approved design |
+| Tasks and handoff | Mapped `tasks`/`prompt`; original IDs and task source, not a presumed plan.md checklist |
+| Discover report | Exact report linked by the selected cycle's DISCOVER entry or mapped handoff |
+| Build evidence | Selected cycle/package/leaf build-log entries and actual selected tracked/dirty/new-file evidence |
+| Authority docs | Mapped constitution, relevant repository instructions and ADRs selected with P03's actual Markdown/YAML metadata reader |
 
 ## The three legs
 
 **Leg 1 — DEFINE↔PLAN** (plan-time; what PLAN Step 8 delegates here):
-- Every design-doc requirement maps to ≥1 plan.md task (coverage)
+- Every selected requirement maps to at least one original mapped task (coverage)
 - Every design decision is tasked or explicitly deferred — including decisions not phrased as
   requirements (the old Step 8 "design decisions not yet tasked" check)
-- No plan task lacks a traceable design requirement (no untasked scope creep into the plan)
+- No original task lacks a traceable requirement (no untasked scope creep into the plan)
 - Design decisions marked LOCKED are not contradicted by any task
-- plan.md dependencies consistent with discover-report ADR constraints
+- Mapped task dependencies are consistent with the linked discover-report ADR constraints
 
 **Leg 2 — PLAN↔BUILD** (post-build):
-- Every plan.md task has a terminal build-log status (DONE / DONE_WITH_CONCERNS / BLOCKED — none missing)
+- Every mapped leaf has attributable build evidence/status (DONE / DONE_WITH_CONCERNS /
+  BLOCKED); BLOCKED is unresolved work, not accepted completion
 - No commits in the cycle's range fall outside any task's scope (untasked work shipped)
 - Deviations (BLOCKED tasks, DONE_WITH_CONCERNS) are reflected back: design doc amended, plan
   annotated, or an explicit operator gap-acceptance recorded
 
 **Leg 3 — Authority alignment** (both times):
-- Nothing in plan.md or the built tree contradicts an Accepted ADR
+- Nothing in the mapped design/tasks or built tree contradicts an Accepted ADR;
+  unknown metadata remains visible rather than silently removing the document
 - CLAUDE.md frozen zones (pack contract, frontmatter contracts, AGENT-INSTRUCTIONS) untouched
   unless the plan explicitly declared a meta-infra change with its M1 artifact
 
 ## Report format (persisted)
 
-Write `.claude/runtime/state/analyze-report.md`:
+Write the selected report path and link it from this cycle's ledger/handoff. Do not
+overwrite another initiative's report or carry its accepted findings into this one:
+
+Record `analyze_report_path` through `state_append ANALYZE <actual-status>` after
+the report is persisted. After `workflow_resume`, the consumer reads that exact
+`state_cycle_field analyze_report_path` and checks the report's map/profile/package/
+leaf identity. Missing or mismatching evidence remains INCOMPLETE, not a stale
+global GREEN. ANALYZE is a utility entry and does not move the canonical phase.
 
 ```
 # analyze-report
 ts: <timestamp>
 trigger: standalone | plan-step8 | build-final
-legs_checked: [define-plan, plan-build, authority]   # SKIPPED legs listed with reason
-verdict: GREEN | YELLOW | RED
+work_map: <exact original work.json>
+artifacts: <original spec/plan/tasks/prompt paths>
+package_id: <selected package>
+leaf_ids: [<original IDs>]
+profile: <actually verified P07 reference>
+required_policy: <unchanged P05 bridge>
+legs_checked: [define-plan, plan-build, authority]
+legs_incomplete: [<missing required evidence and reason>]
+verdict: GREEN | YELLOW | RED | INCOMPLETE
 
 | # | Severity | Leg | Finding | Artifact:line | Suggested action |
 |---|----------|-----|---------|---------------|------------------|
@@ -83,7 +109,7 @@ Severity rubric: **P1** = a contradiction (task vs LOCKED decision, ADR violatio
 shipped work) → verdict RED. **P2** = a coverage gap (requirement with no task, task with no
 terminal status) → YELLOW unless operator-accepted. **P3** = traceability nits → GREEN-with-notes.
 
-**Supersede rule:** a re-run replaces the report, but operator-accepted findings carry forward
+**Supersede rule:** a re-run explicitly supersedes the same work/phase report, but operator-accepted findings carry forward
 (re-emit them marked `accepted <date>`, excluded from the verdict) — an acceptance recorded at
 plan-step8 must survive the build-final re-run, or accepted gaps re-flag forever.
 
@@ -96,8 +122,10 @@ A pack may wire a hard gate via `compliance.hooks`; the neutral `_default` pack 
 - Do NOT fix anything found — this skill reports; the operator or the owning phase acts.
 - Do NOT re-litigate design quality — wrong-shaped-but-consistent is GREEN here (quality is
   plan-eng-review's lens).
-- Do NOT fail on missing artifacts — mark legs SKIPPED with the reason; a partial check
-  honestly labeled beats a crash.
+- Do NOT hide missing required artifacts as skipped success. Preserve a partial report
+  with INCOMPLETE legs and the exact missing sources; it is not clearance.
+- Do NOT compute a separate acceptance hash. When binding evidence, use P05 `bind_work`
+  and the shared review/QA contract, including immutable obligations.
 
 ## Cycle-position footer
 
@@ -105,7 +133,7 @@ Close your report with the shared position footer. Outside an active cycle it re
 ambient line; inside one it shows the operator's position + next step:
 
 ```bash
-source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/lib/cycle-footer.sh"   # fallback: "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/lib/cycle-footer.sh"
+source "${LINTEL_SOURCE_ROOT:?select trusted source}/lib/cycle-footer.sh"
 render_cycle_footer                               # auto: thin when no cycle, full/--compact when in one
 ```
 

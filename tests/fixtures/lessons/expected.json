@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "description": "Shared oracle for the awk entry point in lib/memory.sh and bin/li-lessons.py. Line numbers are 1-based; block ranges are inclusive.",
+  "fixtures": {
+    "grammar.md": {
+      "next_id": "L-010",
+      "count": 7,
+      "lessons": [
+        {"id": "L-001", "line": 6, "end": 8, "state": "active"},
+        {"id": "L-002", "line": 9, "end": 15, "state": "superseded", "superseded_by": "L-004"},
+        {"id": "L-003", "line": 16, "end": 18, "state": "active"},
+        {"id": "L-004", "line": 23, "end": 26, "state": "active", "supersedes": ["L-002"]},
+        {"id": "L-005", "line": 27, "end": 35, "state": "active"},
+        {"id": "L-007", "line": 42, "end": 45, "state": "superseded", "superseded_by": "L-008"},
+        {"id": "L-008", "line": 46, "end": 49, "state": "active", "supersedes": ["L-007"]},
+        {"id": "L-008", "line": 50, "end": 52, "state": "active"},
+        {"id": "L-009", "line": 53, "end": 55, "state": "active", "supersedes": ["L-042"]}
+      ],
+      "recent": [["L-008", 46], ["L-008", 50], ["L-009", 53]],
+      "diagnostics": [
+        [36, "dated_heading"],
+        [39, "unparseable_heading"],
+        [50, "duplicate_id"],
+        [54, "missing_supersede_target"]
+      ],
+      "surface": {
+        "charlie delta": [["L-003", 1]],
+        "golf": [["L-005", 1]],
+        "hotel": [],
+        "india": [],
+        "bravo": [],
+        "juliet": [["L-008", 1]],
+        "kilo lima": [["L-008", 1], ["L-008", 1]],
+        "alpha echo": [["L-001", 1], ["L-004", 1]]
+      },
+      "get": {
+        "L-001": {"exit": 0, "lines": [6, 8]},
+        "L-002": {"exit": 0, "lines": [9, 15]},
+        "L-003": {"exit": 0, "lines": [16, 18]},
+        "L-005": {"exit": 0, "lines": [27, 35]},
+        "L-009": {"exit": 0, "lines": [53, 55]},
+        "L-006": {"exit": 1},
+        "L-999": {"exit": 1},
+        "L-008": {"exit": 2},
+        "L-12a": {"exit": 2}
+      }
+    },
+    "allocation.md": {
+      "next_id": "L-004",
+      "count": 2,
+      "lessons": [
+        {"id": "L-001", "line": 3, "end": 5, "state": "active"},
+        {"id": "L-003", "line": 6, "end": 9, "state": "superseded", "superseded_by": "L-001"},
+        {"id": "L-001", "line": 10, "end": 12, "state": "active", "supersedes": ["L-003"]}
+      ],
+      "recent": [["L-001", 3], ["L-001", 10]],
+      "diagnostics": [[10, "duplicate_id"]],
+      "surface": {
+        "november papa": [["L-001", 1], ["L-001", 1]],
+        "oscar": []
+      },
+      "get": {
+        "L-003": {"exit": 0, "lines": [6, 9]},
+        "L-001": {"exit": 2},
+        "L-002": {"exit": 1}
+      }
+    },
+    "empty.md": {
+      "next_id": "L-001",
+      "count": 0,
+      "lessons": [],
+      "recent": [],
+      "diagnostics": [],
+      "surface": {"lessons": []},
+      "get": {"L-001": {"exit": 1}}
+    }
+  }
+}

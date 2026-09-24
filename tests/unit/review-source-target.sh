@@ -48,18 +48,13 @@ test "$rc" = 3
 grep -Fq "current_head: $target_head" "$review_tmp/target-empty.out"
 echo 'PASS: an installed reader does not reuse a conflicting cwd review'
 
-# Execute the skill's real persistence block with concrete review values. Only
-# its JSON placeholders are filled; command paths and helper calls stay intact.
-awk '
-  /^Persist via first-party/ { section=1; next }
-  section && /^```bash/ { code=1; next }
-  code && /^```/ { exit }
-  code { sub(/\r$/, ""); print }
-' "$review_source/skills/plan-eng-review/SKILL.md" \
-  | sed "s/\"status\":\"\.\.\.\"/\"status\":\"CLEAR\"/g;s/:N/:0/g;s/\"commit\":\"\.\.\.\"/\"commit\":\"$target_head\"/g" > "$review_tmp/persist.sh"
-test -s "$review_tmp/persist.sh"
+# Retain the legacy history-only boundary. The current engineering-review v2
+# snippet is exercised through real prepare/writer/latest/QA/SHIP in
+# integration/universal-work-lifecycle.py::ReviewSnippetTests.
 rc=0
-(cd "$review_tmp/cwd" && source "$review_tmp/persist.sh") > "$review_tmp/target-review.out" || rc=$?
+(cd "$review_tmp/cwd" &&
+ bash "$installed/bin/li-review-log" "{\"skill\":\"plan-eng-review\",\"status\":\"CLEAR\",\"commit\":\"$target_head\"}" &&
+ bash "$installed/bin/li-review-read") > "$review_tmp/target-review.out" || rc=$?
 test "$rc" = 3
 grep -Fq "current_head: $target_head" "$review_tmp/target-review.out"
 grep -q 'VERDICT: BLOCKED' "$review_tmp/target-review.out"
@@ -67,7 +62,7 @@ target_log="$LINTEL_REPO_ROOT/.claude/runtime/audit/reviews.jsonl"
 grep -Fq "\"commit\":\"$target_head\"" "$target_log"
 ! grep -Fq "\"commit\":\"$cwd_head\"" "$target_log"
 test ! -e "$LINTEL_REPO_ROOT/bin/_audit.sh"
-echo 'PASS: the real engineering-review snippet preserves target history without granting unbound clearance'
+echo 'PASS: the legacy writer preserves target history without granting unbound clearance'
 
 # The one-time legacy import must derive both slug and branch from the target.
 for name in target cwd; do

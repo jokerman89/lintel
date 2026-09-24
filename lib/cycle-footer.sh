@@ -2,7 +2,7 @@
 # component: cycle-footer
 # implements: ADR-0003
 # intent: .claude/decisions/0003-cycle-position-footer.md
-# last_intent_review: 2026-09-20
+# last_intent_review: 2026-09-23
 #
 # lib/cycle-footer.sh — render the position footer that closes every official Lintel
 # report, so an operator entering the cycle at any point always knows where they are
@@ -233,6 +233,8 @@ EOF_HIST
     DONE_WITH_CONCERNS) label="done with concerns" ;;
     STARTING|IN_PROGRESS) label="in progress" ;;
     BLOCKED) label="blocked" ;;
+    INCOMPLETE) label="incomplete" ;;
+    UNTRUSTED) label="untrusted" ;;
     NEEDS_CONTEXT) label="needs context" ;;
     PAUSED|ABORTED) label="$(printf '%s' "$status" | tr '[:upper:]' '[:lower:]')" ;;
     *) label="status unknown" ;;

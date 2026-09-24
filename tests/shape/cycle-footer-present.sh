@@ -31,7 +31,14 @@ done
 grep -q "render_cycle_footer" skills/cycle/SKILL.md && pass "cycle orchestrator references footer" || fail "cycle orchestrator missing footer"
 
 # The orchestrator must persist cycle_mode into state so the footer resolves skips without --mode.
-grep -qE "cycle_mode[:=]" skills/cycle/SKILL.md && pass "orchestrator persists cycle_mode to state" || fail "orchestrator missing cycle_mode write"
+# It passes the selected mode to the shared lifecycle entry, which records cycle_mode.
+if grep -qE 'workflow_begin "[^"]*" "\$mode"' skills/cycle/SKILL.md \
+  && grep -qE 'state_cycle_begin "\$id" "\$mode"' lib/workflow.sh \
+  && grep -qF '"cycle_mode=$mode"' lib/state.sh; then
+  pass "orchestrator persists cycle_mode to state"
+else
+  fail "orchestrator missing cycle_mode write"
+fi
 
 # High-traffic non-phase entry points also close with the footer (thin ambient outside a cycle).
 ENTRY_SKILLS="welcome jobs resume status"

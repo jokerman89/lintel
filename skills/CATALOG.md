@@ -14,7 +14,7 @@ Total skills: 127
 | [`/li:adr-new`](adr-new/SKILL.md) | Use when a non-trivial decision needs recording to bootstrap a new Architecture Decision Record from the template, aski… |
 | [`/li:analyze`](analyze/SKILL.md) | Use to check that PLAN and BUILD still match the approved DEFINE design — run when a plan was revised or a build deviat… |
 | [`/li:audit`](audit/SKILL.md) | Read the unified Lintel audit trail — surface .claude/runtime/audit/ (repo events) and ~/.lintel/audit/ (operator event… |
-| [`/li:autoplan`](autoplan/SKILL.md) | Use to run a problem statement through the full planning pipeline in one shot — chains the design doc, strategy review,… |
+| [`/li:autoplan`](autoplan/SKILL.md) | Use to compose task-relevant intake, discovery and canonical PLAN with applicable review lenses, preserving the same or… |
 | [`/li:brief-forge`](brief-forge/SKILL.md) | Use when a workflow explicitly hands work across a boundary — spawning a subagent, transitioning a phase, passing to a … |
 | [`/li:browse`](browse/SKILL.md) | Use to open, read and interact with an authorized page using an observed browser provider, retaining screenshots, print… |
 | [`/li:build`](build/SKILL.md) | Use to execute an approved plan in bounded work packages, preserving short task IDs and acceptance evidence while revie… |
@@ -23,9 +23,9 @@ Total skills: 127
 | [`/li:catalog`](catalog/SKILL.md) | Use to discover Lintel skills by name, purpose or family, or regenerate the committed skill catalog after frontmatter c… |
 | [`/li:clean`](clean/SKILL.md) | Manual self-maintenance trigger. Suggests /context-save + restart when session feels heavy. |
 | [`/li:cli-fingerprint`](cli-fingerprint/SKILL.md) | Use to identify the current CLI, desktop, IDE or cloud surface and inspect its actual tools without inferring capabilit… |
-| [`/li:code-freeze`](code-freeze/SKILL.md) | Mark paths as DO-NOT-MODIFY for this session — other skills check + refuse to touch. |
+| [`/li:code-freeze`](code-freeze/SKILL.md) | Record advisory do-not-modify scope for an explicitly identified session or cycle; this metadata does not enforce a fil… |
 | [`/li:code-review`](code-review/SKILL.md) | Use before landing a change to review just the diff — focused on the changed code only, lighter than a full engineering… |
-| [`/li:code-unfreeze`](code-unfreeze/SKILL.md) | Remove a path from session freeze — other skills can write to it again. |
+| [`/li:code-unfreeze`](code-unfreeze/SKILL.md) | Remove explicitly selected advisory freeze metadata without changing host permissions, project policy or release author… |
 | [`/li:codex`](codex/SKILL.md) | Use for an explicitly authorized Codex outside opinion on a diff, plan, code or hypothesis, retaining actual actor and … |
 | [`/li:compliance-gate`](compliance-gate/SKILL.md) | Compliance-gate aggregator — runs all gates the active pack declares (compliance.hooks) as ONE green/red verdict. Embar… |
 | [`/li:context-budget`](context-budget/SKILL.md) | Show observed context capacity and usage where available, clearly labeled input estimates otherwise; --watch compares a… |
@@ -73,19 +73,19 @@ Total skills: 127
 | [`/li:generate-word`](generate-word/SKILL.md) | Produce an editable Word document through available native tools or a declared library, preserving source detail and re… |
 | [`/li:generate-write`](generate-write/SKILL.md) | Produce content.md (slide/section bodies + bullets + titles) and speaker-notes.md from outline.md. Applies voice corpus… |
 | [`/li:generate-xlsx`](generate-xlsx/SKILL.md) | Produce an editable, source-backed workbook through available native tools, verifying formulas, actual recalculation, p… |
-| [`/li:handoff-size-check`](handoff-size-check/SKILL.md) | Handoff-size warning tied to the 500k cap. Per v3.6 backlog 3.2 — elephant-hint and token-cap as the same mechanism fro… |
+| [`/li:handoff-size-check`](handoff-size-check/SKILL.md) | Use before handoff to estimate the selected work-map artifacts and actual warming inputs against reported host headroom… |
 | [`/li:health`](health/SKILL.md) | Inspect Lintel lifecycle health through doctor, with explicit installed-file, provenance and host-activation boundaries. |
 | [`/li:help`](help/SKILL.md) | List the Lintel skills + agents + hooks available in this session. Filter by category, voice tier, or CLI support. |
-| [`/li:hooks-status`](hooks-status/SKILL.md) | Reader for hooks.jsonl — surface active-vs-dead hooks + override patterns + trigger counts. Closes the hooks-observatio… |
+| [`/li:hooks-status`](hooks-status/SKILL.md) | Reader for hooks.jsonl — per-hook observed records, override patterns and hooks with no observed record in a window, re… |
 | [`/li:instruction-parity-check`](instruction-parity-check/SKILL.md) | Use to verify shared session protocol equality and client-entry links without overwriting project prose or confusing si… |
 | [`/li:investigate`](investigate/SKILL.md) | Use when something is broken and you don't yet know why — drives a hypothesis-led investigation that builds a minimum r… |
 | [`/li:jobs`](jobs/SKILL.md) | Use to see and steer in-flight Lintel jobs — list what's open, continue, replan, abort, or branch a job. The single sou… |
 | [`/li:landing-report`](landing-report/SKILL.md) | Post-ship report — what landed in a window, in engineering or customer-voice format. |
 | [`/li:learn`](learn/SKILL.md) | Use after a correction, insight, or recurring pattern worth remembering to record it as a lesson the next session will … |
 | [`/li:lessons`](lessons/SKILL.md) | Mid-session review of accumulated lessons from .claude/memory/lessons.md — surfaces relevant ones for current task. |
-| [`/li:lessons-promote`](lessons-promote/SKILL.md) | Promote a repo-local lesson from .claude/memory/lessons.md to Lintel's global lessons (scaffolding/01-foundation/.claud… |
+| [`/li:lessons-promote`](lessons-promote/SKILL.md) | Promote one ID-managed project lesson into an explicitly named Lintel work tree's scaffolding baseline, with recorded p… |
 | [`/li:lessons-surface`](lessons-surface/SKILL.md) | Use before or during a task to pull up prior lessons relevant to it — searches the lessons store by keyword and context… |
-| [`/li:maintenance`](maintenance/SKILL.md) | On-demand maintenance — force-compact + static-path monitoring + token-cost simulation. Operator-request 5.3. Builds on… |
+| [`/li:maintenance`](maintenance/SKILL.md) | Use for on-demand storage/context guidance, scoped path diagnostics and labeled usage estimates without treating partia… |
 | [`/li:make-pdf`](make-pdf/SKILL.md) | Convert an authorized URL, Markdown file or HTML through actual browser print, preserving source and separating text/pa… |
 | [`/li:migrations`](migrations/SKILL.md) | Read the installed-source migration catalog against the selected target, preserving overdue, unknown and historical rec… |
 | [`/li:office-hours`](office-hours/SKILL.md) | Use to turn a rough problem statement into a structured, decision-gated design doc ready for engineering review. Reach … |
@@ -100,12 +100,12 @@ Total skills: 127
 | [`/li:perfbench`](perfbench/SKILL.md) | Measure performance — runtime, memory, cold-start — and detect regressions vs baseline. |
 | [`/li:personas-rotate`](personas-rotate/SKILL.md) | Load persona context from .claude/memory/personas.md for demo-prep, workshop-facilitation, or audience-aware writing. |
 | [`/li:plan`](plan/SKILL.md) | Use after DISCOVER, or standalone with an approved design, to produce the cold-executor trio (plan.md + spec.md + promp… |
-| [`/li:plan-and-build`](plan-and-build/SKILL.md) | Use when you already have an approved design doc and just need to plan and implement it — runs PLAN then BUILD and skip… |
+| [`/li:plan-and-build`](plan-and-build/SKILL.md) | Use to compose canonical PLAN and BUILD for an approved design or selected work map, retaining original tasks, package … |
 | [`/li:plan-ceo-review`](plan-ceo-review/SKILL.md) | Use before architecture lands to review a plan's strategy and scope — surfaces the product and business assumptions bak… |
 | [`/li:plan-design-review`](plan-design-review/SKILL.md) | UI/UX gaps review for plans with a frontend surface. Skip for backend/infra/CLI-only work. |
 | [`/li:plan-devex-review`](plan-devex-review/SKILL.md) | Developer experience gaps review. Slow CI, painful deploys, bad local dev, attrition signals. |
 | [`/li:plan-eng-review`](plan-eng-review/SKILL.md) | Use to review a plan or change for engineering soundness before it ships — covers architecture, code quality, test cove… |
-| [`/li:plan-tune`](plan-tune/SKILL.md) | Adjust which AskUserQuestion prompts auto-decide vs ask. Per-question preference tuning. |
+| [`/li:plan-tune`](plan-tune/SKILL.md) | Inspect or record dormant question-tuning preferences; no automatic decision behavior is active until stable question I… |
 | [`/li:profile-switch`](profile-switch/SKILL.md) | Inspect host install state and guide explicitly supported activation or owned snapshot recovery, without inventing plug… |
 | [`/li:qa`](qa/SKILL.md) | Use when you need to know whether the code works and to get the test suite green — runs the full suite, parses failures… |
 | [`/li:qa-only`](qa-only/SKILL.md) | Read-only test run — reports failures, never edits. For ship-gate verification. |

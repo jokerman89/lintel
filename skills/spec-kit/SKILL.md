@@ -75,6 +75,18 @@ the same approval again. A changed requirement or action outside that authorizat
 5. Resume by reading the selected tasks plus checkpoint; never infer completion from a prior
    assistant summary alone. Finish with REVIEW, authorized SHIP, and CAPTURE into existing stores.
 
+ANALYZE, handoff-size-check and CAPTURE use `li-work-artifacts.py --view context`
+or `--view budget` on this same map. They do not assume that tasks live in plan.md,
+select the newest report or recreate a native backlog. Start/resume through
+`lib/workflow.sh` to persist the original paths and actually verify P07 context,
+generation, digest and required policy across fresh shells. A missing/different
+target profile remains unresolved, never an automatic neutral transfer.
+
+Package review uses [the shared P05 evidence contract](../review/references/evidence.md):
+`bind_work` preserves original acceptance identity, immutable QA obligations survive
+observations, and the actual writer/latest reader precede same-context QA/SHIP.
+Checked boxes, old CLEAR strings and missing independent review do not close a task.
+
 On Copilot, invoke native `li-build` / `li-review` skills where discoverable, or load the canonical
 skill file from the adapter's source root. Tool names in shared skills describe operations; use
 the host's actual tools. Lintel's Claude hooks do not run on Copilot.
