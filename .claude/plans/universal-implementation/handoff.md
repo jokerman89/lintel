@@ -356,7 +356,10 @@ never inferred from this directive; a model switch does not change context ident
   removes them at integration: patch `p08-event-catalog-reconciliation.patch`, SHA-256
   `f0724329…f2fef`, 78 lines removed. See the P08 card, "Fourth reconciliation".
   f2's frozen A13 handoff (product `c7fbfd6f`, report `e687d848`) passes coordinator
-  intake and is queued with SAME9db for A13 SPEC, then eligible QUALITY.
+  intake. SAME9db's review returns SPEC FAIL with two P2 reader findings in
+  `bin/li-events.py`. R01: `--kind` runs before the `--since` undated diagnostic.
+  R02: a structurally invalid catalog exits 1 instead of 2. Both are released to f2 as
+  one bounded repair; see the P08 card, "SAME9db review and repair release".
 - P09: module product `5c99612` passes `114ddfe3`, integrated `2d789a4`;
   all 26 product paths match and 13 joined methods pass. `477d3fc` releases
   the original owner's separate N1 safety-quantifier correction and two bounded

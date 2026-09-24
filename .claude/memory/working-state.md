@@ -159,8 +159,9 @@ the first whole QUALITY (`2685bd57`) found P1 F05 (adapter late-edit overwrite) 
 P2 F06 (Bash accepts header-shaped native inventory rows). Both, plus the A23.4.p2
 `config/aliases.yaml` native payload item, are released to the original P10 owner.
 Its frozen fix `a2df2021` / `56346ad3` passes coordinator intake and is with SAME
-`1578dfd8`. f2's frozen A13 handoff (`c7fbfd6f` / `e687d848`) passes intake and is
-queued with SAME9db. Trial `6da1e9c6` adds P08 reconciliation 4: remove the six event
+`1578dfd8`. f2's frozen A13 handoff (`c7fbfd6f` / `e687d848`) passes intake; SAME9db's
+SPEC FAIL (P2 R01/R02 in `bin/li-events.py`) is released to f2 as one bounded repair.
+Trial `6da1e9c6` adds P08 reconciliation 4: remove the six event
 categories whose producers P09 retired (patch `f0724329…`).
 All native leases are revoked;
 no target changes are released merely by the proposed evidence design.
