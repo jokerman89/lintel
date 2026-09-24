@@ -350,6 +350,13 @@ never inferred from this directive; a model switch does not change context ident
   A merge-tree preview with the A13 head and P10 first adds three product conflicts
   and one test conflict, each with a verified resolution. See the P08 card, "Preview
   with the A13 head and P10 first".
+
+  A trial integration tree (`6da1e9c6`) shows a fourth reconciliation. P09 retired six
+  instruction-only event categories that A13's catalog still lists. The coordinator
+  removes them at integration: patch `p08-event-catalog-reconciliation.patch`, SHA-256
+  `f0724329…f2fef`, 78 lines removed. See the P08 card, "Fourth reconciliation".
+  f2's frozen A13 handoff (product `c7fbfd6f`, report `e687d848`) passes coordinator
+  intake and is queued with SAME9db for A13 SPEC, then eligible QUALITY.
 - P09: module product `5c99612` passes `114ddfe3`, integrated `2d789a4`;
   all 26 product paths match and 13 joined methods pass. `477d3fc` releases
   the original owner's separate N1 safety-quantifier correction and two bounded
@@ -383,7 +390,9 @@ never inferred from this directive; a model switch does not change context ident
   strict native inventory and metadata payload" releases both to the original
   owner. It also releases the A23.4.p2 `config/aliases.yaml` native payload item
   and the coordinator-found unterminated-final-record case. SAME `1578dfd8` then
-  rechecks and runs the first eligible whole QUALITY.
+  rechecks and runs the first eligible whole QUALITY. The frozen fix, product
+  `a2df2021` / report-only `56346ad3`, passes coordinator data-only intake (eight
+  exact paths and hashes; B01 and the shared helpers unchanged) and is with SAME.
   Coordinator trial merge (prep only, uncommitted) of `72cf78a5` onto `66090974`:
   12 conflicts. The seven shared-state files come from `7c0fedc2`, which is
   patch-identical to `0ecdb520`, so they resolve to ours. The five product/test
@@ -871,7 +880,7 @@ from the reviewed historical merge `40c2795`. Current implementation ownership:
 | P07 profile context | `b9352dfe-1c1e-4ea3-b7d9-0fd008d39b3d` | Long-path repair ACCEPTED by `a7450597`, integrated `c344133` with reports; joined checks pass, idle |
 | P08 work lifecycle | `f2c305ac-e8b0-4b02-b6cd-c7de598964cf` | Routing `70469296` / `8318c308` frozen and intake verified; bounded native semantic fixture protocol released, no selected-SPEC clearance |
 | P09 specialist depth | `0fe8dc1e-8c6f-4d4a-af68-80696067be27` | Content accepted/integrated `4983af2`; data-core `ea92df8` / `53145bd` frozen and intake verified, same-reviewer data SPEC/QUALITY dispatched |
-| P10 installer lifecycle | `5ea6c88c-68c1-4712-8f55-adecdfe0061f` | B01 `dea408ef` / `72cf78a5` closed in `2685bd57`; F05/F06 plus `config/aliases.yaml` payload released (P10 card) |
+| P10 installer lifecycle | `5ea6c88c-68c1-4712-8f55-adecdfe0061f` | B01 `dea408ef` / `72cf78a5` closed in `2685bd57`; F05/F06 plus payload frozen as `a2df2021` / `56346ad3`, intake passed, with SAME |
 | P11 browser operations | `f413bdcb-e081-45e0-9524-7274b4391665` | `f4cd1f3` / `a49e7b8` has real headless evidence; scoped existing-deadline owned-file readiness correction, acceptance still open |
 | P12 document formats | `0a75211f-455c-4318-864f-bc8023ce9142` | Standalone content/Word/PPT active from `3ee602f`; shared pipeline and later formats remain gated |
 
@@ -897,7 +906,7 @@ repair their own findings. All prior reports remain preserved in `reviews/` and 
 | P07 | Final `a7450597` accepts `4d001463`; integrated through `56de830`, earlier `a8de574`/`3d8e715` preserved | `a7d78944-c02c-4909-a060-2c4f2a754b00` |
 | P08 partial | `402fd804`: F04/F05 P2, joint F01/F02 class open; bounded mechanical F03 closed; selected SPEC FAIL/QUALITY NOT STARTED | `9dbf0a9b-750d-45c2-968c-41a5acb11c92` |
 | P09 | Content `19eb776` accepted/integrated; data-core review targets exact `53145bd` / `ea92df8`; module/parent gates remain | `447d97f5-7919-4433-8f65-a64016c0dbdf` |
-| P10 | `2685bd57`: B01 closed, F01-F04 retained; SPEC FAIL, first whole QUALITY FAIL (P1 F05, P2 F06); awaits frozen fix | `1578dfd8-f239-4eba-989b-3c4bde3e5792` |
+| P10 | `2685bd57`: B01 closed, F01-F04 retained; SPEC FAIL, first whole QUALITY FAIL (P1 F05, P2 F06); frozen fix `a2df2021` / `56346ad3` under recheck | `1578dfd8-f239-4eba-989b-3c4bde3e5792` |
 
 ## Current combined review checkpoints
 
