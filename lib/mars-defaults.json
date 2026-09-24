@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "description": "MARS (Multi-Model Adversarial Review & Screening) defaults. Data only: the host's actual model list, permissions and effort support decide what is used; these values express policy and preferences.",
+  "roster": {
+    "min_participants": 2,
+    "default_participants": 4,
+    "max_participants": 8,
+    "families": ["claude", "gpt", "grok", "mai"],
+    "optional_families": ["gemini"],
+    "selection": "latest-per-family",
+    "family_preferences": {
+      "claude": {"prefer_tiers": ["opus"], "fallback_tiers": ["sonnet"], "exclude_tiers": ["haiku"]},
+      "gpt": {"prefer_variants": ["astra", "sol", "luna"], "exclude_variants": ["mini", "fast", "codex"]},
+      "grok": {},
+      "mai": {},
+      "gemini": {"exclude_variants": []}
+    },
+    "require_distinct_families": true
+  },
+  "settings": {
+    "reasoning_effort": "xhigh",
+    "effort_order": ["none", "minimal", "low", "medium", "high", "xhigh", "max"],
+    "effort_fallback": "highest-supported-at-or-below",
+    "context_tier": "long_context",
+    "context_fallback": "default"
+  },
+  "protocol": {
+    "max_rounds": 2,
+    "challenge_round": "when-contested",
+    "report_word_limit": 350,
+    "blind_first_pass": true
+  },
+  "transport": {
+    "preferred": "subagent",
+    "visible": "nested-session",
+    "nested_session_mode": "autopilot",
+    "close_reviewers_after_collection": true
+  },
+  "offers": {
+    "cycle_checkpoint": "PLAN-approval",
+    "cycle_requires_full_route": true,
+    "standalone_review_offer": true,
+    "auto_mode_is_consent": false,
+    "reoffer_after_decline": false
+  },
+  "evidence": {
+    "release_clearance": false,
+    "identity_levels": ["host-usage", "host-receipt", "requested-only", "self-report"]
+  }
+}
