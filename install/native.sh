@@ -89,7 +89,7 @@ native_relative() {
 native_allowed() {
   native_relative "$1"
   case "$1" in
-    bin/*|lib/*|templates/*|scaffolding/*|skills/*|agents/*|shims/*|docs/*|hooks/*|install/*|.claude-plugin/plugin.json|LICENSE|AGENT-INSTRUCTIONS.md|README.md|SECURITY.md|CONTRIBUTING.md|CODE_OF_CONDUCT.md|CHANGELOG.md)
+    bin/*|lib/*|templates/*|scaffolding/*|skills/*|agents/*|shims/*|docs/*|hooks/*|install/*|.claude-plugin/plugin.json|config/aliases.yaml|LICENSE|AGENT-INSTRUCTIONS.md|README.md|SECURITY.md|CONTRIBUTING.md|CODE_OF_CONDUCT.md|CHANGELOG.md)
       return 0 ;;
     *) native_die "Inventory path outside managed namespaces: $1" ;;
   esac
@@ -161,17 +161,26 @@ native_match() {
   [ -z "$blob" ] || cmp -s "$path" "$blob"
 }
 
+# Every consumer reads the validated copy's records, so no row is skipped or re-read live.
 native_inventory() {
-  local path="$1" hash size relative extra
+  local path="$1" copy="$NATIVE_WORK/inventory" records="$NATIVE_WORK/inventory.records" line header=0
+  local grammar=$'^([0123456789abcdef]{64})\t([0123456789]+)\t([^\t]+)$' hash size relative
+  rm -f "$copy"; : > "$records"
   [ -f "$path" ] || { [ ! -e "$path" ] || native_die "Inventory is not a file"; return 0; }
-  [ "$(head -n 1 "$path")" = $'LINTEL-INSTALL\t1' ] || native_die "Unknown native install inventory; preserve it"
-  while IFS=$'\t' read -r hash size relative extra; do
-    [ "$hash" != LINTEL-INSTALL ] || continue
-    [ -z "$extra" ] && [[ "$hash" =~ ^[a-f0-9]{64}$ ]] && [[ "$size" =~ ^[0-9]+$ ]] ||
-      native_die "Malformed native install inventory"
+  cp "$path" "$copy" && cmp -s "$path" "$copy" || native_die "Inventory changed while reading; preserve it"
+  tr -d '\000' < "$copy" | cmp -s - "$copy" || native_die "Malformed native install inventory"
+  while IFS= read -r line || [ -n "$line" ]; do
+    if [ "$header" = 0 ]; then
+      [ "$line" = $'LINTEL-INSTALL\t1' ] || native_die "Unknown native install inventory; preserve it"
+      header=1; continue
+    fi
+    [[ "$line" =~ $grammar ]] || native_die "Malformed native install inventory"
+    hash="${BASH_REMATCH[1]}"; size="${BASH_REMATCH[2]}"; relative="${BASH_REMATCH[3]}"
     native_allowed "$relative"
-  done < "$path"
-  awk -F '\t' 'NR>1 { key=tolower($3); if(seen[key]++) exit 1 }' "$path" ||
+    printf '%s\t%s\t%s\n' "$hash" "$size" "$relative" >> "$records"
+  done < "$copy"
+  [ "$header" = 1 ] || native_die "Unknown native install inventory; preserve it"
+  awk -F '\t' '{ key=tolower($3); if(seen[key]++) exit 1 }' "$records" ||
     native_die "Duplicate/aliased inventory path"
 }
 
@@ -367,6 +376,8 @@ native_plan_file() {
     fi
   elif [ "$kind" = seed ] && [ "$bh" != - ]; then
     return 0
+  elif [ "$kind" = inventory ] && [ "$bh" != "$old_hash" ]; then
+    native_die "Inventory changed after ownership preflight"
   fi
   [ "$bh" != "$ah" ] || return 0
   index="$(printf '%06d' "$NATIVE_COUNT")"; NATIVE_COUNT=$((NATIVE_COUNT+1))
@@ -386,7 +397,7 @@ native_install() {
     [ -d "$NATIVE_SOURCE/$component" ] || native_die "Missing source component: $component"
     native_unlinked "$NATIVE_SOURCE/$component"
   done
-  for file in LICENSE AGENT-INSTRUCTIONS.md README.md SECURITY.md CONTRIBUTING.md CODE_OF_CONDUCT.md CHANGELOG.md .claude-plugin/plugin.json install/layer-config.yaml.example; do
+  for file in LICENSE AGENT-INSTRUCTIONS.md README.md SECURITY.md CONTRIBUTING.md CODE_OF_CONDUCT.md CHANGELOG.md .claude-plugin/plugin.json config/aliases.yaml install/layer-config.yaml.example; do
     [ -f "$NATIVE_SOURCE/$file" ] && [ ! -L "$NATIVE_SOURCE/$file" ] || native_die "Missing/linked required source: $file"
   done
   while IFS= read -r -d '' file; do
@@ -396,7 +407,7 @@ native_install() {
     \( -name SKILL.md -o -path '*/agents/*.md' -o -path '*/agents/*/*.md' \) -type f -print0)
   native_safe_file "$NATIVE_TARGET" .lintel-install.tsv
   native_inventory "$inventory"
-  [ ! -f "$inventory" ] || old_inventory="$(native_hash "$inventory")"
+  [ ! -f "$NATIVE_WORK/inventory" ] || old_inventory="$(native_hash "$NATIVE_WORK/inventory")"
   mkdir -p "$NATIVE_WORK/receipt/before" "$NATIVE_WORK/receipt/after" "$NATIVE_WORK/receipt/phase"
   : > "$NATIVE_WORK/receipt/plan.tsv"; : > "$NATIVE_WORK/files"
   for component in scaffolding lib bin templates skills agents shims docs hooks install; do
@@ -407,24 +418,23 @@ native_install() {
       printf '%s\n' "$relative" >> "$NATIVE_WORK/files"
     done < <(find "$NATIVE_SOURCE/$component" -type f -print0)
   done
-  printf '%s\n' LICENSE AGENT-INSTRUCTIONS.md README.md SECURITY.md CONTRIBUTING.md CODE_OF_CONDUCT.md CHANGELOG.md .claude-plugin/plugin.json >> "$NATIVE_WORK/files"
+  printf '%s\n' LICENSE AGENT-INSTRUCTIONS.md README.md SECURITY.md CONTRIBUTING.md CODE_OF_CONDUCT.md CHANGELOG.md .claude-plugin/plugin.json config/aliases.yaml >> "$NATIVE_WORK/files"
   LC_ALL=C sort -u "$NATIVE_WORK/files" > "$NATIVE_WORK/sorted"
   awk '{key=tolower($0); if(seen[key]++) exit 1}' "$NATIVE_WORK/sorted" || native_die "Aliased source paths"
   printf 'LINTEL-INSTALL\t1\n' > "$NATIVE_WORK/new-inventory"
   NATIVE_COUNT=0
   while IFS= read -r relative; do
     old_hash=-
-    if [ -f "$inventory" ]; then old_hash="$(awk -F '\t' -v p="$relative" '$3==p {print $1}' "$inventory")"; old_hash="${old_hash:--}"; fi
+    if [ -s "$NATIVE_WORK/inventory.records" ]; then
+      old_hash="$(awk -F '\t' -v p="$relative" '$3==p {print $1}' "$NATIVE_WORK/inventory.records")"; old_hash="${old_hash:--}"
+    fi
     hash="$(native_hash "$NATIVE_SOURCE/$relative")"; size="$(native_size "$NATIVE_SOURCE/$relative")"
     printf '%s\t%s\t%s\n' "$hash" "$size" "$relative" >> "$NATIVE_WORK/new-inventory"
     native_plan_file "$relative" "$NATIVE_SOURCE/$relative" "$old_hash" managed
   done < "$NATIVE_WORK/sorted"
-  if [ -f "$inventory" ]; then
-    while IFS=$'\t' read -r hash size relative; do
-      [ "$hash" != LINTEL-INSTALL ] || continue
-      if ! grep -Fxq "$relative" "$NATIVE_WORK/sorted"; then native_plan_file "$relative" - "$hash" managed; fi
-    done < "$inventory"
-  fi
+  while IFS=$'\t' read -r hash size relative; do
+    if ! grep -Fxq "$relative" "$NATIVE_WORK/sorted"; then native_plan_file "$relative" - "$hash" managed; fi
+  done < "$NATIVE_WORK/inventory.records"
   printf '# Lintel operator preferences; edit freely\nactive_pack: _default\ndefault_mode: internal-tool\nrole_active: none\n' > "$NATIVE_WORK/profile"
   printf '_default\n' > "$NATIVE_WORK/pointer"
   native_plan_file config.yaml "$NATIVE_SOURCE/install/layer-config.yaml.example" - seed
@@ -542,12 +552,12 @@ lintel_native_main() {
     check)
       [ -f "$NATIVE_TARGET/.lintel-install.tsv" ] || native_die "Native inventory missing; installation is unverified"
       native_inventory "$NATIVE_TARGET/.lintel-install.tsv"
+      [ -f "$NATIVE_WORK/inventory" ] || native_die "Native inventory missing; installation is unverified"
       while IFS=$'\t' read -r hash size relative; do
-        [ "$hash" != LINTEL-INSTALL ] || continue
         native_safe_file "$NATIVE_TARGET" "$relative"
         [ -f "$NATIVE_TARGET/$relative" ] && [ "$(native_hash "$NATIVE_TARGET/$relative")" = "$hash" ] &&
           [ "$(native_size "$NATIVE_TARGET/$relative")" = "$size" ] || native_die "Managed-file drift: $relative"
-      done < "$NATIVE_TARGET/.lintel-install.tsv"
+      done < "$NATIVE_WORK/inventory.records"
       printf 'Installed managed bytes verified. Host activation remains unverified.\n' ;;
   esac
 }

@@ -49,7 +49,10 @@ collision before writes. Exact matching historical source files may be adopted; 
 unmanifested files are preserved for explicit reconciliation.
 
 The native managed inventory is `.lintel-install.tsv`. Ordinary config/profile/packs/
-roles/brand content is not in its managed namespace. Missing seed files may be created,
+roles/brand content is not in its managed namespace. The managed payload is the fixed
+source components plus fixed root metadata, including the `config/aliases.yaml` registry
+that resolves opt-in historical aliases; the source must contain every fixed path.
+Missing seed files may be created,
 but existing bytes are preserved. Updating removes only obsolete, unchanged files in the
 previous managed inventory; files merely located in a managed directory are not owned.
 The shared `install/directories.txt` contract retains the historical runtime and
@@ -86,6 +89,10 @@ Spaces and ordinary Unicode remain literal data. Receipts are never sourced or e
 The index is a zero-based, six-digit decimal string. `-` in all three state fields means
 absent/deleted; it is not an empty file. Hashes are 64 lowercase hexadecimal characters.
 `inventory_before` is its exact pre-operation hash or `-`. Inventory publication is last.
+An inventory has exactly one header line; every following line, including a final line
+without a newline, must be one well-formed record. A second header, malformed row or
+unsupported path refuses before writes, and check does not report success. Each performer
+parses one observed copy and binds its inventory write to that copy's hash.
 The platform records the supported mode projection: `bash-mode` uses octal permission
 bits; `powershell-readonly` records the Windows read-only attribute as `0`/`1`. A performer
 refuses an unsupported projection instead of pretending it preserved ACLs or POSIX modes.

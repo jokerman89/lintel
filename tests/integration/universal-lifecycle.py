@@ -1101,7 +1101,8 @@ class NativeInstallLifecycle(unittest.TestCase):
                 shutil.copytree(ROOT / relative, self.source / relative,
                                 ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
         for relative in ("LICENSE", "AGENT-INSTRUCTIONS.md", "README.md", "SECURITY.md",
-                         "CONTRIBUTING.md", "CODE_OF_CONDUCT.md", "CHANGELOG.md"):
+                         "CONTRIBUTING.md", "CODE_OF_CONDUCT.md", "CHANGELOG.md", "config/aliases.yaml"):
+            (self.source / relative).parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(ROOT / relative, self.source / relative)
         self.env = {key: value for key, value in os.environ.items()
                     if not key.startswith(("LINTEL_", "CLAUDE_")) and key != "PACK_CACHE_FILE"}
@@ -1114,13 +1115,13 @@ class NativeInstallLifecycle(unittest.TestCase):
             result = subprocess.run(["git", "init", "-q", str(repo)], env=self.env, capture_output=True)
             self.assertEqual(result.returncode, 0, result.stderr)
 
-    def install(self, *args, powershell=False, success=True, env=None):
+    def install(self, *args, powershell=False, success=True, env=None, bash=False):
         if powershell:
             executable = self.env.get("LINTEL_POWERSHELL") or shutil.which("pwsh") or shutil.which("powershell")
             self.assertIsNotNone(executable, "Native PowerShell verification needs an installed interpreter.")
             command = [executable, "-NoProfile", "-File", str(self.source / "install/install.ps1")]
         else:
-            if OPTIONS.native_performer == "bash":
+            if bash or OPTIONS.native_performer == "bash":
                 command = [OPTIONS.bash, "-c", 'set -euo pipefail; source "$1"; shift; lintel_native_main "$@"',
                            "native-contract-test", str(self.source / "install/native.sh")]
             else:
@@ -1334,6 +1335,86 @@ native_atomic() {
         self.install("--check", success=False)
         self.install(success=False)
         self.assertEqual(hashes(self.home), before)
+
+    def performers(self):
+        for label, powershell in (("bash", False), ("powershell", True)):
+            home, store = self.base / f"h-{label}", self.base / f"h-{label}-recovery"
+            yield label, powershell, home, store, ("--home", str(home), "--store", str(store))
+
+    def test_native_inventory_refuses_every_malformed_record(self):
+        for label, powershell, home, store, roots in self.performers():
+            self.install(*roots, powershell=powershell, bash=not powershell)
+            inventory = home / ".lintel-install.tsv"
+            original = inventory.read_bytes()
+            header, rest = original.split(b"\n", 1)
+            variants = {
+                "trailing-duplicate-header": (original + header + b"\n", "Malformed native install inventory"),
+                "interior-duplicate-header": (header + b"\n" + header + b"\n" + rest,
+                                              "Malformed native install inventory"),
+                "unterminated-malformed-final": (original + b"malformed final record",
+                                                 "Malformed native install inventory"),
+                "unterminated-foreign-final": (original + b"a" * 64 + b"\t1\tprivate/operator.md",
+                                               "Inventory path outside managed namespaces"),
+            }
+            for variant, (data, message) in variants.items():
+                with self.subTest(performer=label, variant=variant):
+                    inventory.write_bytes(data)
+                    before, receipts = hashes(home), hashes(store)
+                    for command in ((), ("--check",)):
+                        result = self.install(*roots, *command, powershell=powershell, bash=not powershell,
+                                              success=False)
+                        print("F06_CASE " + json.dumps({"performer": label, "variant": variant,
+                                                        "command": command[0] if command else "install",
+                                                        "exit": result.returncode,
+                                                        "refusal": message in result.stderr}, sort_keys=True))
+                        self.assertIn(message, result.stderr)
+                        self.assertNotIn("Installed managed bytes verified", result.stdout)
+                        self.assertEqual(hashes(home), before)
+                        self.assertEqual(hashes(store), receipts)
+            inventory.write_bytes(original)
+            verified = self.install(*roots, "--check", powershell=powershell, bash=not powershell)
+            self.assertIn("Installed managed bytes verified", verified.stdout)
+
+    def test_native_unterminated_final_record_is_still_verified(self):
+        for label, powershell, home, store, roots in self.performers():
+            with self.subTest(performer=label):
+                self.install(*roots, powershell=powershell, bash=not powershell)
+                inventory = home / ".lintel-install.tsv"
+                inventory.write_bytes(inventory.read_bytes().rstrip(b"\n"))
+                last = inventory.read_text(encoding="utf-8").split("\n")[-1].split("\t")[2]
+                verified = self.install(*roots, "--check", powershell=powershell, bash=not powershell)
+                self.assertIn("Installed managed bytes verified", verified.stdout)
+                (home / last).write_bytes((home / last).read_bytes() + b"\n# final-record drift\n")
+                before = hashes(home)
+                drift = self.install(*roots, "--check", powershell=powershell, bash=not powershell,
+                                     success=False)
+                print("F06_CASE " + json.dumps({"performer": label, "variant": "unterminated-valid-final",
+                                                "relative": last, "exit": drift.returncode,
+                                                "ready": "Installed managed bytes verified" in drift.stdout}))
+                self.assertIn(f"Managed-file drift: {last}", drift.stderr)
+                self.assertNotIn("Installed managed bytes verified", drift.stdout)
+                self.assertEqual(hashes(home), before)
+
+    def test_native_payload_installs_and_verifies_alias_registry(self):
+        payload = self.source / "config/aliases.yaml"
+        for label, powershell, home, store, roots in self.performers():
+            with self.subTest(performer=label):
+                self.install(*roots, powershell=powershell, bash=not powershell)
+                installed = home / "config/aliases.yaml"
+                self.assertEqual(installed.read_bytes(), payload.read_bytes())
+                rows = [line.split("\t") for line in
+                        (home / ".lintel-install.tsv").read_text(encoding="utf-8").splitlines()[1:]]
+                self.assertIn([hashlib.sha256(payload.read_bytes()).hexdigest(), str(payload.stat().st_size),
+                               "config/aliases.yaml"], rows)
+                verified = self.install(*roots, "--check", powershell=powershell, bash=not powershell)
+                self.assertIn("Installed managed bytes verified", verified.stdout)
+                installed.write_bytes(installed.read_bytes() + b"# operator drift\n")
+                drift = self.install(*roots, "--check", powershell=powershell, bash=not powershell,
+                                     success=False)
+                self.assertIn("Managed-file drift: config/aliases.yaml", drift.stderr)
+                before = hashes(home)
+                self.install(*roots, powershell=powershell, bash=not powershell, success=False)
+                self.assertEqual(hashes(home), before)
 
 
 class ScaffoldMigrationLifecycle(LifecycleFixture):

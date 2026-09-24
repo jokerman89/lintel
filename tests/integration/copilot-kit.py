@@ -26,6 +26,71 @@ REVIEW_RUNTIME_RESOURCES = (
 spec = importlib.util.spec_from_file_location("li_copilot", ROOT / "bin/li-copilot.py")
 adapter = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(adapter)
+F05_BYTES = b"F05 intervening consumer bytes\r\n"
+# Real adapter publication with one test-only intervention. "planned" fires after
+# every planning observation: the candidate's admission call, or the frozen
+# producer's first post-plan state capture (its file_state expected rebuild).
+# "writer" fires at unchanged apply_files entry, after final adapter admission.
+F05_DRIVER = r'''
+import importlib.util,sys
+from pathlib import Path
+sys.dont_write_bytecode=True
+source,target,store=map(Path,sys.argv[1:4])
+relative,operation,phase=sys.argv[4:7]
+sys.path.insert(0,str(source/"lib"))
+import context_safety
+import managed_transaction as transaction
+spec=importlib.util.spec_from_file_location("adapter",source/"bin/li-copilot.py")
+adapter=importlib.util.module_from_spec(spec)
+spec.loader.exec_module(adapter)
+fired=[]
+def intervene():
+    if fired:
+        return
+    fired.append(phase)
+    path=adapter.native_io_path(adapter.safe_path(target,relative))
+    if operation=="create" and path.exists():
+        raise AssertionError("create intervention needs an absent path")
+    if operation in ("edit","delete") and not path.is_file():
+        raise AssertionError("edit/delete intervention needs a present file")
+    if operation=="delete":
+        path.unlink()
+    else:
+        path.parent.mkdir(parents=True,exist_ok=True)
+        path.write_bytes(b"F05 intervening consumer bytes\r\n")
+    print(f"F05_INTERVENTION={phase}:{operation}:{relative}",file=sys.stderr,flush=True)
+def intercept(owner,name):
+    original=getattr(owner,name)
+    def intervening(*values,**options):
+        intervene()
+        return original(*values,**options)
+    setattr(owner,name,intervening)
+if phase=="planned":
+    if hasattr(adapter,"admitted_expectations"):
+        intercept(adapter,"admitted_expectations")
+    else:
+        intercept(context_safety,"file_state")
+elif phase=="writer":
+    intercept(transaction,"apply_files")
+else:
+    raise AssertionError(phase)
+sys.argv=["li-copilot","init","--source",str(source),"--target",str(target),"--store",str(store)]
+try:
+    adapter.main()
+except (ValueError,OSError) as error:
+    print(error,file=sys.stderr)
+    raise SystemExit(17)
+if not fired:
+    raise AssertionError("intervention point was not reached")
+'''
+F05_CONSUMER = {
+    "AGENTS.md": b"# Consumer agents\r\n\r\nKeep this project prose.\r\n",
+    "CLAUDE.md": b"Consumer Claude prose without a block.\n",
+    ".gitignore": b"node_modules/\r\n",
+    ".gitattributes": b"*.bin binary\r\n",
+    "custom.json": b'{"owned":"consumer"}\n',
+}
+F05_MANAGED = ".github/lintel/scaffolding/01-foundation/templates/plan/spec.template.md"
 
 
 class CopilotKit(unittest.TestCase):
@@ -1031,6 +1096,99 @@ except (ValueError,OSError) as error:
         self.assertEqual(self.snapshot(), before)
         self.run_cli()
         self.run_cli("check")
+
+    def _f05_call(self, case, relative, operation, phase):
+        store = case.parent / (case.name + "-store")
+        self.assertFalse(store.exists())
+        result = subprocess.run([sys.executable, "-c", F05_DRIVER, str(self.source), str(case), str(store),
+                                 relative, operation, phase], capture_output=True, text=True, encoding="utf-8")
+        return result, store
+
+    def _f05_refused(self, case, relative, operation, phase, guard=False):
+        before = self.snapshot(case)
+        result, store = self._f05_call(case, relative, operation, phase)
+        expected = dict(before)
+        if operation == "delete":
+            expected.pop(relative)
+        else:
+            expected[relative] = hashlib.sha256(F05_BYTES).hexdigest()
+        after = self.snapshot(case)
+        print("F05_CASE " + json.dumps({
+            "test": self._testMethodName, "case": case.name, "relative": relative, "operation": operation,
+            "phase": phase, "guard": guard, "exit": result.returncode, "ready": "Lintel kit ready" in result.stdout,
+            "only_intervention_changed": after == expected, "store_absent": not store.exists()}, sort_keys=True))
+        self.assertIn(f"F05_INTERVENTION={phase}:{operation}:{relative}", result.stderr)
+        self.assertEqual(result.returncode, 17, result.stdout + result.stderr)
+        self.assertNotIn("Lintel kit ready", result.stdout)
+        message = ("Adapter input changed after planning (preserved): " if guard
+                   else "Caller expected state does not match current bytes: ") + relative
+        self.assertIn(message, result.stderr)
+        self.assertNotIn("Traceback", result.stderr)
+        self.assertEqual(after, expected)
+        self.assertFalse(store.exists())
+
+    def _f05_installed(self, root):
+        root.mkdir()
+        self.run_cli(target=root)
+        start, stale, older = ".github/lintel/START.md", ".github/lintel/obsolete.md", b"# Older kit start\n"
+        (root / start).write_bytes(older)
+        (root / stale).write_bytes(b"# Retired kit page\n")
+        inventory = json.loads((root / adapter.INVENTORY).read_text(encoding="utf-8"))
+        inventory["files"][start] = hashlib.sha256(older).hexdigest()
+        inventory["files"][stale] = hashlib.sha256(b"# Retired kit page\n").hexdigest()
+        (root / adapter.INVENTORY).write_bytes(json.dumps(inventory, indent=2).encode("utf-8") + b"\n")
+        return start, stale
+
+    def test_f05_fresh_late_creations_refuse_before_publication(self):
+        for index, relative in enumerate((".github/lintel/START.md", "AGENTS.md", ".claude/memory/lessons.md",
+                                          ".gitignore", ".gitattributes", adapter.INVENTORY)):
+            with self.subTest(relative=relative):
+                case = self.target / f"c{index}"
+                case.mkdir()
+                self._f05_refused(case, relative, "create", "planned")
+
+    def test_f05_consumer_late_input_changes_refuse(self):
+        cases = (("AGENTS.md", "edit", "planned"), ("AGENTS.md", "delete", "planned"),
+                 ("CLAUDE.md", "edit", "planned"), (".gitignore", "edit", "planned"),
+                 (".gitignore", "delete", "planned"), (".gitattributes", "edit", "planned"),
+                 (".gitattributes", "delete", "planned"), (".github/lintel/START.md", "create", "planned"),
+                 ("AGENTS.md", "edit", "writer"), (".gitignore", "delete", "writer"))
+        for index, (relative, operation, phase) in enumerate(cases):
+            with self.subTest(relative=relative, operation=operation, phase=phase):
+                case = self.target / f"c{index}"
+                case.mkdir()
+                for name, data in F05_CONSUMER.items():
+                    (case / name).write_bytes(data)
+                self._f05_refused(case, relative, operation, phase)
+
+    def test_f05_installed_late_changes_and_guards_refuse(self):
+        start, stale = self._f05_installed(self.target / "tpl")
+        cases = ((start, "edit", "planned", False), (start, "delete", "planned", False),
+                 (stale, "edit", "planned", False), (adapter.INVENTORY, "edit", "planned", False),
+                 (adapter.INVENTORY, "delete", "planned", False), (F05_MANAGED, "edit", "planned", True),
+                 (".claude/memory/lessons.md", "delete", "planned", True), (".gitignore", "edit", "planned", True),
+                 ("AGENTS.md", "edit", "planned", True), (start, "edit", "writer", False),
+                 (stale, "delete", "writer", False), (adapter.INVENTORY, "edit", "writer", False))
+        for index, (relative, operation, phase, guard) in enumerate(cases):
+            with self.subTest(relative=relative, operation=operation, phase=phase):
+                case = self.target / f"c{index}"
+                shutil.copytree(self.target / "tpl", case)
+                self._f05_refused(case, relative, operation, phase, guard)
+
+    def test_f05_post_admission_guard_is_a_labelled_limitation(self):
+        start, _ = self._f05_installed(self.target / "tpl")
+        case = self.target / "tpl"
+        result, store = self._f05_call(case, F05_MANAGED, "edit", "writer")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn(f"F05_INTERVENTION=writer:edit:{F05_MANAGED}", result.stderr)
+        self.assertEqual((case / F05_MANAGED).read_bytes(), F05_BYTES)
+        self.assertEqual((case / start).read_bytes(), adapter.generate(self.source, case)[0][start])
+        check = self.run_cli("check", success=False, target=case)
+        self.assertIn(f"Modified managed file (preserved): {F05_MANAGED}", check.stderr)
+        print(json.dumps({"boundary": "POST_ADMISSION_GUARD_NOT_PROTECTED", "target": str(case),
+                          "actual_exit": result.returncode, "intervening_guard_preserved": True,
+                          "later_check_reports": "Modified managed file (preserved)",
+                          "limitation": "An unchanged adapter input can change after final admission; no atomicity claimed."}))
 
     def test_fresh_portable_clone_and_idempotence(self):
         self.run_cli()

@@ -19,11 +19,28 @@ try {
     catch { $refused = $true }
     if (-not $refused) { throw 'Stale expected bytes were accepted.' }
     if (-not (Test-NativeState (Join-Path $Fixture 'payload.txt') $after)) { throw 'Stale refusal altered user bytes.' }
-    Write-Output 'PASS: native receipt publication, replacement and stale-state refusal.'
+    $inventoryHome = Join-Path $Fixture 'home'
+    [IO.Directory]::CreateDirectory($inventoryHome) | Out-Null
+    $inventoryPath = Join-Path $inventoryHome '.lintel-install.tsv'
+    $observedInventory = "LINTEL-INSTALL`t1`n" + ('a' * 64) + "`t1`tdocs/planned-row.md`n"
+    [IO.File]::WriteAllBytes($inventoryPath, [Text.Encoding]::UTF8.GetBytes($observedInventory))
+    $parseInventory = ${function:Read-NativeInventory}
+    function Read-NativeInventory {
+        $records = & $parseInventory @args
+        [IO.File]::WriteAllBytes($inventoryPath, [Text.Encoding]::UTF8.GetBytes("LINTEL-INSTALL`t1`n"))
+        return $records
+    }
+    $refusal = ''
+    try { Get-NativePlan $Root $inventoryHome | Out-Null } catch { $refusal = $_.Exception.Message }
+    if ($refusal -cne 'Inventory changed after ownership preflight.') {
+        throw "Inventory rewritten after its parsed observation was not refused: '$refusal'"
+    }
+    Write-Output 'PASS: native receipt publication, replacement, stale-state and inventory-observation refusal.'
 } finally {
-    foreach ($file in @('state', 'payload.txt')) {
+    foreach ($file in @('state', 'payload.txt', 'home\.lintel-install.tsv')) {
         $path = Join-Path $Fixture $file
         if ([IO.File]::Exists($path)) { [IO.File]::Delete($path) }
     }
+    if ([IO.Directory]::Exists((Join-Path $Fixture 'home'))) { [IO.Directory]::Delete((Join-Path $Fixture 'home')) }
     [IO.Directory]::Delete($Fixture)
 }

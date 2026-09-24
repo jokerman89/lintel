@@ -84,7 +84,7 @@ function Assert-NativeRelative([string]$Relative) {
 function Assert-NativeAllowed([string]$Relative, [switch]$Receipt) {
     Assert-NativeRelative $Relative
     if ($Relative -cmatch '^(bin|lib|templates|scaffolding|skills|agents|shims|docs|hooks|install)/' -or
-        $Relative -cin @('.claude-plugin/plugin.json', 'LICENSE', 'AGENT-INSTRUCTIONS.md', 'README.md',
+        $Relative -cin @('.claude-plugin/plugin.json', 'config/aliases.yaml', 'LICENSE', 'AGENT-INSTRUCTIONS.md', 'README.md',
                          'SECURITY.md', 'CONTRIBUTING.md', 'CODE_OF_CONDUCT.md', 'CHANGELOG.md')) { return }
     if ($Receipt -and ($Relative -cin @('.lintel-install.tsv', 'config.yaml', 'profile.yaml', 'packs/active-pack') -or
         $Relative.StartsWith('packs/_default/') -or $Relative.StartsWith('brand/design-patterns/'))) { return }
@@ -204,11 +204,13 @@ function Write-NativeAtomic([string]$Root, [string]$Relative, $Expected, $After)
     else { Invoke-NativeReplace $temporary $path $Expected }
 }
 
-function Read-NativeInventory([string]$Root) {
-    $path = Get-NativePath $Root '.lintel-install.tsv'
+function Read-NativeInventory($State) {
+    # Parse the one observed state whose hash later binds the inventory write.
     $result = @{}
-    if (-not [IO.File]::Exists($path)) { return $result }
-    $lines = [IO.File]::ReadAllLines($path, $script:NativeEncoding)
+    if ($null -eq $State) { return $result }
+    $lines = New-Object 'System.Collections.Generic.List[string]'
+    $reader = New-Object IO.StreamReader((New-Object IO.MemoryStream(,$State.bytes)), $script:NativeEncoding, $true)
+    try { while ($null -ne ($line = $reader.ReadLine())) { $lines.Add($line) } } finally { $reader.Dispose() }
     if ($lines.Count -lt 1 -or $lines[0] -cne "LINTEL-INSTALL`t1") { throw 'Unsupported native install inventory; preserve it.' }
     foreach ($line in $lines | Select-Object -Skip 1) {
         $cells = $line.Split("`t")
@@ -266,8 +268,8 @@ function New-NativeValue([byte[]]$Bytes, [string]$Mode = '0') {
 }
 
 function Get-NativePlan([string]$Source, [string]$Root) {
-    $old = Read-NativeInventory $Root
     $inventory = Get-NativeState (Get-NativePath $Root '.lintel-install.tsv')
+    $old = Read-NativeInventory $inventory
     $managed = @{}; $seeds = @{}
     $directories = [IO.File]::ReadAllLines((Get-NativePath $Source 'install/directories.txt'), $script:NativeEncoding)
     if (-not $directories.Count) { throw 'Native directory-slot contract is empty.' }
@@ -286,7 +288,7 @@ function Get-NativePlan([string]$Source, [string]$Root) {
         }
     }
     foreach ($relative in @('LICENSE', 'AGENT-INSTRUCTIONS.md', 'README.md', 'SECURITY.md', 'CONTRIBUTING.md',
-                            'CODE_OF_CONDUCT.md', 'CHANGELOG.md', '.claude-plugin/plugin.json')) {
+                            'CODE_OF_CONDUCT.md', 'CHANGELOG.md', '.claude-plugin/plugin.json', 'config/aliases.yaml')) {
         $value = Get-NativeState (Get-NativePath $Source $relative)
         if ($null -eq $value) { throw "Required source missing: $relative" }
         $managed.Add($relative, $value)
@@ -513,8 +515,9 @@ function Invoke-NativeInstall([string[]]$Arguments, [string]$ExecutableSource) {
     $owner = Assert-NativeStore $root $store $command
     Write-Host "Source: $source`nInstalled data: $root`nRecovery store: $store"
     if ($command -eq 'check') {
-        if (-not [IO.File]::Exists((Join-Path $root '.lintel-install.tsv'))) { throw 'Native inventory missing; installation is unverified.' }
-        $inventory = Read-NativeInventory $root
+        $inventoryState = Get-NativeState (Get-NativePath $root '.lintel-install.tsv')
+        if ($null -eq $inventoryState) { throw 'Native inventory missing; installation is unverified.' }
+        $inventory = Read-NativeInventory $inventoryState
         foreach ($relative in $inventory.Keys) {
             $state = Get-NativeState (Get-NativePath $root $relative)
             if ($null -eq $state -or $state.hash -cne $inventory[$relative]) { throw "Managed-file drift: $relative" }

@@ -11,12 +11,14 @@ import hashlib
 import html
 from html.parser import HTMLParser
 import importlib.util
+import io
 import json
 import os
 from pathlib import Path, PurePosixPath
 import posixpath
 import re
 import shutil
+import stat
 import string
 import subprocess
 import sys
@@ -171,6 +173,50 @@ def read_file(root: Path, relative: str) -> bytes:
     if not native_io_path(path).is_file():
         raise ValueError(f"Required source file is missing: {path}")
     return source_bytes(path)
+
+
+NOT_REGULAR = "not-regular"
+
+
+def owned_reader():
+    from context_safety import read_owned
+    return read_owned
+
+
+def observe_path(target: Path, relative: str) -> tuple[Optional[bytes], object]:
+    """Return the bytes and state one target read derived, never a later rebuild."""
+    path = safe_path(target, relative)
+    try:
+        info = native_io_path(path).lstat()
+    except FileNotFoundError:
+        return None, None
+    if not stat.S_ISREG(info.st_mode):
+        return None, NOT_REGULAR
+    return owned_reader()(target, relative)
+
+
+def observe_file(target: Path, relative: str, observed: dict) -> tuple[Optional[bytes], object]:
+    if relative not in observed:
+        observed[relative] = observe_path(target, relative)
+    return observed[relative]
+
+
+def decoded(data: bytes) -> str:
+    # Same universal-newline text the previous read_text() planning consumed.
+    return io.TextIOWrapper(io.BytesIO(data), encoding="utf-8").read()
+
+
+def admitted_expectations(target: Path, observed: dict, changes: dict) -> dict:
+    """Pair each write with its planning observation; fresh reads only reject."""
+    expected = {}
+    for relative in changes:
+        if relative not in observed or observed[relative][1] == NOT_REGULAR:
+            raise ValueError(f"Adapter publication lacks a planning observation: {relative}")
+        expected[relative] = observed[relative][1]
+    for relative in sorted(set(observed) - set(changes)):
+        if observe_path(target, relative)[1] != observed[relative][1]:
+            raise ValueError(f"Adapter input changed after planning (preserved): {relative}")
+    return expected
 
 
 def source_bytes(path: Path) -> bytes:
@@ -771,11 +817,13 @@ Add project-specific commands and motivated deviations outside its marked block.
     return files, seeds, "repository" if local else "vendored"
 
 
-def load_inventory(target: Path, registry: dict) -> tuple[dict[str, str], dict[str, str], list[str]]:
-    path = safe_path(target, INVENTORY)
-    if not native_io_path(path).exists():
+def load_inventory(target: Path, registry: dict, *, observed: Optional[dict] = None) -> tuple[dict[str, str], dict[str, str], list[str]]:
+    data, state = observe_file(target, INVENTORY, {} if observed is None else observed)
+    if state is None:
         return {}, {}, []
-    value = json.loads(native_io_path(path).read_text(encoding="utf-8"))
+    if state == NOT_REGULAR:
+        raise ValueError(f"Copilot inventory is not a regular file: {INVENTORY}")
+    value = json.loads(decoded(data))
     if (not isinstance(value, dict) or type(value.get("schema_version")) is not int
             or value["schema_version"] != SCHEMA or not isinstance(value.get("files"), dict)):
         raise ValueError("Unsupported or malformed Copilot inventory")
@@ -804,17 +852,19 @@ def load_inventory(target: Path, registry: dict) -> tuple[dict[str, str], dict[s
 
 
 def protocol_updates(source: Path, target: Path, seeds: dict[str, bytes],
-                     old_blocks: dict[str, str], checking: bool) -> tuple[dict[str, bytes], dict[str, str], list[str]]:
+                     old_blocks: dict[str, str], checking: bool, *,
+                     observed: Optional[dict] = None) -> tuple[dict[str, bytes], dict[str, str], list[str]]:
     """Manage only marked protocol blocks; preserve all surrounding project prose."""
+    observed = {} if observed is None else observed
     payload = read_file(source, "scaffolding/01-foundation/SESSION-PROTOCOL.md").decode("utf-8-sig").strip().encode("utf-8")
     block = PROTOCOL_START + b"\n" + payload + b"\n" + PROTOCOL_END
     updates, hashes, errors = {}, {}, []
     for relative in ("AGENTS.md", "CLAUDE.md"):
-        path = safe_path(target, relative)
-        if native_io_path(path).exists() and not native_io_path(path).is_file():
+        current, state = observe_file(target, relative, observed)
+        if state == NOT_REGULAR:
             errors.append(f"Not a regular protocol file: {relative}")
             continue
-        original = native_io_path(path).read_bytes() if native_io_path(path).exists() else seeds[relative]
+        original = current if state else seeds[relative]
         starts, ends = original.count(PROTOCOL_START), original.count(PROTOCOL_END)
         if starts == ends == 0:
             if checking:
@@ -937,37 +987,40 @@ def main(universal: bool = False) -> None:
         print(json.dumps(operation(target, store, args.transaction), indent=2))
         return
     registry = load_registry(native_io_path(safe_path(source, "lib/cli-tiers.yaml")))
-    old, old_blocks, old_clients = load_inventory(target, registry)
+    # Every target read that shapes the plan is recorded once; that observation,
+    # not a later rebuild, is the only state a planned write may replace.
+    observed = {}
+    old, old_blocks, old_clients = load_inventory(target, registry, observed=observed)
     if universal and args.command == "init" and not args.client:
         parser.error("--client is required for init; use other for a manual canonical-file handoff")
     requested = [surface_id(registry, client) for client in args.client] if args.client else (
         ["copilot-cli"] if args.command == "init" or not old_clients else [])
     clients = sorted(set(old_clients + requested))
     files, seeds, mode = generate(source, target, tuple(clients))
-    from context_safety import file_state
     from managed_transaction import apply_files, assert_ready, default_store
     store = store or default_store(target)
     assert_ready(target, store)
     errors = []
     block_updates, block_hashes = {}, {}
     if mode == "vendored":
-        block_updates, block_hashes, block_errors = protocol_updates(source, target, seeds, old_blocks, args.command == "check")
+        block_updates, block_hashes, block_errors = protocol_updates(source, target, seeds, old_blocks, args.command == "check",
+                                                                     observed=observed)
         errors.extend(block_errors)
     # Preflight this user-owned file too, before any managed content is written.
-    ignore = safe_path(target, ".gitignore")
-    if native_io_path(ignore).exists() and not native_io_path(ignore).is_file():
+    ignore_data, ignore_state = observe_file(target, ".gitignore", observed)
+    if ignore_state == NOT_REGULAR:
         raise ValueError(".gitignore is not a regular file")
-    existing_ignore = native_io_path(ignore).read_text(encoding="utf-8") if native_io_path(ignore).exists() else ""
+    existing_ignore = decoded(ignore_data) if ignore_state else ""
     if args.command == "init":
         errors.extend(runtime_ignore_errors(target, existing_ignore, allow_missing_rule=True))
-    attributes = safe_path(target, ".gitattributes")
-    if native_io_path(attributes).exists() and not native_io_path(attributes).is_file():
+    attributes_data, attributes_state = observe_file(target, ".gitattributes", observed)
+    if attributes_state == NOT_REGULAR:
         raise ValueError(".gitattributes is not a regular file")
-    existing_attributes = native_io_path(attributes).read_text(encoding="utf-8") if native_io_path(attributes).exists() else ""
+    existing_attributes = decoded(attributes_data) if attributes_state else ""
     # Preserve a team's existing instruction file. A path-scoped additive entry
     # carries the Lintel pointer instead; unowned files are never adopted silently.
     entry = ".github/copilot-instructions.md"
-    if native_io_path(safe_path(target, entry)).exists() and entry not in old:
+    if observe_file(target, entry, observed)[1] is not None and entry not in old:
         files.pop(entry, None)
     roots = sorted({registry["surfaces"][client]["discovery"]["root"] for client in clients
                     if registry["surfaces"][client]["discovery"]["root"]})
@@ -977,13 +1030,13 @@ def main(universal: bool = False) -> None:
     if entry in files:
         attribute_rules.append(".github/copilot-instructions.md text eol=lf")
     for relative in sorted(set(files) | set(old) | set(seeds)):
-        path = safe_path(target, relative)
-        if native_io_path(path).exists() and not native_io_path(path).is_file():
+        state = observe_file(target, relative, observed)[1]
+        if state == NOT_REGULAR:
             errors.append(f"Not a regular file: {relative}")
             continue
         if relative in seeds:
             continue
-        actual = digest(native_io_path(path).read_bytes()) if native_io_path(path).is_file() else None
+        actual = state["sha256"] if state else None
         if relative in old and actual not in (None, old[relative]):
             errors.append(f"Modified managed file (preserved): {relative}")
         elif relative not in old and actual is not None:
@@ -998,7 +1051,7 @@ def main(universal: bool = False) -> None:
                 errors.append(f"Obsolete managed file: {relative}")
     if args.command == "check":
         for relative in seeds:
-            if not native_io_path(safe_path(target, relative)).is_file():
+            if observe_file(target, relative, observed)[1] in (None, NOT_REGULAR):
                 errors.append(f"Missing foundation file: {relative}")
         if not old:
             errors.append("Adapter inventory is missing; run init")
@@ -1015,20 +1068,18 @@ def main(universal: bool = False) -> None:
     # primitive receives only this fully preflighted, exact byte mutation plan.
     changes = {}
     for relative, data in sorted(files.items()):
-        path = safe_path(target, relative)
-        if not native_io_path(path).exists() or native_io_path(path).read_bytes() != data:
+        current, state = observe_file(target, relative, observed)
+        if state is None or current != data:
             changes[relative] = data
     for relative, data in block_updates.items():
-        path = safe_path(target, relative)
-        if not native_io_path(path).exists() or native_io_path(path).read_bytes() != data:
+        current, state = observe_file(target, relative, observed)
+        if state is None or current != data:
             changes[relative] = data
     for relative, data in seeds.items():
-        path = safe_path(target, relative)
-        if not native_io_path(path).exists() and relative not in block_updates:
+        if observe_file(target, relative, observed)[1] is None and relative not in block_updates:
             changes[relative] = data
     for relative in sorted(set(old) - set(files)):
-        path = safe_path(target, relative)
-        if native_io_path(path).exists():
+        if observe_file(target, relative, observed)[1] is not None:
             changes[relative] = None
     if ".claude/runtime/" not in existing_ignore.splitlines():
         separator = "\n" if existing_ignore.endswith("\n") else "\n\n"
@@ -1042,10 +1093,12 @@ def main(universal: bool = False) -> None:
                  "blocks": block_hashes,
                  "files": {relative: digest(data) for relative, data in sorted(files.items())}}
     inventory_bytes = text_bytes(json.dumps(inventory, indent=2, sort_keys=True))
-    inventory_path = safe_path(target, INVENTORY)
-    if not native_io_path(inventory_path).is_file() or native_io_path(inventory_path).read_bytes() != inventory_bytes:
+    current_inventory, inventory_state = observe_file(target, INVENTORY, observed)
+    if inventory_state is None or current_inventory != inventory_bytes:
         changes[INVENTORY] = inventory_bytes
-    expected = {relative: file_state(target, relative) for relative in changes}
+    # Final consumer admission: guards are rechecked here; write expectations are
+    # the planning observations, enforced again by unchanged apply_files.
+    expected = admitted_expectations(target, observed, changes)
     modes = {relative: None if data is None else expected[relative]["mode"] if expected[relative] else 0o600
              for relative, data in changes.items()}
     result = apply_files(target, store, changes, expected, modes, label="repository adapter publication",

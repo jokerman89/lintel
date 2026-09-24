@@ -118,6 +118,10 @@ host's actual input/output contract. Do not infer enforcement from a file named 
 
 Run `init` from the next approved Lintel revision on an upgrade branch. Managed files that remain
 unchanged may refresh; local edits or conflicting files require review before an update proceeds.
+Every planned write is bound to the exact file state its bytes or create/merge decision came
+from. A file created, edited or deleted after planning refuses the write before publication
+and is preserved. Files that were only read are compared once more just before publication; a
+change after that final comparison is outside this non-atomic guarantee.
 Run `check`, inspect the diff, and repeat your pilot task before merging.
 
 `init` records an owned file transaction with an explicit separate recovery store.
