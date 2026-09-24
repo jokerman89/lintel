@@ -190,6 +190,11 @@ P14: the A23 unit (product `96bd5bab`, report `0a091f34`, on `ad1045b8`; final r
 P10 F-INT-5: the test-only repair `b7555ca3` / `b7cf10ef` is with SAME `1578dfd8`.
 P15 (coordinator): the Windows CI job cannot fit 30 minutes. The sharding and timeout
 decision follows from the joined run's per-entry durations.
+Host note (2026-09-24, 14:00 UTC): host commit-memory exhaustion killed the coordinator's
+async runs and keeper. Exit `3221226091` (`0xC000012D`) with a 0-byte log means `bash.exe`
+could not start, so that result is environmental, not a test result. `/tmp` is now pinned to
+SAME9db's `%LOCALAPPDATA%\Temp\i9f\r2\t`, kept on request, and the new keeper is
+`msyskeeper2`. Earlier:
 Host note (L-049): the host-wide MSYS `/tmp` mount moved at about 07:30 to
 `%LOCALAPPDATA%\Temp\p10n1\r0\temp`, after the shared table reset while no MSYS process
 was running. The launcher guard keeps that root after its run, and a keeper MSYS `sleep`
