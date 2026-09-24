@@ -366,6 +366,10 @@ never inferred from this directive; a model switch does not change context ident
   supplied the step-1 host corroboration receipts for both rejecting candidate-03
   records (T011 `29b575c0…`, T027 `7f96932d…`); see the P08 card, "Preparation
   handoff and step-1 host receipts".
+  SAME9db's recheck resolves A13-R01/R02. The remaining SPEC is blocked by A13-V01, a
+  269-character fixture path under the reviewer's deep isolation root on a host without
+  long paths. The coordinator authorizes a rerun from a short disposable root, with no
+  global setting, product or test change.
 - P09: module product `5c99612` passes `114ddfe3`, integrated `2d789a4`;
   all 26 product paths match and 13 joined methods pass. `477d3fc` releases
   the original owner's separate N1 safety-quantifier correction and two bounded
