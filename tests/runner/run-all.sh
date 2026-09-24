@@ -63,6 +63,12 @@ skipped=0
 total=0
 partial=0
 discovered=0
+not_applicable=0
+# Git Bash, MSYS and Cygwin report their Windows host through uname; everything else is not Windows.
+case "$(uname -s 2>/dev/null || true)" in
+  MINGW*|MSYS*|CYGWIN*) ON_WINDOWS=1 ;;
+  *) ON_WINDOWS=0 ;;
+esac
 
 declare -a FAIL_LOG
 
@@ -111,13 +117,26 @@ for dir in $SEARCH_DIRS; do
       framework_skips=$(printf '%s\n' "$plain_output" | sed -n 's/^OK (skipped=\([1-9][0-9]*\)).*/\1/p')
       if [ -n "$framework_skips" ]; then
         framework_total=$(printf '%s\n' "$plain_output" | sed -n 's/^Ran \([0-9][0-9]*\) test.*/\1/p')
-        if [ "$framework_total" = "$framework_skips" ]; then
+        # Off Windows, a unittest skip whose reason starts "platform: windows-only" is not applicable,
+        # not missing coverage: the Windows jobs run those methods strictly. It counts only when every
+        # skip in the entry carries that reason and something else ran; on Windows it stays partial.
+        platform_skips=0
+        if [ "$ON_WINDOWS" -eq 0 ]; then
+          platform_skips=$(printf '%s\n' "$plain_output" | grep -cE "\.\.\. skipped 'platform: windows-only" || true)
+        fi
+        if [ "$platform_skips" -gt 0 ] && [ "$platform_skips" = "$framework_skips" ] \
+            && [ "$framework_total" != "$framework_skips" ]; then
+          passed=$((passed + 1))
+          not_applicable=$((not_applicable + platform_skips))
+          printf 'N/A: %s windows-only unittest assertions in %s\n' "$platform_skips" "$test_file"
+        elif [ "$framework_total" = "$framework_skips" ]; then
           skipped=$((skipped + 1))
+          printf 'SKIP: %s unittest assertions in %s\n' "$framework_skips" "$test_file"
         else
           passed=$((passed + 1))
           partial=$((partial + 1))
+          printf 'SKIP: %s unittest assertions in %s\n' "$framework_skips" "$test_file"
         fi
-        printf 'SKIP: %s unittest assertions in %s\n' "$framework_skips" "$test_file"
       elif printf '%s\n' "$plain_output" | grep -qE '^[[:space:]]*SKIP([ :]|$)'; then
         if printf '%s\n' "$plain_output" | grep -qE '^[[:space:]]*PASS([ :]|$)'; then
           passed=$((passed + 1))
@@ -147,6 +166,9 @@ printf "${c_green}Pass:   %d${c_reset}\n" "$passed"
 printf "${c_yellow}Skip:   %d${c_reset}\n" "$skipped"
 printf "${c_red}Fail:   %d${c_reset}\n" "$failed"
 printf "Partial: %d (passed tests with skipped assertions)\n" "$partial"
+if [ "$not_applicable" -gt 0 ]; then
+  printf "N/A:     %d (windows-only unittest assertions, not applicable on this host)\n" "$not_applicable"
+fi
 
 if [ "$failed" -gt 0 ]; then
   printf "\n${c_red}== Failure details ==${c_reset}\n"

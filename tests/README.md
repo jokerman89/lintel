@@ -17,6 +17,12 @@ are disjoint and together equal the unsharded run. A malformed shard exits 2, an
 shard fails closed. CI runs the unit tier in 2 shards and the integration tier in 4 on
 every system (ADR-0032).
 
+A unittest skip whose reason begins `platform: windows-only` marks a Windows-native assertion.
+Off Windows, the runner reports such skips as `N/A`, not as partial coverage, but only when every
+skip in the entry carries that reason and at least one test in it ran. On Windows the same skips
+count as partial, so strict mode refuses them. Any other skip reason keeps refusing strict
+acceptance.
+
 The full developer suite needs Bash 4+ because several existing routing tests and developer
 utilities use associative arrays. On macOS, install modern Bash for the suite. CI separately
 checks the bare installer with the stock `/bin/bash` 3.2. On Windows, use Git Bash; native

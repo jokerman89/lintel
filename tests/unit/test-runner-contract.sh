@@ -171,7 +171,50 @@ printf 'echo "  SKIP: unavailable dependency"\n' > "$SHARD_TMP/tests/unit/b.sh"
 expect_shard 0 "unit/a.sh unit/c.sh unit/e.sh " --shard 1/2 --require-all
 expect_shard 1 "unit/b.sh unit/d.sh " --shard 2/2 --require-all
 
+# Platform applicability: off Windows, windows-only unittest skips are N/A only when every skip
+# carries the canonical reason and something ran; on Windows, and for any other reason, they refuse.
+NA_TMP="$(mktemp -d)"
+trap 'rm -rf "$TMP" "$SHARD_TMP" "$NA_TMP"' EXIT
+mkdir -p "$NA_TMP/tests/runner" "$NA_TMP/tests/unit"
+cp "$ROOT/tests/runner/run-all.sh" "$NA_TMP/tests/runner/run-all.sh"
+na_fixture() {
+  # $1: skip reasons, one per skipped test; one further test always passes unless $2 is "none".
+  local reasons="$1" ran=0 skips=0 body=""
+  if [ "${2:-}" != "none" ]; then body+="echo \"test_ok (m.C.test_ok) ... ok\""$'\n'; ran=1; fi
+  while IFS= read -r reason; do
+    [ -n "$reason" ] || continue
+    body+="echo \"test_s$skips (m.C.test_s$skips) ... skipped '$reason'\""$'\n'
+    skips=$((skips + 1)); ran=$((ran + 1))
+  done <<< "$reasons"
+  body+="echo \"Ran $ran tests in 0.001s\""$'\n'"echo \"OK (skipped=$skips)\""$'\n'
+  printf '%s' "$body" > "$NA_TMP/tests/unit/fixture.sh"
+}
+expect_na() {
+  local host="$1" expected="$2" needle="$3"; shift 3
+  local rc=0 output
+  output=$(eval "uname() { echo '$host'; }"; export -f uname; bash "$NA_TMP/tests/runner/run-all.sh" "$@" 2>&1) || rc=$?
+  if [ "$rc" -ne "$expected" ] || [[ "$output" != *"$needle"* ]]; then
+    printf 'FAIL: host %s %s: expected rc %s with [%s], got rc %s\n%s\n' "$host" "$*" "$expected" "$needle" "$rc" "$output"
+    exit 1
+  fi
+}
+[ "$(eval "uname() { echo 'Probe-OS'; }"; export -f uname; bash -c 'uname -s')" = "Probe-OS" ] || {
+  echo 'FAIL: the uname host simulation does not reach a child bash'; exit 1; }
+na_fixture $'platform: windows-only; native long path\nplatform: windows-only; native junction'
+expect_na Linux 0 "N/A: 2 windows-only unittest assertions" --require-all
+expect_na Darwin 0 "N/A:     2 (windows-only unittest assertions" --require-all
+expect_na MINGW64_NT-10.0 1 "FAIL-CLOSED: --require-all forbids skipped tests" --require-all
+expect_na MSYS_NT-10.0 1 "Partial: 1 " --require-all
+na_fixture $'platform: windows-only; native long path\nsymlinks unavailable'
+expect_na Linux 1 "Partial: 1 " --require-all
+expect_na Linux 0 "SKIP: 2 unittest assertions"
+na_fixture $'platform: windows-only; native long path' none
+expect_na Linux 1 "Skip:   1" --require-all
+na_fixture $'Platform: windows-only; wrong case\nplatform:windows-only; no space'
+expect_na Linux 1 "Partial: 1 " --require-all
+
 echo 'PASS: runner rejects invalid input, empty suites, exact tag misses, shell/framework skips, and failed tests'
 echo 'PASS: runner shards are deterministic, disjoint, complete, strict and fail closed when malformed or empty'
+echo 'PASS: windows-only unittest skips are N/A only off Windows and only when every skip is so marked'
 echo 'PASS: runner preserves literal Windows paths and backslash diagnostics'
 echo 'PASS: actual manifest and hook guards report unavailable tools and block strict acceptance'
