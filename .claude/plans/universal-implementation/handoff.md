@@ -370,6 +370,10 @@ never inferred from this directive; a model switch does not change context ident
   269-character fixture path under the reviewer's deep isolation root on a host without
   long paths. The coordinator authorizes a rerun from a short disposable root, with no
   global setting, product or test change.
+  F06 preparation: package 1 passes SPEC and QUALITY. Packages 2 and 3 fail SPEC on
+  three P2 template defects (R01–R03). The coordinator releases step 1 now, and one
+  bounded repair and recheck of packages 2 and 3; see the P08 card, "Preparation review
+  and step-1 re-release".
 - P09: module product `5c99612` passes `114ddfe3`, integrated `2d789a4`;
   all 26 product paths match and 13 joined methods pass. `477d3fc` releases
   the original owner's separate N1 safety-quantifier correction and two bounded
