@@ -961,6 +961,12 @@ after reading a clean result, or make the commit conditional on the check's
 exit status. Recompute abbreviations from the full value rather than typing
 them.
 
+**Recurrence (2026-09-24):** in a PowerShell chain, a failing Python check was followed by
+`git commit` because PowerShell continues after a native command fails. The commit (step-3
+release) carried a wrong tail, `4f9a97f` for `cf9a97f`. It was caught before anyone used
+it and amended. Begin such chains with `$ErrorActionPreference = "Stop"`, and throw on
+`$LASTEXITCODE -ne 0` after each check, before any commit.
+
 ## L-049 - A synthetic TEMP can pin the host-wide MSYS /tmp
 
 **Date:** 2026-09-24
