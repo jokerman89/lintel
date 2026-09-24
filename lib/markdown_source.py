@@ -278,6 +278,9 @@ def _literal(text: str, start: int) -> tuple[int, tuple[Region, ...]]:
         if parser.closing is not None:
             break
     if parser.closing is None:
+        # Newer HTMLParser releases buffer incrementally fed script/style data until close().
+        parser.close()
+    if parser.closing is None:
         regions.extend((Region(Span(end, len(text)), "raw_html_body", tag),
                         Region(Span(start, len(text)), "unknown", tag)))
         return len(text), tuple(regions)
