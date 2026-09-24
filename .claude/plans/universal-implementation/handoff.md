@@ -359,7 +359,9 @@ never inferred from this directive; a model switch does not change context ident
   intake. SAME9db's review returns SPEC FAIL with two P2 reader findings in
   `bin/li-events.py`. R01: `--kind` runs before the `--since` undated diagnostic.
   R02: a structurally invalid catalog exits 1 instead of 2. Both are released to f2 as
-  one bounded repair; see the P08 card, "SAME9db review and repair release".
+  one bounded repair; see the P08 card, "SAME9db review and repair release". The frozen
+  repair (product `5f58da04`, report `af24721a`) passes coordinator intake and is with
+  SAME9db for the recheck.
 - P09: module product `5c99612` passes `114ddfe3`, integrated `2d789a4`;
   all 26 product paths match and 13 joined methods pass. `477d3fc` releases
   the original owner's separate N1 safety-quantifier correction and two bounded
