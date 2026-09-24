@@ -436,7 +436,7 @@ Acceptance: absent telemetry cannot imply healthy/dead or successful enforcement
 - [x] A14.2 Repair dimension keys and argument mapping.
 - [x] A14.3 Support no-animation/CSS-only/no-shader without forced dependencies.
 - [x] A14.4 Update source-grounded version advice while respecting project technology.
-- [ ] A14.5 Exercise a static page and app through the same profile and review contract.
+- [x] A14.5 Exercise a static page and app through the same profile and review contract.
 
 A14.1-.4 source `a1b3a45` passes complete independent `edecfdf` SPEC then
 whole direct-unit QUALITY, with D1-D5 closed. Integration `e1cb9d2` preserves
@@ -444,6 +444,15 @@ all 24 product blobs exactly; actual joined 18 contract methods and retained
 legacy roundtrip pass. Earlier native artifacts remain attributed to `f72f316`;
 these source closures do not clear A14.5's single-HTML, image or framework gates.
 Acceptance: actual artifacts and mandatory design checks, not only populated schema fields.
+A14.5 closure (2026-09-24): the operator authorized a task-local restore through the Microsoft npm
+feed proxy. The framework app (React 19.3.0, Vite 8.3.0) is restored and built from the same design
+and profile as the static page and served on loopback, and its native checks pass. The independent
+reviewer `aba328fd` (claude-opus-5.5, image-capable) passes both halves, V1 direct image observation
+included:
+- static page: SPEC 8/8, QUALITY PASS (`reviews/P11-a145-static-v1.md`);
+- app: SPEC 10/10, QUALITY PASS (`reviews/P11-a145-app.md`).
+The P11 report is integrated in `4998f265`. The P3 notes are cosmetic, and the restore's CDN
+redirects and SHA-1-only lock entries are recorded.
 
 ### A15 Verifiable document formats (P12; R07)
 - [ ] A15.1 Separate shared facts/narrative from format-specific composition and QA.
