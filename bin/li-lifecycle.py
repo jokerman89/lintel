@@ -206,8 +206,9 @@ def create_pack(config: ProfileConfig, args: argparse.Namespace) -> dict:
         data = re.sub(r"(?m)^name:[^\r\n]*", f"name: {name}", text).encode("utf-8")
     # Stage only manifests, not private corpora or extension executables. The same
     # resolver validates the new identity and all ancestors before publication.
+    # Resolve the private staging root: macOS temporary directories live under the /var link.
     with tempfile.TemporaryDirectory(prefix="lintel-pack-") as temporary:
-        staging = Path(temporary)
+        staging = Path(temporary).resolve()
         for parent in chain:
             ancestor = Path(parent["path"])
             atomic_write(staging, parent["name"] + "/pack.yaml", read_owned(ancestor.parent, ancestor.name)[0])
@@ -1035,7 +1036,7 @@ def extension_pack(config: ProfileConfig, args: argparse.Namespace) -> dict:
     values["navigation"]["default_workflow"] = args.workflow
     manifest = manifest_yaml(values).encode("utf-8")
     with tempfile.TemporaryDirectory(prefix="lintel-extension-") as temporary:
-        staged = Path(temporary)
+        staged = Path(temporary).resolve()
         atomic_write(staged, name + "/pack.yaml", manifest)
         validate_pack(replace(config, packs=staged), name)
     sanitize = lambda text: "".join(" " if ord(char) < 32 else char for char in text)
