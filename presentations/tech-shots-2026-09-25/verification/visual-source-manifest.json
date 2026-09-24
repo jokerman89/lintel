@@ -1,0 +1,7 @@
+{
+  "readAt": "2026-09-20T14:32:11.266Z",
+  "source": "https://github.com/jokerman89/lintel/docs/architecture.md",
+  "sha256": "cc7173b2cc8dfbec1eeae0fa59a3a75be10c80b049d524b17219d2b45af6957a",
+  "section": "Where state lives",
+  "change": "Visual map of global, client, committed repository and ignored runtime state"
+}

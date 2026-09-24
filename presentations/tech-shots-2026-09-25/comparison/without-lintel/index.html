@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Support overview · Customer pilot</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="tickets.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to dashboard</a>
+<header class="topbar">
+  <a class="brand" href="index.html" aria-label="Support desk home"><span class="brand-mark" aria-hidden="true">s</span>support<span class="brand-light">desk</span></a>
+  <span class="workspace-label">Customer operations</span>
+  <span class="pilot-badge"><span aria-hidden="true"></span> Synthetic pilot</span>
+</header>
+<main id="main">
+  <div class="page-heading">
+    <div><p class="eyebrow">WORKSPACE / SUPPORT</p><h1>Support overview</h1><p class="subtitle">A clear view of your customer's queue.</p></div>
+    <button id="export" class="primary" type="button"><span aria-hidden="true">↓</span> Export CSV</button>
+  </div>
+  <section class="filter-panel" aria-label="Filter tickets">
+    <div class="filters">
+      <div class="field customer-field"><label for="customer">Customer</label><select id="customer"><option>Northwind</option><option>Contoso</option></select></div>
+      <div class="field search-field"><label for="search">Search tickets</label><input id="search" type="search" placeholder="Ticket ID or subject" autocomplete="off"></div>
+      <div class="field"><label for="status">Status</label><select id="status"><option value="">All</option><option>New</option><option>Investigating</option><option>Resolved</option></select></div>
+      <div class="field"><label for="severity">Severity</label><select id="severity"><option value="">All</option><option>Critical</option><option>High</option><option>Normal</option></select></div>
+    </div>
+    <div class="date-row">
+      <span class="date-heading">Created date <span>UTC</span></span>
+      <div class="field date-field"><label for="start">From</label><input id="start" type="date" aria-describedby="date-help filter-error"></div>
+      <div class="field date-field"><label for="end">Through</label><input id="end" type="date" aria-describedby="date-help filter-error"></div>
+      <span id="date-help" class="date-hint">Inclusive dates · blank means any date</span>
+      <button id="clear" class="text-button" type="button">Clear filters</button>
+    </div>
+    <p id="filter-error" class="error" role="alert" hidden></p>
+  </section>
+  <div class="view-context"><h2><span id="customer-name">Northwind</span> <span class="context-light">/ Queue health</span></h2><p id="view-summary" role="status" aria-live="polite" aria-atomic="true"></p></div>
+  <section class="metrics" aria-label="Filtered ticket metrics">
+    <article class="metric"><div class="metric-title">Total tickets <span aria-hidden="true">▤</span></div><strong id="total-count">0</strong><p>All tickets in this view</p></article>
+    <article class="metric active-metric"><div class="metric-title">Active workload <span aria-hidden="true">↗</span></div><strong id="active-count">0</strong><p>New + Investigating</p></article>
+    <article class="metric"><div class="metric-title">Resolved <span aria-hidden="true">✓</span></div><strong id="resolved-count">0</strong><p>Completed tickets in this view</p></article>
+  </section>
+  <section class="charts" aria-label="Filtered ticket charts">
+    <article class="panel trend-panel"><div class="panel-heading"><div><h2>Ticket arrivals</h2><p>Created tickets by UTC day</p></div><span class="small-tag">Daily count</span></div><div id="trend" class="trend" aria-label="Daily created ticket counts"></div></article>
+    <article class="panel"><div class="panel-heading"><div><h2>Status breakdown</h2><p>Where the current queue stands</p></div></div><div id="status-stack" class="status-stack" aria-hidden="true"></div><div id="breakdown" class="breakdown" aria-label="Ticket counts by status"></div></article>
+  </section>
+  <section class="panel ticket-panel" aria-labelledby="tickets-heading">
+    <div class="panel-heading"><div><h2 id="tickets-heading">Tickets <span id="result-count" class="count-badge">0</span></h2><p>Every row matches the filters above.</p></div><span class="small-tag">Created time · UTC</span></div>
+    <table><caption class="sr-only">Matching customer support tickets, with creation times shown in UTC</caption><thead><tr><th scope="col">Ticket / Subject</th><th scope="col">Status</th><th scope="col">Severity</th><th scope="col">Created</th></tr></thead><tbody id="ticket-rows"></tbody></table>
+    <div id="empty-state" class="empty-state" hidden><span aria-hidden="true">⌕</span><h3>No tickets match these filters</h3><p>Try another search or clear filters to see this customer's full queue.</p></div>
+  </section>
+  <footer class="pilot-note"><span class="note-icon" aria-hidden="true">i</span><p><strong>Local synthetic pilot.</strong> Both customers' sample data are in this browser. Customer selection is a view filter. Production requires server-side authorization and data isolation.</p></footer>
+  <noscript><p class="error">Enable JavaScript to view and filter the synthetic tickets.</p></noscript>
+</main>
+</body>
+</html>

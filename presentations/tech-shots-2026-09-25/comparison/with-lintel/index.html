@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Support workspace · Pilot</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="tickets.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to dashboard</a>
+  <aside class="sidebar" aria-label="Workspace identity">
+    <div class="brand"><span class="brand-mark" aria-hidden="true">s</span> support<span class="brand-dot">.</span></div>
+    <p class="nav-label">WORKSPACE</p>
+    <div class="nav-current"><span aria-hidden="true">▦</span> Overview</div>
+    <div class="sidebar-note"><span class="live-dot" aria-hidden="true"></span> Local pilot<br><small>Synthetic data · Offline</small></div>
+  </aside>
+  <main id="main">
+    <header class="topbar"><span>Workspace <span class="separator">/</span> <strong>Overview</strong></span><span class="pilot-tag">DEMO ENVIRONMENT</span></header>
+    <section class="page-heading" aria-labelledby="page-title">
+      <div><p class="eyebrow">CUSTOMER SUPPORT</p><h1 id="page-title">A clearer view of your queue.</h1><p class="muted">Understand the workload. Focus on what needs attention.</p></div>
+      <button id="export" class="primary" type="button"><span aria-hidden="true">↓</span> Export CSV</button>
+    </section>
+    <section class="filter-panel" aria-labelledby="filter-title">
+      <div class="filter-heading"><h2 id="filter-title">Your view</h2><button id="clear" class="text-button" type="button">Clear filters</button></div>
+      <div class="filters">
+        <label class="customer-field" for="customer">Customer<select id="customer"><option>Northwind</option><option>Contoso</option></select></label>
+        <label class="search-field" for="search">Search tickets<input id="search" type="search" placeholder="Search ID or subject…" autocomplete="off"></label>
+        <label for="status">Status<select id="status"><option value="">All statuses</option><option>New</option><option>Investigating</option><option>Resolved</option></select></label>
+        <label for="severity">Severity<select id="severity"><option value="">All severities</option><option>Critical</option><option>High</option><option>Normal</option></select></label>
+        <label for="start">From · UTC<input id="start" type="date" aria-describedby="date-help filter-error"></label>
+        <label for="end">To · UTC<input id="end" type="date" aria-describedby="date-help filter-error"></label>
+      </div>
+      <p id="date-help" class="helper">Creation dates are inclusive. Leave dates blank to see all time.</p>
+      <p id="filter-error" class="error" role="alert" hidden></p>
+    </section>
+    <div id="view-summary" class="view-summary" aria-live="polite" aria-atomic="true"></div>
+    <section class="metrics" aria-label="Filtered ticket metrics">
+      <article class="metric"><div class="metric-label">Total tickets <span aria-hidden="true">▤</span></div><strong id="total-count">0</strong><p>In your current view</p></article>
+      <article class="metric featured"><div class="metric-label">Active workload <span aria-hidden="true">◉</span></div><strong id="active-count">0</strong><p>New + Investigating</p></article>
+      <article class="metric"><div class="metric-label">Critical priority <span class="critical-dot" aria-hidden="true">●</span></div><strong id="critical-count">0</strong><p>Critical tickets in this view</p></article>
+      <article class="metric"><div class="metric-label">Resolved <span class="resolved-symbol" aria-hidden="true">✓</span></div><strong id="resolved-count">0</strong><p>Completed in this view</p></article>
+    </section>
+    <section class="charts" aria-label="Filtered ticket charts">
+      <article class="panel trend-panel"><div class="panel-heading"><div><h2>Ticket arrivals</h2><p>Created tickets by UTC day</p></div><span class="chart-key"><i aria-hidden="true"></i> Tickets</span></div><div id="trend" class="trend" role="list" aria-label="Daily ticket counts"></div><p class="chart-footnote">Only days with matching tickets are shown.</p></article>
+      <article class="panel status-panel"><div class="panel-heading"><div><h2>Status breakdown</h2><p>Where the work stands</p></div></div><div id="breakdown" class="breakdown" role="list" aria-label="Ticket counts by status"></div><p class="chart-footnote">All statuses reconcile to total tickets.</p></article>
+    </section>
+    <section class="panel tickets-panel" aria-labelledby="tickets-title">
+      <div class="panel-heading"><div class="ticket-title"><h2 id="tickets-title">Tickets</h2><span id="result-count" class="count-tag">0</span></div><span class="muted sort-note">Newest first · UTC</span></div>
+      <table><caption class="sr-only">Tickets matching the selected customer and filters</caption><thead><tr><th scope="col">Ticket</th><th scope="col">Subject</th><th scope="col">Status</th><th scope="col">Severity</th><th scope="col">Created · UTC</th></tr></thead><tbody id="ticket-rows"></tbody></table>
+      <div id="empty-state" class="empty-state" hidden><span aria-hidden="true">⌕</span><h3>No tickets match this view</h3><p>Try a different search, adjust the dates, or clear your filters.</p></div>
+    </section>
+    <footer><strong>Synthetic pilot.</strong> Both customers’ data are in this browser. This selector is not access control. Production requires server-side authorization and data isolation.</footer>
+    <p id="export-message" class="sr-only" role="status"></p>
+    <noscript><p class="error">Enable JavaScript to filter and inspect this local synthetic dashboard.</p></noscript>
+  </main>
+</body>
+</html>

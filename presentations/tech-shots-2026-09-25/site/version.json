@@ -1,0 +1,22 @@
+{
+  "presentation": "Lintel Tech SHOTs",
+  "version": "2026-09-24",
+  "source_commit": "275a35447c4ad271e05816ade43ac48f1acec24f",
+  "slides": 57,
+  "core_minutes": 50,
+  "technical_minutes": 18,
+  "themes": [
+    "neon",
+    "paper"
+  ],
+  "demo_mode": "prepared synthetic browser implementations and saved helper executions",
+  "planned_links": [
+    "Lintel Pack #1 (MS Employee in CAIP)",
+    "Lintel Core",
+    "Lintel Benchmark"
+  ],
+  "source_status": "unreleased development snapshot; public equivalent files plus cited excerpts",
+  "product_minutes": 6,
+  "product_artwork": "four standalone motifs, each in Neon and Paper",
+  "primary_logo": "Folded L \u2014 shaded"
+}
