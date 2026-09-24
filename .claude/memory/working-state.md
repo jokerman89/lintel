@@ -175,9 +175,10 @@ Reconciliation 6 (A13 resources into `ADAPTER_RESOURCES` and capability selectio
 follows at the real P08 integration.
 P09's installed closure passes SAME447 (`2e71a94b`) and is integrated in `da5a599b`;
 A09.5/A17.5 close after the P10 repair and an installed rerun.
-F06: step 1 (`consume-02`: bind, restore and consumption) completed; step 2 is running
-under grant `45cb7508…`, and a latent pin defect is decided as a pin-only retry after the
-candidate grant closes (`7c21a3b0`).
+F06: step 1 (`consume-02`: bind, restore and consumption) completed. In step 2 the candidate
+grant closed with a post-exit rerun under the accepted rotation contract (`-07`,
+`946d362d`). The pin-02 preparation (`17f3cc81…`) and the package 3 refreeze
+(`084bb748…`) are frozen for SAME9db; the pin-02 release follows on PASS.
 P13: the installed-consumer unit is parked on IC-F01; fan-in preparation (A19.3 map,
 status union, generated fan-in, version proposal) is released on the preview
 (`5b6479b5`). Reviewer `4865e4f7` runs gpt-6-astra and holds until the operator switches
