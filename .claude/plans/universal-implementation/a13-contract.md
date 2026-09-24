@@ -694,6 +694,10 @@ edit `skills/CATALOG.md`.
 - `skills/skillify/SKILL.md`: by-ID lookup;
 - `scaffolding/01-foundation/.claude/memory/lessons.md`: the format example and grammar
   comments only;
+- `hooks/shared/job-stale-warn/HOOK.md`: only the documentation of the emitted age field
+  (`age_hours_str`). This coordinator decision accompanies the marker decision below.
+  The emitted field stays unchanged, and a consumer that reads `age_hours` is reported
+  rather than fixed by renaming;
 - `bin/li-review-read`: exactly one `mkdir -p "$(dirname "$marker")"` immediately before
   the legacy-import marker append, and nothing else. This coordinator decision resolves
   item 2 of "Routing without side effects" against the P05-reader prohibition below:
