@@ -12,6 +12,7 @@ import importlib.util
 import json
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -40,9 +41,10 @@ selection = load("accepted_catalog_selection_cases", "tests/unit/catalog-selecti
 class InstalledDiscovery(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        parent = (OPTIONS.fixture_root or Path(tempfile.gettempdir())).resolve(strict=True)
+        parent = OPTIONS.fixture_root or Path(tempfile.gettempdir())
         if parent.is_symlink() or getattr(parent.lstat(), "st_file_attributes", 0) & 0x400:
             raise ValueError("Fixture root must be an ordinary owned directory")
+        parent = parent.resolve(strict=True)
         if OPTIONS.keep_fixtures:
             cls.temporary = None
             cls.run_root = Path(tempfile.mkdtemp(prefix="p13i-", dir=parent))
@@ -303,6 +305,71 @@ class InstalledDiscovery(unittest.TestCase):
                 self.assertEqual(value["body_reads"][0]["path"],
                                  str(bundle / literal["entries"][0]["path"]))
             self.assertEqual(before, self.snapshot())
+
+
+class FixtureRootAdmission(unittest.TestCase):
+    def test_linked_fixture_root_is_refused_before_resolving(self):
+        with tempfile.TemporaryDirectory(prefix="p13-root-", dir=tempfile.gettempdir()) as temporary:
+            base = Path(temporary)
+            target, linked = base / "owned-target", base / "linked-root"
+            target.mkdir()
+            sentinel = target / "keep.txt"
+            sentinel.write_bytes(b"owned target must remain unchanged\n")
+            if os.name == "nt":
+                pwsh = shutil.which("pwsh")
+                self.assertIsNotNone(pwsh, "PowerShell 7 is required to exercise the owned junction")
+                env = dict(os.environ, P13_ROOT_LINK=str(linked), P13_ROOT_TARGET=str(target))
+                result = subprocess.run([
+                    pwsh, "-NoLogo", "-NoProfile", "-NonInteractive", "-Command",
+                    "$ErrorActionPreference='Stop'; "
+                    "if ($PSVersionTable.PSVersion.Major -lt 7) { throw 'PowerShell 7 required' }; "
+                    "New-Item -ItemType Junction -Path $env:P13_ROOT_LINK "
+                    "-Target $env:P13_ROOT_TARGET | Out-Null",
+                ], env=env, capture_output=True, text=True, encoding="utf-8", check=False)
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            else:
+                linked.symlink_to(target, target_is_directory=True)
+            self.assertTrue(linked.is_symlink() or getattr(linked.lstat(), "st_file_attributes", 0) & 0x400)
+            self.assertEqual(linked.resolve(strict=True), target.resolve(strict=True))
+
+            class Probe(InstalledDiscovery):
+                pass
+
+            try:
+                with mock.patch.object(OPTIONS, "fixture_root", linked), \
+                        mock.patch.object(OPTIONS, "keep_fixtures", False):
+                    with self.assertRaisesRegex(ValueError, "ordinary owned directory"):
+                        Probe.setUpClass()
+            finally:
+                admitted = Probe.__dict__.get("run_root")
+                if admitted is not None:
+                    Probe.tearDownClass()
+                print(json.dumps({"N2_linked_root": str(linked), "kind": "junction" if os.name == "nt" else "symlink",
+                                  "admitted_run_root": str(admitted) if admitted is not None else None}))
+                if os.name == "nt":
+                    linked.rmdir()
+                else:
+                    linked.unlink()
+            self.assertEqual(list(target.iterdir()), [sentinel])
+            self.assertEqual(sentinel.read_bytes(), b"owned target must remain unchanged\n")
+
+    def test_ordinary_fixture_root_still_allows_an_owned_run(self):
+        with tempfile.TemporaryDirectory(prefix="p13-root-", dir=tempfile.gettempdir()) as temporary:
+            parent = Path(temporary)
+
+            class Probe(InstalledDiscovery):
+                pass
+
+            with mock.patch.object(OPTIONS, "fixture_root", parent), \
+                    mock.patch.object(OPTIONS, "keep_fixtures", False):
+                try:
+                    Probe.setUpClass()
+                    self.assertEqual(Probe.run_root.parent, parent.resolve(strict=True))
+                    self.assertTrue(Probe.run_root.is_dir())
+                finally:
+                    if "run_root" in Probe.__dict__:
+                        Probe.tearDownClass()
+            self.assertEqual(list(parent.iterdir()), [])
 
 
 if __name__ == "__main__":
