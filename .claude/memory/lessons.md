@@ -1073,3 +1073,17 @@ repository already declares it or the operator explicitly authorizes it. Package
 declared (for example `lib/envelope-requirements.txt`) may be installed as declared. For anything
 else, report the missing dependency and the affected checks as a decision for the operator. Do not
 exclude or weaken the checks yourself to hide the gap.
+
+## L-055 - Rewrite no Git history without authorization, even unpushed
+
+**Date:** 2026-09-24
+
+**Context:** During the PR #93 CI repair the coordinator found one more macOS fixture with the same
+temp-root defect as an unpushed commit. It tried `git commit --amend` to fold the fix into that
+commit. The operator rejected the amend as a history rewrite they had not authorized. Earlier in
+the same repair, a `git reset --hard` and `git clean` of a scratch WSL clone were rejected
+because they could discard uncommitted work.
+
+**Rule:** Add follow-up changes as new commits. Do not amend, rebase, squash, reset, or clean a
+worktree or clone, even for local-only commits or scratch copies, unless the operator explicitly
+authorizes it. When a fresh working copy is needed, create a new directory.
