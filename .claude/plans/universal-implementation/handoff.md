@@ -341,7 +341,13 @@ never inferred from this directive; a model switch does not change context ident
   append, because the audit directory no longer exists before the write. Decision
   `855a5c27` releases one write-site mkdir in that P05 reader, with an A13-owned
   discriminating regression, reviewed as a cross-package change. f2 then sends the
-  frozen A13 handoff to SAME9db.
+  frozen A13 handoff to SAME9db. Its fix commits `bc5b8f75`, `051f66c6` and
+  `c7fbfd6f` pass coordinator scope pre-intake. `5c13c68c` adds the
+  job-stale-warn field documentation to the contract's released list.
+
+  A merge-tree preview with the A13 head and P10 first adds three product conflicts
+  and one test conflict, each with a verified resolution. See the P08 card, "Preview
+  with the A13 head and P10 first".
 - P09: module product `5c99612` passes `114ddfe3`, integrated `2d789a4`;
   all 26 product paths match and 13 joined methods pass. `477d3fc` releases
   the original owner's separate N1 safety-quantifier correction and two bounded
