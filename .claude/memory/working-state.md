@@ -194,7 +194,9 @@ Host note (2026-09-24, 14:00 UTC): host commit-memory exhaustion killed the coor
 async runs and keeper. Exit `3221226091` (`0xC000012D`) with a 0-byte log means `bash.exe`
 could not start, so that result is environmental, not a test result. `/tmp` is now pinned to
 SAME9db's `%LOCALAPPDATA%\Temp\i9f\r2\t`, kept on request, and the new keeper is
-`msyskeeper2`. Earlier:
+`msyskeeper2`. At 14:42 UTC a session restart killed that keeper and the `fin1` runs. `/tmp` now
+resolves to `30146eab`'s `%LOCALAPPDATA%\Temp\p13v\t`, kept on request and held by `msyskeeper3`.
+The joined runs restarted as `fin2-*` on `3d7f1284`. Earlier:
 Host note (L-049): the host-wide MSYS `/tmp` mount moved at about 07:30 to
 `%LOCALAPPDATA%\Temp\p10n1\r0\temp`, after the shared table reset while no MSYS process
 was running. The launcher guard keeps that root after its run, and a keeper MSYS `sleep`
