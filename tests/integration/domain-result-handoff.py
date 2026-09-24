@@ -27,6 +27,8 @@ parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("--root", type=Path, required=True)
 parser.add_argument("--bash", required=True)
 parser.add_argument("--git", required=True)
+parser.add_argument("--artifacts-root", type=Path)
+parser.add_argument("--without-selectors", action="store_true")
 options, test_args = parser.parse_known_args()
 SOURCE = options.root.resolve()
 sys.path.insert(0, str(SOURCE / "lib"))
@@ -34,7 +36,7 @@ import context_safety as safety
 from profile_context import ProfileConfig, load_profile_context, profile_reference, required_policy
 from review_contract import content_digest, evidence_manifest, validate_context, verify_qa
 
-ARTIFACTS = SOURCE / ".claude/runtime/p09-data-core" / uuid.uuid4().hex[:12]
+ARTIFACTS = (options.artifacts_root or SOURCE / ".claude/runtime/p09-data-core") / uuid.uuid4().hex[:12]
 safety.native_io_path(ARTIFACTS).mkdir(parents=True)
 CHECK_CODE = (
     "import unittest\n"
@@ -99,6 +101,8 @@ class DomainHandoff(unittest.TestCase):
             "GH_TOKEN", "GITHUB_TOKEN", "BASH_ENV", "PYTHONPATH", "PACK_CACHE_FILE",
             "LINTEL_PROFILE_REFERENCE", "GIT_CONFIG_COUNT",
         )))
+        if options.without_selectors:
+            self.env = {key: value for key, value in self.env.items() if not key.startswith("LINTEL_")}
         self.git("init", "-q")
         self.git("symbolic-ref", "HEAD", "refs/heads/synthetic")
         self.write(".gitignore", b".claude/runtime/\n")
@@ -150,15 +154,19 @@ class DomainHandoff(unittest.TestCase):
         self.counter += 1
         stem = self.logs / str(self.counter)
         argv = [str(arg) for arg in args]
+        actual_env = env or self.env
+        if options.without_selectors:
+            self.assertFalse(any(key.startswith("LINTEL_") for key in actual_env))
         with safety.native_io_path(stem.with_suffix(".stdout.log")).open("wb") as out, \
                 safety.native_io_path(stem.with_suffix(".stderr.log")).open("wb") as err:
-            result = subprocess.run(argv, cwd=cwd or self.repo, env=env or self.env,
+            result = subprocess.run(argv, cwd=cwd or self.repo, env=actual_env,
                                     stdout=out, stderr=err, timeout=60, check=False)
         stdout = safety.native_io_path(stem.with_suffix(".stdout.log")).read_text(encoding="utf-8")
         stderr = safety.native_io_path(stem.with_suffix(".stderr.log")).read_text(encoding="utf-8")
         safety.native_io_path(stem.with_suffix(".json")).write_bytes(encoded({
             "argv": argv, "cwd": str(cwd or self.repo), "exit_code": result.returncode,
             "synthetic_home": self.env["HOME"], "ceiling": self.env["GIT_CEILING_DIRECTORIES"],
+            "lintel_selectors": sorted(key for key in actual_env if key.startswith("LINTEL_")),
         }))
         if expected is not None:
             self.assertEqual(expected, result.returncode, (stdout + stderr)[-2000:])

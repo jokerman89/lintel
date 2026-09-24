@@ -12,6 +12,12 @@ import tempfile
 import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
+checks_spec = importlib.util.spec_from_file_location(
+    "installed_consumer_checks", Path(__file__).with_name("installed_consumer_checks.py"))
+checks = importlib.util.module_from_spec(checks_spec)
+checks_spec.loader.exec_module(checks)
+REVIEW_RUNTIME_RESOURCES = checks.REVIEW_RUNTIME_RESOURCES
+profile_continuity, review_controls = checks.profile_continuity, checks.review_controls
 JOINED_RUNTIME_RESOURCES = (
     "lib/swarm_snapshot.py", "lib/swarm_evidence.py",
     "lib/envelope_contract.py", "lib/envelope-requirements.txt",
@@ -39,11 +45,6 @@ JOINED_RUNTIME_RESOURCES = (
     "skills/generate-pdf/scripts/check_pdf.py",
     "skills/generate-pdf/scripts/print_pdf.mjs",
     "skills/generate/scripts/pipeline_inputs.py",
-)
-REVIEW_RUNTIME_RESOURCES = (
-    "bin/li-review-evidence.py", "bin/li-review-log", "bin/li-review-read",
-    "lib/review_contract.py", "lib/review-schema.json",
-    "lib/markdown_source.py", "bin/_audit.sh", "lib/paths.sh",
 )
 spec = importlib.util.spec_from_file_location("li_copilot", ROOT / "bin/li-copilot.py")
 adapter = importlib.util.module_from_spec(spec)
@@ -1500,28 +1501,7 @@ except (ValueError,OSError) as error:
     def test_installed_review_controls_use_real_schema_and_reject_required_failure(self):
         self.run_cli()
         bundle = self.target / adapter.BUNDLE
-        for relative in REVIEW_RUNTIME_RESOURCES:
-            self.assertTrue((bundle / relative).is_file(), relative)
-        request = self.target / "control-input.json"
-        control = {
-            "id": "synthetic-evidence", "kind": "check", "requirement": "mandatory",
-            "applicability": "applicable", "status": "pass",
-            "reason": "Synthetic installed-consumer observation.",
-            "policy": {"source": "spec.md", "version": "fixture-1", "applicability": "Synthetic package",
-                       "jurisdiction": None, "actor": None, "effective_date": None},
-            "evidence": ["checks.txt"], "observation": {},
-        }
-        policy = {"required": False, "status": "not_required", "source": None,
-                  "version": None, "applicability": "not_applicable"}
-        for status, code in (("pass", 0), ("fail", 3), ("unverified", 3)):
-            control["status"] = status
-            request.write_text(json.dumps({"controls": [control], "required_policy": policy}), encoding="utf-8")
-            result = subprocess.run([sys.executable, "-I", "-B", "-S",
-                                     str(bundle / "bin/li-review-evidence.py"), "controls",
-                                     "--repo", str(self.target), "--input", str(request)],
-                                    capture_output=True, text=True, encoding="utf-8")
-            self.assertEqual(result.returncode, code, result.stdout + result.stderr)
-            self.assertEqual(json.loads(result.stdout)["blocked"], status != "pass")
+        review_controls(self, bundle, self.target)
 
     def test_joined_installed_dependencies_cannot_be_hidden_by_inventory_removal(self):
         self.run_cli()
@@ -1553,51 +1533,10 @@ except (ValueError,OSError) as error:
         target = self.base / "profile-consumer"
         target.mkdir()
         self.run_cli(target=target)
-        (target / ".claude/profile-requirements.json").write_text(
-            json.dumps({"schema_version": 1, "required_pack": "_default"}), encoding="utf-8")
         home = self.base / "joined-profile-unused-home"
-        home.mkdir()
-        env = {key: value for key, value in os.environ.items()
-               if not key.startswith("LINTEL_") and key != "CLAUDE_SESSION_ID"}
-        env.update(HOME=str(home), USERPROFILE=str(home), PYTHONDONTWRITEBYTECODE="1")
         bash = os.environ.get("LINTEL_TEST_BASH") or shutil.which("bash")
         self.assertTrue(bash)
-        script = '''set -e
-source .github/lintel/lib/copilot-env.sh
-lintel_copilot_env "$PWD"
-printf '%s\\n' "$LINTEL_PROFILE_REFERENCE"
-'''
-
-        def bootstrap():
-            return subprocess.run([bash, "-c", script], cwd=target, env=env,
-                                  capture_output=True, text=True, encoding="utf-8")
-
-        first = bootstrap()
-        self.assertEqual(first.returncode, 0, first.stdout + first.stderr)
-        reference = json.loads(first.stdout)
-        self.assertEqual(reference["name"], "_default")
-        repeated = bootstrap()
-        self.assertEqual(repeated.returncode, 0, repeated.stdout + repeated.stderr)
-        self.assertEqual(json.loads(repeated.stdout), reference)
-        selected = target / ".claude/runtime/profiles/selected.json"
-        pin = selected.read_bytes()
-        manifest = target / adapter.BUNDLE / "packs/_default/pack.yaml"
-        content, times = manifest.read_bytes(), manifest.stat()
-        manifest.write_bytes(content + b"\n# Same-mtime input drift\n")
-        os.utime(manifest, ns=(times.st_atime_ns, times.st_mtime_ns))
-        try:
-            refused = bootstrap()
-            self.assertNotEqual(refused.returncode, 0, refused.stdout + refused.stderr)
-            self.assertIn("PROFILE_", refused.stderr)
-            self.assertEqual(refused.stdout, "")
-            self.assertEqual(selected.read_bytes(), pin)
-        finally:
-            manifest.write_bytes(content)
-            os.utime(manifest, ns=(times.st_atime_ns, times.st_mtime_ns))
-        restored = bootstrap()
-        self.assertEqual(restored.returncode, 0, restored.stdout + restored.stderr)
-        self.assertEqual(json.loads(restored.stdout), reference)
-        self.assertEqual(list(home.iterdir()), [])
+        profile_continuity(self, target / adapter.BUNDLE, target, home, bash)
 
     def test_joined_installed_swarm_and_json_envelope_use_stdlib_dependencies(self):
         self.run_cli()
