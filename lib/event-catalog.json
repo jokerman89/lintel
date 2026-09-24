@@ -596,16 +596,6 @@
     },
     "migration": {
       "kinds": {
-        "claude_home_migrated": {
-          "producers": ["bin/li-migrate-claude-home"],
-          "records_when": ["end"],
-          "fields": ["repo"],
-          "aliases": {},
-          "rules": [
-            {"when": {}, "class": "observation", "check": "performed"}
-          ],
-          "note": "P10 replaces this producer with li-lifecycle migrate; the coordinator reconciles this entry at fan-in."
-        },
         "surfaced": {
           "producers": ["instruction-only:skills/migrations/SKILL.md"],
           "records_when": ["always"],
@@ -623,28 +613,6 @@
           "producers": ["instruction-only:skills/orientator/SKILL.md", "instruction-only:skills/sense/SKILL.md"],
           "records_when": ["always"],
           "fields": ["intent", "workflow", "risk", "confidence", "decision", "budget_used", "escalated"],
-          "aliases": {},
-          "rules": [
-            {"when": {}, "class": "observation", "check": "performed"}
-          ]
-        }
-      }
-    },
-    "pack-lifecycle": {
-      "kinds": {
-        "pack_created": {
-          "producers": ["instruction-only:skills/pack-create/SKILL.md"],
-          "records_when": ["end"],
-          "fields": ["name", "extends", "scope"],
-          "aliases": {},
-          "rules": [
-            {"when": {}, "class": "observation", "check": "performed"}
-          ]
-        },
-        "pack_validated": {
-          "producers": ["instruction-only:skills/pack-validate/SKILL.md"],
-          "records_when": ["end"],
-          "fields": ["name", "verdict"],
           "aliases": {},
           "rules": [
             {"when": {}, "class": "observation", "check": "performed"}
