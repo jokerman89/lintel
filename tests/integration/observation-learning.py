@@ -335,6 +335,95 @@ class EventReaderTests(Sandbox):
         broken = self.run_cmd([PYTHON, tree / "bin/li-events.py", "summary", "--file", absent], expect=2)
         self.assertEqual(json.loads(broken.stdout)["status"], "error")
 
+    def test_undated_diagnostic_is_raised_before_kind_selection(self):
+        since = ("--since", "2026-01-01T00:00:00Z")
+        digest = {"hook": "session-digest", "pack": "_default", "mode": "internal-tool"}
+        dated_match = event(kind="session_digest", **digest)
+        early_match = event(kind="session_digest", ts="2025-12-31T23:00:00Z", **digest)
+        undated_match = event(kind="session_digest", ts="", **digest)
+        undated_other, early_other = event(ts=""), event(ts="2025-12-31T23:00:00Z")
+        kind = ("--kind", "session_digest")
+        cases = [
+            # case, lines, arguments, exit, status, selected, undated diagnostic lines
+            ("undated-other-kind", [undated_other], kind + since, 4, "observed_with_diagnostics", 0, [1]),
+            ("dated-match-then-undated-other", [dated_match, undated_other], kind + since, 4,
+             "observed_with_diagnostics", 1, [2]),
+            ("undated-other-then-dated-match", [undated_other, dated_match], kind + since, 4,
+             "observed_with_diagnostics", 1, [1]),
+            ("undated-match", [undated_match], kind + since, 4, "observed_with_diagnostics", 0, [1]),
+            ("dated-records-filter-silently", [event(), early_other, early_match, dated_match], kind + since, 0,
+             "observed", 1, []),
+            ("dated-other-kind-only", [event()], kind + since, 3, "unobserved", 0, []),
+            ("undated-other-without-since", [undated_other, dated_match], kind, 0, "observed", 1, []),
+        ]
+        for case, lines, extra, code, status, selected, undated in cases:
+            with self.subTest(case=case):
+                path = self.log(f"kind-since-{case}", "".join(line + "\n" for line in lines))
+                result, summary = self.summary(path, *extra, expect=code)
+                self.assertEqual(summary["status"], status)
+                self.assertEqual(summary["records"]["selected"], selected)
+                self.assertEqual([(d["line"], d["code"]) for d in summary["diagnostics"]],
+                                 [(line, "undated") for line in undated])
+                self.assertEqual(sorted(summary["by_kind"]), ["session_digest"] if selected else [])
+                self.assert_no_verdict(summary)
+                result, rows = self.records(path, *extra, expect=code)
+                self.assertEqual([(row["line"], row["diagnostic"]) for row in rows if "diagnostic" in row],
+                                 [(line, "undated") for line in undated])
+                self.assertEqual([row["kind"] for row in rows if "diagnostic" not in row],
+                                 ["session_digest"] * selected)
+                self.assert_no_verdict(rows)
+
+    def test_structurally_invalid_catalogs_exit_two_for_both_commands(self):
+        text = (ROOT / "lib/event-catalog.json").read_text(encoding="utf-8")
+
+        def mutated(change):
+            catalog = json.loads(text)
+            change(catalog)
+            return json.dumps(catalog).encode("utf-8")
+
+        def frozen(catalog):
+            return catalog["categories"]["hooks"]["kinds"]["frozen_zone_warn"]
+
+        cases = {
+            "malformed-json": b"{",
+            "rules-null-element": mutated(lambda c: frozen(c).update(rules=[None])),
+            "rules-string-element": mutated(lambda c: frozen(c).update(rules=["default"])),
+            "rule-when-null": mutated(lambda c: frozen(c)["rules"][0].update(when=None)),
+            "aliases-list": mutated(lambda c: frozen(c).update(aliases=[])),
+            "kind-entry-null": mutated(lambda c: c["categories"]["hooks"]["kinds"].update(frozen_zone_warn=None)),
+            "category-list": mutated(lambda c: c["categories"].update(hooks=[])),
+            "vocabulary-list": mutated(lambda c: c.update(vocabulary=[])),
+            "schema-version-boolean": mutated(lambda c: c.update(schema_version=True)),
+            "catalog-version-boolean": mutated(lambda c: c.update(catalog_version=True)),
+            "delegated-null": mutated(lambda c: c["categories"]["reviews"].update(delegated=None)),
+            "dynamic-object": mutated(lambda c: c.update(dynamic={})),
+            "dynamic-entry-null": mutated(lambda c: c["dynamic"].append(None)),
+            "wrapper-entry-number": mutated(lambda c: c["wrappers"].append(1)),
+            "non-recording-hook-null": mutated(lambda c: c["non_recording_hooks"].append(None)),
+            "nested-beyond-the-parser": b"[" * 5000 + b"]" * 5000,
+        }
+        log = self.log("catalog-structure", event() + "\n")
+        for case, data in cases.items():
+            with self.subTest(case=case):
+                tree = self.root / f"catalog {case}"
+                (tree / "bin").mkdir(parents=True)
+                (tree / "lib").mkdir()
+                shutil.copy(EVENTS, tree / "bin/li-events.py")
+                shutil.copy(ROOT / "lib/native_paths.py", tree / "lib/native_paths.py")
+                (tree / "lib/event-catalog.json").write_bytes(data)
+                for command in ("summary", "records"):
+                    result = self.run_cmd([PYTHON, tree / "bin/li-events.py", command, "--file", log,
+                                           "--category", "hooks"], expect=2)
+                    self.assertNotIn("Traceback", result.stderr)
+                    self.assertIn("li-events: event catalog", result.stderr)
+                    if command == "records":
+                        self.assertEqual(result.stdout, "")
+                        continue
+                    payload = json.loads(result.stdout)
+                    self.assertEqual((payload["status"], payload["catalog_version"]), ("error", None))
+                    self.assertTrue(payload["error"].startswith("event catalog"), payload["error"])
+                    self.assert_no_verdict(payload)
+
     def test_reader_only_reads_explicit_files_and_writes_no_bytecode(self):
         tree = self.root / "copied source"
         (tree / "bin").mkdir(parents=True)
