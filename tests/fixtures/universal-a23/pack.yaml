@@ -1,0 +1,8 @@
+schema_version: "1"
+name: a23-policy
+version: 1.0.0
+extends: _default
+compliance:
+  mode: hard
+  hooks: [joined-tests]
+  workprofile_default: off
