@@ -12,10 +12,12 @@ content-bound review evidence and explicit limits on what each check proves.
 
 ### Added
 
-- An owned installation lifecycle. The native installers (`install/native.ps1` with PowerShell 7,
-  `install/native.sh`) need no Python. `bin/li-lifecycle` initializes, checks and recovers
+- An owned installation lifecycle. The native installers (`install/native.ps1`, verified with
+  PowerShell 7; `install/native.sh`) need no Python. `bin/li-lifecycle` initializes and checks
   consumer repositories through a managed-transaction journal and snapshots, and preserves
-  consumer customizations. Its doctor reports installed state without inferring whether hooks fired.
+  consumer customizations. Interrupted operations are recovered explicitly through
+  `bin/li-managed-transaction.py recover`, and only for verified owned bytes. The doctor reports
+  installed state without inferring whether hooks fired.
 - Content-bound independent review evidence (`bin/li-review-evidence.py`, `lib/review_contract.py`).
   Mandatory controls dominate scores, and the review readers and ship readiness refuse a later
   rejecting review before SHIP instead of selecting an older pass.
@@ -47,11 +49,14 @@ content-bound review evidence and explicit limits on what each check proves.
 
 ### Known limits
 
-- Evidence is from native Windows with Python 3.11 and PowerShell 7. Linux and macOS run in CI.
-  Windows PowerShell 5.1 and a Python 3.9 runtime are not verified.
-- Two capabilities stay open: the design contract's static page and app exercise, which needs a
-  framework dependency restore, and complete document rendering and editability for the Word,
-  PowerPoint, PDF and workbook formats.
+- Evidence is from native Windows with Python 3.11 and PowerShell 7. CI adds Linux and macOS with
+  Python 3.12. Windows PowerShell 5.1, which the native performer supports, and a Python 3.9 runtime
+  are not verified.
+- Still open:
+  - the design contract's app exercise, which needs a framework dependency restore;
+  - the direct image observation of its static page;
+  - complete document rendering and editability for Word, PowerPoint, PDF and workbooks;
+  - a Visio writer, which stays a template-only staged slot.
 - Required-policy enforcement is not verified without a resolved company policy source.
 
 These changes remain in the beta line. They do not claim a completed enterprise pilot, compliance
