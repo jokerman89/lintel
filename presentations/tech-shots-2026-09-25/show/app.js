@@ -9,7 +9,7 @@ const demo = id => evidence.demos.find(x=>x.id===id);
 const compare = () => window.COMPARISON_DATA || {};
 const B = '../comparison/';
 const state = {index:0, packed:false, curated:false, later:false, profile:'lab', regression:'before'};
-const acts=[];slides.forEach((s,i)=>{if(s.optional)return;const a=acts[acts.length-1];if(a&&a.name===s.chapter){a.last=i;a.minutes+=s.minutes;}else acts.push({name:s.chapter,first:i,last:i,minutes:s.minutes});});
+const acts=[];slides.forEach((s,i)=>{if(s.optional||s.holding)return;const a=acts[acts.length-1];if(a&&a.name===s.chapter){a.last=i;a.minutes+=s.minutes;}else acts.push({name:s.chapter,first:i,last:i,minutes:s.minutes});});
 const firstBackup=slides.findIndex(s=>s.optional&&!s.track);
 const firstTechnical=slides.findIndex(s=>s.track==="technical");
 const firstProducts=slides.findIndex(s=>s.track==="products");
@@ -134,19 +134,23 @@ resources:s=>shell(s,'<div class="resource-links">'+comparisonButton('Prepared A
 Object.assign(templates, window.LINTEL_OPENING({shell, icon, state}));
 Object.assign(templates, window.LINTEL_TECHNICAL({shell,icon,state,viewButton}));
 Object.assign(templates, window.LINTEL_PRODUCTS({shell,icon,state,viewButton}));
-let lastRendered=-1;
+templates.holding=window.LINTEL_INTRO.render;
+let lastRendered=-1, notesHtml="", notesWindow=null;
+const notesWindowName="lintel-notes-"+Math.random().toString(36).slice(2);
 function render(){
-const s=slides[state.index];$('#stage').innerHTML=(templates[s.type]||templates.triad)(s);
+const s=slides[state.index];window.LINTEL_INTRO.unmount();$('#stage').innerHTML=(templates[s.type]||templates.triad)(s);
 // A click re-renders the same screen: do not replay the entrance animation over a dense diagram.
 if(lastRendered===state.index)$('#stage .slide').classList.add('no-anim');lastRendered=state.index;
 $('#chapter').textContent=s.chapter;$('#counter').textContent=String(state.index+1).padStart(2,'0')+' / '+slides.length;
 document.querySelectorAll('#acts button').forEach(b=>{const first=Number(b.dataset.act),group=b.dataset.group;const a=acts.find(x=>x.first===first);const here=group==='products'?s.track==='products':group==='technical'?s.track==='technical':group==='backup'?!!s.optional&&!s.track:!!a&&state.index>=a.first&&state.index<=a.last;const last=group?slides.reduce((end,x,i)=>(group==='backup'?x.optional&&!x.track:x.track===group)?i:end,-1):a.last;const fill=here?Math.round((state.index-first+1)/(last-first+1)*100):state.index>last?100:0;b.style.setProperty('--fill',fill+'%');b.setAttribute('aria-label',(a?.name||group||'Section')+': '+fill+'%'+(here?', current section':fill===100?', completed':', upcoming'));b.classList.toggle('current',here);b.classList.toggle('done',fill===100&&!here);if(here)b.setAttribute('aria-current','step');else b.removeAttribute('aria-current');});
+window.LINTEL_INTRO.mount();
+$('#next span').textContent=s.holding?'Begin':'Next';
 $('#prev').disabled=state.index===0;$('#next').disabled=state.index===slides.length-1;
 const elapsed=slides.slice(0,state.index).filter(x=>!x.optional).reduce((a,x)=>a+x.minutes,0);
 const moduleElapsed=slides.slice(0,state.index).filter(x=>x.track===s.track).reduce((a,x)=>a+x.minutes,0);
 const timing=(start,end)=>[start,end].map(m=>String(Math.floor(m)).padStart(2,'0')+':'+String(Math.round((m%1)*60)).padStart(2,'0')).join('–');
-$('#clock').textContent=s.track==='products'?timing(moduleElapsed,moduleElapsed+s.minutes)+' / '+productMinutes+' MIN · PRODUCTS':s.track==='technical'?timing(moduleElapsed,moduleElapsed+s.minutes)+' / '+technicalMinutes+' MIN · TECHNICAL':s.optional?'OPTIONAL / REFERENCE':timing(elapsed,elapsed+s.minutes)+' / 50 MIN';
-$('#noteContent').innerHTML='<p class="note-time">'+esc(s.chapter)+' · '+s.minutes+' MIN · SLIDE '+(state.index+1)+'</p><h2>'+esc(s.title).replace(/\n/g,' ')+'</h2>'+(s.cue?'<div class="oral-cue"><b>SAY</b><p>'+esc(s.cue)+'</p></div>':'')+(s.stageAction?'<div class="oral-action"><b>DO / ASK</b><p>'+esc(s.stageAction)+'</p></div>':'')+(s.bridge?'<div class="oral-bridge"><b>THEN →</b><p>'+esc(s.bridge)+'</p></div>':'')+esc(s.notes).split('\n\n').map(x=>'<p>'+x+'</p>').join('')+(s.sources?'<p>'+s.sources.map(u=>'<a href="'+esc(u)+'" target="_blank" rel="noopener">'+esc(u)+'</a>').join('<br>')+'</p>':'');
+$('#clock').textContent=s.holding?'BEFORE WE BEGIN · UNTIMED':s.track==='products'?timing(moduleElapsed,moduleElapsed+s.minutes)+' / '+productMinutes+' MIN · PRODUCTS':s.track==='technical'?timing(moduleElapsed,moduleElapsed+s.minutes)+' / '+technicalMinutes+' MIN · TECHNICAL':s.optional?'OPTIONAL / REFERENCE':timing(elapsed,elapsed+s.minutes)+' / 50 MIN';
+notesHtml='<p class="note-time">'+esc(s.chapter)+' · '+(s.holding?'BEFORE START':s.minutes+' MIN')+' · SLIDE '+(state.index+1)+'</p><h2>'+esc(s.title).replace(/\n/g,' ')+'</h2>'+(s.cue?'<div class="oral-cue"><b>SAY</b><p>'+esc(s.cue)+'</p></div>':'')+(s.stageAction?'<div class="oral-action"><b>DO / ASK</b><p>'+esc(s.stageAction)+'</p></div>':'')+(s.bridge?'<div class="oral-bridge"><b>THEN →</b><p>'+esc(s.bridge)+'</p></div>':'')+esc(s.notes).split('\n\n').map(x=>'<p>'+x+'</p>').join('')+(s.sources?'<p>'+s.sources.map(u=>'<a href="'+esc(u)+'" target="_blank" rel="noopener">'+esc(u)+'</a>').join('<br>')+'</p>':'');
 document.title=(state.index+1)+' · '+s.title.replace(/\n/g,' ')+' · Lintel';
 $('#stage').setAttribute('aria-label','Slide '+(state.index+1)+': '+s.title.replace(/\n/g,' '));
 document.querySelectorAll('#overviewGrid button').forEach((b,i)=>b.classList.toggle('active',i===state.index));
@@ -156,14 +160,21 @@ function go(i){const leaving=slides[state.index].type;if(leaving==='swarmreveal'
 function fit(){if(innerWidth<=650)return;const box=$('#viewport').getBoundingClientRect();const scale=Math.min((box.width-34)/1440,(box.height-22)/810);$('#stage').style.transform='scale('+scale+')';}
 function showViewer(url,title){const target=new URL(url,location.href);if(target.origin===location.origin)target.searchParams.set('theme',document.documentElement.dataset.theme||'neon');$('#viewerTitle').textContent=title;$('#viewerSource').href=target.href;$('#viewerFrame').src=target.href;$('#viewer').showModal();}
 function closeViewer(){$('#viewer').close();$('#viewerFrame').src='about:blank';}
-function toggleNotes(){$('#notePanel').hidden=!$('#notePanel').hidden;$('#notes').setAttribute('aria-expanded',String(!$('#notePanel').hidden));}
+// Keep speaker notes in their own window, never over the audience slide.
+function openNotes(){
+const status=$('#notesStatus');status.hidden=true;
+if(notesWindow&&!notesWindow.closed){notesWindow.focus();return;}
+notesWindow=window.open('notes.html',notesWindowName,'popup=yes,width=900,height=820,resizable=yes,scrollbars=yes');
+if(!notesWindow){status.textContent='Allow pop-ups for this site, then choose Notes again.';status.hidden=false;return;}
+notesWindow.focus();
+}
 const mmss=m=>String(Math.floor(m)).padStart(2,'0')+':'+String(Math.round((m%1)*60)).padStart(2,'0');
-$('#overviewGrid').innerHTML=slides.map((s,i)=>{const n=acts.findIndex(a=>a.first===i);const start=n>=0?acts.slice(0,n).reduce((t,a)=>t+a.minutes,0):0;const head=n>=0?'<h3 class="o-act"><b>'+(n+1)+'</b>'+esc(acts[n].name)+'<span>'+mmss(start)+' · '+acts[n].minutes+' min</span></h3>':i===firstProducts?'<h3 class="o-act"><b>P</b>Product launch<span>separate · '+productMinutes+' min</span></h3>':i===firstTechnical?'<h3 class="o-act"><b>T</b>Technical deep dive<span>separate · '+technicalMinutes+' min</span></h3>':i===firstBackup?'<h3 class="o-act"><b>+</b>Backup<span>optional · reference</span></h3>':'';return head+'<button data-slide="'+i+'"><span class="o-num">'+String(i+1).padStart(2,'0')+(s.optional?' / '+esc(s.chapter):' · '+s.minutes+' min')+'</span>'+esc(s.title).replace(/\n/g,' ')+'</button>';}).join('');
+$('#overviewGrid').innerHTML=slides.map((s,i)=>{const n=acts.findIndex(a=>a.first===i);const start=n>=0?acts.slice(0,n).reduce((t,a)=>t+a.minutes,0):0;const head=n>=0?'<h3 class="o-act"><b>'+(n+1)+'</b>'+esc(acts[n].name)+'<span>'+mmss(start)+' · '+acts[n].minutes+' min</span></h3>':i===firstProducts?'<h3 class="o-act"><b>P</b>Product launch<span>separate · '+productMinutes+' min</span></h3>':i===firstTechnical?'<h3 class="o-act"><b>T</b>Technical deep dive<span>separate · '+technicalMinutes+' min</span></h3>':i===firstBackup?'<h3 class="o-act"><b>+</b>Backup<span>optional · reference</span></h3>':'';return head+'<button data-slide="'+i+'"><span class="o-num">'+String(i+1).padStart(2,'0')+(s.holding?' · before start':s.optional?' / '+esc(s.chapter):' · '+s.minutes+' min')+'</span>'+esc(s.title).replace(/\n/g,' ')+'</button>';}).join('');
 $('#acts').innerHTML=acts.map((a,n)=>'<button data-act="'+a.first+'" style="flex-grow:'+(a.minutes+3)+'" title="'+esc(a.name)+' · '+a.minutes+' min" aria-label="Act '+(n+1)+': '+esc(a.name)+', '+a.minutes+' minutes"><b>'+(n+1)+'</b><span>'+esc(String(a.name||'').replace(/^The /,''))+'</span></button>').join('')+(firstBackup>=0?'<button data-act="'+firstBackup+'" data-group="backup" class="backup" style="flex-grow:5" title="Optional and reference screens" aria-label="Backup: optional and reference screens"><b>+</b><span>Backup</span></button>':'');
 if(firstProducts>=0)$('#acts').insertAdjacentHTML('beforeend','<button data-act="'+firstProducts+'" data-group="products" style="flex-grow:7" title="Product launch · '+productMinutes+' minutes" aria-label="Products: '+productMinutes+' minute launch section"><b>P</b><span>Products</span></button>');
 if(firstTechnical>=0)$('#acts').insertAdjacentHTML('beforeend','<button data-act="'+firstTechnical+'" data-group="technical" style="flex-grow:8" title="Separate technical section · '+technicalMinutes+' minutes" aria-label="Technical: separate '+technicalMinutes+' minute section"><b>T</b><span>Technical</span></button>');
 $('#prev').onclick=()=>go(state.index-1);$('#next').onclick=()=>go(state.index+1);
-$('#overview').onclick=()=>$('#overviewDialog').showModal();$('#notes').onclick=toggleNotes;$('#closeNotes').onclick=toggleNotes;
+$('#overview').onclick=()=>$('#overviewDialog').showModal();$('#notes').onclick=openNotes;
 $('#full').onclick=async()=>{try{if(!document.fullscreenElement)await document.documentElement.requestFullscreen();else await document.exitFullscreen();}catch{ $('#full').title='Use the browser fullscreen shortcut';}};
 document.addEventListener('click',event=>{
 const b=event.target.closest('button');if(!b)return;
@@ -188,15 +199,21 @@ if(b.dataset.regression){state.regression=b.dataset.regression;render();keep('#s
 document.addEventListener('keydown',e=>{
 if(e.target.closest('input,textarea,select')||e.ctrlKey||e.altKey||e.metaKey)return;
 if($('#viewer').open||$('#overviewDialog').open)return;
-if(e.key==='Escape'){$('#notePanel').hidden=true;return;}
+if(e.key==='Escape'){$('#notesStatus').hidden=true;return;}
 if(e.key==='ArrowRight'||e.key==='PageDown'||(e.key===' '&&e.target===document.body)){e.preventDefault();go(state.index+1);}
 if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(state.index-1);}
 if(e.key==='Home'){e.preventDefault();go(0);}if(e.key==='End'){e.preventDefault();go(slides.length-1);}
-if(e.key.toLowerCase()==='n')toggleNotes();if(e.key.toLowerCase()==='o')$('#overviewDialog').showModal();if(e.key.toLowerCase()==='f')$('#full').click();
+if(e.key.toLowerCase()==='n')openNotes();if(e.key.toLowerCase()==='o')$('#overviewDialog').showModal();if(e.key.toLowerCase()==='f')$('#full').click();
 });
 $('#viewer').addEventListener('close',()=>{$('#viewerFrame').src='about:blank';});
 addEventListener('resize',fit);addEventListener('hashchange',()=>{const i=slides.findIndex(s=>s.id===location.hash.slice(1));if(i>=0&&i!==state.index)go(i);});
 $('#stage').style.setProperty('--cl',CL.map(w=>w+'px').join(' '));
 const initial=slides.findIndex(s=>s.id===location.hash.slice(1));state.index=initial>=0?initial:0;render();
-window.DECK_API={go,state,slides};
+// Presenter API: one same-origin snapshot contract, consumed by notes.js.
+// Reading on a short interval also reconnects a notes window after this page reloads.
+window.DECK_API={go,state,slides,registerPresenter:popup=>{if(popup.opener===window&&popup.location.href===new URL('notes.html',location.href).href)notesWindow=popup;},getPresenterNotes:()=>({
+ index:state.index,total:slides.length,id:slides[state.index].id,
+ title:slides[state.index].title,html:notesHtml,timing:$('#clock').textContent,
+ nextTitle:slides[state.index+1]?.title||'End of presentation'
+})};
 })();

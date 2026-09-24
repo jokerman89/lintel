@@ -1,5 +1,17 @@
 window.DECK_SLIDES = [
   {
+    "id": "welcome",
+    "chapter": "Welcome",
+    "type": "holding",
+    "holding": true,
+    "title": "The portal is open.",
+    "subtitle": "We begin shortly.",
+    "minutes": 0,
+    "notes": "Leave this screen on while people join. The supplied portal animation loops silently. Pause motion if preferred; reduced-motion settings show the still image by default. This holding screen is outside the 50-minute talk. When everyone is ready, choose Begin or press the right arrow: the original opening starts on slide 2. The illustration sets the atmosphere; it is not evidence of product behavior.",
+    "stageAction": "Let the room settle. Use fullscreen if presenting. Choose Begin when you are ready.",
+    "bridge": "We had a plan. The AI had other plans."
+  },
+  {
     "id": "three-hours",
     "chapter": "Meet Lintel",
     "type": "systemcover",

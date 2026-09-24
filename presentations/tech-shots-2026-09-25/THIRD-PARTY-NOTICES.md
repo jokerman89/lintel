@@ -45,3 +45,7 @@ SOFTWARE.
 ## Fluent-inspired theme
 
 Design guidance: [Microsoft Fluent 2](https://fluent2.microsoft.design). This is an independent interpretation retaining Lintel identity, not a Microsoft product or endorsement. Original vector illustrations: `assets/fluent-gateway.svg` and `assets/products/*-fluent.svg`. These contain native geometry and the existing Lintel Folded L motif, not Microsoft artwork. Segoe/system typography uses installed system fonts; no font binaries or remote font loading are included. See [theme guide](site/THEMES.md) for the specific design sources.
+
+## Intro animation
+
+The living-portal clip was supplied by Johannes Åkerman for this presentation; its bytes are preserved. The poster is extracted from the same clip. See [media provenance](assets/intro/README.md).
