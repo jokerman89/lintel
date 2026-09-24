@@ -696,6 +696,7 @@ This is accepted-P06-engine evidence, not P10 linked/default transaction accepta
 The remaining eight discovery/authoring consumers and existing template are
 released to the original P13 owner with explicit status/welcome ownership.
 
+The final report is [reports/final.md](reports/final.md): a draft for A23.5, completed at the final freeze.
 Current original acceptance count is 90/113. A19.3, A19.4 and A20.4 close from P13's
 accepted fan-in (review `reviews/P13-fanin-f581b07.md`, integrated `cd877232`), after F06's
 acceptance and recovery's integration of P08 (`9f351a00`). A18.3 and A18.4 close from P13's accepted
