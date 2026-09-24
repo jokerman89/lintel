@@ -158,11 +158,16 @@ e2e footer (reconciled in `ebfbcd0d`). P10 B01 is independently closed in scope,
 the first whole QUALITY (`2685bd57`) found P1 F05 (adapter late-edit overwrite) and
 P2 F06 (Bash accepts header-shaped native inventory rows). Both, plus the A23.4.p2
 `config/aliases.yaml` native payload item, are released to the original P10 owner.
-Its frozen fix `a2df2021` / `56346ad3` passes coordinator intake and is with SAME
-`1578dfd8`. f2's frozen A13 handoff (`c7fbfd6f` / `e687d848`) passes intake; SAME9db's
-SPEC FAIL (P2 R01/R02 in `bin/li-events.py`) is released to f2 as one bounded repair.
+Its frozen fix `a2df2021` / `56346ad3` passes SAME's final review `f460eb9f` (SPEC and
+QUALITY PASS, 0/0/0; compliance UNVERIFIED without a resolved policy source) and is
+integrated in `68d32240`; the complete kit runs on `3397311f`.
+f2's frozen A13 handoff (`c7fbfd6f` / `e687d848`) failed SAME9db's SPEC on P2 R01/R02
+in `bin/li-events.py`. The repair `5f58da04` / `af24721a` resolves both; the remaining
+SPEC reruns from a short root after the A13-V01 path-limit decision (`f23833c5`).
 Trial `6da1e9c6` adds P08 reconciliation 4: remove the six event
-categories whose producers P09 retired (patch `f0724329…`).
+categories whose producers P09 retired (patch `f0724329…`). f2's three remaining F06
+preparation packages are with SAME9db, and the step-1 host receipts are supplied
+(`29de9bff`).
 All native leases are revoked;
 no target changes are released merely by the proposed evidence design.
 Source `70469296` and bound inputs stay frozen; no fourth actor.
