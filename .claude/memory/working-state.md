@@ -167,7 +167,12 @@ SPEC reruns from a short root after the A13-V01 path-limit decision (`f23833c5`)
 Trial `6da1e9c6` adds P08 reconciliation 4: remove the six event
 categories whose producers P09 retired (patch `f0724329…`). f2's three remaining F06
 preparation packages are with SAME9db, and the step-1 host receipts are supplied
-(`29de9bff`).
+(`29de9bff`). SAME9db passes package 1 and fails packages 2 and 3 on P2 template defects;
+`8754515a` releases F06 step 1 now plus one bounded repair of packages 2 and 3.
+`f7cbe5bc` releases the installed closures unblocked by P10: P09 A09.5/A17.5 to the
+original owner (reviewer `447d97f5`) and P13 A18.3/A18.4/A19.4 to the original owner
+(reviewer `4865e4f7`). A13.1.b/.4.b follow after A13.a passes and P10's joined checks
+are green, on a P08 integration preview.
 All native leases are revoked;
 no target changes are released merely by the proposed evidence design.
 Source `70469296` and bound inputs stay frozen; no fourth actor.
