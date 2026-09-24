@@ -1,0 +1,54 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>baseline-questions · actual artifact</title><style>:root{color-scheme:dark}*{box-sizing:border-box}body{background:#100d16;color:#f2eaf8;font:18px/1.65 Arial,sans-serif;margin:0}main{max-width:1150px;margin:0 auto;padding:40px 45px 80px}h1{font-size:42px;line-height:1.1;letter-spacing:-.03em}h2{color:#d9a1fa;font-size:28px;margin-top:38px}h3{font-size:22px}a{color:#a6ff00}table{width:100%;border-collapse:collapse;font-size:15px}th,td{border-bottom:1px solid #46364f;padding:12px;text-align:left;vertical-align:top}pre{background:#211927;padding:22px;white-space:pre-wrap;overflow-wrap:anywhere;font:15px/1.6 Consolas,monospace}code{color:#d9bae9}blockquote{border-left:3px solid #a6ff00;padding-left:20px;margin-left:0;color:#cdbcd8}.label{font:13px Consolas,monospace;letter-spacing:.12em;color:#a6ff00;margin-bottom:27px}nav{display:flex;gap:25px;border-bottom:1px solid #483450;padding:18px 35px;font-size:15px}@media(max-width:650px){main{padding:25px 20px}h1{font-size:31px}table{font-size:12px}td,th{padding:7px}}</style><link rel="stylesheet" href="../../site/theme.css"><script src="../../site/theme.js"></script><link rel="icon" href="../../site/favicon.ico?v=folded-l" sizes="16x16 32x32 48x48"><link rel="icon" href="../../site/favicon-32.png?v=folded-l" type="image/png" sizes="32x32"><link rel="icon" href="../../site/mark.svg?v=folded-l" type="image/svg+xml"><link rel="apple-touch-icon" href="../../site/apple-touch-icon.png?v=folded-l" sizes="180x180"></head><body><nav><a href="../../show/index.html">Presentation</a><a href="../index.html">Comparison desk</a><a href="../without-lintel/questions.md">Raw artifact</a></nav><main><div class="label">ACTUAL SAVED ARTIFACT / without-lintel/questions.md</div><h1>Questions and answers</h1>
+<p>The stakeholder was unavailable. The answers below are from stakeholder-answers.md, not an invented conversation.</p>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>Answer and source</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Who is the audience and default customer?</td>
+<td>Support leads; Northwind by default, with Contoso as the other customer. Stakeholder: Who and why / Filters and data contract.</td>
+</tr>
+<tr>
+<td>What is active?</td>
+<td>New plus Investigating; Resolved is excluded, even with a Resolved-only filter. Stakeholder: What does active mean?</td>
+</tr>
+<tr>
+<td>Which outputs do filters affect?</td>
+<td>Every KPI, chart, result count and CSV uses the exact same filtered set. Stakeholder: Filters and data contract.</td>
+</tr>
+<tr>
+<td>What date boundary applies?</td>
+<td>Inclusive UTC creation dates, including offset timestamps; blanks are unbounded. Stakeholder: Filters and data contract.</td>
+</tr>
+<tr>
+<td>How should search behave?</td>
+<td>Case-insensitive matching on ticket ID and subject. Stakeholder: Filters and data contract.</td>
+</tr>
+<tr>
+<td>What belongs in CSV?</td>
+<td>id, customer, subject, status, severity, createdAt, preserving original timestamps with correct quoting and formula neutralization. Stakeholder: Export and suspicious data.</td>
+</tr>
+<tr>
+<td>Does customer selection enforce access?</td>
+<td>No; both customers&#39; synthetic data are in the browser. Production requires server-side authorization and data isolation. Stakeholder: Scope and trust boundary.</td>
+</tr>
+<tr>
+<td>What happens when clearing?</td>
+<td>Preserve the selected customer and clear other filters. Stakeholder: Interaction.</td>
+</tr>
+</tbody></table>
+<h2>Implementation assumptions</h2>
+<ul>
+<li>Show tickets in stable fixture order; no sort control is requested.</li>
+<li>Trim outer search whitespace for convenient pasted queries.</li>
+<li>Invalid or reversed date ranges show a corrective message, zero results and disable export until corrected, avoiding an apparently valid report.</li>
+<li>A valid empty result can export a CSV containing only the column headings.</li>
+<li>Show all three status categories, including zero counts; show only actual matching UTC days in the trend.</li>
+<li>Keep selections in memory for this page session only. No persistence or backend is needed.</li>
+<li>Reject malformed fixture data with a visible error instead of silently omitting records.</li>
+</ul>
+<p>No unresolved stakeholder decision blocks this local pilot.</p>
+</main></body></html>

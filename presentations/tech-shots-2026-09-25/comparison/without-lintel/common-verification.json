@@ -1,0 +1,77 @@
+{
+  "checkedAt": "2026-09-20T13:15:01.024Z",
+  "runner": "Shared frozen Playwright browser checks; CI configuration supplied, remote CI not run",
+  "checks": [
+    {
+      "id": "B01",
+      "title": "Offline launch",
+      "status": "PASS"
+    },
+    {
+      "id": "B02",
+      "title": "Default and customer metrics",
+      "status": "PASS"
+    },
+    {
+      "id": "B03",
+      "title": "Resolved means zero active",
+      "status": "PASS"
+    },
+    {
+      "id": "B04",
+      "title": "UTC start/end includes offset fixture",
+      "status": "PASS"
+    },
+    {
+      "id": "B05",
+      "title": "UTC late offset lands on next day",
+      "status": "PASS"
+    },
+    {
+      "id": "B06",
+      "title": "Filters intersect and search ignores case",
+      "status": "PASS"
+    },
+    {
+      "id": "B07",
+      "title": "Empty state and zero metrics",
+      "status": "PASS"
+    },
+    {
+      "id": "B08",
+      "title": "Charts reconcile and expose readable counts",
+      "status": "PASS"
+    },
+    {
+      "id": "B09",
+      "title": "CSV exact rows, columns and escaping",
+      "status": "PASS"
+    },
+    {
+      "id": "B10",
+      "title": "CSV formula-like cells neutralized",
+      "status": "PASS"
+    },
+    {
+      "id": "B11",
+      "title": "Markup remains text",
+      "status": "PASS"
+    },
+    {
+      "id": "B12",
+      "title": "Labelled controls and responsive widths",
+      "status": "PASS"
+    },
+    {
+      "id": "B13",
+      "title": "Clear preserves selected customer",
+      "status": "PASS"
+    },
+    {
+      "id": "B14",
+      "title": "Pilot boundary in UI and handoff",
+      "status": "PASS"
+    }
+  ],
+  "browserErrors": []
+}

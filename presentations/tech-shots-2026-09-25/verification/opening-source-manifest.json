@@ -1,0 +1,22 @@
+{
+  "revision": "275a35447c4ad271e05816ade43ac48f1acec24f",
+  "readAt": "2026-09-20T13:41:57.397Z",
+  "sources": [
+    {
+      "path": "README.md",
+      "sha256": "07eff9a56086615680d2894121c4186df13719d3fc37ba750f0d5132f787ee07"
+    },
+    {
+      "path": "docs/the-cycle.md",
+      "sha256": "b9765815b9c8b9d2a6276a871720f242f96340439feb6ebbac6773df2bd1f6c9"
+    },
+    {
+      "path": "docs/multi-cli.md",
+      "sha256": "47adbdd98e6aed41da44587ce4fa2771f1d3883599ca0b761fb5d3f1202655e1"
+    },
+    {
+      "path": "lib/cli-tiers.yaml",
+      "sha256": "371d69e8a4f3f1ecb45911a4dfa9edbe0882a59113381fec5a26c6f39343c57b"
+    }
+  ]
+}

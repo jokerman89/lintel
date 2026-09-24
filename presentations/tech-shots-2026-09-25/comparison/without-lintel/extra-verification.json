@@ -1,0 +1,31 @@
+{
+  "checkedAt": "2026-09-20T13:13:19.943Z",
+  "runner": "Additional local Chromium checks",
+  "checks": [
+    {
+      "name": "Reversed dates explain the error, zero outputs and prevent export; clear recovers",
+      "status": "PASS"
+    },
+    {
+      "name": "All 32 customer/status/severity combinations reconcile metrics, rows and both charts",
+      "status": "PASS"
+    },
+    {
+      "name": "Empty view has zero status counts and downloads a header-only CSV",
+      "status": "PASS"
+    },
+    {
+      "name": "Single date bound is inclusive and search trims pasted whitespace",
+      "status": "PASS"
+    },
+    {
+      "name": "Keyboard focus is visible and fixture array remains unchanged",
+      "status": "PASS"
+    },
+    {
+      "name": "Missing or malformed ticket data shows a recoverable source error",
+      "status": "PASS"
+    }
+  ],
+  "browserErrors": []
+}
