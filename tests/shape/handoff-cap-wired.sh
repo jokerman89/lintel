@@ -1,16 +1,18 @@
 #!/usr/bin/env bash
 # tests/shape/handoff-cap-wired.sh
-# Asserts (v4.9 cost-gap fix): the 500k handoff cap is WIRED at the two
-# trio handoffs. The cap logic is prose-embedded shell in
-# skills/handoff-size-check/SKILL.md (no sourceable function), so the
+# Asserts selected-work handoff budgeting is WIRED at both handoffs.
+# Authority: accepted P03 500adb3, skills/context-budget/SKILL.md
+# "Shared admission reader" and "Local thresholds and compatibility";
+# lib/context_safety.py::context_budget. Unknown capacity stays unknown.
+# Behavior/threshold evidence lives in integration/universal-work-lifecycle.py.
+# This is a structural guard, not a model/runtime invocation. The
 # regression risk is that PLAN/CAPTURE silently stop invoking it. This test
 # pins the wiring so it can't regress un-noticed:
 #   W1 — PLAN (trio-emit) invokes /li:handoff-size-check, non-blocking,
 #        with an off-switch
 #   W2 — CAPTURE (trio-reaffirm) invokes /li:handoff-size-check, non-blocking,
 #        with an off-switch
-#   W3 — the cap mechanism itself still exists (handoff-size-check skill +
-#        the 500k cap in context-budget) so the calls resolve to something
+#   W3 — shared selected-map/P03 reader exists, with unknown/provenance semantics
 #   W4 — BUILD's per-task review is complexity-gated (mechanical → inline,
 #        substantive → two-stage dedicated), keyed to agent-dispatch-rules
 # tag: shape v4.9 handoff-cap-wiring
@@ -44,9 +46,9 @@ if [ -f "$PLAN" ]; then
   grep -q -- "--skip-handoff-size-check" "$PLAN" \
     && pass "plan cap check has an off-switch (--skip-handoff-size-check)" \
     || fail "plan cap check missing off-switch"
-  grep -qE "500k|500 ?k" "$PLAN" \
-    && pass "plan references the 500k cap" \
-    || fail "plan does not reference the 500k cap"
+  grep -q "/li:handoff-size-check --map" "$PLAN" \
+    && pass "plan carries the selected map to budgeting" \
+    || fail "plan budget call loses explicit work selection"
 else
   fail "skills/plan/SKILL.md MISSING"
 fi
@@ -64,9 +66,9 @@ if [ -f "$CAPTURE" ]; then
   grep -q -- "--skip-handoff-size-check" "$CAPTURE" \
     && pass "capture cap check has an off-switch (--skip-handoff-size-check)" \
     || fail "capture cap check missing off-switch"
-  grep -qE "500k|500 ?k" "$CAPTURE" \
-    && pass "capture references the 500k cap" \
-    || fail "capture does not reference the 500k cap"
+  grep -q "/li:handoff-size-check --map" "$CAPTURE" \
+    && pass "capture carries the same selected map to budgeting" \
+    || fail "capture budget call loses explicit work selection"
 else
   fail "skills/capture/SKILL.md MISSING"
 fi
@@ -76,18 +78,28 @@ echo ""
 echo "[W3] the cap mechanism exists (calls resolve to something real)"
 if [ -f "$HSC" ]; then
   pass "skills/handoff-size-check/SKILL.md exists"
-  grep -qE "500k" "$HSC" && pass "handoff-size-check carries the 500k cap" \
-                         || fail "handoff-size-check lost the 500k cap"
+  if grep -q 'li-work-artifacts.py' "$HSC" && grep -q -- '--view budget' "$HSC" &&
+     grep -q 'context_budget' "$HSC" && grep -q 'unknown' "$HSC"; then
+    pass "handoff reader uses selected artifacts and P03 budget with unknown capacity"
+  else
+    fail "handoff reader lost the actual shared budget mechanism or unknown boundary"
+  fi
 else
   fail "skills/handoff-size-check/SKILL.md MISSING (calls would dangle)"
 fi
 if [ -f "$CTXBUDGET" ]; then
-  grep -qE "mode_envelopes" "$CTXBUDGET" \
-    && pass "context-budget defines mode_envelopes (the cap source)" \
-    || fail "context-budget missing mode_envelopes"
-  grep -qE "customer-engagement:[[:space:]]*\{[[:space:]]*soft:[[:space:]]*500k" "$CTXBUDGET" \
-    && pass "context-budget default cap is 500k soft" \
-    || fail "context-budget default 500k soft cap not found"
+  if grep -q 'context_budget' "$CTXBUDGET" && grep -q -- '--capacity-source' "$CTXBUDGET" &&
+     grep -q 'unknown' "$CTXBUDGET"; then
+    pass "context-budget carries actual helper, observation source and unknown capacity"
+  else
+    fail "context-budget lost the accepted P03 observation contract"
+  fi
+  if grep -q 'mode_envelopes' "$CTXBUDGET" &&
+     grep -q 'not defaults for model capacity' "$CTXBUDGET"; then
+    pass "historical local thresholds remain advice, not a fabricated host default"
+  else
+    fail "historical threshold compatibility or no-capacity-default boundary lost"
+  fi
 else
   fail "skills/context-budget/SKILL.md MISSING (cap source gone)"
 fi

@@ -105,7 +105,13 @@ Each subdirectory contains:
 
 ## Audit
 
-Every hook fire (warn or block) logs to `.claude/runtime/audit/hooks.jsonl`. Append-only.
+Hooks record findings, blocks, overrides and failures (such as an unavailable scanner) through the
+shared advisory writer into `hooks.jsonl` (repo-scoped `.claude/runtime/audit/` on the v5 layout,
+resolved by `bin/_audit.sh`). Clean passes and non-recording hooks (`context-bloat-warn`) write
+nothing, a failed write only warns, and some hooks discard that warning. An absent record is
+therefore not evidence that a hook did not run, and a block record is not proof that the host
+honored the block. `lib/event-catalog.json` lists what each hook records and when; read the log
+with `bin/li-events.py` or `/li:hooks-status`.
 
 ## See also
 

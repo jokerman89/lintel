@@ -10,7 +10,12 @@ cli_support: [claude-code, codex]
 
 # /office-hours
 
-The design-doc generator. Takes an unstructured problem statement and produces a structured design document with: context, goals, premises, decisions, risks, scope, and a forcing-question section. Output lands at `~/.lintel/projects/<slug>/<user>-<branch>-design-<datetime>.md` and is the input to `/plan-ceo-review` and `/plan-eng-review`.
+An exploratory intake entry into DEFINE/PLAN. Preserve structured context, goals,
+premises, alternatives, risks and genuinely unresolved questions. Apply
+[task-relevant intake](../define/references/intake.md) and the
+[selected work-map contract](../spec-kit/references/work-map.md). Output is the
+same explicit repository-local design path DEFINE uses, not a global project store.
+Engineering review remains available; venture strategy review is opt-in.
 
 ## When to use
 
@@ -31,16 +36,22 @@ The design-doc generator. Takes an unstructured problem statement and produces a
 - Optional `--scope <area>` — narrow the design to a specific surface (e.g. "billing", "portal-auth")
 - Optional `--reference <files>` — additional context files to read in (existing ADRs, codebase docs, prior designs)
 - Optional `--mode <full|minimal>` — `full` (default) runs all sections; `minimal` skips Risks + Forcing Questions for small designs
+- Optional `--map <work.json>` / `--lens venture` — retain existing work or select
+  the venture lens explicitly; neither changes authority or auto-approves a draft
 
 ## Workflow
 
-1. **Locate or create project dir.** `~/.lintel/projects/<slug>/` based on repo name + branch. Create if absent.
+1. **Select the initiative.** Use `bin/li-work-artifacts.py --view context` for an
+   existing map, or choose the same `.claude/plans/<initiative>/design.md` used by
+   DEFINE for new work. Never choose by basename, branch freshness or modification time.
 2. **Read context.** Project CLAUDE.md, any `--reference` files, recent commits for repo state.
-3. **Structured intake.** Via AskUserQuestion, gather:
+3. **Structured intake.** Read existing evidence/answers first; ask only missing
+   material decisions through the actual host channel. Useful inputs are:
    - One-line goal
    - Primary user task affected
    - Constraints (technical, business, voice, compliance)
-   - Three plausible directions (operator names them, skill expands)
+   - Viable alternatives and their trade-offs (derive from evidence; do not require
+     the operator to invent three alternatives as an interview step)
 4. **Generate sections:**
    - **Context** — current state, what's broken, what's working
    - **Goals** — outcome statements, measurable where possible
@@ -49,9 +60,14 @@ The design-doc generator. Takes an unstructured problem statement and produces a
    - **Out-of-Scope** — explicit list of what's excluded and why
    - **Risks** — known unknowns, dependencies, single-points-of-failure
    - **Forcing Questions** — 3-5 questions that, if not answered, block implementation
-5. **Write doc.** Atomic write to `~/.lintel/projects/<slug>/<user>-<branch>-design-<datetime>.md`.
-6. **Set status.** Doc header includes `Status: DRAFT`. Operator marks `APPROVED` after addressing forcing questions.
-7. **Report path + next step.**
+5. **Write doc.** Use the selected DEFINE design path. Preserve its existing content,
+   mapped task ownership and answered decisions.
+6. **Set status.** A new exploratory design is DRAFT, not automatically APPROVED.
+   Existing scoped approval survives unchanged input; material revisions identify
+   exactly which approval needs renewal.
+7. **Report path + next step.** Canonical DEFINE approval and PLAN produce/reconcile
+   the original spec/plan/tasks/prompt/work.json. Office-hours does not create a
+   parallel implementation backlog or another readiness verdict.
 
 ## Output structure
 
@@ -60,9 +76,9 @@ The design-doc generator. Takes an unstructured problem statement and produces a
 title: <one-line>
 status: DRAFT
 created: 2026-05-27T17:42:00Z
-user: jokerman
-branch: main
-slug: jokerman-lintel
+user: <operator>
+branch: <current branch>
+slug: <selected initiative>
 ---
 
 # <One-line goal>
@@ -106,7 +122,8 @@ Recommendation: A
 ## Compliance integration
 
 - Doc body sanity-scanned for Layer 2 patterns (secrets, customer-data, PII). BLOCK on hit.
-- Doc lives at `~/.lintel/projects/` (local). Optional sync to brain repo if configured.
+- The design stays in the selected repository. External export/sync requires its
+  own configured destination and authorization; none is activated here.
 - Per Premise of repo policy: no customer data in design docs ever.
 
 ## Voice tier note
@@ -126,10 +143,10 @@ Recommendation: A
 **Standard:**
 ```
 > /office-hours "new pricing page with tiered display"
-[Intake interview, 4 questions]
-✓ Doc: ~/.lintel/projects/.../jokerman-main-design-20260527-174200.md
+[Only unresolved decisions are asked]
+✓ Doc: .claude/plans/pricing-page/design.md
   Status: DRAFT (operator marks APPROVED after addressing forcing questions)
-  Next: /plan-ceo-review on this doc.
+  Next: canonical DEFINE approval, then PLAN; strategy lens only if selected.
 ```
 
 **With references:**
@@ -148,7 +165,7 @@ Recommendation: A
 
 ## See also
 
-- `/plan-ceo-review` — next step in the plan chain
+- `/plan-ceo-review` — optional venture/strategy lens
 - `/plan-eng-review` — required review gate, appends the REVIEW REPORT
 - `/autoplan` — orchestrates this skill + reviews in one chain
 - `/design-consultation` — exploratory discussion before committing to a design doc

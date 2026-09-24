@@ -1,6 +1,6 @@
 # Jobs system — single source of truth for curated flows in flight
 
-**Last updated:** 2026-05-29 (v3.8 Feature 1 implementation)
+**Last updated:** 2026-09-20 (selected work and observable runtime state)
 **Status:** Concept doc — referenced by skills/jobs/SKILL.md, skills/status/SKILL.md, hooks/shared/job-{begin,end,stale-warn}/
 
 > Curated flows in Lintel (cycle, plan, future Azure-e2e recipes, safe-install) carry implicit state — which phase are we in, what produced what, what's waiting on what. Before v3.8 that state lived scattered across `00-state.md`, `.planner-checkpoint.md`, and operator memory. The jobs system is **the place that lists in-flight curated work, a rule that abandoned ones must be cleaned up, and a way to operate on them as units.**
@@ -16,6 +16,12 @@ In a shell/CLI session the operator and AI can digress freely. Without a jobs sy
 - Two flows on the same repo collide on the same loose state files.
 
 ## The model
+
+The committed [work map](../../skills/spec-kit/references/work-map.md) owns
+specification/design/tasks/handoff paths and original task IDs. Job records are
+optional execution observations, not another task backlog or proof of review.
+Automatic job hooks remain dormant under ADR-0008. An empty job registry therefore
+cannot establish that no initiative is open.
 
 ```
 <repo>/.claude/runtime/jobs/
@@ -41,22 +47,27 @@ Example: `cycle-20260529-1430-a3b2c1`.
 
 ### `workflow_root: true` frontmatter flag
 
-A new frontmatter field that marks a skill as job-spawning. Initial set:
+A frontmatter field declaring a workflow entry point. It does not itself spawn a
+job or prove that the optional job hook is registered. Initial set:
 
 - `skills/cycle/SKILL.md`
 - `skills/plan/SKILL.md`
 
-Future: any new e2e recipe, safe-install flow, Azure-e2e, etc. Adding the flag is what makes a skill participate in the jobs system.
+Other workflows can use the same explicit helpers; a flag does not authorize hook activation.
 
 ### `job-begin` hook
 
-Fires on PreToolUse for a workflow_root skill. Creates `<repo>/.claude/runtime/jobs/<id>/` with `job.yaml`, moves the skill's `00-state.md` into the job folder, regenerates `_active.md`.
+Dormant historical hook for a compatible PreToolUse adapter. When explicitly called,
+it creates a job record; no native registration or live invocation is inferred here.
 
 Source: `hooks/shared/job-begin/run.sh`
 
 ### `job-end` hook
 
-Fires on `status=DONE`, operator-abort, or fatal phase failure. Reads cleanup policy from `job.yaml`:
+Dormant historical promotion/archive recipe. Its promotion is not accepted as a
+safe producer for mapped work: failed/aborted candidates and colliding initiative
+or ADR filenames must not replace approved artifacts. Keep it inactive pending
+its owned behavior evidence. The stored cleanup policy remains readable:
 
 ```yaml
 cleanup_policy:
@@ -64,19 +75,21 @@ cleanup_policy:
   discard: [scratch/*]
 ```
 
-- **Keep** items promoted to permanent homes:
+- Historical intended **keep** destinations:
   - ADRs → `.claude/decisions/`
-  - Lessons → `.claude/memory/lessons.md` (via existing `lessons-promote` skill)
+  - Lessons → never appended. The hook only suggests `/li:learn` review and
+    `/li:lessons-promote` for general lessons; candidates stay in the archived job outputs.
   - Plan/spec/prompt → `.claude/plans/<slug>/`
-- **Discard** items deleted.
-- Job moved to `_archive/<YYYY-MM-DD>/<job-id>/`.
-- `_active.md` regenerated.
+- Explicit archive operations use `job_archive`; they are separate from approval
+  or promotion of durable artifacts. Preserve failed candidates for diagnosis.
 
 Source: `hooks/shared/job-end/run.sh`
 
 ### `job-stale-warn` hook
 
-Fires at session-start (first `/li:cycle`, `/li:resume`, `/li:sense`, OR `/li:status` of a session). Reads `_active.md`. For each job untouched > N hours (default 24, configurable), surfaces:
+Optional, dormant session-start warning. Explicit `stale_jobs` reads actual records
+without filtering blocked/overdue work out of the observation. Missing/unparseable
+timestamps report `age-unknown` instead of becoming recent or disappearing:
 
 ```
 ⚠ Job <workflow>-<id> open, untouched 4d. Continue / abort / branch?
@@ -98,7 +111,10 @@ Source: `hooks/shared/job-stale-warn/run.sh`
 
 ### `/li:status` skill — quick read
 
-Single command, single purpose: show what's open right now. `cat ~/.lintel/jobs/_active.md` (the cross-repo registry). Operator-friendly alias for `/li:jobs list`.
+Single command: `list_jobs --read-only` over the selected repository's actual
+records, plus stale/unknown-age observations and the explicitly selected work map.
+It creates no registry/audit directories when sourced with `LINTEL_JOBS_NO_INIT=1`.
+Cross-repository registry reading requires its own explicit selection.
 
 ### `bin/_jobs.sh` — sourced helper
 
@@ -119,8 +135,8 @@ Functions used by hooks + skills:
 - `job_resume_point <id>` → deepest incomplete + startable step name (WBS node-path for `tree` plans)
 - `job_archive <id> <result>` → cleanup + move to archive
 - `regenerate_active` → rebuild `_active.md`
-- `list_jobs` → cat `_active.md`
-- `stale_jobs <hours>` → list jobs untouched > N hours
+- `list_jobs` → compatible derived registry view; `--read-only` inspects actual local records
+- `stale_jobs <hours>` → retain old and unknown-age observations without treating age as completion
 - `job_path <id>` → echo absolute job-dir path
 
 ## State unification (design §3.6 — closes split-brain state)
@@ -132,10 +148,11 @@ There is **one canonical home for each kind of state**, split by ownership:
 | Durable artifacts — the trio (`plan.md` / `spec.md` / `prompt.md`) + `scope.md` + WBS | **`.claude/plans/<slug>/`** (in the repo, committed) | the repo — "documented in the repo" |
 | Job control — `job.yaml`, `_active.md`, `00-state.md`, `outputs/`, `inputs/` | **`<repo>/.claude/runtime/jobs/<id>/`** (gitignored) | the harness |
 
-The trio is **born** in `<repo>/.claude/runtime/jobs/<id>/outputs/` during a job and **promoted**
-to the repo at `.claude/plans/<slug>/` by `job-end` on DONE. The committed tree is the durable,
-version-controlled home; `.claude/runtime/jobs/` is transient job control that the
-`_archive/` sweep eventually reclaims.
+Native PLAN writes the durable trio/map at the selected committed paths. Spec Kit
+keeps its original files and IDs. Jobs may reference them; no default pipeline
+depends on dormant `job-end` promotion. The shared cycle ledger carries the map's
+paths and actually verified profile reference/policy. Its correlated cycle history
+survives interleaved initiatives and a later explicit resume without resetting SENSE.
 
 ### Canonical plan.md path — the one true location
 
@@ -151,8 +168,9 @@ was `docs/plans/<slug>/plan.md` pre-ADR-0005). The other two are **deprecated**
 | root / cwd `plan.md` (or bare `docs/plans/`) | **deprecated** | was `skills/plan/SKILL.md:255,262` "root or …" + `.claude/engineering/design-archive/lintel-v3.5-cycle-and-roles.md`; ambiguous, collides across concurrent jobs |
 
 `<slug>` is the wedge/title slug. A directory (not a flat file) is canonical
-because the trio + scope + WBS must co-locate so resume, `handoff-size-check`, and
-the cold-executor handoff all find their siblings by a single path. The two
+because it is a useful native convention. The selected work map, not sibling
+guessing, lets resume, ANALYZE, CAPTURE and handoff budgeting locate original
+artifacts; external task/spec/handoff paths need not co-locate. The two
 deprecated forms remain readable for the grace window noted in
 `docs/migrations/` but are no longer emitted.
 
@@ -217,7 +235,8 @@ no negation, no other status values. An empty/absent predicate means "never
 blocked". A clause whose referenced step is not yet DONE (including a
 missing/unknown step) evaluates false → the step is blocked. Anything outside the
 grammar is treated conservatively as unsatisfiable, so a malformed predicate never
-silently unblocks a gate. BUILD literally cannot start until `PLAN.status == DONE`.
+silently unblocks this predicate. It is a mechanical helper a caller must use,
+not universal host enforcement. A job's DONE is not P05 review/QA clearance.
 
 `job_update <id> <step> <status>` updates a **named step's** status when `<step>`
 is a populated `steps[]` entry (the job stays `ACTIVE`; terminal transitions are
@@ -239,7 +258,7 @@ it returns empty and resume falls back to `current_step`. See
 ### Nothing runs in the background
 
 - `_active.md` is regenerated on writes, never on a timer.
-- `job-stale-warn` runs at session-start, not continuously.
+- `job-stale-warn` is dormant unless a compatible adapter was explicitly activated.
 - No daemon, no watcher, no scheduler.
 
 A folder, three hooks, two skills, one frontmatter flag, one helper. That's the whole system.
@@ -264,7 +283,8 @@ A folder, three hooks, two skills, one frontmatter flag, one helper. That's the 
 
 ## What this explicitly does NOT do
 
-- Does not gate hooks. Hooks still block via existing `exit 1`.
+- Does not gate hooks. Actual blocking behavior depends on the verified host adapter;
+  the Claude block protocol uses exit 2, not a generic exit-1 claim.
 - Does not replace `00-state.md`. That file lives inside the job folder; format unchanged.
 - Does not add a daemon, watcher, or scheduler.
 - Does not invent new state mechanics — surfaces existing pieces.

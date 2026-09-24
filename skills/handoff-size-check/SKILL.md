@@ -1,7 +1,7 @@
 ---
 name: handoff-size-check
 layer: foundation
-description: Handoff-size warning tied to the 500k cap. Per v3.6 backlog 3.2 — elephant-hint and token-cap as the same mechanism from two ends.
+description: Use before handoff to estimate the selected work-map artifacts and actual warming inputs against reported host headroom, keeping unknown capacity and advisory limits explicit.
 color: yellow
 tools: Read, Bash, Glob, Grep
 voice: internal
@@ -12,162 +12,88 @@ cli_support:
     level: degraded
 ---
 
-You are the `handoff-size-check` skill — pre-handoff payload validation against the 500k cap.
+# Handoff-size check
 
-## What this skill does
+Keep the two-ended scope check: SENSE's elephant hint catches broad work before
+planning; this reader measures the actual handoff after PLAN and after CAPTURE.
+It is a batch payload estimate, not monitoring, context compaction or host control.
 
-When the operator picks "run anyway" on a broad idea (elephant-hint default), the plan declares its own handoff size. If the plan's payload approaches the 500k cap → natural warning point ("this plan yields ~480k handoff, near cap — split it?").
+## Select the payload
 
-Per v3.6 backlog 3.2 — complements 3.1 elephant-hint + 2.1 500k cap as **the same mechanism from two ends:**
-- Elephant-hint (3.1): catches a broad idea BEFORE plan-writing
-- Handoff-size-check (3.2): catches a large plan AFTER plan-writing
-- Cleaner than two separate systems.
+Use the [shared work-map contract](../spec-kit/references/work-map.md) and its
+`bin/li-work-artifacts.py` reader. Select `--map <work.json>` explicitly or retain
+`LINTEL_WORK_MAP` from the verified lifecycle. No runtime/state/plan.md default,
+newest initiative, guessed sibling spec/prompt or second task store is allowed.
+For a legacy explicit plan (`<plan.md>` or `--plan <path>`), preserve that entry as
+an unmapped inspection: use P03 `context_select --path <literal-file>` and
+`context_budget` on its returned bytes. Name exactly which original linked inputs
+were supplied. Missing spec/handoff/warming remains incomplete; never guess siblings
+or create a competing backlog merely to estimate a file. Mapped lifecycle handoffs
+use the common map command below.
 
-## When to use
-
-- **Post-PLAN-phase auto** — `/li:cycle` invokes this after plan.md is done
-- **Standalone audit** — `/li:handoff-size-check <plan.md>` → check a specific plan
-- **Pre-cold-executor-handoff** — verifies trio + warming total < cap
-
-## When NOT to use
-
-- Mid-plan-writing (a warning against a partial plan is a false positive)
-- Single-skill estimate — use `/li:context-budget` directly
-- Real-time monitoring — this is a batch check at handoff points
-
-## Workflow
-
-### Step 1 — Locate plan + warming-manifest
+Before policy consumption, verify the saved P07 reference through `workflow_resume`.
+Add literal `--warm-path` arguments from P03's actual context selection. Keep those
+paths bounded and preserve source/target separation. No warming input supplied
+means **not supplied**, not a verified zero-byte warming workload.
 
 ```bash
-PLAN_FILE="${1:-.claude/runtime/state/plan.md}"
-WARMING_FILE=".claude/runtime/state/warming-manifest.md"  # from context-warm-* invocations
-[ -f "$PLAN_FILE" ] || { echo "No plan found at $PLAN_FILE"; exit 2; }
+python="${LINTEL_PYTHON:-python3}"
+"$python" "${LINTEL_SOURCE_ROOT:?select trusted source}/bin/li-work-artifacts.py" \
+  --repo "${LINTEL_REPO_ROOT:?select target}" \
+  --map "${LINTEL_WORK_MAP:?select work.json}" --view budget
 ```
 
-### Step 2 — Compute payload size
+The reader includes distinct map/spec/plan/tasks/prompt/constitution files once.
+It uses P03 `select_files` and `context_budget`; it does not infer token usage
+from optional/manual event counters. Append known inputs only when their source
+is actually available:
 
-```bash
-# Cold-executor trio sizes
-spec_size=$(wc -c < .claude/runtime/state/spec.md 2>/dev/null || echo 0)
-plan_size=$(wc -c < "$PLAN_FILE")
-prompt_size=$(wc -c < .claude/runtime/state/prompt.md 2>/dev/null || echo 0)
-
-# Warming projected loads
-warming_total=0
-if [ -f "$WARMING_FILE" ]; then
-  # Parse warming-manifest for per-load file-sizes
-  while IFS= read -r line; do
-    if [[ "$line" =~ ^load:[[:space:]]*([0-9]+) ]]; then
-      warming_total=$((warming_total + ${BASH_REMATCH[1]}))
-    fi
-  done < "$WARMING_FILE"
-fi
-
-# Convert bytes to tokens (rough: 1 token ≈ 4 bytes)
-trio_tokens=$(( (spec_size + plan_size + prompt_size) / 4 ))
-warming_tokens=$(( warming_total / 4 ))
-total_tokens=$(( trio_tokens + warming_tokens ))
+```text
+--warm-path docs/selected-adr.md
+--capacity <host-reported tokens> --capacity-source <actual host source>
+--used <tokens> --usage-source <actual source> --usage-kind observed|estimated
+--reserve <output reserve>
 ```
 
-### Step 3 — Apply mode-aware cap (per 2.1)
+## Interpret the result
 
-Read current mode from `~/.lintel/profile.yaml`. Look up the cap from context-budget mode_envelopes:
+Report the original artifact paths, selected bytes, byte/4 token estimate and
+its limitations, warming selection, capacity/usage source and admission result.
 
-```yaml
-hotfix:              { soft: 200k, hard: 300k }
-customer-engagement: { soft: 500k, hard: 750k }
-research-dive:       { soft: 750k, hard: 900k }
-demo-prep:           { soft: 300k, hard: 450k }
-internal-tool:       { soft: 400k, hard: 600k }
-```
+| Result | Meaning and next action |
+|---|---|
+| within-reported-headroom | Estimate fits supplied observations; not exact tokenizer or cost evidence |
+| estimated-fit | Headroom also depends on estimated usage; retain that uncertainty |
+| over-capacity | Split the handoff or reduce future selected reads before that load |
+| unknown | Capacity or usage was not supplied; no fit/healthy verdict is possible |
+| missing/malformed input | Incomplete check with nonzero helper exit; repair selection |
 
-### Step 4 — Surface verdict
+The shared policy is **advisory** for PLAN and CAPTURE. An estimate/unknown result
+does not itself pause their independent work. An explicitly required task limit or
+an actual host refusal still blocks the affected load; record that source instead
+of inventing a universal 500k cap. Mode changes, disk cleanup and future exclusions
+cannot reclaim already-sent conversation context.
 
-```
-HANDOFF SIZE CHECK — <mode> mode (cap: <soft>k soft / <hard>k hard)
-══════════════════════════════════════════════════════════════════
+## Retained choices and limits
 
-Plan + trio:      <X>k tokens (~<%> of soft cap)
-Warming projected: <Y>k tokens
-TOTAL HANDOFF:    <Z>k tokens
+- For a broad handoff, propose splitting coherent packages, narrowing warming
+  inputs or checkpointing and restarting. Do not silently cut authority files.
+- Preserve `--skip-handoff-size-check`/`SKIP_HANDOFF_SIZE_CHECK=1` as an advisory
+  caller opt-out; record **not run**, never a green result or a required-policy bypass.
+- Optional observation uses the existing writer, for example
+  `audit_log handoff-size-checks size_check "work_map=$LINTEL_WORK_MAP"
+  "basis=estimated" "admission=unknown"` with actual returned values. No automatic
+  global logging or calibration is enabled.
+- Exit 0 from the mechanical reader means the estimate was computed, not that
+  capacity is known or delivery is cleared. Malformed/unreadable selections fail.
 
-Status:
-  Z < soft  → ✅ GREEN — proceed
-  soft ≤ Z < hard → ⚠ YELLOW — near cap, consider:
-    - Split the plan (into 2 smaller phases)
-    - Skip --skip-warming-<X> on lowest-priority warming target
-    - Switch to research-dive mode (higher cap) if research-justified
-  Z >= hard → ⛔ RED — exceeds cap, MUST reduce:
-    - Plan is too broad → split now
-    - Warming includes too many files → cut to essentials
-    - Mode mismatch → consider research-dive
+## Status and recovery
 
-Suggested next step: <auto-recommendation>
-```
+DONE means a reported estimate was produced; DONE_WITH_CONCERNS includes unknown
+headroom, omitted warming or an advisory excess. NEEDS_CONTEXT means missing
+selection/evidence. BLOCKED is reserved for a real required limit, denied read or
+failed required input. Keep the current map and repair that input, never silently
+fall back to another initiative or a mode-specific capacity guess.
 
-Return code: 0 (green), 1 (yellow), 2 (red).
-
-### Step 5 — Audit-log
-
-One line via the unified writer (ts/operator/cycle_id come from the envelope):
-
-```bash
-source "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/bin/_audit.sh"
-audit_log handoff-size-checks size_check "plan=$PLAN_FILE" "mode=$mode" \
-  "total_tokens=$total_tokens" "verdict=$verdict"
-# → .claude/runtime/audit/handoff-size-checks.jsonl
-```
-
-## Status protocol
-
-- **DONE** — check done, verdict green
-- **DONE_WITH_CONCERNS** — yellow verdict (near cap warnings)
-- **BLOCKED** — red verdict (exceeds cap) — operator must address before handoff
-- **NEEDS_CONTEXT** — no plan file at default path and `--plan` arg missing
-
-## Pause-points
-
-- Red verdict: hard-block for operator decision (split / cut warming / abort handoff)
-- Yellow verdict: surface options + ask whether to proceed (override OK with justification)
-- Missing warming-manifest: assume warming = 0 + warn that the estimate may be low
-
-## Integration
-
-**Reads:**
-- `.claude/runtime/state/plan.md` (or `--plan <path>` override)
-- `.claude/runtime/state/spec.md`, `prompt.md` (cold-executor trio)
-- `.claude/runtime/state/warming-manifest.md`
-- `~/.lintel/profile.yaml` (current mode → cap)
-- skills/context-budget/SKILL.md mode_envelopes
-
-**Writes:**
-- `.claude/runtime/audit/handoff-size-checks.jsonl`
-- stdout (verdict report)
-- Return code (CI/script consumption)
-
-**Consumed by:**
-- `/li:cycle` (auto-invocation post-PLAN)
-- Operator (pre-handoff manual check)
-- `/li:ship` (could integrate as a ship-gate)
-
-## Anti-patterns
-
-- **Auto-cut warming without operator-approval** — cap-violation surfaces options;
-  operator decides which warming targets stay.
-- **Override red verdict without justification-log** — `--override "<reason>"` logs
-  intent. Silent bypass = future-debugging-pain.
-- **Token-budget in bytes** — Lintel cap is in tokens. Convert at compute time.
-
-## Failure recovery
-
-- Plan-file unreadable: exit BLOCKED with diagnostic
-- Mode unknown: fall back to customer-engagement defaults + warn
-- Warming-manifest absent: assume 0 warming, surface "estimate may be low"
-
-## Recommended next steps after invocation
-
-- Green: proceed with cold-executor handoff
-- Yellow: review the warming list for cut-candidates, consider splitting
-- Red: address blocker (split / cut / mode-change), re-run check
-- Pair with `/li:context-budget --report` for deeper headroom-analysis
+PLAN, CAPTURE and standalone callers use this same interpretation. For deeper
+resource advice use `/li:context-budget`; it does not change the model window.

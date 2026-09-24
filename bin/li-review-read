@@ -57,6 +57,7 @@ if [ -n "${GSTACK_HOME:-}" ]; then
     while IFS= read -r line; do
       [ -z "$line" ] || bash "$SOURCE_ROOT/bin/li-review-log" --history "$line" >/dev/null || exit 3
     done <<< "$lines"
+    mkdir -p "$(dirname "$marker")"
     printf '%s\n' "$legacy" >> "$marker"
   fi
 fi

@@ -23,6 +23,10 @@ Equivalent to:
 ```
 
 Closes out a cycle that was previously plan-and-built.
+Use [work-map.md](../spec-kit/references/work-map.md), `bin/li-work-artifacts.py`
+and `workflow_resume` to preserve original IDs, selected artifact paths and the
+actually verified P07 reference/required policy. This alias has no separate
+approval, artifact naming or review-result interpretation.
 
 ## When to use
 
@@ -44,7 +48,8 @@ Closes out a cycle that was previously plan-and-built.
 
 Verify:
 - BUILD output exists (commits since prior phase start)
-- plan.md present and matches current diff scope
+- Selected mapped spec/plan/tasks/prompt match the requested scope; include dirty
+  and new selected files, not just commits since BUILD
 - Branch state clean OR operator confirms intentional WIP
 
 ### Step 2 — Delegate
@@ -55,12 +60,18 @@ Verify:
 
 This runs:
 - REVIEW (3-stage: spec compliance, code quality, compliance gates)
-- SHIP (HARD-RULES, voice + brand gates, PR open / deploy)
+- SHIP (shared same-context review/QA gate and only explicitly authorized delivery;
+  deployment is never implied by this alias)
 - CAPTURE (lessons, ADR, EVOLUTION-LOG, cold-executor trio)
 
 ### Step 3 — Post-cycle
 
 After CAPTURE DONE: full cycle summary surfaced per CAPTURE phase output.
+Before SHIP, use [the accepted P05 contract](../review/references/evidence.md):
+prepare immutable obligations, actual review/audit writer, latest applicable
+reader, same-context QA/SHIP. Direct verification, legacy CLEAR strings or
+unavailable corroboration cannot clear the alias. A later repair renews affected
+evidence. Reuse prior scope authorization without extending it to publication.
 
 ## Status protocol
 

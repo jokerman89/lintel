@@ -1,7 +1,7 @@
 ---
 name: autoplan
 layer: foundation
-description: Use to run a problem statement through the full planning pipeline in one shot — chains the design doc, strategy review, engineering review, and design review end to end. Reach for it when you want a plan taken from raw problem to fully reviewed without driving each review step by hand.
+description: Use to compose task-relevant intake, discovery and canonical PLAN with applicable review lenses, preserving the same original work map and approval as direct planning.
 color: purple
 tools: Read, Bash, Edit
 voice: internal
@@ -14,7 +14,15 @@ cli_support:
 
 # /li:autoplan
 
-Orchestrator skill. Chains the full plan pipeline: `/li:office-hours` (design doc) → `/li:plan-ceo-review` (scope) → `/li:plan-eng-review` (arch + tests) → optionally `/li:plan-design-review` (UI/UX) → optionally `/li:plan-devex-review` (DX). One invocation, one design + complete review set, ready to ship.
+A convenience entry into canonical DEFINE/DISCOVER/PLAN, not a second planner or
+approval system. `office-hours` remains an optional exploratory intake mode;
+engineering, applicable UI and DX review retain their detailed methods. The
+venture/strategy lens is optional, never inferred from task size.
+
+Follow [task-relevant intake](../define/references/intake.md) and the
+[shared work-map contract](../spec-kit/references/work-map.md), validated by
+`bin/li-work-artifacts.py`. Identical input/authorization must reach the same
+original artifacts and approval state as invoking PLAN directly.
 
 ## When to use
 
@@ -31,92 +39,100 @@ Orchestrator skill. Chains the full plan pipeline: `/li:office-hours` (design do
 ## Inputs
 
 - Optional `--skip <skill>` — skip a specific skill in the chain (e.g., `--skip plan-design-review` for backend-only work)
-- Optional `--include-devex` — add `/li:plan-devex-review` to the chain (default: skip)
-- Optional `--mode <full|minimal>` — `full` (default) runs all 4 reviews; `minimal` runs office-hours + plan-eng-review only
+- Optional `--include-devex` — explicitly include the developer-workflow lens
+- Optional `--mode <full|minimal>` — depth of applicable planning, not an approval shortcut
+- Optional `--map <work.json>` / `--lens venture` — retain the original selection or opt
+  into strategy questions; required acceptance/review cannot be skipped by an alias
 
 ## Workflow
 
-1. **Mode + skip decisions** — confirm what's in the chain via AskUserQuestion (one question listing the proposed chain).
-2. **Step 1: /li:office-hours** — runs full skill. Output: design doc at `.claude/engineering/design-archive/<slug>-design.md` with Status: APPROVED.
-3. **Auto-detect scope changes** — if office-hours produced a design doc with major product-direction changes, ensure `/li:plan-ceo-review` is in the chain (override --skip if needed; explicit operator override allowed).
-4. **Step 2: /li:plan-ceo-review** — runs against the design doc. Output: CEO review log entry + verdict.
-5. **Step 3: /li:plan-eng-review** — runs against the design doc. Output: required Eng Review log entry + implementation task list + REPORT appended to design doc.
-6. **Step 4: /li:plan-design-review** (auto-detected: only fires if design doc has UI scope OR `--include-design-review`) — UI/UX review log entry.
-7. **Step 5: /li:plan-devex-review** (only fires if `--include-devex`) — DX review log entry.
-8. **Synthesize:** read all review-log entries from this run, render unified REVIEW REPORT in design doc.
-9. **Final verdict:** any review NOT CLEARED → autoplan exits "NOT READY"; all CLEARED → "READY TO IMPLEMENT."
+1. **Select and verify.** Retain the explicit map, original IDs and verified P07
+   reference/required policy through `workflow_resume`; ask only unresolved decisions.
+2. **Existing approved work.** Invoke canonical PLAN's mapped-work branch to
+   reconcile the original design/spec/tasks/handoff. Do not regenerate them or
+   repeat DEFINE's interview.
+3. **New work.** Use office-hours/DEFINE to explore only missing decisions.
+   Office-hours returns DRAFT until scoped approval; it does not produce the
+   APPROVED map by itself. DISCOVER supplies code/ADR/lesson grounding.
+4. **Canonical PLAN.** Run PLAN once with those exact inputs. PLAN owns the trio/map,
+   unchanged leaf/package IDs, applicable engineering/UI/DX reviews, dependency
+   analysis, handoff budget and approval. Do not invoke its review passes a second time.
+5. **Optional strategy lens.** When explicitly requested, apply plan-ceo-review to
+   the same design. Material scope changes return to PLAN; a skipped optional lens
+   is not silently forced back into the chain.
+6. **Synthesize.** Link actual reports and unresolved findings by original ID.
+   Use [P05 evidence](../review/references/evidence.md), not old CLEAR strings.
+7. **Return canonical status.** Ready for authorized BUILD only when PLAN's
+   selected map is APPROVED and required evidence is satisfied. No automatic
+   SHIP, publication, task copying or independent-review claim follows.
 
 ## Report format
 
 ```
 Autoplan Status: <branch>
 
-Chain: office-hours → plan-ceo-review → plan-eng-review → plan-design-review
+Chain: optional intake → DEFINE/DISCOVER as needed → canonical PLAN
 Mode: full
 Skipped: plan-devex-review (default)
 
-Step 1/4 /li:office-hours: ✓ design doc APPROVED (.claude/engineering/design-archive/<slug>-design.md)
-Step 2/4 /li:plan-ceo-review: ✓ SCOPE LOCKED (3 forcing-questions answered, 5 premises agreed)
-Step 3/4 /li:plan-eng-review: ✓ ENG CLEARED (6 issues resolved, 2 critical gaps encoded as tasks)
-Step 4/4 /li:plan-design-review: ⏸ SKIPPED — no UI scope detected
+Intake: existing answers reused; <explicit design path and actual status>
+Strategy lens: not selected (or its actual report)
+PLAN: <actual spec/quality/applicable UI/DX results and unresolved IDs>
 
-Final verdict: ✓ READY TO IMPLEMENT
-Design doc: <path>
-Task list: <N> implementation tasks
-Next: begin Phase 1 implementation OR /li:ship (if work already done)
+Final status: <canonical PLAN status, not a new verdict>
+Work map: <exact path>; original tasks: <exact mapped path and IDs>
+Next: authorized BUILD, or the precise unresolved PLAN decision/evidence
 ```
 
 ## Compliance integration
 
 - Each chained skill applies the active pack's compliance gates at invocation (`resolve_pack_field compliance.hooks`; none in the neutral `_default` pack).
-- Autoplan aggregates: if ANY chained skill flagged a pack compliance gate, autoplan exits NOT READY.
+- Mandatory applicable failure/unverified/error blocks its dependent action through
+  P05's shared control interpretation. Advisory findings remain advice.
 
 ## Failure modes
 
 - **`/li:office-hours` returns "NEEDS_CONTEXT" or "BLOCKED":** chain pauses. Operator addresses, then re-runs autoplan (idempotent — reads existing design doc if present).
 - **`/li:plan-ceo-review` returns REVISE:** chain pauses. Operator updates design doc per CEO findings, then re-runs autoplan.
-- **`/li:plan-eng-review` Exit Plan Mode Gate fails:** chain pauses. Operator fixes the design doc structure (REVIEW REPORT must be last h2).
+- **A required planning review remains incomplete:** keep that gate open with the
+  actual host/manual handoff. A native ExitPlanMode API or a last-heading convention
+  is not a Universal permission requirement.
 - **Any chained skill times out:** report which skill, allow operator to re-run that skill standalone, then resume autoplan.
 
 ## Idempotency
 
-Autoplan can be re-run safely. Each chained skill detects existing artifacts (design doc, review-log entries) and either:
-- Updates them (if invoked with `--rerun`)
-- Skips them (default — only fills missing steps)
-
-Operator controls re-run granularity. Default = only fill what's missing.
+Resume the same explicit map and completed phase evidence. Reuse reviews only when
+the shared latest-reader still validates the exact context; file existence or age
+alone cannot establish reuse. Repair only affected work and renew affected evidence.
 
 ## Examples
 
 **Full pipeline:**
 ```
 > /li:autoplan
-Chain: office-hours → ceo-review → eng-review → design-review
-[runs all 4 in sequence]
-✓ READY TO IMPLEMENT
+Chain: DEFINE/DISCOVER as needed → PLAN with applicable review lenses
+[original work map becomes APPROVED only within actual authority and required review]
 ```
 
 **Backend only, skip design-review:**
 ```
 > /li:autoplan --skip plan-design-review
-Chain: office-hours → ceo-review → eng-review
-[runs 3]
-✓ READY TO IMPLEMENT
+Chain: canonical planning; no UI lens because no UI scope
+[the same approved work map and original task IDs]
 ```
 
 **Minimal:**
 ```
 > /li:autoplan --mode minimal
-Chain: office-hours → plan-eng-review (CEO + design + DX skipped)
-[runs 2]
-✓ READY TO IMPLEMENT
+Chain: minimal task-relevant intake → PLAN
+[required engineering review retained; optional strategy lens not selected]
 ```
 
 **Blocked mid-chain:**
 ```
 > /li:autoplan
-Step 2/4 /li:plan-ceo-review: ✗ REVISE — wedge specificity not established
-Chain paused. Update design doc, re-run /li:autoplan when ready.
+PLAN: NEEDS_CONTEXT — migration rollback ownership remains unresolved
+Independent planning can continue; dependent BUILD stays open.
 ```
 
 ## See also
@@ -126,4 +142,4 @@ Chain paused. Update design doc, re-run /li:autoplan when ready.
 - `/li:plan-eng-review` — step 3 (the required gate)
 - `/li:plan-design-review` — step 4 (UI scope only)
 - `/li:plan-devex-review` — opt-in step 5
-- `/li:ship` — runs AFTER autoplan completes
+- `/li:ship` — separate, authorized delivery after actual BUILD/REVIEW/QA

@@ -61,6 +61,15 @@ resolve inside `LINTEL_REPO_ROOT`, the working repository.
 Set `plan_path` and `tasks_path` from the validated map's original `plan` and `tasks` fields,
 and retain `LINTEL_WORK_MAP` as the selected map path. Native work without a map uses plan.md
 for both paths. Record these references in the ledger with the leaf results.
+Use the shared lifecycle entry in [work-map.md](../spec-kit/references/work-map.md):
+`workflow_resume` verifies the saved P07 reference and required policy, then
+`workflow_inspect "$LINTEL_WORK_MAP"` reads the original task/package definitions.
+A legacy native plan can be inspected without a map, but strict release clearance
+requires a reconciled map and the shared bound evidence, not a parallel backlog.
+
+Before a write, surface any advisory code-freeze scope and its stated limitation;
+do not claim a universal filesystem lock or a host hook that has not been verified.
+Honor an operator's explicit frozen scope even when enforcement is cooperative.
 
 
 **Host portability:** `TodoWrite`, `Task`, `Read` and `Bash` below describe operations, not
@@ -228,6 +237,15 @@ empty-diff block below for tasks whose acceptance requires a code or artifact ch
 
 #### 3c — Two-stage review (complexity-gated)
 
+Use [the accepted evidence contract](../review/references/evidence.md) for each
+package: prepare its exact selected source/acceptance snapshot and immutable
+`qa_requirements`, obtain actual review, persist it with the real writer, then
+consume the latest applicable decision with its expected context/corroboration.
+Do not omit, retype or downgrade obligations after seeing observations. Old/empty/
+positive-string review records remain history only; direct `verify` is not latest-log
+clearance. Carry verified profile context/generation/digest and required policy into
+delegation and cold resume unchanged. An unavailable independent reviewer remains open.
+
 **Review-routing gate (per `docs/concepts/agent-dispatch-rules.md` rule (c) — inline when cheap + deterministic):**
 
 Route review by the **aggregate package** complexity and risk, not by the smallest leaf:
@@ -310,7 +328,15 @@ If `checkpoint_push: true`: also push WIP to origin.
 ### Step 5 — Build log
 
 Append to `.claude/runtime/state/build-log.md`:
+Use an explicitly linked per-cycle log for new work; retain legacy logs as history.
+Each entry identifies the same map, original task source and profile, so two
+initiatives' results cannot be merged by task ID alone:
 ```yaml
+cycle_id: <original cycle ID>
+work_map: <selected work.json>
+tasks_path: <original mapped tasks>
+profile: <verified complete P07 reference>
+required_policy: <unchanged bridge>
 task: T<N>
 package_id: P<N>                  # annotation, not a new job/state schema
 title: <title>
@@ -333,7 +359,7 @@ ts: <timestamp>
 After last task DONE:
 1. Run full test suite (`/li:qa` invoked)
 2. Check no regressions in unmentioned areas
-3. Invoke `/li:analyze` with trigger `build-final` (ADR-0004) — the PLAN↔BUILD leg: every plan
+3. Invoke `/li:analyze --map <same selected map>` with trigger `build-final` (ADR-0004) — the PLAN↔BUILD leg: every original
    task has a terminal status, no untasked work shipped, deviations reflected back. Surface the
    report verdict; RED/YELLOW findings go to the operator (advisory, not a hard block).
 4. If `pair-agent` mode: invoke for operator-pair-programming-style final walkthrough
@@ -344,8 +370,7 @@ After last task DONE:
 Mechanical since v5.0 (ADR-0008) — one command, not a YAML obligation (per-task metrics live in build-log.md, Step 5):
 
 ```bash
-_sl="${LINTEL_SOURCE_ROOT:-${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}}/lib/state.sh"
-[ -f "$_sl" ] || _sl="$HOME/.lintel/lib/state.sh"; source "$_sl"   # installed by install.sh in consumer repos
+source "${LINTEL_SOURCE_ROOT:?select the trusted source}/lib/state.sh"
 # Set these from the reviewed package/leaf results, never from an intended outcome.
 case "${build_status:?set actual BUILD status}" in
   DONE|DONE_WITH_CONCERNS) build_next=REVIEW ;;
@@ -464,7 +489,7 @@ Close your report with the shared position footer so the operator always knows w
 cycle and the one logical next action — whether this phase ran standalone or inside `/li:cycle`:
 
 ```bash
-source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/lib/cycle-footer.sh"   # fallback: "${LINTEL_SOURCE_ROOT:-$(git rev-parse --show-toplevel)}/lib/cycle-footer.sh"
+source "${LINTEL_SOURCE_ROOT:?select trusted source}/lib/cycle-footer.sh"
 render_cycle_footer                               # reads .claude/runtime/state/00-state.md; --compact for short replies
 ```
 

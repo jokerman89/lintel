@@ -11,7 +11,11 @@ hop_in: no
 
 # /plan-eng-review
 
-The **required** review per Lintel's Review Readiness Dashboard. Scope: architecture, code quality, test coverage, performance. Outputs a structured plan-file review report + persists via first-party `bin/li-review-log` so the ship phase can read it.
+Engineering planning review: architecture, code quality, test coverage and
+performance. Keep the structured report and actual evidence, not a legacy dashboard
+string. Apply [task-relevant intake](../define/references/intake.md) and
+[P05 evidence](../review/references/evidence.md). A plan-quality pass alone does not
+clear implementation, independent review or delivery.
 
 The architecture-and-tests gate before build — the one review Lintel requires. On top of the architecture/quality/coverage/performance pass it also runs:
 - `cli_support` frontmatter check on every skill/agent the plan adds
@@ -31,7 +35,8 @@ The architecture-and-tests gate before build — the one review Lintel requires.
 
 ## Inputs
 
-- Optional path to a plan/design doc. Auto-discovers from `~/.lintel/projects/<slug>/*-design-*.md` if not provided.
+- Explicit plan/design path or the same selected work map as PLAN/BUILD. No
+  freshest-global-design or newest-directory discovery.
 - Optional `--scope diff` — review the current branch's diff instead of a plan doc (degrades to `/review` semantics).
 
 For mapped work, validate the explicitly selected work.json with `bin/li-work-artifacts.py`
@@ -48,10 +53,12 @@ use singleton packages. Honor the same selection as PLAN/BUILD, never the newest
 1. **What existing code partially solves each sub-problem?** Map reusable patterns.
 2. **Minimum set of changes?** Ruthless about scope creep.
 3. **Complexity check:** plan touches 8+ files OR introduces 2+ new classes/services?
-   - If yes: AskUserQuestion proposing minimal version, ask reduce-or-proceed.
-   - **STOP** until resolved.
-4. **TODOS.md cross-reference:** any deferred items now blocking? Any items the plan SHOULD subsume?
-5. **Completeness check:** is plan doing the complete version or a shortcut? With AI-assisted coding, completeness cost is 10-100x cheaper than human-team — recommend the lake, not the puddle.
+   - If yes: inspect the aggregate risk and simpler alternatives. Ask reduce-or-proceed
+     only if scope is actually unresolved; retain an already approved large scope.
+4. **Original task-source cross-reference:** any deferred items now blocking?
+   Propose scope changes explicitly, without a second TODOS backlog.
+5. **Completeness check:** does the plan deliver its requested outcome or leave an
+   unacknowledged shortcut? Prefer complete acceptance without inventing productivity ratios.
 6. **Distribution check:** new artifact type (binary, package, container)? CI/CD pipeline included or deferred?
 7. **Granularity hard check (2–5 min per verifiable leaf):**
    For every leaf in plan.md, estimate implementation time from its specification and linked context:
@@ -80,7 +87,8 @@ package/leaf IDs so a shared review cannot hide gaps.
 
 1. **Architecture** — system design, dependency graph, data flow, scaling, security boundaries, ASCII diagrams worth embedding in code comments.
 2. **Code quality** — DRY (aggressively flag), error handling, technical debt, over/under-engineering.
-3. **Tests** — coverage diagram per Step 3 below; 100% coverage is the goal. Test plan artifact written.
+3. **Tests** — risk/acceptance coverage diagram per Step 3 below; distinguish covered,
+   missing and unobservable behavior rather than imposing an unexplained percentage.
 4. **Performance** — N+1 queries, memory, caching opportunities, slow paths.
 
 ### Test Step 3 — coverage diagram (mandatory)
@@ -91,7 +99,10 @@ Trace every codepath the plan introduces. Map user flows + interaction edge case
 
 ### Optional: Outside voice
 
-After all 4 sections: offer codex (or Claude subagent if codex unavailable) for independent challenge. Cross-model tension surfaced per topic via AskUserQuestion. User decides per tension point — outside voice is INFORMATIONAL, not auto-applied.
+Use an available, authorized independent host reviewer or an explicit external/manual
+handoff. Keep the same original map, profile, scope and evidence. Do not require a
+vendor/model name or invent a command. Surface actionable disagreement; ask only
+unresolved material choices. The implementer cannot supply its own independence.
 
 ## Report format — written to the plan/design doc
 
@@ -108,23 +119,39 @@ After all 4 sections: offer codex (or Claude subagent if codex unavailable) for 
 
 Persist via first-party `bin/li-review-log`:
 ```bash
-review_source="${LINTEL_SOURCE_ROOT:-${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null)}}"
-"$review_source/bin/li-review-log" '{"skill":"plan-eng-review","timestamp":"...","status":"...","unresolved":N,"critical_gaps":N,"issues_found":N,"mode":"FULL_REVIEW","commit":"..."}'
-"$review_source/bin/li-review-read"
+review_source="${LINTEL_SOURCE_ROOT:?select trusted source}"
+python="${LINTEL_PYTHON:-python3}"
+"$python" "$review_source/bin/li-review-evidence.py" validate \
+  --record "${review_record:?set actual v2 decision}" || exit $?
+bash "$review_source/bin/li-review-log" --file "$review_record" || exit $?
+bash "$review_source/bin/li-review-read" --skill plan-eng-review \
+  --expected "${review_context:?set prepared context}" \
+  --corroboration "${corroboration:?set actual independent receipt}" --gate-json
 ```
 
 Run both helpers from the selected source bundle. `LINTEL_REPO_ROOT` selects the
-working repository for audit data, commit matching and legacy import; it does not
-select helper code. If unset, the helpers use the current working repository.
+working repository, not helper code. Prepare the context with the shared `prepare`
+command **before** actual review, retaining immutable `qa_requirements`, original
+leaf coverage and the verified P07 reference/required-policy bridge. Then author
+the observed v2 decision; this persistence block is not a fabricated result template.
+Use same-context QA/SHIP only after applicable review/acceptance is actually complete.
+
+For a draft design or unmapped read-only pass, use P05 `snapshot` then `inspect`
+with actual controls. It needs no duplicate backlog and returns
+`release_clearance:false`. Old positive-string/empty-commit records remain history,
+not approval. A standalone direct verify cannot establish latest-log clearance.
 
 ## Required outputs
 
 - **NOT in scope** section — explicit deferrals with one-line rationale.
 - **What already exists** — reuse map.
-- **TODOS.md updates** — trace proposed deferrals to their findings and resolve any missing scope decision.
+- **Original mapped task updates/proposals** — trace deferrals by existing ID and
+  resolve any missing scope decision without duplicating the backlog.
 - **Failure modes** — per new codepath: realistic failure + test? + err handling? + silent vs visible. Critical gaps flagged.
 - **Worktree parallelization** — dependency table + lanes + execution order + conflict flags.
-- **Implementation Tasks** — unchanged leaf IDs, each derived from a finding (no padding), grouped by bounded work package in the plan. Keep the existing flat JSONL artifact via `jq -nc` for /autoplan aggregation; packaging adds no job schema.
+- **Implementation Tasks** — unchanged leaf IDs, each derived from a finding (no
+  padding), grouped by bounded work package in the original plan/task artifact.
+  Autoplan consumes canonical PLAN; no parallel JSONL task authority is produced.
 - **Completion Summary** — section-by-section issue counts + Lake Score (X/Y recommendations chose complete).
 
 ## Compliance integration
@@ -132,21 +159,26 @@ select helper code. If unset, the helpers use the current working repository.
 - The active pack's compliance gates run at Step 0 (`resolve_pack_field compliance.hooks`; none by default). The advisory baseline still applies — no customer data in plan prose, no secrets, no production mutations without auth.
 - Per Lintel v1: also verify every new skill/agent introduced declares `cli_support` in frontmatter (per C1) and `voice` tier (per A6).
 
-## Exit Plan Mode Gate (BLOCKING)
+## Report completion and host plan mode
 
-Before `ExitPlanMode`:
+Before reporting a planning review complete:
 
-1. Read the plan file. Confirm the LAST `## ` heading is `## REVIEW REPORT`. Dual-accept (grace until 2026-09-12): the legacy `## GSTACK REVIEW REPORT` heading still passes, so design docs approved before the rename remain valid. New writes use `## REVIEW REPORT`.
+1. Read the selected plan and report. A native design can append `## REVIEW REPORT`
+   when authorized; preserve external Spec Kit structure and use an explicitly linked
+   report instead of forcing a last-heading convention into it.
 2. Report contains: Runs/Status/Findings table + VERDICT line.
-3. `bin/li-review-log` called + `bin/li-review-read` consumed at least once.
+3. For bound review, the actual writer and latest applicable reader consume the
+   prepared context. For inspection, report its limited non-clearance result.
 
-Failing this gate + calling `ExitPlanMode` = contract violation. User sees a plan with a missing/stale report + rejects it.
+Use native plan UI only when available and permitted. There is no Universal
+`ExitPlanMode` requirement; its absence does not remove the artifact or review gates.
 
 ## Failure modes
 
 - **No design doc:** offer `/office-hours` as prerequisite. If user skips, proceed with standard review against the diff.
 - **Operator skips a per-issue AskUserQuestion:** mark as unresolved decision, list in "Unresolved decisions that may bite later" at end.
-- **jq missing:** skip JSONL write, warn user — markdown task list still primary deliverable.
+- **Required evidence persistence fails:** report the error and leave review open;
+  never skip the write into an apparent clearance.
 
 ## Examples
 
@@ -155,8 +187,8 @@ Failing this gate + calling `ExitPlanMode` = contract violation. User sees a pla
 > /plan-eng-review
 [Step 0 + 4 sections, 6 issues resolved]
 ✓ ENG CLEARED — ready to implement
-Tasks: 17 in markdown + JSONL
-Dashboard updated
+Tasks: 17 original IDs in the selected task artifact
+Observed report and shared evidence linked; release clearance remains separate
 ```
 
 **Scope reduction:**

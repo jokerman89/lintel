@@ -15,6 +15,10 @@
 #   - tests/unit/orientator-mechanical-routing.sh
 #                                       : asserts that Swedish intent routing still
 #                                         works — functional, not residue
+#   - tests/unit/intent-operation-boundary.sh
+#                                       : asserts that Swedish operator requests keep
+#                                         their intent and request boundaries —
+#                                         functional, not residue
 #   - tests/unit/hook-patterns.sh       : asserts the Swedish personal-data tells
 #                                         (ärende, personnummer) stay detected —
 #                                         functional, not residue
@@ -46,6 +50,8 @@ is_allowlisted() {
     lib/orientator-routing.sh) return 0 ;;
     # Asserts that Swedish intent routing still resolves.
     tests/unit/orientator-mechanical-routing.sh) return 0 ;;
+    # Asserts that Swedish operator requests keep their intent and request boundaries.
+    tests/unit/intent-operation-boundary.sh) return 0 ;;
     # Asserts the Swedish personal-data tells (ärende, personnummer) stay detected.
     tests/unit/hook-patterns.sh) return 0 ;;
     # This guard itself — it carries the Swedish word list it searches for.

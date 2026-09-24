@@ -2,7 +2,7 @@
 name: code-unfreeze
 layer: foundation
 v1_alias: [li-unfreeze]
-description: Remove a path from session freeze — other skills can write to it again.
+description: Remove explicitly selected advisory freeze metadata without changing host permissions, project policy or release authority.
 color: blue
 tools: Read, Edit, Bash
 voice: internal
@@ -11,18 +11,21 @@ cli_support: [claude-code, codex]
 
 # /code-unfreeze
 
-Reverses `/code-freeze`. Removes paths from the session freeze metadata file, allowing other Lintel skills to write to them again. Logged to audit.
+Reverses `/code-freeze` metadata, not host or project controls. Exact removal from
+the selected session/cycle file is advisory and does not grant permission to write.
+No filesystem lock or universal skill refusal was installed.
 
 ## When to use
 
 - Done with the focused-scope work that motivated the freeze — open the area back up
 - Freeze was added by mistake or applied too broadly
-- Project freeze (loaded from CLAUDE.md frozen-zones) needs a temporary override — unfreeze for one operation, then re-freeze
+- A runtime reminder is no longer needed; changing a static project rule requires
+  separate explicit authority, not this command
 
 ## When NOT to use
 
 - Trying to bypass Layer 2 compliance — that's not what freeze controls; Layer 2 always overrides
-- Cleaning up old session state — freeze is session-scoped, expires automatically when session ends
+- Automatic cleanup or expiry — no timer/watcher is implemented
 
 ## Inputs
 
@@ -35,8 +38,11 @@ Reverses `/code-freeze`. Removes paths from the session freeze metadata file, al
 1. **Resolve paths.** Canonicalize.
 2. **Read session freeze file.** `.claude/runtime/state/code-freeze/<session-id>.yaml`.
 3. **Match.** Exact-match required (no glob expansion at unfreeze time — too easy to over-unfreeze by accident).
-4. **Remove matched entries.** Write the updated freeze file.
-5. **Audit log.** Append to `.claude/runtime/audit/code-freeze.jsonl` with operation: unfreeze.
+4. **Remove matched entries.** Preserve all unmatched entries and verify the exact
+   selected file's new contents before reporting success.
+5. **Audit observation.** Use the existing writer once per removed path:
+   `audit_log code-freeze unfreeze "path=<path>" "reason=<reason>"`; the event is not
+   verification of host permission or project-policy override.
 6. **Report remaining freeze state.**
 
 ## Report format
@@ -52,15 +58,18 @@ Currently frozen this session:
 
 ## Compliance integration
 
-- Unfreezing a CLAUDE.md frozen-zone path: WARN explicitly that this is a TEMPORARY runtime override and the static rule still applies — re-freeze when done.
+- Removing a reminder for a project frozen-zone path is **not** a temporary override.
+  The static rule and required permission still apply.
 - Audit log retains the unfreeze event even after session ends.
 
 ## Failure modes
 
 - **Path not in current freeze:** report it wasn't frozen (no-op). Do not error.
 - **`--all` invoked but freeze file is empty:** report no-op, exit cleanly.
-- **Session file corrupted:** report + offer to reset (operator confirms).
-- **Operator unfreezes a CLAUDE.md frozen-zone path without `--reason`:** require the reason — this is a deliberate override of project policy and deserves a trail.
+- **Session file corrupted:** retain the file and report unknown scope; no empty
+  success-shaped replacement.
+- **Operator requests a project-policy exception:** refer to its actual authority
+  boundary. A local reason field or unfreeze event cannot grant it.
 
 ## Examples
 
@@ -85,5 +94,5 @@ Currently frozen this session:
 ## See also
 
 - `/code-freeze` — add to session freeze
-- `/help` — shows current freeze state
+- `/code-freeze --list` — shows the recorded advisory freeze state
 - Project CLAUDE.md frozen-zones — permanent rules, distinct from session freeze
