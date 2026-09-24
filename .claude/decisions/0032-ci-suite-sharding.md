@@ -51,10 +51,21 @@ Every discovered test must still run under `--require-all` on every system.
 - **Windows** jobs select the approved PowerShell 7 with
   `LINTEL_POWERSHELL=<path of pwsh.exe>`. `tests/integration/universal-a23.py` requires it,
   and every local Windows result used it.
-- **Windows** jobs also set `TEMP` and `TMP` to `RUNNER_TEMP` (`D:\a\_temp`). The installed-consumer
-  tests refuse fixtures whose paths reach 235 characters. `domain-installed-consumers` needs
-  about 201 characters below its temp root, so the default `C:\Users\runneradmin\AppData\Local\Temp`
-  would give about 253. Locally it passes with a short work directory (`fin2-dic-short`).
+- **Every** job gives the tests a synthetic home and temporary root, as the local verification
+  launcher does (L-051). `HOME` and `USERPROFILE` point at `$RUNNER_TEMP/s/h`, and `TEMP`, `TMP`
+  and `TMPDIR` at `$RUNNER_TEMP/s/t`; Windows also sets `APPDATA`, `LOCALAPPDATA`, `HOMEDRIVE` and
+  `HOMEPATH` under that home. The root is the physical path (`pwd -P`).
+  - The installed-consumer tests refuse fixtures whose paths reach 235 characters.
+    `domain-installed-consumers` needs about 201 characters below its temp root, so the default
+    `C:\Users\runneradmin\AppData\Local\Temp` would give about 253, while `D:\a\_temp\s\t` fits.
+    Locally it passes with a short work directory (`fin2-dic-short`).
+  - macOS's default temporary directory lies under `/var`, a link to `/private/var`, and Lintel
+    refuses fixture roots with linked ancestors.
+  - The P10 default-consumer fixtures require `HOME`, `USERPROFILE` and the temporary variables
+    under one parent.
+- **Every** job installs the repository's declared optional YAML parser
+  (`lib/envelope-requirements.txt`) before the tests; catalog, discovery and envelope tests read YAML.
+  No other third-party package is installed (L-054).
 
 ## Alternatives considered
 
@@ -94,6 +105,25 @@ Every discovered test must still run under `--require-all` on every system.
     other shards. The kit shard's estimate is rechecked on the frozen head.
 - **Separate steps.** The behavior, e2e and shape tiers run as separate steps, and later checks run
   with `!cancelled()`, so one failure does not hide the others.
+
+## First hosted run (2026-09-24)
+
+Run `36054668106` on `2ab1f25d` was the first hosted strict run on Linux, macOS and Windows. It
+failed in all three systems. The causes were a mix of environment gaps and portability defects
+that local Windows runs could not show:
+
+- the declared YAML parser was not installed;
+- the macOS `/var` link, and the missing synthetic home and temp variables;
+- plan closure bullets that parsed as duplicate task definitions;
+- Windows process search choosing System32's WSL `bash.exe` over Git Bash, in tests and in three
+  product entries;
+- newer Python `HTMLParser` releases buffering incremental script data until `close()`;
+- entries that wrote `__pycache__` into installed kits;
+- fixtures that assumed Windows variables, executable bits or a separate Python directory.
+
+The coordinator repaired these in one batch. The P12 `document-pdf` checks also need an existing
+`pypdf` reader, which the repository does not declare. The operator refused to add it, so it
+stays an open decision (L-054).
 
 ## References
 

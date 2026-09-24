@@ -29,6 +29,16 @@ utilities use associative arrays. On macOS, install modern Bash for the suite. C
 checks the bare installer with the stock `/bin/bash` 3.2. On Windows, use Git Bash; native
 PowerShell installer verification is `./tests/runner/check-install.ps1`.
 
+Run the suite the way CI does:
+
+- Install the declared optional YAML parser (`python3 -m pip install -r lib/envelope-requirements.txt`).
+  The catalog, discovery and envelope tests need it.
+- Give the suite a synthetic `HOME` and `USERPROFILE`, with `TEMP`, `TMP` and `TMPDIR` under the
+  same parent, and use a physical path with no linked ancestors. On macOS, the default
+  `/var/folders/...` directory sits under the `/var` link, which Lintel refuses as a fixture root.
+- `document-pdf` also needs an existing `pypdf` installation. The repository does not declare or
+  install it.
+
 Each test has a shell entry point and exits nonzero on failure. Some entry points execute Python
 standard-library unittest suites. The runner discovers current tests instead of relying on a
 fixed test count. It prints each test as it starts, aggregates failures, reports skipped coverage,

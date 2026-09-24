@@ -54,19 +54,47 @@ jobs:
           printf '#!/usr/bin/env bash\nexec python "$@"\n' > "$RUNNER_TEMP/lintel-ci-bin/python3"
           chmod +x "$RUNNER_TEMP/lintel-ci-bin/python3"
           echo "$RUNNER_TEMP/lintel-ci-bin" >> "$GITHUB_PATH"
-      - name: Select the approved PowerShell 7 and a short temp root for Windows tests
+      - name: Install the declared optional YAML parser
+        # Catalog, discovery and envelope tests read YAML through the declared optional requirement.
+        run: python3 -m pip install --disable-pip-version-check -r lib/envelope-requirements.txt
+      - name: Give the tests a synthetic home and a short physical temporary root
+        # Mirrors the local verification launcher (L-051): tests never see the runner's real profile,
+        # and fixtures that pair HOME with TEMP find both under one root. The physical path avoids
+        # macOS's /var -> /private/var link, which Lintel refuses as a fixture ancestor, and stays
+        # short enough for the Windows installed-consumer path budget (fixture paths below 235).
+        run: |
+          mkdir -p "$RUNNER_TEMP/s/h/AppData/Roaming" "$RUNNER_TEMP/s/h/AppData/Local" "$RUNNER_TEMP/s/t"
+          root="$(cd "$RUNNER_TEMP/s" && pwd -P)"
+          if [ "$RUNNER_OS" = Windows ]; then
+            root="$(cygpath -w "$root")"
+            home="$root\\h" temp="$root\\t"
+            {
+              echo "APPDATA=$home\\AppData\\Roaming"
+              echo "LOCALAPPDATA=$home\\AppData\\Local"
+              echo "HOMEDRIVE=${home%%:*}:"
+              echo "HOMEPATH=${home#*:}"
+            } >> "$GITHUB_ENV"
+          else
+            home="$root/h" temp="$root/t"
+          fi
+          {
+            echo "HOME=$home"
+            echo "USERPROFILE=$home"
+            echo "TEMP=$temp"
+            echo "TMP=$temp"
+            echo "TMPDIR=$temp"
+          } >> "$GITHUB_ENV"
+      - name: Select the approved PowerShell 7 for Windows tests
         if: runner.os == 'Windows'
         shell: pwsh
-        # Installed-consumer tests refuse fixture paths of 235 characters or more; the default
-        # C:\Users\runneradmin\AppData\Local\Temp root would exceed that, RUNNER_TEMP (D:\a\_temp) does not.
         run: |
           "LINTEL_POWERSHELL=$((Get-Command pwsh).Source)" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
-          "TEMP=$env:RUNNER_TEMP" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
-          "TMP=$env:RUNNER_TEMP" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
       - name: Check verification dependencies
         run: |
+          printf 'HOME=%s TEMP=%s TMPDIR=%s\n' "$HOME" "$TEMP" "$TMPDIR"
           git --version
           python3 --version
+          python3 -c 'import yaml, tempfile; print("PyYAML", yaml.__version__, "temp", tempfile.gettempdir())'
           jq --version
       - name: Verify repository structure
         if: matrix.part == 'other'
