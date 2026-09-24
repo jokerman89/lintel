@@ -145,7 +145,7 @@ ADAPTER_RESOURCES = (
     "bin/li-migrate-claude-home", "bin/li-pack-scaffold",
     "bin/li-domain-result.py", "lib/domain_result.py", "lib/domain-result-schema.json",
     "lib/state.sh", "lib/cycle-modes.sh", "lib/cycle-footer.sh", "lib/workflow.sh",
-    "bin/li-events.py", "lib/event-catalog.json", "bin/li-lessons.py",
+    "bin/li-events.py", "lib/event-catalog.json", "bin/li-lessons.py", "lib/memory.sh",
     "bin/li-catalog.py", "lib/capability-selections.json",
     "skills/catalog/references/metadata.md", "skills/catalog/references/selections.md",
     "skills/browse/scripts/chromium.mjs", "skills/scrape/scripts/extract.mjs",
