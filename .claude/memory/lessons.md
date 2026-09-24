@@ -1057,3 +1057,19 @@ probe or switch GitHub credentials, `hosts.yml` or token environment variables. 
 to an injected or Enterprise Managed User identity. If the session's identity cannot publish, stop
 and leave the exact commands for the operator, or wait for their explicit authorization to publish
 as `jokerman89`.
+
+## L-054 - Add no third-party package the repository has not declared
+
+**Date:** 2026-09-24
+
+**Context:** While repairing PR #93's CI, the coordinator found that the P12 `document-pdf` tests
+need `pypdf`. P12's design uses the environment's existing reader, and local runs had pypdf 6.13.2,
+but CI does not. The coordinator started to create `tests/requirements.txt` declaring
+`pypdf>=6.13.2,<7` and install it in CI. The operator rejected it: the package is undeclared, the
+assistant chose it, and the user never authorized it.
+
+**Rule:** Never add, declare or install a third-party package, even for tests or CI only, unless the
+repository already declares it or the operator explicitly authorizes it. Packages that are already
+declared (for example `lib/envelope-requirements.txt`) may be installed as declared. For anything
+else, report the missing dependency and the affected checks as a decision for the operator. Do not
+exclude or weaken the checks yourself to hide the gap.
