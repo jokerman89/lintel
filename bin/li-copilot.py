@@ -10,12 +10,15 @@ from bisect import bisect_right
 import hashlib
 import html
 from html.parser import HTMLParser
+import importlib.util
+import io
 import json
 import os
 from pathlib import Path, PurePosixPath
 import posixpath
 import re
 import shutil
+import stat
 import string
 import subprocess
 import sys
@@ -32,6 +35,22 @@ if not _MARKDOWN_PROVIDER.is_file():
     print(f"ERROR: Required source file is missing: {_MARKDOWN_PROVIDER}", file=sys.stderr)
     raise SystemExit(1)
 from markdown_source import LineBoundary, classify_markdown
+
+_NATIVE_PROVIDER = Path(__file__).resolve().parents[1] / "lib/native_paths.py"
+if not _NATIVE_PROVIDER.is_file():
+    print(f"ERROR: Required source file is missing: {_NATIVE_PROVIDER}", file=sys.stderr)
+    raise SystemExit(1)
+if _NATIVE_PROVIDER.is_symlink() or getattr(_NATIVE_PROVIDER.lstat(), "st_file_attributes", 0) & 0x400:
+    print(f"ERROR: Linked trusted source helper is refused: {_NATIVE_PROVIDER}", file=sys.stderr)
+    raise SystemExit(1)
+_native_spec = importlib.util.spec_from_file_location("lintel_adapter_native_paths", _NATIVE_PROVIDER)
+if _native_spec is None or _native_spec.loader is None:
+    print(f"ERROR: Cannot load required source helper: {_NATIVE_PROVIDER}", file=sys.stderr)
+    raise SystemExit(1)
+_native_paths = importlib.util.module_from_spec(_native_spec)
+_native_spec.loader.exec_module(_native_paths)
+native_io_path = _native_paths.native_io_path
+path_identity = _native_paths.path_identity
 
 SCHEMA = 1
 INVENTORY = ".github/lintel/manifest.json"
@@ -118,8 +137,12 @@ ADAPTER_RESOURCES = (
     "bin/li-client-capabilities.py", "bin/li-adapter.py", "lib/pack-schema.yaml",
     "lib/markdown_source.py", "lib/profile_context.py", "lib/profile-context-schema.json",
     "lib/native_paths.py",
-    "lib/context_safety.py", "lib/review_contract.py", "lib/review-schema.json",
+    "lib/context_safety.py", "lib/managed_transaction.py",
+    "bin/li-snapshot.py", "bin/li-managed-transaction.py",
+    "lib/review_contract.py", "lib/review-schema.json",
     "bin/li-review-evidence.py", "bin/li-review-log", "bin/li-review-read",
+    "bin/li-lifecycle", "bin/li-lifecycle.py", "bin/li-scaffold", "bin/li-doctor",
+    "bin/li-migrate-claude-home", "bin/li-pack-scaffold",
     "bin/li-domain-result.py", "lib/domain_result.py", "lib/domain-result-schema.json",
     "lib/state.sh", "lib/cycle-modes.sh", "lib/cycle-footer.sh", "lib/workflow.sh",
     "bin/li-catalog.py", "lib/capability-selections.json",
@@ -154,24 +177,70 @@ def safe_path(root: Path, relative: str) -> Path:
     path = root
     for part in rel.parts:
         path = path / part
-        if path.is_symlink() or (path.exists() and getattr(path.lstat(), "st_file_attributes", 0) & 0x400):
+        native = native_io_path(path)
+        if native.is_symlink() or (native.exists() and getattr(native.lstat(), "st_file_attributes", 0) & 0x400):
             raise ValueError(f"Symlink/reparse point refused: {path}")
-        if path != root / relative and path.exists() and not path.is_dir():
+        if path != root / relative and native.exists() and not native.is_dir():
             raise ValueError(f"Parent is not a directory: {path}")
-    if not path.resolve().is_relative_to(root):
+    resolved = Path(*path_identity(native_io_path(path).resolve()))
+    if not resolved.is_relative_to(Path(*path_identity(root))):
         raise ValueError(f"Path escapes target: {relative}")
     return path
 
 
 def read_file(root: Path, relative: str) -> bytes:
     path = safe_path(root, relative)
-    if not path.is_file():
+    if not native_io_path(path).is_file():
         raise ValueError(f"Required source file is missing: {path}")
     return source_bytes(path)
 
 
+NOT_REGULAR = "not-regular"
+
+
+def owned_reader():
+    from context_safety import read_owned
+    return read_owned
+
+
+def observe_path(target: Path, relative: str) -> tuple[Optional[bytes], object]:
+    """Return the bytes and state one target read derived, never a later rebuild."""
+    path = safe_path(target, relative)
+    try:
+        info = native_io_path(path).lstat()
+    except FileNotFoundError:
+        return None, None
+    if not stat.S_ISREG(info.st_mode):
+        return None, NOT_REGULAR
+    return owned_reader()(target, relative)
+
+
+def observe_file(target: Path, relative: str, observed: dict) -> tuple[Optional[bytes], object]:
+    if relative not in observed:
+        observed[relative] = observe_path(target, relative)
+    return observed[relative]
+
+
+def decoded(data: bytes) -> str:
+    # Same universal-newline text the previous read_text() planning consumed.
+    return io.TextIOWrapper(io.BytesIO(data), encoding="utf-8").read()
+
+
+def admitted_expectations(target: Path, observed: dict, changes: dict) -> dict:
+    """Pair each write with its planning observation; fresh reads only reject."""
+    expected = {}
+    for relative in changes:
+        if relative not in observed or observed[relative][1] == NOT_REGULAR:
+            raise ValueError(f"Adapter publication lacks a planning observation: {relative}")
+        expected[relative] = observed[relative][1]
+    for relative in sorted(set(observed) - set(changes)):
+        if observe_path(target, relative)[1] != observed[relative][1]:
+            raise ValueError(f"Adapter input changed after planning (preserved): {relative}")
+    return expected
+
+
 def source_bytes(path: Path) -> bytes:
-    data = path.read_bytes()
+    data = native_io_path(path).read_bytes()
     if path.suffix in TEXT_SUFFIXES or not path.suffix:
         data = data.replace(b"\r\n", b"\n")
     return data
@@ -560,7 +629,7 @@ def bundle_documentation(source: Path, files: dict[str, bytes]) -> None:
                     # A directory link must reach real bundled children; do not glob-copy it.
                     for index in ("README.md", "_INDEX.md"):
                         candidate = posixpath.join(target, index)
-                        if safe_path(source, candidate).is_file():
+                        if native_io_path(safe_path(source, candidate)).is_file():
                             pending.append(candidate)
                             break
                 elif any(target == component or target.startswith(component + "/") for component in COMPONENTS):
@@ -586,7 +655,7 @@ def bundle_documentation(source: Path, files: dict[str, bytes]) -> None:
 def generate(source: Path, target: Path,
              clients: tuple[str, ...] = ("copilot-cli",)) -> tuple[dict[str, bytes], dict[str, bytes], str]:
     local = source == target
-    registry = load_registry(safe_path(source, "lib/cli-tiers.yaml"))
+    registry = load_registry(native_io_path(safe_path(source, "lib/cli-tiers.yaml")))
     records = [registry["surfaces"][surface_id(registry, client)] for client in clients]
     copilot = any(record["discovery"]["kind"] == "copilot" for record in records)
     files = {}
@@ -595,16 +664,18 @@ def generate(source: Path, target: Path,
     if not local:
         for component in COMPONENTS:
             folder = safe_path(source, component)
-            if not folder.is_dir():
+            native_folder = native_io_path(folder)
+            if not native_folder.is_dir():
                 raise ValueError(f"Missing source component: {component}")
-            for path in sorted(folder.rglob("*")):
+            for candidate in sorted(native_folder.rglob("*")):
+                path = folder / candidate.relative_to(native_folder)
                 relative = path.relative_to(source).as_posix()
                 safe_path(source, relative)
-                if path.is_file() and "__pycache__" not in path.parts and path.suffix != ".pyc":
+                if native_io_path(path).is_file() and "__pycache__" not in path.parts and path.suffix != ".pyc":
                     files[f"{BUNDLE}/{relative}"] = source_bytes(path)
         for canonical, entry in (("shims/copilot/COPILOT.md", "COPILOT.md"),
                                  ("shims/universal/ADAPTER.md", "ADAPTER.md")):
-            bridge = canonical if (source / canonical).is_file() else entry
+            bridge = canonical if native_io_path(source / canonical).is_file() else entry
             data = read_file(source, bridge)
             files[f"{BUNDLE}/{entry}"] = data
             files[f"{BUNDLE}/{canonical}"] = data
@@ -766,11 +837,13 @@ Add project-specific commands and motivated deviations outside its marked block.
     return files, seeds, "repository" if local else "vendored"
 
 
-def load_inventory(target: Path, registry: dict) -> tuple[dict[str, str], dict[str, str], list[str]]:
-    path = safe_path(target, INVENTORY)
-    if not path.exists():
+def load_inventory(target: Path, registry: dict, *, observed: Optional[dict] = None) -> tuple[dict[str, str], dict[str, str], list[str]]:
+    data, state = observe_file(target, INVENTORY, {} if observed is None else observed)
+    if state is None:
         return {}, {}, []
-    value = json.loads(path.read_text(encoding="utf-8"))
+    if state == NOT_REGULAR:
+        raise ValueError(f"Copilot inventory is not a regular file: {INVENTORY}")
+    value = json.loads(decoded(data))
     if (not isinstance(value, dict) or type(value.get("schema_version")) is not int
             or value["schema_version"] != SCHEMA or not isinstance(value.get("files"), dict)):
         raise ValueError("Unsupported or malformed Copilot inventory")
@@ -799,17 +872,19 @@ def load_inventory(target: Path, registry: dict) -> tuple[dict[str, str], dict[s
 
 
 def protocol_updates(source: Path, target: Path, seeds: dict[str, bytes],
-                     old_blocks: dict[str, str], checking: bool) -> tuple[dict[str, bytes], dict[str, str], list[str]]:
+                     old_blocks: dict[str, str], checking: bool, *,
+                     observed: Optional[dict] = None) -> tuple[dict[str, bytes], dict[str, str], list[str]]:
     """Manage only marked protocol blocks; preserve all surrounding project prose."""
+    observed = {} if observed is None else observed
     payload = read_file(source, "scaffolding/01-foundation/SESSION-PROTOCOL.md").decode("utf-8-sig").strip().encode("utf-8")
     block = PROTOCOL_START + b"\n" + payload + b"\n" + PROTOCOL_END
     updates, hashes, errors = {}, {}, []
     for relative in ("AGENTS.md", "CLAUDE.md"):
-        path = safe_path(target, relative)
-        if path.exists() and not path.is_file():
+        current, state = observe_file(target, relative, observed)
+        if state == NOT_REGULAR:
             errors.append(f"Not a regular protocol file: {relative}")
             continue
-        original = path.read_bytes() if path.exists() else seeds[relative]
+        original = current if state else seeds[relative]
         starts, ends = original.count(PROTOCOL_START), original.count(PROTOCOL_END)
         if starts == ends == 0:
             if checking:
@@ -854,81 +929,118 @@ def verify_links(files: dict[str, bytes], target: Path) -> list[str]:
                 directory = urlsplit(link).path.endswith("/")
                 if key not in files and not (directory and any(path.startswith(key + "/") for path in files)):
                     missing.append(f"Missing bundled documentation target: {relative} -> {link}")
-            elif key not in files and not safe_path(target, key).is_file():
+            elif key not in files and not native_io_path(safe_path(target, key)).is_file():
                 missing.append(f"Missing generated link: {relative} -> {link}")
     return missing
 
 
 def atomic_write(path: Path, data: bytes) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    fd, tmp = tempfile.mkstemp(prefix=".lintel-", dir=path.parent)
+    native_io_path(path.parent).mkdir(parents=True, exist_ok=True)
+    fd, tmp = tempfile.mkstemp(prefix=".lintel-", dir=native_io_path(path.parent))
+    temporary = path.parent / Path(tmp).name
     try:
         with os.fdopen(fd, "wb") as handle:
             handle.write(data)
-        os.replace(tmp, path)
+        os.replace(native_io_path(temporary), native_io_path(path))
     finally:
-        if os.path.exists(tmp):
-            os.unlink(tmp)
+        if native_io_path(temporary).exists():
+            native_io_path(temporary).unlink()
 
 
-def runtime_ignore_errors(target: Path, ignore_text: str) -> list[str]:
-    """Check the required rule and, in Git repos, its effective negation behavior."""
-    if ".claude/runtime/" not in ignore_text.splitlines():
-        return ["Missing .claude/runtime/ ignore rule; run init"]
-    git = shutil.which("git")
-    if git and (target / ".git").exists():
-        result = subprocess.run(
-            [git, "-c", "core.fsmonitor=false", "-C", str(target), "check-ignore",
-             "--no-index", "--quiet", ".claude/runtime/.lintel-ignore-check"],
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
-        if result.returncode:
+def runtime_ignore_errors(target: Path, ignore_text: str, *, allow_missing_rule: bool = False) -> list[str]:
+    """Verify Git before allowing init to repair a missing required rule."""
+    has_rule = ".claude/runtime/" in ignore_text.splitlines()
+    if native_io_path(target / ".git").exists():
+        git = shutil.which("git")
+        if not git:
+            return [f"Git ignore verification unavailable for {target}: git executable not found"]
+        try:
+            result = subprocess.run(
+                [git, "-c", "core.fsmonitor=false", "-C", str(target), "check-ignore",
+                 "--no-index", "--quiet", ".claude/runtime/.lintel-ignore-check"],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
+        except OSError as error:
+            return [f"Git ignore verification unavailable for {target}: {error}"]
+        if result.returncode not in (0, 1):
+            details = b"\n".join(output for output in (result.stderr, result.stdout) if output)
+            diagnostic = details.decode("utf-8", errors="replace").strip() or "no diagnostic output"
+            return [f"Git ignore verification failed for {target} (exit {result.returncode}): {diagnostic}"]
+        if result.returncode == 1 and has_rule:
             return ["Git does not confirm .claude/runtime/ is ignored; review conflicting ignore rules"]
+    if not has_rule and not allow_missing_rule:
+        return ["Missing .claude/runtime/ ignore rule; run init"]
     return []
 
 
 def main(universal: bool = False) -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("command", choices=("init", "check"))
+    parser.add_argument("command", choices=("init", "check", "inspect", "recover"))
     parser.add_argument("--target", type=Path, default=Path.cwd())
     parser.add_argument("--source", type=Path, default=None)
     parser.add_argument("--client", action="append", help="Exact surface ID or alias; repeat for a team; no global installation")
+    parser.add_argument("--store", type=Path, help="Separate owned recovery store; defaults to a reported target sibling")
+    parser.add_argument("--transaction", help="Exact transaction ID for inspect or explicit recovery")
     args = parser.parse_args()
-    target = args.target.resolve()
+    target_argument = args.target.absolute()
+    target = native_io_path(target_argument).resolve()
+    if target_argument.anchor == path_identity(target_argument)[0]:
+        target = Path(*path_identity(target))
     # Executable-relative source is stable even after copilot-env sets LINTEL_HOME
     # to project runtime storage. A source override is explicit, never ambient.
-    source = (args.source or Path(__file__).resolve().parent.parent).resolve()
-    if not target.is_dir():
+    source_argument = (args.source or Path(__file__).resolve().parent.parent).absolute()
+    source = native_io_path(source_argument).resolve()
+    if source_argument.anchor == path_identity(source_argument)[0]:
+        source = Path(*path_identity(source))
+    if not native_io_path(target).is_dir():
         raise ValueError(f"Target directory does not exist: {target}")
     if target in (Path(target.anchor), Path.home().resolve()):
         raise ValueError("Target must be a project directory, not a filesystem or user-home root")
-    registry = load_registry(safe_path(source, "lib/cli-tiers.yaml"))
-    old, old_blocks, old_clients = load_inventory(target, registry)
+    store = args.store or (Path(os.environ["LINTEL_RECOVERY_STORE"]) if os.environ.get("LINTEL_RECOVERY_STORE") else None)
+    if args.command in ("inspect", "recover"):
+        if not args.transaction:
+            parser.error("--transaction is required for inspect/recover")
+        for relative in ADAPTER_RESOURCES:
+            read_file(source, relative)
+        from managed_transaction import default_store, inspect_transaction, recover_transaction
+        store = store or default_store(target)
+        operation = inspect_transaction if args.command == "inspect" else recover_transaction
+        print(json.dumps(operation(target, store, args.transaction), indent=2))
+        return
+    registry = load_registry(native_io_path(safe_path(source, "lib/cli-tiers.yaml")))
+    # Every target read that shapes the plan is recorded once; that observation,
+    # not a later rebuild, is the only state a planned write may replace.
+    observed = {}
+    old, old_blocks, old_clients = load_inventory(target, registry, observed=observed)
     if universal and args.command == "init" and not args.client:
         parser.error("--client is required for init; use other for a manual canonical-file handoff")
     requested = [surface_id(registry, client) for client in args.client] if args.client else (
         ["copilot-cli"] if args.command == "init" or not old_clients else [])
     clients = sorted(set(old_clients + requested))
     files, seeds, mode = generate(source, target, tuple(clients))
+    from managed_transaction import apply_files, assert_ready, default_store
+    store = store or default_store(target)
+    assert_ready(target, store)
     errors = []
     block_updates, block_hashes = {}, {}
     if mode == "vendored":
-        block_updates, block_hashes, block_errors = protocol_updates(source, target, seeds, old_blocks, args.command == "check")
+        block_updates, block_hashes, block_errors = protocol_updates(source, target, seeds, old_blocks, args.command == "check",
+                                                                     observed=observed)
         errors.extend(block_errors)
     # Preflight this user-owned file too, before any managed content is written.
-    ignore = safe_path(target, ".gitignore")
-    if ignore.exists() and not ignore.is_file():
+    ignore_data, ignore_state = observe_file(target, ".gitignore", observed)
+    if ignore_state == NOT_REGULAR:
         raise ValueError(".gitignore is not a regular file")
-    existing_ignore = ignore.read_text(encoding="utf-8") if ignore.exists() else ""
-    if args.command == "init" and ".claude/runtime/" in existing_ignore.splitlines():
-        errors.extend(runtime_ignore_errors(target, existing_ignore))
-    attributes = safe_path(target, ".gitattributes")
-    if attributes.exists() and not attributes.is_file():
+    existing_ignore = decoded(ignore_data) if ignore_state else ""
+    if args.command == "init":
+        errors.extend(runtime_ignore_errors(target, existing_ignore, allow_missing_rule=True))
+    attributes_data, attributes_state = observe_file(target, ".gitattributes", observed)
+    if attributes_state == NOT_REGULAR:
         raise ValueError(".gitattributes is not a regular file")
-    existing_attributes = attributes.read_text(encoding="utf-8") if attributes.exists() else ""
+    existing_attributes = decoded(attributes_data) if attributes_state else ""
     # Preserve a team's existing instruction file. A path-scoped additive entry
     # carries the Lintel pointer instead; unowned files are never adopted silently.
     entry = ".github/copilot-instructions.md"
-    if safe_path(target, entry).exists() and entry not in old:
+    if observe_file(target, entry, observed)[1] is not None and entry not in old:
         files.pop(entry, None)
     roots = sorted({registry["surfaces"][client]["discovery"]["root"] for client in clients
                     if registry["surfaces"][client]["discovery"]["root"]})
@@ -938,13 +1050,13 @@ def main(universal: bool = False) -> None:
     if entry in files:
         attribute_rules.append(".github/copilot-instructions.md text eol=lf")
     for relative in sorted(set(files) | set(old) | set(seeds)):
-        path = safe_path(target, relative)
-        if path.exists() and not path.is_file():
+        state = observe_file(target, relative, observed)[1]
+        if state == NOT_REGULAR:
             errors.append(f"Not a regular file: {relative}")
             continue
         if relative in seeds:
             continue
-        actual = digest(path.read_bytes()) if path.is_file() else None
+        actual = state["sha256"] if state else None
         if relative in old and actual not in (None, old[relative]):
             errors.append(f"Modified managed file (preserved): {relative}")
         elif relative not in old and actual is not None:
@@ -959,7 +1071,7 @@ def main(universal: bool = False) -> None:
                 errors.append(f"Obsolete managed file: {relative}")
     if args.command == "check":
         for relative in seeds:
-            if not safe_path(target, relative).is_file():
+            if observe_file(target, relative, observed)[1] in (None, NOT_REGULAR):
                 errors.append(f"Missing foundation file: {relative}")
         if not old:
             errors.append("Adapter inventory is missing; run init")
@@ -972,35 +1084,47 @@ def main(universal: bool = False) -> None:
     if args.command == "check":
         print(f"Lintel kit verified: {len(files)} managed files; {mode} source; clients={','.join(clients)}; no live-host validation.")
         return
-    # Everything above is read-only. Only write after the entire update passes.
+    # The adapter still owns selection and protected-file policy. The shared
+    # primitive receives only this fully preflighted, exact byte mutation plan.
+    changes = {}
     for relative, data in sorted(files.items()):
-        path = safe_path(target, relative)
-        if not path.exists() or path.read_bytes() != data:
-            atomic_write(path, data)
+        current, state = observe_file(target, relative, observed)
+        if state is None or current != data:
+            changes[relative] = data
     for relative, data in block_updates.items():
-        path = safe_path(target, relative)
-        if not path.exists() or path.read_bytes() != data:
-            atomic_write(path, data)
+        current, state = observe_file(target, relative, observed)
+        if state is None or current != data:
+            changes[relative] = data
     for relative, data in seeds.items():
-        path = safe_path(target, relative)
-        if not path.exists():
-            atomic_write(path, data)
+        if observe_file(target, relative, observed)[1] is None and relative not in block_updates:
+            changes[relative] = data
     for relative in sorted(set(old) - set(files)):
-        path = safe_path(target, relative)
-        if path.exists():
-            path.unlink()
+        if observe_file(target, relative, observed)[1] is not None:
+            changes[relative] = None
     if ".claude/runtime/" not in existing_ignore.splitlines():
         separator = "\n" if existing_ignore.endswith("\n") else "\n\n"
-        atomic_write(ignore, (existing_ignore + separator + "# Lintel local session state\n.claude/runtime/\n").encode("utf-8"))
+        changes[".gitignore"] = (existing_ignore + separator + "# Lintel local session state\n.claude/runtime/\n").encode("utf-8")
     missing_rules = [rule for rule in attribute_rules if rule not in existing_attributes.splitlines()]
     if missing_rules:
         separator = "\n" if existing_attributes.endswith("\n") else "\n\n"
-        atomic_write(attributes, (existing_attributes + separator + "# Lintel portable adapter kit\n" + "\n".join(missing_rules) + "\n").encode("utf-8"))
+        changes[".gitattributes"] = (existing_attributes + separator + "# Lintel portable adapter kit\n" + "\n".join(missing_rules) + "\n").encode("utf-8")
     inventory = {"schema_version": SCHEMA, "source_mode": mode, "hooks_installed": False,
                  "clients": clients,
                  "blocks": block_hashes,
                  "files": {relative: digest(data) for relative, data in sorted(files.items())}}
-    atomic_write(safe_path(target, INVENTORY), text_bytes(json.dumps(inventory, indent=2, sort_keys=True)))
+    inventory_bytes = text_bytes(json.dumps(inventory, indent=2, sort_keys=True))
+    current_inventory, inventory_state = observe_file(target, INVENTORY, observed)
+    if inventory_state is None or current_inventory != inventory_bytes:
+        changes[INVENTORY] = inventory_bytes
+    # Final consumer admission: guards are rechecked here; write expectations are
+    # the planning observations, enforced again by unchanged apply_files.
+    expected = admitted_expectations(target, observed, changes)
+    modes = {relative: None if data is None else expected[relative]["mode"] if expected[relative] else 0o600
+             for relative, data in changes.items()}
+    result = apply_files(target, store, changes, expected, modes, label="repository adapter publication",
+                         final_paths=[INVENTORY] if INVENTORY in changes else [])
+    if result["id"]:
+        print(f"Verified file transaction: {result['id']}; recovery store: {result['store']}")
     print(f"Lintel kit ready: {len(files)} managed files; {mode} source; clients={','.join(clients)}. Review the managed inventory and foundation diff.")
     print("Start a new host session and inspect its discovery UI, or read .github/lintel/START.md explicitly. No hooks or host permissions were changed.")
 

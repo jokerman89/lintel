@@ -1,145 +1,69 @@
 ---
 name: pack-switch
 layer: foundation
-description: Use to change which pack is active — switching the identity that drives voice, compliance, persona, and roles. Validates the target pack, records it as active, and audits the switch. Reach for it when work calls for a different company or compliance context than the one currently loaded.
+description: Use to explicitly switch the effective pack through the structured profile lifecycle, preserving required policy, configured paths and generation-bound recovery.
 color: green
 tools: Read, Write, Bash
 voice: internal
 cli_support: [claude-code, codex]
 ---
 
-You are the PACK-SWITCH skill — switches which pack the operator's cycles read from.
+# Pack switch
 
-## What this skill does
-
-Writes `~/.lintel/packs/active-pack` to the new pack name. The next session picks up the new pack; the current session keeps its cached pack (per pack-resolver semantics in [pack-resolver.md](../../docs/concepts/pack-resolver.md)).
-
-## When to use
-
-- Operator moves from one customer/team domain to another
-- Operator wants to test a newly created pack
-- After running `/li:v4-migrate` (which recommends pack-switch as the final step)
-
-## When NOT to use
-
-- Mid-cycle — switch takes effect at NEXT session; the current cycle ignores
-- One-off override for a single workflow — use `--mode` or `--pack <name>` flags
+Change policy context only for the selected working repository and configured operator
+store. Follow [lifecycle paths](../../docs/lifecycle.md); a bare install, source bundle,
+working target and profile pointer are different things.
 
 ## Workflow
 
-### Step 1 — Resolve target pack
+1. Read the current `profile-status`, then `pack-validate <target>` through the source-owned
+   helper. Show the current and requested effective voice, compliance, navigation, persona,
+   role and extension fields. A changed policy can invalidate the current plan and review.
+2. Establish authorization for this target and reason. An explicit operator switch is
+   already authorization; ask only for a missing decision. Never replace a repository's
+   required pack or silently remove `LINTEL_PROFILE_PACK` to make the switch succeed.
+3. Run the actual helper and retain its exit status:
+
+   ```bash
+   bash "$LINTEL_SOURCE_ROOT/bin/li-lifecycle" \
+     --source "$LINTEL_SOURCE_ROOT" --repo "$LINTEL_REPO_ROOT" \
+     pack-switch "$target" --reason "$reason"
+   ```
+
+4. Report `changed`, the effective pack, actual configured pointer and full returned
+   reference: schema_version, context_id, generation, digest, name and version. A repeated
+   switch to the already effective target is a verified no-op, not a new activation.
+5. Carry the returned reference into subsequent work only as part of this explicit switch.
+   Older handoffs must fail their reference check; replan affected work and obtain fresh
+   review. Ordinary bootstrap verifies a pin and never silently adopts the new generation.
+
+The helper consumes `LINTEL_PACKS_DIR` and `LINTEL_ACTIVE_PACK_FILE`, validates before
+writing, atomically writes the configured pointer and invokes the accepted structured
+rebind API. Profile history retains the previous generation and reason. Do not maintain
+another parser, raw cache, home pointer or independent hand-written audit receipt.
+
+## Drift and interrupted switching
+
+`PROFILE_DRIFT`, missing history, invalid required packs and incompatible schema/product/
+capability constraints are unresolved errors, never neutral success. A failed binding
+after the pointer write is `PROFILE_SWITCH_INCOMPLETE`, not "active next session".
+Preserve both pointer and history, inspect the error, then use an explicitly reasoned
+rebind through the same helper:
 
 ```bash
-target="${1:?usage: /li:pack-switch <pack-name>}"
-source "$REPO_ROOT/lib/pack-resolver.sh"
-
-if ! validate_pack "$target" 2>&1; then
-  echo "ERROR: pack '$target' does not validate; switch refused"
-  echo "Hint: /li:pack-list to see valid packs"
-  exit 1
-fi
+bash "$LINTEL_SOURCE_ROOT/bin/li-lifecycle" \
+  --source "$LINTEL_SOURCE_ROOT" --repo "$LINTEL_REPO_ROOT" \
+  profile-rebind --pack "$target" --reason "$recovery_reason"
 ```
 
-### Step 2 — Read current active
+Do not automatically roll back, delete a context, forge a reference or retry against a
+different target. The legacy `clear_pack_cache` accessor remains an explicit reasoned
+rebind compatibility path, not a way to discard history.
 
-```bash
-LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
-ACTIVE_FILE="$LINTEL_HOME/packs/active-pack"
-mkdir -p "$LINTEL_HOME/packs" 2>/dev/null
+## Extension and host boundary
 
-current="_default"
-[ -f "$ACTIVE_FILE" ] && current=$(head -1 "$ACTIVE_FILE" | tr -d '[:space:]')
-```
-
-### Step 3 — Confirm switch (when target differs)
-
-If `current == target`: no-op, surface "already active" and exit DONE.
-
-Otherwise surface diff:
-
-```
-Pack switch:
-  Current: <current>
-  Target:  <target>
-
-  Effective at: next session (current session keeps cached pack)
-  Operator's workflows after switch: <target>'s defaults
-  
-  Proceed? [Y/n]
-```
-
-### Step 4 — Write active-pack file + audit
-
-```bash
-echo "$target" > "$ACTIVE_FILE"
-
-ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-printf '{"ts":"%s","kind":"pack_switched","from":"%s","to":"%s","operator":"%s"}\n' \
-  "$ts" "$current" "$target" "$(whoami)" \
-  >> "$LINTEL_HOME/audit/pack-lifecycle.jsonl"
-
-echo "✓ Active pack: $target (next session)"
-```
-
-### Step 5 — Surface effective changes
-
-Read both packs and surface fields that differ:
-
-```
-Effective field changes (next session):
-  voice.default_tier: <old> → <new>
-  compliance.mode:    <old> → <new>
-  navigation.default_workflow: <old> → <new>
-  (etc.)
-```
-
-Operator sees what changes before living with the new pack.
-
-### Step 5b — Surface extension-pack surface (ADR-0018)
-
-If the target is an **extension pack** it brings its OWN skills/agents/hooks + a workflow — not just identity. Read the TARGET manifest with the shared `_pack_ext_field` parser (block-scoped + comment-stripped + truthy-alias aware — one parser, not three; `resolve_pack_field`/`pack_is_extension` read the *active* cached pack, which is not the target until next session):
-
-```bash
-tgt_dir=$(_pack_dir "$target") && tgt="$tgt_dir/pack.yaml"
-case "$(_pack_ext_field "$tgt" is_extension)" in true|yes|on)
-  ns=$(_pack_ext_field "$tgt" namespace)
-  wf=$(_pack_ext_field "$tgt" workflow)
-  echo "Extension pack '$target' — brings its own surface (active next session):"
-  echo "  namespace: /$ns:    workflow: /$ns:$wf  (run the full pack cycle)"
-  echo "  ships: skills + agents + hooks"
-;; esac
-```
-
-> An extension pack must ALSO be installed as a plugin (`/plugin install <name>`) for its skills/agents/hooks to load. `pack-switch` activates its identity and makes Lintel aware of it; the plugin install provides the executable surface.
-
-## Pause-points
-
-- Step 3: confirm switch when current ≠ target (skipped with `--auto`)
-
-## Integration
-
-**Reads:**
-- `lib/pack-resolver.sh` (validation)
-- `~/.lintel/packs/<target>/pack.yaml` (field-diff)
-- `~/.lintel/packs/<current>/pack.yaml` (field-diff)
-
-**Writes:**
-- `~/.lintel/packs/active-pack`
-- `~/.lintel/audit/pack-lifecycle.jsonl`
-
-## Anti-patterns
-
-- **Skipping field-diff surface** — operator deserves to see what changes
-- **Switching mid-cycle and expecting current session to update** — per resolver semantics, cache survives until next session
-- **Auto-switching after `/li:pack-create`** — operator decides
-
-## Mid-session override
-
-If the operator REALLY wants the current session to pick up the new pack:
-
-```bash
-# Run clear_pack_cache from a shell that sources lib/pack-resolver.sh
-source $REPO_ROOT/lib/pack-resolver.sh && clear_pack_cache
-```
-
-This is documented but not automated — explicit override per L-004.
+An extension pack still contributes its declared namespace, workflow and specialist
+methods. Show those from the validated target values, including which surfaces it
+declares. Identity selection does **not** install/discover plugins, register hooks, grant
+permissions, copy private packs or switch models. Use the actual host-supported extension
+operation separately with its own authorization and observed discovery evidence.

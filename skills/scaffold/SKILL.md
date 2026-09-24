@@ -1,126 +1,77 @@
 ---
 name: scaffold
 layer: foundation
-description: Use when setting up a new or existing repo to work with Lintel to install the base templates interactively — the repo instruction file, the lessons store, the evolution log, and the decisions directory. Reach for it to bootstrap the per-repo scaffolding the disciplines depend on.
+description: Use to initialize or inspect repository foundations through the owned scaffold helper, preserving existing instructions, memory and explicit profile boundaries.
 color: cyan
 tools: Read, Bash, Edit, Write, Glob
 voice: internal
 cli_support: [claude-code, codex]
 ---
 
-You are the li-scaffold skill.
+# Scaffold
 
-## What this skill does
+Set up a new or existing repository with the current foundation, AGENTS/CLAUDE entry
+templates, memory index, lessons/personas/working state, decisions, plan and swarm
+templates. Keep the established base-initialization use case; use the actual helper
+instead of a second copy/render recipe.
 
-Sets up a new repo (or initializes scaffolding in existing repo) with Lintel's Category B templates: CLAUDE.md (from template + repo-specific variables), CORE-PRINCIPLES.md, EVOLUTION.md, EVOLUTION-LOG.md, .claude/memory/{lessons,working-state,personas}.md, .claude/plans/todo.md, .claude/decisions/{README,TEMPLATE}.md, TEMPLATE-skill.md. (Subagents come from the plugin fleet — no repo-local `.claude/agents/`.)
+## Resolve the operation
 
-This is how new repos get Lintel defaults inside 30 seconds.
+Follow [lifecycle paths](../../docs/lifecycle.md). Resolve helper code at the approved
+`LINTEL_SOURCE_ROOT`; the explicit target alone selects where files change. Do not switch
+to a different repository by basename, fetch a source implicitly or use the working
+target's executable files as Lintel's implementation.
 
-## When to use
+Reuse supplied name, intent and target. Ask only for missing decisions. `--mode` and
+`--voice` are rendered preferences, not enabled controls. `--pack` must resolve through the
+structured policy contract. Required caller and target policy cannot be silently
+replaced by neutral defaults or by an identically named pack with different content.
+The historical `--compliance` spelling returns an explicit unsupported-policy error
+before writes; it never had a control implementation. Use validated pack policy instead
+of treating a `full`/`minimal` label as enforcement.
 
-- Brand-new repo, no CLAUDE.md yet
-- Existing repo joining Lintel standards
-- Per-engagement template initialization
+## Inspect, then initialize
 
-## When NOT to use
-
-- Repo already has CLAUDE.md (warn before overwrite)
-- Scratch / throwaway repo (outside scope; recommend lighter setup)
-
-## Workflow
-
-1. **Verify target.** Current cwd = target repo? Confirm via AskUserQuestion.
-
-2. **Check for collisions.** Files that would be created or overwritten:
-   - `CLAUDE.md` — overwrite or merge?
-   - `.claude/memory/` — exists with content?
-   - `.claude/decisions/` — exists?
-   Recommend backup if collisions.
-
-3. **Locate Lintel scaffolding source.**
-   - Primary: `~/.lintel/scaffolding/01-foundation/`
-   - Fallback: clone or fetch from `jokerman89/lintel`
-
-4. **Gather repo-specific variables (AskUserQuestion):**
-   - Repo name
-   - Team / owner
-   - Engagement type (customer-engagement / internal-tool / mvp / research)
-   - Default voice tier (resolved from the active pack — `internal` by default)
-   - Compliance level (resolved from the active pack — `advisory` by default)
-   - GitHub URL (if known)
-
-5. **Render CLAUDE.md from template.** Substitute variables. Result: project-specific CLAUDE.md.
-
-6. **Copy other scaffolding files.**
-   ```bash
-   cp scaffolding/01-foundation/CORE-PRINCIPLES.md .
-   cp scaffolding/01-foundation/EVOLUTION.md .
-   cp scaffolding/01-foundation/EVOLUTION-LOG.md .
-   mkdir -p .claude/memory .claude/plans .claude/decisions
-   cp scaffolding/01-foundation/.claude/memory/* .claude/memory/   # lessons + working-state + personas + personas-example
-   cp scaffolding/01-foundation/.claude/plans/* .claude/plans/
-   cp scaffolding/01-foundation/.claude/decisions/* .claude/decisions/
-   # No .claude/agents/ — the subagent fleet ships with the plugin; a repo-local agent
-   # would shadow the fleet's same-named one (removed 2026-06-14, ADR-0015 subtraction).
-   cp scaffolding/01-foundation/.claude/SUBAGENT-GUIDE.md .claude/
-   cp scaffolding/01-foundation/TEMPLATE-skill.md .
-   cp scaffolding/01-foundation/TEMPLATE-agent.md .
-   ```
-
-7. **Initial commit (interactive — confirm with operator):**
-   ```bash
-   git add CLAUDE.md CORE-PRINCIPLES.md EVOLUTION.md EVOLUTION-LOG.md .claude/ TEMPLATE-*.md
-   git commit -m "chore: scaffold Lintel base via li-scaffold"
-   ```
-
-8. **Add compliance template (optional).** If the active pack ships compliance scaffolding (`resolve_pack_field compliance.hooks` non-empty), apply the pack's compliance templates too. The `_default` pack ships none.
-
-9. **Report.** Files created + next steps.
-
-## Output format
-
-```
-LINTEL-SCAFFOLD: <repo name>
-
-Variables collected:
-- Repo: <name>
-- Team: <team>
-- Engagement type: <type>
-- Voice tier default: <tier>
-- Compliance level: <level>
-
-Files created:
-- ✓ CLAUDE.md (rendered from template)
-- ✓ CORE-PRINCIPLES.md
-- ✓ EVOLUTION.md, EVOLUTION-LOG.md
-- ✓ .claude/memory/{lessons,working-state,personas}.md
-- ✓ .claude/plans/todo.md
-- ✓ .claude/decisions/{README,TEMPLATE}.md
-- ✓ .claude/memory/personas-example.md
-- ✓ .claude/SUBAGENT-GUIDE.md (subagents come from the plugin fleet — no repo-local agents)
-- ✓ TEMPLATE-skill.md, TEMPLATE-agent.md
-
-If the active pack ships compliance scaffolding:
-- ✓ pack-provided compliance docs (none in _default)
-
-Commit: <SHA>
-
-Next steps:
-- [ ] Review CLAUDE.md, adjust project-specific sections
-- [ ] Customize .claude/memory/personas.md with engagement-specific personas
-- [ ] Install Lintel plugin for your CLI: see docs/per-cli/
-- [ ] First /qa to verify setup
+```bash
+bash "$LINTEL_SOURCE_ROOT/bin/li-scaffold" check --target "$target"
+bash "$LINTEL_SOURCE_ROOT/bin/li-scaffold" init --target "$target" --name "$name"
 ```
 
-## Edge cases
+`check`/`--dry-run` report the actual planned create/replace/delete paths without writing.
+The helper preflights all paths and collisions, including late links, before publication.
+Existing project instructions and seed files stay user-owned. Legacy data is migrated
+only through the same verified transaction, never overwritten by new template seeds.
 
-- **Existing CLAUDE.md** — backup first, merge interactively, OR offer dry-run preview.
-- **No Lintel scaffolding source available** — recommend `git clone jokerman89/lintel ~/.lintel`.
-- **Non-git directory** — recommend `git init` first.
-- **Customer wants to fork Lintel** — see `docs/compliance.md` for what they'd need to change.
+The legacy Claude `autoMemoryDirectory` pointer is a repository-local setting with
+preserved surrounding configuration. Use `--no-memory-pointer` when that client-specific
+setting is not wanted. A declared path is not proof of live host memory behavior.
 
-## Why this matters
+For a native repository adapter, use `--client <exact-surface>` (repeatable) or the
+preserved `--copilot` alias. These delegate to the existing ownership engine; they cannot
+be combined with unsupported legacy rendering options. They do not register hooks,
+change permissions, provision credentials or install a company pack.
 
-Without this skill, every new repo starts CLAUDE.md from scratch. With it, every new repo starts with proven defaults. 30-second setup vs 30-minute setup.
+## Context and recovery
 
-This is Category B (Repo-scaffolding) in action — the templates Lintel curates get applied to make every new project consistent.
+When an existing caller context is supplied, the helper verifies that pin against its
+original repository/home/source. An explicit new target is separately resolved, with a
+required caller policy retained as an operation constraint. It does not transplant the
+parent reference, change parent state or create a child profile generation. Start work
+in the child with its own explicit bootstrap.
+
+Record the helper's exact result and transaction/store identity. Its staged byte plan
+uses P03 snapshots and explicit, conflict-preserving restore. On interruption, keep the
+error and receipt; do not report success, retry into partial state or automatically roll
+back. Use the documented `li-managed-transaction.py inspect|recover` command for the exact
+target/store/ID. Later user edits and consumed recovery permissions are refused.
+
+## Finish
+
+Verify the returned changed/preserved files and relevant consumer checks. Leave Git
+staging and commits to the authorized task; the helper never stages an unrelated index.
+Preserve existing project governance. Additional compliance assets, private exports and
+hook/host activation each need their own configured scope and evidence.
+
+The internal-tool and MVP aliases add application intent and working-flow acceptance to
+this base operation. Foundation files alone are not a functioning application or a
+verified live client session.

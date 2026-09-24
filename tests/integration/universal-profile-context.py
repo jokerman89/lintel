@@ -49,6 +49,7 @@ class ProfileLifecycle(unittest.TestCase):
             "lib/pack-resolver.sh", "lib/profile_context.py", "lib/native_paths.py",
             "lib/profile-context-schema.json", "lib/pack-schema.yaml",
             "lib/copilot-env.sh", "lib/paths.sh", "lib/orientator-routing.sh", "bin/_audit.sh",
+            "lib/context_safety.py", "bin/li-lifecycle", "bin/li-lifecycle.py",
             "packs/_default/pack.yaml", ".claude-plugin/plugin.json",
         ):
             destination = self.source / relative
@@ -1224,21 +1225,93 @@ finally:
         self.assertFalse((self.target / "profile-code-marker").exists())
 
     def test_validation_skill_executes_shared_contract_without_activation(self):
-        self.pack("strict", 'requires_lintel_product: ">=0.9.0 <1.0.0"\n')
+        manifest = self.pack("strict", 'requires_lintel_product: ">=0.9.0 <1.0.0"\n')
         self.require("strict")
+        self.select("_default")
+        (self.home / "profile.yaml").write_bytes(b"# Operator-owned preference\nrole_active: none\n")
+        host_home = self.base / "host home"
+        host_home.mkdir()
+        env = dict(self.env, HOME=str(host_home), USERPROFILE=str(host_home))
+        for name in ("HOME", "USERPROFILE", "LINTEL_SOURCE_ROOT", "LINTEL_REPO_ROOT",
+                     "LINTEL_HOME", "LINTEL_PACKS_DIR", "LINTEL_ACTIVE_PACK_FILE", "LINTEL_AUDIT_DIR"):
+            self.assertTrue(Path(env[name]).resolve().is_relative_to(self.base.resolve()), name)
         skill = (ROOT / "skills/pack-validate/SKILL.md").read_text(encoding="utf-8")
         blocks = re.findall(r"```bash\n(.*?)\n```", skill, re.DOTALL)
-        self.assertEqual(len(blocks), 3)
-        result = self.shell("\n".join(blocks), source_resolver=False)
-        self.assertIn("PASS: declared runtime contracts passed", result.stdout)
-        self.assertIn("live host/company controls remain unverified", result.stdout)
+        self.assertEqual(len(blocks), 1)
+
+        def snapshot():
+            return {path.relative_to(self.base).as_posix(): hashlib.sha256(path.read_bytes()).hexdigest()
+                    for path in self.base.rglob("*") if path.is_file()}
+
+        def validate(target="", *, reference=None, success=True):
+            invocation = dict(env, target=target)
+            if reference is not None:
+                invocation["LINTEL_PROFILE_REFERENCE"] = json.dumps(reference)
+            before = snapshot()
+            result = self.shell(blocks[0], env=invocation, success=success, source_resolver=False)
+            self.assertEqual(snapshot(), before, "Validation changed source, target, profile or host-home bytes")
+            return json.loads(result.stdout) if success else result
+
+        product = json.loads((self.source / ".claude-plugin/plugin.json").read_text(encoding="utf-8"))["version"]
+        for target in ("", "strict"):
+            with self.subTest(binding="unbound", target=target or "selected"):
+                result = validate(target)
+                self.assertEqual(result["name"], "strict")
+                self.assertEqual(result["status"], "valid")
+                self.assertEqual(result["values"]["version"], "1.2.3")
+                self.assertEqual(result["values"]["voice"]["default_tier"], "internal")
+                self.assertEqual(result["values"]["compliance"],
+                                 {"mode": "hard", "hooks": ["synthetic-evidence"]})
+                self.assertEqual(result["values"]["navigation"]["default_workflow"], "controlled")
+                self.assertEqual(result["compatibility"], [{
+                    "name": "strict", "schema_version": "1", "legacy_schema": True,
+                    "legacy_marker": None, "product_version": product,
+                    "product_requirement": ">=0.9.0 <1.0.0", "capabilities": {}, "status": "compatible",
+                }])
+                self.assertIsNone(result["profile_reference"])
+                self.assertEqual(result["host_activation"], "not performed")
         self.assertFalse(list((self.home / "sessions").glob("**/current-profile.json")))
-        (self.target / ".claude/profile-requirements.json").write_text(
-            '{"schema_version":1,"required_pack":null}', encoding="utf-8",
-        )
-        invalid = self.shell("\n".join(blocks), success=False, source_resolver=False)
-        self.assertIn("PROFILE_REQUIRED", invalid.stderr)
+        self.assertFalse((self.target / ".claude/runtime/profiles/selected.json").exists())
+
+        requirements = self.target / ".claude/profile-requirements.json"
+        valid_requirements = requirements.read_bytes()
+        requirements.write_text('{"schema_version":1,"required_pack":null}', encoding="utf-8")
+        for target in ("", "strict", "_default"):
+            with self.subTest(required_policy="malformed", target=target or "selected"):
+                invalid = validate(target, success=False)
+                self.assertIn("PROFILE_REQUIRED", invalid.stderr)
         self.assertFalse(list((self.home / "sessions").glob("**/current-profile.json")))
+        requirements.write_bytes(valid_requirements)
+
+        # Only the explicit producer binds a pin; the actual skill must verify it without rebinding.
+        reference = json.loads(self.shell("profile_context_reference", env=env).stdout)
+        self.assertEqual(reference["name"], "strict")
+        for target in ("", "strict"):
+            result = validate(target, reference=reference)
+            self.assertEqual(result["profile_reference"], reference)
+            self.assertEqual(result["host_activation"], "not performed")
+
+        original, times = manifest.read_bytes(), manifest.stat()
+        manifest.write_bytes(original + b"# same-mtime required-policy drift\n")
+        os.utime(manifest, ns=(times.st_atime_ns, times.st_mtime_ns))
+        for target in ("", "_default"):
+            with self.subTest(binding="drifted", target=target or "selected"):
+                invalid = validate(target, reference=reference, success=False)
+                self.assertIn("PROFILE_DRIFT", invalid.stderr)
+        manifest.write_bytes(original)
+        os.utime(manifest, ns=(times.st_atime_ns, times.st_mtime_ns))
+        self.assertEqual(validate(reference=reference)["profile_reference"], reference)
+
+        current = next((self.home / "sessions").glob("**/current-profile.json"))
+        original_pin = current.read_bytes()
+        current.unlink()
+        for target in ("", "_default"):
+            with self.subTest(binding="missing", target=target or "selected"):
+                invalid = validate(target, reference=reference, success=False)
+                self.assertIn("PROFILE_CONTEXT_MISSING", invalid.stderr)
+                self.assertFalse(current.exists())
+        current.write_bytes(original_pin)
+        self.assertEqual(validate(reference=reference)["profile_reference"], reference)
 
     def test_explicit_roots_and_target_data_are_preserved(self):
         self.pack("strict", root=self.target / "packs")

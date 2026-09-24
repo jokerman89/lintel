@@ -49,7 +49,7 @@ Total skills: 127
 | [`/li:devex-review`](devex-review/SKILL.md) | Review the built developer experience — scripts, onboarding, error messages, time-to-hello-world. |
 | [`/li:dh`](dh/SKILL.md) | Use for devops and hosting depth — deployment plans, rollback strategy, observability specs, SLI/SLO budgets, capacity … |
 | [`/li:discover`](discover/SKILL.md) | Use after DEFINE, before PLAN, to gather context before planning — maps the codebase, surfaces relevant ADRs and lesson… |
-| [`/li:doctor`](doctor/SKILL.md) | Use when something seems off with the Lintel install, or to confirm it's healthy, to run a cross-CLI health check — ver… |
+| [`/li:doctor`](doctor/SKILL.md) | Use to diagnose source, target, profile and installed-file integrity while keeping actual host activation explicitly un… |
 | [`/li:document-generate`](document-generate/SKILL.md) | Generate documentation from code — engineering reference, customer guides, or onboarding tutorials. |
 | [`/li:eval`](eval/SKILL.md) | Run the active pack's voice TEST against its voice CORPUS — per-cell accuracy → CALIBRATION.md. |
 | [`/li:fix`](fix/SKILL.md) | Use for a known bug with a clear fix path that needs to ship now — runs the abbreviated SENSE, BUILD, REVIEW, SHIP path… |
@@ -74,7 +74,7 @@ Total skills: 127
 | [`/li:generate-write`](generate-write/SKILL.md) | Produce content.md (slide/section bodies + bullets + titles) and speaker-notes.md from outline.md. Applies voice corpus… |
 | [`/li:generate-xlsx`](generate-xlsx/SKILL.md) | Produce an editable, source-backed workbook through available native tools, verifying formulas, actual recalculation, p… |
 | [`/li:handoff-size-check`](handoff-size-check/SKILL.md) | Handoff-size warning tied to the 500k cap. Per v3.6 backlog 3.2 — elephant-hint and token-cap as the same mechanism fro… |
-| [`/li:health`](health/SKILL.md) | Lintel install + upstream status check. Verifies layers, manifest, hooks, upstream pins, CLI shims. |
+| [`/li:health`](health/SKILL.md) | Inspect Lintel lifecycle health through doctor, with explicit installed-file, provenance and host-activation boundaries. |
 | [`/li:help`](help/SKILL.md) | List the Lintel skills + agents + hooks available in this session. Filter by category, voice tier, or CLI support. |
 | [`/li:hooks-status`](hooks-status/SKILL.md) | Reader for hooks.jsonl — surface active-vs-dead hooks + override patterns + trigger counts. Closes the hooks-observatio… |
 | [`/li:instruction-parity-check`](instruction-parity-check/SKILL.md) | Use to verify shared session protocol equality and client-entry links without overwriting project prose or confusing si… |
@@ -87,13 +87,13 @@ Total skills: 127
 | [`/li:lessons-surface`](lessons-surface/SKILL.md) | Use before or during a task to pull up prior lessons relevant to it — searches the lessons store by keyword and context… |
 | [`/li:maintenance`](maintenance/SKILL.md) | On-demand maintenance — force-compact + static-path monitoring + token-cost simulation. Operator-request 5.3. Builds on… |
 | [`/li:make-pdf`](make-pdf/SKILL.md) | Convert an authorized URL, Markdown file or HTML through actual browser print, preserving source and separating text/pa… |
-| [`/li:migrations`](migrations/SKILL.md) | Surface pending v4.x migrations at SENSE. Sister to /li:status. Read-only — surfaces operator-callsites still on deprec… |
+| [`/li:migrations`](migrations/SKILL.md) | Read the installed-source migration catalog against the selected target, preserving overdue, unknown and historical rec… |
 | [`/li:office-hours`](office-hours/SKILL.md) | Use to turn a rough problem statement into a structured, decision-gated design doc ready for engineering review. Reach … |
 | [`/li:open-managed-browser`](open-managed-browser/SKILL.md) | Use to open an explicitly owned browser session for operator debugging, or check a real provider without touching perso… |
 | [`/li:orientator`](orientator/SKILL.md) | Phase 3 v4.0 — lightweight routing agent invoked at SENSE. Reads operator prompt + active pack's navigation policy, rec… |
 | [`/li:pack-create`](pack-create/SKILL.md) | Use to create a blank, inherited, or cloned Lintel pack and validate it before activation. |
-| [`/li:pack-list`](pack-list/SKILL.md) | Lists every pack discoverable in ~/.lintel/packs/ and repo packs/ — shows name, extends, voice tier, compliance mode, a… |
-| [`/li:pack-switch`](pack-switch/SKILL.md) | Use to change which pack is active — switching the identity that drives voice, compliance, persona, and roles. Validate… |
+| [`/li:pack-list`](pack-list/SKILL.md) | List configured-store, repository and installed-source packs with resolver precedence, validation results and the actua… |
+| [`/li:pack-switch`](pack-switch/SKILL.md) | Use to explicitly switch the effective pack through the structured profile lifecycle, preserving required policy, confi… |
 | [`/li:pack-validate`](pack-validate/SKILL.md) | Validate a pack before activation or after editing its manifest. Checks effective required fields and inheritance with … |
 | [`/li:pair-agent`](pair-agent/SKILL.md) | Use to pair with an available specialist context or a durable external handoff, retaining scoped turns and honest revie… |
 | [`/li:perf-mode`](perf-mode/SKILL.md) | Advise on bounded working sets, context observations and checkpoint strategy for heavy phases; never changes model capa… |
@@ -106,7 +106,7 @@ Total skills: 127
 | [`/li:plan-devex-review`](plan-devex-review/SKILL.md) | Developer experience gaps review. Slow CI, painful deploys, bad local dev, attrition signals. |
 | [`/li:plan-eng-review`](plan-eng-review/SKILL.md) | Use to review a plan or change for engineering soundness before it ships — covers architecture, code quality, test cove… |
 | [`/li:plan-tune`](plan-tune/SKILL.md) | Adjust which AskUserQuestion prompts auto-decide vs ask. Per-question preference tuning. |
-| [`/li:profile-switch`](profile-switch/SKILL.md) | Toggle the Lintel install on/off fast + swap to a previous setup without touching the repo. Operator-request 5.2. |
+| [`/li:profile-switch`](profile-switch/SKILL.md) | Inspect host install state and guide explicitly supported activation or owned snapshot recovery, without inventing plug… |
 | [`/li:qa`](qa/SKILL.md) | Use when you need to know whether the code works and to get the test suite green — runs the full suite, parses failures… |
 | [`/li:qa-only`](qa-only/SKILL.md) | Read-only test run — reports failures, never edits. For ship-gate verification. |
 | [`/li:research`](research/SKILL.md) | Composite shortcut for research-dive — runs SENSE + DEFINE + DISCOVER, no BUILD/SHIP. For "understand before commit" mo… |
@@ -119,9 +119,9 @@ Total skills: 127
 | [`/li:roles-list`](roles-list/SKILL.md) | List all available roles (public + private, if accessible). Shows id, display name, scope, sensitivity, last-updated. |
 | [`/li:safe-install`](safe-install/SKILL.md) | Protect explicitly owned installation files with verified snapshots and conflict-preserving restore; announce recovery … |
 | [`/li:sc`](sc/SKILL.md) | Use for security and compliance depth — threat models, auth flows, secret management, dependency-security audits, compl… |
-| [`/li:scaffold`](scaffold/SKILL.md) | Use when setting up a new or existing repo to work with Lintel to install the base templates interactively — the repo i… |
-| [`/li:scaffold-internal-tool`](scaffold-internal-tool/SKILL.md) | Initialize an internal-tooling repo — CI, README, pack compliance hooks, no customer surface. |
-| [`/li:scaffold-mvp`](scaffold-mvp/SKILL.md) | Initialize a product-MVP repo — full structure + pack-driven compliance/voice/deploy wiring. |
+| [`/li:scaffold`](scaffold/SKILL.md) | Use to initialize or inspect repository foundations through the owned scaffold helper, preserving existing instructions… |
+| [`/li:scaffold-internal-tool`](scaffold-internal-tool/SKILL.md) | Create a working internal CLI, service, dashboard or script using the common owned foundation initializer and the proje… |
+| [`/li:scaffold-mvp`](scaffold-mvp/SKILL.md) | Initialize an MVP around its real users and first working journey, sharing the owned foundation helper and explicit pol… |
 | [`/li:scope`](scope/SKILL.md) | Use after SENSE, before DEFINE, when a request's size is ambiguous — turns a raw ask into a sized, disambiguated scope … |
 | [`/li:scrape`](scrape/SKILL.md) | Use to extract structured data from authorized pages with selector schemas, explicit pacing, visible failures and prior… |
 | [`/li:sense`](sense/SKILL.md) | Use at the very start of a task to read the situation before deciding how to work — detects operator intent, the active… |
@@ -136,5 +136,5 @@ Total skills: 127
 | [`/li:tq`](tq/SKILL.md) | Use for testing and QA-strategy depth — test-pyramid review, coverage audits, contract-test design, regression suites, … |
 | [`/li:uniformity`](uniformity/SKILL.md) | Read-only uniformity-contract dashboard — runs the Gate-M3 floor shape-test and points at the regenerable coverage matr… |
 | [`/li:usage-log`](usage-log/SKILL.md) | Append-only usage log for skill/agent invocations — manual writer (one audit_log line) plus reader reports. One log, no… |
-| [`/li:v4-migrate`](v4-migrate/SKILL.md) | Walks operator through v3.x → v4.0 migration — detects v3.x usage signals, recommends pack activation, optionally write… |
+| [`/li:v4-migrate`](v4-migrate/SKILL.md) | Retain explicit v3-to-v4 identity inspection and recovery through the current migration reader and structured pack swit… |
 | [`/li:welcome`](welcome/SKILL.md) | Use on first run to choose a useful task, inspect the actual client surface and take a proportionate plan, build, revie… |

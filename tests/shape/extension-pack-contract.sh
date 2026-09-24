@@ -120,12 +120,11 @@ PK="$SCAF/demo-pack"
 [ -f "$PK/.claude-plugin/plugin.json" ] && pass "plugin.json created" || fail "plugin.json missing"
 [ -f "$PK/pack.yaml" ] && pass "pack.yaml created" || fail "pack.yaml missing"
 grep -qE '^[[:space:]]*is_extension:[[:space:]]*true' "$PK/pack.yaml" 2>/dev/null && pass "scaffold is_extension:true" || fail "scaffold not is_extension:true"
-grep -qE '^[[:space:]]*namespace:[[:space:]]*demo([[:space:]]|$)' "$PK/pack.yaml" 2>/dev/null && pass "scaffold namespace set" || fail "scaffold namespace not set"
-grep -qE '^[[:space:]]*workflow:[[:space:]]*demo-forge' "$PK/pack.yaml" 2>/dev/null && pass "scaffold workflow set" || fail "scaffold workflow not set"
+[ "$(_pack_ext_field "$PK/pack.yaml" namespace)" = demo ] && pass "scaffold namespace set" || fail "scaffold namespace not set"
+[ "$(_pack_ext_field "$PK/pack.yaml" workflow)" = demo-forge ] && pass "scaffold workflow set" || fail "scaffold workflow not set"
 for d in skills agents hooks knowhow; do [ -d "$PK/$d" ] && pass "dir $d/ present" || fail "dir $d/ missing"; done
 # the scaffolded pack must validate via the resolver
-export LINTEL_PACKS_DIR="$SCAF"
-if validate_pack demo-pack 2>/dev/null; then pass "scaffolded pack validates"; else fail "scaffolded pack fails validate_pack"; fi
+if LINTEL_PACKS_DIR="$SCAF" validate_pack demo-pack 2>/dev/null; then pass "scaffolded pack validates"; else fail "scaffolded pack fails validate_pack"; fi
 
 # ── 4b. manifest-injection guard: hostile --description must not poison plugin.json ──
 echo ""; echo "[4b] scaffolder manifest-injection guard"

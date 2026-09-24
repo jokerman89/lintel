@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+# component: lifecycle-shell-entry
+# implements: ADR-0028, ADR-0029
+# intent: .claude/plans/universal-implementation/packages/P10.md
+# constraints: pass configured paths as arguments across the MSYS/native boundary
+# last_intent_review: 2026-09-20
+set -euo pipefail
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+SOURCE="${LINTEL_SOURCE_ROOT:-$(cd "$SCRIPT_DIR/.." && pwd -P)}"
+REPO="${LINTEL_REPO_ROOT:-$PWD}"
+DATA_HOME="${LINTEL_HOME:-$REPO/.claude/runtime/lintel-home}"
+PACKS="${LINTEL_PACKS_DIR:-$DATA_HOME/packs}"
+POINTER="${LINTEL_ACTIVE_PACK_FILE:-$PACKS/active-pack}"
+CONTEXT="${LINTEL_PROFILE_CONTEXT:-}"
+if [ -z "$CONTEXT" ] && [ -z "${LINTEL_PROFILE_REFERENCE:-}" ]; then
+  CONTEXT="${LINTEL_SESSION_ID:-${CLAUDE_SESSION_ID:-}}"
+fi
+if [ -n "${LINTEL_PRIVATE_ROLES_DIR:-}" ]; then
+  set -- --private-roles "$LINTEL_PRIVATE_ROLES_DIR" "$@"
+fi
+if [ -n "${LINTEL_RECOVERY_STORE:-}" ]; then
+  set -- --store "$LINTEL_RECOVERY_STORE" "$@"
+fi
+for candidate in python3 python; do
+  if command -v "$candidate" >/dev/null 2>&1 &&
+    "$candidate" -c 'import sys; assert sys.version_info >= (3, 9)' >/dev/null 2>&1; then
+    exec "$candidate" "$SOURCE/bin/li-lifecycle.py" \
+      --source "$SOURCE" --repo "$REPO" --home "$DATA_HOME" --packs "$PACKS" --pointer "$POINTER" \
+      --context "$CONTEXT" --context-file "${LINTEL_PROFILE_CONTEXT_FILE:-}" \
+      --reference "${LINTEL_PROFILE_REFERENCE:-}" --profile-pack "${LINTEL_PROFILE_PACK:-}" "$@"
+  fi
+done
+echo 'ERROR: lifecycle operations require a supported Python runtime; no operation was performed.' >&2
+exit 2

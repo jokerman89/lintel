@@ -17,24 +17,19 @@ block replaces its parent's whole block.
 
 ### 1. Validate the effective manifest
 
+Follow [lifecycle paths](../../docs/lifecycle.md). If no name was supplied, use the
+effective name from the helper's `profile-status`, not a hardcoded home pointer.
+Do not ignore a failed required-profile or stale-reference check.
+
 ```bash
-pack_source_root="${LINTEL_SOURCE_ROOT:?approved installed Lintel source is required}"
-source "$pack_source_root/lib/pack-resolver.sh" || exit $?
-if [ -n "${1:-}" ]; then
-  target="$1"
-else
-  target=$(get_active_pack_name) || exit $?
-fi
-verdict=PASS
-if validate_pack "$target"; then
-  echo "PASS: manifest, inheritance and declared schema/product/feature compatibility"
-else
-  verdict=FAIL
-  audit_log pack-lifecycle pack_validated "name=$target" "verdict=$verdict"
-  echo "FAIL: pack cannot be activated; correct the diagnostic above."
-  exit 1
-fi
+validation_args=(pack-validate)
+[ -z "${target:-}" ] || validation_args+=("$target")
+bash "$LINTEL_SOURCE_ROOT/bin/li-lifecycle" \
+  --source "$LINTEL_SOURCE_ROOT" --repo "$LINTEL_REPO_ROOT" "${validation_args[@]}"
 ```
+
+The result includes effective values and each ancestor's checked compatibility.
+Nonzero exit is a failure, even if a manifest file exists.
 
 Runtime validation covers a matching directory/name and semantic pack version in each manifest, effective
 `voice.default_tier`, `compliance.mode`, `navigation.default_workflow`, required
@@ -53,9 +48,8 @@ Double-quoted escapes supported by the parser are `\\`, `\"`, `\n`, `\r`, and
 
 ### 2. Report schema and version compatibility
 
-```bash
-pack_compatibility "$target" || exit $?
-```
+Read `compatibility` in that same helper result; do not run a second parser.
+The retained shell `pack_compatibility` accessor delegates to the same implementation.
 
 This uses the same structured implementation as activation. `schema_version`
 selects manifest syntax; `version` belongs to the pack; `requires_lintel_product`
@@ -75,12 +69,10 @@ For an already selected profile, `profile_field_provenance <dotted.path>` and
 not a reason to activate a different target as part of validation. Repo-required
 policy is declared outside its manifest; a failed required load remains an error.
 
-### 3. Audit and return the result
+### 3. Return the observed result
 
-```bash
-audit_log pack-lifecycle pack_validated "name=$target" "verdict=$verdict"
-echo "$verdict: declared runtime contracts passed; live host/company controls remain unverified."
-```
+Report the exit status, effective fields, checked constraints and limitations from the
+helper. This read-only operation does not write a private audit file or activate a pack.
 
 Use `FAIL` for runtime rejection. A structural `PASS` is neither successful
 activation nor proof that a company control, extension plugin, independent review
@@ -89,5 +81,5 @@ Never report an unexecuted gate as passing or activate a pack as a side effect.
 
 ## Integration
 
-Reads `lib/pack-resolver.sh`, `lib/pack-schema.yaml`, and the target ancestry.
-Writes the verdict to stdout and the operator's pack lifecycle audit log.
+Reads the shared profile implementation, schema, source product metadata and target
+ancestry. Writes the result to stdout only.
