@@ -29,6 +29,8 @@ PYTHON = sys.executable
 EVENTS = ROOT / "bin/li-events.py"
 LESSONS = ROOT / "bin/li-lessons.py"
 PROMOTE = ROOT / "bin/li-lessons-promote"
+LIFECYCLE = ROOT / "bin/li-lifecycle.py"
+TRANSACTION = ROOT / "bin/li-managed-transaction.py"
 BASELINE = ROOT / "scaffolding/01-foundation/.claude/memory/lessons.md"
 VERDICT_KEYS = ("status", "evidence", "verification", "enforcement", "class", "check")
 FORBIDDEN = re.compile(r"\b(healthy|dead|firing|enforced|complete)\b")
@@ -764,6 +766,178 @@ class ReviewLegacyImportTests(Sandbox):
                 for _ in range(2):
                     self.read("--json", env=env, expect=0)
                     self.assertEqual(self.marker_lines(), [self.legacy])
+
+
+class InstallerObservationTests(Sandbox):
+    """A13.1.b and A13.4.b: installer evidence comes only from P10's accepted readers."""
+
+    # Test-only fault injection, as in P10's own interruption tests: the integrated
+    # `li-lifecycle migrate` runs unchanged, but its first published file raises afterwards.
+    INTERRUPT = r'''
+import importlib.util, sys
+from pathlib import Path
+source = Path(sys.argv[1])
+sys.dont_write_bytecode = True
+sys.path.insert(0, str(source / "lib"))
+import managed_transaction as transaction
+original = transaction._write_change
+def interrupted(root, relative, data, mode, expected):
+    original(root, relative, data, mode, expected)
+    raise OSError("synthetic A13 interruption after the first published file")
+transaction._write_change = interrupted
+spec = importlib.util.spec_from_file_location("lifecycle", source / "bin/li-lifecycle.py")
+module = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(module)
+sys.argv = ["li-lifecycle", *sys.argv[2:]]
+raise SystemExit(module.main())
+'''
+    UNVERIFIED = ("unverified", "unverified", "unverified")
+    VERDICT = re.compile(r"\b(fired|firing|not[ _-]firing|never left|dead)\b", re.I)
+
+    def setUp(self):
+        super().setUp()
+        self.data = self.home / "installed data"
+
+    def legacy_target(self, name):
+        repo = self.make_repo(name, v5=False)
+        write(repo / "tasks/lessons.md", "# Lessons\n\n## L-001 — Legacy lesson\nlegacy.\n")
+        return repo
+
+    def arguments(self, repo):
+        return ["--source", ROOT, "--repo", repo, "--home", self.data]
+
+    def lifecycle(self, repo, *extra, expect=None):
+        return self.run_cmd([PYTHON, LIFECYCLE, *self.arguments(repo), *extra], cwd=repo, expect=expect)
+
+    def doctor(self, repo, store):
+        result = self.lifecycle(repo, "doctor", "--json", "--store", store)
+        self.assertIn(result.returncode, (0, 1), result.stderr)
+        return json.loads(result.stdout)
+
+    def transaction(self, operation, identifier, repo, store):
+        result = self.run_cmd([PYTHON, TRANSACTION, operation, identifier, "--root", repo, "--store", store],
+                              cwd=repo, expect=0)
+        return result.stdout
+
+    def installer(self, name, p10_output, expect):
+        path = write(self.root / "p10 output" / f"{name}.json",
+                     p10_output if isinstance(p10_output, str) else json.dumps(p10_output))
+        result = self.events("installer", "--file", path, expect=expect)
+        payload = json.loads(result.stdout) if result.stdout.strip() else None
+        if payload is not None:
+            self.assert_no_verdict(payload)
+            self.assertEqual((payload["host_activation"], payload["hook_execution"], payload["registration"]),
+                             self.UNVERIFIED)
+            self.assertEqual((payload["verification"], payload["enforcement"]), ("not_performed", "not_established"))
+        return payload
+
+    def test_complete_interrupted_and_absent_store_transactions_through_p10_readers(self):
+        complete_repo, complete_store = self.legacy_target("complete target"), self.root / "complete store"
+        migrated = self.lifecycle(complete_repo, "--store", complete_store, "migrate", expect=0).stdout
+        identifier = json.loads(migrated)["id"]
+        report = self.installer("complete", self.transaction("inspect", identifier, complete_repo, complete_store), 0)
+        self.assertEqual((report["status"], report["transaction"]["p10_state"], report["transaction"]["evidence"]),
+                         ("verified_file_state", "complete", "p10_verified_terminal_file_state"))
+        operation = self.installer("operation", migrated, 0)
+        self.assertEqual(operation["status"], "verified_file_state")
+        self.assertEqual(operation["operation_profile"]["evidence"], "recorded_input")
+        self.assertEqual(operation["operation_profile"]["enforcement"], "not_established")
+
+        interrupted_repo, interrupted_store = self.legacy_target("interrupted target"), self.root / "interrupted store"
+        failed = self.run_cmd([PYTHON, "-c", self.INTERRUPT, ROOT, *self.arguments(interrupted_repo),
+                               "--store", interrupted_store, "migrate"], cwd=interrupted_repo)
+        self.assertNotEqual(failed.returncode, 0)
+        self.assertIn("synthetic A13 interruption", failed.stderr)
+        # Test scaffolding names the one transaction; the A13 reader never lists or opens the store.
+        (identifier,) = [entry.name for entry in (interrupted_store / "transactions").iterdir()]
+        report = self.installer("interrupted", self.transaction("inspect", identifier, interrupted_repo,
+                                                                interrupted_store), 0)
+        self.assertEqual(report["status"], "incomplete")
+        self.assertIn(report["transaction"]["p10_state"], ("prepared", "applying"))
+        self.assertEqual(report["transaction"]["evidence"], "incomplete_observation")
+        diagnosed = self.installer("interrupted doctor", self.doctor(interrupted_repo, interrupted_store), 4)
+        self.assertEqual((diagnosed["status"], [d["code"] for d in diagnosed["diagnostics"]]),
+                         ("diagnostic", ["p10_transaction_error"]))
+        recovered = self.installer("recovered", self.transaction("recover", identifier, interrupted_repo,
+                                                                 interrupted_store), 0)
+        self.assertEqual((recovered["status"], recovered["transaction"]["p10_state"]),
+                         ("verified_file_state", "recovered"))
+
+        absent_repo, absent_store = self.legacy_target("absent target"), self.root / "absent store"
+        report = self.installer("absent store", self.doctor(absent_repo, absent_store), 3)
+        self.assertEqual((report["status"], report["transaction"]["p10_status"], report["transaction"]["evidence"]),
+                         ("unobserved", "no_incomplete_operation", "no_transaction_reported"))
+        self.assertEqual(report["native_install"]["status"], "unobserved")
+        self.assertEqual(report["diagnostics"], [])
+        self.assertFalse(absent_store.exists())
+
+    def test_integrated_doctor_derives_no_firing_verdict_from_logs(self):
+        repo, store = self.make_repo("doctor target"), self.root / "doctor store"
+        without = self.doctor(repo, store)
+        write(repo / ".claude/runtime/audit/hooks.jsonl",
+              event() + "\n" + event(kind="session_digest", hook="session-digest", pack="_default",
+                                     mode="internal-tool") + "\n")
+        with_log = self.doctor(repo, store)
+        self.assertEqual((without.pop("audit_log_present"), with_log.pop("audit_log_present")), (False, True))
+        self.assertEqual(without, with_log)
+        for report in (without, with_log):
+            self.assertEqual((report["host_activation"], report["hook_execution"], report["hooks"]["registration"]),
+                             self.UNVERIFIED)
+            self.assertIsNone(self.VERDICT.search(json.dumps(report)))
+        text = self.lifecycle(repo, "doctor", "--store", store).stdout
+        self.assertIn("firing unverified", text)
+        self.assertNotRegex(text, r"(?i)has fired|never left|not firing|\bdead\b")
+
+    def test_doctor_logs_map_to_file_presence_only(self):
+        repo, store = self.make_repo("doctor logs"), self.root / "doctor logs store"
+        absent = self.installer("no log", self.doctor(repo, store), 3)
+        write(repo / ".claude/runtime/audit/hooks.jsonl", event() + "\n")
+        present = self.installer("with log", self.doctor(repo, store), 3)
+        self.assertEqual(absent["logs"], {"audit_log_present": False, "evidence": "file_presence_only"})
+        self.assertEqual(present["logs"], {"audit_log_present": True, "evidence": "file_presence_only"})
+        self.assertEqual({key: value for key, value in absent.items() if key not in ("logs", "source")},
+                         {key: value for key, value in present.items() if key not in ("logs", "source")})
+        self.assertEqual(present["profile"], {"evidence": "recorded_input", "enforcement": "not_established"})
+
+    def test_mapping_follows_the_contract_table_exactly(self):
+        # P10-shaped inputs for states the three integrated transactions do not reach.
+        record = {"id": "transaction-" + "0" * 32, "snapshot_id": "snapshot-" + "0" * 32, "files": {},
+                  "store": (self.root / "store").as_posix()}
+        for state, status, evidence, code in (
+                ("prepared", "incomplete", "incomplete_observation", 0),
+                ("applying", "incomplete", "incomplete_observation", 0),
+                ("recovering", "incomplete", "incomplete_observation", 0),
+                ("complete", "verified_file_state", "p10_verified_terminal_file_state", 0),
+                ("recovered", "verified_file_state", "p10_verified_terminal_file_state", 0),
+                ("unknown-future-state", "diagnostic", "unmapped", 4)):
+            with self.subTest(state=state):
+                report = self.installer(f"state {state}", {**record, "state": state}, code)
+                self.assertEqual((report["status"], report["transaction"]["evidence"]), (status, evidence))
+                self.assertEqual(report["source"]["surface"], "transaction")
+        doctor = self.doctor(self.make_repo("table doctor"), self.root / "table store")
+        for native, status, code in (("verified", "verified_file_state", 3), ("not_detected", "unobserved", 3),
+                                     ("unverified", "unverified", 3), ("error", "diagnostic", 4)):
+            with self.subTest(native=native):
+                report = self.installer(f"native {native}", {**doctor, "native_install": {"status": native}}, code)
+                self.assertEqual(report["native_install"]["status"], status)
+                self.assertEqual(report["source"]["surface"], "doctor")
+        for name, data in (("not json", "{"), ("array", "[]"), ("unrecognized", '{"state": 1}'),
+                           ("doctor without status", json.dumps({**doctor, "transaction": {}}))):
+            with self.subTest(malformed=name):
+                self.assertIsNone(self.installer(name, data, 2))
+        self.events("installer", "--file", self.root / "absent.json", expect=2)
+
+    def test_installer_reader_never_opens_the_store(self):
+        repo, store = self.legacy_target("store target"), self.root / "store to remove"
+        identifier = json.loads(self.lifecycle(repo, "--store", store, "migrate", expect=0).stdout)["id"]
+        inspected = self.transaction("inspect", identifier, repo, store)
+        before = self.installer("before removal", inspected, 0)
+        shutil.rmtree(store)
+        after = self.installer("after removal", inspected, 0)
+        self.assertEqual({k: v for k, v in before.items() if k != "source"},
+                         {k: v for k, v in after.items() if k != "source"})
+        source = EVENTS.read_text(encoding="utf-8")
+        self.assertIsNone(re.search(r"meta\.tsv|plan\.tsv|journal\.json|snapshots/|\.lintel-install", source))
 
 
 class FailurePropagationTests(Sandbox):
