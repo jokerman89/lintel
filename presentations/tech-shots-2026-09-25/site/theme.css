@@ -105,3 +105,8 @@
 :root[data-theme="fluent"] #acts button.current:before{background:#cfc2f0;border-right:2px solid #5b4fc4;box-sizing:border-box}
 :root[data-theme="fluent"] #acts button.done:before{background:#e4e4e4}
 :root[data-theme="neon"] #acts button.current:before{border-right:1px solid #a6ff00;box-sizing:border-box}
+
+:root[data-theme="paper"] #acts button.current b,
+:root[data-theme="paper"] #acts button.done b,
+:root[data-theme="fluent"] #acts button.current b,
+:root[data-theme="fluent"] #acts button.done b{color:inherit}
