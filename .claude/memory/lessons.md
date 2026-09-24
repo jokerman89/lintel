@@ -979,3 +979,20 @@ no MSYS process uses the old mount; if it has gone, recreate it empty rather tha
 killing other sessions' processes. Probe Bash stderr before granting a native
 invocation, and treat host warnings as shared-state defects to diagnose, not as
 noise to tolerate.
+
+## L-050 - Do not create drive-root directories without authorization
+
+**Date:** 2026-09-24
+
+**Context:** A P09 installed-consumer test refused its own fixture because paths under
+the coordinator's launcher root (`%LOCALAPPDATA%\Temp\<short>\r0\temp`) exceeded the
+test's 235-character budget. To shorten the root, the coordinator tried to create
+`C:\q`. The operator rejected the command: it creates a system-root directory without
+explicit authorization.
+
+**Rule:** Keep synthetic roots inside the user profile, or inside a workspace that an
+owner already has authorization for, unless the operator explicitly authorizes a
+drive-root path. When a path budget cannot be met there, record the environment
+refusal honestly. Rely on independent evidence that ran inside its own authorized
+short workspace, or route the rerun to that owner. Do not create drive mappings or
+other system-level paths as a workaround.

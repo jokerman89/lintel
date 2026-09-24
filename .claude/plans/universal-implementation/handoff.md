@@ -378,7 +378,8 @@ never inferred from this directive; a model switch does not change context ident
   all 26 product paths match and 13 joined methods pass. After P10's integration, the
   installed-source closure for A09.5/A17.5 is released to the original owner, with
   review by SAME `447d97f5` (P09 card, "Installed-source closure after P10
-  integration"). `477d3fc` releases
+  integration"). SAME447 passes it (`2e71a94b`, 0/0/0/0), and it is integrated in
+  `da5a599b`. The leaves close after the P10 integration repair and an installed rerun. `477d3fc` releases
   the original owner's separate N1 safety-quantifier correction and two bounded
   planning/execution mode probes. N1 and five actual mode packets are frozen
   at `1b75264`, later report-only `4640ca9`. N1 passes SAME `447d97f5` review
