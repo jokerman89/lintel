@@ -160,19 +160,27 @@ P2 F06 (Bash accepts header-shaped native inventory rows). Both, plus the A23.4.
 `config/aliases.yaml` native payload item, are released to the original P10 owner.
 Its frozen fix `a2df2021` / `56346ad3` passes SAME's final review `f460eb9f` (SPEC and
 QUALITY PASS, 0/0/0; compliance UNVERIFIED without a resolved policy source) and is
-integrated in `68d32240`; the complete kit runs on `3397311f`.
-f2's frozen A13 handoff (`c7fbfd6f` / `e687d848`) failed SAME9db's SPEC on P2 R01/R02
-in `bin/li-events.py`. The repair `5f58da04` / `af24721a` resolves both; the remaining
-SPEC reruns from a short root after the A13-V01 path-limit decision (`f23833c5`).
-Trial `6da1e9c6` adds P08 reconciliation 4: remove the six event
-categories whose producers P09 retired (patch `f0724329…`). f2's three remaining F06
-preparation packages are with SAME9db, and the step-1 host receipts are supplied
-(`29de9bff`). SAME9db passes package 1 and fails packages 2 and 3 on P2 template defects;
-`8754515a` releases F06 step 1 now plus one bounded repair of packages 2 and 3.
-`f7cbe5bc` releases the installed closures unblocked by P10: P09 A09.5/A17.5 to the
-original owner (reviewer `447d97f5`) and P13 A18.3/A18.4/A19.4 to the original owner
-(reviewer `4865e4f7`). A13.1.b/.4.b follow after A13.a passes and P10's joined checks
-are green, on a P08 integration preview.
+integrated in `68d32240`. The complete kit on `3397311f` passes 48 of 49; the failure is
+integration defect F-INT-2 (context_safety observed before the source preflight).
+Reconciliation `756835f6` pins `install/directories.txt` to LF. F-INT-2, IC-F01 (an
+intermittent journal read change found by P13) and F-INT-4 (the full-source Bash
+performer exceeds the tests' timeout on Windows) are with the P10 owner as one repair
+for SAME `1578dfd8`. A12.1–A12.4 wait for that repair and the final kit.
+A13.a (A13.1.a/.2/released .3/.4.a) is accepted after the R01–R03 repairs (`0e1746a8`).
+The local branch `jokerman-microsoft-p08-integration-preview` (`3c7ce67e` merge plus
+reconciliation 5, `14b0b51c`) carries P08 and the accepted A13 subset on the
+P10-integrated recovery tree; A13.1.b/.4.b are released to f2 on it (`89bf2792`).
+Reconciliation 6 (A13 resources into `ADAPTER_RESOURCES` and capability selections)
+follows at the real P08 integration.
+P09's installed closure passes SAME447 (`2e71a94b`) and is integrated in `da5a599b`;
+A09.5/A17.5 close after the P10 repair and an installed rerun.
+F06: step 1 (`consume-02`: bind, restore and consumption) completed; step 2 is running
+under grant `45cb7508…`, and a latent pin defect is decided as a pin-only retry after the
+candidate grant closes (`7c21a3b0`).
+P13: the installed-consumer unit is parked on IC-F01; fan-in preparation (A19.3 map,
+status union, generated fan-in, version proposal) is released on the preview
+(`5b6479b5`). Reviewer `4865e4f7` runs gpt-6-astra and holds until the operator switches
+it to claude-opus-5.5.
 Host note (L-049): the host-wide MSYS `/tmp` mount moved at about 07:30 to
 `%LOCALAPPDATA%\Temp\p10n1\r0\temp`, after the shared table reset while no MSYS process
 was running. The launcher guard keeps that root after its run, and a keeper MSYS `sleep`
