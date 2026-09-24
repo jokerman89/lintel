@@ -25,6 +25,7 @@ import unittest
 BASE = "ad1045b8b10a56fa3bcc5c310a8cad84f7ccf2c4"
 WORK_MAP = "specs/chosen/work.json"
 AUTHORITY = "2557676ee5905695c99d3610e4958fa4fbffd2c9"
+WINDOWS_ROOT_BUDGET = 120
 OPTIONS = None
 RUN = None
 
@@ -46,7 +47,10 @@ class LocalRun:
         self.started = time.monotonic()
         self.calls = []
         self.links = []
+        self.inventory_observations = []
+        self.max_inventory_path = 0
         self.check_environment()
+        self.check_path_budget(self.root)
         self.logs = self.root / "logs"
         self.logs.mkdir()
         self.write(self.root / "environment.json", encoded(self.env))
@@ -57,6 +61,7 @@ class LocalRun:
             "base": BASE, "subject": self.subject, "release": AUTHORITY,
             "files": self.source_hashes,
         }))
+        self.safety = runpy.run_path(str(self.source / "lib/context_safety.py"))
 
     @staticmethod
     def write(path, data):
@@ -96,8 +101,16 @@ class LocalRun:
         if Path(self.env["GIT_CEILING_DIRECTORIES"]).resolve() != self.root:
             raise ValueError("Git discovery ceiling differs")
         ps = self.env.get("LINTEL_POWERSHELL")
-        if os.name == "nt" and (not ps or Path(ps).name.lower() != "pwsh.exe"):
-            raise ValueError("Select the approved PowerShell 7 executable explicitly")
+        if os.name == "nt" and ps and Path(ps).name.lower() != "pwsh.exe":
+            raise ValueError("An explicit PowerShell selector must name the approved pwsh.exe")
+
+    @staticmethod
+    def check_path_budget(root):
+        if os.name == "nt" and len(str(root)) > WINDOWS_ROOT_BUDGET:
+            raise ValueError(
+                f"A23 fixture root exceeds its declared {WINDOWS_ROOT_BUDGET}-character Windows budget; "
+                "no automatic relocation is permitted"
+            )
 
     def run(self, argv, *, cwd=None, expected=0):
         self.check_environment()
@@ -197,10 +210,32 @@ cd "$target"
         return repo, bundle
 
     def tree(self, root):
-        if not root.exists():
+        root = Path(root).absolute()
+        if not root.is_relative_to(self.root):
+            raise ValueError("Preservation inventory must stay inside the owned fixture")
+        native = self.safety["native_io_path"]
+        try:
+            native(root).lstat()
+        except FileNotFoundError:
             return {}
-        return {path.relative_to(root).as_posix(): sha(path.read_bytes())
-                for path in root.rglob("*") if path.is_file() and ".git" not in path.relative_to(root).parts}
+        root = self.safety["checked_root"](root)
+        result, pending = {}, [root]
+        while pending:
+            directory = pending.pop()
+            for entry in sorted(native(directory).iterdir(), key=lambda item: item.name):
+                relative = (directory / entry.name).relative_to(root).as_posix()
+                if ".git" in Path(relative).parts:
+                    continue
+                path = self.safety["safe_path"](root, relative)
+                mode = native(path).lstat().st_mode
+                if stat.S_ISDIR(mode):
+                    pending.append(path)
+                elif stat.S_ISREG(mode):
+                    result[relative] = self.safety["read_owned"](root, relative)[1]["sha256"]
+                    self.max_inventory_path = max(self.max_inventory_path, len(str(path)))
+                else:
+                    raise ValueError("Unsupported preservation input: " + relative)
+        return result
 
     def link(self, name, result, *, negative=False, detail=""):
         self.links.append({"name": name, "category": "executed", "negative": negative,
@@ -316,7 +351,8 @@ class CombinedConsumers(unittest.TestCase):
                 try:
                     result = self.scaffold(self.caller, self.bundle, child, prelude=prelude,
                                            extra=(hold,), expected=2)
-                    self.assertIn(b"PROFILE_", result.stderr)
+                    code = b"PROFILE_CONTEXT_MISSING" if kind == "missing" else b"PROFILE_DRIFT"
+                    self.assertIn(code, result.stderr)
                     self.assertEqual(result.stdout, b"")
                     self.assertEqual(RUN.tree(child), child_before)
                     RUN.link("caller-pin-" + kind, result, negative=True,
@@ -373,6 +409,24 @@ class CombinedConsumers(unittest.TestCase):
         RUN.write(child / "packs/a23-policy/pack.yaml",
                   self.pack.read_bytes() + b"roles: {source: changed-policy}\n")
         caller_before, child_before = RUN.tree(repo), RUN.tree(child)
+        home = repo / ".claude/runtime/lintel-home"
+        config = self.profile.ProfileConfig(self.bundle, repo, home, home / "packs",
+                                            home / "packs/active-pack", context_id=ref["context_id"])
+        history = self.profile.context_path(config).parent / "history"
+        entries = list(RUN.safety["native_io_path"](history).iterdir())
+        self.assertTrue(entries, "Actual caller history must be present in the preservation inventory")
+        for entry in entries:
+            relative = (history / entry.name).relative_to(repo).as_posix()
+            self.assertIn(relative, caller_before)
+            self.assertEqual(caller_before[relative], RUN.safety["read_owned"](repo, relative)[1]["sha256"])
+        RUN.inventory_observations.append({
+            "case": "actual-selected-source-caller-history", "root_characters": len(str(RUN.root)),
+            "file_count": len(caller_before),
+            "history": [{"path": (history / item.name).relative_to(repo).as_posix(),
+                         "logical_characters": len(str(history / item.name)),
+                         "sha256": caller_before[(history / item.name).relative_to(repo).as_posix()]}
+                        for item in entries],
+        })
         result = self.scaffold(repo, self.bundle, child, expected=2)
         self.assertIn(b"source/content differs", result.stderr)
         self.assertEqual(result.stdout, b"")
@@ -455,6 +509,16 @@ class CombinedConsumers(unittest.TestCase):
         negative = RUN.run(profile_command, cwd=self.caller, expected=2)
         self.assertIn(b"PROFILE_REFERENCE_MISMATCH", negative.stderr)
         RUN.link("P07-produced-reference-refused", negative, negative=True)
+        inherited = RUN.shell(self.bundle, self.caller, BOOTSTRAP +
+                              'export LINTEL_PROFILE_REFERENCE="$1"\n'
+                              'source "$source_root/lib/workflow.sh"\n'
+                              f'workflow_begin a23-invalid-profile full {WORK_MAP} operation=build\n',
+                              json.dumps({**reference, "digest": "sha256:" + "0" * 64}),
+                              expected=2)
+        self.assertIn(b"PROFILE_REFERENCE_MISMATCH", inherited.stderr)
+        self.assertFalse((self.caller / ".claude/runtime/state/00-state.md").exists())
+        RUN.link("P07-inherited-reference-at-P08-refused", inherited, negative=True,
+                 detail="Actual workflow_begin consumes the broken inherited producer reference before state writes.")
         work_args = [sys.executable, "-I", "-B", self.bundle / "bin/li-work-artifacts.py",
                      "--repo", self.caller, "--map", WORK_MAP, "--view", "context", "--package", "P09",
                      "--leaf", "T014", "--acceptance", "specs/chosen/spec.md"]
@@ -621,7 +685,8 @@ class CombinedConsumers(unittest.TestCase):
         self.assertEqual(result["phase"], "SHIP")
         self.assertEqual(result["profile"], reference)
         self.assertFalse(result["release_clearance"])
-        RUN.link("P05-current-review-to-P08-resume", resumed, detail="Resume destination only; no SHIP action.")
+        RUN.link("P05-current-review-to-P08-resume", resumed,
+                 detail="Test caller observes the latest reader, appends phase state and invokes resume; no automatic review-to-resume product link or SHIP.")
         ledger = self.caller / ".claude/runtime/state/00-state.md"
         before = ledger.read_bytes()
         negative = RUN.shell(self.bundle, self.caller, BOOTSTRAP +
@@ -654,6 +719,60 @@ class CombinedConsumers(unittest.TestCase):
                 raise AssertionError("Installed source changed during consumer verification")
 
 
+class PreservationGuards(unittest.TestCase):
+    def test_optional_selector_and_unrelated_selector_refusal(self):
+        original = dict(RUN.env)
+        try:
+            RUN.env.pop("LINTEL_POWERSHELL", None)
+            RUN.check_environment()
+            if os.name == "nt":
+                RUN.env["LINTEL_POWERSHELL"] = r"C:\Program Files\PowerShell\7\pwsh.exe"
+                RUN.check_environment()
+                RUN.env["LINTEL_POWERSHELL"] = r"C:\synthetic\powershell.exe"
+                with self.assertRaisesRegex(ValueError, "explicit PowerShell selector"):
+                    RUN.check_environment()
+                RUN.env.pop("LINTEL_POWERSHELL")
+            RUN.env["LINTEL_HOME"] = str(RUN.root / "unapproved-selector")
+            with self.assertRaisesRegex(ValueError, "Caller LINTEL selector"):
+                RUN.check_environment()
+        finally:
+            RUN.env = original
+
+    def test_native_inventory_includes_and_detects_long_file_change(self):
+        fixture = RUN.root / "inventory-probe"
+        fixture.mkdir()
+        # Keep the parent accessible to legacy enumeration so the old leaf test
+        # silently omits the long file, rather than only failing to walk a directory.
+        relative = "/".join(["n" * 80] * 2 + ["1-" + "a" * 64 + ".json"])
+        long_file = fixture / relative
+        self.assertGreater(len(str(long_file)), 260)
+        safety = RUN.safety
+        original, changed = b"original owned long-path content\n", b"changed long-path content\n"
+        safety["atomic_write"](fixture, relative, original, expected=None, check_expected=True)
+        safety["atomic_write"](fixture, "short.txt", b"unrelated preserved\n", expected=None, check_expected=True)
+        before = RUN.tree(fixture)
+        self.assertEqual(before, {relative: sha(original), "short.txt": sha(b"unrelated preserved\n")})
+        try:
+            safety["atomic_write"](fixture, relative, changed)
+            after = RUN.tree(fixture)
+            self.assertEqual(after.keys(), before.keys())
+            self.assertNotEqual(after, before)
+            self.assertEqual(after[relative], sha(changed))
+            self.assertEqual(after["short.txt"], before["short.txt"])
+        finally:
+            safety["atomic_write"](fixture, relative, original)
+        self.assertEqual(RUN.tree(fixture), before)
+        RUN.check_path_budget(RUN.root)
+        if os.name == "nt":
+            with self.assertRaisesRegex(ValueError, "no automatic relocation"):
+                RUN.check_path_budget(RUN.root / ("b" * WINDOWS_ROOT_BUDGET))
+        RUN.inventory_observations.append({
+            "case": "native-long-file-mutation", "root_characters": len(str(RUN.root)),
+            "logical_file_characters": len(str(long_file)), "file_count": len(before),
+            "before": before, "changed": after, "restored": RUN.tree(fixture),
+        })
+
+
 def main():
     global OPTIONS, RUN
     parser = argparse.ArgumentParser(description=__doc__)
@@ -663,7 +782,10 @@ def main():
     parser.add_argument("--git", type=Path, required=True)
     OPTIONS = parser.parse_args()
     RUN = LocalRun(OPTIONS)
-    suite = unittest.defaultTestLoader.loadTestsFromTestCase(CombinedConsumers)
+    suite = unittest.TestSuite([
+        unittest.defaultTestLoader.loadTestsFromTestCase(PreservationGuards),
+        unittest.defaultTestLoader.loadTestsFromTestCase(CombinedConsumers),
+    ])
     with (RUN.root / "suite.log").open("x", encoding="utf-8") as log:
         result = unittest.TextTestRunner(stream=log, verbosity=2).run(suite)
     sys.stderr.write((RUN.root / "suite.log").read_text())
@@ -681,6 +803,11 @@ def main():
         "duration_seconds": duration, "windows_ci_budget_seconds": 1800,
         "budget_fraction": duration / 1800, "full_ci_fit": "unverified; other suites share the job budget",
         "source_and_tmp_mount_preserved": True,
+        "path_budget": {"root_characters": len(str(RUN.root)),
+                        "windows_fixture_root_maximum": WINDOWS_ROOT_BUDGET,
+                        "max_inventoried_file_characters": RUN.max_inventory_path,
+                        "scope": "test-root admission only, not a product or Git compatibility guarantee"},
+        "inventory_observations": RUN.inventory_observations,
         "native_scenario": False, "independent_review": "pending coordinator-assigned reviewer",
         "release_clearance": False, "cleanup": "retained all owned roots and logs; no /tmp mutation",
     }
