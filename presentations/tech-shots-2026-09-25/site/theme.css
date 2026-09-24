@@ -45,7 +45,7 @@
 :root[data-theme="paper"] ::selection{background:#d8c3e4;color:#171318}
 :root[data-theme="paper"] dialog::backdrop{background:#302d2466}
 @media(max-width:1150px){.toolbar .edition{display:none}.toolbar{gap:12px}.toolbar .location{max-width:200px}.toolbar .theme-picker{margin-left:2px}.toolbar .theme-picker button{font-size:11px!important;padding:7px!important}}
-@media(max-width:650px){.toolbar .theme-picker{position:fixed;right:12px;bottom:8px;z-index:5;box-shadow:0 2px 12px #0003}.toolbar .theme-picker button{min-height:34px}.statusbar{padding-right:135px}:root[data-theme="paper"] #stage .slide h1{font-size:43px!important}:root[data-theme="paper"] #stage .system-cover h1{font-size:53px!important}.theme-picker{margin-left:0}.ref-tools{z-index:3}}
+@media(max-width:650px){.toolbar{height:100px}.toolbar nav{display:grid;grid-template-columns:40px 34px 80px;gap:5px}.toolbar #next{min-width:80px}.toolbar .theme-picker{position:static;grid-column:1/-1;justify-self:end;margin:0;box-shadow:none}.toolbar .theme-picker button{min-height:34px}#acts{top:100px}.statusbar{padding-right:135px}:root[data-theme="paper"] #stage .slide h1{font-size:43px!important}:root[data-theme="paper"] #stage .system-cover h1{font-size:53px!important}.theme-picker{margin-left:0}.ref-tools{z-index:3}}
 @media print{.theme-picker{display:none}}
 
 /* Paper emphasis and selection stay distinct from the neutral reading surface. */
