@@ -685,7 +685,9 @@ This is accepted-P06-engine evidence, not P10 linked/default transaction accepta
 The remaining eight discovery/authoring consumers and existing template are
 released to the original P13 owner with explicit status/welcome ownership.
 
-Current original acceptance count is 81/113. A09.5 and A17.5 close from P09's accepted
+Current original acceptance count is 85/113. A12.1–A12.4 close from P10's accepted
+integration repair (review `9ca6402a`) and the joined checks on the integrated tree: the
+complete kit passes 50/50 and the light checks 8/8. A09.5 and A17.5 close from P09's accepted
 installed closure, revalidated on recovery `1a116d8c` after P10's integration repair.
 A24.1-.4 now close on the original
 verified three-profile experiment, and A03.2 is reclosed after the accepted

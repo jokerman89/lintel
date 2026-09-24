@@ -17,7 +17,8 @@ changed. Continue from the [recovery checkpoint](../plans/universal-implementati
 and original work map. Existing owners are retained. Operator directive: every
 session and new actor uses `claude-opus-5.5`/max/`long_context`; see the handoff
 rule. Current original acceptance
-is **81/113**, not full release readiness. A09.5 and A17.5 close from P09's accepted
+is **85/113**, not full release readiness. A12.1–A12.4 close from P10's accepted
+integration repair and the joined checks (kit 50/50, light 8/8). A09.5 and A17.5 close from P09's accepted
 installed closure, revalidated after P10's integration repair. A24.1-.4 now close from the completed
 original three-profile experiment and final cross-profile verification.
 A03.2 is reclosed after independently
@@ -165,8 +166,10 @@ integrated in `68d32240`. The complete kit on `3397311f` passes 48 of 49; the fa
 integration defect F-INT-2 (context_safety observed before the source preflight).
 Reconciliation `756835f6` pins `install/directories.txt` to LF. F-INT-2, IC-F01 (an
 intermittent journal read change found by P13) and F-INT-4 (the full-source Bash
-performer exceeds the tests' timeout on Windows) are with the P10 owner as one repair
-for SAME `1578dfd8`. A12.1–A12.4 wait for that repair and the final kit.
+performer exceeds the tests' timeout on Windows) are repaired by the P10 owner
+(`0caba6fe` / `d4b90259`), accepted in SAME `1578dfd8`'s integration review `9ca6402a`
+and integrated in `b0598b0b` / `f740141e`. The joined checks pass, and A12.1–A12.4 are
+closed.
 A13.a (A13.1.a/.2/released .3/.4.a) is accepted after the R01–R03 repairs (`0e1746a8`).
 The local branch `jokerman-microsoft-p08-integration-preview` (`3c7ce67e` merge plus
 reconciliation 5, `14b0b51c`) carries P08 and the accepted A13 subset on the

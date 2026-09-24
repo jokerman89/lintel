@@ -385,28 +385,35 @@ and P09 ContextBudgetAdvisor work; those separate leaves remain open. Do not cla
 initiative-wide capacity/host acceptance from these component checkboxes.
 
 ### A12 Owned installer lifecycle (P10; R01)
-- [ ] A12.1 Route lifecycle skills through tested helpers with source/target separation.
-  - [ ] A12.1.a Bind scaffold/doctor/health to explicit installed source and working target.
-  - [ ] A12.1.b Route pack/profile lifecycle through the accepted structured profile contract.
-  - [ ] A12.1.c Preserve role/persona lifecycle and configured private-data boundaries.
-  - [ ] A12.1.d Route explicit migration/recovery through owned helpers rather than unsafe recipes.
-- [ ] A12.2 Preserve consumer customizations through install/update/conflict.
-  - [ ] A12.2.a Verify fresh and repeated install in an independent consumer.
-  - [ ] A12.2.b Refuse conflicting updates while retaining user prose, config and local extensions.
-    - [ ] A12.2.b.r1 Preserve native existing-file observations and original producer expectations through publication.
-    - [ ] A12.2.b.r2 Verify installed seeded preservation and late-change refusal at the original long plain target.
-- [ ] A12.3 Verify interrupted operations and owned rollback in a separate consumer repository.
-  - [ ] A12.3.a Diagnose interrupted writes without success-shaped partial state.
-  - [ ] A12.3.b Apply explicit recovery only to verified owned bytes.
-- [ ] A12.4 Document real uninstall and historical migration boundaries.
-  - [ ] A12.4.a Distinguish supported client operations and actual uninstall limits.
-  - [ ] A12.4.b Preserve opt-in historical aliases and document recoverability evidence.
-    - [ ] A12.4.b.o1 Correct native marker/legacy/type/enumeration observations without changing the migration schema.
-    - [ ] A12.4.b.o2 Verify the real short153/plain256 diagnostic pair, preserved inputs and explicit inspection failures; obtain the same reviewer's acceptance.
+- [x] A12.1 Route lifecycle skills through tested helpers with source/target separation.
+  - [x] A12.1.a Bind scaffold/doctor/health to explicit installed source and working target.
+  - [x] A12.1.b Route pack/profile lifecycle through the accepted structured profile contract.
+  - [x] A12.1.c Preserve role/persona lifecycle and configured private-data boundaries.
+  - [x] A12.1.d Route explicit migration/recovery through owned helpers rather than unsafe recipes.
+- [x] A12.2 Preserve consumer customizations through install/update/conflict.
+  - [x] A12.2.a Verify fresh and repeated install in an independent consumer.
+  - [x] A12.2.b Refuse conflicting updates while retaining user prose, config and local extensions.
+    - [x] A12.2.b.r1 Preserve native existing-file observations and original producer expectations through publication.
+    - [x] A12.2.b.r2 Verify installed seeded preservation and late-change refusal at the original long plain target.
+- [x] A12.3 Verify interrupted operations and owned rollback in a separate consumer repository.
+  - [x] A12.3.a Diagnose interrupted writes without success-shaped partial state.
+  - [x] A12.3.b Apply explicit recovery only to verified owned bytes.
+- [x] A12.4 Document real uninstall and historical migration boundaries.
+  - [x] A12.4.a Distinguish supported client operations and actual uninstall limits.
+  - [x] A12.4.b Preserve opt-in historical aliases and document recoverability evidence.
+    - [x] A12.4.b.o1 Correct native marker/legacy/type/enumeration observations without changing the migration schema.
+    - [x] A12.4.b.o2 Verify the real short153/plain256 diagnostic pair, preserved inputs and explicit inspection failures; obtain the same reviewer's acceptance.
 Acceptance: a success message corresponds to a verified change in the intended host/target.
 Operator decision: bare installation must remain usable without Python. The approved
 native/runtime transaction split and exact shared ownership release are in packages/P10.md;
 no installer may turn a later operation's Python prerequisite into an install prerequisite.
+Integration closure (2026-09-24): P10's final fix `a2df2021` / `56346ad3` (review
+`f460eb9f`) and its integration repair `0caba6fe` / `d4b90259` (review `9ca6402a`, SPEC
+and QUALITY PASS, 0/0/0) are integrated in `68d32240`, `b0598b0b` and `f740141e`. On
+scratch `e3fca555`, whose tree equals recovery outside `.claude/`, the complete
+`copilot-kit.py` passes 50 of 50 with no skip, and the eight light checks exit 0.
+Compliance stays UNVERIFIED without a resolved policy source. The timestamp actor, the
+cause of WinError 5, Windows PowerShell 5.1 and full hosted CI remain unverified.
 
 ### A13 Observable learning and status (P08; R05)
 - [ ] A13.1 Unify event producer/consumer fields and distinguish observation from verification.
