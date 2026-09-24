@@ -2,9 +2,9 @@
 # implements: ADR-0030
 # intent: .claude/plans/universal-implementation/packages/P10.md
 # constraints: isolated file roots and accepted P03 recovery; no host operations
-# last_intent_review: 2026-09-20
+# last_intent_review: 2026-09-24
 import argparse
-from contextlib import redirect_stderr
+from contextlib import ExitStack, contextmanager, redirect_stderr
 import errno
 import importlib
 import io
@@ -23,10 +23,130 @@ parser.add_argument("--root", type=Path, required=True)
 options, remaining = parser.parse_known_args()
 sys.dont_write_bytecode = True
 sys.path.insert(0, str(options.root.resolve() / "lib"))
+import context_safety
 from context_safety import file_state, native_io_path
+
+# F-INT-5: host functions captured before any test patch; the shield calls them directly.
+HOST_REPLACE, HOST_READ, HOST_SLEEP = os.replace, context_safety.read_owned, time.sleep
+HOST_WINERRORS = (5, 32, 33)
+HOST_DELAYS = (0.02, 0.05, 0.1, 0.2, 0.4, 0.8, 1.6, 3.2)
+UNSTABLE_READ = "File changed while reading: "
+
+
+def plain_path(path) -> str:
+    text = os.fspath(path)
+    if text.startswith("\\\\?\\UNC\\"):
+        text = "\\\\" + text[8:]
+    elif text.startswith("\\\\?\\"):
+        text = text[4:]
+    return os.path.normcase(os.path.abspath(text))
+
+
+class HostTransientExhausted(AssertionError):
+    """A real host transient outlasted the bounded shield, so the test fails explicitly."""
+
+
+class HostTransientShield:
+    """Keep real host transients out of the product's journal retry budget (F-INT-5).
+
+    Replacement injections wrap os.replace above this shield, so an error from the host
+    replacement below it is real. Read injections change a file inside a read, below the
+    shield, and mark each change, so only an unmarked identity refusal counts as a host
+    transient. Absorbing real transients leaves the product's sleeps and notices exactly
+    those the test injected. Every absorption is reported; a bounded budget turns a
+    persistent host failure into an explicit test failure instead of a product retry or a pass.
+    """
+    reports = []
+
+    def __init__(self, roots, *, source="host", replace=HOST_REPLACE, read=HOST_READ, sleep=HOST_SLEEP):
+        self.roots, self.source = [plain_path(root) for root in roots], source
+        self.host_replace, self.host_read, self.host_sleep = replace, read, sleep
+        self.injections, self.rereading, self.absorbed = 0, False, []
+
+    def owned(self, path) -> bool:
+        candidate = plain_path(path)
+        for root in self.roots:
+            try:
+                if os.path.commonpath([root, candidate]) == root:
+                    return True
+            except ValueError:
+                continue
+        return False
+
+    def absorb(self, kind, path, retry, error):
+        outcome = "absorbed-host-transient" if retry < len(HOST_DELAYS) else "unabsorbed-host-transient"
+        record = {"F-INT-5": outcome, "source": self.source, "class": kind, "path": plain_path(path),
+                  "shield_retry": retry + 1, "winerror": getattr(error, "winerror", None), "error": str(error)}
+        if self.source == "host":
+            HostTransientShield.reports.append(record)
+        print(json.dumps(record), flush=True)
+        if retry == len(HOST_DELAYS):
+            raise HostTransientExhausted(f"Host {kind} transient outlasted {retry} shield retries: {path}") from error
+        self.absorbed.append(record)
+        self.host_sleep(HOST_DELAYS[retry])
+
+    def replace(self, source, target, *args, **kwargs):
+        for retry in range(len(HOST_DELAYS) + 1):
+            try:
+                return self.host_replace(source, target, *args, **kwargs)
+            except OSError as error:
+                if getattr(error, "winerror", None) not in HOST_WINERRORS or not self.owned(target):
+                    raise
+                self.absorb("replace", target, retry, error)
+
+    def read_owned(self, root, relative, *args, **kwargs):
+        for retry in range(len(HOST_DELAYS) + 1):
+            injections, self.rereading = self.injections, retry > 0
+            try:
+                return self.host_read(root, relative, *args, **kwargs)
+            except ValueError as error:
+                if (str(error) != UNSTABLE_READ + relative or self.injections != injections
+                        or not self.owned(Path(root) / relative)):
+                    raise
+                self.absorb("read", Path(root) / relative, retry, error)
+            finally:
+                self.rereading = False
 
 
 class ManagedTransaction(unittest.TestCase):
+    @classmethod
+    def tearDownClass(cls):
+        reports = HostTransientShield.reports
+        absorbed = [record for record in reports if record["F-INT-5"] == "absorbed-host-transient"]
+        print(json.dumps({"F-INT-5": "host-transient-summary", "absorbed": len(absorbed),
+                          "replace": sum(record["class"] == "replace" for record in absorbed),
+                          "read": sum(record["class"] == "read" for record in absorbed),
+                          "unabsorbed": len(reports) - len(absorbed)}), flush=True)
+
+    def host_patches(self, shield):
+        return [patch("os.replace", new=shield.replace),
+                *(patch.object(owner, "read_owned", new=shield.read_owned)
+                  for owner in (context_safety, self.module, self.module.snapshot))]
+
+    def inject(self):
+        """Mark a deliberate change made during a read, so no shield absorbs its refusal."""
+        for shield in self.shields:
+            shield.injections += 1
+
+    def rereading(self):
+        return any(shield.rereading for shield in self.shields)
+
+    @contextmanager
+    def simulated_host(self, *, roots=None, replace=None, read=None):
+        """A fresh shield over a simulated host; the real shield stays beneath replacements."""
+        delays = []
+        shield = HostTransientShield(roots or (self.base,), source="simulated",
+                                     replace=replace or self.shields[0].replace,
+                                     read=read or self.shields[0].read_owned, sleep=delays.append)
+        with ExitStack() as stack:
+            for patcher in self.host_patches(shield):
+                stack.enter_context(patcher)
+            self.shields.append(shield)
+            try:
+                yield shield, delays
+            finally:
+                self.shields.remove(shield)
+
     def setUp(self):
         self.module = importlib.import_module("managed_transaction")
         self.tmp = tempfile.TemporaryDirectory(prefix="lintel-txn-")
@@ -45,6 +165,10 @@ class ManagedTransaction(unittest.TestCase):
 
         self.addCleanup(cleanup)
         self.base = Path(self.tmp.name)
+        self.shields = [HostTransientShield((self.base, created_root))]
+        for patcher in self.host_patches(self.shields[0]):
+            patcher.start()
+            self.addCleanup(patcher.stop)
         self.root = self.base / "consumer"
         self.store = self.base / "store"
         self.root.mkdir()
@@ -528,14 +652,14 @@ class ManagedTransaction(unittest.TestCase):
                 print(json.dumps({"B01": "other-publication-not-retried", "phase": phase,
                                   "attempts": len(errors), "same_exception": True, "notices": []}))
 
-    def disturbed_journal_reads(self, selected):
+    def disturbed_journal_reads(self, selected, *, injected=True):
         """Reset the owned journal's timestamps inside chosen reads, as IC-F01 observed."""
         original_open, original_fstat = os.open, os.fstat
         journals, reads, disturbed = {}, [], []
 
         def opened(path, flags, *args, **kwargs):
             descriptor = original_open(path, flags, *args, **kwargs)
-            if Path(path).name == "journal.json":
+            if Path(path).name == "journal.json" and not self.rereading():
                 journals[descriptor] = Path(path)
             return descriptor
 
@@ -547,6 +671,8 @@ class ManagedTransaction(unittest.TestCase):
                     current = os.lstat(path)
                     os.utime(path, ns=(current.st_atime_ns, current.st_mtime_ns - 340_000_000))
                     disturbed.append(len(reads))
+                    if injected:
+                        self.inject()
             return original_fstat(descriptor)
 
         return reads, disturbed, (patch("os.open", side_effect=opened), patch("os.fstat", side_effect=status))
@@ -609,7 +735,7 @@ class ManagedTransaction(unittest.TestCase):
 
             def opened(path, flags, *args, **kwargs):
                 descriptor = original_open(path, flags, *args, **kwargs)
-                if Path(path).name == "journal.json":
+                if Path(path).name == "journal.json" and not self.rereading():
                     journals[descriptor] = Path(path)
                 return descriptor
 
@@ -619,6 +745,7 @@ class ManagedTransaction(unittest.TestCase):
                     if len(reads) == 2:
                         with open(target, "wb") as stream:
                             stream.write(intervening)
+                        self.inject()
                 return original_fstat(descriptor)
 
             notices = io.StringIO()
@@ -733,6 +860,82 @@ class ManagedTransaction(unittest.TestCase):
         self.assertEqual(self.files(), before)
         print(json.dumps({"IC-F01": "apply-persistent", "state": state, "notices": len(notices.getvalue().splitlines()),
                           "recovery": recovered["state"], "original_bytes_restored": True}))
+
+    def host_denial(self, *, times, code=5):
+        """A simulated host denying owned journal replacement below the shield under test."""
+        errors, below = [], self.shields[0].replace
+
+        def replace(source, target, *args, **kwargs):
+            if Path(target).name == "journal.json" and (times is None or len(errors) < times):
+                error = OSError(errno.EACCES, "simulated host replacement denial", str(source), None, str(target))
+                error.winerror = code
+                errors.append(error)
+                raise error
+            return below(source, target, *args, **kwargs)
+
+        return errors, replace
+
+    def test_host_transient_shield_stays_beneath_injections_and_is_bounded(self):
+        windows = SimpleNamespace(name="nt", path=os.path)
+        verification = "li-transaction: owned journal changed during a verification read; retry {}/4."
+        denial = "li-transaction: Windows blocked owned journal replacement; retry 1/4 (winerror 5)."
+        for scenario in ("denied-once", "staging-check-4", "read-disturbed", "persistent", "nonretryable", "unowned"):
+            with self.subTest(scenario=scenario):
+                self.retry_trial("host-shield-" + scenario)
+                with self.module._lock(self.root, self.store):
+                    folder, planned = self.journal_fixture(existing=True)
+                    previous = native_io_path(folder / "journal.json").read_bytes()
+                    errors, replace = self.host_denial(times=None if scenario == "persistent" else 1,
+                                                       code=80 if scenario == "nonretryable" else 5)
+                    # The two observed points: a lone host denial, and one after four injected disturbances.
+                    chosen = {"staging-check-4": {2, 4, 6, 8}, "read-disturbed": {1}}.get(scenario, set())
+                    reads, disturbed, patches = self.disturbed_journal_reads(
+                        lambda number: number in chosen, injected=scenario != "read-disturbed")
+                    host = ({"read": HOST_READ} if scenario == "read-disturbed" else
+                            {"replace": replace, "roots": (self.base / "elsewhere",) if scenario == "unowned" else None})
+                    refusal = {"persistent": HostTransientExhausted, "nonretryable": OSError}.get(scenario)
+                    notices = io.StringIO()
+                    with self.simulated_host(**host) as (shield, host_delays), patches[0], patches[1], \
+                            patch.object(self.module, "os", windows), patch("time.sleep") as delays, \
+                            redirect_stderr(notices):
+                        if refusal:
+                            with self.assertRaises(refusal) as failure:
+                                self.module._save_journal(folder, planned)
+                        else:
+                            self.module._save_journal(folder, planned)
+                    lines = notices.getvalue().splitlines()
+                    product_delays = [call.args[0] for call in delays.call_args_list]
+                    absorbed = [record["class"] for record in shield.absorbed]
+                    self.assertEqual(disturbed, sorted(chosen))
+                    self.assertEqual(sorted(path.name for path in native_io_path(folder).iterdir()), ["journal.json"])
+                    self.assertEqual(native_io_path(folder / "journal.json").read_bytes(),
+                                     previous if refusal else self.module.json_bytes(planned))
+                    if scenario == "staging-check-4":
+                        self.assertEqual(product_delays, [0.05, 0.1, 0.2, 0.4])
+                        self.assertEqual(lines, [verification.format(attempt) for attempt in range(1, 5)])
+                    elif scenario == "unowned":
+                        self.assertEqual(product_delays, [0.05])
+                        self.assertEqual(lines, [denial])
+                    else:
+                        delays.assert_not_called()
+                        self.assertEqual(lines, [])
+                    if scenario == "persistent":
+                        self.assertIs(failure.exception.__cause__, errors[-1])
+                        self.assertEqual(len(errors), len(HOST_DELAYS) + 1)
+                        self.assertEqual(absorbed, ["replace"] * len(HOST_DELAYS))
+                        self.assertEqual(host_delays, list(HOST_DELAYS))
+                    elif scenario == "nonretryable":
+                        self.assertIs(failure.exception, errors[0])
+                        self.assertEqual((len(errors), absorbed, host_delays), (1, [], []))
+                    elif scenario == "unowned":
+                        self.assertEqual((len(errors), absorbed, host_delays), (1, [], []))
+                    elif scenario == "read-disturbed":
+                        self.assertEqual((len(errors), len(reads), absorbed, host_delays), (0, 2, ["read"], [0.02]))
+                    else:
+                        self.assertEqual((len(errors), absorbed, host_delays), (1, ["replace"], [0.02]))
+                    print(json.dumps({"F-INT-5": "simulated-host-point", "scenario": scenario,
+                                      "shield_absorbed": absorbed, "host_errors": len(errors),
+                                      "product_delays": product_delays, "product_notices": lines}))
 
 
 if __name__ == "__main__":
