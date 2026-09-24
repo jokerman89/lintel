@@ -928,3 +928,20 @@ another reviewer does not transfer to the current session. Keep a denial's
 reason and scope in the handoff and in summaries. If a denied action has
 occurred, stop, verify its effects read-only and report it; do not keep
 using the route.
+
+## L-047 - Verify a saved patch applies before recording its hash
+
+**Date:** 2026-09-24
+
+**Context:** The coordinator saved the three P08 reconciliation drafts as a
+patch file and recorded its SHA-256 in the handoff. The save had joined the
+lines without separators, so the recorded file was 3,644 bytes with no line
+breaks and `git apply` rejected it. The loss surfaced only when the patch was
+needed for a later trial tree. The drafts were still intact in their scratch
+worktree, so a byte-exact capture restored the patch (65 more bytes, one per
+line break) with identical content.
+
+**Rule:** Capture diff output as bytes (`git diff --output=<file>` or a
+subprocess that writes stdout unchanged), never through text-joining shell
+pipelines. Run `git apply --check` on the saved file before recording its hash,
+and keep the source drafts until that check has passed.
