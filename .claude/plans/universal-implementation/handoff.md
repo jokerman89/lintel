@@ -469,6 +469,11 @@ never inferred from this directive; a model switch does not change context ident
   timeouts are 180, 300 and 60 minutes. Windows selects PowerShell 7 via `LINTEL_POWERSHELL`.
   The runner contract and a real-tree check prove the shards are disjoint and complete. The
   first hosted run is the final PR's.
+- Main moved on 2026-09-24 (PRs #86 and #87: the presentation site under `presentations/` and
+  its Pages workflow). Recovery merged `origin/main` (`e9401f52`) in `fe9e6284`. It kept
+  recovery's README and inserted main's link line under the title; the presentation files are
+  identical to main. `main` is an ancestor of the delivery branch, so the final PR has no
+  conflict. The product version is `0.11.0` (`99443cf8`).
   Per L-045 nothing is pushed or dispatched before the accepted batch.
   Recovery denies local jq (L-046), so strict `--require-all` refuses locally.
   CI checks `jq --version` before the suite, which makes the final PR's CI the
