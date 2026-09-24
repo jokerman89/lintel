@@ -45,7 +45,7 @@ class SnapshotOwnershipTests(unittest.TestCase):
             self.temp.name = "\\\\?\\" + str(root)
         self.temp.cleanup()
 
-    @unittest.skipUnless(os.name == "nt", "native Windows full snapshot I/O")
+    @unittest.skipUnless(os.name == "nt", "platform: windows-only; native Windows full snapshot I/O")
     def test_native_long_snapshot_lifecycle_keeps_records_and_consumed_permission(self):
         self.store = self.base / "recovery-store"
         while len(str(self.store)) < 290:
@@ -83,7 +83,7 @@ class SnapshotOwnershipTests(unittest.TestCase):
         explicit_store = Path("\\\\?\\" + str(self.store))
         self.assertEqual(snapshot.load_snapshot(self.root, explicit_store, created["id"]), manifest)
 
-    @unittest.skipUnless(os.name == "nt", "native long retention, locks and explicit roots")
+    @unittest.skipUnless(os.name == "nt", "platform: windows-only; native long retention, locks and explicit roots")
     def test_native_long_retention_locks_and_explicit_root_records(self):
         self.store = self.base / ("store-" + "x" * 70) / ("store-" + "y" * 70)
         Path("\\\\?\\" + str(self.store)).mkdir(parents=True)

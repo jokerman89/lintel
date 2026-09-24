@@ -1799,7 +1799,7 @@ class NativePathEvidence(Fixture):
         with self.assertRaisesRegex(ContractError, "Latest applicable shared review blocks"):
             swarm_evidence._latest_review(self.repo, pointers, config)
 
-    @unittest.skipUnless(os.name == "nt", "actual native Windows junction policy")
+    @unittest.skipUnless(os.name == "nt", "platform: windows-only; actual native Windows junction policy")
     def test_native_junction_and_symlink_rules_are_not_replaced_by_provider_policy(self):
         import _winapi
         from review_contract import ContractError, _path, evidence_manifest, snapshot

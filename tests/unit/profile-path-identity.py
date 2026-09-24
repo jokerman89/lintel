@@ -78,7 +78,7 @@ class ProfilePathIdentity(unittest.TestCase):
             path /= "runtime-segment-" + "x" * 45
         return path / ("1-" + "d" * 64 + ".json")
 
-    @unittest.skipUnless(os.name == "nt", "native Windows legacy-length runtime I/O")
+    @unittest.skipUnless(os.name == "nt", "platform: windows-only; native Windows legacy-length runtime I/O")
     def test_long_parents_temporary_lock_and_destination_use_the_same_location(self):
         path = self.long_runtime_path()
         before = (str(self.config.repo), str(self.config.home), str(path))
@@ -107,7 +107,7 @@ class ProfilePathIdentity(unittest.TestCase):
         self.assertEqual([item.name for item in extended(path.parent).iterdir()], [path.name])
         self.assertEqual((str(self.config.repo), str(self.config.home), str(path)), before)
 
-    @unittest.skipUnless(os.name == "nt", "native long-path profile persistence")
+    @unittest.skipUnless(os.name == "nt", "platform: windows-only; native long-path profile persistence")
     def test_existing_long_pin_and_retained_history_are_read_without_rebinding(self):
         home = self.long_runtime_path().parent
         extended(home).mkdir(parents=True)
@@ -144,7 +144,7 @@ class ProfilePathIdentity(unittest.TestCase):
             replace(config, context_id=""),
         )), profile.profile_reference(recovered))
 
-    @unittest.skipUnless(os.name == "nt", "native long-path lock behavior")
+    @unittest.skipUnless(os.name == "nt", "platform: windows-only; native long-path lock behavior")
     def test_long_existing_lock_is_not_stolen_or_treated_as_absent(self):
         path = self.long_runtime_path()
         lock = path.with_name(path.name + ".lock")
@@ -157,7 +157,7 @@ class ProfilePathIdentity(unittest.TestCase):
         self.assertFalse(extended(path).exists())
         self.assertEqual(list(extended(lock).iterdir()), [])
 
-    @unittest.skipUnless(os.name == "nt", "native long-path atomic write cleanup")
+    @unittest.skipUnless(os.name == "nt", "platform: windows-only; native long-path atomic write cleanup")
     def test_failed_long_replace_preserves_existing_bytes_and_cleans_owned_temporary(self):
         path = self.long_runtime_path()
         extended(path.parent).mkdir(parents=True)
@@ -181,7 +181,7 @@ class ProfilePathIdentity(unittest.TestCase):
         profile._write_json(self.config, path, {"replacement": True})
         self.assertEqual(json.loads(extended(path).read_text()), {"replacement": True})
 
-    @unittest.skipUnless(os.name == "nt", "native long-path namespace and containment refusals")
+    @unittest.skipUnless(os.name == "nt", "platform: windows-only; native long-path namespace and containment refusals")
     def test_long_io_alias_cannot_authorize_outside_device_ads_or_traversal(self):
         valid = self.long_runtime_path()
         for spelling in (valid, extended(valid), PureWindowsPath(r"\\server\share\directory\file.json")):
@@ -205,7 +205,7 @@ class ProfilePathIdentity(unittest.TestCase):
         self.assertFalse(extended(sibling.parent).exists())
         self.assertFalse(extended(valid.parent).exists())
 
-    @unittest.skipUnless(os.name == "nt", "native symlink beyond legacy path length")
+    @unittest.skipUnless(os.name == "nt", "platform: windows-only; native symlink beyond legacy path length")
     def test_long_runtime_resolution_follows_existing_link_ancestors_before_mutation(self):
         parent = self.long_runtime_path().parent
         extended(parent).mkdir(parents=True)
@@ -280,7 +280,7 @@ class ProfilePathIdentity(unittest.TestCase):
                 profile._write_json(self.config, path, {"synthetic": True})
             self.assertFalse(path.exists())
 
-    @unittest.skipUnless(os.name == "nt", "native extended-length drive I/O requires Windows")
+    @unittest.skipUnless(os.name == "nt", "platform: windows-only; native extended-length drive I/O requires Windows")
     def test_native_extended_drive_runtime_io_preserves_same_physical_file(self):
         for extended_roots in (False, True):
             config = replace(self.config, repo=extended(self.repo), home=extended(self.home)) \
@@ -299,7 +299,7 @@ class ProfilePathIdentity(unittest.TestCase):
                         self.assertEqual(extended(normal).read_bytes(), normal.read_bytes())
                         self.assertEqual((str(config.repo), str(config.home), str(normal)), before)
 
-    @unittest.skipUnless(os.name == "nt", "native extended-length drive resolution requires Windows")
+    @unittest.skipUnless(os.name == "nt", "platform: windows-only; native extended-length drive resolution requires Windows")
     def test_injected_resolve_alias_only_never_changes_io_or_approved_roots(self):
         selected = self.repo / ".claude/runtime/profiles/selected.json"
         original_resolve = Path.resolve
@@ -316,7 +316,7 @@ class ProfilePathIdentity(unittest.TestCase):
                 self.assertEqual(json.loads(selected.read_text(encoding="utf-8")), {"present": present})
                 self.assertEqual((str(self.config.repo), str(self.config.home)), before)
 
-    @unittest.skipUnless(os.name == "nt", "native extended-length drive resolution requires Windows")
+    @unittest.skipUnless(os.name == "nt", "platform: windows-only; native extended-length drive resolution requires Windows")
     def test_injected_bootstrap_alias_preserves_reference_provenance_and_record_bytes(self):
         config = replace(self.config, context_id="")
         original_resolve = Path.resolve
@@ -341,7 +341,7 @@ class ProfilePathIdentity(unittest.TestCase):
         self.assertEqual(resumed["profile"]["inputs"], first["profile"]["inputs"])
         self.assertEqual(selected_path.read_bytes(), before)
 
-    @unittest.skipUnless(os.name == "nt", "native Windows realpath scheduling reproduction")
+    @unittest.skipUnless(os.name == "nt", "platform: windows-only; native Windows realpath scheduling reproduction")
     def test_native_parent_creation_race_accepts_authorized_extended_result(self):
         triggered, returns = [], []
 
@@ -371,7 +371,7 @@ class ProfilePathIdentity(unittest.TestCase):
             profile._runtime_path(self.config, self.outside / "record.json")
         self.assertFalse((self.outside / "record.json").exists())
 
-    @unittest.skipUnless(os.name == "nt", "native Windows runtime path preflight")
+    @unittest.skipUnless(os.name == "nt", "platform: windows-only; native Windows runtime path preflight")
     def test_device_namespaces_and_traversal_are_rejected_before_resolution(self):
         for text in (r"\\.\pipe\profile", r"\\?\GLOBALROOT\Device\Disk\file",
                      str(self.home / ".." / "outside/file.json")):
@@ -381,7 +381,7 @@ class ProfilePathIdentity(unittest.TestCase):
                 profile._runtime_path(self.config, Path(text))
             self.assertEqual(error.exception.code, "PROFILE_IO")
 
-    @unittest.skipUnless(os.name == "nt", "native Windows physical path casing")
+    @unittest.skipUnless(os.name == "nt", "platform: windows-only; native Windows physical path casing")
     def test_injected_case_distinct_physical_sibling_is_not_authorized(self):
         config = replace(self.config, home=self.home / "Approved")
         candidate = config.home / "record.json"
@@ -391,7 +391,7 @@ class ProfilePathIdentity(unittest.TestCase):
             profile._runtime_path(config, candidate)
         self.assertEqual(error.exception.code, "PROFILE_IO")
 
-    @unittest.skipUnless(os.name == "nt", "native case-sensitive Windows directory fixture")
+    @unittest.skipUnless(os.name == "nt", "platform: windows-only; native case-sensitive Windows directory fixture")
     def test_native_case_sensitive_sibling_root_is_rejected(self):
         case_root = self.root / "case-sensitive"
         case_root.mkdir()
@@ -444,7 +444,7 @@ class ProfilePathIdentity(unittest.TestCase):
             profile._write_json(self.config, file_link, {"must_not_write": True})
         self.assertEqual(outside_file.read_text(encoding="utf-8"), '{"preserved":true}')
 
-    @unittest.skipUnless(os.name == "nt", "native Windows junction case")
+    @unittest.skipUnless(os.name == "nt", "platform: windows-only; native Windows junction case")
     def test_real_junction_escape_and_redirected_runtime_boundary_are_rejected(self):
         for link in (self.home / "junction", self.repo / ".claude/runtime"):
             with self.subTest(link=str(link)):

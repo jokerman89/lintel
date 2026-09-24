@@ -253,7 +253,7 @@ class ProfileLifecycle(unittest.TestCase):
             BOOTSTRAP, env=env, source_resolver=False,
         ).stdout), rebound)
 
-    @unittest.skipUnless(os.name == "nt", "native Windows default-home long-path lifecycle")
+    @unittest.skipUnless(os.name == "nt", "platform: windows-only; native Windows default-home long-path lifecycle")
     def test_default_home_long_runtime_keeps_fresh_shells_history_rebind_and_drift(self):
         self.target = self.base / ("profile-consumer-" + "x" * 95)
         self.target.mkdir()

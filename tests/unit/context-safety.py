@@ -44,7 +44,7 @@ class ContextSafetyTests(unittest.TestCase):
             self.temp.name = "\\\\?\\" + str(root)
         self.temp.cleanup()
 
-    @unittest.skipUnless(os.name == "nt", "native Windows default-length checkpoint I/O")
+    @unittest.skipUnless(os.name == "nt", "platform: windows-only; native Windows default-length checkpoint I/O")
     def test_native_checkpoint_thresholds_keep_logical_paths_and_owned_bytes(self):
         name = "20260921-120000-r" + "a" * 40 + "-repo-mywork-context-save.md"
         for length in (259, 260, 268, 278, 277, 290):
@@ -63,7 +63,7 @@ class ContextSafetyTests(unittest.TestCase):
                 self.assertEqual(safety.read_owned(directory, name)[0], b"owned checkpoint\n")
                 self.assertNotEqual(safety.reserve_checkpoint(directory, name), path)
 
-    @unittest.skipUnless(os.name == "nt", "native long parent/selection I/O")
+    @unittest.skipUnless(os.name == "nt", "platform: windows-only; native long parent/selection I/O")
     def test_native_long_parents_read_select_cool_and_case_identity(self):
         root = self.base
         while len(str(root)) < 285:
@@ -115,7 +115,7 @@ class ContextSafetyTests(unittest.TestCase):
             self.assertNotEqual(run.returncode, 0)
             self.assertFalse(marker.exists(), helper)
 
-    @unittest.skipUnless(os.name == "nt", "native Windows exact snapshot publication operands")
+    @unittest.skipUnless(os.name == "nt", "platform: windows-only; native Windows exact snapshot publication operands")
     def test_native_snapshot_atomic_publication_uses_218_to_260_without_shortening(self):
         parent = self.base.parent
         count = 94 - len(str(parent)) - 1
@@ -154,7 +154,7 @@ class ContextSafetyTests(unittest.TestCase):
         self.assertEqual(safety.file_state(root, relative), before)
         self.assertEqual([p.name for p in Path("\\\\?\\" + str(destination.parent)).iterdir()], ["c" * 64])
 
-    @unittest.skipUnless(os.name == "nt", "native long path ancestry and namespace refusals")
+    @unittest.skipUnless(os.name == "nt", "platform: windows-only; native long path ancestry and namespace refusals")
     def test_native_long_link_escape_and_namespace_refusals_precede_temp_creation(self):
         root = self.base / "long-ancestry"
         while len(str(root)) < 285:
