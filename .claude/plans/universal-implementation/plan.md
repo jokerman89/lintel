@@ -497,9 +497,16 @@ final receiver coverage, not another run of these completed finite attempts.
 ### A18 Optional capabilities without loss (P13; R06)
 - [x] A18.1 Define discoverable capability selections and their dependency/maturity metadata.
 - [x] A18.2 Keep common lifecycle/security core and identity overlay distinct.
-- [ ] A18.3 Verify a selected consumer gets needed methods without unrelated prompt loading.
-- [ ] A18.4 Trace every moved/consolidated use case and preserve useful aliases.
+- [x] A18.3 Verify a selected consumer gets needed methods without unrelated prompt loading.
+- [x] A18.4 Trace every moved/consolidated use case and preserve useful aliases.
 Acceptance: no deletion for file-count reduction; optional capability remains usable.
+Installed closure (2026-09-24): the original owner's installed-consumer unit `5c77a984` /
+`9d7851a4` passes the new independent reviewer's scoped SPEC and then QUALITY with two
+advisory P3 findings (`d0eb793e`), and is integrated in `1e41deb0`. From P10-installed
+sources, a consumer selects from metadata and reads only the chosen body; all 46 aliases,
+196 bodies and 35 module rows are preserved; and a removed asset, an unresolvable alias
+and unrelated body exposure each refuse visibly. The evidence covers Windows with Python
+3.11.9, and the body observer sees only `Path.read_*`. A19.4 closes with A19.3.
 Source declarations and shared-core separation are accepted in
 [P13 family review](reviews/P13-families-20493b7.md), `8f0f7dc`, product
 `20493b7`, integrated `c62606b` with all six source/report blobs exact.
