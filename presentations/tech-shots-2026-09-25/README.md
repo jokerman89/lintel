@@ -2,7 +2,7 @@
 
 [Open the website](https://jokerman89.github.io/lintel/) · [Presentation](https://jokerman89.github.io/lintel/show/index.html) · [Technical reference](https://jokerman89.github.io/lintel/show/technical-reference.html)
 
-A 50-minute level-200 presentation for developers and architects, with a separate six-minute product launch and 18-minute technical module. English slides and speaker notes, two themes, 57 screens including optional material, and prepared browser demos.
+A 50-minute level-200 presentation for developers and architects, with a separate six-minute product launch and 18-minute technical module. English slides and speaker notes, two themes, 58 screens including optional material, and prepared browser demos.
 
 ## Use it
 
