@@ -693,7 +693,16 @@ edit `skills/CATALOG.md`.
 - `CONTRIBUTING.md` and `docs/faq.md`: promotion paragraphs;
 - `skills/skillify/SKILL.md`: by-ID lookup;
 - `scaffolding/01-foundation/.claude/memory/lessons.md`: the format example and grammar
-  comments only.
+  comments only;
+- `bin/li-review-read`: exactly one `mkdir -p "$(dirname "$marker")"` immediately before
+  the legacy-import marker append, and nothing else. This coordinator decision resolves
+  item 2 of "Routing without side effects" against the P05-reader prohibition below:
+  after the base resolver stopped creating the repository audit root, that append was
+  the only direct write that relied on it. With `GSTACK_HOME` set, an empty legacy file
+  and no audit directory, the command exited 1 instead of 0. `li-review-log`,
+  `lib/brief-forge.sh` and `li-envelope-replay` need no change. A resolver exception was
+  rejected. The line lands in its own commit with an A13-owned discriminating
+  regression, and the A13 review assesses it as a cross-package change.
 
 **Coordinator fan-in items (not P08 changes):**
 
