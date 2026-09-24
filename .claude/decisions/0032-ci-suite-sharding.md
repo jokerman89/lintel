@@ -78,6 +78,20 @@ Every discovered test must still run under `--require-all` on every system.
   hosted runners are unknown until the first run.
 - **Neutral:** the runner contract test proves that the shards are disjoint and that
   together they cover exactly the unsharded set. The CI logs show each shard's selection.
+- **Platform applicability.** Five entries skip Windows-native methods on Linux and macOS. Off
+  Windows, the runner reports skips marked `platform: windows-only` as `N/A` instead of refusing
+  them (`tests/README.md`), and the Windows jobs run those methods strictly.
+- **Trade-offs.**
+  - Every Windows job uses PowerShell 7, so CI adds no Windows PowerShell 5.1 evidence. That is
+    not a regression: main's CI also used only PowerShell 7, and 5.1 stays an explicit limit.
+  - Seven macOS jobs exceed the five concurrent macOS jobs of a personal plan, so the macOS
+    parts queue.
+  - `cancel-in-progress` cancels a multi-hour run on any push to the PR branch. Record-only
+    commits must therefore wait until a run finishes, or be batched.
+  - Adding `tests/integration/universal-a23.sh` moves the integration entries sorted after it to
+    other shards. The kit shard's estimate is rechecked on the frozen head.
+- **Separate steps.** The behavior, e2e and shape tiers run as separate steps, and later checks run
+  with `!cancelled()`, so one failure does not hide the others.
 
 ## References
 

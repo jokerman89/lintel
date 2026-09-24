@@ -74,30 +74,34 @@ jobs:
       - name: Run this shard of the unit or integration tier
         if: matrix.part != 'other'
         run: bash tests/runner/run-all.sh --scope "${{ matrix.scope }}" --shard "${{ matrix.shard }}" --require-all
-      - name: Run the behavior, e2e and shape tiers, including security behavior
+      - name: Run the behavior tier, including security behavior
         if: matrix.part == 'other'
-        run: |
-          bash tests/runner/run-all.sh --scope behavior --require-all
-          bash tests/runner/run-all.sh --scope e2e --require-all
-          bash tests/runner/run-all.sh --scope shape --require-all
+        run: bash tests/runner/run-all.sh --scope behavior --require-all
+      # Later checks keep running after an earlier failure so every signal is reported; the job still fails.
+      - name: Run the e2e tier
+        if: ${{ !cancelled() && matrix.part == 'other' }}
+        run: bash tests/runner/run-all.sh --scope e2e --require-all
+      - name: Run the shape tier
+        if: ${{ !cancelled() && matrix.part == 'other' }}
+        run: bash tests/runner/run-all.sh --scope shape --require-all
       - name: Exercise bare installation with stock macOS Bash 3.2
-        if: runner.os == 'macOS' && matrix.part == 'other'
+        if: ${{ !cancelled() && runner.os == 'macOS' && matrix.part == 'other' }}
         run: LINTEL_HOME="$RUNNER_TEMP/lintel-bash32" /bin/bash install/install.sh
       - name: Exercise PowerShell installation and reinstall
-        if: runner.os == 'Windows' && matrix.part == 'other'
+        if: ${{ !cancelled() && runner.os == 'Windows' && matrix.part == 'other' }}
         shell: pwsh
         run: ./tests/runner/check-install.ps1
       - name: Verify catalog drift
-        if: matrix.part == 'other'
+        if: ${{ !cancelled() && matrix.part == 'other' }}
         run: python3 bin/li-catalog.py --check
       - name: Verify canonical startup instructions
-        if: matrix.part == 'other'
+        if: ${{ !cancelled() && matrix.part == 'other' }}
         run: python3 bin/li-instructions.py check
       - name: Verify committed Copilot adapters and inventory
-        if: matrix.part == 'other'
+        if: ${{ !cancelled() && matrix.part == 'other' }}
         run: python3 bin/li-copilot.py check --target . --source .
       - name: Verify generated wiki and capability table
-        if: matrix.part == 'other'
+        if: ${{ !cancelled() && matrix.part == 'other' }}
         run: bash bin/li-wiki-gen --check
 
   syntax:
