@@ -575,6 +575,55 @@ class ReviewRoundTripTests(Sandbox):
         self.assertNotIn("CLEAR", result.stdout)
 
 
+class ReviewLegacyImportTests(Sandbox):
+    """The one-time GSTACK_HOME import creates the marker directory only when it writes the marker."""
+
+    def setUp(self):
+        super().setUp()
+        self.repo = self.make_repo("legacy repo")
+        self.audit = self.repo / ".claude/runtime/audit"
+        self.marker = self.audit / "reviews-legacy-import.done"
+        self.gstack = self.root / "gstack"
+        self.legacy = f"{self.gstack.as_posix()}/projects/legacyrepo/main-reviews.jsonl"
+        self.env.update(LINTEL_REPO_ROOT=self.repo.as_posix())
+
+    def read(self, *extra, env, expect):
+        return self.run_cmd([BASH, ROOT / "bin/li-review-read", *extra], cwd=self.repo, env=env, expect=expect)
+
+    def import_env(self):
+        write(Path(self.legacy), "")
+        return {**self.env, "GSTACK_HOME": self.gstack.as_posix()}
+
+    def marker_lines(self):
+        return self.marker.read_text(encoding="utf-8").splitlines()
+
+    def test_empty_legacy_import_writes_its_marker_without_an_audit_directory(self):
+        env = self.import_env()
+        self.assertFalse(self.audit.exists())
+        self.read("--json", env=env, expect=0)
+        self.assertEqual(self.marker_lines(), [self.legacy])
+        self.assertEqual([path.name for path in self.audit.iterdir()], [self.marker.name])
+
+    def test_reads_without_a_legacy_import_create_no_audit_directory(self):
+        for label, env in (("no GSTACK_HOME", self.env),
+                           ("GSTACK_HOME without a legacy file", {**self.env, "GSTACK_HOME": self.gstack.as_posix()})):
+            with self.subTest(label):
+                self.read("--json", env=env, expect=0)
+                self.read(env=env, expect=3)
+                self.assertFalse(self.audit.exists())
+
+    def test_a_second_import_run_does_not_duplicate_the_marker(self):
+        env = self.import_env()
+        for label, existing in (("audit directory already present", True), ("no audit directory", False)):
+            with self.subTest(label):
+                shutil.rmtree(self.audit, ignore_errors=True)
+                if existing:
+                    self.audit.mkdir(parents=True)
+                for _ in range(2):
+                    self.read("--json", env=env, expect=0)
+                    self.assertEqual(self.marker_lines(), [self.legacy])
+
+
 class FailurePropagationTests(Sandbox):
     STATE = ("---\nphase: CYCLE\nentry_format: 1\nstatus: STARTING\ncycle_id: c1\ncycle_mode: full\n"
              "entry_complete: true\n---\nphase: BUILD\nentry_format: 1\nstatus: STARTING\ncycle_id: c1\n"
