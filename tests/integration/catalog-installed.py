@@ -98,16 +98,20 @@ class InstalledDiscovery(unittest.TestCase):
         self.addCleanup(self.environment.stop)
         self.assertEqual(Path.home(), self.base / "h")
         self.assertFalse(any(key.startswith("LINTEL_") for key in os.environ))
-        self.assert_short(self.base / "worst-case/.github/lintel" / max(
-            (path.relative_to(ROOT) for path in ROOT.rglob("*") if path.is_file() and ".git" not in path.parts),
-            key=lambda path: len(str(path)),
-        ))
+        self.assert_generated_short(ROOT)
         self.source_before = self.snapshot(ROOT)
         self.addCleanup(self.assert_source_unchanged)
 
     def assert_short(self, path):
         self.assertLess(len(str(path).encode("utf-16-le")) // 2, 220,
                         "Use an explicitly selected shorter synthetic fixture root before this test, not a long-path workaround")
+
+    def assert_generated_short(self, source):
+        # Only paths the adapter itself generates can reach a target. Ignored evidence such as
+        # .claude/runtime/ is never bundled, so it must not make this guard order-dependent (F-INT-6).
+        files, seeds, _ = kit.adapter.generate(source, self.base / "worst-case")
+        self.assert_short(self.base / "worst-case" / max(
+            (*files, *seeds), key=lambda relative: len(relative.encode("utf-16-le"))))
 
     def snapshot(self, target=None):
         root = target or self.target
@@ -305,6 +309,35 @@ class InstalledDiscovery(unittest.TestCase):
                 self.assertEqual(value["body_reads"][0]["path"],
                                  str(bundle / literal["entries"][0]["path"]))
             self.assertEqual(before, self.snapshot())
+
+    def test_worst_case_guard_counts_generated_paths_not_ignored_runtime(self):
+        # Rebuild the generator's own inputs in a synthetic source; the real checkout is never written.
+        prefix = kit.adapter.BUNDLE + "/"
+        expected = kit.adapter.generate(ROOT, self.target)
+        synthetic = self.base / "src"
+        for key in expected[0]:
+            if key.startswith(prefix) and (ROOT / key[len(prefix):]).is_file():
+                (synthetic / key[len(prefix):]).parent.mkdir(parents=True, exist_ok=True)
+                shutil.copyfile(ROOT / key[len(prefix):], synthetic / key[len(prefix):])
+        self.assertEqual(kit.adapter.generate(synthetic, self.target), expected)
+
+        def plant(head, name):
+            # 228 units under the old guard's own worst-case/.github/lintel/<relative> composition.
+            width = 228 - len(str(self.base / "worst-case" / prefix / head)) - 2 - len(name)
+            self.assertGreater(width, 0)
+            relative = f"{head}/{'x' * width}/{name}"
+            self.assertEqual(len(str(self.base / "worst-case" / prefix / relative)), 228)
+            (synthetic / relative).parent.mkdir(parents=True)
+            (synthetic / relative).write_bytes(b"{}\n")
+            return relative
+
+        plant(".claude/runtime/p13-worst-case", "evidence.json")
+        self.assertEqual(kit.adapter.generate(synthetic, self.target), expected)
+        self.assert_generated_short(synthetic)
+        bundled = plant("lib/p13-worst-case", "bundled.txt")
+        self.assertIn(prefix + bundled, kit.adapter.generate(synthetic, self.target)[0])
+        with self.assertRaisesRegex(AssertionError, "shorter synthetic fixture root"):
+            self.assert_generated_short(synthetic)
 
 
 class FixtureRootAdmission(unittest.TestCase):
