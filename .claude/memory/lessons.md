@@ -945,3 +945,18 @@ line break) with identical content.
 subprocess that writes stdout unchanged), never through text-joining shell
 pipelines. Run `git apply --check` on the saved file before recording its hash,
 and keep the source drafts until that check has passed.
+
+## L-048 - Gate a bookkeeping commit on its own verification
+
+**Date:** 2026-09-24
+
+**Context:** The coordinator checked the abbreviated hashes in a new P08 card
+section and committed in the same command. The check printed `False` for the
+step-1 failure packet's tail (`c3765d1` for `7d3765d1`), but the commit had
+already run, so erratum `6d5cf4f5` followed `dcdaa44e`. Earlier checks in the
+same session caught every similar slip because they ran before the commit.
+
+**Rule:** Run hash, EOL and reference checks as a separate step, and commit only
+after reading a clean result, or make the commit conditional on the check's
+exit status. Recompute abbreviations from the full value rather than typing
+them.
