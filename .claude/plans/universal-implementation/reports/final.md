@@ -1,8 +1,7 @@
 # Universal initiative final report (P15)
 
-**Status:** draft for the A23.5 independent final review. It is completed at the final freeze
-with the exact head, the joined-run results and the CI results. Nothing has been pushed yet
-(L-045).
+**Status:** frozen for the A23.5 independent final review. The CI results are added after the
+delivery PR's run. Nothing has been pushed before the review (L-045).
 
 ## Delivery identity
 
@@ -146,5 +145,46 @@ These are reviewed at A23.5, not by a package review:
 
 ## Evidence at the final freeze
 
-Filled at the freeze: the joined run on the exact head, the SAME9db and A23 verdicts, and the
-CI results.
+The frozen head is the commit that adds this section. Its product differs from `14ab496e`, the
+targeted run's tree, only in `CHANGELOG.md` wording and in `presentations/`, which equals `main`
+`9575aaac`. Evidence lives under the coordinator's session files, `verification/<label>/`. All
+runs used launcher `d288e74b` with PowerShell 7 only, synthetic roots and no other `LINTEL_*`.
+
+**Joined run on the integrated tree** (`3d7f1284`, whose P08 content equals `3ff59984`):
+
+| Label | Result | `results.json` SHA-256 |
+|---|---|---|
+| `fin2-kit` | `copilot-kit`: Ran 50 tests in 12,578 s, OK, no skip | `857bcdbe…baa70eeb` |
+| `fin2-rest-a` | 72/73; `domain-installed-consumers` exceeds its own 235-character budget under the launcher's long root | `b82813c5…5f7adeff` |
+| `fin2-dic-short` | the same test from a short work directory: exit 0 | `e0dcf3c5…5075a70b` |
+| `fin2-rest-b` | 74/75; `catalog-installed` is F-INT-6, now fixed, reviewed and integrated | `4496f946…679654a8` |
+
+**Targeted run on `14ab496e`** (`fin3-targeted`, 16/16 exit 0, `results.json` `cfdfdb09…cb84947f`),
+covering everything that changed since `3d7f1284`:
+- the runner contract, with the platform N/A and shard cases;
+- `context-safety`, `profile-path-identity` and `snapshot-ownership`, whose skip reasons changed;
+- `catalog-metadata`;
+- CI's cheap steps: catalog, instructions, adapter check, wiki and `install/verify.sh --all`;
+- the whole shape tier;
+- `universal-profile-context` and `universal-a23`;
+- `domain-installed-consumers` from a short work directory;
+- `catalog-installed` (1,254 s) and `review-evidence` (1,000 s).
+
+**Independent verdicts integrated in this delivery:**
+- P10: `f460eb9f`, `9ca6402a` and F-INT-5 (`70bdcd69`).
+- P09's installed closure: `2e71a94b`.
+- P13:
+  - the installed consumers (`d0eb793e`);
+  - the fan-in (`2172dd31`);
+  - N3/N5 (`8a1ebf33`);
+  - F-INT-6 (`0a6df5f6`).
+- P08:
+  - the recheck of `624` (F06 accepted, `a337161c`);
+  - the whole integration review (`f724834c`).
+- The P14 A23 unit: `8a74d548`.
+- A14.5: the static page (`562f0386`) and the app (`9d23f2ff`).
+- The A23.5 Phase 1 notes: `9c6f65a4` and `edd2f556`.
+
+**Not run locally:** the strict `--require-all` suite, because jq is denied (L-046); Linux and macOS;
+Python 3.9 and 3.12; and Windows PowerShell 5.1. The delivery PR's CI supplies the strict suite on
+all three systems, and A23.4 closes on it.
