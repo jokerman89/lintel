@@ -308,6 +308,40 @@ never inferred from this directive; a model switch does not change context ident
   reread or new clearance occurred. Old report/decisions/handoff remain exact;
   current consumer evidence remains valid; MAIN grant801/handoff27 is complete
   and revoked, not permission to reopen that target.
+  Coordinator trial merge (prep only, uncommitted, `%LOCALAPPDATA%\Temp\p08tm`)
+  of `229656cf` onto `14c54d46`: 10 conflicts.
+  - Nine resolve to ours: HEAD already carries P08's content plus later reviewed
+    additions.
+  - `skills/status/SKILL.md` needs a union: P13's accepted reader plus P08's
+    read-only `_jobs.sh` observations, with an explicit repo-local
+    `LINTEL_JOBS_DIR`. Owner: P13 status/welcome fan-in.
+  - Catalog and wiki must be regenerated: P08's own head fails both checks.
+
+  Clean CI-like runs: 16 of 18 P08-affected entry points pass. Three genuine P08
+  findings reproduce on `229656cf` alone:
+  - a stale `cycle_mode` text check in `cycle-footer-present.sh`;
+  - two plan-analysis tests that need `LINTEL_PYTHON` from the caller;
+  - functional Swedish routing inputs in `intent-operation-boundary.sh`, which the
+    English-only guard does not yet allowlist.
+
+  All three are coordinator reconciliations at P08 integration. A draft passes on
+  `229656cf` alone, with a discriminating negative for the guard. Patch:
+  `files\p08-integration-reconciliation.patch`, SHA-256 `2de14c2c…cde01`. See the
+  P08 card, "Coordinator trial-merge findings for integration".
+
+  The remaining 124 entry points on the trial tree (kit excluded): 119 pass, 5 fail
+  (7,942 s), and none is a new P08 finding:
+  - `no-swedish` is the third finding above.
+  - `harness-critical-path` fails exactly as on HEAD; it is P10-owned.
+  - The profile-scenarios freeze refusal comes from the uncommitted tree. The test
+    passes on a detached scratch commit of the merge (`39384b38`).
+  - Two timing and `/tmp` sensitivities fail identically on HEAD.
+
+  A13 contract defect: A13's pure resolver broke the `li-review-read` legacy marker
+  append, because the audit directory no longer exists before the write. Decision
+  `855a5c27` releases one write-site mkdir in that P05 reader, with an A13-owned
+  discriminating regression, reviewed as a cross-package change. f2 then sends the
+  frozen A13 handoff to SAME9db.
 - P09: module product `5c99612` passes `114ddfe3`, integrated `2d789a4`;
   all 26 product paths match and 13 joined methods pass. `477d3fc` releases
   the original owner's separate N1 safety-quantifier correction and two bounded
