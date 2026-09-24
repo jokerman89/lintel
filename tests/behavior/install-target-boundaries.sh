@@ -2,7 +2,8 @@
 # Refuse self-install and linked managed destinations before writing anything.
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-TMP="$(mktemp -d)"
+# macOS mktemp ignores TMPDIR and answers under the /var link; Lintel refuses linked roots.
+TMP="$(mktemp -d)" && TMP="$(cd "${TMP:?}" && pwd -P)" || exit 1
 trap 'rm -rf "$TMP"' EXIT
 source_root="$TMP/source"
 mkdir -p "$source_root/install" "$source_root/lib"

@@ -11,7 +11,8 @@ fail(){ echo "  FAIL: $1"; FAILED=1; }
 echo "tests/shape/extension-pack-contract.sh"
 echo "======================================"
 
-TMP=$(mktemp -d); trap 'rm -rf "$TMP"' EXIT
+# macOS mktemp ignores TMPDIR and answers under the /var link; Lintel refuses linked roots.
+TMP="$(mktemp -d)" && TMP="$(cd "${TMP:?}" && pwd -P)" || exit 1; trap 'rm -rf "$TMP"' EXIT
 export LINTEL_HOME="$TMP/.lintel"
 export LINTEL_PACKS_DIR="$TMP/.lintel/packs"
 export LINTEL_AUDIT_DIR="$TMP/.lintel/audit"

@@ -8,7 +8,8 @@
 
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-TMP="$(mktemp -d)"
+# macOS mktemp ignores TMPDIR and answers under the /var link; Lintel refuses linked roots.
+TMP="$(mktemp -d)" && TMP="$(cd "${TMP:?}" && pwd -P)" || exit 1
 trap 'rm -rf "$TMP"' EXIT
 export LINTEL_HOME="$TMP/home" LINTEL_REPO_ROOT="$ROOT" LINTEL_SOURCE_ROOT="$ROOT"
 export LINTEL_PACKS_DIR="$LINTEL_HOME/packs" LINTEL_AUDIT_DIR="$TMP/audit"

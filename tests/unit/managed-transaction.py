@@ -940,4 +940,5 @@ class ManagedTransaction(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    unittest.main(argv=[sys.argv[0], *remaining])
+    # Verbose output names each skip reason, which the runner needs to classify platform-only skips.
+    unittest.main(argv=[sys.argv[0], *remaining], verbosity=2)

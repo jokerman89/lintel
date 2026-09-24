@@ -20,7 +20,8 @@ DOC="$REPO_ROOT/bin/li-doctor"
 # Parses without error (catches a half-applied edit before anyone runs it).
 bash -n "$DOC" && pass "li-doctor parses (bash -n)" || fail "li-doctor has a syntax error"
 
-TMP="$(mktemp -d)"; trap 'rm -rf "$TMP"' EXIT
+# macOS mktemp ignores TMPDIR and answers under the /var link; Lintel refuses linked roots.
+TMP="$(mktemp -d)" && TMP="$(cd "${TMP:?}" && pwd -P)" || exit 1; trap 'rm -rf "$TMP"' EXIT
 run_doctor() { # <arg...>  → captures output to $OUT, rc to $RC, sandboxed HOME
   OUT="$TMP/out.txt"; RC=0
   if command -v timeout >/dev/null 2>&1; then
