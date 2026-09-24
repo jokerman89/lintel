@@ -16,13 +16,23 @@ concurrency:
 
 jobs:
   suite:
-    name: Full suite (${{ matrix.os }})
+    name: Suite (${{ matrix.os }}, ${{ matrix.part }})
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 30
+    # Sized from local Windows timings (ADR-0032); the integration shard holding the Copilot kit is the longest.
+    timeout-minutes: ${{ matrix.timeout }}
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
+        part: [unit-1, unit-2, integration-1, integration-2, integration-3, integration-4, other]
+        include:
+          - { part: unit-1, scope: unit, shard: 1/2, timeout: 180 }
+          - { part: unit-2, scope: unit, shard: 2/2, timeout: 180 }
+          - { part: integration-1, scope: integration, shard: 1/4, timeout: 300 }
+          - { part: integration-2, scope: integration, shard: 2/4, timeout: 300 }
+          - { part: integration-3, scope: integration, shard: 3/4, timeout: 300 }
+          - { part: integration-4, scope: integration, shard: 4/4, timeout: 300 }
+          - { part: other, scope: other, shard: 1/1, timeout: 60 }
     defaults:
       run:
         shell: bash
@@ -44,29 +54,45 @@ jobs:
           printf '#!/usr/bin/env bash\nexec python "$@"\n' > "$RUNNER_TEMP/lintel-ci-bin/python3"
           chmod +x "$RUNNER_TEMP/lintel-ci-bin/python3"
           echo "$RUNNER_TEMP/lintel-ci-bin" >> "$GITHUB_PATH"
+      - name: Select the approved PowerShell 7 for Windows tests
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: '"LINTEL_POWERSHELL=$((Get-Command pwsh).Source)" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8'
       - name: Check verification dependencies
         run: |
           git --version
           python3 --version
           jq --version
       - name: Verify repository structure
+        if: matrix.part == 'other'
         run: bash install/verify.sh --all
-      - name: Run every test tier, including security behavior and Copilot adapters
-        run: bash tests/runner/run-all.sh --require-all
+      - name: Run this shard of the unit or integration tier
+        if: matrix.part != 'other'
+        run: bash tests/runner/run-all.sh --scope "${{ matrix.scope }}" --shard "${{ matrix.shard }}" --require-all
+      - name: Run the behavior, e2e and shape tiers, including security behavior
+        if: matrix.part == 'other'
+        run: |
+          bash tests/runner/run-all.sh --scope behavior --require-all
+          bash tests/runner/run-all.sh --scope e2e --require-all
+          bash tests/runner/run-all.sh --scope shape --require-all
       - name: Exercise bare installation with stock macOS Bash 3.2
-        if: runner.os == 'macOS'
+        if: runner.os == 'macOS' && matrix.part == 'other'
         run: LINTEL_HOME="$RUNNER_TEMP/lintel-bash32" /bin/bash install/install.sh
       - name: Exercise PowerShell installation and reinstall
-        if: runner.os == 'Windows'
+        if: runner.os == 'Windows' && matrix.part == 'other'
         shell: pwsh
         run: ./tests/runner/check-install.ps1
       - name: Verify catalog drift
+        if: matrix.part == 'other'
         run: python3 bin/li-catalog.py --check
       - name: Verify canonical startup instructions
+        if: matrix.part == 'other'
         run: python3 bin/li-instructions.py check
       - name: Verify committed Copilot adapters and inventory
+        if: matrix.part == 'other'
         run: python3 bin/li-copilot.py check --target . --source .
       - name: Verify generated wiki and capability table
+        if: matrix.part == 'other'
         run: bash bin/li-wiki-gen --check
 
   syntax:
