@@ -22,6 +22,8 @@ from unittest.mock import patch
 
 SOURCE = Path(__file__).resolve().parents[2]
 CLI = SOURCE / "bin" / "li-review-evidence.py"
+# Resolve Bash through PATH; Windows process search would otherwise prefer System32's WSL launcher.
+BASH = shutil.which("bash") or "bash"
 sys.path.insert(0, str(SOURCE / "lib"))
 from native_paths import native_io_path, path_identity
 from review_contract import CONTRACT_VERSION
@@ -178,7 +180,7 @@ class Fixture(unittest.TestCase):
             input = "exec " + shlex.join(
                 arg.as_posix() if isinstance(arg, Path) else str(arg) for arg in args
             ) + "\n"
-            args = ["bash"]
+            args = [BASH]
         result = subprocess.run(
             [str(arg) for arg in args], cwd=self.repo, env=self.env,
             input=input, text=True, encoding="utf-8", capture_output=True, check=False,
@@ -543,7 +545,7 @@ class ReviewEvidence(Fixture):
             "--gate-json",
         ]) + "\n"
         result = subprocess.run(
-            ["bash"], input=command, cwd=self.root, env=env, text=True, encoding="utf-8",
+            [BASH], input=command, cwd=self.root, env=env, text=True, encoding="utf-8",
             capture_output=True, check=False,
         )
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
@@ -552,7 +554,7 @@ class ReviewEvidence(Fixture):
         (installed / "lib" / "native_paths.py").unlink()
         env["PYTHONPATH"] = (self.repo / "lib").as_posix()
         missing = subprocess.run(
-            ["bash"], input=command, cwd=self.root, env=env, text=True, encoding="utf-8",
+            [BASH], input=command, cwd=self.root, env=env, text=True, encoding="utf-8",
             capture_output=True, check=False,
         )
         self.assertNotEqual(missing.returncode, 0)

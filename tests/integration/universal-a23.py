@@ -151,7 +151,8 @@ class LocalRun:
 
     def mount_observation(self, label):
         result = self.run([self.options.bash, "--noprofile", "--norc", "-c",
-                           "mount | grep ' on /tmp ' || true\ntest -d /tmp\n"])
+                           "if command -v mount >/dev/null 2>&1; then mount | grep ' on /tmp ' || true; "
+                           "else echo 'mount unavailable'; fi\ntest -d /tmp\n"])
         if result.stderr:
             raise RuntimeError("Bash startup/mount warning is not acceptance:\n" + result.stderr.decode())
         self.write(self.root / f"mount-{label}.txt", result.stdout)

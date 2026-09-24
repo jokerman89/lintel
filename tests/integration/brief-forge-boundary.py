@@ -11,6 +11,7 @@ from __future__ import annotations
 import json
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -18,6 +19,8 @@ import unittest
 
 
 ROOT = Path(__file__).resolve().parents[2]
+# Resolve Bash through PATH; Windows process search would otherwise prefer System32's WSL launcher.
+BASH = shutil.which("bash") or "bash"
 
 
 class BriefForgeBoundaryTests(unittest.TestCase):
@@ -67,7 +70,7 @@ class BriefForgeBoundaryTests(unittest.TestCase):
             end = "# lintel-test:brief-forge-call:end"
             script = text.split(start, 1)[1].split(end, 1)[0]
         return subprocess.run(
-            ["bash", "-c", script, "brief-forge-test", kind, "swarm", "FixtureWorker", "brief", self.content.as_posix()],
+            [BASH, "-c", script, "brief-forge-test", kind, "swarm", "FixtureWorker", "brief", self.content.as_posix()],
             cwd=self.root, env=self.env, capture_output=True, text=True, check=False, timeout=120,
         )
 
@@ -100,7 +103,7 @@ class BriefForgeBoundaryTests(unittest.TestCase):
                 envelope_path = self.root / "received.json"
                 envelope_path.write_text(result.stdout, encoding="utf-8")
                 valid = subprocess.run(
-                    ["bash", str(ROOT / "bin/li-envelope-validate"), "--quiet", str(envelope_path)],
+                    [BASH, str(ROOT / "bin/li-envelope-validate"), "--quiet", str(envelope_path)],
                     env=self.env, capture_output=True, text=True, check=False,
                 )
                 self.assertEqual(valid.returncode, 0, valid.stderr)
@@ -229,7 +232,7 @@ class BriefForgeBoundaryTests(unittest.TestCase):
                 results = [
                     self.forge(),
                     subprocess.run(
-                        ["bash", str(ROOT / "bin/li-envelope-validate"), str(self.content)],
+                        [BASH, str(ROOT / "bin/li-envelope-validate"), str(self.content)],
                         env=self.env, capture_output=True, text=True, check=False,
                     ),
                 ]
@@ -295,7 +298,7 @@ resolve_pack_field_json() {
         envelope = json.loads(result.stdout)
         artifact = self.root / "received-envelope.json"
         artifact.write_text(result.stdout, encoding="utf-8")
-        command = ["bash", str(ROOT / "bin/li-envelope-replay")]
+        command = [BASH, str(ROOT / "bin/li-envelope-replay")]
         for arguments, expected in (([str(artifact)], 0), ([str(artifact), "--apply"], 1),
                                     ([str(artifact), "--apply", "--force"], 0)):
             replay = subprocess.run(command + arguments, env=self.env, capture_output=True, text=True, check=False)
@@ -333,7 +336,7 @@ resolve_pack_field_json() {
             with self.subTest(expected=expected):
                 self.content.write_text(content, encoding="utf-8")
                 result = subprocess.run(
-                    ["bash", str(ROOT / "bin/li-envelope-validate"), "--quiet", str(self.content)],
+                    [BASH, str(ROOT / "bin/li-envelope-validate"), "--quiet", str(self.content)],
                     env=self.env, capture_output=True, text=True, check=False,
                 )
                 self.assertEqual(result.returncode, expected, result.stderr)

@@ -555,6 +555,9 @@ class MigrationInventory(LifecycleFixture):
         temp.mkdir()
         for key in ("BASH_ENV", "ENV", "CDPATH", "HOMEDRIVE", "HOMEPATH"):
             self.env.pop(key, None)
+        # Hosted Linux runners export XDG_RUNTIME_DIR and other XDG paths outside the fixture.
+        for key in [key for key in self.env if key.startswith("XDG_")]:
+            self.env.pop(key)
         self.env.update({
             "APPDATA": str(user / "AppData/Roaming"),
             "LOCALAPPDATA": str(user / "AppData/Local"),

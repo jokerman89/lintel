@@ -122,6 +122,23 @@ class Sandbox(unittest.TestCase):
     def bash(self, script, **kwargs):
         return self.run_cmd([BASH, "-c", script], **kwargs)
 
+    def python_free_path(self) -> str:
+        kept = []
+        for index, entry in enumerate(self.env["PATH"].split(os.pathsep)):
+            if not entry:
+                continue
+            if not has_python(entry):
+                kept.append(entry)
+            elif not IS_WINDOWS and os.path.isdir(entry):
+                # POSIX system directories hold Python beside the shell tools the reader needs.
+                shadow = self.root / "python-free" / str(index)
+                shadow.mkdir(parents=True)
+                for item in os.scandir(entry):
+                    if not item.name.startswith("python"):
+                        (shadow / item.name).symlink_to(item.path)
+                kept.append(str(shadow))
+        return os.pathsep.join(kept)
+
     def events(self, *arguments, **kwargs):
         return self.run_cmd([PYTHON, EVENTS, *arguments], **kwargs)
 
@@ -1283,8 +1300,7 @@ class LessonTests(Sandbox):
     def test_without_python_reads_work_and_writes_refuse_visibly(self):
         store = self.install("grammar.md")
         before = store.read_bytes()
-        env = {**self.env, "PATH": os.pathsep.join(
-            entry for entry in self.env["PATH"].split(os.pathsep) if entry and not has_python(entry))}
+        env = {**self.env, "PATH": self.python_free_path()}
         env.pop("LINTEL_PYTHON", None)
         probe = self.run_cmd([BASH, "-c", "command -v python3 || command -v python || echo none"], cwd=self.repo,
                              env=env, expect=0)
@@ -1446,10 +1462,10 @@ class PromotionTests(Sandbox):
         before = self.target.read_bytes()
         snapshot = self.snapshot(self.dest)
         hook = self.dest / ".git/hooks/pre-commit"
-        write(hook, "#!/bin/sh\nexit 1\n")
+        write(hook, "#!/bin/sh\nexit 1\n").chmod(0o755)
         self.promote("--commit", "--expect-branch", "main", expect=10)
         self.assertEqual((self.target.read_bytes(), self.snapshot(self.dest)), (before, snapshot))
-        write(hook, "#!/bin/sh\necho extra > extra.txt\ngit add extra.txt\n")
+        write(hook, "#!/bin/sh\necho extra > extra.txt\ngit add extra.txt\n").chmod(0o755)
         old = self.git(self.dest, "rev-parse", "HEAD").stdout.strip()
         staged = self.promote("--commit", "--expect-branch", "main", expect=11)
         new = self.git(self.dest, "rev-parse", "HEAD").stdout.strip()

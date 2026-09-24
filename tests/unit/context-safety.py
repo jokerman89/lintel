@@ -20,6 +20,8 @@ import uuid
 from unittest.mock import patch
 
 SOURCE = Path(__file__).resolve().parents[2]
+# Resolve Bash through PATH; Windows process search would otherwise prefer System32's WSL launcher.
+BASH = shutil.which("bash") or "bash"
 sys.path.insert(0, str(SOURCE / "lib"))
 import context_safety as safety
 
@@ -120,8 +122,10 @@ class ContextSafetyTests(unittest.TestCase):
         parent = self.base.parent
         count = 94 - len(str(parent)) - 1
         self.assertGreater(count, 0, "exact fixture requires an authorized temp parent below 94 characters")
-        self.assertLessEqual(count, 64)
-        base = parent / (uuid.uuid4().hex * 2)[:count]
+        # Short hosted temp roots (for example D:\a\_temp) need more than one UUID's worth of padding.
+        name = (uuid.uuid4().hex * 3)[:count]
+        self.assertEqual(len(name), count)
+        base = parent / name
         base.mkdir()
 
         def cleanup():
@@ -519,11 +523,11 @@ class ContextSafetyTests(unittest.TestCase):
         script.write_text(re.search(r"```bash\n(.*?)\n```", body, re.S)[1], encoding="utf-8")
         env = dict(os.environ, LINTEL_SOURCE_ROOT=str(SOURCE), LINTEL_REPO_ROOT=str(self.root),
                    LINTEL_HOME=str(self.base / "home"), PYTHONDONTWRITEBYTECODE="1")
-        outcome = subprocess.run(["bash", str(script), "--path", "docs/one file.md"],
+        outcome = subprocess.run([BASH, str(script), "--path", "docs/one file.md"],
                                  env=env, capture_output=True, text=True)
         self.assertEqual(outcome.returncode, 0, outcome.stderr)
         self.assertEqual(json.loads(outcome.stdout)["files"][0]["path"], "docs/one file.md")
-        rejected = subprocess.run(["bash", str(script), "--glob", "$(touch injected);*.md"],
+        rejected = subprocess.run([BASH, str(script), "--glob", "$(touch injected);*.md"],
                                   env=env, capture_output=True, text=True)
         self.assertNotEqual(rejected.returncode, 0)
         self.assertFalse((self.root / "injected").exists())
@@ -538,7 +542,7 @@ class ContextSafetyTests(unittest.TestCase):
                 body = (SOURCE / "skills" / name / "SKILL.md").read_text(encoding="utf-8")
                 script = self.base / (name + ".sh")
                 script.write_text(re.search(r"```bash\n(.*?)\n```", body, re.S)[1], encoding="utf-8")
-                run = subprocess.run(["bash", str(script), *args], env=env, capture_output=True, text=True)
+                run = subprocess.run([BASH, str(script), *args], env=env, capture_output=True, text=True)
                 self.assertEqual(run.returncode, 0, run.stderr)
                 result = json.loads(run.stdout)
                 if name == "context-cool":
@@ -563,7 +567,7 @@ class ContextSafetyTests(unittest.TestCase):
             # Quote globs inside Bash; native Windows -> MSYS startup can expand raw argv.
             env.update(FIXTURE_SCRIPT=str(script), FIXTURE_TOPIC=args[0],
                        FIXTURE_PATTERN=args[1], FIXTURE_LIMIT=args[2] if len(args) > 2 else "10")
-            run = subprocess.run(["bash", "-c",
+            run = subprocess.run([BASH, "-c",
                                   'bash "$FIXTURE_SCRIPT" "$FIXTURE_TOPIC" "$FIXTURE_PATTERN" "$FIXTURE_LIMIT"'],
                                  env=env, capture_output=True, text=True)
             self.assertEqual(run.returncode, 0, run.stderr)
@@ -585,7 +589,7 @@ class ContextSafetyTests(unittest.TestCase):
                 (["step-2", "step-2", "unverified", "exact-scope", "none"], False),
                 (["step-2", "step-2", "verified", "other-target", "none"], False),
                 (["step-2", "step-2", "verified", "exact-scope", "possible-live-write"], False)):
-            result = subprocess.run(["bash", str(script), *args], capture_output=True)
+            result = subprocess.run([BASH, str(script), *args], capture_output=True)
             self.assertEqual(result.returncode == 0, allowed)
             self.assertEqual(target.read_text(), "partial local migration; user state retained")
         self.assertEqual((self.root / "unrelated.txt").read_text(), "keep this")
@@ -638,7 +642,7 @@ class ContextSafetyTests(unittest.TestCase):
             lock = self.root / ".git/worktrees" / trial.name / "refs/bisect" / ("good-" + good + ".lock")
             if os.name == "nt":
                 self.assertEqual(len(str(lock)), 283)
-            result = subprocess.run(["bash", str(script), str(self.root), bad, good,
+            result = subprocess.run([BASH, str(script), str(self.root), bad, good,
                                      str(command), str(trial)], env=env, capture_output=True)
             self.assertEqual(result.returncode == 0, expected == 0, result.stderr)
             self.assertTrue(trial.is_dir(), "trial evidence is retained, not force-removed")

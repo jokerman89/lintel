@@ -24,6 +24,8 @@ import tempfile
 import unittest
 
 SOURCE = Path(__file__).resolve().parents[2]
+# Resolve Bash through PATH; Windows process search would otherwise prefer System32's WSL launcher.
+BASH = shutil.which("bash") or "bash"
 sys.path.insert(0, str(SOURCE / "lib"))
 sys.path.insert(0, str(SOURCE / "tests/unit"))
 import profile_context as profile
@@ -130,7 +132,7 @@ class SharedBinding(unittest.TestCase):
         input_text = None
         if arguments[0] == "bash":
             input_text = "exec " + shlex.join(arg.replace("\\", "/") for arg in arguments) + "\n"
-            arguments = ["bash"]
+            arguments = [BASH]
         result = subprocess.run(arguments, input=input_text, cwd=self.repo, env=self.env,
                                 capture_output=True, text=True, encoding="utf-8", timeout=90, check=False)
         if expected is not None:

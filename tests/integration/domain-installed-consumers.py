@@ -93,7 +93,7 @@ class LoggedProcesses:
         plain_json(stem.with_suffix(".json"), {
             "argv": args, "cwd": str(cwd or self.root), "exit_code": result.returncode,
             "home": actual_env["HOME"], "userprofile": actual_env["USERPROFILE"],
-            "temp": actual_env["TEMP"], "git_ceiling": actual_env["GIT_CEILING_DIRECTORIES"],
+            "temp": actual_env.get("TEMP"), "git_ceiling": actual_env.get("GIT_CEILING_DIRECTORIES"),
             "lintel_selectors": [], "stdout_sha256": hashlib.sha256(raw_out).hexdigest(),
             "stderr_sha256": hashlib.sha256(raw_err).hexdigest(),
         })

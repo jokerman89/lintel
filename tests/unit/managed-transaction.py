@@ -466,6 +466,7 @@ class ManagedTransaction(unittest.TestCase):
                         self.assertEqual(self.files(), {"a.txt": b"before a", "b.txt": b"before b",
                                                        "custom.txt": b"never owned"})
 
+    @unittest.skipUnless(os.name == "nt", "platform: windows-only; native Windows store arguments and sharing-violation retry")
     def test_journal_replace_persistent_failure_retains_explicit_recovery(self):
         original_replace = os.replace
         windows = SimpleNamespace(name="nt", path=os.path)

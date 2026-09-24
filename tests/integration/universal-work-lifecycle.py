@@ -21,6 +21,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--root", type=Path, required=True)
 args, remaining = parser.parse_known_args()
 ROOT = args.root.resolve()
+# Resolve Bash through PATH; Windows process search would otherwise prefer System32's WSL launcher.
+BASH = shutil.which("bash") or "bash"
 WORK = runpy.run_path(str(ROOT / "bin/li-work-artifacts.py"))
 REVIEW_FIXTURE = runpy.run_path(str(ROOT / "tests/unit/review_evidence.py"))
 
@@ -61,7 +63,7 @@ class FixtureCase(unittest.TestCase):
 
     def shell(self, script, expected=0):
         result = subprocess.run(
-            ["bash", "-c", 'set -euo pipefail\nsource "$LINTEL_SOURCE_ROOT/lib/state.sh"\n' + script],
+            [BASH, "-c", 'set -euo pipefail\nsource "$LINTEL_SOURCE_ROOT/lib/state.sh"\n' + script],
             cwd=self.repo, env=self.env, text=True, capture_output=True, encoding="utf-8")
         self.assertEqual(result.returncode, expected, result.stdout + result.stderr)
         self.last_stderr = result.stderr
