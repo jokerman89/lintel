@@ -68,7 +68,6 @@
 :root[data-theme="fluent"] .repo-card:nth-child(3) .mini-dash i{background:#216ba5}
 :root[data-theme="fluent"] .primer-bar u{background:#0e6b0e}
 :root[data-theme="fluent"] .primer-window.full .primer-bar u{background:#b10e1e}
-:root[data-theme="fluent"] .rt-block.is-on{background:#6a55a3!important;color:#fff}
 :root[data-theme="fluent"] .rt-block.is-on *{color:inherit}
 :root[data-theme="fluent"] .cl-step.is-on .cl-art{background:#eeebfa;color:#493ca8;border-color:#9883bd}
 :root[data-theme="fluent"] .flow .phase{opacity:1;background:#f0f0f0;color:#616161;border-color:#929292}
@@ -146,15 +145,15 @@
  :root[data-theme="fluent"] .product-caption>span{font-size:23px}
 }
 
-/* Selected labels retain their own semantic contrast against the brand surface. */
+/* Selected labels retain explicit foregrounds for their respective surfaces. */
 :root[data-theme="fluent"] #stage .cl-step.is-on>b{color:#fff}
-:root[data-theme="fluent"] #stage .rt-row.is-on .rt-m{color:#ece5ff}
+:root[data-theme="fluent"] #stage .rt-row.is-on .rt-m{color:#493ca8}
 :root[data-theme="fluent"] #stage .rt-row.is-on.is-warn .rt-m,
-:root[data-theme="fluent"] #stage .rt-row.is-on .rt-tag s{color:#ffe0dc}
-:root[data-theme="fluent"] #stage .rt-row.is-on .rt-tag b{color:#d6f0c7}
-:root[data-theme="fluent"] #stage .rt-row.is-on .rt-tag u{color:#eae0ff}
-:root[data-theme="fluent"] #stage .rt-row.is-on .rt-tag em{color:#f5f5f5}
-:root[data-theme="fluent"] #stage .rt-row.is-on .rt-tag i{color:#e5e5e5}
+:root[data-theme="fluent"] #stage .rt-row.is-on .rt-tag s{color:#b10e1e}
+:root[data-theme="fluent"] #stage .rt-row.is-on .rt-tag b{color:#0e6b0e}
+:root[data-theme="fluent"] #stage .rt-row.is-on .rt-tag u{color:#6336a3}
+:root[data-theme="fluent"] #stage .rt-row.is-on .rt-tag em{color:#616161}
+:root[data-theme="fluent"] #stage .rt-row.is-on .rt-tag i{color:#616161}
 @media(min-width:651px){
  :root[data-theme="fluent"] .system-map{height:480px;grid-template-rows:54px 1fr 44px;gap:14px 21px}
  :root[data-theme="fluent"] .map-records h2{font-size:28px;line-height:1.1}
@@ -165,3 +164,23 @@
 
 /* A narrow helper panel keeps its artwork behind an opaque reading surface. */
 @media(max-width:650px){:root[data-theme="fluent"] .view .hero{background:linear-gradient(#fffffff0,#fffffff0),url("../assets/context-monsters.png") right center/cover}}
+
+/* Keep the name card below the mark; the homepage artwork is unchanged. */
+@media(min-width:651px){:root[data-theme="fluent"] .system-cover .cover-art{background-size:auto,auto 80%;background-position:0 0,right 12px}}
+/* Fine continuous connectors replace boxed arrow glyphs in the journey. */
+:root[data-theme="fluent"] .journey-step{border-top:0}
+:root[data-theme="fluent"] .journey-step:before{content:"";position:absolute;top:0;left:0;right:34px;border-top:1.5px solid #9883bd}
+:root[data-theme="fluent"] .journey-step:after{content:"";width:10px;height:10px;top:-4.25px;right:35px;padding:0;background:transparent;border:0;border-top:1.5px solid #9883bd;border-right:1.5px solid #9883bd;transform:rotate(45deg);pointer-events:none}
+/* Selection frames the route; stage colors remain visible inside that frame. */
+:root[data-theme="fluent"] #stage .rt-row.is-on,
+:root[data-theme="fluent"] #stage .rt-row.is-on:hover{background:#eeebfa;color:#242424;border-color:#9883bd;border-radius:8px}
+:root[data-theme="fluent"] #stage .rt-row.is-on:after{border:1.5px solid #5b4fc4}
+:root[data-theme="fluent"] #stage .rt-block.is-on.cl-pre{background:#6336a3!important;color:#fff}
+:root[data-theme="fluent"] #stage .rt-block.is-on.cl-code{background:#0e6b0e!important;color:#fff}
+:root[data-theme="fluent"] #stage .rt-block.is-on.cl-keep{background:#505050!important;color:#fff}
+:root[data-theme="fluent"] #stage .rt-block.is-off{background:#fff;color:#616161;border-color:#7b7486}
+:root[data-theme="fluent"] #stage .rt-you{background:#fff;border-color:#493ca8;color:#493ca8}
+:root[data-theme="fluent"] #stage .rt-you .scene-icon{color:#493ca8}
+:root[data-theme="fluent"] #stage .rt-names .cl-pre{color:#6336a3}
+:root[data-theme="fluent"] #stage .rt-names .cl-code{color:#0e6b0e}
+:root[data-theme="fluent"] #stage .rt-names .cl-keep{color:#505050}

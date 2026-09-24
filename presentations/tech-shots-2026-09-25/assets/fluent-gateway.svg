@@ -9,7 +9,6 @@
 <g filter="url(#shadow)"><path d="M280 930V272Q280 162 390 162H912Q988 162 988 250V930H919V277Q919 232 875 232H408Q350 232 350 290V930Z" fill="url(#blue)"/>
 <path d="M348 930V290Q348 230 408 230H875Q922 230 922 277V930H858V305Q858 289 839 289H431Q411 289 411 310V930Z" fill="url(#violet)"/>
 <path d="M412 930V311Q412 290 432 290H839Q858 290 858 305V930H810V337H460V930Z" fill="url(#glass)"/>
-<path d="M350 290Q350 231 408 231H875Q921 231 921 277" stroke="#fff" stroke-opacity=".8" stroke-width="3" fill="none"/>
 <path d="M283 930L349 930L412 960L340 960Z" fill="#547aab"/><path d="M922 930L989 930L938 964L859 964Z" fill="#436fa3"/></g>
 <g transform="translate(417 460) scale(3.55)" filter="url(#shadow)"><path fill="url(#violet)" d="M20 27L37 17L51 35V92H103L111 109H20Z"/><path fill="url(#mint)" d="M37 17L108 36V70L90 80V50L37 36Z"/><path d="M37 17L108 36M51 92H103" stroke="#fff" stroke-opacity=".6" fill="none"/></g>
 <circle cx="1065" cy="435" r="47" fill="url(#glass)" filter="url(#shadow)"/><circle cx="216" cy="560" r="30" fill="url(#mint)" filter="url(#shadow)"/><path d="M989 726L1045 700L1095 729L1041 757Z" fill="url(#violet)" filter="url(#shadow)"/></svg>
