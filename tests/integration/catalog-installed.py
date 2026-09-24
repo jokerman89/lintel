@@ -308,25 +308,56 @@ class InstalledDiscovery(unittest.TestCase):
 
 
 class FixtureRootAdmission(unittest.TestCase):
+    CHILD_KEYS = ("HOME", "USERPROFILE", "APPDATA", "LOCALAPPDATA", "TEMP", "TMP", "POWERSHELL_TELEMETRY_OPTOUT")
+
+    def child_environment(self, base, **extra):
+        # The junction helper is a real PowerShell process that writes profile and temporary
+        # state; give it roots inside this test's own directory, never the caller's (L-051).
+        system = {
+            "PATH", "SYSTEMROOT", "WINDIR", "COMSPEC", "PATHEXT", "SYSTEMDRIVE",
+            "OS", "PROCESSOR_ARCHITECTURE", "NUMBER_OF_PROCESSORS",
+        }
+        env = {key: value for key, value in os.environ.items() if key.upper() in system}
+        for key, relative in {"HOME": "h", "USERPROFILE": "h", "APPDATA": "a", "LOCALAPPDATA": "l",
+                              "TEMP": "tmp", "TMP": "tmp", "TMPDIR": "tmp"}.items():
+            path = base / "pwsh" / relative
+            path.mkdir(parents=True, exist_ok=True)
+            self.assertEqual(path.resolve(), path)
+            self.assertFalse(getattr(path.lstat(), "st_file_attributes", 0) & 0x400)
+            env[key] = str(path)
+        env.update(HOMEDRIVE=base.drive, HOMEPATH=str(base / "pwsh" / "h")[len(base.drive):],
+                   POWERSHELL_TELEMETRY_OPTOUT="1", **extra)
+        return env
+
     def test_linked_fixture_root_is_refused_before_resolving(self):
         with tempfile.TemporaryDirectory(prefix="p13-root-", dir=tempfile.gettempdir()) as temporary:
-            base = Path(temporary)
+            base = Path(temporary).resolve(strict=True)
             target, linked = base / "owned-target", base / "linked-root"
             target.mkdir()
             sentinel = target / "keep.txt"
             sentinel.write_bytes(b"owned target must remain unchanged\n")
+            observed = child_files = None
             if os.name == "nt":
                 pwsh = shutil.which("pwsh")
                 self.assertIsNotNone(pwsh, "PowerShell 7 is required to exercise the owned junction")
-                env = dict(os.environ, P13_ROOT_LINK=str(linked), P13_ROOT_TARGET=str(target))
+                env = self.child_environment(base, P13_ROOT_LINK=str(linked), P13_ROOT_TARGET=str(target))
                 result = subprocess.run([
                     pwsh, "-NoLogo", "-NoProfile", "-NonInteractive", "-Command",
                     "$ErrorActionPreference='Stop'; "
                     "if ($PSVersionTable.PSVersion.Major -lt 7) { throw 'PowerShell 7 required' }; "
                     "New-Item -ItemType Junction -Path $env:P13_ROOT_LINK "
-                    "-Target $env:P13_ROOT_TARGET | Out-Null",
+                    "-Target $env:P13_ROOT_TARGET | Out-Null; "
+                    "[ordered]@{HOME=$env:HOME; USERPROFILE=$env:USERPROFILE; APPDATA=$env:APPDATA; "
+                    "LOCALAPPDATA=$env:LOCALAPPDATA; TEMP=$env:TEMP; TMP=$env:TMP; "
+                    "POWERSHELL_TELEMETRY_OPTOUT=$env:POWERSHELL_TELEMETRY_OPTOUT; "
+                    "GetTempPath=[IO.Path]::GetTempPath()} | ConvertTo-Json -Compress",
                 ], env=env, capture_output=True, text=True, encoding="utf-8", check=False)
                 self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                observed = json.loads(result.stdout.strip().splitlines()[-1])
+                self.assertEqual(Path(observed.pop("GetTempPath")), Path(env["TMP"]))
+                self.assertEqual(observed, {key: env[key] for key in self.CHILD_KEYS})
+                child_files = sorted(path.relative_to(base).as_posix()
+                                     for path in (base / "pwsh").rglob("*") if path.is_file())
             else:
                 linked.symlink_to(target, target_is_directory=True)
             self.assertTrue(linked.is_symlink() or getattr(linked.lstat(), "st_file_attributes", 0) & 0x400)
@@ -345,7 +376,8 @@ class FixtureRootAdmission(unittest.TestCase):
                 if admitted is not None:
                     Probe.tearDownClass()
                 print(json.dumps({"N2_linked_root": str(linked), "kind": "junction" if os.name == "nt" else "symlink",
-                                  "admitted_run_root": str(admitted) if admitted is not None else None}))
+                                  "admitted_run_root": str(admitted) if admitted is not None else None,
+                                  "child_environment": observed, "child_state_files": child_files}))
                 if os.name == "nt":
                     linked.rmdir()
                 else:

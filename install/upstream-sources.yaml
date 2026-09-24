@@ -4,7 +4,8 @@
 # act on it: install.sh reads the entries only to print a count ("this installer does not clone
 # them"). Lintel includes author-written integration and explicitly attributed adapted
 # material. `sources` lists references, not automatic imports; `bundled_materials` records
-# the existing distributed third-party material and its notices. See docs/provenance.md.
+# the existing distributed third-party material and its notices. See docs/provenance.md in the
+# Lintel source repository.
 #
 # Fields:
 #   repo            — git URL (HTTPS) of the upstream repo
