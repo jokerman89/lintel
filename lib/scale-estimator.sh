@@ -3,7 +3,7 @@
 # implements: ADR-0008
 # intent: .claude/engineering/design-archive/lintel-scope-and-scaled-planning-design.md
 # constraints: preserve leaf granularity and dormant calibration writes; estimate whole cycles
-# last_intent_review: 2026-09-23
+# last_intent_review: 2026-09-24
 # lib/scale-estimator.sh — mechanical scale estimation for SENSE (Slice 1)
 #
 # Sourced by skills/sense/SKILL.md (step 0b + step 0e). Provides the SIZE axis
@@ -198,8 +198,10 @@ size_default_prior() {
 #
 # Reads CAPTURE's append-only granularity log (written via `audit_log
 # granularity ...`) through bin/_audit.sh `audit_read_files`: the first existing
-# listed file is read and a later existing one is named on stderr, so this
-# estimator keeps no routing of its own. For every record whose `size`
+# listed file is the only source, and a later existing one is named on stderr and
+# never substituted, so this estimator keeps no routing of its own. If that first
+# file cannot be read, the estimator says so on stderr and returns the default
+# below instead of calibrating from a later file. For every record whose `size`
 # field matches <size> and that carries a numeric `actual_tokens`, it takes the
 # MEDIAN of those actuals as the corrected prior — median, not mean, so a single
 # runaway cycle cannot skew the band.
@@ -210,20 +212,29 @@ size_default_prior() {
 # function is purely additive: callers that never had history simply get the
 # old number.
 scale_token_estimate() {
-  local size="${1:-S}" log="" candidate
+  local size="${1:-S}" log="" unreadable="" candidate
   command -v audit_read_files >/dev/null 2>&1 || source "$_SCALE_LIB_DIR/../bin/_audit.sh" 2>/dev/null || true
   if command -v audit_read_files >/dev/null 2>&1; then
     while IFS= read -r candidate; do
       if [ -z "$log" ]; then
-        [ -r "$candidate" ] && log="$candidate"
+        [ -e "$candidate" ] || continue
+        log="$candidate"
+        if ! { [ -f "$log" ] && [ -r "$log" ]; }; then
+          unreadable=1
+          printf 'scale_token_estimate: cannot read %s; using the uncalibrated default\n' "$log" >&2
+        fi
       elif [ -e "$candidate" ]; then
-        printf 'scale_token_estimate: read %s; also present but not read: %s\n' "$log" "$candidate" >&2
+        if [ -n "$unreadable" ]; then
+          printf 'scale_token_estimate: also present but not read: %s\n' "$candidate" >&2
+        else
+          printf 'scale_token_estimate: read %s; also present but not read: %s\n' "$log" "$candidate" >&2
+        fi
       fi
     done < <(audit_read_files granularity)
   fi
 
-  # No history → mechanical default (the Slice-1 guess).
-  [ -n "$log" ] || { printf '%s uncalibrated 0' "$(size_default_prior "$size")"; return 0; }
+  # No history, or an unreadable first file → mechanical default (the Slice-1 guess).
+  [ -n "$log" ] && [ -z "$unreadable" ] || { printf '%s uncalibrated 0' "$(size_default_prior "$size")"; return 0; }
 
   # Collect actual_tokens for records matching this size. Pure awk: match the
   # size field exactly, pull the numeric actual_tokens, sort, take the median.
