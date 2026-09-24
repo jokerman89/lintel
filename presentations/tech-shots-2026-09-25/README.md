@@ -1,8 +1,8 @@
-# Lintel — Tech SHOTs
+# Lintel — Field guide
 
 [Open the website](https://jokerman89.github.io/lintel/) · [Presentation](https://jokerman89.github.io/lintel/show/index.html) · [Technical reference](https://jokerman89.github.io/lintel/show/technical-reference.html)
 
-A 50-minute level-200 presentation for Solution Engineers and Cloud Solution Architects, with a separate six-minute product launch and 18-minute technical module. English slides and speaker notes, two themes, 57 screens including optional material, and prepared browser demos.
+A 50-minute level-200 presentation for developers and architects, with a separate six-minute product launch and 18-minute technical module. English slides and speaker notes, two themes, 57 screens including optional material, and prepared browser demos.
 
 ## Use it
 
@@ -36,7 +36,7 @@ This presentation lives in `presentations/tech-shots-2026-09-25/` inside the [Li
 
 ## Attribution
 
-Created for Johannes Åkerman’s Tech SHOTs session, 25 September 2026. An independent open-source project. See `THIRD-PARTY-NOTICES.md` and the public Sources & evidence page for material provenance.
+Created by Johannes Åkerman. An independent open-source project. See `THIRD-PARTY-NOTICES.md` and the public Sources & evidence page for material provenance.
 
 ## Source availability
 
