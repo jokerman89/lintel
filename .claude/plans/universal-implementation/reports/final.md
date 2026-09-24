@@ -41,26 +41,32 @@ where the leaf evidence and the review files are cited.
 | [A20 Provenance and versions](../plan.md#a20-provenance-and-versions-p07p13-r04) | 4/4 | Accepted |
 | [A21 Safe dormant handoff](../plan.md#a21-safe-dormant-handoff-p04-r08) | 4/4 | Accepted |
 | [A22 Preserved Swarming integration](../plan.md#a22-preserved-swarming-integration-p04-r09) | 7/7 | Accepted |
-| [A23 Boundary regression evidence](../plan.md#a23-boundary-regression-evidence-all-owners-p14-r11) | 0/5 | Pending the A23 unit review, the A23.3.s3 reconciliation, strict CI and the final review |
+| [A23 Boundary regression evidence](../plan.md#a23-boundary-regression-evidence-all-owners-p14-r11) | 0/5 | Pending. A23.1 and A23.2 close with the A23 unit review; A23.3 with the A23.3.s3 reconciliation; A23.4 with its g3 and p2 leaves and the strict CI suite; A23.5 with this final review |
 | [A24 Observable enterprise profile value](../plan.md#a24-observable-enterprise-profile-value-p14-r04r11) | 4/4 | Accepted |
 | [A25 Trusted implementation source](../plan.md#a25-trusted-implementation-source-p01-r01) | 3/3 | Accepted |
 | [A26 Explicit private-sync destination](../plan.md#a26-explicit-private-sync-destination-p02-r10) | 4/4 | Accepted |
 
-Acceptance means the owning package's independent review passed on exact content and the
-coordinator integrated it without changing reviewed bytes. It is not live-host activation,
-compliance certification or model-quality evidence unless the area says so.
+Acceptance means the owning package's independent review passed on exact content. The coordinator
+integrated the reviewed bytes unchanged, except through automatic three-way merges or through
+resolutions that an independent integration review covers (P10 by SAME, P08 by SAME9db). It is
+not live-host activation, compliance certification or model-quality evidence unless the area
+says so.
 
 ## Blocked items that need an operator decision
 
-- **A14.5, the static page and app exercise.** The static half ran. The app half needs a
-  framework build, whose dependency restore failed on TLS. No TLS workaround, offline cache or
-  alternative registry is authorized.
+- **A14.5, the static page and app exercise.** The static page ran, and its review passes seven
+  data-backed controls. The required direct image observation (V1) stays unverified, so static
+  SPEC is blocked (`reviews/P11-static-single-03.md`). The app half needs a framework build,
+  whose dependency restore failed on TLS. No TLS workaround, offline cache or alternative
+  registry is authorized.
 - **A15.1–A15.4, verifiable document formats.** The Word, PowerPoint, workbook and PDF source
   helpers are integrated. Their acceptance needs rendering and editability evidence through
   application routes that the operator denied (Word, Excel, PDF raster). It also needs P12
-  structured-record persistence, which was denied as well.
+  structured-record persistence, which was denied as well. In addition, A15.4's Visio part has
+  no implemented writer or editor (`packages/P12.md`); Visio stays a template-only staged slot,
+  which no permission would resolve.
 
-Neither is counted as accepted, and neither is waived.
+None of these is counted as accepted, and none is waived.
 
 ## Preserved Swarming integration
 
@@ -77,10 +83,29 @@ These are reviewed at A23.5, not by a package review:
   remove catalog kinds whose producers were retired. 6 and 7 declare A13's resources in
   `ADAPTER_RESOURCES`, `lib/memory.sh` included, and add `bin/li-lessons.py` to the core
   selection. SAME9db's whole-P08 integration review covers reconciliations 1–6.
-- **CI sharding (ADR-0032).** `run-all.sh --shard K/N`, with its runner contract, and the
-  sharded `ci.yml` with the PowerShell 7 selector on Windows.
-- **The `main` merge** (`fe9e6284`), which resolves the README conflict.
-- **Version `0.11.0` and the CHANGELOG entry.**
+- **CI (ADR-0032).**
+  - `run-all.sh --shard K/N` (`8651f392`), with its runner contract.
+  - The sharded `ci.yml` (`736cb82f`), with the PowerShell 7 selector and a short `TEMP` on
+    Windows (`b3620e5c`), and separate tier steps (`6d12fd91`).
+  - The runner's `N/A` category for `platform: windows-only` skips off Windows (`917d7125`), and
+    the 22 canonical skip reasons (`89131723`, only reason strings change).
+- **The `main` merges** (`fe9e6284`, and at the freeze any later presentation-only PRs), which
+  resolve the README conflict.
+- **Version `0.11.0` and its CHANGELOG entry** (`99443cf8`, `3ea42d70`).
+- **Earlier coordinator product commits.** They carry surviving product lines that no package
+  review names. The A23.5 Phase 1 review statically passes all of them:
+  - `80f36fb0`: schema references and refusal before writes (A23.4.g1/g2);
+  - `2d83a0c8` and `4d6e9929`: unavailable jq and parser coverage reported as SKIP (A23.3);
+  - `ebfbcd0d`: the e2e footer aligned with status-grounded resume;
+  - `935b640c`: the welcome footer and the ADR-0025 parity oracle;
+  - `aa56a672`: literal failure diagnostics;
+  - `ca280747`: deferred annotations for Python 3.9;
+  - `98ad7edf`, `59ca1b6b`, `7b0a30cf`, `2cea48ec`, `42900fa2`, `ad605dea` and `6885d9e4`:
+    adapter resource closure and selection unions (A23.4.g3);
+  - `678ae228`: PDF and XLSX stage evidence left unknown, with Visio template-only;
+  - `2b672bbe`, `d7eb92fa` and `0eab731c`: tests;
+  - `9f49e261`: `docs/provenance.md` and the upstream registry;
+  - `b72ab473` and `1d40193a`: the routing slice, whose code P08's review covers.
 
 ## Known limits
 
@@ -91,7 +116,21 @@ These are reviewed at A23.5, not by a package review:
   source is resolved.
 - **Host.** An outside actor restores journal timestamps about every 300 s (IC-F01); its identity
   is unknown. P10's bounded retry handles it, and F-INT-5 shields the tests' retry accounting.
-- **Strict suite.** jq is denied locally (L-046), so the first strict full run is the PR's CI.
+- **Strict suite.** jq is denied locally (L-046), so the first strict full run is the PR's CI,
+  which uses Python 3.12 against the local 3.11 evidence.
+- **P08 advisories.** SAME9db's recheck of `624` routes five P3 advisories here:
+  - `state.sh:32` handles drive-relative and UNC paths incompletely;
+  - `workflow.sh:114-122` re-exports an unset profile reference as empty;
+  - `li-work-artifacts.py:72` imports P04's private `_task_sources`;
+  - the routing scan is worst-case O(n²) and lowercases byte-wise, and fails safe;
+  - the whole ledger is rescanned repeatedly.
+- **Unrouted finding F-HOOK-MKDIR.** 25 hook files still run the unguarded
+  `mkdir -p "$LINTEL_HOME/audit"`, for example `hooks/shared/customer-data-block/run.sh:25`.
+  It is outside every released package scope.
+- **Invalid historical evidence.** The `shell27` and `q02` isolation incidents stay invalid, and
+  their effects on the actual home are UNKNOWN.
+- **Unknown causes.** The cause of the intermittent WinError 5 on journal replacement is not
+  established.
 
 ## Evidence at the final freeze
 
