@@ -996,3 +996,19 @@ drive-root path. When a path budget cannot be met there, record the environment
 refusal honestly. Rely on independent evidence that ran inside its own authorized
 short workspace, or route the rerun to that owner. Do not create drive mappings or
 other system-level paths as a workaround.
+
+## L-051 - Isolate diagnostic probe parents, not only their roots
+
+**Date:** 2026-09-24
+
+**Context:** The P10 owner's IC-F01 diagnostic probes, and the parent Python process of
+one timing measurement, ran with the tool shell's real user environment. Only
+`python -I -B` and explicit synthetic roots isolated them. No real-home access is known,
+but the runs could not count as synthetic-environment evidence. The coordinator kept
+them as nonconforming history, excluded them from acceptance evidence, and accepted the
+correction on independently isolated checks.
+
+**Rule:** Give every diagnostic process, parents included, a synthetic HOME,
+USERPROFILE, APPDATA, LOCALAPPDATA, TEMP, TMP and XDG before any import, and record that
+environment with the run. Explicit synthetic roots and interpreter isolation flags are
+not a substitute. Disclose any deviation before relying on its results.
