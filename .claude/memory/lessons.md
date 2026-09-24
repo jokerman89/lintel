@@ -1012,3 +1012,21 @@ correction on independently isolated checks.
 USERPROFILE, APPDATA, LOCALAPPDATA, TEMP, TMP and XDG before any import, and record that
 environment with the run. Explicit synthetic roots and interpreter isolation flags are
 not a substitute. Disclose any deviation before relying on its results.
+
+## L-052 - Keep Git configuration writes out of shared repository config
+
+**Date:** 2026-09-24
+
+**Context:** While creating the scratch worktree `p08int`, the coordinator ran
+`git -C <worktree> config core.fsmonitor false` to keep fsmonitor daemons out of its test
+runs. The repository has no `extensions.worktreeConfig`, so plain `git config` wrote the
+shared `.git/config` of the common directory. For about 18 minutes every session's
+worktree ran Git without fsmonitor: slower, but correct, and the running daemons kept
+working. The coordinator found it while checking the config scope, attributed the write
+to its own command from the file time, restored the evidenced prior value `true` in place,
+and disclosed it.
+
+**Rule:** Never write Git configuration from a scratch or test worktree. Pass settings per
+command with `git -c key=value`, or through the launcher's environment. Before any
+unavoidable config write, check its target with `git config --show-origin`. Never change
+the shared repository config without the operator's authorization.
