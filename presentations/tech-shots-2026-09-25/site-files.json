@@ -170,5 +170,14 @@
   "verification/opening-source-manifest.json",
   "verification/visual-source-manifest.json",
   "web/evidence.js",
-  "web/index.html"
+  "web/index.html",
+  "show/intro.css",
+  "show/intro.js",
+  "assets/intro/lintel-living-portal.mp4",
+  "assets/intro/lintel-living-portal-poster.jpg",
+  "assets/intro/README.md",
+  "show/notes.html",
+  "show/notes.css",
+  "show/notes.js",
+  "show/notes-status.css"
 ]
