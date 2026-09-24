@@ -192,6 +192,11 @@ Operator question (2026-09-24 17:58): why is nothing pushed? Answer: everything 
 locally (682 commits); L-045 holds publication until the final accepted batch. The offer to
 push a draft PR early got no answer (the operator is away), so L-045 stands. Push and PR
 follow directly after the last gates: P08 integration review, A23, F-INT-6 and A23.5.
+A14.5 (2026-09-24 19:25): the operator authorized the Microsoft npm feed proxy
+(`packagefeedproxy.microsoft.io`), and a credential-free synthetic probe resolved vite 8.3.0.
+The framework half is released to the P11 owner (`cf483bc8`). V1 needs an image-capable
+observer. A15 stays open: its Word/Excel, PDF-raster and P12 record-persistence denials are not
+npm-related, and the question about lifting them went unanswered, so no authorization is assumed.
 P15 (coordinator): the Windows CI job cannot fit 30 minutes. The sharding and timeout
 decision follows from the joined run's per-entry durations.
 Host note (2026-09-24, 14:00 UTC): host commit-memory exhaustion killed the coordinator's
