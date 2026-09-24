@@ -6,9 +6,16 @@ Bash, Git, Python 3.9+ and jq installed:
 ```bash
 bash tests/runner/run-all.sh --require-all   # every tier; skipped coverage fails
 bash tests/runner/run-all.sh --scope unit    # one tier during development
+bash tests/runner/run-all.sh --scope integration --shard 2/4 --require-all   # one CI shard
 bash tests/runner/run-all.sh --shape-only    # structural contracts
 bash tests/integration/copilot-kit.sh       # portable Copilot behavior
 ```
+
+`--shard K/N` runs the discovered files at positions `i` with `i mod N = K - 1`, counting
+only those, so strict accounting stays exact within each shard. The shards `1/N` to `N/N`
+are disjoint and together equal the unsharded run. A malformed shard exits 2, and an empty
+shard fails closed. CI runs the unit tier in 2 shards and the integration tier in 4 on
+every system (ADR-0032).
 
 The full developer suite needs Bash 4+ because several existing routing tests and developer
 utilities use associative arrays. On macOS, install modern Bash for the suite. CI separately

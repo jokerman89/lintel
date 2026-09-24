@@ -5,6 +5,7 @@
 #   bash tests/runner/run-all.sh                  # everything
 #   bash tests/runner/run-all.sh --tag <tag>      # filter by tag
 #   bash tests/runner/run-all.sh --scope unit     # unit only (subset)
+#   bash tests/runner/run-all.sh --shard 2/4      # every 4th discovered file, from the 2nd
 #
 # Exit codes:
 #   0 = all pass (or skips only)
@@ -19,15 +20,24 @@ TESTS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TAG_FILTER=""
 SCOPE="all"
 REQUIRE_ALL=0
+SHARD_INDEX=1
+SHARD_COUNT=1
 
 while [ $# -gt 0 ]; do
   case "$1" in
     --tag) [ $# -ge 2 ] && [ -n "$2" ] || { echo "ERROR: --tag needs a value" >&2; exit 2; }; TAG_FILTER="$2"; shift 2 ;;
     --scope) [ $# -ge 2 ] && [ -n "$2" ] || { echo "ERROR: --scope needs a value" >&2; exit 2; }; SCOPE="$2"; shift 2 ;;
+    --shard)
+      # A shard is K/N with 1 <= K <= N; any other spelling is a runner error, never a subset.
+      if [ $# -lt 2 ] || ! [[ "$2" =~ ^([1-9][0-9]*)/([1-9][0-9]*)$ ]] \
+          || [ "${BASH_REMATCH[1]}" -gt "${BASH_REMATCH[2]}" ]; then
+        echo "ERROR: --shard needs K/N with 1 <= K <= N" >&2; exit 2
+      fi
+      SHARD_INDEX="${BASH_REMATCH[1]}"; SHARD_COUNT="${BASH_REMATCH[2]}"; shift 2 ;;
     --require-all) REQUIRE_ALL=1; shift ;;
     --shape-only) SCOPE="shape"; shift ;;
     -h|--help)
-      head -10 "${BASH_SOURCE[0]}"; exit 0 ;;
+      head -11 "${BASH_SOURCE[0]}"; exit 0 ;;
     *) echo "ERROR: unknown argument $1" >&2; exit 2 ;;
   esac
 done
@@ -52,6 +62,7 @@ failed=0
 skipped=0
 total=0
 partial=0
+discovered=0
 
 declare -a FAIL_LOG
 
@@ -60,6 +71,10 @@ for dir in $SEARCH_DIRS; do
   [ -d "$TESTS_DIR/$dir" ] || continue
   while IFS= read -r test_file; do
     [ -f "$test_file" ] || continue
+    position=$discovered
+    discovered=$((discovered + 1))
+    # Files outside this shard are neither run nor counted, so strict accounting stays exact.
+    [ $((position % SHARD_COUNT + 1)) -eq "$SHARD_INDEX" ] || continue
     total=$((total + 1))
 
     # Enforce tags here; old tests do not all implement their own tag filter.
@@ -125,6 +140,9 @@ done
 echo ""
 printf "${c_bold}== Lintel test summary ==${c_reset}\n"
 printf "Total:   %d\n" "$total"
+if [ "$SHARD_COUNT" -gt 1 ]; then
+  printf "Shard:   %d/%d (%d of %d discovered test files)\n" "$SHARD_INDEX" "$SHARD_COUNT" "$total" "$discovered"
+fi
 printf "${c_green}Pass:   %d${c_reset}\n" "$passed"
 printf "${c_yellow}Skip:   %d${c_reset}\n" "$skipped"
 printf "${c_red}Fail:   %d${c_reset}\n" "$failed"
@@ -137,6 +155,10 @@ if [ "$failed" -gt 0 ]; then
 fi
 
 if [ "$total" -eq 0 ]; then
+  if [ "$SHARD_COUNT" -gt 1 ]; then
+    printf "\n${c_red}FAIL-CLOSED: shard %d/%d of scope '%s' selected zero of %d discovered tests — a run that asserts nothing is not green.${c_reset}\n" "$SHARD_INDEX" "$SHARD_COUNT" "$SCOPE" "$discovered" >&2
+    exit 1
+  fi
   printf "\n${c_red}FAIL-CLOSED: scope '%s' discovered zero tests — a run that asserts nothing is not green.${c_reset}\n" "$SCOPE" >&2
   exit 1
 fi

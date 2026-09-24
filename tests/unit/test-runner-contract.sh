@@ -123,6 +123,55 @@ cp "$ROOT/tests/shape/manifest-identity.sh" "$TMP/tests/shape/manifest-identity.
   )
   [ "$unavailable_failures" -eq 0 ] || exit 1
 )
+
+# Sharding: deterministic, disjoint shards whose union is the unsharded run, with strict
+# accounting inside each shard and fail-closed malformed or empty shards.
+SHARD_TMP="$(mktemp -d)"
+trap 'rm -rf "$TMP" "$SHARD_TMP"' EXIT
+mkdir -p "$SHARD_TMP/tests/runner" "$SHARD_TMP/tests/unit"
+cp "$ROOT/tests/runner/run-all.sh" "$SHARD_TMP/tests/runner/run-all.sh"
+SHARD_RUNNER="$SHARD_TMP/tests/runner/run-all.sh"
+for name in a b c d e; do
+  printf 'echo "  PASS: %s"\n' "$name" > "$SHARD_TMP/tests/unit/$name.sh"
+done
+shard_run() {
+  SHARD_RC=0
+  SHARD_OUT=$(bash "$SHARD_RUNNER" "$@" 2>&1) || SHARD_RC=$?
+  SHARD_RAN=$(printf '%s\n' "$SHARD_OUT" | sed -n 's/^RUN //p' | sort | tr '\n' ' ')
+}
+expect_shard() {
+  local expected_rc="$1" expected_ran="$2"; shift 2
+  shard_run "$@"
+  if [ "$SHARD_RC" -ne "$expected_rc" ] || [ "$SHARD_RAN" != "$expected_ran" ]; then
+    printf 'FAIL: %s: expected rc %s running [%s], got rc %s running [%s]\n%s\n' \
+      "$*" "$expected_rc" "$expected_ran" "$SHARD_RC" "$SHARD_RAN" "$SHARD_OUT"
+    exit 1
+  fi
+}
+for bad in "" 0/2 3/2 x/2 1/0 1/2/3 -1/2 01/2 "1 /2"; do
+  expect_shard 2 "" --shard "$bad"
+done
+expect_shard 2 "" --shard
+all="unit/a.sh unit/b.sh unit/c.sh unit/d.sh unit/e.sh "
+expect_shard 0 "$all"
+expect_shard 0 "$all" --shard 1/1
+expect_shard 0 "unit/a.sh unit/c.sh unit/e.sh " --shard 1/2
+[[ "$SHARD_OUT" == *"Shard:   1/2 (3 of 5 discovered test files)"* ]] || {
+  printf 'FAIL: shard summary missing\n%s\n' "$SHARD_OUT"; exit 1; }
+expect_shard 0 "unit/b.sh unit/d.sh " --shard 2/2
+expect_shard 0 "unit/c.sh " --shard 3/5 --scope unit
+expect_shard 1 "" --shard 6/6
+[[ "$SHARD_OUT" == *"selected zero of 5 discovered tests"* ]] || {
+  printf 'FAIL: empty shard was not refused visibly\n%s\n' "$SHARD_OUT"; exit 1; }
+union=""
+for index in 1 2 3; do shard_run --shard "$index/3" --require-all; union="$union$SHARD_RAN"; done
+[ "$(printf '%s' "$union" | tr ' ' '\n' | sed '/^$/d' | sort | tr '\n' ' ')" = "$all" ] || {
+  printf 'FAIL: shards 1-3 of 3 are not a disjoint cover: [%s]\n' "$union"; exit 1; }
+printf 'echo "  SKIP: unavailable dependency"\n' > "$SHARD_TMP/tests/unit/b.sh"
+expect_shard 0 "unit/a.sh unit/c.sh unit/e.sh " --shard 1/2 --require-all
+expect_shard 1 "unit/b.sh unit/d.sh " --shard 2/2 --require-all
+
 echo 'PASS: runner rejects invalid input, empty suites, exact tag misses, shell/framework skips, and failed tests'
+echo 'PASS: runner shards are deterministic, disjoint, complete, strict and fail closed when malformed or empty'
 echo 'PASS: runner preserves literal Windows paths and backslash diagnostics'
 echo 'PASS: actual manifest and hook guards report unavailable tools and block strict acceptance'
