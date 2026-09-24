@@ -531,6 +531,59 @@ export LINTEL_JOBS_NO_INIT=1; source "$LINTEL_SOURCE_ROOT/bin/_jobs.sh"; list_jo
         self.assertFalse(fresh.exists())
         self.assertFalse((repo / ".claude/runtime").exists())
 
+    # Test-only projection: NTFS under Git Bash cannot deny reads to a file the test owns,
+    # so the shell's `[ -r <primary> ]` predicate alone is made false; the file still exists.
+    SCALE = r'''
+source "$LINTEL_SOURCE_ROOT/bin/_audit.sh"
+source "$LINTEL_SOURCE_ROOT/lib/scale-estimator.sh"
+first="$(audit_file granularity)"
+printf 'default=%s\n' "$(size_default_prior S)"
+if [ "${PROJECT_UNREADABLE:-0}" = 1 ]; then
+  function [ {
+    if [[ $# == 3 && "$1" == -r && "$2" == "$first" && "$3" == ']' ]]; then return 1; fi
+    builtin [ "$@"
+  }
+  builtin [ -e "$first" ] && printf 'primary_exists=yes\n'
+fi
+printf 'estimate=%s\n' "$(scale_token_estimate S)"
+'''
+
+    def test_scale_estimator_uses_the_first_existing_history_file(self):
+        repo = self.make_repo("v5 repo")
+        env = {**self.env, "LINTEL_REPO_ROOT": repo.as_posix()}
+        record = ('{"ts":"2026-09-24T00:00:00Z","kind":"actual_vs_estimated","operator":"fixture",'
+                  '"cycle_id":"%s","size":"S","est_tokens":"12000","actual_tokens":"%d"}\n')
+        primary = repo / ".claude/runtime/audit/granularity.jsonl"
+        legacy = self.home / ".lintel/audit/granularity.jsonl"
+
+        def estimate(unreadable=False):
+            result = self.bash(self.SCALE, cwd=repo, env={**env, "PROJECT_UNREADABLE": "1" if unreadable else "0"},
+                               expect=0)
+            out = dict(line.split("=", 1) for line in result.stdout.splitlines())
+            return out, result.stderr
+
+        write(legacy, record % ("legacy", 9000))
+        out, err = estimate()
+        self.assertEqual(out["estimate"], "9000 calibrated 1")
+        self.assertNotIn("also present", err)
+        write(primary, record % ("current", 1000))
+        out, err = estimate()
+        self.assertEqual(out["estimate"], "1000 calibrated 1")
+        self.assertIn("also present but not read", err)
+        self.assertIn(legacy.as_posix(), err)
+        out, err = estimate(unreadable=True)
+        self.assertEqual(out["primary_exists"], "yes")
+        self.assertEqual(out["estimate"], f"{out['default']} uncalibrated 0")
+        self.assertIn("cannot read", err)
+        self.assertIn("granularity.jsonl", err.split("cannot read", 1)[1].splitlines()[0])
+        self.assertIn("also present but not read", err)
+        self.assertNotIn("9000", out["estimate"])
+        legacy.unlink()
+        out, err = estimate(unreadable=True)
+        self.assertEqual(out["estimate"], f"{out['default']} uncalibrated 0")
+        self.assertIn("cannot read", err)
+        self.assertNotIn("also present", err)
+
 
 class ProducerRoundTripTests(Sandbox):
     def setUp(self):
