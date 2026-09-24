@@ -160,6 +160,8 @@ class ModuleConsumers(DATA["DomainHandoff"]):
         self.selected_map(domains=("ta", "da", "sc", "dh", "tq"))
         self.bind_request()
         self.produce(score=100)
+        self.prepare_final()
+        self.assertTrue(self.verify(command="summary")["ok"])
         safety.native_io_path(self.repo / self.result_path("sc")).unlink()
         self.prepare_final()
         summary = self.verify(command="summary", expected=3)
