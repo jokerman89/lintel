@@ -22,10 +22,5 @@ window.LINTEL_PRODUCTS=({shell,icon,viewButton})=>({
   'product-slide product-pack'),
  productcore:s=>shell(s,
   '<div class="core-journey"><div class="core-client"><span class="p-label">YOUR EXISTING CODING APP</span>'+icon('terminal')+'<h2>Desktop or CLI</h2><p>Including GitHub Copilot</p></div><div class="core-workflow"><span class="p-label">A CASE-SPECIFIC CORE</span><div class="core-start"><b>YOU INVOKE IT</b><q>Run the architecture review.</q></div><div class="core-path"><div><span>01</span><b>Relevant context</b></div><i>→</i><div><span>02</span><b>Chosen workflow</b></div><i>→</i><div><span>03</span><b>Reviewed artifacts</b></div></div><p class="core-output">Review notes + decision brief + next action</p></div></div><div class="core-fit"><strong>A focused workflow.<br>Less to maintain.</strong><p>For work a person drives in the coding app.<br>Hosted services still suit unattended execution.</p></div>',
-  'product-slide product-core'),
- productbenchmark:s=>shell(s,
-  '<div class="benchmark-constant"><span class="p-label">HOLD CONSTANT</span><p>Model <i>·</i> Task <i>·</i> Project knowledge <i>·</i> Tests + permissions</p></div><div class="benchmark-arms"><div><span>A / COMPETENT BASELINE</span><h2>The agent +<br>a well-prepared repo</h2></div><div class="benchmark-versus">vs.</div><div><span>B / WORKFLOW TREATMENT</span><h2>The same setup<br>+ Lintel</h2></div></div><div class="benchmark-measures">'+[
-   ['clock','Accepted change','How long until it is usable?'],['bubble','Interventions','How often did you step in?'],['handoff','Defects + recovery','What failed or got forgotten?'],['scales','Total cost','Including process overhead.']
-  ].map(([i,h,p])=>'<div>'+icon(i)+'<h3>'+h+'</h3><p>'+p+'</p></div>').join('')+'</div><div class="p-bottom"><p>Measure outcomes. Include the overhead.</p>'+viewButton('Open the prepared comparison','../comparison/index.html','Prepared A/B exhibit · one run per arm')+'</div>',
-  'product-slide product-benchmark')
+  'product-slide product-core')
 });
