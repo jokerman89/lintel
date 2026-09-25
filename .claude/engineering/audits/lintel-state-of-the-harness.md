@@ -192,7 +192,7 @@ the ta/da/sc/dh/tq modules.
    delegation with an explicit brief, read/write boundaries and required operator checkpoints.
    If unavailable, retain serial work or an external handoff; self-review is not independent review.
    **Original account, not a current entrypoint or client-policy claim:**
-   `pair-agent --agent <Name>` — a two-mind, in-the-loop alternation between the main agent and
+   the retired pairing entry (`--agent <Name>`) — a two-mind, in-the-loop alternation between the main agent and
    a named subagent, with an operator gate each turn. Claude-Code-only (Agent-tool dependency).
 3. **Inline vs dedicated** — `docs/concepts/agent-dispatch-rules.md`: spawn when open-ended or
    adversarial; run inline when cheap + deterministic or needs accumulated context.
@@ -301,7 +301,7 @@ The planning machinery threads a **size axis** through SENSE → SCOPE → PLAN 
 - **Granularity** — the original leaf target was 2–5 minutes of implementer time.
   Current plan inspection is `/li:inspect --target plan --lens engineering`, covering every
   original leaf's acceptance and size without replacing the approval or shared review gates.
-  The source-era `plan-eng-review` account of a BLOCKING per-leaf check remains historical,
+  The source-era engineering plan-review account of a BLOCKING per-leaf check remains historical,
   not a measured duration or proof of automatic enforcement by the current host.
 - **The calibration loop** — CAPTURE records `actual_tokens` per size; the estimator reads the median
   back as the corrected prior. Estimates self-correct from recorded actuals.
@@ -368,7 +368,7 @@ audit writer), `_jobs.sh` (the jobs engine).
 | `.claude/runtime/state/00-state.md` (+ module state) | per-repo cycle state (gitignored) | written by cycle/module skills |
 | `~/.lintel/profile.yaml` | active pack · mode · role | operator-global |
 | `~/.lintel/jobs/_active.md` | cross-repo jobs registry (job data lives per-repo) | `/li:resume`/`/li:status` read it |
-| `.claude/runtime/sessions/` | context-save snapshots | `/li:resume --from <checkpoint-path>` reads an owned or explicitly authorized checkpoint |
+| `.claude/runtime/sessions/` | `/li:pause` checkpoints | `/li:resume --from <checkpoint-path>` reads an owned or explicitly authorized checkpoint |
 | `~/.lintel/audit/*.jsonl` | append-only audit (reviews, overrides, envelopes, hooks) | via `bin/_audit.sh` |
 
 Current checkpoint navigation reads continuity context only. It does not rename old saves,

@@ -323,7 +323,7 @@ Each module ships with:
 | `/li:ta loop` | mid-cycle architecture iteration | revised ADRs + diff against prior decisions + impact analysis |
 | `/li:ta single --action <capability>` | current targeted route | api-design / dependency-graph / boundary-review / complexity-audit / scaling-plan / contract-collision / quality-attributes |
 
-**Original sub-skill proposals (identifiers, not callable entries):**
+**Original TA sub-skill proposals (identifiers, not callable entries):**
 
 - `ta-api-design` — REST/GraphQL/gRPC interface design with versioning + breaking-change analysis
 - `ta-dependency-graph` — module dependency map, circular-detection, layering audit
@@ -393,7 +393,7 @@ engineering:
 | `/li:da loop` | iterative schema refinement | revised schema + diff + backward-compat analysis |
 | `/li:da single --action <capability>` | current targeted route | schema-design / migration-plan / retention-policy / query-pattern-audit / sharding-plan / data-contract-collision / analytics-readiness |
 
-**Original sub-skill proposals (identifiers, not callable entries):**
+**Original DA sub-skill proposals (identifiers, not callable entries):**
 
 - `da-schema-design` — entity-relationship modeling, normalization vs denormalization decisions
 - `da-migration-plan` — zero-downtime migration sequencing
@@ -497,7 +497,7 @@ engineering:
 | `/li:dh loop` | iterative reliability tightening | revised SLO + diff + remediation plan |
 | `/li:dh single --action <capability>` | current targeted route | deployment-plan / observability-spec / sli-slo-spec / cost-projection / rollback-strategy / capacity-headroom / on-call-playbook |
 
-**Original sub-skill proposals (identifiers, not callable entries):**
+**Original DH sub-skill proposals (identifiers, not callable entries):**
 
 - `dh-ci-design` — pipeline stages + gates + parallelism
 - `dh-infra-as-code` — Terraform/Bicep/CDK module spec
@@ -561,7 +561,7 @@ engineering:
 | `/li:tq loop` | iterative coverage tightening | revised plan + diff + new tests written + verdict |
 | `/li:tq single --action <capability>` | current targeted route | coverage-audit / perf-budget-spec / contract-test-design / regression-suite / chaos-plan / flaky-quarantine / test-pyramid-review |
 
-**Original sub-skill proposals (identifiers, not callable entries):**
+**Original TQ sub-skill proposals (identifiers, not callable entries):**
 
 - `tq-coverage-audit` — line / branch / mutation coverage scoring
 - `tq-regression-design` — diff-driven regression test selection
