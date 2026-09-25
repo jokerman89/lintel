@@ -91,18 +91,25 @@ Understand the request, choose the scope, define success, inspect the code, plan
 build it, review the result, ship within the authorized scope, and capture what was learned.
 Small fixes can use a shorter route. A larger change can span multiple sessions and build cards.
 
-Portable native wrappers expose `li-cycle`, `li-plan`, `li-build`, `li-review` and related
-skills; invocation follows the host, not a universal slash spelling. Copilot's native
-planner, builder and reviewer profiles remain available. The full catalog contains architecture, data,
+Every client reaches the same skills; only the invocation form differs. The Claude plugin uses
+`/li:<skill>`, portable adapter wrappers expose `li-cycle`, `li-plan`, `li-build`, `li-review`
+and related skills where the host discovers them, and the Universal adapter uses explicit file
+handoff. Hosts with native agent profiles also receive planner, builder and reviewer roles.
+Common entrypoints include `define` to shape a request, `inspect` for plan or repository
+lenses, `verify` for read-only checks, `diagnose` for bugs, `cross-check` for an independent
+second review, and `pause`/`resume` for continuity. The full catalog contains architecture, data,
 security, operations, testing, design and document workflows; load that depth when it helps.
 
 These are agent instructions backed by local helpers. Workflow approvals and review discipline
 still depend on the agent following the instructions and the team enforcing its merge rules.
 [The cycle](docs/the-cycle.md) explains the phases and their artifacts.
 
+Upgrading an existing workflow? The [native workflow migration](docs/migrations/2026-09-25-native-workflows.md)
+maps consolidated entrypoints while preserving saved work, owned installations and review evidence.
+
 ## Scale an approved plan with a swarm
 
-When a reviewed plan contains dependency-independent ownership domains, opt in with `/li:swarm`.
+When a reviewed plan contains dependency-independent ownership domains, opt in with the `swarm` skill.
 Lintel adds a committed coordination map, charter and per-lane briefs, reports and reviews beside the
 existing task map. One coordinator owns shared state, generated outputs, commits and integration.
 
@@ -195,8 +202,8 @@ and observation details. Static compatibility tiers are conservative hints, not 
 <!-- CLI-TIERS:END -->
 
 See [multi-CLI support](docs/multi-cli.md) for invocation differences and activation boundaries.
-The portable Copilot kit uses `/li-<skill>` names; legacy plugin workflows use the naming
-provided by their host.
+Portable adapter wrappers use `li-<skill>` names (typed `/li-<skill>` where the host uses
+slash invocation); the Claude plugin uses `/li:<skill>`; the Universal route reads canonical files.
 
 ## Explore and contribute
 
