@@ -140,3 +140,7 @@ install/directories.txt text eol=lf
 .claude/plans/universal-implementation/reviews/P13-discovery-2a4ba25.md text eol=lf
 .claude/plans/universal-implementation/reviews/P13-discovery-final-b1d4caf.md text eol=lf
 .claude/plans/universal-implementation/reviews/P13-fanin-f581b07.md text eol=lf
+.claude/decisions/0036-mars-multi-model-review.md text eol=lf
+.claude/plans/mars/plan.md text eol=lf
+.claude/plans/mars/research.md text eol=lf
+.claude/plans/mars/review-method-design.md text eol=lf
