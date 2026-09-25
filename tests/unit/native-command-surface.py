@@ -78,6 +78,34 @@ class CommandSurfaceTests(unittest.TestCase):
         after = "# API\n\n" + block + "\nskill: str\n"
         self.assertTrue(any(item.code == "missing-command" for item in self.findings(after, "docs/api.md")))
 
+    def test_python_fence_excludes_split_fstring_tokens_under_the_pep701_contract(self):
+        import tokenize
+        start, middle, end = 9001, 9002, 9003
+        Token = tokenize.TokenInfo
+
+        def split_stream(readline):
+            # Python 3.12+ emits f-string bodies as FSTRING_MIDDLE between START and END.
+            yield Token(tokenize.NAME, "value", (1, 0), (1, 5), "")
+            yield Token(tokenize.OP, "=", (1, 6), (1, 7), "")
+            yield Token(start, 'f"""', (1, 8), (1, 12), "")
+            yield Token(middle, "\nskill: qa\n", (1, 12), (3, 0), "")
+            yield Token(end, '"""', (3, 0), (3, 3), "")
+            yield Token(tokenize.NEWLINE, "\n", (3, 3), (3, 4), "")
+            yield Token(tokenize.ENDMARKER, "", (4, 0), (4, 0), "")
+
+        text = '# API\n\n```python\nvalue = f"""\nskill: qa\n"""\n```\n'
+        with mock.patch.object(guard, "STRING_OPEN_TOKENS", frozenset({start})), \
+                mock.patch.object(guard, "STRING_CLOSE_TOKENS", frozenset({end})), \
+                mock.patch.object(guard, "LITERAL_TOKENS", frozenset({tokenize.STRING, tokenize.COMMENT, start, middle, end})), \
+                mock.patch.object(guard.tokenize, "generate_tokens", split_stream):
+            self.assertEqual(guard.python_fence_lines(text), set())
+        with mock.patch.object(guard, "STRING_OPEN_TOKENS", frozenset({start})), \
+                mock.patch.object(guard, "STRING_CLOSE_TOKENS", frozenset({end})), \
+                mock.patch.object(guard, "LITERAL_TOKENS", frozenset({tokenize.STRING, tokenize.COMMENT, start, end})), \
+                mock.patch.object(guard.tokenize, "generate_tokens", split_stream):
+            self.assertEqual(guard.python_fence_lines(text), set())  # extent tracking alone suffices
+        self.assertTrue(any("qa" in item.message for item in self.findings(text, "docs/api.md")))
+
     def test_source_revision_field_observes_only_the_exact_bound_original_field(self):
         path = ".claude/plans/original/card.md"
         field = "Own `office-hours` and `plan-eng-review`, plus\n`skills/codex/SKILL.md` for that version.\n"

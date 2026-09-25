@@ -1377,6 +1377,15 @@ def routing_lines(text: str, relative: str, exemptions: list[dict],
     return "".join(masked).splitlines()
 
 
+# Literal token types across tokenize versions (PEP 701 split f-strings; later template strings).
+STRING_OPEN_TOKENS = frozenset(getattr(tokenize, name) for name in ("FSTRING_START", "TSTRING_START")
+                               if hasattr(tokenize, name))
+STRING_CLOSE_TOKENS = frozenset(getattr(tokenize, name) for name in ("FSTRING_END", "TSTRING_END")
+                                if hasattr(tokenize, name))
+LITERAL_TOKENS = frozenset({tokenize.STRING, tokenize.COMMENT} | STRING_OPEN_TOKENS | STRING_CLOSE_TOKENS | {
+    getattr(tokenize, name) for name in ("FSTRING_MIDDLE", "TSTRING_MIDDLE") if hasattr(tokenize, name)})
+
+
 def python_fence_lines(text: str) -> set[int]:
     """Code lines of fenced Python blocks that no string token touches (shared classifier, tokenize)."""
     selected: set[int] = set()
@@ -1405,10 +1414,17 @@ def python_fence_lines(text: str) -> set[int]:
         indent = min((len(lines[n - 1]) - len(lines[n - 1].lstrip()) for n in numbers if lines[n - 1].strip()), default=0)
         source = "\n".join(lines[n - 1][indent:] for n in numbers) + "\n"
         touched: set[int] = set()
+        opened: list[int] = []
         try:
             for token in tokenize.generate_tokens(io.StringIO(source).readline):
-                if token.type in {tokenize.STRING, tokenize.COMMENT} or token.type == getattr(tokenize, "FSTRING_START", -1):
+                if token.type in LITERAL_TOKENS:
                     touched.update(range(token.start[0], token.end[0] + 1))
+                if token.type in STRING_OPEN_TOKENS:
+                    opened.append(token.start[0])
+                elif token.type in STRING_CLOSE_TOKENS and opened:
+                    touched.update(range(opened.pop(), token.end[0] + 1))
+            if opened:
+                continue  # An unterminated literal gains no annotation exemption.
         except (tokenize.TokenError, IndentationError, SyntaxError):
             continue  # Unparseable code gains no annotation exemption.
         selected.update(n for index, n in enumerate(numbers, 1) if index not in touched)
