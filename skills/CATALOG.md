@@ -5,9 +5,9 @@ CI checks this file for drift; edit the source SKILL.md to change a description.
 
 Use `/li:<name>` in a Lintel plugin, or ask Copilot to run the named Lintel skill.
 
-Total skills: 94
+Total skills: 95
 
-## foundation layer (94 skills)
+## foundation layer (95 skills)
 
 | Skill | Description |
 |---|---|
@@ -69,6 +69,7 @@ Total skills: 94
 | [`/li:lessons-promote`](lessons-promote/SKILL.md) | Promote one ID-managed project lesson into an explicitly named Lintel work tree's scaffolding baseline, with recorded p… |
 | [`/li:lessons-surface`](lessons-surface/SKILL.md) | Use before or during a task for keyword-ranked lessons, the complete index or an exact lesson ID, without changing the … |
 | [`/li:maintenance`](maintenance/SKILL.md) | Use for on-demand storage/context guidance, scoped path diagnostics and labeled usage estimates without treating partia… |
+| [`/li:mars`](mars/SKILL.md) | Use when a problem, plan, spec, implementation or review deserves a deliberate multi-model adversarial second look — ru… |
 | [`/li:migrations`](migrations/SKILL.md) | Read the installed-source migration catalog against the selected target, preserving overdue, unknown and historical rec… |
 | [`/li:orientator`](orientator/SKILL.md) | Phase 3 v4.0 — lightweight routing agent invoked at SENSE. Reads operator prompt + active pack's navigation policy, rec… |
 | [`/li:pack-create`](pack-create/SKILL.md) | Use to create a blank, inherited, or cloned Lintel pack and validate it before activation. |

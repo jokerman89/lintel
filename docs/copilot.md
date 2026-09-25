@@ -43,7 +43,7 @@ not symlinks or an installed plugin cache. The target's `.github/lintel/` resour
 to remain available when another developer or a cloud agent checks out the repository.
 
 Core skills are `li-welcome`, `li-cycle`, `li-sense`, `li-scope`, `li-define`, `li-discover`,
-`li-plan`, `li-build`, `li-review`, `li-ship`, `li-capture`, `li-resume`, `li-spec-kit` and `li-swarm`. Invoke them as
+`li-plan`, `li-build`, `li-review`, `li-ship`, `li-capture`, `li-resume`, `li-spec-kit`, `li-swarm` and `li-mars`. Invoke them as
 `/li-plan` and similar where the host offers slash invocation; otherwise name the skill or its
 file. These are adapters to Lintel's canonical workflow, whose deeper documents often use
 `/li:plan` notation. A colon command is not the portable skill's identifier.
