@@ -58,8 +58,15 @@ standard library and runs git read-only. `tests/unit/ci-matrix.sh` tests it.
   - any file without an extension, including dotfiles such as `.gitattributes`;
   - any file whose extension is not on the documentation allowlist. The allowlist is Markdown,
     HTML, text and common image formats. An unknown extension widens the matrix and never narrows
-    it.
-- **A documentation-only pull request** runs the suite on Ubuntu alone.
+    it;
+  - any file that is added, deleted, renamed (both sides), copied or changes type, whatever its
+    extension, unless the path lies under `docs/`, `.claude/` or `presentations/`. Adding or
+    removing a file changes the installed file set, where path length, letter case and reserved
+    names differ per system. Nothing under those three trees is installed.
+- **A documentation-only pull request** runs the suite on Ubuntu alone. It modifies Markdown, HTML,
+  text or images anywhere outside the always-sensitive locations above, and adds, deletes or
+  renames such files only under `docs/`, `.claude/` or `presentations/`. Modifying an existing
+  `skills/x/SKILL.md` stays on Ubuntu; adding one runs the full matrix.
 - **The log.** The `plan` job prints its decision, its reason and every path that caused it, and
   writes the same to the job summary.
 - **Triggers.** `pull_request` has no branch filter in `ci.yml` or `catalog.yml`, so stacked pull
@@ -94,12 +101,12 @@ standard library and runs git read-only. `tests/unit/ci-matrix.sh` tests it.
   - Code pull requests still run the full matrix, and every push to `main` does too.
   - Stacked pull requests get CI.
 - **Negative:**
-  - A documentation-only pull request gets no macOS or Windows signal. It changes no code, so a
-    system-specific failure could only come from how code on one system handles that
-    documentation. Examples are a new file name that exceeds the Windows installed-path budget, or
-    an encoding or line-ending problem. The push to `main` runs the full matrix and catches such a
-    failure at the latest after merge. Apply `ci:full-matrix` when a documentation change adds or
-    renames files that are installed or copied, such as skills, agents or templates.
+  - A documentation-only pull request gets no macOS or Windows signal. It changes no code and
+    adds, deletes or renames files only in trees that are never installed, so a system-specific
+    failure could only come from how code on one system reads changed content, for example an
+    encoding or line-ending problem in an edited skill. The push to `main` runs the full matrix and
+    catches such a failure at the latest after merge. Apply `ci:full-matrix` when an edit to
+    installed documentation deserves cross-system evidence before merge.
   - The suite starts after the `plan` job, which adds its checkout time to every run. The planner
     also becomes part of the CI's trusted path. Its unit test and its fail-safe default contain
     that risk.

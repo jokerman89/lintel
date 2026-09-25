@@ -77,8 +77,11 @@ model follows the complete cycle or establishes measured enterprise productivity
 
 CI runs every tier on Ubuntu for every pull request and push, with explicit Python and jq preflight.
 Pushes to `main`, manual dispatches, pull requests labelled `ci:full-matrix` and pull requests that
-touch a platform-sensitive path also run every tier on macOS and Windows; a documentation-only pull
-request stays on Ubuntu, and a diff that cannot be computed selects all three (ADR-0037,
+touch a platform-sensitive path also run every tier on macOS and Windows. Adding, deleting or
+renaming any file outside `docs/`, `.claude/` and `presentations/` counts as platform-sensitive;
+editing existing Markdown, HTML, text or images outside code locations does not. A
+documentation-only pull request stays on Ubuntu, and a diff that cannot be computed selects all
+three (ADR-0037,
 `tests/unit/ci-matrix.sh`). Actions use reviewed commit pins and read-only repository tokens.
 Catalog drift checks never push a
 follow-up commit to the default branch. Native Windows install/reinstall tests require no Pester
