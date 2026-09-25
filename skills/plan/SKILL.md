@@ -14,7 +14,7 @@ navigation:
   triggers:
     - operator types /li:plan as standalone (planner-as-module)
     - cycle phase 4 invokes after DEFINE + DISCOVER
-    - operator wants ≤5min/task granularity discipline + founder approval gate
+    - operator wants short verifiable tasks and scope approval before BUILD
   sibling_workflows:
     - /li:cycle — full 9-step pipeline that includes plan
     - /li:define — design doc producer (plan input)
@@ -36,7 +36,9 @@ Takes APPROVED design doc (from DEFINE) + discover-report.md (from DISCOVER) and
 5. **Optional swarm profile** — when independent domains exist and the operator opts in, add one
    validated coordination pointer without duplicating task authority
 
-Adopted from speckit (cross-section Analyze), Architect image (cost-estimate gate, founder approval gate), and superpowers (two-stage subagent review).
+Keep requirements, work selection, review evidence and approval distinct. ANALYZE
+checks cross-artifact consistency; inspect supplies engineering, design and
+developer-experience judgment without creating another planning authority.
 
 ## When to use
 
@@ -111,9 +113,12 @@ the deliverable because of that requirement. Keep advice distinct from mandatory
 profile presence does not prove that a hook is installed or a control passed. For `_default`
 or no applicable requirement, record that outcome without inventing enterprise controls.
 
-### Step 2 — Plan-eng-review (engineering plan)
+### Step 2 — Draft tasks and inspect engineering
 
-Invoke `/li:plan-eng-review` skill (or inline equivalent).
+Draft the tasks below from the approved design and current code, then invoke
+`/li:inspect --target plan --lens engineering --map <same selected work.json>`.
+For an explicitly unmapped design, pass its exact path until the native DRAFT
+map exists. PLAN owns task writing; inspect reports findings and proposals.
 
 Output: task list with for each task:
 - Task ID
@@ -126,7 +131,8 @@ Output: task list with for each task:
 - Complexity (mechanical / multi-file / architecture)
 - Recommended implementer role (per discover-report's mapping; shared by its work package)
 
-Rule (from superpowers): each task should be 2-5 minutes of implementer time. Bigger = decompose.
+Each leaf should be 2-5 minutes of bounded implementation. Larger leaves need
+decomposition or an explicitly accepted concern; packaging does not waive the check.
 
 Group leaves into **work packages** (`P1`, `P2`, …) using the
 [planner module contract](../../docs/concepts/planner-as-module.md#work-packages).
@@ -150,18 +156,22 @@ For new native work, write/validate its DRAFT work.json at this point and call
 `workflow_bind_work` in the already established cycle. ANALYZE and budgeting then
 use that selection before final approval; a path binding never upgrades DRAFT.
 
-### Step 3 — Plan-design-review (if frontend in scope)
+### Step 3 — Inspect design when a rendered surface is in scope
 
-If design doc indicates UI/frontend work, invoke `/li:plan-design-review`:
+If the design changes a rendered or interactive surface, invoke
+`/li:inspect --target plan --lens design --map <same selected work.json>`:
 - Design system implications
 - Accessibility considerations
-- Visual sketch (if needed) via `/li:design-html` or `/li:design-review`
+- Interaction states, edge cases and trustworthy feedback
+- Optional authorized sketch through `/li:generate-web` mockup mode or
+  `/li:frontend-design` variants; sketches are not browser validation
 
-Add design tasks to plan.
+Reconcile findings in the original task artifact. Record grounded
+not-applicable when there is no design surface; do not invent a visual PASS.
 
-### Step 4 — Plan-devex-review (when developer workflows are affected)
+### Step 4 — Inspect developer experience when workflows are affected
 
-Invoke `/li:plan-devex-review`:
+Invoke `/li:inspect --target plan --lens devex --map <same selected work.json>`:
 - Operator-DX implications (will this be painful to use later?)
 - Documentation needed
 - Telemetry hooks needed
@@ -177,8 +187,9 @@ The coordinating planner resolves routine corrections within authority. Present 
 material unresolved trade-off to the operator once, with viable alternatives.
 
 Update the selected original artifacts and re-review affected findings until the
-plan is consistent. `/li:plan-tune` is dormant preference data, not a conflict
-resolver; it is not called here and does not grant approval.
+plan is consistent. Preserve one shared inspection result covering all required
+lenses; the last optional lens cannot erase another lens's unresolved finding.
+Existing question-preference history stays dormant and is not approval authority.
 
 ### Step 6 — Dependency graph
 
@@ -201,8 +212,9 @@ and can own disjoint repository paths. Generated outputs, shared schemas, plan/r
 commits, and integration are coordinator-owned reducers; do not count them as worker domains.
 
 If no independent ownership exists, keep ordinary sequential BUILD and emit no swarm fields. If it
-does exist, show the candidate waves, write scopes, expected isolation, `max_parallel`, and the
-current host's `subagents` tier from `lib/cli-tiers.yaml`. Ask whether to use the swarm profile unless
+does exist, show the candidate waves, write scopes, expected isolation, `max_parallel`, and
+the actual host's inspected delegation/isolation capabilities and permissions.
+`lib/cli-tiers.yaml` describes surfaces, not proof that a tool ran. Ask whether to use the swarm profile unless
 the operator already requested it in the current authorized scope. This is an execution-profile
 choice, not approval for additional scope or external actions.
 
@@ -335,12 +347,21 @@ immutable evidence/QA obligations remain unchanged. A report pointer is not rele
 If the report has findings: surface the gap-list, ask operator: defer to backlog / add to plan /
 accept gap (record the acceptance in the report).
 
-### Step 9 — Adversarial two-stage review (adopted from superpowers)
+### Step 9 — Adversarial two-stage review with shared evidence
 
-Dispatch CodeReviewer subagent (or general-purpose) with plan.md path:
+Use the [shared evidence contract](../review/references/evidence.md). Prepare the
+exact selected plan/map/package/leaf context before review, using inspect's
+target-specific required-lens check IDs, verified profile/required policy and
+immutable `qa_requirements`. State the actual
+validation required at plan time; proposed future BUILD tests are not observations.
+
+Give a separately attributable reviewer the original requirements/design/tasks,
+the selected diff and all applicable inspect lens findings. Use a real available
+reviewer or a durable external/manual handoff, not a mandatory agent/model name.
 
 **Stage 1 — Spec compliance review:**
-"Does plan.md match design doc requirements exactly? Coverage gaps? Tasks not traceable to design?"
+"Do the original selected design and task artifacts match every requirement?
+Identify coverage gaps and tasks without a traceable requirement."
 
 If Stage 1 finds issues: fix (Edit tool), re-dispatch. Max 3 iterations.
 
@@ -356,6 +377,24 @@ the retry limit is not permission to proceed as though it passed.
 
 If independent review is unavailable, retain a manual/external handoff and label
 the plan unreviewed. Do not call self-review independent or close a required gate.
+
+The actual reviewer persists observed v2 decisions using inspect's
+[bound-review procedure](../inspect/SKILL.md#persist-via-first-party),
+including failures. The final decision must cover spec, quality and every required
+lens/leaf against this context; a spec-only or final-lens-only pass is insufficient.
+PLAN then consumes the latest applicable decision explicitly:
+
+```bash
+bash "${LINTEL_SOURCE_ROOT:?select trusted source}/bin/li-review-read" --skill inspect \
+  --expected "${review_context:?set the same prepared v2 context}" \
+  --corroboration "${corroboration:?set actual independent receipt}" --gate-json
+```
+
+Missing, stale, rejected or uncorroborated required evidence keeps PLAN open. A
+`REVIEW REPORT` heading, score or direct `verify` is not latest-log clearance.
+Unmapped/draft exploratory inspection can remain non-clearing; obtain required
+bound evidence before claiming readiness. Later implementation/QA/SHIP needs its
+own applicable context, not borrowed planning clearance.
 
 ### Step 10 — Operator approval gate
 
@@ -402,7 +441,7 @@ Read the template, strip the comment header + the unused `depth_schema` sections
 <!-- - Duration: <time>   ← only emit when --with-time (design §3.7) -->
 ```
 
-**Depth-parametric rendering (design §3.3).** Read `depth_schema` from `scope.md` (emitted by the SCOPE phase) and render the `plan.template.md` section that matches. The 2-5 min granularity rule applies to the **leaf** (task at flat/phased, subtask at tree) — hierarchy adds milestones, it does not weaken the leaf check. `plan-eng-review` Step 0's BLOCKING per-leaf check stays.
+**Depth-parametric rendering (design §3.3).** Read `depth_schema` from `scope.md` (emitted by the SCOPE phase) and render the `plan.template.md` section that matches. The 2-5 min granularity rule applies to the **leaf** (task at flat/phased, subtask at tree) — hierarchy adds milestones, it does not weaken the leaf check. The inspect engineering lens retains the blocking per-leaf granularity check.
 
 - **`flat`** (XS/S — today's shape): one task table, IDs `T1, T2, …`.
 - **`phased`** (M): phases with tasks, numbered `1, 1.1 / 2, 2.1`.
@@ -528,9 +567,9 @@ state_append PLAN DONE next=BUILD "work_map_path=$LINTEL_WORK_MAP" \
 
 ## Pause-points (MANDATORY)
 
-1. After plan-eng-review/design-review/devex-review → confirm findings addressed before tune
-2. After cost estimate → AskUserQuestion gate (D7)
-3. After cross-section-analyze → if gaps, AskUserQuestion defer/add/accept
+1. After applicable inspect lenses, reconcile required findings in the original tasks.
+2. After the cost estimate, ask only if a resource or scope decision remains unresolved.
+3. After cross-section-analyze, resolve material gaps against existing authority.
 4. After two-stage review → fix gaps before next stage
 5. After full plan + reviews -> actual host question only for missing scope approval (D10)
 
@@ -585,10 +624,10 @@ Skip-conditions:
 - **No cost estimate** — operator commits to unknown burn → wasted hours
 - **Skipping two-stage review because "it's a simple plan"** — simple plans hide assumption gaps
 - **Ignoring ADRs identified in DISCOVER** — they're constraints, not advisory
-- **Task decomposition too coarse** — 2-5 min per task (superpowers rule); bigger = decompose
+- **Task decomposition too coarse** — 2-5 min per leaf; bigger requires decomposition or an explicit concern
 - **Invented model availability** — select roles by package complexity and honor the current host's actual model configuration
 - **Plan finalized without scope authority** — retain existing approval or ask for
-  the missing decision; no founder identity or repeated interview is required
+  the missing decision; no personal-role framing or repeated interview is required
 - **Treating parallelizable cards as automatic swarm consent** — surface the option; absence of both
   swarm fields preserves sequential BUILD
 - **Repeating task prose/dependencies in coordination.json** — the mapped tasks artifact is the one
@@ -615,7 +654,7 @@ PLAN is no longer just Phase 4 of `cycle` — it's a callable planner-module tha
 
 **1. Inside cycle (Phase 4):**
 ```
-/li:cycle → SENSE → DEFINE → DISCOVER → PLAN → BUILD → REVIEW → SHIP → CAPTURE
+/li:cycle → SENSE → SCOPE → DEFINE → DISCOVER → PLAN → BUILD → REVIEW → SHIP → CAPTURE
                                           ▲
                                   reads DEFINE + DISCOVER outputs from job dir
 ```

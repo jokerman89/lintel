@@ -28,7 +28,7 @@ the old `analyze-report.md` path is readable history, not automatic current evid
 
 ## When NOT to use
 
-- As a substitute for `/li:plan-eng-review` (that is quality judgment; this is coverage mechanics)
+- As a substitute for `/li:inspect --target plan --lens engineering` (quality judgment is separate from coverage mechanics)
 - Mid-task inside BUILD (per-task review is 3b-guard + two-stage review territory)
 - When no design doc or plan exists yet — there is nothing to cross-check; run the cycle phases first
 
@@ -121,7 +121,7 @@ A pack may wire a hard gate via `compliance.hooks`; the neutral `_default` pack 
 
 - Do NOT fix anything found — this skill reports; the operator or the owning phase acts.
 - Do NOT re-litigate design quality — wrong-shaped-but-consistent is GREEN here (quality is
-  plan-eng-review's lens).
+  the inspect engineering lens).
 - Do NOT hide missing required artifacts as skipped success. Preserve a partial report
   with INCOMPLETE legs and the exact missing sources; it is not clearance.
 - Do NOT compute a separate acceptance hash. When binding evidence, use P05 `bind_work`
