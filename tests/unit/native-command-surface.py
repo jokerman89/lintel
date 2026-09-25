@@ -869,10 +869,13 @@ class CommandSurfaceTests(unittest.TestCase):
     def historical_register(self, records):
         self.write(guard.HISTORICAL_REGISTER, json.dumps({"schema_version": 1, "records": records}))
 
+    def register_codes(self):
+        return {item.code for item in guard.scan(self.root)}
+
     def test_declared_historical_record_is_reported_not_dropped(self):
         path = ".claude/engineering/audits/old.md"
         self.write(path, "# Old audit\nUse /li:qa and read [gone](missing.md).\n")
-        self.historical_register([{"path": path, "reason": "Dated audit narrative."}])
+        self.historical_register([{"path": path, "count": 2, "reason": "Dated audit narrative."}])
         exemptions = []
         self.assertEqual(guard.scan(self.root, exemptions=exemptions), [])
         observed = [item for item in exemptions if item.get("classification") == "HISTORICAL"]
@@ -880,30 +883,72 @@ class CommandSurfaceTests(unittest.TestCase):
         self.assertEqual({item["field"].split(":")[0] for item in observed}, {"retired-command", "missing-path"})
         self.assertTrue(all(item["reason"] == "Dated audit narrative." for item in observed))
 
-    def test_historical_record_heading_keeps_earlier_current_text_checked(self):
+    def test_new_reference_in_a_declared_record_fails_the_exact_count(self):
+        path = ".claude/plans/old/plan.md"
+        self.write(path, "Use /li:qa.\n")
+        self.historical_register([{"path": path, "count": 1, "reason": "Completed plan."}])
+        self.assertEqual(guard.scan(self.root), [])
+        self.write(path, "Use /li:qa.\n## Current\nRun /li:office-hours now.\n")
+        findings = guard.scan(self.root)
+        self.assertIn("historical-record-count", {item.code for item in findings})
+        self.assertEqual({(item.path, item.code) for item in findings if item.path == path},
+                         {(path, "retired-command")})
+        self.write(path, "Use /li:verify.\n")
+        self.assertEqual(self.register_codes(), {"historical-record-count"})
+
+    def test_historical_record_headings_bound_the_declared_range(self):
         path = ".claude/plans/todo.md"
-        self.write(path, "# Index\nRun /li:qa now.\n## Historical\nUse /li:qa.\n")
-        self.historical_register([{"path": path, "reason": "Completed ledger.", "from_heading": "## Historical"}])
+        self.write(path, "# Index\nRun /li:qa now.\n## Historical\nUse /li:qa.\n## Current\nRun /li:qa.\n")
+        self.historical_register([{"path": path, "count": 1, "reason": "Completed ledger.",
+                                   "from_heading": "## Historical", "to_heading": "## Current"}])
         findings = guard.scan(self.root)
         self.assertEqual([(item.path, item.line, item.code) for item in findings],
-                         [(path, 2, "retired-command")])
+                         [(path, 2, "retired-command"), (path, 6, "retired-command")])
 
-    def test_historical_register_is_refused_for_current_surfaces_and_stale_entries(self):
-        for path in ("docs/old.md", ".claude/decisions/0001-record.md", ".claude/memory/lessons.md",
-                     "CHANGELOG.md", "skills/review/references/old.md"):
-            with self.subTest(path=path):
-                self.write(path, "Use /li:qa.\n")
-                self.historical_register([{"path": path, "reason": "Not a record tree."}])
-                codes = {item.code for item in guard.scan(self.root)}
+    def test_historical_register_refuses_malformed_or_misplaced_entries(self):
+        record = ".claude/plans/old/record.md"
+        self.write(record, "# Record\nUse /li:qa.\n")
+        cases = {
+            "current docs": {"path": "docs/old.md", "count": 1, "reason": "Not a record tree."},
+            "decision": {"path": ".claude/decisions/0001-record.md", "count": 1, "reason": "Current."},
+            "memory": {"path": ".claude/memory/lessons.md", "count": 1, "reason": "Current."},
+            "traversal": {"path": ".claude/plans/../../docs/old.md", "count": 1, "reason": "Escape."},
+            "backslash": {"path": ".claude\\plans\\old\\record.md", "count": 1, "reason": "Escape."},
+            "absolute": {"path": "/.claude/plans/old/record.md", "count": 1, "reason": "Escape."},
+            "missing file": {"path": ".claude/plans/old/absent.md", "count": 1, "reason": "Gone."},
+            "extra key": {"path": record, "count": 1, "reason": "Old.", "lines": [1]},
+            "no reason": {"path": record, "count": 1, "reason": " "},
+            "no count": {"path": record, "reason": "Old."},
+            "zero count": {"path": record, "count": 0, "reason": "Old."},
+            "absent heading": {"path": record, "count": 1, "reason": "Old.", "from_heading": "## Missing"},
+        }
+        for name in ("current docs", "decision", "memory"):
+            self.write(cases[name]["path"], "Use /li:qa.\n")
+        for name, entry in cases.items():
+            with self.subTest(case=name):
+                self.historical_register([entry])
+                codes = self.register_codes()
                 self.assertIn("historical-register", codes)
                 self.assertIn("retired-command", codes)
-                (self.root / path).unlink()
-        path = ".claude/plans/old/clean.md"
-        self.write(path, "Use /li:verify.\n")
-        self.historical_register([{"path": path, "reason": "Nothing historical remains."}])
-        self.assertEqual({item.code for item in guard.scan(self.root)}, {"stale-historical-record"})
-        self.historical_register([{"path": path}])
-        self.assertIn("historical-register", {item.code for item in guard.scan(self.root)})
+        with self.subTest(case="duplicate"):
+            entry = {"path": record, "count": 1, "reason": "Old."}
+            self.historical_register([entry, entry])
+            self.assertIn("historical-register", self.register_codes())
+        with self.subTest(case="duplicated heading"):
+            self.write(record, "# Record\n## Old\nUse /li:qa.\n## Old\n")
+            self.historical_register([{"path": record, "count": 1, "reason": "Old.", "from_heading": "## Old"}])
+            self.assertIn("historical-register", self.register_codes())
+        with self.subTest(case="schema"):
+            self.write(guard.HISTORICAL_REGISTER, json.dumps({"schema_version": 2, "records": []}))
+            self.assertIn("historical-register", self.register_codes())
+
+    def test_declared_record_keeps_non_reference_codes_strict(self):
+        path = ".claude/plans/old/record.md"
+        self.write(path, "Use /li:qa.\n")
+        self.historical_register([{"path": path, "count": 1, "reason": "Old."}])
+        with mock.patch.object(guard, "routing_lines", side_effect=ValueError("synthetic parse failure")):
+            codes = self.register_codes()
+        self.assertIn("observation-parse-error", codes)
 
     def test_bound_payload_is_preserved_but_surrounding_narrative_is_checked(self):
         path = ".claude/plans/old/report.md"
