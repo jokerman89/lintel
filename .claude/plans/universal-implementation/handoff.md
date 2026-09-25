@@ -721,8 +721,12 @@ portability defects; the coordinator repaired them (ADR-0032, "First hosted run"
 `document-pdf` fails, because it needs an existing `pypdf` that the repository does not declare,
 and the operator refused to add it (L-054). Next:
 
-1. Preserve A23.5's Phase 3 addendum from `8df81ac8`, byte-exact, together with the records-only
-   commit, and push both once.
+1. Done (2026-09-25): A23.5's Phase 3 addendum from `8df81ac8` is preserved byte-exact
+   (`reviews/A23.5-phase3-ci-ed91ef4.md`, SHA-256 `bb42e3e0…72669c49`). It superseded a first
+   version (`13801bf3…9b02ee82`) whose job count repeated the coordinator's own miscount ("20"
+   instead of 19 green jobs). It passes the delta and binds run `36065850657`. The records-only
+   head that preserves it needs its own CI run, reproducing the same 19 green jobs with each
+   integration-3 failing only on `document-pdf` (A5-27).
 2. Close A23.4 only after the operator decides on `pypdf` and a CI run is green. Do not exclude or
    weaken `document-pdf`.
 3. After the merge, send "Removing legacy skills and agents" (`f4584b03`) the explicit CI-ready

@@ -654,6 +654,7 @@ all-client acceptance, the strict full suite or initiative release clearance.
   - [x] A23.4.g3 Preflight accepted shared helper dependencies before consumer writes and exercise installed-source failures.
   - [x] A23.4.p1 Independently accept the shared native-path core/extraction and its source closure.
   - [x] A23.4.p2 Verify accepted P10 direct consumers and full default installed init/check/recovery at original paths.
+  - [ ] A23.4.ci Pass the strict suite in the delivery PR's CI on Linux, macOS and Windows, with no failed, skipped or partial entry.
 - [x] A23.5 Obtain independent final spec/quality review of exact integrated content.
 Acceptance: evidence category and limitations are explicit; existing useful tests remain.
 A23.5 closure (2026-09-24): the independent final reviewer `8df81ac8` (claude-opus-5.5) returns SPEC PASS,
@@ -661,6 +662,11 @@ then whole QUALITY PASS with six records-only P3s, on the exact frozen head `ad5
 `main` `9575aaac` (`reviews/A23.5-final-ad529eb.md`). The merged content is 755 files: 539 product
 and 216 record paths. Every product byte traces to a reviewed unit or to a coordinator change it
 reviewed, and nothing is lost relative to `main`. A23.4 closes with PR #93's strict CI.
+Its Phase 3 addendum (2026-09-25, `reviews/A23.5-phase3-ci-ed91ef4.md`) covers the CI-repair delta
+`2ab1f25d..ed91ef4f`: SPEC PASS, then QUALITY PASS with five P3 advisories (A5-26 to A5-30) and a
+resolved correction of its own Phase 2 (A5-25). It binds CI run `36065850657`, whose test merge has
+exactly `ed91ef4f`'s tree. The binding carries to a later head only if that head changes nothing
+outside `.claude/` and its own CI run reproduces the outcome.
 A23.4.g3 and A23.4.p2 closure (2026-09-24): the complete kit passes 50/50 on the integrated tree
 (`fin2-kit`, `3d7f1284`).
 - For g3, its data-driven missing-resource refusals cover every declared resource, reconciliations 6
@@ -672,9 +678,10 @@ A23.4 CI status (2026-09-25): the first hosted strict run (`36054668106` on `2ab
 three systems. The failures were portability defects that the local Windows evidence could not show.
 The coordinator's repair is recorded in ADR-0032 ("First hosted run") and in `reports/final.md`
 ("Delivery CI"). On `ed91ef4f`, run `36065850657` passes 149 of 150 entries on each system, with no
-skipped or partial result. The one failing entry is `document-pdf`: it needs an existing `pypdf`,
-which the repository does not declare and the operator refused to add (L-054). A23.4 stays open
-until the operator decides on that dependency.
+skipped or partial result; 19 of its 22 jobs pass. The one failing entry is `document-pdf`: it needs
+an existing `pypdf`, which the repository does not declare and the operator refused to add (L-054).
+A23.4 stays open until the operator decides on that dependency. The open leaf `A23.4.ci` keeps this
+gate visible in the product reader's remaining-work view (A5-28).
 A23.1 and A23.2 closure (2026-09-24): the P14 A23 unit (`96bd5bab`, repair `88c92377`, report
 `d13455de`) passes `6310f7ad`'s complete SPEC and first whole QUALITY after the F1/F2 repair
 (`reviews/P14-a23-recheck-88c9237.md`), and is integrated in `8f418e68`.

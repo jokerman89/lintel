@@ -21,7 +21,8 @@ is **108/113**, not full release readiness. Open: A15.1–.4 (denied routes) and
 blocked only on the `document-pdf` pypdf decision, L-054). A23.5 closed on 2026-09-24.
 **Delivery, 2026-09-25:** PR #93 (draft, `jokerman89`) head `ed91ef4f`; CI run `36065850657`
 passes 149/150 entries per system, and only `document-pdf` fails (undeclared `pypdf`). The A23.5
-Phase 3 addendum for the CI-repair delta is requested from `8df81ac8`. The session
+Phase 3 addendum passes the CI-repair delta and binds that run (`reviews/A23.5-phase3-ci-ed91ef4.md`).
+The open leaf `A23.4.ci` keeps the gate visible to the product reader. The session
 "Removing legacy skills and agents" (`f4584b03`) waits for an explicit CI-ready handoff after
 the merge. A08, A10, A13, A14.5 and A23.1–.3 closed on 2026-09-24. A19.3, A19.4 and A20.4 close from P13's accepted
 fan-in (`cd877232`). A18.3 and A18.4 close from P13's accepted

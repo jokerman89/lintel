@@ -1,10 +1,11 @@
 # Universal initiative final report (P15)
 
-**Status:** A23.5 passes on the frozen head `ad529ebc` (`reviews/A23.5-final-ad529eb.md`). The branch is
-published as draft PR #93 by `jokerman89`. Its first hosted strict runs found portability defects,
-which the coordinator repaired (see "Delivery CI"). On the repaired head, every CI job passes except
-the three that run `document-pdf`. That entry needs a `pypdf` the repository does not declare, and
-adding it is an open operator decision.
+**Status:** A23.5 passes on the frozen head `ad529ebc` (`reviews/A23.5-final-ad529eb.md`). Its Phase 3
+addendum passes the CI-repair delta up to `ed91ef4f` and binds CI to it
+(`reviews/A23.5-phase3-ci-ed91ef4.md`). The branch is published as draft PR #93 by `jokerman89`. Its
+first hosted strict runs found portability defects, which the coordinator repaired (see "Delivery
+CI"). On the repaired head, every CI job passes except the three that run `document-pdf`. That entry
+needs a `pypdf` the repository does not declare, and adding it is an open operator decision.
 
 ## Delivery identity
 
@@ -109,7 +110,7 @@ These are reviewed at A23.5, not by a package review:
       script and style regions that close on newer `HTMLParser` releases (`8c9893f9`);
     - fixture portability (`497863de`, `9d23accc`, `53383406`);
     - lessons L-054 and L-055 (`c5667a7e`, `ed91ef4f`).
-    A23.5's Phase 3 addendum reviews this delta.
+    A23.5's Phase 3 addendum passes this delta (`reviews/A23.5-phase3-ci-ed91ef4.md`).
 - **The `main` merges** (`fe9e6284`, and at the freeze any later presentation-only PRs), which
   resolve the README conflict.
 - **Version `0.11.0` and its CHANGELOG entry** (`99443cf8`, `3ea42d70`).
@@ -173,6 +174,15 @@ These are reviewed at A23.5, not by a package review:
   - QI-3: the node-absent fallback of `hooks-registration-safe.sh:41` misreads escaped quotes.
   - The A23 unit's Q1: `universal-a23.py` runs a whole P09 test module through `runpy`.
   - P13's N1: the installed-consumer entries are a large share of a Windows CI shard.
+  - A23.5 Phase 3 (`reviews/A23.5-phase3-ci-ed91ef4.md`):
+    - A5-26: the Windows default-home test clears its 260-character threshold by only 2 characters
+      under hosted `D:\a\_temp\s\t`.
+    - A5-27: records are test inputs, so a records-only head needs its own CI run.
+    - A5-28: the reader's remaining-work view omitted A23.4 while all its leaves were checked.
+      This is resolved in records by the open leaf `A23.4.ci`.
+    - A5-29: `lib/envelope-requirements.txt:1` understates what needs PyYAML.
+    - A5-30: `copilot-kit`'s default-caller test requires `USERPROFILE` on POSIX.
+    The reviewer's own A5-25, a P2 correction of its Phase 2, is resolved by `261efeae`.
 - **A14.5 restore.** 24 lock entries carry SHA-1 integrity only, because the feed supplies only a
   shasum. The tarballs arrive through Azure DevOps' first-party CDN redirects, and the signed
   delivery URLs are never copied into reports.
@@ -219,8 +229,9 @@ exercises it, and it was validated statically and in the A23.5 review. The entri
 - The P14 A23 unit: `8a74d548`.
 - A14.5: the static page (`562f0386`) and the app (`9d23f2ff`).
 - The P14 A23 unit's first review (`fb17f69f`, SPEC FAIL, repaired) and its recheck.
-- A23.5: the Phase 1 notes (`9c6f65a4`), the Phase 1b notes (`edd2f556`) and the Phase 2 final
-  review (`reviews/A23.5-final-ad529eb.md`).
+- A23.5: the Phase 1 notes (`9c6f65a4`), the Phase 1b notes (`edd2f556`), the Phase 2 final
+  review (`reviews/A23.5-final-ad529eb.md`) and the Phase 3 CI addendum
+  (`reviews/A23.5-phase3-ci-ed91ef4.md`, SHA-256 `bb42e3e0…72669c49`).
 
 **Not run locally:** the strict `--require-all` suite, because jq is denied (L-046); Linux and macOS;
 Python 3.9 and 3.12; and Windows PowerShell 5.1. The delivery PR's CI supplies the strict suite on
@@ -235,7 +246,7 @@ and summaries are under the coordinator's session files, `ci93/`.
 |---|---|---|
 | `36054668106` | `2ab1f25d` | The first hosted strict run. It failed on all three systems; ADR-0032's "First hosted run" section records the causes. |
 | `36063322462` | `c5667a7e` | The repair batch. It confirmed most of the repair and exposed two further classes: macOS `mktemp` ignores `TMPDIR`, and a quiet skip was counted as partial. It was superseded when those fixes were pushed. |
-| `36065850657` | `ed91ef4f` | 20 of 23 jobs pass, and each system passes 149 of its 150 entries. The only failing entry is `document-pdf`, in integration shard 3 on each system (27 errors, `No module named 'pypdf'`). |
+| `36065850657` | `ed91ef4f` | 19 of 22 jobs pass: the syntax job, and unit-1, unit-2, integration-1, -2, -4 and `other` on each system. Each system passes 149 of its 150 entries. The only failing entry is `document-pdf`, in integration shard 3 on each system (27 errors, `No module named 'pypdf'`). |
 
 On `ed91ef4f`, every other entry passes with no skipped or partial result. That includes
 `copilot-kit`, `universal-a23` and every `platform: windows-only` method on hosted Windows. Off
@@ -244,3 +255,9 @@ all pass: repository verification, stock Bash 3.2 installation on macOS, `check-
 Windows, and the catalog, instructions, adapter and wiki checks. The jq-dependent assertions X2,
 C-5 and C-7 and the platform row X3 therefore now run strictly. A23.4 stays open only for the
 `pypdf` decision above.
+
+A23.5's Phase 3 addendum binds this run to the reviewed content: every job checked out the test merge
+`4382b3c8`, whose parents are `9575aaac` and `ed91ef4f` and whose tree equals `ed91ef4f`'s. The longest
+job, Windows integration-3, which holds the Copilot kit, took 93.6 of its 300 minutes. A later head
+inherits the binding only if it changes nothing outside `.claude/` and its own CI run reproduces this
+outcome: the same 19 green jobs, each integration-3 failing only on `document-pdf`.
