@@ -1,0 +1,448 @@
+{
+  "artifact_type": "Finite set05 context renewals and narrowed-span semantic decisions",
+  "status": "COMPLETE_SEMANTIC_CLASSIFICATION_ONLY",
+  "candidate": "e0f89432477f1d3c343c54007be42899f7da87ae",
+  "input": {
+    "path": "C:\\Users\\jokerman\\.copilot\\session-state\\e9c20b62-f877-4242-82cd-b5002d452da8\\files\\c-span-review-set-05.json",
+    "bytes": 24771,
+    "sha256": "da29bc4cfe03e4d5ab330359f4860e7d1542eaf119521eabc82bd3f9f850ec10"
+  },
+  "reviewer": {
+    "id": "cleanup-quality-reviewer",
+    "app_project_session": "6c39f786-01dd-4a99-b120-f286df376300",
+    "tool_artifact_session": "8b0c4a2f-3e1b-4c3d-8237-74d02ff29710"
+  },
+  "result": {
+    "ACCEPT": 17,
+    "REJECT": 0,
+    "NEEDS_NARROWING": 0,
+    "CONTEXT_RENEWAL": 14,
+    "NEW_NARROWED": 3,
+    "source_files": 4,
+    "selected_raw_utf8_bytes": 28244,
+    "scope": "Explicit new-context assessment of14 previously accepted exact declarations plus3 genuinely narrower proposal windows.",
+    "activation_release_qa_routing_or_mechanism_clearance": false,
+    "runtime_or_counterexample_execution": "NOT_RUN"
+  },
+  "conditions": [
+    "Each ACCEPT is limited to its exact path, unique ordered markers, complete raw span, declaration digest and the new full-source context at e0f89432.",
+    "The14 unchanged declarations do not inherit their old full-source approval automatically; this artifact explicitly renews their semantic context, and the actual acceptance/evidence binding must be renewed accordingly.",
+    "The old source_evidence references remain original provenance; they do not substitute for the new source_context_sha256 in the actual admission mechanism.",
+    "The12 set03 declarations were previously accepted but are not registered in this commit; the two original-report declarations are existing set02 registrations whose source context changed.",
+    "The three new TA/DA/TQ windows start after the maintained targeted-route rows324,394,562, respectively, and grant no masking permission to those rows or their surrounding current invocation/recovery guidance.",
+    "The DA window was read in full, including its proposed agents, hooks and checkpoint states; these are original design-state descriptions, not current operator execution or observed migration success.",
+    "The P13 renewals remain pinned original comparison/alias layers; the separately changed current F-key legend and current row view are not approved by this renewal.",
+    "The W4 coordinator completion note is outside the four renewed record windows; classifying the original worker inventory does not verify that new completion claim or any native PDF behavior.",
+    "No previous rejected whole window is reversed: only the three new exact declarations exclude the current-route portions that invalidated set03-spans093-095.",
+    "No raw-byte/EOL normalization, dual hash, widened marker, parser expansion, whole-file waiver or blanket historical approval is authorized.",
+    "Historical counts, source comparisons, old alias behavior and quoted outcomes remain observations, not current names, current execution, license clearance, profile authority or P05/QA/release acceptance.",
+    "Only unanimous exact approvals may later be admitted through the existing mechanism with actual evidence and attributable review observations; no mask, registry or canonical review record was written here."
+  ],
+  "decisions": [
+    {
+      "id": "set03-span-021",
+      "decision": "ACCEPT",
+      "reason": "The unchanged DEFINE row still belongs to the measured original harness phase inventory, while the separately edited current delegation and checkpoint navigation remain outside it.",
+      "kind": "CONTEXT_RENEWAL",
+      "path": ".claude/engineering/audits/lintel-state-of-the-harness.md",
+      "declaration_digest": "0ac3360c21e210559963adad7f10cf91fda9fa530e1b3b1e00c2e688aa88ce57",
+      "sha256": "b1c48772cf85447813ae87bc3ab9dd970d31befc6768443389c3ad203da77133",
+      "source_context_sha256": "12855ef870b0878e6cb01e1f29d295af0a7c8d05ab46bf14c8758c14ac36769b",
+      "raw_bytes": 205,
+      "source_lines_inclusive": [
+        112,
+        112
+      ]
+    },
+    {
+      "id": "set03-span-022",
+      "decision": "ACCEPT",
+      "reason": "The unchanged fragment explicitly records the original composite inventory and still ends before the current navigation block.",
+      "kind": "CONTEXT_RENEWAL",
+      "path": ".claude/engineering/audits/lintel-state-of-the-harness.md",
+      "declaration_digest": "15c030a263ead371c65bbe48b4740b78fb3963ab5e15831fd403c55c9d9a11eb",
+      "sha256": "d4203ad78c089bc03b497d3ef617a3a613b75354e005718569ddfe08d2dc2520",
+      "source_context_sha256": "12855ef870b0878e6cb01e1f29d295af0a7c8d05ab46bf14c8758c14ac36769b",
+      "raw_bytes": 73,
+      "source_lines_inclusive": [
+        123,
+        124
+      ]
+    },
+    {
+      "id": "set03-span-023",
+      "decision": "ACCEPT",
+      "reason": "The complete unchanged cluster inventory remains the pinned168-skill source-era census and was not reframed by the separate current-navigation corrections.",
+      "kind": "CONTEXT_RENEWAL",
+      "path": ".claude/engineering/audits/lintel-state-of-the-harness.md",
+      "declaration_digest": "2c7c71b2cb680e813c662c82f0b91e64aa1632fe6f80c1354e2f826db3146a51",
+      "sha256": "54661c89ee5be4f5821c8bc3e6e4af8ade8264cea268cb24225ab10edea86dfb",
+      "source_context_sha256": "12855ef870b0878e6cb01e1f29d295af0a7c8d05ab46bf14c8758c14ac36769b",
+      "raw_bytes": 2596,
+      "source_lines_inclusive": [
+        140,
+        171
+      ]
+    },
+    {
+      "id": "set03-span-027",
+      "decision": "ACCEPT",
+      "reason": "The unchanged inconsistency section still reports the original audit's naming and rubric observations rather than prescribing current routes.",
+      "kind": "CONTEXT_RENEWAL",
+      "path": ".claude/engineering/audits/lintel-state-of-the-harness.md",
+      "declaration_digest": "eebce2f0b7a8508c739100be2611872ea6659a84deff03a9cb7ce4a9a56fb758",
+      "sha256": "a363f9f2816112182e27152d17859f9c00e41e30c788df7b43e1f11dd164f408",
+      "source_context_sha256": "12855ef870b0878e6cb01e1f29d295af0a7c8d05ab46bf14c8758c14ac36769b",
+      "raw_bytes": 925,
+      "source_lines_inclusive": [
+        449,
+        462
+      ]
+    },
+    {
+      "id": "set03-span-028",
+      "decision": "ACCEPT",
+      "reason": "The unchanged rough-readiness list retains the original snapshot's defects and residual watcher finding without becoming present execution guidance.",
+      "kind": "CONTEXT_RENEWAL",
+      "path": ".claude/engineering/audits/lintel-state-of-the-harness.md",
+      "declaration_digest": "23f6c97ff543f4c2608c6373f041ddc8bfc06097e920483b0342bde6a8590c10",
+      "sha256": "9edfcee368a8511aca57293a4e43426fd02fcb7e508a86f4ac4883ad3856aa5c",
+      "source_context_sha256": "12855ef870b0878e6cb01e1f29d295af0a7c8d05ab46bf14c8758c14ac36769b",
+      "raw_bytes": 1267,
+      "source_lines_inclusive": [
+        476,
+        490
+      ]
+    },
+    {
+      "id": "set03-span-096",
+      "decision": "ACCEPT",
+      "reason": "The criteria are still explicitly retained original targets rather than current API promises, and the actual current pack/envelope guidance remains before the span.",
+      "kind": "CONTEXT_RENEWAL",
+      "path": ".claude/engineering/design-archive/lintel-v4.0-reframe-design.md",
+      "declaration_digest": "62cfe99e0cc4e386c9771ba5e1599f21c11dce73a15ec87935012be1f786ca47",
+      "sha256": "83a3bbedc6ad9f58e5b23798d701f8333f84dea52049721967369f0d2c471da2",
+      "source_context_sha256": "eeabed426b8d001a9836308991995098d1badf789cc64fbe404535f6e3a069e3",
+      "raw_bytes": 1705,
+      "source_lines_inclusive": [
+        942,
+        956
+      ]
+    },
+    {
+      "id": "set03-span-097",
+      "decision": "ACCEPT",
+      "reason": "The original S0-P1.3 review finding and proposed scope reduction remain unchanged observations despite the newly unique proposal labels elsewhere.",
+      "kind": "CONTEXT_RENEWAL",
+      "path": ".claude/engineering/design-archive/lintel-v4.0-reframe-design.md",
+      "declaration_digest": "1aa1bb3be7a8eb42e95e0fb819137bab6173f5a79fbbf8296fe6dafb5c63970d",
+      "sha256": "93efa85435934a87a9255cd3b7bc011fe87d4af524c588768237a3eaeee490dc",
+      "source_context_sha256": "eeabed426b8d001a9836308991995098d1badf789cc64fbe404535f6e3a069e3",
+      "raw_bytes": 410,
+      "source_lines_inclusive": [
+        1085,
+        1089
+      ]
+    },
+    {
+      "id": "set03-span-098",
+      "decision": "ACCEPT",
+      "reason": "The two original review findings still record overlap and untestable-criterion concerns with proposed fixes, not current module or pack invocation instructions.",
+      "kind": "CONTEXT_RENEWAL",
+      "path": ".claude/engineering/design-archive/lintel-v4.0-reframe-design.md",
+      "declaration_digest": "85402fa70bbd71005b74ed0f1ecd09e74e286c862539252b30c9dfb9265f1314",
+      "sha256": "53f4942b46370585f49d2b76c9bc5e4bfd400adc6fc9f1e93c54b9e3d895e670",
+      "source_context_sha256": "eeabed426b8d001a9836308991995098d1badf789cc64fbe404535f6e3a069e3",
+      "raw_bytes": 819,
+      "source_lines_inclusive": [
+        1094,
+        1102
+      ]
+    },
+    {
+      "id": "set03-span-113",
+      "decision": "ACCEPT",
+      "reason": "The unchanged fragment records W4's original in-scope joins, while the later coordinator join-status amendment is separate from this worker observation.",
+      "kind": "CONTEXT_RENEWAL",
+      "path": ".claude/plans/legacy-cleanup/swarm/reports/W4.md",
+      "declaration_digest": "1ea3ebf261e0e2b2e2be9c0263f15d9ee66b0d0e20a8481dfb97f7a45da9c975",
+      "sha256": "aaf6ee3cdc176150f1cfe9feebeebde5f114e10cfa191869f7bf57dcb8b9822f",
+      "source_context_sha256": "eb4732e56eb625fd72d28296e64c6473cf9a20ddf8a255b6fb71ad41ea78d0ef",
+      "raw_bytes": 76,
+      "source_lines_inclusive": [
+        781,
+        781
+      ]
+    },
+    {
+      "id": "set03-span-114",
+      "decision": "ACCEPT",
+      "reason": "The unchanged three-path list remains the worker's original temporary bridge inventory and does not promise those resources are available now.",
+      "kind": "CONTEXT_RENEWAL",
+      "path": ".claude/plans/legacy-cleanup/swarm/reports/W4.md",
+      "declaration_digest": "698d0bd8bf26f2255ac768ca848f6d08a803437f45353274633f308723874514",
+      "sha256": "acb4a07080b18b712e3ea7f3149bd868e6d215e4d8475aafc67f11970dfdf290",
+      "source_context_sha256": "eb4732e56eb625fd72d28296e64c6473cf9a20ddf8a255b6fb71ad41ea78d0ef",
+      "raw_bytes": 128,
+      "source_lines_inclusive": [
+        818,
+        820
+      ]
+    },
+    {
+      "id": "set03-span-116",
+      "decision": "ACCEPT",
+      "reason": "The unchanged fragment records original foreign-lane ownership, and its revised adjacent prose now explicitly describes what those owners were to do.",
+      "kind": "CONTEXT_RENEWAL",
+      "path": ".claude/plans/legacy-cleanup/swarm/reports/W4.md",
+      "declaration_digest": "83353391191985bf0a72c64b2cc5b762cbc9d84832eb8958b5c155ba74f8e92e",
+      "sha256": "8b16d77b469b29eef67a87b59505295d226eb9b8824fee84d50a4061ce33f6da",
+      "source_context_sha256": "eb4732e56eb625fd72d28296e64c6473cf9a20ddf8a255b6fb71ad41ea78d0ef",
+      "raw_bytes": 79,
+      "source_lines_inclusive": [
+        930,
+        930
+      ]
+    },
+    {
+      "id": "set03-span-117",
+      "decision": "ACCEPT",
+      "reason": "The unchanged ownership-list continuation remains an original worker handoff observation rather than a new current workflow selection.",
+      "kind": "CONTEXT_RENEWAL",
+      "path": ".claude/plans/legacy-cleanup/swarm/reports/W4.md",
+      "declaration_digest": "82faa06532fc2e88740f92a146d584c50c166b874b750b4086cd9f6c5a748bb1",
+      "sha256": "c6b837fa98b85de5198bce161c3036ba8ec8288b80d746c285f4ddb7223192b2",
+      "source_context_sha256": "eb4732e56eb625fd72d28296e64c6473cf9a20ddf8a255b6fb71ad41ea78d0ef",
+      "raw_bytes": 72,
+      "source_lines_inclusive": [
+        933,
+        933
+      ]
+    },
+    {
+      "id": "original-report-1",
+      "decision": "ACCEPT",
+      "reason": "The complete unchanged216-324 section remains the exact204ea725-to-42abfcba comparison and associated original evidence, distinct from the later current F-key legend.",
+      "kind": "CONTEXT_RENEWAL",
+      "path": ".claude/plans/universal-implementation/reports/P13-skills-preservation.md",
+      "declaration_digest": "44fcf7671a9fbf0019c19d988831decd99d42211b13ae10aec458aed03ba1365",
+      "sha256": "9583978d30843804689c3b92226e9988a4ee52b0cdc08a40058172d1465a40c0",
+      "source_context_sha256": "71fa6b98fa8d6e91ec38f38ac62aa5285785c8d7c55328fb940219dcd67f2b6d",
+      "raw_bytes": 12949,
+      "source_lines_inclusive": [
+        216,
+        324
+      ]
+    },
+    {
+      "id": "original-report-2",
+      "decision": "ACCEPT",
+      "reason": "The unchanged alias/argument table remains part of the original pinned preservation layer superseded by the later current view, not an active alias registry or dispatch contract.",
+      "kind": "CONTEXT_RENEWAL",
+      "path": ".claude/plans/universal-implementation/reports/P13-skills-preservation.md",
+      "declaration_digest": "ad5531edf3094e1fbc5df33701dd9b199e4aba2e15dabc6e7f78c804dd493815",
+      "sha256": "3303d2a91be9c8eb05beb2b2b49f6bd2137e1a1b4b3350f679eea4b93b1df895",
+      "source_context_sha256": "71fa6b98fa8d6e91ec38f38ac62aa5285785c8d7c55328fb940219dcd67f2b6d",
+      "raw_bytes": 3580,
+      "source_lines_inclusive": [
+        325,
+        346
+      ]
+    },
+    {
+      "id": "set05-span-001",
+      "decision": "ACCEPT",
+      "reason": "The newly bounded TA block contains only original sub-skill, candidate-agent and hook proposals, excluding the current targeted-route row and subsequent operational checkpoints.",
+      "kind": "NEW_NARROWED",
+      "path": ".claude/engineering/design-archive/lintel-v4.0-reframe-design.md",
+      "declaration_digest": "24431fffbe5ba9636c1d3ece431eaf765ace7d2b47af031977b146c5d2359b15",
+      "sha256": "77441146a237dfe88bbb27a07a02c9f163a1e8ab91404b18d46ac085f51b4acd",
+      "source_context_sha256": "eeabed426b8d001a9836308991995098d1badf789cc64fbe404535f6e3a069e3",
+      "raw_bytes": 1377,
+      "source_lines_inclusive": [
+        326,
+        349
+      ]
+    },
+    {
+      "id": "set05-span-002",
+      "decision": "ACCEPT",
+      "reason": "The complete narrowed DA block describes original proposed sub-skills, agents, hooks and desired checkpoint states, excluding the current DA route and following recovery instruction.",
+      "kind": "NEW_NARROWED",
+      "path": ".claude/engineering/design-archive/lintel-v4.0-reframe-design.md",
+      "declaration_digest": "7d3814cdabf39e6b5fb964dce532bcb662a8bbf18e8b7e8b089e9597a7eee47b",
+      "sha256": "76bf0528bac9de51867eebe538992be5181a795242c65b3a987e365c451f781b",
+      "source_context_sha256": "eeabed426b8d001a9836308991995098d1badf789cc64fbe404535f6e3a069e3",
+      "raw_bytes": 1450,
+      "source_lines_inclusive": [
+        396,
+        425
+      ]
+    },
+    {
+      "id": "set05-span-003",
+      "decision": "ACCEPT",
+      "reason": "The unique TQ proposal block contains only original non-callable sub-skill identifiers and descriptions, with the live targeted route outside its bounds.",
+      "kind": "NEW_NARROWED",
+      "path": ".claude/engineering/design-archive/lintel-v4.0-reframe-design.md",
+      "declaration_digest": "0e940c805be04bde77c4ad586070e024ab3b8c62bed6e4eeb6903c74c501946d",
+      "sha256": "d07e57293ddc68db898328eebef3d79d1d113de3ee05680a8e04917f982c5fc7",
+      "source_context_sha256": "eeabed426b8d001a9836308991995098d1badf789cc64fbe404535f6e3a069e3",
+      "raw_bytes": 533,
+      "source_lines_inclusive": [
+        564,
+        573
+      ]
+    }
+  ],
+  "verification": {
+    "actual_checks": [
+      "Verified exact input24771 bytes/SHA-256 and full immutable e0f89432 candidate identity.",
+      "Verified17 unique exact declarations, raw hashes, four complete-source hashes, all28244 UTF-8 bytes and unique ordered nonnested prose boundary/range identities.",
+      "Compared every renewal's declaration and raw hash with this reviewer's original accepted set03 or set02 decision; every new full-source hash is different.",
+      "Read the complete four-file delta from5f086471 to e0f89432 and each affected document's relevant current framing, all17 complete windows and adjacent current instructions.",
+      "Read both complete renewed P13 sections and the separate changed current legend, rather than inferring historical status from headings.",
+      "Confirmed the two P13 registrations retain their declaration fields; the12 approved set03 renewal IDs are not registered at this commit.",
+      "Confirmed three new IDs are not already registered, do not overlap any existing same-file registration and exclude current targeted-route rows324/394/562.",
+      "An initial registry-membership probe incorrectly assumed all14 renewals were registered and stopped; the corrected check preserves the actual two-registered/twelve-approved distinction without a source change."
+    ],
+    "not_run": [
+      "guard census",
+      "mechanism validation",
+      "runtime",
+      "native browser or documents",
+      "hosted CI",
+      "counterexamples",
+      "profile or P05/QA persistence"
+    ],
+    "limitation": "Semantic context renewal and raw identity checks are not a general quality review of the new navigation fixes or convergence candidate."
+  },
+  "preservation": {
+    "only_new_output": "c-span-semantic-decisions-05.json in this reviewer's session files",
+    "work_map": ".claude/plans/legacy-cleanup/work.json",
+    "package_id": "INTEGRATE",
+    "original_leaf_count": 58,
+    "completed_leaves": [],
+    "source_edits_by_reviewer": false,
+    "prior_artifacts_edited": false,
+    "new_actors": false,
+    "runtime_profile_or_canonical_p05_writes": false,
+    "checkout_mutations_commits_pushes_or_publication": false,
+    "verified_prior_artifacts": [
+      {
+        "name": "legacy-cleanup-integrated-quality-review-a7a1df33.md",
+        "bytes": 31485,
+        "sha256": "54615423fc63810db9d64476f14fdc48f1f8b1482abcb25389b62bb6c09ad78a",
+        "outcome": "SOURCE QUALITY FAIL; P0 0, P1 0, P2 6, P3 1. Not reopened or revised by this semantic task."
+      },
+      {
+        "name": "c-span-semantic-decisions-01.json",
+        "bytes": 31881,
+        "sha256": "71838a8e8bbbf7a0ffd7f11d3a856f946921b4a3b605d4f389df3185d59112fd",
+        "outcome": "Superseded CRLF registration history only; no approval transfer."
+      },
+      {
+        "name": "c-span-semantic-decisions-01-lf.json",
+        "bytes": 31160,
+        "sha256": "b6cb3e61d15c1e3d666c0ce9a3031f18512ebdbcde4852ba7be4422b1bdfd75a",
+        "outcome": "17 ACCEPT, unchanged and not repeated here."
+      },
+      {
+        "name": "c-span-semantic-decisions-02-lf.json",
+        "bytes": 18913,
+        "sha256": "3dc35ad36977975266eee64952ef04f6b3475f5ce9a8503ccd6e539a4fd0c228",
+        "outcome": "2 ACCEPT, 3 REJECT, unchanged. The P08 authored-path, P11 frozen-path/next-gate and W1 changed-files rejections are not reversed."
+      },
+      {
+        "name": "c-span-semantic-decisions-final-lf.json",
+        "bytes": 93307,
+        "sha256": "49849ac92449ac2fde2fbd8816807a830ff63ee895ae42a04226957e988a6c45"
+      },
+      {
+        "name": "legacy-cleanup-changed-quality-review-ba603072.md",
+        "bytes": 26159,
+        "sha256": "6f16593bb4da6b03d3b03c7fb9436c90a235f52b4359c28794d2f8bf72d3bd57"
+      },
+      {
+        "name": "c-framing-refinement-ack-v2.json",
+        "bytes": 16753,
+        "sha256": "a263b5104b39616eb84d405f4b50127083c83a0777785617920557eb912ed756"
+      },
+      {
+        "name": "c-span-semantic-decisions-03.json",
+        "bytes": 141969,
+        "sha256": "9a8030b76b0289f3bc285de69a93e27daa71af2a7d93d304d4096d1837561354"
+      },
+      {
+        "name": "c-span-semantic-decisions-03-with-addendum.json",
+        "bytes": 161688,
+        "sha256": "e1f52cf6a197218a14c37c06375547e416a689d09c4f824d71036062cb7c3f04"
+      },
+      {
+        "name": "c-span-semantic-decisions-04.json",
+        "bytes": 15235,
+        "sha256": "d4e589f4f87ac1a743d65fe3b0b759a3aefcf78d61209c825c678f352a64e216"
+      }
+    ],
+    "original_leaf_ids": [
+      "3.1.a",
+      "3.2.a",
+      "3.3.a",
+      "3.4.a",
+      "4.1.a",
+      "4.3.a",
+      "4.4.a",
+      "2.1.a",
+      "5.1.a",
+      "5.2.a",
+      "5.10.a",
+      "5.12.a",
+      "5.4.a",
+      "5.5.a",
+      "5.7.a",
+      "5.7.c",
+      "5.8.a",
+      "6.1.a",
+      "6.2.a",
+      "6.3.a",
+      "6.4.a",
+      "5.6.a",
+      "7.1.a",
+      "7.2.a",
+      "7.3.a",
+      "7.4.a",
+      "7.5.a",
+      "0.3.a",
+      "0.3.b",
+      "0.3.c",
+      "1.5.a",
+      "1.6.a",
+      "1.6.b",
+      "1.7.b",
+      "7.1.c",
+      "1.8.a",
+      "2.2.a",
+      "2.3.a",
+      "2.4.a",
+      "8.8.a",
+      "9.3.a",
+      "0.1.b",
+      "0.2.c",
+      "4.2.a",
+      "5.7.e",
+      "8.2.a",
+      "8.4.a",
+      "8.5.a",
+      "8.7.a",
+      "9.1.a",
+      "9.2.a",
+      "10.1.a",
+      "10.2.a",
+      "10.4.a",
+      "10.5.a",
+      "10.5.b",
+      "10.6.a",
+      "10.8.a"
+    ]
+  }
+}
