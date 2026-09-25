@@ -3,12 +3,16 @@ name: Catalog
 on:
   push:
     branches: [main]
+  # No branch filter, matching ci.yml (ADR-0037): stacked pull requests also get the drift signal.
   pull_request:
-    branches: [main]
   workflow_dispatch:
 
 permissions:
   contents: read
+
+concurrency:
+  group: catalog-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   check:
