@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # component: mars-contract-tests
-# implements: draft MARS decision (.claude/plans/mars/adr-draft.md)
+# implements: ADR-0034
 # intent: .claude/plans/mars/spec.md
 # constraints: hermetic temp dirs; no sessions, models or network
-# last_intent_review: 2026-09-24
+# last_intent_review: 2026-09-25
 """Behavior tests for MARS roster, offer gate and panel ownership/close state."""
 import copy
 import json
@@ -317,6 +317,158 @@ class HeaderTests(PanelTests.__bases__[0]):
         self.panel["origin"]["requested_by"] = "operator\nverdict: pass"
         with self.assertRaises(mc.ContractError):
             mc.build_request(self.panel, "r1", 1, "body", self.schema)
+
+
+class BindingTests(unittest.TestCase):
+    """Method meta, input snapshot, overlap refusal, profile reference and inspection (R09/R11/R12)."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.repo = Path(self.tmp.name) / "repo"
+        (self.repo / "src").mkdir(parents=True)
+        (self.repo / "src" / "util.py").write_text("def f():\n    return 1\n", encoding="utf-8")
+        for command in (["init", "-q"], ["config", "user.email", "t@example.invalid"],
+                        ["config", "user.name", "t"], ["add", "."], ["commit", "-q", "-m", "base"]):
+            subprocess.run(["git", "-C", str(self.repo), *command], check=True, capture_output=True)
+        self.run_dir = self.repo / ".claude" / "runtime" / "mars" / "b1"
+        self.inputs, self.records = self.run_dir / "inputs", self.run_dir / "records"
+        self.inputs.mkdir(parents=True)
+        self.brief = self.inputs / "brief.md"
+        self.brief.write_text("frozen brief\n", encoding="utf-8")
+        self.panel = self.records / "panel.json"
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def cli(self, *args):
+        return subprocess.run([sys.executable, str(CLI), *map(str, args)], capture_output=True, text=True,
+                              cwd=str(self.repo))
+
+    def init(self, *extra):
+        return self.cli("panel", "init", "--panel", self.panel, "--id", "b1", "--owner", OWNER,
+                        "--brief", self.brief, "--consent", "turn", "--kind", "implementation",
+                        "--requested-by", "operator", "--trigger", "explicit", "--caller", "standalone",
+                        "--surface", "copilot-app", "--repository", "o/r", "--branch", "b",
+                        "--commit", "c" * 40, "--repo", self.repo, *extra)
+
+    def test_repository_root_selection_is_refused_before_any_write(self):
+        result = self.init("--select", ".")
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("output_overlaps_selection", result.stderr)
+        self.assertFalse(self.panel.exists())
+        self.assertFalse((self.inputs / "snapshot.json").exists())
+
+    def test_bound_input_verifies_then_detects_change_and_blocks_dispatch(self):
+        made = self.init("--select", "src")
+        self.assertEqual(made.returncode, 0, made.stderr)
+        self.assertTrue((self.inputs / "snapshot.json").is_file())
+        self.assertEqual(self.cli("panel", "add", "--panel", self.panel, "--slot", "r1", "--model", "m-a",
+                                  "--transport", "subagent").returncode, 0)
+        verified = self.cli("panel", "verify-input", "--panel", self.panel)
+        self.assertEqual(verified.returncode, 0, verified.stderr)
+        self.assertEqual(json.loads(verified.stdout)["status"], "verified")
+        request = self.records / "r1.request.md"
+        brief = self.cli("panel", "brief", "--panel", self.panel, "--slot", "r1", "--round", "1",
+                         "--body", self.brief, "--out", request)
+        self.assertEqual(brief.returncode, 0, brief.stderr)
+        self.assertIn("snapshot_digest:", request.read_text(encoding="utf-8"))
+        (self.repo / "src" / "util.py").write_text("def f():\n    return 2\n", encoding="utf-8")
+        changed = self.cli("panel", "verify-input", "--panel", self.panel)
+        self.assertEqual(changed.returncode, 3)
+        self.assertEqual(json.loads(changed.stdout)["changed_paths"], ["src/util.py"])
+        again = self.cli("panel", "brief", "--panel", self.panel, "--slot", "r1", "--round", "1",
+                         "--body", self.brief, "--out", self.records / "again.md")
+        self.assertEqual(again.returncode, 2)
+        self.assertIn("input_changed", again.stderr)
+
+    def test_round_one_body_must_be_the_frozen_brief(self):
+        self.assertEqual(self.init().returncode, 0)
+        self.cli("panel", "add", "--panel", self.panel, "--slot", "r1", "--model", "m-a", "--transport", "subagent")
+        other = self.inputs / "other.md"
+        other.write_text("a different body\n", encoding="utf-8")
+        result = self.cli("panel", "brief", "--panel", self.panel, "--slot", "r1", "--round", "1",
+                          "--body", other, "--out", self.records / "r1.md")
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("frozen brief", result.stderr)
+
+    def test_profile_reference_is_recorded_validated_or_explicitly_absent(self):
+        self.assertEqual(self.init().returncode, 0)
+        self.assertEqual(mc.read_json(self.panel)["profile_status"], "none-selected")
+        self.panel.unlink()
+        reference = {"schema_version": 1, "context_id": "ctx-1", "generation": 1,
+                     "digest": "sha256:" + "a" * 64, "name": "_default", "version": "1.0.0"}
+        ref_path = Path(self.tmp.name) / "ref.json"
+        ref_path.write_text(json.dumps(reference), encoding="utf-8")
+        self.assertEqual(self.init("--profile-ref", ref_path).returncode, 0)
+        self.assertEqual(mc.read_json(self.panel)["profile"], reference)
+        self.panel.unlink()
+        ref_path.write_text(json.dumps({**reference, "generation": 0}), encoding="utf-8")
+        self.assertEqual(self.init("--profile-ref", ref_path).returncode, 2)
+
+    def test_method_meta_links_questions_and_coverage(self):
+        sys.path.insert(0, str(ROOT / "lib"))
+        import review_method as rm
+        catalog = rm.load_catalog()
+        questions = rm.select_questions(catalog, "implementation", [], "quality")
+        body = rm.render_body(kind="implementation", stage="quality", subject_ref="src/util.py",
+                              subject_text="def f(): return 1", questions=questions)
+        self.brief.write_text(body, encoding="utf-8", newline="\n")
+        meta = rm.method_meta(kind="implementation", stage="quality", subject_ref="src/util.py", body=body,
+                              questions=questions)
+        meta_path = self.inputs / "method.json"
+        meta_path.write_text(json.dumps({**meta, "brief_sha256": "0" * 64}), encoding="utf-8")
+        self.assertEqual(self.init("--method-meta", meta_path).returncode, 2)
+        meta_path.write_text(json.dumps(meta), encoding="utf-8")
+        self.assertEqual(self.init("--method-meta", meta_path).returncode, 0, "valid meta")
+        panel = mc.read_json(self.panel)
+        self.assertEqual(panel["subject"]["method"]["questions"], meta["questions"])
+        mc.add_participant(panel, "r1", "m-a", "subagent", None, None, None)
+        schema = mc.load_schema()
+        rows = "\n".join(f"| {q} | checked | traced src/util.py:1 |" for q in meta["questions"][1:])
+        text = report_text(panel, "r1", 1, verdict="pass", p1=0) + \
+            f"\n## Standing questions\n| SQ | Status | Evidence |\n|---|---|---|\n{rows}\n"
+        path = self.records / "r1-round1.md"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(text, encoding="utf-8")
+        mc.record_round(panel, "r1", 1, path, schema=schema)
+        entry = panel["participants"][0]["rounds"][0]
+        self.assertFalse(entry["coverage"]["complete"])
+        self.assertEqual(entry["coverage"]["incomplete"], [meta["questions"][0]])
+        self.assertFalse(mc.summary(panel)["coverage_complete"])
+        header = mc.validate_header("synthesis", mc.parse_header(
+            mc.synthesis_header(panel, schema, mc.load_defaults(), [0, 0, 1]), "synthesis"), schema)
+        self.assertEqual(header["outcome"], "incomplete")
+        self.assertEqual(header["coverage_complete"], "false")
+
+    def test_outcome_and_inspection_follow_the_shared_rule_and_never_clear(self):
+        self.assertEqual(self.init("--select", "src").returncode, 0)
+        panel = mc.read_json(self.panel)
+        schema, defaults = mc.load_schema(), mc.load_defaults()
+        for slot, model in (("r1", "m-a"), ("r2", "m-b")):
+            mc.add_participant(panel, slot, model, "subagent", None, None, None)
+            path = self.records / f"{slot}.md"
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(report_text(panel, slot, 1), encoding="utf-8")
+            mc.record_round(panel, slot, 1, path, schema=schema)
+        verified = mc.verify_input(panel)
+        for counts, outcome in (([1, 0, 0], "fail"), ([0, 2, 0], "changes-requested"), ([0, 0, 3], "pass")):
+            header = mc.synthesis_header(panel, schema, defaults, counts, verified)
+            fields = mc.validate_header("synthesis", mc.parse_header(header, "synthesis"), schema)
+            self.assertEqual(fields["outcome"], outcome)
+            self.assertEqual(fields["input"], "verified")
+        synthesis = mc.synthesis_header(panel, schema, defaults, [0, 0, 3], verified) + "\n## Agreed\n"
+        record = mc.inspection_record(panel, synthesis, schema, verified)
+        self.assertEqual((record["purpose"], record["release_clearance"]), ("inspection", False))
+        self.assertEqual(record["snapshot"]["result_digest"], panel["subject"]["input"]["snapshot_digest"])
+        self.assertEqual(record["outcome"], "pass")
+        (self.repo / "src" / "util.py").write_text("changed\n", encoding="utf-8")
+        changed = mc.verify_input(panel)
+        self.assertEqual(changed["status"], "changed")
+        with self.assertRaises(mc.ContractError):
+            mc.inspection_record(panel, synthesis, schema, changed)
+        stale = mc.validate_header("synthesis", mc.parse_header(
+            mc.synthesis_header(panel, schema, defaults, [0, 0, 0], changed), "synthesis"), schema)
+        self.assertEqual((stale["input"], stale["outcome"]), ("changed", "incomplete"))
 
 
 class CliTests(unittest.TestCase):

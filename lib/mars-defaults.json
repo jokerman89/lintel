@@ -27,7 +27,7 @@
   "protocol": {
     "max_rounds": 2,
     "challenge_round": "when-contested",
-    "report_word_limit": 350,
+    "report_word_limit": 900,
     "blind_first_pass": true
   },
   "transport": {

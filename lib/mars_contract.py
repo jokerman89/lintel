@@ -1,19 +1,21 @@
 # component: mars-contract
-# implements: ADR-0026, ADR-0028 (draft MARS decision in .claude/plans/mars/adr-draft.md)
+# implements: ADR-0034, ADR-0028, ADR-0026
 # intent: .claude/plans/mars/spec.md
 # constraints: stdlib only; data selection never dispatches models, grants permission or clears release
-# last_intent_review: 2026-09-24
+# last_intent_review: 2026-09-25
 """Roster, offer and panel-state rules for Multi-Model Adversarial Review & Screening (MARS)."""
 from __future__ import annotations
 
 import datetime
 import hashlib
+import importlib
 import json
 import os
 import re
+import sys
 import tempfile
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 DEFAULTS_PATH = Path(__file__).with_name("mars-defaults.json")
 SCHEMA_PATH = Path(__file__).with_name("mars-schema.json")
@@ -356,11 +358,19 @@ def build_request(panel: Dict[str, Any], slot: str, round_no: int, body: str,
         "requested_model": part["requested_model"],
         "reasoning_effort": part.get("requested_effort") or "host-default",
         "context_tier": part.get("requested_context_tier") or "host-default",
-        "word_limit": panel.get("word_limit", 350), "reply_via": "final-response", "protocol": PROTOCOL_REF,
+        "word_limit": panel.get("word_limit", 900), "reply_via": "final-response", "protocol": PROTOCOL_REF,
     }
     for key in ("cycle_id", "work_map"):
         if origin.get(key):
             fields[key] = origin[key]
+    method = panel["subject"].get("method")
+    if method:
+        fields.update(stage=method["stage"], method=method["version"], questions=method["questions"] or "none")
+        if method["tags"]:
+            fields["tags"] = method["tags"]
+    bound = panel["subject"].get("input")
+    if bound:
+        fields["snapshot_digest"] = bound["snapshot_digest"]
     if lens:
         fields["lens"] = lens
     header = render_header("request", fields, schema)
@@ -383,14 +393,20 @@ def record_round(panel: Dict[str, Any], slot: str, round_no: int, result: Path,
                              "header": "legacy" if legacy else "none"}
     if status == "received" and not legacy:
         require(schema is not None, "a header schema is required to record a received report")
-        fields = validate_header("report", parse_header(Path(result).read_text(encoding="utf-8-sig"), "report"),
-                                 schema)
+        text = Path(result).read_text(encoding="utf-8-sig")
+        fields = validate_header("report", parse_header(text, "report"), schema)
         for key, expected in (("panel", panel["panel_id"]), ("slot", slot), ("round", str(round_no)),
                               ("brief_sha256", panel["subject"]["brief_sha256"])):
             require(fields[key] == expected, f"report header {key}={fields[key]!r} does not match {expected!r}")
         entry.update(header="v1", verdict=fields["verdict"], confidence=int(fields["confidence"]),
                      counts={"p1": int(fields["p1"]), "p2": int(fields["p2"]), "p3": int(fields["p3"])},
                      self_reported_model=fields["self_reported_model"])
+        method = panel["subject"].get("method")
+        if method and fields.get("stage"):
+            require(fields["stage"] == method["stage"], f"report stage {fields['stage']!r} differs from the packet")
+        if method and round_no == 1:
+            coverage = _lib_module("review_method").check_coverage(text, method["questions"])
+            entry["coverage"] = {"complete": coverage["complete"], "incomplete": coverage["incomplete"]}
     part["rounds"].append(entry)
     part["state"] = "reported" if status == "received" else "failed"
     validate_panel(panel)
@@ -437,15 +453,25 @@ def summary(panel: Dict[str, Any]) -> Dict[str, Any]:
     rounds_run = max((len(p["rounds"]) for p in parts), default=0)
     complete = bool(parts) and all(
         len(p["rounds"]) == rounds_run and all(r["status"] == "received" for r in p["rounds"]) for p in parts)
-    return {"panel_id": panel["panel_id"], "participants": len(parts), "reported": len(reported),
-            "operational_status": "complete" if complete else "partial",
-            "requested_distinct_models": len(requested), "verified_distinct_models": len(observed),
-            "multi_model_verified": complete and len(observed) >= 2 and len(observed) == len(reported),
-            "calls": sum(len(p["rounds"]) for p in parts), "release_clearance": False}
+    result = {"panel_id": panel["panel_id"], "participants": len(parts), "reported": len(reported),
+              "operational_status": "complete" if complete else "partial",
+              "requested_distinct_models": len(requested), "verified_distinct_models": len(observed),
+              "multi_model_verified": complete and len(observed) >= 2 and len(observed) == len(reported),
+              "calls": sum(len(p["rounds"]) for p in parts), "release_clearance": False}
+    if panel["subject"].get("method"):
+        first = [r for p in parts for r in p["rounds"] if r["round"] == 1 and r["status"] == "received"]
+        result["coverage_complete"] = bool(first) and all(r.get("coverage", {}).get("complete") for r in first)
+    return result
 
 
-def synthesis_header(panel: Dict[str, Any], schema: Dict[str, Any], defaults: Dict[str, Any]) -> str:
-    """Header for the coordinator's synthesis report; the body is written by the coordinator."""
+def synthesis_header(panel: Dict[str, Any], schema: Dict[str, Any], defaults: Dict[str, Any],
+                     adjudicated: Optional[Sequence[int]] = None,
+                     verification: Optional[Dict[str, Any]] = None) -> str:
+    """Header for the coordinator's synthesis report; the body is written by the coordinator.
+
+    With adjudicated P1/P2/P3 counts, `outcome` uses the Review Method's single decision rule,
+    so a panel and a single review reach the same result for the same findings.
+    """
     facts = summary(panel)
     origin = _origin(panel)
     parts = panel["participants"]
@@ -475,4 +501,146 @@ def synthesis_header(panel: Dict[str, Any], schema: Dict[str, Any], defaults: Di
         fields["downgrades"] = downgrades
     if failed:
         fields["failed_slots"] = failed
+    method = panel["subject"].get("method")
+    if method:
+        fields.update(stage=method["stage"], questions=method["questions"] or "none",
+                      coverage_complete=facts["coverage_complete"])
+    bound = panel["subject"].get("input")
+    if bound:
+        fields["snapshot_digest"] = bound["snapshot_digest"]
+        fields["input"] = (verification or {}).get("status", "unverified")
+    profile = panel.get("profile")
+    fields["profile"] = f"{profile['name']}@{profile['version']}#g{profile['generation']}" if profile else "none"
+    if adjudicated is not None:
+        require(len(adjudicated) == 3 and all(isinstance(n, int) and n >= 0 for n in adjudicated),
+                "adjudicated counts are three non-negative integers: p1,p2,p3")
+        complete = facts["operational_status"] == "complete" and facts.get("coverage_complete", True) \
+            and fields.get("input", "verified") == "verified"
+        fields["adjudicated"] = f"p1={adjudicated[0]} p2={adjudicated[1]} p3={adjudicated[2]}"
+        fields["outcome"] = _lib_module("review_method").stage_outcome(adjudicated[0], adjudicated[1], complete)
     return render_header("synthesis", fields, schema)
+
+
+# ── Content binding: method meta, input snapshot, profile reference, inspection ────────────
+
+def _lib_module(name: str):
+    """Load a sibling lib module lazily; a MARS run without binding needs none of them."""
+    lib = str(Path(__file__).resolve().parent)
+    if lib not in sys.path:
+        sys.path.insert(0, lib)
+    return importlib.import_module(name)
+
+
+def attach_method(panel: Dict[str, Any], meta: Dict[str, Any]) -> None:
+    """Link the frozen brief to the Review Method packet it was rendered from."""
+    rm = _lib_module("review_method")
+    try:
+        rm.validate_meta(meta)
+    except rm.MethodError as error:
+        raise ContractError(str(error)) from error
+    require(meta["brief_sha256"] == panel["subject"]["brief_sha256"], "method meta describes a different brief")
+    require(meta["subject_kind"] == panel["subject"]["kind"], "method meta subject kind differs from --kind")
+    panel["subject"]["method"] = {"version": meta["method_version"], "stage": meta["stage"],
+                                  "questions": list(meta["questions"]), "tags": list(meta["tags"]),
+                                  "acceptance": list(meta["acceptance"])}
+
+
+def attach_profile(panel: Dict[str, Any], repo: Path, reference: Optional[Path] = None) -> None:
+    """Record the selected profile reference (P07), or say explicitly that none is selected."""
+    path = Path(reference) if reference else Path(repo) / ".claude" / "runtime" / "profiles" / "selected.json"
+    if not path.is_file():
+        require(reference is None, f"profile reference not found: {path}")
+        panel["profile"], panel["profile_status"] = None, "none-selected"
+        return
+    profile_context = _lib_module("profile_context")
+    try:
+        panel["profile"] = profile_context.validate_profile_reference(read_json(path))
+    except profile_context.ProfileError as error:
+        raise ContractError(f"invalid profile reference: {error}") from error
+    panel["profile_status"] = "selected"
+
+
+def output_overlaps(repo: Path, selection: Sequence[str], outputs: Sequence[Path]) -> List[str]:
+    """Mutable outputs inside (or containing) the selected input would invalidate the snapshot."""
+    root = os.path.normcase(os.path.abspath(repo))
+    hits = []
+    for output in outputs:
+        try:
+            relative = os.path.relpath(os.path.normcase(os.path.abspath(output)), root)
+        except ValueError:
+            continue
+        if relative == os.pardir or relative.startswith(os.pardir + os.sep):
+            continue
+        relative = "" if relative == "." else relative.replace(os.sep, "/")
+        for item in selection:
+            chosen = os.path.normcase(item).replace("\\", "/").strip("/")
+            chosen = "" if chosen in ("", ".") else chosen
+            if not chosen or not relative or relative == chosen or relative.startswith(chosen + "/") \
+                    or chosen.startswith(relative + "/"):
+                hits.append(f"{Path(output).as_posix()} overlaps selection {item!r}")
+    return hits
+
+
+def bind_input(panel: Dict[str, Any], repo: Path, base: str, selection: Sequence[str],
+               snapshot_path: Path, outputs: Sequence[Path]) -> Dict[str, Any]:
+    """Freeze the selected repository content with review_contract.snapshot before any dispatch."""
+    require(bool(selection), "an explicit nonempty selection is required to bind input")
+    hits = output_overlaps(repo, selection, [snapshot_path, *outputs])
+    require(not hits, "output_overlaps_selection: " + "; ".join(hits)
+            + ". Keep MARS records outside the selected input; the selection is not narrowed for you.")
+    require(not Path(snapshot_path).exists(), f"input snapshot already exists (immutable): {snapshot_path}")
+    review_contract = _lib_module("review_contract")
+    try:
+        snapshot = review_contract.snapshot(Path(repo), base=base, selection=list(selection))
+    except review_contract.ContractError as error:
+        raise ContractError(f"input snapshot refused: {error}") from error
+    write_json(Path(snapshot_path), snapshot)
+    panel["subject"]["input"] = {"repo": os.path.abspath(repo), "snapshot_path": Path(snapshot_path).as_posix(),
+                                 "snapshot_digest": snapshot["result_digest"], "base": snapshot["base"],
+                                 "head": snapshot["head"], "selection": snapshot["selection"]}
+    return snapshot
+
+
+def verify_input(panel: Dict[str, Any], repo: Optional[Path] = None) -> Dict[str, Any]:
+    """Re-snapshot the bound selection. Any change means new observations under a new panel."""
+    bound = panel["subject"].get("input")
+    if not bound:
+        return {"status": "unbound"}
+    stored = read_json(Path(bound["snapshot_path"]))
+    require(stored.get("result_digest") == bound["snapshot_digest"], "stored input snapshot was modified")
+    review_contract = _lib_module("review_contract")
+    try:
+        current = review_contract.snapshot(Path(repo or bound["repo"]), base=stored["base"],
+                                           selection=stored["selection"], record_path=stored["record_path"])
+    except review_contract.ContractError as error:
+        return {"status": "changed", "snapshot_digest": bound["snapshot_digest"], "reason": str(error),
+                "changed_paths": []}
+    before = {entry["path"]: entry for entry in stored["entries"]}
+    after = {entry["path"]: entry for entry in current["entries"]}
+    changed = sorted(path for path in set(before) | set(after) if before.get(path) != after.get(path))
+    same = current["result_digest"] == stored["result_digest"] and not changed
+    result = {"status": "verified" if same else "changed", "snapshot_digest": bound["snapshot_digest"],
+              "changed_paths": changed}
+    if not same and not changed:
+        result["reason"] = "HEAD or base resolution changed"
+    return result
+
+
+def inspection_record(panel: Dict[str, Any], synthesis_text: str, schema: Dict[str, Any],
+                      verification: Dict[str, Any]) -> Dict[str, Any]:
+    """Content-bound inspection evidence for REVIEW (purpose: inspection, never clearance)."""
+    require(verification["status"] != "changed", "input_changed: collect observations again under a new panel")
+    header = validate_header("synthesis", parse_header(synthesis_text, "synthesis"), schema)
+    require(header["panel"] == panel["panel_id"] and header["brief_sha256"] == panel["subject"]["brief_sha256"],
+            "synthesis belongs to another panel or brief")
+    bound = panel["subject"].get("input")
+    return {"schema_version": 1, "purpose": "inspection", "source": "mars", "release_clearance": False,
+            "panel_id": panel["panel_id"],
+            "subject": {key: panel["subject"].get(key) for key in ("kind", "ref", "brief_sha256", "method")},
+            "input": verification["status"],
+            "snapshot": read_json(Path(bound["snapshot_path"])) if bound else None,
+            "profile": panel.get("profile"), "summary": summary(panel),
+            "adjudicated": header.get("adjudicated"), "outcome": header.get("outcome"),
+            "synthesis_sha256": hashlib.sha256(synthesis_text.encode("utf-8")).hexdigest(),
+            "reports": [{"slot": p["slot"], "round": r["round"], "status": r["status"], "sha256": r["sha256"]}
+                        for p in panel["participants"] for r in p["rounds"]]}

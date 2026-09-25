@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # component: mars-cli
-# implements: ADR-0028 (draft MARS decision in .claude/plans/mars/adr-draft.md)
+# implements: ADR-0034, ADR-0028
 # intent: .claude/plans/mars/spec.md
-# constraints: stdlib only; never invokes models, sessions or network; writes only the named panel file
-# last_intent_review: 2026-09-24
+# constraints: stdlib only; never invokes models, sessions or network; writes only the named panel/record files
+# last_intent_review: 2026-09-25
 """MARS (Multi-Model Adversarial Review & Screening) data helper.
 
 Subcommands print JSON. Exit 0 = ok/eligible, 3 = valid but not eligible, 2 = invalid input.
@@ -35,8 +35,8 @@ def _git(*args):
 
 
 def origin_from(args):
-    remote = _git("config", "--get", "remote.origin.url") or ""
-    repo = args.repository or (remote.rstrip("/").removesuffix(".git").split("github.com")[-1].lstrip(":/") or None)
+    remote = _git("config", "--get", "remote.origin.url")
+    repo = args.repository or mc._lib_module("review_method").repository_slug(remote)
     return {"requested_by": args.requested_by, "trigger": args.trigger, "caller": args.caller,
             "coordinator_surface": args.surface, "repository": repo,
             "branch": args.branch or _git("branch", "--show-current"),
@@ -78,7 +78,16 @@ def main(argv=None) -> int:
     init.add_argument("--consent", required=True)
     init.add_argument("--kind", default="review")
     init.add_argument("--subject-ref")
+    init.add_argument("--method-meta", type=Path, help="li-review-packet render --meta-out for this brief")
+    init.add_argument("--select", action="append", help="bind this repository path (repeatable)")
+    init.add_argument("--base", default="HEAD", help="snapshot base commit for --select")
+    init.add_argument("--repo", type=Path, default=Path.cwd())
+    init.add_argument("--snapshot", type=Path, help="immutable snapshot path (default: next to the brief)")
+    init.add_argument("--profile-ref", type=Path, help="profile reference (default: selected profile, if any)")
     origin_args(init, True)
+    verify = psub.add_parser("verify-input", help="is the bound selected input unchanged?")
+    verify.add_argument("--panel", type=Path, required=True)
+    verify.add_argument("--repo", type=Path)
     origin = psub.add_parser("origin", help="fill origin on a panel created without it (unset fields only)")
     origin.add_argument("--panel", type=Path, required=True)
     origin.add_argument("--subject-ref")
@@ -124,6 +133,11 @@ def main(argv=None) -> int:
     summ.add_argument("--panel", type=Path, required=True)
     synth = psub.add_parser("synthesis-header", help="mars-synthesis header for the coordinator report")
     synth.add_argument("--panel", type=Path, required=True)
+    synth.add_argument("--adjudicated", help="adjudicated counts p1,p2,p3 -> outcome by the shared rule")
+    inspect = psub.add_parser("inspection", help="content-bound inspection record (release_clearance false)")
+    inspect.add_argument("--panel", type=Path, required=True)
+    inspect.add_argument("--synthesis", type=Path, required=True)
+    inspect.add_argument("--out", type=Path)
 
     args = parser.parse_args(argv)
     try:
@@ -141,10 +155,19 @@ def main(argv=None) -> int:
                 raise mc.ContractError(f"panel already exists: {args.panel}")
             value = mc.new_panel(args.id, args.owner, args.brief, args.consent, defaults, args.kind,
                                  origin_from(args), args.subject_ref)
+            if args.method_meta:
+                mc.attach_method(value, mc.read_json(args.method_meta))
+            mc.attach_profile(value, args.repo, args.profile_ref)
+            if args.select:
+                mc.bind_input(value, args.repo, args.base, args.select,
+                              args.snapshot or args.brief.parent / "snapshot.json", [args.panel.parent])
             mc.write_json(args.panel, value)
             return emit(value)
         value = mc.read_json(args.panel)
         mc.validate_panel(value)
+        if args.action == "verify-input":
+            result = mc.verify_input(value, args.repo)
+            return emit(result, 3 if result["status"] == "changed" else 0)
         if args.action == "origin":
             current = value.setdefault("origin", {key: None for key in mc.ORIGIN_FIELDS})
             for key, new in origin_from(args).items():
@@ -155,14 +178,28 @@ def main(argv=None) -> int:
             value["subject"].setdefault("ref", value["subject"]["brief_path"])
             value.setdefault("word_limit", defaults["protocol"]["report_word_limit"])
         elif args.action == "brief":
+            if args.round == 1:
+                mc.require(mc.sha256_file(args.body) == value["subject"]["brief_sha256"],
+                           "round-1 body differs from the frozen brief; every slot gets the same bytes")
+            checked = mc.verify_input(value)
+            mc.require(checked["status"] != "changed",
+                       "input_changed: the selected input changed; start a new panel with new consent")
             text, fields = mc.build_request(value, args.slot, args.round,
                                             args.body.read_text(encoding="utf-8-sig"), schema, args.lens)
             args.out.parent.mkdir(parents=True, exist_ok=True)
             args.out.write_text(text, encoding="utf-8", newline="\n")
             return emit({"request": args.out.as_posix(), "sha256": mc.sha256_file(args.out), "header": fields})
         elif args.action == "synthesis-header":
-            print(mc.synthesis_header(value, schema, defaults), end="")
+            counts = [int(n) for n in args.adjudicated.split(",")] if args.adjudicated else None
+            print(mc.synthesis_header(value, schema, defaults, counts, mc.verify_input(value)), end="")
             return 0
+        elif args.action == "inspection":
+            record = mc.inspection_record(value, args.synthesis.read_text(encoding="utf-8-sig"), schema,
+                                          mc.verify_input(value))
+            if args.out:
+                mc.require(not args.out.exists(), f"inspection record already exists: {args.out}")
+                mc.write_json(args.out, record)
+            return emit(record)
         elif args.action == "add":
             mc.add_participant(value, args.slot, args.model, args.transport, args.session,
                                args.effort, args.context)
