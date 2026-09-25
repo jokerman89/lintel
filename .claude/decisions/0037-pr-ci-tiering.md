@@ -66,7 +66,7 @@ standard library and runs git read-only. `tests/unit/ci-matrix.sh` tests it.
 - **A documentation-only pull request** runs the suite on Ubuntu alone. It modifies Markdown, HTML,
   text or images anywhere outside the always-sensitive locations above, and adds, deletes or
   renames such files only under `docs/`, `.claude/` or `presentations/`. Modifying an existing
-  `skills/x/SKILL.md` stays on Ubuntu; adding one runs the full matrix.
+  `SKILL.md` under `skills/` stays on Ubuntu; adding one runs the full matrix.
 - **The log.** The `plan` job prints its decision, its reason and every path that caused it, and
   writes the same to the job summary.
 - **Triggers.** `pull_request` has no branch filter in `ci.yml` or `catalog.yml`, so stacked pull
