@@ -1,5 +1,5 @@
 ---
-name: skillify
+name: skill-new
 layer: foundation
 description: Turn a recurring task or pattern into a new Lintel skill — scaffolds SKILL.md from TEMPLATE.
 color: green
@@ -8,7 +8,7 @@ voice: internal
 cli_support: [claude-code, codex]
 ---
 
-# /skillify
+# Skill new
 
 Turn an authorized recurring task or selected `L-NNN` lesson into a useful skill draft,
 using the existing `scaffolding/01-foundation/TEMPLATE-skill.md` from the trusted source.
@@ -21,10 +21,10 @@ spelling `/li:regen-mocks`; do not silently strip or add a prefix.
 
 ## When to use
 
-- A `/learn` entry tagged `skillify-candidate` is mature enough to formalize
+- A `/li:lessons-add` entry tagged `skillify-candidate` is mature enough to formalize
 - A repeating multi-step task has emerged in 3+ sessions
 - Team-shared workflow needs a single command instead of step-by-step prose
-- After a `/retro` flagged a workflow worth standardizing
+- After `/li:capture --retrospective` identified a workflow worth standardizing
 
 ## When NOT to use
 
@@ -35,7 +35,7 @@ spelling `/li:regen-mocks`; do not silently strip or add a prefix.
 ## Inputs
 
 - Required: bare canonical name (kebab-case), one-line description and authorized target directory
-- Optional `--from-lesson <L-NNN>` — read a `/learn` entry by ID, use it as seed
+- Optional `--from-lesson <L-NNN>` — read an existing lesson by ID, use it as seed
 - `--dir <subdir>` — explicit repository-relative draft directory; no implicit personal destination
 - Optional `--voice <tier>` — declared voice tier (default: internal; project/pack constraints still apply)
 - Optional `--cli <list>` — source declarations using the accepted registry; default empty/unknown, not claimed host support
@@ -141,7 +141,7 @@ turn it into this per-draft check. If the helper is unavailable, leave validatio
 ## Report format
 
 ```
-Skillify: regen-mocks
+Skill draft: regen-mocks
 
 Path: <authorized target>/drafts/regen-mocks/SKILL.md
 Voice: internal
@@ -176,7 +176,7 @@ Adoption/discovery is a separately authorized adapter action, not performed here
 
 **From a lesson:**
 ```
-> /li:skillify --name regen-mocks --from-lesson L-042 --dir drafts/regen-mocks
+> /li:skill-new --name regen-mocks --from-lesson L-042 --dir drafts/regen-mocks
 [When that selected lesson exists and the target path is authorized]
 Draft: drafts/regen-mocks/SKILL.md
 Inputs: existing mock schema and explicit output directory.
@@ -188,17 +188,17 @@ Validation: report the actual exact-file check; method not executed by this exam
 
 **Inline:**
 ```
-> /li:skillify --name standup-brief --voice mixed --dir drafts/standup-brief
+> /li:skill-new --name standup-brief --voice mixed --dir drafts/standup-brief
 Description: "Summarize explicitly supplied commits and approved issue data."
 Draft preserves input citations and separates completed work from blockers.
 No network query or customer-data export follows from authoring the draft.
-> /li:skillify --name match --dir drafts/match
+> /li:skill-new --name match --dir drafts/match
 COLLISION: skill:skill-router; keep the retained alias. No file written.
 ```
 
 ## See also
 
 - `TEMPLATE-skill.md` — the scaffold this skill uses
-- `/learn` — produces skillify-candidate lessons
-- `/health` — broader diagnostics when explicitly selected, not a substitute for exact-file validation
-- `/retro` — surfaces skillify candidates from session activity
+- `/li:lessons-add` — records reusable patterns; old `skillify-candidate` metadata remains readable
+- `/li:doctor` — broader diagnostics, not a substitute for exact-file validation
+- `/li:capture --retrospective` — identifies skill candidates from actual session activity

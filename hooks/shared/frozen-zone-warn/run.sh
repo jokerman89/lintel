@@ -1,37 +1,41 @@
 #!/usr/bin/env bash
-# frozen-zone-warn — Lintel warn-only hook
-# Warns when Edit/Write targets a frozen-zone path.
+# component: frozen-zone-warning
+# implements: ADR-0005, ADR-0028
+# intent: .claude/plans/legacy-cleanup/spec.md
+# constraints: optional warn-only hook; never changes permission or freeze state
+# last_intent_review: 2026-09-25
 
-set -euo pipefail
+set -uo pipefail
 
-source "$(dirname "${BASH_SOURCE[0]}")/../_input.sh"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)" || exit 0
+source "$ROOT/hooks/shared/_input.sh" || exit 0
 TARGET_PATH="$(hook_input file_path "${1:-}")"
 [ -z "$TARGET_PATH" ] && exit 0
 
-LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
-mkdir -p "$LINTEL_HOME/audit"
+source "$ROOT/lib/paths.sh" || exit 0
+REPO="$(lintel_repo_root)" || exit 0
+[ -n "$REPO" ] || exit 0
 
 # Unified audit writer (hooks/shared/<name>/ → repo-root → bin/). Idempotent source.
-command -v audit_log >/dev/null 2>&1 || source "$(dirname "${BASH_SOURCE[0]}")/../../../bin/_audit.sh"
+command -v audit_log >/dev/null 2>&1 || source "$ROOT/bin/_audit.sh" || exit 0
 
 # Collect frozen patterns from session + project CLAUDE.md
-SESSION_ID="${LINTEL_SESSION_ID:-default}"
-SESSION_FREEZE="$LINTEL_HOME/freeze/${SESSION_ID}.yaml"
-PROJECT_CLAUDE_MD="$(pwd)/CLAUDE.md"
+SESSION_ID="${LINTEL_SESSION_ID:-${CLAUDE_SESSION_ID:-${LINTEL_CYCLE_ID:-}}}"
+PROJECT_CLAUDE_MD="$REPO/CLAUDE.md"
 
 session_match=""
 project_match=""
 
-# Check session freeze (simple grep — full YAML parser would be better)
-if [ -f "$SESSION_FREEZE" ]; then
-  while IFS= read -r line; do
-    path=$(echo "$line" | sed -n 's/^[ ]*-[ ]*path:[ ]*//p' | tr -d '\"')
-    [ -z "$path" ] && continue
-    if [[ "$TARGET_PATH" == "$path"* ]]; then
-      session_match="$path"
-      break
-    fi
-  done < "$SESSION_FREEZE"
+# Read the same state grammar as the producer; failure is unknown scope, not an empty list.
+if [ -n "$SESSION_ID" ]; then
+  python_cmd="${LINTEL_PYTHON:-python3}"
+  if ! session_match=$("$python_cmd" -B "$ROOT/skills/code-freeze/scripts/freeze.py" \
+      --repo "$REPO" --state-dir "$(lintel_state_dir)" --session "$SESSION_ID" \
+      --legacy-file "$LINTEL_HOME/freeze/$SESSION_ID.yaml" --check "$TARGET_PATH"); then
+    echo "WARN [Lintel hook]: session freeze scope could not be read; no enforcement is claimed."
+    session_match=""
+  fi
+  session_match="${session_match%%$'\n'*}"
 fi
 
 # Check project CLAUDE.md "Frozen zones" section (heuristic)
@@ -70,7 +74,11 @@ if [ -n "$session_match" ] || [ -n "$project_match" ]; then
   fi
   audit_log "hooks" "frozen_zone_warn" "hook=frozen-zone-warn" "tier=warn" "frozen_path=$matched" "edit_target=$TARGET_PATH" "source=$source"
   echo "WARN [Lintel hook]: editing $TARGET_PATH which is in frozen zone ($matched, source: $source)"
-  echo "WARN: Use /li:code-unfreeze if intentional, or consider whether this edit is correct. (warn-only.)"
+  if [ "$source" = session-freeze ]; then
+    echo "WARN: Inspect /li:code-freeze --list; use --lift only for an authorized scope change. (warn-only.)"
+  else
+    echo "WARN: A project frozen-zone rule needs its own explicit exception; runtime --lift cannot override it."
+  fi
 fi
 
 exit 0

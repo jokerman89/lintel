@@ -1,14 +1,14 @@
 ---
-name: context-save
+name: pause
 layer: foundation
 description: Use before the context window fills up or before clearing the session to save the current state to a checkpoint file. Reach for it when a session is getting heavy and you want to preserve where you are so a later session can pick up exactly here.
 color: blue
 tools: Read, Write, Bash, Grep, Glob
 voice: internal
-cli_support: [claude-code]
+cli_support: [claude-code, codex, copilot]
 ---
 
-# /context-save
+# Pause
 
 Save the current session's load-bearing state to a checkpoint file so a fresh session can resume cold. Use **before** context bloat hits productivity, OR when handing off to a teammate, OR when ending a session mid-task.
 
@@ -34,7 +34,9 @@ Save the current session's load-bearing state to a checkpoint file so a fresh se
   - Active TODOs (this skill's own TodoWrite state if available, else `.claude/plans/todo.md`)
   - Last 3 user turns (operator pastes them if not introspectable)
 
-- **Optional argument:** a short label describing the in-flight task (used as filename suffix, passed to `context_save_path` as `[label]`). `--label` covers the named-snapshot use case — the former standalone snapshot skill is folded into this one (its old name routes here via `config/aliases.yaml`).
+- **Optional argument:** a short label describing the in-flight task, either positional or
+  `--label <name>`. Pass the selected value to `context_save_path`; reject conflicting labels.
+  The command name changes, not the checkpoint grammar, storage roots or helper API.
 
 ## Workflow
 
@@ -46,7 +48,7 @@ Save the current session's load-bearing state to a checkpoint file so a fresh se
    path=$(context_save_path "${label:-}") || exit 1
    ```
 
-   `context_save_path` reserves an empty file at `.claude/runtime/sessions/<branch>/<YYYYMMDD-HHMMSS>-r<repository-key>-<slug>[-<label>]-context-save.md` and creates the directory. It refuses unsafe directories and chooses a collision suffix instead of overwriting. The key identifies the canonical repository path, including the shared legacy directory. The filename ends `-context-save.md` so restore/warm readers match; empty reservations are not discoverable checkpoints.
+   `context_save_path` reserves an empty file at `.claude/runtime/sessions/<branch>/<YYYYMMDD-HHMMSS>-r<repository-key>-<slug>[-<label>]-context-save.md` and creates the directory. It refuses unsafe directories and chooses a collision suffix instead of overwriting. The key identifies the canonical repository path, including the shared legacy directory. Keep the `-context-save.md` suffix: it is persisted data shared by discovery, resume and warming, not a retired command. Empty reservations are not discoverable checkpoints.
 3. Gather:
    - **What the task is** — one-line description (operator-provided or inferred from recent turns).
    - **What got done** — bulleted from todo-list completed items + recent commit messages on this branch.
@@ -106,7 +108,8 @@ Save the current session's load-bearing state to a checkpoint file so a fresh se
 
 ## Resume command
 
-To restore this session: `/context-restore <checkpoint-path>` OR paste this file into a fresh session.
+To read this checkpoint in a fresh session: `/li:resume --from <checkpoint-path>`.
+Keep the selected work map, original task IDs and verified profile reference unchanged.
 ```
 
 5. Confirm the write succeeded and is nonempty, then run `context_checkpoint "$path"` to
@@ -120,7 +123,7 @@ To restore this session: `/context-restore <checkpoint-path>` OR paste this file
 ✓ Checkpoint saved
   Path: <full path>
   Size: <bytes>
-  Resume: /context-restore <path>
+  Resume: /li:resume --from <path>
 ```
 
 ## Edge cases
@@ -152,23 +155,24 @@ This skill writes a checkpoint outside the committed tree (to the gitignored `.c
 
 **Mid-task save with label:**
 ```
-> /context-save phase-2-skills-batch-1
+> /li:pause phase-2-skills-batch-1
 ✓ Checkpoint saved
   Path: .claude/runtime/sessions/main/20260527-153022-lintel-phase-2-skills-batch-1-context-save.md
-  Resume: /context-restore .claude/runtime/sessions/main/20260527-153022-lintel-phase-2-skills-batch-1-context-save.md
+  Resume: /li:resume --from .claude/runtime/sessions/main/20260527-153022-lintel-phase-2-skills-batch-1-context-save.md
 ```
 
 **No label:**
 ```
-> /context-save
+> /li:pause
 ✓ Checkpoint saved
   Path: .claude/runtime/sessions/main/20260527-153455-lintel-context-save.md
 ```
 
 ## See also
 
-- `/context-restore` — read a checkpoint into a fresh session
-- `/li:resume` — **paired with this skill**: resume discovers these checkpoints (newest-first via `context_latest`) and, when no cycle ledger exists, offers `/li:context-restore <path>` instead of misdirecting to a fresh cycle
+- `/li:resume --from <path>` — read an owned checkpoint into a fresh session
+- `/li:resume` — discovers checkpoints through `context_latest` without letting local
+  history override an explicitly selected work map or committed active work
 - `/clean` — manual self-maintenance trigger (offers to call this first)
 - Layer 4 `li-token-watcher` hook — surfaces this skill when token thresholds hit
 

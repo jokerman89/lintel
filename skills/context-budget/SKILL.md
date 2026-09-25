@@ -1,7 +1,6 @@
 ---
 name: context-budget
 layer: foundation
-v1_alias: [li-context-tokenwatch]
 description: Show observed context capacity and usage where available, clearly labeled input estimates otherwise; --watch compares available observations with local warning thresholds.
 color: cyan
 tools: Read, Bash, Grep
@@ -80,7 +79,7 @@ to the shared helper; it does not pass those skill-only flags to `context_budget
 4. With `--quiet`, suppress only a known below-threshold result. Still report unknown/error.
    In CI, report red/unknown as non-success if this check is required; zero observations
    are not a verified pass. This skill is not a background watcher or a registered hook.
-5. Recommend bounded retrieval, `/li:context-save` and a fresh session where useful.
+5. Recommend bounded retrieval, `/li:pause` and a fresh session where useful.
    Only suggest a host compaction control when that exact control is available and its
    result can be observed. `/clean` or disk archival alone cannot reclaim model context.
 

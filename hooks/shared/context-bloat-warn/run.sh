@@ -45,12 +45,12 @@ diff=$(( now_call - last_warn ))
 # Decide tier
 if [ "$tokens" -ge "$HARD_TOKEN" ] || [ "$calls" -ge "$HARD_CALLS" ]; then
   echo "WARN [Lintel context-bloat]: HARD threshold crossed (tokens=$tokens/$HARD_TOKEN, calls=$calls/$HARD_CALLS)"
-  echo "WARN: Run /context-save now; resume in fresh session. Quality degrades past this point."
+  echo "WARN: Run /li:pause now; read the checkpoint with /li:resume --from in a fresh session."
   mkdir -p "$(dirname "$RATE_FILE")"
   echo "$now_call" > "$RATE_FILE"
 elif [ "$tokens" -ge "$SOFT_TOKEN" ] || [ "$calls" -ge "$SOFT_CALLS" ]; then
   echo "WARN [Lintel context-bloat]: soft threshold crossed (tokens=$tokens/$SOFT_TOKEN, calls=$calls/$SOFT_CALLS)"
-  echo "WARN: Consider /context-save at next natural pause."
+  echo "WARN: Consider /li:pause at the next natural break."
   mkdir -p "$(dirname "$RATE_FILE")"
   echo "$now_call" > "$RATE_FILE"
 fi

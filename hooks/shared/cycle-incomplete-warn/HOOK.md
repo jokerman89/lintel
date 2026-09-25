@@ -3,7 +3,7 @@ name: cycle-incomplete-warn
 tier: warn-only
 event: Stop
 fires_on: turn end while an active cycle is open mid-flight (a phase started, cycle not complete)
-override: none needed — say `go` / `pause` / `/li:capture`, or it stays silent once the cycle closes
+override: none needed; continue, use /li:pause, or capture the actual outcome
 necessity: RECOMMENDED
 gap_if_skipped: "The session can silently end mid-cycle with no position footer — the recurring 'did lots of work, then total silence, no next step' symptom (L-008, L-016). The footer convention reverts to 100% model-discipline."
 audit: .claude/runtime/audit/hooks.jsonl
