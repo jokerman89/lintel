@@ -212,6 +212,15 @@ time. A no-subagent host uses the main agent or exports replayable briefs and mu
 self-review as independent. See [swarming work](concepts/swarming-work.md) for selection, inspection,
 recovery and close procedures.
 
+### MARS is an optional review panel, not a mode or phase
+
+`/li:mars` asks several distinct models the same review question independently, with one
+challenge round only when they disagree. A full nine-phase cycle offers it once, at PLAN's
+approval gate, and only on a host that proves per-child model selection and observable
+identity; partial and rerouted cycles never offer, and auto mode never accepts. A single
+reviewer and every panel slot receive the same Review Method packet. MARS output is inspection
+input, never release clearance. See [MARS](concepts/mars.md).
+
 **Composite shortcuts** are pure delegators to a subset:
 
 ```
