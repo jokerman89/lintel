@@ -37,7 +37,8 @@ def _git(*args):
 def origin_from(args):
     remote = _git("config", "--get", "remote.origin.url")
     repo = args.repository or mc._lib_module("review_method").repository_slug(remote)
-    return {"requested_by": args.requested_by, "trigger": args.trigger, "caller": args.caller,
+    return {"requested_by": args.requested_by, "trigger": args.trigger,
+            "caller": args.caller.strip() if args.caller else args.caller,
             "coordinator_surface": args.surface, "repository": repo,
             "branch": args.branch or _git("branch", "--show-current"),
             "commit": args.commit or _git("rev-parse", "HEAD"),

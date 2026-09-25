@@ -553,6 +553,55 @@ class BindingTests(unittest.TestCase):
             mc.synthesis_header(unbound, schema, defaults, [0, 0, 0]), "synthesis"), schema)
         self.assertEqual(header["outcome"], "incomplete")
 
+    def test_review_callers_are_normalized_and_need_binding_method_and_counts(self):
+        """Any spelling of the review caller gets the REVIEW guards (R1)."""
+        sys.path.insert(0, str(ROOT / "lib"))
+        import review_method as rm
+        schema, defaults = mc.load_schema(), mc.load_defaults()
+
+        def record(panel, name):
+            mc.add_participant(panel, "r1", "m-a", "subagent", None, None, None)
+            path = self.records / f"{name}.md"
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(report_text(panel, "r1", 1, verdict="pass", p1=0), encoding="utf-8")
+            mc.record_round(panel, "r1", 1, path, schema=schema)
+
+        def outcome(panel):
+            header = mc.synthesis_header(panel, schema, defaults, [0, 0, 0], mc.verify_input(panel))
+            return mc.validate_header("synthesis", mc.parse_header(header, "synthesis"), schema)["outcome"]
+
+        unbound = mc.new_panel("c1", OWNER, self.brief, "turn", defaults, "implementation", ORIGIN, "x")
+        record(unbound, "c1")
+        self.assertEqual(outcome(unbound), "pass")
+        for caller in ("review", "REVIEW", " review ", "cycle:REVIEW"):
+            unbound["origin"]["caller"] = caller
+            self.assertEqual(outcome(unbound), "incomplete", caller)
+
+        self.assertEqual(self.init("--select", "src", "--caller", " Review ").returncode, 0)
+        without_method = mc.read_json(self.panel)
+        self.assertEqual(without_method["origin"]["caller"], "Review")
+        record(without_method, "b1")
+        self.assertEqual(outcome(without_method), "incomplete")
+
+        self.panel.unlink()
+        (self.inputs / "snapshot.json").unlink()
+        questions = rm.select_questions(rm.load_catalog(), "implementation", [], "quality")
+        body = rm.render_body(kind="implementation", stage="quality", subject_ref="src/util.py",
+                              subject_text="def f(): return 1", questions=questions)
+        self.brief.write_bytes(body.encode("utf-8"))
+        meta = rm.method_meta(kind="implementation", stage="quality", subject_ref="src/util.py", body=body,
+                              questions=questions)
+        meta_path = self.inputs / "method.json"
+        meta_path.write_text(json.dumps(meta), encoding="utf-8")
+        made = self.init("--select", "src", "--method-meta", meta_path, "--caller", "review")
+        self.assertEqual(made.returncode, 0, made.stderr)
+        complete = mc.read_json(self.panel)
+        record(complete, "m1")
+        verified = mc.verify_input(complete)
+        with self.assertRaises(mc.ContractError, msg="a REVIEW inspection needs adjudicated counts"):
+            mc.inspection_record(complete, mc.synthesis_header(complete, schema, defaults, None, verified),
+                                 schema, verified)
+
     def test_an_aliased_output_path_still_overlaps(self):
         """S3: a junction or symlink spelling of the repository cannot hide an overlap."""
         alias = Path(self.tmp.name) / "alias"

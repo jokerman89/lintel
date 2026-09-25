@@ -148,7 +148,7 @@ any P1 is `fail`; missing coverage, a contradictory header or `unable` is `incom
 never a pass; P2 or a spec deviation is `changes-requested`; otherwise `pass`. It exits 0
 for a complete, consistent report (whatever the outcome) and 3 otherwise. A panel applies
 the same rule to its adjudicated counts (`--adjudicated p1,p2,p3[,deviations]`; deviations
-are required when the packet lists acceptance IDs), with a
+are required when a `spec` or `full` packet lists acceptance IDs), with a
 partial panel or an unverified input also `incomplete`. The result is review input, not
 release clearance.
 

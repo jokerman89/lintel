@@ -8,7 +8,7 @@ plan in [status.md](status.md) ("Remaining", items 0-5). The CyberGym benchmark 
 **Sources:** [spec.md](spec.md) (R01-R17), [review-method-design.md](review-method-design.md)
 (RM1-RM9), [integration.md](../../../skills/mars/references/integration.md).
 **Coordinator:** Finish work / Go Live (`88aecc43-40f9-41d4-8947-6c2fb0a55481`) owns merge
-timing, version assignment and delivery. No PR or merge is opened from this branch.
+timing, version assignment and delivery. Go Live published the branch as PR #105; merge pending.
 
 ## Assumptions (autopilot, stated rather than asked)
 
@@ -72,8 +72,9 @@ recursive panels, automatic fixes, version bumps and PR creation.
 - Live: RM9 re-pilot, four host-verified models, [pilot-2026-09-25-rm9.md](pilot-2026-09-25-rm9.md).
 - Independent review (`lintel-reviewer`, two rounds): first pass CHANGES REQUESTED (Stage 1:
   2 P1, 1 P2, 1 P3; Stage 2: 3 P2, 2 P3). All nine resolved in 76142944 and 7daffd00; the
-  recheck found one new P2 (omitted deviation count), fixed with a test. Remaining advisory
-  P3s are recorded in status.md.
+  recheck found one new P2 (omitted deviation count), fixed with a test. A changed-scope review
+  of `cb39cedc` (reviewer `586563af`) passed with four P3s, addressed in the next commit; see
+  status.md.
 
 **Deviations from the cards:** the cycle offer moved entirely to PLAN's approval gate (cycle
 Step 5 only surfaces it), so a full cycle has exactly one offer point. RM8 exists as the CLI and
@@ -81,5 +82,6 @@ method §7; CAPTURE is not edited because an active lane owns it. Commit 7daffd0
 also credits the P1 rubric note, which landed earlier in 5a89b4c5; history was not rewritten.
 
 **Next:** the operator ordered an immediate merge; ADR-0034 (with D1; renumbered ADR-0036 on 2026-09-25) is accepted and the
-changelog updated. Publishing is handed to Go Live (this session's GitHub actor is barred by
-L-053). The pending consolidated hooks follow #104. No push or PR was made from here.
+changelog updated. Go Live published PR #105 as `jokerman89` (this session's GitHub actor is
+barred by L-053); merge pending, #105 first, then #104 converges. The pending consolidated
+hooks follow #104.

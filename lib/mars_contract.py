@@ -522,8 +522,13 @@ def synthesis_header(panel: Dict[str, Any], schema: Dict[str, Any], defaults: Di
                 "this panel checks acceptance rows: pass --adjudicated p1,p2,p3,deviations")
         counts = _adjudicated_counts(adjudicated)
         fields["adjudicated"] = _format_adjudicated(counts)
-        fields["outcome"] = panel_outcome(facts, counts, input_status, origin.get("caller"))
+        fields["outcome"] = panel_outcome(facts, counts, input_status, origin.get("caller"), bool(method))
     return render_header("synthesis", fields, schema)
+
+
+def _is_review_caller(caller: Optional[str]) -> bool:
+    """REVIEW panel mode however the caller is spelled: `review`, `REVIEW`, `cycle:REVIEW`."""
+    return (caller or "").strip().lower().rsplit(":", 1)[-1] == "review"
 
 
 def _adjudicated_counts(values: Sequence[int]) -> Tuple[int, int, int, int]:
@@ -537,16 +542,19 @@ def _format_adjudicated(counts: Sequence[int]) -> str:
 
 
 def panel_outcome(facts: Dict[str, Any], counts: Sequence[int], input_status: str,
-                  caller: Optional[str] = None) -> str:
+                  caller: Optional[str] = None, has_method: bool = True) -> str:
     """The Review Method's decision rule over adjudicated counts.
 
     A partial panel, a report that is incomplete, inconsistent or `unable`, a changed or
-    unverified input, and an unbound REVIEW panel all make the result incomplete, exactly as
-    they would for a single report. `coverage_complete` means every received round-1 report
-    is complete and consistent under the method.
+    unverified input, and a REVIEW panel without a bound input or the method packet all make
+    the result incomplete, exactly as they would for a single report. `coverage_complete`
+    means every received round-1 report is complete and consistent under the method.
     """
-    bound_ok = input_status == "verified" or (input_status == "unbound" and caller != "review")
-    complete = facts["operational_status"] == "complete" and facts.get("coverage_complete", True) and bound_ok
+    review = _is_review_caller(caller)
+    bound_ok = input_status == "verified" or (input_status == "unbound" and not review)
+    method_ok = has_method or not review
+    complete = facts["operational_status"] == "complete" and facts.get("coverage_complete", True) \
+        and bound_ok and method_ok
     return _lib_module("review_method").stage_outcome(counts[0], counts[1], complete, deviations=counts[3])
 
 
@@ -683,16 +691,19 @@ def inspection_record(panel: Dict[str, Any], synthesis_text: str, schema: Dict[s
     require(header["panel"] == panel["panel_id"] and header["brief_sha256"] == panel["subject"]["brief_sha256"],
             "synthesis belongs to another panel or brief")
     bound = panel["subject"].get("input")
-    if (panel.get("origin") or {}).get("caller") == "review":
+    caller = (panel.get("origin") or {}).get("caller")
+    if _is_review_caller(caller):
         require(bool(bound) and bool(panel["subject"].get("method")),
                 "REVIEW panel mode needs a bound selection (--select) and the method packet (--method-meta)")
+        require(bool(header.get("adjudicated")),
+                "REVIEW panel mode needs adjudicated counts (synthesis-header --adjudicated)")
     facts = summary(panel)
     outcome = None
     if header.get("adjudicated"):
         match = re.fullmatch(r"p1=(\d+) p2=(\d+) p3=(\d+) deviations=(\d+)", header["adjudicated"])
         require(match is not None, "adjudicated field is malformed")
         counts = tuple(int(n) for n in match.groups())
-        outcome = panel_outcome(facts, counts, verification["status"], (panel.get("origin") or {}).get("caller"))
+        outcome = panel_outcome(facts, counts, verification["status"], caller, bool(panel["subject"].get("method")))
         require(header.get("outcome") == outcome,
                 f"synthesis outcome {header.get('outcome')!r} does not match its adjudicated counts ({outcome!r})")
     return {"schema_version": 1, "purpose": "inspection", "source": "mars", "release_clearance": False,

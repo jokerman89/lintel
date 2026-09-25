@@ -2,13 +2,17 @@
 
 **Updated:** 2026-09-25
 **Branch:** `jokerman-microsoft-mars-integration` (from `origin/main` `80002ed4` plus the seven
-prototype commits of `jokerman-microsoft-mmars-development-plan`, which is unchanged)
+prototype commits of `jokerman-microsoft-mmars-development-plan`, which is unchanged), converged
+with `origin/main` `1981e591` through the ordinary merge `f790c409` (main's 78-file delta only)
 **Coordinator:** Finish work / Go Live `88aecc43-40f9-41d4-8947-6c2fb0a55481`.
 **Delivery (2026-09-25):** the operator ordered "Merge everything now". ADR-0036 is accepted and
 the changelog lists MARS under 0.11.0 (unreleased). This session's GitHub CLI actor is
 `jokerman_microsoft`, so L-053 bars it from publishing; push, PR, CI and merge were handed to Go
 Live, which already has permission to publish as `jokerman89`. If Go Live declines, the operator
-runs them (`files/mars-pr-body.md` in this session holds the PR text).
+runs them (`files/mars-pr-body.md` in this session holds the PR text). Go Live published it as
+[PR #105](https://github.com/jokerman89/lintel/pull/105) as `jokerman89`; merge pending. The
+agreed order is #105 first, after green CI and an independent review of the final head, then
+#104 converges, then the client PR and the docs PRs.
 **Decision:** [ADR-0036](../../decisions/0036-mars-multi-model-review.md), drafted and reviewed as ADR-0034
 (renumbered 2026-09-25: #104 holds 0034, the client cleanup 0035). Plan and evidence:
 [plan.md](plan.md), [RM9 re-pilot](pilot-2026-09-25-rm9.md).
@@ -46,13 +50,15 @@ bundle closure checked; RM9 live pilot; two independent review rounds, all findi
 `universal-adapters.sh` was stopped after 3 of 17 cases passed in about two hours, and
 `catalog-installed.sh` was not run; CI on a Linux runner is the faster place to finish them.
 
-## Advisory P3 notes from the independent recheck
+## Advisory P3 notes
 
 - Fixed: overlap checks now fold case on every host (2c8b5b04).
 - `coverage_complete` means "complete and consistent under the method", documented in the
   protocol rather than renamed.
-- The branch is based on `80002ed4`; `origin/main` has since gained six commits, none in
-  files this branch changes except three lines in ADR-0033.
+- The changed-scope review of `cb39cedc` (reviewer `586563af`, PASS, P3 4) raised R1-R4:
+  caller spelling and missing packet or counts for REVIEW panels, the deviation-count stage,
+  plan Step 12's `mars_offer` field, and these records. All four are addressed in the commit
+  after `cb39cedc`; its own independent review is reported to Go Live with that SHA.
 
 ## Known limits
 

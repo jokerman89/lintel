@@ -120,8 +120,11 @@ models, downgrades, failed slots, calls, input verification, profile, coverage, 
 shared-rule `outcome` and `release_clearance: false`), then:
 
 `coverage_complete: true` means every received round-1 report is complete and consistent
-under the method (questions, acceptance rows, header agreement, not `unable`). When the
-packet lists acceptance IDs, `--adjudicated` must include the deviation count.
+under the method (questions, acceptance rows, header agreement, not `unable`). When a
+`spec` or `full` packet lists acceptance IDs, `--adjudicated` must include the deviation
+count. A REVIEW panel (any spelling of caller `review`) also needs a bound selection, the
+method packet and adjudicated counts, or its outcome is `incomplete` and `panel inspection`
+refuses it.
 
 | Disposition | Rule |
 |---|---|
