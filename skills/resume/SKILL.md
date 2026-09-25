@@ -1,7 +1,7 @@
 ---
 name: resume
 layer: foundation
-description: Use in a fresh session to resume selected committed work, a cycle or a job, or read an owned checkpoint with --from without replacing current work or policy.
+description: Use when returning in a fresh session to resume selected committed work, a cycle or a job, or read an owned checkpoint with --from without replacing current work or policy.
 color: cyan
 tools: Read, Bash, Grep, Glob
 voice: internal

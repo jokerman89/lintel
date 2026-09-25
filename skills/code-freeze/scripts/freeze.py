@@ -224,16 +224,16 @@ def main() -> int:
         if not args.list:
             selected = []
             for value in args.paths:
-                path = relative_scope(root, value)
+                path = selector_path(value.rstrip("/\\"))
                 if any(char in path for char in "*?["):
                     if args.lift:
                         raise ValueError("--lift requires exact recorded paths, not globs.")
                     manifest = select_files(root, patterns=[path])
                     if manifest["status"] != "selected":
                         raise ValueError(f"Freeze glob has no complete selection: {value}")
-                    selected.extend(item["path"] for item in manifest["files"])
+                    selected.extend(relative_scope(root, item["path"]) for item in manifest["files"])
                 else:
-                    selected.append(path)
+                    selected.append(relative_scope(root, path))
             selected = list(dict.fromkeys(selected))
             if args.lift:
                 removed = {relative_scope(root, entry["path"]) for entry in state["frozen"]

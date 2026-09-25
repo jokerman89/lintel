@@ -328,6 +328,23 @@ class ContinuityContracts(unittest.TestCase):
         self.assertEqual(json.loads(self.freeze("--list").stdout)["frozen"], [])
         self.assertEqual(legacy.read_bytes(), before)
 
+    def test_freeze_glob_expands_to_literal_files_before_native_path_checks(self):
+        self.write("src/frozen/first.txt", "one\n")
+        self.write("src/frozen/second.txt", "two\n")
+        self.write("src/frozen/keep.md", "not selected\n")
+        self.write("src/frozen-other/third.txt", "different directory\n")
+        frozen = json.loads(self.freeze("src/frozen/*.txt", "--reason", "bounded glob").stdout)
+        self.assertEqual([row["path"] for row in frozen["frozen"]],
+                         ["src/frozen/first.txt", "src/frozen/second.txt"])
+        self.assertIn("warn-only", self.hook("src/frozen/first.txt").stdout)
+        self.assertEqual(self.hook("src/frozen/keep.md").stdout, "")
+        self.assertEqual(self.hook("src/frozen-other/third.txt").stdout, "")
+        state = self.state_file().read_bytes()
+        self.freeze("--lift", "src/frozen/*.txt", expected=2)
+        self.freeze("missing/*.txt", expected=2)
+        self.freeze("../outside/*.txt", expected=2)
+        self.assertEqual(self.state_file().read_bytes(), state)
+
     def test_freeze_refuses_bad_state_and_paths_without_silent_reset(self):
         self.freeze("../outside", expected=2)
         self.freeze("--all", expected=2)

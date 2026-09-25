@@ -54,7 +54,7 @@ SOURCE_EXCEPTIONS = {
 IGNORED_DIRECTORIES = frozenset({".git", "node_modules", "__pycache__", ".venv", "venv"})
 TEXT_SUFFIXES = frozenset({
     ".md", ".sh", ".ps1", ".py", ".json", ".yaml", ".yml", ".toml",
-    ".js", ".mjs", ".txt", ".template", ".example",
+    ".js", ".mjs", ".html", ".htm", ".txt", ".template", ".example",
 })
 HOST_SLASH_COMMANDS = frozenset({"help", "skills", "instructions", "plugins", "plugin"})
 NAME = r"[a-z][a-z0-9]*(?:-[a-z0-9]+)*"
@@ -467,6 +467,14 @@ def routing_lines(text: str, relative: str, exemptions: list[dict],
 
     if relative.endswith(".json"):
         json_observations(text)
+    elif Path(relative).suffix in {".html", ".htm"}:
+        for match in re.finditer(
+                r"<script\b(?P<attributes>[^>]*)>(?P<json>[\s\S]*?)</script\s*>",
+                text, re.IGNORECASE):
+            if re.fullmatch(r"""\s+type\s*=\s*(["'])application/json\1\s*""",
+                            match["attributes"], re.IGNORECASE):
+                json_observations(match["json"], match.start("json"),
+                                  "inert HTML script[type=application/json]")
     elif relative == f"{COMPARISON_DIR}/data.js":
         assignment = re.match(r"\s*window\.COMPARISON_DATA\s*=\s*", text)
         if assignment:

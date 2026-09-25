@@ -47,6 +47,40 @@ class CommandSurfaceTests(unittest.TestCase):
             "Use /li:verify, /li-diagnose and `li-cross-check`.\n"
             "Read [the plan](skills/plan/SKILL.md) and `skills/review/SKILL.md`.\n"), [])
 
+    def test_current_html_and_htm_routing_is_not_excluded_by_extension(self):
+        for suffix in ("html", "htm"):
+            relative = "docs/current." + suffix
+            with self.subTest(suffix=suffix):
+                self.assertEqual(self.findings("<p>Use /li:verify.</p>\n", relative), [])
+                self.assertTrue(self.findings("<p>Use /li:qa.</p>\n", relative))
+                self.assertTrue(self.findings(
+                    '<script type="module">import "../skills/web-session/scripts/missing.mjs";</script>\n',
+                    relative))
+                (self.root / relative).unlink()
+
+    def test_html_inert_evidence_field_is_visible_but_current_routing_still_fails(self):
+        relative = "docs/evidence.html"
+        record = json.dumps({
+            "schema_version": 2, "skill": "qa", "status": "unverified",
+            "timestamp": "fixture", "context": {}, "reviewer": {},
+            "provenance": "declared", "controls": [], "coverage": [], "evidence": [],
+        })
+        inert = '<script type="application/json">' + record + "</script>\n"
+        self.write(relative, inert)
+        exemptions = []
+        self.assertEqual(guard.scan(self.root, exemptions=exemptions), [])
+        self.assertTrue(any(item.get("path") == relative
+                            and item.get("field", "").endswith("/skill")
+                            and item.get("classification") == "OBSERVATION"
+                            for item in exemptions))
+        self.assertTrue(self.findings(inert + "<p>Use /li:qa.</p>\n", relative))
+        self.assertTrue(self.findings(
+            inert + '<script type="module">import "../skills/qa/SKILL.md";</script>\n', relative))
+        self.assertTrue(self.findings(
+            '<script type="text/javascript">' + record + "</script>\n", relative))
+        self.assertTrue(self.findings(
+            '<script type="application/json" src="active.js">' + record + "</script>\n", relative))
+
     def test_every_retired_command_is_rejected_in_explicit_namespaces(self):
         for name in sorted(guard.RETIRED_COMMANDS):
             for prefix in ("/li:", "/li-", "skill:"):

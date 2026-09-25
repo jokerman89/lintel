@@ -578,13 +578,40 @@ state_append BUILD BLOCKED next=REVIEW cycle_id=one
 
     def test_skill_new_checks_literal_aliases_before_any_draft_write(self):
         self.env["draft_relative"] = "drafts/new/SKILL.md"
-        for name in ("match", "skill-router", "MATCH", "$(touch author-marker)", "../escape", ""):
+        for name in ("skill-router", "SKILL-ROUTER", "MATCH", "$(touch author-marker)", "../escape", ""):
             self.env["skill_name"] = name
             before = tree_snapshot(self.base)
             result = self.shell(block("skill-new", "### Check name and destination"))
             self.assertNotEqual(result.returncode, 0)
             self.assertTrue(result.stderr)
             self.assertEqual(tree_snapshot(self.base), before)
+
+    def test_skill_new_checks_declared_neutral_alias_in_selected_source(self):
+        source = self.base / "alias-source"
+        for relative in ("bin/li-catalog.py", "lib/client_capabilities.py",
+                         "lib/envelope_contract.py", "lib/cli-tiers.yaml",
+                         "lib/context_safety.py", "lib/native_paths.py"):
+            self.write(source / relative, (ROOT / relative).read_text(encoding="utf-8"))
+        self.write(source / "skills/fixture-action/SKILL.md",
+                   "---\nname: fixture-action\nlayer: foundation\ndescription: Use for fixtures.\n"
+                   "voice: internal\ncli_support: []\n---\nFixture method.\n")
+        aliases = self.write(source / "config/aliases.yaml", json.dumps({
+            "version": 1, "skill_aliases": [{"old": "fixture-alias", "new": "fixture-action"}],
+        }))
+        self.env.update(LINTEL_SOURCE_ROOT=source.as_posix(),
+                        skill_name="fixture-alias", draft_relative="drafts/alias/SKILL.md")
+        rejected = self.unchanged("skill-new", "### Check name and destination", expected=2)
+        self.assertIn("COLLISION: skill:fixture-action", rejected.stderr)
+        aliases.write_text('{"version":1,"skill_aliases":[]}\n', encoding="utf-8")
+        accepted = self.unchanged("skill-new", "### Check name and destination")
+        self.assertIn("drafts", accepted.stdout)
+        self.assertFalse((self.repo / self.env["draft_relative"]).exists())
+
+    def test_skill_new_released_alias_is_not_an_invisible_reservation(self):
+        self.env.update(skill_name="match", draft_relative="drafts/match/SKILL.md")
+        accepted = self.unchanged("skill-new", "### Check name and destination")
+        self.assertIn("drafts", accepted.stdout)
+        self.assertFalse((self.repo / self.env["draft_relative"]).exists())
 
     def test_skill_new_accepts_bare_name_but_not_wrapper_or_existing_target(self):
         self.env.update(skill_name="regen-mocks", draft_relative="drafts/regen-mocks/SKILL.md")

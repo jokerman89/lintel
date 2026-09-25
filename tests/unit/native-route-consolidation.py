@@ -7,11 +7,18 @@
 """Check retained method boundaries after removing redundant public routes."""
 
 from pathlib import Path
+from contextlib import redirect_stderr, redirect_stdout
+import importlib.util
+import io
+import json
 import os
 import re
 import shutil
 import subprocess
+import sys
+import tempfile
 import unittest
+from unittest import mock
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -146,6 +153,48 @@ class NativeRoutes(unittest.TestCase):
         self.assertEqual(result.returncode, 2)
         self.assertEqual(result.stdout, "")
         self.assertTrue(result.stderr)
+
+    def test_freeze_glob_uses_real_owned_files_without_launching_audit_process(self):
+        specification = importlib.util.spec_from_file_location(
+            "freeze_pattern_fixture", ROOT / "skills/code-freeze/scripts/freeze.py")
+        freeze = importlib.util.module_from_spec(specification)
+        specification.loader.exec_module(freeze)
+        with tempfile.TemporaryDirectory(prefix="freeze-pattern-unit-") as temporary:
+            repo = Path(temporary).resolve()
+            directory = repo / "src" / "frozen"
+            directory.mkdir(parents=True)
+            for name in ("first.txt", "second.txt", "keep.md"):
+                (directory / name).write_text(name, encoding="utf-8")
+            state = repo / ".claude/runtime/state/code-freeze/fixture.yaml"
+
+            def invoke(*arguments):
+                output, errors = io.StringIO(), io.StringIO()
+                argv = ["freeze.py", "--repo", str(repo),
+                        "--state-dir", ".claude/runtime/state", "--session", "fixture", *arguments]
+                with mock.patch.object(sys, "argv", argv), redirect_stdout(output), redirect_stderr(errors):
+                    status = freeze.main()
+                return status, output.getvalue(), errors.getvalue()
+
+            with mock.patch.object(freeze, "record_audit") as audit:
+                status, output, errors = invoke("src/frozen/*.txt", "--reason", "bounded fixture")
+                self.assertEqual(status, 0, errors)
+                self.assertEqual([row["path"] for row in json.loads(output)["frozen"]],
+                                 ["src/frozen/first.txt", "src/frozen/second.txt"])
+                audit.assert_called_once_with(
+                    repo, "freeze", ["src/frozen/first.txt", "src/frozen/second.txt"], "bounded fixture")
+                before = state.read_bytes()
+                for operands in (("--lift", "src/frozen/*.txt"),
+                                 ("missing/*.txt",), ("../outside/*.txt",),
+                                 ("src/frozen/file:stream",)):
+                    with self.subTest(refused=operands):
+                        status, output, errors = invoke(*operands)
+                        self.assertEqual(status, 2)
+                        self.assertEqual(output, "")
+                        self.assertTrue(errors)
+                        self.assertEqual(state.read_bytes(), before)
+                self.assertEqual(audit.call_count, 1)
+                self.assertEqual(sorted(path.name for path in directory.iterdir()),
+                                 ["first.txt", "keep.md", "second.txt"])
 
 
 if __name__ == "__main__":
