@@ -47,7 +47,7 @@ Closes operator-request 5.3 + integrates with L-002 (grep-first-pattern adapted 
 ### `--force-compact`
 
 Use P03 `/li:context-budget` for observed/estimated/unknown headroom, and
-`/li:context-save` -> restart -> `/li:context-restore` for owned checkpoint continuity.
+`/li:pause` -> restart -> `/li:resume --from <checkpoint>` for owned checkpoint continuity.
 Retain the same [work map](../spec-kit/references/work-map.md) and actual verified
 profile reference/required policy. Context state is not selected by a newer basename.
 

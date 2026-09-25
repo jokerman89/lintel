@@ -1,7 +1,7 @@
 # Uniformity coverage matrix — generated
 
-Generated: 2026-06-12T12:04:35Z by `bin/li-uniformity`. **Do not hand-edit** — regenerate
-from frontmatter. Contract: [uniformity-contract.md](../concepts/uniformity-contract.md).
+Generated: 2026-09-25T10:21:33Z by `bin/li-uniformity`. **Do not hand-edit** — regenerate
+from frontmatter. Contract: [uniformity-contract.md](../../../docs/concepts/uniformity-contract.md).
 
 This is the living dashboard for uniformity-as-contract. The FLOOR (D14
 necessity on workflow_root skills + block-hooks) is mechanically enforced by
@@ -14,11 +14,11 @@ not applicable for this kind (see contract for the per-kind reasons).
 
 | Kind | Count | necessity adoption | gap_if_skipped | navigation |
 |---|---|---|---|---|
-| workflow_root skills | 8 | 100% | 100% | 100% |
-| regular skills | 116 | 12% | 12% | 0% |
+| workflow_root skills | 10 | 100% | 100% | 100% |
+| regular skills | 84 | 14% | 14% | 1% |
 | agents | 69 | 0% | 0% | n/a |
 | block-hooks | 2 | 100% | 100% | n/a |
-| warn-hooks | 27 | 11% | 11% | n/a |
+| warn-hooks | 29 | 17% | 17% | n/a |
 | lifecycle-hooks | 2 | 0% | 0% | n/a |
 | packs | 1 | 0% | n/a | 0% |
 
@@ -28,7 +28,7 @@ not applicable for this kind (see contract for the per-kind reasons).
 
 ## Matrix by kind
 
-### Workflow-root skills (n=8)
+### Workflow-root skills (n=10)
 
 | Component | D14 necessity | D12 gap | D4 nav | D9 brief-forge | D7 pack | D13 obs | D6 recovery | D5 checkpoints |
 |---|---|---|---|---|---|---|---|---|
@@ -38,62 +38,51 @@ not applicable for this kind (see contract for the per-kind reasons).
 | `full-engineering-pass` | yes | yes | yes | — | — | — | — | — |
 | `plan` | yes | yes | yes | — | — | — | — | — |
 | `sc` | yes | yes | yes | — | — | — | — | — |
+| `spec-kit` | yes | yes | yes | — | — | — | — | — |
+| `swarm` | yes | yes | yes | — | — | — | — | — |
 | `ta` | yes | yes | yes | — | — | — | — | — |
 | `tq` | yes | yes | yes | — | — | — | — | — |
 
 Adoption: D14 necessity=100%(floor) · D12 gap=100%(floor) · D4 nav=100%(floor) · D9 brief-forge=0% · D7 pack=0% · D13 obs=0% · D6 recovery=0% · D5 checkpoints=0%
 
-### Regular skills (n=116)
+### Regular skills (n=84)
 
 | Component | D14 necessity | D12 gap | D4 nav | D9 brief-forge | D7 pack | D13 obs | D6 recovery | D5 checkpoints |
 |---|---|---|---|---|---|---|---|---|
 | `adr-new` | — | — | — | — | — | — | — | — |
 | `analyze` | yes | yes | — | — | — | — | — | — |
 | `audit` | — | — | — | — | — | — | — | — |
-| `autoplan` | — | — | — | — | — | — | — | — |
 | `brief-forge` | — | — | — | — | — | — | — | — |
-| `browse` | — | — | — | — | — | — | — | — |
 | `build` | yes | yes | — | — | — | — | — | — |
 | `capture` | yes | yes | — | — | — | — | — | — |
-| `careful` | — | — | — | — | — | — | — | — |
 | `catalog` | — | — | — | — | — | — | — | — |
 | `clean` | — | — | — | — | — | — | — | — |
 | `cli-fingerprint` | — | — | — | — | — | — | — | — |
 | `code-freeze` | — | — | — | — | — | — | — | — |
 | `code-review` | — | — | — | — | — | — | — | — |
-| `code-unfreeze` | — | — | — | — | — | — | — | — |
-| `codex` | — | — | — | — | — | — | — | — |
 | `compliance-gate` | — | — | — | — | — | — | — | — |
 | `context-budget` | — | — | — | — | — | — | — | — |
 | `context-cool` | — | — | — | — | — | — | — | — |
-| `context-restore` | — | — | — | — | — | — | — | — |
-| `context-save` | — | — | — | — | — | — | — | — |
-| `context-warm` | — | — | — | — | — | — | — | — |
-| `context-warm-adrs` | — | — | — | — | — | — | — | — |
 | `context-warm-customer` | — | — | — | — | — | — | — | — |
 | `context-warm-from-url` | — | — | — | — | — | — | — | — |
-| `context-warm-related` | — | — | — | — | — | — | — | — |
-| `context-warm-sessions` | — | — | — | — | — | — | — | — |
+| `context-warm` | — | — | — | — | — | — | — | — |
+| `cross-check` | — | — | — | — | — | — | — | — |
 | `define` | yes | yes | — | — | — | — | — | — |
-| `design-consultation` | — | — | — | — | — | — | — | — |
-| `design-html` | — | — | — | — | — | — | — | — |
-| `design-review` | — | — | — | — | — | — | — | — |
-| `design-shotgun` | — | — | — | — | — | — | — | — |
-| `devex-review` | — | — | — | — | — | — | — | — |
+| `design-dna` | — | — | — | — | — | — | — | — |
+| `diagnose` | — | — | — | — | — | — | — | — |
 | `discover` | yes | yes | — | — | — | — | — | — |
 | `doctor` | — | — | — | — | — | — | — | — |
-| `document-generate` | — | — | — | — | — | — | — | — |
 | `eval` | — | — | — | — | — | — | — | — |
 | `fix` | yes | yes | — | — | — | — | — | — |
-| `frontend-design` | — | — | — | — | — | — | — | — |
 | `frontend-design-review` | — | — | — | — | — | — | — | — |
+| `frontend-design` | — | — | — | — | — | — | — | — |
 | `frontend-motion` | — | — | — | — | — | — | — | — |
 | `frontend-shader` | — | — | — | — | — | — | — | — |
 | `frontend-style-extract` | — | — | — | — | — | — | — | — |
 | `frontend-typography` | — | — | — | — | — | — | — | — |
-| `generate` | — | — | — | — | — | — | — | — |
 | `generate-app` | — | — | — | — | — | — | — | — |
 | `generate-design` | — | — | — | — | — | — | — | — |
+| `generate-docs` | — | — | — | — | — | — | — | — |
 | `generate-outline` | — | — | — | — | — | — | — | — |
 | `generate-pdf` | — | — | — | — | — | — | — | — |
 | `generate-ppt` | — | — | — | — | — | — | — | — |
@@ -104,67 +93,48 @@ Adoption: D14 necessity=100%(floor) · D12 gap=100%(floor) · D4 nav=100%(floor)
 | `generate-word` | — | — | — | — | — | — | — | — |
 | `generate-write` | — | — | — | — | — | — | — | — |
 | `generate-xlsx` | — | — | — | — | — | — | — | — |
+| `generate` | — | — | — | — | — | — | — | — |
 | `handoff-size-check` | — | — | — | — | — | — | — | — |
-| `health` | — | — | — | — | — | — | — | — |
-| `help` | — | — | — | — | — | — | — | — |
 | `hooks-status` | — | — | — | — | — | — | — | — |
+| `inspect` | yes | yes | — | — | — | — | — | — |
 | `instruction-parity-check` | — | — | — | — | — | — | — | — |
-| `investigate` | — | — | — | — | — | — | — | — |
 | `jobs` | — | — | — | — | — | — | — | — |
-| `landing-report` | — | — | — | — | — | — | — | — |
-| `learn` | — | — | — | — | — | — | — | — |
-| `lessons` | — | — | — | — | — | — | — | — |
+| `lessons-add` | — | — | — | — | — | — | — | — |
 | `lessons-promote` | — | — | — | — | — | — | — | — |
 | `lessons-surface` | — | — | — | — | — | — | — | — |
 | `maintenance` | — | — | — | — | — | — | — | — |
-| `make-pdf` | — | — | — | — | — | — | — | — |
 | `migrations` | — | — | — | — | — | — | — | — |
-| `office-hours` | — | — | — | — | — | — | — | — |
-| `open-managed-browser` | — | — | — | — | — | — | — | — |
 | `orientator` | — | — | — | — | — | — | — | — |
 | `pack-create` | — | — | — | — | — | — | — | — |
 | `pack-list` | — | — | — | — | — | — | — | — |
 | `pack-switch` | — | — | — | — | — | — | — | — |
 | `pack-validate` | — | — | — | — | — | — | — | — |
-| `pair-agent` | — | — | — | — | — | — | — | — |
-| `perfbench` | — | — | — | — | — | — | — | — |
+| `pause` | — | — | — | — | — | — | — | — |
 | `perf-mode` | — | — | — | — | — | — | — | — |
-| `personas-rotate` | — | — | — | — | — | — | — | — |
-| `plan-and-build` | yes | yes | — | — | — | — | — | — |
-| `plan-ceo-review` | — | — | — | — | — | — | — | — |
-| `plan-design-review` | — | — | — | — | — | — | — | — |
-| `plan-devex-review` | — | — | — | — | — | — | — | — |
-| `plan-eng-review` | — | — | — | — | — | — | — | — |
-| `plan-tune` | — | — | — | — | — | — | — | — |
+| `perfbench` | — | — | — | — | — | — | — | — |
 | `profile-switch` | — | — | — | — | — | — | — | — |
-| `qa` | — | — | — | — | — | — | — | — |
-| `qa-only` | — | — | — | — | — | — | — | — |
-| `research` | yes | yes | — | — | — | — | — | — |
 | `resume` | — | — | — | — | — | — | — | — |
-| `retro` | — | — | — | — | — | — | — | — |
 | `review` | yes | yes | — | — | — | — | — | — |
-| `review-and-ship` | yes | yes | — | — | — | — | — | — |
-| `role` | — | — | — | — | — | — | — | — |
 | `role-new` | — | — | — | — | — | — | — | — |
+| `role` | — | — | — | — | — | — | — | — |
 | `roles-list` | — | — | — | — | — | — | — | — |
 | `safe-install` | — | — | — | — | — | — | — | — |
-| `scaffold` | — | — | — | — | — | — | — | — |
 | `scaffold-internal-tool` | — | — | — | — | — | — | — | — |
 | `scaffold-mvp` | — | — | — | — | — | — | — | — |
+| `scaffold` | — | — | — | — | — | — | — | — |
 | `scope` | yes | yes | — | — | — | — | — | — |
-| `scrape` | — | — | — | — | — | — | — | — |
 | `sense` | yes | yes | — | — | — | — | — | — |
-| `setup-browser-cookies` | — | — | — | — | — | — | — | — |
 | `ship` | yes | yes | — | — | — | — | — | — |
-| `skillify` | — | — | — | — | — | — | — | — |
+| `skill-new` | — | — | — | — | — | — | — | — |
 | `skill-router` | — | — | — | — | — | — | — | — |
 | `status` | — | — | — | — | — | — | — | — |
 | `uniformity` | — | — | — | — | — | — | — | — |
 | `usage-log` | — | — | — | — | — | — | — | — |
-| `v4-migrate` | — | — | — | — | — | — | — | — |
+| `verify` | — | — | — | — | — | — | — | — |
+| `web-session` | — | — | — | — | — | — | — | — |
 | `welcome` | yes | yes | yes | — | — | — | — | — |
 
-Adoption: D14 necessity=12% · D12 gap=12% · D4 nav=0% · D9 brief-forge=0% · D7 pack=0% · D13 obs=0% · D6 recovery=0% · D5 checkpoints=0%
+Adoption: D14 necessity=14% · D12 gap=14% · D4 nav=1% · D9 brief-forge=0% · D7 pack=0% · D13 obs=0% · D6 recovery=0% · D5 checkpoints=0%
 
 ### Agents (n=69)
 
@@ -192,9 +162,9 @@ Adoption: D14 necessity=12% · D12 gap=12% · D4 nav=0% · D9 brief-forge=0% · 
 | `PPTNarrativeArchitect` | — | — | n/a | — | — | — | n/a |
 | `WebExperienceCritic` | — | — | n/a | — | — | — | n/a |
 | `WordTechnicalEditor` | — | — | n/a | — | — | — | n/a |
-| `AccessibilityChecker` | — | — | n/a | — | — | — | n/a |
 | `ADRDrafter` | — | — | n/a | — | — | — | n/a |
 | `APIDesigner` | — | — | n/a | — | — | — | n/a |
+| `AccessibilityChecker` | — | — | n/a | — | — | — | n/a |
 | `Architect` | — | — | n/a | — | — | — | n/a |
 | `BackendArchitect` | — | — | n/a | — | — | — | n/a |
 | `CapacityPlanner` | — | — | n/a | — | — | — | n/a |
@@ -203,8 +173,8 @@ Adoption: D14 necessity=12% · D12 gap=12% · D4 nav=0% · D9 brief-forge=0% · 
 | `ContextBudgetAdvisor` | — | — | n/a | — | — | — | n/a |
 | `ContractTestArchitect` | — | — | n/a | — | — | — | n/a |
 | `CostAnalyzer` | — | — | n/a | — | — | — | n/a |
-| `DatabaseDesigner` | — | — | n/a | — | — | — | n/a |
 | `DataPipelineDesigner` | — | — | n/a | — | — | — | n/a |
+| `DatabaseDesigner` | — | — | n/a | — | — | — | n/a |
 | `DebugForensics` | — | — | n/a | — | — | — | n/a |
 | `DeploymentEngineer` | — | — | n/a | — | — | — | n/a |
 | `DocWriter` | — | — | n/a | — | — | — | n/a |
@@ -251,11 +221,13 @@ Adoption: D14 necessity=0% · D12 gap=0% · D9 brief-forge=0% · D7 pack=0% · D
 
 Adoption: D14 necessity=100%(floor) · D12 gap=100%(floor) · D7 pack=0% · D13 obs=0%
 
-### Warn-hooks (n=27)
+### Warn-hooks (n=29)
 
 | Component | D14 necessity | D12 gap | D4 nav | D9 brief-forge | D7 pack | D13 obs | D6 recovery |
 |---|---|---|---|---|---|---|---|
 | `context-bloat-warn` | — | — | n/a | n/a | — | — | n/a |
+| `cycle-incomplete-warn` | yes | yes | n/a | n/a | — | — | n/a |
+| `cycle-position-inject` | yes | yes | n/a | n/a | — | — | n/a |
 | `da-migration-irreversible-warn` | — | — | n/a | n/a | — | — | n/a |
 | `da-retention-violation-warn` | — | — | n/a | n/a | — | — | n/a |
 | `da-schema-drift-warn` | — | — | n/a | n/a | — | — | n/a |
@@ -283,7 +255,7 @@ Adoption: D14 necessity=100%(floor) · D12 gap=100%(floor) · D7 pack=0% · D13 
 | `tq-coverage-drop-warn` | — | — | n/a | n/a | — | — | n/a |
 | `tq-perf-regression-warn` | — | — | n/a | n/a | — | — | n/a |
 
-Adoption: D14 necessity=11% · D12 gap=11% · D7 pack=0% · D13 obs=0%
+Adoption: D14 necessity=17% · D12 gap=17% · D7 pack=0% · D13 obs=0%
 
 ### Lifecycle-hooks (n=2)
 

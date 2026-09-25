@@ -1,7 +1,7 @@
 # Task-relevant intake
 
-This is the shared question/authority procedure for SCOPE, DEFINE, PLAN and their
-alternate entry points. It is instruction-driven, not a question daemon or an
+This is the shared question/authority procedure for SCOPE, DEFINE, PLAN and
+inspection. It is instruction-driven, not a question daemon or an
 automatic approval mechanism. Use the [Universal adapter](../../../shims/universal/ADAPTER.md)
 and the [selected work map](../../spec-kit/references/work-map.md).
 
@@ -31,12 +31,14 @@ and the [selected work map](../../spec-kit/references/work-map.md).
 | Migration | Source/target versions, compatibility, owned data, interruption/recovery |
 | Research or comparison | Research question, source boundary, evidence quality, uncertainties |
 | Feature or internal tool | User task, smallest useful outcome, constraints, viable alternatives |
-| Explicit venture strategy | Demand evidence, status quo, paying-user wedge, distribution, future fit |
+| Explicit strategy | Demand or outcome evidence, status quo, smallest useful outcome, adoption, future fit |
 
 L/XL size, a fresh repository, missing `scope.md` or an unfamiliar domain never
-selects the venture lens. `--lens venture`, a task-relevant explicitly selected
-pack lens, or the operator's strategy request can select it. Preserve the useful
-venture questions in DEFINE and plan-ceo-review without making them universal gates.
+selects a strategy lens. `--lens strategy`, the explicit `--lens venture` spelling,
+a task-relevant operator-selected pack lens, or the operator's strategy request
+can select it. DEFINE retains strategic questions without making them universal
+gates. `--mode minimal` reduces narration and optional exploration, not mandatory
+risk, policy, approval or review obligations.
 
 ## Examples
 
@@ -50,5 +52,7 @@ venture questions in DEFINE and plan-ceo-review without making them universal ga
   workarounds and the narrowest paying-user wedge. Mark unsupported premises rather
   than inventing market evidence or psychological traits.
 
-`plan-tune` preferences are dormant data until a tested reader exists. They do not
-resolve a design conflict, change host permissions or override any material decision.
+Existing question-preference history remains inspectable data at its original
+path. No runtime reader applies it, and entry consolidation does not delete it.
+It cannot resolve a design conflict, change host permissions or override a
+material decision. Record current decisions in the selected design/handoff.

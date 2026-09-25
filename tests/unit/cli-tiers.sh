@@ -3,7 +3,7 @@
 # Locks lib/cli-tiers.sh — the per-CLI capability tier lookup that /li:welcome uses
 # for its honest first-run message and that li-wiki-gen uses to generate the README
 # table. The tier logic is the thing most likely to be wrong, so it gets a real test
-# (plan-eng-review decision: a testable shell lib, not untestable markdown).
+# (engineering inspection decision: a testable shell lib, not untestable markdown).
 # tag: onboarding cli-tiers
 set -uo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"

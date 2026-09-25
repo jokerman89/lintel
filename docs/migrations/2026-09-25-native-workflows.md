@@ -35,6 +35,7 @@ An installed file is not evidence of native discovery or a completed client test
 | `learn`, `lessons` | `/li:lessons-add` for additions and `/li:lessons-surface` for lookup. Preserve `L-NNN` grammar, update-before-append, deduplication and supersession. |
 | `skillify` | `/li:skill-new`, retaining owned scaffold targets and frontmatter validation. Historical candidate preference/type values remain compatible. |
 | `document-generate` | `/li:generate-docs --source <path> --target reference\|customer-guide\|tutorial`, retaining source fidelity, voice, depth and output selection. |
+| `make-pdf` | `/li:generate-pdf`, which carries the former print options and provider. See the PDF writer note below. |
 | `context-save`, `context-restore` | `/li:pause [label]` or `--label <label>`, and `/li:resume --from <checkpoint>`. Ordinary resume keeps selected-work/ledger/job precedence. |
 | `context-warm-related`, `context-warm-adrs`, `context-warm-sessions` | `/li:context-warm --related <topic>`, `--adrs <topic>` or `--sessions [N]`, alongside retained `--path`, `--glob` and `--pattern` selection. |
 | `browse`, `scrape`, `open-managed-browser`, `setup-browser-cookies` | `/li:web-session --mode browse\|scrape\|open\|cookies`, preserving each mode's inputs, provider, URL admission, lifecycle and cookie-consent boundaries. |
@@ -49,14 +50,22 @@ An installed file is not evidence of native discovery or a completed client test
 | `help`, `v4-migrate` | `/li:catalog` or `/li:welcome` for navigation; `/li:migrations` for historical inspection and explicitly authorized apply/rebind guidance. |
 | `personas-rotate` | `/li:role --audience [name]` and `--clear-audience`, using configured persona sources. This is a conversation overlay, not a change to the persistent working role. |
 
-The PDF writer remains supported. The former `make-pdf` print route is folded into
-`generate-pdf`, which carries its print options and provider; there is still no PDF
-reader, so do not claim a PDF reader/inspection result. Workbook, slide,
-Word and other format providers are not an optional cleanup quota.
+The PDF writer and all direct print options now belong to `/li:generate-pdf`:
+input/output, A4/letter/custom paper, portrait/landscape, header/footer, print CSS and
+background selection. Its actual preparation and canonical browser-print consumers
+remain. ADR-0033 removed the reader, so produced PDF text, pages and visual inspection
+remain unverified without a separately authorized observer. Workbook, slide, Word and
+other format providers are not an optional cleanup quota.
 
 `verify --json` retains compatible reporting fields (`runner`, `passes`, `failures`,
 `skipped`, `exit`, `failures_list`). That summary is not the separate strict v2 QA artifact
 consumed by the shared acceptance and SHIP gates.
+
+For additional code-review/diagnosis checks, use `--cross-check --reviewer codex`
+when that specific available reviewer is authorized, or `--cross-check` for actual
+host selection. This replaces vendor-named review switches without removing Codex
+client support. `--no-cross-check` retains the explicit opt-out for optional checks;
+it cannot waive required independent review.
 
 ## Preserve saved work and evidence
 

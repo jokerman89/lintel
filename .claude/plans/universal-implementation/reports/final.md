@@ -6,8 +6,10 @@ addendum passes the CI-repair delta up to `ed91ef4f` and binds CI to it
 first hosted strict runs found portability defects, which the coordinator repaired (see "Delivery
 CI"). On that head every CI job passed except the three that ran `document-pdf`, which needed an
 undeclared `pypdf`. On 2026-09-25 the operator ordered both remaining blockers removed from Lintel
-(ADR-0033): the pypdf-based PDF reader, and the blocked A15.1–A15.4 items. The removal needs its
-own strict CI run and an A23.5 addendum.
+(ADR-0033): the pypdf-based PDF reader, and the blocked A15.1–A15.4 items. On the removal head
+`b7b245fa`, run `36108366549` passes all 22 jobs. PR #93 is merged into `main` as `80002ed4`
+(2026-09-25), so every item in scope is closed. The A23.5 Phase 4 addendum on the removal is a
+post-merge review.
 
 ## Delivery identity
 
@@ -20,8 +22,8 @@ own strict CI run and an A23.5 addendum.
 
 ## Acceptance by area
 
-The count is 108 of 109 original top-level items. A15's four items are removed from scope by the
-operator's decision (ADR-0033), and A23.4 closes on the strict CI run of the removal head. Each area
+The count is 109 of 109 original top-level items in scope. A15's four items are removed from scope
+by the operator's decision (ADR-0033). Each area
 links to its plan section, where the leaf evidence and the review files are cited.
 
 | Area | Closed | Status |
@@ -48,7 +50,7 @@ links to its plan section, where the leaf evidence and the review files are cite
 | [A20 Provenance and versions](../plan.md#a20-provenance-and-versions-p07p13-r04) | 4/4 | Accepted |
 | [A21 Safe dormant handoff](../plan.md#a21-safe-dormant-handoff-p04-r08) | 4/4 | Accepted |
 | [A22 Preserved Swarming integration](../plan.md#a22-preserved-swarming-integration-p04-r09) | 7/7 | Accepted |
-| [A23 Boundary regression evidence](../plan.md#a23-boundary-regression-evidence-all-owners-p14-r11) | 4/5 | Pending: A23.4 (leaf `A23.4.ci`) closes on the strict CI run of the removal head; A23.1–.3 and A23.5 are closed |
+| [A23 Boundary regression evidence](../plan.md#a23-boundary-regression-evidence-all-owners-p14-r11) | 5/5 | Accepted; A23.4 closes on run `36108366549` (all 22 jobs green on the removal head) |
 | [A24 Observable enterprise profile value](../plan.md#a24-observable-enterprise-profile-value-p14-r04r11) | 4/4 | Accepted |
 | [A25 Trusted implementation source](../plan.md#a25-trusted-implementation-source-p01-r01) | 3/3 | Accepted |
 | [A26 Explicit private-sync destination](../plan.md#a26-explicit-private-sync-destination-p02-r10) | 4/4 | Accepted |
@@ -96,7 +98,8 @@ These are reviewed at A23.5, not by a package review:
 - **CI (ADR-0032).**
   - `run-all.sh --shard K/N` (`8651f392`), with its runner contract.
   - The sharded `ci.yml` (`736cb82f`), with the PowerShell 7 selector and a short `TEMP` on
-    Windows (`b3620e5c`), and separate tier steps (`6d12fd91`).
+    Windows (`b3620e5c`, since replaced by the synthetic root of `d739d479`), and separate tier
+    steps (`6d12fd91`).
   - The runner's `N/A` category for `platform: windows-only` skips off Windows (`917d7125`), and
     the 22 canonical skip reasons (`89131723`, only reason strings change).
   - The repair after the first hosted run (ADR-0032, "First hosted run"):
@@ -175,6 +178,14 @@ These are reviewed at A23.5, not by a package review:
   - QI-3: the node-absent fallback of `hooks-registration-safe.sh:41` misreads escaped quotes.
   - The A23 unit's Q1: `universal-a23.py` runs a whole P09 test module through `runpy`.
   - P13's N1: the installed-consumer entries are a large share of a Windows CI shard.
+  - A23.5 Phase 4 (`reviews/A23.5-phase4-removal-b7b245f.md`):
+    - A5-31: leftover reader claims remain in `skills/catalog/references/selections.md:332-341` and
+      `docs/client-adapters.md:128`, and `make-pdf` step 6 needs one sentence.
+    - A5-32: `generate-pdf`'s DONE status can be reached while text and pages are unverified.
+    A5-31 and A5-32 are routed as fix-forward items to the "Removing legacy skills and agents"
+    integration, which owns those paths after the merge. A5-33 (state the interpretation in
+    ADR-0033) and A5-34 (stale records) are resolved in this records update. A5-35 is under
+    "Delivery CI".
   - A23.5 Phase 3 (`reviews/A23.5-phase3-ci-ed91ef4.md`):
     - A5-26: the Windows default-home test clears its 260-character threshold by only 2 characters
       under hosted `D:\a\_temp\s\t`.
@@ -232,7 +243,8 @@ exercises it, and it was validated statically and in the A23.5 review. The entri
 - The P14 A23 unit's first review (`fb17f69f`, SPEC FAIL, repaired) and its recheck.
 - A23.5: the Phase 1 notes (`9c6f65a4`), the Phase 1b notes (`edd2f556`), the Phase 2 final
   review (`reviews/A23.5-final-ad529eb.md`) and the Phase 3 CI addendum
-  (`reviews/A23.5-phase3-ci-ed91ef4.md`, SHA-256 `bb42e3e0…72669c49`).
+  (`reviews/A23.5-phase3-ci-ed91ef4.md`, SHA-256 `bb42e3e0…72669c49`), and the post-merge Phase 4
+  addendum on the removal (`reviews/A23.5-phase4-removal-b7b245f.md`, SHA-256 `63192487…a0aa37ef`).
 
 **Not run locally:** the strict `--require-all` suite, because jq is denied (L-046); Linux and macOS;
 Python 3.9 and 3.12; and Windows PowerShell 5.1. The delivery PR's CI supplies the strict suite on
@@ -248,14 +260,16 @@ and summaries are under the coordinator's session files, `ci93/`.
 | `36054668106` | `2ab1f25d` | The first hosted strict run. It failed on all three systems; ADR-0032's "First hosted run" section records the causes. |
 | `36063322462` | `c5667a7e` | The repair batch. It confirmed most of the repair and exposed two further classes: macOS `mktemp` ignores `TMPDIR`, and a quiet skip was counted as partial. It was superseded when those fixes were pushed. |
 | `36065850657` | `ed91ef4f` | 19 of 22 jobs pass: the syntax job, and unit-1, unit-2, integration-1, -2, -4 and `other` on each system. Each system passes 149 of its 150 entries. The only failing entry is `document-pdf`, in integration shard 3 on each system (27 errors, `No module named 'pypdf'`). |
+| `36076065427` | `d285a332` | The records-only head that preserves the Phase 3 addendum. It reproduces `36065850657`: the same 19 green jobs, each integration-3 failing only on `document-pdf`. |
+| `36108366549` | `b7b245fa` | The removal head (ADR-0033). All 22 jobs pass on Linux, macOS and Windows, with no failed, skipped or partial entry. |
 
 On `ed91ef4f`, every other entry passes with no skipped or partial result. That includes
 `copilot-kit`, `universal-a23` and every `platform: windows-only` method on hosted Windows. Off
 Windows, those methods are reported as N/A: 23 on Linux and 23 on macOS. The once-per-system checks
 all pass: repository verification, stock Bash 3.2 installation on macOS, `check-install.ps1` on
 Windows, and the catalog, instructions, adapter and wiki checks. The jq-dependent assertions X2,
-C-5 and C-7 and the platform row X3 therefore now run strictly. A23.4 stays open only for the
-`pypdf` decision above.
+C-5 and C-7 and the platform row X3 therefore now run strictly. At that point A23.4 stayed open
+only for the `pypdf` decision.
 
 A23.5's Phase 3 addendum binds this run to the reviewed content: every job checked out the test merge
 `4382b3c8`, whose parents are `9575aaac` and `ed91ef4f` and whose tree equals `ed91ef4f`'s. The longest
@@ -264,5 +278,17 @@ inherits the binding only if it changes nothing outside `.claude/` and its own C
 outcome: the same 19 green jobs, each integration-3 failing only on `document-pdf`.
 
 The operator-ordered removal (ADR-0033) then deleted `document-pdf`'s pypdf-dependent tests together
-with the reader. The removal head is a product change: it needs its own green strict run and an
-A23.5 addendum, which PR #93's checks and `reviews/` record.
+with the reader. Run `36108366549` on the removal head passes all 22 jobs, and PR #93 merged as
+`80002ed4`.
+
+**Merge timing (A5-35).** PR #93 merged at 08:03:07Z. At that moment the Phase 4 addendum had not
+arrived, and Windows integration-1, -2 and -3 were still running.
+- The authority was the operator's instruction "Make this as fast as possible, do not slow down, skip
+  whatever you can skip we must RUSH".
+- The coordinator received it before the merge: it interrupted the monitoring read that preceded the
+  08:02:39Z CI check. The session store stamps it 08:04:52Z, after the merge, which likely reflects
+  recording rather than delivery.
+- Earlier instructions pointed the same way: "Hurry" (07:14:25Z), and "GO live nu!", which the removal
+  session relayed from 07:08:27Z.
+- `A23.4.ci` therefore closed retroactively, when the last Windows job finished (09:06:13Z), and the
+  Phase 4 addendum passed after the merge.

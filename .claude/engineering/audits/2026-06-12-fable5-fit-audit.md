@@ -1,5 +1,9 @@
 # Lintel × Claude Code (Fable 5) — end-to-end fit audit
 
+> Retained historical narrative. Terminology was neutralized on 2026-09-25;
+> former external path/name labels are symbolic, not executable current routes.
+> Original dates, finding IDs and recorded outcomes remain historical, not rerun acceptance.
+
 > Research-dive 2026-06-12, operator-requested ("ax till limpa"). Three tracks: mechanical
 > health pass · skill-surface elegance metrics · wired-vs-shipped reality. Plus a first-person
 > assessment by the agent operating inside the harness. Assessment only — no fixes applied.
@@ -33,7 +37,7 @@ ceremony; the same capability fits in ~60% of the current size.
 |---|---|
 | Per-skill protocol ceremony (status enums, hop-in, voice, pause-points…) restated 110-166× | ~5.4-8.2k lines (20-30%) |
 | 35 engineering sub-skills with exactly ONE caller each (their module) | ~4,400 lines (16%) |
-| Skills with ≤1 inbound command reference | 27 (16%) — incl. gbrain-setup/sync at 0 |
+| Skills with ≤1 inbound command reference | 27 (16%) — incl. retired-memory-addon-setup/sync at 0 |
 | Agent fleet wired | 69/70 (orphan: WorkshopFacilitator) |
 | Spine (top-20 central skills) | only 19-20% of lines — healthy concentration |
 

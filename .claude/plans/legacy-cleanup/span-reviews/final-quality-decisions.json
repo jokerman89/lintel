@@ -1,0 +1,1055 @@
+{
+  "artifact_type": "finite semantic adjudication; not P05 clearance or a new runtime schema",
+  "date": "2026-09-25",
+  "candidate": "a7a1df338bacf900f1210f08131f391831992f1f",
+  "base": "77cb8d3f893d2ef42be2631fe35ae45594f21bd3",
+  "carry_over_source": "d285a33283ec90341b79f3d093d1e9ca6a1504ce",
+  "input": {
+    "path": "C:\\Users\\jokerman\\.copilot\\session-state\\e9c20b62-f877-4242-82cd-b5002d452da8\\files\\c-span-review-final-records-lf.json",
+    "bytes": 336492,
+    "sha256": "d860ca5a2824718b7ad4b76014b362dfd8e69c1219473bd91d8abf21ab84d8aa",
+    "entries": 54,
+    "source_files": 36,
+    "excerpt_bytes": 159621,
+    "representation": "Exact UTF-8 LF excerpts from the declared a7 Git blobs; no working-tree EOL rewrite, normalization or alternate CRLF identity.",
+    "declaration_fields": ["id", "path", "start", "end", "sha256", "category", "reason", "source_evidence"],
+    "declaration_serialization": "JSON ensure_ascii=true, sort_keys=true, separators=(',', ':'), allow_nan=false, encoded UTF-8 and SHA-256 hashed. All eight original field values and markers remain those in the exact input packet; this decision artifact does not replace the declarations."
+  },
+  "reviewer": {
+    "app_project_session_id": "6c39f786-01dd-4a99-b120-f286df376300",
+    "tool_session_id": "8b0c4a2f-3e1b-4c3d-8237-74d02ff29710",
+    "coordinator_routing_id": "e9c20b62-f877-4242-82cd-b5002d452da8",
+    "independence": "Separate semantic reviewer, not the report author, declaration author, product implementer or SOURCE-SPEC actor 1742f900-1de4-4a59-beee-95c3a907a063.",
+    "descendants": 0
+  },
+  "result": {
+    "ACCEPT": 49,
+    "REJECT": 5,
+    "NEEDS_EVIDENCE": 0,
+    "scope": "Exactly the 54 remaining-source-record declarations in the supplied final LF packet.",
+    "rejected_ids": ["remaining-source-record-5", "remaining-source-record-24", "remaining-source-record-32", "remaining-source-record-33", "remaining-source-record-39"],
+    "release_clearance": false,
+    "mechanism_review": "NOT_PERFORMED",
+    "counterexample_execution": "NOT_RUN",
+    "runtime_hosted_qa_or_p05_corroboration": "NOT_PERFORMED",
+    "interpretation": "Forty-nine bounded records have a substantive original-assessment, source-comparison, reproduction or observed-result meaning in their exact supplied contexts. Five proposed masks are overbroad: the W5 remediation task, maintained context-warming navigation, the operative P13 evidence/disposition legend, the P13 current-map navigation/supersession section, and the P06 future-quality instruction mixed with old dispositions. Leave these five declarations visible and unapproved. Rejecting a whole-section mask does not reject every historical fact inside it or authorize changing an original report."
+  },
+  "original_work": {
+    "work_map": ".claude/plans/legacy-cleanup/work.json",
+    "package_id": "INTEGRATE",
+    "original_leaf_ids": [
+      "3.1.a", "3.2.a", "3.3.a", "3.4.a", "4.1.a", "4.3.a", "4.4.a",
+      "2.1.a", "5.1.a", "5.2.a", "5.10.a", "5.12.a",
+      "5.4.a", "5.5.a", "5.7.a", "5.7.c", "5.8.a", "6.1.a", "6.2.a", "6.3.a", "6.4.a",
+      "5.6.a", "7.1.a", "7.2.a", "7.3.a", "7.4.a", "7.5.a",
+      "0.3.a", "0.3.b", "0.3.c", "1.5.a", "1.6.a", "1.6.b", "1.7.b", "7.1.c",
+      "1.8.a", "2.2.a", "2.3.a", "2.4.a", "8.8.a", "9.3.a",
+      "0.1.b", "0.2.c", "4.2.a", "5.7.e", "8.2.a", "8.4.a", "8.5.a", "8.7.a",
+      "9.1.a", "9.2.a", "10.1.a", "10.2.a", "10.4.a", "10.5.a", "10.5.b", "10.6.a", "10.8.a"
+    ],
+    "semantic_scope_related_leaves": ["0.2.c", "0.3.a", "0.3.b", "0.3.c", "9.3.a"],
+    "completed_leaves": [],
+    "previously_unverified_leaves_remain_open": ["7.1.c", "9.3.a", "0.2.c", "9.2.a", "10.2.a", "10.5.a", "10.8.a"],
+    "preservation": "All 58 original leaves, six original lane reports, 69 agents and 94 canonical skills remain unchanged. Axx and other IDs quoted in old reports are original provenance, not replacements for the cleanup work map. No deletion quota, task closure or authority change follows."
+  },
+  "conditions": [
+    "ACCEPT applies only to the original packet's exact path, unique ordered whole-line markers, start-inclusive/end-exclusive span, raw LF SHA and declaration digest. The inclusive line coordinates below are supplemental citations, not alternate boundaries or a locator that may drift.",
+    "The eight-field declaration digest does not itself include source_context_sha256. Each decision explicitly binds that complete-source hash and Git blob here, as well as the full packet hash. A consumer must retain this binding through the actual existing prepared acceptance/evidence mechanism, including its original full-source acceptance-manifest identity; a freely supplied matching hash is not sufficient.",
+    "An unchanged excerpt embedded under changed current-use context cannot inherit approval. Any full-source context mismatch, newly operative surrounding instruction or changed use requires new bound evidence and a new semantic decision. Full-source hashing is a context invariant, never whole-file masking permission.",
+    "No byte normalization, alternate CRLF hash, duplicate/nested/reordered marker, missing end, relocated path, expanded section, new record or generic heading/schema-shaped fallback is approved. Only the exact accepted interior may be classified; adjacent text remains checked.",
+    "Keep visible precise OBSERVATION locations, categories and reasons. Unknown/new/current routes, navigation, imports, selection, replacement/result consumer fields, active evidence legends and deferred execution instructions do not inherit an exception from an original path, date, heading or file history.",
+    "Original source-specific assessments may contain recorded recommendations, comparisons and reproductions. That does not turn the recommendation into authorized work. Conversely, an actual task card, active consumer legend or future-owner instruction is not merely an assessment because it sits in an old report.",
+    "Historical counts, PASS/FAIL/BUILT statuses, reviewer names, aliases, module mappings and claims about methods or test runs remain attributed original observations. They are not current availability, native registration, policy, independent execution, present acceptance or release proof.",
+    "Keep invalid historical pseudo-YAML and quoted scripts/diffs as literal evidence. Do not repair them into fake-valid structured data, parse them as runtime instructions, execute them or infer a new provider contract from them.",
+    "All per-record counterexamples below are semantic discriminators, NOT RUN tests. Their intended boundary is rejection or continued visibility of current-use/new bytes, not suppression by a baseline, extension, subtree, date or supposedly historical heading.",
+    "Narrowing suggestions are not approvals. Any revised marker, field selection, span, hash, category, reason or source context needs a new exact declaration and explicit decision. No rejected digest may be registered as accepted or reused for a narrower span.",
+    "The unchanged set01/set02 LF decisions remain separate. No earlier CRLF approval transfers, no prior rejection is reversed, and no owner chronology or later discharge reference supplies independent clearance or blanket report permission.",
+    "This artifact is decision data only. No guard implementation, P05 producer/reader, runtime record, profile bootstrap, corroboration, full-candidate review, hosted outcome or QA/release receipt is created."
+  ],
+  "decisions": [
+    {
+      "id": "remaining-source-record-1",
+      "declaration_digest": "23516ac77eb68548a68d9e83c95a34dc7c834f72adee329344832185bd90d470",
+      "sha256": "8a96aa2d750d4e268b637e396a5f70ec9f3b2276cac643bfbbc3009c8cc56210",
+      "path": ".claude/engineering/audits/2026-09-20-universal-quality/reviews/upstream.md",
+      "source_context_sha256": "0c29e06fe608668251791b56a13cef71953edd6de98fed004cb05af6bb9b3522",
+      "source_git_blob": "dd73dadb7cd04d6142a6bebeebd6a436afdea529",
+      "source_lines_inclusive": [33, 46],
+      "decision": "ACCEPT",
+      "basis": "UP-02 is an original read-only comparison of Lintel 28061e4 and named upstream revisions. Its old QA coverage observations and Borrow/Avoid/Acceptance proposals are the substance of that comparison, not an instruction to run the retired QA entry now.",
+      "current_use_inside": "Capability and observable-evidence recommendations are original assessment conclusions. They grant neither browser permission nor a working current route, and do not establish actual browser execution.",
+      "adjacent_boundary": "UP-03 at 47 is excluded and separately decided; no preceding or following review section inherits this span.",
+      "counterexamples": [
+        "Insert 'Run /li:qa now' as current execution inside UP-02: new bytes require a new decision, not an assessment-heading exemption.",
+        "Recontextualize the unchanged paragraph as the current browser dispatch contract: the complete original context binding fails."
+      ]
+    },
+    {
+      "id": "remaining-source-record-2",
+      "declaration_digest": "da5f6fa74b6f169d5efb405a587c4c7a1657fc59cce9317b5b2c5ddfe50b615c",
+      "sha256": "b32f6508a4331f5773701782a5be0819a1630b6b05e6d9492d142dff2fe0ae9d",
+      "path": ".claude/engineering/audits/2026-09-20-universal-quality/reviews/upstream.md",
+      "source_context_sha256": "0c29e06fe608668251791b56a13cef71953edd6de98fed004cb05af6bb9b3522",
+      "source_git_blob": "dd73dadb7cd04d6142a6bebeebd6a436afdea529",
+      "source_lines_inclusive": [47, 58],
+      "decision": "ACCEPT",
+      "basis": "UP-03 records the same named upstream/source comparison's premise-testing and optional startup/presentation-lens assessment. The plan-ceo-review reference at 55 identifies the compared original method, not a newly selected consumer.",
+      "current_use_inside": "The proposed optional lens is advice attributed to that comparison. This does not register the old alias, mandate a venture interview or alter current DEFINE routing.",
+      "adjacent_boundary": "UP-04 at 59 and its ADR discussion remain outside this declaration.",
+      "counterexamples": [
+        "Add a current selection field pointing to skill:plan-ceo-review: that new field must remain unapproved.",
+        "Change the surrounding source comparison into an active onboarding instruction while keeping this excerpt: approval cannot transfer."
+      ]
+    },
+    {
+      "id": "remaining-source-record-3",
+      "declaration_digest": "ef72eca9afedd3e3576517a9dcef1f9af0fd34c3bef72ec23f63ba42d7efec50",
+      "sha256": "581de21fd22a19a408353e884b1a117d742a99b7f3974744509b94d7de3ff6dc",
+      "path": ".claude/engineering/audits/lintel-five-lens-audit.md",
+      "source_context_sha256": "77e5e56ea14714c665878d7cb01912b09bc0de739bd1a511a82eeb2e1a73e08e",
+      "source_git_blob": "fb35db0c5584369680aa6bda925a833fef26f02d",
+      "source_lines_inclusive": [28, 46],
+      "decision": "ACCEPT",
+      "basis": "The preamble fixes the advisory, propose-never-execute reflection to main at 0f4aa16 and its 168-skill/65-agent census. The twelve strengths, including old composites and warming shortcuts, are evaluated features of that source.",
+      "current_use_inside": "Preservation language is the auditor's original assessment, not present registration or a current install/dispatch list. The later historical banner alone would not justify this decision.",
+      "adjacent_boundary": "Findings by lens at 47 is excluded. Other findings and any later instructions retain their own classification.",
+      "counterexamples": [
+        "Add a live replacement command or import to the strengths list: its changed digest is unapproved.",
+        "Remove the source-pinned advisory context or republish this as the current skill catalog: the old approval does not follow."
+      ]
+    },
+    {
+      "id": "remaining-source-record-4",
+      "declaration_digest": "16166b96ca8e74f69ad436466a9799238e2aaca4cb4abba5b32c2e4a7a5dc0cc",
+      "sha256": "c8974b5efc7605511ff760f2fe27b07c0b8e036019e0d650ecba3d923f1d09af",
+      "path": ".claude/engineering/audits/lintel-uniformity-MASTER.md",
+      "source_context_sha256": "130b70d16e8b0692bb4c6b0410b4b6e1ef048a8b730597d9321379d7c2a55cec",
+      "source_git_blob": "3de01d3ca1472da02f06d1f761547316a8747a0b",
+      "source_lines_inclusive": [29, 55],
+      "decision": "ACCEPT",
+      "basis": "This is the completed original eight-cohort/five-crosscut v4.0 assessment's ranked finding synthesis, tied to its 144-skill/83-agent census and cohort evidence. The components, proposed uplift, reason, effort and dependency columns are an original analytical comparison, not an approved work-card execution.",
+      "current_use_inside": "The 'Proposed uplift' column is not a current replacement/result column. Its imperative recommendations remain attributed proposals; no resolver installation, storage migration or retired planner invocation is authorized. This is distinct from the actual W5 task package rejected in record 5.",
+      "adjacent_boundary": "The cross-cut scorecard at 56 is excluded. Earlier build-order advice and the separate remediation plan do not receive this mask.",
+      "counterexamples": [
+        "Add a Current cleanup route column or mark the proposed uplift as authorized live dispatch: the new content must remain checked.",
+        "Make this table the active implementation checklist through outside-context instructions: unchanged table bytes no longer suffice."
+      ]
+    },
+    {
+      "id": "remaining-source-record-5",
+      "declaration_digest": "9e94019d9147fe3c951bd3d812d53ae0d99be608f06656f0bd6c66ec1c126a90",
+      "sha256": "7dddd3b44c2cb07365878797fcb8570634274fa450cef7d9cbc19c2afdbb6938",
+      "path": ".claude/engineering/audits/lintel-uniformity-REMEDIATION-PLAN.md",
+      "source_context_sha256": "aa6d3cdcf3fef08ec5433686175e20db8562e47b0e3c7ab9a269d83f07ad646b",
+      "source_git_blob": "9be0fc1fe97e9200b95089653520c47d69de579f",
+      "source_lines_inclusive": [95, 103],
+      "decision": "REJECT",
+      "basis": "This is an actual DRAFT_FOR_REVIEW remediation work package, not a finding/result observation. Lines 97-100 command canonical-root/config changes, select retired skill paths and assign W5.1-W5.5 tasks. The test and verification lines specify future work rather than record outcomes.",
+      "current_use_inside": "Masking the whole package would hide executable planning/consumer guidance, including the old storage destination and retired planner/context paths. Age and a source blob do not establish that this task body is an observational field.",
+      "adjacent_boundary": "W4's verification before 95 and W6 beginning 104 are excluded, but the proposed W5 interior itself is overbroad.",
+      "narrowing_suggestion": "Leave this declaration unapproved. If an exact retired source-path field is needed as provenance, submit only that literal field with its original attribution and new digest, excluding the What/Tasks/Tests/Verification instructions. No narrower field is approved here.",
+      "counterexamples": [
+        "Change W5.3 into another current migration step: a task remains checked even under an old audit heading.",
+        "Rename this exact declaration's category to historical, or assert that all old draft plans are observations: neither overrides this REJECT."
+      ]
+    },
+    {
+      "id": "remaining-source-record-6",
+      "declaration_digest": "87601d7f4f5d89c63d2bc72dbe82dec3e03df7e88b093e5c3b96a8d872f2a785",
+      "sha256": "ccb42664949b6b7b4049c9645eccd4ff65506c17930d9928cdc9671faddb92d6",
+      "path": ".claude/engineering/audits/lintel-uniformity-cross-X1-concept-consistency.md",
+      "source_context_sha256": "433c90b5fa8729dbdcb964627cab94573295c4a15e378228e0e790d954bc8b56",
+      "source_git_blob": "2be9a8592a8914eaea767bdf455fe6beaf8a7f3c",
+      "source_lines_inclusive": [232, 253],
+      "decision": "ACCEPT",
+      "basis": "The D1-D14 health summary expressly synthesizes the eight original cohorts and their comparative contract defects. Old planner/context names identify the assessed specimens and gaps.",
+      "current_use_inside": "The dimension conclusions are original audit judgments, not present required metadata, live dispatch or proof that the same defects remain in a7.",
+      "adjacent_boundary": "The fragmentation verdict at 254 is outside the span.",
+      "counterexamples": [
+        "Add a current remediation owner/action to a health row: the changed assessment requires fresh classification.",
+        "Use the unchanged summary as a current capability selector by altering its source context: approval fails."
+      ]
+    },
+    {
+      "id": "remaining-source-record-7",
+      "declaration_digest": "11a2c70243213db365f20afc1875d835bcf8fb9132bc1d4a89396d9f0d0da166",
+      "sha256": "6956ed31bcb4be0e9b47391ca2ca4c304459db10f23898c7015de598981d5483",
+      "path": ".claude/engineering/audits/lintel-uniformity-cross-X3-evolution.md",
+      "source_context_sha256": "476bc2ffa3e899d1ccf147a9fa6b3cb8ceffd0a33bd95aad6e4d255413c84ed8",
+      "source_git_blob": "cccb92b88f32b6a26b38fe566c31c4e02387a1da",
+      "source_lines_inclusive": [84, 98],
+      "decision": "ACCEPT",
+      "basis": "The synthesis-only method and enumerated old channels ground the 5 closed-loop, 11 write-only and 4 absent tallies, including the stated alternative collapsed count. These are original observations about channel coverage.",
+      "current_use_inside": "The counts neither declare today's telemetry healthy/dead nor activate any reader. Differing aggregation is preserved as recorded, not silently reconciled.",
+      "adjacent_boundary": "The operational-motto discussion beginning 99 is excluded.",
+      "counterexamples": [
+        "Insert 'Read the retired audit channel now' into the tally: changed bytes are not approved.",
+        "Extend the end boundary to absorb the following operational discussion: the existing digest cannot authorize that extension."
+      ]
+    },
+    {
+      "id": "remaining-source-record-8",
+      "declaration_digest": "71cdaac6637488df1b72aa3ee1a35fa6a796fdd926473f652d09edb4731493c6",
+      "sha256": "513603557a7add716c5b978f82968b487036c7c6b507e70bb6d21e88c347dfe8",
+      "path": ".claude/engineering/audits/lintel-uniformity-cross-X4-entry-point-matrix.md",
+      "source_context_sha256": "905ca3ff5e19fb3b307a5f4f8c159e15bbf2271bb8a1a83b119b0d85834597d6",
+      "source_git_blob": "d822fd48c4032332bf15e3431372ab048e6be099",
+      "source_lines_inclusive": [74, 125],
+      "decision": "ACCEPT",
+      "basis": "The 47 footnotes are the file:line and cohort evidence for the original v4.0 entry-point matrix. Conditional hook coverage, missing consumers and SHOULD/skip judgments are source-specific assessments rather than a registration manifest.",
+      "current_use_inside": "Words such as fires and skipped describe the original matrix's assertions. They do not prove current hook execution, register removed entries or authorize private profile access.",
+      "adjacent_boundary": "Cell tally at 126 is excluded; this approval does not cover the matrix or later ranked actions.",
+      "counterexamples": [
+        "Add a new present-day hook import to a footnote: it cannot pass as an original source citation.",
+        "Treat all footnotes in this file as historical based on this one declaration: unselected and changed text stays checked."
+      ]
+    },
+    {
+      "id": "remaining-source-record-9",
+      "declaration_digest": "783d8b747e69ff6ffad8adb4baa11ba2b4f4bcf6d9fca1851411e580ae0dc126",
+      "sha256": "308bfd18267af8673da050b3c524fee410e83c3e6e6c220bcd2df35b523e909e",
+      "path": ".claude/engineering/audits/lintel-uniformity-cross-X4-entry-point-matrix.md",
+      "source_context_sha256": "905ca3ff5e19fb3b307a5f4f8c159e15bbf2271bb8a1a83b119b0d85834597d6",
+      "source_git_blob": "d822fd48c4032332bf15e3431372ab048e6be099",
+      "source_lines_inclusive": [157, 166],
+      "decision": "ACCEPT",
+      "basis": "This paragraph interprets the original matrix's coverage and distinguishes wiring gaps from designed-but-unbuilt gaps. Its Fix= phrasing classifies potential remedies to those observations, without defining an executable task sequence.",
+      "current_use_inside": "The taxonomy is not current hook enablement or a command to wire a retired entry. It remains an original analytical conclusion.",
+      "adjacent_boundary": "The ranked should-fire action section at 167 is excluded and remains independently checked.",
+      "counterexamples": [
+        "Append an authorized-now command to the taxonomy: new bytes are outside this decision.",
+        "Widen the marker pair to cover ranked next actions: the accepted observation cannot absorb them."
+      ]
+    },
+    {
+      "id": "remaining-source-record-10",
+      "declaration_digest": "503f64c570aae8a68c22535137c75eaf1a3b5496a6611540a8cc2e50b5af7097",
+      "sha256": "cb4023155ed2921e95ab35767d24a6816fbdf24e3de16c35abfc4a6982285fd9",
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort1-phase-core.md",
+      "source_context_sha256": "e310ddc655779b73f971900f618253aae615ed3142ea2205d16df62f4518e4a2",
+      "source_git_blob": "012aeabfe2d7bde332cb987dad3c4780999cd103",
+      "source_lines_inclusive": [1, 14],
+      "decision": "ACCEPT",
+      "basis": "The opening records the original cohort's exact 13-component audit population, eight phases, five composites and assessment floors. The retired names are specimens being counted and compared.",
+      "current_use_inside": "This original audit population is not the current canonical catalog or a required execution sequence. Its naming/counts remain literal historical data.",
+      "adjacent_boundary": "Designed-not-built note at 15 is excluded; no whole-document heading exemption follows.",
+      "counterexamples": [
+        "Add a Current selected skills list to the preamble: its changed content is unapproved.",
+        "Use this original 13-component count as a7's catalog oracle: semantic observation is not a present count assertion."
+      ]
+    },
+    {
+      "id": "remaining-source-record-11",
+      "declaration_digest": "523bf246e6c546b1749949495116abeb61bd4457bb3bb17f8ca93013e1bfc10d",
+      "sha256": "089c077add940712de24c777ed343daf99317dcd505cb948ddb7caa7cb76af50",
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort1-phase-core.md",
+      "source_context_sha256": "e310ddc655779b73f971900f618253aae615ed3142ea2205d16df62f4518e4a2",
+      "source_git_blob": "012aeabfe2d7bde332cb987dad3c4780999cd103",
+      "source_lines_inclusive": [27, 34],
+      "decision": "ACCEPT",
+      "basis": "The ranking compares plan, fix and review-and-ship within the original cohort, with method and telemetry differences as reasons. It is evaluative source evidence, not live dispatch selection.",
+      "current_use_inside": "Strongest/weakest does not instruct a current user to run the old composite or claim it still exists.",
+      "adjacent_boundary": "Per-component finding records at 35 are excluded and do not inherit approval.",
+      "counterexamples": [
+        "Add 'For this task choose review-and-ship' to the ranking: a current selection remains unapproved.",
+        "Move the same ranking into today's install instructions: this path/context-bound decision cannot transfer."
+      ]
+    },
+    {
+      "id": "remaining-source-record-12",
+      "declaration_digest": "2cd11ce2b6218da1648f316b8f9c5dabcf93d84432df54d9b2a94b359ee22594",
+      "sha256": "129fb3510e136fb9dc2f045e94791c6bde891c7388091b1493422bdbcb9c1674",
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort1-phase-core.md",
+      "source_context_sha256": "e310ddc655779b73f971900f618253aae615ed3142ea2205d16df62f4518e4a2",
+      "source_git_blob": "012aeabfe2d7bde332cb987dad3c4780999cd103",
+      "source_lines_inclusive": [359, 366],
+      "decision": "ACCEPT",
+      "basis": "This summarizes the same thirteen assessed components and their original relative strengths/weaknesses. Its meaning derives from the inspected cohort records and population, not merely the summary heading.",
+      "current_use_inside": "No current replacement path or executable next action is supplied in this bounded summary.",
+      "adjacent_boundary": "Top findings at 367 is excluded.",
+      "counterexamples": [
+        "Insert a replacement consumer field into the summary: the new field needs independent classification.",
+        "Extend this declaration through the ranked findings solely because they share a cohort: the boundary/hash changes and approval ends."
+      ]
+    },
+    {
+      "id": "remaining-source-record-13",
+      "declaration_digest": "0ba8931d0a70a54dc79b956bf753ac703ac95d75bd34f85ebc6f4457f551d31e",
+      "sha256": "5c27128524c44aa4f8192b151e9f52c6293870cd5f903e08dbbb8520f9309bc2",
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md",
+      "source_context_sha256": "ced1058d2c3313048659c01dc8627a31588fbec0ed7d719f18490fcb300e7638",
+      "source_git_blob": "7236207c6e22a3122427a8a28cb4db2ca49eb97e",
+      "source_lines_inclusive": [713, 717],
+      "decision": "ACCEPT",
+      "basis": "The peer assessment compares the original planner cohort's methods and omissions using the preceding component findings. Retired planner names identify the ranked specimens.",
+      "current_use_inside": "Ranking a former entry is not a present-day recommendation to invoke it, register an alias or prefer a model.",
+      "adjacent_boundary": "Top findings at 718 is separately declared; no combined heading-based mask is approved.",
+      "counterexamples": [
+        "Add a current planner selection directive to the peer list: it changes the semantic role and bytes.",
+        "Change the source context from a cohort audit to active planning policy: matching excerpt bytes cannot preserve approval."
+      ]
+    },
+    {
+      "id": "remaining-source-record-14",
+      "declaration_digest": "fd9ff43dc018df9ec93ff56872d8f6ef0f9106664b5e02bb2ef8e79dea4f8cc9",
+      "sha256": "082e59f783da13c39867dd9c0a28f9f5db5313afbab2c18fff82ab15b5cbbef1",
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md",
+      "source_context_sha256": "ced1058d2c3313048659c01dc8627a31588fbec0ed7d719f18490fcb300e7638",
+      "source_git_blob": "7236207c6e22a3122427a8a28cb4db2ca49eb97e",
+      "source_lines_inclusive": [718, 725],
+      "decision": "ACCEPT",
+      "basis": "The three original findings connect observed producer/consumer roots, absent logs/external logging and missing necessity/lessons to the audited planner specimens. Each Uplift is the auditor's proposed remedy to its named defect.",
+      "current_use_inside": "This complete finding form is an observation plus recommendation, not a selected work package or permission to run the former external tooling. It does not assert those old bugs remain today.",
+      "adjacent_boundary": "Secondary findings at 726 are separately decided.",
+      "counterexamples": [
+        "Turn an Uplift into a current owned task with an execution/import instruction: new bytes and meaning require review.",
+        "Treat every Uplift paragraph anywhere as historical by shape alone: that is not authorized by this exact record."
+      ]
+    },
+    {
+      "id": "remaining-source-record-15",
+      "declaration_digest": "1bcb2c6f97a52d3aa2143001bd5bda41cb4dcab724532c559e3db6c1668b5a01",
+      "sha256": "a498a1d7e61636a8eafe73f762d099fa6cfeca5e9834130d1ab6426bdb3a1354",
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md",
+      "source_context_sha256": "ced1058d2c3313048659c01dc8627a31588fbec0ed7d719f18490fcb300e7638",
+      "source_git_blob": "7236207c6e22a3122427a8a28cb4db2ca49eb97e",
+      "source_lines_inclusive": [726, 733],
+      "decision": "ACCEPT",
+      "basis": "The secondary findings record the original cohort's token vocabulary, CLI inversion, missing Step0/checkpoint and half-built tuning inconsistencies. Named paths/methods are evidence subjects.",
+      "current_use_inside": "These comparative defects and remedies do not define current CLI capabilities, activate tuning or select a retired reviewer.",
+      "adjacent_boundary": "Designed-not-built at 734 is a separate declaration.",
+      "counterexamples": [
+        "Insert a current plan-tune preference-reader invocation: the new instruction stays checked.",
+        "Apply this approval to a different file's similar bullet list: path, source and declaration binding prohibit transfer."
+      ]
+    },
+    {
+      "id": "remaining-source-record-16",
+      "declaration_digest": "dddf96ebafe2abf029abf51e16da829bae5a6c6b8453288143e1feaf913c0ba6",
+      "sha256": "f3c00f6697cc738739524dfdd8563ebef973b7ee78c56890c490d94d9510983d",
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md",
+      "source_context_sha256": "ced1058d2c3313048659c01dc8627a31588fbec0ed7d719f18490fcb300e7638",
+      "source_git_blob": "7236207c6e22a3122427a8a28cb4db2ca49eb97e",
+      "source_lines_inclusive": [734, 739],
+      "decision": "ACCEPT",
+      "basis": "The original cohort distinguishes designed capabilities from implemented planner behavior and records that limitation once rather than manufacturing per-component failures.",
+      "current_use_inside": "The assessment is not proof that a dormant subsystem is active or permission to build it now.",
+      "adjacent_boundary": "Operator decisions required at 740 is deliberately excluded and remains checked.",
+      "counterexamples": [
+        "Extend the end marker over operator decisions: the old digest cannot authorize the wider mask.",
+        "Change a designed-not-built statement into a current import/selection: its new bytes require a decision."
+      ]
+    },
+    {
+      "id": "remaining-source-record-17",
+      "declaration_digest": "0c552e16ee582795ef0195a58cb6205db1674fcf3f23236f037a2255385ac0d5",
+      "sha256": "d0b6d5bdda27268a4043be2e46c3236fd6e6efb3edb1dba5b26cde51fefd1746",
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort3-handoff.md",
+      "source_context_sha256": "a50235e766c6ff06f0e7a4136528c5d37d0d1008df2d2ad7899dd88d78a0caea",
+      "source_git_blob": "88004da66e3e123d2d922d79a2332f083b18d1ba",
+      "source_lines_inclusive": [82, 93],
+      "decision": "ACCEPT",
+      "basis": "CF-2 is a complete original producer/consumer mismatch finding, citing the old context-save/context-dump path and glob contract and proposing a shared shape/test remedy.",
+      "current_use_inside": "The old paths describe the reported failure; they are not current resume defaults or authority to read old/private session data. The recommendation is not an executable task assignment.",
+      "adjacent_boundary": "CF-3 at 94 is excluded.",
+      "counterexamples": [
+        "Insert a live resume command using the retired dump path: it must not inherit this original finding's observation status.",
+        "Replace the original source context with current recovery instructions: unchanged finding bytes cannot be admitted."
+      ]
+    },
+    {
+      "id": "remaining-source-record-18",
+      "declaration_digest": "3bb202bd49825e7f68f25e8583620b4911a0a3c5c1d3776d6407f53af1636afa",
+      "sha256": "42a6df994f09823c0f8cfecb7893a41ab584f2b7311f39fc5f66982b0e34b22a",
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort3-handoff.md",
+      "source_context_sha256": "a50235e766c6ff06f0e7a4136528c5d37d0d1008df2d2ad7899dd88d78a0caea",
+      "source_git_blob": "88004da66e3e123d2d922d79a2332f083b18d1ba",
+      "source_lines_inclusive": [378, 420],
+      "decision": "ACCEPT",
+      "basis": "This is the complete context-warm D1-D14 source-assessment record, with original file citations, peer comparison and proposed uplift. The assessment grammar and cited specimens establish its observational role.",
+      "current_use_inside": "Its historical pseudo-YAML remains literal, including any invalid syntax. It is neither a valid runtime schema nor a new delegation/profile/read contract, and the recommendations confer no execution permission.",
+      "adjacent_boundary": "Warm variants at 421 and its delegation prose are excluded.",
+      "counterexamples": [
+        "Parse or repair the excerpt into a working configuration and consume its paths: this approval supplies no such contract.",
+        "Add a new current delegate/import field or widen through the following variants: changed bytes/boundaries remain unapproved."
+      ]
+    },
+    {
+      "id": "remaining-source-record-19",
+      "declaration_digest": "897888fffa7c8de935aedc993aa104bbb667f20d830dbd0928030a4baf2bd8f0",
+      "sha256": "836cda9a25541067fdcb35dbc9b5baf3f4761112e2436427cf4253416c7adbd6",
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort7-packs-roles.md",
+      "source_context_sha256": "f56907565af02eed4afcf2daba74a47c3f5d41f550d79797b090e883cbf76303",
+      "source_git_blob": "b21a3845989bfea4ee009b38c1e8470577cc0c5a",
+      "source_lines_inclusive": [171, 298],
+      "decision": "ACCEPT",
+      "basis": "The selected original role-skill delta records cite source behavior, compare peers and propose uplift. The text's six-record description actually encompasses seven records including role-new; that original discrepancy is preserved, not corrected or promoted into an accepted count.",
+      "current_use_inside": "The role methods and pseudo-YAML are assessed specimens, not installed role declarations or permission to alter a profile. No valid-parser or current-role-count claim follows.",
+      "adjacent_boundary": "Role-file schema-uniformity table at 299 is excluded.",
+      "counterexamples": [
+        "Add a current role activation directive to a delta record: it is new unapproved content, even if it resembles an assessment field.",
+        "Repair the historical pseudo-YAML or silently omit role-new to make the count six: the exact approved bytes no longer match."
+      ]
+    },
+    {
+      "id": "remaining-source-record-20",
+      "declaration_digest": "05c967ec6e751abef1e3962bb5ab0d4e8a0d5712d6f57feaed2fc4b4fa091e57",
+      "sha256": "2adf3ae7fb782b7f1d7a3374536f9a34e04507b4daab960a178f7460e2bc782d",
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort7-packs-roles.md",
+      "source_context_sha256": "f56907565af02eed4afcf2daba74a47c3f5d41f550d79797b090e883cbf76303",
+      "source_git_blob": "b21a3845989bfea4ee009b38c1e8470577cc0c5a",
+      "source_lines_inclusive": [335, 361],
+      "decision": "ACCEPT",
+      "basis": "The zero-consumer diagnosis records original grep/read-site evidence, the pack-resolver discrepancy and a proposed consumer repair. Those concrete producer/consumer observations establish a finding rather than a live configuration procedure.",
+      "current_use_inside": "The resolver proposal does not authorize reading a private profile, changing the active pack or assuming the same zero-consumer state today.",
+      "adjacent_boundary": "WorkProfile at 362 is separately declared.",
+      "counterexamples": [
+        "Append an instruction to inspect a real user's profile: this decision does not authorize or mask it.",
+        "Relabel the original grep finding as the current runtime configuration contract: the context/semantic binding no longer applies."
+      ]
+    },
+    {
+      "id": "remaining-source-record-21",
+      "declaration_digest": "662b20049e6a8cdd10bb4fc682a4e31120b82683f5f5bfeb05767d7ba3552698",
+      "sha256": "35cf52f7313df6a96cc451183d108300726d3fedc05d8bcdc13354304573078a",
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort7-packs-roles.md",
+      "source_context_sha256": "f56907565af02eed4afcf2daba74a47c3f5d41f550d79797b090e883cbf76303",
+      "source_git_blob": "b21a3845989bfea4ee009b38c1e8470577cc0c5a",
+      "source_lines_inclusive": [362, 384],
+      "decision": "ACCEPT",
+      "basis": "The WorkProfile finding compares two original storage locations, schema/readers and the missing toggle before proposing resolver layering. It records a specific historical split-contract diagnosis.",
+      "current_use_inside": "The former field names and layering recommendation are not current schema defaults, a pack-switch operation or permission to mutate either location.",
+      "adjacent_boundary": "Designed-not-built lifecycle at 385 is outside this decision.",
+      "counterexamples": [
+        "Add a current write-profile command to the finding: it remains unapproved.",
+        "Use the old dual-location field names as an active migration policy without new context review: no transfer is allowed."
+      ]
+    },
+    {
+      "id": "remaining-source-record-22",
+      "declaration_digest": "d0b8745615ec950c5e7a3d05cdaca2f2da3521a2f9869d8cafbf22485675e2e1",
+      "sha256": "4a1e23f5aa5f0a22b1d6711bbf0e41970263a7ce264b5e3ce72b923ab36bab31",
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort7-packs-roles.md",
+      "source_context_sha256": "f56907565af02eed4afcf2daba74a47c3f5d41f550d79797b090e883cbf76303",
+      "source_git_blob": "b21a3845989bfea4ee009b38c1e8470577cc0c5a",
+      "source_lines_inclusive": [385, 408],
+      "decision": "ACCEPT",
+      "basis": "The original lifecycle note contrasts an existing tested resolver with missing wrappers and records a reuse proposal instead of miscounting every skill as an independent architectural defect.",
+      "current_use_inside": "The inventory of existing/missing pieces is original evidence, not today's capability catalog or authority to install or activate the proposed lifecycle.",
+      "adjacent_boundary": "Cohort summary at 409 is separately declared.",
+      "counterexamples": [
+        "Add an execution task to install a missing wrapper: an architectural observation does not mask that task.",
+        "Change the outside source context to present lifecycle documentation: original bytes alone cannot admit the span."
+      ]
+    },
+    {
+      "id": "remaining-source-record-23",
+      "declaration_digest": "149291fe98adc5508819331d75f1443658f6cb54052d1c23e32236512c6c87a2",
+      "sha256": "30f4fd1f3c0a6ea1ce57c4f014eb00df49f7bbc516cb20a880e288691b8a137a",
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort7-packs-roles.md",
+      "source_context_sha256": "f56907565af02eed4afcf2daba74a47c3f5d41f550d79797b090e883cbf76303",
+      "source_git_blob": "b21a3845989bfea4ee009b38c1e8470577cc0c5a",
+      "source_lines_inclusive": [409, 416],
+      "decision": "ACCEPT",
+      "basis": "The strongest/weakest, adoption and proportionality statements summarize the original cohort's inspected evidence rather than a new set of dispatch choices.",
+      "current_use_inside": "Adoption/quality judgments remain historical claims; they do not establish current role availability or general maturity.",
+      "adjacent_boundary": "Top three ranked findings at 417 are excluded.",
+      "counterexamples": [
+        "Add a current selected-role field to the summary: it must stay checked.",
+        "Broaden the end marker into ranked remedies or operator actions: the current digest does not cover that range."
+      ]
+    },
+    {
+      "id": "remaining-source-record-24",
+      "declaration_digest": "773639ec16de6b88226d85d4bf47f32efcdf553b90bb14228ee7dee6db07a8c5",
+      "sha256": "c4b1549747332632b50fb2f9607a6bd4ca82c5ebcea7ed576424141a4b99a070",
+      "path": ".claude/engineering/design-archive/lintel-v3.5-cycle-and-roles.md",
+      "source_context_sha256": "21a900067ba276f9c92f18fc225482a306bd5bfd6790e0c42ccf8b6a7dad46e7",
+      "source_git_blob": "8e061b5f34f3b5b1098c3a70ff54a3c51b7e9f5d",
+      "source_lines_inclusive": [987, 1001],
+      "decision": "REJECT",
+      "basis": "This is not an untouched original-only list. The preamble says labels are normalized for navigation and points to current execution/migration contracts. Against 77, a7 updates 991-993 to canonical context-warm --related/--sessions/--adrs forms and 996 to resume --from; those are maintained navigation surfaces inside the proposed mask.",
+      "current_use_inside": "A whole-section historical mask would conceal newly maintained canonical routes together with old design descriptions. File age and an archive directory cannot exempt those present navigation entries.",
+      "adjacent_boundary": "Warming patterns at 1002 is excluded, but current routing is already present inside 987-1001.",
+      "narrowing_suggestion": "Keep the supplied span checked. If a literal original design observation is needed, propose its exact field independently, excluding maintained command/navigation cells and preserving proof of its original meaning. Do not reuse this digest or treat the whole table as historic.",
+      "counterexamples": [
+        "Replace one current canonical command with a removed alias in the same table: the guard must still detect it.",
+        "Keep all bytes but label the archive subtree historical: neither the active navigation nor this REJECT disappears."
+      ]
+    },
+    {
+      "id": "remaining-source-record-25",
+      "declaration_digest": "09824aebdc558e76b3de5430871fad688b8d3208a13a0dc1e96101d5ea8eabda",
+      "sha256": "a1ff1448ccdfe8b2cee30a5bf3c31a5b562df0e5f468f0e69e6f2710b86a65f1",
+      "path": ".claude/engineering/evolution/2026-06-10-v4.11-launch-polish.md",
+      "source_context_sha256": "660910dbee558fd9d3be8d5df6d818100ba898e37bfc56d85a33b3144b3e929d",
+      "source_git_blob": "a986a22160b4df21fea7d48e3651283dde90995a",
+      "source_lines_inclusive": [16, 20],
+      "decision": "ACCEPT",
+      "basis": "The title/description records the specific v4.11 structural change and its reported Gate M1 closure; the bound frontmatter explicitly identifies context-budgetwatch as removed. The former name denotes what the change removed.",
+      "current_use_inside": "The closure statement remains the evolution record's original claim, not a renewed gate decision or evidence that the removed entry should be installed.",
+      "adjacent_boundary": "What changed at 21 is excluded; no evolution-file-wide exception follows.",
+      "counterexamples": [
+        "Add 'Enable context-budgetwatch now' to the description: changed current instruction is not approved.",
+        "Transfer this title-based approval to another evolution note lacking the removal relation: source/path/context binding prevents it."
+      ]
+    },
+    {
+      "id": "remaining-source-record-26",
+      "declaration_digest": "c21323af4b958186f3c5a9056c2e8d30c1073c80655a03de379fd92fc375823e",
+      "sha256": "3f94980b82377da5bdd8e3ff0b6ff97627b593fa04490876dbedbe2ef9cb4893",
+      "path": ".claude/plans/universal-implementation/reports/P06.md",
+      "source_context_sha256": "ac45bf5e62bbf3a6107d8dc7897b5ba02a3de80c76dd5ccc88eca9d18fd5c60b",
+      "source_git_blob": "86ccac92719ec3da6f89f7adcfa326ae344d49b4",
+      "source_lines_inclusive": [781, 798],
+      "decision": "ACCEPT",
+      "basis": "This bounded original P06 changed-path/ownership inventory identifies the product's files and six assigned skill methods. It records scope and preservation rather than an instruction to consume the old names now.",
+      "current_use_inside": "Reported paths are original authorship/ownership evidence. Unlike the rejected set02 P08 declaration, this span stops before coordinator regeneration and prospective integration directions.",
+      "adjacent_boundary": "Coordinator regeneration and remaining integration boundaries at 799, including directions at 801 onward, stay checked.",
+      "counterexamples": [
+        "Add a Current replacement/import column to this inventory: that new consumer surface is unapproved.",
+        "Widen the span through the next regeneration instructions: path provenance cannot excuse the added prose."
+      ]
+    },
+    {
+      "id": "remaining-source-record-27",
+      "declaration_digest": "668a4096cbca68a3865d67e0e953148b99eb0eefb7adbc165edd25a83a2e6bbd",
+      "sha256": "21a9fe68e96665123593a7145b26fe65169263db832cea82a2c936e5c5b9c5d0",
+      "path": ".claude/plans/universal-implementation/reports/P08-A13.md",
+      "source_context_sha256": "03491ddca03c64a0d62f36ea080174d7be190b25d433b2e3a0d04203cf0417f9",
+      "source_git_blob": "b1adca081ed7b3adc037bf6e9d7a16fd841b9d4b",
+      "source_lines_inclusive": [578, 629],
+      "decision": "ACCEPT",
+      "basis": "The section records the original catalog regeneration failure with exact committed/regenerated byte counts and hashes and a fenced zero-context diff. The diff's plus-lines are quoted observed output, not a proposed current catalog registration.",
+      "current_use_inside": "Expected failure remains a failure at that checkpoint. Quoted replacement-looking rows must remain literal evidence, not be applied, parsed as the current catalog or treated as present generator acceptance.",
+      "adjacent_boundary": "Deviations from the contract at 630 is excluded.",
+      "counterexamples": [
+        "Move a quoted plus-line into a live catalog or current replacement table: this report-only decision cannot approve it.",
+        "Append a current generator command outside the excluded boundary or alter the fenced diff: it remains checked/new."
+      ]
+    },
+    {
+      "id": "remaining-source-record-28",
+      "declaration_digest": "d4e854a4e61bcd8916c51c0c00e1525d7d5f2502490e98982f5e9be7b1244a65",
+      "sha256": "ab38440302d1e6cf88f17dd67c1a9fdbd2e7ca6ee75916c182e32b3d3140cc51",
+      "path": ".claude/plans/universal-implementation/reports/P08.md",
+      "source_context_sha256": "371df0998005103a663da054e184b64cd5e7dacccc8a31fac2e32593370c2673",
+      "source_git_blob": "ec86961128c11abb3ab7a04edd0f3c2b2c259bac",
+      "source_lines_inclusive": [136, 170],
+      "decision": "ACCEPT",
+      "basis": "The original 8d477701/f9685530 implementation report explicitly defines Built as authored/self-checked, not accepted, and ties rows to named actual fixtures. The A13 rows report no implementation or incomplete evidence at that checkpoint; the Python row separates 3.11 execution from unavailable 3.9 runtime proof.",
+      "current_use_inside": "Needs/deferred language at 160-163 states the old evidence boundary, not a command to import a producer or consume a new reader. No current route/replacement column or executable owner action is introduced. These rows cannot close A13, activate a dormant consumer, establish hook registration or transfer the original test claims to a7.",
+      "adjacent_boundary": "The prospective coordinator reconciliation at 130-134 remains outside and unapproved under set02. Synthetic isolation/incident at 171 is also excluded; this decision neither excuses that incident nor authorizes its launcher.",
+      "counterexamples": [
+        "Replace a deferred evidence limit with 'Use this unreviewed reader now': the new current-consumer instruction must remain unapproved.",
+        "Treat this original Built column as present cleanup acceptance or widen into adjacent integration instructions: neither follows from the exact observation decision."
+      ]
+    },
+    {
+      "id": "remaining-source-record-29",
+      "declaration_digest": "61f16fb39d379f8a176a7a3d817188c5c404adde534205c5c45e2412f87e3845",
+      "sha256": "ac9aff104fb0f1387dc8e78dfc53a0d04fd89f1ac1ece957ca5a8a56485f9577",
+      "path": ".claude/plans/universal-implementation/reports/P08.md",
+      "source_context_sha256": "371df0998005103a663da054e184b64cd5e7dacccc8a31fac2e32593370c2673",
+      "source_git_blob": "ec86961128c11abb3ab7a04edd0f3c2b2c259bac",
+      "source_lines_inclusive": [2165, 2215],
+      "decision": "ACCEPT",
+      "basis": "The narrative reports distinct original build-alias/fix-direct gates, exact packet/context hashes, observed five-test RED/GREEN results, snapshot counts and receipt identities. Its temporal progression is explicit and is followed by the next original gate checkpoint at 2216.",
+      "current_use_inside": "Consumption remains pending at 2212-2214 is a recorded non-consumption state while that specific fix-alias case ran, not an instruction or permission to switch targets, consume today's evidence or recreate the launcher. The original receipt/corroboration claims are not revalidated or adopted by this reviewer.",
+      "adjacent_boundary": "Earlier launcher-grant/actor restrictions remain outside. Four first-leaf gates and BUILD-DIRECT T027 at 2216 is excluded, not silently merged into this record.",
+      "counterexamples": [
+        "Add a command to consume the receipt or restart a target now: that new prospective action cannot be masked as progress history.",
+        "Change the surrounding context to identify today's pending review instead of the named original comparison: unchanged receipt text cannot inherit approval."
+      ]
+    },
+    {
+      "id": "remaining-source-record-30",
+      "declaration_digest": "8db991bb87a947dac6070861cabe920da3791e82456d2b8590e7a129715b8b97",
+      "sha256": "d22351e652f3db751081e776fdf587e1deaf0f69330c0817175186bf7f927692",
+      "path": ".claude/plans/universal-implementation/reports/P08.md",
+      "source_context_sha256": "371df0998005103a663da054e184b64cd5e7dacccc8a31fac2e32593370c2673",
+      "source_git_blob": "ec86961128c11abb3ab7a04edd0f3c2b2c259bac",
+      "source_lines_inclusive": [3502, 3540],
+      "decision": "ACCEPT",
+      "basis": "The final original direct/alias comparison reports its exact comparison identity, 269 snapshots, distinct seeds/packets and both SHIP BLOCKED/CAPTURE unreached outcomes. It retains the missing genuine rejecting-review observation rather than manufacturing completion.",
+      "current_use_inside": "The outcome table describes those original attempts only. It neither revives aliases nor transfers their reviews, approves SHIP or satisfies the currently unverified leaves.",
+      "adjacent_boundary": "Original leaf traceability and retained limits at 3541 is excluded, including its separate authority discussion.",
+      "counterexamples": [
+        "Insert a current accepted/ship-ready column into this blocked original comparison: the changed result must be checked.",
+        "Consume these old packet IDs as current P05 evidence: this semantic decision supplies no such corroboration."
+      ]
+    },
+    {
+      "id": "remaining-source-record-31",
+      "declaration_digest": "56217b2f4e27f7e59c63982bf3a9a3fc578855a5285169d04a6f317a89b3282c",
+      "sha256": "dacdde6ce3631790c5875605aed8a29663125427f3d8f942dc01600a42dc98f9",
+      "path": ".claude/plans/universal-implementation/reports/P11.md",
+      "source_context_sha256": "182e7264fd598f01360ef226bc4772face1bece9a411011a4232cebd083e1db7",
+      "source_git_blob": "ee6ea993336bbd3fab7f0b45ce50bc64b11c39b5",
+      "source_lines_inclusive": [34, 56],
+      "decision": "ACCEPT",
+      "basis": "The frozen 3115790 source chain grounds P11's original ownership and retained browse/open-managed-browser/cookies/scrape methods, including the concrete Node/CDP fallback and excluded agent/P12/installer/shared-plan work.",
+      "current_use_inside": "This is a report of implemented scope/method preservation, not present browser permission, actual BrowserSession evidence or a current fallback invocation instruction.",
+      "adjacent_boundary": "Per-leaf current evidence at 57 is excluded. The earlier rejected P11 frozen-path/next-gate span remains rejected.",
+      "counterexamples": [
+        "Add 'Launch the browser now' or a current cookie import to this ownership report: it is not original scope data.",
+        "Treat the recorded fallback as available in today's host without capability/permission evidence: approval does not transfer availability."
+      ]
+    },
+    {
+      "id": "remaining-source-record-32",
+      "declaration_digest": "504ed77ffc678ceb127e2bd1de72a5280af7ec9245aa6d9607feb654c9a0a2bb",
+      "sha256": "a248b4a6bc036618d14969e79ba800160af8b12dfb6a0eabb00a8a76d8df036e",
+      "path": ".claude/plans/universal-implementation/reports/P13-skills-preservation.md",
+      "source_context_sha256": "fc24a67bfa15df557d6bbfbfa742e010a94cff6d5f9ca2b34732b371fb4826d7",
+      "source_git_blob": "b1f5435932c20e15d71c1fb55e8be44c1932f534",
+      "source_lines_inclusive": [434, 497],
+      "decision": "REJECT",
+      "basis": "This is an operative evidence/disposition legend for the adjacent 126-record current view, not merely a frozen comparison list. Lines 437-481 instruct Preserve/Retain/Use/Keep and specify provider/navigation/selection semantics; 483-491 update accepted/current/pending dispositions. Those keys are consumed by the table beginning 498.",
+      "current_use_inside": "Masking the entire legend would hide live consumer interpretation and current source/status substitutions. The old set02 204ea725/42abfcba observations are separate declarations and do not approve this appended current-view layer. This is a classification rejection, not a new claim that each key's old evidence is false.",
+      "adjacent_boundary": "The table at 498 is excluded syntactically but consumes this legend semantically; separating the heading alone does not make the instructions observational.",
+      "narrowing_suggestion": "If needed, submit exact literal original report/source-attribution fields, excluding imperative method/selection clauses, current evidence/status reinterpretation and table-consumer instructions. Each new field requires its own context and digest decision; no F-key or whole-list waiver is approved.",
+      "counterexamples": [
+        "Point an F-key to a removed/currently invalid consumer while retaining the legend heading: that interpretation must remain checked.",
+        "Approve this section by borrowing the accepted older P13 map digest or by excluding only the following table: neither removes the live legend."
+      ]
+    },
+    {
+      "id": "remaining-source-record-33",
+      "declaration_digest": "88612672e6eeec715402af64042de09a29d6110bf2e7e7cbaa05bcbf8e114319",
+      "sha256": "967291a87f55270670e4235b6ea741e6a50d144cea0d8efe5fa4a89f18f63edf",
+      "path": ".claude/plans/universal-implementation/reports/P13.md",
+      "source_context_sha256": "1a4f251c25621e6632f48796e15ccc7eef5d9d5b98987357502ad8f2be5fd7fe",
+      "source_git_blob": "17967cacffbc51cad20db787b6959a62f7e45395",
+      "source_lines_inclusive": [1388, 1422],
+      "decision": "REJECT",
+      "basis": "The e7f799ec/14b0b51c preview attribution supports original source-comparison observations, but the selected whole section also provides working current-view navigation at 1390, current path/alias/disposition interpretation at 1394-1396, explicit supersession of current/pending descriptions at 1406-1412, and map navigation at 1416-1417. The source-count paragraph alone does not justify masking these consumer surfaces.",
+      "current_use_inside": "The 118 changed/8 identical figures and old 46/35 counts can be historical claims without making the navigation and current-map supersession an exempt field. This rejection does not assert those original preview counts are false or overturn the older set02 source-state approvals.",
+      "adjacent_boundary": "Status and already-integrated welcome at 1423 remains checked. The preceding preview product/hash inventory is not automatically covered either.",
+      "narrowing_suggestion": "A new exact declaration could propose only the source-identity comparison paragraph at 1398-1404, with its preview attribution. Keep the current-view links, interpreted path/alias fields and supersession prose visible. That suggested narrower range is not approved.",
+      "counterexamples": [
+        "Break the current-view link or add a removed route to its current mapping: the original preview count must not suppress the navigation defect.",
+        "Use the entire old file's immutable hash as permission for current-map/result prose: context identity is not a whole-section semantic exemption."
+      ]
+    },
+    {
+      "id": "remaining-source-record-34",
+      "declaration_digest": "348b8b59866899a96d98c6a7156b50123f70b46bb9737c56c4e2c3f3ba43e345",
+      "sha256": "d93c0ba76fcc64ba5976170a0837dacdfcf5b013c42343c780eb83d587aa4a34",
+      "path": ".claude/plans/universal-implementation/reviews/A23.5-phase4-removal-b7b245f.md",
+      "source_context_sha256": "63192487ac9b88d54e36b26fad48ed64a8e8db9ad496161b7de2239ea0aa37ef",
+      "source_git_blob": "d2ff5cbf6a72efe09636baf7333e304cfa55ecfc",
+      "source_lines_inclusive": [87, 131],
+      "decision": "ACCEPT",
+      "basis": "The commit-by-area delta assessments are explicitly about d285a332..b7b245fa, including reader removal, refusal behavior, method losses and scope. Source references identify the original compared changes.",
+      "current_use_inside": "PASS in this table is the old review's bounded delta judgment, not a7 source quality, P05 or release acceptance. Removed reader descriptions do not restore functionality.",
+      "adjacent_boundary": "Findings at 132 is a separate declaration.",
+      "counterexamples": [
+        "Add an a7 acceptance/result column or current PDF reader invocation: it cannot inherit the original delta assessment.",
+        "Change the compared commits in surrounding context without changing the table: full-context binding rejects reuse."
+      ]
+    },
+    {
+      "id": "remaining-source-record-35",
+      "declaration_digest": "873e2870ac31571579e5e4cb4ad749a7477cfdb3702bc793721767fee10f469a",
+      "sha256": "4e36c655cb14124c7772708c2ed95421f87876d8de6211f9f8a2a3fd9d0c9293",
+      "path": ".claude/plans/universal-implementation/reviews/A23.5-phase4-removal-b7b245f.md",
+      "source_context_sha256": "63192487ac9b88d54e36b26fad48ed64a8e8db9ad496161b7de2239ea0aa37ef",
+      "source_git_blob": "d2ff5cbf6a72efe09636baf7333e304cfa55ecfc",
+      "source_lines_inclusive": [132, 151],
+      "decision": "ACCEPT",
+      "basis": "A5-31 through A5-35 are original b7b245fa findings with source citations, repair recommendations and contemporaneous early-merge/CI chronology. Their original occurrence remains evidence even where A5-31/A5-32 were subsequently source-fixed.",
+      "current_use_inside": "The recommended corrections are parts of the original findings, not present work authorization. This does not declare old findings newly open, erase them or resolve their authority/hosted concerns.",
+      "adjacent_boundary": "Local evidence at 152, including its historical execution environment, is excluded.",
+      "counterexamples": [
+        "Add a current merge authorization to a finding row: it must stay checked and cannot become an observation by proximity.",
+        "Replace a historical finding status with today's closure while retaining the old registration: changed bytes require a new decision."
+      ]
+    },
+    {
+      "id": "remaining-source-record-36",
+      "declaration_digest": "696151e591bad584597276bae8e6c55a668cd205ee1b25fe99f705d32f502aad",
+      "sha256": "8f3d864c3fad33ce176cafd831029bc6c6730fed989cfdf7110f5041e2ec88f5",
+      "path": ".claude/plans/universal-implementation/reviews/P05-excerpt-context-final.md",
+      "source_context_sha256": "42e0ae717e464710604dda994138a8a8420020a32b987c8885711b1ad9273c71",
+      "source_git_blob": "957f5533bfadfe40e5fd45a3538c7214980ed673",
+      "source_lines_inclusive": [293, 319],
+      "decision": "ACCEPT",
+      "basis": "The b023e8c review records specific original synthetic docs-only fixtures, assertions and QA/SHIP outcomes, including the mandatory document-check kind check and advisory failure. These are the conditions of that test specimen.",
+      "current_use_inside": "The old kind:check fixture is not a replacement for this initiative's immutable kind:tests controls. The old zero-finding observations do not create a new canonical P05 PASS or actual corroboration.",
+      "adjacent_boundary": "Commands, actual evidence and non-green attempts at 320 is excluded; no launcher execution is authorized.",
+      "counterexamples": [
+        "Use the historical document-check configuration to drop current-routing or strict-hosted-tests: this observation cannot modify mandatory QA.",
+        "Add a current P05 receipt/clearance claim inside the section: new bytes and authority remain unapproved."
+      ]
+    },
+    {
+      "id": "remaining-source-record-37",
+      "declaration_digest": "82a742f27c3f7fa5ccf26a470bdc2086e0d20098eed2a6fe7ce4c1390d69bd54",
+      "sha256": "1ce9b55656e260713b202c3bdd509a8809a45c8a1772493a68eea497ad31a31b",
+      "path": ".claude/plans/universal-implementation/reviews/P05-recheck.md",
+      "source_context_sha256": "4a3cb79a9eed563ceb340c80a3584ad0127a1d8efeb1ab9351aa1aea8dd43672",
+      "source_git_blob": "0307f862476d1edc7dd765041d4b7b725cafed24",
+      "source_lines_inclusive": [20, 42],
+      "decision": "ACCEPT",
+      "basis": "This past-tense review-method/scope record identifies e5b92a4, product 54147fd, preserved prior reports and actually read repair files, including qa-only. It also names validate_decision and explicitly bounds the original bootstrap evidence.",
+      "current_use_inside": "The heading's authority term describes the original review's provenance; it is not a new grant. The API/file list and earlier isolation claim cannot authorize a current private launcher, profile bootstrap or reader substitution.",
+      "adjacent_boundary": "Original findings: disposition at 43 is excluded.",
+      "counterexamples": [
+        "Append a present instruction to bootstrap a profile or invoke qa-only: it is outside the original past-tense observation.",
+        "Borrow the old isolation claim as proof this checkout has the same authorized environment: the decision supplies no runtime evidence."
+      ]
+    },
+    {
+      "id": "remaining-source-record-38",
+      "declaration_digest": "90e099d29246b075c05e29c42bb653a4217aeda2b4225d82a4cf49905d655fa1",
+      "sha256": "94a6398ed7b1beb59b864dde28111bce18a160bf4d862905984d495e082f9021",
+      "path": ".claude/plans/universal-implementation/reviews/P06-component.md",
+      "source_context_sha256": "8937098dcfc2389fc08828d095c5c13fd480f21a6649ff5e68d0bf7574e4e023",
+      "source_git_blob": "fd6b58e03943f5e7c68a72b751b3eb4e53d511f2",
+      "source_lines_inclusive": [52, 75],
+      "decision": "ACCEPT",
+      "basis": "The original 6f5d665/4a277f7 assessment against 40c2795 records A05.2 FAIL for seven missing destinations, other bounded dispositions and the retained methods of six named workflows. It is a specified component review, not a live selection manifest.",
+      "current_use_inside": "Old PASS and retained-method cells describe that source and do not establish current alias availability, installed navigation or all-host execution.",
+      "adjacent_boundary": "P06-C01 detail at 76 is excluded.",
+      "counterexamples": [
+        "Add a current install/dispatch instruction to a retained-method cell: changed consumer content stays checked.",
+        "Apply these original PASS cells to a7 without a new exact review: semantic classification is not acceptance transfer."
+      ]
+    },
+    {
+      "id": "remaining-source-record-39",
+      "declaration_digest": "ce29b0bb01cfdced6c9fee6098d7e28206bf36e85d1aeea871fb042bb67d2caa",
+      "sha256": "0035ea373b2f0b1eefba5e72ab2dfa41249f62b03f243db7d0f326a748de0f06",
+      "path": ".claude/plans/universal-implementation/reviews/P06-final.md",
+      "source_context_sha256": "f344ce07cd5b796c47da68341213cc1288f328375405b19556f2de00fbf9fb44",
+      "source_git_blob": "5e6dbd0b867f8c170959ea2812f7db19cd21c452",
+      "source_lines_inclusive": [250, 274],
+      "decision": "REJECT",
+      "basis": "The 560e64ac per-leaf table and retained-method paragraph are original observations, but lines 271-273 also direct a later authorized candidate's first quality pass to cover the complete bounded delta from 40c2795. That is a prospective review-scope instruction, not an observed result.",
+      "current_use_inside": "A whole-section observation mask would include a deferred reviewer/consumer directive. Whether later work discharged it does not turn this mixed declaration into a pure source-result field or permit silently ignoring the earlier review boundary.",
+      "adjacent_boundary": "Checks actually run at 275 is excluded, but the prospective instruction already lies inside the proposed range.",
+      "narrowing_suggestion": "Submit a new declaration for the original table and retained-method paragraph at 250-267, ending before the Stage 1 FAIL paragraph at 269, with exact unique markers and the same source attribution. Keep the future-quality instruction visible. This suggested range is not approved.",
+      "counterexamples": [
+        "Alter the required future quality baseline or add a retired review command to that instruction: it must remain checked despite the old table.",
+        "Reuse this rejected digest for only the table or cite a later completed review as automatic reversal: neither is an explicit new decision."
+      ]
+    },
+    {
+      "id": "remaining-source-record-40",
+      "declaration_digest": "a21741b143b6dbcc7d2dde2fcca66d9b3aaa6f2d94daba1d02548ca5760cdd33",
+      "sha256": "4eeaab91d2b83a82cdf3cb5d4c9e30d8ea3e6bb17dc12c5888f151f70e93edf3",
+      "path": ".claude/plans/universal-implementation/reviews/P06-recheck.md",
+      "source_context_sha256": "e6eba1e4c06aea372739d06273d28f38e21e2aa8f6c57c92fe9f12d5a8e2b7b9",
+      "source_git_blob": "c6e0c146ffaf2a252ed14a8f776195436fe2b326",
+      "source_lines_inclusive": [98, 153],
+      "decision": "ACCEPT",
+      "basis": "P06-C02 is the complete original be696488 literal-HTML navigation finding: expected behavior, root cause, synthetic input, actual process output and bounded correction. Its resource attribute examples are the specimens used to explain the recorded defect.",
+      "current_use_inside": "Quoted reproduction commands and correction language belong to that original finding; they are not new execution instructions or evidence of a rerun by this reviewer.",
+      "adjacent_boundary": "P06-C03 at 154 is excluded.",
+      "counterexamples": [
+        "Add a live resource import outside the quoted original reproduction: it cannot be exempted by the finding heading.",
+        "Change the report context so the reproduction is a current installation procedure: exact original bytes no longer establish observational use."
+      ]
+    },
+    {
+      "id": "remaining-source-record-41",
+      "declaration_digest": "196ba3d967a03949dbeb1b72a1cf0f4f19e0cacfca7d225c25d4290a7a429b5d",
+      "sha256": "b89d35c869d9275aaa448ed9babc6b7ac2ca68d87e0b834bfb32f24cd27ea49b",
+      "path": ".claude/plans/universal-implementation/reviews/P06-shared-boundary-final.md",
+      "source_context_sha256": "5f8d262e315aed505b064b3fb3d7524cd11bea9b325f831dd3e64f1c20378b14",
+      "source_git_blob": "c3d3e662026de6bb2c79b93235fbb1bebdae4afd",
+      "source_lines_inclusive": [131, 226],
+      "decision": "ACCEPT",
+      "basis": "P06-C07 is the original 09148b71 multiline-code/resource-boundary finding, including exact literal regions, absent/present synthetic resource outcomes, clone/one-change controls and the recorded provider correction. This complete diagnostic structure grounds the examples as evidence.",
+      "current_use_inside": "The captured installer output's 'Start a new host session' wording is quoted original output, not this reviewer's instruction. No installer, clone, hook or resource operation was executed for this semantic decision.",
+      "adjacent_boundary": "Retained earlier closures at 227 is excluded.",
+      "counterexamples": [
+        "Add a present installation instruction outside the captured output or a new current resource path: it needs separate classification.",
+        "Parse a quoted output line as an active adapter command: the observation decision confers no execution authority."
+      ]
+    },
+    {
+      "id": "remaining-source-record-42",
+      "declaration_digest": "6699694c60b2a202ddfb275dbc516a2d6cf40d5aaea5820cbd13ad1d5bf268de",
+      "sha256": "37a0edb6030943b41bc8ed7bf552f6243f361f79e45caaf72f66e6136f15412e",
+      "path": ".claude/plans/universal-implementation/reviews/P06-shared-boundary-final.md",
+      "source_context_sha256": "5f8d262e315aed505b064b3fb3d7524cd11bea9b325f831dd3e64f1c20378b14",
+      "source_git_blob": "c3d3e662026de6bb2c79b93235fbb1bebdae4afd",
+      "source_lines_inclusive": [260, 298],
+      "decision": "ACCEPT",
+      "basis": "The original provider checkpoint's per-leaf and repair-leaf dispositions distinguish C06/C07 failure, earlier bounded closures, quality not run and pending P05 dependency. They record the specified review's result and limits.",
+      "current_use_inside": "This is not a current routing/replacement table or future execution task. None of its original PASS/pending cells proves current source quality, capability availability or P05 acceptance.",
+      "adjacent_boundary": "Checks actually run at 299 is excluded.",
+      "counterexamples": [
+        "Add a Current replacement/import column to the disposition table: old leaf provenance cannot exempt it.",
+        "Consume an original bounded closure as today's mandatory review result: no acceptance transfer is authorized."
+      ]
+    },
+    {
+      "id": "remaining-source-record-43",
+      "declaration_digest": "bfeaddbfe259c9ca64e7bf16d6a517c601aa9d4c59ae74227226a88a32c5baf9",
+      "sha256": "e1aeec33a43e1ddb1127b0982f9374cc8fb3b45d3306ed0e46c5ed5673edee17",
+      "path": ".claude/plans/universal-implementation/reviews/P08-combined-2f4cc38.md",
+      "source_context_sha256": "1dc9ae7a7b7bf8f7b2fa90d25bfdd756be19fe27a6a6863645906c0fa221d06e",
+      "source_git_blob": "6490d87f051648add6a61eef2bbeff89178b0ee4",
+      "source_lines_inclusive": [445, 484],
+      "decision": "ACCEPT",
+      "basis": "The 2f4cc38 review's selected-leaf table records 21 repaired cases versus four failing contrasts out of twelve, named c20/q02 evidence, quality NOT STARTED and deferred A13. It is a concrete original result ledger, not a claim of overall acceptance.",
+      "current_use_inside": "The rows retain the failures and deferred evidence as original limits; they do not issue a new consumer instruction or authorize today's review/SHIP.",
+      "adjacent_boundary": "Freeze and handoff at 485 and its prospective coordinator directions are excluded.",
+      "counterexamples": [
+        "Widen the span into coordinator next actions: the original result table cannot mask the handoff.",
+        "Add a current alias dispatch or completed-QA claim to a result row: changed consumer/result content remains unapproved."
+      ]
+    },
+    {
+      "id": "remaining-source-record-44",
+      "declaration_digest": "4e5c05d0489ee22ca75a0c324d287532176e0e8f5d2e3cb3eeb69e07ef2b1457",
+      "sha256": "ebc65e4d142dceb36dc9e559f402e9c85da4b6a840e6881c9dcb6c290295e34e",
+      "path": ".claude/plans/universal-implementation/reviews/P08-partial.md",
+      "source_context_sha256": "9131f1680d756f72503521c4028215df3f53f73b42387e6550b8c9b6d4d17b20",
+      "source_git_blob": "d28b8a0230c28a2d8887205810d3b64a8dea7c7c",
+      "source_lines_inclusive": [160, 192],
+      "decision": "ACCEPT",
+      "basis": "The 062ffc6/8d477701 partial review gives source-specific FAIL/PASS/UNVERIFIED dispositions and actual r03 limits, explicitly recording the coordinator's report-only stop and absence of a quality stage.",
+      "current_use_inside": "The reported stop is an original review-state fact, not a newly imposed or lifted authority boundary. The original evidence cannot stand in for present complete review.",
+      "adjacent_boundary": "Commands actually executed and isolation at 193 is excluded; its private launcher is neither sourced nor authorized.",
+      "counterexamples": [
+        "Add an instruction to resume the old launcher or promote a partial PASS: changed content remains checked.",
+        "Use this original table as evidence that current mandatory quality ran: the semantic observation supplies no such outcome."
+      ]
+    },
+    {
+      "id": "remaining-source-record-45",
+      "declaration_digest": "bcba47dbd8ef0ab039a684f1440ce9410675e3538f4ee32717a7af61dbd8e410",
+      "sha256": "950286eabf24806c0a91840350b21ae4630f059c4d2e363503ef61c713999104",
+      "path": ".claude/plans/universal-implementation/reviews/P08-routing-plan-recheck.md",
+      "source_context_sha256": "ac57b75105605a2c3ced269a6f9635d5ba98aa6027bd4913947c1ea908e24509",
+      "source_git_blob": "863106f41f791248890fa9a690a381deaf181eb6",
+      "source_lines_inclusive": [223, 253],
+      "decision": "ACCEPT",
+      "basis": "The 8bde700/44e2ef7 recheck distinguishes earlier scoped PASS from the selected source's failed routing/Windows-history F03, with quality and integration not reached. Named source states make the result comparison substantive.",
+      "current_use_inside": "Current in this original review means its pinned candidate, not cleanup a7. The section records stage disposition rather than a new routing or invocation contract.",
+      "adjacent_boundary": "Commands, isolation and raw evidence at 254 is excluded.",
+      "counterexamples": [
+        "Add a present alias invocation to a result row: it cannot inherit the old candidate's result classification.",
+        "Borrow the old environment or review identity as current proof: this semantic decision does not validate either."
+      ]
+    },
+    {
+      "id": "remaining-source-record-46",
+      "declaration_digest": "80acd60f6f1a8e6aa02066c26e0dca5271f5fc6af280582ebbe283677414aee0",
+      "sha256": "44b42ab8748afd39b03731d33fef317c0c514c1c9b7a06f6bb32e19c0eae957f",
+      "path": ".claude/plans/universal-implementation/reviews/P08-selected-final-229656c.md",
+      "source_context_sha256": "ce61df9a1850be20ca57bd26a4bc055b27fcd6d71e74b0f7ac1da40d8d5892a0",
+      "source_git_blob": "6cec814119a016b29b863e9b0b587655d63bcc93",
+      "source_lines_inclusive": [65, 104],
+      "decision": "ACCEPT",
+      "basis": "The original 229656c selected review attributes its 46-path responsibilities, dependency commits and markdown_source.py blob, and records that P10/P13 WIP was not imported. The named composites/lenses/freeze entries are original reviewed sources and methods.",
+      "current_use_inside": "The dependency table is evidence attribution for that frozen review, not a current import manifest or a license to invoke removed entries.",
+      "adjacent_boundary": "Important selected-reader revision seam at 105 remains outside; source attributions do not absorb its separate limits.",
+      "counterexamples": [
+        "Add an import-now instruction for an attributed dependency: new current-use content must remain checked.",
+        "Use original authorship of one file to approve neighboring replacement/result cells in another report: no path-only transfer is permitted."
+      ]
+    },
+    {
+      "id": "remaining-source-record-47",
+      "declaration_digest": "982e4da62b244ba2ad7ccc1133f0d650536f9bb3d1ff216ba8ceae79a903bb37",
+      "sha256": "8269bcc9269b38fc261701f7fc3bd54412beaa5fd27409a701acefd539b3ebe7",
+      "path": ".claude/plans/universal-implementation/reviews/P08-selected-final-229656c.md",
+      "source_context_sha256": "ce61df9a1850be20ca57bd26a4bc055b27fcd6d71e74b0f7ac1da40d8d5892a0",
+      "source_git_blob": "6cec814119a016b29b863e9b0b587655d63bcc93",
+      "source_lines_inclusive": [347, 365],
+      "decision": "ACCEPT",
+      "basis": "This records actual original intake, direct/alias, venture, planning, BUILD and fix comparison outcomes and their finite limits, including respondent UNKNOWN and separately attributable decisions.",
+      "current_use_inside": "Fixture PASS and old entry names are observed comparison data, expressly not full-P08 or live-model acceptance. UNKNOWN is not repaired into an invented user answer.",
+      "adjacent_boundary": "MAIN actual local CAPTURE at 366 is excluded.",
+      "counterexamples": [
+        "Add a current mandatory venture interview or alias selection to the comparison: it is a new instruction, not a historical outcome.",
+        "Treat the old respondent UNKNOWN as answered based on this approval: semantic classification provides no missing evidence."
+      ]
+    },
+    {
+      "id": "remaining-source-record-48",
+      "declaration_digest": "be73b533c9519fd938d5c590dc3adff40facfa0f6ca3e83e0b96b8dfe4f24cb5",
+      "sha256": "88715b25f2d3b7b2fd2605d73ddaace6e94c90b3512de0a69514048430aff981",
+      "path": ".claude/plans/universal-implementation/reviews/P08-selected-final-229656c.md",
+      "source_context_sha256": "ce61df9a1850be20ca57bd26a4bc055b27fcd6d71e74b0f7ac1da40d8d5892a0",
+      "source_git_blob": "6cec814119a016b29b863e9b0b587655d63bcc93",
+      "source_lines_inclusive": [440, 472],
+      "decision": "ACCEPT",
+      "basis": "The original/refinement-leaf table records finite source/grammar/native-method evidence, revision-qualified 704-test evidence versus a later reader seam, A10.3 UNVERIFIED/BLOCKED, quality NOT STARTED and intentionally deferred A13.",
+      "current_use_inside": "These are the original review's evidence dispositions, not a current replacement map or authorization to consume a deferred producer. No original count is claimed as a test run in this semantic task.",
+      "adjacent_boundary": "Verification performed now and preserved limits at 473 is excluded and explicitly records that the original review itself ran zero new product/native tests.",
+      "counterexamples": [
+        "Replace BLOCKED with a current accepted result or add a deferred consumer invocation: the changed row needs new review.",
+        "Report the old 704 count as executed by this reviewer: this approval cannot make that claim true."
+      ]
+    },
+    {
+      "id": "remaining-source-record-49",
+      "declaration_digest": "8c5fd2eb0929f0cc041da70dfbe2389faacb5ebcc1b14a1f52335c2838b4e515",
+      "sha256": "8dbf54ef9732918287f6265448e5347c3bdeb8384bafe65afb81c74eb2a675aa",
+      "path": ".claude/plans/universal-implementation/reviews/P11-browser-final-14b419c.md",
+      "source_context_sha256": "184c76777f0339e21d107af08682cb45362f20716924a46dbe1d603145e516bb",
+      "source_git_blob": "cec145d8f6d4b7750949b723ab924a45b57d7086",
+      "source_lines_inclusive": [42, 73],
+      "decision": "ACCEPT",
+      "basis": "The 14b419c versus 043019a finding record distinguishes Q1 closure from Q2 numeric-extraction regression, with the original bounded diagnostic observations and correction rationale. It expressly limits the review's native/A14 claims.",
+      "current_use_inside": "Diagnostic input and timing claims remain original evidence, not a newly performed reproduction, present native-browser acceptance or a command to exercise the defect.",
+      "adjacent_boundary": "Actual checks and provenance at 74 is excluded.",
+      "counterexamples": [
+        "Add a current browser launch or a7 acceptance claim to the finding: changed operational/result content must be checked.",
+        "Reinterpret the old diagnostic timings as a test run in this session: the semantic approval is not execution evidence."
+      ]
+    },
+    {
+      "id": "remaining-source-record-50",
+      "declaration_digest": "13fe362c00b8142e76058a2c3820550b44b04f656483cfdef03ab5e5a3866462",
+      "sha256": "7348a2ff042a874f15c8315d52afc7ee4362cbfb4a4c0068d57e8a3a86619260",
+      "path": ".claude/plans/universal-implementation/reviews/P11-browser-final-d3b5569.md",
+      "source_context_sha256": "071e0d878049a83b5c12282b4a384963f946374d475adee7ae0ffb587e80ddd4",
+      "source_git_blob": "eb7eaa237b34ce74db49888f6e40f12d344c049e",
+      "source_lines_inclusive": [8, 34],
+      "decision": "ACCEPT",
+      "basis": "The exact reviewer/source/ancestry, report hash, 852-line preservation and three changed paths identify the original d3b5569 review inputs. Authority wording records that review's attribution rather than granting this reviewer additional work.",
+      "current_use_inside": "The original source identity and reviewer are not corroboration for the current attempt. Nothing here authorizes native/browser execution or transfers the old A16 verdict.",
+      "adjacent_boundary": "Per-leaf staged verdict at 35 is excluded. Later-discharge chronology may cite this report but does not approve other rejected declarations.",
+      "counterexamples": [
+        "Borrow the original reviewer identity as current independent corroboration: no such transfer is approved.",
+        "Add a current execution/authority grant to the source inventory: changed bytes remain unapproved."
+      ]
+    },
+    {
+      "id": "remaining-source-record-51",
+      "declaration_digest": "b2b31d8fabfc7cbfb4da8d56babd2c5622d3a635c694c012cb57b8310934ac8b",
+      "sha256": "005a1820a91f8399e197d9ab263575e946f3943b599019b5cf645356a14c352c",
+      "path": ".claude/plans/universal-implementation/reviews/P11-design-f72f316.md",
+      "source_context_sha256": "4d1bd906d75a2244ffd67d3e4d7012adbb986ba45d6c124527d22e0073868f8c",
+      "source_git_blob": "9f9a8a57d322a4164056b27f90d69994a2cb8d10",
+      "source_lines_inclusive": [8, 46],
+      "decision": "ACCEPT",
+      "basis": "The f72f316 reviewer/source chain and 24-path inventory identify the actual original selection: five frontend roles, thirteen skills and shared contract/schema/helper/tests. Reported reads and P12/provider exclusions delimit that review.",
+      "current_use_inside": "The inventory is not a current role/skill dispatch list or an A14 acceptance claim. The original source SPEC's three findings outside this span remain unaffected.",
+      "adjacent_boundary": "Complete scoped SPEC at 47 is excluded.",
+      "counterexamples": [
+        "Add current agent launch/model selection to this original read inventory: new operational content stays checked.",
+        "Treat preservation of an old path as proof that its current consumer exists: the observation supplies provenance, not present availability."
+      ]
+    },
+    {
+      "id": "remaining-source-record-52",
+      "declaration_digest": "3e71ba7034cf5592f55e51e5f4ac438f6601e097b3a85a660558fd1b0b4751f6",
+      "sha256": "31e3bc26fc6c9d5292a6a3e9cd981ac1c12e6c9e285a756a1e7fab58f04843fa",
+      "path": ".claude/plans/universal-implementation/reviews/P12-common-source-32dac88.md",
+      "source_context_sha256": "fe1cc9b776a131b67605e4cf5a0b7224cd0b5e20a3841534ffa0f21c870b46e8",
+      "source_git_blob": "e3ab47829cdfaac572ca842333ee5f089cf698f4",
+      "source_lines_inclusive": [63, 85],
+      "decision": "ACCEPT",
+      "basis": "The 32dac88 source review evaluates standalone Word/PPT outline, variants, defaults, QA, orchestration, callers and optional roles. The table reports methods retained in that named source and explicitly separates them from runtime/pipeline/layout/all-role proof.",
+      "current_use_inside": "Current-sounding method cells are the assessed source contract, not a new present routing resource. They do not register removed helper entries or establish native Office/PDF execution.",
+      "adjacent_boundary": "Source QUALITY and limitations at 86 is excluded; its verdict is not imported into current QA.",
+      "counterexamples": [
+        "Turn an assessed method cell into a current replacement/import instruction: the changed consumer surface is not approved.",
+        "Claim native output acceptance from this source-only comparison: semantic classification cannot supply missing observations."
+      ]
+    },
+    {
+      "id": "remaining-source-record-53",
+      "declaration_digest": "e5cd91c2865a44601a272334619bb8351d2ac1171f22d3508afd15d2c57bbe7a",
+      "sha256": "e3c8cb712a1117bb44b4e3180205ed168ce97816080ba4635e3b80dbd3abdd64",
+      "path": ".claude/plans/universal-implementation/reviews/P12-pdf-5978def.md",
+      "source_context_sha256": "6197da20821420272034354c560726a8f23ad24979a1b154cb9a928c456de009",
+      "source_git_blob": "5fa957a5e43885ceac99cbc488111bdfd3a51870",
+      "source_lines_inclusive": [38, 48],
+      "decision": "ACCEPT",
+      "basis": "The exact 5978def finding table records D01 user-unit scale, D02 CropBox and D03 RCDATA/head-boundary defects. It retains quality not started and the lack of native-page3 waiver.",
+      "current_use_inside": "Those named original defects and failed stage are source-review results, not a current PDF route, a native test result or a waived required check.",
+      "adjacent_boundary": "D01 detailed explanation at 49 is excluded.",
+      "counterexamples": [
+        "Add a present native-page3 waiver to the findings table: new authority/result content remains checked.",
+        "Use the historical table as a current provider contract or resurrect its removed reader: this approval does not permit either."
+      ]
+    },
+    {
+      "id": "remaining-source-record-54",
+      "declaration_digest": "44ce8ab65d174b7de098604b305125f3d6e6e0d10acb28cc55adae66bd815db9",
+      "sha256": "5ef7be7edcd2b4f2edf76bdedab6efc902dc9bbaa35b736fe8f3ab79983b2a7c",
+      "path": ".claude/plans/universal-implementation/reviews/P13-consumers-7884ddd.md",
+      "source_context_sha256": "769ed6345de88107b0aaddc7d39b6c9f41c47cd01ac333ecec2aceda1c991680",
+      "source_git_blob": "a069192fcec4deed20ea14f449e3e15dfc26584d",
+      "source_lines_inclusive": [43, 88],
+      "decision": "ACCEPT",
+      "basis": "The frozen 7884ddd/report 5df8e99 SPEC finding/control record reports the owned deep-draft preflight false-success, short-path control and no performed overwrite. Eleven bounded passes/one failure and the old 196 headers/127 skills/46 aliases/69 roles are its original test-scope observations.",
+      "current_use_inside": "The old counts are not current catalog or copied-kit oracles. The finding's reproduction is recorded evidence, not an instruction to create/overwrite a draft or a test executed during this semantic task.",
+      "adjacent_boundary": "Actual checks, failures retained and limits at 89 is excluded.",
+      "counterexamples": [
+        "Use the old 196/46 counts as a current expected installed catalog without deriving canonical identities: this observation cannot justify that oracle.",
+        "Add a current write/overwrite instruction or replacement route to the finding: new content must remain checked."
+      ]
+    }
+  ],
+  "prior_artifacts_unchanged": [
+    {
+      "name": "legacy-cleanup-integrated-quality-review-a7a1df33.md",
+      "bytes": 31485,
+      "sha256": "54615423fc63810db9d64476f14fdc48f1f8b1482abcb25389b62bb6c09ad78a",
+      "outcome": "SOURCE QUALITY FAIL; P0 0, P1 0, P2 6, P3 1. Not reopened or revised by this semantic task."
+    },
+    {
+      "name": "c-span-semantic-decisions-01.json",
+      "bytes": 31881,
+      "sha256": "71838a8e8bbbf7a0ffd7f11d3a856f946921b4a3b605d4f389df3185d59112fd",
+      "outcome": "Superseded CRLF registration history only; no approval transfer."
+    },
+    {
+      "name": "c-span-semantic-decisions-01-lf.json",
+      "bytes": 31160,
+      "sha256": "b6cb3e61d15c1e3d666c0ce9a3031f18512ebdbcde4852ba7be4422b1bdfd75a",
+      "outcome": "17 ACCEPT, unchanged and not repeated here."
+    },
+    {
+      "name": "c-span-semantic-decisions-02-lf.json",
+      "bytes": 18913,
+      "sha256": "3dc35ad36977975266eee64952ef04f6b3475f5ce9a8503ccd6e539a4fd0c228",
+      "outcome": "2 ACCEPT, 3 REJECT, unchanged. The P08 authored-path, P11 frozen-path/next-gate and W1 changed-files rejections are not reversed."
+    }
+  ],
+  "verification": {
+    "actually_performed": [
+      "Verified exact a7 HEAD and clean repository state; all writes for this request are confined to this new session artifact.",
+      "Read all 54 complete selected excerpts, supplied original prefixes and relevant marker-adjacent source context; made one independent decision per exact declaration digest.",
+      "Verified the 336492-byte input SHA, 54 unique IDs/digests, 36 source paths and 159621 exact excerpt bytes.",
+      "Recomputed every raw UTF-8 LF excerpt hash and compact eight-field declaration digest; checked PENDING input status, unique ordered whole-line markers, exact ranges and byte equality to the declared a7 Git blobs.",
+      "Verified complete source Git identities and source_context_sha256 values and that each supplied prefix matches the original blob.",
+      "Compared original-context identity to base without using equality as semantic permission; nine complete source files differ from 77 while all declared a7 identities match.",
+      "Inspected the maintained command changes in record 24 against base and the exact mixed-purpose boundaries in records 5, 32, 33 and 39.",
+      "Retained earlier set01/set02 decisions, source-quality report and their exact hashes; used owner-provenance chronology only as scoped factual context."
+    ],
+    "not_performed": [
+      "No new classifier or paired-counterexample fixtures were executed; all counterexamples are NOT RUN.",
+      "No product, installer, hook, browser, PDF, Office, native-host, runtime, dynamic isolated-parent or hosted acceptance suites were run for this finite semantic task.",
+      "No private launcher/profile access, credential use, dependency installation, global configuration change or denied-route recreation occurred.",
+      "No source, generated, authority, runtime or repository review record was edited; no staging, commit, push, PR action, new actor or descendant was created.",
+      "No implementation review of a future masking mechanism, complete forward candidate, prepared P05 control/corroboration or mandatory QA completion is claimed."
+    ],
+    "read_limit": "All selected interiors were read in full. Full source bytes were cryptographically checked, with supplied prefixes and relevant surrounding text inspected semantically; this is not a claim to have re-read every line of all 36 complete documents.",
+    "retained_non_green_inspection": "An initial overstrict base-equality check stopped on record 3. The assumption was corrected: this packet binds a7, not unchanged full files at 77. The corrected read-only check reported nine complete-source differences while verifying all a7 declarations. No source or authority change followed."
+  },
+  "qa_and_guard_limits": {
+    "attempt": "legacy-cleanup-corrected-a7a1df33",
+    "prepared_context_canonical_digest": "c00396e129aa16e5aeb6cb32b0a170e93ddcbdeb6cb000bf9b7822f4bd87df11",
+    "prepared_context_raw_sha256": "afb6296397419b0fe32e440dadd84dd5d7d0347c77da34d4da04807aaef61c7e",
+    "profile_ownership": "Generation 2, _default 1.0.0, context e9c20b62-f877-4242-82cd-b5002d452da8 and digest ce259b67ed7a8d414488c92c4f4c1cbf65da8e69bc2eec8647808aaebf03b9d4 belong to the original integration target. Nothing was bootstrapped, borrowed or rebound to this reviewer checkout.",
+    "mandatory_controls": [
+      {"id": "source-tests", "kind": "tests", "mandatory": true},
+      {"id": "strict-hosted-tests", "kind": "tests", "mandatory": true},
+      {"id": "current-routing", "kind": "tests", "mandatory": true}
+    ],
+    "guard": "No guard run or changed count is claimed here. Prior bare-a7 evidence remains 1395 unclassified candidates plus 1543 visible OBSERVATION fields; these are not all defects. The hosted synthetic-merge 1422 count has different source identity and remains separate. No proposal count is automatically accepted and no blanket baseline is recommended.",
+    "authority": "SOURCE-SPEC PASS, the immutable SOURCE QUALITY FAIL report, these semantic decisions and any coordinator forward fixes are separate evidence layers. No canonical P05 PASS, fabricated corroboration, all-green hosted outcome, released leaf or merge/release clearance follows.",
+    "next_boundary": "The coordinator may use only explicitly accepted exact declarations with their bound original contexts. The five rejected declarations and all other unresolved text stay visible. Any narrower proposal, changed outside context, mechanism review or new full candidate requires its separately authorized review; this finite task stops at 54 decisions."
+  }
+}

@@ -33,7 +33,7 @@ fi
 if [ -n "$joined" ]; then
   audit_log "hooks" "no_customer_data_in_screenshot" "hook=no-customer-data-in-screenshot" "tier=warn" "artifact_dir=$ARTIFACT_DIR" "patterns_matched=$joined"
   echo "WARN [Lintel hook]: screenshot DOM at $ARTIFACT_DIR contains customer-data tells ($joined)"
-  echo "WARN: Quarantine the artifact before sharing. Consider mv to ~/.lintel/quarantine/"
+  echo "WARN: Do not share this artifact. Use an explicitly authorized owned quarantine destination."
 fi
 
 exit 0

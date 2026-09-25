@@ -68,7 +68,7 @@ can be grounded N/A; an N/A display score is not verified functionality.
 
 ## When NOT to invoke
 
-- Pre-implementation review (no artifact yet) — use `/plan-eng-review`
+- Pre-implementation review (no artifact yet) — use `/inspect` on the plan with the design lens
 - Source-code review — use `CodeReviewer` (existing)
 - Accessibility-only deep-dive — use `AccessibilityChecker` (existing)
 

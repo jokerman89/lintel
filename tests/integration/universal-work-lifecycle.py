@@ -996,28 +996,28 @@ if _context_run budget; then exit 96; fi
 class ReviewSnippetTests(REVIEW_FIXTURE["Fixture"]):
     def test_actual_plan_review_snippet_to_latest_qa_ship(self):
         self.record()
-        self.review["skill"] = "plan-eng-review"
+        self.review["skill"] = "inspect"
         self.corroborate()
         self.write_json(self.request["record_path"], self.review)
         self.env.update(review_record=self.record_file.as_posix(),
                         review_context=self.expected_file.as_posix(),
                         corroboration=self.observed_file.as_posix())
-        snippet = skill_block("plan-eng-review", "Persist via first-party")
+        snippet = skill_block("inspect", "Persist via first-party")
         self.run_command(["bash", "-c", snippet], ok=0)
-        self.read(skill="plan-eng-review", ok=0)
+        self.read(skill="inspect", ok=0)
         self.assertEqual(self.qa().returncode, 0)
         self.cli("ship", "--repo", self.repo, "--expected", self.expected_file,
                  "--corroboration", self.observed_file, "--qa", self.qa_file,
-                 "--skill", "plan-eng-review", ok=0)
+                 "--skill", "inspect", ok=0)
         # Actual later rejecting writer revokes the earlier positive result.
         self.review["status"] = "fail"
         self.corroborate()
         self.write_json(self.request["record_path"], self.review)
         self.run_command(["bash", "-c", snippet], ok=3)
-        self.read(skill="plan-eng-review", ok=3)
+        self.read(skill="inspect", ok=3)
         self.cli("ship", "--repo", self.repo, "--expected", self.expected_file,
                  "--corroboration", self.observed_file, "--qa", self.qa_file,
-                 "--skill", "plan-eng-review", ok=3)
+                 "--skill", "inspect", ok=3)
 
 
 if __name__ == "__main__":

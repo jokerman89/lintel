@@ -1,5 +1,9 @@
 # Lintel uniformity audit — Cohort 2: planner sub-chain
 
+> Retained historical narrative. Terminology was neutralized on 2026-09-25;
+> former external path/name labels are symbolic, not executable current routes.
+> Original dates, finding IDs and recorded outcomes remain historical, not rerun acceptance.
+
 **Cohort:** 2 (planner sub-chain)
 **Auditor pass:** uniformity, 14 dimensions, NO-CUT (uplift only)
 **Date:** 2026-05-29
@@ -19,7 +23,7 @@
 
 **Not present in repo (named in cohort spec but absent / belong to other cohorts):**
 - `plan` and `plan-and-build` exist but are Cohort 1 phase-core skills — excluded here.
-- No other `plan-*` skills found beyond the seven above. The gstack marketplace `/plan-design-review`, `/plan-eng-review` etc. are *namesakes* — the Lintel versions audited here are the in-repo copies under `skills/`, not the gstack plugin skills.
+- No other `plan-*` skills found beyond the seven above. The retired-provider marketplace `/plan-design-review`, `/plan-eng-review` etc. are *namesakes* — the Lintel versions audited here are the in-repo copies under `skills/`, not the retired-provider plugin skills.
 
 ---
 
@@ -65,7 +69,7 @@ dimensions:
     nano: "SKILL.md:58-106 (Output structure block, full frontmatter + sections)"
     macro: "design doc is the shared object the whole chain reads"
     high: "shared-schema discipline — one schema, both sides import"
-    finding: "strongest in-cohort: fully specifies output doc frontmatter + section order incl. the LAST-h2 GSTACK REVIEW REPORT contract"
+    finding: "strongest in-cohort: fully specifies output doc frontmatter + section order incl. the LAST-h2 retired-provider REVIEW REPORT contract"
     proposed: "extract the design-doc frontmatter into a shared schema doc the review skills cite, rather than each re-describing it"
     why: "two+ components communicate via this doc; per shared-schema rule the schema should live once and be imported, not redescribed in 5 skills"
   D4_entrypoints:
@@ -82,7 +86,7 @@ dimensions:
     high: "checkpoint/resume promise"
     finding: "below bar: writes only the final doc; a 4-round intake interrupted mid-way has no checkpoint to resume from"
     proposed: "write intake answers to a scratch checkpoint (e.g. projects/<slug>/.intake-<ts>.json) after each AskUserQuestion so an interrupted interview resumes"
-    why: "achieve resumable-intake; gstack context-save shows the scratch-state pattern — steal it for intake state"
+    why: "achieve resumable-intake; retired-provider context-save shows the scratch-state pattern — steal it for intake state"
   D6_recovery:
     state: present
     nano: "SKILL.md:118-124 (Failure modes — STUCK path, doc-exists path)"
@@ -124,7 +128,7 @@ dimensions:
     macro: "main-context cleanliness during multi-round intake + section generation"
     finding: "below bar: full section generation (7 sections) runs inline in main context"
     proposed: "spawn a curated-brief subagent for section drafting (Architect-style), returning the doc body; keep intake in main context"
-    why: "dedicated-vs-inline rule — 7-section generation is bulk work that should not fill main context; gstack does heavy generation in subagents"
+    why: "dedicated-vs-inline rule — 7-section generation is bulk work that should not fill main context; retired-provider does heavy generation in subagents"
   D12_failure:
     state: present
     nano: "SKILL.md:118-124"
@@ -133,10 +137,10 @@ dimensions:
     why: "n/a"
   D13_observability:
     state: absent
-    nano: "no review-log / usage-log / envelope write (unlike the 4 review skills which call gstack-review-log)"
+    nano: "no review-log / usage-log / envelope write (unlike the 4 review skills which call retired-provider-review-log)"
     macro: "operator visibility into chain runs"
     high: "observability/jobs-visibility promise"
-    finding: "below bar: office-hours writes NO telemetry, while every review peer persists a gstack-review-log line. The chain's first step is invisible to the run aggregator"
+    finding: "below bar: office-hours writes NO telemetry, while every review peer persists a retired-provider-review-log line. The chain's first step is invisible to the run aggregator"
     proposed: "emit a review-log (or future envelope-log) line: {skill:office-hours, status, doc_path, sections_generated, mode, commit}"
     why: "autoplan step 8 'read all review-log entries from this run' silently misses step 1 today — observability must be uniform across all chain members"
   D14_necessity:
@@ -164,9 +168,9 @@ dimensions:
     state: present
     nano: "SKILL.md:32-35 (Inputs — auto-discovers latest design doc)"
     macro: "chain step 2"
-    finding: "present but input path points at ~/.gstack/projects/ (line 33) — see D3 path-fragmentation finding"
+    finding: "present but input path points at ~/.retired-provider/projects/ (line 33) — see D3 path-fragmentation finding"
     proposed: "normalize input discovery path to ~/.lintel/projects/"
-    why: "office-hours WRITES to ~/.lintel/projects/ (office-hours:13) but ceo-review READS ~/.gstack/projects/ — the chain hand-off is broken at the directory level"
+    why: "office-hours WRITES to ~/.lintel/projects/ (office-hours:13) but ceo-review READS ~/.retired-provider/projects/ — the chain hand-off is broken at the directory level"
   D2_tail:
     state: present
     nano: "SKILL.md:48-71 (Report format incl. VERDICT SCOPE LOCKED/REVISE)"
@@ -175,10 +179,10 @@ dimensions:
     why: "autoplan aggregates verdicts; one verdict vocabulary makes aggregation lossless"
   D3_objects:
     state: partial
-    nano: "SKILL.md:33,38 (~/.gstack/projects/<slug>)"
+    nano: "SKILL.md:33,38 (~/.retired-provider/projects/<slug>)"
     macro: "reads office-hours design doc, appends CEO Review section"
     high: "shared-schema discipline + chain integrity"
-    finding: "PATH FRAGMENTATION: reads ~/.gstack/projects/ while producer writes ~/.lintel/projects/. Output object (CEO Review section) location vs office-hours' LAST-h2 contract not reconciled"
+    finding: "PATH FRAGMENTATION: reads ~/.retired-provider/projects/ while producer writes ~/.lintel/projects/. Output object (CEO Review section) location vs office-hours' LAST-h2 contract not reconciled"
     proposed: "single source the projects-dir constant; cite office-hours' shared design-doc schema"
     why: "highest-severity correctness issue in cohort — a literal broken hand-off path"
   D4_entrypoints:
@@ -192,7 +196,7 @@ dimensions:
     nano: "no checkpoint write"
     macro: "interrupted 3-question + premise loop"
     finding: "below bar: a multi-question review interrupted mid-way restarts from zero"
-    proposed: "persist answered-questions to review-log incrementally (it already calls gstack-review-log at end — make it per-question or write a resume marker)"
+    proposed: "persist answered-questions to review-log incrementally (it already calls retired-provider-review-log at end — make it per-question or write a resume marker)"
     why: "achieve resumable review; plan-eng-review's Exit-Plan-Mode gate is the only checkpoint discipline in cohort — generalize it"
   D6_recovery:
     state: present
@@ -229,12 +233,12 @@ dimensions:
     why: "n/a"
   D13_observability:
     state: present
-    nano: "SKILL.md:73-76 (gstack-review-log call)"
+    nano: "SKILL.md:73-76 (retired-provider-review-log call)"
     macro: "run aggregation by autoplan"
     high: "observability promise"
-    finding: "present BUT calls ~/.claude/skills/gstack/bin/gstack-review-log — a gstack-plugin binary path, not a Lintel-owned one. Brand + dependency fragmentation"
-    proposed: "route through a Lintel-owned review-log binary (li-review-log) or document the gstack dependency explicitly"
-    why: "Lintel claims first-party-first; depending on a gstack bin at a ~/.claude path couples the chain to an external plugin install"
+    finding: "present BUT calls ~/.claude/skills/retired-provider/bin/retired-provider-review-log — a retired-provider-plugin binary path, not a Lintel-owned one. Brand + dependency fragmentation"
+    proposed: "route through a Lintel-owned review-log binary (li-review-log) or document the retired-provider dependency explicitly"
+    why: "Lintel claims first-party-first; depending on a retired-provider bin at a ~/.claude path couples the chain to an external plugin install"
   D14_necessity:
     state: partial
     nano: "SKILL.md:13 ('Optional but recommended')"
@@ -321,9 +325,9 @@ dimensions:
     why: "n/a"
   D13_observability:
     state: present
-    nano: "SKILL.md:91-94 (gstack-review-log), 118 (log read verified at exit)"
+    nano: "SKILL.md:91-94 (retired-provider-review-log), 118 (log read verified at exit)"
     finding: "strongest observability: WRITES log AND verifies it was READ at exit gate (closed loop)"
-    proposed: "keep as bar; same gstack-bin-path dependency caveat as ceo-review (D13)"
+    proposed: "keep as bar; same retired-provider-bin-path dependency caveat as ceo-review (D13)"
     why: "closed-loop write+read verification is the observability bar — but route through Lintel-owned bin"
   D14_necessity:
     state: partial
@@ -360,8 +364,8 @@ dimensions:
     why: "autoplan final-verdict logic (line 43: 'any review NOT CLEARED') needs a token, not just a score"
   D3_objects:
     state: present
-    nano: "SKILL.md:31,69 (~/.gstack/projects/), report appended to plan"
-    finding: "same PATH FRAGMENTATION as ceo-review (reads ~/.gstack/projects/)"
+    nano: "SKILL.md:31,69 (~/.retired-provider/projects/), report appended to plan"
+    finding: "same PATH FRAGMENTATION as ceo-review (reads ~/.retired-provider/projects/)"
     proposed: "normalize to ~/.lintel/projects/"
     why: "broken hand-off path — see ceo-review D3"
   D4_entrypoints:
@@ -399,7 +403,7 @@ dimensions:
   D11_subagent:
     state: partial
     nano: "SKILL.md:72-76 (design binary + outside voices, optional)"
-    finding: "near-bar: invokes external design binary + outside voices, but binary is a gstack path (~/.claude/skills/gstack/design/dist/design)"
+    finding: "near-bar: invokes external design binary + outside voices, but binary is a retired-provider path (~/.claude/skills/retired-provider/design/dist/design)"
     proposed: "keep delegation; same first-party-bin concern as review-log"
     why: "delegation present; dependency-path concern only"
   D12_failure:
@@ -410,8 +414,8 @@ dimensions:
     why: "n/a"
   D13_observability:
     state: present
-    nano: "SKILL.md:67-70 (gstack-review-log)"
-    finding: "present; same gstack-bin-path caveat"
+    nano: "SKILL.md:67-70 (retired-provider-review-log)"
+    finding: "present; same retired-provider-bin-path caveat"
     proposed: "route through Lintel-owned bin"
     why: "first-party-first"
   D14_necessity:
@@ -450,7 +454,7 @@ dimensions:
   D3_objects:
     state: present
     nano: "SKILL.md:31 (plan/design doc), report table"
-    finding: "present; does NOT cite a projects-dir path (lighter input contract than peers) — paradoxically avoids the gstack/lintel path bug"
+    finding: "present; does NOT cite a projects-dir path (lighter input contract than peers) — paradoxically avoids the retired-provider/lintel path bug"
     proposed: "explicitly state input discovery path (and use ~/.lintel/projects/) for uniformity"
     why: "underspecified input path is its own gap even if it dodges the fragmentation"
   D4_entrypoints:
@@ -499,8 +503,8 @@ dimensions:
     why: "n/a"
   D13_observability:
     state: present
-    nano: "SKILL.md:71-74 (gstack-review-log, richest payload incl. tthw/persona/tier)"
-    finding: "richest log payload in cohort; same gstack-bin-path caveat"
+    nano: "SKILL.md:71-74 (retired-provider-review-log, richest payload incl. tthw/persona/tier)"
+    finding: "richest log payload in cohort; same retired-provider-bin-path caveat"
     proposed: "route through Lintel-owned bin"
     why: "first-party-first"
   D14_necessity:
@@ -539,7 +543,7 @@ dimensions:
   D3_objects:
     state: present
     nano: "SKILL.md:39,146 (~/.lintel/question-preferences.jsonl)"
-    finding: "strong: correctly uses ~/.lintel/ (NOT gstack) AND tombstone (append-only audit) discipline. The ONE cohort skill with correct Lintel paths throughout"
+    finding: "strong: correctly uses ~/.lintel/ (NOT retired-provider) AND tombstone (append-only audit) discipline. The ONE cohort skill with correct Lintel paths throughout"
     proposed: "hold as the path-correctness exemplar — peers should match this"
     why: "plan-tune proves the ~/.lintel/ convention; ceo/design reviews diverged from it"
   D4_entrypoints:
@@ -627,10 +631,10 @@ dimensions:
     why: "aggregation is only as clean as the member verdict vocabulary"
   D3_objects:
     state: present
-    nano: "SKILL.md:36,54 (~/.gstack/projects/<slug>)"
+    nano: "SKILL.md:36,54 (~/.retired-provider/projects/<slug>)"
     macro: "orchestrates the shared design doc across all members"
     high: "chain integrity"
-    finding: "PATH FRAGMENTATION: step 2 expects office-hours output at ~/.gstack/projects/ but office-hours WRITES ~/.lintel/projects/. The orchestrator encodes the wrong path"
+    finding: "PATH FRAGMENTATION: step 2 expects office-hours output at ~/.retired-provider/projects/ but office-hours WRITES ~/.lintel/projects/. The orchestrator encodes the wrong path"
     proposed: "normalize to ~/.lintel/projects/ everywhere"
     why: "the orchestrator is the worst place for the path bug — it propagates the wrong location to every step"
   D4_entrypoints:
@@ -709,13 +713,13 @@ priority: high
 ### Strongest / weakest peers
 
 - **Strongest peer: `plan-eng-review`.** Sets the bar on D1 (BLOCKING Step 0), D2 (closed BLOCKING exit gate), D3 (richest output contract + JSONL), D11 (explicit outside-voice subagent), D13 (write-AND-verify-read closed loop). It is the depth target for the cohort. `office-hours` is co-strongest on D3 (shared-object schema) and D6 (5 enumerated failure modes); `autoplan` is strongest on D6 resume/idempotency; `plan-tune` is strongest on path-correctness (D3) and entry-point coverage (D4).
-- **Weakest peer: `plan-design-review`.** Below bar on the most dimensions simultaneously: D3 (gstack-path bug), D5 (no checkpoint), D8 (cli_support claude-only AND missing necessity/io), D10 (no lessons). It also depends on an external gstack design binary. Uplift to eng-review depth is the largest single delta in the cohort.
+- **Weakest peer: `plan-design-review`.** Below bar on the most dimensions simultaneously: D3 (retired-provider-path bug), D5 (no checkpoint), D8 (cli_support claude-only AND missing necessity/io), D10 (no lessons). It also depends on an external retired-provider design binary. Uplift to eng-review depth is the largest single delta in the cohort.
 
 ### Top findings (cohort-wide)
 
-1. **PATH FRAGMENTATION (correctness, high).** `office-hours` writes design docs to `~/.lintel/projects/`, but `plan-ceo-review`, `plan-eng-review`, `plan-design-review`, and `autoplan` all read/expect `~/.gstack/projects/`. `plan-tune` correctly uses `~/.lintel/`. The chain hand-off is literally broken at the directory level. **Uplift:** single-source the projects-dir constant; normalize all to `~/.lintel/projects/`. (Affects D1/D3 of 5 components.)
+1. **PATH FRAGMENTATION (correctness, high).** `office-hours` writes design docs to `~/.lintel/projects/`, but `plan-ceo-review`, `plan-eng-review`, `plan-design-review`, and `autoplan` all read/expect `~/.retired-provider/projects/`. `plan-tune` correctly uses `~/.lintel/`. The chain hand-off is literally broken at the directory level. **Uplift:** single-source the projects-dir constant; normalize all to `~/.lintel/projects/`. (Affects D1/D3 of 5 components.)
 
-2. **OBSERVABILITY GAPS at chain head and orchestrator (high).** `office-hours` (chain step 1) and `autoplan` (the orchestrator) emit NO review-log line, while all 4 review skills do. autoplan's step-8 "read all review-log entries from this run" therefore silently misses the first step and never records its own aggregate run. **Uplift:** both emit a log line; additionally the 4 reviews call `~/.claude/skills/gstack/bin/gstack-review-log` — an external gstack-plugin binary path, violating first-party-first. Route through a Lintel-owned `li-review-log`. (Affects D13 across the cohort.)
+2. **OBSERVABILITY GAPS at chain head and orchestrator (high).** `office-hours` (chain step 1) and `autoplan` (the orchestrator) emit NO review-log line, while all 4 review skills do. autoplan's step-8 "read all review-log entries from this run" therefore silently misses the first step and never records its own aggregate run. **Uplift:** both emit a log line; additionally the 4 reviews call `~/.claude/skills/retired-provider/bin/retired-provider-review-log` — an external retired-provider-plugin binary path, violating first-party-first. Route through a Lintel-owned `li-review-log`. (Affects D13 across the cohort.)
 
 3. **NECESSITY + lessons consultation absent cohort-wide (high).** No component declares `necessity`/`gap_if_skipped` in frontmatter (only prose), even `plan-eng-review` which IS the required gate. Separately, NO component consults `lessons.md`/knowhow — including the three skills where memory would compound most (office-hours premises, ceo-review founder-signal synthesis, devex TTHW trend). The operator-relation and repo-relation learning threads are written-but-not-consulted. **Uplift:** add `necessity`+`gap_if_skipped` fields everywhere; wire lessons/knowhow reads into the context-loading step of each. (Affects D8/D10/D14.)
 

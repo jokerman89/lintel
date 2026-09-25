@@ -157,7 +157,7 @@ class UniversalAdapters(unittest.TestCase):
                          "scaffolding/01-foundation/templates/swarm/agent-brief.template.md"):
             self.assertTrue((bundle / resource).is_file(), resource)
         self.assertIn("AGENTS.md", (bundle / "START.md").read_text())
-        for workflow in ("cli-fingerprint", "pair-agent", "codex"):
+        for workflow in ("cli-fingerprint", "cross-check"):
             canonical = bundle / "skills" / workflow / "SKILL.md"
             self.assertIn("../../shims/universal/ADAPTER.md", canonical.read_text(encoding="utf-8"))
             self.assertTrue((canonical.parent / "../../shims/universal/ADAPTER.md").resolve().is_file())

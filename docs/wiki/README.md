@@ -23,6 +23,7 @@ See [docs/concepts/](../concepts/) for canonical conceptual references:
 - [envelope](../concepts/envelope.md)
 - [full-engineering-pass](../concepts/full-engineering-pass.md)
 - [jobs-system](../concepts/jobs-system.md)
+- [mars](../concepts/mars.md)
 - [memory-v2](../concepts/memory-v2.md)
 - [meta-infra-discipline](../concepts/meta-infra-discipline.md)
 - [obsidian-integration](../concepts/obsidian-integration.md)

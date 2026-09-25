@@ -1,140 +1,122 @@
 ---
 name: code-freeze
 layer: foundation
-v1_alias: [li-freeze]
-description: Record advisory do-not-modify scope for an explicitly identified session or cycle; this metadata does not enforce a filesystem or universal host write lock.
+description: Use to add, list or lift advisory session freeze paths; preserves project policy and never grants or removes host write permission.
 color: red
 tools: Read, Edit, Bash
 voice: internal
-cli_support: [claude-code, codex]
+cli_support: [claude-code, codex, copilot]
 ---
 
-# /code-freeze
+# Code freeze
 
-Session/cycle-scoped **advisory** do-not-modify metadata in
-`.claude/runtime/state/code-freeze/<session-id>.yaml`. It records operator intent,
-not a filesystem lock, host permission or automatic refusal by every skill.
-BUILD/QA must honor explicit operator scope through their normal authorization
-checks; no universal automatic freeze consumer is implemented or claimed here.
-
-Use to prevent drift: "we're working on portal/, do not touch landing/ this session."
-
-## When to use
-
-- Mid-session, operator notices a skill is wandering into unrelated areas — lock those areas
-- Refactor with surgical scope — freeze everything except the target dir
-- Working alongside a teammate on a shared branch; lock their files
-- Surface a project frozen-zone rule alongside temporary scope reminders, without
-  claiming new runtime enforcement
-
-## When NOT to use
-
-- Permanent project policy — that belongs in CLAUDE.md, not session freeze
-- Read protection — metadata does not grant or remove read permission
-- Multi-session enforcement — no expiry watcher or automatic cleanup is installed
+Record advisory do-not-modify scope for the explicitly selected session or cycle.
+The state is `.claude/runtime/state/code-freeze/<session-id>.yaml` on the v5 layout;
+`lintel_state_dir` retains the repository's legacy path resolution. This metadata is
+not a filesystem lock, host permission or project-policy exception.
 
 ## Inputs
 
-- Required: one or more paths (file or directory, glob accepted)
-- Optional `--reason <text>` — why this is frozen (logged to audit, helpful when reviewing later)
-- Optional `--until <expr>` — requested expiry intent (`eod`, `session`, `1h` or
-  an explicit time), evaluated when inspected; not a timer or automatic unfreeze
-- Optional `--list` — show current freeze state without adding
+- One or more repository-relative paths: add or update exact scope. Bounded globs
+  expand to existing files through the shared safe selector.
+- `--reason <text>`: a recorded reason; omitted reasons preserve existing entries.
+- `--until <intent>`: requested expiry such as `session`, `eod`, `1h` or a timestamp.
+  It is a reminder, not a timer. Nothing automatically removes an expired entry.
+- `--list`: read recorded state without writing.
+- `--lift <path...>`: remove exact recorded paths only; no glob expansion.
+- `--lift --all`: remove all entries from this selected session's repository file.
 
-## Workflow
+Choose one operation. `--all` without `--lift`, conflicting modes, missing operands,
+unsafe paths and malformed state fail visibly without replacing the old file. A
+nonexistent literal future path may be frozen and is reported as prospective scope.
+An unmatched glob is not permission to freeze its parent or an entire repository.
 
-1. **Resolve paths.** Use literal repository-relative paths and P03's bounded
-   selector for existing glob matches. Reject escapes/links; do not eval input.
-   A nonexistent future path remains explicit prospective scope, not a failed match
-   silently broadened to its parent.
-2. **Sanity check.** Reject obvious mistakes: empty path, root `/`, freezing `~/.lintel/` itself.
-3. **Write to the explicitly selected session/cycle freeze file.** Use an actual
-   host session ID or retained cycle ID, never a shell PID or guessed `default`.
-   Read back the intended entries before reporting persistence. Example:
-   ```yaml
-   advisory: true
-   frozen:
-     - path: src/components/landing/
-       reason: working on portal, keep landing untouched
-       added_at: 2026-05-27T17:14:03Z
-       expires: session
-   ```
-4. **Carry the pointer.** Link this scope reminder from the selected work/handoff.
-   Report that enforcement is cooperative. Do not claim every write skill consumes it.
-5. **Audit observation.** Use the existing writer once per recorded path:
-   `audit_log code-freeze freeze "path=<path>" "reason=<reason>"`. The record is an observation,
-   not evidence of enforcement.
-6. **Report current freeze state.**
+## Run the selected operation
 
-## Report format
+Carry an actual host session ID or retained cycle ID in the existing environment.
+Never invent a PID/default identity or scan other sessions. Pass operands as an array:
 
-```
-Advisory freeze: 2 paths recorded; automatic enforcement not verified
-
-Currently frozen this session:
-- src/components/landing/    (reason: working on portal)
-- supabase/migrations/       (reason: migration churn risk)
-
-To unfreeze: /code-unfreeze <path>
-An exception needs explicit scoped operator authorization; no universal --ignore-freeze flag exists.
+```bash
+source_root="${LINTEL_SOURCE_ROOT:?select the trusted source}"
+source "$source_root/lib/paths.sh"
+repo="$(lintel_repo_root)" || exit 1
+state_dir="$(lintel_state_dir)" || exit 1
+session_id="${LINTEL_SESSION_ID:-${CLAUDE_SESSION_ID:-${LINTEL_CYCLE_ID:-}}}"
+[ -n "$session_id" ] || { echo 'Select the actual session or retained cycle ID.' >&2; exit 2; }
+python_cmd="${LINTEL_PYTHON:-python3}"
+"$python_cmd" -B "$source_root/skills/code-freeze/scripts/freeze.py" \
+  --repo "$repo" --state-dir "$state_dir" --session "$session_id" \
+  --legacy-file "$LINTEL_HOME/freeze/$session_id.yaml" "$@"
 ```
 
-## How other skills honor the freeze
+The shared producer/reader validates paths with `context_safety.py`, conditionally
+replaces only the selected state file and verifies its read-back. It does not change
+the context/recovery helper, source files, profile, Git configuration or host policy.
+A changed/unreadable/corrupt file is not reset to apparently unrestricted state.
 
-An agent honoring this reminder should:
+The existing YAML shape stays readable:
 
-1. Read `.claude/runtime/state/code-freeze/<session-id>.yaml` before any Edit/Write.
-2. If target path matches a frozen entry: refuse, report the freeze + reason.
-3. Require explicit scope authorization for an exception. A reason or local marker
-   cannot override project governance, host permissions or required controls.
+```yaml
+advisory: true
+frozen:
+  - path: src/landing/
+    reason: keep this area unchanged during the current task
+    added_at: 2026-09-25T08:00:00Z
+    expires: session
+```
 
-This is instruction-driven and advisory, not a claim that every writer implements a
-check. The optional `frozen-zone-warn` hook remains warn-only and dormant; its legacy
-reader uses `$LINTEL_HOME/freeze/<session-id>.yaml`, not this repository path.
-Do not silently copy records there, activate the hook or call it enforcement.
+Lift preserves unmatched entries and their metadata; absent paths are explicit no-ops.
+After an actual change, the existing advisory audit writer records `code-freeze`
+`freeze` or `unfreeze` once per changed path. Audit failure is reported separately from
+state persistence. List/no-op operations neither rewrite state nor manufacture events.
 
-## Compliance integration
+## Hook consumption and compatibility
 
-- Freeze cannot prevent Layer 2 always-on checks (those override). E.g. you can't freeze "skip the sanity-scan" — the sanity-scan is Layer 2.
-- Project frozen-zone rules remain authoritative independently. Context restore/help
-  are not promised to auto-populate this metadata.
+The optional `frozen-zone-warn` hook reads this same repository state through the same
+reader. It compares a file or directory boundary, not a misleading string prefix.
+Only a configured compatible hook invocation produces a warning; this skill does not
+register it, and the hook remains **warn-only**, never a write lock.
+There is no universal automatic freeze consumer: clients that do not run that
+explicitly configured compatible hook receive no automatic warning. A recorded
+scope or discovered skill file does not prove host activation or prevent a write.
+
+When repository state is absent, an explicitly identified legacy
+`$LINTEL_HOME/freeze/<session-id>.yaml` remains a read-only list/warning source. Do not
+copy or mutate it implicitly. A mutation reports that this legacy source needs explicit
+reconciliation; an existing repository file, including an empty list, takes precedence
+and does not resurrect old entries after lift.
+
+Static project frozen-zone rules remain independent. Lifting a runtime reminder
+does not override those rules, enterprise policy or permissions. Before an exception,
+obtain its actual scoped authority. There is no universal `--ignore-freeze` flag.
+
+## Report and recovery
+
+Show the exact state path/source, current entries, changed paths, prospective paths and
+unmatched lift requests. State persistence and hook observation are separate evidence:
+report **advisory scope recorded**, not **writes blocked**. Missing Python or a failed
+reader leaves the operation unverified; preserve the file and do not switch to a
+weaker parser. An unknown hook read warns about unknown scope and still does not block.
 
 ## Failure modes
 
-- **Path doesn't exist:** WARN, still add to freeze (you may be locking a path that will be created — refusal is "do not create this path either").
-- **Path conflicts with existing freeze:** consolidate, do not duplicate. Update reason if operator supplies a new one.
-- **Session file corrupted:** preserve it and report unknown scope. Do not reset
-  to an empty, apparently unrestricted state.
-- **Operator asks for an exception:** there is no override flag to pass. Require explicit
-  scoped authorization and a recorded reason, or remove the entry with `/code-unfreeze`.
+- Missing Python or required reader: report the operation unverified; retain the
+  original state and do not substitute a weaker parser.
+- Malformed, linked or foreign state: refuse mutation, preserve the original bytes
+  and report unknown scope. An optional hook may warn, but never invent clearance.
+- Unmatched or excessive glob: fail the bounded selection without widening to a
+  parent directory. Lift accepts only exact recorded paths or the explicit all mode.
+- Audit failure after an owned write: state persistence and missing audit evidence
+  are separate facts; report both, with no successful audit claim or blind rollback.
+- Host without the configured warning hook: disclose that no automatic warning was
+  observed. Project policy and permissions still apply independently of this reminder.
 
-## Examples
-
-**Lock a directory:**
-```
-> /code-freeze src/components/landing/ --reason "working on portal"
-✓ Advisory scope recorded. Honor it during BUILD; automatic host enforcement is unverified.
-```
-
-**Lock multiple with auto-expire:**
-```
-> /code-freeze supabase/migrations/ scripts/deploy/ --reason "migration cooldown" --until 1h
-✓ 2 advisory paths recorded with a requested one-hour expiry; no timer was installed.
+```text
+/li:code-freeze src/landing --reason "work is limited to src/portal"
+/li:code-freeze --list
+/li:code-freeze --lift src/landing --reason "scope change authorized"
+/li:code-freeze --lift --all --reason "session scope completed"
 ```
 
-**List current state:**
-```
-> /code-freeze --list
-3 paths frozen this session:
-- src/components/landing/    (working on portal, until session end)
-- supabase/migrations/       (migration cooldown, until 18:14:03)
-- .lovable/memory/style/     (designsystem-policy lockdown, until session end)
-```
-
-## See also
-
-- `/code-unfreeze` — remove a path from session freeze
-- `/code-freeze --list` — shows the recorded advisory freeze state; no session-start display
-  is installed
-- `/context-restore` — restores owned checkpoints; no automatic freeze enforcement implied
-- Project CLAUDE.md "frozen zones" section — permanent freezes, not session-scoped
+Use `/li:pause` and `/li:resume --from <checkpoint>` for continuity notes. Neither
+operation automatically copies or clears freeze metadata.
