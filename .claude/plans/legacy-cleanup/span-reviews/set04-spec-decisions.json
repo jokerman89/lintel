@@ -1,0 +1,168 @@
+{
+  "review_type": "finite-set04-exact-span-semantic-adjudication",
+  "status": "CLASSIFICATION_ONLY",
+  "candidate": "a4ae1f57dacea1c3e17b0589dc0eaade5158c27a",
+  "input": {
+    "path": "C:\\Users\\jokerman\\.copilot\\session-state\\e9c20b62-f877-4242-82cd-b5002d452da8\\files\\c-span-review-set-04.json",
+    "sha256": "a683a57a7ed83b51aa2ec178017740b8299e33afd06aface0f0d975c6d9b0251",
+    "bytes": 13739,
+    "declarations": 10,
+    "source_files": 4,
+    "raw_span_bytes": 3238,
+    "supplied_findings_inside": 11
+  },
+  "reviewer": {
+    "project_session_id": "a32b10cf-657d-4c7c-b298-8fcb60cd0735",
+    "session_state_id": "1742f900-1de4-4a59-beee-95c3a907a063",
+    "role": "Same prior source-spec reviewer; no descendants, product implementation or MARS invocation."
+  },
+  "counts": {"ACCEPT": 6, "REJECT": 4, "NEEDS_NARROWING": 0},
+  "scope": "Only the ten exact declarations in the pinned set04 packet. All four source files were read in full, not classified by filename, date, merged status or the packet's completed-checklist category.",
+  "source_contexts": {
+    ".claude/decisions/0036-mars-multi-model-review.md": "5ccb9fc10fc0e854af0d63c1513e7031863a172cbefcdcf97fd73f10af945087",
+    ".claude/plans/mars/plan.md": "df994a39d7f85273736869227f11c0df6d5b530f3f67cf88819c86393d359cee",
+    ".claude/plans/mars/research.md": "34ce733362f560796d2a781930ad086e493ccc9e982e187e8b50937b637657fe",
+    ".claude/plans/mars/review-method-design.md": "6bd0b6c5c36d972b6c6e59ffa7665cbdebbaf1d19536c13cdd800c78e0103240"
+  },
+  "conditions": [
+    "Bind each verdict to the exact declaration_digest, raw_sha256, source_context_sha256 and candidate; unchanged span bytes alone do not transfer approval across a changed source context.",
+    "ACCEPT applies to the selected historical observation or proposal only; it does not make the surrounding ADR, plan, research or design file wholly historical or exempt.",
+    "The ADR's replacement-target status is distinguished from an instruction to use plan-eng-review; the research table is an expressly retained original evidence/design-consequence record, not a live dispatch menu.",
+    "The design's source-input inventory, original problem assessment and fenced architecture proposal are distinguished from its current-form callable-entry table, implementation work card and preservation requirements.",
+    "The four REJECTs identify spans unsuitable for observation masking, not four newly proven implementation bugs or an overall MARS/source-spec failure.",
+    "All outside prose, current navigation, governing constraints, imports and rejected spans remain checked. No wider mask, parser waiver, new framing filter or registration is authorized.",
+    "Only a matching independent quality verdict can contribute to the coordinator's eventual intersection; this reviewer did not read or inherit the other actor's set04 decisions.",
+    "Prior set03, addendum and framing artifacts remain byte-exact. Their 94 selected source blobs also retain the prior selected identities at this candidate, but this check is not a new semantic verdict or whole-candidate acceptance.",
+    "No runtime QA, hosted CI, current guard, profile, model panel, canonical P05 record, signature, mechanism, quality or release clearance follows from these classifications."
+  ],
+  "release_clearance": false,
+  "canonical_p05_record_written": false,
+  "overall_acceptance": "UNVERIFIED",
+  "candidate_source_spec_verdict": "NOT_REVIEWED_IN_THIS_TASK",
+  "guard_and_runtime_execution": "NOT_RUN",
+  "checks_actually_performed": [
+    "Pinned the packet's 13739 raw bytes and SHA-256 and resolved the exact immutable candidate without moving the reviewer checkout.",
+    "Read all four complete source files, totaling 40550 bytes: ADR-0036, the MARS plan, research and review-method design.",
+    "Independently recomputed all ten eight-field declaration digests and verified all full-source/raw-span hashes, raw byte counts and physical line ranges.",
+    "Verified unique ordered whole-line top-level prose boundaries and no overlap among the ten proposed ranges using the existing shared Markdown classifier.",
+    "Confirmed 3238 selected raw bytes and eleven supplied finding labels inside their declared ranges; the guard itself was not run.",
+    "Compared all 94 prior set03 source-file Git identities at convergence with their prior selected candidates, using the addendum candidate for launch-polish and the original candidate for the other 93.",
+    "Rechecked the completed set03, combined-addendum and framing artifact raw hashes and the unchanged clean reviewer checkout."
+  ],
+  "not_run": [
+    "No code/mechanism review beyond the finite semantic question, dynamic fixtures, runtime suite, hosted CI, guard execution, profile transfer or live model verification.",
+    "No external source link was fetched; public-research claims remain attributed original observations, not refreshed facts.",
+    "No source, plan, ADR, memory, runtime, registry, registration, branch or prior reviewer artifact was changed."
+  ],
+  "executed_command_ledger": [
+    {"command": 28, "action": "Pin input/candidate, inspect four source identities and verify reviewer HEAD/status.", "exit": 0},
+    {"command": 29, "action": "Read the complete ADR-0036 and MARS plan at the selected candidate.", "exit": 0},
+    {"command": 30, "action": "Read the complete MARS research record without following its external links.", "exit": 0},
+    {"command": 31, "action": "Verify all ten declaration/context/raw hashes, exact byte counts, ranges, boundary kinds and supplied finding positions.", "exit": 0},
+    {"command": 32, "action": "Read the complete review-method design, including current-form entrypoints, cards and preservation rules.", "exit": 0},
+    {"command": 33, "action": "Verify all 94 earlier source contexts remain identical and all three completed artifacts retain their raw hashes.", "exit": 0}
+  ],
+  "decisions": [
+    {
+      "id": "set04-span-001",
+      "path": ".claude/decisions/0036-mars-multi-model-review.md",
+      "start_line": 18,
+      "end_line_exclusive": 19,
+      "decision": "ACCEPT",
+      "declaration_digest": "704f8a318d425819f05fb49feec783a5d172fd023de488681662bba15a1a1031",
+      "raw_sha256": "346df6bc5a03e5a494df37159b3e3aee71d06cefe9a302431046626148e8205e",
+      "reason": "The continuation belongs to the ADR's account of outside-voice hooks Lintel previously had, not an instruction to invoke any of them now."
+    },
+    {
+      "id": "set04-span-002",
+      "path": ".claude/decisions/0036-mars-multi-model-review.md",
+      "start_line": 89,
+      "end_line_exclusive": 90,
+      "decision": "ACCEPT",
+      "declaration_digest": "d2e504c3706031c19bd0784259af9b4e46f5ef37aa7289c1d32e66b57651a6a7",
+      "raw_sha256": "d902d28d261ba612f2c17f3677662ea140ef13c4a1f9a455b89b234855b6aa54",
+      "reason": "The implementation-status continuation identifies the planned consolidation target by the entry it replaces, without presenting that retired entry as callable or directing a current invocation."
+    },
+    {
+      "id": "set04-span-003",
+      "path": ".claude/plans/mars/plan.md",
+      "start_line": 13,
+      "end_line_exclusive": 24,
+      "decision": "REJECT",
+      "declaration_digest": "35c61eb5cebd278180ac5d88d129edc74e9b4b224b365c973810ea924ae795c1",
+      "raw_sha256": "6f0e4f83679b561f4b78309846d1545e60c380d60b126a256e10cea33a358e78",
+      "reason": "The complete assumptions block adopts the operative REVIEW panel-decision path and current ownership/drift-guard boundaries, so completed build-card checkboxes do not make it observation-only."
+    },
+    {
+      "id": "set04-span-004",
+      "path": ".claude/plans/mars/research.md",
+      "start_line": 46,
+      "end_line_exclusive": 47,
+      "decision": "ACCEPT",
+      "declaration_digest": "609abc128e493aff6625e0433e811edc46460787f3e587963c2134c6cd828524",
+      "raw_sha256": "9b729ef4eada46b34505e5d883bbb0d780b7eeb488424924dbcea21730c55e0a",
+      "reason": "The row preserves the original fixed-baseline research observation and its proposed design consequence under the explicit traceability note, not a present command or dispatch instruction."
+    },
+    {
+      "id": "set04-span-005",
+      "path": ".claude/plans/mars/review-method-design.md",
+      "start_line": 5,
+      "end_line_exclusive": 6,
+      "decision": "ACCEPT",
+      "declaration_digest": "1239d4423054f675485c2c3b81e60518d851af4faa74fcb599d0050232f9196f",
+      "raw_sha256": "19dab4348859be96dc53f27e68c3bb191b6d003389f240d7b0ce26e08a045715",
+      "reason": "The metadata line identifies the original design-input inventory, not a request to execute those workflows."
+    },
+    {
+      "id": "set04-span-006",
+      "path": ".claude/plans/mars/review-method-design.md",
+      "start_line": 10,
+      "end_line_exclusive": 19,
+      "decision": "ACCEPT",
+      "declaration_digest": "036fc61c8cf8fd7d6915e3e5cfeb7cb1b824ba9c7007b781b4be460cbba1a44d",
+      "raw_sha256": "23f2b7f0211fc6b70aa7e91df34594358187a87d983c79ac7663efaa88f2d935",
+      "reason": "The complete problem statement records the source-time prompt/rubric comparison that motivated the design, rather than selecting a current reviewer workflow."
+    },
+    {
+      "id": "set04-span-007",
+      "path": ".claude/plans/mars/review-method-design.md",
+      "start_line": 55,
+      "end_line_exclusive": 70,
+      "decision": "ACCEPT",
+      "declaration_digest": "f9470e0b5eb437978f61686f2984d8b79800f622336d6bda37b548e166ccd4a5",
+      "raw_sha256": "9e294883be08a29f018624b90780e8425a4ea0774af2d9ac23a3c6770726f134",
+      "reason": "The fenced architecture specimen preserves the original proposed dependency and report-flow design without supplying a present invocation or claiming the depicted consumers are accepted."
+    },
+    {
+      "id": "set04-span-008",
+      "path": ".claude/plans/mars/review-method-design.md",
+      "start_line": 122,
+      "end_line_exclusive": 124,
+      "decision": "REJECT",
+      "declaration_digest": "f02ec6c7b2f5519ec1ba60b16d7578acb3312a254ab9e1e3e9df9f42a5de52f8",
+      "raw_sha256": "7a9e8a0c9fd727058b720a115778d6898279c33b27bb8b3ea7e6b7d1a40b58d4",
+      "reason": "The entrypoint table directly presents /li:plan-eng-review as a runnable caller and specifies its method and MARS offer behavior, rather than recording an observed result."
+    },
+    {
+      "id": "set04-span-009",
+      "path": ".claude/plans/mars/review-method-design.md",
+      "start_line": 138,
+      "end_line_exclusive": 139,
+      "decision": "REJECT",
+      "declaration_digest": "52381dae4533f915fcffc939938c98dc88d5ea0b6b99101d1ab8fa0111beb996",
+      "raw_sha256": "09e86556ab06f4c5f9dbe9b7f7f5f6a63aa586c4db9498da570828c6745705ad",
+      "reason": "RM5 is a consumer-wiring and drift-guard implementation contract with required caller behavior, not a recorded completed checklist or test observation."
+    },
+    {
+      "id": "set04-span-010",
+      "path": ".claude/plans/mars/review-method-design.md",
+      "start_line": 148,
+      "end_line_exclusive": 155,
+      "decision": "REJECT",
+      "declaration_digest": "b5d5f878364ff45555c94dfd4ab3515bf6e28087bdfc74b6b7c1bd6485eb31c7",
+      "raw_sha256": "7788c3d385543e08cd733d463329235d5c8fa4e6eace0b925999dbf8d28d703a",
+      "reason": "The section states operative domain/policy preservation requirements and assigns plan-eng-review's reviewer pass to the method, not merely a historical finding or result."
+    }
+  ],
+  "readback": "Before delivery, verify all ten ordered identity/decision records, counts, exact source contexts and preservation of earlier artifacts; report the resulting raw artifact hash separately rather than embedding a self-hash."
+}

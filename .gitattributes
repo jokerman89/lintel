@@ -156,3 +156,7 @@ install/directories.txt text eol=lf
 .claude/plans/legacy-cleanup/span-reviews/set05-quality-decisions.json -text whitespace=trailing-space,space-before-tab,cr-at-eol
 .claude/plans/legacy-cleanup/span-reviews/set05-decision.json -text whitespace=trailing-space,space-before-tab,cr-at-eol
 .claude/plans/legacy-cleanup/span-reviews/set05-corroboration.json -text whitespace=trailing-space,space-before-tab,cr-at-eol
+.claude/plans/legacy-cleanup/span-reviews/set04-spec-decisions.json -text whitespace=trailing-space,space-before-tab,cr-at-eol
+.claude/plans/legacy-cleanup/span-reviews/set04-quality-decisions.json -text whitespace=trailing-space,space-before-tab,cr-at-eol
+.claude/plans/legacy-cleanup/span-reviews/set04-decision.json -text whitespace=trailing-space,space-before-tab,cr-at-eol
+.claude/plans/legacy-cleanup/span-reviews/set04-corroboration.json -text whitespace=trailing-space,space-before-tab,cr-at-eol

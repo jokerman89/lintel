@@ -2991,6 +2991,19 @@ acceptance. No other historical candidate is accepted by this register.
       "declaration_digest": "eebce2f0b7a8508c739100be2611872ea6659a84deff03a9cb7ce4a9a56fb758",
       "review": ".claude/plans/legacy-cleanup/span-reviews/set05-decision.json",
       "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set05-corroboration.json"
+    },
+    {
+      "id": "set04-span-004",
+      "path": ".claude/plans/mars/research.md",
+      "start": "| Local `skills\\plan-eng-review\\SKILL.md`, Optional outside voice | Engineering plan review has another independent challenge entry. | Route it to the same MARS offer/protocol. |",
+      "end": "| Local `skills\\code-review\\SKILL.md` | Large-diff Codex review has distinct existing semantics. | Do not silently remove this required/legacy behavior; MARS is an additive optional offer. |",
+      "sha256": "9b729ef4eada46b34505e5d883bbb0d780b7eeb488424924dbcea21730c55e0a",
+      "category": "completed checklist record excerpt",
+      "reason": "Exact bounded excerpt of a preserved dated record that names then-existing, removed or proposed workflow names/paths as recorded facts; it does not select or route a current workflow. Text outside this exact span remains checked.",
+      "source_evidence": ".claude/plans/mars/research.md:46-46 at a4ae1f57dacea1c3e17b0589dc0eaade5158c27a; source sha256 34ce733362f560796d2a781930ad086e493ccc9e982e187e8b50937b637657fe",
+      "declaration_digest": "609abc128e493aff6625e0433e811edc46460787f3e587963c2134c6cd828524",
+      "review": ".claude/plans/legacy-cleanup/span-reviews/set04-decision.json",
+      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set04-corroboration.json"
     }
   ]
 }
