@@ -48,7 +48,7 @@ publishing the harness possible at all.
 Canonical skills live at `skills/<name>/SKILL.md`, one source for every client. The invocation
 form depends on the adapter: `/li:<name>` in the Claude plugin, generated `li-<name>` wrappers in
 the Copilot, Codex and Gemini repository adapters, or an explicit file handoff through the
-Universal adapter. The tree holds 95 skill entries (directories with a `SKILL.md`). They fall
+Universal adapter. The tree holds 94 skill entries (directories with a `SKILL.md`). They fall
 into clusters:
 
 | Cluster | What it holds |
@@ -79,8 +79,8 @@ to current methods and explains non-destructive updates. A few boundaries matter
 - `generate-pdf` keeps its converter and browser-print writer. Lintel ships no PDF reader
   ([ADR-0033](../.claude/decisions/0033-remove-document-format-acceptance-and-pdf-reader.md)),
   so produced text, pages and rendering stay unverified unless an authorized inspection
-  operation is available. The `make-pdf` entry remains until its print options join
-  `generate-pdf`.
+  operation is available. The former `make-pdf` entry is folded into `generate-pdf`, which now
+  carries its print options.
 
 ### `agents/` — delegated roles
 
