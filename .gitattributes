@@ -144,3 +144,7 @@ install/directories.txt text eol=lf
 .claude/plans/mars/plan.md text eol=lf
 .claude/plans/mars/research.md text eol=lf
 .claude/plans/mars/review-method-design.md text eol=lf
+.claude/plans/legacy-cleanup/span-reviews/set03-spec-decisions.json -text whitespace=trailing-space,space-before-tab,cr-at-eol
+.claude/plans/legacy-cleanup/span-reviews/set03-quality-decisions.json -text whitespace=trailing-space,space-before-tab,cr-at-eol
+.claude/plans/legacy-cleanup/span-reviews/set03-decision.json -text whitespace=trailing-space,space-before-tab,cr-at-eol
+.claude/plans/legacy-cleanup/span-reviews/set03-corroboration.json -text whitespace=trailing-space,space-before-tab,cr-at-eol
