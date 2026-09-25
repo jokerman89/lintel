@@ -9,10 +9,14 @@ frozen-path overlay in ../spec.md has priority over every ordinary scope.
 
 ## Coordinator contract
 
-Integration session e9d7470d-278c-4d7a-8a73-e1fd7a108ece alone writes plan/runtime state,
+Integration host/routing session e9c20b62-f877-4242-82cd-b5002d452da8 alone writes plan/runtime state,
 generated reducers, commits and integration history. Workers write only their scope
 and own report. No worker edits another worktree, stages/commits, pushes, opens a PR,
 authors its review, or creates further descendants.
+
+The app workspace separately identifies its project session as
+e9d7470d-278c-4d7a-8a73-e1fd7a108ece. This is not the host actor/invocation identity.
+Use the host/routing ID for messages, actual profile context and review attribution.
 
 Each worker sends its actual worktree/branch/base, changed paths, exact checks,
 per-leaf outcomes, capability carry-over, limitations and deferred consumers.
@@ -42,3 +46,24 @@ Missing runtime evidence remains missing; distinct role strings do not prove ind
 An out-of-scope change is preserved and quarantined until reconciled. This worktree is
 isolation for attribution, not a security sandbox. Existing failures and real-host
 limits remain visible. No archived worktree, reset, history rewrite or cleanup shortcut.
+
+## Validation boundary update
+
+The host refused W1's private/session-environment launcher before execution. No
+continuation may copy, move, inline, switch tools or borrow another launcher to
+recreate the refused action. Source-only checks and existing expressly authorized
+read-only swarm metadata commands remain separate observations. Dynamic tests needing
+that refused setup remain NOT RUN. Normal committed-repository hosted CI is a separate
+required acceptance path and must never load the refused launcher.
+
+The coordinator's earlier, separately accepted map/profile bootstrap is historical
+evidence only; it does not transfer permission to a worker. Pre-update documentary red
+checks reported by other lanes remain labelled observations, not current acceptance.
+
+## Ownership correction, 2026-09-25
+
+The initial documentation directory scope included a generated showcase HTML file.
+The parent identified the overlap before fan-in; the scope now names only its README,
+and the generated HTML is explicitly coordinator-owned/frozen. Directory scopes must
+be checked against generated-file inventories before dispatch, not only against
+obvious catalog/wiki directories. Record this lesson in memory after its freeze lifts.

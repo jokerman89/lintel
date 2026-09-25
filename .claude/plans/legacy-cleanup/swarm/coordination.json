@@ -6,7 +6,7 @@
   "integration_branch": "jokerman-microsoft-legacy-cleanup-integration",
   "max_parallel": 6,
   "coordinator_paths": [
-    "skills/CATALOG.md", "docs/wiki", ".github/skills", ".github/agents",
+    "skills/CATALOG.md", "docs/wiki", "docs/showcase/lintel-the-harness.html", ".github/skills", ".github/agents",
     ".github/lintel", ".agents", ".claude/decisions", ".claude/memory",
     ".claude/plans/todo.md", ".claude/plans/universal-implementation",
     "CHANGELOG.md", "bin/li-copilot.py", "lib/capability-selections.json",
@@ -39,7 +39,7 @@
         "skills/qa","skills/qa-only","skills/verify","skills/investigate",
         "skills/diagnose","skills/codex","skills/cross-check","skills/code-review",
         "skills/perfbench","agents",
-        "tests/behavior/agent-contract-scenarios.py","tests/behavior/agent-contract-scenarios.sh",
+        "tests/behavior/agent_contract_scenarios.py","tests/behavior/agent-contract-scenarios.sh",
         "tests/unit/quality-consolidation.py","tests/unit/quality-consolidation.sh"
       ],
       "brief":".claude/plans/legacy-cleanup/swarm/briefs/W2.md",
@@ -117,7 +117,7 @@
         "docs/copilot.md","docs/the-cycle.md","docs/spec-kit.md","docs/compliance.md",
         "docs/client-adapters.md","docs/claude-code.md","docs/provenance.md","docs/precedence.md",
         "docs/power-user.md","docs/native-installation.md","docs/multi-cli.md","docs/lifecycle.md",
-        "docs/concepts","docs/migrations","docs/showcase",
+        "docs/concepts","docs/migrations","docs/showcase/README.md",
         ".claude/engineering/design-archive",".claude/engineering/evolution",
         ".claude/engineering/compat-audits"
       ],

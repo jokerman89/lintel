@@ -14,14 +14,16 @@ This is the single task authority; coordination contains no second backlog.
 ## Plan signals
 
 Size XL. Six implementation packages and one coordinator package. Phases: BUILD,
-REVIEW, SHIP, CAPTURE. Whole-cycle token estimate remains uncalibrated; no measured
-capacity or spend is claimed. No additional resource ceiling was requested.
+REVIEW, SHIP, CAPTURE. The actual `scale_token_estimate XL` result is 120,000 tokens,
+uncalibrated, zero samples. This is a whole-cycle estimate, not measured capacity
+or spend. No additional resource ceiling was requested.
 
 ## Profile impact
 
-Use the repository-local verified profile context and existing neutral fallback
-only when its resolver validates it. No enterprise control is inferred from installed
-files. Frozen requirements/evidence/profile contracts remain authoritative.
+Repository-local bootstrap observed `_default` version 1.0.0, generation 1, under
+the actual host session ID. It is a verified neutral context, not evidence of enterprise
+hook enforcement. The full reference stays in its owned runtime context. Frozen
+requirements/evidence/profile contracts remain authoritative.
 
 ## Work packages
 

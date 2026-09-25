@@ -4,8 +4,9 @@
 
 Read spec.md, plan.md and swarm/charter.md in this directory. This is the explicitly
 authorized cleanup released at 2026-09-25 09:08 CEST. The parent coordinator is session
-`f4584b03-22c2-468c-abe8-cb1bc3016a6d`; integration is
-`e9d7470d-278c-4d7a-8a73-e1fd7a108ece`. Starting HEAD is
+`f4584b03-22c2-468c-abe8-cb1bc3016a6d`; integration host/routing identity is
+`e9c20b62-f877-4242-82cd-b5002d452da8` (workspace project-session identifier:
+`e9d7470d-278c-4d7a-8a73-e1fd7a108ece`). Starting HEAD is
 `d285a33283ec90341b79f3d093d1e9ca6a1504ce`, not the obsolete audit baseline.
 Use the six existing isolated lanes, never a replacement parallel backlog.
 
