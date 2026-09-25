@@ -1,5 +1,9 @@
 # Design: Lintel v3.5 — Azure Toolbox
 
+> Editorial update, 2026-09-25: nomenclature and operative pointers were updated.
+> The [original record](https://github.com/jokerman89/lintel/blob/77cb8d3f/.claude/engineering/design-archive/lintel-v3.5-azure-toolbox-plan.md) remains at that immutable revision.
+> Original IDs, dates, service scope, estimates and outcomes remain; no delivery is newly claimed.
+
 > Historical design. Original dates, task IDs, service choices and review outcomes are
 > preserved, not rerun. Current method names are navigation only; no new cloud,
 > customer-data, private-source or installation authority follows from this record.
@@ -252,12 +256,12 @@ mappings:
 
 ### v3.5 deliverables (this iteration)
 
-1. `skills/az-tldr/SKILL.md` — orchestration body (300-400 lines)
-2. `skills/az-tldr/services/_template.md` — service-content template (150 lines)
-3. `skills/az-tldr/services/expressroute.md` — FIRST SHIPPED service, deep content (~800-1200 lines incl. all 15 sections)
-4. `skills/az-tldr/services/README.md` — list of supported services + status table
-5. `skills/az-tldr/sections/README.md` — section-glossary, what each § means + how subagents are invoked per section
-6. `skills/az-tldr/agent-mapping.yaml` — service → subagent mapping (5-10 entries for likely-future services as placeholder)
+1. Provide the predecessor service-overview orchestration body (300-400 lines).
+2. Provide its service-content template, `_template.md` (150 lines).
+3. Provide the ExpressRoute resource, `expressroute.md` — the planned FIRST SHIPPED service, deep content (~800-1200 lines incl. all 15 sections).
+4. Provide the service-resource `README.md` — list of supported services + status table.
+5. Provide the section-resource `README.md` — section-glossary, what each § means + how subagents are invoked per section.
+6. Provide `agent-mapping.yaml` — service → subagent mapping (5-10 entries for likely-future services as placeholder).
 7. `tests/unit/az-toolbox-service-files.sh` — verifies all services/ files validate against template + as-of dates fresh
 8. `docs/per-cli/az-toolbox.md` — operator install + invocation guide
 9. Add `/az-tldr` to README skill-catalog

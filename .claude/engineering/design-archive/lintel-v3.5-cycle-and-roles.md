@@ -6,10 +6,9 @@
 > canonical phases, actual host capabilities, existing authority and shared v2 evidence.
 > See the [native migration](../../../docs/migrations/2026-09-25-native-workflows.md).
 
-> Navigation update, 2026-09-25: current route lists below use the accepted native
-> interfaces. Original step identifiers without a shipped entry are explicitly
-> proposals, not callable skills. Original samples, decisions, counts and outcomes
-> remain records; no example or historical test was executed under the updated names.
+> Editorial update, 2026-09-25: nomenclature and operative pointers were updated.
+> The [original record](https://github.com/jokerman89/lintel/blob/77cb8d3f/.claude/engineering/design-archive/lintel-v3.5-cycle-and-roles.md) remains at that immutable revision.
+> Unimplemented step IDs remain proposals; original samples, decisions, counts and outcomes are not rerun.
 
 **Date:** 2026-05-28
 **Branch:** `v3-dev` (will become `lintel-rebrand` post-approval)
@@ -1199,11 +1198,11 @@ When approved, this runs as a discrete branch + commit sequence:
    - `bin/li-lessons-promote` → `bin/li-lessons-promote`
    - `bin/li-update` → `bin/li-update`
    - `bin/li-adr-new` → `bin/li-adr-new`
-3. **Skill renames:**
-   - `skills/li:cli-fingerprint/` → `skills/li-doctor/` (deprecate cli-fingerprint, replaced by li-doctor)
-   - `skills/li:doctor/` → `skills/li-doctor/` (merge)
-   - `skills/li:eval/` → `skills/li-eval/`
-   - `skills/li:scaffold/` → `skills/li-scaffold/`
+3. **Resolve the predecessor wrapper capabilities through current source owners:**
+   - Entry discovery: `skills/welcome/SKILL.md`; the actual loaded adapter owns host bindings, not a predecessor client-fingerprinting wrapper.
+   - Local diagnostics: `skills/doctor/SKILL.md`; keep installed-file checks separate from observed host activation.
+   - Voice calibration: `skills/eval/SKILL.md`; source presence is not an executed evaluation.
+   - Repository foundations: `skills/scaffold/SKILL.md`; preserve the selected source, target, ownership and policy boundaries.
    - All `li-*` skill names in frontmatter `name:` field → `li-*`
 4. **Plugin manifest changes:**
    - `.claude-plugin/plugin.json` — `name: "lintel"` (full word for marketplace), description starts "Lintel — ..."
@@ -1220,7 +1219,7 @@ When approved, this runs as a discrete branch + commit sequence:
    - `jokerman89` → `jokerman89` (note: lowercase, since GH username changed)
 6. **Skill invocation namespace:**
    - Operator selects verification, an authorized domain method or `/li:cycle`
-   - Wait — the user wants `/li:command` short form. Plugin name = "lintel" gives `/li:` namespace.
+   - The requested shorthand was a plugin-qualified workflow invocation using the `li` namespace; the generic command label was not an implemented skill.
    - **DECISION needed:** plugin name "li" (gives `/li:cycle`) vs "lintel" (gives `/li:cycle`). Recommend "li" for ergonomics (3 chars beats 6 chars typed daily). Marketplace display name = "Lintel".
 7. **Entrypoint files:**
    - Root `CLAUDE.md` — rewrite for Lintel
