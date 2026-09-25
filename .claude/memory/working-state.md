@@ -8,6 +8,18 @@ Cross-session working state (not durable rules — that's [[lessons.md]]; not pe
 
 ---
 
+## Active - Supported clients narrowed to four families (2026-09-25)
+
+**Status:** built and locally verified on branch `jokerman-microsoft-trim-supported-clients`
+(ADR-0035; [plan](../plans/supported-clients/plan.md), [review](../plans/supported-clients/review.md)):
+targeted tests, the shape tier and `install/verify.sh --all` pass under a synthetic home;
+independent review has no open P0-P2 finding. Lintel supports GitHub Copilot, Claude, Codex and
+Cursor plus the manual `other` route; the ten other families, the Gemini extension, the OpenCode
+guide and two `li-update` routes are removed.
+**What's pending:** push and PR need this session's operator (L-045, L-053). Recorded merge order:
+#105, then #104, then this branch (ordinary merge of `main`, no rebase), then the docs branches;
+re-apply ADR-0035 to what lands first.
+
 ## Active - Universal implementation (2026-09-20)
 
 **Recovery, updated 2026-09-23:** the operator transferred the broken MasterSession to

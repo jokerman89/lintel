@@ -1,5 +1,10 @@
 # Work index — current initiative and historical plans
 
+Supported clients (2026-09-25): [plan](supported-clients/plan.md), [spec](supported-clients/spec.md),
+[handoff](supported-clients/prompt.md) and [review](supported-clients/review.md) narrow Lintel to
+GitHub Copilot, Claude, Codex and Cursor (ADR-0035). Built on its feature branch; delivery waits
+for the operator.
+
 Current initiative: [Universal implementation](universal-implementation/work.json), coordinated by
 MasterSession's recovery session `88aecc43-40f9-41d4-8947-6c2fb0a55481`.
 Follow its [current handoff](universal-implementation/handoff.md); the original plan remains
