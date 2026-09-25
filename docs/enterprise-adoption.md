@@ -37,7 +37,8 @@ particular vendor or arbitrary retention window is not a neutral prerequisite.
 3. **Do a bounded task.** Discover the skills, write a specification and build cards, implement them,
    review against the specification, and capture a decision or lesson where warranted.
 4. **Hand off cold.** Start a new session, ideally with another developer, and invoke the
-   discovered `li-resume` or read its canonical file explicitly.
+   `resume` workflow in that client's form (`/li:resume`, a generated `li-resume` wrapper, or an
+   explicit read of its canonical file).
    It should identify the completed work, remaining cards and verification evidence from files.
 5. **Review the evidence.** Compare against the agreed baseline and decide whether to adopt, adjust
    or remove the kit. Keep the decision in the repository.
