@@ -35,7 +35,7 @@ MARS = **Multi-Model Adversarial Review & Screening**.
 
 ## Pending (needs the in-flight legacy cleanup base)
 
-- MARS hooks for the consolidated planning inspection (replacing `plan-eng-review`),
+- MARS hooks for the consolidated planning inspection (`/li:inspect --target plan`, replacing the former plan engineering review),
   `define`'s spec review, `cross-check` and `CodeReviewer`: specified in
   `skills/mars/references/integration.md`, not applied to files that lane removes or rewrites.
 - Repository-wide drift guard (no rubric outside the method) after that consolidation.
