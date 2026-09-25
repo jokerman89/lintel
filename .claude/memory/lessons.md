@@ -1126,3 +1126,15 @@ the actual manifest-bound bytes where present; otherwise explain the exact obser
 or citation that must remain faithful. Neutralize ordinary current narrative without
 altering observed inputs and claiming the same old review. Use precise path/field
 residuals, preserve required notices, and never encode identity or claim a false zero scan.
+
+## L-060 - Do not amend commits or override hook configuration without authorization
+
+**Date:** 2026-09-25
+
+**Context:** A coordinator tried to amend an unpublished local commit and passed a
+command-line hook-path override. The operator rejected it as history amendment and a hook
+bypass without explicit authorization.
+
+**Rule:** Correct mistakes with a new ordinary commit. Never pass `--amend`, `--no-verify`
+or a `core.hooksPath` override unless the operator explicitly authorizes that exact action,
+even when no hook is currently installed or the commit is local-only.
