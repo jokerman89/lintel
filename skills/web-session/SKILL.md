@@ -48,11 +48,11 @@ Use `frontend-design-review` for built UI critique, `generate-web --mode mockup`
 for static HTML authoring, and `generate-pdf` for composition/print choices. Printing
 does not imply PDF text, dimensions or rendered-page inspection passed.
 
-Resource-only import/reference bridges remain at the former browser resource
-paths while frozen PDF and foreign consumers are joined. They expose this same
-provider, not another browser implementation or discoverable legacy command.
-The coordinator must include the canonical resources in installed dependency
-closure before pruning the bridges. No generated inventory is changed here.
+PDF and other consumers use these canonical resources through the existing
+installed dependency inventory. Temporary resource bridges were removed after
+those consumers were joined; they are not a second provider or entrypoint.
+Missing installed resources remain an explicit integrity failure, not permission
+to load a personal browser copy or a retired path.
 
 ## Evidence
 

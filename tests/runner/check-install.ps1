@@ -1,6 +1,7 @@
 # Behavioral verification of the native Windows installer, without Pester.
 param(
     [switch]$PruningOnly,
+    [switch]$SnapshotOnly,
     [ValidateSet('powershell', 'bash')][string]$PruningPerformer = 'powershell'
 )
 $ErrorActionPreference = 'Stop'
@@ -26,11 +27,79 @@ function Write-FixtureFile([string]$Root, [string]$Relative, [string]$Text) {
 }
 
 function Get-FixtureSnapshot([string]$Root) {
-  $rows = foreach ($file in Get-ChildItem -LiteralPath $Root -File -Recurse -Force | Sort-Object FullName) {
-    $relative = $file.FullName.Substring($Root.Length)
-    "$relative`t$((Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256).Hash)"
+  $rootItem = Get-Item -LiteralPath $Root -Force -ErrorAction Stop
+  if (-not $rootItem.PSIsContainer -or
+      ($rootItem.Attributes -band [IO.FileAttributes]::ReparsePoint)) {
+    throw 'A fixture snapshot requires an ordinary owned directory.'
   }
-  return $rows -join "`n"
+  $pending = New-Object 'System.Collections.Generic.Stack[string]'
+  $rows = New-Object 'System.Collections.Generic.List[string]'
+  $pending.Push($rootItem.FullName)
+  while ($pending.Count -gt 0) {
+    foreach ($entry in Get-ChildItem -LiteralPath $pending.Pop() -Force -ErrorAction Stop) {
+      $relative = $entry.FullName.Substring($rootItem.FullName.Length)
+      if ($entry.Attributes -band [IO.FileAttributes]::ReparsePoint) {
+        $record = [ordered]@{
+          path = $relative; kind = 'link'; link_type = $entry.LinkType
+          target = @($entry.Target)
+        }
+        $rows.Add((ConvertTo-Json -InputObject $record -Compress))
+      } elseif ($entry.PSIsContainer) {
+        $pending.Push($entry.FullName)
+      } else {
+        $record = [ordered]@{
+          path = $relative; kind = 'file'
+          sha256 = (Get-FileHash -LiteralPath $entry.FullName -Algorithm SHA256 -ErrorAction Stop).Hash
+        }
+        $rows.Add((ConvertTo-Json -InputObject $record -Compress))
+      }
+    }
+  }
+  return ($rows | Sort-Object) -join "`n"
+}
+
+function Test-FixtureSnapshot {
+  $root = Join-Path $TestRoot 'snapshot-owned'
+  $foreign = Join-Path $TestRoot 'snapshot-foreign'
+  New-Item -ItemType Directory -Path $root, $foreign | Out-Null
+  $ordinary = Join-Path $root 'ordinary.txt'
+  [IO.File]::WriteAllText($ordinary, 'owned bytes')
+  $foreignFile = Join-Path $foreign 'not-owned.txt'
+  [IO.File]::WriteAllText($foreignFile, 'foreign fixture bytes')
+  $missing = Join-Path $foreign 'missing.txt'
+  New-Item -ItemType SymbolicLink -Path (Join-Path $root 'dangling.txt') -Target $missing | Out-Null
+  New-Item -ItemType SymbolicLink -Path (Join-Path $root 'foreign.txt') -Target $foreignFile | Out-Null
+  New-Item -ItemType Junction -Path (Join-Path $root 'foreign-dir') -Target $foreign | Out-Null
+  $before = Get-FixtureSnapshot $root
+  $records = @($before -split "`n" | ForEach-Object { $_ | ConvertFrom-Json })
+  if ($records.Count -ne 4 -or @($records | Where-Object kind -eq 'link').Count -ne 3) {
+    throw 'Fixture snapshot must record links without following file or directory targets.'
+  }
+  $regular = @($records | Where-Object kind -eq 'file')
+  if ($regular.Count -ne 1 -or $regular[0].path -cne '\ordinary.txt') {
+    throw 'Fixture snapshot read a foreign link target.'
+  }
+  foreach ($pair in @(@('\dangling.txt', $missing), @('\foreign.txt', $foreignFile),
+      @('\foreign-dir', $foreign))) {
+    $link = @($records | Where-Object path -eq $pair[0])
+    if ($link.Count -ne 1 -or @($link[0].target).Count -ne 1 -or
+        $link[0].target[0] -cne $pair[1] -or -not $link[0].link_type) {
+      throw 'Fixture snapshot did not preserve the link target spelling and type.'
+    }
+  }
+  [IO.File]::WriteAllText($foreignFile, 'changed outside selected snapshot')
+  if ((Get-FixtureSnapshot $root) -cne $before -or (Test-Path -LiteralPath $missing)) {
+    throw 'Changing a link target changed the owned snapshot or materialized a dangling target.'
+  }
+  $locked = [IO.File]::Open($ordinary, [IO.FileMode]::Open, [IO.FileAccess]::Read, [IO.FileShare]::None)
+  try {
+    $failed = $false
+    try { Get-FixtureSnapshot $root | Out-Null } catch { $failed = $true }
+    if (-not $failed) { throw 'Unreadable ordinary files must fail the fixture snapshot.' }
+  } finally {
+    $locked.Dispose()
+  }
+  Write-Host 'PASS: fixture snapshots preserve link identity without following targets and fail on unreadable ordinary files.'
 }
 
 function Invoke-PruningInstall([string]$Source, [string]$Target, [switch]$ExpectConflict, [switch]$Check) {
@@ -160,6 +229,9 @@ function Test-ManagedPruning {
 
 try {
   New-Item -ItemType Directory -Path $TestRoot | Out-Null
+  if ($SnapshotOnly -and $PruningOnly) { throw 'Select one focused verification mode.' }
+  Test-FixtureSnapshot
+  if ($SnapshotOnly) { exit 0 }
   if ($PruningOnly) {
     Test-ManagedPruning
     exit 0

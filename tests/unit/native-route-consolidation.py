@@ -97,6 +97,27 @@ class NativeRoutes(unittest.TestCase):
         ):
             self.assertIn(boundary, migration)
 
+    def test_related_archive_navigation_keeps_real_sibling_destinations(self):
+        directory = ROOT / ".claude/engineering/design-archive"
+        total = 0
+        for name, expected in (("LAYERS.md", 1), ("lintel-feature-brief-forge.md", 3),
+                               ("lintel-feature-spine-packs-navigation.md", 3)):
+            text = (directory / name).read_text(encoding="utf-8")
+            targets = re.findall(r"\]\(([^)]*lintel-v4\.0-reframe-design\.md[^)]*)\)", text)
+            self.assertEqual(len(targets), expected, name)
+            for target in targets:
+                relative, _, fragment = target.partition("#")
+                self.assertEqual(relative, "lintel-v4.0-reframe-design.md")
+                self.assertTrue((directory / relative).is_file())
+                if fragment:
+                    self.assertIn(fragment, (
+                        "chapter-1--generic-spine--packs--navigation",
+                        "chapter-2--brief-forge--envelope--generated-wiki",
+                    ))
+                total += 1
+        self.assertEqual(total, 7)
+        self.assertFalse((directory / "../design/lintel-v4.0-reframe-design.md").exists())
+
     def test_review_reader_keeps_shared_clearance_and_read_only_history(self):
         reader = source("bin/li-review-read")
         self.assertIn("skill=inspect", reader)

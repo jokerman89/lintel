@@ -75,7 +75,7 @@ if [ -n "$session_match" ] || [ -n "$project_match" ]; then
   audit_log "hooks" "frozen_zone_warn" "hook=frozen-zone-warn" "tier=warn" "frozen_path=$matched" "edit_target=$TARGET_PATH" "source=$source"
   echo "WARN [Lintel hook]: editing $TARGET_PATH which is in frozen zone ($matched, source: $source)"
   if [ "$source" = session-freeze ]; then
-    echo "WARN: Inspect /li:code-freeze --list; use --lift only for an authorized scope change. (warn-only.)"
+    echo "WARN: Inspect /li:code-freeze --list; use /li:code-freeze --lift only for an authorized scope change. (warn-only.)"
   else
     echo "WARN: A project frozen-zone rule needs its own explicit exception; runtime --lift cannot override it."
   fi

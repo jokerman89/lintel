@@ -9,6 +9,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import sys
@@ -541,9 +542,13 @@ class MigrationInventory(LifecycleFixture):
         for path in self.source.rglob("*"):
             if path.is_file():
                 self.assertEqual(path.read_bytes(), (ROOT / path.relative_to(self.source)).read_bytes())
-        blocks = skill.read_text(encoding="utf-8").split("```bash\n")
-        self.assertEqual(len(blocks), 2)
-        self.skill_block = blocks[1].split("```", 1)[0]
+        text = skill.read_text(encoding="utf-8")
+        marker = "## Run the real reader\n"
+        self.assertEqual(text.count(marker), 1, "Missing or ambiguous migration-reader section")
+        section = text.split(marker, 1)[1].split("\n## ", 1)[0]
+        blocks = re.findall(r"(?m)^```bash\n(.*?)^```\s*$", section, re.S)
+        self.assertEqual(len(blocks), 1, "The selected reader must expose exactly one executable block")
+        self.skill_block = blocks[0]
         self.caller = self.base / "unrelated caller"
         self.caller.mkdir()
         (self.caller / "unrelated.txt").write_bytes(b"Caller-owned content.\n")

@@ -1023,8 +1023,24 @@ class FailurePropagationTests(Sandbox):
             "explicit": (explicit_repo, {"LINTEL_AUDIT_DIR": explicit_file.as_posix()}),
             "v5": (v5_repo, {}),
         }
+        fallback = self.home / ".lintel/audit"
+
+        def fallback_snapshot():
+            if not fallback.exists():
+                return None
+            self.assertTrue(fallback.is_dir())
+            self.assertFalse(fallback.is_symlink())
+            return {
+                path.relative_to(fallback).as_posix():
+                    ("directory", None) if path.is_dir() else ("file", path.read_bytes())
+                for path in sorted(fallback.rglob("*"))
+            }
+
         for name, (repo, extra) in variants.items():
             with self.subTest(variant=name):
+                fallback_before = fallback_snapshot()
+                blocked = explicit_file if name == "explicit" else repo / ".claude/runtime/audit"
+                blocked_before = blocked.read_bytes()
                 env = {**self.env, "LINTEL_REPO_ROOT": repo.as_posix(), **extra}
                 results = self.advisory_and_mandatory(repo, env)
                 for producer in ("advisory", "state_append", "lesson_add", "job_create"):
@@ -1035,7 +1051,9 @@ class FailurePropagationTests(Sandbox):
                     self.assertNotEqual(results[producer].returncode, 0, producer)
                 for hook, result in self.quiet_hooks(repo, env).items():
                     self.assertEqual((result.returncode, product_stderr(result.stderr)), (0, ""), hook)
-                self.assertTrue((self.home / ".lintel/audit").is_dir())
+                self.assertEqual(fallback_snapshot(), fallback_before,
+                                 "A failed selected audit sink must not create or write a fallback")
+                self.assertEqual(blocked.read_bytes(), blocked_before)
 
     def test_unwritable_writer_store_fails_without_success_line(self):
         state_repo = self.make_repo("state repo")

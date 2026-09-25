@@ -155,7 +155,9 @@ If invoked with `--from-frontend-design <run-dir>` instead of `--brief` or `--fr
      project structure; write routes/components and only justified manifest changes
 
 5. **Gate 0 + 4-gate quality pipeline** (per /generate-ppt):
-   - Gate 0 (mechanical, ADR-0015): use `validate_design.check(content, path,
+   - Gate 0 (mechanical, ADR-0015): use the
+     [design validator](../design-dna/scripts/validate_design.py),
+     `validate_design.check(content, path,
      profile_hexes)` on actual HTML with the loaded design's resolved palette.
      Hard errors such as zoom-disable, killed focus and emoji icons block;
      off-palette/token findings retain their warning severity. Do not reconstruct

@@ -19,7 +19,10 @@ import textwrap
 import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
-BASH = shutil.which("bash")
+GIT = shutil.which("git")
+GIT_BASH = Path(GIT).resolve().parent.parent / "bin/bash.exe" if GIT else None
+BASH = (str(GIT_BASH) if os.name == "nt" and GIT_BASH and GIT_BASH.is_file()
+        else shutil.which("bash"))
 
 
 def body(skill: str) -> str:
@@ -371,6 +374,35 @@ class ContinuityContracts(unittest.TestCase):
             self.assertIn(contract, capture)
         self.assertIn("Step 8b", capture)
         self.assertIn("no release, tag, commit, publication or approval", capture)
+
+class RetrospectiveWordingContracts(unittest.TestCase):
+    def test_retrospective_wording_guard_checks_only_the_preserved_section(self):
+        guard = (ROOT / "tests/shape/observation-consumer-wording.sh").read_text(encoding="utf-8")
+        function = re.search(r"(?ms)^retrospective_text\(\) \{\n.*?^\}\n", guard)
+        self.assertIsNotNone(function)
+        verdict = re.search(r"(?m)^VERDICT='([^']+)'$", guard)
+        self.assertIsNotNone(verdict)
+        script = (function[0] + "\nVERDICT='" + verdict[1] + "'\n"
+                  'section="$(retrospective_text "$1")" || exit $?\n'
+                  '[ -n "$section" ] || exit 2\n'
+                  'if printf "%s\\n" "$section" | grep -qiE "$VERDICT"; then exit 1; fi\n')
+        heading = "### Step 8 — Retrospective (--retrospective)\n"
+        ending = "\n### Step 8b — Release report\nHistorical dead write outside this method.\n"
+        self.assertIsNotNone(BASH)
+        with tempfile.TemporaryDirectory(prefix="retrospective-wording-") as temporary:
+            path = Path(temporary) / "retrospective.md"
+            for text, expected in (
+                    (heading + "Absence remains unobserved.\n" + ending, 0),
+                    (heading + "Nothing ran.\n" + ending, 1),
+                    ("### Different section\nAbsence remains unobserved.\n", 2),
+                    (heading + "One.\n" + heading + "Two.\n", 2)):
+                with self.subTest(expected=expected):
+                    path.write_text(text, encoding="utf-8")
+                    result = subprocess.run(
+                        [BASH, "--noprofile", "--norc", "-c", script, "wording-fixture", path.as_posix()],
+                        capture_output=True, text=True, check=False,
+                    )
+                    self.assertEqual(result.returncode, expected, result.stdout + result.stderr)
 
 
 if __name__ == "__main__":
