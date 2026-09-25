@@ -38,8 +38,8 @@ MARS = **Multi-Model Adversarial Review & Screening**.
 Unit 78/78 and shape 41/41 (one `jq`-absent partial each); focused MARS/method tests 62;
 copilot-kit 19 of 21 run cases pass, and the 2 failures reproduce on the base; generator and
 bundle closure checked; RM9 live pilot; two independent review rounds, all findings fixed.
-`universal-adapters.sh` and `catalog-installed.sh` were still running when this was written
-(3 of 17 adapter cases passed so far); CI on a Linux runner is the faster place to finish them.
+`universal-adapters.sh` was stopped after 3 of 17 cases passed in about two hours, and
+`catalog-installed.sh` was not run; CI on a Linux runner is the faster place to finish them.
 
 ## Advisory P3 notes from the independent recheck
 
