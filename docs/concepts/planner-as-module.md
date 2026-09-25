@@ -3,7 +3,7 @@
 **Last updated:** 2026-09-08 (short leaves, bounded work packages)
 **Status:** Concept doc — referenced by skills/plan/SKILL.md, skills/inspect/SKILL.md, skills/capture/SKILL.md, skills/cycle/SKILL.md
 
-> Invocation: commands use the Claude plugin form `/li:<skill>`. Copilot, Codex and Gemini adapters expose `li-<skill>`; the Universal adapter uses an explicit `skills/<skill>/SKILL.md` handoff.
+> Invocation: commands use the Claude plugin form `/li:<skill>`. Copilot, Codex and Gemini adapters expose the installed core workflows as `li-<skill>`; for any other skill, and on the Universal adapter, hand off `skills/<skill>/SKILL.md` explicitly.
 
 PLAN is callable on its own or within a cycle. It produces the complete cold-executor trio
 (plan.md + spec.md + prompt.md), preserves short, verifiable leaves and groups connected work

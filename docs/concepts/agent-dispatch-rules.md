@@ -89,7 +89,8 @@ Does the step need conversation context to make sense?
 ## Operator override
 
 Commands below use the Claude plugin form `/li:<skill>`; Copilot, Codex and Gemini adapters
-expose `li-<skill>`, and the Universal adapter uses an explicit `skills/<skill>/SKILL.md` handoff.
+expose the installed core workflows as `li-<skill>` (for example `li-cycle`). Other skills,
+and the Universal adapter, use an explicit `skills/<skill>/SKILL.md` handoff.
 
 `/li:cycle --inline-all` forces all phases inline (for context-budget pressure).
 `/li:cycle --dedicated-all` forces all phases dedicated (rare; usually wasteful).
