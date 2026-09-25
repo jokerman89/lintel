@@ -8,7 +8,7 @@
 
 ## The rule (2 conditions for dedicated, 2 for inline)
 
-### Spawn a dedicated subagent (via Agent tool) when:
+### Spawn a dedicated subagent (via the host's native delegation tool) when:
 
 **(a) Step produces heavy intermediate reasoning you don't want in the main window.**
 
@@ -23,7 +23,7 @@ The subagent reads broadly, returns narrowly. Main context stays clean.
 
 Examples:
 - Security audit (any context-poisoning from main = compromised review)
-- Codex outside-voice opinion (independence is the value)
+- Independent cross-check through an actual permitted reviewer (independence is the value)
 - Spec-review loop post-design-doc (catch what main missed)
 
 Fresh context is feature, not bug.
@@ -72,11 +72,12 @@ Does the step need conversation context to make sense?
   NO  → default to dedicated (when in doubt, isolate)
 ```
 
-## Applied to Lintel's 8 phases
+## Applied to Lintel's nine phases
 
 | Phase | Default mode | Why |
 |---|---|---|
 | SENSE | inline (rule d) | Reads conversation context to detect intent |
+| SCOPE | inline (rule d) | Resolves material scope ambiguity without losing the request |
 | DEFINE | inline (rule d) | Builds on SENSE output |
 | DISCOVER | dedicated (rule a) | Open-ended codebase exploration |
 | PLAN | inline (rule d) | Synthesizes prior phases |
@@ -86,6 +87,9 @@ Does the step need conversation context to make sense?
 | CAPTURE | inline (rule d) | Synthesizes what just happened |
 
 ## Operator override
+
+Commands below use the Claude plugin form `/li:<skill>`; Copilot, Codex and Gemini adapters
+expose `li-<skill>`, and the Universal adapter uses an explicit `skills/<skill>/SKILL.md` handoff.
 
 `/li:cycle --inline-all` forces all phases inline (for context-budget pressure).
 `/li:cycle --dedicated-all` forces all phases dedicated (rare; usually wasteful).
