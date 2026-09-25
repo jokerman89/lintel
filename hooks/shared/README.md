@@ -5,9 +5,10 @@ two block gates (secrets, customer data), the secret warn-on-edit, the direct-pu
 budget warn, the two cycle-continuity hooks, and the prompt-scan. The remaining 24 — including all
 the module warn-hooks — ship inert and are opt-in.
 
-This is a Claude Code hook bundle. It is not translated to other clients: the Copilot kit and the
-Codex, Gemini and Universal adapters do not register or run these hooks, and a hook file's presence
-is not evidence that it runs. See [multi-CLI support](../../docs/multi-cli.md).
+This is a Claude Code hook bundle. It is not translated to other clients: the Copilot kit, the
+Codex and Cursor manifests, the Gemini extension, the OpenCode guide and the Universal adapter do
+not register or run these hooks, and a hook file's presence is not evidence that it runs. See
+[universal client support](../../docs/multi-cli.md).
 
 ## Activation model (per A1 design decision)
 
