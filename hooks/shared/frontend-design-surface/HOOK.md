@@ -6,7 +6,7 @@ fires_on: frontend-file edits with relevant patterns in ~/.lintel/brand/design-p
 override: pass --no-design-surface flag OR /li:profile-switch --dormant frontend-design-surface
 audit: .claude/runtime/audit/hooks.jsonl
 throttle: max 1 surface per file per session (state in ~/.lintel/sessions/<pid>-design-surfaced)
-budget: <200ms for vault of 1-3 patterns (MVP per /plan-eng-review concern #7)
+budget: <200ms target for a vault of 1-3 patterns; host timing must be measured
 ---
 
 # frontend-design-surface
@@ -71,7 +71,7 @@ If vault is empty → silent exit (no surface). MVP.
 
 - Target: <200ms for vault of 1-3 patterns
 - Degrades linearly to vault size — operator-vault > 10 patterns triggers vault-index.json optimization (Phase C+1)
-- Per /plan-eng-review concern #7: MVP-budget documented + acknowledged
+- The budget is a target, not an observed execution claim.
 
 ## Override paths
 
