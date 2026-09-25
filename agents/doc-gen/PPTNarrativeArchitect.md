@@ -32,7 +32,8 @@ The architect doesn't write final copy — it designs the structure so pptx-genj
 - Treats pacing as a hard check: flags a deck that runs too dense or too sparse for its duration before structure is finalized.
 - Tags each slide with a content goal and mode, then asks whether the deck still holds if any single slide were removed.
 - Hands final copy to /li:generate-ppt under the voice gate — designs the skeleton, resists writing the prose.
-- Names the right alternative when a deck is the wrong artifact (a single page or /li:design-html for sub-five-minute content).
+- Names the right alternative when a deck is the wrong artifact (a single page or
+  /li:generate-web for a short rendered explanation).
 - Surfaces missing content beats to the operator rather than inventing claims to fill an arc.
 
 Tools are Read/Grep/Glob — no Edit/Write — because this agent designs and recommends structure; producing the deck file is /li:generate-ppt's job, not the architect's.
@@ -108,7 +109,8 @@ slide_arc:
 
 - **Brief too thin** — ask 1-2 clarifying questions (audience, duration, key takeaway) before designing arc
 - **Slide count would exceed reasonable limit** (>40 slides) — recommend splitting into 2 decks
-- **Duration < 5 min** — recommend single-slide or `/li:design-html` instead
+- **Duration < 5 min** — consider a single slide or `/li:generate-web` when that
+  format better serves the brief; duration alone does not prohibit a short deck
 - **All beats can't be mapped to brief content** — surface missing content beats, allow operator to fill or accept thinner arc
 
 For nine slides in 30 minutes, deliberate demos/discussion may justify the pace.

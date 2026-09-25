@@ -85,6 +85,16 @@ else
   fail "skills/cycle/SKILL.md MISSING"
 fi
 
+DEFINE="$REPO_ROOT/skills/define/SKILL.md"
+if [ -f "$DEFINE" ]; then
+  for term in LINTEL_SCOPE_PATH chosen_reading depth_schema decision_resolved "FEATURE fast-path"; do
+    grep -q "$term" "$DEFINE" && pass "DEFINE retains selected scope input: $term" \
+                             || fail "DEFINE lost selected scope input: $term"
+  done
+else
+  fail "skills/define/SKILL.md MISSING"
+fi
+
 echo ""
 if [ "$FAILED" -eq 0 ]; then echo "All scope-phase-present assertions PASSED"; exit 0
 else echo "Some scope-phase-present assertions FAILED"; exit 1; fi

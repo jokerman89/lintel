@@ -109,7 +109,7 @@
           ]
         },
         "unfreeze": {
-          "producers": ["instruction-only:skills/code-unfreeze/SKILL.md"],
+          "producers": ["instruction-only:skills/code-freeze/SKILL.md"],
           "records_when": ["always"],
           "fields": ["path", "reason"],
           "aliases": {"target_path": ["path"]},
@@ -685,7 +685,7 @@
     "qa-fixes": {
       "kinds": {
         "auto_fix": {
-          "producers": ["instruction-only:skills/qa/SKILL.md"],
+          "producers": ["instruction-only:skills/verify/SKILL.md"],
           "records_when": ["always"],
           "fields": ["file", "fix_kind"],
           "aliases": {"target_path": ["file"]},

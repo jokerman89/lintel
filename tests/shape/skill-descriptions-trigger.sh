@@ -17,20 +17,20 @@ fail(){ echo "  FAIL: $1"; FAILED=1; }
 echo "tests/shape/skill-descriptions-trigger.sh"
 echo "========================================="
 
-# The skills migrated to trigger form (ADR-0014 wave). New skills should join this list.
+# Current workflows retaining the trigger-form contract after consolidation.
 MIGRATED="sense scope define discover plan build review ship capture cycle resume jobs status \
-analyze brief-forge office-hours fix code-review qa investigate learn lessons-surface adr-new \
-context-save context-restore context-warm plan-eng-review plan-ceo-review plan-and-build autoplan \
+analyze brief-forge fix code-review verify diagnose cross-check lessons-add lessons-surface adr-new \
+pause context-warm inspect skill-new generate-docs web-session \
 ta da sc dh tq full-engineering-pass scaffold welcome doctor pack-switch role generate"
 
 # A trigger phrase: the description leads with / contains a Use-when form.
 TRIGGER='^(description:[[:space:]]*)?(Use (when|after|to|for|at|before|during|on|whenever)|Run (when|after|to|before)|Trigger (when|after|on))'
 # Archaeology that must not appear in a description.
-ARCH='Phase [0-9]|Cohort [0-9]|v[0-9]+\.[0-9]+ Feature|\bADR-[0-9]|\bL-[0-9]{3}|adopted from|spec-kit|superpowers|gstack'
+ARCH='Phase [0-9]|Cohort [0-9]|v[0-9]+\.[0-9]+ Feature|\bADR-[0-9]|\bL-[0-9]{3}|adopted from|ported from'
 
 for s in $MIGRATED; do
   f="skills/$s/SKILL.md"
-  [ -f "$f" ] || continue   # alias-only names (e.g. role-activate) have no own SKILL.md
+  [ -f "$f" ] || { fail "$s: required workflow is missing"; continue; }
   desc="$(grep -m1 '^description:' "$f" | sed 's/^description:[[:space:]]*//' | tr -d '\r')"
   if [ -z "$desc" ]; then fail "$s: no description"; continue; fi
   if printf '%s' "$desc" | grep -qiE "$TRIGGER" || printf 'description: %s' "$desc" | grep -qiE "$TRIGGER"; then

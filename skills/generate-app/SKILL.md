@@ -16,7 +16,7 @@ cli_support:
 license_note: produces customer-bound output if --customer-share flag set
 ---
 
-You are the `generate-app` orchestrator skill — full-app scaffold for v3.7 generate-* family (Phase B — resolves M-2 from /plan-eng-review per design-director vs rendering-engine separation).
+You are the `generate-app` skill for full-app scaffolds, preserving the design-director versus rendering-engine separation.
 
 ## What this skill does
 
@@ -211,7 +211,7 @@ Same as generate-web (per existing v3.5 pattern):
 ## Status protocol
 
 - **DONE** — app skeleton generated, npm install + npm run dev succeed in smoke-test
-- **DONE_WITH_CONCERNS** — build succeeds but design-review yellow (if --review)
+- **DONE_WITH_CONCERNS** — build succeeds but frontend-design-review reports advisory concerns (if --review)
 - **BLOCKED** — frontend-design-spec.json invalid schema, OR build fails, OR customer-share voice-fail
 - **NEEDS_CONTEXT** — stack-choice missing or frontend-design-spec absent
 

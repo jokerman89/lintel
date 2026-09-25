@@ -188,19 +188,18 @@ Verify consistency:
 
 Surface gaps. If any: AskUserQuestion fix / defer / accept.
 
-### Step 6 — Optional outside-voice review (gated)
+### Step 6 — Optional independent cross-check
 
-AskUserQuestion: "Run independent Codex review? 3-5 min."
+When requested or covered by the existing review scope, use `/li:cross-check --diff`
+with the exact selected result and accepted requirements. Select an actually available,
+permitted independent context; add `--reviewer <name>` only for an explicit choice.
+Native delegation and an authorized external reviewer are valid routes. A vendor
+name is not proof that a client, model, sandbox or permission is available.
 
-If YES:
-- `codex exec` with read-only sandbox
-- Prompt: "Independent reviewer. 5 representative diffs. Spot what internal review may have missed. Output: P1/P2/P3 findings."
-- Run with 5-min timeout
-- Surface output verbatim under "OUTSIDE VOICE (Codex):" header
-- Cross-synthesize with internal findings
-
-If unavailable: record the optional pass as unverified. It cannot replace the
-required independent reviewer or supply a fictitious observation.
+Keep the reviewer read-only, bind its actual identity/result, and reconcile cited
+findings against the source. Do not silently invoke or install an external client.
+If the independent context is unavailable, preserve a bounded handoff and mark this
+observation unverified. It cannot replace required review or manufacture corroboration.
 
 ### Step 7 — Write artifacts
 

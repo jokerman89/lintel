@@ -23,7 +23,7 @@ The subagent reads broadly, returns narrowly. Main context stays clean.
 
 Examples:
 - Security audit (any context-poisoning from main = compromised review)
-- Codex outside-voice opinion (independence is the value)
+- Independent cross-check through an actual permitted reviewer (independence is the value)
 - Spec-review loop post-design-doc (catch what main missed)
 
 Fresh context is feature, not bug.
@@ -72,11 +72,12 @@ Does the step need conversation context to make sense?
   NO  → default to dedicated (when in doubt, isolate)
 ```
 
-## Applied to Lintel's 8 phases
+## Applied to Lintel's nine phases
 
 | Phase | Default mode | Why |
 |---|---|---|
 | SENSE | inline (rule d) | Reads conversation context to detect intent |
+| SCOPE | inline (rule d) | Resolves material scope ambiguity without losing the request |
 | DEFINE | inline (rule d) | Builds on SENSE output |
 | DISCOVER | dedicated (rule a) | Open-ended codebase exploration |
 | PLAN | inline (rule d) | Synthesizes prior phases |

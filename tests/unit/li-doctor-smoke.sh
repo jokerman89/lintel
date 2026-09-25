@@ -22,12 +22,15 @@ bash -n "$DOC" && pass "li-doctor parses (bash -n)" || fail "li-doctor has a syn
 
 # macOS mktemp ignores TMPDIR and answers under the /var link; Lintel refuses linked roots.
 TMP="$(mktemp -d)" && TMP="$(cd "${TMP:?}" && pwd -P)" || exit 1; trap 'rm -rf "$TMP"' EXIT
+mkdir -p "$TMP/home" "$TMP/target"
 run_doctor() { # <arg...>  → captures output to $OUT, rc to $RC, sandboxed HOME
   OUT="$TMP/out.txt"; RC=0
   if command -v timeout >/dev/null 2>&1; then
-    HOME="$TMP/home" LINTEL_HOME="$TMP/home/.lintel" timeout 30 bash "$DOC" "$@" > "$OUT" 2>&1 || RC=$?
+    HOME="$TMP/home" LINTEL_HOME="$TMP/home/.lintel" timeout 30 bash "$DOC" \
+      --source "$REPO_ROOT" --target "$TMP/target" "$@" > "$OUT" 2>&1 || RC=$?
   else
-    HOME="$TMP/home" LINTEL_HOME="$TMP/home/.lintel" bash "$DOC" "$@" > "$OUT" 2>&1 || RC=$?
+    HOME="$TMP/home" LINTEL_HOME="$TMP/home/.lintel" bash "$DOC" \
+      --source "$REPO_ROOT" --target "$TMP/target" "$@" > "$OUT" 2>&1 || RC=$?
   fi
 }
 
@@ -46,8 +49,22 @@ case "$RC" in 0|1) pass "--verbose rc bounded ($RC)";; *) fail "--verbose crashe
 run_doctor --no-such-flag
 [ "$RC" = "2" ] && pass "unknown flag → clean rc 2" || fail "unknown flag rc=$RC (expected 2)"
 
-# 4. it touched only the sandbox HOME, never the real one.
-[ ! -e "$TMP/home/.lintel" ] || [ -d "$TMP/home/.lintel" ] && pass "writes (if any) stayed in the sandbox" || fail "li-doctor wrote outside the sandbox"
+# 4. Real structured health preserves local failure and the unverified host boundary.
+run_doctor --quick --json
+[ "$RC" = "1" ] && pass "incomplete target health retains exit 1" || fail "incomplete target health rc=$RC"
+python="${LINTEL_PYTHON:-python3}"
+if "$python" -I -B - "$OUT" "$TMP/target" <<'PY'
+import json
+from pathlib import Path
+import sys
+report = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+assert Path(report["target"]).resolve() == Path(sys.argv[2]).resolve()
+assert report["host_activation"] == report["hook_execution"] == "unverified"
+assert report["issues"] and report["foundation_missing"]
+assert report["status"] == "attention"
+PY
+then pass "JSON contains actual local findings, not invented activation"
+else fail "invalid structured diagnostic output"; fi
 
 echo ""
 if [ "$FAILED" = 1 ]; then echo "RESULT: FAIL"; exit 1; fi

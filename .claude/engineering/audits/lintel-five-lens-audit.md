@@ -1,5 +1,9 @@
 # Lintel — five-lens office-hours audit
 
+> Retained historical narrative. Terminology was neutralized on 2026-09-25;
+> former external path/name labels are symbolic, not executable current routes.
+> Original dates, finding IDs and recorded outcomes remain historical, not rerun acceptance.
+
 **Mode:** reflection / due-diligence (advisory — propose, never execute).
 **Snapshot:** stable `main @ 0f4aa16`. **Method:** six read-only auditors, one per cohort, all five lenses each.
 **Disciplines:** intention before critique · evidence (path:line) · never remove capability (raise weak to strongest peer) · lift strengths as deliberately as weaknesses.
@@ -85,7 +89,7 @@ Headline: **Swedish across the shipped surface** (full list in the Hygiene Manif
 
 | What | Where | Severity | Recommendation |
 |---|---|---|---|
-| `bin/li-adr-new` help text says `jstack-adr-new`/`jstack-scaffold` (don't exist) | `bin/li-adr-new:2,6,16,21,26,42,43` | minor | Rename to `li-*` (the only un-renamed bin script). |
+| `bin/li-adr-new` help text says `retired-wrapper-adr-new`/`retired-wrapper-scaffold` (don't exist) | `bin/li-adr-new:2,6,16,21,26,42,43` | minor | Rename to `li-*` (the only un-renamed bin script). |
 | Hard-coded absolute personal paths | `CLAUDE.md:164`, `README.md:88`, `bin/li-lessons-promote:10,29`, `lintel-v3.5-azure-toolbox-plan.md:290` | minor | Parameterize to `$HOME`/repo-relative/placeholder. |
 | `@microsoft.com` author email on the public shipping surface (disagrees with git identity `@gmail.com`) | all 6 author-bearing manifests + README:168 + SECURITY:7 | minor | Decide on a neutral maintainer address. |
 | `"operator":"jokerman"` in 17 HOOK.md examples + 4 docs | sc-/da-/dh-/tq-/ta- HOOK.md, orientator.md:159 | cosmetic | Replace with `"<operator>"` in examples. |
@@ -141,7 +145,7 @@ Ranked by impact. Every recommendation preserves capability (off-switch / wire-t
 
 Absolute personal paths (`/Users/`, `/home/<user>`, `C:\Users`): **none.** (Only `/home/runner` CI paths, which are correct.)
 Portability-breaking hard-coded paths: `CLAUDE.md:164` (`E:/Workspace/jokerman-session-setup`) · `README.md:88` (`$HOME/Workspace/jokerman-lintel/bin`) · `bin/li-lessons-promote:10,29` (`$HOME/Workspace/jokerman-session-setup` default) · `.claude/engineering/design-archive/lintel-v3.5-azure-toolbox-plan.md:290` (`E:/Workspace/jokerman-lintel`).
-Username `jokerman` in examples: 17 HOOK.md (`sc-auth-bypass-warn:43`, `da-retention-violation-warn:40`, `tq-perf-regression-warn:32`, … full list in infra-audit) + `orientator.md:159` + `lintel-v3.5-cycle-and-roles.md:170` + 2 structure-change docs (`jokerman89`) + `agents/engineering/DocWriter.md:56` (`@jokerman/gstack`).
+Username `jokerman` in examples: 17 HOOK.md (`sc-auth-bypass-warn:43`, `da-retention-violation-warn:40`, `tq-perf-regression-warn:32`, … full list in infra-audit) + `orientator.md:159` + `lintel-v3.5-cycle-and-roles.md:170` + 2 structure-change docs (`jokerman89`) + `agents/engineering/DocWriter.md:56` (`the historical external package`).
 `@microsoft.com` email: `.claude-plugin/plugin.json:7`, `marketplace.json:5`, `.codex-plugin:7`, `.cursor-plugin:8`, `.copilot-plugin:7`, `.droid-plugin:7`, `README.md:168`, `SECURITY.md:7`, `PLUGIN-FORMAT-RESEARCH.md:23`, `lintel-v3-plan.md:509`.
 
 ### Cringe / rot comments
@@ -154,7 +158,7 @@ Username `jokerman` in examples: 17 HOOK.md (`sc-auth-bypass-warn:43`, `da-reten
 
 **Quick wins (high value, low effort):**
 1. **English sweep of the v3.5–v3.7 cohort** (~27 skills + 5 frontend agents + hooks + 2 CI workflows + Codex manifest prompts). Fixing skill `description:` frontmatter auto-clears `CATALOG.md` Swedish + the mojibake. Target dialect: the v4.x modules.
-2. **Reconcile the shipping identity** — one slug/version/email across 8 manifests + install + opencode to match `bin/`; rename `li-adr-new` `jstack-*`→`li-*`.
+2. **Reconcile the shipping identity** — one slug/version/email across 8 manifests + install + opencode to match `bin/`; rename `li-adr-new` `retired-wrapper-*`→`li-*`.
 3. **Regenerate the generated artifacts** — run `bin/li-wiki-gen` (fixes the 192/92/3 showcase + counts); reconcile README v4.7 vs CHANGELOG v4.6.
 4. **Parameterize the 4 hard-coded absolute paths.**
 

@@ -47,9 +47,11 @@ through their directory, including older filenames.
 
 - `operator-profile.jsonl` append (CAPTURE Step 9) — written, never read. Removed; the
   granularity calibration record is the real feedback loop.
-- `context-snapshot`, `context-dump`, `context-warmup` skills — duplicates of save / restore /
-  warm. Aliased (grace to 2026-09-12); `bin/_context.sh` is the shared core.
-- Honest labels on gbrain (query loop not yet integrated) instead of implying integration.
+- Duplicate checkpoint and warming entrypoints were consolidated; the old command-alias
+  grace ended on 2026-09-12. `bin/_context.sh` remains the shared core and saved data
+  stays readable through pause/resume and warming.
+- Unintegrated external-memory proposals were labelled as such instead of implying a
+  working query loop.
 
 ## What stays deliberately simple
 

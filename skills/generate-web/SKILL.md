@@ -1,31 +1,28 @@
 ---
 name: generate-web
 layer: foundation
-description: Produce brand-compliant static HTML or Next.js scaffold for demo/landing page.
+description: Use to render a static HTML mockup, a profile-aware single-file page or a Next.js scaffold from a brief or the existing design/content contracts.
 color: green
 tools: Read, Write, Bash, Glob
 voice: mixed
-cli_support:
-  - cli: claude-code
-    level: full
-  - cli: codex
-    level: degraded
-    degradation:
-      - capability: AskUserQuestion
-        strategy: auto-pick-recommended
-      - capability: Browser
-        strategy: degraded-output
-license_note: produces customer-bound output if --variant=customer-demo
+cli_support: [claude-code, codex, copilot]
+license_note: produces customer-bound output when explicitly requested
 ---
 
 # /generate-web
 
-Brand-compliant web artifact generation. Two variants:
+Web artifact generation with `--mode artifact|mockup`; default `artifact`
+preserves the existing brief/pipeline/frontend-design routes below.
 
-- **`single-file`** — self-contained HTML (Lovable-style aesthetic; one file, inline CSS, optional inline JS)
-- **`nextjs-scaffold`** — multi-file Next.js project (real demo with routes, components, deploy-ready)
+- **Mockup mode:** follow the [mockup procedure](references/mockup.md) for
+  `--brief`, `--reference`, `--tokens`, `--inherit-project`, `--copy-tier`,
+  `--out` and optional `--preview`. It implies `single-file`: actual static HTML,
+  inline CSS/minimal JS, no framework or build step.
+- **Artifact variants:** `single-file` is self-contained HTML; `nextjs-scaffold`
+  is a multi-file project with routes and components, not a deployment.
 
-Uses native HTML / Next.js templates from `~/.lintel/brand/web-templates/` or in-repo defaults.
+Use only explicitly selected or verified-profile templates and available project
+resources. A named template is not proof a bundled skeleton exists.
 
 The [shared design contract](../design-dna/references/design-contract.md) is the
 only input/argument/profile boundary. Template paths must be explicitly authorized;
@@ -46,10 +43,10 @@ their historic home convention does not permit personal-directory discovery.
 ## Inputs
 
 - Required `--brief <path|inline>` — content brief **OR** `--from-pipeline <dir>` (Phase 2: shared pipeline mode) **OR** `--from-frontend-design <dir>` (v3.7 Phase B: frontend-design family integration)
-- Required `--variant <single-file|nextjs-scaffold>` — output shape
+- Required `--variant <single-file|nextjs-scaffold>` in artifact mode; mockup implies single-file
 - Optional `--audience <text>` — primary audience
 - Optional `--use-defaults` — force in-repo default templates
-- Optional `--preview` — after generation, open in `/open-managed-browser`
+- Optional `--preview` — after generation, use `/web-session --mode open` on an owned admitted preview
 - Optional `--theme <name>` — apply a pack-provided theme palette (default: neutral)
 - Required explicit `--out <path>` for owned output; optional `--customer-share`
   is propagated from the director. Reject conflicting input modes, unknown or
@@ -82,16 +79,18 @@ If invoked with `--from-pipeline <run-dir>` instead of `--brief`:
 If invoked with `--from-frontend-design <run-dir>` instead of `--brief` or `--from-pipeline`:
 
 1. **Read frontend-design output:**
-   - `<run-dir>/frontend-design-spec.json` — **distinct filename** from pipeline's `design-spec.json` (M-1 resolution per /plan-eng-review — avoids schema collision). Verify `"source": "frontend-design"` + `"schema_version": 1` before consuming.
-   - Embedded blocks: `typography` (font-stacks + variable-axes + size-scale) + `motion` (libraries + scroll-trigger-config + key-animations + perf-budget) + `shader` (om present; nullable) + `component_libraries` (shadcn + Aceternity etc) + `layout_grammar` (max-width + grid + breakpoints) + `interaction_signature` (scroll-smoothing + hover-intent + page-transitions) + `visual_thesis` (one-paragraph)
+   - `<run-dir>/frontend-design-spec.json` — **distinct filename** from pipeline's `design-spec.json`, avoiding a schema collision. Verify `"source": "frontend-design"` + `"schema_version": 1` before consuming.
+   - Embedded blocks: `typography`, `motion`, nullable `shader`, `component_libraries`, `layout_grammar`, `interaction_signature` and `visual_thesis`.
 
 2. **Shared handshake:** use `design_contract.load_design` with the external
    prepared P05 context and explicit P07 configuration, then `renderer_args`.
    Checking two JSON strings alone does not validate bindings, choices or policy.
 
 3. **Replace brief-parsing logic** with direct-read of spec:
-   - Hero copy: synthesize from `visual_thesis` + brand-context
-   - Typography: emit `<link>` tags from `typography.font_stacks[].loading_strategy` + apply via Tailwind config
+   - Copy: preserve the bound brief/content; a visual thesis is design direction,
+     not a replacement for substantive source text, tables or limitations
+   - Typography: honor `typography.font_stacks[].loading_strategy` through the
+     existing target's CSS/config; fetch or link external assets only when authorized
    - Motion: `none` emits no animation dependency; `css` emits only selected CSS;
      `library` imports only the selected, sourced library and justified configuration.
    - Shader: emit a selected GPU component only when
@@ -102,11 +101,13 @@ If invoked with `--from-frontend-design <run-dir>` instead of `--brief` or `--fr
    - Component libraries: preserve existing primitives; emit no setup/import when
      the selected list is empty. New library advice requires source/version/license evidence.
    - Layout: apply `layout_grammar.max_width` + grid-config to root layout
-   - Interaction: emit Lenis init if `interaction_signature.scroll_smoothing`
+   - Interaction: apply selected smoothing only through its explicitly chosen
+     library/stack; native scrolling emits no smoothing dependency
 
 4. **Design-pass hook integration:**
    - WebExperienceCritic agent runs on produced HTML/JSX (existing pattern)
-   - DesignSystemAuditor agent (Phase A2) optional post-gen audit if `--review` flag set
+   - `frontend-design-review` consumes actual output and the original required
+     observations; an optional review request cannot waive a mandatory control
 
 5. **CLI stays backward-compat:** existing `--brief` + `--from-pipeline`-flag invocations work unchanged. `--from-frontend-design` is an additive third mode.
 
@@ -125,17 +126,20 @@ If invoked with `--from-frontend-design <run-dir>` instead of `--brief` or `--fr
 
 2. **Read brief + parse structure:**
    - Hero (title + subtitle + CTA)
-   - 2-4 substantive sections
+   - All substantive sections, preserving source detail rather than a fixed section cap
    - Optional: features grid, FAQ, footer
    Resolve direct brief input into the same frontend contract, pinning the existing
    project/profile and retrieval evidence before rendering. No parallel private
    schema for this entry point.
 
-3. **Invoke `WebExperienceCritic` agent** for layout review BEFORE generation:
+3. **Apply the `WebExperienceCritic` method** for layout review BEFORE generation:
    - Information hierarchy
    - Accessibility (WCAG AA via existing AccessibilityChecker)
    - Motion-language considerations
    - Brand alignment
+
+   Use actual native delegation when available and authorized; otherwise label
+   the builder's pass as self-review. No actor or model is implied by this recipe.
 
 3b. **Stack-guidance pass (ADR-0015 — retrieval before rendering):**
    ```bash
@@ -145,17 +149,27 @@ If invoked with `--from-frontend-design <run-dir>` instead of `--brief` or `--fr
    `design-dna/data/stacks/<stack>.csv` (same root) directly.
 
 4. **Generate per variant:**
-   - **single-file:** populate `~/.lintel/brand/web-templates/landing-single-file.html` (or default)
-   - **nextjs-scaffold:** copy `~/.lintel/brand/web-templates/demo-site/` skeleton, write src/app/page.tsx + components, generate package.json
+   - **single-file:** render the selected design as one HTML file with inline
+     CSS and only necessary authorized interactions
+   - **nextjs-scaffold:** use a selected compatible skeleton or the established
+     project structure; write routes/components and only justified manifest changes
 
 5. **Gate 0 + 4-gate quality pipeline** (per /generate-ppt):
-   - Gate 0 (mechanical, ADR-0015): `python3 "${LINTEL_SKILLS_DIR:-skills}/design-dna/scripts/validate_design.py" <out>.html --profile <active-profile>` — exit 1 BLOCKS (zoom-disable, killed focus, emoji icons, off-palette drift). Fix and re-run; never ship over a red gate.
+   - Gate 0 (mechanical, ADR-0015): use the
+     [design validator](../design-dna/scripts/validate_design.py),
+     `validate_design.check(content, path,
+     profile_hexes)` on actual HTML with the loaded design's resolved palette.
+     Hard errors such as zoom-disable, killed focus and emoji icons block;
+     off-palette/token findings retain their warning severity. Do not reconstruct
+     a bundled profile path that ignores a selected pack asset or brief override.
    - Gate 1: voice (if customer-bound)
    - Gate 2: brand-conformance
    - Gate 3: honest-limitations (only if generating an AI-feature page with disclosure)
    - Gate 4: provenance
 
-6. **On pass:** move from draft → `--out`
+6. **Publish within scope:** atomically write/read back the selected `--out`,
+   preserving an authorized replacement's preimage. Report actual checks and
+   blocked/unverified obligations; no draft move confers release clearance.
 
 7. **Optional preview** through the shared browser operations on an authorized owned
    local server. Verify health and actual session ownership first; provider availability
@@ -163,48 +177,17 @@ If invoked with `--from-frontend-design <run-dir>` instead of `--brief` or `--fr
 
 ## Report format
 
-```
-Generate Web: legal-assistant-demo
-
-Variant: single-file
-Template: landing-single-file.html (~/.lintel/brand/web-templates/, brand 2026-Q2)
-Theme: pack-default
-Voice tier: internal (pack-resolved)
-
-## Structure (from brief)
-  Hero: "Every contract, answered in seconds"
-    CTA: "Book the demo"
-  Section 1: What changes for the lawyer
-  Section 2: Where the AI helps + where it stops
-  Section 3: How we got here (engagement timeline)
-
-## Pre-gen review (WebExperienceCritic)
-  Information hierarchy: clear ✓
-  Accessibility: WCAG AA (contrast verified) ✓
-  Motion: prefers-reduced-motion respected ✓
-  Brand: pack palette applied ✓
-
-## Generation
-  Produced ~/.lintel/draft/legal-assistant-demo.html (87 KB)
-  6 SVGs embedded from the active pack's asset library
-
-## 4-Gate pipeline
-  Gate 1 (voice):   ✓ PASS — score 86/100
-  Gate 2 (brand):   ✓ PASS — pack palette + assets from brand 2026-Q2
-  Gate 3 (honest):  N/A — no AI-disclosure section in this variant
-  Gate 4 (proven):  ✓ PASS — PROV-c4d5 recorded
-
-## Status
-ALL GATES PASS. Moving from draft → ./legal-assistant-demo.html.
-
-Preview: /open-managed-browser file://~/.lintel/draft/legal-assistant-demo.html
-```
+Report mode/variant, exact source/design/output paths, selected profile/template,
+retained content, actual rendering operations and mechanical/voice/brand/
+limitations/provenance outcomes. State whether preview, keyboard, responsive,
+reduced-motion and other required observations ran, with their actual evidence.
+Missing browser or renderer coverage remains unverified, not a fabricated pass.
 
 ## Compliance integration
 
 - 4-gate pipeline is the customer-bound enforcement path; the specific gates are pack-configurable (`resolve_pack_field compliance.hooks`; none by default)
 - HTML/JS output sanitized — no inline scripts that fetch external resources without disclosure
-- nextjs-scaffold pre-wires the active pack's deploy gate (if any)
+- nextjs-scaffold retains applicable deployment requirements but triggers no deployment
 
 ## Failure modes
 
@@ -218,15 +201,14 @@ Preview: /open-managed-browser file://~/.lintel/draft/legal-assistant-demo.html
 
 **Single-file customer demo:**
 ```
-> /generate-web --brief demo-brief.md --variant single-file --theme pack-default --preview
-[Generates HTML, opens in /open-managed-browser]
+> /generate-web --brief demo-brief.md --variant single-file --out demo.html --preview
+[Render; preview only through a verified owned server and authorized provider.]
 ```
 
 **Next.js scaffold:**
 ```
-> /generate-web --brief microsite-brief.md --variant nextjs-scaffold --use-defaults
-[Generates ./legal-assistant/ with package.json + src/]
-Run: cd legal-assistant && npm install && npm run dev
+> /generate-web --brief microsite-brief.md --variant nextjs-scaffold --use-defaults --out microsite
+[Render a compatible scaffold; use existing tooling and authorized dependency restoration only.]
 ```
 
 ## See also
@@ -234,5 +216,7 @@ Run: cd legal-assistant && npm install && npm run dev
 - `BRAND-INTEGRATION.md`
 - `WebExperienceCritic` agent
 - `AccessibilityChecker` (Layer 4) for WCAG audit
-- `/open-managed-browser` — open the generated file
+- `/web-session --mode open` — preview the generated file through owned loopback
+- `/frontend-design --mode variants` — compare directions around a mockup
+- `/generate-docs` — produce source-grounded Markdown before a format handoff
 - The active pack's deploy gate — wire Next.js deployment (pack-configurable)

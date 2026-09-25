@@ -1,134 +1,110 @@
 ---
 name: lessons-surface
 layer: foundation
-description: Use before or during a task to pull up prior lessons relevant to it — searches the lessons store by keyword and context and surfaces matching entries so past corrections actually inform the current work. Runs at SENSE and is callable on its own when you want to check what's been learned about a topic.
+description: Use before or during a task for keyword-ranked lessons, the complete index or an exact lesson ID, without changing the memory store.
 color: yellow
 tools: Read, Bash, Grep
 voice: internal
-cli_support:
-  - cli: claude-code
-    level: full
-  - cli: codex
-    level: degraded
+cli_support: [claude-code, codex, copilot]
 ---
 
-You are the `lessons-surface` skill — closes the L-001/L-002 loop. Without this skill, `.claude/memory/lessons.md` grows but is never read → compounding learning that doesn't compound.
+# Lessons surface
 
-## What this skill does
+Read the selected repository's lessons through `lib/memory.sh` and `bin/li-lessons.py`.
+This combines task-oriented lookup with the short SENSE/PLAN/BUILD warm-up. It neither
+writes lessons nor grants authority to override current requirements or accepted decisions.
+Use `/li:lessons-add` to add, update or supersede a rule.
 
-Reads the project lessons store resolved by `lintel_lessons_file` (`.claude/memory/lessons.md` on the v5 layout), matches entries against the operator's current context (keyword from prompt OR current branch/phase), surfaces relevant lessons up-front so future sessions don't repeat the same mistakes. Outside a repository it reports "no project lessons store (unobserved)".
+## Inputs
 
-Designed for Cohort 2 item 1.3. Solo-invokable. Auto-invoked from `/li:sense` Step 0 when relevant.
+- `--keyword <text>`: top three matching active lessons. Keywords are literal text.
+- `--all`: complete heading index, with superseded entries visibly marked.
+- `--id <L-NNN>`: the exact full block, including its supersession markers.
+- No flag: derive keywords from the selected repository's branch and recent commit
+  subjects, then surface at most two lessons for the short cycle warm-up.
+- `--legacy-operator`: an explicitly requested, authorized read-only view of the old
+  operator JSONL store. Do not inspect personal stores during ordinary project lookup.
 
-Critical: L-001 (scaffolding ≠ content) + L-002 (grep first) were created in this session, but without lessons-surface the next session would not know they exist.
+These are mutually exclusive modes. Keep existing `LESSONS_TOP_N` caller overrides for
+keyword lookup; an all/index request is not silently reduced to the default top three.
 
-## When to use
+## Read the selected store
 
-- **Auto from SENSE** — `/li:sense` calls this as Step 0 to warm up context with relevant lessons
-- **Solo before planning** — "which lessons apply to my new skill family?" → `/li:lessons-surface --keyword "new family"`
-- **Audit lessons** — "what have I collected?" → `/li:lessons-surface --all`
-- **Specific lesson lookup** — `/li:lessons-surface --id L-001`
-
-## When NOT to use
-
-- Lessons authoring — use `/li:learn` (`bin/li-lessons.py` allocates IDs and writes conditionally)
-- Lesson application enforcement — this surfaces; enforcement is skill-specific
-- Historical lesson archaeology — `git log .claude/memory/lessons.md` is canonical
-
-## Workflow
-
-### Step 1 — Mechanical surface (lib/memory.sh — ADR-0006)
-
-The scoring is implemented in bash, not prose. Run it:
+Resolve the trusted source independently of the working target. Pass mode arguments as
+an array to this block; never interpolate keywords or IDs into shell source.
 
 ```bash
-source "${LINTEL_SOURCE_ROOT:-$LINTEL_REPO_ROOT}/lib/memory.sh"   # sources lib/paths.sh for the lessons location
-
-# Keyword mode (--keyword "<text>"):
-lessons_surface <keyword tokens>
-
-# Auto-from-SENSE mode (no flag): derive keywords from branch + recent commits
-kw="$(git rev-parse --abbrev-ref HEAD 2>/dev/null | tr '/-' ' ') $(git log -3 --format=%s 2>/dev/null | tr '\n' ' ')"
-LESSONS_TOP_N=2 lessons_surface $kw    # top-2 — SENSE is short
+source "${LINTEL_SOURCE_ROOT:?select the trusted source}/lib/memory.sh"
+case "${1:-}" in
+  --keyword)
+    [ "$#" -eq 2 ] && [ -n "$2" ] || { echo 'Supply one nonempty keyword value.' >&2; exit 2; }
+    lessons_surface "$2" ;;
+  --all)
+    [ "$#" -eq 1 ] || { echo 'Use one lessons lookup mode.' >&2; exit 2; }
+    lessons_index ;;
+  --id)
+    [ "$#" -eq 2 ] || { echo 'Supply one lesson ID.' >&2; exit 2; }
+    lessons_helper get --id "$2" ;;
+  --legacy-operator)
+    [ "$#" -eq 1 ] || { echo 'Use one lessons lookup mode.' >&2; exit 2; }
+    lessons_legacy_operator ;;
+  "")
+    repo="$(lintel_repo_root)" || exit 1
+    [ -n "$repo" ] || { echo 'No project lessons store (unobserved).' >&2; exit 1; }
+    branch=$(git -C "$repo" symbolic-ref --quiet --short HEAD 2>/dev/null) || branch=""
+    subjects=$(git -C "$repo" log -3 --format=%s 2>/dev/null) || subjects=""
+    keywords="$(printf '%s\n%s' "$branch" "$subjects" | tr '/-\n' '   ')"
+    LESSONS_TOP_N=2 lessons_surface "$keywords" ;;
+  *) echo 'Unknown lessons lookup mode.' >&2; exit 2 ;;
+esac
 ```
 
-`lessons_surface` scores each `L-NNN` block by keyword hits, SKIPS superseded lessons
-(`superseded_by:` marker — supersede-don't-delete convention), and prints the top-3
-(`LESSONS_TOP_N` overrides). Empty output = no relevant lessons; say so in one line. Malformed
-headings, duplicate IDs, missing supersede targets and dated legacy headings are reported on
-stderr — relay them rather than skipping them.
+`lintel_lessons_file` owns store selection, including unmigrated `tasks/lessons.md`.
+When both old and new stores exist, relay the helper's diagnostic naming the store read
+and the ignored one. Absence is **unobserved**, not an existing empty store or proof that
+no lessons apply. Do not create a store during lookup.
 
-**All mode (`--all`):** `lessons_index` lists every lesson heading in file order, 1 line each,
-with superseded ones ending in `(superseded)`.
+The shared grammar recognizes `## L-<digits>` headings outside fenced code and reports
+malformed headings, duplicate IDs, missing supersession targets and dated legacy blocks.
+Relay stderr diagnostics. Keyword ranking skips superseded entries; index and ID lookup
+retain them. Do not add a competing parser, invented relevance score or recency bonus.
+`lessons_find_related <keywords>` provides the uncapped matching index for a requested
+deeper review or the CAPTURE update phase.
 
-**ID mode (`--id L-NNN`):** `python3 "$LINTEL_SOURCE_ROOT/bin/li-lessons.py" get --id L-NNN`
-prints that exact block, a superseded one with its visible marker. Exit 1 means absent, exit 2
-duplicated or malformed.
+## Read and apply the full lesson
 
-### Step 2 — Read the surfaced lessons
+For each selected ID, use `lessons_helper get --id <L-NNN>` to read the complete block.
+Exit 1 means absent; exit 2 means duplicated or malformed. With no supported Python,
+full-block retrieval is unavailable; the shell ranking/index/count readers still work.
+Do not call a ranked heading a full lesson or silently guess its body.
 
-For each id `lessons_surface` returned, print its full block with `li-lessons.py get --id`
-(Rule + Why + How to apply + [[cross-references]]) — the ranked line alone is not enough context
-to apply a lesson.
+Show the original rule, its source/date when present, and one sentence explaining its
+relevance to the current task. Default to at most three full blocks; paginate a larger
+explicit review. A conflicting or outdated lesson is a finding to reconcile, not a
+reason to erase history. Supersede it through `/li:lessons-add` when authorized.
 
-### Step 3 — Render
+## Optional cross-repository history
 
-Markdown per lesson:
+The legacy operator view is labelled **not ID-managed** and is never imported or written.
+If the operator has separately opted into lesson synchronization, read only the explicitly
+authorized synced files. Neither a lookup request nor a missing project store activates a
+global sink, private synchronization or promotion. `/li:lessons-promote` keeps its own
+explicit destination and authority.
 
-```markdown
-### L-001 — Lintel is scaffolding, not curated content (relevance: 8/10)
+## Result
 
-**Rule:** Lintel ships structure (templates, tests, agent-mapping, invocation skills) and ONE canonical deep example per pattern.
+Report the selected store, actual mode, lesson IDs, relevant full blocks and diagnostics.
+No matches in an existing readable store is a valid empty result. Missing/unreadable
+sources and invalid arguments remain visible as incomplete/blocked lookup, never a
+healthy empty result. An advisory SENSE warm-up may continue with that limitation recorded.
 
-**Why:** Operator caught it: "No need to build more services, only for the template and the example."
+Examples:
 
-**How to apply:** [bullets, first 2-3]
-
-Related: [[L-002]]
+```text
+/li:lessons-surface --keyword "checkpoint ownership"
+/li:lessons-surface --id L-037
+/li:lessons-surface --all
 ```
 
-Surface MAX 3 lessons (avoid drowning operator). Sort by relevance.
-
-## Status protocol
-
-- **DONE** — N lessons surfaced (or 0 if no match)
-- **DONE_WITH_CONCERNS** — lessons store present but reader diagnostics were reported (malformed headings, duplicate IDs, missing supersede targets or dated legacy entries)
-- **BLOCKED** — the resolved lessons store denies read
-- **NEEDS_CONTEXT** — `--keyword` mode without a keyword arg
-
-## Pause-points
-
-- Lessons.md has > 50 entries and no keyword → ask for focus ("topic narrowing" via AskUserQuestion)
-- Multiple lessons score > 7 → ask the operator which is most relevant (or surface all)
-
-## Integration
-
-**Reads:**
-- The project lessons store from `lintel_lessons_file` (`.claude/memory/lessons.md` on the v5 layout)
-
-**Writes:**
-- stdout (markdown report)
-
-**Consumed by:**
-- `/li:sense` (Step 0 auto-invocation)
-- Operator (solo before planning)
-- `/li:plan` (can call this for pre-plan context-warming)
-- `/li:cycle` (auto-call at cycle-start)
-
-## Anti-patterns
-
-- **Auto-surface ALL lessons every session** — drowns. Max 3 by default.
-- **Hard-blocking on lesson-violation** — this surfaces for awareness, not enforcement. Enforcement is skill-specific (e.g., frontmatter-lint enforces discipline lessons).
-- **Generate new lessons** — this is reader-only. New lessons are written through `/li:learn` or `/li:capture`, which use `bin/li-lessons.py`.
-
-## Failure recovery
-
-- Malformed entry (unparseable `## L-` heading, duplicate ID, missing supersede target, dated heading): the reader names it on stderr; count it and report it at the end
-- Empty store: surface "Lessons capture empty. Record insights with /li:learn or /li:capture." Outside a repository: "no project lessons store (unobserved)".
-- > 1000 lessons (someday): paginate `lessons_index` output
-
-## Recommended next steps after invocation
-
-- Apply surfaced lessons immediately to current work (that's the point)
-- If a lesson is missing but should exist: record it with `/li:learn`
-- Periodically `/li:lessons-surface --all` for audit + cleanup
+This is read-only awareness. Authoring, enforcement, promotion and host memory remain
+separate operations.

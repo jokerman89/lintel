@@ -13,18 +13,34 @@ FAILED=0
 pass() { echo "  PASS: $1"; }
 fail() { echo "  FAIL: $1"; FAILED=1; }
 
+retrospective_text() {
+  awk '
+    { sub(/\r$/, "") }
+    /^### Step 8 — Retrospective \(--retrospective\)$/ { starts++; active=1; next }
+    active && /^#{1,3} / { active=0 }
+    active { print }
+    END { if (starts != 1) exit 2 }
+  ' "$1"
+}
+
 echo "tests/shape/observation-consumer-wording.sh"
 echo "==========================================="
 
 VERDICT='\bdead\b|active-vs-dead|never[- ]invoked|nothing (ran|has been|was) (run|logged|audit-logged|recorded)|nothing ran'
-for skill in hooks-status audit usage-log retro maintenance; do
+for skill in hooks-status audit usage-log capture maintenance; do
   file="$REPO_ROOT/skills/$skill/SKILL.md"
   if [ ! -f "$file" ]; then
     fail "$skill: SKILL.md missing"
     continue
   fi
-  # The contract's own negation ("absence is not evidence that nothing ran") is not a verdict.
-  hits="$(sed -E 's/not evidence that nothing ran//g' "$file" | grep -niE "$VERDICT" || true)"
+  if [ "$skill" = capture ]; then
+    section="$(retrospective_text "$file")" || { fail "capture: missing or ambiguous retrospective section"; continue; }
+    [ -n "$section" ] || { fail "capture: empty retrospective section"; continue; }
+  else
+    section="$(cat "$file")"
+  fi
+  # A historical CAPTURE note outside the retained retrospective is not its verdict.
+  hits="$(printf '%s\n' "$section" | sed -E 's/not evidence that nothing ran//g' | grep -niE "$VERDICT" || true)"
   if [ -n "$hits" ]; then
     fail "$skill issues an absence verdict:"
     printf '%s\n' "$hits" | sed 's/^/      /'

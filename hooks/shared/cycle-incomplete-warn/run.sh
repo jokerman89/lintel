@@ -37,6 +37,6 @@ command -v audit_log >/dev/null 2>&1 && \
 
 echo "WARN [Lintel]: this turn is ending with an open cycle — don't lose the thread."
 printf '%s\n' "$foot"
-echo "WARN: say 'go' to continue · 'pause' to checkpoint (/li:context-save) · or close it with /li:capture."
+echo "WARN: continue the selected phase · checkpoint with /li:pause · or record the actual outcome with /li:capture."
 
 exit 0

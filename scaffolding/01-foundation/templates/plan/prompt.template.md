@@ -39,8 +39,8 @@ This file is a SELF-CONTAINED prompt. A fresh AI session reading only this promp
 1. Read spec.md fully
 2. Read plan.md
 3. Run /li:cycle --from BUILD (skip DEFINE/PLAN, they're done)
-4. Apply two-stage review per task
-5. Run /li:qa final
+4. Apply specification then quality review per bounded package, covering every original leaf
+5. Run /li:verify; repairs need explicit authorization and fresh affected evidence
 6. Ship per /li:ship
 
 ## What you DON'T need to know

@@ -1,7 +1,7 @@
 # Planner-as-module — plan is a callable sub-workflow
 
 **Last updated:** 2026-09-08 (short leaves, bounded work packages)
-**Status:** Concept doc — referenced by skills/plan/SKILL.md, skills/plan-eng-review/SKILL.md, skills/capture/SKILL.md, skills/cycle/SKILL.md
+**Status:** Concept doc — referenced by skills/plan/SKILL.md, skills/inspect/SKILL.md, skills/capture/SKILL.md, skills/cycle/SKILL.md
 
 PLAN is callable on its own or within a cycle. It produces the complete cold-executor trio
 (plan.md + spec.md + prompt.md), preserves short, verifiable leaves and groups connected work
@@ -62,7 +62,7 @@ Each leaf remains targeted at **2–5 minutes of implementation**. At flat/phase
 is a leaf; at tree depth a subtask is a leaf. Every leaf retains its ID, owner/edit boundary,
 requirements, dependencies, observable acceptance, verification procedure and evidence.
 
-`plan-eng-review` Step 0 evaluates every leaf. A leaf estimated above five minutes must be
+`inspect --target plan --lens engineering` evaluates every leaf. A leaf estimated above five minutes must be
 decomposed or explicitly accepted with its concern recorded, using the existing gate.
 This is an instruction-driven judgment, not a timed runtime validator. Grouping leaves does
 not weaken the check. Time estimates appear in output only when requested.
@@ -101,7 +101,7 @@ separation follow the host's actual capabilities and the BUILD skill.
 
 With 2.1 + 2.2 + 2.3, PLAN becomes a callable sub-workflow:
 
-#### Inside cycle (Phase 4)
+#### Inside cycle (PLAN)
 ```
 /li:cycle → SENSE → SCOPE → DEFINE → DISCOVER → PLAN → BUILD → REVIEW → SHIP → CAPTURE
                                           ▲
@@ -116,13 +116,13 @@ With 2.1 + 2.2 + 2.3, PLAN becomes a callable sub-workflow:
    workflow_root: true (job tracking only when invoked through an active integration)
    produces: plan.md + spec.md + prompt.md (the trio)
    handoff-size-check against 500k cap
-   founder approval gate
+   operator approval gate
    → DONE, ready for cold-executor handoff
 ```
 
 #### Sub-module called by another workflow_root skill
 ```
-/li:cycle-azure-e2e           OR    /li:safe-install
+<authorized caller workflow> OR    /li:safe-install
   ↓ discovery                        ↓ pre-flight
   CALL /li:plan --from <design>      CALL /li:plan --from <change-spec>
   ↓ receives trio                    ↓ receives trio
@@ -158,7 +158,7 @@ Callers can rely on these paths existing post-DONE. CAPTURE re-affirms but doesn
 
 - Does not add new agents; reuses existing CodeReviewer / Architect / ReadOnly.
 - Does not change the cycle's phase order or its approval gates.
-- Does not invent new gate types; granularity check piggybacks plan-eng-review Step 0.
+- Does not invent new gate types; the engineering inspection lens retains the granularity check.
 - Does not hide oversized leaves inside a package; the existing decomposition/concern gate applies.
 
 ## Operator validation criteria
@@ -174,15 +174,15 @@ Once both features ship, success looks like:
 ## L-001 / L-002 / L-003 / L-004 application
 
 - **L-001:** PLAN body is contract. Specific tasks decomposed at invocation. Don't pre-bake "what 5 min looks like" for every domain — the estimate is per-task at invocation time.
-- **L-002:** before adding the granularity check, plan-eng-review's existing Step 0 was already BLOCKING with complexity check + completeness check. Granularity check is an additive rule, not a parallel system.
+- **L-002:** the existing engineering review already checked complexity and completeness before the granularity check was added. The inspection lens retains that check rather than creating a parallel approval system.
 - **L-003:** when caller says "this task is 4 min," verify by sample sizing for the first 2-3 tasks. Operator estimates may be optimistic.
 - **L-004:** PLAN is decision-layer (what tasks, what order, what spec). BUILD is execution-layer (writing the code). The trio is the contract between them — this is L-004 in action at the within-cycle level.
 
 ## See also
 
 - `skills/plan/SKILL.md` — primary
-- `skills/plan-eng-review/SKILL.md` — Step 0 granularity check
+- `skills/inspect/SKILL.md` — engineering lens and per-leaf granularity check
 - `skills/capture/SKILL.md` — trio reaffirm (not regenerate) post-v3.8
-- `skills/cycle/SKILL.md` — caller passes --no-job for Phase 4 invocation
+- `skills/cycle/SKILL.md` — caller passes --no-job for PLAN invocation
 - `docs/concepts/jobs-system.md` — the first half of this feature pair (Feature 1)
 - `.claude/memory/lessons.md` L-004 — separate decisions from execution

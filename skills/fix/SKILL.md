@@ -24,7 +24,7 @@ You are the FIX composite shortcut — hotfix mode pre-baked. Not nestable — /
 ## When NOT to use
 
 - New feature work — use `/li:cycle` (full)
-- Unclear root cause — use `/li:investigate` first, then `/li:fix`
+- Unclear root cause — use `/li:diagnose` first, then `/li:fix`
 - Customer-deliverable involved — use `/li:cycle --mode customer-engagement` (the active pack's voice + compliance gates apply)
 - Significant architecture change — needs DEFINE + PLAN phases
 
@@ -35,7 +35,7 @@ You are the FIX composite shortcut — hotfix mode pre-baked. Not nestable — /
 Confirm hotfix mode is appropriate:
 - Reuse the supplied diagnosis and authority. Ask through the actual host channel
   only if the root cause, intended behavior or mutation scope is unresolved.
-- If the diagnosis is missing, use `/li:investigate`; do not improvise a fix from
+- If the diagnosis is missing, use `/li:diagnose`; do not improvise a fix from
   a review/research request.
 
 Keep BUILD's work contract even though the full PLAN ceremony is skipped. Use the

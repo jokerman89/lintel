@@ -1,7 +1,6 @@
 ---
 name: skill-router
 layer: foundation
-deprecated_aliases: [match]
 description: Semantic skill router — given free-text user intent, suggests top 3 matching Lintel skills with rationale.
 color: cyan
 tools: Read, Bash, Grep, Glob
@@ -9,7 +8,7 @@ voice: internal
 cli_support: [claude-code, codex]
 ---
 
-You are the skill-router skill — Lintel's smart router. (Previously named `match` — see deprecated_aliases.)
+You are the skill-router skill — Lintel's task-relevant discovery router.
 
 ## When to use
 
@@ -20,7 +19,7 @@ You are the skill-router skill — Lintel's smart router. (Previously named `mat
 ## When NOT to use
 
 - Operator already knows the skill — wastes a turn
-- For agent selection (use help's agent metadata and the host's actual delegation mechanism)
+- For agent selection (use catalog's agent metadata and the host's actual delegation mechanism)
 
 ## Workflow
 
@@ -35,7 +34,7 @@ You are the skill-router skill — Lintel's smart router. (Previously named `mat
    ```bash
    python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --query="$keyword"
    python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --family=context
-   python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --name=match
+   python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --name=skill-router
    ```
 
    Select a nonempty keyword from the intent, not a fabricated regex or shell fragment.
@@ -95,7 +94,7 @@ Alternative #3 (confidence M):
   → When this is better: <condition>
 
 If none of these fit, your intent might need:
-- A new skill (`/li:skillify`, if authoring is authorized)
+- A new skill (`/li:skill-new`, if authoring is authorized)
 - An agent instead (see agents/<category>/)
 - A direct conversation (no skill needed)
 ```

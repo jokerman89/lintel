@@ -44,7 +44,7 @@ The active pack's voice gates (`resolve_pack_field voice.gates_active`; none by 
 Verify ship-readiness:
 - `git status` is clean OR operator confirms uncommitted is intentional
 - Current branch is NOT main (unless explicit per-batch direct-push auth)
-- Run `/li:qa-only`, never fixing `/li:qa` after review. Require actual nonzero
+- Run `/li:verify` in its read-only default, never `--repair` after review. Require actual nonzero
   applicable validation and explicit skipped/unavailable coverage. An approved
   docs-only package can use an observed mandatory document check with grounded
   tests N/A; applicable required tests still need nonzero executed coverage.
@@ -267,11 +267,12 @@ EOF
 
 ### Step 10 — Release notes (if version tag)
 
-If shipping tags release version:
-- Invoke `/li:landing-report`
-- Generate release notes from commit log between tags
-- The active pack's voice gates fire if customer-facing release (`resolve_pack_field voice.gates_active`; none by default)
-- Output: `CHANGELOG.md` entry + `RELEASE-NOTES.md`
+For an explicitly authorized release or PR summary, use the release-report step in
+`/li:capture --release-summary`. Select the actual commit/tag range, link delivered work, distinguish
+features/fixes/migrations and state unresolved limits. Generate a `CHANGELOG.md` entry
+and a separate release-notes file only when those outputs are requested. A report
+does not create a tag, release or deployment. Apply configured customer-facing voice
+checks where relevant; neither this prose nor a pack label proves a hook fired.
 
 ### Step 11 — 00-state.md append
 

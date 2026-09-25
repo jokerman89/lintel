@@ -1,0 +1,341 @@
+{
+  "artifact_type": "finite semantic adjudication; not a P05 decision, QA receipt or new clearance schema",
+  "date": "2026-09-25",
+  "candidate": "a7a1df338bacf900f1210f08131f391831992f1f",
+  "decision_target": {
+    "path": "C:\\Users\\jokerman\\.copilot\\session-state\\e9c20b62-f877-4242-82cd-b5002d452da8\\files\\c-span-review-set-01-lf.json",
+    "bytes": 101656,
+    "sha256": "419f2ddc5e81182f7829d4aa871ce7218e1000940a9d5a775fc5bfd19d474dd4",
+    "representation": "Exact UTF-8 LF span bytes in original a7 Git blobs; no consumption-time normalization or dual-hash acceptance"
+  },
+  "representation_mapping": {
+    "path": "C:\\Users\\jokerman\\.copilot\\session-state\\e9c20b62-f877-4242-82cd-b5002d452da8\\files\\c-span-lf-representation-mapping.json",
+    "bytes": 14582,
+    "sha256": "abc480f47003987a8f83f315a1ea64443913000067ed6fd072ea4256ad0101e4",
+    "status": "Reviewed as identity data, not authority to apply attributes or modify source",
+    "prior_packet_superseded_for_registration": "c-span-review-set-01.json",
+    "prior_decision_artifact": "c-span-semantic-decisions-01.json",
+    "approval_transfer": false,
+    "explanation": "All 17 LF raw hashes and declaration digests were independently recomputed and matched to the exact Git spans. The semantic content and markers were compared with the complete records already read; only their EOL representation and receipt metadata changed. Every LF digest below receives an explicit new decision. The earlier CRLF artifact is preserved as history, not a registration alternative."
+  },
+  "reviewer": {
+    "app_project_session_id": "6c39f786-01dd-4a99-b120-f286df376300",
+    "tool_session_id": "8b0c4a2f-3e1b-4c3d-8237-74d02ff29710",
+    "coordinator_routing_id": "e9c20b62-f877-4242-82cd-b5002d452da8",
+    "role": "Separate independent semantic reviewer, not declaration author, implementer, source-spec actor or W5/W6 author",
+    "descendants": 0
+  },
+  "result": {
+    "ACCEPT": 17,
+    "REJECT": 0,
+    "NEEDS_EVIDENCE": 0,
+    "scope": "Exactly the supplied 17 one-record source-era audit spans in their final LF representation",
+    "release_clearance": false,
+    "mechanism_review": "NOT_PERFORMED",
+    "runtime_and_hosted_qa": "NOT_PERFORMED",
+    "canonical_p05_decision_or_corroboration": "NOT_CREATED",
+    "original_a7_quality_verdict": "UNCHANGED: SOURCE QUALITY FAIL; P0 0, P1 0, P2 6, P3 1"
+  },
+  "original_work": {
+    "work_map": ".claude/plans/legacy-cleanup/work.json",
+    "package_id": "INTEGRATE",
+    "original_leaf_ids": [
+      "3.1.a", "3.2.a", "3.3.a", "3.4.a", "4.1.a", "4.3.a", "4.4.a",
+      "2.1.a", "5.1.a", "5.2.a", "5.10.a", "5.12.a",
+      "5.4.a", "5.5.a", "5.7.a", "5.7.c", "5.8.a", "6.1.a", "6.2.a", "6.3.a", "6.4.a",
+      "5.6.a", "7.1.a", "7.2.a", "7.3.a", "7.4.a", "7.5.a",
+      "0.3.a", "0.3.b", "0.3.c", "1.5.a", "1.6.a", "1.6.b", "1.7.b", "7.1.c",
+      "1.8.a", "2.2.a", "2.3.a", "2.4.a", "8.8.a", "9.3.a",
+      "0.1.b", "0.2.c", "4.2.a", "5.7.e", "8.2.a", "8.4.a", "8.5.a", "8.7.a",
+      "9.1.a", "9.2.a", "10.1.a", "10.2.a", "10.4.a", "10.5.a", "10.5.b", "10.6.a", "10.8.a"
+    ],
+    "semantic_scope_related_leaves": ["0.2.c", "0.3.a", "0.3.b", "0.3.c", "9.3.a"],
+    "completed_leaves_by_this_artifact": [],
+    "previously_unverified_leaves_remain_open": ["7.1.c", "9.3.a", "0.2.c", "9.2.a", "10.2.a", "10.5.a", "10.8.a"],
+    "preserved_contracts": "All 58 original leaves, all 69 agents, 94 canonical skills and mandatory source-tests/strict-hosted-tests/current-routing QA obligations remain unchanged. No profile reference is created, rebound, borrowed or transferred."
+  },
+  "mandatory_semantic_conditions": [
+    "Each ACCEPT binds only its exact LF declaration_digest and raw sha256, literal source path, unique ordered whole-line start/end markers and supplied range. Start is included and end excluded. No approved marker may widen or acquire a different digest without a new independent decision.",
+    "The declaration digest is SHA-256 of compact sorted JSON over exactly id, path, start, end, sha256, category, reason and source_evidence, using ensure_ascii=true and allow_nan=false. All 17 were independently recomputed. The final packet hash separately binds the supplied raw excerpts and coordinate metadata.",
+    "Historical meaning comes from each complete named audit subject, concrete source-line references, dimensional observations, proposed remedies and peer comparison, read in the original audit context. A heading, date, hash, BUILT/complete label or historical banner alone is insufficient.",
+    "The complete original source context must remain bound to the corresponding exact LF source hash below through the actual existing prepared acceptance/evidence machinery before a mechanism admits a span. Mere span equality or a freely supplied context-hash field is insufficient. If that binding is missing, changed or unverified, admission stays blocked despite this semantic ACCEPT.",
+    "A changed preamble or adjacent instruction that turns an unchanged record into current configuration or execution invalidates its historical-use premise. Recontextualized records need a fresh semantic decision, not automatic acceptance from matching interior bytes. Full-source hashes are context invariants, never whole-file exemptions: only the approved spans may be masked.",
+    "Every other span remains checked, including preceding inventories, live imports/selections/current-use text, following summaries, excluded end-marker sections, unknown fields or records and other cohort narratives. A neighboring accepted record must satisfy its separate decision.",
+    "These YAML-labelled records include informal or invalid pseudo-YAML. Preserve them as literal recorded text, including obsolete or unsafe recommendations. No valid-YAML claim, execution, silent repair, file read, profile operation, permission or endorsed remedy follows.",
+    "Raw admission must compare exact LF bytes without EOL conversion, alternate hashes or a parser-shape fallback. The reviewer's CRLF-to-LF comparison established representation equivalence only; it is not product admission logic. The proposed five per-file attribute declarations are not implemented or accepted by this review.",
+    "A whole-file/subtree/extension/cohort waiver, suppress-all census baseline, unapproved marker expansion or approval inherited by new record shapes is rejected. Source truth, source-era line accuracy, licenses, runtime behavior, P05 status and actor independence are not established by record shape.",
+    "Mechanism implementation, bound-context consumption, actual counterexample tests, fresh full-candidate review, mandatory QA/current-routing checks and release remain separate and unverified here."
+  ],
+  "required_original_contexts": [
+    {
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md",
+      "git_blob": "7236207c6e22a3122427a8a28cb4db2ca49eb97e",
+      "bytes": 44185,
+      "sha256": "ced1058d2c3313048659c01dc8627a31588fbec0ed7d719f18490fcb300e7638",
+      "meaning": "Original planner-subchain audit context. The digest preserves context, not exemption for the component inventory, architecture note or cohort summary."
+    },
+    {
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort3-handoff.md",
+      "git_blob": "88004da66e3e123d2d922d79a2332f083b18d1ba",
+      "bytes": 58031,
+      "sha256": "a50235e766c6ff06f0e7a4136528c5d37d0d1008df2d2ad7899dd88d78a0caea",
+      "meaning": "Original handoff-cohort audit and CF-reference context. Unselected warm/budget/cool/router records and surrounding prose remain checked."
+    },
+    {
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort7-packs-roles.md",
+      "git_blob": "b21a3845989bfea4ee009b38c1e8470577cc0c5a",
+      "bytes": 31892,
+      "sha256": "f56907565af02eed4afcf2daba74a47c3f5d41f550d79797b090e883cbf76303",
+      "meaning": "Original role/profile audit context. The shared six-role records after the exclusive end marker are not approved."
+    },
+    {
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort8-cross-cutting.md",
+      "git_blob": "e5c72d5f09650d97878351e5617df7d471bfd84f",
+      "bytes": 23426,
+      "sha256": "995add94e58350ef95af2afb1e6868bc1bf402b20a762c6981e64ba71e7aebdc",
+      "meaning": "Original layer-audit context. Only the named provenance-layer record is approved, not the matrix, other layers or audit-writer section."
+    }
+  ],
+  "counterexamples": {
+    "status": "Required discriminating semantic cases; NOT RUN against a classifier",
+    "all_entries": [
+      "Add a current_use/import/selection key or 'Use /li:qa now' inside a record: changed raw bytes revoke that exact approval; no generic historical-record fallback.",
+      "Insert a current instruction after the closing fence but before the exclusive end: the raw span changes and is not approved.",
+      "Insert a current instruction before the start or after the exclusive end: it remains outside the mask; changed full-source context also requires fresh binding and semantic consideration.",
+      "Change only the preamble to designate the unchanged block as a live route/configuration source: matching span bytes must not clear the changed context.",
+      "Duplicate, nest or reorder whole-line markers, omit the end, widen the end into another record, or transplant the exact bytes to another path: no approval.",
+      "Change LF to CRLF, punctuation, source paths, old results, category, reason or source_evidence: neither the original CRLF decision nor a newly computed unapproved digest may be used.",
+      "Add a new record with the same headings/fields/date, or current prose in another field: no shape-based inheritance.",
+      "Preserve invalid historic pseudo-YAML literally; do not claim a successful parse or execute paths, tags, aliases, shell snippets or original recommendations."
+    ]
+  },
+  "decisions": [
+    {
+      "id": "cohort-2-record-46",
+      "declaration_digest": "6f2cf811e6443a8d7104a422ec43273472ada7db9c85bd50824417cdf4f1e9a5",
+      "sha256": "5a2f9d16bb7768d1896786312ecb9deaa1525c9cb61f53d450342c0543cc15c2",
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md",
+      "source_lines_inclusive": [44, 159],
+      "decision": "ACCEPT",
+      "basis": "The office-hours subject at 47-49 is assessed through cited D1-D14 findings, including lost intake checkpoints at 84-89 and missing telemetry at 140-145. This is one recorded assessment, not an active workflow selection.",
+      "current_use_analysis": "The /autoplan chain, last-h2 contract and {skill:office-hours,...} log recipe are old observations or proposed remedies. They do not restore routes or authorize current state/log writes.",
+      "adjacent_boundary": "The plan-ceo-review heading at 160 is excluded; the component table and architecture note are not approved.",
+      "specific_counterexample": "A new 'Use /li:office-hours now' inside or adjacent to the record must not inherit this approval."
+    },
+    {
+      "id": "cohort-2-record-162",
+      "declaration_digest": "2392ddcf8c125d1fa2f6a0d2873272c0ad83a9aeeee9131273c8455bcab07a37",
+      "sha256": "20072875e9bb402acd0f2c95c32f93d244a39b9c106f9bcc1a11c617c4a75c20",
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md",
+      "source_lines_inclusive": [160, 255],
+      "decision": "ACCEPT",
+      "basis": "The named plan-ceo-review record compares its original writer/reader roots at 169-187 and old logging dependency at 236-241. Those relational defects and proposed repairs establish its audit role.",
+      "current_use_analysis": "Path normalization, founder-signal memory and li-review-log recommendations are original remedy text, not present permission to read personal data, execute reviews or issue clearance.",
+      "adjacent_boundary": "The plan-eng-review heading at 256 is excluded and needs its own decision.",
+      "specific_counterexample": "A new current_use: /li:plan-ceo-review field or live import beside the marker remains unapproved."
+    },
+    {
+      "id": "cohort-2-record-258",
+      "declaration_digest": "85557358040fa473b01085d1efa06b705d867c9713f5a27c43af8cd8f6c12089",
+      "sha256": "ac7e1204fec95717d24910629fc268b2ebf8d31a2062fb172e256b47296170c4",
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md",
+      "source_lines_inclusive": [256, 345],
+      "decision": "ACCEPT",
+      "basis": "Source-specific entry/exit observations at 265-280, interruption gaps at 288-292 and write/read-log findings at 328-331 describe one old engineering-review component.",
+      "current_use_analysis": "The last-h2 heading gate, jq JSONL, REQUIRED and outside-voice statements are source-era observations/proposals. They are not current shared-v2 semantics, successful tool execution or delegation authority.",
+      "adjacent_boundary": "The plan-design-review heading at 346 is excluded.",
+      "specific_counterexample": "Adding a current command to clear SHIP from the old heading, or invoke /li:plan-eng-review now, must invalidate or remain outside this approval."
+    },
+    {
+      "id": "cohort-2-record-348",
+      "declaration_digest": "e73b13887fe900782fd5f4cc314b722342fef0dd8ee305802c3e9b983bda1531",
+      "sha256": "23e6c50160c3dccadbd07d14ba18a6fe77211e570f4f3484f3c25272e8f84e2f",
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md",
+      "source_lines_inclusive": [346, 434],
+      "decision": "ACCEPT",
+      "basis": "The score/token mismatch at 361-364, broken input-root relation at 367-370 and narrower client declaration at 392-395 are findings about the explicitly named former design-review component.",
+      "current_use_analysis": "CLEARED-token, external design-binary and previous-score lookup proposals are historical remedies, not active APIs, current vendor support or score-based release permission.",
+      "adjacent_boundary": "The plan-devex-review heading at 435 is excluded.",
+      "specific_counterexample": "A new import of skills/plan-design-review/SKILL.md or current invocation in a neighboring result/prose field must still be checked."
+    },
+    {
+      "id": "cohort-2-record-437",
+      "declaration_digest": "df5c5895a5412e2f867a6512e8d188268e37ffef89b3a55e7d8a081e7d470e77",
+      "sha256": "2bb7b1715dd175cdde0f216c8959a71e64cb7e57e66f0fbca05509e1e87a78fe",
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md",
+      "source_lines_inclusive": [435, 523],
+      "decision": "ACCEPT",
+      "basis": "The cited missing-Step-0 inconsistency at 444-447, score aggregation at 450-453 and uncheckpointed measurements at 468-471 describe the old devex review rather than a requested live measurement.",
+      "current_use_analysis": "Install/timing-subagent and TTHW history suggestions remain recorded remedies, not installation authority, measured timings or an actor invocation.",
+      "adjacent_boundary": "The plan-tune heading at 524 is excluded.",
+      "specific_counterexample": "A new 'Run /li:plan-devex-review --fresh-clone now' instruction cannot be hidden inside or adjacent to this record."
+    },
+    {
+      "id": "cohort-2-record-526",
+      "declaration_digest": "f4a8721453a58a877b0fc09877d7ab00b284207629b9b3daf5a87f1f428d57d0",
+      "sha256": "f9e308c575b87cb0fc6a8401f2784839dbb4688f0bac832e819cf420a2bb4be6",
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md",
+      "source_lines_inclusive": [524, 612],
+      "decision": "ACCEPT",
+      "basis": "The preference/tombstone behavior at 545-548, inline entrypoint at 551-554 and telemetry-without-suggestion finding at 577-580 are a coherent assessment of the old plan-tune subject.",
+      "current_use_analysis": "'Active immediately', --reset-all, --suggest and operator_decision_required: no are historical claims/proposals, not current preference mutations or permission.",
+      "adjacent_boundary": "The autoplan heading at 613 is excluded and only its separate digest can be approved.",
+      "specific_counterexample": "A new /li:plan-tune --reset-all action or live preference-write recipe must not inherit approval."
+    },
+    {
+      "id": "cohort-2-record-615",
+      "declaration_digest": "0c647479ba940ee82b373fe81f24abb5c4a48e52629cb375594371cd6caa2ff6",
+      "sha256": "a2b954cafc898010517ef61cdf5c25dccabc568020648e6504fd99cddbd26c7c",
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md",
+      "source_lines_inclusive": [613, 710],
+      "decision": "ACCEPT",
+      "basis": "The autoplan source-path mismatch at 634-639, inferred checkpoint at 648-651 and absent own-log finding at 691-694 describe one recorded orchestrator audit. After its fence there is only the exact blank/horizontal separator.",
+      "current_use_analysis": "READY/NOT-READY, .autoplan-state.json and {skill:autoplan,...} are old output/proposal literals, not current orchestration, state-schema or release authority.",
+      "adjacent_boundary": "Cohort summary at 711 and all its prose are excluded; the separator at 709 is inert exact content, not permission to extend the span.",
+      "specific_counterexample": "Widening the end into Cohort summary or adding a new /li:autoplan call requires a new decision; summary instructions are independently checked."
+    },
+    {
+      "id": "cohort-3-record-156",
+      "declaration_digest": "8b7b2544e8f490c9c14ff9be3e65e3144a92f2915e4136cb9034aebe1d72c435",
+      "sha256": "19cbd5e62f363a393f1e469ef886b99e3d5eecdfd4c4435ffcd0f52b9878885a",
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort3-handoff.md",
+      "source_lines_inclusive": [154, 243],
+      "decision": "ACCEPT",
+      "basis": "The named context-save subject, mismatched context-dump filename/root and CF-1/CF-2 references at 175-179 establish a historical producer/consumer finding, distinct from later proposed envelope improvements.",
+      "current_use_analysis": "The stdout fallback, retention and envelope-writing recommendations are preserved original advice, not current disclosure permission, storage selection or owned-recovery behavior.",
+      "adjacent_boundary": "The context-restore heading at 244 is excluded; the preceding cohort findings are not covered.",
+      "specific_counterexample": "A new current /li:context-save call or changed checkpoint-path instruction inside/adjacent to this record remains unapproved."
+    },
+    {
+      "id": "cohort-3-record-246",
+      "declaration_digest": "139dc45b72ee220ac0e06fc2da251791396049670a0985da59adcb7c9a39a350",
+      "sha256": "bc1e3d513b3430086a86abbbc1a5d2085eafd56c823dbf46178f62ad0894c196",
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort3-handoff.md",
+      "source_lines_inclusive": [244, 297],
+      "decision": "ACCEPT",
+      "basis": "The root comparison at 259-262, cited saved-revision check at 266-267 and receive-side evaluation gap at 281-284 are recorded observations of the old restore method.",
+      "current_use_analysis": "The alias-root proposal, seven-day threshold, 'never error' assessment and DONE scoring are old advice, not current ownership, persistence, failure or profile rules.",
+      "adjacent_boundary": "The context-snapshot heading at 298 is excluded.",
+      "specific_counterexample": "Adding current_use: /li:context-restore or a removed-SKILL import, inside or beside the record, must not use the old approval."
+    },
+    {
+      "id": "cohort-3-record-300",
+      "declaration_digest": "754e11ade412e5c3dafd25b3c9b8c07c7d2690f51a98f0a0069072591adddef3",
+      "sha256": "e67bdeb98c96b4a1ca2d57748d4145e2e943bfefa4b70b25c9bb88759993f5d5",
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort3-handoff.md",
+      "source_lines_inclusive": [298, 337],
+      "decision": "ACCEPT",
+      "basis": "The third filename convention at 309-313, missing recovery at 316 and proposed snapshot/restart handoff at 319-324 form one named historical audit record.",
+      "current_use_analysis": "Consolidation, stdout fallback, 00-state and envelope statements are original descriptions/proposals. Informal inline pseudo-YAML is literal text, not a parsed or executable checkpoint schema.",
+      "adjacent_boundary": "The context-dump heading at 338 is excluded.",
+      "specific_counterexample": "A new current /li:context-snapshot selection or import cannot inherit this exact literal approval."
+    },
+    {
+      "id": "cohort-3-record-340",
+      "declaration_digest": "b2c851f6344c635fe847dc5db8a5680a32606023de06a4c8f62f4835c43912b1",
+      "sha256": "ba0548c912dbae1ee6e8800db4e04af33d3d9d33714816c3930e7626904f71ef",
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort3-handoff.md",
+      "source_lines_inclusive": [338, 377],
+      "decision": "ACCEPT",
+      "basis": "The reader/producer mismatch at 349-353 and proposed integration test preserve the original context-dump failure. Receive-side evaluation is separately proposed, not recorded as implemented.",
+      "current_use_analysis": "The old grep operand, named producer and canonical-warm delegation are source behavior/remedy descriptions; no actual reading, restoration or present bug verification follows.",
+      "adjacent_boundary": "The context-warm heading at 378 is excluded and that surviving method has no decision in this set.",
+      "specific_counterexample": "Widening the end across context-warm or adding a current skills/context-dump/SKILL.md import is not approved."
+    },
+    {
+      "id": "cohort-3-record-587",
+      "declaration_digest": "39b9eb0065a3c2ea81acf5b2c00964ae58919cb70ee0ba2ed387b4ee856fa515",
+      "sha256": "342fbdcb0a4af4808fb198924b26f01950e66d5efaafdf8a691d6170355b0e45",
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort3-handoff.md",
+      "source_lines_inclusive": [585, 622],
+      "decision": "ACCEPT",
+      "basis": "Cited context-state.json versus 00-state.md drift at 596-602 and the phase-entry model assessment ground one old context-warmup record with an unresolved alternative.",
+      "current_use_analysis": "State convergence alternatives, auto-warmup and an agent reference are historical proposals/observations, not accepted state changes, capacity measurements or delegation.",
+      "adjacent_boundary": "The context-budget heading at 623 is excluded.",
+      "specific_counterexample": "A new live /li:context-warmup route or an end widened into context-budget must not acquire this approval."
+    },
+    {
+      "id": "cohort-3-record-667",
+      "declaration_digest": "b847225489c33c72134ef6bf202b3283679d64f56ac99d00b9b1faeb40ed5ab5",
+      "sha256": "2509637606f107e0a493b2112f3aa3c44ca85f8d0a4e07f45244ff7e1a196f25",
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort3-handoff.md",
+      "source_lines_inclusive": [665, 700],
+      "decision": "ACCEPT",
+      "basis": "The config split at 676-679 and explicitly uncertain hook duplication at 682-685 are recorded findings about budgetwatch, retaining original uncertainty and the proposed consolidation.",
+      "current_use_analysis": "Thresholds, telemetry fallback, v1_alias and auto-invoke-on-RED statements are historical claims/proposals, not current capacity, registration, hook activation or automation authority.",
+      "adjacent_boundary": "The context-cool heading at 701 is excluded.",
+      "specific_counterexample": "A current /li:context-budgetwatch command or newly active threshold field must remain unapproved whether inserted inside or adjacent."
+    },
+    {
+      "id": "cohort-3-record-735",
+      "declaration_digest": "af12d99c068e6150a56c30fd7a8e323da33d40bf4e61768863be7a2c1209cc7a",
+      "sha256": "9aeabd25a8d216f12ba39f55c150dca2e9ebf0d0237a92628cc440446c6d4772",
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort3-handoff.md",
+      "source_lines_inclusive": [733, 774],
+      "decision": "ACCEPT",
+      "basis": "The pair-agent scope/input citations, lost turn-loop checkpoint and source-level delegation at 740-750 and 763-766 establish a single audit of that former method.",
+      "current_use_analysis": "'True subagent', Agent-tool spawning and per-turn logging are historical claims/proposals, not actual independent review, host capability or a present grant to create actors.",
+      "adjacent_boundary": "The codex heading at 775 is excluded and requires its own exact decision.",
+      "specific_counterexample": "A new 'Invoke /li:pair-agent now' or current delegate field cannot be hidden by this record's historical classification."
+    },
+    {
+      "id": "cohort-3-record-777",
+      "declaration_digest": "d71dcd20ce93e7276c03299b066f05ba6f94078ee1f0cdf26ec0d0cbebe0358c",
+      "sha256": "25ac31f168dca4960cc26c72f7511dab5c24daaa9927e1ea5bfdadb75c7d8b14",
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort3-handoff.md",
+      "source_lines_inclusive": [775, 818],
+      "decision": "ACCEPT",
+      "basis": "The codex-skill output/log assessment at 782-789, enumerated old callers at 792-795 and subprocess-versus-Agent distinction at 807 coherently describe the source-era method.",
+      "current_use_analysis": "The removed skill path, --with-codex callers, provider preference and spend-log assertions remain original observations. They neither mandate a vendor/model nor prove client execution or authorize a subprocess.",
+      "adjacent_boundary": "The skill-router heading at 819 is excluded.",
+      "specific_counterexample": "Add a current skill:codex selection, /li:codex command or executable import beside the old caller list: it must not inherit this approval."
+    },
+    {
+      "id": "cohort-7-record-46",
+      "declaration_digest": "ae0387bba935b5358fae5544520ae6f4b85a013512fe10d61bd3675b7de57244",
+      "sha256": "8897a6feed24251023dce26b7227a7ce4f46df05c53ab6f23e88e7f05d80f67c",
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort7-packs-roles.md",
+      "source_lines_inclusive": [44, 170],
+      "decision": "ACCEPT",
+      "basis": "The role-activate source subject, pack-role disconnect at 101-106, propagation gap at 117-122 and write-without-read memory finding at 125-130 provide substantive historical audit meaning.",
+      "current_use_analysis": "The proposed pack-resolver source call, personal-role paths and activation/logging claims are old observations/remedies, not current helper execution, private access or profile authority. Informal colon-bearing pseudo-YAML stays literal.",
+      "adjacent_boundary": "The shared six-role heading at 171 and explanatory prose at 173 are excluded; those records do not inherit this decision.",
+      "specific_counterexample": "An end widened into the shared role records or a new current_use: /li:role-activate field needs fresh approval and must not be masked."
+    },
+    {
+      "id": "cohort-8-record-189",
+      "declaration_digest": "e43ccff4f5af47e0770625e07915a67cf771e7b65dfc3edc9f3cbdb6083b2941",
+      "sha256": "408e98aaf91eeca90cf0207c5470f09046dad29e0587534912d4c454bab59169",
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort8-cross-cutting.md",
+      "source_lines_inclusive": [187, 217],
+      "decision": "ACCEPT",
+      "basis": "One layer record names provenance, its old artifact inventory, 2/8 adoption and specific review/ship/build source-chain gap at 190-209. This grounds a historical layer assessment, not merely a BUILT heading.",
+      "current_use_analysis": "BUILT, hard-gate, provenance-track and the proposed BUILD breadcrumb are original claimed adoption/remediation fields. They prove no current file/agent, mandatory policy, executed log or release acceptance.",
+      "adjacent_boundary": "Layer 6 at 218 and its block at 220 are excluded; other layers and the matrix receive no approval.",
+      "specific_counterexample": "A new live provenance-track selection/import or a widened Layer-6 boundary cannot use this exact Layer-5 approval."
+    }
+  ],
+  "verification": {
+    "actually_performed": [
+      "Read all 17 complete literal records, the four audit enclosures and immediate marker-adjacent context; evaluated current-looking statements inside each record separately from outside use.",
+      "Verified both packet hashes, 17 unique IDs, all raw excerpt hashes, unique ordered markers, supplied line/fence coordinates and original source receipts.",
+      "Recomputed every final LF eight-field declaration digest and verified each full excerpt byte-for-byte against the original a7 Git blob, without normalizing admission bytes.",
+      "Compared old/new marker and semantic text identity; every final raw SHA and declaration digest is different and expressly decided here rather than inherited.",
+      "Computed all four complete original LF source hashes and blob IDs for the mandatory historical-context binding.",
+      "Kept the reviewer checkout at a7 with clean index/product files and the prior a7 quality report unchanged."
+    ],
+    "not_performed": [
+      "No YAML parsing, execution of historical content, product/guard/attribute change, residual registration, runtime write or actor delegation.",
+      "No new census, broad audit, classifier test, existing-P05 semantic-record consumption, corroboration, native/runtime/hosted QA or final-candidate clearance.",
+      "No private profile/credential query, dependency installation, environment launcher, global configuration, staging, commit, push, PR or merge."
+    ],
+    "limits": "The old source-line claims and observed results are preserved as historical reports, not independently re-proven. Complete-source hashes preserve context but do not approve unselected text. Parent-reported prospective attributes and full-source acceptance-manifest checks remain unreviewed implementation proposals.",
+    "output_transport": "Two early plain-text display commands stopped on console UnicodeEncodeError; complete reads were repeated with lossless ASCII escapes only for display. No source bytes or hashes were changed."
+  },
+  "preserved_quality_report": {
+    "path": "C:\\Users\\jokerman\\.copilot\\session-state\\8b0c4a2f-3e1b-4c3d-8237-74d02ff29710\\files\\legacy-cleanup-integrated-quality-review-a7a1df33.md",
+    "sha256": "54615423fc63810db9d64476f14fdc48f1f8b1482abcb25389b62bb6c09ad78a",
+    "status": "UNCHANGED"
+  },
+  "stop": "Finite 17-decision semantic pass complete. Only these exact LF declarations are accepted, subject to their original bound context and all conditions above. Remaining C candidates, mechanism correctness, full fresh candidate and mandatory QA/release are separate."
+}

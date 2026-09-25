@@ -6,7 +6,7 @@ operator: jokerman
 affected_paths:
   - hooks/shared/{secret-scan-block,customer-data-block}/run.sh (fail-closed, ADR-0014/issue I1)
   - lib/auto-decide.sh (new — one-way-door guard, I3)
-  - skills/plan/SKILL.md (trio-completeness gate I4 + founder→operator)
+  - skills/plan/SKILL.md (trio-completeness gate I4 + operator-centered approval wording)
   - skills/instruction-parity-check/SKILL.md (ghost files → real shims)
   - bin/li-doctor (Windows hook-fire note, I2)
   - lib/cli-tiers.yaml (li@ typo + codex native); .copilot-plugin/, .droid-plugin/ deleted
@@ -17,6 +17,9 @@ breaking_change: false
 ---
 
 # Structure change: cli-issues-craft
+
+> Historical record. Dates, issue IDs, platform observations and test results below are
+> preserved; terminology normalization does not establish a rerun or current client support.
 
 > Gate M1 — ADR-0014. Three workstreams (multi-CLI, issue-mining, prompt-craft) from
 > .claude/engineering/audits/2026-06-13-cli-issues-craft-synthesis.md.

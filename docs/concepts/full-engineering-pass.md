@@ -19,7 +19,7 @@ contract; neither an environment variable nor `parallel: true` proves it happene
 ## Invocation
 
 Use for the explicitly requested cross-domain outcome. For a bounded API decision,
-use TA single capability; for a data-only question use DA. No mandatory founder
+use TA single capability; for a data-only question use DA. No mandatory strategy
 interview or company-deep mode is required to make the neutral harness useful.
 Full/`--resume`/dry-run retain their meanings; dry-run does not fabricate artifacts.
 

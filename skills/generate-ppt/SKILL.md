@@ -50,7 +50,7 @@ editable PowerPoint or rendered PPTX evidence.
 
 ## When NOT to use
 
-- One-slide quick mockup — `/design-html` is faster
+- Static UI mockup rather than a slide — use `/generate-web --mode mockup`
 - Non-PPT artifact — use `/generate-word` or `/generate-web`
 - Pack compliance gate not satisfied AND output is customer-bound — resolve the gate first
 
@@ -90,7 +90,7 @@ new domain envelope.
 3. **Apply format-specific design-pass via design_pass_hook:**
    - Reads `per_format.ppt.layouts[N].design_pass_hook` (canonical: PPTNarrativeArchitect)
    - Invokes agent for a PPT-specific fidelity-pass (slide-narrative-arc, FastPath-recommendations, animation-cues) on top of the shared baseline
-   - Acknowledges plan-eng-review Reviewer Concern #7 — per-format design-agents stay per-format
+   - Keep format-specific design methods separate from shared content generation
 
 4. **CLI stays backward-compat:** existing `--brief`-flag invocations work unchanged. `--from-pipeline` is additive.
 

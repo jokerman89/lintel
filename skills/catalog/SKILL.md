@@ -1,14 +1,14 @@
 ---
 name: catalog
 layer: foundation
-description: Use to discover Lintel skills by name, purpose or family, or regenerate the committed skill catalog after frontmatter changes.
+description: Use to discover Lintel skills and agents by name, purpose, category, voice or declared client support, or regenerate the committed skill catalog after frontmatter changes.
 color: yellow
 tools: Read, Write, Bash, Glob, Grep
 voice: internal
 cli_support: [claude-code, codex, copilot]
 ---
 
-# Skill catalog
+# Skills and agents catalog
 
 `skills/CATALOG.md` is a generated view of canonical `skills/*/SKILL.md` frontmatter.
 Use the existing generator's compact metadata for discovery before reading selected canonical
@@ -26,13 +26,27 @@ python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json
 python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --query="$keyword"
 python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --family=context
 python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --kind=agent --query="$keyword"
-python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --name=match
+python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --name=skill-router
+python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --kind=all
+python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --kind=all --category=qa
+python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --kind=all --voice=internal --cli=copilot
 ```
 
 Only pass a query when the operator supplied a nonempty keyword. `--search` is an alias
 for `--query`. Family filters are literal prefixes, not globs; query/filter values are
 data, never shell fragments. Pass each as one quoted argument, without `eval` or command
 construction. Listing and filtering do not write or regenerate `skills/CATALOG.md`.
+
+For a general help/onboarding request, use `--kind=all` and group the actual returned
+declarations by category. The category API retains `qa` as a display grouping, not a
+command name. Show counts from the result, voice and declared support, and add full
+descriptions when the operator asks for detail. Registry aliases select one client
+surface, not a vendor's entire product family.
+
+This is not an inventory of active tools or registered hooks. A canonical agent file
+needs a real permitted host delegation binding or an explicitly labelled manual
+handoff. For hook availability, use `/li:hooks-status` and actual host evidence; for
+installation health, `/li:doctor`; for task-first onboarding, `/li:welcome`.
 
 Use returned names, descriptions, aliases and source-relative paths to choose the relevant
 entry. Then read only the selected body beneath the returned, trusted `source_root`.
@@ -53,8 +67,6 @@ Choose one operation, rather than loading the entire selection and all of its bo
 
 ```bash
 python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --list-selections
-python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --selection="$selection"
-python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --selection=demo-script --kind=agent
 ```
 
 Set `selection` to the exact nonempty ID returned by the first operation. The
@@ -68,6 +80,23 @@ No selection keeps ordinary discovery unchanged. Unknown, blank or malformed sel
 are errors, not a reason to regenerate, prune files, activate wrappers or invent another
 inventory. Preserve source-stage warnings, aliases and `maturity: unknown`. A selected
 role still needs an actual permitted host binding or explicit serial/manual handoff.
+
+### Selected capability
+
+Run one literal selection query after choosing an ID. `python_cmd` may name the
+inspected Python 3 executable; an absent/blank ID fails before the helper runs.
+
+```bash
+: "${LINTEL_SOURCE_ROOT:?select the trusted Lintel source}"
+: "${selection:?select a nonempty capability ID}"
+"${python_cmd:-python3}" -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" \
+  --json --selection="$selection"
+```
+
+Repeat `--selection` only for distinct explicitly requested IDs. Existing category,
+voice, client and kind filters may narrow displayed entries but cannot erase the
+required dependency/resource/provenance closure. `--list-selections` is a separate
+operation, not a filter. A source declaration never proves native availability.
 
 ## Generate and check
 

@@ -1,21 +1,19 @@
 ---
 name: frontend-design-review
 layer: foundation
-description: Quality gate for produced frontend designs. 6-dimension audit (typography hierarchy + motion coherence + shader perf-budget + accessibility WCAG AA + brand conformance + responsive fidelity). Scored rubric. Solo-invokable.
+description: Use to review built UI or produced frontend designs with actual route/viewport evidence, six canonical advisory dimensions and the existing required-control contract.
 color: orange
 tools: Read, Write, Bash, Glob
 voice: internal
-cli_support:
-  - cli: claude-code
-    level: full
-  - cli: codex
-    level: degraded
-    degradation:
-      - capability: AskUserQuestion
-        strategy: auto-pick-recommended
+cli_support: [claude-code, codex, copilot]
 ---
 
-You are the `frontend-design-review` skill — quality gate for the v3.7 frontend-* family (Phase A2 — resolves /plan-eng-review M-3 reviewer-concern #3).
+You are the `frontend-design-review` skill for produced designs and built UI.
+
+For `--url`, routes, viewports and changed-file context, follow the
+[built review procedure](references/built-review.md). It retains visual polish,
+accessibility, motion, copy, layout/density and brand critique while using this
+same `design-review.json` contract. No retired review entrypoint is required.
 
 ## What this skill does
 
@@ -23,7 +21,7 @@ Reads a produced frontend artifact (HTML file, Next.js project, screenshots, or 
 
 Solo-invokable for audit or chained from `/li:frontend-design` Workflow Step 7 (if enabled).
 
-**Scoring rubric (resolves M-3 from /plan-eng-review):**
+**Retained advisory scoring rubric:**
 - Per dimension: **≥80 = green**, **60-79 = yellow**, **<60 = red**
 - Overall verdict: ALL dimensions green → GREEN. Any red → RED. Otherwise YELLOW.
 - Scores are advisory; applicable mandatory P05 fail/error/unverified results
@@ -45,25 +43,28 @@ L-001-discipline: skill body is the contract (the 6 dimensions). Agent at invoca
 
 ## When NOT to use
 
-- Pre-implementation review (no artifact to score yet) — use `/plan-eng-review` instead
+- Pre-implementation review (no artifact to score yet) — use `/inspect --target plan --lens design` instead
 - A/B test scoring (different bar) — out of scope for this skill
 - Purely typographic-only review — use `/li:frontend-typography` direct
 
 ## Inputs
 
-- Required `<artifact>` — path to HTML file, Next.js project dir, screenshot, OR live URL
-- Optional `--baseline <vault-name>` — compare against `~/.lintel/brand/design-patterns/<name>/` baseline
+- Required `<artifact>` or `--url <url>` — HTML file, project directory, screenshot or live URL; reject conflicting selections
+- Optional `--baseline <pattern>` — compare against an explicitly selected project/pack pattern
 - Optional `--dimensions <comma-list>` — subset audit (default: all 6)
 - Optional `--out <path>` — output path (default: `<artifact-dir>/design-review.json`)
 - Optional `--customer-share` — strict-mode: yellow → BLOCKED
-- Optional `--include-screenshots` — capture artifact rendering for audit-log (Playwright headless)
+- Optional `--include-screenshots` — capture through an actual authorized `web-session` provider
+- Built-UI inputs: `--url`, `--routes`, `--viewport`, `--baseline-ref` and
+  `--include-copy-pillar`; see the linked procedure. A Git baseline reference
+  and a design-pattern baseline are distinct inputs, never guessed from one flag.
 
 ## Workflow
 
 ### Step 1 — Parse + validate artifact
 
 ```bash
-artifact="${1:-}"
+artifact="${URL:-${1:-}}"
 baseline="${BASELINE:-}"
 dimensions="${DIMENSIONS:-all}"
 customer_share="${CUSTOMER_SHARE:-}"
@@ -88,12 +89,16 @@ fi
 
 Before any agent judgment, run the cheap hard gate on HTML artifacts:
 
-First reload the selected design through `design_contract.load_design`. Feed its
+When the artifact has a selected design, reload it through `design_contract.load_design`. Feed its
 resolved palette (including explicit brief overrides) to the existing
 `validate_design.check(content, path, profile_hexes)` API, or use the standalone
 CLI with the explicit verified profile asset path. Do not reconstruct a bundled
 profile path by name when P07 selected a pack-owned asset. Static validation
 retains its actual error/warning scope and is not browser evidence.
+For a standalone built surface without a design spec, use the explicitly verified
+project/profile tokens and actual artifact as the review inputs. Do not invent a
+design envelope merely to review an operator-built page. The same canonical
+advisory dimension keys remain available through `validate_review`.
 
 Exit 1 → the run is **RED** regardless of dimension scores (hard findings include
 zoom-disable, killed focus and emoji icons; off-palette/token checks are warnings). Surface the validator output as
@@ -102,7 +107,10 @@ findings; the 6-dimension audit still runs so the operator gets the full picture
 
 ### Step 2 — DesignSystemAuditor agent dispatch
 
-Hand off to `agents/frontend/DesignSystemAuditor.md`. Agent loads artifact + (optional) baseline + dimension-list + the active design profile (`skills/design-dna/profiles/`, default anthropic-default) as the brand-conformance reference when no vault baseline is given.
+Use the `agents/frontend/DesignSystemAuditor.md` method with the artifact, selected
+baseline, dimension list and verified design profile. Delegate only through an
+available authorized native operation. Otherwise label the pass as self-review;
+the independent review requirement remains open. A role file is not a tool call.
 
 ### Step 3 — Run 6-dimension audit
 
@@ -134,10 +142,10 @@ Hand off to `agents/frontend/DesignSystemAuditor.md`. Agent loads artifact + (op
 - Focus-rings visible + meet contrast
 - Aria-labels on icon-buttons
 - prefers-reduced-motion + prefers-color-scheme respected
-- **Red flags:** contrast <3:1 on critical text, no keyboard nav, focus-rings stripped without replacement
+- **Red flags:** normal-text contrast <4.5:1 or large-text contrast <3:1, no keyboard nav, focus-rings stripped without replacement
 
 **Dimension 5: Brand conformance (0-100)**
-- Palette tokens match `~/.lintel/brand/palettes/<active>.json` (if customer-share)
+- Palette tokens match the verified profile and selected brief overrides
 - Logo placement matches brand guidelines
 - Typography family matches brand spec (if operator-licensed)
 - Voice-tier compliance (internal vs customer-share copy)
@@ -162,7 +170,7 @@ JSON output. A null score retains unverified/unscored advice, not a synthetic 10
 
 ### Step 5 — Customer-share strict gate
 
-Run the shared helper's `review` operation with the selected design, external P05
+For a design-bound artifact, run the shared helper's `review` operation with the selected design, external P05
 context/QA and the same explicit P07 configuration as rendering. It verifies
 current input bytes/profile and every original required observation. A dimension
 subset or none/CSS/no-shader choice cannot drop keyboard, contrast or other controls.
@@ -170,6 +178,11 @@ Ground N/A applicability through P05; never award an artificial score to clear i
 Actual browser absence remains unverified for keyboard/focus, responsive behavior,
 reduced-motion and performance measurements. Independent review still follows the
 existing P05 protocol; this advisory helper reports `release_clearance: false`.
+For standalone built UI without a selected design, retain its actual source,
+captures, profile and obligations through P05's existing standalone snapshot/
+inspect route (or the already selected mapped context). Do not call the
+design-bound helper with an invented spec or claim independent clearance from
+standalone inspection. Required observations remain mandatory in either route.
 
 ### Step 6 — Output report
 
@@ -246,8 +259,8 @@ Full report: $out
 
 **Reads:**
 - `<artifact>` (URL, file, dir, screenshot)
-- `~/.lintel/brand/design-patterns/<baseline>/` (if --baseline)
-- `~/.lintel/brand/palettes/<active>.json` (for brand-conformance dimension)
+- Explicit selected design-pattern baseline (if --baseline)
+- Current resolved palette/profile asset (for brand-conformance dimension)
 
 **Writes:**
 - `<artifact-dir>/design-review.json` (or $OUT-path)
@@ -266,18 +279,19 @@ Full report: $out
 
 - **Scoring without rubric** — pre-A2 design-doc concern #3. Skill body documents rubric explicitly.
 - **Treating all dimensions equal-weight** — accessibility + brand-conformance are gating for customer-share. Don't average them in.
-- **Skipping baseline comparison when vault has match** — operator-invested patterns. Use them.
+- **Ignoring an explicitly selected baseline** — retain that comparison or
+  report the missing input; do not discover personal patterns automatically.
 - **Producing review.json without `schema_version`** — M-5 compliance.
 
 ## Failure recovery
 
 - Artifact unreadable: BLOCKED with diagnostic ("file not found", "URL 404", "directory not a project")
 - Headless-browser screenshot fails: degrade to static-audit + flag in review
-- Baseline-vault missing: warn + fall back
+- Explicit baseline missing: block that comparison and report the missing input
 
 ## Recommended next steps after invocation
 
 - GREEN → inspect mandatory controls and obtain actual independent clearance
 - YELLOW → address findings + re-run review
 - RED → hard-block + investigate per-dimension findings
-- Use design-review.json as input to `/li:context-save` for session-handoff
+- Use design-review.json as input to `/li:pause` for session-handoff

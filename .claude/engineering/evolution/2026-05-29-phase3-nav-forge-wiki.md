@@ -1,5 +1,9 @@
 # Structure change — Phase 3: navigation + Brief Forge + wiki-gen + v4.0 ship
 
+> Historical record. Original IDs, dates, decisions and observations below are retained,
+> not rerun. Current navigation uses `/li:migrations`; generated output must be rebuilt
+> from owned source, not hand-edited using the historical rollback suggestion.
+
 **Date:** 2026-05-29
 **Cycle:** v4.0 Phase 3 (v4.0-rc → v4.0 ship)
 **Mode:** meta-infra (M1-M4 active); wiki-gen under internal-tool
@@ -71,7 +75,8 @@ For operators using v4.0-alpha/beta (Phase 1+2):
 4. Operators wanting to bypass Brief Forge on a specific skill add `brief_forge_bypass: true` to that skill's frontmatter
 5. CI starts running `bin/li-wiki-gen --check` and fails on diff (warn-only per design doc §2.4 in v4.0; fail-on-diff from v4.1)
 
-`/li:v4-migrate` (from Phase 2) gets a Phase 3 addendum: detects Phase 1+2 state, recommends no action (already current).
+The Phase 2 migration method received a Phase 3 addendum: detect Phase 1+2 state and
+recommend no action for an already-current target. Current routing is `/li:migrations`.
 
 ## Forward compatibility
 

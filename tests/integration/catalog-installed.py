@@ -12,6 +12,7 @@ import importlib.util
 import json
 import os
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import sys
@@ -222,7 +223,7 @@ class InstalledDiscovery(unittest.TestCase):
         source = json.loads(self.query(ROOT, "--kind=all").stdout)
         installed = json.loads(self.query(bundle, "--kind=all").stdout)
         self.assertEqual(installed["entries"], source["entries"])
-        aliases, module_capabilities = 0, 0
+        aliases = 0
         for entry in installed["entries"]:
             path = bundle / entry["path"]
             self.assertEqual(path.read_bytes(), kit.adapter.source_bytes(ROOT / entry["path"]))
@@ -230,11 +231,24 @@ class InstalledDiscovery(unittest.TestCase):
                 aliases += 1
                 found = json.loads(self.query(bundle, "--kind=" + entry["kind"], "--name=" + alias["name"]).stdout)
                 self.assertEqual(found["entries"], [entry])
-                if entry["name"] in ("ta", "da", "sc", "dh", "tq"):
-                    capability = alias["name"][len(entry["name"]) + 1:]
-                    self.assertIn("| `" + capability + "` |", path.read_text(encoding="utf-8"))
-                    module_capabilities += 1
-        self.assertEqual((aliases, module_capabilities), (46, 35))
+        self.assertEqual(aliases, sum(len(entry["aliases"]) for entry in source["entries"]))
+        module_capabilities = 0
+        for module in ("ta", "da", "sc", "dh", "tq"):
+            entry = next(item for item in installed["entries"]
+                         if item["kind"] == "skill" and item["name"] == module)
+            discovered = []
+            for selected_root in (ROOT, bundle):
+                text = (selected_root / entry["path"]).read_text(encoding="utf-8")
+                marker = "## Sub-capability dispatch\n"
+                self.assertEqual(text.count(marker), 1, module)
+                section = text.split(marker, 1)[1].split("\n## ", 1)[0]
+                actions = re.findall(r"^\| `([a-z][a-z0-9-]+)` \|", section, re.M)
+                self.assertEqual(len(actions), 7, module)
+                self.assertEqual(len(set(actions)), 7, module)
+                discovered.append(actions)
+            self.assertEqual(discovered[0], discovered[1], module)
+            module_capabilities += len(discovered[1])
+        self.assertEqual(module_capabilities, 35)
         index = json.loads(self.query(bundle, "--list-selections").stdout)
         for definition in index["selections"]:
             example = definition["example"]
@@ -251,11 +265,14 @@ class InstalledDiscovery(unittest.TestCase):
         bundle = self.installed()
         path = bundle / "config/aliases.yaml"
         original = path.read_bytes()
-        old, new = b"    new: skill-router\n", b"    new: p13-absent-method\n"
+        old = b"skill_aliases: []"
+        new = (b"skill_aliases:\n  - old: synthetic-missing-target\n"
+               b"    new: p13-absent-method\n    introduced_in: fixture\n"
+               b"    removal_at: 2099-01-01\n    migration_note: fixture-only\n")
         self.assertEqual(original.count(old), 1)
         path.write_bytes(original.replace(old, new, 1))
         before = self.snapshot()
-        for arguments in (("--kind=skill", "--name=match"),
+        for arguments in (("--kind=skill", "--name=synthetic-missing-target"),
                           ("--selection=demo-script", "--query=does-not-match-anything")):
             result = self.query(bundle, *arguments, success=False)
             self.assertIn("config/aliases.yaml", result.stderr)

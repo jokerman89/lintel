@@ -14,7 +14,7 @@ already adopted *part* of it — PLAN Step 8 ("Cross-section-analyze, adopted fr
 phase", `skills/plan/SKILL.md:156-164`) checks design↔plan coverage at plan time. What Lintel
 lacks, verified against the tree on 2026-06-10:
 
-1. **Re-runnability.** Step 8 fires once inside PLAN. Plans get revised (plan-eng-review:
+1. **Re-runnability.** Step 8 fires once inside PLAN. Plans get revised (the engineering review method:
    "after any major plan revision") and BUILD deviates; nothing re-checks consistency after.
 2. **The BUILD leg.** Nothing reconciles the finished build against the plan (all tasks
    accounted for; no untasked work shipped) or against the design doc. BUILD's final pass
@@ -39,7 +39,7 @@ We chose a **standalone read-only skill `/li:analyze`** that performs the full t
 - **Extend PLAN Step 8 + mirror check inline in BUILD**: smaller diff. Rejected because it
   duplicates the check logic in two skills (violates shared-schema discipline), is not
   operator-callable standalone, and still produces no persisted artifact for SHIP.
-- **Fold into `/li:plan-eng-review`**: one gate fewer. Rejected because cross-artifact coverage
+- **Fold into engineering inspection (now `/li:inspect`)**: one gate fewer. Rejected because cross-artifact coverage
   is a mechanical check, not the quality-judgment review that skill performs, and the BUILD leg
   does not fit its before-ship timing.
 - **Defer**: Step 8 covers the plan-time case today. Rejected by operator 2026-06-10 — the

@@ -30,7 +30,7 @@ Restructures code without changing observable behavior: extract function, inline
 - Stops on any post-refactor test failure and reports the smallest reproducer. Recovery is
   limited to the recorded trial changes, never a reset of the caller's checkout; it does
   not chase the failure forward into an unrequested debugging session.
-- Hands a discovered bug to /investigate or DebugForensics instead of fixing it inline; a refactor that fixes a bug is no longer behavior-preserving.
+- Hands a discovered bug to /diagnose or DebugForensics instead of fixing it inline; a refactor that fixes a bug is no longer behavior-preserving.
 - Warns rather than proceeds when coverage is too thin to verify preservation, and recommends adding tests first.
 - Pushes back when asked to bundle a refactor with a behavior change, and proposes splitting them into separate commits.
 
@@ -46,7 +46,7 @@ must not overwrite unrelated staged, unstaged or untracked work while recovering
 
 ## When NOT to invoke
 
-- Code is wrong (refactor doesn't fix bugs — `/investigate` then fix)
+- Code is wrong (refactor doesn't fix bugs — `/diagnose` then an authorized fix)
 - Test suite absent — refactor without tests is gambling
 - Code is fine + operator dislikes style — taste isn't refactor
 
@@ -99,7 +99,7 @@ Behavior preserved. Recommend commit message:
   the smallest reproducer. Never use checkout/reset/clean on the caller's tree. If an
   attributable restore fails or is interrupted, preserve its journal and current files;
   resume the same snapshot only after rechecking conflicts, rather than broadening undo.
-- **Refactor reveals a bug:** STOP — that's an `/investigate` job, not a refactor.
+- **Refactor reveals a bug:** STOP — that's a `/diagnose` job, not a refactor.
 - **Operator wants refactor + behavior change in one commit:** push back, recommend splitting.
 - **Tests insufficient to verify (low coverage):** WARN — refactor is risky. Recommend adding tests first.
 

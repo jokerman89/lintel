@@ -46,8 +46,10 @@ Designed for "write the script once, deliver to N formats without duplicate work
 
 - Single-format quick draft → invoke format-specific skill directly (`/li:generate-ppt`, `/li:generate-web`, `/li:generate-word`) with `--brief` — bypasses orchestrator overhead
 - Re-rendering an existing run with new template → invoke the format-builder solo with `--from-pipeline <run-dir>`
-- QA-only on existing artifact → invoke `/li:generate-qa <artifact>` solo
+- Verification of an existing artifact → invoke `/li:generate-qa <artifact>` solo
 - Outline-only ideation → invoke `/li:generate-outline` solo
+- Documentation from source code → `/li:generate-docs`; its complete Markdown
+  output can be the explicit brief for this pipeline, not fabricated pipeline output
 
 ## Workflow
 
@@ -273,5 +275,5 @@ These flags appeared in earlier design-doc drafts but are **not implemented** as
 
 - For one-format follow-up after shared binding is available: use the format-builder's `--from-pipeline ${run_dir}` flag, preserving the full source.
 - For voice-tier upgrade (internal → customer-share): re-invoke `/li:generate --customer-share --from-pipeline ${run_id}`.
-- For multi-format-cohort comparison: invoke `/li:qa-only` on the aggregated qa-report.
+- For multi-format-cohort comparison: invoke read-only `/li:verify` on the aggregated qa-report.
 - For sharing externally: pipe `${run_dir}/web/index.html` via `/li:generate-web --customer-share` after the compliance gate passes.

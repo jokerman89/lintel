@@ -66,9 +66,10 @@ not an exhaustive map — run `/li:catalog` to discover the full set.
 
 - Multi-step work / a real task → `/li:cycle` (the 9-step SENSE→CAPTURE loop; writes `.claude/runtime/state/00-state.md`)
 - Architecture / data / security / devops / testing depth → `/li:ta` · `/li:da` · `/li:sc` · `/li:dh` · `/li:tq`
-- Bug / "why is this broken" → `/li:investigate`  ·  Tests / "does it work" → `/li:qa`
-- Plan review → `/li:plan-eng-review` / `/li:plan-ceo-review`  ·  Brainstorm an idea → `/li:office-hours`
-- Deep context load → `/li:context-warm`  ·  Save / resume → `/li:context-save` · `/li:resume`
+- Bug / "why is this broken" → `/li:diagnose`  ·  Tests / "does it work" → `/li:verify` (read-only unless repair is authorized)
+- Plan/repository inspection → `/li:inspect --target plan|repo --lens engineering|design|devex`  ·  Shape an idea → `/li:define`
+- Independent second review → `/li:cross-check` with a separately attributable reviewer
+- Deep context load → `/li:context-warm`  ·  Save / resume → `/li:pause` · `/li:resume`
 - Record a decision → `/li:adr-new`  ·  Capture a lesson → `/li:capture`
 - Switch / inspect identity → `/li:pack-switch` · `/li:pack-list` · `/li:role`
 - Discover everything → `/li:catalog`
@@ -121,7 +122,7 @@ claude --plugin-dir "$PWD"
 ```
 
 ### Skill namespacing
-Skills are namespaced `/li:qa`, `/li:cycle`, etc. Inside this repo they work directly via the plugin manifest.
+Skills are namespaced `/li:verify`, `/li:cycle`, etc. Inside this repo they work directly via the plugin manifest.
 
 ### Catalog
 `skills/CATALOG.md` is generated with `python3 bin/li-catalog.py` and checked for drift in CI. Edit frontmatter, then regenerate; do not hand-edit the catalog.

@@ -1,8 +1,12 @@
 # TODOS
 
+> Historical backlog. Original T-IDs, decisions, dates and deferred outcomes remain
+> unchanged; no item is newly approved or completed by this update. Current workflow
+> names are in the [native migration](../../../docs/migrations/2026-09-25-native-workflows.md).
+
 Deferred work, ordered by priority. Each item has the context needed to pick it up cold.
 
-Source: design doc `jokerman-main-design-20260526-225146.md` (deferred items) + this `/plan-eng-review` session (new items surfaced).
+Source: design doc `jokerman-main-design-20260526-225146.md` (deferred items) + the historical engineering-review session (new items surfaced).
 
 ---
 
@@ -18,7 +22,7 @@ Source: design doc `jokerman-main-design-20260526-225146.md` (deferred items) + 
 
 **Cons:** Editing user's Claude Code config (via symlink into `~/.claude/hooks/` or settings.json modification) has side-effects. Risk of breaking existing hook setup.
 
-**Context:** Resolved A1 in `/plan-eng-review` 2026-05-26 — three implementation paths considered (symlink, settings.json, manual). All deferred to v1.1.0 pending more usage data on which hooks are actually useful.
+**Context:** Resolved A1 in engineering review 2026-05-26 — three implementation paths considered (symlink, settings.json, manual). All deferred to v1.1.0 pending more usage data on which hooks are actually useful.
 
 **Depends on:** v1.0.0 ships + at least 2 SEs use Layer 4 hooks manually for ~30 days. Real usage data informs which path.
 
@@ -90,7 +94,7 @@ Source: design doc `jokerman-main-design-20260526-225146.md` (deferred items) + 
 
 **Cons:** ~30 LOC of careful filesystem handling. Risk of bugs in the swap logic itself. May not be worth it if partial-state-on-fail is rare in practice.
 
-**Context:** Surfaced as C1 alternative in `/plan-eng-review`. Resolved as "leave partial state + document recovery" for v1. Revisit if partial-install reports become common.
+**Context:** Surfaced as C1 alternative in engineering review. Resolved as "leave partial state + document recovery" for v1. Revisit if partial-install reports become common.
 
 ---
 
@@ -104,7 +108,9 @@ Source: design doc `jokerman-main-design-20260526-225146.md` (deferred items) + 
 
 **Cons:** Supply chain risk (running an un-pinned curl install). v1 explicitly rejects this for that reason — `install.sh` prompts the user with install commands instead. Revisit only if there's a way to pin + verify yq's hash before execution.
 
-**Context:** Surfaced in design doc Dependencies. Deferred to v1.1.0 with the requirement that any auto-bootstrap include hash verification (matching the `gstack-browse` setup pattern that already does this for bun).
+**Context:** Surfaced in design doc Dependencies. Deferred to v1.1.0 with a requirement
+for pinned hash verification before any proposed bootstrap. That proposal does not authorize
+installing a dependency now or reusing a denied tool route.
 
 ---
 
@@ -166,7 +172,7 @@ Source: design doc `jokerman-main-design-20260526-225146.md` (deferred items) + 
 
 **Cons:** Adds CI complexity. A PR that "looks like docs only" but accidentally touches install logic should still get full matrix — paths need to be carefully scoped.
 
-**Context:** Surfaced in `/plan-eng-review` Performance review. Not v1 blocker — minor optimization.
+**Context:** Surfaced in the engineering performance review. Not v1 blocker — minor optimization.
 
 ---
 

@@ -50,6 +50,9 @@ Apply [task-relevant intake](../define/references/intake.md) and the
 [shared work-map contract](../spec-kit/references/work-map.md). Resolve actual
 profile/policy before consumption, retain the selected original map and answers,
 and do not equate an inferred larger size with broader authority.
+DEFINE reads this same selected `scope.md`; its compact intake retains material
+risk and approval checks. PLAN uses `/li:inspect --target plan` for applicable
+review lenses, not another sizing interview.
 
 ### Step 1 — Load the request + the orientator route
 

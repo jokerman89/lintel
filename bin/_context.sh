@@ -3,9 +3,9 @@
 # implements: ADR-0006
 # intent: docs/concepts/memory-v2.md
 # constraints: helpers own paths/naming/discovery; content stays LLM-written
-# last_intent_review: 2026-09-20
+# last_intent_review: 2026-09-25
 #
-# bin/_context.sh — mechanical core for the context-save/restore family.
+# bin/_context.sh — mechanical core for pause, resume and context warming.
 # Closes the prose-only gap: 5 context skills shipped with zero bash. The
 # LLM still writes/reads the checkpoint CONTENT; these helpers make the
 # path handling, naming and discovery deterministic.
@@ -19,12 +19,31 @@
 # Scope: checkpoints live in <repo>/.claude/runtime/sessions/<branch>/ (v5,
 # ADR-0005); the legacy ~/.lintel/sessions/<branch>/ remains an owner-filtered,
 # read-only fallback. Historical checkpoints are not deleted when a date passes.
+# Helper names and the -context-save.md filename grammar are persisted compatibility.
 
 _CONTEXT_BIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck disable=SC1091
 command -v lintel_sessions_dir >/dev/null 2>&1 || source "$_CONTEXT_BIN_DIR/../lib/paths.sh"
 
 LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
+
+context_resume_kind() {
+  [ "$#" -ge 1 ] && [ -n "$1" ] || {
+    echo 'Resume --from requires one nonempty operand.' >&2
+    return 2
+  }
+  local value="$1" step
+  shift
+  case "$value" in
+    *$'\n'*|*$'\r'*|--*) echo 'Invalid resume operand; use an explicit path for a flag-shaped filename.' >&2; return 2 ;;
+    ./*|../*|*/*|*\\*|[A-Za-z]:*) printf 'checkpoint\n'; return 0 ;;
+    SENSE|SCOPE|DEFINE|DISCOVER|PLAN|BUILD|REVIEW|SHIP|CAPTURE) printf 'phase\n'; return 0 ;;
+  esac
+  for step in "$@"; do
+    [ "$value" != "$step" ] || { printf 'step\n'; return 0; }
+  done
+  printf 'checkpoint\n'
+}
 
 _context_run() {
   local python

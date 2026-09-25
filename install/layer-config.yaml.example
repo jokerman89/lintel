@@ -1,8 +1,8 @@
-# JStack layer config — example
+# Lintel operator configuration example
 #
-# Copy to ~/.jstack/config.yaml and edit to override defaults.
-# install.sh reads this file with strict YAML parse — typos in keys (e.g. layer3
-# vs layer_3) produce a clear error, not a silent skip.
+# A fresh bare install seeds ~/.lintel/config.yaml from this file.
+# Existing operator configuration is preserved. This example documents preferences;
+# it does not activate hooks, install upstream projects or enforce host policy.
 
 version: 1
 
@@ -11,15 +11,15 @@ version: 1
 # behavior comes from the active pack, not from extra scaffolding layers.
 layers:
   layer_1:
-    enabled: true                   # required — install.sh refuses to disable
-    install_path: ~/.jstack/scaffolding/01-foundation
+    enabled: true                   # foundation is part of the native payload
+    install_path: ~/.lintel/scaffolding/01-foundation
 
 # Compliance tier override.
 # The active pack defines its own compliance gates (resolve_pack_field
 # compliance.hooks; none by default). The neutral defaults below are
 # pack-agnostic safety rules. Operator can ELEVATE any reference rule to
 # on-demand or always-on per project.
-# Operator CANNOT DISABLE the always-on rules — install.sh refuses.
+# Actual enforcement belongs to the configured host and repository controls.
 compliance:
   always_on_rules:                  # non-negotiable
     - no_customer_data
@@ -31,9 +31,9 @@ compliance:
   # elevations: list reference rule names here to promote them to always-on for this repo
   elevate_to_always_on: []
 
-# Self-maintenance watchers (per Eng review session 2 A5).
+# Optional self-maintenance watchers.
 # Soft warnings only — the harness CANNOT compact your conversation.
-# These watchers surface /context-save when sessions get heavy.
+# These watchers recommend /li:pause when sessions get heavy.
 watchers:
   token_watcher:
     enabled: true
@@ -51,22 +51,13 @@ watchers:
 voice:
   default_tier: internal            # safe default — direct, builder-talking-to-builder
 
-# Upstream sources (clone-time pins).
-# upstream-sources.yaml carries the actual pin SHAs.
-# This block lets operator opt-out of specific upstreams (e.g. team doesn't want ToB skills).
-upstreams:
-  gstack:               { enabled: false }   # reference-only — not installed (ADR-0011)
-  gsd-redux:            { enabled: true }
-  agentshield:          { enabled: true }
-  ecc:                  { enabled: true }
-  trailofbits-skills:   { enabled: true }    # CC-BY-SA-4.0 — restricted tier
-  anthropic-skills:     { enabled: true }    # mixed Apache + source-available — restricted tier
-  trailofbits-claude-code-config: { enabled: false }  # reference-only by default
-  anthropic-plugins-official:     { enabled: false }  # reference-only by default
+# The declaration-only upstream-sources.yaml records provenance and required notices.
+# Native installation never downloads those projects.
+upstreams: {}
 
 # CLI shim deployment.
-# scaffold-repo.sh drops the appropriate shim into each target repo.
-# Set to false to skip a CLI you don't use.
+# Select actual repository adapters explicitly with bin/li-adapter.
+# These historical preference keys alone do not install or activate a client.
 cli_shims:
   claude_code: true                 # drops CLAUDE.md
   copilot_enterprise: true          # drops .github/copilot-instructions.md

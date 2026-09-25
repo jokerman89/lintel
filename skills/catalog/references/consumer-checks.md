@@ -1,7 +1,7 @@
 # Discovery consumer checks
 
 The catalog/selection [metadata](metadata.md) and [selection](selections.md) contracts
-remain the only inventory. Catalog, help, router and welcome query them before selected
+remain the only inventory. Catalog, router and welcome query them before selected
 body reads. Status uses them for method names/aliases, never for progress. Skillify
 uses the same name/alias query before authoring an explicitly owned new draft.
 

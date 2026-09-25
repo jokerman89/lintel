@@ -66,9 +66,23 @@ for skill in "${FRONTEND_SKILLS[@]}"; do
   fi
 done
 
-# frontend-design orchestrator specific checks (parallel-dispatch + M-1 + boundary)
+# Director modes retain the existing schema and rendering boundary.
 ORCHESTRATOR="$REPO_ROOT/skills/frontend-design/SKILL.md"
 if [ -f "$ORCHESTRATOR" ]; then
+  for mode in design advice variants; do
+    if grep -q "$mode" "$ORCHESTRATOR"; then
+      pass "frontend-design retains mode: $mode"
+    else
+      fail "frontend-design missing mode: $mode"
+    fi
+  done
+  for method in advice variants; do
+    if [ -f "$REPO_ROOT/skills/frontend-design/references/$method.md" ]; then
+      pass "frontend-design retains procedure: $method"
+    else
+      fail "frontend-design missing procedure: $method"
+    fi
+  done
   if grep -qE "PARALLEL|parallel" "$ORCHESTRATOR"; then
     pass "frontend-design orchestrator references PARALLEL dispatch (M-4)"
   else
@@ -182,7 +196,7 @@ if [ -f "$REVIEW_SKILL" ]; then
   if grep -qE "(≥|>=)?80.*green" "$REVIEW_SKILL" && grep -qE "60-79.*yellow" "$REVIEW_SKILL"; then
     pass "frontend-design-review has explicit scoring rubric (≥80=green, 60-79=yellow, <60=red)"
   else
-    fail "frontend-design-review missing scoring rubric (resolves /plan-eng-review M-3 concern #3)"
+    fail "frontend-design-review missing the retained advisory scoring rubric"
   fi
 fi
 

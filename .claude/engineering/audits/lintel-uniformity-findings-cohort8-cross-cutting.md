@@ -1,5 +1,9 @@
 # Cohort 8 findings — cross-cutting infrastructure
 
+> Retained historical narrative. Terminology was neutralized on 2026-09-25;
+> former external path/name labels are symbolic, not executable current routes.
+> Original dates, finding IDs and recorded outcomes remain historical, not rerun acceptance.
+
 **Auditor:** uniformity auditor (cohort 8 of 8)
 **Date:** 2026-05-29
 **Scope:** 6 cross-cutting layers × 8 phase-core skills. NO-CUT. BUILT vs DESIGNED-NOT-BUILT marked per layer.
@@ -80,7 +84,7 @@ dimensions:
     high: "jobs visibility promise — 'see what's open right now'"
     finding: "Only 2 skills (cycle, plan) declare workflow_root. The 8 phase-core skills do NOT individually participate; a solo /li:sense or /li:build leaves no job trace. job-begin fires PreToolUse but is opt-in via manual symlink (hooks/shared/README.md:7) so default installs get zero job tracking."
     proposed: "Decide the participation model: either (a) phase skills run only nested inside cycle/plan jobs (then document this explicitly and add the NO_JOB guard to each), or (b) give each phase skill a lightweight job-touch so solo invocations are visible. Today it is neither — ambiguous."
-    why: "Achieve uniform in-flight visibility. gstack's context-save/restore + GSD's .planning/ thread model both persist per-invocation state; Lintel persists only for the 2 root flows. Option (a) is more elegant (fewer parts) and matches the anti-pattern note in jobs-system.md:156 about nesting."
+    why: "Achieve uniform in-flight visibility. retired-provider's context-save/restore + GSD's .planning/ thread model both persist per-invocation state; Lintel persists only for the 2 root flows. Option (a) is more elegant (fewer parts) and matches the anti-pattern note in jobs-system.md:156 about nesting."
   D5_checkpoints:
     state: present
     nano: "bin/_jobs.sh:80-103 job_update writes current_step + last_touched; 00-state.md moved into job dir"

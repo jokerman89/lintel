@@ -1,4 +1,9 @@
 # Behavioral verification of the native Windows installer, without Pester.
+param(
+    [switch]$PruningOnly,
+    [switch]$SnapshotOnly,
+    [ValidateSet('powershell', 'bash')][string]$PruningPerformer = 'powershell'
+)
 $ErrorActionPreference = 'Stop'
 $RepoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $TestRoot = Join-Path ([IO.Path]::GetTempPath()) ("lintel-install-" + [guid]::NewGuid().ToString('N'))
@@ -15,8 +20,222 @@ function Invoke-Installer {
   if ($LASTEXITCODE -ne 0) { throw "Installer failed: $LASTEXITCODE" }
 }
 
+function Write-FixtureFile([string]$Root, [string]$Relative, [string]$Text) {
+  $path = Join-Path $Root $Relative
+  [IO.Directory]::CreateDirectory((Split-Path -Parent $path)) | Out-Null
+  [IO.File]::WriteAllText($path, $Text, (New-Object Text.UTF8Encoding($false)))
+}
+
+function Get-FixtureSnapshot([string]$Root) {
+  $rootItem = Get-Item -LiteralPath $Root -Force -ErrorAction Stop
+  if (-not $rootItem.PSIsContainer -or
+      ($rootItem.Attributes -band [IO.FileAttributes]::ReparsePoint)) {
+    throw 'A fixture snapshot requires an ordinary owned directory.'
+  }
+  $pending = New-Object 'System.Collections.Generic.Stack[string]'
+  $rows = New-Object 'System.Collections.Generic.List[string]'
+  $pending.Push($rootItem.FullName)
+  while ($pending.Count -gt 0) {
+    foreach ($entry in Get-ChildItem -LiteralPath $pending.Pop() -Force -ErrorAction Stop) {
+      $relative = $entry.FullName.Substring($rootItem.FullName.Length)
+      if ($entry.Attributes -band [IO.FileAttributes]::ReparsePoint) {
+        $record = [ordered]@{
+          path = $relative; kind = 'link'; link_type = $entry.LinkType
+          target = @($entry.Target)
+        }
+        $rows.Add((ConvertTo-Json -InputObject $record -Compress))
+      } elseif ($entry.PSIsContainer) {
+        $pending.Push($entry.FullName)
+      } else {
+        $record = [ordered]@{
+          path = $relative; kind = 'file'
+          sha256 = (Get-FileHash -LiteralPath $entry.FullName -Algorithm SHA256 -ErrorAction Stop).Hash
+        }
+        $rows.Add((ConvertTo-Json -InputObject $record -Compress))
+      }
+    }
+  }
+  return ($rows | Sort-Object) -join "`n"
+}
+
+function Test-FixtureSnapshot {
+  $root = Join-Path $TestRoot 'snapshot-owned'
+  $foreign = Join-Path $TestRoot 'snapshot-foreign'
+  New-Item -ItemType Directory -Path $root, $foreign | Out-Null
+  $ordinary = Join-Path $root 'ordinary.txt'
+  [IO.File]::WriteAllText($ordinary, 'owned bytes')
+  $foreignFile = Join-Path $foreign 'not-owned.txt'
+  [IO.File]::WriteAllText($foreignFile, 'foreign fixture bytes')
+  $missing = Join-Path $foreign 'missing.txt'
+  New-Item -ItemType SymbolicLink -Path (Join-Path $root 'dangling.txt') -Target $missing | Out-Null
+  New-Item -ItemType SymbolicLink -Path (Join-Path $root 'foreign.txt') -Target $foreignFile | Out-Null
+  New-Item -ItemType Junction -Path (Join-Path $root 'foreign-dir') -Target $foreign | Out-Null
+  $before = Get-FixtureSnapshot $root
+  $records = @($before -split "`n" | ForEach-Object { $_ | ConvertFrom-Json })
+  if ($records.Count -ne 4 -or @($records | Where-Object kind -eq 'link').Count -ne 3) {
+    throw 'Fixture snapshot must record links without following file or directory targets.'
+  }
+  $regular = @($records | Where-Object kind -eq 'file')
+  if ($regular.Count -ne 1 -or $regular[0].path -cne '\ordinary.txt') {
+    throw 'Fixture snapshot read a foreign link target.'
+  }
+  foreach ($pair in @(@('\dangling.txt', $missing), @('\foreign.txt', $foreignFile),
+      @('\foreign-dir', $foreign))) {
+    $link = @($records | Where-Object path -eq $pair[0])
+    if ($link.Count -ne 1 -or @($link[0].target).Count -ne 1 -or
+        $link[0].target[0] -cne $pair[1] -or -not $link[0].link_type) {
+      throw 'Fixture snapshot did not preserve the link target spelling and type.'
+    }
+  }
+  [IO.File]::WriteAllText($foreignFile, 'changed outside selected snapshot')
+  if ((Get-FixtureSnapshot $root) -cne $before -or (Test-Path -LiteralPath $missing)) {
+    throw 'Changing a link target changed the owned snapshot or materialized a dangling target.'
+  }
+  $locked = [IO.File]::Open($ordinary, [IO.FileMode]::Open, [IO.FileAccess]::Read, [IO.FileShare]::None)
+  try {
+    $failed = $false
+    try { Get-FixtureSnapshot $root | Out-Null } catch { $failed = $true }
+    if (-not $failed) { throw 'Unreadable ordinary files must fail the fixture snapshot.' }
+  } finally {
+    $locked.Dispose()
+  }
+  Write-Host 'PASS: fixture snapshots preserve link identity without following targets and fail on unreadable ordinary files.'
+}
+
+function Invoke-PruningInstall([string]$Source, [string]$Target, [switch]$ExpectConflict, [switch]$Check) {
+  # A negative subprocess must be observed, not promoted to the script verdict.
+  $ErrorActionPreference = 'Continue'
+  $extra = @()
+  if ($Check) { $extra += '--check' }
+  if ($PruningPerformer -eq 'bash') {
+    $bash = (Get-Command bash -ErrorAction Stop).Source
+    $output = & $bash -c 'set -euo pipefail; source "$1"; shift; lintel_native_main "$@"' `
+      native-pruning (Join-Path $RepoRoot 'install\native.sh') --source $Source --home $Target `
+      --store ($Target + '-recovery') @extra 2>&1
+  } else {
+    $output = & $ShellExe -NoProfile -NonInteractive -File (Join-Path $RepoRoot 'install\install.ps1') `
+      -Source $Source -Home $Target -Store ($Target + '-recovery') @extra 2>&1
+  }
+  $code = $LASTEXITCODE
+  $text = $output -join "`n"
+  if ($ExpectConflict) {
+    if ($code -eq 0 -or $text -notmatch 'Modified managed file' -or $text -match 'Install complete') {
+      throw "Expected an explicit pre-write managed-edit refusal, got exit $code`: $text"
+    }
+  } elseif ($code -ne 0) {
+    throw "Native pruning fixture failed with exit $code`: $text"
+  }
+  return $text
+}
+
+function Test-ManagedPruning {
+  $source = Join-Path $TestRoot 'pruning-source'
+  $target = Join-Path $TestRoot 'pruning-target'
+  $store = $target + '-recovery'
+  foreach ($directory in @('scaffolding', 'lib', 'bin', 'templates', 'skills', 'agents',
+      'shims', 'docs', 'hooks', 'install', 'packs\_default', '.claude-plugin', 'config')) {
+    [IO.Directory]::CreateDirectory((Join-Path $source $directory)) | Out-Null
+  }
+  foreach ($relative in @('LICENSE', 'AGENT-INSTRUCTIONS.md', 'README.md', 'SECURITY.md',
+      'CONTRIBUTING.md', 'CODE_OF_CONDUCT.md', 'CHANGELOG.md')) {
+    Write-FixtureFile $source $relative "Synthetic native install fixture.`n"
+  }
+  Write-FixtureFile $source '.claude-plugin\plugin.json' "{}`n"
+  Write-FixtureFile $source 'config\aliases.yaml' "version: 1`nskill_aliases: []`nenv_var_aliases: []`nplugin_slug_aliases: []`n"
+  foreach ($relative in @('install\directories.txt', 'install\layer-config.yaml.example', 'packs\_default\pack.yaml')) {
+    [IO.File]::Copy((Join-Path $RepoRoot $relative), (Join-Path $source $relative))
+  }
+  $header = "---`nname: {0}`ndescription: Use to exercise a synthetic install.`ncolor: green`n" +
+    "tools: Read`nvoice: internal`nlayer: foundation`ncli_support: [copilot]`n---`n"
+  Write-FixtureFile $source 'skills\prior-example\SKILL.md' ($header -f 'prior-example')
+  Write-FixtureFile $source 'skills\current-example\SKILL.md' ($header -f 'current-example')
+  Write-FixtureFile $source 'skills\prior-example\scripts\helper.sh' "echo inert fixture`n"
+  Invoke-PruningInstall $source $target | Out-Null
+  $oldReceipts = @{}
+  foreach ($receipt in Get-ChildItem -LiteralPath $store -Directory) {
+    $oldReceipts[$receipt.Name] = Get-FixtureSnapshot $receipt.FullName
+  }
+  if ($oldReceipts.Count -ne 1) { throw 'Initial installation did not retain exactly one transaction receipt.' }
+  $custom = @{
+    'skills\prior-example\operator-note.md' = "Keep this user file beside retired managed files.`n"
+    'skills\operator-workflow\SKILL.md' = "User-owned workflow content.`n"
+    'config.yaml' = "Operator configuration.`n"
+    'profile.yaml' = "Operator profile.`n"
+    'roles\private\operator.md' = "Synthetic private role.`n"
+    'packs\_default\pack.yaml' = "Operator pack customization.`n"
+    'hooks\operator-extra\run.sh' = "echo inert operator hook`n"
+  }
+  foreach ($entry in $custom.GetEnumerator()) { Write-FixtureFile $target $entry.Key $entry.Value }
+  $retired = @('skills/prior-example/SKILL.md', 'skills/prior-example/scripts/helper.sh')
+  $editedPath = Join-Path $target $retired[1]
+  $managedBytes = [IO.File]::ReadAllBytes($editedPath)
+  [IO.File]::WriteAllText($editedPath, 'User edit to a formerly managed file.')
+  foreach ($relative in $retired) { [IO.File]::Delete((Join-Path $source $relative)) }
+  Write-FixtureFile $source 'skills\current-example\SKILL.md' (($header -f 'current-example') + "Updated candidate.`n")
+  $beforeRefusal = Get-FixtureSnapshot $TestRoot
+  Invoke-PruningInstall $source $target -ExpectConflict | Out-Null
+  if ((Get-FixtureSnapshot $TestRoot) -cne $beforeRefusal) {
+    throw 'A rejected prune changed the source, installed files, inventory or receipt evidence.'
+  }
+  [IO.File]::WriteAllBytes($editedPath, $managedBytes)
+  Invoke-PruningInstall $source $target | Out-Null
+  $inventory = [IO.File]::ReadAllText((Join-Path $target '.lintel-install.tsv'))
+  foreach ($relative in $retired) {
+    if (Test-Path -LiteralPath (Join-Path $target $relative)) { throw "Owned retired file was not pruned: $relative" }
+    if ($inventory.Contains("`t$relative`n")) { throw "Retired path remained in the managed inventory: $relative" }
+  }
+  foreach ($entry in $custom.GetEnumerator()) {
+    if ([IO.File]::ReadAllText((Join-Path $target $entry.Key)) -cne $entry.Value) {
+      throw "Pruning changed operator content: $($entry.Key)"
+    }
+  }
+  if ($inventory.Contains('operator-note.md') -or $inventory.Contains('operator-workflow')) {
+    throw 'Pruning claimed an unowned user file in the managed inventory.'
+  }
+  $kept = 'skills\current-example\SKILL.md'
+  if ([IO.File]::ReadAllText((Join-Path $target $kept)) -cne [IO.File]::ReadAllText((Join-Path $source $kept))) {
+    throw 'The retained workflow did not update with the pruned candidate.'
+  }
+  foreach ($name in $oldReceipts.Keys) {
+    if ((Get-FixtureSnapshot (Join-Path $store $name)) -cne $oldReceipts[$name]) {
+      throw 'A completed prior receipt was changed by pruning.'
+    }
+  }
+  $newReceipts = @(Get-ChildItem -LiteralPath $store -Directory |
+    Where-Object { -not $oldReceipts.ContainsKey($_.Name) })
+  if ($newReceipts.Count -ne 1) { throw 'Pruning did not record exactly one new transaction.' }
+  $receiptRoot = $newReceipts[0].FullName
+  if ([IO.File]::ReadAllText((Join-Path $receiptRoot 'state')).Trim() -cne 'complete') {
+    throw 'Pruning was not recorded as a completed transaction.'
+  }
+  $rows = [IO.File]::ReadAllLines((Join-Path $receiptRoot 'plan.tsv'))
+  if ($rows[-1].Split("`t")[7] -cne '.lintel-install.tsv') { throw 'Inventory was not the final publication.' }
+  foreach ($relative in $retired) {
+    $deletionRows = @($rows | Where-Object { $_.Split("`t")[7] -ceq $relative })
+    if ($deletionRows.Count -ne 1) { throw "Missing exact deletion receipt row: $relative" }
+    $cells = $deletionRows[0].Split("`t")
+    if ($cells[1] -ceq '-' -or $cells[4] -cne '-' -or
+        [IO.File]::ReadAllText((Join-Path $receiptRoot "phase/$($cells[0])")).Trim() -cne 'applied') {
+      throw "Deletion was not bound to its before state and verified applied phase: $relative"
+    }
+  }
+  $stable = Get-FixtureSnapshot $TestRoot
+  Invoke-PruningInstall $source $target | Out-Null
+  $verified = Invoke-PruningInstall $source $target -Check
+  if ($verified -notmatch 'Installed managed bytes verified' -or
+      (Get-FixtureSnapshot $TestRoot) -cne $stable) { throw 'Repeat/check changed the pruned result or its receipts.' }
+  Write-Host "PASS: $PruningPerformer managed pruning preserves edits, user files, inventory ownership and transaction receipts."
+}
+
 try {
   New-Item -ItemType Directory -Path $TestRoot | Out-Null
+  if ($SnapshotOnly -and $PruningOnly) { throw 'Select one focused verification mode.' }
+  Test-FixtureSnapshot
+  if ($SnapshotOnly) { exit 0 }
+  if ($PruningOnly) {
+    Test-ManagedPruning
+    exit 0
+  }
   # An accidental destination equal to the checkout must fail before replacing
   # scaffolding (the previous replace-then-copy path could delete its own source).
   $env:LINTEL_HOME = $RepoRoot
@@ -61,6 +280,7 @@ try {
   if ($LASTEXITCODE -eq 0) { throw 'Installer accepted a dangling profile symlink' }
   if (Test-Path -LiteralPath $outsideProfile) { throw 'Installer seeded outside its home through a symlink' }
   if (Test-Path -LiteralPath (Join-Path $linkedHome 'scaffolding')) { throw 'Linked install wrote before refusal' }
+  Test-ManagedPruning
   Write-Host 'PASS: PowerShell install/reinstall preserves operator state, includes Copilot assets and rejects linked homes.'
 } finally {
   $env:LINTEL_HOME = $oldLintelHome

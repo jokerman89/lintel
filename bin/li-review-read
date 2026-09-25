@@ -6,14 +6,14 @@
 # last_intent_review: 2026-09-20
 set -euo pipefail
 SOURCE_ROOT="${LINTEL_SOURCE_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
-skill=plan-eng-review
+skill=inspect
 json_only=0
 options=()
 usage() {
   echo 'Usage: bash li-review-read [--skill <name>] [--expected <context.json>]'
   echo '       [--corroboration <host-or-human.json>] [--days N] [--gate-json | --json]'
   echo 'Exit 0: strict clearance (or raw --json history); 3: blocked; 2: invocation error.'
-  echo 'Only an explicitly set GSTACK_HOME enables one-time historical import.'
+  echo 'Reads the selected target audit only; --json retains raw historical inspection.'
 }
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -42,25 +42,6 @@ export LINTEL_REPO_ROOT="$REPO_ROOT"
 source "$SOURCE_ROOT/bin/_audit.sh"
 log="$(_audit_out_dir reviews)/reviews.jsonl"
 
-if [ -n "${GSTACK_HOME:-}" ]; then
-  remote="$(git -C "$REPO_ROOT" remote get-url origin 2>/dev/null || true)"
-  slug=""
-  if [ -n "$remote" ]; then
-    slug="$(printf '%s' "$remote" | sed 's|.*[:/]\([^/]*/[^/]*\)\.git$|\1|;s|.*[:/]\([^/]*/[^/]*\)$|\1|' | tr '/' '-' | tr -cd 'a-zA-Z0-9._-')"
-  fi
-  slug="${slug:-$(basename "$REPO_ROOT" | tr -cd 'a-zA-Z0-9._-')}"
-  branch="$(git -C "$REPO_ROOT" rev-parse --abbrev-ref HEAD | tr -cd 'a-zA-Z0-9._-')"
-  legacy="$GSTACK_HOME/projects/$slug/$branch-reviews.jsonl"
-  marker="$(dirname "$log")/reviews-legacy-import.done"
-  if [ -f "$legacy" ] && ! { [ -f "$marker" ] && grep -Fxq "$legacy" "$marker"; }; then
-    lines="$("$python" "$helper" import-lines --file "$legacy")" || exit 3
-    while IFS= read -r line; do
-      [ -z "$line" ] || bash "$SOURCE_ROOT/bin/li-review-log" --history "$line" >/dev/null || exit 3
-    done <<< "$lines"
-    mkdir -p "$(dirname "$marker")"
-    printf '%s\n' "$legacy" >> "$marker"
-  fi
-fi
 if [ "$json_only" -eq 1 ]; then
   if [ -f "$log" ]; then cat "$log"; fi
   exit 0

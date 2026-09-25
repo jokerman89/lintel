@@ -41,7 +41,7 @@ For each `(Lintel item, upstream-equivalent)` pair:
 
 ## Why 0.6 specifically?
 
-**Empirical default**, not a derived number. Selected per plan-eng-review session 2 (T-303) as a starting point. Real value should be determined by:
+**Historical proposed default**, not a derived number. Selected in engineering-review session 2 (T-303) as a starting point. The unbuilt proposal suggested:
 
 1. Run the method against a sample of pairs (5-10)
 2. Manually classify each pair as plagiaristic / inspired / distinct
@@ -83,13 +83,14 @@ Operator response when a pair scores ≥0.6:
 
 **Estimated effort:** ~2 SE-days for a working implementation.
 
-**Owner:** TBD. Plan-eng-review T-303 names this as a v1.0.0 blocker.
+**Owner:** TBD. Historical engineering-review task T-303 named this as a v1.0.0 blocker;
+the supersession above means it is not a current acceptance requirement.
 
 ## Pre-implementation manual gate
 
 Until the script exists, the operator manually:
 
-1. For each Lintel skill/agent, identify its closest upstream analog (from gstack, ECC, GSD Redux, etc.)
+1. For each Lintel skill/agent, identify its closest method-source analog from the recorded source registry
 2. Read both side by side for 30 seconds
 3. Honestly classify: distinct / inspired / too-close
 4. Record the classification in `~/.lintel/manual-similarity-review.md`
@@ -101,4 +102,4 @@ This is slower + more subjective, but defensible while the script is pending.
 - `SHIP-GATE.md` Gate 7 — where this methodology applies
 - `LICENSE-TIERS.md` — orthogonal concern (compatibility, not similarity)
 - `install/upstream-sources.yaml` — the upstream sources to compare against
-- plan-eng-review T-303 (in the design doc) — the formal task assignment
+- Historical engineering-review T-303 (in the design doc) — the original task assignment

@@ -1,11 +1,21 @@
 # Work index — current initiative and historical plans
 
-Current initiative: [Universal implementation](universal-implementation/work.json), coordinated by
+Current initiative: [Removing legacy skills and agents](legacy-cleanup/work.json),
+coordinated by host session `e9c20b62-f877-4242-82cd-b5002d452da8`. Its
+[integration state](legacy-cleanup/integration-state.md), original-ID plan and
+swarm evidence own the active cleanup. Implementation is in progress; final review,
+strict hosted CI and delivery remain open.
+
+## Upstream implementation record follow-up
+
+The separately owned [Universal implementation](universal-implementation/work.json) was coordinated by
 MasterSession's recovery session `88aecc43-40f9-41d4-8947-6c2fb0a55481`.
 Follow its [current handoff](universal-implementation/handoff.md); the original plan remains
-the sole task ledger. The entries below are preserved history.
+its sole task ledger. Its source merged through PR #93 at `80002ed4`; final records
+remain with that owner. The older checkpoint below is preserved history, not the
+current cleanup acceptance count.
 
-Current review checkpoint: 79/113 original acceptances. Complete P08 selected
+Historical review checkpoint: 79/113 original acceptances. Complete P08 selected
 SPEC `624b554f` is BLOCKED on F06/A10.3; whole QUALITY has not started.
 The negative-control method and private M01 correction pass their bounded
 reviews. The first exact candidate-only release is SAMEc2/ship-direct;

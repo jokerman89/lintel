@@ -113,7 +113,7 @@ def _resume_context(
         raise ValueError("--cycle-id must select a nonempty original cycle")
     environment = {key: value for key, value in os.environ.items() if not key.startswith("BASH_FUNC_")}
     for key in (
-        "BASH_ENV", "ENV", "GSTACK_HOME", "PACK_CACHE_FILE", "LINTEL_CYCLE_ID", "LINTEL_WORK_MAP",
+        "BASH_ENV", "ENV", "PACK_CACHE_FILE", "LINTEL_CYCLE_ID", "LINTEL_WORK_MAP",
         "LINTEL_PROFILE_CONTEXT", "LINTEL_PROFILE_CONTEXT_FILE", "LINTEL_PROFILE_REFERENCE",
         "LINTEL_PROFILE_PACK", "LINTEL_REQUIRED_POLICY",
     ):

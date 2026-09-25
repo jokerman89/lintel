@@ -157,17 +157,17 @@ def identifier(value: object, path: Path) -> str:
 
 
 def skill_category(name: str) -> str:
-    if name.startswith("plan") or name == "office-hours":
+    if name.startswith("plan") or name in ("define", "inspect"):
         return "plan"
-    if name.startswith("qa") or name in ("investigate", "review", "code-review"):
+    if name.startswith("qa") or name in ("verify", "diagnose", "cross-check", "review", "code-review"):
         return "qa"
-    if name.startswith("ship") or name == "review-and-ship":
+    if name.startswith("ship"):
         return "ship"
     if name.startswith("compliance"):
         return "compliance"
     if name == "eval":
         return "voice"
-    if name in ("catalog", "help", "skill-router", "skillify", "uniformity", "welcome", "doctor"):
+    if name in ("catalog", "skill-router", "skill-new", "uniformity", "welcome", "doctor"):
         return "meta"
     return "ops"
 

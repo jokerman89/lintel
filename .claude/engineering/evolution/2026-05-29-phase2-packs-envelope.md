@@ -1,5 +1,9 @@
 # Structure change — Phase 2: pack architecture + envelope schema
 
+> Historical record. Dates, IDs, source-time paths and verification claims below belong
+> to this transition, not current policy or a new test run. Current migration guidance
+> uses `/li:migrations`; required profile and shared evidence contracts still govern execution.
+
 **Date:** 2026-05-29
 **Cycle:** v4.0 Phase 2 (v4.0-beta)
 **Mode:** meta-infra (M1-M4 active)
@@ -60,7 +64,9 @@ For operators currently on `_default` pack: nothing required. `_default` stays a
 
 For operators currently using Lintel for CAIP-SE work (the historical primary use case): run `/li:pack-switch caip-se` once after Phase 2 ships. After that, behavior is identical to v3.x — the same voice, compliance hooks, personas, voice corpus that lived in the spine now live in the caip-se pack and resolve to the same effective values.
 
-`/li:v4-migrate` automates this: detects v3.x usage signals (compliance hooks invoked, Trailblazer voice references, CAIP-SE-shaped state), recommends pack activation, can write the active-pack file with `--apply`.
+The historical migration method detected v3.x usage signals, recommended pack activation and
+offered an explicit apply step. Current `/li:migrations` retains inspection and authorized
+apply/rebind guidance; this record does not authorize automatic pack activation.
 
 ## Forward compatibility
 
