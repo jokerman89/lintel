@@ -10,9 +10,10 @@ Read the project's existing instructions and specifications. Decide what the fir
 must demonstrate, for example an endpoint's expected response and failure behavior.
 Keep existing work maps and task IDs; Spec Kit does not need a second backlog.
 
-Use the proportionate workflow. A review-only request stays read-only. Small fixes do not
-need a venture interview or every phase of the cycle. Optional architecture, data, security,
-operations, testing, design and document methods remain available when the task needs them.
+Use the proportionate workflow. A review-only request stays read-only, and `verify` tests without
+repairing unless `--repair` is explicitly requested. Small fixes do not need a strategy interview
+or every phase of the cycle; use `fix` or an explicit cycle range. Optional architecture, data,
+security, operations, testing, design and document methods remain available when the task needs them.
 
 ## 2. Select a repository adapter
 
@@ -67,7 +68,7 @@ to force an update. Review and commit the installation diff, including its sourc
 Open the target in the selected client. Inspect the host's actual skills/agent UI under
 its trust and organization policies; do not assume a reload command works everywhere.
 The portable wrappers are named `li-*`; invocation syntax follows the host. Claude's
-preserved plugin names use `/li:<skill>`.
+preserved plugin names use `/li:<skill>`; the Universal adapter uses an explicit file read.
 
 When discovery is absent or uncertain, use the explicit route:
 
@@ -92,6 +93,8 @@ Open a fresh session and invoke the discovered `li-resume`, or explicitly read
 `.github/lintel/skills/resume/SKILL.md`. It should select the same work map and original
 task IDs, cite completed cards and real verification, retain the effective profile reference,
 and identify the next action or blocker. It must not need the prior chat or a personal home.
+To stop deliberately mid-task, run `pause` first; `resume --from <phase|step|checkpoint>`
+selects an explicit starting point.
 
 Record the exact client/version, Lintel revision, discovered names, actual tool path, task
 result and fresh-session outcome. Mark unrun cases explicitly. This is live pilot evidence,
@@ -136,7 +139,9 @@ duplicate skills or shadowed project definitions. Global Bash/PowerShell install
 exist as a separate operator-chosen scope, not a prerequisite or side effect of this path.
 
 For a missing skill, inspect the actual host discovery, trust and permissions, then use a
-permitted explicit file read. For an installer conflict, preserve the named path and reconcile
+permitted explicit file read. If the name came from an older release, check the
+[native workflow migration](migrations/2026-09-25-native-workflows.md) for its current route.
+For an installer conflict, preserve the named path and reconcile
 in a reviewed branch. For a missing interpreter, report the failed check rather than claiming
 installation success. For a lost plan, locate the selected committed work map, not the newest
 file by timestamp. See [enterprise adoption](enterprise-adoption.md) for pilot acceptance.
