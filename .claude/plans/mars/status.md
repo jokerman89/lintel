@@ -3,8 +3,12 @@
 **Updated:** 2026-09-25
 **Branch:** `jokerman-microsoft-mars-integration` (from `origin/main` `80002ed4` plus the seven
 prototype commits of `jokerman-microsoft-mmars-development-plan`, which is unchanged)
-**Coordinator:** Finish work / Go Live `88aecc43-40f9-41d4-8947-6c2fb0a55481` owns merge timing,
-version assignment and delivery. No PR has been opened from this branch.
+**Coordinator:** Finish work / Go Live `88aecc43-40f9-41d4-8947-6c2fb0a55481`.
+**Delivery (2026-09-25):** the operator ordered "Merge everything now". ADR-0034 is accepted and
+the changelog lists MARS under 0.11.0 (unreleased). This session's GitHub CLI actor is
+`jokerman_microsoft`, so L-053 bars it from publishing; push, PR, CI and merge were handed to Go
+Live, which already has permission to publish as `jokerman89`. If Go Live declines, the operator
+runs them (`files/mars-pr-body.md` in this session holds the PR text).
 **Decision:** [ADR-0034](../../decisions/0034-mars-multi-model-review.md). Plan and evidence:
 [plan.md](plan.md), [RM9 re-pilot](pilot-2026-09-25-rm9.md).
 
@@ -35,7 +39,7 @@ MARS = **Multi-Model Adversarial Review & Screening**.
 
 ## Verification (details in plan.md "Review")
 
-Unit 78/78 and shape 41/41 (one `jq`-absent partial each); focused MARS/method tests 62;
+Unit 78/78 and shape 41/41 (one `jq`-absent partial each); focused MARS/method tests 63;
 copilot-kit 19 of 21 run cases pass, and the 2 failures reproduce on the base; generator and
 bundle closure checked; RM9 live pilot; two independent review rounds, all findings fixed.
 `universal-adapters.sh` was stopped after 3 of 17 cases passed in about two hours, and
@@ -43,7 +47,7 @@ bundle closure checked; RM9 live pilot; two independent review rounds, all findi
 
 ## Advisory P3 notes from the independent recheck
 
-- Path case folding follows `normcase`; case-insensitive macOS volumes are not folded.
+- Fixed: overlap checks now fold case on every host (2c8b5b04).
 - `coverage_complete` means "complete and consistent under the method", documented in the
   protocol rather than renamed.
 - The branch is based on `80002ed4`; `origin/main` has since gained six commits, none in

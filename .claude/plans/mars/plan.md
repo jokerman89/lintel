@@ -60,8 +60,8 @@ recursive panels, automatic fixes, version bumps and PR creation.
   host's inherited `GIT_CONFIG_*` variables removed. With them present, 11 native-path cases in
   `review-evidence.sh` fail on their own fixture guard; identical on the base.
 - Shape: `--scope shape` 41/41 pass (1 partial: `jq` absent).
-- Focused: `review-method.sh` 21, `mars-contract.sh` 39, `mars-hooks.sh` 2 (all OK; the
-  junction alias case ran).
+- Focused: `review-method.sh` 21, `mars-contract.sh` 40, `mars-hooks.sh` 2 (all OK; the
+  junction alias and case-variant cases ran).
 - Integration: copilot-kit 21 of 50 cases run: 19 pass, including the six generation and
   closure cases after updating the catalog total to 197 (0e0e0452). Two caller-policy cases
   fail on a fixture HOME assertion here and identically on the base `80002ed4`. The other 29
@@ -80,5 +80,6 @@ Step 5 only surfaces it), so a full cycle has exactly one offer point. RM8 exist
 method §7; CAPTURE is not edited because an active lane owns it. Commit 7daffd00's message
 also credits the P1 rubric note, which landed earlier in 5a89b4c5; history was not rewritten.
 
-**Next:** Go Live schedules the merge after the legacy cleanup, applies the pending
-consolidated hooks, confirms D1 and assigns the version. No push or PR was made from here.
+**Next:** the operator ordered an immediate merge; ADR-0034 (with D1) is accepted and the
+changelog updated. Publishing is handed to Go Live (this session's GitHub actor is barred by
+L-053). The pending consolidated hooks follow #104. No push or PR was made from here.
