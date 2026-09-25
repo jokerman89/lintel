@@ -16,9 +16,11 @@ targeted tests, the shape tier and `install/verify.sh --all` pass under a synthe
 independent review has no open P0-P2 finding. Lintel supports GitHub Copilot, Claude, Codex and
 Cursor plus the manual `other` route; the ten other families, the Gemini extension, the OpenCode
 guide and two `li-update` routes are removed.
-**What's pending:** push and PR need this session's operator (L-045, L-053). Recorded merge order:
-#105, then #104, then this branch (ordinary merge of `main`, no rebase), then the docs branches;
-re-apply ADR-0035 to what lands first.
+**What's pending:** publication as `jokerman89` (L-045, L-053): the app PR tool in this session
+runs as the Enterprise Managed User and was refused (403, fork creation), so the operator pushes
+the branch and opens the draft PR (commands in the review). Recorded merge order: #105, then #104,
+then this branch (ordinary merge of `main`, no rebase), then the docs branches; re-apply ADR-0035
+to what lands first.
 
 ## Active - Universal implementation (2026-09-20)
 

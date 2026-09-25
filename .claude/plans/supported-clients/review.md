@@ -116,4 +116,8 @@ The long CI shards are dominated by entries this change does not touch, such as
   removed clients, and a documentation branch adds Gemini/OpenCode sections to `docs/multi-cli.md`.
   After each merge, re-run the live-path scan, `li-catalog.py --check` and `li-wiki-gen --check`,
   and verify the combined candidate.
-- Push, PR, CI and merge wait for this session's operator (L-045, L-053).
+- Push, PR, CI and merge wait for this session's operator (L-045, L-053). On 2026-09-25 the app's
+  PR tool in this session ran as the Enterprise Managed User and was refused (403 while creating a
+  fork); nothing was created, and no push was attempted. To publish, the operator runs, as
+  `jokerman89`: `git push -u origin jokerman-microsoft-trim-supported-clients`, then opens a draft
+  PR against `main` titled "refactor(clients)!: support only Copilot, Claude, Codex and Cursor".
