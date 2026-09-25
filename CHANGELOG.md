@@ -38,6 +38,14 @@ content-bound review evidence and explicit limits on what each check proves.
   are built from the same design contract and checked in a real browser.
 - A deterministic `--shard K/N` option for `tests/runner/run-all.sh`. CI runs the strict suite in
   shards on every system (ADR-0032).
+- MARS (`/li:mars`), a deliberate multi-model adversarial review. A small panel of distinct models
+  reviews one frozen brief, with a challenge round only when they disagree. Dissent is preserved,
+  identity comes from host evidence, and the result is inspection input, never release clearance.
+  Offers need live host capability and consent; a full cycle offers it once, at PLAN's approval
+  gate (ADR-0034).
+- One Review Method for single reviews and panels (`skills/review/references/method.md`,
+  `lib/review_method.py`, `bin/li-review-packet.py`): standing questions with stable IDs,
+  evidence levels, one severity rubric, required per-question coverage and one decision rule.
 
 ### Changed
 
@@ -47,6 +55,9 @@ content-bound review evidence and explicit limits on what each check proves.
   for each client surface.
 - The Swarm integration, the dormant envelope handoff, the trusted implementation source and the
   explicit private-sync destination are preserved under their accepted contracts.
+- REVIEW's Stage 1 and 2 reviewers receive the Review Method packet instead of inline prompts. A
+  reply with missing coverage, an unverified acceptance row or a header that contradicts its
+  findings is re-requested, never scored as a pass.
 
 ### Removed
 
@@ -64,6 +75,8 @@ content-bound review evidence and explicit limits on what each check proves.
   verified, and Visio stays a template-only staged slot. These acceptance items are removed from
   the release's scope (ADR-0033).
 - Required-policy enforcement is not verified without a resolved company policy source.
+- MARS model identity is verified from the Copilot App's local usage records only; other hosts
+  report requested-only identity. Live panels have run on the Copilot App alone.
 
 These changes remain in the beta line. They do not claim a completed enterprise pilot, compliance
 certification or a published 1.0 release.

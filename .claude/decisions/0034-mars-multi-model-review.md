@@ -1,8 +1,8 @@
 # ADR-0034: MARS multi-model review and one shared Review Method
 
-- **Status:** Accepted direction, 2026-09-25; merge timing and version assignment remain with
-  the coordinator. Decision D1 below is adopted as designed and flagged for operator
-  confirmation at merge.
+- **Status:** Accepted, 2026-09-25. Merged on the operator's instruction to merge now. D1 below
+  ships as proposed; it was presented for confirmation before that instruction, and a later
+  ADR can reverse it.
 - **Date:** 2026-09-25
 - **Deciders:** the operator (requested MARS, its defaults, a live four-model pilot, and
   integration "according to our plan"); implemented on `jokerman-microsoft-mars-integration`
