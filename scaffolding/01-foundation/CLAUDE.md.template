@@ -22,8 +22,11 @@ Commits and a reviewed pull request. Record non-trivial decisions under `.claude
 Use native skills where installed: Copilot core skills use `/li-plan`, `/li-build`, `/li-review`,
 `/li-cycle` and `/li-resume`; Claude plugin skills use `/li:<name>`. Use the client discovery view
 or explicit skill paths when needed. Specialist architecture, data, security, operations and
-testing workflows are available from the canonical catalog when installed. Plan review,
-investigation, testing, context warming, decision capture and save/restore are on-demand workflows.
+testing workflows are available from the canonical catalog when installed. Canonical on-demand
+routes include `inspect --target plan|repo`, `diagnose`, `verify`, `context-warm`, `pause`
+and `resume --from <checkpoint>`. Verification is read-only unless repair is explicitly
+authorized; checkpoint names and old saved data remain compatible. Use the trusted canonical
+skill file if a native wrapper is unavailable.
 Do not claim every catalog entry or hook is native to every host.
 
 ## Project-specific agents and conventions

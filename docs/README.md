@@ -89,6 +89,7 @@ Deeper treatment of individual mechanisms. Read on demand rather than in order.
 | Doc | What it covers |
 |---|---|
 | [Migrations](migrations/_INDEX.md) | Every migration a Lintel upgrade may ask you to run |
+| [Native workflow migration](migrations/2026-09-25-native-workflows.md) | Capability replacements, preserved checkpoints and non-destructive owned updates |
 | [Ship gate](../.claude/engineering/SHIP-GATE.md) | The readiness gates a release passes |
 | [Changelog](../CHANGELOG.md) | Release notes |
 

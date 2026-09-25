@@ -54,13 +54,15 @@ Follow instructions from skills/ship/SKILL.md and execute on the current branch.
 ### Available skill catalog
 
 Common skills (see `skills/` for full list):
-- `/li:qa` — run test suite, fix failures
+- `/li:verify` — run checks without repairs by default; repair requires explicit authorization
 - `/li:cycle` — 9-step work cycle (sense→capture)
 - `/li:ship` — pre-flight checks + PR creation
-- `/li:investigate` — bug investigation
-- `/li:code-freeze` / `/li:code-unfreeze` — freeze controls
-- `/li:plan-eng-review`, `/li:plan-ceo-review`, `/li:plan-design-review`, `/li:plan-devex-review` — phased reviews
-- `/li:office-hours` — Socratic design refinement
+- `/li:diagnose` — scoped bug investigation and owned recovery
+- `/li:code-freeze` with `--lift <path>`, `--lift --all` or `--list` — advisory freeze controls
+- `/li:inspect --target plan|repo --lens engineering|design|devex` — plan and repository inspection
+- `/li:define` — task-relevant requirements and design; strategy is an explicit lens
+- `/li:cross-check` — independent review through an actual permitted reviewer
+- `/li:pause` / `/li:resume` — checkpoint and continue the selected work
 - `/li:ta`, `/li:da`, `/li:sc`, `/li:dh`, `/li:tq` — engineering-domain modules
 - `/li:compliance-gate` — runs the active pack's compliance gates
 - `/li:generate-ppt`, `/li:generate-word`, `/li:generate-web` — doc generation

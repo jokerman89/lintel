@@ -8,6 +8,12 @@ affected_count: 42
 
 # Compatibility audit: copilot-enterprise-launch
 
+> Historical generated evidence. Original RED findings, timestamps, hashes, counts,
+> source-time paths and the reviewed disposition remain unchanged; no test was rerun.
+> Current plan-review routes use `inspect` with engineering/devex lenses. The
+> [native migration](../../../docs/migrations/2026-09-25-native-workflows.md) is navigation,
+> not a transfer of this report's acceptance to a new result.
+
 **Verdict: RED** — 42 affected artifacts across 4 questions.
 
 ## Q1 — Frontmatter contract changes (17)

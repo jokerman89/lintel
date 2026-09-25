@@ -3,7 +3,7 @@
 The system-wide uniformity audit (`.claude/engineering/audits/lintel-uniformity-*`) defined 14
 uniformity dimensions (D1–D14) and ranked the top-20 findings. The audit was a
 one-time snapshot. This document turns that snapshot into a **continuous,
-machine-checked contract** — the parked `/autoplan` recommendation.
+machine-checked contract**, preserving the audit's recommendation without a separate planning entrypoint.
 
 The contract has three moving parts, and this doc is the first:
 
@@ -30,7 +30,7 @@ The audit reviews (`lintel-uniformity-REVIEW.md`,
 A read-only `warn-only` hook is *not* expected to declare `recovery:` (D6) —
 it has nothing to recover; it observes and warns. A `workflow_root: true` skill
 *is* expected to declare `necessity:` (D14) and `navigation:`, because an
-orchestrator (cycle, orientator, autoplan) routes on those fields. Demanding
+orchestrator (cycle or orientator) routes on those fields. Demanding
 all 14 dimensions of every component would be uniformity-as-bureaucracy: it
 would force meaningless declarations and bury the load-bearing ones.
 

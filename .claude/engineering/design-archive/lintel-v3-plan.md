@@ -1,11 +1,19 @@
 # Lintel v3 — plan (revised)
 
+> Historical plan. Original dates, task IDs, source-time inventory and observed limitations
+> remain records, not present-day capability or installation claims. Current workflow routes
+> are in the [native migration](../../../docs/migrations/2026-09-25-native-workflows.md).
+> No proposed check below was rerun, and no historical approval grants a new mutation.
+
 **Datum:** 2026-05-27
 **Föregående:** [lintel-v2-design.md](lintel-v2-design.md) (v2 spec-complete)
 **Status:** PLAN — approved by operator 2026-05-27. Execution started on `v3-dev` branch.
 **Författare:** Claude Code (Opus 4.7) på begäran av jokerman89 (MS Sweden CAIP-SE).
 
-> Den första v3-planen rekommenderade MCP-server + per-CLI compile. Den var överarbetad. Operatör pekade på [obra/superpowers](https://github.com/obra/superpowers) som visar att varje modern AI-CLI redan har plugin/extension-system inbyggt — vi behöver bara små per-CLI manifest-filer som pekar på samma `skills/`-katalog. Denna version reflekterar det.
+> The first v3 plan proposed an MCP server and per-client compilation. The operator instead
+> selected small client manifests pointing at shared `skills/` sources after comparing existing
+> plugin formats. That correction explains the design; format examples did not prove live
+> support on every client. Exact source provenance remains separately recorded.
 
 ---
 
@@ -27,13 +35,13 @@ Tre arkitektoniska beslut som driver allt:
 
 ## 1. Premiss — varför vi gör om
 
-### 1.1 v2:s fynd från /devex-review
+### 1.1 v2 findings from developer-experience inspection
 
 Återanvänds från första v3-planen:
 
 | Område | v2 status | v3 åtgärd |
 |---|---|---|
-| 25 Layer-4 agents | "Bloat — gstack-duplikat" — felaktig framing | KEEP + organisera per domän + bygg ut |
+| 25 Layer-4 agents | Incorrectly framed as duplicate tooling | KEEP + organise by domain + preserve useful roles |
 | 11 top-level .md i root | För många | Flytta 5 design-docs till `.claude/engineering/design-archive/` |
 | 3 v2 "engines" utan runtime | Spec utan implementation | Antingen verklig runtime via plugin (där tillämpligt) eller `STATUS: SPEC ONLY`-banner |
 | Multi-CLI claim | Claude-first, andra ~25-30% | Plugin-manifest per CLI ger ~80-100% per modern CLI |
@@ -46,7 +54,9 @@ Tre arkitektoniska beslut som driver allt:
 
 **Fel #1: MCP-server som kärnan.** Övertekniskt. Lintel:s skill-bodies är statisk markdown — en runtime-server tillför inget. Plugin-manifest räcker.
 
-**Fel #2: "Trim 25 Layer-4 agents → docs/USE-TASK-TOOL.md".** Felaktig framing — agenterna är Lintel-kurerat värde, inte gstack-duplikat. v3 BYGGER UT agenterna istället, organiserade per domän.
+**Fel #2: "Trim 25 Layer-4 agents → docs/USE-TASK-TOOL.md".** The framing was wrong:
+useful curated roles must not be discarded merely because another tool has similar roles.
+The selected v3 direction preserved them and organised them by domain.
 
 **Fel #3: Glömde att scaffolding/01-foundation/ är templates, inte skills.** CORE-PRINCIPLES, EVOLUTION-LOG, tasks/lessons.md, ADR-mallar — de kopieras IN i andra repos via `install.sh`. Måste bevaras + moderniseras.
 
@@ -91,7 +101,7 @@ CROSS-SESSION (persistent)
 ├─ Memory persistence (across sessions in same repo)
 ├─ Lessons sync (across repos via li-lessons-sync, opt-in)
 ├─ Brand/voice corpus sync (~/.lintel/brand/, ~/.lintel/voice/)
-└─ Cross-machine state (gstack-brain pattern)
+└─ Cross-machine state (explicit private synchronization)
 ```
 
 Varje fas har Lintel-komponenter som styr beteendet. **Det är därför v3 inte är "bara skills".**
@@ -104,9 +114,9 @@ Varje fas har Lintel-komponenter som styr beteendet. **Det är därför v3 inte 
 - **Voice corpus, compliance docs, ADR-mallar** = referensmaterial harness:en konsulterar
 - **bin/ scripts** (li-scaffold, li-lessons-sync, li-doctor) = operator-side utilities som binder samman
 
-Vi designar för hela livscykeln, inte bara `/qa`-kommandot.
+The design covers the whole lifecycle, not only the verification command.
 
-### 2.3 Per-CLI native equivalence (re-verifierad mot superpowers)
+### 2.3 Historical per-client format comparison
 
 | CLI | Plugin-mekanism | Installer-kommando | Status |
 |---|---|---|---|
@@ -116,7 +126,7 @@ Vi designar för hela livscykeln, inte bara `/qa`-kommandot.
 | Cursor | `.cursor-plugin/plugin.json` med skills+agents+commands+hooks | `/add-plugin lintel` | ✓ native via Cursor marketplace |
 | Gemini CLI | `gemini-extension.json` + GEMINI.md | `gemini extensions install <repo-url>` | ✓ native via Gemini extensions |
 | OpenCode | `.opencode/INSTALL.md` + `.opencode/plugins/` | Fetch INSTALL.md instructions | ✓ native, dokumenterad workflow |
-| Copilot CLI | `copilot plugin marketplace add` + `install` | `copilot plugin install` | ✓ native (verified by superpowers) |
+| Copilot CLI | `copilot plugin marketplace add` + `install` | `copilot plugin install` | Historical claim: native from source comparison; not a current live observation |
 | Factory Droid | `droid plugin marketplace add` + `install` | `droid plugin install` | ✓ native |
 | Cline | VSCode extension settings | Custom Instructions | ~ degraded (no native plugin API yet) |
 | Continue | `config.json` customCommands | Manual setup | ~ degraded |
@@ -428,7 +438,7 @@ jokerman-lintel/
 │
 ├── bin/                               ← operator-side utilities
 │   ├── li-scaffold                ← copy scaffolding/01-foundation/ → target repo
-│   ├── li-lessons-sync            ← cross-repo lessons sync (gstack-brain-style)
+│   ├── li-lessons-sync            ← explicit private cross-repo lessons sync
 │   ├── li-lessons-promote         ← promote repo lesson → global Lintel
 │   ├── li-doctor                  ← cross-CLI health check
 │   ├── li-update                  ← update plugin from latest tag
@@ -534,7 +544,7 @@ jokerman-lintel/
     "capabilities": ["Interactive", "Read", "Write"],
     "defaultPrompt": [
       "Hjälp mig med ett nytt customer engagement.",
-      "Kör /qa på min branch."
+      "Run /li:verify on the selected branch."
     ],
     "brandColor": "#0078D4"
   }
@@ -639,11 +649,11 @@ Resultat: ny repo har sane defaults inom 30 sekunder.
 
 1. **Per-repo `tasks/lessons.md`** — lessons från corrections i det specifika repot. Reviewas vid session-start.
 
-2. **Cross-repo sync via `li-lessons-sync`** — opt-in. Lessons från Repo A sync:as till `~/.lintel/lessons/<repo-slug>.md` så Repo B kan referera. Gstack-brain-style — privat per operatör.
+2. **Cross-repo sync via `li-lessons-sync`** — opt-in. Lessons från Repo A sync:as till `~/.lintel/lessons/<repo-slug>.md` så Repo B kan referera. Private per operator, with an explicitly authorized destination.
 
 3. **Global Lintel lessons via `li-lessons-promote`** — när en lesson är generell (inte repo-specific), promote till Lintel global. Hamnar i `scaffolding/01-foundation/tasks/lessons.md` så alla framtida scaffolded repos får den som baseline.
 
-**Mid-session lessons-review skill:** `/lessons` slash-command laddar relevanta lessons (filtrerade på keywords från current task) som kontext.
+**Current mid-session lesson route:** `/li:lessons-surface` loads relevant lessons filtered by the current task.
 
 ### 5.3 ADR mekanism
 
@@ -661,13 +671,16 @@ Hook: när CLAUDE.md modifieras → auto-append entry i EVOLUTION-LOG.md med com
 
 ### 5.5 Persona mekanism
 
-`/personas-rotate` skill: laddar persona-context från `tasks/personas.md` för demo-prep eller workshop-facilitation. Persona-data ärvs av subagents om de spawnas under sessionen.
+The historical persona-context proposal used the repository's persona source for preparation
+and facilitation. Current routing is `/li:role --audience [name]`, a conversation-only overlay;
+delegates do not automatically inherit private context.
 
 ### 5.6 Memory mekanism
 
 `tasks/memory.md` är durable cross-session storage per repo. Strukturerad med typer (user / feedback / project / reference) — samma format som Claude Code's built-in memory.
 
-`/context-save` skill skriver, `/context-restore` läser. Plus auto-update vid relevanta corrections.
+Current checkpoint routes are `/li:pause` and `/li:resume --from <checkpoint>`; durable memory
+remains separately owned. The old storage paths in this plan describe its historical layout.
 
 ### 5.7 Voice corpus mekanism
 
@@ -690,7 +703,7 @@ Hook: när CLAUDE.md modifieras → auto-append entry i EVOLUTION-LOG.md med com
 ```
 
 **Vad operatör får:**
-- Alla skills som slash-commands (`/qa`, `/release-ev2`, etc.)
+- Skills as host-discovered commands (current verification route: `/li:verify`)
 - Alla agents tillgängliga via Task tool
 - Hooks installade via settings.json (operatör opt-in per hook)
 - AGENT-INSTRUCTIONS som CLAUDE.md context
@@ -811,7 +824,7 @@ Bulk-script via sed (`bin/li-migrate-v2-to-v3` engångsskript).
 - [ ] `bash tests/runner/run-all.sh` grön
 - [ ] Create `v3-dev` branch
 - [ ] Commit denna plan på branch
-- [ ] **Research per-CLI plugin format** — verifiera mot superpowers + senaste docs för varje CLI:
+- [ ] **Research per-CLI plugin format** — compare available format examples with each client's documented interface:
   - Claude Code marketplace requirements
   - Codex plugin.json schema (`interface{}` block details)
   - Cursor plugin.json full schema
@@ -858,16 +871,16 @@ Bulk-script via sed (`bin/li-migrate-v2-to-v3` engångsskript).
 
 - [ ] `/lessons-promote` (promote repo lesson → global)
 - [ ] `/adr-new` (bootstrap ADR from template)
-- [ ] `/personas-rotate` (load persona context)
+- [ ] Audience-context method (current route: `/li:role --audience [name]`)
 - [ ] `/match` (semantic skill router)
 - [ ] `/li:doctor` (cross-CLI health check)
 - [ ] `/li:scaffold` (invoke repo scaffolding)
-- [ ] `/lessons` (mid-session lessons-review)
+- [ ] `/li:lessons-surface` (current route for mid-session lesson lookup)
 
 ### Phase 5 — Bin scripts + install updates (2 dagar)
 
 - [ ] `bin/li-scaffold` — scaffolding/01-foundation/* → target repo
-- [ ] `bin/li-lessons-sync` — cross-repo lessons sync (gstack-brain-style)
+- [ ] `bin/li-lessons-sync` — explicitly authorized private cross-repo lessons sync
 - [ ] `bin/li-lessons-promote` — promote to global
 - [ ] `bin/li-doctor` — health check
 - [ ] `bin/li-update` — update plugin from latest tag

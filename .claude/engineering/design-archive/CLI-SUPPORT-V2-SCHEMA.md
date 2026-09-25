@@ -1,5 +1,10 @@
 # cli_support v2 schema
 
+> Historical schema proposal. Keep its IDs, examples and stated limitations as design
+> history, not current enforcement or host support. Current adapters use the operation
+> registry and actual permissions; native delegation replaces the retired pairing wrapper.
+> No schema or host check below was rerun in this documentation update.
+
 Frontmatter schema for skill + agent CLI support declarations. v2 introduces per-CLI degradation maps + runtime enforcement (Phase B).
 
 **P1 fix T8 from eng-review.** Source of truth referenced by `TEMPLATE-skill.md` and `TEMPLATE-agent.md`.
@@ -109,7 +114,7 @@ Map persisted to `~/.lintel/sessions/$SESSION_ID/shim-map.json`. Recomputed if c
 
 ## Examples
 
-### Pure claude-code skill (e.g. `/pair-agent`)
+### Historical Claude-only delegated-workflow example
 
 ```yaml
 cli_support:
@@ -126,7 +131,7 @@ cli_support:
     reason: same
 ```
 
-### Full multi-CLI skill (e.g. `/qa`)
+### Historical multi-client verification example
 
 ```yaml
 cli_support:

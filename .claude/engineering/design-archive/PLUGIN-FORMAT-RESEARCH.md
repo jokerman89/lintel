@@ -5,8 +5,9 @@
 > commands/slugs/manifest names are from v3 planning (e.g. the inferred `.copilot-plugin/` and
 > `.droid-plugin/` were never needed — Copilot and Droid read `.claude-plugin/` via interop, and
 > the repo slug is `jokerman89/lintel`, plugin `li@jokerman-lintel`). **For current install steps
-> see [README](../../README.md#quick-start) + [getting-started](../getting-started.md).** Kept for
-> the format-research context only.
+> see [README](../../../README.md#start-with-one-useful-task) +
+> [getting started](../../../docs/getting-started.md).** Original source citations, dates and
+> uncertain findings remain research provenance; no historical check was rerun.
 
 **Date:** 2026-05-27
 **Researcher:** Claude Code (Opus 4.7)
@@ -47,7 +48,7 @@ This document captures the plugin-manifest format research per CLI as of v3 plan
 - `bin/` — executables added to Bash tool's PATH when plugin is active
 - `settings.json` — default settings (only `agent` + `subagentStatusLine` supported)
 
-**Skill namespace:** `/<plugin-name>:<skill>` — e.g. `/li:qa`. This protects against conflicts.
+**Skill namespace:** `/<plugin-name>:<skill>` — current example: `/li:verify`. This protects against conflicts.
 
 **Marketplace:**
 - `claude-plugins-official` (curated by Anthropic, no application process)
@@ -68,7 +69,8 @@ This document captures the plugin-manifest format research per CLI as of v3 plan
 
 ## 2. Codex CLI / Codex App
 
-**Source:** obra/superpowers `.codex-plugin/plugin.json` (production-verified).
+**Source:** the cited comparison source's `.codex-plugin/plugin.json`
+(historically described as production-verified; not live Lintel acceptance).
 
 **Manifest location:** `.codex-plugin/plugin.json`
 
@@ -91,7 +93,7 @@ This document captures the plugin-manifest format research per CLI as of v3 plan
     "developerName": "jokerman89",
     "category": "Coding",
     "capabilities": ["Interactive", "Read", "Write"],
-    "defaultPrompt": ["Help me with a new customer engagement.", "Run /qa on my branch."],
+    "defaultPrompt": ["Help me with a bounded task.", "Run /li:verify on my branch."],
     "websiteURL": "...",
     "privacyPolicyURL": "...",
     "termsOfServiceURL": "...",
@@ -118,7 +120,8 @@ This document captures the plugin-manifest format research per CLI as of v3 plan
 
 ## 3. Cursor
 
-**Source:** obra/superpowers `.cursor-plugin/plugin.json` (production-verified).
+**Source:** the cited comparison source's `.cursor-plugin/plugin.json`
+(historically described as production-verified; not live Lintel acceptance).
 
 **Manifest location:** `.cursor-plugin/plugin.json`
 
@@ -155,7 +158,8 @@ This document captures the plugin-manifest format research per CLI as of v3 plan
 
 ## 4. Gemini CLI
 
-**Source:** obra/superpowers `gemini-extension.json` (production-verified).
+**Source:** the cited comparison source's `gemini-extension.json`
+(historically described as production-verified; not live Lintel acceptance).
 
 **Manifest location:** `gemini-extension.json` (at repo root, not in subdirectory!)
 
@@ -184,7 +188,8 @@ gemini extensions install https://github.com/jokerman89/jokerman-lintel
 
 ## 5. OpenCode
 
-**Source:** obra/superpowers `.opencode/INSTALL.md` + `.opencode/plugins/` (production-verified).
+**Source:** the cited comparison source's `.opencode/INSTALL.md` + `.opencode/plugins/`
+(historically described as production-verified; not live Lintel acceptance).
 
 **Manifest location:** `.opencode/INSTALL.md` (markdown-based install instructions) + per-skill plugins in `.opencode/plugins/`.
 
@@ -208,7 +213,7 @@ The operator literally tells OpenCode to fetch and follow the INSTALL.md. OpenCo
 
 ## 6. Factory Droid
 
-**Source:** Superpowers README + droid CLI docs.
+**Source:** the cited comparison source's README + Droid CLI docs.
 
 **Install command:**
 ```bash
@@ -226,7 +231,7 @@ droid plugin install lintel@lintel
 
 ## 7. GitHub Copilot CLI
 
-**Source:** Superpowers README.
+**Source:** the cited comparison source's README.
 
 **Install command:**
 ```bash
@@ -261,10 +266,10 @@ For v3 we target **Copilot CLI** (has plugin system). VSCode Copilot remains via
 | CLI | Manifest format | Manifest location | Marketplace | v3 status |
 |---|---|---|---|---|
 | Claude Code | JSON | `.claude-plugin/plugin.json` | `claude-plugins-official` (curated) + team via `/plugin marketplace add` | ✓ DONE — pattern verified |
-| Codex CLI/App | JSON with `interface{}` | `.codex-plugin/plugin.json` | OpenAI marketplace | ✓ Pattern verified (superpowers) |
-| Cursor | JSON | `.cursor-plugin/plugin.json` | Cursor marketplace | ✓ Pattern verified (superpowers) |
-| Gemini CLI | JSON (tiny) | `gemini-extension.json` (root) | Gemini extensions | ✓ Pattern verified (superpowers) |
-| OpenCode | Markdown | `.opencode/INSTALL.md` | None (URL fetch) | ✓ Pattern verified (superpowers) |
+| Codex CLI/App | JSON with `interface{}` | `.codex-plugin/plugin.json` | OpenAI marketplace | ✓ Historical pattern comparison |
+| Cursor | JSON | `.cursor-plugin/plugin.json` | Cursor marketplace | ✓ Historical pattern comparison |
+| Gemini CLI | JSON (tiny) | `gemini-extension.json` (root) | Gemini extensions | ✓ Historical pattern comparison |
+| OpenCode | Markdown | `.opencode/INSTALL.md` | None (URL fetch) | ✓ Historical pattern comparison |
 | Copilot CLI | JSON (unknown schema) | `.copilot-plugin/plugin.json` (inferred) | `copilot plugin marketplace add` | ⚠ Need to verify exact schema |
 | Factory Droid | JSON (unknown schema) | `.droid-plugin/plugin.json` (inferred) | `droid plugin marketplace add` | ⚠ Need to verify exact schema |
 | Copilot VSCode | Markdown | `.github/copilot-instructions.md` | n/a (shim) | ✓ v2 fallback pattern |
@@ -299,7 +304,7 @@ For v3 we target **Copilot CLI** (has plugin system). VSCode Copilot remains via
 ## 11. Constraints we accept
 
 - **MS-internal first.** Public marketplace submission requires MS legal review. Default v3.0.0 ships only the team-marketplace pattern (`/plugin marketplace add jokerman89/jokerman-lintel`). Public submission deferred to v3.x post-legal-clear.
-- **Per-CLI UX differences accepted.** Skill-namespacing differs (Claude `/li:qa` vs others), hook formats differ, subagent mechanisms differ. We document, don't normalize.
+- **Per-CLI UX differences accepted.** Skill-namespacing differs (current Claude example: `/li:verify`), hook formats differ, subagent mechanisms differ. Document the actual host rather than inventing a universal binding.
 - **Schema-drift over time.** CLIs update plugin specs. We commit to verify per-CLI version every release.
 
 ---
