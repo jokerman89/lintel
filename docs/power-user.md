@@ -22,20 +22,21 @@ is an explicit choice.
 
 ### Warming
 
-Six skills load context deliberately. Each reports the tokens it added and appends the event to
-`.claude/runtime/state/context-budget.md`.
+Context loading uses one local selection skill plus explicit URL and engagement workflows.
+Each reports estimated tokens added and records the event in `.claude/runtime/state/context-budget.md`.
 
 | Skill | Loads |
 |---|---|
-| `/li:context-warm <paths>` | Named files or globs. The base the others build on. `--pattern` warms the repo's declared high-leverage set instead of an explicit target. |
-| `/li:context-warm-related <topic>` | Heuristic search across the working tree for the top N files matching a topic. |
-| `/li:context-warm-adrs <topic>` | Decision records from `.claude/decisions/` whose title or body matches a topic. |
-| `/li:context-warm-sessions [N]` | The last N session checkpoints on the current branch. |
+| `/li:context-warm --path <file>` / `--glob <pattern>` | Named files or globs through the safe-selection helper. `--pattern` selects the repo's declared high-leverage set. |
+| `/li:context-warm --related <topic>` | Topic search within explicitly bounded selectors, not an unrestricted repository or home scan. |
+| `/li:context-warm --adrs <topic>` | Matching decision records; `--accepted-only` and `--include-deprecated` make status selection explicit. |
+| `/li:context-warm --sessions [N]` | The last 1–5 session checkpoints on the current branch; default 3. |
 | `/li:context-warm-from-url <url>` | Fetches a documentation page or reference into context. |
 | `/li:context-warm-customer <name>` | Loads a separate engagement repo's instruction file, decisions and recent commits. |
 
-Those six are the complete set. If you have seen another `context-warm-*` name in older notes, it
-does not exist as a skill.
+Related-file, decision-record and checkpoint loading are modes, not separate local skill
+entrypoints. Selection boundaries and heading-scoped extraction still apply; a new command name
+does not permit reading a different repository or private source.
 
 Warm before PLAN when discovery named specific files, and before REVIEW when the artifact under
 review references code that is not yet in the window. Warming after the fact costs the same tokens
@@ -45,7 +46,7 @@ and buys less.
 
 `/li:context-budget` breaks utilization down by source and recommends warming or cooling.
 `/li:context-budget --watch` runs the threshold check instead: soft at roughly 50k tokens or 80 tool
-calls, hard at 80k or 130, and it recommends `/li:clean` or `/li:context-save` when a line is crossed.
+calls, hard at 80k or 130, and it recommends `/li:clean` or `/li:pause` when a line is crossed.
 
 Be clear about what this is: the numbers are **estimated** by summing the deltas in the budget log
 plus a per-turn guess for conversation history. It is not a reading of the CLI's actual context
@@ -56,8 +57,8 @@ accounting. Treat it as a trend line, not a gauge.
 `/li:context-cool` exists because a context window is append-only — nothing can retract tokens
 mid-session. So cooling marks warmed sources as ignorable in
 `.claude/runtime/state/context-ignore.md`, which downstream skills and subagents respect, and clears
-the budget tracking. The only true reduction is the round trip: `/li:context-save`, restart the
-session, `/li:context-restore`, then warm back only what you still need.
+the budget tracking. The only true reduction is the round trip: `/li:pause`, restart the
+session, `/li:resume --from <checkpoint>`, then warm back only what you still need.
 
 ### Raising the ceiling
 
@@ -72,18 +73,28 @@ substitute for warming the right ten files.
 
 Two independent stores hold "where we were", and it matters which one you left behind.
 
-**Checkpoints** come from `/li:context-save`. The skill writes
+**Checkpoints** come from `/li:pause`. The skill retains the existing storage grammar:
 `.claude/runtime/sessions/<branch>/<YYYYMMDD-HHMMSS>-<slug>[-<label>]-context-save.md` containing
 what the task is, what got done, what is in flight, what is next, decisions taken, **failed attempts**
 (so the next session does not retry them), and files touched. Pass a short label to name the
-snapshot. `/li:context-restore` reads the newest checkpoint for the current branch, re-reads every
-file it lists, and diffs the commits that landed since it was written.
+snapshot. `/li:resume --from <checkpoint>` selects a saved checkpoint and reconciles its recorded
+files and revision with the current repository. Shared or historical sources require their
+existing explicit authorization before `--explicit` is used. Old saves remain readable and
+discoverable; a retired skill name or filename suffix is not a reason to delete them.
 
 **Cycle state** is `.claude/runtime/state/00-state.md` — the phase ledger a running cycle appends to.
 
-`/li:resume` checks both. A session that ended mid-cycle leaves cycle state; one that ended with a
-save leaves a checkpoint and no cycle state. Resume discovers whichever exists and either routes you
-to the next phase or hands off to `/li:context-restore`.
+Ordinary `/li:resume` preserves the selected work map, cycle ledger and job precedence. A checkpoint
+is a continuity source, not permission to replace that selected work with a newer unrelated save.
+Use `--from` for an explicitly chosen checkpoint, retaining original task IDs, profile references,
+failed attempts and outstanding review.
+
+The existing `/li:resume --from <step>` override also remains: recognized cycle phases and exact
+step IDs in the selected job use their normal readiness and authority checks. Otherwise the value
+selects a checkpoint path. If a checkpoint name collides with a step, use an explicit relative or
+absolute path (for example `.\BUILD` on Windows). On other platforms the same prefix is
+`./BUILD`. `--explicit` applies only to authorized shared
+checkpoint reads, not to bypassing a job's readiness gate.
 
 **Continuous checkpointing** is off by default. Set `checkpoint_mode: continuous` in
 `~/.lintel/profile.yaml` and BUILD commits a work-in-progress checkpoint after each completed task,
@@ -179,8 +190,9 @@ them into the preset list at invocation. Nothing about audience or compliance is
 ## Code freeze
 
 `/li:code-freeze <paths> --reason "<why>" --until <session|eod|1h|timestamp>` records advisory
-do-not-modify metadata in `.claude/runtime/state/code-freeze/<session-id>.yaml`, and
-`/li:code-unfreeze` removes entries from it. Both actions record an audit observation.
+do-not-modify metadata in `.claude/runtime/state/code-freeze/<session-id>.yaml`.
+`--list` inspects it, `--lift <exact-path...>` removes selected entries and `--lift --all`
+removes all entries in the selected session scope. Changes retain their audit observations.
 
 The honest description: this is **cooperative metadata, not a filesystem lock**. Nothing refuses a
 matching write on its own and nothing enforces the freeze: BUILD and review are expected to honor
@@ -188,11 +200,10 @@ the recorded scope through their normal authorization checks. `--until` records 
 intent; no timer or cleanup removes an entry. Permanent policy belongs in a frozen-zones section of
 the repo instruction file instead.
 
-A separate `frozen-zone-warn` hook exists but is warn-only, opt-in and not auto-registered. It does
-not read the metadata above. It reads two sources of its own: prefix matches from the legacy
-session file `$LINTEL_HOME/freeze/${LINTEL_SESSION_ID:-default}.yaml`, and substring matches from
-the current directory's `CLAUDE.md` "Frozen zones" section. A match prints a warning that names
-`/li:code-unfreeze`; the edit proceeds.
+The separate `frozen-zone-warn` hook reads this repository state when explicitly activated,
+alongside its retained legacy-session and instruction-file sources. It remains warn-only,
+opt-in and unregistered by default. A match recommends `/li:code-freeze --lift <path>`;
+it does not block the edit or override an operator's frozen scope.
 
 Worth it when a refactor has surgical scope, or when the agent has already wandered once.
 
@@ -234,7 +245,7 @@ Three files carry knowledge across sessions, all under `<repo>/.claude/memory/`:
 
 | File | Holds | Write when |
 |---|---|---|
-| `lessons.md` | Rules learned from corrections | After any correction, via `/li:learn` |
+| `lessons.md` | Rules learned from corrections | After any correction, via `/li:lessons-add` |
 | `working-state.md` | Durable cross-session state — what is in flight and why | When durable state changes |
 | `personas.md` | Operator calibration | When you learn how someone actually wants to be worked with |
 
@@ -277,7 +288,9 @@ Naming these is cheaper than you discovering them:
 - **`/li:code-freeze` is advisory metadata.** Nothing enforces it: no skill refuses a matching write on its own, and the filesystem does not block one. Honoring it is cooperative.
 - **The default pack ships no roles.** The role machinery works; the content is yours to write.
 - **The audit trail is local and gitignored.** It is not a shared compliance artifact.
-- **Lintel does not install, vendor, or update third-party tools.** The installer copies Lintel's own files and nothing else. There is no uninstall script; removal means deleting `~/.lintel/` and the plugin.
+- **Installation does not provision third-party tools.** Retained bundled resources still carry
+  their required notices. Use the [owned installation and recovery procedure](native-installation.md)
+  for updates; never treat an entire home directory, user config, packs or receipts as disposable.
 
 ---
 

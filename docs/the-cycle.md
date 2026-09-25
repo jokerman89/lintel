@@ -63,9 +63,11 @@ against.
 
 ### 3. DEFINE — lock the design
 
-The forcing-question phase. DEFINE clarifies intent, locks premises, forces alternatives to be
-stated rather than assumed, and picks the wedge — the specific first cut of the problem that the
-rest of the cycle builds. It runs under the active role's lens.
+DEFINE clarifies the requested outcome, affected users, constraints, risks and acceptance, then
+selects a bounded first delivery. It reads existing approved work before asking for missing
+decisions. Engineering is the default lens; `--lens strategy` is an explicit choice, not a
+mandatory business interview. Rough ideas receive exploratory intake, while an already bounded
+change can use `--mode minimal` without dropping required authority, risk or review checks.
 
 **Produces** an **approved** design document. Not a draft.
 
@@ -102,6 +104,10 @@ PLAN writes the **cold-executor trio**, all three born together:
 | `prompt.md` | enough context for a fresh agent with no history to execute it |
 
 Task granularity is hard-checked. PLAN also produces the cost estimate that the pre-BUILD gate uses.
+`/li:inspect --target plan --lens engineering` checks the plan and every leaf; add the design or
+devex lens when relevant. Inspection findings feed the existing approval and content-bound
+review procedure. A score or report heading is not review clearance. ANALYZE remains the
+separate cross-artifact consistency check.
 
 **Produces** the trio, plus `tasks_count` and a labelled token estimate written to the state ledger.
 When an approved plan has independent ownership domains, PLAN may offer the swarm execution profile.
@@ -143,8 +149,9 @@ of that size.
 2. **Code quality** — would a staff engineer approve this?
 3. **Pack compliance** — does it satisfy the active pack's gates?
 
-A P1 finding blocks SHIP. The review is deliberately adversarial: a reviewer that agrees with the
-implementer is not a review.
+A P1 finding blocks SHIP. Required independent review uses a separately attributable reviewer;
+implementer self-review or a change of role label cannot satisfy it. `/li:cross-check` provides
+an additional independent perspective only when an actual permitted reviewer is available.
 
 For a swarm, per-lane reviews must pass before fan-in, but they do not close the initiative. REVIEW
 runs again against the reconciled integrated tree so interactions between independently correct
@@ -176,7 +183,8 @@ default branch is never the default path.
 
 The phase that makes the next session cheaper. CAPTURE records lessons from any correction, drafts a
 decision record for any non-trivial decision, appends the evolution log, updates working state, and
-reaffirms the cold-executor trio against what was actually built.
+reaffirms the cold-executor trio against what was actually built. It also records the retrospective
+and delivery summary without claiming that a skipped SHIP phase published anything.
 
 **Produces** lesson entries, an ADR, evolution-log and working-state updates.
 
@@ -212,14 +220,17 @@ time. A no-subagent host uses the main agent or exports replayable briefs and mu
 self-review as independent. See [swarming work](concepts/swarming-work.md) for selection, inspection,
 recovery and close procedures.
 
-**Composite shortcuts** are pure delegators to a subset:
+Use explicit cycle ranges or a documented preset for a shorter route:
 
 ```
-/li:fix                SENSE + BUILD + REVIEW + SHIP
-/li:research           SENSE + DEFINE + DISCOVER
-/li:plan-and-build     PLAN + BUILD
-/li:review-and-ship    REVIEW + SHIP + CAPTURE
+/li:fix                              SENSE + BUILD + REVIEW + SHIP
+/li:cycle --mode research-dive        SENSE + DEFINE + DISCOVER
+/li:cycle --from PLAN --to BUILD      PLAN + BUILD
+/li:cycle --from REVIEW --to CAPTURE  REVIEW + SHIP + CAPTURE
 ```
+
+Ranges preserve the selected work map, approval gates and resume position. They do not authorize
+repair, publication or deployment merely because a phase appears in the range.
 
 ---
 
