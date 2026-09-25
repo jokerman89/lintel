@@ -61,7 +61,8 @@ receipts, no-Python bare installation, native path identity and exact strict CI 
 | health | doctor retains nonduplicate installed-health checks |
 | pair-agent, careful | native delegation/swarm and explicit confirmation/rollback guidance |
 | code-unfreeze | code-freeze --lift path / --lift --all / --list |
-| research, plan-and-build, review-and-ship | documented cycle ranges, continuity routing updated |
+| plan-and-build, review-and-ship | documented cycle ranges, continuity routing updated |
+| research (retained) | kept as a minimal native shortcut to `/li:cycle --mode research-dive`: an optional non-legacy entry that published guidance still uses; no capability loss |
 | help, v4-migrate, personas-rotate | catalog/welcome; retire obsolete migration/persona wrapper after inspection |
 
 ## Constraints

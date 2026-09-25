@@ -36,7 +36,7 @@ devex-review plan-tune autoplan qa qa-only investigate codex learn lessons skill
 document-generate context-save context-restore context-warm-related context-warm-adrs
 context-warm-sessions browse scrape open-managed-browser setup-browser-cookies make-pdf
 design-consultation design-shotgun design-html design-review retro landing-report health
-pair-agent careful code-unfreeze research plan-and-build review-and-ship help v4-migrate
+pair-agent careful code-unfreeze plan-and-build review-and-ship help v4-migrate
 personas-rotate match context-budgetwatch context-snapshot context-dump context-warmup
 role-activate role-deactivate role-rotate role-frame role-deep-dive role-update
 ta-api-design ta-boundary-review ta-complexity-audit ta-contract-collision

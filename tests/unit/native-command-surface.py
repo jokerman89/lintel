@@ -51,6 +51,30 @@ class CommandSurfaceTests(unittest.TestCase):
             "Use /li:verify, /li-diagnose and `li-cross-check`.\n"
             "Read [the plan](skills/plan/SKILL.md) and `skills/review/SKILL.md`.\n"), [])
 
+    def test_retained_research_shortcut_resolves_but_retired_ranges_do_not(self):
+        self.assertNotIn("research", guard.RETIRED_COMMANDS)
+        source = (ROOT / "skills" / "research" / "SKILL.md").read_text(encoding="utf-8")
+        self.assertIn("\nname: research\n", source)
+        self.assertIn("/li:cycle --mode research-dive", source)
+        self.assertIn("skips PLAN, BUILD, REVIEW, SHIP and CAPTURE", source)
+        self.assertIn("not implementation approval", source)
+        cycle = (ROOT / "skills" / "cycle" / "SKILL.md").read_text(encoding="utf-8")
+        preset = cycle[cycle.index("\nresearch-dive:"):].split("\n\n")[0]
+        phases = re.search(r"\n  phases: \[([^\]]*)\]", preset)[1].split(", ")
+        skipped = re.search(r"\n  skip: \[([^\]]*)\]", preset)[1].split(", ")
+        self.assertEqual(phases, ["SENSE", "DEFINE", "DISCOVER"])
+        self.assertTrue({"BUILD", "SHIP"} <= set(skipped))
+        guide = (ROOT / "presentations/tech-shots-2026-09-25/show/field-guide.html").read_text(encoding="utf-8")
+        self.assertIn("/li:research", guide.splitlines()[3])
+        self.skill("cycle")
+        self.write("skills/research/SKILL.md", source)
+        self.assertEqual(self.findings("Run /li:research for the survey.\n"), [])
+        for retired in ("/li:plan-and-build", "/li:review-and-ship", "/li:office-hours"):
+            self.assertTrue(self.findings(f"Run {retired} next.\n"), retired)
+        (self.root / "skills" / "research" / "SKILL.md").unlink()
+        self.assertTrue(any(item.code == "missing-command"
+                            for item in self.findings("Run /li:research for the survey.\n")))
+
     def reviewed_span_fixture(self):
         self.skill("status")
         source = "# Original record\n\n## Recorded field\nOriginal /li:qa invocation.\n## Next field\nRetained record boundary.\n"
