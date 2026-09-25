@@ -3,8 +3,8 @@ name: CI
 on:
   push:
     branches: [main]
+  # No branch filter: stacked pull requests whose base is another feature branch also get CI.
   pull_request:
-    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -15,24 +15,44 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  plan:
+    name: Plan suite matrix
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+      tier: ${{ steps.plan.outputs.tier }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+          # The full history holds the pull request's base and head, so their merge base is computable.
+          fetch-depth: 0
+      - name: Choose operating systems from the event, label and diff (ADR-0037)
+        id: plan
+        # Ubuntu always runs every part. Push, dispatch, the ci:full-matrix label, a platform-sensitive
+        # diff or any failure to compute the diff add macOS and Windows.
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PR_LABELS: ${{ toJSON(github.event.pull_request.labels.*.name) }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: >-
+          python3 bin/li-ci-matrix.py --event "$EVENT_NAME" --labels "$PR_LABELS"
+          --base "$BASE_SHA" --head "$HEAD_SHA"
+          --github-output "$GITHUB_OUTPUT" --summary "$GITHUB_STEP_SUMMARY"
+
   suite:
     name: Suite (${{ matrix.os }}, ${{ matrix.part }})
+    needs: plan
     runs-on: ${{ matrix.os }}
     # Sized from local Windows timings (ADR-0032); the integration shard holding the Copilot kit is the longest.
     timeout-minutes: ${{ matrix.timeout }}
     strategy:
       fail-fast: false
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        part: [unit-1, unit-2, integration-1, integration-2, integration-3, integration-4, other]
-        include:
-          - { part: unit-1, scope: unit, shard: 1/2, timeout: 180 }
-          - { part: unit-2, scope: unit, shard: 2/2, timeout: 180 }
-          - { part: integration-1, scope: integration, shard: 1/4, timeout: 300 }
-          - { part: integration-2, scope: integration, shard: 2/4, timeout: 300 }
-          - { part: integration-3, scope: integration, shard: 3/4, timeout: 300 }
-          - { part: integration-4, scope: integration, shard: 4/4, timeout: 300 }
-          - { part: other, scope: other, shard: 1/1, timeout: 60 }
+      # bin/li-ci-matrix.py owns the parts, shards and timeouts of ADR-0032 and selects the operating
+      # systems per ADR-0037: all three, or Ubuntu alone for a documentation-only pull request.
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
     defaults:
       run:
         shell: bash
