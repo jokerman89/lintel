@@ -80,8 +80,8 @@ to current methods and explains non-destructive updates. A few boundaries matter
 - `generate-pdf` keeps its converter and browser-print writer. Lintel ships no PDF reader
   ([ADR-0033](../.claude/decisions/0033-remove-document-format-acceptance-and-pdf-reader.md)),
   so produced text, pages and rendering stay unverified unless an authorized inspection
-  operation is available. The former `make-pdf` entry is folded into `generate-pdf`, which now
-  carries its print options.
+  operation is available. The former standalone PDF-rendering entry is folded into
+  `generate-pdf`, which now carries its print options.
 
 ### `agents/` — delegated roles
 
