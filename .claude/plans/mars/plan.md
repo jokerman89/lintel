@@ -15,7 +15,7 @@ timing, version assignment and delivery. Go Live published the branch as PR #105
 - **D1** (review-method-design.md) is adopted as designed: in panel mode REVIEW records its
   decision through the existing content-bound path from the adjudicated panel result.
   MARS alone never clears anything; standalone MARS stays advisory.
-- `define` and `plan-eng-review` are being rewritten or removed by the in-flight native
+- `define` and the former plan engineering review are being rewritten or removed by the in-flight native
   planning consolidation lane, and `CodeReviewer` by the quality lane. Their MARS hooks are
   specified in integration.md for the consolidated files instead of edited here.
 - The drift guard is scoped to REVIEW's reviewer prompts. A repository-wide "no rubric

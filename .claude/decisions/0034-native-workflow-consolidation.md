@@ -57,11 +57,12 @@ Parent-reserved presentation publication and the separately owned upstream recor
 follow-up remain outside this change.
 
 Amended 2026-09-25: dated internal records under `.claude/engineering/` and `.claude/plans/`
-that still name former workflows are declared by exact path, optionally from one exact heading,
-with a rationale in `.claude/plans/legacy-cleanup/historical-records.json`. The command-surface
-guard reports each of their references as a HISTORICAL observation by path and line instead of
-failing, so byte-bound records stay unmodified. Entries outside those trees, malformed entries
-and stale entries fail. Current skills, documentation, decisions, memory and root files remain
+that still name former workflows are declared by exact path, exact reference count and
+rationale, optionally bounded by exact headings, in
+`.claude/plans/legacy-cleanup/historical-records.json`. The command-surface guard reports each
+of their references as a HISTORICAL observation by path and line instead of failing, so
+byte-bound records stay unmodified, and its summary states the historical count. Entries outside
+those trees, malformed entries and any count mismatch (a new or removed reference) fail. Current skills, documentation, decisions, memory and root files remain
 strict; the one live presentation route was corrected rather than declared.
 
 ## Alternatives
