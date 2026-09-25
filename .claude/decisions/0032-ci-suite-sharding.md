@@ -5,7 +5,8 @@
 - **Deciders:** coordinator88 (P15 final delivery), under the operator's "drive to finish"
   authorization
 - **Supersedes:** —
-- **Superseded by:** —
+- **Superseded by (in part):** ADR-0037, which selects the operating systems of a pull request's
+  suite matrix. The parts, shards, timeouts and steps below still apply.
 
 ## Context
 

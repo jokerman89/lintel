@@ -260,3 +260,25 @@ outputs and these open gates. Both retained reviewers assess that immutable delt
 parallel with hosted CI; source-spec, quality, strict QA/current routing and actual
 permission remain separate merge gates. Client cleanup follows #104; downstream
 documentation PRs follow both. No current task is completed by this handoff.
+
+## PR stabilization pass (2026-09-25 evening)
+
+The operator asked a new session to fix every open PR problem, shorten PR CI and use a
+swarm. That session's coordinator changes on this branch:
+
+- Merged main `af94ff74` (MARS, PR #105). Conflicts: both lesson series kept (L-056 to
+  L-059), MARS cycle section kept beside the range guidance, canonical catalog comparison
+  kept in the Copilot kit test, trigger-form list gained `mars`; generated files regenerated.
+- The guard's remaining failures were dated internal records, 22 of them byte-bound by
+  reviewed spans. They are now declared by exact path with a rationale in
+  [historical-records.json](historical-records.json) and reported as HISTORICAL
+  observations (ADR-0034 amendment). Current surfaces stay strict: merged MARS/review
+  references, ADR-0033/ADR-0036 wording and the open S4L item were corrected instead.
+- The deferred presentation route was edited on this branch after the operator's
+  fix-all-PR-problems instruction; the operator was asked and was unavailable, so the edit
+  is flagged in the PR for review. Nothing is published until an authorized merge to main.
+- Local evidence: guard PASS (0 findings, 695 HISTORICAL observations), guard unit cases
+  76/76, shape scope 42/42, MARS/review-method/planning/quality unit files pass. The full
+  strict hosted matrix is still the required gate; it is not replaced by these results.
+- Downstream docs PRs #94-#100 are stacked on this branch; CI tiering arrives from the
+  separate CI PR. Merge order: CI PR, then #104, then the docs PRs.
