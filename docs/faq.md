@@ -142,9 +142,10 @@ skill through the Universal adapter. Use `verify` for read-only testing (repairs
 ## A skill I used before is missing. Where did it go?
 
 Related entrypoints were consolidated into native methods with explicit modes; capabilities were
-kept. For example `qa` became `verify`, `investigate` became `diagnose`, `context-save` became
-`pause`, and `research`, `plan-and-build` and `review-and-ship` became cycle ranges. Old names are
-not executable aliases. The [native workflow migration](migrations/2026-09-25-native-workflows.md)
+kept. For example QA runs through `verify`, failure investigation through `diagnose` and context
+saving through `pause`. The former research shortcut is `/li:cycle --mode research-dive`, and the
+composite build and delivery shortcuts are cycle ranges such as `--from PLAN --to BUILD` and
+`--from REVIEW --to CAPTURE`. Old names are not executable aliases. The [native workflow migration](migrations/2026-09-25-native-workflows.md)
 maps every former entry and explains how to update an owned installation without losing saved work.
 
 ## What if the agent ignores the instructions?
