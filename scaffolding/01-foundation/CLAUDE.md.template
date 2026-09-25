@@ -19,11 +19,18 @@ Suggested mode: `{{MODE}}`. Record the actual build, lint and test commands, def
 required review checks and deployment boundaries here. Use a feature branch, atomic Conventional
 Commits and a reviewed pull request. Record non-trivial decisions under `.claude/decisions/`.
 
-Use native skills where installed: Copilot core skills use `/li-plan`, `/li-build`, `/li-review`,
-`/li-cycle` and `/li-resume`; Claude plugin skills use `/li:<name>`. Use the client discovery view
-or explicit skill paths when needed. Specialist architecture, data, security, operations and
-testing workflows are available from the canonical catalog when installed. Plan review,
-investigation, testing, context warming, decision capture and save/restore are on-demand workflows.
+Use native skills where installed. Invocation differs per client: generated Copilot, Codex and
+Gemini adapters expose `li-<skill>` wrappers (for example `li-plan`, `li-build`, `li-review`,
+`li-cycle` and `li-resume`); the Claude plugin uses `/li:<skill>`; other clients read the trusted
+`skills/<skill>/SKILL.md` file through the Universal adapter. Use the client discovery view or
+explicit skill paths when needed. Specialist architecture, data, security, operations and
+testing workflows are available from the canonical catalog when installed. Canonical on-demand
+routes include `inspect --target plan|repo`, `diagnose`, `verify`, `context-warm`, `pause`
+and `resume --from <checkpoint>`. Verification is read-only unless repair is explicitly
+authorized; checkpoint names and old saved data remain compatible. Use the trusted canonical
+skill file if a native wrapper is unavailable.
+`resume --from` also accepts a cycle phase or job step; use a path prefix such as `./BUILD`
+when a saved checkpoint name matches a phase.
 Do not claim every catalog entry or hook is native to every host.
 
 ## Project-specific agents and conventions

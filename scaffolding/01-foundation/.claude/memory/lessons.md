@@ -13,7 +13,7 @@ Each lesson is one level-two Markdown heading made of its ID, an em dash and a s
 
 Write the rule so it works outside the specific incident. "Never do X against live without Y" is better than "at Task 0 I ran the wrong command".
 
-IDs are allocated as one more than the highest existing ID (L-001 for an empty file), compared numerically and never reused. New lessons are appended at the end, oldest first. Record them with `/li:learn` (`bin/li-lessons.py`) so allocation and the conditional write stay mechanical.
+IDs are allocated as one more than the highest existing ID (L-001 for an empty file), compared numerically and never reused. New lessons are appended at the end, oldest first. Record them with the `lessons-add` skill (`bin/li-lessons.py`) so allocation and the conditional write stay mechanical.
 
 ---
 
