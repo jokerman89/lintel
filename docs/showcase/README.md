@@ -8,7 +8,8 @@ for adoption and the [skill catalog](../../skills/CATALOG.md) for the canonical 
 
 The page combines repository-derived counts with a short system map and architecture overview.
 It is a snapshot of its generation source, not proof that every catalog item runs on every client.
-The [Copilot guide](../copilot.md) defines native integration scope, and
+The [multi-CLI guide](../multi-cli.md) and [client adapters](../client-adapters.md) define
+per-client integration scope, and
 [enterprise adoption](../enterprise-adoption.md) defines the evidence needed for a rollout.
 
 ## Open it
@@ -30,6 +31,10 @@ bash bin/li-wiki-gen --check
 `bin/li-wiki-gen` and `lib/wiki-gen.sh` own the generated copy and layout. Hand edits to the HTML
 are overwritten. Source changes must be regenerated and reviewed before release. The check
 reports drift against the repository; it does not verify runtime behavior.
+
+After a [workflow consolidation](../migrations/2026-09-25-native-workflows.md), regenerate from
+the integrated canonical sources rather than editing old command names or counts in the HTML.
+An isolated documentation update does not make the generated snapshot current.
 
 The output embeds its styling and requires no external assets. Hyperlinks navigate to the
 referenced documentation when opened. See [wiki generation](../concepts/wiki-generation.md)

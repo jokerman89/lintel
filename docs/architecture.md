@@ -45,21 +45,42 @@ publishing the harness possible at all.
 
 ### `skills/` — what your CLI can invoke
 
-Canonical skills live at `skills/<name>/SKILL.md`. Claude plugin workflows use `/li:<name>`; the Copilot repository kit exposes native core adapters as `li-<name>`. They fall into clusters:
+Canonical skills live at `skills/<name>/SKILL.md`, one source for every client. The invocation
+form depends on the adapter: `/li:<name>` in the Claude plugin, generated `li-<name>` wrappers in
+the Copilot, Codex and Gemini repository adapters, or an explicit file handoff through the
+Universal adapter. The tree holds 95 skill entries (directories with a `SKILL.md`). They fall
+into clusters:
 
 | Cluster | What it holds |
 |---|---|
-| **Cycle** | the nine phase skills, the `cycle` orchestrator, the opt-in `swarm` execution profile, four composite shortcuts, plus `resume`, `status`, `jobs` |
+| **Cycle** | the nine phase skills, the `cycle` orchestrator with explicit phase ranges, the `fix` shortcut, the opt-in `swarm` execution profile, plus `resume`, `status`, `jobs` |
 | **Engineering modules** | `ta`, `da`, `sc`, `dh`, `tq` — each an orchestrator plus sub-skills — and `full-engineering-pass`, which composes all five in dependency order |
 | **Generate** | a shared content pipeline (outline → write → design → QA) feeding per-format renderers |
 | **Frontend** | a design-director orchestrator over typography, motion and shader sub-skills, each emitting a JSON contract, plus a six-dimension review gate |
-| **Context** | warming (load specific files, related files, prior sessions, decision records), budget visibility, save and restore |
-| **Session harness** | `doctor`, `health`, `scaffold`, `catalog`, `uniformity`, `learn`, `lessons`, `adr-new`, `capture`, `audit`, `code-freeze` |
+| **Context** | `context-warm` modes for files, related sources, prior sessions and decision records; budget visibility; `pause` and `resume` |
+| **Session harness** | `doctor`, `scaffold`, `catalog`, `uniformity`, `lessons-add`, `lessons-surface`, `adr-new`, `capture`, `audit`, `code-freeze` |
 | **Pack and role** | `pack-create`, `pack-switch`, `pack-list`, `pack-validate`, and the role lifecycle |
-| **Plan review** | `office-hours`, `plan-eng-review`, `plan-ceo-review`, `plan-design-review`, `plan-devex-review` |
+| **Intake and inspection** | `define` for task-relevant requirements and optional strategy; `inspect` with plan/repo targets and engineering/design/devex lenses |
+| **Verification and diagnosis** | `verify` with read-only default and explicitly authorized repair, `diagnose`, and `cross-check` with an actual independent reviewer |
+| **Browser and documents** | `web-session` browse/scrape/open/cookies modes, `generate-docs`, and the retained per-format document providers |
 
 `skills/CATALOG.md` is generated from skill frontmatter on push, never hand-curated — the same
 anti-drift principle as the capability table.
+
+Consolidation changes entrypoints, not accepted evidence, ownership or provider contracts.
+The [native workflow migration](migrations/2026-09-25-native-workflows.md) maps older entrypoints
+to current methods and explains non-destructive updates. A few boundaries matter in practice:
+
+- `resume --from <phase|job-step>` keeps its existing override; `resume --from <checkpoint>` reads
+  a `pause` checkpoint as continuity context. Prefix a path (for example `./BUILD`) when a
+  checkpoint name would collide with a phase.
+- `code-freeze` adds, lists and lifts advisory freeze paths (`--lift <path>`, `--lift --all`,
+  `--list`); it never changes host write permission.
+- `generate-pdf` keeps its converter and browser-print writer. Lintel ships no PDF reader
+  ([ADR-0033](../.claude/decisions/0033-remove-document-format-acceptance-and-pdf-reader.md)),
+  so produced text, pages and rendering stay unverified unless an authorized inspection
+  operation is available. The `make-pdf` entry remains until its print options join
+  `generate-pdf`.
 
 ### `agents/` — delegated roles
 
