@@ -598,6 +598,7 @@ def observation_fields(value: object) -> list[tuple[tuple, str, str]]:
                     "boundary_assessment",
                     "counterexamples", "current_use_inside", "narrowing_suggestion",
                     "source_context_sha256", "source_git_blob", "bounded_narrowing",
+                    "reason", "decision_candidate",
                 ), category, reason)
 
     if (isinstance(value.get("review_type"), str) and isinstance(value.get("reviewer"), dict)

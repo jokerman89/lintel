@@ -170,6 +170,11 @@ class CommandSurfaceTests(unittest.TestCase):
         del report["current_use"]
         report["decisions"][0]["import"] = "skills/qa/SKILL.md"
         self.assertTrue(self.findings(json.dumps(report), path))
+        del report["decisions"][0]["import"]
+        report["decisions"][0]["reason"] = "The window records the original /li:qa entry"
+        self.assertEqual(self.findings(json.dumps(report), path), [])
+        report["decisions"][0]["decision"] = "APPROVED"
+        self.assertTrue(self.findings(json.dumps(report), path))
 
     def test_framing_acknowledgement_reasons_do_not_hide_new_routing(self):
         path = ".claude/plans/legacy-cleanup/framing-ack.json"
