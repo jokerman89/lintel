@@ -6,8 +6,10 @@ addendum passes the CI-repair delta up to `ed91ef4f` and binds CI to it
 first hosted strict runs found portability defects, which the coordinator repaired (see "Delivery
 CI"). On that head every CI job passed except the three that ran `document-pdf`, which needed an
 undeclared `pypdf`. On 2026-09-25 the operator ordered both remaining blockers removed from Lintel
-(ADR-0033): the pypdf-based PDF reader, and the blocked A15.1–A15.4 items. The removal needs its
-own strict CI run and an A23.5 addendum.
+(ADR-0033): the pypdf-based PDF reader, and the blocked A15.1–A15.4 items. On the removal head
+`b7b245fa`, run `36108366549` passes all 22 jobs. PR #93 is merged into `main` as `80002ed4`
+(2026-09-25), so every item in scope is closed. The A23.5 Phase 4 addendum on the removal is a
+post-merge review.
 
 ## Delivery identity
 
@@ -20,8 +22,8 @@ own strict CI run and an A23.5 addendum.
 
 ## Acceptance by area
 
-The count is 108 of 109 original top-level items. A15's four items are removed from scope by the
-operator's decision (ADR-0033), and A23.4 closes on the strict CI run of the removal head. Each area
+The count is 109 of 109 original top-level items in scope. A15's four items are removed from scope
+by the operator's decision (ADR-0033). Each area
 links to its plan section, where the leaf evidence and the review files are cited.
 
 | Area | Closed | Status |
@@ -48,7 +50,7 @@ links to its plan section, where the leaf evidence and the review files are cite
 | [A20 Provenance and versions](../plan.md#a20-provenance-and-versions-p07p13-r04) | 4/4 | Accepted |
 | [A21 Safe dormant handoff](../plan.md#a21-safe-dormant-handoff-p04-r08) | 4/4 | Accepted |
 | [A22 Preserved Swarming integration](../plan.md#a22-preserved-swarming-integration-p04-r09) | 7/7 | Accepted |
-| [A23 Boundary regression evidence](../plan.md#a23-boundary-regression-evidence-all-owners-p14-r11) | 4/5 | Pending: A23.4 (leaf `A23.4.ci`) closes on the strict CI run of the removal head; A23.1–.3 and A23.5 are closed |
+| [A23 Boundary regression evidence](../plan.md#a23-boundary-regression-evidence-all-owners-p14-r11) | 5/5 | Accepted; A23.4 closes on run `36108366549` (all 22 jobs green on the removal head) |
 | [A24 Observable enterprise profile value](../plan.md#a24-observable-enterprise-profile-value-p14-r04r11) | 4/4 | Accepted |
 | [A25 Trusted implementation source](../plan.md#a25-trusted-implementation-source-p01-r01) | 3/3 | Accepted |
 | [A26 Explicit private-sync destination](../plan.md#a26-explicit-private-sync-destination-p02-r10) | 4/4 | Accepted |
@@ -248,6 +250,7 @@ and summaries are under the coordinator's session files, `ci93/`.
 | `36054668106` | `2ab1f25d` | The first hosted strict run. It failed on all three systems; ADR-0032's "First hosted run" section records the causes. |
 | `36063322462` | `c5667a7e` | The repair batch. It confirmed most of the repair and exposed two further classes: macOS `mktemp` ignores `TMPDIR`, and a quiet skip was counted as partial. It was superseded when those fixes were pushed. |
 | `36065850657` | `ed91ef4f` | 19 of 22 jobs pass: the syntax job, and unit-1, unit-2, integration-1, -2, -4 and `other` on each system. Each system passes 149 of its 150 entries. The only failing entry is `document-pdf`, in integration shard 3 on each system (27 errors, `No module named 'pypdf'`). |
+| `36108366549` | `b7b245fa` | The removal head (ADR-0033). All 22 jobs pass on Linux, macOS and Windows, with no failed, skipped or partial entry. |
 
 On `ed91ef4f`, every other entry passes with no skipped or partial result. That includes
 `copilot-kit`, `universal-a23` and every `platform: windows-only` method on hosted Windows. Off
@@ -264,5 +267,5 @@ inherits the binding only if it changes nothing outside `.claude/` and its own C
 outcome: the same 19 green jobs, each integration-3 failing only on `document-pdf`.
 
 The operator-ordered removal (ADR-0033) then deleted `document-pdf`'s pypdf-dependent tests together
-with the reader. The removal head is a product change: it needs its own green strict run and an
-A23.5 addendum, which PR #93's checks and `reviews/` record.
+with the reader. Run `36108366549` on the removal head passes all 22 jobs, and PR #93 merged as
+`80002ed4`.
