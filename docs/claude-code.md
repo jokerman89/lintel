@@ -39,6 +39,12 @@ skills; use the host's actual invocation, or explicitly read `.github/lintel/STA
 Plan one bounded change, execute authorized cards, record actual checks, obtain independent
 review and resume the same committed work map in a fresh session.
 
+The plugin route invokes workflows as `/li:<skill>` (for example `/li:define`,
+`/li:inspect`, `/li:verify`, `/li:diagnose`, `/li:cross-check`, `/li:pause`,
+`/li:resume`). The repository route exposes the core entry points as `li-<skill>` wrappers
+and reads other workflows from their canonical files. Former entry names are mapped in the
+[native workflow migration](migrations/2026-09-25-native-workflows.md); they are not aliases.
+
 Native delegation, worktrees, browser integrations and memory depend on current tools,
 version and permissions. A worktree provides change attribution, not a security sandbox.
 Optional native agent memory and model configuration remain usable through the Claude

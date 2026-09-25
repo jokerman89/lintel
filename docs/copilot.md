@@ -57,6 +57,11 @@ a requirement for a separately attributable independent reviewer.
 The kit and CLI plugin expose the same native core entry points. The wider canonical catalog remains source content to read on demand. Their presence does not prove
 that every specialist skill in the full catalog works on every Copilot surface.
 
+Catalog workflows without a native wrapper, such as `define`, `inspect`, `verify`
+(read-only unless repair is authorized), `diagnose`, `cross-check` and `pause`, are read
+from `.github/lintel/skills/<name>/SKILL.md`. Former entry names are mapped in the
+[native workflow migration](migrations/2026-09-25-native-workflows.md); they are not aliases.
+
 ## Copilot CLI plugin
 
 For an operator who prefers plugin distribution of the same native core workflow:

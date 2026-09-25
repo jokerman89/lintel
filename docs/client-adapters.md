@@ -28,10 +28,12 @@ observations. Locally exercised installer fixtures do not establish discovery or
 
 ## Client-specific routes
 
-**GitHub Copilot:** `copilot-cli`, `copilot-app`, `copilot-vscode`, `copilot-cloud` each select
-the existing `.github/skills` and custom-agent kit. Organization policy and available APIs
-still differ. Other Copilot IDEs use `other` until their contracts are verified.
-The [dedicated guide](copilot.md) preserves the native kit and CLI plugin.
+No client is the default. Every native route generates `li-<skill>` wrappers for the core
+workflow entry points; invoke them through the host's own mechanism (slash command, `$`
+reference, skills UI or skill tool). The Claude Code plugin keeps its namespaced
+`/li:<skill>` form. Manual routes read the canonical `skills/<skill>/SKILL.md` through
+`START.md`. Former workflow names are mapped in the
+[native workflow migration](migrations/2026-09-25-native-workflows.md), not aliased.
 
 **Claude:** `claude-code` and `claude-desktop` select `.claude/skills` for CLI and Desktop
 Code local respectively. This does not cover Chat, Cowork or cloud. The
@@ -50,6 +52,11 @@ instead of assuming an old `/add-plugin` command or universal settings contract.
 **Gemini:** `gemini-cli` selects `.gemini/skills`; the existing `gemini-extension.json`
 context route remains. Skills, consent, subagent restrictions and experimental features
 follow the exact version, not the obsolete assumption that Gemini has no native skills.
+
+**GitHub Copilot:** `copilot-cli`, `copilot-app`, `copilot-vscode`, `copilot-cloud` each select
+the existing `.github/skills` and custom-agent kit. Organization policy and available APIs
+still differ. Other Copilot IDEs use `other` until their contracts are verified.
+The [dedicated guide](copilot.md) preserves the native kit and CLI plugin.
 
 **OpenCode:** `opencode-cli` selects `.opencode/skills`. `opencode-desktop` and `opencode-ide`
 use manual handoff until their specific discovery/API contracts are established. The

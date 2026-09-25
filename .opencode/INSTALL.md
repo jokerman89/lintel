@@ -8,29 +8,36 @@ Fetch and follow instructions from https://raw.githubusercontent.com/jokerman89/
 
 ## What Lintel is
 
-Lintel is a company-neutral, pack-driven session harness for agent-based development —
-markdown + bash scaffolding that an AI CLI loads as a plugin: skills (slash-commands),
-agents (subagent roles), hooks, and repo-scaffolding templates. Identity (voice,
-compliance, persona) resolves from the active pack; only the neutral `_default` pack
-ships in this repo.
+Lintel is a company-neutral, pack-driven session harness for agent-based development:
+canonical workflows (skills), specialist agent roles, optional hooks and repository
+scaffolding, exposed to each client through thin adapters. Identity (voice, compliance,
+persona) resolves from the active pack; only the neutral `_default` pack ships in this repo.
 
 ## Install steps
 
 1. Clone the repo (or fetch raw files on demand): `git clone https://github.com/jokerman89/lintel`
 2. Read `AGENTS.md` (repo map + load-bearing rules), then `AGENT-INSTRUCTIONS.md` —
    the canonical cross-CLI session ritual. Treat both as the session bootstrap.
-3. Load skills from `skills/<name>/SKILL.md` and agents from `agents/<category>/<Name>.md`
-   per OpenCode's discovery mechanism. Counts are computed, never hardcoded:
-   `find skills -name SKILL.md | wc -l` and `find agents -name '*.md' | grep -cv README`
-4. Hooks (`hooks/shared/`) are optional; hook *enforcement* fires on Claude Code only.
-   On OpenCode, read each `HOOK.md` and apply its discipline manually.
-5. Capability honesty: `source lib/cli-tiers.sh; cli_tier_field opencode tier` before
-   claiming a capability — never over-claim what this CLI cannot do.
+3. For a shared project kit on the OpenCode CLI/TUI, run from the reviewed checkout:
+   `python3 bin/li-adapter.py init --client opencode-cli --target <project>` and then
+   `python3 bin/li-adapter.py check --target <project>`. This generates `.opencode/skills/li-*`
+   wrappers for the core entry points plus the `.github/lintel/` source bundle. OpenCode
+   desktop and IDE surfaces (`opencode-desktop`, `opencode-ide`) use the manual route.
+4. Invoke wrappers by the names OpenCode actually lists. For any other workflow, or when
+   discovery is unavailable, read `.github/lintel/START.md` and the canonical
+   `skills/<name>/SKILL.md` explicitly. Canonical documents write `/li:<skill>`; that is
+   the Claude plugin's notation, not OpenCode syntax.
+5. Hooks (`hooks/shared/`) are a Claude Code-compatible bundle and are not translated for
+   OpenCode. Read each `HOOK.md` and apply its discipline manually; do not claim enforcement.
+6. Capability honesty: `python3 bin/li-client-capabilities.py show --client opencode-cli`
+   separates vendor documentation, delivered files and observed runs. Live workflows
+   remain `not_run` until a real session is recorded; do not over-claim.
 
 ## Update flow
 
-Re-fetch from `main` and re-read `AGENT-INSTRUCTIONS.md`. Per-skill OpenCode shims (if
-ever needed) live in `.opencode/plugins/` — currently empty; skills load as content.
+Pull the next approved revision, re-read `AGENT-INSTRUCTIONS.md`, and re-run `init` and
+`check` on an upgrade branch. Former workflow names are mapped in
+`docs/migrations/2026-09-25-native-workflows.md`; they are not aliases.
 
 ## Issues
 
