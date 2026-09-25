@@ -26,10 +26,11 @@ Gemini adapters expose `li-<skill>` wrappers (for example `li-plan`, `li-build`,
 explicit skill paths when needed. Specialist architecture, data, security, operations and
 testing workflows are available from the canonical catalog when installed. Canonical on-demand
 routes include `inspect --target plan|repo`, `diagnose`, `verify`, `context-warm`, `pause`
-and `resume --from <phase|job-step>`; saved checkpoints also restore, with a path prefix such as
-`./BUILD` when a checkpoint name matches a phase. Verification is read-only unless repair is explicitly authorized;
-checkpoint names and old saved data remain compatible. Use the trusted canonical skill file if
-a native wrapper is unavailable.
+and `resume --from <checkpoint>`. Verification is read-only unless repair is explicitly
+authorized; checkpoint names and old saved data remain compatible. Use the trusted canonical
+skill file if a native wrapper is unavailable.
+`resume --from` also accepts a cycle phase or job step; use a path prefix such as `./BUILD`
+when a saved checkpoint name matches a phase.
 Do not claim every catalog entry or hook is native to every host.
 
 ## Project-specific agents and conventions
