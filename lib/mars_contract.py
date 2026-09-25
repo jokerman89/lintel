@@ -405,8 +405,12 @@ def record_round(panel: Dict[str, Any], slot: str, round_no: int, result: Path,
         if method and fields.get("stage"):
             require(fields["stage"] == method["stage"], f"report stage {fields['stage']!r} differs from the packet")
         if method and round_no == 1:
-            coverage = _lib_module("review_method").check_coverage(text, method["questions"])
-            entry["coverage"] = {"complete": coverage["complete"], "incomplete": coverage["incomplete"]}
+            assessment = _lib_module("review_method").assess_report(
+                text, questions=method["questions"], stage=method["stage"], acceptance=method["acceptance"],
+                verdict=fields["verdict"], counts=(entry["counts"]["p1"], entry["counts"]["p2"], entry["counts"]["p3"]))
+            entry["coverage"] = {"complete": assessment["usable"], "incomplete": assessment["incomplete"],
+                                 "inconsistencies": assessment["inconsistencies"],
+                                 "deviations": assessment["deviations"], "outcome": assessment["outcome"]}
     part["rounds"].append(entry)
     part["state"] = "reported" if status == "received" else "failed"
     validate_panel(panel)
@@ -506,19 +510,44 @@ def synthesis_header(panel: Dict[str, Any], schema: Dict[str, Any], defaults: Di
         fields.update(stage=method["stage"], questions=method["questions"] or "none",
                       coverage_complete=facts["coverage_complete"])
     bound = panel["subject"].get("input")
+    input_status = (verification or {}).get("status", "unverified") if bound else "unbound"
+    fields["input"] = input_status
     if bound:
         fields["snapshot_digest"] = bound["snapshot_digest"]
-        fields["input"] = (verification or {}).get("status", "unverified")
     profile = panel.get("profile")
     fields["profile"] = f"{profile['name']}@{profile['version']}#g{profile['generation']}" if profile else "none"
     if adjudicated is not None:
-        require(len(adjudicated) == 3 and all(isinstance(n, int) and n >= 0 for n in adjudicated),
-                "adjudicated counts are three non-negative integers: p1,p2,p3")
-        complete = facts["operational_status"] == "complete" and facts.get("coverage_complete", True) \
-            and fields.get("input", "verified") == "verified"
-        fields["adjudicated"] = f"p1={adjudicated[0]} p2={adjudicated[1]} p3={adjudicated[2]}"
-        fields["outcome"] = _lib_module("review_method").stage_outcome(adjudicated[0], adjudicated[1], complete)
+        needs_deviations = bool(method and method["acceptance"] and method["stage"] in ("spec", "full"))
+        require(not needs_deviations or len(adjudicated) == 4,
+                "this panel checks acceptance rows: pass --adjudicated p1,p2,p3,deviations")
+        counts = _adjudicated_counts(adjudicated)
+        fields["adjudicated"] = _format_adjudicated(counts)
+        fields["outcome"] = panel_outcome(facts, counts, input_status, origin.get("caller"))
     return render_header("synthesis", fields, schema)
+
+
+def _adjudicated_counts(values: Sequence[int]) -> Tuple[int, int, int, int]:
+    require(len(values) in (3, 4) and all(isinstance(n, int) and n >= 0 for n in values),
+            "adjudicated counts are non-negative integers: p1,p2,p3[,deviations]")
+    return (values[0], values[1], values[2], values[3] if len(values) == 4 else 0)
+
+
+def _format_adjudicated(counts: Sequence[int]) -> str:
+    return f"p1={counts[0]} p2={counts[1]} p3={counts[2]} deviations={counts[3]}"
+
+
+def panel_outcome(facts: Dict[str, Any], counts: Sequence[int], input_status: str,
+                  caller: Optional[str] = None) -> str:
+    """The Review Method's decision rule over adjudicated counts.
+
+    A partial panel, a report that is incomplete, inconsistent or `unable`, a changed or
+    unverified input, and an unbound REVIEW panel all make the result incomplete, exactly as
+    they would for a single report. `coverage_complete` means every received round-1 report
+    is complete and consistent under the method.
+    """
+    bound_ok = input_status == "verified" or (input_status == "unbound" and caller != "review")
+    complete = facts["operational_status"] == "complete" and facts.get("coverage_complete", True) and bound_ok
+    return _lib_module("review_method").stage_outcome(counts[0], counts[1], complete, deviations=counts[3])
 
 
 # ── Content binding: method meta, input snapshot, profile reference, inspection ────────────
@@ -560,23 +589,37 @@ def attach_profile(panel: Dict[str, Any], repo: Path, reference: Optional[Path] 
     panel["profile_status"] = "selected"
 
 
+def _resolved(path: Path) -> str:
+    """Canonical spelling after links and junctions, for containment checks only.
+
+    Case folding follows the host's `normcase` (Windows folds; POSIX, including
+    case-insensitive macOS volumes, compares the resolved spelling as is).
+    """
+    return os.path.normcase(os.path.realpath(os.path.abspath(path)))
+
+
+def _contains(parent: str, child: str) -> bool:
+    try:
+        return os.path.commonpath([parent, child]) == parent
+    except ValueError:
+        return False
+
+
 def output_overlaps(repo: Path, selection: Sequence[str], outputs: Sequence[Path]) -> List[str]:
-    """Mutable outputs inside (or containing) the selected input would invalidate the snapshot."""
-    root = os.path.normcase(os.path.abspath(repo))
+    """Mutable outputs inside (or containing) the selected input would invalidate the snapshot.
+
+    Compares resolved spellings, so a symlink or junction cannot hide an overlap.
+    """
+    root = _resolved(repo)
+    targets = []
+    for item in selection:
+        chosen = item.replace("\\", "/").strip("/")
+        targets.append((item, root if chosen in ("", ".") else _resolved(Path(repo) / chosen)))
     hits = []
     for output in outputs:
-        try:
-            relative = os.path.relpath(os.path.normcase(os.path.abspath(output)), root)
-        except ValueError:
-            continue
-        if relative == os.pardir or relative.startswith(os.pardir + os.sep):
-            continue
-        relative = "" if relative == "." else relative.replace(os.sep, "/")
-        for item in selection:
-            chosen = os.path.normcase(item).replace("\\", "/").strip("/")
-            chosen = "" if chosen in ("", ".") else chosen
-            if not chosen or not relative or relative == chosen or relative.startswith(chosen + "/") \
-                    or chosen.startswith(relative + "/"):
+        written = _resolved(output)
+        for item, target in targets:
+            if _contains(target, written) or _contains(written, target):
                 hits.append(f"{Path(output).as_posix()} overlaps selection {item!r}")
     return hits
 
@@ -628,19 +671,35 @@ def verify_input(panel: Dict[str, Any], repo: Optional[Path] = None) -> Dict[str
 
 def inspection_record(panel: Dict[str, Any], synthesis_text: str, schema: Dict[str, Any],
                       verification: Dict[str, Any]) -> Dict[str, Any]:
-    """Content-bound inspection evidence for REVIEW (purpose: inspection, never clearance)."""
+    """Content-bound inspection evidence for REVIEW (purpose: inspection, never clearance).
+
+    The outcome is recomputed from the adjudicated counts and current panel facts; an edited
+    synthesis cannot claim a different result.
+    """
     require(verification["status"] != "changed", "input_changed: collect observations again under a new panel")
     header = validate_header("synthesis", parse_header(synthesis_text, "synthesis"), schema)
     require(header["panel"] == panel["panel_id"] and header["brief_sha256"] == panel["subject"]["brief_sha256"],
             "synthesis belongs to another panel or brief")
     bound = panel["subject"].get("input")
+    if (panel.get("origin") or {}).get("caller") == "review":
+        require(bool(bound) and bool(panel["subject"].get("method")),
+                "REVIEW panel mode needs a bound selection (--select) and the method packet (--method-meta)")
+    facts = summary(panel)
+    outcome = None
+    if header.get("adjudicated"):
+        match = re.fullmatch(r"p1=(\d+) p2=(\d+) p3=(\d+) deviations=(\d+)", header["adjudicated"])
+        require(match is not None, "adjudicated field is malformed")
+        counts = tuple(int(n) for n in match.groups())
+        outcome = panel_outcome(facts, counts, verification["status"], (panel.get("origin") or {}).get("caller"))
+        require(header.get("outcome") == outcome,
+                f"synthesis outcome {header.get('outcome')!r} does not match its adjudicated counts ({outcome!r})")
     return {"schema_version": 1, "purpose": "inspection", "source": "mars", "release_clearance": False,
             "panel_id": panel["panel_id"],
             "subject": {key: panel["subject"].get(key) for key in ("kind", "ref", "brief_sha256", "method")},
             "input": verification["status"],
             "snapshot": read_json(Path(bound["snapshot_path"])) if bound else None,
-            "profile": panel.get("profile"), "summary": summary(panel),
-            "adjudicated": header.get("adjudicated"), "outcome": header.get("outcome"),
+            "profile": panel.get("profile"), "summary": facts,
+            "adjudicated": header.get("adjudicated"), "outcome": outcome,
             "synthesis_sha256": hashlib.sha256(synthesis_text.encode("utf-8")).hexdigest(),
             "reports": [{"slot": p["slot"], "round": r["round"], "status": r["status"], "sha256": r["sha256"]}
                         for p in panel["participants"] for r in p["rounds"]]}

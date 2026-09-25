@@ -133,7 +133,8 @@ def main(argv=None) -> int:
     summ.add_argument("--panel", type=Path, required=True)
     synth = psub.add_parser("synthesis-header", help="mars-synthesis header for the coordinator report")
     synth.add_argument("--panel", type=Path, required=True)
-    synth.add_argument("--adjudicated", help="adjudicated counts p1,p2,p3 -> outcome by the shared rule")
+    synth.add_argument("--adjudicated",
+                       help="adjudicated counts p1,p2,p3[,deviations] -> outcome by the shared rule")
     inspect = psub.add_parser("inspection", help="content-bound inspection record (release_clearance false)")
     inspect.add_argument("--panel", type=Path, required=True)
     inspect.add_argument("--synthesis", type=Path, required=True)
@@ -187,7 +188,8 @@ def main(argv=None) -> int:
             text, fields = mc.build_request(value, args.slot, args.round,
                                             args.body.read_text(encoding="utf-8-sig"), schema, args.lens)
             args.out.parent.mkdir(parents=True, exist_ok=True)
-            args.out.write_text(text, encoding="utf-8", newline="\n")
+            with open(args.out, "w", encoding="utf-8", newline="\n") as handle:
+                handle.write(text)
             return emit({"request": args.out.as_posix(), "sha256": mc.sha256_file(args.out), "header": fields})
         elif args.action == "synthesis-header":
             counts = [int(n) for n in args.adjudicated.split(",")] if args.adjudicated else None

@@ -6,8 +6,9 @@
 # last_intent_review: 2026-09-25
 """Review Method packet helper: select questions, render one packet body, check reports.
 
-Subcommands print JSON. Exit 0 = ok, 3 = valid input but an incomplete or invalid report,
-2 = invalid input. The caller dispatches reviewers; this helper renders and checks text.
+Subcommands print JSON. Exit 0 = ok (for check: a complete, consistent report, whatever its
+outcome), 3 = valid input but an incomplete, inconsistent or unusable report, 2 = invalid input.
+The caller dispatches reviewers; this helper renders and checks text.
 """
 import argparse
 import json
@@ -43,7 +44,8 @@ def _catalog(args):
 
 def _write(path: Path, text: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(text, encoding="utf-8", newline="\n")
+    with open(path, "w", encoding="utf-8", newline="\n") as handle:
+        handle.write(text)
 
 
 def main(argv=None) -> int:
@@ -156,7 +158,7 @@ def main(argv=None) -> int:
         if args.command == "check":
             result = rm.check_report(args.report.read_text(encoding="utf-8-sig"), rm.read_json(args.meta),
                                      prefix=args.header)
-            return emit(result, 0 if result["complete"] and result["verdict_consistent"] else 3)
+            return emit(result, 0 if result["usable"] else 3)
         log = args.log or (args.repo / rm.OUTCOME_LOG)
         if args.command == "outcome":
             record = rm.outcome_record(_catalog(args), args.sq, args.outcome, args.ref, args.note)

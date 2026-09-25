@@ -45,7 +45,7 @@
       "optional": ["cycle_id", "work_map", "downgrades", "failed_slots", "stage", "questions",
                    "coverage_complete", "snapshot_digest", "input", "profile", "adjudicated", "outcome"],
       "enums": {"status": ["complete", "partial"], "release_clearance": ["false"],
-                "input": ["verified", "changed", "unverified"], "coverage_complete": ["true", "false"],
+                "input": ["verified", "changed", "unverified", "unbound"], "coverage_complete": ["true", "false"],
                 "outcome": ["pass", "changes-requested", "fail", "incomplete"]}
     }
   }

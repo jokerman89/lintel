@@ -266,10 +266,38 @@ class ReportTests(unittest.TestCase):
     def test_single_and_adjudicated_panel_counts_share_the_decision_rule(self):
         """RM6: equivalent findings give equivalent outcomes in both modes."""
         for counts, complete in (((0, 0), True), ((0, 2), True), ((1, 0), True), ((0, 0), False)):
+            verdict = "block" if counts[0] else "concerns" if counts[1] else "pass"
             single = rm.check_report(report(self.meta, self.rows if complete else self.rows[1:],
-                                            p1=counts[0], p2=counts[1],
-                                            verdict="block" if counts[0] else "pass"), self.meta)
+                                            p1=counts[0], p2=counts[1], verdict=verdict), self.meta)
             self.assertEqual(single["outcome"], rm.stage_outcome(counts[0], counts[1], complete))
+
+    def test_spec_deviation_unverified_and_duplicate_rows_never_pass(self):
+        body = rm.render_body(kind="implementation", stage="spec", subject_ref="util.py", subject_text="x",
+                              questions=[], acceptance=["R01"])
+        meta = rm.method_meta(kind="implementation", stage="spec", subject_ref="util.py", body=body,
+                              questions=[], acceptance=["R01"])
+        deviation = rm.check_report(report(meta, [], verdict="concerns", spec_rows=[("R01", "deviation")]), meta)
+        self.assertEqual((deviation["outcome"], deviation["usable"]), ("changes-requested", True))
+        for rows in ([("R01", "unverified")], [("R01", "pass"), ("R01", "deviation")], []):
+            result = rm.check_report(report(meta, [], spec_rows=rows), meta)
+            self.assertEqual(result["outcome"], "incomplete", rows)
+        self.assertEqual(rm.check_report(report(meta, [], spec_rows=[("R01", "PASS")]), meta)["outcome"], "pass")
+
+    def test_header_contradicting_the_body_is_incomplete(self):
+        cases = {
+            "block-without-p1": dict(verdict="block"),
+            "pass-with-p2": dict(verdict="pass", p2=1),
+            "concerns-without-findings": dict(verdict="concerns"),
+            "unable": dict(verdict="unable"),
+        }
+        for name, fields in cases.items():
+            result = rm.check_report(report(self.meta, self.rows, **fields), self.meta)
+            self.assertEqual(result["outcome"], "incomplete", name)
+            self.assertFalse(result["usable"], name)
+        cited = [(self.rows[0][0], "finding", "F1"), *self.rows[1:]]
+        self.assertEqual(rm.check_report(report(self.meta, cited), self.meta)["outcome"], "incomplete")
+        self.assertEqual(rm.check_report(report(self.meta, cited, p3=1, verdict="concerns"), self.meta)["outcome"],
+                         "pass")
 
     def test_cli_check_exit_codes(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -279,6 +307,10 @@ class ReportTests(unittest.TestCase):
             bad.write_text(report(self.meta, self.rows[1:]), encoding="utf-8")
             self.assertEqual(run(PACKET, "check", "--report", good, "--meta", meta).returncode, 0)
             self.assertEqual(run(PACKET, "check", "--report", bad, "--meta", meta).returncode, 3)
+            bad.write_text(report(self.meta, self.rows, verdict="unable"), encoding="utf-8")
+            self.assertEqual(run(PACKET, "check", "--report", bad, "--meta", meta).returncode, 3)
+            good.write_text(report(self.meta, self.rows, p1=1, verdict="block"), encoding="utf-8")
+            self.assertEqual(run(PACKET, "check", "--report", good, "--meta", meta).returncode, 0)
             bad.write_text("no header\n", encoding="utf-8")
             self.assertEqual(run(PACKET, "check", "--report", bad, "--meta", meta).returncode, 2)
 

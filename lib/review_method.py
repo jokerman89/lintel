@@ -431,27 +431,67 @@ def check_coverage(text: str, selected: Sequence[str]) -> Dict[str, Any]:
 
 
 def check_spec(text: str, acceptance: Sequence[str]) -> Dict[str, Any]:
+    """One row per acceptance ID: `pass`, `deviation` or `unverified`. Anything else is incomplete."""
     results: Dict[str, str] = {}
+    duplicates = []
     for cells in table_rows(text, "Spec compliance"):
         key = _bare(cells[0]) if cells else ""
         value = _bare(cells[1]).lower() if len(cells) > 1 else ""
-        if key:
-            results.setdefault(key, value if value in SPEC_RESULTS else "invalid")
+        if not key:
+            continue
+        if key in results:
+            duplicates.append(key)
+            continue
+        results[key] = value if value in SPEC_RESULTS else "invalid"
     missing = [key for key in acceptance if key not in results]
     invalid = [key for key in acceptance if results.get(key) == "invalid"]
+    unverified = [key for key in acceptance if results.get(key) == "unverified"]
+    duplicated = sorted(set(duplicates) & set(acceptance))
     return {"results": {key: results[key] for key in acceptance if key in results}, "missing": missing,
-            "invalid": invalid, "deviations": [key for key in acceptance if results.get(key) == "deviation"],
-            "complete": not missing and not invalid}
+            "invalid": invalid, "unverified": unverified, "duplicates": duplicated,
+            "deviations": [key for key in acceptance if results.get(key) == "deviation"],
+            "incomplete": sorted(set(missing) | set(invalid) | set(unverified) | set(duplicated)),
+            "complete": not (missing or invalid or unverified or duplicated)}
 
 
-def stage_outcome(p1: int, p2: int, complete: bool, verdict: Optional[str] = None) -> str:
+def stage_outcome(p1: int, p2: int, complete: bool, verdict: Optional[str] = None, deviations: int = 0) -> str:
     """One rule for single reports and adjudicated panel results. Incomplete is never a pass."""
-    require(all(isinstance(n, int) and n >= 0 for n in (p1, p2)), "finding counts must be non-negative integers")
+    require(all(isinstance(n, int) and n >= 0 for n in (p1, p2, deviations)),
+            "finding and deviation counts must be non-negative integers")
     if p1:
         return "fail"
     if verdict == "unable" or not complete:
         return "incomplete"
-    return "changes-requested" if p2 else "pass"
+    return "changes-requested" if p2 or deviations else "pass"
+
+
+def assess_report(text: str, *, questions: Sequence[str], stage: str, acceptance: Sequence[str],
+                  verdict: Optional[str], counts: Sequence[int]) -> Dict[str, Any]:
+    """Coverage, spec rows and header consistency for one report; shared by single and panel paths."""
+    require(stage in STAGES, f"stage must be one of {STAGES}")
+    p1, p2, p3 = (int(n) for n in counts)
+    coverage = check_coverage(text, questions)
+    spec = check_spec(text, acceptance) if stage in ("spec", "full") and acceptance else None
+    deviations = len(spec["deviations"]) if spec else 0
+    findings = p1 + p2 + p3
+    inconsistencies = []
+    if verdict == "pass" and (p1 or p2 or deviations):
+        inconsistencies.append("verdict pass with a P1 or P2 finding or a spec deviation")
+    if verdict == "block" and not (p1 or deviations):
+        inconsistencies.append("verdict block without a P1 finding or a spec deviation")
+    if verdict == "concerns" and not (findings or deviations):
+        inconsistencies.append("verdict concerns without findings or deviations")
+    if not findings and any(status == "finding" for status in coverage["statuses"].values()):
+        inconsistencies.append("standing questions cite findings but the finding counts are zero")
+    complete = coverage["complete"] and (spec is None or spec["complete"]) and verdict != "unable"
+    incomplete = list(coverage["incomplete"]) + (list(spec["incomplete"]) if spec else [])
+    if verdict == "unable":
+        incomplete.append("verdict:unable")
+    usable = complete and not inconsistencies
+    return {"coverage": coverage, "spec": spec, "deviations": deviations, "complete": complete,
+            "incomplete": incomplete, "inconsistencies": inconsistencies,
+            "verdict_consistent": not inconsistencies, "usable": usable,
+            "outcome": stage_outcome(p1, p2, usable, verdict, deviations)}
 
 
 def check_report(text: str, meta: Dict[str, Any], *, prefix: str = "review",
@@ -467,14 +507,10 @@ def check_report(text: str, meta: Dict[str, Any], *, prefix: str = "review",
         for key in ("p1", "p2", "p3"):
             require(re.fullmatch(r"\d+", fields.get(key, "")) is not None, f"{key} must be a non-negative integer")
     require(fields.get("brief_sha256") == meta["brief_sha256"], "report is bound to a different brief")
-    coverage = check_coverage(text, meta["questions"])
-    spec = check_spec(text, meta["acceptance"]) if meta["stage"] in ("spec", "full") and meta["acceptance"] else None
-    complete = coverage["complete"] and (spec is None or spec["complete"])
-    p1, p2 = int(fields["p1"]), int(fields["p2"])
-    verdict = fields.get("verdict")
-    return {"header": fields, "coverage": coverage, "spec": spec, "complete": complete,
-            "verdict_consistent": not (verdict == "pass" and p1), "outcome": stage_outcome(p1, p2, complete, verdict),
-            "release_clearance": False}
+    assessment = assess_report(text, questions=meta["questions"], stage=meta["stage"],
+                               acceptance=meta["acceptance"], verdict=fields.get("verdict"),
+                               counts=(fields["p1"], fields["p2"], fields["p3"]))
+    return {"header": fields, **assessment, "release_clearance": False}
 
 
 # ── Calibration loop (opt-in audit data) ────────────────────────────────────────────

@@ -7,6 +7,7 @@
 """Behavior tests for MARS roster, offer gate and panel ownership/close state."""
 import copy
 import json
+import os
 import subprocess
 import sys
 import tempfile
@@ -412,7 +413,7 @@ class BindingTests(unittest.TestCase):
         questions = rm.select_questions(catalog, "implementation", [], "quality")
         body = rm.render_body(kind="implementation", stage="quality", subject_ref="src/util.py",
                               subject_text="def f(): return 1", questions=questions)
-        self.brief.write_text(body, encoding="utf-8", newline="\n")
+        self.brief.write_bytes(body.encode("utf-8"))
         meta = rm.method_meta(kind="implementation", stage="quality", subject_ref="src/util.py", body=body,
                               questions=questions)
         meta_path = self.inputs / "method.json"
@@ -469,6 +470,104 @@ class BindingTests(unittest.TestCase):
         stale = mc.validate_header("synthesis", mc.parse_header(
             mc.synthesis_header(panel, schema, defaults, [0, 0, 0], changed), "synthesis"), schema)
         self.assertEqual((stale["input"], stale["outcome"]), ("changed", "incomplete"))
+
+    def method_panel(self, stage, acceptance, slots):
+        """A panel whose round-1 reports are real method reports, plus the same text for a single check."""
+        sys.path.insert(0, str(ROOT / "lib"))
+        import review_method as rm
+        questions = rm.select_questions(rm.load_catalog(), "implementation", [], stage)
+        body = rm.render_body(kind="implementation", stage=stage, subject_ref="src/util.py",
+                              subject_text="def f(): return 1", questions=questions, acceptance=acceptance)
+        self.brief.write_bytes(body.encode("utf-8"))
+        meta = rm.method_meta(kind="implementation", stage=stage, subject_ref="src/util.py", body=body,
+                              questions=questions, acceptance=acceptance)
+        panel = mc.new_panel("m1", OWNER, self.brief, "turn", mc.load_defaults(), "implementation", ORIGIN, "x")
+        mc.attach_method(panel, meta)
+        schema = mc.load_schema()
+        texts = {}
+        for slot, (verdict, counts, spec_rows) in slots.items():
+            mc.add_participant(panel, slot, f"model-{slot}", "subagent", None, None, None)
+            text = report_text(panel, slot, 1, verdict=verdict, p1=counts[0], p2=counts[1], p3=counts[2])
+            if spec_rows is not None:
+                text += "\n## Spec compliance\n| ID | Result | Location | Evidence |\n|---|---|---|---|\n" + \
+                    "".join(f"| {key} | {value} | src/util.py:1 | traced |\n" for key, value in spec_rows)
+            text += "\n## Standing questions\n| SQ | Status | Evidence |\n|---|---|---|\n" + \
+                "".join(f"| {q['id']} | checked | traced src/util.py:1 |\n" for q in questions)
+            path = self.records / f"{slot}.md"
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(text.encode("utf-8"))
+            mc.record_round(panel, slot, 1, path, schema=schema)
+            texts[slot] = text
+        return rm, meta, panel, schema, texts
+
+    def panel_outcome(self, panel, schema, counts):
+        header = mc.synthesis_header(panel, schema, mc.load_defaults(), counts, mc.verify_input(panel))
+        return mc.validate_header("synthesis", mc.parse_header(header, "synthesis"), schema)["outcome"]
+
+    def test_panel_and_single_reach_the_same_outcome_for_the_same_reports(self):
+        """S1: spec rows, unable verdicts and deviations count identically in both modes."""
+        cases = (
+            ("spec", ["R01", "R02"], ("pass", (0, 0, 0), []), [0, 0, 0, 0], "incomplete"),
+            ("quality", [], ("unable", (0, 0, 0), None), [0, 0, 0], "incomplete"),
+            ("spec", ["R01"], ("concerns", (0, 0, 0), [("R01", "deviation")]), [0, 0, 0, 1], "changes-requested"),
+            ("spec", ["R01"], ("pass", (0, 0, 0), [("R01", "pass")]), [0, 0, 0, 0], "pass"),
+        )
+        for stage, acceptance, slot_report, adjudicated, expected in cases:
+            for leftover in self.records.glob("*.md"):
+                leftover.unlink()
+            rm, meta, panel, schema, texts = self.method_panel(stage, acceptance, {"r1": slot_report, "r2": slot_report})
+            single = rm.check_report(texts["r1"], meta, prefix="mars")
+            self.assertEqual(single["outcome"], expected, (stage, slot_report))
+            self.assertEqual(self.panel_outcome(panel, schema, adjudicated), expected, (stage, slot_report))
+            if acceptance:
+                with self.assertRaises(mc.ContractError, msg="deviations may not be omitted"):
+                    self.panel_outcome(panel, schema, adjudicated[:3])
+
+    def test_inspection_recomputes_the_outcome_and_review_callers_need_binding(self):
+        self.assertEqual(self.init("--select", "src").returncode, 0)
+        panel = mc.read_json(self.panel)
+        schema, defaults = mc.load_schema(), mc.load_defaults()
+        for slot in ("r1", "r2"):
+            mc.add_participant(panel, slot, f"m-{slot}", "subagent", None, None, None)
+            path = self.records / f"{slot}.md"
+            path.write_text(report_text(panel, slot, 1), encoding="utf-8")
+            mc.record_round(panel, slot, 1, path, schema=schema)
+        verified = mc.verify_input(panel)
+        synthesis = mc.synthesis_header(panel, schema, defaults, [1, 0, 0], verified)
+        self.assertEqual(mc.inspection_record(panel, synthesis, schema, verified)["outcome"], "fail")
+        with self.assertRaises(mc.ContractError):
+            mc.inspection_record(panel, synthesis.replace("outcome: fail", "outcome: pass"), schema, verified)
+        panel["origin"]["caller"] = "review"
+        with self.assertRaises(mc.ContractError):
+            mc.inspection_record(panel, synthesis, schema, verified)
+        unbound = mc.new_panel("u1", OWNER, self.brief, "turn", defaults, "implementation", ORIGIN, "x")
+        mc.add_participant(unbound, "r1", "m-a", "subagent", None, None, None)
+        path = self.records / "u1.md"
+        path.write_text(report_text(unbound, "r1", 1, verdict="pass", p1=0), encoding="utf-8")
+        mc.record_round(unbound, "r1", 1, path, schema=schema)
+        header = mc.validate_header("synthesis", mc.parse_header(
+            mc.synthesis_header(unbound, schema, defaults, [0, 0, 0]), "synthesis"), schema)
+        self.assertEqual((header["input"], header["outcome"]), ("unbound", "pass"))
+        unbound["origin"]["caller"] = "review"
+        header = mc.validate_header("synthesis", mc.parse_header(
+            mc.synthesis_header(unbound, schema, defaults, [0, 0, 0]), "synthesis"), schema)
+        self.assertEqual(header["outcome"], "incomplete")
+
+    def test_an_aliased_output_path_still_overlaps(self):
+        """S3: a junction or symlink spelling of the repository cannot hide an overlap."""
+        alias = Path(self.tmp.name) / "alias"
+        try:
+            if os.name == "nt":
+                import _winapi
+                _winapi.CreateJunction(str(self.repo), str(alias))
+            else:
+                os.symlink(self.repo, alias, target_is_directory=True)
+        except (OSError, ImportError, AttributeError) as error:
+            self.skipTest(f"cannot create a directory alias here: {error}")
+        records = alias / ".claude" / "runtime" / "mars" / "b1" / "records"
+        self.assertTrue(mc.output_overlaps(self.repo, ["."], [records]))
+        self.assertTrue(mc.output_overlaps(alias, ["src"], [self.repo / "src" / "x.json"]))
+        self.assertEqual(mc.output_overlaps(self.repo, ["src"], [records]), [])
 
 
 class CliTests(unittest.TestCase):
