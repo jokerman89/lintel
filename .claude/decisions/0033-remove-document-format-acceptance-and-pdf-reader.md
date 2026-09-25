@@ -11,7 +11,7 @@
 
 PR #93 carried two blockers that only the operator could resolve:
 
-- **The PDF reader.** `skills/generate-pdf/scripts/check_pdf.py` read produced PDFs through an
+- **The PDF reader.** The former `generate-pdf` script `scripts/check_pdf.py` read produced PDFs through an
   existing `pypdf` installation. The repository never declared `pypdf`, and the operator refused
   to add it (L-054). `tests/integration/document-pdf.sh` therefore failed in integration shard 3
   on every CI system, and A23.4's strict CI could not pass.

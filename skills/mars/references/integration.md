@@ -30,13 +30,13 @@ never consent; ask with the offer text in [the skill](../SKILL.md).
 
 ## Pending hooks for the consolidated planning and quality workflows
 
-The native planning consolidation replaces `plan-eng-review` (and related plan reviews)
-with a consolidated inspection workflow and rewrites `define`; the quality consolidation
-renames `codex` to `cross-check` and revises `CodeReviewer`. Apply these on that base,
-not to the files being removed:
+The native planning consolidation replaced the former plan reviews with
+`/li:inspect --target plan` and its lenses, and rewrote `define`; the quality consolidation
+renamed the former outside-voice workflow to `cross-check` and revised `CodeReviewer`. These
+hooks are still pending on that base:
 
-- **Inspection (replacing `plan-eng-review`):** its optional outside-voice step routes to
-  `/li:mars` with caller `plan-eng-review` or the new workflow name; stays informational.
+- **Inspection (`/li:inspect --target plan`):** its optional outside-voice step routes to
+  `/li:mars` with caller `inspect`; stays informational.
 - **`define` spec review:** the optional cross-model second opinion routes to `/li:mars`
   with subject kind `problem` or `spec`, standalone only (inside a cycle PLAN owns the offer).
 - **`cross-check`:** keeps the single independent reviewer; a multi-model request is

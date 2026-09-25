@@ -4,7 +4,7 @@
 `bin/li-review-packet.py`; sections 1-5 below are the packet text sent to reviewers.
 **Consumers:** `/li:review` Stage 1 and 2 (single or panel), `/li:mars` (every panel slot,
 including the optional `/li:code-review` panel) and the plan approval review. The planning
-and quality consolidation adopts it for the replacement of `plan-eng-review`, `define`'s
+and quality consolidation adopts it for `/li:inspect --target plan`, `define`'s
 spec review and code-review's single pass (see `skills/mars/references/integration.md`).
 **Standing questions:** `lib/review-questions.json` (stable IDs; projects extend with
 `.claude/review/questions.json`).

@@ -15,7 +15,7 @@
 ## Context
 
 Lintel had several host-specific "outside voice" hooks (review Step 6, define's cross-model
-opinion, plan-eng-review, code-review's Codex gate) and no way to put the same question to
+opinion, the former plan engineering review, code-review's Codex gate) and no way to put the same question to
 several different models deliberately. Hosts such as the Copilot App now select a model per
 child context and record which model ran, but many hosts override or fall back silently.
 Swarm (ADR-0027) fans out implementation; it is the wrong tool for a targeted second look.
@@ -86,7 +86,7 @@ standalone MARS stays advisory.
 Applied: cycle Step 5 (surfaces PLAN's recorded answer, never offers), plan Step 10
 (option E), review Stage 1/2 (method packet) and Step 6b (panel mode), code-review
 (optional panel), Copilot `WORKFLOWS` and the MARS resource closure. Pending on the native
-planning and quality consolidation: the inspection workflow replacing plan-eng-review,
+planning and quality consolidation: the inspection workflow (`/li:inspect`) replacing the former plan engineering review,
 define's spec review, cross-check and CodeReviewer
 (`skills/mars/references/integration.md`). A repository-wide drift guard (no rubric outside
 the method) waits for that consolidation; today's guard covers REVIEW's prompts.

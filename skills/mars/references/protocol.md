@@ -30,7 +30,7 @@ round: <1|2>
 round_type: <blind|challenge>
 requested_by: <who asked, e.g. operator via <session>>
 trigger: <explicit|cycle-offer|review-offer>
-caller: <standalone|cycle:PLAN|review|code-review|plan-eng-review|define>
+caller: <standalone|cycle:PLAN|review|code-review|inspect|define>
 consent_ref: <operator turn or approval reference>
 coordinator_session: <owner session id — the only session that may close you>
 coordinator_surface: <exact client surface, e.g. copilot-app>
