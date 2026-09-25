@@ -20,7 +20,7 @@ import json
 from pathlib import PurePosixPath
 import subprocess
 import sys
-from typing import Callable, Optional, Sequence
+from typing import Callable, Optional, Sequence, Tuple, Union
 
 sys.dont_write_bytecode = True
 
@@ -52,7 +52,12 @@ MARKDOWN_SUFFIXES = frozenset({".md", ".markdown"})
 DOC_SUFFIXES = MARKDOWN_SUFFIXES | frozenset({
     ".html", ".htm", ".txt", ".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp", ".ico",
 })
+# Added, deleted or renamed files are documentation only below these trees; nothing there is installed.
+STRUCTURAL_DOC_DIRS = ("docs/", ".claude/", "presentations/")
 SUMMARY_PATH_LIMIT = 50
+
+# One changed path: its `git diff --name-status` letter and the path. A bare string means a content edit.
+Change = Tuple[str, str]
 
 
 class DiffError(RuntimeError):
@@ -71,11 +76,24 @@ class Decision:
         return ALL_OS if self.tier == "full" else (UBUNTU,)
 
 
-def is_platform_sensitive(path: str) -> bool:
-    """True when a changed, deleted or renamed path can behave differently per operating system."""
+def _normalize(path: str) -> str:
     normalized = path.replace("\\", "/")
     while normalized.startswith("./"):
         normalized = normalized[2:]
+    return normalized
+
+
+def is_platform_sensitive(path: str, status: str = "M") -> bool:
+    """True when this change to a path can behave differently per operating system.
+
+    Content edits (status M) are judged by location and extension. Adding, deleting, renaming,
+    copying or retyping a file changes the installed file set, where path length, letter case
+    and reserved names differ per system, so any such path outside the documentation-only
+    trees is sensitive whatever its extension.
+    """
+    normalized = _normalize(path)
+    if status[:1] != "M" and not normalized.startswith(STRUCTURAL_DOC_DIRS):
+        return True
     suffix = PurePosixPath(normalized).suffix.lower()
     if normalized.startswith(SENSITIVE_DIRS):
         return True
@@ -86,12 +104,12 @@ def is_platform_sensitive(path: str) -> bool:
     return suffix not in DOC_SUFFIXES
 
 
-def parse_name_status(raw: bytes) -> list[str]:
-    """Every path in `git diff --name-status -z` output, including both sides of a rename or copy."""
+def parse_name_status(raw: bytes) -> list[Change]:
+    """Every (status letter, path) in `git diff --name-status -z` output, both sides of a rename or copy."""
     fields = raw.decode("utf-8", "surrogateescape").split("\0")
     if fields and fields[-1] == "":
         fields.pop()
-    paths: list[str] = []
+    changes: list[Change] = []
     index = 0
     while index < len(fields):
         status = fields[index]
@@ -101,9 +119,9 @@ def parse_name_status(raw: bytes) -> list[str]:
         names = fields[index + 1:index + 1 + count]
         if len(names) != count or not all(names):
             raise DiffError("truncated diff output")
-        paths.extend(names)
+        changes.extend((status[0], name) for name in names)
         index += 1 + count
-    return paths
+    return changes
 
 
 def _git(repo: str, *args: str) -> bytes:
@@ -120,7 +138,7 @@ def _git(repo: str, *args: str) -> bytes:
     return result.stdout
 
 
-def git_changed_paths(repo: str, base: str, head: str) -> list[str]:
+def git_changed_paths(repo: str, base: str, head: str) -> list[Change]:
     """Paths changed from the merge base of base and head to head."""
     merge_base = _git(repo, "merge-base", base, head).decode("ascii", "replace").strip()
     if not merge_base:
@@ -139,7 +157,7 @@ def parse_labels(raw: Optional[str]) -> list[str]:
 
 
 def decide(event: str, labels_json: Optional[str], base: Optional[str], head: Optional[str],
-           changed_paths: Callable[[str, str], Sequence[str]]) -> Decision:
+           changed_paths: Callable[[str, str], Sequence[Union[str, Change]]]) -> Decision:
     """Select the matrix tier. Only a successfully computed, documentation-only PR diff narrows it."""
     if event != "pull_request":
         return Decision("full", f"event {event or '(none)'} always runs the full matrix")
@@ -152,15 +170,17 @@ def decide(event: str, labels_json: Optional[str], base: Optional[str], head: Op
     if not base or not head:
         return Decision("full", "pull request base or head SHA missing; failing safe")
     try:
-        paths = list(changed_paths(base, head))
+        changes = [("M", item) if isinstance(item, str) else (item[0], item[1])
+                   for item in changed_paths(base, head)]
     except Exception as exc:  # noqa: BLE001 - any failure to compute the diff must widen, not narrow
         return Decision("full", f"diff computation failed ({exc}); failing safe")
-    if not paths:
+    if not changes:
         return Decision("full", "diff is empty, so docs-only cannot be shown; failing safe")
-    triggers = tuple(sorted({path for path in paths if is_platform_sensitive(path)}))
+    triggers = tuple(sorted({f"{path} ({status})" if status != "M" else path
+                             for status, path in changes if is_platform_sensitive(path, status)}))
     if triggers:
-        return Decision("full", f"{len(triggers)} platform-sensitive path(s) changed", triggers, len(paths))
-    return Decision("ubuntu", f"all {len(paths)} changed path(s) are documentation", (), len(paths))
+        return Decision("full", f"{len(triggers)} platform-sensitive path(s) changed", triggers, len(changes))
+    return Decision("ubuntu", f"all {len(changes)} changed path(s) are documentation", (), len(changes))
 
 
 def matrix(decision: Decision) -> dict[str, list]:

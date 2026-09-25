@@ -45,6 +45,9 @@ class GitRepo:
         self.git("config", "commit.gpgsign", "false")
         self.write("README.md", "base\n")
         self.write("bin/tool.sh", "#!/usr/bin/env bash\necho base\n")
+        self.write("docs/a.md", "# Guide\n\nA documentation page that is renamed in one test.\n")
+        self.write(".claude/plans/x.md", "# Plan\n")
+        self.write("skills/x/SKILL.md", "# Skill\n")
         self.git("add", "-A")
         self.git("commit", "-q", "-m", "base")
         self.base = self.rev("HEAD")
@@ -95,12 +98,28 @@ class ClassificationTests(unittest.TestCase):
             with self.subTest(path=path):
                 self.assertTrue(cm.is_platform_sensitive(path))
 
-    def test_name_status_parser_keeps_both_sides_of_renames(self):
-        raw = b"M\0README.md\0R087\0docs/old.md\0bin/new.py\0D\0lib/gone.sh\0"
-        self.assertEqual(cm.parse_name_status(raw), ["README.md", "docs/old.md", "bin/new.py", "lib/gone.sh"])
+    def test_name_status_parser_keeps_status_and_both_sides_of_renames(self):
+        raw = b"M\0README.md\0R087\0docs/old.md\0bin/new.py\0D\0lib/gone.sh\0A\0skills/x/SKILL.md\0"
+        self.assertEqual(cm.parse_name_status(raw), [("M", "README.md"), ("R", "docs/old.md"),
+                                                     ("R", "bin/new.py"), ("D", "lib/gone.sh"),
+                                                     ("A", "skills/x/SKILL.md")])
         for broken in (b"R100\0only-one\0", b"?\0x\0", b"M\0"):
             with self.subTest(raw=broken), self.assertRaises(cm.DiffError):
                 cm.parse_name_status(broken)
+
+    def test_structural_changes_outside_documentation_trees_are_sensitive(self):
+        for status in ("A", "D", "R", "C", "T"):
+            for path in ("skills/x/SKILL.md", "README.md", "agents/a/Role.md", "scaffolding/t/x.txt",
+                         "docs-extra/a.md", ".github/skills/li-x/SKILL.md"):
+                with self.subTest(status=status, path=path):
+                    self.assertTrue(cm.is_platform_sensitive(path, status))
+            for path in ("docs/a.md", ".claude/plans/x.md", "presentations/deck/index.html"):
+                with self.subTest(status=status, path=path):
+                    self.assertFalse(cm.is_platform_sensitive(path, status))
+        # Content rules still apply inside the documentation trees.
+        self.assertTrue(cm.is_platform_sensitive("docs/run.sh", "A"))
+        self.assertTrue(cm.is_platform_sensitive(".claude/plans/work.json", "D"))
+        self.assertFalse(cm.is_platform_sensitive("skills/x/SKILL.md", "M"))
 
 
 class DecisionTests(unittest.TestCase):
@@ -128,6 +147,20 @@ class DecisionTests(unittest.TestCase):
         summary.encode("utf-8")
         self.assertIn("&lt;b&gt;", summary)
         self.assertIn("\\udcff", summary)
+
+    def test_structural_markdown_changes_follow_the_documentation_trees(self):
+        cases = {
+            "added skill": ([("A", "skills/x/SKILL.md")], "full"),
+            "renamed doc": ([("R", "docs/a.md"), ("R", "docs/b.md")], "ubuntu"),
+            "deleted plan": ([("D", ".claude/plans/x.md")], "ubuntu"),
+            "modified skill": ([("M", "skills/x/SKILL.md")], "ubuntu"),
+            "doc renamed out of docs": ([("R", "docs/a.md"), ("R", "skills/a.md")], "full"),
+        }
+        for name, (changes, tier) in cases.items():
+            with self.subTest(case=name):
+                self.assertEqual(cm.decide("pull_request", "[]", "b", "h", fixed(changes)).tier, tier)
+        added = cm.decide("pull_request", "[]", "b", "h", fixed([("A", "skills/x/SKILL.md")]))
+        self.assertEqual(added.triggers, ("skills/x/SKILL.md (A)",))
 
     def test_full_matrix_label_forces_full_even_for_docs(self):
         decision = cm.decide("pull_request", '["docs", "ci:full-matrix"]', "b", "h", fixed(["README.md"]))
@@ -216,6 +249,20 @@ class RealGitTests(unittest.TestCase):
                                                "--base", self.repo.base, "--head", head)
         self.assertEqual((tier, planned["os"]), ("ubuntu", ["ubuntu-latest"]))
         self.assertIn("documentation", summary)
+
+    def test_structural_markdown_branches_follow_the_documentation_trees(self):
+        guide = "# Guide\n\nA documentation page that is renamed in one test.\n"
+        cases = (("add-skill", {"skills/y/SKILL.md": "# New skill\n"}, "full"),
+                 ("rename-doc", {"docs/a.md": None, "docs/b.md": guide}, "ubuntu"),
+                 ("delete-plan", {".claude/plans/x.md": None}, "ubuntu"),
+                 ("modify-skill", {"skills/x/SKILL.md": "# Skill, edited\n"}, "ubuntu"))
+        for name, changes, expected in cases:
+            with self.subTest(branch=name):
+                head = self.repo.branch(name, changes)
+                tier, _, summary = self.run_main("--event", "pull_request", "--labels", "[]",
+                                                 "--base", self.repo.base, "--head", head)
+                self.assertEqual(tier, expected, summary)
+        self.assertIn("R", self.repo.git("diff", "--name-status", "-M", self.repo.base, "rename-doc")[:1])
 
     def test_code_branch_and_deleted_code_are_full(self):
         for name, changes in (("code", {"bin/tool.sh": "#!/usr/bin/env bash\necho changed\n"}),
