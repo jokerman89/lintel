@@ -37,7 +37,7 @@ python3 bin/li-adapter.py check --target ../your-repo
 Substitute the selected surface. Repeat `--client` to share one source bundle across a team:
 
 ```bash
-python3 bin/li-adapter.py init --client copilot-app --client gemini-cli --target ../your-repo
+python3 bin/li-adapter.py init --client copilot-app --client cursor-ide --target ../your-repo
 ```
 
 On Windows, use Python 3.9+ through its actual executable, for example:
@@ -130,8 +130,8 @@ an advisory pass.
 
 ## Existing routes and troubleshooting
 
-The Copilot native kit/plugin, Claude plugin/skills/agents/hooks, Codex and Cursor manifests,
-Gemini extension and OpenCode manual guide remain available. Choose intentionally to avoid
+The Copilot native kit/plugin, Claude plugin/skills/agents/hooks and the Codex and Cursor
+manifests remain available. Choose intentionally to avoid
 duplicate skills or shadowed project definitions. Global Bash/PowerShell installers still
 exist as a separate operator-chosen scope, not a prerequisite or side effect of this path.
 

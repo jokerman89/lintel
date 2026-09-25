@@ -5,7 +5,7 @@ description: Use on first run to choose a useful task, inspect the actual client
 color: green
 tools: Read, Bash
 voice: internal
-cli_support: [claude-code, codex, copilot, cursor, gemini, opencode, droid]
+cli_support: [claude-code, codex, copilot, cursor]
 necessity: OPTIONAL
 gap_if_skipped: "The operator has no guided first task or clear distinction between installed resources, host capabilities and observed execution."
 navigation:

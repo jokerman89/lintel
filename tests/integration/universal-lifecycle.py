@@ -493,6 +493,8 @@ class ProfileLifecycle(LifecycleFixture):
         report = json.loads(result.stdout)
         self.assertIn("shared/session-digest/run.sh", report["hooks"]["modified"])
         self.assertEqual(report["host_activation"], "unverified")
+        self.assertEqual([row["name"] for row in report["installed_clis"]],
+                         ["claude", "codex", "cursor", "copilot"])
         self.assertEqual(len(report["cached_plugins"]), 2)
         self.assertTrue(all(row["activation"] == "unverified" for row in report["cached_plugins"]))
         self.assertEqual(report["hook_execution"], "unverified")

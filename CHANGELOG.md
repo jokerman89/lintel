@@ -50,6 +50,12 @@ content-bound review evidence and explicit limits on what each check proves.
 
 ### Removed
 
+- Client support outside GitHub Copilot, Claude, Codex and Cursor (ADR-0035). The registry drops
+  the Gemini, OpenCode, Factory Droid, Antigravity, Kiro, Devin/Cascade, Junie, Cline, Continue and
+  Aider records (24 surfaces). The Gemini extension (`gemini-extension.json`, `GEMINI.md`), the
+  OpenCode guide (`.opencode/INSTALL.md`) and the Gemini and Droid routes in `bin/li-update` are
+  deleted. Other hosts can still use the explicit manual route (`other`); see the
+  [migration index](docs/migrations/_INDEX.md).
 - The pypdf-based PDF reader (`skills/generate-pdf/scripts/check_pdf.py`) and its tests. Lintel has
   no PDF reader and depends on no PDF library. `generate-pdf` still prepares HTML and prints through
   the accepted browser route, but the produced PDF's text, pages and rendering are unverified

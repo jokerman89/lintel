@@ -10,8 +10,6 @@ cli_support:
     level: full
   - cli: codex
     level: full
-  - cli: gemini
-    level: full
 ---
 
 You are the `design-dna` module — Lintel's design knowledge + retrieval layer (ADR-0015/0016).

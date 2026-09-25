@@ -5,7 +5,7 @@ description: Use for an explicitly authorized Codex outside opinion on a diff, p
 color: purple
 tools: Bash, Read
 voice: internal
-cli_support: [claude-code, codex, copilot, cursor, gemini, opencode, droid]
+cli_support: [claude-code, codex, copilot, cursor]
 ---
 
 # Outside opinion with Codex

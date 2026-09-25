@@ -6,9 +6,9 @@
 
 One memory home per repo: `.claude/memory/`. `MEMORY.md` is the index (≤200 lines — Claude
 Code's native auto-memory loads it for free at session start, and writes there too via the
-`autoMemoryDirectory` pointer). The other 7 CLIs get the same content through the
-`session-digest` hook + the CLAUDE.md/AGENTS.md ritual. One store, two read paths, zero
-duplication.
+`autoMemoryDirectory` pointer). Copilot, Codex and Cursor get the same content through the
+CLAUDE.md/AGENTS.md ritual, which reads the files that the `session-digest` hook summarizes.
+One store, two read paths, zero duplication.
 
 ## What is mechanical (not prose)
 

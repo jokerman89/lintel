@@ -59,21 +59,13 @@ printf '%s\\t%s\\t%s\\n' "$tool" "$PWD" "$*" >> "$STUB_LOG"
 case "$tool:$*" in
   "git:fetch -q origin") exit "${FETCH_STATUS:-0}" ;;
   "git:pull --ff-only -q") exit "${PULL_STATUS:-0}" ;;
-  "gemini:extensions list")
-    printf '%s\\n' "${GEMINI_LIST_TEXT:-li}"
-    exit "${GEMINI_LIST_STATUS:-0}" ;;
   "copilot:plugin list")
     printf '%s\\n' "${COPILOT_LIST_TEXT:-li}"
     exit "${COPILOT_LIST_STATUS:-0}" ;;
-  "droid:plugin list")
-    printf '%s\\n' "${DROID_LIST_TEXT:-li}"
-    exit "${DROID_LIST_STATUS:-0}" ;;
-  "gemini:extensions update li") exit "${GEMINI_STATUS:-0}" ;;
   "copilot:plugin update li@jokerman-lintel") exit "${COPILOT_STATUS:-0}" ;;
   "copilot:plugin install li@jokerman-lintel --force")
     [ "${INSTALL_STATUS:-0}" = 0 ] || exit "$INSTALL_STATUS"
     printf 'installed\\n' > "$STUB_INSTALL_MARKER" ;;
-  "droid:plugin update li") exit "${DROID_STATUS:-0}" ;;
   *) printf 'ERROR: unexpected stub invocation: %s %s\\n' "$tool" "$*" >&2; exit 99 ;;
 esac
 """
@@ -951,6 +943,8 @@ class Updater(Fixture):
         self.stubs = self.base / "stub commands"
         self.log = self.base / "update-calls.txt"
         self.install_marker = self.base / "fallback-installed"
+        # gemini and droid stay on PATH as decoys: their update routes were removed (ADR-0035),
+        # so any invocation reaches the stub's unexpected-call branch and fails the run.
         for tool in ("git", "gemini", "copilot", "droid", "claude", "codex", "cursor"):
             path = self.stubs / tool
             write(path, UPDATE_STUB)
@@ -977,20 +971,19 @@ class Updater(Fixture):
             )
         ]
 
-    def assert_other_hosts_run(self) -> None:
-        for command in (
-            "gemini extensions update li", "copilot plugin update li@jokerman-lintel",
-            "droid plugin update li",
-        ):
-            self.assertIn(command, self.calls())
+    def assert_scriptable_host_runs(self) -> None:
+        self.assertIn("copilot plugin update li@jokerman-lintel", self.calls())
+        self.assertFalse(any(call.startswith(("gemini ", "droid ")) for call in self.calls()), self.calls())
 
     def test_success_preserves_all_hosts_and_operator_guidance(self) -> None:
         result = self.update()
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertEqual(self.calls()[:2], ["git fetch -q origin", "git pull --ff-only -q"])
-        self.assert_other_hosts_run()
+        self.assert_scriptable_host_runs()
         for guidance in ("claude code:", "codex:", "cursor:", "li-doctor"):
             self.assertIn(guidance, result.stdout)
+        for removed in ("gemini:", "droid:"):
+            self.assertNotIn(removed, result.stdout)
         for line in self.log.read_text().splitlines():
             tool, cwd, _ = line.split("\t")
             expected = "/synthetic home/.lintel" if tool == "git" else "/target project"
@@ -1000,72 +993,53 @@ class Updater(Fixture):
         result = self.update(FETCH_STATUS="17")
         self.assertEqual(result.returncode, 17, result.stdout + result.stderr)
         self.assertNotIn("git pull --ff-only -q", self.calls())
-        self.assert_other_hosts_run()
+        self.assert_scriptable_host_runs()
         self.assertNotIn("updated", result.stdout)
         self.assertIn("failed", result.stderr.lower())
 
     def test_pull_failure_is_reported_and_hosts_continue(self) -> None:
         result = self.update(PULL_STATUS="18")
         self.assertEqual(result.returncode, 18, result.stdout + result.stderr)
-        self.assert_other_hosts_run()
+        self.assert_scriptable_host_runs()
         self.assertNotIn("updated", result.stdout)
-
-    def test_gemini_failure_cannot_become_success(self) -> None:
-        result = self.update(GEMINI_STATUS="21")
-        self.assertEqual(result.returncode, 21, result.stdout + result.stderr)
-        self.assert_other_hosts_run()
-        self.assertIn("failed", result.stderr.lower())
 
     def test_copilot_failure_runs_and_verifies_install_fallback(self) -> None:
         result = self.update(COPILOT_STATUS="22")
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn("copilot plugin install li@jokerman-lintel --force", self.calls())
         self.assertEqual(self.install_marker.read_text(), "installed\n")
-        self.assert_other_hosts_run()
+        self.assert_scriptable_host_runs()
 
     def test_copilot_failed_fallback_is_not_success(self) -> None:
         result = self.update(COPILOT_STATUS="22", INSTALL_STATUS="23")
         self.assertEqual(result.returncode, 23, result.stdout + result.stderr)
         self.assertFalse(self.install_marker.exists())
-        self.assert_other_hosts_run()
-
-    def test_droid_failure_is_not_discarded(self) -> None:
-        result = self.update(DROID_STATUS="24")
-        self.assertEqual(result.returncode, 24, result.stdout + result.stderr)
+        self.assert_scriptable_host_runs()
         self.assertIn("failed", result.stderr.lower())
 
     def test_first_unrecovered_failure_survives_later_results(self) -> None:
-        result = self.update(FETCH_STATUS="17", GEMINI_STATUS="21", DROID_STATUS="24")
+        result = self.update(FETCH_STATUS="17", COPILOT_STATUS="22", INSTALL_STATUS="23")
         self.assertEqual(result.returncode, 17, result.stdout + result.stderr)
-        self.assert_other_hosts_run()
+        self.assert_scriptable_host_runs()
+        self.assertIn("copilot plugin install li@jokerman-lintel --force", self.calls())
 
-    def test_failed_host_discovery_is_explicit_and_other_hosts_continue(self) -> None:
-        for host in ("GEMINI", "COPILOT", "DROID"):
-            with self.subTest(host=host):
-                result = self.update(**{f"{host}_LIST_STATUS": "25"})
-                self.assertEqual(result.returncode, 25, result.stdout + result.stderr)
-                self.assertIn("failed", result.stderr.lower())
-                updates = [call for call in self.calls() if " update " in call]
-                self.assertEqual(len(updates), 2, self.calls())
-                self.assertFalse(any(call.startswith(host.lower()) for call in updates))
+    def test_failed_host_discovery_is_explicit_and_guidance_continues(self) -> None:
+        result = self.update(COPILOT_LIST_STATUS="25")
+        self.assertEqual(result.returncode, 25, result.stdout + result.stderr)
+        self.assertIn("failed", result.stderr.lower())
+        self.assertFalse(any(" update " in call for call in self.calls()), self.calls())
+        for guidance in ("claude code:", "codex:", "cursor:"):
+            self.assertIn(guidance, result.stdout)
 
     def test_absent_plugins_are_skipped_without_invented_updates(self) -> None:
-        result = self.update(
-            GEMINI_LIST_TEXT="example", COPILOT_LIST_TEXT="example", DROID_LIST_TEXT="example"
-        )
+        result = self.update(COPILOT_LIST_TEXT="example")
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertFalse(any(" update " in call for call in self.calls()))
 
     def test_dry_run_never_invokes_mutating_commands(self) -> None:
-        result = self.update(
-            "--dry-run", FETCH_STATUS="17", GEMINI_STATUS="21",
-            COPILOT_STATUS="22", DROID_STATUS="24",
-        )
+        result = self.update("--dry-run", FETCH_STATUS="17", COPILOT_STATUS="22")
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertEqual(
-            self.calls(),
-            ["gemini extensions list", "copilot plugin list", "droid plugin list"],
-        )
+        self.assertEqual(self.calls(), ["copilot plugin list"])
         self.assertIn("[dry-run]", result.stdout)
         self.assertFalse(self.install_marker.exists())
 
@@ -1075,7 +1049,7 @@ class Updater(Fixture):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertNotIn("git fetch -q origin", self.calls())
         self.assertIn("not a git repo", result.stdout)
-        self.assert_other_hosts_run()
+        self.assert_scriptable_host_runs()
 
 
 if __name__ == "__main__":

@@ -158,7 +158,7 @@ cmd_layers() {
     fi
   done
 
-  # v3: also check skills/ + agents/ + hooks/ + 7 plugin manifests at repo root
+  # v3: also check skills/ + agents/ + hooks/ + 6 plugin manifests at repo root
   if [ -d "$REPO_ROOT/skills" ] && [ -d "$REPO_ROOT/agents" ] && [ -d "$REPO_ROOT/hooks" ]; then
     ok "v3 plugin-manifest layout present (skills/ + agents/ + hooks/ at repo root)"
   else
@@ -371,8 +371,6 @@ cmd_plugin_manifests() {
     ".cursor-plugin/plugin.json"
     ".github/plugin/plugin.json"
     ".github/plugin/marketplace.json"
-    "gemini-extension.json"
-    ".opencode/INSTALL.md"
   )
   local missing=0
   for m in "${manifests[@]}"; do
@@ -408,7 +406,7 @@ cmd_plugin_manifests() {
 
   # Also check root entrypoint files
   hdr "Root entrypoint files (v3)"
-  for f in CLAUDE.md AGENTS.md GEMINI.md; do
+  for f in CLAUDE.md AGENTS.md; do
     if [ -f "$REPO_ROOT/$f" ]; then
       ok "$f"
     else

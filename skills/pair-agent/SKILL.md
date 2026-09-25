@@ -5,7 +5,7 @@ description: Use to pair with an available specialist context or a durable exter
 color: green
 tools: Read, Bash, Grep, Glob
 voice: internal
-cli_support: [claude-code, codex, copilot, cursor, gemini, opencode, droid]
+cli_support: [claude-code, codex, copilot, cursor]
 ---
 
 # /pair-agent

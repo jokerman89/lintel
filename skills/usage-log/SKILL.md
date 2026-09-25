@@ -66,7 +66,7 @@ The foundation that `/li:maintenance` (5.3) and `/li:catalog` (1.6 trends) build
 - `skill` — frontmatter `name:` value (the one required k=v)
 - `mode` — invocation mode if relevant ("full", "brief", "section:<x>") — optional
 - `tokens_est` — heuristic estimate (input + output, not cached) — optional
-- `cli` — claude-code | codex | cursor | gemini | copilot-cli | droid — optional
+- `cli` — claude-code | codex | cursor | copilot-cli — optional
 
 ## Workflow
 

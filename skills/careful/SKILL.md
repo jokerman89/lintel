@@ -7,7 +7,7 @@ tools: Read, Bash, Grep, Glob, Edit
 voice: internal
 necessity: OPTIONAL
 gap_if_skipped: "High-stakes mutations run at normal cadence — no per-mutation confirm, no stated rollback path, no elevated audit. Fine for routine work; risky for irreversible or production-adjacent changes."
-cli_support: [claude-code, codex, copilot, cursor, gemini, opencode, droid]
+cli_support: [claude-code, codex, copilot, cursor]
 ---
 
 # /li:careful
