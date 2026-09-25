@@ -114,6 +114,8 @@ This is where the repo's central rule lives: *if a guarantee is only prose, it i
 | `scale-estimator.sh` | sizing, and the calibration path that turns token estimates from guesses into measurements |
 | `client_capabilities.py` and `cli-tiers.sh` | one validated surface/operation registry, explicit session-binding selection and conservative legacy/table views |
 | `swarm_contract.py` and `li-swarm.py` | validate opt-in swarm topology, per-lane scope and close evidence without executing artifact content |
+| `review_method.py` and `li-review-packet.py` | the shared Review Method: standing-question selection, one packet body for single and panel reviews, coverage checks and the single decision rule |
+| `mars_contract.py` and `li-mars.py` | MARS roster, offer gate and panel state: input snapshot binding, identity evidence, owned-session close plans and inspection records; never dispatches |
 
 ---
 

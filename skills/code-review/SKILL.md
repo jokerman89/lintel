@@ -103,6 +103,16 @@ are not valid evidence.
 - Sanity scan on diff content (secrets, customer-data, PII) — fast pre-check. Blocks if hit.
 - `cli_support` + `voice` frontmatter validation on any new/changed skill or agent files in the diff.
 
+## Optional MARS panel
+
+For a high-risk diff (auth, data loss, concurrency, migration or a security boundary),
+offer [MARS](../mars/SKILL.md) once when `li-mars.py offer` (caller `code-review`) returns 0.
+The panel sends the shared [Review Method](../review/references/method.md) packet (kind
+`code-review`, stage `quality`) and binds the same selection; this workflow's own single
+pass keeps its four dimensions until the quality consolidation adopts the method. Findings
+stay read-only inspection input; the large-diff Codex gate, required independence and the
+shared evidence gate are unchanged.
+
 ## Confidence scoring
 
 Every finding gets a 1-10 confidence:

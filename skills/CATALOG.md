@@ -5,9 +5,9 @@ CI checks this file for drift; edit the source SKILL.md to change a description.
 
 Use `/li:<name>` in a Lintel plugin, or ask Copilot to run the named Lintel skill.
 
-Total skills: 127
+Total skills: 128
 
-## foundation layer (127 skills)
+## foundation layer (128 skills)
 
 | Skill | Description |
 |---|---|
@@ -87,6 +87,7 @@ Total skills: 127
 | [`/li:lessons-surface`](lessons-surface/SKILL.md) | Use before or during a task to pull up prior lessons relevant to it — searches the lessons store by keyword and context… |
 | [`/li:maintenance`](maintenance/SKILL.md) | Use for on-demand storage/context guidance, scoped path diagnostics and labeled usage estimates without treating partia… |
 | [`/li:make-pdf`](make-pdf/SKILL.md) | Convert an authorized URL, Markdown file or HTML through actual browser print, preserving source and separating text/pa… |
+| [`/li:mars`](mars/SKILL.md) | Use when a problem, plan, spec, implementation or review deserves a deliberate multi-model adversarial second look — ru… |
 | [`/li:migrations`](migrations/SKILL.md) | Read the installed-source migration catalog against the selected target, preserving overdue, unknown and historical rec… |
 | [`/li:office-hours`](office-hours/SKILL.md) | Use to turn a rough problem statement into a structured, decision-gated design doc ready for engineering review. Reach … |
 | [`/li:open-managed-browser`](open-managed-browser/SKILL.md) | Use to open an explicitly owned browser session for operator debugging, or check a real provider without touching perso… |

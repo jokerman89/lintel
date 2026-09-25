@@ -366,6 +366,21 @@ approved, ask through the actual host question channel:
 - B) REDIRECT — specific feedback (loop back)
 - C) PAUSE — save state for later, don't proceed
 - D) ABORT — close plan, status BLOCKED
+- E) MARS FIRST — only when the MARS offer gate below passed
+
+**Optional MARS (offered at most once).** Before asking, build a request for
+`li-mars.py offer` ([MARS](../mars/SKILL.md)): caller `plan`, live host facts and any
+recorded decline; inside a cycle add the cycle's actual selected `route` and checkpoint
+`PLAN-approval`, so only a full nine-phase cycle can pass. Exit 3 means no option E and
+no mention. When existing approval is retained, ask the offer alone instead of re-asking
+approval. Keep the answer from the moment it is given: every later approval question in
+this plan run (after REDIRECT or after a MARS run) sends `already_offered: true`, plus
+`declined: true` after a no, so option E never reappears. On PAUSE, put
+`mars_offer=<accepted|declined>` on the entry that records the pause (inside a cycle, the
+`cycle_paused: true` state entry) so a resumed plan does not re-offer. With consent, MARS reviews the
+plan with the shared review method; its findings return to Step 9 fix/accept handling,
+then approval is asked again. Record `mars_offer=<accepted|declined>` on the Step 12 PLAN
+entry so no later phase re-offers. `--auto` and silence never select E.
 
 If A: mark the reviewed trio APPROVED, finalize it and write the checkpoint. Only declare
 status DONE after the artifact checks below pass. Until approval, all three remain DRAFT.
@@ -516,7 +531,8 @@ state_append PLAN DONE next=BUILD "work_map_path=$LINTEL_WORK_MAP" \
   "plan_path=${plan_path:?mapped plan}" "tasks_path=${tasks_path:?mapped tasks}" \
   "spec_draft_path=${spec_path:?mapped spec}" "prompt_path=${prompt_path:?mapped handoff}" \
   "tasks_count=${tasks_count:?original leaf count}" \
-  "tokens_est=${tokens_est:?labeled estimate}" "tokens_est_basis=$tokens_est_basis"
+  "tokens_est=${tokens_est:?labeled estimate}" "tokens_est_basis=$tokens_est_basis" \
+  "mars_offer=${mars_offer:-not-offered}"
 ```
 
 ## Status protocol

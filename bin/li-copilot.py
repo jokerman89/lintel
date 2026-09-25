@@ -97,6 +97,7 @@ WORKFLOWS = {
     "resume": "Use to resume an interrupted initiative from its saved plan, state and handoff.",
     "spec-kit": "Use when a project uses GitHub Spec Kit to connect its requirements and tasks to Lintel build and review evidence.",
     "swarm": "Use when an approved mapped plan opts in to coordinated multi-agent execution with explicit ownership, attributable isolation and durable evidence.",
+    "mars": "Use when a problem, plan, spec, implementation or review needs a deliberate multi-model adversarial review with bounded rounds and preserved dissent.",
 }
 AGENTS = {
     "planner": ("Plan requirements, specifications and executable build cards for a scoped initiative.", "plan"),
@@ -131,6 +132,21 @@ SWARM_RESOURCES = (
     "scaffolding/01-foundation/templates/swarm/agent-brief.template.md",
     "scaffolding/01-foundation/templates/swarm/agent-report.template.md",
     "scaffolding/01-foundation/templates/swarm/agent-review.template.md",
+)
+# MARS and the shared Review Method it sends: the workflow, its helpers and their data.
+MARS_RESOURCES = (
+    "skills/mars/SKILL.md",
+    "skills/mars/references/protocol.md",
+    "skills/mars/references/integration.md",
+    "skills/review/references/method.md",
+    "bin/li-mars.py",
+    "bin/li-review-packet.py",
+    "lib/mars_contract.py",
+    "lib/mars-defaults.json",
+    "lib/mars-schema.json",
+    "lib/review_method.py",
+    "lib/review-method-schema.json",
+    "lib/review-questions.json",
 )
 ADAPTER_RESOURCES = (
     "lib/client_capabilities.py", "lib/cli-tiers.yaml", "lib/cli-tiers.sh",
@@ -689,6 +705,10 @@ def generate(source: Path, target: Path,
         data = read_file(source, relative)
         if not local and files.get(f"{BUNDLE}/{relative}") != data:
             raise ValueError(f"Swarm resource was not bundled: {relative}")
+    for relative in MARS_RESOURCES:
+        data = read_file(source, relative)
+        if not local and files.get(f"{BUNDLE}/{relative}") != data:
+            raise ValueError(f"MARS resource was not bundled: {relative}")
     for relative in ADAPTER_RESOURCES:
         data = read_file(source, relative)
         if not local and files.get(f"{BUNDLE}/{relative}") != data:

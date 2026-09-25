@@ -337,6 +337,12 @@ Surface the task count and labeled estimate. Ask only if the actual plan or reso
 boundary requires a new decision. The estimate stays UNCALIBRATED without measured
 samples; it is neither current context usage nor a known model capacity.
 
+**MARS is offered once, at PLAN.** PLAN's approval gate (Step 10) owns the cycle's single
+optional [MARS](../mars/SKILL.md) offer, and only for the canonical nine-phase route after
+every mode, range, skip and reroute. Surface PLAN's recorded `mars_offer` with the plan
+signals when present. This gate never makes, repeats or upgrades that offer; `--auto`,
+silence and an unknown host capability never count as acceptance.
+
 If the approved work map selected the swarm profile, validate it and its coordination document at
 this same boundary, surface the ready frontier and actual host tier, then hand BUILD to
 `/li:swarm run`. Validation failure blocks BUILD and returns to PLAN. If no valid swarm fields are
