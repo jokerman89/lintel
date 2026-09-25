@@ -20,9 +20,10 @@ It is **not** Swarm, not implementation fan-out, not a scheduler and not a relea
 ## When to use
 
 - Operator asks for MARS, a multi-model review, a second/outside opinion or a model panel.
-- A full `/li:cycle` reaches its PLAN approval gate and the offer gate says `offer: true`.
-- A standalone review workflow (`review`, `code-review`, `plan-eng-review`, `define`)
-  offers it once for a concrete target on a capable host.
+- A full `/li:cycle` reaches its pre-BUILD gate (or `/li:plan` approval) and the offer gate
+  says `offer: true`.
+- A standalone review workflow (`review`, `code-review`) offers it once for a concrete
+  target on a capable host.
 - High-stakes or easily-fooled subjects: auth, data loss, concurrency, migration plans,
   security boundaries, specs with irreversible decisions.
 
@@ -42,7 +43,7 @@ It is **not** Swarm, not implementation fan-out, not a scheduler and not a relea
 | Reasoning effort | `xhigh` (extra high) | clamped to the model's highest supported at or below; recorded |
 | Context | `long_context` (1M) | falls back to default where unsupported; recorded |
 | Rounds | blind pass + one challenge **only when contested** | max 2 rounds, max participants × 2 calls |
-| Transport | `subagent` (cheapest); `nested-session` when the operator wants visible sessions | nested sessions are closed after collection |
+| Transport | `subagent` (nothing to close); `nested-session` when the operator wants visible sessions | similar input cost per call in a large repository (RM9); nested sessions are closed after collection |
 | Offers | once, at the full-cycle PLAN gate or once per standalone review | never re-offered after decline; auto mode is not consent |
 | Output | findings, dissent, gaps, identity evidence | `release_clearance: false` always |
 
@@ -73,15 +74,20 @@ roster, target or larger budget needs new consent. An existing explicit request 
 
 ### 3. Freeze the brief and open the panel
 
-Write the subject brief to `inputs/brief.md`: subject (inline excerpt, diff or artifact paths
-at a commit), the questions and the round-1 body from [protocol.md](references/protocol.md).
-Keep mutable records **outside** anything the brief selects for content binding; if the
-operator's scope includes `.claude/runtime/`, narrow it deliberately or store records
-elsewhere — never silently exclude.
+Render the subject once with the shared [Review Method](../review/references/method.md)
+(see [protocol.md](references/protocol.md) "Round 1") into `inputs/brief.md` and
+`inputs/method.json`. For repository content, bind the exact selection with `--select`
+(repeatable; `--base` defaults to `HEAD`): `panel init` snapshots it through the shared
+content-bound review contract into `inputs/snapshot.json` and records the selected profile
+reference when one exists. Records that would sit inside the selection (for example a
+repository-root selection with records under `.claude/runtime/`) are refused with
+`output_overlaps_selection` before anything is written; store them outside the selection.
+The selection is never narrowed or excluded for you.
 
 ```bash
 python3 "$src/bin/li-mars.py" panel init --panel "$run/records/panel.json" --id "$panel_id" \
-  --owner "$HOST_SESSION_ID" --brief "$run/inputs/brief.md" --kind code-review \
+  --owner "$HOST_SESSION_ID" --brief "$run/inputs/brief.md" --kind implementation \
+  --method-meta "$run/inputs/method.json" --select <path> [--select <path>] \
   --subject-ref "<path, PR or excerpt label>" --consent "<operator turn reference>" \
   --requested-by "operator via $HOST_SESSION_ID" --trigger explicit --caller standalone \
   --surface copilot-app            # repository/branch/commit default to read-only git facts
@@ -89,7 +95,8 @@ python3 "$src/bin/li-mars.py" panel init --panel "$run/records/panel.json" --id 
 
 The panel's `origin` (who requested it, trigger, caller, coordinator, surface, repository,
 branch, commit, optional cycle/work map) feeds every header. `brief` refuses to render
-without it.
+without it, refuses a round-1 body that differs from the frozen brief, and refuses to
+dispatch after the bound input changed (`panel verify-input` reports the changed paths).
 
 ### 4. Dispatch the blind pass
 
@@ -137,13 +144,15 @@ refute with evidence and summarize stances in the report header's `positions` fi
 
 ### 7. Synthesize
 
-Open the synthesis with `panel synthesis-header` (a ` ```mars-synthesis ` block: status,
-requester, coordinator, repository/commit, subject, requested vs verified models,
-downgrades, failed slots, calls, `release_clearance: false`). Then adjudicate against the
+Open the synthesis with `panel synthesis-header --adjudicated <p1,p2,p3>` (a
+` ```mars-synthesis ` block: status, requester, coordinator, repository/commit, subject,
+requested vs verified models, downgrades, failed slots, calls, input verification, profile,
+coverage, the shared-rule `outcome`, `release_clearance: false`). Then adjudicate against the
 source, not the head count: agreed findings (with the strongest evidence), disputed
 findings with each side, rejected claims and why, unique catches (single-reviewer findings
 that survive challenge are often the most valuable), gaps nobody covered, and
-recommended checks.
+recommended checks. `panel inspection --synthesis <file> --out <records file>` emits the
+content-bound inspection record REVIEW consumes; it refuses a changed input.
 
 ### 8. Close only what you spawned
 
@@ -175,12 +184,16 @@ the owner. Subagents need no close. Abort path: `--include-incomplete`, after re
 
 ## Integration
 
-- Offer hook points for cycle/plan/review/define/plan-eng-review/code-review:
-  [integration.md](references/integration.md).
-- Lessons from Microsoft's MDASH on catching bugs inline:
-  `.claude/plans/mars/mdash-lessons.md`.
+- Offer points: full `/li:cycle` pre-BUILD gate, `/li:plan` approval option E, `/li:review`
+  Step 6b (panel mode) and `/li:code-review`. Snippets and the pending consolidated planning
+  hooks: [integration.md](references/integration.md).
+- One method: [Review Method](../review/references/method.md) and
+  `lib/review-questions.json`; single reviews and panels send the same packet body.
+- Decision: [ADR-0034](../../.claude/decisions/0034-mars-multi-model-review.md).
+  Lessons from Microsoft's MDASH on catching bugs inline: `.claude/plans/mars/mdash-lessons.md`.
 - Evidence contract: MARS output is inspection data only. Strict review, QA and SHIP stay
-  with `/li:review`, `/li:ship` and the content-bound review evidence.
+  with `/li:review`, `/li:ship` and the content-bound review evidence. In REVIEW panel mode,
+  REVIEW records its own decision from the adjudicated result.
 
 ## Voice tier behavior
 
