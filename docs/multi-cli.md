@@ -82,7 +82,7 @@ invoke it depends on the route, not on a preferred client:
 | Generated repository wrappers (Claude Code, Codex, Copilot, Cursor, Gemini CLI, OpenCode and other documented roots) | The `li-<skill>` wrapper through the host's own skill invocation, for example `/li-plan` where slash invocation exists, a `$li-plan` reference or the skills UI |
 | Universal manual handoff | Ask the host to read `.github/lintel/START.md` and the canonical `skills/<skill>/SKILL.md` |
 
-Wrappers are generated for the core workflow entry points (welcome, cycle phases, resume, spec-kit and swarm). Other catalog workflows are read
+Wrappers are generated for the core workflow entry points (welcome, cycle phases, resume, spec-kit, swarm and mars). Other catalog workflows are read
 from their canonical file on demand. Deeper documents use `/li:<skill>` notation; translate
 it to the route you actually use. Former entry names from the workflow consolidation are
 mapped in the [native workflow migration](migrations/2026-09-25-native-workflows.md);
