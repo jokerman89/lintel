@@ -645,13 +645,13 @@ all-client acceptance, the strict full suite or initiative release clearance.
   - [x] A23.3.s3 Reconcile remaining original package and caller evidence against this refusal contract before whole-parent acceptance.
   - [x] A23.3.s4 Reproduce the same hidden-skip behavior in the actual hook-input and plugin-manifest guards.
   - [x] A23.3.s5 Report unavailable extraction/parsing/field coverage explicitly, retain available checks and reject false valid-JSON claims.
-- [ ] A23.4 Run stable-tree generated checks, strict suite and separate consumer installation.
+- [x] A23.4 Run stable-tree generated checks, strict suite and separate consumer installation.
   - [x] A23.4.g1 Render schema references from actual pack/envelope contracts; reject invalid source rather than emitting empty or stale metadata.
   - [x] A23.4.g2 Regenerate and check the joined catalog, wiki, README and repository adapter without hand-editing their output.
   - [x] A23.4.g3 Preflight accepted shared helper dependencies before consumer writes and exercise installed-source failures.
   - [x] A23.4.p1 Independently accept the shared native-path core/extraction and its source closure.
   - [x] A23.4.p2 Verify accepted P10 direct consumers and full default installed init/check/recovery at original paths.
-  - [ ] A23.4.ci Pass the strict suite in the delivery PR's CI on Linux, macOS and Windows, with no failed, skipped or partial entry.
+  - [x] A23.4.ci Pass the strict suite in the delivery PR's CI on Linux, macOS and Windows, with no failed, skipped or partial entry.
 - [x] A23.5 Obtain independent final spec/quality review of exact integrated content.
 Acceptance: evidence category and limitations are explicit; existing useful tests remain.
 A23.5 closure (2026-09-24): the independent final reviewer `8df81ac8` (claude-opus-5.5) returns SPEC PASS,
@@ -664,6 +664,9 @@ Its Phase 3 addendum (2026-09-25, `reviews/A23.5-phase3-ci-ed91ef4.md`) covers t
 resolved correction of its own Phase 2 (A5-25). It binds CI run `36065850657`, whose test merge has
 exactly `ed91ef4f`'s tree. The binding carries to a later head only if that head changes nothing
 outside `.claude/` and its own CI run reproduces the outcome.
+Its post-merge Phase 4 addendum (`reviews/A23.5-phase4-removal-b7b245f.md`) covers the operator-ordered
+removal `d285a332..b7b245fa`: SPEC PASS, then QUALITY PASS. It has one P2 records finding (A5-35, the merge
+timing, recorded in `reports/final.md`) and four P3 advisories, and binds run `36108366549` (22/22 green).
 A23.4.g3 and A23.4.p2 closure (2026-09-24): the complete kit passes 50/50 on the integrated tree
 (`fin2-kit`, `3d7f1284`).
 - For g3, its data-driven missing-resource refusals cover every declared resource, reconciliations 6
@@ -681,6 +684,10 @@ A23.4 stays open until the operator decides on that dependency. The open leaf `A
 gate visible in the product reader's remaining-work view (A5-28). On 2026-09-25 the operator decided:
 remove it. ADR-0033 removes the pypdf-based reader and its tests, and `A23.4.ci` closes on the strict
 CI run of the resulting head.
+A23.4 closure (2026-09-25): run `36108366549` on the removal head `b7b245fa` passes all 22 jobs on
+Linux, macOS and Windows, with no failed, skipped or partial entry. PR #93 is merged into `main` as
+`80002ed4`. On the operator's rush order it merged before the three longest Windows jobs finished;
+all three passed afterwards.
 A23.1 and A23.2 closure (2026-09-24): the P14 A23 unit (`96bd5bab`, repair `88c92377`, report
 `d13455de`) passes `6310f7ad`'s complete SPEC and first whole QUALITY after the F1/F2 repair
 (`reviews/P14-a23-recheck-88c9237.md`), and is integrated in `8f418e68`.

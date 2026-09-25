@@ -37,6 +37,9 @@ On 2026-09-25 the operator answered both with one instruction: remove them from 
   boundaries and passing tests. No acceptance is claimed for them.
 - The initiative's count becomes 109 items, and A23.4 closes on the strict CI run of the
   resulting head.
+- **Scope reading.** "Remove this from Lintel" is read as removing the blockers: the unverifiable
+  requirements and the undeclared dependency, not the document skills. This is the coordinator's
+  interpretation of the instruction, and the operator may extend it to the skills themselves.
 
 ## Alternatives considered
 

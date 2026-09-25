@@ -2,13 +2,13 @@
 
 [Open the website](https://jokerman89.github.io/lintel/) · [Presentation](https://jokerman89.github.io/lintel/show/index.html) · [Technical reference](https://jokerman89.github.io/lintel/show/technical-reference.html)
 
-A 50-minute level-200 presentation for developers and architects, with a separate six-minute product launch and 18-minute technical module. English slides and speaker notes, three themes (Neon, Paper and Fluent), 59 screens including an untimed video welcome and optional material, and prepared browser demos.
+A 50-minute level-200 presentation for developers and architects, with a separate six-minute product launch and 18-minute technical module. English slides and speaker notes, three themes (Neon, Paper and Fluent), 60 screens including an untimed video welcome and optional material, and a three-arm kitchen-test guide.
 
 ## Use it
 
-Open `index.html` in a browser, or run `python -m http.server 8000` from this directory and visit http://127.0.0.1:8000. The Pages site also offers a downloadable offline kit. Core presentation and synthetic dashboards need no API keys or backend. External source links require internet access.
+Open `index.html` in a browser, or run `python -m http.server 8000` from this directory and visit http://127.0.0.1:8000. The Pages site also offers a downloadable offline kit. Slides and the protocol guide need no backend. The new kitchen dashboard runs from its separately supplied local harness. External source links require internet access.
 
-Slide controls: arrows/Next/Previous, O for overview, N for notes, F for fullscreen. The Neon/Paper/Fluent preference is stored in the browser. The two demo result apps retain their original design in all three themes.
+Slide controls: arrows/Next/Previous, O for overview, N for notes, F for fullscreen. The Neon/Paper/Fluent preference is stored in the browser. The new kitchen chapter uses all three themes; the separate local dashboard has its own design.
 
 ## Edit and publish
 
@@ -19,7 +19,7 @@ Slide controls: arrows/Next/Previous, O for overview, N for notes, F for fullscr
 - `site/portal.css`, `site/theme.css`, `site/theme.js`: homepage and themes.
 - `show/technical-reference.html`: source-backed inventory and reader.
 - `presenter/`: public delivery guides. Keep script/timings aligned when changing slides.
-- `comparison/`: prepared same-prompt comparison and original browser implementations.
+- `comparison/index.html`: new three-arm Service House protocol, prompt and brief. Old comparison source remains archived in Git but is excluded from the public allowlist.
 - `web/`: saved helper proof explorer; it does not execute a live agent.
 
 Create a branch, make a focused change, then from the repository root run `python presentations/tech-shots-2026-09-25/tools/build.py` (or `python tools/build.py` from this directory). This validates internal links and the publication boundary, builds `_site/`, and refreshes the offline zip. Preview `_site/` and check all three themes. Open a pull request; the same checks run there. Merging to main deploys the prepared `_site/` artifact via GitHub Pages.
@@ -28,9 +28,9 @@ Create a branch, make a focused change, then from the repository root run `pytho
 
 ## Keep the reference honest
 
-The technical content is pinned to Lintel commit `275a35447c4ad271e05816ade43ac48f1acec24f`. See `site/version.json` and the per-item source links. Helpers in the saved proof explorer use a separately recorded revision. When Lintel or a client changes, review affected support claims and their evidence before updating this snapshot. Existence of a file is not proof that a client executes it.
+The technical content is pinned to Lintel commit `80002ed4aaa8697ff658f50902a469c80e14856d`. See `site/version.json` and the per-item source links. Helpers in the saved proof explorer use a separately recorded revision. When Lintel or a client changes, review affected support claims and their evidence before updating this snapshot. Existence of a file is not proof that a client executes it.
 
-The A/B exhibit contains one prepared run per arm, with the same task, data and stakeholder answers. It is not evidence of a general productivity gain. Public handoff excerpts replace recording-host executable paths with portable prerequisites; input hashes remain the original recording provenance.
+The new kitchen test compares Naked Copilot, Lintel serial and Lintel + Swarming on32frozen requirements. No completed three-arm results are published. Reference/control scores are harness calibration only. The separate harness, private trial metadata and billing/session records are not bundled.
 
 This presentation lives in `presentations/tech-shots-2026-09-25/` inside the [Lintel repository](https://github.com/jokerman89/lintel). The Pages workflow publishes only the validated presentation output. Publishing the site does not release Lintel or bundle the planned product distributions.
 
@@ -40,7 +40,7 @@ Created by Johannes Åkerman. An independent open-source project. See `THIRD-PAR
 
 ## Source availability
 
-Revision 275a354 is an unreleased local development snapshot, not a publicly installable release. `reference-source/` contains only cited technical excerpts for changed files. Identical-file links resolve to public revision 28061e4. Source publication here does not publish or modify the Lintel development branch.
+Current reference uses merged80002ed4 on the0.11.0 beta development line. Historical excerpts in `reference-source/` retain their original pins and are labelled historical. Main/technical slides distinguish delivered adapters from observed host execution.127skills remain current; approximately80is a future consolidation target.
 
 ## Brand
 
