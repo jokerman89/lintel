@@ -40,7 +40,7 @@ Used by `generate` orchestrator as Step 8 (aggregate QA on all produced formats)
 
 - Voice-gate (vocabulary-blocklist) — that's the active pack's compliance gates (`resolve_pack_field compliance.hooks`; none by default). QA enforces broader checks; the voice-gate is the customer-share-specific block.
 - Brand-asset audit (template freshness across the brand directory) — that's a separate operator workflow
-- Pre-implementation design review — use `/li:plan-design-review` for design-doc-level review
+- Pre-implementation design review — use `/li:inspect --target plan --lens design`
 
 ## Inputs
 

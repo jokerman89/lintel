@@ -1,7 +1,7 @@
 # Feature Request — Brief Forge + standardized payload + 1:1 wiki
 
 **Compiled:** 2026-05-28 · from a design conversation between operator and Claude.
-**Status:** Standalone feature request. Consolidated into v4.0 via [`.claude/engineering/design-archive/lintel-v4.0-reframe-design.md`](../design/lintel-v4.0-reframe-design.md) Chapter 2.
+**Status:** Standalone feature request. Consolidated into v4.0 via [`.claude/engineering/design-archive/lintel-v4.0-reframe-design.md`](lintel-v4.0-reframe-design.md) Chapter 2.
 **Scope:** A universal hand-off gate that fires on every context boundary crossing, a standardized payload envelope for progress-tracking, and a generated 1:1 wiki that stays in sync with the system.
 
 **Locked decisions (operator):**
@@ -13,7 +13,7 @@
 
 ---
 
-> Original full text preserved in the project's external archive. This file is the canonical reference within the repo. v4.0 design doc consolidates and interprets — see [Chapter 2 of v4.0 reframe](../design/lintel-v4.0-reframe-design.md#chapter-2--brief-forge--envelope--generated-wiki) for the unified implementation plan.
+> Original full text preserved in the project's external archive. This file is the canonical reference within the repo. v4.0 design doc consolidates and interprets — see [Chapter 2 of v4.0 reframe](lintel-v4.0-reframe-design.md#chapter-2--brief-forge--envelope--generated-wiki) for the unified implementation plan.
 
 ## What "every hand-off" means concretely
 
@@ -57,4 +57,4 @@ Pack-driven policy via `brief_forge:` block in `pack.yaml`. Mechanical-first; si
 2. **Envelope storage retention.** Forever in `_archive/`, or trim after N days? Recommended: forever, they're small and grep-able.
 3. **CI enforcement on wiki staleness** — fail build, or warn-only? Recommended: warn-only for v1, harden once wiki has proven useful.
 
-See [v4.0 design Chapter 2.2-2.4](../design/lintel-v4.0-reframe-design.md#chapter-2--brief-forge--envelope--generated-wiki) for AI interpretation + recommendations.
+See [v4.0 design Chapter 2.2-2.4](lintel-v4.0-reframe-design.md#chapter-2--brief-forge--envelope--generated-wiki) for AI interpretation + recommendations.

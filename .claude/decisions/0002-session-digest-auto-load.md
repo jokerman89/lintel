@@ -17,8 +17,8 @@ injects, or the user asks.
 The consequence: the snowball never compounded. Lessons accumulated in `tasks/lessons.md` but never
 reached a fresh session unless someone explicitly read the file. The operator's global memory does
 not have this problem because the harness injects a `MEMORY.md` index into every session. Lintel had
-no equivalent. The `/office-hours` design
-([.claude/engineering/design-archive/claude-md-capability-and-memory-surfacing.md](../design/claude-md-capability-and-memory-surfacing.md))
+no equivalent. The historical requirements design
+([.claude/engineering/design-archive/claude-md-capability-and-memory-surfacing.md](../engineering/design-archive/claude-md-capability-and-memory-surfacing.md))
 established that the fix must be **mechanical** (inject), not a soft `CLAUDE.md` "please read these
 files" instruction — the soft version is exactly what silently failed.
 
@@ -65,5 +65,5 @@ these files here"). Ships in both Lintel's own repo and the scaffolded template.
 
 ## References
 
-- [.claude/engineering/design-archive/claude-md-capability-and-memory-surfacing.md](../design/claude-md-capability-and-memory-surfacing.md)
+- [.claude/engineering/design-archive/claude-md-capability-and-memory-surfacing.md](../engineering/design-archive/claude-md-capability-and-memory-surfacing.md)
 - [ADR-0001](0001-lintel-dogfoods-its-own-scaffolding.md) — the dogfooding decision this builds on

@@ -17,7 +17,7 @@ cli_support:
 Preserve the useful status, temporary disable/re-enable, named snapshot and previous-setup
 recovery entry points. This skill controls **host installation intent**, not the effective
 company pack or a conversation's audience lens. Use `/li:pack-switch` for policy context
-and `/li:personas-rotate` for a temporary audience.
+and `/li:role --audience <name>` for a temporary audience.
 
 ## Status and host operations
 

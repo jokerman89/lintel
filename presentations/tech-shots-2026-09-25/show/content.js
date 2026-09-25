@@ -33,12 +33,16 @@ window.DECK_SLIDES = [
     "title": "Here’s the whole system.",
     "subtitle": "A workflow kit inside the coding tools you already use.",
     "minutes": 1.5,
-    "notes": "Start at the top: you supply the outcome and important choices. Your coding client runs the model and tools. Inside that environment, Lintel provides a reusable method. The agent loads a relevant skill and, where supported, delegates a focused agent role. A pack supplies team standards and knowledge. Registered hooks react to selected host events. The agent and invoked helpers update project scaffolding: plans, decisions, lessons and a handoff. Compounding is the return path: retrieve the relevant record before the next task. The kit and pack can be installed for you or the repository; the project records belong with that project. Temporary execution state is separate and Git-ignored. Permissions and CI remain platform controls. This is an architecture overview, not a promise that every client loads every resource. The inspected Lintel hook bundle uses Claude Code registration; Copilot hook parity is a separate implementation plan. CLI, editor and desktop describe possible host surfaces, not identical feature coverage. MDASH and AGT address different jobs; this workflow kit does not replace them. We will return to that boundary after the orientation.",
+    "notes": "Start at the top: you supply the outcome and important choices. Your coding client runs the model and tools. Lintel provides a reusable method; skills carry workflows and agent roles carry focused assignments. Packs supply team knowledge. The agent and invoked helpers maintain project scaffolding: plans, decisions, lessons and a handoff. The next task retrieves the relevant records.\n\nUniversal changes are merged on the 0.11.0 beta development line. The concrete advances are a shared work map, a verified effective profile, owned installation and recovery, and independent review evidence bound to the content being delivered. These are specific contracts and helpers, not a hosted agent runtime.\n\nAdapters connect the shared kit to an exact client surface. Native-format discovery does not prove execution. The portable repository kit installs no hooks. Lintel’s optional native hook adapter still uses the Claude Code protocol; Copilot has a hook API, but this bundle has not been translated to it. Permissions and CI remain platform controls. MDASH and AGT serve different jobs.",
     "showSubtitle": true,
     "evidenceLabel": "Hook coverage depends on the client and verified activation.",
     "cue": "Your agent does the work. Lintel gives it a method and a useful trail to leave behind.",
     "stageAction": "Read the map top to bottom. Point to the team pack, then follow the return line from project records into the next task.",
-    "bridge": "Before we open those parts, here is the moment this changed how I worked."
+    "bridge": "Before we open those parts, here is the moment this changed how I worked.",
+    "sources": [
+      "https://github.com/jokerman89/lintel/blob/80002ed4aaa8697ff658f50902a469c80e14856d/docs/architecture.md",
+      "https://github.com/jokerman89/lintel/blob/80002ed4aaa8697ff658f50902a469c80e14856d/docs/client-adapters.md"
+    ]
   },
   {
     "id": "swarming-moment",
@@ -47,16 +51,34 @@ window.DECK_SLIDES = [
     "title": "I stopped being the queue.",
     "subtitle": "My GitHub activity, before and after adopting Lintel swarming.",
     "showSubtitle": false,
-    "minutes": 1,
+    "minutes": 0.5,
     "eyebrow": "MY JOURNEY / THE SWARMING MOMENT",
     "evidenceLabel": "Two selected days from my GitHub history. Contributions measure activity — not quality or bugs fixed.",
     "cue": "Here is a day from before I had swarming in Lintel. Fifty-five contributions. Then I changed how I organised the work.",
     "stageAction": "Point to 55. Click “Then I turned on swarming.” Let 711 land in silence for two beats. Point to the original screenshots, then trace the report-to-fix flow. Use “Replay reveal” if rehearsing.",
-    "bridge": "The number gets your attention. The structure is what I want you to take away. Here are the six parts that make it possible.",
-    "notes": "Here is a day from before swarming in Lintel: fifty-five contributions. Then I changed how I organised the work. [Click. Pause for two beats.] Seven hundred and eleven. Same me. A different way to work.\n\nThese are two selected days from my GitHub history. Contributions are activity, not a quality score or a count of bugs fixed. This is a personal observation, not a controlled benchmark.\n\nNow think about a bug list, or a report from MDASH or MARS. Triage it. Agree the fixes. Give independent work to isolated lanes, with one coordinator keeping the plan. Review each lane independently, then integrate and test the combined result. No safe isolation? Run the briefs sequentially.\n\nThat is the useful shift: an overwhelming report becomes reviewable work. The chart gets your attention. The structure is what I want you to take away.",
+    "bridge": "More throughput also gave me a very large reminder about delivery boundaries.",
+    "notes": "Before swarming, one busy day showed 55contributions. Afterwards, this day showed 711. [Reveal.] That changed the scale of work I could coordinate. These are two personal activity snapshots, not proof of quality or a measured speedup. More activity still has to become reviewed, useful changes. And that brings me to the next morning.",
     "sources": [
       "../presenter/sources.html#swarming-activity",
       "../reference-source/docs-concepts-swarming-work-md.html#L4"
+    ]
+  },
+  {
+    "id": "we-broke-github",
+    "chapter": "Meet Lintel",
+    "type": "githubmoment",
+    "title": "We broke GitHub.*",
+    "subtitle": "*My browser tab, technically.",
+    "showSubtitle": true,
+    "minutes": 0.5,
+    "eyebrow": "THE NEXT MORNING",
+    "evidenceLabel": "Personal incident · PR #93 screenshot · not a throughput benchmark",
+    "cue": "740 commits. 760 files. One very unhappy browser tab.",
+    "stageAction": "Point to the unresponsive-tab message, pause for the joke, then move on. Do not open the enormous PR live.",
+    "bridge": "The lesson is to agree the delivery boundary before workers start. Here are the parts that make the work reviewable.",
+    "notes": "I tried the new swarming and left it working overnight. I forgot to authorize pull requests along the way. The result: 740 commits, 760 files—and an unresponsive browser tab. So, obviously, we broke GitHub. [Pause.] My tab, to be precise. More throughput still needs small, reviewable deliveries.\n\nThis is my account of the incident. The supplied screenshot documents the visible PR counts and unresponsive tab, not a GitHub outage or a measured productivity gain. Agree PR authorization, bounded delivery packages and a stop condition before dispatch. A missing delivery decision is a reason to pause the affected work, not permission to keep expanding it.",
+    "sources": [
+      "https://github.com/jokerman89/lintel/pull/93"
     ]
   },
   {
@@ -157,24 +179,32 @@ window.DECK_SLIDES = [
     "minutes": 1,
     "showSubtitle": false,
     "evidenceLabel": "Representative Lintel layout · adapter-specific files vary",
-    "notes": "Remember the window: files are what survive a session. This is where Lintel puts them. Point to the left first: machine-global means reusable across projects on this computer. The ~/.lintel/ home contains your profile and installed packs, as well as operator-wide records. Your coding client owns its own settings, tools and permissions; ~/.claude/ is a Claude-specific home, not a universal home for every app. Now point right: the project repository keeps reviewed memory, decisions, plans and handoffs under its declared paths. In the standard Lintel layout that is .claude/memory/, .claude/decisions/ and .claude/plans/. Commit the appropriate reviewed knowledge so Git can carry it to the next person or session. The dashed area is .claude/runtime/: temporary execution state is ignored and does not travel in a normal clone. The .claude folder name does not require Claude Code. Client adapters (the few files that teach one coding tool where to find all this — next screen) can add their own files; the Copilot repository kit uses .github/copilot-instructions.md, .github/skills/, .github/agents/ and .github/lintel/. Those details are in the field guide. Your global profile and installed packs do not automatically appear on a colleague’s machine through Git. The active pack must be available and configured there. The point is to separate reusable operator context, portable project knowledge and disposable run state.",
+    "notes": "Remember the window: files are what survive a session. This is where Lintel puts them. Point to the left first: machine-global means reusable across projects on this computer. The ~/.lintel/ home contains your profile and installed packs, as well as operator-wide records. Your coding client owns its own settings, tools and permissions; ~/.claude/ is a Claude-specific home, not a universal home for every app. Now point right: the project repository keeps reviewed memory, decisions, plans and handoffs under its declared paths. In the standard Lintel layout that is .claude/memory/, .claude/decisions/ and .claude/plans/. Commit the appropriate reviewed knowledge so Git can carry it to the next person or session. The dashed area is .claude/runtime/: temporary execution state is ignored and does not travel in a normal clone. The .claude folder name does not require Claude Code. Client adapters (the few files that teach one coding tool where to find all this — next screen) can add their own files; the Copilot route of the Universal repository kit uses .github/copilot-instructions.md, .github/skills/, .github/agents/ and .github/lintel/. Those details are in the field guide. Your global profile and installed packs do not automatically appear on a colleague’s machine through Git. The active pack must be available and configured there. The point is to separate reusable operator context, portable project knowledge and disposable run state.\n\nThe shared source bundle remains .github/lintel/ for compatibility. Other selected surfaces get their own discovery roots pointing into it. A repo can require a specific pack in .claude/profile-requirements.json; profile.yaml carries role/mode preferences, not pack selection. Bound profile drift requires explicit reconciliation. See the technical module for exact paths.",
     "cue": "Your setup stays with you. The project’s reviewed knowledge travels with the project.",
     "stageAction": "Trace left → right, then the Git arrow. Point to the dashed runtime box last.",
-    "bridge": "Almost none of this is tied to one coding tool. I will show you the exception."
+    "bridge": "Almost none of this is tied to one coding tool. I will show you the exception.",
+    "sources": [
+      "https://github.com/jokerman89/lintel/blob/80002ed4aaa8697ff658f50902a469c80e14856d/docs/client-adapters.md",
+      "https://github.com/jokerman89/lintel/blob/80002ed4aaa8697ff658f50902a469c80e14856d/docs/lifecycle.md"
+    ]
   },
   {
     "id": "supported-tools",
     "chapter": "Meet Lintel",
     "type": "clients",
-    "title": "Keep your coding tool.\nShare the working method.",
-    "subtitle": "CLI, editor or coding desktop app — through the adapter that fits.",
+    "title": "One method.\nYour actual tools.",
+    "subtitle": "CLI · desktop · IDE · cloud — check the exact surface.",
     "minutes": 1,
-    "notes": "Lintel’s direction is universal. This screen describes the integrations declared in this repository snapshot, not a promise that every feature behaves identically in every client. Native skill integrations are declared for Claude Code, Codex CLI and App, Cursor, GitHub Copilot CLI and Factory Droid. Gemini CLI and OpenCode use explicit workflow-file references in the current Lintel integration. Cline, Continue and Aider are best-effort. The Copilot repository kit is a separate adoption route for VS Code, CLI and cloud-agent work. In plain language, an adapter teaches the client where to find the shared instructions. The detail that matters is hooks: scripts the tool runs automatically at a set moment, for example before a commit. Lintel’s hook bundle is supplied for Claude Code; it does not automatically follow the method to other hosts. The full declared matrix is behind the button, for anyone who wants the exact differences. A practical detail: in the Copilot repository kit the planning skill is called /li-plan; other hosts can expose different command names. Install and validate the appropriate adapter in a pilot repo first.",
+    "notes": "The Universal registry now names 37 surfaces across 14 product families, plus an explicit manual fallback. Twenty-five records have a generated native-format discovery route. CLI, desktop, IDE and cloud are separate entries, because one product name does not imply the same capabilities everywhere. Gemini CLI and OpenCode CLI now have native-format skill routes; the old content-only slide is retired.\n\nKeep three evidence levels separate: vendor documentation, delivered Lintel files, and observed host execution. The registry has three partial Copilot App observations and no complete live acceptance record. Other unrecorded observations mean not_run, not proven failure.\n\nThe shared .github/lintel bundle reuses the existing Copilot installation engine. It is not Copilot-only. Native roots differ by surface. The portable route installs no hooks; the optional Claude-compatible plugin adapter is separate. Inspect the detailed matrix and validate your actual host before relying on controls.",
     "showSubtitle": true,
-    "evidenceLabel": "Repository-declared integrations · capabilities vary",
+    "evidenceLabel": "37 named surfaces + manual fallback · not 37 certified integrations",
     "cue": "Keep your tool. Reuse the method. Verify what this host actually supports.",
     "stageAction": "Point to the hook boundary. Open the matrix only if asked.",
-    "bridge": "One more thing: what this is not."
+    "bridge": "One more thing: what this is not.",
+    "sources": [
+      "https://github.com/jokerman89/lintel/blob/80002ed4aaa8697ff658f50902a469c80e14856d/docs/client-adapters.md",
+      "https://github.com/jokerman89/lintel/blob/80002ed4aaa8697ff658f50902a469c80e14856d/lib/cli-tiers.yaml"
+    ]
   },
   {
     "id": "not-one-ring",
@@ -254,99 +284,99 @@ window.DECK_SLIDES = [
     "id": "experiment",
     "chapter": "The kitchen demo",
     "type": "experiment",
-    "title": "Same brief.\nTwo finished dishes.",
-    "subtitle": "The build is prepared. The inspection happens together.",
+    "title": "One brief.\nThree ways to build.",
+    "subtitle": "Naked Copilot → Lintel → Lintel + Swarming",
     "minutes": 1,
-    "notes": "We are doing this TV-chef style. Both builds have already run; you do not have to watch a model type for fifteen minutes. We preserve the exact implementation prompt, starting material and available stakeholder answers. Each arm gets its own fresh agent context. One works with the ordinary brief; the other receives the curated Lintel workflow instructions. The baseline is allowed to do a good job. We are inspecting one paired demonstration, not claiming a causal benchmark of every model or tool. The rubric is frozen before the runs. We will show both strengths and misses.",
-    "showSubtitle": false,
-    "evidenceLabel": "Two prepared agent builds · one paired example",
-    "cue": "The cooking is done. Now we taste both dishes.",
-    "stageAction": "Say the baseline is competent and allowed to win. Introduce the equal inputs.",
-    "bridge": "Here is the brief both agents received."
+    "notes": "This replaces the old two-dashboard exhibit. The new kitchen test builds Service House: a working restaurant operations app. Every arm receives the same prompt, public brief, fixture, selectors and starter. Naked Copilot uses one session without Lintel or delegation. Lintel uses the finalized pinned workflow, serial packages and independent review. Lintel + Swarming uses the same Lintel version and delegate configuration, with independent implementation packages in parallel.\n\nTV-chef delivery still works: run the comparison beforehand and inspect the frozen outputs in the local dashboard. This presentation snapshot has no completed three-arm results. A local naked-only pilot is not the three-arm comparison. Do not imply that a reference fixture is an agent result. The benchmark must be authorized and run before showing a winner.",
+    "showSubtitle": true,
+    "evidenceLabel": "New kitchen protocol · comparative results pending",
+    "cue": "Same kitchen. Same order. Three ways to run the pass.",
+    "stageAction": "Introduce the three treatments. Say that the public snapshot contains no completed three-arm comparison.",
+    "bridge": "First, freeze what a finished kitchen actually means."
   },
   {
     "id": "brief",
     "chapter": "The kitchen demo",
     "type": "brief",
-    "title": "A dashboard.\nHow hard can it be?",
-    "subtitle": "The dangerous words are usually the ordinary ones.",
+    "title": "“Just a kitchen app.”\nFamous last words.",
+    "subtitle": "32 observable requirements. 100 possible points.",
     "minutes": 1,
-    "notes": "Ask the room first; then open the exact prompt rather than relying on the shortened paraphrase. The request asks for a support dashboard with a selected customer, useful charts and an export. Before showing the results, ask the audience: what does active mean? What does customer isolation mean here? Should the export honor all filters? What is the date boundary? The available answer sheet is identical for both arms. The point is to observe whether the workflow makes those questions visible and turns the answers into implementation and checks. These are recorded agent discoveries using supplied answers, not a staged human conversation.",
-    "showSubtitle": false,
-    "evidenceLabel": "Paraphrase above · exact shared prompt linked",
-    "cue": "Which ordinary word hides the biggest assumption?",
-    "stageAction": "Ask the room before opening the exact shared prompt.",
-    "bridge": "Hold on to your guesses. Let’s open both results."
+    "notes": "Service House has Menu, Orders, Inventory and Reports, with a basket and checkout. It includes exact cents, combined filters, order transitions, stock reservation, persistence, reports, CSV, theme, mobile and keyboard behavior. There are 32 frozen requirements; K16 ticket creation and K25 persistence weigh five points, every other requirement three, totaling100.\n\nThe shared prompt explicitly says not to ask follow-up questions. Important business choices are already in the brief. Unlike the old example, this experiment does not measure discovery of missing stakeholder answers. It measures whether each workflow carries the same explicit requirements into the build and verification. Show the exact prompt, not a paraphrase masquerading as the input.",
+    "showSubtitle": true,
+    "evidenceLabel": "Service House · frozen public contract · synthetic data",
+    "cue": "The homepage is the easy part. The dinner shift is the test.",
+    "stageAction": "Open the brief. Point to exact currency, cancellation and persistence—not all32 rows.",
+    "bridge": "Now we can inspect the same dinner shift in each result."
   },
   {
     "id": "results",
     "chapter": "The kitchen demo",
     "type": "results",
-    "title": "Looks good.\nNow make it answer questions.",
-    "subtitle": "Open both finished apps. Try the same actions in each.",
+    "title": "The dinner shift\nis the demo.",
+    "subtitle": "Try the same actions in all three arms.",
     "minutes": 4,
-    "notes": "Open the ordinary build first, then the Lintel build. Use the same clicks, same customer, same date range and same export. Ask the audience what they notice, but separate visual preference from functional behavior. Use the prepared common checks as the source of truth; do not invent a failure on stage. If both handle a case correctly, say so. Show the implementation result before the process artifacts so the audience has a concrete object to reason about. Keep the demo modal within the presentation; Escape returns you to this slide. At four minutes, move on even if there are more styling preferences to discuss.",
+    "notes": "The public guide explains the experiment; the actual read-only dashboard runs locally on port 4310. It is not a static Pages app and no live trial telemetry is published here. When comparative runs are ready, show all arms, including failures and timeouts. Open their real apps from the dashboard, then use the same operations.\n\nFirst, order two soups and a lemonade with KITCHEN10: total 21.29 dollars. Second, cancel an eligible ticket and verify stock is restored once. Third, reload and verify orders, statuses, basket and inventory persist without a duplicate checkout. Finally, inspect an individual requirement failure in the ledger.\n\nIf the measured candidates are unavailable, show the frozen brief and empty comparison state. A reference app can illustrate intended behavior only if named as a fixture. Never use it as the Lintel arm or fabricate a winner. Keep this inspection to four minutes.",
     "showSubtitle": true,
-    "evidenceLabel": "Actual frozen outputs · same inputs and checks",
-    "cue": "Let’s make both apps answer the same questions.",
-    "stageAction": "Use identical customer, date and CSV actions. Escape closes each app. Four minutes maximum.",
-    "bridge": "Both hold up. So look one layer down: what did each agent ask before it wrote code?"
+    "evidenceLabel": "Local dashboard for actual evidence · no published comparison yet",
+    "cue": "Pretty is the opening act. Correct is the dinner service.",
+    "stageAction": "Open the local dashboard if prepared. Inspect the same actions in each completed candidate. If runs are pending, walk the contract only and say so.",
+    "bridge": "The critical choices were supplied up front. Did they survive implementation?"
   },
   {
     "id": "questions",
     "chapter": "The kitchen demo",
     "type": "questions",
-    "title": "The best line of code\nwas a question.",
-    "subtitle": "An ambiguity only helps when it becomes a decision.",
+    "title": "No questions.\nNo moving goalposts.",
+    "subtitle": "The decisions are in the brief. Make them survive the build.",
     "minutes": 3,
-    "notes": "Use the three tabs to present one question → decision → check trace at a time. Then open each run's question log. Compare what was actually identified, rather than pretending the baseline asked nothing. Follow one question all the way through: the ambiguous word, the stakeholder answer, the planned acceptance condition and the code or test that uses it. The logs distinguish actual questions or discoveries from assumptions. No invented dialogue. If both runs discover the same issue, the difference may be how explicitly it survives into the work, or there may be no difference at all. This is where a thin plan often fails: a label such as add filtering can hide several unresolved contracts. In the recorded final pair, both arms identified the shared ambiguities; the baseline additionally recorded malformed-data handling. Use that as evidence that good project context matters in both setups.",
-    "showSubtitle": false,
-    "evidenceLabel": "Both runs surfaced these ambiguities.",
-    "cue": "Both runs found useful questions. Follow what happened to the answer.",
-    "stageAction": "Use the tabs. Open actual logs. Pick one trace rather than reading every entry.",
-    "bridge": "A question only matters if it survives into the plan."
+    "notes": "The earlier kitchen demo used stakeholder questions. This replacement deliberately freezes the answers. The prompt forbids follow-up questions, so we must not invent question logs or praise one arm for asking more.\n\nFollow K14: subtotal 21.50, discount 2.15, tax 1.94, total 21.29. The implementation must preserve cents and the stated rounding. Follow K20: cancellation restores stock exactly once, including protection against repeated actions. Follow K25: reload preserves state without duplicating checkout.\n\nThese are contract traces we intend to inspect, not explanations of an observed winner. A plan is thin when it says add checkout but loses these conditions. A workflow earns its cost when the conditions remain visible through implementation and independent checking.",
+    "showSubtitle": true,
+    "evidenceLabel": "Illustrative contract traces · not agent transcripts",
+    "cue": "This time, “what did you mean?” is already answered.",
+    "stageAction": "Trace one of three contracts: cents, cancel-once stock, or reload persistence.",
+    "bridge": "Depth is whether the requirement reaches a check, not how long the plan looks."
   },
   {
     "id": "plans",
     "chapter": "The kitchen demo",
     "type": "plans",
-    "title": "A longer plan\nis not a deeper plan.",
-    "subtitle": "Depth is traceability: requirement → decision → task → evidence.",
+    "title": "A plan should\nleave fingerprints.",
+    "subtitle": "Requirement → work package → implementation → independent check.",
     "minutes": 2,
-    "notes": "Open the plans from both arms. Count useful connections, not words. Is a task tied to a file or component? Does it have a dependency? Is there a specific way to verify it? Can a new session tell what remains? A verbose plan that repeats the prompt is still thin. A compact plan can be excellent if it resolves the important questions. This slide is intentionally not a fabricated good-plan versus bad-plan caricature. The files belong to the actual two runs. Use the recorded comparison findings, including ties and strengths in the ordinary arm.",
-    "showSubtitle": false,
-    "evidenceLabel": "Illustrative trace · actual plans linked",
-    "cue": "Plan depth is a connection, not a word count.",
-    "stageAction": "Open both actual plans. Follow one requirement through decision, task and evidence.",
-    "bridge": "Plans are promises. Checks are what happened."
+    "notes": "This diagram is an expected trace, not an actual plan from a completed trial. Once the runs exist, inspect the real files in each candidate without inventing missing artifacts. Does K20 have an owner, dependency and observable acceptance? Does the implementation reserve and restore stock consistently? Can independent review identify the exact content it checked?\n\nThe serial and swarm treatments must retain the same review policy. Parallelism changes scheduling, not the quality bar. A larger plan is not automatically better, and missing native reviewers cannot be replaced by the builder declaring itself independent. Measure whether useful structure survives at a reasonable cost.",
+    "showSubtitle": true,
+    "evidenceLabel": "Expected trace · actual plan comparison awaits runs",
+    "cue": "Do not count pages. Follow K20.",
+    "stageAction": "Trace cancellation through ownership, implementation and observable stock restoration. When runs exist, open their actual artifacts.",
+    "bridge": "Then separate what we measure. A fast response is not a finished product."
   },
   {
     "id": "ab-evidence",
     "chapter": "The kitchen demo",
     "type": "scoreboard",
-    "title": "LGTM is not\na test result.",
-    "subtitle": "One common rubric. Observable behavior. No beauty contest.",
+    "title": "Four measures.\nZero invented winners.",
+    "subtitle": "Speed, completeness and cost are different questions.",
     "minutes": 1.5,
-    "notes": "Show the common checks and their observed outcomes. These are the checks performed on these prepared builds, not a universal quality score. The same test meaning applies to both arms. Look at data semantics, filter consistency, boundary behavior and unsafe input handling, as available in the actual report. The question is not which agent can say it tested something more convincingly. It is what we can reproduce. If there are failures, show the exact condition. Do not patch a result mid-demo and keep calling it the original run. The final coordinator rerun recorded 14/14 passing common checks for each arm and no browser errors. Do not convert that tie into a superiority score.",
-    "showSubtitle": false,
-    "evidenceLabel": "Saved common checks · synthetic fixtures",
-    "cue": "LGTM is an opinion. These are checks we can inspect.",
-    "stageAction": "Show representative rows. The full report has all fourteen.",
-    "bridge": "Fourteen of fourteen. Twice. Let me say plainly what that means."
+    "notes": "First HTTP response, usable UI and declared completion are separate timestamps. A timeout is not completed work. The independent headless grader evaluates 32 requirements for 100 possible points and preserves failures and screenshots. All coordinator, worker, reviewer and retry costs belong in actual billed credits; tokens and model multipliers are not billed credits. Missing or partial receipts remain unknown or partial.\n\nRecorded harness self-checks show the reference fixture at 100/100 and the incomplete control at 0/100. These prove grader mechanics for those fixtures, not Lintel performance. Comparative outcomes are not published in this snapshot. Do not transplant the old 14/14 comparison into this experiment.",
+    "showSubtitle": true,
+    "evidenceLabel": "Reference/control checks ≠ comparative model results",
+    "cue": "Unknown credits are unknown—not a very impressive zero.",
+    "stageAction": "Read time-to-live, declared completion, coverage and billed credits separately. Reference100/100 is calibration only.",
+    "bridge": "Even when results arrive, one more distinction matters: what did we actually change?"
   },
   {
     "id": "why-different",
     "chapter": "The kitchen demo",
     "type": "causal",
-    "title": "Plot twist.\nBoth can code.",
-    "subtitle": "The differentiator has to survive the next session.",
+    "title": "Let the baseline win.\nIf it wins.",
+    "subtitle": "A benchmark that cannot disappoint you is a demo trick.",
     "minutes": 1.5,
-    "notes": "Here is the honest result: both finished builds pass all fourteen shared checks. Both identified the important ambiguities, and the baseline also has a useful handoff. We should not pretend that adding Lintel was necessary for good reasoning or functioning code in this task. The Lintel arm produced more explicit spec, task dependency, acceptance, fresh-session prompt and review structure. That is an observed artifact difference, not evidence of faster recovery or better business outcomes. It also has more context and documents to maintain. A single paired run cannot isolate every cause. The next experiment should test whether this added structure actually improves a cold handoff enough to pay for its overhead.",
-    "showSubtitle": false,
-    "evidenceLabel": "Handoff benefit and productivity gains remain unmeasured.",
-    "cue": "Both passed. If I hid that, this would be a sales trick.",
-    "stageAction": "Pause on the tie. Explain the additional records and their cost.",
-    "bridge": "A tie on code. What I can actually prove is smaller: three mechanisms, no model involved. First: does a team’s profile change anything real?"
+    "notes": "Naked versus Lintel changes the workflow and also permits delegate models. It compares a workflow/model configuration, not the isolated causal effect of a text file. The two Lintel arms keep the same version, delegate models and independent review policy; serial versus parallel packages is their intended difference. Record actual resolved models. A separate all-same-model series would add a useful control.\n\nActive implementation overlap is needed to verify swarming; overlapping session lifetimes or parallel reviewers do not establish it. Run arms sequentially, then counterbalance orders over independent repetitions. Three windows building simultaneously make a good spectacle, but introduce resource contention. Keep timeouts, failures, exclusions and sample counts. The result may be no gain—or negative net value. That is useful.\n\nWe now leave the new benchmark and inspect historical deterministic helper examples. Their original source pins remain visible; they are not current Universal acceptance runs.",
+    "showSubtitle": true,
+    "evidenceLabel": "Hypothesis until measured · no causal speedup claim",
+    "cue": "The result gets a vote. My favourite tool does not get a head start.",
+    "stageAction": "Name the model-mix confound. Explain the cleaner serial-versus-swarm question.",
+    "bridge": "While that comparison is pending, here are three smaller mechanisms we have saved evidence for."
   },
   {
     "id": "profile",
@@ -355,9 +385,9 @@ window.DECK_SLIDES = [
     "title": "A profile should\nchange the work.",
     "subtitle": "“Enterprise” is not a theme color.",
     "minutes": 2,
-    "notes": "Remember the pack from the kit screen: the team’s standards. This switches between two of them, a lab and a customer pilot. Switch between Lab and Customer pilot. This is a separate, deterministic demo: no model runs here, and it is not part of the paired agent builds. The actual Lintel pack resolver supplies values from two synthetic manifests. A presentation consumer turns them into the displayed contract. Notice the evidence requirement changes from a smoke test to a tenant negative test; identity and network design requirements change too. The demo_policy fields are custom presentation fields. No identity or network infrastructure is provisioned, and hard mode is a configuration value, not proof of enforcement. The value hypothesis is concrete: a profile should change decisions, questions and acceptance evidence.",
+    "notes": "Remember the pack from the kit screen: the team’s standards. This switches between two of them, a lab and a customer pilot. Switch between Lab and Customer pilot. This is a separate, deterministic demo: no model runs here, and it is not part of the paired agent builds. The actual Lintel pack resolver supplies values from two synthetic manifests. A presentation consumer turns them into the displayed contract. Notice the evidence requirement changes from a smoke test to a tenant negative test; identity and network design requirements change too. The demo_policy fields are custom presentation fields. No identity or network infrastructure is provisioned, and hard mode is a configuration value, not proof of enforcement. The value hypothesis is concrete: a profile should change decisions, questions and acceptance evidence.\n\nThis saved mechanism proof predates the Universal integration. It retains its original provenance. Current Universal adds content-bound profile identity, shared lifecycle recovery and structured evidence; this older run does not verify those additions.",
     "showSubtitle": true,
-    "evidenceLabel": "Saved resolver values · custom demo fields · no provisioning",
+    "evidenceLabel": "Historical helper proof · original source pin · not Universal acceptance",
     "cue": "Enterprise is not a theme color. The requirements must change.",
     "stageAction": "Toggle Lab → Customer pilot. Read the changed evidence field.",
     "bridge": "A profile changes the requirements. Now lose the chat and see what survives."
@@ -369,9 +399,9 @@ window.DECK_SLIDES = [
     "title": "Delete the chat.\nKeep the plot.",
     "subtitle": "The next session needs coordinates, not a séance.",
     "minutes": 2,
-    "notes": "This is the window idea, applied: assume the session is gone — what is left on disk? We do not delete anything in your real repo. The prepared proof creates a local clone of a synthetic fixture without the ignored runtime ledger. The committed specification, plan, tasks and handoff survive. Show the four pointers and the next action T002. The helper validates the map and file boundaries; the explicit handoff supplies the next task. It is not the helper reasoning about priorities. Missing files and a path escaping the repo are rejected in the saved run. A fresh agent still needs to read and reason about those artifacts, but it no longer has to recover the project from chat archaeology. The four on-screen labels stand for the exact committed paths shown in the offline field guide and helper proof explorer.",
+    "notes": "This is the window idea, applied: assume the session is gone — what is left on disk? We do not delete anything in your real repo. The prepared proof creates a local clone of a synthetic fixture without the ignored runtime ledger. The committed specification, plan, tasks and handoff survive. Show the four pointers and the next action T002. The helper validates the map and file boundaries; the explicit handoff supplies the next task. It is not the helper reasoning about priorities. Missing files and a path escaping the repo are rejected in the saved run. A fresh agent still needs to read and reason about those artifacts, but it no longer has to recover the project from chat archaeology. The four on-screen labels stand for the exact committed paths shown in the offline field guide and helper proof explorer.\n\nThis saved mechanism proof predates the Universal integration. It retains its original provenance. Current Universal adds content-bound profile identity, shared lifecycle recovery and structured evidence; this older run does not verify those additions.",
     "showSubtitle": false,
-    "evidenceLabel": "Saved helper proof · handoff names T002; validator checks the map",
+    "evidenceLabel": "Historical helper proof · original source pin · not Universal acceptance",
     "cue": "We lose the runtime, not the plot.",
     "stageAction": "Trace the four committed pointers to T002. The saved helper checks the map.",
     "bridge": "The plot survived. Does a lesson?"
@@ -383,9 +413,9 @@ window.DECK_SLIDES = [
     "title": "A lesson that never returns\nis just a diary entry.",
     "subtitle": "Capture → retrieve → verify → reinforce.",
     "minutes": 3,
-    "notes": "Show Before: lookup by document ID allows another tenant's document. Switch to Fixed: the same three tests now include the tenant condition. Then select Reintroduce bug: deliberately run the vulnerable version again and watch the cross-tenant check fail. That is the important negative control. The prepared lesson is retrieved through the real keyword-scoped memory helper; an obsolete lesson and an unrelated lesson are excluded. This is not model training and not proof of production authentication. It is an example of turning a specific correction into both reusable context and executable protection. Read the red result aloud for remote participants.",
+    "notes": "Show Before: lookup by document ID allows another tenant's document. Switch to Fixed: the same three tests now include the tenant condition. Then select Reintroduce bug: deliberately run the vulnerable version again and watch the cross-tenant check fail. That is the important negative control. The prepared lesson is retrieved through the real keyword-scoped memory helper; an obsolete lesson and an unrelated lesson are excluded. This is not model training and not proof of production authentication. It is an example of turning a specific correction into both reusable context and executable protection. Read the red result aloud for remote participants.\n\nThis saved mechanism proof predates the Universal integration. It retains its original provenance. Current Universal adds content-bound profile identity, shared lifecycle recovery and structured evidence; this older run does not verify those additions.",
     "showSubtitle": false,
-    "evidenceLabel": "Actual saved tests · prepared variants · trusted test identity",
+    "evidenceLabel": "Historical helper proof · original source pin · not Universal acceptance",
     "cue": "Put the bug back. Does the test notice?",
     "stageAction": "Click Before → Fixed → Reintroduce bug. Read the red result aloud.",
     "bridge": "One correction, two homes: a lesson and a test. That generalises."
@@ -436,13 +466,13 @@ window.DECK_SLIDES = [
     "id": "small-core",
     "chapter": "The honest value",
     "type": "smallcore",
-    "title": "The process has to\npay rent.",
-    "subtitle": "Start small. Add depth when the task earns it.",
+    "title": "Less surface.\nKeep the depth.",
+    "subtitle": "127 skills today → about 80 planned.",
     "minutes": 1,
-    "notes": "My biggest concern is negative net value. More roles, instructions and review stages can add latency, conflicts and maintenance. A nine-stage cycle does not automatically belong in a one-line fix. The small core is current intent, relevant project knowledge, a checkable next action and proportionate verification. Add deeper architecture, security review or orchestration when risk or coordination needs justify it. Lintel's subtraction decision points in this direction. Its eval decision calls for evidence; an accepted direction is not proof that every evaluation capability is implemented. In a pilot, measure time to an accepted change, interventions, residual defects, cost and cold-session recovery. If process costs more than it prevents, simplify it.",
-    "showSubtitle": false,
-    "evidenceLabel": "More process can cost more than it prevents.",
-    "cue": "Process has to earn the time it takes.",
+    "notes": "My biggest concern is negative net value. More roles, instructions and review stages can add latency, conflicts and maintenance. A nine-stage cycle does not automatically belong in a one-line fix. The small core is current intent, relevant project knowledge, a checkable next action and proportionate verification. Add deeper architecture, security review or orchestration when risk or coordination needs justify it. Lintel's subtraction decision points in this direction. Its eval decision calls for evidence; an accepted direction is not proof that every evaluation capability is implemented. In a pilot, measure time to an accepted change, interventions, residual defects, cost and cold-session recovery. If process costs more than it prevents, simplify it.\n\nI am consolidating roughly 120 skills toward about 80. Today the inspected source still has 127 definitions. The goal is fewer overlapping entry points with richer workflows behind them, not deleting valuable capability. This reduction is planned, not delivered, and the count alone proves no quality improvement.",
+    "showSubtitle": true,
+    "evidenceLabel": "Consolidation target · preserve useful capability",
+    "cue": "Fewer things to choose. Keep the parts that do useful work.",
     "stageAction": "Contrast a label change with a tenant-boundary change.",
     "bridge": "Keep it small, and it helps the people who are just starting."
   },
@@ -609,7 +639,7 @@ window.DECK_SLIDES = [
     "subtitle": "Source artifacts, reproducible checks and presenter controls.",
     "minutes": 0,
     "optional": true,
-    "notes": "Reference screen for Q&A. The prepared comparison, the existing helper evidence and the source notes are all local in this package. Arrow keys navigate, N opens notes, O opens overview, F requests fullscreen, and Escape closes a demo or dialog. Recorded observations are labeled. Demo-only fixtures are synthetic. The prior PowerPoint remains available as a backup, but this web presentation is the primary delivery.",
+    "notes": "Open the new Service House kitchen guide, the historical helper proof explorer, the regenerated English notes or the current Universal technical inventory. The kitchen runs locally; its comparative results are pending. The historical two-dashboard build is no longer part of the current public exhibit.",
     "showSubtitle": false,
     "evidenceLabel": "Offline source artifacts and presenter guides",
     "cue": "Everything shown here is inspectable in the package.",
@@ -688,8 +718,8 @@ window.DECK_SLIDES = [
     "cue": "Benchmark should measure accepted work, including the cost of the harness.",
     "stageAction": "Point at what stays the same and what changes. Name the four measures. Open the prepared comparison only if time allows.",
     "bridge": "Choose one recurring task and measure the result.",
-    "notes": "The Benchmark offering is planned. Its purpose is to compare a competent baseline against the same setup with Lintel, not to compare a carefully prepared harness with a deliberately weak prompt.\n\nHold the model, task, project knowledge, tests and permissions constant. Change the workflow treatment. Use more than one task and independent repetitions before making a broad claim.\n\nMeasure time to an accepted change, human interventions, remaining defects and recovery, and total cost including the extra process. Bigger plans and longer answers are not success criteria by themselves. If the harness does not help a small task, that is a useful result.\n\nThe existing browser comparison is a prepared single-run exhibit available today. It is useful for inspecting artifacts and decisions, but it does not establish a general productivity gain and is not the complete Benchmark package. Its link will follow.",
-    "evidenceLabel": "Lintel Benchmark · Planned evaluation package · Prepared A/B exhibit available now",
+    "notes": "Lintel Benchmark is the evaluation direction. The current kitchen harness now defines three arms: Naked Copilot, Lintel serial and Lintel + Swarming. All share the Service House brief and 32 requirements for 100 points. It records usable UI, declared completion, requirement coverage and billed credits separately.\n\nThe harness and reference/control checks exist locally. The public page describes the method; it does not bundle the local server, publish trial/session records or claim completed comparative runs. The distribution link remains pending. This is not evidence of a productivity win. Normal Lintel versus naked also changes delegation/model mix; keep the caveat visible and repeat with matched models if isolating that effect.",
+    "evidenceLabel": "Kitchen harness prepared · comparative results and distribution pending",
     "eyebrow": "04 / LINTEL BENCHMARK"
   },
   {
@@ -698,13 +728,18 @@ window.DECK_SLIDES = [
     "track": "technical",
     "optional": true,
     "type": "techkit",
-    "title": "Open the toolbox.\nLeave most of it closed.",
+    "title": "Open the toolbox.\nChoose a small working set.",
     "minutes": 1,
-    "cue": "The catalogue is big. The useful working set should be small.",
-    "stageAction": "Enter through the Technical tab. Say that this is a separate 18-minute module. Do not read the counts as a feature checklist.",
-    "bridge": "Let’s choose the workflows that earn their place.",
-    "notes": "We have seen the story and the prepared comparison. Now let’s open the machinery: which instructions we load, who executes them, where the evidence lands, and what actually fires automatically.\n\nThis source snapshot contains 127 canonical skills, 69 agent-role files and 33 hook scripts. Those are inventory counts, not 127 capabilities proven in every client. The library lives in the Lintel source bundle; the project receives the relevant context and outputs. Loading everything would defeat the deliberate-context idea.\n\nA skill is a reusable procedure. An agent file gives a worker a role, scope and reporting contract. A hook is executable code invoked by a compatible host registration, or explicitly by a workflow. The file’s existence alone does not activate anything.\n\nOur operating question is simple: for this task, what must be understood, produced and checked? That determines the working set. Think toolbox, not npm install for your entire brain.",
-    "evidenceLabel": "Implementation snapshot · 275a354 · Source details in the technical reference"
+    "cue": "Universal 0.11.0 keeps one method across the clients we use. Choose the few parts this task needs.",
+    "stageAction": "Enter through the Technical tab. Establish that this is a separate eighteen-minute module. Read the current count once, then distinguish planned curation from shipped change.",
+    "bridge": "Start with the work loop, then add the expertise the task needs.",
+    "notes": "This section describes merged Universal 0.11.0 at source revision 80002ed4. The source has 127 canonical skills, 69 agent roles and 33 hook scripts. Those are reusable source definitions, not everything loaded into one conversation, and not proof that every client executes every capability.\n\nThe next direction is curation toward roughly 80 skills while preserving useful methods. That is planned work, not a reduction this release already delivered. In particular, the preservation map’s 80 CAP records are an audit category, not an eighty-skill product. All original canonical paths and 46 aliases remain.\n\nThe useful unit is one outcome with the right context, clear ownership and enough evidence to accept it. We will follow that through the shared lifecycle, then look at where actual client tools change execution.",
+    "evidenceLabel": "Universal 0.11.0 · source 80002ed4 · observed limits apply",
+    "subtitle": null,
+    "sources": [
+      "https://github.com/jokerman89/lintel/blob/80002ed4/skills/CATALOG.md#L10",
+      "https://github.com/jokerman89/lintel/blob/80002ed4/.claude/plans/universal-implementation/reports/P13-skills-preservation.md#L414"
+    ]
   },
   {
     "id": "tech-skills",
@@ -714,11 +749,17 @@ window.DECK_SLIDES = [
     "type": "techskills",
     "title": "Start with the loop.\nAdd depth on demand.",
     "minutes": 1.5,
-    "cue": "My starter set closes the work loop; specialists come in when the task gives them a reason.",
-    "stageAction": "Walk left to right through plan, build, review and capture. Point to the three specialist families. Offer the full catalogue without opening all 127 rows.",
-    "bridge": "A workflow tells us what happens. A role tells a worker what to own.",
-    "notes": "This is an editorial starter set, not a measured popularity ranking. Cycle routes the work; scope and define establish the problem and depth; discover reads relevant knowledge. Plan creates the executable handoff, build works through accepted cards, review inspects the result, ship handles the authorized delivery, and capture records the useful learning.\n\nThe highest-value planning artifact is not a long checklist. A card needs a requirement, dependencies, affected files, acceptance criteria and a verification command. Short tasks can sit inside one coherent work package, with review at the package boundary. Do not run the entire ceremony for a typo.\n\nResume and context-save/context-restore address continuity; doctor, hooks-status and the install checks help investigate a broken setup. Their outputs still need interpretation, because some diagnostic prose contains historical paths.\n\nThen add depth where it matters. ta covers technical architecture, da data, sc security/compliance, dh deployment/hosting, and tq testing/quality. Frontend and generate families help with repeated design and deliverables. Swarm is an opt-in coordination profile, not a default tenth phase. Nice-to-have means optional for this task, not low quality or removable.\n\nCanonical notation is li:plan. Copilot native wrappers use li-plan. Use the actual skill name discovered by your client.",
-    "evidenceLabel": "Implementation snapshot · 275a354 · Source details in the technical reference"
+    "cue": "Plan the original work, build a bounded package, review its actual result and keep the useful lesson.",
+    "stageAction": "Walk PLAN → BUILD → REVIEW → CAPTURE. Spend the extra sentence on REVIEW: a PASS heading is not enough. Keep specialist detail in the notes and reference.",
+    "bridge": "A workflow defines the method. A role defines who owns a bounded piece of it.",
+    "notes": "The nine-phase lifecycle stays intact. PLAN keeps the original requirements and task IDs in one work map. BUILD groups connected short leaves into a bounded package with one owner. Every leaf retains its acceptance evidence; a failed leaf keeps the package open. REVIEW and QA are bound to the selected content and requirements, so a previous pass cannot clear a changed result. CAPTURE preserves reviewed progress, decisions and lessons.\n\nTA, DA, SC, DH and TQ add architecture, data, security, delivery and testing depth. Their data helper records and verifies observations; the agent still performs the specialist work. Its output does not grant release clearance.\n\nBrowser operations and the design contract have bounded acceptance evidence, including a static page and a React/Vite app. Document-format capabilities remain staged: Word, PowerPoint, workbook and PDF end-to-end acceptance was removed from Universal’s scope, never passed or waived. The PDF writer remains; its removed reader cannot verify output text, pages or rendering. Visio has no writer.",
+    "evidenceLabel": "Universal 0.11.0 · source 80002ed4 · observed limits apply",
+    "subtitle": null,
+    "sources": [
+      "https://github.com/jokerman89/lintel/blob/80002ed4/docs/concepts/engineering-modules.md#L3",
+      "https://github.com/jokerman89/lintel/blob/80002ed4/skills/review/references/evidence.md#L73",
+      "https://github.com/jokerman89/lintel/blob/80002ed4/.claude/decisions/0033-remove-document-format-acceptance-and-pdf-reader.md#L25"
+    ]
   },
   {
     "id": "tech-agents",
@@ -728,11 +769,17 @@ window.DECK_SLIDES = [
     "type": "techagents",
     "title": "Give each worker a job.\nAnd a boundary.",
     "minutes": 1.5,
-    "cue": "A role file is a brief. It does not create another process or grant more permissions.",
-    "stageAction": "Follow the prepare → implement → challenge diagram. Point to the single coordinator line. Ask: who owns the verdict?",
-    "bridge": "Those workers need to agree on where the truth lives.",
-    "notes": "Planner turns the request into executable work. Architect or a domain specialist resolves a design question. Build executes the accepted plan using a worker with a bounded write scope. CodeReviewer and TestRunner supply separate review and test evidence; SecurityAuditor is useful when the change touches a relevant threat boundary.\n\nThe named role matters less than its contract: exact inputs, allowed tools, writable files, acceptance and report format. A reviewer reports findings and limitations rather than quietly fixing the code it is reviewing. Otherwise it is marking its own homework.\n\nA Markdown agent file is not an operating-system permission boundary. Native delegation, separate context, tool restrictions and parallel execution depend on the host. If one agent replays the roles serially, call that self-review. The Copilot kit exposes three native profiles: lintel-planner, lintel-builder and lintel-reviewer; the wider canonical roles are source material loaded as needed.\n\nFor swarming, keep one authoritative task map. The coordinator owns shared state and integration. Concurrent writers need disjoint scopes and attributable isolation, such as separate worktrees. Each lane gets its own report and independent review, followed by review of the reconciled result. Without safe isolation, replay the same briefs sequentially. The evidence should survive even when the original agents do not.",
-    "evidenceLabel": "Implementation snapshot · 275a354 · Source details in the technical reference"
+    "cue": "A role is a bounded brief. Independent review needs an actual independent reviewer.",
+    "stageAction": "Follow prepare → implement → challenge. Point to the coordinator. Distinguish isolated parallel writers from read-only parallel research.",
+    "bridge": "The workers and reviewers need the same source of truth and the same ownership boundaries.",
+    "notes": "A Planner or Architect clarifies requirements, alternatives and acceptance. A scoped worker implements one package and returns attributable changes and evidence for every leaf. A reviewer reports findings against that result; the reviewer does not repair its own findings. A different actor name or an available delegation tool is not proof of an independent invocation.\n\nSwarming is an opt-in execution profile over PLAN, BUILD and REVIEW. It adds committed briefs, scope and evidence pointers alongside the original work map. One coordinator owns shared state, generated reducers, commits and serial integration. Concurrent writers require disjoint write scopes and attributable worktrees, patches or equivalent host-enforced isolation. A union diff from a shared checkout cannot establish ownership.\n\nWithout safe concurrent execution, run the same briefs sequentially. Without a required independent reviewer, keep the substantive package open. Lane review does not replace final review of the reconciled integration branch.",
+    "evidenceLabel": "Universal 0.11.0 · source 80002ed4 · observed limits apply",
+    "subtitle": null,
+    "sources": [
+      "https://github.com/jokerman89/lintel/blob/80002ed4/docs/concepts/swarming-work.md#L29",
+      "https://github.com/jokerman89/lintel/blob/80002ed4/docs/concepts/swarming-work.md#L129",
+      "https://github.com/jokerman89/lintel/blob/80002ed4/skills/review/references/evidence.md#L230"
+    ]
   },
   {
     "id": "tech-storage",
@@ -742,11 +789,18 @@ window.DECK_SLIDES = [
     "type": "techstorage",
     "title": "Four places.\nFour different owners.",
     "minutes": 2,
-    "cue": "Installed instructions, personal configuration, project knowledge and runtime scratch are different things.",
-    "stageAction": "Point out the Git boundary. Then select Copilot kit to show its local-home override. Read only the two root paths aloud.",
-    "bridge": "Now follow one task through those locations.",
-    "notes": "Start with the source bundle: skills, agents, hooks, helpers and scaffolding templates. A plugin manager owns its installed location; do not assume that the installed copy lives inside the customer project. The Copilot repository kit instead carries reviewed source resources under .github/lintel and native entry points under .github/skills and .github/agents.\n\nThe ordinary LINTEL_HOME default is ~/.lintel: profile, active-pack selection, packs, roles and reusable assets, plus some cross-repository caches and registries. Here ~ means the current user’s home on that machine. It is configurable. In the portable Copilot helper environment, the default is the project’s .claude/runtime/lintel-home, with an explicit operator setting taking precedence. A global install is not required for that route.\n\nThe project’s durable knowledge belongs in .claude/memory, decisions and plans. These are the files a teammate can receive through Git when committed. The .claude name is a shared Lintel storage convention, not a requirement to use Claude Code.\n\nRuntime ledgers, checkpoints, jobs and audits normally live in .claude/runtime and are ignored. They stay on that checkout. Some logs remain under LINTEL_HOME or configured output roots, so the full inventory identifies exceptions.\n\nThe v5 layout marker controls several path helpers. Legacy repositories can still resolve to tasks, docs/adr and .lintel/state. Resolve the actual layout before migrating anything; do not create two competing memory stores.",
-    "evidenceLabel": "Implementation snapshot · 275a354 · Source details in the technical reference"
+    "cue": "Trusted source, configuration home, project knowledge and local evidence have different owners and lifetimes.",
+    "stageAction": "Point out the Git boundary. Toggle Bare install to Repo kit. Explain that the shared .github/lintel bundle serves the selected Universal clients, not only Copilot.",
+    "bridge": "Now follow a task through those locations and watch how evidence changes.",
+    "notes": "The trusted Lintel source supplies helpers, skills and roles. LINTEL_SOURCE_ROOT identifies it; LINTEL_REPO_ROOT identifies the exact working project. Never choose helper code from an untrusted target because its name happens to match.\n\nThe configuration home is explicit. A bare installation normally uses the personal .lintel home. Repository adapters default to the project’s .claude/runtime/lintel-home when no home was configured. The shared source bundle remains .github/lintel for compatibility and serves every selected Universal route; it installs no hook bundle.\n\nCurated plans, decisions, lessons and handoffs belong with the project and are committed intentionally. Ignored runtime includes the cycle ledger, review evidence, checkpoints and audit observations. Profile contexts keep a current-profile.json with verified generations; recovery transactions retain their receipt and snapshot together.\n\nA fresh clone receives committed intent, not ignored evidence or private policy. A receipt describes an observed local operation; it does not establish host activation, independent review or policy enforcement.",
+    "evidenceLabel": "Universal 0.11.0 · source 80002ed4 · observed limits apply",
+    "subtitle": null,
+    "sources": [
+      "https://github.com/jokerman89/lintel/blob/80002ed4/docs/lifecycle.md#L9",
+      "https://github.com/jokerman89/lintel/blob/80002ed4/docs/client-adapters.md#L18",
+      "https://github.com/jokerman89/lintel/blob/80002ed4/docs/lifecycle.md#L104",
+      "https://github.com/jokerman89/lintel/blob/80002ed4/lib/profile_context.py#L654"
+    ]
   },
   {
     "id": "tech-cycle",
@@ -756,11 +810,18 @@ window.DECK_SLIDES = [
     "type": "techcycle",
     "title": "Every phase leaves\ndifferent evidence.",
     "minutes": 2,
-    "cue": "The workflow instructs the agent to write the evidence. A hook does not write all of this for it.",
-    "stageAction": "Select PLAN, then BUILD, then CAPTURE. Show that the concrete files change while the durable/runtime distinction stays stable. Mention that the reference covers all nine phases.",
-    "bridge": "That split is what makes a restart possible—and sets its limits.",
-    "notes": "Follow a task from request to delivery. SENSE and SCOPE record the route, size and intended depth. DEFINE creates the agreed design; DISCOVER leaves a record of useful context. PLAN produces the plan/spec/prompt trio and, for mapped work, work.json that points at the authoritative artifacts.\n\nBUILD updates card status and records verification. REVIEW leaves findings and acceptance evidence. SHIP handles the authorized delivery and records its status; it does not imply production deployment. CAPTURE curates lessons, decisions and the working handoff. Not every phase writes every optional file, and small routes can skip phases deliberately.\n\nClick PLAN: plan.md answers how and in what order, spec.md defines the expected behavior and acceptance, prompt.md tells a fresh executor how to start. Click BUILD: a completed checkbox must point to real evidence, not just an optimistic summary. Click CAPTURE: preserve the reason behind a decision and a reusable lesson, not the entire conversation.\n\nThe state helper appends phase/status records to the runtime ledger when invoked by the workflow. The runtime log helps with local continuity; committed plans and reviewed knowledge carry across checkouts. Some specialist reports remain ignored until explicitly promoted. If a report matters for a teammate’s decision, preserve it at an agreed committed evidence location.\n\nThe reference lists writer, trigger, path, lifetime and limitations for each declared output family. Arbitrary generated apps and operator-selected destinations are intentionally not a finite filename list.",
-    "evidenceLabel": "Implementation snapshot · 275a354 · Source details in the technical reference"
+    "cue": "The same work and profile identity travel through the phases. The evidence changes as the work progresses.",
+    "stageAction": "Select PLAN, BUILD and REVIEW; then CAPTURE if time permits. For REVIEW, explain current content plus immutable acceptance, rather than reading filenames aloud.",
+    "bridge": "Those identities make a restart useful, and show when it must stop for reconciliation.",
+    "notes": "A cycle begins with an explicit identity before its phases write state. The ledger carries the selected work map, original artifact paths and verified profile reference. SCOPE, DEFINE and DISCOVER add the relevant decisions and source knowledge. PLAN preserves one authoritative task artifact; Spec Kit keeps its original files and IDs.\n\nBUILD records acceptance per leaf while implementing and reviewing a coherent package. REVIEW adds a version-2 decision bound to the selected product snapshot and acceptance sources. Required QA obligations are selected before observations. Results cannot hide a failed requirement by dropping it, relabelling it advisory or inventing not-applicable after the fact.\n\nThe reader considers the latest applicable decision before its verdict. A later rejecting or malformed relevant decision blocks an older PASS. The delivery gate checks review and QA against the same context; it permits continuing work already authorized, not a new deployment.\n\nCAPTURE keeps verified progress, decisions and corrections useful for the next session. Human-readable reports remain useful, but their filename or PASS heading is not clearance.",
+    "evidenceLabel": "Universal 0.11.0 · source 80002ed4 · observed limits apply",
+    "subtitle": null,
+    "sources": [
+      "https://github.com/jokerman89/lintel/blob/80002ed4/skills/spec-kit/references/work-map.md#L123",
+      "https://github.com/jokerman89/lintel/blob/80002ed4/skills/build/SKILL.md#L330",
+      "https://github.com/jokerman89/lintel/blob/80002ed4/skills/review/references/evidence.md#L261",
+      "https://github.com/jokerman89/lintel/blob/80002ed4/skills/review/references/evidence.md#L302"
+    ]
   },
   {
     "id": "tech-resume",
@@ -768,13 +829,20 @@ window.DECK_SLIDES = [
     "track": "technical",
     "optional": true,
     "type": "techresume",
-    "title": "Restart from files.\nNot from hope.",
+    "title": "Restart from the work.\nVerify the context.",
     "minutes": 1.5,
-    "cue": "The fresh session should be able to find the work, the next card and the reason it is next.",
-    "stageAction": "Trace todo → work.json → original artifacts. Point to the missing-runtime line. Do not imply that ignored evidence reappears after cloning.",
-    "bridge": "What can hooks add around that explicit workflow?",
-    "notes": "The committed work map is a small index, not another backlog. At .claude/plans/<initiative>/work.json it names the real specification, plan, tasks and handoff, and can link the swarm coordination contract. The initiative is linked from the committed todo or working-state file.\n\nWhen a new session starts, prefer an operator-named map, then an unambiguous active map. If several initiatives are active, ask which one. Selecting whichever file is newest can quietly resume the wrong work.\n\nFor Spec Kit, original specs/.../spec.md, plan.md and tasks.md and their IDs stay authoritative. Lintel maps them instead of duplicating them. The validator checks the map contract and paths without executing content. It does not certify that a checked task was actually verified.\n\nLocal runtime helps reconstruct the last session position, while context-save/context-restore can use local checkpoints. A fresh clone does not contain those ignored checkpoints, jobs or runtime-only reports. Recover from committed plans and evidence, then rebuild local bookkeeping. If evidence is missing, label the work unverified.\n\nThe generic resume flow still starts from runtime and offers the mapped route; the Copilot native adapter explicitly supports committed-map selection. Test the cold-start route you intend to use. A handoff is only useful if someone who did not attend the conversation can act on it.",
-    "evidenceLabel": "Implementation snapshot · 275a354 · Source details in the technical reference"
+    "cue": "A fresh session must find the original work, verify its context and identify the actual unmet step.",
+    "stageAction": "Trace the committed index to original artifacts. Point to the profile/cycle check and the missing-review line. Do not imply that cloning reconstructs evidence.",
+    "bridge": "Hooks can add observations around that workflow, when their actual host registration exists.",
+    "notes": "Choose an operator-named work map, or an unambiguous active map linked from the committed todo and working state. Do not select by newest timestamp. The map points to the original specification, plan, tasks and handoff. Its source checkbox view does not certify acceptance.\n\nThe shared resume path selects the original cycle and verifies the profile context, generation, digest, required policy and target. Missing references or changed sources do not silently become a new neutral profile. An explicit transfer, rebind or replan is needed, with affected evidence reviewed again.\n\nSTARTING, BLOCKED and NEEDS_CONTEXT return to the same phase. A truncated DONE record cannot advance it. Committed artifacts let a new clone inspect intent; ignored local evidence and private policy do not appear by magic. Preserve attributable unfinished work and quarantine anything whose owner or review cannot be established. Missing required review keeps the work open.",
+    "evidenceLabel": "Universal 0.11.0 · source 80002ed4 · observed limits apply",
+    "subtitle": null,
+    "sources": [
+      "https://github.com/jokerman89/lintel/blob/80002ed4/skills/spec-kit/references/work-map.md#L88",
+      "https://github.com/jokerman89/lintel/blob/80002ed4/skills/spec-kit/references/work-map.md#L154",
+      "https://github.com/jokerman89/lintel/blob/80002ed4/lib/workflow.sh#L183",
+      "https://github.com/jokerman89/lintel/blob/80002ed4/docs/concepts/swarming-work.md#L172"
+    ]
   },
   {
     "id": "tech-hooks",
@@ -782,13 +850,20 @@ window.DECK_SLIDES = [
     "track": "technical",
     "optional": true,
     "type": "techhooks",
-    "title": "Hooks react.\nWorkflows do the work.",
+    "title": "Hooks react.\nReceipts show what happened.",
     "minutes": 2,
-    "cue": "Five registered event types. Nine core scripts. Twenty-four more scripts that are not automatically registered.",
-    "stageAction": "Walk the event spine from session start to stop. Toggle to optional groups. Emphasize WARN versus BLOCK, and that Stop does not force continuation.",
-    "bridge": "The same workflow can travel further than its hook registration.",
-    "notes": "At this snapshot, the Claude-compatible manifest registers nine scripts across SessionStart, UserPromptSubmit, PreToolUse, PostToolUse and Stop. Session digest and cycle position inject context. Proposed-edit and prompt scanners warn. The memory-budget hook warns after edits. The stop hook emits an advisory reminder about incomplete work; host delivery needs verification. It does not force continuation or create a checkpoint.\n\nTwo scripts intentionally return a blocking result for detected secret or customer-data patterns in selected git commit/push commands. These are heuristic checks with overrides and scan limitations, not a complete DLP system. Despite its name, no-direct-main-push only warns. Branch protection and platform permissions are the independent boundary.\n\nToggle the optional view. Fifteen domain advisories cover architecture, data, security, deployment and testing. Six other scripts surface context, design or risk signals. Three job helpers address begin, end and stale work. They have no registrations in the core manifest. Event names in a HOOK.md file are suggested wiring, not evidence that it runs.\n\nSome names promise more than the code: the screenshot check reads DOM text, not pixels; cost and performance warnings do not measure spend or run benchmarks. Domain checks often inspect the existing file before an edit. The full inventory documents these limits.\n\nThe practical test is event → actual payload → script → visible result and audit. A symlink or plugin manifest alone is not that evidence. No hooks were activated while preparing this presentation.",
-    "evidenceLabel": "Implementation snapshot · 275a354 · Source details in the technical reference"
+    "cue": "Nine core registrations and twenty-four optional scripts. A recorded event is an observation, not a green light.",
+    "stageAction": "Toggle the core and optional groups. Distinguish warning, block and observation. Explain one unavailable-scanner receipt instead of adding another inventory slide.",
+    "bridge": "The workflow travels through more clients than this native hook adapter.",
+    "notes": "The source contains 33 hook scripts. Nine core registrations use the Claude Code protocol across five event types; 24 more scripts remain optional or manually invoked. The Universal repository kit installs none, even for a selected Claude route. Copilot has vendor-native hooks, but this release does not translate Lintel’s bundle to them. Actual registration and firing still need evidence.\n\nTwo git scanners intentionally deny commits or pushes. Their supported literal command parser collects the relevant candidate content and refuses ambiguous inspection or missing scanners instead of treating failure as a clean scan. These remain bounded pattern scanners with explicit overrides, not complete data-loss prevention. Other scripts often warn or remind. Stop does not force continuation.\n\nThe new event catalog describes 23 producer categories and 66 record kinds, not 66 hooks. The event reader reports observed records only. A block receipt may say the check was not performed because the scanner was unavailable. Missing records mean unobserved; a record itself is not proof of host enforcement.",
+    "evidenceLabel": "Universal 0.11.0 · source 80002ed4 · observed limits apply",
+    "subtitle": null,
+    "sources": [
+      "https://github.com/jokerman89/lintel/blob/80002ed4/hooks/hooks.json#L1",
+      "https://github.com/jokerman89/lintel/blob/80002ed4/hooks/shared/_input.sh#L94",
+      "https://github.com/jokerman89/lintel/blob/80002ed4/lib/event-catalog.json#L1",
+      "https://github.com/jokerman89/lintel/blob/80002ed4/bin/li-events.py#L471"
+    ]
   },
   {
     "id": "tech-clients",
@@ -796,13 +871,20 @@ window.DECK_SLIDES = [
     "track": "technical",
     "optional": true,
     "type": "techclients",
-    "title": "Same knowledge.\nDifferent entry points.",
+    "title": "One method.\nYour actual tools.",
     "minutes": 2,
-    "cue": "Portable content is the goal. Runtime parity is something we must demonstrate per client.",
-    "stageAction": "Select Claude Code, then Copilot, then Codex/Cursor. Point out where the source bundle and project outputs differ. Use the reference for the remaining clients.",
-    "bridge": "Now make the content specific to the organisation.",
-    "notes": "The shared project artifacts can stay the same while discovery and execution differ. Claude Code uses the Claude plugin convention and the registered hook manifest. Codex and Cursor have manifests that point to canonical skills and agents; this Lintel snapshot does not register the hook bundle for those clients. An agents field alone is not proof of live delegation.\n\nCopilot has the most explicit portable repository route: .github/skills/li-*/SKILL.md, three .github/agents profiles, repository instructions and source resources under .github/lintel. The checked manifest contains fourteen workflows including swarm. The CLI plugin packages the same native core entry points. VS Code, CLI and cloud need their own live acceptance checks; another IDE under the Copilot brand does not inherit all these claims.\n\nGemini’s extension manifest points to GEMINI.md. Lintel’s current integration uses context/content rather than declaring native skills or hooks. OpenCode has content-loading instructions; its plugin shim directory is empty. Factory Droid follows the declared marketplace route without Lintel hook translation. Cline, Continue and Aider are best-effort manual instruction routes.\n\nThese are facts about this Lintel revision, not a claim about what current vendors can support. In particular, Copilot has native hook facilities; Lintel’s shipped hook configuration for Copilot is empty. The future universal-adapter plan is not counted as implemented support here.\n\nMarketplace cache paths are host-managed and may vary. Inspect the installed bundle in the client instead of copying a path from someone else’s laptop. The reference records every declared entry point and explicitly marks unspecified locations.",
-    "evidenceLabel": "Implementation snapshot · 275a354 · Source details in the technical reference"
+    "cue": "Universal delivers shared adapters. Documented capability, delivered files and observed execution are three different things.",
+    "stageAction": "Select Claude, Copilot and Gemini/OpenCode to show what changed. Keep the remaining surface matrix in the technical reference. Do not describe families as one uniform host.",
+    "bridge": "The next boundary is the organization’s policy and the exact profile this work is using.",
+    "notes": "The registry has 37 named surfaces across fourteen product families plus a manual fallback. Twenty-five records have native-format skill routes; thirteen use a manual route including that fallback. These count delivered contracts and files, not certified clients. A shared engine generates fourteen starter workflows and preserves the full canonical source bundle. Copilot additionally retains its three native role profiles.\n\nCodex CLI, desktop and IDE use .agents/skills; Codex cloud is manual. Cursor CLI, IDE and cloud use .cursor/skills. Gemini CLI and OpenCode CLI now have native-format routes; OpenCode desktop and IDE remain manual. Exact routes for Factory, Antigravity, Kiro, Devin, Junie, Cline, Continue and Aider are in the reference. Existing plugin and extension routes remain.\n\nAll selected repository routes share .github/lintel. The directory name does not make this Copilot-only. No Lintel hooks are installed by that route. The registry records only three partial Copilot App observations and no complete per-operation acceptance record. Actual discovery, questioning, delegation, isolation, review and resume must be checked in the selected client and version. Missing independent review remains open.",
+    "evidenceLabel": "Universal 0.11.0 · source 80002ed4 · observed limits apply",
+    "subtitle": null,
+    "sources": [
+      "https://github.com/jokerman89/lintel/blob/80002ed4/docs/client-adapters.md#L18",
+      "https://github.com/jokerman89/lintel/blob/80002ed4/lib/cli-tiers.yaml#L67",
+      "https://github.com/jokerman89/lintel/blob/80002ed4/lib/cli-tiers.yaml#L117",
+      "https://github.com/jokerman89/lintel/blob/80002ed4/shims/universal/ADAPTER.md#L65"
+    ]
   },
   {
     "id": "tech-packs",
@@ -810,13 +892,19 @@ window.DECK_SLIDES = [
     "track": "technical",
     "optional": true,
     "type": "techpacks",
-    "title": "Your pack makes\n“good” specific.",
+    "title": "Make “good” specific.\nKeep its identity stable.",
     "minutes": 1,
-    "cue": "A stronger model still needs the decisions and standards your team actually chose.",
-    "stageAction": "Follow the profile → selected pack → task path. Point to the host-policy rail beneath it.",
-    "bridge": "That knowledge must stay useful as the project changes.",
-    "notes": "A profile selects operator context; an active pack supplies the organisation’s voice, workflows, role context and declared constraints. The neutral _default pack is the baseline when no company identity is configured. It does not turn a personal installation into an approved enterprise deployment.\n\nThe resolver separates configured pack directories, working-repository packs and bundled source. Pack composition replaces defined blocks rather than deeply merging every nested key. Missing-field defaults and explicit inheritance are different mechanisms; inspect the resolved field when debugging unexpected behavior.\n\nUse packs for reviewed project knowledge and repeatable standards: architectural decisions, acceptable evidence, appropriate design conventions and business vocabulary. Keep credentials in the platform’s secret system. A local private pack is not automatically available in a cloud agent’s checkout.\n\nInstructions that say require approval or run a compliance check remain workflow rules until supported execution is configured and tested. A pack field naming a hook does not register it with every client. The team’s actual access control, branch rules and CI remain their own layer.",
-    "evidenceLabel": "Implementation snapshot · 275a354 · Source details in the technical reference"
+    "cue": "A required profile cannot silently disappear into neutral defaults. Its identity travels with the work.",
+    "stageAction": "Follow require → resolve → verify. Say context, generation and digest once; explain them as which policy content this work was approved against.",
+    "bridge": "The same discipline applies to the knowledge and receipts we preserve.",
+    "notes": "Team requirements can name a required pack in .claude/profile-requirements.json. An explicit pack invocation is also required selection. Missing, malformed or incompatible required content blocks; it does not silently become the neutral baseline. An invalid optional legacy preference may use a validated neutral fallback only with an explicit diagnostic. profile.yaml retains role and mode preferences; it is not the pack selector.\n\nThe effective profile carries a context, generation and content digest. The resolver verifies requirements, selected manifests, ancestry, defaults and source/target identity. Same-time edits or a changed pointer still count as drift. An explicit, reason-bearing rebind preserves the previous generation and requires affected work to be replanned and reviewed.\n\nThis gives review a stable policy reference. It does not install an organization’s controls or prove those controls operated. Platform permissions and CI remain separately configured and verified; the initiative’s real required-policy enforcement remains unverified in the recorded acceptance setting.",
+    "evidenceLabel": "Universal 0.11.0 · source 80002ed4 · observed limits apply",
+    "subtitle": null,
+    "sources": [
+      "https://github.com/jokerman89/lintel/blob/80002ed4/.claude/decisions/0029-required-profile-context.md#L24",
+      "https://github.com/jokerman89/lintel/blob/80002ed4/docs/lifecycle.md#L152",
+      "https://github.com/jokerman89/lintel/blob/80002ed4/.claude/plans/universal-implementation/reports/final.md#L133"
+    ]
   },
   {
     "id": "tech-maintenance",
@@ -824,13 +912,20 @@ window.DECK_SLIDES = [
     "track": "technical",
     "optional": true,
     "type": "techmaintenance",
-    "title": "Memory needs an editor.\nNot a landfill.",
+    "title": "Keep the lesson.\nKeep the evidence.",
     "minutes": 1.5,
-    "cue": "Keep the reasoning. Bound the working set. Make disposal explicit.",
-    "stageAction": "Move across update, supersede and archive. Point to the committed/runtime separation. Mention the manual maintenance boundary.",
-    "bridge": "Finally, prove the setup works after an upgrade.",
-    "notes": "There are three different maintenance jobs. First, curate durable knowledge: update an existing fact before appending another version, give lessons stable IDs, and explicitly supersede outdated lessons or decisions while preserving why they existed. Keep the memory index short and the working-state handoff current.\n\nSecond, control transient output: ignore runtime state, checkpoints, job scratch and audit churn according to the repository contract. If test evidence must survive a clone, commit the reviewed evidence deliberately. Gitignored does not mean deleted or harmless, and it is not a privacy boundary.\n\nThird, maintain the installed kit: pin the reviewed source revision, inspect update diffs, preserve project edits and rerun the pilot. The Copilot installer uses a managed inventory and detects conflicts instead of blindly overwriting local changes. It has no general remove command. Do not delete an entire .github or .claude directory to uninstall it.\n\nThe source has memory-budget warnings and on-demand maintenance workflows, not a universal automatic garbage collector. clean recommends save/restart/restore; it cannot compact a host conversation itself. maintenance contains manual procedures and partial examples, so verify targets and retention before running them. Job-end has real promotion/cleanup behavior but is dormant by default; it is not a safe blanket cleanup switch.\n\nOur standard should be: every durable document has a purpose, an owner and a reader. If nobody can explain who will use it next, it is probably documentation compost.",
-    "evidenceLabel": "Implementation snapshot · 275a354 · Source details in the technical reference"
+    "cue": "Capture the rule and its reason. Retrieve it when relevant. Preserve evidence before disposing of scratch.",
+    "stageAction": "Move across capture, retrieve and preserve. Separate a useful saved lesson from proof that it improved the next outcome; do the same for a receipt and enforcement.",
+    "bridge": "Then test whether the whole setup works in the client that will use it.",
+    "notes": "A correction should leave a dated rule with context and preventive action. Update or explicitly supersede an existing lesson when appropriate; keep the reason. Current architecture, specifications and accepted decisions outrank remembered advice. Loading the relevant lesson on the next task is observable behavior; improved outcomes need their own evidence.\n\nCheckpoints now include repository identity, refuse unsafe paths and avoid overwriting collisions. The mapped original work and verified profile reference must survive the handoff. A file reservation alone is not a completed checkpoint.\n\nOwned snapshots and recovery have concrete inventory and preimage checks. Snapshot retention protects recent copies, the newest five and incomplete operations; pruning requires explicitly selected eligible snapshots and refuses unowned content. Keep a transaction receipt with its referenced snapshot. That is bounded recovery, not a universal retention policy. Maintenance does not compact the host conversation or run a cleanup daemon. An event receipt records an observation, not quality or compliance clearance.",
+    "evidenceLabel": "Universal 0.11.0 · source 80002ed4 · observed limits apply",
+    "subtitle": null,
+    "sources": [
+      "https://github.com/jokerman89/lintel/blob/80002ed4/scaffolding/01-foundation/CORE-PRINCIPLES.md#L25",
+      "https://github.com/jokerman89/lintel/blob/80002ed4/skills/context-save/SKILL.md#L41",
+      "https://github.com/jokerman89/lintel/blob/80002ed4/skills/maintenance/SKILL.md#L47",
+      "https://github.com/jokerman89/lintel/blob/80002ed4/bin/li-snapshot.py#L376"
+    ]
   },
   {
     "id": "tech-proof",
@@ -840,10 +935,17 @@ window.DECK_SLIDES = [
     "type": "techproof",
     "title": "Installed is not\nthe same as working.",
     "minutes": 2,
-    "cue": "Test discovery, a real task, a cold restart and the negative cases. Then measure whether the process earned its cost.",
-    "stageAction": "Use the four checks as the live-client pilot checklist. Finish with the reference link or return to the main story. Do not claim these checks ran in every client.",
-    "bridge": "Take one recurring workflow and run the same acceptance test on the clients your team actually uses.",
-    "notes": "Before a rollout or client upgrade, record the Lintel revision, client version, enabled policies and relevant dependencies. Structural checks can show that files and schemas are valid; they cannot prove the model followed them.\n\nOne: verify actual discovery. Which instruction file, skill and agent did the client select? Check for duplicate personal and repository copies. Two: execute one bounded task with a requirement-traced plan and a real failing-then-passing acceptance check. Review the diff and evidence, not just the agent’s summary.\n\nThree: start a fresh session or clone without the original runtime state or personal home. Can it select the correct committed work map and resume at the right card? Four: test negative cases using synthetic fixtures: missing helper, malformed hook input, denied action, ambiguous initiative and edited managed file during update. Required platform controls must still work when agent instructions are ignored.\n\nFor Windows or cloud execution, explicitly confirm Bash, Python and any optional analyzer a selected helper needs. Do not let a silent missing dependency look like a clean scan.\n\nThen assess value with the same model, task, project knowledge, tests and CI in both conditions. Measure time to accepted change, interventions, defects, recovery and total cost, including process overhead. This presentation’s source inspection is not an all-client execution certification or a measured productivity claim.\n\nThat is the technical proposition: a small useful working set, durable decisions and verification you can inspect. The larger library is there when the work needs it.",
-    "evidenceLabel": "Implementation snapshot · 275a354 · Source details in the technical reference"
+    "cue": "Test discovery, accepted work, a cold restart and refusal cases. Measure outcomes and overhead.",
+    "stageAction": "Use the four checks as the rollout checklist. End on the measured-outcome line. Offer the reference without opening its full inventory unless asked.",
+    "bridge": "Choose one recurring task and run the same acceptance protocol in the clients your team actually uses.",
+    "notes": "Pin the Lintel revision, client version, selected profile, tools and permissions. First verify which instruction, skill and role were actually discovered. Then execute one bounded task with original requirement IDs, a real acceptance check, attributable changes and the required independent review.\n\nRestart without the original chat. Select the same work map and original cycle, verify the profile and report the actual unmet step. Use synthetic negative cases: changed policy content, failed or skipped mandatory QA, later rejecting review, missing independent reviewer, ambiguous work map and edited managed files. A missing capability must remain visible.\n\nSource checks and hosted tests establish their stated boundaries, not every client’s runtime behavior or model quality. The current source includes bounded browser/design acceptance; document-format acceptance remains staged or removed as documented. Do not turn the historical demo into Universal evidence, or the merged initiative report’s stale 108/109 wording into a stronger closure claim without the exact final CI/review record.\n\nMeasure time to accepted change, interventions, rework, defects, recovery and total process cost under comparable conditions. A smaller useful working set and inspectable evidence are the proposition; a productivity improvement must be measured.",
+    "evidenceLabel": "Universal 0.11.0 · source 80002ed4 · observed limits apply",
+    "subtitle": null,
+    "sources": [
+      "https://github.com/jokerman89/lintel/blob/80002ed4/shims/universal/ADAPTER.md#L104",
+      "https://github.com/jokerman89/lintel/blob/80002ed4/skills/review/references/evidence.md#L302",
+      "https://github.com/jokerman89/lintel/blob/80002ed4/.claude/decisions/0033-remove-document-format-acceptance-and-pdf-reader.md#L25",
+      "https://github.com/jokerman89/lintel/blob/80002ed4/.claude/plans/universal-implementation/reports/final.md#L133"
+    ]
   }
 ];

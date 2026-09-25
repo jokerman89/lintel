@@ -81,10 +81,11 @@
       "source": "skills/design-dna/SKILL.md",
       "members": [
         "skill:design-dna",
-        "skill:design-consultation"
+        "skill:frontend-design"
       ],
       "requires": ["core"],
       "resources": [
+        "skills/frontend-design/references/advice.md",
         "skills/design-dna/scripts/core.py",
         "skills/design-dna/scripts/search.py",
         "skills/design-dna/scripts/design_system.py",
@@ -170,15 +171,11 @@
         "skill:frontend-shader",
         "skill:frontend-design-review",
         "skill:frontend-style-extract",
-        "skill:design-html",
-        "skill:design-review",
-        "skill:design-shotgun",
-        "skill:plan-design-review",
+        "skill:inspect",
         "skill:generate-style-learn",
         "skill:generate-web",
         "skill:generate-app",
-        "skill:browse",
-        "skill:open-managed-browser",
+        "skill:web-session",
         "agent:FrontendArchitect",
         "agent:TypographyCurator",
         "agent:MotionDirector",
@@ -189,8 +186,17 @@
       ],
       "requires": ["design-knowledge"],
       "resources": [
-        "skills/browse/references/browser-operations.md",
-        "skills/browse/scripts/chromium.mjs",
+        "skills/frontend-design/references/variants.md",
+        "skills/frontend-design-review/references/built-review.md",
+        "skills/generate-web/references/mockup.md",
+        "skills/web-session/references/browser-operations.md",
+        "skills/web-session/references/browse.md",
+        "skills/web-session/references/scrape.md",
+        "skills/web-session/references/open.md",
+        "skills/web-session/references/cookies.md",
+        "skills/web-session/scripts/chromium.mjs",
+        "skills/web-session/scripts/extract.mjs",
+        "lib/url_policy.py",
         "skills/full-engineering-pass/references/domain-handoff.md",
         "lib/domain_result.py",
         "lib/domain-result-schema.json"
@@ -223,7 +229,7 @@
         "skill:generate-write",
         "skill:generate-design",
         "skill:generate-qa",
-        "skill:document-generate",
+        "skill:generate-docs",
         "agent:SystemArchitect",
         "agent:WordTechnicalEditor",
         "agent:DesignSystemAuditor"
@@ -248,7 +254,7 @@
       ],
       "outputs": [
         "Outline, complete written content, real speaker-note content where requested, and format-specific QA obligations.",
-        "Source-grounded repository reference, customer-guide or tutorial drafts through the distinct document-generate method.",
+        "Source-grounded repository reference, customer-guide or tutorial drafts through the distinct generate-docs method.",
         "Choose a format with an explicit selection union; common preparation is not a finished native artifact."
       ],
       "example": {
@@ -333,8 +339,7 @@
       "source": "skills/generate-pdf/SKILL.md",
       "members": [
         "skill:generate-pdf",
-        "skill:make-pdf",
-        "skill:browse",
+        "skill:web-session",
         "agent:WordTechnicalEditor"
       ],
       "requires": ["core"],
@@ -342,8 +347,14 @@
         "skills/generate-write/references/fidelity-and-evidence.md",
         "skills/generate-pdf/scripts/prepare_html.py",
         "skills/generate-pdf/scripts/print_pdf.mjs",
-        "skills/browse/references/browser-operations.md",
-        "skills/browse/scripts/chromium.mjs",
+        "skills/web-session/references/browser-operations.md",
+        "skills/web-session/references/browse.md",
+        "skills/web-session/references/scrape.md",
+        "skills/web-session/references/open.md",
+        "skills/web-session/references/cookies.md",
+        "skills/web-session/scripts/chromium.mjs",
+        "skills/web-session/scripts/extract.mjs",
+        "lib/url_policy.py",
         "lib/context_safety.py",
         "lib/native_paths.py",
         "lib/review_contract.py",

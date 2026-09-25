@@ -1,5 +1,9 @@
 # Multi-CLI · issues-we'll-share · prompt-craft — research synthesis + plan
 
+> Retained historical narrative. Terminology was neutralized on 2026-09-25;
+> former external path/name labels are symbolic, not executable current routes.
+> Original dates, finding IDs and recorded outcomes remain historical, not rerun acceptance.
+
 > 2026-06-13. Three operator-requested workstreams: (1) make multi-CLI support the best it can
 > be; (2) mine the resolved issues of the tools we descend from / run on, for traps we share;
 > (3) study how the best competitors write agents/skills/prompts and raise our bar. Each backed
@@ -43,11 +47,11 @@ Three findings dominate, one per workstream:
 |---|---|---|---|
 | I1 | claude-code #60490/#66573 — exit-2 block downgraded if an upstream cmd fails under `set -e` | secret-scan-block + customer-data-block: `set -euo pipefail`, `exit 2` last | **FIX NOW** (Wave A) — guard the block path; negative test |
 | I2 | claude-code #59072 — SessionStart hooks silently never fire on Windows | session-digest is our only SessionStart hook; operator on Win11 | **FIX NOW** (Wave B) — li-doctor loud no-fire warn |
-| I3 | gstack #603/#1740 — AI auto-decided a scope change; sovereignty incident | our AUTO_DECIDE is 100% prose, no mechanical door_type | **FIX NOW** (Wave B) — mechanical one-way-door keyword guard |
-| I4 | gstack #1127/#1791 — cold-executor trio drift; `li-envelope-validate` exists but PLAN never calls it | PLAN Step 11 is prose-only | **FIX NOW** (Wave B) — wire the validator |
+| I3 | Historical external incidents 603/1740 — AI auto-decided a scope change; sovereignty incident | our AUTO_DECIDE is 100% prose, no mechanical door_type | **FIX NOW** (Wave B) — mechanical one-way-door keyword guard |
+| I4 | Historical external incidents 1127/1791 — cold-executor trio drift; `li-envelope-validate` exists but PLAN never calls it | PLAN Step 11 is prose-only | **FIX NOW** (Wave B) — wire the validator |
 | I5 | superpowers v5.0.6 — plan/spec review subagents removed (zero quality lift); CODE review kept | our plan-*-review may dispatch where inline self-review suffices | **PLAN** — measure before changing (needs the eval) |
 | I6 | claude-code #63855 — subagents inherit full CLAUDE.md+rules+skills at boot → context cap | every Lintel subagent dispatch pays this | **MONITOR** — keep CLAUDE.md lean; adopt loadProjectRules:false when it ships |
-| I7 | gstack #1048 — blanket subtraction produced harmful schema advice | our Subtraction Bias is a core principle | **PLAN** — carve a data-modeling exception (ADR) |
+| I7 | Historical external incident 1048 — blanket subtraction produced harmful schema advice | our Subtraction Bias is a core principle | **PLAN** — carve a data-modeling exception (ADR) |
 
 ## Workstream 3 — prompt craft (the bar-raise)
 

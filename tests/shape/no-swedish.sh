@@ -68,6 +68,19 @@ is_allowlisted() {
   return 1
 }
 
+is_functional_source_data() {
+  local content="${2#*:}"
+  content="${content%$'\r'}"
+  content="${content#"${content%%[![:space:]]*}"}"
+  case "$1" in
+    tests/shape/native-command-surface.py)
+      [ "$content" = '{"namn", "kvalitet", "åtgärd", "motivering", "belägg"},' ] ;;
+    tests/unit/native-command-surface.py)
+      [ "$content" = '"| Namn | Kvalitet | Åtgärd | Motivering | Belägg |\n|---|---|---|---|---|\n"' ] ;;
+    *) return 1 ;;
+  esac
+}
+
 # Shipped surface: agent-invokable trees + the installer + the first-touch docs.
 # README.md + docs/ are included so stray Swedish in a user-facing explainer is
 # caught; the historical/generated/functional paths above are exempt.
@@ -84,7 +97,12 @@ while IFS= read -r f; do
   is_allowlisted "$f" && continue
   [ -f "$f" ] || continue
   while IFS= read -r line; do
-    [ -n "$line" ] && { fail "$f — Swedish letter — $line"; hits=$((hits+1)); }
+    [ -n "$line" ] || continue
+    if is_functional_source_data "$f" "$line"; then
+      pass "$f:${line%%:*}: exact functional historical-header data"
+    else
+      fail "$f — Swedish letter — $line"; hits=$((hits+1))
+    fi
   done < <(LC_ALL=C grep -nE "$CHAR_RE" "$f" 2>/dev/null)
   while IFS= read -r line; do
     [ -n "$line" ] && { fail "$f — Swedish word — $line"; hits=$((hits+1)); }

@@ -16,8 +16,8 @@ fail() { echo "  FAIL: $1"; FAILED=1; }
 echo "tests/unit/cycle-skills-present.sh"
 echo "=================================="
 
-# 8 phase-skills (bare names, no li- prefix)
-PHASES=(sense define discover plan build review ship capture)
+# Nine phase-skills, including the optional sizing phase.
+PHASES=(sense scope define discover plan build review ship capture)
 for phase in "${PHASES[@]}"; do
   f="$REPO_ROOT/skills/$phase/SKILL.md"
   if [ -f "$f" ]; then
@@ -38,14 +38,18 @@ for orch in cycle resume; do
   [ -f "$f" ] && pass "orchestrator: $orch" || fail "orchestrator missing: $orch"
 done
 
-# 4 composite shortcuts
-for comp in fix research plan-and-build review-and-ship; do
+# The bounded bug-fix entry remains; other compositions use cycle ranges.
+for comp in fix; do
   f="$REPO_ROOT/skills/$comp/SKILL.md"
   [ -f "$f" ] && pass "composite: $comp" || fail "composite missing: $comp"
 done
+for route in '--mode research-dive' '--from PLAN --to BUILD' '--from REVIEW --to CAPTURE'; do
+  grep -Fq -- "$route" "$REPO_ROOT/skills/cycle/SKILL.md" \
+    && pass "cycle route: $route" || fail "missing cycle route: $route"
+done
 
 # Frontmatter has cli_support
-for skill_dir in sense define discover plan build review ship capture cycle resume; do
+for skill_dir in sense scope define discover plan build review ship capture cycle resume; do
   f="$REPO_ROOT/skills/$skill_dir/SKILL.md"
   [ -f "$f" ] || continue
   if ! grep -q '^cli_support:' "$f"; then
@@ -55,7 +59,7 @@ done
 pass "all cycle skills have cli_support frontmatter"
 
 # Frontmatter has layer: foundation
-for skill_dir in sense define discover plan build review ship capture cycle resume; do
+for skill_dir in sense scope define discover plan build review ship capture cycle resume; do
   f="$REPO_ROOT/skills/$skill_dir/SKILL.md"
   [ -f "$f" ] || continue
   layer=$(grep '^layer:' "$f" | head -1 | awk '{print $2}')

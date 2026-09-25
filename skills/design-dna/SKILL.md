@@ -31,7 +31,7 @@ every frontend/web consumer; source parsing or a populated spec is not rendering
 ## When to use
 
 - Auto-invoked: `/li:frontend-design` Step 1.5 (required), `generate-web`/`generate-app` stack
-  pass, `frontend-design-review`/`design-review` validation pass
+  pass, `frontend-design-review` validation and built-UI critique
 - Solo: "what style fits a fintech dashboard?", "palette for a healthcare app", "React Native
   list-performance rules", "validate this HTML"
 
@@ -110,8 +110,7 @@ severity columns. Validation falls back to the review checklist in `frontend-des
 **Writes:** `docs/design-system/MASTER.md` + `pages/*.md` in the target repo (persist), audit:
 `.claude/runtime/audit/design-dna-runs.jsonl`
 **Consumed by:** `/li:frontend-design` (Step 1.5), `/li:frontend-typography`,
-`/li:frontend-motion`, `/li:generate-web`, `/li:generate-app`, `/li:frontend-design-review`,
-`/li:design-review`
+`/li:frontend-motion`, `/li:generate-web`, `/li:generate-app`, `/li:frontend-design-review`
 
 ## Status protocol
 

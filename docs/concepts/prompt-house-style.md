@@ -1,18 +1,19 @@
 # Lintel prompt house-style (v2)
 
-> ADR-0014. How Lintel writes skills and agents so they are sharper than the field and tuned to
-> the CURRENT model generation (Fable 5 / Opus 4.8+), not a 2024 one. Evidence base:
-> .claude/engineering/audits/2026-06-13-cli-issues-craft-synthesis.md (Anthropic best-practices, superpowers,
-> wshobson/VoltAgent, the rules-format authors, 2026 prompt SOTA — all cited there). This is the
-> contract every new skill/agent follows and the bar existing ones are rewritten to.
+> ADR-0014. Lintel writes skills and agents around concrete triggers, bounded methods and
+> verifiable outputs, using the current host's configured model rather than requiring a
+> particular model. The dated evidence and source citations remain in
+> .claude/engineering/audits/2026-06-13-cli-issues-craft-synthesis.md. This is the
+> authoring contract; historical comparisons do not establish current execution results.
 
 ## The two rules that change the most
 
 ### 1. `description:` is a TRIGGER, not a summary
 The description is the auto-invocation mechanism — Claude reads it to decide WHEN to use the
 skill, often WITHOUT reading the body. If it summarizes the workflow, Claude follows the summary
-instead of the body (superpowers' measured regression: a description saying "code review between
-tasks" made Claude do ONE review when the skill specified TWO).
+instead of the body. The cited historical regression describes a summary saying "code review
+between tasks" leading to one review when the body specified two; that observation is not a
+new test result.
 
 - State **when to use**, in third person, with concrete trigger terms. Lead with `Use when …` /
   `Use after …` / `Use to …`.
@@ -59,9 +60,13 @@ The bar-raise adds judgment, not length:
 - **Behavioral traits** (5-8 bullets) — what the agent ALWAYS does first / defers / refuses.
   Distinct from Voice (how it sounds): traits are what it does. This is the consistency engine.
 - **Tool scoping with a one-line why** (Anthropic: "no Edit/Write because this agent only reviews").
-- **Memory/model** per ADR-0012 where it applies.
+- **Memory/model** through the actual host adapter; retain useful memory without making
+  optional host features or a model name mandatory (ADRs 0012 and 0028).
 - **Output contract**: a concrete report shape the caller can rely on (priority-bucketed, or a
   fielded/JSON handoff envelope for the module agents that hand off).
+- **Internal voice**: direct engineering prose about decisions, evidence, risks and next actions.
+  Customer-facing voice remains an explicitly selected pack concern. Preserve required notices
+  for retained third-party material; neutral wording is not license clearance.
 
 ## What the field taught us NOT to do
 

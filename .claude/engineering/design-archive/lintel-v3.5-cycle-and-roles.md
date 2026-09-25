@@ -1,20 +1,31 @@
 # Lintel v3.5 — Cycle, Roles, Context Warming, Modes
 
+> Historical design. Original section/task IDs, dates, examples, counts and outcomes are
+> retained; method labels are normalized for navigation, not evidence of rerun checks.
+> The original eight-phase proposal predates SCOPE. Current execution uses all nine
+> canonical phases, actual host capabilities, existing authority and shared v2 evidence.
+> See the [native migration](../../../docs/migrations/2026-09-25-native-workflows.md).
+
 **Date:** 2026-05-28
 **Branch:** `v3-dev` (will become `lintel-rebrand` post-approval)
 **Status:** DRAFT — awaiting operator approval before rename execution
 **Supersedes:** li-v3-plan.md (architectural depth layer)
 **Companion:** li-v3.5-azure-toolbox-plan.md (still applies, becomes lintel-v3.5-azure-toolbox.md after rename)
 
-> Deep cycle design + role-lifting + context warming + multi-mode invocation. No thin patterns. Each phase = sub-skills + dedicated agents + artifacts + gates. Built on gstack, learns from superpowers + speckit, adds what neither has: compliance-tiered, MS-internal-aware, role-lifted, multi-CLI.
+> Deep cycle design, role context, deliberate warming and mode selection. The historical
+> proposal combined detailed methods, staged artifacts, independent review and continuity.
+> Its comparative observations below explain the design; they are not current superiority claims.
 
 ---
 
 ## §0 — Why this exists
 
-`/devex-review` ranked v3 at 5.8/10 honest. The fix landed (78 agents organized, plugin manifests, session-harness framing). But the CYCLE itself was implicit — a series of skills invoked ad-hoc by the operator, no named end-to-end path.
+The historical developer-experience inspection ranked v3 at 5.8/10. The fix landed
+(78 agents organized, plugin manifests, session-harness framing). But the cycle itself
+was implicit: separate methods without a named end-to-end path.
 
-This doc fills that gap. The Lintel cycle becomes the explicit skeleton, with depth comparable to superpowers' per-skill richness, speckit's phase structure, and gstack's process discipline — plus what neither has: compliance tiering, voice corpus, role-lifting, multi-CLI portability.
+This design addressed that gap with an explicit cycle combining method depth, phase
+artifacts, decision discipline, policy context, role context and client portability.
 
 We refine and beef. We do not bloat.
 
@@ -24,7 +35,7 @@ We refine and beef. We do not bloat.
 
 Three deeply-studied competitors. What each does well, where each is limited, and what Lintel takes from each.
 
-### 1.1 obra/superpowers — depth via per-skill richness
+### 1.1 Detailed method workflows
 
 **What they do well:**
 - **14 skills, each FAT** — brainstorming alone has visual-companion sub-tool, scope-assessment pre-questions, design-isolation principle, spec self-review, ending-criteria gate. Not "ask a question." A 200-line workflow.
@@ -76,29 +87,29 @@ Three deeply-studied competitors. What each does well, where each is limited, an
 - Composable slash command pattern — `/li:sense`, `/li:define`, etc.
 - Intent vs technical separation in DEFINE vs PLAN
 
-### 1.3 gstack (parent project, we build on top)
+### 1.3 Decision discipline and continuity
 
 **What they do well:**
 - **AskUserQuestion as decision-brief primitive** — D-numbered, ELI10, recommendation, stakes, options with ≥40-char pros/cons, completeness score, net line. Highly structured.
-- **Office-hours forcing questions** — six adapted by mode (Startup/Builder/Intrapreneurship), one-at-a-time, push until specific.
+- **Design-intake questions** — six proposed mode-specific questions, one at a time, to make scope concrete.
 - **Builder profile** — tier tracking across sessions (introduction / welcome_back / regular / inner_circle). Resources adapt to tier.
 - **Confusion protocol** — ambiguous = stop, present options, ask.
 - **Premise check phase** — before alternatives, lock baseline assumptions.
-- **Cross-model second opinion** — Codex outside-voice or Claude subagent for independence.
-- **Founder signal synthesis** — observe + reflect specific signals after design.
+- **Independent second opinion** — a separately attributable reviewer through an available host.
+- **Operator signal synthesis** — observe and reflect concrete constraints after design.
 - **Boil-the-lake principle** — completeness when marginal cost low; flag oceans.
 - **Continuous checkpoint mode** — auto-commit WIP with context blocks.
-- **Voice section per model** — Garry-shaped builder-to-builder, no AI vocabulary, no em dashes.
+- **Internal voice guidance** — direct engineering prose, concrete evidence and explicit limitations.
 - **Telemetry built-in but opt-in** — local-only by default.
 
 **What's limited:**
-- Startup-founder centric framing. Intrapreneurship adaptation exists but is a tone-shift, not a structural mode.
+- Venture-centric framing; adapting tone alone did not create a team-oriented structural mode.
 - No domain-specific compliance (no RAIS, no OneCS, no EV2).
 - No customer-facing voice gate.
 - No role-lifting concept.
 
 **Lintel takes:**
-- ALL of gstack's process discipline (we already inherit)
+- Explicit decision, scope, review and continuity discipline
 - AskUserQuestion format = mandatory for every phase decision gate
 - Builder profile evolves to operator profile (cross-session tier tracking)
 - Premise check + Cross-model second opinion = preserved per phase as optional
@@ -107,13 +118,13 @@ Three deeply-studied competitors. What each does well, where each is limited, an
 
 ### 1.4 Lintel (us, current v3) — what we already do better
 
-- **Plugin manifest pattern across 8 CLIs** — superpowers via plugin marketplaces too, but Lintel adds Codex/Cursor/Gemini/OpenCode/Copilot/Droid in one repo
+- **Plugin manifest pattern across 8 CLIs** — a shared source with client-specific discovery; the historical comparison was not live evidence for every host
 - **78 specialized agents per domain** — none of the three has this. Architect image had generic "Section Agent."
 - **5+7+8 compliance tiering** — HARD-RULES (always-on), ON-DEMAND, REFERENCE
 - **Trailblazer voice corpus** (60 paragraphs, 12 cells, calibratable) — beyond what any of them has
 - **Repo scaffolding via bin/li-scaffold** (becomes bin/li-scaffold) — Speckit has memory/, none has full repo bootstrap
 - **MS-internal aware** — RAIS, OneCS, AGT, EV2, OneBranch, 1ESPT
-- **Cross-session continuity** — lessons.md, EVOLUTION-LOG.md, ADR template, /li:context-save/restore
+- **Cross-session continuity** — lessons.md, EVOLUTION-LOG.md, ADR template; current checkpoint routes are `/li:pause` and `/li:resume --from <checkpoint>`
 - **Doc-gen 4-gate** — /li:generate-ppt, /li:generate-word, /li:generate-web with voice + brand + honest-limitations + provenance
 
 ### 1.5 What Lintel ADDS that none has
@@ -229,15 +240,16 @@ Next: /li:cycle --from DEFINE  OR  /li:define standalone  OR  /li:build
 
 ### §2.2 — Phase 2: DEFINE (~2-5k tokens, 3-15 min)
 
-**Purpose:** clarify intent, lock premises, pick wedge, name first artifact. Office-hours-style forcing questions. Inherited from gstack; deepened with role-lift + WorkProfile-aware framing.
+**Purpose:** clarify intent, lock premises, select bounded work and name the first artifact.
+The historical method added role and policy context; current DEFINE uses task-relevant questions.
 
-**Slash:** `/li:define` (or `/li:office-hours` legacy alias)
+**Current route:** `/li:define`; engineering is the default and strategy is explicit.
 
 **Sub-skills invoked:**
-- `/li:context-gather` — read CLAUDE.md, TODOS, recent git log, recent design docs (phase 1 of office-hours)
-- `/li:related-design-scan` — grep design docs for keyword overlap (phase 2.5 of office-hours)
+- `/li:context-gather` — proposed intake step: read instructions, selected work, recent changes and relevant designs
+- `/li:related-design-scan` — proposed intake step: find overlapping designs
 - `/li:landscape-search` — optional WebSearch for conventional wisdom (phase 2.75; gated)
-- `/li:forcing-questions` — six adapted questions per mode (the heart of office-hours)
+- `/li:forcing-questions` — historical proposal for six adapted questions per mode
 - `/li:premise-check` — lock baseline assumptions
 - `/li:cross-model-opinion` — Codex/subagent independence check (optional)
 - `/li:alternatives` — 2-3 implementation approaches MANDATORY
@@ -258,7 +270,8 @@ Next: /li:cycle --from DEFINE  OR  /li:define standalone  OR  /li:build
 - `00-state.md` entry — DEFINE phase complete, design doc path
 
 **Gates:**
-- **Forcing-questions gate** — premise-check and alternatives MANDATORY (per gstack /office-hours), even if user says "skip"
+- **Historical intake gate** — premise checks and alternatives were mandatory in this proposal;
+  current minimal intake still preserves mandatory risk, authority and review obligations.
 - **Design doc APPROVED via AskUserQuestion** — A) approve, B) revise, C) start over
 
 **Status protocol:**
@@ -284,8 +297,8 @@ Next: /li:cycle --from DEFINE  OR  /li:define standalone  OR  /li:build
 - Triggers: /li:plan next (if not /li:cycle), or proceeds to DISCOVER in /li:cycle
 
 **Anti-patterns:**
-- Skipping forcing questions because operator seems impatient — gstack's escape-hatch (after 1 push, ask 2 more critical Qs)
-- Asking >1 question per AskUserQuestion call (gstack rule)
+- Skipping unresolved material decisions because the operator seems impatient
+- Bundling multiple decisions into one question
 - Letting design doc be approved before adversarial spec review
 - Cross-contaminating role-lens onto premises if role is sensitivity=private (sanitize)
 
@@ -307,7 +320,7 @@ If role active, BEFORE writing alternatives:
 **Sub-skills invoked:**
 - `/li:codebase-map` — Grep/Glob for relevant files based on DEFINE keywords
 - `/li:adr-scan` — read `docs/adr/` for relevant prior decisions
-- `/li:lessons-scan` — apply /li:lessons skill (relevance-filtered)
+- Lesson lookup — `/li:lessons-surface` with task-relevant selection
 - `/li:dependency-audit` — surface dependencies that touch the wedge area
 - `/li:related-skill-scan` — check if existing skills in `skills/` overlap (avoid duplicates)
 - `/li:related-agent-scan` — match wedge to existing agents that should be subagent-pulled in PLAN/BUILD
@@ -351,15 +364,16 @@ If role active, BEFORE writing alternatives:
 
 ### §2.4 — Phase 4: PLAN (~3-8k tokens, 5-20 min)
 
-**Purpose:** convert design + discovery into executable task breakdown. Cost estimate. Founder/operator approval gate. Cold-executor handoff prep starts here.
+**Purpose:** convert design + discovery into executable task breakdown. Cost estimate.
+Operator approval gate. Cold-executor handoff prep starts here.
 
 **Slash:** `/li:plan`
 
 **Sub-skills invoked:**
-- `/li:plan-eng-review` — engineering plan, alternatives if scope changed
-- `/li:plan-design-review` — design system / UX implications (if frontend)
-- `/li:plan-devex-review` — operator-DX implications (always run)
-- `/li:plan-tune` — iterative refinement based on review findings
+- `/li:inspect --target plan --lens engineering` — engineering plan and scope alternatives
+- `/li:inspect --target plan --lens design` — design system / UX implications (if applicable)
+- `/li:inspect --target plan --lens devex` — developer-experience implications (if applicable)
+- PLAN refinement — apply review findings within the existing approval boundary
 - `/li:tasks-write` — task list with file paths + complete code (where prescriptive) + verification steps
 - `/li:dependency-graph` — task ordering, blocking deps surfaced
 - `/li:cost-estimate` — tokens × phase × model = $-estimate (NEW — adopted from Architect image)
@@ -387,7 +401,7 @@ If role active, BEFORE writing alternatives:
 
 **Gates:**
 - **Cost-estimate gate** — AskUserQuestion: "Estimated cost: $X / Y tokens / Z min. Proceed?" (NEW)
-- **Founder approval gate** — MANDATORY PAUSE per Architect image. AskUserQuestion: approve / redirect / pause / abort.
+- **Operator approval gate** — MANDATORY PAUSE per Architect image. AskUserQuestion: approve / redirect / pause / abort.
 
 **Status protocol:**
 - DONE — plan APPROVED with cost-estimate accepted
@@ -396,7 +410,7 @@ If role active, BEFORE writing alternatives:
 - NEEDS_CONTEXT — DESIGN missing details PLAN can't fill
 
 **Pause-points:**
-- After plan-eng-review: confirm review findings addressed
+- After engineering inspection: confirm review findings addressed
 - After cost-estimate: AskUserQuestion gate
 - After full plan: AskUserQuestion approval gate
 
@@ -409,7 +423,7 @@ If role active, BEFORE writing alternatives:
 - Writes: plan.md, .planner-checkpoint.md, spec.md (draft), 00-state.md
 - Triggers: BUILD with plan.md as canonical source
 
-**Two-stage subagent review (adopted from superpowers):**
+**Two-stage independent review:**
 After plan draft:
 1. **Spec-compliance review** subagent: does plan match design doc requirements exactly?
 2. **Quality review** subagent: are tasks well-decomposed, deps correct, costs realistic?
@@ -426,7 +440,9 @@ Fix between stages, re-review if needed. Stop after 3 iterations or convergence.
 
 ### §2.5 — Phase 5: BUILD (~variable, depends on plan)
 
-**Purpose:** execute plan via TDD + subagent-driven development pattern (adopted from superpowers). Each task = fresh subagent + two-stage review.
+**Purpose:** execute the plan with verification and separately attributable review.
+The historical proposal used one fresh implementer per task; current BUILD groups original
+short leaves into bounded packages without losing their acceptance or two-stage review.
 
 **Slash:** `/li:build`
 
@@ -435,9 +451,9 @@ Fix between stages, re-review if needed. Stop after 3 iterations or convergence.
 - `/li:dispatch-implementer` — spawn subagent per task with full task text + context
 - `/li:two-stage-review` — spec-compliance review THEN code-quality review per task
 - `/li:fix-loop` — address review findings, re-dispatch
-- `/li:pair-agent` — operator pair-programming mode (interactive)
-- `/li:continuous-checkpoint` — auto-commit WIP if checkpoint_mode=continuous (gstack-inherited)
-- `/li:use-git-worktrees` — parallel branch dev (superpowers-inherited)
+- Native BUILD walkthrough — bounded interactive collaboration through actual host tools
+- Continuous checkpointing — retained explicit preference, within commit/push authority
+- Attributable Git worktrees — parallel writers only under an approved disjoint swarm
 - `/li:verification-before-completion` — confirm task actually works before marking done
 - `/li:context-warm-build` — operator can warm context with related files mid-BUILD (NEW)
 
@@ -485,12 +501,12 @@ Fix between stages, re-review if needed. Stop after 3 iterations or convergence.
 - Writes: source code, commits, build-log.md, 00-state.md
 - Triggers: REVIEW after all tasks DONE
 
-**Model selection (adopted from superpowers):**
+**Historical sizing labels (not current model mandates):**
 - Mechanical/isolated tasks → Haiku (fast, cheap)
 - Multi-file integration → Sonnet
 - Architecture/design judgment → Opus
 
-**Anti-patterns (per superpowers):**
+**Anti-patterns:**
 - Starting on main without explicit consent
 - Skipping reviews
 - Proceeding with unfixed issues
@@ -521,7 +537,7 @@ Fix between stages, re-review if needed. Stop after 3 iterations or convergence.
 - `/li:provenance-track` — track AI-assisted-generation provenance
 - `/li:first-party-check` — first-party-first compliance
 - `/li:dependency-audit` — CVE/license/supply-chain
-- `/li:codex` — outside-voice code review (optional)
+- `/li:cross-check --diff` — optional additional independent review through an actual permitted reviewer
 
 **Agents (concentrated review pool):**
 - **CodeReviewer** (engineering/) — primary
@@ -595,7 +611,7 @@ Fix between stages. Don't merge stages.
 - `/li:generate-ppt / -word / -web` — if customer-deliverable doc-gen needed (4-gate pipeline)
 - `/li:demo-deliverable-gen` — if engagement demo
 - `/li:rais-transparency-note` — if AI-system shipped to customer
-- `/li:landing-report` — release notes generation
+- `/li:capture --release-summary` — delivery-summary capability alongside SHIP
 
 **Agents:**
 - **ReleaseEngineer** (engineering/) — primary
@@ -609,7 +625,7 @@ Fix between stages. Don't merge stages.
 
 **Artifacts produced:**
 - Pushed branch + PR (or direct-push if explicitly authorized)
-- `release-notes.md` — generated via /li:landing-report
+- `release-notes.md` — delivery-summary output; current route is `/li:capture --release-summary`
 - `provenance-log.md` — append to repo's provenance log (if WorkProfile=on)
 - Customer deliverables (if applicable): .pptx, .docx, .html
 - `00-state.md` entry
@@ -657,15 +673,15 @@ Fix between stages. Don't merge stages.
 **Slash:** `/li:capture`
 
 **Sub-skills invoked:**
-- `/li:learn` — capture lesson from corrections during cycle, append to `tasks/lessons.md`
+- `/li:lessons-add` — capture corrections using the repository's durable lesson grammar
 - `/li:adr-new` — bootstrap ADR if non-trivial architectural decision was made
 - `/li:lessons-promote` — operator-driven: if lesson is general, promote to Lintel global
 - `/li:evolution-log-append` — if CLAUDE.md was modified, log
-- `/li:context-save` — write canonical session context for /li:context-restore later
-- `/li:retro` — brief retro (what worked / friction / next-time)
+- `/li:pause` — save compatible session context for `/li:resume --from <checkpoint>`
+- `/li:capture --retrospective` — what worked, friction and next-time adjustments
 - `/li:cold-executor-handoff` — finalize spec.md + plan.md + prompt.md as self-contained trio (NEW — from Architect image)
 - `/li:role-debrief` — if role was active, update role-file with anything learned (sensitivity-aware)
-- `/li:builder-profile-update` — append session to operator profile (gstack-inherited)
+- Historical profile-update proposal — no current write or policy authority follows from this record
 
 **Agents:**
 - **ADRDrafter** (engineering/) — primary, ADR drafting
@@ -808,7 +824,8 @@ explain_level: default       # or terse
 ### 3.3 — Active vs passive invocation
 
 **Active mode:** operator types `/li:cycle` and drives.
-**Passive mode:** Lintel observes session context and SUGGESTS skill invocation. Operator opt-in via `proactive: true` (gstack-inherited).
+**Passive mode proposal:** observe session context and suggest relevant methods under the
+operator's explicit `proactive: true` preference; this record does not activate a watcher.
 
 ```yaml
 # ~/.lintel/profile.yaml
@@ -817,16 +834,18 @@ proactive: true  # Lintel suggests skill invocation when context matches
 ```
 
 Examples of passive triggers:
-- Operator pastes error stack → suggest /li:investigate
+- Operator pastes error stack → suggest `/li:diagnose`
 - Operator says "ship this" → suggest /li:ship or /li:cycle --from SHIP
 - Operator says "let me think about this" → suggest /li:define
-- Operator mid-session for >30 turns → suggest /li:context-save
+- Operator mid-session for >30 turns → suggest `/li:pause`
 
 **Auto mode (NEW):** Lintel runs cycle WITHOUT operator confirmation between phases.
 ```bash
 /li:cycle --mode customer-engagement --auto
 ```
-Auto-decides at gates using recommended option (per gstack /plan-tune AUTO_DECIDE opt-in pattern). Operator can intervene at any time.
+The historical proposal auto-selected recommended options at gates. Current execution
+preserves actual operator decisions and stops at unresolved authority or irreversible
+boundaries; a preference cannot supply approval, review evidence or publication permission.
 
 **Aggressive passive:** Lintel jumps in even without operator prompt at session start, surfaces SENSE report unprompted (`proactive: aggressive`).
 
@@ -968,23 +987,23 @@ This requires explicit context warming — the operator says "load these, then w
 ### 5.2 — Context warming skills
 
 ```
-/li:context-warm <file-glob> [+ <file-glob>] ...   # load specified files into session
-/li:context-warm-related <topic>                    # heuristic load: search + dump relevant files
-/li:context-warm-sessions <branch> [<n-sessions>]   # load last N session-saves on branch
-/li:context-warm-adrs <topic>                       # load topic-relevant ADRs
+/li:context-warm --path <path> --glob <pattern>    # select bounded source manifests
+/li:context-warm --related <topic> --glob <pattern> # search within explicitly selected sources
+/li:context-warm --sessions [N]                    # selected branch, 1-5 saves, default 3
+/li:context-warm --adrs <topic>                    # retain explicit ADR status selection
 /li:context-warm-customer <engagement>              # load customer-engagement repo state
 /li:context-warm-from-url <url>                     # fetch + dump (e.g., Microsoft Learn doc)
-/li:context-dump <session-id>                       # read previous session's /li:context-save
-/li:context-snapshot [--name <name>]                # save current context state for later resume
-/li:context-budget                                  # show current utilization, recommend warm/cool
-/li:context-cool [--keep <patterns>]                # selective drop of context to free budget
+/li:resume --from <checkpoint>                    # read an authorized saved checkpoint
+/li:pause [label]                                  # save an owned compatible checkpoint
+/li:context-budget                                # report observations or unknown capacity
+/li:context-cool --path <path>                      # exclude future reads; no token reclamation claim
 ```
 
 ### 5.3 — Warming patterns
 
 **Smart load via heuristic:**
 ```bash
-/li:context-warm-related "ExpressRoute"
+/li:context-warm --related "ExpressRoute" --glob "docs/*.md"
 # → scans cwd + ~/.lintel/scaffolding/ + .claude/engineering/design-archive/ for ExpressRoute mentions
 # → loads top 10 most-relevant files
 # → reports: "Loaded 8 files, ~12k tokens. Budget: 50k / 1M used."
@@ -999,8 +1018,8 @@ This requires explicit context warming — the operator says "load these, then w
 
 **Session resume:**
 ```bash
-/li:context-warm-sessions v3-dev 5
-# loads last 5 sessions' /li:context-save outputs
+/li:context-warm --sessions 5
+# on the selected historical branch v3-dev; saved checkpoint grammar is unchanged
 # operator now has continuity across days
 ```
 
@@ -1081,10 +1100,10 @@ The Lintel cycle is invocable at 6 layers of granularity.
 
 ### Layer 3: Composite (multi-phase shortcuts)
 ```
-/li:plan-and-build         # PLAN → BUILD (skip review/ship)
-/li:review-and-ship        # REVIEW → SHIP
+/li:cycle --from PLAN --to BUILD     # PLAN → BUILD; later review remains required
+/li:cycle --from REVIEW --to CAPTURE # REVIEW → SHIP → CAPTURE, within existing authority
 /li:fix                    # SENSE → BUILD → REVIEW → SHIP (hotfix pattern)
-/li:research               # SENSE → DEFINE → DISCOVER (no build)
+/li:cycle --mode research-dive      # SENSE → DEFINE → DISCOVER (no build)
 ```
 
 ### Layer 4: Mode preset (full cycle with preset)
@@ -1143,7 +1162,7 @@ When approved, this runs as a discrete branch + commit sequence:
    - `jokerman89/jokerman-lintel` → `jokerman89/jokerman-lintel`
    - `jokerman89` → `jokerman89` (note: lowercase, since GH username changed)
 6. **Skill invocation namespace:**
-   - Operator types `/li:qa`, `/li:az-tldr`, `/li:cycle`
+   - Operator selects verification, an authorized domain method or `/li:cycle`
    - Wait — the user wants `/li:command` short form. Plugin name = "lintel" gives `/li:` namespace.
    - **DECISION needed:** plugin name "li" (gives `/li:cycle`) vs "lintel" (gives `/li:cycle`). Recommend "li" for ergonomics (3 chars beats 6 chars typed daily). Marketplace display name = "Lintel".
 7. **Entrypoint files:**
@@ -1197,7 +1216,7 @@ Estimated CC-time: ~1-2 hours mechanical execution.
 - ~40 sub-skills per phase (some new, many existing renamed)
 - /li:cycle orchestrator
 - /li:resume
-- 5 composite shortcuts (/li:fix, /li:research, /li:plan-and-build, /li:review-and-ship)
+- Historical target: 5 composite shortcuts (current navigation uses `/li:fix` and explicit cycle ranges)
 - 5 mode presets (hotfix, customer-engagement, internal-tool, demo-prep, research-dive)
 - WorkProfile toggle + profile.yaml schema
 - Role-lifting (7 skills + role-file format + sync mechanism)
@@ -1276,7 +1295,7 @@ After approval of this doc:
 2. **Execute rename** (Phase A — atomic branch + sed + git mv + GH rename + remote update)
 3. **Build 8 phase-skills** (Phase B — each ~200-400 lines per current depth standard)
 4. **Build /li:cycle orchestrator + /li:resume** (Phase C)
-5. **Build composite shortcuts** (Phase D — /li:fix, /li:research, etc.)
+5. **Build shorter cycle routes** (Phase D; current routes use the retained fix preset and explicit cycle ranges)
 6. **Build role-lifting infra** (Phase E — 7 skills + role file format + bin/li-roles-sync + 3 default public role files: Field-CTO, Solution-Architect, Engineering-Manager)
 7. **Build context-warming infra** (Phase F — 9 skills + budget-tracking)
 8. **Add cold-executor handoff** (Phase G — spec.md + plan.md + prompt.md generators in CAPTURE)
