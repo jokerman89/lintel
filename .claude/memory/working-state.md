@@ -17,9 +17,10 @@ changed. Continue from the [recovery checkpoint](../plans/universal-implementati
 and original work map. Existing owners are retained. Operator directive: every
 session and new actor uses `claude-opus-5.5`/max/`long_context`; see the handoff
 rule. Current original acceptance
-is **108/109**, not full release readiness. On 2026-09-25 the operator ordered A15.1–.4 and the
-pypdf-based PDF reader removed from Lintel (ADR-0033). A23.4 (leaf `A23.4.ci`) closes on the strict
-CI run of the removal head. A23.5 closed on 2026-09-24.
+is **109/109**, delivered: PR #93 is merged into `main` as `80002ed4` (2026-09-25). The operator
+ordered A15.1–.4 and the pypdf-based PDF reader removed from Lintel (ADR-0033). A23.4 closed on run
+`36108366549` (all 22 jobs green). A23.5 closed on 2026-09-24; its Phase 4 addendum on the removal
+is a post-merge review.
 **Delivery, 2026-09-25:** PR #93 (draft, `jokerman89`) head `ed91ef4f`; CI run `36065850657`
 passes 149/150 entries per system, and only `document-pdf` fails (undeclared `pypdf`). The A23.5
 Phase 3 addendum passes the CI-repair delta and binds that run (`reviews/A23.5-phase3-ci-ed91ef4.md`).
