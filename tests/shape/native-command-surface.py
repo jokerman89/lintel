@@ -114,54 +114,54 @@ PEER_REPORTS = {
 # see ".claude/plans/legacy-cleanup/residuals.md" "Source-revision original fields".
 SOURCE_REVISION_FIELDS = {
     '.claude/engineering/audits/lintel-uniformity-REMEDIATION-PLAN.md': ('2f4dd682af396af8dc2c65dd5241c49d7e4f3d9e', '# Lintel uniformity remediation plan', (
-        ('### W5 — Correctness bugs + first-party-first (finding #4, #5, #16; DEC-4, DEC-5, DEC-15)', 'lines', 1, 'c517ee9f7f9e533a6075b02198091c148ca545c996581a124d289ee6f465ccf5'),
+        (('## Workstreams (leverage-first, each independently shippable)', '### W5 — Correctness bugs + first-party-first (finding #4, #5, #16; DEC-4, DEC-5, DEC-15)'), 'lines', 1, 'c517ee9f7f9e533a6075b02198091c148ca545c996581a124d289ee6f465ccf5'),
     )),
     '.claude/plans/universal-implementation/a13-contract.md': ('77cb8d3f893d2ef42be2631fe35ae45594f21bd3', '# A13 observation and learning contract', (
-        ('### Writes', 'lines', 2, '6782f0d1397ad5d85115fa0d4afcb73c69a1ba6aef2e8fc90960984dd7a5669b'),
-        ('## A13.3 Freeze: advisory boundary corrections', 'lines', 1, '905d07da1f5c0fdb1f7c08fcf6251e63a4e93121ad10c50a20e52d28c7b894db'),
-        ('## Write scope and limits', 'lines', 1, '37df73a7c1d2b73f1acf7593cf7816491e13a22e708ff837a2064caaf23e0335'),
+        (('## A13.2 Lessons: IDs, retrieval, sinks and promotion', '### Writes'), 'lines', 2, '6782f0d1397ad5d85115fa0d4afcb73c69a1ba6aef2e8fc90960984dd7a5669b'),
+        (('## A13.3 Freeze: advisory boundary corrections',), 'lines', 1, '905d07da1f5c0fdb1f7c08fcf6251e63a4e93121ad10c50a20e52d28c7b894db'),
+        (('## Write scope and limits',), 'lines', 1, '37df73a7c1d2b73f1acf7593cf7816491e13a22e708ff837a2064caaf23e0335'),
     )),
     '.claude/plans/universal-implementation/packages/P05.md': ('77cb8d3f893d2ef42be2631fe35ae45594f21bd3', '# P05 - Mandatory outcomes and exact-result review', (
-        ('## Ownership and shared interface', 'lines', 11, 'd3fbb66ecea34ab4debdc4a8147ff2089290e19c1bfa791a1f2195962f53e82d'),
+        (('## Ownership and shared interface',), 'lines', 11, 'd3fbb66ecea34ab4debdc4a8147ff2089290e19c1bfa791a1f2195962f53e82d'),
     )),
     '.claude/plans/universal-implementation/packages/P06.md': ('77cb8d3f893d2ef42be2631fe35ae45594f21bd3', '# P06 - Universal operations and truthful client adapters', (
-        ('## Ownership', 'lines', 9, 'e70c5dbe85ed50e8c233e61e0eefcb66333f4c23b36dab01530511d4a643e14a'),
+        (('## Ownership',), 'lines', 9, 'e70c5dbe85ed50e8c233e61e0eefcb66333f4c23b36dab01530511d4a643e14a'),
     )),
     '.claude/plans/universal-implementation/packages/P08.md': ('77cb8d3f893d2ef42be2631fe35ae45594f21bd3', '# P08 - One work lifecycle and observable learning', (
-        ('## Ownership', 'lines', 11, 'fea88c721d691921333bce6c70683c0a16f7ea146b5f202c6eb4b308ec33dfcd'),
-        ('## Leaves and integration evidence', 'cell', 3, 'd712d8f3df9a549248b3df195a14ff06bd0ea1378076d45d44daf786f0058748'),
-        ('## Remaining original delivery-refusal pair', 'lines', 8, 'fdee281b2b5eed33d2e5e2807edc9e20dfbec194d2aa3638c24a9cb89d7ca8ce'),
-        ('### Candidate-03 intake and parallel remaining-F06 preparation', 'lines', 2, '20cdca4976b4e36c37b4ef51ba15bb2ac4e86516bed7e3de7521aaeed1b4398f'),
+        (('## Ownership',), 'lines', 11, 'fea88c721d691921333bce6c70683c0a16f7ea146b5f202c6eb4b308ec33dfcd'),
+        (('## Leaves and integration evidence',), 'cell', 3, 'd712d8f3df9a549248b3df195a14ff06bd0ea1378076d45d44daf786f0058748', ' Acceptance ', ' A10.4 '),
+        (('## Remaining original delivery-refusal pair',), 'lines', 8, 'fdee281b2b5eed33d2e5e2807edc9e20dfbec194d2aa3638c24a9cb89d7ca8ce'),
+        (('## F06 original negative-control verification re-plan', '### Candidate-03 intake and parallel remaining-F06 preparation'), 'lines', 2, '20cdca4976b4e36c37b4ef51ba15bb2ac4e86516bed7e3de7521aaeed1b4398f'),
     )),
     '.claude/plans/universal-implementation/packages/P09.md': ('77cb8d3f893d2ef42be2631fe35ae45594f21bd3', '# P09 - Retained specialist methods and portable agent roles', (
-        ('### Remaining module-consumer release', 'lines', 7, '315d55b7d29e56039f067089ee30bd938b1d974315b89b422e761bdc23ed7d19'),
-        ('### N1 semantic correction and original receiver-mode proof', 'lines', 7, '4da80d80672633d0eae9b1e7bb28c2c5ff20545ca5acd7abc2729652a3bab729'),
+        (('## Ownership and preservation', '### Remaining module-consumer release'), 'lines', 7, '315d55b7d29e56039f067089ee30bd938b1d974315b89b422e761bdc23ed7d19'),
+        (('## Ownership and preservation', '### N1 semantic correction and original receiver-mode proof'), 'lines', 7, '4da80d80672633d0eae9b1e7bb28c2c5ff20545ca5acd7abc2729652a3bab729'),
     )),
     '.claude/plans/universal-implementation/packages/P10.md': ('77cb8d3f893d2ef42be2631fe35ae45594f21bd3', '# P10 - Owned consumer lifecycle', (
-        ('## Ownership', 'lines', 7, 'b9e6b8fae2317db0c0c9dd9c06680c128a722aecc9acec6f7f77c463f0c008b1'),
+        (('## Ownership',), 'lines', 7, 'b9e6b8fae2317db0c0c9dd9c06680c128a722aecc9acec6f7f77c463f0c008b1'),
     )),
     '.claude/plans/universal-implementation/packages/P11.md': ('77cb8d3f893d2ef42be2631fe35ae45594f21bd3', '# P11 - Working design and real browser operations', (
-        ('## Browser-only first unit', 'lines', 6, '9be0399af0abcfa922ee6a23f8e9ea6aafaf26ee0fa95be8bf73733939df1cea'),
-        ('### Owned endpoint readiness correction', 'lines', 9, '76b62aa9d47664a686c5e69522fca0512b579f5080cf56c6186fdad50516212b'),
-        ('### Q1 complete numeric extraction', 'lines', 6, '4e2f06ea55d34052ab12e08e8b92e673eee583769a5ff013406c670b2209907f'),
+        (('## Browser-only first unit',), 'lines', 6, '9be0399af0abcfa922ee6a23f8e9ea6aafaf26ee0fa95be8bf73733939df1cea'),
+        (('## Ownership', '### Owned endpoint readiness correction'), 'lines', 9, '76b62aa9d47664a686c5e69522fca0512b579f5080cf56c6186fdad50516212b'),
+        (('## Ownership', '### Q1 complete numeric extraction'), 'lines', 6, '4e2f06ea55d34052ab12e08e8b92e673eee583769a5ff013406c670b2209907f'),
     )),
     '.claude/plans/universal-implementation/packages/P12.md': ('77cb8d3f893d2ef42be2631fe35ae45594f21bd3', '# P12 - Artifact-specific document production', (
-        ('## Standalone PDF writer and truthful inspection unit', 'lines', 7, 'c7e36f4288ae6786a6b636333f0bfbfdab65c4a51cfe0b6bcef95c4f855dceeb'),
-        ('## Ownership and value', 'lines', 4, '5cdf9a91cb7b8aff597973ff9984725dd666e58736c54da613f46ef54a672f6e'),
+        (('## Standalone PDF writer and truthful inspection unit',), 'lines', 7, 'c7e36f4288ae6786a6b636333f0bfbfdab65c4a51cfe0b6bcef95c4f855dceeb'),
+        (('## Ownership and value',), 'lines', 4, '5cdf9a91cb7b8aff597973ff9984725dd666e58736c54da613f46ef54a672f6e'),
     )),
     '.claude/plans/universal-implementation/packages/P13.md': ('77cb8d3f893d2ef42be2631fe35ae45594f21bd3', '# P13 - Discovery, optional capability selection and provenance', (
-        ('## Compact discovery first unit', 'lines', 6, '3ab6924ce6c8abb611f29a668a51f7bea287191c8f57b65c7fa314ae7155fb95'),
+        (('## Compact discovery first unit',), 'lines', 6, '3ab6924ce6c8abb611f29a668a51f7bea287191c8f57b65c7fa314ae7155fb95'),
     )),
     '.claude/plans/universal-implementation/plan.md': ('77cb8d3f893d2ef42be2631fe35ae45594f21bd3', '# Plan: Universal implementation', (
-        ('## Packages and ownership', 'cell', 3, 'bf11431cb4f4d0fbf6a8c4ce80e46f9ecfd0649274b6c4728f8ea02fd4b280e2'),
-        ('### A10 Proportionate intake and composition (P08; R05)', 'lines', 1, 'b9a8eb629798afd462b90678c4afd1e83da8e2dcc465a8471468c02fb16827bf'),
+        (('## Packages and ownership',), 'cell', 3, 'bf11431cb4f4d0fbf6a8c4ce80e46f9ecfd0649274b6c4728f8ea02fd4b280e2', ' Owned product paths ', ' P05 Evidence and controls '),
+        (('## Action leaves', '### A10 Proportionate intake and composition (P08; R05)'), 'lines', 1, 'b9a8eb629798afd462b90678c4afd1e83da8e2dcc465a8471468c02fb16827bf'),
     )),
     '.claude/plans/universal-implementation/reports/P08.md': ('77cb8d3f893d2ef42be2631fe35ae45594f21bd3', '# P08 partial implementation checkpoint', (
-        ('### Proposed bounded original-proof execution, not yet released or run', 'cell', 1, '7c7f32a85d9b8386ae1e91c2067361fa2268de4e4bc47224736081238556a092'),
-        ('### Proposed bounded original-proof execution, not yet released or run', 'cell', 1, 'e08677db60605e74c8b1929ddc3e73583795319ff959098e442c73804b19869d'),
-        ('### Proposed bounded original-proof execution, not yet released or run', 'cell', 1, 'bd2263ab9d1aab804a6f7d50a31e0ef420b2a93ca0f87dda76bb51f3860db823'),
-        ('### Proposed bounded original-proof execution, not yet released or run', 'cell', 1, 'f12ce21ddf0f9a336ecd4cda95860e7db041b6b29c5544d3f7af504fb8a99d55'),
-        ('### Original alias separately released after verified direct quiescence', 'lines', 8, 'ca14eee88af18d0a65101689882d9423a4c7b668e15e2e1a027ca9b27a881a45'),
+        (('## F04/F05 request-boundary correction and remaining-proof protocol', '### Proposed bounded original-proof execution, not yet released or run'), 'cell', 1, '7c7f32a85d9b8386ae1e91c2067361fa2268de4e4bc47224736081238556a092', ' Alternate entry ', ' New-work `autoplan` / `office-hours` composition '),
+        (('## F04/F05 request-boundary correction and remaining-proof protocol', '### Proposed bounded original-proof execution, not yet released or run'), 'cell', 1, 'e08677db60605e74c8b1929ddc3e73583795319ff959098e442c73804b19869d', ' Alternate entry ', ' `plan-and-build` '),
+        (('## F04/F05 request-boundary correction and remaining-proof protocol', '### Proposed bounded original-proof execution, not yet released or run'), 'cell', 1, 'bd2263ab9d1aab804a6f7d50a31e0ef420b2a93ca0f87dda76bb51f3860db823', ' Alternate entry ', ' `review-and-ship` '),
+        (('## F04/F05 request-boundary correction and remaining-proof protocol', '### Proposed bounded original-proof execution, not yet released or run'), 'cell', 1, 'f12ce21ddf0f9a336ecd4cda95860e7db041b6b29c5544d3f7af504fb8a99d55', ' Alternate entry ', ' Standalone `plan-eng-review`, `plan-devex-review`, opt-in `plan-ceo-review`, and `handoff-size-check` '),
+        (('## Authorized native semantic fixture: planning evidence', '### Original alias separately released after verified direct quiescence'), 'lines', 8, 'ca14eee88af18d0a65101689882d9423a4c7b668e15e2e1a027ca9b27a881a45'),
     )),
 }
 FORMER_HEADERS = frozenset({
@@ -612,17 +612,30 @@ def naming_record_observations(text: str, relative: str, observe, reject) -> Non
                     "Literal identifier output of the recorded comparison; the original claimed count is preserved, not independently confirmed. No current command is invoked.")
 
 
-def source_revision_observations(text: str, relative: str, observe) -> None:
-    """Observe retired tokens only inside exact original fields bound by digest, title and section."""
+def heading_ancestry(text: str, boundaries, offset: int) -> tuple[str, ...]:
+    """Actual (prose, non-nested) heading chain above an offset, H1 excluded."""
+    chain: list[tuple[int, str]] = []
+    for line in boundaries.lines:
+        if line.start >= offset:
+            break
+        label = text[line.start:line.end]
+        heading = re.match(r"(#{1,6}) ", label)
+        if line.kind == "prose" and not line.container_ids and heading:
+            level = len(heading[1])
+            chain = [item for item in chain if item[0] < level] + [(level, label)]
+    return tuple(label for level, label in chain if level > 1)
+
+
+def source_revision_observations(text: str, relative: str, observe, raw_exact: bool = True) -> None:
+    """Observe retired tokens only inside exact original fields bound by digest, title, ancestry and role."""
     declared = SOURCE_REVISION_FIELDS.get(relative)
-    if declared is None:
-        return
+    if declared is None or not raw_exact:
+        return  # Normalized (for example CRLF) bytes are not the recorded raw field.
     revision, title, fields = declared
     boundaries = observation_support("markdown_source").classify_markdown(text)
-    headings = [(line.start, text[line.start:line.end]) for line in boundaries.lines
-                if line.kind == "prose" and not line.container_ids
-                and re.match(r"#{1,6} ", text[line.start:line.end])]
-    titles = [label for _, label in headings if label.startswith("# ")]
+    titles = [text[line.start:line.end] for line in boundaries.lines
+              if line.kind == "prose" and not line.container_ids
+              and text[line.start:line.end].startswith("# ")]
     if titles != [title]:
         return  # A missing, changed, fenced-only or second actual H1 binds nothing.
     lines = text.split("\n")
@@ -630,31 +643,37 @@ def source_revision_observations(text: str, relative: str, observe) -> None:
     for line in lines:
         offsets.append(offsets[-1] + len(line) + 1)
 
-    def section(offset):
-        return next((label for start, label in reversed(headings) if start < offset), None)
-
-    for heading, kind, size, digest in fields:
+    for ancestry, kind, size, digest, *role in fields:
         spans = []
         if kind == "lines":
             for index in range(len(lines) - size + 1):
-                window = "\n".join(lines[index:index + size]) + "\n"
-                if hashlib.sha256(window.encode("utf-8")).hexdigest() == digest:
-                    spans.append((offsets[index], offsets[index] + len(window) - 1))
+                lower = offsets[index]
+                window = text[lower:offsets[index + size]]
+                if window.endswith("\n") and hashlib.sha256(window.encode("utf-8")).hexdigest() == digest:
+                    spans.append((lower, lower + len(window) - 1))
         elif kind == "cell":
+            header, key = role
             for index, line in enumerate(lines):
                 cells = line.split("|") if line.startswith("|") else []
                 if len(cells) > size + 1 and hashlib.sha256(cells[size].encode("utf-8")).hexdigest() == digest:
-                    start = offsets[index] + len("|".join(cells[:size])) + 1
-                    spans.append((start, start + len(cells[size])))
-        if len(spans) != 1 or section(spans[0][0]) != heading:
-            continue  # Changed, duplicated, moved or unbound fields receive no observation.
+                    top = index
+                    while top > 0 and lines[top - 1].startswith("|"):
+                        top -= 1
+                    head = lines[top].split("|")
+                    separator = lines[top + 1] if top + 1 < len(lines) else ""
+                    if (top + 1 < index and re.fullmatch(r"\|(?:\s*:?-{3,}:?\s*\|)+\s*", separator)
+                            and len(head) > size + 1 and head[size] == header and cells[1] == key):
+                        start = offsets[index] + len("|".join(cells[:size])) + 1
+                        spans.append((start, start + len(cells[size])))
+        if len(spans) != 1 or heading_ancestry(text, boundaries, spans[0][0]) != tuple(ancestry):
+            continue  # Changed, duplicated, moved, re-roled or unbound fields receive no observation.
         lower, upper = spans[0]
         field = text[lower:upper]
         tokens = {(m.start(), m.end()) for pattern in (SKILL_PATH, DISTINCTIVE_COMMAND)
                   for m in pattern.finditer(field)}
         tokens |= {(m.start(), m.end()) for m in re.finditer(r"`[^`\n]+`", field)}
         for start, end in sorted(tokens):
-            observe(lower + start, lower + end, f"source-revision field: {heading}", "original source-revision field",
+            observe(lower + start, lower + end, f"source-revision field: {ancestry[-1]}", "original source-revision field",
                     f"Exact field bytes of this record at {revision[:12]} ({title}); that version's declared scope or "
                     "acceptance, not a current routing instruction or authorization of current selected work. "
                     "Adjacent prose and every other occurrence remain checked.")
@@ -1294,7 +1313,7 @@ def markdown_observations(text: str, relative: str, observe, reported_changes: s
 def routing_lines(text: str, relative: str, exemptions: list[dict],
                   recorded_comparison_input: str | None = None,
                   observation_errors: list[tuple[int, str]] | None = None,
-                  reviewed_spans: list[dict] | None = None) -> list[str]:
+                  reviewed_spans: list[dict] | None = None, raw_exact: bool = True) -> list[str]:
     masked = list(text)
     reported_changes: set[str] = set()
 
@@ -1373,7 +1392,7 @@ def routing_lines(text: str, relative: str, exemptions: list[dict],
         remaining = "".join(masked)
         cohort_yaml_observations(remaining, relative, observe, reject)
         naming_record_observations(remaining, relative, observe, reject)
-        source_revision_observations(text, relative, observe)
+        source_revision_observations(text, relative, observe, raw_exact)
     return "".join(masked).splitlines()
 
 
@@ -1397,9 +1416,12 @@ def python_fence_lines(text: str) -> set[int]:
             continue
         body = text[line.body.start:line.body.end].strip()
         marker = re.match(r"(`{3,}|~{3,})(.*)$", body)
+        if fence is not None and fence[2] != line.container_ids:
+            fence = None  # An ended quote/list container cannot carry its fence into a new block.
         if fence is None:
             info = marker[2].strip().split() if marker else []
-            fence = (marker[1] if marker else "", bool(info) and info[0].casefold() in {"python", "py", "python3"})
+            fence = (marker[1] if marker else "", bool(marker) and bool(info)
+                     and info[0].casefold() in {"python", "py", "python3"}, line.container_ids)
             if fence[1]:
                 blocks.append([])
             continue
@@ -1417,6 +1439,8 @@ def python_fence_lines(text: str) -> set[int]:
         opened: list[int] = []
         try:
             for token in tokenize.generate_tokens(io.StringIO(source).readline):
+                if token.type == tokenize.ERRORTOKEN:
+                    raise tokenize.TokenError("unrecognized token")
                 if token.type in LITERAL_TOKENS:
                     touched.update(range(token.start[0], token.end[0] + 1))
                 if token.type in STRING_OPEN_TOKENS:
@@ -1516,8 +1540,9 @@ def scan(root: Path, check: str = "all", exemptions: list[dict] | None = None) -
         former_column = False
         observation_errors: list[tuple[int, str]] = []
         try:
+            raw_exact = relative not in SOURCE_REVISION_FIELDS or path.read_bytes() == text.encode("utf-8")
             routed = routing_lines(text, relative, exemptions, recorded_comparison_input,
-                                   observation_errors, reviewed.get(relative))
+                                   observation_errors, reviewed.get(relative), raw_exact)
         except ValueError as error:
             add(relative, 1, "observation-parse-error", str(error))
             routed = text.splitlines()

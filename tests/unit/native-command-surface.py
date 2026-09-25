@@ -34,7 +34,7 @@ class CommandSurfaceTests(unittest.TestCase):
     def write(self, relative, text):
         path = self.root / relative
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(text, encoding="utf-8")
+        path.write_text(text, encoding="utf-8", newline="")
         return path
 
     def skill(self, name, extra=""):
@@ -112,7 +112,7 @@ class CommandSurfaceTests(unittest.TestCase):
         text = ("# P99 - Original card\n\n## Ownership\n\n" + field +
                 "\nCurrent note: keep checking.\n")
         digest = hashlib.sha256(field.encode("utf-8")).hexdigest()
-        declared = {path: ("a" * 40, "# P99 - Original card", (("## Ownership", "lines", 2, digest),))}
+        declared = {path: ("a" * 40, "# P99 - Original card", ((("## Ownership",), "lines", 2, digest),))}
         with mock.patch.dict(guard.SOURCE_REVISION_FIELDS, declared, clear=True):
             self.assertEqual(self.findings(text, path), [])
             exemptions = []
@@ -145,17 +145,46 @@ class CommandSurfaceTests(unittest.TestCase):
         path = ".claude/plans/original/plan.md"
         cell = " `skills/{review,qa-only}` "
         text = "# Plan\n\n## Packages\n\n| ID | Owns | Notes |\n|---|---|---|\n| P05 |" + cell + "| original |\n"
-        declared = {path: ("b" * 40, "# Plan", (("## Packages", "cell", 2, hashlib.sha256(cell.encode()).hexdigest()),))}
+        declared = {path: ("b" * 40, "# Plan", ((("## Packages",), "cell", 2,
+                                                 hashlib.sha256(cell.encode()).hexdigest(), " Owns ", " P05 "),))}
         with mock.patch.dict(guard.SOURCE_REVISION_FIELDS, declared, clear=True):
             self.assertEqual(self.findings(text, path), [])
             self.assertTrue(self.findings(text.replace("| original |", "| run `plan-eng-review` |"), path))
             self.assertTrue(self.findings(text.replace("qa-only}", "qa-only,help}"), path))
+            # The same cell under a different column role or row identity is not the original field.
+            self.assertTrue(self.findings(text.replace("| Owns |", "| Dispatch |"), path))
+            self.assertTrue(self.findings(text.replace("| P05 |", "| P99 |"), path))
+            self.assertTrue(self.findings(text.replace("|---|---|---|\n", ""), path))
+
+    def test_source_revision_field_needs_exact_raw_bytes_and_full_ancestry(self):
+        path = ".claude/plans/original/nested.md"
+        field = "Own `office-hours` for that version.\n"
+        text = "# P98 - Card\n\n## Package scope\n\n### Ownership\n\n" + field + "\nDone.\n"
+        digest = hashlib.sha256(field.encode("utf-8")).hexdigest()
+        declared = {path: ("c" * 40, "# P98 - Card",
+                           ((("## Package scope", "### Ownership"), "lines", 1, digest),))}
+        with mock.patch.dict(guard.SOURCE_REVISION_FIELDS, declared, clear=True):
+            self.assertEqual(self.findings(text, path), [])
+            # A changed true ancestor, CRLF bytes or a synthesized final newline bind nothing.
+            self.assertTrue(self.findings(text.replace("## Package scope", "## Current routing"), path))
+            (self.root / path).write_bytes(text.replace("\n", "\r\n").encode("utf-8"))
+            self.assertTrue(guard.scan(self.root))
+            self.assertTrue(self.findings(text.split("\nDone.")[0].rstrip("\n"), path))
+            last = "# P98 - Card\n\n## Package scope\n\n### Ownership\n\n" + field.rstrip("\n")
+            self.assertTrue(self.findings(last, path))
+
+    def test_python_fence_state_does_not_leak_across_container_boundaries(self):
+        text = "# API\n\n> ```python\n> x = 1\n```yaml\nskill: qa\n```\n"
+        self.assertTrue(any("qa" in item.message for item in self.findings(text, "docs/api.md")))
+        stray = "# API\n\n```python\nx = `bad`\ndef f(*, skill: str,\n      limit: int): ...\n```\n"
+        self.assertTrue(any(item.code == "missing-command" for item in self.findings(stray, "docs/api.md")))
 
     def test_declared_source_revision_fields_are_documented_in_the_register(self):
         register = (ROOT / guard.RESIDUAL_REGISTER).read_text(encoding="utf-8")
         section = register[register.index("## Source-revision original fields"):]
         for relative, (revision, title, fields) in guard.SOURCE_REVISION_FIELDS.items():
-            for heading, kind, size, digest in fields:
+            for entry in fields:
+                digest = entry[3]
                 self.assertIn(digest, section, relative)
                 self.assertIn(revision, section, relative)
                 self.assertIn(relative, section)
