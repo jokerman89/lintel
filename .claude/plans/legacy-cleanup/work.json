@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "workflow": "lintel",
+  "status": "APPROVED",
+  "spec": ".claude/plans/legacy-cleanup/spec.md",
+  "plan": ".claude/plans/legacy-cleanup/plan.md",
+  "tasks": ".claude/plans/legacy-cleanup/plan.md",
+  "prompt": ".claude/plans/legacy-cleanup/prompt.md",
+  "execution_mode": "swarm",
+  "coordination": ".claude/plans/legacy-cleanup/swarm/coordination.json"
+}
