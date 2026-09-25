@@ -45,4 +45,4 @@ const mesh = new Mesh(gl, { geometry, program })
 
 ## L-001 note
 
-This snippet is canonical schema-by-example. Operator-extracted shader-snippets via `/li:frontend-style-extract` go to `~/.lintel/brand/shader-snippets/<name>/` and live alongside this one.
+This snippet is canonical schema-by-example. Operator-extracted shader-snippets via the `frontend-style-extract` skill go to `~/.lintel/brand/shader-snippets/<name>/` and live alongside this one.
