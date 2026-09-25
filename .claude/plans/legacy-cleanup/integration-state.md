@@ -27,17 +27,26 @@ that main before serial fan-in. Preserve the worker branches and worktrees.
 | Lane | App routing session | Branch | State |
 |---|---|---|---|
 | W1 | 7a4e21ae-488c-456a-a2e3-350459607d36 | jokerman-microsoft-native-planning-consolidation | Coordinator-preserved commit `556e4ea18968028daf413e5c435ee74a88a854fe`; acceptance pending |
-| W2 | 10c8fef1-69f2-497a-9f07-f4dc60965172 | jokerman-microsoft-native-quality-workflows | Implementing owned scope |
+| W2 | 10c8fef1-69f2-497a-9f07-f4dc60965172 | jokerman-microsoft-native-quality-workflows | Coordinator-preserved commit `2af909a802533ed93fdb0c64224994ae6c74d4ae`; acceptance pending |
 | W3 | 750acb1b-2dff-4a5d-b4cb-d48fbc7903eb | jokerman-microsoft-continuity-workflow-consolidation | Implementing owned scope |
 | W4 | 76bdc4fe-168f-4544-8364-754356d820a6 | jokerman-microsoft-browser-design-consolidation | Coordinator-preserved commit `da4a3d160de1a300e51e777710e19d8eb6ba1515`; acceptance pending |
 | W5 | b8d0a9b2-2c45-4662-ac0f-df0cf8d7fe20 | jokerman-microsoft-native-installation-guards | Implementing owned scope; narrowed alias edit accepted |
-| W6 | ddc03556-684b-4165-9fa9-939fb8043dea | jokerman-microsoft-native-documentation-migration | Implementing original scope; no extra audit ownership |
+| W6 | ddc03556-684b-4165-9fa9-939fb8043dea | jokerman-microsoft-native-documentation-migration | Original source scope finished; report/snapshot in progress; no extra audit ownership |
 
 W1's exact 21 paths and W4's exact 44 precommit paths passed coordinator scope checks;
 both indexes were empty and their base HEADs matched before preservation. W4's report
 bytes matched its reported SHA-256. No worker report is promoted to independent clearance.
 Git detects four W4 moves, so its preservation commit reports 40 changed paths, not a
 loss of the separately checked 44-path precommit add/delete inventory.
+W2's 28 precommit paths and report hash passed scope/attribution checks. Git detects
+two moves, so its preserved commit lists 26 changes. All 69 useful agent roles remain.
+
+First independent reviewer: `1742f900-1de4-4a59-beee-95c3a907a063`, Cleanup capability
+review. It reads preserved W1/W2/W4 commits plus coordinator `4deae9c8` as a preliminary
+specification/capability comparison only. No fan-in, frozen edits or final clearance.
+Reuse it for the actual reconciled spec review; the separate quality reviewer has not
+started. Presentation reservation authority and historical-record classification
+corrections were supplied as explicit later overlays, not silently changed inputs.
 
 ## Coordinator changes and observations
 
@@ -77,6 +86,12 @@ W5's delete/recreate of the alias registry was refused without deleting it. Pare
 clarified only surgical in-place retirement of identified expired records, preserving
 the registry/path/schema/unrelated data. The host accepted those limited edits.
 No replay of the refused deletion is authorized.
+
+The parent clarified that presentation paths are its scoped reservation, not a claim
+that the operator enumerated those exact paths. The provisional residual register
+also separates original observations/citations from actually manifest-bound evidence;
+not every narrative review file is inherently immutable. Record both attribution and
+classification rules in the lesson store after its freeze lifts.
 
 ## Next integration actions
 

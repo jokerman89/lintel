@@ -12,14 +12,21 @@ authorize a retired command, establish current affiliation, or supply current re
 clearance. No entire `.claude`, evidence or presentation directory is exempted.
 Do not claim literal zero identity tokens repository-wide when these values remain.
 
-## Original observed evidence
+## Original observations and evidence requiring classification
 
-These exact files preserve source-era evidence and references. Changing their quoted
-inputs while retaining their original verdict, digest or review identity would
-misrepresent what was observed. Current-tree routing acceptance does not consume these
-old values; the final candidate requires newly bound review and QA.
+These exact files contain source-era observations or references. They are not all
+cryptographically content-bound records merely because a filename says review.
+Only an actual canonical context/manifest binding can establish that property, and
+this provisional census has not established it for every row.
 
-| Exact path | Immutable field or category | Why it is not current routing |
+Preserve the original observed input or citation where changing it while retaining
+the old finding would misrepresent the observation. Independently identify the
+necessary exact fields; ordinary surrounding narrative can still be neutralized
+after its ownership freeze lifts. No signature, legal clearance or new acceptance
+is inferred. Current routing acceptance does not consume these older values; the
+final candidate requires newly bound review and QA.
+
+| Exact path | Retained field or observation category | Why it is not current routing |
 |---|---|---|
 | `.claude/engineering/audits/2026-09-20-universal-quality/inventory.json` | Original reviewed-file `path` field for ADR-0011 | Inventory of the audited revision, not an executable/source selection for the new candidate |
 | `.claude/engineering/audits/2026-09-20-universal-quality/reviews/workflow.json` | Original finding-location `path` field for ADR-0011 | Cites the source that was actually reviewed, not a current link to execute |
@@ -54,13 +61,17 @@ only if the final integrated scan actually requires them. An assumption that a r
 removed all covered text is not legal clearance. No encoded identity or concealed
 attribution is used to produce an empty scan.
 
-## Explicitly excluded presentation snapshots
+## Parent-reserved presentation snapshots
+
+The exclusion comes from the parent coordinator's scoped execution contract to avoid
+unrelated publication/deployment. It is not a claim that the operator personally
+enumerated these exact paths. That current scoped reservation remains in force.
 
 | Exact path | Frozen category | Why outside current cleanup acceptance |
 |---|---|---|
-| `presentations/tech-shots-2026-09-25/reference-source/bin-li-review-read.html` | Published/reference source excerpt | User explicitly excluded these presentation paths and publication; not an installed current helper |
-| `presentations/tech-shots-2026-09-25/reference-source/skills-plan-SKILL-md.html` | Published/reference source excerpt | User explicitly excluded these presentation paths and publication; not the canonical PLAN method |
-| `presentations/tech-shots-2026-09-25/show/technical-reference.html` | Existing presentation reference content | Preserved within the explicit presentation exclusion, not declared cleaned or regenerated |
+| `presentations/tech-shots-2026-09-25/reference-source/bin-li-review-read.html` | Published/reference source excerpt | Parent-reserved presentation/publication scope; not an installed current helper |
+| `presentations/tech-shots-2026-09-25/reference-source/skills-plan-SKILL-md.html` | Published/reference source excerpt | Parent-reserved presentation/publication scope; not the canonical PLAN method |
+| `presentations/tech-shots-2026-09-25/show/technical-reference.html` | Existing presentation reference content | Preserved within the parent scope reservation, not declared cleaned or regenerated |
 
 ## Final acceptance gate
 
