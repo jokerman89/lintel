@@ -1,52 +1,57 @@
 # MARS status
 
-**Updated:** 2026-09-24
-**Branch:** `jokerman-microsoft-mmars-development-plan` (this session's own branch; new files only
-except the regenerated `skills/CATALOG.md`)
-**Coordinator:** Finish work session `88aecc43-40f9-41d4-8947-6c2fb0a55481` owns integration timing.
+**Updated:** 2026-09-25
+**Branch:** `jokerman-microsoft-mars-integration` (from `origin/main` `80002ed4` plus the seven
+prototype commits of `jokerman-microsoft-mmars-development-plan`, which is unchanged)
+**Coordinator:** Finish work / Go Live `88aecc43-40f9-41d4-8947-6c2fb0a55481` owns merge timing,
+version assignment and delivery. No PR has been opened from this branch.
+**Decision:** [ADR-0034](../../decisions/0034-mars-multi-model-review.md). Plan and evidence:
+[plan.md](plan.md), [RM9 re-pilot](pilot-2026-09-25-rm9.md).
 
-MARS = **Multi-Model Adversarial Review & Screening** (renamed from MMARS by the operator).
+MARS = **Multi-Model Adversarial Review & Screening**.
 
-## Built and verified
+## Integrated
 
-| Item | Path | Evidence |
-|---|---|---|
-| Canonical skill | `skills/mars/SKILL.md` | frontmatter lint, catalog regeneration PASS |
-| Reviewer/challenge/synthesis protocol | `skills/mars/references/protocol.md` | used live in the pilot |
-| Integration snippets (not applied) | `skills/mars/references/integration.md` | — |
-| Defaults | `lib/mars-defaults.json` | latest per family, xhigh, 1M, 4 reviewers, max 8 |
-| Header schema (request/report/synthesis) | `lib/mars-schema.json` | unit tests + live refusal of malformed/mismatched reports |
-| Contract helper | `lib/mars_contract.py` | 30 unit tests |
-| CLI | `bin/li-mars.py` | roster, offer, panel init/origin/add/brief/record/observe/close-plan/mark-closed/summary/synthesis-header |
-| Native Copilot entry | `.github/skills/li-mars/SKILL.md` | matches generator format |
-| Tests | `tests/unit/mars_contract.py`, `tests/unit/mars-contract.sh` | 30/30 PASS |
-| Fixtures | `tests/fixtures/mars/` | pilot brief, Copilot App host snapshot |
-| Public doc | `docs/concepts/mars.md` | — |
-| Live pilot | `.claude/plans/mars/pilot-2026-09-24.md` | 4 models, 2 rounds, host-verified identity, 8 sessions closed safely |
-| MDASH lessons | `.claude/plans/mars/mdash-lessons.md` | — |
-| ADR draft | `.claude/plans/mars/adr-draft.md` | number allocated on the released base |
-| Shared Review Method design | `.claude/plans/mars/review-method-design.md` | DRAFT; decision D1 open |
-| Review Method (draft) | `skills/review/references/method.md` | not wired |
-| Standing questions (draft) | `lib/review-questions.json` | 37 questions, unique stable IDs, validated |
+| Item | Path |
+|---|---|
+| Canonical skill, protocol, integration points | `skills/mars/` |
+| Shared Review Method (packet text, rubric, evidence levels) | `skills/review/references/method.md` |
+| Standing questions with stable IDs and advisory tag rules | `lib/review-questions.json` |
+| Method library and packet CLI | `lib/review_method.py`, `lib/review-method-schema.json`, `bin/li-review-packet.py` |
+| Panel helper with method meta, input snapshot, overlap refusal, profile, inspection | `lib/mars_contract.py`, `lib/mars-schema.json`, `lib/mars-defaults.json`, `bin/li-mars.py` |
+| Workflow hooks | cycle Step 5, plan Step 10 (option E), review Stage 1/2 and Step 6b, code-review |
+| Distribution | `bin/li-copilot.py` (`WORKFLOWS`, `MARS_RESOURCES`), `.github/skills/li-mars/SKILL.md`, trigger list, catalog |
+| Tests | `tests/unit/review-method.sh`, `tests/unit/mars-contract.sh`, `tests/unit/mars-hooks.sh` |
+| Records | ADR-0034, `.claude/engineering/evolution/2026-09-25-mars-integration.md`, L-056 |
 
-## Remaining (coordinator-scheduled, on the released Universal base)
+## Pending (needs the in-flight legacy cleanup base)
 
-0. Execute the Review Method cards RM1–RM9 in `review-method-design.md` first: REVIEW and
-   MARS must send the same reviewer packet. Keep `/li:review` and `/li:mars` independently
-   runnable; the method library is the only shared part.
-1. Apply `skills/mars/references/integration.md` edits to cycle, plan, review, define,
-   plan-eng-review and code-review (shared files, deliberately not touched here).
-2. Add `mars` to `bin/li-copilot.py` `WORKFLOWS` and the resource closure; regenerate adapters
-   and `skills/CATALOG.md`; add `mars` to the description-trigger `MIGRATED` list.
-3. Bind MARS inspection records to the released `review_contract.py` snapshot/inspection
-   evidence and `profile_context.py` reference (spec R09/R11); today the brief hash binds
-   the frozen brief only.
-4. Allocate the ADR number; add an evolution entry.
-5. Optional: a subagent-transport pilot to measure the cost difference.
+- MARS hooks for the consolidated planning inspection (replacing `plan-eng-review`),
+  `define`'s spec review, `cross-check` and `CodeReviewer`: specified in
+  `skills/mars/references/integration.md`, not applied to files that lane removes or rewrites.
+- Repository-wide drift guard (no rubric outside the method) after that consolidation.
+- CAPTURE wiring for the opt-in calibration log (RM8); today it is the CLI and method §7.
+- Operator confirmation of D1 (ADR-0034) at merge.
+
+## Verification (details in plan.md "Review")
+
+Unit 78/78 and shape 41/41 (one `jq`-absent partial each); focused MARS/method tests 62;
+copilot-kit 19 of 21 run cases pass, and the 2 failures reproduce on the base; generator and
+bundle closure checked; RM9 live pilot; two independent review rounds, all findings fixed.
+`universal-adapters.sh` and `catalog-installed.sh` were still running when this was written
+(3 of 17 adapter cases passed so far); CI on a Linux runner is the faster place to finish them.
+
+## Advisory P3 notes from the independent recheck
+
+- Path case folding follows `normcase`; case-insensitive macOS volumes are not folded.
+- `coverage_complete` means "complete and consistent under the method", documented in the
+  protocol rather than renamed.
+- The branch is based on `80002ed4`; `origin/main` has since gained six commits, none in
+  files this branch changes except three lines in ADR-0033.
 
 ## Known limits
 
-- Identity evidence reader is host-specific (Copilot App local session store); other hosts
-  need their own observation route or stay `requested-only`.
+- Identity evidence is host-specific: Copilot App `assistant_usage_events` per child session or
+  subagent `agent_id`. Other hosts need their own observation route or stay `requested-only`.
 - "Latest" relies on version numbers in model IDs and the family preferences in defaults.
-- No live run on hosts other than the Copilot App.
+- Live runs so far: Copilot App only; one synthetic subject; no challenge round in RM9.
