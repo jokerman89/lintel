@@ -5,6 +5,10 @@ two block gates (secrets, customer data), the secret warn-on-edit, the direct-pu
 budget warn, the two cycle-continuity hooks, and the prompt-scan. The remaining 24 — including all
 the module warn-hooks — ship inert and are opt-in.
 
+This is a Claude Code hook bundle. It is not translated to other clients: the Copilot kit and the
+Codex, Gemini and Universal adapters do not register or run these hooks, and a hook file's presence
+is not evidence that it runs. See [multi-CLI support](../../docs/multi-cli.md).
+
 ## Activation model (per A1 design decision)
 
 Hooks ship INERT at `~/.lintel/hooks/`. They are NOT auto-installed into `~/.claude/hooks/` — operator manually symlinks each one to opt in:
@@ -40,8 +44,8 @@ Cross-cutting:
 3. `frozen-zone-warn` — warns when about to edit a frozen-zone path
 4. `context-bloat-warn` — surfaces at the token / tool-call soft threshold
 5. `no-direct-main-push` — warns on `git push` to `main` (requires per-batch auth)
-6. `no-merge-without-review` — warns on PR merge without a /review or /plan-eng-review record
-7. `no-customer-data-in-screenshot` — scans /browse screenshots for customer-data tells
+6. `no-merge-without-review` — warns on PR merge without a current content-bound review decision
+7. `no-customer-data-in-screenshot` — scans selected web-session artifacts for customer-data tells
 8. `no-production-mutation-without-auth` — warns on prod-mutation Bash commands without explicit auth
 9. `frontend-design-surface` — surfaces brand design patterns on frontend edits
 

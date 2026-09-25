@@ -35,7 +35,7 @@ is a cooperative reminder for BUILD and review; this hook is a separate, dormant
 
 ## Message
 
-A match prints the frozen path and its source, then names `/li:code-unfreeze` for removing an
+A match prints the frozen path and its source, then names an explicitly authorized `/li:code-freeze --lift` for removing an
 advisory freeze that is no longer wanted. The warning is informational.
 
 ## Audit

@@ -14,7 +14,7 @@ Surfaces context-bloat warning at the 50k token / 80 tool-call soft threshold (c
 ## Behavior
 
 - At soft threshold: prints one-line warning. Repeats no more than once per 5 tool-calls (don't spam).
-- At hard threshold (80k / 130 calls): prints stronger warning recommending `/context-save` immediately.
+- At hard threshold (80k / 130 calls): recommends `/li:pause`, then `/li:resume --from` in a fresh session.
 - Reads thresholds from `~/.lintel/config.yaml` `watcher` section.
 
 ## Why warn-only
