@@ -1,5 +1,5 @@
 # component: review-method
-# implements: ADR-0034, ADR-0028
+# implements: ADR-0036, ADR-0028
 # intent: skills/review/references/method.md
 # constraints: stdlib only; renders and checks text, never dispatches reviewers, grants permission or clears release
 # last_intent_review: 2026-09-25

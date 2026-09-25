@@ -1,6 +1,6 @@
 # Review Method
 
-**Status:** Accepted (ADR-0034). Rendered by `lib/review_method.py` and
+**Status:** Accepted (ADR-0036). Rendered by `lib/review_method.py` and
 `bin/li-review-packet.py`; sections 1-5 below are the packet text sent to reviewers.
 **Consumers:** `/li:review` Stage 1 and 2 (single or panel), `/li:mars` (every panel slot,
 including the optional `/li:code-review` panel) and the plan approval review. The planning

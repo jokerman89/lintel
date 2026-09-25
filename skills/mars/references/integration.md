@@ -55,4 +55,4 @@ not to the files being removed:
 
 ## Decision record
 
-[ADR-0034](../../../.claude/decisions/0034-mars-multi-model-review.md).
+[ADR-0036](../../../.claude/decisions/0036-mars-multi-model-review.md).

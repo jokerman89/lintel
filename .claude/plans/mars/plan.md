@@ -41,7 +41,7 @@ timing, version assignment and delivery. No PR or merge is opened from this bran
   packet plus Step 6b panel mode, code-review optional offer. Declining changes nothing.
 - [x] **I4 Distribution** (R13) `mars` in `bin/li-copilot.py` `WORKFLOWS` with a required
   resource closure, `MIGRATED` trigger list, regenerated native entry and catalog, docs lists.
-- [x] **I5 Decision and records** (R17) ADR-0034, evolution entry, concept doc, status,
+- [x] **I5 Decision and records** (R17) ADR-0034 (renumbered ADR-0036 on 2026-09-25), evolution entry, concept doc, status,
   lesson for today's correction.
 - [x] **I6 Calibration loop** (RM8) opt-in per-question outcome log and summary.
 - [x] **I7 Verification** unit, shape and integration checks; independent spec then quality
@@ -80,6 +80,6 @@ Step 5 only surfaces it), so a full cycle has exactly one offer point. RM8 exist
 method §7; CAPTURE is not edited because an active lane owns it. Commit 7daffd00's message
 also credits the P1 rubric note, which landed earlier in 5a89b4c5; history was not rewritten.
 
-**Next:** the operator ordered an immediate merge; ADR-0034 (with D1) is accepted and the
+**Next:** the operator ordered an immediate merge; ADR-0034 (with D1; renumbered ADR-0036 on 2026-09-25) is accepted and the
 changelog updated. Publishing is handed to Go Live (this session's GitHub actor is barred by
 L-053). The pending consolidated hooks follow #104. No push or PR was made from here.

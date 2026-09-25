@@ -42,7 +42,7 @@ content-bound review evidence and explicit limits on what each check proves.
   reviews one frozen brief, with a challenge round only when they disagree. Dissent is preserved,
   identity comes from host evidence, and the result is inspection input, never release clearance.
   Offers need live host capability and consent; a full cycle offers it once, at PLAN's approval
-  gate (ADR-0034).
+  gate (ADR-0036).
 - One Review Method for single reviews and panels (`skills/review/references/method.md`,
   `lib/review_method.py`, `bin/li-review-packet.py`): standing questions with stable IDs,
   evidence levels, one severity rubric, required per-question coverage and one decision rule.

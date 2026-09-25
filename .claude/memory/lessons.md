@@ -1088,9 +1088,10 @@ because they could discard uncommitted work.
 worktree or clone, even for local-only commits or scratch copies, unless the operator explicitly
 authorizes it. When a fresh working copy is needed, create a new directory.
 
-## L-056 - Commit only on the branch the operator authorized
+## L-059 - Commit only on the branch the operator authorized
 
-**Date:** 2026-09-25
+**Date:** 2026-09-25 (recorded as L-056 on the MARS branch; renumbered because the native
+workflow consolidation already holds L-056 to L-058)
 
 **Context:** The operator paused a benchmark and said to open a branch and integrate MARS. Before
 branching, the assistant tried to commit a pending MARS pilot-note edit on the existing prototype

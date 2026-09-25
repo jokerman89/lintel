@@ -19,7 +19,8 @@ breaking_change: false
 
 # Structure change: MARS integration
 
-> Gate M1 (structure-impact analysis) artifact for ADR-0034.
+> Gate M1 (structure-impact analysis) artifact for ADR-0036 (drafted as ADR-0034; renumbered
+> 2026-09-25 because #104 holds 0034 and the client cleanup holds 0035).
 
 ## What changed (shape)
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # component: review-method-tests
-# implements: ADR-0034
+# implements: ADR-0036
 # intent: skills/review/references/method.md
 # constraints: hermetic temp dirs; no sessions, models or network
 # last_intent_review: 2026-09-25

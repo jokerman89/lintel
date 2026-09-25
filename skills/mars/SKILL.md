@@ -189,7 +189,7 @@ the owner. Subagents need no close. Abort path: `--include-incomplete`, after re
   hooks: [integration.md](references/integration.md).
 - One method: [Review Method](../review/references/method.md) and
   `lib/review-questions.json`; single reviews and panels send the same packet body.
-- Decision: [ADR-0034](../../.claude/decisions/0034-mars-multi-model-review.md).
+- Decision: [ADR-0036](../../.claude/decisions/0036-mars-multi-model-review.md).
   Lessons from Microsoft's MDASH on catching bugs inline: `.claude/plans/mars/mdash-lessons.md`.
 - Evidence contract: MARS output is inspection data only. Strict review, QA and SHIP stay
   with `/li:review`, `/li:ship` and the content-bound review evidence. In REVIEW panel mode,

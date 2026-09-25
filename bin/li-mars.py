@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # component: mars-cli
-# implements: ADR-0034, ADR-0028
+# implements: ADR-0036, ADR-0028
 # intent: .claude/plans/mars/spec.md
 # constraints: stdlib only; never invokes models, sessions or network; writes only the named panel/record files
 # last_intent_review: 2026-09-25

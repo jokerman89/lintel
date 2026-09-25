@@ -1,8 +1,11 @@
-# ADR-0034: MARS multi-model review and one shared Review Method
+# ADR-0036: MARS multi-model review and one shared Review Method
 
 - **Status:** Accepted, 2026-09-25. Merged on the operator's instruction to merge now. D1 below
   ships as proposed; it was presented for confirmation before that instruction, and a later
   ADR can reverse it.
+- **Renumbered:** drafted and reviewed as ADR-0034, renumbered ADR-0036 on 2026-09-25 because
+  the native workflow consolidation (#104) holds 0034 and the client cleanup holds 0035.
+  Earlier commits and review rounds refer to ADR-0034.
 - **Date:** 2026-09-25
 - **Deciders:** the operator (requested MARS, its defaults, a live four-model pilot, and
   integration "according to our plan"); implemented on `jokerman-microsoft-mars-integration`

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # component: mars-hooks-tests
-# implements: ADR-0034
+# implements: ADR-0036
 # intent: skills/mars/references/integration.md
 # constraints: reads canonical workflow text only; no sessions, models or network
 # last_intent_review: 2026-09-25

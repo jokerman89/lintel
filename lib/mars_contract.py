@@ -1,5 +1,5 @@
 # component: mars-contract
-# implements: ADR-0034, ADR-0028, ADR-0026
+# implements: ADR-0036, ADR-0028, ADR-0026
 # intent: .claude/plans/mars/spec.md
 # constraints: stdlib only; data selection never dispatches models, grants permission or clears release
 # last_intent_review: 2026-09-25

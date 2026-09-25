@@ -4,12 +4,13 @@
 **Branch:** `jokerman-microsoft-mars-integration` (from `origin/main` `80002ed4` plus the seven
 prototype commits of `jokerman-microsoft-mmars-development-plan`, which is unchanged)
 **Coordinator:** Finish work / Go Live `88aecc43-40f9-41d4-8947-6c2fb0a55481`.
-**Delivery (2026-09-25):** the operator ordered "Merge everything now". ADR-0034 is accepted and
+**Delivery (2026-09-25):** the operator ordered "Merge everything now". ADR-0036 is accepted and
 the changelog lists MARS under 0.11.0 (unreleased). This session's GitHub CLI actor is
 `jokerman_microsoft`, so L-053 bars it from publishing; push, PR, CI and merge were handed to Go
 Live, which already has permission to publish as `jokerman89`. If Go Live declines, the operator
 runs them (`files/mars-pr-body.md` in this session holds the PR text).
-**Decision:** [ADR-0034](../../decisions/0034-mars-multi-model-review.md). Plan and evidence:
+**Decision:** [ADR-0036](../../decisions/0036-mars-multi-model-review.md), drafted and reviewed as ADR-0034
+(renumbered 2026-09-25: #104 holds 0034, the client cleanup 0035). Plan and evidence:
 [plan.md](plan.md), [RM9 re-pilot](pilot-2026-09-25-rm9.md).
 
 MARS = **Multi-Model Adversarial Review & Screening**.
@@ -26,7 +27,7 @@ MARS = **Multi-Model Adversarial Review & Screening**.
 | Workflow hooks | cycle Step 5, plan Step 10 (option E), review Stage 1/2 and Step 6b, code-review |
 | Distribution | `bin/li-copilot.py` (`WORKFLOWS`, `MARS_RESOURCES`), `.github/skills/li-mars/SKILL.md`, trigger list, catalog |
 | Tests | `tests/unit/review-method.sh`, `tests/unit/mars-contract.sh`, `tests/unit/mars-hooks.sh` |
-| Records | ADR-0034, `.claude/engineering/evolution/2026-09-25-mars-integration.md`, L-056 |
+| Records | ADR-0036, `.claude/engineering/evolution/2026-09-25-mars-integration.md`, L-059 (recorded as L-056 in a4a264e1; #104 holds L-056 to L-058) |
 
 ## Pending (needs the in-flight legacy cleanup base)
 
@@ -35,7 +36,7 @@ MARS = **Multi-Model Adversarial Review & Screening**.
   `skills/mars/references/integration.md`, not applied to files that lane removes or rewrites.
 - Repository-wide drift guard (no rubric outside the method) after that consolidation.
 - CAPTURE wiring for the opt-in calibration log (RM8); today it is the CLI and method §7.
-- Operator confirmation of D1 (ADR-0034) at merge.
+- D1 (ADR-0036) ships as proposed on the operator's merge instruction.
 
 ## Verification (details in plan.md "Review")
 

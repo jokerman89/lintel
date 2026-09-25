@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # component: mars-contract-tests
-# implements: ADR-0034
+# implements: ADR-0036
 # intent: .claude/plans/mars/spec.md
 # constraints: hermetic temp dirs; no sessions, models or network
 # last_intent_review: 2026-09-25
