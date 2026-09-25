@@ -569,6 +569,12 @@ class BindingTests(unittest.TestCase):
         self.assertTrue(mc.output_overlaps(alias, ["src"], [self.repo / "src" / "x.json"]))
         self.assertEqual(mc.output_overlaps(self.repo, ["src"], [records]), [])
 
+    def test_a_case_variant_output_path_overlaps_on_every_host(self):
+        """Fail closed on case-insensitive volumes (macOS default) as well as Windows."""
+        self.assertTrue(mc.output_overlaps(self.repo, ["src"], [self.repo / "SRC" / "x.json"]))
+        self.assertTrue(mc.output_overlaps(self.repo, ["SRC"], [self.repo / "src"]))
+        self.assertEqual(mc.output_overlaps(self.repo, ["src"], [self.repo / "docs" / "x.json"]), [])
+
 
 class CliTests(unittest.TestCase):
     def run_cli(self, *args):

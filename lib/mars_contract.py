@@ -592,10 +592,11 @@ def attach_profile(panel: Dict[str, Any], repo: Path, reference: Optional[Path] 
 def _resolved(path: Path) -> str:
     """Canonical spelling after links and junctions, for containment checks only.
 
-    Case folding follows the host's `normcase` (Windows folds; POSIX, including
-    case-insensitive macOS volumes, compares the resolved spelling as is).
+    Case is folded on every host, so a case-variant spelling counts as the same place even on
+    a case-insensitive macOS volume. On a case-sensitive filesystem this can refuse two paths
+    that differ only by case; that refusal is the intended fail-closed direction.
     """
-    return os.path.normcase(os.path.realpath(os.path.abspath(path)))
+    return os.path.normcase(os.path.realpath(os.path.abspath(path))).casefold()
 
 
 def _contains(parent: str, child: str) -> bool:
@@ -608,7 +609,8 @@ def _contains(parent: str, child: str) -> bool:
 def output_overlaps(repo: Path, selection: Sequence[str], outputs: Sequence[Path]) -> List[str]:
     """Mutable outputs inside (or containing) the selected input would invalidate the snapshot.
 
-    Compares resolved spellings, so a symlink or junction cannot hide an overlap.
+    Compares resolved, case-folded spellings, so a symlink, junction or other case cannot hide
+    an overlap.
     """
     root = _resolved(repo)
     targets = []
