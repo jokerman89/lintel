@@ -110,13 +110,22 @@ Identify scope of review:
 
 ### Step 2 — Stage 1: Spec compliance review
 
-Dispatch CodeReviewer agent (or general-purpose):
+Dispatch CodeReviewer agent (or general-purpose) with the shared
+[Review Method](references/method.md) packet for stage `spec`. Render it once from the
+prepared snapshot's selected content, with every selected requirement or leaf ID:
 
-Prompt:
-"Review the diff against plan.md. For each task in plan.md, verify the implementation matches requirements EXACTLY. Be strict. 'Close enough' is not acceptable. Output:
-- Per-task: PASS or list deviations with file:line + suggested fix
-- Aggregate: total tasks PASS / total deviations / spec-compliance score
-Be terse. Don't praise."
+```bash
+python3 "$LINTEL_SOURCE_ROOT/bin/li-review-packet.py" --repo "$LINTEL_REPO_ROOT" render \
+  --kind implementation --stage spec --acceptance <ID> [--acceptance <ID> ...] \
+  --subject-file <selected diff/content> --subject-ref "<branch or package>" \
+  --body-out "$run/inputs/stage1.md" --meta-out "$run/inputs/stage1.json" \
+  --request-out "$run/records/stage1.request.md" --requested-by "<operator via session>" --surface <client>
+```
+
+Send the rendered request unchanged. The method sets the strictness ("close enough" is a
+deviation) and the report shape; validate the reply with
+`li-review-packet.py check --report <reply> --meta "$run/inputs/stage1.json"`. A reply that
+omits an acceptance ID is incomplete and is re-requested, never scored as PASS.
 
 Record exact `pass`, `fail`, `unverified` or `error` per acceptance control and map
 every selected leaf to its evidence. A missing acceptance result blocks that leaf;
@@ -129,17 +138,13 @@ If Stage 1 FAILS:
 
 ### Step 3 — Stage 2: Code quality review (ONLY after Stage 1 PASS)
 
-Dispatch CodeReviewer agent:
-
-Prompt:
-"Review the diff for quality. Dimensions:
-- Correctness (logic, edge cases, error handling)
-- Security (injection, secrets, auth, OWASP)
-- Performance (N+1, hot paths, memory)
-- Code style (naming, structure, DRY)
-- Test coverage (happy path, edge cases, regression)
-
-For each finding: P1 (block ship) / P2 (must fix) / P3 (nit). Include file:line + concrete fix. Confidence per finding. Be terse."
+Dispatch CodeReviewer agent with the method packet for stage `quality`, rendered the same
+way with `--stage quality` and the confirmed surface tags (`li-review-packet.py tags`
+proposes them from the changed paths and diff; you confirm and pass `--tags`). The packet
+carries the selected standing questions, the evidence levels and the one severity rubric:
+P1 blocks ship, P2 is fixed before ship unless explicitly accepted, P3 is a nit; confidence
+never changes severity. `check` returns `incomplete` when a selected question lacks a
+status or evidence; re-request instead of treating the silence as a pass.
 
 If Stage 2 FAILS:
 - P1 findings BLOCK — fix loop required
@@ -202,6 +207,19 @@ If YES:
 If unavailable: record the optional pass as unverified. It cannot replace the
 required independent reviewer or supply a fictitious observation.
 
+### Step 6b — Optional MARS panel mode (gated)
+
+Standalone review only: when `li-mars.py offer` (caller `review`, live host facts, no
+cycle route) returns 0 and MARS was not already offered or declined for this target,
+offer it once. Inside a cycle the only offer belongs to PLAN; never offer here. With
+consent, run [MARS](../mars/SKILL.md) with the same method packet and stage as the single
+reviewer it replaces, bound to the same selection (`panel init --select`). REVIEW records
+its own stage decision through the existing content-bound path from the adjudicated
+result (`synthesis-header --adjudicated` outcome, `panel inspection` record); MARS itself
+never marks the review PASS. Surface panel findings under "MARS (multi-model):".
+Declined or unavailable: continue the single-reviewer path unchanged and say nothing
+unless the operator asked for MARS.
+
 ### Step 7 — Write artifacts
 
 **`review-report.md`** (`.claude/runtime/state/review-report-<datetime>.md`):
@@ -237,6 +255,9 @@ required independent reviewer or supply a fictitious observation.
 
 ## Outside voice (if run)
 [Codex output verbatim]
+
+## MARS (multi-model, if run)
+[synthesis header, adjudicated findings, preserved dissent, inspection record path]
 
 ## Verdict
 - Ship-ready: <yes/no/yes-with-caveats>

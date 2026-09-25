@@ -366,6 +366,17 @@ approved, ask through the actual host question channel:
 - B) REDIRECT — specific feedback (loop back)
 - C) PAUSE — save state for later, don't proceed
 - D) ABORT — close plan, status BLOCKED
+- E) MARS FIRST — only when the MARS offer gate below passed
+
+**Optional MARS (offered at most once).** Before asking, build a request for
+`li-mars.py offer` ([MARS](../mars/SKILL.md)): caller `plan`, live host facts and any
+recorded decline; inside a cycle add the cycle's actual selected `route` and checkpoint
+`PLAN-approval`, so only a full nine-phase cycle can pass. Exit 3 means no option E and
+no mention. When existing approval is retained, ask the offer alone instead of re-asking
+approval. With consent, MARS reviews the plan with the shared review method; its findings
+return to Step 9 fix/accept handling, then approval is asked again. Record
+`mars_offer=<accepted|declined>` on the Step 12 PLAN entry so no later phase re-offers.
+`--auto` and silence never select E.
 
 If A: mark the reviewed trio APPROVED, finalize it and write the checkpoint. Only declare
 status DONE after the artifact checks below pass. Until approval, all three remain DRAFT.
