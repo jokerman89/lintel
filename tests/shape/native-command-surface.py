@@ -61,6 +61,14 @@ SOURCE_EXCEPTIONS = {
     "skills/design-dna/LICENSES/MIT-next-level-builder.txt": "Required notice for the retained design corpus.",
     "skills/design-dna/LICENSES/Apache-2.0-anthropic.txt": "Required license for the retained profile adaptation.",
 }
+# Dated internal records that name former workflows as original observations are declared by
+# exact path and rationale in HISTORICAL_REGISTER, optionally from one exact heading to the end
+# of the file. Their reference findings are reported as HISTORICAL observations by path and
+# line, never silently dropped. Entries are refused outside these record trees, so they cannot
+# hide a current skill, documentation, decision, memory or root-file route.
+HISTORICAL_REGISTER = ".claude/plans/legacy-cleanup/historical-records.json"
+HISTORICAL_ROOTS = (".claude/engineering/", ".claude/plans/")
+HISTORICAL_CODES = frozenset({"retired-command", "missing-command", "missing-path"})
 IGNORED_DIRECTORIES = frozenset({".git", "node_modules", "__pycache__", ".venv", "venv"})
 TEXT_SUFFIXES = frozenset({
     ".md", ".sh", ".ps1", ".py", ".json", ".yaml", ".yml", ".toml",
@@ -979,6 +987,56 @@ def routing_lines(text: str, relative: str, exemptions: list[dict],
     return "".join(masked).splitlines()
 
 
+def historical_records(root: Path) -> tuple[dict[str, tuple[int, str]], list[Finding]]:
+    """Return declared record paths with their first historical line and rationale."""
+    register = root / HISTORICAL_REGISTER
+    if not register.exists():
+        return {}, []
+    try:
+        value = json.loads(register.read_text(encoding="utf-8-sig"))
+    except (OSError, UnicodeError, ValueError) as error:
+        return {}, [Finding(HISTORICAL_REGISTER, 1, "historical-register", f"Unreadable register: {error}")]
+    entries = value.get("records") if isinstance(value, dict) and value.get("schema_version") == 1 else None
+    if not isinstance(entries, list):
+        return {}, [Finding(HISTORICAL_REGISTER, 1, "historical-register",
+                            "Register needs schema_version 1 and a records list.")]
+    records: dict[str, tuple[int, str]] = {}
+    errors: list[Finding] = []
+    for index, entry in enumerate(entries, 1):
+        relative = entry.get("path") if isinstance(entry, dict) else None
+        reason = entry.get("reason") if isinstance(entry, dict) else None
+        heading = entry.get("from_heading") if isinstance(entry, dict) else None
+        if (not isinstance(entry, dict) or set(entry) - {"path", "reason", "from_heading"}
+                or not isinstance(relative, str) or not isinstance(reason, str) or not reason.strip()
+                or (heading is not None and (not isinstance(heading, str) or not heading.startswith("#")))):
+            errors.append(Finding(HISTORICAL_REGISTER, 1, "historical-register",
+                                  f"Record {index} needs an exact path, a rationale and an optional Markdown heading."))
+            continue
+        if (not relative.startswith(HISTORICAL_ROOTS) or "\\" in relative
+                or any(part in {"", ".", ".."} for part in relative.split("/"))):
+            errors.append(Finding(HISTORICAL_REGISTER, 1, "historical-register",
+                                  f"Historical records are allowed only in dated internal record trees: {relative}"))
+            continue
+        if relative in records:
+            errors.append(Finding(HISTORICAL_REGISTER, 1, "historical-register", f"Duplicate record: {relative}"))
+            continue
+        path = root / relative
+        if not path.is_file():
+            errors.append(Finding(HISTORICAL_REGISTER, 1, "historical-register", f"Missing record: {relative}"))
+            continue
+        first = 1
+        if heading is not None:
+            matches = [number for number, line in
+                       enumerate(path.read_text(encoding="utf-8-sig").splitlines(), 1) if line.strip() == heading]
+            if len(matches) != 1:
+                errors.append(Finding(HISTORICAL_REGISTER, 1, "historical-register",
+                                      f"Heading must occur exactly once in {relative}: {heading}"))
+                continue
+            first = matches[0]
+        records[relative] = (first, reason.strip())
+    return records, errors
+
+
 def scan(root: Path, check: str = "all", exemptions: list[dict] | None = None) -> list[Finding]:
     root = root.resolve()
     if exemptions is None:
@@ -1034,6 +1092,8 @@ def scan(root: Path, check: str = "all", exemptions: list[dict] | None = None) -
                 add(relative, line, "missing-command", f"No canonical workflow for: {name}")
 
     recorded_comparison_input = None
+    records, record_errors = historical_records(root)
+    findings.update(record_errors)
     paths = source_files(root)
     paths.sort(key=lambda path: (path.relative_to(root).as_posix() != f"{COMPARISON_DIR}/results.json",
                                  path.as_posix()))
@@ -1165,6 +1225,18 @@ def scan(root: Path, check: str = "all", exemptions: list[dict] | None = None) -
                     resolved = (path.parent / target).resolve()
                     if resolved.is_relative_to(root) and not resolved.exists():
                         add(relative, number, "missing-path", f"Unresolved local link: {target}")
+    observed: set[str] = set()
+    for item in sorted(findings):
+        record = records.get(item.path)
+        if item.code in HISTORICAL_CODES and record and item.line >= record[0]:
+            findings.discard(item)
+            observed.add(item.path)
+            exemptions.append({"path": item.path, "line": item.line, "field": f"{item.code}: {item.message}",
+                               "category": "declared historical record", "reason": record[1],
+                               "classification": "HISTORICAL"})
+    for relative in sorted(set(records) - observed):
+        add(HISTORICAL_REGISTER, 1, "stale-historical-record",
+            f"Declared record has no remaining historical reference; remove it: {relative}")
     return sorted(findings)
 
 

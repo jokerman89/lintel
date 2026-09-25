@@ -56,6 +56,14 @@ original observations/citations, and do not claim repository-wide zero tokens.
 Parent-reserved presentation publication and the separately owned upstream record
 follow-up remain outside this change.
 
+Amended 2026-09-25: dated internal records under `.claude/engineering/` and `.claude/plans/`
+that still name former workflows are declared by exact path, optionally from one exact heading,
+with a rationale in `.claude/plans/legacy-cleanup/historical-records.json`. The command-surface
+guard reports each of their references as a HISTORICAL observation by path and line instead of
+failing, so byte-bound records stay unmodified. Entries outside those trees, malformed entries
+and stale entries fail. Current skills, documentation, decisions, memory and root files remain
+strict; the one live presentation route was corrected rather than declared.
+
 ## Alternatives
 
 1. Delete whole historical families to hit a numerical target. Rejected: working
