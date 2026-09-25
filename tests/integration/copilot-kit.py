@@ -308,7 +308,7 @@ class CopilotKit(unittest.TestCase):
         self.assertEqual({item["id"] for item in index["selections"]}, expected)
         self.assertFalse(index["executed"])
         full = json.loads(query("--kind=all").stdout)
-        self.assertEqual(full["total"], 196)
+        self.assertEqual(full["total"], 197)
         for name in sorted(expected):
             with self.subTest(selection=name):
                 result = query(f"--selection={name}")
