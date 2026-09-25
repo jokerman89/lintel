@@ -1,8 +1,8 @@
 {
   "presentation": "Lintel Field Guide",
-  "version": "2026-09-24",
-  "source_commit": "275a35447c4ad271e05816ade43ac48f1acec24f",
-  "slides": 59,
+  "version": "2026-09-25",
+  "source_commit": "80002ed4aaa8697ff658f50902a469c80e14856d",
+  "slides": 60,
   "core_minutes": 50,
   "technical_minutes": 18,
   "themes": [
@@ -10,15 +10,18 @@
     "paper",
     "fluent"
   ],
-  "demo_mode": "prepared synthetic browser implementations and saved helper executions",
+  "demo_mode": "Service House three-arm protocol; no completed comparison published; separate historical helper proofs",
   "planned_links": [
     "Lintel Pack #1 (MS Employee in CAIP)",
     "Lintel Core",
     "Lintel Benchmark"
   ],
-  "source_status": "unreleased development snapshot; public equivalent files plus cited excerpts",
+  "source_status": "Merged Universal0.11.0 beta development line; not complete live-host acceptance",
   "product_minutes": 6,
   "product_artwork": "four standalone motifs: Neon and Paper rasters plus Fluent SVG sculptures",
-  "primary_logo": "Folded L — shaded",
-  "holding_slide": "welcome"
+  "primary_logo": "Folded L \u2014 shaded",
+  "holding_slide": "welcome",
+  "kitchen_source_commit": "f347241",
+  "skills_current": 127,
+  "skills_consolidation_target": "approximately80; planned"
 }
