@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# DESCRIPTION: Standalone PDF preparation, text/page/origin checks and non-clearing visual limits.
+# DESCRIPTION: Standalone PDF preparation, print-request validation and the non-clearing visual gate.
 # TAGS: integration,codex-compatible
 # component: document-pdf-entry
-# implements: ADR-0028
+# implements: ADR-0028, ADR-0033
 # intent: .claude/plans/universal-implementation/packages/P12.md
 # constraints: explicit local fixtures; no browser/app/raster launch or automatic installation
-# last_intent_review: 2026-09-22
+# last_intent_review: 2026-09-25
 set -euo pipefail
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 python="${LINTEL_PYTHON:-python3}"

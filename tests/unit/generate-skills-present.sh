@@ -87,7 +87,6 @@ done
 CONCRETE_SUPPORT=(
   skills/generate-pdf/scripts/prepare_html.py
   skills/generate-pdf/scripts/print_pdf.mjs
-  skills/generate-pdf/scripts/check_pdf.py
   skills/generate-xlsx/scripts/check_xlsx.py
   tests/integration/document-pdf.py
   tests/integration/document-pdf.sh

@@ -36,8 +36,8 @@ Run the suite the way CI does:
 - Give the suite a synthetic `HOME` and `USERPROFILE`, with `TEMP`, `TMP` and `TMPDIR` under the
   same parent, and use a physical path with no linked ancestors. On macOS, the default
   `/var/folders/...` directory sits under the `/var` link, which Lintel refuses as a fixture root.
-- `document-pdf` also needs an existing `pypdf` installation. The repository does not declare or
-  install it.
+
+No test needs a PDF library: Lintel has no PDF reader (ADR-0033).
 
 Each test has a shell entry point and exits nonzero on failure. Some entry points execute Python
 standard-library unittest suites. The runner discovers current tests instead of relying on a

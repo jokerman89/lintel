@@ -342,7 +342,6 @@
         "skills/generate-write/references/fidelity-and-evidence.md",
         "skills/generate-pdf/scripts/prepare_html.py",
         "skills/generate-pdf/scripts/print_pdf.mjs",
-        "skills/generate-pdf/scripts/check_pdf.py",
         "skills/browse/references/browser-operations.md",
         "skills/browse/scripts/chromium.mjs",
         "lib/context_safety.py",
@@ -356,12 +355,12 @@
       ],
       "provenance": [],
       "inputs": [
-        "Authorized Markdown, HTML or URL source, explicit PDF output and an exact source/page oracle.",
-        "Actual permitted converter, browser print and PDF reader with applicable policy and declared dependencies."
+        "Authorized Markdown, HTML or URL source and an explicit PDF output.",
+        "Actual permitted converter and browser print with applicable policy and declared dependencies."
       ],
       "outputs": [
         "PDF from the existing preparation/print route when available, preserving the original editable source.",
-        "Actual text, physical page-bound and source-retention diagnostics, separately from required visual observations."
+        "Preparation and print diagnostics; the produced PDF's text, pages and visual rendering stay unverified."
       ],
       "example": {
         "path": "skills/catalog/references/selections.md",
@@ -370,7 +369,7 @@
       "limitations": [
         "The accepted PDF source method is implemented, not TEMPLATE ONLY; unknown maturity is not a missing-method claim.",
         "Standalone production does not require the common pipeline; explicitly union document-content when using --from-pipeline input admission.",
-        "Missing converters/readers, wrong physical page bounds or unverified required visual inspection remain explicit gates.",
+        "Missing converters, print errors or unverified PDF text, pages and visual inspection remain explicit gates; Lintel has no PDF reader.",
         "Browser sources are not an installed engine, network permission or a native print action."
       ]
     },

@@ -577,7 +577,6 @@ class CatalogSelection(unittest.TestCase):
             "document-pdf": {
                 "skills/generate-pdf/scripts/prepare_html.py",
                 "skills/generate-pdf/scripts/print_pdf.mjs",
-                "skills/generate-pdf/scripts/check_pdf.py",
                 "skills/browse/scripts/chromium.mjs",
                 "skills/browse/references/browser-operations.md",
             },

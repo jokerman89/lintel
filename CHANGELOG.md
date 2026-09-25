@@ -48,14 +48,21 @@ content-bound review evidence and explicit limits on what each check proves.
 - The Swarm integration, the dormant envelope handoff, the trusted implementation source and the
   explicit private-sync destination are preserved under their accepted contracts.
 
+### Removed
+
+- The pypdf-based PDF reader (`skills/generate-pdf/scripts/check_pdf.py`) and its tests. Lintel has
+  no PDF reader and depends on no PDF library. `generate-pdf` still prepares HTML and prints through
+  the accepted browser route, but the produced PDF's text, pages and rendering are unverified
+  (ADR-0033).
+
 ### Known limits
 
 - Evidence is from native Windows with Python 3.11 and PowerShell 7. CI adds Linux and macOS with
   Python 3.12. Windows PowerShell 5.1, which the native performer supports, and a Python 3.9 runtime
   are not verified.
-- Still open:
-  - complete document rendering and editability for Word, PowerPoint, PDF and workbooks;
-  - a Visio writer, which stays a template-only staged slot.
+- Complete document rendering and editability for Word, PowerPoint, PDF and workbooks are not
+  verified, and Visio stays a template-only staged slot. These acceptance items are removed from
+  the release's scope (ADR-0033).
 - Required-policy enforcement is not verified without a resolved company policy source.
 
 These changes remain in the beta line. They do not claim a completed enterprise pilot, compliance

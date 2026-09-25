@@ -1,7 +1,7 @@
 ---
 name: generate-pdf
 layer: foundation
-description: Produce a PDF through an available converter and accepted browser print operation, preserving source content and separating text/page evidence from incomplete visual inspection.
+description: Produce a PDF through an available converter and accepted browser print operation, preserving source content; Lintel does not read the produced PDF, so its text, pages and visual rendering stay unverified.
 color: orange
 tools: Read, Write, Bash, Glob
 voice: internal
@@ -14,7 +14,7 @@ cli_support:
 
 # /generate-pdf
 
-Produce a searchable PDF from an explicit source while preserving its full
+Produce a PDF from an explicit source while preserving its full
 argument, tables, citations, code, units and material limitations. Standalone
 production does not require an unaccepted shared design schema. Retain editable
 source even though PDF editing is not promised.
@@ -36,9 +36,9 @@ source even though PDF editing is not promised.
   `--accessible` requires actual PDF structure/reading-order/link/accessibility
   evidence, not merely searchable text or a structure-tree flag.
 
-## Select a real writer and reader
+## Select a real writer
 
-Inspect actual converter, browser and PDF-reader APIs before calling them.
+Inspect actual converter and browser APIs before calling them.
 Use available declared Pandoc or Markdown-it, including the explicitly selected
 `markdown-it-py` API. The format-local helper imports Markdown-it only for Markdown
 input; it does not implement a replacement parser. Missing conversion blocks that
@@ -56,9 +56,9 @@ The helper consumes public `Admission`, `BrowserSession.start`, `open`, `media`,
 `read`, `print` and `close` operations, not a daemon or private CDP extension.
 It never attaches to a personal browser/profile.
 
-The selected reader here is the existing `pypdf` API. No PDF renderer/parser is
-implemented by this skill. Another existing reader is an explicit choice needing
-its own observations, never a silent fallback after denied inspection.
+Lintel has no PDF reader. It does not parse, render or inspect the produced PDF,
+and it does not depend on a PDF library (ADR-0033). An existing reader or viewer
+is an explicit, separately authorized choice needing its own observations.
 Word/PPT export remains a possible independently authorized source strategy, not
 an automatic fallback. Denied Word/Excel/UI/PDF-raster operations cannot be retried
 through COM, another launcher, provider or export tool.
@@ -72,8 +72,8 @@ through COM, another launcher, provider or export tool.
    HTML or available converter route. Keep source-to-HTML/print-CSS provenance,
    select CSS/config overrides, and retain a missing converter as a real gap.
 2. Resolve explicit owned input/output/CSS/header-footer paths. Verify current
-   P07 reference/policy and selected work identity. Declare P05 fidelity, print,
-   text/page and complete visual requirements before observing them. Neutral
+   P07 reference/policy and selected work identity. Declare P05 fidelity, print
+   and complete visual requirements before observing them. Neutral
    defaults do not invent brand, disclosure or score gates.
 3. Prepare print HTML with `scripts/prepare_html.py`, an explicitly selected
    available converter, or a supplied complete HTML document. The helper preserves
@@ -93,10 +93,10 @@ through COM, another launcher, provider or export tool.
    reduced-motion media, reads the page, calls actual print and closes the
    context/process/profile in `finally`. Stop the exact server and verify cleanup,
    including failures. Missing APIs or provider errors do not become success.
-6. Read the actual PDF with `scripts/check_pdf.py` and an explicit source oracle.
-   Check searchable complete content, page-specific material, physical paper
-   dimensions, page/crop boxes and transformed text origins against their
-   effective intersection. File size is not QA.
+6. Do not read or inspect the produced PDF with Lintel: it has no PDF reader.
+   Searchable complete content, page-specific material, physical paper dimensions
+   and text positions stay unverified unless a separately authorized reader or
+   viewer observes them. File size and exit codes are not QA.
 7. Obtain complete rendered-page inspection through an actually permitted route:
    clipping, glyphs, table continuation, heading orphans, code, references, images
    and headers/footers. Text/origins or HTML print-media screenshots are not
@@ -112,7 +112,6 @@ Use the host's native path spelling and line-continuation syntax:
 ```text
 python <trusted-source>\skills\generate-pdf\scripts\prepare_html.py --root <owned-root> --input brief.html --out prepared.html --format a4 --orientation portrait --header-footer header-footer.yaml --print-css print.css
 node <trusted-source>\skills\generate-pdf\scripts\print_pdf.mjs <owned-print-request.json>
-python <trusted-source>\skills\generate-pdf\scripts\check_pdf.py --root <owned-root> --input output.pdf --expect pdf-expectations.json
 ```
 
 Preparation accepts `.md`/`.markdown` only with its available converter.
@@ -132,36 +131,6 @@ checks, preserving unverified QA status when applicable. No overwrite, URL
 refusal, incomplete cleanup or timeout is converted to successful completion.
 The provider's real DOM read bounds cause explicit refusal, never source truncation.
 
-Reader expectations use `required_text` (nonempty complete source segments),
-optional `min_pages`, `paper_points` (physical width/height in 1/72-inch points),
-and `page_text` (page number to expected text). The existing reader's `user_unit`
-must be finite and positive; physical dimensions multiply raw box differences
-by that scale. Missing reader support or invalid scale is an error, not a
-unit-1 fallback. An omitted PDF UserUnit uses the reader's PDF-defined default.
-Results retain raw `media_box`, `crop_box`, `effective_box` and text origins
-separately from `physical_media_points` and `physical_effective_points`.
-
-Both boxes must have finite ordered coordinates and a nonempty intersection.
-An oversized crop cannot hide origins outside the media box; a narrower crop
-still restricts the effective region. Original crop membership remains reported
-alongside media/effective membership. No origin is clamped or discarded.
-Matching normalizes whitespace only, not numbers, punctuation or facts. These
-are **not full glyph bounds or complete visual inspection**. Blank/truncated/
-encrypted/malformed, missing-content or wrong-paper output cannot pass.
-Exit 0 means only requested reader checks; exit 3 means failed/unverified checks
-and exit 2 is an input/reader error. Release clearance is always false.
-
-Keep source-text, page-dimension and text-origin outcomes separate, without
-changing the aggregate failure. The four-page synthetic print retained complete
-source text and A4 page boxes, but pypdf 6.13.2 reported sixteen table-column text
-origins outside page 3. All four pages have UserUnit 1; physical-unit and effective
-box checks do not explain or clear those observations. A single documented
-experimental-layout diagnostic failed
-inside that same reader before producing coordinates. Both observations remain
-non-clearing: neither a proven visual clipping defect nor permission to clamp
-coordinates, discard table cells or assert successful geometry. Full page visual
-inspection remains separately unverified; no denied raster route was retried.
-
 ## Roles, status and evidence
 
 Retain WordTechnicalEditor as the read-only document-structure/accuracy method,
@@ -170,14 +139,14 @@ Use actual available delegation only; do not invent a role or independent review
 Apply configured brand references from explicit verified paths, never a personal
 template scan. A PDF visual reference is not itself a writer or required template.
 
-- **DONE:** all requested writer/fidelity/reader/visual and policy controls met.
+- **DONE:** all requested writer/fidelity/visual and policy controls met.
 - **DONE_WITH_CONCERNS:** mandatory observations complete, advisory concerns only.
-- **BLOCKED:** missing selected converter, writer/reader error, partial content,
+- **BLOCKED:** missing selected converter, writer or print error, partial content,
   failed required check or unverified required visual inspection.
 - **NEEDS_CONTEXT:** missing source/output authority or unresolved applicability.
 
 Record exact input/output hashes, converter/library/browser versions, actual
-URL/origin/process/context/cleanup evidence, reader results and the precise visual
-gap. QA observations are not structured independent decisions/corroboration;
+URL/origin/process/context/cleanup evidence and the precise text, page and visual
+gaps. QA observations are not structured independent decisions/corroboration;
 an explicit denial of those writes stays binding. Shared pipeline, accessible
 PDF certification and other formats retain their own actual acceptance.

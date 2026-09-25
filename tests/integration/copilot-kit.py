@@ -42,7 +42,6 @@ JOINED_RUNTIME_RESOURCES = (
     "skills/generate-xlsx/references/native-xlsx.md",
     "skills/generate-xlsx/scripts/check_xlsx.py",
     "skills/generate-pdf/scripts/prepare_html.py",
-    "skills/generate-pdf/scripts/check_pdf.py",
     "skills/generate-pdf/scripts/print_pdf.mjs",
     "skills/generate/scripts/pipeline_inputs.py",
 )
@@ -249,7 +248,7 @@ class CopilotKit(unittest.TestCase):
         for relative in (
             "skills/generate-write/references/fidelity-and-evidence.md",
             "skills/generate-xlsx/scripts/check_xlsx.py",
-            "skills/generate-pdf/scripts/check_pdf.py",
+            "skills/generate-pdf/scripts/prepare_html.py",
         ):
             path = clone_bundle / relative
             original_resource = path.read_bytes()

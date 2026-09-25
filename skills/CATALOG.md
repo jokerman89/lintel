@@ -64,7 +64,7 @@ Total skills: 127
 | [`/li:generate-app`](generate-app/SKILL.md) | Full-app scaffold-orchestrator. Reads frontend-design-spec.json + generates vite-react/next-app/svelte-kit project skel… |
 | [`/li:generate-design`](generate-design/SKILL.md) | Produce design-spec.json (per-format layout-mappings + palette + fonts + asset placements) from content.md. Shared cont… |
 | [`/li:generate-outline`](generate-outline/SKILL.md) | Produce outline.md (structured presentation/document skeleton) from a brief. Shared content-pipeline sub-skill, solo-in… |
-| [`/li:generate-pdf`](generate-pdf/SKILL.md) | Produce a PDF through an available converter and accepted browser print operation, preserving source content and separa… |
+| [`/li:generate-pdf`](generate-pdf/SKILL.md) | Produce a PDF through an available converter and accepted browser print operation, preserving source content; Lintel do… |
 | [`/li:generate-ppt`](generate-ppt/SKILL.md) | Produce an editable PowerPoint deck through available native tools or pptxgenjs, retaining source detail in notes and i… |
 | [`/li:generate-qa`](generate-qa/SKILL.md) | Validate generated artifacts (any format) against brand, voice, readability, and structure standards. Auto-fixes where … |
 | [`/li:generate-style-learn`](generate-style-learn/SKILL.md) | Analyze .pptx/.docx/web-examples and extract a reusable style palette. v3.5 Phase 3 of the doc-generation-pipeline. |
