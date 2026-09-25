@@ -785,13 +785,12 @@ class MigrationInventory(LifecycleFixture):
                    LINTEL_PRIVATE_ROLES_DIR=str(home / "private/roles"),
                    CLAUDE_CONFIG_DIR=str(Path(self.env["HOME"]) / ".claude"),
                    COPILOT_HOME=str(Path(self.env["HOME"]) / ".copilot"),
-                   GSTACK_STATE_DIR=str(Path(self.env["HOME"]) / ".gstack"),
                    PACK_CACHE_FILE=str(home / "profile-cache.json"), LINTEL_JOBS_NO_INIT="1")
         env.pop("LINTEL_RECOVERY_STORE", None)
         for key, value in env.items():
             if ((key.startswith(("LINTEL_", "XDG_")) and key != "LINTEL_JOBS_NO_INIT") or key in
                     ("HOME", "USERPROFILE", "APPDATA", "LOCALAPPDATA", "TEMP", "TMP", "TMPDIR",
-                     "CLAUDE_CONFIG_DIR", "COPILOT_HOME", "GSTACK_STATE_DIR",
+                     "CLAUDE_CONFIG_DIR", "COPILOT_HOME",
                      "PACK_CACHE_FILE", "GIT_CONFIG_GLOBAL")):
                 self.assertTrue(Path(value).is_relative_to(self.base), (key, value))
         for path in (home / "profile.yaml", home / "sessions/profiles", home / "audit",

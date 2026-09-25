@@ -19,8 +19,34 @@ You are the role skill — the lifecycle command for session roles.
 | `/li:role --rotate <role-id>` | Swap roles atomically — verify new, deactivate current, activate new |
 | `/li:role --frame <artifact>` | Apply the active role's outcome-lens to an artifact |
 | `/li:role --deep-dive [role-id]` | Load the FULL role file (~2-3k tokens) on demand |
+| `/li:role --audience [name]` | List or load an explicitly selected audience persona for this conversation without changing role/profile state |
+| `/li:role --clear-audience` | Stop applying the audience overlay to future responses; persisted data and prior conversation remain |
 
 Create or evolve role files with `/li:role-new` (and `/li:role-new --update <id>`); discover them with `/li:roles-list`.
+
+## Audience context without a profile change
+
+`--audience` is a conversational lens, separate from the persistent working role.
+Resolve allowed sources through the existing source-owned helper:
+
+```bash
+bash "$LINTEL_SOURCE_ROOT/bin/li-lifecycle" \
+  --source "$LINTEL_SOURCE_ROOT" --repo "$LINTEL_REPO_ROOT" persona-sources
+```
+
+This preserves verified profile selection and anchors relative pack persona sources
+at their defining manifest. List available names and concise purpose before loading
+an unselected persona. Read only the selected, authorized definition from the returned
+sources, including `.claude/memory/personas.md` or `docs/personas` where declared.
+Do not search another checkout or private home to manufacture a missing result.
+
+Apply its responsibilities, concerns, communication preferences, decision criteria and
+pitfalls to the requested task. Ask if its voice conflicts with required policy.
+Missing names stay missing; list actual choices rather than inventing a persona.
+Keep customer/private context out of public artifacts and pass only an explicitly
+authorized summary to a delegate. No automatic inheritance or independent review is
+implied. `--clear-audience` ends future use of the overlay but cannot erase conversation
+content; neither action edits profile files, packs, durable memory or host settings.
 
 ## Role resolution (shared by all actions)
 

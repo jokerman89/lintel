@@ -211,7 +211,7 @@ python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --selection=design-kno
 scale from 4px to 8px, and the project's selected current token/reference files. Carry
 an existing verified profile reference if profile-bound advice is requested.
 
-**Method and output.** Select design-consultation for the decision, or design-dna's
+**Method and output.** Select frontend-design's advice mode for the decision, or design-dna's
 bounded retrieval method for supporting rows. Compare retaining the 4px scale,
 switching to 8px, and changing only section spacing; report cost, regression surface
 and the brief-supported recommendation. Token/corpus resources and both notices remain
@@ -262,7 +262,7 @@ run path. Name the requested formats rather than generating every format.
 **Method and output.** The existing outline/write methods preserve source IDs and full
 reasoning in `outline.md`/`content.md`, with actual speaker-note content for slides.
 Use an explicit union with the desired format for shared-input production. For a
-repository-reference task, select document-generate and ground its signatures,
+repository-reference task, select generate-docs and ground its signatures,
 examples and caveats in the supplied code/tests instead of a slide outline.
 
 **Negative.** Do not remove a qualification or truncate canonical content to forty

@@ -109,7 +109,7 @@
           ]
         },
         "unfreeze": {
-          "producers": ["instruction-only:skills/code-unfreeze/SKILL.md"],
+          "producers": ["instruction-only:skills/code-freeze/SKILL.md"],
           "records_when": ["always"],
           "fields": ["path", "reason"],
           "aliases": {"target_path": ["path"]},

@@ -289,7 +289,7 @@ memory_file="$(lintel_working_state_file 2>/dev/null)"
 [ -f "$memory_file" ] && memory_count=$(grep -c '^## ' "$memory_file")
 ```
 
-Surface: "X lessons / Y memory entries available — invoke `/li:lessons` to filter for current intent."
+Surface: "X lessons / Y memory entries available — invoke `/li:lessons-surface` to filter for current intent."
 
 Do NOT load the content. Just signal availability.
 

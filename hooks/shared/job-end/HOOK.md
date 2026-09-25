@@ -20,7 +20,7 @@ Per v3.8 Feature 1: terminating jobs cleanly via this hook removes the "abandone
    - `adr/*` → `.claude/decisions/` (copied by the hook when that directory exists)
    - `plan.md` + `spec.md` + `prompt.md` → `.claude/plans/<slug>/` OR operator-configured path
    - `lessons.md` candidates are **not appended** anywhere. The hook only suggests reviewing
-     them with `/li:learn` (the project store resolved by `lintel_lessons_file`) and
+     them with `/li:lessons-add` (the project store resolved by `lintel_lessons_file`) and
      `/li:lessons-promote` for general lessons; the candidates stay in the archived job outputs.
 3. **Discard:** delete `scratch/*` and other matching paths from policy.
 4. Moves the job folder to `.claude/runtime/jobs/_archive/<YYYY-MM-DD>/<job-id>/`.

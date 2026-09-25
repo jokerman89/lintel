@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # tests/shape/welcome-wiring.sh
-# Locks /li:welcome as a THIN ORCHESTRATOR (plan-eng-review scope): it must delegate
+# Locks /li:welcome as a thin orchestrator: it must delegate
 # to the existing pieces (/li:cli-fingerprint, the cli-tiers single source,
 # /li:cycle --dry-run) rather than rebuild detection or hardcode the tier table, must
 # run the demo in dry-run (no first-run mutation), and must state the hooks-Claude-only

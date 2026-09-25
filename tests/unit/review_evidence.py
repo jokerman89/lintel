@@ -87,7 +87,7 @@ class Fixture(unittest.TestCase):
         native_io_path(self.repo).mkdir(parents=True)
         self.env = dict(os.environ)
         for key in list(self.env):
-            if key.startswith(("LINTEL_", "CLAUDE_", "GSTACK_")):
+            if key.startswith(("LINTEL_", "CLAUDE_")):
                 self.env.pop(key)
         directories = {
             "HOME": "home", "USERPROFILE": "home", "APPDATA": "appdata",
@@ -95,7 +95,6 @@ class Fixture(unittest.TestCase):
             "XDG_CONFIG_HOME": "xdg-config", "XDG_DATA_HOME": "xdg-data",
             "XDG_CACHE_HOME": "xdg-cache", "XDG_STATE_HOME": "xdg-state",
             "XDG_RUNTIME_DIR": "xdg-runtime", "LINTEL_HOME": "home/.lintel",
-            "GSTACK_HOME": "legacy",
         }
         for key, name in directories.items():
             path = self.root / name
@@ -304,7 +303,7 @@ class LegacyRegressions(Fixture):
     def test_empty_commit_is_not_filled_in(self):
         result = self.run_command([
             "bash", SOURCE / "bin" / "li-review-log",
-            '{"skill":"plan-eng-review","status":"CLEAR","commit":""}',
+            '{"skill":"inspect","status":"CLEAR","commit":""}',
         ])
         self.assertNotEqual(result.returncode, 0, result.stdout)
 
@@ -323,7 +322,7 @@ class LegacyRegressions(Fixture):
         for status in ("CLEAR", "NOT CLEARED"):
             self.run_command([
                 "bash", SOURCE / "bin" / "li-review-log", encoded({
-                    "skill": "plan-eng-review", "status": status, "commit": self.base[:7],
+                    "skill": "inspect", "status": status, "commit": self.base[:7],
                 }),
             ], ok=0)
         result = self.run_command(["bash", SOURCE / "bin" / "li-review-read"])

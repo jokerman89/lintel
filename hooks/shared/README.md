@@ -40,8 +40,8 @@ Cross-cutting:
 3. `frozen-zone-warn` — warns when about to edit a frozen-zone path
 4. `context-bloat-warn` — surfaces at the token / tool-call soft threshold
 5. `no-direct-main-push` — warns on `git push` to `main` (requires per-batch auth)
-6. `no-merge-without-review` — warns on PR merge without a /review or /plan-eng-review record
-7. `no-customer-data-in-screenshot` — scans /browse screenshots for customer-data tells
+6. `no-merge-without-review` — warns on PR merge without a current content-bound review decision
+7. `no-customer-data-in-screenshot` — scans selected web-session artifacts for customer-data tells
 8. `no-production-mutation-without-auth` — warns on prod-mutation Bash commands without explicit auth
 9. `frontend-design-surface` — surfaces brand design patterns on frontend edits
 

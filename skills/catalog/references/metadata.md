@@ -93,8 +93,8 @@ Each entry contains:
 | `cli_support` | `{cli, surface, level}` declarations; `level: null` for ungraded list hints |
 | `maturity` | `unknown`; this unit does not decide or infer capability maturity |
 
-Skill display categories retain help's heuristic grouping: plan/office-hours, QA and
-review/investigate, ship/review-and-ship, compliance, eval's voice group, discovery/meta
+Skill display categories group planning/DEFINE/inspect, verification/diagnosis/review,
+shipping, compliance, eval's voice group, discovery/meta
 tools, and an ops remainder. These are presentation labels, not optional capability
 packages, dependency declarations, policy or P08 intent routing. Agent categories come
 from agent frontmatter. Selection never moves or deletes canonical content.
@@ -117,7 +117,7 @@ its old `cli_support` says `full`. Maturity and actual execution require separat
 
 ## Selection and failure behavior
 
-Catalog/help can list metadata without reading any body. Skill-router shortlists at most
+Catalog can list skill and agent metadata without reading any body. Skill-router shortlists at most
 three entries, then reads only those selected canonical bodies to check applicability,
 exclusions and prerequisites. It recommends a real host invocation only when discovered
 and permitted; otherwise it names an explicit canonical-file or serial/manual fallback.

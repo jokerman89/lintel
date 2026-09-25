@@ -240,30 +240,30 @@ state_append BUILD "$fixture_status" next=REVIEW "cycle_id=$fixture_cycle"
         return source
 
     def test_discovery_callers_expose_real_selection_and_literal_operations(self):
-        for name in ("catalog", "help", "skill-router", "welcome", "status"):
+        for name in ("catalog", "skill-router", "welcome", "status"):
             with self.subTest(name=name):
                 text = body(name)
                 self.assertIn("li-catalog.py", text)
                 self.assertIn("source", text)
                 self.assertIn("selected", text)
-        for name in ("catalog", "help", "skill-router", "welcome"):
+        for name in ("catalog", "skill-router", "welcome"):
             self.assertIn("--selection=", body(name))
         self.assertIn("--list-selections", body("catalog"))
         self.assertIn("at most three", body("skill-router"))
 
     def test_welcome_query_is_literal_and_does_not_create_state(self):
-        for query in ("match", "$(touch unwanted-marker)", "[$.*]", "--check"):
+        for query in ("skill-router", "$(touch unwanted-marker)", "[$.*]", "--check"):
             self.env["keyword"] = query
             result = self.unchanged("welcome", "## 3. Discover the selected method")
             value = json.loads(result.stdout)
             self.assertFalse(value["executed"])
-            if query == "match":
+            if query == "skill-router":
                 self.assertIn("skill:skill-router", [entry["id"] for entry in value["entries"]])
         self.assertFalse((self.repo / ".claude/runtime").exists())
 
     def test_selection_caller_uses_installed_operation_not_a_new_router(self):
         self.env["selection"] = "demo-script"
-        result = self.unchanged("help", "### Selected capability")
+        result = self.unchanged("catalog", "### Selected capability")
         value = json.loads(result.stdout)
         self.assertEqual(value["selection"]["order"], ["core", "demo-script"])
         self.assertEqual(
@@ -274,7 +274,7 @@ state_append BUILD "$fixture_status" next=REVIEW "cycle_id=$fixture_cycle"
         for selection in ("", "demo-script*", "$(touch selection-marker)"):
             self.env["selection"] = selection
             before = tree_snapshot(self.base)
-            failed = self.shell(block("help", "### Selected capability"))
+            failed = self.shell(block("catalog", "### Selected capability"))
             self.assertNotEqual(failed.returncode, 0)
             self.assertTrue(failed.stderr)
             self.assertEqual(tree_snapshot(self.base), before)
@@ -576,24 +576,24 @@ state_append BUILD BLOCKED next=REVIEW cycle_id=one
         result = self.unchanged("uniformity", "## Workflow", expected=7)
         self.assertIn("injected-floor-error", result.stderr)
 
-    def test_skillify_checks_literal_aliases_before_any_draft_write(self):
+    def test_skill_new_checks_literal_aliases_before_any_draft_write(self):
         self.env["draft_relative"] = "drafts/new/SKILL.md"
         for name in ("match", "skill-router", "MATCH", "$(touch author-marker)", "../escape", ""):
             self.env["skill_name"] = name
             before = tree_snapshot(self.base)
-            result = self.shell(block("skillify", "### Check name and destination"))
+            result = self.shell(block("skill-new", "### Check name and destination"))
             self.assertNotEqual(result.returncode, 0)
             self.assertTrue(result.stderr)
             self.assertEqual(tree_snapshot(self.base), before)
 
-    def test_skillify_accepts_bare_name_but_not_wrapper_or_existing_target(self):
+    def test_skill_new_accepts_bare_name_but_not_wrapper_or_existing_target(self):
         self.env.update(skill_name="regen-mocks", draft_relative="drafts/regen-mocks/SKILL.md")
-        result = self.unchanged("skillify", "### Check name and destination")
+        result = self.unchanged("skill-new", "### Check name and destination")
         self.assertIn("regen-mocks", result.stdout)
         self.write(self.repo / self.env["draft_relative"], "PRESERVE EXISTING DRAFT\n")
-        self.unchanged("skillify", "### Check name and destination", expected=2)
+        self.unchanged("skill-new", "### Check name and destination", expected=2)
         self.env.update(skill_name="li-regen-mocks", draft_relative="drafts/unused/SKILL.md")
-        self.unchanged("skillify", "### Check name and destination", expected=2)
+        self.unchanged("skill-new", "### Check name and destination", expected=2)
 
     def deep_draft(self):
         folder = self.repo / "drafts" / ("bounded-" + "a" * 72)
@@ -606,14 +606,14 @@ state_append BUILD BLOCKED next=REVIEW cycle_id=one
         )
         return draft
 
-    def test_skillify_new_deep_draft_keeps_logical_path_and_does_not_write(self):
+    def test_skill_new_deep_draft_keeps_logical_path_and_does_not_write(self):
         draft = self.deep_draft()
         self.assertFalse(native_io_path(draft).exists())
-        result = self.unchanged("skillify", "### Check name and destination")
+        result = self.unchanged("skill-new", "### Check name and destination")
         self.assertEqual(result.stdout.strip(), str(draft))
         self.assertEqual(result.stderr, "")
 
-    def test_skillify_existing_deep_draft_refuses_without_overwrite(self):
+    def test_skill_new_existing_deep_draft_refuses_without_overwrite(self):
         draft = self.deep_draft()
         physical = native_io_path(draft)
         physical.parent.mkdir(parents=True)
@@ -625,7 +625,7 @@ state_append BUILD BLOCKED next=REVIEW cycle_id=one
             "bf6ce5e717df278e50d11785693086c68ebb6e34cd6ec2db1a6daa46a7b36d72",
         )
         before = tree_snapshot(self.base)
-        result = self.shell(block("skillify", "### Check name and destination"))
+        result = self.shell(block("skill-new", "### Check name and destination"))
         self.assertEqual(tree_snapshot(self.base), before)
         self.assertEqual(physical.read_bytes(), content)
         self.assertEqual(result.returncode, 2, (
@@ -635,18 +635,18 @@ state_append BUILD BLOCKED next=REVIEW cycle_id=one
         self.assertEqual(result.stdout, "")
         self.assertIn("refusing overwrite", result.stderr)
 
-    def test_skillify_refuses_outside_destination(self):
+    def test_skill_new_refuses_outside_destination(self):
         self.env.update(skill_name="regen-mocks", draft_relative="../outside/SKILL.md")
-        self.unchanged("skillify", "### Check name and destination", expected=2)
+        self.unchanged("skill-new", "### Check name and destination", expected=2)
 
-    def test_skillify_missing_source_does_not_run_target_helper(self):
+    def test_skill_new_missing_source_does_not_run_target_helper(self):
         source = self.base / "absent helpers"
         source.mkdir()
         self.env.update(
             LINTEL_SOURCE_ROOT=source.as_posix(), skill_name="regen-mocks",
             draft_relative="drafts/regen-mocks/SKILL.md",
         )
-        self.unchanged("skillify", "### Check name and destination", expected=2)
+        self.unchanged("skill-new", "### Check name and destination", expected=2)
 
     def test_template_and_exact_draft_frontmatter_validation(self):
         template = (ROOT / "scaffolding/01-foundation/TEMPLATE-skill.md").read_text(encoding="utf-8")
@@ -654,11 +654,11 @@ state_append BUILD BLOCKED next=REVIEW cycle_id=one
         text = template.replace("{{name}}", "regen-mocks").replace("{{description}}", "Draft a repeatable mock workflow.")
         draft = self.write(self.repo / "drafts/regen-mocks/SKILL.md", text)
         self.env["draft"] = draft.as_posix()
-        result = self.unchanged("skillify", "### Validate the exact draft")
+        result = self.unchanged("skill-new", "### Validate the exact draft")
         self.assertIn("required fields", result.stdout)
         self.assertNotIn("deployed", result.stdout)
         self.write(draft, text.replace("layer: foundation\n", "") + "\nlayer: body-decoy\n")
-        result = self.unchanged("skillify", "### Validate the exact draft", expected=1)
+        result = self.unchanged("skill-new", "### Validate the exact draft", expected=1)
         self.assertIn("missing layer", result.stdout)
         self.assertIn("INVALID", result.stderr)
 
@@ -670,7 +670,7 @@ state_append BUILD BLOCKED next=REVIEW cycle_id=one
             "---\nname: invalid\nlayer: foundation\n",
         ):
             self.write(draft, text)
-            result = self.unchanged("skillify", "### Validate the exact draft", expected=1)
+            result = self.unchanged("skill-new", "### Validate the exact draft", expected=1)
             self.assertIn("INVALID", result.stderr)
             self.assertIn("missing frontmatter", result.stdout)
 

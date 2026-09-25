@@ -30,7 +30,7 @@ example    store        yes              yes    no
 - Operator forgot which packs exist
 - Before `/li:pack-switch` to confirm target
 - Before `/li:pack-create` to avoid name collision
-- After `/li:v4-migrate` to confirm the recommended pack is present
+- After an explicit identity migration through `/li:migrations` to confirm the selected pack is present
 
 ## When NOT to use
 

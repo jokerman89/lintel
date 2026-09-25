@@ -97,7 +97,7 @@ class Sandbox(unittest.TestCase):
             folder.mkdir(parents=True)
         drive, tail = os.path.splitdrive(str(self.home))
         self.env = {key: value for key, value in os.environ.items()
-                    if not key.startswith(("LINTEL_", "CLAUDE_", "GIT_", "GSTACK_", "PYTHONDONTWRITEBYTECODE"))}
+                    if not key.startswith(("LINTEL_", "CLAUDE_", "GIT_", "PYTHONDONTWRITEBYTECODE"))}
         self.env.update(
             HOME=self.home.as_posix(), USERPROFILE=str(self.home), HOMEDRIVE=drive,
             HOMEPATH=tail or str(self.home), APPDATA=str(self.home / "AppData/Roaming"),
@@ -214,23 +214,30 @@ class ObservationPreservation(Sandbox):
     def shell(self, script):
         return self.bash("set -euo pipefail\n" + script, cwd=self.repo, expect=0).stdout
 
-    def test_freeze_records_are_advisory_and_legacy_hook_only_warns(self):
+    def test_freeze_records_are_advisory_and_repository_state_wins_over_legacy(self):
         target = write(self.repo / "src/frozen/file.txt", "fixture baseline\n")
         freeze = "advisory: true\nfrozen:\n  - path: src/frozen/\n    reason: synthetic scope\n"
-        write(self.repo / ".claude/runtime/state/code-freeze/synthetic-freeze.yaml", freeze)
+        state = self.repo / ".claude/runtime/state/code-freeze/synthetic-freeze.yaml"
+        write(state, freeze)
         hook = 'bash "$LINTEL_SOURCE_ROOT/hooks/shared/frozen-zone-warn/run.sh" src/frozen/file.txt'
-        self.assertEqual(self.shell(hook), "", "canonical metadata must not be advertised as a wired hook")
-        write(self.home / ".lintel/freeze/synthetic-freeze.yaml", freeze)
         warned = self.shell(hook)
         self.assertIn("warn-only", warned)
-        self.assertIn("/li:code-unfreeze", warned)
+        self.assertIn("/li:code-freeze --lift", warned)
         self.assertNotIn("Use /unfreeze", warned)
         record = json.loads((self.root / "audit/hooks.jsonl").read_text(encoding="utf-8"))
         self.assertEqual(record["kind"], "frozen_zone_warn")
         self.assertEqual(record["hook"], "frozen-zone-warn")
         self.assertEqual(record["tier"], "warn")
+        legacy = self.home / ".lintel/freeze/synthetic-freeze.yaml"
+        write(legacy, freeze)
+        write(state, "advisory: true\nfrozen: []\n")
+        self.assertEqual(self.shell(hook), "", "an explicit repository lift must not revive a legacy freeze")
+        state.unlink()
+        self.assertIn("/li:code-freeze --lift", self.shell(hook))
+        self.assertEqual(legacy.read_text(encoding="utf-8"), freeze)
+        self.assertEqual(target.read_text(encoding="utf-8"), "fixture baseline\n")
         self.assertEqual(self.shell(
-            'source "$LINTEL_SOURCE_ROOT/bin/_audit.sh"\naudit_count hooks frozen_zone_warn'), "1\n")
+            'source "$LINTEL_SOURCE_ROOT/bin/_audit.sh"\naudit_count hooks frozen_zone_warn'), "2\n")
         self.assertEqual(target.read_text(encoding="utf-8"), "fixture baseline\n")
         # No filesystem lock was installed; an explicit fixture write remains possible.
         write(target, "explicit fixture write\n")
@@ -719,16 +726,16 @@ class ReviewRoundTripTests(Sandbox):
         repo = self.make_repo("review repo")
         env = {**self.env, "LINTEL_REPO_ROOT": repo.as_posix()}
         head = self.git(repo, "rev-parse", "--short", "HEAD").stdout.strip()
-        payload = json.dumps({"skill": "plan-eng-review", "status": "CLEAR", "commit": head})
+        payload = json.dumps({"skill": "inspect", "status": "CLEAR", "commit": head})
         self.run_cmd([BASH, ROOT / "bin/li-review-log", payload], cwd=repo, env=env, expect=0)
         raw = self.run_cmd([BASH, ROOT / "bin/li-review-read", "--json"], cwd=repo, env=env, expect=0)
-        self.assertIn('"kind":"plan-eng-review"', raw.stdout)
+        self.assertIn('"kind":"inspect"', raw.stdout)
         gate = self.run_cmd([BASH, ROOT / "bin/li-review-read"], cwd=repo, env=env, expect=3)
         self.assertIn(f"current_head: {head}", gate.stdout)
         log = repo / ".claude/runtime/audit/reviews.jsonl"
         result, summary = self.summary(log, expect=0)
         self.assertEqual((summary["records"]["lines"], summary["records"]["valid"]), (1, 1))
-        counted = summary["by_kind"]["plan-eng-review"]
+        counted = summary["by_kind"]["inspect"]
         self.assertEqual((counted["count"], counted["class"], counted["check"]), (1, None, None))
         self.assertEqual(counted["delegated"], "li-review-read")
         result, rows = self.records(log, expect=0)
@@ -736,53 +743,47 @@ class ReviewRoundTripTests(Sandbox):
         self.assertNotIn("CLEAR", result.stdout)
 
 
-class ReviewLegacyImportTests(Sandbox):
-    """The one-time GSTACK_HOME import creates the marker directory only when it writes the marker."""
+class ReviewHistoryReadTests(Sandbox):
+    """Inspection preserves recorded history and does not create or import state."""
 
     def setUp(self):
         super().setUp()
-        self.repo = self.make_repo("legacy repo")
+        self.repo = self.make_repo("history repo")
         self.audit = self.repo / ".claude/runtime/audit"
         self.marker = self.audit / "reviews-legacy-import.done"
-        self.gstack = self.root / "gstack"
-        self.legacy = f"{self.gstack.as_posix()}/projects/legacyrepo/main-reviews.jsonl"
         self.env.update(LINTEL_REPO_ROOT=self.repo.as_posix())
 
     def read(self, *extra, env, expect):
         return self.run_cmd([BASH, ROOT / "bin/li-review-read", *extra], cwd=self.repo, env=env, expect=expect)
 
-    def import_env(self):
-        write(Path(self.legacy), "")
-        return {**self.env, "GSTACK_HOME": self.gstack.as_posix()}
-
-    def marker_lines(self):
-        return self.marker.read_text(encoding="utf-8").splitlines()
-
-    def test_empty_legacy_import_writes_its_marker_without_an_audit_directory(self):
-        env = self.import_env()
+    def test_empty_history_inspection_writes_no_marker_or_audit_directory(self):
         self.assertFalse(self.audit.exists())
-        self.read("--json", env=env, expect=0)
-        self.assertEqual(self.marker_lines(), [self.legacy])
-        self.assertEqual([path.name for path in self.audit.iterdir()], [self.marker.name])
+        result = self.read("--json", env=self.env, expect=0)
+        self.assertEqual(result.stdout, "")
+        self.assertFalse(self.audit.exists())
 
-    def test_reads_without_a_legacy_import_create_no_audit_directory(self):
-        for label, env in (("no GSTACK_HOME", self.env),
-                           ("GSTACK_HOME without a legacy file", {**self.env, "GSTACK_HOME": self.gstack.as_posix()})):
-            with self.subTest(label):
-                self.read("--json", env=env, expect=0)
-                self.read(env=env, expect=3)
-                self.assertFalse(self.audit.exists())
+    def test_foreign_history_is_not_discovered_or_imported(self):
+        foreign = self.root / "unselected-history" / "reviews.jsonl"
+        write(foreign, '{"skill":"inspect","status":"CLEAR","commit":"old"}\n')
+        before = foreign.read_bytes()
+        self.read("--json", env=self.env, expect=0)
+        self.read(env=self.env, expect=3)
+        self.assertFalse(self.audit.exists())
+        self.assertEqual(foreign.read_bytes(), before)
 
-    def test_a_second_import_run_does_not_duplicate_the_marker(self):
-        env = self.import_env()
-        for label, existing in (("audit directory already present", True), ("no audit directory", False)):
-            with self.subTest(label):
-                shutil.rmtree(self.audit, ignore_errors=True)
-                if existing:
-                    self.audit.mkdir(parents=True)
-                for _ in range(2):
-                    self.read("--json", env=env, expect=0)
-                    self.assertEqual(self.marker_lines(), [self.legacy])
+    def test_repeated_read_preserves_old_log_and_import_marker_bytes(self):
+        head = self.git(self.repo, "rev-parse", "--short", "HEAD").stdout.strip()
+        payload = json.dumps({"skill": "inspect", "status": "CLEAR", "commit": head})
+        self.run_cmd([BASH, ROOT / "bin/li-review-log", payload],
+                     cwd=self.repo, env=self.env, expect=0)
+        write(self.marker, "Previously imported source remains historical data.\n")
+        log = self.audit / "reviews.jsonl"
+        before = (log.read_bytes(), self.marker.read_bytes())
+        for _ in range(2):
+            result = self.read("--json", env=self.env, expect=0)
+            self.assertEqual(result.stdout, before[0].decode("utf-8"))
+            self.read(env=self.env, expect=3)
+            self.assertEqual((log.read_bytes(), self.marker.read_bytes()), before)
 
 
 class InstallerObservationTests(Sandbox):
@@ -988,7 +989,7 @@ class FailurePropagationTests(Sandbox):
             "job_create": self.bash('source "$LINTEL_SOURCE_ROOT/bin/_jobs.sh"\njob_create matrix internal-tool',
                                     cwd=repo, env=env),
             "review_log": self.run_cmd([BASH, ROOT / "bin/li-review-log", json.dumps(
-                {"skill": "plan-eng-review", "status": "CLEAR", "commit": head})], cwd=repo, env=env),
+                {"skill": "inspect", "status": "CLEAR", "commit": head})], cwd=repo, env=env),
             "brief_forge": self.forge(repo, env, "write_bypass_audit subagent_spawn swarm worker eligible"),
             "replay": self.run_cmd([BASH, ROOT / "bin/li-envelope-replay", self.envelope, "--apply", "--force"],
                                    cwd=repo, env=env),
