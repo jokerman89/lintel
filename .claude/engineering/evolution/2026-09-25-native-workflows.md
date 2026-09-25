@@ -63,6 +63,17 @@ Generated outputs follow their existing generators. Strict hosted sharding and
 independent specification then quality review remain required; unfinished checks
 are recorded in the selected plan rather than labelled successful.
 
+The actual `li-compat-audit --against 77cb8d3f893d2ef42be2631fe35ae45594f21bd3
+--output native-workflows` result is **RED**: 60 frontmatter-change candidates,
+13 moves, 26 possible-default candidates and two shared shell helpers (101 total
+category entries, not 101 independent defects). These include the explicitly
+authorized entry renames and verification-default change. No field/schema
+requirement was relaxed to hide them. The raw generated report is preserved in
+session evidence with SHA-256
+`77754f46ece923734e545741af4863cd97d8d5f33d5a11eff2da2ec76acebf64`.
+Its structural warning requires the migration/callsite and independent review
+already selected for this initiative; it is not represented as a green audit.
+
 The initial integrated PDF-consumer fixture used a non-executable synthetic Python
 path and failed before print. The corrected fixture uses the real read-only URL
 policy helper and synthetic browser methods, covering successful/failed print
