@@ -5,12 +5,14 @@ description: Use before landing a change to review just the diff — focused on 
 color: red
 tools: Read, Bash, Grep, Glob
 voice: internal
-cli_support: [claude-code, codex]
+cli_support: [claude-code, codex, copilot]
 ---
 
 # /code-review
 
-Reviews the current branch's diff before landing. Lighter than `/plan-eng-review` (which reviews a plan/design doc). Use when there's no plan but you want a code review pass before `/ship`.
+Reviews the selected changed result before landing. Use `/inspect` for plan-stage
+engineering/design/devex assessment; use this workflow for the implemented diff.
+An existing plan supplies acceptance, not a reason to skip reviewing the code.
 
 Auto-scales by aggregate risk: mechanical diffs may use explicitly labeled inline
 review; substantive changes need a separately attributable reviewer. An optional
@@ -20,20 +22,27 @@ outside-review tool does not substitute for missing independence.
 
 - Branch is feature-complete, no design doc exists
 - Quick correctness pass before `/ship`
-- Small fixes / refactors that don't warrant `/plan-eng-review`
-- `/ship` blocked by "Eng Review NOT CLEARED" and the work is too small for full plan-eng-review
+- Small fixes / refactors needing focused correctness and quality feedback
+- `/ship` needs the latest applicable content-bound review, not a clearance heading
 
 ## When NOT to use
 
-- Plan exists — use `/plan-eng-review` against the plan instead
+- Only a plan exists, with no implementation to inspect — use `/inspect` on that plan
 - Trivial mechanical diff — inline review is proportionate; record the actual mode
 - Tests fail — fix first, review after
 
 ## Inputs
 
-- Optional `--base <branch>` — compare against this base instead of default branch (default: `main`)
-- Optional `--codex` — force Codex structured review even on small diffs
-- Optional `--no-codex` — skip Codex even on large diffs
+- Optional `--base <ref>` — compare against this explicit local base rather than the
+  repository's known default branch; resolve an unknown base instead of guessing.
+- Optional `--cross-check` — request an additional independent pass through `/cross-check`.
+- Optional `--no-cross-check` — skip that optional additional pass; this does not waive
+  required independent review of substantive work.
+- Optional `--reviewer <name>` — select an actual reviewer/client for `--cross-check`;
+  requires that flag. Codex remains a valid explicitly authorized client.
+
+Invocation: `/code-review [--base <ref>] [--cross-check [--reviewer <name>] | --no-cross-check]`.
+Conflicting cross-check flags are an input error, not a reason to choose silently.
 
 ## Workflow
 
@@ -52,15 +61,19 @@ enter the strict SHIP path. See [inspection mode](../review/references/evidence.
    to downgrade substantive risk.
 2. **Read selected content** — inspect every selected changed state and relevant
    surrounding functions/tests. A commit-only diff cannot clear dirty/new files.
-3. **4-dimension review** (lighter than `/plan-eng-review`'s 4 sections — no per-issue AskUserQuestion overhead):
+3. **4-dimension review** (focused on implementation; no routine per-issue approval interview):
    - Architecture impact (does the diff respect existing boundaries?)
    - Code quality (DRY violations, error handling, edge cases)
    - Test coverage (does the diff add tests for new code paths? regression risk?)
    - Performance (N+1, memory, slow paths introduced)
 4. **Independent pass** — use an actual available independent reviewer for substantive
-   scope. `--codex` requests an outside review when available; `--no-codex` does not
+   scope. `--cross-check` requests an additional separate opinion; skipping it does not
    waive required independence. Keep findings read-only and route fixes to the builder.
-5. **Persist via `bin/li-review-log`** with `skill: code-review` (distinct from Phase-6 `/review` and `plan-eng-review`).
+   Forward the exact selected snapshot to `/cross-check --diff`, including any
+   explicit reviewer choice; do not substitute the current committed diff for it.
+   A selected unavailable reviewer leaves that pass unverified, never silently replaced.
+5. **Persist via `bin/li-review-log`** with `skill: code-review` (distinct from Phase-6
+   `/review`, plan/repository `/inspect` and an additional `cross-check` decision).
 6. **Output: findings list + severity + suggested fixes.**
 
 ## Report format
@@ -69,7 +82,7 @@ enter the strict SHIP path. See [inspection mode](../review/references/evidence.
 Review Status: <branch> vs <base>
 
 Diff scope: 173 lines changed across 8 files (MEDIUM)
-Codex pass: optional, skipped this run
+Additional cross-check: optional, not requested
 
 ## Findings (3)
 
@@ -80,22 +93,26 @@ Codex pass: optional, skipped this run
 [P3] (confidence: 7/10) src/utils/format.ts:12 — DRY violation
    formatDate duplicated in format.ts and date-helpers.ts; consolidate
 
-[P3] (confidence: 9/10) tests/billing.test.ts:NEW — Missing edge case
-   refundPayment with 0 amount: no test. Add test or document why allowed.
+[P2] (confidence: 9/10) tests/billing.test.ts:NEW — Missing required edge case
+   Selected acceptance requires refundPayment with 0 amount; no test covers it.
+   Add the regression check and report its actual result.
 
 ## Verdict
 - P1 count: 0 — no block
-- P2 count: 1 — should fix before /ship
-- P3 count: 2 — recommended fixes
+- P2 count: 2 — must resolve before /ship
+- P3 count: 1 — advisory improvement
 
-Run /ship when P2+ resolved.
+Resolve P1/P2 findings, then recheck the exact result through the shared evidence gate.
+An empty finding count alone is not release clearance.
 ```
 
 Persist the full version-2 decision with `skill: code-review` through the shared
 writer, then consume the shared reader with the same expected context and actual
 host/human corroboration. The [procedure](../review/references/evidence.md) defines
-the executable commands. Missing/unverified mandatory controls block independently
-of advisory findings. Empty or placeholder commits and loose clearance strings
+the executable commands. Preserve work/package/leaf IDs, attempt, profile context/
+generation/digest and required policy; verify the current reference before consumption.
+Missing/unverified mandatory controls block independently of advisory findings.
+Empty or placeholder commits and loose clearance strings
 are not valid evidence.
 
 ## Compliance integration
@@ -116,7 +133,8 @@ Every finding gets a 1-10 confidence:
 
 - **Diff empty:** implementation clearance is blocked. An approved verification-only
   task may use its actual acceptance evidence without inventing changes.
-- **Diff too large to fully analyze:** spot-check + warn operator that some files weren't deeply reviewed.
+- **Diff too large to fully analyze:** report unreviewed files/controls explicitly;
+  partial findings cannot clear their mandatory acceptance.
 - **Outside reviewer unavailable:** use an available separate reviewer or manual
   handoff. A main-agent self-review remains declared, not independently corroborated.
 - **`bin/li-review-log` unavailable:** print findings; strict clearance remains blocked.
@@ -138,16 +156,18 @@ P1: 0, P2: 1, P3: 2
 Action: fix P2 before /ship.
 ```
 
-**Large diff with Codex P1 gate:**
+**Large diff with a corroborated independent P1 finding:**
 ```
 > /code-review
 Diff: 412 lines, 18 files (LARGE)
-Codex pass: P1 found — race condition in payment-handler.ts:108
+Independent reviewer: P1 found — race condition in payment-handler.ts:108
 ✗ /ship BLOCKED until P1 resolved
 ```
 
 ## See also
 
-- `/plan-eng-review` — heavier plan-stage review (use when design doc exists)
-- `/investigate` — debugging when /code-review finds something broken
+- `/inspect` — engineering/design/devex lenses over a selected plan or repository
+- `/diagnose` — debugging when /code-review finds something broken
+- `/cross-check` — an additional separate opinion using an available authorized reviewer
+- `/verify` — read-only validation of the reviewed result; repair requires explicit authority
 - `/ship` — consumes the latest applicable content-bound decision and same-context read-only QA

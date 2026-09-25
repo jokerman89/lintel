@@ -1,7 +1,6 @@
 ---
 name: perfbench
 layer: foundation
-v1_alias: [li-benchmark]
 description: Measure performance — runtime, memory, cold-start — and detect regressions vs baseline.
 color: yellow
 tools: Read, Bash, Glob
@@ -87,7 +86,7 @@ Baseline: 20260520-114000 (git: f19d388)
 ## Regressions
 [Unclassified] serialize-large: 34 ms → 45 ms (+32%, rounded)
    Hypothesis to test: validation pass; comparison alone does not isolate the cause
-   Investigation: /investigate "serialize-large regression"
+   Diagnosis: /diagnose "serialize-large regression"
 
 [Unclassified] list-render-1k: 74 ms → 87 ms (+18%)
    Hypothesis to test: new render path
@@ -141,6 +140,6 @@ Report actual new and retained old paths/digests; a failed write is not a new ba
 ## See also
 
 - `PerformanceAnalyzer` subagent — for finding the bottleneck once `/perfbench` flagged a regression
-- `/qa` — correctness; `/perfbench` is performance
-- `/investigate` — for hypothesis-driven follow-up on a regression
+- `/verify` — correctness; `/perfbench` is performance
+- `/diagnose` — for hypothesis-driven follow-up on a regression
 - `/li:ship` — consumes the actual required/advisory QA obligation; required performance failures block

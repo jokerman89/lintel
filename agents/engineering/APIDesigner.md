@@ -108,7 +108,7 @@ paths:
 
 ## Next steps
 1. Operator reviews shape
-2. /office-hours to formalize
+2. /define to record agreed API scope, consumers and constraints
 3. Implement against the agreed v1 contract
 4. Deprecation only if an actual breaking transition was approved
 ```

@@ -51,7 +51,7 @@ Tools are Read/Bash/Grep/Glob — no Edit/Write — because this agent inspects 
 ## When NOT to invoke
 
 - Markdown content review — wrong tool
-- Mobile-only audit — see AccessibilityChecker or `/li:design-review`
+- Mobile-only audit — see AccessibilityChecker or `/li:frontend-design-review`
 - Brand-conformance only — covered by Gate 2 in /li:generate-web
 
 ## Workflow

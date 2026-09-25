@@ -54,7 +54,8 @@ lists and explicit none/CSS motion are valid. Do not create another schema.
 ## When NOT to invoke
 
 - Code-output needed → invoke `FrontendBuilder` (existing)
-- Wireframe sketch → `agents/engineering/Architect` or `/li:design-html`
+- Wireframe sketch → `agents/engineering/Architect` for structure or `/li:generate-web`
+  for a rendered mockup
 - Post-gen visual review → `WebExperienceCritic` or `DesignSystemAuditor` (Phase A2)
 
 ## Workflow
