@@ -731,6 +731,9 @@ and the operator refused to add it (L-054). Next:
    are removed (ADR-0033). The removal head needs a green strict CI run and an A23.5 addendum from
    `8df81ac8`. Then close `A23.4.ci`, mark PR #93 ready and merge it with a merge commit, so that
    reviewed commit IDs stay reachable.
+   Delivered (2026-09-25): PR #93 merged as `main` `80002ed4`. Run `36108366549` passed all 22 jobs;
+   the operator's rush order merged it before the last three Windows jobs, which then passed.
+   The A23.5 Phase 4 addendum is a post-merge review; preserve it under `reviews/` when it arrives.
 3. After the merge, send "Removing legacy skills and agents" (`f4584b03`) the explicit CI-ready
    handoff: the main SHA, the run and job evidence, and the ownership boundaries.
 Current original acceptance count is 107/113. A08, A10 and A13 close on SAME9db's whole-P08
