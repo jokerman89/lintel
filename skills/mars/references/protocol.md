@@ -114,10 +114,14 @@ Put your stance per claim in the header's `positions` field. Same read-only rule
 
 ## Coordinator synthesis
 
-Start the synthesis with `li-mars.py panel synthesis-header --adjudicated <p1,p2,p3>`
+Start the synthesis with `li-mars.py panel synthesis-header --adjudicated <p1,p2,p3[,deviations]>`
 (status, who requested it, coordinator, repository/commit, subject, requested vs verified
 models, downgrades, failed slots, calls, input verification, profile, coverage, the
 shared-rule `outcome` and `release_clearance: false`), then:
+
+`coverage_complete: true` means every received round-1 report is complete and consistent
+under the method (questions, acceptance rows, header agreement, not `unable`). When the
+packet lists acceptance IDs, `--adjudicated` must include the deviation count.
 
 | Disposition | Rule |
 |---|---|
@@ -129,11 +133,14 @@ shared-rule `outcome` and `release_clearance: false`), then:
 
 Never decide by majority or average confidence. Verify contested facts against the source
 (run the smallest check yourself when cheap). Preserve dissent. The adjudicated counts go
-through the same decision rule as a single review (any P1 `fail`; partial panel, missing
-coverage or a changed input `incomplete`; P2 `changes-requested`; else `pass`). MARS output
+through the same decision rule as a single review (any P1 `fail`; a partial panel, a slot
+report that is incomplete, contradictory or `unable`, or a changed input `incomplete`; P2 or
+a spec deviation `changes-requested`; else `pass`). MARS output
 feeds existing review/fix decisions; it does not approve or block SHIP on its own.
 `panel inspection --synthesis <file>` turns a finished panel into a content-bound
-inspection record (`purpose: inspection`, `release_clearance: false`) and refuses when the
+inspection record (`purpose: inspection`, `release_clearance: false`), recomputes the
+outcome from the adjudicated counts (an edited outcome is refused), requires a bound
+selection and the method packet when the caller is `review`, and refuses when the
 bound input changed.
 
 ## Collection pitfalls (observed in the 2026-09-24 pilot)

@@ -111,8 +111,10 @@ Identify scope of review:
 ### Step 2 — Stage 1: Spec compliance review
 
 Dispatch CodeReviewer agent (or general-purpose) with the shared
-[Review Method](references/method.md) packet for stage `spec`. Render it once from the
-prepared snapshot's selected content, with every selected requirement or leaf ID:
+[Review Method](references/method.md) packet for stage `spec`. Keep packet files in an owned
+run directory outside the review selection, for example
+`run="$LINTEL_REPO_ROOT/.claude/runtime/review/<cycle-or-review-id>"`. Render the packet once
+from the prepared snapshot's selected content, with every selected requirement or leaf ID:
 
 ```bash
 python3 "$LINTEL_SOURCE_ROOT/bin/li-review-packet.py" --repo "$LINTEL_REPO_ROOT" render \
@@ -124,8 +126,10 @@ python3 "$LINTEL_SOURCE_ROOT/bin/li-review-packet.py" --repo "$LINTEL_REPO_ROOT"
 
 Send the rendered request unchanged. The method sets the strictness ("close enough" is a
 deviation) and the report shape; validate the reply with
-`li-review-packet.py check --report <reply> --meta "$run/inputs/stage1.json"`. A reply that
-omits an acceptance ID is incomplete and is re-requested, never scored as PASS.
+`li-review-packet.py check --report <reply> --meta "$run/inputs/stage1.json"`. Any
+`deviation` row fails Stage 1 (outcome `changes-requested`: fix loop, defer with ADR or
+accept-risk). A missing, duplicated or `unverified` acceptance row, or a header that
+contradicts the findings, is `incomplete` (exit 3): re-request it, never score it as PASS.
 
 Record exact `pass`, `fail`, `unverified` or `error` per acceptance control and map
 every selected leaf to its evidence. A missing acceptance result blocks that leaf;
@@ -213,7 +217,8 @@ Standalone review only: when `li-mars.py offer` (caller `review`, live host fact
 cycle route) returns 0 and MARS was not already offered or declined for this target,
 offer it once. Inside a cycle the only offer belongs to PLAN; never offer here. With
 consent, run [MARS](../mars/SKILL.md) with the same method packet and stage as the single
-reviewer it replaces, bound to the same selection (`panel init --select`). REVIEW records
+reviewer it replaces, bound to the same selection (`panel init --caller review --select <path>
+--method-meta <meta>`; an unbound REVIEW panel is never complete). REVIEW records
 its own stage decision through the existing content-bound path from the adjudicated
 result (`synthesis-header --adjudicated` outcome, `panel inspection` record); MARS itself
 never marks the review PASS. Surface panel findings under "MARS (multi-model):".

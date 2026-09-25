@@ -2,9 +2,10 @@
 
 **Status:** Accepted (ADR-0034). Rendered by `lib/review_method.py` and
 `bin/li-review-packet.py`; sections 1-5 below are the packet text sent to reviewers.
-**Consumers:** `/li:review` Stage 1 and 2 (single or panel), `/li:mars`, `/li:code-review`
-and the plan approval review. Planning-review consolidation adopts it for the replacement
-of `plan-eng-review` and `define`'s spec review (see `skills/mars/references/integration.md`).
+**Consumers:** `/li:review` Stage 1 and 2 (single or panel), `/li:mars` (every panel slot,
+including the optional `/li:code-review` panel) and the plan approval review. The planning
+and quality consolidation adopts it for the replacement of `plan-eng-review`, `define`'s
+spec review and code-review's single pass (see `skills/mars/references/integration.md`).
 **Standing questions:** `lib/review-questions.json` (stable IDs; projects extend with
 `.claude/review/questions.json`).
 
@@ -115,7 +116,11 @@ After the header, these sections in order:
 ```
 
 A report that omits an applicable standing question, or marks one `checked` without
-evidence, is incomplete.
+evidence, is incomplete. Each Spec compliance row's Result is `pass`, `deviation` or
+`unverified`; a missing, duplicated or `unverified` row leaves the report incomplete.
+The header must agree with the body: `pass` has no P1, P2 or deviation; `block` needs a P1
+or a deviation; `concerns` needs a finding or a deviation; a question marked `finding`
+needs a counted finding. A contradiction makes the report incomplete.
 
 ## 6. Panel additions (MARS only)
 
@@ -139,9 +144,13 @@ python3 "$pkt" check --report <final response> --meta "$run/inputs/method.json"
 `render` writes the body once; a single reviewer receives it behind a `review-request`
 header, and every MARS slot receives the same bytes behind a `mars-request` header.
 `check` refuses a report bound to another brief and returns the one decision rule:
-any P1 is `fail`; missing coverage or `unable` is `incomplete`, never a pass; P2 is
-`changes-requested`; otherwise `pass`. A panel applies the same rule to its adjudicated
-counts. The result is review input, not release clearance.
+any P1 is `fail`; missing coverage, a contradictory header or `unable` is `incomplete`,
+never a pass; P2 or a spec deviation is `changes-requested`; otherwise `pass`. It exits 0
+for a complete, consistent report (whatever the outcome) and 3 otherwise. A panel applies
+the same rule to its adjudicated counts (`--adjudicated p1,p2,p3[,deviations]`; deviations
+are required when the packet lists acceptance IDs), with a
+partial panel or an unverified input also `incomplete`. The result is review input, not
+release clearance.
 
 **Calibration (opt-in).** After delivery, record whether a question's findings were
 `accepted`, `rejected`, or a later defect `escaped` it (`--sq none` when no question

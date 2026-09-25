@@ -144,7 +144,7 @@ refute with evidence and summarize stances in the report header's `positions` fi
 
 ### 7. Synthesize
 
-Open the synthesis with `panel synthesis-header --adjudicated <p1,p2,p3>` (a
+Open the synthesis with `panel synthesis-header --adjudicated <p1,p2,p3[,deviations]>` (a
 ` ```mars-synthesis ` block: status, requester, coordinator, repository/commit, subject,
 requested vs verified models, downgrades, failed slots, calls, input verification, profile,
 coverage, the shared-rule `outcome`, `release_clearance: false`). Then adjudicate against the

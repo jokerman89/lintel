@@ -373,10 +373,13 @@ approved, ask through the actual host question channel:
 recorded decline; inside a cycle add the cycle's actual selected `route` and checkpoint
 `PLAN-approval`, so only a full nine-phase cycle can pass. Exit 3 means no option E and
 no mention. When existing approval is retained, ask the offer alone instead of re-asking
-approval. With consent, MARS reviews the plan with the shared review method; its findings
-return to Step 9 fix/accept handling, then approval is asked again. Record
-`mars_offer=<accepted|declined>` on the Step 12 PLAN entry so no later phase re-offers.
-`--auto` and silence never select E.
+approval. Keep the answer from the moment it is given: every later approval question in
+this plan run (after REDIRECT or after a MARS run) sends `already_offered: true`, plus
+`declined: true` after a no, so option E never reappears; PAUSE saves the answer with the
+plan state. With consent, MARS reviews the
+plan with the shared review method; its findings return to Step 9 fix/accept handling,
+then approval is asked again. Record `mars_offer=<accepted|declined>` on the Step 12 PLAN
+entry so no later phase re-offers. `--auto` and silence never select E.
 
 If A: mark the reviewed trio APPROVED, finalize it and write the checkpoint. Only declare
 status DONE after the artifact checks below pass. Until approval, all three remain DRAFT.
