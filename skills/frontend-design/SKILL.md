@@ -1,22 +1,33 @@
 ---
 name: frontend-design
 layer: foundation
-description: Frontend design-director orchestrator. Chains typography + motion (+ shader in Phase A2) → frontend-design-spec.json → calls generate-web/generate-app for rendering. Design-director-layer per v3.7 family-separation.
+description: Use to direct frontend design, advise on a design-system choice or compare bounded variants while preserving the shared design contract and actual rendering/review evidence.
 color: orange
 tools: Read, Write, Bash, Glob
 voice: mixed
-cli_support:
-  - cli: claude-code
-    level: full
-  - cli: codex
-    level: degraded
-    degradation:
-      - capability: AskUserQuestion
-        strategy: auto-pick-recommended
+cli_support: [claude-code, codex, copilot]
 license_note: produces customer-bound output if --customer-share flag set
 ---
 
-You are the `frontend-design` orchestrator skill — entrypoint for production-ready frontend design e2e per v3.7 frontend-* family.
+You are the `frontend-design` skill, the design-director layer over existing rendering tools.
+
+## Modes
+
+Select `--mode design|advice|variants`; default `design` preserves the ordinary
+brief-to-design-to-render workflow below. Reject conflicting mode inputs before
+writing. These are skill inputs, not an installed command parser.
+
+| Mode | Inputs and output |
+|---|---|
+| `design` | `<brief>`, selected pattern/target/stack, explicit `--out`; bound `frontend-design-spec.json`, rendered artifact and review |
+| `advice` | `<question>`, `--scope`, `--read-design-system`, `--cross-check`; grounded alternatives and a recommendation, no code |
+| `variants` | `--seed`, `--axis`, `--count` (2-8, default 4), optional `--brief`/`--only`, explicit `--out`; per-variant designs, rendered HTML and comparison `index.html` |
+
+For advice follow [the advice procedure](references/advice.md). For variants
+follow [the variants procedure](references/variants.md). Neither mode invents
+independent actors, installs tools, replaces project technology or waives policy.
+Advice stops before rendering. Variants reuse this decision contract and the
+existing `generate-web` renderer for each actual output.
 
 ## What this skill does
 
@@ -39,7 +50,7 @@ actual available delegation or serial execution; a role name is not an invocatio
 
 ## When NOT to use
 
-- Wireframe-only sketch → `/li:design-html` (existing skill)
+- Wireframe-only sketch → `/li:generate-web --mode mockup`
 - Single design-decision-axis (just typography or just motion) → solo sub-skill `/li:frontend-typography` or `/li:frontend-motion`
 - Pure file-gen without design-direction → `/li:generate-web` directly with `--brief`
 - Re-render existing run → `/li:generate-web --from-frontend-design <existing-run-dir>`
@@ -47,16 +58,16 @@ actual available delegation or serial execution; a role name is not an invocatio
 ## Inputs
 
 - Required `<brief>` — design brief text or path to brief.md
-- Optional `--pattern <vault-name>` — select from `~/.lintel/brand/design-patterns/<name>/` (Phase A2 enables canonical pattern)
+- Optional `--pattern <name>` — select an explicitly configured project/pack pattern; no personal-vault discovery
 - Optional `--target-format <single-file|nextjs|app>` — default: `single-file`. `app` triggers generate-app (Phase B)
 - Optional `--customer-share` — sets CUSTOMER_SHARE=1, triggers compliance-gate + voice-gate
-- Optional `--out <path>` — output path (default: `~/.lintel/frontend-runs/<run-id>/`)
-- Optional `--skip-shader` — Phase A1 default (frontend-shader skill ships in A2)
+- Required `--out <path>` for rendering — owned repository-relative run directory
+- Optional `--skip-shader` — explicit no-shader choice, not an unfinished GPU feature
 - `--stack <next-app|vite-react|svelte-kit>` for `--target-format app`, selected
   explicitly or confirmed from the existing project manifest; never infer React
   for an unknown stack.
 
-## Workflow
+## Design mode workflow
 
 ### Step 1 — Parse invocation + warm context
 
@@ -87,13 +98,13 @@ python3 "$dna/scripts/search.py" "<product> <industry> <tone keywords from brief
   --design-system -f markdown -p "<project>" > "$out_dir/design-dna.md"
 ```
 
-Use the already verified P07 reference and `design_contract.profile_asset` to select
+Use the already verified P07 `profile_ref` and `design_contract.profile_asset` to select
 the pack-owned profile before the same named bundled asset. Retain its hash and
 retrieval output in `binding`. Missing required policy or a selected asset blocks;
 do not source a personal-home fallback or silently substitute a brand.
 
-Precedence: **brief > profile (`$dna/profiles/$profile.yaml`) > corpus hit** — the profile is the
-house default (anthropic-default: warm ink-and-paper); the corpus recommendation fills what the
+Precedence: **brief > verified profile > corpus hit** — the profile is the
+selected baseline; the corpus recommendation fills what the
 profile doesn't pin (style pattern, landing structure, product-specific palette when the brief
 asks for one); the brief's own words always win. Both `design-dna.md` and the profile feed
 Step 2-4 dispatch and Step 5 synthesis. No python3 → use the grep fallback documented in
@@ -145,7 +156,7 @@ Read typography.json + motion.json (+ shader.json if A2). Synthesizes into `fron
     "page_transitions": "none"
   },
   "palette": {
-    "source_profile": "anthropic-default",
+    "source_profile": "<selected-profile>",
     "tokens": { "<semantic-name>": "<hex>" }
   },
   "style": {
@@ -153,7 +164,7 @@ Read typography.json + motion.json (+ shader.json if A2). Synthesizes into `fron
     "anti_patterns": ["<from the corpus reasoning rule>"]
   },
   "design_dna": {
-    "profile": "anthropic-default",
+    "profile": "<selected-profile>",
     "search_query": "<the Step 1.5 query>",
     "search_ref": "design-dna.md"
   },
@@ -203,8 +214,8 @@ The gate is no longer optional. Two parts, in order:
    design/context. That consumer rechecks P07 and the original P05 obligations.
 
 Validator errors → **BLOCKED** (fix and re-render; never ship over a red gate). No rendered HTML
-yet (spec-only run) → validator runs in generate-web/generate-app instead; the review still runs
-on the spec. python3 absent → run the review with the design-dna non-negotiables checklist
+yet (spec-only run) → validator runs in generate-web/generate-app when output exists;
+spec feedback does not count as built-UI review. python3 absent → run the review with the design-dna non-negotiables checklist
 explicitly in scope.
 
 ### Step 8 — Output paths + recommendation
@@ -233,7 +244,8 @@ Next:
 
 ## Status protocol
 
-- **DONE** — both sub-skills returned, frontend-design-spec.json written, schema-validation passed
+- **DONE** — the requested mode produced its actual outputs and required
+  observations; spec validation alone does not complete a requested render/review
 - **DONE_WITH_CONCERNS** — sub-skill returned with warnings (e.g., font-license unclear)
 - **BLOCKED** — sub-skill failed, OR brief unparsable, OR customer-share check failed
 - **NEEDS_CONTEXT** — brief too vague (no audience, no purpose, no aesthetic-direction)
@@ -242,14 +254,14 @@ Next:
 
 **Reads:**
 - `<brief>` argument (path or inline text)
-- `~/.lintel/brand/design-patterns/<name>/` (if `--pattern` flag set; Phase A2 enables)
-- `~/.lintel/profile.yaml` (mode → voice-tier)
+- Explicitly selected project/pack pattern (if `--pattern` is set)
+- Verified P07 reference, selected profile asset and actual voice requirements
 
 **Writes:**
-- `~/.lintel/frontend-runs/<run-id>/typography.json` (via frontend-typography sub-skill)
-- `~/.lintel/frontend-runs/<run-id>/motion.json` (via frontend-motion sub-skill)
-- `~/.lintel/frontend-runs/<run-id>/frontend-design-spec.json` (Step 5 synthesis)
-- Audit-log: `.claude/runtime/audit/frontend-design-runs.jsonl`
+- `<out>/typography.json` and `<out>/motion.json` (validated sub-skill output)
+- `<out>/frontend-design-spec.json` (Step 5 synthesis)
+- Variants add separate bound runs, rendered files and comparison `index.html`
+- Advice returns Markdown or the explicit owned `--out`; no rendered artifact
 
 **Calls into:**
 - `/li:design-dna` system search + profile resolution (Step 1.5, required) + validator (Step 7)
@@ -261,7 +273,9 @@ Next:
 
 **Boundary with the generate-* family:**
 
-frontend-design is the DESIGN-DIRECTOR-LAYER (decisions). generate-web/generate-app are the RENDERING-ENGINE-LAYER (file-output). Frontend-design CALLS into generate-* for rendering. Not vice versa. Sharp boundary per the v3.7 design-doc family-separation-table.
+frontend-design is the design-director layer; generate-web/generate-app own file
+output. Direct brief/mockup rendering can use the director's decision method
+without recursively invoking its render step. No second design schema is created.
 
 **Brand-asset-slots (Phase A1 documents paths; folders lazy-created):**
 - `~/.lintel/brand/design-patterns/` — Phase A2 ships canonical `ultra-modern-lovable-style/`
@@ -274,7 +288,8 @@ frontend-design is the DESIGN-DIRECTOR-LAYER (decisions). generate-web/generate-
 - **Invented parallel dispatch** — serial/manual operation is valid when the host
   cannot provide attributable parallel ownership.
 - **Pre-baking canonical patterns** — Phase A1 ships slot-bootstrapping only. Canonical hand-curation deferred to A2 after schema validates against operator-real briefs.
-- **Bundling commercial fonts/libraries** — Lintel ships scaffolding. Operator licenses Pangram + installs GSAP/OGL/Aceternity via npm.
+- **Bundling unlicensed fonts/libraries** — preserve actual source/license
+  evidence and authorized tooling scope; no installation follows from advice.
 
 ## Failure recovery
 

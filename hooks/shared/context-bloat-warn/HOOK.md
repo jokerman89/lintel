@@ -19,8 +19,11 @@ Surfaces context-bloat warning at the 50k token / 80 tool-call soft threshold (c
 
 ## Why warn-only
 
-Claude cannot mid-session compact context. The skill is honest about this — it surfaces, operator decides. Blocking tool calls past the threshold would just frustrate without solving the problem.
+This optional warning cannot compact the host's active context. It surfaces recorded
+observations against local thresholds; the operator decides. Blocking tool calls would
+not reclaim context.
 
 ## Audit
 
-Skipped — would generate too much noise. The `/li:context-budget --watch` check writes explicit audit events when the operator invokes it.
+Not logged. `/li:context-budget --watch` reports its actual observations separately;
+neither a threshold file nor this hook's presence proves that telemetry was collected.

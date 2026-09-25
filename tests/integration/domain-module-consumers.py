@@ -289,7 +289,7 @@ class ModuleConsumers(DATA["DomainHandoff"]):
         self.assertIn("original task checkbox is not checkpoint status", handoff)
 
     def test_adjacent_methods_have_bound_evidence_and_honest_failure(self):
-        for name in ("investigate", "perfbench", "devex-review"):
+        for name in ("diagnose", "perfbench", "inspect"):
             text = (SOURCE / f"skills/{name}/SKILL.md").read_text(encoding="utf-8")
             with self.subTest(skill=name):
                 self.assertIn("domain-handoff.md#module-caller-procedure", text)
@@ -299,8 +299,11 @@ class ModuleConsumers(DATA["DomainHandoff"]):
         perf = (SOURCE / "skills/perfbench/SKILL.md").read_text(encoding="utf-8")
         self.assertIn("Missing baseline means no comparison", perf)
         self.assertIn("skipped required", perf)
-        devex = (SOURCE / "skills/devex-review/SKILL.md").read_text(encoding="utf-8")
+        devex = (SOURCE / "skills/inspect/SKILL.md").read_text(encoding="utf-8")
         self.assertIn("do not fall back to in-place mutation", devex)
+        self.assertIn("mapped developer-experience or engineering-module work", devex)
+        self.assertIn("caller-owned request, start, result", devex)
+        self.assertIn("Standalone/unmapped inspection keeps", devex)
 
 
 if __name__ == "__main__":

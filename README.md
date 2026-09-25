@@ -100,6 +100,9 @@ These are agent instructions backed by local helpers. Workflow approvals and rev
 still depend on the agent following the instructions and the team enforcing its merge rules.
 [The cycle](docs/the-cycle.md) explains the phases and their artifacts.
 
+Upgrading an existing workflow? The [native workflow migration](docs/migrations/2026-09-25-native-workflows.md)
+maps consolidated entrypoints while preserving saved work, owned installations and review evidence.
+
 ## Scale an approved plan with a swarm
 
 When a reviewed plan contains dependency-independent ownership domains, opt in with `/li:swarm`.

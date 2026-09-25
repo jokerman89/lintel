@@ -65,7 +65,7 @@ _paths_lib="$(dirname "${BASH_SOURCE[0]}")/../../../lib/paths.sh"
 command -v lintel_lessons_file >/dev/null 2>&1 || { [ -f "$_paths_lib" ] && source "$_paths_lib"; }
 lessons_file="$(cd "$repo_root" 2>/dev/null && lintel_lessons_file 2>/dev/null || true)"
 if [ -f "$dir/outputs/lessons.md" ]; then
-  echo "[lintel] Lesson candidates in job outputs were not appended to ${lessons_file:-a project lessons store}; suggested: review them with /li:learn, then /li:lessons-promote only for general lessons"
+  echo "[lintel] Lesson candidates in job outputs were not appended to ${lessons_file:-a project lessons store}; suggested: review them with /li:lessons-add, then /li:lessons-promote only for general lessons"
 fi
 
 # Promote ADRs

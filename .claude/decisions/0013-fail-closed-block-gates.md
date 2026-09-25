@@ -16,7 +16,7 @@ which Claude Code treats as warn-and-proceed. Lintel's two BLOCK hooks (secret-s
 customer-data-block) had exactly this shape: the flagship control was silently downgradeable to
 advisory by any internal hiccup. Two adjacent gaps shipped with it: the gates scanned full diff
 hunks (context lines caused false positives that train operators to override), and `--auto`
-mode had no mechanical notion of a one-way door (gstack #603's sovereignty incident — prose-only
+mode had no mechanical notion of a one-way door (historical external incident 603 — prose-only
 AUTO_DECIDE let an agent auto-decide an irreversible change).
 
 ## Decision

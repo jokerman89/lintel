@@ -45,11 +45,17 @@ printf 'old local checkpoint\n' > "$local_old"
 [ "$(in_repo "$a" context_list | wc -l | tr -d ' ')" = 2 ]
 echo 'PASS: migrated repository retains local history and its owned legacy checkpoint'
 
-# Execute the warm skill's real discovery block from a different repository.
+# Execute the consolidated skill's named discovery block from a different repository.
 git -C "$b" branch -m target-branch
 warm_script="$review_tmp/warm.sh"
-awk '/^```bash/{inside=1;next} inside && /^```/{exit} inside{print}' \
-  "$review_source/skills/context-warm-sessions/SKILL.md" > "$warm_script"
+awk '
+  /^## Sessions mode$/ { section=1; next }
+  section && /^## / { exit }
+  section && /^```bash$/ { inside=1; next }
+  inside && /^```$/ { exit }
+  inside { print }
+' "$review_source/skills/context-warm/SKILL.md" > "$warm_script"
+[ -s "$warm_script" ] || { echo 'FAIL: sessions mode block is missing'; exit 1; }
 printf '\nprintf "%%s\\n" "$branch" "$candidates"\n' >> "$warm_script"
 target_path=$(cd "$a"; LINTEL_REPO_ROOT="$b" context_save_path target)
 case "$target_path" in */target-branch/*) ;; *) exit 1 ;; esac

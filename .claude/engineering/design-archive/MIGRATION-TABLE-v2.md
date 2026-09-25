@@ -1,5 +1,11 @@
 # Lintel v2 Migration Table
 
+> Historical inventory, not current routing. Original `<v1>` identifiers, v2 names,
+> counts and Phase A outcomes are retained as evidence of that transition.
+> For current capability-preserving routes and owned updates, use the
+> [native workflow migration](../../../docs/migrations/2026-09-25-native-workflows.md).
+> No historical command or verification recommendation below was rerun for this update.
+
 Full enumeration of all 65 skills + 40 agents in v1 with v2 rename status. Source of truth consumed by Phase A migration script.
 
 **Naming rule:** mirror MS internal process terminology where one exists. Generic engineering vocabulary stays unchanged. Aliases retained until v2.5 (operator data-driven retirement decision).
@@ -35,7 +41,7 @@ Full enumeration of all 65 skills + 40 agents in v1 with v2 rename status. Sourc
 | `<v1>scrape</v1>` | `/scrape` | unchanged | Generic |
 | `<v1>make-pdf</v1>` | `/make-pdf` | unchanged | Generic |
 | `<v1>setup-browser-cookies</v1>` | `/setup-browser-cookies` | unchanged | Generic |
-| `<v1>open-gstack-browser</v1>` | `/open-managed-browser` | RENAMED | Drop "gstack" branding internally |
+| `<v1>open-gstack-browser</v1>` | `/open-managed-browser` | RENAMED | Use a provider-neutral managed-browser name |
 | `<v1>design-review</v1>` | `/design-review` | unchanged | Generic; visual pillar review |
 | `<v1>design-consultation</v1>` | `/design-consultation` | unchanged | Generic |
 | `<v1>design-html</v1>` | `/design-html` | unchanged | Generic |
@@ -52,7 +58,7 @@ Full enumeration of all 65 skills + 40 agents in v1 with v2 rename status. Sourc
 | `<v1>pair-agent</v1>` | `/pair-agent` | unchanged | Generic |
 | `<v1>skillify</v1>` | `/skillify` | unchanged | Lintel-specific |
 | `<v1>landing-report</v1>` | `/landing-report` | unchanged | Generic |
-| `<v1>setup-gbrain</v1>` | `/setup-brain` | RENAMED | Drop gstack-brain branding |
+| `<v1>setup-gbrain</v1>` | `/setup-brain` | RENAMED | Use a neutral private-index setup name |
 | `<v1>sync-gbrain</v1>` | `/sync-brain` | RENAMED | Same |
 | `<v1>document-generate</v1>` | `/document-generate` | unchanged | Generic; doc-gen is MS-specific in Layer 3 |
 
@@ -134,7 +140,7 @@ Full enumeration of all 65 skills + 40 agents in v1 with v2 rename status. Sourc
 
 ## Agents — Layer 4 power-user (25)
 
-All Layer 4 agents are gstack-equivalent generic engineering helpers. No MS-specific terminology mapping applies — these stay unchanged.
+All Layer 4 agents are generic engineering helpers. No MS-specific terminology mapping applied in this historical transition — these stayed unchanged.
 
 CodeReviewer, ReadOnly, SanityChecker, TestRunner, Architect, Refactorer, Migrator, SecurityAuditor, PerformanceAnalyzer, DependencyAuditor, APIDesigner, DatabaseDesigner, DocWriter, ADRDrafter, ChangelogMaintainer, DebugForensics, Planner, Explorer, ResearchSynthesizer, ReleaseEngineer, BackendArchitect, FrontendBuilder, DevOpsToolchain, DataPipelineDesigner, AccessibilityChecker.
 

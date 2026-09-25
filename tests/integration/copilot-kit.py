@@ -29,7 +29,11 @@ JOINED_RUNTIME_RESOURCES = (
     "lib/state.sh", "lib/cycle-modes.sh", "lib/cycle-footer.sh", "lib/workflow.sh",
     "bin/li-catalog.py", "lib/capability-selections.json",
     "skills/catalog/references/metadata.md", "skills/catalog/references/selections.md",
-    "skills/browse/scripts/chromium.mjs", "skills/scrape/scripts/extract.mjs",
+    "skills/web-session/scripts/chromium.mjs", "skills/web-session/scripts/extract.mjs",
+    "skills/web-session/references/browser-operations.md",
+    "skills/web-session/references/browse.md", "skills/web-session/references/scrape.md",
+    "skills/web-session/references/open.md", "skills/web-session/references/cookies.md",
+    "skills/code-freeze/scripts/freeze.py",
     "lib/url_policy.py", "config/aliases.yaml", "install/upstream-sources.yaml",
     ".claude-plugin/plugin.json",
     "skills/design-dna/scripts/design_contract.py",
@@ -42,6 +46,8 @@ JOINED_RUNTIME_RESOURCES = (
     "skills/generate-xlsx/references/native-xlsx.md",
     "skills/generate-xlsx/scripts/check_xlsx.py",
     "skills/generate-pdf/scripts/prepare_html.py",
+    "skills/web-session/scripts/chromium.mjs",
+    "skills/code-freeze/scripts/freeze.py",
     "skills/generate-pdf/scripts/print_pdf.mjs",
     "skills/generate/scripts/pipeline_inputs.py",
 )
@@ -201,14 +207,14 @@ class CopilotKit(unittest.TestCase):
                              adapter.source_bytes(self.source / relative))
         unrelated = self.base / "unrelated-cwd"
         unrelated.mkdir()
-        for arguments in (("--json", "--name=match"),
+        for arguments in (("--json", "--name=skill-router"),
                           ("--json", "--selection=demo-script", "--kind=agent")):
             result = self.catalog_query(bundle, *arguments, cwd=unrelated)
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             value = json.loads(result.stdout)
             self.assertFalse(value["executed"])
             self.assertNotIn("## Behavioral traits", result.stdout)
-            if "--name=match" in arguments:
+            if "--name=skill-router" in arguments:
                 self.assertEqual([item["id"] for item in value["entries"]], ["skill:skill-router"])
             else:
                 self.assertEqual({item["id"] for item in value["entries"]}, {
@@ -308,7 +314,12 @@ class CopilotKit(unittest.TestCase):
         self.assertEqual({item["id"] for item in index["selections"]}, expected)
         self.assertFalse(index["executed"])
         full = json.loads(query("--kind=all").stdout)
-        self.assertEqual(full["total"], 196)
+        canonical_result = self.catalog_query(self.source, "--json", "--kind=all", cwd=unrelated, env=env)
+        self.assertEqual(canonical_result.returncode, 0, canonical_result.stdout + canonical_result.stderr)
+        canonical = json.loads(canonical_result.stdout)
+        self.assertEqual(full["entries"], canonical["entries"])
+        self.assertEqual(full["total"], len(canonical["entries"]))
+        self.assertEqual(full["matched"], canonical["matched"])
         for name in sorted(expected):
             with self.subTest(selection=name):
                 result = query(f"--selection={name}")

@@ -1,0 +1,439 @@
+{
+  "schema_version": 1,
+  "description": "Exact internal records whose former workflow references are reported as HISTORICAL observations by tests/shape/native-command-surface.py. Current routes elsewhere still fail.",
+  "records": [
+    {
+      "path": ".claude/engineering/audits/2026-06-12-battletest-synthesis.md",
+      "reason": "Dated audit narrative; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/engineering/audits/2026-06-12-launch-readiness-register.md",
+      "reason": "Dated audit narrative; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/engineering/audits/2026-06-18-launch-readiness-register-v2.md",
+      "reason": "Dated audit narrative; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/engineering/audits/2026-09-20-universal-quality/action-plan.md",
+      "reason": "Dated audit narrative; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/engineering/audits/2026-09-20-universal-quality/report.md",
+      "reason": "Dated audit narrative; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/engineering/audits/lintel-five-lens-audit.md",
+      "reason": "Dated audit narrative; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/engineering/audits/lintel-five-lens-remediation-plan.md",
+      "reason": "Dated audit narrative; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/engineering/audits/lintel-state-of-the-harness.md",
+      "reason": "Dated audit narrative; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/engineering/audits/lintel-uniformity-REMEDIATION-PLAN.md",
+      "reason": "Dated audit narrative; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/engineering/audits/lintel-uniformity-REMEDIATION-REVIEW.md",
+      "reason": "Dated audit narrative; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/engineering/audits/lintel-uniformity-VOTE.md",
+      "reason": "Dated audit narrative; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/engineering/audits/lintel-uniformity-audit-prompt.md",
+      "reason": "Dated audit narrative; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/engineering/audits/lintel-uniformity-cross-X2-promise-verification.md",
+      "reason": "Dated audit narrative; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/engineering/audits/lintel-uniformity-cross-X3-evolution.md",
+      "reason": "Dated audit narrative; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/engineering/audits/lintel-uniformity-cross-X4-entry-point-matrix.md",
+      "reason": "Dated audit narrative; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/engineering/audits/lintel-uniformity-cross-X5-necessity.md",
+      "reason": "Dated audit narrative; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort1-phase-core.md",
+      "reason": "Dated audit narrative; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md",
+      "reason": "Dated audit narrative; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort3-handoff.md",
+      "reason": "Dated audit narrative; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort4-agents.md",
+      "reason": "Dated audit narrative; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort6-eng-domains.md",
+      "reason": "Dated audit narrative; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort7-packs-roles.md",
+      "reason": "Dated audit narrative; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort8-cross-cutting.md",
+      "reason": "Dated audit narrative; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/engineering/compat-audits/2026-06-12-compat-audit-2026-06-12-1399.md",
+      "reason": "Dated compatibility audit; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/engineering/compat-audits/2026-09-08-copilot-enterprise-launch.md",
+      "reason": "Dated compatibility audit; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/engineering/design-archive/CLI-SUPPORT-V2-SCHEMA.md",
+      "reason": "Superseded design archive; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/engineering/design-archive/MIGRATION-TABLE-v2.md",
+      "reason": "Superseded design archive; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/engineering/design-archive/lintel-feature-spine-packs-navigation.md",
+      "reason": "Superseded design archive; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/engineering/design-archive/lintel-v2-design.md",
+      "reason": "Superseded design archive; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/engineering/design-archive/lintel-v3-plan.md",
+      "reason": "Superseded design archive; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/engineering/design-archive/lintel-v3.5-azure-toolbox-plan.md",
+      "reason": "Superseded design archive; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/engineering/design-archive/lintel-v3.5-cycle-and-roles.md",
+      "reason": "Superseded design archive; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/engineering/design-archive/lintel-v3.5-doc-generation-plan.md",
+      "reason": "Superseded design archive; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/engineering/design-archive/lintel-v3.6-alias-mechanism.md",
+      "reason": "Superseded design archive; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/engineering/design-archive/lintel-v3.6-backlog-sequencing.md",
+      "reason": "Superseded design archive; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/engineering/design-archive/lintel-v3.6-cohort4-naming-decisions.md",
+      "reason": "Superseded design archive; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/engineering/design-archive/lintel-v3.6-decisions-67-68.md",
+      "reason": "Superseded design archive; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/engineering/design-archive/lintel-v3.7-frontend-design-system.md",
+      "reason": "Superseded design archive; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/engineering/design-archive/lintel-v4.0-reframe-design.md",
+      "reason": "Superseded design archive; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/engineering/evolution/2026-05-29-phase2-packs-envelope.md",
+      "reason": "Dated structural evolution record; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/engineering/evolution/2026-05-29-spine-extraction-audit.md",
+      "reason": "Dated structural evolution record; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/engineering/evolution/2026-06-03-caip-pack-extraction.md",
+      "reason": "Dated structural evolution record; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/engineering/evolution/2026-06-10-v4.11-launch-polish.md",
+      "reason": "Dated structural evolution record; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/engineering/evolution/2026-06-12-battletest-remediation.md",
+      "reason": "Dated structural evolution record; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/engineering/evolution/2026-06-12-memory-v2.md",
+      "reason": "Dated structural evolution record; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/engineering/evolution/2026-06-13-design-dna.md",
+      "reason": "Dated structural evolution record; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/engineering/evolution/2026-06-18-launch-readiness.md",
+      "reason": "Dated structural evolution record; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/plans/legacy-cleanup/spec.md",
+      "reason": "Consolidation record naming the entries it retired; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/plans/legacy-cleanup/swarm/briefs/W4.md",
+      "reason": "Consolidation record naming the entries it retired; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/plans/legacy-cleanup/swarm/reports/W2.md",
+      "reason": "Consolidation record naming the entries it retired; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/plans/legacy-cleanup/swarm/reports/W3.md",
+      "reason": "Consolidation record naming the entries it retired; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/plans/legacy-cleanup/swarm/reports/W4.md",
+      "reason": "Consolidation record naming the entries it retired; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/plans/legacy-cleanup/swarm/reports/W5.md",
+      "reason": "Consolidation record naming the entries it retired; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/plans/mars/plan.md",
+      "reason": "MARS design record written before native consolidation; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/plans/mars/research.md",
+      "reason": "MARS design record written before native consolidation; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/plans/mars/review-method-design.md",
+      "reason": "MARS design record written before native consolidation; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/plans/mars/status.md",
+      "reason": "MARS design record written before native consolidation; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/plans/todo.md",
+      "from_heading": "## Historical plans — superseded as current work",
+      "reason": "Completed plan ledger below this heading; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/plans/universal-implementation/a13-contract.md",
+      "reason": "Completed universal implementation record; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/plans/universal-implementation/packages/P05.md",
+      "reason": "Completed universal implementation record; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/plans/universal-implementation/packages/P06.md",
+      "reason": "Completed universal implementation record; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/plans/universal-implementation/packages/P08.md",
+      "reason": "Completed universal implementation record; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/plans/universal-implementation/packages/P09.md",
+      "reason": "Completed universal implementation record; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/plans/universal-implementation/packages/P10.md",
+      "reason": "Completed universal implementation record; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/plans/universal-implementation/packages/P11.md",
+      "reason": "Completed universal implementation record; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/plans/universal-implementation/packages/P12.md",
+      "reason": "Completed universal implementation record; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/plans/universal-implementation/packages/P13.md",
+      "reason": "Completed universal implementation record; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/plans/universal-implementation/plan.md",
+      "reason": "Completed universal implementation record; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/plans/universal-implementation/reports/P03-joined-path-repair.md",
+      "reason": "Completed universal implementation record; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/plans/universal-implementation/reports/P03.md",
+      "reason": "Completed universal implementation record; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/plans/universal-implementation/reports/P05.md",
+      "reason": "Completed universal implementation record; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/plans/universal-implementation/reports/P06.md",
+      "reason": "Completed universal implementation record; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/plans/universal-implementation/reports/P08-A13.md",
+      "reason": "Completed universal implementation record; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/plans/universal-implementation/reports/P08.md",
+      "reason": "Completed universal implementation record; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/plans/universal-implementation/reports/P09.md",
+      "reason": "Completed universal implementation record; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/plans/universal-implementation/reports/P10.md",
+      "reason": "Completed universal implementation record; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/plans/universal-implementation/reports/P11.md",
+      "reason": "Completed universal implementation record; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/plans/universal-implementation/reports/P12-pdf-source-repair.md",
+      "reason": "Completed universal implementation record; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/plans/universal-implementation/reports/P12-pdf.md",
+      "reason": "Completed universal implementation record; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/plans/universal-implementation/reports/P13-skills-preservation.md",
+      "reason": "Completed universal implementation record; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/plans/universal-implementation/reports/P13.md",
+      "reason": "Completed universal implementation record; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/plans/universal-implementation/reports/final.md",
+      "reason": "Completed universal implementation record; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/plans/universal-implementation/reviews/A23.5-final-ad529eb.md",
+      "reason": "Completed universal implementation record; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/plans/universal-implementation/reviews/A23.5-phase1-0d802cb.md",
+      "reason": "Completed universal implementation record; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/plans/universal-implementation/reviews/P03-joined-path-final.md",
+      "reason": "Completed universal implementation record; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/plans/universal-implementation/reviews/P03.md",
+      "reason": "Completed universal implementation record; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/plans/universal-implementation/reviews/P05-excerpt-context-final.md",
+      "reason": "Completed universal implementation record; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/plans/universal-implementation/reviews/P05-final.md",
+      "reason": "Completed universal implementation record; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/plans/universal-implementation/reviews/P05-shared-boundary-final.md",
+      "reason": "Completed universal implementation record; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/plans/universal-implementation/reviews/P05.md",
+      "reason": "Completed universal implementation record; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/plans/universal-implementation/reviews/P06-component.md",
+      "reason": "Completed universal implementation record; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/plans/universal-implementation/reviews/P06-final.md",
+      "reason": "Completed universal implementation record; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/plans/universal-implementation/reviews/P06-provider-repair-final.md",
+      "reason": "Completed universal implementation record; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/plans/universal-implementation/reviews/P06-recheck.md",
+      "reason": "Completed universal implementation record; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/plans/universal-implementation/reviews/P06-shared-boundary-final.md",
+      "reason": "Completed universal implementation record; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/plans/universal-implementation/reviews/P08-integration-3ff5998.md",
+      "reason": "Completed universal implementation record; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/plans/universal-implementation/reviews/P08-selected-final-229656c.md",
+      "reason": "Completed universal implementation record; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/plans/universal-implementation/reviews/P10-component.md",
+      "reason": "Completed universal implementation record; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/plans/universal-implementation/reviews/P10-preservation-a797b2d.md",
+      "reason": "Completed universal implementation record; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/plans/universal-implementation/reviews/P11-browser-3115790.md",
+      "reason": "Completed universal implementation record; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/plans/universal-implementation/reviews/P11-browser-final-14b419c.md",
+      "reason": "Completed universal implementation record; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/plans/universal-implementation/reviews/P12-pdf-1ba9f9b.md",
+      "reason": "Completed universal implementation record; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/plans/universal-implementation/reviews/P12-pdf-5978def.md",
+      "reason": "Completed universal implementation record; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/plans/universal-implementation/reviews/P13-consumers-4922a6b.md",
+      "reason": "Completed universal implementation record; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/plans/universal-implementation/reviews/P13-consumers-7884ddd.md",
+      "reason": "Completed universal implementation record; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/plans/universal-implementation/reviews/P13-discovery-2a4ba25.md",
+      "reason": "Completed universal implementation record; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/plans/universal-implementation/reviews/P13-discovery-final-b1d4caf.md",
+      "reason": "Completed universal implementation record; former names and paths are original observations, not current routes (ADR-0034)."
+    },
+    {
+      "path": ".claude/plans/universal-implementation/reviews/P13-fanin-f581b07.md",
+      "reason": "Completed universal implementation record; former names and paths are original observations, not current routes (ADR-0034)."
+    }
+  ]
+}

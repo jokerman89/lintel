@@ -20,7 +20,10 @@ set -uo pipefail
 
 _dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 _root="$(cd "$_dir/../../.." && pwd)"                 # plugin root — for sourcing libs
-_repo="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"   # the USER's repo — for state + footer
+_repo="${LINTEL_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}"
+case "$_repo" in [A-Za-z]:*)
+  if command -v cygpath >/dev/null 2>&1; then _repo="$(cygpath -u "$_repo")" || exit 0; fi ;;
+esac
 
 # State ledger lives in the user's repo (v5 path, legacy fallback).
 _sf="$_repo/.claude/runtime/state/00-state.md"
@@ -66,7 +69,7 @@ fi
 # ── 2. Gap A: a cycle is being invoked but no ledger exists yet → nudge to start it ──
 # (the model owns the write so cycle_id/mode/branch/commit are correct — no auto-write).
 case "$PROMPT" in
-  */li:cycle*|*/li:fix*|*/li:autoplan*|*/li:plan-and-build*)
+  */li:cycle*|*/li-cycle*|*/li:fix*|*/li-fix*)
     if ! { [ -f "$_sf" ] && grep -qiE '^[[:space:]]*phase:[[:space:]]*CYCLE' "$_sf" 2>/dev/null; }; then
       _emit "LINTEL CYCLE ENTRY — and the ledger has no cycle marker yet. Your FIRST mechanical action, before any phase work: state_append CYCLE STARTING cycle_id=<id> cycle_mode=<mode> branch=<branch> commit=<sha> (source lib/state.sh per the cycle skill's mode-persistence step). The position footer, the turn-end Stop hook, and the session digest ALL key off this marker — skip it and the cycle loses the thread."
     fi

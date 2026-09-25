@@ -23,6 +23,17 @@ Only load the relevant workflow and references. The portable kit includes canoni
 resources, but only the `li-*` skills in `.github/skills/` are native entry points.
 Do not claim every catalog workflow has been validated in every Copilot client.
 
+For task routing, use `define` for requirements, `inspect` for plan/repository inspection,
+`verify` for checks, `diagnose` for investigation and `cross-check` for a separately
+attributable review. `verify` is read-only unless repair is explicitly authorized.
+Use `pause` and `resume --from <checkpoint-path>` for saved context. Existing
+`resume --from <phase|job-step>` overrides remain supported; use an explicit path
+such as `./BUILD` for a checkpoint whose name matches a phase or selected step.
+These are canonical
+workflow names, not a claim that a native wrapper exists on every host; use the
+canonical-file fallback above when discovery is unavailable. Consolidation preserves
+the selected work map, profile reference and shared review/QA evidence contracts.
+
 If a shell helper is necessary, use Bash (Git Bash on Windows), keep the current
 directory at the working repository, and set LINTEL_REPO_ROOT to that repository.
 Resolve the helper by its full path under the resource root. Do not assume the
