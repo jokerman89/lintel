@@ -22,9 +22,9 @@ An update should pin the actual reviewed source revision and retain applicable n
 ## Workflow consolidation
 
 The 2026-09-25 [native workflow migration](migrations/2026-09-25-native-workflows.md)
-retired or renamed entrypoints, including several whose names came from the reference-only
-harness Lintel grew out of (see the registry and
-[ADR-0011](../.claude/decisions/0011-gstack-de-heritage.md)). It did not change the
+retired or renamed entrypoints, including several whose names came from an earlier external
+harness (see [ADR-0011](../.claude/decisions/0011-native-workflow-ownership.md) and
+[ADR-0034](../.claude/decisions/0034-native-workflow-consolidation.md)). It did not change the
 design-dna component, and its attribution and license files above stay with it. Removing an
 entrypoint does not remove a notice owed by retained content; if a retained file still carries
 adapted material, its notice stays with that file.
