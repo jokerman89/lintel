@@ -2,48 +2,42 @@
 name: frozen-zone-warn
 tier: warn-only
 event: PreToolUse (Edit | Write)
-fires_on: edit target matching a legacy session freeze entry or a project CLAUDE.md "Frozen zones" bullet
-override: none — the hook only warns; the edit proceeds unchanged
-audit: .claude/runtime/audit/hooks.jsonl (repo-scoped; resolved by bin/_audit.sh)
+fires_on: edit target matching selected session freeze state or a project Frozen zones bullet
+override: none; the hook only warns
+audit: .claude/runtime/audit/hooks.jsonl (resolved by bin/_audit.sh)
 ---
 
-# frozen-zone-warn
+# Frozen zone warning
 
-Opt-in and warn-only. When an Edit or Write targets a frozen path, the hook prints a warning
-and records one `frozen_zone_warn` finding. It never blocks, and nothing enforces a freeze.
+Optional and warn-only. A match reports the path/source and records a `frozen_zone_warn`
+observation through the existing advisory audit writer. The hook always exits zero;
+it neither prevents an edit nor installs a host write lock.
 
-## What it reads
+## Sources
 
-The hook reads exactly two sources:
+The selected working repository is `LINTEL_REPO_ROOT`, with the existing Git-root fallback.
+Use a real `LINTEL_SESSION_ID`, host `CLAUDE_SESSION_ID` or retained `LINTEL_CYCLE_ID`;
+no guessed `default` session is read.
 
-1. **Legacy session freeze file:** `$LINTEL_HOME/freeze/${LINTEL_SESSION_ID:-default}.yaml`. Each
-   `- path: <prefix>` entry is a **prefix** match against the edit target.
-2. **Project `CLAUDE.md`:** the current directory's `CLAUDE.md` section whose heading starts with
-   `Frozen zones`. Each bullet's first path-like token is a **substring** match against the edit
-   target.
+1. `$(lintel_state_dir)/code-freeze/<session-id>.yaml`: the state written by
+   `/li:code-freeze`, parsed by its shared `scripts/freeze.py` reader. Exact file or
+   directory-boundary matching handles both repository-relative and absolute targets.
+2. Only if that file is absent, the same explicit session's legacy
+   `$LINTEL_HOME/freeze/<session-id>.yaml`, read-only. An empty repository list takes
+   precedence. Nothing migrates, edits or clears legacy state implicitly.
+3. The selected repository's `CLAUDE.md` Frozen zones section, using the retained
+   heuristic bullet reader. This is a project-rule warning, not runtime scope.
 
-It does not read the advisory metadata that `/li:code-freeze` records under
-`.claude/runtime/state/code-freeze/<session-id>.yaml`, and it builds no glob list. That metadata
-is a cooperative reminder for BUILD and review; this hook is a separate, dormant legacy reader.
+A missing/failed Python reader or malformed session file is reported as unknown scope,
+not an empty unfrozen state. It still does not block. Without a session ID, only the
+project-rule source is inspected.
 
-## What it does not do
+## Authority and evidence
 
-- No enforcement: `/clean`, `/li:code-freeze` and other skills do not block on this hook's result,
-  and no filesystem or host write lock is installed.
-- No automatic registration: it ships inert and runs only after an operator activates it.
-- No override flag: there is nothing to override because the edit is never stopped.
+The message recommends `/li:code-freeze --list` and an explicitly authorized `--lift`
+for runtime scope changes. A project rule requires its own exception; `--lift` cannot
+override it. The audit retains `source=session-freeze|project-claude-md`, frozen path
+and edit target. A warning/audit proves only that this invocation matched and warned.
 
-## Message
-
-A match prints the frozen path and its source, then names `/li:code-unfreeze` for removing an
-advisory freeze that is no longer wanted. The warning is informational.
-
-## Audit
-
-One record per match, written through the shared advisory writer (a failed write only warns):
-
-```jsonl
-{"ts":"...","kind":"frozen_zone_warn","operator":"...","cycle_id":"...","hook":"frozen-zone-warn","tier":"warn","frozen_path":"src/components/landing/","edit_target":"src/components/landing/Hero.tsx","source":"session-freeze | project-claude-md"}
-```
-
-A record shows that the hook matched and warned. It is not proof that the edit was prevented.
+No registration, model control, permission override or automatic expiry is added.
+Compatible host activation remains a separate operator-controlled action.

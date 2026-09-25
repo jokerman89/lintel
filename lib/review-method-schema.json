@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "description": "Single-review message headers for the shared Review Method (skills/review/references/method.md). Same syntax as the MARS headers: a fenced block with info string review-<kind>, one `key: value` per line; list values are comma-separated. MARS carries the same subject, brief and model fields and adds panel, slot and round (lib/mars-schema.json). The packet body after the header is identical in both modes.",
+  "headers": {
+    "request": {
+      "required": [
+        "review", "version", "requested_by", "coordinator_session", "coordinator_surface",
+        "repository", "branch", "commit",
+        "subject_kind", "subject_ref", "stage", "brief_sha256", "method", "questions",
+        "reasoning_effort", "context_tier", "reply_via"
+      ],
+      "optional": ["requested_model", "cycle_id", "work_map", "package", "leaves", "tags", "word_limit"],
+      "enums": {
+        "stage": ["spec", "quality", "full"],
+        "reply_via": ["final-response"],
+        "subject_kind": ["problem", "plan", "spec", "implementation", "review", "code-review"]
+      }
+    },
+    "report": {
+      "required": [
+        "review", "version", "stage", "brief_sha256",
+        "verdict", "p1", "p2", "p3", "confidence", "read_only", "self_reported_model", "coverage"
+      ],
+      "optional": ["tools_used", "gaps"],
+      "enums": {
+        "stage": ["spec", "quality", "full"],
+        "verdict": ["block", "concerns", "pass", "unable"],
+        "read_only": ["attested"]
+      },
+      "integers": ["p1", "p2", "p3", "confidence"]
+    }
+  }
+}

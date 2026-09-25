@@ -9,7 +9,7 @@ review_source="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 review_parent="$(cd "${TMPDIR:-/tmp}" && pwd -P)"
 review_tmp="$(mktemp -d "$review_parent/lintel-review-roots.XXXXXX")"
 trap 'case "$review_tmp" in "$review_parent"/lintel-review-roots.*) rm -rf -- "$review_tmp" ;; esac' EXIT
-export LINTEL_HOME="$review_tmp/home" GSTACK_HOME="$review_tmp/legacy"
+export LINTEL_HOME="$review_tmp/home"
 unset LINTEL_AUDIT_DIR LINTEL_REPO_ROOT LINTEL_SOURCE_ROOT
 installed="$review_tmp/installed/.github/lintel"
 mkdir -p "$installed/bin" "$installed/lib"
@@ -33,7 +33,7 @@ test "$target_head" != "$cwd_head"
 # Without environment hints, the installed executable finds its sibling helper
 # code but records the caller's working repository and commit.
 (cd "$review_tmp/cwd" && bash "$installed/bin/li-review-log" \
-  "{\"skill\":\"plan-eng-review\",\"status\":\"CLEAR\",\"commit\":\"$cwd_head\"}" > "$review_tmp/cwd-write.out")
+  "{\"skill\":\"inspect\",\"status\":\"CLEAR\",\"commit\":\"$cwd_head\"}" > "$review_tmp/cwd-write.out")
 rc=0
 (cd "$review_tmp/cwd" && bash "$installed/bin/li-review-read") > "$review_tmp/cwd-read.out" || rc=$?
 test "$rc" = 3
@@ -53,7 +53,7 @@ echo 'PASS: an installed reader does not reuse a conflicting cwd review'
 # integration/universal-work-lifecycle.py::ReviewSnippetTests.
 rc=0
 (cd "$review_tmp/cwd" &&
- bash "$installed/bin/li-review-log" "{\"skill\":\"plan-eng-review\",\"status\":\"CLEAR\",\"commit\":\"$target_head\"}" &&
+ bash "$installed/bin/li-review-log" "{\"skill\":\"inspect\",\"status\":\"CLEAR\",\"commit\":\"$target_head\"}" &&
  bash "$installed/bin/li-review-read") > "$review_tmp/target-review.out" || rc=$?
 test "$rc" = 3
 grep -Fq "current_head: $target_head" "$review_tmp/target-review.out"
@@ -64,16 +64,11 @@ grep -Fq "\"commit\":\"$target_head\"" "$target_log"
 test ! -e "$LINTEL_REPO_ROOT/bin/_audit.sh"
 echo 'PASS: the legacy writer preserves target history without granting unbound clearance'
 
-# The one-time legacy import must derive both slug and branch from the target.
-for name in target cwd; do
-  mkdir -p "$GSTACK_HOME/projects/$name"
-  printf '{"skill":"legacy-%s","status":"CLEAR","commit":"%s","timestamp":"%s"}\n' \
-    "$name" "$target_head" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-    > "$GSTACK_HOME/projects/$name/$name-branch-reviews.jsonl"
-done
+# Reading history is read-only and retains already recorded old-format entries.
+cp "$target_log" "$review_tmp/target-log.before"
 (cd "$review_tmp/cwd" && bash "$installed/bin/li-review-read" --json) > "$review_tmp/target-json.out"
-grep -Fq '"kind":"legacy-target"' "$review_tmp/target-json.out"
-! grep -Fq 'legacy-cwd' "$review_tmp/target-json.out"
-grep -Fxq "$GSTACK_HOME/projects/target/target-branch-reviews.jsonl" \
-  "$LINTEL_REPO_ROOT/.claude/runtime/audit/reviews-legacy-import.done"
-echo 'PASS: legacy import follows the target repository and branch'
+cmp "$target_log" "$review_tmp/target-log.before"
+cmp "$target_log" "$review_tmp/target-json.out"
+grep -Fq "\"commit\":\"$target_head\"" "$review_tmp/target-json.out"
+! grep -Fq "\"commit\":\"$cwd_head\"" "$review_tmp/target-json.out"
+echo 'PASS: historical inspection preserves target bytes and never imports a foreign log'

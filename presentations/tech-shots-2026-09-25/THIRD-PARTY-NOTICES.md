@@ -1,6 +1,6 @@
 # Attribution and source material
 
-- Lintel source and curated workflow excerpts: https://github.com/jokerman89/lintel. The included excerpt license is retained at `comparison/lintel-source-LICENSE`.
+- Lintel source and curated workflow excerpts: https://github.com/jokerman89/lintel. The included excerpt license is retained at `reference-source/lintel-source-LICENSE.txt`.
 - Context research is linked and attributed in `presenter/sources.html`; the site does not redistribute the research papers.
 - Illustrations are supplied or generated conceptual artwork for the Lintel presentation. They are not screenshots of client software or measured results.
 - Paper theme inspiration: https://polsia.com and a supplied visual reference. No Polsia code, images, account content or customer information is included.
@@ -49,3 +49,11 @@ Design guidance: [Microsoft Fluent 2](https://fluent2.microsoft.design). This is
 ## Intro animation
 
 The living-portal clip was supplied by Johannes Åkerman for this presentation; its bytes are preserved. The poster is extracted from the same clip. See [media provenance](assets/intro/README.md).
+
+## PR93 anecdote
+
+`assets/swarming/github-tab.png` is the unchanged screenshot supplied by Johannes for this presentation. It shows an unresponsive browser tab, not evidence of a GitHub service outage. The new Service House prompt and brief come from the user-designated kitchen demo; no raw trial records or separate application code are republished.
+
+## PR93 anecdote
+
+`assets/swarming/github-tab.png` is the unchanged screenshot supplied by Johannes for this presentation. It shows an unresponsive browser tab, not evidence of a GitHub service outage. The new Service House prompt and brief come from the user-designated kitchen demo; no raw trial records or separate application code are republished.

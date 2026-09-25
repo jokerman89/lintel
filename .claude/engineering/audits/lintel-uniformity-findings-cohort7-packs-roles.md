@@ -1,5 +1,9 @@
 # Cohort 7 — pack lifecycle skills + role/profile mechanics + WorkProfile logic
 
+> Retained historical narrative. Terminology was neutralized on 2026-09-25;
+> former external path/name labels are symbolic, not executable current routes.
+> Original dates, finding IDs and recorded outcomes remain historical, not rerun acceptance.
+
 **Audit date:** 2026-05-29
 **Branch:** v4.0-phase1-meta-infra-spine
 **Auditor:** uniformity auditor (cohort 7)
@@ -67,7 +71,7 @@ dimensions:
     high: in/out contract
     finding: contract is documented in body but not in frontmatter (no expected_inputs/outputs field)
     proposed: add expected_inputs/expected_outputs frontmatter to match the cohort-1 phase-skill standard
-    why: achieve declared contract at frontmatter level; pack.yaml + design doc already model declared I/O — roles should match. gstack skills declare args in frontmatter; steal that.
+    why: achieve declared contract at frontmatter level; pack.yaml + design doc already model declared I/O — roles should match. retired-provider skills declare args in frontmatter; steal that.
   D4_entrypoints:
     state: present
     nano: "SKILL.md:138 Hop-in support: YES"
@@ -351,7 +355,7 @@ So there ARE two parallel state-resolution patterns in the repo today: (1) the N
 
 **proposed (NO-CUT):** keep both files (profile.yaml is operator-mutable session state; pack.yaml is pack-shipped defaults — they are not redundant), but make the resolver the single read path. Skills call `resolve_pack_field`, and the resolver internally layers profile.yaml overrides on top of pack.yaml defaults (operator override > pack default > hardcoded fallback). Migrate consumers one at a time starting with sense (the documented "parse once at SENSE Step 1" entry the resolver header already assumes at resolver:11). The resolver is BUILT and TESTED; the work is wiring, not authoring.
 
-**why this specifically:** the v4.0 design's whole thesis is "the pack is the single source of identity-bound state." That promise is currently 0% upheld at the consumer layer despite the interface being 100% built. This is the single highest-leverage finding in the cohort: one well-tested lib, zero adoption. The elegant move is not to write more resolver code — it is to delete the duplicate grep-profile.yaml lines in 5+ skills and replace each with one `resolve_pack_field` call, which is subtraction (fewer parsing patterns) in service of the pack promise. gstack/speckit precedent: a config-resolver that every command sources at head is the standard; the resolver already mirrors that shape — it just needs the `source` lines added at each skill head.
+**why this specifically:** the v4.0 design's whole thesis is "the pack is the single source of identity-bound state." That promise is currently 0% upheld at the consumer layer despite the interface being 100% built. This is the single highest-leverage finding in the cohort: one well-tested lib, zero adoption. The elegant move is not to write more resolver code — it is to delete the duplicate grep-profile.yaml lines in 5+ skills and replace each with one `resolve_pack_field` call, which is subtraction (fewer parsing patterns) in service of the pack promise. retired-provider/speckit precedent: a config-resolver that every command sources at head is the standard; the resolver already mirrors that shape — it just needs the `source` lines added at each skill head.
 
 ---
 

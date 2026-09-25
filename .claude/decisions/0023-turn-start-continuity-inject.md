@@ -35,8 +35,8 @@ completing the trifecta (turn-start drive + turn-end Stop backstop + SessionStar
 3. **Single source of truth.** When a cycle is active it injects the compact
    `render_cycle_footer --compact` position + "render the footer, give the per-phase report, advance
    when this phase is done." No second ledger parser (the cross-cycle footer bug came from two parsers).
-4. **Gap-A nudge, same hook.** If the prompt invokes a cycle (`/li:cycle`, `/li:fix`, `/li:autoplan`,
-   `/li:plan-and-build`) and no ledger marker exists, it nudges the model to write `CYCLE STARTING`
+4. **Gap-A nudge, same hook.** If the prompt invokes `/li:cycle` (including explicit phase
+   ranges) or `/li:fix` and no ledger marker exists, it nudges the model to write `CYCLE STARTING`
    first (the model owns the write — no auto-write, so cycle_id/mode/branch/commit stay correct).
 5. **Pack-ready seam.** Built cycle-source-agnostic; a commented seam lets a future revision probe an
    active pack's `continuity.probe` so pack cycles (e.g. `/s4l:forge`) get the same treatment — no rework.

@@ -39,7 +39,7 @@ Designs components, modules, or features before they're implemented. Produces: d
 - Non-trivial new feature about to be built — design first, code second
 - Existing area being refactored at architectural scale (not surgical fix)
 - Cross-cutting decision (e.g. "how do we structure our event bus?")
-- Pre-`/office-hours` exploration of options
+- Pre-`/define` exploration of options when scope or constraints are unresolved
 
 ## When NOT to invoke
 
@@ -56,7 +56,7 @@ Designs components, modules, or features before they're implemented. Produces: d
    when the requirement can be met by an existing component.
 5. **Recommendation** with reason.
 6. **Output:**
-   - Design doc (markdown, ready for `/office-hours`-style consumption)
+   - Design doc (markdown, with requirements and decisions ready for `/plan`)
    - Interface definitions (compile-ready stub code)
    - Sequence diagram (mermaid or ASCII)
 
@@ -107,8 +107,8 @@ User → API → NewComponent → DB
 
 ## Next steps
 1. Operator reviews + tunes interface
-2. /office-hours to formalize into a design doc
-3. /plan-eng-review for implementation tasks
+2. /define if requirements or scope remain unresolved, then /plan for implementation tasks
+3. /inspect the plan with the engineering lens
 4. Implementation
 ```
 

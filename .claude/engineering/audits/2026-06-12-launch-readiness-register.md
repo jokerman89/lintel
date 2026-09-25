@@ -1,5 +1,9 @@
 # Launch-readiness register — v5.x "old-school ready"
 
+> Retained historical narrative. Terminology was neutralized on 2026-09-25;
+> former external path/name labels are symbolic, not executable current routes.
+> Original dates, finding IDs and recorded outcomes remain historical, not rerun acceptance.
+
 > 2026-06-12/13 · cycle `launch-readiness-20260612` (meta-infra) · operator directive: *"a complete
 > list of everything that's needed in order to comfortably, in every possible aspect, say that
 > we're ready for launch — every i dotted, every aspect tested."*
@@ -113,7 +117,7 @@ counts verified exact (124 skills / 69 agents / 31 hooks / hook-matrix / 4-root 
 
 **C7 Obligations (A6):** 46-row consolidated inventory (see agent report): 10 block-launch
 rows (all cheap; the two expensive-looking ones are already built and need landing), earliest
-hard date 2026-06-28 (JSTACK alias removal), heaviest cluster 2026-09-12 (44 aliases +
+hard date 2026-06-28 (retired-wrapper alias removal), heaviest cluster 2026-09-12 (44 aliases +
 post-grace sweeps + operator migrations; one date conflict 09-12 vs 12-12 to reconcile),
 largest undated security promise = real git pre-commit/pre-push install. ADR numbering gap:
 0012 → 0014. TODOS-v2.md needs a disposition pass (live skills still reference it).
@@ -129,7 +133,7 @@ largest undated security promise = real git pre-commit/pre-push install. ADR num
 | B3 | **New hook bypasses (L-012 class)** | Flatten `$CMD` newlines before matcher+override greps in both BLOCK hooks + negative tests (line-continuation, multiline override forgery); `git diff --no-ext-diff --no-textconv`; push-path outgoing-commit scan; `read -t` integer fallback (macOS fail-open); audit record on scanner-unavailable exit | A5, A7 |
 | B4 | **Footer/state cross-cycle class** | `state_cycle_segment` helper in lib/state.sh; footer consumes it (fixes thin-tier P0 + wrong here/done/mode); `audit_log` derives cycle_id from ledger; resume integrity last-match + CYCLE block writes branch/commit; multi-cycle regression tests | A7, A1 |
 | B5 | **Windows + portability floor** | install.ps1: seed identity + copy lib/bin/templates + `shared/` hook layout + real validation scope; li-doctor bash-3.2 + stale-path fixes; verify.sh mapfile + scaffolding-coherence repoint + cli-matrix repoint-or-delete; `lintel@`→`li@` ×4; Cursor tier demote; fingerprint↔tiers normalization; `.opencode/INSTALL.md` rewrite-or-demote (CAIP leak); exec bits +x; GEMINI.md slug/name | A3, A7, A8 |
-| B6 | **Docs truth sweep** | README (v5.0→5.3.0, manifests, per-cli promise, missing rows); getting-started (role-activate, opencode pointer); AGENTS/GEMINI v3-plan + lessons-path + codex-subagents contradiction; shims (tasks/ paths, gstack rec); AGENT-INSTRUCTIONS matrix→cli-tiers pointer; state-of-the-harness + multi-cli.md rewrite-or-banner; LAYERS lists; MS-Layer language ×2; GLOSSARY/ta/tq dormancy qualifiers; Swedish ×3 + no-swedish covers docs+README; CATALOG UTF-8 generator fix | A4, A8, A6 |
+| B6 | **Docs truth sweep** | README (v5.0→5.3.0, manifests, per-cli promise, missing rows); getting-started (role-activate, opencode pointer); AGENTS/GEMINI v3-plan + lessons-path + codex-subagents contradiction; shims (tasks/ paths, retired-provider rec); AGENT-INSTRUCTIONS matrix→cli-tiers pointer; state-of-the-harness + multi-cli.md rewrite-or-banner; LAYERS lists; MS-Layer language ×2; GLOSSARY/ta/tq dormancy qualifiers; Swedish ×3 + no-swedish covers docs+README; CATALOG UTF-8 generator fix | A4, A8, A6 |
 | B7 | **Mechanism honesty** | usage-log demote (P0); cycle-runs telemetry → one `audit_log` line in cycle Step 8; granularity contradiction → one truth (dormant note in capture); jobs registry claims demoted until a writer fires; 7 compliance-flavored prose streams → `audit_log` one-liners or deleted; 6 bespoke `>>` writers → helper; pack-resolver cache key + sourced set -u leak; `_audit.sh` C0 catch-all + audit_count + append-warn; state.sh phase/key strip; li-doctor smoke + customer-data-block/warn-hooks execution tests | A2, A1, A7 |
 | B8 | **Release close + hygiene** | "Upgrading & uninstalling" section (reconcile 3 provisioning models); migration-index date conflict + version-pinned labels → dates; working-state/MEMORY stale entries (PRs merged, v4.0-reframe closed); TODOS-v2 disposition; scaffolding `tasks/` template leftovers; M1 structure-changes entry + M2 compat audit + M4 recap for this cycle | A3, A6, A2 |
 
@@ -144,7 +148,7 @@ largest undated security promise = real git pre-commit/pre-push install. ADR num
 | H17 pack provenance + H18 plugin pinning (public-launch tier) + append-only audit sink | ADR-0010 staged | 2026-08-31 |
 | Full-surface description→trigger sweep + aggressive-language dial-back | ADR-0014 follow-ups | 2026-07-31 |
 | Per-CLI command-stub generator (Gemini/Cursor/Codex `skills_native`) | craft synthesis | with ADR-0019 |
-| JSTACK env-alias removal | aliases.yaml:8 | **2026-06-28** |
+| retired-wrapper env-alias removal | aliases.yaml:8 | **2026-06-28** |
 | match→skill-router alias (08-29) · context-budgetwatch (09-10) · 44 aliases + post-grace v5 sweep + dual-accept removal | aliases.yaml, ADR-0005/0009/0011 | 2026-09-12 → removal sweep 2026-12-12 |
 | I7 Subtraction-Bias data-modeling exception ADR · J9 jsonl-vs-OTel · J10 plan-mode | syntheses | 2026-08-31 or cut |
 | v6 shrink-to-kernel / packs-as-product decision | battletest verdict | decision point: after eval-harness ships |

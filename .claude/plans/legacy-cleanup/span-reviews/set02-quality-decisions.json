@@ -1,0 +1,176 @@
+{
+  "artifact_type": "finite semantic adjudication; not P05 clearance or a new runtime schema",
+  "date": "2026-09-25",
+  "candidate": "a7a1df338bacf900f1210f08131f391831992f1f",
+  "input": {
+    "path": "C:\\Users\\jokerman\\.copilot\\session-state\\e9c20b62-f877-4242-82cd-b5002d452da8\\files\\c-span-review-set-02-lf.json",
+    "bytes": 33957,
+    "sha256": "ae312ba5ea83dc3d917bc4b99bc6b58edde5f145eb46ddaf2ec6de49f8d37528"
+  },
+  "reviewer": {
+    "app_project_session_id": "6c39f786-01dd-4a99-b120-f286df376300",
+    "tool_session_id": "8b0c4a2f-3e1b-4c3d-8237-74d02ff29710",
+    "coordinator_routing_id": "e9c20b62-f877-4242-82cd-b5002d452da8",
+    "independence": "Separate semantic reviewer, not the report author, declaration author, implementer or spec actor",
+    "descendants": 0
+  },
+  "result": {
+    "ACCEPT": 2,
+    "REJECT": 3,
+    "NEEDS_EVIDENCE": 0,
+    "scope": "Exactly five supplied set02 LF declarations",
+    "release_clearance": false,
+    "mechanism_review": "NOT_PERFORMED",
+    "counterexample_execution": "NOT_PERFORMED",
+    "runtime_hosted_qa_or_p05_corroboration": "NOT_PERFORMED",
+    "interpretation": "The two pinned P13 source-state records can be preserved as exact original observations. Three other declarations are too broad for their proposed classification: they also encompass prospective integration/review instructions or current replacement/result consumer fields. Rejecting those masks does not authorize rewriting the original reports or imply that their old findings are newly false."
+  },
+  "original_work": {
+    "work_map": ".claude/plans/legacy-cleanup/work.json",
+    "package_id": "INTEGRATE",
+    "original_leaf_ids": [
+      "3.1.a", "3.2.a", "3.3.a", "3.4.a", "4.1.a", "4.3.a", "4.4.a",
+      "2.1.a", "5.1.a", "5.2.a", "5.10.a", "5.12.a",
+      "5.4.a", "5.5.a", "5.7.a", "5.7.c", "5.8.a", "6.1.a", "6.2.a", "6.3.a", "6.4.a",
+      "5.6.a", "7.1.a", "7.2.a", "7.3.a", "7.4.a", "7.5.a",
+      "0.3.a", "0.3.b", "0.3.c", "1.5.a", "1.6.a", "1.6.b", "1.7.b", "7.1.c",
+      "1.8.a", "2.2.a", "2.3.a", "2.4.a", "8.8.a", "9.3.a",
+      "0.1.b", "0.2.c", "4.2.a", "5.7.e", "8.2.a", "8.4.a", "8.5.a", "8.7.a",
+      "9.1.a", "9.2.a", "10.1.a", "10.2.a", "10.4.a", "10.5.a", "10.5.b", "10.6.a", "10.8.a"
+    ],
+    "semantic_scope_related_leaves": ["0.2.c", "0.3.a", "0.3.b", "0.3.c", "9.3.a"],
+    "completed_leaves": [],
+    "previously_unverified_leaves_remain_open": ["7.1.c", "9.3.a", "0.2.c", "9.2.a", "10.2.a", "10.5.a", "10.8.a"],
+    "preservation": "No change to 58 leaves, 69 agents, 94 canonical skills, mandatory source-tests/strict-hosted-tests/current-routing controls, profile references, original a7 quality verdict or prior set01 LF decisions."
+  },
+  "conditions": [
+    "ACCEPT applies only to the exact declared path, unique ordered whole-line markers, start-inclusive/end-exclusive span, LF raw SHA and declaration digest shown. No changed or narrowed declaration is automatically approved.",
+    "The eight-field declaration digest binds id, path, start, end, sha256, category, reason and source_evidence using compact sorted ensure_ascii=true JSON. It does not by itself include the separate source_context_sha256 field. That context hash is explicitly bound here, by the full input hash and by the required actual acceptance/evidence context; it must not be omitted by a consumer.",
+    "Admission needs the original full-source context bound through the actual existing prepared acceptance/evidence mechanism, not merely a declared digest or matching historical heading. Any outside-context change or recontextualization as current execution blocks reuse. Whole-source hashing is a context invariant, not permission to mask the whole file.",
+    "No byte/EOL normalization, alternate CRLF hash, duplicate/nested/reordered marker, missing end, relocated path, expanded section, new record or generic schema-shaped fallback is approved.",
+    "Keep visible exact OBSERVATION locations/categories/reasons and preserve source bytes. Unknown, new and adjacent current routes, imports, selections, result columns and deferred-consumer instructions remain checked.",
+    "Historical status, accepted-source, BUILT, score, test count, alias count and reviewer names are recorded claims only. They do not establish present availability, policy, review independence, actual execution or licensing clearance.",
+    "Do not parse or execute literal historical paths, pseudo-YAML, code examples or proposals. No runtime, P05 producer/reader, corroboration, full-candidate or release clearance follows.",
+    "Narrowing suggestions under REJECT are review feedback only. The coordinator must prepare new exact declarations, unique markers, raw hashes and context bindings and obtain explicit semantic decisions before registration."
+  ],
+  "decisions": [
+    {
+      "id": "original-report-1",
+      "declaration_digest": "44fcf7671a9fbf0019c19d988831decd99d42211b13ae10aec458aed03ba1365",
+      "sha256": "9583978d30843804689c3b92226e9988a4ee52b0cdc08a40058172d1465a40c0",
+      "path": ".claude/plans/universal-implementation/reports/P13-skills-preservation.md",
+      "source_context_sha256": "fc24a67bfa15df557d6bbfbfa742e010a94cff6d5f9ca2b34732b371fb4826d7",
+      "source_git_blob": "b1f5435932c20e15d71c1fb55e8be44c1932f534",
+      "source_lines_inclusive": [216, 324],
+      "decision": "ACCEPT",
+      "basis": "The complete report explicitly fixes its comparison to 204ea725 and 42abfcba and defines C/U as source-state classifications, not acceptance. Lines 218-248 identify this particular delta and J04/J09/J11/J12/J13 evidence layers; the 43-original-plus-Swarm rows and subsequent role/Swarm attribution remain facts claimed about that named source comparison. This substantive source-to-source relation, not the heading or date, establishes historical meaning.",
+      "current_use_inside": "The 'Current identity' and 'retained current method' columns mean current at the explicitly pinned P13 source, not at cleanup a7. The PDF reader claim at 272, retained match at 288, older framework/pipeline limits and bounded A22.7 statements must remain original observations; they cannot restore the removed reader, alias or old acceptance. The role and Swarm subsections are part of the same bounded source-disposition/attribution record, not new work instructions.",
+      "adjacent_boundary": "The Alias and argument preservation heading at 325 is excluded and has a separate decision. Earlier 126-row tables, the later selection/distribution guidance and other report prose do not inherit this approval.",
+      "counterexamples": [
+        "Add a Current cleanup route/import column to the delta or a new 'Use /li:make-pdf now' sentence: changed bytes lose approval; no source-table fallback.",
+        "Change the report preamble so 42abfcba is no longer the subject, or designate this table as live cleanup capability selection while retaining its bytes: the full-source context binding fails and semantic approval cannot be reused.",
+        "Add a current command after the excluded heading: it remains independently checked; one accepted source-disposition section never covers neighboring prose."
+      ]
+    },
+    {
+      "id": "original-report-2",
+      "declaration_digest": "ad5531edf3094e1fbc5df33701dd9b199e4aba2e15dabc6e7f78c804dd493815",
+      "sha256": "3303d2a91be9c8eb05beb2b2b49f6bd2137e1a1b4b3350f679eea4b93b1df895",
+      "path": ".claude/plans/universal-implementation/reports/P13-skills-preservation.md",
+      "source_context_sha256": "fc24a67bfa15df557d6bbfbfa742e010a94cff6d5f9ca2b34732b371fb4826d7",
+      "source_git_blob": "b1f5435932c20e15d71c1fb55e8be44c1932f534",
+      "source_lines_inclusive": [325, 346],
+      "decision": "ACCEPT",
+      "basis": "The 46 alias names are the original P13 preservation sample in the same explicitly pinned 42abfcba source comparison. Each row pairs original names with then-observed method/arguments and a source/evidence limit. The report expressly distinguishes metadata from actual host alias registration or execution.",
+      "current_use_inside": "'Existing registry remains unchanged', 'Names are not expired by date' and 'Current method/arguments' describe that report's original source state. They are not current registry policy or evidence that cleanup a7 still has aliases. Keep the old checkpoint links/arguments and 35 module-capability mappings as observations; verify present canonical dispatch independently rather than granting it from this table.",
+      "adjacent_boundary": "Selection and provenance disposition at 347 is excluded. No current capability-selection resource or live migration replacement column elsewhere is approved.",
+      "counterexamples": [
+        "Add members: [skill:qa] or a current alias-registration instruction inside the section: the raw hash changes and the new field stays unapproved.",
+        "Copy the same table into a present-day migration guide or change its full-source context to active registry policy: this path/context-bound decision does not transfer.",
+        "Append 'Use /li:context-save today' after line 346: that current instruction remains checked even if the original alias table is unchanged."
+      ]
+    },
+    {
+      "id": "original-report-3",
+      "declaration_digest": "de298aa54901eb80058fd178aefa1c11bfa02b7a8f6d83c3a11f7405cf2b4703",
+      "sha256": "64655822ed4c6f610e5b396940b1785062d34a1beb5d23dcf800db9a7df0bd92",
+      "path": ".claude/plans/universal-implementation/reports/P08.md",
+      "source_context_sha256": "371df0998005103a663da054e184b64cd5e7dacccc8a31fac2e32593370c2673",
+      "source_git_blob": "ec86961128c11abb3ab7a04edd0f3c2b2c259bac",
+      "source_lines_inclusive": [67, 135],
+      "decision": "REJECT",
+      "basis": "The 46-path inventory at 74-121 is an attributable original product list, but the proposed whole-section span extends into live handoff/consumer instructions: lines 130-134 leave generated consistency unreconciled and require coordinator reconciliation of edited canonical skills. Those are not path-list members. Exact old bytes do not justify masking an original instruction together with the inventory under one authored-path category.",
+      "current_use_inside": "The coordinator integration requirement at 133-134 is prospective consumer guidance, not an observed completed action. Its historical origin does not establish a blanket exemption for deferred instructions under the requested boundary. Preserve the text; do not relabel it as a verified result or erase its unresolved status.",
+      "adjacent_boundary": "Per-leaf implementation and evidence at 136 is correctly excluded, but that does not cure the overbreadth before it.",
+      "narrowing_suggestion": "Prepare a new declaration covering only the original inventory introduction and literal list, lines 67-122, ending before the unique Gated bin/_audit.sh paragraph at 123, or use individually located list fields. Preserve Windows path spelling. Keep all later scope/consumer prose checked. The new markers and digest need a separate explicit decision.",
+      "counterexamples": [
+        "Add 'Use /li:autoplan now' inside the path fence: it is no longer a pure literal inventory and must not be approved.",
+        "Add a current import or integration instruction to the prose after the list: the narrowed path observation cannot hide it.",
+        "Retain the supplied broad digest and merely rename its category to historical: this REJECT remains."
+      ]
+    },
+    {
+      "id": "original-report-4",
+      "declaration_digest": "0b8837ed4cefba4617abc2f128827a90f669fe60f07df066c39bc182cdd84577",
+      "sha256": "9353b6f8d1effc61d8b177f4a476db0f125ca3a95c43457ecedfa815916a34c1",
+      "path": ".claude/plans/universal-implementation/reports/P11.md",
+      "source_context_sha256": "182e7264fd598f01360ef226bc4772face1bece9a411011a4232cebd083e1db7",
+      "source_git_blob": "ee6ea993336bbd3fab7f0b45ce50bc64b11c39b5",
+      "source_lines_inclusive": [632, 718],
+      "decision": "REJECT",
+      "basis": "Three actual commit-attributed frozen path lists are identifiable, but the declaration crosses the peer-level 'Review and next gate' heading at 684 and includes prospective ownership/instruction text. Lines 655-657 direct later generated summaries; lines 713-717 prescribe the next owner action and constrain future execution. This is broader than an original frozen-path/validation observation field.",
+      "current_use_inside": "The original next-action/review restrictions must remain faithful and visible, not converted into a route exemption or a current reviewed result. The later Q1 checkpoint explicitly distinguishes older source identities, but being older does not make every earlier handoff instruction an approved observation span. Missing native/PDF observations remain unverified.",
+      "adjacent_boundary": "Q1 numeric extraction correction at 719 is excluded, but the supplied range already contains a second section and operational guidance before that marker.",
+      "narrowing_suggestion": "Submit only the three literal path inventories at 639-652, 661-668 and 673-677 with their exact original commit attribution and unique bounded markers. Keep 655-657 and the entire Review and next gate section at 684-717 checked. If validation observations also need classification, propose their exact result fields separately, excluding future instructions. No proposed narrower digest is approved here.",
+      "counterexamples": [
+        "Insert a new import into one of the path fences: its changed raw bytes/grammar must fail the narrowed observation.",
+        "Append 'Run /li:browse now' to Next owner action: it remains checked, not hidden by the earlier frozen-path heading.",
+        "Change the end marker to include Q1 or use the original whole-section digest as approval for the three smaller lists: neither is authorized."
+      ]
+    },
+    {
+      "id": "original-report-5",
+      "declaration_digest": "c06e5a91fcc6c271f565384671aa3d4aeb55695c2cb00a092ce50b79398366ad",
+      "sha256": "a9e25891b731b7d53ab53ff4c8fdc02a9df8f3f65aa8b70bb7613891aa144cee",
+      "path": ".claude/plans/legacy-cleanup/swarm/reports/W1.md",
+      "source_context_sha256": "8a18d07801f0d2ca8c9a407af0333eb8241d481a3a018b417f600832679663dc",
+      "source_git_blob": "04bbf6cb63a4cca91db704a818cbd927c27d9b5b",
+      "source_lines_inclusive": [126, 146],
+      "decision": "REJECT",
+      "basis": "The worker/source identity and removed-path cells at 134-136 have a sound original-change-record basis. The proposed full-section mask also covers the Result column and replacement/current consumer claims at 130-139, including PLAN routing and --skill inspect consumption at 132 and assertions about replacement checks at 137-139. Those fields were explicitly required to remain checked, not inherit a changed-path exemption.",
+      "current_use_inside": "This is not a finding that the original worker's result claims are false. It is a rejection of masking the current replacement/result consumer surface together with the retired original input paths. Declared changed_paths corroborates which paths were reported, not the correctness, current dependency closure or acceptance of the Result column.",
+      "adjacent_boundary": "Final signatures at 147 is correctly excluded, but the current-method/result column is inside the proposed span. Original report bytes must remain unchanged.",
+      "narrowing_suggestion": "Propose only exact first-column retired source/path spans at 134-136, corroborated by the original W1 declared changed_paths, using precise cell/span boundaries and new digests. Leave all Result cells, replacement paths, surrounding prose and Final signatures checked. Do not approve the whole rows or table; each new declaration requires an explicit decision.",
+      "counterexamples": [
+        "Add 'Use /li:qa' in a Result cell on the same row as a valid original deleted path: the current-use clause must still fail.",
+        "Add a retired import or false replacement resource in the Result column or prose: changed-path membership cannot excuse it.",
+        "Extend first-column recognition to neighboring cells or use this rejected section digest as approval for narrowed cells: no automatic transfer."
+      ]
+    }
+  ],
+  "verification": {
+    "actually_performed": [
+      "Read all five complete excerpts, every table column and included paragraph, plus original report identity/pinning context and immediate marker-adjacent lines.",
+      "Verified five exact UTF-8 LF excerpt hashes, eight-field declaration digests, unique ordered markers and start-inclusive/end-exclusive coordinates.",
+      "Matched every excerpt byte-for-byte to the frozen a7 Git blob; verified the four complete source_context_sha256 values and source Git identities.",
+      "Separated typed pinned source-state observations from prospective handoff instructions and the current W1 result/replacement consumer fields."
+    ],
+    "not_performed": [
+      "No new source audit, product/guard changes, residual registration, YAML parse, historical command execution or runtime/P05 state write.",
+      "No narrowed declaration was created or approved, and no mechanism/counterexample/runtime/hosted test was run.",
+      "No delegation, credential/private-profile probe, environment launcher, installation, global setting, staging, commit, push or PR operation."
+    ],
+    "limits": "Original reported executions, review outcomes and cited source-era line numbers are not re-proven. Full-source context binding prevents changed-use reuse but is not full-file semantic acceptance. Complete candidate quality and mandatory QA remain as previously reported."
+  },
+  "preserved_quality_report": {
+    "path": "C:\\Users\\jokerman\\.copilot\\session-state\\8b0c4a2f-3e1b-4c3d-8237-74d02ff29710\\files\\legacy-cleanup-integrated-quality-review-a7a1df33.md",
+    "sha256": "54615423fc63810db9d64476f14fdc48f1f8b1482abcb25389b62bb6c09ad78a",
+    "status": "UNCHANGED: SOURCE QUALITY FAIL"
+  },
+  "preserved_set01_lf": {
+    "path": "C:\\Users\\jokerman\\.copilot\\session-state\\8b0c4a2f-3e1b-4c3d-8237-74d02ff29710\\files\\c-span-semantic-decisions-01-lf.json",
+    "sha256": "b6cb3e61d15c1e3d666c0ce9a3031f18512ebdbcde4852ba7be4422b1bdfd75a",
+    "status": "UNCHANGED: 17 exact LF semantic ACCEPT decisions with bound-context conditions"
+  },
+  "stop": "Five set02 decisions complete. Register only the two exact accepted declarations if all bound-context and mechanism conditions are met. The three rejected broad spans remain unapproved pending separately prepared and explicitly reviewed narrower inputs. No further scope or clearance is implied."
+}
