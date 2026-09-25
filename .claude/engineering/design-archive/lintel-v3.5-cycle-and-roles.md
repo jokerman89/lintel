@@ -987,16 +987,16 @@ This requires explicit context warming — the operator says "load these, then w
 ### 5.2 — Context warming skills
 
 ```
-/li:context-warm <file-glob> [+ <file-glob>] ...   # load specified files into session
+/li:context-warm --path <path> --glob <pattern>    # select bounded source manifests
 /li:context-warm --related <topic> --glob <pattern> # search within explicitly selected sources
 /li:context-warm --sessions [N]                    # selected branch, 1-5 saves, default 3
 /li:context-warm --adrs <topic>                    # retain explicit ADR status selection
 /li:context-warm-customer <engagement>              # load customer-engagement repo state
 /li:context-warm-from-url <url>                     # fetch + dump (e.g., Microsoft Learn doc)
 /li:resume --from <checkpoint>                    # read an authorized saved checkpoint
-/li:context-snapshot [--name <name>]                # save current context state for later resume
-/li:context-budget                                  # show current utilization, recommend warm/cool
-/li:context-cool [--keep <patterns>]                # selective drop of context to free budget
+/li:pause [label]                                  # save an owned compatible checkpoint
+/li:context-budget                                # report observations or unknown capacity
+/li:context-cool --path <path>                      # exclude future reads; no token reclamation claim
 ```
 
 ### 5.3 — Warming patterns

@@ -24,9 +24,9 @@
 
 ## What already exists (reuse, do not rebuild)
 
-- [bin/li-wiki-gen](../../bin/li-wiki-gen) — regenerates showcase + wiki counts. The count-drift fix is *run it*, not *build it*.
-- [context-budget/SKILL.md:49-76](../../skills/context-budget/SKILL.md) — the 500k cap logic already exists. Wiring = calling it at a handoff.
-- [bin/_audit.sh](../../bin/_audit.sh) — the source-guard + idempotent idiom. The hook stdin shim and `_patterns.sh` copy it; they do not invent a new style.
+- [bin/li-wiki-gen](../../../bin/li-wiki-gen) — regenerates showcase + wiki counts. The count-drift fix is *run it*, not *build it*.
+- [context-budget/SKILL.md:49-76](../../../skills/context-budget/SKILL.md) — the 500k cap logic already exists. Wiring = calling it at a handoff.
+- [bin/_audit.sh](../../../bin/_audit.sh) — the source-guard + idempotent idiom. The hook stdin shim and `_patterns.sh` copy it; they do not invent a new style.
 - `subagent_spawn` convention — orphan-agent wiring is dispatch lines, not machinery.
 - [.claude/engineering/audits/lintel-uniformity-REMEDIATION-REVIEW.md](lintel-uniformity-REMEDIATION-REVIEW.md) — precedent already ruled: leverage-first, themed PRs, no contract-before-consumer. This plan inherits it.
 

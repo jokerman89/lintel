@@ -1,0 +1,297 @@
+{
+  "schema_version": 2,
+  "skill": "review",
+  "status": "unverified",
+  "timestamp": "2026-09-25T12:33:38.551507+00:00",
+  "reason": "Coordinator transcription of preserved independent per-declaration ACCEPT reports into existing v2 data; not a reviewer-issued overall PASS or release clearance.",
+  "context": {
+    "attempt_id": "legacy-cleanup-span-set01-lf",
+    "builder": {
+      "context": "copilot-session:e9c20b62-f877-4242-82cd-b5002d452da8",
+      "id": "cleanup-integration"
+    },
+    "independence_required": true,
+    "profile": {
+      "context_id": "e9c20b62-f877-4242-82cd-b5002d452da8",
+      "digest": "sha256:ce259b67ed7a8d414488c92c4f4c1cbf65da8e69bc2eec8647808aaebf03b9d4",
+      "generation": 2,
+      "name": "_default",
+      "schema_version": 1,
+      "version": "1.0.0"
+    },
+    "purpose": "verification_only",
+    "qa_requirements": [
+      {
+        "applicability": "applicable",
+        "id": "historical-spans",
+        "kind": "check",
+        "policy": {
+          "actor": null,
+          "applicability": "Only exact historical-span semantic classification, not release or runtime approval",
+          "effective_date": null,
+          "jurisdiction": null,
+          "source": ".claude/plans/legacy-cleanup/spec.md",
+          "version": "2026-09-25"
+        },
+        "requirement": "mandatory"
+      }
+    ],
+    "required_controls": [
+      "historical-spans"
+    ],
+    "required_policy": {
+      "applicability": "not_applicable",
+      "required": false,
+      "source": "bundled-neutral",
+      "status": "not_required",
+      "version": "1.0.0"
+    },
+    "schema_version": 2,
+    "snapshot": {
+      "base": "a7a1df338bacf900f1210f08131f391831992f1f",
+      "entries": [
+        {
+          "base": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "ced1058d2c3313048659c01dc8627a31588fbec0ed7d719f18490fcb300e7638"
+          },
+          "head": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "ced1058d2c3313048659c01dc8627a31588fbec0ed7d719f18490fcb300e7638"
+          },
+          "index": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "ced1058d2c3313048659c01dc8627a31588fbec0ed7d719f18490fcb300e7638"
+          },
+          "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md",
+          "worktree": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "ced1058d2c3313048659c01dc8627a31588fbec0ed7d719f18490fcb300e7638"
+          }
+        },
+        {
+          "base": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "a50235e766c6ff06f0e7a4136528c5d37d0d1008df2d2ad7899dd88d78a0caea"
+          },
+          "head": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "a50235e766c6ff06f0e7a4136528c5d37d0d1008df2d2ad7899dd88d78a0caea"
+          },
+          "index": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "a50235e766c6ff06f0e7a4136528c5d37d0d1008df2d2ad7899dd88d78a0caea"
+          },
+          "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort3-handoff.md",
+          "worktree": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "a50235e766c6ff06f0e7a4136528c5d37d0d1008df2d2ad7899dd88d78a0caea"
+          }
+        },
+        {
+          "base": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "f56907565af02eed4afcf2daba74a47c3f5d41f550d79797b090e883cbf76303"
+          },
+          "head": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "f56907565af02eed4afcf2daba74a47c3f5d41f550d79797b090e883cbf76303"
+          },
+          "index": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "f56907565af02eed4afcf2daba74a47c3f5d41f550d79797b090e883cbf76303"
+          },
+          "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort7-packs-roles.md",
+          "worktree": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "f56907565af02eed4afcf2daba74a47c3f5d41f550d79797b090e883cbf76303"
+          }
+        },
+        {
+          "base": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "995add94e58350ef95af2afb1e6868bc1bf402b20a762c6981e64ba71e7aebdc"
+          },
+          "head": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "995add94e58350ef95af2afb1e6868bc1bf402b20a762c6981e64ba71e7aebdc"
+          },
+          "index": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "995add94e58350ef95af2afb1e6868bc1bf402b20a762c6981e64ba71e7aebdc"
+          },
+          "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort8-cross-cutting.md",
+          "worktree": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "995add94e58350ef95af2afb1e6868bc1bf402b20a762c6981e64ba71e7aebdc"
+          }
+        }
+      ],
+      "head": "a7a1df338bacf900f1210f08131f391831992f1f",
+      "record_path": ".claude/runtime/reviews/legacy-cleanup-span-semantic-01.json",
+      "result_digest": "e6bf273cf6dbd1712c11de89f4b1dbcb5cc3a87a01aba23c2c1d25fb0a6b04c2",
+      "selection": [
+        ".claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md",
+        ".claude/engineering/audits/lintel-uniformity-findings-cohort3-handoff.md",
+        ".claude/engineering/audits/lintel-uniformity-findings-cohort7-packs-roles.md",
+        ".claude/engineering/audits/lintel-uniformity-findings-cohort8-cross-cutting.md"
+      ]
+    },
+    "work": {
+      "acceptance_digest": "2f5549a9eaed4a27555f9b01b7581ca094229c5ce49800e030aeca429213bde7",
+      "acceptance_manifest": [
+        {
+          "end": null,
+          "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md",
+          "sha256": "ced1058d2c3313048659c01dc8627a31588fbec0ed7d719f18490fcb300e7638",
+          "start": null
+        },
+        {
+          "end": null,
+          "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort3-handoff.md",
+          "sha256": "a50235e766c6ff06f0e7a4136528c5d37d0d1008df2d2ad7899dd88d78a0caea",
+          "start": null
+        },
+        {
+          "end": null,
+          "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort7-packs-roles.md",
+          "sha256": "f56907565af02eed4afcf2daba74a47c3f5d41f550d79797b090e883cbf76303",
+          "start": null
+        },
+        {
+          "end": null,
+          "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort8-cross-cutting.md",
+          "sha256": "995add94e58350ef95af2afb1e6868bc1bf402b20a762c6981e64ba71e7aebdc",
+          "start": null
+        },
+        {
+          "end": null,
+          "path": ".claude/plans/legacy-cleanup/plan.md",
+          "sha256": "33af73c2ad7388737d71716c2243347785598a3be91045dce0c8e984d39f81e9",
+          "start": null
+        },
+        {
+          "end": null,
+          "path": ".claude/plans/legacy-cleanup/prompt.md",
+          "sha256": "e93bc8bc3bb78d0fc7ba691078f126bc6094d92eacbec4404f5d14e80aea75e8",
+          "start": null
+        },
+        {
+          "end": null,
+          "path": ".claude/plans/legacy-cleanup/spec.md",
+          "sha256": "a101f99340629ae655a111da3aa8c03a0c2ace51b569e71fc75b93232b9b549c",
+          "start": null
+        }
+      ],
+      "acceptance_paths": [
+        ".claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md",
+        ".claude/engineering/audits/lintel-uniformity-findings-cohort3-handoff.md",
+        ".claude/engineering/audits/lintel-uniformity-findings-cohort7-packs-roles.md",
+        ".claude/engineering/audits/lintel-uniformity-findings-cohort8-cross-cutting.md",
+        ".claude/plans/legacy-cleanup/plan.md",
+        ".claude/plans/legacy-cleanup/prompt.md",
+        ".claude/plans/legacy-cleanup/spec.md"
+      ],
+      "leaf_ids": [
+        "0.2.c",
+        "9.3.a",
+        "10.2.a"
+      ],
+      "map_digest": "1ea633652c308129d8926f157c5a6910c4983f4a1e688d1c3a6bddd42930e4a0",
+      "package_id": "INTEGRATE",
+      "work_map": ".claude/plans/legacy-cleanup/work.json"
+    }
+  },
+  "reviewer": {
+    "id": "cleanup-quality-reviewer",
+    "context": "copilot-session:8b0c4a2f-3e1b-4c3d-8237-74d02ff29710"
+  },
+  "provenance": "declared",
+  "controls": [
+    {
+      "id": "historical-spans",
+      "kind": "check",
+      "requirement": "mandatory",
+      "applicability": "applicable",
+      "policy": {
+        "source": ".claude/plans/legacy-cleanup/spec.md",
+        "version": "2026-09-25",
+        "applicability": "Only exact historical-span semantic classification, not release or runtime approval",
+        "jurisdiction": null,
+        "actor": null,
+        "effective_date": null
+      },
+      "status": "pass",
+      "reason": "Both actual separately attributed reviewers accepted these17 exact LF declarations; mechanism and release remain unverified.",
+      "evidence": [
+        ".claude/plans/legacy-cleanup/span-reviews/set01-spec-decisions.json",
+        ".claude/plans/legacy-cleanup/span-reviews/set01-quality-decisions.json"
+      ],
+      "observation": {
+        "span_declarations": [
+          "0c647479ba940ee82b373fe81f24abb5c4a48e52629cb375594371cd6caa2ff6",
+          "139dc45b72ee220ac0e06fc2da251791396049670a0985da59adcb7c9a39a350",
+          "2392ddcf8c125d1fa2f6a0d2873272c0ad83a9aeeee9131273c8455bcab07a37",
+          "39b9eb0065a3c2ea81acf5b2c00964ae58919cb70ee0ba2ed387b4ee856fa515",
+          "6f2cf811e6443a8d7104a422ec43273472ada7db9c85bd50824417cdf4f1e9a5",
+          "754e11ade412e5c3dafd25b3c9b8c07c7d2690f51a98f0a0069072591adddef3",
+          "85557358040fa473b01085d1efa06b705d867c9713f5a27c43af8cd8f6c12089",
+          "8b7b2544e8f490c9c14ff9be3e65e3144a92f2915e4136cb9034aebe1d72c435",
+          "ae0387bba935b5358fae5544520ae6f4b85a013512fe10d61bd3675b7de57244",
+          "af12d99c068e6150a56c30fd7a8e323da33d40bf4e61768863be7a2c1209cc7a",
+          "b2c851f6344c635fe847dc5db8a5680a32606023de06a4c8f62f4835c43912b1",
+          "b847225489c33c72134ef6bf202b3283679d64f56ac99d00b9b1faeb40ed5ab5",
+          "d71dcd20ce93e7276c03299b066f05ba6f94078ee1f0cdf26ec0d0cbebe0358c",
+          "df5c5895a5412e2f867a6512e8d188268e37ffef89b3a55e7d8a081e7d470e77",
+          "e43ccff4f5af47e0770625e07915a67cf771e7b65dfc3edc9f3cbdb6083b2941",
+          "e73b13887fe900782fd5f4cc314b722342fef0dd8ee305802c3e9b983bda1531",
+          "f4a8721453a58a877b0fc09877d7ab00b284207629b9b3daf5a87f1f428d57d0"
+        ],
+        "review_scope": "semantic classification only",
+        "source_contexts": [
+          ".claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md",
+          ".claude/engineering/audits/lintel-uniformity-findings-cohort3-handoff.md",
+          ".claude/engineering/audits/lintel-uniformity-findings-cohort7-packs-roles.md",
+          ".claude/engineering/audits/lintel-uniformity-findings-cohort8-cross-cutting.md"
+        ]
+      }
+    }
+  ],
+  "coverage": {
+    "0.2.c": [
+      "historical-spans"
+    ],
+    "9.3.a": [
+      "historical-spans"
+    ],
+    "10.2.a": [
+      "historical-spans"
+    ]
+  },
+  "evidence": [
+    {
+      "path": ".claude/plans/legacy-cleanup/span-reviews/set01-quality-decisions.json",
+      "sha256": "b6cb3e61d15c1e3d666c0ce9a3031f18512ebdbcde4852ba7be4422b1bdfd75a"
+    },
+    {
+      "path": ".claude/plans/legacy-cleanup/span-reviews/set01-spec-decisions.json",
+      "sha256": "e0356ef56e8d654b67ba212c989da6ab2e6112c377123319449b0eee7e589e0e"
+    }
+  ]
+}

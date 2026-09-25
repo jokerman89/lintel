@@ -9,13 +9,23 @@ from __future__ import annotations
 
 import argparse
 from dataclasses import asdict, dataclass
+from functools import lru_cache
+import importlib.util
+import hashlib
+from html.parser import HTMLParser
+from html import unescape
 import json
 import os
 from pathlib import Path
 import re
 import stat
 import subprocess
+import sys
 from urllib.parse import unquote
+
+sys.dont_write_bytecode = True
+SOURCE_ROOT = Path(__file__).resolve().parents[2]
+RESIDUAL_REGISTER = ".claude/plans/legacy-cleanup/residuals.md"
 
 
 # Approved entry retirements, including expired central aliases. These are command
@@ -79,6 +89,20 @@ SKILL_PATH = re.compile(
 )
 LINK = re.compile(r"\[[^\]\n]*\]\((<?[^\s)]+>?)(?:\s+['\"][^)]*)?\)")
 URL = re.compile(r"\b(?:https?|mailto):[^\s`<>)]+", re.I)
+COHORT_REPORTS = {
+    f".claude/engineering/audits/lintel-uniformity-findings-cohort{number}-{name}.md": number
+    for number, name in (
+        (1, "phase-core"), (2, "planner"), (3, "handoff"), (4, "agents"),
+        (5, "hooks"), (6, "eng-domains"), (7, "packs-roles"), (8, "cross-cutting"),
+    )
+}
+PEER_REPORTS = {
+    f".claude/engineering/audits/lintel-uniformity-cross-X{number}-{name}.md": number
+    for number, name in (
+        (1, "concept-consistency"), (2, "promise-verification"), (3, "evolution"),
+        (4, "entry-point-matrix"), (5, "necessity"),
+    )
+}
 FORMER_HEADERS = frozenset({
     "old", "old name", "former", "former entry", "former entries",
     "retired entry", "retired entries", "removed entry", "removed entries",
@@ -215,6 +239,237 @@ def json_locations(text: str) -> tuple[object, dict[tuple, tuple[int, int, objec
     return value, locations
 
 
+@lru_cache(maxsize=2)
+def observation_support(name: str):
+    if name not in {"envelope_contract", "markdown_source"}:
+        raise ValueError("Unknown observation support module")
+    path = SOURCE_ROOT / "lib" / (name + ".py")
+    if path.is_symlink() or getattr(path.lstat(), "st_file_attributes", 0) & 0x400:
+        raise ValueError("Linked observation support module refused")
+    specification = importlib.util.spec_from_file_location("routing_" + name, path)
+    if specification is None or specification.loader is None:
+        raise ValueError("Required observation support module is unavailable")
+    module = importlib.util.module_from_spec(specification)
+    specification.loader.exec_module(module)
+    return module
+
+
+def registered_observation_spans(root: Path) -> tuple[dict[str, list[dict]], list[Finding]]:
+    register = root / RESIDUAL_REGISTER
+    if not register.exists():
+        return {}, []
+    errors = []
+    spans: dict[str, list[dict]] = {}
+    try:
+        source = register.read_text(encoding="utf-8-sig")
+        records = list(re.finditer(
+            r"(?m)^<!-- lintel-reviewed-source-spans:v1\r?\n(?P<json>[\s\S]*?)^-->", source))
+        if not records:
+            return {}, []
+        if len(records) != 1:
+            raise ValueError("Ambiguous reviewed-span register")
+        envelope = observation_support("envelope_contract")
+        value = envelope.load_text(records[0]["json"])
+        if (not isinstance(value, dict) or set(value) != {"entries"}
+                or not isinstance(value["entries"], list)):
+            raise ValueError("Reviewed-span register must contain exactly an entries list")
+        keys = {"id", "path", "start", "end", "sha256", "category", "reason",
+                "source_evidence", "declaration_digest", "review", "corroboration"}
+        identifiers = set()
+        markdown = observation_support("markdown_source")
+        sys.path.insert(0, str(SOURCE_ROOT / "lib"))
+        from context_safety import read_owned
+        from review_contract import content_digest, load_json, validate_review, validate_shape
+
+        for entry in value["entries"]:
+            if not isinstance(entry, dict) or set(entry) != keys:
+                raise ValueError("Malformed reviewed-span entry")
+            identifier = entry["id"]
+            if not isinstance(identifier, str) or not re.fullmatch(r"[a-z0-9][a-z0-9-]{0,79}", identifier) or identifier in identifiers:
+                raise ValueError("Invalid or duplicate reviewed-span ID")
+            identifiers.add(identifier)
+            relative = entry["path"]
+            parts = Path(relative).parts if isinstance(relative, str) else ()
+            if (not parts or "\\" in relative or ":" in relative or relative.startswith("/")
+                    or any(part in {"", ".", ".."} for part in relative.split("/"))
+                    or any(character in relative for character in "*?[")):
+                raise ValueError("Reviewed span must name one literal repository-relative source")
+            if relative == RESIDUAL_REGISTER or not all(
+                    isinstance(entry[field], str) and entry[field].strip()
+                    for field in ("start", "end", "category", "reason", "source_evidence")):
+                raise ValueError("Reviewed span requires exact markers and a substantive source reason")
+            if not all(re.fullmatch(r"[0-9a-f]{64}", entry[field] or "")
+                       for field in ("sha256", "declaration_digest")):
+                raise ValueError("Reviewed span needs raw source and declaration digests")
+            declaration = {key: entry[key] for key in
+                           ("id", "path", "start", "end", "sha256", "category", "reason", "source_evidence")}
+            if content_digest(declaration) != entry["declaration_digest"]:
+                raise ValueError(f"Reviewed-span declaration changed: {identifier}")
+            path = root / relative
+            for parent in (path, *path.parents):
+                if parent == root.parent:
+                    break
+                if parent.exists() and (parent.is_symlink() or getattr(parent.lstat(), "st_file_attributes", 0) & 0x400):
+                    raise ValueError(f"Linked reviewed-span source refused: {relative}")
+            data, _ = read_owned(root, relative, 2097152)
+            text = data.decode("utf-8")
+            boundaries = markdown.classify_markdown(text)
+            starts = [line for line in boundaries.lines
+                      if text[line.start:line.end] == entry["start"]]
+            ends = [line for line in boundaries.lines
+                    if text[line.start:line.end] == entry["end"]]
+            if len(starts) != 1 or len(ends) != 1 or starts[0].start >= ends[0].start:
+                raise ValueError(f"Missing, duplicated or reordered reviewed-span markers: {identifier}")
+            if starts[0].container_ids or ends[0].container_ids:
+                raise ValueError(f"Nested reviewed-span markers refused: {identifier}")
+            if starts[0].kind != "prose" or ends[0].kind != "prose":
+                raise ValueError(f"Literal or opaque reviewed-span boundaries refused: {identifier}")
+            lower, upper = starts[0].start, ends[0].start
+            if lower == 0 and upper >= len(text.rstrip("\r\n")):
+                raise ValueError("Whole-file reviewed-span exemptions are forbidden")
+            selected = text[lower:upper].encode("utf-8")
+            if hashlib.sha256(selected).hexdigest() != entry["sha256"]:
+                raise ValueError(f"Reviewed-span raw bytes changed: {identifier}")
+            review_path = entry["review"]
+            if (not isinstance(review_path, str) or not review_path.startswith(".claude/plans/legacy-cleanup/")
+                    or ".." in review_path.split("/") or "\\" in review_path):
+                raise ValueError("Reviewed-span decision must be an explicit committed cleanup artifact")
+            decision = validate_review(load_json(read_owned(root, review_path, 2097152)[0].decode("utf-8-sig")))
+            if (decision["status"] not in {"pass", "unverified"}
+                    or decision["reviewer"]["id"] == decision["context"]["builder"]["id"]
+                    or decision["reviewer"]["context"] == decision["context"]["builder"]["context"]):
+                raise ValueError("Reviewed spans require a distinct review actor/context")
+            corroboration_path = entry["corroboration"]
+            if (not isinstance(corroboration_path, str)
+                    or not corroboration_path.startswith(".claude/plans/legacy-cleanup/")
+                    or ".." in corroboration_path.split("/") or "\\" in corroboration_path):
+                raise ValueError("Reviewed-span corroboration must be an explicit committed cleanup artifact")
+            corroboration = load_json(read_owned(root, corroboration_path, 2097152)[0].decode("utf-8-sig"))
+            validate_shape(corroboration, "corroboration")
+            if (corroboration["record_digest"] != content_digest(decision)
+                    or corroboration["attempt_id"] != decision["context"]["attempt_id"]
+                    or corroboration["builder"] != decision["context"]["builder"]
+                    or corroboration["reviewer"] != decision["reviewer"]):
+                raise ValueError("Reviewed-span actor observation does not match the exact semantic decision")
+            source_context = [item for item in decision["context"]["work"]["acceptance_manifest"]
+                              if item["path"] == relative and item["start"] is None and item["end"] is None]
+            if len(source_context) != 1 or source_context[0]["sha256"] != hashlib.sha256(data).hexdigest():
+                raise ValueError(f"Original observation context changed or is not bound: {identifier}")
+            approved = [control for control in decision["controls"]
+                        if control["id"] == "historical-spans" and control["kind"] == "check"
+                        and control["requirement"] == "mandatory" and control["applicability"] == "applicable"
+                        and control["status"] == "pass"]
+            if len(approved) != 1 or entry["declaration_digest"] not in approved[0]["observation"].get("span_declarations", []):
+                raise ValueError(f"Span lacks an exact passing independent semantic observation: {identifier}")
+            report_paths = approved[0]["evidence"]
+            evidence = {item["path"]: item["sha256"] for item in decision["evidence"]}
+            if not report_paths or any(
+                    hashlib.sha256(read_owned(root, name, 2097152)[0]).hexdigest() != evidence[name]
+                    for name in report_paths):
+                raise ValueError("Reviewed-span supporting report is missing or changed")
+            previous = spans.setdefault(relative, [])
+            if any(lower < item["end"] and upper > item["start"] for item in previous):
+                raise ValueError("Overlapping reviewed spans are forbidden")
+            previous.append({**entry, "start": lower, "end": upper,
+                             "line": text.count("\n", 0, lower) + 1,
+                             "end_line": text.count("\n", 0, upper - 1) + 1})
+    except (OSError, UnicodeError, ValueError, KeyError, TypeError) as error:
+        errors.append(Finding(RESIDUAL_REGISTER, 1, "reviewed-span-invalid", str(error)))
+        return {}, errors
+    return spans, errors
+
+
+def cohort_yaml_observations(text: str, relative: str, observe, reject) -> None:
+    cohort = COHORT_REPORTS.get(relative)
+    if cohort is None:
+        return
+    title = re.search(r"(?im)^#[^\n]*\bCohort\s+([1-8])\b", text)
+    dated = re.search(r"(?im)^\*\*(?:Auditor pass date|Audit date|Date):\*\*\s*\d{4}-\d{2}-\d{2}\b", text)
+    if title is None or int(title[1]) != cohort or dated is None:
+        return
+    boundaries = observation_support("markdown_source").classify_markdown(text)
+    envelope = observation_support("envelope_contract")
+    opening = None
+    for line in boundaries.lines:
+        content = text[line.content_start:line.end]
+        marker = re.fullmatch(r"(`{3,}|~{3,})(.*)", content)
+        if line.kind != "fenced_code":
+            opening = None
+            continue
+        if opening is None:
+            if marker and marker[2].strip() in {"yaml", "yml"}:
+                opening = (marker[1], line.next_start)
+            continue
+        if not marker or marker[2].strip() or marker[1][0] != opening[0][0] or len(marker[1]) < len(opening[0]):
+            continue
+        offset = opening[1]
+        document = text[offset:line.start]
+        opening = None
+        if not has_reference(document):
+            continue
+        if cohort == 8 and not re.search(r"(?m)^layer: provenance\s*$", document):
+            continue
+        record_line = text.count("\n", 0, offset) + 1
+        try:
+            value = envelope.load_text(document)
+            yaml = envelope._yaml_module()
+            node = yaml.compose(document, Loader=yaml.SafeLoader)
+        except (envelope.EnvelopeError, ValueError) as error:
+            reject(record_line, f"Cohort observation parse failed: {error}")
+            continue
+        if not isinstance(value, dict):
+            reject(record_line, "Unsupported cohort observation: expected an original record mapping")
+            continue
+        layer_record = cohort == 8 and {"layer", "status", "built_artifacts", "dimensions"} <= value.keys()
+        component_record = (
+            {"component", "kind", "cohort", "peer_comparison", "operator_decision_required", "priority"} <= value.keys()
+            and value.get("cohort") == cohort and type(value.get("cohort")) is int
+            and value.get("kind") in {
+                "skill", "agent", "hook", "lib", "role",
+                "skill (orchestrator, workflow_root)", "skill (composite-delegator)",
+            }
+            and isinstance(value.get("component"), str)
+        )
+        if not layer_record and not component_record:
+            reject(record_line, "Unsupported cohort observation record; no fields were exempted")
+            continue
+        selected = set()
+        if layer_record:
+            selected.add(("built_artifacts", 0))
+        else:
+            selected.update((key,) for key in ("component", "kind", "cohort", "operator_decision_required", "priority"))
+            dimensions = value.get("dimensions")
+            if isinstance(dimensions, dict):
+                for key, fields in dimensions.items():
+                    if isinstance(key, str) and re.fullmatch(r"D(?:[1-9]|1[0-4])_[A-Za-z0-9_]+", key) and isinstance(fields, dict):
+                        selected.update(("dimensions", key, field) for field in
+                                        ("state", "nano", "macro", "high", "finding", "proposed", "why"))
+            deltas = value.get("deltas")
+            if isinstance(deltas, dict) and isinstance(value.get("shared_with_role_activate"), str):
+                selected.add(("shared_with_role_activate",))
+                selected.update(("deltas", field) for field in (
+                    "D2_tail", "D3_objects", "D4_entrypoints", "D5_checkpoints", "D6_recovery",
+                    "D7_pack", "D9_brief_forge", "D10_knowledge", "D11_subagent", "D13_observability",
+                    "cross_ref", "pii_discipline", "integrity_check", "role_in_cohort",
+                ))
+            selected.update(("peer_comparison", field) for field in
+                            ("strongest_peer_in_cohort", "this_component_depth", "uplift_needed"))
+
+        def visit(current, path=()):
+            if isinstance(current, yaml.MappingNode):
+                for key, child in current.value:
+                    if isinstance(key, yaml.ScalarNode):
+                        visit(child, (*path, key.value))
+            elif isinstance(current, yaml.SequenceNode):
+                for index, child in enumerate(current.value):
+                    visit(child, (*path, index))
+            elif isinstance(current, yaml.ScalarNode) and path in selected:
+                observe(offset + current.start_mark.index, offset + current.end_mark.index,
+                        "cohort record /" + "/".join(map(str, path)), "source-era cohort field",
+                        "Named original cohort-audit value; source marks preserve adjacent fields. This is not current routing, verified binding or execution.")
+        visit(node)
+
+
 def observation_fields(value: object) -> list[tuple[tuple, str, str]]:
     """Classify inspected data fields, not a schema, authorization or binding verdict."""
     if not isinstance(value, dict):
@@ -225,6 +480,40 @@ def observation_fields(value: object) -> list[tuple[tuple, str, str]]:
         for name in sorted(names):
             if name in record:
                 selected.append(((*prefix, name), category, reason))
+
+    if (isinstance(value.get("candidate"), str) and re.fullmatch(r"[0-9a-f]{40}", value["candidate"])
+            and isinstance(value.get("reviewer"), dict) and isinstance(value.get("decisions"), list)
+            and ("artifact_type" in value or "review_type" in value)):
+        category = "declared semantic-review field"
+        reason = "Original per-declaration review observation; only exact reviewed-span admission checks its decision and context. Shape is not independence or release clearance."
+        fields(value, (), (
+            "artifact_type", "review_type", "status", "date", "candidate",
+            "decision_target", "representation_mapping", "representation",
+            "representation_mapping_path", "representation_mapping_sha256",
+            "input_path", "input_sha256", "input_bytes", "reviewer", "result",
+            "original_work", "mandatory_semantic_conditions", "required_original_contexts",
+            "counterexamples", "verification", "preserved_quality_report", "stop",
+            "superseded_crlf_decisions", "representation_decision", "scope", "counts",
+            "release_clearance", "canonical_p05_record_written", "overall_acceptance",
+            "historical_context_binding", "input", "conditions", "base", "carry_over_source",
+            "prior_artifacts_unchanged", "qa_and_guard_limits", "preserved_set01_lf",
+            "selected_raw_excerpt_bytes", "selected_declarations", "selected_source_files",
+            "identity_binding", "owner_chronology", "common_conditions",
+            "checks_actually_performed", "executed_command_ledger",
+        ), category, reason)
+        for index, decision in enumerate(value["decisions"]):
+            if (isinstance(decision, dict) and {"id", "declaration_digest", "decision"} <= decision.keys()
+                    and decision["decision"] in {"ACCEPT", "REJECT", "NEEDS_EVIDENCE"}):
+                fields(decision, ("decisions", index), (
+                    "id", "declaration_digest", "sha256", "raw_sha256", "path",
+                    "start", "end", "end_exclusive", "start_line", "end_line_exclusive",
+                    "source_lines_inclusive", "decision", "basis", "current_use_analysis",
+                    "adjacent_boundary", "specific_counterexample", "prior_crlf_declaration_digest",
+                    "current_instruction_found", "semantic_reason", "current_instruction_assessment",
+                    "boundary_assessment",
+                    "counterexamples", "current_use_inside", "narrowing_suggestion",
+                    "source_context_sha256", "source_git_blob", "bounded_narrowing",
+                ), category, reason)
 
     category = evidence_category(value)
     if category:
@@ -333,13 +622,126 @@ def comparison_input(value: object) -> str | None:
     return None
 
 
-def markdown_observations(text: str, relative: str, observe) -> None:
+def html_source_observations(text: str, observe) -> None:
+    offsets = [0]
+    for match in re.finditer("\n", text):
+        offsets.append(match.end())
+
+    class SourceFields(HTMLParser):
+        def __init__(self):
+            super().__init__(convert_charrefs=False)
+            self.stack = []
+            self.nodes = []
+
+        def position(self):
+            line, column = self.getpos()
+            return offsets[line - 1] + column
+
+        def handle_starttag(self, tag, attributes):
+            start = self.position()
+            node = {"tag": tag, "attributes": dict(attributes), "start": start,
+                    "content": start + len(self.get_starttag_text()), "end": None,
+                    "parent": self.stack[-1] if self.stack else None, "children": []}
+            self.nodes.append(node)
+            if self.stack:
+                self.stack[-1]["children"].append(node)
+            if tag not in {"area", "base", "br", "col", "embed", "hr", "img", "input",
+                           "link", "meta", "param", "source", "track", "wbr"}:
+                self.stack.append(node)
+
+        def handle_startendtag(self, tag, attributes):
+            self.handle_starttag(tag, attributes)
+            if self.stack and self.stack[-1]["tag"] == tag:
+                self.stack.pop()
+
+        def handle_endtag(self, tag):
+            if self.stack and self.stack[-1]["tag"] == tag:
+                self.stack.pop()["end"] = self.position()
+
+    parser = SourceFields()
+    parser.feed(text)
+    parser.close()
+
+    def value(node):
+        if node["end"] is None or node["children"]:
+            return None
+        return unescape(text[node["content"]:node["end"]]).strip()
+
+    source_heading = next((value(node) for node in parser.nodes if node["tag"] == "h1"
+                           and value(node) and re.fullmatch(r"[\w.-]+(?:/[\w.-]+)+", value(node))), None)
+    excerpt_context = (
+        source_heading
+        and re.search(r"(?:read.only excerpt|source excerpt)", text, re.I)
+        and re.search(r"Full-file SHA-256:\s*<code>[a-f0-9]{64}</code>", text, re.I)
+        and re.search(r"(?:revision|snapshot)\s*<code>[a-f0-9]{7,40}</code>", text, re.I)
+    )
+    for node in parser.nodes:
+        content = value(node)
+        if content is None:
+            continue
+        if node["tag"] == "a" and "source-link" in node["attributes"].get("class", "").split():
+            target = node["attributes"].get("href", "")
+            match = re.fullmatch(r"https://github\.com/[\w.-]+/[\w.-]+/blob/([a-f0-9]{40})/([^#]+)#L(\d+)", target)
+            if match and content == unquote(match[2]) + ":" + match[3]:
+                observe(node["content"], node["end"], "pinned source-link label", "source citation",
+                        f"Label names source at declared Git revision {match[1]}, not an installed resource. Destination/content truth is not fetched or verified.")
+        if not excerpt_context:
+            continue
+        if node["tag"] == "h1" and content == source_heading:
+            observe(node["content"], node["end"], "source-excerpt identity", "declared original source",
+                    "Identity label of the explicitly marked line-numbered source excerpt, not a current resource import.")
+        elif node["tag"] == "title" and content.startswith(source_heading + " ") and "source excerpt" in content.lower():
+            observe(node["content"], node["end"], "source-excerpt title", "declared original source",
+                    "Title names the original excerpt source, not a current callable workflow.")
+        elif node["tag"] == "code":
+            parent = node["parent"]
+            if parent and parent["tag"] == "div" and parent["attributes"].get("class") == "source-line":
+                identifier = parent["attributes"].get("id", "")
+                line = re.fullmatch(r"L(\d+)", identifier)
+                anchors = [child for child in parent["children"] if child["tag"] == "a"]
+                if (line and len(anchors) == 1 and anchors[0]["attributes"].get("href") == "#" + identifier
+                        and value(anchors[0]) == line[1]):
+                    observe(node["content"], node["end"], f"original source line {identifier}", "line-numbered source excerpt",
+                            f"Escaped/inert code field in the declared excerpt of {source_heading}; no execution, exact-source binding or live workflow acceptance is inferred. Scripts and adjacent fields remain checked.")
+
+
+def markdown_observations(text: str, relative: str, observe, reported_changes: set[str] | None = None) -> None:
     baseline = re.search(r"(?im)^(?:\*\*)?Baseline(?:\*\*)?:[^\n]*?\b([a-f0-9]{7,64})\b", text)
     if baseline is None and re.search(r"\bhistorical source comparison\b", text, re.I):
         baseline = re.search(r"\b(?:checkpoint|at)\s+`([a-f0-9]{7,64})`", text, re.I)
     if baseline is None:
         baseline = re.search(r"(?im)^\*\*(?:Auditor pass date|Audit date):\*\*\s*(\d{4}-\d{2}-\d{2})", text)
     context = f"Declared source-era context {baseline[1]}; observation only, baseline/binding not verified." if baseline else ""
+    cohort = COHORT_REPORTS.get(relative)
+    peer = PEER_REPORTS.get(relative)
+    original_role = bool(
+        (cohort and re.search(rf"(?im)^#[^\n]*\bCohort\s+{cohort}\b", text))
+        or (peer and re.search(rf"(?im)^\*\*(?:Cross-cutting pass|Pass):\*\*\s*X{peer}\b", text))
+    )
+    original_date = re.search(r"(?im)^\*\*(?:Auditor pass date|Audit date|Date):\*\*\s*(\d{4}-\d{2}-\d{2})\b", text)
+    peer_context = original_role and original_date is not None
+    original_report = (
+        relative in {
+            ".claude/plans/universal-implementation/reports/P08.md",
+            ".claude/plans/universal-implementation/reports/P08-A13.md",
+            ".claude/plans/universal-implementation/reports/P11.md",
+        }
+        and re.search(r"\b[a-f0-9]{40}\b", text) is not None
+        and re.search(r"(?im)^#[^\n]*\bP(?:08|11|13)\b", text) is not None
+    )
+    peer_tables = (
+        ({"cohort", "norm", "deviators"}, {"deviators"}),
+        ({"#", "promise", "verdict", "should-uphold count", "actually-upholds"}, {"actually-upholds"}),
+        ({"#", "mechanism", "thread", "writes?", "consulted?", "verdict"}, {"mechanism", "writes?", "consulted?"}),
+        ({"entry-point", "jobs", "brief-forge", "knowledge", "hooks", "packs", "voice", "provenance", "audit-log"}, {"entry-point"}),
+        ({"#", "component", "proposed necessity", "proposed `gap_if_skipped` (one line)", "priority"}, {"component"}),
+        ({"component", "path", "role in chain"}, {"component", "path"}),
+        ({"root", "used by", "nano"}, {"used by", "nano"}),
+        ({"agent", "refs", "invoked?", "primary phase(s)/skill(s)"}, {"primary phase(s)/skill(s)"}),
+        ({"artifact kind", "exists today", "path"}, {"path"}),
+        ({"layer", "sc has (bar)", "da has today", "uplift to reach bar"}, {"uplift to reach bar"}),
+        ({"component", "kind", "state"}, {"component"}),
+    )
 
     # These are inspected table field sets, not permission to ignore an audit/report.
     table_fields = (
@@ -352,6 +754,8 @@ def markdown_observations(text: str, relative: str, observe) -> None:
          "retained method and output", "responsible package / leaf", "disposition and rationale",
          "worked example / evidence", "status and evidence limit"},
         {"component", "path", "role in chain"},
+        {"skill", "current identity", "owner/evidence and retained current method", "remaining boundary"},
+        {"retained names", "current method/arguments", "source and evidence limit"},
     )
     snapshot_fields = {"path", "status", "mode", "bytes (git lf)", "sha-256 (git lf blob)", "commits"}
     headers = []
@@ -360,6 +764,11 @@ def markdown_observations(text: str, relative: str, observe) -> None:
     declared_diff = False
     fence = None
     deleted_fence = False
+    inventory_heading = False
+    inventory_fence = None
+    inventory_lines = []
+    diff_fence = None
+    diff_lines = []
     release = ""
     removed = False
     offset = 0
@@ -372,11 +781,39 @@ def markdown_observations(text: str, relative: str, observe) -> None:
             if fence is None:
                 fence = boundary[1]
                 deleted_fence = deleted_heading and declared_diff and boundary[2].strip() == "text"
+                if original_report and inventory_heading and boundary[2].strip() == "text":
+                    inventory_fence = start + len(raw)
+                    inventory_lines = []
+                if original_report and boundary[2].strip() == "diff":
+                    diff_fence = start + len(raw)
+                    diff_lines = []
             elif boundary[1][0] == fence[0] and len(boundary[1]) >= len(fence) and not boundary[2].strip():
+                if inventory_fence is not None and inventory_lines:
+                    pattern = r"(?:skills|agents|bin|lib|tests|hooks|docs|install|config|scaffolding|\.claude|\.github)[/\\][\w./\\-]+"
+                    if all(re.fullmatch(pattern, value.strip()) for _, value in inventory_lines if value.strip()):
+                        for position, value in inventory_lines:
+                            if value.strip():
+                                observe(position, position + len(value), "original authored-path inventory member",
+                                        "source-era path inventory",
+                                        "Literal member in the original report's named authored/frozen-path inventory; no current import, validated deletion or execution is implied.")
+                if diff_fence is not None and diff_lines:
+                    values = [value for _, value in diff_lines]
+                    if (any(value.startswith("--- ") for value in values)
+                            and any(value.startswith("+++ ") for value in values)
+                            and any(re.match(r"^@@ -\d+(?:,\d+)? \+\d+(?:,\d+)? @@", value) for value in values)
+                            and all(not value or value.startswith(("--- ", "+++ ", "@@ ", "+", "-", " ", "\\ No newline"))
+                                    for value in values)):
+                        observe(diff_fence, start, "original unified-diff quotation", "recorded patch data",
+                                "The original report quotes a complete file/hunk diff as observed change data; surrounding instructions and executable consumers remain checked.")
                 fence = None
                 deleted_fence = False
+                inventory_fence = diff_fence = None
             continue
         if fence is not None:
+            if inventory_fence is not None:
+                inventory_lines.append((start, line))
+            if diff_fence is not None:
+                diff_lines.append((start, line))
             if deleted_fence and re.fullmatch(r"(?:skills|agents|bin|lib|tests|hooks|docs|install)/[\w./-]+", line.strip()):
                 observe(start, start + len(line), "deleted path", "deleted-path record",
                         "Literal path in a declared deletion observation with a Git diff source; no execution or independently verified deletion is implied.")
@@ -386,6 +823,8 @@ def markdown_observations(text: str, relative: str, observe) -> None:
             headers = []
             table_active = False
             deleted_heading = heading[2].casefold() in {"actual deleted paths", "deleted paths", "removed paths"}
+            inventory_heading = bool(re.fullmatch(r"(?:Exact P\d+-authored product paths|Frozen changed paths)",
+                                                 heading[2], re.I))
             declared_diff = False
             if len(heading[1]) <= 2:
                 version = re.match(r"(\d+\.\d+\.\d+)\b", heading[2])
@@ -421,6 +860,15 @@ def markdown_observations(text: str, relative: str, observe) -> None:
         normalized = {header.casefold() for header in headers}
         allowed = next((fields for fields in table_fields if fields <= normalized), set()) if context else set()
         reason = context
+        if peer_context and len(normalized) == len(headers):
+            for required, observed in peer_tables:
+                if required <= normalized:
+                    allowed = observed
+                    reason = (
+                        f"Named field of the declared {original_date[1]} cohort/peer source comparison; "
+                        "not current dispatch, independently verified history or permission. Other columns remain checked."
+                    )
+                    break
         if snapshot_fields <= normalized:
             values = {header.casefold(): cell[2].strip("`") for header, cell in zip(headers, cells)}
             if (re.fullmatch(r"[\w.-]+(?:/[\w.-]+)+", values["path"])
@@ -434,14 +882,28 @@ def markdown_observations(text: str, relative: str, observe) -> None:
         for header, (left, right, _) in zip(headers, cells):
             if header.casefold() in allowed:
                 observe(start + left, start + right, f"table column: {header}", "source-era table", reason)
+            elif reported_changes and header.casefold() in {"changed source", "paths", "changed surface"}:
+                cell = line[left:right]
+                for reference in re.finditer(r"`([^`]+)`", cell):
+                    path = reference[1].replace("\\", "/")
+                    removal = re.search(r"\b(?:removed|retired)\b",
+                                        cell[:reference.start()].rsplit(";", 1)[-1], re.I)
+                    if path in reported_changes or (
+                            removal and f"skills/{path}/SKILL.md" in reported_changes):
+                        observe(start + left + reference.start(), start + left + reference.end(),
+                                f"reported changed-path cell: {header}", "reported change membership",
+                                "This exact path/name also occurs in the original report's changed_paths; result columns and current instructions remain checked. No deletion or review is validated.")
 
 
 def routing_lines(text: str, relative: str, exemptions: list[dict],
-                  recorded_comparison_input: str | None = None) -> list[str]:
+                  recorded_comparison_input: str | None = None,
+                  observation_errors: list[tuple[int, str]] | None = None,
+                  reviewed_spans: list[dict] | None = None) -> list[str]:
     masked = list(text)
+    reported_changes: set[str] = set()
 
-    def observe(start, end, field, category, reason):
-        if not has_reference(text[start:end]):
+    def observe(start, end, field, category, reason, force=False):
+        if not force and not has_reference(text[start:end]):
             return
         exemptions.append({
             "path": relative, "line": text.count("\n", 0, start) + 1,
@@ -450,12 +912,25 @@ def routing_lines(text: str, relative: str, exemptions: list[dict],
         })
         masked[start:end] = ["\n" if char == "\n" else " " for char in text[start:end]]
 
+    for span in reviewed_spans or []:
+        observe(span["start"], span["end"], "reviewed original source span: " + span["id"],
+                span["category"], span["reason"] +
+                " Exact original bytes and semantic review declaration match; this is classification only, not live P05/QA/SHIP clearance.",
+                force=True)
+    if relative == RESIDUAL_REGISTER:
+        for match in re.finditer(r"(?m)^<!-- lintel-reviewed-source-spans:v1\r?\n[\s\S]*?^-->", text):
+            observe(match.start(), match.end(), "reviewed-span declarations", "classification metadata",
+                    "Literal original markers are data for exact checked observations, not workflow invocations.")
     def json_observations(document, offset=0, prefix=""):
         try:
             value, locations = json_locations(document)
         except ValueError:
             return  # Unrecognized/malformed data gains no observation exemption.
         fields = observation_fields(value)
+        if (isinstance(value, dict) and value.get("artifact_kind") == "swarm-report"
+                and evidence_category(value) and isinstance(value.get("changed_paths"), list)):
+            reported_changes.update(path.replace("\\", "/") for path in value["changed_paths"]
+                                    if isinstance(path, str))
         if (relative in {f"{COMPARISON_DIR}/results.json", f"{COMPARISON_DIR}/data.js"}
                 and comparison_input(value) is not None):
             fields.append((("artifacts", COMPARISON_INPUT), "recorded comparison input",
@@ -475,6 +950,7 @@ def routing_lines(text: str, relative: str, exemptions: list[dict],
                             match["attributes"], re.IGNORECASE):
                 json_observations(match["json"], match.start("json"),
                                   "inert HTML script[type=application/json]")
+        html_source_observations(text, observe)
     elif relative == f"{COMPARISON_DIR}/data.js":
         assignment = re.match(r"\s*window\.COMPARISON_DATA\s*=\s*", text)
         if assignment:
@@ -493,7 +969,13 @@ def routing_lines(text: str, relative: str, exemptions: list[dict],
         json_observations(match["json"], match.start("json"), "lintel-swarm-evidence:v2")
 
     if Path(relative).suffix in {".md", ".template"}:
-        markdown_observations(text, relative, observe)
+        markdown_observations(text, relative, observe, reported_changes)
+        def reject(line, reason):
+            if observation_errors is None:
+                raise ValueError(reason)
+            observation_errors.append((line, reason))
+        remaining = "".join(masked)
+        cohort_yaml_observations(remaining, relative, observe, reject)
     return "".join(masked).splitlines()
 
 
@@ -502,6 +984,8 @@ def scan(root: Path, check: str = "all", exemptions: list[dict] | None = None) -
     if exemptions is None:
         exemptions = []
     findings: set[Finding] = set()
+    reviewed, reviewed_errors = registered_observation_spans(root)
+    findings.update(reviewed_errors)
 
     def add(path: str, line: int, code: str, message: str) -> None:
         findings.add(Finding(path, line, code, message))
@@ -579,7 +1063,16 @@ def scan(root: Path, check: str = "all", exemptions: list[dict] | None = None) -
                 add(relative, 1, "retired-entry", "Retired native wrapper is still discoverable.")
         test_code = relative.startswith("tests/") and path.suffix in {".py", ".sh", ".ps1"}
         former_column = False
-        for number, original in enumerate(routing_lines(text, relative, exemptions, recorded_comparison_input), 1):
+        observation_errors: list[tuple[int, str]] = []
+        try:
+            routed = routing_lines(text, relative, exemptions, recorded_comparison_input,
+                                   observation_errors, reviewed.get(relative))
+        except ValueError as error:
+            add(relative, 1, "observation-parse-error", str(error))
+            routed = text.splitlines()
+        for line, reason in observation_errors:
+            add(relative, line, "observation-parse-error", reason)
+        for number, original in enumerate(routed, 1):
             line = URL.sub("", original).replace("\\|", "\x00").replace("\\", "/")
             if line.lstrip().startswith("|"):
                 columns = line.split("|")

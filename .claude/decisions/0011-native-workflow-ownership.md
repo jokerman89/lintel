@@ -35,9 +35,9 @@ making anything worse, never renaming for its own sake. Three classes, five wave
   (B15) is functionality already lost (no hook ever cleaned `~/.lintel/sessions/`) — the refactor
   restores it.
 - **C — prompt-patterns reinvented (3):** `--auto` becomes "auto-decide reversible gates, always
-  ask one-way doors" on plan-tune's preference ledger (safer than blanket-YES); the dead
+  ask one-way doors" on the planning-tuning preference ledger (safer than blanket-YES); the dead
   operator-profile/tier-tracking remnant is removed (ADR-0006 already deleted the write);
-  `plan-ceo-review`'s "founder signal" framing becomes operator-signal, pack-driven where a
+  the strategy-review method's "founder signal" framing becomes operator-signal, pack-driven where a
   strategy role exists.
 
 ## Consequences

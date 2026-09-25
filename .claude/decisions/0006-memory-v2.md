@@ -8,7 +8,7 @@
 
 The 2026-06-12 memory audit split Lintel's memory promises into REAL (session-digest, jobs,
 00-state, audit writer, granularity calibration) and PROSE-ONLY (lessons-surface declared in
-SENSE but unimplemented; the context-save family with zero bash; operator-profile written but
+SENSE but unimplemented; the checkpoint-saving family with zero bash; operator-profile written but
 never read). Competitive research showed the field converged on Lintel's file-based model, and
 identified the cheap table-stakes Lintel lacked: hook-based capture, an update-phase, scoped
 loading, AGENTS.md interop. Claude Code's native auto-memory (default-on) had no contract with

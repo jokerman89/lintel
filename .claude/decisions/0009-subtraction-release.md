@@ -30,7 +30,7 @@ discoverability noise. Lintel had no subtraction mechanism — it only grew.
    (zero dispatchers).
 4. **Role family 8 → 3.** `role` (lifecycle: activate/deactivate/rotate/frame/deep-dive),
    `role-new` (creation + update), `roles-list` (discovery). Six aliases.
-5. **Not touched in this release:** personas-rotate (overlap with role-rotate noted; decide
+5. **Not touched in this release:** temporary audience rotation (overlap with persistent role rotation noted; decide
    with usage data), the context-warm-* variants (heavily referenced), Anti-patterns/
    Examples/Integration sections (content-bearing), agents/ (already disciplined).
 

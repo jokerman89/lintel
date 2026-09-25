@@ -177,7 +177,7 @@ helper surfaces immediately.
 when the suite failed, and `-N` can clip the summary block that says FAILED.
 
 **Why:** v4.11 Phase A: the full suite FAILED (phase-a-naming-migration expected the removed
-context-budgetwatch) but my `| tail -6` invocation returned rc=0 and clipped the summary — I reported
+budget-watcher entry) but my `| tail -6` invocation returned rc=0 and clipped the summary — I reported
 "green" on a red tree and nearly committed it. Same family as the runner's own fail-closed fix shipped
 in this very phase: silence is not success ([[L-003]]).
 

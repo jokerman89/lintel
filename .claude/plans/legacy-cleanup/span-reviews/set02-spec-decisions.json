@@ -1,0 +1,150 @@
+{
+  "review_type": "finite set02 exact-LF semantic adjudication",
+  "status": "FINAL_SEMANTIC_DECISIONS_ONLY",
+  "candidate": "a7a1df338bacf900f1210f08131f391831992f1f",
+  "input_path": "C:\\Users\\jokerman\\.copilot\\session-state\\e9c20b62-f877-4242-82cd-b5002d452da8\\files\\c-span-review-set-02-lf.json",
+  "input_sha256": "ae312ba5ea83dc3d917bc4b99bc6b58edde5f145eb46ddaf2ec6de49f8d37528",
+  "input_bytes": 33957,
+  "reviewer": {
+    "project_session_id": "a32b10cf-657d-4c7c-b298-8fcb60cd0735",
+    "tool_session_id": "1742f900-1de4-4a59-beee-95c3a907a063",
+    "coordinator_routing_id": "e9c20b62-f877-4242-82cd-b5002d452da8",
+    "descendants_created": false,
+    "source_or_guard_changes_made": false
+  },
+  "scope": "Only the five supplied set02 declarations. This is separate from the seventeen final set01 LF decisions. Decisions classify the complete proposed exact raw spans, not all files or all records with similar headings. REJECT concerns the proposed span width/category, not the historical value of its individual observations.",
+  "counts": {
+    "ACCEPT": 3,
+    "REJECT": 2,
+    "NEEDS_EVIDENCE": 0
+  },
+  "release_clearance": false,
+  "canonical_p05_record_written": false,
+  "overall_acceptance": "UNVERIFIED; required guard implementation, quality, QA and other controls remain separate",
+  "decisions": [
+    {
+      "id": "original-report-1",
+      "declaration_digest": "44fcf7671a9fbf0019c19d988831decd99d42211b13ae10aec458aed03ba1365",
+      "raw_sha256": "9583978d30843804689c3b92226e9988a4ee52b0cdc08a40058172d1465a40c0",
+      "path": ".claude/plans/universal-implementation/reports/P13-skills-preservation.md",
+      "source_context_sha256": "fc24a67bfa15df557d6bbfbfa742e010a94cff6d5f9ca2b34732b371fb4826d7",
+      "start": "## Accepted-source delta",
+      "end_exclusive": "## Alias and argument preservation",
+      "start_line": 216,
+      "end_line_exclusive": 325,
+      "decision": "ACCEPT",
+      "semantic_reason": "The section explicitly limits its subject to the 204ea725-to-42abfcba39ac80a271ff57e838ffccb1d7f6ed7c source delta, defines C as changed bytes rather than acceptance, and explains J04/J09/J11/J12/J13 as separately attributed predecessor evidence. The skill table, frontend-role subsection and Swarm subsection all continue that same original source-disposition account. They preserve rejected and unverified predecessor outcomes rather than issue a new execution recipe.",
+      "current_instruction_assessment": "No present execution/routing instruction prevents classification. The table's remaining-boundary statements, including not advertising a rejected pipeline or treating a wrapper as live support, qualify those original source observations; they do not tell the current cleanup to invoke retired names. References to the historical reader, match alias and old skill paths are current-at-that-source claims, not today's inventory.",
+      "boundary_assessment": "This is broader than one table: it deliberately includes the frontend-role and separately attributed Swarm subsections. I reviewed those too. They report original attribution/count preservation and limited predecessor acceptance, not a new owner action. The alias section is excluded.",
+      "approval_limits": "ACCEPT only this exact LF declaration with full original source-context binding. It neither certifies the old source/acceptance claims nor generalizes to every Accepted-source delta heading or future table replacement column."
+    },
+    {
+      "id": "original-report-2",
+      "declaration_digest": "ad5531edf3094e1fbc5df33701dd9b199e4aba2e15dabc6e7f78c804dd493815",
+      "raw_sha256": "3303d2a91be9c8eb05beb2b2b49f6bd2137e1a1b4b3350f679eea4b93b1df895",
+      "path": ".claude/plans/universal-implementation/reports/P13-skills-preservation.md",
+      "source_context_sha256": "fc24a67bfa15df557d6bbfbfa742e010a94cff6d5f9ca2b34732b371fb4826d7",
+      "start": "## Alias and argument preservation",
+      "end_exclusive": "## Selection and provenance disposition",
+      "start_line": 325,
+      "end_line_exclusive": 347,
+      "decision": "ACCEPT",
+      "semantic_reason": "This is the report's original 46-alias observation and exact argument mapping, coupled to its original source context. It expressly distinguishes metadata from executable rewrite rules and repeatedly limits registration/runtime/permission claims. The preservation words in table cells describe the semantics of the originally observed mapping.",
+      "current_instruction_assessment": "No independent current instruction is selected. The introductory unchanged-registry and non-expiry statements must remain understood as that earlier report's disposition, not a reversal of the cleanup's retired aliases. 'Current method' is current at the bound original source; it is not a live alias registry or present migration replacement table.",
+      "boundary_assessment": "One contiguous observation section ending before selection/provenance disposition; no following active selection procedure is included.",
+      "approval_limits": "ACCEPT only the exact LF span plus the original full source context. A changed framing that presents these aliases as currently installed invalidates admission, even if the table itself stays byte-identical."
+    },
+    {
+      "id": "original-report-3",
+      "declaration_digest": "de298aa54901eb80058fd178aefa1c11bfa02b7a8f6d83c3a11f7405cf2b4703",
+      "raw_sha256": "64655822ed4c6f610e5b396940b1785062d34a1beb5d23dcf800db9a7df0bd92",
+      "path": ".claude/plans/universal-implementation/reports/P08.md",
+      "source_context_sha256": "371df0998005103a663da054e184b64cd5e7dacccc8a31fac2e32593370c2673",
+      "start": "## Exact P08-authored product paths",
+      "end_exclusive": "## Per-leaf implementation and evidence",
+      "start_line": 67,
+      "end_line_exclusive": 136,
+      "decision": "REJECT",
+      "semantic_reason": "The original 46-path literal and statements of authored/untouched files are historical observations, but the proposed whole section continues into an unquoted integration obligation. Lines 130-134 distinguish unreconciled generated state and direct that the edited canonical skills must be reconciled during coordinator integration. Classifying this entire declaration as only an authored-path inventory would also hide that procedural handoff.",
+      "current_instruction_assessment": "The live-facing instruction at lines 133-134 ('must be reconciled ... during coordinator integration') is not inside the literal path list or a field quoting an old recommendation. It remains a substantive integration obligation; a historical report context does not justify suppressing that text together with source-path observations.",
+      "boundary_assessment": "The inventory fence ends at line 121, but the requested span continues through the integration handoff at line 134. It is overbroad for the declared inventory category.",
+      "bounded_narrowing": {
+        "suggested_data_fields": [
+          {"start_line": 75, "end_line_inclusive": 120, "meaning": "Exact Windows-separated repository-relative authored-path members only."}
+        ],
+        "keep_checked": [
+          "The generated-state and coordinator-integration prose at lines 130-134.",
+          "Any commands, imports or current instruction appended within or beside a path list."
+        ],
+        "instruction": "Submit a distinct narrowed declaration/digest if classification is still desired. Preserve the original source text. This decision does not pre-approve the proposed narrower span or turn the surrounding obligation into a historical exemption."
+      }
+    },
+    {
+      "id": "original-report-4",
+      "declaration_digest": "0b8837ed4cefba4617abc2f128827a90f669fe60f07df066c39bc182cdd84577",
+      "raw_sha256": "9353b6f8d1effc61d8b177f4a476db0f125ca3a95c43457ecedfa815916a34c1",
+      "path": ".claude/plans/universal-implementation/reports/P11.md",
+      "source_context_sha256": "182e7264fd598f01360ef226bc4772face1bece9a411011a4232cebd083e1db7",
+      "start": "## Frozen changed paths",
+      "end_exclusive": "## Q1 numeric extraction correction",
+      "start_line": 632,
+      "end_line_exclusive": 719,
+      "decision": "REJECT",
+      "semantic_reason": "The selected range includes three original frozen-path lists and result observations, but also a separate same-level 'Review and next gate' section. It contains a direct Next owner action to take an immutable source/report pair through SPEC then QUALITY, and operative continuation/release constraints. This is not one inert inventory or validation-result field.",
+      "current_instruction_assessment": "Lines 655-657 direct later generated summaries; lines 707-715 preserve review gates and assign the next owner action. They are unquoted procedural handoff text, not merely source names or recorded completed effects. Their restrictive nature is not a reason to mask them; they must remain subject to live-text/authority checks.",
+      "boundary_assessment": "The proposed end marker reaches past the path record into the independent review/next-gate section at line 684. The entire proposed declaration is rejected, without disputing the value of its original path and failure observations.",
+      "bounded_narrowing": {
+        "suggested_data_fields": [
+          {"start_line": 640, "end_line_inclusive": 651, "meaning": "Initial exact source/report path inventory."},
+          {"start_line": 662, "end_line_inclusive": 667, "meaning": "Original six-path continuation inventory."},
+          {"start_line": 674, "end_line_inclusive": 676, "meaning": "Original three-path readiness inventory."}
+        ],
+        "keep_checked": [
+          "Later-summary requirements at lines 654-657.",
+          "Review and next gate section, especially the instruction and authority boundaries at lines 707-717.",
+          "New/current instructions or imports anywhere outside exact separately approved data fields."
+        ],
+        "instruction": "Propose separately bounded original path or observed-result fields with new digests. Do not automatically classify all text between Frozen changed paths and the later correction heading, and do not rewrite the historical source to make the current declaration fit."
+      }
+    },
+    {
+      "id": "original-report-5",
+      "declaration_digest": "c06e5a91fcc6c271f565384671aa3d4aeb55695c2cb00a092ce50b79398366ad",
+      "raw_sha256": "a9e25891b731b7d53ab53ff4c8fdc02a9df8f3f65aa8b70bb7613891aa144cee",
+      "path": ".claude/plans/legacy-cleanup/swarm/reports/W1.md",
+      "source_context_sha256": "8a18d07801f0d2ca8c9a407af0333eb8241d481a3a018b417f600832679663dc",
+      "start": "## Changed files and capability carry-over",
+      "end_exclusive": "## Final signatures",
+      "start_line": 126,
+      "end_line_exclusive": 147,
+      "decision": "ACCEPT",
+      "semantic_reason": "The original W1 table describes its actual reported change set, retained methods, explicit deletions and authored versus unrun tests. The following prose explains why one unchanged test is in a file-kind snapshot and explicitly disclaims proof of committed deletion. This is an original worker result/accounting record, not an instruction to invoke its removed sources.",
+      "current_instruction_assessment": "No current instruction is embedded. Verbs such as Routes, Requires and Retain in the result column describe implemented method behavior in that original report; they are not a new execution/handoff sequence. The current signature section is excluded.",
+      "boundary_assessment": "One changed-files table plus its directly related snapshot limitation. No Final signatures or deferred integration procedure is included.",
+      "approval_limits": "ACCEPT only the exact original LF record with full-context binding. This does not approve altered result-column instructions, infer execution of authored tests, prove Git deletion or confer independent acceptance from the worker report."
+    }
+  ],
+  "common_conditions": [
+    "All five decisions are per exact supplied declaration_digest, raw_sha256, path, included-start/excluded-end markers and range. No conclusion follows for an edited, widened, nested or different declaration.",
+    "Full original source_context_sha256 must be acceptance-bound through the existing P05 mechanism. A changed outside context invalidates classification even when the selected raw bytes are unchanged. These supplied source-context hashes were not independently reloaded from whole files in this finite pass.",
+    "LF raw bytes are strict. CRLF substitution or other byte changes must reject; no consumption-time normalization or encoded identity is permitted.",
+    "ACCEPT classifies historical content, not its truth, continued correctness, present authorization, license sufficiency or current resource existence. Historical reader/alias/source claims are not promoted into present routing.",
+    "REJECT means the entire proposed digest is not approved for masking. Suggested narrower ranges are proposals only and require new exact declarations and semantic decisions; they are not a partial acceptance of the rejected digest.",
+    "Current/live instructions are distinguished semantically from descriptive method arguments and recorded recommendations, not just by imperative words, heading labels, dates or hashes.",
+    "Adjacent current calls, imports, replacement columns, continuation constraints and unknown fields remain checked. No whole-file, directory, extension or census-baseline suppression is authorized.",
+    "This separate set02 does not broaden or alter set01 LF decisions. No source/guard/profile/configuration write, descendant, CI or canonical P05 result was produced. Overall acceptance remains UNVERIFIED."
+  ],
+  "checks_actually_performed": [
+    "Read all five complete raw excerpts in the supplied set02 packet, including the extra same-level subsections inside original-report-1 and original-report-4.",
+    "Calculated packet SHA-256/byte count and verified each exact LF raw-excerpt hash and declared line count.",
+    "Compared the stated historical-data purpose with the actual source-disposition, alias mapping, authored-path, review/handoff and changed-files content.",
+    "Identified concrete unquoted integration/next-owner instructions inside two overbroad declarations rather than accepting whole report sections by title or source hash."
+  ],
+  "executed_command_ledger": [
+    {"shell_id": "13", "operation": "python -I -B -: read only supplied set02 packet; verify 33957-byte length, five LF excerpt hashes/line counts; print declaration metadata and all heading coordinates.", "exit_code": 0},
+    {"shell_id": "14", "operation": "python -I -B -: print complete raw set02 excerpts 2 and 3 with supplied source coordinates.", "exit_code": 0},
+    {"shell_id": "15", "operation": "python -I -B -: print complete raw set02 excerpt 4, including the separate Review and next gate section.", "exit_code": 0},
+    {"shell_id": "16", "operation": "python -I -B -: print complete raw set02 excerpt 5 and its original snapshot limitation.", "exit_code": 0},
+    {"shell_id": "17", "operation": "python -I -B -: verify persisted set02 JSON against all five exact declaration/raw/source-context hashes, markers/ranges and decisions; confirm ACCEPT3/REJECT2 with bounded narrowing and separate unchanged set01 LF decision set.", "exit_code": 0}
+  ]
+}

@@ -1,12 +1,16 @@
 #!/usr/bin/env python3
 """Synthetic positive and negative cases for the current command-surface guard."""
 import importlib.util
+import hashlib
 import json
 from pathlib import Path
+import re
+import shutil
 import subprocess
 import sys
 import tempfile
 import unittest
+from unittest import mock
 
 sys.dont_write_bytecode = True
 ROOT = Path(__file__).resolve().parents[2]
@@ -47,6 +51,340 @@ class CommandSurfaceTests(unittest.TestCase):
             "Use /li:verify, /li-diagnose and `li-cross-check`.\n"
             "Read [the plan](skills/plan/SKILL.md) and `skills/review/SKILL.md`.\n"), [])
 
+    def reviewed_span_fixture(self):
+        self.skill("status")
+        source = "# Original record\n\n## Recorded field\nOriginal /li:qa invocation.\n## Next field\nRetained record boundary.\n"
+        path = "docs/original-record.md"
+        self.write(path, source)
+        (self.root / path).write_bytes(source.encode("utf-8"))
+        selected = "## Recorded field\nOriginal /li:qa invocation.\n"
+        entry = {
+            "id": "original-record-field", "path": path,
+            "start": "## Recorded field", "end": "## Next field",
+            "sha256": hashlib.sha256(selected.encode()).hexdigest(),
+            "category": "original invocation observation",
+            "reason": "One recorded old input, not a current invocation; adjacent text stays checked.",
+            "source_evidence": "Synthetic separately reviewed fixture record.",
+        }
+        sys.path.insert(0, str(ROOT / "lib"))
+        import review_contract as contract
+        entry["declaration_digest"] = contract.content_digest(entry)
+        review_path = ".claude/plans/legacy-cleanup/span-review.json"
+        report_path = ".claude/plans/legacy-cleanup/span-review.md"
+        self.write(report_path, "Synthetic semantic decision; not product acceptance.\n")
+        absent = {"kind": "absent", "mode": "000000", "sha256": None}
+        snapshot = {"base": "1" * 40, "head": "2" * 40, "selection": [path],
+                    "record_path": ".claude/runtime/reviews/fixture.json",
+                    "entries": [{"path": path, **{key: absent for key in ("base", "head", "index", "worktree")}}]}
+        snapshot["result_digest"] = contract._snapshot_digest(snapshot)
+        manifest = [{"path": path, "start": None, "end": None, "sha256": hashlib.sha256(source.encode()).hexdigest()}]
+        work = {"work_map": None, "map_digest": None, "package_id": "fixture",
+                "leaf_ids": ["T1"], "acceptance_paths": [path], "acceptance_manifest": manifest,
+                "acceptance_digest": contract.content_digest(manifest)}
+        policy = {"required": False, "status": "not_required", "source": None,
+                  "version": None, "applicability": "not_applicable"}
+        reference = {"source": "fixture.md", "version": "1", "applicability": "Semantic classification only",
+                     "jurisdiction": None, "actor": None, "effective_date": None}
+        requirement = {"id": "historical-spans", "kind": "check", "requirement": "mandatory",
+                       "applicability": "applicable", "policy": reference}
+        context = {"schema_version": 2, "work": work, "snapshot": snapshot, "profile": None,
+                   "attempt_id": "fixture-attempt", "builder": {"id": "builder", "context": "fixture-build"},
+                   "independence_required": True, "purpose": "verification_only", "required_policy": policy,
+                   "required_controls": ["historical-spans"], "qa_requirements": [requirement]}
+        decision = {"schema_version": 2, "skill": "review", "status": "unverified",
+                    "timestamp": "2026-09-25T10:00:00+00:00", "reason": "Synthetic semantic fixture only.",
+                    "context": context, "reviewer": {"id": "reviewer", "context": "fixture-review"},
+                    "provenance": "declared", "controls": [{**requirement, "status": "pass",
+                    "reason": "Exact synthetic declaration observed.", "evidence": [report_path],
+                    "observation": {"span_declarations": [entry["declaration_digest"]]}}],
+                    "coverage": {"T1": ["historical-spans"]},
+                    "evidence": [{"path": report_path,
+                                  "sha256": hashlib.sha256((self.root / report_path).read_bytes()).hexdigest()}]}
+        contract.validate_review(decision)
+        self.write(review_path, json.dumps(decision))
+        entry["review"] = review_path
+        entry["corroboration"] = ".claude/plans/legacy-cleanup/span-corroboration.json"
+        self.write(entry["corroboration"], json.dumps({
+            "schema_version": 1, "kind": "host", "source": "synthetic test fixture",
+            "reference": "fixture://separate-review-context",
+            "record_digest": contract.content_digest(decision),
+            "attempt_id": context["attempt_id"], "builder": context["builder"],
+            "reviewer": decision["reviewer"],
+        }))
+        self.write(guard.RESIDUAL_REGISTER,
+                   "# Residuals\n\n<!-- lintel-reviewed-source-spans:v1\n"
+                   + json.dumps({"entries": [entry]}, indent=2) + "\n-->\n")
+        return path, source, entry, decision
+
+    def test_reviewed_span_requires_exact_bytes_and_keeps_adjacent_routes_enforced(self):
+        path, source, entry, _ = self.reviewed_span_fixture()
+        exemptions = []
+        self.assertEqual(guard.scan(self.root, exemptions=exemptions), [])
+        self.assertTrue(any(item.get("field") == "reviewed original source span: " + entry["id"]
+                            for item in exemptions))
+        for changed in (source.replace("invocation.", "invocation!"),
+                        source.replace("\n", "\r\n"),
+                        source + "\nUse /li:qa now.\n"):
+            (self.root / path).write_bytes(changed.encode("utf-8"))
+            self.assertTrue(guard.scan(self.root))
+        (self.root / path).write_bytes(source.encode("utf-8"))
+        self.write("docs/current.md", "Use /li:verify now.\n")
+        self.assertEqual(guard.scan(self.root), [])
+        (self.root / path).write_bytes(source.replace("# Original record", "# Current workflow instructions").encode("utf-8"))
+        self.assertTrue(any(item.code == "reviewed-span-invalid" for item in guard.scan(self.root)))
+
+    def test_reviewed_span_rejects_forgery_missing_review_and_ambiguous_markers(self):
+        path, source, entry, decision = self.reviewed_span_fixture()
+        for changed in (source + "\n## Recorded field\nDuplicate.\n",
+                        source.replace("## Recorded field", "> ## Recorded field"),
+                        source.replace("## Next field", "## Reordered field"),
+                        "# Only file\n"):
+            (self.root / path).write_bytes(changed.encode("utf-8"))
+            self.assertTrue(any(item.code == "reviewed-span-invalid" for item in guard.scan(self.root)))
+        (self.root / path).write_bytes(source.encode("utf-8"))
+        review_path = self.root / entry["review"]
+        original = review_path.read_bytes()
+        decision["controls"][0]["observation"]["span_declarations"] = []
+        review_path.write_text(json.dumps(decision), encoding="utf-8")
+        self.assertTrue(any(item.code == "reviewed-span-invalid" for item in guard.scan(self.root)))
+        review_path.write_bytes(original)
+        register = self.root / guard.RESIDUAL_REGISTER
+        value = json.loads(re.search(r"lintel-reviewed-source-spans:v1\n([\s\S]*?)\n-->", register.read_text())[1])
+        value["entries"][0]["end"] = "Retained record boundary."
+        register.write_text("# Residuals\n<!-- lintel-reviewed-source-spans:v1\n" + json.dumps(value) + "\n-->\n")
+        self.assertTrue(any(item.code == "reviewed-span-invalid" for item in guard.scan(self.root)))
+
+    def test_semantic_report_fields_do_not_hide_new_runtime_routing(self):
+        path = ".claude/plans/legacy-cleanup/semantic-report.json"
+        report = {
+            "artifact_type": "finite semantic report", "candidate": "a" * 40,
+            "reviewer": {"id": "fixture"},
+            "decisions": [{"id": "original", "declaration_digest": "b" * 64,
+                           "decision": "ACCEPT", "basis": "Original /li:qa observation"}],
+        }
+        findings, observations = self.observations(json.dumps(report), path)
+        self.assertEqual(findings, [])
+        self.assertTrue(observations)
+        report["current_use"] = "skill:qa"
+        self.assertTrue(self.findings(json.dumps(report), path))
+        del report["current_use"]
+        report["decisions"][0]["import"] = "skills/qa/SKILL.md"
+        self.assertTrue(self.findings(json.dumps(report), path))
+
+    def test_exact_lf_attribute_materializes_original_blob_without_hash_fallback(self):
+        source = self.root / "attribute-source"
+        target = self.root / "attribute-checkout"
+        source.mkdir()
+        target.mkdir()
+        relative = "historical/record.md"
+        (source / ".gitattributes").write_bytes((relative + " text eol=lf\n").encode())
+        document = source / relative
+        document.parent.mkdir()
+        original = b"# Original record\n\n## Field\nOriginal /li:qa observation.\n## Next\n"
+        document.write_bytes(original)
+        git = shutil.which("git")
+        self.assertIsNotNone(git)
+
+        def run(*args):
+            result = subprocess.run([git, "-C", str(source), *args],
+                                    capture_output=True, check=False)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            return result.stdout
+
+        run("init", "-q")
+        run("add", "--", ".gitattributes", relative)
+        blob_before = run("rev-parse", ":" + relative)
+        run("-c", "core.autocrlf=true", "checkout-index", "--all",
+            "--prefix=" + target.as_posix() + "/")
+        materialized = (target / relative).read_bytes()
+        self.assertEqual(materialized, original)
+        self.assertNotIn(b"\r", materialized)
+        self.assertEqual(run("rev-parse", ":" + relative), blob_before)
+        (target / relative).write_bytes(materialized.replace(b"\n", b"\r\n"))
+        self.assertNotEqual(hashlib.sha256((target / relative).read_bytes()).hexdigest(),
+                            hashlib.sha256(original).hexdigest())
+
+    def test_exact_evidence_attribute_preserves_json_bytes_but_not_routing_exemption(self):
+        source = self.root / "evidence-source"
+        target = self.root / "evidence-checkout"
+        source.mkdir()
+        target.mkdir()
+        relative = "evidence/review.json"
+        original = b'{\r\n  "record": "literal original bytes"\r\n}\r\n'
+        (source / ".gitattributes").write_bytes(
+            (relative + " -text whitespace=trailing-space,space-before-tab,cr-at-eol\n").encode())
+        path = source / relative
+        path.parent.mkdir()
+        path.write_bytes(original)
+        git = shutil.which("git")
+        self.assertIsNotNone(git)
+        for arguments in (
+                ["init", "-q"],
+                ["add", "--", ".gitattributes", relative],
+                ["-c", "core.autocrlf=true", "checkout-index", "--all",
+                 "--prefix=" + target.as_posix() + "/"]):
+            result = subprocess.run([git, "-C", str(source), *arguments],
+                                    capture_output=True, check=False)
+            self.assertEqual(result.returncode, 0, result.stderr)
+        blob = subprocess.check_output([git, "-C", str(source), "show", ":" + relative])
+        self.assertEqual(blob, original)
+        self.assertEqual((target / relative).read_bytes(), original)
+        self.assertEqual(json.loads(blob), {"record": "literal original bytes"})
+        checked = subprocess.run([git, "-C", str(source), "diff", "--cached", "--check"],
+                                 capture_output=True, check=False)
+        self.assertEqual(checked.returncode, 0, checked.stdout + checked.stderr)
+        path.write_bytes(original.replace(b"{\r\n", b"{ \r\n"))
+        checked = subprocess.run([git, "-C", str(source), "diff", "--check"],
+                                 capture_output=True, check=False)
+        self.assertNotEqual(checked.returncode, 0)
+        self.write(".gitattributes", "docs/current.json -text\n")
+        self.assertTrue(self.findings('{"skill":"qa"}\n', "docs/current.json"))
+
+    def cohort_record(self, dimensions='  D1_head: {state: present, nano: "Original /li:qa input"}\n'):
+        return (
+            "# Cohort 1 - Recorded source audit\n\n**Date:** 2026-05-29\n\n"
+            "```yaml\ncomponent: skills/qa/SKILL.md\nkind: skill\ncohort: 1\n"
+            "dimensions:\n" + dimensions +
+            "peer_comparison: {strongest_peer_in_cohort: qa-only}\n"
+            "operator_decision_required: false\npriority: P2\n```\n"
+        )
+
+    def test_cohort_values_use_parser_marks_without_exempting_current_siblings(self):
+        path = ".claude/engineering/audits/lintel-uniformity-findings-cohort1-phase-core.md"
+        text = self.cohort_record()
+        findings, observations = self.observations(text, path)
+        self.assertEqual(findings, [])
+        self.assertTrue(any(item["field"].endswith("/dimensions/D1_head/nano") for item in observations))
+        for changed in (
+                text + "\nUse /li:qa now.\n",
+                text.replace('nano: "Original /li:qa input"', 'nano: "Original /li:qa input", current_use: "/li:qa"'),
+                text.replace("priority: P2", 'priority: P2\nimport: skills/qa/SKILL.md')):
+            with self.subTest(changed=changed):
+                self.assertTrue(self.findings(changed, path))
+        self.write(path, text)
+        self.assertTrue(self.findings(text, "docs/current-audit.md"))
+
+    def test_multiline_unicode_cohort_value_does_not_swallow_following_live_field(self):
+        path = ".claude/engineering/audits/lintel-uniformity-findings-cohort1-phase-core.md"
+        dimensions = '  D1_head:\n    state: present\n    nano: |-\n      Original /li:qa input\n      Unicode π source\n'
+        text = self.cohort_record(dimensions).replace("\n", "\r\n")
+        findings, observations = self.observations(text, path)
+        self.assertEqual(findings, [])
+        self.assertTrue(any(item["category"] == "source-era cohort field" and item["end_line"] > item["line"]
+                            for item in observations))
+        changed = text.replace("peer_comparison:", '    current_use: "/li:qa"\r\npeer_comparison:')
+        self.assertTrue(self.findings(changed, path))
+
+    def test_cohort_context_and_parser_failures_never_create_clean_pass(self):
+        path = ".claude/engineering/audits/lintel-uniformity-findings-cohort1-phase-core.md"
+        text = self.cohort_record()
+        for changed in (
+                text.replace("cohort: 1", "cohort: 2"),
+                text.replace("dimensions:", "dimensions: [invalid"),
+                text.replace("kind: skill", "kind: active-workflow")):
+            with self.subTest(changed=changed):
+                findings = self.findings(changed, path)
+                self.assertTrue(any(item.code == "observation-parse-error" for item in findings))
+        envelope = guard.observation_support("envelope_contract")
+        with mock.patch.object(envelope, "load_text", side_effect=envelope.EnvelopeError("Parser unavailable")):
+            findings = self.findings(text, path)
+        self.assertTrue(any(item.code == "observation-parse-error" for item in findings))
+
+    def test_report_change_cells_require_exact_declared_membership(self):
+        path = ".claude/plans/old/report.md"
+        record = {
+            "schema_version": 2, "artifact_kind": "swarm-report",
+            "work_map": ".claude/plans/old/work.json", "package_id": "W1",
+            "leaf_ids": ["1.a"], "attempt_id": "fixture", "acceptance_digest": "fixture",
+            "result_digest": "fixture", "changed_paths": ["skills/qa/SKILL.md"],
+        }
+        text = ("<!-- lintel-swarm-evidence:v2\n" + json.dumps(record) + "\n-->\n"
+                "| Changed source | Result |\n|---|---|\n"
+                "| `skills/qa/SKILL.md` | Removed from the original result. |\n")
+        findings, observations = self.observations(text, path)
+        self.assertEqual(findings, [])
+        self.assertTrue(any(item["category"] == "reported change membership" for item in observations))
+        self.assertTrue(self.findings(text.replace("Removed from the original result.", "Use /li:qa now."), path))
+        self.assertTrue(self.findings(text + "| `skills/qa-only/SKILL.md` | Unlisted path. |\n", path))
+        self.assertTrue(self.findings(text + "\nCurrent import: `skills/qa/SKILL.md`.\n", path))
+
+    def test_peer_fields_require_original_role_and_do_not_hide_current_columns(self):
+        path = ".claude/engineering/audits/lintel-uniformity-cross-X1-concept-consistency.md"
+        text = ("# Cross-cutting pass X1\n\n**Pass:** X1 of 5\n**Date:** 2026-05-29\n\n"
+                "| Cohort | norm | deviators |\n|---|---|---|\n"
+                "| 1 | original scope | Original /li:qa observation |\n")
+        findings, observations = self.observations(text, path)
+        self.assertEqual(findings, [])
+        self.assertTrue(any(item["field"] == "table column: deviators" for item in observations))
+        self.assertTrue(self.findings(text + "\nUse /li:qa now.\n", path))
+        self.assertTrue(self.findings(text.replace("| norm |", "| Current route |"), path))
+        self.assertTrue(self.findings(text.replace("**Pass:** X1", "**Pass:** X2"), path))
+        changed = text.replace("| deviators |", "| deviators | Current use |").replace(
+            "|---|---|---|", "|---|---|---|---|").replace(
+            "| Original /li:qa observation |", "| Original /li:qa observation | /li:qa |")
+        self.assertTrue(self.findings(changed, path))
+
+    def test_cohort_subject_paths_do_not_exempt_instructions_in_role_column(self):
+        path = ".claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md"
+        text = ("# Cohort 2 - Original planner audit\n\n**Date:** 2026-05-29\n\n"
+                "| Component | Path | Role in chain |\n|---|---|---|\n"
+                "| qa | skills/qa/SKILL.md | Original checker |\n")
+        findings, observations = self.observations(text, path)
+        self.assertEqual(findings, [])
+        self.assertTrue(observations)
+        self.assertTrue(self.findings(text.replace("Original checker", "Use /li:qa now"), path))
+
+    def test_original_report_path_inventory_does_not_hide_commands_or_current_uses(self):
+        path = ".claude/plans/universal-implementation/reports/P08.md"
+        text = ("# P08 original source report\n\n**Base:** `" + "a" * 40 + "`\n\n"
+                "## Exact P08-authored product paths\n\n```text\n"
+                "skills\\qa\\SKILL.md\nskills/qa-only/SKILL.md\n```\n")
+        self.assertEqual(self.findings(text, path), [])
+        self.assertTrue(self.findings(text + "\nUse /li:qa now.\n", path))
+        self.assertTrue(self.findings(text.replace("skills/qa-only/SKILL.md", "run /li:qa"), path))
+        self.write(path, text)
+        self.assertTrue(self.findings(text, "docs/current-inventory.md"))
+
+    def test_original_report_diff_is_data_not_an_executable_code_fence(self):
+        path = ".claude/plans/universal-implementation/reports/P08-A13.md"
+        text = ("# P08 original observation report\n\n**Base:** `" + "a" * 40 + "`\n\n"
+                "## Observed catalog delta\n```diff\n--- a/skills/CATALOG.md\n+++ b/skills/CATALOG.md\n"
+                "@@ -1 +1 @@\n-Use /li:qa.\n+Use /li:qa-only.\n```\n")
+        self.assertEqual(self.findings(text, path), [])
+        self.assertTrue(self.findings(text + "\nCurrent import: `skills/qa/SKILL.md`.\n", path))
+        self.assertTrue(self.findings(text.replace("@@ -1 +1 @@", "Run /li:qa now"), path))
+        self.write(path, text)
+        self.assertTrue(self.findings(text, "skills/verify/current-patch.md"))
+
+    def test_language_guard_allows_only_exact_functional_header_data(self):
+        language = (ROOT / "tests/shape/no-swedish.sh").read_text(encoding="utf-8")
+        function = re.search(r"(?ms)^is_functional_source_data\(\) \{\n.*?^\}\n", language)
+        self.assertIsNotNone(function)
+        git = shutil.which("git")
+        native_bash = Path(git).resolve().parent.parent / "bin/bash.exe" if git else None
+        bash = str(native_bash) if sys.platform == "win32" and native_bash and native_bash.is_file() else shutil.which("bash")
+        self.assertIsNotNone(bash)
+        cases = [
+            ("tests/shape/native-command-surface.py",
+             next(line for line in GUARD.read_text(encoding="utf-8").splitlines() if '{"namn",' in line)),
+            ("tests/unit/native-command-surface.py",
+             next(line for line in Path(__file__).read_text(encoding="utf-8").splitlines()
+                  if line.lstrip().startswith('"| Namn |'))),
+        ]
+        script = function[0] + '\nis_functional_source_data "$1" "$2"\n'
+        for path, line in cases:
+            for selected, content, expected in (
+                    (path, "123:" + line, 0), (path, "123:" + line + "\r", 0),
+                    (path, "123:" + line + " unrelated prose", 1),
+                    (path, "123:description: " + line, 1),
+                    ("README.md", "123:" + line, 1)):
+                with self.subTest(path=selected, expected=expected):
+                    result = subprocess.run(
+                        [bash, "--noprofile", "--norc", "-c", script, "language-data", selected, content],
+                        capture_output=True, text=True, check=False,
+                    )
+                    self.assertEqual(result.returncode, expected, result.stdout + result.stderr)
+
     def test_current_html_and_htm_routing_is_not_excluded_by_extension(self):
         for suffix in ("html", "htm"):
             relative = "docs/current." + suffix
@@ -80,6 +418,32 @@ class CommandSurfaceTests(unittest.TestCase):
             '<script type="text/javascript">' + record + "</script>\n", relative))
         self.assertTrue(self.findings(
             '<script type="application/json" src="active.js">' + record + "</script>\n", relative))
+
+    def test_html_pinned_source_labels_do_not_exempt_arbitrary_link_text_or_imports(self):
+        path = "docs/source.html"
+        link = ('<a class="source-link" href="https://github.com/example/repo/blob/' + "a" * 40
+                + '/skills/qa/SKILL.md#L7">skills/qa/SKILL.md:7</a>')
+        self.assertEqual(self.findings(link, path), [])
+        self.assertTrue(self.findings(link.replace("blob/" + "a" * 40, "blob/main"), path))
+        self.assertTrue(self.findings(link.replace(">skills/qa/SKILL.md:7", ">Use /li:qa now"), path))
+        self.assertTrue(self.findings(link + '<script>import "skills/qa/SKILL.md";</script>', path))
+
+    def test_html_original_code_line_fields_leave_new_live_content_checked(self):
+        path = "docs/excerpt.html"
+        source = (
+            '<title>skills/qa/SKILL.md - source excerpt</title><h1>skills/qa/SKILL.md</h1>'
+            '<p>Read-only excerpt at revision <code>1234567</code>.</p>'
+            '<p>Full-file SHA-256: <code>' + "a" * 64 + '</code>.</p>'
+            '<div class="source-line" id="L1"><a href="#L1">1</a><code>Use /li:qa.</code></div>'
+        )
+        findings, observations = self.observations(source, path)
+        self.assertEqual(findings, [])
+        self.assertTrue(any(item["field"] == "original source line L1" for item in observations))
+        self.assertTrue(self.findings(source + "<p>Use /li:qa now.</p>", path))
+        self.assertTrue(self.findings(source.replace('href="#L1"', 'href="#L2"'), path))
+        self.assertTrue(self.findings(source.replace("Full-file SHA-256:", "Current instructions:"), path))
+        self.assertTrue(self.findings(source.replace("<code>Use /li:qa.</code>",
+                         '<code><script>import "skills/qa/SKILL.md";</script></code>'), path))
 
     def test_every_retired_command_is_rejected_in_explicit_namespaces(self):
         for name in sorted(guard.RETIRED_COMMANDS):

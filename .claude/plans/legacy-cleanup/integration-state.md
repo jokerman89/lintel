@@ -186,3 +186,77 @@ Final independent spec re-review must include W3/W5/W6, the integrated F1 repair
 A5-31/A5-32, exact census and these open acceptance boundaries. The later quality
 review remains a separate actor. Both source review and actual v2 QA/corroboration
 are required before final SHIP; an incomplete draft is not a completed initiative.
+
+## Current forward candidate and remaining gates
+
+The latest completed source-spec review passed exact `a7a1df33`; its separate
+quality review failed with Q-01 through Q-07. The following forward repairs address
+those findings and actual hosted failures without relabelling the old results:
+canonical installed-entry/module discovery, heading-scoped migration/retrospective
+consumers, no audit fallback creation, link-aware fixture snapshots, meaningful
+validator/functional-data checks, full lift guidance and seven live navigation links.
+Current task authority permits the primary repairs; it does not permit retrying the
+rejected merge in the separate preparation worktree.
+
+The ordinary fixes are preserved at `f3a24d52`; its direct child `d1f2f758` fixes the
+runtime-discovered freeze documentation/consumer assertion and verifies supported
+read-only listing. The original source reports and failed f3 observation remain
+unchanged. Go Live independently ran targeted fixtures on clean immutable Windows
+and WSL checkouts:
+
+- f3 installed catalog/module discovery, portable optional family and all fifteen
+  MigrationInventory cases passed on both hosts.
+- Windows SnapshotOnly and both PowerShell/Bash pruning performers passed.
+- f3 audit-directory failure cases passed, while its freeze-document assertion failed.
+  The exact same two observation selectors passed on both hosts at d1.
+- POSIX PowerShell was NOT RUN. These are targeted results, not a full strict suite.
+
+The raw runtime report SHA-256 is
+`f2c8e66f239d289eda48395b9737ac6bb42ea4c51e0f470363a18362a598f6e1`.
+It names exact host versions, two source SHAs and 22 evidence files. No denied
+launcher, borrowed target profile or unavailable native artifact was used by this
+integration session.
+
+The actual main advance `1981e591defb5114798aa2be7e6ccbb524214a89` is included.
+Its changes are presentation-only, preserved byte-for-byte. The old a7 hosted run
+tested synthetic merge `fe36f27c7c5aaa48de1b7ae685cba233d3396ea9`, not the a7/77
+source tree; its 1422-candidate result is not the earlier 1395 local census.
+Main's own run was green; a7's strict run failed (10 successful jobs, 12 failures).
+
+The C register now contains **68** exact, unanimously accepted LF declarations.
+Only those spans are observed, with full original source-context digests, preserved
+peer reports, existing v2 data and matching host-observation records. Their semantic
+records remain overall **UNVERIFIED**, not release clearance. Rejected, disputed,
+widened or changed spans are not accepted. Exact-path LF and evidence-byte attributes
+preserve original Git/evidence bytes; they do not exempt content from scanning.
+
+Latest real forward-tree guard: **exit 1, 688 unresolved diagnostics**, 2190 visible
+observations, all 68 approved spans emitted. Of these, **687 are still unadjudicated
+internal references**, not automatically defects or accepted historical observations.
+No ordinary shipped code/skill/doc surface outside internal records/presentation is
+reported. The remaining single presentation item below is a genuine current route,
+not history. The guard is NOT green and this candidate is NOT merge-ready.
+
+### Current deferred permission
+
+`presentations/tech-shots-2026-09-25/show/field-guide.html:4` actively advertises the
+removed research shortcut. The exact proposed replacement is the existing cycle
+research-dive mode. The operator's no-web-presentation boundary and unanswered
+permission question mean it is **CURRENT_DEFERRED_PERMISSION**, not fixed or exempt.
+The source/publisher owner must obtain explicit authorization for that literal edit
+and normal Pages publication. The session-local unapplied patch has SHA-256
+`612932301c25b5d1f969fe2cbcef92735f2618b4fe9e304a323296908a23d621`.
+No presentation bytes or deployment configuration were changed by cleanup.
+
+### Publication and next action
+
+Existing draft PR #104 is the only aggregate PR. Its source publication was performed
+by the separately operator-authorized publisher after this session's creation failed
+403 and supported edit failed 404. Do not retry those app operations without changed
+access, borrow credentials or create another PR.
+
+Publish only the next exact clean **READY_FOR_DRAFT_CI** commit with matched generated
+outputs and these open gates. Both retained reviewers assess that immutable delta in
+parallel with hosted CI; source-spec, quality, strict QA/current routing and actual
+permission remain separate merge gates. Client cleanup follows #104; downstream
+documentation PRs follow both. No current task is completed by this handoff.

@@ -1,0 +1,1167 @@
+{
+  "schema_version": 2,
+  "skill": "review",
+  "status": "unverified",
+  "timestamp": "2026-09-25T13:55:38.794084+00:00",
+  "reason": "Coordinator transcription of original separate-session semantic decisions; not overall review/QA/SHIP clearance. Original reports are preserved byte-for-byte.",
+  "context": {
+    "attempt_id": "legacy-cleanup-span-final-lf",
+    "builder": {
+      "context": "copilot-session:e9c20b62-f877-4242-82cd-b5002d452da8",
+      "id": "cleanup-integration"
+    },
+    "independence_required": true,
+    "profile": {
+      "context_id": "e9c20b62-f877-4242-82cd-b5002d452da8",
+      "digest": "sha256:ce259b67ed7a8d414488c92c4f4c1cbf65da8e69bc2eec8647808aaebf03b9d4",
+      "generation": 2,
+      "name": "_default",
+      "schema_version": 1,
+      "version": "1.0.0"
+    },
+    "purpose": "verification_only",
+    "qa_requirements": [
+      {
+        "applicability": "applicable",
+        "id": "historical-spans",
+        "kind": "check",
+        "policy": {
+          "actor": null,
+          "applicability": "Only exact historical-span semantic classification, not release or runtime approval",
+          "effective_date": null,
+          "jurisdiction": null,
+          "source": ".claude/plans/legacy-cleanup/spec.md",
+          "version": "2026-09-25"
+        },
+        "requirement": "mandatory"
+      }
+    ],
+    "required_controls": [
+      "historical-spans"
+    ],
+    "required_policy": {
+      "applicability": "not_applicable",
+      "required": false,
+      "source": "bundled-neutral",
+      "status": "not_required",
+      "version": "1.0.0"
+    },
+    "schema_version": 2,
+    "snapshot": {
+      "base": "a7a1df338bacf900f1210f08131f391831992f1f",
+      "entries": [
+        {
+          "base": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "0c29e06fe608668251791b56a13cef71953edd6de98fed004cb05af6bb9b3522"
+          },
+          "head": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "0c29e06fe608668251791b56a13cef71953edd6de98fed004cb05af6bb9b3522"
+          },
+          "index": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "0c29e06fe608668251791b56a13cef71953edd6de98fed004cb05af6bb9b3522"
+          },
+          "path": ".claude/engineering/audits/2026-09-20-universal-quality/reviews/upstream.md",
+          "worktree": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "0c29e06fe608668251791b56a13cef71953edd6de98fed004cb05af6bb9b3522"
+          }
+        },
+        {
+          "base": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "77e5e56ea14714c665878d7cb01912b09bc0de739bd1a511a82eeb2e1a73e08e"
+          },
+          "head": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "77e5e56ea14714c665878d7cb01912b09bc0de739bd1a511a82eeb2e1a73e08e"
+          },
+          "index": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "77e5e56ea14714c665878d7cb01912b09bc0de739bd1a511a82eeb2e1a73e08e"
+          },
+          "path": ".claude/engineering/audits/lintel-five-lens-audit.md",
+          "worktree": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "77e5e56ea14714c665878d7cb01912b09bc0de739bd1a511a82eeb2e1a73e08e"
+          }
+        },
+        {
+          "base": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "130b70d16e8b0692bb4c6b0410b4b6e1ef048a8b730597d9321379d7c2a55cec"
+          },
+          "head": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "130b70d16e8b0692bb4c6b0410b4b6e1ef048a8b730597d9321379d7c2a55cec"
+          },
+          "index": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "130b70d16e8b0692bb4c6b0410b4b6e1ef048a8b730597d9321379d7c2a55cec"
+          },
+          "path": ".claude/engineering/audits/lintel-uniformity-MASTER.md",
+          "worktree": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "130b70d16e8b0692bb4c6b0410b4b6e1ef048a8b730597d9321379d7c2a55cec"
+          }
+        },
+        {
+          "base": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "433c90b5fa8729dbdcb964627cab94573295c4a15e378228e0e790d954bc8b56"
+          },
+          "head": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "433c90b5fa8729dbdcb964627cab94573295c4a15e378228e0e790d954bc8b56"
+          },
+          "index": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "433c90b5fa8729dbdcb964627cab94573295c4a15e378228e0e790d954bc8b56"
+          },
+          "path": ".claude/engineering/audits/lintel-uniformity-cross-X1-concept-consistency.md",
+          "worktree": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "433c90b5fa8729dbdcb964627cab94573295c4a15e378228e0e790d954bc8b56"
+          }
+        },
+        {
+          "base": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "476bc2ffa3e899d1ccf147a9fa6b3cb8ceffd0a33bd95aad6e4d255413c84ed8"
+          },
+          "head": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "476bc2ffa3e899d1ccf147a9fa6b3cb8ceffd0a33bd95aad6e4d255413c84ed8"
+          },
+          "index": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "476bc2ffa3e899d1ccf147a9fa6b3cb8ceffd0a33bd95aad6e4d255413c84ed8"
+          },
+          "path": ".claude/engineering/audits/lintel-uniformity-cross-X3-evolution.md",
+          "worktree": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "476bc2ffa3e899d1ccf147a9fa6b3cb8ceffd0a33bd95aad6e4d255413c84ed8"
+          }
+        },
+        {
+          "base": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "905ca3ff5e19fb3b307a5f4f8c159e15bbf2271bb8a1a83b119b0d85834597d6"
+          },
+          "head": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "905ca3ff5e19fb3b307a5f4f8c159e15bbf2271bb8a1a83b119b0d85834597d6"
+          },
+          "index": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "905ca3ff5e19fb3b307a5f4f8c159e15bbf2271bb8a1a83b119b0d85834597d6"
+          },
+          "path": ".claude/engineering/audits/lintel-uniformity-cross-X4-entry-point-matrix.md",
+          "worktree": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "905ca3ff5e19fb3b307a5f4f8c159e15bbf2271bb8a1a83b119b0d85834597d6"
+          }
+        },
+        {
+          "base": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "e310ddc655779b73f971900f618253aae615ed3142ea2205d16df62f4518e4a2"
+          },
+          "head": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "e310ddc655779b73f971900f618253aae615ed3142ea2205d16df62f4518e4a2"
+          },
+          "index": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "e310ddc655779b73f971900f618253aae615ed3142ea2205d16df62f4518e4a2"
+          },
+          "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort1-phase-core.md",
+          "worktree": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "e310ddc655779b73f971900f618253aae615ed3142ea2205d16df62f4518e4a2"
+          }
+        },
+        {
+          "base": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "ced1058d2c3313048659c01dc8627a31588fbec0ed7d719f18490fcb300e7638"
+          },
+          "head": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "ced1058d2c3313048659c01dc8627a31588fbec0ed7d719f18490fcb300e7638"
+          },
+          "index": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "ced1058d2c3313048659c01dc8627a31588fbec0ed7d719f18490fcb300e7638"
+          },
+          "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md",
+          "worktree": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "ced1058d2c3313048659c01dc8627a31588fbec0ed7d719f18490fcb300e7638"
+          }
+        },
+        {
+          "base": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "a50235e766c6ff06f0e7a4136528c5d37d0d1008df2d2ad7899dd88d78a0caea"
+          },
+          "head": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "a50235e766c6ff06f0e7a4136528c5d37d0d1008df2d2ad7899dd88d78a0caea"
+          },
+          "index": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "a50235e766c6ff06f0e7a4136528c5d37d0d1008df2d2ad7899dd88d78a0caea"
+          },
+          "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort3-handoff.md",
+          "worktree": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "a50235e766c6ff06f0e7a4136528c5d37d0d1008df2d2ad7899dd88d78a0caea"
+          }
+        },
+        {
+          "base": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "f56907565af02eed4afcf2daba74a47c3f5d41f550d79797b090e883cbf76303"
+          },
+          "head": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "f56907565af02eed4afcf2daba74a47c3f5d41f550d79797b090e883cbf76303"
+          },
+          "index": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "f56907565af02eed4afcf2daba74a47c3f5d41f550d79797b090e883cbf76303"
+          },
+          "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort7-packs-roles.md",
+          "worktree": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "f56907565af02eed4afcf2daba74a47c3f5d41f550d79797b090e883cbf76303"
+          }
+        },
+        {
+          "base": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "660910dbee558fd9d3be8d5df6d818100ba898e37bfc56d85a33b3144b3e929d"
+          },
+          "head": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "660910dbee558fd9d3be8d5df6d818100ba898e37bfc56d85a33b3144b3e929d"
+          },
+          "index": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "660910dbee558fd9d3be8d5df6d818100ba898e37bfc56d85a33b3144b3e929d"
+          },
+          "path": ".claude/engineering/evolution/2026-06-10-v4.11-launch-polish.md",
+          "worktree": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "660910dbee558fd9d3be8d5df6d818100ba898e37bfc56d85a33b3144b3e929d"
+          }
+        },
+        {
+          "base": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "ac45bf5e62bbf3a6107d8dc7897b5ba02a3de80c76dd5ccc88eca9d18fd5c60b"
+          },
+          "head": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "ac45bf5e62bbf3a6107d8dc7897b5ba02a3de80c76dd5ccc88eca9d18fd5c60b"
+          },
+          "index": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "ac45bf5e62bbf3a6107d8dc7897b5ba02a3de80c76dd5ccc88eca9d18fd5c60b"
+          },
+          "path": ".claude/plans/universal-implementation/reports/P06.md",
+          "worktree": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "ac45bf5e62bbf3a6107d8dc7897b5ba02a3de80c76dd5ccc88eca9d18fd5c60b"
+          }
+        },
+        {
+          "base": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "03491ddca03c64a0d62f36ea080174d7be190b25d433b2e3a0d04203cf0417f9"
+          },
+          "head": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "03491ddca03c64a0d62f36ea080174d7be190b25d433b2e3a0d04203cf0417f9"
+          },
+          "index": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "03491ddca03c64a0d62f36ea080174d7be190b25d433b2e3a0d04203cf0417f9"
+          },
+          "path": ".claude/plans/universal-implementation/reports/P08-A13.md",
+          "worktree": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "03491ddca03c64a0d62f36ea080174d7be190b25d433b2e3a0d04203cf0417f9"
+          }
+        },
+        {
+          "base": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "371df0998005103a663da054e184b64cd5e7dacccc8a31fac2e32593370c2673"
+          },
+          "head": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "371df0998005103a663da054e184b64cd5e7dacccc8a31fac2e32593370c2673"
+          },
+          "index": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "371df0998005103a663da054e184b64cd5e7dacccc8a31fac2e32593370c2673"
+          },
+          "path": ".claude/plans/universal-implementation/reports/P08.md",
+          "worktree": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "371df0998005103a663da054e184b64cd5e7dacccc8a31fac2e32593370c2673"
+          }
+        },
+        {
+          "base": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "182e7264fd598f01360ef226bc4772face1bece9a411011a4232cebd083e1db7"
+          },
+          "head": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "182e7264fd598f01360ef226bc4772face1bece9a411011a4232cebd083e1db7"
+          },
+          "index": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "182e7264fd598f01360ef226bc4772face1bece9a411011a4232cebd083e1db7"
+          },
+          "path": ".claude/plans/universal-implementation/reports/P11.md",
+          "worktree": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "182e7264fd598f01360ef226bc4772face1bece9a411011a4232cebd083e1db7"
+          }
+        },
+        {
+          "base": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "63192487ac9b88d54e36b26fad48ed64a8e8db9ad496161b7de2239ea0aa37ef"
+          },
+          "head": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "63192487ac9b88d54e36b26fad48ed64a8e8db9ad496161b7de2239ea0aa37ef"
+          },
+          "index": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "63192487ac9b88d54e36b26fad48ed64a8e8db9ad496161b7de2239ea0aa37ef"
+          },
+          "path": ".claude/plans/universal-implementation/reviews/A23.5-phase4-removal-b7b245f.md",
+          "worktree": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "63192487ac9b88d54e36b26fad48ed64a8e8db9ad496161b7de2239ea0aa37ef"
+          }
+        },
+        {
+          "base": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "42e0ae717e464710604dda994138a8a8420020a32b987c8885711b1ad9273c71"
+          },
+          "head": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "42e0ae717e464710604dda994138a8a8420020a32b987c8885711b1ad9273c71"
+          },
+          "index": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "42e0ae717e464710604dda994138a8a8420020a32b987c8885711b1ad9273c71"
+          },
+          "path": ".claude/plans/universal-implementation/reviews/P05-excerpt-context-final.md",
+          "worktree": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "42e0ae717e464710604dda994138a8a8420020a32b987c8885711b1ad9273c71"
+          }
+        },
+        {
+          "base": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "4a3cb79a9eed563ceb340c80a3584ad0127a1d8efeb1ab9351aa1aea8dd43672"
+          },
+          "head": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "4a3cb79a9eed563ceb340c80a3584ad0127a1d8efeb1ab9351aa1aea8dd43672"
+          },
+          "index": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "4a3cb79a9eed563ceb340c80a3584ad0127a1d8efeb1ab9351aa1aea8dd43672"
+          },
+          "path": ".claude/plans/universal-implementation/reviews/P05-recheck.md",
+          "worktree": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "4a3cb79a9eed563ceb340c80a3584ad0127a1d8efeb1ab9351aa1aea8dd43672"
+          }
+        },
+        {
+          "base": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "8937098dcfc2389fc08828d095c5c13fd480f21a6649ff5e68d0bf7574e4e023"
+          },
+          "head": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "8937098dcfc2389fc08828d095c5c13fd480f21a6649ff5e68d0bf7574e4e023"
+          },
+          "index": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "8937098dcfc2389fc08828d095c5c13fd480f21a6649ff5e68d0bf7574e4e023"
+          },
+          "path": ".claude/plans/universal-implementation/reviews/P06-component.md",
+          "worktree": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "8937098dcfc2389fc08828d095c5c13fd480f21a6649ff5e68d0bf7574e4e023"
+          }
+        },
+        {
+          "base": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "e6eba1e4c06aea372739d06273d28f38e21e2aa8f6c57c92fe9f12d5a8e2b7b9"
+          },
+          "head": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "e6eba1e4c06aea372739d06273d28f38e21e2aa8f6c57c92fe9f12d5a8e2b7b9"
+          },
+          "index": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "e6eba1e4c06aea372739d06273d28f38e21e2aa8f6c57c92fe9f12d5a8e2b7b9"
+          },
+          "path": ".claude/plans/universal-implementation/reviews/P06-recheck.md",
+          "worktree": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "e6eba1e4c06aea372739d06273d28f38e21e2aa8f6c57c92fe9f12d5a8e2b7b9"
+          }
+        },
+        {
+          "base": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "5f8d262e315aed505b064b3fb3d7524cd11bea9b325f831dd3e64f1c20378b14"
+          },
+          "head": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "5f8d262e315aed505b064b3fb3d7524cd11bea9b325f831dd3e64f1c20378b14"
+          },
+          "index": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "5f8d262e315aed505b064b3fb3d7524cd11bea9b325f831dd3e64f1c20378b14"
+          },
+          "path": ".claude/plans/universal-implementation/reviews/P06-shared-boundary-final.md",
+          "worktree": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "5f8d262e315aed505b064b3fb3d7524cd11bea9b325f831dd3e64f1c20378b14"
+          }
+        },
+        {
+          "base": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "1dc9ae7a7b7bf8f7b2fa90d25bfdd756be19fe27a6a6863645906c0fa221d06e"
+          },
+          "head": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "1dc9ae7a7b7bf8f7b2fa90d25bfdd756be19fe27a6a6863645906c0fa221d06e"
+          },
+          "index": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "1dc9ae7a7b7bf8f7b2fa90d25bfdd756be19fe27a6a6863645906c0fa221d06e"
+          },
+          "path": ".claude/plans/universal-implementation/reviews/P08-combined-2f4cc38.md",
+          "worktree": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "1dc9ae7a7b7bf8f7b2fa90d25bfdd756be19fe27a6a6863645906c0fa221d06e"
+          }
+        },
+        {
+          "base": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "9131f1680d756f72503521c4028215df3f53f73b42387e6550b8c9b6d4d17b20"
+          },
+          "head": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "9131f1680d756f72503521c4028215df3f53f73b42387e6550b8c9b6d4d17b20"
+          },
+          "index": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "9131f1680d756f72503521c4028215df3f53f73b42387e6550b8c9b6d4d17b20"
+          },
+          "path": ".claude/plans/universal-implementation/reviews/P08-partial.md",
+          "worktree": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "9131f1680d756f72503521c4028215df3f53f73b42387e6550b8c9b6d4d17b20"
+          }
+        },
+        {
+          "base": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "ac57b75105605a2c3ced269a6f9635d5ba98aa6027bd4913947c1ea908e24509"
+          },
+          "head": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "ac57b75105605a2c3ced269a6f9635d5ba98aa6027bd4913947c1ea908e24509"
+          },
+          "index": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "ac57b75105605a2c3ced269a6f9635d5ba98aa6027bd4913947c1ea908e24509"
+          },
+          "path": ".claude/plans/universal-implementation/reviews/P08-routing-plan-recheck.md",
+          "worktree": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "ac57b75105605a2c3ced269a6f9635d5ba98aa6027bd4913947c1ea908e24509"
+          }
+        },
+        {
+          "base": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "ce61df9a1850be20ca57bd26a4bc055b27fcd6d71e74b0f7ac1da40d8d5892a0"
+          },
+          "head": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "ce61df9a1850be20ca57bd26a4bc055b27fcd6d71e74b0f7ac1da40d8d5892a0"
+          },
+          "index": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "ce61df9a1850be20ca57bd26a4bc055b27fcd6d71e74b0f7ac1da40d8d5892a0"
+          },
+          "path": ".claude/plans/universal-implementation/reviews/P08-selected-final-229656c.md",
+          "worktree": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "ce61df9a1850be20ca57bd26a4bc055b27fcd6d71e74b0f7ac1da40d8d5892a0"
+          }
+        },
+        {
+          "base": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "184c76777f0339e21d107af08682cb45362f20716924a46dbe1d603145e516bb"
+          },
+          "head": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "184c76777f0339e21d107af08682cb45362f20716924a46dbe1d603145e516bb"
+          },
+          "index": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "184c76777f0339e21d107af08682cb45362f20716924a46dbe1d603145e516bb"
+          },
+          "path": ".claude/plans/universal-implementation/reviews/P11-browser-final-14b419c.md",
+          "worktree": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "184c76777f0339e21d107af08682cb45362f20716924a46dbe1d603145e516bb"
+          }
+        },
+        {
+          "base": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "071e0d878049a83b5c12282b4a384963f946374d475adee7ae0ffb587e80ddd4"
+          },
+          "head": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "071e0d878049a83b5c12282b4a384963f946374d475adee7ae0ffb587e80ddd4"
+          },
+          "index": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "071e0d878049a83b5c12282b4a384963f946374d475adee7ae0ffb587e80ddd4"
+          },
+          "path": ".claude/plans/universal-implementation/reviews/P11-browser-final-d3b5569.md",
+          "worktree": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "071e0d878049a83b5c12282b4a384963f946374d475adee7ae0ffb587e80ddd4"
+          }
+        },
+        {
+          "base": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "4d1bd906d75a2244ffd67d3e4d7012adbb986ba45d6c124527d22e0073868f8c"
+          },
+          "head": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "4d1bd906d75a2244ffd67d3e4d7012adbb986ba45d6c124527d22e0073868f8c"
+          },
+          "index": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "4d1bd906d75a2244ffd67d3e4d7012adbb986ba45d6c124527d22e0073868f8c"
+          },
+          "path": ".claude/plans/universal-implementation/reviews/P11-design-f72f316.md",
+          "worktree": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "4d1bd906d75a2244ffd67d3e4d7012adbb986ba45d6c124527d22e0073868f8c"
+          }
+        },
+        {
+          "base": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "fe1cc9b776a131b67605e4cf5a0b7224cd0b5e20a3841534ffa0f21c870b46e8"
+          },
+          "head": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "fe1cc9b776a131b67605e4cf5a0b7224cd0b5e20a3841534ffa0f21c870b46e8"
+          },
+          "index": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "fe1cc9b776a131b67605e4cf5a0b7224cd0b5e20a3841534ffa0f21c870b46e8"
+          },
+          "path": ".claude/plans/universal-implementation/reviews/P12-common-source-32dac88.md",
+          "worktree": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "fe1cc9b776a131b67605e4cf5a0b7224cd0b5e20a3841534ffa0f21c870b46e8"
+          }
+        },
+        {
+          "base": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "6197da20821420272034354c560726a8f23ad24979a1b154cb9a928c456de009"
+          },
+          "head": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "6197da20821420272034354c560726a8f23ad24979a1b154cb9a928c456de009"
+          },
+          "index": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "6197da20821420272034354c560726a8f23ad24979a1b154cb9a928c456de009"
+          },
+          "path": ".claude/plans/universal-implementation/reviews/P12-pdf-5978def.md",
+          "worktree": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "6197da20821420272034354c560726a8f23ad24979a1b154cb9a928c456de009"
+          }
+        },
+        {
+          "base": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "769ed6345de88107b0aaddc7d39b6c9f41c47cd01ac333ecec2aceda1c991680"
+          },
+          "head": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "769ed6345de88107b0aaddc7d39b6c9f41c47cd01ac333ecec2aceda1c991680"
+          },
+          "index": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "769ed6345de88107b0aaddc7d39b6c9f41c47cd01ac333ecec2aceda1c991680"
+          },
+          "path": ".claude/plans/universal-implementation/reviews/P13-consumers-7884ddd.md",
+          "worktree": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "769ed6345de88107b0aaddc7d39b6c9f41c47cd01ac333ecec2aceda1c991680"
+          }
+        }
+      ],
+      "head": "d1f2f75831fa23ed85f79e0a21f7a67451ea1c7e",
+      "record_path": ".claude/runtime/reviews/legacy-cleanup-span-semantic-final.json",
+      "result_digest": "73b2300473a3379844c06c3b4c96a5843c65b724f8639d85fc4e56a1b2c31c24",
+      "selection": [
+        ".claude/engineering/audits/2026-09-20-universal-quality/reviews/upstream.md",
+        ".claude/engineering/audits/lintel-five-lens-audit.md",
+        ".claude/engineering/audits/lintel-uniformity-MASTER.md",
+        ".claude/engineering/audits/lintel-uniformity-cross-X1-concept-consistency.md",
+        ".claude/engineering/audits/lintel-uniformity-cross-X3-evolution.md",
+        ".claude/engineering/audits/lintel-uniformity-cross-X4-entry-point-matrix.md",
+        ".claude/engineering/audits/lintel-uniformity-findings-cohort1-phase-core.md",
+        ".claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md",
+        ".claude/engineering/audits/lintel-uniformity-findings-cohort3-handoff.md",
+        ".claude/engineering/audits/lintel-uniformity-findings-cohort7-packs-roles.md",
+        ".claude/engineering/evolution/2026-06-10-v4.11-launch-polish.md",
+        ".claude/plans/universal-implementation/reports/P06.md",
+        ".claude/plans/universal-implementation/reports/P08-A13.md",
+        ".claude/plans/universal-implementation/reports/P08.md",
+        ".claude/plans/universal-implementation/reports/P11.md",
+        ".claude/plans/universal-implementation/reviews/A23.5-phase4-removal-b7b245f.md",
+        ".claude/plans/universal-implementation/reviews/P05-excerpt-context-final.md",
+        ".claude/plans/universal-implementation/reviews/P05-recheck.md",
+        ".claude/plans/universal-implementation/reviews/P06-component.md",
+        ".claude/plans/universal-implementation/reviews/P06-recheck.md",
+        ".claude/plans/universal-implementation/reviews/P06-shared-boundary-final.md",
+        ".claude/plans/universal-implementation/reviews/P08-combined-2f4cc38.md",
+        ".claude/plans/universal-implementation/reviews/P08-partial.md",
+        ".claude/plans/universal-implementation/reviews/P08-routing-plan-recheck.md",
+        ".claude/plans/universal-implementation/reviews/P08-selected-final-229656c.md",
+        ".claude/plans/universal-implementation/reviews/P11-browser-final-14b419c.md",
+        ".claude/plans/universal-implementation/reviews/P11-browser-final-d3b5569.md",
+        ".claude/plans/universal-implementation/reviews/P11-design-f72f316.md",
+        ".claude/plans/universal-implementation/reviews/P12-common-source-32dac88.md",
+        ".claude/plans/universal-implementation/reviews/P12-pdf-5978def.md",
+        ".claude/plans/universal-implementation/reviews/P13-consumers-7884ddd.md"
+      ]
+    },
+    "work": {
+      "acceptance_digest": "fc22162224b0573dac4d8d12db3e16c2a8d11e88352938573812ee99f392c48d",
+      "acceptance_manifest": [
+        {
+          "end": null,
+          "path": ".claude/engineering/audits/2026-09-20-universal-quality/reviews/upstream.md",
+          "sha256": "0c29e06fe608668251791b56a13cef71953edd6de98fed004cb05af6bb9b3522",
+          "start": null
+        },
+        {
+          "end": null,
+          "path": ".claude/engineering/audits/lintel-five-lens-audit.md",
+          "sha256": "77e5e56ea14714c665878d7cb01912b09bc0de739bd1a511a82eeb2e1a73e08e",
+          "start": null
+        },
+        {
+          "end": null,
+          "path": ".claude/engineering/audits/lintel-uniformity-MASTER.md",
+          "sha256": "130b70d16e8b0692bb4c6b0410b4b6e1ef048a8b730597d9321379d7c2a55cec",
+          "start": null
+        },
+        {
+          "end": null,
+          "path": ".claude/engineering/audits/lintel-uniformity-cross-X1-concept-consistency.md",
+          "sha256": "433c90b5fa8729dbdcb964627cab94573295c4a15e378228e0e790d954bc8b56",
+          "start": null
+        },
+        {
+          "end": null,
+          "path": ".claude/engineering/audits/lintel-uniformity-cross-X3-evolution.md",
+          "sha256": "476bc2ffa3e899d1ccf147a9fa6b3cb8ceffd0a33bd95aad6e4d255413c84ed8",
+          "start": null
+        },
+        {
+          "end": null,
+          "path": ".claude/engineering/audits/lintel-uniformity-cross-X4-entry-point-matrix.md",
+          "sha256": "905ca3ff5e19fb3b307a5f4f8c159e15bbf2271bb8a1a83b119b0d85834597d6",
+          "start": null
+        },
+        {
+          "end": null,
+          "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort1-phase-core.md",
+          "sha256": "e310ddc655779b73f971900f618253aae615ed3142ea2205d16df62f4518e4a2",
+          "start": null
+        },
+        {
+          "end": null,
+          "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md",
+          "sha256": "ced1058d2c3313048659c01dc8627a31588fbec0ed7d719f18490fcb300e7638",
+          "start": null
+        },
+        {
+          "end": null,
+          "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort3-handoff.md",
+          "sha256": "a50235e766c6ff06f0e7a4136528c5d37d0d1008df2d2ad7899dd88d78a0caea",
+          "start": null
+        },
+        {
+          "end": null,
+          "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort7-packs-roles.md",
+          "sha256": "f56907565af02eed4afcf2daba74a47c3f5d41f550d79797b090e883cbf76303",
+          "start": null
+        },
+        {
+          "end": null,
+          "path": ".claude/engineering/evolution/2026-06-10-v4.11-launch-polish.md",
+          "sha256": "660910dbee558fd9d3be8d5df6d818100ba898e37bfc56d85a33b3144b3e929d",
+          "start": null
+        },
+        {
+          "end": null,
+          "path": ".claude/plans/legacy-cleanup/plan.md",
+          "sha256": "33af73c2ad7388737d71716c2243347785598a3be91045dce0c8e984d39f81e9",
+          "start": null
+        },
+        {
+          "end": null,
+          "path": ".claude/plans/legacy-cleanup/prompt.md",
+          "sha256": "e93bc8bc3bb78d0fc7ba691078f126bc6094d92eacbec4404f5d14e80aea75e8",
+          "start": null
+        },
+        {
+          "end": null,
+          "path": ".claude/plans/legacy-cleanup/spec.md",
+          "sha256": "a101f99340629ae655a111da3aa8c03a0c2ace51b569e71fc75b93232b9b549c",
+          "start": null
+        },
+        {
+          "end": null,
+          "path": ".claude/plans/universal-implementation/reports/P06.md",
+          "sha256": "ac45bf5e62bbf3a6107d8dc7897b5ba02a3de80c76dd5ccc88eca9d18fd5c60b",
+          "start": null
+        },
+        {
+          "end": null,
+          "path": ".claude/plans/universal-implementation/reports/P08-A13.md",
+          "sha256": "03491ddca03c64a0d62f36ea080174d7be190b25d433b2e3a0d04203cf0417f9",
+          "start": null
+        },
+        {
+          "end": null,
+          "path": ".claude/plans/universal-implementation/reports/P08.md",
+          "sha256": "371df0998005103a663da054e184b64cd5e7dacccc8a31fac2e32593370c2673",
+          "start": null
+        },
+        {
+          "end": null,
+          "path": ".claude/plans/universal-implementation/reports/P11.md",
+          "sha256": "182e7264fd598f01360ef226bc4772face1bece9a411011a4232cebd083e1db7",
+          "start": null
+        },
+        {
+          "end": null,
+          "path": ".claude/plans/universal-implementation/reviews/A23.5-phase4-removal-b7b245f.md",
+          "sha256": "63192487ac9b88d54e36b26fad48ed64a8e8db9ad496161b7de2239ea0aa37ef",
+          "start": null
+        },
+        {
+          "end": null,
+          "path": ".claude/plans/universal-implementation/reviews/P05-excerpt-context-final.md",
+          "sha256": "42e0ae717e464710604dda994138a8a8420020a32b987c8885711b1ad9273c71",
+          "start": null
+        },
+        {
+          "end": null,
+          "path": ".claude/plans/universal-implementation/reviews/P05-recheck.md",
+          "sha256": "4a3cb79a9eed563ceb340c80a3584ad0127a1d8efeb1ab9351aa1aea8dd43672",
+          "start": null
+        },
+        {
+          "end": null,
+          "path": ".claude/plans/universal-implementation/reviews/P06-component.md",
+          "sha256": "8937098dcfc2389fc08828d095c5c13fd480f21a6649ff5e68d0bf7574e4e023",
+          "start": null
+        },
+        {
+          "end": null,
+          "path": ".claude/plans/universal-implementation/reviews/P06-recheck.md",
+          "sha256": "e6eba1e4c06aea372739d06273d28f38e21e2aa8f6c57c92fe9f12d5a8e2b7b9",
+          "start": null
+        },
+        {
+          "end": null,
+          "path": ".claude/plans/universal-implementation/reviews/P06-shared-boundary-final.md",
+          "sha256": "5f8d262e315aed505b064b3fb3d7524cd11bea9b325f831dd3e64f1c20378b14",
+          "start": null
+        },
+        {
+          "end": null,
+          "path": ".claude/plans/universal-implementation/reviews/P08-combined-2f4cc38.md",
+          "sha256": "1dc9ae7a7b7bf8f7b2fa90d25bfdd756be19fe27a6a6863645906c0fa221d06e",
+          "start": null
+        },
+        {
+          "end": null,
+          "path": ".claude/plans/universal-implementation/reviews/P08-partial.md",
+          "sha256": "9131f1680d756f72503521c4028215df3f53f73b42387e6550b8c9b6d4d17b20",
+          "start": null
+        },
+        {
+          "end": null,
+          "path": ".claude/plans/universal-implementation/reviews/P08-routing-plan-recheck.md",
+          "sha256": "ac57b75105605a2c3ced269a6f9635d5ba98aa6027bd4913947c1ea908e24509",
+          "start": null
+        },
+        {
+          "end": null,
+          "path": ".claude/plans/universal-implementation/reviews/P08-selected-final-229656c.md",
+          "sha256": "ce61df9a1850be20ca57bd26a4bc055b27fcd6d71e74b0f7ac1da40d8d5892a0",
+          "start": null
+        },
+        {
+          "end": null,
+          "path": ".claude/plans/universal-implementation/reviews/P11-browser-final-14b419c.md",
+          "sha256": "184c76777f0339e21d107af08682cb45362f20716924a46dbe1d603145e516bb",
+          "start": null
+        },
+        {
+          "end": null,
+          "path": ".claude/plans/universal-implementation/reviews/P11-browser-final-d3b5569.md",
+          "sha256": "071e0d878049a83b5c12282b4a384963f946374d475adee7ae0ffb587e80ddd4",
+          "start": null
+        },
+        {
+          "end": null,
+          "path": ".claude/plans/universal-implementation/reviews/P11-design-f72f316.md",
+          "sha256": "4d1bd906d75a2244ffd67d3e4d7012adbb986ba45d6c124527d22e0073868f8c",
+          "start": null
+        },
+        {
+          "end": null,
+          "path": ".claude/plans/universal-implementation/reviews/P12-common-source-32dac88.md",
+          "sha256": "fe1cc9b776a131b67605e4cf5a0b7224cd0b5e20a3841534ffa0f21c870b46e8",
+          "start": null
+        },
+        {
+          "end": null,
+          "path": ".claude/plans/universal-implementation/reviews/P12-pdf-5978def.md",
+          "sha256": "6197da20821420272034354c560726a8f23ad24979a1b154cb9a928c456de009",
+          "start": null
+        },
+        {
+          "end": null,
+          "path": ".claude/plans/universal-implementation/reviews/P13-consumers-7884ddd.md",
+          "sha256": "769ed6345de88107b0aaddc7d39b6c9f41c47cd01ac333ecec2aceda1c991680",
+          "start": null
+        }
+      ],
+      "acceptance_paths": [
+        ".claude/engineering/audits/2026-09-20-universal-quality/reviews/upstream.md",
+        ".claude/engineering/audits/lintel-five-lens-audit.md",
+        ".claude/engineering/audits/lintel-uniformity-MASTER.md",
+        ".claude/engineering/audits/lintel-uniformity-cross-X1-concept-consistency.md",
+        ".claude/engineering/audits/lintel-uniformity-cross-X3-evolution.md",
+        ".claude/engineering/audits/lintel-uniformity-cross-X4-entry-point-matrix.md",
+        ".claude/engineering/audits/lintel-uniformity-findings-cohort1-phase-core.md",
+        ".claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md",
+        ".claude/engineering/audits/lintel-uniformity-findings-cohort3-handoff.md",
+        ".claude/engineering/audits/lintel-uniformity-findings-cohort7-packs-roles.md",
+        ".claude/engineering/evolution/2026-06-10-v4.11-launch-polish.md",
+        ".claude/plans/legacy-cleanup/plan.md",
+        ".claude/plans/legacy-cleanup/prompt.md",
+        ".claude/plans/legacy-cleanup/spec.md",
+        ".claude/plans/universal-implementation/reports/P06.md",
+        ".claude/plans/universal-implementation/reports/P08-A13.md",
+        ".claude/plans/universal-implementation/reports/P08.md",
+        ".claude/plans/universal-implementation/reports/P11.md",
+        ".claude/plans/universal-implementation/reviews/A23.5-phase4-removal-b7b245f.md",
+        ".claude/plans/universal-implementation/reviews/P05-excerpt-context-final.md",
+        ".claude/plans/universal-implementation/reviews/P05-recheck.md",
+        ".claude/plans/universal-implementation/reviews/P06-component.md",
+        ".claude/plans/universal-implementation/reviews/P06-recheck.md",
+        ".claude/plans/universal-implementation/reviews/P06-shared-boundary-final.md",
+        ".claude/plans/universal-implementation/reviews/P08-combined-2f4cc38.md",
+        ".claude/plans/universal-implementation/reviews/P08-partial.md",
+        ".claude/plans/universal-implementation/reviews/P08-routing-plan-recheck.md",
+        ".claude/plans/universal-implementation/reviews/P08-selected-final-229656c.md",
+        ".claude/plans/universal-implementation/reviews/P11-browser-final-14b419c.md",
+        ".claude/plans/universal-implementation/reviews/P11-browser-final-d3b5569.md",
+        ".claude/plans/universal-implementation/reviews/P11-design-f72f316.md",
+        ".claude/plans/universal-implementation/reviews/P12-common-source-32dac88.md",
+        ".claude/plans/universal-implementation/reviews/P12-pdf-5978def.md",
+        ".claude/plans/universal-implementation/reviews/P13-consumers-7884ddd.md"
+      ],
+      "leaf_ids": [
+        "0.2.c",
+        "9.3.a",
+        "10.2.a"
+      ],
+      "map_digest": "1ea633652c308129d8926f157c5a6910c4983f4a1e688d1c3a6bddd42930e4a0",
+      "package_id": "INTEGRATE",
+      "work_map": ".claude/plans/legacy-cleanup/work.json"
+    }
+  },
+  "reviewer": {
+    "id": "cleanup-quality-reviewer",
+    "context": "copilot-session:8b0c4a2f-3e1b-4c3d-8237-74d02ff29710"
+  },
+  "provenance": "declared",
+  "controls": [
+    {
+      "applicability": "applicable",
+      "id": "historical-spans",
+      "kind": "check",
+      "policy": {
+        "actor": null,
+        "applicability": "Only exact historical-span semantic classification, not release or runtime approval",
+        "effective_date": null,
+        "jurisdiction": null,
+        "source": ".claude/plans/legacy-cleanup/spec.md",
+        "version": "2026-09-25"
+      },
+      "requirement": "mandatory",
+      "status": "pass",
+      "reason": "Only the49 exact LF declarations accepted by BOTH independent actors; allfive rejected/disputed declarations remain excluded.",
+      "evidence": [
+        ".claude/plans/legacy-cleanup/span-reviews/final-spec-decisions.json",
+        ".claude/plans/legacy-cleanup/span-reviews/final-quality-decisions.json"
+      ],
+      "observation": {
+        "span_declarations": [
+          "05c967ec6e751abef1e3962bb5ab0d4e8a0d5712d6f57feaed2fc4b4fa091e57",
+          "09824aebdc558e76b3de5430871fad688b8d3208a13a0dc1e96101d5ea8eabda",
+          "0ba8931d0a70a54dc79b956bf753ac703ac95d75bd34f85ebc6f4457f551d31e",
+          "0c552e16ee582795ef0195a58cb6205db1674fcf3f23236f037a2255385ac0d5",
+          "11a2c70243213db365f20afc1875d835bcf8fb9132bc1d4a89396d9f0d0da166",
+          "13fe362c00b8142e76058a2c3820550b44b04f656483cfdef03ab5e5a3866462",
+          "149291fe98adc5508819331d75f1443658f6cb54052d1c23e32236512c6c87a2",
+          "16166b96ca8e74f69ad436466a9799238e2aaca4cb4abba5b32c2e4a7a5dc0cc",
+          "196ba3d967a03949dbeb1b72a1cf0f4f19e0cacfca7d225c25d4290a7a429b5d",
+          "1bcb2c6f97a52d3aa2143001bd5bda41cb4dcab724532c559e3db6c1668b5a01",
+          "23516ac77eb68548a68d9e83c95a34dc7c834f72adee329344832185bd90d470",
+          "2cd11ce2b6218da1648f316b8f9c5dabcf93d84432df54d9b2a94b359ee22594",
+          "348b8b59866899a96d98c6a7156b50123f70b46bb9737c56c4e2c3f3ba43e345",
+          "3bb202bd49825e7f68f25e8583620b4911a0a3c5c1d3776d6407f53af1636afa",
+          "3e71ba7034cf5592f55e51e5f4ac438f6601e097b3a85a660558fd1b0b4751f6",
+          "44ce8ab65d174b7de098604b305125f3d6e6e0d10acb28cc55adae66bd815db9",
+          "4e5c05d0489ee22ca75a0c324d287532176e0e8f5d2e3cb3eeb69e07ef2b1457",
+          "503f64c570aae8a68c22535137c75eaf1a3b5496a6611540a8cc2e50b5af7097",
+          "523bf246e6c546b1749949495116abeb61bd4457bb3bb17f8ca93013e1bfc10d",
+          "56217b2f4e27f7e59c63982bf3a9a3fc578855a5285169d04a6f317a89b3282c",
+          "61f16fb39d379f8a176a7a3d817188c5c404adde534205c5c45e2412f87e3845",
+          "662b20049e6a8cdd10bb4fc682a4e31120b82683f5f5bfeb05767d7ba3552698",
+          "668a4096cbca68a3865d67e0e953148b99eb0eefb7adbc165edd25a83a2e6bbd",
+          "6699694c60b2a202ddfb275dbc516a2d6cf40d5aaea5820cbd13ad1d5bf268de",
+          "696151e591bad584597276bae8e6c55a668cd205ee1b25fe99f705d32f502aad",
+          "71cdaac6637488df1b72aa3ee1a35fa6a796fdd926473f652d09edb4731493c6",
+          "783d8b747e69ff6ffad8adb4baa11ba2b4f4bcf6d9fca1851411e580ae0dc126",
+          "80acd60f6f1a8e6aa02066c26e0dca5271f5fc6af280582ebbe283677414aee0",
+          "82a742f27c3f7fa5ccf26a470bdc2086e0d20098eed2a6fe7ce4c1390d69bd54",
+          "873e2870ac31571579e5e4cb4ad749a7477cfdb3702bc793721767fee10f469a",
+          "87601d7f4f5d89c63d2bc72dbe82dec3e03df7e88b093e5c3b96a8d872f2a785",
+          "897888fffa7c8de935aedc993aa104bbb667f20d830dbd0928030a4baf2bd8f0",
+          "8c5fd2eb0929f0cc041da70dfbe2389faacb5ebcc1b14a1f52335c2838b4e515",
+          "8db991bb87a947dac6070861cabe920da3791e82456d2b8590e7a129715b8b97",
+          "90e099d29246b075c05e29c42bb653a4217aeda2b4225d82a4cf49905d655fa1",
+          "982e4da62b244ba2ad7ccc1133f0d650536f9bb3d1ff216ba8ceae79a903bb37",
+          "a21741b143b6dbcc7d2dde2fcca66d9b3aaa6f2d94daba1d02548ca5760cdd33",
+          "b2b31d8fabfc7cbfb4da8d56babd2c5622d3a635c694c012cb57b8310934ac8b",
+          "bcba47dbd8ef0ab039a684f1440ce9410675e3538f4ee32717a7af61dbd8e410",
+          "be73b533c9519fd938d5c590dc3adff40facfa0f6ca3e83e0b96b8dfe4f24cb5",
+          "bfeaddbfe259c9ca64e7bf16d6a517c601aa9d4c59ae74227226a88a32c5baf9",
+          "c21323af4b958186f3c5a9056c2e8d30c1073c80655a03de379fd92fc375823e",
+          "d0b8745615ec950c5e7a3d05cdaca2f2da3521a2f9869d8cafbf22485675e2e1",
+          "d4e854a4e61bcd8916c51c0c00e1525d7d5f2502490e98982f5e9be7b1244a65",
+          "da5f6fa74b6f169d5efb405a587c4c7a1657fc59cce9317b5b2c5ddfe50b615c",
+          "dddf96ebafe2abf029abf51e16da829bae5a6c6b8453288143e1feaf913c0ba6",
+          "e5cd91c2865a44601a272334619bb8351d2ac1171f22d3508afd15d2c57bbe7a",
+          "ef72eca9afedd3e3576517a9dcef1f9af0fd34c3bef72ec23f63ba42d7efec50",
+          "fd9ff43dc018df9ec93ff56872d8f6ef0f9106664b5e02bb2ef8e79dea4f8cc9"
+        ],
+        "review_scope": "semantic classification only",
+        "rejected_declarations": [
+          "9e94019d9147fe3c951bd3d812d53ae0d99be608f06656f0bd6c66ec1c126a90",
+          "773639ec16de6b88226d85d4bf47f32efcdf553b90bb14228ee7dee6db07a8c5",
+          "504ed77ffc678ceb127e2bd1de72a5280af7ec9245aa6d9607feb654c9a0a2bb",
+          "88612672e6eeec715402af64042de09a29d6110bf2e7e7cbaa05bcbf8e114319",
+          "ce29b0bb01cfdced6c9fee6098d7e28206bf36e85d1aeea871fb042bb67d2caa"
+        ]
+      }
+    }
+  ],
+  "coverage": {
+    "0.2.c": [
+      "historical-spans"
+    ],
+    "9.3.a": [
+      "historical-spans"
+    ],
+    "10.2.a": [
+      "historical-spans"
+    ]
+  },
+  "evidence": [
+    {
+      "path": ".claude/plans/legacy-cleanup/span-reviews/final-quality-decisions.json",
+      "sha256": "49849ac92449ac2fde2fbd8816807a830ff63ee895ae42a04226957e988a6c45"
+    },
+    {
+      "path": ".claude/plans/legacy-cleanup/span-reviews/final-spec-decisions.json",
+      "sha256": "4f3573c78baa4f7156c749d795afe83f67035d5558c31fa9a59e34250adaf894"
+    }
+  ]
+}
