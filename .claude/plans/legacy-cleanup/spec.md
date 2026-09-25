@@ -73,8 +73,8 @@ receipts, no-Python bare installation, native path identity and exact strict CI 
 - No new third-party dependency, including the refused PDF reader dependency.
 - The 09:13 CEST upstream update removes the PDF reader `check_pdf.py`, not the writer.
   Do not preserve/reintroduce that reader or claim it passed.
-- Frozen until PR #93 merges: `skills/generate-pdf/scripts/check_pdf.py`,
-  `bin/li-copilot.py`, `lib/capability-selections.json`, `skills/generate-pdf/SKILL.md`,
+- PR #93 has merged and removed that reader (ADR-0033). Its freeze ended at the merge;
+  it had covered the reader, `bin/li-copilot.py`, `lib/capability-selections.json`, `skills/generate-pdf/SKILL.md`,
   `tests/README.md`, `tests/integration/document-pdf.py`, its `.sh` entry,
   `tests/integration/copilot-kit.py`, `tests/unit/catalog-selection.py`,
   `tests/unit/generate-skills-present.sh`, all derived catalogs/wiki/adapters,
