@@ -1,5 +1,9 @@
 # Cross-cutting pass X2 — promise verification
 
+> Retained historical narrative. Terminology was neutralized on 2026-09-25;
+> former external path/name labels are symbolic, not executable current routes.
+> Original dates, finding IDs and recorded outcomes remain historical, not rerun acceptance.
+
 **Pass:** X2 of 5 (per `.claude/engineering/audits/lintel-uniformity-audit-prompt.md` §"Cross-component checks")
 **Date:** 2026-05-29
 **Branch:** v4.0-phase1-meta-infra-spine (mid v4.0 reframe, Phase 1 of 3)
@@ -29,7 +33,7 @@ Verdict vocabulary:
 | 7 | Mandatory pause at PLAN approval (founder gate) | **UPHELD** | PLAN (+ its callers) | PLAN built, gate MANDATORY, BLOCKED-on-3x-reject |
 | 8 | Navigation mandatory on workflow_root (v4.0) | **DESIGNED-NOT-BUILT** | every workflow_root skill (cycle, plan) | 0 declare navigation; shape test is Phase-1 WARN-only |
 | 9 | Override-with-audit (every gate has --override + audit; audit consumed) | **PARTIALLY-UPHELD** | all gates/hooks | override+audit present; two divergent writers; highest-stakes overrides bypass unified trail; some audits write-only |
-| 10 | First-party-first (no gstack/3P binary on execution path) | **BROKEN** | all execution-path skills | 4+ planner skills + design-review call `~/.claude/skills/gstack/bin/*` on the path |
+| 10 | First-party-first (no retired-provider/3P binary on execution path) | **BROKEN** | all execution-path skills | 4+ planner skills + design-review call `~/.claude/skills/retired-provider/bin/*` on the path |
 
 **Counts: UPHELD 1 · PARTIALLY-UPHELD 4 · BROKEN 2 · DESIGNED-NOT-BUILT 3.**
 
@@ -202,19 +206,19 @@ Verdict vocabulary:
 
 ---
 
-### Promise 10 — First-party-first (no gstack/3P binary on execution path)
+### Promise 10 — First-party-first (no retired-provider/3P binary on execution path)
 
 **Verdict: BROKEN.**
 
 **The claim.** CLAUDE.md (project): "Lintel claims first-party-first." The motto's MS-CAIP-SE framing prefers MS/first-party. A dedicated hook (`non-first-party-warn`) and skill (`first-party-check`) exist to enforce it. The promise: no external-plugin binary sits on Lintel's own execution path.
 
-**Evidence — the planner sub-chain depends on gstack binaries on the path.**
-- "the 4 reviews call `~/.claude/skills/gstack/bin/gstack-review-log` — an external gstack-plugin binary path, violating first-party-first." (cohort 2 top finding 2, line 718; plan-ceo-review D13 line 230 "a gstack-plugin binary path, not a Lintel-owned one. Brand + dependency fragmentation"; plan-eng-review D13 line 322; plan-design-review D13 line 411; plan-devex-review D13 line 500).
-- plan-design-review also "depends on an external gstack design binary" `~/.claude/skills/gstack/design/dist/design` (cohort 2 line 712; D11 line 399).
-- codex persists via `gstack-review-log` (cohort 3, codex D3 line 780, D5 line 791) — "persist via the canonical envelope/jobs log, not gstack-review-log (CF-1 sibling)."
-- Storage-root schism reinforces the coupling: context-save/restore write/read `~/.gstack/projects/<slug>/checkpoints/` (cohort 3 CF-1, line 50-60); the planner chain's projects-dir is split `~/.lintel/projects/` (producer) vs `~/.gstack/projects/` (consumers) — "the chain hand-off is literally broken at the directory level" (cohort 2 top finding 1, line 716).
+**Evidence — the planner sub-chain depends on retired-provider binaries on the path.**
+- "the 4 reviews call `~/.claude/skills/retired-provider/bin/retired-provider-review-log` — an external retired-provider-plugin binary path, violating first-party-first." (cohort 2 top finding 2, line 718; plan-ceo-review D13 line 230 "a retired-provider-plugin binary path, not a Lintel-owned one. Brand + dependency fragmentation"; plan-eng-review D13 line 322; plan-design-review D13 line 411; plan-devex-review D13 line 500).
+- plan-design-review also "depends on an external retired-provider design binary" `~/.claude/skills/retired-provider/design/dist/design` (cohort 2 line 712; D11 line 399).
+- codex persists via `retired-provider-review-log` (cohort 3, codex D3 line 780, D5 line 791) — "persist via the canonical envelope/jobs log, not retired-provider-review-log (CF-1 sibling)."
+- Storage-root schism reinforces the coupling: context-save/restore write/read `~/.retired-provider/projects/<slug>/checkpoints/` (cohort 3 CF-1, line 50-60); the planner chain's projects-dir is split `~/.lintel/projects/` (producer) vs `~/.retired-provider/projects/` (consumers) — "the chain hand-off is literally broken at the directory level" (cohort 2 top finding 1, line 716).
 
-**Why BROKEN, not a nit.** Lintel ships a hook and a skill to enforce first-party-first against the *target repo*, while its own review/observability execution path calls a gstack-plugin binary at a `~/.claude` path. "Depending on a gstack bin at a ~/.claude path couples the chain to an external plugin install" (cohort 2 line 237). The framework breaks the exact rule it enforces on others — and worse, the dependency is load-bearing (review-log write+verify-read is the observability spine of the planner chain, cohort 2 line 326). The audit-prompt explicitly cites this as a known break ("cohort 2 found reviews call a gstack binary = first-party-first broken"). **Uplift (per cohort 2):** route through a Lintel-owned `li-review-log`; alias the gstack path for back-compat (NO-CUT).
+**Why BROKEN, not a nit.** Lintel ships a hook and a skill to enforce first-party-first against the *target repo*, while its own review/observability execution path calls a retired-provider-plugin binary at a `~/.claude` path. "Depending on a retired-provider bin at a ~/.claude path couples the chain to an external plugin install" (cohort 2 line 237). The framework breaks the exact rule it enforces on others — and worse, the dependency is load-bearing (review-log write+verify-read is the observability spine of the planner chain, cohort 2 line 326). The audit-prompt explicitly cites this as a known break ("cohort 2 found reviews call a retired-provider binary = first-party-first broken"). **Uplift (per cohort 2):** route through a Lintel-owned `li-review-log`; alias the retired-provider path for back-compat (NO-CUT).
 
 ---
 
@@ -233,5 +237,5 @@ Verdict vocabulary:
 
 **3 most-broken promises:**
 1. **Pack-driven behavior (BROKEN)** — `lib/pack-resolver.sh` is built, tested, self-described as a 30+-skill critical-path interface, and has ZERO consumers; every skill grep-reads legacy `profile.yaml` against a different file than the canonical `pack.yaml`.
-2. **First-party-first (BROKEN)** — Lintel's own planner reviews + codex + design-review call gstack-plugin binaries (`~/.claude/skills/gstack/bin/gstack-review-log`, gstack design binary) on the execution path, violating the rule Lintel ships a hook to enforce on others.
+2. **First-party-first (BROKEN)** — Lintel's own planner reviews + codex + design-review call retired-provider-plugin binaries (`~/.claude/skills/retired-provider/bin/retired-provider-review-log`, retired-provider design binary) on the execution path, violating the rule Lintel ships a hook to enforce on others.
 3. **Cross-session memory via lessons (PARTIALLY-UPHELD, write-only)** — CAPTURE/role-update write lessons but PLAN, BUILD, REVIEW, SHIP, the entire planner chain, and ~80 of 83 agents never read them; the marquee miss is "don't mock Azure SDK" never reaching the BUILD implementer.

@@ -1,5 +1,9 @@
 # Lintel uniformity audit — VOTE register
 
+> Retained historical narrative. Terminology was neutralized on 2026-09-25;
+> former external path/name labels are symbolic, not executable current routes.
+> Original dates, finding IDs and recorded outcomes remain historical, not rerun acceptance.
+
 **For:** operator. Mark your choice by putting `[x]` on one approach per decision (or write your own under "operator note").
 **Consolidation:** the 8 cohorts flagged ~44 `operator_decision_required: yes` records. Most collapse — e.g. all 7 role-skill flags are the *same* "wire to pack-resolver?" decision. They're consolidated into the 15 distinct decisions below, leverage-ranked. Each links to its source cohort/cross-cut file.
 **Rule:** no option removes functionality. Every approach is an uplift or a wiring/consolidation choice.
@@ -41,21 +45,21 @@
 ---
 
 ## DEC-4 — canonical storage root (fixes live producer/consumer bugs)
-*Source: cohort2, cohort3, X1 · finding #4.* Data lives across `~/.gstack/`, `~/.lintel/sessions/`, in-repo `.lintel/state/`, `~/.lintel/audit/`. Two named consumers can't read their named producer.
+*Source: cohort2, cohort3, X1 · finding #4.* Data lives across `~/.retired-provider/`, `~/.lintel/sessions/`, in-repo `.lintel/state/`, `~/.lintel/audit/`. Two named consumers can't read their named producer.
 
-- [ ] **A (recommended)** — Canonicalize on `~/.lintel/`; fix `context-save`→`dump`/`warm-sessions` paths + planner chain `~/.gstack`→`~/.lintel`. Lintel-native, first-party.
-- [ ] **B** — Canonicalize on `~/.gstack/` (matches gstack tooling the operator also runs). Conflicts with first-party-first.
+- [ ] **A (recommended)** — Canonicalize on `~/.lintel/`; fix `context-save`→`dump`/`warm-sessions` paths + planner chain `~/.retired-provider`→`~/.lintel`. Lintel-native, first-party.
+- [ ] **B** — Canonicalize on `~/.retired-provider/` (matches retired-provider tooling the operator also runs). Conflicts with first-party-first.
 - [ ] **C** — Per-job dirs only (`~/.lintel/jobs/<id>/`) for all transient state; deprecate loose roots.
 
 **Recommendation: A** (with C as the longer-term shape). These are correctness bugs — fix regardless of which root. *Operator note:* ____
 
 ---
 
-## DEC-5 — first-party-first: de-gstack the planner chain?
-*Source: cohort2, X2 · finding #5.* plan-*-review + codex + design-review call gstack-plugin binaries on the execution path.
+## DEC-5 — first-party-first: move the planner chain to native ownership?
+*Source: cohort2, X2 · finding #5.* plan-*-review + codex + design-review call retired-provider-plugin binaries on the execution path.
 
-- [ ] **A (recommended)** — Replace gstack binary calls with in-repo/first-party equivalents (review-log, design tooling). Honors the rule Lintel enforces on others.
-- [ ] **B** — Keep gstack calls but guard behind a capability check + document the dependency. Pragmatic, but the violation stands.
+- [ ] **A (recommended)** — Replace retired-provider binary calls with in-repo/first-party equivalents (review-log, design tooling). Honors the rule Lintel enforces on others.
+- [ ] **B** — Keep retired-provider calls but guard behind a capability check + document the dependency. Pragmatic, but the violation stands.
 - [ ] **C** — Make the planner reviews pack-policy-gated: caip-se pack forbids 3P binaries, _default allows. Ties to DEC-1.
 
 **Recommendation: A.** *Operator note:* ____

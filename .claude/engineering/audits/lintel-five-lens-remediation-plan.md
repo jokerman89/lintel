@@ -1,5 +1,9 @@
 # Lintel — five-lens remediation plan (engineering-reviewed)
 
+> Retained historical narrative. Terminology was neutralized on 2026-09-25;
+> former external path/name labels are symbolic, not executable current routes.
+> Original dates, finding IDs and recorded outcomes remain historical, not rerun acceptance.
+
 **Companion to:** [lintel-five-lens-audit.md](lintel-five-lens-audit.md) (the findings).
 **Review:** `/plan-eng-review` — Step 0 scope challenge + Architecture / Code-Quality / Test / Performance, four operator decisions resolved.
 **Disciplines carried from the audit:** never remove capability (raise weak to strongest peer) · evidence-cited · the four resolved decisions all chose the complete, capability-preserving option.
@@ -59,8 +63,8 @@ Synthesized from the review. P1 blocks ship, P2 same-branch, P3 follow-up. Effor
   - New `tests/shape/no-swedish.sh`: block `å ä ö` + a Swedish-stopword list across `skills/ agents/ hooks/`; allowlist legit cases. Wire into `ci.yml` + a `verify.sh` subcommand.
   - Verify: passes after T1; fails on a planted Swedish line.
 - [x] **T3 (P2, human ~2h / CC ~20min)** — release — identity single-source + sync test [D2]
-  - Canonical slug/version/email in one place; `tests/shape/manifest-identity.sh` asserts all 8 manifests + `install.sh` + `.opencode/INSTALL.md` agree. Rename `bin/li-adr-new` `jstack-*`→`li-*`.
-  - Verify: shape test green; `grep -r jstack- bin/` returns zero.
+  - Canonical slug/version/email in one place; `tests/shape/manifest-identity.sh` asserts all 8 manifests + `install.sh` + `.opencode/INSTALL.md` agree. Rename `bin/li-adr-new` `retired-wrapper-*`→`li-*`.
+  - Verify: shape test green; `grep -r retired-wrapper- bin/` returns zero.
 - [x] **T4 (P2, human ~1h / CC ~10min)** — docs — parameterize hard-coded paths + operator examples
   - `CLAUDE.md:164`, `README.md:88`, `bin/li-lessons-promote:10`, design doc → `$HOME`/placeholder; `"operator":"jokerman"` in 17 HOOK.md → `"<operator>"`.
 

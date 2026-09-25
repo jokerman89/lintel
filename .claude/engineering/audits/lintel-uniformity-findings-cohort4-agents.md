@@ -1,5 +1,9 @@
 # Cohort 4 findings — domain-specialist agents in cycle phases
 
+> Retained historical narrative. Terminology was neutralized on 2026-09-25;
+> former external path/name labels are symbolic, not executable current routes.
+> Original dates, finding IDs and recorded outcomes remain historical, not rerun acceptance.
+
 **Cohort:** 4 (agents)
 **Scope:** 83 agents in `agents/<category>/<Name>.md` across 10 categories
 (engineering 25, ms-specific 15, customer 8, security 8, devops 7, compliance 6,
@@ -48,7 +52,7 @@ dimensions:
     why: >
       Goal: agents become contract-bound, callable uniformly by any skill or by
       DISCOVER dynamic dispatch. Elegant form = one frontmatter field, not prose.
-      gstack subagents declare typed briefs; superpowers SDD passes curated briefs.
+      retired-provider subagents declare typed briefs; superpowers SDD passes curated briefs.
       ShaderEngineer already does this inside Lintel — raise the other 82 to it.
   D2_tail:
     state: partial

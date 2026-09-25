@@ -1,5 +1,9 @@
 # Lintel uniformity remediation plan
 
+> Retained historical narrative. Terminology was neutralized on 2026-09-25;
+> former external path/name labels are symbolic, not executable current routes.
+> Original dates, finding IDs and recorded outcomes remain historical, not rerun acceptance.
+
 **Status:** DRAFT_FOR_REVIEW — produced from the system-wide uniformity audit (8 cohorts + X1–X5 + MASTER + VOTE in `.claude/engineering/audits/`).
 **Branch target:** new work off `v4.0-phase1-meta-infra-spine`.
 **Mode:** **meta-infra** — nearly every task touches `skills/`, `agents/`, `hooks/`, `bin/`, `lib/`. Ships under Gate M1–M4 (structure-impact, compatibility-audit, shape-tests, future-operator validation) per `.claude/engineering/design-archive/lintel-v4.0-reframe-design.md` Ch.4.
@@ -12,8 +16,8 @@
 The audit surfaced three structural themes, not 44 scattered defects:
 
 1. **Built-but-unwired cluster (the dominant theme).** Lintel's best machinery exists, is tested, and has zero consumers: `lib/pack-resolver.sh` (0 callers), `bin/_audit.sh` (0 phase callers), `lessons.md` (write-only). These broke or half-broke 4 architectural promises. The fix is wiring + subtraction — the cheapest, highest-leverage work in the repo.
-2. **A handful of real correctness bugs** hiding under uniformity gaps: producer/consumer path mismatches where a named consumer cannot read its named producer (`context-save`→`context-dump`/`warm-sessions`; planner chain reads `~/.gstack` while office-hours writes `~/.lintel`).
-3. **First-party-first broken in Lintel's own planner chain** — it calls gstack binaries on the execution path, the exact rule Lintel ships a hook to enforce on others.
+2. **A handful of real correctness bugs** hiding under uniformity gaps: producer/consumer path mismatches where a named consumer cannot read its named producer (`context-save`→`context-dump`/`warm-sessions`; planner chain reads `~/.retired-provider` while office-hours writes `~/.lintel`).
+3. **First-party-first broken in Lintel's own planner chain** — it calls retired-provider binaries on the execution path, the exact rule Lintel ships a hook to enforce on others.
 
 Plus: uniform weaknesses (necessity declarations absent on ~148 components; frontmatter drift on 33 agents; counts stale in README), and designed-not-built layers (envelope, Brief Forge, knowhow, wiki, engineering-domain modules) that are on-schedule, not regressions.
 
@@ -90,11 +94,11 @@ Close every BROKEN/PARTIAL promise, fix the correctness bugs, normalize the cont
 
 ### W5 — Correctness bugs + first-party-first (finding #4, #5, #16; DEC-4, DEC-5, DEC-15)
 
-**What:** Fix the live producer/consumer breakages and de-gstack the planner chain. Canonicalize storage on `~/.lintel/`; fix `context-save`→`dump`/`warm-sessions` paths and planner-chain `~/.gstack`→`~/.lintel`. Replace gstack-binary calls in plan-*-review/codex with in-repo equivalents. Unify config (`profile.yaml` canonical; fold `config.yaml`).
+**What:** Fix the live producer/consumer breakages and native-ownership the planner chain. Canonicalize storage on `~/.lintel/`; fix `context-save`→`dump`/`warm-sessions` paths and planner-chain `~/.retired-provider`→`~/.lintel`. Replace retired-provider-binary calls in plan-*-review/codex with in-repo equivalents. Unify config (`profile.yaml` canonical; fold `config.yaml`).
 
 **Files:** `skills/context-{save,dump,warm-sessions}/SKILL.md`, `skills/office-hours/SKILL.md`, `skills/plan-{ceo,eng,design,devex}-review/SKILL.md`, `skills/codex/SKILL.md`.
 **Tasks:** W5.1 canonical-root decision applied; W5.2 fix two broken read paths; W5.3 planner-chain path fix; W5.4 first-party log/tooling swap; W5.5 config unification + migration entry.
-**Tests:** `tests/shape/no-gstack-binary-on-exec-path.sh`; a round-trip test for save→dump.
+**Tests:** `tests/shape/no-retired-provider-binary-on-exec-path.sh`; a round-trip test for save→dump.
 **Verification:** first-party-first BROKEN→UPHELD; the two named consumers find their producer's output.
 
 ### W6 — Targeted depth + dispatch (finding #6, #7, #9, #10; DEC-6, DEC-7, DEC-9, DEC-10)
@@ -126,7 +130,7 @@ W6 (dispatch + DA + jobs) ── W6.5 depends on W1; rest independent
 
 ## Operator decisions folded in (defaults = audit recommendations)
 
-This plan assumes option **A** for all 15 VOTE decisions (the recommended uplift). The load-bearing ones to confirm before W1/W5 start: **DEC-1** (adopt pack-resolver), **DEC-4** (canonical root = `~/.lintel/`), **DEC-5** (de-gstack planner). The rest are "obvious uplift" and can be confirmed at the gate. Full register: `.claude/engineering/audits/lintel-uniformity-VOTE.md`.
+This plan assumes option **A** for all 15 VOTE decisions (the recommended uplift). The load-bearing ones to confirm before W1/W5 start: **DEC-1** (adopt pack-resolver), **DEC-4** (canonical root = `~/.lintel/`), **DEC-5** (native-ownership planner). The rest are "obvious uplift" and can be confirmed at the gate. Full register: `.claude/engineering/audits/lintel-uniformity-VOTE.md`.
 
 ## Verification criteria (plan is "done" when)
 

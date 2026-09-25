@@ -1,5 +1,9 @@
 # Launch-readiness register v2 — public launch (2026-06-18)
 
+> Retained historical narrative. Terminology was neutralized on 2026-09-25;
+> former external path/name labels are symbolic, not executable current routes.
+> Original dates, finding IDs and recorded outcomes remain historical, not rerun acceptance.
+
 > Cycle `launch-readiness` (meta-infra), branch `feat/launch-readiness`. Inventory @ v5.7.1:
 > 125 skills · 69 agents · 33 hooks · 14 lib · 21 bin · 25 ADRs · 93 tests (89/89 green).
 > Built from a 10-agent read-only audit (A1–A8 internal + B1–B2 external research). Severity:
@@ -57,8 +61,8 @@ directly targets "agents ignore the workflow mid-task."
   `plan.md` → the post-PLAN cycle gate is silently DEAD.
 
 **Honesty / brand / correctness:**
-- `skills/doctor/SKILL.md:60` emits `JSTACK-DOCTOR` (pre-rebrand) + `skills/scaffold/SKILL.md:84`
-  `JSTACK-SCAFFOLD` banner.
+- `skills/doctor/SKILL.md:60` emits `retired-wrapper-DOCTOR` (pre-rebrand) + `skills/scaffold/SKILL.md:84`
+  `retired-wrapper-SCAFFOLD` banner.
 - `skills/catalog/SKILL.md:140,149` documents `skills/catalog/bin/regenerate.sh` that does not exist
   (real generator is inlined in `.github/workflows/catalog.yml`).
 - `skills/help/SKILL.md:34,78-81,116` is built on the dead pre-plugin install model (`install.sh`,

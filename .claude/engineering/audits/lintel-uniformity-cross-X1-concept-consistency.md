@@ -1,5 +1,9 @@
 # Cross-cutting pass X1 — concept consistency
 
+> Retained historical narrative. Terminology was neutralized on 2026-09-25;
+> former external path/name labels are symbolic, not executable current routes.
+> Original dates, finding IDs and recorded outcomes remain historical, not rerun acceptance.
+
 **Pass:** X1 of X1–X5 (concept consistency)
 **Standard:** `.claude/engineering/audits/lintel-uniformity-audit-prompt.md` (14 dimensions D1–D14)
 **Inputs:** all 8 cohort findings files (`lintel-uniformity-findings-cohort{1-8}-*.md`)
@@ -60,7 +64,7 @@ Each row = one cohort's **norm** for that dimension; deviators named inline.
 |---|---|---|
 | 1 phase-core | present | `cycle` above (only ABORTED state); 4 composites **partial** (status "inherits") |
 | 2 planner | present | `plan-eng-review` above (BLOCKING exit gate); design/devex **partial** (score-delta, no CLEARED token) |
-| 3 handoff | **split** | lintel-dialect (DONE/BLOCKED) vs gstack-dialect (✓ only, no token) — ~7 below floor; `skill-router` absent |
+| 3 handoff | **split** | lintel-dialect (DONE/BLOCKED) vs retired-provider-dialect (✓ only, no token) — ~7 below floor; `skill-router` absent |
 | 4 agents | partial | every agent has Report format but status vocab inconsistent (DONE vs free-text Verdict) |
 | 5 hooks | present | `job-end` above (DONE/ABORTED/FAILED protocol) |
 | 6 eng-domains | split | SC deep (PASS/NEEDS_ACTION blocks downstream); TA/DA thin (agent report, no verdict) |
@@ -72,7 +76,7 @@ Each row = one cohort's **norm** for that dimension; deviators named inline.
 | Cohort | norm | deviators |
 |---|---|---|
 | 1 phase-core | **partial** | only `plan` has a deterministic caller-relyable contract; `discover` close (full report schema) |
-| 2 planner | partial + **BROKEN** | `office-hours` writes `~/.lintel/projects/`; ceo/eng/design/autoplan read `~/.gstack/projects/` — path break; `plan-tune` correct |
+| 2 planner | partial + **BROKEN** | `office-hours` writes `~/.lintel/projects/`; ceo/eng/design/autoplan read `~/.retired-provider/projects/` — path break; `plan-tune` correct |
 | 3 handoff | **broken** | storage-root schism (4 roots); `context-save`→`context-dump` & →`context-warm-sessions` **live contract breaks**; `context-warm`/`codex` set the bar |
 | 4 agents | partial | prose in/out; structured emitters cite consuming SKILL.md (good); text-report agents have no out-schema |
 | 5 hooks | present | `no-merge-without-review` above (consults review-log); `no-customer-data-in-screenshot` partial (implicit dom.html) |
@@ -202,7 +206,7 @@ Each row = one cohort's **norm** for that dimension; deviators named inline.
 | Cohort | norm | deviators |
 |---|---|---|
 | 1 phase-core | **split** | define/plan/build/review/capture/cycle have `*-metrics.jsonl`; **sense/discover/ship + all 4 composites absent**; composites can't be distinguished from raw cycle (no `invoked_via`) |
-| 2 planner | split | review skills log (via **gstack-bin path** — first-party violation); `office-hours`/`autoplan` emit NO log |
+| 2 planner | split | review skills log (via **retired-provider-bin path** — first-party violation); `office-hours`/`autoplan` emit NO log |
 | 3 handoff | split | `context-warm-customer` bar (durable audit); `skill-router` **absent** (invisible runs) |
 | 4 agents | **absent** | all 83 — no per-agent usage/envelope/cost trail |
 | 5 hooks | present | 17/19 write hooks.jsonl (consumed by hooks-status ✓); **but bypass `_audit.sh`**; `context-bloat-warn` zero audit |
@@ -231,8 +235,8 @@ For each dimension: which cohorts implement it well, which don't, and the single
 worst fragmentation.
 
 - **D1 head** — well: hooks(5), packs/roles(7), planner(2). Weak: agents(4, prose-only). Worst frag: SC has a validated `/li:` entry, peer DA has no entry at all (agent-spawn only).
-- **D2 tail** — well: phase-core(1), packs/roles(7), eng-SC. Weak: handoff(3, dialect split). Worst frag: lintel DONE/BLOCKED dialect vs gstack `✓`-only dialect coexist in cohort 3 — a resume engine can machine-detect half the cohort, not the other half.
-- **D3 in/out contract** — well: hooks(5), packs/roles(7). Weak/broken: planner(2 path bug), handoff(3 schism), cross-cutting(4 no envelope). **Worst frag: live producer/consumer breaks** — `context-save`→`context-dump` and the planner `~/.gstack/` vs `~/.lintel/` path split (a consumer literally cannot read its named producer).
+- **D2 tail** — well: phase-core(1), packs/roles(7), eng-SC. Weak: handoff(3, dialect split). Worst frag: lintel DONE/BLOCKED dialect vs retired-provider `✓`-only dialect coexist in cohort 3 — a resume engine can machine-detect half the cohort, not the other half.
+- **D3 in/out contract** — well: hooks(5), packs/roles(7). Weak/broken: planner(2 path bug), handoff(3 schism), cross-cutting(4 no envelope). **Worst frag: live producer/consumer breaks** — `context-save`→`context-dump` and the planner `~/.retired-provider/` vs `~/.lintel/` path split (a consumer literally cannot read its named producer).
 - **D4 entry-points** — well: phase-core(1), planner(2), packs/roles(7), hooks(5). **Worst frag: agents(4)** — DISCOVER dynamic scan omits the entire `frontend` category + 11 orphan agents reachable by no skill, vs ms-specific/security/compliance fully wired.
 - **D5 checkpoints** — well: **packs/roles(7, strongest)**, phase-core(1). Weak/absent: planner(2), agents(4). Worst frag: every role skill appends a typed 00-state event, but no planner review skill checkpoints mid-flight — peer cohorts on opposite extremes.
 - **D6 recovery** — well: **packs/roles(7)**, phase-core(1), planner(2). Weak: handoff(3 split), agents(4 vocab). Worst frag: within cohort 3, `pair-agent` has the best failure enumeration while `context-snapshot`/`-budget`/`-cool` have no failure-modes section at all.
