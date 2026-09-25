@@ -65,6 +65,16 @@ class CommandSurfaceTests(unittest.TestCase):
             self.assertTrue(any(item.code == "missing-command" for item in self.findings("# API\n\n" + other, "docs/api.md")), fence)
         prose = "# API\n\n- skill: str\n\n" + block
         self.assertTrue(any(item.line == 3 for item in self.findings(prose, "docs/api.md")))
+        literals = (
+            'request = """\nskill: qa\n"""\n',
+            "note = '''\nskill: qa\n'''\n",
+            'value = f"""\nskill: qa\n"""\n',
+        )
+        for literal in literals:
+            fenced = "# API\n\n```python\n" + literal + "```\n"
+            self.assertTrue(any("qa" in item.message for item in self.findings(fenced, "docs/api.md")), literal)
+        broken = "# API\n\n```python\ndef f(*, skill: str\n```\n"
+        self.assertTrue(any(item.code == "missing-command" for item in self.findings(broken, "docs/api.md")))
         after = "# API\n\n" + block + "\nskill: str\n"
         self.assertTrue(any(item.code == "missing-command" for item in self.findings(after, "docs/api.md")))
 
@@ -93,7 +103,12 @@ class CommandSurfaceTests(unittest.TestCase):
                             text.replace("plus\n", "plus /li:plan-and-build\n"),
                             text + "\n## Ownership\n\n" + field,
                             text.replace("## Ownership", "## Current routing"),
-                            text.replace("# P99 - Original card", "# P99 - Current card")):
+                            text.replace("# P99 - Original card", "# P99 - Current card"),
+                            # A fenced old heading or title is not the actual section or H1.
+                            text.replace("## Ownership\n\n", "## Current routing\n\n```text\n## Ownership\n```\n\n"),
+                            text.replace("# P99 - Original card\n",
+                                         "# P99 - Current card\n\n```text\n# P99 - Original card\n```\n"),
+                            text + "\n# P99 - Original card\n"):
                 self.assertTrue(self.findings(variant, path), variant[-60:])
         # Without the recorded proof the same bytes are ordinary current text.
         self.assertTrue(self.findings(text, path))

@@ -14,10 +14,12 @@ import importlib.util
 import hashlib
 from html.parser import HTMLParser
 from html import unescape
+import io
 import json
 import os
 from pathlib import Path
 import re
+import tokenize
 import stat
 import subprocess
 import sys
@@ -616,15 +618,20 @@ def source_revision_observations(text: str, relative: str, observe) -> None:
     if declared is None:
         return
     revision, title, fields = declared
+    boundaries = observation_support("markdown_source").classify_markdown(text)
+    headings = [(line.start, text[line.start:line.end]) for line in boundaries.lines
+                if line.kind == "prose" and not line.container_ids
+                and re.match(r"#{1,6} ", text[line.start:line.end])]
+    titles = [label for _, label in headings if label.startswith("# ")]
+    if titles != [title]:
+        return  # A missing, changed, fenced-only or second actual H1 binds nothing.
     lines = text.split("\n")
     offsets = [0]
     for line in lines:
         offsets.append(offsets[-1] + len(line) + 1)
-    if next((line for line in lines if line.startswith("# ")), None) != title:
-        return
 
-    def section(index):
-        return next((lines[i] for i in range(index - 1, -1, -1) if re.match(r"#{1,6} ", lines[i])), None)
+    def section(offset):
+        return next((label for start, label in reversed(headings) if start < offset), None)
 
     for heading, kind, size, digest in fields:
         spans = []
@@ -632,16 +639,16 @@ def source_revision_observations(text: str, relative: str, observe) -> None:
             for index in range(len(lines) - size + 1):
                 window = "\n".join(lines[index:index + size]) + "\n"
                 if hashlib.sha256(window.encode("utf-8")).hexdigest() == digest:
-                    spans.append((index, offsets[index], offsets[index] + len(window) - 1))
+                    spans.append((offsets[index], offsets[index] + len(window) - 1))
         elif kind == "cell":
             for index, line in enumerate(lines):
                 cells = line.split("|") if line.startswith("|") else []
                 if len(cells) > size + 1 and hashlib.sha256(cells[size].encode("utf-8")).hexdigest() == digest:
                     start = offsets[index] + len("|".join(cells[:size])) + 1
-                    spans.append((index, start, start + len(cells[size])))
+                    spans.append((start, start + len(cells[size])))
         if len(spans) != 1 or section(spans[0][0]) != heading:
             continue  # Changed, duplicated, moved or unbound fields receive no observation.
-        _, lower, upper = spans[0]
+        lower, upper = spans[0]
         field = text[lower:upper]
         tokens = {(m.start(), m.end()) for pattern in (SKILL_PATH, DISTINCTIVE_COMMAND)
                   for m in pattern.finditer(field)}
@@ -651,7 +658,6 @@ def source_revision_observations(text: str, relative: str, observe) -> None:
                     f"Exact field bytes of this record at {revision[:12]} ({title}); that version's declared scope or "
                     "acceptance, not a current routing instruction or authorization of current selected work. "
                     "Adjacent prose and every other occurrence remain checked.")
-
 
 def observation_fields(value: object) -> list[tuple[tuple, str, str]]:
     """Classify inspected data fields, not a schema, authorization or binding verdict."""
@@ -1372,8 +1378,9 @@ def routing_lines(text: str, relative: str, exemptions: list[dict],
 
 
 def python_fence_lines(text: str) -> set[int]:
-    """Line numbers inside fenced blocks whose info string declares Python (shared classifier)."""
+    """Code lines of fenced Python blocks that no string token touches (shared classifier, tokenize)."""
     selected: set[int] = set()
+    blocks: list[list[int]] = []
     fence = None
     for line in observation_support("markdown_source").classify_markdown(text).lines:
         if line.kind != "fenced_code":
@@ -1384,14 +1391,28 @@ def python_fence_lines(text: str) -> set[int]:
         if fence is None:
             info = marker[2].strip().split() if marker else []
             fence = (marker[1] if marker else "", bool(info) and info[0].casefold() in {"python", "py", "python3"})
+            if fence[1]:
+                blocks.append([])
             continue
         if marker and marker[1].startswith(fence[0]) and not marker[2].strip():
             fence = None
             continue
         if fence[1]:
-            selected.add(text.count("\n", 0, line.start) + 1)
+            blocks[-1].append(line.start)
+    lines = text.split("\n")
+    for starts in blocks:
+        numbers = [text.count("\n", 0, start) + 1 for start in starts]
+        indent = min((len(lines[n - 1]) - len(lines[n - 1].lstrip()) for n in numbers if lines[n - 1].strip()), default=0)
+        source = "\n".join(lines[n - 1][indent:] for n in numbers) + "\n"
+        touched: set[int] = set()
+        try:
+            for token in tokenize.generate_tokens(io.StringIO(source).readline):
+                if token.type in {tokenize.STRING, tokenize.COMMENT} or token.type == getattr(tokenize, "FSTRING_START", -1):
+                    touched.update(range(token.start[0], token.end[0] + 1))
+        except (tokenize.TokenError, IndentationError, SyntaxError):
+            continue  # Unparseable code gains no annotation exemption.
+        selected.update(n for index, n in enumerate(numbers, 1) if index not in touched)
     return selected
-
 
 def scan(root: Path, check: str = "all", exemptions: list[dict] | None = None) -> list[Finding]:
     root = root.resolve()
