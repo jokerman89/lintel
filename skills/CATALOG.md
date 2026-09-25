@@ -80,7 +80,7 @@ Total skills: 94
 | [`/li:perfbench`](perfbench/SKILL.md) | Measure performance — runtime, memory, cold-start — and detect regressions vs baseline. |
 | [`/li:plan`](plan/SKILL.md) | Use after DISCOVER, or standalone with an approved design, to produce the cold-executor trio (plan.md + spec.md + promp… |
 | [`/li:profile-switch`](profile-switch/SKILL.md) | Inspect host install state and guide explicitly supported activation or owned snapshot recovery, without inventing plug… |
-| [`/li:resume`](resume/SKILL.md) | Use in a fresh session to resume selected committed work, a cycle or a job, or read an owned checkpoint with --from wit… |
+| [`/li:resume`](resume/SKILL.md) | Use when returning in a fresh session to resume selected committed work, a cycle or a job, or read an owned checkpoint … |
 | [`/li:review`](review/SKILL.md) | Use after BUILD, before SHIP, to adversarially review what was built — checks spec compliance, code quality, the active… |
 | [`/li:role`](role/SKILL.md) | Use to take on or change a working role — activate one for a lightweight lens, turn it off, swap mid-session, apply its… |
 | [`/li:role-new`](role-new/SKILL.md) | Scaffold a new role file from template via guided interview — IDENTITY, COLD KNOWLEDGE, DECISION CRITERIA, OUTCOME LENS… |
@@ -93,7 +93,7 @@ Total skills: 94
 | [`/li:scope`](scope/SKILL.md) | Use after SENSE, before DEFINE, when a request's size is ambiguous — turns a raw ask into a sized, disambiguated scope … |
 | [`/li:sense`](sense/SKILL.md) | Use at the very start of a task to read the situation before deciding how to work — detects operator intent, the active… |
 | [`/li:ship`](ship/SKILL.md) | Use after REVIEW passes, when reviewed work is ready to land, to open a PR, deploy, or hand off to a customer — runs th… |
-| [`/li:skill-new`](skill-new/SKILL.md) | Turn a recurring task or pattern into a new Lintel skill — scaffolds SKILL.md from TEMPLATE. |
+| [`/li:skill-new`](skill-new/SKILL.md) | Use to turn an authorized recurring task or pattern into a new Lintel skill draft using the existing scaffold and front… |
 | [`/li:skill-router`](skill-router/SKILL.md) | Semantic skill router — given free-text user intent, suggests top 3 matching Lintel skills with rationale. |
 | [`/li:spec-kit`](spec-kit/SKILL.md) | Use when a repository has GitHub Spec Kit artifacts and needs Lintel planning, build-card execution, review or session … |
 | [`/li:status`](status/SKILL.md) | Use to quickly check where you are in flight — shows what's open right now, an alias for listing jobs. The fast "what w… |

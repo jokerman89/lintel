@@ -1,7 +1,7 @@
 # Uniformity coverage matrix — generated
 
-Generated: 2026-09-25T09:41:49Z by `bin/li-uniformity`. **Do not hand-edit** — regenerate
-from frontmatter. Contract: [uniformity-contract.md](../concepts/uniformity-contract.md).
+Generated: 2026-09-25T10:21:33Z by `bin/li-uniformity`. **Do not hand-edit** — regenerate
+from frontmatter. Contract: [uniformity-contract.md](../../../docs/concepts/uniformity-contract.md).
 
 This is the living dashboard for uniformity-as-contract. The FLOOR (D14
 necessity on workflow_root skills + block-hooks) is mechanically enforced by
