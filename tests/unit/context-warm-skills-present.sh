@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # tests/unit/context-warm-skills-present.sh
 #
-# Verifies v3.5 context-warming infrastructure: 10 skills present + valid.
+# Verifies the consolidated continuity surface and retained external-source workflows.
 # Bare-name form: skill folder/name bare (no li- prefix), invocation /li:<name>.
 # tag: v3.5 context-warming
 
@@ -16,16 +16,13 @@ fail() { echo "  FAIL: $1"; FAILED=1; }
 echo "tests/unit/context-warm-skills-present.sh"
 echo "========================================="
 
-# 10 context-warming skills (bare folder names)
+# Canonical entry points (bare folder names).
 WARM_SKILLS=(
   context-warm
-  context-warm-related
-  context-warm-sessions
-  context-warm-adrs
   context-warm-customer
   context-warm-from-url
-  context-save
-  context-restore
+  pause
+  resume
   context-budget
   context-cool
 )
@@ -67,7 +64,7 @@ pass "all context-warming skills have layer: foundation"
 
 # context-warm is the base, most variants reference /li:context-warm.
 # from-url uses WebFetch directly (not delegating); excluded from delegation check.
-DELEGATING_VARIANTS=(context-warm-related context-warm-sessions context-warm-adrs context-warm-customer)
+DELEGATING_VARIANTS=(context-warm-customer)
 for variant in "${DELEGATING_VARIANTS[@]}"; do
   f="$REPO_ROOT/skills/$variant/SKILL.md"
   [ -f "$f" ] || continue
@@ -78,6 +75,18 @@ for variant in "${DELEGATING_VARIANTS[@]}"; do
   fi
 done
 pass "all delegating context-warm variants reference /li:context-warm"
+
+for heading in '## Select before reading' '## Related mode' '## ADR mode' '## Sessions mode'; do
+  if grep -Fxq "$heading" "$REPO_ROOT/skills/context-warm/SKILL.md"; then
+    pass "context-warm retains $heading"
+  else
+    fail "missing context-warm mode: $heading"
+  fi
+done
+for retired in context-save context-restore context-warm-related context-warm-adrs context-warm-sessions; do
+  [ ! -f "$REPO_ROOT/skills/$retired/SKILL.md" ] && pass "redundant entry retired: $retired" ||
+    fail "redundant context entry remains: $retired"
+done
 
 # Budget tracking referenced in base skill
 if grep -q 'context-budget.md' "$REPO_ROOT/skills/context-warm/SKILL.md"; then

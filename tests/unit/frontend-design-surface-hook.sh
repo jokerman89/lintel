@@ -96,9 +96,15 @@ fi
 
 # Operator-disable escape hatch
 if grep -q "frontend-design-surface-disabled" "$RUN_SH"; then
-  pass "run.sh respects --no-design-surface escape hatch"
+  pass "run.sh reads the current disable-preference path"
 else
-  fail "run.sh missing operator-disable escape hatch"
+  fail "run.sh missing the current disable-preference path"
+fi
+
+if grep -q "legacy_disabled" "$RUN_SH"; then
+  fail "run.sh must not read or recreate expired migration preferences"
+else
+  pass "run.sh no longer reads expired migration preferences"
 fi
 
 # Step 4 — Behavior smoke test (use temp HOME to avoid contaminating real state)

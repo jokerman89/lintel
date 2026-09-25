@@ -1,5 +1,9 @@
 # Lintel uniformity audit — Cohort 3: Brief Forge / hand-off / envelope candidates
 
+> Retained historical narrative. Terminology was neutralized on 2026-09-25;
+> former external path/name labels are symbolic, not executable current routes.
+> Original dates, finding IDs and recorded outcomes remain historical, not rerun acceptance.
+
 **Cohort:** 3 of 8
 **Status:** complete
 **Auditor pass date:** 2026-05-29
@@ -54,23 +58,23 @@ The cohort writes to **four mutually-inconsistent roots** for the same conceptua
 
 | Root | Used by | nano |
 |---|---|---|
-| `~/.gstack/projects/<slug>/checkpoints/` | context-save, context-restore | context-save:41, context-restore:35 |
+| `~/.retired-provider/projects/<slug>/checkpoints/` | context-save, context-restore | context-save:41, context-restore:35 |
 | `~/.lintel/sessions/<branch>/` | context-snapshot, context-dump, context-warm-sessions | context-snapshot:36, context-dump:38, context-warm-sessions:40 |
 | `.lintel/state/` (in-repo) | context-warm, context-budget, context-cool | context-warm:66, context-budget:33, context-cool:34 |
 | `~/.lintel/audit/*.jsonl` | context-warm-customer, context-warm-from-url, context-warmup, pair-agent, codex | context-warm-customer:96, etc. |
 
 **high:** breaks the cross-session-memory promise and the future envelope promise
-(`~/.lintel/jobs/<id>/envelopes/`). A save written to `~/.gstack/` is invisible to a
+(`~/.lintel/jobs/<id>/envelopes/`). A save written to `~/.retired-provider/` is invisible to a
 restore family that reads `~/.lintel/sessions/`. context-save and context-restore are a
 matched pair that work; context-dump explicitly reads `*-context-save.md` from
-`~/.lintel/sessions/` (context-dump:38) but context-save writes to `~/.gstack/` — **the
+`~/.lintel/sessions/` (context-dump:38) but context-save writes to `~/.retired-provider/` — **the
 dump skill cannot find what save wrote.** This is a live breakage, not just a style nit.
 
 **proposed (uplift):** Adopt a single canonical root. The brief-forge envelope already
 declares `~/.lintel/jobs/<id>/envelopes/` as the home; converge all persistence there and
 keep the in-repo `.lintel/state/` only for the live 00-state/budget ledger. Add a
 `scaffolding`-level constant (e.g. `LINTEL_STATE_ROOT`) imported by every skill — shared
-schema discipline. **Never delete the gstack path; alias it to the canonical root for
+schema discipline. **Never delete the retired-provider path; alias it to the canonical root for
 back-compat.**
 
 **operator_decision_required: yes** (which root wins).
@@ -103,14 +107,14 @@ runtime behavior, but the *declaration gap* is a real finding now.
 
 Two dialects coexist:
 
-- **gstack dialect** (context-save, -restore, -budgetwatch, pair-agent, codex,
+- **retired-provider dialect** (context-save, -restore, -budgetwatch, pair-agent, codex,
   skill-router): prose `## Report format` with a `✓` line, no DONE/BLOCKED status token.
 - **lintel dialect** (context-snapshot, -dump, -cool, -warm + all warm variants):
   explicit `## Status protocol` with `DONE / BLOCKED / NEEDS_CONTEXT` + `## Hop-in support`
   + `## 00-state.md append`.
 
 **high:** D2 (explicit declared exit) is the floor for any component a resume/replay engine
-reads. The gstack-dialect skills have *implicit* tails — a resume engine cannot
+reads. The retired-provider-dialect skills have *implicit* tails — a resume engine cannot
 machine-detect their completion. The strongest peers (lintel dialect) declare it.
 
 **proposed:** Normalize all 18 to the lintel dialect: `## Status protocol` with
@@ -163,12 +167,12 @@ dimensions:
     state: partial
     nano: context-save:102 ("## Report format" ✓ line); no Status protocol token
     high: resume/replay cannot machine-detect completion (CF-4)
-    finding: gstack-dialect tail — human ✓ only, no DONE/BLOCKED.
+    finding: retired-provider-dialect tail — human ✓ only, no DONE/BLOCKED.
     proposed: add Status protocol DONE/BLOCKED + Hop-in support; keep ✓ as DONE body.
     why: bring to context-warm bar; lintel dialect is the machine-readable floor.
   D3_objects:
     state: partial
-    nano: context-save:41 (writes ~/.gstack/...); consumer context-dump:38 expects ~/.lintel/...
+    nano: context-save:41 (writes ~/.retired-provider/...); consumer context-dump:38 expects ~/.lintel/...
     high: producer/consumer contract break (CF-1, CF-2) — live breakage.
     finding: output filename + root do not match its named consumer (context-dump).
     proposed: shared checkpoint-envelope spec; both import; add integration test.
@@ -248,14 +252,14 @@ dimensions:
   D2_tail:
     state: partial
     nano: context-restore:43 (Report format ✓ only, no Status protocol)
-    finding: gstack-dialect tail (CF-4).
+    finding: retired-provider-dialect tail (CF-4).
     proposed: add Status protocol; keep restoration summary as DONE body.
   D3_objects:
     state: partial
-    nano: context-restore:35 (reads ~/.gstack/...checkpoints)
+    nano: context-restore:35 (reads ~/.retired-provider/...checkpoints)
     high: reads a different root than snapshot/dump write (CF-1).
     finding: pairs correctly with context-save root but diverges from the snapshot family.
-    proposed: read canonical root; accept legacy gstack path as alias.
+    proposed: read canonical root; accept legacy retired-provider path as alias.
   D4_entrypoints: { state: present, nano: "context-restore:13, :120 (companion to /clean, save)", finding: covered }
   D5_checkpoints:
     state: present
@@ -454,7 +458,7 @@ dimensions:
   D3_objects:
     state: partial
     nano: context-warm-sessions:40 (reads ~/.lintel/sessions/<branch>/*-context-save.md)
-    high: same broken assumption as context-dump (CF-2) — expects context-save at ~/.lintel/sessions, but save writes ~/.gstack.
+    high: same broken assumption as context-dump (CF-2) — expects context-save at ~/.lintel/sessions, but save writes ~/.retired-provider.
     finding: SECOND consumer that cannot find context-save output. Reinforces CF-1/CF-2 severity.
     proposed: align to shared checkpoint-envelope spec.
   D4_entrypoints: { state: present, nano: "context-warm-sessions:18; also the recommended path from context-dump:27" }
@@ -586,7 +590,7 @@ kind: skill
 cohort: 3
 dimensions:
   D1_head: { state: present, nano: "context-warmup:37 (--task/--all/--estimate-only flags)", finding: explicit; also has the cohort's only degraded-cli_support declaration (:8-16) }
-  D2_tail: { state: partial, nano: "context-warmup:58 (Report format); no Status protocol token", finding: gstack-dialect tail (CF-4) }
+  D2_tail: { state: partial, nano: "context-warmup:58 (Report format); no Status protocol token", finding: retired-provider-dialect tail (CF-4) }
   D3_objects:
     state: partial
     nano: context-warmup:46 (reads context-state.json + warmup_tasks frontmatter)
@@ -666,7 +670,7 @@ kind: skill
 cohort: 3
 dimensions:
   D1_head: { state: present, nano: "context-budgetwatch:32-36 (--budget/--quiet/--mode flags)", finding: explicit, above-bar for budget cluster }
-  D2_tail: { state: partial, nano: "context-budgetwatch:60 (Report format GREEN/YELLOW/RED); no Status protocol token", finding: gstack-dialect (CF-4); but CI exit-code behavior (:99) is a strong machine-tail }
+  D2_tail: { state: partial, nano: "context-budgetwatch:60 (Report format GREEN/YELLOW/RED); no Status protocol token", finding: retired-provider-dialect (CF-4); but CI exit-code behavior (:99) is a strong machine-tail }
   D3_objects:
     state: partial
     nano: context-budgetwatch:39 (~/.lintel/config.yaml watcher section) + :49 (~/.lintel/sessions/<id>/tokens.txt)
@@ -734,7 +738,7 @@ kind: skill
 cohort: 3
 dimensions:
   D1_head: { state: present, nano: "pair-agent:33 (required --agent + task; --turns/--scope)", finding: explicit, validated inputs }
-  D2_tail: { state: partial, nano: "pair-agent:51 (Report format + Synthesis); no DONE/BLOCKED token", finding: gstack-dialect (CF-4); synthesis is a strong human tail but not machine-tokenized }
+  D2_tail: { state: partial, nano: "pair-agent:51 (Report format + Synthesis); no DONE/BLOCKED token", finding: retired-provider-dialect (CF-4); synthesis is a strong human tail but not machine-tokenized }
   D3_objects:
     state: present
     nano: pair-agent:33-38 (Inputs) + :50 (two-perspective trace + synthesis out)
@@ -776,19 +780,19 @@ kind: skill
 cohort: 3
 dimensions:
   D1_head: { state: present, nano: "codex:30-35 (required target one-of; --prompt-style/--budget) + :38 preflight", finding: explicit + preflight PATH check at head, above-bar }
-  D2_tail: { state: partial, nano: "codex:46 (Report format + Synthesis); no DONE/BLOCKED token", finding: gstack-dialect (CF-4) }
+  D2_tail: { state: partial, nano: "codex:46 (Report format + Synthesis); no DONE/BLOCKED token", finding: retired-provider-dialect (CF-4) }
   D3_objects:
     state: present
-    nano: codex:39-44 (in=diff/plan/code/hypothesis -> Codex -> normalized P1/P2/P3 out, persisted via gstack-review-log)
+    nano: codex:39-44 (in=diff/plan/code/hypothesis -> Codex -> normalized P1/P2/P3 out, persisted via retired-provider-review-log)
     high: skill->subprocess (a moment-1 variant) with a NORMALIZED output contract (P1/P2/P3) — strongest output-normalization in cohort.
     finding: above-bar; normalizes external tool output to Lintel severities (:41).
-    proposed: persist via the canonical envelope/jobs log, not gstack-review-log (CF-1 sibling).
+    proposed: persist via the canonical envelope/jobs log, not retired-provider-review-log (CF-1 sibling).
   D4_entrypoints:
     state: present
     nano: codex:111-116 (used by /investigate --with-codex, /plan-eng-review, /release-ev2)
     high: best D4 in cohort — explicitly enumerates the skills that call it.
     finding: above-bar; chained from 3 named callers.
-  D5_checkpoints: { state: present, nano: "codex:43 (persist via gstack-review-log so release-ev2 can read)", finding: durable cross-skill state — strong, but on gstack root (CF-1) }
+  D5_checkpoints: { state: present, nano: "codex:43 (persist via retired-provider-review-log so release-ev2 can read)", finding: durable cross-skill state — strong, but on retired-provider root (CF-1) }
   D6_recovery: { state: present, nano: "codex:85-89 (CLI-missing / malformed / budget-exceeded / hallucination all handled)", finding: above-bar; hallucination-suppression (:89) is unique }
   D7_pack: { state: partial, nano: "codex:78 (first-party-first: prefer Azure OpenAI gateway per config)", finding: config-driven provider routing — a proto-pack policy }
   D8_frontmatter: { state: partial, nano: "codex:1-9 (claude-code-only correctly single; CF-3; no necessity)" }
@@ -870,9 +874,9 @@ priority: high
 1. **Storage-root schism (CF-1)** — four roots for the same data; **two live producer/consumer
    breakages** (context-save→context-dump, context-save→context-warm-sessions) where a
    consumer cannot find what its named producer writes. This is the cohort's headline.
-2. **Config schism (D3)** — `~/.gstack/`, `~/.lintel/profile.yaml`, `~/.lintel/config.yaml`,
+2. **Config schism (D3)** — `~/.retired-provider/`, `~/.lintel/profile.yaml`, `~/.lintel/config.yaml`,
    `.lintel/state/`, plus `context-state.json` vs `00-state.md`. Five-way drift inside one cohort.
-3. **Dialect split (CF-4)** — gstack-prose tail vs lintel Status-protocol tail; ~7 skills
+3. **Dialect split (CF-4)** — retired-provider-prose tail vs lintel Status-protocol tail; ~7 skills
    below the machine-readable-tail floor.
 4. **Brief Forge should-fire is dense here (D9)** — designed-not-built, but moments 1
    (pair-agent, codex), 2 (context-warmup), 4 (save/snapshot/dump/warm-sessions), and 5

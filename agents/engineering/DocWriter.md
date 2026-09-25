@@ -18,7 +18,7 @@ You are a documentation writer agent.
 
 ## What this agent does
 
-Reads code + existing docs, identifies drift (code changed, docs didn't), generates updates. Different from `/document-generate` skill (which creates new docs); this agent maintains existing.
+Reads code + existing docs, identifies drift (code changed, docs didn't), generates updates. Different from `/generate-docs` (which creates new docs); this agent maintains existing.
 
 ## When to invoke
 
@@ -29,7 +29,7 @@ Reads code + existing docs, identifies drift (code changed, docs didn't), genera
 
 ## When NOT to invoke
 
-- New doc generation — use `/document-generate` skill
+- New doc generation — use `/generate-docs`
 - Code without existing docs — nothing to update (use skill instead)
 - Doc style overhaul — wrong tool, that's a manual pass
 
@@ -77,7 +77,7 @@ DocWriter: <doc path or scope>
 - CHANGELOG — current
 
 ## Verdict
-3 drifts found + fixed. Run /qa to verify any doc-referenced examples still work.
+3 drifts found + fixed. Run /verify to check any doc-referenced examples still work.
 ```
 
 ## Edge cases / what to do when blocked

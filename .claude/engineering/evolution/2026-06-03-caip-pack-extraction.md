@@ -22,6 +22,12 @@ breaking_change: true   # extracts ms-internal + caip-se packs to a separate rep
 
 # Structure change: CAIP pack extraction to a standalone distributable repo
 
+> Historical extraction record. Original paths and line claims below identify that
+> source revision; dates, IDs and decisions are unchanged and no check was rerun here.
+> The former document-generation entry now routes through `generate-docs`; use the
+> [native migration](../../../docs/migrations/2026-09-25-native-workflows.md) for current names.
+> Historical repository/rollback proposals grant no new external or destructive authority.
+
 > Gate M1 (structure-impact analysis) artifact for the CAIP extraction initiative.
 > This is the master cut-list. **No files move until the operator approves this manifest
 > and names the target repo.** Line numbers in the DE-BIAS table are Explore-agent claims
@@ -29,7 +35,7 @@ breaking_change: true   # extracts ms-internal + caip-se packs to a separate rep
 
 ## Context — what this finishes
 
-The v4.0 reframe ([lintel-v4.0-reframe-design.md](../../design/lintel-v4.0-reframe-design.md))
+The v4.0 reframe ([lintel-v4.0-reframe-design.md](../design-archive/lintel-v4.0-reframe-design.md))
 designed Lintel as "a generic harness with CAIP-SE as one pack." It shipped the **pack
 manifests** (`packs/_default`, `packs/ms-internal`, `packs/caip-se`) but **never executed the
 Phase-2 spine extraction**: the `caip-se/pack.yaml` references content dirs (`voice/`,

@@ -38,7 +38,7 @@ and no automatic choice when a material decision is unresolved.
 ## When NOT to use
 
 - Mid-task code-editing — jobs is lifecycle, not editing
-- For non-workflow_root skills — single-shot skills (`/li:doctor`, `/li:health`) don't spawn jobs
+- For non-workflow_root skills — single-shot diagnostics such as `/li:doctor` don't spawn jobs
 - To enforce ordering between steps — that's `job.yaml.blocked_until`, evaluated by `job_can_start <id> <step>` in `bin/_jobs.sh`, not this skill
 
 ## Inputs

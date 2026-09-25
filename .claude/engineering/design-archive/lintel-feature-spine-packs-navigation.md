@@ -1,7 +1,7 @@
 # Feature Request — Generic spine + packs + navigation (the Lintel reframe)
 
 **Compiled:** 2026-05-28 · from a design conversation between operator and Claude.
-**Status:** Standalone feature request (separate from `lintel-v3.6-backlog.md` and `lintel-feature-curated-flow-tracking.md`). Consolidated into v4.0 via [`.claude/engineering/design-archive/lintel-v4.0-reframe-design.md`](../design/lintel-v4.0-reframe-design.md) Chapter 1.
+**Status:** Standalone feature request (separate from `lintel-v3.6-backlog.md` and `lintel-feature-curated-flow-tracking.md`). Consolidated into v4.0 via [`.claude/engineering/design-archive/lintel-v4.0-reframe-design.md`](lintel-v4.0-reframe-design.md) Chapter 1.
 **Scope:** A reframing of what Lintel *is* — from a CAIP-SE tool with generic capabilities to a generic spine with CAIP-SE as one pack among many. Four chapters, shippable independently.
 
 **Locked decisions (operator):**
@@ -14,7 +14,7 @@
 
 ---
 
-> Original full text is preserved in the project's external archive. This file is the canonical reference within the repo. v4.0 design doc consolidates and interprets — see [Chapter 1 of v4.0 reframe](../design/lintel-v4.0-reframe-design.md#chapter-1--generic-spine--packs--navigation) for the unified implementation plan.
+> Original full text is preserved in the project's external archive. This file is the canonical reference within the repo. v4.0 design doc consolidates and interprets — see [Chapter 1 of v4.0 reframe](lintel-v4.0-reframe-design.md#chapter-1--generic-spine--packs--navigation) for the unified implementation plan.
 
 ## Summary of the four chapters
 
@@ -43,4 +43,4 @@ When all four ship, success looks like:
 2. **Pack-versioning enforcement strictness** — warn-only or block-on-incompatible? Recommended warn-only for v1; block once pack ecosystem grows.
 3. **Default `auto_mode_eligible` for new workflow_roots** — true or false by convention? Recommended `false` by default; operator opts in per workflow.
 
-See [v4.0 design Chapter 1.2-1.4](../design/lintel-v4.0-reframe-design.md#chapter-1--generic-spine--packs--navigation) for AI interpretation + recommendations on each.
+See [v4.0 design Chapter 1.2-1.4](lintel-v4.0-reframe-design.md#chapter-1--generic-spine--packs--navigation) for AI interpretation + recommendations on each.

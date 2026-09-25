@@ -6,6 +6,11 @@
 
 # Lintel v5.0 — `.claude/` home, memory v2, Obsidian integration
 
+> Historical design. Original ADR/task IDs, dates, counts, failed mechanisms and decisions
+> remain records, not current runtime claims. No historical check was rerun. Current
+> checkpoint methods are `pause`, `resume --from` and `context-warm` modes; persisted
+> helper names, old saves and recovery evidence remain compatible.
+
 **Status:** APPROVED-DIRECTION (operator locked D1–D4 on 2026-06-12) — implementation pending cost gate.
 **Mode:** meta-infra (Gates M1–M4 active).
 **Builds on:** `feat/capture-vault-sink` (vault sink Step 7b, `.obsidian/` gitignore).
@@ -21,7 +26,7 @@ Three operator-stated problems, one architecture:
    genuine app documentation, written on demand.
 2. **Memory promises vs reality.** The 2026-06-12 audit verdicts: session-digest hook, jobs system,
    00-state, audit writer, granularity calibration are **mechanical and real**. But `lessons-surface`
-   (declared in SENSE Step 0a), the entire context-save/restore family (5 skills, zero bash),
+   (declared in SENSE Step 0a), the checkpoint family (5 skills, zero bash at that revision),
    brief-forge evaluators, and operator-profile reads are **prose-only**. Some writes are dead
    (operator-profile.jsonl written, never read). The operator's suspicion ("bara på ytan?") is
    confirmed for those mechanisms.
@@ -109,7 +114,7 @@ AGENT-INSTRUCTIONS ritual cover the same read. One store, two read paths, zero d
 | Mechanism | Action |
 |---|---|
 | lessons-surface | **Implement** `lib/memory.sh: lessons_surface <keywords>` (grep-rank, top-3) — called mechanically from SENSE Step 0a |
-| context-save family (8 skills) | **Consolidate to 3** (`context-save`, `context-restore`, `context-warm` + budget flag); implement `bin/_context.sh` (save/list/restore against `.claude/runtime/sessions/`); fold snapshot→save, dump→restore, budgetwatch already removed in v4.11 |
+| Checkpoint family (8 historical skills) | **Consolidate to 3 methods** (current routes: `pause`, `resume --from`, `context-warm` modes); retain `bin/_context.sh` save/list/restore against `.claude/runtime/sessions/`. The historical plan folded snapshot/dump methods; it does not authorize deleting old saves or changing persisted grammar. |
 | brief-forge evaluators | **Honest scope:** implement the one cheap evaluator (completeness = field check vs envelope-schema.yaml in bash); delete the unimplemented evaluator promises from SKILL.md prose |
 | operator-profile.jsonl | **Subtract** the dead write from CAPTURE Step 9 (granularity calibration already provides the real feedback loop) |
 | context-budget | Keep advisory; surface one line in digest (no hard gate) |

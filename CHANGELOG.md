@@ -5,6 +5,44 @@ Notable changes to Lintel. Behaviour changes to the canonical agent instructions
 
 ---
 
+## 0.12.0 — unreleased
+
+### Changed
+
+- Consolidate the public surface into 94 canonical skills while retaining all 69
+  useful agent roles. DEFINE owns intake; `inspect` owns plan/repository lenses;
+  `verify` is read-only by default with explicit authorized repair; `diagnose` and
+  `cross-check` retain owned investigation and actual independent review.
+- Consolidate browser modes under `web-session` without changing the browser or
+  extraction implementations. PDF print consumers use that canonical provider.
+  `generate-pdf` retains input/output, paper, orientation, header/footer, CSS and
+  background choices; ADR-0033's reader removal and unverified inspection limits stay.
+- Preserve design advice, variants, built-UI review, single-file mockups and
+  source-grounded documentation under their existing frontend/rendering owners.
+- Use `pause`, compatible `resume` and bounded warming modes for continuity.
+  Phase/job-step `--from` overrides remain distinct from explicit checkpoint paths;
+  old checkpoint files, receipts and historical logs remain readable.
+- Share advisory freeze state between add/list/lift and the optional warning hook.
+  No host hook is activated or promoted into a permission boundary.
+- Retire expired alias records and redundant entrypoints; preserve native owned
+  installation receipts, user files and the no-Python bare-install prerequisite.
+  Update existing adapter resource closure, catalogs and source documentation.
+
+### Migration and evidence
+
+- Follow [native workflow migration](docs/migrations/2026-09-25-native-workflows.md).
+  Update installed copies through the existing owned installer/adapter, not manual
+  deletion of user state or a new inventory.
+- Review/QA v2, exact content/attempt/work/profile binding, latest-decision semantics
+  and independent corroboration remain unchanged. Source-only and synthetic checks
+  do not imply native browser, document or model acceptance.
+- Preserve required notices and explicitly classified original observations.
+  Historical citations are not active routing or a repository-wide zero-token claim.
+  Actual integration, review and hosted results are tracked in the
+  [cleanup work map](.claude/plans/legacy-cleanup/work.json).
+
+---
+
 ## 0.11.0 — unreleased
 
 The Universal initiative: one company-neutral lifecycle across clients, with owned installation,
@@ -38,6 +76,14 @@ content-bound review evidence and explicit limits on what each check proves.
   are built from the same design contract and checked in a real browser.
 - A deterministic `--shard K/N` option for `tests/runner/run-all.sh`. CI runs the strict suite in
   shards on every system (ADR-0032).
+- MARS (`/li:mars`), a deliberate multi-model adversarial review. A small panel of distinct models
+  reviews one frozen brief, with a challenge round only when they disagree. Dissent is preserved,
+  identity comes from host evidence, and the result is inspection input, never release clearance.
+  Offers need live host capability and consent; a full cycle offers it once, at PLAN's approval
+  gate (ADR-0036).
+- One Review Method for single reviews and panels (`skills/review/references/method.md`,
+  `lib/review_method.py`, `bin/li-review-packet.py`): standing questions with stable IDs,
+  evidence levels, one severity rubric, required per-question coverage and one decision rule.
 
 ### Changed
 
@@ -47,6 +93,9 @@ content-bound review evidence and explicit limits on what each check proves.
   for each client surface.
 - The Swarm integration, the dormant envelope handoff, the trusted implementation source and the
   explicit private-sync destination are preserved under their accepted contracts.
+- REVIEW's Stage 1 and 2 reviewers receive the Review Method packet instead of inline prompts. A
+  reply with missing coverage, an unverified acceptance row or a header that contradicts its
+  findings is re-requested, never scored as a pass.
 
 ### Removed
 
@@ -64,6 +113,8 @@ content-bound review evidence and explicit limits on what each check proves.
   verified, and Visio stays a template-only staged slot. These acceptance items are removed from
   the release's scope (ADR-0033).
 - Required-policy enforcement is not verified without a resolved company policy source.
+- MARS model identity is verified from the Copilot App's local usage records only; other hosts
+  report requested-only identity. Live panels have run on the Copilot App alone.
 
 These changes remain in the beta line. They do not claim a completed enterprise pilot, compliance
 certification or a published 1.0 release.
