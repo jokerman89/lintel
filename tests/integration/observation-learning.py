@@ -228,6 +228,20 @@ class ObservationPreservation(Sandbox):
         self.assertEqual(record["kind"], "frozen_zone_warn")
         self.assertEqual(record["hook"], "frozen-zone-warn")
         self.assertEqual(record["tier"], "warn")
+        state_before = state.read_bytes()
+        audit_before = (self.root / "audit/hooks.jsonl").read_bytes()
+        listed = self.run_cmd(
+            [PYTHON, ROOT / "skills/code-freeze/scripts/freeze.py",
+             "--repo", self.repo, "--state-dir", self.repo / ".claude/runtime/state",
+             "--session", "synthetic-freeze", "--list"],
+            cwd=self.repo, env=self.env, expect=0,
+        )
+        current = json.loads(listed.stdout)
+        self.assertTrue(current["advisory"])
+        self.assertEqual([item["path"] for item in current["frozen"]], ["src/frozen/"])
+        self.assertEqual(current["changed"], [])
+        self.assertEqual(state.read_bytes(), state_before)
+        self.assertEqual((self.root / "audit/hooks.jsonl").read_bytes(), audit_before)
         legacy = self.home / ".lintel/freeze/synthetic-freeze.yaml"
         write(legacy, freeze)
         write(state, "advisory: true\nfrozen: []\n")
@@ -244,9 +258,21 @@ class ObservationPreservation(Sandbox):
         self.assertEqual(target.read_text(encoding="utf-8"), "explicit fixture write\n")
         body = (ROOT / "skills/code-freeze/SKILL.md").read_text(encoding="utf-8")
         self.assertIn("advisory", body)
+        self.assertIn("Only a configured compatible hook invocation produces a warning", body)
+        self.assertIn("never a write lock", body)
+        self.assertIn("enterprise policy or permissions", body)
         self.assertIn("no universal automatic freeze consumer", body)
-        self.assertNotIn("--ignore-freeze", body.split("## Failure modes", 1)[1])
-        self.assertNotIn("shows currently frozen paths", body)
+        self.assertEqual(body.count("## Report and recovery\n"), 1)
+        recovery = body.split("## Report and recovery\n", 1)[1].split("\n## ", 1)[0]
+        self.assertIn("preserve the file and do not switch to a", recovery)
+        self.assertIn("unknown scope and still does not block", recovery)
+        self.assertNotIn("--ignore-freeze", recovery)
+        self.assertEqual(body.count("## Failure modes\n"), 1)
+        failures = body.split("## Failure modes\n", 1)[1].split("\n## ", 1)[0]
+        self.assertIn("preserve the original bytes", failures)
+        self.assertIn("without widening", failures)
+        self.assertIn("state persistence and missing audit evidence", failures)
+        self.assertNotIn("--ignore-freeze", failures)
         hook_doc = (ROOT / "hooks/shared/frozen-zone-warn/HOOK.md").read_text(encoding="utf-8")
         self.assertNotIn("--ignore-freeze", hook_doc)
         self.assertIn("$LINTEL_HOME/freeze/", hook_doc)

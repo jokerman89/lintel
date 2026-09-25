@@ -76,6 +76,9 @@ The optional `frozen-zone-warn` hook reads this same repository state through th
 reader. It compares a file or directory boundary, not a misleading string prefix.
 Only a configured compatible hook invocation produces a warning; this skill does not
 register it, and the hook remains **warn-only**, never a write lock.
+There is no universal automatic freeze consumer: clients that do not run that
+explicitly configured compatible hook receive no automatic warning. A recorded
+scope or discovered skill file does not prove host activation or prevent a write.
 
 When repository state is absent, an explicitly identified legacy
 `$LINTEL_HOME/freeze/<session-id>.yaml` remains a read-only list/warning source. Do not
@@ -94,6 +97,19 @@ unmatched lift requests. State persistence and hook observation are separate evi
 report **advisory scope recorded**, not **writes blocked**. Missing Python or a failed
 reader leaves the operation unverified; preserve the file and do not switch to a
 weaker parser. An unknown hook read warns about unknown scope and still does not block.
+
+## Failure modes
+
+- Missing Python or required reader: report the operation unverified; retain the
+  original state and do not substitute a weaker parser.
+- Malformed, linked or foreign state: refuse mutation, preserve the original bytes
+  and report unknown scope. An optional hook may warn, but never invent clearance.
+- Unmatched or excessive glob: fail the bounded selection without widening to a
+  parent directory. Lift accepts only exact recorded paths or the explicit all mode.
+- Audit failure after an owned write: state persistence and missing audit evidence
+  are separate facts; report both, with no successful audit claim or blind rollback.
+- Host without the configured warning hook: disclose that no automatic warning was
+  observed. Project policy and permissions still apply independently of this reminder.
 
 ```text
 /li:code-freeze src/landing --reason "work is limited to src/portal"
