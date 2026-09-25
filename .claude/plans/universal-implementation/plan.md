@@ -62,7 +62,7 @@ Additional necessary paths require an explicit ownership extension from MasterSe
 | P09 Specialist depth | A09, A17: domain decisions and portable roles | `agents/` except until P03/P05 direct corrections integrated; `skills/{ta*,da*,sc*,dh*,tq*,full-engineering-pass}`, specialist references/tests and domain docs | P05/P06/P08 |
 | P10 Installer lifecycle | A12: preserved consumer-owned state | `install/`, `bin/li-scaffold`, pack/profile/migration lifecycle helpers/skills and tests | P01/P03/P06/P07; do not overlap P08 |
 | P11 Design/browser | A14, A16: runnable shared contract and actual browser operations | Design/frontend/browser skills, design schema/helpers/tests, scoped frontend assets | P03/P05/P06/P07/P08/P09 |
-| P12 Document formats | A15: format-specific methods and observable artifact QA | Generate skills, document-format agents/references, format helpers and tests | P09/P11 |
+| P12 Document formats | A15 (removed from scope, ADR-0033): format-specific methods and observable artifact QA | Generate skills, document-format agents/references, format helpers and tests | P09/P11 |
 | P13 Discovery/provenance | A18, A19, A20 provenance: optional capability selection without loss | Capability/package manifest, catalog generator/skills, provenance notices and docs, version metadata | P06/P07/P09/P10/P11/P12 |
 | P14 Integrated acceptance | A23, A24: contract and synthetic-profile outcomes | Cross-component/consumer/host scenario tests, evidence reports, verification docs | All applicable packages; tests also land with every earlier package |
 | P15 Final delivery | All acceptance reconciled, current main/CI/PR | Coordinator-owned generated outputs, final review and handoff | P01-P14 and authorized remote identity |
@@ -463,18 +463,15 @@ included:
 The P11 report is integrated in `4998f265`. The P3 notes are cosmetic, and the restore's CDN
 redirects and SHA-1-only lock entries are recorded.
 
-### A15 Verifiable document formats (P12; R07)
-- [ ] A15.1 Separate shared facts/narrative from format-specific composition and QA.
-- [ ] A15.2 Remove universal 40-word truncation and test retained long reasoning.
-- [ ] A15.3 Verify supported document/slide rendering and promised editability.
-  - [ ] A15.3.word Verify real editable Word output, retained content and rendered/reopen evidence.
-  - [ ] A15.3.ppt Verify real editable slide output, notes/content retention and rendered/reopen evidence.
-  - [ ] A15.3.shared Bind the released shared design/profile/work contract to both format consumers.
-- [ ] A15.4 Give PDF/XLSX/Visio concrete adapters, recalculation/QA and honest staged boundaries.
-  - [ ] A15.4.pdf Verify a declared PDF writer/export route with page/text fidelity.
-  - [ ] A15.4.xlsx Verify a concrete workbook writer, recalculation and cached/formula integrity.
-  - [ ] A15.4.visio Verify a concrete diagram writer, connectors/labels and real reopen/editability.
-Acceptance: missing renderer remains unfinished; authored outputs preserve intended reasoning.
+### Removed from scope: A15 verifiable document formats (P12; R07)
+On the operator's instruction of 2026-09-25 ("Ta bort detta ur Lintel"), ADR-0033 removes the four
+blocked A15 items from the Universal initiative. They were never accepted, and removal is not a
+waiver. Their acceptance needed Word, Excel and PDF-raster application routes and P12
+structured-record persistence, all denied by the operator, and Visio had no writer. The integrated
+document skills and their passing tests stay in Lintel as staged capabilities with explicit
+unverified boundaries; the pypdf-based PDF reader is removed. The removed items covered shared facts
+separated from format composition, no universal 40-word truncation, Word and slide rendering and
+editability, and the PDF, XLSX and Visio adapters.
 
 ### A16 Real browser operations (P11; R03/R07)
 - [x] A16.1 Share browse/cookies/scrape/preview/print operations and session ownership.
@@ -681,7 +678,9 @@ The coordinator's repair is recorded in ADR-0032 ("First hosted run") and in `re
 skipped or partial result; 19 of its 22 jobs pass. The one failing entry is `document-pdf`: it needs
 an existing `pypdf`, which the repository does not declare and the operator refused to add (L-054).
 A23.4 stays open until the operator decides on that dependency. The open leaf `A23.4.ci` keeps this
-gate visible in the product reader's remaining-work view (A5-28).
+gate visible in the product reader's remaining-work view (A5-28). On 2026-09-25 the operator decided:
+remove it. ADR-0033 removes the pypdf-based reader and its tests, and `A23.4.ci` closes on the strict
+CI run of the resulting head.
 A23.1 and A23.2 closure (2026-09-24): the P14 A23 unit (`96bd5bab`, repair `88c92377`, report
 `d13455de`) passes `6310f7ad`'s complete SPEC and first whole QUALITY after the F1/F2 repair
 (`reviews/P14-a23-recheck-88c9237.md`), and is integrated in `8f418e68`.
@@ -707,7 +706,7 @@ of four groups, and none counts as executed evidence for a closed item:
   P08-5 (case-sensitive positive), P08-12 (host activation and hooks), P09-5 (path budget at a
   long root), P10-4 (long linked-worktree positive), P10-9 (WinError 5 cause) and P13-6 (the
   `verify.sh` upstream listing without yq).
-- **Blocked items.** P12-2 (A15, denied routes). The A14.5 rows are resolved: P11-4 was executed, and P11-5's
+- **Blocked items.** P12-2 (A15, denied routes); A15 is removed from scope by ADR-0033. The A14.5 rows are resolved: P11-4 was executed, and P11-5's
   framework build closed through the operator-authorized Microsoft npm feed restore and its reviews.
 
 The runner reports only canonical `platform: windows-only` skips as N/A, and only off Windows

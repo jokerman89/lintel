@@ -4,8 +4,10 @@
 addendum passes the CI-repair delta up to `ed91ef4f` and binds CI to it
 (`reviews/A23.5-phase3-ci-ed91ef4.md`). The branch is published as draft PR #93 by `jokerman89`. Its
 first hosted strict runs found portability defects, which the coordinator repaired (see "Delivery
-CI"). On the repaired head, every CI job passes except the three that run `document-pdf`. That entry
-needs a `pypdf` the repository does not declare, and adding it is an open operator decision.
+CI"). On that head every CI job passed except the three that ran `document-pdf`, which needed an
+undeclared `pypdf`. On 2026-09-25 the operator ordered both remaining blockers removed from Lintel
+(ADR-0033): the pypdf-based PDF reader, and the blocked A15.1–A15.4 items. The removal needs its
+own strict CI run and an A23.5 addendum.
 
 ## Delivery identity
 
@@ -18,8 +20,9 @@ needs a `pypdf` the repository does not declare, and adding it is an open operat
 
 ## Acceptance by area
 
-The count is 108/113 original top-level items. Each area links to its plan section,
-where the leaf evidence and the review files are cited.
+The count is 108 of 109 original top-level items. A15's four items are removed from scope by the
+operator's decision (ADR-0033), and A23.4 closes on the strict CI run of the removal head. Each area
+links to its plan section, where the leaf evidence and the review files are cited.
 
 | Area | Closed | Status |
 |---|---|---|
@@ -37,7 +40,7 @@ where the leaf evidence and the review files are cited.
 | [A12 Owned installer lifecycle](../plan.md#a12-owned-installer-lifecycle-p10-r01) | 4/4 | Accepted |
 | [A13 Observable learning and status](../plan.md#a13-observable-learning-and-status-p08-r05) | 4/4 | Accepted |
 | [A14 Working design contract](../plan.md#a14-working-design-contract-p11-r07) | 5/5 | Accepted |
-| [A15 Verifiable document formats](../plan.md#a15-verifiable-document-formats-p12-r07) | 0/4 | Blocked: denied Word, Excel and PDF-raster application routes, denied P12 record persistence, and no Visio writer (a template-only staged slot) |
+| [A15 Verifiable document formats](../plan.md#removed-from-scope-a15-verifiable-document-formats-p12-r07) | removed | Removed from scope by the operator (ADR-0033); never accepted, not waived. The document skills stay as staged capabilities, and the PDF reader is removed |
 | [A16 Real browser operations](../plan.md#a16-real-browser-operations-p11-r03r07) | 4/4 | Accepted |
 | [A17 Portable, useful agent roles](../plan.md#a17-portable-useful-agent-roles-p09-r06) | 5/5 | Accepted |
 | [A18 Optional capabilities without loss](../plan.md#a18-optional-capabilities-without-loss-p13-r06) | 4/4 | Accepted |
@@ -45,7 +48,7 @@ where the leaf evidence and the review files are cited.
 | [A20 Provenance and versions](../plan.md#a20-provenance-and-versions-p07p13-r04) | 4/4 | Accepted |
 | [A21 Safe dormant handoff](../plan.md#a21-safe-dormant-handoff-p04-r08) | 4/4 | Accepted |
 | [A22 Preserved Swarming integration](../plan.md#a22-preserved-swarming-integration-p04-r09) | 7/7 | Accepted |
-| [A23 Boundary regression evidence](../plan.md#a23-boundary-regression-evidence-all-owners-p14-r11) | 4/5 | Blocked: A23.4's strict CI passes on every job except `document-pdf`'s, which needs the undeclared `pypdf` (operator decision); A23.1–.3 and A23.5 are closed |
+| [A23 Boundary regression evidence](../plan.md#a23-boundary-regression-evidence-all-owners-p14-r11) | 4/5 | Pending: A23.4 (leaf `A23.4.ci`) closes on the strict CI run of the removal head; A23.1–.3 and A23.5 are closed |
 | [A24 Observable enterprise profile value](../plan.md#a24-observable-enterprise-profile-value-p14-r04r11) | 4/4 | Accepted |
 | [A25 Trusted implementation source](../plan.md#a25-trusted-implementation-source-p01-r01) | 3/3 | Accepted |
 | [A26 Explicit private-sync destination](../plan.md#a26-explicit-private-sync-destination-p02-r10) | 4/4 | Accepted |
@@ -56,29 +59,24 @@ resolutions that an independent integration review covers (P10 by SAME, P08 by S
 not live-host activation, compliance certification or model-quality evidence unless the area
 says so.
 
-## Blocked items that need an operator decision
+## Operator decisions on the blocked items
 
-A14.5 is now accepted. On the operator's instruction, the framework app's dependencies were
+A14.5 is accepted. On the operator's instruction, the framework app's dependencies were
 restored task-locally through the Microsoft npm feed proxy, and the image-capable reviewer
 `aba328fd` passed both halves, with V1 observed directly (`reviews/P11-a145-static-v1.md` and
-`reviews/P11-a145-app.md`). Two items stay blocked:
+`reviews/P11-a145-app.md`). On 2026-09-25 the operator ordered the last two blockers removed from
+Lintel ("Ta bort detta ur Lintel"), and ADR-0033 records that decision:
 
-- **A15.1–A15.4, verifiable document formats.** The Word, PowerPoint, workbook and PDF source
-  helpers are integrated. Their acceptance needs rendering and editability evidence through
-  application routes that the operator denied (Word, Excel, PDF raster). It also needs P12
-  structured-record persistence, which was denied as well. In addition, A15.4's Visio part has
-  no implemented writer or editor (`packages/P12.md`); Visio stays a template-only staged slot,
-  which no permission would resolve. The operator's question about lifting the Word, Excel and
-  record-persistence denials went unanswered, so no authorization is assumed.
-- **A23.4, the strict CI suite, blocked only on `document-pdf`.** P12's PDF checks read PDFs
-  through an existing `pypdf` installation (`skills/generate-pdf/SKILL.md`), and the local runs had
-  pypdf 6.13.2. The repository does not declare pypdf, and the operator refused to have it added as
-  a CI dependency (L-054). `tests/integration/document-pdf.sh` therefore errors with
-  `ModuleNotFoundError: No module named 'pypdf'` in integration shard 3 on every system, and those
-  three jobs fail. The entry is neither excluded nor weakened. A23.4 closes once the operator
-  authorizes pypdf for CI or chooses another course.
-
-None of these five items counts as accepted, and none is waived.
+- **A15.1–A15.4, verifiable document formats: removed from scope.** The Word, PowerPoint, workbook
+  and PDF source helpers stay integrated as staged capabilities with explicit unverified
+  boundaries. Their acceptance needed denied application routes (Word, Excel, PDF raster) and
+  denied P12 structured-record persistence, and Visio has no writer. The four items were never
+  accepted and are not counted as waived.
+- **The pypdf-based PDF reader: removed.** `skills/generate-pdf/scripts/check_pdf.py` and the
+  `document-pdf` tests that needed `pypdf` are deleted. The remaining preparation and
+  visual-gate tests stay. `generate-pdf` keeps its writer, HTML preparation plus the accepted
+  browser print, and states that the produced PDF's text, pages and rendering are unverified.
+  The repository never declared pypdf, and the operator refused to add it (L-054).
 
 ## Preserved Swarming integration
 
@@ -111,6 +109,9 @@ These are reviewed at A23.5, not by a package review:
     - fixture portability (`497863de`, `9d23accc`, `53383406`);
     - lessons L-054 and L-055 (`c5667a7e`, `ed91ef4f`).
     A23.5's Phase 3 addendum passes this delta (`reviews/A23.5-phase3-ci-ed91ef4.md`).
+  - The operator-ordered removal (ADR-0033): the pypdf-based PDF reader and its tests, the
+    reader's adapter and selection resources, the `generate-pdf` documentation, and A15.1–A15.4
+    removed from the plan's scope. An A23.5 addendum reviews this delta.
 - **The `main` merges** (`fe9e6284`, and at the freeze any later presentation-only PRs), which
   resolve the README conflict.
 - **Version `0.11.0` and its CHANGELOG entry** (`99443cf8`, `3ea42d70`).
@@ -261,3 +262,7 @@ A23.5's Phase 3 addendum binds this run to the reviewed content: every job check
 job, Windows integration-3, which holds the Copilot kit, took 93.6 of its 300 minutes. A later head
 inherits the binding only if it changes nothing outside `.claude/` and its own CI run reproduces this
 outcome: the same 19 green jobs, each integration-3 failing only on `document-pdf`.
+
+The operator-ordered removal (ADR-0033) then deleted `document-pdf`'s pypdf-dependent tests together
+with the reader. The removal head is a product change: it needs its own green strict run and an
+A23.5 addendum, which PR #93's checks and `reviews/` record.

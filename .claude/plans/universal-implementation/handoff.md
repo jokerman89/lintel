@@ -727,8 +727,10 @@ and the operator refused to add it (L-054). Next:
    instead of 19 green jobs). It passes the delta and binds run `36065850657`. The records-only
    head that preserves it needs its own CI run, reproducing the same 19 green jobs with each
    integration-3 failing only on `document-pdf` (A5-27).
-2. Close A23.4 only after the operator decides on `pypdf` and a CI run is green. Do not exclude or
-   weaken `document-pdf`.
+2. Done (2026-09-25): on the operator's instruction, the pypdf-based PDF reader and A15.1–A15.4
+   are removed (ADR-0033). The removal head needs a green strict CI run and an A23.5 addendum from
+   `8df81ac8`. Then close `A23.4.ci`, mark PR #93 ready and merge it with a merge commit, so that
+   reviewed commit IDs stay reachable.
 3. After the merge, send "Removing legacy skills and agents" (`f4584b03`) the explicit CI-ready
    handoff: the main SHA, the run and job evidence, and the ownership boundaries.
 Current original acceptance count is 107/113. A08, A10 and A13 close on SAME9db's whole-P08
