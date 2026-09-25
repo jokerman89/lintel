@@ -7,6 +7,11 @@
 > *(Counts are that run's snapshot — live counts are in the README. Repo-state paths below have
 > been updated in place to the v5 `.claude/` home, ADR-0005, where the originals would mislead.)*
 
+> **Navigation-only editorial update (2026-09-25):** current pointers in sections
+> 3, 5, 9 and 13 use the accepted native routes. Other text remains the source-era
+> audit, including inventories, comparisons, counts, status and outcomes.
+> No historical test, host observation or readiness claim is refreshed by this edit.
+
 ---
 
 ## 0. Executive summary & readiness verdict
@@ -114,10 +119,18 @@ DEFINE — so the pipeline is really nine phases. Each phase is its own skill wr
 
 **Mode presets** (`skills/cycle/SKILL.md`): `hotfix` (SENSE+BUILD+REVIEW+SHIP), `internal-tool` (all),
 `research-dive` (SENSE+DEFINE+DISCOVER), `meta-infra` (all, heavier REVIEW/CAPTURE, activates Gates
-M1–M4, 600k soft / 900k hard cap), `auto`. **Composite shortcuts** are pure delegators: `/li:fix`,
-`/li:research`, `/li:plan-and-build`, `/li:review-and-ship`. Always-enforced gates: cost estimate before
-BUILD; mandatory founder approval at end of PLAN; 3-stage REVIEW; compliance hard-stop in SHIP; per-task
-two-stage subagent review in BUILD (complexity-gated since v4.9 — mechanical leaves review inline).
+M1–M4, 600k soft / 900k hard cap), `auto`. The original composite inventory was `fix`, `research`,
+`plan-and-build`, `review-and-ship` (pure delegators in that snapshot).
+
+**Current navigation:** `/li:fix`, `/li:cycle --mode research-dive`,
+`/li:cycle --from PLAN --to BUILD`, `/li:cycle --from REVIEW --to CAPTURE`, respectively.
+Keep the selected work, original task IDs, required review/QA and existing authority;
+a route does not grant publication or deployment permission.
+
+**Original gate account, not current enforcement evidence:**
+> Always-enforced gates: cost estimate before
+> BUILD; mandatory founder approval at end of PLAN; 3-stage REVIEW; compliance hard-stop in SHIP; per-task
+> two-stage subagent review in BUILD (complexity-gated since v4.9 — mechanical leaves review inline).
 
 ---
 
@@ -169,13 +182,17 @@ DebugForensics, Planner, TestRunner, ReadOnly, …) and **module-spawned special
 SystemArchitect, DeploymentEngineer, ObservabilityArchitect, PerfBudgetEnforcer, …) — the agent half of
 the ta/da/sc/dh/tq modules.
 
-**Dispatch model** — three paths, one canonical convention:
+**Dispatch model recorded in the snapshot** — three paths, one canonical convention:
 
 1. **`/li:brief-forge subagent_spawn <from-skill> <AgentName> brief "$brief_file"`** — the canonical
    one-shot spawn. A skill writes a brief (task / context_pointers / constraints / acceptance) to a
    tempfile and routes it through Brief Forge (which scores completeness, writes an envelope to the
    audit log, and gates on score). Used by the module sub-skills, `ship`, `discover`, `generate-ppt`.
-2. **`/li:pair-agent --agent <Name>`** — a two-mind, in-the-loop alternation between the main agent and
+2. **Current interactive delegation:** within `/li:build`, use the actual host's scoped
+   delegation with an explicit brief, read/write boundaries and required operator checkpoints.
+   If unavailable, retain serial work or an external handoff; self-review is not independent review.
+   **Original account, not a current entrypoint or client-policy claim:**
+   `pair-agent --agent <Name>` — a two-mind, in-the-loop alternation between the main agent and
    a named subagent, with an operator gate each turn. Claude-Code-only (Agent-tool dependency).
 3. **Inline vs dedicated** — `docs/concepts/agent-dispatch-rules.md`: spawn when open-ended or
    adversarial; run inline when cheap + deterministic or needs accumulated context.
@@ -281,8 +298,11 @@ The planning machinery threads a **size axis** through SENSE → SCOPE → PLAN 
 - **The cold-executor trio** — PLAN emits `plan.md` + `spec.md` + `prompt.md` *simultaneously*, from
   versioned templates under `scaffolding/01-foundation/templates/plan/`. A fresh AI session reading only
   the trio can re-execute the work.
-- **Granularity** — every leaf is 2–5 minutes of implementer time; `plan-eng-review` keeps a BLOCKING
-  per-leaf check.
+- **Granularity** — the original leaf target was 2–5 minutes of implementer time.
+  Current plan inspection is `/li:inspect --target plan --lens engineering`, covering every
+  original leaf's acceptance and size without replacing the approval or shared review gates.
+  The source-era `plan-eng-review` account of a BLOCKING per-leaf check remains historical,
+  not a measured duration or proof of automatic enforcement by the current host.
 - **The calibration loop** — CAPTURE records `actual_tokens` per size; the estimator reads the median
   back as the corrected prior. Estimates self-correct from recorded actuals.
 
@@ -348,8 +368,11 @@ audit writer), `_jobs.sh` (the jobs engine).
 | `.claude/runtime/state/00-state.md` (+ module state) | per-repo cycle state (gitignored) | written by cycle/module skills |
 | `~/.lintel/profile.yaml` | active pack · mode · role | operator-global |
 | `~/.lintel/jobs/_active.md` | cross-repo jobs registry (job data lives per-repo) | `/li:resume`/`/li:status` read it |
-| `.claude/runtime/sessions/` | context-save snapshots | `/li:context-restore` reads them |
+| `.claude/runtime/sessions/` | context-save snapshots | `/li:resume --from <checkpoint-path>` reads an owned or explicitly authorized checkpoint |
 | `~/.lintel/audit/*.jsonl` | append-only audit (reviews, overrides, envelopes, hooks) | via `bin/_audit.sh` |
+
+Current checkpoint navigation reads continuity context only. It does not rename old saves,
+restore source bytes or replace selected work, profile references or review evidence.
 
 **Jobs system** — `workflow_root` flows (cycle, plan) spawn a job under `.claude/runtime/jobs/<id>/`
 (registry at `~/.lintel/jobs/_active.md`) holding

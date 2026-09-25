@@ -323,10 +323,10 @@ All three role files declare the SAME six body sections plus uniform frontmatter
 **Schema uniformity verdict:** the prompt's hypothesis ("do all 3 declare the same sections including COMPANION SKILLS?") is confirmed YES on all six named sections. The uniformity is not accidental — `role-new/SKILL.md:85-132` renders this exact template, so every role created through the harness inherits the schema. This is the cohort's model for how uniformity SHOULD be enforced: a generator that bakes the schema in.
 
 **Are 8 skills for 3 roles proportionate?** — Yes, and here is why it is NOT over-engineering:
-- The 8 skills are a complete *lifecycle*, not 8 variations on activation: create (role-new), list (roles-list), load-light (role-activate), load-heavy (role-deep-dive), swap (role-rotate), clear (role-deactivate), apply (role-frame), evolve (role-update).
+- The eight original entries covered a complete *lifecycle*, not eight variations on activation: create, list, lightweight load, full load, swap, clear, apply and evolve. Their exact original identities remain in the source records above.
 - The skill count scales with *operators creating their own roles* (role-new is for customer-specific private personas), not with the 3 shipped public roles. 3 is the seed; the design intends operator-grown role libraries.
 - Compare to pack lifecycle: the same CRUD-plus-lifecycle shape is DESIGNED for packs (8 pack-* skills) but not built. Roles are the *proof* that the lifecycle shape is the right one — packs should follow it.
-- The one redundancy worth flagging: role-rotate is role-deactivate + role-activate composed (rotate:69-80 literally delegates to role-activate). That is acceptable composition (a named convenience for the common mid-session swap), not duplication — it adds the atomicity guarantee (verify-new-before-drop-current) the two-step manual sequence lacks.
+- The recorded rotation component composed clearing and activation (its lines 69-80 delegated to the activation component). That was judged acceptable composition, not duplication: the common mid-session swap added verify-new-before-drop-current atomicity that the two-step manual sequence lacked. This preserves the original rationale, not a current registration claim for the old wrappers.
 
 **Verdict: proportionate.** No cut. If anything the cohort under-delivers on D7 (pack influence), not on skill count.
 

@@ -6,6 +6,11 @@
 > canonical phases, actual host capabilities, existing authority and shared v2 evidence.
 > See the [native migration](../../../docs/migrations/2026-09-25-native-workflows.md).
 
+> Navigation update, 2026-09-25: current route lists below use the accepted native
+> interfaces. Original step identifiers without a shipped entry are explicitly
+> proposals, not callable skills. Original samples, decisions, counts and outcomes
+> remain records; no example or historical test was executed under the updated names.
+
 **Date:** 2026-05-28
 **Branch:** `v3-dev` (will become `lintel-rebrand` post-approval)
 **Status:** DRAFT — awaiting operator approval before rename execution
@@ -160,12 +165,14 @@ Each phase = a slash command + sub-skills + dedicated agents + artifact + gates 
 
 **Slash:** `/li:sense` (also invoked at start of /li:cycle)
 
-**Sub-skills invoked:**
-- `/li:detect-intent` — parse operator's last message + cwd state, classify intent (build / fix / review / research / ship / scaffold-new)
-- `/li:detect-workprofile` — read `~/.lintel/profile.yaml`, surface state
-- `/li:detect-role` — if role active, surface role identity (lightweight, not full)
-- `/li:detect-state` — read 00-state.md from cwd if exists, surface phase + last commit
-- `/li:detect-context-budget` — current context window utilization, recommend warm/cool
+**Current route:** `/li:sense`. The original step identifiers below describe
+the proposal; they are not standalone commands or proof that a detector exists.
+
+- `detect-intent` — parse the request and repository context to classify the work.
+- `detect-workprofile` — historical profile-detection proposal, not a current policy selector.
+- `detect-role` — surface an actually selected role without loading private context implicitly.
+- `detect-state` — inspect the selected work and its recorded phase, not a newer unrelated save.
+- `detect-context-budget` — intended budget visibility; current `/li:context-budget` reports observations or unknown capacity.
 
 **Agents:**
 - **ContextBudgetAdvisor** (engineering/) — token utilization analysis
@@ -245,17 +252,20 @@ The historical method added role and policy context; current DEFINE uses task-re
 
 **Current route:** `/li:define`; engineering is the default and strategy is explicit.
 
-**Sub-skills invoked:**
-- `/li:context-gather` — proposed intake step: read instructions, selected work, recent changes and relevant designs
-- `/li:related-design-scan` — proposed intake step: find overlapping designs
-- `/li:landscape-search` — optional WebSearch for conventional wisdom (phase 2.75; gated)
-- `/li:forcing-questions` — historical proposal for six adapted questions per mode
-- `/li:premise-check` — lock baseline assumptions
-- `/li:cross-model-opinion` — Codex/subagent independence check (optional)
-- `/li:alternatives` — 2-3 implementation approaches MANDATORY
-- `/li:role-lens` — if role active, apply role's outcome-lens to the problem (NEW)
-- `/li:design-doc-write` — write design doc to `.claude/engineering/design-archive/lintel-*.md`
-- `/li:spec-review` — adversarial subagent review of doc
+**Current intake:** `/li:define`; use `--mode minimal` only for bounded work and
+`--lens strategy` only when selected. Mandatory authority, risk and review remain.
+The original step identifiers below are proposals, not separately callable skills.
+
+- `context-gather` — read instructions, selected work, recent changes and relevant designs.
+- `related-design-scan` — find overlapping designs before creating another.
+- `landscape-search` — optional authorized research (historical phase 2.75), not an automatic fetch.
+- `forcing-questions` — historical proposal for six adapted questions per mode.
+- `premise-check` — clarify material assumptions within DEFINE.
+- `cross-model-opinion` — optional real independent review; current `/li:cross-check --plan <path>` requires an actual permitted reviewer.
+- `alternatives` — the original 2-3-approach design requirement, not a new command.
+- `role-lens` — apply an actually selected role with `/li:role --frame <artifact>`.
+- `design-doc-write` — the original artifact-writing step, subject to the selected work's owned output paths.
+- `spec-review` — substantive review by an attributable reviewer; a renamed step does not supply acceptance.
 
 **Agents:**
 - **Architect** (engineering/) — primary, design judgment
@@ -317,14 +327,17 @@ If role active, BEFORE writing alternatives:
 
 **Slash:** `/li:discover`
 
-**Sub-skills invoked:**
-- `/li:codebase-map` — Grep/Glob for relevant files based on DEFINE keywords
-- `/li:adr-scan` — read `docs/adr/` for relevant prior decisions
+**Current discovery:** `/li:discover`. The original `codebase-map`, `adr-scan`,
+`dependency-audit`, `related-skill-scan` and `related-agent-scan` identifiers name
+proposed steps, not callable entries.
+
+- `codebase-map` — inspect relevant files using the host's actual read/search tools.
+- `adr-scan` — read decisions from the repository's declared home.
 - Lesson lookup — `/li:lessons-surface` with task-relevant selection
-- `/li:dependency-audit` — surface dependencies that touch the wedge area
-- `/li:related-skill-scan` — check if existing skills in `skills/` overlap (avoid duplicates)
-- `/li:related-agent-scan` — match wedge to existing agents that should be subagent-pulled in PLAN/BUILD
-- `/li:context-warmup` — operator can request additional context loaded (NEW — see §5)
+- `dependency-audit` — identify affected dependencies; `/li:sc dependency-security` supplies deeper security/license analysis when requested.
+- `related-skill-scan` — identify reusable installed methods rather than duplicate them.
+- `related-agent-scan` — select actual available roles and preserve delegation limits.
+- `/li:context-warm --glob "<pattern>"` — preview an explicitly bounded file selection before reading (see §5).
 
 **Agents:**
 - **Explorer** (engineering/) — primary, codebase mapping
@@ -369,16 +382,15 @@ Operator approval gate. Cold-executor handoff prep starts here.
 
 **Slash:** `/li:plan`
 
-**Sub-skills invoked:**
+**Current PLAN navigation and original non-callable step proposals:**
 - `/li:inspect --target plan --lens engineering` — engineering plan and scope alternatives
 - `/li:inspect --target plan --lens design` — design system / UX implications (if applicable)
 - `/li:inspect --target plan --lens devex` — developer-experience implications (if applicable)
 - PLAN refinement — apply review findings within the existing approval boundary
-- `/li:tasks-write` — task list with file paths + complete code (where prescriptive) + verification steps
-- `/li:dependency-graph` — task ordering, blocking deps surfaced
-- `/li:cost-estimate` — tokens × phase × model = $-estimate (NEW — adopted from Architect image)
-- `/li:cross-section-analyze` — coverage check (NEW — adopted from speckit Analyze phase)
-- `/li:plan-checkpoint` — write to `.planner-checkpoint.md` (state for resume)
+- `tasks-write` and `dependency-graph` — original proposed PLAN steps for task text, verification and dependencies; no separate entrypoints are implied.
+- `cost-estimate` — original token/phase/model estimate proposal, not measured spend or a callable workflow.
+- `/li:analyze` — the current cross-artifact consistency method corresponding to the proposed `cross-section-analyze` step.
+- `/li:pause [label]` — save compatible continuity context; the original `plan-checkpoint` proposal is not a separate command or a replacement for the selected work map.
 
 **Agents:**
 - **Planner** (engineering/) — primary, task decomposition
@@ -446,16 +458,16 @@ short leaves into bounded packages without losing their acceptance or two-stage 
 
 **Slash:** `/li:build`
 
-**Sub-skills invoked:**
-- `/li:tdd-cycle` — red-green-refactor for each task (foundational)
-- `/li:dispatch-implementer` — spawn subagent per task with full task text + context
-- `/li:two-stage-review` — spec-compliance review THEN code-quality review per task
-- `/li:fix-loop` — address review findings, re-dispatch
+**Current BUILD navigation and original non-callable step proposals:**
+- `tdd-cycle` — proposed red/green/refactor step within the authorized BUILD card, not a standalone skill.
+- `dispatch-implementer` — proposed handoff step; actual delegation needs the host's available tool and bounded ownership.
+- `two-stage-review` — specification then quality review; changing labels does not establish independence.
+- `fix-loop` — proposed remediation step, limited to authorized findings and fresh affected evidence.
 - Native BUILD walkthrough — bounded interactive collaboration through actual host tools
 - Continuous checkpointing — retained explicit preference, within commit/push authority
 - Attributable Git worktrees — parallel writers only under an approved disjoint swarm
-- `/li:verification-before-completion` — confirm task actually works before marking done
-- `/li:context-warm-build` — operator can warm context with related files mid-BUILD (NEW)
+- `/li:verify` — current checks for the intended `verification-before-completion` step; read-only by default, with repair only under explicit authority.
+- `/li:context-warm --related <topic> --glob "<pattern>"` — bounded reading instead of the proposed `context-warm-build` wrapper.
 
 **Agents (heavy depending on domain):**
 - **TestRunner** (engineering/) — TDD red phase + verification
@@ -525,19 +537,21 @@ short leaves into bounded packages without losing their acceptance or two-stage 
 
 **Slash:** `/li:review`
 
-**Sub-skills invoked:**
-- `/li:review-spec-compliance` — does built code match plan.md requirements exactly?
-- `/li:review-code-quality` — quality dimensions (per CodeReviewer agent)
-- `/li:review-design-coverage` — design system / UX (if frontend)
-- `/li:cross-artifact-analyze` — coverage gaps across spec/plan/build (NEW — from speckit)
-- `/li:caip-audit` — MS CAIP-SE compliance audit (if WorkProfile=on)
-- `/li:onecs-check` — 1CS compliance (if WorkProfile=on + customer-facing)
-- `/li:rais-customer-voice-check` — Trailblazer voice gate (if voice_tier=trailblazer)
-- `/li:agt-tier-stamp` — Agent Governance Framework (if AI agentic system built)
-- `/li:provenance-track` — track AI-assisted-generation provenance
-- `/li:first-party-check` — first-party-first compliance
-- `/li:dependency-audit` — CVE/license/supply-chain
+**Current REVIEW navigation:**
+- `/li:review` — specification, quality and applicable compliance, preserving the shared evidence gates.
+- `/li:frontend-design-review` — design-system or built-UI review when relevant, not a replacement for ordinary code review.
+- `/li:analyze` — coverage and authority consistency across the selected artifacts.
+- `/li:compliance-gate` — evaluate the actually required pack controls; unavailable mandatory evidence remains blocking.
+- `/li:sc dependency-security` — scoped dependency/license/supply-chain analysis when requested.
 - `/li:cross-check --diff` — optional additional independent review through an actual permitted reviewer
+
+Original step proposals were `review-spec-compliance`, `review-code-quality`,
+`review-design-coverage`, `cross-artifact-analyze` and `dependency-audit`; none is
+a standalone entry. Original pack-specific proposals were `caip-audit`, `onecs-check`,
+`rais-customer-voice-check`, `agt-tier-stamp`, `provenance-track` and `first-party-check`.
+Those names do not install or invoke a control in the neutral source. Preserve their
+audit, voice, governance, provenance and technology-policy purposes through the
+actually configured requirements; do not infer equivalence or waive a missing gate.
 
 **Agents (concentrated review pool):**
 - **CodeReviewer** (engineering/) — primary
@@ -601,17 +615,19 @@ Fix between stages. Don't merge stages.
 
 **Slash:** `/li:ship`
 
-**Sub-skills invoked:**
-- `/li:release-ev2` — EV2 pre-flight + PR creation (canonical)
-- `/li:release-deploy-ev2` — EV2 deploy trigger
-- `/li:safe-deploy-ring` — canary rollout
-- `/li:onebranch-validate` — 1ESPT validation if 1ES pipeline
-- `/li:provenance-track` — log AI-assistance provenance for the shipped artifact
-- `/li:rais-customer-voice-check` — final voice gate if customer-facing
-- `/li:generate-ppt / -word / -web` — if customer-deliverable doc-gen needed (4-gate pipeline)
-- `/li:demo-deliverable-gen` — if engagement demo
-- `/li:rais-transparency-note` — if AI-system shipped to customer
+**Current SHIP navigation:**
+- `/li:ship` — delivery preparation and permitted publication after the actual review/QA gates.
+- `/li:dh deployment-plan` and `/li:dh rollback-strategy` — rollout/recovery planning, not deployment permission or execution.
+- `/li:compliance-gate` — the actually applicable provenance, voice and other policy requirements.
+- `/li:generate-ppt`, `/li:generate-word`, `/li:generate-web` — retained document providers under their real input and artifact contracts.
 - `/li:capture --release-summary` — delivery-summary capability alongside SHIP
+
+Original specialized proposals were `release-ev2`, `release-deploy-ev2`,
+`safe-deploy-ring`, `onebranch-validate`, `provenance-track`,
+`rais-customer-voice-check`, `demo-deliverable-gen` and `rais-transparency-note`.
+They are not neutral callable entries. Keep their preflight, rollout, pipeline,
+provenance, voice, demo and transparency intent without claiming a missing pack
+method exists. Live actions and external distribution retain their explicit authority.
 
 **Agents:**
 - **ReleaseEngineer** (engineering/) — primary
@@ -672,15 +688,15 @@ Fix between stages. Don't merge stages.
 
 **Slash:** `/li:capture`
 
-**Sub-skills invoked:**
+**Current CAPTURE navigation and original non-callable step proposals:**
 - `/li:lessons-add` — capture corrections using the repository's durable lesson grammar
 - `/li:adr-new` — bootstrap ADR if non-trivial architectural decision was made
 - `/li:lessons-promote` — operator-driven: if lesson is general, promote to Lintel global
-- `/li:evolution-log-append` — if CLAUDE.md was modified, log
+- `evolution-log-append` — original proposed step; CAPTURE records the authorized evolution entry in the repository's declared location.
 - `/li:pause` — save compatible session context for `/li:resume --from <checkpoint>`
 - `/li:capture --retrospective` — what worked, friction and next-time adjustments
-- `/li:cold-executor-handoff` — finalize spec.md + plan.md + prompt.md as self-contained trio (NEW — from Architect image)
-- `/li:role-debrief` — if role was active, update role-file with anything learned (sensitivity-aware)
+- `cold-executor-handoff` — original proposed step; CAPTURE reaffirms the handoff produced by PLAN without inventing another command or backlog.
+- `/li:role-new --update <id>` — current route for an explicitly authorized, sensitivity-aware role update; the proposed `role-debrief` is not a standalone skill.
 - Historical profile-update proposal — no current write or policy authority follows from this record
 
 **Agents:**
@@ -924,15 +940,17 @@ companion_agents: [FieldCTOAdvisor, DemoNarrativeArc, ExecutiveBriefingDrafter]
 
 ### 4.3 — Role-lifting skills
 
+Current invocation menu; the role-file specimen above remains the original proposal.
+
 ```
-/li:role-activate <role-id>     # load role for current session (LIGHTWEIGHT — identity + voice + outcome-lens summary, ~500 tokens)
-/li:role-deep-dive <role-id>    # load full role-file (heavy, on-demand, ~2-3k tokens)
-/li:role-frame <artifact-path>  # apply active role's lens to an artifact
-/li:role-rotate <new-role-id>   # swap active role mid-session
-/li:role-deactivate             # remove active role
+/li:role <role-id>              # light activation; original sizing hint ~500 tokens
+/li:role --deep-dive <role-id>  # explicit full load; original sizing hint ~2-3k tokens
+/li:role --frame <artifact-path> # apply the actually loaded role's lens
+/li:role --rotate <new-role-id> # validate the new role before changing selection
+/li:role --off                  # deactivate; does not erase prior conversation
 /li:roles-list                  # list available roles + last-updated
 /li:role-new <id>               # scaffold new role from template
-/li:role-update <id>            # add learning to role file (sensitivity-aware)
+/li:role-new --update <id>      # authorized, sensitivity-aware update of an existing role
 ```
 
 ### 4.4 — Session start awareness (lightweight)
@@ -940,7 +958,7 @@ companion_agents: [FieldCTOAdvisor, DemoNarrativeArc, ExecutiveBriefingDrafter]
 SENSE phase reads:
 - `~/.lintel/profile.yaml` → `role_active` field
 - If set, loads role's IDENTITY + VOICE summary (~500 tokens) into session context
-- Does NOT load COLD KNOWLEDGE, OUTCOME LENS, INSIGHTS unless `/li:role-deep-dive` invoked
+- Does NOT load COLD KNOWLEDGE, OUTCOME LENS, INSIGHTS unless `/li:role --deep-dive` is explicitly selected with any required private-context consent
 - Reports: "Role active: <role-id> (deep-dive available)"
 
 This is the LIGHTWEIGHT principle — role aware doesn't mean role-heavy.
@@ -949,7 +967,7 @@ This is the LIGHTWEIGHT principle — role aware doesn't mean role-heavy.
 
 - Private roles (customer-specific) live ONLY in `~/.lintel/roles/private/`, gitignored
 - `no-customer-data-in-role-file` hook blocks committing roles with customer-PII patterns
-- `/li:role-update` sanity-checks for PII before write
+- `/li:role-new --update <id>` is the current update route; inspect the proposed change under its actual sensitivity and ownership checks, not an assumed hook
 - Sync via `bin/li-roles-sync` to operator's private GitHub repo, NOT public Lintel marketplace
 - Public roles (`Field CTO generic`, `Compliance Officer generic`) MIT-licensed, shippable
 
@@ -986,6 +1004,9 @@ This requires explicit context warming — the operator says "load these, then w
 
 ### 5.2 — Context warming skills
 
+Current selectors below preserve bounded source admission and compatible checkpoints.
+They do not expand personal-home paths, transfer permissions or prove host capacity.
+
 ```
 /li:context-warm --path <path> --glob <pattern>    # select bounded source manifests
 /li:context-warm --related <topic> --glob <pattern> # search within explicitly selected sources
@@ -1004,16 +1025,29 @@ This requires explicit context warming — the operator says "load these, then w
 **Smart load via heuristic:**
 ```bash
 /li:context-warm --related "ExpressRoute" --glob "docs/*.md"
-# → scans cwd + ~/.lintel/scaffolding/ + .claude/engineering/design-archive/ for ExpressRoute mentions
-# → loads top 10 most-relevant files
+# Rank only explicitly selected files; related mode defaults to the top 10.
+# Preview before reading; each additional root needs its own authorized selection.
+```
+
+Original illustrative reporting line, retained as data rather than output from the
+updated invocation:
+
+```text
 # → reports: "Loaded 8 files, ~12k tokens. Budget: 50k / 1M used."
 ```
 
 **Multi-repo load:**
 ```bash
-/li:context-warm "~/Workspace/customer-acme/**/*.bicep"
-/li:context-warm "~/Workspace/customer-acme/CLAUDE.md"
-# loads customer's Bicep + their CLAUDE.md for cross-repo reasoning
+/li:context-warm-customer --path <authorized-repository> --scope "**/*.bicep"
+# Select only a permitted repository; preview each file before reading.
+```
+
+The original path operands are preserved literally below. They are not expanded,
+read, or an authorization to access another repository:
+
+```text
+"~/Workspace/customer-acme/**/*.bicep"
+"~/Workspace/customer-acme/CLAUDE.md"
 ```
 
 **Session resume:**
@@ -1026,11 +1060,16 @@ This requires explicit context warming — the operator says "load these, then w
 **URL load (with sanity):**
 ```bash
 /li:context-warm-from-url https://learn.microsoft.com/azure/expressroute/expressroute-faqs
-# WebFetch + dump to context
-# WorkProfile=on: validates URL is MS-domain (no customer-data risk)
+# Use the selected source's URL policy and bounded single-hop retrieval contract.
+# A familiar domain does not prove data safety; redirects require admission before fetch.
 ```
 
 ### 5.4 — Context budget tracking
+
+Original illustrative output is retained unchanged below. It is not a current API
+example, a measurement, or evidence that the old `--keep` selector is supported.
+Current cooling uses `/li:context-cool --path <path>` or `--glob "<pattern>"`;
+it affects future reads, not already-sent tokens.
 
 ```
 /li:context-budget
@@ -1067,11 +1106,10 @@ NEVER auto-loads heavy content unless operator opts in. Honest session-start.
 
 ### 5.6 — Cost awareness
 
-Each `/li:context-warm` operation reports:
-- Tokens added
-- Total budget used after warm
-- Estimated cost ($)
-- Cooldown opportunity (what could be dropped if budget needed)
+Current `/li:context-warm` reports selected sources and input-size estimates.
+Host usage, remaining capacity and cost stay unknown when the host does not report
+them. Cooling excludes future reads; a smaller working context needs an actual
+fresh session after `/li:pause`, followed by selective `/li:resume --from <checkpoint>`.
 
 ---
 
@@ -1080,15 +1118,20 @@ Each `/li:context-warm` operation reports:
 The Lintel cycle is invocable at 6 layers of granularity.
 
 ### Layer 1: Sub-skill (atomic)
+
+The original `premise-check`, `tdd-cycle` and `cross-artifact-analyze` step names
+are not callable skills. Use their current owners without broadening the task:
+
 ```
-/li:premise-check          # just the premise step from DEFINE
-/li:tdd-cycle              # just TDD red-green-refactor from BUILD
-/li:cross-artifact-analyze # just the cross-section consistency check
+/li:define --mode minimal  # bounded intake; mandatory risk/authority/review remain
+/li:build                  # execute only the selected authorized card/package
+/li:analyze                # consistency across the original selected artifacts
 ```
 
 ### Layer 2: Phase (one full phase)
 ```
 /li:sense
+/li:scope
 /li:define
 /li:discover
 /li:plan
@@ -1107,26 +1150,40 @@ The Lintel cycle is invocable at 6 layers of granularity.
 ```
 
 ### Layer 4: Mode preset (full cycle with preset)
+
+Neutral presets:
+
 ```
 /li:cycle --mode hotfix
-/li:cycle --mode customer-engagement
 /li:cycle --mode internal-tool
-/li:cycle --mode demo-prep
 /li:cycle --mode research-dive
+/li:cycle --mode meta-infra
 /li:cycle --mode auto
 ```
 
+The original `customer-engagement` and `demo-prep` names remain possible
+pack-contributed presets, not neutral defaults. Invoke them only when the actually
+selected pack supplies them; this document does not install or activate a pack.
+
 ### Layer 5: Custom cycle
 ```
-/li:cycle --from PLAN --to SHIP --skip REVIEW
-/li:cycle --phases DEFINE,PLAN,BUILD
+/li:cycle --from DEFINE --to PLAN
+/li:cycle --from BUILD --to CAPTURE
 ```
+
+Use supported ranges, not the unimplemented `--phases` proposal. A range never
+waives required review/QA or grants publication/deployment permission.
 
 ### Layer 6: Resume
 ```
-/li:resume                 # reads 00-state.md, picks up at next phase
-/li:resume --from <phase>  # explicit override
+/li:resume                         # selected work, ledger and job precedence
+/li:resume --from <phase-or-step>  # existing override with readiness/authority checks
+/li:resume --from <checkpoint-path> # explicit owned continuity source
 ```
+
+Use an explicit relative or absolute checkpoint path when its bare name collides
+with a phase/step. `--explicit` applies only to an already authorized shared read,
+not to bypassing job readiness or source admission.
 
 ---
 
@@ -1271,6 +1328,10 @@ Before execution:
 ---
 
 ## §11 — Success criteria (post-implementation validation)
+
+Original validation targets follow unchanged. Their flags, counts, estimates and
+"verified" assertions are historical claims, not new execution evidence. Use §4.3,
+§5.2-5.3 and §6 for current navigation; do not execute an old sample as a current API.
 
 This design succeeds if:
 

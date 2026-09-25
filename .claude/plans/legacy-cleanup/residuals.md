@@ -103,8 +103,8 @@ acceptance. No other historical candidate is accepted by this register.
       "reason": "One original bounded component record identifies its source subject and records historical dimensional findings/proposals. It is not a current workflow selection; adjacent/current text is outside this exact proposed span.",
       "source_evidence": "W5 field adjudication record .claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md:46-158; original source receipt 0fa213e84cce95d1ea04f0e21d86bb70bfe25cec2d0a4a2c1e1edbefc77de12d",
       "declaration_digest": "6f2cf811e6443a8d7104a422ec43273472ada7db9c85bd50824417cdf4f1e9a5",
-      "review": ".claude/plans/legacy-cleanup/span-reviews/set01-decision.json",
-      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set01-corroboration.json"
+      "review": ".claude/plans/legacy-cleanup/span-reviews/set01-framed-v2-decision.json",
+      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set01-framed-v2-corroboration.json"
     },
     {
       "id": "cohort-2-record-162",
@@ -116,8 +116,8 @@ acceptance. No other historical candidate is accepted by this register.
       "reason": "One original bounded component record identifies its source subject and records historical dimensional findings/proposals. It is not a current workflow selection; adjacent/current text is outside this exact proposed span.",
       "source_evidence": "W5 field adjudication record .claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md:162-254; original source receipt 0fa213e84cce95d1ea04f0e21d86bb70bfe25cec2d0a4a2c1e1edbefc77de12d",
       "declaration_digest": "2392ddcf8c125d1fa2f6a0d2873272c0ad83a9aeeee9131273c8455bcab07a37",
-      "review": ".claude/plans/legacy-cleanup/span-reviews/set01-decision.json",
-      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set01-corroboration.json"
+      "review": ".claude/plans/legacy-cleanup/span-reviews/set01-framed-v2-decision.json",
+      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set01-framed-v2-corroboration.json"
     },
     {
       "id": "cohort-2-record-258",
@@ -129,8 +129,8 @@ acceptance. No other historical candidate is accepted by this register.
       "reason": "One original bounded component record identifies its source subject and records historical dimensional findings/proposals. It is not a current workflow selection; adjacent/current text is outside this exact proposed span.",
       "source_evidence": "W5 field adjudication record .claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md:258-344; original source receipt 0fa213e84cce95d1ea04f0e21d86bb70bfe25cec2d0a4a2c1e1edbefc77de12d",
       "declaration_digest": "85557358040fa473b01085d1efa06b705d867c9713f5a27c43af8cd8f6c12089",
-      "review": ".claude/plans/legacy-cleanup/span-reviews/set01-decision.json",
-      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set01-corroboration.json"
+      "review": ".claude/plans/legacy-cleanup/span-reviews/set01-framed-v2-decision.json",
+      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set01-framed-v2-corroboration.json"
     },
     {
       "id": "cohort-2-record-348",
@@ -142,8 +142,8 @@ acceptance. No other historical candidate is accepted by this register.
       "reason": "One original bounded component record identifies its source subject and records historical dimensional findings/proposals. It is not a current workflow selection; adjacent/current text is outside this exact proposed span.",
       "source_evidence": "W5 field adjudication record .claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md:348-433; original source receipt 0fa213e84cce95d1ea04f0e21d86bb70bfe25cec2d0a4a2c1e1edbefc77de12d",
       "declaration_digest": "e73b13887fe900782fd5f4cc314b722342fef0dd8ee305802c3e9b983bda1531",
-      "review": ".claude/plans/legacy-cleanup/span-reviews/set01-decision.json",
-      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set01-corroboration.json"
+      "review": ".claude/plans/legacy-cleanup/span-reviews/set01-framed-v2-decision.json",
+      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set01-framed-v2-corroboration.json"
     },
     {
       "id": "cohort-2-record-437",
@@ -155,8 +155,8 @@ acceptance. No other historical candidate is accepted by this register.
       "reason": "One original bounded component record identifies its source subject and records historical dimensional findings/proposals. It is not a current workflow selection; adjacent/current text is outside this exact proposed span.",
       "source_evidence": "W5 field adjudication record .claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md:437-522; original source receipt 0fa213e84cce95d1ea04f0e21d86bb70bfe25cec2d0a4a2c1e1edbefc77de12d",
       "declaration_digest": "df5c5895a5412e2f867a6512e8d188268e37ffef89b3a55e7d8a081e7d470e77",
-      "review": ".claude/plans/legacy-cleanup/span-reviews/set01-decision.json",
-      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set01-corroboration.json"
+      "review": ".claude/plans/legacy-cleanup/span-reviews/set01-framed-v2-decision.json",
+      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set01-framed-v2-corroboration.json"
     },
     {
       "id": "cohort-2-record-526",
@@ -168,8 +168,8 @@ acceptance. No other historical candidate is accepted by this register.
       "reason": "One original bounded component record identifies its source subject and records historical dimensional findings/proposals. It is not a current workflow selection; adjacent/current text is outside this exact proposed span.",
       "source_evidence": "W5 field adjudication record .claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md:526-611; original source receipt 0fa213e84cce95d1ea04f0e21d86bb70bfe25cec2d0a4a2c1e1edbefc77de12d",
       "declaration_digest": "f4a8721453a58a877b0fc09877d7ab00b284207629b9b3daf5a87f1f428d57d0",
-      "review": ".claude/plans/legacy-cleanup/span-reviews/set01-decision.json",
-      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set01-corroboration.json"
+      "review": ".claude/plans/legacy-cleanup/span-reviews/set01-framed-v2-decision.json",
+      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set01-framed-v2-corroboration.json"
     },
     {
       "id": "cohort-2-record-615",
@@ -181,8 +181,8 @@ acceptance. No other historical candidate is accepted by this register.
       "reason": "One original bounded component record identifies its source subject and records historical dimensional findings/proposals. It is not a current workflow selection; adjacent/current text is outside this exact proposed span.",
       "source_evidence": "W5 field adjudication record .claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md:615-707; original source receipt 0fa213e84cce95d1ea04f0e21d86bb70bfe25cec2d0a4a2c1e1edbefc77de12d",
       "declaration_digest": "0c647479ba940ee82b373fe81f24abb5c4a48e52629cb375594371cd6caa2ff6",
-      "review": ".claude/plans/legacy-cleanup/span-reviews/set01-decision.json",
-      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set01-corroboration.json"
+      "review": ".claude/plans/legacy-cleanup/span-reviews/set01-framed-v2-decision.json",
+      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set01-framed-v2-corroboration.json"
     },
     {
       "id": "cohort-3-record-156",
@@ -194,8 +194,8 @@ acceptance. No other historical candidate is accepted by this register.
       "reason": "One original bounded component record identifies its source subject and records historical dimensional findings/proposals. It is not a current workflow selection; adjacent/current text is outside this exact proposed span.",
       "source_evidence": "W5 field adjudication record .claude/engineering/audits/lintel-uniformity-findings-cohort3-handoff.md:156-242; original source receipt 2a506dbe99147a5caa64d9f80e67525e2beab2e470642dd3f0383cf45bd117c2",
       "declaration_digest": "8b7b2544e8f490c9c14ff9be3e65e3144a92f2915e4136cb9034aebe1d72c435",
-      "review": ".claude/plans/legacy-cleanup/span-reviews/set01-decision.json",
-      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set01-corroboration.json"
+      "review": ".claude/plans/legacy-cleanup/span-reviews/set01-framed-v2-decision.json",
+      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set01-framed-v2-corroboration.json"
     },
     {
       "id": "cohort-3-record-246",
@@ -207,8 +207,8 @@ acceptance. No other historical candidate is accepted by this register.
       "reason": "One original bounded component record identifies its source subject and records historical dimensional findings/proposals. It is not a current workflow selection; adjacent/current text is outside this exact proposed span.",
       "source_evidence": "W5 field adjudication record .claude/engineering/audits/lintel-uniformity-findings-cohort3-handoff.md:246-296; original source receipt 2a506dbe99147a5caa64d9f80e67525e2beab2e470642dd3f0383cf45bd117c2",
       "declaration_digest": "139dc45b72ee220ac0e06fc2da251791396049670a0985da59adcb7c9a39a350",
-      "review": ".claude/plans/legacy-cleanup/span-reviews/set01-decision.json",
-      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set01-corroboration.json"
+      "review": ".claude/plans/legacy-cleanup/span-reviews/set01-framed-v2-decision.json",
+      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set01-framed-v2-corroboration.json"
     },
     {
       "id": "cohort-3-record-300",
@@ -220,8 +220,8 @@ acceptance. No other historical candidate is accepted by this register.
       "reason": "One original bounded component record identifies its source subject and records historical dimensional findings/proposals. It is not a current workflow selection; adjacent/current text is outside this exact proposed span.",
       "source_evidence": "W5 field adjudication record .claude/engineering/audits/lintel-uniformity-findings-cohort3-handoff.md:300-336; original source receipt 2a506dbe99147a5caa64d9f80e67525e2beab2e470642dd3f0383cf45bd117c2",
       "declaration_digest": "754e11ade412e5c3dafd25b3c9b8c07c7d2690f51a98f0a0069072591adddef3",
-      "review": ".claude/plans/legacy-cleanup/span-reviews/set01-decision.json",
-      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set01-corroboration.json"
+      "review": ".claude/plans/legacy-cleanup/span-reviews/set01-framed-v2-decision.json",
+      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set01-framed-v2-corroboration.json"
     },
     {
       "id": "cohort-3-record-340",
@@ -233,8 +233,8 @@ acceptance. No other historical candidate is accepted by this register.
       "reason": "One original bounded component record identifies its source subject and records historical dimensional findings/proposals. It is not a current workflow selection; adjacent/current text is outside this exact proposed span.",
       "source_evidence": "W5 field adjudication record .claude/engineering/audits/lintel-uniformity-findings-cohort3-handoff.md:340-376; original source receipt 2a506dbe99147a5caa64d9f80e67525e2beab2e470642dd3f0383cf45bd117c2",
       "declaration_digest": "b2c851f6344c635fe847dc5db8a5680a32606023de06a4c8f62f4835c43912b1",
-      "review": ".claude/plans/legacy-cleanup/span-reviews/set01-decision.json",
-      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set01-corroboration.json"
+      "review": ".claude/plans/legacy-cleanup/span-reviews/set01-framed-v2-decision.json",
+      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set01-framed-v2-corroboration.json"
     },
     {
       "id": "cohort-3-record-587",
@@ -246,8 +246,8 @@ acceptance. No other historical candidate is accepted by this register.
       "reason": "One original bounded component record identifies its source subject and records historical dimensional findings/proposals. It is not a current workflow selection; adjacent/current text is outside this exact proposed span.",
       "source_evidence": "W5 field adjudication record .claude/engineering/audits/lintel-uniformity-findings-cohort3-handoff.md:587-621; original source receipt 2a506dbe99147a5caa64d9f80e67525e2beab2e470642dd3f0383cf45bd117c2",
       "declaration_digest": "39b9eb0065a3c2ea81acf5b2c00964ae58919cb70ee0ba2ed387b4ee856fa515",
-      "review": ".claude/plans/legacy-cleanup/span-reviews/set01-decision.json",
-      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set01-corroboration.json"
+      "review": ".claude/plans/legacy-cleanup/span-reviews/set01-framed-v2-decision.json",
+      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set01-framed-v2-corroboration.json"
     },
     {
       "id": "cohort-3-record-667",
@@ -259,8 +259,8 @@ acceptance. No other historical candidate is accepted by this register.
       "reason": "One original bounded component record identifies its source subject and records historical dimensional findings/proposals. It is not a current workflow selection; adjacent/current text is outside this exact proposed span.",
       "source_evidence": "W5 field adjudication record .claude/engineering/audits/lintel-uniformity-findings-cohort3-handoff.md:667-699; original source receipt 2a506dbe99147a5caa64d9f80e67525e2beab2e470642dd3f0383cf45bd117c2",
       "declaration_digest": "b847225489c33c72134ef6bf202b3283679d64f56ac99d00b9b1faeb40ed5ab5",
-      "review": ".claude/plans/legacy-cleanup/span-reviews/set01-decision.json",
-      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set01-corroboration.json"
+      "review": ".claude/plans/legacy-cleanup/span-reviews/set01-framed-v2-decision.json",
+      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set01-framed-v2-corroboration.json"
     },
     {
       "id": "cohort-3-record-735",
@@ -272,8 +272,8 @@ acceptance. No other historical candidate is accepted by this register.
       "reason": "One original bounded component record identifies its source subject and records historical dimensional findings/proposals. It is not a current workflow selection; adjacent/current text is outside this exact proposed span.",
       "source_evidence": "W5 field adjudication record .claude/engineering/audits/lintel-uniformity-findings-cohort3-handoff.md:735-773; original source receipt 2a506dbe99147a5caa64d9f80e67525e2beab2e470642dd3f0383cf45bd117c2",
       "declaration_digest": "af12d99c068e6150a56c30fd7a8e323da33d40bf4e61768863be7a2c1209cc7a",
-      "review": ".claude/plans/legacy-cleanup/span-reviews/set01-decision.json",
-      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set01-corroboration.json"
+      "review": ".claude/plans/legacy-cleanup/span-reviews/set01-framed-v2-decision.json",
+      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set01-framed-v2-corroboration.json"
     },
     {
       "id": "cohort-3-record-777",
@@ -285,8 +285,8 @@ acceptance. No other historical candidate is accepted by this register.
       "reason": "One original bounded component record identifies its source subject and records historical dimensional findings/proposals. It is not a current workflow selection; adjacent/current text is outside this exact proposed span.",
       "source_evidence": "W5 field adjudication record .claude/engineering/audits/lintel-uniformity-findings-cohort3-handoff.md:777-817; original source receipt 2a506dbe99147a5caa64d9f80e67525e2beab2e470642dd3f0383cf45bd117c2",
       "declaration_digest": "d71dcd20ce93e7276c03299b066f05ba6f94078ee1f0cdf26ec0d0cbebe0358c",
-      "review": ".claude/plans/legacy-cleanup/span-reviews/set01-decision.json",
-      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set01-corroboration.json"
+      "review": ".claude/plans/legacy-cleanup/span-reviews/set01-framed-v2-decision.json",
+      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set01-framed-v2-corroboration.json"
     },
     {
       "id": "cohort-7-record-46",
@@ -298,8 +298,8 @@ acceptance. No other historical candidate is accepted by this register.
       "reason": "One original bounded component record identifies its source subject and records historical dimensional findings/proposals. It is not a current workflow selection; adjacent/current text is outside this exact proposed span.",
       "source_evidence": "W5 field adjudication record .claude/engineering/audits/lintel-uniformity-findings-cohort7-packs-roles.md:46-169; original source receipt 2b591319c04717785963a7463d4a75b41f041d44f1178c413a121f1de22fcabb",
       "declaration_digest": "ae0387bba935b5358fae5544520ae6f4b85a013512fe10d61bd3675b7de57244",
-      "review": ".claude/plans/legacy-cleanup/span-reviews/set01-decision.json",
-      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set01-corroboration.json"
+      "review": ".claude/plans/legacy-cleanup/span-reviews/set01-framed-v2-decision.json",
+      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set01-framed-v2-corroboration.json"
     },
     {
       "id": "cohort-8-record-189",
@@ -493,8 +493,8 @@ acceptance. No other historical candidate is accepted by this register.
       "reason": "Proposed only: this bounded section records an original source assessment, comparison, disposition or observed result. Independent readers must reject any present instruction or consumer that this range would hide; source-era metadata alone is not approval.",
       "source_evidence": "Exact source a7a1df338bacf900f1210f08131f391831992f1f; section ### Strongest / weakest peers; full original context blob 7236207c6e22a3122427a8a28cb4db2ca49eb97e",
       "declaration_digest": "0ba8931d0a70a54dc79b956bf753ac703ac95d75bd34f85ebc6f4457f551d31e",
-      "review": ".claude/plans/legacy-cleanup/span-reviews/final-decision.json",
-      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/final-corroboration.json"
+      "review": ".claude/plans/legacy-cleanup/span-reviews/final-framed-v2-decision.json",
+      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/final-framed-v2-corroboration.json"
     },
     {
       "id": "remaining-source-record-14",
@@ -506,8 +506,8 @@ acceptance. No other historical candidate is accepted by this register.
       "reason": "Proposed only: this bounded section records an original source assessment, comparison, disposition or observed result. Independent readers must reject any present instruction or consumer that this range would hide; source-era metadata alone is not approval.",
       "source_evidence": "Exact source a7a1df338bacf900f1210f08131f391831992f1f; section ### Top findings (cohort-wide); full original context blob 7236207c6e22a3122427a8a28cb4db2ca49eb97e",
       "declaration_digest": "fd9ff43dc018df9ec93ff56872d8f6ef0f9106664b5e02bb2ef8e79dea4f8cc9",
-      "review": ".claude/plans/legacy-cleanup/span-reviews/final-decision.json",
-      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/final-corroboration.json"
+      "review": ".claude/plans/legacy-cleanup/span-reviews/final-framed-v2-decision.json",
+      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/final-framed-v2-corroboration.json"
     },
     {
       "id": "remaining-source-record-15",
@@ -519,8 +519,8 @@ acceptance. No other historical candidate is accepted by this register.
       "reason": "Proposed only: this bounded section records an original source assessment, comparison, disposition or observed result. Independent readers must reject any present instruction or consumer that this range would hide; source-era metadata alone is not approval.",
       "source_evidence": "Exact source a7a1df338bacf900f1210f08131f391831992f1f; section ### Secondary findings; full original context blob 7236207c6e22a3122427a8a28cb4db2ca49eb97e",
       "declaration_digest": "1bcb2c6f97a52d3aa2143001bd5bda41cb4dcab724532c559e3db6c1668b5a01",
-      "review": ".claude/plans/legacy-cleanup/span-reviews/final-decision.json",
-      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/final-corroboration.json"
+      "review": ".claude/plans/legacy-cleanup/span-reviews/final-framed-v2-decision.json",
+      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/final-framed-v2-corroboration.json"
     },
     {
       "id": "remaining-source-record-16",
@@ -532,8 +532,8 @@ acceptance. No other historical candidate is accepted by this register.
       "reason": "Proposed only: this bounded section records an original source assessment, comparison, disposition or observed result. Independent readers must reject any present instruction or consumer that this range would hide; source-era metadata alone is not approval.",
       "source_evidence": "Exact source a7a1df338bacf900f1210f08131f391831992f1f; section ### Designed-not-built (recorded once, not per-component); full original context blob 7236207c6e22a3122427a8a28cb4db2ca49eb97e",
       "declaration_digest": "dddf96ebafe2abf029abf51e16da829bae5a6c6b8453288143e1feaf913c0ba6",
-      "review": ".claude/plans/legacy-cleanup/span-reviews/final-decision.json",
-      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/final-corroboration.json"
+      "review": ".claude/plans/legacy-cleanup/span-reviews/final-framed-v2-decision.json",
+      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/final-framed-v2-corroboration.json"
     },
     {
       "id": "remaining-source-record-17",
@@ -545,8 +545,8 @@ acceptance. No other historical candidate is accepted by this register.
       "reason": "Proposed only: this bounded section records an original source assessment, comparison, disposition or observed result. Independent readers must reject any present instruction or consumer that this range would hide; source-era metadata alone is not approval.",
       "source_evidence": "Exact source a7a1df338bacf900f1210f08131f391831992f1f; section ### CF-2 — context-save ↔ context-dump contract break (D3, high); full original context blob 88004da66e3e123d2d922d79a2332f083b18d1ba",
       "declaration_digest": "0c552e16ee582795ef0195a58cb6205db1674fcf3f23236f037a2255385ac0d5",
-      "review": ".claude/plans/legacy-cleanup/span-reviews/final-decision.json",
-      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/final-corroboration.json"
+      "review": ".claude/plans/legacy-cleanup/span-reviews/final-framed-v2-decision.json",
+      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/final-framed-v2-corroboration.json"
     },
     {
       "id": "remaining-source-record-18",
@@ -558,8 +558,8 @@ acceptance. No other historical candidate is accepted by this register.
       "reason": "Proposed only: this bounded section records an original source assessment, comparison, disposition or observed result. Independent readers must reject any present instruction or consumer that this range would hide; source-era metadata alone is not approval.",
       "source_evidence": "Exact source a7a1df338bacf900f1210f08131f391831992f1f; section ### context-warm (THE BAR — strongest peer); full original context blob 88004da66e3e123d2d922d79a2332f083b18d1ba",
       "declaration_digest": "3bb202bd49825e7f68f25e8583620b4911a0a3c5c1d3776d6407f53af1636afa",
-      "review": ".claude/plans/legacy-cleanup/span-reviews/final-decision.json",
-      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/final-corroboration.json"
+      "review": ".claude/plans/legacy-cleanup/span-reviews/final-framed-v2-decision.json",
+      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/final-framed-v2-corroboration.json"
     },
     {
       "id": "remaining-source-record-19",
@@ -571,8 +571,8 @@ acceptance. No other historical candidate is accepted by this register.
       "reason": "Proposed only: this bounded section records an original source assessment, comparison, disposition or observed result. Independent readers must reject any present instruction or consumer that this range would hide; source-era metadata alone is not approval.",
       "source_evidence": "Exact source a7a1df338bacf900f1210f08131f391831992f1f; section ### component: skills/role-rotate / role-deactivate / role-frame / role-deep-dive / role-update / roles-list (shared record); full original context blob b21a3845989bfea4ee009b38c1e8470577cc0c5a",
       "declaration_digest": "897888fffa7c8de935aedc993aa104bbb667f20d830dbd0928030a4baf2bd8f0",
-      "review": ".claude/plans/legacy-cleanup/span-reviews/final-decision.json",
-      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/final-corroboration.json"
+      "review": ".claude/plans/legacy-cleanup/span-reviews/final-framed-v2-decision.json",
+      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/final-framed-v2-corroboration.json"
     },
     {
       "id": "remaining-source-record-20",
@@ -584,8 +584,8 @@ acceptance. No other historical candidate is accepted by this register.
       "reason": "Proposed only: this bounded section records an original source assessment, comparison, disposition or observed result. Independent readers must reject any present instruction or consumer that this range would hide; source-era metadata alone is not approval.",
       "source_evidence": "Exact source a7a1df338bacf900f1210f08131f391831992f1f; section ## pack-resolver consumer-consistency finding — CENTER OF COHORT (D7); full original context blob b21a3845989bfea4ee009b38c1e8470577cc0c5a",
       "declaration_digest": "05c967ec6e751abef1e3962bb5ab0d4e8a0d5712d6f57feaed2fc4b4fa091e57",
-      "review": ".claude/plans/legacy-cleanup/span-reviews/final-decision.json",
-      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/final-corroboration.json"
+      "review": ".claude/plans/legacy-cleanup/span-reviews/final-framed-v2-decision.json",
+      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/final-framed-v2-corroboration.json"
     },
     {
       "id": "remaining-source-record-21",
@@ -597,8 +597,8 @@ acceptance. No other historical candidate is accepted by this register.
       "reason": "Proposed only: this bounded section records an original source assessment, comparison, disposition or observed result. Independent readers must reject any present instruction or consumer that this range would hide; source-era metadata alone is not approval.",
       "source_evidence": "Exact source a7a1df338bacf900f1210f08131f391831992f1f; section ## WorkProfile finding (D7); full original context blob b21a3845989bfea4ee009b38c1e8470577cc0c5a",
       "declaration_digest": "662b20049e6a8cdd10bb4fc682a4e31120b82683f5f5bfeb05767d7ba3552698",
-      "review": ".claude/plans/legacy-cleanup/span-reviews/final-decision.json",
-      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/final-corroboration.json"
+      "review": ".claude/plans/legacy-cleanup/span-reviews/final-framed-v2-decision.json",
+      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/final-framed-v2-corroboration.json"
     },
     {
       "id": "remaining-source-record-22",
@@ -610,8 +610,8 @@ acceptance. No other historical candidate is accepted by this register.
       "reason": "Proposed only: this bounded section records an original source assessment, comparison, disposition or observed result. Independent readers must reject any present instruction or consumer that this range would hide; source-era metadata alone is not approval.",
       "source_evidence": "Exact source a7a1df338bacf900f1210f08131f391831992f1f; section ## Designed-not-built lifecycle note (arch-level, single finding — not per-skill spam); full original context blob b21a3845989bfea4ee009b38c1e8470577cc0c5a",
       "declaration_digest": "d0b8745615ec950c5e7a3d05cdaca2f2da3521a2f9869d8cafbf22485675e2e1",
-      "review": ".claude/plans/legacy-cleanup/span-reviews/final-decision.json",
-      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/final-corroboration.json"
+      "review": ".claude/plans/legacy-cleanup/span-reviews/final-framed-v2-decision.json",
+      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/final-framed-v2-corroboration.json"
     },
     {
       "id": "remaining-source-record-23",
@@ -623,8 +623,8 @@ acceptance. No other historical candidate is accepted by this register.
       "reason": "Proposed only: this bounded section records an original source assessment, comparison, disposition or observed result. Independent readers must reject any present instruction or consumer that this range would hide; source-era metadata alone is not approval.",
       "source_evidence": "Exact source a7a1df338bacf900f1210f08131f391831992f1f; section ## Cohort 7 summary; full original context blob b21a3845989bfea4ee009b38c1e8470577cc0c5a",
       "declaration_digest": "149291fe98adc5508819331d75f1443658f6cb54052d1c23e32236512c6c87a2",
-      "review": ".claude/plans/legacy-cleanup/span-reviews/final-decision.json",
-      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/final-corroboration.json"
+      "review": ".claude/plans/legacy-cleanup/span-reviews/final-framed-v2-decision.json",
+      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/final-framed-v2-corroboration.json"
     },
     {
       "id": "remaining-source-record-25",

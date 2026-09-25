@@ -171,6 +171,72 @@ class CommandSurfaceTests(unittest.TestCase):
         report["decisions"][0]["import"] = "skills/qa/SKILL.md"
         self.assertTrue(self.findings(json.dumps(report), path))
 
+    def test_framing_acknowledgement_reasons_do_not_hide_new_routing(self):
+        path = ".claude/plans/legacy-cleanup/framing-ack.json"
+        report = {
+            "review_type": "finite framing acknowledgement", "reviewer": {"id": "fixture"},
+            "framing_digest_recipe": {"fields": ["id"]},
+            "decisions": [{"id": "original", "declaration_digest": "b" * 64,
+                           "framing_digest": "c" * 64, "decision": "ACK",
+                           "reason": "The /li:role-activate peer record is not an ancestor"}],
+        }
+        findings, observations = self.observations(json.dumps(report), path)
+        self.assertEqual(findings, [])
+        self.assertTrue(observations)
+        report["decisions"][0]["next"] = "/li:role-activate"
+        self.assertTrue(self.findings(json.dumps(report), path))
+        del report["decisions"][0]["next"]
+        report["decisions"][0]["decision"] = "APPROVED"
+        self.assertTrue(self.findings(json.dumps(report), path))
+        report["decisions"][0]["decision"] = "ACK"
+        del report["framing_digest_recipe"]
+        self.assertTrue(self.findings(json.dumps(report), path))
+
+    def test_acknowledged_framing_excerpts_allow_unrelated_edits_but_not_context_drift(self):
+        path, source, entry, decision = self.reviewed_span_fixture()
+        source = source.replace("# Original record\n\n",
+                                "# Original record\n\n**Date:** 2026-05-29\n"
+                                "**Scope:** Original component audit\n**Role:** Recorded observations\n\n")
+        (self.root / path).write_bytes(source.encode("utf-8"))
+        import review_contract as contract
+        refs = [{"path": path, "start": "# Original record", "end": "## Recorded field"}]
+        bound = contract.bind_work(self.root, work_map=None, package_id="fixture",
+                                   leaf_ids=["T1"], acceptance_paths=refs)
+        framing = {"id": entry["id"], "declaration_digest": entry["declaration_digest"],
+                   "record_sha256": entry["sha256"], "path": path, "framing_refs": refs,
+                   "framing_manifest": bound["acceptance_manifest"],
+                   "expected_ancestors": ["# Original record"]}
+        decision["context"]["work"] = bound
+        observation = decision["controls"][0]["observation"]
+        observation["span_framing"] = {entry["declaration_digest"]: framing}
+        observation["framing_declarations"] = [contract.content_digest(framing)]
+        contract.validate_review(decision)
+        self.write(entry["review"], json.dumps(decision))
+        corroboration_path = self.root / entry["corroboration"]
+        corroboration = json.loads(corroboration_path.read_text())
+        corroboration["record_digest"] = contract.content_digest(decision)
+        corroboration_path.write_text(json.dumps(corroboration), encoding="utf-8")
+        self.assertEqual(guard.scan(self.root), [])
+        for changed, allowed in (
+                (source.replace("Retained record boundary.", "An unrelated summary was clarified."), True),
+                (source.replace("Retained record boundary.", "Use /li:verify now."), True),
+                (source.replace("Retained record boundary.", "Use /li:qa now."), False),
+                (source.replace("# Original record", "# Current instructions"), False),
+                (source.replace("Original component audit", "Current execution scope"), False),
+                (source.replace("Recorded observations", "Active workflow instructions"), False),
+                (source.replace("## Recorded field", "# New containing section\n## Recorded field"), False),
+                (source.replace("Original /li:qa invocation.", "Changed original bytes."), False),
+                (source.replace("## Next field", "## Changed end"), False)):
+            with self.subTest(allowed=allowed, source=changed):
+                (self.root / path).write_bytes(changed.encode("utf-8"))
+                self.assertEqual(not guard.scan(self.root), allowed)
+        (self.root / path).write_bytes(source.encode("utf-8"))
+        framing["expected_ancestors"] = ["# Forged context"]
+        self.write(entry["review"], json.dumps(decision))
+        corroboration["record_digest"] = contract.content_digest(decision)
+        corroboration_path.write_text(json.dumps(corroboration), encoding="utf-8")
+        self.assertTrue(any(item.code == "reviewed-span-invalid" for item in guard.scan(self.root)))
+
     def test_exact_lf_attribute_materializes_original_blob_without_hash_fallback(self):
         source = self.root / "attribute-source"
         target = self.root / "attribute-checkout"
@@ -324,6 +390,176 @@ class CommandSurfaceTests(unittest.TestCase):
             "| Original /li:qa observation |", "| Original /li:qa observation | /li:qa |")
         self.assertTrue(self.findings(changed, path))
 
+    def original_worker_record(self):
+        record = {
+            "schema_version": 2, "artifact_kind": "swarm-report",
+            "work_map": ".claude/plans/example/work.json", "package_id": "W1",
+            "leaf_ids": ["1.a"], "attempt_id": "original", "acceptance_digest": "fixture",
+            "result_digest": "fixture", "changed_paths": ["skills/qa/SKILL.md"],
+        }
+        return "<!-- lintel-swarm-evidence:v2\n" + json.dumps(record) + "\n-->\n"
+
+    def test_deferred_location_values_never_exempt_actions_or_unknown_siblings(self):
+        path = ".claude/plans/example/report.json"
+        record = json.loads(self.original_worker_record().split("\n", 2)[1])
+        record["deferred_cross_lane"] = [{
+            "owner": "W4", "paths": ["skills/browse/SKILL.md:11"],
+            "references": ["skills/browse/scripts/chromium.mjs", "make-pdf"],
+            "action": "Original unresolved dependency.",
+        }]
+        findings, observations = self.observations(json.dumps(record, indent=2), path)
+        self.assertEqual(findings, [])
+        self.assertTrue(any(item["field"] == "/deferred_cross_lane/0/paths/0" for item in observations))
+        record["deferred_cross_lane"][0]["action"] = "Use /li:qa now."
+        self.assertTrue(self.findings(json.dumps(record), path))
+        record["deferred_cross_lane"][0]["action"] = "Original unresolved dependency."
+        record["deferred_cross_lane"][0]["current_selection"] = "skill:qa"
+        self.assertTrue(self.findings(json.dumps(record), path))
+        del record["deferred_cross_lane"][0]["current_selection"]
+        record["deferred_cross_lane"][0]["references"] = ["Use /li:qa"]
+        self.assertTrue(self.findings(json.dumps(record), path))
+
+    def test_original_worker_locations_leave_join_instructions_and_unknown_fields_checked(self):
+        path = ".claude/plans/example/report.md"
+        text = (self.original_worker_record()
+                + "## Deferred foreign consumers\n\n"
+                "| Owner/surface | Observed join to complete |\n|---|---|\n"
+                "| W4: `skills/browse/SKILL.md:11,20-24` | Original source location to reconcile. |\n")
+        findings, observations = self.observations(text, path)
+        self.assertEqual(findings, [])
+        self.assertTrue(any(item["field"] == "reported source location: Owner/surface"
+                            for item in observations))
+        for changed in (
+                text.replace("Original source location to reconcile.", "Use /li:qa now."),
+                text.replace("W4: `skills/browse/SKILL.md:11,20-24`", "Import `skills/browse/SKILL.md:11`"),
+                text.replace("| Owner/surface |", "| Current selection |"),
+                text.replace("## Deferred foreign consumers", "## Current resource imports"),
+                text.replace("skills/browse/SKILL.md:11,20-24", "skills/browse/SKILL.md")):
+            with self.subTest(changed=changed):
+                self.assertTrue(self.findings(changed, path))
+
+    def test_original_changed_location_accepts_directory_and_lines_not_unlisted_paths(self):
+        path = ".claude/plans/example/report.md"
+        text = (self.original_worker_record()
+                + "| Changed source | Result |\n|---|---|\n"
+                "| `skills/qa`, `skills/qa/SKILL.md:2-8` | Original change inventory. |\n")
+        self.assertEqual(self.findings(text, path), [])
+        self.assertTrue(self.findings(text.replace("skills/qa/SKILL.md:2-8", "skills/qa-only/SKILL.md:2"), path))
+        self.assertTrue(self.findings(text.replace("Original change inventory.", "Use /li:qa now."), path))
+        self.assertTrue(self.findings(text.replace("`skills/qa`,", "Use `skills/qa`,"), path))
+
+    def test_original_report_path_columns_are_not_current_selections(self):
+        path = ".claude/plans/universal-implementation/reports/P03.md"
+        prefix = "# P03 implementation handoff\n\n- Start: `" + "a" * 40 + "`\n\n"
+        for header in ("| Surface | Changed files |", "| Group | Exact paths |",
+                       "| Candidate area | Changed paths |", "| Area | Owned files reviewed |",
+                       "| Area | Files in the initial implementation and subsequent repairs |"):
+            with self.subTest(header=header):
+                text = prefix + header + "\n|---|---|\n| Original inputs | `skills/qa/SKILL.md` |\n"
+                self.assertEqual(self.findings(text, path), [])
+                self.assertTrue(self.findings(text.replace("`skills/qa/SKILL.md`", "Use `skills/qa/SKILL.md`"), path))
+                self.assertTrue(self.findings(text.replace(header, "| Surface | Current selection |"), path))
+                self.assertTrue(self.findings(text.replace("a" * 40, "unknown"), path))
+        for header in ("| Selected paths | Scope |", "| Paths | Responsibility |",
+                       "| Changed product path | Reviewed purpose |"):
+            with self.subTest(header=header):
+                text = prefix + header + "\n|---|---|\n| `skills/qa/SKILL.md` | Original input. |\n"
+                self.assertEqual(self.findings(text, path), [])
+                self.assertTrue(self.findings(text.replace("Original input.", "Import `skills/qa/SKILL.md`."), path))
+        text = (prefix + "| ID | Severity | File:lines | Finding and required correction | Confidence |\n"
+                "|---|---|---|---|---|\n| F1 | P2 | `skills/qa/SKILL.md:2` | Original finding. | High |\n")
+        self.assertEqual(self.findings(text, path), [])
+        self.assertTrue(self.findings(text.replace("Original finding.", "Use /li:qa."), path))
+        self.assertTrue(self.findings(prefix + "Import `skills/qa/SKILL.md` now.\n", path))
+
+    def test_observed_command_and_result_literals_do_not_hide_new_instructions(self):
+        path = ".claude/plans/example/report.md"
+        prefix = self.original_worker_record() + "## Checks actually run\n\n"
+        text = (prefix + "| Observed command | Observed result |\n|---|---|\n"
+                "| `bash skills/qa/scripts/test.sh` | `exit 1: skills/qa/scripts/test.sh missing` |\n")
+        findings, observations = self.observations(text, path)
+        self.assertEqual(findings, [])
+        self.assertTrue(any(item["category"] == "recorded command literal" for item in observations))
+        for changed in (
+                text + "\nRun /li:qa now.\n",
+                text.replace("`exit 1: skills/qa/scripts/test.sh missing`", "Use /li:qa now."),
+                text.replace("`exit 1: skills/qa/scripts/test.sh missing`", "`exit 1` and then import `skills/qa/SKILL.md`."),
+                text.replace("`exit 1: skills/qa/scripts/test.sh missing`", "`exit 1; Use /li:qa now`"),
+                text.replace("`bash skills/qa/scripts/test.sh`", "`Use /li:qa now`"),
+                text.replace("## Checks actually run", "## Commands to run"),
+                text.replace("| Observed command |", "| Current command |")):
+            with self.subTest(changed=changed):
+                self.assertTrue(self.findings(changed, path))
+        source = (prefix + "| Source | Actual result |\n|---|---|\n"
+                  "| `[Original fixture](missing-example.md)` | PASS, original data-only check. |\n")
+        self.assertEqual(self.findings(source, path), [])
+        self.assertTrue(self.findings(source.replace("PASS, original data-only check.", "Import `skills/qa/SKILL.md`."), path))
+
+    def test_original_file_line_link_is_citation_not_current_import(self):
+        path = ".claude/plans/example/report.md"
+        prefix = self.original_worker_record()
+        citation = "[skills/qa/SKILL.md:42](../../skills/qa/SKILL.md#L42)"
+        text = prefix + "Original source: " + citation + ".\n"
+        findings, observations = self.observations(text, path)
+        self.assertEqual(findings, [])
+        self.assertTrue(any(item["field"] == "original file:line citation" for item in observations))
+        for changed in (text.replace("Original source:", "Use"), text.replace("#L42", "#L43"),
+                        text + "Import `skills/qa/SKILL.md`.\n",
+                        text.rstrip() + " Use " + citation + ".\n",
+                        text.replace("../../skills/qa/SKILL.md", "../../skills/qa-only/SKILL.md")):
+            self.assertTrue(self.findings(changed, path))
+
+    def test_original_version_and_proposed_symbols_leave_current_version_blocking(self):
+        path = ".claude/plans/example/report.md"
+        prefix = self.original_worker_record()
+        text = (prefix + "| Original version | Proposed symbol | Current version |\n|---|---|---|\n"
+                "| `/li:qa` | `/li:example-proposal` | `/li:verify` |\n")
+        self.assertEqual(self.findings(text, path), [])
+        self.assertTrue(self.findings(text.replace("`/li:verify`", "`/li:qa-only`"), path))
+        self.assertTrue(self.findings(text.replace("`/li:example-proposal`", "Use `/li:example-proposal` now."), path))
+        self.assertTrue(self.findings(text + "\nUse /li:example-proposal.\n", path))
+        proposed = prefix + "- `/li:example-proposal` - proposed intake step: original design operand.\n"
+        self.assertEqual(self.findings(proposed, path), [])
+        self.assertTrue(self.findings(proposed.replace("proposed intake step:", "current intake step:"), path))
+        self.assertTrue(self.findings(proposed + "Select /li:example-proposal now.\n", path))
+
+    def test_prohibited_operand_is_not_an_import_and_conditions_remain_checked(self):
+        path = ".claude/plans/example/report.md"
+        prefix = self.original_worker_record()
+        text = prefix + "Do not reintroduce `skills/web-session/scripts/removed.py`.\n"
+        self.assertEqual(self.findings(text, path), [])
+        self.assertTrue(self.findings(text.replace("Do not reintroduce", "Import"), path))
+        self.assertTrue(self.findings(text.replace("`.", "` until validation passes."), path))
+        self.assertTrue(self.findings(text + "Use `skills/web-session/scripts/removed.py` now.\n", path))
+        self.assertTrue(self.findings(prefix + "```python\nimportlib.import_module('skills/qa/SKILL.md')\n```\n", path))
+
+    def test_audit_scope_names_require_same_record_subject_and_no_execution_claim(self):
+        path = ".claude/engineering/audits/lintel-uniformity-findings-cohort1-phase-core.md"
+        text = self.cohort_record().replace("**Date:** 2026-05-29",
+                                          "**Date:** 2026-05-29\n**Components audited:** qa and its original metadata")
+        self.assertEqual(self.findings(text, path), [])
+        current = text.replace("qa and its original metadata", "Use /li:qa now")
+        self.assertTrue(self.findings(current, path))
+        unknown = text.replace("qa and its original metadata", "qa-only and its original metadata")
+        self.assertTrue(self.findings(unknown, path))
+
+    def test_original_domain_proposal_inventory_preserves_unbuilt_symbols_not_current_uses(self):
+        path = ".claude/engineering/audits/lintel-uniformity-findings-cohort6-eng-domains.md"
+        text = ("# Cohort 6 findings - engineering domain coverage\n\n**Cohort:** 6\n"
+                "**Critical framing:** Modules are **DESIGNED but NOT BUILT** in "
+                "lintel-v4.0-reframe-design.md.\n\n"
+                "| Artifact kind | Exists today | Path |\n|---|---|---|\n"
+                "| Dedicated skills | 0 | designed: `ta-api-design`, `qa-only` |\n")
+        findings, observations = self.observations(text, path)
+        self.assertEqual(findings, [])
+        self.assertTrue(observations)
+        self.assertTrue(self.findings(text + "\nUse /li:qa-only now.\n", path))
+        self.assertTrue(self.findings(text.replace("DESIGNED but NOT BUILT", "CURRENT WORKFLOW"), path))
+        current = text.replace("| Path |", "| Path | Current use |").replace(
+            "|---|---|---|", "|---|---|---|---|").replace(
+            "designed: `ta-api-design`, `qa-only` |", "designed: `ta-api-design`, `qa-only` | /li:qa |")
+        self.assertTrue(self.findings(current, path))
+
     def test_cohort_subject_paths_do_not_exempt_instructions_in_role_column(self):
         path = ".claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md"
         text = ("# Cohort 2 - Original planner audit\n\n**Date:** 2026-05-29\n\n"
@@ -355,6 +591,54 @@ class CommandSurfaceTests(unittest.TestCase):
         self.assertTrue(self.findings(text.replace("@@ -1 +1 @@", "Run /li:qa now"), path))
         self.write(path, text)
         self.assertTrue(self.findings(text, "skills/verify/current-patch.md"))
+
+    def test_original_versioned_mapping_keeps_both_old_fields_but_checks_current_use(self):
+        path = ".claude/engineering/design-archive/MIGRATION-TABLE-v2.md"
+        text = ("# Lintel v2 Migration Table\n\nv1 names below use `<v1>token</v1>` markup.\n\n"
+                "| v1 name | v2 name | Status | Rename reason |\n|---|---|---|---|\n"
+                "| `<v1>qa-only</v1>` | `/qa-only` | unchanged | Original transition. |\n")
+        findings, observations = self.observations(text, path)
+        self.assertEqual(findings, [])
+        self.assertTrue(any(item["field"].endswith("/ v2 name") for item in observations))
+        self.assertTrue(self.findings(text.replace("Original transition.", "Use /li:qa now."), path))
+        self.assertTrue(self.findings(text + "\nCurrent import: `skills/qa/SKILL.md`.\n", path))
+        self.assertTrue(self.findings(text.replace("<v1>qa-only</v1>", "qa-only"), path))
+
+    def test_generated_compatibility_path_is_not_a_current_dependency(self):
+        path = ".claude/engineering/compat-audits/example.md"
+        text = ("---\nslug: example\nagainst: working-tree\nverdict: RED\n---\n\n"
+                "# Compatibility audit: example\n\n## Q1 - Frontmatter contract changes (1)\n\n"
+                "- `skills/qa/SKILL.md`\n\n*Generated by bin/li-compat-audit at 2026-09-25T10:00:00Z*\n")
+        self.assertEqual(self.findings(text, path), [])
+        self.assertTrue(self.findings(text.replace("- `skills/qa/SKILL.md`", "- Use `skills/qa/SKILL.md` now."), path))
+        self.assertTrue(self.findings(text + "\nUse /li:qa now.\n", path))
+        self.assertTrue(self.findings(text.replace("Generated by bin/li-compat-audit", "Current workflow"), path))
+
+    def test_original_naming_values_and_output_do_not_register_current_aliases(self):
+        path = ".claude/engineering/design-archive/lintel-v3.6-cohort4-naming-decisions.md"
+        text = ("# Cohort 4 - Naming Decisions WS-4a + WS-4b\n\n**Status:** PROPOSED\n\n"
+                "```yaml\ncurrent_name: qa-only\ndescription: Original verification method.\n"
+                "frontmatter_v1_alias: null\nrecommendation: KEEP\n"
+                "rationale: Original /li:qa-only comparison.\noperator_veto: unset\n```\n")
+        self.assertEqual(self.findings(text, path), [])
+        self.assertTrue(self.findings(text.replace("operator_veto: unset",
+                                                  "operator_veto: unset\ncurrent_use: /li:qa"), path))
+        self.assertTrue(self.findings(text + "\nUse /li:qa-only now.\n", path))
+        output = ("`comm -12 source-a source-b` returns **3** name-collisions on disk:\n\n"
+                  "```\nqa-only, plan-eng-review\n```\n")
+        self.assertEqual(self.findings(text + output, path), [])
+        self.assertTrue(self.findings(text + output.replace("qa-only, ", "Use /li:qa, "), path))
+
+    def test_source_snapshot_inventory_names_do_not_hide_current_instructions(self):
+        path = ".claude/engineering/audits/lintel-state-of-the-harness.md"
+        text = ("# Lintel - State of the Harness\n\nRead-only source: read-only sweep of `main @ 1234567`.\n"
+                "Counts are that run's snapshot.\n\n## 4. Skills - 168, by cluster\n\n"
+                "- **Original family (~7)** - `plan-eng-review`, `qa-only`.\n"
+                "  Other original identities: `context-save`.\n\n## 5. Other material\n")
+        self.assertEqual(self.findings(text, path), [])
+        self.assertTrue(self.findings(text.replace("Other original identities:", "Use"), path))
+        self.assertTrue(self.findings(text + "\nUse /li:qa now.\n", path))
+        self.assertTrue(self.findings(text.replace("Counts are that run's snapshot.", "Current execution rules."), path))
 
     def test_language_guard_allows_only_exact_functional_header_data(self):
         language = (ROOT / "tests/shape/no-swedish.sh").read_text(encoding="utf-8")

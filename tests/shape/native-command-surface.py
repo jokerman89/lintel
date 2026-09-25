@@ -88,6 +88,10 @@ SKILL_PATH = re.compile(
     rf"(?P<name>(?:li:)?{NAME})(?P<tail>(?:/[a-zA-Z0-9_.%-]+)*)(?![\w-])"
 )
 LINK = re.compile(r"\[[^\]\n]*\]\((<?[^\s)]+>?)(?:\s+['\"][^)]*)?\)")
+SOURCE_LOCATION = re.compile(
+    r"(?P<path>(?:skills|agents|bin|lib|tests|hooks|docs|install|config|scaffolding|\.claude|\.github)"
+    r"/[\w.-]+(?:/[\w.-]+)*)(?::(?P<lines>[1-9]\d*(?:-[1-9]\d*)?(?:,[1-9]\d*(?:-[1-9]\d*)?)*))?"
+)
 URL = re.compile(r"\b(?:https?|mailto):[^\s`<>)]+", re.I)
 COHORT_REPORTS = {
     f".claude/engineering/audits/lintel-uniformity-findings-cohort{number}-{name}.md": number
@@ -279,7 +283,7 @@ def registered_observation_spans(root: Path) -> tuple[dict[str, list[dict]], lis
         markdown = observation_support("markdown_source")
         sys.path.insert(0, str(SOURCE_ROOT / "lib"))
         from context_safety import read_owned
-        from review_contract import content_digest, load_json, validate_review, validate_shape
+        from review_contract import bind_work, content_digest, load_json, validate_review, validate_shape
 
         for entry in value["entries"]:
             if not isinstance(entry, dict) or set(entry) != keys:
@@ -351,16 +355,62 @@ def registered_observation_spans(root: Path) -> tuple[dict[str, list[dict]], lis
                     or corroboration["builder"] != decision["context"]["builder"]
                     or corroboration["reviewer"] != decision["reviewer"]):
                 raise ValueError("Reviewed-span actor observation does not match the exact semantic decision")
-            source_context = [item for item in decision["context"]["work"]["acceptance_manifest"]
-                              if item["path"] == relative and item["start"] is None and item["end"] is None]
-            if len(source_context) != 1 or source_context[0]["sha256"] != hashlib.sha256(data).hexdigest():
-                raise ValueError(f"Original observation context changed or is not bound: {identifier}")
             approved = [control for control in decision["controls"]
                         if control["id"] == "historical-spans" and control["kind"] == "check"
                         and control["requirement"] == "mandatory" and control["applicability"] == "applicable"
                         and control["status"] == "pass"]
             if len(approved) != 1 or entry["declaration_digest"] not in approved[0]["observation"].get("span_declarations", []):
                 raise ValueError(f"Span lacks an exact passing independent semantic observation: {identifier}")
+            observation = approved[0]["observation"]
+            framing = observation.get("span_framing", {}).get(entry["declaration_digest"])
+            if framing is None:
+                source_context = [item for item in decision["context"]["work"]["acceptance_manifest"]
+                                  if item["path"] == relative and item["start"] is None and item["end"] is None]
+                if len(source_context) != 1 or source_context[0]["sha256"] != hashlib.sha256(data).hexdigest():
+                    raise ValueError(f"Original observation context changed or is not bound: {identifier}")
+            else:
+                frame_keys = {"id", "declaration_digest", "record_sha256", "path",
+                              "framing_refs", "framing_manifest", "expected_ancestors"}
+                if not isinstance(framing, dict) or set(framing) != frame_keys:
+                    raise ValueError("Malformed exact framing declaration")
+                if (framing["id"] != identifier or framing["declaration_digest"] != entry["declaration_digest"]
+                        or framing["record_sha256"] != entry["sha256"] or framing["path"] != relative
+                        or content_digest(framing) not in observation.get("framing_declarations", [])):
+                    raise ValueError("Framing declaration lacks its exact independently acknowledged digest")
+                refs = framing["framing_refs"]
+                if not isinstance(refs, list) or not refs:
+                    raise ValueError("Framing requires explicit acceptance excerpts")
+                for ref in refs:
+                    validate_shape(ref, "acceptanceRef")
+                    if (not isinstance(ref, dict) or ref["path"] != relative
+                            or ref["start"] is None or ref["end"] is None):
+                        raise ValueError("Framing may select only exact excerpts in its original source")
+                    for marker in (ref["start"], ref["end"]):
+                        matches = [line for line in boundaries.lines if text[line.start:line.end] == marker]
+                        if len(matches) != 1 or matches[0].container_ids or matches[0].kind != "prose":
+                            raise ValueError("Ambiguous, nested or literal framing marker")
+                bound = bind_work(root, work_map=None, package_id="framing-observation",
+                                  leaf_ids=["frame"], acceptance_paths=refs)
+                if bound["acceptance_manifest"] != framing["framing_manifest"]:
+                    raise ValueError(f"Original title/scope/record-role framing changed: {identifier}")
+                manifest = decision["context"]["work"]["acceptance_manifest"]
+                if any(manifest.count(item) != 1 for item in framing["framing_manifest"]):
+                    raise ValueError("Framing excerpts are not bound by the original review acceptance manifest")
+                own_heading = re.match(r"^(#{1,6})\s+", entry["start"])
+                if own_heading is None:
+                    raise ValueError("Framed records require an explicit heading boundary")
+                ancestors = []
+                for line in boundaries.lines:
+                    if line.start >= lower:
+                        break
+                    label = text[line.start:line.end]
+                    heading = re.match(r"^(#{1,6})\s+", label)
+                    if line.kind == "prose" and not line.container_ids and heading:
+                        level = len(heading[1])
+                        ancestors = [item for item in ancestors if item[0] < level] + [(level, label)]
+                actual = [label for level, label in ancestors if level < len(own_heading[1])]
+                if actual != framing["expected_ancestors"]:
+                    raise ValueError(f"Original containing-section ancestry changed: {identifier}")
             report_paths = approved[0]["evidence"]
             evidence = {item["path"]: item["sha256"] for item in decision["evidence"]}
             if not report_paths or any(
@@ -470,6 +520,41 @@ def cohort_yaml_observations(text: str, relative: str, observe, reject) -> None:
         visit(node)
 
 
+def naming_record_observations(text: str, relative: str, observe, reject) -> None:
+    if (relative != ".claude/engineering/design-archive/lintel-v3.6-cohort4-naming-decisions.md"
+            or not text.startswith("# Cohort 4")
+            or "**Status:** PROPOSED" not in text or "WS-4a" not in text or "WS-4b" not in text):
+        return
+    envelope = observation_support("envelope_contract")
+    for match in re.finditer(r"(?m)^```yaml\r?\n(?P<body>[\s\S]*?)^```\s*$", text):
+        document = match["body"]
+        try:
+            value = envelope.load_text(document)
+            yaml = envelope._yaml_module()
+            node = yaml.compose(document, Loader=yaml.SafeLoader)
+        except (ValueError, envelope.EnvelopeError) as error:
+            reject(text.count("\n", 0, match.start("body")) + 1,
+                   "Original naming-record parse failed: " + str(error))
+            continue
+        required = {"current_name", "description", "frontmatter_v1_alias", "recommendation", "rationale", "operator_veto"}
+        if not isinstance(value, dict) or not required <= value.keys():
+            reject(text.count("\n", 0, match.start("body")) + 1, "Unsupported original naming-record shape")
+            continue
+        for key, scalar in node.value:
+            if (isinstance(key, yaml.ScalarNode) and key.value in required | {"alias_grace_period"}
+                    and isinstance(scalar, yaml.ScalarNode)):
+                observe(match.start("body") + scalar.start_mark.index,
+                        match.start("body") + scalar.end_mark.index,
+                        "original naming proposal / " + key.value, "recorded naming decision",
+                        "Value in the original WS-4 naming proposal, not current registration or operator approval. Unknown sibling fields and adjacent current uses remain checked.")
+    for match in re.finditer(r"(?m)^`comm -12 [^\n]+` returns \*\*\d+\*\* name-collisions on disk:\s*\n\n```\r?\n(?P<body>[\s\S]*?)^```\s*$", text):
+        items = [name.strip() for name in match["body"].split(",")]
+        if items and all(re.fullmatch(NAME, item) for item in items):
+            observe(match.start("body"), match.end("body"), "original discovery name-list output",
+                    "recorded discovery output",
+                    "Literal identifier output of the recorded comparison; the original claimed count is preserved, not independently confirmed. No current command is invoked.")
+
+
 def observation_fields(value: object) -> list[tuple[tuple, str, str]]:
     """Classify inspected data fields, not a schema, authorization or binding verdict."""
     if not isinstance(value, dict):
@@ -515,6 +600,19 @@ def observation_fields(value: object) -> list[tuple[tuple, str, str]]:
                     "source_context_sha256", "source_git_blob", "bounded_narrowing",
                 ), category, reason)
 
+    if (isinstance(value.get("review_type"), str) and isinstance(value.get("reviewer"), dict)
+            and isinstance(value.get("framing_digest_recipe"), (str, dict, list))
+            and isinstance(value.get("decisions"), list)):
+        category = "declared framing acknowledgement field"
+        reason = "Original per-declaration framing acknowledgement; only exact reviewed-span admission checks its digest. Shape is not independence or release clearance."
+        for index, decision in enumerate(value["decisions"]):
+            if (isinstance(decision, dict)
+                    and {"id", "declaration_digest", "framing_digest", "decision"} <= decision.keys()
+                    and decision["decision"] in {"ACK", "REJECT", "NEEDS_NARROWING"}):
+                fields(decision, ("decisions", index), (
+                    "id", "declaration_digest", "framing_digest", "decision", "reason",
+                ), category, reason)
+
     category = evidence_category(value)
     if category:
         fields(value, (), (
@@ -527,6 +625,23 @@ def observation_fields(value: object) -> list[tuple[tuple, str, str]]:
             "independence_required", "required_policy", "required_controls", "qa_requirements",
             "context_digest",
         ), category, "Recorded evidence field; binding, status and independence are not verified by this routing check.")
+        if category == "swarm observation payload" and value.get("artifact_kind") == "swarm-report":
+            for index, entry in enumerate(value.get("deferred_cross_lane", []) if isinstance(
+                    value.get("deferred_cross_lane"), list) else []):
+                if (not isinstance(entry, dict) or not isinstance(entry.get("owner"), str)
+                        or not isinstance(entry.get("action"), str)):
+                    continue
+                for key in ("paths", "references"):
+                    members = entry.get(key)
+                    if not isinstance(members, list):
+                        continue
+                    for member, location in enumerate(members):
+                        if isinstance(location, str) and (
+                                SOURCE_LOCATION.fullmatch(location.replace("\\", "/"))
+                                or (key == "references" and re.fullmatch(NAME, location))):
+                            selected.append((("deferred_cross_lane", index, key, member),
+                                             "reported deferred-source location",
+                                             "Original report dependency location/symbol, not an import or new approval; action and unknown sibling fields remain checked."))
 
     baseline = value.get("baseline")
     if isinstance(baseline, dict):
@@ -719,7 +834,17 @@ def markdown_observations(text: str, relative: str, observe, reported_changes: s
         or (peer and re.search(rf"(?im)^\*\*(?:Cross-cutting pass|Pass):\*\*\s*X{peer}\b", text))
     )
     original_date = re.search(r"(?im)^\*\*(?:Auditor pass date|Audit date|Date):\*\*\s*(\d{4}-\d{2}-\d{2})\b", text)
-    peer_context = original_role and original_date is not None
+    explicit_module_proposal = (
+        cohort == 6
+        and re.search(r"(?m)^\*\*Cohort:\*\* 6\b", text) is not None
+        and "**Critical framing:**" in text
+        and "**DESIGNED but NOT BUILT**" in text
+        and "lintel-v4.0-reframe-design.md" in text
+    )
+    peer_context = original_role and (original_date is not None or explicit_module_proposal)
+    peer_identity = original_date[1] if original_date else "explicit original designed/not-built domain inventory"
+    audited_subjects = set(re.findall(r"(?m)^component:\s*(skills/[a-z0-9-]+/SKILL\.md)\s*$", text)) if peer_context else set()
+    audited_names = {path.split("/")[1] for path in audited_subjects}
     original_report = (
         relative in {
             ".claude/plans/universal-implementation/reports/P08.md",
@@ -728,6 +853,39 @@ def markdown_observations(text: str, relative: str, observe, reported_changes: s
         }
         and re.search(r"\b[a-f0-9]{40}\b", text) is not None
         and re.search(r"(?im)^#[^\n]*\bP(?:08|11|13)\b", text) is not None
+    )
+    recorded_report = bool(reported_changes) or (
+        re.fullmatch(r"\.claude/plans/universal-implementation/(?:reports|reviews)/P\d{2}[\w-]*\.md", relative)
+        and re.search(r"(?im)^# P\d{2}\b[^\n]*(?:report|review|evidence|handoff|repair)", text)
+        and re.search(r"\b[a-f0-9]{40}\b", text)
+    )
+    location_tables = (
+        ({"surface", "changed files"}, "changed files"),
+        ({"group", "exact paths"}, "exact paths"),
+        ({"candidate area", "changed paths"}, "changed paths"),
+        ({"area", "owned files reviewed"}, "owned files reviewed"),
+        ({"area", "files in the initial implementation and subsequent repairs"},
+         "files in the initial implementation and subsequent repairs"),
+        ({"selected paths", "scope"}, "selected paths"),
+        ({"paths", "responsibility"}, "paths"),
+        ({"changed product path", "reviewed purpose"}, "changed product path"),
+        ({"id", "severity", "file:lines", "finding and required correction", "confidence"}, "file:lines"),
+    )
+    versioned_mapping = (
+        relative == ".claude/engineering/design-archive/MIGRATION-TABLE-v2.md"
+        and text.startswith("# Lintel v2 Migration Table")
+        and "v1 names below use `<v1>token</v1>` markup" in text
+    )
+    compatibility_record = (
+        re.search(r"(?m)^# Compatibility audit: [a-z0-9-]+\s*$", text) is not None
+        and re.search(r"(?m)^against: (?:working-tree|[a-f0-9]{7,40})\s*$", text) is not None
+        and re.search(r"(?m)^\*Generated by bin/li-compat-audit at \d{4}-\d{2}-\d{2}T", text) is not None
+    )
+    snapshot_inventory = (
+        relative == ".claude/engineering/audits/lintel-state-of-the-harness.md"
+        and text.startswith("# Lintel")
+        and re.search(r"read-only sweep of `main @ ([a-f0-9]{7,40})`", text) is not None
+        and "Counts are that run's snapshot" in text
     )
     peer_tables = (
         ({"cohort", "norm", "deviators"}, {"deviators"}),
@@ -771,6 +929,11 @@ def markdown_observations(text: str, relative: str, observe, reported_changes: s
     diff_lines = []
     release = ""
     removed = False
+    compatibility_section = False
+    compatibility_moves = False
+    skill_inventory_section = False
+    skill_inventory_row = False
+    report_section = ""
     offset = 0
     for raw in text.splitlines(keepends=True):
         line = raw.rstrip("\r\n")
@@ -825,7 +988,13 @@ def markdown_observations(text: str, relative: str, observe, reported_changes: s
             deleted_heading = heading[2].casefold() in {"actual deleted paths", "deleted paths", "removed paths"}
             inventory_heading = bool(re.fullmatch(r"(?:Exact P\d+-authored product paths|Frozen changed paths)",
                                                  heading[2], re.I))
+            compatibility_section = compatibility_record and bool(re.fullmatch(
+                r"Q[1-4] .+ \(\d+\)", heading[2]))
+            compatibility_moves = compatibility_section and heading[2].startswith("Q2 ")
+            skill_inventory_section = snapshot_inventory and bool(re.fullmatch(r"4\. Skills .+ by cluster", heading[2]))
+            skill_inventory_row = False
             declared_diff = False
+            report_section = heading[2].casefold()
             if len(heading[1]) <= 2:
                 version = re.match(r"(\d+\.\d+\.\d+)\b", heading[2])
                 release = version[1] if version else ""
@@ -842,6 +1011,65 @@ def markdown_observations(text: str, relative: str, observe, reported_changes: s
                     observe(start + match.start(), start + match.end(),
                             f"release {release} / Removed / resource", "removed-resource declaration",
                             "Release-note removal is an observation, not a current resource dependency; the declared release is not independently verified.")
+        if peer_context:
+            scope_field = re.match(r"^\*\*(Components audited|Verified count|Strongest in cohort|Weakest in cohort):\*\*\s*(.*)$", line)
+            if scope_field and not re.search(r"\b(?:use|run|invoke|execute|import|current_use)\b", scope_field[2], re.I):
+                for subject in sorted(audited_subjects, key=len, reverse=True):
+                    for match in re.finditer(re.escape(subject), line):
+                        observe(start + match.start(), start + match.end(), "original audit subject identity",
+                                "source-era audit scope", "The named subject is also a component field in this original cohort record. It is not a current import or claim that the subject remains registered.")
+                for name in sorted(audited_names, key=len, reverse=True):
+                    for match in re.finditer(r"(?<![\w/:-])" + re.escape(name) + r"(?![\w/-])", line):
+                        observe(start + match.start(), start + match.end(), "original audit subject name",
+                                "source-era audit scope", "This scalar names a component actually identified by the same source-era audit; adjacent/current-use fields remain checked.")
+        if compatibility_section:
+            match = re.fullmatch(r"- `(?P<path>(?:skills|agents|bin|lib|tests|hooks|docs|install)/[\w./-]+)`"
+                                 r"(?: \(cross-cutting .+ verify all callers\))?", line)
+            if match:
+                observe(start + match.start("path"), start + match.end("path"),
+                        "generated compatibility affected-path member", "recorded change inventory",
+                        "The compatibility report inventories changed/renamed/deleted source paths, not required current imports. Verdict and execution are not validated.")
+            if compatibility_moves:
+                move = re.fullmatch(r"- (?P<before>[\w./-]+) → (?P<after>[\w./-]+)", line)
+                if move:
+                    for operand in ("before", "after"):
+                        observe(start + move.start(operand), start + move.end(operand),
+                                "generated compatibility rename " + operand, "recorded path transition",
+                                "Before/after operands of the original generated rename inventory, not active resource selection. Other text remains checked.")
+        if skill_inventory_section:
+            if re.match(r"^- \*\*[^*]+\*\* ", line):
+                skill_inventory_row = True
+            elif not line.strip() or (line and not line.startswith(" ")):
+                skill_inventory_row = False
+            if skill_inventory_row and not re.search(r"\b(?:use|run|invoke|execute|import|current_use)\b", line, re.I):
+                for match in re.finditer(r"`([a-z][a-z0-9*|\[\]-]*)`", line):
+                    observe(start + match.start(), start + match.end(), "original snapshot inventory identifier",
+                            "source-era inventory name",
+                            "Identifier/family operand in the original named source snapshot's cluster inventory, not a current route or registration. Narrative/current-use instructions are not masked.")
+        if recorded_report:
+            citation = re.match(r"^(?:Original|Recorded) source:\s*", line)
+            if citation:
+                link = LINK.match(line, citation.end())
+                if link:
+                    label = line[link.start():link.start(1) - 2].lstrip("[")
+                    location = SOURCE_LOCATION.fullmatch(label)
+                    target = unquote(link[1].strip("<>"))
+                    if (location and location["lines"] and location["lines"].isdigit()
+                            and re.fullmatch(r"(?:\.\./)*" + re.escape(location["path"])
+                                             + "#L" + location["lines"], target)):
+                        observe(start + link.start(), start + link.end(), "original file:line citation",
+                                "source-era linked location",
+                                "Original source location and matching line anchor, not a current import; target history and execution are not verified.")
+            proposal = re.match(r"^- `(?P<symbol>/li[:-]" + NAME + r")` (?:-|—) proposed (?:intake step|symbol):", line)
+            if proposal:
+                observe(start + proposal.start("symbol"), start + proposal.end("symbol"),
+                        "original proposed symbol operand", "recorded symbol proposal",
+                        "A proposed operand in the original report, not an available command or approval; subsequent instructions remain checked.")
+            prohibition = re.fullmatch(r"Do not (?:reintroduce|restore) `(?P<path>[^`]+)`\.", line)
+            if prohibition and SOURCE_LOCATION.fullmatch(prohibition["path"].replace("\\", "/")):
+                observe(start + prohibition.start("path"), start + prohibition.end("path"),
+                        "explicit prohibited resource operand", "non-import operand",
+                        "This exact resource is prohibited, not required; conditional permissions and adjacent actual uses remain checked.")
         if not line.lstrip().startswith("|"):
             headers = []
             table_active = False
@@ -858,14 +1086,71 @@ def markdown_observations(text: str, relative: str, observe, reported_changes: s
             table_active = False
             continue
         normalized = {header.casefold() for header in headers}
+        indexed = {header.casefold(): (left, right, value)
+                   for header, (left, right, value) in zip(headers, cells)}
+        if recorded_report and len(indexed) == len(headers):
+            location_field = next((field for required, field in location_tables if required <= normalized), None)
+            deferred = (report_section == "deferred foreign consumers"
+                        and {"owner/surface", "observed join to complete"} <= normalized)
+            if deferred:
+                location_field = "owner/surface"
+            if location_field:
+                left, right, value = indexed[location_field]
+                references = list(re.finditer(r"`([^`]+)`", line[left:right]))
+                remainder = re.sub(r"`[^`]+`", "", value)
+                operand_only = re.fullmatch(r"\s*(?:(?:Coordinator(?:/docs)?|W\d+):)?[\s,;]*", remainder)
+                for reference in references if operand_only else []:
+                    location = SOURCE_LOCATION.fullmatch(reference[1].replace("\\", "/"))
+                    if location and (not deferred or location["lines"]):
+                        observe(start + left + reference.start(), start + left + reference.end(),
+                                "reported source location: " + headers[list(indexed).index(location_field)],
+                                "source-era report location",
+                                "Location operand in the original change/deferred-source record; result, join instructions and unknown fields remain checked.")
+            observed_table = report_section in {"checks actually run", "checks actually observed", "commands and results"}
+            command_field = next((key for key in ("observed command", "command", "source") if key in indexed), None)
+            result_field = next((key for key in ("observed result", "actual result") if key in indexed), None)
+            if observed_table and command_field and result_field:
+                result_value = indexed[result_field][2]
+                result_literal = re.fullmatch(r"`((?:exit \d+|PASS|FAIL|NOT RUN)\b[^`]*)`", result_value)
+                if result_literal and re.search(r"\b(?:use|import|run|select|invoke|execute|load)\b",
+                                                result_literal[1], re.I):
+                    result_literal = None
+                result_prefix = re.match(r"(?:PASS|FAIL|NOT RUN|Exit \d+)\b", result_value)
+                if result_literal or result_prefix:
+                    left, right, value = indexed[command_field]
+                    if (re.fullmatch(r"`[^`]+`", value)
+                            and not re.match(r"`(?:Use|Run|Import|Select|Invoke|Execute|Load)\b", value, re.I)):
+                        observe(start + left, start + right, "observed table / " + command_field,
+                                "recorded command literal", "Literal input of the original observed check, not a request to run it; result instructions and other fields remain checked.")
+                    if result_literal:
+                        left, right, _ = indexed[result_field]
+                        observe(start + left, start + right, "observed table / " + result_field,
+                                "recorded result literal", "Literal recorded exit/output, not current instructions or independent verification.")
+            if {"original version", "proposed symbol", "current version"} <= normalized:
+                for field in ("original version", "proposed symbol"):
+                    left, right, value = indexed[field]
+                    if re.fullmatch(r"`(?:/li[:-])?" + NAME + r"`", value):
+                        observe(start + left, start + right, "original symbol field: " + field,
+                                "recorded symbol proposal", "Original/proposed identity only; current-version and result columns remain strict.")
         allowed = next((fields for fields in table_fields if fields <= normalized), set()) if context else set()
         reason = context
+        if versioned_mapping and {"v1 name", "v2 name", "status", "rename reason"} <= normalized:
+            indexed = {header.casefold(): (left, right, value)
+                       for header, (left, right, value) in zip(headers, cells)}
+            former = re.fullmatch(r"`<v1>([a-z][a-z0-9-]*)</v1>`", indexed["v1 name"][2])
+            successor = re.fullmatch(r"`/([a-z][a-z0-9-]*)`", indexed["v2 name"][2])
+            if former and successor and indexed["status"][2] in {"unchanged", "RENAMED"}:
+                for field in ("v1 name", "v2 name"):
+                    left, right, _ = indexed[field]
+                    observe(start + left, start + right, f"original versioned mapping / {field}",
+                            "recorded version transition",
+                            "Protected v1 identity and its recorded v2 successor are transition data, not current aliases. Reason/current-use columns remain checked; no mapping was executed.")
         if peer_context and len(normalized) == len(headers):
             for required, observed in peer_tables:
                 if required <= normalized:
                     allowed = observed
                     reason = (
-                        f"Named field of the declared {original_date[1]} cohort/peer source comparison; "
+                        f"Named field of the declared {peer_identity} cohort/peer source comparison; "
                         "not current dispatch, independently verified history or permission. Other columns remain checked."
                     )
                     break
@@ -884,11 +1169,17 @@ def markdown_observations(text: str, relative: str, observe, reported_changes: s
                 observe(start + left, start + right, f"table column: {header}", "source-era table", reason)
             elif reported_changes and header.casefold() in {"changed source", "paths", "changed surface"}:
                 cell = line[left:right]
+                if re.search(r"\b(?:use|import|run|select|invoke|execute|load|require)\b",
+                             re.sub(r"`[^`]*`", "", cell), re.I):
+                    continue
                 for reference in re.finditer(r"`([^`]+)`", cell):
                     path = reference[1].replace("\\", "/")
+                    location = SOURCE_LOCATION.fullmatch(path)
+                    if location:
+                        path = location["path"]
                     removal = re.search(r"\b(?:removed|retired)\b",
                                         cell[:reference.start()].rsplit(";", 1)[-1], re.I)
-                    if path in reported_changes or (
+                    if path in reported_changes or path + "/SKILL.md" in reported_changes or (
                             removal and f"skills/{path}/SKILL.md" in reported_changes):
                         observe(start + left + reference.start(), start + left + reference.end(),
                                 f"reported changed-path cell: {header}", "reported change membership",
@@ -976,6 +1267,7 @@ def routing_lines(text: str, relative: str, exemptions: list[dict],
             observation_errors.append((line, reason))
         remaining = "".join(masked)
         cohort_yaml_observations(remaining, relative, observe, reject)
+        naming_record_observations(remaining, relative, observe, reject)
     return "".join(masked).splitlines()
 
 
