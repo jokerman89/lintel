@@ -627,19 +627,6 @@ acceptance. No other historical candidate is accepted by this register.
       "corroboration": ".claude/plans/legacy-cleanup/span-reviews/final-framed-v2-corroboration.json"
     },
     {
-      "id": "remaining-source-record-25",
-      "path": ".claude/engineering/evolution/2026-06-10-v4.11-launch-polish.md",
-      "start": "# Structure change: v4.11 launch polish — e2e fail-closed + context-budgetwatch removal",
-      "end": "## What changed (shape)",
-      "sha256": "a1ff1448ccdfe8b2cee30a5bf3c31a5b562df0e5f468f0e69e6f2710b86a65f1",
-      "category": "original source assessment or result record",
-      "reason": "Proposed only: this bounded section records an original source assessment, comparison, disposition or observed result. Independent readers must reject any present instruction or consumer that this range would hide; source-era metadata alone is not approval.",
-      "source_evidence": "Exact source a7a1df338bacf900f1210f08131f391831992f1f; section # Structure change: v4.11 launch polish — e2e fail-closed + context-budgetwatch removal; full original context blob a986a22160b4df21fea7d48e3651283dde90995a",
-      "declaration_digest": "09824aebdc558e76b3de5430871fad688b8d3208a13a0dc1e96101d5ea8eabda",
-      "review": ".claude/plans/legacy-cleanup/span-reviews/final-decision.json",
-      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/final-corroboration.json"
-    },
-    {
       "id": "remaining-source-record-26",
       "path": ".claude/plans/universal-implementation/reports/P06.md",
       "start": "## Changed paths and preserved ownership",
@@ -2757,6 +2744,58 @@ acceptance. No other historical candidate is accepted by this register.
       "declaration_digest": "fd752643fa9277107aa823ecfde3647eb8258ff273f53e2795ebb809d0938855",
       "review": ".claude/plans/legacy-cleanup/span-reviews/set03-decision.json",
       "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set03-corroboration.json"
+    },
+    {
+      "id": "remaining-source-record-25",
+      "path": ".claude/engineering/evolution/2026-06-10-v4.11-launch-polish.md",
+      "start": "# Structure change: v4.11 launch polish — e2e fail-closed + context-budgetwatch removal",
+      "end": "## What changed (shape)",
+      "sha256": "a1ff1448ccdfe8b2cee30a5bf3c31a5b562df0e5f468f0e69e6f2710b86a65f1",
+      "category": "original source assessment or result record",
+      "reason": "Proposed only: this bounded section records an original source assessment, comparison, disposition or observed result. Independent readers must reject any present instruction or consumer that this range would hide; source-era metadata alone is not approval.",
+      "source_evidence": "Exact source a7a1df338bacf900f1210f08131f391831992f1f; section # Structure change: v4.11 launch polish — e2e fail-closed + context-budgetwatch removal; full original context blob a986a22160b4df21fea7d48e3651283dde90995a",
+      "declaration_digest": "09824aebdc558e76b3de5430871fad688b8d3208a13a0dc1e96101d5ea8eabda",
+      "review": ".claude/plans/legacy-cleanup/span-reviews/set03a-decision.json",
+      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set03a-corroboration.json"
+    },
+    {
+      "id": "set03-span-206",
+      "path": ".claude/engineering/evolution/2026-06-10-v4.11-launch-polish.md",
+      "start": "## Compatibility",
+      "end": "_Editorial note (2026-09-25): the record above is preserved as originally written; current workflow names are listed in `skills/CATALOG.md`._",
+      "sha256": "b3dfb15a5d46b97459e41334147850e58b8efb0db3d669e81efa44e363d725a7",
+      "category": "original evolution record excerpt",
+      "reason": "Exact bounded excerpt of a preserved dated record that names then-existing, removed or proposed workflow names/paths as recorded facts; it does not select or route a current workflow. Text outside this exact span remains checked.",
+      "source_evidence": ".claude/engineering/evolution/2026-06-10-v4.11-launch-polish.md:46-54 at 957b3b8bdcc661a2427f7335712e2511f62917e1; source sha256 082b478ed6273f6f3b7206e5e8b49aa733aff4e1ea0c511b1dd21cbb4610c8dd",
+      "declaration_digest": "4bf8437489a9ea93bb4e2554f5f60e8807372b58eccd5978022e7e56db317dbf",
+      "review": ".claude/plans/legacy-cleanup/span-reviews/set03a-decision.json",
+      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set03a-corroboration.json"
+    },
+    {
+      "id": "set03-span-104",
+      "path": ".claude/engineering/evolution/2026-06-10-v4.11-launch-polish.md",
+      "start": "## What changed (shape)",
+      "end": "## Why (intent)",
+      "sha256": "932c34c529f51de4fecc9e8df58e375cd70d6433e5da4ebde3383aecb8bca303",
+      "category": "original evolution record excerpt",
+      "reason": "Exact bounded excerpt of a preserved dated record that names then-existing, removed or proposed workflow names/paths as recorded facts; it does not select or route a current workflow. Text outside this exact span remains checked.",
+      "source_evidence": ".claude/engineering/evolution/2026-06-10-v4.11-launch-polish.md:21-38 at 957b3b8bdcc661a2427f7335712e2511f62917e1; source sha256 082b478ed6273f6f3b7206e5e8b49aa733aff4e1ea0c511b1dd21cbb4610c8dd",
+      "declaration_digest": "edc99d530a402524bc08e27b4480ea8582e45befe448581a278c0daa913fb801",
+      "review": ".claude/plans/legacy-cleanup/span-reviews/set03a-decision.json",
+      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set03a-corroboration.json"
+    },
+    {
+      "id": "set03-span-103",
+      "path": ".claude/engineering/evolution/2026-06-10-v4.11-launch-polish.md",
+      "start": "affected_paths:",
+      "end": "# Structure change: v4.11 launch polish — e2e fail-closed + context-budgetwatch removal",
+      "sha256": "f3485ed60e641fd973bfa0e3215ad8edd79889b1fac42cfa52129f92f918658c",
+      "category": "original evolution record excerpt",
+      "reason": "Exact bounded excerpt of a preserved dated record that names then-existing, removed or proposed workflow names/paths as recorded facts; it does not select or route a current workflow. Text outside this exact span remains checked.",
+      "source_evidence": ".claude/engineering/evolution/2026-06-10-v4.11-launch-polish.md:6-15 at 957b3b8bdcc661a2427f7335712e2511f62917e1; source sha256 082b478ed6273f6f3b7206e5e8b49aa733aff4e1ea0c511b1dd21cbb4610c8dd",
+      "declaration_digest": "f384e702e32f43583442c0f69a8390c1ce77b6223501814308c69c5e84d39483",
+      "review": ".claude/plans/legacy-cleanup/span-reviews/set03a-decision.json",
+      "corroboration": ".claude/plans/legacy-cleanup/span-reviews/set03a-corroboration.json"
     }
   ]
 }
