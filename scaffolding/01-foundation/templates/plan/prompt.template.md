@@ -36,9 +36,9 @@ This file is a SELF-CONTAINED prompt. A fresh AI session reading only this promp
 
 ## How to re-execute
 
-Commands below use the Claude plugin form `/li:<skill>`. In generated Copilot, Codex or Gemini
-adapters use the `li-<skill>` wrapper; elsewhere read the trusted `skills/<skill>/SKILL.md` file
-through the Universal adapter.
+Commands below use the Claude plugin form `/li:<skill>`. Generated client adapters expose the
+equivalent `li-<skill>` wrapper (Copilot invokes `/li-<skill>`); on a manual route read the
+trusted `skills/<skill>/SKILL.md` file through the Universal adapter.
 
 1. Read spec.md fully
 2. Read plan.md
