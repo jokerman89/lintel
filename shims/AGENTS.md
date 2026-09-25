@@ -22,7 +22,11 @@ inventory and permissions of the selected CLI, desktop or IDE surface. A separat
 needs authorization and attributable read-only scope; its existence alone is not review clearance.
 
 The preserved plugin is one route; the portable adapter generates `.agents/skills/li-*`.
-Inspect the host's skill names and invocation rather than assuming `/li:<skill>` syntax.
+Inspect the host's skill names and invocation (skills UI or `$li-<skill>` references)
+rather than assuming the Claude plugin's `/li:<skill>` syntax. Workflows without a wrapper,
+such as `define`, `inspect`, `verify`, `diagnose` and `cross-check`, are read from their
+canonical `skills/<name>/SKILL.md`. `cross-check` is the independent-review workflow; it
+replaces the former `codex` skill name, while Codex client support itself remains.
 The Claude hook bundle is not a Codex translation. Missing tools or safe write isolation retain
 manual/serial work and outstanding independent review. See `universal/ADAPTER.md` in this tree.
 

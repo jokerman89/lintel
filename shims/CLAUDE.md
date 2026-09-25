@@ -30,7 +30,11 @@ A subagent's output is a single message back to the main agent. Treat it as cont
 
 ### Slash commands
 
-Claude Code supports project-local and user-global slash commands (skills). Project-local skills can live alongside this scaffolding.
+The Claude Code plugin exposes Lintel workflows as namespaced `/li:<skill>` commands. The
+repository-only route generates hook-free `.claude/skills/li-*` wrappers for the core entry
+points; other workflows are read from their canonical `skills/<name>/SKILL.md`. Avoid
+installing both routes unless their precedence has been checked. Project-local skills can
+live alongside this scaffolding.
 
 ### Plan mode
 
