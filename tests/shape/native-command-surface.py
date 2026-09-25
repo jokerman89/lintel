@@ -65,7 +65,10 @@ NAMED_SKILL = re.compile(
     rf"(?:\b(?:skill|workflow|command)\s+[`'\"](?P<before>{NAME})[`'\"]|"
     rf"[`'\"](?P<after>{NAME})[`'\"]\s+skill\b)", re.I,
 )
-SKILL_FIELD = re.compile(rf"""(?:^|[\s{{,])["']?skill["']?\s*[:=]\s*["']?(?P<name>{NAME})(?=["'\s,}}]|$)""", re.I)
+SKILL_FIELD = re.compile(
+    rf"""(?:^[ \t]*(?:-[ \t]+)?skill\s*[:=]|["']skill["']\s*:|[{{,]\s*skill\s*:|`skill\s*:)"""
+    rf"""\s*["']?(?P<name>{NAME})(?=["'\s,}}`]|$)""", re.I,
+)
 DISTINCTIVE_COMMAND = re.compile(
     r"(?<![\w/.-])(" + "|".join(re.escape(name) for name in sorted(RETIRED_COMMANDS)
                                 if "-" in name) + r")(?![\w/.-])", re.I,
@@ -80,6 +83,10 @@ FORMER_HEADERS = frozenset({
     "old", "old name", "former", "former entry", "former entries",
     "retired entry", "retired entries", "removed entry", "removed entries",
 })
+# The operator reserved this original experiment input, not the presentation subtree.
+COMPARISON_DIR = "presentations/tech-shots-2026-09-25/comparison"
+COMPARISON_INPUT = "with-lintel/workflow-context.md"
+COMPARISON_REVISION = "275a35447c4ad271e05816ade43ac48f1acec24f"
 
 
 @dataclass(frozen=True, order=True)
@@ -168,33 +175,318 @@ def evidence_category(value: object) -> str | None:
     return None
 
 
-def routing_lines(text: str, relative: str, exemptions: list[dict]) -> list[str]:
-    lines = text.splitlines()
-    if relative.endswith(".json"):
+def json_locations(text: str) -> tuple[object, dict[tuple, tuple[int, int, object]]]:
+    """Use the JSON decoder to locate values; never infer a field from a line regex."""
+    def unique(pairs):
+        result = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError("Duplicate JSON key")
+            result[key] = value
+        return result
+
+    decoder = json.JSONDecoder(object_pairs_hook=unique)
+    value = decoder.decode(text)
+    locations = {}
+
+    def whitespace(index):
+        return re.compile(r"\s*").match(text, index).end()
+
+    def walk(item, path, start):
+        start = whitespace(start)
+        index = start
+        if isinstance(item, (dict, list)):
+            index = whitespace(start + 1)
+            children = item.items() if isinstance(item, dict) else enumerate(item)
+            for key, child in children:
+                if isinstance(item, dict):
+                    _, index = decoder.raw_decode(text, index)
+                    index = whitespace(index) + 1  # The already-decoded colon.
+                index = whitespace(walk(child, (*path, key), index))
+                if text[index:index + 1] == ",":
+                    index = whitespace(index + 1)
+            end = index + 1
+        else:
+            _, end = decoder.raw_decode(text, start)
+        locations[path] = (start, end, item)
+        return end
+
+    walk(value, (), 0)
+    return value, locations
+
+
+def observation_fields(value: object) -> list[tuple[tuple, str, str]]:
+    """Classify inspected data fields, not a schema, authorization or binding verdict."""
+    if not isinstance(value, dict):
+        return []
+    selected = []
+
+    def fields(record, prefix, names, category, reason):
+        for name in sorted(names):
+            if name in record:
+                selected.append(((*prefix, name), category, reason))
+
+    category = evidence_category(value)
+    if category:
+        fields(value, (), (
+            "schema_version", "artifact_kind", "initiative", "task_id", "status", "worker",
+            "actor_ref", "isolation_ref", "observed_head", "branch", "work_map", "package_id",
+            "leaf_ids", "attempt_id", "acceptance_digest", "result", "result_digest",
+            "changed_paths", "deleted_paths", "leaf_results", "checks", "limitations",
+            "skill", "timestamp", "reason", "context", "reviewer", "provenance", "controls",
+            "coverage", "evidence", "work", "snapshot", "profile", "builder", "purpose",
+            "independence_required", "required_policy", "required_controls", "qa_requirements",
+            "context_digest",
+        ), category, "Recorded evidence field; binding, status and independence are not verified by this routing check.")
+
+    baseline = value.get("baseline")
+    if isinstance(baseline, dict):
+        baseline = baseline.get("commit")
+    if isinstance(baseline, str) and re.fullmatch(r"[a-fA-F0-9]{7,64}", baseline):
+        reason = f"Declared source baseline {baseline}; recorded source-era data, not current routing. Baseline/binding not verified."
+        inventory_keys = {"path", "group", "bytes", "lines", "skill_refs", "tool_terms"}
+        if isinstance(value.get("files"), list):
+            for index, entry in enumerate(value["files"]):
+                if (isinstance(entry, dict) and inventory_keys <= entry.keys()
+                        and isinstance(entry["path"], str) and isinstance(entry["group"], str)
+                        and all(type(entry[key]) is int and entry[key] >= 0 for key in ("bytes", "lines"))
+                        and all(isinstance(entry[key], list) and all(isinstance(part, str) for part in entry[key])
+                                for key in ("skill_refs", "tool_terms"))):
+                    fields(entry, ("files", index), inventory_keys, "source-era inventory", reason)
+        if ({"scope", "coverage", "findings", "interactions", "limitations"} <= value.keys()
+                and isinstance(value["scope"], (str, dict))
+                and isinstance(value["coverage"], (list, dict))
+                and all(isinstance(value[key], list) for key in ("findings", "interactions", "limitations"))):
+            category = "source-era audit review"
+            coverage_keys = {"name", "path", "lines_read", "quality", "action", "reason", "evidence"}
+            if isinstance(value["coverage"], list):
+                for index, entry in enumerate(value["coverage"]):
+                    if (isinstance(entry, dict) and coverage_keys <= entry.keys()
+                            and isinstance(entry["path"], str) and type(entry["lines_read"]) is int
+                            and isinstance(entry["evidence"], list)):
+                        fields(entry, ("coverage", index), coverage_keys - {"evidence"}, category, reason)
+                        for evidence_index, source in enumerate(entry["evidence"]):
+                            if isinstance(source, dict):
+                                fields(source, ("coverage", index, "evidence", evidence_index),
+                                       ("path", "line", "lines", "note"), category, reason)
+            for index, entry in enumerate(value["findings"]):
+                if isinstance(entry, dict) and {"id", "evidence", "recommendation"} <= entry.keys():
+                    fields(entry, ("findings", index), (
+                        "id", "priority", "title", "problem", "impact", "recommendation",
+                        "verification", "confidence", "sources",
+                    ), category, reason)
+                    if isinstance(entry["evidence"], list):
+                        for evidence_index, source in enumerate(entry["evidence"]):
+                            if isinstance(source, dict):
+                                fields(source, ("findings", index, "evidence", evidence_index),
+                                       ("path", "line", "lines", "note"), category, reason)
+            for index, entry in enumerate(value["interactions"]):
+                if isinstance(entry, str):
+                    selected.append((("interactions", index), category, reason))
+                elif isinstance(entry, dict):
+                    fields(entry, ("interactions", index), (
+                        "journey", "observation", "related_findings", "topic", "recommendation",
+                        "subsystem", "current", "target", "sequence", "preserve", "findings",
+                        "provenance", "examples_of_knowhow_to_recover",
+                    ), category, reason)
+            for index, entry in enumerate(value["limitations"]):
+                if isinstance(entry, str):
+                    selected.append((("limitations", index), category, reason))
+
+    if (value.get("schema_version") == 1
+            and all(isinstance(value.get(key), str) for key in ("initiative", "work_map", "charter"))
+            and isinstance(value.get("scope_rules"), dict)
+            and value["scope_rules"].get("worker") == "write_scope+own_report"
+            and isinstance(value.get("lanes"), list)):
+        reason = "Declared ownership may include removed paths; membership is not an import, validated authority or execution."
+        if isinstance(value.get("coordinator_paths"), list):
+            for index, path in enumerate(value["coordinator_paths"]):
+                if isinstance(path, str):
+                    selected.append((("coordinator_paths", index), "ownership membership", reason))
+        for index, lane in enumerate(value["lanes"]):
+            if (isinstance(lane, dict) and isinstance(lane.get("task_id"), str)
+                    and isinstance(lane.get("write_scope"), list)):
+                for member, path in enumerate(lane["write_scope"]):
+                    if isinstance(path, str):
+                        selected.append((("lanes", index, "write_scope", member), "ownership membership", reason))
+    return selected
+
+
+def has_reference(text: str) -> bool:
+    text = re.sub(r"\\+", "/", text)
+    return text.strip(" \t\r\n'\"").casefold() in RETIRED_COMMANDS or any(pattern.search(text) for pattern in (
+        EXPLICIT_COMMAND, NATIVE_COMMAND, BARE_COMMAND, NAMED_SKILL, SKILL_FIELD,
+        DISTINCTIVE_COMMAND, SKILL_PATH, LINK,
+    ))
+
+
+def comparison_input(value: object) -> str | None:
+    if (not isinstance(value, dict) or value.get("schemaVersion") != 1 or value.get("attempt") != 2
+            or not isinstance(value.get("provenance"), dict) or not isinstance(value.get("artifacts"), dict)):
+        return None
+    provenance = value["provenance"]
+    recorded = value["artifacts"].get(COMPARISON_INPUT)
+    if (provenance.get("sourceRevision") == COMPARISON_REVISION
+            and isinstance(provenance.get("frozenAt"), str) and provenance["frozenAt"]
+            and isinstance(recorded, str) and recorded):
+        return recorded
+    return None
+
+
+def markdown_observations(text: str, relative: str, observe) -> None:
+    baseline = re.search(r"(?im)^(?:\*\*)?Baseline(?:\*\*)?:[^\n]*?\b([a-f0-9]{7,64})\b", text)
+    if baseline is None and re.search(r"\bhistorical source comparison\b", text, re.I):
+        baseline = re.search(r"\b(?:checkpoint|at)\s+`([a-f0-9]{7,64})`", text, re.I)
+    if baseline is None:
+        baseline = re.search(r"(?im)^\*\*(?:Auditor pass date|Audit date):\*\*\s*(\d{4}-\d{2}-\d{2})", text)
+    context = f"Declared source-era context {baseline[1]}; observation only, baseline/binding not verified." if baseline else ""
+
+    # These are inspected table field sets, not permission to ignore an audit/report.
+    table_fields = (
+        {"original source", "original recommendation", "evidence"},
+        {"namn", "kvalitet", "åtgärd", "motivering", "belägg"},
+        {"original and current source", "original recommendation; source state",
+         "responsible package and acceptance", "retained method and output",
+         "change or grounded retention rationale", "worked example and evidence", "remaining boundary"},
+        {"audit record / original recommendation", "current canonical path and aliases / arguments",
+         "retained method and output", "responsible package / leaf", "disposition and rationale",
+         "worked example / evidence", "status and evidence limit"},
+        {"component", "path", "role in chain"},
+    )
+    snapshot_fields = {"path", "status", "mode", "bytes (git lf)", "sha-256 (git lf blob)", "commits"}
+    headers = []
+    table_active = False
+    deleted_heading = False
+    declared_diff = False
+    fence = None
+    deleted_fence = False
+    release = ""
+    removed = False
+    offset = 0
+    for raw in text.splitlines(keepends=True):
+        line = raw.rstrip("\r\n")
+        start = offset
+        offset += len(raw)
+        boundary = re.match(r"^\s{0,3}(`{3,}|~{3,})([^`~]*)$", line)
+        if boundary:
+            if fence is None:
+                fence = boundary[1]
+                deleted_fence = deleted_heading and declared_diff and boundary[2].strip() == "text"
+            elif boundary[1][0] == fence[0] and len(boundary[1]) >= len(fence) and not boundary[2].strip():
+                fence = None
+                deleted_fence = False
+            continue
+        if fence is not None:
+            if deleted_fence and re.fullmatch(r"(?:skills|agents|bin|lib|tests|hooks|docs|install)/[\w./-]+", line.strip()):
+                observe(start, start + len(line), "deleted path", "deleted-path record",
+                        "Literal path in a declared deletion observation with a Git diff source; no execution or independently verified deletion is implied.")
+            continue
+        heading = re.match(r"^(#{1,6})\s+(.+)$", line)
+        if heading:
+            headers = []
+            table_active = False
+            deleted_heading = heading[2].casefold() in {"actual deleted paths", "deleted paths", "removed paths"}
+            declared_diff = False
+            if len(heading[1]) <= 2:
+                version = re.match(r"(\d+\.\d+\.\d+)\b", heading[2])
+                release = version[1] if version else ""
+                removed = False
+            elif len(heading[1]) == 3:
+                removed = bool(release) and heading[2].casefold() == "removed"
+        if deleted_heading and re.search(r"\bObserved\b.*`git diff [^`]*--diff-filter=D", line):
+            declared_diff = True
+        if relative == "CHANGELOG.md" and removed:
+            for match in re.finditer(r"`(?:skills|bin|lib|tests)/[\w./-]+`", line):
+                prefix = line[:match.start()]
+                if (re.match(r"^\s*-\s+(?:The\b|Removed\b)", prefix, re.I)
+                        and not re.search(r"\b(?:use|import|run|select|selection|load|invoke|execute|source|call|require)\b", prefix, re.I)):
+                    observe(start + match.start(), start + match.end(),
+                            f"release {release} / Removed / resource", "removed-resource declaration",
+                            "Release-note removal is an observation, not a current resource dependency; the declared release is not independently verified.")
+        if not line.lstrip().startswith("|"):
+            headers = []
+            table_active = False
+            continue
+        pipes = [match.start() for match in re.finditer(r"(?<!\\)\|", line)]
+        cells = [(left + 1, right, line[left + 1:right].strip()) for left, right in zip(pipes, pipes[1:])]
+        if not cells:
+            continue
+        if headers and len(headers) == len(cells) and all(re.fullmatch(r":?-{3,}:?", cell[2]) for cell in cells):
+            table_active = True
+            continue
+        if not table_active or len(headers) != len(cells):
+            headers = [cell[2] for cell in cells]
+            table_active = False
+            continue
+        normalized = {header.casefold() for header in headers}
+        allowed = next((fields for fields in table_fields if fields <= normalized), set()) if context else set()
+        reason = context
+        if snapshot_fields <= normalized:
+            values = {header.casefold(): cell[2].strip("`") for header, cell in zip(headers, cells)}
+            if (re.fullmatch(r"[\w.-]+(?:/[\w.-]+)+", values["path"])
+                    and values["status"] in {"A", "M", "D", "R"}
+                    and re.fullmatch(r"[0-7]{6}", values["mode"])
+                    and re.fullmatch(r"\d[\d,]*", values["bytes (git lf)"])
+                    and re.fullmatch(r"[a-f0-9]{64}", values["sha-256 (git lf blob)"], re.I)
+                    and re.search(r"\b[a-f0-9]{7,40}\b", values["commits"], re.I)):
+                allowed = snapshot_fields
+                reason = "Recorded per-path bytes/hash/commit tuple; source-era observation only, hashes and deletion status not verified."
+        for header, (left, right, _) in zip(headers, cells):
+            if header.casefold() in allowed:
+                observe(start + left, start + right, f"table column: {header}", "source-era table", reason)
+
+
+def routing_lines(text: str, relative: str, exemptions: list[dict],
+                  recorded_comparison_input: str | None = None) -> list[str]:
+    masked = list(text)
+
+    def observe(start, end, field, category, reason):
+        if not has_reference(text[start:end]):
+            return
+        exemptions.append({
+            "path": relative, "line": text.count("\n", 0, start) + 1,
+            "end_line": text.count("\n", 0, end - 1) + 1, "field": field,
+            "classification": "OBSERVATION", "category": category, "reason": reason,
+        })
+        masked[start:end] = ["\n" if char == "\n" else " " for char in text[start:end]]
+
+    def json_observations(document, offset=0, prefix=""):
         try:
-            category = evidence_category(json.loads(text))
-        except json.JSONDecodeError:
-            category = None
-        if category:
-            exemptions.append({"path": relative, "field": "$", "category": category,
-                               "reason": "Recorded evidence data; only the shared contract can validate its binding, status or independence."})
-            return []
-    start = None
-    for index, line in enumerate(lines):
-        if line.strip() == "<!-- lintel-swarm-evidence:v2":
-            start = index
-        elif start is not None and line.strip() == "-->":
+            value, locations = json_locations(document)
+        except ValueError:
+            return  # Unrecognized/malformed data gains no observation exemption.
+        fields = observation_fields(value)
+        if (relative in {f"{COMPARISON_DIR}/results.json", f"{COMPARISON_DIR}/data.js"}
+                and comparison_input(value) is not None):
+            fields.append((("artifacts", COMPARISON_INPUT), "recorded comparison input",
+                           f"Original experiment input field at declared sourceRevision {COMPARISON_REVISION}; data only, not cryptographic binding or current execution. Other fields and executable JS remain checked."))
+        for path, category, reason in fields:
+            start, end, _ = locations[path]
+            field = prefix + "/" + "/".join(str(part).replace("~", "~0").replace("/", "~1") for part in path)
+            observe(offset + start, offset + end, field, category, reason)
+
+    if relative.endswith(".json"):
+        json_observations(text)
+    elif relative == f"{COMPARISON_DIR}/data.js":
+        assignment = re.match(r"\s*window\.COMPARISON_DATA\s*=\s*", text)
+        if assignment:
             try:
-                category = evidence_category(json.loads("\n".join(lines[start + 1:index])))
-            except json.JSONDecodeError:
-                category = None
-            if category:
-                exemptions.append({"path": relative, "field": "lintel-swarm-evidence:v2",
-                                   "line": start + 1, "end_line": index + 1, "category": category,
-                                   "reason": "Recorded observation payload; its presence proves no binding or clearance, and surrounding narrative remains checked."})
-                lines[start:index + 1] = [""] * (index + 1 - start)
-            start = None
-    return lines
+                _, end = json.JSONDecoder().raw_decode(text, assignment.end())
+            except ValueError:
+                pass  # Nonliteral JS is not recognized as serialized result data.
+            else:
+                json_observations(text[assignment.end():end], assignment.end(), "window.COMPARISON_DATA")
+    elif (relative == f"{COMPARISON_DIR}/{COMPARISON_INPUT}"
+          and recorded_comparison_input is not None and text == recorded_comparison_input):
+        observe(0, len(text), "original prompt copied from results.json/artifacts/with-lintel~1workflow-context.md",
+                "recorded comparison input",
+                f"Exact text copy of the reserved experiment's recorded input at sourceRevision {COMPARISON_REVISION}; copy agreement is not cryptographic binding or execution. New or changed prompt text receives no exemption.")
+    for match in re.finditer(r"(?m)^[ \t]*<!-- lintel-swarm-evidence:v2\r?\n(?P<json>[\s\S]*?)^[ \t]*-->", text):
+        json_observations(match["json"], match.start("json"), "lintel-swarm-evidence:v2")
+
+    if Path(relative).suffix in {".md", ".template"}:
+        markdown_observations(text, relative, observe)
+    return "".join(masked).splitlines()
 
 
 def scan(root: Path, check: str = "all", exemptions: list[dict] | None = None) -> list[Finding]:
@@ -249,10 +541,14 @@ def scan(root: Path, check: str = "all", exemptions: list[dict] | None = None) -
             else:
                 add(relative, line, "missing-command", f"No canonical workflow for: {name}")
 
-    for path in source_files(root):
+    recorded_comparison_input = None
+    paths = source_files(root)
+    paths.sort(key=lambda path: (path.relative_to(root).as_posix() != f"{COMPARISON_DIR}/results.json",
+                                 path.as_posix()))
+    for path in paths:
         relative = path.relative_to(root).as_posix()
         if relative in SOURCE_EXCEPTIONS:
-            exemptions.append({"path": relative, "field": "$file", "category": "declared source exception",
+            exemptions.append({"path": relative, "line": 1, "field": "$file", "category": "declared source exception",
                                "reason": SOURCE_EXCEPTIONS[relative]})
             continue
         if path.is_symlink() or getattr(path.lstat(), "st_file_attributes", 0) & 0x400:
@@ -263,12 +559,19 @@ def scan(root: Path, check: str = "all", exemptions: list[dict] | None = None) -
         except (OSError, UnicodeError) as error:
             add(relative, 1, "read-error", f"Cannot inspect text: {type(error).__name__}")
             continue
+        if relative == f"{COMPARISON_DIR}/results.json":
+            try:
+                record, _ = json_locations(text)
+            except ValueError:
+                pass
+            else:
+                recorded_comparison_input = comparison_input(record)
         if path.name == "SKILL.md" and path.parent.name.startswith("li-"):
             if path.parent.name[3:].casefold() in RETIRED_COMMANDS:
                 add(relative, 1, "retired-entry", "Retired native wrapper is still discoverable.")
         test_code = relative.startswith("tests/") and path.suffix in {".py", ".sh", ".ps1"}
         former_column = False
-        for number, original in enumerate(routing_lines(text, relative, exemptions), 1):
+        for number, original in enumerate(routing_lines(text, relative, exemptions, recorded_comparison_input), 1):
             line = URL.sub("", original).replace("\\|", "\x00").replace("\\", "/")
             if line.lstrip().startswith("|"):
                 columns = line.split("|")
@@ -382,7 +685,8 @@ def main() -> int:
         for item in findings:
             print(f"{item.path}:{item.line}: {item.code}: {item.message}")
         for item in exemptions:
-            print(f"EXEMPT {item['path']} [{item['field']}]: {item['reason']}")
+            label = item.get("classification", "EXEMPT")
+            print(f"{label} {item['path']}:{item['line']} [{item['field']}] ({item['category']}): {item['reason']}")
         print(f"native-command-surface: {'FAIL' if findings else 'PASS'} ({len(findings)} findings)")
     return 1 if findings else 0
 
