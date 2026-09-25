@@ -1,0 +1,68 @@
+# MARS status
+
+**Updated:** 2026-09-25
+**Branch:** `jokerman-microsoft-mars-integration` (from `origin/main` `80002ed4` plus the seven
+prototype commits of `jokerman-microsoft-mmars-development-plan`, which is unchanged), converged
+with `origin/main` `1981e591` through the ordinary merge `f790c409` (main's 78-file delta only)
+**Coordinator:** Finish work / Go Live `88aecc43-40f9-41d4-8947-6c2fb0a55481`.
+**Delivery (2026-09-25):** the operator ordered "Merge everything now". ADR-0036 is accepted and
+the changelog lists MARS under 0.11.0 (unreleased). This session's GitHub CLI actor is
+`jokerman_microsoft`, so L-053 bars it from publishing; push, PR, CI and merge were handed to Go
+Live, which already has permission to publish as `jokerman89`. If Go Live declines, the operator
+runs them (`files/mars-pr-body.md` in this session holds the PR text). Go Live published it as
+[PR #105](https://github.com/jokerman89/lintel/pull/105) as `jokerman89`; merge pending. The
+agreed order is #105 first, after green CI and an independent review of the final head, then
+#104 converges, then the client PR and the docs PRs.
+**Decision:** [ADR-0036](../../decisions/0036-mars-multi-model-review.md), drafted and reviewed as ADR-0034
+(renumbered 2026-09-25: #104 holds 0034, the client cleanup 0035). Plan and evidence:
+[plan.md](plan.md), [RM9 re-pilot](pilot-2026-09-25-rm9.md).
+
+MARS = **Multi-Model Adversarial Review & Screening**.
+
+## Integrated
+
+| Item | Path |
+|---|---|
+| Canonical skill, protocol, integration points | `skills/mars/` |
+| Shared Review Method (packet text, rubric, evidence levels) | `skills/review/references/method.md` |
+| Standing questions with stable IDs and advisory tag rules | `lib/review-questions.json` |
+| Method library and packet CLI | `lib/review_method.py`, `lib/review-method-schema.json`, `bin/li-review-packet.py` |
+| Panel helper with method meta, input snapshot, overlap refusal, profile, inspection | `lib/mars_contract.py`, `lib/mars-schema.json`, `lib/mars-defaults.json`, `bin/li-mars.py` |
+| Workflow hooks | cycle Step 5, plan Step 10 (option E), review Stage 1/2 and Step 6b, code-review |
+| Distribution | `bin/li-copilot.py` (`WORKFLOWS`, `MARS_RESOURCES`), `.github/skills/li-mars/SKILL.md`, trigger list, catalog |
+| Tests | `tests/unit/review-method.sh`, `tests/unit/mars-contract.sh`, `tests/unit/mars-hooks.sh` |
+| Records | ADR-0036, `.claude/engineering/evolution/2026-09-25-mars-integration.md`, L-059 (recorded as L-056 in a4a264e1; #104 holds L-056 to L-058) |
+
+## Pending (needs the in-flight legacy cleanup base)
+
+- MARS hooks for the consolidated planning inspection (replacing `plan-eng-review`),
+  `define`'s spec review, `cross-check` and `CodeReviewer`: specified in
+  `skills/mars/references/integration.md`, not applied to files that lane removes or rewrites.
+- Repository-wide drift guard (no rubric outside the method) after that consolidation.
+- CAPTURE wiring for the opt-in calibration log (RM8); today it is the CLI and method §7.
+- D1 (ADR-0036) ships as proposed on the operator's merge instruction.
+
+## Verification (details in plan.md "Review")
+
+Unit 78/78 and shape 41/41 (one `jq`-absent partial each); focused MARS/method tests 63;
+copilot-kit 19 of 21 run cases pass, and the 2 failures reproduce on the base; generator and
+bundle closure checked; RM9 live pilot; two independent review rounds, all findings fixed.
+`universal-adapters.sh` was stopped after 3 of 17 cases passed in about two hours, and
+`catalog-installed.sh` was not run; CI on a Linux runner is the faster place to finish them.
+
+## Advisory P3 notes
+
+- Fixed: overlap checks now fold case on every host (2c8b5b04).
+- `coverage_complete` means "complete and consistent under the method", documented in the
+  protocol rather than renamed.
+- The changed-scope review of `cb39cedc` (reviewer `586563af`, PASS, P3 4) raised R1-R4:
+  caller spelling and missing packet or counts for REVIEW panels, the deviation-count stage,
+  plan Step 12's `mars_offer` field, and these records. All four are addressed in the commit
+  after `cb39cedc`; its own independent review is reported to Go Live with that SHA.
+
+## Known limits
+
+- Identity evidence is host-specific: Copilot App `assistant_usage_events` per child session or
+  subagent `agent_id`. Other hosts need their own observation route or stay `requested-only`.
+- "Latest" relies on version numbers in model IDs and the family preferences in defaults.
+- Live runs so far: Copilot App only; one synthetic subject; no challenge round in RM9.

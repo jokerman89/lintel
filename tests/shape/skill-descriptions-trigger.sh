@@ -21,7 +21,7 @@ echo "========================================="
 MIGRATED="sense scope define discover plan build review ship capture cycle resume jobs status \
 analyze brief-forge fix code-review verify diagnose cross-check lessons-add lessons-surface adr-new \
 pause context-warm inspect skill-new generate-docs web-session \
-ta da sc dh tq full-engineering-pass scaffold welcome doctor pack-switch role generate"
+ta da sc dh tq full-engineering-pass scaffold welcome doctor pack-switch role generate mars"
 
 # A trigger phrase: the description leads with / contains a Use-when form.
 TRIGGER='^(description:[[:space:]]*)?(Use (when|after|to|for|at|before|during|on|whenever)|Run (when|after|to|before)|Trigger (when|after|on))'

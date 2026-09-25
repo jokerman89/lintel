@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "description": "MARS message headers. Single source for the coordinator request, reviewer report and coordinator synthesis. Rendered as a fenced block with info string mars-<kind>, one `key: value` per line; list values are comma-separated. Request and report carry the same subject, brief and model facts as the single-review headers in lib/review-method-schema.json; the request body after the header is the shared Review Method packet.",
+  "headers": {
+    "request": {
+      "required": [
+        "mars", "version", "panel", "slot", "round", "round_type",
+        "requested_by", "trigger", "caller", "consent_ref",
+        "coordinator_session", "coordinator_surface",
+        "repository", "branch", "commit",
+        "subject_kind", "subject_ref", "brief_sha256",
+        "requested_model", "reasoning_effort", "context_tier",
+        "word_limit", "reply_via", "protocol"
+      ],
+      "optional": ["cycle_id", "work_map", "package", "leaves", "lens", "deadline",
+                   "stage", "method", "questions", "tags", "snapshot_digest"],
+      "enums": {
+        "round_type": ["blind", "challenge"],
+        "trigger": ["explicit", "cycle-offer", "review-offer"],
+        "reply_via": ["final-response"],
+        "subject_kind": ["problem", "plan", "spec", "implementation", "review", "code-review"],
+        "stage": ["spec", "quality", "full"]
+      }
+    },
+    "report": {
+      "required": [
+        "mars", "version", "panel", "slot", "round", "brief_sha256",
+        "verdict", "p1", "p2", "p3", "confidence", "read_only", "self_reported_model",
+        "coverage"
+      ],
+      "optional": ["tools_used", "gaps", "positions", "stage"],
+      "enums": {
+        "verdict": ["block", "concerns", "pass", "unable"],
+        "read_only": ["attested"]
+      },
+      "integers": ["round", "p1", "p2", "p3", "confidence"]
+    },
+    "synthesis": {
+      "required": [
+        "mars", "version", "panel", "status", "requested_by", "trigger", "caller",
+        "coordinator_session", "repository", "branch", "commit", "subject_kind", "subject_ref",
+        "brief_sha256", "participants", "reported", "rounds", "calls",
+        "requested_models", "verified_models", "multi_model_verified", "release_clearance"
+      ],
+      "optional": ["cycle_id", "work_map", "downgrades", "failed_slots", "stage", "questions",
+                   "coverage_complete", "snapshot_digest", "input", "profile", "adjudicated", "outcome"],
+      "enums": {"status": ["complete", "partial"], "release_clearance": ["false"],
+                "input": ["verified", "changed", "unverified", "unbound"], "coverage_complete": ["true", "false"],
+                "outcome": ["pass", "changes-requested", "fail", "incomplete"]}
+    }
+  }
+}

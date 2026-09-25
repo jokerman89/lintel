@@ -1127,6 +1127,20 @@ or citation that must remain faithful. Neutralize ordinary current narrative wit
 altering observed inputs and claiming the same old review. Use precise path/field
 residuals, preserve required notices, and never encode identity or claim a false zero scan.
 
+## L-059 - Commit only on the branch the operator authorized
+
+**Date:** 2026-09-25 (recorded as L-056 on the MARS branch; renumbered because the native
+workflow consolidation already holds L-056 to L-058)
+
+**Context:** The operator paused a benchmark and said to open a branch and integrate MARS. Before
+branching, the assistant tried to commit a pending MARS pilot-note edit on the existing prototype
+branch with a message it chose. The operator rejected the commit: it was an effect on another branch
+beyond the branch-and-integrate authorization.
+
+**Rule:** When asked to open a branch for new work, do not create preparatory commits on the current
+or any other branch. Carry uncommitted edits into the new branch without committing them elsewhere,
+and commit them there as part of the authorized work. The existing branch stays exactly as it was.
+
 ## L-060 - Do not amend commits or override hook configuration without authorization
 
 **Date:** 2026-09-25
