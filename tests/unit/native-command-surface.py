@@ -51,6 +51,73 @@ class CommandSurfaceTests(unittest.TestCase):
             "Use /li:verify, /li-diagnose and `li-cross-check`.\n"
             "Read [the plan](skills/plan/SKILL.md) and `skills/review/SKILL.md`.\n"), [])
 
+    def test_python_fence_annotation_is_not_a_workflow_but_literals_stay_checked(self):
+        block = "```python\ndef select_latest(records, *, skill: str,\n                  limit: int) -> None: ...\n```\n"
+        self.assertEqual(self.findings("# API\n\n" + block, "docs/api.md"), [])
+        quoted = block.replace("limit: int) -> None: ...", 'limit: int) -> None: select({"skill": "qa"})')
+        self.assertTrue(any("qa" in item.message for item in self.findings("# API\n\n" + quoted, "docs/api.md")))
+        colon_quoted = block.replace("skill: str", 'skill: "qa"')
+        self.assertTrue(self.findings("# API\n\n" + colon_quoted, "docs/api.md"))
+        for fence in ("```bash\n", "```\n", "~~~yaml\n"):
+            other = block.replace("```python\n", fence, 1)
+            if fence.startswith("~~~"):
+                other = other.rstrip("\n").rsplit("```", 1)[0] + "~~~\n"
+            self.assertTrue(any(item.code == "missing-command" for item in self.findings("# API\n\n" + other, "docs/api.md")), fence)
+        prose = "# API\n\n- skill: str\n\n" + block
+        self.assertTrue(any(item.line == 3 for item in self.findings(prose, "docs/api.md")))
+        after = "# API\n\n" + block + "\nskill: str\n"
+        self.assertTrue(any(item.code == "missing-command" for item in self.findings(after, "docs/api.md")))
+
+    def test_source_revision_field_observes_only_the_exact_bound_original_field(self):
+        path = ".claude/plans/original/card.md"
+        field = "Own `office-hours` and `plan-eng-review`, plus\n`skills/codex/SKILL.md` for that version.\n"
+        text = ("# P99 - Original card\n\n## Ownership\n\n" + field +
+                "\nCurrent note: keep checking.\n")
+        digest = hashlib.sha256(field.encode("utf-8")).hexdigest()
+        declared = {path: ("a" * 40, "# P99 - Original card", (("## Ownership", "lines", 2, digest),))}
+        with mock.patch.dict(guard.SOURCE_REVISION_FIELDS, declared, clear=True):
+            self.assertEqual(self.findings(text, path), [])
+            exemptions = []
+            guard.scan(self.root, exemptions=exemptions)
+            observed = [item for item in exemptions if item.get("category") == "original source-revision field"]
+            self.assertTrue(observed and all(item["classification"] == "OBSERVATION" for item in observed))
+            # A current instruction beside the field, or the same value elsewhere, stays checked.
+            self.assertTrue(self.findings(text + "\nRun `office-hours` next.\n", path))
+            self.assertTrue(self.findings(text, ".claude/plans/original/other.md"))
+            self.assertTrue(self.findings(json.dumps({"leaves": [{"skill": "office-hours"}]}),
+                                          ".claude/plans/original/work.json"))
+            (self.root / ".claude/plans/original/other.md").unlink()
+            (self.root / ".claude/plans/original/work.json").unlink()
+            # Changed, duplicated, moved or retitled fields lose the observation.
+            for variant in (text.replace("that version", "this version"),
+                            text.replace("plus\n", "plus /li:plan-and-build\n"),
+                            text + "\n## Ownership\n\n" + field,
+                            text.replace("## Ownership", "## Current routing"),
+                            text.replace("# P99 - Original card", "# P99 - Current card")):
+                self.assertTrue(self.findings(variant, path), variant[-60:])
+        # Without the recorded proof the same bytes are ordinary current text.
+        self.assertTrue(self.findings(text, path))
+
+    def test_source_revision_cell_leaves_sibling_cells_checked(self):
+        path = ".claude/plans/original/plan.md"
+        cell = " `skills/{review,qa-only}` "
+        text = "# Plan\n\n## Packages\n\n| ID | Owns | Notes |\n|---|---|---|\n| P05 |" + cell + "| original |\n"
+        declared = {path: ("b" * 40, "# Plan", (("## Packages", "cell", 2, hashlib.sha256(cell.encode()).hexdigest()),))}
+        with mock.patch.dict(guard.SOURCE_REVISION_FIELDS, declared, clear=True):
+            self.assertEqual(self.findings(text, path), [])
+            self.assertTrue(self.findings(text.replace("| original |", "| run `plan-eng-review` |"), path))
+            self.assertTrue(self.findings(text.replace("qa-only}", "qa-only,help}"), path))
+
+    def test_declared_source_revision_fields_are_documented_in_the_register(self):
+        register = (ROOT / guard.RESIDUAL_REGISTER).read_text(encoding="utf-8")
+        section = register[register.index("## Source-revision original fields"):]
+        for relative, (revision, title, fields) in guard.SOURCE_REVISION_FIELDS.items():
+            for heading, kind, size, digest in fields:
+                self.assertIn(digest, section, relative)
+                self.assertIn(revision, section, relative)
+                self.assertIn(relative, section)
+                self.assertRegex(revision, r"^[0-9a-f]{40}$")
+
     def test_retained_research_shortcut_resolves_but_retired_ranges_do_not(self):
         self.assertNotIn("research", guard.RETIRED_COMMANDS)
         source = (ROOT / "skills" / "research" / "SKILL.md").read_text(encoding="utf-8")

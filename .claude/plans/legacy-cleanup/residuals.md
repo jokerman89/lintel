@@ -3047,3 +3047,46 @@ acceptance. No other historical candidate is accepted by this register.
   ]
 }
 -->
+
+## Source-revision original fields
+
+These exact fields are the declared scope, acceptance or executed target of their record at
+the named source revision. They are not routing instructions and do not authorize current
+selected work: re-selecting or re-executing an old plan against current source must re-plan.
+The guard observes only the retired name tokens inside each field, and only while the field
+bytes match the digest under the same title and section. Adjacent prose, sibling table
+cells and every other occurrence stay checked. Proof: each field is byte-identical at its
+revision (`git show <revision>:<path>`) under the same title and section, and the named
+targets existed there. Exception: in the W5 `**Files:**` field, the `dump` member of the
+brace-expanded context-skill group did not exist at `2f4dd682`; that unproven member is
+neither flagged nor observed and is reported, not accepted. Universal
+`work.json` status is unchanged (APPROVED, not COMPLETE).
+
+| Path | Line | Section | Field | Revision | SHA-256 |
+|---|---|---|---|---|---|
+| `.claude/engineering/audits/lintel-uniformity-REMEDIATION-PLAN.md` | 99 | ### W5 — Correctness bugs + first-party-first (finding #4, #5, #16; DEC-4, DEC-5, DEC-15) | 1 line(s) | `2f4dd682af396af8dc2c65dd5241c49d7e4f3d9e` | `c517ee9f7f9e533a6075b02198091c148ca545c996581a124d289ee6f465ccf5` |
+| `.claude/plans/universal-implementation/a13-contract.md` | 419 | ### Writes | 2 line(s) | `77cb8d3f893d2ef42be2631fe35ae45594f21bd3` | `6782f0d1397ad5d85115fa0d4afcb73c69a1ba6aef2e8fc90960984dd7a5669b` |
+| `.claude/plans/universal-implementation/a13-contract.md` | 560 | ## A13.3 Freeze: advisory boundary corrections | 1 line(s) | `77cb8d3f893d2ef42be2631fe35ae45594f21bd3` | `905d07da1f5c0fdb1f7c08fcf6251e63a4e93121ad10c50a20e52d28c7b894db` |
+| `.claude/plans/universal-implementation/a13-contract.md` | 696 | ## Write scope and limits | 1 line(s) | `77cb8d3f893d2ef42be2631fe35ae45594f21bd3` | `37df73a7c1d2b73f1acf7593cf7816491e13a22e708ff837a2064caaf23e0335` |
+| `.claude/plans/universal-implementation/packages/P05.md` | 11 | ## Ownership and shared interface | 11 line(s) | `77cb8d3f893d2ef42be2631fe35ae45594f21bd3` | `d3fbb66ecea34ab4debdc4a8147ff2089290e19c1bfa791a1f2195962f53e82d` |
+| `.claude/plans/universal-implementation/packages/P06.md` | 9 | ## Ownership | 9 line(s) | `77cb8d3f893d2ef42be2631fe35ae45594f21bd3` | `e70c5dbe85ed50e8c233e61e0eefcb66333f4c23b36dab01530511d4a643e14a` |
+| `.claude/plans/universal-implementation/packages/P08.md` | 52 | ## Ownership | 11 line(s) | `77cb8d3f893d2ef42be2631fe35ae45594f21bd3` | `fea88c721d691921333bce6c70683c0a16f7ea146b5f202c6eb4b308ec33dfcd` |
+| `.claude/plans/universal-implementation/packages/P08.md` | 80 | ## Leaves and integration evidence | table cell 3 | `77cb8d3f893d2ef42be2631fe35ae45594f21bd3` | `d712d8f3df9a549248b3df195a14ff06bd0ea1378076d45d44daf786f0058748` |
+| `.claude/plans/universal-implementation/packages/P08.md` | 642 | ## Remaining original delivery-refusal pair | 8 line(s) | `77cb8d3f893d2ef42be2631fe35ae45594f21bd3` | `fdee281b2b5eed33d2e5e2807edc9e20dfbec194d2aa3638c24a9cb89d7ca8ce` |
+| `.claude/plans/universal-implementation/packages/P08.md` | 1126 | ### Candidate-03 intake and parallel remaining-F06 preparation | 2 line(s) | `77cb8d3f893d2ef42be2631fe35ae45594f21bd3` | `20cdca4976b4e36c37b4ef51ba15bb2ac4e86516bed7e3de7521aaeed1b4398f` |
+| `.claude/plans/universal-implementation/packages/P09.md` | 113 | ### Remaining module-consumer release | 7 line(s) | `77cb8d3f893d2ef42be2631fe35ae45594f21bd3` | `315d55b7d29e56039f067089ee30bd938b1d974315b89b422e761bdc23ed7d19` |
+| `.claude/plans/universal-implementation/packages/P09.md` | 199 | ### N1 semantic correction and original receiver-mode proof | 7 line(s) | `77cb8d3f893d2ef42be2631fe35ae45594f21bd3` | `4da80d80672633d0eae9b1e7bb28c2c5ff20545ca5acd7abc2729652a3bab729` |
+| `.claude/plans/universal-implementation/packages/P10.md` | 8 | ## Ownership | 7 line(s) | `77cb8d3f893d2ef42be2631fe35ae45594f21bd3` | `b9e6b8fae2317db0c0c9dd9c06680c128a722aecc9acec6f7f77c463f0c008b1` |
+| `.claude/plans/universal-implementation/packages/P11.md` | 9 | ## Browser-only first unit | 6 line(s) | `77cb8d3f893d2ef42be2631fe35ae45594f21bd3` | `9be0399af0abcfa922ee6a23f8e9ea6aafaf26ee0fa95be8bf73733939df1cea` |
+| `.claude/plans/universal-implementation/packages/P11.md` | 168 | ### Owned endpoint readiness correction | 9 line(s) | `77cb8d3f893d2ef42be2631fe35ae45594f21bd3` | `76b62aa9d47664a686c5e69522fca0512b579f5080cf56c6186fdad50516212b` |
+| `.claude/plans/universal-implementation/packages/P11.md` | 229 | ### Q1 complete numeric extraction | 6 line(s) | `77cb8d3f893d2ef42be2631fe35ae45594f21bd3` | `4e2f06ea55d34052ab12e08e8b92e673eee583769a5ff013406c670b2209907f` |
+| `.claude/plans/universal-implementation/packages/P12.md` | 152 | ## Standalone PDF writer and truthful inspection unit | 7 line(s) | `77cb8d3f893d2ef42be2631fe35ae45594f21bd3` | `c7e36f4288ae6786a6b636333f0bfbfdab65c4a51cfe0b6bcef95c4f855dceeb` |
+| `.claude/plans/universal-implementation/packages/P12.md` | 420 | ## Ownership and value | 4 line(s) | `77cb8d3f893d2ef42be2631fe35ae45594f21bd3` | `5cdf9a91cb7b8aff597973ff9984725dd666e58736c54da613f46ef54a672f6e` |
+| `.claude/plans/universal-implementation/packages/P13.md` | 8 | ## Compact discovery first unit | 6 line(s) | `77cb8d3f893d2ef42be2631fe35ae45594f21bd3` | `3ab6924ce6c8abb611f29a668a51f7bea287191c8f57b65c7fa314ae7155fb95` |
+| `.claude/plans/universal-implementation/plan.md` | 58 | ## Packages and ownership | table cell 3 | `77cb8d3f893d2ef42be2631fe35ae45594f21bd3` | `bf11431cb4f4d0fbf6a8c4ce80e46f9ecfd0649274b6c4728f8ea02fd4b280e2` |
+| `.claude/plans/universal-implementation/plan.md` | 358 | ### A10 Proportionate intake and composition (P08; R05) | 1 line(s) | `77cb8d3f893d2ef42be2631fe35ae45594f21bd3` | `b9a8eb629798afd462b90678c4afd1e83da8e2dcc465a8471468c02fb16827bf` |
+| `.claude/plans/universal-implementation/reports/P08.md` | 1723 | ### Proposed bounded original-proof execution, not yet released or run | table cell 1 | `77cb8d3f893d2ef42be2631fe35ae45594f21bd3` | `7c7f32a85d9b8386ae1e91c2067361fa2268de4e4bc47224736081238556a092` |
+| `.claude/plans/universal-implementation/reports/P08.md` | 1724 | ### Proposed bounded original-proof execution, not yet released or run | table cell 1 | `77cb8d3f893d2ef42be2631fe35ae45594f21bd3` | `e08677db60605e74c8b1929ddc3e73583795319ff959098e442c73804b19869d` |
+| `.claude/plans/universal-implementation/reports/P08.md` | 1725 | ### Proposed bounded original-proof execution, not yet released or run | table cell 1 | `77cb8d3f893d2ef42be2631fe35ae45594f21bd3` | `bd2263ab9d1aab804a6f7d50a31e0ef420b2a93ca0f87dda76bb51f3860db823` |
+| `.claude/plans/universal-implementation/reports/P08.md` | 1728 | ### Proposed bounded original-proof execution, not yet released or run | table cell 1 | `77cb8d3f893d2ef42be2631fe35ae45594f21bd3` | `f12ce21ddf0f9a336ecd4cda95860e7db041b6b29c5544d3f7af504fb8a99d55` |
+| `.claude/plans/universal-implementation/reports/P08.md` | 3258 | ### Original alias separately released after verified direct quiescence | 8 line(s) | `77cb8d3f893d2ef42be2631fe35ae45594f21bd3` | `ca14eee88af18d0a65101689882d9423a4c7b668e15e2e1a027ca9b27a881a45` |
