@@ -1,0 +1,22 @@
+{
+  "presentation_snapshot": "2026-09-25",
+  "source_repository": "lintel-kitchen-demo",
+  "source_commit": "f347241",
+  "status": "No completed three-arm comparative results published",
+  "arms": [
+    "Naked Copilot",
+    "Lintel (serial packages + independent review)",
+    "Lintel + Swarming"
+  ],
+  "requirements": 32,
+  "possible_points": 100,
+  "raw_trials_included": false,
+  "model_runs_started_by_this_update": false,
+  "prompt_sha256": "749045fb36e72e1bc2dce02843ac911ad9a2a6380e908e38adf6c2192cbd89d9",
+  "brief_sha256": "375fde476f09117ae2aa1fce3497138b832e62f5552b0458eec261b288032829",
+  "calibration_only": {
+    "reference": 100,
+    "incomplete_control": 0,
+    "source": "Recorded harness self-check2026-09-24; not a model result"
+  }
+}
