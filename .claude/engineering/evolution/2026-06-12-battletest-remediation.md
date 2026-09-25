@@ -6,9 +6,9 @@ operator: jokerman
 affected_paths:
   - hooks/shared/{secret-scan-block,customer-data-block}/run.sh + _patterns.sh (ADR-0010)
   - bin/_audit.sh, lib/state.sh, bin/li-scaffold, install/install.ps1 (ADR-0010)
-  - skills/capture/SKILL.md (vault PII scan, ADR-0010; gstack attribution, ADR-0011)
+  - skills/capture/SKILL.md (vault PII scan, ADR-0010; native method rationale, ADR-0011)
   - agents/**/*.md (memory:/model: frontmatter, ADR-0012) + tests/shape/frontmatter-lint-all.sh
-  - ~30 files gstack de-heritage (ADR-0011)
+  - ~30 files native method consolidation (ADR-0011)
   - skills/{resume,context-restore,context-save,define,sense,plan,cycle}/SKILL.md (friction, synthesis Wave H)
   - README, getting-started, welcome, CLAUDE.md, install.sh, docs/GLOSSARY.md (docs, Wave D)
 risk_class: high
@@ -17,31 +17,36 @@ breaking_change: false
 
 # Structure change: battletest-remediation
 
+> Historical record. Source-time path identifiers, dates, counts, findings and outcomes
+> remain historical; the checks below were not rerun in this documentation migration.
+> Current navigation is in the [native migration](../../../docs/migrations/2026-09-25-native-workflows.md).
+> Old heading/log compatibility cannot clear the current shared v2 review/QA gate.
+
 > Gate M1 artifact. Six-persona adversarial battletest (.claude/engineering/audits/2026-06-12-battletest-synthesis.md)
-> + gstack de-heritage. Four ADRs: 0010 (security), 0011 (gstack), 0012 (agent memory/model).
+> + native method consolidation. Four ADRs: 0010 (security), 0011 (native routing), 0012 (agent memory/model).
 
 ## What changed (shape)
 
 Security (ADR-0010): block hooks match any git phrasing + scan staged∪worktree; modern token
 formats; vault pre-write PII scan; CR/LF-safe audit + state; li-scaffold sed RCE closed.
-gstack (ADR-0011): 44 edits / 30 files — attribution rewritten to native rationale, gstack
-paths/binaries → native helpers, REVIEW REPORT heading dual-accept + legacy review-log import +
+Native routing (ADR-0011): 44 edits / 30 files — method prose rewritten to native rationale,
+external paths/binaries → native helpers, REVIEW REPORT heading dual-accept + legacy review-log import +
 disable-file migration (all zero-loss, grace 2026-09-12). Agent frontmatter (ADR-0012): 23
 agents `memory: project`, 4 `model: haiku`, frontmatter-lint extended. Friction (Wave H):
-resume↔context-restore wired, cost-gate honesty, DEFINE feature fast-path, SENSE meta-infra
+resume/checkpoint restoration wired, cost-gate honesty, DEFINE feature fast-path, SENSE meta-infra
 marker-gated. Docs (Wave D): canonical hook-activation matrix, GLOSSARY, stale-count fixes,
 4-root state map, install ghosts removed.
 
 ## Backward-compat
 
-Additive or alias-covered. New frontmatter keys optional. gstack names route via aliases +
+Additive or alias-covered at that revision. New frontmatter keys optional. Former names routed via aliases +
 dual-accept heading. No required contract dropped (M2 RED = additive frontmatter + alias-covered
 removals; override documented).
 
 ## Migration path
 
 Two rows in _INDEX.md (v5.2-gstack-deheritage, v5.2-security-hardening). Security auto-applies
-via plugin update; gstack grace to 2026-09-12.
+via plugin update; native-routing transition grace to 2026-09-12.
 
 ## Verification
 

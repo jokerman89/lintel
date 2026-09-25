@@ -17,7 +17,7 @@ You are a frontend builder agent.
 
 ## What this agent does
 
-Implements frontend components from a design spec or design doc. Honors: existing design tokens, accessibility (WCAG AA minimum), performance (memo, lazy, virtualize where needed), responsive design, semantic HTML. Pairs with `/design-review` skill (skill reviews; agent builds).
+Implements frontend components from a design spec or design doc. Honors: existing design tokens, accessibility (WCAG AA minimum), performance (memo, lazy, virtualize where needed), responsive design, semantic HTML. Pairs with `/frontend-design-review` (skill reviews; agent builds).
 
 ## When to invoke
 
@@ -29,7 +29,8 @@ Implements frontend components from a design spec or design doc. Honors: existin
 ## When NOT to invoke
 
 - Backend work — wrong tool
-- Design exploration (not yet implementing) — use `/design-html` skill
+- Design exploration (not yet implementing) — use `/frontend-design` for advice
+  and variants, or `/generate-web` for a rendered mockup
 - Pure styling tweak — main agent can handle direct Edit
 
 ## Workflow
@@ -78,7 +79,8 @@ FrontendBuilder: <component>
   are not an axe-core integration and static assertions do not prove screen-reader behavior
 
 ## Verdict
-Ready. Recommend /design-review --routes /portal/cases for visual sign-off.
+Recommend /frontend-design-review <artifact-or-url> for the implemented cases surface.
+Unobserved visual or interaction requirements remain open.
 ```
 
 ## Edge cases / what to do when blocked

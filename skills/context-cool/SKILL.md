@@ -52,9 +52,9 @@ other agents or other repositories. Include it explicitly in a delegated retriev
 
 If saving state helps:
 
-1. `/li:context-save <label>` preserves decisions and next work.
+1. `/li:pause <label>` preserves decisions and next work.
 2. Start a fresh session using the actual host operation.
-3. `/li:context-restore` reads the owned checkpoint and a bounded current-file set.
+3. `/li:resume --from <checkpoint>` reads the owned checkpoint and a bounded current-file set.
 4. `/li:context-warm` previews only still-needed sources.
 
 On a failed exclusions write, report failure; leave previous exclusions intact. Do not

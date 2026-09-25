@@ -1,0 +1,183 @@
+{
+  "schema_version": 2,
+  "skill": "review",
+  "status": "unverified",
+  "timestamp": "2026-09-25T12:48:51.244070+00:00",
+  "reason": "Faithful coordinator transcription of two actual matching semantic ACCEPTs; neither rejected spans nor overall release clearance is inferred.",
+  "context": {
+    "attempt_id": "legacy-cleanup-span-set02-lf",
+    "builder": {
+      "context": "copilot-session:e9c20b62-f877-4242-82cd-b5002d452da8",
+      "id": "cleanup-integration"
+    },
+    "independence_required": true,
+    "profile": {
+      "context_id": "e9c20b62-f877-4242-82cd-b5002d452da8",
+      "digest": "sha256:ce259b67ed7a8d414488c92c4f4c1cbf65da8e69bc2eec8647808aaebf03b9d4",
+      "generation": 2,
+      "name": "_default",
+      "schema_version": 1,
+      "version": "1.0.0"
+    },
+    "purpose": "verification_only",
+    "qa_requirements": [
+      {
+        "applicability": "applicable",
+        "id": "historical-spans",
+        "kind": "check",
+        "policy": {
+          "actor": null,
+          "applicability": "Only exact historical-span semantic classification, not release or runtime approval",
+          "effective_date": null,
+          "jurisdiction": null,
+          "source": ".claude/plans/legacy-cleanup/spec.md",
+          "version": "2026-09-25"
+        },
+        "requirement": "mandatory"
+      }
+    ],
+    "required_controls": [
+      "historical-spans"
+    ],
+    "required_policy": {
+      "applicability": "not_applicable",
+      "required": false,
+      "source": "bundled-neutral",
+      "status": "not_required",
+      "version": "1.0.0"
+    },
+    "schema_version": 2,
+    "snapshot": {
+      "base": "a7a1df338bacf900f1210f08131f391831992f1f",
+      "entries": [
+        {
+          "base": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "fc24a67bfa15df557d6bbfbfa742e010a94cff6d5f9ca2b34732b371fb4826d7"
+          },
+          "head": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "fc24a67bfa15df557d6bbfbfa742e010a94cff6d5f9ca2b34732b371fb4826d7"
+          },
+          "index": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "fc24a67bfa15df557d6bbfbfa742e010a94cff6d5f9ca2b34732b371fb4826d7"
+          },
+          "path": ".claude/plans/universal-implementation/reports/P13-skills-preservation.md",
+          "worktree": {
+            "kind": "file",
+            "mode": "100644",
+            "sha256": "fc24a67bfa15df557d6bbfbfa742e010a94cff6d5f9ca2b34732b371fb4826d7"
+          }
+        }
+      ],
+      "head": "4dcd51584df8f91abefaa34cc073f3e1560813a2",
+      "record_path": ".claude/runtime/reviews/legacy-cleanup-span-semantic-02.json",
+      "result_digest": "0a46d16375a8e2b3e89486a2ca081fe90dbc702e372721eb209ee0a56e9a14cf",
+      "selection": [
+        ".claude/plans/universal-implementation/reports/P13-skills-preservation.md"
+      ]
+    },
+    "work": {
+      "acceptance_digest": "ccaf402255b625f46602102f83ccf45239e79e43c6f9642b7608c901f2a9bf1b",
+      "acceptance_manifest": [
+        {
+          "end": null,
+          "path": ".claude/plans/legacy-cleanup/plan.md",
+          "sha256": "33af73c2ad7388737d71716c2243347785598a3be91045dce0c8e984d39f81e9",
+          "start": null
+        },
+        {
+          "end": null,
+          "path": ".claude/plans/legacy-cleanup/prompt.md",
+          "sha256": "e93bc8bc3bb78d0fc7ba691078f126bc6094d92eacbec4404f5d14e80aea75e8",
+          "start": null
+        },
+        {
+          "end": null,
+          "path": ".claude/plans/legacy-cleanup/spec.md",
+          "sha256": "a101f99340629ae655a111da3aa8c03a0c2ace51b569e71fc75b93232b9b549c",
+          "start": null
+        },
+        {
+          "end": null,
+          "path": ".claude/plans/universal-implementation/reports/P13-skills-preservation.md",
+          "sha256": "fc24a67bfa15df557d6bbfbfa742e010a94cff6d5f9ca2b34732b371fb4826d7",
+          "start": null
+        }
+      ],
+      "acceptance_paths": [
+        ".claude/plans/legacy-cleanup/plan.md",
+        ".claude/plans/legacy-cleanup/prompt.md",
+        ".claude/plans/legacy-cleanup/spec.md",
+        ".claude/plans/universal-implementation/reports/P13-skills-preservation.md"
+      ],
+      "leaf_ids": [
+        "0.2.c",
+        "9.3.a",
+        "10.2.a"
+      ],
+      "map_digest": "1ea633652c308129d8926f157c5a6910c4983f4a1e688d1c3a6bddd42930e4a0",
+      "package_id": "INTEGRATE",
+      "work_map": ".claude/plans/legacy-cleanup/work.json"
+    }
+  },
+  "reviewer": {
+    "id": "cleanup-quality-reviewer",
+    "context": "copilot-session:8b0c4a2f-3e1b-4c3d-8237-74d02ff29710"
+  },
+  "provenance": "declared",
+  "controls": [
+    {
+      "applicability": "applicable",
+      "id": "historical-spans",
+      "kind": "check",
+      "policy": {
+        "actor": null,
+        "applicability": "Only exact historical-span semantic classification, not release or runtime approval",
+        "effective_date": null,
+        "jurisdiction": null,
+        "source": ".claude/plans/legacy-cleanup/spec.md",
+        "version": "2026-09-25"
+      },
+      "requirement": "mandatory",
+      "status": "pass",
+      "reason": "Both independently attributed actors accepted only these two exact P13 LF declaration digests; rejected entries excluded.",
+      "evidence": [
+        ".claude/plans/legacy-cleanup/span-reviews/set02-spec-decisions.json",
+        ".claude/plans/legacy-cleanup/span-reviews/set02-quality-decisions.json"
+      ],
+      "observation": {
+        "span_declarations": [
+          "44fcf7671a9fbf0019c19d988831decd99d42211b13ae10aec458aed03ba1365",
+          "ad5531edf3094e1fbc5df33701dd9b199e4aba2e15dabc6e7f78c804dd493815"
+        ],
+        "review_scope": "semantic classification only"
+      }
+    }
+  ],
+  "coverage": {
+    "0.2.c": [
+      "historical-spans"
+    ],
+    "9.3.a": [
+      "historical-spans"
+    ],
+    "10.2.a": [
+      "historical-spans"
+    ]
+  },
+  "evidence": [
+    {
+      "path": ".claude/plans/legacy-cleanup/span-reviews/set02-quality-decisions.json",
+      "sha256": "3dc35ad36977975266eee64952ef04f6b3475f5ce9a8503ccd6e539a4fd0c228"
+    },
+    {
+      "path": ".claude/plans/legacy-cleanup/span-reviews/set02-spec-decisions.json",
+      "sha256": "31f0851e9d185bb30294d3005901583f580495a1190f88e3d5abd3fe176ba251"
+    }
+  ]
+}

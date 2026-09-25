@@ -17,6 +17,9 @@ breaking_change: true
 
 # Structure change: launch-readiness
 
+> Historical record. Original dates, IDs, failed alternatives and verification claims
+> remain historical. No check below was rerun for the native naming migration.
+
 > Gate M1 artifact. The v5.x "old-school ready" drive: an 8-audit launch-readiness register
 > (.claude/engineering/audits/2026-06-12-launch-readiness-register.md) + the remediation it found, executed as
 > waves 0–7. ADRs 0013 (fail-closed gates) + the staged 0015/0016/0017. Builds on the v5.3
@@ -32,7 +35,7 @@ resume, audit cycle_id) to the current cycle — append-only multi-cycle ledgers
 position/mode/completeness. **Multi-CLI:** two fabricated manifests deleted + propagated to all five
 asserting surfaces; `lintel@`→`li@` everywhere; install.ps1 reaches identity-seed + lib/bin copy +
 `shared/` hook parity; li-doctor is bash-3.2-safe; `.opencode/INSTALL.md` rewritten neutral.
-**Honesty:** docs truth sweep across ~30 files (stale v3-plan/`tasks/`/`docs/adr`/gstack/version
+**Honesty:** docs truth sweep across ~30 files (stale v3-plan/`tasks/`/`docs/adr`/inherited-routing/version
 refs), dormancy qualifiers at point of sale, usage-log + cycle telemetry + compliance prose streams
 converted to real `audit_log` calls or labeled dormant. **Hygiene:** `no-swedish.sh` covers docs +
 README (historical/generated/functional exempt); CATALOG generator is character-safe; exec bits

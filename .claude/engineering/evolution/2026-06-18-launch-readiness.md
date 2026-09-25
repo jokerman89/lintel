@@ -17,6 +17,12 @@ breaking_change: false
 
 # Structure change: launch-readiness
 
+> Historical record. The affected-path list identifies source-time entries, not current
+> routing. Current equivalents are in the
+> [native migration](../../../docs/migrations/2026-09-25-native-workflows.md).
+> Dates, counts, the reverted move, RED disposition and test observations are retained;
+> none of those checks was rerun by this documentation update.
+
 > Gate M1 (structure-impact analysis) artifact. Public-launch readiness pass over the whole harness.
 
 ## What changed (shape)

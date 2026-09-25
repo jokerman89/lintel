@@ -20,7 +20,7 @@ fi
 grep -q 'STALE: docs/wiki/skills.md' "$TMP/result"
 grep -q 'Intentional drift' "$TMP/docs/wiki/skills.md"
 # CRLF source must not silently empty the skill index.
-grep -q '| help | foundation |  | internal | \[claude-code, codex, copilot\] |' "$TMP/docs/wiki/skills.md"
+grep -q '| catalog | foundation |  | internal | \[claude-code, codex, copilot\] |' "$TMP/docs/wiki/skills.md"
 grep -q '| spec-kit | foundation |' "$TMP/docs/wiki/skills.md"
 grep -q '| GitHub Copilot CLI | .github/skills | documented | not_run |' "$TMP/README.md"
 

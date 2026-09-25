@@ -130,9 +130,9 @@ No browser tool means browser evidence remains missing, not a fabricated success
 | Need | Canonical workflow |
 |---|---|
 | Small authorized fix | `fix`, or direct scoped work with verification |
-| Find why something fails | `investigate` |
+| Find why something fails | `diagnose` |
 | Substantial change | `plan` / `cycle`, then authorized `build` |
-| Verify behavior | `qa` |
+| Verify behavior | `verify` (read-only by default; explicit `--repair` for authorized fixes) |
 | Review only | `review`, with no write escalation |
 | Continue work | `resume`, preserving the original map and IDs |
 | Diagnose installation | `doctor` plus the installed adapter's `check` |

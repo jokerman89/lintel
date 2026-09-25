@@ -289,7 +289,7 @@ memory_file="$(lintel_working_state_file 2>/dev/null)"
 [ -f "$memory_file" ] && memory_count=$(grep -c '^## ' "$memory_file")
 ```
 
-Surface: "X lessons / Y memory entries available — invoke `/li:lessons` to filter for current intent."
+Surface: "X lessons / Y memory entries available — invoke `/li:lessons-surface` to filter for current intent."
 
 Do NOT load the content. Just signal availability.
 
@@ -343,7 +343,7 @@ Next options:
   • /li:cycle [--mode <preset>]   — full cycle from here
   • /li:<phase>                    — jump to specific phase
   • /li:resume                     — pick up where we left off
-  • /li:skill-router "<intent>"    — semantic router if unsure (was /li:match — grace until 2026-08-29)
+  • /li:skill-router "<intent>"    — semantic router if unsure
 ```
 
 ## Status protocol

@@ -1,0 +1,621 @@
+{
+  "review_type": "final finite original-observation semantic adjudication",
+  "status": "FINAL_SEMANTIC_DECISIONS_ONLY",
+  "candidate": "a7a1df338bacf900f1210f08131f391831992f1f",
+  "input_path": "C:\\Users\\jokerman\\.copilot\\session-state\\e9c20b62-f877-4242-82cd-b5002d452da8\\files\\c-span-review-final-records-lf.json",
+  "input_sha256": "d860ca5a2824718b7ad4b76014b362dfd8e69c1219473bd91d8abf21ab84d8aa",
+  "input_bytes": 336492,
+  "selected_raw_excerpt_bytes": 159621,
+  "selected_declarations": 54,
+  "selected_source_files": 36,
+  "reviewer": {
+    "project_session_id": "a32b10cf-657d-4c7c-b298-8fcb60cd0735",
+    "tool_session_id": "1742f900-1de4-4a59-beee-95c3a907a063",
+    "coordinator_routing_id": "e9c20b62-f877-4242-82cd-b5002d452da8",
+    "implemented_selected_source_or_guard": false,
+    "descendants_created": false
+  },
+  "scope": "Only the 54 exact declarations in the identified final packet. All full selected excerpts and their supplied original context prefixes were read. Set01/set02 accepted decisions and earlier broad-span rejections are not reopened or changed.",
+  "counts": {
+    "ACCEPT": 51,
+    "REJECT": 3,
+    "NEEDS_EVIDENCE": 0
+  },
+  "identity_binding": {
+    "per_decision": "Each id and declaration_digest below selects exactly the corresponding entry in the byte-identified input packet, including its exact LF raw sha256, source_context_sha256, path, included start marker, excluded end marker, range and counterexamples. No field or hash from a different declaration is substitutable.",
+    "verified_source_relation": "All 54 supplied raw excerpts match their exact ranges at a7a1df33. All 36 full-source raw hashes and supplied context prefixes match those immutable Git blobs. Included start and excluded end markers each occur uniquely and in order in their full source.",
+    "admission": "Both the span's raw bytes and the complete historical source context must remain applicable through the existing P05 acceptance selection. Changed outside context invalidates admission even if the selected span is unchanged. Full-source hashes are invalidation inputs, not whole-file suppression.",
+    "representation": "LF bytes are exact. No CRLF or other normalization is allowed during registration/consumption.",
+    "declaration_digest_limit": "The supplied declaration digests are bound identifiers. No unspecified digest preimage/schema was invented or substituted; raw packet, excerpt and source hashes were independently checked."
+  },
+  "owner_chronology": {
+    "artifact": "C:\\Users\\jokerman\\.copilot\\session-state\\e9c20b62-f877-4242-82cd-b5002d452da8\\files\\original-owner-provenance-77.md",
+    "treatment": "Read as attributed owner chronology only. It identifies later P08/P08-A13/P11 discharge references and preserves limitations; it is not independent clearance or authority to mask next-action prose. No prior rejected broad P08/P11 declaration is approved by this decision set, and no later-discharge review or runtime test was rerun."
+  },
+  "release_clearance": false,
+  "canonical_p05_record_written": false,
+  "overall_acceptance": "UNVERIFIED; this finite semantic decision set does not approve guard code, current-routing completion, quality, QA, hosted CI or SHIP",
+  "decisions": [
+    {
+      "id": "remaining-source-record-1",
+      "declaration_digest": "23516ac77eb68548a68d9e83c95a34dc7c834f72adee329344832185bd90d470",
+      "path": ".claude/engineering/audits/2026-09-20-universal-quality/reviews/upstream.md",
+      "start_line": 33,
+      "end_line_exclusive": 47,
+      "decision": "ACCEPT",
+      "semantic_reason": "UP-02 compares the pinned Lintel QA source with revision-pinned external browser methods, explicitly distinguishing a provider's existence from executed QA. Borrow/Avoid/Acceptance are the original comparison's recommendations and evaluation criteria, not a new browser task.",
+      "current_instruction_assessment": "No present execution instruction is selected. Browser discovery/rendering and retained repair-mode suggestions remain source-era comparison proposals; they grant no provider, session, network or test authority."
+    },
+    {
+      "id": "remaining-source-record-2",
+      "declaration_digest": "da5f6fa74b6f169d5efb405a587c4c7a1657fc59cce9317b5b2c5ddfe50b615c",
+      "path": ".claude/engineering/audits/2026-09-20-universal-quality/reviews/upstream.md",
+      "start_line": 47,
+      "end_line_exclusive": 59,
+      "decision": "ACCEPT",
+      "semantic_reason": "UP-03 assesses source-cited intake/premise behavior against a pinned comparison and proposes optional rather than mandatory venture framing. Its worked-example advice is part of that bounded design comparison.",
+      "current_instruction_assessment": "No current implementation or routing instruction is embedded. The suggestions do not restore retired intake entries, require a customer/payer interview or validate demand."
+    },
+    {
+      "id": "remaining-source-record-3",
+      "declaration_digest": "ef72eca9afedd3e3576517a9dcef1f9af0fd34c3bef72ec23f63ba42d7efec50",
+      "path": ".claude/engineering/audits/lintel-five-lens-audit.md",
+      "start_line": 28,
+      "end_line_exclusive": 47,
+      "decision": "ACCEPT",
+      "semantic_reason": "The twelve strengths are the named, source-era findings of the explicitly advisory, propose-never-execute assessment of snapshot 0f4aa16. They compare state, delegators, metadata, routing, hooks and runtime design rather than prescribe a selected operation.",
+      "current_instruction_assessment": "Words such as lift, resist and copy express the auditor's design recommendations within that assessment. They are not a present permission grant or proof that old path, count, hook and fallback claims still hold."
+    },
+    {
+      "id": "remaining-source-record-4",
+      "declaration_digest": "16166b96ca8e74f69ad436466a9799238e2aaca4cb4abba5b32c2e4a7a5dc0cc",
+      "path": ".claude/engineering/audits/lintel-uniformity-MASTER.md",
+      "start_line": 29,
+      "end_line_exclusive": 56,
+      "decision": "ACCEPT",
+      "semantic_reason": "This is the completed audit's ranked finding table, with affected subjects, proposed uplifts, rationale, effort and decision dependencies. The action-shaped cells are explicitly proposals attached to the original observations, not executable build cards.",
+      "current_instruction_assessment": "No current task or consumer is selected. The old proposed schema requirements, paths, counts and provider wiring do not override the current approved plan or establish their own authority."
+    },
+    {
+      "id": "remaining-source-record-5",
+      "declaration_digest": "9e94019d9147fe3c951bd3d812d53ae0d99be608f06656f0bd6c66ec1c126a90",
+      "path": ".claude/engineering/audits/lintel-uniformity-REMEDIATION-PLAN.md",
+      "start_line": 95,
+      "end_line_exclusive": 104,
+      "decision": "REJECT",
+      "semantic_reason": "This span is a draft remediation work card, not a finding/result record: What directs live fixes and configuration convergence, Files selects edit targets, Tasks assigns W5.1-W5.5 and Tests/Verification prescribe execution. Its historical banner alone does not make that complete work contract an original observation.",
+      "current_instruction_assessment": "Lines 97 and 100-102 are implementation and verification directions that the proposed classification would hide. The supplied context still identifies a DRAFT_FOR_REVIEW plan; no specific discharge or supersession of this work card is evidenced in this packet.",
+      "bounded_narrowing": "Leave What/Tasks/Tests/Verification checked. If needed, propose only exact quoted historical subject/path fields with independently established original-card provenance and a new digest, or provide specific evidence that resolves this card's instructional authority. No narrower span is approved here."
+    },
+    {
+      "id": "remaining-source-record-6",
+      "declaration_digest": "87601d7f4f5d89c63d2bc72dbe82dec3e03df7e88b093e5c3b96a8d872f2a785",
+      "path": ".claude/engineering/audits/lintel-uniformity-cross-X1-concept-consistency.md",
+      "start_line": 232,
+      "end_line_exclusive": 254,
+      "decision": "ACCEPT",
+      "semantic_reason": "D1-D14 are comparative summaries of the eight original cohort findings and their worst observed fragmentation. The source context defines this as synthesis of cohort norms, not per-component execution.",
+      "current_instruction_assessment": "No new current action is prescribed. Old absent/present, host, count and producer-consumer claims remain the historical assessment; the later fragmentation verdict is excluded."
+    },
+    {
+      "id": "remaining-source-record-7",
+      "declaration_digest": "11a2c70243213db365f20afc1875d835bcf8fb9132bc1d4a89396d9f0d0da166",
+      "path": ".claude/engineering/audits/lintel-uniformity-cross-X3-evolution.md",
+      "start_line": 84,
+      "end_line_exclusive": 99,
+      "decision": "ACCEPT",
+      "semantic_reason": "This section totals the previously assessed closed-loop, write-only and absent mechanisms, including its alternative lesson-row aggregation and caveats. It is original measurement/synthesis accounting.",
+      "current_instruction_assessment": "No current workflow instruction occurs. The totals and classifications are not a present inventory, activation claim or new policy."
+    },
+    {
+      "id": "remaining-source-record-8",
+      "declaration_digest": "71cdaac6637488df1b72aa3ee1a35fa6a796fdd926473f652d09edb4731493c6",
+      "path": ".claude/engineering/audits/lintel-uniformity-cross-X4-entry-point-matrix.md",
+      "start_line": 74,
+      "end_line_exclusive": 126,
+      "decision": "ACCEPT",
+      "semantic_reason": "All 47 footnotes explain the original entry-point matrix cells through source/cohort citations and the fires/skipped/SHOULD vocabulary. They include conditional hook installation and distinctions between missing wiring and unbuilt layers.",
+      "current_instruction_assessment": "Action-like 'should' text explains why the old audit classified a cell; it is not a new dispatch instruction. Source-era claims about hooks, jobs, agents and logs are not current enforcement or host observations."
+    },
+    {
+      "id": "remaining-source-record-9",
+      "declaration_digest": "783d8b747e69ff6ffad8adb4baa11ba2b4f4bcf6d9fca1851411e580ae0dc126",
+      "path": ".claude/engineering/audits/lintel-uniformity-cross-X4-entry-point-matrix.md",
+      "start_line": 157,
+      "end_line_exclusive": 167,
+      "decision": "ACCEPT",
+      "semantic_reason": "The section synthesizes the original matrix's under-wiring finding, adoption clusters and two quantified gap classes. 'Fix =' names the type of work implied by each old gap, not a selected command.",
+      "current_instruction_assessment": "No current implementation sequence or mutation is selected. The following ranked should-fire work is outside this span."
+    },
+    {
+      "id": "remaining-source-record-10",
+      "declaration_digest": "503f64c570aae8a68c22535137c75eaf1a3b5496a6611540a8cc2e50b5af7097",
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort1-phase-core.md",
+      "start_line": 1,
+      "end_line_exclusive": 15,
+      "decision": "ACCEPT",
+      "semantic_reason": "The selected prefix identifies the audit cohort, its thirteen subjects, original standard and the two methodological comparison floors. It describes how that audit was conducted.",
+      "current_instruction_assessment": "No live route is invoked. The original eight-phase/composite census and no-cut comparison rule are not promoted to today's lifecycle or cleanup governance."
+    },
+    {
+      "id": "remaining-source-record-11",
+      "declaration_digest": "523bf246e6c546b1749949495116abeb61bd4457bb3bb17f8ca93013e1bfc10d",
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort1-phase-core.md",
+      "start_line": 27,
+      "end_line_exclusive": 35,
+      "decision": "ACCEPT",
+      "semantic_reason": "The ranking compares the original plan/cycle, fix and thinner composite sources by enumerated contract and observability traits.",
+      "current_instruction_assessment": "No current next step or implementation command is present. Relative rankings do not certify the present methods or make retired composites active."
+    },
+    {
+      "id": "remaining-source-record-12",
+      "declaration_digest": "2cd11ce2b6218da1648f316b8f9c5dabcf93d84432df54d9b2a94b359ee22594",
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort1-phase-core.md",
+      "start_line": 359,
+      "end_line_exclusive": 367,
+      "decision": "ACCEPT",
+      "semantic_reason": "This compact original coverage/peer summary repeats the assessed thirteen subjects and comparative strengths/weaknesses, without including the later ranked findings.",
+      "current_instruction_assessment": "No current instruction is hidden. The old counts and body-quality rankings remain historical results only."
+    },
+    {
+      "id": "remaining-source-record-13",
+      "declaration_digest": "0ba8931d0a70a54dc79b956bf753ac703ac95d75bd34f85ebc6f4457f551d31e",
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md",
+      "start_line": 713,
+      "end_line_exclusive": 718,
+      "decision": "ACCEPT",
+      "semantic_reason": "The two bullets synthesize the already described source-era dimensional comparisons, naming which former planning methods set each bar and why another lagged.",
+      "current_instruction_assessment": "The uplift phrasing is a comparative audit conclusion, not authorization to restore a former reviewer or its gate. No current consumer is selected."
+    },
+    {
+      "id": "remaining-source-record-14",
+      "declaration_digest": "fd9ff43dc018df9ec93ff56872d8f6ef0f9106664b5e02bb2ef8e79dea4f8cc9",
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md",
+      "start_line": 718,
+      "end_line_exclusive": 726,
+      "decision": "ACCEPT",
+      "semantic_reason": "The three original cohort findings explain path fragmentation, incomplete logging and absent necessity/lesson reads, with explicit Uplift clauses tied to those observations.",
+      "current_instruction_assessment": "Normalization, native-log routing and metadata/lesson suggestions are original finding recommendations, not a present edit plan or command. They do not override the current shared evidence contract."
+    },
+    {
+      "id": "remaining-source-record-15",
+      "declaration_digest": "1bcb2c6f97a52d3aa2143001bd5bda41cb4dcab724532c559e3db6c1668b5a01",
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md",
+      "start_line": 726,
+      "end_line_exclusive": 734,
+      "decision": "ACCEPT",
+      "semantic_reason": "The secondary findings record old verdict-vocabulary, declared-client, missing-step, checkpoint and tuning-loop discrepancies.",
+      "current_instruction_assessment": "The short reconcile/closing suggestions are attached to those historical findings, not live remediation instructions or proof that the old preference mechanism is active."
+    },
+    {
+      "id": "remaining-source-record-16",
+      "declaration_digest": "dddf96ebafe2abf029abf51e16da829bae5a6c6b8453288143e1feaf913c0ba6",
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort2-planner.md",
+      "start_line": 734,
+      "end_line_exclusive": 740,
+      "decision": "ACCEPT",
+      "semantic_reason": "The three bullets identify unbuilt policy/envelope integrations and potential original call sites rather than executed behavior.",
+      "current_instruction_assessment": "No integration is activated or commanded. The following operator-decision section is outside the exact span."
+    },
+    {
+      "id": "remaining-source-record-17",
+      "declaration_digest": "0c552e16ee582795ef0195a58cb6205db1674fcf3f23236f037a2255385ac0d5",
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort3-handoff.md",
+      "start_line": 82,
+      "end_line_exclusive": 94,
+      "decision": "ACCEPT",
+      "semantic_reason": "CF-2 cites the former producer and consumer lines, explains the original path/filename mismatch and labels shared-shape/integration-test changes as proposed.",
+      "current_instruction_assessment": "The proposed definition/test is a historical audit remedy, not an instruction to replace current checkpoint grammar or restore removed entries."
+    },
+    {
+      "id": "remaining-source-record-18",
+      "declaration_digest": "3bb202bd49825e7f68f25e8583620b4911a0a3c5c1d3776d6407f53af1636afa",
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort3-handoff.md",
+      "start_line": 378,
+      "end_line_exclusive": 421,
+      "decision": "ACCEPT",
+      "semantic_reason": "The single literal dimensional assessment anchors the original warmer's input/output, budget writes, recovery and proposed envelope/frontmatter changes in specific source lines.",
+      "current_instruction_assessment": "No current read or handoff is directed. Old WorkProfile, model-window and budget claims remain recorded assessments, not current policy or observed capacity. Literal syntax is not certified."
+    },
+    {
+      "id": "remaining-source-record-19",
+      "declaration_digest": "897888fffa7c8de935aedc993aa104bbb667f20d830dbd0928030a4baf2bd8f0",
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort7-packs-roles.md",
+      "start_line": 171,
+      "end_line_exclusive": 299,
+      "decision": "ACCEPT",
+      "semantic_reason": "The complete shared section contains seven original role-method delta records, although its introduction says six. Each records a named subject, source-located behavior, peer comparison and uplift judgment; this is not a current role registry.",
+      "current_instruction_assessment": "No role activation, profile mutation, private read or sync is commanded now. Imperatives remain inside recorded proposed/delta assessments. Acceptance neither fixes the historical count discrepancy nor validates pseudo-YAML or current role behavior."
+    },
+    {
+      "id": "remaining-source-record-20",
+      "declaration_digest": "05c967ec6e751abef1e3962bb5ab0d4e8a0d5712d6f57feaed2fc4b4fa091e57",
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort7-packs-roles.md",
+      "start_line": 335,
+      "end_line_exclusive": 362,
+      "decision": "ACCEPT",
+      "semantic_reason": "The named original architectural finding reports grep results, cites direct-profile consumers and proposes a then-intended read-layer migration with its rationale.",
+      "current_instruction_assessment": "No new resolver implementation is selected. Its proposed profile-over-pack and hardcoded fallback semantics are historical recommendations, not changes to current required-policy or P07 failure behavior."
+    },
+    {
+      "id": "remaining-source-record-21",
+      "declaration_digest": "662b20049e6a8cdd10bb4fc682a4e31120b82683f5f5bfeb05767d7ba3552698",
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort7-packs-roles.md",
+      "start_line": 362,
+      "end_line_exclusive": 385,
+      "decision": "ACCEPT",
+      "semantic_reason": "C7-WORKPROFILE-DUAL-LOCATION records the old two-schema discrepancy and source consumers, followed by an explicitly proposed toggle/resolver migration.",
+      "current_instruction_assessment": "The directive-shaped migration wording is within the original finding's proposed remedy. It does not authorize rebuilding an old toggle or weakening present required-profile semantics."
+    },
+    {
+      "id": "remaining-source-record-22",
+      "declaration_digest": "d0b8745615ec950c5e7a3d05cdaca2f2da3521a2f9869d8cafbf22485675e2e1",
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort7-packs-roles.md",
+      "start_line": 385,
+      "end_line_exclusive": 409,
+      "decision": "ACCEPT",
+      "semantic_reason": "This one architecture finding distinguishes the then-present resolver substrate from eight unbuilt lifecycle skills and records an explicitly proposed reuse strategy.",
+      "current_instruction_assessment": "No current lifecycle build, installation or pack operation is requested. Present-tense availability refers to the bound original audit, not today's catalog."
+    },
+    {
+      "id": "remaining-source-record-23",
+      "declaration_digest": "149291fe98adc5508819331d75f1443658f6cb54052d1c23e32236512c6c87a2",
+      "path": ".claude/engineering/audits/lintel-uniformity-findings-cohort7-packs-roles.md",
+      "start_line": 409,
+      "end_line_exclusive": 417,
+      "decision": "ACCEPT",
+      "semantic_reason": "The cohort summary records comparative schema quality, adoption, role-library proportionality and the original decision-required tally.",
+      "current_instruction_assessment": "No live instruction or permission is hidden. Its zero-adoption and count claims remain old observations; the next ranked-findings section is excluded."
+    },
+    {
+      "id": "remaining-source-record-24",
+      "declaration_digest": "773639ec16de6b88226d85d4bf47f32efcdf553b90bb14228ee7dee6db07a8c5",
+      "path": ".claude/engineering/design-archive/lintel-v3.5-cycle-and-roles.md",
+      "start_line": 987,
+      "end_line_exclusive": 1002,
+      "decision": "REJECT",
+      "semantic_reason": "The selected text is a runnable-looking command/navigation list rather than a recorded result or assessed source citation. The supplied document prefix explicitly says method labels have been normalized for navigation, and the list mixes new consolidated routes with the retired context-snapshot invocation and unqualified budget/cooling claims.",
+      "current_instruction_assessment": "Lines 990-999 direct load, fetch, resume, save and cooling behavior; line 997 still presents /li:context-snapshot as usable. Hiding the whole navigation list under a historical-heading exception would conceal current reference correctness rather than preserve an original immutable observation.",
+      "bounded_narrowing": "Keep this current-navigation list checked and reconcile its live routes, or supply a separately delimited genuinely original source quotation with proven original context and a new declaration. Do not classify the current mixed list merely because it lives in design-archive."
+    },
+    {
+      "id": "remaining-source-record-25",
+      "declaration_digest": "09824aebdc558e76b3de5430871fad688b8d3208a13a0dc1e96101d5ea8eabda",
+      "path": ".claude/engineering/evolution/2026-06-10-v4.11-launch-polish.md",
+      "start_line": 16,
+      "end_line_exclusive": 21,
+      "decision": "ACCEPT",
+      "semantic_reason": "The brief heading/description identifies a particular completed structural-change artifact and the two historical punch-list remainders it addressed. Its surrounding affected-path record explicitly identifies the removed entry.",
+      "current_instruction_assessment": "No current command or next step is included. This identifies the original removal event, not a request to restore the old method or a new claim that today's gates passed."
+    },
+    {
+      "id": "remaining-source-record-26",
+      "declaration_digest": "c21323af4b958186f3c5a9056c2e8d30c1073c80655a03de379fd92fc375823e",
+      "path": ".claude/plans/universal-implementation/reports/P06.md",
+      "start_line": 781,
+      "end_line_exclusive": 799,
+      "decision": "ACCEPT",
+      "semantic_reason": "This section inventories the original P06 author's changed areas and expressly lists what was not edited. It is an authorship/ownership account tied to the report's frozen source, not an install manifest.",
+      "current_instruction_assessment": "No new file edit or regeneration is directed. The coordinator regeneration and remaining-boundary section is outside the span."
+    },
+    {
+      "id": "remaining-source-record-27",
+      "declaration_digest": "668a4096cbca68a3865d67e0e953148b99eb0eefb7adbc165edd25a83a2e6bbd",
+      "path": ".claude/plans/universal-implementation/reports/P08-A13.md",
+      "start_line": 578,
+      "end_line_exclusive": 630,
+      "decision": "ACCEPT",
+      "semantic_reason": "The original report records producer counts, an actual expected catalog-check failure, retained byte/hash identities and the exact resulting unified diff. It explicitly states the real catalog was not edited.",
+      "current_instruction_assessment": "Use/Remove wording inside old and new diff lines is quoted source under real file/hunk structure, not current instructions. This decision neither applies the patch nor calls the old failure a present failure or a pass."
+    },
+    {
+      "id": "remaining-source-record-28",
+      "declaration_digest": "d4e854a4e61bcd8916c51c0c00e1525d7d5f2502490e98982f5e9be7b1244a65",
+      "path": ".claude/plans/universal-implementation/reports/P08.md",
+      "start_line": 136,
+      "end_line_exclusive": 171,
+      "decision": "ACCEPT",
+      "semantic_reason": "The selected table defines Built as authored/self-checked, records each original leaf's tests and deferred seams, and separately reports the actual interpreter versus unobserved 3.9 runtime.",
+      "current_instruction_assessment": "Needs/deferred statements are the original checkpoint's evidence status, not a new execution grant. No source, fixture or profile action is requested, and later owner chronology is not substituted for this recorded limited result."
+    },
+    {
+      "id": "remaining-source-record-29",
+      "declaration_digest": "61f16fb39d379f8a176a7a3d817188c5c404adde534205c5c45e2412f87e3845",
+      "path": ".claude/plans/universal-implementation/reports/P08.md",
+      "start_line": 2165,
+      "end_line_exclusive": 2216,
+      "decision": "ACCEPT",
+      "semantic_reason": "This is a chronology of original comparison candidates, independent packet/context identities, actual red/green outcomes, preserved unknowns and a received target-specific review. Its pending-consumption boundary is explicitly retained.",
+      "current_instruction_assessment": "No new target switch, reviewer dispatch or continuation is ordered. References to the original reviewer/controller describe that recorded chain and expressly deny transferred clearance or permission expansion."
+    },
+    {
+      "id": "remaining-source-record-30",
+      "declaration_digest": "8db991bb87a947dac6070861cabe920da3791e82456d2b8590e7a129715b8b97",
+      "path": ".claude/plans/universal-implementation/reports/P08.md",
+      "start_line": 3502,
+      "end_line_exclusive": 3541,
+      "decision": "ACCEPT",
+      "semantic_reason": "The finite delivery-pair table records original inputs, separate contexts, observed local authority refusals, unreached CAPTURE and the then-unobserved rejecting-review condition. It limits the comparison rather than closing whole P08.",
+      "current_instruction_assessment": "The no-additional-case/publication statements preserve the original experiment's authority limits and missing evidence. They do not authorize or assign current work, or erase the prior missing-condition record after later discharge."
+    },
+    {
+      "id": "remaining-source-record-31",
+      "declaration_digest": "56217b2f4e27f7e59c63982bf3a9a3fc578855a5285169d04a6f317a89b3282c",
+      "path": ".claude/plans/universal-implementation/reports/P11.md",
+      "start_line": 34,
+      "end_line_exclusive": 57,
+      "decision": "ACCEPT",
+      "semantic_reason": "The original browser-only report identifies the authored scope and retained four-method capabilities, with concrete provider constraints and untouched dependency/owner boundaries.",
+      "current_instruction_assessment": "No current browser, login, print or edit operation is directed. It records what the original source supplied, not native execution of today's renamed consumer."
+    },
+    {
+      "id": "remaining-source-record-32",
+      "declaration_digest": "504ed77ffc678ceb127e2bd1de72a5280af7ec9245aa6d9607feb654c9a0a2bb",
+      "path": ".claude/plans/universal-implementation/reports/P13-skills-preservation.md",
+      "start_line": 434,
+      "end_line_exclusive": 498,
+      "decision": "ACCEPT",
+      "semantic_reason": "F01-F13 and the narrower suffix keys define the original preservation map's evidence/disposition vocabulary, citing specific predecessor reports and limiting each retained method's acceptance. The final paragraphs explicitly distinguish worked/recheck scenarios from fresh executions and earlier failures from later accepted source.",
+      "current_instruction_assessment": "Preserve/Keep/Use phrasing describes the method disposition keyed to that original map, not a new task or dispatch. Pending reviewer301 and upstream references remain historical attribution/status; no current profile, actor or capability result is inferred."
+    },
+    {
+      "id": "remaining-source-record-33",
+      "declaration_digest": "88612672e6eeec715402af64042de09a29d6110bf2e7e7cbaa05bcbf8e114319",
+      "path": ".claude/plans/universal-implementation/reports/P13.md",
+      "start_line": 1388,
+      "end_line_exclusive": 1423,
+      "decision": "ACCEPT",
+      "semantic_reason": "The section records the original 126-row preservation-map join, changed/unchanged source counts, appended-history boundary and separately attributed Swarm/role maps.",
+      "current_instruction_assessment": "No current routing is commanded. Original aliases and canonical-path counts describe that preview, not the cleanup's current inventory or semantic PASS counts."
+    },
+    {
+      "id": "remaining-source-record-34",
+      "declaration_digest": "348b8b59866899a96d98c6a7156b50123f70b46bb9737c56c4e2c3f3ba43e345",
+      "path": ".claude/plans/universal-implementation/reviews/A23.5-phase4-removal-b7b245f.md",
+      "start_line": 87,
+      "end_line_exclusive": 132,
+      "decision": "ACCEPT",
+      "semantic_reason": "This is an exact two-commit removal review: its table records deleted/retained source and tests, named observations, remaining references and the reviewer's bounded interpretation of the operator's instruction.",
+      "current_instruction_assessment": "No new reader removal/restoration or test execution is ordered. The old inventory and source locations are evidence of that delta, not today's installed resources or a new scope waiver."
+    },
+    {
+      "id": "remaining-source-record-35",
+      "declaration_digest": "873e2870ac31571579e5e4cb4ad749a7477cfdb3702bc793721767fee10f469a",
+      "path": ".claude/plans/universal-implementation/reviews/A23.5-phase4-removal-b7b245f.md",
+      "start_line": 132,
+      "end_line_exclusive": 152,
+      "decision": "ACCEPT",
+      "semantic_reason": "The A5-31-A5-35 table is the original post-merge review's location-bound findings, requested corrections and chronology uncertainty; its following observations explain retained historical reader references and actual remaining gates.",
+      "current_instruction_assessment": "Reword/State/Add and the suggested records follow-up are remedies inside that identified historical finding table, not a new instruction to amend an old PR or restore a reader. Acceptance does not resolve its historical timing uncertainty or grant current publication authority."
+    },
+    {
+      "id": "remaining-source-record-36",
+      "declaration_digest": "696151e591bad584597276bae8e6c55a668cd205ee1b25fe99f705d32f502aad",
+      "path": ".claude/plans/universal-implementation/reviews/P05-excerpt-context-final.md",
+      "start_line": 293,
+      "end_line_exclusive": 320,
+      "decision": "ACCEPT",
+      "semantic_reason": "The Python literal and exact exits are explicitly recorded as two completed synthetic docs-only QA/SHIP observations, including preselected obligations, failed advisory status and unchanged files.",
+      "current_instruction_assessment": "The code is a quoted executed fixture, not a command to run now. Its 0/0/0 receipts are not current QA or actual host/human attestations."
+    },
+    {
+      "id": "remaining-source-record-37",
+      "declaration_digest": "82a742f27c3f7fa5ccf26a470bdc2086e0d20098eed2a6fe7ce4c1390d69bd54",
+      "path": ".claude/plans/universal-implementation/reviews/P05-recheck.md",
+      "start_line": 20,
+      "end_line_exclusive": 43,
+      "decision": "ACCEPT",
+      "semantic_reason": "This section records the earlier review checkout/isolation, unchanged implementation, assessed repair scope and newly observed API/report qualification.",
+      "current_instruction_assessment": "'Read the complete repair delta' is the report's account of its performed read, in the context of the selected immutable recheck, not a current reading assignment or source mutation."
+    },
+    {
+      "id": "remaining-source-record-38",
+      "declaration_digest": "90e099d29246b075c05e29c42bb653a4217aeda2b4225d82a4cf49905d655fa1",
+      "path": ".claude/plans/universal-implementation/reviews/P06-component.md",
+      "start_line": 52,
+      "end_line_exclusive": 76,
+      "decision": "ACCEPT",
+      "semantic_reason": "The two tables record original per-leaf component SPEC results and individually assessed preserved skill methods, including the failed navigation leaf and honest unverified client/runtime limits.",
+      "current_instruction_assessment": "No present action or approval is hidden. The old PASS/FAIL cells and retained method descriptions cannot close current integration or live-host acceptance."
+    },
+    {
+      "id": "remaining-source-record-39",
+      "declaration_digest": "ce29b0bb01cfdced6c9fee6098d7e28206bf36e85d1aeea871fb042bb67d2caa",
+      "path": ".claude/plans/universal-implementation/reviews/P06-final.md",
+      "start_line": 250,
+      "end_line_exclusive": 275,
+      "decision": "REJECT",
+      "semantic_reason": "The per-leaf table and unchanged-method account are original result observations, but the selected final paragraph also instructs the scope of a future authorized quality pass: it still must cover the complete bounded change rather than only the repair.",
+      "current_instruction_assessment": "Lines 271-273 are an unquoted prospective review instruction, not merely the result of the completed failing SPEC pass. The packet supplies no specific later discharge of this P06 instruction, and a historical filename/status does not justify masking it.",
+      "bounded_narrowing": "Propose exact original disposition-table/method-observation fields from lines 254-267, or separately bounded completed-status statements, with new declarations. Leave the prospective quality-scope instruction checked unless its authority is explicitly reconciled with evidence. No proposed narrower digest is approved by this rejection."
+    },
+    {
+      "id": "remaining-source-record-40",
+      "declaration_digest": "a21741b143b6dbcc7d2dde2fcca66d9b3aaa6f2d94daba1d02548ca5760cdd33",
+      "path": ".claude/plans/universal-implementation/reviews/P06-recheck.md",
+      "start_line": 98,
+      "end_line_exclusive": 154,
+      "decision": "ACCEPT",
+      "semantic_reason": "P06-C02 is one original source-location-bound defect record: expected semantics, concrete synthetic source, actual installed-generator outputs and the required correction that follows from those observations.",
+      "current_instruction_assessment": "Append/Create/Exercise text specifies the recorded reproduction and remedy for that immutable failing candidate, not a new test assignment. No generator, script or fixture is executed or accepted by retaining it."
+    },
+    {
+      "id": "remaining-source-record-41",
+      "declaration_digest": "196ba3d967a03949dbeb1b72a1cf0f4f19e0cacfca7d225c25d4290a7a429b5d",
+      "path": ".claude/plans/universal-implementation/reviews/P06-shared-boundary-final.md",
+      "start_line": 131,
+      "end_line_exclusive": 227,
+      "decision": "ACCEPT",
+      "semantic_reason": "P06-C07 records the exact original parser input, expected/actual regions, real-process refusal and erroneous bundling, clone readback and one-change controls. Cause/required-correction text is the remedy associated with that demonstrated defect.",
+      "current_instruction_assessment": "The embedded commands and host onboarding messages are quoted original output, not live instructions. The correction recommendation does not authorize a new parser, rerun, installation or suppression of required checks."
+    },
+    {
+      "id": "remaining-source-record-42",
+      "declaration_digest": "6699694c60b2a202ddfb275dbc516a2d6cf40d5aaea5820cbd13ad1d5bf268de",
+      "path": ".claude/plans/universal-implementation/reviews/P06-shared-boundary-final.md",
+      "start_line": 260,
+      "end_line_exclusive": 299,
+      "decision": "ACCEPT",
+      "semantic_reason": "Both tables are the prior review's staged per-leaf dispositions, preserving failed C06/C07 behavior, partial repair progress, unrun quality and separately owned P05 dependencies.",
+      "current_instruction_assessment": "Pending/incomplete cells record the old verdict boundary rather than direct present execution. They cannot clear the current candidate or waive unobserved controls."
+    },
+    {
+      "id": "remaining-source-record-43",
+      "declaration_digest": "bfeaddbfe259c9ca64e7bf16d6a517c601aa9d4c59ae74227226a88a32c5baf9",
+      "path": ".claude/plans/universal-implementation/reviews/P08-combined-2f4cc38.md",
+      "start_line": 445,
+      "end_line_exclusive": 485,
+      "decision": "ACCEPT",
+      "semantic_reason": "The complete original/refinement table records what passed mechanically, failed, remained unverified or was not selected at that combined checkpoint. The explanatory close separates original requirements from unrelated platform expansion.",
+      "current_instruction_assessment": "No current testing or continuation instruction is included; the later Freeze and handoff section is excluded. Old result statuses remain scoped observations."
+    },
+    {
+      "id": "remaining-source-record-44",
+      "declaration_digest": "4e5c05d0489ee22ca75a0c324d287532176e0e8f5d2e3cb3eeb69e07ef2b1457",
+      "path": ".claude/plans/universal-implementation/reviews/P08-partial.md",
+      "start_line": 160,
+      "end_line_exclusive": 193,
+      "decision": "ACCEPT",
+      "semantic_reason": "The per-leaf SPEC/QUALITY table and concluding stop chronology preserve the earlier bounded failing review, missing proofs and the fact that a completed in-flight suite did not override its counterexamples.",
+      "current_instruction_assessment": "The coordinator's stop is reported as an earlier observed instruction, not newly issued. No additional audit, test, repair or current quality clearance follows."
+    },
+    {
+      "id": "remaining-source-record-45",
+      "declaration_digest": "bcba47dbd8ef0ab039a684f1440ce9410675e3538f4ee32717a7af61dbd8e410",
+      "path": ".claude/plans/universal-implementation/reviews/P08-routing-plan-recheck.md",
+      "start_line": 223,
+      "end_line_exclusive": 254,
+      "decision": "ACCEPT",
+      "semantic_reason": "The section explicitly distinguishes retained prior scoped PASS from new acceptance and records failed or unobserved original controls with quality not started.",
+      "current_instruction_assessment": "No current task is assigned. The absence of quality-start authorization is a recorded boundary of that recheck, not a new permission change or a current all-work hold."
+    },
+    {
+      "id": "remaining-source-record-46",
+      "declaration_digest": "80acd60f6f1a8e6aa02066c26e0dca5271f5fc6af280582ebbe283677414aee0",
+      "path": ".claude/plans/universal-implementation/reviews/P08-selected-final-229656c.md",
+      "start_line": 65,
+      "end_line_exclusive": 105,
+      "decision": "ACCEPT",
+      "semantic_reason": "The authored-surface table describes the exact original source/method responsibilities assessed, followed by separately attributed dependency commits and explicit unchanged/import boundaries.",
+      "current_instruction_assessment": "Obligation descriptions explain the reviewed original source; no new dispatch or write is selected. The important reader-revision seam remains outside this exact span and must remain checked/bound."
+    },
+    {
+      "id": "remaining-source-record-47",
+      "declaration_digest": "982e4da62b244ba2ad7ccc1133f0d650536f9bb3d1ff216ba8ceae79a903bb37",
+      "path": ".claude/plans/universal-implementation/reviews/P08-selected-final-229656c.md",
+      "start_line": 347,
+      "end_line_exclusive": 366,
+      "decision": "ACCEPT",
+      "semantic_reason": "The table reports original finite intake, planning, research, build and fix comparisons, retaining unknown respondent attribution, separate authority, distinct profiles and unexecuted hypotheses.",
+      "current_instruction_assessment": "No current question, outreach, converter or implementation is requested. Fixture-specific review results remain input observations, not current whole-P08 or cleanup clearance."
+    },
+    {
+      "id": "remaining-source-record-48",
+      "declaration_digest": "be73b533c9519fd938d5c590dc3adff40facfa0f6ca3e83e0b96b8dfe4f24cb5",
+      "path": ".claude/plans/universal-implementation/reviews/P08-selected-final-229656c.md",
+      "start_line": 440,
+      "end_line_exclusive": 473,
+      "decision": "ACCEPT",
+      "semantic_reason": "This is the complete original/refinement disposition table for the specified selected review, with revision-qualified PASSes, a still-missing rejecting-review observation and intentionally unselected work.",
+      "current_instruction_assessment": "No current task checkbox or runtime is changed. Its old pass/block/dormancy labels remain actual-scope history and cannot override later applicable decisions."
+    },
+    {
+      "id": "remaining-source-record-49",
+      "declaration_digest": "8c5fd2eb0929f0cc041da70dfbe2389faacb5ebcc1b14a1f52335c2838b4e515",
+      "path": ".claude/plans/universal-implementation/reviews/P11-browser-final-14b419c.md",
+      "start_line": 42,
+      "end_line_exclusive": 74,
+      "decision": "ACCEPT",
+      "semantic_reason": "The bounded original finding records Q1 closure and the independently observed Q2 numeric-extraction stall, its scoped test input, actual timing cutoff and correction recommendation.",
+      "current_instruction_assessment": "The reproduction is inert historical evidence, not a requested execution. No new performance specification or current browser failure is inferred from those original observations."
+    },
+    {
+      "id": "remaining-source-record-50",
+      "declaration_digest": "13fe362c00b8142e76058a2c3820550b44b04f656483cfdef03ab5e5a3866462",
+      "path": ".claude/plans/universal-implementation/reviews/P11-browser-final-d3b5569.md",
+      "start_line": 8,
+      "end_line_exclusive": 35,
+      "decision": "ACCEPT",
+      "semantic_reason": "The section records the original reviewer/product/report/authority identities, unchanged dependency merge and exact three-path correction reviewed against the prior complete scope.",
+      "current_instruction_assessment": "No present action or new independent-review claim is hidden. The identities and historical read statement do not authenticate this current semantic reviewer or establish fresh browser execution."
+    },
+    {
+      "id": "remaining-source-record-51",
+      "declaration_digest": "b2b31d8fabfc7cbfb4da8d56babd2c5622d3a635c694c012cb57b8310934ac8b",
+      "path": ".claude/plans/universal-implementation/reviews/P11-design-f72f316.md",
+      "start_line": 8,
+      "end_line_exclusive": 47,
+      "decision": "ACCEPT",
+      "semantic_reason": "This is the exact old independent review's source/actor selection and completed read account, including original 24-path ownership and preserved browser dependencies.",
+      "current_instruction_assessment": "The complete product-selection list is historical review scope, not an active installer/capability selection. No current design, provider or generated-output edit is authorized."
+    },
+    {
+      "id": "remaining-source-record-52",
+      "declaration_digest": "3e71ba7034cf5592f55e51e5f4ac438f6601e097b3a85a660558fd1b0b4751f6",
+      "path": ".claude/plans/universal-implementation/reviews/P12-common-source-32dac88.md",
+      "start_line": 63,
+      "end_line_exclusive": 86,
+      "decision": "ACCEPT",
+      "semantic_reason": "The completed source-assessment table records retained outline, Word variants/templates, PPT, QA, SHIP and role method contracts, then identifies sibling surfaces inspected only for compatibility.",
+      "current_instruction_assessment": "Default/required behavior is described as reviewed source, not a new format invocation or distribution grant. No native Office/document result or broader method acceptance is supplied."
+    },
+    {
+      "id": "remaining-source-record-53",
+      "declaration_digest": "e5cd91c2865a44601a272334619bb8351d2ac1171f22d3508afd15d2c57bbe7a",
+      "path": ".claude/plans/universal-implementation/reviews/P12-pdf-5978def.md",
+      "start_line": 38,
+      "end_line_exclusive": 49,
+      "decision": "ACCEPT",
+      "semantic_reason": "The three-row table explicitly names exact old source locations, findings and confidence, distinguishing checker defects from a native specimen observation.",
+      "current_instruction_assessment": "No current checker dependency or reader restoration is requested. The removed-reader paths identify the source that was actually reviewed; the following reproduction/correction detail is excluded."
+    },
+    {
+      "id": "remaining-source-record-54",
+      "declaration_digest": "44ce8ab65d174b7de098604b305125f3d6e6e0d10acb28cc55adae66bd815db9",
+      "path": ".claude/plans/universal-implementation/reviews/P13-consumers-7884ddd.md",
+      "start_line": 43,
+      "end_line_exclusive": 89,
+      "decision": "ACCEPT",
+      "semantic_reason": "The original source-consumer review records the exact failing Windows destination observation, synthetic reproduction and expected versus actual result, then preserves eleven passing controls alongside the failed one.",
+      "current_instruction_assessment": "Use/Create/Run language belongs to the reported reproducible case, explicitly observed twice without an overwrite, and its bounded remedy. It is not a new test, authoring, installation or permission grant; the old result does not certify current behavior."
+    }
+  ],
+  "common_conditions": [
+    "ACCEPT is only a semantic decision that the exact supplied section is an original comparison, assessment, disposition, method-evidence or result record. It does not affirm the old statement's truth or continued applicability.",
+    "No span is accepted solely because of a heading, date, path, hash, historical banner, old verdict or owner assertion. The decisions rely on the actual enclosed text, source/context relationships and distinction between original recommendations/results and operative work/navigation/review instructions.",
+    "REJECT applies to the entire supplied declaration digest. Suggested narrowing is not partial approval; any new declaration requires its own exact identity and semantic review. Rejected source is preserved, not rewritten to obtain a match.",
+    "All accepted spans retain exact LF raw hashes and full original source-context invalidation through the existing P05 contract. Changes outside a span can invalidate its historical interpretation even when the span bytes are unchanged.",
+    "Only approved selected spans may be classified; excluded end markers, adjacent summaries, current routes, imports, unknown fields and executable consumers remain checked. Complete-source hashes must never become whole-file suppression.",
+    "Quoted code, diff hunks, test recipes and original result output were read as evidence, not executed. YAML-labelled literal syntax was not validated or repaired and no synthetic example or old test count is promoted to a new runtime pass.",
+    "Existing set01/set02 approvals and rejections are unchanged. Owner chronology did not silently reverse earlier rejected broad P08/P11 spans, and this packet contains no new decision approving those old digests.",
+    "No new parser dialect, guard implementation, repository source change, profile transfer, CI operation, descendant or canonical P05 result is approved or performed. Overall acceptance remains UNVERIFIED until actual remaining quality/QA/current-routing/hosted gates are satisfied."
+  ],
+  "checks_actually_performed": [
+    "Read the exact final packet and all 54 complete raw excerpts, reading each distinct supplied original context prefix and checking repeated contexts against the same source.",
+    "Read the owner chronology as attributed supporting information only, not independent review or a blanket exception.",
+    "Verified packet SHA-256 and 336492-byte size; 54 unique entry IDs and declaration digests; 36 source paths and 159621 selected raw UTF-8 bytes.",
+    "Verified all 54 LF raw excerpt hashes without representation normalization.",
+    "Read only the 36 exact selected source Git blobs at a7a1df33 in a single git cat-file --batch operation. Verified their complete raw hashes and supplied prefixes; all 54 raw ranges exactly match and all start/end marker lines are unique and ordered.",
+    "No repository code, fixture, generator, browser, profile, CI or shared P05 helper was executed. Immutable Git-object reads were data verification, not a new code audit."
+  ],
+  "executed_command_ledger": [
+    {"shell_id": "0", "operation": "python -I -B -: read final packet, compute packet/raw hashes and count unique declarations/files; print bounded inventory.", "exit_code": 0},
+    {"shell_id": "1", "operation": "python -I -B -: read declaration 1 with full supplied context prefix and numbered raw excerpt.", "exit_code": 0},
+    {"shell_id": "2", "operation": "python -I -B -: read declarations 2-6, printing each new source context and complete raw excerpt.", "exit_code": 0},
+    {"shell_id": "3", "operation": "python -I -B -: read declarations 13-18 and the two relevant supplied source contexts.", "exit_code": 0},
+    {"shell_id": "4", "operation": "python -I -B -: read declarations 7-12 and their distinct supplied contexts.", "exit_code": 0},
+    {"shell_id": "5", "operation": "python -I -B -: read declarations 19-23 and the original role/pack audit context.", "exit_code": 0},
+    {"shell_id": "6", "operation": "python -I -B -: read declarations 24-27 with their supplied design/evolution/implementation contexts.", "exit_code": 0},
+    {"shell_id": "7", "operation": "python -I -B -: read declarations 28-30 and original P08 context.", "exit_code": 0},
+    {"shell_id": "8", "operation": "python -I -B -: read declarations 31-33 and their original browser/preservation report contexts.", "exit_code": 0},
+    {"shell_id": "9", "operation": "python -I -B -: read declarations 34-37 and their prior-review contexts.", "exit_code": 0},
+    {"shell_id": "10", "operation": "python -I -B -: read declarations 38-40 and their original component/final/recheck contexts.", "exit_code": 0},
+    {"shell_id": "11", "operation": "python -I -B -: read declarations 41-43, retaining full quoted evidence and staged verdicts.", "exit_code": 0},
+    {"shell_id": "12", "operation": "python -I -B -: read declarations 44-45 with original partial/recheck context.", "exit_code": 0},
+    {"shell_id": "13", "operation": "python -I -B -: read declarations 46-48 and original selected-review context.", "exit_code": 0},
+    {"shell_id": "14", "operation": "python -I -B -: read declarations 49-51 and their exact browser/design review contexts.", "exit_code": 0},
+    {"shell_id": "15", "operation": "python -I -B - plus one read-only git cat-file --batch: verify 36 complete-source raw hashes and all 54 exact excerpts, context prefixes, line ranges and unique ordered full-source markers at a7a1df33.", "exit_code": 0},
+    {"shell_id": "16", "operation": "python -I -B -: read declarations 52-54 and original format/consumer review contexts.", "exit_code": 0},
+    {"shell_id": "17", "operation": "python -I -B -: verify persisted final JSON against all 54 exact packet identities, paths, ranges, decisions and substantive reasons; confirm ACCEPT51/REJECT3/NEEDS_EVIDENCE0 and explicit bounded narrowing for the three rejected digests.", "exit_code": 0}
+  ]
+}

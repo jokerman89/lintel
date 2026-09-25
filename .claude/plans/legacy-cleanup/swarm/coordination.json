@@ -1,0 +1,129 @@
+{
+  "schema_version": 1,
+  "initiative": "legacy-cleanup",
+  "work_map": ".claude/plans/legacy-cleanup/work.json",
+  "charter": ".claude/plans/legacy-cleanup/swarm/charter.md",
+  "integration_branch": "jokerman-microsoft-legacy-cleanup-integration",
+  "max_parallel": 6,
+  "coordinator_paths": [
+    "skills/CATALOG.md", "docs/wiki", "docs/showcase/lintel-the-harness.html", ".github/skills", ".github/agents",
+    ".github/lintel", ".agents", ".claude/decisions", ".claude/memory",
+    ".claude/plans/todo.md", ".claude/plans/universal-implementation",
+    "CHANGELOG.md", "bin/li-copilot.py", "lib/capability-selections.json",
+    "lib/review_contract.py", "lib/review-schema.json", "lib/profile_context.py",
+    ".github/workflows", "presentations", "tests/README.md",
+    "tests/integration/copilot-kit.py", "tests/integration/document-pdf.py",
+    "tests/integration/document-pdf.sh", "tests/unit/catalog-selection.py",
+    "tests/unit/generate-skills-present.sh", "skills/generate-pdf"
+  ],
+  "scope_rules": {"worker":"write_scope+own_report","reviewer":"own_review","reducers":"coordinator-only"},
+  "lanes": [
+    {
+      "task_id":"W1","wave":1,"role":"lintel-builder","isolation":"git-worktree",
+      "write_scope":[
+        "skills/define","skills/office-hours","skills/plan-ceo-review","skills/inspect",
+        "skills/plan","skills/plan-eng-review","skills/plan-design-review",
+        "skills/plan-devex-review","skills/devex-review","skills/plan-tune",
+        "skills/autoplan","skills/scope","skills/discover","skills/analyze",
+        "tests/unit/workflow-root-and-trio.sh","tests/shape/scope-phase-present.sh",
+        "tests/shape/analyze-gate-wired.sh","tests/shape/handoff-cap-wired.sh",
+        "tests/unit/planning-consolidation.py","tests/unit/planning-consolidation.sh"
+      ],
+      "brief":".claude/plans/legacy-cleanup/swarm/briefs/W1.md",
+      "report":".claude/plans/legacy-cleanup/swarm/reports/W1.md",
+      "review":".claude/plans/legacy-cleanup/swarm/reviews/W1.md"
+    },
+    {
+      "task_id":"W2","wave":1,"role":"lintel-builder","isolation":"git-worktree",
+      "write_scope":[
+        "skills/qa","skills/qa-only","skills/verify","skills/investigate",
+        "skills/diagnose","skills/codex","skills/cross-check","skills/code-review",
+        "skills/perfbench","agents",
+        "tests/behavior/agent_contract_scenarios.py","tests/behavior/agent-contract-scenarios.sh",
+        "tests/unit/quality-consolidation.py","tests/unit/quality-consolidation.sh"
+      ],
+      "brief":".claude/plans/legacy-cleanup/swarm/briefs/W2.md",
+      "report":".claude/plans/legacy-cleanup/swarm/reports/W2.md",
+      "review":".claude/plans/legacy-cleanup/swarm/reviews/W2.md"
+    },
+    {
+      "task_id":"W3","wave":1,"role":"lintel-builder","isolation":"git-worktree",
+      "write_scope":[
+        "skills/context-save","skills/pause","skills/context-restore","skills/resume",
+        "skills/context-warm","skills/context-warm-related","skills/context-warm-adrs",
+        "skills/context-warm-sessions","skills/context-cool","skills/context-budget",
+        "skills/learn","skills/lessons-add","skills/lessons","skills/lessons-surface",
+        "skills/skillify","skills/skill-new","skills/code-freeze","skills/code-unfreeze",
+        "skills/retro","skills/capture","skills/landing-report","skills/health",
+        "skills/doctor","skills/clean","skills/maintenance",
+        "bin/_context.sh","hooks/shared/context-bloat-warn","hooks/shared/cycle-incomplete-warn",
+        "hooks/shared/cycle-position-inject","hooks/shared/frozen-zone-warn",
+        "tests/unit/context-checkpoint-roundtrip.sh","tests/unit/context-repository-ownership.sh",
+        "tests/unit/context-warm-skills-present.sh","tests/unit/cycle-continuity.sh",
+        "tests/unit/memory-v2.sh","tests/unit/li-doctor-smoke.sh",
+        "tests/unit/continuity-consolidation.py","tests/unit/continuity-consolidation.sh"
+      ],
+      "brief":".claude/plans/legacy-cleanup/swarm/briefs/W3.md",
+      "report":".claude/plans/legacy-cleanup/swarm/reports/W3.md",
+      "review":".claude/plans/legacy-cleanup/swarm/reviews/W3.md"
+    },
+    {
+      "task_id":"W4","wave":1,"role":"lintel-builder","isolation":"git-worktree",
+      "write_scope":[
+        "skills/browse","skills/scrape","skills/open-managed-browser","skills/setup-browser-cookies",
+        "skills/web-session","skills/make-pdf","skills/design-consultation","skills/design-shotgun",
+        "skills/design-html","skills/design-review","skills/frontend-design",
+        "skills/frontend-design-review","skills/frontend-style-extract","skills/frontend-typography",
+        "skills/frontend-motion","skills/frontend-shader","skills/design-dna",
+        "skills/document-generate","skills/generate-docs","skills/generate-web","skills/generate-ppt",
+        "skills/generate-word","skills/generate-xlsx","skills/generate","skills/generate-app",
+        "skills/generate-outline","skills/generate-write","skills/generate-design","skills/generate-qa",
+        "skills/generate-style-learn","skills/generate-visio",
+        "hooks/shared/frontend-design-surface","hooks/shared/no-customer-data-in-screenshot",
+        "tests/unit/frontend-design-surface-hook.sh","tests/unit/frontend-skills-present.sh",
+        "tests/integration/frontend-design-roundtrip.sh","tests/integration/design-browser-pipeline.py",
+        "tests/integration/design-browser-pipeline.sh","tests/integration/design-contract.py",
+        "tests/integration/design-contract.sh","tests/unit/browser-consolidation.py",
+        "tests/unit/browser-consolidation.sh"
+      ],
+      "brief":".claude/plans/legacy-cleanup/swarm/briefs/W4.md",
+      "report":".claude/plans/legacy-cleanup/swarm/reports/W4.md",
+      "review":".claude/plans/legacy-cleanup/swarm/reviews/W4.md"
+    },
+    {
+      "task_id":"W5","wave":1,"role":"lintel-builder","isolation":"git-worktree",
+      "write_scope":[
+        "install","config/aliases.yaml","bin/_aliases.sh","bin/li-adapter.py",
+        "tests/unit/aliases-resolve.sh","tests/unit/phase-a-naming-migration.sh",
+        "tests/shape/deprecated-aliases-resolve.sh","tests/shape/skill-descriptions-trigger.sh",
+        "tests/shape/native-command-surface.py","tests/shape/native-command-surface.sh",
+        "tests/unit/native-command-surface.py","tests/unit/native-command-surface.sh",
+        "tests/behavior/install-target-boundaries.sh","tests/behavior/install-fail-closed.sh",
+        "tests/runner/check-install.ps1"
+      ],
+      "brief":".claude/plans/legacy-cleanup/swarm/briefs/W5.md",
+      "report":".claude/plans/legacy-cleanup/swarm/reports/W5.md",
+      "review":".claude/plans/legacy-cleanup/swarm/reviews/W5.md"
+    },
+    {
+      "task_id":"W6","wave":1,"role":"lintel-builder","isolation":"git-worktree",
+      "write_scope":[
+        "README.md","AGENTS.md","CLAUDE.md","GEMINI.md","AGENT-INSTRUCTIONS.md","CONTRIBUTING.md",
+        "LAYERS.md","shims","scaffolding/01-foundation/AGENTS.md.template",
+        "scaffolding/01-foundation/CLAUDE.md.template","scaffolding/01-foundation/TEMPLATE-skill.md",
+        "scaffolding/01-foundation/templates/plan",
+        "docs/README.md","docs/architecture.md","docs/GLOSSARY.md","docs/getting-started.md",
+        "docs/faq.md","docs/enterprise-profile-value.md","docs/enterprise-adoption.md",
+        "docs/copilot.md","docs/the-cycle.md","docs/spec-kit.md","docs/compliance.md",
+        "docs/client-adapters.md","docs/claude-code.md","docs/provenance.md","docs/precedence.md",
+        "docs/power-user.md","docs/native-installation.md","docs/multi-cli.md","docs/lifecycle.md",
+        "docs/concepts","docs/migrations","docs/showcase/README.md",
+        ".claude/engineering/design-archive",".claude/engineering/evolution",
+        ".claude/engineering/compat-audits"
+      ],
+      "brief":".claude/plans/legacy-cleanup/swarm/briefs/W6.md",
+      "report":".claude/plans/legacy-cleanup/swarm/reports/W6.md",
+      "review":".claude/plans/legacy-cleanup/swarm/reviews/W6.md"
+    }
+  ]
+}

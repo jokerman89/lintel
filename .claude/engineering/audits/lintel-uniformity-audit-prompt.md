@@ -1,5 +1,9 @@
 # Master prompt — Lintel system-wide uniformity audit
 
+> Retained historical narrative. Terminology was neutralized on 2026-09-25;
+> former external path/name labels are symbolic, not executable current routes.
+> Original dates, finding IDs and recorded outcomes remain historical, not rerun acceptance.
+
 **Purpose:** Run a deep, structured audit of every Lintel component (skills, agents, workflows, phases, hooks, packs) against a single uniform standard. Find where depth is uneven, where the framework breaks its own promises, and where one concept lives in one section but not in another. Produce a findings register and a prioritized recommendation set the operator can vote on, compare, and integrate.
 
 **Critical operator directive — read first:**
@@ -103,7 +107,7 @@ Before writing a `proposed` field, you must internally answer all of:
 
 1. **What are we trying to achieve here?** State the architectural goal in one sentence.
 2. **Is there a more elegant way?** Consider at least one alternative to the obvious fix.
-3. **Does someone else do this better?** Reference gstack, superpowers, speckit, ECC, Architect-bilden — does any of them have a pattern we should steal?
+3. **Does someone else do this better?** Reference retired-provider, superpowers, speckit, ECC, Architect-bilden — does any of them have a pattern we should steal?
 4. **Why this specifically?** Justify the chosen approach over the alternative.
 
 If you cannot answer all four, the recommendation is not ready. Mark it `needs-more-thought` and move on.

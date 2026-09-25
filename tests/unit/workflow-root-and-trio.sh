@@ -56,6 +56,8 @@ if [ -f "$PLAN" ]; then
   else
     fail "plan/SKILL.md missing --no-job documentation"
   fi
+else
+  fail "plan/SKILL.md missing"
 fi
 
 # Feature 2.2: CAPTURE no longer generates prompt.md (reaffirm only)
@@ -74,22 +76,40 @@ if [ -f "$CAPTURE" ]; then
   else
     fail "capture/SKILL.md Step 6 heading not updated"
   fi
+else
+  fail "capture/SKILL.md missing"
 fi
 
-# Feature 2.3: plan-eng-review has granularity hard check
-PER="$REPO_ROOT/skills/plan-eng-review/SKILL.md"
-if [ -f "$PER" ]; then
-  if grep -qE "Granularity hard check|2.{1,3}5 min" "$PER"; then
-    pass "plan-eng-review Step 0 has granularity hard check (Feature 2.3)"
+# Short leaves remain a substantive inspection obligation, not a naming check.
+INSPECT="$REPO_ROOT/skills/inspect/SKILL.md"
+if [ -f "$INSPECT" ]; then
+  if grep -q "Granularity hard check" "$INSPECT" &&
+     grep -q "every leaf" "$INSPECT" &&
+     grep -q "2-5 minutes" "$INSPECT"; then
+    pass "inspect checks granularity and acceptance for every leaf"
   else
-    fail "plan-eng-review missing granularity hard check"
+    fail "inspect missing the per-leaf granularity contract"
   fi
 
-  if grep -qE "Decompose now|AskUserQuestion.*decompose" "$PER"; then
-    pass "plan-eng-review documents decompose-or-accept AskUserQuestion path"
+  if grep -q "Decompose now" "$INSPECT" &&
+     grep -q "Accept with concern" "$INSPECT" &&
+     grep -q "operator authority" "$INSPECT"; then
+    pass "inspect retains authorized decompose-or-concern decisions"
   else
-    fail "plan-eng-review missing decompose AskUserQuestion path"
+    fail "inspect missing the decomposition decision path"
   fi
+  for lens in engineering design devex; do
+    grep -q "/li:inspect --target plan --lens $lens" "$PLAN" \
+      && pass "PLAN routes the $lens lens to inspect" \
+      || fail "PLAN does not route the $lens lens to inspect"
+  done
+  grep -q -- "--skill inspect" "$PLAN" &&
+    grep -q -- "--expected" "$PLAN" &&
+    grep -q -- "--corroboration" "$PLAN" \
+    && pass "PLAN consumes explicitly selected bound inspection evidence" \
+    || fail "PLAN lost the shared latest-reader selection"
+else
+  fail "skills/inspect/SKILL.md missing"
 fi
 
 # Concept docs present

@@ -39,8 +39,8 @@ not waive applicable attribution.
 
 ## Comparison evidence versus import evidence
 
-The 2026-09-20 comparison inspected selected gstack, Superpowers, GSD Core and ECC
-revisions. Those revisions are recorded separately under `method_comparisons` in the
+The 2026-09-20 comparison inspected selected method-source revisions. Their exact
+identities and revisions are recorded separately under `method_comparisons` in the
 registry. They establish which material informed that comparison, not what Lintel once
 imported, whether an upstream workflow ran successfully, or a measured performance gain.
 

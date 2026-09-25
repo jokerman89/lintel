@@ -31,6 +31,10 @@ bash bin/li-wiki-gen --check
 are overwritten. Source changes must be regenerated and reviewed before release. The check
 reports drift against the repository; it does not verify runtime behavior.
 
+After a [workflow consolidation](../migrations/2026-09-25-native-workflows.md), regenerate from
+the integrated canonical sources rather than editing old command names or counts in the HTML.
+An isolated documentation update does not make the generated snapshot current.
+
 The output embeds its styling and requires no external assets. Hyperlinks navigate to the
 referenced documentation when opened. See [wiki generation](../concepts/wiki-generation.md)
 for sources, determinism and verification.

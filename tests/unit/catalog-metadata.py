@@ -454,15 +454,15 @@ class CatalogMetadata(unittest.TestCase):
         self.assertIn(b"PyYAML", result.stderr)
 
     def test_selected_callers_use_one_query_before_loading_bodies(self):
-        for name in ("catalog", "help", "skill-router"):
+        for name in ("catalog", "skill-router"):
             body = (ROOT / "skills" / name / "SKILL.md").read_text(encoding="utf-8")
             self.assertIn("li-catalog.py", body)
             self.assertIn("--json", body)
             self.assertIn("selected", body)
             self.assertIn("LINTEL_SOURCE_ROOT", body)
-        help_body = (ROOT / "skills" / "help" / "SKILL.md").read_text()
+        catalog_body = (ROOT / "skills" / "catalog" / "SKILL.md").read_text()
         router = (ROOT / "skills" / "skill-router" / "SKILL.md").read_text()
-        self.assertNotIn('Glob `"$root"/', help_body)
+        self.assertNotIn('Glob `"$root"/', catalog_body)
         self.assertNotIn("Read all `skills/*/SKILL.md`", router)
         self.assertNotIn("~/.lintel/telemetry/", router)
 

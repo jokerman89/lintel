@@ -1,9 +1,13 @@
 # Lintel battletest — six-persona adversarial synthesis + remediation plan
 
+> Retained historical narrative. Terminology was neutralized on 2026-09-25;
+> former external path/name labels are symbolic, not executable current routes.
+> Original dates, finding IDs and recorded outcomes remain historical, not rerun acceptance.
+
 > 2026-06-12. Operator directive: attack everything; every undefensible service is replaced,
 > integrated, or overcome in delivery; never lose functionality, never make anything worse;
 > no retreat except planned. Six personas (grumpy veteran · security attacker · noob · hype
-> early-adopter · pragmatic daily-driver · competitor analyst) + a gstack de-heritage inventory.
+> early-adopter · pragmatic daily-driver · competitor analyst) + a retired-provider de-heritage inventory.
 > This is the authoritative findings register. Status column tracked to closure.
 
 ## The one truth all six personas hit
@@ -61,19 +65,19 @@ changelog-speak descriptions · J5 install.sh ghosts (/tier-stamp-agents, entra/
 pauses than exist · J8 review vs code-review overlap unreconciled · J9 jsonl vs OTel · J10 no
 plan-mode integration. **All FIX NOW (Wave D, docs)** except J9/J10 (PLAN).
 
-## gstack de-heritage (operator-demanded "true refactor")
+## retired-provider de-heritage (operator-demanded "true refactor")
 
 73 mentions / 38 files, classified: **20 attribution** (rewrite to native rationale),
 **17 live couplings** (3 with flagged loss-risk + mitigation), **3 prompt-patterns to reinvent**.
 Executed as Waves 1-5 (see worklist below). Never lose functionality: B12 (REVIEW REPORT
 heading) dual-accepts during grace; B10 (hook disable-file) migrates; B11 (legacy review log)
 imports once. B15 (maintenance marker cleanup) is functionality already lost — the refactor
-restores it. gbrain already pruned (ADR-0009); `setup-browser-cookies` gstack ref de-heritaged.
+restores it. retired-memory-addon already pruned (ADR-0009); `setup-browser-cookies` retired-provider ref de-heritaged.
 
 ## Execution waves (this cycle)
 
 - **Wave S (security)** — K1-K4, H8, H16: the genuinely dangerous set. ADR-0010.
-- **Wave G (gstack)** — Waves 1-2 (attribution + broken-path repairs) now; 3-5 (contract/supply/design) staged with grace windows. ADR-0011.
+- **Wave G (retired-provider)** — Waves 1-2 (attribution + broken-path repairs) now; 3-5 (contract/supply/design) staged with grace windows. ADR-0011.
 - **Wave M (model+memory)** — H4, H12: agent `memory:` + `model:` frontmatter. ADR-0012.
 - **Wave H (friction)** — K5, K6, H6, H7, H14, H15: the daily-driver KO/HARD set.
 - **Wave B (bin)** — H3 + bin smoke test.
