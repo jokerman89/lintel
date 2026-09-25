@@ -3,6 +3,8 @@
 **Last updated:** 2026-09-20 (operation/subject boundary)
 **Status:** Concept doc — referenced by `skills/orientator/SKILL.md`, `lib/orientator-routing.sh`, `skills/sense/SKILL.md` (Step 0d)
 
+> Invocation: commands use the Claude plugin form `/li:<skill>`. Copilot, Codex and Gemini adapters expose `li-<skill>`; the Universal adapter uses an explicit `skills/<skill>/SKILL.md` handoff.
+
 > The operator types a prompt. Sometimes it's "fix the broken button" — obviously a hotfix. Sometimes it's "what should I do?" — genuinely ambiguous. The orientator is the **mechanical-first router** that turns prompts into workflow recommendations, escalates to LLM only when mechanical confidence falls below the pack's threshold, and writes every decision to an audit log the operator can inspect.
 
 ## The problem

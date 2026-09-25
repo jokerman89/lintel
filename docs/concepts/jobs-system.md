@@ -3,6 +3,8 @@
 **Last updated:** 2026-09-20 (selected work and observable runtime state)
 **Status:** Concept doc — referenced by skills/jobs/SKILL.md, skills/status/SKILL.md, hooks/shared/job-{begin,end,stale-warn}/
 
+> Invocation: commands use the Claude plugin form `/li:<skill>`. Copilot, Codex and Gemini adapters expose `li-<skill>`; the Universal adapter uses an explicit `skills/<skill>/SKILL.md` handoff.
+
 > Curated flows in Lintel (cycle, plan, future Azure-e2e recipes, safe-install) carry implicit state — which phase are we in, what produced what, what's waiting on what. Before v3.8 that state lived scattered across `00-state.md`, `.planner-checkpoint.md`, and operator memory. The jobs system is **the place that lists in-flight curated work, a rule that abandoned ones must be cleaned up, and a way to operate on them as units.**
 
 ## The problem
@@ -77,7 +79,7 @@ cleanup_policy:
 
 - Historical intended **keep** destinations:
   - ADRs → `.claude/decisions/`
-  - Lessons → never appended. The hook only suggests `/li:learn` review and
+  - Lessons → never appended. The hook only suggests review through `/li:lessons-add` and
     `/li:lessons-promote` for general lessons; candidates stay in the archived job outputs.
   - Plan/spec/prompt → `.claude/plans/<slug>/`
 - Explicit archive operations use `job_archive`; they are separate from approval
