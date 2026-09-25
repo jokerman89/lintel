@@ -186,8 +186,8 @@ python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json \
 There is no conditional-dependency language. Standalone Word/PDF/XLSX require neither
 the common pipeline nor unrelated formats. A source/resource in closure is not a request
 to read its whole body; choose the actual method/role first. Filters change displayed
-entries, not the closure or policy. For example, `--name=match` can validly return no
-entry inside a frontend projection while the unchanged ordinary `--json --name=match`
+entries, not the closure or policy. For example, `--name=skill-router` can validly return no
+entry inside a frontend projection while ordinary `--json --name=skill-router`
 still resolves `skill:skill-router`.
 
 Design resources explicitly enumerate the existing scripts, six contract/token
@@ -330,20 +330,24 @@ python3 -B "$LINTEL_SOURCE_ROOT/bin/li-catalog.py" --json --selection=document-p
 ```
 
 **Inputs.** An authorized local Markdown/HTML brief, explicit owned PDF output, page
-size and exact source/page oracle; actual permitted converter, print and reader tools.
+size and selected required QA inventory; actual permitted converter and print tools.
+Any external reader/viewer is a separate explicit choice, not a bundled dependency.
 
 **Method and output.** Keep the original source, use the existing prepare/print
-methods and accepted browser operation when available, then inspect text retention
-and physical page boundaries with the existing checker. Record actual tool/version,
-source/output and reader evidence separately from visual inspection.
+methods and accepted browser operation when available. Lintel has no PDF reader:
+text retention, physical page boundaries and rendered pages remain unverified unless
+an independently authorized reader/viewer actually observes them. Record writer,
+source/output and any separately obtained inspection evidence distinctly.
 
 **Negative.** A wrong physical page size, clipped effective boundary, absent reader
 or missing required visual observation cannot be hidden by a nonempty PDF file.
 Do not substitute a successful metadata query for conversion or print.
 
 **Evidence limit.** PDF now has implemented accepted source methods; unknown maturity
-does not mean TEMPLATE ONLY. Required visual/full-format and denied record routes
-remain separate. Standalone conversion does not depend on the rejected shared join.
+does not mean TEMPLATE ONLY. Writing/printing is not inspected-PDF completion.
+Missing selected mandatory text/page/visual observations stay BLOCKED; retaining a
+partial artifact does not waive those obligations. Denied record routes remain
+separate. Standalone conversion does not depend on the rejected shared join.
 
 ## Workbook example
 

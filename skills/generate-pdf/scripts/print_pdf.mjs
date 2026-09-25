@@ -5,7 +5,7 @@
 // last_intent_review: 2026-09-22
 import { readFile } from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
-import { Admission, BrowserSession, artifactName } from '../../browse/scripts/chromium.mjs';
+import { Admission, BrowserSession, artifactName } from '../../web-session/scripts/chromium.mjs';
 
 export function validateRequest(request) {
   if (!request || typeof request !== 'object' || Array.isArray(request)

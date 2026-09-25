@@ -1,7 +1,7 @@
 {
   "name": "li",
   "description": "Lintel — company-neutral, pack-driven session harness with 9-step cycle, role-lifting, context-warming",
-  "version": "0.11.0",
+  "version": "0.12.0",
   "author": {
     "name": "jokerman89",
     "email": "johannes.akerman@gmail.com"

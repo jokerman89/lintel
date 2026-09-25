@@ -16,8 +16,8 @@ The draft belongs to an explicitly owned path in the working target, not automat
 to Lintel's source bundle, a personal skill tree or a native discovery directory.
 
 Drafting does not install, symlink, register or activate a skill. A bare canonical name
-such as `regen-mocks` is distinct from a host wrapper such as `li-regen-mocks` or plugin
-spelling `/li:regen-mocks`; do not silently strip or add a prefix.
+such as the proposed `regen-mocks` is distinct from a host wrapper `li-<name>` or
+plugin spelling `/li:<name>`; do not silently strip or add a prefix.
 
 ## When to use
 

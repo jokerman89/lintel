@@ -47,14 +47,22 @@ An installed file is not evidence of native discovery or a completed client test
 | `help`, `v4-migrate` | `/li:catalog` or `/li:welcome` for navigation; `/li:migrations` for historical inspection and explicitly authorized apply/rebind guidance. |
 | `personas-rotate` | `/li:role --audience [name]` and `--clear-audience`, using configured persona sources. This is a conversation overlay, not a change to the persistent working role. |
 
-The PDF writer remains supported. The `make-pdf` print route stays available until its
-options and resource consumers are joined to `generate-pdf`; do not remove a working
-writer or claim a PDF reader/inspection result during that transition. Workbook, slide,
-Word and other format providers are not an optional cleanup quota.
+The PDF writer and all direct print options now belong to `/li:generate-pdf`:
+input/output, A4/letter/custom paper, portrait/landscape, header/footer, print CSS and
+background selection. Its actual preparation and canonical browser-print consumers
+remain. ADR-0033 removed the reader, so produced PDF text, pages and visual inspection
+remain unverified without a separately authorized observer. Workbook, slide, Word and
+other format providers are not an optional cleanup quota.
 
 `verify --json` retains compatible reporting fields (`runner`, `passes`, `failures`,
 `skipped`, `exit`, `failures_list`). That summary is not the separate strict v2 QA artifact
 consumed by the shared acceptance and SHIP gates.
+
+For additional code-review/diagnosis checks, use `--cross-check --reviewer codex`
+when that specific available reviewer is authorized, or `--cross-check` for actual
+host selection. This replaces vendor-named review switches without removing Codex
+client support. `--no-cross-check` retains the explicit opt-out for optional checks;
+it cannot waive required independent review.
 
 ## Preserve saved work and evidence
 

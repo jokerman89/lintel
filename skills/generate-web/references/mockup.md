@@ -70,6 +70,6 @@ actual render/validation operations, preview state and missing observations.
 This is a mockup, not a production component or deployment.
 
 Use `frontend-design --mode variants --seed <file.html>` to explore another
-direction, `frontend-design-review` to critique the built result, and `make-pdf`
+direction, `frontend-design-review` to critique the built result, and `generate-pdf`
 for retained print choices. The frozen PDF join does not block HTML creation;
 it does leave any unavailable PDF inspection unverified.

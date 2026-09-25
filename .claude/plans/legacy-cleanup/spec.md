@@ -89,3 +89,14 @@ Routine naming/consolidation is authorized. Only a genuinely new material choice
 the parent. Upstream completion, hosted CI, real client observations and independence
 are observations to obtain, never assumptions. Local missing tools/permissions are
 reported without bypass; required acceptance remains open until evidenced.
+
+## Accepted PDF fix-forward requirements
+
+Go Live's Phase 4 observations **A5-31** and **A5-32** are part of this cleanup's
+existing R4/R8 leaves `7.1.a` and `10.5.a`. The selection example and adapter/native
+guide must describe the retained writer/print path without claiming the removed
+reader or inspection. Completion follows the original selected required QA inventory:
+missing mandatory text/page/visual observations remain BLOCKED, with any useful
+partial artifact separately disclosed. Never revise obligations after observing
+results or restore/install the removed reader. Source-contract checks and shared
+QA negative cases must cover this distinction; include both IDs in final reviews.

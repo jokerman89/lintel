@@ -45,7 +45,7 @@ installed Chromium-family executable, Node.js 22+ and Python 3.9+; it installs
 nothing and preserves its single-page, no-credential boundaries.
 
 Use `frontend-design-review` for built UI critique, `generate-web --mode mockup`
-for static HTML authoring, and `make-pdf` for composition/print choices. Printing
+for static HTML authoring, and `generate-pdf` for composition/print choices. Printing
 does not imply PDF text, dimensions or rendered-page inspection passed.
 
 Resource-only import/reference bridges remain at the former browser resource

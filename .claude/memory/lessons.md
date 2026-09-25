@@ -260,12 +260,12 @@ it tested the happy path only. Behavior tests must include the adversarial path.
 
 **Rule:** When the operator says "make it ours / go all in / live up to the name," that is an
 instruction to REINVENT — rewrite the content end-to-end in Lintel's own voice, structure, and
-model so the result would stand on its own with no ancestor. Deleting the word "gstack" (or
+model so the result would stand on its own with no ancestor. Deleting a former provider's name (or
 "heavily inspired by X") from prose is de-heritage, NOT reinvention. They are different jobs and
 the small one masquerades as the big one.
 
-**Why:** v5.3 lineage cleanup. I removed gstack references and reported the spine "ours." The
-operator caught it cold — the real test was whether every gstack-derived skill had been read and
+**Why:** v5.3 lineage cleanup. I removed inherited identity references and reported the spine "ours." The
+operator caught it cold — the real test was whether every inherited skill had been read and
 rewritten end to end — and escalated the scope: nothing half-done, a full engaged refactor, done
 properly. I had done a find-and-replace and called it ownership. The actual work was reinventing
 12 spine skills in Lintel's own idiom (ADR-0013). De-heritage is cheap and invisible; reinvention
@@ -1087,3 +1087,42 @@ because they could discard uncommitted work.
 **Rule:** Add follow-up changes as new commits. Do not amend, rebase, squash, reset, or clean a
 worktree or clone, even for local-only commits or scratch copies, unless the operator explicitly
 authorizes it. When a fresh working copy is needed, create a new directory.
+
+## L-056 - Check generated files inside delegated directory scopes
+
+**Date:** 2026-09-25
+
+**Context:** The initial cleanup documentation scope included a showcase directory
+containing generated HTML reserved by another owner. The parent caught it before
+that file was edited.
+
+**Rule:** Compare proposed directory scopes with the actual generated-file inventory,
+not only obvious catalog/wiki roots. Enumerate editable source files where a directory
+mixes manual and generated content, reserve generated paths mechanically, notify the
+worker and revalidate topology before continuation.
+
+## L-057 - Attribute authority and actor namespaces precisely
+
+**Date:** 2026-09-25
+
+**Context:** Cleanup artifacts initially conflated the workspace project identifier
+with the host/routing actor and attributed a parent's presentation reservation directly
+to the operator.
+
+**Rule:** Label workspace, routing and actual invocation identities separately.
+Bind evidence to the observed actor and name the actual source of a scope reservation.
+Do not strengthen a forwarded coordination instruction into an invented direct user
+statement or transfer another context's tool permission.
+
+## L-058 - Classify historical evidence before preserving or rewriting it
+
+**Date:** 2026-09-25
+
+**Context:** A cleanup residual register treated original narrative review observations
+too broadly as immutable content-bound evidence. Parent review corrected the distinction.
+
+**Rule:** A review filename or old verdict is not a cryptographic binding. Identify
+the actual manifest-bound bytes where present; otherwise explain the exact observation
+or citation that must remain faithful. Neutralize ordinary current narrative without
+altering observed inputs and claiming the same old review. Use precise path/field
+residuals, preserve required notices, and never encode identity or claim a false zero scan.

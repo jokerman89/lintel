@@ -192,6 +192,14 @@ process handle and timeout, report what stopped or remains running and label
 remaining stages unrun. A first-N test subset cannot establish full-suite success
 or duration. Never invent onboarding measurements from source inspection.
 
+For mapped developer-experience or engineering-module work, use the
+[shared original-work procedure](../full-engineering-pass/references/domain-handoff.md#module-caller-procedure)
+for original map/package/leaf admission and caller-owned request, start, result and
+checkpoint evidence. Preserve the verified profile, external P05 preparation,
+immutable controls, actual QA and independently corroborated review. A bare score
+is not a domain result or recorded decision. Standalone/unmapped inspection keeps
+the non-clearing snapshot/inspect route below; it does not manufacture a domain map.
+
 ## Report and reconcile
 
 Use a selected report path or return the report in the conversation when writes

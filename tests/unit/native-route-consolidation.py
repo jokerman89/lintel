@@ -7,7 +7,10 @@
 """Check retained method boundaries after removing redundant public routes."""
 
 from pathlib import Path
+import os
 import re
+import shutil
+import subprocess
 import unittest
 
 
@@ -97,6 +100,52 @@ class NativeRoutes(unittest.TestCase):
         self.assertIn("never `--repair` after review", ship)
         self.assertIn("v2 review/context/QA", ship)
         self.assertIn("actual independent corroboration", ship)
+
+    def test_resume_selector_discriminates_phases_steps_and_literal_paths(self):
+        git = shutil.which("git")
+        native_bash = Path(git).resolve().parent.parent / "bin/bash.exe" if git else None
+        bash = (str(native_bash) if os.name == "nt" and native_bash and native_bash.is_file()
+                else shutil.which("bash"))
+        self.assertIsNotNone(bash, "Bash is required for the read-only selector")
+        script = 'source "$1/bin/_context.sh"; shift; context_resume_kind "$@"'
+        for operand, steps, kind in (
+            ("BUILD", ["BUILD"], "phase"),
+            ("build", ["build"], "step"),
+            ("1.2.a", ["1.2.a", "2.1.a"], "step"),
+            ("./BUILD", ["BUILD"], "checkpoint"),
+            (r".\BUILD", ["BUILD"], "checkpoint"),
+            ("C:/owned/BUILD", ["BUILD"], "checkpoint"),
+            ("notes/1.2.a", ["1.2.a"], "checkpoint"),
+            ("missing-step", ["1.2.a"], "checkpoint"),
+        ):
+            with self.subTest(operand=operand):
+                result = subprocess.run(
+                    [bash, "--noprofile", "--norc", "-c", script, "selector",
+                     ROOT.as_posix(), operand, *steps],
+                    cwd=ROOT, capture_output=True, text=True, check=False,
+                )
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertEqual(result.stdout.strip(), kind)
+        for operands in ([], [""], ["--explicit"]):
+            with self.subTest(invalid=operands):
+                result = subprocess.run(
+                    [bash, "--noprofile", "--norc", "-c", script, "selector",
+                     ROOT.as_posix(), *operands],
+                    cwd=ROOT, capture_output=True, text=True, check=False,
+                )
+                self.assertEqual(result.returncode, 2)
+                self.assertEqual(result.stdout, "")
+                self.assertTrue(result.stderr)
+        # Construct the literal newline inside Bash: native Windows argv transport
+        # can split it before the selector receives a single operand.
+        newline_script = 'source "$1/bin/_context.sh"; context_resume_kind "$(printf \'BUILD\\nSHIP\')"'
+        result = subprocess.run(
+            [bash, "--noprofile", "--norc", "-c", newline_script, "selector", ROOT.as_posix()],
+            cwd=ROOT, capture_output=True, text=True, check=False,
+        )
+        self.assertEqual(result.returncode, 2)
+        self.assertEqual(result.stdout, "")
+        self.assertTrue(result.stderr)
 
 
 if __name__ == "__main__":

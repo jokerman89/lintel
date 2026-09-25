@@ -9,7 +9,7 @@
 The surface audit measured: 166 skills / 27k lines where 30-38% is per-skill template ceremony
 (the same status enum, hop-in note, voice section restated 110-166 times); 35 engineering
 sub-skills with exactly ONE caller each (~4.4k lines encoding a 35-row dispatch table as
-files); a 0-reference tail (gbrain-setup/sync, WorkshopFacilitator); and a role family of 8
+files); a 0-reference tail (external-memory setup/sync, WorkshopFacilitator); and a role family of 8
 slash commands for CRUD. Surface area is cost: tokens at load, drift at every contract change,
 discoverability noise. Lintel had no subtraction mechanism — it only grew.
 
@@ -24,7 +24,7 @@ discoverability noise. Lintel had no subtraction mechanism — it only grew.
    sub-skill files fold into their module's SKILL.md as a dispatch table (capability | agents
    | output | raise-help). Invocation becomes `/li:ta api-design`; the old names alias to the
    module (grace to 2026-09-12). Nobody solo-invoked them — the reference graph proved it.
-3. **0-ref pruning.** gbrain-setup + gbrain-sync removed (capability was honest-labeled
+3. **0-ref pruning.** External-memory setup and synchronization entries removed (capability was honest-labeled
    "query loop not integrated"; nothing referenced them — the aliases pointing at them retire
    with a comment recording what they pointed at, the same way the WS-4b renames were handled). WorkshopFacilitator agent removed
    (zero dispatchers).

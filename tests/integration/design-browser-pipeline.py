@@ -83,7 +83,7 @@ SOURCES = [
     "lib/review-schema.json", "lib/markdown_source.py", "bin/li-work-artifacts.py",
     "lib/swarm_contract.py", "lib/swarm_snapshot.py", "packs/_default/pack.yaml",
     "skills/web-session/scripts/chromium.mjs", "skills/web-session/scripts/extract.mjs",
-    "skills/browse/scripts/chromium.mjs", "skills/scrape/scripts/extract.mjs",
+    "skills/web-session/scripts/chromium.mjs", "skills/web-session/scripts/extract.mjs",
     "skills/web-session/SKILL.md", "skills/web-session/references/browser-operations.md",
     "tests/integration/browser-live.mjs", "tests/integration/browser-operations.test.mjs",
     "tests/integration/design-browser-pipeline.py", "tests/integration/design-browser-pipeline.sh",

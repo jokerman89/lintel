@@ -113,6 +113,24 @@ existing resume-target/precondition checks below. Otherwise branch on what exist
 > **Paired with `/li:pause`.** Discovery and owned reads remain in `bin/_context.sh`;
 > the command consolidation does not change filename suffixes, ownership or recovery.
 
+### Step 1a — Classify explicit resume input
+
+After selecting the original work/job, pass the literal `--from` operand first,
+followed by only that selected source's actual step IDs. The shared helper performs
+no discovery, file read, state write or dispatch:
+
+```bash
+source "${LINTEL_SOURCE_ROOT:?select the trusted source}/bin/_context.sh"
+context_resume_kind "$@"
+```
+
+`phase` keeps the canonical phase override and its existing preconditions; `step`
+keeps the exact selected-job step and `job_can_start` check. `checkpoint` selects
+only that literal path for Step 1b, never the newest save. Explicit relative/absolute
+paths win over reserved words, so `BUILD` is a phase while `./BUILD` is a checkpoint.
+Reject `--explicit` for a phase/step result. The category is not authority to start
+work or to read an unowned checkpoint.
+
 ### Step 1b — Read a selected checkpoint
 
 This block receives the `--from` path as its first argument and optional `--explicit`

@@ -125,8 +125,10 @@ aliases after copying. Their optional YAML parser remains an operation-specific
 dependency, not a new prerequisite for native bare installation. Required work,
 review, domain, browser, selected-design and document helper/schema/reference
 files are checked before consumer writes. This includes the source-fidelity and
-native-format guides, workbook integrity reader and PDF preparation/inspection/
-print adapters, plus the shared document input-admission helper. An explicit
+native-format guides, workbook integrity reader and PDF preparation/print adapters,
+plus the shared document input-admission helper. Lintel supplies no PDF reader;
+produced PDF text, page and visual inspection remain unverified without a separately
+authorized observer. An explicit
 `document-content` selection union supplies that helper's declared preflight
 resources without forcing pipeline dependencies onto standalone format choices.
 File presence does not prove a renderer, recalculation engine, browser or live

@@ -8,6 +8,25 @@ Cross-session working state (not durable rules — that's [[lessons.md]]; not pe
 
 ---
 
+## Active - Native workflow cleanup (2026-09-25)
+
+**Status:** all six isolated implementation lanes are integrated on verified main
+`77cb8d3f893d2ef42be2631fe35ae45594f21bd3`; final acceptance is incomplete.
+The [work map](../plans/legacy-cleanup/work.json) and
+[integration handoff](../plans/legacy-cleanup/integration-state.md) own the original
+cleanup tasks, remaining structural census gate, preserved worker commits and actual
+review/verification boundaries. Coordinator host/routing identity is
+`e9c20b62-f877-4242-82cd-b5002d452da8`; parent is `f4584b03`.
+
+**What's pending:** freeze the reviewable aggregate draft, reuse spec reviewer
+`1742f900-1de4-4a59-beee-95c3a907a063` on exact current inputs, then use a separate
+quality reviewer. Obtain cleanup-specific strict hosted CI and close the actual
+current-routing guard; source-only checks are not native artifact or shared runtime
+acceptance. Seven downstream documentation drafts wait for this aggregate merge.
+Keep generation-1 profile observations historical; final preparation uses the
+explicitly rebound generation-2 target-local context. No denied environment launcher
+is resumed, and the PDF reader removed by ADR-0033 stays absent.
+
 ## Active - Universal implementation (2026-09-20)
 
 **Recovery, updated 2026-09-23:** the operator transferred the broken MasterSession to

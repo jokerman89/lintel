@@ -11,6 +11,7 @@ from pathlib import Path
 import re
 import shutil
 import subprocess
+import sys
 import unittest
 
 
@@ -60,41 +61,66 @@ class Consolidation(unittest.TestCase):
         for name in (
             "browse", "scrape", "open-managed-browser", "setup-browser-cookies",
             "design-consultation", "design-shotgun", "design-html", "design-review",
-            "document-generate",
+            "document-generate", "make-pdf",
         ):
             self.assertFalse((ROOT / "skills" / name / "SKILL.md").exists(), name)
         self.requires(
-            "skills/make-pdf/SKILL.md", "--input", "--format", "--orientation",
+            "skills/generate-pdf/SKILL.md", "--input", "--format", "--orientation",
             "--header-footer", "--print-css", "--no-background",
-            "../generate-pdf/SKILL.md", "deferred",
+            "../web-session/references/browser-operations.md", "Lintel has no PDF reader",
         )
+        self.assertFalse((ROOT / "skills/generate-pdf/scripts/check_pdf.py").exists())
 
-    def test_compatibility_resources_are_the_same_provider_not_forks(self):
+    def test_pdf_writer_consumes_canonical_provider_and_always_closes(self):
         node = shutil.which("node")
         self.assertIsNotNone(node, "Node is required; no dependency install is performed")
         script = """
 import assert from 'node:assert/strict';
+import { resolve } from 'node:path';
 import * as current from './skills/web-session/scripts/chromium.mjs';
-import * as old from './skills/browse/scripts/chromium.mjs';
 import * as extraction from './skills/web-session/scripts/extract.mjs';
-import * as oldExtraction from './skills/scrape/scripts/extract.mjs';
-assert.deepEqual(Object.keys(current), Object.keys(old));
-for (const key of Object.keys(current)) assert.equal(current[key], old[key]);
-assert.deepEqual(Object.keys(extraction), Object.keys(oldExtraction));
-for (const key of Object.keys(extraction)) assert.equal(extraction[key], oldExtraction[key]);
+import { printDocument } from './skills/generate-pdf/scripts/print_pdf.mjs';
 for (const method of ['open', 'read', 'act', 'media', 'screenshot', 'print', 'close'])
   assert.equal(typeof current.BrowserSession.prototype[method], 'function');
-console.log('same provider and extraction exports; seven operations retained');
+for (const method of ['validateSchema', 'extractPage', 'diffRecords'])
+  assert.equal(typeof extraction[method], 'function');
+const original = current.BrowserSession.start;
+try {
+  for (const fail of [false, true]) {
+    const calls = [];
+    current.BrowserSession.start = async options => {
+      assert(options.admission instanceof current.Admission);
+      calls.push('start');
+      return {
+        runDir: 'synthetic-run', evidence: { version: 'synthetic-not-native' },
+        open: async () => { calls.push('open'); return {}; },
+        media: async options => {
+          assert.deepEqual(options, { print: true, reducedMotion: true });
+          calls.push('media');
+        },
+        read: async () => { calls.push('read'); return {}; },
+        print: async () => { calls.push('print'); if (fail) throw new Error('synthetic print failure'); return 'not-created.pdf'; },
+        close: async () => { calls.push('close'); },
+      };
+    };
+    const request = {
+      url: 'https://fixture.example.test/document', origin: 'https://fixture.example.test',
+      python: process.argv[1], executable: resolve('synthetic-browser'),
+      outputRoot: resolve('synthetic-run'), name: 'result.pdf',
+      context: { session_id: 'fixture', work_map: 'fixture-map', profile_ref: { fixture: true } },
+    };
+    if (fail) await assert.rejects(printDocument(request), /synthetic print failure/);
+    else assert.equal((await printDocument(request)).release_clearance, false);
+    assert.deepEqual(calls, ['start', 'open', 'media', 'read', 'print', 'close']);
+  }
+} finally { current.BrowserSession.start = original; }
+console.log('canonical print consumer and cleanup exercised with synthetic methods; no PDF or browser created');
 """
         result = subprocess.run(
-            [node, "--input-type=module", "--eval", script], cwd=ROOT,
+            [node, "--input-type=module", "--eval", script, sys.executable], cwd=ROOT,
             text=True, capture_output=True, timeout=30, check=False,
         )
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.requires(
-            "skills/browse/references/browser-operations.md",
-            "../../web-session/references/browser-operations.md",
-        )
 
     def test_provider_data_operations_need_no_launch_or_personal_state(self):
         node = shutil.which("node")
@@ -205,7 +231,7 @@ console.log('no-launch option/artifact/action refusals and synthetic extraction/
         expression = re.compile(r"/(?:li:|li-)?(?:" + "|".join(retired) + r")(?=[`\s])")
         for name in (
             "web-session", "frontend-design", "frontend-design-review", "generate-docs",
-            "generate-web", "generate-app", "generate-ppt", "generate-qa", "make-pdf",
+            "generate-web", "generate-app", "generate-ppt", "generate-qa", "generate-pdf",
         ):
             for path in (ROOT / "skills" / name).rglob("*.md"):
                 self.assertIsNone(expression.search(path.read_text(encoding="utf-8")), str(path))
@@ -213,6 +239,23 @@ console.log('no-launch option/artifact/action refusals and synthetic extraction/
     def test_workbook_and_pipeline_writers_remain_available(self):
         for name in ("generate-ppt", "generate-word", "generate-xlsx", "generate-visio"):
             self.assertTrue((ROOT / "skills" / name / "SKILL.md").is_file(), name)
+
+    def test_pdf_reader_claims_and_completion_follow_selected_qa(self):
+        text = self.requires(
+            "skills/generate-pdf/SKILL.md", "selected required QA inventory",
+            "mandatory PDF text, page or visual observation",
+            "Partial artifact, not completion", "with **BLOCKED**",
+            "selected before observations", "never omit, downgrade or waive",
+        )
+        self.assertIn("Lintel has no PDF reader", text)
+        example = self.read("skills/catalog/references/selections.md").split(
+            "## PDF example\n", 1)[1].split("\n## ", 1)[0]
+        self.assertIn("Lintel has no PDF reader", example)
+        self.assertNotIn("with the existing checker", example)
+        self.assertIn("Missing selected mandatory text/page/visual observations stay BLOCKED", example)
+        adapters = self.read("docs/client-adapters.md")
+        self.assertIn("PDF preparation/print adapters", adapters)
+        self.assertIn("Lintel supplies no PDF reader", adapters)
         self.assertTrue((ROOT / "skills/generate-xlsx/scripts/check_xlsx.py").is_file())
         self.assertTrue((ROOT / "skills/generate/scripts/pipeline_inputs.py").is_file())
         schema = json.loads(self.read("skills/design-dna/references/design-contract.schema.json"))

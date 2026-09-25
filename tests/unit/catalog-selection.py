@@ -27,16 +27,15 @@ spec.loader.exec_module(support)
 FAMILIES = {
     "design-knowledge": {
         "requires": ["core"],
-        "skills": "design-dna design-consultation",
+        "skills": "design-dna frontend-design",
         "agents": "",
     },
     "frontend-design": {
         "requires": ["design-knowledge"],
         "skills": (
             "frontend-design frontend-typography frontend-motion frontend-shader "
-            "frontend-design-review frontend-style-extract design-html design-review "
-            "design-shotgun plan-design-review generate-style-learn generate-web "
-            "generate-app browse open-managed-browser"
+            "frontend-design-review frontend-style-extract inspect generate-style-learn generate-web "
+            "generate-app web-session"
         ),
         "agents": (
             "FrontendArchitect TypographyCurator MotionDirector ShaderEngineer "
@@ -45,7 +44,7 @@ FAMILIES = {
     },
     "document-content": {
         "requires": ["design-knowledge"],
-        "skills": "generate generate-outline generate-write generate-design generate-qa document-generate",
+        "skills": "generate generate-outline generate-write generate-design generate-qa generate-docs",
         "agents": "SystemArchitect WordTechnicalEditor DesignSystemAuditor",
     },
     "document-word": {
@@ -56,7 +55,7 @@ FAMILIES = {
         "agents": "PPTNarrativeArchitect SlideNarrationCritic",
     },
     "document-pdf": {
-        "requires": ["core"], "skills": "generate-pdf make-pdf browse", "agents": "WordTechnicalEditor",
+        "requires": ["core"], "skills": "generate-pdf web-session", "agents": "WordTechnicalEditor",
     },
     "document-xlsx": {
         "requires": ["core"], "skills": "generate-xlsx", "agents": "CostAnalyzer CapacityPlanner",
@@ -577,8 +576,10 @@ class CatalogSelection(unittest.TestCase):
             "document-pdf": {
                 "skills/generate-pdf/scripts/prepare_html.py",
                 "skills/generate-pdf/scripts/print_pdf.mjs",
-                "skills/browse/scripts/chromium.mjs",
-                "skills/browse/references/browser-operations.md",
+                "skills/web-session/scripts/chromium.mjs",
+                "skills/web-session/scripts/extract.mjs",
+                "skills/web-session/references/browser-operations.md",
+                "lib/url_policy.py",
             },
             "document-xlsx": {
                 "skills/generate-xlsx/references/native-xlsx.md",
@@ -645,10 +646,10 @@ class CatalogSelection(unittest.TestCase):
         self.assertEqual(selected["matched"], 0)
         self.assertTrue(selected["selection"]["resources"])
         before = support.files_snapshot(self.base)
-        match = self.cli("--json", "--selection=frontend-design", "--name=match", source=ROOT)
+        match = self.cli("--json", "--selection=frontend-design", "--name=skill-router", source=ROOT)
         self.assertEqual(match.returncode, 0, match.stderr)
         self.assertEqual(json.loads(match.stdout)["matched"], 0)
-        ordinary = self.cli("--json", "--name=match", source=ROOT)
+        ordinary = self.cli("--json", "--name=skill-router", source=ROOT)
         self.assertEqual(ordinary.returncode, 0, ordinary.stderr)
         self.assertEqual(json.loads(ordinary.stdout)["entries"][0]["id"], "skill:skill-router")
         self.assertNotIn("## Behavioral traits", json.dumps(selected))
@@ -737,18 +738,29 @@ class CatalogSelection(unittest.TestCase):
         self.assertIn("P09-agent-preservation.md", text)
         self.assertIn("P04-preservation.md", text)
         self.assertIn("No original leaf is completed", text)
-        aliases = self.catalog.load_text((ROOT / "config/aliases.yaml").read_text(encoding="utf-8"))["skill_aliases"]
-        self.assertEqual(len(aliases), 46)
-        for alias in aliases:
-            self.assertIn("`" + alias["old"] + "`", text)
-            if alias["new"] in ("ta", "da", "sc", "dh", "tq"):
-                capability = alias["old"][len(alias["new"]) + 1:]
-                body = (ROOT / "skills" / alias["new"] / "SKILL.md").read_text(encoding="utf-8")
+        historical_section = text.split("## Alias and argument preservation\n", 1)[1].split("\n## ", 1)[0]
+        historical_aliases = [
+            name for line in historical_section.splitlines() if line.startswith("| `")
+            for name in re.findall(r"`([^`]+)`", line.split("|")[1])
+        ]
+        self.assertEqual(len(historical_aliases), 46)
+        self.assertEqual(len(set(historical_aliases)), 46)
+        live_aliases = self.catalog.load_text(
+            (ROOT / "config/aliases.yaml").read_text(encoding="utf-8"))["skill_aliases"]
+        self.assertFalse(set(historical_aliases) & {alias["old"] for alias in live_aliases})
+        for alias in historical_aliases:
+            module, _, capability = alias.partition("-")
+            if module in ("ta", "da", "sc", "dh", "tq"):
+                body = (ROOT / "skills" / module / "SKILL.md").read_text(encoding="utf-8")
                 self.assertIn("| `" + capability + "` |", body)
+        original_paths = {f"skills/{name}/SKILL.md" for name in originals}
         for target in re.findall(r"\[[^\]]+\]\(([^)]+)\)", text):
             if "://" in target or target.startswith("#"):
                 continue
-            self.assertTrue((report.parent / target.split("#", 1)[0]).resolve().exists(), target)
+            resolved = (report.parent / target.split("#", 1)[0]).resolve()
+            if not resolved.exists():
+                self.assertIn(resolved.relative_to(ROOT).as_posix(), original_paths,
+                              "Only exact originally audited skill paths can be historical links: " + target)
 
 
 if __name__ == "__main__":

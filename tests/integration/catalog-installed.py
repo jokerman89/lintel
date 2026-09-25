@@ -251,11 +251,14 @@ class InstalledDiscovery(unittest.TestCase):
         bundle = self.installed()
         path = bundle / "config/aliases.yaml"
         original = path.read_bytes()
-        old, new = b"    new: skill-router\n", b"    new: p13-absent-method\n"
+        old = b"skill_aliases: []"
+        new = (b"skill_aliases:\n  - old: synthetic-missing-target\n"
+               b"    new: p13-absent-method\n    introduced_in: fixture\n"
+               b"    removal_at: 2099-01-01\n    migration_note: fixture-only\n")
         self.assertEqual(original.count(old), 1)
         path.write_bytes(original.replace(old, new, 1))
         before = self.snapshot()
-        for arguments in (("--kind=skill", "--name=match"),
+        for arguments in (("--kind=skill", "--name=synthetic-missing-target"),
                           ("--selection=demo-script", "--query=does-not-match-anything")):
             result = self.query(bundle, *arguments, success=False)
             self.assertIn("config/aliases.yaml", result.stderr)

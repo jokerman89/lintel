@@ -5,6 +5,44 @@ Notable changes to Lintel. Behaviour changes to the canonical agent instructions
 
 ---
 
+## 0.12.0 — unreleased
+
+### Changed
+
+- Consolidate the public surface into 94 canonical skills while retaining all 69
+  useful agent roles. DEFINE owns intake; `inspect` owns plan/repository lenses;
+  `verify` is read-only by default with explicit authorized repair; `diagnose` and
+  `cross-check` retain owned investigation and actual independent review.
+- Consolidate browser modes under `web-session` without changing the browser or
+  extraction implementations. PDF print consumers use that canonical provider.
+  `generate-pdf` retains input/output, paper, orientation, header/footer, CSS and
+  background choices; ADR-0033's reader removal and unverified inspection limits stay.
+- Preserve design advice, variants, built-UI review, single-file mockups and
+  source-grounded documentation under their existing frontend/rendering owners.
+- Use `pause`, compatible `resume` and bounded warming modes for continuity.
+  Phase/job-step `--from` overrides remain distinct from explicit checkpoint paths;
+  old checkpoint files, receipts and historical logs remain readable.
+- Share advisory freeze state between add/list/lift and the optional warning hook.
+  No host hook is activated or promoted into a permission boundary.
+- Retire expired alias records and redundant entrypoints; preserve native owned
+  installation receipts, user files and the no-Python bare-install prerequisite.
+  Update existing adapter resource closure, catalogs and source documentation.
+
+### Migration and evidence
+
+- Follow [native workflow migration](docs/migrations/2026-09-25-native-workflows.md).
+  Update installed copies through the existing owned installer/adapter, not manual
+  deletion of user state or a new inventory.
+- Review/QA v2, exact content/attempt/work/profile binding, latest-decision semantics
+  and independent corroboration remain unchanged. Source-only and synthetic checks
+  do not imply native browser, document or model acceptance.
+- Preserve required notices and explicitly classified original observations.
+  Historical citations are not active routing or a repository-wide zero-token claim.
+  Actual integration, review and hosted results are tracked in the
+  [cleanup work map](.claude/plans/legacy-cleanup/work.json).
+
+---
+
 ## 0.11.0 — unreleased
 
 The Universal initiative: one company-neutral lifecycle across clients, with owned installation,

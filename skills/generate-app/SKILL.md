@@ -211,7 +211,7 @@ Same as generate-web (per existing v3.5 pattern):
 ## Status protocol
 
 - **DONE** — app skeleton generated, npm install + npm run dev succeed in smoke-test
-- **DONE_WITH_CONCERNS** — build succeeds but design-review yellow (if --review)
+- **DONE_WITH_CONCERNS** — build succeeds but frontend-design-review reports advisory concerns (if --review)
 - **BLOCKED** — frontend-design-spec.json invalid schema, OR build fails, OR customer-share voice-fail
 - **NEEDS_CONTEXT** — stack-choice missing or frontend-design-spec absent
 

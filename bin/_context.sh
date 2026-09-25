@@ -27,6 +27,24 @@ command -v lintel_sessions_dir >/dev/null 2>&1 || source "$_CONTEXT_BIN_DIR/../l
 
 LINTEL_HOME="${LINTEL_HOME:-$HOME/.lintel}"
 
+context_resume_kind() {
+  [ "$#" -ge 1 ] && [ -n "$1" ] || {
+    echo 'Resume --from requires one nonempty operand.' >&2
+    return 2
+  }
+  local value="$1" step
+  shift
+  case "$value" in
+    *$'\n'*|*$'\r'*|--*) echo 'Invalid resume operand; use an explicit path for a flag-shaped filename.' >&2; return 2 ;;
+    ./*|../*|*/*|*\\*|[A-Za-z]:*) printf 'checkpoint\n'; return 0 ;;
+    SENSE|SCOPE|DEFINE|DISCOVER|PLAN|BUILD|REVIEW|SHIP|CAPTURE) printf 'phase\n'; return 0 ;;
+  esac
+  for step in "$@"; do
+    [ "$value" != "$step" ] || { printf 'step\n'; return 0; }
+  done
+  printf 'checkpoint\n'
+}
+
 _context_run() {
   local python
   for python in python3 python; do

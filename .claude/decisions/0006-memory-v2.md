@@ -28,7 +28,7 @@ Every memory promise becomes **mechanical or subtracted** — nothing stays pros
    plain markdown); update-before-append in CAPTURE (mem0's update-phase); path-scoped rules in
    `.claude/rules/` (the four-mode loading pattern); AGENTS.md pointer emission in scaffold.
 4. **Subtractions**: operator-profile.jsonl append (dead write); context-snapshot/dump/warmup
-   skills (duplicates — aliased to save/restore/warm, grace to 2026-09-12); over-claiming gbrain
+   skills (duplicates — aliased to save/restore/warm, grace to 2026-09-12); over-claiming external-memory
    prose (now honestly labeled "query loop not integrated").
 5. **Not building**: embeddings, databases, consolidation daemons — the field's evidence says
    they don't pay for procedural memory at Lintel's scale. Revisit only on grep-scaling pain.

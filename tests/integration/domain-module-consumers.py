@@ -301,6 +301,9 @@ class ModuleConsumers(DATA["DomainHandoff"]):
         self.assertIn("skipped required", perf)
         devex = (SOURCE / "skills/inspect/SKILL.md").read_text(encoding="utf-8")
         self.assertIn("do not fall back to in-place mutation", devex)
+        self.assertIn("mapped developer-experience or engineering-module work", devex)
+        self.assertIn("caller-owned request, start, result", devex)
+        self.assertIn("Standalone/unmapped inspection keeps", devex)
 
 
 if __name__ == "__main__":

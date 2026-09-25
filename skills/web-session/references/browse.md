@@ -11,7 +11,7 @@ skill is a workflow, not a bundled browser daemon or a promise that Playwright e
 - Capture a viewport/screenshot and DOM excerpt for design or QA review.
 - Read authorized public documentation, follow a click chain or fill synthetic inputs.
 - Inspect console/network failures when the chosen provider exposes those observations.
-- Print an authorized page to a local PDF. Document composition remains with `/make-pdf`.
+- Print an authorized page to a local PDF. Document composition remains with `/li:generate-pdf`.
 
 Use `/web-session --mode scrape` for declarative multi-page extraction. Use `/web-session --mode cookies` when
 authentication is needed; do not move an existing personal session into automation.
@@ -96,5 +96,5 @@ check cannot pass via source inspection or a manual task that nobody performed.
 - `/web-session --mode open` - operator-driven debugging with explicit ownership.
 - `/web-session --mode cookies` - user-chosen login surface and non-secret validation.
 - `/web-session --mode scrape` - selector schemas, pacing, failures and comparison across pages.
-- `/frontend-design-review`, `/verify`, `/make-pdf` - consume actual browser artifacts; their other
+- `/li:frontend-design-review`, `/li:verify`, `/li:generate-pdf` - consume actual browser artifacts; their other
   acceptance obligations remain separate.

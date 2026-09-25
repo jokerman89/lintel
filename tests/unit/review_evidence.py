@@ -1142,6 +1142,24 @@ class ReviewEvidence(Fixture):
         self.assertEqual(self.qa(controls=[document, advice]).returncode, 0)
         self.ship()
 
+    def test_pdf_writer_cannot_replace_missing_selected_text_and_page_observations(self):
+        writer = control("pdf-writer")
+        text = control("pdf-text", status="unverified")
+        pages = control("pdf-pages", status="unverified")
+        required = [writer, text, pages]
+        self.request["required_controls"] = ["spec", "quality", "pdf-writer", "pdf-text", "pdf-pages"]
+        self.request["qa_requirements"] = [qa_requirement(item) for item in required]
+        self.record(status="unverified", controls=[control(), control("quality"), *required])
+        self.log()
+        self.corroborate()
+        self.assertEqual(self.qa(controls=required).returncode, 3)
+        self.ship(ok=3)
+        self.assertNotEqual(self.qa(controls=[writer]).returncode, 0)
+        downgraded = deepcopy(required)
+        downgraded[1]["requirement"] = "advisory"
+        self.assertNotEqual(self.qa(controls=downgraded).returncode, 0)
+        self.ship(ok=3)
+
     def test_qa_needs_actual_applicable_validation_not_only_exemptions(self):
         self.good()
         tests_na = control("tests", "tests", status="unverified")

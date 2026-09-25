@@ -91,4 +91,4 @@ Do not fabricate duration, robot-policy clearance or success from a JSON file's 
 
 Keep extracted content within the authorized scope; do not include credentials,
 customer data or personal account information in examples or retained artifacts.
-For visual verification use `/web-session --mode browse`; for a composed PDF use `/make-pdf`.
+For visual verification use `/li:web-session --mode browse`; for a composed PDF use `/li:generate-pdf`.
