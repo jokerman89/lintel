@@ -1,8 +1,10 @@
 # Lintel as a session harness
 
-> **STATUS: superseded — describes the v3 model.** This doc predates the v4.0 foundation + packs reframe. It references directories that no longer exist (`scaffolding/02-sdl/`, `scaffolding/03-ms-team/`), v3 counts, and Microsoft CAIP-SE as the baseline. Identity (compliance, voice, personas, brand, roles) is now declared by the active **pack** (`packs/<name>/pack.yaml`), not hardcoded; the neutral `_default` pack is the baseline and company identity (e.g. Microsoft CAIP-SE) installs as an external pack. For the current foundation + packs architecture, read [CLAUDE.md](../CLAUDE.md) and [AGENT-INSTRUCTIONS.md](../AGENT-INSTRUCTIONS.md). The mental model below is kept for historical reference.
+> **STATUS: superseded — describes the v3 model.** This doc predates the v4.0 foundation + packs reframe. It references directories that no longer exist (`scaffolding/02-sdl/`, `scaffolding/03-ms-team/`), v3 counts, and Microsoft CAIP-SE as the baseline. Identity (compliance, voice, personas, brand, roles) is now declared by the active **pack** (`packs/<name>/pack.yaml`), not hardcoded; the neutral `_default` pack is the baseline and company identity (e.g. Microsoft CAIP-SE) installs as an external pack. For the current foundation + packs architecture, read [CLAUDE.md](../../../CLAUDE.md) and [AGENT-INSTRUCTIONS.md](../../../AGENT-INSTRUCTIONS.md). Original counts, dates and observations remain historical; normalized names do not mean checks were rerun.
 
-This explains the mental model for v3 and beyond. If you're new to Lintel, read this first.
+This preserves the v3 mental model. New users should start with the current
+[getting-started guide](../../../docs/getting-started.md) and
+[native workflow migration](../../../docs/migrations/2026-09-25-native-workflows.md).
 
 ---
 
@@ -45,10 +47,10 @@ While the agent is working, Lintel provides:
 ### Skill invocation
 
 81 skills available via the agent CLI's plugin system. Examples:
-- `/qa` — test + fix loop
+- `/li:verify --repair` — test and explicitly authorized repair; default verification is read-only
 - `/release-ev2` — pre-flight checks + PR creation
 - `/safe-deploy-ring` — canary rollout
-- `/investigate` — bug investigation
+- `/li:diagnose` — scoped bug investigation
 - `/rais-customer-voice-check` — Trailblazer voice gate before customer-facing artifact ships
 - `/onecs-check` — 1CS compliance gate
 - `/agt-tier-stamp` — AGT framework tier stamp
@@ -83,7 +85,8 @@ When work wraps up, Lintel ensures durable artifacts:
 
 ### Lessons captured
 
-Corrections during the session → `tasks/lessons.md` entries. The `/learn` skill formalizes this.
+Corrections during the session → historical `tasks/lessons.md` entries. The current
+`/li:lessons-add` method uses the repository's declared memory home and existing lesson grammar.
 
 Generalizable lessons → promote to Lintel global via `bin/li-lessons-promote`. Lands in `scaffolding/01-foundation/tasks/lessons.md` so every future scaffolded repo inherits.
 
@@ -97,7 +100,8 @@ Changes to `CLAUDE.md` itself → entry in `EVOLUTION-LOG.md`. Future contributo
 
 ### Memory committed
 
-Cross-session durable state → `tasks/memory.md`. The `/context-save` skill writes; `/context-restore` reads next session.
+Cross-session durable state used `tasks/memory.md` in this layout. Compatible checkpoints
+now use `/li:pause` and `/li:resume --from <checkpoint>`; they do not replace durable memory.
 
 ### Todo handoff
 
@@ -176,4 +180,4 @@ Ask: "Does this contribute to the harness mechanism, or is it just a useful skil
 
 Both are valuable, but harness-level work (improving session-start ritual, adding cross-cutting hooks, deepening compliance enforcement, expanding scaffolding templates) has higher leverage than single-purpose skills.
 
-See [CONTRIBUTING.md](../CONTRIBUTING.md) for the process.
+See [CONTRIBUTING.md](../../../CONTRIBUTING.md) for the process.

@@ -77,7 +77,7 @@ cleanup_policy:
 
 - Historical intended **keep** destinations:
   - ADRs → `.claude/decisions/`
-  - Lessons → never appended. The hook only suggests `/li:learn` review and
+  - Lessons → never appended. The hook only suggests review through `/li:lessons-add` and
     `/li:lessons-promote` for general lessons; candidates stay in the archived job outputs.
   - Plan/spec/prompt → `.claude/plans/<slug>/`
 - Explicit archive operations use `job_archive`; they are separate from approval

@@ -147,7 +147,7 @@ Frontmatter is checked by `tests/shape/frontmatter-lint-all.sh`. Get it wrong an
 ### A new skill
 
 Lives at `skills/<kebab-case-name>/SKILL.md`. Copy the shape of an existing one —
-`skills/qa/SKILL.md` is a good reference. Required frontmatter:
+`skills/verify/SKILL.md` is a good reference. Required frontmatter:
 
 `name` (matches the directory), `layer`, `description`, `color`, `tools`, `voice`, `cli_support`.
 
@@ -199,7 +199,7 @@ Hooks run with the operator's privileges. Keep them minimal. Warning hooks may f
 
 When a pull request teaches something a future contributor should know, record it in
 [.claude/memory/lessons.md](.claude/memory/lessons.md) as a rule that prevents the mistake
-recurring (`/li:learn` allocates the next `L-NNN`). `bin/li-lessons-promote` promotes one such
+recurring (`/li:lessons-add` allocates the next `L-NNN`). `bin/li-lessons-promote` promotes one such
 lesson into the scaffolding baseline of a Lintel work tree named with `--lintel-dir`, so every
 future scaffolded repo inherits it. It writes only
 `scaffolding/01-foundation/.claude/memory/lessons.md` with a provenance comment and an explicit

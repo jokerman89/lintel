@@ -559,16 +559,26 @@ class ContextSafetyTests(unittest.TestCase):
         (adrs / "0001-design notes.md").write_text("# ADR: Architecture\n**Status:** Accepted\n")
         env = dict(os.environ, LINTEL_SOURCE_ROOT=str(SOURCE), LINTEL_REPO_ROOT=str(self.root),
                    LINTEL_HOME=str(self.base / "home"), PYTHONDONTWRITEBYTECODE="1")
-        for name, args in (("context-warm-related", ["architecture", "docs/*.md", "1"]),
-                           ("context-warm-adrs", ["architecture", "accepted"])):
-            body = (SOURCE / "skills" / name / "SKILL.md").read_text(encoding="utf-8")
+        body = (SOURCE / "skills/context-warm/SKILL.md").read_text(encoding="utf-8")
+        for name, heading, args in (
+                ("related", "## Related mode", ["architecture", "--glob", "docs/*.md", "--limit", "1"]),
+                ("adrs", "## ADR mode", ["architecture", "--accepted-only"])):
+            self.assertEqual(body.count(heading), 1, f"missing or ambiguous source heading: {heading}")
+            section = body.split(heading, 1)[1].split("\n## ", 1)[0]
+            recipe = re.search(r"```bash\n(.*?)\n```", section, re.S)
+            self.assertIsNotNone(recipe, f"missing {name} caller block")
             script = self.base / (name + ".sh")
-            script.write_text(re.search(r"```bash\n(.*?)\n```", body, re.S)[1], encoding="utf-8")
+            script.write_text(recipe[1], encoding="utf-8")
             # Quote globs inside Bash; native Windows -> MSYS startup can expand raw argv.
             env.update(FIXTURE_SCRIPT=str(script), FIXTURE_TOPIC=args[0],
-                       FIXTURE_PATTERN=args[1], FIXTURE_LIMIT=args[2] if len(args) > 2 else "10")
+                       FIXTURE_PATTERN="docs/*.md", FIXTURE_LIMIT="1")
+            command = (
+                'bash "$FIXTURE_SCRIPT" "$FIXTURE_TOPIC" --glob "$FIXTURE_PATTERN" --limit "$FIXTURE_LIMIT"'
+                if name == "related" else
+                'bash "$FIXTURE_SCRIPT" "$FIXTURE_TOPIC" --accepted-only'
+            )
             run = subprocess.run([BASH, "-c",
-                                  'bash "$FIXTURE_SCRIPT" "$FIXTURE_TOPIC" "$FIXTURE_PATTERN" "$FIXTURE_LIMIT"'],
+                                  command],
                                  env=env, capture_output=True, text=True)
             self.assertEqual(run.returncode, 0, run.stderr)
             result = json.loads(run.stdout)

@@ -76,7 +76,8 @@ ResearchSynthesizer: <question>
 
 ## Recommendations
 1. Re-evaluate vendor options for src/lib/payment
-2. If a better-fit alternative is identified: /office-hours to draft a migration ADR
+2. If a better-fit alternative is identified: /define to reconcile migration scope,
+   then /adr-new for an accepted material decision
 3. If staying with Stripe: propose a linked review note under the repo's decision convention;
    do not silently rewrite an accepted ADR or its historical rationale
 

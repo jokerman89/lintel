@@ -113,9 +113,6 @@ def _latest_review(
         "LINTEL_PYTHON": Path(sys.executable).as_posix(), "LINTEL_HOME": config.home.as_posix(),
         "LINTEL_PACKS_DIR": config.packs.as_posix(), "LINTEL_ACTIVE_PACK_FILE": config.pointer.as_posix(),
     }
-    # Historical imports are a separate explicit operation, not a side effect of
-    # an acceptance-capable status or resume read.
-    environment.pop("GSTACK_HOME", None)
     observed = subprocess.run(command, cwd=repo, env=environment, capture_output=True,
                               text=True, encoding="utf-8", check=False)
     if observed.returncode not in (0, 3):

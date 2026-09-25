@@ -46,6 +46,15 @@ else
   pass "PLAN Step 8 inline checklist removed (single implementation)"
 fi
 
+INSPECT="$REPO_ROOT/skills/inspect/SKILL.md"
+if [ -f "$INSPECT" ] &&
+   grep -q "/li:inspect --target plan --lens engineering" "$SKILL" &&
+   grep -q "ANALYZE remains the separate cross-artifact" "$INSPECT"; then
+  pass "inspection quality and ANALYZE consistency remain separate"
+else
+  fail "inspection replacement missing or conflated with ANALYZE"
+fi
+
 # 3. BUILD final pass calls the build-final leg (same instruction, not scattered mentions)
 if grep -q '/li:analyze.*build-final\|build-final.*\`/li:analyze\`' "$BUILD"; then
   pass "BUILD final pass invokes /li:analyze (build-final trigger, same instruction)"

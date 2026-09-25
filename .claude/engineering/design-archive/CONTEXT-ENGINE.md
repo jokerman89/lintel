@@ -1,5 +1,10 @@
 # Lintel Context Engine (1M Budget Engine)
 
+> Historical proposal, not a runtime capability claim. Original estimates, IDs and
+> outcomes are retained; no check was rerun for this naming update. Current context
+> selection and compatible pause/resume routes are in the
+> [native migration](../../../docs/migrations/2026-09-25-native-workflows.md).
+
 Context as a **budgeted resource**, not as "what fits before compaction." Outcome-based — spend tokens where outcome density is high, save where it doesn't.
 
 v2.0 ships engine as **declarative + soft-enforcement only** (per P1 fix T1 from eng-review). Hard enforcement (block on budget exceeded) deferred to v2.0.5 patch after usage data confirms warnings get acted on.
@@ -8,7 +13,7 @@ v2.0 ships engine as **declarative + soft-enforcement only** (per P1 fix T1 from
 
 ## Why this engine exists
 
-**The problem in v1:** Long sessions hit the context wall. The operator either waits for auto-compaction (which loses structure) or runs `/context-save` and restarts (which loses momentum). Neither serves "tuffa faser" — multi-week customer-engagement work that genuinely needs 800k+ tokens of loaded context.
+**The problem in v1:** Long sessions hit the context wall. The operator either waits for auto-compaction (which loses structure) or checkpoints and restarts (current route: `/li:pause`), losing momentum. Neither served the proposed multi-week work needing substantial selected context.
 
 **The v2 approach:** Phase declarations + budget tracking + warmup patterns + outcome scoring. The operator declares phases ("preload all engagement docs", "build the demo", "voice-check the deliverable") and the engine tracks budget consumption per phase. The operator gets visibility + tools, not magic.
 
@@ -98,7 +103,7 @@ At **100%** of phase budget consumed:
 
 > ⚠⚠ Context budget watcher: phase `build` exhausted (500k of 500k spent).
 >   Recommend:
->   1. `/context-save` + fresh session, OR
+>   1. `/li:pause` + fresh session, OR
 >   2. `/context-budget --next-phase` to transition + decay, OR
 >   3. `/context-budget --override +N` to extend phase budget (logged)
 

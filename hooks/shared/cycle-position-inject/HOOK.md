@@ -23,8 +23,12 @@ nothing when no cycle exists), it uses `render_cycle_footer --compact` — the s
 for "is a cycle active" — and, if a cycle is genuinely mid-flight, injects via the
 `UserPromptSubmit` `additionalContext` envelope: the compact position line + "render the footer, give
 the per-phase report, and advance when this phase is done." If the prompt INVOKES a cycle
-(`/li:cycle`, `/li:fix`, `/li:autoplan`, `/li:plan-and-build`) but no ledger marker exists yet, it
+(`/li:cycle`, `/li:fix`, or the portable `li-` spellings) but no ledger marker exists yet, it
 injects a one-line nudge to write `CYCLE STARTING` first (gap-A: the marker everything keys off).
+
+Use cycle ranges for partial work, for example `/li:cycle --from PLAN --to BUILD` or
+`/li:cycle --from REVIEW --to CAPTURE`. Retired composite entry points are not recognized.
+`LINTEL_REPO_ROOT` selects the working repository even when the shell is in the source bundle.
 
 ## Why inject-only, never block
 

@@ -10,8 +10,8 @@ import { Worker } from 'node:worker_threads';
 import test from 'node:test';
 import {
   Admission, artifactName, BrowserSession, checkProvider, validateAction,
-} from '../../skills/browse/scripts/chromium.mjs';
-import { diffRecords, extractPage, validateSchema } from '../../skills/scrape/scripts/extract.mjs';
+} from '../../skills/web-session/scripts/chromium.mjs';
+import { diffRecords, extractPage, validateSchema } from '../../skills/web-session/scripts/extract.mjs';
 
 const policy = (hosts = ['app.example.test'], origins = ['https://app.example.test']) =>
   new Admission({ python: process.env.LINTEL_PYTHON, hosts, origins });
@@ -399,7 +399,7 @@ test('numeric extraction consumes whitespace and decorated inputs within the exi
       parentPort.postMessage(results);
     })();
   `, { eval: true, workerData: {
-    moduleUrl: new URL('../../skills/scrape/scripts/extract.mjs', import.meta.url).href,
+    moduleUrl: new URL('../../skills/web-session/scripts/extract.mjs', import.meta.url).href,
   } });
   let timer;
   try {
@@ -454,10 +454,14 @@ test('action arguments are bounded data, not executable page code or invented ve
   ]) assert.throws(() => validateAction(action));
 });
 
-test('all four retained entry points share the same operation and ownership reference', async () => {
-  for (const name of ['browse', 'open-managed-browser', 'setup-browser-cookies', 'scrape']) {
-    const text = await readFile(new URL(`../../skills/${name}/SKILL.md`, import.meta.url), 'utf8');
-    assert.match(text, /references\/browser-operations\.md/);
+test('all four web-session modes share the same operation and ownership reference', async () => {
+  const root = new URL('../../skills/web-session/', import.meta.url);
+  const entry = await readFile(new URL('SKILL.md', root), 'utf8');
+  assert.match(entry, /references\/browser-operations\.md/);
+  for (const mode of ['browse', 'open', 'cookies', 'scrape']) {
+    assert.match(entry, new RegExp(`references/${mode}\\.md`));
+    const text = await readFile(new URL(`references/${mode}.md`, root), 'utf8');
+    assert.match(text, /browser-operations\.md/);
     assert.doesNotMatch(text, /Codex and Copilot do not have native browser-control|--force-prod|Browser detached/);
   }
 });
