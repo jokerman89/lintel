@@ -76,6 +76,10 @@ SKILL_PATH = re.compile(
 )
 LINK = re.compile(r"\[[^\]\n]*\]\((<?[^\s)]+>?)(?:\s+['\"][^)]*)?\)")
 URL = re.compile(r"\b(?:https?|mailto):[^\s`<>)]+", re.I)
+FORMER_HEADERS = frozenset({
+    "old", "old name", "former", "former entry", "former entries",
+    "retired entry", "retired entries", "removed entry", "removed entries",
+})
 
 
 @dataclass(frozen=True, order=True)
@@ -173,7 +177,7 @@ def routing_lines(text: str, relative: str, exemptions: list[dict]) -> list[str]
             category = None
         if category:
             exemptions.append({"path": relative, "field": "$", "category": category,
-                               "reason": "Immutable evidence data; the shared contract, not this routing check, validates it."})
+                               "reason": "Recorded evidence data; only the shared contract can validate its binding, status or independence."})
             return []
     start = None
     for index, line in enumerate(lines):
@@ -187,7 +191,7 @@ def routing_lines(text: str, relative: str, exemptions: list[dict]) -> list[str]
             if category:
                 exemptions.append({"path": relative, "field": "lintel-swarm-evidence:v2",
                                    "line": start + 1, "end_line": index + 1, "category": category,
-                                   "reason": "Bound observation payload; surrounding narrative remains checked."})
+                                   "reason": "Recorded observation payload; its presence proves no binding or clearance, and surrounding narrative remains checked."})
                 lines[start:index + 1] = [""] * (index + 1 - start)
             start = None
     return lines
@@ -265,15 +269,14 @@ def scan(root: Path, check: str = "all", exemptions: list[dict] | None = None) -
         test_code = relative.startswith("tests/") and path.suffix in {".py", ".sh", ".ps1"}
         former_column = False
         for number, original in enumerate(routing_lines(text, relative, exemptions), 1):
-            line = URL.sub("", original).replace("\\", "/")
+            line = URL.sub("", original).replace("\\|", "\x00").replace("\\", "/")
             if line.lstrip().startswith("|"):
                 columns = line.split("|")
                 first = columns[1].strip().casefold()
-                if first in {"old", "old name", "former", "former entry", "retired entry", "removed entry"}:
+                if first in FORMER_HEADERS:
                     former_column = True
                 if former_column:
-                    if first and first not in {"old", "old name", "former", "former entry",
-                                               "retired entry", "removed entry"} and not re.fullmatch(r"[- :]+", first):
+                    if first and first not in FORMER_HEADERS and not re.fullmatch(r"[- :]+", first):
                         exemptions.append({"path": relative, "line": number, "field": "migration table, former-entry column",
                                            "category": "retired-name mapping",
                                            "reason": "The replacement column and all prose remain checked."})
@@ -287,7 +290,14 @@ def scan(root: Path, check: str = "all", exemptions: list[dict] | None = None) -
                 # Bare li-* names can also be utilities or downstream examples.
                 # Validate unknown workflows only in an explicit workflow namespace.
                 if name.casefold() in RETIRED_COMMANDS:
-                    command(relative, number, name)
+                    utilities = [root / "bin" / ("li-" + name + suffix)
+                                 for suffix in ("", ".py", ".sh", ".ps1")]
+                    if any(item.is_file() for item in utilities):
+                        exemptions.append({"path": relative, "line": number,
+                                           "field": match[0], "category": "existing utility",
+                                           "reason": "A bare utility name/message resolves in bin; explicit workflow invocations remain checked."})
+                    else:
+                        command(relative, number, name)
             for match in BARE_COMMAND.finditer(line):
                 name = match["name"].casefold()
                 action = re.search(r"\b(?:run|invoke|use|command|workflow|skill)\b",
@@ -299,6 +309,12 @@ def scan(root: Path, check: str = "all", exemptions: list[dict] | None = None) -
                 if name.casefold() in RETIRED_COMMANDS:
                     command(relative, number, name)
             for match in SKILL_FIELD.finditer(line):
+                if (path.suffix == ".py" and re.search(r"\bskill\s*:\s*" + re.escape(match["name"]) + r"\b", match[0])
+                        and not re.search(r"""[:=]\s*["']""", match[0])):
+                    exemptions.append({"path": relative, "line": number,
+                                       "field": match[0].strip(), "category": "Python annotation",
+                                       "reason": "An unquoted Python type annotation is not a literal workflow identity."})
+                    continue
                 command(relative, number, match["name"], fixture_literal=test_code)
             if (path.suffix in {".md", ".template"}
                     or (path.suffix in {".json", ".yaml", ".yml", ".toml"}
@@ -328,7 +344,14 @@ def scan(root: Path, check: str = "all", exemptions: list[dict] | None = None) -
                                        "reason": "No literal source-root consumer on this line; fixture paths need not exist in the source tree. Retired identities still fail."})
                     continue
                 if not (root / target).exists():
-                    add(relative, number, "missing-path", f"Unresolved workflow path: {target}")
+                    if (test_code and path.suffix == ".py"
+                            and re.search(r"\bself\.assertFalse\s*\(", line[:match.start()])
+                            and re.search(r"\.exists\(\)\s*\)", line[match.end():])):
+                        exemptions.append({"path": relative, "line": number,
+                                           "field": target, "category": "negative absence assertion",
+                                           "reason": "This assertion requires the resource to remain absent; positive imports/selections still require it."})
+                    else:
+                        add(relative, number, "missing-path", f"Unresolved workflow path: {target}")
             if path.suffix in {".md", ".template"}:
                 for match in links:
                     target = unquote(match[1].strip("<>").split("#", 1)[0])

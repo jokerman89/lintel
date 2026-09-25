@@ -79,6 +79,25 @@ class CommandSurfaceTests(unittest.TestCase):
             "The review command and the code-freeze policy remain useful.\n"
             "Preserve `.lintel/design-html` and `browse-runs` user data.\n"), [])
 
+    def test_existing_utility_is_not_a_retired_workflow_invocation(self):
+        self.write("bin/li-lessons.py", "print('li-lessons: source diagnostic')\n")
+        self.assertEqual(self.findings("Use `li-lessons.py --help`; li-lessons: diagnostic.\n"), [])
+        self.assertTrue(self.findings("Use /li:lessons.\n"))
+
+    def test_python_annotation_does_not_hide_literal_routing(self):
+        path = "lib/example.py"
+        self.assertEqual(self.findings("def read(skill: str):\n    return skill\n", path), [])
+        self.assertTrue(self.findings('choice = {"skill": "qa"}\n', path))
+        self.assertTrue(self.findings('skill = "qa"\n', path))
+
+    def test_negative_absence_assertion_does_not_hide_real_resource_dependency(self):
+        path = "tests/unit/absent-reader.py"
+        missing = "skills/web-session/scripts/removed.py"
+        self.assertEqual(self.findings(
+            'self.assertFalse((ROOT / "' + missing + '").exists())\n', path), [])
+        self.assertTrue(self.findings('resource = ROOT / "' + missing + '"\n', path))
+        self.assertTrue(self.findings('self.assertTrue((ROOT / "' + missing + '").exists())\n', path))
+
     def test_longer_surviving_names_do_not_match_retired_suffixes(self):
         self.skill("generate-style-learn")
         self.skill("frontend-design-review")
@@ -201,6 +220,12 @@ class CommandSurfaceTests(unittest.TestCase):
         self.assertTrue(self.findings(
             "| Former entry | Replacement |\n|---|---|\n"
             "| `/li:qa` | `/li:verify` |\n\nRun /li:qa now.\n", path))
+        self.assertEqual(self.findings(
+            "| Former entries | Current route |\n|---|---|\n"
+            "| `qa-only`, `codex` skill | `/li:verify --scope one\\|two` |\n", path), [])
+        self.assertTrue(self.findings(
+            "| Former entries | Current route |\n|---|---|\n"
+            "| `qa-only` | `/li:qa --scope one\\|two` |\n", path))
 
     def test_required_skill_tree_cannot_be_missing_or_empty(self):
         for path in (self.root / "skills").glob("*/SKILL.md"):
